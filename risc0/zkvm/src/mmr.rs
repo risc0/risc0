@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{receipt_claim::UnionClaim, sha::Digestible, Assumption};
+use crate::{Assumption, claim::receipt::UnionClaim, sha::Digestible};
 use alloc::{boxed::Box, collections::VecDeque};
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 
 #[allow(dead_code)]
@@ -52,7 +52,7 @@ where
     }
 
     pub fn root(mut self) -> Result<T::Item> {
-        if self.peaks.is_empty() {
+        if self.is_empty() {
             bail!("no elements for host mmr");
         }
         if self.peaks.len() == 1 {
@@ -64,6 +64,10 @@ where
             T::merge_item(&mut item, peak.item())?;
         }
         Ok(item)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.peaks.is_empty()
     }
 }
 

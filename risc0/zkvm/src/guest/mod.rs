@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@
 //! ```
 //!
 //! Notice how [env::read] is used to load the two factors, and [env::commit] is used to make their
-//! composite product publicly available. All input an output of your guest is private except for
+//! composite product publicly available. All inputs and outputs of your guest are private except for
 //! what is written to the journal with [env::commit].
 //!
 //! By default, the guest only has the Rust `core` libraries and not `std`. A partial
@@ -138,7 +138,7 @@ macro_rules! entry {
         // Include generated main in a module so we don't conflict
         // with any other definitions of "main" in this file.
         mod zkvm_generated_main {
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             fn main() {
                 super::ZKVM_ENTRY()
             }
@@ -147,16 +147,18 @@ macro_rules! entry {
 }
 
 #[cfg(target_os = "zkvm")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn __start() -> ! {
-    risc0_zkvm_platform::heap::init();
+    unsafe {
+        risc0_zkvm_platform::heap::init();
+    }
     env::init();
 
     {
-        extern "C" {
+        unsafe extern "C" {
             fn main();
         }
-        main()
+        unsafe { main() }
     }
 
     env::finalize(true, 0);

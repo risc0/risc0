@@ -103,8 +103,8 @@ jobs:
       - name: Install risczero toolchain
         run: |
           cargo install --locked --force --path risc0/cargo-risczero
-          cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-          cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+          cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+          cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
         working-directory: risc0
       - uses: foundry-rs/foundry-toolchain@v1
       # Apply local patch

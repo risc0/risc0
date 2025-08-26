@@ -13,24 +13,28 @@
 // limitations under the License.
 
 use crate::components::Component;
-use crate::distribution::{download_bytes, download_json, DistributionPlatform, ProgressWriter};
+use crate::distribution::{
+    DistributionPlatform, ProgressWriter, download_bytes, download_json,
+    sha2::{Sha256Digest, Sha256Writer},
+    signature::{PublicKey, Signature},
+};
 #[cfg(feature = "publish")]
-use crate::distribution::{upload_bytes, ProgressReader};
+use crate::distribution::{ProgressReader, signature::PrivateKey, upload_bytes};
 use crate::env::Environment;
 #[cfg(feature = "publish")]
 use crate::{AwsCredentials, Platform};
-use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferDirection};
+use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferKind};
 
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use serde_with::{DisplayFromStr, serde_as};
+
+use std::collections::BTreeMap;
 use std::fmt;
 #[cfg(feature = "publish")]
-use std::{
-    collections::hash_map::Entry, fs::File, io::Read as _, io::Seek as _, io::SeekFrom, path::Path,
-};
+use std::{collections::btree_map::Entry, fs::File, io::Seek as _, io::SeekFrom, path::Path};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[serde(transparent)]
 struct TargetTriple(String);
 
@@ -40,14 +44,16 @@ impl fmt::Display for TargetTriple {
     }
 }
 
+#[serde_as]
 #[derive(Serialize, Deserialize)]
 struct Artifact {
-    sha256: String,
+    #[serde_as(as = "Vec<DisplayFromStr>")]
+    sha256_blobs: Vec<Sha256Digest>,
 }
 
 #[derive(Serialize, Deserialize, Default)]
 struct TargetSpecificRelease {
-    artifacts: HashMap<TargetTriple, Artifact>,
+    artifacts: BTreeMap<TargetTriple, Artifact>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -62,36 +68,63 @@ enum Release {
     TargetAgnostic(TargetAgnosticRelease),
 }
 
+#[serde_as]
 #[derive(Serialize, Deserialize)]
 struct DistributionManifest {
-    releases: HashMap<semver::Version, Release>,
+    releases: BTreeMap<semver::Version, Release>,
     latest_version: semver::Version,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    signature: Option<Signature>,
 }
 
-#[cfg(feature = "publish")]
-fn sha256_for_file(file: &mut File) -> Result<String> {
-    use sha2::Digest as _;
-
-    let mut hasher = sha2::Sha256::new();
-
-    let mut chunk = vec![0u8; 1024 * 1024];
-    loop {
-        let bytes_read = file.read(&mut chunk)?;
-        if bytes_read == 0 {
-            break;
+impl DistributionManifest {
+    #[cfg(feature = "publish")]
+    fn new(latest_version: Version) -> Self {
+        Self {
+            latest_version,
+            releases: Default::default(),
+            signature: None,
         }
-        hasher.update(&chunk[..bytes_read]);
     }
-    Ok(format!("{:x}", hasher.finalize()))
+
+    #[cfg(feature = "install")]
+    fn verify(&mut self, public_key: &PublicKey) -> Result<()> {
+        let signature = self.signature.take().ok_or_else(|| {
+            RzupError::Other("distribution_manifest.json missing signature".into())
+        })?;
+
+        let manifest_json =
+            serde_json::to_vec(self).expect("serde_json should serialize successfully to memory");
+
+        public_key.verify(&manifest_json, &signature)?;
+
+        Ok(())
+    }
+
+    #[cfg(not(feature = "install"))]
+    fn verify(&mut self, _public_key: &PublicKey) -> Result<()> {
+        Err(RzupError::Other("install feature not enabled".into()))
+    }
+
+    #[cfg(feature = "publish")]
+    fn sign(&mut self, private_key: &PrivateKey) -> Result<()> {
+        let manifest_json =
+            serde_json::to_vec(self).expect("serde_json should serialize successfully to memory");
+
+        let signature = private_key.sign(&manifest_json);
+        self.signature = Some(signature);
+        Ok(())
+    }
 }
 
 #[cfg(feature = "publish")]
 fn validate_tar_xz(file: &mut File) -> Result<()> {
+    use liblzma::bufread::XzDecoder;
     use std::io::BufReader;
     use tar::Archive;
-    use xz::bufread::XzDecoder;
 
-    let mut ar = Archive::new(XzDecoder::new(BufReader::new(file)));
+    let mut ar = Archive::new(XzDecoder::new_parallel(BufReader::new(file)));
     let entries = ar
         .entries()
         .map_err(|e| RzupError::Other(format!("invalid tar.xz file: {e}")))?
@@ -111,7 +144,7 @@ fn sign_s3_request(
     creds: &AwsCredentials,
     req: &mut http::Request<reqwest::blocking::Body>,
 ) -> Result<()> {
-    use aws_sigv4::http_request::{sign, SignableBody, SignableRequest, SigningSettings};
+    use aws_sigv4::http_request::{SignableBody, SignableRequest, SigningSettings, sign};
     use aws_sigv4::sign::v4;
 
     let identity = creds.clone().into();
@@ -156,6 +189,13 @@ fn sign_s3_request(
     Ok(())
 }
 
+#[cfg(feature = "publish")]
+fn is_object_not_found_error(error: &RzupError) -> bool {
+    let error_str = error.to_string();
+
+    error_str.contains("<Code>AccessDenied</Code>") || error_str.contains("<Code>NoSuchKey</Code>")
+}
+
 pub struct S3Bucket<'a> {
     base_urls: &'a BaseUrls,
 }
@@ -176,7 +216,10 @@ impl<'a> S3Bucket<'a> {
 
         let base_url = &self.base_urls.s3_base_url;
         let url = format!("{base_url}/rzup/components/{component}/distribution_manifest.json");
-        download_json(&url, &None)
+        let mut manifest: DistributionManifest = download_json(&url, &None)?;
+        manifest.verify(env.public_key())?;
+
+        Ok(manifest)
     }
 
     #[cfg(feature = "publish")]
@@ -229,10 +272,12 @@ impl<'a> S3Bucket<'a> {
         &self,
         version: &Version,
         platform: Option<Platform>,
-        sha256: String,
+        sha256: Sha256Digest,
         manifest: &mut DistributionManifest,
     ) {
-        let artifact = Artifact { sha256 };
+        let artifact = Artifact {
+            sha256_blobs: vec![sha256],
+        };
         match manifest.releases.entry(version.clone()) {
             Entry::Occupied(mut entry) => {
                 let existing_release = entry.get_mut();
@@ -244,7 +289,7 @@ impl<'a> S3Bucket<'a> {
                         artifacts.insert(TargetTriple(platform.target_triple()), artifact);
                     }
                     (existing_release @ Release::TargetAgnostic(_), Some(platform)) => {
-                        let mut artifacts = HashMap::new();
+                        let mut artifacts = BTreeMap::new();
                         artifacts.insert(TargetTriple(platform.target_triple()), artifact);
                         *existing_release =
                             Release::TargetSpecific(TargetSpecificRelease { artifacts });
@@ -258,7 +303,7 @@ impl<'a> S3Bucket<'a> {
             }
             Entry::Vacant(entry) => {
                 entry.insert(if let Some(platform) = platform {
-                    let mut artifacts = HashMap::new();
+                    let mut artifacts = BTreeMap::new();
                     artifacts.insert(TargetTriple(platform.target_triple()), artifact);
                     Release::TargetSpecific(TargetSpecificRelease { artifacts })
                 } else {
@@ -273,10 +318,14 @@ impl<'a> S3Bucket<'a> {
         &self,
         component: &Component,
         creds: &AwsCredentials,
-        manifest: DistributionManifest,
+        private_key: &PrivateKey,
+        mut manifest: DistributionManifest,
     ) -> Result<()> {
+        manifest.sign(private_key)?;
+
         let manifest_json = serde_json::to_vec(&manifest)
             .expect("serde_json should serialize successfully to memory");
+
         let manifest_json_len = manifest_json.len() as u64;
         let base_url = &self.base_urls.s3_base_url;
         let upload_url =
@@ -300,17 +349,17 @@ impl<'a> S3Bucket<'a> {
         creds: &AwsCredentials,
         data_stream: File,
         data_length: u64,
-        sha256: &String,
+        sha256: &Sha256Digest,
     ) -> Result<()> {
         let base_url = &self.base_urls.s3_base_url;
         let upload_url = format!("{base_url}/rzup/components/{component}/sha256/{sha256}");
         let upload_id = format!("{component}/{sha256}");
 
         env.emit(RzupEvent::TransferStarted {
-            direction: TransferDirection::Upload,
+            kind: TransferKind::Upload,
             id: upload_id.clone(),
-            version: version.to_string(),
-            url: upload_url.clone(),
+            version: Some(version.to_string()),
+            url: Some(upload_url.clone()),
             len: Some(data_length),
         });
         let (send, recv) = std::sync::mpsc::channel();
@@ -333,9 +382,9 @@ impl<'a> S3Bucket<'a> {
         })?;
 
         env.emit(RzupEvent::TransferCompleted {
-            direction: TransferDirection::Upload,
+            kind: TransferKind::Upload,
             id: upload_id,
-            version: version.to_string(),
+            version: Some(version.to_string()),
         });
 
         Ok(())
@@ -355,13 +404,33 @@ impl<'a> S3Bucket<'a> {
             .get_aws_creds()
             .ok_or_else(|| RzupError::Other("missing AWS S3 credentials".into()))?;
 
-        let mut manifest = self.get_distribution_manifest(env, component)?;
+        env.emit(RzupEvent::Print {
+            message: "Getting private key from AWS".into(),
+        });
+        let private_key = env.get_private_key()?;
+
+        env.emit(RzupEvent::Print {
+            message: "Reading distribution_manifest.json".into(),
+        });
+        let mut manifest = match self.get_distribution_manifest(env, component) {
+            Ok(manifest) => manifest,
+            Err(error) => {
+                if is_object_not_found_error(&error) {
+                    DistributionManifest::new(version.clone())
+                } else {
+                    return Err(error);
+                }
+            }
+        };
 
         // Check if we are going to replace something by uploading
         if !force {
             self.validate_upload(version, platform, &manifest)?;
         }
 
+        env.emit(RzupEvent::Print {
+            message: "Validating artifact".into(),
+        });
         let mut data_stream = File::open(payload)?;
         validate_tar_xz(&mut data_stream)?;
         data_stream.seek(SeekFrom::Start(0))?;
@@ -372,7 +441,7 @@ impl<'a> S3Bucket<'a> {
         });
 
         let data_length = data_stream.metadata()?.len();
-        let sha256 = sha256_for_file(&mut data_stream)?;
+        let sha256 = Sha256Digest::calculate_for_file(&mut data_stream)?;
         data_stream.seek(SeekFrom::Start(0))?;
 
         // Upload the artifact to S3
@@ -392,7 +461,7 @@ impl<'a> S3Bucket<'a> {
         env.emit(RzupEvent::Print {
             message: format!("Updating distribution_manifest.json for {component} {version}"),
         });
-        self.upload_manifest(component, &creds, manifest)?;
+        self.upload_manifest(component, &creds, &private_key, manifest)?;
 
         Ok(())
     }
@@ -407,6 +476,7 @@ impl<'a> S3Bucket<'a> {
         let creds = env
             .get_aws_creds()
             .ok_or_else(|| RzupError::Other("missing AWS S3 credentials".into()))?;
+        let private_key = env.get_private_key()?;
 
         let mut manifest = self.get_distribution_manifest(env, component)?;
         if !manifest.releases.contains_key(version) {
@@ -422,7 +492,7 @@ impl<'a> S3Bucket<'a> {
                 setting latest-version to {version}"
             ),
         });
-        self.upload_manifest(component, &creds, manifest)?;
+        self.upload_manifest(component, &creds, &private_key, manifest)?;
 
         Ok(())
     }
@@ -477,6 +547,15 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
         };
 
         let archive_name = component.archive_name(platform)?;
+        if artifact.sha256_blobs.is_empty() {
+            return Err(RzupError::Other("release contains no artifacts".into()));
+        }
+        if artifact.sha256_blobs.len() > 1 {
+            return Err(RzupError::Other(
+                "release contains multiple artifacts, update rzup".into(),
+            ));
+        }
+        let artifact_sha256 = &artifact.sha256_blobs[0];
 
         let download_path = env.tmp_dir().join(archive_name);
         let mut download_file = std::fs::OpenOptions::new()
@@ -486,29 +565,43 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
             .open(&download_path)?;
 
         let base_url = &self.base_urls.s3_base_url;
-        let sha256 = &artifact.sha256;
-        let download_url = format!("{base_url}/rzup/components/{component}/sha256/{sha256}");
+        let download_url =
+            format!("{base_url}/rzup/components/{component}/sha256/{artifact_sha256}");
         let mut resp = download_bytes(&download_url, &None)?;
 
         env.emit(RzupEvent::TransferStarted {
-            direction: TransferDirection::Download,
+            kind: TransferKind::Download,
             id: component.to_string(),
-            version: version.to_string(),
-            url: download_url.clone(),
+            version: Some(version.to_string()),
+            url: Some(download_url.clone()),
             len: resp.content_length(),
         });
 
-        resp.copy_to(&mut ProgressWriter::new(
+        let mut writer = Sha256Writer::new(ProgressWriter::new(
             component.to_string(),
             env,
             &mut download_file,
-        ))
-        .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
+        ));
+        resp.copy_to(&mut writer)
+            .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
+
+        let download_sha = writer.finish();
+
+        if &download_sha != artifact_sha256 {
+            env.emit(RzupEvent::InstallationFailed {
+                id: component.to_string(),
+                version: version.to_string(),
+            });
+            return Err(RzupError::Sha256Mismatch {
+                expected: artifact_sha256.to_string(),
+                actual: download_sha.to_string(),
+            });
+        }
 
         env.emit(RzupEvent::TransferCompleted {
-            direction: TransferDirection::Download,
+            kind: TransferKind::Download,
             id: component.to_string(),
-            version: version.to_string(),
+            version: Some(version.to_string()),
         });
 
         Ok(())

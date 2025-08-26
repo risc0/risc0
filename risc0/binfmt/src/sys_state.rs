@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
-use crate::{tagged_struct, Digestible};
+use crate::{Digestible, tagged_struct};
 
 /// Represents the public state of a segment, needed for continuations and
 /// receipt verification.

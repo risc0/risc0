@@ -14,7 +14,7 @@
 
 use std::{
     io,
-    pin::{pin, Pin},
+    pin::{Pin, pin},
     task::{Context, Poll},
 };
 
@@ -146,9 +146,9 @@ mod tests {
     use assert_matches::assert_matches;
     use opentelemetry::metrics::MeterProvider as _;
     use opentelemetry_sdk::metrics::{
+        PeriodicReader, SdkMeterProvider,
         data::{AggregatedMetrics, MetricData, ResourceMetrics},
         in_memory_exporter::InMemoryMetricExporter,
-        PeriodicReader, SdkMeterProvider,
     };
     use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
     use tokio::net::UnixStream;

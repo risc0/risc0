@@ -11,7 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::distribution::Platform;
+use crate::distribution::{
+    Platform,
+    signature::{PrivateKey, PublicKey},
+};
 use crate::error::Result;
 use crate::{AwsCredentials, RzupError, RzupEvent};
 
@@ -36,6 +39,8 @@ pub struct Environment {
     platform: Platform,
     github_token: Option<String>,
     aws_creds_factory: Box<dyn Fn() -> Option<AwsCredentials> + Send + Sync>,
+    private_key_getter: Box<dyn Fn() -> Result<PrivateKey> + Send + Sync>,
+    public_key: PublicKey,
 }
 
 fn get_github_token_from_hosts_yml(home_dir: &Path) -> Result<String> {
@@ -113,6 +118,31 @@ fn get_aws_creds() -> Result<AwsCredentials> {
     Err(RzupError::Other("publish feature not enabled".into()))
 }
 
+#[cfg(feature = "publish")]
+const RZUP_PUBLISH_SECRET_ID: &str = "rzup-publish-key";
+
+#[cfg(feature = "publish")]
+#[tokio::main]
+async fn get_private_key() -> Result<PrivateKey> {
+    let config = aws_config::load_from_env().await;
+    let client = aws_sdk_secretsmanager::Client::new(&config);
+    let secret = client
+        .get_secret_value()
+        .secret_id(RZUP_PUBLISH_SECRET_ID)
+        .send()
+        .await
+        .map_err(|e| RzupError::Other(format!("failed to get private key: {e}")))?;
+    let key_pem = secret
+        .secret_string
+        .ok_or_else(|| RzupError::Other("missing secret_string".into()))?;
+    PrivateKey::new(&key_pem)
+}
+
+#[cfg(not(feature = "publish"))]
+fn get_private_key() -> Result<PrivateKey> {
+    Err(RzupError::Other("publish feature not enabled".into()))
+}
+
 impl Environment {
     fn ensure_directories(&self) -> Result<()> {
         if !self.risc0_dir.exists() {
@@ -133,12 +163,15 @@ impl Environment {
         Ok(())
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn with_paths_creds_platform_and_event_handler(
         risc0_dir: impl Into<PathBuf>,
         rustup_dir: impl AsRef<Path>,
         cargo_dir: impl AsRef<Path>,
         github_token: Option<String>,
         aws_creds_factory: impl Fn() -> Option<AwsCredentials> + Send + Sync + 'static,
+        private_key_getter: impl Fn() -> Result<PrivateKey> + Send + Sync + 'static,
+        public_key: PublicKey,
         platform: Platform,
         event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
     ) -> Result<Self> {
@@ -158,6 +191,8 @@ impl Environment {
             platform,
             github_token,
             aws_creds_factory: Box::new(aws_creds_factory),
+            private_key_getter: Box::new(private_key_getter),
+            public_key,
         };
         env.set_event_handler(event_handler);
 
@@ -192,6 +227,8 @@ impl Environment {
             .ok();
 
         let aws_creds_factory = || get_aws_creds().ok();
+        let private_key_getter = || get_private_key();
+        let public_key = PublicKey::official();
 
         let env = Self::with_paths_creds_platform_and_event_handler(
             risc0_dir,
@@ -199,6 +236,8 @@ impl Environment {
             cargo_dir,
             github_token,
             aws_creds_factory,
+            private_key_getter,
+            public_key,
             platform,
             event_handler,
         )?;
@@ -250,6 +289,14 @@ impl Environment {
         (self.aws_creds_factory)()
     }
 
+    pub fn get_private_key(&self) -> Result<PrivateKey> {
+        (self.private_key_getter)()
+    }
+
+    pub fn public_key(&self) -> &PublicKey {
+        &self.public_key
+    }
+
     #[cfg(feature = "install")]
     pub fn flock(&self, name: &str) -> Result<LockFile> {
         use fs2::FileExt as _;
@@ -280,7 +327,7 @@ pub struct LockFile {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::distribution::Os;
+    use crate::distribution::{Os, signature::PublicKey};
 
     fn no_env(_: &str) -> VarResult<String> {
         Err(std::env::VarError::NotPresent)
@@ -311,6 +358,8 @@ mod tests {
             tmp_dir.path().join(".cargo"),
             Some("foo".into()),
             || None,
+            || Err(RzupError::Other("no private key".into())),
+            PublicKey::official(),
             Platform::new("x86_64", Os::Linux),
             |_| {},
         )

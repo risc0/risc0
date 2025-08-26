@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
-use risc0_benchmark::{benches::*, run_jobs, Job};
+use risc0_benchmark::{Job, benches::*, run_jobs};
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]

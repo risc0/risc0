@@ -22,14 +22,14 @@ use alloc::{
 use anyhow::bail;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
-use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
+use risc0_binfmt::{Digestible, read_sha_halfs, tagged_struct};
 use risc0_circuit_recursion::{
+    CIRCUIT, CircuitImpl,
     control_id::{ALLOWED_CONTROL_ROOT, MIN_LIFT_PO2, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
-    CircuitImpl, CIRCUIT,
 };
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{
-    adapter::{CircuitInfo, ProtocolInfo, PROOF_SYSTEM_INFO},
+    adapter::{CircuitInfo, PROOF_SYSTEM_INFO, ProtocolInfo},
     core::{
         digest::Digest,
         hash::{hash_suite_from_name, sha::Sha256},
@@ -39,11 +39,12 @@ use risc0_zkp::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    MaybePruned,
+    claim::Unknown,
     receipt::{
-        merkle::{MerkleGroup, MerkleProof},
         VerifierContext,
+        merkle::{MerkleGroup, MerkleProof},
     },
-    receipt_claim::{MaybePruned, Unknown},
     sha,
 };
 
@@ -57,10 +58,7 @@ use crate::{
 #[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
-pub struct SuccinctReceipt<Claim>
-where
-    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
-{
+pub struct SuccinctReceipt<Claim> {
     /// The cryptographic seal of this receipt. This seal is a STARK proving an execution of the
     /// recursion circuit.
     #[debug("{} bytes", self.get_seal_bytes().len())]
@@ -90,13 +88,13 @@ where
     pub control_inclusion_proof: MerkleProof,
 }
 
-impl<Claim> SuccinctReceipt<Claim>
-where
-    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
-{
+impl<Claim> SuccinctReceipt<Claim> {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
-    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+    pub fn verify_integrity(&self) -> Result<(), VerificationError>
+    where
+        Claim: risc0_binfmt::Digestible + core::fmt::Debug,
+    {
         self.verify_integrity_with_context(&VerifierContext::default())
     }
 
@@ -105,7 +103,10 @@ where
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
-    ) -> Result<(), VerificationError> {
+    ) -> Result<(), VerificationError>
+    where
+        Claim: risc0_binfmt::Digestible + core::fmt::Debug,
+    {
         let params = ctx
             .succinct_verifier_parameters
             .as_ref()
@@ -222,9 +223,29 @@ where
             .root(&self.control_id, hash_suite.hashfn.as_ref()))
     }
 
+    #[cfg(feature = "prove")]
+    pub(crate) fn to_assumption(
+        &self,
+        erase_control_root: bool,
+    ) -> anyhow::Result<crate::Assumption>
+    where
+        Claim: risc0_binfmt::Digestible,
+    {
+        Ok(crate::Assumption {
+            claim: self.claim.digest::<sha::Impl>(),
+            control_root: match erase_control_root {
+                false => self.control_root()?,
+                true => Digest::ZERO,
+            },
+        })
+    }
+
     /// Prunes the claim, retaining its digest, and converts into a [SuccinctReceipt] with an unknown
     /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
-    pub fn into_unknown(self) -> SuccinctReceipt<Unknown> {
+    pub fn into_unknown(self) -> SuccinctReceipt<Unknown>
+    where
+        Claim: risc0_binfmt::Digestible,
+    {
         SuccinctReceipt {
             claim: MaybePruned::Pruned(self.claim.digest::<sha::Impl>()),
             seal: self.seal,
@@ -242,14 +263,23 @@ pub(crate) fn allowed_control_ids(
     po2_max: usize,
 ) -> anyhow::Result<impl Iterator<Item = Digest>> {
     // Recursion programs (ZKRs) that are to be included in the allowed set.
-    // NOTE: Although the rv32im circuit has control IDs down to po2 13, lift predicates are only
-    // generated for po2 14 and above, hence the magic 14 below.
-    let allowed_zkr_names: BTreeSet<String> =
-        ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
-            .map(str::to_string)
-            .into_iter()
-            .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
-            .collect();
+    let po2_range = MIN_LIFT_PO2..=usize::min(po2_max, risc0_zkp::MAX_CYCLES_PO2);
+    let allowed_zkr_names: BTreeSet<String> = [
+        "join.zkr",
+        "join_povw.zkr",
+        "join_unwrap_povw.zkr",
+        "resolve.zkr",
+        "resolve_povw.zkr",
+        "resolve_unwrap_povw.zkr",
+        "identity.zkr",
+        "unwrap_povw.zkr",
+        "union.zkr",
+    ]
+    .map(str::to_string)
+    .into_iter()
+    .chain(po2_range.clone().map(|i| format!("lift_rv32im_v2_{i}.zkr")))
+    .chain(po2_range.map(|i| format!("lift_rv32im_v2_povw_{i}.zkr")))
+    .collect();
 
     let zkr_control_ids = match hash_name.as_ref() {
         "sha-256" => SHA256_CONTROL_IDS,
@@ -260,9 +290,12 @@ pub(crate) fn allowed_control_ids(
         ),
     };
 
-    Ok(zkr_control_ids
-        .into_iter()
-        .filter_map(move |(name, digest)| allowed_zkr_names.contains(name).then_some(digest)))
+    Ok(allowed_zkr_names.into_iter().map(move |name| {
+        *zkr_control_ids
+            .iter()
+            .find_map(|(zkr_name, digest)| (zkr_name == &name).then_some(digest))
+            .expect("zkr name in allowed_zkr_names not found in zkr_control_ids")
+    }))
 }
 
 /// Constructs the root for the set of allowed control IDs, given a maximum cycle count as a po2.
@@ -352,7 +385,7 @@ impl Default for SuccinctReceiptVerifierParameters {
 
 #[cfg(test)]
 mod tests {
-    use super::{allowed_control_root, SuccinctReceiptVerifierParameters, ALLOWED_CONTROL_ROOT};
+    use super::{ALLOWED_CONTROL_ROOT, SuccinctReceiptVerifierParameters, allowed_control_root};
     use crate::{receipt::DEFAULT_MAX_PO2, sha::Digestible};
     use risc0_zkp::core::digest::digest;
 
@@ -364,7 +397,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("6da21180b0fb9de482aed36931a29b10feeb64fb96de49f2f2e5e119e2bb8cd8")
+            digest!("ece5e9b8ae2cd6ea6b1827b464ff0348f9a7f4decd269c0087fdfd75098da013")
         );
     }
 

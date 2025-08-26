@@ -26,7 +26,7 @@ use std::{
     vec,
 };
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
@@ -159,7 +159,7 @@ const CARGO_TOML_METHODS_TMP: &str = r#"
 [package]
 name = "methods"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [build-dependencies]
 risc0-build = { {{ risc0_build }} }
@@ -172,7 +172,7 @@ const CARGO_TOML_TEMPLATE: &str = r#"
 [package]
 name = "method_name"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [workspace]
 

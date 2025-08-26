@@ -24,17 +24,17 @@ use anyhow::Result;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_zkp::core::hash::poseidon_254::Poseidon254HashSuite;
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
-    MULTI_TEST_PATH,
+    HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_PATH,
+    multi_test::MultiTestSpec,
 };
-use tempfile::{tempdir, TempDir};
+use tempfile::{TempDir, tempdir};
 use test_log::test;
 
 use super::{Asset, AssetRequest, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
-    receipt::SuccinctReceipt, recursion::MerkleGroup, ApiClient, ApiServer, ExecutorEnv,
-    InnerReceipt, ProveKeccakRequest, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt,
-    SessionInfo, SuccinctReceiptVerifierParameters, Unknown, VerifierContext,
+    ApiClient, ApiServer, ExecutorEnv, InnerReceipt, ProveKeccakRequest, ProverOpts, Receipt,
+    ReceiptClaim, SegmentReceipt, SessionInfo, SuccinctReceiptVerifierParameters, Unknown,
+    VerifierContext, receipt::SuccinctReceipt, recursion::MerkleGroup,
 };
 
 struct TestClientConnector {
@@ -233,6 +233,7 @@ fn prove_segment_elf() {
 }
 
 #[test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 fn lift_join_identity() {
     let segment_limit_po2 = 16; // 64k cycles
     let cycles = 1 << segment_limit_po2;
@@ -376,13 +377,13 @@ mod keccak_po2 {
     use std::{cell::RefCell, rc::Rc};
 
     use anyhow::Result;
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    use risc0_zkvm_methods::{MULTI_TEST_ELF, multi_test::MultiTestSpec};
     use test_log::test;
 
     use super::Asset;
     use crate::{
-        host::api::tests::TestClient, receipt::SuccinctReceipt, CoprocessorCallback, ExecutorEnv,
-        ProveKeccakRequest, Unknown,
+        CoprocessorCallback, ExecutorEnv, ProveKeccakRequest, Unknown,
+        host::api::tests::TestClient, receipt::SuccinctReceipt,
     };
 
     pub const KECCAK_TEST_PO2: u32 = 15;
@@ -429,10 +430,10 @@ mod keccak_po2 {
 #[test(tokio::test)]
 #[cfg(feature = "redis")]
 async fn redis_asset() {
-    let url = "127.0.0.1:6379";
-    let listener = tokio::net::TcpListener::bind(url)
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
         .await
         .expect("failed to bind to port 6379");
+    let url = listener.local_addr().unwrap().to_string();
 
     let _ = mini_redis::server::run(
         listener,

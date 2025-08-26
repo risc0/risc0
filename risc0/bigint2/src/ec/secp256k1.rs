@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use super::{Curve, WeierstrassCurve, EC_256_WIDTH_WORDS};
+use super::{Curve, EC_256_WIDTH_WORDS, WeierstrassCurve};
 
 /// The secp256k1 curve's prime as u32 digits, least significant digit first
 pub(crate) const SECP256K1_PRIME: [u32; EC_256_WIDTH_WORDS] = [
@@ -28,7 +28,7 @@ const SECP256K1_CURVE: &WeierstrassCurve<EC_256_WIDTH_WORDS> =
 
 /// An implementation of [Curve] for secp256k1.
 ///
-/// This type should be used as a generic for [AffinePoint].
+/// This type should be used as a generic for [AffinePoint][super::AffinePoint].
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Secp256k1Curve {}
 

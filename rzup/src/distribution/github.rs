@@ -14,11 +14,11 @@
 
 use crate::components::Component;
 use crate::distribution::{
-    check_for_not_found, download_bytes, download_json, parse_cpp_version, DistributionPlatform,
-    Platform, ProgressWriter,
+    DistributionPlatform, Platform, ProgressWriter, check_for_not_found, download_bytes,
+    download_json, parse_cpp_version,
 };
 use crate::env::Environment;
-use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferDirection};
+use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferKind};
 
 use semver::Version;
 use serde::Deserialize;
@@ -167,10 +167,10 @@ impl<'a> DistributionPlatform for GithubRelease<'a> {
         let mut resp = download_bytes(&download_url, env.github_token())?;
 
         env.emit(RzupEvent::TransferStarted {
-            direction: TransferDirection::Download,
+            kind: TransferKind::Download,
             id: component.to_string(),
-            version: version.to_string(),
-            url: download_url.clone(),
+            version: Some(version.to_string()),
+            url: Some(download_url.clone()),
             len: resp.content_length(),
         });
 
@@ -182,9 +182,9 @@ impl<'a> DistributionPlatform for GithubRelease<'a> {
         .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
 
         env.emit(RzupEvent::TransferCompleted {
-            direction: TransferDirection::Download,
+            kind: TransferKind::Download,
             id: component.to_string(),
-            version: version.to_string(),
+            version: Some(version.to_string()),
         });
 
         Ok(())
