@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ impl VerifyCommand {
         Ok(receipt)
     }
 
-    fn source(&self) -> SourceType {
+    fn source(&self) -> SourceType<'_> {
         match (&self.source.path, &self.source.id) {
             (Some(path), None) => SourceType::Path(path),
             (None, Some(id)) => SourceType::Id(id),

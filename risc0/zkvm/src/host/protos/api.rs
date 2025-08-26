@@ -111,30 +111,6 @@ pub mod prove_segment_reply {
         Error(super::GenericError),
     }
 }
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ProveZkrReply {
-    #[prost(oneof = "prove_zkr_reply::Kind", tags = "1, 2")]
-    pub kind: ::core::option::Option<prove_zkr_reply::Kind>,
-}
-/// Nested message and enum types in `ProveZkrReply`.
-pub mod prove_zkr_reply {
-    #[allow(clippy::derive_partial_eq_without_eq)]
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
-    pub enum Kind {
-        #[prost(message, tag = "1")]
-        Ok(super::ProveZkrResult),
-        #[prost(message, tag = "2")]
-        Error(super::GenericError),
-    }
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ProveZkrResult {
-    #[prost(message, optional, tag = "1")]
-    pub receipt: ::core::option::Option<Asset>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ProveKeccakRequest {
     #[prost(message, optional, tag = "1")]
