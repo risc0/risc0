@@ -55,6 +55,8 @@ use crate::{TraceCallback, TraceEvent};
 type GimliReader = EndianRcSlice<RunTimeEndian>;
 type ObjectContext = Context<GimliReader>;
 
+const USER_END_ADDR: u32 = 0xc000_0000;
+
 /// Operations effecting the function call stack.
 #[derive(Debug)]
 enum CallStackOp {
@@ -652,16 +654,18 @@ impl TraceCallback for Profiler {
 
                 self.add_cycles_to_current_stack(cycles);
 
-                let mut update_stack = false;
+                if pc <= USER_END_ADDR {
+                    let mut update_stack = false;
 
-                if let Some(op) = extract_call_stack_op(orig_insn) {
-                    self.handle_function_call(op, pc, orig_pc, &mut update_stack)?;
-                }
+                    if let Some(op) = extract_call_stack_op(orig_insn) {
+                        self.handle_function_call(op, pc, orig_pc, &mut update_stack)?;
+                    }
 
-                self.handle_inline_functions(pc, &mut update_stack);
+                    self.handle_inline_functions(pc, &mut update_stack);
 
-                if update_stack {
-                    self.update_stack(pc);
+                    if update_stack {
+                        self.update_stack(pc);
+                    }
                 }
 
                 // Update pc, insn, and cycle
