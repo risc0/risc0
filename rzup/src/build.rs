@@ -80,7 +80,7 @@ pub fn run_command_and_stream_output(
 
             return Err(RzupError::Other(format!(
                 "Process `{cmd_str}` failed with status {status}\n\
-                stodout: {stdout}\n\
+                stdout: {stdout}\n\
                 stderr: {stderr}",
             )));
         }

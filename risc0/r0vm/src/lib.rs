@@ -20,8 +20,8 @@ use std::{io, net::SocketAddr, path::PathBuf, rc::Rc};
 use clap::{Args, Parser, ValueEnum};
 use risc0_circuit_rv32im::execute::Segment;
 use risc0_zkvm::{
-    compute_image_id, get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts,
-    ProverServer, VerifierContext,
+    ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
+    compute_image_id, get_prover_server,
 };
 
 use self::actors::protocol::TaskKind;

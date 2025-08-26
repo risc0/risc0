@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,25 +17,25 @@ use std::rc::Rc;
 use anyhow::Result;
 use rayon::{iter::IntoParallelIterator, prelude::*};
 use risc0_circuit_keccak_sys::{
-    risc0_circuit_keccak_cpu_poly_fp, risc0_circuit_keccak_cpu_witgen, RawBuffer, RawExecBuffers,
-    RawPreflightTrace, ScatterInfo,
+    RawBuffer, RawExecBuffers, RawPreflightTrace, ScatterInfo, risc0_circuit_keccak_cpu_poly_fp,
+    risc0_circuit_keccak_cpu_witgen,
 };
 use risc0_core::scope;
 use risc0_sys::ffi_wrap;
 use risc0_zkp::{
-    core::{hash::poseidon2::Poseidon2HashSuite, log2_ceil},
-    field::{map_pow, Elem as _, ExtElem as _, RootsOfUnity as _},
-    hal::{
-        cpu::{CpuBuffer, CpuHal},
-        AccumPreflight, CircuitHal,
-    },
     INV_RATE,
+    core::{hash::poseidon2::Poseidon2HashSuite, log2_ceil},
+    field::{Elem as _, ExtElem as _, RootsOfUnity as _, map_pow},
+    hal::{
+        AccumPreflight, CircuitHal,
+        cpu::{CpuBuffer, CpuHal},
+    },
 };
 
 use crate::{
-    prove::{KeccakProver, KeccakProverImpl, GLOBAL_MIX, GLOBAL_OUT},
+    prove::{GLOBAL_MIX, GLOBAL_OUT, KeccakProver, KeccakProverImpl},
     zirgen::{
-        circuit::{CircuitField, ExtVal, Val, REGISTER_GROUP_ACCUM, REGISTER_GROUP_DATA},
+        circuit::{CircuitField, ExtVal, REGISTER_GROUP_ACCUM, REGISTER_GROUP_DATA, Val},
         info::POLY_MIX_POWERS,
     },
 };

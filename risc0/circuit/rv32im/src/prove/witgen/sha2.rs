@@ -14,7 +14,7 @@
 
 use crate::{
     execute::sha2::Sha2State,
-    zirgen::circuit::{ShaStateLayout, LAYOUT_TOP},
+    zirgen::circuit::{LAYOUT_TOP, ShaStateLayout},
 };
 
 const SHA2_STATE_LAYOUT: &ShaStateLayout = LAYOUT_TOP.inst_result.arm11.state;

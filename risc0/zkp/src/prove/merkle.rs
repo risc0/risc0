@@ -144,14 +144,14 @@ impl<H: Hal> MerkleTreeProver<H> {
 mod tests {
     use rand::Rng;
     use risc0_core::field::{
-        baby_bear::{BabyBear, BabyBearElem},
         Elem,
+        baby_bear::{BabyBear, BabyBearElem},
     };
 
     use super::*;
     use crate::{
         core::{
-            hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite, HashSuite},
+            hash::{HashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite},
             log2_ceil,
         },
         hal::cpu::CpuHal,

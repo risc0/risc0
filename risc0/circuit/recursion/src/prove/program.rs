@@ -15,11 +15,11 @@
 use anyhow::Result;
 
 use risc0_zkp::{
+    ZK_CYCLES,
     core::{digest::Digest, hash::HashSuite},
     field::baby_bear::{BabyBear, BabyBearElem},
     hal::{self, Hal},
     prove::poly_group::PolyGroup,
-    ZK_CYCLES,
 };
 
 use super::RECURSION_CODE_SIZE;

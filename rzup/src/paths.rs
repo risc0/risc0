@@ -129,8 +129,8 @@ impl Paths {
 mod tests {
     use super::*;
     use crate::{
-        distribution::{signature::PublicKey, Os, Platform},
         RzupError,
+        distribution::{Os, Platform, signature::PublicKey},
     };
     use semver::Version;
     use tempfile::TempDir;
@@ -250,14 +250,18 @@ mod tests {
 
         let version_dir = component.get_version_dir(&env, &version);
         std::fs::create_dir_all(&version_dir).unwrap();
-        assert!(Paths::find_version_dir(&env, &component, &version)
-            .unwrap()
-            .is_some());
+        assert!(
+            Paths::find_version_dir(&env, &component, &version)
+                .unwrap()
+                .is_some()
+        );
 
         // Test directory cleanup
         Paths::cleanup_version(&env, &component, &version).unwrap();
-        assert!(Paths::find_version_dir(&env, &component, &version)
-            .unwrap()
-            .is_none());
+        assert!(
+            Paths::find_version_dir(&env, &component, &version)
+                .unwrap()
+                .is_none()
+        );
     }
 }

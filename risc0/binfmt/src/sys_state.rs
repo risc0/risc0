@@ -21,7 +21,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
-use crate::{tagged_struct, Digestible};
+use crate::{Digestible, tagged_struct};
 
 /// Represents the public state of a segment, needed for continuations and
 /// receipt verification.
