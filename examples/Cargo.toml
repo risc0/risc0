@@ -41,6 +41,9 @@ members = [
   "xgboost",
 ]
 
+[workspace.package]
+edition = "2024"
+
 # Always optimize; otherwise tests take excessively long.
 [profile.dev]
 opt-level = 3

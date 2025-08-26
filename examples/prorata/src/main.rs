@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ use std::{fs, path::PathBuf};
 use clap::{Parser, Subcommand};
 use prorata_core::{AllocationQuery, AllocationQueryResult};
 use prorata_methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
-use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
+use risc0_zkvm::{ExecutorEnv, Receipt, default_prover};
 use rust_decimal::Decimal;
 
 #[derive(Parser)]
@@ -75,7 +75,7 @@ fn main() {
 /// the input CSV file. The core operation is performed inside the zkVM and the
 /// resulting receipt is stored to disk.
 fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
-    println!("Query: {}", recipient);
+    println!("Query: {recipient}");
     let recipients_csv = std::fs::read(input).expect("Failed to read input file");
 
     let query = AllocationQuery {
@@ -118,8 +118,8 @@ fn verify(input: &str) {
                 .journal
                 .decode()
                 .expect("Failed to deserialize result");
-            print!("{}", result);
+            print!("{result}");
         }
-        Err(e) => println!("Receipt is invalid: {}", e),
+        Err(e) => println!("Receipt is invalid: {e}"),
     }
 }

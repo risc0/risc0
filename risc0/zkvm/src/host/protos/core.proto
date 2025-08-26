@@ -7,6 +7,41 @@ package core;
 message ProveInfo {
   Receipt receipt = 1;
   SessionStats stats = 2;
+  InnerReceipt work_receipt = 3;
+}
+
+message EcallMetric {
+  uint64 count = 1;
+  uint64 cycles = 2;
+}
+
+message EcallMetrics {
+  EcallMetric bigint = 1;
+  EcallMetric poseidon2 = 2;
+  EcallMetric read = 3;
+  EcallMetric sha2 = 4;
+  EcallMetric terminate = 5;
+  EcallMetric user = 6;
+  EcallMetric write = 7;
+}
+
+message SyscallMetric {
+  uint64 count = 1;
+  uint64 size = 2;
+}
+
+message SyscallMetrics {
+  SyscallMetric keccak = 1;
+  SyscallMetric prove_keccak = 2;
+  SyscallMetric read = 3;
+  SyscallMetric verify_integrity = 4;
+  SyscallMetric verify_integrity2 = 5;
+  SyscallMetric write = 6;
+}
+
+message Duration {
+    uint64 secs = 1;
+    uint32 nanos = 2;
 }
 
 message SessionStats {
@@ -15,6 +50,9 @@ message SessionStats {
   uint64 user_cycles = 3;
   uint64 paging_cycles = 4;
   uint64 reserved_cycles = 5;
+  EcallMetrics ecall_metrics = 6;
+  SyscallMetrics syscall_metrics = 7;
+  Duration execution_time = 8;
 }
 
 message Receipt {
@@ -31,7 +69,8 @@ message ReceiptMetadata {
 // NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
 // In Rust, they are distinct types because Rust needs to size everything on the
 // stack and e.g. SuccinctReceipt<ReceiptClaim> and SuccinctReceipt<Unknown>
-// have different sizes. Protobuf handles this without issue.
+// have different sizes. Protobuf handles this without issue. GenericReceipt also
+// uses this message type for similar reasons, but the composite kind is unused.
 message InnerReceipt {
   oneof kind {
     CompositeReceipt composite = 1;
@@ -60,7 +99,7 @@ message SuccinctReceipt {
   base.CompatVersion version = 1;
   bytes seal = 2;
   base.Digest control_id = 3;
-  MaybePruned claim = 4; // MaybePruned<ReceiptClaim>
+  MaybePruned claim = 4; // MaybePruned<Claim>
   MerkleProof control_inclusion_proof = 5;
   string hashfn = 6;
   base.Digest verifier_parameters = 7;
@@ -74,7 +113,7 @@ message MerkleProof {
 message Groth16Receipt {
   base.CompatVersion version = 1;
   bytes seal = 2;
-  MaybePruned claim = 3; // MaybePruned<ReceiptClaim>
+  MaybePruned claim = 3; // MaybePruned<Claim>
   base.Digest verifier_parameters = 4;
 }
 
@@ -84,6 +123,17 @@ message ReceiptClaim {
   base.ExitCode exit_code = 3;
   MaybePruned input = 4;  // Option<MaybePruned<Input>>
   MaybePruned output = 5; // Option<MaybePruned<Output>>
+}
+
+message Work {
+  bytes nonce_min = 1;
+  bytes nonce_max = 2;
+  uint64 value = 3;
+}
+
+message WorkClaim {
+  MaybePruned claim = 1; // MaybePruned<Claim>
+  MaybePruned work = 2; // MaybePruned<Work>
 }
 
 message UnionClaim {
@@ -121,5 +171,5 @@ message Assumptions {
 }
 
 message FakeReceipt {
-  MaybePruned claim = 1; // MaybePruned<ReceiptClaim>
+  MaybePruned claim = 1; // MaybePruned<Claim>
 }

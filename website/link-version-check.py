@@ -17,7 +17,9 @@ EXCEPTIONS = [
     "github.com/risc0/risc0-ethereum/blob/release-0.7",
     "github.com/risc0/risc0-ethereum/blob/release-0.10",
     # allow links to v1.1.0-rc.3, which is referenced as a deployed version of contracts.
-    "github.com/risc0/risc0-ethereum/tree/v1.1.0-rc.3/contracts/"
+    "github.com/risc0/risc0-ethereum/tree/v1.1.0-rc.3/contracts/",
+    # For 2.1, we didn't release a new version of risc0-zkvm-platform
+    "https://docs.rs/risc0-zkvm-platform/2.0/risc0_zkvm_platform/fileno/index.html"
 ]
 
 REPOS = [
