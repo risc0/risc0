@@ -14,31 +14,32 @@
 
 use std::rc::Rc;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use risc0_circuit_recursion_sys::{
+    RawAccumBuffers, RawExecBuffers, RawPreflightTrace, StepMode,
     risc0_circuit_recursion_cpu_accum, risc0_circuit_recursion_cpu_eval_check,
-    risc0_circuit_recursion_cpu_witgen, RawAccumBuffers, RawExecBuffers, RawPreflightTrace,
-    StepMode,
+    risc0_circuit_recursion_cpu_witgen,
 };
 use risc0_sys::ffi_wrap;
 use risc0_zkp::{
+    INV_RATE,
     core::{
         hash::{
-            poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite, sha::Sha256HashSuite,
+            poseidon_254::Poseidon254HashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
         },
         log2_ceil,
     },
     field::{
+        RootsOfUnity as _,
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-        map_pow, RootsOfUnity as _,
+        map_pow,
     },
-    hal::{cpu::CpuBuffer, AccumPreflight, CircuitHal},
-    INV_RATE,
+    hal::{AccumPreflight, CircuitHal, cpu::CpuBuffer},
 };
 
 use crate::{
-    prove::{RecursionProver, RecursionProverImpl},
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
+    prove::{RecursionProver, RecursionProverImpl},
 };
 
 use super::{CircuitAccumulator, CircuitWitnessGenerator};

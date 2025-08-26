@@ -14,7 +14,7 @@
 
 //! Sets the version of a crate or many crates.
 
-use anyhow::{anyhow, Context as _, Result};
+use anyhow::{Context as _, Result, anyhow};
 use camino::Utf8Path;
 use clap::Parser;
 
@@ -79,7 +79,7 @@ fn update_version(args: &UpdateCrateVersion, old_version: &semver::Version) -> s
 
     if let Some(rc_num) = args.add_rc {
         new_version.pre = semver::Prerelease::new(&format!("rc.{rc_num}"))
-            .expect("should always be a vaild pre-release value");
+            .expect("should always be a valid pre-release value");
     }
 
     new_version
@@ -94,7 +94,11 @@ fn run_inner(args: &UpdateCrateVersion, workspace_root: &Path) -> Result<()> {
     let mut new_workspace_versions = BTreeMap::new();
 
     for package in metadata.workspace_default_packages() {
-        if args.package.as_ref().is_some_and(|p| p != &package.name) {
+        if args
+            .package
+            .as_ref()
+            .is_some_and(|p| p != package.name.as_str())
+        {
             continue;
         }
 

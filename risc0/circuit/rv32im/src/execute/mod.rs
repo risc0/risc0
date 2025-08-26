@@ -15,6 +15,7 @@
 pub(crate) mod bibc;
 pub(crate) mod bigint;
 mod executor;
+pub mod gdb;
 pub(crate) mod pager;
 pub mod platform;
 pub(crate) mod poseidon2;
@@ -29,7 +30,7 @@ pub mod testutil;
 
 pub use self::{
     bigint::analyze::analyze as bigint_analyze,
-    executor::{CycleLimit, EcallMetric, Executor, ExecutorResult, SimpleSession},
+    executor::{CycleLimit, Executor, ExecutorResult, SimpleSession},
     platform::*,
     segment::Segment,
     syscall::{Syscall, SyscallContext},
@@ -39,4 +40,25 @@ pub const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20;
 
 pub(crate) fn node_idx(page_idx: u32) -> u32 {
     MEMORY_PAGES as u32 + page_idx
+}
+
+#[inline]
+#[cold]
+fn cold() {}
+
+#[inline]
+#[allow(dead_code)]
+fn likely(b: bool) -> bool {
+    if !b {
+        cold()
+    }
+    b
+}
+
+#[inline]
+fn unlikely(b: bool) -> bool {
+    if b {
+        cold()
+    }
+    b
 }

@@ -23,7 +23,7 @@ From [Wikipedia](https://en.wikipedia.org/wiki/Digital_signature):
 > not altered in transit (integrity).
 
 This example shows how to build a simple digital signature scheme on the Risc0
-platform. In this scheme, the sender possesses a passphrase which they use to
+platform. In this scheme, the sender possesses a passphrase that they use to
 sign messages. Their identity is simply the SHA-256d hash of their passphrase.
 
 In our scheme, we would send the message, the commitment (message and

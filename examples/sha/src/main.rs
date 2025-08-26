@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
 // limitations under the License.
 
 use clap::Parser;
-use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv, Receipt};
+use risc0_zkvm::{ExecutorEnv, Receipt, default_prover, sha::Digest};
 use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 
 /// Hash the given bytes, returning the digest and a [Receipt] that can
-/// be used to verify that the that the hash was computed correctly (i.e. that
+/// be used to verify that the hash was computed correctly (i.e. that
 /// the Prover knows a preimage for the given SHA-256 hash)
 ///
 /// Select which method to use with `use_rust_crypto`.
@@ -67,7 +67,7 @@ fn main() {
         .verify(HASH_ID)
         .expect("receipt verification failed");
 
-    println!("I provably know data whose SHA-256 hash is {}", digest);
+    println!("I provably know data whose SHA-256 hash is {digest}");
 }
 
 #[cfg(test)]

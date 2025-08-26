@@ -16,18 +16,18 @@ use anyhow::Result;
 use risc0_circuit_rv32im_sys::RawMemoryTransaction;
 use risc0_zkp::{
     core::digest::DIGEST_WORDS,
-    field::{baby_bear, Elem as _},
+    field::{Elem as _, baby_bear},
 };
 
 use crate::{
     execute::{
-        node_idx,
+        CycleState, MERKLE_TREE_END_ADDR, MERKLE_TREE_START_ADDR, WORD_SIZE, node_idx,
         pager::{PAGE_WORDS, POSEIDON_PAGE_ROUNDS},
         poseidon2::{Poseidon2, Poseidon2State},
         r0vm::Risc0Context,
-        tx, CycleState, MERKLE_TREE_END_ADDR, MERKLE_TREE_START_ADDR, WORD_SIZE,
+        tx,
     },
-    zirgen::circuit::{ExtVal, PoseidonStateLayout, LAYOUT_TOP},
+    zirgen::circuit::{ExtVal, LAYOUT_TOP, PoseidonStateLayout},
 };
 
 use super::node_idx_to_addr;
@@ -180,52 +180,52 @@ impl Poseidon2State {
 }
 
 impl Poseidon2 {
-    pub fn read_start(ctx: &mut dyn Risc0Context) -> Result<()> {
+    pub fn read_start(ctx: &mut impl Risc0Context) -> Result<()> {
         // tracing::trace!("read_start");
         let p2 = Poseidon2State::new_start(0);
         ctx.on_poseidon2_cycle(CycleState::PoseidonEntry, &p2);
         Ok(())
     }
 
-    pub fn read_node(ctx: &mut dyn Risc0Context, node_idx: u32) -> Result<()> {
+    pub fn read_node(ctx: &mut impl Risc0Context, node_idx: u32) -> Result<()> {
         // tracing::trace!("read_node: {node_idx:#010x}");
         let mut p2 = Poseidon2State::new_node(node_idx, true);
         p2.rest(ctx, CycleState::PoseidonPaging)
     }
 
-    pub fn read_page(ctx: &mut dyn Risc0Context, page_idx: u32) -> Result<()> {
+    pub fn read_page(ctx: &mut impl Risc0Context, page_idx: u32) -> Result<()> {
         // tracing::trace!("read_page: {page_idx:#010x}");
         let mut p2 = Poseidon2State::new_page(page_idx, true);
         p2.rest(ctx, CycleState::PoseidonPaging)
     }
 
-    pub fn read_done(ctx: &mut dyn Risc0Context) -> Result<()> {
+    pub fn read_done(ctx: &mut impl Risc0Context) -> Result<()> {
         // tracing::trace!("read_done");
         let p2 = Poseidon2State::new_done(MERKLE_TREE_START_ADDR.0, CycleState::Resume, 2);
         ctx.on_poseidon2_cycle(CycleState::PoseidonPaging, &p2);
         Ok(())
     }
 
-    pub fn write_start(ctx: &mut dyn Risc0Context) -> Result<()> {
+    pub fn write_start(ctx: &mut impl Risc0Context) -> Result<()> {
         // tracing::trace!("write_start");
         let p2 = Poseidon2State::new_start(3);
         ctx.on_poseidon2_cycle(CycleState::PoseidonEntry, &p2);
         Ok(())
     }
 
-    pub fn write_node(ctx: &mut dyn Risc0Context, node_idx: u32) -> Result<()> {
+    pub fn write_node(ctx: &mut impl Risc0Context, node_idx: u32) -> Result<()> {
         // tracing::trace!("write_node: {node_idx:#010x}");
         let mut p2 = Poseidon2State::new_node(node_idx, false);
         p2.rest(ctx, CycleState::PoseidonPaging)
     }
 
-    pub fn write_page(ctx: &mut dyn Risc0Context, page_idx: u32) -> Result<()> {
+    pub fn write_page(ctx: &mut impl Risc0Context, page_idx: u32) -> Result<()> {
         // tracing::trace!("write_page: {page_idx:#010x}");
         let mut p2 = Poseidon2State::new_page(page_idx, false);
         p2.rest(ctx, CycleState::PoseidonPaging)
     }
 
-    pub fn write_done(ctx: &mut dyn Risc0Context) -> Result<()> {
+    pub fn write_done(ctx: &mut impl Risc0Context) -> Result<()> {
         // tracing::trace!("write_done");
         let p2 = Poseidon2State::new_done(MERKLE_TREE_END_ADDR.0, CycleState::StoreRoot, 5);
         ctx.on_poseidon2_cycle(CycleState::PoseidonPaging, &p2);

@@ -17,16 +17,16 @@ use std::rc::Rc;
 use anyhow::Result;
 use rayon::prelude::*;
 use risc0_circuit_rv32im_sys::{
-    risc0_circuit_rv32im_cpu_accum, risc0_circuit_rv32im_cpu_poly_fp,
-    risc0_circuit_rv32im_cpu_witgen, RawAccumBuffers, RawBuffer, RawExecBuffers, RawPreflightTrace,
+    RawAccumBuffers, RawBuffer, RawExecBuffers, RawPreflightTrace, risc0_circuit_rv32im_cpu_accum,
+    risc0_circuit_rv32im_cpu_poly_fp, risc0_circuit_rv32im_cpu_witgen,
 };
 use risc0_core::scope;
 use risc0_sys::ffi_wrap;
 use risc0_zkp::{
-    core::{hash::poseidon2::Poseidon2HashSuite, log2_ceil},
-    field::{map_pow, Elem, ExtElem as _, RootsOfUnity as _},
-    hal::{cpu::CpuBuffer, AccumPreflight, CircuitHal},
     INV_RATE,
+    core::{hash::poseidon2::Poseidon2HashSuite, log2_ceil},
+    field::{Elem, ExtElem as _, RootsOfUnity as _, map_pow},
+    hal::{AccumPreflight, CircuitHal, cpu::CpuBuffer},
 };
 
 use super::{
@@ -34,9 +34,9 @@ use super::{
     StepMode,
 };
 use crate::{
-    prove::{witgen::preflight::PreflightTrace, GLOBAL_MIX, GLOBAL_OUT},
+    prove::{GLOBAL_MIX, GLOBAL_OUT, witgen::preflight::PreflightTrace},
     zirgen::{
-        circuit::{CircuitField, ExtVal, Val, REGISTER_GROUP_ACCUM, REGISTER_GROUP_DATA},
+        circuit::{CircuitField, ExtVal, REGISTER_GROUP_ACCUM, REGISTER_GROUP_DATA, Val},
         info::POLY_MIX_POWERS,
     },
 };
@@ -190,7 +190,9 @@ impl CircuitHal<CpuHal> for CpuCircuitHal {
                 )
             };
             let x = Val::ROU_FWD[po2 + EXP_PO2].pow(cycle);
-            // TODO: what is this magic number 3?
+            // Multiply by 3 to shift the evaluation point in the field.
+            // This avoids collisions at roots of unity during polynomial checks,
+            // and is part of the protocol’s algebraic structure.
             let y = (Val::new(3) * x).pow(1 << po2);
             let ret = tot * (y - Val::new(1)).inv();
 
@@ -220,8 +222,9 @@ impl CircuitHal<CpuHal> for CpuCircuitHal {
 
 #[allow(dead_code)]
 pub fn segment_prover() -> Result<Box<dyn SegmentProver>> {
-    let suite = Poseidon2HashSuite::new_suite();
-    let hal = Rc::new(CpuHal::new(suite));
-    let circuit_hal = Rc::new(CpuCircuitHal);
-    Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
+    let hal_factory = || {
+        let suite = Poseidon2HashSuite::new_suite();
+        (Rc::new(CpuHal::new(suite)), Rc::new(CpuCircuitHal))
+    };
+    Ok(Box::new(SegmentProverImpl::new(hal_factory)))
 }

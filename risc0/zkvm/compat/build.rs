@@ -45,6 +45,7 @@ fn install_r0vm(version: &str, args: &[&str]) {
         .arg("--root")
         .arg(root)
         .arg(format!("risc0-r0vm@{version}"))
+        .env("CARGO_ENCODED_RUSTFLAGS", "")
         .status()
         .unwrap();
 

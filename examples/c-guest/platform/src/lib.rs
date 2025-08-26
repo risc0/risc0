@@ -71,7 +71,7 @@ pub struct sha256_state {
     inner: *mut Sha256<Impl>,
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn init_sha256() -> *mut sha256_state {
     Box::into_raw(Box::new(sha256_state {
         inner: Box::into_raw(Box::new(Sha256::new())),
@@ -83,13 +83,15 @@ pub extern "C" fn init_sha256() -> *mut sha256_state {
 /// # Safety
 /// This is safe assuming that pointers have not been manually modified, and len does not go past
 /// the buffer of the data in memory.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn sha256_update(hasher: *mut sha256_state, data: *const u8, len: u32) {
-    if hasher.is_null() || data.is_null() || (*hasher).inner.is_null() {
-        sys_panic(ERR_FREED.as_ptr(), ERR_FREED.len())
+    if hasher.is_null() || data.is_null() || unsafe { (*hasher).inner }.is_null() {
+        unsafe { sys_panic(ERR_FREED.as_ptr(), ERR_FREED.len()) }
     }
-    let data_slice = slice::from_raw_parts(data, len as usize);
-    (*(*hasher).inner).update(data_slice);
+    let data_slice = unsafe { slice::from_raw_parts(data, len as usize) };
+    unsafe {
+        (*(*hasher).inner).update(data_slice);
+    }
 }
 
 /// Finalize the hasher, returning an allocated digest of the output hash.
@@ -99,15 +101,17 @@ pub unsafe extern "C" fn sha256_update(hasher: *mut sha256_state, data: *const u
 ///
 /// # Safety
 /// Assumes [sha256_state] has not been freed previously.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn sha256_finalize(hasher: *mut sha256_state) -> *mut Digest {
-    if hasher.is_null() || (*hasher).inner.is_null() {
-        sys_panic(ERR_FREED.as_ptr(), ERR_FREED.len())
+    if hasher.is_null() || unsafe { (*hasher).inner }.is_null() {
+        unsafe { sys_panic(ERR_FREED.as_ptr(), ERR_FREED.len()) }
     }
     let inner = unsafe { Box::from_raw((*hasher).inner) };
     let result = inner.finalize();
     // Free hasher to assert it is unused after finalize.
-    sha256_free(hasher);
+    unsafe {
+        sha256_free(hasher);
+    }
     let arr: [u8; 32] = result.into();
     Box::into_raw(Box::new(arr.into()))
 }
@@ -116,17 +120,19 @@ pub unsafe extern "C" fn sha256_finalize(hasher: *mut sha256_state) -> *mut Dige
 ///
 /// # Safety
 /// This assumes the state has not already been freed or manually modified.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn sha256_free(hasher: *mut sha256_state) {
     if !hasher.is_null() {
-        let mut boxed_hasher = Box::from_raw(hasher);
+        unsafe {
+            let mut boxed_hasher = Box::from_raw(hasher);
 
-        let inner = Box::from_raw(boxed_hasher.inner);
-        // Set pointer to null to avoid double free. `black_box` to avoid compiler optimizing away.
-        boxed_hasher.inner = ptr::null_mut();
-        drop(inner);
+            let inner = Box::from_raw(boxed_hasher.inner);
+            // Set pointer to null to avoid double free. `black_box` to avoid compiler optimizing away.
+            boxed_hasher.inner = ptr::null_mut();
+            drop(inner);
 
-        drop(boxed_hasher);
+            drop(boxed_hasher);
+        }
     }
 }
 
@@ -134,11 +140,15 @@ pub unsafe extern "C" fn sha256_free(hasher: *mut sha256_state) {
 ///
 /// # Safety
 /// Assumes hasher has not been freed.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn env_exit(hasher: *mut sha256_state, exit_code: u8) -> ! {
-    let journal_digest = sha256_finalize(hasher);
-    let output_words: [u32; 8] =
-        tagged_struct::<Impl>("risc0.Output", &[&*journal_digest, &Digest::ZERO], &[]).into();
+    let journal_digest = unsafe { sha256_finalize(hasher) };
+    let output_words: [u32; 8] = tagged_struct::<Impl>(
+        "risc0.Output",
+        &[unsafe { &*journal_digest }, &Digest::ZERO],
+        &[],
+    )
+    .into();
     sys_halt(exit_code, &output_words)
 }
 
@@ -147,17 +157,19 @@ pub unsafe extern "C" fn env_exit(hasher: *mut sha256_state, exit_code: u8) -> !
 /// # Safety
 /// This is safe assuming that pointers have not been manually modified, and len does not go past
 /// the buffer of the data in memory.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn env_commit(hasher: *mut sha256_state, bytes_ptr: *const u8, len: u32) {
-    sha256_update(hasher, bytes_ptr, len);
-    sys_write(fileno::JOURNAL, bytes_ptr, len as usize);
+    unsafe {
+        sha256_update(hasher, bytes_ptr, len);
+        sys_write(fileno::JOURNAL, bytes_ptr, len as usize);
+    }
 }
 
 /// Reads `len` bytes into buffer from the host.
 ///
 /// # Safety
 /// Assumes that the buffer has at least `len` bytes allocated.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn env_read(bytes_ptr: *mut u8, len: u32) -> usize {
-    sys_read(fileno::STDIN, bytes_ptr, len as usize)
+    unsafe { sys_read(fileno::STDIN, bytes_ptr, len as usize) }
 }

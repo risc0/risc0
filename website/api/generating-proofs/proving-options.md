@@ -1,13 +1,5 @@
 # Options for Proof Generation
 
-:::info
-The `stark2snark` prover currently _only_ works on x86 architecture, and so Apple Silicon is _currently unsupported_ (even via Docker).
-
-You can find out more info on the relevant issues [here](https://github.com/risc0/risc0/issues/1520) and [here](https://github.com/risc0/risc0/issues/1749).
-:::
-
----
-
 To support a variety of use cases, RISC Zero allows users a variety of options for proof generation.
 
 Users can choose between:
@@ -20,6 +12,7 @@ We recommend option 1 during development, option 2 for applications involving pr
 
 :::tip
 [`prove_with_opts`] allows users to choose between [composite, succinct or groth16 receipts].
+See the [Shrink-Wrapping] page for more details about groth16 receipts.
 :::
 
 [`prove_with_opts`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
@@ -28,3 +21,4 @@ We recommend option 1 during development, option 2 for applications involving pr
 [dev-mode]: ./dev-mode.md
 [Local Proving]: ./local-proving.md
 [Remote Proving]: ./remote-proving.md
+[Shrink-Wrapping]: ../blockchain-integration/shrink-wrapping.md

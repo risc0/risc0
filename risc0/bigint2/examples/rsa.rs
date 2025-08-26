@@ -14,7 +14,7 @@
 
 use clap::Parser;
 use risc0_bigint2_methods::RSA_ELF;
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use risc0_zkvm::{ExecutorEnv, default_prover};
 
 #[derive(Parser)]
 struct Args {

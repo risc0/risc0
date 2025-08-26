@@ -25,20 +25,20 @@ use lazy_static::lazy_static;
 #[cfg(feature = "std")]
 use std::sync::Arc;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 use derive_more::Debug;
 use risc0_zkp::{
     core::{
-        digest::{Digest, DIGEST_WORDS},
-        hash::poseidon2::{poseidon2_mix, CELLS},
+        digest::{DIGEST_WORDS, Digest},
+        hash::poseidon2::{CELLS, poseidon2_mix},
     },
-    field::{baby_bear::BabyBearElem, Elem as _},
+    field::{Elem as _, baby_bear::BabyBearElem},
 };
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    PAGE_BYTES, PAGE_WORDS, Program, WORD_SIZE,
     addr::{ByteAddr, WordAddr},
-    Program, PAGE_BYTES, PAGE_WORDS, WORD_SIZE,
 };
 
 const MEMORY_BYTES: u64 = 1 << 32;
@@ -100,7 +100,7 @@ pub struct Page(Vec<u8>);
 
 /// A memory image
 ///
-/// A full memory image of a zkVM guest. Includes functio∑nality for accessing
+/// A full memory image of a zkVM guest. Includes functionality for accessing
 /// memory and associated digests, and for initializing the memory state for a
 /// [Program].
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -212,17 +212,21 @@ impl MemoryImage {
         bail!("Unavailable page: {page_idx}")
     }
 
-    /// Return the page data, panics if not available
-    pub fn get_existing_page(&self, page_idx: u32) -> Page {
-        self.pages.get(&page_idx).unwrap().clone()
-    }
-
     /// Set the data for a page
     pub fn set_page(&mut self, page_idx: u32, page: Page) {
         // tracing::trace!("set_page({page_idx:#08x})");
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
         self.expand_if_zero(digest_idx);
         self.digests.insert(digest_idx, page.digest());
+        self.pages.insert(page_idx, page);
+        self.mark_dirty(digest_idx);
+    }
+
+    /// Set the data for a page and with the given digest
+    pub fn set_page_with_digest(&mut self, page_idx: u32, page: Page, digest: Digest) {
+        let digest_idx = MEMORY_PAGES as u32 + page_idx;
+        self.expand_if_zero(digest_idx);
+        self.digests.insert(digest_idx, digest);
         self.pages.insert(page_idx, page);
         self.mark_dirty(digest_idx);
     }
@@ -234,11 +238,6 @@ impl MemoryImage {
         self.digests
             .get(&digest_idx)
             .ok_or_else(|| anyhow!("Unavailable digest: {digest_idx}"))
-    }
-
-    /// Get a digest, panics if not available
-    pub fn get_existing_digest(&self, digest_idx: u32) -> &Digest {
-        self.digests.get(&digest_idx).unwrap()
     }
 
     /// Set a digest
@@ -339,6 +338,11 @@ impl MemoryImage {
             self.digests.insert(idx, parent_digest);
         }
     }
+
+    /// Discard the hashes and turn the MemoryImage into just its pages
+    pub fn into_pages(self) -> BTreeMap<u32, Page> {
+        self.pages
+    }
 }
 
 impl Default for Page {
@@ -381,6 +385,7 @@ impl Page {
     /// Thus, if you pass a [WordAddr] belonging to a different page,
     /// [Page::load] will load from the address in _this_ page with the same
     /// [WordAddr::page_subaddr].
+    #[inline(always)]
     pub fn load(&self, addr: WordAddr) -> u32 {
         let byte_addr = addr.page_subaddr().baddr().0 as usize;
         let mut bytes = [0u8; WORD_SIZE];
@@ -392,11 +397,13 @@ impl Page {
     }
 
     #[cfg(feature = "std")]
+    #[inline(always)]
     fn ensure_writable(&mut self) -> &mut [u8] {
         &mut Arc::make_mut(&mut self.0)[..]
     }
 
     #[cfg(not(feature = "std"))]
+    #[inline(always)]
     fn ensure_writable(&mut self) -> &mut [u8] {
         &mut self.0
     }
@@ -408,6 +415,7 @@ impl Page {
     /// this page. Thus, if you pass a [WordAddr] belonging to a different page,
     /// [Page::store] will store to the address in _this_ page with the same
     /// [WordAddr::page_subaddr].
+    #[inline(always)]
     pub fn store(&mut self, addr: WordAddr, word: u32) {
         let writable_ref = self.ensure_writable();
 
@@ -417,6 +425,7 @@ impl Page {
     }
 
     /// Get a shared reference to the underlying data in the page
+    #[inline(always)]
     pub fn data(&self) -> &Vec<u8> {
         &self.0
     }

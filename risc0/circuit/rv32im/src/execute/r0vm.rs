@@ -14,33 +14,22 @@
 
 use std::{cmp::min, fmt::Write as _};
 
-use anyhow::{anyhow, bail, Result};
-use enum_map::Enum;
+use anyhow::{Result, anyhow, bail};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::{
     platform::*,
     poseidon2::{Poseidon2, Poseidon2State},
-    rv32im::{DecodedInstruction, EmuContext, Emulator, Exception, Instruction},
+    rv32im::{EmuContext, Emulator, Exception, InsnKind},
     sha2::{self, Sha2State},
 };
+use crate::EcallKind;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub(crate) enum LoadOp {
     Peek,
     Load,
     Record,
-}
-
-#[derive(Clone, Copy, Debug, Enum)]
-pub enum EcallKind {
-    BigInt,
-    Poseidon2,
-    Read,
-    Sha2,
-    Terminate,
-    User,
-    Write,
 }
 
 pub(crate) trait Risc0Context {
@@ -59,20 +48,27 @@ pub(crate) trait Risc0Context {
     /// Set the machine mode
     fn set_machine_mode(&mut self, mode: u32);
 
-    fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
+    fn on_insn_start(
+        &mut self,
+        kind: InsnKind,
+        decoded: &super::rv32im::DecodedInstruction,
+    ) -> Result<()>;
 
-    fn on_insn_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
+    fn on_insn_end(&mut self, kind: InsnKind) -> Result<()>;
 
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32>;
 
+    #[inline(always)]
     fn load_register(&mut self, op: LoadOp, base: WordAddr, idx: usize) -> Result<u32> {
         self.load_u32(op, base + idx)
     }
 
+    #[inline(always)]
     fn load_machine_register(&mut self, op: LoadOp, idx: usize) -> Result<u32> {
         self.load_register(op, MACHINE_REGS_ADDR.waddr(), idx)
     }
 
+    #[inline(always)]
     fn load_aligned_addr_from_machine_register(
         &mut self,
         op: LoadOp,
@@ -81,6 +77,7 @@ pub(crate) trait Risc0Context {
         check_aligned_addr(ByteAddr(self.load_machine_register(op, idx)?))
     }
 
+    #[inline(always)]
     fn load_u8(&mut self, op: LoadOp, addr: ByteAddr) -> Result<u8> {
         let word = self.load_u32(op, addr.waddr())?;
         let bytes = word.to_le_bytes();
@@ -88,6 +85,7 @@ pub(crate) trait Risc0Context {
         Ok(bytes[byte_offset])
     }
 
+    #[inline(always)]
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
         let mut region = Vec::with_capacity(size);
         if addr.is_aligned() && (0 == size % WORD_SIZE) {
@@ -106,6 +104,36 @@ pub(crate) trait Risc0Context {
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;
 
+    #[inline(always)]
+    fn store_region(&mut self, addr: ByteAddr, input: &[u8]) -> Result<()> {
+        let size = input.len();
+        if addr.is_aligned() && (0 == size % WORD_SIZE) {
+            let mut waddr = addr.waddr();
+            for i in (0..size).step_by(WORD_SIZE) {
+                self.store_u32(
+                    waddr.postfix_inc(),
+                    u32::from_le_bytes(input[i..(i + WORD_SIZE)].try_into().unwrap()),
+                )?;
+            }
+        } else {
+            for (i, byte) in input.iter().enumerate() {
+                self.store_u8(addr + i, *byte)?;
+            }
+        }
+        Ok(())
+    }
+
+    #[inline(always)]
+    fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
+        let byte_offset = addr.subaddr() as usize;
+        let word = self.load_u32(LoadOp::Record, addr.waddr())?;
+        let mut bytes = word.to_le_bytes();
+        bytes[byte_offset] = byte;
+        let word = u32::from_le_bytes(bytes);
+        self.store_u32(addr.waddr(), word)
+    }
+
+    #[inline(always)]
     fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
         self.store_u32(base + idx, word)
     }
@@ -153,34 +181,157 @@ pub(crate) trait Risc0Context {
     fn ecall_bigint(&mut self) -> Result<()>;
 }
 
+#[cfg(test)]
+pub struct TestRisc0Context {
+    pc: ByteAddr,
+    user_pc: ByteAddr,
+    machine_mode: u32,
+    memory: std::collections::BTreeMap<WordAddr, u32>,
+}
+
+#[cfg(test)]
+impl Default for TestRisc0Context {
+    fn default() -> Self {
+        Self {
+            pc: ByteAddr(0),
+            user_pc: ByteAddr(0),
+            machine_mode: 0,
+            memory: Default::default(),
+        }
+    }
+}
+
+#[cfg(test)]
+impl TestRisc0Context {
+    pub fn assert_uninit(&self, addr: ByteAddr) {
+        assert_eq!(self.memory.get(&addr.waddr()), None);
+    }
+}
+
+#[cfg(test)]
+impl Risc0Context for TestRisc0Context {
+    fn get_pc(&self) -> ByteAddr {
+        self.pc
+    }
+
+    fn set_pc(&mut self, addr: ByteAddr) {
+        self.pc = addr;
+    }
+
+    fn set_user_pc(&mut self, addr: ByteAddr) {
+        self.user_pc = addr;
+    }
+
+    fn get_machine_mode(&self) -> u32 {
+        self.machine_mode
+    }
+
+    fn set_machine_mode(&mut self, mode: u32) {
+        self.machine_mode = mode;
+    }
+
+    fn on_insn_start(
+        &mut self,
+        _kind: InsnKind,
+        _decoded: &super::rv32im::DecodedInstruction,
+    ) -> Result<()> {
+        Ok(())
+    }
+
+    fn on_insn_end(&mut self, _kind: InsnKind) -> Result<()> {
+        Ok(())
+    }
+
+    fn load_u32(&mut self, _op: LoadOp, addr: WordAddr) -> Result<u32> {
+        Ok(self.memory.get(&addr).copied().unwrap_or_else(|| {
+            panic!(
+                "load_u32 of address 0x{:x} which has not been written to",
+                addr.0
+            )
+        }))
+    }
+
+    fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
+        self.memory.insert(addr, word);
+        Ok(())
+    }
+
+    /// We need our own implementation in order to avoid uninitialized read of the u32 containing
+    /// the u8.
+    fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
+        let byte_offset = addr.subaddr() as usize;
+        let word = self.memory.get(&addr.waddr()).copied().unwrap_or(0);
+        let mut bytes = word.to_le_bytes();
+        bytes[byte_offset] = byte;
+        let word = u32::from_le_bytes(bytes);
+        self.store_u32(addr.waddr(), word)
+    }
+
+    fn host_read(&mut self, _fd: u32, _buf: &mut [u8]) -> Result<u32> {
+        unimplemented!()
+    }
+
+    fn host_write(&mut self, _fd: u32, _buf: &[u8]) -> Result<u32> {
+        unimplemented!()
+    }
+
+    fn on_terminate(&mut self, _a0: u32, _a1: u32) -> Result<()> {
+        Ok(())
+    }
+
+    fn on_ecall_cycle(
+        &mut self,
+        _cur: CycleState,
+        _next: CycleState,
+        _s0: u32,
+        _s1: u32,
+        _s2: u32,
+        _kind: super::r0vm::EcallKind,
+    ) -> Result<()> {
+        Ok(())
+    }
+
+    fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &super::sha2::Sha2State) {}
+
+    fn on_poseidon2_cycle(
+        &mut self,
+        _cur_state: CycleState,
+        _p2: &super::poseidon2::Poseidon2State,
+    ) {
+    }
+
+    fn ecall_bigint(&mut self) -> Result<()> {
+        unimplemented!()
+    }
+}
+
 fn check_aligned_addr(addr: ByteAddr) -> Result<WordAddr> {
     addr.waddr_aligned()
         .ok_or_else(|| anyhow!("{addr:?} is an unaligned address"))
 }
 
-pub struct Risc0Machine<'a, T: Risc0Context> {
-    ctx: &'a mut T,
+pub struct Risc0Machine<'a, C: Risc0Context> {
+    ctx: &'a mut C,
 }
 
-impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
-    pub fn step(emu: &mut Emulator, ctx: &'a mut T) -> Result<()> {
-        emu.step(&mut Risc0Machine { ctx }).inspect_err(|_| {
-            emu.dump();
-        })
+impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
+    #[inline(always)]
+    pub fn step(emu: &mut Emulator, ctx: &'a mut C) -> Result<()> {
+        emu.step(&mut Risc0Machine { ctx })
     }
 
-    pub fn suspend(ctx: &'a mut T) -> Result<()> {
+    pub fn suspend(ctx: &'a mut C) -> Result<()> {
         let mut this = Risc0Machine { ctx };
         this.store_memory(SUSPEND_PC_ADDR.waddr(), this.ctx.get_pc().0)?;
         this.store_memory(SUSPEND_MODE_ADDR.waddr(), this.ctx.get_machine_mode())?;
         this.ctx.suspend()
     }
 
-    pub fn resume(ctx: &'a mut T) -> Result<()> {
+    pub fn resume(ctx: &'a mut C) -> Result<()> {
         let mut this = Risc0Machine { ctx };
         let pc = guest_addr(this.load_memory(SUSPEND_PC_ADDR.waddr())?)?;
         let machine_mode = this.load_memory(SUSPEND_MODE_ADDR.waddr())?;
-        tracing::debug!("resume(entry: {pc:?}, mode: {machine_mode})");
+        // tracing::debug!("resume(entry: {pc:?}, mode: {machine_mode})");
         this.ctx.set_pc(pc);
         this.ctx.set_machine_mode(machine_mode);
         this.ctx.resume()
@@ -208,7 +359,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
 
     fn user_ecall(&mut self) -> Result<bool> {
         let dispatch_addr = guest_addr(self.load_memory(ECALL_DISPATCH_ADDR.waddr())?)?;
-        tracing::trace!("user_ecall> addr: {dispatch_addr:?}");
+        // tracing::trace!("user_ecall> addr: {dispatch_addr:?}");
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
             return self.trap(Exception::UserEnvCall(dispatch_addr));
         }
@@ -218,7 +369,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
     }
 
     fn ecall_terminate(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_terminate");
+        // tracing::trace!("ecall_terminate");
         self.ctx.on_ecall_cycle(
             CycleState::MachineEcall,
             CycleState::Terminate,
@@ -264,11 +415,11 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
         if len > 0 {
             guest_addr(ptr.0)?;
         }
-        tracing::trace!("ecall_read({fd}, {ptr:?}, {len})");
+        // tracing::trace!("ecall_read({fd}, {ptr:?}, {len})");
         let mut bytes = vec![0u8; len as usize];
         let mut rlen = self.ctx.host_read(fd, &mut bytes)?;
         self.store_register(REG_A0, rlen)?;
-        tracing::trace!("rlen: {rlen}");
+        // tracing::trace!("rlen: {rlen}");
         if rlen == 0 {
             self.next_pc();
         }
@@ -304,7 +455,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
 
         while rlen > 0 && !ptr.is_aligned() {
             // tracing::trace!("prefix");
-            self.store_u8(ptr, bytes[i])?;
+            self.ctx.store_u8(ptr, bytes[i])?;
             ptr += 1u32;
             i += 1;
             rlen -= 1;
@@ -329,7 +480,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
                     rlen -= WORD_SIZE as u32;
                 } else {
                     // tracing::trace!("store: {:#010x} -> null", 0);
-                    self.store_memory(SAFE_WRITE_ADDR.waddr(), 0)?;
+                    self.store_memory(SAFE_WRITE_ADDR.waddr() + j, 0)?;
                 }
             }
 
@@ -342,7 +493,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
 
         while rlen > 0 {
             // tracing::trace!("suffix");
-            self.store_u8(ptr, bytes[i])?;
+            self.ctx.store_u8(ptr, bytes[i])?;
             ptr += 1u32;
             i += 1;
             rlen -= 1;
@@ -445,15 +596,6 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
         Ok(())
     }
 
-    fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
-        let byte_offset = addr.subaddr() as usize;
-        let word = self.load_memory(addr.waddr())?;
-        let mut bytes = word.to_le_bytes();
-        bytes[byte_offset] = byte;
-        let word = u32::from_le_bytes(bytes);
-        self.store_memory(addr.waddr(), word)
-    }
-
     fn regs_base_addr(&self) -> WordAddr {
         if self.is_machine_mode() {
             MACHINE_REGS_ADDR.waddr()
@@ -522,12 +664,16 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
         Ok(false)
     }
 
-    fn on_insn_decoded(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
-        self.ctx.on_insn_start(insn, decoded)
+    fn on_insn_decoded(
+        &mut self,
+        kind: InsnKind,
+        decoded: &super::rv32im::DecodedInstruction,
+    ) -> Result<()> {
+        self.ctx.on_insn_start(kind, decoded)
     }
 
-    fn on_normal_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
-        self.ctx.on_insn_end(insn, decoded)
+    fn on_normal_end(&mut self, kind: InsnKind) -> Result<()> {
+        self.ctx.on_insn_end(kind)
     }
 
     fn get_pc(&self) -> ByteAddr {
@@ -538,12 +684,14 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
         self.ctx.set_pc(addr);
     }
 
+    #[inline(always)]
     fn load_register(&mut self, idx: usize) -> Result<u32> {
         // tracing::trace!("load_reg: x{idx}");
         let base = self.regs_base_addr();
         self.ctx.load_register(LoadOp::Record, base, idx)
     }
 
+    #[inline(always)]
     fn store_register(&mut self, idx: usize, word: u32) -> Result<()> {
         // tracing::trace!("store_reg: x{idx} <= {word:#010x}");
         let base = self.regs_base_addr();
@@ -557,10 +705,12 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
         }
     }
 
+    #[inline(always)]
     fn load_memory(&mut self, addr: WordAddr) -> Result<u32> {
         self.ctx.load_u32(LoadOp::Record, addr)
     }
 
+    #[inline(always)]
     fn store_memory(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         self.ctx.store_u32(addr, word)
     }

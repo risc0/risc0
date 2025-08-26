@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use risc0_binfmt::WordAddr;
 use risc0_zkp::core::hash::sha::BLOCK_WORDS;
 
 use crate::execute::{
     platform::*,
-    r0vm::{guest_addr, LoadOp, Risc0Context},
+    r0vm::{LoadOp, Risc0Context, guest_addr},
 };
 
 const SHA2_LOAD_STATE_CYCLES: u32 = 4;
@@ -45,7 +45,7 @@ pub(crate) struct Sha2State {
 impl Sha2State {
     fn step(
         &mut self,
-        ctx: &mut dyn Risc0Context,
+        ctx: &mut impl Risc0Context,
         cur_state: &mut CycleState,
         next_state: CycleState,
     ) {
@@ -55,7 +55,7 @@ impl Sha2State {
     }
 }
 
-pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
+pub fn ecall(ctx: &mut impl Risc0Context) -> Result<()> {
     let state_in_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A0)?)?.waddr();
     let state_out_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A1)?)?.waddr();
     let data_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A2)?)?.waddr();

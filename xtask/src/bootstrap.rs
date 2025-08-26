@@ -15,17 +15,17 @@
 use std::{borrow::Borrow, collections::HashSet, fmt::Write, process::Command};
 
 use clap::Parser;
-use risc0_circuit_keccak::{prove::zkr::get_keccak_zkr, KECCAK_PO2_RANGE};
+use risc0_circuit_keccak::{KECCAK_PO2_RANGE, prove::zkr::get_keccak_zkr};
 use risc0_circuit_recursion::prove::zkr::{get_all_zkrs, get_zkr};
 use risc0_zkp::core::{
     digest::Digest,
     hash::{
-        hash_suite_from_name, poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite,
+        hash_suite_from_name, poseidon_254::Poseidon254HashSuite, poseidon2::Poseidon2HashSuite,
     },
 };
 use risc0_zkvm::{
-    recursion::{MerkleGroup, Program},
     DEFAULT_MAX_PO2, RECURSION_PO2,
+    recursion::{MerkleGroup, Program},
 };
 
 #[derive(Parser)]
@@ -68,7 +68,7 @@ impl Bootstrap {
         Command::new("rustfmt")
             .arg(path)
             .status()
-            .expect("failed to format {path}");
+            .unwrap_or_else(|_| panic!("failed to format {path}"));
     }
 
     fn generate_recursion_control_ids() {
@@ -78,12 +78,22 @@ impl Bootstrap {
         // because there may be ZKRs included only for tests, or ones that are not part of the main
         // set of allowed programs (e.g. accelerators, and po2 22-24). Those programs can be
         // enabled by using a custom VerifierContext.
-        let allowed_zkr_names: HashSet<String> =
-            ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
-                .map(str::to_string)
-                .into_iter()
-                .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
-                .collect();
+        let allowed_zkr_names: HashSet<String> = [
+            "join.zkr",
+            "join_povw.zkr",
+            "join_unwrap_povw.zkr",
+            "resolve.zkr",
+            "resolve_povw.zkr",
+            "resolve_unwrap_povw.zkr",
+            "identity.zkr",
+            "unwrap_povw.zkr",
+            "union.zkr",
+        ]
+        .map(str::to_string)
+        .into_iter()
+        .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
+        .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_povw_{i}.zkr")))
+        .collect();
 
         tracing::info!("Using allowed_zkr_names {allowed_zkr_names:#?}");
 
@@ -155,7 +165,7 @@ impl Bootstrap {
                 let program = Program::from_encoded(encoded_program, RECURSION_PO2);
 
                 tracing::info!("computing control ID for {name} with {hashfn}");
-                let control_id = program.compute_control_id(hash_suite.clone());
+                let control_id = program.compute_control_id(hash_suite.clone()).unwrap();
 
                 tracing::debug!("{name} control id: {control_id:?}");
                 (name.clone(), control_id)
@@ -165,7 +175,9 @@ impl Bootstrap {
 
     pub fn generate_identity_bn254_control_id() -> Digest {
         let program = get_zkr("identity.zkr", RECURSION_PO2).unwrap();
-        program.compute_control_id(Poseidon254HashSuite::new_suite())
+        program
+            .compute_control_id(Poseidon254HashSuite::new_suite())
+            .unwrap()
     }
 
     fn bootstrap_keccak() {
@@ -191,7 +203,7 @@ impl Bootstrap {
             let hash_suite = Poseidon2HashSuite::new_suite();
             ret.push((
                 format!("keccak_lift po2={po2}"),
-                program.compute_control_id(hash_suite),
+                program.compute_control_id(hash_suite).unwrap(),
             ))
         }
         ret

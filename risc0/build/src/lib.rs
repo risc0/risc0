@@ -35,10 +35,11 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use cargo_metadata::{Message, MetadataCommand, Package};
 use config::GuestMetadata;
-use risc0_binfmt::{ProgramBinary, KERNEL_START_ADDR};
+use rayon::prelude::*;
+use risc0_binfmt::{KERNEL_START_ADDR, ProgramBinary};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
@@ -50,11 +51,11 @@ pub use self::{
         DockerOptions, DockerOptionsBuilder, DockerOptionsBuilderError, GuestOptions,
         GuestOptionsBuilder, GuestOptionsBuilderError,
     },
-    docker::{docker_build, BuildStatus, TARGET_DIR},
+    docker::{BuildStatus, TARGET_DIR, docker_build},
 };
 
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
-const DEFAULT_DOCKER_TAG: &str = "r0.1.85.0";
+const DEFAULT_DOCKER_TAG: &str = "r0.1.88.0";
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -68,7 +69,7 @@ impl Risc0Metadata {
     }
 }
 
-trait GuestBuilder: Sized {
+trait GuestBuilder: Sized + Send {
     fn build(guest_info: &GuestInfo, name: &str, elf_path: &str) -> Result<Self>;
 
     fn codegen_consts(&self) -> String;
@@ -158,7 +159,9 @@ fn compute_image_id(elf: &[u8], elf_path: &str) -> Result<Digest> {
     Ok(match r0vm_image_id(elf_path, "--id") {
         Ok(image_id) => image_id,
         Err(err) => {
-            tty_println("Falling back to slow ImageID computation. Updating to the latest r0vm will speed this up.");
+            tty_println(
+                "Falling back to slow ImageID computation. Updating to the latest r0vm will speed this up.",
+            );
             tty_println(&format!("  error: {err}"));
             risc0_binfmt::compute_image_id(elf)?
         }
@@ -241,7 +244,9 @@ impl GuestBuilder for GuestListEntry {
 /// Returns the given cargo Package from the metadata in the Cargo.toml manifest
 /// within the provided `manifest_dir`.
 pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
-    let manifest_dir = manifest_dir.as_ref();
+    // Canonicalize the manifest directory specified by the user.
+    let manifest_dir =
+        fs::canonicalize(manifest_dir.as_ref()).expect("could not canonicalize manifest path");
     let manifest_path = manifest_dir.join("Cargo.toml");
     let manifest_meta = MetadataCommand::new()
         .manifest_path(&manifest_path)
@@ -428,10 +433,7 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
         cmd.env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
 
         // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
-        // feature is available. Gated behind unstable to match risc0-zkvm-platform. Note that this
-        // would be seamless if there was a reliable way to tell whether it is enabled in
-        // risc0-zkvm-platform, however, this problem is also temporary.
-        #[cfg(feature = "unstable")]
+        // feature is available.
         cmd.env("RISC0_FEATURE_bigint2", "");
     }
 
@@ -555,7 +557,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
         cmd.args(["--features", &(guest_pkg.to_owned() + "/" + feature)]);
     }
 
-    eprintln!("Building staticlib: {:?}", cmd);
+    eprintln!("Building staticlib: {cmd:?}");
 
     // Run the build command and extract the name of the resulting staticlib
     // artifact.
@@ -572,7 +574,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
                 }
             }
             Message::CompilerMessage(msg) => {
-                eprint!("{}", msg);
+                eprint!("{msg}");
             }
             _ => (),
         }
@@ -746,7 +748,9 @@ fn do_embed_methods<G: GuestBuilder>(mut guest_opts: HashMap<&str, GuestOptions>
 
     // If the user provided options for a package that wasn't built, abort.
     if let Some(package) = guest_opts.keys().next() {
-        panic!("Error: guest options were provided for package {package:?} but the package was not built.");
+        panic!(
+            "Error: guest options were provided for package {package:?} but the package was not built."
+        );
     }
 
     build_methods(&pkg_opts)
@@ -759,58 +763,37 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
-    // NOTE: Codegen of the guest list is gated behind the "guest-list" feature flag,
-    // although the data structure are not, because when the `GuestListEntry` type
-    // is referenced in the generated code, this requires `risc0-build` be declared
-    // as a dependency of the methods crate.
-    #[cfg(feature = "guest-list")]
-    let mut guest_list_codegen = Vec::new();
-    #[cfg(feature = "guest-list")]
-    methods_file
-        .write_all(b"use risc0_build::GuestListEntry;\n")
-        .unwrap();
-
     let profile = if is_debug() { "debug" } else { "release" };
 
-    let mut guest_list = vec![];
-    for guest in guest_packages {
-        println!("Building guest package: {}", guest.name);
+    let guest_list: Vec<G> = guest_packages
+        .par_iter()
+        .flat_map(|guest| {
+            println!("Building guest package: {}", guest.name);
 
-        let guest_info = GuestInfo {
-            options: guest.opts.clone(),
-            metadata: (&guest.pkg).into(),
-        };
+            let guest_info = GuestInfo {
+                options: guest.opts.clone(),
+                metadata: (&guest.pkg).into(),
+            };
 
-        let methods: Vec<G> = if guest.opts.use_docker.is_some() {
-            build_guest_package_docker(&guest.pkg, &guest.target_dir, &guest_info).unwrap();
-            guest_methods(&guest.pkg, &guest.target_dir, &guest_info, "docker")
-        } else {
-            build_guest_package(&guest.pkg, &guest.target_dir, &guest_info);
-            guest_methods(&guest.pkg, &guest.target_dir, &guest_info, profile)
-        };
+            if guest.opts.use_docker.is_some() {
+                build_guest_package_docker(&guest.pkg, &guest.target_dir, &guest_info).unwrap();
+                guest_methods(&guest.pkg, &guest.target_dir, &guest_info, "docker")
+            } else {
+                build_guest_package(&guest.pkg, &guest.target_dir, &guest_info);
+                guest_methods(&guest.pkg, &guest.target_dir, &guest_info, profile)
+            }
+        })
+        .collect();
 
-        for method in methods {
-            methods_file
-                .write_all(method.codegen_consts().as_bytes())
-                .unwrap();
-
-            #[cfg(feature = "guest-list")]
-            guest_list_codegen.push(method.codegen_list_entry());
-            guest_list.push(method);
-        }
+    #[cfg(not(feature = "guest-list"))]
+    for guest in guest_list.iter() {
+        methods_file
+            .write_all(guest.codegen_consts().as_bytes())
+            .unwrap();
     }
 
     #[cfg(feature = "guest-list")]
-    methods_file
-        .write_all(
-            format!(
-                "\npub const GUEST_LIST: &[{}] = &[{}];\n",
-                std::any::type_name::<G>(),
-                guest_list_codegen.join(",")
-            )
-            .as_bytes(),
-        )
-        .unwrap();
+    build_guest_list(&guest_list, methods_file);
 
     // HACK: It's not particularly practical to figure out all the
     // files that all the guest crates transitively depend on.  So, we
@@ -822,6 +805,40 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
     println!("cargo:rerun-if-env-changed=RISC0_GUEST_LOGFILE");
 
     guest_list
+}
+
+#[cfg(feature = "guest-list")]
+fn build_guest_list<G: GuestBuilder>(guest_list: &[G], mut methods_file: File) {
+    // NOTE: Codegen of the guest list is gated behind the "guest-list" feature flag,
+    // although the data structure are not, because when the `GuestListEntry` type
+    // is referenced in the generated code, this requires `risc0-build` be declared
+    // as a dependency of the methods crate.
+
+    // prefix
+    methods_file
+        .write_all(b"use risc0_build::GuestListEntry;\n")
+        .unwrap();
+
+    // body
+    let mut guest_list_codegen = Vec::new();
+    for method in guest_list.iter() {
+        methods_file
+            .write_all(method.codegen_consts().as_bytes())
+            .unwrap();
+        guest_list_codegen.push(method.codegen_list_entry());
+    }
+
+    // suffix
+    methods_file
+        .write_all(
+            format!(
+                "\npub const GUEST_LIST: &[{}] = &[{}];\n",
+                std::any::type_name::<G>(),
+                guest_list_codegen.join(",")
+            )
+            .as_bytes(),
+        )
+        .unwrap();
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.

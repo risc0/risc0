@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use k256_methods::BENCHMARK_ELF;
-use risc0_zkvm::{default_executor, ExecutorEnv};
+use risc0_zkvm::{ExecutorEnv, default_executor};
 
 // Simple main to load and run the benchmark binary in the RISC Zero Executor.
 fn main() {

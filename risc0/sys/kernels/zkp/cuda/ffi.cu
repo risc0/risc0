@@ -65,11 +65,11 @@ const char* risc0_zkp_cuda_eltwise_sum_fpext(Fp* out,
 }
 
 const char* risc0_zkp_cuda_eltwise_zeroize_fp(Fp* elems, const uint32_t count) {
-  return launchKernel(eltwise_zeroize_fp, count, 0, elems);
+  return launchKernel(eltwise_zeroize_fp, count, 0, elems, count);
 }
 
 const char* risc0_zkp_cuda_eltwise_zeroize_fpext(FpExt* elems, const uint32_t count) {
-  return launchKernel(eltwise_zeroize_fpext, count, 0, elems);
+  return launchKernel(eltwise_zeroize_fpext, count, 0, elems, count);
 }
 
 const char* risc0_zkp_cuda_fri_fold(Fp* out, const Fp* in, const FpExt* mix, const uint32_t count) {

@@ -1,7 +1,7 @@
 [package]
 name = "risc0-circuit-rv32im"
 description = "RISC Zero circuit for rv32im"
-version = "3.0.0"
+version = "4.0.2"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -19,6 +19,8 @@ derive_more = { version = "2.0.1", default-features = false, features = [
   "add_assign",
   "debug",
 ] }
+gdbstub = { version = "0.7", optional = true }
+gdbstub_arch = { version = "0.3", optional = true }
 paste = "1.0"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
@@ -32,11 +34,10 @@ tracing = { version = "0.1", default-features = false, features = [
 ] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
-auto_ops = { version = "0.3", optional = true }
 bit-vec = "0.8"
 byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
-enum-map = { version = "2.7.3", optional = true }
+enum-map = { version = "2.7.3" }
 malachite = { version = "0.4.22", optional = true, default-features = false, features = [
   "naturals_and_integers",
   "32_bit_limbs",
@@ -50,6 +51,7 @@ ringbuffer = { version = "0.15.0", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 smallvec = { version = "1.13", optional = true }
+wide = { version = "0.7", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
@@ -65,13 +67,13 @@ cuda = [
   "risc0-sys/cuda",
   "risc0-zkp/cuda",
 ]
-default = ["prove"]
+default = []
 # entropy_finder = []
 execute = [
   "anyhow/backtrace",
-  "dep:auto_ops",
   "dep:byteorder",
-  "dep:enum-map",
+  "dep:gdbstub",
+  "dep:gdbstub_arch",
   "dep:malachite",
   "dep:num-derive",
   "dep:num-traits",
@@ -87,6 +89,7 @@ prove = [
   "dep:rayon",
   "dep:risc0-circuit-rv32im-sys",
   "dep:risc0-sys",
+  "dep:wide",
   "execute",
   "risc0-zkp/prove",
 ]

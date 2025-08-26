@@ -14,7 +14,6 @@
 
 use anyhow::Result;
 use derive_more::Debug;
-use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::platform::{REG_MAX, REG_ZERO, WORD_SIZE};
@@ -30,10 +29,10 @@ pub trait EmuContext {
     fn trap(&mut self, cause: Exception) -> Result<bool>;
 
     // Callback when instructions are decoded
-    fn on_insn_decoded(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
+    fn on_insn_decoded(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()>;
 
     // Callback when instructions end normally
-    fn on_normal_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
+    fn on_normal_end(&mut self, kind: InsnKind) -> Result<()>;
 
     // Get the program counter
     fn get_pc(&self) -> ByteAddr;
@@ -63,11 +62,8 @@ pub trait EmuContext {
     fn check_data_store(&self, addr: ByteAddr) -> bool;
 }
 
-// #[derive(Default)]
-pub struct Emulator {
-    table: FastDecodeTable,
-    ring: AllocRingBuffer<(ByteAddr, Instruction, DecodedInstruction)>,
-}
+#[derive(Default)]
+pub struct Emulator;
 
 #[derive(Debug)]
 #[repr(u32)]
@@ -106,15 +102,6 @@ pub struct DecodedInstruction {
     func3: u32,
     rd: u32,
     opcode: u32,
-}
-
-#[derive(Clone, Copy, Debug)]
-enum InsnCategory {
-    Compute,
-    Load,
-    Store,
-    System,
-    Invalid,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -177,15 +164,6 @@ pub enum InsnKind {
     Invalid = 255,
 }
 
-#[derive(Clone, Copy, Debug)]
-pub struct Instruction {
-    pub kind: InsnKind,
-    category: InsnCategory,
-    pub opcode: u32,
-    pub func3: u32,
-    pub func7: u32,
-}
-
 impl DecodedInstruction {
     fn new(insn: u32) -> Self {
         Self {
@@ -229,163 +207,89 @@ impl DecodedInstruction {
     }
 }
 
-const fn insn(
-    kind: InsnKind,
-    category: InsnCategory,
-    opcode: u32,
-    func3: i32,
-    func7: i32,
-) -> Instruction {
-    Instruction {
-        kind,
-        category,
-        opcode,
-        func3: func3 as u32,
-        func7: func7 as u32,
-    }
-}
-
-type InstructionTable = [Instruction; 48];
-type FastInstructionTable = [u8; 1 << 10];
-
-const RV32IM_ISA: InstructionTable = [
-    insn(InsnKind::Invalid, InsnCategory::Invalid, 0x00, 0x0, 0x00),
-    insn(InsnKind::Add, InsnCategory::Compute, 0x33, 0x0, 0x00),
-    insn(InsnKind::Sub, InsnCategory::Compute, 0x33, 0x0, 0x20),
-    insn(InsnKind::Xor, InsnCategory::Compute, 0x33, 0x4, 0x00),
-    insn(InsnKind::Or, InsnCategory::Compute, 0x33, 0x6, 0x00),
-    insn(InsnKind::And, InsnCategory::Compute, 0x33, 0x7, 0x00),
-    insn(InsnKind::Sll, InsnCategory::Compute, 0x33, 0x1, 0x00),
-    insn(InsnKind::Srl, InsnCategory::Compute, 0x33, 0x5, 0x00),
-    insn(InsnKind::Sra, InsnCategory::Compute, 0x33, 0x5, 0x20),
-    insn(InsnKind::Slt, InsnCategory::Compute, 0x33, 0x2, 0x00),
-    insn(InsnKind::SltU, InsnCategory::Compute, 0x33, 0x3, 0x00),
-    insn(InsnKind::AddI, InsnCategory::Compute, 0x13, 0x0, -1),
-    insn(InsnKind::XorI, InsnCategory::Compute, 0x13, 0x4, -1),
-    insn(InsnKind::OrI, InsnCategory::Compute, 0x13, 0x6, -1),
-    insn(InsnKind::AndI, InsnCategory::Compute, 0x13, 0x7, -1),
-    insn(InsnKind::SllI, InsnCategory::Compute, 0x13, 0x1, 0x00),
-    insn(InsnKind::SrlI, InsnCategory::Compute, 0x13, 0x5, 0x00),
-    insn(InsnKind::SraI, InsnCategory::Compute, 0x13, 0x5, 0x20),
-    insn(InsnKind::SltI, InsnCategory::Compute, 0x13, 0x2, -1),
-    insn(InsnKind::SltIU, InsnCategory::Compute, 0x13, 0x3, -1),
-    insn(InsnKind::Beq, InsnCategory::Compute, 0x63, 0x0, -1),
-    insn(InsnKind::Bne, InsnCategory::Compute, 0x63, 0x1, -1),
-    insn(InsnKind::Blt, InsnCategory::Compute, 0x63, 0x4, -1),
-    insn(InsnKind::Bge, InsnCategory::Compute, 0x63, 0x5, -1),
-    insn(InsnKind::BltU, InsnCategory::Compute, 0x63, 0x6, -1),
-    insn(InsnKind::BgeU, InsnCategory::Compute, 0x63, 0x7, -1),
-    insn(InsnKind::Jal, InsnCategory::Compute, 0x6f, -1, -1),
-    insn(InsnKind::JalR, InsnCategory::Compute, 0x67, 0x0, -1),
-    insn(InsnKind::Lui, InsnCategory::Compute, 0x37, -1, -1),
-    insn(InsnKind::Auipc, InsnCategory::Compute, 0x17, -1, -1),
-    insn(InsnKind::Mul, InsnCategory::Compute, 0x33, 0x0, 0x01),
-    insn(InsnKind::MulH, InsnCategory::Compute, 0x33, 0x1, 0x01),
-    insn(InsnKind::MulHSU, InsnCategory::Compute, 0x33, 0x2, 0x01),
-    insn(InsnKind::MulHU, InsnCategory::Compute, 0x33, 0x3, 0x01),
-    insn(InsnKind::Div, InsnCategory::Compute, 0x33, 0x4, 0x01),
-    insn(InsnKind::DivU, InsnCategory::Compute, 0x33, 0x5, 0x01),
-    insn(InsnKind::Rem, InsnCategory::Compute, 0x33, 0x6, 0x01),
-    insn(InsnKind::RemU, InsnCategory::Compute, 0x33, 0x7, 0x01),
-    insn(InsnKind::Lb, InsnCategory::Load, 0x03, 0x0, -1),
-    insn(InsnKind::Lh, InsnCategory::Load, 0x03, 0x1, -1),
-    insn(InsnKind::Lw, InsnCategory::Load, 0x03, 0x2, -1),
-    insn(InsnKind::LbU, InsnCategory::Load, 0x03, 0x4, -1),
-    insn(InsnKind::LhU, InsnCategory::Load, 0x03, 0x5, -1),
-    insn(InsnKind::Sb, InsnCategory::Store, 0x23, 0x0, -1),
-    insn(InsnKind::Sh, InsnCategory::Store, 0x23, 0x1, -1),
-    insn(InsnKind::Sw, InsnCategory::Store, 0x23, 0x2, -1),
-    insn(InsnKind::Eany, InsnCategory::System, 0x73, 0x0, 0x00),
-    insn(InsnKind::Mret, InsnCategory::System, 0x73, 0x0, 0x18),
-];
-
-// RISC-V instruction are determined by 3 parts:
-// - Opcode: 7 bits
-// - Func3: 3 bits
-// - Func7: 7 bits
-// In many cases, func7 and/or func3 is ignored.  A standard trick is to decode
-// via a table, but a 17 bit lookup table destroys L1 cache.  Luckily for us,
-// in practice the low 2 bits of opcode are always 11, so we can drop them, and
-// also func7 is always either 0, 1, 0x20 or don't care, so we can reduce func7
-// to 2 bits, which gets us to 10 bits, which is only 1k.
-struct FastDecodeTable {
-    table: FastInstructionTable,
-}
-
-impl Default for FastDecodeTable {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl FastDecodeTable {
-    fn new() -> Self {
-        let mut table: FastInstructionTable = [0; 1 << 10];
-        for (isa_idx, insn) in RV32IM_ISA.iter().enumerate() {
-            Self::add_insn(&mut table, insn, isa_idx);
-        }
-        Self { table }
-    }
-
-    // Map to 10 bit format
-    fn map10(opcode: u32, func3: u32, func7: u32) -> usize {
-        let op_high = opcode >> 2;
-        // Map 0 -> 0, 1 -> 1, 0x20 -> 2, everything else to 3
-        let func72bits = if func7 <= 1 {
-            func7
-        } else if func7 == 0x20 {
-            2
-        } else {
-            3
-        };
-        ((op_high << 5) | (func72bits << 3) | func3) as usize
-    }
-
-    fn add_insn(table: &mut FastInstructionTable, insn: &Instruction, isa_idx: usize) {
-        let op_high = insn.opcode >> 2;
-        if (insn.func3 as i32) < 0 {
-            for f3 in 0..8 {
-                for f7b in 0..4 {
-                    let idx = (op_high << 5) | (f7b << 3) | f3;
-                    table[idx as usize] = isa_idx as u8;
-                }
-            }
-        } else if (insn.func7 as i32) < 0 {
-            for f7b in 0..4 {
-                let idx = (op_high << 5) | (f7b << 3) | insn.func3;
-                table[idx as usize] = isa_idx as u8;
-            }
-        } else {
-            table[Self::map10(insn.opcode, insn.func3, insn.func7)] = isa_idx as u8;
-        }
-    }
-
-    fn lookup(&self, decoded: &DecodedInstruction) -> Instruction {
-        let isa_idx = self.table[Self::map10(decoded.opcode, decoded.func3, decoded.func7)];
-        RV32IM_ISA[isa_idx as usize]
-    }
-}
-
 impl Emulator {
     pub fn new() -> Self {
-        Self {
-            table: FastDecodeTable::new(),
-            ring: AllocRingBuffer::new(10),
+        Self {}
+    }
+
+    fn trace_instruction<C: EmuContext>(
+        &mut self,
+        ctx: &mut C,
+        kind: InsnKind,
+        decoded: &DecodedInstruction,
+    ) -> Result<()> {
+        ctx.on_insn_decoded(kind, decoded)
+    }
+
+    #[inline(always)]
+    fn exec_rv32im<C: EmuContext>(&mut self, ctx: &mut C, word: u32) -> Result<Option<InsnKind>> {
+        let decoded = DecodedInstruction::new(word);
+
+        match (decoded.opcode, decoded.func3, decoded.func7) {
+            // R-format arithmetic ops
+            (0b0110011, 0b000, 0b0000000) => self.step_compute(ctx, InsnKind::Add, decoded),
+            (0b0110011, 0b000, 0b0100000) => self.step_compute(ctx, InsnKind::Sub, decoded),
+            (0b0110011, 0b001, 0b0000000) => self.step_compute(ctx, InsnKind::Sll, decoded),
+            (0b0110011, 0b010, 0b0000000) => self.step_compute(ctx, InsnKind::Slt, decoded),
+            (0b0110011, 0b011, 0b0000000) => self.step_compute(ctx, InsnKind::SltU, decoded),
+            (0b0110011, 0b101, 0b0000000) => self.step_compute(ctx, InsnKind::Srl, decoded),
+            (0b0110011, 0b100, 0b0000000) => self.step_compute(ctx, InsnKind::Xor, decoded),
+            (0b0110011, 0b101, 0b0100000) => self.step_compute(ctx, InsnKind::Sra, decoded),
+            (0b0110011, 0b110, 0b0000000) => self.step_compute(ctx, InsnKind::Or, decoded),
+            (0b0110011, 0b111, 0b0000000) => self.step_compute(ctx, InsnKind::And, decoded),
+            (0b0110011, 0b000, 0b0000001) => self.step_compute(ctx, InsnKind::Mul, decoded),
+            (0b0110011, 0b001, 0b0000001) => self.step_compute(ctx, InsnKind::MulH, decoded),
+            (0b0110011, 0b010, 0b0000001) => self.step_compute(ctx, InsnKind::MulHSU, decoded),
+            (0b0110011, 0b011, 0b0000001) => self.step_compute(ctx, InsnKind::MulHU, decoded),
+            (0b0110011, 0b100, 0b0000001) => self.step_compute(ctx, InsnKind::Div, decoded),
+            (0b0110011, 0b101, 0b0000001) => self.step_compute(ctx, InsnKind::DivU, decoded),
+            (0b0110011, 0b110, 0b0000001) => self.step_compute(ctx, InsnKind::Rem, decoded),
+            (0b0110011, 0b111, 0b0000001) => self.step_compute(ctx, InsnKind::RemU, decoded),
+            // I-format arithmetic ops
+            (0b0010011, 0b000, _) => self.step_compute(ctx, InsnKind::AddI, decoded),
+            (0b0010011, 0b001, 0b0000000) => self.step_compute(ctx, InsnKind::SllI, decoded),
+            (0b0010011, 0b010, _) => self.step_compute(ctx, InsnKind::SltI, decoded),
+            (0b0010011, 0b011, _) => self.step_compute(ctx, InsnKind::SltIU, decoded),
+            (0b0010011, 0b100, _) => self.step_compute(ctx, InsnKind::XorI, decoded),
+            (0b0010011, 0b101, 0b0000000) => self.step_compute(ctx, InsnKind::SrlI, decoded),
+            (0b0010011, 0b101, 0b0100000) => self.step_compute(ctx, InsnKind::SraI, decoded),
+            (0b0010011, 0b110, _) => self.step_compute(ctx, InsnKind::OrI, decoded),
+            (0b0010011, 0b111, _) => self.step_compute(ctx, InsnKind::AndI, decoded),
+            // I-format memory loads
+            (0b0000011, 0b000, _) => self.step_load(ctx, InsnKind::Lb, decoded),
+            (0b0000011, 0b001, _) => self.step_load(ctx, InsnKind::Lh, decoded),
+            (0b0000011, 0b010, _) => self.step_load(ctx, InsnKind::Lw, decoded),
+            (0b0000011, 0b100, _) => self.step_load(ctx, InsnKind::LbU, decoded),
+            (0b0000011, 0b101, _) => self.step_load(ctx, InsnKind::LhU, decoded),
+            // S-format memory stores
+            (0b0100011, 0b000, _) => self.step_store(ctx, InsnKind::Sb, decoded),
+            (0b0100011, 0b001, _) => self.step_store(ctx, InsnKind::Sh, decoded),
+            (0b0100011, 0b010, _) => self.step_store(ctx, InsnKind::Sw, decoded),
+            // U-format lui
+            (0b0110111, _, _) => self.step_compute(ctx, InsnKind::Lui, decoded),
+            // U-format auipc
+            (0b0010111, _, _) => self.step_compute(ctx, InsnKind::Auipc, decoded),
+            // B-format branch
+            (0b1100011, 0b000, _) => self.step_compute(ctx, InsnKind::Beq, decoded),
+            (0b1100011, 0b001, _) => self.step_compute(ctx, InsnKind::Bne, decoded),
+            (0b1100011, 0b100, _) => self.step_compute(ctx, InsnKind::Blt, decoded),
+            (0b1100011, 0b101, _) => self.step_compute(ctx, InsnKind::Bge, decoded),
+            (0b1100011, 0b110, _) => self.step_compute(ctx, InsnKind::BltU, decoded),
+            (0b1100011, 0b111, _) => self.step_compute(ctx, InsnKind::BgeU, decoded),
+            // J-format jal
+            (0b1101111, _, _) => self.step_compute(ctx, InsnKind::Jal, decoded),
+            // I-format jalr
+            (0b1100111, _, _) => self.step_compute(ctx, InsnKind::JalR, decoded),
+            // System instruction
+            (0b1110011, 0b000, 0b0011000) => self.step_system(ctx, InsnKind::Mret, decoded),
+            (0b1110011, 0b000, 0b0000000) => self.step_system(ctx, InsnKind::Eany, decoded),
+            _ => Ok(ctx
+                .trap(Exception::IllegalInstruction(decoded.insn, line!()))?
+                .then_some(InsnKind::Invalid)),
         }
     }
 
-    pub fn dump(&self) {
-        tracing::debug!("Dumping last {} instructions:", self.ring.len());
-        for (pc, insn, decoded) in self.ring.iter() {
-            tracing::debug!("{pc:?}> {:#010x}  {}", decoded.insn, disasm(insn, decoded));
-        }
-    }
-
-    #[cold]
-    fn ring_push(&mut self, pc: ByteAddr, insn: Instruction, decoded: DecodedInstruction) {
-        self.ring.push((pc, insn, decoded));
-    }
-
+    #[inline(always)]
     pub fn step<C: EmuContext>(&mut self, ctx: &mut C) -> Result<()> {
         let pc = ctx.get_pc();
 
@@ -400,38 +304,40 @@ impl Emulator {
             return Ok(());
         }
 
-        let decoded = DecodedInstruction::new(word);
-        let insn = self.table.lookup(&decoded);
-        ctx.on_insn_decoded(&insn, &decoded)?;
-        // Only store the ring buffer if we are gonna print it
-        if tracing::enabled!(tracing::Level::DEBUG) {
-            self.ring_push(pc, insn, decoded.clone());
+        if let Some(kind) = self.exec_rv32im(ctx, word)? {
+            ctx.on_normal_end(kind)?
         }
-
-        if match insn.category {
-            InsnCategory::Compute => self.step_compute(ctx, insn.kind, &decoded)?,
-            InsnCategory::Load => self.step_load(ctx, insn.kind, &decoded)?,
-            InsnCategory::Store => self.step_store(ctx, insn.kind, &decoded)?,
-            InsnCategory::System => self.step_system(ctx, insn.kind, &decoded)?,
-            InsnCategory::Invalid => ctx.trap(Exception::IllegalInstruction(word, 1))?,
-        } {
-            ctx.on_normal_end(&insn, &decoded)?;
-        };
 
         Ok(())
     }
 
+    fn load_rs2<M: EmuContext>(
+        &self,
+        ctx: &mut M,
+        decoded: &DecodedInstruction,
+        rs1: u32,
+    ) -> Result<u32> {
+        if decoded.rs1 == decoded.rs2 {
+            Ok(rs1)
+        } else {
+            ctx.load_register(decoded.rs2 as usize)
+        }
+    }
+
+    #[inline(always)]
     fn step_compute<M: EmuContext>(
         &mut self,
         ctx: &mut M,
         kind: InsnKind,
-        decoded: &DecodedInstruction,
-    ) -> Result<bool> {
+        decoded: DecodedInstruction,
+    ) -> Result<Option<InsnKind>> {
+        self.trace_instruction(ctx, kind, &decoded)?;
+
         let pc = ctx.get_pc();
         let mut new_pc = pc + WORD_SIZE;
         let mut rd = decoded.rd;
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
-        let rs2 = ctx.load_register(decoded.rs2 as usize)?;
+        let rs2 = self.load_rs2(ctx, &decoded, rs1)?;
         let imm_i = decoded.imm_i();
         let mut br_cond = |cond| -> u32 {
             rd = 0;
@@ -537,23 +443,26 @@ impl Emulator {
             _ => unreachable!(),
         };
         if !new_pc.is_aligned() {
-            return ctx.trap(Exception::InstructionMisaligned);
+            return Ok(ctx.trap(Exception::InstructionMisaligned)?.then_some(kind));
         }
         ctx.store_register(rd as usize, out)?;
         ctx.set_pc(new_pc);
-        Ok(true)
+        Ok(Some(kind))
     }
 
+    #[inline(always)]
     fn step_load<M: EmuContext>(
         &mut self,
         ctx: &mut M,
         kind: InsnKind,
-        decoded: &DecodedInstruction,
-    ) -> Result<bool> {
+        decoded: DecodedInstruction,
+    ) -> Result<Option<InsnKind>> {
+        self.trace_instruction(ctx, kind, &decoded)?;
+
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_i()));
         if !ctx.check_data_load(addr) {
-            return ctx.trap(Exception::LoadAccessFault(addr));
+            return Ok(ctx.trap(Exception::LoadAccessFault(addr))?.then_some(kind));
         }
         let data = ctx.load_memory(addr.waddr())?;
         let shift = 8 * (addr.0 & 3);
@@ -567,7 +476,7 @@ impl Emulator {
             }
             InsnKind::Lh => {
                 if addr.0 & 0x01 != 0 {
-                    return ctx.trap(Exception::LoadAddressMisaligned);
+                    return Ok(ctx.trap(Exception::LoadAddressMisaligned)?.then_some(kind));
                 }
                 let mut out = (data >> shift) & 0xffff;
                 if out & 0x8000 != 0 {
@@ -577,14 +486,14 @@ impl Emulator {
             }
             InsnKind::Lw => {
                 if addr.0 & 0x03 != 0 {
-                    return ctx.trap(Exception::LoadAddressMisaligned);
+                    return Ok(ctx.trap(Exception::LoadAddressMisaligned)?.then_some(kind));
                 }
                 data
             }
             InsnKind::LbU => (data >> shift) & 0xff,
             InsnKind::LhU => {
                 if addr.0 & 0x01 != 0 {
-                    return ctx.trap(Exception::LoadAddressMisaligned);
+                    return Ok(ctx.trap(Exception::LoadAddressMisaligned)?.then_some(kind));
                 }
                 (data >> shift) & 0xffff
             }
@@ -592,21 +501,24 @@ impl Emulator {
         };
         ctx.store_register(decoded.rd as usize, out)?;
         ctx.set_pc(ctx.get_pc() + WORD_SIZE);
-        Ok(true)
+        Ok(Some(kind))
     }
 
+    #[inline(always)]
     fn step_store<M: EmuContext>(
         &mut self,
         ctx: &mut M,
         kind: InsnKind,
-        decoded: &DecodedInstruction,
-    ) -> Result<bool> {
+        decoded: DecodedInstruction,
+    ) -> Result<Option<InsnKind>> {
+        self.trace_instruction(ctx, kind, &decoded)?;
+
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
-        let rs2 = ctx.load_register(decoded.rs2 as usize)?;
+        let rs2 = self.load_rs2(ctx, &decoded, rs1)?;
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_s()));
         let shift = 8 * (addr.0 & 3);
         if !ctx.check_data_store(addr) {
-            return ctx.trap(Exception::StoreAccessFault);
+            return Ok(ctx.trap(Exception::StoreAccessFault)?.then_some(kind));
         }
         let mut data = ctx.load_memory(addr.waddr())?;
         match kind {
@@ -617,7 +529,9 @@ impl Emulator {
             InsnKind::Sh => {
                 if addr.0 & 0x01 != 0 {
                     tracing::debug!("Misaligned SH");
-                    return ctx.trap(Exception::StoreAddressMisaligned(addr));
+                    return Ok(ctx
+                        .trap(Exception::StoreAddressMisaligned(addr))?
+                        .then_some(kind));
                 }
                 data ^= data & (0xffff << shift);
                 data |= (rs2 & 0xffff) << shift;
@@ -625,7 +539,9 @@ impl Emulator {
             InsnKind::Sw => {
                 if addr.0 & 0x03 != 0 {
                     tracing::debug!("Misaligned SW");
-                    return ctx.trap(Exception::StoreAddressMisaligned(addr));
+                    return Ok(ctx
+                        .trap(Exception::StoreAddressMisaligned(addr))?
+                        .then_some(kind));
                 }
                 data = rs2;
             }
@@ -633,16 +549,19 @@ impl Emulator {
         }
         ctx.store_memory(addr.waddr(), data)?;
         ctx.set_pc(ctx.get_pc() + WORD_SIZE);
-        Ok(true)
+        Ok(Some(kind))
     }
 
+    #[inline(always)]
     fn step_system<M: EmuContext>(
         &mut self,
         ctx: &mut M,
         kind: InsnKind,
-        decoded: &DecodedInstruction,
-    ) -> Result<bool> {
-        match kind {
+        decoded: DecodedInstruction,
+    ) -> Result<Option<InsnKind>> {
+        self.trace_instruction(ctx, kind, &decoded)?;
+
+        Ok(match kind {
             InsnKind::Eany => match decoded.rs2 {
                 0 => ctx.ecall(),
                 1 => ctx.trap(Exception::Breakpoint),
@@ -650,7 +569,8 @@ impl Emulator {
             },
             InsnKind::Mret => ctx.mret(),
             _ => unreachable!(),
-        }
+        }?
+        .then_some(kind))
     }
 }
 
@@ -672,13 +592,13 @@ impl std::fmt::Display for Register {
     }
 }
 
-pub fn disasm(insn: &Instruction, decoded: &DecodedInstruction) -> String {
+pub fn disasm(kind: InsnKind, decoded: &DecodedInstruction) -> String {
     let (rd, rs1, rs2) = (
         Register(decoded.rd),
         Register(decoded.rs1),
         Register(decoded.rs2),
     );
-    match insn.kind {
+    match kind {
         InsnKind::Invalid => "illegal".to_string(),
         InsnKind::Add => format!("add {rd}, {rs1}, {rs2}"),
         InsnKind::Sub => format!("sub {rd}, {rs1}, {rs2}"),
