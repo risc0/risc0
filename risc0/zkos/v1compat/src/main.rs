@@ -231,7 +231,7 @@ mod zkvm {
 
     #[panic_handler]
     fn panic(info: &core::panic::PanicInfo) -> ! {
-        use no_std_strings::{str_format, str256};
+        use no_std_strings::{str256, str_format};
         let msg = str_format!(str256, "{}", info);
         host_ecall_write(1, msg.as_ptr(), msg.len());
         illegal_instruction()
