@@ -17,6 +17,7 @@ use core::arch::asm;
 use core::{cmp::min, ffi::CStr, ptr::null_mut, slice, str::Utf8Error};
 
 use num_enum::{FromPrimitive, IntoPrimitive};
+use paste::paste;
 
 use crate::WORD_SIZE;
 
@@ -162,23 +163,23 @@ pub mod nr {
 #[derive(Copy, Clone, Debug, Eq, PartialEq, IntoPrimitive, FromPrimitive)]
 pub enum Syscall {
     #[num_enum(catch_all)]
-    Unknown(usize),
-    Argc,
-    Argv,
-    CycleCount,
-    Exit,
-    Fork,
-    Getenv,
-    Keccak,
-    Log,
-    Panic,
-    Pipe,
-    Random,
-    Read,
-    User,
-    VerifyIntegrity,
-    VerifyIntegrity2,
-    Write,
+    Unknown(usize) = 0,
+    Argc = 1,
+    Argv = 2,
+    CycleCount = 3,
+    Exit = 4,
+    Fork = 5,
+    Getenv = 6,
+    Keccak = 7,
+    Log = 8,
+    Panic = 9,
+    Pipe = 10,
+    Random = 11,
+    Read = 12,
+    User = 13,
+    VerifyIntegrity = 14,
+    VerifyIntegrity2 = 15,
+    Write = 16,
 }
 
 impl SyscallName {
@@ -222,66 +223,60 @@ pub struct Return(pub u32, pub u32);
 
 macro_rules! impl_syscall {
     ($func_name:ident
-     // Ugh, unfortunately we can't make this a regular macro list since the asm macro
-     // doesn't expand register names so in($register) doesn't work.
-     $(, $a0:ident
-       $(, $a1:ident
-         $(, $a2: ident
-           $(, $a3: ident
-             $(, $a4: ident
-             )?
-           )?
-         )?
-       )?
-     )?) => {
+        // Ugh, unfortunately we can't make this a regular macro list since the asm macro
+        // doesn't expand register names so in($register) doesn't work.
+        $(, $a0:ident $(, $a1:ident $(, $a2: ident $(, $a3: ident $(, $a4: ident )? )? )? )? )?
+    ) => {
         /// Invoke a raw system call
         ///
         /// # Safety
         ///
         /// `from_host` must be aligned and dereferenceable.
         #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
+        #[deprecated]
         pub unsafe extern "C" fn $func_name(
-            syscall: Syscall,
             syscall_name: SyscallName,
             from_host: *mut u32,
             from_host_words: usize
-            $(,$a0: u32
-                $(,$a1: u32
-                    $(,$a2: u32
-                        $(,$a3: u32
-                            $(,$a4: u32)?
-                        )?
-                    )?
-                )?
-            )?
+            $(,$a0: u32 $(,$a1: u32 $(,$a2: u32 $(,$a3: u32 $(,$a4: u32)? )? )? )? )?
         ) -> Return {
-            #[cfg(target_os = "zkvm")] {
-                let syscall: usize = syscall.into();
-                let a0: u32;
-                let a1: u32;
-                unsafe {
-                    ::core::arch::asm!(
-                        "ecall",
-                        in("t0") $crate::syscall::ecall::SOFTWARE,
-                        in("t6") syscall,
-                        inlateout("a0") from_host => a0,
-                        inlateout("a1") from_host_words => a1,
-                        in("a2") syscall_name.as_ptr()
-                            $(,in("a3") $a0
-                              $(,in("a4") $a1
-                                $(,in("a5") $a2
-                                  $(,in("a6") $a3
-                                    $(,in("a7") $a4
-                                    )?
-                                  )?
-                                )?
-                              )?
-                            )?);
+            unimplemented!();
+        }
+
+
+        paste! {
+            /// Invoke a raw system call
+            ///
+            /// # Safety
+            ///
+            /// `from_host` must be aligned and dereferenceable.
+            #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
+            pub unsafe extern "C" fn [<$func_name _nr>] (
+                syscall: usize,
+                syscall_name: SyscallName,
+                from_host: *mut u32,
+                from_host_words: usize
+                $(,$a0: u32 $(,$a1: u32 $(,$a2: u32 $(,$a3: u32 $(,$a4: u32)? )? )? )? )?
+            ) -> Return {
+                #[cfg(target_os = "zkvm")] {
+                    let a0: u32;
+                    let a1: u32;
+                    unsafe {
+                        ::core::arch::asm!(
+                            "ecall",
+                            in("t0") $crate::syscall::ecall::SOFTWARE,
+                            in("t6") syscall,
+                            inlateout("a0") from_host => a0,
+                            inlateout("a1") from_host_words => a1,
+                            in("a2") syscall_name.as_ptr()
+                            $(,in("a3") $a0 $(,in("a4") $a1 $(,in("a5") $a2 $(,in("a6") $a3 $(,in("a7") $a4 )? )? )? )? )?
+                        );
+                    }
+                    Return(a0, a1)
                 }
-                Return(a0, a1)
+                #[cfg(not(target_os = "zkvm"))]
+                unimplemented!()
             }
-            #[cfg(not(target_os = "zkvm"))]
-            unimplemented!()
         }
     }
 }
@@ -521,7 +516,7 @@ pub unsafe extern "C" fn sys_bigint(
 /// `recv_buf` must be aligned and dereferenceable.
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_rand(recv_buf: *mut u32, words: usize) {
-    unsafe { syscall_0(Syscall::Random, nr::SYS_RANDOM, recv_buf, words) };
+    unsafe { syscall_0_nr(Syscall::Random.into(), nr::SYS_RANDOM, recv_buf, words) };
 }
 
 /// # Safety
@@ -530,8 +525,8 @@ pub unsafe extern "C" fn sys_rand(recv_buf: *mut u32, words: usize) {
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_panic(msg_ptr: *const u8, len: usize) -> ! {
     unsafe {
-        syscall_2(
-            Syscall::Panic,
+        syscall_2_nr(
+            Syscall::Panic.into(),
             nr::SYS_PANIC,
             null_mut(),
             0,
@@ -554,8 +549,8 @@ pub unsafe extern "C" fn sys_panic(msg_ptr: *const u8, len: usize) -> ! {
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
     unsafe {
-        syscall_2(
-            Syscall::Log,
+        syscall_2_nr(
+            Syscall::Log.into(),
             nr::SYS_LOG,
             null_mut(),
             0,
@@ -567,8 +562,14 @@ pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
 
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub extern "C" fn sys_cycle_count() -> u64 {
-    let Return(hi, lo) =
-        unsafe { syscall_0(Syscall::CycleCount, nr::SYS_CYCLE_COUNT, null_mut(), 0) };
+    let Return(hi, lo) = unsafe {
+        syscall_0_nr(
+            Syscall::CycleCount.into(),
+            nr::SYS_CYCLE_COUNT,
+            null_mut(),
+            0,
+        )
+    };
     ((hi as u64) << 32) + lo as u64
 }
 
@@ -595,8 +596,8 @@ fn print(msg: &str) {
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nbytes: usize) -> usize {
     let Return(nbytes_read, final_word) = unsafe {
-        syscall_2(
-            Syscall::Read,
+        syscall_2_nr(
+            Syscall::Read.into(),
             nr::SYS_READ,
             recv_ptr as *mut u32,
             nbytes,
@@ -630,8 +631,8 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nbytes: usize) -> 
 pub unsafe extern "C" fn sys_read_words(fd: u32, recv_ptr: *mut u32, nwords: usize) -> usize {
     let nbytes = nwords * WORD_SIZE;
     let Return(nbytes_read, final_word) = unsafe {
-        syscall_2(
-            Syscall::Read,
+        syscall_2_nr(
+            Syscall::Read.into(),
             nr::SYS_READ,
             recv_ptr,
             nbytes,
@@ -648,8 +649,8 @@ pub unsafe extern "C" fn sys_read_words(fd: u32, recv_ptr: *mut u32, nwords: usi
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize) {
     unsafe {
-        syscall_3(
-            Syscall::Write,
+        syscall_3_nr(
+            Syscall::Write.into(),
             nr::SYS_WRITE,
             null_mut(),
             0,
@@ -711,8 +712,8 @@ pub unsafe extern "C" fn sys_getenv(
         }
     }
     let Return(a0, _) = unsafe {
-        syscall_2(
-            Syscall::Getenv,
+        syscall_2_nr(
+            Syscall::Getenv.into(),
             nr::SYS_GETENV,
             out_words,
             out_nwords,
@@ -737,7 +738,7 @@ pub extern "C" fn sys_argc() -> usize {
         const MSG: &[u8] = "sys_argc is disabled; can be enabled with the sys-args feature flag on risc0-zkvm-platform".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
-    let Return(a0, _) = unsafe { syscall_0(Syscall::Argc, nr::SYS_ARGC, null_mut(), 0) };
+    let Return(a0, _) = unsafe { syscall_0_nr(Syscall::Argc.into(), nr::SYS_ARGC, null_mut(), 0) };
     a0 as usize
 }
 
@@ -769,8 +770,8 @@ pub unsafe extern "C" fn sys_argv(
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
     let Return(a0, _) = unsafe {
-        syscall_1(
-            Syscall::Argv,
+        syscall_1_nr(
+            Syscall::Argv.into(),
             nr::SYS_ARGV,
             out_words,
             out_nwords,
@@ -848,8 +849,8 @@ pub unsafe extern "C" fn sys_verify_integrity(
 
     // Send the claim_digest to the host via software ecall.
     let Return(a0, _) = unsafe {
-        syscall_2(
-            Syscall::VerifyIntegrity,
+        syscall_2_nr(
+            Syscall::VerifyIntegrity.into(),
             nr::SYS_VERIFY_INTEGRITY,
             null_mut(),
             0,
@@ -885,8 +886,8 @@ pub unsafe extern "C" fn sys_verify_integrity2(
 
     // Send the claim_digest to the host via software ecall.
     let Return(a0, _) = unsafe {
-        syscall_2(
-            Syscall::VerifyIntegrity2,
+        syscall_2_nr(
+            Syscall::VerifyIntegrity2.into(),
             nr::SYS_VERIFY_INTEGRITY2,
             null_mut(),
             0,
@@ -924,7 +925,7 @@ unsafe extern "C" {
 #[cfg(feature = "export-syscalls")]
 #[unsafe(no_mangle)]
 pub extern "C" fn sys_fork() -> i32 {
-    let Return(a0, _) = unsafe { syscall_0(Syscall::Fork, nr::SYS_FORK, null_mut(), 0) };
+    let Return(a0, _) = unsafe { syscall_0_nr(Syscall::Fork.into(), nr::SYS_FORK, null_mut(), 0) };
     a0 as i32
 }
 
@@ -947,7 +948,7 @@ pub extern "C" fn sys_fork() -> i32 {
 #[cfg(feature = "export-syscalls")]
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
-    let Return(a0, _) = unsafe { syscall_0(Syscall::Pipe, nr::SYS_PIPE, pipefd, 2) };
+    let Return(a0, _) = unsafe { syscall_0_nr(Syscall::Pipe.into(), nr::SYS_PIPE, pipefd, 2) };
     a0 as i32
 }
 
@@ -957,7 +958,7 @@ pub unsafe extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
 #[cfg(feature = "export-syscalls")]
 #[unsafe(no_mangle)]
 pub extern "C" fn sys_exit(status: i32) -> ! {
-    let Return(a0, _) = unsafe { syscall_0(Syscall::Exit, nr::SYS_EXIT, null_mut(), 0) };
+    let Return(a0, _) = unsafe { syscall_0_nr(Syscall::Exit.into(), nr::SYS_EXIT, null_mut(), 0) };
     #[allow(clippy::empty_loop)]
     loop {
         // prevent dishonest provers from relying on the ability to prove the
@@ -974,8 +975,8 @@ pub unsafe extern "C" fn sys_keccak(
     out_state: *mut [u64; KECCACK_STATE_DWORDS],
 ) -> i32 {
     let Return(a0, _) = unsafe {
-        syscall_3(
-            Syscall::Keccak,
+        syscall_3_nr(
+            Syscall::Keccak.into(),
             nr::SYS_KECCAK,
             out_state as *mut u32,
             KECCACK_STATE_WORDS,
@@ -1006,8 +1007,8 @@ pub unsafe extern "C" fn sys_prove_keccak(
     control_root: *const [u32; DIGEST_WORDS],
 ) {
     let Return(a0, _) = unsafe {
-        syscall_3(
-            Syscall::Keccak,
+        syscall_3_nr(
+            Syscall::Keccak.into(),
             nr::SYS_KECCAK,
             null_mut(),
             0,

@@ -10,6 +10,7 @@ repository = { workspace = true }
 [dependencies]
 cfg-if = "1.0"
 num_enum = { version = "0.7.4", default-features = false }
+paste = "1.0.15"
 stability = "0.2"
 
 # This crate should have as few dependencies as possible so it can be

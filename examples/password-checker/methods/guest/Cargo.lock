@@ -1170,6 +1170,7 @@ dependencies = [
  "getrandom 0.3.3",
  "libm",
  "num_enum",
+ "paste",
  "stability",
 ]
 

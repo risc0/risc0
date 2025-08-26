@@ -86,7 +86,7 @@ use risc0_zkvm_platform::{
     WORD_SIZE, align_up, fileno,
     syscall::{
         self, Syscall, SyscallName, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input,
-        sys_log, sys_pause, syscall_2,
+        sys_log, sys_pause, syscall_2_nr,
     },
 };
 use serde::{Serialize, de::DeserializeOwned};
@@ -193,8 +193,8 @@ pub fn pause(exit_code: u8) {
 /// Exchange data with the host.
 pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> syscall::Return {
     unsafe {
-        syscall_2(
-            Syscall::User,
+        syscall_2_nr(
+            Syscall::User.into(),
             syscall,
             from_host.as_mut_ptr(),
             from_host.len(),
