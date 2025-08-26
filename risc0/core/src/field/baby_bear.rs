@@ -26,7 +26,7 @@ use core::{
 
 use bytemuck::{CheckedBitPattern, NoUninit, Zeroable};
 
-use crate::field;
+use crate::field::{self, Elem as FieldElem};
 
 /// Definition of this field for operations that operate on the baby
 /// bear field and its 4th degree extension.
