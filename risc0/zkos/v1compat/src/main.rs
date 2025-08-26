@@ -19,6 +19,7 @@
 fn main() {}
 
 #[cfg(any(target_os = "zkvm", rust_analyzer))]
+#[allow(static_mut_refs)]
 mod zkvm {
     use core::{
         arch::{asm, global_asm},
@@ -297,6 +298,7 @@ mod zkvm {
             Syscall::VerifyIntegrity => sys_verify_integrity(fd),
             Syscall::VerifyIntegrity2 => sys_verify_integrity2(fd),
             Syscall::Write => sys_write(fd),
+            Syscall::ProveZkr => sys_prove_zkr(fd),
             Syscall::Unknown(_) => unimplemented!(),
         }
     }
@@ -444,6 +446,20 @@ mod zkvm {
         // 2. The host-side can only handle a single chunk.
         host_ecall_read_trunc(fd, buf, nwords * WORD_SIZE);
         let (a0, _a1) = read_a0_a1();
+        set_ureg(REG_A0, a0);
+    }
+
+    fn sys_prove_zkr(fd: u32) {
+        // a0: from_host -> ret
+        // a1: from_host_words
+        // a2: syscall_name
+        // a3: claim_digest
+        // a4: control_id
+        // a5: control_root
+        // a6: input
+        // a7: input_len
+
+        let (a0, _a1) = host_syscall_a0_a1(fd);
         set_ureg(REG_A0, a0);
     }
 
