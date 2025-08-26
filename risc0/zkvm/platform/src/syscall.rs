@@ -152,9 +152,12 @@ pub mod nr {
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
     #[deprecated]
-    pub const SYS_PROVE_KECCAK: &str = "";
-    #[deprecated]
-    pub const SYS_PROVE_ZKR: &str = "";
+    pub const SYS_PROVE_KECCAK: crate::syscall::SyscallName = unsafe {
+        crate::syscall::SyscallName::from_bytes_with_nul(
+            c"risc0-zkvm-platform::syscall::SYS_PROVE_KECCAK".as_ptr() as *const u8,
+        )
+    };
+    declare_syscall!(pub SYS_PROVE_ZKR);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
@@ -183,6 +186,7 @@ pub enum Syscall {
     VerifyIntegrity = 14,
     VerifyIntegrity2 = 15,
     Write = 16,
+    ProveZkr = 17,
 }
 
 impl SyscallName {
@@ -923,17 +927,35 @@ pub extern "C" fn sys_exit(status: i32) -> ! {
 /// `control_root` must be aligned and dereferenceable.
 /// `input` must be aligned and have `input_len` u32s dereferenceable
 #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-#[deprecated]
 #[stability::unstable]
 pub unsafe extern "C" fn sys_prove_zkr(
-    _claim_digest: *const [u32; DIGEST_WORDS],
-    _control_id: *const [u32; DIGEST_WORDS],
-    _control_root: *const [u32; DIGEST_WORDS],
-    _input: *const u32,
-    _input_len: usize,
+    claim_digest: *const [u32; DIGEST_WORDS],
+    control_id: *const [u32; DIGEST_WORDS],
+    control_root: *const [u32; DIGEST_WORDS],
+    input: *const u32,
+    input_len: usize,
 ) {
-    const MSG: &[u8] = "sys_prove_zkr unsupported".as_bytes();
-    unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    let Return(a0, _) = unsafe {
+        syscall_5_nr(
+            Syscall::ProveZkr.into(),
+            nr::SYS_PROVE_ZKR,
+            null_mut(),
+            0,
+            claim_digest as u32,
+            control_id as u32,
+            control_root as u32,
+            input as u32,
+            input_len as u32,
+        )
+    };
+
+    // Check to ensure the host indicated success by returning 0.
+    // Currently, this should always be the case. This check is
+    // included for forwards-compatibility.
+    if a0 != 0 {
+        const MSG: &[u8] = "sys_prove_zkr returned error result".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
 }
 
 /// Permute the keccak state on the host
