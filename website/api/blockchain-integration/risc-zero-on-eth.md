@@ -34,7 +34,6 @@ This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. T
 [blockchain-examples]: https://github.com/risc0/risc0-ethereum/tree/main/examples
 [docs-zkvm]: ../zkvm/zkvm-overview.md
 [foundry-template]: https://github.com/boundless-xyz/boundless-foundry-template
-[governance-example]: https://github.com/risc0/risc0-ethereum/tree/release-1.2/examples/governance
 [governor-standard]: https://docs.openzeppelin.com/contracts/5.x/api/governance
 [revm]: https://crates.io/crates/revm
 [risc0-ethereum]: https://github.com/risc0/risc0-ethereum
