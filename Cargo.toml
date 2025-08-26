@@ -25,7 +25,6 @@ members = [
   "risc0/zkos/v1compat",
   "risc0/zkp",
   "risc0/zkvm",
-  "risc0/zkvm/compat",
   "risc0/zkvm/methods",
   "risc0/zkvm/platform",
   "risc0/zkvm/receipts",
@@ -66,7 +65,7 @@ risc0-sys = { version = "1.5.1", default-features = false, path = "risc0/sys" }
 risc0-zkos-v1compat = { version = "2.1.0", path = "risc0/zkos/v1compat" }
 risc0-zkp = { version = "3.0.2", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "4.0.0", default-features = false, path = "risc0/zkvm" }
-risc0-zkvm-platform = { version = "2.0.5", default-features = false, path = "risc0/zkvm/platform" }
+risc0-zkvm-platform = { version = "2.1.0", default-features = false, path = "risc0/zkvm/platform" }
 rzup = { version = "0.6.0", default-features = false, path = "rzup" }
 sppark = "0.1.12"
 
@@ -77,5 +76,18 @@ lto = true
 [profile.dev]
 opt-level = 3
 
+[profile.test]
+opt-level = 0
+codegen-units = 256
+debug = 1
+lto = "off"
+incremental = true
+
 [profile.release]
 lto = true
+
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+  'cfg(ci)',
+  'cfg(ci_profile, values("fast", "medium", "slow"))',
+] }

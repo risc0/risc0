@@ -145,7 +145,7 @@ impl Rzup {
     /// Sets an event handler for receiving notifications about operations.
     ///
     /// # Arguments
-    /// * `handler` - Function that will be called for each event
+    /// * `event_handler` - Function that will be called for each event
     #[cfg(test)]
     pub(crate) fn set_event_handler(
         &mut self,
@@ -575,6 +575,42 @@ mod tests {
                 .unwrap()
         }
 
+        fn bad_tar_gz_response() -> HyperResponse {
+            let mut tar_bytes = vec![];
+            let mut tar_builder = tar::Builder::new(&mut tar_bytes);
+            let mut header = tar::Header::new_gnu();
+            header.set_size(4);
+            for i in 0..10 {
+                tar_builder
+                    .append_data(
+                        &mut header,
+                        format!("tar_contents{i}.bin"),
+                        &[0xFF, 0xFE, 0xFF, 0xFF][..],
+                    )
+                    .unwrap();
+            }
+            tar_builder.finish().unwrap();
+            drop(tar_builder);
+
+            // truncate the tar in the middle of the data to make it invalid
+            let idx = tar_bytes.iter().rposition(|b| *b == 0xFE).unwrap();
+            tar_bytes.truncate(idx);
+
+            let mut tar_gz_bytes = vec![];
+            let mut encoder =
+                flate2::write::GzEncoder::new(&mut tar_gz_bytes, flate2::Compression::default());
+            encoder.write_all(&tar_bytes).unwrap();
+            drop(encoder);
+
+            hyper::Response::builder()
+                .status(200)
+                .header("content-type", "application/octet-stream")
+                .body(http_body_util::Full::new(hyper::body::Bytes::from(
+                    tar_gz_bytes,
+                )))
+                .unwrap()
+        }
+
         fn dummy_tar_xz_response(sub_dir: &str) -> HyperResponse {
             let mut tar_bytes = vec![];
             let mut tar_builder = tar::Builder::new(&mut tar_bytes);
@@ -651,6 +687,7 @@ mod tests {
             "/github_api/repos/risc0/risc0/releases/tags/v1.0.0".into() => json_response("{}"),
             "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.1".into() => json_response("{}"),
             "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.2".into() => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.3".into() => json_response("{}"),
             "/github_api/repos/risc0/rust/releases/tags/r0.1.79.0".into() => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.0.0/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => dummy_tar_gz_response(),
@@ -658,6 +695,8 @@ mod tests {
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => dummy_tar_gz_response(),
             "/risc0_github/risc0/releases/download/v1.0.0-rc.2/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => dummy_tar_gz_response(),
+            "/risc0_github/risc0/releases/download/v1.0.0-rc.3/\
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => bad_tar_gz_response(),
             "/risc0_github/risc0/releases/download/v1.0.0/\
                 cargo-risczero-aarch64-apple-darwin.tgz".into() => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.79.0/\
@@ -1735,6 +1774,59 @@ mod tests {
             true, /* use_github_token */
             Platform::new("x86_64", Os::Linux),
         )
+    }
+
+    #[test]
+    fn install_bad_tar_gz() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            None,
+            server.private_key.clone(),
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        let base_url = &server.base_urls.risc0_github_base_url;
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                let error = rzup
+                    .install_component(&Component::R0Vm, Some("1.0.0-rc.3".parse().unwrap()), false)
+                    .unwrap_err();
+                assert!(
+                    matches!(&error, RzupError::Io(msg) if msg.starts_with("failed to unpack")),
+                    "{error:?}"
+                );
+            },
+            vec![
+                RzupEvent::InstallationStarted {
+                    id: "r0vm".into(),
+                    version: "1.0.0-rc.3".into(),
+                },
+                RzupEvent::TransferStarted {
+                    kind: TransferKind::Download,
+                    id: "cargo-risczero".into(),
+                    version: Some("1.0.0-rc.3".into()),
+                    url: Some(format!(
+                        "{base_url}/risc0/releases/download/v1.0.0-rc.3/\
+                        cargo-risczero-x86_64-unknown-linux-gnu.tgz"
+                    )),
+                    len: Some(196),
+                },
+                RzupEvent::TransferProgress {
+                    id: "cargo-risczero".into(),
+                    incr: 196,
+                },
+                RzupEvent::TransferCompleted {
+                    kind: TransferKind::Download,
+                    id: "cargo-risczero".into(),
+                    version: Some("1.0.0-rc.3".into()),
+                },
+            ],
+        );
+
+        assert_eq!(rzup.list_versions(&Component::R0Vm).unwrap(), vec![]);
     }
 
     fn test_list_multiple_versions(component: Component, version1: Version, version2: Version) {
