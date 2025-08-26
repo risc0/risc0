@@ -16,9 +16,9 @@ use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::digest::Digest;
 use test_log::test;
 
-use crate::{TerminateState, MAX_INSN_CYCLES};
+use crate::{MAX_INSN_CYCLES, TerminateState};
 
-use super::{testutil, DEFAULT_SEGMENT_LIMIT_PO2};
+use super::{DEFAULT_SEGMENT_LIMIT_PO2, testutil};
 
 #[test]
 fn basic() {

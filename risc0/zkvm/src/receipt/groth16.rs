@@ -17,7 +17,7 @@ use alloc::vec::Vec;
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
-use risc0_binfmt::{tagged_struct, Digestible};
+use risc0_binfmt::{Digestible, tagged_struct};
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_groth16::{Verifier, VerifyingKey};
 use risc0_zkp::core::hash::sha::Sha256;
@@ -26,9 +26,10 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
+    MaybePruned,
     claim::Unknown,
-    receipt::{succinct::allowed_control_root, VerifierContext},
-    sha, MaybePruned,
+    receipt::{VerifierContext, succinct::allowed_control_root},
+    sha,
 };
 
 /// A receipt composed of a Groth16 over the BN_254 curve

@@ -1568,7 +1568,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "1.4.1"
+version = "1.4.2"
 dependencies = [
  "anyhow",
  "bincode",
@@ -1736,7 +1736,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "anyhow",
  "bincode",
@@ -5577,6 +5577,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "num_enum"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a973b4e44ce6cad84ce69d797acf9a044532e4184c4f267913d1b546a0727b7a"
+dependencies = [
+ "num_enum_derive",
+ "rustversion",
+]
+
+[[package]]
+name = "num_enum_derive"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77e878c846a8abae00dd069496dbe8751b16ac1c3d6bd2a7283a938e8228f90d"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.100",
+]
+
+[[package]]
 name = "number_prefix"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6590,9 +6611,9 @@ checksum = "60a357793950651c4ed0f3f52338f53b2f809f32d83a07f72909fa13e4c6c1e3"
 
 [[package]]
 name = "rayon"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b418a60154510ca1a002a752ca9714984e21e4241e804d32555251faf8b78ffa"
+checksum = "368f01d005bf8fd9b1206fb6fa653e6c4a81ceb1466406b81792d87c5677a58f"
 dependencies = [
  "either",
  "rayon-core",
@@ -6600,9 +6621,9 @@ dependencies = [
 
 [[package]]
 name = "rayon-core"
-version = "1.12.1"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1465873a3dfdaa8ae7cb14b4383657caab0b3e8a0aa9ae8e04b044854c8dfce2"
+checksum = "22e18b0f0062d30d4230b2e85ff77fdfe4326feb054b9783a3460d8435c8ab91"
 dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
@@ -6784,7 +6805,7 @@ checksum = "3df6368f71f205ff9c33c076d170dd56ebf68e8161c733c0caa07a7a5509ed53"
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.7"
+version = "1.4.9"
 dependencies = [
  "anyhow",
  "clap 4.5.37",
@@ -6796,7 +6817,7 @@ dependencies = [
  "puffin_http",
  "risc0-bigint2-methods",
  "risc0-zkvm",
- "rstest 0.25.0",
+ "rstest",
  "stability",
  "test-log",
  "tracing",
@@ -6812,7 +6833,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.0"
+version = "3.0.2"
 dependencies = [
  "anyhow",
  "borsh",
@@ -6835,7 +6856,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "anyhow",
  "cargo_metadata 0.19.2",
@@ -6843,6 +6864,7 @@ dependencies = [
  "dirs",
  "docker-generate",
  "hex",
+ "rayon",
  "risc0-binfmt",
  "risc0-zkos-v1compat",
  "risc0-zkp",
@@ -6857,7 +6879,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "cc",
  "directories",
@@ -6869,7 +6891,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "4.0.0"
+version = "4.0.2"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -6901,7 +6923,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "4.0.0"
+version = "4.0.2"
 dependencies = [
  "cc",
  "cust",
@@ -6915,7 +6937,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.0"
+version = "4.0.2"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -6942,7 +6964,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "4.0.0"
+version = "4.0.2"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -6953,7 +6975,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "4.0.0"
+version = "4.0.2"
 dependencies = [
  "anyhow",
  "bit-vec 0.8.0",
@@ -6990,7 +7012,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "4.0.0"
+version = "4.0.2"
 dependencies = [
  "cc",
  "cust",
@@ -7004,7 +7026,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "2.0.1"
+version = "3.0.1"
 dependencies = [
  "bytemuck",
  "nvtx",
@@ -7015,7 +7037,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.0"
+version = "3.0.2"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -7044,7 +7066,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16-sys"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "blst",
@@ -7056,7 +7078,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-povw"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -7088,7 +7110,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -7128,7 +7150,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.5.0"
+version = "1.5.1"
 dependencies = [
  "anyhow",
  "blst",
@@ -7150,15 +7172,16 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.0.2"
+version = "2.1.0"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "3.0.0"
+version = "3.0.2"
 dependencies = [
  "anyhow",
  "blake2",
@@ -7191,7 +7214,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -7244,7 +7267,7 @@ dependencies = [
  "risc0-zkvm-platform",
  "rmp-serde",
  "rrs-lib",
- "rstest 0.25.0",
+ "rstest",
  "ruint",
  "rustc-demangle",
  "rzup",
@@ -7266,22 +7289,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-zkvm-compat-tests"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "risc0-binfmt",
- "risc0-r0vm",
- "risc0-zkp",
- "risc0-zkvm",
- "risc0-zkvm-methods",
- "rstest 0.24.0",
- "semver 1.0.26",
- "test-log",
- "tokio",
-]
-
-[[package]]
 name = "risc0-zkvm-methods"
 version = "3.0.0"
 dependencies = [
@@ -7299,7 +7306,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.4"
+version = "2.1.0"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -7308,6 +7315,8 @@ dependencies = [
  "getrandom 0.2.16",
  "getrandom 0.3.2",
  "libm",
+ "num_enum",
+ "paste",
  "stability",
 ]
 
@@ -7412,44 +7421,14 @@ dependencies = [
 
 [[package]]
 name = "rstest"
-version = "0.24.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03e905296805ab93e13c1ec3a03f4b6c4f35e9498a3d5fa96dc626d22c03cd89"
-dependencies = [
- "futures-timer",
- "futures-util",
- "rstest_macros 0.24.0",
- "rustc_version 0.4.1",
-]
-
-[[package]]
-name = "rstest"
 version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6fc39292f8613e913f7df8fa892b8944ceb47c247b78e1b1ae2f09e019be789d"
 dependencies = [
  "futures-timer",
  "futures-util",
- "rstest_macros 0.25.0",
+ "rstest_macros",
  "rustc_version 0.4.1",
-]
-
-[[package]]
-name = "rstest_macros"
-version = "0.24.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef0053bbffce09062bee4bcc499b0fbe7a57b879f1efe088d6d8d4c7adcdef9b"
-dependencies = [
- "cfg-if",
- "glob",
- "proc-macro-crate",
- "proc-macro2",
- "quote",
- "regex",
- "relative-path",
- "rustc_version 0.4.1",
- "syn 2.0.100",
- "unicode-ident",
 ]
 
 [[package]]
@@ -7757,7 +7736,7 @@ checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 
 [[package]]
 name = "rzup"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "aws-config",
  "aws-credential-types",

@@ -16,28 +16,28 @@ use std::{
     cell::RefCell,
     collections::BTreeSet,
     rc::Rc,
-    sync::mpsc::{sync_channel, SyncSender},
+    sync::mpsc::{SyncSender, sync_channel},
     thread::{self, ScopedJoinHandle},
 };
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use enum_map::EnumMap;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
 use risc0_zkp::core::{
-    digest::{Digest, DIGEST_BYTES},
+    digest::{DIGEST_BYTES, Digest},
     log2_ceil,
 };
 
 use crate::{
+    EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
     execute::rv32im::disasm,
     trace::{TraceCallback, TraceEvent},
-    EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
 };
 
 use super::{
-    bigint,
-    pager::{compute_partial_image, PageTraceEvent, PagedMemory, WorkingImage},
+    SyscallContext, bigint,
+    pager::{PageTraceEvent, PagedMemory, WorkingImage, compute_partial_image},
     platform::*,
     poseidon2::Poseidon2State,
     r0vm::{LoadOp, Risc0Context, Risc0Machine},
@@ -45,7 +45,7 @@ use super::{
     segment::Segment,
     sha2::Sha2State,
     syscall::Syscall,
-    unlikely, SyscallContext,
+    unlikely,
 };
 
 pub struct Executor<'a, 'b, S: Syscall> {

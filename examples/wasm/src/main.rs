@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use risc0_zkvm::{ExecutorEnv, default_prover};
 use wasm_methods::{WASM_INTERP_ELF, WASM_INTERP_ID};
 
 fn wat2wasm(wat: &str) -> Result<Vec<u8>, wat::Error> {

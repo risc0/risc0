@@ -323,21 +323,13 @@ impl From<u64> for Elem {
 /// Wrapping addition of [Elem] using Baby Bear field modulus
 fn add(lhs: u32, rhs: u32) -> u32 {
     let x = lhs.wrapping_add(rhs);
-    if x >= P {
-        x - P
-    } else {
-        x
-    }
+    if x >= P { x - P } else { x }
 }
 
 /// Wrapping subtraction of [Elem] using Baby Bear field modulus
 fn sub(lhs: u32, rhs: u32) -> u32 {
     let x = lhs.wrapping_sub(rhs);
-    if x > P {
-        x.wrapping_add(P)
-    } else {
-        x
-    }
+    if x > P { x.wrapping_add(P) } else { x }
 }
 
 /// Wrapping multiplication of [Elem]  using Baby Bear field modulus
@@ -354,11 +346,7 @@ const fn mul(lhs: u32, rhs: u32) -> u32 {
     // uint32_t ret = o64 >> 32;
     let ret = (o64 >> 32) as u32;
     // return (ret >= P ? ret - P : ret);
-    if ret >= P {
-        ret - P
-    } else {
-        ret
-    }
+    if ret >= P { ret - P } else { ret }
 }
 
 /// Encode to Montgomery form from direct form.
@@ -805,7 +793,7 @@ mod tests {
 
     use rand::{Rng, SeedableRng};
 
-    use super::{field, Elem, ExtElem, P, P_U64};
+    use super::{Elem, ExtElem, P, P_U64, field};
     use crate::field::Elem as FieldElem;
 
     #[test]
