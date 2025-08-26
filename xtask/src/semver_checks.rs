@@ -196,7 +196,7 @@ fn vendor_packages(
     cargo_toml_contents += "name = \"placeholder-project\"\n";
     cargo_toml_contents += "[dependencies]\n";
     for (package, version) in packages {
-        cargo_toml_contents += &format!("{package} = \"{version}\"\n");
+        cargo_toml_contents += &format!("{package} = \"={version}\"\n");
     }
     std::fs::write(project_dir.join("Cargo.toml"), &cargo_toml_contents)?;
     std::fs::create_dir(project_dir.join("src"))?;
@@ -238,7 +238,9 @@ fn compare_published_package_to_vendored_version(
     version: &Version,
     vendored_packages: &Path,
 ) -> Result<(), anyhow::Error> {
-    println!("Comparing {package} v{version} to crates.io version to see if it needs a patch version bump");
+    println!(
+        "Comparing {package} v{version} to crates.io version to see if it needs a patch version bump"
+    );
 
     // Have cargo package up the package for publishing
     run_command(
