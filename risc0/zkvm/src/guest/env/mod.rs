@@ -76,7 +76,7 @@ mod verify;
 mod write;
 
 use alloc::{
-    alloc::{Layout, alloc},
+    alloc::{alloc, Layout},
     vec,
 };
 use core::cell::OnceCell;
@@ -84,25 +84,26 @@ use core::cell::OnceCell;
 use anyhow::Result;
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
-    WORD_SIZE, align_up, fileno,
+    align_up, fileno,
     syscall::{
-        self, Syscall, SyscallName, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input,
-        sys_log, sys_pause, syscall_2_nr,
+        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
+        syscall_2_nr, Syscall, SyscallName,
     },
+    WORD_SIZE,
 };
-use serde::{Serialize, de::DeserializeOwned};
+use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
-    Assumptions, MaybePruned, Output,
     sha::{
-        Digest, Digestible,
         rust_crypto::{Digest as _, Sha256},
+        Digest, Digestible,
     },
+    Assumptions, MaybePruned, Output,
 };
 
 pub use self::{
     read::{FdReader, Read},
-    verify::{VerifyIntegrityError, verify, verify_assumption, verify_integrity},
+    verify::{verify, verify_assumption, verify_integrity, VerifyIntegrityError},
     write::{FdWriter, Write},
 };
 
