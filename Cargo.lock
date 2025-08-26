@@ -6030,21 +6030,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-zkvm-compat-tests"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "risc0-binfmt",
- "risc0-r0vm",
- "risc0-zkp",
- "risc0-zkvm",
- "risc0-zkvm-methods",
- "rstest",
- "semver",
- "test-log",
-]
-
-[[package]]
 name = "risc0-zkvm-methods"
 version = "2.2.0"
 dependencies = [
