@@ -224,24 +224,28 @@ jobs:
             nvcc_arch: sm_89
             test_command: cargo test
             partition: 1
+            ci_profile: slow
           - os: macOS
             arch: ARM64
             feature: default
             device: apple_m2_pro
             test_command: cargo nextest run --partition hash:1/2
             partition: 1
+            ci_profile: fast
           - os: macOS
             arch: ARM64
             feature: default
             device: apple_m2_pro
             test_command: cargo nextest run --partition hash:2/2
             partition: 2
+            ci_profile: fast
     env:
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
+      RUSTFLAGS: --cfg ci="${{ matrix.ci_profile }}"
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
@@ -264,10 +268,10 @@ jobs:
         with:
           crate: cargo-nextest
           version: "0.9.96"
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force gdb $RISC0_CPP_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force risc0-groth16 $RISC0_GROTH16_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install gdb $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install risc0-groth16 $RISC0_GROTH16_VERSION
       - name: Install gdb dependencies
         run: brew install zstd gettext lz4 mpfr gmp
         if: matrix.os == 'macOS'
@@ -294,17 +298,20 @@ jobs:
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
             test_command: cargo test
+            ci_profile: slow
           - os: macOS
             arch: ARM64
             feature: default
             device: apple_m2_pro
             test_command: cargo nextest run
+            ci_profile: fast
     env:
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
+      RUSTFLAGS: --cfg ci="${{ matrix.ci_profile }}"
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
@@ -319,22 +326,19 @@ jobs:
         with:
           crate: cargo-nextest
           version: "0.9.96"
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force risc0-groth16 $RISC0_GROTH16_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install risc0-groth16 $RISC0_GROTH16_VERSION
       - name: test risc0-r0vm
         run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE
       - name: test risc0-r0vm (disable-dev-mode)
         run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode
-      - run: ${{ matrix.test_command }} --release -p cargo-risczero -F experimental
-      - name: run fibonacci benchmark
-        run: cargo run --release --locked -F $FEATURE -- fibonacci
-        working-directory: benchmarks
+      - run: ${{ matrix.test_command }} -p cargo-risczero -F experimental
       - name: run datasheet generator (smoke test)
-        run: cargo run --release --locked -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
+        run: cargo run --locked -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
       - name: run datasheet generator (CUDA full)
         if: matrix.feature == 'cuda'
-        run: cargo run --release --locked -F $FEATURE -F prove --example datasheet
+        run: cargo run --locked -F $FEATURE -F prove --example datasheet
       - name: check benches
         run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
@@ -366,7 +370,7 @@ jobs:
             device: apple_m2_pro
             test_command: cargo nextest run
     env:
-      CARGO_BUILD_JOBS: 32
+      CARGO_BUILD_JOBS: 16
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
@@ -389,8 +393,8 @@ jobs:
         with:
           crate: cargo-nextest
           version: "0.9.96"
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - name: test in dev mode
         run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace --exclude prover-example
@@ -438,8 +442,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - run: sccache --show-stats
 
@@ -496,8 +500,8 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: run SemVer checks
         run: cargo run --bin xtask --no-default-features -- semver-checks --locked $UPDATE
         env:
@@ -530,8 +534,8 @@ jobs:
         run: brew install gnu-sed
         if: matrix.os == 'macOS'
       - run: cargo install --force --path risc0/cargo-risczero --locked
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: |
           cargo risczero new \
             --path $(pwd) \
@@ -575,8 +579,8 @@ jobs:
         with:
           crate: wasm-pack
           version: "0.13.1"
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo run --bin xtask -- gen-receipt
       - run: |
           npm install
@@ -601,8 +605,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_CI_USER }}
           password: ${{ secrets.DOCKERHUB_CI_PAT }}
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo test -p risc0-build -F docker
       - run: cargo test -p risc0-groth16 -F prove --release
       - run: cargo test -p risc0-zkvm -F docker -F prove -- docker
