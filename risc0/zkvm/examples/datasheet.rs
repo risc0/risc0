@@ -40,7 +40,6 @@ use tabled::{settings::Style, Table, Tabled};
 /// Powers-of-two for cycles, paired with the number of loop iterations used to
 /// achieve that many cycles.
 const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
-    (14, 1),               // 14, 16K
     (15, 1024 * 8),        // 15, 32K
     (16, 1024 * 16),       // 16, 64K
     (17, 1024 * 32),       // 17, 128K
@@ -56,7 +55,7 @@ const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
 const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
 
 /// The number of iterations of the LOOP_ELF needed to fill up a po2=20 segment.
-const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 495 + 790;
+const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 494 + 817;
 
 /// The maximum number of cycles in a segment that can be reserved (for fitting the
 /// potential next instruction and for lookup table + control when proving)
@@ -311,7 +310,7 @@ impl Datasheet {
         let ctx = VerifierContext::default();
         let prover = get_prover_server(&opts).unwrap();
 
-        let (po2, iters) = CYCLES_PO2_ITERS[1];
+        let (po2, iters) = CYCLES_PO2_ITERS[0];
 
         let env = ExecutorEnv::builder()
             .write_slice(&iters.to_le_bytes())

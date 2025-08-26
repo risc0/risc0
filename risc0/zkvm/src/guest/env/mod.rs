@@ -76,7 +76,7 @@ mod verify;
 mod write;
 
 use alloc::{
-    alloc::{alloc, Layout},
+    alloc::{Layout, alloc},
     vec,
 };
 use core::cell::OnceCell;
@@ -84,26 +84,25 @@ use core::cell::OnceCell;
 use anyhow::Result;
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
-    align_up, fileno,
+    WORD_SIZE, align_up, fileno,
     syscall::{
-        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
-        syscall_2, SyscallName,
+        self, Syscall, SyscallName, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input,
+        sys_log, sys_pause, syscall_2_nr,
     },
-    WORD_SIZE,
 };
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 
 use crate::{
-    sha::{
-        rust_crypto::{Digest as _, Sha256},
-        Digest, Digestible,
-    },
     Assumptions, MaybePruned, Output,
+    sha::{
+        Digest, Digestible,
+        rust_crypto::{Digest as _, Sha256},
+    },
 };
 
 pub use self::{
     read::{FdReader, Read},
-    verify::{verify, verify_assumption, verify_integrity, VerifyIntegrityError},
+    verify::{VerifyIntegrityError, verify, verify_assumption, verify_integrity},
     write::{FdWriter, Write},
 };
 
@@ -195,7 +194,8 @@ pub fn pause(exit_code: u8) {
 /// Exchange data with the host.
 pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> syscall::Return {
     unsafe {
-        syscall_2(
+        syscall_2_nr(
+            Syscall::User.into(),
             syscall,
             from_host.as_mut_ptr(),
             from_host.len(),

@@ -36,25 +36,25 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use enum_map::{Enum, EnumMap};
 use risc0_binfmt::ByteAddr;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{
+    DIGEST_BYTES, SyscallName,
     nr::{
         SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_KECCAK, SYS_LOG, SYS_PANIC, SYS_PIPE,
         SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_VERIFY_INTEGRITY2,
         SYS_WRITE,
     },
-    SyscallName, DIGEST_BYTES,
 };
 
 use crate::{
+    Assumption, AssumptionReceipt, ExecutorEnv,
     host::client::{
         env::{AssumptionReceipts, CoprocessorCallbackRef, ProveKeccakRequest, ProveZkrRequest},
         posix_io::PosixIo,
     },
-    Assumption, AssumptionReceipt, ExecutorEnv,
 };
 
 use self::{

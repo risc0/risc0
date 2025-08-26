@@ -22,7 +22,6 @@ members = [
   "risc0/zkos/v1compat",
   "risc0/zkp",
   "risc0/zkvm",
-  "risc0/zkvm/compat",
   "risc0/zkvm/methods",
   "risc0/zkvm/platform",
   "risc0/zkvm/receipts",
@@ -61,7 +60,7 @@ risc0-sys = { version = "1.4.0", default-features = false, path = "risc0/sys" }
 risc0-zkp = { version = "2.0.2", default-features = false, path = "risc0/zkp" }
 risc0-zkos-v1compat = { version = "2.0.1", path = "risc0/zkos/v1compat" }
 risc0-zkvm = { version = "2.3.1", default-features = false, path = "risc0/zkvm" }
-risc0-zkvm-platform = { version = "2.0.3", default-features = false, path = "risc0/zkvm/platform" }
+risc0-zkvm-platform = { version = "2.1.0", default-features = false, path = "risc0/zkvm/platform" }
 rzup = { version = "0.4.1", default-features = false, path = "rzup" }
 sppark = "0.1.10"
 
