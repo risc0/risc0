@@ -1551,7 +1551,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.5"
+version = "2.1.0"
 dependencies = [
  "bytemuck",
  "cfg-if",

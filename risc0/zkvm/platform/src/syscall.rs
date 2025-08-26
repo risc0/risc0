@@ -152,6 +152,10 @@ pub mod nr {
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
+    #[deprecated]
+    pub const SYS_PROVE_KECCAK: &str = "";
+    #[deprecated]
+    pub const SYS_PROVE_ZKR: &str = "";
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
