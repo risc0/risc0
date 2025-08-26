@@ -233,7 +233,7 @@ fn prove_segment_elf() {
 }
 
 #[test]
-#[cfg_attr(all(ci, not(ci = "slow")), ignore = "slow test")]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 fn lift_join_identity() {
     let segment_limit_po2 = 16; // 64k cycles
     let cycles = 1 << segment_limit_po2;

@@ -89,5 +89,5 @@ lto = true
 [workspace.lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = [
   'cfg(ci)',
-  'cfg(ci, values("fast", "medium", "slow"))',
+  'cfg(ci_profile, values("fast", "medium", "slow"))',
 ] }
