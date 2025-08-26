@@ -14,40 +14,73 @@
 
 use std::{rc::Rc, sync::Arc};
 
-use anyhow::Context;
+use anyhow::{Context, Result};
 use kameo::prelude::*;
 use risc0_zkvm::{
-    get_prover_server, CoprocessorCallback, DevModeDelay, DevModeProver, ExecutorEnv, ExecutorImpl,
-    NullSegmentRef, ProveKeccakRequest, ProveZkrRequest, ProverOpts, ProverServer, VerifierContext,
+    CoprocessorCallback, DevModeDelay, DevModeProver, ExecutorEnv, ExecutorImpl, NullSegmentRef,
+    PreflightResults, ProveKeccakRequest, ProverOpts, ProverServer, VerifierContext,
+    get_prover_server,
 };
+use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tokio::task::JoinHandle;
 
 use super::{
     factory::FactoryRouterActor,
     protocol::{
+        ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Session,
+        ShrinkWrapKind, ShrinkWrapTask, Task, TaskError, TaskHeader, TaskKind, UnionTask, WorkerId,
         factory::{
             GetTask, JoinNode, ProveKeccakDone, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg,
             UnionDone,
         },
         worker::TaskMsg,
-        ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Session,
-        Task, TaskError, TaskHeader, TaskKind, UnionTask, WorkerId,
     },
 };
 
-struct Processor {
-    factory: ActorRef<FactoryRouterActor>,
-    delay: Option<DevModeDelay>,
-    po2: usize,
+struct ProveSegmentCoreTask {
+    preflight_results: Box<PreflightResults>,
 }
 
+enum GpuTask {
+    ProveSegmentCore(ProveSegmentCoreTask),
+    ProveKeccak(Arc<ProveKeccakTask>),
+    Lift(Arc<LiftTask>),
+    Join(Arc<JoinTask>),
+    Union(Arc<UnionTask>),
+    Resolve(Arc<ResolveTask>),
+    ShrinkWrap(Arc<ShrinkWrapTask>),
+}
+
+struct GpuTaskMsg {
+    header: TaskHeader,
+    task: GpuTask,
+}
+
+enum CpuTask {
+    Execute(Arc<ExecuteTask>),
+    Preflight(Arc<ProveSegmentTask>),
+}
+
+struct CpuTaskMsg {
+    header: TaskHeader,
+    task: CpuTask,
+}
+
+/// Number of tasks we pull off the network and queue up in memory before processing
+const RECEIVE_QUEUE_DEPTH: usize = 1;
+
+/// Number of tasks we queue up to do on CPU
+const CPU_QUEUE_DEPTH: usize = 2;
+
+/// Number of tasks we queue up to do on GPU
+const GPU_QUEUE_DEPTH: usize = 2;
+
 pub(crate) struct Worker {
-    worker_id: WorkerId,
     factory: ActorRef<FactoryRouterActor>,
     task_kinds: Vec<TaskKind>,
-    join_handle: Option<JoinHandle<()>>,
+    join_handles: Vec<JoinHandle<()>>,
     delay: Option<DevModeDelay>,
-    po2: usize,
+    pub(crate) death_receiver: Option<tokio::sync::oneshot::Receiver<()>>,
 }
 
 impl Worker {
@@ -55,51 +88,49 @@ impl Worker {
         factory: ActorRef<FactoryRouterActor>,
         task_kinds: Vec<TaskKind>,
         delay: Option<DevModeDelay>,
-        po2: usize,
     ) -> Self {
         Self {
-            worker_id: WorkerId::new_v4(),
             factory,
             task_kinds,
-            join_handle: None,
+            join_handles: vec![],
             delay,
-            po2,
+            death_receiver: None,
         }
     }
 
     pub fn start(&mut self) {
-        if self.join_handle.is_some() {
+        if !self.join_handles.is_empty() {
             return;
         }
 
-        let request = GetTask {
-            worker_id: self.worker_id,
-            kinds: self.task_kinds.clone(),
-        };
+        let task_kinds = self.task_kinds.clone();
         let factory = self.factory.clone();
-        let processor = Processor {
-            factory: factory.clone(),
-            delay: self.delay,
-            po2: self.po2,
-        };
-        self.join_handle = Some(tokio::spawn(async move {
-            loop {
-                let reply = factory.ask(request.clone()).await;
-                processor.process_task(reply).await;
+        let (send, mut recv) = channel(RECEIVE_QUEUE_DEPTH);
+        self.join_handles.push(tokio::spawn(async move {
+            while let Ok(permit) = send.reserve().await {
+                let task = factory
+                    .ask(GetTask {
+                        worker_id: WorkerId::new_v4(),
+                        kinds: task_kinds.clone(),
+                    })
+                    .await;
+                permit.send(task);
             }
         }));
+        let (death_sender, death_receiver) = tokio::sync::oneshot::channel();
+        let processor = Processor::new(self.factory.clone(), self.delay, death_sender);
+        self.join_handles.push(tokio::spawn(async move {
+            while let Some(Ok(msg)) = recv.recv().await {
+                processor.process_task(msg).await;
+            }
+        }));
+        self.death_receiver = Some(death_receiver);
     }
 
-    pub async fn stop(self) {
-        if let Some(join_handle) = self.join_handle {
+    pub async fn stop(mut self) {
+        for join_handle in std::mem::take(&mut self.join_handles) {
             join_handle.abort();
         }
-    }
-}
-
-impl From<anyhow::Error> for TaskError {
-    fn from(value: anyhow::Error) -> Self {
-        Self::Generic(value.to_string())
     }
 }
 
@@ -117,29 +148,124 @@ impl Prover {
     }
 }
 
+struct Processor {
+    gpu_queue: Sender<GpuTaskMsg>,
+    cpu_queue: Sender<CpuTaskMsg>,
+    _death_sender: tokio::sync::oneshot::Sender<()>,
+}
+
 impl Processor {
-    async fn process_task(&self, msg: Result<TaskMsg, SendError<GetTask, SendError<GetTask>>>) {
-        let msg = match msg {
-            Ok(msg) => msg,
-            Err(err) => {
-                tracing::error!("GetTask reply error: {err}");
-                return;
-            }
-        };
-        let header = msg.header.clone();
-        let result = match msg.task {
-            Task::Execute(task) => self.execute(msg.header, task).await,
-            Task::ProveSegment(task) => self.prove_segment(msg.header, task).await,
-            Task::Lift(task) => self.lift(msg.header, task).await,
-            Task::Join(task) => self.join(msg.header, task).await,
-            Task::ProveKeccak(task) => self.prove_keccak(msg.header, task).await,
-            Task::Union(task) => self.union(msg.header, task).await,
-            Task::Resolve(task) => self.resolve(msg.header, task).await,
-        };
-        let result = self.send_done(header, result).await;
-        if let Err(err) = result {
-            tracing::error!("Failed to send error: {err}");
+    fn new(
+        factory: ActorRef<FactoryRouterActor>,
+        delay: Option<DevModeDelay>,
+        death_sender: tokio::sync::oneshot::Sender<()>,
+    ) -> Self {
+        let (gpu_send, gpu_recv) = channel(GPU_QUEUE_DEPTH);
+        let (cpu_send, cpu_recv) = channel(CPU_QUEUE_DEPTH);
+
+        let gpu_processor = GpuProcessor::new(factory.clone(), delay);
+        tokio::task::spawn(async move {
+            gpu_processor.process_tasks(gpu_recv).await;
+        });
+
+        let cpu_processor = CpuProcessor::new(factory.clone(), delay, gpu_send.clone());
+        tokio::task::spawn(async move {
+            cpu_processor.process_tasks(cpu_recv).await;
+        });
+
+        Self {
+            gpu_queue: gpu_send,
+            cpu_queue: cpu_send,
+            _death_sender: death_sender,
         }
+    }
+
+    async fn process_task(&self, msg: TaskMsg) {
+        match msg.task {
+            Task::Execute(task) => {
+                self.cpu_queue
+                    .send(CpuTaskMsg {
+                        header: msg.header,
+                        task: CpuTask::Execute(task),
+                    })
+                    .await
+                    .unwrap();
+            }
+            Task::ProveSegment(task) => {
+                self.cpu_queue
+                    .send(CpuTaskMsg {
+                        header: msg.header,
+                        task: CpuTask::Preflight(task),
+                    })
+                    .await
+                    .unwrap();
+            }
+            Task::Lift(task) => {
+                self.gpu_queue
+                    .send(GpuTaskMsg {
+                        header: msg.header,
+                        task: GpuTask::Lift(task),
+                    })
+                    .await
+                    .unwrap();
+            }
+            Task::Join(task) => {
+                self.gpu_queue
+                    .send(GpuTaskMsg {
+                        header: msg.header,
+                        task: GpuTask::Join(task),
+                    })
+                    .await
+                    .unwrap();
+            }
+            Task::ProveKeccak(task) => {
+                self.gpu_queue
+                    .send(GpuTaskMsg {
+                        header: msg.header,
+                        task: GpuTask::ProveKeccak(task),
+                    })
+                    .await
+                    .unwrap();
+            }
+            Task::Union(task) => {
+                self.gpu_queue
+                    .send(GpuTaskMsg {
+                        header: msg.header,
+                        task: GpuTask::Union(task),
+                    })
+                    .await
+                    .unwrap();
+            }
+            Task::Resolve(task) => {
+                self.gpu_queue
+                    .send(GpuTaskMsg {
+                        header: msg.header,
+                        task: GpuTask::Resolve(task),
+                    })
+                    .await
+                    .unwrap();
+            }
+            Task::ShrinkWrap(task) => {
+                self.gpu_queue
+                    .send(GpuTaskMsg {
+                        header: msg.header,
+                        task: GpuTask::ShrinkWrap(task),
+                    })
+                    .await
+                    .unwrap();
+            }
+        }
+    }
+}
+
+struct GpuProcessor {
+    factory: ActorRef<FactoryRouterActor>,
+    delay: Option<DevModeDelay>,
+}
+
+impl GpuProcessor {
+    fn new(factory: ActorRef<FactoryRouterActor>, delay: Option<DevModeDelay>) -> Self {
+        Self { factory, delay }
     }
 
     async fn task_start(&self, header: TaskHeader) -> anyhow::Result<()> {
@@ -158,76 +284,47 @@ impl Processor {
         Ok(self.factory.tell(TaskDoneMsg { header, payload }).await?)
     }
 
-    async fn execute(
-        &self,
-        header: TaskHeader,
-        task: Arc<ExecuteTask>,
-    ) -> Result<TaskDone, TaskError> {
-        tracing::info!("ELF: {} bytes", task.request.binary.len());
-        self.task_start(header.clone()).await?;
-        let factory = self.factory.clone();
-        let header_copy = header.clone();
-        let po2 = self.po2 as u32;
-        let session: anyhow::Result<Session> = tokio::task::spawn_blocking(move || {
-            let coproc = Coprocessor {
-                factory: factory.clone(),
-                header,
-            };
-
-            let mut env = ExecutorEnv::builder();
-            for assumption in task.request.assumptions.iter() {
-                env.add_assumption(assumption.clone());
-            }
-            let env = env
-                // .stdout(writer) // TODO
-                .write_slice(&task.request.input)
-                .coprocessor_callback(coproc)
-                // .session_limit(limit) // TODO
-                .segment_limit_po2(po2)
-                .build()?;
-
-            let mut exec = ExecutorImpl::from_elf(env, &task.request.binary)?;
-            let session = exec.run_with_callback(|segment| {
-                let msg = TaskUpdateMsg {
-                    header: header_copy.clone(),
-                    payload: TaskUpdate::Segment(segment),
-                };
-                factory.tell(msg).blocking_send()?;
-                Ok(Box::new(NullSegmentRef))
-            })?;
-
-            let assumptions = session
-                .assumptions
-                .into_iter()
-                .map(|(_, receipt)| Arc::new(receipt))
-                .collect();
-
-            let session = Session {
-                segment_count: session.segments.len(),
-                user_cycles: session.user_cycles,
-                total_cycles: session.total_cycles,
-                journal: session.journal,
-                assumptions,
-            };
-
-            Ok(session)
-        })
-        .await
-        .context("JoinHandle error: execute task")?;
-        Ok(TaskDone::Session(Arc::new(session?)))
+    async fn process_tasks(&self, mut recv: Receiver<GpuTaskMsg>) {
+        while let Some(msg) = recv.recv().await {
+            self.process_task(msg).await;
+        }
     }
 
-    async fn prove_segment(
+    async fn process_task(&self, msg: GpuTaskMsg) {
+        let header = msg.header.clone();
+
+        let result = match msg.task {
+            GpuTask::ProveSegmentCore(task) => self.prove_segment_core(msg.header, task).await,
+            GpuTask::ProveKeccak(task) => self.prove_keccak(msg.header, task).await,
+            GpuTask::Lift(task) => self.lift(msg.header, task).await,
+            GpuTask::Join(task) => self.join(msg.header, task).await,
+            GpuTask::Union(task) => self.union(msg.header, task).await,
+            GpuTask::Resolve(task) => self.resolve(msg.header, task).await,
+            GpuTask::ShrinkWrap(task) => self.shrink_wrap(msg.header, task).await,
+        };
+
+        let result = self.send_done(header, result).await;
+        if let Err(err) = result {
+            tracing::error!("Failed to send error: {err}");
+        }
+    }
+
+    async fn prove_segment_core(
         &self,
         header: TaskHeader,
-        task: Arc<ProveSegmentTask>,
+        task: ProveSegmentCoreTask,
     ) -> Result<TaskDone, TaskError> {
-        tracing::info!("ProveSegment: {}", task.segment.index);
+        tracing::info!(
+            "ProveSegmentCore: {}",
+            task.preflight_results.segment_index()
+        );
         self.task_start(header.clone()).await?;
         let prover = Prover { delay: self.delay };
         let receipt = tokio::task::spawn_blocking(move || {
-            let ctx = VerifierContext::default();
-            prover.get()?.prove_segment(&ctx, &task.segment)
+            let ctx = VerifierContext::default().with_dev_mode(prover.delay.is_some());
+            prover
+                .get()?
+                .prove_segment_core(&ctx, *task.preflight_results)
         })
         .await
         .context("JoinHandle error: prove_segment task")??;
@@ -313,6 +410,183 @@ impl Processor {
         .context("JoinHandle error: resolve task")??;
         Ok(TaskDone::Resolve(Arc::new(receipt)))
     }
+
+    async fn shrink_wrap(
+        &self,
+        header: TaskHeader,
+        task: Arc<ShrinkWrapTask>,
+    ) -> Result<TaskDone, TaskError> {
+        tracing::info!(
+            "ShrinkWrap({:?}): {:?}",
+            task.kind,
+            header.global_id.task_id
+        );
+        self.task_start(header.clone()).await?;
+        let prover = Prover { delay: self.delay };
+        let task_kind = task.kind;
+        let opts = match task_kind {
+            ShrinkWrapKind::Groth16 => ProverOpts::groth16(),
+        };
+        let receipt =
+            tokio::task::spawn_blocking(move || prover.get()?.compress(&opts, &task.receipt))
+                .await
+                .with_context(|| format!("JoinHandle error: shrink_wrap({task_kind:?}) task"))??;
+        Ok(TaskDone::ShrinkWrap(Arc::new(receipt)))
+    }
+}
+
+struct CpuProcessor {
+    factory: ActorRef<FactoryRouterActor>,
+    delay: Option<DevModeDelay>,
+
+    gpu_queue: Sender<GpuTaskMsg>,
+}
+
+impl CpuProcessor {
+    fn new(
+        factory: ActorRef<FactoryRouterActor>,
+        delay: Option<DevModeDelay>,
+        gpu_queue: Sender<GpuTaskMsg>,
+    ) -> Self {
+        Self {
+            factory,
+            delay,
+            gpu_queue,
+        }
+    }
+
+    async fn task_start(&self, header: TaskHeader) -> anyhow::Result<()> {
+        self.send_update(header, TaskUpdate::Start).await
+    }
+
+    async fn send_update(&self, header: TaskHeader, payload: TaskUpdate) -> anyhow::Result<()> {
+        Ok(self.factory.tell(TaskUpdateMsg { header, payload }).await?)
+    }
+
+    async fn send_done(
+        &self,
+        header: TaskHeader,
+        payload: Result<TaskDone, TaskError>,
+    ) -> anyhow::Result<()> {
+        Ok(self.factory.tell(TaskDoneMsg { header, payload }).await?)
+    }
+
+    async fn process_tasks(&self, mut recv: Receiver<CpuTaskMsg>) {
+        while let Some(msg) = recv.recv().await {
+            self.process_task(msg).await;
+        }
+    }
+
+    async fn process_task(&self, msg: CpuTaskMsg) {
+        let header = msg.header.clone();
+
+        let result = match msg.task {
+            CpuTask::Execute(task) => self.execute(msg.header, task).await,
+            CpuTask::Preflight(task) => {
+                if let Err(error) = self.preflight(msg.header, task).await {
+                    if let Err(err) = self.send_done(header, Err(error)).await {
+                        tracing::error!("Failed to send error: {err}");
+                    }
+                }
+                return;
+            }
+        };
+
+        let result = self.send_done(header, result).await;
+        if let Err(err) = result {
+            tracing::error!("Failed to send error: {err}");
+        }
+    }
+
+    async fn execute(
+        &self,
+        header: TaskHeader,
+        task: Arc<ExecuteTask>,
+    ) -> Result<TaskDone, TaskError> {
+        tracing::info!("ELF: {} bytes", task.request.binary.len());
+        self.task_start(header.clone()).await?;
+        let factory = self.factory.clone();
+        let header_copy = header.clone();
+        let session: anyhow::Result<Session> = tokio::task::spawn_blocking(move || {
+            let coproc = Coprocessor {
+                factory: factory.clone(),
+                header,
+            };
+
+            let mut env = ExecutorEnv::builder();
+            for assumption in task.request.assumptions.iter() {
+                env.add_assumption(assumption.clone());
+            }
+            if let Some(po2) = task.request.segment_limit_po2 {
+                env.segment_limit_po2(po2);
+            }
+            let env = env
+                // .stdout(writer) // TODO
+                .write_slice(&task.request.input)
+                .coprocessor_callback(coproc)
+                // .session_limit(limit) // TODO
+                .build()?;
+
+            // TODO(povw): Add PoVW here
+            let mut exec = ExecutorImpl::from_elf(env, &task.request.binary)?;
+            let mut segments = vec![];
+            let session = exec.run_with_callback(|segment| {
+                segments.push(segment.get_info());
+                let msg = TaskUpdateMsg {
+                    header: header_copy.clone(),
+                    payload: TaskUpdate::Segment(segment),
+                };
+                factory.tell(msg).blocking_send()?;
+                Ok(Box::new(NullSegmentRef))
+            })?;
+
+            let stats = session.stats();
+            let receipt_claim = session.claim()?;
+            let assumptions = session
+                .assumptions
+                .into_iter()
+                .map(|(_, receipt)| Arc::new(receipt))
+                .collect();
+
+            let session = Session {
+                stats,
+                journal: session.journal,
+                assumptions,
+                segments,
+                exit_code: session.exit_code,
+                receipt_claim,
+            };
+
+            Ok(session)
+        })
+        .await
+        .context("JoinHandle error: execute task")?;
+        Ok(TaskDone::Session(Arc::new(session?)))
+    }
+
+    async fn preflight(
+        &self,
+        header: TaskHeader,
+        task: Arc<ProveSegmentTask>,
+    ) -> Result<(), TaskError> {
+        tracing::info!("Preflight: {}", task.segment.index);
+        self.task_start(header.clone()).await?;
+        let prover = Prover { delay: self.delay };
+        let preflight_results = tokio::task::spawn_blocking(move || -> Result<_> {
+            Ok(Box::new(prover.get()?.segment_preflight(&task.segment)?))
+        })
+        .await
+        .context("JoinHandle error: prove_segment task")??;
+        self.gpu_queue
+            .send(GpuTaskMsg {
+                header,
+                task: GpuTask::ProveSegmentCore(ProveSegmentCoreTask { preflight_results }),
+            })
+            .await
+            .unwrap();
+
+        Ok(())
+    }
 }
 
 struct Coprocessor {
@@ -321,10 +595,6 @@ struct Coprocessor {
 }
 
 impl CoprocessorCallback for Coprocessor {
-    fn prove_zkr(&mut self, _request: ProveZkrRequest) -> anyhow::Result<()> {
-        unimplemented!()
-    }
-
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> anyhow::Result<()> {
         self.factory
             .tell(TaskUpdateMsg {

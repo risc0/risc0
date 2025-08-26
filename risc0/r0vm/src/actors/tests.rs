@@ -12,22 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::time::Duration;
+use std::{
+    net::{Ipv4Addr, SocketAddrV4},
+    time::Duration,
+};
 
+use assert_matches::assert_matches;
 use risc0_zkvm::DevModeDelay;
 use risc0_zkvm_methods::FIB_ELF;
 
-use crate::actors::{protocol::JobStatus, PoolConfig, SimulationConfig};
-
-use super::{protocol::TaskKind, App};
+use super::{
+    App, PoolConfig, WorkerConfig,
+    protocol::{JobStatus, ProofRequest, ShrinkWrapKind, ShrinkWrapRequest, TaskKind},
+};
 
 const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
-    prove_segment: Duration::from_millis(800),
+    prove_segment_core: Duration::from_millis(500),
+    segment_preflight: Duration::from_millis(300),
     prove_keccak: Duration::from_millis(250),
     lift: Duration::from_millis(150),
     join: Duration::from_millis(250),
     union: Duration::from_millis(250),
     resolve: Duration::from_millis(250),
+    shrink_wrap_groth16: Duration::from_millis(3_760),
 };
 
 // const PROFILE_L40S: DevModeDelay = DevModeDelay {
@@ -39,50 +46,79 @@ const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
 //     resolve: Duration::from_millis(350),
 // };
 
-#[test_log::test(tokio::test(flavor = "multi_thread"))]
-#[cfg_attr(feature = "disable-dev-mode", ignore)]
-async fn basic() {
-    tracing::info!("basic");
-
+async fn do_test(remote: bool) {
     let task_kinds = vec![
         TaskKind::Execute,
         TaskKind::ProveSegment,
         TaskKind::Lift,
         TaskKind::Join,
+        TaskKind::ShrinkWrap,
     ];
 
     let storage_root = assert_fs::TempDir::new().unwrap();
 
-    let config = SimulationConfig {
+    let config = WorkerConfig {
         pools: vec![PoolConfig {
             count: 100,
-            profile: PROFILE_RTX_5090,
+            profile: Some(PROFILE_RTX_5090),
             task_kinds: task_kinds.clone(),
         }],
     };
 
+    let po2 = Some(21);
+    let addr = remote.then_some(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into());
     let mut app = App::new(
-        true,
-        task_kinds,
-        None,
-        None,
+        /* is_manager */ true,
+        addr,
+        /* api_addr */ None,
         Some(storage_root.to_path_buf()),
         Some(config),
-        21,
+        po2,
+        /* enable_telemetry */ false,
     )
     .await
     .unwrap();
 
     const ITERATIONS: u32 = 30_000_000;
 
-    let info = app
-        .run_binary(FIB_ELF.to_vec(), u32::to_le_bytes(ITERATIONS).to_vec())
-        .await
-        .unwrap();
+    let request = ProofRequest {
+        binary: FIB_ELF.to_vec(),
+        input: u32::to_le_bytes(ITERATIONS).to_vec(),
+        assumptions: vec![],
+        segment_limit_po2: po2,
+        execute_only: false,
+    };
 
-    tracing::info!("{info:#?}");
+    let info = app.proof_request(request).await.unwrap();
 
-    assert!(matches!(info.status, JobStatus::Succeeded(_result)));
+    tracing::info!("proof_request result = {info:#?}");
+
+    let result = assert_matches!(info.status, JobStatus::Succeeded(r) => r);
+
+    let request = ShrinkWrapRequest {
+        kind: ShrinkWrapKind::Groth16,
+        receipt: (*result.receipt.unwrap()).clone(),
+    };
+
+    let info = app.shrink_wrap_request(request).await.unwrap();
+
+    tracing::info!("shrink_wrap_request result = {info:#?}");
 
     app.stop().await;
+}
+
+#[test_log::test(tokio::test(flavor = "multi_thread"))]
+#[cfg_attr(feature = "disable-dev-mode", ignore)]
+async fn basic_local() {
+    tracing::info!("basic (local)");
+
+    do_test(/* remote */ false).await
+}
+
+#[test_log::test(tokio::test(flavor = "multi_thread"))]
+#[cfg_attr(feature = "disable-dev-mode", ignore)]
+async fn basic_remote() {
+    tracing::info!("basic (remote)");
+
+    do_test(/* remote */ true).await
 }

@@ -140,7 +140,7 @@ impl<'a, E: Elem + Into<u32>, C: Component> Tree<'a, E, C> {
     /// Returns the contents of this tree, which should have a single element, as a u32.
     pub fn get_u32_from_elem(&self) -> Result<u32> {
         let u32s = self.get_u32s()?;
-        assert_eq!(u32s.len(), 1, "Expecting only a single u32 in {:?}", self);
+        assert_eq!(u32s.len(), 1, "Expecting only a single u32 in {self:?}");
         Ok(u32s[0])
     }
 }
@@ -202,9 +202,9 @@ impl<E: Elem + Into<u32>> Visitor for TreePrinter<'_, E> {
                     for val in subtree.vals {
                         if val > 255 {
                             // Unexpected non-byte in u32reg
-                            write!(msg, "[{:#x}?]", val)?;
+                            write!(msg, "[{val:#x}?]")?;
                         } else {
-                            write!(msg, "{:02x}", val)?;
+                            write!(msg, "{val:02x}")?;
                         }
                     }
                     self.lines.push(msg);
@@ -253,7 +253,7 @@ impl<E: Elem + Into<u32>> Visitor for TreePrinter<'_, E> {
 
     fn visit_reg(&mut self, offset: usize) -> core::fmt::Result {
         if let Some(val) = self.buf.get(offset) {
-            self.lines.push(format!("{:?}", val));
+            self.lines.push(format!("{val:?}"));
             self.item_count += 1;
         }
         Ok(())

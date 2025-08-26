@@ -14,14 +14,14 @@ permissions:
   contents: write
 
 env:
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
-  TAG: v1.1.0
-  VERSION: "1.1.0"
+  TAG: v4.0.0
+  VERSION: 4.0.0
 
 jobs:
   release:
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", cpu]
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", cpu]
     strategy:
       fail-fast: false
       matrix:
@@ -64,13 +64,13 @@ jobs:
       # otherwise cargo-binstall sometimes errors with 404.
       - run: sleep 90
 
-      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
+      - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-binstall
           version: "1.10.16"
       - run: cargo binstall -y --force cargo-risczero@${{ env.VERSION }}
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo run

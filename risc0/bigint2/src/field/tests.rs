@@ -22,7 +22,7 @@ use risc0_bigint2_methods::{
     MODINV_256_ELF, MODINV_384_ELF, MODMUL_256_ELF, MODMUL_384_ELF, MODSUB_256_ELF, MODSUB_384_ELF,
     RAW_TEST_ELF,
 };
-use risc0_zkvm::{get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, Journal, ProverOpts};
+use risc0_zkvm::{DeserializeOwned, ExecutorEnv, ExitCode, Journal, ProverOpts, get_prover_server};
 use rstest::rstest;
 
 use crate::BigUintWrap;

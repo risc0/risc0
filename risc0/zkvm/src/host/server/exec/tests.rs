@@ -21,24 +21,24 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
-use risc0_binfmt::{ExitCode, MemoryImage, Program, ProgramBinary};
+use risc0_binfmt::{ExitCode, MemoryImage, PovwJobId, PovwLogId, Program, ProgramBinary};
 use risc0_circuit_rv32im::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
-    multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
-    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND2_ELF, RAND_ELF,
+    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, RAND2_ELF,
     SLICE_IO_ELF, STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
+    multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
 };
 use risc0_zkvm_platform::{
-    fileno,
+    WORD_SIZE, fileno,
     syscall::{bigint, nr::SYS_RANDOM},
-    WORD_SIZE,
 };
 use rstest::rstest;
 use sha2::{Digest as _, Sha256};
 
 use crate::{
+    ExecutorEnv, Session, SimpleSegmentRef,
     host::server::exec::{
         executor::ExecutorImpl,
         profiler::Profiler,
@@ -46,13 +46,14 @@ use crate::{
     },
     serde::to_vec,
     sha::{Digest, Digestible},
-    ExecutorEnv, Session, SimpleSegmentRef,
 };
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
-    ExecutorImpl::from_elf(env, elf)
+    let session = ExecutorImpl::from_elf(env, elf)
         .unwrap()
-        .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+        .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))?;
+    session.log();
+    Ok(session)
 }
 
 fn multi_test(spec: MultiTestSpec) {
@@ -266,7 +267,7 @@ fn bigint_accel() {
 
     let cases = generate_bigint_test_cases(10);
     for case in cases {
-        println!("Running BigInt circuit test case: {:x?}", case);
+        println!("Running BigInt circuit test case: {case:x?}");
         let input = MultiTestSpec::BigInt {
             count: 1,
             x: case.x,
@@ -486,53 +487,78 @@ fn posix_style_read() {
     }
 }
 
+#[rstest]
+#[case(0, 0, b"abcdefghijkl")]
+#[case(0, 1, b"abcdefghijkl")]
+#[case(0, 2, b"abcdefghijkl")]
+#[case(0, 3, b"abcdefghijkl")]
+#[case(0, 4, b"\0\0\0\0efghijkl")]
+#[case(0, 5, b"\0\0\0\0efghijkl")]
+#[case(0, 6, b"\0\0\0\0efghijkl")]
+#[case(0, 7, b"\0\0\0\0efghijkl")]
+#[case(1, 0, b"Abcdefghijkl")]
+#[case(1, 1, b"Abcdefghijkl")]
+#[case(1, 2, b"Abcdefghijkl")]
+#[case(1, 3, b"A\0\0\0efghijkl")]
+#[case(1, 4, b"A\0\0\0efghijkl")]
+#[case(1, 5, b"A\0\0\0efghijkl")]
+#[case(1, 6, b"A\0\0\0efghijkl")]
+#[case(1, 7, b"A\0\0\0\0\0\0\0ijkl")]
+#[case(2, 0, b"ABcdefghijkl")]
+#[case(2, 1, b"ABcdefghijkl")]
+#[case(2, 2, b"AB\0\0efghijkl")]
+#[case(2, 3, b"AB\0\0efghijkl")]
+#[case(2, 4, b"AB\0\0efghijkl")]
+#[case(2, 5, b"AB\0\0efghijkl")]
+#[case(2, 6, b"AB\0\0\0\0\0\0ijkl")]
+#[case(2, 7, b"AB\0\0\0\0\0\0ijkl")]
+#[case(3, 0, b"ABCdefghijkl")]
+#[case(3, 1, b"ABC\0efghijkl")]
+#[case(3, 2, b"ABC\0efghijkl")]
+#[case(3, 3, b"ABC\0efghijkl")]
+#[case(3, 4, b"ABC\0efghijkl")]
+#[case(3, 5, b"ABC\0\0\0\0\0ijkl")]
+#[case(3, 6, b"ABC\0\0\0\0\0ijkl")]
+#[case(3, 7, b"ABC\0\0\0\0\0ijkl")]
 #[test_log::test]
-fn short_read_combinations() {
+fn short_read_combinations(
+    #[case] read_len: usize,
+    #[case] excess_buffer: usize,
+    #[case] expected: &[u8],
+) {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
     let buf: Vec<u8> = (b'a'..=b'l').collect();
     // Input to read bytes from.
     let readbuf: Vec<u8> = (b'A'..b'L').collect();
 
-    for read_len in 0..WORD_SIZE {
-        for excess_buffer in 0..WORD_SIZE * 2 {
-            let buffer = read_len + excess_buffer;
-            let mut expected = buf.to_vec();
+    let buffer = read_len + excess_buffer;
 
-            expected[..read_len].copy_from_slice(&readbuf[..read_len]);
+    let spec = MultiTestSpec::SysRead {
+        fd: FD,
+        buf: buf.to_vec(),
+        pos_and_len: vec![(0, buffer as u32)],
+    };
+    let env = ExecutorEnv::builder()
+        .read_fd(FD, &readbuf[..read_len])
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
 
-            // The current behaviour of the read call for more bytes than available is to write
-            // zeroes for the remaining bytes.
-            expected[read_len..buffer].fill(0);
-
-            let spec = MultiTestSpec::SysRead {
-                fd: FD,
-                buf: buf.to_vec(),
-                pos_and_len: vec![(0, buffer as u32)],
-            };
-            let env = ExecutorEnv::builder()
-                .read_fd(FD, &readbuf[..read_len])
-                .write(&spec)
-                .unwrap()
-                .build()
-                .unwrap();
-            let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-            assert_eq!(session.exit_code, ExitCode::Halted(0));
-
-            let (actual, num_read): (Vec<u8>, Vec<usize>) =
-                session.journal.unwrap().decode().unwrap();
-            assert_eq!(
-                [read_len].as_slice(),
-                &num_read,
-                "length mismatch, length {read_len} buffer: {buffer}"
-            );
-            assert_eq!(
-                from_utf8(&actual).unwrap(),
-                from_utf8(&expected).unwrap(),
-                "length {read_len}, buffer {buffer}"
-            );
-        }
-    }
+    let (actual, num_read): (Vec<u8>, Vec<usize>) = session.journal.unwrap().decode().unwrap();
+    assert_eq!(
+        [read_len].as_slice(),
+        &num_read,
+        "length mismatch, length {read_len} buffer: {buffer}"
+    );
+    assert_eq!(
+        from_utf8(&actual).unwrap(),
+        from_utf8(expected).unwrap(),
+        "length {read_len}, buffer {buffer}"
+    );
 }
 
 #[test_log::test]
@@ -796,9 +822,10 @@ mod sys_verify {
         let err = execute_elf(env, MULTI_TEST_ELF).map(|_| ()).unwrap_err();
 
         tracing::debug!("err: {err}");
-        assert!(err
-            .to_string()
-            .contains("env::verify_integrity returned error"));
+        assert!(
+            err.to_string()
+                .contains("env::verify_integrity returned error")
+        );
     }
 }
 
@@ -1021,7 +1048,7 @@ fn profiler() {
         vec![
             (
                 vec![
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into()
@@ -1030,8 +1057,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func2".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func2".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1040,8 +1067,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func3".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func3".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1050,9 +1077,9 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func3".into(),
-                    "profile_test_func5".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func3".into(),
+                    "multi_test::profiler::profile_test_func5".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1061,8 +1088,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func4".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func4".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1071,8 +1098,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func5".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func5".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1102,7 +1129,10 @@ fn profiler() {
     let program = Program::load_elf(binary.user_elf, u32::MAX).unwrap();
 
     // Check that the addresses for these two functions point to the right place
-    for func_name in ["profile_test_func2", "profile_test_func3"] {
+    for func_name in [
+        "multi_test::profiler::profile_test_func2",
+        "multi_test::profiler::profile_test_func3",
+    ] {
         let test_func = test_samples
             .iter()
             .find(|sample| sample.frames[0].frame.name == func_name)
@@ -1154,18 +1184,22 @@ fn memory_access() {
         Ok(session.exit_code)
     };
 
-    assert!(access_memory(0x0000_0000)
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("StoreAccessFault"));
+    assert!(
+        access_memory(0x0000_0000)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("StoreAccessFault")
+    );
 
     let addr = 0xC000_0000;
-    assert!(access_memory(addr)
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("StoreAccessFault"));
+    assert!(
+        access_memory(addr)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("StoreAccessFault")
+    );
 
     assert_eq!(access_memory(0x0B00_0000).unwrap(), ExitCode::Halted(0));
 }
@@ -1345,23 +1379,28 @@ mod docker {
         let occurrences = events
             .windows(4)
             .filter_map(|window| {
-                if let &[TraceEvent::InstructionStart {
-                    // li x5, 1337
-                    cycle: cycle1,
-                    pc: pc1,
-                    ..
-                }, TraceEvent::RegisterSet {
-                    idx: 5,
-                    value: 1337,
-                }, TraceEvent::InstructionStart {
-                    // sw x5, 548(zero)
-                    cycle: cycle2,
-                    pc: pc2,
-                    ..
-                }, TraceEvent::RegisterSet {
-                    idx: 6,
-                    value: 0x08000000,
-                }] = window
+                if let &[
+                    TraceEvent::InstructionStart {
+                        // li x5, 1337
+                        cycle: cycle1,
+                        pc: pc1,
+                        ..
+                    },
+                    TraceEvent::RegisterSet {
+                        idx: 5,
+                        value: 1337,
+                    },
+                    TraceEvent::InstructionStart {
+                        // sw x5, 548(zero)
+                        cycle: cycle2,
+                        pc: pc2,
+                        ..
+                    },
+                    TraceEvent::RegisterSet {
+                        idx: 6,
+                        value: 0x08000000,
+                    },
+                ] = window
                 {
                     // Note: it's possible that these instructions could lie between page
                     // boundaries. If that is the case, it means that the difference between cycle2
@@ -1425,4 +1464,42 @@ fn session_limit(
         .build()
         .unwrap();
     execute_elf(env, MULTI_TEST_ELF).unwrap();
+}
+
+#[test_log::test]
+fn povw_nonce_assignment() {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
+    let povw_job_id = PovwJobId {
+        log: PovwLogId::from(0x202ce_u64),
+        job: 42,
+    };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(17)
+        .povw(povw_job_id)
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    for (i, segment_ref) in session.segments.into_iter().enumerate() {
+        let segment = segment_ref.resolve().unwrap();
+        assert_eq!(segment.inner.povw_nonce, Some(povw_job_id.nonce(i as u32)));
+    }
+}
+
+#[test_log::test]
+fn povw_nonce_default_assignment() {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(17)
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    // If no PoVW work information is set in the ExecutorEnv, the povw_nonce should be None.
+    for segment_ref in session.segments.into_iter() {
+        let segment = segment_ref.resolve().unwrap();
+        assert_eq!(segment.inner.povw_nonce, None);
+    }
 }

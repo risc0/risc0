@@ -14,8 +14,7 @@
 
 use crate::field::*;
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modadd_256_unchecked(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
@@ -25,8 +24,7 @@ pub extern "C" fn risc0_bigint_modadd_256_unchecked(
     unchecked::modadd_256(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modadd_384_unchecked(
     lhs: &[u32; FIELD_384_WIDTH_WORDS],
     rhs: &[u32; FIELD_384_WIDTH_WORDS],
@@ -36,8 +34,7 @@ pub extern "C" fn risc0_bigint_modadd_384_unchecked(
     unchecked::modadd_384(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modinv_256_unchecked(
     inp: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
@@ -46,8 +43,7 @@ pub extern "C" fn risc0_bigint_modinv_256_unchecked(
     unchecked::modinv_256(inp, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modinv_384_unchecked(
     inp: &[u32; FIELD_384_WIDTH_WORDS],
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
@@ -56,8 +52,7 @@ pub extern "C" fn risc0_bigint_modinv_384_unchecked(
     unchecked::modinv_384(inp, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modmul_256_unchecked(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
@@ -67,8 +62,7 @@ pub extern "C" fn risc0_bigint_modmul_256_unchecked(
     unchecked::modmul_256(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modmul_384_unchecked(
     lhs: &[u32; FIELD_384_WIDTH_WORDS],
     rhs: &[u32; FIELD_384_WIDTH_WORDS],
@@ -78,8 +72,7 @@ pub extern "C" fn risc0_bigint_modmul_384_unchecked(
     unchecked::modmul_384(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modsub_256_unchecked(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
@@ -89,8 +82,7 @@ pub extern "C" fn risc0_bigint_modsub_256_unchecked(
     unchecked::modsub_256(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modsub_384_unchecked(
     lhs: &[u32; FIELD_384_WIDTH_WORDS],
     rhs: &[u32; FIELD_384_WIDTH_WORDS],
@@ -100,8 +92,7 @@ pub extern "C" fn risc0_bigint_modsub_384_unchecked(
     unchecked::modsub_384(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_deg2_add_256_unchecked(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -111,8 +102,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_add_256_unchecked(
     unchecked::extfield_deg2_add_256(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_deg2_add_384_unchecked(
     lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -122,8 +112,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_add_384_unchecked(
     unchecked::extfield_deg2_add_384(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_deg2_sub_256_unchecked(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -133,8 +122,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_sub_256_unchecked(
     unchecked::extfield_deg2_sub_256(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_deg2_sub_384_unchecked(
     lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -144,8 +132,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_sub_384_unchecked(
     unchecked::extfield_deg2_sub_384(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_xxone_mul_256_unchecked(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -156,8 +143,7 @@ pub extern "C" fn risc0_bigint_extfield_xxone_mul_256_unchecked(
     unchecked::extfield_xxone_mul_256(lhs, rhs, modulus, modsqr, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_xxone_mul_384_unchecked(
     lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -168,8 +154,7 @@ pub extern "C" fn risc0_bigint_extfield_xxone_mul_384_unchecked(
     unchecked::extfield_xxone_mul_384(lhs, rhs, modulus, modsqr, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modadd_256(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
@@ -179,8 +164,7 @@ pub extern "C" fn risc0_bigint_modadd_256(
     modadd_256(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modadd_384(
     lhs: &[u32; FIELD_384_WIDTH_WORDS],
     rhs: &[u32; FIELD_384_WIDTH_WORDS],
@@ -190,8 +174,7 @@ pub extern "C" fn risc0_bigint_modadd_384(
     modadd_384(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modinv_256(
     inp: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
@@ -200,8 +183,7 @@ pub extern "C" fn risc0_bigint_modinv_256(
     modinv_256(inp, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modinv_384(
     inp: &[u32; FIELD_384_WIDTH_WORDS],
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
@@ -210,8 +192,7 @@ pub extern "C" fn risc0_bigint_modinv_384(
     modinv_384(inp, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modmul_256(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
@@ -221,8 +202,7 @@ pub extern "C" fn risc0_bigint_modmul_256(
     modmul_256(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modmul_384(
     lhs: &[u32; FIELD_384_WIDTH_WORDS],
     rhs: &[u32; FIELD_384_WIDTH_WORDS],
@@ -232,8 +212,7 @@ pub extern "C" fn risc0_bigint_modmul_384(
     modmul_384(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modsub_256(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
@@ -243,8 +222,7 @@ pub extern "C" fn risc0_bigint_modsub_256(
     modsub_256(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_modsub_384(
     lhs: &[u32; FIELD_384_WIDTH_WORDS],
     rhs: &[u32; FIELD_384_WIDTH_WORDS],
@@ -254,8 +232,7 @@ pub extern "C" fn risc0_bigint_modsub_384(
     modsub_384(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_deg2_add_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -265,8 +242,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_add_256(
     extfield_deg2_add_256(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_deg2_add_384(
     lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -276,8 +252,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_add_384(
     extfield_deg2_add_384(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_deg2_sub_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -287,8 +262,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_sub_256(
     extfield_deg2_sub_256(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_deg2_sub_384(
     lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -298,8 +272,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_sub_384(
     extfield_deg2_sub_384(lhs, rhs, modulus, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_xxone_mul_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -310,8 +283,7 @@ pub extern "C" fn risc0_bigint_extfield_xxone_mul_256(
     extfield_xxone_mul_256(lhs, rhs, modulus, modsqr, result);
 }
 
-#[stability::unstable]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn risc0_bigint_extfield_xxone_mul_384(
     lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],

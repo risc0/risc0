@@ -1,12 +1,12 @@
 [package]
 name = "bls12_381-inner"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [workspace]
 
 [dependencies]
-risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std", "unstable"] }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
 bls12_381 = "0.8.0"
 
 [patch.crates-io]
