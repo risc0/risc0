@@ -16,18 +16,18 @@ use anyhow::Result;
 use risc0_circuit_rv32im_sys::RawMemoryTransaction;
 use risc0_zkp::{
     core::digest::DIGEST_WORDS,
-    field::{baby_bear, Elem as _},
+    field::{Elem as _, baby_bear},
 };
 
 use crate::{
     execute::{
-        node_idx,
+        CycleState, MERKLE_TREE_END_ADDR, MERKLE_TREE_START_ADDR, WORD_SIZE, node_idx,
         pager::{PAGE_WORDS, POSEIDON_PAGE_ROUNDS},
         poseidon2::{Poseidon2, Poseidon2State},
         r0vm::Risc0Context,
-        tx, CycleState, MERKLE_TREE_END_ADDR, MERKLE_TREE_START_ADDR, WORD_SIZE,
+        tx,
     },
-    zirgen::circuit::{ExtVal, PoseidonStateLayout, LAYOUT_TOP},
+    zirgen::circuit::{ExtVal, LAYOUT_TOP, PoseidonStateLayout},
 };
 
 use super::node_idx_to_addr;

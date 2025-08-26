@@ -15,17 +15,20 @@
 use std::{collections::VecDeque, sync::LazyLock};
 
 use anyhow::Result;
-use risc0_binfmt::{tagged_struct, PovwJobId, PovwLogId};
+use risc0_binfmt::{PovwJobId, PovwLogId, tagged_struct};
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
-    core::digest::{digest, Digest, DIGEST_SHORTS},
+    core::digest::{DIGEST_SHORTS, Digest, digest},
     field::baby_bear::BabyBearElem,
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec};
 
-use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
+use super::{MerkleGroup, Prover, identity_p254, join, lift, prove::zkr};
 use crate::{
+    ALLOWED_CONTROL_ROOT, ExecutorEnv, InnerReceipt, Journal, MaybePruned, ProverOpts,
+    RECURSION_PO2, Receipt, ReceiptClaim, SegmentReceipt, Session, SimpleSegmentRef,
+    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, WorkClaim,
     claim::Unknown,
     default_prover, get_prover_server,
     host::server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
@@ -34,9 +37,6 @@ use crate::{
         join_povw, join_unwrap_povw, lift_povw, resolve_povw, resolve_unwrap_povw, unwrap_povw,
     },
     sha::{self, Digestible},
-    ExecutorEnv, InnerReceipt, Journal, MaybePruned, ProverOpts, Receipt, ReceiptClaim,
-    SegmentReceipt, Session, SimpleSegmentRef, SuccinctReceipt, SuccinctReceiptVerifierParameters,
-    VerifierContext, WorkClaim, ALLOWED_CONTROL_ROOT, RECURSION_PO2,
 };
 
 #[test_log::test]
@@ -233,6 +233,7 @@ fn test_recursion_lift_then_unwrap_povw() {
 }
 
 #[test_log::test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 fn test_recursion_lift_join_unwrap_povw() -> anyhow::Result<()> {
     // Prove the base case
     let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();
@@ -304,6 +305,7 @@ fn test_recursion_lift_join_unwrap_povw() -> anyhow::Result<()> {
 }
 
 #[test_log::test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 fn test_recursion_lift_join_identity_p254_e2e() {
     // Prove the base case
     let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();

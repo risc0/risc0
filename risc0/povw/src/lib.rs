@@ -44,3 +44,6 @@ pub use error::Error;
 pub use tree::{
     Bitmap, Job, Merkleized, MerkleizedIndex, Opening, SubtreeOpening, WorkLog, WorkSet,
 };
+
+// Re-export key types from risc0_binfmt
+pub use risc0_binfmt::{PovwJobId, PovwLogId, PovwNonce};

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 use chess_core::Inputs;
 use chess_methods::{CHECKMATE_ELF, CHECKMATE_ID};
 use clap::Parser;
-use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
-use shakmaty::{fen::Fen, CastlingMode, Chess, FromSetup, Position, Setup};
+use risc0_zkvm::{ExecutorEnv, Receipt, default_prover};
+use shakmaty::{CastlingMode, Chess, FromSetup, Position, Setup, fen::Fen};
 
 #[derive(Parser)]
 struct Cli {

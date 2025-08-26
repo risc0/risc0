@@ -24,7 +24,10 @@ PUBLIC_HEADER = """
 """.strip()
 
 PUBLIC_HEADER_RE = re.compile(
-    "^" + PUBLIC_HEADER.replace("(", "\\(").replace(")", "\\)").replace("{YEAR}", "(?P<year>[0-9]+)"),
+    "^"
+    + PUBLIC_HEADER.replace("(", "\\(")
+    .replace(")", "\\)")
+    .replace("{YEAR}", "(?P<year>[0-9]+)"),
 )
 
 EXTENSIONS = [
@@ -39,7 +42,6 @@ SKIP_DIRS = [
     str(Path.cwd()) + "/risc0/zkvm/src/host/protos",
     str(Path.cwd()) + "/risc0/zkvm/src/host/server/exec",
     str(Path.cwd()) + "/risc0/cargo-risczero/tests/test_crate",
-    str(Path.cwd()) + "/bento",
 ]
 
 
@@ -48,6 +50,7 @@ def fix_file(file_obj, file_contents, start, end, insert):
     file_obj.seek(0)
     file_obj.truncate()
     file_obj.write(file_contents)
+
 
 def check_file(root, file, fix):
     cmd = ["git", "log", "-1", "--format=%ad", "--date=format:%Y", file]
@@ -74,12 +77,13 @@ def check_file(root, file, fix):
             print("license completely missing")
             if fix:
                 print(f"fixing {rel_path}")
-                header = PUBLIC_HEADER.replace("{YEAR}", expected_year) + '\n'
+                header = PUBLIC_HEADER.replace("{YEAR}", expected_year) + "\n"
                 fix_file(file_obj, file_contents, 0, 0, header)
             else:
                 return 1
 
     return 0
+
 
 def repo_root():
     """Return an absolute Path to the repo root"""
@@ -97,8 +101,12 @@ def tracked_files():
 
 def main():
 
-    parser = argparse.ArgumentParser(description="to update years, use the --fix option")
-    parser.add_argument("--fix", action="store_true", help="modify files with correct year")
+    parser = argparse.ArgumentParser(
+        description="to update years, use the --fix option"
+    )
+    parser.add_argument(
+        "--fix", action="store_true", help="modify files with correct year"
+    )
     args = parser.parse_args()
 
     root = repo_root()

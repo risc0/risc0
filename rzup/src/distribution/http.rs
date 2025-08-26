@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::error::{Result, RzupError};
-use reqwest::{blocking::Client, IntoUrl, Url};
+use reqwest::{IntoUrl, Url, blocking::Client};
 use std::time::Duration;
 
 /// 3 hour HTTP timeout, internet can be slow and components can be up to 5gb.

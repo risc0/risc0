@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use bls12_381_methods::BLS12_381_VERIFY_ELF;
-use risc0_zkvm::{default_executor, ExecutorEnv};
+use risc0_zkvm::{ExecutorEnv, default_executor};
 
 fn exec_pairing() {
     let env = ExecutorEnv::builder().build().unwrap();

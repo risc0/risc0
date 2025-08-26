@@ -14,7 +14,7 @@
 
 use std::collections::BTreeSet;
 
-use anyhow::{anyhow, bail, ensure, Result};
+use anyhow::{Result, anyhow, bail, ensure};
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
 use risc0_binfmt::{ByteAddr, WordAddr};
@@ -23,19 +23,19 @@ use risc0_core::scope;
 use risc0_zkp::core::digest::DIGEST_WORDS;
 
 use crate::{
+    EcallKind,
     execute::{
         bigint::BigIntBytes,
         node_idx,
-        pager::{page_idx, PageState, PagedMemory},
+        pager::{PageState, PagedMemory, page_idx},
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
         r0vm::{LoadOp, Risc0Context, Risc0Machine},
-        rv32im::{disasm, Emulator, InsnKind},
+        rv32im::{Emulator, InsnKind, disasm},
         segment::Segment,
         sha2::Sha2State,
     },
     zirgen::circuit::ExtVal,
-    EcallKind,
 };
 
 use super::{

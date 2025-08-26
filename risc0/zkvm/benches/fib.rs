@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use hotbench::{benchmark_group, benchmark_main, BenchGroup};
+use hotbench::{BenchGroup, benchmark_group, benchmark_main};
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
+    ExecutorEnv, ExecutorImpl, ProverOpts, RECURSION_PO2, VerifierContext, get_prover_server,
 };
 use risc0_zkvm_methods::FIB_ELF;
 

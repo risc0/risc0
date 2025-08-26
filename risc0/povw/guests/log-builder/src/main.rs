@@ -13,10 +13,10 @@
 // limitations under the License.
 
 use risc0_povw::{
-    guest::{Input, Journal, State},
     Job, WorkLog,
+    guest::{Input, Journal, State},
 };
-use risc0_zkvm::{guest::env, sha::Digestible, Digest};
+use risc0_zkvm::{Digest, guest::env, sha::Digestible};
 use ruint::Uint;
 
 type U96 = Uint<96, 2>;

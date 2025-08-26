@@ -1,7 +1,7 @@
 [package]
 name = "rzup"
 description = "The RISC Zero version management library and CLI"
-version = "0.5.0"
+version = "0.6.0"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -66,7 +66,7 @@ serde_with = "3"
 sha2 = { version = "0.10", default-features = false }
 strum = { version = "0.27.1", features = ["derive"] }
 tar = { version = "0.4.43", optional = true }
-tempfile = "3.14.0"
+tempfile = "3.20.0"
 thiserror = "2.0.6"
 tokio = { version = "1.43.0", features = ["rt", "rt-multi-thread", "macros"], optional = true }
 toml = "0.8.19"

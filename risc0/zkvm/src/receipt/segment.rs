@@ -17,16 +17,16 @@ use alloc::{collections::BTreeSet, string::String, vec::Vec};
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
-use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, PovwNonce};
+use risc0_binfmt::{Digestible, PovwNonce, tagged_iter, tagged_struct};
 use risc0_zkp::{
-    adapter::{CircuitInfo as _, ProtocolInfo, PROOF_SYSTEM_INFO},
+    adapter::{CircuitInfo as _, PROOF_SYSTEM_INFO, ProtocolInfo},
     core::{digest::Digest, hash::sha::Sha256},
     verify::VerificationError,
 };
 use serde::{Deserialize, Serialize};
 
 use super::VerifierContext;
-use crate::{sha, ReceiptClaim};
+use crate::{ReceiptClaim, sha};
 
 /// A receipt attesting to the execution of a Segment.
 ///

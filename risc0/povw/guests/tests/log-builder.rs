@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use risc0_binfmt::{PovwJobId, PovwLogId, PovwNonce};
 use risc0_povw::{
+    Job, WorkLog,
     guest::{Input, Journal, State, WorkLogUpdate},
     prover::WorkLogUpdateProver,
-    Job, WorkLog,
 };
 use risc0_povw_guests::{RISC0_POVW_LOG_BUILDER_ELF, RISC0_POVW_LOG_BUILDER_ID};
 use risc0_zkvm::{
-    default_executor, default_prover, Digest, ExecutorEnv, ExitCode, FakeReceipt, MaybePruned,
-    ProveInfo, ProverOpts, ReceiptClaim, Unknown, Work, WorkClaim,
+    Digest, ExecutorEnv, ExitCode, FakeReceipt, MaybePruned, ProveInfo, ProverOpts, ReceiptClaim,
+    Unknown, Work, WorkClaim, default_executor, default_prover,
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+use risc0_zkvm_methods::{MULTI_TEST_ELF, multi_test::MultiTestSpec};
 use ruint::uint;
 
 fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
@@ -261,6 +261,7 @@ fn two_batched_updates() -> anyhow::Result<()> {
 }
 
 #[test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 fn prove_three_sequential_updates() -> anyhow::Result<()> {
     let work_log_id = uint!(0xdeafbee7_U160);
 
