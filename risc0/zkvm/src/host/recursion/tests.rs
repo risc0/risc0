@@ -233,7 +233,7 @@ fn test_recursion_lift_then_unwrap_povw() {
 }
 
 #[test_log::test]
-#[cfg_attr(not(ci = "slow"), ignore = "slow test")]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 fn test_recursion_lift_join_unwrap_povw() -> anyhow::Result<()> {
     // Prove the base case
     let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();
@@ -305,7 +305,7 @@ fn test_recursion_lift_join_unwrap_povw() -> anyhow::Result<()> {
 }
 
 #[test_log::test]
-#[cfg_attr(not(ci = "slow"), ignore = "slow test")]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 fn test_recursion_lift_join_identity_p254_e2e() {
     // Prove the base case
     let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();
