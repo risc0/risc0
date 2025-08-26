@@ -17,7 +17,10 @@ use std::{sync::Arc, time::Duration};
 use derive_more::From;
 use serde::{Deserialize, Serialize};
 
-use crate::{AssumptionReceipt, Journal, Receipt, SessionStats};
+use crate::{
+    AssumptionReceipt, ExitCode, Journal, Receipt, ReceiptClaim, SegmentInfo, SessionInfo,
+    SessionStats,
+};
 
 /// TODO
 #[derive(Serialize, Deserialize)]
@@ -33,6 +36,9 @@ pub struct ProofRequest {
 
     /// TODO
     pub segment_limit_po2: Option<u32>,
+
+    /// TODO
+    pub execute_only: bool,
 }
 
 /// TODO
@@ -97,7 +103,7 @@ pub struct ProofResult {
     pub session: Arc<Session>,
 
     /// TODO
-    pub receipt: Arc<Receipt>,
+    pub receipt: Option<Arc<Receipt>>,
 }
 
 /// TODO
@@ -118,6 +124,26 @@ pub struct Session {
 
     /// TODO
     pub assumptions: Vec<Arc<AssumptionReceipt>>,
+
+    /// TODO
+    pub segments: Vec<SegmentInfo>,
+
+    /// TODO
+    pub exit_code: ExitCode,
+
+    /// TODO
+    pub receipt_claim: ReceiptClaim,
+}
+
+impl From<Session> for SessionInfo {
+    fn from(s: Session) -> Self {
+        Self {
+            segments: s.segments,
+            journal: s.journal.unwrap_or_default(),
+            exit_code: s.exit_code,
+            receipt_claim: Some(s.receipt_claim),
+        }
+    }
 }
 
 /// TODO
