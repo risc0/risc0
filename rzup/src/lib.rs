@@ -1762,7 +1762,7 @@ mod tests {
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
-            86,
+            hyper_len(dummy_tar_gz_response()),
             vec![
                 ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/tar_contents.bin"
                     .into(),
