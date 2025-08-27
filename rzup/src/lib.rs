@@ -520,6 +520,97 @@ mod tests {
     const HELLO_WORLD3_DUMMY_TAR_XZ_SHA256: &str =
         "ed9efde9a314a9063a9b91d21e9eb1508defce0817ee6a81142d8bf6fb1f045e";
 
+    fn dummy_tar_gz_response() -> HyperResponse {
+        let mut tar_bytes = vec![];
+        let mut tar_builder = tar::Builder::new(&mut tar_bytes);
+        let mut header = tar::Header::new_gnu();
+        header.set_size(4);
+        tar_builder
+            .append_data(&mut header, "tar_contents.bin", &[1, 2, 3, 4][..])
+            .unwrap();
+        tar_builder.finish().unwrap();
+        drop(tar_builder);
+
+        let mut tar_gz_bytes = vec![];
+        let mut encoder =
+            flate2::write::GzEncoder::new(&mut tar_gz_bytes, flate2::Compression::default());
+        encoder.write_all(&tar_bytes).unwrap();
+        drop(encoder);
+
+        hyper::Response::builder()
+            .status(200)
+            .header("content-type", "application/octet-stream")
+            .body(http_body_util::Full::new(hyper::body::Bytes::from(
+                tar_gz_bytes,
+            )))
+            .unwrap()
+    }
+
+    fn bad_tar_gz_response() -> HyperResponse {
+        let mut tar_bytes = vec![];
+        let mut tar_builder = tar::Builder::new(&mut tar_bytes);
+        let mut header = tar::Header::new_gnu();
+        header.set_size(4);
+        for i in 0..10 {
+            tar_builder
+                .append_data(
+                    &mut header,
+                    format!("tar_contents{i}.bin"),
+                    &[0xFF, 0xFE, 0xFF, 0xFF][..],
+                )
+                .unwrap();
+        }
+        tar_builder.finish().unwrap();
+        drop(tar_builder);
+
+        // truncate the tar in the middle of the data to make it invalid
+        let idx = tar_bytes.iter().rposition(|b| *b == 0xFE).unwrap();
+        tar_bytes.truncate(idx);
+
+        let mut tar_gz_bytes = vec![];
+        let mut encoder =
+            flate2::write::GzEncoder::new(&mut tar_gz_bytes, flate2::Compression::default());
+        encoder.write_all(&tar_bytes).unwrap();
+        drop(encoder);
+
+        hyper::Response::builder()
+            .status(200)
+            .header("content-type", "application/octet-stream")
+            .body(http_body_util::Full::new(hyper::body::Bytes::from(
+                tar_gz_bytes,
+            )))
+            .unwrap()
+    }
+
+    fn dummy_tar_xz_response(sub_dir: &str) -> HyperResponse {
+        let mut tar_bytes = vec![];
+        let mut tar_builder = tar::Builder::new(&mut tar_bytes);
+        let mut header = tar::Header::new_gnu();
+        header.set_size(4);
+        tar_builder
+            .append_data(
+                &mut header,
+                format!("{sub_dir}/tar_contents.bin"),
+                &[1, 2, 3, 4][..],
+            )
+            .unwrap();
+        tar_builder.finish().unwrap();
+        drop(tar_builder);
+
+        let mut tar_xz_bytes = vec![];
+        let mut encoder = liblzma::write::XzEncoder::new(&mut tar_xz_bytes, 1);
+        encoder.write_all(&tar_bytes).unwrap();
+        drop(encoder);
+
+        hyper::Response::builder()
+            .status(200)
+            .header("content-type", "application/octet-stream")
+            .body(http_body_util::Full::new(hyper::body::Bytes::from(
+                tar_xz_bytes,
+            )))
+            .unwrap()
+    }
+
     fn build_mock_server_data(
         install_script: String,
         private_key: &PrivateKey,
@@ -546,97 +637,6 @@ mod tests {
                 .status(200)
                 .header("content-type", "text/plain")
                 .body(http_body_util::Full::new(hyper::body::Bytes::from(text)))
-                .unwrap()
-        }
-
-        fn dummy_tar_gz_response() -> HyperResponse {
-            let mut tar_bytes = vec![];
-            let mut tar_builder = tar::Builder::new(&mut tar_bytes);
-            let mut header = tar::Header::new_gnu();
-            header.set_size(4);
-            tar_builder
-                .append_data(&mut header, "tar_contents.bin", &[1, 2, 3, 4][..])
-                .unwrap();
-            tar_builder.finish().unwrap();
-            drop(tar_builder);
-
-            let mut tar_gz_bytes = vec![];
-            let mut encoder =
-                flate2::write::GzEncoder::new(&mut tar_gz_bytes, flate2::Compression::default());
-            encoder.write_all(&tar_bytes).unwrap();
-            drop(encoder);
-
-            hyper::Response::builder()
-                .status(200)
-                .header("content-type", "application/octet-stream")
-                .body(http_body_util::Full::new(hyper::body::Bytes::from(
-                    tar_gz_bytes,
-                )))
-                .unwrap()
-        }
-
-        fn bad_tar_gz_response() -> HyperResponse {
-            let mut tar_bytes = vec![];
-            let mut tar_builder = tar::Builder::new(&mut tar_bytes);
-            let mut header = tar::Header::new_gnu();
-            header.set_size(4);
-            for i in 0..10 {
-                tar_builder
-                    .append_data(
-                        &mut header,
-                        format!("tar_contents{i}.bin"),
-                        &[0xFF, 0xFE, 0xFF, 0xFF][..],
-                    )
-                    .unwrap();
-            }
-            tar_builder.finish().unwrap();
-            drop(tar_builder);
-
-            // truncate the tar in the middle of the data to make it invalid
-            let idx = tar_bytes.iter().rposition(|b| *b == 0xFE).unwrap();
-            tar_bytes.truncate(idx);
-
-            let mut tar_gz_bytes = vec![];
-            let mut encoder =
-                flate2::write::GzEncoder::new(&mut tar_gz_bytes, flate2::Compression::default());
-            encoder.write_all(&tar_bytes).unwrap();
-            drop(encoder);
-
-            hyper::Response::builder()
-                .status(200)
-                .header("content-type", "application/octet-stream")
-                .body(http_body_util::Full::new(hyper::body::Bytes::from(
-                    tar_gz_bytes,
-                )))
-                .unwrap()
-        }
-
-        fn dummy_tar_xz_response(sub_dir: &str) -> HyperResponse {
-            let mut tar_bytes = vec![];
-            let mut tar_builder = tar::Builder::new(&mut tar_bytes);
-            let mut header = tar::Header::new_gnu();
-            header.set_size(4);
-            tar_builder
-                .append_data(
-                    &mut header,
-                    format!("{sub_dir}/tar_contents.bin"),
-                    &[1, 2, 3, 4][..],
-                )
-                .unwrap();
-            tar_builder.finish().unwrap();
-            drop(tar_builder);
-
-            let mut tar_xz_bytes = vec![];
-            let mut encoder = liblzma::write::XzEncoder::new(&mut tar_xz_bytes, 1);
-            encoder.write_all(&tar_bytes).unwrap();
-            drop(encoder);
-
-            hyper::Response::builder()
-                .status(200)
-                .header("content-type", "application/octet-stream")
-                .body(http_body_util::Full::new(hyper::body::Bytes::from(
-                    tar_xz_bytes,
-                )))
                 .unwrap()
         }
 
@@ -737,6 +737,12 @@ mod tests {
             format!("/s3/rzup/components/risc0-groth16/sha256/{HELLO_WORLD2_DUMMY_TAR_XZ_SHA256}") => dummy_tar_xz_response("hello-world2"),
             format!("/s3/rzup/components/risc0-groth16/sha256/{HELLO_WORLD3_DUMMY_TAR_XZ_SHA256}") => dummy_tar_xz_response("hello-world2"),
         }
+    }
+
+    fn hyper_len(resp: HyperResponse) -> u64 {
+        use hyper::body::Body as _;
+
+        resp.body().size_hint().exact().unwrap()
     }
 
     async fn request_handler(
@@ -1495,7 +1501,7 @@ mod tests {
                 cargo-risczero-{target_triple}.tgz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
-            86,
+            hyper_len(dummy_tar_gz_response()),
             vec![format!(
                 ".risc0/extensions/v1.0.0-cargo-risczero-{target_triple}/tar_contents.bin"
             )],
@@ -1535,7 +1541,7 @@ mod tests {
                 cargo-risczero-{target_triple}.tgz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
-            86,
+            hyper_len(dummy_tar_gz_response()),
             vec![format!(
                 ".risc0/extensions/v1.0.0-cargo-risczero-{target_triple}/tar_contents.bin"
             )],
@@ -1583,7 +1589,7 @@ mod tests {
                 rust-toolchain-{target_triple}.tar.gz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
-            86,
+            hyper_len(dummy_tar_gz_response()),
             vec![format!(
                 ".risc0/toolchains/v1.81.0-rust-{target_triple}/tar_contents.bin"
             )],
@@ -1614,11 +1620,7 @@ mod tests {
         let server = MockDistributionServer::new();
 
         // This is just the size of the archive we end up creating.
-        let download_size = if target_double == "linux-x86_64" {
-            152
-        } else {
-            148
-        };
+        let download_size = hyper_len(dummy_tar_xz_response(&format!("riscv32im-{target_double}")));
 
         install_test(
             server.base_urls.clone(),
@@ -1680,7 +1682,7 @@ mod tests {
                 riscv32im-gdb-{target_double}.tar.xz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
-            128, /* download_size */
+            hyper_len(dummy_tar_xz_response(".")), /* download_size */
             vec![format!(
                 ".risc0/extensions/v2024.1.5-gdb-{target_triple}/tar_contents.bin"
             )],
@@ -1812,11 +1814,11 @@ mod tests {
                         "{base_url}/risc0/releases/download/v1.0.0-rc.3/\
                         cargo-risczero-x86_64-unknown-linux-gnu.tgz"
                     )),
-                    len: Some(196),
+                    len: Some(hyper_len(bad_tar_gz_response())),
                 },
                 RzupEvent::TransferProgress {
                     id: "cargo-risczero".into(),
-                    incr: 196,
+                    incr: hyper_len(bad_tar_gz_response()),
                 },
                 RzupEvent::TransferCompleted {
                     kind: TransferKind::Download,
@@ -2507,11 +2509,11 @@ mod tests {
                     url: Some(format!(
                         "{base_url}/rzup/components/risc0-groth16/sha256/{HELLO_WORLD3_DUMMY_TAR_XZ_SHA256}"
                     )),
-                    len: Some(140),
+                    len: Some(hyper_len(dummy_tar_xz_response("hello-world"))),
                 },
                 RzupEvent::TransferProgress {
                     id: "risc0-groth16".into(),
-                    incr: 140,
+                    incr: hyper_len(dummy_tar_xz_response("hello-world")),
                 },
                 RzupEvent::InstallationFailed {
                     id: "risc0-groth16".into(),
