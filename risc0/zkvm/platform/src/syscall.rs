@@ -184,6 +184,7 @@ pub enum Syscall {
     VerifyIntegrity = 14,
     VerifyIntegrity2 = 15,
     Write = 16,
+    ProveZkr = 17,
 }
 
 impl SyscallName {
