@@ -127,6 +127,7 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
             input,
             assumptions: vec![],
             segment_limit_po2: None,
+            execute_only: false,
         };
         app.proof_request(request).await.unwrap();
     } else if is_manager {
