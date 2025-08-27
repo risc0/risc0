@@ -163,7 +163,7 @@ impl<P: Prover> WorkLogUpdateProver<P> {
             ensure!(
                 job_number == work.nonce_max.job,
                 "work claim nonce min job number is not equal to nonce max job number: {} != {job_number}",
-                work.nonce_min.job,
+                work.nonce_min.job
             );
             ensure!(
                 work.nonce_min.segment == 0,
