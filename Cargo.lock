@@ -1736,7 +1736,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "3.0.1"
+version = "3.0.3"
 dependencies = [
  "anyhow",
  "bincode",
@@ -6844,7 +6844,7 @@ checksum = "3df6368f71f205ff9c33c076d170dd56ebf68e8161c733c0caa07a7a5509ed53"
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.8"
+version = "1.4.10"
 dependencies = [
  "anyhow",
  "clap 4.5.37",
@@ -6872,7 +6872,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.1"
+version = "3.0.2"
 dependencies = [
  "anyhow",
  "borsh",
@@ -6895,7 +6895,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "3.0.1"
+version = "3.0.3"
 dependencies = [
  "anyhow",
  "cargo_metadata 0.19.2",
@@ -6929,7 +6929,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "4.0.1"
+version = "4.0.2"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -6975,7 +6975,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.1"
+version = "4.0.2"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -7013,7 +7013,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "4.0.1"
+version = "4.0.2"
 dependencies = [
  "anyhow",
  "bit-vec 0.8.0",
@@ -7075,7 +7075,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.1"
+version = "3.0.2"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -7148,7 +7148,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "3.0.1"
+version = "3.0.3"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -7210,7 +7210,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.0.2"
+version = "2.2.0"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -7219,7 +7219,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "3.0.1"
+version = "3.0.2"
 dependencies = [
  "anyhow",
  "blake2",
@@ -7252,7 +7252,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "3.0.1"
+version = "3.0.3"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -7344,7 +7344,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.4"
+version = "2.2.0"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -7778,7 +7778,7 @@ checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 
 [[package]]
 name = "rzup"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "aws-config",
  "aws-credential-types",
