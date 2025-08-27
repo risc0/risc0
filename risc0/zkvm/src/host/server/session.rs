@@ -265,10 +265,10 @@ impl Session {
             .filter_map(|(_, receipt)| match receipt {
                 AssumptionReceipt::Proven(_) => None,
                 AssumptionReceipt::Unresolved(assumption) => {
-                    if let Some(ref keccak) = keccak_root_assumption {
-                        if keccak == assumption {
-                            return None;
-                        }
+                    if let Some(ref keccak) = keccak_root_assumption
+                        && keccak == assumption
+                    {
+                        return None;
                     }
                     Some(assumption.clone())
                 }

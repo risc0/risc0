@@ -46,10 +46,10 @@ impl BakeCommand {
 
         let (included, _excluded) = self.workspace.partition_packages(&meta);
         for pkg in included {
-            if let Some(_risc0) = pkg.metadata.get("risc0") {
-                if pkg.targets.iter().any(|x| x.is_bin()) {
-                    self.bake_target(pkg, &target_dir)?;
-                }
+            if let Some(_risc0) = pkg.metadata.get("risc0")
+                && pkg.targets.iter().any(|x| x.is_bin())
+            {
+                self.bake_target(pkg, &target_dir)?;
             }
         }
 
