@@ -46,6 +46,9 @@ repository = "https://github.com/risc0/risc0/"
 bonsai-sdk = { version = "1.4.1", default-features = false, path = "bonsai/sdk" }
 hotbench = { path = "tools/hotbench" }
 metal = "0.29"
+# NOTE(victor): In https://github.com/risc0/risc0/pull/3361 the version
+# requirements are set to 3.0.3, rather than 3.0.4 as specified in the crate
+# Cargo.toml files, to allow only risc0-povw to be published.
 risc0-bigint2 = { version = "1.4.10", default-features = false, path = "risc0/bigint2" }
 risc0-binfmt = { version = "3.0.2", default-features = false, path = "risc0/binfmt" }
 risc0-build = { version = "3.0.3", default-features = false, path = "risc0/build" }
@@ -59,7 +62,7 @@ risc0-circuit-rv32im-sys = { version = "4.0.1", default-features = false, path =
 risc0-core = { version = "3.0.0", default-features = false, path = "risc0/core" }
 risc0-groth16 = { version = "3.0.2", default-features = false, path = "risc0/groth16" }
 risc0-groth16-sys = { version = "0.1.0", default-features = false, path = "risc0/groth16-sys" }
-risc0-povw = { version = "0.1.1", default-features = false, path = "risc0/povw" }
+risc0-povw = { version = "0.2.0", default-features = false, path = "risc0/povw" }
 risc0-r0vm = { version = "3.0.3", default-features = false, path = "risc0/r0vm" }
 risc0-sys = { version = "1.5.0", default-features = false, path = "risc0/sys" }
 risc0-zkos-v1compat = { version = "2.2.0", path = "risc0/zkos/v1compat" }

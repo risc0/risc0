@@ -483,13 +483,6 @@ fn find_publishable_packages_with_lib(
             continue;
         }
 
-        // XXX remi: risc0-povw 0.1.1 has its only possible baseline yanked, and this somehow
-        // breaks semver-checks for it, so just skip it.
-        if package.name.as_str() == "risc0-povw" && package.version == semver::Version::new(0, 1, 1)
-        {
-            continue;
-        }
-
         packages.insert(package.name.to_string(), package.clone());
     }
 
