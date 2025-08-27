@@ -311,10 +311,10 @@ fn is_skip_build() -> bool {
 
 fn get_env_var(name: &str) -> String {
     let ret = env::var(name).unwrap_or_default();
-    if let Some(pkg) = env::var_os("CARGO_PKG_NAME") {
-        if pkg != "cargo-risczero" {
-            println!("cargo:rerun-if-env-changed={name}");
-        }
+    if let Some(pkg) = env::var_os("CARGO_PKG_NAME")
+        && pkg != "cargo-risczero"
+    {
+        println!("cargo:rerun-if-env-changed={name}");
     }
     ret
 }
@@ -666,10 +666,10 @@ fn build_guest_package(pkg: &Package, target_dir: impl AsRef<Path>, guest_info: 
 fn get_out_dir() -> PathBuf {
     // This code is based on https://docs.rs/cxx-build/latest/src/cxx_build/target.rs.html#10-49
 
-    if let Some(target_dir) = env::var_os("CARGO_TARGET_DIR").map(Into::<PathBuf>::into) {
-        if target_dir.is_absolute() {
-            return target_dir.join("riscv-guest");
-        }
+    if let Some(target_dir) = env::var_os("CARGO_TARGET_DIR").map(Into::<PathBuf>::into)
+        && target_dir.is_absolute()
+    {
+        return target_dir.join("riscv-guest");
     }
 
     let mut dir: PathBuf = env::var_os("OUT_DIR").unwrap().into();

@@ -91,7 +91,7 @@ impl VerifyCommand {
         Ok(receipt)
     }
 
-    fn source(&self) -> SourceType {
+    fn source(&self) -> SourceType<'_> {
         match (&self.source.path, &self.source.id) {
             (Some(path), None) => SourceType::Path(path),
             (None, Some(id)) => SourceType::Id(id),
