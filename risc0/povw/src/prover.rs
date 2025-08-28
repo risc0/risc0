@@ -14,18 +14,18 @@
 
 use std::{borrow::Cow, convert::Infallible};
 
-use anyhow::{anyhow, ensure, Context};
+use anyhow::{Context, anyhow, ensure};
 use derive_builder::Builder;
 use risc0_binfmt::PovwLogId;
 use risc0_zkvm::{
-    compute_image_id, Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, Receipt, WorkClaim,
+    Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, Receipt, WorkClaim, compute_image_id,
 };
 
 use crate::{
-    guest::{
-        Input, Journal, State, WorkLogUpdate, RISC0_POVW_LOG_BUILDER_ELF, RISC0_POVW_LOG_BUILDER_ID,
-    },
     Job, WorkLog,
+    guest::{
+        Input, Journal, RISC0_POVW_LOG_BUILDER_ELF, RISC0_POVW_LOG_BUILDER_ID, State, WorkLogUpdate,
+    },
 };
 
 /// A stateful prover for work log updates which runs the Log Builder to produce a receipt for each
