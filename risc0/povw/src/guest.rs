@@ -23,12 +23,11 @@ use crate::{error::Error, Job, SubtreeOpening, WorkLog};
 
 /// Guest program for the Log Builder.
 #[cfg(feature = "prover")]
-pub const RISC0_POVW_LOG_BUILDER_ELF: &[u8] =
-    include_bytes!("../guests/log-builder/elfs/risc0-povw-log-builder.bin");
+pub const RISC0_POVW_LOG_BUILDER_ELF: &[u8] = include_bytes!("../elfs/risc0-povw-log-builder.bin");
 
 /// Guest program identifier, known as the image ID, for the Log Builder guest.
 pub const RISC0_POVW_LOG_BUILDER_ID: [u8; 32] =
-    *include_bytes!("../guests/log-builder/elfs/risc0-povw-log-builder.iid");
+    *include_bytes!("../elfs/risc0-povw-log-builder.iid");
 
 /// State of the PoVW guest program execution.
 ///
