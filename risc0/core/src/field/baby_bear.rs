@@ -737,7 +737,7 @@ impl ops::Mul<ExtElem> for Elem {
 
 // Now we get to the interesting case of multiplication. Basically,
 // multiply out the polynomial representations, and then reduce module
-// `x^4 - B`, which means powers >= 4 get shifted back 4 and
+// `x^4 + BETA` (i.e., `x^4 = -BETA`), which means powers >= 4 get shifted back 4 and
 // multiplied by `-beta`. We could write this as a double loops with
 // some `if`s and hope it gets unrolled properly, but it's small
 // enough to just hand write.

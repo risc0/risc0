@@ -483,10 +483,10 @@ impl CpuProcessor {
         let result = match msg.task {
             CpuTask::Execute(task) => self.execute(msg.header, task).await,
             CpuTask::Preflight(task) => {
-                if let Err(error) = self.preflight(msg.header, task).await {
-                    if let Err(err) = self.send_done(header, Err(error)).await {
-                        tracing::error!("Failed to send error: {err}");
-                    }
+                if let Err(error) = self.preflight(msg.header, task).await
+                    && let Err(err) = self.send_done(header, Err(error)).await
+                {
+                    tracing::error!("Failed to send error: {err}");
                 }
                 return;
             }

@@ -470,12 +470,11 @@ fn find_publishable_packages_with_lib(
     let mut packages = BTreeMap::new();
     for package in metadata.workspace_default_packages() {
         // check for package.metadata.release.release = false
-        if let Some(release_metadata) = package.metadata.get("release") {
-            if let Some(release_flag) = release_metadata.get("release") {
-                if release_flag.as_bool().is_some_and(|v| !v) {
-                    continue;
-                }
-            }
+        if let Some(release_metadata) = package.metadata.get("release")
+            && let Some(release_flag) = release_metadata.get("release")
+            && release_flag.as_bool().is_some_and(|v| !v)
+        {
+            continue;
         }
 
         // check if package has a `lib` target (semver won't run on non-libraries)
