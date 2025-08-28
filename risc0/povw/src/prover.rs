@@ -22,7 +22,9 @@ use risc0_zkvm::{
 };
 
 use crate::{
-    guest::{Input, Journal, State, WorkLogUpdate},
+    guest::{
+        Input, Journal, State, WorkLogUpdate, RISC0_POVW_LOG_BUILDER_ELF, RISC0_POVW_LOG_BUILDER_ID,
+    },
     Job, WorkLog,
 };
 
@@ -47,10 +49,14 @@ pub struct WorkLogUpdateProver<P> {
     #[builder(setter(custom), default)]
     pub continuation: Option<(Journal, Receipt)>,
     /// Image ID for the Log Builder program.
-    #[builder(setter(custom))]
+    ///
+    /// Defaults to the Log Builder program ID that is built into this crate.
+    #[builder(setter(custom), default = "RISC0_POVW_LOG_BUILDER_ID.into()")]
     pub log_builder_id: Digest,
     /// Executable for the Log Builder program.
-    #[builder(setter(custom))]
+    ///
+    /// Defaults to the Log Builder program that is built into this crate.
+    #[builder(setter(custom), default = "RISC0_POVW_LOG_BUILDER_ELF.into()")]
     pub log_builder_program: Cow<'static, [u8]>,
 }
 
