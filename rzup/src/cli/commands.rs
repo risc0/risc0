@@ -141,15 +141,15 @@ impl ShowCommand {
                 }
 
                 // Only show warning if version in settings doesn't exist in versions list
-                if let Some(settings_version) = current_version {
-                    if !versions.contains(&settings_version) {
-                        rzup.print(format!(
-                            "! Version {settings_version} specified in settings.toml is not installed",
-                        ));
-                        rzup.print(format!(
-                            "  Please use 'rzup use {component} <VERSION>' to switch default component",
-                        ));
-                    }
+                if let Some(settings_version) = current_version
+                    && !versions.contains(&settings_version)
+                {
+                    rzup.print(format!(
+                        "! Version {settings_version} specified in settings.toml is not installed",
+                    ));
+                    rzup.print(format!(
+                        "  Please use 'rzup use {component} <VERSION>' to switch default component",
+                    ));
                 }
             }
         }

@@ -96,6 +96,7 @@ fn prove_elf_succinct(env: ExecutorEnv, elf: &[u8]) -> Result<Receipt> {
 }
 
 #[test_log::test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 fn keccak_union() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::KeccakUnion(3))
@@ -222,6 +223,7 @@ fn sha_basics() {
 }
 
 #[test_log::test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 fn sha_iter() {
     let input = MultiTestSpec::ShaDigestIter {
         data: Vec::from([0u8; 32]),
@@ -241,6 +243,7 @@ fn sha_iter() {
 }
 
 #[test_log::test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(10);
     for case in cases {

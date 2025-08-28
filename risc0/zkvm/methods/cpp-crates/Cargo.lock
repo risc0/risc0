@@ -747,6 +747,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
+name = "memmap2"
+version = "0.9.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "483758ad303d734cec05e5c12b41d7e93e6a6390c5e9dae6bdeb7c1259012d28"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "merlin"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -820,6 +829,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "num_enum"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a973b4e44ce6cad84ce69d797acf9a044532e4184c4f267913d1b546a0727b7a"
+dependencies = [
+ "num_enum_derive",
+ "rustversion",
+]
+
+[[package]]
+name = "num_enum_derive"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77e878c846a8abae00dd069496dbe8751b16ac1c3d6bd2a7283a938e8228f90d"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.87",
+]
+
+[[package]]
 name = "objc"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -836,9 +866,9 @@ checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
 name = "paste"
-version = "1.0.14"
+version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c"
+checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "pin-project-lite"
@@ -1000,7 +1030,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.2"
+version = "3.0.3"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1020,7 +1050,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "4.0.2"
+version = "4.0.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1034,7 +1064,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.2"
+version = "4.0.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1047,7 +1077,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "4.0.2"
+version = "4.0.3"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -1072,7 +1102,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.2"
+version = "3.0.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1082,6 +1112,7 @@ dependencies = [
  "ark-serialize",
  "bytemuck",
  "hex",
+ "memmap2",
  "num-bigint",
  "num-traits",
  "risc0-binfmt",
@@ -1091,15 +1122,16 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.1.0"
+version = "2.2.1"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "3.0.2"
+version = "3.0.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1158,13 +1190,15 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.5"
+version = "2.3.0"
 dependencies = [
  "bytemuck",
  "cfg-if",
  "getrandom 0.2.12",
  "getrandom 0.3.3",
  "libm",
+ "num_enum",
+ "paste",
  "stability",
 ]
 
@@ -1199,6 +1233,12 @@ name = "ruint-macro"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48fd7bd8a6377e15ad9d42a8ec25371b94ddc67abe7c8b9127bec79bebaaae18"
+
+[[package]]
+name = "rustversion"
+version = "1.0.22"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 
 [[package]]
 name = "semver"
