@@ -54,3 +54,58 @@ pub const fn align_up(addr: usize, align: usize) -> usize {
     let mask = align - 1;
     (addr + mask) & !mask
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_align_up_basic() {
+        // Test basic alignment cases
+        assert_eq!(align_up(0, 4), 0);
+        assert_eq!(align_up(1, 4), 4);
+        assert_eq!(align_up(2, 4), 4);
+        assert_eq!(align_up(3, 4), 4);
+        assert_eq!(align_up(4, 4), 4);
+        assert_eq!(align_up(5, 4), 8);
+    }
+
+    #[test]
+    fn test_align_up_powers_of_two() {
+        // Test different power-of-2 alignments
+        assert_eq!(align_up(7, 2), 8);
+        assert_eq!(align_up(7, 8), 8);
+        assert_eq!(align_up(7, 16), 16);
+        assert_eq!(align_up(15, 16), 16);
+        assert_eq!(align_up(16, 16), 16);
+        assert_eq!(align_up(17, 16), 32);
+    }
+
+    #[test]
+    fn test_align_up_word_size() {
+        // Test alignment to WORD_SIZE (4 bytes)
+        assert_eq!(align_up(0, WORD_SIZE), 0);
+        assert_eq!(align_up(1, WORD_SIZE), 4);
+        assert_eq!(align_up(4, WORD_SIZE), 4);
+        assert_eq!(align_up(5, WORD_SIZE), 8);
+        assert_eq!(align_up(8, WORD_SIZE), 8);
+    }
+
+    #[test]
+    fn test_align_up_page_size() {
+        // Test alignment to PAGE_SIZE (1024 bytes)
+        assert_eq!(align_up(0, PAGE_SIZE), 0);
+        assert_eq!(align_up(1, PAGE_SIZE), 1024);
+        assert_eq!(align_up(1023, PAGE_SIZE), 1024);
+        assert_eq!(align_up(1024, PAGE_SIZE), 1024);
+        assert_eq!(align_up(1025, PAGE_SIZE), 2048);
+    }
+
+    #[test]
+    fn test_align_up_edge_cases() {
+        // Test edge cases
+        assert_eq!(align_up(0, 1), 0);
+        assert_eq!(align_up(1, 1), 1);
+        assert_eq!(align_up(usize::MAX - 3, 4), usize::MAX - 3);
+    }
+}
