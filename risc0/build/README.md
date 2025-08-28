@@ -15,8 +15,8 @@ repository](https://github.com/risc0/risc0-rust-starter). In that repository,
 directory](https://github.com/risc0/risc0-rust-starter/tree/main/methods).
 
 Guest methods are embedded for the host to use by calling
-[embed\_methods](crate::embed_methods) (or
-[embed\_methods\_with\_options](crate::embed_methods_with_options)) in a [build
+`embed_methods` (or
+`embed_methods_with_options`) in a [build
 script](https://doc.rust-lang.org/cargo/reference/build-scripts.html). An
 example `build.rs` file would look like:
 
