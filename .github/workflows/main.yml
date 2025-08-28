@@ -78,6 +78,10 @@ jobs:
               - *base
               - bonsai/sdk/**
               - risc0/**
+            package:
+              - *base
+              - bonsai/sdk/**
+              - risc0/**
             examples:
               - *base
               - examples/**
@@ -468,6 +472,27 @@ jobs:
       - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-zkp -p risc0-groth16 -Fprove,std --no-deps
       - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p cargo-risczero -Fdocker,r0vm --no-deps
       - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-binfmt -p risc0-core -p risc0-zkvm-platform --all-features  --no-deps
+      - run: sccache --show-stats
+
+  # Run as a separate job because we need to install a different set of tools.
+  # In particular, it uses nightly Rust and _does not_ install cargo risczero.
+  # NOTE: Once the --workspace flag is stablized, this can use stable rust, but
+  # should still be run as a job that does not have cargo-risczero installed.
+  check-package:
+    if: needs.changes.outputs.package == 'true'
+    needs: changes
+    runs-on: [self-hosted, cluster, macOS, cpu]
+    env:
+      # Using the package --workspace flag requires nightly cargo.
+      # nightly-2025-05-09 corresponds to 1.88
+      NIGHTLY_RUST_TOOLCHAIN: nightly-2025-05-09
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
+        with:
+          toolchain: ${{ env.NIGHTLY_RUST_TOOLCHAIN }}
+      - uses: ./.github/actions/sccache
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} package --workspace --exclude risc0-povw-guests --exclude doc-test --exclude risc0-tools --exclude xtask
       - run: sccache --show-stats
 
   check-external:
