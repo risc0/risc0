@@ -57,6 +57,15 @@ const applicationsBenchmarksTableSchema = {
     user_cycles: z.string(),
     proof_bytes: z.string(),
   }),
+  "release-3.0": z.object({
+    name: z.string(),
+    size: z.string(),
+    speed: z.string(),
+    total_duration: z.string(),
+    total_cycles: z.string(),
+    user_cycles: z.string(),
+    proof_bytes: z.string(),
+  }),
 };
 
 export type ApplicationsBenchmarksTableSchema<T extends keyof typeof applicationsBenchmarksTableSchema> = z.infer<

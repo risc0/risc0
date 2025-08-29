@@ -1,10 +1,10 @@
 [package]
 name = "bls12_381-methods"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [build-dependencies]
-risc0-build = { path = "../../../risc0/build", features = ["unstable"] }
+risc0-build = { path = "../../../risc0/build" }
 
 [package.metadata.risc0]
 methods = ["guest"]

@@ -1,7 +1,7 @@
 [package]
 name = "risc0-circuit-rv32im"
 description = "RISC Zero circuit for rv32im"
-version = "3.0.0"
+version = "4.0.3"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -37,7 +37,7 @@ tracing = { version = "0.1", default-features = false, features = [
 bit-vec = "0.8"
 byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
-enum-map = { version = "2.7.3", optional = true }
+enum-map = { version = "2.7.3" }
 malachite = { version = "0.4.22", optional = true, default-features = false, features = [
   "naturals_and_integers",
   "32_bit_limbs",
@@ -72,7 +72,6 @@ default = []
 execute = [
   "anyhow/backtrace",
   "dep:byteorder",
-  "dep:enum-map",
   "dep:gdbstub",
   "dep:gdbstub_arch",
   "dep:malachite",

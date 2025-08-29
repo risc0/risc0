@@ -16,7 +16,6 @@ message ServerRequest {
     ResolveRequest resolve = 7;
     CompressRequest compress = 8;
     VerifyRequest verify = 9;
-    ProveZkrRequest prove_zkr = 10;
     ProveKeccakRequest prove_keccak = 11;
     UnionRequest union = 12;
   }
@@ -59,25 +58,6 @@ message ProveSegmentReply {
     ProveSegmentResult ok = 1;
     GenericError error = 2;
   }
-}
-
-message ProveZkrRequest {
-  base.Digest claim_digest = 1;
-  base.Digest control_id = 2;
-  bytes input = 3;
-  // This is optional in the context of a CoprocessorRequest
-  AssetRequest receipt_out = 4;
-}
-
-message ProveZkrReply {
-  oneof kind {
-    ProveZkrResult ok = 1;
-    GenericError error = 2;
-  }
-}
-
-message ProveZkrResult {
-  Asset receipt = 1;
 }
 
 message ProveKeccakRequest {
@@ -227,6 +207,7 @@ message ExecutorEnv {
   string segment_path = 12;
   bool coprocessor = 13;
   optional uint32 keccak_max_po2 = 14;
+  bytes povw_job_id = 15;
 }
 
 message AssumptionReceipt {
@@ -242,6 +223,7 @@ message ProverOpts {
   ReceiptKind receipt_kind = 3;
   repeated base.Digest control_ids = 4;
   uint64 max_segment_po2 = 5;
+  bool is_dev_mode = 6;
 }
 
 enum ReceiptKind {
@@ -369,7 +351,6 @@ message TraceEvent {
 
 message CoprocessorRequest {
   oneof kind {
-    ProveZkrRequest prove_zkr = 1;
     ProveKeccakRequest prove_keccak = 2;
   }
 }
@@ -409,7 +390,6 @@ service Server {
   rpc prove(ProveRequest) returns (stream ServerReply);
   rpc execute(ExecuteRequest) returns (stream ServerReply);
   rpc prove_segment(ProveSegmentRequest) returns (ProveSegmentReply);
-  rpc prove_zkr(ProveZkrRequest) returns (ProveZkrReply);
   rpc lift(LiftRequest) returns (LiftReply);
   rpc join(JoinRequest) returns (JoinReply);
   rpc resolve(ResolveRequest) returns (ResolveReply);

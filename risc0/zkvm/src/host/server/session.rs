@@ -15,25 +15,25 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
-use std::{collections::BTreeSet, fs, path::PathBuf};
+use std::{collections::BTreeSet, fs, path::PathBuf, time::Duration};
 
-use anyhow::{ensure, Result};
+use anyhow::{Context, Result, ensure};
 use enum_map::EnumMap;
-use risc0_binfmt::SystemState;
-use risc0_circuit_rv32im::{execute::EcallMetric, TerminateState};
+use risc0_binfmt::{PovwJobId, SystemState};
+use risc0_circuit_keccak::{KECCAK_CONTROL_ROOT, compute_keccak_digest};
+use risc0_circuit_rv32im::{EcallKind, EcallMetric, TerminateState};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::{
-        client::env::{ProveKeccakRequest, ProveZkrRequest, SegmentPath},
-        prove_info::SessionStats,
-    },
-    sha::Digest,
     Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
-    ReceiptClaim,
+    ReceiptClaim, SegmentInfo, Work,
+    host::{
+        client::env::{ProveKeccakRequest, SegmentPath},
+        prove_info::{SessionStats, SyscallKind, SyscallMetric},
+    },
+    mmr::{GuestPeak, MerkleMountainAccumulator},
+    sha::Digest,
 };
-
-use super::exec::syscall::{SyscallKind, SyscallMetric};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -94,19 +94,21 @@ pub struct Session {
     /// The system state of the final MemoryImage at the end of execution.
     pub post_state: SystemState,
 
-    /// A list of pending ZKR proof requests.
-    // TODO: make this scalable so we don't OOM
-    pub(crate) pending_zkrs: Vec<ProveZkrRequest>,
-
     /// A list of pending keccak proof requests.
     // TODO: make this scalable so we don't OOM
     pub(crate) pending_keccaks: Vec<ProveKeccakRequest>,
 
-    /// ecall metrics grouped by name.
-    pub(crate) ecall_metrics: Vec<(String, EcallMetric)>,
+    /// ecall metrics grouped by kind.
+    pub(crate) ecall_metrics: EnumMap<EcallKind, EcallMetric>,
 
     /// syscall metrics grouped by kind.
     pub(crate) syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
+
+    /// Optional PoVW job identifier for tracking verifiable work.
+    pub(crate) povw_job_id: Option<PovwJobId>,
+
+    /// The elapsed execution time.
+    pub(crate) execution_time: Duration,
 }
 
 /// The execution trace of a portion of a program.
@@ -137,6 +139,14 @@ impl Segment {
 
     pub(crate) fn user_cycles(&self) -> u32 {
         self.inner.suspend_cycle
+    }
+
+    /// Construct a `SegmentInfo` containing information about this segment.
+    pub fn get_info(&self) -> SegmentInfo {
+        SegmentInfo {
+            po2: self.po2() as u32,
+            cycles: self.user_cycles(),
+        }
     }
 }
 
@@ -190,28 +200,16 @@ impl Session {
         // Construct the Output struct for the session, checking internal consistency.
         // NOTE: The Session output is distinct from the final Segment output because in the
         // Session output any proven assumptions are not included.
-        self.claim_with_assumptions(self.assumptions.iter().map(|(_, x)| x))
-    }
-
-    pub(crate) fn claim_with_assumptions<'a>(
-        &self,
-        assumptions: impl Iterator<Item = &'a AssumptionReceipt>,
-    ) -> Result<ReceiptClaim> {
         let output = if self.exit_code.expects_output() {
             self.journal
                 .as_ref()
                 .map(|journal| -> Result<_> {
                     Ok(Output {
                         journal: journal.bytes.clone().into(),
-                        assumptions: Assumptions(
-                            assumptions
-                                .filter_map(|x| match x {
-                                    AssumptionReceipt::Proven(_) => None,
-                                    AssumptionReceipt::Unresolved(a) => Some(a.clone().into()),
-                                })
-                                .collect::<Vec<_>>(),
-                        )
-                        .into(),
+                        assumptions: self
+                            .unresolved_assumptions()
+                            .context("failed to compute unresolved_assumptions")?
+                            .into(),
                     })
                 })
                 .transpose()?
@@ -238,6 +236,56 @@ impl Session {
         })
     }
 
+    fn keccak_root_assumption(&self) -> Result<Option<Assumption>> {
+        let mut keccak_receipts = MerkleMountainAccumulator::<GuestPeak>::new();
+        for proof_request in self.pending_keccaks.iter() {
+            let claim = compute_keccak_digest(bytemuck::cast_slice(proof_request.input.as_slice()));
+            tracing::debug!("adding keccak assumption: {}", claim);
+            keccak_receipts.insert(Assumption {
+                claim,
+                control_root: KECCAK_CONTROL_ROOT,
+            })?;
+        }
+
+        if !keccak_receipts.is_empty() {
+            let root_assumption = keccak_receipts.root()?;
+            tracing::debug!("keccak root assumption for session: {:?}", root_assumption);
+            return Ok(Some(root_assumption));
+        }
+        Ok(None)
+    }
+
+    fn unresolved_assumptions(&self) -> Result<Assumptions> {
+        let keccak_root_assumption = self
+            .keccak_root_assumption()
+            .context("failed to compute keccak root assumption")?;
+        Ok(self
+            .assumptions
+            .iter()
+            .filter_map(|(_, receipt)| match receipt {
+                AssumptionReceipt::Proven(_) => None,
+                AssumptionReceipt::Unresolved(assumption) => {
+                    if let Some(ref keccak) = keccak_root_assumption
+                        && keccak == assumption
+                    {
+                        return None;
+                    }
+                    Some(assumption.clone())
+                }
+            })
+            .collect::<Vec<_>>()
+            .into())
+    }
+
+    /// Returns the work value for this session if PoVW tracking is enabled.
+    pub fn work(&self) -> Option<Work> {
+        self.povw_job_id.map(|povw_job_id| Work {
+            nonce_min: povw_job_id.nonce(0),
+            nonce_max: povw_job_id.nonce(self.segments.len() as u32),
+            value: self.total_cycles,
+        })
+    }
+
     /// Log cycle information for this [Session].
     ///
     /// This logs the total and user cycles for this [Session] at the INFO level.
@@ -246,43 +294,8 @@ impl Session {
             return;
         }
 
-        let pct = |cycles: u64| cycles as f64 / self.total_cycles as f64 * 100.0;
-
-        tracing::info!("number of segments: {}", self.segments.len());
-        tracing::info!("{} total cycles", self.total_cycles);
-        tracing::info!(
-            "{} user cycles ({:.2}%)",
-            self.user_cycles,
-            pct(self.user_cycles)
-        );
-        tracing::info!(
-            "{} paging cycles ({:.2}%)",
-            self.paging_cycles,
-            pct(self.paging_cycles)
-        );
-        tracing::info!(
-            "{} reserved cycles ({:.2}%)",
-            self.reserved_cycles,
-            pct(self.reserved_cycles)
-        );
-
-        tracing::info!("ecalls");
-        let mut ecall_metrics = self.ecall_metrics.clone();
-        ecall_metrics.sort_by(|a, b| a.1.cycles.cmp(&b.1.cycles));
-        for (name, metric) in ecall_metrics.iter().rev() {
-            tracing::info!(
-                "\t{} {name} calls, {} cycles, ({:.2}%)",
-                metric.count,
-                metric.cycles,
-                pct(metric.cycles)
-            );
-        }
-
-        tracing::info!("syscalls");
-        let mut syscall_metrics: Vec<_> = self.syscall_metrics.iter().collect();
-        syscall_metrics.sort_by(|a, b| a.1.count.cmp(&b.1.count));
-        for (name, metric) in syscall_metrics.iter().rev() {
-            tracing::info!("\t{} {name:?} calls", metric.count);
+        for line in self.stats().to_string().split("\n") {
+            tracing::info!("{line}");
         }
     }
 
@@ -296,6 +309,17 @@ impl Session {
             user_cycles: self.user_cycles,
             paging_cycles: self.paging_cycles,
             reserved_cycles: self.reserved_cycles,
+            ecall_metrics: self
+                .ecall_metrics
+                .iter()
+                .map(|(k, v)| (k, Some(v.clone())))
+                .collect(),
+            syscall_metrics: self
+                .syscall_metrics
+                .iter()
+                .map(|(k, v)| (k, Some(v.clone())))
+                .collect(),
+            execution_time: Some(self.execution_time),
         }
     }
 }

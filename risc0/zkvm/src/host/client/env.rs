@@ -24,22 +24,23 @@ use std::{
     sync::Arc,
 };
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use bytemuck::Pod;
 use bytes::Bytes;
-use risc0_circuit_keccak::{KeccakState, KECCAK_PO2_RANGE};
+use risc0_binfmt::PovwJobId;
+use risc0_circuit_keccak::{KECCAK_PO2_RANGE, KeccakState};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 use tempfile::TempDir;
 
 use crate::{
+    AssumptionReceipt, TraceCallback,
     host::client::{
         posix_io::PosixIo,
-        slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
+        slice_io::{SliceIo, SliceIoTable, slice_io_from_fn},
     },
     serde::to_vec,
-    AssumptionReceipt, TraceCallback,
 };
 
 /// A builder pattern used to construct an [ExecutorEnv].
@@ -64,21 +65,7 @@ impl SegmentPath {
     }
 }
 
-/// A ZKR proof request.
-#[stability::unstable]
-pub struct ProveZkrRequest {
-    /// The digest of the claim that this ZKR program is expected to produce.
-    pub claim_digest: Digest,
-
-    /// The control ID uniquely identifies the ZKR program to be proven.
-    pub control_id: Digest,
-
-    /// The input that the ZKR program should operate on.
-    pub input: Vec<u8>,
-}
-
 /// A Keccak proof request.
-#[stability::unstable]
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct ProveKeccakRequest {
     /// The digest of the claim that this keccak input is expected to produce.
@@ -96,11 +83,7 @@ pub struct ProveKeccakRequest {
 
 /// A trait that supports the ability to be notified of proof requests
 /// on-demand.
-#[stability::unstable]
 pub trait CoprocessorCallback {
-    /// Request that a ZKR proof is produced.
-    fn prove_zkr(&mut self, request: ProveZkrRequest) -> Result<()>;
-
     /// Request that a keccak proof is produced.
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()>;
 }
@@ -131,6 +114,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) pprof_out: Option<PathBuf>,
     pub(crate) input_digest: Option<Digest>,
     pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
+    pub(crate) povw_job_id: Option<PovwJobId>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -172,10 +156,10 @@ impl<'a> ExecutorEnvBuilder<'a> {
                 .with_read_fd(fileno::STDIN, reader);
         }
 
-        if inner.pprof_out.is_none() {
-            if let Ok(env_var) = std::env::var("RISC0_PPROF_OUT") {
-                inner.pprof_out = Some(env_var.into());
-            }
+        if inner.pprof_out.is_none()
+            && let Ok(env_var) = std::env::var("RISC0_PPROF_OUT")
+        {
+            inner.pprof_out = Some(env_var.into());
         }
 
         if let Ok(po2) = std::env::var("RISC0_KECCAK_PO2") {
@@ -365,7 +349,6 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// can be more efficient than deserializing a message on-demand. On-demand
     /// deserialization can cause many syscalls, whereas a frame will only have
     /// two.
-    #[stability::unstable]
     pub fn write_frame(&mut self, payload: &[u8]) -> &mut Self {
         let len = payload.len() as u32;
         self.inner.input.extend_from_slice(&len.to_le_bytes());
@@ -467,16 +450,31 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add a callback for coprocessor requests.
-    #[stability::unstable]
     pub fn coprocessor_callback(&mut self, callback: impl CoprocessorCallback + 'a) -> &mut Self {
         self.inner.coprocessor = Some(Rc::new(RefCell::new(callback)));
         self
     }
 
     /// Add a callback for coprocessor requests.
-    #[stability::unstable]
     pub fn coprocessor_callback_ref(&mut self, callback: CoprocessorCallbackRef<'a>) -> &mut Self {
         self.inner.coprocessor = Some(callback);
+        self
+    }
+
+    /// Return [ProverOpts][crate::ProverOpts] with proof of verifiable work (PoVW) enabled, and the specified work
+    /// log identifer and job number as the base for PoVW nonces assigned to each segment.
+    ///
+    /// ```
+    /// # use risc0_zkvm::ExecutorEnv;
+    /// use ruint::uint;
+    ///
+    /// let work_log_id = uint!(0xC2A2379b379da8C076d51520C4f6a2fc5AAE3d1e_U160);
+    /// ExecutorEnv::builder().povw((work_log_id, rand::random()));
+    /// ```
+    ///
+    /// See also [PovwJobId]
+    pub fn povw(&mut self, povw_job_id: impl Into<PovwJobId>) -> &mut Self {
+        self.inner.povw_job_id = Some(povw_job_id.into());
         self
     }
 }

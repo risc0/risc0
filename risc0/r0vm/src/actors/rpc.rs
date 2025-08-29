@@ -17,11 +17,11 @@ use std::future::Future;
 use std::num::NonZeroU32;
 use std::sync::{Arc, Mutex};
 
-use anyhow::{anyhow, bail, Context as _, Result};
+use anyhow::{Context as _, Result, anyhow, bail};
 use opentelemetry::metrics::{Counter, Meter};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use tokio::io::{AsyncRead, AsyncReadExt as _, AsyncWrite, AsyncWriteExt as _};
-use tokio::net::{tcp, unix, TcpStream, UnixStream};
+use tokio::net::{TcpStream, UnixStream, tcp, unix};
 use tokio::sync::Mutex as TokioMutex;
 
 /// Create a pair of RPC sender and receiver. The sender is used to send messages to the remote
@@ -137,8 +137,8 @@ impl<StreamT: AsyncRead + Unpin> RpcReceiver<StreamT> {
 //
 
 impl RpcMessageId {
-    const INITIAL: Self = Self(unsafe { NonZeroU32::new_unchecked(1) });
-    const MAX: Self = Self(unsafe { NonZeroU32::new_unchecked(u32::MAX) });
+    const INITIAL: Self = Self(NonZeroU32::new(1).unwrap());
+    const MAX: Self = Self(NonZeroU32::new(u32::MAX).unwrap());
 
     fn incr(&mut self) {
         if *self == Self::MAX {
@@ -418,11 +418,11 @@ mod tests {
     use assert_matches::assert_matches;
     use opentelemetry::metrics::MeterProvider as _;
     use opentelemetry_sdk::metrics::{
+        PeriodicReader, SdkMeterProvider,
         data::{AggregatedMetrics, MetricData, ResourceMetrics},
         in_memory_exporter::InMemoryMetricExporter,
-        PeriodicReader, SdkMeterProvider,
     };
-    use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver};
+    use tokio::sync::mpsc::{UnboundedReceiver, unbounded_channel};
 
     #[test]
     fn header_serialization() {

@@ -24,11 +24,12 @@ _start:
     # NOTE: We don't check for errors since we assume the host will provide
     # correct input
     li      t0, 2         # `ecall::SOFTWARE`
+    li      t6, 12        # `Syscall::Read`
     la      a0, count     # Set syscall buffer pointer
-    li      a1, 1         # Set syscall buffer length in words
+    li      a1, 4         # Set syscall buffer length in bytes
     la      a2, sys_read  # Set syscall name C string
     li      a3, 0         # Set read file to `STDIN_FILENO`
-    li      a4, 4         # Set read length to 1 word
+    li      a4, 4         # Set read length to 1 word (in bytes)
     ecall                 # `ecall(t0, a0, a1, a2, a3, a4)`
 
     # Prepare loop.

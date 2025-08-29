@@ -11,11 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+use crate::RzupError;
 use crate::components::Component;
 use crate::env::Environment;
 use crate::error::Result;
 use crate::events::RzupEvent;
-use crate::RzupError;
 
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -58,8 +58,7 @@ impl Settings {
             if Version::parse(version_str).is_err() {
                 env.emit(RzupEvent::Print {
                     message: format!(
-                        "! Warning: settings.toml: invalid semver `{}` for component `{}`",
-                        version_str, component
+                        "! Warning: settings.toml: invalid semver `{version_str}` for component `{component}`",
                     ),
                 });
             }
@@ -107,16 +106,22 @@ impl Settings {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::distribution::{Os, Platform};
+    use crate::{
+        RzupError,
+        distribution::{Os, Platform, signature::PublicKey},
+    };
     use tempfile::TempDir;
 
     fn test_env() -> (TempDir, Environment) {
         let tmp_dir = TempDir::new().unwrap();
-        let env = Environment::with_paths_token_platform_and_event_handler(
+        let env = Environment::with_paths_creds_platform_and_event_handler(
             tmp_dir.path().join(".risc0"),
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             None,
+            || None,
+            || Err(RzupError::Other("no private key".into())),
+            PublicKey::official(),
             Platform::new("x86_64", Os::Linux),
             |_| {},
         )

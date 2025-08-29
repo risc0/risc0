@@ -9,7 +9,7 @@ resolver = "2"
 [package]
 name = "risc0-zkvm-methods-sys-env"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 # We don't enable getrandom, sys-getenv, or sys-args here.

@@ -16,9 +16,11 @@ use crate::error::Result;
 use crate::events::RzupEvent;
 use crate::{Rzup, RzupError};
 
-use clap::{ArgGroup, Parser};
+use clap::{ArgGroup, Args, Parser, Subcommand};
 use colored::Colorize;
 use semver::Version;
+
+use std::path::PathBuf;
 
 fn parser(cmd: &str) -> Vec<&'static str> {
     match cmd {
@@ -68,24 +70,27 @@ fn parse_cpp_version(v: &str) -> Result<Version> {
     })
 }
 
+fn parse_version(name: Option<&str>, v: &str) -> Result<Version> {
+    // special handling for cpp date-based versions
+    // TODO: Move away from date version tags to semver
+    if name.is_some_and(|n| n == "cpp" || n == "gdb") {
+        return parse_cpp_version(v);
+    }
+
+    Version::parse(v).map_err(|_| {
+        RzupError::InvalidVersion(format!(
+            "{v}\n\n  {}: use semantic version (e.g. 1.0.0)",
+            "tip".green()
+        ))
+    })
+}
+
 impl InstallCommand {
     fn parse_version(&self) -> Result<Option<Version>> {
         let Some(v) = &self.version else {
             return Ok(None);
         };
-
-        // special handling for cpp date-based versions
-        // TODO: Move away from date version tags to semver
-        if self.name.as_ref().is_some_and(|n| n == "cpp" || n == "gdb") {
-            return Ok(Some(parse_cpp_version(v)?));
-        }
-
-        Ok(Some(Version::parse(v).map_err(|_| {
-            RzupError::InvalidVersion(format!(
-                "{v}\n\n  {}: use semantic version (e.g. 1.0.0)",
-                "tip".green()
-            ))
-        })?))
+        Ok(Some(parse_version(self.name.as_deref(), v)?))
     }
 
     pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
@@ -136,15 +141,15 @@ impl ShowCommand {
                 }
 
                 // Only show warning if version in settings doesn't exist in versions list
-                if let Some(settings_version) = current_version {
-                    if !versions.contains(&settings_version) {
-                        rzup.print(format!(
-                            "! Version {settings_version} specified in settings.toml is not installed",
-                        ));
-                        rzup.print(format!(
-                            "  Please use 'rzup use {component} <VERSION>' to switch default component",
-                        ));
-                    }
+                if let Some(settings_version) = current_version
+                    && !versions.contains(&settings_version)
+                {
+                    rzup.print(format!(
+                        "! Version {settings_version} specified in settings.toml is not installed",
+                    ));
+                    rzup.print(format!(
+                        "  Please use 'rzup use {component} <VERSION>' to switch default component",
+                    ));
                 }
             }
         }
@@ -301,5 +306,132 @@ impl BuildCommand {
             &self.tag_or_commit,
             &self.path,
         )
+    }
+}
+
+pub const PUBLISH_HELP: &str = "Discussion:
+    Tools for publishing a component to S3.
+
+    The create-archive sub-command creates a tar.xz file to send to S3.
+
+    The upload sub-command uploads the tar.xz file to S3 as a component with a particular version
+    and optional target.
+
+    The set-version sub-command sets the latest version of a component.
+
+    upload and set-version require that AWS credentials be available in the environment.
+";
+
+#[derive(Args)]
+#[group(required = true, multiple = false)]
+struct TargetGroup {
+    /// Is the component the same for all targets
+    #[arg(long, conflicts_with = "target_triple")]
+    target_agnostic: bool,
+    /// The target triple of the component
+    #[arg(long, conflicts_with = "target_agnostic")]
+    target_triple: Option<String>,
+}
+
+#[derive(Parser)]
+pub struct PublishUploadCommand {
+    /// Name of component to publish (e.g. rust).
+    #[arg(value_parser=parser("publish"))]
+    name: String,
+    /// Version of the component to publish (e.g. 1.0.0).
+    version: String,
+    #[command(flatten)]
+    target_group: TargetGroup,
+    /// If the component at the given target / version already exists, replace it
+    #[arg(long)]
+    force: bool,
+    /// The path to the archive
+    payload: PathBuf,
+}
+
+#[derive(Parser)]
+pub struct PublishSetLatestCommand {
+    /// Name of component to update the latest version of (e.g. rust).
+    #[arg(value_parser=parser("publish"))]
+    name: String,
+    /// Version to set (e.g. 1.0.0).
+    version: String,
+}
+
+#[derive(Parser)]
+pub struct PublishCreateArtifactCommand {
+    /// Path to directory or file to create .tar.xz from.
+    #[arg(long)]
+    input: PathBuf,
+    /// Output path to .tar.xz file we are creating
+    #[arg(long)]
+    output: PathBuf,
+    /// The compression level, 0-9
+    #[arg(long, default_value = "6")]
+    compression_level: u32,
+}
+
+#[derive(Subcommand)]
+pub(crate) enum PublishCommand {
+    /// Uploads an artifact to S3 as a component.
+    ///
+    /// Each version of a component is either tagged with a target, or is target agnostic. A
+    /// particular version can only have one target-agnostic artifact, or many target specific
+    /// artifacts, but each target may only have one artifact each.
+    ///
+    /// Requires that AWS credentials be available in the environment.
+    Upload(PublishUploadCommand),
+    /// Sets the latest version for a component on S3.
+    ///
+    /// This will cause rzup install and rzup check to consider the given version as the latest.
+    ///
+    /// Requires that AWS credentials be available in the environment.
+    SetLatest(PublishSetLatestCommand),
+    /// Creates an artifact by creating a tar.xz file.
+    ///
+    /// The given input path can either be a directory or a file. If the path is a directory, all
+    /// the contents are added and at a path relative to the directory root. If the input is a
+    /// file, the file is added to the root of the archive.
+    CreateArtifact(PublishCreateArtifactCommand),
+}
+
+impl PublishCommand {
+    #[cfg_attr(not(feature = "publish"), allow(unused_variables))]
+    pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
+        #[cfg(feature = "publish")]
+        match self {
+            Self::Upload(cmd) => {
+                let version = parse_version(Some(&cmd.name), &cmd.version)?;
+                let platform = cmd
+                    .target_group
+                    .target_triple
+                    .map(|tt| {
+                        crate::Platform::from_target_triple(&tt).ok_or_else(|| {
+                            RzupError::Other("unsupported target-triple {tt}".into())
+                        })
+                    })
+                    .transpose()?;
+
+                let name = cmd.name.parse()?;
+                rzup.publish_upload(&name, &version, platform, &cmd.payload, cmd.force)?;
+
+                Ok(())
+            }
+            Self::SetLatest(cmd) => {
+                let version = parse_version(Some(&cmd.name), &cmd.version)?;
+                let name = cmd.name.parse()?;
+                rzup.publish_set_latest(&name, &version)?;
+
+                Ok(())
+            }
+            Self::CreateArtifact(cmd) => {
+                rzup.publish_create_artifact(&cmd.input, &cmd.output, cmd.compression_level)?;
+
+                Ok(())
+            }
+        }
+
+        #[cfg(not(feature = "publish"))]
+        Err(RzupError::Other("publish feature not enabled".into()))
     }
 }

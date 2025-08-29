@@ -10,7 +10,7 @@ Waldo, you can prove you _know_ where he is while keeping that location secret.
 But these days, why not implement a real zero-knowledge proof to show you know
 where Waldo is?
 
-This example implements a RISC0 zero-knowledge program which allows a prover to
+This example implements a RISC0 zero-knowledge program that allows a prover to
 convince a verifier they know Waldo's location in a public Where's Waldo puzzle,
 without revealing Waldo's coordinates.
 
@@ -65,7 +65,7 @@ small image chunks and use a Merkle tree to commit to this vector. The zkVM
 guest can then ask the host for image chunks, and along with the chunk the host
 can provide a Merkle path that proves the chunk is part of the committed image.
 
-In the `waldo_core::merkle` module is implemented a wrapper on the
+In the `waldo_core::merkle` module a wrapper is implemented on the
 `merkle_light` crate with support for using the SHA256 guest circuit, and
 providing a `VectorOracle` abstraction. In the `waldo_core::image` module is
 implemented a specific MerkleTree type for images, and an `ImageOracle` type
@@ -99,7 +99,7 @@ could be used to produce a provable blur, image down-scaling, and more.
 First, make sure [rustup](https://rustup.rs) is installed. This project uses a
 [nightly](https://doc.rust-lang.org/book/appendix-07-nightly-rust.html) version
 of [Rust](https://doc.rust-lang.org/book/ch01-01-installation.html). The
-[`rust-toolchain`](rust-toolchain) file will be used by `cargo` to automatically
+[`rust-toolchain`](/rust-toolchain.toml) file will be used by `cargo` to automatically
 install the correct version.
 
 To build and run this example, try using the following commands.

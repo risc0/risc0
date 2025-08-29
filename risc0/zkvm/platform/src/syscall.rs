@@ -16,6 +16,9 @@
 use core::arch::asm;
 use core::{cmp::min, ffi::CStr, ptr::null_mut, slice, str::Utf8Error};
 
+use num_enum::{FromPrimitive, IntoPrimitive};
+use paste::paste;
+
 use crate::WORD_SIZE;
 
 pub mod ecall {
@@ -149,13 +152,47 @@ pub mod nr {
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
-    declare_syscall!(pub SYS_PROVE_KECCAK);
-    declare_syscall!(pub SYS_PROVE_ZKR);
+    #[deprecated]
+    pub const SYS_PROVE_KECCAK: crate::syscall::SyscallName = unsafe {
+        crate::syscall::SyscallName::from_bytes_with_nul(
+            c"risc0-zkvm-platform::syscall::SYS_PROVE_KECCAK".as_ptr() as *const u8,
+        )
+    };
+    #[deprecated]
+    pub const SYS_PROVE_ZKR: crate::syscall::SyscallName = unsafe {
+        crate::syscall::SyscallName::from_bytes_with_nul(
+            c"risc0-zkvm-platform::syscall::SYS_PROVE_ZKR".as_ptr() as *const u8,
+        )
+    };
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY2);
     declare_syscall!(pub SYS_WRITE);
+}
+
+#[repr(usize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, IntoPrimitive, FromPrimitive)]
+pub enum Syscall {
+    #[num_enum(catch_all)]
+    Unknown(usize) = 0,
+    Argc = 1,
+    Argv = 2,
+    CycleCount = 3,
+    Exit = 4,
+    Fork = 5,
+    Getenv = 6,
+    Keccak = 7,
+    Log = 8,
+    Panic = 9,
+    Pipe = 10,
+    Random = 11,
+    Read = 12,
+    User = 13,
+    VerifyIntegrity = 14,
+    VerifyIntegrity2 = 15,
+    Write = 16,
+    ProveZkr = 17,
 }
 
 impl SyscallName {
@@ -199,61 +236,60 @@ pub struct Return(pub u32, pub u32);
 
 macro_rules! impl_syscall {
     ($func_name:ident
-     // Ugh, unfortunately we can't make this a regular macro list since the asm macro
-     // doesn't expand register names so in($register) doesn't work.
-     $(, $a0:ident
-       $(, $a1:ident
-         $(, $a2: ident
-           $(, $a3: ident
-             $(, $a4: ident
-             )?
-           )?
-         )?
-       )?
-     )?) => {
+        // Ugh, unfortunately we can't make this a regular macro list since the asm macro
+        // doesn't expand register names so in($register) doesn't work.
+        $(, $a0:ident $(, $a1:ident $(, $a2: ident $(, $a3: ident $(, $a4: ident )? )? )? )? )?
+    ) => {
         /// Invoke a raw system call
         ///
         /// # Safety
         ///
         /// `from_host` must be aligned and dereferenceable.
-        #[cfg_attr(feature = "export-syscalls", no_mangle)]
-        pub unsafe extern "C" fn $func_name(syscall: SyscallName,
-                                 from_host: *mut u32,
-                                 from_host_words: usize
-                                 $(,$a0: u32
-                                   $(,$a1: u32
-                                     $(,$a2: u32
-                                       $(,$a3: u32
-                                         $(,$a4: u32
-                                         )?
-                                       )?
-                                     )?
-                                   )?
-                                 )?
+        #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
+        #[deprecated]
+        pub unsafe extern "C" fn $func_name(
+            syscall_name: SyscallName,
+            from_host: *mut u32,
+            from_host_words: usize
+            $(,$a0: u32 $(,$a1: u32 $(,$a2: u32 $(,$a3: u32 $(,$a4: u32)? )? )? )? )?
         ) -> Return {
-            #[cfg(target_os = "zkvm")] {
-                let a0: u32;
-                let a1: u32;
-                ::core::arch::asm!(
-                    "ecall",
-                    in("t0") $crate::syscall::ecall::SOFTWARE,
-                    inlateout("a0") from_host => a0,
-                    inlateout("a1") from_host_words => a1,
-                    in("a2") syscall.as_ptr()
-                        $(,in("a3") $a0
-                          $(,in("a4") $a1
-                            $(,in("a5") $a2
-                              $(,in("a6") $a3
-                                $(,in("a7") $a4
-                                )?
-                              )?
-                            )?
-                          )?
-                        )?);
-                Return(a0, a1)
+            unimplemented!();
+        }
+
+
+        paste! {
+            /// Invoke a raw system call
+            ///
+            /// # Safety
+            ///
+            /// `from_host` must be aligned and dereferenceable.
+            #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
+            pub unsafe extern "C" fn [<$func_name _nr>] (
+                syscall: usize,
+                syscall_name: SyscallName,
+                from_host: *mut u32,
+                from_host_words: usize
+                $(,$a0: u32 $(,$a1: u32 $(,$a2: u32 $(,$a3: u32 $(,$a4: u32)? )? )? )? )?
+            ) -> Return {
+                #[cfg(target_os = "zkvm")] {
+                    let a0: u32;
+                    let a1: u32;
+                    unsafe {
+                        ::core::arch::asm!(
+                            "ecall",
+                            in("t0") $crate::syscall::ecall::SOFTWARE,
+                            in("t6") syscall,
+                            inlateout("a0") from_host => a0,
+                            inlateout("a1") from_host_words => a1,
+                            in("a2") syscall_name.as_ptr()
+                            $(,in("a3") $a0 $(,in("a4") $a1 $(,in("a5") $a2 $(,in("a6") $a3 $(,in("a7") $a4 )? )? )? )? )?
+                        );
+                    }
+                    Return(a0, a1)
+                }
+                #[cfg(not(target_os = "zkvm"))]
+                unimplemented!()
             }
-            #[cfg(not(target_os = "zkvm"))]
-            unimplemented!()
         }
     }
 }
@@ -265,7 +301,7 @@ impl_syscall!(syscall_3, a3, a4, a5);
 impl_syscall!(syscall_4, a3, a4, a5, a6);
 impl_syscall!(syscall_5, a3, a4, a5, a6, a7);
 
-fn ecall_1(t0: u32, a0: u32, a1: u32) {
+unsafe fn ecall_1(t0: u32, a0: u32, a1: u32) {
     #[cfg(target_os = "zkvm")]
     unsafe {
         asm!(
@@ -282,7 +318,7 @@ fn ecall_1(t0: u32, a0: u32, a1: u32) {
     }
 }
 
-fn ecall_3(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32) {
+unsafe fn ecall_3(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32) {
     #[cfg(target_os = "zkvm")]
     unsafe {
         asm!(
@@ -301,7 +337,7 @@ fn ecall_3(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32) {
     }
 }
 
-fn ecall_4(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32, a4: u32) {
+unsafe fn ecall_4(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32, a4: u32) {
     #[cfg(target_os = "zkvm")]
     unsafe {
         asm!(
@@ -329,13 +365,15 @@ fn ecall_4(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32, a4: u32) {
 // location in the program where `sys_halt` is called. As long as the halt instruction only exists
 // in one place within the program, the pc will always be the same invariant with input.
 #[inline(never)]
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) -> ! {
-    ecall_1(
-        ecall::HALT,
-        halt::TERMINATE | ((user_exit as u32) << 8),
-        out_state as u32,
-    );
+    unsafe {
+        ecall_1(
+            ecall::HALT,
+            halt::TERMINATE | ((user_exit as u32) << 8),
+            out_state as u32,
+        )
+    };
     unreachable!();
 }
 
@@ -347,16 +385,18 @@ pub extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS])
 // location in the program where `sys_pause` is called. As long as the pause instruction only exists
 // in one place within the program, the pc will always be the same invariant with input.
 #[inline(never)]
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_pause(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) {
-    ecall_1(
-        ecall::HALT,
-        halt::PAUSE | ((user_exit as u32) << 8),
-        out_state as u32,
-    );
+    unsafe {
+        ecall_1(
+            ecall::HALT,
+            halt::PAUSE | ((user_exit as u32) << 8),
+            out_state as u32,
+        )
+    };
 }
 
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub extern "C" fn sys_input(index: u32) -> u32 {
     let t0 = ecall::INPUT;
     let index = index & 0x07;
@@ -381,7 +421,7 @@ pub extern "C" fn sys_input(index: u32) -> u32 {
 ///
 /// `out_state`, `in_state`, `block1_ptr`, and `block2_ptr` must be aligned and
 /// dereferenceable.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 #[cfg_attr(not(feature = "export-syscalls"), inline(always))]
 pub unsafe extern "C" fn sys_sha_compress(
     out_state: *mut [u32; DIGEST_WORDS],
@@ -389,20 +429,22 @@ pub unsafe extern "C" fn sys_sha_compress(
     block1_ptr: *const [u32; DIGEST_WORDS],
     block2_ptr: *const [u32; DIGEST_WORDS],
 ) {
-    ecall_4(
-        ecall::SHA,
-        out_state as u32,
-        in_state as u32,
-        block1_ptr as u32,
-        block2_ptr as u32,
-        1,
-    );
+    unsafe {
+        ecall_4(
+            ecall::SHA,
+            out_state as u32,
+            in_state as u32,
+            block1_ptr as u32,
+            block2_ptr as u32,
+            1,
+        )
+    };
 }
 
 /// # Safety
 ///
 /// `out_state`, `in_state`, and `buf` must be aligned and dereferenceable.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 #[cfg_attr(not(feature = "export-syscalls"), inline(always))]
 pub unsafe extern "C" fn sys_sha_buffer(
     out_state: *mut [u32; DIGEST_WORDS],
@@ -415,16 +457,18 @@ pub unsafe extern "C" fn sys_sha_buffer(
     let mut in_state = in_state;
     while count_remain > 0 {
         let count = min(count_remain, MAX_SHA_COMPRESS_BLOCKS as u32);
-        ecall_4(
-            ecall::SHA,
-            out_state as u32,
-            in_state as u32,
-            ptr as u32,
-            ptr.add(DIGEST_BYTES) as u32,
-            count,
-        );
+        unsafe {
+            ecall_4(
+                ecall::SHA,
+                out_state as u32,
+                in_state as u32,
+                ptr as u32,
+                ptr.add(DIGEST_BYTES) as u32,
+                count,
+            )
+        };
         count_remain -= count;
-        ptr = ptr.add(2 * DIGEST_BYTES * count as usize);
+        ptr = unsafe { ptr.add(2 * DIGEST_BYTES * count as usize) };
         in_state = out_state;
     }
 }
@@ -433,7 +477,7 @@ pub unsafe extern "C" fn sys_sha_buffer(
 ///
 /// `state_addr`, `in_buf_addr`, and `out_buf_addr` must be word-aligned and
 /// dereferenceable.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 #[cfg_attr(not(feature = "export-syscalls"), inline(always))]
 pub unsafe extern "C" fn sys_poseidon2(
     state_addr: *mut [u32; DIGEST_WORDS],
@@ -445,19 +489,21 @@ pub unsafe extern "C" fn sys_poseidon2(
     debug_assert!(in_buf_addr as usize % WORD_SIZE == 0);
     debug_assert!(out_buf_addr as usize % WORD_SIZE == 0);
 
-    ecall_3(
-        ecall::POSEIDON2,
-        state_addr as u32 / WORD_SIZE as u32,
-        in_buf_addr as u32 / WORD_SIZE as u32,
-        out_buf_addr as u32 / WORD_SIZE as u32,
-        bits_count,
-    );
+    unsafe {
+        ecall_3(
+            ecall::POSEIDON2,
+            state_addr as u32 / WORD_SIZE as u32,
+            in_buf_addr as u32 / WORD_SIZE as u32,
+            out_buf_addr as u32 / WORD_SIZE as u32,
+            bits_count,
+        )
+    };
 }
 
 /// # Safety
 ///
 /// `result`, `x`, `y`, and `modulus` must be aligned and dereferenceable.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 #[cfg_attr(not(feature = "export-syscalls"), inline(always))]
 pub unsafe extern "C" fn sys_bigint(
     result: *mut [u32; bigint::WIDTH_WORDS],
@@ -466,49 +512,86 @@ pub unsafe extern "C" fn sys_bigint(
     y: *const [u32; bigint::WIDTH_WORDS],
     modulus: *const [u32; bigint::WIDTH_WORDS],
 ) {
-    ecall_4(
-        ecall::BIGINT,
-        result as u32,
-        op,
-        x as u32,
-        y as u32,
-        modulus as u32,
-    );
+    unsafe {
+        ecall_4(
+            ecall::BIGINT,
+            result as u32,
+            op,
+            x as u32,
+            y as u32,
+            modulus as u32,
+        )
+    };
 }
 
 /// # Safety
 ///
 /// `recv_buf` must be aligned and dereferenceable.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_rand(recv_buf: *mut u32, words: usize) {
-    syscall_0(nr::SYS_RANDOM, recv_buf, words);
+    unsafe { syscall_0_nr(Syscall::Random.into(), nr::SYS_RANDOM, recv_buf, words) };
 }
 
 /// # Safety
 ///
 /// `msg_ptr` must be aligned and dereferenceable.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_panic(msg_ptr: *const u8, len: usize) -> ! {
-    syscall_2(nr::SYS_PANIC, null_mut(), 0, msg_ptr as u32, len as u32);
+    unsafe {
+        syscall_2_nr(
+            Syscall::Panic.into(),
+            nr::SYS_PANIC,
+            null_mut(),
+            0,
+            msg_ptr as u32,
+            len as u32,
+        )
+    };
 
     // As a fallback for non-compliant hosts, issue an illegal instruction.
     #[cfg(target_os = "zkvm")]
-    asm!("sw x0, 1(x0)");
+    unsafe {
+        asm!("sw x0, 1(x0)");
+    }
     unreachable!()
 }
 
 /// # Safety
 ///
 /// `msg_ptr` must be aligned and dereferenceable.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
-    syscall_2(nr::SYS_LOG, null_mut(), 0, msg_ptr as u32, len as u32);
+    unsafe {
+        syscall_2_nr(
+            Syscall::Log.into(),
+            nr::SYS_LOG,
+            null_mut(),
+            0,
+            msg_ptr as u32,
+            len as u32,
+        )
+    };
 }
 
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub extern "C" fn sys_cycle_count() -> u64 {
-    let Return(hi, lo) = unsafe { syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0) };
+    let Return(hi, lo) = unsafe {
+        syscall_0_nr(
+            Syscall::CycleCount.into(),
+            nr::SYS_CYCLE_COUNT,
+            null_mut(),
+            0,
+        )
+    };
     ((hi as u64) << 32) + lo as u64
+}
+
+#[allow(dead_code)]
+fn print(msg: &str) {
+    let msg = msg.as_bytes();
+    unsafe {
+        sys_log(msg.as_ptr(), msg.len());
+    }
 }
 
 /// Reads the given number of bytes into the given buffer, posix-style.  Returns
@@ -523,71 +606,20 @@ pub extern "C" fn sys_cycle_count() -> u64 {
 /// # Safety
 ///
 /// `recv_ptr` must be aligned and dereferenceable.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
-pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> usize {
-    // The SYS_READ system call can do a given number of word-aligned reads
-    // efficiently. The semantics of the system call are:
-    //
-    //   (nread, word) = syscall_2(nr::SYS_READ, outbuf,
-    //                             num_words_in_outbuf, fd, nbytes);
-    //
-    // This reads exactly nbytes from the file descriptor, and fills the words
-    // in outbuf, followed by up to 4 bytes returned in "word", and fills
-    // the rest with NULs.  It returns the number of bytes read.
-    //
-    // sys_read exposes this as a byte-aligned read by:
-    //   * Copies any unaligned bytes at the start or end of the region.
-
-    // Fills 0-3 bytes from a u32 into memory, returning the pointer afterwards.
-    unsafe fn fill_from_word(mut ptr: *mut u8, mut word: u32, nfill: usize) -> *mut u8 {
-        debug_assert!(nfill < 4, "nfill={nfill}");
-        for _ in 0..nfill {
-            *ptr = (word & 0xFF) as u8;
-            word >>= 8;
-            ptr = ptr.add(1);
-        }
-        ptr
-    }
-
-    // Determine how many bytes at the beginning of the buffer we have
-    // to read in order to become word-aligned.
-    let ptr_offset = (recv_ptr as usize) & (WORD_SIZE - 1);
-    let (main_ptr, main_requested, nread_first) = if ptr_offset == 0 {
-        (recv_ptr, nread, 0)
-    } else {
-        let unaligned_at_start = min(nread, WORD_SIZE - ptr_offset);
-        // Read unaligned bytes into "firstword".
-        let Return(nread_first, firstword) =
-            syscall_2(nr::SYS_READ, null_mut(), 0, fd, unaligned_at_start as u32);
-        debug_assert_eq!(nread_first as usize, unaligned_at_start);
-
-        // Align up to a word boundary to do the main copy.
-        let main_ptr = fill_from_word(recv_ptr, firstword, unaligned_at_start);
-        if nread == unaligned_at_start {
-            // We only read part of a word, and don't have to read any full words.
-            return nread;
-        }
-        (main_ptr, nread - unaligned_at_start, nread_first as usize)
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
+pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nbytes: usize) -> usize {
+    let Return(nbytes_read, final_word) = unsafe {
+        syscall_2_nr(
+            Syscall::Read.into(),
+            nr::SYS_READ,
+            recv_ptr as *mut u32,
+            nbytes,
+            fd,
+            nbytes as u32,
+        )
     };
 
-    // Copy in all of the word-aligned data
-    let main_words = main_requested / WORD_SIZE;
-    let (nread_main, lastword) =
-        sys_read_internal(fd, main_ptr as *mut u32, main_words, main_requested);
-    debug_assert!(nread_main <= main_requested);
-    let read_words = nread_main / WORD_SIZE;
-
-    // Copy in individual bytes after the word-aligned section.
-    let unaligned_at_end = main_requested % WORD_SIZE;
-
-    // The last 0-3 bytes are returned in lastword. Write those to complete the _requested_ read amount.
-    fill_from_word(
-        main_ptr.add(main_words * WORD_SIZE),
-        lastword,
-        unaligned_at_end,
-    );
-
-    nread_first + nread_main
+    nbytes_read as usize
 }
 
 /// Reads up to the given number of words into the buffer [recv_buf,
@@ -608,67 +640,38 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
 ///
 /// `recv_ptr' must be a word-aligned pointer and point to a region of
 /// `nwords' size.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_read_words(fd: u32, recv_ptr: *mut u32, nwords: usize) -> usize {
-    sys_read_internal(fd, recv_ptr, nwords, nwords * WORD_SIZE).0
-}
-
-fn sys_read_internal(fd: u32, recv_ptr: *mut u32, nwords: usize, nbytes: usize) -> (usize, u32) {
-    let mut nwords_remain = nwords;
-    let mut nbytes_remain = nbytes;
-    let mut nread_total_bytes = 0;
-    let mut recv_ptr = recv_ptr;
-    let mut final_word = 0;
-    while nbytes_remain > 0 {
-        debug_assert!(
-            final_word == 0,
-            "host returned non-zero final word on a fully aligned read"
-        );
-        let chunk_len = min(nbytes_remain, MAX_BUF_BYTES) as u32;
-        let Return(nread_bytes, last_word) = unsafe {
-            syscall_2(
-                nr::SYS_READ,
-                recv_ptr,
-                min(nwords_remain, MAX_BUF_WORDS),
-                fd,
-                chunk_len,
-            )
-        };
-        let nread_bytes = nread_bytes as usize;
-        let nread_words = nread_bytes / WORD_SIZE;
-        recv_ptr = unsafe { recv_ptr.add(nread_words) };
-        final_word = last_word;
-        nwords_remain -= nread_words;
-        nread_total_bytes += nread_bytes;
-        nbytes_remain -= nread_bytes;
-        if nread_bytes < chunk_len as usize {
-            // We've reached EOF, and the host has returned a partial word.
-            break;
-        }
-    }
-    (nread_total_bytes, final_word)
+    let nbytes = nwords * WORD_SIZE;
+    let Return(nbytes_read, final_word) = unsafe {
+        syscall_2_nr(
+            Syscall::Read.into(),
+            nr::SYS_READ,
+            recv_ptr,
+            nbytes,
+            fd,
+            nbytes as u32,
+        )
+    };
+    nbytes_read as usize
 }
 
 /// # Safety
 ///
 /// `write_ptr` must be aligned and dereferenceable.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize) {
-    let mut nbytes_remain = nbytes;
-    let mut write_ptr = write_ptr;
-    while nbytes_remain > 0 {
-        let nbytes = min(nbytes_remain, MAX_BUF_BYTES);
-        syscall_3(
+    unsafe {
+        syscall_3_nr(
+            Syscall::Write.into(),
             nr::SYS_WRITE,
             null_mut(),
             0,
             fd,
             write_ptr as u32,
             nbytes as u32,
-        );
-        write_ptr = write_ptr.add(nbytes);
-        nbytes_remain -= nbytes;
-    }
+        )
+    };
 }
 
 // Some environment variable names are considered safe by default to use in the guest, provided by
@@ -697,7 +700,7 @@ const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[
 /// # Safety
 ///
 /// `out_words` and `varname` must be aligned and dereferenceable.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_getenv(
     out_words: *mut u32,
     out_nwords: usize,
@@ -721,13 +724,16 @@ pub unsafe extern "C" fn sys_getenv(
             unsafe { sys_panic(MSG_2.as_ptr(), MSG_2.len()) };
         }
     }
-    let Return(a0, _) = syscall_2(
-        nr::SYS_GETENV,
-        out_words,
-        out_nwords,
-        varname as u32,
-        varname_len as u32,
-    );
+    let Return(a0, _) = unsafe {
+        syscall_2_nr(
+            Syscall::Getenv.into(),
+            nr::SYS_GETENV,
+            out_words,
+            out_nwords,
+            varname as u32,
+            varname_len as u32,
+        )
+    };
     if a0 == u32::MAX {
         usize::MAX
     } else {
@@ -739,13 +745,13 @@ pub unsafe extern "C" fn sys_getenv(
 ///
 /// NOTE: Repeated calls to sys_argc are not guaranteed to result in the same
 /// data being returned. Returned data is entirely in the control of the host.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub extern "C" fn sys_argc() -> usize {
     if cfg!(not(feature = "sys-args")) {
         const MSG: &[u8] = "sys_argc is disabled; can be enabled with the sys-args feature flag on risc0-zkvm-platform".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
-    let Return(a0, _) = unsafe { syscall_0(nr::SYS_ARGC, null_mut(), 0) };
+    let Return(a0, _) = unsafe { syscall_0_nr(Syscall::Argc.into(), nr::SYS_ARGC, null_mut(), 0) };
     a0 as usize
 }
 
@@ -766,7 +772,7 @@ pub extern "C" fn sys_argc() -> usize {
 /// # Safety
 ///
 /// `out_words` must be aligned and dereferenceable.
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_argv(
     out_words: *mut u32,
     out_nwords: usize,
@@ -776,11 +782,19 @@ pub unsafe extern "C" fn sys_argv(
         const MSG: &[u8] = "sys_argv is disabled; can be enabled with the sys-args feature flag on risc0-zkvm-platform".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
-    let Return(a0, _) = syscall_1(nr::SYS_ARGV, out_words, out_nwords, arg_index as u32);
+    let Return(a0, _) = unsafe {
+        syscall_1_nr(
+            Syscall::Argv.into(),
+            nr::SYS_ARGV,
+            out_words,
+            out_nwords,
+            arg_index as u32,
+        )
+    };
     a0 as usize
 }
 
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 #[deprecated]
 pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
     unsafe { sys_alloc_aligned(WORD_SIZE * nwords, WORD_SIZE) as *mut u32 }
@@ -790,7 +804,7 @@ pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
 ///
 /// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
 #[cfg(all(feature = "export-syscalls", not(target_os = "zkvm")))]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
     unimplemented!("sys_alloc_aligned called outside of target_os = zkvm");
 }
@@ -803,10 +817,13 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
     feature = "heap-embedded-alloc",
     target_os = "zkvm"
 ))]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
     use core::alloc::GlobalAlloc;
-    crate::heap::embedded::HEAP.alloc(core::alloc::Layout::from_size_align(bytes, align).unwrap())
+    unsafe {
+        crate::heap::embedded::HEAP
+            .alloc(core::alloc::Layout::from_size_align(bytes, align).unwrap())
+    }
 }
 
 /// # Safety
@@ -817,9 +834,9 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
     not(feature = "heap-embedded-alloc"),
     target_os = "zkvm"
 ))]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
-    crate::heap::bump::alloc_aligned(bytes, align)
+    unsafe { crate::heap::bump::alloc_aligned(bytes, align) }
 }
 
 /// Send a ReceiptClaim digest to the host to request verification.
@@ -834,18 +851,19 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 /// `claim_digest` must be aligned and dereferenceable.
 /// `control_root` must be aligned and dereferenceable.
 #[cfg(feature = "export-syscalls")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn sys_verify_integrity(
     claim_digest: *const [u32; DIGEST_WORDS],
     control_root: *const [u32; DIGEST_WORDS],
 ) {
     let mut to_host = [0u32; DIGEST_WORDS * 2];
-    to_host[..DIGEST_WORDS].copy_from_slice(claim_digest.as_ref().unwrap_unchecked());
-    to_host[DIGEST_WORDS..].copy_from_slice(control_root.as_ref().unwrap_unchecked());
+    to_host[..DIGEST_WORDS].copy_from_slice(unsafe { claim_digest.as_ref().unwrap_unchecked() });
+    to_host[DIGEST_WORDS..].copy_from_slice(unsafe { control_root.as_ref().unwrap_unchecked() });
 
+    // Send the claim_digest to the host via software ecall.
     let Return(a0, _) = unsafe {
-        // Send the claim_digest to the host via software ecall.
-        syscall_2(
+        syscall_2_nr(
+            Syscall::VerifyIntegrity.into(),
             nr::SYS_VERIFY_INTEGRITY,
             null_mut(),
             0,
@@ -870,18 +888,19 @@ pub unsafe extern "C" fn sys_verify_integrity(
 /// `claim_digest` must be aligned and dereferenceable.
 /// `control_root` must be aligned and dereferenceable.
 #[cfg(feature = "export-syscalls")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn sys_verify_integrity2(
     claim_digest: *const [u32; DIGEST_WORDS],
     control_root: *const [u32; DIGEST_WORDS],
 ) {
     let mut to_host = [0u32; DIGEST_WORDS * 2];
-    to_host[..DIGEST_WORDS].copy_from_slice(claim_digest.as_ref().unwrap_unchecked());
-    to_host[DIGEST_WORDS..].copy_from_slice(control_root.as_ref().unwrap_unchecked());
+    to_host[..DIGEST_WORDS].copy_from_slice(unsafe { claim_digest.as_ref().unwrap_unchecked() });
+    to_host[DIGEST_WORDS..].copy_from_slice(unsafe { control_root.as_ref().unwrap_unchecked() });
 
+    // Send the claim_digest to the host via software ecall.
     let Return(a0, _) = unsafe {
-        // Send the claim_digest to the host via software ecall.
-        syscall_2(
+        syscall_2_nr(
+            Syscall::VerifyIntegrity2.into(),
             nr::SYS_VERIFY_INTEGRITY2,
             null_mut(),
             0,
@@ -900,7 +919,7 @@ pub unsafe extern "C" fn sys_verify_integrity2(
 }
 // Make sure we only get one of these since it's stateful.
 #[cfg(not(feature = "export-syscalls"))]
-extern "C" {
+unsafe extern "C" {
     pub fn sys_alloc_aligned(nwords: usize, align: usize) -> *mut u8;
 }
 
@@ -917,9 +936,9 @@ extern "C" {
 /// 0 is returned in the child. On failure, -1 is returned in the parent, no
 /// child process is created.
 #[cfg(feature = "export-syscalls")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn sys_fork() -> i32 {
-    let Return(a0, _) = unsafe { syscall_0(nr::SYS_FORK, null_mut(), 0) };
+    let Return(a0, _) = unsafe { syscall_0_nr(Syscall::Fork.into(), nr::SYS_FORK, null_mut(), 0) };
     a0 as i32
 }
 
@@ -940,9 +959,9 @@ pub extern "C" fn sys_fork() -> i32 {
 /// `pipefd` must be aligned, dereferenceable, and have capacity for 2 u32
 /// values.
 #[cfg(feature = "export-syscalls")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
-    let Return(a0, _) = syscall_0(nr::SYS_PIPE, pipefd, 2);
+    let Return(a0, _) = unsafe { syscall_0_nr(Syscall::Pipe.into(), nr::SYS_PIPE, pipefd, 2) };
     a0 as i32
 }
 
@@ -950,9 +969,9 @@ pub unsafe extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
 ///
 /// Currently the `status` is unused and ignored.
 #[cfg(feature = "export-syscalls")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn sys_exit(status: i32) -> ! {
-    let Return(a0, _) = unsafe { syscall_0(nr::SYS_EXIT, null_mut(), 0) };
+    let Return(a0, _) = unsafe { syscall_0_nr(Syscall::Exit.into(), nr::SYS_EXIT, null_mut(), 0) };
     #[allow(clippy::empty_loop)]
     loop {
         // prevent dishonest provers from relying on the ability to prove the
@@ -960,68 +979,25 @@ pub extern "C" fn sys_exit(status: i32) -> ! {
     }
 }
 
-/// Executes a `ZKR' in the recursion circuit, specified by control
-/// ID.  The control ID must be registered in the host's index of ZKRs.
-///
-/// This only triggers the execution of the ZKR; it does not add any
-/// assumptions.  In order to prove that the ZKR executed correctly,
-/// users must calculate the claim digest and add it to the list of
-/// assumptions.
-///
-/// # Safety
-///
-/// `claim_digest` must be aligned and dereferenceable.
-/// `control_id` must be aligned and dereferenceable.
-/// `control_root` must be aligned and dereferenceable.
-/// `input` must be aligned and have `input_len` u32s dereferenceable
-#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-#[stability::unstable]
-pub unsafe extern "C" fn sys_prove_zkr(
-    claim_digest: *const [u32; DIGEST_WORDS],
-    control_id: *const [u32; DIGEST_WORDS],
-    control_root: *const [u32; DIGEST_WORDS],
-    input: *const u32,
-    input_len: usize,
-) {
-    let Return(a0, _) = unsafe {
-        syscall_5(
-            nr::SYS_PROVE_ZKR,
-            null_mut(),
-            0,
-            claim_digest as u32,
-            control_id as u32,
-            control_root as u32,
-            input as u32,
-            input_len as u32,
-        )
-    };
-
-    // Check to ensure the host indicated success by returning 0.
-    // Currently, this should always be the case. This check is
-    // included for forwards-compatibility.
-    if a0 != 0 {
-        const MSG: &[u8] = "sys_prove_zkr returned error result".as_bytes();
-        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
-    }
-}
-
 /// Permute the keccak state on the host
 ///
 /// # Safety
-#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-#[stability::unstable]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_keccak(
     in_state: *const [u64; KECCACK_STATE_DWORDS],
     out_state: *mut [u64; KECCACK_STATE_DWORDS],
 ) -> i32 {
-    let Return(a0, _) = syscall_3(
-        nr::SYS_KECCAK,
-        out_state as *mut u32,
-        KECCACK_STATE_WORDS,
-        keccak_mode::KECCAK_PERMUTE,
-        in_state as u32,
-        0,
-    );
+    let Return(a0, _) = unsafe {
+        syscall_3_nr(
+            Syscall::Keccak.into(),
+            nr::SYS_KECCAK,
+            out_state as *mut u32,
+            KECCACK_STATE_WORDS,
+            keccak_mode::KECCAK_PERMUTE,
+            in_state as u32,
+            0,
+        )
+    };
     a0 as i32
 }
 
@@ -1038,14 +1014,14 @@ pub unsafe extern "C" fn sys_keccak(
 /// `claim_digest` must be aligned and dereferenceable.
 /// `control_root` must be aligned and dereferenceable.
 /// `input` must be aligned and have `input_len` u32s dereferenceable
-#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-#[stability::unstable]
+#[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_prove_keccak(
     claim_digest: *const [u32; DIGEST_WORDS],
     control_root: *const [u32; DIGEST_WORDS],
 ) {
     let Return(a0, _) = unsafe {
-        syscall_3(
+        syscall_3_nr(
+            Syscall::Keccak.into(),
             nr::SYS_KECCAK,
             null_mut(),
             0,
@@ -1089,8 +1065,7 @@ macro_rules! impl_sys_bigint2 {
         /// # Safety
         ///
         /// `blob_ptr` and all arguments must be aligned and dereferenceable.
-        #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-        #[stability::unstable]
+        #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
         pub unsafe extern "C" fn $func_name(blob_ptr: *const u8, a1: *const u32
             $(, $a2: *const u32
                 $(, $a3: *const u32
@@ -1103,7 +1078,7 @@ macro_rules! impl_sys_bigint2 {
             )?
         ) {
             #[cfg(target_os = "zkvm")]
-            {
+            unsafe {
                 let header = blob_ptr as *const $crate::syscall::BigIntBlobHeader;
                 let nondet_program_ptr = (header.add(1)) as *const u32;
                 let verify_program_ptr = nondet_program_ptr.add((*header).nondet_program_size as usize);

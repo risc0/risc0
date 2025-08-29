@@ -16,7 +16,7 @@ pub mod analyze;
 
 use std::{collections::BTreeMap, io::Cursor};
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 use malachite::Natural;
 use risc0_binfmt::WordAddr;
 use smallvec::SmallVec;
@@ -69,7 +69,7 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
         let start_addr = base + offset * BIGINT_WIDTH_WORDS as u32;
         check_bigint_addr(start_addr, self.mode)?;
 
-        let word_count = (count + 3) / 4;
+        let word_count = count.div_ceil(4);
         // Note: Inline cap of 12 is chosen because blst_fp are 6 u64 limbs, so 12 u32 limbs
         let mut limbs = SmallVec::<[u32; 12]>::with_capacity(word_count as usize);
         let mut addr = start_addr;
@@ -97,7 +97,9 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
         let addr = base + offset * BIGINT_WIDTH_WORDS as u32;
         check_bigint_addr(addr, self.mode)?;
 
-        tracing::trace!("store(arena: {arena}, offset: {offset}, count: {count}, addr: {addr:?}, value: {value})");
+        tracing::trace!(
+            "store(arena: {arena}, offset: {offset}, count: {count}, addr: {addr:?}, value: {value})"
+        );
 
         let limbs = value.to_limbs_asc();
         ensure!(
