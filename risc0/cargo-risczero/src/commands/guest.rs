@@ -14,12 +14,12 @@
 
 use std::{fs, io, io::Write, path::PathBuf, process::Stdio};
 
-use anyhow::{anyhow, bail, ensure, Context, Result};
+use anyhow::{Context, Result, anyhow, bail, ensure};
 use cargo_metadata::{Artifact, ArtifactProfile, Message};
 use clap::{Args, Subcommand};
 use risc0_build::cargo_command;
-use risc0_zkvm::{default_executor, ExecutorEnv, ExitCode};
-use tempfile::{tempdir, TempDir};
+use risc0_zkvm::{ExecutorEnv, ExitCode, default_executor};
+use tempfile::{TempDir, tempdir};
 
 const ZIP_CONTENTS: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/cargo-risczero.zip"));
 

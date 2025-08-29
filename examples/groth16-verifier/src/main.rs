@@ -15,9 +15,8 @@
 use groth16_verifier_methods::{GROTH16_VERIFIER_ELF, GROTH16_VERIFIER_ID};
 use risc0_groth16::{ProofJson, PublicInputsJson, Verifier, VerifyingKeyJson};
 use risc0_zkvm::{
-    default_prover,
+    ExecutorEnv, default_prover,
     sha::{Digest, Digestible},
-    ExecutorEnv,
 };
 
 const PROOF: &str = include_str!("data/proof.json");

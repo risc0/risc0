@@ -17,7 +17,7 @@ use alloc::{vec, vec::Vec};
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
-use risc0_binfmt::{tagged_struct, Digestible, ExitCode};
+use risc0_binfmt::{Digestible, ExitCode, tagged_struct};
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
@@ -32,7 +32,7 @@ use super::{
     SuccinctReceiptVerifierParameters, VerifierContext,
 };
 use crate::{
-    sha, Assumption, InnerAssumptionReceipt, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    Assumption, InnerAssumptionReceipt, MaybePruned, Output, PrunedValueError, ReceiptClaim, sha,
 };
 
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
@@ -82,10 +82,10 @@ impl CompositeReceipt {
         for receipt in receipts {
             receipt.verify_integrity_with_context(ctx)?;
             tracing::debug!("claim: {:#?}", receipt.claim);
-            if let Some(id) = expected_pre_state_digest {
-                if id != receipt.claim.pre.digest::<sha::Impl>() {
-                    return Err(VerificationError::ImageVerificationError);
-                }
+            if let Some(id) = expected_pre_state_digest
+                && id != receipt.claim.pre.digest::<sha::Impl>()
+            {
+                return Err(VerificationError::ImageVerificationError);
             }
             if receipt.claim.exit_code != ExitCode::SystemSplit {
                 return Err(VerificationError::UnexpectedExitCode);
@@ -106,10 +106,10 @@ impl CompositeReceipt {
         // Verify the last receipt in the continuation.
         final_receipt.verify_integrity_with_context(ctx)?;
         tracing::debug!("final: {:#?}", final_receipt.claim);
-        if let Some(id) = expected_pre_state_digest {
-            if id != final_receipt.claim.pre.digest::<sha::Impl>() {
-                return Err(VerificationError::ImageVerificationError);
-            }
+        if let Some(id) = expected_pre_state_digest
+            && id != final_receipt.claim.pre.digest::<sha::Impl>()
+        {
+            return Err(VerificationError::ImageVerificationError);
         }
 
         // Verify all assumptions on the receipt are resolved by attached receipts.

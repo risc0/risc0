@@ -19,7 +19,7 @@ use addr2line::{
     demangle_auto,
     gimli::{self, Reader as _},
 };
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 
 use super::Frame;
 
@@ -127,17 +127,16 @@ impl<'dwarf> InlineFunctionTableBuilder<'dwarf> {
     ) -> Result<()> {
         let mut entries = unit.entries();
         while let Some((_, entry)) = entries.next_dfs()? {
-            if entry.tag() == gimli::DW_TAG_compile_unit {
-                if let Ok(gimli::AttributeValue::Language(unit_language)) =
+            if entry.tag() == gimli::DW_TAG_compile_unit
+                && let Ok(gimli::AttributeValue::Language(unit_language)) =
                     dwarf_attr_or_error(entry, gimli::DW_AT_language)
-                {
-                    self.language = Some(unit_language);
-                }
+            {
+                self.language = Some(unit_language);
             }
-            if entry.tag() == gimli::DW_TAG_inlined_subroutine {
-                if let Err(error) = self.build_from_inline_subroutine(unit, entry) {
-                    tracing::warn!("Error decoding DWARF for DW_TAG_inlined_subroutine: {error}");
-                }
+            if entry.tag() == gimli::DW_TAG_inlined_subroutine
+                && let Err(error) = self.build_from_inline_subroutine(unit, entry)
+            {
+                tracing::warn!("Error decoding DWARF for DW_TAG_inlined_subroutine: {error}");
             }
         }
 

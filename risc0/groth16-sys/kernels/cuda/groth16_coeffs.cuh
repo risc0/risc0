@@ -119,114 +119,60 @@ public:
     gpu.sync();
   }
 
-  preprocessed_coeffs(const gpu_t& gpu, const char* file_path) : gpu(gpu) {
-    int pcoeffs_file = open(file_path, O_RDONLY);
-
-    if (pcoeffs_file < 0) {
-      throw sppark_error{errno, "open(\"%s\") failed: ", file_path};
-    }
-
-    struct stat st;
-    fstat(pcoeffs_file, &st);
-    size_t file_size = st.st_size;
-
-    const byte* _ptr = (const byte*)mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, pcoeffs_file, 0);
+  preprocessed_coeffs(const gpu_t& gpu, const byte *input_coeffs) : gpu(gpu) {
     {
-      int err = errno;
-      close(pcoeffs_file);
-      if (_ptr == MAP_FAILED) {
-        throw sppark_error{err, "mmap(\"%s\") failed: ", file_path};
-      }
+      size_t* ptr = (size_t*)input_coeffs;
+      size_t coeff_count_a = ptr[0];
+      size_t coeff_count_b = ptr[1];
+      size_t unique_count_a = ptr[2];
+      size_t unique_count_b = ptr[3];
+
+      d_coeffs = gpu_ptr_t<coeff_t>(
+          (coeff_t*)gpu.Dmalloc((coeff_count_a + coeff_count_b) * sizeof(coeff_t)));
+      d_independent_indices = gpu_ptr_t<uint32_t>(
+          (uint32_t*)gpu.Dmalloc((unique_count_a + unique_count_b) * sizeof(uint32_t)));
+
+      d_coeffs_a = slice_t<coeff_t>(&d_coeffs[0], coeff_count_a);
+      d_coeffs_b = slice_t<coeff_t>(&d_coeffs[coeff_count_a], coeff_count_b);
+
+      d_ind_idx_a = slice_t<uint32_t>(&d_independent_indices[0], unique_count_a);
+      d_ind_idx_b = slice_t<uint32_t>(&d_independent_indices[unique_count_a], unique_count_b);
     }
 
-    try {
-      {
-        size_t* ptr = (size_t*)_ptr;
-        size_t coeff_count_a = ptr[0];
-        size_t coeff_count_b = ptr[1];
-        size_t unique_count_a = ptr[2];
-        size_t unique_count_b = ptr[3];
+    const byte* ptr = input_coeffs + 4 * sizeof(size_t);
+    gpu.HtoD(&d_coeffs[0], (coeff_t*)&ptr[0], d_coeffs_a.size() + d_coeffs_b.size());
 
-        d_coeffs = gpu_ptr_t<coeff_t>(
-            (coeff_t*)gpu.Dmalloc((coeff_count_a + coeff_count_b) * sizeof(coeff_t)));
-        d_independent_indices = gpu_ptr_t<uint32_t>(
-            (uint32_t*)gpu.Dmalloc((unique_count_a + unique_count_b) * sizeof(uint32_t)));
+    ptr += (d_coeffs_a.size() + d_coeffs_b.size()) * sizeof(coeff_t);
+    gpu.HtoD(
+        &d_independent_indices[0], (uint32_t*)&ptr[0], d_ind_idx_a.size() + d_ind_idx_b.size());
 
-        d_coeffs_a = slice_t<coeff_t>(&d_coeffs[0], coeff_count_a);
-        d_coeffs_b = slice_t<coeff_t>(&d_coeffs[coeff_count_a], coeff_count_b);
-
-        d_ind_idx_a = slice_t<uint32_t>(&d_independent_indices[0], unique_count_a);
-        d_ind_idx_b = slice_t<uint32_t>(&d_independent_indices[unique_count_a], unique_count_b);
-      }
-
-      const byte* ptr = _ptr + 4 * sizeof(size_t);
-      gpu.HtoD(&d_coeffs[0], (coeff_t*)&ptr[0], d_coeffs_a.size() + d_coeffs_b.size());
-
-      ptr += (d_coeffs_a.size() + d_coeffs_b.size()) * sizeof(coeff_t);
-      gpu.HtoD(
-          &d_independent_indices[0], (uint32_t*)&ptr[0], d_ind_idx_a.size() + d_ind_idx_b.size());
-
-      gpu.sync();
-      munmap(const_cast<byte*>(_ptr), file_size);
-    } catch (const sppark_error& e) {
-      gpu.sync();
-      munmap(const_cast<byte*>(_ptr), file_size);
-
-      throw;
-    }
+    gpu.sync();
   }
 
-  void write_to_file(const char* file_path) {
-    size_t file_size = 4 * sizeof(size_t) +
-                       (d_coeffs_a.size() + d_coeffs_b.size()) * sizeof(coeff_t) +
-                       (d_ind_idx_a.size() + d_ind_idx_b.size()) * sizeof(uint32_t);
-
-    int pcoeffs_file = open(file_path, O_RDWR | O_CREAT, (mode_t)0666);
-    if (pcoeffs_file == -1) {
-      throw sppark_error{errno, "open(\"%s\") failed: ", file_path};
-    }
-    if (ftruncate(pcoeffs_file, file_size) == -1) {
-      int err = errno;
-      close(pcoeffs_file);
-      throw sppark_error{err, "failed to set the size of \"%s\" to %zu: ", file_path, file_size};
-    }
-    byte* _file_ptr =
-        (byte*)mmap(0, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, pcoeffs_file, 0);
+  size_t copy_to(size_t preprocessed_coeffs_len, byte *preprocessed_coeffs_out) {
+    size_t copy_size = 4 * sizeof(size_t) +
+                     (d_coeffs_a.size() + d_coeffs_b.size()) * sizeof(coeff_t) +
+                     (d_ind_idx_a.size() + d_ind_idx_b.size()) * sizeof(uint32_t);
+    assert(preprocessed_coeffs_len >= copy_size);
 
     {
-      int err = errno;
-      close(pcoeffs_file);
-      if (_file_ptr == MAP_FAILED) {
-        throw sppark_error{err, "mmap(\"%s\") failed: ", file_path};
-      }
+      size_t* copy_ptr = (size_t*)preprocessed_coeffs_out;
+      copy_ptr[0] = d_coeffs_a.size();
+      copy_ptr[1] = d_coeffs_b.size();
+      copy_ptr[2] = d_ind_idx_a.size();
+      copy_ptr[3] = d_ind_idx_b.size();
     }
 
-    try {
-      {
-        size_t* file_ptr = (size_t*)_file_ptr;
-        file_ptr[0] = d_coeffs_a.size();
-        file_ptr[1] = d_coeffs_b.size();
-        file_ptr[2] = d_ind_idx_a.size();
-        file_ptr[3] = d_ind_idx_b.size();
-      }
+    byte* copy_ptr = preprocessed_coeffs_out;
 
-      byte* file_ptr = _file_ptr;
+    copy_ptr += 4 * sizeof(size_t);
+    gpu.DtoH((coeff_t*)copy_ptr, &d_coeffs[0], d_coeffs_a.size() + d_coeffs_b.size());
 
-      file_ptr += 4 * sizeof(size_t);
-      gpu.DtoH((coeff_t*)file_ptr, &d_coeffs[0], d_coeffs_a.size() + d_coeffs_b.size());
+    copy_ptr += (d_coeffs_a.size() + d_coeffs_b.size()) * sizeof(coeff_t);
+    gpu.DtoH(
+        (uint32_t*)copy_ptr, &d_independent_indices[0], d_ind_idx_a.size() + d_ind_idx_b.size());
 
-      file_ptr += (d_coeffs_a.size() + d_coeffs_b.size()) * sizeof(coeff_t);
-      gpu.DtoH(
-          (uint32_t*)file_ptr, &d_independent_indices[0], d_ind_idx_a.size() + d_ind_idx_b.size());
-
-      gpu.sync();
-      munmap(_file_ptr, file_size);
-    } catch (const sppark_error& e) {
-      gpu.sync();
-      munmap(_file_ptr, file_size);
-
-      throw;
-    }
+    return copy_size;
   }
 
   const slice_t<coeff_t> get_coeffs_a() const { return d_coeffs_a; }

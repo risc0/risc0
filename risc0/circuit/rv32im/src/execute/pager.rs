@@ -17,7 +17,7 @@ use std::{
     sync::OnceLock,
 };
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use bit_vec::BitVec;
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
@@ -196,7 +196,7 @@ impl PageTable {
     }
 
     fn clear(&mut self) {
-        // You would think its faster to re-use the memory, but filling it with zeros is
+        // You would think its faster to reuse the memory, but filling it with zeros is
         // slower
         // than just allocating a new piece of zeroed memory.
         self.table = vec![Self::INVALID_IDX; NUM_PAGES];

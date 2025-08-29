@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{recursion::Prover, sha::Digest, ProverOpts};
+use risc0_zkvm::{ProverOpts, recursion::Prover, sha::Digest};
 
 fn main() {
     tracing_subscriber::fmt()

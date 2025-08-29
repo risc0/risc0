@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{digest, Digest};
+use risc0_zkvm::{Digest, digest};
 
 use crate::WorkSet;
 
 /// List of pre-calculated subtree roots with all-empty bitmaps for leaves.
 ///
-/// Indexed by the hieght with height zero defined as the value of the leaf.
+/// Indexed by the height with height zero defined as the value of the leaf.
 pub(crate) const EMPTY_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
     digest!("a505c1affa9b6d2ed829d837d14eb8614f198bfc7f40e3c438ac9e366f410073"),
     digest!("6603858652cd6a283a3df113a010d2b05e56d65539bd1fba68d732529eaa88da"),
@@ -273,7 +273,7 @@ pub(crate) const EMPTY_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
 
 /// List of pre-calculated subtree roots with all-full bitmaps for leaves.
 ///
-/// Indexed by the hieght with height zero defined as the value of the leaf.
+/// Indexed by the height with height zero defined as the value of the leaf.
 pub(crate) const FULL_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
     digest!("db015763e201a3f7e51178938859ce0f6c6d9c3457f42b0dc9244c3ab65ebe89"),
     digest!("bb025bc4bcfefdbd43a39e0507738a3efc6137465e70f4682926cb3b7d201103"),
@@ -528,11 +528,11 @@ pub(crate) const FULL_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
 
 #[cfg(test)]
 mod tests {
-    use super::{WorkSet, FULL_SUBTREE_ROOTS};
+    use super::{FULL_SUBTREE_ROOTS, WorkSet};
     use crate::{
+        Bitmap,
         consts::EMPTY_SUBTREE_ROOTS,
         tree::{hash_leaf, join},
-        Bitmap,
     };
     use risc0_zkvm::Digest;
 

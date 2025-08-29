@@ -13,9 +13,9 @@
 // limitations under the License.
 
 use assert_cmd::Command;
-use assert_fs::{fixture::PathChild, TempDir};
-use risc0_zkvm::{serde::to_vec, Receipt};
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_PATH};
+use assert_fs::{TempDir, fixture::PathChild};
+use risc0_zkvm::{Receipt, serde::to_vec};
+use risc0_zkvm_methods::{MULTI_TEST_PATH, multi_test::MultiTestSpec};
 
 fn run_dev_mode() -> Receipt {
     let temp = TempDir::new().unwrap();
@@ -62,7 +62,7 @@ fn dev_mode_verify_fail_env_var() {
 
 #[test]
 #[cfg(not(feature = "disable-dev-mode"))]
-fn dev_mode_programatic() {
+fn dev_mode_programmatic() {
     use risc0_zkvm::VerifierContext;
 
     let receipt = run_dev_mode();
@@ -81,7 +81,7 @@ fn dev_mode_programatic() {
 
 #[test]
 #[cfg(not(feature = "disable-dev-mode"))]
-fn dev_mode_verify_fail_programatic() {
+fn dev_mode_verify_fail_programmatic() {
     use risc0_zkvm::VerifierContext;
 
     let receipt = run_dev_mode();

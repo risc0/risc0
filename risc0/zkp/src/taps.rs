@@ -74,7 +74,7 @@ impl TapSet<'_> {
         self.group_begin[self.num_groups()]
     }
 
-    pub fn taps(&self) -> TapIter {
+    pub fn taps(&self) -> TapIter<'_> {
         TapIter {
             data: self.taps,
             cursor: 0,
@@ -82,7 +82,7 @@ impl TapSet<'_> {
         }
     }
 
-    pub fn regs(&self) -> RegisterIter {
+    pub fn regs(&self) -> RegisterIter<'_> {
         RegisterIter {
             data: self.taps,
             cursor: 0,
@@ -90,7 +90,7 @@ impl TapSet<'_> {
         }
     }
 
-    pub fn group_taps(&self, group_id: usize) -> TapIter {
+    pub fn group_taps(&self, group_id: usize) -> TapIter<'_> {
         TapIter {
             data: self.taps,
             cursor: self.group_begin[group_id],
@@ -98,7 +98,7 @@ impl TapSet<'_> {
         }
     }
 
-    pub fn group_regs(&self, group_id: usize) -> RegisterIter {
+    pub fn group_regs(&self, group_id: usize) -> RegisterIter<'_> {
         RegisterIter {
             data: self.taps,
             cursor: self.group_begin[group_id],
@@ -124,7 +124,7 @@ impl TapSet<'_> {
         self.reg_count
     }
 
-    pub fn combos(&self) -> ComboIter {
+    pub fn combos(&self) -> ComboIter<'_> {
         ComboIter {
             data: ComboData {
                 taps: self.combo_taps,
@@ -135,7 +135,7 @@ impl TapSet<'_> {
         }
     }
 
-    pub fn get_combo(&self, id: usize) -> ComboRef {
+    pub fn get_combo(&self, id: usize) -> ComboRef<'_> {
         ComboRef {
             data: ComboData {
                 taps: self.combo_taps,

@@ -28,8 +28,8 @@ use anyhow::{anyhow, bail, ensure};
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
 use risc0_binfmt::{
-    read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
-    ExitCode, InvalidExitCodeError,
+    Digestible, ExitCode, InvalidExitCodeError, read_sha_halfs, tagged_list, tagged_list_cons,
+    tagged_struct, write_sha_halfs,
 };
 use risc0_circuit_rv32im::{HighLowU16, Rv32imV2Claim, TerminateState};
 use risc0_zkp::core::digest::Digest;
@@ -37,13 +37,13 @@ use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
 
 use super::{
+    Unknown,
     maybe_pruned::{MaybePruned, PrunedValueError},
     work::WorkClaimError,
-    Unknown,
 };
 use crate::{
-    sha::{self, Sha256},
     SystemState, WorkClaim,
+    sha::{self, Sha256},
 };
 
 /// Public claims about a zkVM guest execution, such as the journal committed to by the guest.
@@ -219,7 +219,7 @@ impl ReceiptClaim {
             .context("conditional receipt has pruned assumptions")?;
 
         // Use the control root from the head of the assumptions list to form an Assumption from
-        // the given claim. This is a simplifying assumption but connot guarantee that the claim
+        // the given claim. This is a simplifying assumption but cannot guarantee that the claim
         // actually resolves the assumption if it was produced with an incompatible control root.
         let head_control_root = assumptions
             .first()
