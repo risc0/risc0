@@ -35,5 +35,5 @@ This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. T
 [steel-src]: https://github.com/risc0/risc0-ethereum/tree/release-1.0/steel
 [verifier-contracts]: https://github.com/risc0/risc0-ethereum/tree/release-1.0/contracts
 [zeth-article]: https://www.risczero.com/news/zeth-release
-[zeth-repo]: https://github.com/risc0/zeth
+[zeth-repo]: https://github.com/boundless-xyz/zeth
 [zkvm-examples]: /api/zkvm/examples
