@@ -54,7 +54,7 @@ pub struct SegmentReceipt {
 
     /// A digest of the verifier parameters that can be used to verify this receipt.
     ///
-    /// Acts as a fingerprint to identity differing proof system or circuit versions between a
+    /// Acts as a fingerprint to identify differing proof system or circuit versions between a
     /// prover and a verifier. Is not intended to contain the full verifier parameters, which must
     /// be provided by a trusted source (e.g. packaged with the verifier code).
     pub verifier_parameters: Digest,
