@@ -62,6 +62,7 @@ pub struct WorkLogUpdateProver<P> {
 
 impl<P> WorkLogUpdateProverBuilder<P> {
     /// Set the underlying RISC Zero zkVM [Prover].
+    #[must_use]
     pub fn prover<Q>(&mut self, prover: Q) -> WorkLogUpdateProverBuilder<Q> {
         WorkLogUpdateProverBuilder {
             prover: Some(prover),
