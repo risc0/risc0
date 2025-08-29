@@ -54,12 +54,182 @@ You can find detailed information in the [version management design][version-man
 
 ### Contract Addresses
 
-:::info
-Contracts are not deployed for unreleased versions.
-You can use the [deployed contracts for a released version][doc-released-contracts].
-:::
+### Ethereum Mainnet (1)
 
-[doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
+| Contract                                   | Address                                                              |
+| ------------------------------------------ | -------------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][router-src]       | [`0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319`][router-1-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-1-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x9F9994Eb4Cb5200198FEfb470f8b50301662e696`][estop-1-etherscan]    |
+| TimelockController                         | [`0x0b144E07A0826182B6b59788c34b32Bfa86Fb711`][timelock-1-etherscan] |
+
+<br/>
+
+### Ethereum Sepolia (11155111)
+
+| Contract                                   | Address                                                                     |
+| ------------------------------------------ | --------------------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][router-src]       | [`0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187`][router-11155111-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-11155111-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x724d375B5b622e15f0E64e9Deb76a4cB17877797`][estop-11155111-etherscan]    |
+| TimelockController                         | [`0xB4E3306129208cC8e6E75157f75f62eAe0B920a0`][timelock-11155111-etherscan] |
+
+<br/>
+
+### Ethereum Holesky (17000)
+
+| Contract                                   | Address                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| [RiscZeroVerifierRouter][router-src]       | [`0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C`][router-17000-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-17000-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x724d375B5b622e15f0E64e9Deb76a4cB17877797`][estop-17000-etherscan]    |
+| TimelockController                         | [`0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319`][timelock-17000-etherscan] |
+
+<br/>
+
+### Ethereum Hoodi (560048)
+
+| Contract                                   | Address                                                                   |
+| ------------------------------------------ | ------------------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][router-src]       | [`0x32Db7dc407AC886807277636a1633A1381748DD8`][router-560048-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-560048-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x724d375B5b622e15f0E64e9Deb76a4cB17877797`][estop-560048-etherscan]    |
+| TimelockController                         | [`0xE1CC216c5fd5EcAE1e951bDdcf951601554Be338`][timelock-560048-etherscan] |
+
+<br/>
+
+### Arbitrum Mainnet (42161)
+
+| Contract                                   | Address                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-42161-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-42161-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x9F9994Eb4Cb5200198FEfb470f8b50301662e696`][estop-42161-etherscan]    |
+| TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-42161-etherscan] |
+
+<br/>
+
+### Arbitrum Sepolia (421614)
+
+| Contract                                   | Address                                                                   |
+| ------------------------------------------ | ------------------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-421614-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-421614-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x724d375B5b622e15f0E64e9Deb76a4cB17877797`][estop-421614-etherscan]    |
+| TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-421614-etherscan] |
+
+<br/>
+
+### Avalanche Mainnet (43114)
+
+| Contract                                   | Address                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| [RiscZeroVerifierRouter][router-src]       | [`0x0b144E07A0826182B6b59788c34b32Bfa86Fb711`][router-43114-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-43114-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x9F9994Eb4Cb5200198FEfb470f8b50301662e696`][estop-43114-etherscan]    |
+| TimelockController                         | [`0xDC986a09728F76110FF666eE7b20d99086501d15`][timelock-43114-etherscan] |
+
+<br/>
+
+### Avalanche Fuji (43113)
+
+| Contract                                   | Address                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| [RiscZeroVerifierRouter][router-src]       | [`0x0b144E07A0826182B6b59788c34b32Bfa86Fb711`][router-43113-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-43113-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x724d375B5b622e15f0E64e9Deb76a4cB17877797`][estop-43113-etherscan]    |
+| TimelockController                         | [`0xDC986a09728F76110FF666eE7b20d99086501d15`][timelock-43113-etherscan] |
+
+<br/>
+
+### Base Mainnet (8453)
+
+| Contract                                   | Address                                                                 |
+| ------------------------------------------ | ----------------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-8453-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-8453-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x9F9994Eb4Cb5200198FEfb470f8b50301662e696`][estop-8453-etherscan]    |
+| TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-8453-etherscan] |
+
+<br/>
+
+### Base Sepolia (84532)
+
+| Contract                                   | Address                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-84532-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-84532-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x724d375B5b622e15f0E64e9Deb76a4cB17877797`][estop-84532-etherscan]    |
+| TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-84532-etherscan] |
+
+<br/>
+
+### Optimism Mainnet (10)
+
+| Contract                                   | Address                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-10-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-10-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x9F9994Eb4Cb5200198FEfb470f8b50301662e696`][estop-10-etherscan]    |
+| TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-10-etherscan] |
+
+<br/>
+
+### Optimism Sepolia (11155420)
+
+| Contract                                   | Address                                                                     |
+| ------------------------------------------ | --------------------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][router-src]       | [`0xB369b4dd27FBfb59921d3A4a3D23AC2fc32FB908`][router-11155420-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-11155420-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x724d375B5b622e15f0E64e9Deb76a4cB17877797`][estop-11155420-etherscan]    |
+| TimelockController                         | [`0x2DEfEA335392bb62d01f74e338697C7B31De254C`][timelock-11155420-etherscan] |
+
+<br/>
+
+### Linea Mainnet (59144)
+
+| Contract                                   | Address                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-59144-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x3d9aad871eaae3c5b847930f3Eef878D91766e46`][verifier-59144-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x4384e61DF16BFB392EFC1eF4B0D99F4ECC49BC40`][estop-59144-etherscan]    |
+| TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-59144-etherscan] |
+
+<br/>
+
+### Linea Sepolia (59141)
+
+| Contract                                   | Address                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| [RiscZeroVerifierRouter][router-src]       | [`0x27983ee173aD10E171D17C9c5C14d5baFE997609`][router-59141-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x3d9aad871eaae3c5b847930f3Eef878D91766e46`][verifier-59141-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0xF968911CA0b32faE4CDded83F1219b89189EB94B`][estop-59141-etherscan]    |
+| TimelockController                         | [`0xBDaEd5bbf8016AfD05Fc4659572e5fEb5854aAD4`][timelock-59141-etherscan] |
+
+<br/>
+
+### Polygon (POS) Mainnet (137)
+
+| Contract                                   | Address                                                                |
+| ------------------------------------------ | ---------------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][router-src]       | [`0xdBAD523786971B75A7b1c1CFdCfECDeb59A764B9`][router-137-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x2a098988600d87650Fb061FfAff08B97149Fa84D`][verifier-137-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x9F9994Eb4Cb5200198FEfb470f8b50301662e696`][estop-137-etherscan]    |
+| TimelockController                         | [`0x15249b0ee8eCabC8AB5753763501D4AcD0B7ABAB`][timelock-137-etherscan] |
+
+<br/>
+
+### Polygon zkEVM Mainnet (1101)
+
+| Contract                                   | Address                                                                 |
+| ------------------------------------------ | ----------------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-1101-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0xBdbFbF4500fced0d5511feEc1BB6a62EEf5Cd028`][verifier-1101-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0xf0BF916fCC8581C1c2EfA480444feDf9BdbE8A4c`][estop-1101-etherscan]    |
+| TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-1101-etherscan] |
+
+<br/>
+
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/release-3.0/contracts/EvenNumber.sol#L46-L52
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/3.0/risc0_zkvm/struct.Groth16Receipt.html
@@ -70,3 +240,70 @@ You can use the [deployed contracts for a released version][doc-released-contrac
 [term-verify]: /terminology#verify
 [term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm
 [version-management]: https://github.com/risc0/risc0-ethereum/blob/release-3.0/contracts/version-management-design.md
+[verifier-src]: https://github.com/risc0/risc0-ethereum/tree/release-3.0/contracts/src/groth16/RiscZeroGroth16Verifier.sol
+[router-src]: https://github.com/risc0/risc0-ethereum/blob/release-3.0/contracts/src/RiscZeroVerifierRouter.sol
+[estop-src]: https://github.com/risc0/risc0-ethereum/blob/release-3.0/contracts/src/RiscZeroVerifierEmergencyStop.sol
+[router-1-etherscan]: https://etherscan.io/address/0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319#code
+[verifier-1-etherscan]: https://etherscan.io/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-1-etherscan]: https://etherscan.io/address/0x9F9994Eb4Cb5200198FEfb470f8b50301662e696#code
+[timelock-1-etherscan]: https://etherscan.io/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711#code
+[router-11155111-etherscan]: https://sepolia.etherscan.io/address/0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187#code
+[verifier-11155111-etherscan]: https://sepolia.etherscan.io/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-11155111-etherscan]: https://sepolia.etherscan.io/address/0x724d375B5b622e15f0E64e9Deb76a4cB17877797#code
+[timelock-11155111-etherscan]: https://sepolia.etherscan.io/address/0xB4E3306129208cC8e6E75157f75f62eAe0B920a0#code
+[router-17000-etherscan]: https://holesky.etherscan.io/address/0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C#code
+[verifier-17000-etherscan]: https://holesky.etherscan.io/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-17000-etherscan]: https://holesky.etherscan.io/address/0x724d375B5b622e15f0E64e9Deb76a4cB17877797#code
+[timelock-17000-etherscan]: https://holesky.etherscan.io/address/0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319#code
+[router-560048-etherscan]: https://hoodi.etherscan.io/address/0x32Db7dc407AC886807277636a1633A1381748DD8#code
+[verifier-560048-etherscan]: https://hoodi.etherscan.io/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-560048-etherscan]: https://hoodi.etherscan.io/address/0x724d375B5b622e15f0E64e9Deb76a4cB17877797#code
+[timelock-560048-etherscan]: https://hoodi.etherscan.io/address/0xE1CC216c5fd5EcAE1e951bDdcf951601554Be338#code
+[router-42161-etherscan]: https://arbiscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
+[verifier-42161-etherscan]: https://arbiscan.io/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-42161-etherscan]: https://arbiscan.io/address/0x9F9994Eb4Cb5200198FEfb470f8b50301662e696#code
+[timelock-42161-etherscan]: https://arbiscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
+[router-421614-etherscan]: https://sepolia.arbiscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
+[verifier-421614-etherscan]: https://sepolia.arbiscan.io/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-421614-etherscan]: https://sepolia.arbiscan.io/address/0x724d375B5b622e15f0E64e9Deb76a4cB17877797#code
+[timelock-421614-etherscan]: https://sepolia.arbiscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
+[router-43114-etherscan]: https://snowtrace.io/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711#code
+[verifier-43114-etherscan]: https://snowtrace.io/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-43114-etherscan]: https://snowtrace.io/address/0x9F9994Eb4Cb5200198FEfb470f8b50301662e696#code
+[timelock-43114-etherscan]: https://snowtrace.io/address/0xDC986a09728F76110FF666eE7b20d99086501d15#code
+[router-43113-etherscan]: https://testnet.snowtrace.io/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711#code
+[verifier-43113-etherscan]: https://testnet.snowtrace.io/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-43113-etherscan]: https://testnet.snowtrace.io/address/0x724d375B5b622e15f0E64e9Deb76a4cB17877797#code
+[timelock-43113-etherscan]: https://testnet.snowtrace.io/address/0xDC986a09728F76110FF666eE7b20d99086501d15#code
+[router-8453-etherscan]: https://basescan.org/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
+[verifier-8453-etherscan]: https://basescan.org/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-8453-etherscan]: https://basescan.org/address/0x9F9994Eb4Cb5200198FEfb470f8b50301662e696#code
+[timelock-8453-etherscan]: https://basescan.org/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
+[router-84532-etherscan]: https://sepolia.basescan.org/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
+[verifier-84532-etherscan]: https://sepolia.basescan.org/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-84532-etherscan]: https://sepolia.basescan.org/address/0x724d375B5b622e15f0E64e9Deb76a4cB17877797#code
+[timelock-84532-etherscan]: https://sepolia.basescan.org/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
+[router-10-etherscan]: https://optimistic.etherscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
+[verifier-10-etherscan]: https://optimistic.etherscan.io/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-10-etherscan]: https://optimistic.etherscan.io/address/0x9F9994Eb4Cb5200198FEfb470f8b50301662e696#code
+[timelock-10-etherscan]: https://optimistic.etherscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
+[router-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0xB369b4dd27FBfb59921d3A4a3D23AC2fc32FB908#code
+[verifier-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0x724d375B5b622e15f0E64e9Deb76a4cB17877797#code
+[timelock-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0x2DEfEA335392bb62d01f74e338697C7B31De254C#code
+[router-59144-etherscan]: https://lineascan.build/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
+[verifier-59144-etherscan]: https://lineascan.build/address/0x3d9aad871eaae3c5b847930f3Eef878D91766e46#code
+[estop-59144-etherscan]: https://lineascan.build/address/0x4384e61DF16BFB392EFC1eF4B0D99F4ECC49BC40#code
+[timelock-59144-etherscan]: https://lineascan.build/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
+[router-59141-etherscan]: https://sepolia.lineascan.build/address/0x27983ee173aD10E171D17C9c5C14d5baFE997609#code
+[verifier-59141-etherscan]: https://sepolia.lineascan.build/address/0x3d9aad871eaae3c5b847930f3Eef878D91766e46#code
+[estop-59141-etherscan]: https://sepolia.lineascan.build/address/0xF968911CA0b32faE4CDded83F1219b89189EB94B#code
+[timelock-59141-etherscan]: https://sepolia.lineascan.build/address/0xBDaEd5bbf8016AfD05Fc4659572e5fEb5854aAD4#code
+[router-137-etherscan]: https://polygonscan.com/address/0xdBAD523786971B75A7b1c1CFdCfECDeb59A764B9#code
+[verifier-137-etherscan]: https://polygonscan.com/address/0x2a098988600d87650Fb061FfAff08B97149Fa84D#code
+[estop-137-etherscan]: https://polygonscan.com/address/0x9F9994Eb4Cb5200198FEfb470f8b50301662e696#code
+[timelock-137-etherscan]: https://polygonscan.com/address/0x15249b0ee8eCabC8AB5753763501D4AcD0B7ABAB#code
+[router-1101-etherscan]: https://zkevm.polygonscan.com/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
+[verifier-1101-etherscan]: https://zkevm.polygonscan.com/address/0xBdbFbF4500fced0d5511feEc1BB6a62EEf5Cd028#code
+[estop-1101-etherscan]: https://zkevm.polygonscan.com/address/0xf0BF916fCC8581C1c2EfA480444feDf9BdbE8A4c#code
+[timelock-1101-etherscan]: https://zkevm.polygonscan.com/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code

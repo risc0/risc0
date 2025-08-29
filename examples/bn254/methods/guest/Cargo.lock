@@ -742,6 +742,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
+name = "memmap2"
+version = "0.9.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "483758ad303d734cec05e5c12b41d7e93e6a6390c5e9dae6bdeb7c1259012d28"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "merlin"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -994,7 +1003,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.2"
+version = "3.0.3"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1014,7 +1023,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "4.0.2"
+version = "4.0.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1028,7 +1037,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.2"
+version = "4.0.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1041,7 +1050,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "4.0.2"
+version = "4.0.3"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -1066,7 +1075,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.2"
+version = "3.0.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1076,6 +1085,7 @@ dependencies = [
  "ark-serialize",
  "bytemuck",
  "hex",
+ "memmap2",
  "num-bigint",
  "num-traits",
  "risc0-binfmt",
@@ -1085,7 +1095,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.1.0"
+version = "2.2.1"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -1094,7 +1104,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "3.0.2"
+version = "3.0.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1144,7 +1154,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.1.0"
+version = "2.3.0"
 dependencies = [
  "bytemuck",
  "cfg-if",

@@ -105,7 +105,7 @@ jobs:
           cargo install --locked --force --path risc0/cargo-risczero
           cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
           cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
-        working-directory: risc0
+        working-directory: ${{ env.RISC0_PATH }}
       - uses: foundry-rs/foundry-toolchain@v1
       # Apply local patch
       - name: Local patch on risc0-ethereum
@@ -119,6 +119,10 @@ jobs:
           RISC0_ETHEREUM_PATH: ${{ env.RISC0_ETHEREUM_PATH }}
         working-directory: ${{ env.RISC0_PATH }}
       # Build and test risc0-ethereum
+      # TODO(risc0-ethereum#677): This forge build step is required because test-utils needs the
+      # built contract artifacts. Find a good way to remove this requirement.
+      - run: forge build
+        working-directory: ${{ env.RISC0_ETHEREUM_PATH }}
       - name: build risc0-ethereum
         run: cargo test --workspace --no-run
         working-directory: ${{ env.RISC0_ETHEREUM_PATH }}

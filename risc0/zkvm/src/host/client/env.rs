@@ -147,10 +147,10 @@ impl<'a> ExecutorEnvBuilder<'a> {
                 .with_read_fd(fileno::STDIN, reader);
         }
 
-        if inner.pprof_out.is_none() {
-            if let Ok(env_var) = std::env::var("RISC0_PPROF_OUT") {
-                inner.pprof_out = Some(env_var.into());
-            }
+        if inner.pprof_out.is_none()
+            && let Ok(env_var) = std::env::var("RISC0_PPROF_OUT")
+        {
+            inner.pprof_out = Some(env_var.into());
         }
 
         if let Ok(po2) = std::env::var("RISC0_KECCAK_PO2") {
