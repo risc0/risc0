@@ -126,6 +126,7 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
             input,
             assumptions: vec![],
             segment_limit_po2: None,
+            execute_only: false,
         };
         app.proof_request(request).await.unwrap();
     } else if is_manager {
@@ -453,11 +454,11 @@ impl App {
             server.stop().await;
         }
 
-        if let Some(manager) = self.manager.take() {
-            if manager.stop_gracefully().await.is_ok() {
-                tracing::info!("manager: wait for stop");
-                manager.wait_for_stop().await;
-            }
+        if let Some(manager) = self.manager.take()
+            && manager.stop_gracefully().await.is_ok()
+        {
+            tracing::info!("manager: wait for stop");
+            manager.wait_for_stop().await;
         }
 
         tracing::info!("worker: stop");
@@ -465,11 +466,11 @@ impl App {
             worker.stop().await;
         }
 
-        if let Some(factory) = self.factory {
-            if factory.stop_gracefully().await.is_ok() {
-                tracing::info!("factory: wait for stop");
-                factory.wait_for_stop().await;
-            }
+        if let Some(factory) = self.factory
+            && factory.stop_gracefully().await.is_ok()
+        {
+            tracing::info!("factory: wait for stop");
+            factory.wait_for_stop().await;
         }
 
         if let Some(provider) = self.provider {

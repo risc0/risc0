@@ -483,10 +483,10 @@ impl CpuProcessor {
         let result = match msg.task {
             CpuTask::Execute(task) => self.execute(msg.header, task).await,
             CpuTask::Preflight(task) => {
-                if let Err(error) = self.preflight(msg.header, task).await {
-                    if let Err(err) = self.send_done(header, Err(error)).await {
-                        tracing::error!("Failed to send error: {err}");
-                    }
+                if let Err(error) = self.preflight(msg.header, task).await
+                    && let Err(err) = self.send_done(header, Err(error)).await
+                {
+                    tracing::error!("Failed to send error: {err}");
                 }
                 return;
             }
@@ -529,7 +529,9 @@ impl CpuProcessor {
 
             // TODO(povw): Add PoVW here
             let mut exec = ExecutorImpl::from_elf(env, &task.request.binary)?;
+            let mut segments = vec![];
             let session = exec.run_with_callback(|segment| {
+                segments.push(segment.get_info());
                 let msg = TaskUpdateMsg {
                     header: header_copy.clone(),
                     payload: TaskUpdate::Segment(segment),
@@ -539,6 +541,7 @@ impl CpuProcessor {
             })?;
 
             let stats = session.stats();
+            let receipt_claim = session.claim()?;
             let assumptions = session
                 .assumptions
                 .into_iter()
@@ -549,6 +552,9 @@ impl CpuProcessor {
                 stats,
                 journal: session.journal,
                 assumptions,
+                segments,
+                exit_code: session.exit_code,
+                receipt_claim,
             };
 
             Ok(session)

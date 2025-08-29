@@ -26,7 +26,6 @@
 .equ HOST_ECALL_SHA, 4
 .equ HOST_ECALL_BIGINT, 5
 .equ WORD_SIZE, 4
-.equ MAX_IO_BYTES, 1024
 .equ DIGEST_WORDS, 8
 .equ REG_SP, 2
 .equ REG_T0, 5
@@ -40,6 +39,7 @@
 .equ REG_A5, 15
 .equ REG_A6, 16
 .equ REG_T3, 28
+.equ REG_T6, 31
 .equ USER_MODE, 0
 .equ MACHINE_MODE, 1
 
@@ -65,7 +65,6 @@ _start:
     li tp, USER_REGS_ADDR
     la s1, _ecall_table
     li s2, ECALL_TABLE_SIZE
-    li s3, MAX_IO_BYTES
 
     # Load the user program entry into MEPC
     li a0, USER_START_ADDR
@@ -83,7 +82,7 @@ _ecall_table:
     j _ecall_software
     j _ecall_sha
     j _ecall_bigint
-    fence # user
+    unimp # user
     j _ecall_bigint2
     j _ecall_poseidon2
 
@@ -91,7 +90,7 @@ _ecall_dispatch:
     # load t0 from userspace
     lw a0, REG_T0 * WORD_SIZE (tp)
     # check that ecall request is within range
-    bge a0, s2, 1f
+    bgeu a0, s2, 1f
     # adjust index so that it points to word sized entries
     slli a0, a0, 2
     # compute the table entry
@@ -99,7 +98,7 @@ _ecall_dispatch:
     # jump into dispatch table
     jr a1
 1:
-    fence # panic
+    unimp # panic
 
 _ecall_halt:
     # copy output digest from pointer in a1 to GLOBAL_OUTPUT_ADDR
@@ -143,7 +142,7 @@ _ecall_halt:
     mret
 
 1:
-    fence
+    unimp
 
 # return a word of the input digest to the user
 _ecall_input:
@@ -165,40 +164,17 @@ _ecall_input:
     mret
 
 1:
-    fence # panic
+    unimp # panic
 
 _ecall_software:
-    # prepare a software ecall
-    li a7, HOST_ECALL_READ
-    lw a0, REG_A2 * WORD_SIZE (tp) # syscall_ptr -> fd
-    lw a1, REG_A0 * WORD_SIZE (tp) # from_host_ptr -> buf
-    lw a2, REG_A1 * WORD_SIZE (tp) # from_host_len -> len
-    slli a2, a2, 2
-
-    # check if length is > 1024
-    bltu s3, a2, 1f
-
-    # call the host
-    ecall
-
-    # read (a0, a1) back from host
-    # fd == 0 means read (a0, a1) from host
-    li a0, 0
-    # read into user registers starting at a0
-    addi a1, tp, REG_A0 * WORD_SIZE
-    # read two words from host
-    li a2, 2 * WORD_SIZE
-    # call the host
-    ecall
-
-    # return back to userspace
-    mret
-1:
+    lw a0, REG_T6 * WORD_SIZE (tp) # user/kernel syscall nr
+    lw a1, REG_A2 * WORD_SIZE (tp) # syscall_ptr
+    lw a2, REG_A0 * WORD_SIZE (tp) # from_host_ptr
+    lw a3, REG_A1 * WORD_SIZE (tp) # from_host_len
     call ecall_software
 
     # return back to userspace
     mret
-
 
 _ecall_sha:
     lw a0, REG_A0 * WORD_SIZE (tp) # out_state

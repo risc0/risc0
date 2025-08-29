@@ -51,10 +51,10 @@ impl BakeCommand {
         }
         for pkg in included {
             tracing::debug!("Starting build for package {}", pkg.name);
-            if let Some(_risc0) = pkg.metadata.get("risc0") {
-                if pkg.targets.iter().any(|x| x.is_bin()) {
-                    self.bake_target(pkg, &target_dir)?;
-                }
+            if let Some(_risc0) = pkg.metadata.get("risc0")
+                && pkg.targets.iter().any(|x| x.is_bin())
+            {
+                self.bake_target(pkg, &target_dir)?;
             }
         }
 

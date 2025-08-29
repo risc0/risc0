@@ -351,12 +351,12 @@ impl JobActor {
                                 assumptions.push_back(Arc::new(inner.succinct().unwrap().clone()));
                             }
                             AssumptionReceipt::Unresolved(assumption) => {
-                                if let Some(keccak_root) = self.keccak_root.clone() {
-                                    if keccak_root.claim.digest() == assumption.claim {
-                                        tracing::info!("Using keccak_root");
-                                        assumptions.push_back(keccak_root);
-                                        continue;
-                                    }
+                                if let Some(keccak_root) = self.keccak_root.clone()
+                                    && keccak_root.claim.digest() == assumption.claim
+                                {
+                                    tracing::info!("Using keccak_root");
+                                    assumptions.push_back(keccak_root);
+                                    continue;
                                 }
                                 panic!("Missing assumption: {assumption:?}");
                             }
@@ -383,7 +383,7 @@ impl JobActor {
                 );
                 let result = ProofResult {
                     session: session.clone(),
-                    receipt: Arc::new(receipt),
+                    receipt: Some(Arc::new(receipt)),
                 };
                 self.status = JobStatus::Succeeded(result);
                 self.self_ref().stop_gracefully().await.unwrap();
@@ -392,10 +392,11 @@ impl JobActor {
     }
 
     fn join_root(&self, session: &Arc<Session>) -> Option<Arc<SuccinctReceipt<ReceiptClaim>>> {
-        if let Some((range, join_root)) = self.joins.first_key_value() {
-            if range.start == 0 && range.end == session.stats.segments {
-                return Some(join_root.clone());
-            }
+        if let Some((range, join_root)) = self.joins.first_key_value()
+            && range.start == 0
+            && range.end == session.stats.segments
+        {
+            return Some(join_root.clone());
         }
         None
     }

@@ -82,10 +82,10 @@ impl CompositeReceipt {
         for receipt in receipts {
             receipt.verify_integrity_with_context(ctx)?;
             tracing::debug!("claim: {:#?}", receipt.claim);
-            if let Some(id) = expected_pre_state_digest {
-                if id != receipt.claim.pre.digest::<sha::Impl>() {
-                    return Err(VerificationError::ImageVerificationError);
-                }
+            if let Some(id) = expected_pre_state_digest
+                && id != receipt.claim.pre.digest::<sha::Impl>()
+            {
+                return Err(VerificationError::ImageVerificationError);
             }
             if receipt.claim.exit_code != ExitCode::SystemSplit {
                 return Err(VerificationError::UnexpectedExitCode);
@@ -106,10 +106,10 @@ impl CompositeReceipt {
         // Verify the last receipt in the continuation.
         final_receipt.verify_integrity_with_context(ctx)?;
         tracing::debug!("final: {:#?}", final_receipt.claim);
-        if let Some(id) = expected_pre_state_digest {
-            if id != final_receipt.claim.pre.digest::<sha::Impl>() {
-                return Err(VerificationError::ImageVerificationError);
-            }
+        if let Some(id) = expected_pre_state_digest
+            && id != final_receipt.claim.pre.digest::<sha::Impl>()
+        {
+            return Err(VerificationError::ImageVerificationError);
         }
 
         // Verify all assumptions on the receipt are resolved by attached receipts.

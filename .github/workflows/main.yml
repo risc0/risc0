@@ -32,7 +32,6 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      bento: ${{ steps.filter.outputs.bento }}
       browser: ${{ steps.filter.outputs.browser }}
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
@@ -56,11 +55,6 @@ jobs:
               - rust-toolchain.toml
               - Cargo.lock
               - rzup/**
-            bento:
-              - *base
-              - bonsai/sdk/**
-              - risc0/**
-              - bento/**
             browser:
               - *base
               - examples/browser-verify/**
@@ -94,7 +88,7 @@ jobs:
             test:
               - *base
               - bonsai/sdk/**
-              - compact_proof/**
+              - groth16_proof/**
               - external/**
               - risc0/**
               - xtask/**
@@ -108,8 +102,6 @@ jobs:
   main-status-check:
     if: always()
     needs:
-      # - bento-run
-      - bento-test
       - browser
       - check
       - check-external
@@ -154,12 +146,10 @@ jobs:
         with:
           node-version: 20
       - run: cargo fmt --all --check
-      - run: cargo fmt --all --check --manifest-path bento/Cargo.toml
       - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
       - run: cargo sort --workspace --grouped --check
-      - run: cargo sort --workspace --grouped --check bento
       - run: cargo sort --workspace --grouped --check benchmarks
       - run: cargo sort --workspace --grouped --check examples
       - run: cargo sort --workspace --grouped --check tools/crates-validator
@@ -212,9 +202,6 @@ jobs:
       - uses: ./.github/actions/protoc
       - name: "root: cargo clippy"
         run: cargo clippy -F $FEATURE -F unstable --all-targets
-      - name: "bento: cargo clippy"
-        run: cargo clippy -F $FEATURE --all-targets
-        working-directory: bento
       - name: "benchmarks: cargo clippy"
         run: cargo clippy -F $FEATURE --all-targets
         working-directory: benchmarks
@@ -237,24 +224,28 @@ jobs:
             nvcc_arch: sm_89
             test_command: cargo test
             partition: 1
+            ci_profile: slow
           - os: macOS
             arch: ARM64
             feature: default
             device: apple_m2_pro
             test_command: cargo nextest run --partition hash:1/2
             partition: 1
+            ci_profile: fast
           - os: macOS
             arch: ARM64
             feature: default
             device: apple_m2_pro
             test_command: cargo nextest run --partition hash:2/2
             partition: 2
+            ci_profile: fast
     env:
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
+      RUSTFLAGS: --cfg ci --cfg ci_profile="${{ matrix.ci_profile }}"
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
@@ -277,10 +268,10 @@ jobs:
         with:
           crate: cargo-nextest
           version: "0.9.96"
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force gdb $RISC0_CPP_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force risc0-groth16 $RISC0_GROTH16_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install gdb $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install risc0-groth16 $RISC0_GROTH16_VERSION
       - name: Install gdb dependencies
         run: brew install zstd gettext lz4 mpfr gmp
         if: matrix.os == 'macOS'
@@ -307,17 +298,20 @@ jobs:
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
             test_command: cargo test
+            ci_profile: slow
           - os: macOS
             arch: ARM64
             feature: default
             device: apple_m2_pro
             test_command: cargo nextest run
+            ci_profile: fast
     env:
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
+      RUSTFLAGS: --cfg ci --cfg ci_profile="${{ matrix.ci_profile }}"
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
@@ -332,22 +326,19 @@ jobs:
         with:
           crate: cargo-nextest
           version: "0.9.96"
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force risc0-groth16 $RISC0_GROTH16_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install risc0-groth16 $RISC0_GROTH16_VERSION
       - name: test risc0-r0vm
         run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE
       - name: test risc0-r0vm (disable-dev-mode)
         run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode
-      - run: ${{ matrix.test_command }} --release -p cargo-risczero -F experimental
-      - name: run fibonacci benchmark
-        run: cargo run --release --locked -F $FEATURE -- fibonacci
-        working-directory: benchmarks
+      - run: ${{ matrix.test_command }} -p cargo-risczero -F experimental
       - name: run datasheet generator (smoke test)
-        run: cargo run --release --locked -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
+        run: cargo run --locked -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
       - name: run datasheet generator (CUDA full)
         if: matrix.feature == 'cuda'
-        run: cargo run --release --locked -F $FEATURE -F prove --example datasheet
+        run: cargo run --locked -F $FEATURE -F prove --example datasheet
       - name: check benches
         run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
@@ -379,7 +370,7 @@ jobs:
             device: apple_m2_pro
             test_command: cargo nextest run
     env:
-      CARGO_BUILD_JOBS: 32
+      CARGO_BUILD_JOBS: 16
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
@@ -402,8 +393,8 @@ jobs:
         with:
           crate: cargo-nextest
           version: "0.9.96"
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - name: test in dev mode
         run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace --exclude prover-example
@@ -451,10 +442,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
-      - run: cargo doc --no-deps --manifest-path bento/Cargo.toml --workspace
       - run: sccache --show-stats
 
   # Run as a separate job because we need to install a different set of tools.
@@ -510,8 +500,8 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: run SemVer checks
         run: cargo run --bin xtask --no-default-features -- semver-checks --locked $UPDATE
         env:
@@ -544,8 +534,8 @@ jobs:
         run: brew install gnu-sed
         if: matrix.os == 'macOS'
       - run: cargo install --force --path risc0/cargo-risczero --locked
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: |
           cargo risczero new \
             --path $(pwd) \
@@ -589,8 +579,8 @@ jobs:
         with:
           crate: wasm-pack
           version: "0.13.1"
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo run --bin xtask -- gen-receipt
       - run: |
           npm install
@@ -615,8 +605,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_CI_USER }}
           password: ${{ secrets.DOCKERHUB_CI_PAT }}
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo test -p risc0-build -F docker
       - run: cargo test -p risc0-groth16 -F prove --release
       - run: cargo test -p risc0-zkvm -F docker -F prove -- docker
@@ -668,89 +658,3 @@ jobs:
         working-directory: web
       - run: bun run test
         working-directory: web
-
-  bento-test:
-    if: needs.changes.outputs.bento == 'true'
-    needs: changes
-    runs-on: [ self-hosted, cluster, Linux, X64, cpu ]
-    services:
-      postgres:
-        image: postgres:latest
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_PASSWORD: password
-    env:
-      RUST_BACKTRACE: full
-      RISC0_DEV_MODE: true
-      DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-      - uses: ./.github/actions/protoc
-      - uses: baptiste0928/cargo-install@v3
-        with:
-          crate: cargo-nextest
-          version: "0.9.96"
-          key: Linux-cpu
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - name: Install sqlx-cli
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: sqlx-cli
-          version: '=0.8.2'
-          locked: true
-          args: --no-default-features
-          features: postgres
-      - run: sqlx migrate run --source bento/crates/taskdb/migrations/
-      - run: cargo test --manifest-path bento/Cargo.toml --locked --workspace --all-targets -- --ignored
-      - run: sccache --show-stats
-
-  bento-run:
-    if: false # needs.changes.outputs.bento == 'true'
-    needs: changes
-    runs-on: [ self-hosted, cluster, Linux, X64, cuda, g6e.xlarge, bench ]
-    env:
-      FEATURE: cuda
-      RISC0_BUILD_LOCKED: 1
-      RISC0_EXECUTOR: ipc
-      RISC0_PROVER: ipc
-      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
-      RUST_BACKTRACE: full
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/cuda
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-      - uses: ./.github/actions/protoc
-      - uses: baptiste0928/cargo-install@v3
-        with:
-          crate: cargo-nextest
-          version: "0.9.96"
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - run: cargo build --release -p risc0-r0vm -F $FEATURE
-      - uses: aws-actions/configure-aws-credentials@v4
-        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-        id: aws-creds
-        with:
-          aws-region: 'us-west-2'
-          role-to-assume: 'arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access'
-          output-credentials: true
-      - name: create ci creds file
-        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-        run: |
-          echo "[default]" > bento/dockerfiles/ci-cache-creds.txt
-          echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> bento/dockerfiles/ci-cache-creds.txt && \
-          echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> bento/dockerfiles/ci-cache-creds.txt && \
-          echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> bento/dockerfiles/ci-cache-creds.txt
-      - uses: docker/login-action@v3
-        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-        with:
-          username: ${{ secrets.DOCKERHUB_CI_USER }}
-          password: ${{ secrets.DOCKERHUB_CI_PAT }}
-      - uses: docker/setup-buildx-action@v3
-      - run: COMPOSE_BAKE=true docker compose --env-file bento/dockerfiles/sample.env -f compose.yml up -d
-      - run: RUST_LOG=info cargo run --manifest-path bento/Cargo.toml --bin bento_cli -- -c 32 -s
