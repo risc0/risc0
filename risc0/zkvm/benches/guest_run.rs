@@ -121,7 +121,10 @@ fn memcpy() {
 
 fn serde() {
     let claims = vec![ReceiptClaim::ok(BENCH_ID, vec![0; 1024]); 3];
-    let encoded = serde::to_vec(&claims).unwrap();
+    let encoded_u32 = serde::to_vec(&claims).unwrap();
+    let encoded: Vec<u8> = encoded_u32.iter()
+        .flat_map(|&word| word.to_le_bytes().to_vec())
+        .collect();
 
     run_guest_with(
         "read",
