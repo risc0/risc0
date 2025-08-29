@@ -16,5 +16,5 @@ This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. T
 [revm]: https://crates.io/crates/revm
 [signature-aggregation]: https://github.com/risc0/risc0/blob/release-0.18/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs
 [zeth-article]: https://www.risczero.com/news/zeth-release
-[zeth-repo]: https://github.com/risc0/zeth
+[zeth-repo]: https://github.com/boundless-xyz/zeth
 [zkvm-examples]: /api/zkvm/examples
