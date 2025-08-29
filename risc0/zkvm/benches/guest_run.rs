@@ -134,17 +134,9 @@ fn serde() {
             .unwrap(),
     );
 
-    run_guest_framed(
-        "read_framed",
-        BenchmarkSpec::ReadFramed,
-        &encoded,
-    );
+    run_guest_framed("read_framed", BenchmarkSpec::ReadFramed, &encoded);
 
-    run_guest_framed(
-        "read_buffered",
-        BenchmarkSpec::ReadBuffered,
-        &encoded,
-    );
+    run_guest_framed("read_buffered", BenchmarkSpec::ReadBuffered, &encoded);
 }
 
 fn bincode() {
