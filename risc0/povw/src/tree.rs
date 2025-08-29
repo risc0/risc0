@@ -465,15 +465,15 @@ impl Job {
         };
 
         // Check whether the requested subtree contains the boundary.
-        let boundry_level_index = index_max.checked_shr(8 + height as u32).unwrap_or(0);
-        match index.cmp(&boundry_level_index) {
+        let boundary_level_index = index_max.checked_shr(8 + height as u32).unwrap_or(0);
+        match index.cmp(&boundary_level_index) {
             Ordering::Less => FULL_SUBTREE_ROOTS[height],
-            Ordering::Equal => self.boundry_subtree_root(height),
+            Ordering::Equal => self.boundary_subtree_root(height),
             Ordering::Greater => EMPTY_SUBTREE_ROOTS[height],
         }
     }
 
-    fn boundry_subtree_root(&self, height: usize) -> Digest {
+    fn boundary_subtree_root(&self, height: usize) -> Digest {
         let mut index: u32 = self.index_max.unwrap();
 
         // Get the leaf and consume the first 8 bits.
