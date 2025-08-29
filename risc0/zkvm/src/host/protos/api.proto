@@ -60,17 +60,6 @@ message ProveSegmentReply {
   }
 }
 
-message ProveZkrReply {
-  oneof kind {
-    ProveZkrResult ok = 1;
-    GenericError error = 2;
-  }
-}
-
-message ProveZkrResult {
-  Asset receipt = 1;
-}
-
 message ProveKeccakRequest {
   base.Digest claim_digest = 1;
   uint32 po2 = 2;

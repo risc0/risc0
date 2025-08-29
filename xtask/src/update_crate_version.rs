@@ -103,12 +103,11 @@ fn run_inner(args: &UpdateCrateVersion, workspace_root: &Path) -> Result<()> {
         }
 
         // check for package.metadata.release.release = false
-        if let Some(release_metadata) = package.metadata.get("release") {
-            if let Some(release_flag) = release_metadata.get("release") {
-                if release_flag.as_bool().is_some_and(|v| !v) {
-                    continue;
-                }
-            }
+        if let Some(release_metadata) = package.metadata.get("release")
+            && let Some(release_flag) = release_metadata.get("release")
+            && release_flag.as_bool().is_some_and(|v| !v)
+        {
+            continue;
         }
 
         let manifest_path = &package.manifest_path;
