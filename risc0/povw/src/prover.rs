@@ -80,7 +80,7 @@ impl<P> WorkLogUpdateProverBuilder<P> {
         work_log: WorkLog,
         continuation_receipt: Receipt,
     ) -> anyhow::Result<&mut Self> {
-        let journal: Journal = borsh::from_slice(&continuation_receipt.journal.bytes)
+        let journal = Journal::decode(&continuation_receipt.journal.bytes)
             .context("failed to deserialize continuation receipt journal")?;
 
         // NOTE: We could also check the self_image_id and work_log_id. However, these values may
@@ -196,7 +196,7 @@ impl<P: Prover> WorkLogUpdateProver<P> {
         };
 
         let env = env_builder
-            .write_frame(&borsh::to_vec(&input)?)
+            .write_frame(&input.encode()?)
             .build()
             .context("failed to build ExecutorEnv")?;
 
@@ -207,7 +207,7 @@ impl<P: Prover> WorkLogUpdateProver<P> {
 
         // Set the continuation update on this prover such that if this method is called again, the
         // Log Builder state will be loaded.
-        let journal: Journal = borsh::from_slice(&prove_info.receipt.journal.bytes)
+        let journal = Journal::decode(&prove_info.receipt.journal.bytes)
             .context("failed to deserialize journal from proven work log update")?;
         self.continuation = Some((journal, prove_info.receipt.clone()));
 
