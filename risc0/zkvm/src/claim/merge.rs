@@ -47,7 +47,7 @@ pub(crate) trait Merge: Digestible + Sized {
     }
 }
 
-/// Error returned when a merge it attempted with two values with unequal digests.
+/// Error returned when a merge is attempted with two values with unequal digests.
 #[derive(Debug, Clone)]
 pub(crate) struct MergeInequalityError(pub Digest, pub Digest);
 
