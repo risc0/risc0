@@ -180,7 +180,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// Lowering this value will reduce the memory consumption of the prover. Memory consumption is
     /// roughly linear with the segment size, so lowering this value by 1 will cut memory
-    /// consumpton by about half.
+    /// consumption by about half.
     ///
     /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
     /// either up or down, may result in better proving performance.
@@ -196,7 +196,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// Lowering this value will reduce the memory consumption of the prover. Memory consumption is
     /// roughly linear with the segment size, so lowering this value by 1 will cut memory
-    /// consumpton by about half.
+    /// consumption by about half.
     ///
     /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
     /// either up or down, may result in better proving performance.
