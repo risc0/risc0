@@ -21,7 +21,7 @@ The protocol includes a two-part setup phase; the first setup happens once per z
 #### Part 1: Circuit Setup
 
 This setup is transparent and establishes the public parameters for the prover & verifier.
-These public parameters include the number and length of the trace columns, the choice of hash function and Merklization structure, as well as a full enumeration of the constraints that are to be enforced.
+These public parameters include the number and length of the trace columns, the choice of hash function and Merkleization structure, as well as a full enumeration of the constraints that are to be enforced.
 
 #### Part 2: Program Setup
 
