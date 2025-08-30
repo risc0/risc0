@@ -17,7 +17,7 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 
-use risc0_zkvm::{declare_syscall, sha::Digest};
+use risc0_zkvm::sha::Digest;
 use risc0_zkvm_platform::syscall::bigint;
 use serde::{Deserialize, Serialize};
 
@@ -83,10 +83,6 @@ pub enum MultiTestSpec {
         // Number of guest cycles to use, including startup.
         cycles: u64,
     },
-    Syscall {
-        count: u32,
-    },
-    SyscallWords,
     ShaConforms,
     ShaCycleCount,
     ShaDigest {
@@ -121,6 +117,3 @@ pub enum MultiTestSpec {
     },
     TooManySha,
 }
-
-declare_syscall!(pub SYS_MULTI_TEST);
-declare_syscall!(pub SYS_MULTI_TEST_WORDS);
