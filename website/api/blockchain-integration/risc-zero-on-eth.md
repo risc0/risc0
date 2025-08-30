@@ -26,10 +26,6 @@ The [Boundless Foundry Template][foundry-template] provides a minimal applicatio
 
 [Zeth][zeth-repo] produces ZK validity proofs for Ethereum Virtual Machine blocks (EVM). This is accomplished by running [revm], a Rust implementation of the EVM in the zkVM. The end result is an open-source zkEVM with high code reuse and minute, not hour, proving times on Bonsai. For more info check out [Announcing Zeth: The first Type Zero zkEVM][zeth-article].
 
-### DAO Governance Example
-
-This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. The protocol, based on the OpenZeppelin [Governor smart contract standard][governor-standard], batches signature verifications off-chain for a DAO governance vote. The end result is that in [\~160 lines of Rust][signature-aggregation], a gas savings of \~77% is achieved with significant room for optimizations.
-
 [article-coprocessor]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability
 [blockchain-examples]: https://github.com/risc0/risc0-ethereum/tree/main/examples
 [docs-zkvm]: ../zkvm/zkvm-overview.md
