@@ -1,6 +1,6 @@
 [package]
 name = "risc0-circuit-keccak-sys"
-description = "Generated HAL code for keccak cicuit"
+description = "Generated HAL code for keccak circuit"
 version = "4.0.2"
 edition = { workspace = true }
 license = { workspace = true }
