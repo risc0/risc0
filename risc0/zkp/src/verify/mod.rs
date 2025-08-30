@@ -185,7 +185,7 @@ impl<'a, F: Field> Verifier<'a, F> {
             po2: 0,
             tot_cycles: 0,
             iop: RefCell::new(ReadIOP::new(seal, suite.rng.as_ref())),
-            // TODO: change this to core::iter::repeat_n once it's stablabized.
+            // TODO: change this to core::iter::repeat_n once it's stabilized.
             merkle_verifiers: core::iter::repeat_with(|| None)
                 .take(taps.num_groups())
                 .collect(),
