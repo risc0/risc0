@@ -270,11 +270,6 @@ mod tests {
         assert_eq!(deserialized.share, dec!(0.5));
     }
 
-    // TODO: Add better test cases for allocate() to test rounding, stability,
-    // etc.
-    // TODO: Add test for AllocationQuery behavior including CSV white space
-    // issues.
-
     /// Test rounding behavior with various decimal precision scenarios
     #[test]
     fn test_allocate_rounding() {
