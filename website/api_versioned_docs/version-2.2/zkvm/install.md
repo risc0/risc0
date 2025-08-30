@@ -78,4 +78,4 @@ In order to see the latest releases for the rust toolchain see [Rust-releases].
 [Rust]: https://www.rust-lang.org
 [Rust-releases]: https://github.com/risc0/rust/releases
 [rustup]: https://rustup.rs
-[rzup-repo]: https://github.com/risc0/risc0/tree/release-2.2/rzup
+[rzup-repo]: https://github.com/risc0/risc0/tree/release-2.3/rzup
