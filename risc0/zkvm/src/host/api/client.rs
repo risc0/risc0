@@ -81,7 +81,8 @@ impl Client {
     /// Construct a [Client] based on environment variables.
     ///
     /// Example:
-    /// ```
+    /// ```no_run
+    /// use risc0_zkvm::ApiClient;
     /// let r0_client = ApiClient::from_env()
     ///     .expect("An instance of ApiClient should be available to proceed");
     /// ```
@@ -102,7 +103,8 @@ impl Client {
     /// Prove the specified ELF binary.
     ///
     /// Example:
-    /// ```
+    /// ```no_run
+    /// use risc0_zkvm::{ApiClient, ExecutorEnv, ExecutorEnvBuilder, ProverOpts, Asset};
     /// let r0_client = ApiClient::from_env()
     ///     .expect("An instance of ApiClient should be available to proceed");
     /// let input = "zk is eating the world";
@@ -162,7 +164,8 @@ impl Client {
     /// that hides away many details and produces the final receipt in one go.
     ///
     /// Example:
-    /// ```
+    /// ```no_run
+    /// use risc0_zkvm::{ApiClient, ExecutorEnv, ExecutorEnvBuilder, ProverOpts, Asset, AssetRequest};
     /// let r0_client = ApiClient::from_env()
     ///     .expect("An instance of ApiClient should be available to proceed");
     /// let input = "zk is eating the world";
@@ -223,11 +226,33 @@ impl Client {
     /// Prove the specified segment.
     ///
     /// Example:
-    /// ```
+    /// ```no_run
+    /// use risc0_zkvm::{ApiClient, ExecutorEnv, ExecutorEnvBuilder, ProverOpts, Asset, AssetRequest};
     /// let r0_client = ApiClient::from_env()
     ///     .expect("An instance of ApiClient should be available to proceed");
+    /// # let input = "zk is eating the world";
+    /// # let exec_env = ExecutorEnv::builder()
+    /// #     .write(&input)
+    /// #     .expect("Input should be available to hash")
+    /// #     .build()
+    /// #     .expect("An execution environment should be available to proceed");
+    /// # let mut segments = Vec::new();
+    /// # // Assume that we have an ELF located in `./elfs/keccak.elf` that expects a `&str` as input
+    /// # let keccak_elf: Vec<u8> = std::fs::read("./elfs/keccak.elf")
+    /// #    .expect("An ELF should be available to prove");
+    /// # let session_info = r0_client.execute(
+    /// #    &exec_env,
+    /// #    Asset::Inline(keccak_elf.into()),
+    /// #    AssetRequest::Inline,
+    /// #    |segment_info, seg| -> anyhow::Result<()> {
+    /// #        println!("Another segment `{segment_info:?}` is ready!");
+    /// #        segments.push(seg);
+    /// #        Ok(())
+    /// #    },
+    /// # )
+    /// # .expect("Execute should succeed to obtain segments");
     /// let mut segment_receipts = Vec::new();
-    /// // Assume we have some segments in the 'segments' variable
+    /// // Assume that we have some segments in the 'segments' variable
     /// for segment in segments.into_iter() {
     ///     let segment_receipt = r0_client.prove_segment(
     ///         &ProverOpts::default(),
@@ -341,9 +366,41 @@ impl Client {
     /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
     ///
     /// Example:
-    /// ```
+    /// ```no_run
+    /// use risc0_zkvm::{ApiClient, ExecutorEnv, ExecutorEnvBuilder, ProverOpts, Asset, AssetRequest};
     /// let r0_client = ApiClient::from_env()
     ///     .expect("An instance of ApiClient should be available to proceed");
+    /// # let input = "zk is eating the world";
+    /// # let exec_env = ExecutorEnv::builder()
+    /// #     .write(&input)
+    /// #     .expect("Input should be available to hash")
+    /// #     .build()
+    /// #     .expect("An execution environment should be available to proceed");
+    /// # let mut segments = Vec::new();
+    /// # // Assume that we have an ELF located in `./elfs/keccak.elf` that expects a `&str` as input
+    /// # let keccak_elf: Vec<u8> = std::fs::read("./elfs/keccak.elf")
+    /// #    .expect("An ELF should be available to prove");
+    /// # let session_info = r0_client.execute(
+    /// #    &exec_env,
+    /// #    Asset::Inline(keccak_elf.into()),
+    /// #    AssetRequest::Inline,
+    /// #    |segment_info, seg| -> anyhow::Result<()> {
+    /// #        println!("Another segment `{segment_info:?}` is ready!");
+    /// #        segments.push(seg);
+    /// #        Ok(())
+    /// #    },
+    /// # )
+    /// # .expect("Execute should succeed to obtain segments");
+    /// # let mut segment_receipts = Vec::new();
+    /// # for segment in segments.into_iter() {
+    /// #    let segment_receipt = r0_client.prove_segment(
+    /// #        &ProverOpts::default(),
+    /// #        segment,
+    /// #        AssetRequest::Inline,
+    /// #    )
+    /// #    .expect("Segment should be proved to get a segment receipt");
+    /// #    segment_receipts.push(segment_receipt);
+    /// # }
     /// // Assume we have some proved segments in the 'segment_receipts' variable
     /// let mut lifted_receipts = Vec::new();
     /// for segment_receipt in segment_receipts.into_iter() {
@@ -402,11 +459,53 @@ impl Client {
     /// the same session can be compressed into a single receipt for the entire session.
     ///
     /// Example:
-    /// ```
+    /// ```no_run
     /// // Once lifted, all receipts should be aggregated into a final receipt. Here we use functional style folding.
+    /// use risc0_zkvm::{ApiClient, ExecutorEnv, ExecutorEnvBuilder, ProverOpts, Asset, AssetRequest};
     /// let r0_client = ApiClient::from_env()
     ///     .expect("An instance of ApiClient should be available to proceed");
-    /// // Assume we have some succinct receipts in the 'lifted_receipts' variable
+    /// # let input = "zk is eating the world";
+    /// # let exec_env = ExecutorEnv::builder()
+    /// #     .write(&input)
+    /// #     .expect("Input should be available to hash")
+    /// #     .build()
+    /// #     .expect("An execution environment should be available to proceed");
+    /// # let mut segments = Vec::new();
+    /// # // Assume that we have an ELF located in `./elfs/keccak.elf` that expects a `&str` as input
+    /// # let keccak_elf: Vec<u8> = std::fs::read("./elfs/keccak.elf")
+    /// #    .expect("An ELF should be available to prove");
+    /// # let session_info = r0_client.execute(
+    /// #    &exec_env,
+    /// #    Asset::Inline(keccak_elf.into()),
+    /// #    AssetRequest::Inline,
+    /// #    |segment_info, seg| -> anyhow::Result<()> {
+    /// #        println!("Another segment `{segment_info:?}` is ready!");
+    /// #        segments.push(seg);
+    /// #        Ok(())
+    /// #    },
+    /// # )
+    /// # .expect("Execute should succeed to obtain segments");
+    /// # let mut segment_receipts = Vec::new();
+    /// # for segment in segments.into_iter() {
+    /// #    let segment_receipt = r0_client.prove_segment(
+    /// #        &ProverOpts::default(),
+    /// #        segment,
+    /// #        AssetRequest::Inline,
+    /// #    )
+    /// #    .expect("Segment should be proved to get a segment receipt");
+    /// #    segment_receipts.push(segment_receipt);
+    /// # }
+    /// # let mut lifted_receipts = Vec::new();
+    /// # for segment_receipt in segment_receipts.into_iter() {
+    /// #    let succinct_receipt = r0_client.lift(
+    /// #        &ProverOpts::default(),
+    /// #        segment_receipt.try_into().expect("Segment receipt should be a valid asset"),
+    /// #        AssetRequest::Inline,
+    /// #    )
+    /// #    .expect("Segment receipt should be lifted to get a succinct receipt");
+    /// #    lifted_receipts.push(succinct_receipt);
+    /// # }    
+    /// // Assume that we have some succinct receipts in the 'lifted_receipts' variable
     /// let mut iter = lifted_receipts.into_iter();
     /// let first = iter.next().unwrap();
     /// let aggregated_receipt = iter
@@ -683,10 +782,21 @@ impl Client {
     /// Verify a [Receipt].
     ///
     /// Example:
-    /// ```
+    /// ```no_run
+    /// use risc0_zkvm::{ApiClient, ExecutorEnv, ExecutorEnvBuilder, default_prover, Receipt, Asset, Digest};
+    /// use hex::FromHex;
     /// let r0_client = ApiClient::from_env()
     ///     .expect("An instance of ApiClient should be available to proceed");
-    /// // Assume the following `image_id` is valid for a guest whose honest execution is recorded in `receipt`
+    /// let input = "zk is eating the world";
+    /// let exec_env = ExecutorEnv::builder()
+    ///     .write(&input)
+    ///     .unwrap()
+    ///     .build()
+    ///     .unwrap();
+    /// # let keccak_elf: Vec<u8> = std::fs::read("./elfs/keccak.elf")
+    /// #    .expect("An ELF should be available to prove");
+    /// let receipt = default_prover().prove(exec_env, &keccak_elf).unwrap().receipt;
+    /// // Assume that the following `image_id` is valid for our guest
     /// let image_id = Digest::from_hex("12f3b3543911f1704e0bcba08a1231e92d1c7704397173ffff61b165ce32bfc8")
     ///     .expect("The hex string should be a valid image id");
     /// r0_client.verify(
