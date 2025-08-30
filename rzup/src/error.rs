@@ -45,7 +45,7 @@ pub enum RzupError {
     #[error("Unsupported distribution platform: {0}")]
     UnsupportedDistributionPlatform(String),
 
-    #[error("SHA-265 sum mismatch: expected = {expected}, actual = {actual}")]
+    #[error("SHA-256 sum mismatch: expected = {expected}, actual = {actual}")]
     Sha256Mismatch { expected: String, actual: String },
 
     #[error("Signature failed to verify: {0}")]
