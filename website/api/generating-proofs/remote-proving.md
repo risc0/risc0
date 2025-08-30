@@ -6,7 +6,7 @@ Bonsai lets users generate proofs for their zkVM applications, without using the
 Users specify which zkVM application they want to run, as well as the inputs to that program, and Bonsai returns a proof.
 
 Bonsai is highly parallelized and highly performant: proving work on Bonsai is split among a dynamically-sized GPU cluster, offering ultra-fast proving.
-To get a taste of what you can do with Bonsai, check out [Zeth][external-zeth], our [Governance Showcase][external-governance-showcase], and our blog post about using [RISC Zero as a zk coprocessor with Bonsai proving][external-zkcoprocessor].
+To get a taste of what you can do with Bonsai, check out [Zeth][external-zeth] and our blog post about using [RISC Zero as a zk coprocessor with Bonsai proving][external-zkcoprocessor].
 
 If you already have an API key, you can request proofs from Bonsai in any of the following ways:
 
