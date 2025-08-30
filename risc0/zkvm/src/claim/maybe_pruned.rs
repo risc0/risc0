@@ -95,7 +95,7 @@ where
 }
 
 impl<T> MaybePruned<Option<T>> {
-    /// Returns true is the value is None, or the value is pruned as the zero
+    /// Returns true if the value is None, or the value is pruned as the zero
     /// digest.
     pub fn is_none(&self) -> bool {
         match self {
@@ -105,7 +105,7 @@ impl<T> MaybePruned<Option<T>> {
         }
     }
 
-    /// Returns true is the value is Some(_), or the value is pruned as a
+    /// Returns true if the value is Some(_), or the value is pruned as a
     /// non-zero digest.
     pub fn is_some(&self) -> bool {
         !self.is_none()

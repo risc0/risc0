@@ -32,11 +32,11 @@ pub trait HashFn<F: Field>: Send + Sync {
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Box<Digest>;
 
     /// Generate a hash from a slice of field elements.  This may be unpadded so
-    /// this is only safe to used when the size is known.
+    /// this is only safe to be used when the size is known.
     fn hash_elem_slice(&self, slice: &[F::Elem]) -> Box<Digest>;
 
     /// Generate a hash from a slice of extension field element.  This may be
-    /// unpadded so this is only safe to used when the size is known.
+    /// unpadded so this is only safe to be used when the size is known.
     fn hash_ext_elem_slice(&self, slice: &[F::ExtElem]) -> Box<Digest>;
 }
 

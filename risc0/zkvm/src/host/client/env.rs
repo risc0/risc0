@@ -462,7 +462,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Return [ProverOpts][crate::ProverOpts] with proof of verifiable work (PoVW) enabled, and the specified work
-    /// log identifer and job number as the base for PoVW nonces assigned to each segment.
+    /// log identifier and job number as the base for PoVW nonces assigned to each segment.
     ///
     /// ```
     /// # use risc0_zkvm::ExecutorEnv;

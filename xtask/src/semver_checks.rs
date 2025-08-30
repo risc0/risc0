@@ -784,7 +784,7 @@ mod tests {
     use std::collections::HashMap;
 
     #[test]
-    fn sermver_output_parsing() {
+    fn semver_output_parsing() {
         let output = SemverOutput::parse(
             "
             Building risc0-foobar v1.4.0 (current)

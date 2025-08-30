@@ -125,7 +125,7 @@ pub struct Receipt {
     /// Metadata providing context on the receipt, about the proving system, SDK versions, and other
     /// information to help with interoperability. It is not cryptographically bound to the receipt,
     /// and should not be used for security-relevant decisions, such as choosing whether or not to
-    /// accept a receipt based on it's stated version.
+    /// accept a receipt based on its stated version.
     pub metadata: ReceiptMetadata,
 }
 
@@ -228,8 +228,8 @@ impl Receipt {
             journal: MaybePruned::Pruned(self.journal.digest()),
             // TODO(#982): It would be reasonable for this method to allow integrity verification
             // for receipts that have a non-empty assumptions list, but it is not supported here
-            // because we don't have a enough information to open the assumptions list unless we
-            // require it be empty.
+            // because we don't have enough information to open the assumptions list unless we
+            // require it to be empty.
             assumptions: Assumptions(vec![]).into(),
         });
 
@@ -607,7 +607,7 @@ impl<Claim> FakeReceipt<Claim> {
 impl TryFrom<FakeReceipt<ReceiptClaim>> for Receipt {
     type Error = PrunedValueError;
 
-    /// Try to create a [Receipt] from a [FakeReceipt]. In order to succeed, the jounal must be
+    /// Try to create a [Receipt] from a [FakeReceipt]. In order to succeed, the journal must be
     /// populated on the receipt claim (i.e. it cannot be pruned).
     fn try_from(fake_receipt: FakeReceipt<ReceiptClaim>) -> Result<Self, Self::Error> {
         // Attempt to copy the journal from the receipt claim, returning an error if pruned.
