@@ -26,7 +26,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
-    ReceiptClaim, Work,
+    ReceiptClaim, SegmentInfo, Work,
     host::{
         client::env::{ProveKeccakRequest, SegmentPath},
         prove_info::{SessionStats, SyscallKind, SyscallMetric},
@@ -139,6 +139,14 @@ impl Segment {
 
     pub(crate) fn user_cycles(&self) -> u32 {
         self.inner.suspend_cycle
+    }
+
+    /// Construct a `SegmentInfo` containing information about this segment.
+    pub fn get_info(&self) -> SegmentInfo {
+        SegmentInfo {
+            po2: self.po2() as u32,
+            cycles: self.user_cycles(),
+        }
     }
 }
 
@@ -257,10 +265,10 @@ impl Session {
             .filter_map(|(_, receipt)| match receipt {
                 AssumptionReceipt::Proven(_) => None,
                 AssumptionReceipt::Unresolved(assumption) => {
-                    if let Some(ref keccak) = keccak_root_assumption {
-                        if keccak == assumption {
-                            return None;
-                        }
+                    if let Some(ref keccak) = keccak_root_assumption
+                        && keccak == assumption
+                    {
+                        return None;
                     }
                     Some(assumption.clone())
                 }

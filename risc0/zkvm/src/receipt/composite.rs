@@ -56,7 +56,7 @@ pub struct CompositeReceipt {
 
     /// A digest of the verifier parameters that can be used to verify this receipt.
     ///
-    /// Acts as a fingerprint to identity differing proof system or circuit versions between a
+    /// Acts as a fingerprint to identify differing proof system or circuit versions between a
     /// prover and a verifier. Is not intended to contain the full verifier parameters, which must
     /// be provided by a trusted source (e.g. packaged with the verifier code).
     pub verifier_parameters: Digest,
@@ -82,10 +82,10 @@ impl CompositeReceipt {
         for receipt in receipts {
             receipt.verify_integrity_with_context(ctx)?;
             tracing::debug!("claim: {:#?}", receipt.claim);
-            if let Some(id) = expected_pre_state_digest {
-                if id != receipt.claim.pre.digest::<sha::Impl>() {
-                    return Err(VerificationError::ImageVerificationError);
-                }
+            if let Some(id) = expected_pre_state_digest
+                && id != receipt.claim.pre.digest::<sha::Impl>()
+            {
+                return Err(VerificationError::ImageVerificationError);
             }
             if receipt.claim.exit_code != ExitCode::SystemSplit {
                 return Err(VerificationError::UnexpectedExitCode);
@@ -106,10 +106,10 @@ impl CompositeReceipt {
         // Verify the last receipt in the continuation.
         final_receipt.verify_integrity_with_context(ctx)?;
         tracing::debug!("final: {:#?}", final_receipt.claim);
-        if let Some(id) = expected_pre_state_digest {
-            if id != final_receipt.claim.pre.digest::<sha::Impl>() {
-                return Err(VerificationError::ImageVerificationError);
-            }
+        if let Some(id) = expected_pre_state_digest
+            && id != final_receipt.claim.pre.digest::<sha::Impl>()
+        {
+            return Err(VerificationError::ImageVerificationError);
         }
 
         // Verify all assumptions on the receipt are resolved by attached receipts.

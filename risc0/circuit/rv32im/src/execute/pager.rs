@@ -196,7 +196,7 @@ impl PageTable {
     }
 
     fn clear(&mut self) {
-        // You would think its faster to re-use the memory, but filling it with zeros is
+        // You would think its faster to reuse the memory, but filling it with zeros is
         // slower
         // than just allocating a new piece of zeroed memory.
         self.table = vec![Self::INVALID_IDX; NUM_PAGES];

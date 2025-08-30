@@ -31,7 +31,7 @@ For users who prefer manual installation or those who use systems such as x86-64
 
 - Clone the repository with `git clone https://github.com/risc0/risc0.git`.
 - In the root of the repository, install `rzup` with `cargo install --path rzup`.
-- Build and install the rust toolchain with `rzup toolchain build rust`. This command may require utilities such as `cmake` and the `ninja` build system to be installed.
+- Build and install the rust toolchain with `rzup build rust`. This command may require utilities such as `cmake` and the `ninja` build system to be installed.
 - Build and install the `cargo-risczero` by first checking out the branch `release-*` where `*` is `[major release number].[minor release number]` of your desired zkVM version. For example, if you would like to install version 1.1.0, run `git checkout origin/release-1.1` and run `cargo install --path risc0/cargo-risczero`.
 
 For x86-64 linux and arm64 macOS, install the C++ toolchains by running:

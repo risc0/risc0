@@ -101,26 +101,6 @@ pub mod prove_segment_reply {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct ProveZkrReply {
-    #[prost(oneof = "prove_zkr_reply::Kind", tags = "1, 2")]
-    pub kind: ::core::option::Option<prove_zkr_reply::Kind>,
-}
-/// Nested message and enum types in `ProveZkrReply`.
-pub mod prove_zkr_reply {
-    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
-    pub enum Kind {
-        #[prost(message, tag = "1")]
-        Ok(super::ProveZkrResult),
-        #[prost(message, tag = "2")]
-        Error(super::GenericError),
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct ProveZkrResult {
-    #[prost(message, optional, tag = "1")]
-    pub receipt: ::core::option::Option<Asset>,
-}
-#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ProveKeccakRequest {
     #[prost(message, optional, tag = "1")]
     pub claim_digest: ::core::option::Option<super::base::Digest>,

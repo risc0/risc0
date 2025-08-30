@@ -334,11 +334,11 @@ fn add_raw<const WIDTH: usize>(
 /// Checks if the bit at the position is set.
 fn bit<const WIDTH: usize>(scalar: &[u32; WIDTH], bit: u32) -> bool {
     let bits_per_digit = 32u32;
-    if let Ok(digit_index) = usize::try_from(bit / bits_per_digit) {
-        if let Some(digit) = scalar.get(digit_index) {
-            let bit_mask = (1u32) << (bit % bits_per_digit);
-            return (digit & bit_mask) != 0;
-        }
+    if let Ok(digit_index) = usize::try_from(bit / bits_per_digit)
+        && let Some(digit) = scalar.get(digit_index)
+    {
+        let bit_mask = (1u32) << (bit % bits_per_digit);
+        return (digit & bit_mask) != 0;
     }
     false
 }

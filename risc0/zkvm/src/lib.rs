@@ -155,7 +155,7 @@ pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest};
 pub use {
     self::host::{
         prove_info::{ProveInfo, SessionStats},
-        recursion::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
+        recursion::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID},
     },
     risc0_binfmt::compute_image_id,
     risc0_groth16::Seal as Groth16Seal,
@@ -191,7 +191,7 @@ pub fn get_version() -> Result<Version, semver::Error> {
 /// Returns `true` if dev mode is enabled.
 #[cfg(feature = "std")]
 #[deprecated(
-    note = "dev-mode can be enabled programatically, so this function is no longer authoritative. \
+    note = "dev-mode can be enabled programmatically, so this function is no longer authoritative. \
             Use `ProverOpts::is_dev_mode` or `VerifierContext::is_dev_mode`"
 )]
 pub fn is_dev_mode() -> bool {
