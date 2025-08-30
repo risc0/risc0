@@ -217,6 +217,10 @@ impl<P: Prover> WorkLogUpdateProver<P> {
             .build()
             .context("failed to build ExecutorEnv")?;
 
+        // NOTE: This may block the current thread for a significant amount of time. It is not
+        // trivial to wrap this statement in e.g. tokio's spawn_blocking because self contains
+        // a VerifierContext which does not implement Send. If this causes any issues, the caller
+        // can mitigate the issue by building and calling the prover in a seperate thread.
         let prove_info = self
             .prover
             .prove_with_ctx(
