@@ -29,6 +29,7 @@ use crate::{
     Job, WorkLog,
 };
 
+// NOTE: The owned pattern is used here because verifier_ctx does not impl Clone.
 /// A stateful prover for work log updates which runs the Log Builder to produce a receipt for each
 /// update to the work log.
 #[derive(Builder)]
