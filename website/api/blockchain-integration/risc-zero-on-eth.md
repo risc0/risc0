@@ -30,10 +30,8 @@ The [Boundless Foundry Template][foundry-template] provides a minimal applicatio
 [blockchain-examples]: https://github.com/risc0/risc0-ethereum/tree/main/examples
 [docs-zkvm]: ../zkvm/zkvm-overview.md
 [foundry-template]: https://github.com/boundless-xyz/boundless-foundry-template
-[governor-standard]: https://docs.openzeppelin.com/contracts/5.x/api/governance
 [revm]: https://crates.io/crates/revm
 [risc0-ethereum]: https://github.com/risc0/risc0-ethereum
-[signature-aggregation]: https://github.com/risc0/risc0-ethereum/blob/main/examples/governance/methods/guest/src/bin/finalize_votes.rs
 [steel-blog]: https://risczero.com/blog/introducing-steel-2.0
 [steel-repo]: https://risc0.github.io/risc0-ethereum/risc0_steel/
 [steel-src]: https://github.com/risc0/risc0-ethereum/tree/main/crates/steel
