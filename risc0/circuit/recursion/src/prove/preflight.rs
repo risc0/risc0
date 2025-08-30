@@ -379,7 +379,7 @@ impl Preflight {
         let in_a = self.wom_read(args[0]);
         let in_b = self.wom_read(args[1]);
         let result = if args_u32[2] != 0 {
-            // AND and combine [a, b, 0, 0] & [c, d, 0, 0] -> [(a&c) + ((b&d) << 16), 0, 0,
+            // AND combine [a, b, 0, 0] & [c, d, 0, 0] -> [(a&c) + ((b&d) << 16), 0, 0,
             // 0]
             let result = FpExt::new(
                 Fp::new(
