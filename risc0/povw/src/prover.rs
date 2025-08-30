@@ -179,7 +179,7 @@ impl<P: Prover> WorkLogUpdateProver<P> {
             );
             ensure!(
                 self.log_id == work.nonce_max.log,
-                "work claim nonce min log id is not equal to the expected log id: {} != {}",
+                "work claim nonce max log id is not equal to the expected log id: {} != {}",
                 work.nonce_max.log,
                 self.log_id
             );
