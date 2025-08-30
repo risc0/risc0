@@ -39,7 +39,7 @@ const NUM_BITS: usize = 31;
 // Smallest allowed alpha for Baby Bear
 const ALPHA: usize = 7;
 
-// A structure to hold all computed constant to eventually be exported
+// A structure to hold all computed constants to eventually be exported
 struct ComputedConstants {
     rounds_full: usize,             // The number of full rounds, always 8 in practice
     rounds_partial: usize,          // The number of partial rounds, computed based on security
@@ -62,7 +62,7 @@ impl ComputedConstants {
     }
 }
 
-// A function to turns a string of hex constants into a vector of Elems
+// A function to turn a string of hex constants into a vector of Elems
 fn to_elems(input_string: &str) -> Vec<Elem> {
     let mut out = Vec::<Elem>::new();
     for part in input_string.split(',') {
