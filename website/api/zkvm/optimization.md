@@ -447,9 +447,9 @@ cycle counts added.
 | OR rd,rs1,rs2       | Or                                 | rd ← ux(rs1) ∨ ux(rs2)                         | 2                                               |
 | AND rd,rs1,rs2      | And                                | rd ← ux(rs1) ∧ ux(rs2)                         | 2                                               |
 | MUL rd,rs1,rs2      | Multiply                           | rd ← ux(rs1) × ux(rs2)                         | 1                                               |
-| MULH rd,rs1,rs2     | Multiply High Signed Signed        | rd ← (sx(rs1) × sx(rs2)) » xlen                | 1                                               |
+| MULH rd,rs1,rs2     | Multiply High Signed               | rd ← (sx(rs1) × sx(rs2)) » xlen                | 1                                               |
 | MULHSU rd,rs1,rs2   | Multiply High Signed Unsigned      | rd ← (sx(rs1) × ux(rs2)) » xlen                | 1                                               |
-| MULHU rd,rs1,rs2    | Multiply High Unsigned Unsigned    | rd ← (ux(rs1) × ux(rs2)) » xlen                | 1                                               |
+| MULHU rd,rs1,rs2    | Multiply High Unsigned             | rd ← (ux(rs1) × ux(rs2)) » xlen                | 1                                               |
 | DIV rd,rs1,rs2      | Divide Signed                      | rd ← sx(rs1) ÷ sx(rs2)                         | 2                                               |
 | DIVU rd,rs1,rs2     | Divide Unsigned                    | rd ← ux(rs1) ÷ ux(rs2)                         | 2                                               |
 | REM rd,rs1,rs2      | Remainder Signed                   | rd ← sx(rs1) mod sx(rs2)                       | 2                                               |

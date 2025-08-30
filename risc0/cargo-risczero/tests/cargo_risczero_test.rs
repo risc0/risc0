@@ -17,7 +17,7 @@
 use std::process::Command;
 
 #[test]
-#[ignore = "failing as of oct 18 with with cargo 1.79"]
+#[ignore = "failing as of oct 18 with cargo 1.79"]
 fn basic_usage() {
     let exe_path = env!("CARGO_BIN_EXE_cargo-risczero");
     let args = ["risczero", "test"];
