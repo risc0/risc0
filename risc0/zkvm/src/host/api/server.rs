@@ -389,7 +389,7 @@ impl Server {
 
             let binary = env_request
                 .binary
-                .ok_or_else(|| malformed_err("ProveRequest.env_request.binary"))?;
+                .ok_or_else(|| malformed_err("ExecutorEnv.binary"))?;
             let bytes = binary.as_bytes()?;
 
             let opts: ProverOpts = request
