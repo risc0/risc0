@@ -8,7 +8,7 @@ The FRI protocol finishes the argument by proving the assertion about block prox
 
 ## Basic Function
 
-Given a Merkle root, the _FRI protocol_ is a recursive technique for proving that the associated Merkle leaves are associated with a low-degree polynomial.
+Given a Merkle root, the _FRI protocol_ is a recursive technique for proving that the associated Merkle leaves correspond to a low-degree polynomial.
 
 ## Background
 
