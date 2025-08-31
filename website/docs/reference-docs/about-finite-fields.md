@@ -25,7 +25,7 @@ We say $3$ is a **multiplicative generator** for the integers modulo 5. For any 
 
 Most of your Algebra II knowledge about polynomials still holds in finite fields.
 
-`Example: Consider` $f(x)=x^2-1\text{ mod }5$`.  Observe that ` $f(1)=f(4)=0.$
+`Example: Consider` $f(x)=x^2-1\text{ mod }5$`. Observe that ` $f(1)=f(4)=0.$
 `We say ` $f$ `has roots at 1 and 4, and we can factor in the familiar way:` $f(x)=(x-1)(x-4)$`.`
 
 `Example:
