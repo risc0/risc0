@@ -111,7 +111,7 @@ ImageID: c7c399c25ecf26b79e987ed060efce1f0836a594ad1059b138b6ed2f123dad38 - "tar
 ImageID: a51a4b747f18b7e5f36a016bdd6f885e8293dbfca2759d6667a6df8edd5f2489 - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/slice_io"
 ```
 
-## datashet
+## datasheet
 
 The `datasheet` command performs a benchmark to evaluate zkVM performance for
 the current machine's hardware, and then prints a table (along with optional
