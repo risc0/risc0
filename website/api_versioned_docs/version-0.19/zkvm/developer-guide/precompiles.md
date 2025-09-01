@@ -13,11 +13,11 @@ These crates include:
 - [RustCrypto's `k256` crate](https://github.com/risc0/RustCrypto-elliptic-curves/tree/risczero)
 - [Dalek Cryptography's curve25519-dalek crate](https://github.com/risc0/curve25519-dalek/tree/risczero)
 
-Each of these are forks of the original source code repository, with modifications to use RISC Zero cryptography extensions.
+Each of these is forks of the original source code repository, with modifications to use RISC Zero cryptography extensions.
 
 ### Using Accelerated Crates
 
-When using any of the crates listed above directly, specifying the dependency as a [git dependency](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories). For example:
+When using any of the crates listed above directly, specify the dependency as a [git dependency](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories). For example:
 
 ```toml
 [dependencies.sha2]
