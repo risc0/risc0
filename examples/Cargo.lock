@@ -4404,6 +4404,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "revm"
+version = "0.1.0"
+dependencies = [
+ "revm-core",
+ "revm-methods",
+ "risc0-zkvm",
+ "tracing-subscriber 0.3.19",
+]
+
+[[package]]
+name = "revm-core"
+version = "0.1.0"
+dependencies = [
+ "revm-methods",
+ "risc0-zkvm",
+ "serde",
+]
+
+[[package]]
+name = "revm-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "rfc6979"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

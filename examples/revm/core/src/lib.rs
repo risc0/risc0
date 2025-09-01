@@ -14,7 +14,7 @@
 
 #![doc = include_str!("../../README.md")]
 
-use revm_methods::REVM_ELF;
+use revm_methods::REVM_GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 
 // This is a simple EVM demo for the RISC Zero zkVM.
@@ -34,7 +34,7 @@ pub fn execute_evm_bytecode(bytecode: Vec<u8>) -> (Receipt, usize) {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, REVM_ELF).unwrap().receipt;
+    let receipt = prover.prove(env, REVM_GUEST_ELF).unwrap().receipt;
 
     // Extract journal of receipt (i.e. output - the length of processed bytecode)
     let processed_length: usize = receipt.journal.decode().expect(

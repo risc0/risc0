@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use revm_core::execute_evm_bytecode;
-use revm_methods::GUEST_ID;
+use revm_methods::REVM_GUEST_ID;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -32,7 +32,7 @@ fn main() {
     // Here is where one would send 'receipt' over the network...
 
     // Verify receipt, panic if it's wrong
-    receipt.verify(GUEST_ID).expect(
+    receipt.verify(REVM_GUEST_ID).expect(
         "Code you have proven should successfully verify; did you specify the correct image ID?",
     );
 

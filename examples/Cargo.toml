@@ -38,6 +38,8 @@ members = [
   "wordle",
   "wordle/core",
   "xgboost",
+  "revm",
+  "revm/core",
 ]
 
 # Always optimize; otherwise tests take excessively long.
