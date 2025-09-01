@@ -1,0 +1,10 @@
+[package]
+name = "revm-guest"
+version = "0.12.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
+revm = { version = "14", default-features = false, features = ["std"] }
