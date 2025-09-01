@@ -58,15 +58,10 @@ mod tests {
     fn test_simple_bytecode() {
         // Simple bytecode: PUSH1 0x42 PUSH1 0x00 MSTORE PUSH1 0x20 PUSH1 0x00 RETURN
         // This stores 0x42 in memory and returns it
-        let bytecode = vec![0x60, 0x42, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xf3];
+        let bytecode = hex::decode("604260005260206000f3").unwrap();
         let (_, result) = execute_evm_bytecode(bytecode.clone());
         // The expected return value should be 0x42 padded to 32 bytes (0x20)
-        let expected_return = vec![
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x42,
-        ];
+        let expected_return = hex::decode("0000000000000000000000000000000000000000000000000000000000000042").unwrap();
         assert_eq!(
             result, expected_return,
             "We expect the zkVM output to be the actual return value from EVM execution"

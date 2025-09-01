@@ -22,7 +22,7 @@ fn main() {
 
     // Simple EVM bytecode that stores a value and returns it
     // PUSH1 0x42 PUSH1 0x00 MSTORE PUSH1 0x20 PUSH1 0x00 RETURN
-    let bytecode = vec![0x60, 0x42, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xf3];
+    let bytecode = hex::decode("604260005260206000f3").unwrap();
 
     println!("Executing EVM bytecode: {:02x?}", bytecode);
 

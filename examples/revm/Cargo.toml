@@ -8,6 +8,7 @@ revm-core = { path = "core" }
 revm-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+hex = "0.4"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
