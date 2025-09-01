@@ -7,3 +7,4 @@ edition = "2021"
 revm-methods = { path = "../methods" }
 risc0-zkvm = { path = "../../../risc0/zkvm" }
 serde = { version = "1.0", default-features = false }
+hex = "0.4"

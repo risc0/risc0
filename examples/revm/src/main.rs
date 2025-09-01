@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use revm_core::execute_evm_bytecode;
+use revm_core::config::EvmConfig;
 use revm_methods::REVM_GUEST_ID;
 
 fn main() {
@@ -20,9 +21,9 @@ fn main() {
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
-    // Simple EVM bytecode that stores a value and returns it
-    // PUSH1 0x42 PUSH1 0x00 MSTORE PUSH1 0x20 PUSH1 0x00 RETURN
-    let bytecode = hex::decode("604260005260206000f3").unwrap();
+    // Load EVM configuration
+    let config = EvmConfig::default();
+    let bytecode = config.get_bytecode_owned();
 
     println!("Executing EVM bytecode: {:02x?}", bytecode);
 

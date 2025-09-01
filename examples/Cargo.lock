@@ -4418,6 +4418,7 @@ dependencies = [
 name = "revm-core"
 version = "0.1.0"
 dependencies = [
+ "hex",
  "revm-methods",
  "risc0-zkvm",
  "serde",

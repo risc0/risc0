@@ -17,6 +17,8 @@
 use revm_methods::REVM_GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 
+pub mod config;
+
 // This is a simple EVM demo for the RISC Zero zkVM.
 // By running the demo, you can prove that you executed specific EVM bytecode
 // inside the zkVM, providing cryptographic proof of the execution.
@@ -56,9 +58,10 @@ mod tests {
 
     #[test]
     fn test_simple_bytecode() {
-        // Simple bytecode: PUSH1 0x42 PUSH1 0x00 MSTORE PUSH1 0x20 PUSH1 0x00 RETURN
-        // This stores 0x42 in memory and returns it
-        let bytecode = hex::decode("604260005260206000f3").unwrap();
+        // Use configuration from the core crate
+        let config = config::EvmConfig::default();
+        let bytecode = config.get_bytecode_owned();
+        
         let (_, result) = execute_evm_bytecode(bytecode.clone());
         // The expected return value should be 0x42 padded to 32 bytes (0x20)
         let expected_return = hex::decode("0000000000000000000000000000000000000000000000000000000000000042").unwrap();
