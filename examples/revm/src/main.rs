@@ -27,7 +27,7 @@ fn main() {
     println!("Executing EVM bytecode: {:02x?}", bytecode);
 
     // Execute the bytecode inside the zkVM
-    let (receipt, processed_length) = execute_evm_bytecode(bytecode.clone());
+    let (receipt, return_value) = execute_evm_bytecode(bytecode.clone());
 
     // Here is where one would send 'receipt' over the network...
 
@@ -36,5 +36,8 @@ fn main() {
         "Code you have proven should successfully verify; did you specify the correct image ID?",
     );
 
-    println!("✓ Receipt verified! Processed {} bytes of EVM bytecode.", processed_length);
+    println!(
+        "✓ Receipt verified! EVM bytecode returned: {:02x?}",
+        return_value
+    );
 }

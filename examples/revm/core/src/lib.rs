@@ -22,7 +22,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 // inside the zkVM, providing cryptographic proof of the execution.
 
 // Execute EVM bytecode inside the zkVM
-pub fn execute_evm_bytecode(bytecode: Vec<u8>) -> (Receipt, usize) {
+pub fn execute_evm_bytecode(bytecode: Vec<u8>) -> (Receipt, Vec<u8>) {
     let env = ExecutorEnv::builder()
         // Send bytecode to the guest
         .write(&bytecode)
@@ -36,18 +36,18 @@ pub fn execute_evm_bytecode(bytecode: Vec<u8>) -> (Receipt, usize) {
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove(env, REVM_GUEST_ELF).unwrap().receipt;
 
-    // Extract journal of receipt (i.e. output - the length of processed bytecode)
-    let processed_length: usize = receipt.journal.decode().expect(
+    // Extract journal of receipt (i.e. output - the return value from EVM execution)
+    let return_value: Vec<u8> = receipt.journal.decode().expect(
         "Journal output should deserialize into the same types (& order) that it was written",
     );
 
     // Report the result
     println!(
-        "Successfully executed EVM bytecode of length {} inside zkVM!",
-        processed_length
+        "Successfully executed EVM bytecode inside zkVM! Return value: {:02x?}",
+        return_value
     );
 
-    (receipt, processed_length)
+    (receipt, return_value)
 }
 
 #[cfg(test)]
@@ -60,10 +60,16 @@ mod tests {
         // This stores 0x42 in memory and returns it
         let bytecode = vec![0x60, 0x42, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xf3];
         let (_, result) = execute_evm_bytecode(bytecode.clone());
+        // The expected return value should be 0x42 padded to 32 bytes (0x20)
+        let expected_return = vec![
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x42,
+        ];
         assert_eq!(
-            result,
-            bytecode.len(),
-            "We expect the zkVM output to be the length of the processed bytecode"
+            result, expected_return,
+            "We expect the zkVM output to be the actual return value from EVM execution"
         );
     }
 }

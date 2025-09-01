@@ -15,7 +15,7 @@
 #![no_main]
 #![no_std]
 
-use revm::{Evm, InMemoryDB};
+use revm::{primitives::{TxEnv, TransactTo, Bytes}, Evm, InMemoryDB};
 use risc0_zkvm::guest::env;
 extern crate alloc;
 use alloc::vec::Vec;
@@ -29,11 +29,27 @@ fn main() {
     // Create a new EVM instance with in-memory database
     let mut evm = Evm::builder().with_db(InMemoryDB::default()).build();
 
-    // Create a simple transaction that executes the bytecode
-    // This is the simplest possible EVM execution - just run the bytecode
-    let _tx_result = evm.transact();
+    // Set up the transaction environment to execute the bytecode
+    evm.context.evm.env.tx = TxEnv {
+        transact_to: TransactTo::Create,
+        data: Bytes::from(bytecode),
+        ..Default::default()
+    };
 
-    // For this simple example, we'll just commit that we successfully
-    // processed the bytecode (the length as proof we received it)
-    env::commit(&bytecode.len());
+    // Execute the transaction and get the result
+    let tx_result = evm.transact().unwrap();
+    
+    // Extract the return value from the transaction result
+    let return_value = match tx_result.result {
+        revm::primitives::ExecutionResult::Success { output, .. } => {
+            match output {
+                revm::primitives::Output::Call(data) => data.to_vec(),
+                revm::primitives::Output::Create(data, _) => data.to_vec(),
+            }
+        },
+        _ => Vec::new(), // Return empty vec for failed transactions
+    };
+
+    // Commit the actual return value instead of just the bytecode length
+    env::commit(&return_value);
 }
