@@ -153,9 +153,17 @@ pub mod nr {
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
     #[deprecated]
-    pub const SYS_PROVE_KECCAK: &str = "";
+    pub const SYS_PROVE_KECCAK: crate::syscall::SyscallName = unsafe {
+        crate::syscall::SyscallName::from_bytes_with_nul(
+            c"risc0-zkvm-platform::syscall::SYS_PROVE_KECCAK".as_ptr() as *const u8,
+        )
+    };
     #[deprecated]
-    pub const SYS_PROVE_ZKR: &str = "";
+    pub const SYS_PROVE_ZKR: crate::syscall::SyscallName = unsafe {
+        crate::syscall::SyscallName::from_bytes_with_nul(
+            c"risc0-zkvm-platform::syscall::SYS_PROVE_ZKR".as_ptr() as *const u8,
+        )
+    };
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
