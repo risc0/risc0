@@ -16,6 +16,7 @@
 
 use revm_methods::REVM_GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
+use config::EvmConfig;
 
 pub mod config;
 
@@ -24,10 +25,10 @@ pub mod config;
 // inside the zkVM, providing cryptographic proof of the execution.
 
 // Execute EVM bytecode inside the zkVM
-pub fn execute_evm_bytecode(bytecode: Vec<u8>) -> (Receipt, Vec<u8>) {
+pub fn execute_evm_bytecode(config: EvmConfig) -> (Receipt, bool) {
     let env = ExecutorEnv::builder()
-        // Send bytecode to the guest
-        .write(&bytecode)
+        // Send config to the guest
+        .write(&config)
         .unwrap()
         .build()
         .unwrap();
@@ -39,7 +40,7 @@ pub fn execute_evm_bytecode(bytecode: Vec<u8>) -> (Receipt, Vec<u8>) {
     let receipt = prover.prove(env, REVM_GUEST_ELF).unwrap().receipt;
 
     // Extract journal of receipt (i.e. output - the return value from EVM execution)
-    let return_value: Vec<u8> = receipt.journal.decode().expect(
+    let return_value: bool = receipt.journal.decode().expect(
         "Journal output should deserialize into the same types (& order) that it was written",
     );
 
@@ -60,11 +61,10 @@ mod tests {
     fn test_simple_bytecode() {
         // Use configuration from the core crate
         let config = config::EvmConfig::default();
-        let bytecode = config.get_bytecode_owned();
         
-        let (_, result) = execute_evm_bytecode(bytecode.clone());
-        // The expected return value should be 0x42 padded to 32 bytes (0x20)
-        let expected_return = hex::decode("0000000000000000000000000000000000000000000000000000000000000042").unwrap();
+        let (_, result) = execute_evm_bytecode(config);
+        // The expected return value should be TRUE padded to 32 bytes
+        let expected_return = true;
         assert_eq!(
             result, expected_return,
             "We expect the zkVM output to be the actual return value from EVM execution"

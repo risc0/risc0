@@ -1685,6 +1685,8 @@ version = "0.12.0"
 dependencies = [
  "revm",
  "risc0-zkvm",
+ "serde",
+ "sha3",
 ]
 
 [[package]]

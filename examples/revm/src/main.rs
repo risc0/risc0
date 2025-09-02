@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use revm_core::execute_evm_bytecode;
 use revm_core::config::EvmConfig;
+use revm_core::execute_evm_bytecode;
 use revm_methods::REVM_GUEST_ID;
 
 fn main() {
@@ -23,12 +23,11 @@ fn main() {
 
     // Load EVM configuration
     let config = EvmConfig::default();
-    let bytecode = config.get_bytecode_owned();
 
-    println!("Executing EVM bytecode: {:02x?}", bytecode);
+    println!("Executing EVM bytecode: {:02x?} with signature: {} and input: {}", config.get_bytecode_owned(), config.get_signature(), config.get_input());
 
     // Execute the bytecode inside the zkVM
-    let (receipt, return_value) = execute_evm_bytecode(bytecode.clone());
+    let (receipt, return_value) = execute_evm_bytecode(config);
 
     // Here is where one would send 'receipt' over the network...
 
