@@ -19,7 +19,7 @@ use risc0_zkvm::{Digest, Unknown, WorkClaim};
 use ruint::aliases::U160;
 use serde::{Deserialize, Serialize};
 
-use crate::{error::Error, Job, SubtreeOpening, WorkLog};
+use crate::{Job, SubtreeOpening, WorkLog, error::Error};
 
 /// Guest program for the Log Builder.
 #[cfg(feature = "prover")]

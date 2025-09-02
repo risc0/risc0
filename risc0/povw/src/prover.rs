@@ -14,19 +14,19 @@
 
 use std::{borrow::Cow, convert::Infallible};
 
-use anyhow::{anyhow, ensure, Context};
+use anyhow::{Context, anyhow, ensure};
 use derive_builder::Builder;
 use risc0_binfmt::PovwLogId;
 use risc0_zkvm::{
-    compute_image_id, Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, ProverOpts, Receipt,
-    VerifierContext, WorkClaim,
+    Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, ProverOpts, Receipt, VerifierContext,
+    WorkClaim, compute_image_id,
 };
 
 use crate::{
-    guest::{
-        Input, Journal, State, WorkLogUpdate, RISC0_POVW_LOG_BUILDER_ELF, RISC0_POVW_LOG_BUILDER_ID,
-    },
     Job, WorkLog,
+    guest::{
+        Input, Journal, RISC0_POVW_LOG_BUILDER_ELF, RISC0_POVW_LOG_BUILDER_ID, State, WorkLogUpdate,
+    },
 };
 
 // NOTE: The owned pattern is used here because verifier_ctx does not impl Clone.
