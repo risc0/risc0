@@ -49,3 +49,8 @@ pub(crate) const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
 pub fn compute_image_id(blob: &[u8]) -> Result<Digest> {
     ProgramBinary::decode(blob)?.compute_image_id()
 }
+
+/// Compute and return the kernel image ID of the specified combined user ELF + kernel ELF binary.
+pub fn compute_kernel_id(blob: &[u8]) -> Result<Digest> {
+    ProgramBinary::decode(blob)?.kernel_image_id()
+}
