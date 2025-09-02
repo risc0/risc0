@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
-revm = { version = "14", default-features = false, features = ["std"] }
+revm = { path = "/root/revm/crates/revm", default-features = false, features = ["std"] }
 sha3 = "0.10"
 serde = { version = "1.0", default-features = false, features = ["derive"] }

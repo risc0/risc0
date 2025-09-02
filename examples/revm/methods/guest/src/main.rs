@@ -15,20 +15,27 @@
 #![no_main]
 #![no_std]
 
-use revm::{primitives::{TxEnv, TransactTo, Bytes}, Evm, InMemoryDB};
+use revm::{
+    context::{Context, TxEnv},
+    context_interface::result::{ExecutionResult, Output},
+    database::CacheDB,
+    database_interface::EmptyDB,
+    primitives::{Bytes, TxKind},
+    ExecuteCommitEvm, MainBuilder, MainContext,
+};
 use risc0_zkvm::guest::env;
-use sha3::{Keccak256, Digest};
+use sha3::{Digest, Keccak256};
 
 extern crate alloc;
+use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
-use alloc::string::String;
 
 // Define the EvmConfig struct locally with serde support
 #[derive(Clone, Debug, serde::Deserialize)]
 struct EvmConfig {
     bytecode: Vec<u8>,
-    signature: String,
+    function_signature: String,
     input: i64,
 }
 
@@ -41,9 +48,15 @@ fn keccak256(data: &[u8]) -> [u8; 32] {
     hasher.finalize().into()
 }
 
-// Simple ABI encoding for uint256
-fn encode_uint256(value: i64) -> Vec<u8> {
+// Simple ABI encoding for int256
+fn encode_int256(value: i64) -> Vec<u8> {
     let mut result = vec![0u8; 32];
+    // For negative values, fill with 0xFF
+    if value < 0 {
+        for byte in result.iter_mut() {
+            *byte = 0xFF;
+        }
+    }
     // Convert i64 to big-endian bytes and place at the end
     let bytes = value.to_be_bytes();
     for (i, &byte) in bytes.iter().enumerate() {
@@ -57,46 +70,72 @@ fn main() {
     let config: EvmConfig = env::read();
 
     // Create a new EVM instance with in-memory database
-    let mut evm = Evm::builder().with_db(InMemoryDB::default()).build();
+    let ctx = Context::mainnet().with_db(CacheDB::<EmptyDB>::default());
+    let mut evm = ctx.build_mainnet();
 
-    // Set up the transaction environment to execute the bytecode
-    evm.context.evm.inner.env.tx = TxEnv {
-        transact_to: TransactTo::Create,
-        data: Bytes::from(config.bytecode),
-        ..Default::default()
+    // Deploy the contract
+    let deploy_result = evm
+        .transact_commit(
+            TxEnv::builder()
+                .kind(TxKind::Create)
+                .data(Bytes::from(config.bytecode.clone()))
+                .build()
+                .unwrap(),
+        )
+        .unwrap();
+
+    // Extract the deployed contract address
+    let contract_address = match deploy_result {
+        ExecutionResult::Success {
+            output: Output::Create(_, Some(addr)),
+            ..
+        } => addr,
+        _ => {
+            // If deployment failed, commit with error
+            env::commit(&(config.bytecode, config.function_signature, false));
+            return;
+        }
     };
-    
-    let result = evm.transact().unwrap();
-    // Get the created contract address from the state
-    let contract_address = result.state.into_iter().next().unwrap().0;
 
     // Get function signature (first 4 bytes of keccak256 of function signature)
-    let signature_hash = keccak256(config.signature.as_bytes());
-    let signature = &signature_hash[..4];
-    
-    // Encode the input parameter
-    let argument = encode_uint256(config.input);
-    let mut calldata = Vec::from(signature);
+    let signature_hash = keccak256(config.function_signature.as_bytes());
+    let selector = &signature_hash[..4];
+
+    // Encode the input parameter (int256)
+    let argument = encode_int256(config.input);
+    let mut calldata = Vec::from(selector);
     calldata.extend(argument);
 
-    let mut call_evm = Evm::builder().with_db(evm.db().clone()).build();
-
-    call_evm.context.evm.inner.env.tx = TxEnv {
-        transact_to: TransactTo::Call(contract_address),
-        data: Bytes::from(calldata),
-        ..Default::default()
-    };
-
-    let call_result = call_evm.transact().unwrap();
+    // Call the function
+    let call_result = evm
+        .transact_commit(
+            TxEnv::builder()
+                .kind(TxKind::Call(contract_address))
+                .data(Bytes::from(calldata))
+                .nonce(1)
+                .build()
+                .unwrap(),
+        )
+        .unwrap();
 
     // Extract the return value from the transaction result
-    let is_solved = if let Some(result_bytes) = call_result.result.output() {
-        // Check if we have enough bytes and the last byte is non-zero
-        result_bytes.len() > 31 && result_bytes[31] != 0
-    } else {
-        false
+    let is_solved = match call_result {
+        ExecutionResult::Success { output, .. } => {
+            match output {
+                Output::Call(bytes) => {
+                    // Check if any byte is non-zero (true)
+                    bytes.iter().any(|&byte| byte != 0)
+                }
+                _ => false,
+            }
+        }
+        _ => false,
     };
-    
+
     // Commit the result
-    env::commit(&is_solved);
+    env::commit(&(
+        config.bytecode,
+        config.function_signature,
+        is_solved
+    ));
 }

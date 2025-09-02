@@ -10,16 +10,6 @@ This example shows the simplest possible integration between RISC Zero and revm:
 2. **Guest**: Uses revm to process the bytecode inside the zkVM
 3. **Verification**: The host verifies the proof that the bytecode was executed
 
-The example uses a simple bytecode sequence that stores a value in memory and returns it:
-```
-PUSH1 0x42    // Push value 0x42 onto stack
-PUSH1 0x00    // Push memory offset 0x00 onto stack  
-MSTORE        // Store 0x42 at memory offset 0x00
-PUSH1 0x20    // Push return data size (32 bytes)
-PUSH1 0x00    // Push return data offset (0x00)
-RETURN        // Return 32 bytes from memory offset 0x00
-```
-
 ## Quick Start
 
 First, make sure [rustup](https://rustup.rs) is installed. The

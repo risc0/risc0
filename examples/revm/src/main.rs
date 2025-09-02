@@ -24,7 +24,12 @@ fn main() {
     // Load EVM configuration
     let config = EvmConfig::default();
 
-    println!("Executing EVM bytecode: {:02x?} with signature: {} and input: {}", config.get_bytecode_owned(), config.get_signature(), config.get_input());
+    println!(
+        "Executing EVM bytecode {} with function signature {} and input {}",
+        hex::encode(config.get_bytecode_owned()),
+        config.get_function_signature(),
+        config.get_input()
+    );
 
     // Execute the bytecode inside the zkVM
     let (receipt, return_value) = execute_evm_bytecode(config);

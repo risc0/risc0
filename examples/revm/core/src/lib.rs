@@ -40,17 +40,20 @@ pub fn execute_evm_bytecode(config: EvmConfig) -> (Receipt, bool) {
     let receipt = prover.prove(env, REVM_GUEST_ELF).unwrap().receipt;
 
     // Extract journal of receipt (i.e. output - the return value from EVM execution)
-    let return_value: bool = receipt.journal.decode().expect(
+    let public_state: (Vec<u8>, String, bool) = receipt.journal.decode().expect(
         "Journal output should deserialize into the same types (& order) that it was written",
     );
+
+    assert_eq!(public_state.0, config.bytecode, "Bytecode should be the same");
+    assert_eq!(public_state.1, config.function_signature, "Function signature should be the same");
 
     // Report the result
     println!(
         "Successfully executed EVM bytecode inside zkVM! Return value: {:02x?}",
-        return_value
+        public_state.2
     );
 
-    (receipt, return_value)
+    (receipt, public_state.2)
 }
 
 #[cfg(test)]
@@ -63,7 +66,7 @@ mod tests {
         let config = config::EvmConfig::default();
         
         let (_, result) = execute_evm_bytecode(config);
-        // The expected return value should be TRUE padded to 32 bytes
+        // The expected return value should be TRUE
         let expected_return = true;
         assert_eq!(
             result, expected_return,
