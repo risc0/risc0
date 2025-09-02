@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ pub mod sha;
 
 use alloc::{boxed::Box, rc::Rc, string::String};
 
-use risc0_core::field::{baby_bear::BabyBear, Field};
+use risc0_core::field::{Field, baby_bear::BabyBear};
 
 use super::digest::Digest;
 
@@ -32,11 +32,11 @@ pub trait HashFn<F: Field>: Send + Sync {
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Box<Digest>;
 
     /// Generate a hash from a slice of field elements.  This may be unpadded so
-    /// this is only safe to used when the size is known.
+    /// this is only safe to be used when the size is known.
     fn hash_elem_slice(&self, slice: &[F::Elem]) -> Box<Digest>;
 
     /// Generate a hash from a slice of extension field element.  This may be
-    /// unpadded so this is only safe to used when the size is known.
+    /// unpadded so this is only safe to be used when the size is known.
     fn hash_ext_elem_slice(&self, slice: &[F::ExtElem]) -> Box<Digest>;
 }
 

@@ -30,20 +30,20 @@ use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
-            HashSuite,
+            HashSuite, blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite,
+            sha::Sha256HashSuite,
         },
     },
     verify::VerificationError,
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
-    claim::Unknown,
-    serde::{from_slice, Error},
-    sha::{Digestible, Sha256},
     Assumption, Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    claim::Unknown,
+    serde::{Error, from_slice},
+    sha::{Digestible, Sha256},
 };
 
 pub use self::groth16::{Groth16Receipt, Groth16ReceiptVerifierParameters};
@@ -125,7 +125,7 @@ pub struct Receipt {
     /// Metadata providing context on the receipt, about the proving system, SDK versions, and other
     /// information to help with interoperability. It is not cryptographically bound to the receipt,
     /// and should not be used for security-relevant decisions, such as choosing whether or not to
-    /// accept a receipt based on it's stated version.
+    /// accept a receipt based on its stated version.
     pub metadata: ReceiptMetadata,
 }
 
@@ -228,8 +228,8 @@ impl Receipt {
             journal: MaybePruned::Pruned(self.journal.digest()),
             // TODO(#982): It would be reasonable for this method to allow integrity verification
             // for receipts that have a non-empty assumptions list, but it is not supported here
-            // because we don't have a enough information to open the assumptions list unless we
-            // require it be empty.
+            // because we don't have enough information to open the assumptions list unless we
+            // require it to be empty.
             assumptions: Assumptions(vec![]).into(),
         });
 
@@ -309,10 +309,10 @@ pub enum InnerReceipt {
     /// A non-succinct [CompositeReceipt], made up of one inner receipt per segment.
     Composite(CompositeReceipt),
 
-    /// A [SuccinctReceipt], proving arbitrarily long zkVM computions with a single STARK.
+    /// A [SuccinctReceipt], proving arbitrarily long zkVM computations with a single STARK.
     Succinct(SuccinctReceipt<ReceiptClaim>),
 
-    /// A [Groth16Receipt], proving arbitrarily long zkVM computions with a single Groth16 SNARK.
+    /// A [Groth16Receipt], proving arbitrarily long zkVM computations with a single Groth16 SNARK.
     Groth16(Groth16Receipt<ReceiptClaim>),
 
     /// A [FakeReceipt], with no cryptographic integrity, used only for development.
@@ -370,19 +370,19 @@ impl InnerReceipt {
     /// Extract the [ReceiptClaim] from this receipt.
     pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
         match self {
-            Self::Composite(ref inner) => Ok(inner.claim()?.into()),
-            Self::Groth16(ref inner) => Ok(inner.claim.clone()),
-            Self::Succinct(ref inner) => Ok(inner.claim.clone()),
-            Self::Fake(ref inner) => Ok(inner.claim.clone()),
+            Self::Composite(inner) => Ok(inner.claim()?.into()),
+            Self::Groth16(inner) => Ok(inner.claim.clone()),
+            Self::Succinct(inner) => Ok(inner.claim.clone()),
+            Self::Fake(inner) => Ok(inner.claim.clone()),
         }
     }
 
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
         match self {
-            Self::Composite(ref inner) => inner.verifier_parameters,
-            Self::Groth16(ref inner) => inner.verifier_parameters,
-            Self::Succinct(ref inner) => inner.verifier_parameters,
+            Self::Composite(inner) => inner.verifier_parameters,
+            Self::Groth16(inner) => inner.verifier_parameters,
+            Self::Succinct(inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
         }
     }
@@ -487,17 +487,17 @@ impl<Claim> GenericReceipt<Claim> {
         Claim: Clone,
     {
         match self {
-            Self::Groth16(ref inner) => inner.claim.clone(),
-            Self::Succinct(ref inner) => inner.claim.clone(),
-            Self::Fake(ref inner) => inner.claim.clone(),
+            Self::Groth16(inner) => inner.claim.clone(),
+            Self::Succinct(inner) => inner.claim.clone(),
+            Self::Fake(inner) => inner.claim.clone(),
         }
     }
 
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
         match self {
-            Self::Groth16(ref inner) => inner.verifier_parameters,
-            Self::Succinct(ref inner) => inner.verifier_parameters,
+            Self::Groth16(inner) => inner.verifier_parameters,
+            Self::Succinct(inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
         }
     }
@@ -607,7 +607,7 @@ impl<Claim> FakeReceipt<Claim> {
 impl TryFrom<FakeReceipt<ReceiptClaim>> for Receipt {
     type Error = PrunedValueError;
 
-    /// Try to create a [Receipt] from a [FakeReceipt]. In order to succeed, the jounal must be
+    /// Try to create a [Receipt] from a [FakeReceipt]. In order to succeed, the journal must be
     /// populated on the receipt claim (i.e. it cannot be pruned).
     fn try_from(fake_receipt: FakeReceipt<ReceiptClaim>) -> Result<Self, Self::Error> {
         // Attempt to copy the journal from the receipt claim, returning an error if pruned.
@@ -825,19 +825,19 @@ impl InnerAssumptionReceipt {
     /// Note that only the claim digest is available because the claim type may be unknown.
     pub fn claim_digest(&self) -> Result<Digest, VerificationError> {
         match self {
-            Self::Composite(ref inner) => Ok(inner.claim()?.digest()),
-            Self::Groth16(ref inner) => Ok(inner.claim.digest()),
-            Self::Succinct(ref inner) => Ok(inner.claim.digest()),
-            Self::Fake(ref inner) => Ok(inner.claim.digest()),
+            Self::Composite(inner) => Ok(inner.claim()?.digest()),
+            Self::Groth16(inner) => Ok(inner.claim.digest()),
+            Self::Succinct(inner) => Ok(inner.claim.digest()),
+            Self::Fake(inner) => Ok(inner.claim.digest()),
         }
     }
 
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
         match self {
-            Self::Composite(ref inner) => inner.verifier_parameters,
-            Self::Groth16(ref inner) => inner.verifier_parameters,
-            Self::Succinct(ref inner) => inner.verifier_parameters,
+            Self::Composite(inner) => inner.verifier_parameters,
+            Self::Groth16(inner) => inner.verifier_parameters,
+            Self::Succinct(inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
         }
     }
@@ -984,8 +984,10 @@ impl VerifierContext {
     /// Return [VerifierContext] with is_dev_mode enabled or disabled.
     pub fn with_dev_mode(mut self, dev_mode: bool) -> Self {
         if cfg!(feature = "disable-dev-mode") && dev_mode {
-            panic!("zkVM: Inconsistent settings -- please resolve. \
-                The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
+            panic!(
+                "zkVM: Inconsistent settings -- please resolve. \
+                The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag."
+            );
         }
         self.dev_mode = dev_mode;
         self
@@ -1025,8 +1027,8 @@ impl Default for VerifierContext {
 mod tests {
     use super::{FakeReceipt, InnerReceipt, Receipt};
     use crate::{
-        sha::{Digest, DIGEST_BYTES},
         MaybePruned,
+        sha::{DIGEST_BYTES, Digest},
     };
     use risc0_zkp::verify::VerificationError;
 

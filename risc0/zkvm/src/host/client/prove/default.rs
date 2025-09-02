@@ -20,15 +20,15 @@ use std::{
     sync::Arc,
 };
 
-use anyhow::{bail, ensure, Context as _, Result};
+use anyhow::{Context as _, Result, bail, ensure};
 use serde::de::DeserializeOwned;
 
 use crate::{
+    ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptKind, SessionInfo, VerifierContext,
     rpc::{
         JobInfo, JobRequest, JobStatus, ProofRequest, ProofResult, ShrinkWrapKind,
         ShrinkWrapRequest, ShrinkWrapResult,
     },
-    ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptKind, SessionInfo, VerifierContext,
 };
 
 use super::{Executor, Prover, ProverOpts};
@@ -90,10 +90,10 @@ impl Prover for DefaultProver {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<ProveInfo> {
-        let result = self.prove(env, elf)?;
+        let result = self.prove(env, elf, false /* execute_only */)?;
 
         let mut prove_info = ProveInfo {
-            receipt: Arc::into_inner(result.receipt).unwrap(),
+            receipt: Arc::into_inner(result.receipt.unwrap()).unwrap(),
             work_receipt: None, // TODO(povw): implement PoVW here
             stats: result.session.stats.clone(),
         };
@@ -135,8 +135,12 @@ impl Prover for DefaultProver {
 }
 
 impl Executor for DefaultProver {
-    fn execute(&self, _env: ExecutorEnv<'_>, _elf: &[u8]) -> Result<SessionInfo> {
-        todo!()
+    fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
+        Ok(
+            Arc::into_inner(self.prove(env, elf, true /* execute_only */)?.session)
+                .unwrap()
+                .into(),
+        )
     }
 }
 
@@ -181,12 +185,13 @@ impl DefaultProver {
         })
     }
 
-    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProofResult> {
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8], execute_only: bool) -> Result<ProofResult> {
         let proof_request = ProofRequest {
             binary: elf.to_vec(),
             input: env.input,
             assumptions: env.assumptions.borrow().0.clone(),
             segment_limit_po2: env.segment_limit_po2,
+            execute_only,
         };
 
         self.rpc_request(proof_request)

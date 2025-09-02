@@ -16,7 +16,7 @@ pub mod analyze;
 
 use std::{collections::BTreeMap, io::Cursor};
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 use malachite::Natural;
 use risc0_binfmt::WordAddr;
 use smallvec::SmallVec;
@@ -97,7 +97,9 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
         let addr = base + offset * BIGINT_WIDTH_WORDS as u32;
         check_bigint_addr(addr, self.mode)?;
 
-        tracing::trace!("store(arena: {arena}, offset: {offset}, count: {count}, addr: {addr:?}, value: {value})");
+        tracing::trace!(
+            "store(arena: {arena}, offset: {offset}, count: {count}, addr: {addr:?}, value: {value})"
+        );
 
         let limbs = value.to_limbs_asc();
         ensure!(

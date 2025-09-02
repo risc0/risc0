@@ -18,10 +18,10 @@ use clap::Parser;
 use regex::Regex;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_zkvm::{
-    get_prover_server, sha::Digestible, Digest, ExecutorEnv, ExecutorImpl,
-    Groth16ReceiptVerifierParameters, ProverOpts, Receipt, VerifierContext,
+    Digest, ExecutorEnv, ExecutorImpl, Groth16ReceiptVerifierParameters, ProverOpts, Receipt,
+    VerifierContext, get_prover_server, sha::Digestible,
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec};
 
 #[derive(Debug, Parser)]
 pub struct BootstrapGroth16 {
@@ -116,7 +116,7 @@ fn bootstrap_verifying_key(risc0_ethereum_path: &Path) {
     Command::new("rustfmt")
         .arg(RUST_VERIFIER_PATH)
         .status()
-        .expect("failed to format {RUST_GROTH16_VERIFIER_PATH}");
+        .unwrap_or_else(|_| panic!("failed to format {RUST_VERIFIER_PATH}"));
 }
 
 fn bootstrap_control_id(risc0_ethereum_path: &Path) {

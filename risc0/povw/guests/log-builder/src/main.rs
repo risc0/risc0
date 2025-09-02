@@ -13,10 +13,10 @@
 // limitations under the License.
 
 use risc0_povw::{
-    guest::{Input, Journal, State},
     Job, WorkLog,
+    guest::{Input, Journal, State},
 };
-use risc0_zkvm::{guest::env, sha::Digestible, Digest};
+use risc0_zkvm::{Digest, guest::env, sha::Digestible};
 use ruint::Uint;
 
 type U96 = Uint<96, 2>;
@@ -46,7 +46,7 @@ fn main() {
     let mut update_value = 0u64;
     for update in input.updates {
         // Verify the WorkClaim and extract the Work struct.
-        // NOTE: env::verify_assumption is used here instead of env::verify, becuase the claim type
+        // NOTE: env::verify_assumption is used here instead of env::verify, because the claim type
         // is WorkClaim<Unknown> rather than ReceiptClaim.
         env::verify_assumption(update.claim.digest(), Digest::ZERO).unwrap();
         let work = update.claim.work.value().expect("work value is pruned");

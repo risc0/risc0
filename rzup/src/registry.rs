@@ -115,18 +115,18 @@ impl Registry {
         component: &Component,
     ) -> Result<Option<(Version, std::path::PathBuf)>> {
         let component_installed = component.parent_component().unwrap_or(*component);
-        if let Some(version) = self.settings.get_default_version(component) {
-            if let Some(path) = Paths::find_version_dir(env, &component_installed, &version)? {
-                return Ok(Some((version, path)));
-            }
+        if let Some(version) = self.settings.get_default_version(component)
+            && let Some(path) = Paths::find_version_dir(env, &component_installed, &version)?
+        {
+            return Ok(Some((version, path)));
         }
 
         // Components installed by old versions might leave us in a state where there is a
         // component installed, but no active version
-        if let Some(version) = self.find_highest_installed_version(env, component)? {
-            if let Some(path) = Paths::find_version_dir(env, &component_installed, &version)? {
-                return Ok(Some((version, path)));
-            }
+        if let Some(version) = self.find_highest_installed_version(env, component)?
+            && let Some(path) = Paths::find_version_dir(env, &component_installed, &version)?
+        {
+            return Ok(Some((version, path)));
         }
 
         Ok(None)
@@ -195,21 +195,20 @@ impl Registry {
 
         let _lock_file = env.flock(&format!(".{component_to_install}-{version}"))?;
 
-        if !force {
-            if let Some(path) = Paths::find_version_dir(env, &component_to_install, &version)? {
-                env.emit(RzupEvent::ComponentAlreadyInstalled {
-                    id: component.to_string(),
-                    version: version.to_string(),
-                });
-                env.emit(RzupEvent::Debug {
-                    message: format!(
-                        "Component {component} already installed at path {}",
-                        path.display()
-                    ),
-                });
-                self.set_default_component_version(env, component, version.clone())?;
-                return Ok(());
-            }
+        if !force && let Some(path) = Paths::find_version_dir(env, &component_to_install, &version)?
+        {
+            env.emit(RzupEvent::ComponentAlreadyInstalled {
+                id: component.to_string(),
+                version: version.to_string(),
+            });
+            env.emit(RzupEvent::Debug {
+                message: format!(
+                    "Component {component} already installed at path {}",
+                    path.display()
+                ),
+            });
+            self.set_default_component_version(env, component, version.clone())?;
+            return Ok(());
         }
 
         components::install(component, env, &self.base_urls, &version, force)?;
@@ -264,10 +263,9 @@ impl Registry {
             .settings
             .get_default_version(component)
             .is_some_and(|version| &version == removed_version)
+            && let Some(new_version) = self.find_highest_installed_version(env, component)?
         {
-            if let Some(new_version) = self.find_highest_installed_version(env, component)? {
-                self.set_default_component_version(env, component, new_version)?;
-            }
+            self.set_default_component_version(env, component, new_version)?;
         }
         Ok(())
     }

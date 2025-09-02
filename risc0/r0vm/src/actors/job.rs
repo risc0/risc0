@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod execute_only;
 mod proof;
 mod shrink_wrap;
 mod tracer;
@@ -21,9 +22,9 @@ use kameo::{error::Infallible, prelude::*};
 use tokio::task::JoinSet;
 
 use super::{
+    TaskDoneMsg, TaskUpdateMsg,
     factory::FactoryActor,
     protocol::{JobId, JobStatusReply, JobStatusRequest, ProofRequest, ShrinkWrapRequest},
-    TaskDoneMsg, TaskUpdateMsg,
 };
 
 pub(crate) struct JobActor {
@@ -37,6 +38,7 @@ pub(crate) struct JobActor {
 enum InnerJobActor {
     Proof(ActorRef<proof::JobActor>),
     ShrinkWrap(ActorRef<shrink_wrap::JobActor>),
+    ExecuteOnly(ActorRef<execute_only::JobActor>),
 }
 
 impl Actor for JobActor {
@@ -102,7 +104,11 @@ impl Message<ProofRequest> for JobActor {
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         let (delegated_reply, reply_sender) = ctx.reply_sender();
-        self.request::<_, proof::JobActor>(request, ctx.actor_ref(), reply_sender);
+        if request.execute_only {
+            self.request::<_, execute_only::JobActor>(request, ctx.actor_ref(), reply_sender);
+        } else {
+            self.request::<_, proof::JobActor>(request, ctx.actor_ref(), reply_sender);
+        }
         delegated_reply
     }
 }
@@ -132,6 +138,7 @@ impl Message<JobStatusRequest> for JobActor {
         match self.inner.as_mut().unwrap() {
             InnerJobActor::Proof(job) => job.ask(msg).await.unwrap(),
             InnerJobActor::ShrinkWrap(job) => job.ask(msg).await.unwrap(),
+            InnerJobActor::ExecuteOnly(job) => job.ask(msg).await.unwrap(),
         }
     }
 }
@@ -147,6 +154,7 @@ impl Message<TaskUpdateMsg> for JobActor {
         match self.inner.as_mut().unwrap() {
             InnerJobActor::Proof(job) => job.ask(msg).await.unwrap(),
             InnerJobActor::ShrinkWrap(job) => job.ask(msg).await.unwrap(),
+            InnerJobActor::ExecuteOnly(job) => job.ask(msg).await.unwrap(),
         }
     }
 }
@@ -162,6 +170,7 @@ impl Message<TaskDoneMsg> for JobActor {
         match self.inner.as_mut().unwrap() {
             InnerJobActor::Proof(job) => job.ask(msg).await.unwrap(),
             InnerJobActor::ShrinkWrap(job) => job.ask(msg).await.unwrap(),
+            InnerJobActor::ExecuteOnly(job) => job.ask(msg).await.unwrap(),
         }
     }
 }

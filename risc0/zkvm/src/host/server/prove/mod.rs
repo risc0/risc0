@@ -23,22 +23,22 @@ pub(crate) mod union_peak;
 
 use std::rc::Rc;
 
-use anyhow::{anyhow, bail, ensure, Result};
+use anyhow::{Result, anyhow, bail, ensure};
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 use risc0_groth16::prove::shrink_wrap;
 use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
-    claim::{receipt::UnionClaim, Unknown},
+    ExecutorEnv, PreflightResults, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, Segment,
+    Session, VerifierContext, WorkClaim,
+    claim::{Unknown, receipt::UnionClaim},
     host::prove_info::ProveInfo,
     receipt::{
         CompositeReceipt, Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt,
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     sha::Digestible,
-    ExecutorEnv, PreflightResults, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, Segment,
-    Session, VerifierContext, WorkClaim,
 };
 
 mod private {
@@ -87,7 +87,7 @@ pub trait ProverServer: private::Sealed {
 
     /// Prove the specified keccak request
     fn prove_keccak(&self, request: &crate::ProveKeccakRequest)
-        -> Result<SuccinctReceipt<Unknown>>;
+    -> Result<SuccinctReceipt<Unknown>>;
 
     /// Lift a [SegmentReceipt] into a [SuccinctReceipt]
     fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>>;

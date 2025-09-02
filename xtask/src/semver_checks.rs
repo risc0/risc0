@@ -18,12 +18,12 @@
 //! to what `crates.io` has for the baseline. If changes are detected, we require a bump in the
 //! patch version of the crate.
 
-use anyhow::{anyhow, bail, Context as _, Result};
+use anyhow::{Context as _, Result, anyhow, bail};
 use cargo_semver_checks::{Check, GlobalConfig, Rustdoc};
 use clap::Parser;
 use semver::{Version, VersionReq};
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, DisplayFromStr};
+use serde_with::{DisplayFromStr, serde_as};
 use tempfile::tempdir;
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -76,7 +76,7 @@ impl Write for PrintStdout {
     }
 }
 
-/// Receive output from `ChannelWriter`, echos them to `eprint` calls and also saves the output and
+/// Receive output from `ChannelWriter`, echoes it to `eprint` calls and also saves the output and
 /// returns it.
 fn tee_semver_output(recv: std::sync::mpsc::Receiver<Vec<u8>>) -> Vec<u8> {
     let mut output = vec![];
@@ -222,7 +222,7 @@ fn vendor_packages(
     Ok(project_dir.join("vendor"))
 }
 
-/// Runs some command, checks for errors, and forwards output from stdout / stderr to `print and
+/// Runs some command, checks for errors, and forwards output from stdout / stderr to `print` and
 /// `eprint` which allows the test fixture to capture the output.
 fn run_command(cmd: &mut Command, error_message: &str) -> Result<()> {
     let context = format!(
@@ -470,12 +470,11 @@ fn find_publishable_packages_with_lib(
     let mut packages = BTreeMap::new();
     for package in metadata.workspace_default_packages() {
         // check for package.metadata.release.release = false
-        if let Some(release_metadata) = package.metadata.get("release") {
-            if let Some(release_flag) = release_metadata.get("release") {
-                if release_flag.as_bool().is_some_and(|v| !v) {
-                    continue;
-                }
-            }
+        if let Some(release_metadata) = package.metadata.get("release")
+            && let Some(release_flag) = release_metadata.get("release")
+            && release_flag.as_bool().is_some_and(|v| !v)
+        {
+            continue;
         }
 
         // check if package has a `lib` target (semver won't run on non-libraries)
@@ -608,7 +607,65 @@ fn semver_compatible(a: &semver::Version, b: &semver::Version) -> bool {
     if !a.pre.is_empty() || !b.pre.is_empty() {
         return false;
     }
-    a.major == b.major
+    if a.major == 0 && b.major == 0 {
+        a.minor == b.minor
+    } else {
+        a.major == b.major
+    }
+}
+
+#[test]
+fn semver_compatible_test() {
+    assert!(semver_compatible(
+        &semver::Version::new(1, 2, 3),
+        &semver::Version::new(1, 2, 3)
+    ));
+    assert!(semver_compatible(
+        &semver::Version::new(1, 2, 3),
+        &semver::Version::new(1, 3, 3)
+    ));
+    assert!(semver_compatible(
+        &semver::Version::new(1, 2, 3),
+        &semver::Version::new(1, 2, 4)
+    ));
+    assert!(semver_compatible(
+        &semver::Version::new(0, 1, 0),
+        &semver::Version::new(0, 1, 1)
+    ));
+
+    assert!(!semver_compatible(
+        &"1.2.3-rc.1".parse().unwrap(),
+        &"1.2.3-rc.1".parse().unwrap()
+    ));
+    assert!(!semver_compatible(
+        &"1.2.3-rc.1".parse().unwrap(),
+        &"1.2.3-rc.2".parse().unwrap()
+    ));
+    assert!(!semver_compatible(
+        &"1.2.3-rc.1".parse().unwrap(),
+        &semver::Version::new(1, 2, 3)
+    ));
+    assert!(!semver_compatible(
+        &semver::Version::new(1, 2, 3),
+        &"1.2.3-rc.1".parse().unwrap()
+    ));
+
+    assert!(!semver_compatible(
+        &semver::Version::new(1, 2, 3),
+        &semver::Version::new(2, 0, 0)
+    ));
+    assert!(!semver_compatible(
+        &semver::Version::new(2, 0, 0),
+        &semver::Version::new(1, 2, 3)
+    ));
+    assert!(!semver_compatible(
+        &semver::Version::new(0, 1, 0),
+        &semver::Version::new(0, 2, 0)
+    ));
+    assert!(!semver_compatible(
+        &semver::Version::new(0, 2, 0),
+        &semver::Version::new(0, 1, 0)
+    ));
 }
 
 /// Entrypoint for the tests. See the module doc-comment about what it does.
@@ -727,7 +784,7 @@ mod tests {
     use std::collections::HashMap;
 
     #[test]
-    fn sermver_output_parsing() {
+    fn semver_output_parsing() {
         let output = SemverOutput::parse(
             "
             Building risc0-foobar v1.4.0 (current)
@@ -817,20 +874,22 @@ mod tests {
     ) {
         // Create a published version of the baseline like what would exist on `crates.io` and save
         // it so we can move it into place in our test version of `cargo vendor`
-        assert!(Command::new("cargo")
-            .args([
-                "publish",
-                "--allow-dirty",
-                "--dry-run",
-                "--package",
-                crate_name
-            ])
-            .current_dir(tempdir.path().join(baseline_name))
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .unwrap()
-            .success());
+        assert!(
+            Command::new("cargo")
+                .args([
+                    "publish",
+                    "--allow-dirty",
+                    "--dry-run",
+                    "--package",
+                    crate_name
+                ])
+                .current_dir(tempdir.path().join(baseline_name))
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+                .unwrap()
+                .success()
+        );
 
         // Locally published crates have this directory, but not ones on `crates.io`
         let published_crate = tempdir

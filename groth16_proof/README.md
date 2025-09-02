@@ -36,7 +36,7 @@ All the following commands must be run from the `groth16_proof` directory.
 
 The `input.json` file needs to be generated using the `seal-to-json` utility.
 Place this file into the directory of your choice, then add this as a volume and
-run the docker container:
+run the Docker container:
 
 ```bash
 docker run --rm -v $WORK_DIR:/mnt risc0-groth16-prover

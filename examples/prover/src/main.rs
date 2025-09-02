@@ -24,11 +24,11 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::Result;
 use risc0_zkvm::{
-    sha::{Digest, Digestible},
     ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
     ProveKeccakRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
+    sha::{Digest, Digestible},
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec};
 
 use crate::plan::Planner;
 

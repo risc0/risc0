@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ __global__ void eltwise_copy_fp_region(Fp* into,
 __global__ void
 eltwise_sum_fpext(Fp* out, const FpExt* in, const uint32_t to_add, const uint32_t count);
 
-__global__ void eltwise_zeroize_fp(Fp* elems);
+__global__ void eltwise_zeroize_fp(Fp* elems, uint32_t count);
 
-__global__ void eltwise_zeroize_fpext(FpExt* elems);
+__global__ void eltwise_zeroize_fpext(FpExt* elems, uint32_t count);
 
 __global__ void fri_fold(Fp* out, const Fp* in, const FpExt* mix, const uint32_t count);
 

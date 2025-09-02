@@ -14,14 +14,16 @@
 
 use std::time::Duration;
 
-use anyhow::{ensure, Context, Result};
+use anyhow::{Context, Result, ensure};
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::{
+    ExecutorEnv, MaybePruned, PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim,
+    ReceiptKind, Segment, Session, VerifierContext, WorkClaim,
     claim::{
-        receipt::{exit_code_from_terminate_state, UnionClaim},
         Unknown,
+        receipt::{UnionClaim, exit_code_from_terminate_state},
     },
     host::{
         prove_info::ProveInfo,
@@ -29,8 +31,6 @@ use crate::{
     },
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     recursion::MerkleProof,
-    ExecutorEnv, MaybePruned, PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim,
-    ReceiptKind, Segment, Session, VerifierContext, WorkClaim,
 };
 
 const ERR_DEV_MODE_DISABLED: &str =

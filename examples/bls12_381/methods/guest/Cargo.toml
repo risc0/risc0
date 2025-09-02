@@ -1,7 +1,7 @@
 [package]
 name = "bls12_381-inner"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [workspace]
 
@@ -10,5 +10,4 @@ risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, featur
 bls12_381 = "0.8.0"
 
 [patch.crates-io]
-# TODO: Get a tag stabilized and use it
-bls12_381 = { git = "https://github.com/risc0/zkcrypto-bls12_381", rev = "dead6adb067eb9fb95b1afc9582ec429b25e4cc6" }
+bls12_381 = { git = "https://github.com/risc0/zkcrypto-bls12_381", tag = "bls12_381/v0.8.0-risczero.1" }

@@ -12,111 +12,107 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    ffi::{c_char, CStr, CString, NulError},
-    path::{Path, PathBuf},
-};
+use std::ffi::{CStr, c_char};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 #[cfg(feature = "cuda")]
 pub use sppark::Error as SpparkError;
 
-pub struct SetupParams {
-    pub pcoeffs_path: RawPath,
-    pub fres_path: RawPath,
-    pub srs_path: RawPath,
+pub struct ProveParams<'a> {
+    pub pcoeffs: &'a [u8],
+    pub fres: &'a [u8],
+    pub srs: &'a [u8],
 }
 
-impl SetupParams {
-    pub fn new(root_dir: &Path) -> anyhow::Result<Self> {
-        Ok(SetupParams {
-            pcoeffs_path: root_dir.join("preprocessed_coeffs.bin").try_into()?,
-            fres_path: root_dir.join("fuzzed_msm_results.bin").try_into()?,
-            srs_path: root_dir.join("stark_verify_final.zkey").try_into()?,
-        })
-    }
-}
-
-pub struct WitnessParams {
-    pub graph_path: PathBuf,
-}
-
-impl WitnessParams {
-    pub fn new(root_dir: &Path) -> Self {
-        WitnessParams {
-            graph_path: root_dir.join("stark_verify_graph.bin"),
-        }
-    }
-}
-
-pub struct ProverParams {
-    pub public_path: RawPath,
-    pub proof_path: RawPath,
-    pub witness: *const u8,
-}
-
-impl ProverParams {
-    pub fn new(root_dir: &Path, witness: *const u8) -> anyhow::Result<Self> {
-        Ok(Self {
-            public_path: root_dir.join("public.json").try_into()?,
-            proof_path: root_dir.join("proof.json").try_into()?,
-            witness,
-        })
-    }
+pub struct SetupParams<'a> {
+    pub srs: &'a [u8],
+    pub fuzzed_results_out: &'a mut [u8],
+    pub preprocessed_coeffs_out: &'a mut [u8],
 }
 
 #[cfg(feature = "cuda")]
-pub fn prove(prover_params: &ProverParams, setup_params: &SetupParams) -> anyhow::Result<()> {
-    let setup_params = RawSetupParams {
-        pcoeffs_path: setup_params.pcoeffs_path.c_str.as_ptr(),
-        fres_path: setup_params.fres_path.c_str.as_ptr(),
-        srs_path: setup_params.srs_path.c_str.as_ptr(),
-    };
-    let prover_params = RawProverParams {
-        public_path: prover_params.public_path.c_str.as_ptr(),
-        proof_path: prover_params.proof_path.c_str.as_ptr(),
-        witness: prover_params.witness,
+pub fn prove(witness: &[u8], prove_params: &ProveParams<'_>) -> anyhow::Result<Groth16Proof> {
+    let prove_params = RawProveParams {
+        pcoeffs: prove_params.pcoeffs.as_ptr(),
+        fres: prove_params.fres.as_ptr(),
+        srs: prove_params.srs.as_ptr(),
+        srs_len: prove_params.srs.len(),
     };
 
-    ffi_wrap(|| unsafe { risc0_groth16_cuda_prove(&setup_params, &prover_params) })
+    let mut proof = Groth16Proof::default();
+    ffi_wrap(|| unsafe { risc0_groth16_cuda_prove(&prove_params, witness.as_ptr(), &mut proof) })?;
+    Ok(proof)
 }
 
+/// Returns bytes copied into (fuzzed_results, preprocessed_coeffs)
 #[cfg(all(feature = "cuda", feature = "setup"))]
-pub fn setup(params: &SetupParams) -> anyhow::Result<()> {
-    let raw_params = RawSetupParams {
-        pcoeffs_path: params.pcoeffs_path.c_str.as_ptr(),
-        fres_path: params.fres_path.c_str.as_ptr(),
-        srs_path: params.srs_path.c_str.as_ptr(),
+pub fn setup(params: &mut SetupParams<'_>) -> anyhow::Result<(usize, usize)> {
+    let mut fuzzed_results_copied = 0usize;
+    let mut preprocessed_coeffs_copied = 0usize;
+
+    let mut raw_params = RawSetupParams {
+        srs: params.srs.as_ptr(),
+        srs_len: params.srs.len(),
+        fuzzed_results_len: params.fuzzed_results_out.len(),
+        fuzzed_results_out: params.fuzzed_results_out.as_mut_ptr(),
+        preprocessed_coeffs_len: params.preprocessed_coeffs_out.len(),
+        preprocessed_coeffs_out: params.preprocessed_coeffs_out.as_mut_ptr(),
+        fuzzed_results_copied: &mut fuzzed_results_copied,
+        preprocessed_coeffs_copied: &mut preprocessed_coeffs_copied,
     };
-    ffi_wrap(|| unsafe { risc0_groth16_cuda_setup(&raw_params) })
+    ffi_wrap(|| unsafe { risc0_groth16_cuda_setup(&mut raw_params) })?;
+    Ok((fuzzed_results_copied, preprocessed_coeffs_copied))
 }
 
 #[cfg_attr(not(feature = "cuda"), allow(dead_code))]
 #[repr(C)]
-struct RawProverParams {
-    pub public_path: *const c_char,
-    pub proof_path: *const c_char,
-    pub witness: *const u8,
+struct RawProveParams {
+    pub pcoeffs: *const u8,
+    pub fres: *const u8,
+    pub srs: *const u8,
+    pub srs_len: usize,
 }
 
-#[cfg_attr(not(feature = "cuda"), allow(dead_code))]
+#[cfg_attr(not(all(feature = "cuda", feature = "setup")), allow(dead_code))]
 #[repr(C)]
 struct RawSetupParams {
-    pub pcoeffs_path: *const c_char,
-    pub fres_path: *const c_char,
-    pub srs_path: *const c_char,
+    pub srs: *const u8,
+    pub srs_len: usize,
+    pub fuzzed_results_len: usize,
+    pub preprocessed_coeffs_len: usize,
+    pub fuzzed_results_copied: *mut usize,
+    pub preprocessed_coeffs_copied: *mut usize,
+    pub fuzzed_results_out: *mut u8,
+    pub preprocessed_coeffs_out: *mut u8,
 }
 
-extern "C" {
+#[cfg_attr(not(feature = "cuda"), allow(dead_code))]
+#[repr(C)]
+#[derive(Default)]
+pub struct Fp {
+    pub v: [u32; 8],
+}
+
+#[cfg_attr(not(feature = "cuda"), allow(dead_code))]
+#[repr(C)]
+#[derive(Default)]
+pub struct Groth16Proof {
+    pub a: [Fp; 2],
+    pub c: [Fp; 2],
+    pub b: [Fp; 4],
+}
+
+unsafe extern "C" {
     #[cfg(feature = "cuda")]
     fn risc0_groth16_cuda_prove(
-        setup: *const RawSetupParams,
-        params: *const RawProverParams,
+        setup: *const RawProveParams,
+        witness: *const u8,
+        proof_out: *mut Groth16Proof,
     ) -> *const c_char;
 
     #[cfg(all(feature = "cuda", feature = "setup"))]
-    fn risc0_groth16_cuda_setup(params: *const RawSetupParams) -> *const c_char;
+    fn risc0_groth16_cuda_setup(params: *mut RawSetupParams) -> *const c_char;
 }
 
 #[cfg_attr(not(feature = "cuda"), allow(dead_code))]
@@ -124,7 +120,7 @@ fn ffi_wrap<F>(mut inner: F) -> Result<()>
 where
     F: FnMut() -> *const c_char,
 {
-    extern "C" {
+    unsafe extern "C" {
         fn free(str: *const c_char);
     }
 
@@ -141,36 +137,5 @@ where
             msg
         };
         Err(anyhow!(what))
-    }
-}
-
-#[cfg_attr(not(feature = "cuda"), allow(dead_code))]
-pub struct RawPath {
-    path: PathBuf,
-    c_str: CString,
-}
-
-impl RawPath {
-    pub fn as_path(&self) -> &Path {
-        &self.path
-    }
-}
-
-impl TryFrom<&Path> for RawPath {
-    type Error = NulError;
-
-    fn try_from(value: &Path) -> Result<Self, Self::Error> {
-        Ok(RawPath {
-            path: value.to_path_buf(),
-            c_str: CString::new(value.as_os_str().as_encoded_bytes())?,
-        })
-    }
-}
-
-impl TryFrom<PathBuf> for RawPath {
-    type Error = NulError;
-
-    fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
-        RawPath::try_from(value.as_path())
     }
 }

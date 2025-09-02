@@ -323,21 +323,13 @@ impl From<u64> for Elem {
 /// Wrapping addition of [Elem] using Baby Bear field modulus
 fn add(lhs: u32, rhs: u32) -> u32 {
     let x = lhs.wrapping_add(rhs);
-    if x >= P {
-        x - P
-    } else {
-        x
-    }
+    if x >= P { x - P } else { x }
 }
 
 /// Wrapping subtraction of [Elem] using Baby Bear field modulus
 fn sub(lhs: u32, rhs: u32) -> u32 {
     let x = lhs.wrapping_sub(rhs);
-    if x > P {
-        x.wrapping_add(P)
-    } else {
-        x
-    }
+    if x > P { x.wrapping_add(P) } else { x }
 }
 
 /// Wrapping multiplication of [Elem]  using Baby Bear field modulus
@@ -354,11 +346,7 @@ const fn mul(lhs: u32, rhs: u32) -> u32 {
     // uint32_t ret = o64 >> 32;
     let ret = (o64 >> 32) as u32;
     // return (ret >= P ? ret - P : ret);
-    if ret >= P {
-        ret - P
-    } else {
-        ret
-    }
+    if ret >= P { ret - P } else { ret }
 }
 
 /// Encode to Montgomery form from direct form.
@@ -749,7 +737,7 @@ impl ops::Mul<ExtElem> for Elem {
 
 // Now we get to the interesting case of multiplication. Basically,
 // multiply out the polynomial representations, and then reduce module
-// `x^4 - B`, which means powers >= 4 get shifted back 4 and
+// `x^4 + BETA` (i.e., `x^4 = -BETA`), which means powers >= 4 get shifted back 4 and
 // multiplied by `-beta`. We could write this as a double loops with
 // some `if`s and hope it gets unrolled properly, but it's small
 // enough to just hand write.
@@ -805,7 +793,7 @@ mod tests {
 
     use rand::{Rng, SeedableRng};
 
-    use super::{field, Elem, ExtElem, P, P_U64};
+    use super::{Elem, ExtElem, P, P_U64, field};
     use crate::field::Elem as FieldElem;
 
     #[test]

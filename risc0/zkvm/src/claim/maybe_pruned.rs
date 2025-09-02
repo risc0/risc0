@@ -53,16 +53,16 @@ impl<T> MaybePruned<T> {
     /// Unwrap the value as a reference, or return an error.
     pub fn as_value(&self) -> Result<&T, PrunedValueError> {
         match self {
-            MaybePruned::Value(ref value) => Ok(value),
-            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(*digest)),
+            MaybePruned::Value(value) => Ok(value),
+            MaybePruned::Pruned(digest) => Err(PrunedValueError(*digest)),
         }
     }
 
     /// Unwrap the value as a mutable reference, or return an error.
     pub fn as_value_mut(&mut self) -> Result<&mut T, PrunedValueError> {
         match self {
-            MaybePruned::Value(ref mut value) => Ok(value),
-            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(*digest)),
+            MaybePruned::Value(value) => Ok(value),
+            MaybePruned::Pruned(digest) => Err(PrunedValueError(*digest)),
         }
     }
 }
@@ -79,7 +79,7 @@ where
 {
     fn digest<S: Sha256>(&self) -> Digest {
         match self {
-            MaybePruned::Value(ref val) => val.digest::<S>(),
+            MaybePruned::Value(val) => val.digest::<S>(),
             MaybePruned::Pruned(digest) => *digest,
         }
     }
@@ -95,7 +95,7 @@ where
 }
 
 impl<T> MaybePruned<Option<T>> {
-    /// Returns true is the value is None, or the value is pruned as the zero
+    /// Returns true if the value is None, or the value is pruned as the zero
     /// digest.
     pub fn is_none(&self) -> bool {
         match self {
@@ -105,7 +105,7 @@ impl<T> MaybePruned<Option<T>> {
         }
     }
 
-    /// Returns true is the value is Some(_), or the value is pruned as a
+    /// Returns true if the value is Some(_), or the value is pruned as a
     /// non-zero digest.
     pub fn is_some(&self) -> bool {
         !self.is_none()

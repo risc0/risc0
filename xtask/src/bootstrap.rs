@@ -15,17 +15,17 @@
 use std::{borrow::Borrow, collections::HashSet, fmt::Write, process::Command};
 
 use clap::Parser;
-use risc0_circuit_keccak::{prove::zkr::get_keccak_zkr, KECCAK_PO2_RANGE};
+use risc0_circuit_keccak::{KECCAK_PO2_RANGE, prove::zkr::get_keccak_zkr};
 use risc0_circuit_recursion::prove::zkr::{get_all_zkrs, get_zkr};
 use risc0_zkp::core::{
     digest::Digest,
     hash::{
-        hash_suite_from_name, poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite,
+        hash_suite_from_name, poseidon_254::Poseidon254HashSuite, poseidon2::Poseidon2HashSuite,
     },
 };
 use risc0_zkvm::{
-    recursion::{MerkleGroup, Program},
     DEFAULT_MAX_PO2, RECURSION_PO2,
+    recursion::{MerkleGroup, Program},
 };
 
 #[derive(Parser)]
@@ -47,7 +47,7 @@ impl Bootstrap {
         out
     }
 
-    // Format a list of control IDs, include the names as data in a tuple of (&str, Digest)
+    // Format a list of control IDs, including the names as data in a tuple of (&str, Digest)
     fn format_control_ids_with_name(
         ids: impl IntoIterator<Item = impl Borrow<(String, Digest)>>,
     ) -> String {
@@ -68,7 +68,7 @@ impl Bootstrap {
         Command::new("rustfmt")
             .arg(path)
             .status()
-            .expect("failed to format {path}");
+            .unwrap_or_else(|_| panic!("failed to format {path}"));
     }
 
     fn generate_recursion_control_ids() {

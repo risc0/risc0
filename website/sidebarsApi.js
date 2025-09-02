@@ -64,7 +64,7 @@ export default {
     },
     {
       type: "category",
-      label: "Writing your zkVM Application",
+      label: "Developing your zkVM Application",
       collapsed: true,
       items: [
         {
@@ -101,6 +101,11 @@ export default {
           type: "doc",
           label: "Rust Crates that Use C++",
           id: "zkvm/rust-crates-with-cpp",
+        },
+        {
+          type: "doc",
+          label: "Debugging with gdb",
+          id: "zkvm/debugging-with-gdb",
         },
         {
           type: "link",
@@ -177,6 +182,11 @@ export default {
           type: "doc",
           label: "Verifier Contracts",
           id: "blockchain-integration/contracts/verifier",
+        },
+        {
+          type: "doc",
+          label: "Shrink-Wrapping",
+          id: "blockchain-integration/shrink-wrapping",
         },
       ],
     },

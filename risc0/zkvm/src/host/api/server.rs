@@ -18,15 +18,17 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use bytes::Bytes;
 use prost::Message;
 use risc0_binfmt::PovwJobId;
 use risc0_zkp::core::digest::Digest;
 
-use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
+use super::{ConnectionWrapper, Connector, TcpConnector, malformed_err, path_to_string, pb};
 use crate::{
-    get_prover_server, get_version,
+    AssetRequest, Assumption, ExecutorEnv, InnerAssumptionReceipt, ProverOpts, Receipt,
+    ReceiptClaim, Segment, SegmentReceipt, SegmentRef, Session, SuccinctReceipt, TraceCallback,
+    TraceEvent, Unknown, VerifierContext, get_prover_server, get_version,
     host::{
         api::convert::keccak_input_to_bytes,
         client::{
@@ -38,9 +40,6 @@ use crate::{
         },
     },
     recursion::identity_p254,
-    AssetRequest, Assumption, ExecutorEnv, InnerAssumptionReceipt, ProverOpts, Receipt,
-    ReceiptClaim, Segment, SegmentReceipt, SegmentRef, Session, SuccinctReceipt, TraceCallback,
-    TraceEvent, Unknown, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -989,10 +988,10 @@ fn execute_redis(
     use redis::{Client, Commands, ConnectionLike, SetExpiry, SetOptions};
     use std::{
         sync::{
-            mpsc::{sync_channel, Receiver},
             Arc, Mutex,
+            mpsc::{Receiver, sync_channel},
         },
-        thread::{spawn, JoinHandle},
+        thread::{JoinHandle, spawn},
     };
 
     let channel_size = match std::env::var("RISC0_REDIS_CHANNEL_SIZE") {

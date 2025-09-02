@@ -18,7 +18,7 @@ use bytemuck::Pod;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{sys_verify_integrity, sys_verify_integrity2};
 
-use crate::{sha::Digestible, Assumption, MaybePruned, PrunedValueError, ReceiptClaim};
+use crate::{Assumption, MaybePruned, PrunedValueError, ReceiptClaim, sha::Digestible};
 
 use super::ASSUMPTIONS_DIGEST;
 
@@ -27,7 +27,7 @@ use super::ASSUMPTIONS_DIGEST;
 /// Calling this function in the guest is logically equivalent to verifying a receipt with the same
 /// image ID and journal. Any party verifying the receipt produced by this execution can then be
 /// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
-/// potentially distinct guests can be combined into one. This feature is know as [composition].
+/// potentially distinct guests can be combined into one. This feature is known as [composition].
 ///
 /// In order to be valid, the [crate::Receipt] must have [ExitCode::Halted(0)][crate::ExitCode] or
 /// [ExitCode::Paused(0)][crate::ExitCode], an empty assumptions list, and an all-zeroes input
@@ -71,7 +71,7 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), I
 /// Calling this function in the guest is logically equivalent to verifying a receipt with the same
 /// [ReceiptClaim][crate::ReceiptClaim]. Any party verifying the receipt produced by this execution
 /// can then be sure that the receipt verified by this call is also valid. In this way, multiple
-/// receipts from  potentially distinct guests can be combined into one. This feature is known as
+/// receipts from potentially distinct guests can be combined into one. This feature is known as
 /// [composition].
 ///
 /// In order for a receipt to be valid, it must have a verifying cryptographic seal and

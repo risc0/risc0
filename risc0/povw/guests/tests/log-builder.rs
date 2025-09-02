@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use risc0_binfmt::{PovwJobId, PovwLogId, PovwNonce};
 use risc0_povw::{
+    Job, WorkLog,
     guest::{Input, Journal, State, WorkLogUpdate},
     prover::WorkLogUpdateProver,
-    Job, WorkLog,
 };
 use risc0_povw_guests::{RISC0_POVW_LOG_BUILDER_ELF, RISC0_POVW_LOG_BUILDER_ID};
 use risc0_zkvm::{
-    default_executor, default_prover, Digest, ExecutorEnv, ExitCode, FakeReceipt, MaybePruned,
-    ProveInfo, ProverOpts, ReceiptClaim, Unknown, Work, WorkClaim,
+    Digest, ExecutorEnv, ExitCode, FakeReceipt, MaybePruned, ProveInfo, ProverOpts, ReceiptClaim,
+    Unknown, Work, WorkClaim, default_executor, default_prover,
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+use risc0_zkvm_methods::{MULTI_TEST_ELF, multi_test::MultiTestSpec};
 use ruint::uint;
 
 fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
@@ -74,7 +74,7 @@ fn rand_claim() -> MaybePruned<Unknown> {
     MaybePruned::Pruned(Digest::new(rand::random()))
 }
 
-/// Proves the busy loop test utility, using default_prover, which is guarenteed to run for at
+/// Proves the busy loop test utility, using default_prover, which is guaranteed to run for at
 /// least as many user cycles as is given in the cycles argument.
 fn prove_busy_loop(job_id: PovwJobId, cycles: u64) -> anyhow::Result<ProveInfo> {
     let env = ExecutorEnv::builder()
@@ -261,6 +261,7 @@ fn two_batched_updates() -> anyhow::Result<()> {
 }
 
 #[test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 fn prove_three_sequential_updates() -> anyhow::Result<()> {
     let work_log_id = uint!(0xdeafbee7_U160);
 
@@ -338,7 +339,7 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
 
     // Prove another update, this time rebuilding the prover with provided work log and receipt to
     // resume the previous state, like what might be done if the state is being deserialized from
-    // peristent storage.
+    // persistent storage.
 
     let work_info = prove_busy_loop(
         PovwJobId {
