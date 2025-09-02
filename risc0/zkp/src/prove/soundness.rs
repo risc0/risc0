@@ -29,7 +29,7 @@
 //! Increasing SEGMENT_SIZE to the maximum of 2^24 cycles reduces the result to 95 bits of conjectured soundness.
 //!
 //! Use the following command to run the calculator:
-//! RUST_LOG=risc0_zkp=info cargo run --release
+//! RUST_LOG=risc0_zkp=debug cargo run -p risc0-zkvm --example fib --features=prove --release -- --iterations 1
 //!
 //! Running the calculator results in a terminal printout for scenarios (1) and (3) in the list above.
 //! The calculator also includes code for scenarios (2) and (4).
