@@ -1448,7 +1448,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-povw"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "borsh",
  "bytemuck",
