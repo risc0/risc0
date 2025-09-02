@@ -27,43 +27,16 @@ use risc0_zkvm::guest::env;
 use sha3::{Digest, Keccak256};
 
 extern crate alloc;
-use alloc::string::String;
-use alloc::vec;
 use alloc::vec::Vec;
 
 // Define the EvmConfig struct locally with serde support
 #[derive(Clone, Debug, serde::Deserialize)]
 struct EvmConfig {
     bytecode: Vec<u8>,
-    function_signature: String,
-    input: i64,
+    calldata: Vec<u8>,
 }
 
 risc0_zkvm::guest::entry!(main);
-
-// Simple keccak256 implementation
-fn keccak256(data: &[u8]) -> [u8; 32] {
-    let mut hasher = Keccak256::new();
-    hasher.update(data);
-    hasher.finalize().into()
-}
-
-// Simple ABI encoding for int256
-fn encode_int256(value: i64) -> Vec<u8> {
-    let mut result = vec![0u8; 32];
-    // For negative values, fill with 0xFF
-    if value < 0 {
-        for byte in result.iter_mut() {
-            *byte = 0xFF;
-        }
-    }
-    // Convert i64 to big-endian bytes and place at the end
-    let bytes = value.to_be_bytes();
-    for (i, &byte) in bytes.iter().enumerate() {
-        result[24 + i] = byte;
-    }
-    result
-}
 
 fn main() {
     // Read the bytecode from the host
@@ -72,6 +45,10 @@ fn main() {
     // Create a new EVM instance with in-memory database
     let ctx = Context::mainnet().with_db(CacheDB::<EmptyDB>::default());
     let mut evm = ctx.build_mainnet();
+
+    // Compute keccak256 hashes of bytecode and calldata
+    let bytecode_hash = Keccak256::digest(&config.bytecode);
+    let calldata_hash = Keccak256::digest(&config.calldata);
 
     // Deploy the contract
     let deploy_result = evm
@@ -91,20 +68,14 @@ fn main() {
             ..
         } => addr,
         _ => {
-            // If deployment failed, commit with error
-            env::commit(&(config.bytecode, config.function_signature, false));
+            // If deployment failed, commit with error (using hashes)
+            env::commit(&(bytecode_hash.to_vec(), calldata_hash.to_vec(), false));
             return;
         }
     };
 
-    // Get function signature (first 4 bytes of keccak256 of function signature)
-    let signature_hash = keccak256(config.function_signature.as_bytes());
-    let selector = &signature_hash[..4];
-
-    // Encode the input parameter (int256)
-    let argument = encode_int256(config.input);
-    let mut calldata = Vec::from(selector);
-    calldata.extend(argument);
+    // Use the calldata directly from config
+    let calldata = config.calldata.clone();
 
     // Call the function
     let call_result = evm
@@ -132,10 +103,10 @@ fn main() {
         _ => false,
     };
 
-    // Commit the result
+    // Commit the hashes instead of raw data
     env::commit(&(
-        config.bytecode,
-        config.function_signature,
+        bytecode_hash.to_vec(),
+        calldata_hash.to_vec(),
         is_solved
     ));
 }

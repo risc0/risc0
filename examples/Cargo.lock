@@ -4411,6 +4411,7 @@ dependencies = [
  "revm-core",
  "revm-methods",
  "risc0-zkvm",
+ "sha3",
  "tracing-subscriber 0.3.19",
 ]
 
@@ -4422,6 +4423,7 @@ dependencies = [
  "revm-methods",
  "risc0-zkvm",
  "serde",
+ "sha3",
 ]
 
 [[package]]
@@ -5381,6 +5383,16 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest 0.10.7",
+]
+
+[[package]]
+name = "sha3"
+version = "0.10.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75872d278a8f37ef87fa0ddbda7802605cb18344497949862c0d4dcb291eba60"
+dependencies = [
+ "digest 0.10.7",
+ "keccak",
 ]
 
 [[package]]

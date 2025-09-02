@@ -24,11 +24,15 @@ fn main() {
     // Load EVM configuration
     let config = EvmConfig::default();
 
+    // Compute and display hashes instead of raw data for privacy
+    use sha3::{Digest, Keccak256};
+    let bytecode_hash = Keccak256::digest(config.get_bytecode());
+    let calldata_hash = Keccak256::digest(config.get_calldata());
+
     println!(
-        "Executing EVM bytecode {} with function signature {} and input {}",
-        hex::encode(config.get_bytecode_owned()),
-        config.get_function_signature(),
-        config.get_input()
+        "Executing EVM bytecode hash: 0x{} with calldata hash: 0x{}",
+        hex::encode(bytecode_hash),
+        hex::encode(calldata_hash)
     );
 
     // Execute the bytecode inside the zkVM

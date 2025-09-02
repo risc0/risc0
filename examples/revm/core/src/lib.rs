@@ -17,7 +17,9 @@
 use revm_methods::REVM_GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 use config::EvmConfig;
+use sha3::{Digest, Keccak256};
 
+pub mod abi;
 pub mod config;
 
 // This is a simple EVM demo for the RISC Zero zkVM.
@@ -39,18 +41,31 @@ pub fn execute_evm_bytecode(config: EvmConfig) -> (Receipt, bool) {
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove(env, REVM_GUEST_ELF).unwrap().receipt;
 
-    // Extract journal of receipt (i.e. output - the return value from EVM execution)
-    let public_state: (Vec<u8>, String, bool) = receipt.journal.decode().expect(
+    // Extract journal of receipt (now contains hashes instead of raw data)
+    let public_state: (Vec<u8>, Vec<u8>, bool) = receipt.journal.decode().expect(
         "Journal output should deserialize into the same types (& order) that it was written",
     );
 
-    assert_eq!(public_state.0, config.bytecode, "Bytecode should be the same");
-    assert_eq!(public_state.1, config.function_signature, "Function signature should be the same");
+    // Compute expected hashes
+    let expected_bytecode_hash = Keccak256::digest(&config.bytecode);
+    let expected_calldata_hash = Keccak256::digest(&config.calldata);
+
+    // Compare hashes instead of raw data
+    assert_eq!(public_state.0, expected_bytecode_hash.to_vec(), "Bytecode hash mismatch");
+    assert_eq!(public_state.1, expected_calldata_hash.to_vec(), "Calldata hash mismatch");
 
     // Report the result
     println!(
         "Successfully executed EVM bytecode inside zkVM! Return value: {:02x?}",
         public_state.2
+    );
+    println!(
+        "Bytecode hash: 0x{}",
+        hex::encode(&public_state.0)
+    );
+    println!(
+        "Calldata hash: 0x{}",
+        hex::encode(&public_state.1)
     );
 
     (receipt, public_state.2)
