@@ -121,7 +121,7 @@ impl<Claim> SuccinctReceipt<Claim> {
 
         // Check that the proof system and circuit info strings match what is implemented by this
         // function. Info strings are used a version identifiers, and this verify implementation
-        // supports exactly one proof systema and circuit version at a time.
+        // supports exactly one proof system and circuit version at a time.
         if params.proof_system_info != PROOF_SYSTEM_INFO {
             return Err(VerificationError::ProofSystemInfoMismatch {
                 expected: PROOF_SYSTEM_INFO,

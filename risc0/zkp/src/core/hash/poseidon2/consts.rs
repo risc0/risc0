@@ -169,7 +169,7 @@ pub const _M_EXT: &[Elem] = &baby_bear_array![
 /// Standardizing on the same coefficients as <https://github.com/HorizenLabs/poseidon2.git>
 /// (as used in its plain implementation of Poseidon2 for BabyBear)
 ///
-/// These parameters are have been confirmed to pass the algorithms given in Grassi, Rechberger, and
+/// These parameters have been confirmed to pass the algorithms given in Grassi, Rechberger, and
 /// Schofnegger's paper "Proving Resistance Against Infinitely Long Subspace Trails: How to Choose
 /// the Linear Layer" by running a version of the code provided with the paper adapted to include
 /// these parameters in what's tested.
