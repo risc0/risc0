@@ -14,7 +14,7 @@
 
 use std::path::PathBuf;
 
-use anyhow::{Context, Result, anyhow, bail};
+use anyhow::{anyhow, bail, Context, Result};
 use enum_map::EnumMap;
 use prost::{Message, Name};
 use risc0_binfmt::SystemState;
@@ -23,20 +23,20 @@ use risc0_circuit_rv32im::{EcallKind, EcallMetric};
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
-use super::{Asset, AssetRequest, RedisParams, malformed_err, path_to_string, pb};
+use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
-    Assumption, Assumptions, ExitCode, GenericReceipt, Groth16Receipt, Input, Journal, MaybePruned,
-    Output, ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
-    Work, WorkClaim,
-    claim::{Unknown, receipt::UnionClaim},
+    claim::{receipt::UnionClaim, Unknown},
     host::{
         client::env::ProveKeccakRequest,
         prove_info::{SyscallKind, SyscallMetric},
     },
     receipt::{
-        CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata,
-        SegmentReceipt, SuccinctReceipt, merkle::MerkleProof,
+        merkle::MerkleProof, CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt,
+        ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
     },
+    Assumption, Assumptions, ExitCode, GenericReceipt, Groth16Receipt, Input, Journal, MaybePruned,
+    Output, ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
+    Work, WorkClaim,
 };
 
 mod ver {

@@ -29,6 +29,8 @@ opentelemetry = "0.30.0"
 opentelemetry-appender-tracing = "0.30.0"
 opentelemetry-otlp = "0.30.0"
 opentelemetry_sdk = "0.30.0"
+rand = "0.9.1"
+risc0-binfmt = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["prove"] }
 serde = { version = "1.0.219", features = ["rc"] }

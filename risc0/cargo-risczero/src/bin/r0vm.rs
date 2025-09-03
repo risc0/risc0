@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-fn main() {
-    #[cfg(feature = "r0vm")]
-    risc0_r0vm::main();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    risc0_r0vm::main()
 }
