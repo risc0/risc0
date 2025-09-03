@@ -19,7 +19,7 @@ use risc0_zkvm::{Digest, Unknown, WorkClaim};
 use ruint::aliases::U160;
 use serde::{Deserialize, Serialize};
 
-use crate::{Job, SubtreeOpening, WorkLog};
+use crate::{Job, SubtreeOpening, WorkLog, error::Error};
 
 /// Guest program for the Log Builder.
 #[cfg(feature = "prover")]
@@ -86,6 +86,16 @@ impl Input {
     pub fn builder() -> InputBuilder {
         Default::default()
     }
+
+    /// Serialize the input to a vector of bytes.
+    pub fn encode(&self) -> Result<Vec<u8>, Error> {
+        borsh::to_vec(self).map_err(Into::into)
+    }
+
+    /// Deserialize the input from a slice of bytes.
+    pub fn decode(buffer: impl AsRef<[u8]>) -> Result<Self, Error> {
+        borsh::from_slice(buffer.as_ref()).map_err(Into::into)
+    }
 }
 
 /// A single work log update containing a work claim and its non-inclusion proof.
@@ -147,5 +157,15 @@ impl Journal {
     /// Create a [JournalBuilder] to construct a [Journal].
     pub fn builder() -> JournalBuilder {
         Default::default()
+    }
+
+    /// Serialize the journal to a vector of bytes.
+    pub fn encode(&self) -> Result<Vec<u8>, Error> {
+        borsh::to_vec(self).map_err(Into::into)
+    }
+
+    /// Deserialize the journal from a slice of bytes.
+    pub fn decode(buffer: impl AsRef<[u8]>) -> Result<Self, Error> {
+        borsh::from_slice(buffer.as_ref()).map_err(Into::into)
     }
 }
