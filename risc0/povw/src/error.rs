@@ -43,4 +43,8 @@ pub enum Error {
     /// Merkle path root does not match the expected commitment root.
     #[error("merkle path root does not match expected root")]
     PathRootMismatch,
+
+    /// An I/O error occurred during operations such as serialization or deserialization.
+    #[error("serialization error")]
+    SerializationError(#[from] std::io::Error),
 }

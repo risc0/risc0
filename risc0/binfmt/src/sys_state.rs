@@ -73,7 +73,7 @@ impl Digestible for SystemState {
     }
 }
 
-/// Read a SHA-256 digest as a series of half-wrods (i.e. 16-bit values).
+/// Read a SHA-256 digest as a series of half-words (i.e. 16-bit values).
 pub fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Result<Digest, DecodeError> {
     let mut bytes = Vec::<u8>::new();
     if flat.len() < 16 {
@@ -103,7 +103,7 @@ fn read_u32_bytes(flat: &mut VecDeque<u32>) -> Result<u32, DecodeError> {
     ))
 }
 
-/// Write a SHA-256 digest as a series of half-wrods (i.e. 16-bit values).
+/// Write a SHA-256 digest as a series of half-words (i.e. 16-bit values).
 pub fn write_sha_halfs(flat: &mut Vec<u32>, digest: &Digest) {
     for x in digest.as_words() {
         flat.push(*x & 0xffff);

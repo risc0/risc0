@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 use std::process::Command;
 
 #[test]
-#[ignore = "failing as of oct 18 with with cargo 1.79"]
+#[ignore = "failing as of oct 18 with cargo 1.79"]
 fn basic_usage() {
     let exe_path = env!("CARGO_BIN_EXE_cargo-risczero");
     let args = ["risczero", "test"];

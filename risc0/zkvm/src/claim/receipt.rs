@@ -219,7 +219,7 @@ impl ReceiptClaim {
             .context("conditional receipt has pruned assumptions")?;
 
         // Use the control root from the head of the assumptions list to form an Assumption from
-        // the given claim. This is a simplifying assumption but connot guarantee that the claim
+        // the given claim. This is a simplifying assumption but cannot guarantee that the claim
         // actually resolves the assumption if it was produced with an incompatible control root.
         let head_control_root = assumptions
             .first()
