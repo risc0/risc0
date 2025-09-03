@@ -29,7 +29,7 @@ use ui::{TerminalUi, TextUi};
 #[derive(Subcommand)]
 enum Commands {
     /// Install and update components
-    #[command(alias = "update", after_help = commands::INSTALL_HELP)]
+    #[command(alias = "update", after_help = commands::install_help())]
     Install(InstallCommand),
     /// Check for new component versions
     #[command(after_help = commands::CHECK_HELP)]
