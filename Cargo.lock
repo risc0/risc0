@@ -1719,6 +1719,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "cargo-lock"
+version = "10.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c06acb4f71407ba205a07cb453211e0e6a67b21904e47f6ba1f9589e38f2e454"
+dependencies = [
+ "semver 1.0.26",
+ "serde",
+ "toml 0.8.23",
+ "url",
+]
+
+[[package]]
 name = "cargo-platform"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4546,6 +4558,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "hyper-tls"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70206fc6890eaca9fde8a0bf71caa2ddfc9fe045ac9e5c70df101a7dbde866e0"
+dependencies = [
+ "bytes",
+ "http-body-util",
+ "hyper 1.7.0",
+ "hyper-util",
+ "native-tls",
+ "tokio",
+ "tokio-native-tls",
+ "tower-service",
+]
+
+[[package]]
 name = "hyper-util"
 version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6888,10 +6916,12 @@ dependencies = [
  "http-body-util",
  "hyper 1.7.0",
  "hyper-rustls 0.27.7",
+ "hyper-tls",
  "hyper-util",
  "js-sys",
  "log",
  "mime",
+ "native-tls",
  "percent-encoding",
  "pin-project-lite",
  "quinn",
@@ -6902,6 +6932,7 @@ dependencies = [
  "serde_urlencoded",
  "sync_wrapper",
  "tokio",
+ "tokio-native-tls",
  "tokio-rustls 0.26.2",
  "tokio-util",
  "tower",
@@ -8843,6 +8874,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio-native-tls"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbae76ab933c85776efabc971569dd6119c580d8f5d448769dec1764bf796ef2"
+dependencies = [
+ "native-tls",
+ "tokio",
+]
+
+[[package]]
 name = "tokio-rustls"
 version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10136,6 +10177,7 @@ dependencies = [
  "anyhow",
  "bincode",
  "camino",
+ "cargo-lock",
  "cargo-semver-checks",
  "cargo_metadata 0.21.0",
  "clap 4.5.46",
@@ -10145,6 +10187,7 @@ dependencies = [
  "prost-build 0.14.1",
  "protobuf-src",
  "regex",
+ "reqwest",
  "risc0-binfmt",
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
@@ -10156,12 +10199,14 @@ dependencies = [
  "rlimit",
  "semver 1.0.26",
  "serde",
+ "serde_json",
  "serde_with",
  "tempfile",
  "toml 0.9.5",
  "toml_edit 0.23.4",
  "tracing",
  "tracing-subscriber 0.3.19",
+ "url",
  "walkdir",
  "which 8.0.0",
  "xshell",
