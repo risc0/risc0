@@ -5,11 +5,9 @@ version = 1
 [manager]
 listen = "0.0.0.0:9000"
 
-[worker]
-
-[[worker.pools]]
+[[worker]]
 count = 4
-subscribe = ["Execute"]
+subscribe = ["execute"]
 
 [storage]
 path = "/mnt/storage/risc0"

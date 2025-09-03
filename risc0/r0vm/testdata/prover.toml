@@ -2,7 +2,7 @@
 
 version = 1
 
-[worker]
+[[worker]]
 manager = "1.2.3.4:9000"
 subscribe = [
   "prove-segment",
@@ -13,17 +13,6 @@ subscribe = [
   "resolve",
 ]
 
-[[worker.pools]]
-count = 8
-subscribe = [
-  "prove-segment",
-  "prove-keccak",
-  "lift",
-  "join",
-  "union",
-  "resolve",
-]
-
-[[worker.pools]]
-count = 8
+[[worker]]
+manager = "1.2.3.4:9000"
 subscribe = ["lift", "join", "union", "resolve"]

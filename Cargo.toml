@@ -77,7 +77,7 @@ lto = true
 opt-level = 3
 
 [profile.test]
-opt-level = 0
+opt-level = 3
 codegen-units = 256
 debug = 1
 lto = "off"

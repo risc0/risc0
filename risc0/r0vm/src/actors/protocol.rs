@@ -54,6 +54,7 @@ pub(crate) enum JobStatusReply {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) enum TaskKind {
     Execute,
     ProveSegment,

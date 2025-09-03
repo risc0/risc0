@@ -6,8 +6,7 @@ listen = "127.0.0.1:8000"
 [manager]
 listen = "127.0.0.1:9000"
 
-[worker]
-gpus = "auto"
+[[worker]]
 subscribe = [
   "execute",
   "prove-segment",
