@@ -406,7 +406,7 @@ impl<'a> ProgramBinary<'a> {
     }
 
     /// Compute the memory merkle root of the kernel.
-    pub fn kernel_image_id(&self) -> Result<Digest> {
+    pub fn kernel_id(&self) -> Result<Digest> {
         Ok(MemoryImage::new_kernel(self.kernel_program()?).image_id())
     }
 }
