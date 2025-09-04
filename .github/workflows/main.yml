@@ -510,6 +510,22 @@ jobs:
             UPDATE: ${{ startsWith(github.event.pull_request.base.ref || github.head_ref || github.ref_name, 'release-') && '--update' || '' }}
       - run: sccache --show-stats
 
+  check-release-backwards-compat:
+    needs: changes
+    runs-on: [self-hosted, cluster, cpu, Linux, X64, nvidia_rtx_4000_ada]
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - name: run crates-backwards-compat
+        run: cargo run --bin xtask --no-default-features -- release-backwards-compat --cuda
+
   check-template:
     if: needs.changes.outputs.check-template == 'true'
     needs: changes

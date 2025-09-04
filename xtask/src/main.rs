@@ -22,6 +22,7 @@ mod extract_elf;
 #[cfg(feature = "zkvm")]
 mod gen_receipt;
 mod install;
+mod release_backwards_compat;
 mod semver_checks;
 #[cfg(feature = "setup-groth16")]
 mod setup_groth16;
@@ -34,8 +35,9 @@ use clap::{Parser, Subcommand};
 use self::{bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16, gen_receipt::GenReceipt};
 use self::{
     bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos,
-    extract_elf::ExtractElf, install::Install, semver_checks::SemverChecks,
-    update_crate_version::UpdateCrateVersion, update_lock_files::UpdateLockFiles,
+    extract_elf::ExtractElf, install::Install, release_backwards_compat::ReleaseBackwardsCompat,
+    semver_checks::SemverChecks, update_crate_version::UpdateCrateVersion,
+    update_lock_files::UpdateLockFiles,
 };
 
 #[derive(Parser)]
@@ -55,6 +57,7 @@ enum Commands {
     #[cfg(feature = "zkvm")]
     GenReceipt(GenReceipt),
     Install(Install),
+    ReleaseBackwardsCompat(ReleaseBackwardsCompat),
     SemverChecks(SemverChecks),
     #[cfg(feature = "setup-groth16")]
     SetupGroth16(self::setup_groth16::SetupGroth16),
@@ -73,6 +76,7 @@ impl Commands {
             Commands::BootstrapPoseidon(cmd) => cmd.run(),
             Commands::BootstrapProtos(cmd) => cmd.run(),
             Commands::Install(cmd) => cmd.run(),
+            Commands::ReleaseBackwardsCompat(cmd) => cmd.run(),
             #[cfg(feature = "zkvm")]
             Commands::GenReceipt(cmd) => cmd.run(),
             Commands::SemverChecks(cmd) => cmd.run(),
