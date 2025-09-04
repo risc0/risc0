@@ -49,3 +49,11 @@ pub(crate) const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
 pub fn compute_image_id(blob: &[u8]) -> Result<Digest> {
     ProgramBinary::decode(blob)?.compute_image_id()
 }
+
+/// Compute and return the kernel ID of the specified binary.
+///
+/// The given binary is expected to be a combined user ELF + kernel ELF binary. The returned digest
+/// is of the kernel, and is constant with respect to the user program.
+pub fn compute_kernel_id(blob: &[u8]) -> Result<Digest> {
+    ProgramBinary::decode(blob)?.kernel_id()
+}
