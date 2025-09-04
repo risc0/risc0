@@ -299,6 +299,7 @@ mod zkvm {
             Syscall::VerifyIntegrity2 => sys_verify_integrity2(fd),
             Syscall::Write => sys_write(fd),
             Syscall::Unknown(_) => unimplemented!(),
+            Syscall::ProveZkr => todo!(),
         }
     }
 

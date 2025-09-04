@@ -437,6 +437,16 @@ impl<'a> Preflight<'a> {
                     Back::None,
                 );
             }
+            InsnKind::Fence => {
+                self.add_cycle(
+                    state,
+                    pc,
+                    major::CONTROL0,
+                    control_minor::FENCE,
+                    0,
+                    Back::None,
+                );
+            }
             _ => {
                 self.add_cycle(state, pc, insn.major(), insn.minor(), 0, Back::None);
             }
