@@ -114,6 +114,9 @@ impl Syscall for SysWrite {
         std::io::copy(&mut from_guest, &mut *writer.borrow_mut())?;
         drop(from_guest);
 
+        // XXX should we have a concrete flush syscall?
+        writer.borrow_mut().flush()?;
+
         let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::Write];
         metric.count += 1;
         metric.size += buf_len as u64;

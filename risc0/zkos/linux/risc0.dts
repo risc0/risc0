@@ -1,0 +1,56 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+	compatible = "zkvm,rv32-nommu", "riscv";
+	model = "zkVM RV32 NOMMU (SBI-timer + hvc console)";
+
+	chosen {
+		/* hvc via SBI console; make it early and default */
+		bootargs = "earlyprintk earlycon=sbi console=hvc0 init=/bin/sh";
+	};
+
+	cpus {
+		timebase-frequency = <10000000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu0: cpu@0 {
+			compatible = "riscv";
+			device_type = "cpu";
+			reg = <0x0>;
+			/* match your exposed ISA */
+			riscv,isa = "rv32imafd";
+			/* NOMMU */
+			mmu-type = "none";
+			status = "okay";	
+			/* optional UNCORE Freq hint; not required */
+			/* timebase-frequency is NOT needed when using SBI TIME */
+			cpu0_intc: interrupt-controller {
+				compatible = "riscv,cpu-intc";
+				#interrupt-cells = <1>;
+				interrupt-controller;
+			};
+
+
+		};
+	};
+
+	/* RAM visible to Linux. Keep this to the low region you want userland in. */
+	memory@0 {
+		device_type = "memory";
+		reg = <0x00011000 0x08000000>; /* 128 MiB example */
+	};
+
+	mtimer: aclint-mtimer@c2000000 {
+		compatible = "riscv,aclint-mtimer";
+		reg = <0xc2000000 0x00008000>;   /* adjust to your map */
+		interrupts-extended = <&cpu0_intc 5>;  /* STIP (S-timer) */
+		clock-frequency = <10000000>;     /* timebase — match your helper */
+	};
+	/* Nothing else is required: 
+	   - Timer comes from SBI TIME
+	   - Console from SBI console (hvc)
+	   - IPIs can be omitted (UP bring-up) */
+};
