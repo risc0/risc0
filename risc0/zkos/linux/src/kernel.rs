@@ -37,6 +37,7 @@ const USER_HEAP_START_ADDR: usize = 0x0800_0000; // TODO: figure out where data 
 const USER_HEAP_START_PTR: *const u8 = USER_HEAP_START_ADDR as *const u8;
 const USER_HEAP_SIZE: usize = 0x40000000;
 const USER_HEAP_END_ADDR: usize = USER_HEAP_START_ADDR + USER_HEAP_SIZE;
+const USER_PHENT_SIZE: usize = 32; // ELF32_Phdr size in bytes
 
 const ARGC: usize = 1;
 const PROGRAM_NAME: &[u8] = b"r0vm";
@@ -47,10 +48,9 @@ const PAGE_SIZE: usize = 4096;
 const ASCII_TABLE_PTR: *const u8 = 0xbfff_0200 as *const u8;
 
 /// Program header table address (stored in memory)
-const USER_PHDR_ADDR: usize = 0xffff_3000;
-
+const USER_PHDR_ADDR_PTR: *const usize = 0xffff_3000 as *const usize;
 /// Program header count address (stored in memory)
-const USER_PHDR_NUM_ADDR: usize = 0xffff_3008;
+const USER_PHDR_NUM_ADDR_PTR: *const usize = 0xffff_3008 as *const usize;
 
 const SYS_IOCTL: u32 = 29;
 const SYS_READ: u32 = 63;
@@ -191,7 +191,16 @@ unsafe extern "C" fn kstart() -> ! {
     stack.add_aux_word(AuxType::EUid, 1); // auxv[2]
     stack.add_aux_word(AuxType::Gid, 1); // auxv[3]
     stack.add_aux_word(AuxType::EGid, 1); // auxv[4]
-    stack.add_aux_word(AuxType::Null, 0); // auxv[5]
+                                          // Add AT_PHDR, AT_PHNUM, AT_PHENT
+                                          // Define the AuxType variants if not already defined:
+                                          //     Phdr = ...,
+                                          //     Phnum = ...,
+                                          //     Phent = ...,
+                                          // Use the constants for addresses and sizes
+    stack.add_aux_word(AuxType::Phdr, USER_PHDR_ADDR_PTR.read_volatile()); // auxv[5]
+    stack.add_aux_word(AuxType::PhNum, USER_PHDR_NUM_ADDR_PTR.read_volatile()); // auxv[6]
+    stack.add_aux_word(AuxType::PhEnt, USER_PHENT_SIZE); // auxv[7]
+    stack.add_aux_word(AuxType::Null, 0); // auxv[8]
 
     set_ureg(REG_SP, USER_STACK_PTR as u32);
 
