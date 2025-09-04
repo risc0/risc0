@@ -37,6 +37,7 @@ members = [
   "tools/elf-to-bin",
   "tools/gpu-guard",
   "tools/gpu-guard/macros",
+  "tools/elf-to-bin",
   "tools/hotbench",
   "vendor/sppark",
   "website/doc-test/main",

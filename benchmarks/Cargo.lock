@@ -3773,6 +3773,7 @@ dependencies = [
  "anyhow",
  "cargo_metadata",
  "derive_builder",
+ "dirs",
  "docker-generate",
  "hex",
  "rayon",

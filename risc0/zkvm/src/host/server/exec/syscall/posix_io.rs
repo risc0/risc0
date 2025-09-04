@@ -109,7 +109,8 @@ impl Syscall for SysWrite {
         tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
-
+        // XXX should we have a concrete flush syscall?
+        writer.borrow_mut().flush()?;
         let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::Write];
         metric.count += 1;
         metric.size += buf_len as u64;
