@@ -22,8 +22,8 @@ fn main() {
             [(
                 "risc0-zkos-linux-guests-hello",
                 GuestOptionsBuilder::default()
-                    .toolchain("risc0-linux")
-                    .target("riscv32im-unknown-linux-musl")
+                    .toolchain("nightly-2025-08-29")
+                    .target("/home/carsten/riscv32gc-unknown-linux-musl.json")
                     .kernel(VMLINUZ_ELF)
                     .build()
                     .unwrap(),

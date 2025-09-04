@@ -12,66 +12,67 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::{alloc::Layout, ptr::NonNull};
+use no_std_strings::{str_format, str256};
 
-use no_std_strings::{str256, str_format};
-use rlsf::Tlsf;
-
-const REG_SP: usize = 2;
-const REG_A0: usize = 10;
-const REG_A1: usize = 11;
-const REG_A2: usize = 12;
-const REG_A3: usize = 13;
-const REG_A4: usize = 14;
-const REG_A5: usize = 15;
-// const REG_A6: usize = 16;
-const REG_A7: usize = 17;
-
-const USER_REGS_PTR: *mut u32 = 0xffff_0080 as *mut u32;
-const MEPC_PTR: *mut usize = 0xffff_0200 as *mut usize;
-const USER_START_PTR: *const usize = 0x0001_0000 as *const usize;
-const USER_STACK_ADDR: usize = 0xbfff_0000;
-const USER_STACK_PTR: *const usize = USER_STACK_ADDR as *const usize;
-const USER_STACK_SIZE: usize = 2 * 1024 * 1024;
-const USER_HEAP_START_ADDR: usize = 0x0800_0000; // TODO: figure out where data ends in user program
-const USER_HEAP_START_PTR: *const u8 = USER_HEAP_START_ADDR as *const u8;
-const USER_HEAP_END_ADDR: usize = USER_STACK_ADDR - USER_STACK_SIZE;
-const USER_HEAP_SIZE: usize = USER_HEAP_END_ADDR - USER_HEAP_START_ADDR;
-
-const ARGC: usize = 1;
-const PROGRAM_NAME: &[u8] = b"r0vm";
-const PAGE_SIZE: usize = 4096;
-// const AT_VECTOR_SIZE_BASE: usize = 20;
-// const AT_VECTOR_SIZE_ARCH: usize = 7;
-// const AT_VECTOR_SIZE: usize = 2 * (AT_VECTOR_SIZE_ARCH + AT_VECTOR_SIZE_BASE + 1);
-const ASCII_TABLE_PTR: *const u8 = 0xbfff_0200 as *const u8;
-
-const SYS_IOCTL: u32 = 29;
-const SYS_READ: u32 = 63;
-const SYS_WRITE: u32 = 64;
-const SYS_WRITEV: u32 = 66;
-const SYS_EXIT: u32 = 93;
-const SYS_EXIT_GROUP: u32 = 94;
-const SYS_SET_TID_ADDRESS: u32 = 96;
-const SYS_TKILL: u32 = 130;
-const SYS_SIGALTSTACK: u32 = 132;
-const SYS_RT_SIGACTION: u32 = 134;
-const SYS_RT_SIGPROCMASK: u32 = 135;
-const SYS_BRK: u32 = 214;
-const SYS_MUNMAP: u32 = 215;
-const SYS_MMAP: u32 = 222;
-const SYS_PPOLL: u32 = 414;
-
-#[derive(Clone, Copy)]
-enum Err {
-    NoMem = -12,
-    Inval = -22,
+use crate::atomic_emul::emulate_atomic_instruction;
+use crate::compressed_emul::{
+    emulate_compressed_instruction, handle_mpec_fixup, unaligned_instruction_execution,
+};
+use crate::constants::*;
+use crate::host_calls::{host_argc, host_log, host_terminate};
+use crate::linux_abi::{handle_linux_syscall, start_linux_binary};
+use crate::softfloat::{
+    emulate_fp_instruction, emulate_fp_load_store, handle_float_csr_exception,
+    handle_float_csr_fcsr, handle_float_csr_frm, init_softfloat,
+};
+// Debug configuration - set to true to enable debug prints, false to disable
+pub const DEBUG_ENABLED: bool = false;
+pub const TRACE_ENABLED: bool = false;
+// Debug print macro that avoids str_format evaluation when debug is disabled
+#[macro_export]
+macro_rules! debug_print {
+    ($($arg:tt)*) => {
+        if DEBUG_ENABLED {
+            let msg = str_format!(str256, $($arg)*);
+            print(&msg);
+        }
+    };
 }
 
-static mut BRK: u32 = USER_HEAP_START_ADDR as u32;
+macro_rules! trace_print {
+    ($($arg:tt)*) => {
+        if TRACE_ENABLED {
+            let msg = str_format!(str256, $($arg)*);
+            print(&msg);
+        }
+    };
+}
 
-type Heap = Tlsf<'static, usize, usize, { usize::BITS as usize }, { usize::BITS as usize }>;
-static mut HEAP: Heap = Heap::new();
+macro_rules! kprint {
+    ($($arg:tt)*) => {
+            let msg = str_format!(str256, $($arg)*);
+            print(&msg);
+    };
+}
+
+// Debug print macro for simple string literals (no formatting)
+macro_rules! debug_print_simple {
+    ($msg:literal) => {
+        if DEBUG_ENABLED {
+            print($msg);
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! kpanic {
+    ($($arg:tt)*) => {
+        kprint!($($arg)*);
+        host_terminate(1, 0);
+        #[allow(unreachable_code)]
+        loop {}
+    };
+}
 
 #[cfg(target_arch = "riscv32")]
 core::arch::global_asm!(include_str!("kernel.s"));
@@ -79,124 +80,118 @@ core::arch::global_asm!(include_str!("kernel.s"));
 #[cfg(target_arch = "riscv32")]
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
+    kpanic!("Panic: {}", _info);
     unsafe { core::arch::asm!("unimp", options(noreturn)) }
 }
 
-fn get_ureg(idx: usize) -> u32 {
+pub fn get_ureg(idx: usize) -> u32 {
+    // x0 (register 0) should always return 0
+    if idx == 0 {
+        return 0;
+    }
     unsafe { USER_REGS_PTR.add(idx).read() }
 }
 
-fn set_ureg(idx: usize, word: u32) {
+pub fn set_ureg(idx: usize, word: u32) {
+    // Guard against writing to x0 (register 0) - it should always remain 0
+    if idx == 0 {
+        return;
+    }
     unsafe { USER_REGS_PTR.add(idx).write_volatile(word) };
 }
 
-#[allow(unused)]
-enum AuxType {
-    Null = 0,
-    Ignore = 1,
-    ExecFd = 2,
-    Phdr = 3,
-    PhEnt = 4,
-    PhNum = 5,
-    PageSz = 6,
-    Base = 7,
-    Flags = 8,
-    Entry = 9,
-    NotElf = 10,
-    Uid = 11,
-    EUid = 12,
-    Gid = 13,
-    EGid = 14,
-    Platform = 15,
-    HwCap = 16,
-    ClkTck = 17,
-    Secure = 23,
-    BasePlatform = 24,
-    Random = 25,
-    HwCap2 = 26,
-    ExecFn = 31,
-    SysInfo = 32,
-    SysInfoEhdr = 33,
+#[allow(dead_code)]
+pub fn get_vm_machine_mode() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(VM_MACHINE_MODE) }
 }
 
-struct UserStack {
-    sp: *mut usize,
-    strs_ptr: *mut u8,
+#[allow(dead_code)]
+pub fn set_vm_machine_mode(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(VM_MACHINE_MODE) = value;
+    }
 }
 
-impl UserStack {
-    fn new() -> Self {
-        Self {
-            sp: USER_STACK_PTR as *mut usize,
-            strs_ptr: ASCII_TABLE_PTR as *mut u8,
+// CSR (Control and Status Register) emulation
+unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
+    let funct3 = (insn >> 12) & 0x7;
+    let rd = (insn >> 7) & 0x1f;
+    let rs1 = (insn >> 15) & 0x1f;
+    let csr_addr = (insn >> 20) & 0xfff;
+
+    trace_print!(
+        "Emulating CSR instruction at PC: {:#010x}, funct3={}, rd={}, rs1={}, csr={:#03x}",
+        mepc,
+        funct3,
+        rd,
+        rs1,
+        csr_addr
+    );
+
+    // Log CSR operations for debugging
+    let operation = match funct3 {
+        0x0 => "invalid",
+        0x1 => "csrrw",
+        0x2 => "csrrs",
+        0x3 => "csrrc",
+        0x5 => "csrrwi",
+        0x6 => "csrrsi",
+        0x7 => "csrrci",
+        _ => "unknown",
+    };
+    if DEBUG_ENABLED && csr_addr != 0x100 {
+        debug_print!(
+            "CSR {} {}: csr=0x{:03x}, rd=x{}, rs1=x{} (PC=0x{:08x})\n",
+            operation,
+            if funct3 >= 0x5 {
+                "immediate"
+            } else {
+                "register"
+            },
+            csr_addr,
+            rd,
+            rs1,
+            mepc
+        );
+    }
+
+    // Handle floating point CSR operations
+    match csr_addr {
+        0x001 => {
+            handle_float_csr_exception(funct3, rs1, rd);
+        }
+        0x002 => {
+            handle_float_csr_frm(funct3, rs1, rd);
+        }
+        0x003 => {
+            handle_float_csr_fcsr(funct3, rs1, rd);
+        }
+        _ => {
+            kpanic!("Unsupported CSR address: {:#03x}", csr_addr);
         }
     }
-
-    fn add_word(&mut self, word: usize) {
-        unsafe {
-            self.sp.write_volatile(word);
-            self.sp = self.sp.add(1);
-        }
-    }
-
-    fn add_null(&mut self) {
-        self.add_word(0);
-    }
-
-    fn add_aux_word(&mut self, atype: AuxType, word: usize) {
-        self.add_word(atype as usize);
-        self.add_word(word);
-    }
-
-    fn add_str(&mut self, str: &[u8]) {
-        let strs_ptr = self.strs_ptr;
-        unsafe {
-            strs_ptr.copy_from(str.as_ptr(), str.len());
-            self.strs_ptr = strs_ptr.add(str.len() + 1);
-        }
-        self.add_word(strs_ptr as usize);
-    }
-}
-
-impl Err {
-    pub fn as_errno(&self) -> u32 {
-        *self as u32
-    }
-}
-
-#[no_mangle]
-unsafe extern "C" fn kstart() -> ! {
-    let user_start_addr = USER_START_PTR.read_volatile();
-    MEPC_PTR.write_volatile(user_start_addr);
-
-    let mut stack = UserStack::new();
-
-    // args
-    stack.add_word(ARGC);
-    stack.add_str(PROGRAM_NAME);
-    stack.add_null();
-
-    // env
-    stack.add_null();
-
-    // aux
-    stack.add_aux_word(AuxType::PageSz, PAGE_SIZE); // auxv[0]
-    stack.add_aux_word(AuxType::Uid, 1); // auxv[1]
-    stack.add_aux_word(AuxType::EUid, 1); // auxv[2]
-    stack.add_aux_word(AuxType::Gid, 1); // auxv[3]
-    stack.add_aux_word(AuxType::EGid, 1); // auxv[4]
-    stack.add_aux_word(AuxType::Null, 0); // auxv[5]
-
-    set_ureg(REG_SP, USER_STACK_PTR as u32);
-
-    let block: &[u8] = core::slice::from_raw_parts(USER_HEAP_START_PTR, USER_HEAP_SIZE);
-    #[allow(static_mut_refs)]
-    HEAP.insert_free_block_ptr(block.into());
 
     mret()
 }
 
-fn mret() -> ! {
+#[unsafe(no_mangle)]
+unsafe extern "C" fn kstart() -> ! {
+    // Initialize floating point registers to zero at startup
+    init_softfloat();
+
+    debug_print_simple!("kstart");
+    // args - get actual argc and argv from host
+    let argc = host_argc();
+    debug_print!("argc is {argc}");
+    // Check if we have any arguments
+    if argc == 0 {
+        kpanic!("No arguments provided");
+    } else {
+        start_linux_binary(argc)
+    }
+}
+
+pub fn mret() -> ! {
     #[cfg(target_arch = "riscv32")]
     unsafe {
         core::arch::asm!("mret", options(noreturn))
@@ -205,321 +200,374 @@ fn mret() -> ! {
     unimplemented!()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn ecall_dispatch() -> ! {
-    let nr = get_ureg(REG_A7);
+    handle_linux_syscall()
+}
 
-    match nr {
-        SYS_IOCTL => syscall3(sys_ioctl),
-        SYS_READ => syscall3(sys_read),
-        SYS_WRITE => syscall3(sys_write),
-        SYS_WRITEV => syscall3(sys_writev),
-        SYS_EXIT => syscall1(sys_exit),
-        SYS_EXIT_GROUP => syscall1(sys_exit_group),
-        SYS_SET_TID_ADDRESS => syscall1(sys_set_tid_address),
-        SYS_TKILL => syscall2(sys_tkill),
-        SYS_SIGALTSTACK => syscall2(sys_sigaltstack),
-        SYS_RT_SIGACTION => syscall4(sys_rt_sigaction),
-        SYS_RT_SIGPROCMASK => syscall4(sys_rt_sigprocmask),
-        SYS_BRK => syscall1(sys_brk),
-        SYS_MMAP => syscall6(sys_mmap),
-        SYS_MUNMAP => syscall2(sys_munmap),
-        SYS_PPOLL => syscall5(sys_ppoll),
-        _ => {
-            let msg = str_format!(str256, "syscall: {nr}");
-            print(&msg);
-            set_ureg(REG_A0, 0);
+#[unsafe(no_mangle)]
+unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
+    // Get the saved PC from MEPC (where the illegal instruction occurred)
+    let mepc = unsafe { MEPC_PTR.read_volatile() };
+    // Read the instruction as a u16 first
+    let instruction_h = unsafe { (mepc as *const u16).read_volatile() };
+    if instruction_h & 0x3 != 0x3 {
+        emulate_compressed_instruction(mepc, instruction_h)
+    } else if mepc % 4 != 0 {
+        unaligned_instruction_execution(mepc, instruction_h);
+    }
+
+    let instruction_l = unsafe { (mepc as *const u16).add(1).read_volatile() };
+    let instruction = (instruction_l as u32) << 16 | instruction_h as u32;
+    if instruction == 0xffff_ffff {
+        handle_mpec_fixup()
+    }
+    // Check if this is a fence instruction (0x0ff0000f)
+    if instruction == 0x0ff0000f {
+        // Fence instruction - treat as null-op and continue
+        // mret will automatically increment MEPC by 4, so we don't need to do anything
+        /* let msg = str_format!(str256, "Emulating fence instruction at PC: {:#010x}", mepc);
+        print(&msg); */
+        mret()
+    }
+
+    // Check if this is a fence.i instruction (0x0000100f)
+    if instruction == 0x0000100f {
+        // Fence.i instruction - treat as null-op and continue
+        // mret will automatically increment MEPC by 4, so we don't need to do anything
+        /* let msg = str_format!(
+            str256,
+            "Emulating fence.i instruction at PC: {:#010x}",
+            mepc
+        );
+        print(&msg); */
+        mret()
+    }
+
+    // Check if this is a fence rw,rw instruction (0x0330000f)
+    if instruction == 0x0330000f {
+        // Fence rw,rw instruction - ensure all read and write operations before this fence
+        // are completed before any read and write operations after this fence
+        // In our emulated environment, we can treat this as a memory barrier
+        trace_print!("Emulating fence rw,rw instruction at PC: {:#010x}", mepc);
+        // For now, treat as null-op since we don't have complex memory ordering
+        // In a real implementation, this would ensure memory ordering constraints
+        mret()
+    }
+
+    // Check if this is a fence ow,ow instruction (0x0550000f)
+    if instruction == 0x0550000f {
+        // Fence ow,ow instruction - ensure all "other" and write operations before this fence
+        // are completed before any "other" and write operations after this fence
+        // In our emulated environment, we can treat this as a memory barrier
+        trace_print!("Emulating fence ow,ow instruction at PC: {:#010x}", mepc);
+        // For now, treat as null-op since we don't have complex memory ordering
+        // In a real implementation, this would ensure memory ordering constraints
+        mret()
+    }
+
+    // Decode instruction fields
+    let opcode = instruction & 0x0000007f;
+    let rd = (instruction & 0x00000f80) >> 7;
+    let rs1 = (instruction & 0x000f8000) >> 15;
+    let rs2 = (instruction & 0x01f00000) >> 20;
+    let funct3 = (instruction & 0x00007000) >> 12;
+    let funct7 = (instruction & 0xfe000000) >> 25;
+    trace_print!(
+        "Decoded instruction: {:#08x}, opcode={:#02x}, funct7={:#02x}",
+        instruction,
+        opcode,
+        funct7
+    );
+    // Check for floating point operations (opcode 0x43) - R4-type instructions
+    if opcode == 0x43 {
+        /*let msg = str_format!(
+            str256,
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        print(&msg); */
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
         }
     }
 
-    mret()
+    // Check for floating point operations (opcode 0x47) - R4-type instructions
+    if opcode == 0x47 {
+        /* let msg = str_format!(
+            str256,
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        print(&msg); */
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point operations (opcode 0x4b) - R4-type instructions
+    if opcode == 0x4b {
+        /* let msg = str_format!(
+            str256,
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        print(&msg); */
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point operations (opcode 0x4f) - R4-type instructions
+    if opcode == 0x4f {
+        debug_print!(
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point operations (opcode 0x53)
+    if opcode == 0x53 {
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point operations (opcode 0x63) - alternative encoding
+    if opcode == 0x63 {
+        trace_print!(
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point load/store operations (opcode 0x07 = Load-FP, 0x27 = Store-FP)
+    if opcode == 0x07 || opcode == 0x27 {
+        unsafe {
+            emulate_fp_load_store(instruction, mepc);
+        }
+    }
+
+    // Check for SYSTEM operations (opcode 0x73)
+    if opcode == 0x73 {
+        // Check if this is a privileged system instruction (funct3=000)
+        if funct3 == 0x0 {
+            // Extract funct12 field (bits [31:20])
+            let funct12 = (instruction >> 20) & 0xfff;
+
+            // Check for sret instruction (funct12 = 0x102)
+            if funct12 == 0x102 {
+                // should be
+                kpanic!("sret instruction intercepted at PC: {:#010x}", mepc);
+            } else if funct12 == 0x105 {
+                // WFI, null-op
+                mret()
+            }
+
+            // Handle other privileged system instructions here if needed
+            kpanic!(
+                "Unsupported privileged system instruction: funct12={:#03x} at PC: {:#010x}",
+                funct12,
+                mepc
+            );
+        } else {
+            // This is a CSR instruction (funct3 != 000)
+            unsafe {
+                emulate_csr_instruction(instruction, mepc);
+            }
+        }
+    }
+
+    // Check for RV32A atomic memory operations
+    if opcode == 0x2f {
+        emulate_atomic_instruction(mepc, rd, rs1, rs2, funct3, funct7);
+    }
+
+    // Log the illegal instruction event and terminate
+    kpanic!(
+        "Illegal instruction at PC: {:#010x}, instr: {:#010x}",
+        mepc,
+        instruction
+    );
 }
 
-fn print(msg: &str) {
+pub fn print(msg: &str) {
     let msg = msg.as_bytes();
     host_log(msg.as_ptr(), msg.len());
 }
 
-fn host_terminate(_a0: u32, _a1: u32) -> ! {
-    #[cfg(target_arch = "riscv32")]
-    unsafe {
-        const HOST_ECALL_TERMINATE: u32 = 0;
-        core::arch::asm!("ecall",
-            in("a7") HOST_ECALL_TERMINATE,
-            in("a0") _a0,
-            in("a1") _a1,
-            options(noreturn)
-        )
-    };
-    #[cfg(not(target_arch = "riscv32"))]
-    unimplemented!()
-}
+#[unsafe(no_mangle)]
+unsafe extern "C" fn instruction_misaligned_dispatch() -> ! {
+    // Get the saved PC from MEPC (where the misaligned instruction occurred)
+    let mepc = unsafe { MEPC_PTR.read_volatile() };
 
-fn host_log(_msg_ptr: *const u8, _msg_len: usize) {
-    #[cfg(target_arch = "riscv32")]
-    unsafe {
-        const HOST_ECALL_WRITE: u32 = 2;
-        core::arch::asm!("ecall",
-            in("a7") HOST_ECALL_WRITE,
-            in("a0") 0,
-            in("a1") _msg_ptr,
-            in("a2") _msg_len,
-        )
-    };
-}
+    // Read the instruction that caused the misaligned jump
+    let instruction = unsafe { (mepc as *const u32).read_volatile() };
 
-fn set_result(result: Result<u32, Err>) {
-    set_ureg(REG_A0, result.unwrap_or_else(|e| e.as_errno()));
-}
+    // Decode instruction fields
+    let opcode = instruction & 0x0000007f;
+    let rd = (instruction & 0x00000f80) >> 7;
+    let rs1 = (instruction & 0x000f8000) >> 15;
+    let rs2 = (instruction & 0x01f00000) >> 20;
+    let funct3 = (instruction & 0x00007000) >> 12;
+    let _funct7 = (instruction & 0xfe000000) >> 25;
 
-fn syscall1<F: Fn(u32) -> Result<u32, Err>>(inner: F) {
-    set_result(inner(get_ureg(REG_A0)));
-}
+    debug_print!(
+        "Instruction misaligned dispatch: PC={:#010x}, instr={:#010x}, opcode={:#02x}",
+        mepc,
+        instruction,
+        opcode
+    );
 
-fn syscall2<F: Fn(u32, u32) -> Result<u32, Err>>(inner: F) {
-    set_result(inner(get_ureg(REG_A0), get_ureg(REG_A1)));
-}
+    match opcode {
+        0x63 => {
+            // Branch instructions (beq, bne, blt, bge, bltu, bgeu)
+            let imm = ((instruction & 0x80000000) >> 19) // imm[12]
+                | ((instruction & 0x7e000000) >> 20) // imm[10:5]
+                | ((instruction & 0x00000f00) >> 7) // imm[4:1]
+                | ((instruction & 0x00000080) << 4); // imm[11]
 
-fn syscall3<F: Fn(u32, u32, u32) -> Result<u32, Err>>(inner: F) {
-    set_result(inner(get_ureg(REG_A0), get_ureg(REG_A1), get_ureg(REG_A2)));
-}
+            // Sign-extend the immediate
+            let offset = if (imm & 0x1000) != 0 {
+                imm | 0xffffe000
+            } else {
+                imm
+            };
 
-fn syscall4<F: Fn(u32, u32, u32, u32) -> Result<u32, Err>>(inner: F) {
-    set_result(inner(
-        get_ureg(REG_A0),
-        get_ureg(REG_A1),
-        get_ureg(REG_A2),
-        get_ureg(REG_A3),
-    ));
-}
+            let rs1_value = get_ureg(rs1 as usize);
+            let rs2_value = get_ureg(rs2 as usize);
+            let should_branch = match funct3 {
+                0x0 => rs1_value == rs2_value,                   // beq
+                0x1 => rs1_value != rs2_value,                   // bne
+                0x4 => (rs1_value as i32) < (rs2_value as i32),  // blt
+                0x5 => (rs1_value as i32) >= (rs2_value as i32), // bge
+                0x6 => rs1_value < rs2_value,                    // bltu
+                0x7 => rs1_value >= rs2_value,                   // bgeu
+                _ => false,
+            };
 
-fn syscall5<F: Fn(u32, u32, u32, u32, u32) -> Result<u32, Err>>(inner: F) {
-    set_result(inner(
-        get_ureg(REG_A0),
-        get_ureg(REG_A1),
-        get_ureg(REG_A2),
-        get_ureg(REG_A3),
-        get_ureg(REG_A4),
-    ));
-}
-
-fn syscall6<F: Fn(u32, u32, u32, u32, u32, u32) -> Result<u32, Err>>(inner: F) {
-    set_result(inner(
-        get_ureg(REG_A0),
-        get_ureg(REG_A1),
-        get_ureg(REG_A2),
-        get_ureg(REG_A3),
-        get_ureg(REG_A4),
-        get_ureg(REG_A5),
-    ));
-}
-
-/// change the location of the program break
-///
-/// https://man7.org/linux/man-pages/man2/brk.2.html
-/// https://elixir.bootlin.com/linux/v5.15.5/source/mm/mmap.c#L194
-/// https://elixir.bootlin.com/linux/v5.15.5/source/mm/nommu.c#L381
-fn sys_brk(addr: u32) -> Result<u32, Err> {
-    let ret = unsafe {
-        if addr > USER_HEAP_START_ADDR as u32 {
-            BRK = addr;
+            if should_branch {
+                let target_pc = (mepc as i32).wrapping_add(offset as i32) as usize;
+                debug_print!(
+                    "Branch taken: PC={:#010x} + {:#x} = {:#010x}",
+                    mepc,
+                    offset,
+                    target_pc
+                );
+                // Set MEPC to the target address (circuit bug: subtract 4)
+                unsafe { MEPC_PTR.write_volatile(target_pc.wrapping_sub(4)) };
+            } else {
+                debug_print!("Branch not taken, continuing sequentially");
+                // Set MEPC to next instruction
+                unsafe { MEPC_PTR.write_volatile(mepc) };
+            }
+            mret()
         }
-        BRK
-    };
+        0x6f => {
+            // JAL (Jump and Link)
+            let imm = ((instruction & 0x80000000) >> 11) // imm[20]
+                | ((instruction & 0x7fe00000) >> 20) // imm[10:1]
+                | ((instruction & 0x00100000) >> 9) // imm[11]
+                | (instruction & 0x000ff000); // imm[19:12]
 
-    // let msg = str_format!(str256, "sys_brk(0x{addr:08x}) -> 0x{ret:08x}");
-    // print(&msg);
+            // Sign-extend the immediate
+            let offset = if (imm & 0x100000) != 0 {
+                imm | 0xffe00000
+            } else {
+                imm
+            };
 
-    Ok(ret)
-}
+            let target_pc = (mepc as i32).wrapping_add(offset as i32) as usize;
+            let return_addr = mepc + 4;
 
-/// https://man7.org/linux/man-pages/man2/mmap.2.html
-/// https://elixir.bootlin.com/linux/v5.15.5/source/arch/riscv/kernel/sys_riscv.c#L30
-/// https://elixir.bootlin.com/linux/v5.15.5/source/mm/mmap.c#L1583
-/// https://elixir.bootlin.com/linux/v5.15.5/source/mm/mmap.c#L1404
-/// https://elixir.bootlin.com/linux/v5.15.5/source/mm/nommu.c#L1282
-/// https://elixir.bootlin.com/linux/v5.15.5/source/mm/nommu.c#L1056
-fn sys_mmap(
-    _addr: u32,
-    len: u32,
-    _prot: u32,
-    _flags: u32,
-    fd: u32,
-    _offset: u32,
-) -> Result<u32, Err> {
-    let _fd = fd as i32;
+            debug_print!(
+                "JAL: PC={:#010x} + {:#x} = {:#010x}, return={:#010x}",
+                mepc,
+                offset,
+                target_pc,
+                return_addr
+            );
 
-    // let msg = str_format!(
-    //     str256,
-    //     "sys_mmap(0x{_addr:08x}, {len}, {_prot}, 0x{_flags:08x}, {_fd}, {_offset})"
-    // );
-    // print(&msg);
-
-    if len == 0 {
-        return Err(Err::Inval);
-    }
-
-    #[allow(static_mut_refs)]
-    let ptr = unsafe {
-        let layout = Layout::from_size_align(len as usize, PAGE_SIZE).unwrap_unchecked();
-        let ptr = HEAP.allocate(layout).ok_or(Err::NoMem)?.as_ptr();
-        if !ptr.is_null() {
-            ptr.write_bytes(0, layout.size());
+            // Save return address in rd
+            set_ureg(rd as usize, return_addr as u32);
+            // Set MEPC to the target address (circuit bug: subtract 4)
+            unsafe { MEPC_PTR.write_volatile(target_pc.wrapping_sub(4)) };
+            mret()
         }
-        ptr
-    };
+        0x67 => {
+            // JALR (Jump and Link Register)
+            let imm = (instruction & 0xfff00000) >> 20; // Sign-extended 12-bit immediate
 
-    // let msg = str_format!(str256, "{ptr:?}");
-    // print(&msg);
+            let rs1_value = get_ureg(rs1 as usize);
+            let target_pc = ((rs1_value as i32).wrapping_add(imm as i32) as usize) & !1; // Clear LSB
+            let return_addr = mepc + 4;
 
-    Ok(ptr as u32)
-}
+            debug_print!(
+                "JALR: x{}({:#010x}) + {:#x} = {:#010x}, return={:#010x}",
+                rs1,
+                rs1_value,
+                imm,
+                target_pc,
+                return_addr
+            );
 
-/// https://man7.org/linux/man-pages/man2/mmap.2.html
-fn sys_munmap(addr: u32, _len: u32) -> Result<u32, Err> {
-    let ptr = addr as *mut u8;
-
-    // let msg = str_format!(str256, "sys_munmap({ptr:?}, {_len})");
-    // print(&msg);
-
-    if ptr.is_null() {
-        return Err(Err::Inval);
+            // Save return address in rd
+            set_ureg(rd as usize, return_addr as u32);
+            // Set MEPC to the target address (circuit bug: subtract 4)
+            unsafe { MEPC_PTR.write_volatile(target_pc.wrapping_sub(4)) };
+            mret()
+        }
+        _ => {
+            kpanic!(
+                "Instruction address misaligned trap: unsupported opcode {:#02x} at PC {:#010x}",
+                opcode,
+                mepc
+            );
+        }
     }
-
-    #[allow(static_mut_refs)]
-    unsafe {
-        HEAP.deallocate(NonNull::new_unchecked(ptr), PAGE_SIZE)
-    };
-
-    Ok(0)
 }
 
-/// https://man7.org/linux/man-pages/man2/read.2.html
-fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
-    // const HOST_ECALL_READ: u32 = 1;
-    // let msg = str_format!(str256, "sys_read({fd}, {buf:?}, {count})");
-    // print(&msg);
-    Ok(0)
+#[unsafe(no_mangle)]
+unsafe extern "C" fn instruction_fault_dispatch() -> ! {
+    kpanic!("Instruction access fault trap - not implemented");
 }
 
-/// https://man7.org/linux/man-pages/man2/write.2.html
-fn sys_write(fd: u32, buf: u32, count: u32) -> Result<u32, Err> {
-    do_write(fd as i32, buf as *const u8, count as usize).map(|x| x as u32)
+#[unsafe(no_mangle)]
+unsafe extern "C" fn breakpoint_dispatch() -> ! {
+    kpanic!("Breakpoint trap - not implemented");
 }
 
-fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
-    // let msg = str_format!(str256, "do_write({fd}, {buf:?}, {count})");
-    // print(&msg);
-
-    if fd == 1 || fd == 2 {
-        host_log(buf, count);
-    }
-
-    Ok(count)
+#[unsafe(no_mangle)]
+unsafe extern "C" fn load_address_misaligned_dispatch() -> ! {
+    kpanic!("Load address misaligned trap - not implemented");
 }
 
-#[repr(C)]
-struct IoVec {
-    iov_base: *mut u8,
-    iov_len: usize,
+#[unsafe(no_mangle)]
+unsafe extern "C" fn load_access_fault_dispatch() -> ! {
+    let epc = unsafe { MEPC_PTR.read_volatile() };
+    kpanic!(
+        "Load access fault trap - not implemented, at PC: {:#010x}",
+        epc
+    );
 }
 
-/// https://man7.org/linux/man-pages/man2/writev.2.html
-fn sys_writev(fd: u32, vec_ptr: u32, vlen: u32) -> Result<u32, Err> {
-    let fd = fd as i32;
-    let vec_ptr = vec_ptr as *const IoVec;
-    let vec = unsafe { core::slice::from_raw_parts(vec_ptr, vlen as usize) };
-
-    // let msg = str_format!(str256, "sys_writev({fd}, {vec_ptr:?}, {vlen})");
-    // print(&msg);
-
-    let mut total: usize = 0;
-    for iov in vec {
-        total += do_write(fd, iov.iov_base, iov.iov_len)?;
-    }
-    Ok(total as u32)
+#[unsafe(no_mangle)]
+unsafe extern "C" fn store_address_misaligned_dispatch() -> ! {
+    kpanic!("Store address misaligned trap - not implemented");
 }
 
-/// https://man7.org/linux/man-pages/man2/ioctl.2.html
-fn sys_ioctl(fd: u32, _cmd: u32, arg: u32) -> Result<u32, Err> {
-    let _fd = fd as i32;
-    let _arg = arg as *const u8;
-    // let msg = str_format!(str256, "sys_ioctl({fd}, {cmd}, 0x{arg:08x})");
-    // print(&msg);
-    Ok(0)
-}
-
-/// https://man7.org/linux/man-pages/man2/_exit.2.html
-fn sys_exit(error_code: u32) -> Result<u32, Err> {
-    // let msg = str_format!(str256, "sys_exit({error_code})");
-    // print(&msg);
-    host_terminate(error_code, 0);
-}
-
-/// https://man7.org/linux/man-pages/man2/exit_group.2.html
-fn sys_exit_group(_error_code: u32) -> Result<u32, Err> {
-    // let msg = str_format!(str256, "sys_exit_group({error_code})");
-    // print(&msg);
-    Ok(0)
-}
-
-/// https://man7.org/linux/man-pages/man2/tkill.2.html
-fn sys_tkill(_pid: u32, _sig: u32) -> Result<u32, Err> {
-    // let msg = str_format!(str256, "sys_tkill({_pid}, {_sig})");
-    // print(&msg);
-    Ok(0)
-}
-
-/// https://man7.org/linux/man-pages/man2/set_tid_address.2.html
-fn sys_set_tid_address(tidptr: u32) -> Result<u32, Err> {
-    let _tidptr = tidptr as *const u8;
-    // let msg = str_format!(str256, "sys_set_tid_address({tidptr:?})");
-    // print(&msg);
-    Ok(0)
-}
-
-/// https://man7.org/linux/man-pages/man2/sigaltstack.2.html
-fn sys_sigaltstack(uss: u32, uoss: u32) -> Result<u32, Err> {
-    let _uss = uss as *const u8;
-    let _uoss = uoss as *const u8;
-    // let msg = str_format!(str256, "sys_sigaltstack({uss:?}, {uoss:?})");
-    // print(&msg);
-    Ok(0)
-}
-
-/// https://man7.org/linux/man-pages/man2/sigaction.2.html
-fn sys_rt_sigaction(_sig: u32, act: u32, oact: u32, _sigsetsize: u32) -> Result<u32, Err> {
-    let _act = act as *const u8;
-    let _oact = oact as *const u8;
-    // let msg = str_format!(
-    //     str256,
-    //     "sys_rt_sigaction({_sig}, {_act:?}, {_oact:?}, {_sigsetsize})"
-    // );
-    // print(&msg);
-    Ok(0)
-}
-
-/// https://man7.org/linux/man-pages/man2/sigprocmask.2.html
-fn sys_rt_sigprocmask(_how: u32, nset: u32, oset: u32, _sigsetsize: u32) -> Result<u32, Err> {
-    let _nset = nset as *const u8;
-    let _oset = oset as *const u8;
-    // let msg = str_format!(
-    //     str256,
-    //     "sys_rt_sigprocmask({_how}, {_nset:?}, {_oset:?}, {_sigsetsize})"
-    // );
-    // print(&msg);
-    Ok(0)
-}
-
-/// https://man7.org/linux/man-pages/man2/poll.2.html
-fn sys_ppoll(ufds: u32, _nfds: u32, tsp: u32, sigmask: u32, _sigsetsize: u32) -> Result<u32, Err> {
-    let _ufds = ufds as *const u8;
-    let _tsp = tsp as *const u8;
-    let _sigmask = sigmask as *const u8;
-    // let msg = str_format!(
-    //     str256,
-    //     "sys_ppoll({ufds:?}, {nfds}, {tsp:?}, {sigmask:?}, {sigsetsize})"
-    // );
-    // print(&msg);
-    Ok(0)
+#[unsafe(no_mangle)]
+unsafe extern "C" fn store_access_fault_dispatch() -> ! {
+    kpanic!("Store access fault trap - not implemented");
 }

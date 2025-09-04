@@ -1,4 +1,4 @@
-\// Copyright 2025 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -15,15 +15,12 @@
 
 use std::{fs, path::Path, process::Command};
 
-use anyhow::{Context, Result, bail};
+use anyhow::{bail, Context, Result};
 use cargo_metadata::Package;
 use docker_generate::DockerFile;
 use tempfile::tempdir;
 
-use crate::{
-    GuestOptions, RISC0_TARGET_TRIPLE, config::GuestInfo, encode_rust_flags, get_env_var,
-    get_package,
-};
+use crate::{config::GuestInfo, encode_rust_flags, get_env_var, get_package, GuestOptions};
 
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile
@@ -226,7 +223,7 @@ fn check_cargo_lock(manifest_path: &Path) -> Result<()> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use crate::{DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder, build_package};
+    use crate::{build_package, DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder};
 
     use super::*;
 

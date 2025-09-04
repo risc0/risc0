@@ -671,9 +671,8 @@ impl Risc0Context for Preflight<'_> {
         if self.cur_write >= self.segment.write_record.len() {
             bail!("Invalid segment: unexpected write record");
         }
-        let wlen = self.segment.write_record[self.cur_write];
         self.cur_write += 1;
-        Ok(wlen)
+        Ok(self.segment.write_record[self.cur_write])
     }
 
     fn on_sha2_cycle(&mut self, cur_state: CycleState, sha2: &Sha2State) {

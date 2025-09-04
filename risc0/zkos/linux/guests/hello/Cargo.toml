@@ -9,7 +9,6 @@ edition = "2021"
 [dependencies]
 
 [profile.release]
-lto = true
 opt-level = 3
 debug = 1
 

@@ -1,0 +1,64 @@
+diff --git a/p/link.ld b/p/link.ld
+index b3e315e..95c1140 100644
+--- a/p/link.ld
++++ b/p/link.ld
+@@ -3,7 +3,7 @@ ENTRY(_start)
+ 
+ SECTIONS
+ {
+-  . = 0x80000000;
++  . = 0x11000;
+   .text.init : { *(.text.init) }
+   . = ALIGN(0x1000);
+   .tohost : { *(.tohost) }
+diff --git a/p/riscv_test.h b/p/riscv_test.h
+index 3d4637a..c00e147 100644
+--- a/p/riscv_test.h
++++ b/p/riscv_test.h
+@@ -150,10 +150,7 @@
+   li a0, MSTATUS_MPP;                                                   \
+   csrs mstatus, a0;                                                     \
+ 
+-#define RVTEST_FP_ENABLE                                                \
+-  li a0, MSTATUS_FS & (MSTATUS_FS >> 1);                                \
+-  csrs mstatus, a0;                                                     \
+-  csrwi fcsr, 0
++#define RVTEST_FP_ENABLE                                                
+ 
+ #define RVTEST_VECTOR_ENABLE                                            \
+   li a0, (MSTATUS_VS & (MSTATUS_VS >> 1)) |                             \
+@@ -218,34 +215,11 @@ handle_exception:                                                       \
+         j write_tohost;                                                 \
+ reset_vector:                                                           \
+         INIT_XREG;                                                      \
+-        RISCV_MULTICORE_DISABLE;                                        \
+-        INIT_RNMI;                                                      \
+-        INIT_SATP;                                                      \
+-        INIT_PMP;                                                       \
+-        DELEGATE_NO_TRAPS;                                              \
+         li TESTNUM, 0;                                                  \
+-        la t0, trap_vector;                                             \
+-        csrw mtvec, t0;                                                 \
+         CHECK_XLEN;                                                     \
+-        /* if an stvec_handler is defined, delegate exceptions to it */ \
+-        la t0, stvec_handler;                                           \
+-        beqz t0, 1f;                                                    \
+-        csrw stvec, t0;                                                 \
+-        li t0, (1 << CAUSE_LOAD_PAGE_FAULT) |                           \
+-               (1 << CAUSE_STORE_PAGE_FAULT) |                          \
+-               (1 << CAUSE_FETCH_PAGE_FAULT) |                          \
+-               (1 << CAUSE_MISALIGNED_FETCH) |                          \
+-               (1 << CAUSE_USER_ECALL) |                                \
+-               (1 << CAUSE_BREAKPOINT);                                 \
+-        csrw medeleg, t0;                                               \
+-1:      csrwi mstatus, 0;                                               \
+         init;                                                           \
+         EXTRA_INIT;                                                     \
+         EXTRA_INIT_TIMER;                                               \
+-        la t0, 1f;                                                      \
+-        csrw mepc, t0;                                                  \
+-        csrr a0, mhartid;                                               \
+-        mret;                                                           \
+ 1:
+ 
+ //-----------------------------------------------------------------------

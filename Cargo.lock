@@ -1921,6 +1921,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "cc-version"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e142b8a521e1a062f6cccb17827e45b06bc11cb65792535be5f8dec6c89e05c"
+dependencies = [
+ "cc",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "cexpr"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2796,6 +2806,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e079f19b08ca6239f47f8ba8509c11cf3ea30095831f7fed61441475edd8c449"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "elf-to-bin"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "clap 4.5.46",
+ "risc0-binfmt",
 ]
 
 [[package]]
@@ -7504,9 +7523,12 @@ dependencies = [
 name = "risc0-zkos-linux"
 version = "0.0.0"
 dependencies = [
+ "bytemuck",
+ "elf",
  "include_bytes_aligned",
  "no_std_strings",
  "rlsf",
+ "softfloat-sys",
 ]
 
 [[package]]
@@ -8536,6 +8558,14 @@ checksum = "233504af464074f9d066d7b5416c5f9b894a5862a6506e306f7b816cdd6f1807"
 dependencies = [
  "libc",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "softfloat-sys"
+version = "0.1.4"
+dependencies = [
+ "cc",
+ "cc-version",
 ]
 
 [[package]]
