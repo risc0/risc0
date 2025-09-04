@@ -46,6 +46,12 @@ pub const GLOBAL_INPUT_ADDR: ByteAddr = ByteAddr(0xffff_0260);
 pub const ECALL_DISPATCH_ADDR: ByteAddr = ByteAddr(0xffff_1000);
 pub const TRAP_DISPATCH_ADDR: ByteAddr = ByteAddr(0xffff_2000);
 
+/// Program header table address (stored in memory)
+pub const USER_PHDR_ADDR: ByteAddr = ByteAddr(0xffff_3000);
+
+/// Program header count address (stored in memory)
+pub const USER_PHDR_NUM_ADDR: ByteAddr = ByteAddr(0xffff_3008);
+
 pub const MEMORY_END_ADDR: WordAddr = WordAddr(0x4000_0000);
 pub const MERKLE_TREE_START_ADDR: WordAddr = WordAddr(0x4000_0000);
 pub const MERKLE_TREE_END_ADDR: WordAddr = WordAddr(0x4400_0000);
