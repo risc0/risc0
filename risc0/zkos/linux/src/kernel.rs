@@ -35,8 +35,8 @@ const USER_STACK_PTR: *const usize = USER_STACK_ADDR as *const usize;
 const USER_STACK_SIZE: usize = 2 * 1024 * 1024;
 const USER_HEAP_START_ADDR: usize = 0x0800_0000; // TODO: figure out where data ends in user program
 const USER_HEAP_START_PTR: *const u8 = USER_HEAP_START_ADDR as *const u8;
-const USER_HEAP_END_ADDR: usize = USER_STACK_ADDR - USER_STACK_SIZE;
-const USER_HEAP_SIZE: usize = USER_HEAP_END_ADDR - USER_HEAP_START_ADDR;
+const USER_HEAP_SIZE: usize = 0x40000000;
+const USER_HEAP_END_ADDR: usize = USER_HEAP_START_ADDR + USER_HEAP_SIZE;
 
 const ARGC: usize = 1;
 const PROGRAM_NAME: &[u8] = b"r0vm";
@@ -45,6 +45,12 @@ const PAGE_SIZE: usize = 4096;
 // const AT_VECTOR_SIZE_ARCH: usize = 7;
 // const AT_VECTOR_SIZE: usize = 2 * (AT_VECTOR_SIZE_ARCH + AT_VECTOR_SIZE_BASE + 1);
 const ASCII_TABLE_PTR: *const u8 = 0xbfff_0200 as *const u8;
+
+/// Program header table address (stored in memory)
+const USER_PHDR_ADDR: usize = 0xffff_3000;
+
+/// Program header count address (stored in memory)
+const USER_PHDR_NUM_ADDR: usize = 0xffff_3008;
 
 const SYS_IOCTL: u32 = 29;
 const SYS_READ: u32 = 63;
@@ -166,7 +172,7 @@ impl Err {
 
 #[no_mangle]
 unsafe extern "C" fn kstart() -> ! {
-    let user_start_addr = USER_START_PTR.read_volatile();
+    let user_start_addr = USER_START_PTR.read_volatile() - 4;
     MEPC_PTR.write_volatile(user_start_addr);
 
     let mut stack = UserStack::new();
@@ -192,7 +198,7 @@ unsafe extern "C" fn kstart() -> ! {
     let block: &[u8] = core::slice::from_raw_parts(USER_HEAP_START_PTR, USER_HEAP_SIZE);
     #[allow(static_mut_refs)]
     HEAP.insert_free_block_ptr(block.into());
-
+    print("return from kstart");
     mret()
 }
 
@@ -209,6 +215,8 @@ fn mret() -> ! {
 unsafe extern "C" fn ecall_dispatch() -> ! {
     let nr = get_ureg(REG_A7);
 
+    let msg = str_format!(str256, "syscall: {nr}");
+    print(&msg);
     match nr {
         SYS_IOCTL => syscall3(sys_ioctl),
         SYS_READ => syscall3(sys_read),
@@ -473,9 +481,9 @@ fn sys_tkill(_pid: u32, _sig: u32) -> Result<u32, Err> {
 /// https://man7.org/linux/man-pages/man2/set_tid_address.2.html
 fn sys_set_tid_address(tidptr: u32) -> Result<u32, Err> {
     let _tidptr = tidptr as *const u8;
-    // let msg = str_format!(str256, "sys_set_tid_address({tidptr:?})");
-    // print(&msg);
-    Ok(0)
+    let msg = str_format!(str256, "sys_set_tid_address({tidptr:?})");
+    print(&msg);
+    Ok(1)
 }
 
 /// https://man7.org/linux/man-pages/man2/sigaltstack.2.html

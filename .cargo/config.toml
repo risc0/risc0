@@ -6,3 +6,6 @@ xtask-groth16 = "run --package xtask --no-default-features -F setup-groth16 -- s
 
 [build]
 rustflags = ["-Dclippy::all", "-Dwarnings"]
+
+[target.riscv32im-unknown-none-elf]
+rustflags = [ "-Clink-arg=-Ttext=0xc0000000", "-Cpasses=lower-atomic", "-Cpanic=abort" ]
