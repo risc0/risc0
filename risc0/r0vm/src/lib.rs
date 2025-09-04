@@ -16,6 +16,8 @@
 mod actors;
 mod api;
 
+use std::fs::File;
+use std::os::unix::io::FromRawFd;
 use std::{io, net::SocketAddr, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
@@ -148,7 +150,16 @@ enum ReceiptKind {
 }
 
 pub fn main() {
-    let args = Cli::parse();
+    let mut cli_args = std::env::args().collect::<Vec<_>>();
+    let mut guest_args = Vec::new();
+
+    // Find the "--" separator and split arguments
+    if let Some(dash_dash_pos) = cli_args.iter().position(|arg| arg == "--") {
+        guest_args = cli_args.split_off(dash_dash_pos + 1);
+        cli_args.pop(); // Remove the "--" itself
+    }
+
+    let args = Cli::parse_from(cli_args);
 
     if args.mode.config.is_some() {
         self::actors::async_main(args.mode.config).unwrap();
@@ -195,6 +206,11 @@ pub fn main() {
     let env = {
         let mut builder = ExecutorEnv::builder();
 
+        // Add guest arguments if any were provided after "--"
+        if !guest_args.is_empty() {
+            builder.args(&guest_args);
+        }
+
         for var in args.env.iter() {
             let (name, value) = var
                 .split_once('=')
@@ -206,6 +222,11 @@ pub fn main() {
             builder.stdin(std::fs::File::open(input).unwrap());
         } else {
             builder.stdin(io::stdin());
+        }
+        // use fd 3 for p9 reading, and 4 for p9 writing
+        unsafe {
+            builder.read_fd(3, io::BufReader::new(File::from_raw_fd(3)));
+            builder.write_fd(4, io::BufWriter::new(File::from_raw_fd(4)));
         }
 
         if let Some(pprof_out) = args.pprof_out.as_ref() {
@@ -274,5 +295,6 @@ impl Cli {
 fn init_logging() {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
+        .with_writer(std::io::stderr)
         .init();
 }
