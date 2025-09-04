@@ -647,6 +647,8 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
 
     fn trap(&mut self, cause: Exception) -> Result<bool> {
         self.ctx.trap_rewind();
+          self.dump_registers(true)?;
+            self.dump_registers(false)?;
         if let Exception::Breakpoint = cause {
             self.dump_registers(true)?;
             self.dump_registers(false)?;
