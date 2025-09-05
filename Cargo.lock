@@ -7208,7 +7208,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-povw"
-version = "0.2.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -7436,7 +7436,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.2.0"
+version = "2.2.1"
 dependencies = [
  "bytemuck",
  "cfg-if",

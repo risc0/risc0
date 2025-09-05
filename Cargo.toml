@@ -62,12 +62,14 @@ risc0-circuit-rv32im-sys = { version = "4.0.1", default-features = false, path =
 risc0-core = { version = "3.0.0", default-features = false, path = "risc0/core" }
 risc0-groth16 = { version = "3.0.2", default-features = false, path = "risc0/groth16" }
 risc0-groth16-sys = { version = "0.1.0", default-features = false, path = "risc0/groth16-sys" }
-risc0-povw = { version = "0.2.0", default-features = false, path = "risc0/povw" }
+risc0-povw = { version = "0.4.0", default-features = false, path = "risc0/povw" }
 risc0-r0vm = { version = "3.0.3", default-features = false, path = "risc0/r0vm" }
 risc0-sys = { version = "1.5.0", default-features = false, path = "risc0/sys" }
 risc0-zkos-v1compat = { version = "2.2.0", path = "risc0/zkos/v1compat" }
 risc0-zkp = { version = "3.0.2", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "3.0.3", default-features = false, path = "risc0/zkvm" }
+# NOTE(remi): The version requirement is set to 2.2.0, rather than 2.2.1 as specified in the crate
+# Cargo.toml files, to allow only risc0-zkvm-platform to be published independently.
 risc0-zkvm-platform = { version = "2.2.0", default-features = false, path = "risc0/zkvm/platform" }
 rzup = { version = "0.5.1", default-features = false, path = "rzup" }
 sppark = "0.1.12"

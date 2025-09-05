@@ -19,16 +19,15 @@ use risc0_zkvm::{Digest, Unknown, WorkClaim};
 use ruint::aliases::U160;
 use serde::{Deserialize, Serialize};
 
-use crate::{Job, SubtreeOpening, WorkLog};
+use crate::{error::Error, Job, SubtreeOpening, WorkLog};
 
 /// Guest program for the Log Builder.
 #[cfg(feature = "prover")]
-pub const RISC0_POVW_LOG_BUILDER_ELF: &[u8] =
-    include_bytes!("../guests/log-builder/elfs/risc0-povw-log-builder.bin");
+pub const RISC0_POVW_LOG_BUILDER_ELF: &[u8] = include_bytes!("../elfs/risc0-povw-log-builder.bin");
 
 /// Guest program identifier, known as the image ID, for the Log Builder guest.
 pub const RISC0_POVW_LOG_BUILDER_ID: [u8; 32] =
-    *include_bytes!("../guests/log-builder/elfs/risc0-povw-log-builder.iid");
+    *include_bytes!("../elfs/risc0-povw-log-builder.iid");
 
 /// State of the PoVW guest program execution.
 ///
@@ -86,6 +85,16 @@ impl Input {
     /// Create an [InputBuilder] to construct an [Input].
     pub fn builder() -> InputBuilder {
         Default::default()
+    }
+
+    /// Serialize the input to a vector of bytes.
+    pub fn encode(&self) -> Result<Vec<u8>, Error> {
+        borsh::to_vec(self).map_err(Into::into)
+    }
+
+    /// Deserialize the input from a slice of bytes.
+    pub fn decode(buffer: impl AsRef<[u8]>) -> Result<Self, Error> {
+        borsh::from_slice(buffer.as_ref()).map_err(Into::into)
     }
 }
 
@@ -148,5 +157,15 @@ impl Journal {
     /// Create a [JournalBuilder] to construct a [Journal].
     pub fn builder() -> JournalBuilder {
         Default::default()
+    }
+
+    /// Serialize the journal to a vector of bytes.
+    pub fn encode(&self) -> Result<Vec<u8>, Error> {
+        borsh::to_vec(self).map_err(Into::into)
+    }
+
+    /// Deserialize the journal from a slice of bytes.
+    pub fn decode(buffer: impl AsRef<[u8]>) -> Result<Self, Error> {
+        borsh::from_slice(buffer.as_ref()).map_err(Into::into)
     }
 }
