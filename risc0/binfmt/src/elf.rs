@@ -383,19 +383,31 @@ impl<'a> ProgramBinary<'a> {
         ret
     }
 
+    fn user_program(&self) -> Result<Program> {
+        Program::load_elf(self.user_elf, KERNEL_START_ADDR.0).context("Loading user ELF")
+    }
+
+    fn kernel_program(&self) -> Result<Program> {
+        Program::load_elf(self.kernel_elf, u32::MAX).context("Loading kernel ELF")
+    }
+
     /// Convert this binary into a `MemoryImage`.
     pub fn to_image(&self) -> Result<MemoryImage> {
-        let user_program =
-            Program::load_elf(self.user_elf, KERNEL_START_ADDR.0).context("Loading user ELF")?;
-        let kernel_program =
-            Program::load_elf(self.kernel_elf, u32::MAX).context("Loading kernel ELF")?;
-        Ok(MemoryImage::with_kernel(user_program, kernel_program))
+        Ok(MemoryImage::with_kernel(
+            self.user_program()?,
+            self.kernel_program()?,
+        ))
     }
 
     /// Compute and return the ImageID of this binary.
     pub fn compute_image_id(&self) -> Result<Digest> {
         let merkle_root = self.to_image()?.image_id();
         Ok(SystemState { pc: 0, merkle_root }.digest::<Impl>())
+    }
+
+    /// Compute the memory merkle root of the kernel.
+    pub fn kernel_id(&self) -> Result<Digest> {
+        Ok(MemoryImage::new_kernel(self.kernel_program()?).image_id())
     }
 }
 

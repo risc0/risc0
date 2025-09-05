@@ -33,8 +33,18 @@ fn parser(cmd: &str) -> Vec<&'static str> {
     }
 }
 
-pub const INSTALL_HELP: &str = "Discussion:
-    Installs a component (or all components) of a particular version.
+pub fn install_help() -> String {
+    let default_components_str = Component::iter()
+        .filter(|c| c.install_by_default())
+        .map(|c| c.as_str())
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    format!(
+        "Discussion:
+    Installs a component (or all default components) of a particular version.
+
+    The default components are: [{default_components_str}]
 
     If no version is specified, the latest version is used.
 
@@ -47,11 +57,13 @@ pub const INSTALL_HELP: &str = "Discussion:
     `GITHUB_TOKEN` environment variable, then from ~/.config/gh/hosts.yml.
 
     The default version of the component is updated to the version that was
-    just installed.";
+    just installed."
+    )
+}
 
 #[derive(Parser)]
 pub(crate) struct InstallCommand {
-    /// Name of component to install (e.g. rust). If not provided, installs all components.
+    /// Name of component to install (e.g. rust). If not provided, installs all default components.
     #[arg(value_parser=parser("install"))]
     name: Option<String>,
     /// Version of the component to install (e.g. 1.0.0). If not provided, installs the latest version.
@@ -103,7 +115,7 @@ impl InstallCommand {
                 rzup.self_update()?
             }
         } else {
-            rzup.install_all(self.force)?;
+            rzup.install_default(self.force)?;
         }
 
         Ok(())
