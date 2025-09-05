@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{borrow::Borrow, collections::HashSet, fmt::Write, process::Command};
+use std::{borrow::Borrow, collections::HashSet, fmt::Write, process::Command, sync::Arc};
 
 use clap::Parser;
 use risc0_circuit_keccak::{KECCAK_PO2_RANGE, prove::zkr::get_keccak_zkr};
@@ -72,12 +72,6 @@ impl Bootstrap {
     }
 
     fn generate_recursion_control_ids() {
-        // Recursion programs (ZKRs) that are to be included in the allowed set, used in the
-        // default verifier context.
-        // NOTE: We use an allow list here, rather than including all ZKRs in the zip archive,
-        // because there may be ZKRs included only for tests, or ones that are not part of the main
-        // set of allowed programs (e.g. accelerators, and po2 22-24). Those programs can be
-        // enabled by using a custom VerifierContext.
         let allowed_zkr_names: HashSet<String> = [
             "join.zkr",
             "join_povw.zkr",
@@ -108,9 +102,13 @@ impl Bootstrap {
                 .collect::<Vec<_>>()
         );
 
+        let poseidon2_suite = Arc::new(Poseidon2HashSuite::new_suite());
         let poseidon2_control_ids =
-            Self::generate_recursion_control_ids_with_hash(&zkrs, "poseidon2");
-        let sha256_control_ids = Self::generate_recursion_control_ids_with_hash(&zkrs, "sha-256");
+            Self::generate_recursion_control_ids_with_hash(&zkrs, poseidon2_suite.clone());
+        let sha256_control_ids = Self::generate_recursion_control_ids_with_hash(
+            &zkrs,
+            Arc::new(hash_suite_from_name("sha-256").unwrap()),
+        );
 
         let allowed_control_ids: Vec<(String, Digest)> = poseidon2_control_ids
             .iter()
@@ -119,7 +117,6 @@ impl Bootstrap {
             .collect();
         tracing::info!("Calculate allowed_control_ids {allowed_control_ids:#?}");
 
-        // Calculate a Merkle root for the allowed control IDs and add it to the file.
         let merkle_group = MerkleGroup::new(
             allowed_control_ids
                 .iter()
@@ -128,9 +125,7 @@ impl Bootstrap {
         )
         .unwrap();
 
-        let hash_suite = Poseidon2HashSuite::new_suite();
-        let hashfn = hash_suite.hashfn.as_ref();
-        let allowed_control_root = merkle_group.calc_root(hashfn);
+        let allowed_control_root = merkle_group.calc_root(poseidon2_suite.hashfn.as_ref());
         tracing::info!("Computed allowed_control_root: {allowed_control_root}");
 
         let bn254_identity_control_id = Self::generate_identity_bn254_control_id();
@@ -150,24 +145,17 @@ impl Bootstrap {
         tracing::info!("writing control ids to {CONTROL_ID_PATH_RECURSION}");
         std::fs::write(CONTROL_ID_PATH_RECURSION, contents).unwrap();
 
-        // Use rustfmt to format the file.
         Self::rustfmt(CONTROL_ID_PATH_RECURSION);
     }
 
     pub fn generate_recursion_control_ids_with_hash(
         zkrs: &[(String, Vec<u32>)],
-        hashfn: &str,
+        hash_suite: Arc<dyn risc0_zkp::core::hash::HashSuite>,
     ) -> Vec<(String, Digest)> {
-        let hash_suite = hash_suite_from_name(hashfn).unwrap();
-
-        zkrs.iter()
+        zkrs.par_iter()
             .map(|(name, encoded_program)| {
                 let program = Program::from_encoded(encoded_program, RECURSION_PO2);
-
-                tracing::info!("computing control ID for {name} with {hashfn}");
                 let control_id = program.compute_control_id(hash_suite.clone()).unwrap();
-
-                tracing::debug!("{name} control id: {control_id:?}");
                 (name.clone(), control_id)
             })
             .collect()
@@ -181,9 +169,11 @@ impl Bootstrap {
     }
 
     fn bootstrap_keccak() {
-        let control_ids = Self::generate_keccak_control_ids();
+        let poseidon2_suite = Arc::new(Poseidon2HashSuite::new_suite());
+        let control_ids = Self::generate_keccak_control_ids(poseidon2_suite.clone());
         let control_root = Self::generate_keccak_control_root(
             control_ids.iter().map(|(_name, digest)| *digest).collect(),
+            poseidon2_suite,
         );
         let contents = format!(
             include_str!("templates/control_id_keccak.rs"),
@@ -192,27 +182,24 @@ impl Bootstrap {
         );
         std::fs::write(CONTROL_ID_PATH_KECCAK, contents).unwrap();
 
-        // Use rustfmt to format the file.
         Self::rustfmt(CONTROL_ID_PATH_KECCAK);
     }
 
-    fn generate_keccak_control_ids() -> Vec<(String, Digest)> {
-        let mut ret = vec![];
-        for po2 in KECCAK_PO2_RANGE {
-            let program = get_keccak_zkr(po2).unwrap();
-            let hash_suite = Poseidon2HashSuite::new_suite();
-            ret.push((
-                format!("keccak_lift po2={po2}"),
-                program.compute_control_id(hash_suite).unwrap(),
-            ))
-        }
-        ret
+    fn generate_keccak_control_ids(
+        hash_suite: Arc<Poseidon2HashSuite>,
+    ) -> Vec<(String, Digest)> {
+        KECCAK_PO2_RANGE
+            .into_par_iter()
+            .map(|po2| {
+                let program = get_keccak_zkr(po2).unwrap();
+                let control_id = program.compute_control_id(hash_suite.clone()).unwrap();
+                (format!("keccak_lift po2={po2}"), control_id)
+            })
+            .collect()
     }
 
-    fn generate_keccak_control_root(control_ids: Vec<Digest>) -> Digest {
-        let hash_suite = Poseidon2HashSuite::new_suite();
-        let hashfn = hash_suite.hashfn.as_ref();
+    fn generate_keccak_control_root(control_ids: Vec<Digest>, hash_suite: Arc<Poseidon2HashSuite>) -> Digest {
         let group = MerkleGroup::new(control_ids).unwrap();
-        group.calc_root(hashfn)
+        group.calc_root(hash_suite.hashfn.as_ref())
     }
 }
