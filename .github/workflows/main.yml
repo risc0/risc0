@@ -166,7 +166,7 @@ jobs:
         with:
           python-version: "3.10"
       - run: python license-check.py
-      - name: check for "D0 NOT MERGE" comments
+      - name: check for "DO NOT MERGE" comments
         run: |
           [ "$(grep -re 'DO[_ ]\?NOT[_ ]\?MERGE' $(git ls-tree --full-tree --name-only -r HEAD) | tee /dev/fd/2 | wc -l)" -eq "0" ]
       - name: Compare circom hashes to golden values
