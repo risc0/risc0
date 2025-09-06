@@ -28,4 +28,4 @@ prover stark_verify.cs stark_verify_final.pk.dmp "$WITNESS_FILE" /mnt/proof.json
 
 # Clean up the named pipe once everything is done
 wait && rm "$WITNESS_FILE"
-  
+
