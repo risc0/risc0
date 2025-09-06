@@ -34,11 +34,9 @@ impl Paths {
 
         let matching_path = std::fs::read_dir(component_dir)?
             .filter_map(|entry| entry.ok())
-            .filter_map(|entry| {
-                match entry.file_type() {
-                    Ok(ft) if ft.is_dir() && !ft.is_symlink() => Some(entry),
-                    _ => None,
-                }
+            .filter_map(|entry| match entry.file_type() {
+                Ok(ft) if ft.is_dir() && !ft.is_symlink() => Some(entry),
+                _ => None,
             })
             .find_map(|entry| {
                 let dir_name = entry.file_name().to_string_lossy().to_string();
