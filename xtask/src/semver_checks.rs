@@ -76,7 +76,7 @@ impl Write for PrintStdout {
     }
 }
 
-/// Receive output from `ChannelWriter`, echos them to `eprint` calls and also saves the output and
+/// Receive output from `ChannelWriter`, echoes it to `eprint` calls and also saves the output and
 /// returns it.
 fn tee_semver_output(recv: std::sync::mpsc::Receiver<Vec<u8>>) -> Vec<u8> {
     let mut output = vec![];
@@ -222,7 +222,7 @@ fn vendor_packages(
     Ok(project_dir.join("vendor"))
 }
 
-/// Runs some command, checks for errors, and forwards output from stdout / stderr to `print and
+/// Runs some command, checks for errors, and forwards output from stdout / stderr to `print` and
 /// `eprint` which allows the test fixture to capture the output.
 fn run_command(cmd: &mut Command, error_message: &str) -> Result<()> {
     let context = format!(

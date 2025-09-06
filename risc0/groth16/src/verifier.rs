@@ -176,7 +176,7 @@ impl Verifier {
     }
 }
 
-/// Verifying key for Groth16 proofs.
+/// Scalar field element over BN254 used for public inputs and hashing.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Fr(#[serde(with = "serde_ark")] pub(crate) ark_bn254::Fr);
 

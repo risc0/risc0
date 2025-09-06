@@ -47,7 +47,7 @@ impl Bootstrap {
         out
     }
 
-    // Format a list of control IDs, include the names as data in a tuple of (&str, Digest)
+    // Format a list of control IDs, including the names as data in a tuple of (&str, Digest)
     fn format_control_ids_with_name(
         ids: impl IntoIterator<Item = impl Borrow<(String, Digest)>>,
     ) -> String {

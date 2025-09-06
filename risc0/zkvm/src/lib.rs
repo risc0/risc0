@@ -155,9 +155,9 @@ pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest};
 pub use {
     self::host::{
         prove_info::{ProveInfo, SessionStats},
-        recursion::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
+        recursion::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID},
     },
-    risc0_binfmt::compute_image_id,
+    risc0_binfmt::{compute_image_id, compute_kernel_id},
     risc0_groth16::Seal as Groth16Seal,
 };
 

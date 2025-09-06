@@ -159,9 +159,9 @@ impl Rzup {
     /// # Arguments
     /// * `force` - If true, reinstalls even if already installed
     #[cfg_attr(not(feature = "cli"), expect(dead_code))]
-    pub(crate) fn install_all(&mut self, force: bool) -> Result<()> {
+    pub(crate) fn install_default(&mut self, force: bool) -> Result<()> {
         self.registry
-            .install_all_components(&self.environment, force)?;
+            .install_default_components(&self.environment, force)?;
         Ok(())
     }
 
@@ -2935,7 +2935,7 @@ mod tests {
     }
 
     #[test]
-    fn list_legacy_versions_cargo_risczero_install_aaple_aarch64() {
+    fn list_legacy_versions_cargo_risczero_install_apple_aarch64() {
         list_legacy_versions(
             "rust_aarch64-apple-darwin_r0.1.79.0",
             "rust_aarch64-apple-darwin_r0.1.81.0",

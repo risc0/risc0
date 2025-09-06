@@ -111,7 +111,7 @@ impl From<Bitmap> for [u8; 32] {
 ///
 /// Organizes work logs by their 160-bit log IDs and provides Merkle tree operations
 /// for proving nonce inclusion/non-inclusion across all logs.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[non_exhaustive]
 pub struct WorkSet {
     /// Map of work log IDs to their corresponding work logs.
@@ -240,7 +240,7 @@ impl WorkSet {
 ///
 /// Organizes jobs by their 64-bit job IDs and provides Merkle tree operations
 /// for proving nonce inclusion/non-inclusion within this log.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[non_exhaustive]
 pub struct WorkLog {
     /// Map of job IDs to their corresponding jobs.
@@ -395,7 +395,7 @@ impl WorkLog {
 ///
 /// Stores the maximum used nonce index as a shorthand for the range [0, index_max].
 /// When set to None, represents an empty job with no used nonces.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[non_exhaustive]
 pub struct Job {
     /// Only store the max used index, as a shorthand for the range [0, index_max]. When set to
@@ -465,15 +465,15 @@ impl Job {
         };
 
         // Check whether the requested subtree contains the boundary.
-        let boundry_level_index = index_max.checked_shr(8 + height as u32).unwrap_or(0);
-        match index.cmp(&boundry_level_index) {
+        let boundary_level_index = index_max.checked_shr(8 + height as u32).unwrap_or(0);
+        match index.cmp(&boundary_level_index) {
             Ordering::Less => FULL_SUBTREE_ROOTS[height],
-            Ordering::Equal => self.boundry_subtree_root(height),
+            Ordering::Equal => self.boundary_subtree_root(height),
             Ordering::Greater => EMPTY_SUBTREE_ROOTS[height],
         }
     }
 
-    fn boundry_subtree_root(&self, height: usize) -> Digest {
+    fn boundary_subtree_root(&self, height: usize) -> Digest {
         let mut index: u32 = self.index_max.unwrap();
 
         // Get the leaf and consume the first 8 bits.

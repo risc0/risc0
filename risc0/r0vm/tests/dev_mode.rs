@@ -62,7 +62,7 @@ fn dev_mode_verify_fail_env_var() {
 
 #[test]
 #[cfg(not(feature = "disable-dev-mode"))]
-fn dev_mode_programatic() {
+fn dev_mode_programmatic() {
     use risc0_zkvm::VerifierContext;
 
     let receipt = run_dev_mode();
@@ -81,7 +81,7 @@ fn dev_mode_programatic() {
 
 #[test]
 #[cfg(not(feature = "disable-dev-mode"))]
-fn dev_mode_verify_fail_programatic() {
+fn dev_mode_verify_fail_programmatic() {
     use risc0_zkvm::VerifierContext;
 
     let receipt = run_dev_mode();
