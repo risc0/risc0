@@ -4404,6 +4404,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "revm"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "revm-core",
+ "revm-methods",
+ "risc0-zkvm",
+ "sha3",
+ "tracing-subscriber 0.3.19",
+]
+
+[[package]]
+name = "revm-core"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "revm-methods",
+ "risc0-zkvm",
+ "serde",
+ "sha3",
+]
+
+[[package]]
+name = "revm-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "rfc6979"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5353,6 +5383,16 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest 0.10.7",
+]
+
+[[package]]
+name = "sha3"
+version = "0.10.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75872d278a8f37ef87fa0ddbda7802605cb18344497949862c0d4dcb291eba60"
+dependencies = [
+ "digest 0.10.7",
+ "keccak",
 ]
 
 [[package]]
