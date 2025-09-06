@@ -125,8 +125,19 @@ pub trait CircuitInfo {
     const MIX_SIZE: usize;
 }
 
+pub struct GroupInfo {
+    pub global_count: usize,
+    pub mix_count: usize,
+}
+
+pub trait CircuitInfoV3 {
+    fn get_groups(&self) -> &'static [GroupInfo];
+}
+
 /// traits implemented by generated rust code used in both prover and verifier
 pub trait CircuitCoreDef<F: Field>: CircuitInfo + PolyExt<F> + TapsProvider {}
+
+pub trait CircuitCoreDefV3<F: Field>: CircuitInfoV3 + PolyExt<F> + TapsProvider {}
 
 pub type Arg = usize;
 pub type Var = usize;
