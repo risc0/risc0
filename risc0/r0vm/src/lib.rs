@@ -21,7 +21,7 @@ use clap::{Args, Parser, ValueEnum};
 use risc0_circuit_rv32im::execute::Segment;
 use risc0_zkvm::{
     ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
-    compute_image_id, get_prover_server,
+    compute_image_id, compute_kernel_id, get_prover_server,
 };
 
 use self::actors::protocol::TaskKind;
@@ -77,6 +77,10 @@ struct Cli {
     /// Compute the image_id for the specified ELF
     #[arg(long)]
     id: bool,
+
+    /// Compute the kernel image ID for the specified binary.
+    #[arg(long, conflicts_with = "id")]
+    kernel_id: bool,
 
     #[arg(long)]
     with_debugger: bool,
@@ -175,6 +179,12 @@ pub fn main() {
     if args.id {
         let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();
         let image_id = compute_image_id(&blob).unwrap();
+        println!("{image_id}");
+        return;
+    }
+    if args.kernel_id {
+        let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();
+        let image_id = compute_kernel_id(&blob).unwrap();
         println!("{image_id}");
         return;
     }
