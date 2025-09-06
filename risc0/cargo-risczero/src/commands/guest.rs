@@ -33,10 +33,10 @@ pub struct GuestCommand {
 /// Subcommands of cargo that are supported by this cargo risczero command.
 #[derive(Debug, Subcommand)]
 pub enum GuestSubCommands {
-    /// Invocation of `cargo risczero build` which calls `cargo build`.
+    /// Invocation of `cargo risczero guest build` which calls `cargo build`.
     Build(CommonArgs),
 
-    /// Invocation of `cargo risczero build` which calls `cargo test --no-run`.
+    /// Invocation of `cargo risczero guest test` which calls `cargo test --no-run`.
     Test(CommonArgs),
 }
 
