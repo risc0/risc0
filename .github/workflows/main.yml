@@ -370,7 +370,7 @@ jobs:
             device: apple_m2_pro
             test_command: cargo nextest run
     env:
-      CARGO_BUILD_JOBS: 16
+      CARGO_BUILD_JOBS: 32
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1

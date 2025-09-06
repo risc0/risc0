@@ -226,7 +226,7 @@ impl Registry {
         Ok(())
     }
 
-    pub fn install_all_components(&mut self, env: &Environment, force: bool) -> Result<()> {
+    pub fn install_default_components(&mut self, env: &Environment, force: bool) -> Result<()> {
         for component in Component::iter().filter(|c| c.install_by_default()) {
             self.install_component(env, &component, None, force)?;
         }
