@@ -24,8 +24,6 @@ use risc0_zkvm::{
     compute_image_id, compute_kernel_id, get_prover_server,
 };
 
-use self::actors::protocol::TaskKind;
-
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
 #[command(about, version, author)]
@@ -124,14 +122,6 @@ struct Mode {
     #[arg(long)]
     segment: Option<PathBuf>,
 
-    /// Start the manager.
-    #[arg(long)]
-    manager: bool,
-
-    /// Start a worker.
-    #[arg(long, value_enum, value_delimiter(','))]
-    worker: Vec<TaskKind>,
-
     #[arg(long)]
     config: Option<PathBuf>,
 }
@@ -157,8 +147,8 @@ enum ReceiptKind {
 pub fn main() {
     let args = Cli::parse();
 
-    if args.mode.manager || !args.mode.worker.is_empty() || args.mode.config.is_some() {
-        self::actors::async_main(&args).unwrap();
+    if args.mode.config.is_some() {
+        self::actors::async_main(args.mode.config).unwrap();
         return;
     }
 
