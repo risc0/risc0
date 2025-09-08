@@ -378,6 +378,310 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
                 mret()
             }
+            (0x2, 0x04) => {
+                // amoxor.w - atomic memory operation: XOR word
+                let msg = str_format!(
+                    str256,
+                    "Emulating amoxor.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
+                    mepc,
+                    rd,
+                    rs1,
+                    rs2
+                );
+                print(&msg);
+
+                // Get address from rs1 register
+                let addr = get_ureg(rs1 as usize);
+
+                // Check alignment (4-byte aligned for 32-bit words)
+                if addr % 4 != 0 {
+                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+
+                // Read current value from memory
+                let current_value = (addr as *const u32).read_volatile();
+
+                // Get value to XOR from rs2 register
+                let xor_value = get_ureg(rs2 as usize);
+
+                // Perform atomic XOR operation
+                let new_value = current_value ^ xor_value;
+                (addr as *mut u32).write_volatile(new_value);
+
+                // Write original value to rd register
+                // XXX check for rd = 0?
+                set_ureg(rd as usize, current_value);
+
+                let msg = str_format!(
+                    str256,
+                    "emulating amoxor.w: addr={:#010x}, old={:#010x}, xor={:#010x}, new={:#010x}",
+                    addr,
+                    current_value,
+                    xor_value,
+                    new_value
+                );
+                print(&msg);
+
+                mret()
+            }
+            (0x2, 0x08) => {
+                // amoor.w - atomic memory operation: OR word
+                let msg = str_format!(
+                    str256,
+                    "Emulating amoor.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
+                    mepc,
+                    rd,
+                    rs1,
+                    rs2
+                );
+                print(&msg);
+
+                // Get address from rs1 register
+                let addr = get_ureg(rs1 as usize);
+
+                // Check alignment (4-byte aligned for 32-bit words)
+                if addr % 4 != 0 {
+                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+
+                // Read current value from memory
+                let current_value = (addr as *const u32).read_volatile();
+
+                // Get value to OR from rs2 register
+                let or_value = get_ureg(rs2 as usize);
+
+                // Perform atomic OR operation
+                let new_value = current_value | or_value;
+                (addr as *mut u32).write_volatile(new_value);
+
+                // Write original value to rd register
+                // XXX check for rd = 0?
+                set_ureg(rd as usize, current_value);
+
+                let msg = str_format!(
+                    str256,
+                    "emulating amoor.w: addr={:#010x}, old={:#010x}, or={:#010x}, new={:#010x}",
+                    addr,
+                    current_value,
+                    or_value,
+                    new_value
+                );
+                print(&msg);
+
+                mret()
+            }
+            (0x2, 0x0c) => {
+                // amoand.w - atomic memory operation: AND word
+                let msg = str_format!(
+                    str256,
+                    "Emulating amoand.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
+                    mepc,
+                    rd,
+                    rs1,
+                    rs2
+                );
+                print(&msg);
+
+                // Get address from rs1 register
+                let addr = get_ureg(rs1 as usize);
+
+                // Check alignment (4-byte aligned for 32-bit words)
+                if addr % 4 != 0 {
+                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+
+                // Read current value from memory
+                let current_value = (addr as *const u32).read_volatile();
+
+                // Get value to AND from rs2 register
+                let and_value = get_ureg(rs2 as usize);
+
+                // Perform atomic AND operation
+                let new_value = current_value & and_value;
+                (addr as *mut u32).write_volatile(new_value);
+
+                // Write original value to rd register
+                // XXX check for rd = 0?
+                set_ureg(rd as usize, current_value);
+
+                let msg = str_format!(
+                    str256,
+                    "emulating amoand.w: addr={:#010x}, old={:#010x}, and={:#010x}, new={:#010x}",
+                    addr,
+                    current_value,
+                    and_value,
+                    new_value
+                );
+                print(&msg);
+
+                mret()
+            }
+            (0x2, 0x10) => {
+                // amomin.w - atomic memory operation: minimum word (signed)
+                let msg = str_format!(
+                    str256,
+                    "Emulating amomin.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
+                    mepc,
+                    rd,
+                    rs1,
+                    rs2
+                );
+                print(&msg);
+
+                // Get address from rs1 register
+                let addr = get_ureg(rs1 as usize);
+
+                // Check alignment (4-byte aligned for 32-bit words)
+                if addr % 4 != 0 {
+                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+
+                // Read current value from memory
+                let current_value = (addr as *const u32).read_volatile();
+
+                // Get value to compare from rs2 register
+                let compare_value = get_ureg(rs2 as usize);
+
+                // Perform atomic minimum operation (signed comparison)
+                let current_signed = current_value as i32;
+                let compare_signed = compare_value as i32;
+                let new_value = if current_signed < compare_signed {
+                    current_value
+                } else {
+                    compare_value
+                };
+                (addr as *mut u32).write_volatile(new_value);
+
+                // Write original value to rd register
+                // XXX check for rd = 0?
+                set_ureg(rd as usize, current_value);
+
+                let msg = str_format!(
+                    str256,
+                    "emulating amomin.w: addr={:#010x}, old={:#010x}, cmp={:#010x}, new={:#010x}",
+                    addr,
+                    current_value,
+                    compare_value,
+                    new_value
+                );
+                print(&msg);
+
+                mret()
+            }
+            (0x2, 0x14) => {
+                // amomax.w - atomic memory operation: maximum word (signed)
+                let msg = str_format!(
+                    str256,
+                    "Emulating amomax.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
+                    mepc,
+                    rd,
+                    rs1,
+                    rs2
+                );
+                print(&msg);
+
+                // Get address from rs1 register
+                let addr = get_ureg(rs1 as usize);
+
+                // Check alignment (4-byte aligned for 32-bit words)
+                if addr % 4 != 0 {
+                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+
+                // Read current value from memory
+                let current_value = (addr as *const u32).read_volatile();
+
+                // Get value to compare from rs2 register
+                let compare_value = get_ureg(rs2 as usize);
+
+                // Perform atomic maximum operation (signed comparison)
+                let current_signed = current_value as i32;
+                let compare_signed = compare_value as i32;
+                let new_value = if current_signed > compare_signed {
+                    current_value
+                } else {
+                    compare_value
+                };
+                (addr as *mut u32).write_volatile(new_value);
+
+                // Write original value to rd register
+                // XXX check for rd = 0?
+                set_ureg(rd as usize, current_value);
+
+                let msg = str_format!(
+                    str256,
+                    "emulating amomax.w: addr={:#010x}, old={:#010x}, cmp={:#010x}, new={:#010x}",
+                    addr,
+                    current_value,
+                    compare_value,
+                    new_value
+                );
+                print(&msg);
+
+                mret()
+            }
+            (0x2, 0x18) => {
+                // amominu.w - atomic memory operation: minimum word (unsigned)
+                let msg = str_format!(
+                    str256,
+                    "Emulating amominu.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
+                    mepc,
+                    rd,
+                    rs1,
+                    rs2
+                );
+                print(&msg);
+
+                // Get address from rs1 register
+                let addr = get_ureg(rs1 as usize);
+
+                // Check alignment (4-byte aligned for 32-bit words)
+                if addr % 4 != 0 {
+                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+
+                // Read current value from memory
+                let current_value = (addr as *const u32).read_volatile();
+
+                // Get value to compare from rs2 register
+                let compare_value = get_ureg(rs2 as usize);
+
+                // Perform atomic minimum operation (unsigned comparison)
+                let new_value = if current_value < compare_value {
+                    current_value
+                } else {
+                    compare_value
+                };
+                (addr as *mut u32).write_volatile(new_value);
+
+                // Write original value to rd register
+                // XXX check for rd = 0?
+                set_ureg(rd as usize, current_value);
+
+                let msg = str_format!(
+                    str256,
+                    "emulating amominu.w: addr={:#010x}, old={:#010x}, cmp={:#010x}, new={:#010x}",
+                    addr,
+                    current_value,
+                    compare_value,
+                    new_value
+                );
+                print(&msg);
+
+                mret()
+            }
             _ => {
                 // Other atomic operations not implemented yet
                 let msg = str_format!(
