@@ -481,21 +481,51 @@ fn emulate_fmul(insn: u32) -> ! {
 fn emulate_fdiv(insn: u32) -> ! {
     let precision = get_precision(insn);
 
+    // Setup rounding mode (funct3 field contains rounding mode)
+    let rm = (insn >> 12) & 0x7; // funct3 field contains rounding mode
+    let rounding_mode = if rm == 7 {
+        get_frm() as u8 // Dynamic rounding mode from FCSR
+    } else {
+        rm as u8 // Static rounding mode from instruction
+    };
+
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
         let rs2 = get_f32_rs2(insn);
-        // Use proper softfloat division (rounding mode already set globally)
+        // Clear softfloat flags and set rounding mode before operation
+        unsafe {
+            softfloat_exceptionFlags_write_helper(0);
+            softfloat_roundingMode_write_helper(rounding_mode);
+        };
+
+        // Use proper softfloat division
         let f32_rs1 = float32_t { v: rs1 };
         let f32_rs2 = float32_t { v: rs2 };
         let result = unsafe { f32_div(f32_rs1, f32_rs2) };
+
+        // Update FCSR with softfloat flags
+        let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+        set_fflags(softfloat_flags as u32);
+
         set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
         let rs1 = get_f64_rs1(insn);
         let rs2 = get_f64_rs2(insn);
-        // Use proper softfloat division (rounding mode already set globally)
+        // Clear softfloat flags and set rounding mode before operation
+        unsafe {
+            softfloat_exceptionFlags_write_helper(0);
+            softfloat_roundingMode_write_helper(rounding_mode);
+        };
+
+        // Use proper softfloat division
         let f64_rs1 = float64_t { v: rs1 };
         let f64_rs2 = float64_t { v: rs2 };
         let result = unsafe { f64_div(f64_rs1, f64_rs2) };
+
+        // Update FCSR with softfloat flags
+        let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+        set_fflags(softfloat_flags as u32);
+
         set_f64_rd(insn, result.v);
     } else {
         let msg = str_format!(str256, "Unsupported precision: {}", precision);
@@ -603,10 +633,21 @@ fn emulate_fmin(insn: u32) -> ! {
 fn emulate_fsqrt(insn: u32) -> ! {
     let precision = get_precision(insn);
 
+    // Setup rounding mode (funct3 field contains rounding mode)
+    let rm = (insn >> 12) & 0x7; // funct3 field contains rounding mode
+    let rounding_mode = if rm == 7 {
+        get_frm() as u8 // Dynamic rounding mode from FCSR
+    } else {
+        rm as u8 // Static rounding mode from instruction
+    };
+
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
-        // Clear softfloat flags before operation
-        unsafe { softfloat_exceptionFlags_write_helper(0) };
+        // Clear softfloat flags and set rounding mode before operation
+        unsafe {
+            softfloat_exceptionFlags_write_helper(0);
+            softfloat_roundingMode_write_helper(rounding_mode);
+        };
 
         // Use proper softfloat square root
         let f32_rs1 = float32_t { v: rs1 };
@@ -619,8 +660,11 @@ fn emulate_fsqrt(insn: u32) -> ! {
         set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
         let rs1 = get_f64_rs1(insn);
-        // Clear softfloat flags before operation
-        unsafe { softfloat_exceptionFlags_write_helper(0) };
+        // Clear softfloat flags and set rounding mode before operation
+        unsafe {
+            softfloat_exceptionFlags_write_helper(0);
+            softfloat_roundingMode_write_helper(rounding_mode);
+        };
 
         // Use proper softfloat square root
         let f64_rs1 = float64_t { v: rs1 };
