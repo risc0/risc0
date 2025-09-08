@@ -320,16 +320,6 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 // XXX check for rd = 0?
                 set_ureg(rd as usize, current_value);
 
-                let msg = str_format!(
-                    str256,
-                    "emulating amoadd.w: addr={:#010x}, old={:#010x}, add={:#010x}, new={:#010x}",
-                    addr,
-                    current_value,
-                    add_value,
-                    new_value
-                );
-                print(&msg);
-
                 mret()
             }
             (0x2, 0x01) => {
@@ -366,15 +356,6 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 // Write original value to rd register
                 // XXX check for rd = 0?
                 set_ureg(rd as usize, current_value);
-
-                let msg = str_format!(
-                    str256,
-                    "emulating amoswap.w: addr={:#010x}, old={:#010x}, new={:#010x}",
-                    addr,
-                    current_value,
-                    swap_value
-                );
-                print(&msg);
 
                 mret()
             }
@@ -414,16 +395,6 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 // XXX check for rd = 0?
                 set_ureg(rd as usize, current_value);
 
-                let msg = str_format!(
-                    str256,
-                    "emulating amoxor.w: addr={:#010x}, old={:#010x}, xor={:#010x}, new={:#010x}",
-                    addr,
-                    current_value,
-                    xor_value,
-                    new_value
-                );
-                print(&msg);
-
                 mret()
             }
             (0x2, 0x08) => {
@@ -462,16 +433,6 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 // XXX check for rd = 0?
                 set_ureg(rd as usize, current_value);
 
-                let msg = str_format!(
-                    str256,
-                    "emulating amoor.w: addr={:#010x}, old={:#010x}, or={:#010x}, new={:#010x}",
-                    addr,
-                    current_value,
-                    or_value,
-                    new_value
-                );
-                print(&msg);
-
                 mret()
             }
             (0x2, 0x0c) => {
@@ -509,16 +470,6 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 // Write original value to rd register
                 // XXX check for rd = 0?
                 set_ureg(rd as usize, current_value);
-
-                let msg = str_format!(
-                    str256,
-                    "emulating amoand.w: addr={:#010x}, old={:#010x}, and={:#010x}, new={:#010x}",
-                    addr,
-                    current_value,
-                    and_value,
-                    new_value
-                );
-                print(&msg);
 
                 mret()
             }
@@ -564,16 +515,6 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 // XXX check for rd = 0?
                 set_ureg(rd as usize, current_value);
 
-                let msg = str_format!(
-                    str256,
-                    "emulating amomin.w: addr={:#010x}, old={:#010x}, cmp={:#010x}, new={:#010x}",
-                    addr,
-                    current_value,
-                    compare_value,
-                    new_value
-                );
-                print(&msg);
-
                 mret()
             }
             (0x2, 0x14) => {
@@ -618,16 +559,6 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 // XXX check for rd = 0?
                 set_ureg(rd as usize, current_value);
 
-                let msg = str_format!(
-                    str256,
-                    "emulating amomax.w: addr={:#010x}, old={:#010x}, cmp={:#010x}, new={:#010x}",
-                    addr,
-                    current_value,
-                    compare_value,
-                    new_value
-                );
-                print(&msg);
-
                 mret()
             }
             (0x2, 0x18) => {
@@ -670,16 +601,6 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 // XXX check for rd = 0?
                 set_ureg(rd as usize, current_value);
 
-                let msg = str_format!(
-                    str256,
-                    "emulating amominu.w: addr={:#010x}, old={:#010x}, cmp={:#010x}, new={:#010x}",
-                    addr,
-                    current_value,
-                    compare_value,
-                    new_value
-                );
-                print(&msg);
-
                 mret()
             }
             (0x2, 0x1c) => {
@@ -721,16 +642,6 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 // Write original value to rd register
                 // XXX check for rd = 0?
                 set_ureg(rd as usize, current_value);
-
-                let msg = str_format!(
-                    str256,
-                    "emulating amomaxu.w: addr={:#010x}, old={:#010x}, cmp={:#010x}, new={:#010x}",
-                    addr,
-                    current_value,
-                    compare_value,
-                    new_value
-                );
-                print(&msg);
 
                 mret()
             }
