@@ -6,6 +6,9 @@ listen = "127.0.0.1:8000"
 [manager]
 listen = "127.0.0.1:9000"
 
+[allocator]
+rpc-listen = "127.0.0.1:9001"
+
 [executor]
 count = 1
 

@@ -35,6 +35,7 @@ pub(crate) struct AppConfig {
     pub version: usize,
     pub api: Option<ApiConfig>,
     pub manager: Option<ManagerConfig>,
+    pub allocator: Option<AllocatorConfig>,
     pub executor: Option<ExecutorConfig>,
     pub prover: Option<Vec<ProverConfig>>,
     pub storage: Option<StorageConfig>,
@@ -51,17 +52,27 @@ pub(crate) struct ApiConfig {
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub(crate) struct ManagerConfig {
     pub listen: Option<SocketAddr>,
+    pub allocator: Option<SocketAddr>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
+pub(crate) struct AllocatorConfig {
+    pub rpc_listen: Option<SocketAddr>,
+    pub proxy_listen: Option<SocketAddr>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub(crate) struct ExecutorConfig {
     pub manager: Option<SocketAddr>,
+    pub allocator: Option<SocketAddr>,
     pub count: usize,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub(crate) struct ProverConfig {
     pub manager: Option<SocketAddr>,
+    pub allocator: Option<SocketAddr>,
     pub count: Option<usize>,
     pub subscribe: Vec<TaskKind>,
     pub simulate: Option<DevModeDelay>,
@@ -88,13 +99,20 @@ impl Default for AppConfig {
             }),
             manager: Some(ManagerConfig {
                 listen: Some(default_manager_listen_addr()),
+                allocator: None,
+            }),
+            allocator: Some(AllocatorConfig {
+                rpc_listen: Some(default_allocator_listen_addr()),
+                proxy_listen: None,
             }),
             executor: Some(ExecutorConfig {
                 manager: None,
+                allocator: None,
                 count: 1,
             }),
             prover: Some(vec![ProverConfig {
                 manager: None,
+                allocator: None,
                 count: None,
                 subscribe: vec![
                     TaskKind::ProveSegment,
@@ -118,6 +136,10 @@ pub(crate) fn default_api_listen_addr() -> SocketAddr {
 
 pub(crate) fn default_manager_listen_addr() -> SocketAddr {
     SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 9000)
+}
+
+pub(crate) fn default_allocator_listen_addr() -> SocketAddr {
+    SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 9001)
 }
 
 #[cfg(test)]
@@ -149,6 +171,7 @@ mod tests {
                     po2: None,
                 }),
                 manager: None,
+                allocator: None,
                 executor: None,
                 prover: None,
                 storage: Some(StorageConfig {
@@ -172,10 +195,13 @@ mod tests {
                     po2: None,
                 }),
                 manager: Some(ManagerConfig {
-                    listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap())
+                    listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap()),
+                    allocator: None,
                 }),
+                allocator: None,
                 executor: Some(ExecutorConfig {
                     manager: None,
+                    allocator: None,
                     count: 4,
                 }),
                 prover: None,
@@ -196,10 +222,12 @@ mod tests {
                 version: 1,
                 api: None,
                 manager: None,
+                allocator: None,
                 executor: None,
                 prover: Some(vec![
                     ProverConfig {
                         manager: Some(SocketAddr::from_str("10.0.3.24:9000").unwrap()),
+                        allocator: None,
                         count: None,
                         simulate: None,
                         subscribe: vec![
@@ -213,6 +241,7 @@ mod tests {
                     },
                     ProverConfig {
                         manager: Some(SocketAddr::from_str("10.0.3.24:9000").unwrap()),
+                        allocator: None,
                         count: None,
                         simulate: None,
                         subscribe: vec![

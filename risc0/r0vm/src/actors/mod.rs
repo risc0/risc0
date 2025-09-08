@@ -13,6 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+pub(crate) mod allocator;
 pub(crate) mod config;
 pub(crate) mod factory;
 pub(crate) mod job;
@@ -27,6 +28,7 @@ pub(crate) mod worker;
 use std::{
     error::Error as StdError,
     io::{Write, stdin},
+    marker::PhantomData,
     net::{Ipv4Addr, SocketAddr, SocketAddrV4},
     os::{fd::AsFd as _, unix::net::UnixStream as StdUnixStream},
     path::{Path, PathBuf},
@@ -34,7 +36,8 @@ use std::{
     time::Duration,
 };
 
-use anyhow::Context;
+use anyhow::Context as _;
+use derive_more::From;
 use kameo::prelude::*;
 use nvml_wrapper::Nvml;
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
@@ -48,7 +51,7 @@ use serde::{Deserialize, Serialize};
 use tempfile::NamedTempFile;
 use tokio::{
     io::{AsyncReadExt as _, AsyncWriteExt as _},
-    net::{TcpListener, UnixStream, tcp},
+    net::{TcpListener, TcpStream, UnixStream, tcp},
     process::{Child, Command},
     task::JoinHandle,
 };
@@ -56,14 +59,15 @@ use tracing_subscriber::{
     EnvFilter, Layer as _, layer::SubscriberExt as _, util::SubscriberInitExt as _,
 };
 
-use crate::{actors::config::TelemetryConfig, init_logging};
+use crate::init_logging;
 
 use self::{
+    allocator::{AllocatorActor, AllocatorRouterActor, RegisterManager},
     config::{
-        AppConfig, ExecutorConfig, ManagerConfig, ProverConfig, VERSION, VersionConfig,
-        default_api_listen_addr,
+        AllocatorConfig, AppConfig, ExecutorConfig, ManagerConfig, ProverConfig, TelemetryConfig,
+        VERSION, VersionConfig, default_api_listen_addr,
     },
-    factory::{FactoryActor, FactoryRouterActor, RemoteFactoryActor},
+    factory::{FactoryActor, FactoryRouterActor},
     manager::ManagerActor,
     protocol::{
         JobInfo, JobRequest, ProofRequest, ProofResult, ShrinkWrapRequest, ShrinkWrapResult,
@@ -203,20 +207,30 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
         AppConfig {
             version: VERSION,
             api: None,
-            manager: Some(ManagerConfig { listen: Some(addr) }),
+            manager: Some(ManagerConfig {
+                listen: Some(addr),
+                allocator: None,
+            }),
+            allocator: Some(AllocatorConfig {
+                rpc_listen: Some(addr),
+                proxy_listen: None,
+            }),
             executor: Some(ExecutorConfig {
                 manager: None,
+                allocator: None,
                 count: 1,
             }),
             prover: Some(vec![
                 ProverConfig {
                     manager: None,
+                    allocator: None,
                     count: num_gpus,
                     subscribe: large_tasks,
                     simulate: None,
                 },
                 ProverConfig {
                     manager: None,
+                    allocator: None,
                     count: num_gpus,
                     subscribe: small_tasks,
                     simulate: None,
@@ -225,7 +239,8 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
             storage: None,
             telemetry: None,
         },
-        /*enable_logging=*/ true,
+        /*enable_logging=*/
+        true,
     )
     .await?;
 
@@ -254,6 +269,7 @@ struct TempConfig {
 impl TempConfig {
     fn new(
         manager_addr: SocketAddr,
+        allocator_addr: SocketAddr,
         subscribe: Vec<TaskKind>,
         enable_telemetry: bool,
     ) -> anyhow::Result<Self> {
@@ -261,9 +277,11 @@ impl TempConfig {
             version: VERSION,
             api: None,
             manager: None,
+            allocator: None,
             executor: None,
             prover: Some(vec![ProverConfig {
                 manager: Some(manager_addr),
+                allocator: Some(allocator_addr),
                 count: Some(1),
                 subscribe,
                 simulate: None,
@@ -296,14 +314,6 @@ fn spawn_fail(path: &Path) -> String {
     format!("Could not launch \"{}\".", path.to_string_lossy())
 }
 
-#[allow(clippy::large_enum_variant)]
-#[derive(Serialize, Deserialize)]
-enum RemoteRequest {
-    GetTask(GetTask),
-    TaskUpdate(TaskUpdateMsg),
-    TaskDone(TaskDoneMsg),
-}
-
 struct ChildState {
     child: Child,
     // Pin the temporary file so that it stays alive for the lifetime of the child process.
@@ -313,18 +323,23 @@ struct ChildState {
 pub(crate) struct App {
     provider: Option<OpenTelemetryProvider>,
     manager: Option<ActorRef<ManagerActor>>,
+    allocator: Option<ActorRef<AllocatorActor>>,
     factory: Option<ActorRef<FactoryActor>>,
     workers: Vec<Worker>,
-    server: Option<Server>,
+    factory_rpc_server: Option<FactoryRpcServer>,
+    allocator_rpc_server: Option<AllocatorRpcServer>,
     children: Vec<ChildState>,
 }
 
 impl App {
     pub async fn new(cfg: AppConfig, enable_logging: bool) -> Result<Self, Box<dyn StdError>> {
         let mut manager = None;
+        let mut allocator = None;
         let mut factory = None;
-        let mut server = None;
-        let mut local_addr = None;
+        let mut factory_rpc_server = None;
+        let mut local_factory_rpc_addr = None;
+        let mut allocator_rpc_server = None;
+        let mut local_allocator_rpc_addr = None;
 
         let provider = if cfg.telemetry.is_some() {
             Some(OpenTelemetryProvider::new())
@@ -334,6 +349,24 @@ impl App {
             }
             None
         };
+
+        if let Some(cfg_allocator) = &cfg.allocator {
+            tracing::info!("Starting allocator");
+
+            let alloc_ref = kameo::spawn(AllocatorActor::new());
+            allocator = Some(alloc_ref.clone());
+
+            if let Some(rpc_listen_addr) = cfg_allocator.rpc_listen {
+                allocator_rpc_server =
+                    Some(AllocatorRpcServer::new(rpc_listen_addr, alloc_ref.clone()));
+                local_allocator_rpc_addr =
+                    allocator_rpc_server.as_mut().unwrap().start(true).await?;
+            }
+
+            if let Some(proxy_listen_addr) = cfg_allocator.proxy_listen {
+                tokio::spawn(allocator::run_proxy(proxy_listen_addr, alloc_ref));
+            }
+        }
 
         if let Some(cfg_manager) = &cfg.manager {
             let storage_root = if cfg.api.is_some() {
@@ -346,7 +379,9 @@ impl App {
                 None
             };
 
-            let factory_ref = kameo::spawn(FactoryActor::new());
+            let alloc_ref = AllocatorRouterActor::new(&cfg_manager.allocator, &allocator).await?;
+
+            let factory_ref = kameo::spawn(FactoryActor::new(alloc_ref.clone()));
             factory = Some(factory_ref.clone());
 
             let manager_ref =
@@ -354,8 +389,8 @@ impl App {
             manager = Some(manager_ref.clone());
 
             if let Some(listen_addr) = cfg_manager.listen {
-                server = Some(Server::new(listen_addr, factory_ref));
-                local_addr = server.as_mut().unwrap().start().await?;
+                factory_rpc_server = Some(FactoryRpcServer::new(listen_addr, factory_ref));
+                local_factory_rpc_addr = factory_rpc_server.as_mut().unwrap().start(false).await?;
             }
 
             if let Some(cfg_api) = &cfg.api {
@@ -366,6 +401,15 @@ impl App {
                     manager_ref,
                     cfg_api.po2,
                 ));
+
+                alloc_ref
+                    .ask(RegisterManager {
+                        zkvm_version: env!("CARGO_PKG_VERSION").parse().unwrap(),
+                        port: api_addr.port(),
+                        path: "/".into(),
+                        remote_address: None,
+                    })
+                    .await?;
             }
         }
 
@@ -373,14 +417,16 @@ impl App {
         let mut children = vec![];
 
         if let Some(cfg_executor) = cfg.executor {
-            Self::create_executors(&cfg_executor, &factory, &mut workers).await?;
+            Self::create_executors(&cfg_executor, &factory, &allocator, &mut workers).await?;
         }
 
         if let Some(cfg_prover) = cfg.prover {
             Self::create_provers(
                 &cfg_prover,
-                local_addr,
+                local_factory_rpc_addr,
+                local_allocator_rpc_addr,
                 &factory,
+                &allocator,
                 &mut workers,
                 &mut children,
                 provider.is_some(),
@@ -391,9 +437,11 @@ impl App {
         Ok(Self {
             provider,
             manager,
+            allocator,
             factory,
             workers,
-            server,
+            factory_rpc_server,
+            allocator_rpc_server,
             children,
         })
     }
@@ -401,31 +449,35 @@ impl App {
     async fn create_executors(
         executor: &ExecutorConfig,
         factory: &Option<ActorRef<FactoryActor>>,
+        allocator: &Option<ActorRef<AllocatorActor>>,
         workers: &mut Vec<Worker>,
     ) -> Result<(), Box<dyn StdError>> {
         tracing::info!("Starting executor: {executor:?}");
 
-        let factory_ref = match executor.manager {
-            Some(addr) => {
-                let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
-                kameo::spawn(FactoryRouterActor::Remote(remote))
-            }
-            None => kameo::spawn(FactoryRouterActor::Local(factory.as_ref().unwrap().clone())),
-        };
+        let alloc_ref = AllocatorRouterActor::new(&executor.allocator, allocator).await?;
+        let factory_ref = FactoryRouterActor::new(&executor.manager, factory).await?;
 
         for _ in 0..executor.count {
-            let mut worker = Worker::new(factory_ref.clone(), vec![TaskKind::Execute], None);
-            worker.start();
+            let mut worker = Worker::new(
+                factory_ref.clone(),
+                alloc_ref.clone(),
+                vec![TaskKind::Execute],
+                None,
+            );
+            worker.start()?;
             workers.push(worker);
         }
 
         Ok(())
     }
 
+    #[allow(clippy::too_many_arguments)]
     async fn create_provers(
         cfg_prover: &[ProverConfig],
-        local_addr: Option<SocketAddr>,
+        local_factory_addr: Option<SocketAddr>,
+        local_allocator_addr: Option<SocketAddr>,
         factory: &Option<ActorRef<FactoryActor>>,
+        allocator: &Option<ActorRef<AllocatorActor>>,
         workers: &mut Vec<Worker>,
         children: &mut Vec<ChildState>,
         enable_telemetry: bool,
@@ -435,31 +487,44 @@ impl App {
 
             let count = prover.count.unwrap_or_else(|| cuda_devices().unwrap_or(1));
             if (cfg_prover.len() == 1 && count == 1) || prover.simulate.is_some() {
-                let factory_ref = match prover.manager {
-                    Some(addr) => {
-                        let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
-                        kameo::spawn(FactoryRouterActor::Remote(remote))
-                    }
-                    None => {
-                        kameo::spawn(FactoryRouterActor::Local(factory.as_ref().unwrap().clone()))
-                    }
-                };
+                let alloc_ref = AllocatorRouterActor::new(&prover.allocator, allocator).await?;
+                let factory_ref = FactoryRouterActor::new(&prover.manager, factory).await?;
 
                 let mut worker = Worker::new(
                     factory_ref.clone(),
+                    alloc_ref.clone(),
                     prover.subscribe.clone(),
                     prover.simulate,
                 );
-                worker.start();
+                worker.start()?;
                 workers.push(worker);
             } else {
                 let r0vm_path = std::env::current_exe()?;
-                if prover.manager.is_none() && local_addr.is_none() {
-                    return Err(anyhow::anyhow!("Invalid configuration: either manager must run locally or prover.manager must be set").into());
+                if prover.manager.is_none() && local_factory_addr.is_none() {
+                    return Err(anyhow::anyhow!(
+                        "Invalid configuration: \
+                        either manager must run locally or prover.manager must be set"
+                    )
+                    .into());
                 }
-                let manager_addr = prover.manager.unwrap_or_else(|| local_addr.unwrap());
+                let manager_addr = prover
+                    .manager
+                    .unwrap_or_else(|| local_factory_addr.unwrap());
+
+                if prover.allocator.is_none() && local_allocator_addr.is_none() {
+                    return Err(anyhow::anyhow!(
+                        "Invalid configuration: \
+                        either allocator must run locally or prover.allocator must be set"
+                    )
+                    .into());
+                }
+                let allocator_addr = prover
+                    .allocator
+                    .unwrap_or_else(|| local_allocator_addr.unwrap());
+
                 let cfg_child = Arc::new(TempConfig::new(
                     manager_addr,
+                    allocator_addr,
                     prover.subscribe.clone(),
                     enable_telemetry,
                 )?);
@@ -493,9 +558,21 @@ impl App {
     pub async fn stop(mut self) {
         tracing::info!("app: stop");
 
-        if let Some(server) = self.server.take() {
-            tracing::info!("server: stop");
+        if let Some(server) = self.factory_rpc_server.take() {
+            tracing::info!("factory_rpc_server: stop");
             server.stop().await;
+        }
+
+        if let Some(server) = self.allocator_rpc_server.take() {
+            tracing::info!("allocator_rpc_server: stop");
+            server.stop().await;
+        }
+
+        if let Some(allocator) = self.allocator.take()
+            && allocator.stop_gracefully().await.is_ok()
+        {
+            tracing::info!("allocator: wait for stop");
+            allocator.wait_for_stop().await;
         }
 
         if let Some(manager) = self.manager.take()
@@ -546,34 +623,47 @@ impl App {
     }
 }
 
-struct Server {
-    listen_addr: SocketAddr,
-    factory: ActorRef<FactoryActor>,
-    join_handle: Option<JoinHandle<()>>,
+type FactoryRpcServer = RpcServer<FactoryActor, RemoteFactoryRequest>;
+type AllocatorRpcServer = RpcServer<AllocatorActor, RemoteAllocatorRequest>;
+
+struct RpcDisconnect {
+    remote_address: SocketAddr,
 }
 
-impl Server {
-    pub fn new(listen_addr: SocketAddr, factory: ActorRef<FactoryActor>) -> Self {
+struct RpcServer<ReceiverT: Actor, MessageT> {
+    listen_addr: SocketAddr,
+    receiver: ActorRef<ReceiverT>,
+    join_handle: Option<JoinHandle<()>>,
+    _msg: PhantomData<MessageT>,
+}
+
+impl<ReceiverT, MessageT> RpcServer<ReceiverT, MessageT>
+where
+    ReceiverT: Actor + Message<RpcDisconnect>,
+    MessageT: DispatchRpcMessage<ReceiverT> + serde::de::DeserializeOwned,
+{
+    pub fn new(listen_addr: SocketAddr, receiver: ActorRef<ReceiverT>) -> Self {
         Self {
             listen_addr,
-            factory,
+            receiver,
             join_handle: None,
+            _msg: PhantomData,
         }
     }
 
-    pub async fn start(&mut self) -> anyhow::Result<Option<SocketAddr>> {
+    pub async fn start(&mut self, forward_errors: bool) -> anyhow::Result<Option<SocketAddr>> {
         if self.join_handle.is_some() {
             return Ok(None);
         }
 
-        let factory = self.factory.clone();
+        let receiver = self.receiver.clone();
         let listener = TcpListener::bind(self.listen_addr).await?;
         let local_addr = listener.local_addr()?;
 
         self.join_handle = Some(tokio::spawn(async move {
             let mut join_set = tokio::task::JoinSet::new();
             loop {
-                let (stream, _addr) = match listener.accept().await {
+                let (stream, remote_address) = match listener.accept().await {
                     Ok(result) => result,
                     Err(err) => {
                         tracing::error!("{err}");
@@ -583,16 +673,26 @@ impl Server {
 
                 let meter = opentelemetry::global::meter("r0vm");
                 let stream = metrics::StreamWithMetrics::new(stream, meter.clone());
-                let factory = factory.clone();
+                let receiver = receiver.clone();
                 join_set.spawn(async move {
                     let (rpc_sender, mut rpc_receiver) = rpc_system(stream, meter);
+                    let cloned_receiver = receiver.clone();
                     rpc_receiver
-                        .receive_many(move |req, message_id| {
+                        .receive_many::<MessageT, _>(move |req, message_id| {
                             let rpc_sender = rpc_sender.clone();
-                            let factory = factory.clone();
-                            handle_request(rpc_sender, req, message_id, factory)
+                            let receiver = cloned_receiver.clone();
+                            let ops = RpcDispatchOps {
+                                rpc_sender,
+                                message_id,
+                                forward_errors,
+                            };
+                            req.dispatch(remote_address, receiver, ops)
                         })
                         .await;
+                    receiver
+                        .tell(RpcDisconnect { remote_address })
+                        .await
+                        .unwrap();
                 });
             }
         }));
@@ -609,39 +709,264 @@ impl Server {
 
 type WriteStream = metrics::OwnedWriteHalfWithMetrics<tcp::OwnedWriteHalf>;
 
-async fn handle_request(
+struct RpcDispatchOps {
     rpc_sender: RpcSender<WriteStream>,
-    request: RemoteRequest,
     message_id: Option<RpcMessageId>,
-    factory: ActorRef<FactoryActor>,
-) {
-    match request {
-        RemoteRequest::GetTask(msg) => {
-            let message_id = message_id.expect("request not expecting response");
+    forward_errors: bool,
+}
 
-            // The PendingReply isn't Send, so I have to do this :/
-            let (tx, rx) = tokio::sync::oneshot::channel();
-            tokio::task::spawn(async move {
-                let pending_reply = factory.ask(msg).enqueue().await.unwrap();
-                tx.send(()).unwrap();
-                if let Ok(reply) = pending_reply.await {
-                    rpc_sender.respond(&reply, message_id).await.unwrap();
+impl RpcDispatchOps {
+    async fn ask<ReceiverT, MessageT>(self, receiver: ActorRef<ReceiverT>, msg: MessageT)
+    where
+        ReceiverT: Message<MessageT>,
+        MessageT: Send + 'static,
+        <<ReceiverT as Message<MessageT>>::Reply as Reply>::Ok: serde::Serialize + Sync,
+        <<ReceiverT as Message<MessageT>>::Reply as Reply>::Error: serde::Serialize + Sync,
+    {
+        let message_id = self.message_id.expect("request not expecting response");
+
+        // The PendingReply isn't Send, so I have to do this :/
+        let (tx, rx) = tokio::sync::oneshot::channel();
+        tokio::task::spawn(async move {
+            let pending_reply = receiver.ask(msg).enqueue().await.unwrap();
+            tx.send(()).unwrap();
+
+            if self.forward_errors {
+                match pending_reply.await {
+                    Ok(reply) => {
+                        self.rpc_sender
+                            .respond(&std::result::Result::<_, ()>::Ok(reply), message_id)
+                            .await
+                            .unwrap();
+                    }
+                    Err(SendError::HandlerError(error)) => {
+                        self.rpc_sender
+                            .respond(&std::result::Result::<(), _>::Err(error), message_id)
+                            .await
+                            .unwrap();
+                    }
+                    Err(other_error) => {
+                        panic!("rpc actor send error: {other_error:?}")
+                    }
                 }
-            });
+            } else if let Ok(reply) = pending_reply.await {
+                self.rpc_sender.respond(&reply, message_id).await.unwrap();
+            }
+        });
 
-            // wait until message has been enqueued in mailbox to preserve ordering.
-            let _ = rx.await;
-        }
-        RemoteRequest::TaskUpdate(msg) => {
-            assert!(message_id.is_none());
-            factory.tell(msg).await.unwrap();
-        }
-        RemoteRequest::TaskDone(msg) => {
-            assert!(message_id.is_none());
-            factory.tell(msg).await.unwrap();
+        // wait until message has been enqueued in mailbox to preserve ordering.
+        let _ = rx.await;
+    }
+
+    async fn tell<ReceiverT, MessageT>(self, receiver: ActorRef<ReceiverT>, msg: MessageT)
+    where
+        ReceiverT: Message<MessageT>,
+        MessageT: Send + 'static,
+    {
+        assert!(self.message_id.is_none());
+        receiver.tell(msg).await.unwrap();
+    }
+}
+
+trait DispatchRpcMessage<ReceiverT: Actor> {
+    fn dispatch(
+        self,
+        remote_address: SocketAddr,
+        receiver: ActorRef<ReceiverT>,
+        ops: RpcDispatchOps,
+    ) -> impl Future<Output = ()> + Send + 'static;
+}
+
+#[allow(clippy::large_enum_variant)]
+#[derive(Serialize, Deserialize, From)]
+enum RemoteFactoryRequest {
+    GetTask(GetTask),
+    TaskUpdate(TaskUpdateMsg),
+    TaskDone(TaskDoneMsg),
+}
+
+impl DispatchRpcMessage<FactoryActor> for RemoteFactoryRequest {
+    async fn dispatch(
+        self,
+        _remote_address: SocketAddr,
+        receiver: ActorRef<FactoryActor>,
+        ops: RpcDispatchOps,
+    ) {
+        match self {
+            RemoteFactoryRequest::GetTask(msg) => {
+                ops.ask(receiver, msg).await;
+            }
+            RemoteFactoryRequest::TaskUpdate(msg) => {
+                ops.tell(receiver, msg).await;
+            }
+            RemoteFactoryRequest::TaskDone(msg) => {
+                ops.tell(receiver, msg).await;
+            }
         }
     }
 }
+
+#[allow(clippy::large_enum_variant)]
+#[derive(Serialize, Deserialize, From)]
+enum RemoteAllocatorRequest {
+    RegisterWorker(allocator::RegisterWorker),
+    ChooseWorker(allocator::ChooseWorker),
+    AllocateHardware(allocator::AllocateHardware),
+    DeallocateHardware(allocator::DeallocateHardware),
+    RegisterManager(allocator::RegisterManager),
+}
+
+impl DispatchRpcMessage<AllocatorActor> for RemoteAllocatorRequest {
+    async fn dispatch(
+        self,
+        remote_address: SocketAddr,
+        receiver: ActorRef<AllocatorActor>,
+        ops: RpcDispatchOps,
+    ) {
+        match self {
+            RemoteAllocatorRequest::RegisterWorker(mut msg) => {
+                msg.remote_address = Some(remote_address);
+                ops.ask(receiver, msg).await;
+            }
+            RemoteAllocatorRequest::ChooseWorker(msg) => {
+                ops.ask(receiver, msg).await;
+            }
+            RemoteAllocatorRequest::AllocateHardware(msg) => {
+                ops.ask(receiver, msg).await;
+            }
+            RemoteAllocatorRequest::DeallocateHardware(msg) => {
+                ops.ask(receiver, msg).await;
+            }
+            RemoteAllocatorRequest::RegisterManager(mut msg) => {
+                msg.remote_address = Some(remote_address);
+                ops.ask(receiver, msg).await;
+            }
+        }
+    }
+}
+
+macro_rules! routing_actor_impl {
+    ($type:ty, $request:ty, $reply:ty) => {
+        impl Message<$request> for $type {
+            type Reply = ForwardedReply<$request, $reply>;
+
+            async fn handle(
+                &mut self,
+                msg: $request,
+                ctx: &mut Context<Self, Self::Reply>,
+            ) -> Self::Reply {
+                match self {
+                    Self::Local(actor_ref) => ctx.forward(actor_ref, msg).await,
+                    Self::Remote(actor_ref) => ctx.forward(actor_ref, msg).await,
+                }
+            }
+        }
+    };
+}
+pub(crate) use routing_actor_impl;
+
+pub(crate) struct RemoteActor<ActorT> {
+    rpc_sender: RpcSender<WriteStream>,
+    rpc_receiver_handle: JoinHandle<()>,
+    rpc_death_recv: Option<tokio::sync::oneshot::Receiver<()>>,
+    remote_actor: std::marker::PhantomData<ActorT>,
+}
+
+impl<ActorT> RemoteActor<ActorT> {
+    pub(crate) async fn new(addr: SocketAddr) -> anyhow::Result<Self> {
+        let meter = opentelemetry::global::meter("r0vm");
+        let stream =
+            metrics::StreamWithMetrics::new(TcpStream::connect(addr).await?, meter.clone());
+        let (rpc_sender, mut rpc_receiver) = rpc_system(stream, meter);
+
+        let (rpc_death_send, rpc_death_recv) = tokio::sync::oneshot::channel();
+        let rpc_receiver_handle = tokio::task::spawn(async move {
+            rpc_receiver
+                .receive_many(|_: (), _| async {
+                    tracing::error!("received unexpected unsolicited RPC message");
+                })
+                .await;
+            let _ = rpc_death_send.send(());
+        });
+
+        Ok(Self {
+            rpc_sender,
+            rpc_receiver_handle,
+            rpc_death_recv: Some(rpc_death_recv),
+            remote_actor: std::marker::PhantomData,
+        })
+    }
+}
+
+impl<ActorT: Send + 'static> Actor for RemoteActor<ActorT> {
+    type Error = anyhow::Error;
+
+    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
+        let rpc_death_recv = self.rpc_death_recv.take().unwrap();
+        tokio::task::spawn(async move {
+            let _ = rpc_death_recv.await;
+            actor_ref.kill();
+        });
+        Ok(())
+    }
+
+    async fn on_stop(
+        &mut self,
+        _actor_ref: WeakActorRef<Self>,
+        _reason: ActorStopReason,
+    ) -> Result<(), Self::Error> {
+        self.rpc_sender.shutdown().await?;
+        self.rpc_receiver_handle.abort();
+
+        Ok(())
+    }
+}
+
+macro_rules! remote_actor_ask {
+    ($type:ty, $request:ty, $reply:ty, $msg_ty:ty) => {
+        impl Message<$request> for $type {
+            type Reply = DelegatedReply<$reply>;
+
+            async fn handle(
+                &mut self,
+                msg: $request,
+                ctx: &mut Context<Self, Self::Reply>,
+            ) -> Self::Reply {
+                let (delegated_reply, reply_sender) = ctx.reply_sender();
+
+                let msg: $msg_ty = msg.into();
+                self.rpc_sender
+                    .ask(&msg, move |response: $reply| {
+                        if let Some(reply_sender) = reply_sender {
+                            reply_sender.send(response);
+                        }
+                    })
+                    .await
+                    .unwrap();
+                delegated_reply
+            }
+        }
+    };
+}
+pub(crate) use remote_actor_ask;
+
+macro_rules! remote_actor_tell {
+    ($type:ty, $request:ty, $msg_ty:ty) => {
+        impl Message<$request> for $type {
+            type Reply = ();
+
+            async fn handle(
+                &mut self,
+                msg: $request,
+                _ctx: &mut Context<Self, Self::Reply>,
+            ) -> Self::Reply {
+                let msg: $msg_ty = msg.into();
+                self.rpc_sender.tell(&msg).await.unwrap();
+            }
+        }
+    };
+}
+pub(crate) use remote_actor_tell;
 
 fn default_storage_root() -> PathBuf {
     dirs::home_dir().unwrap().join(".risc0").join("r0vm")

@@ -232,11 +232,14 @@ pub mod factory {
 
 pub mod worker {
     use super::*;
+    use crate::actors::allocator::{CpuCores, GpuTokens};
 
     #[derive(Clone, Reply, Serialize, Deserialize)]
     pub(crate) struct TaskMsg {
         pub header: TaskHeader,
         pub task: Task,
+        pub gpu_tokens: GpuTokens,
+        pub cores: CpuCores,
     }
 }
 

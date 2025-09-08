@@ -24,7 +24,7 @@ use risc0_zkvm_methods::FIB_ELF;
 
 use super::{
     App,
-    config::{AppConfig, ExecutorConfig, ManagerConfig, StorageConfig, VERSION},
+    config::{AllocatorConfig, AppConfig, ExecutorConfig, ManagerConfig, StorageConfig, VERSION},
     protocol::{JobStatus, ProofRequest, ShrinkWrapKind, ShrinkWrapRequest, TaskKind},
 };
 
@@ -64,13 +64,22 @@ async fn do_test(remote: bool) {
         AppConfig {
             version: VERSION,
             api: None,
-            manager: Some(ManagerConfig { listen: addr }),
+            manager: Some(ManagerConfig {
+                listen: addr,
+                allocator: None,
+            }),
+            allocator: Some(AllocatorConfig {
+                rpc_listen: None,
+                proxy_listen: None,
+            }),
             executor: Some(ExecutorConfig {
                 manager: None,
+                allocator: None,
                 count: 1,
             }),
             prover: Some(vec![crate::actors::config::ProverConfig {
                 manager: None,
+                allocator: None,
                 count: Some(100),
                 subscribe: task_kinds.clone(),
                 simulate: Some(PROFILE_RTX_5090),

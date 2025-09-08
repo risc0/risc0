@@ -17,6 +17,7 @@ use std::{rc::Rc, sync::Arc};
 
 use anyhow::{Context, Result};
 use kameo::prelude::*;
+use nvml_wrapper::Nvml;
 use risc0_zkvm::{
     CoprocessorCallback, DevModeDelay, DevModeProver, ExecutorEnv, ExecutorImpl, NullSegmentRef,
     PreflightResults, ProveKeccakRequest, ProverOpts, ProverServer, VerifierContext,
@@ -26,6 +27,10 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tokio::task::JoinHandle;
 
 use super::{
+    allocator::{
+        AllocateHardware, AllocatorRouterActor, CpuCores, CpuSpec, DeallocateHardware, GpuSpec,
+        GpuTokens, HardwareReservation, HardwareResource, RegisterWorker,
+    },
     factory::FactoryRouterActor,
     protocol::{
         ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Session,
@@ -76,8 +81,23 @@ const CPU_QUEUE_DEPTH: usize = 2;
 /// Number of tasks we queue up to do on GPU
 const GPU_QUEUE_DEPTH: usize = 2;
 
+fn get_gpus_from_nvml() -> Result<Vec<GpuSpec>> {
+    let mut gpus = vec![];
+    let nvml = Nvml::init()?;
+    for idx in 0..nvml.device_count()? {
+        let device = nvml.device_by_index(idx)?;
+        gpus.push(GpuSpec {
+            name: device.name()?,
+            uuid: device.uuid()?.parse().unwrap(),
+            tokens: GpuTokens::from(100),
+        });
+    }
+    Ok(gpus)
+}
+
 pub(crate) struct Worker {
     factory: ActorRef<FactoryRouterActor>,
+    allocator: ActorRef<AllocatorRouterActor>,
     task_kinds: Vec<TaskKind>,
     join_handles: Vec<JoinHandle<()>>,
     delay: Option<DevModeDelay>,
@@ -87,11 +107,13 @@ pub(crate) struct Worker {
 impl Worker {
     pub fn new(
         factory: ActorRef<FactoryRouterActor>,
+        allocator: ActorRef<AllocatorRouterActor>,
         task_kinds: Vec<TaskKind>,
         delay: Option<DevModeDelay>,
     ) -> Self {
         Self {
             factory,
+            allocator,
             task_kinds,
             join_handles: vec![],
             delay,
@@ -99,21 +121,43 @@ impl Worker {
         }
     }
 
-    pub fn start(&mut self) {
+    pub fn start(&mut self) -> Result<()> {
         if !self.join_handles.is_empty() {
-            return;
+            return Ok(());
         }
 
         tracing::info!("Starting worker: {:?}", self.task_kinds);
+
+        let id = WorkerId::new_v4();
+        let allocator = self.allocator.clone();
+
+        let gpus = get_gpus_from_nvml()?;
+        let cpu = CpuSpec {
+            cores: CpuCores::from(usize::from(std::thread::available_parallelism()?) as u64),
+        };
+        let mut hardware = gpus
+            .iter()
+            .map(|gpu| gpu.clone().into())
+            .collect::<Vec<HardwareResource>>();
+        hardware.push(cpu.into());
 
         let task_kinds = self.task_kinds.clone();
         let factory = self.factory.clone();
         let (send, mut recv) = channel(RECEIVE_QUEUE_DEPTH);
         self.join_handles.push(tokio::spawn(async move {
+            allocator
+                .ask(RegisterWorker {
+                    remote_address: None,
+                    worker_id: id,
+                    hardware,
+                })
+                .await
+                .unwrap();
+
             while let Ok(permit) = send.reserve().await {
                 let task = factory
                     .ask(GetTask {
-                        worker_id: WorkerId::new_v4(),
+                        worker_id: id,
                         kinds: task_kinds.clone(),
                     })
                     .await;
@@ -122,12 +166,36 @@ impl Worker {
         }));
         let (death_sender, death_receiver) = tokio::sync::oneshot::channel();
         let processor = Processor::new(self.factory.clone(), self.delay, death_sender);
+        let allocator = self.allocator.clone();
         self.join_handles.push(tokio::spawn(async move {
             while let Some(Ok(msg)) = recv.recv().await {
+                let hardware_reservations = vec![
+                    HardwareReservation::Gpu {
+                        id: gpus[0].uuid.clone(),
+                        tokens: msg.gpu_tokens,
+                    },
+                    HardwareReservation::Cpu { cores: msg.cores },
+                ];
+                allocator
+                    .ask(AllocateHardware {
+                        worker_id: id,
+                        hardware_reservations: hardware_reservations.clone(),
+                    })
+                    .await
+                    .unwrap();
                 processor.process_task(msg).await;
+                allocator
+                    .tell(DeallocateHardware {
+                        worker_id: id,
+                        hardware_reservations,
+                    })
+                    .await
+                    .unwrap();
             }
         }));
         self.death_receiver = Some(death_receiver);
+
+        Ok(())
     }
 
     pub async fn stop(mut self) {

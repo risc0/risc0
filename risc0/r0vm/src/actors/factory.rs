@@ -13,26 +13,23 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{collections::HashMap, net::SocketAddr};
+use std::collections::HashMap;
+use std::error::Error as StdError;
+use std::net::SocketAddr;
 
 use kameo::{error::Infallible, prelude::*};
 use multi_index_map::MultiIndexMap;
-use rand::{SeedableRng, rngs::SmallRng, seq::IndexedRandom};
-use tokio::{
-    net::{TcpStream, tcp},
-    task::JoinHandle,
-};
 
 use super::{
-    RemoteRequest,
+    RemoteActor, RemoteFactoryRequest, RpcDisconnect,
+    allocator::{AllocatorRouterActor, ChooseWorker, CpuCores, GpuTokens},
     job::JobActor,
-    metrics,
     protocol::{
         GlobalId, JobId, Task, TaskHeader, TaskKind, WorkerId,
         factory::{DropJob, GetTask, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
         worker::TaskMsg,
     },
-    rpc::{RpcSender, rpc_system},
+    remote_actor_ask, remote_actor_tell, routing_actor_impl,
 };
 
 #[derive(Clone, MultiIndexMap)]
@@ -60,18 +57,18 @@ pub(crate) struct FactoryActor {
     pending_tasks: MultiIndexTaskRowMap,
     active_tasks: HashMap<GlobalId, TaskMsg>,
     reply_senders: HashMap<WorkerId, ReplySender<TaskMsg>>,
-    rng: SmallRng,
+    allocator: ActorRef<AllocatorRouterActor>,
 }
 
 impl FactoryActor {
-    pub fn new() -> Self {
+    pub fn new(allocator: ActorRef<AllocatorRouterActor>) -> Self {
         Self {
             jobs: HashMap::default(),
             workers: Default::default(),
             pending_tasks: Default::default(),
             active_tasks: HashMap::default(),
             reply_senders: HashMap::default(),
-            rng: SmallRng::from_os_rng(),
+            allocator,
         }
     }
 }
@@ -120,12 +117,23 @@ impl Message<SubmitTaskMsg> for FactoryActor {
         let task = TaskMsg {
             header: msg.header.clone(),
             task: msg.task.clone(),
+            // XXX remi
+            cores: CpuCores::from(0),
+            gpu_tokens: GpuTokens::from(100),
         };
 
-        let workers = self.workers.get_by_task_kind(&task_kind);
+        let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
 
-        if let Some(worker) = workers.choose(&mut self.rng) {
-            let worker_id = worker.worker_id;
+        if !workers.is_empty() {
+            let response = self
+                .allocator
+                .ask(ChooseWorker {
+                    candidates: workers.iter().map(|w| w.worker_id).collect(),
+                })
+                .await
+                .unwrap();
+
+            let worker_id = response.worker_id;
             self.workers.remove_by_worker_id(&worker_id);
             let reply_sender = self.reply_senders.remove(&worker_id).unwrap();
             reply_sender.send(task);
@@ -158,6 +166,9 @@ impl Message<GetTask> for FactoryActor {
                         task_kind,
                     },
                     task: row.task.clone(),
+                    // XXX remi
+                    cores: CpuCores::from(0),
+                    gpu_tokens: GpuTokens::from(100),
                 };
                 self.pending_tasks.remove_by_global_id(&row.global_id);
                 self.active_tasks.insert(row.global_id, task_msg.clone());
@@ -215,150 +226,52 @@ impl Message<TaskDoneMsg> for FactoryActor {
     }
 }
 
+impl Message<RpcDisconnect> for FactoryActor {
+    type Reply = ();
+
+    async fn handle(&mut self, _msg: RpcDisconnect, _ctx: &mut Context<Self, Self::Reply>) {
+        // nothing to do
+    }
+}
+
 #[derive(Actor)]
 pub(crate) enum FactoryRouterActor {
     Local(ActorRef<FactoryActor>),
     Remote(ActorRef<RemoteFactoryActor>),
 }
 
-impl Message<GetTask> for FactoryRouterActor {
-    type Reply = ForwardedReply<GetTask, DelegatedReply<TaskMsg>>;
-
-    async fn handle(&mut self, msg: GetTask, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
-        match self {
-            FactoryRouterActor::Local(actor_ref) => ctx.forward(actor_ref, msg).await,
-            FactoryRouterActor::Remote(actor_ref) => ctx.forward(actor_ref, msg).await,
+impl FactoryRouterActor {
+    pub async fn new(
+        addr: &Option<SocketAddr>,
+        local: &Option<ActorRef<FactoryActor>>,
+    ) -> Result<ActorRef<Self>, Box<dyn StdError>> {
+        if let Some(addr) = addr {
+            let remote = kameo::spawn(RemoteFactoryActor::new(*addr).await?);
+            Ok(kameo::spawn(Self::Remote(remote)))
+        } else {
+            Ok(kameo::spawn(Self::Local(
+                local.as_ref().ok_or("no factory configured")?.clone(),
+            )))
         }
     }
 }
 
-impl Message<TaskUpdateMsg> for FactoryRouterActor {
-    type Reply = ForwardedReply<TaskUpdateMsg, ()>;
+routing_actor_impl!(FactoryRouterActor, GetTask, DelegatedReply<TaskMsg>);
+routing_actor_impl!(FactoryRouterActor, TaskUpdateMsg, ());
+routing_actor_impl!(FactoryRouterActor, TaskDoneMsg, ());
 
-    async fn handle(
-        &mut self,
-        msg: TaskUpdateMsg,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        match self {
-            FactoryRouterActor::Local(actor_ref) => ctx.forward(actor_ref, msg).await,
-            FactoryRouterActor::Remote(actor_ref) => ctx.forward(actor_ref, msg).await,
-        }
-    }
-}
+pub type RemoteFactoryActor = RemoteActor<FactoryActor>;
 
-impl Message<TaskDoneMsg> for FactoryRouterActor {
-    type Reply = ForwardedReply<TaskDoneMsg, ()>;
+remote_actor_ask!(
+    RemoteActor<FactoryActor>,
+    GetTask,
+    TaskMsg,
+    RemoteFactoryRequest
+);
 
-    async fn handle(
-        &mut self,
-        msg: TaskDoneMsg,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        match self {
-            FactoryRouterActor::Local(actor_ref) => ctx.forward(actor_ref, msg).await,
-            FactoryRouterActor::Remote(actor_ref) => ctx.forward(actor_ref, msg).await,
-        }
-    }
-}
-
-type WriteStream = metrics::OwnedWriteHalfWithMetrics<tcp::OwnedWriteHalf>;
-
-pub(crate) struct RemoteFactoryActor {
-    rpc_sender: RpcSender<WriteStream>,
-    rpc_receiver_handle: JoinHandle<()>,
-    rpc_death_recv: Option<tokio::sync::oneshot::Receiver<()>>,
-}
-
-impl RemoteFactoryActor {
-    pub(crate) async fn new(addr: SocketAddr) -> anyhow::Result<Self> {
-        let meter = opentelemetry::global::meter("r0vm");
-        let stream =
-            metrics::StreamWithMetrics::new(TcpStream::connect(addr).await?, meter.clone());
-        let (rpc_sender, mut rpc_receiver) = rpc_system(stream, meter);
-
-        let (rpc_death_send, rpc_death_recv) = tokio::sync::oneshot::channel();
-        let rpc_receiver_handle = tokio::task::spawn(async move {
-            rpc_receiver
-                .receive_many(|_: (), _| async {
-                    tracing::error!("received unexpected unsolicited RPC message");
-                })
-                .await;
-            let _ = rpc_death_send.send(());
-        });
-
-        Ok(Self {
-            rpc_sender,
-            rpc_receiver_handle,
-            rpc_death_recv: Some(rpc_death_recv),
-        })
-    }
-}
-
-impl Actor for RemoteFactoryActor {
-    type Error = anyhow::Error;
-
-    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
-        let rpc_death_recv = self.rpc_death_recv.take().unwrap();
-        tokio::task::spawn(async move {
-            let _ = rpc_death_recv.await;
-            actor_ref.kill();
-        });
-        Ok(())
-    }
-
-    async fn on_stop(
-        &mut self,
-        _actor_ref: WeakActorRef<Self>,
-        _reason: ActorStopReason,
-    ) -> Result<(), Self::Error> {
-        self.rpc_sender.shutdown().await?;
-        self.rpc_receiver_handle.abort();
-
-        Ok(())
-    }
-}
-
-impl Message<GetTask> for RemoteFactoryActor {
-    type Reply = DelegatedReply<TaskMsg>;
-
-    async fn handle(&mut self, msg: GetTask, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
-        let (delegated_reply, reply_sender) = ctx.reply_sender();
-
-        let reply_sender = reply_sender.unwrap();
-        let msg = RemoteRequest::GetTask(msg);
-        self.rpc_sender
-            .ask(&msg, move |response: TaskMsg| {
-                reply_sender.send(response);
-            })
-            .await
-            .unwrap();
-        delegated_reply
-    }
-}
-
-impl Message<TaskUpdateMsg> for RemoteFactoryActor {
-    type Reply = ();
-
-    async fn handle(
-        &mut self,
-        msg: TaskUpdateMsg,
-        _ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        let msg = RemoteRequest::TaskUpdate(msg);
-        self.rpc_sender.tell(&msg).await.unwrap();
-    }
-}
-
-impl Message<TaskDoneMsg> for RemoteFactoryActor {
-    type Reply = ();
-
-    async fn handle(
-        &mut self,
-        msg: TaskDoneMsg,
-        _ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        let msg = RemoteRequest::TaskDone(msg);
-        self.rpc_sender.tell(&msg).await.unwrap();
-    }
-}
+remote_actor_tell!(
+    RemoteActor<FactoryActor>,
+    TaskUpdateMsg,
+    RemoteFactoryRequest
+);
+remote_actor_tell!(RemoteActor<FactoryActor>, TaskDoneMsg, RemoteFactoryRequest);
