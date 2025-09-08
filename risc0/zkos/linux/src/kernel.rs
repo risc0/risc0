@@ -296,6 +296,7 @@ unsafe fn emulate_fp_instruction(insn: u32, mepc: usize) -> ! {
         0x4f => emulate_fmadd(insn),   // FNMADD.S
         0x4e => emulate_fmadd(insn),   // FNMADD.D
         0x70 => emulate_fmv_if(insn),  // FMV (float to int)
+        0x71 => emulate_fmv_if(insn),  // FCLASS.D
         0x78 => emulate_fmv_fi(insn),  // FMV (int to float)
         _ => {
             let msg = str_format!(str256, "Unsupported FP instruction: funct7={:#02x}", funct7);
@@ -1173,18 +1174,25 @@ fn emulate_fmv_if(insn: u32) -> ! {
     let funct7 = (insn >> 25) & 0x7f;
     let funct3 = (insn >> 12) & 0x7;
 
-    if rs2 == 0 && funct7 == 0x70 && funct3 == 0x1 {
+    if rs2 == 0 && (funct7 == 0x70 || funct7 == 0x71) && funct3 == 0x1 {
         // fclass instruction
-        if precision == PRECISION_S {
+        if funct7 == 0x70 && precision == PRECISION_S {
+            // fclass.s
             let rs1 = get_f32_rs1(insn);
             let classification = classify_f32(rs1);
             set_ureg(rd as usize, classification);
-        } else if precision == PRECISION_D {
+        } else if funct7 == 0x71 && precision == PRECISION_D {
+            // fclass.d
             let rs1 = get_f64_rs1(insn);
             let classification = classify_f64(rs1);
             set_ureg(rd as usize, classification as u32);
         } else {
-            let msg = str_format!(str256, "Unsupported fclass precision: {}", precision);
+            let msg = str_format!(
+                str256,
+                "Unsupported fclass: funct7=0x{:x}, precision={}",
+                funct7,
+                precision
+            );
             print(&msg);
             host_terminate(1, 0);
         }
