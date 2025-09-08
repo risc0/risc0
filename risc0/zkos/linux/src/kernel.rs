@@ -27,8 +27,17 @@ const REG_A5: usize = 15;
 // const REG_A6: usize = 16;
 const REG_A7: usize = 17;
 
+// Floating point register constants
+const NUM_FP_REGS: usize = 32;
+const FP_REG_SIZE: usize = 8; // 64-bit registers
+const FP_REGS_SIZE: usize = NUM_FP_REGS * FP_REG_SIZE; // 256 bytes total
+
 const USER_REGS_PTR: *mut u32 = 0xffff_0080 as *mut u32;
 const MEPC_PTR: *mut usize = 0xffff_0200 as *mut usize;
+// Floating point register storage area (32 x 64-bit registers = 256 bytes)
+const FP_REGS_PTR: *mut u64 = 0xfff_4000 as *mut u64;
+// Floating point control and status register (FCSR) storage
+const FCSR_PTR: *mut u32 = 0xfff_4100 as *mut u32;
 const USER_START_PTR: *const usize = 0x0001_0000 as *const usize;
 const USER_STACK_ADDR: usize = 0xbfff_0000;
 const USER_STACK_PTR: *const usize = USER_STACK_ADDR as *const usize;
@@ -94,6 +103,777 @@ fn get_ureg(idx: usize) -> u32 {
 
 fn set_ureg(idx: usize, word: u32) {
     unsafe { USER_REGS_PTR.add(idx).write_volatile(word) };
+}
+
+fn get_fp_reg(idx: usize) -> u64 {
+    unsafe { FP_REGS_PTR.add(idx).read() }
+}
+
+fn set_fp_reg(idx: usize, value: u64) {
+    unsafe { FP_REGS_PTR.add(idx).write_volatile(value) };
+}
+
+fn init_fp_regs() {
+    // Initialize all floating point registers to zero
+    for i in 0..NUM_FP_REGS {
+        set_fp_reg(i, 0);
+    }
+}
+
+// FCSR (Floating Point Control and Status Register) access functions
+fn get_fcsr() -> u32 {
+    unsafe { FCSR_PTR.read() }
+}
+
+fn set_fcsr(value: u32) {
+    unsafe { FCSR_PTR.write_volatile(value) };
+}
+
+fn get_fflags() -> u32 {
+    get_fcsr() & 0x1F // Lower 5 bits are the exception flags
+}
+
+fn set_fflags(value: u32) {
+    let fcsr = get_fcsr();
+    set_fcsr((fcsr & !0x1F) | (value & 0x1F));
+}
+
+fn get_frm() -> u32 {
+    (get_fcsr() >> 5) & 0x7 // Bits 5-7 are the rounding mode
+}
+
+fn set_frm(value: u32) {
+    let fcsr = get_fcsr();
+    set_fcsr((fcsr & !0xE0) | ((value & 0x7) << 5));
+}
+
+// Floating point register access macros (similar to riscv-pk)
+fn get_fp_reg_from_insn(insn: u32, pos: u32) -> u64 {
+    let reg_idx = ((insn >> (pos - 3)) & 0xf8) as usize;
+    get_fp_reg(reg_idx)
+}
+
+fn set_fp_reg_from_insn(insn: u32, pos: u32, value: u64) {
+    let reg_idx = ((insn >> (pos - 3)) & 0xf8) as usize;
+    set_fp_reg(reg_idx, value);
+}
+
+// Floating point register access for specific instruction fields
+fn get_f32_rs1(insn: u32) -> u32 {
+    get_fp_reg_from_insn(insn, 15) as u32
+}
+
+fn get_f32_rs2(insn: u32) -> u32 {
+    get_fp_reg_from_insn(insn, 20) as u32
+}
+
+fn get_f32_rs3(insn: u32) -> u32 {
+    get_fp_reg_from_insn(insn, 27) as u32
+}
+
+fn get_f64_rs1(insn: u32) -> u64 {
+    get_fp_reg_from_insn(insn, 15)
+}
+
+fn get_f64_rs2(insn: u32) -> u64 {
+    get_fp_reg_from_insn(insn, 20)
+}
+
+fn get_f64_rs3(insn: u32) -> u64 {
+    get_fp_reg_from_insn(insn, 27)
+}
+
+fn set_f32_rd(insn: u32, value: u32) {
+    set_fp_reg_from_insn(insn, 7, value as u64);
+}
+
+fn set_f64_rd(insn: u32, value: u64) {
+    set_fp_reg_from_insn(insn, 7, value);
+}
+
+// Floating point instruction precision and rounding mode extraction
+fn get_precision(insn: u32) -> u32 {
+    (insn >> 25) & 3
+}
+
+fn get_rm(insn: u32) -> u32 {
+    (insn >> 12) & 7
+}
+
+const PRECISION_S: u32 = 0; // Single precision (32-bit)
+const PRECISION_D: u32 = 1; // Double precision (64-bit)
+
+// Main floating point emulation function
+unsafe fn emulate_fp_instruction(insn: u32, mepc: usize) -> ! {
+    let funct7 = (insn >> 25) & 0x7f;
+    let funct3 = (insn >> 12) & 0x7;
+    let rd = (insn >> 7) & 0x1f;
+    let rs1 = (insn >> 15) & 0x1f;
+    let rs2 = (insn >> 20) & 0x1f;
+
+    let msg = str_format!(
+        str256,
+        "Emulating FP instruction at PC: {:#010x}, funct7={:#02x}, funct3={}, rd={}, rs1={}, rs2={}",
+        mepc, funct7, funct3, rd, rs1, rs2
+    );
+    print(&msg);
+
+    // Floating point registers should be initialized at startup, not on every instruction
+
+    // Dispatch based on funct7 (main opcode for floating point instructions)
+    match funct7 {
+        0x00 => emulate_fadd(insn),    // FADD
+        0x04 => emulate_fsub(insn),    // FSUB
+        0x08 => emulate_fmul(insn),    // FMUL
+        0x0c => emulate_fdiv(insn),    // FDIV
+        0x10 => emulate_fsgnj(insn),   // FSGNJ
+        0x14 => emulate_fmin(insn),    // FMIN
+        0x2c => emulate_fsqrt(insn),   // FSQRT
+        0x50 => emulate_fcmp(insn),    // FCMP (FEQ, FLT, FLE)
+        0x60 => emulate_fcvt_if(insn), // FCVT (float to int)
+        0x68 => emulate_fcvt_fi(insn), // FCVT (int to float)
+        0x70 => emulate_fmv_if(insn),  // FMV (float to int)
+        0x78 => emulate_fmv_fi(insn),  // FMV (int to float)
+        _ => {
+            let msg = str_format!(str256, "Unsupported FP instruction: funct7={:#02x}", funct7);
+            print(&msg);
+            host_terminate(1, 0);
+        }
+    }
+}
+
+// Floating point arithmetic operations
+fn emulate_fadd(insn: u32) -> ! {
+    let precision = get_precision(insn);
+
+    if precision == PRECISION_S {
+        let rs1 = get_f32_rs1(insn);
+        let rs2 = get_f32_rs2(insn);
+        // For now, just do simple addition (we'll need proper softfloat later)
+        let result = rs1.wrapping_add(rs2);
+        set_f32_rd(insn, result);
+    } else if precision == PRECISION_D {
+        let rs1 = get_f64_rs1(insn);
+        let rs2 = get_f64_rs2(insn);
+        // For now, just do simple addition (we'll need proper softfloat later)
+        let result = rs1.wrapping_add(rs2);
+        set_f64_rd(insn, result);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+fn emulate_fsub(insn: u32) -> ! {
+    let precision = get_precision(insn);
+
+    if precision == PRECISION_S {
+        let rs1 = get_f32_rs1(insn);
+        let rs2 = get_f32_rs2(insn);
+        // For now, just do simple subtraction (we'll need proper softfloat later)
+        let result = rs1.wrapping_sub(rs2);
+        set_f32_rd(insn, result);
+    } else if precision == PRECISION_D {
+        let rs1 = get_f64_rs1(insn);
+        let rs2 = get_f64_rs2(insn);
+        // For now, just do simple subtraction (we'll need proper softfloat later)
+        let result = rs1.wrapping_sub(rs2);
+        set_f64_rd(insn, result);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+fn emulate_fmul(insn: u32) -> ! {
+    let precision = get_precision(insn);
+
+    if precision == PRECISION_S {
+        let rs1 = get_f32_rs1(insn);
+        let rs2 = get_f32_rs2(insn);
+        // For now, just do simple multiplication (we'll need proper softfloat later)
+        let result = rs1.wrapping_mul(rs2);
+        set_f32_rd(insn, result);
+    } else if precision == PRECISION_D {
+        let rs1 = get_f64_rs1(insn);
+        let rs2 = get_f64_rs2(insn);
+        // For now, just do simple multiplication (we'll need proper softfloat later)
+        let result = rs1.wrapping_mul(rs2);
+        set_f64_rd(insn, result);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+fn emulate_fdiv(insn: u32) -> ! {
+    let precision = get_precision(insn);
+
+    if precision == PRECISION_S {
+        let rs1 = get_f32_rs1(insn);
+        let rs2 = get_f32_rs2(insn);
+        // For now, just do simple division (we'll need proper softfloat later)
+        let result = if rs2 != 0 { rs1 / rs2 } else { 0 };
+        set_f32_rd(insn, result);
+    } else if precision == PRECISION_D {
+        let rs1 = get_f64_rs1(insn);
+        let rs2 = get_f64_rs2(insn);
+        // For now, just do simple division (we'll need proper softfloat later)
+        let result = if rs2 != 0 { rs1 / rs2 } else { 0 };
+        set_f64_rd(insn, result);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+fn emulate_fsgnj(insn: u32) -> ! {
+    let precision = get_precision(insn);
+    let rm = get_rm(insn);
+
+    if precision == PRECISION_S {
+        let rs1 = get_f32_rs1(insn);
+        let rs2 = get_f32_rs2(insn);
+        // Simple sign manipulation (we'll need proper softfloat later)
+        let result = match rm {
+            0 => (rs1 & 0x7fffffff) | (rs2 & 0x80000000),  // fsgnj
+            1 => (rs1 & 0x7fffffff) | (!rs2 & 0x80000000), // fsgnjn
+            2 => (rs1 & 0x7fffffff) | ((rs1 ^ rs2) & 0x80000000), // fsgnjx
+            _ => {
+                let msg = str_format!(str256, "Unsupported fsgnj rm: {}", rm);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+        };
+        set_f32_rd(insn, result);
+    } else if precision == PRECISION_D {
+        let rs1 = get_f64_rs1(insn);
+        let rs2 = get_f64_rs2(insn);
+        // Simple sign manipulation (we'll need proper softfloat later)
+        let result = match rm {
+            0 => (rs1 & 0x7fffffffffffffff) | (rs2 & 0x8000000000000000), // fsgnj
+            1 => (rs1 & 0x7fffffffffffffff) | (!rs2 & 0x8000000000000000), // fsgnjn
+            2 => (rs1 & 0x7fffffffffffffff) | ((rs1 ^ rs2) & 0x8000000000000000), // fsgnjx
+            _ => {
+                let msg = str_format!(str256, "Unsupported fsgnj rm: {}", rm);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+        };
+        set_f64_rd(insn, result);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+fn emulate_fmin(insn: u32) -> ! {
+    let precision = get_precision(insn);
+    let rm = get_rm(insn);
+
+    if precision == PRECISION_S {
+        let rs1 = get_f32_rs1(insn);
+        let rs2 = get_f32_rs2(insn);
+        // Simple min/max (we'll need proper softfloat later)
+        let result = match rm {
+            0 => {
+                if rs1 < rs2 {
+                    rs1
+                } else {
+                    rs2
+                }
+            } // fmin
+            1 => {
+                if rs1 > rs2 {
+                    rs1
+                } else {
+                    rs2
+                }
+            } // fmax
+            _ => {
+                let msg = str_format!(str256, "Unsupported fmin rm: {}", rm);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+        };
+        set_f32_rd(insn, result);
+    } else if precision == PRECISION_D {
+        let rs1 = get_f64_rs1(insn);
+        let rs2 = get_f64_rs2(insn);
+        // Simple min/max (we'll need proper softfloat later)
+        let result = match rm {
+            0 => {
+                if rs1 < rs2 {
+                    rs1
+                } else {
+                    rs2
+                }
+            } // fmin
+            1 => {
+                if rs1 > rs2 {
+                    rs1
+                } else {
+                    rs2
+                }
+            } // fmax
+            _ => {
+                let msg = str_format!(str256, "Unsupported fmin rm: {}", rm);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+        };
+        set_f64_rd(insn, result);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+fn emulate_fsqrt(insn: u32) -> ! {
+    let precision = get_precision(insn);
+
+    if precision == PRECISION_S {
+        let rs1 = get_f32_rs1(insn);
+        // For now, just return the input (we'll need proper softfloat later)
+        set_f32_rd(insn, rs1);
+    } else if precision == PRECISION_D {
+        let rs1 = get_f64_rs1(insn);
+        // For now, just return the input (we'll need proper softfloat later)
+        set_f64_rd(insn, rs1);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+fn emulate_fcmp(insn: u32) -> ! {
+    let precision = get_precision(insn);
+    let rm = get_rm(insn);
+    let rd = (insn >> 7) & 0x1f;
+
+    if precision == PRECISION_S {
+        let rs1 = get_f32_rs1(insn);
+        let rs2 = get_f32_rs2(insn);
+        let result = match rm {
+            0 => {
+                if rs1 == rs2 {
+                    1
+                } else {
+                    0
+                }
+            } // feq
+            1 => {
+                if rs1 < rs2 {
+                    1
+                } else {
+                    0
+                }
+            } // flt
+            2 => {
+                if rs1 <= rs2 {
+                    1
+                } else {
+                    0
+                }
+            } // fle
+            _ => {
+                let msg = str_format!(str256, "Unsupported fcmp rm: {}", rm);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+        };
+        set_ureg(rd as usize, result);
+    } else if precision == PRECISION_D {
+        let rs1 = get_f64_rs1(insn);
+        let rs2 = get_f64_rs2(insn);
+        let result = match rm {
+            0 => {
+                if rs1 == rs2 {
+                    1
+                } else {
+                    0
+                }
+            } // feq
+            1 => {
+                if rs1 < rs2 {
+                    1
+                } else {
+                    0
+                }
+            } // flt
+            2 => {
+                if rs1 <= rs2 {
+                    1
+                } else {
+                    0
+                }
+            } // fle
+            _ => {
+                let msg = str_format!(str256, "Unsupported fcmp rm: {}", rm);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+        };
+        set_ureg(rd as usize, result as u32);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+fn emulate_fcvt_if(insn: u32) -> ! {
+    // Float to integer conversion
+    let precision = get_precision(insn);
+    #[allow(unused_variables)]
+    let rs2 = (insn >> 20) & 0x1f;
+    let rd = (insn >> 7) & 0x1f;
+
+    if precision == PRECISION_S {
+        let rs1 = get_f32_rs1(insn);
+        // For now, just use the value directly (we'll need proper softfloat later)
+        set_ureg(rd as usize, rs1);
+    } else if precision == PRECISION_D {
+        let rs1 = get_f64_rs1(insn);
+        // For now, just cast (we'll need proper softfloat later)
+        let result = rs1 as u32;
+        set_ureg(rd as usize, result);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+fn emulate_fcvt_fi(insn: u32) -> ! {
+    // Integer to float conversion
+    let precision = get_precision(insn);
+    let rs1_idx = (insn >> 15) & 0x1f;
+    let rs1 = get_ureg(rs1_idx as usize);
+
+    if precision == PRECISION_S {
+        // For now, just cast (we'll need proper softfloat later)
+        set_f32_rd(insn, rs1);
+    } else if precision == PRECISION_D {
+        // For now, just cast (we'll need proper softfloat later)
+        set_f64_rd(insn, rs1 as u64);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+fn emulate_fmv_if(insn: u32) -> ! {
+    // Float to integer move
+    let precision = get_precision(insn);
+    let rd = (insn >> 7) & 0x1f;
+
+    if precision == PRECISION_S {
+        let rs1 = get_f32_rs1(insn);
+        set_ureg(rd as usize, rs1);
+    } else if precision == PRECISION_D {
+        let rs1 = get_f64_rs1(insn);
+        set_ureg(rd as usize, rs1 as u32);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+fn emulate_fmv_fi(insn: u32) -> ! {
+    // Integer to float move
+    let precision = get_precision(insn);
+    let rs1_idx = (insn >> 15) & 0x1f;
+    let rs1 = get_ureg(rs1_idx as usize);
+
+    if precision == PRECISION_S {
+        set_f32_rd(insn, rs1);
+    } else if precision == PRECISION_D {
+        set_f64_rd(insn, rs1 as u64);
+    } else {
+        let msg = str_format!(str256, "Unsupported precision: {}", precision);
+        print(&msg);
+        host_terminate(1, 0);
+    }
+
+    mret()
+}
+
+// Floating point load/store emulation
+unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
+    let funct3 = (insn >> 12) & 0x7;
+    let rd = (insn >> 7) & 0x1f;
+    let rs1 = (insn >> 15) & 0x1f;
+
+    // Extract immediate for I-type instructions (loads)
+    let imm_i = ((insn as i32) >> 20) as u32;
+
+    // Calculate address: rs1 + immediate
+    let base_addr = get_ureg(rs1 as usize);
+    let addr = base_addr.wrapping_add(imm_i);
+
+    let msg = str_format!(
+        str256,
+        "Emulating FP load/store at PC: {:#010x}, funct3={}, rd={}, rs1={}, addr={:#010x}",
+        mepc,
+        funct3,
+        rd,
+        rs1,
+        addr
+    );
+    print(&msg);
+
+    match funct3 {
+        0x2 => {
+            // flw - floating point load word (32-bit)
+            // Check 4-byte alignment
+            if addr % 4 != 0 {
+                let msg = str_format!(str256, "Address misaligned for flw: {:#010x}", addr);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+
+            // Load 32-bit value from memory
+            let value = (addr as *const u32).read_volatile();
+
+            // Store in floating point register (as 32-bit in 64-bit register)
+            set_f32_rd(insn, value);
+
+            let msg = str_format!(str256, "flw: loaded {:#010x} into f{}", value, rd);
+            print(&msg);
+        }
+        0x3 => {
+            // fld - floating point load double (64-bit)
+            // Check 8-byte alignment
+            if addr % 8 != 0 {
+                let msg = str_format!(str256, "Address misaligned for fld: {:#010x}", addr);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+
+            // Load 64-bit value from memory
+            let value = (addr as *const u64).read_volatile();
+
+            // Store in floating point register
+            set_f64_rd(insn, value);
+
+            let msg = str_format!(str256, "fld: loaded {:#016x} into f{}", value, rd);
+            print(&msg);
+        }
+        _ => {
+            let msg = str_format!(str256, "Unsupported FP load/store funct3: {}", funct3);
+            print(&msg);
+            host_terminate(1, 0);
+        }
+    }
+
+    mret()
+}
+
+// CSR (Control and Status Register) emulation
+unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
+    let funct3 = (insn >> 12) & 0x7;
+    let rd = (insn >> 7) & 0x1f;
+    let rs1 = (insn >> 15) & 0x1f;
+    let csr_addr = (insn >> 20) & 0xfff;
+
+    let msg = str_format!(
+        str256,
+        "Emulating CSR instruction at PC: {:#010x}, funct3={}, rd={}, rs1={}, csr={:#03x}",
+        mepc,
+        funct3,
+        rd,
+        rs1,
+        csr_addr
+    );
+    print(&msg);
+
+    // Handle floating point CSR operations
+    match csr_addr {
+        0x001 => {
+            // fflags - Floating point exception flags
+            match funct3 {
+                0x1 => {
+                    // csrrw (read and write) - fsflags rs1, fflags
+                    let current_flags = get_fflags();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_fflags(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_flags);
+
+                    let msg = str_format!(
+                        str256,
+                        "fsflags: read flags {:#02x}, wrote {:#02x}",
+                        current_flags,
+                        if rs1 != 0 { get_ureg(rs1 as usize) } else { 0 }
+                    );
+                    print(&msg);
+                }
+                0x2 => {
+                    // csrrs (read and set) - fsflags rs1, fflags
+                    let current_flags = get_fflags();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_fflags(current_flags | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_flags);
+
+                    let msg = str_format!(str256, "fsflags: read flags {:#02x}", current_flags);
+                    print(&msg);
+                }
+                0x3 => {
+                    // csrrc (read and clear) - fsflags rs1, fflags
+                    let current_flags = get_fflags();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_fflags(current_flags & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_flags);
+
+                    let msg = str_format!(
+                        str256,
+                        "fsflags: read flags {:#02x}, cleared {:#02x}",
+                        current_flags,
+                        if rs1 != 0 { get_ureg(rs1 as usize) } else { 0 }
+                    );
+                    print(&msg);
+                }
+                0x5 => {
+                    // csrrwi (read and write immediate) - fsflags uimm, fflags
+                    let current_flags = get_fflags();
+                    let imm = rs1; // In csrrwi, rs1 field contains the immediate
+                    set_fflags(imm);
+                    set_ureg(rd as usize, current_flags);
+
+                    let msg = str_format!(
+                        str256,
+                        "fsflags: read flags {:#02x}, wrote immediate {:#02x}",
+                        current_flags,
+                        imm
+                    );
+                    print(&msg);
+                }
+                0x6 => {
+                    // csrrsi (read and set immediate) - fsflags uimm, fflags
+                    let current_flags = get_fflags();
+                    let imm = rs1; // In csrrsi, rs1 field contains the immediate
+                    set_fflags(current_flags | imm);
+                    set_ureg(rd as usize, current_flags);
+
+                    let msg = str_format!(
+                        str256,
+                        "fsflags: read flags {:#02x}, set immediate {:#02x}",
+                        current_flags,
+                        imm
+                    );
+                    print(&msg);
+                }
+                0x7 => {
+                    // csrrci (read and clear immediate) - fsflags uimm, fflags
+                    let current_flags = get_fflags();
+                    let imm = rs1; // In csrrci, rs1 field contains the immediate
+                    set_fflags(current_flags & !imm);
+                    set_ureg(rd as usize, current_flags);
+
+                    let msg = str_format!(
+                        str256,
+                        "fsflags: read flags {:#02x}, clear immediate {:#02x}",
+                        current_flags,
+                        imm
+                    );
+                    print(&msg);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported fflags funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        0x002 => {
+            // frm - Floating point rounding mode
+            match funct3 {
+                0x2 => {
+                    // csrrs (read and set) - fsrm rs1, frm
+                    let current_frm = get_frm();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_frm(current_frm | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_frm);
+
+                    let msg = str_format!(str256, "fsrm: read frm {:#02x}", current_frm);
+                    print(&msg);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported frm funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        0x003 => {
+            // fcsr - Floating point control and status register
+            match funct3 {
+                0x2 => {
+                    // csrrs (read and set) - fscsr rs1, fcsr
+                    let current_fcsr = get_fcsr();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_fcsr(current_fcsr | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_fcsr);
+
+                    let msg = str_format!(str256, "fscsr: read fcsr {:#02x}", current_fcsr);
+                    print(&msg);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported fcsr funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        _ => {
+            let msg = str_format!(str256, "Unsupported CSR address: {:#03x}", csr_addr);
+            print(&msg);
+            host_terminate(1, 0);
+        }
+    }
+
+    mret()
 }
 
 #[allow(unused)]
@@ -207,6 +987,13 @@ unsafe extern "C" fn kstart() -> ! {
     let block: &[u8] = core::slice::from_raw_parts(USER_HEAP_START_PTR, USER_HEAP_SIZE);
     #[allow(static_mut_refs)]
     HEAP.insert_free_block_ptr(block.into());
+
+    // Initialize floating point registers to zero at startup
+    init_fp_regs();
+
+    // Initialize FCSR to zero at startup
+    set_fcsr(0);
+
     print("return from kstart");
     mret()
 }
@@ -275,6 +1062,21 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
         let msg = str_format!(str256, "Emulating fence instruction at PC: {:#010x}", mepc);
         print(&msg);
         mret()
+    }
+
+    // Check for floating point operations (opcode 0x53)
+    if opcode == 0x53 {
+        return emulate_fp_instruction(instruction, mepc);
+    }
+
+    // Check for floating point load/store operations (opcode 0x07)
+    if opcode == 0x07 {
+        return emulate_fp_load_store(instruction, mepc);
+    }
+
+    // Check for CSR operations (opcode 0x73)
+    if opcode == 0x73 {
+        return emulate_csr_instruction(instruction, mepc);
     }
 
     // Check for RV32A atomic memory operations
