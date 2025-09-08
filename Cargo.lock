@@ -2725,6 +2725,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4445909572dbd556c457c849c4ca58623d84b27c8fff1e74b0b4227d8b90d17b"
 
 [[package]]
+name = "elf-to-bin"
+version = "0.1.0"
+dependencies = [
+ "clap 4.5.37",
+ "risc0-binfmt",
+]
+
+[[package]]
 name = "embedded-alloc"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

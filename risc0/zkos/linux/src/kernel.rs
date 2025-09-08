@@ -468,8 +468,8 @@ fn sys_ioctl(fd: u32, _cmd: u32, arg: u32) -> Result<u32, Err> {
 
 /// https://man7.org/linux/man-pages/man2/_exit.2.html
 fn sys_exit(error_code: u32) -> Result<u32, Err> {
-    // let msg = str_format!(str256, "sys_exit({error_code})");
-    // print(&msg);
+    let msg = str_format!(str256, "sys_exit({error_code})");
+    print(&msg);
     host_terminate(error_code, 0);
 }
 
