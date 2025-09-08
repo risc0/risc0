@@ -1694,6 +1694,21 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     let msg = str_format!(str256, "fsrm: read frm {:#02x}", current_frm);
                     print(&msg);
                 }
+                0x5 => {
+                    // csrrwi (read and write immediate) - fsrm rs1, frm
+                    let current_frm = get_frm();
+                    let immediate_value = rs1; // rs1 field contains the immediate value
+                    set_frm(immediate_value);
+                    set_ureg(rd as usize, current_frm);
+
+                    let msg = str_format!(
+                        str256,
+                        "fsrm: csrrwi frm {:#02x} -> {:#02x}",
+                        current_frm,
+                        immediate_value
+                    );
+                    print(&msg);
+                }
                 _ => {
                     let msg = str_format!(str256, "Unsupported frm funct3: {}", funct3);
                     print(&msg);
@@ -1704,6 +1719,21 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
         0x003 => {
             // fcsr - Floating point control and status register
             match funct3 {
+                0x1 => {
+                    // csrrw (read and write) - fscsr rs1, fcsr
+                    let current_fcsr = get_fcsr();
+                    let rs1_value = get_ureg(rs1 as usize);
+                    set_fcsr(rs1_value);
+                    set_ureg(rd as usize, current_fcsr);
+
+                    let msg = str_format!(
+                        str256,
+                        "fscsr: csrrw fcsr {:#02x} -> {:#02x}",
+                        current_fcsr,
+                        rs1_value
+                    );
+                    print(&msg);
+                }
                 0x2 => {
                     // csrrs (read and set) - fscsr rs1, fcsr
                     let current_fcsr = get_fcsr();
@@ -1714,6 +1744,21 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_ureg(rd as usize, current_fcsr);
 
                     let msg = str_format!(str256, "fscsr: read fcsr {:#02x}", current_fcsr);
+                    print(&msg);
+                }
+                0x5 => {
+                    // csrrwi (read and write immediate) - fscsr rs1, fcsr
+                    let current_fcsr = get_fcsr();
+                    let immediate_value = rs1; // rs1 field contains the immediate value
+                    set_fcsr(immediate_value);
+                    set_ureg(rd as usize, current_fcsr);
+
+                    let msg = str_format!(
+                        str256,
+                        "fscsr: csrrwi fcsr {:#02x} -> {:#02x}",
+                        current_fcsr,
+                        immediate_value
+                    );
                     print(&msg);
                 }
                 _ => {
