@@ -21,7 +21,8 @@ use softfloat_sys::{
     f32_to_i32, f64_add, f64_div, f64_eq, f64_le, f64_lt, f64_mul, f64_mulAdd, f64_sqrt, f64_sub,
     f64_to_f32, f64_to_i32, float32_t, float64_t, i32_to_f32, i32_to_f64,
     softfloat_exceptionFlags_read_helper, softfloat_exceptionFlags_write_helper,
-    softfloat_roundingMode_read_helper, softfloat_roundingMode_write_helper,
+    softfloat_roundingMode_read_helper, softfloat_roundingMode_write_helper, ui32_to_f32,
+    ui32_to_f64,
 };
 
 const REG_SP: usize = 2;
@@ -105,10 +106,18 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
 }
 
 fn get_ureg(idx: usize) -> u32 {
+    // x0 (register 0) should always return 0
+    if idx == 0 {
+        return 0;
+    }
     unsafe { USER_REGS_PTR.add(idx).read() }
 }
 
 fn set_ureg(idx: usize, word: u32) {
+    // Guard against writing to x0 (register 0) - it should always remain 0
+    if idx == 0 {
+        return;
+    }
     unsafe { USER_REGS_PTR.add(idx).write_volatile(word) };
 }
 
@@ -162,12 +171,12 @@ fn set_frm(value: u32) {
 
 // Floating point register access macros (similar to riscv-pk)
 fn get_fp_reg_from_insn(insn: u32, pos: u32) -> u64 {
-    let reg_idx = ((insn >> (pos - 3)) & 0xf8) as usize;
+    let reg_idx = ((insn >> pos) & 0x1f) as usize;
     get_fp_reg(reg_idx)
 }
 
 fn set_fp_reg_from_insn(insn: u32, pos: u32, value: u64) {
-    let reg_idx = ((insn >> (pos - 3)) & 0xf8) as usize;
+    let reg_idx = ((insn >> pos) & 0x1f) as usize;
     set_fp_reg(reg_idx, value);
 }
 
@@ -201,6 +210,14 @@ fn set_f32_rd(insn: u32, value: u32) {
 }
 
 fn set_f64_rd(insn: u32, value: u64) {
+    let rd = (insn >> 7) & 0x1f;
+    let msg_debug = str_format!(
+        str256,
+        "DEBUG: set_f64_rd: storing {:#016x} to f{}",
+        value,
+        rd
+    );
+    print(&msg_debug);
     set_fp_reg_from_insn(insn, 7, value);
 }
 
@@ -623,8 +640,8 @@ fn emulate_fcmp(insn: u32) -> ! {
         let f32_rs2 = float32_t { v: rs2 };
         let result = match rm {
             0 => {
-                // feq - floating point equal
-                if unsafe { f32_eq(f32_rs1, f32_rs2) } {
+                // fle - floating point less than or equal
+                if unsafe { f32_le(f32_rs1, f32_rs2) } {
                     1
                 } else {
                     0
@@ -639,8 +656,8 @@ fn emulate_fcmp(insn: u32) -> ! {
                 }
             }
             2 => {
-                // fle - floating point less than or equal
-                if unsafe { f32_le(f32_rs1, f32_rs2) } {
+                // feq - floating point equal
+                if unsafe { f32_eq(f32_rs1, f32_rs2) } {
                     1
                 } else {
                     0
@@ -660,8 +677,8 @@ fn emulate_fcmp(insn: u32) -> ! {
         let f64_rs2 = float64_t { v: rs2 };
         let result = match rm {
             0 => {
-                // feq - floating point equal
-                if unsafe { f64_eq(f64_rs1, f64_rs2) } {
+                // fle - floating point less than or equal
+                if unsafe { f64_le(f64_rs1, f64_rs2) } {
                     1
                 } else {
                     0
@@ -676,8 +693,8 @@ fn emulate_fcmp(insn: u32) -> ! {
                 }
             }
             2 => {
-                // fle - floating point less than or equal
-                if unsafe { f64_le(f64_rs1, f64_rs2) } {
+                // feq - floating point equal
+                if unsafe { f64_eq(f64_rs1, f64_rs2) } {
                     1
                 } else {
                     0
@@ -731,23 +748,73 @@ fn emulate_fcvt_if(insn: u32) -> ! {
 fn emulate_fcvt_fi(insn: u32) -> ! {
     // Integer to float conversion
     let precision = get_precision(insn);
+    let funct3 = (insn >> 12) & 0x7;
+    let rs2 = (insn >> 20) & 0x1f; // rs2 field determines signed vs unsigned
     let rs1_idx = (insn >> 15) & 0x1f;
     let rs1 = get_ureg(rs1_idx as usize);
     let _rounding_mode = get_frm() as u8;
 
+    // Clear softfloat exception flags before operation
+    unsafe { softfloat_exceptionFlags_write_helper(0) };
+
+    let msg = str_format!(
+        str256,
+        "fcvt_fi: insn={:#010x}, precision={}, funct3={}, rs2={}, rs1={:#010x}",
+        insn,
+        precision,
+        funct3,
+        rs2,
+        rs1
+    );
+    print(&msg);
+
     if precision == PRECISION_S {
-        // Use proper softfloat conversion
-        let result = unsafe { i32_to_f32(rs1 as i32) };
+        // Single precision output
+        let result = match rs2 {
+            0 => {
+                // W - signed word (32-bit)
+                unsafe { i32_to_f32(rs1 as i32) }
+            }
+            1 => {
+                // WU - unsigned word (32-bit)
+                unsafe { ui32_to_f32(rs1 as u32) }
+            }
+            _ => {
+                let msg = str_format!(str256, "Unsupported fcvt rs2: {}", rs2);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+        };
         set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
-        // Use proper softfloat conversion
-        let result = unsafe { i32_to_f64(rs1 as i32) };
+        // Double precision output
+        let result = match rs2 {
+            0 => {
+                // W - signed word (32-bit)
+                unsafe { i32_to_f64(rs1 as i32) }
+            }
+            1 => {
+                // WU - unsigned word (32-bit)
+                unsafe { ui32_to_f64(rs1 as u32) }
+            }
+            _ => {
+                let msg = str_format!(str256, "Unsupported fcvt rs2: {}", rs2);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+        };
         set_f64_rd(insn, result.v);
+        let msg = str_format!(str256, "fcvt_fi: result={:#016x}", result.v);
+        print(&msg);
     } else {
         let msg = str_format!(str256, "Unsupported precision: {}", precision);
         print(&msg);
         host_terminate(1, 0);
     }
+
+    // Sync softfloat exception flags with FCSR
+    let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+    set_fflags(softfloat_flags as u32);
 
     mret()
 }
@@ -1046,12 +1113,22 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             }
 
             // Get 64-bit value from floating point register
+            let msg_debug = str_format!(str256, "DEBUG: About to read from f{} (rs2={})", rs2, rs2);
+            print(&msg_debug);
             let value = get_f64_rs2(insn);
+            let msg_debug2 = str_format!(str256, "DEBUG: Read value {:#016x} from f{}", value, rs2);
+            print(&msg_debug2);
 
             // Store 64-bit value to memory
             (addr as *mut u64).write_volatile(value);
 
-            let msg = str_format!(str256, "fsd: stored {:#016x} from f{}", value, rs2);
+            let msg = str_format!(
+                str256,
+                "fsd: stored {:#016x} from f{} at addr {:#010x}",
+                value,
+                rs2,
+                addr
+            );
             print(&msg);
         }
         _ => {
@@ -1380,8 +1457,19 @@ fn mret() -> ! {
 unsafe extern "C" fn ecall_dispatch() -> ! {
     let nr = get_ureg(REG_A7);
 
-    let msg = str_format!(str256, "syscall: {nr}");
+    let msg = str_format!(str256, "syscall: {nr} (a7={})", get_ureg(17));
     print(&msg);
+
+    // Debug: check all registers around a7
+    let msg2 = str_format!(
+        str256,
+        "DEBUG: a5={}, a6={}, a7={}, s0={}",
+        get_ureg(15),
+        get_ureg(16),
+        get_ureg(17),
+        get_ureg(18)
+    );
+    print(&msg2);
     match nr {
         SYS_IOCTL => syscall3(sys_ioctl),
         SYS_READ => syscall3(sys_read),
