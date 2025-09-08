@@ -682,6 +682,58 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
                 mret()
             }
+            (0x2, 0x1c) => {
+                // amomaxu.w - atomic memory operation: maximum word (unsigned)
+                let msg = str_format!(
+                    str256,
+                    "Emulating amomaxu.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
+                    mepc,
+                    rd,
+                    rs1,
+                    rs2
+                );
+                print(&msg);
+
+                // Get address from rs1 register
+                let addr = get_ureg(rs1 as usize);
+
+                // Check alignment (4-byte aligned for 32-bit words)
+                if addr % 4 != 0 {
+                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+
+                // Read current value from memory
+                let current_value = (addr as *const u32).read_volatile();
+
+                // Get value to compare from rs2 register
+                let compare_value = get_ureg(rs2 as usize);
+
+                // Perform atomic maximum operation (unsigned comparison)
+                let new_value = if current_value > compare_value {
+                    current_value
+                } else {
+                    compare_value
+                };
+                (addr as *mut u32).write_volatile(new_value);
+
+                // Write original value to rd register
+                // XXX check for rd = 0?
+                set_ureg(rd as usize, current_value);
+
+                let msg = str_format!(
+                    str256,
+                    "emulating amomaxu.w: addr={:#010x}, old={:#010x}, cmp={:#010x}, new={:#010x}",
+                    addr,
+                    current_value,
+                    compare_value,
+                    new_value
+                );
+                print(&msg);
+
+                mret()
+            }
             _ => {
                 // Other atomic operations not implemented yet
                 let msg = str_format!(
