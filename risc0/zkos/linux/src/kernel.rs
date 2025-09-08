@@ -589,21 +589,34 @@ fn emulate_fmin(insn: u32) -> ! {
         host_terminate(1, 0);
     }
 
+    // Clear softfloat flags before operation
+    unsafe {
+        softfloat_exceptionFlags_write_helper(0);
+    };
+
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
         let rs2 = get_f32_rs2(insn);
         let f32_rs1 = float32_t { v: rs1 };
         let f32_rs2 = float32_t { v: rs2 };
 
+        // Check if either operand is NaN
+        let rs1_is_nan = (rs1 & 0x7f800000) == 0x7f800000 && (rs1 & 0x7fffff) != 0;
+        let rs2_is_nan = (rs2 & 0x7f800000) == 0x7f800000 && (rs2 & 0x7fffff) != 0;
+
         // Follow riscv-pk approach: use proper floating-point comparison
         let arg1 = if rm == 1 { f32_rs2 } else { f32_rs1 };
         let arg2 = if rm == 1 { f32_rs1 } else { f32_rs2 };
 
-        // Check if rs2 is NaN - if so, return rs1
-        let is_rs2_nan = unsafe { f32_isSignalingNaN(f32_rs2) } || (rs2 != rs2);
-        let use_rs1 = unsafe { f32_lt_quiet(arg1, arg2) } || is_rs2_nan;
-
+        // riscv-pk logic: use_rs1 = f32_lt_quiet(arg1, arg2) || isNaNF32UI(rs2)
+        let use_rs1 = unsafe { f32_lt_quiet(arg1, arg2) } || rs2_is_nan;
+        
         let result = if use_rs1 { rs1 } else { rs2 };
+
+        // Update FCSR with softfloat flags
+        let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+        set_fflags(softfloat_flags as u32);
+
         set_f32_rd(insn, result);
     } else if precision == PRECISION_D {
         let rs1 = get_f64_rs1(insn);
@@ -611,15 +624,81 @@ fn emulate_fmin(insn: u32) -> ! {
         let f64_rs1 = float64_t { v: rs1 };
         let f64_rs2 = float64_t { v: rs2 };
 
-        // Follow riscv-pk approach: use proper floating-point comparison
-        let arg1 = if rm == 1 { f64_rs2 } else { f64_rs1 };
-        let arg2 = if rm == 1 { f64_rs1 } else { f64_rs2 };
+        // Check if either operand is NaN
+        let rs1_is_nan =
+            (rs1 & 0x7ff0000000000000) == 0x7ff0000000000000 && (rs1 & 0xfffffffffffff) != 0;
+        let rs2_is_nan =
+            (rs2 & 0x7ff0000000000000) == 0x7ff0000000000000 && (rs2 & 0xfffffffffffff) != 0;
 
-        // Check if rs2 is NaN - if so, return rs1
-        let is_rs2_nan = unsafe { f64_isSignalingNaN(f64_rs2) } || (rs2 != rs2);
-        let use_rs1 = unsafe { f64_lt_quiet(arg1, arg2) } || is_rs2_nan;
+        // Special case: if both operands are NaN, return canonical NaN (test expectation)
+        let result = if rs1_is_nan && rs2_is_nan {
+            0x7ff8000000000000 // canonical NaN
+        } else {
+            // Special case: handle signed zeros
+            let rs1_is_zero = (rs1 & 0x7fffffffffffffff) == 0;
+            let rs2_is_zero = (rs2 & 0x7fffffffffffffff) == 0;
+            
+            if rs1_is_zero && rs2_is_zero {
+                // Both are zeros, for fmin return the negative zero, for fmax return the positive zero
+                if rm == 0 { // fmin
+                    if rs1 == 0x8000000000000000 || rs2 == 0x8000000000000000 {
+                        0x8000000000000000 // return negative zero
+                    } else {
+                        0x0000000000000000 // return positive zero
+                    }
+                } else { // fmax
+                    if rs1 == 0x0000000000000000 || rs2 == 0x0000000000000000 {
+                        0x0000000000000000 // return positive zero
+                    } else {
+                        0x8000000000000000 // return negative zero
+                    }
+                }
+            } else {
+                // Follow riscv-pk approach: use proper floating-point comparison
+                let arg1 = if rm == 1 { f64_rs2 } else { f64_rs1 };
+                let arg2 = if rm == 1 { f64_rs1 } else { f64_rs2 };
 
-        let result = if use_rs1 { rs1 } else { rs2 };
+                // riscv-pk logic: use_rs1 = f64_lt_quiet(arg1, arg2) || isNaNF64UI(rs2)
+                let use_rs1 = unsafe { f64_lt_quiet(arg1, arg2) } || rs2_is_nan;
+                if use_rs1 {
+                    rs1
+                } else {
+                    rs2
+                }
+            }
+        };
+
+        // Update FCSR with softfloat flags
+        let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+        // Debug: print flags for NaN test
+        if rs1_is_nan || rs2_is_nan {
+            let msg = str_format!(
+                str256,
+                "fmin/fmax NaN: rs1={:x} rs2={:x} result={:x} flags={}",
+                rs1,
+                rs2,
+                result,
+                softfloat_flags
+            );
+            print(&msg);
+        }
+        // Debug: print for zero test
+        if (rs1 == 0x8000000000000000 && rs2 == 0x0000000000000000)
+            || (rs1 == 0x0000000000000000 && rs2 == 0x8000000000000000)
+        {
+            let msg = str_format!(
+                str256,
+                "fmin/fmax zero: rs1=0x{:x}, rs2=0x{:x}, result=0x{:x}, rm={}, flags={}",
+                rs1,
+                rs2,
+                result,
+                rm,
+                softfloat_flags
+            );
+            print(&msg);
+        }
+        set_fflags(softfloat_flags as u32);
+
         set_f64_rd(insn, result);
     } else {
         let msg = str_format!(str256, "Unsupported fmin/fmax precision: {}", precision);
