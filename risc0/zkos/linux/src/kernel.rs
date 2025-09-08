@@ -18,9 +18,9 @@ use no_std_strings::{str256, str_format};
 use rlsf::Tlsf;
 use softfloat_sys::{
     f32_add, f32_div, f32_eq, f32_le, f32_lt, f32_mul, f32_mulAdd, f32_sqrt, f32_sub, f32_to_f64,
-    f32_to_i32, f64_add, f64_div, f64_eq, f64_le, f64_lt, f64_mul, f64_mulAdd, f64_sqrt, f64_sub,
-    f64_to_f32, f64_to_i32, float32_t, float64_t, i32_to_f32, i32_to_f64,
-    softfloat_exceptionFlags_read_helper, softfloat_exceptionFlags_write_helper,
+    f32_to_i32, f32_to_ui32, f64_add, f64_div, f64_eq, f64_le, f64_lt, f64_mul, f64_mulAdd,
+    f64_sqrt, f64_sub, f64_to_f32, f64_to_i32, f64_to_ui32, float32_t, float64_t, i32_to_f32,
+    i32_to_f64, softfloat_exceptionFlags_read_helper, softfloat_exceptionFlags_write_helper,
     softfloat_roundingMode_read_helper, softfloat_roundingMode_write_helper, ui32_to_f32,
     ui32_to_f64,
 };
@@ -719,23 +719,99 @@ fn emulate_fcmp(insn: u32) -> ! {
 fn emulate_fcvt_if(insn: u32) -> ! {
     // Float to integer conversion
     let precision = get_precision(insn);
-    #[allow(unused_variables)]
-    let rs2 = (insn >> 20) & 0x1f;
+    let funct3 = (insn >> 12) & 0x7; // This is the rounding mode (rm)
     let rd = (insn >> 7) & 0x1f;
-    let rounding_mode = get_frm() as u8;
+    let rs2 = (insn >> 20) & 0x1f; // This determines signed (0) vs unsigned (1) conversion
+                                   // Use funct3 as rounding mode if it's not 111 (DYN), otherwise use FRM
+    let rounding_mode = if funct3 == 7 {
+        get_frm() as u8
+    } else {
+        funct3 as u8
+    };
+
+    // Clear softfloat exception flags and sync rounding mode before conversion
+    unsafe {
+        softfloat_exceptionFlags_write_helper(0);
+        softfloat_roundingMode_write_helper(rounding_mode);
+    }
+
+    let msg = str_format!(
+        str256,
+        "fcvt_if: insn={:#010x}, precision={}, rs2={}, rd={}, rounding_mode={}",
+        insn,
+        precision,
+        rs2,
+        rd,
+        rounding_mode
+    );
+    print(&msg);
 
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
         let f32_rs1 = float32_t { v: rs1 };
-        // Use proper softfloat conversion
-        let result = unsafe { f32_to_i32(f32_rs1, rounding_mode, true) };
-        set_ureg(rd as usize, result as u32);
+        let result = match rs2 {
+            0 => {
+                // fcvt.w.s - signed 32-bit conversion
+                unsafe { f32_to_i32(f32_rs1, rounding_mode, true) as u32 }
+            }
+            1 => {
+                // fcvt.wu.s - unsigned 32-bit conversion
+                // Follow riscv-pk approach: use softfloat directly and let it handle special cases
+                unsafe { f32_to_ui32(f32_rs1, rounding_mode, true) as u32 }
+            }
+            _ => {
+                let msg = str_format!(str256, "Unsupported fcvt rs2: {}", rs2);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+        };
+        set_ureg(rd as usize, result);
+
+        // Sync softfloat exception flags with FCSR for single precision
+        let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+        set_fflags(softfloat_flags as u32);
     } else if precision == PRECISION_D {
+        let rs1_reg = (insn >> 15) & 0x1f;
         let rs1 = get_f64_rs1(insn);
         let f64_rs1 = float64_t { v: rs1 };
-        // Use proper softfloat conversion
-        let result = unsafe { f64_to_i32(f64_rs1, rounding_mode, true) };
-        set_ureg(rd as usize, result as u32);
+        let msg = str_format!(
+            str256,
+            "fcvt_if: rs1_reg={}, double input value: {:#016x}",
+            rs1_reg,
+            rs1
+        );
+        print(&msg);
+        let result = match rs2 {
+            0 => {
+                // fcvt.w.d - signed 32-bit conversion
+                unsafe { f64_to_i32(f64_rs1, rounding_mode, true) as u32 }
+            }
+            1 => {
+                // fcvt.wu.d - unsigned 32-bit conversion
+                // Follow riscv-pk approach: use softfloat directly and let it handle special cases
+                unsafe { f64_to_ui32(f64_rs1, rounding_mode, true) as u32 }
+            }
+            _ => {
+                let msg = str_format!(str256, "Unsupported fcvt rs2: {}", rs2);
+                print(&msg);
+                host_terminate(1, 0);
+            }
+        };
+        set_ureg(rd as usize, result);
+        let msg = str_format!(str256, "fcvt_if: result={:#010x}", result);
+        print(&msg);
+
+        // Sync softfloat exception flags with FCSR for double precision
+        let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+        set_fflags(softfloat_flags as u32);
+        let msg = str_format!(
+            str256,
+            "fcvt_if: result={:#08x}, softfloat_flags={:#02x}, fcsr_flags={:#02x}",
+            result,
+            softfloat_flags,
+            get_fflags()
+        );
+        print(&msg);
     } else {
         let msg = str_format!(str256, "Unsupported precision: {}", precision);
         print(&msg);
@@ -815,6 +891,13 @@ fn emulate_fcvt_fi(insn: u32) -> ! {
     // Sync softfloat exception flags with FCSR
     let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
     set_fflags(softfloat_flags as u32);
+    let msg = str_format!(
+        str256,
+        "fcvt_if: softfloat_flags={:#02x}, fcsr_flags={:#02x}",
+        softfloat_flags,
+        get_fflags()
+    );
+    print(&msg);
 
     mret()
 }
