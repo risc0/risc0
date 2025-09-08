@@ -260,11 +260,89 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
     // Read the instruction as a u32
     let instruction = (mepc as *const u32).read_volatile();
 
+    // Decode instruction fields
+    let opcode = instruction & 0x0000007f;
+    let rd = (instruction & 0x00000f80) >> 7;
+    let rs1 = (instruction & 0x000f8000) >> 15;
+    let rs2 = (instruction & 0x01f00000) >> 20;
+    let funct3 = (instruction & 0x00007000) >> 12;
+    let funct7 = (instruction & 0xfe000000) >> 25;
+
     // Check if this is a fence instruction (0x0ff0000f)
     if instruction == 0x0ff0000f {
         // Fence instruction - treat as null-op and continue
         // mret will automatically increment MEPC by 4, so we don't need to do anything
+        let msg = str_format!(str256, "Emulating fence instruction at PC: {:#010x}", mepc);
+        print(&msg);
         mret()
+    }
+
+    // Check for RV32A atomic memory operations
+    if opcode == 0x2f {
+        let funct5 = (funct7 & 0b1111100) >> 2;
+        let _aq = (funct7 & 0b0000010) >> 1; // acquire access
+        let _rl = funct7 & 0b0000001; // release access
+
+        match (funct3, funct5) {
+            (0x2, 0x00) => {
+                // amoadd.w - atomic memory operation: add word
+                let msg = str_format!(
+                    str256,
+                    "Emulating amoadd.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
+                    mepc,
+                    rd,
+                    rs1,
+                    rs2
+                );
+                print(&msg);
+
+                // Get address from rs1 register
+                let addr = get_ureg(rs1 as usize);
+
+                // Check alignment (4-byte aligned for 32-bit words)
+                if addr % 4 != 0 {
+                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+
+                // Read current value from memory
+                let current_value = (addr as *const u32).read_volatile();
+
+                // Get value to add from rs2 register
+                let add_value = get_ureg(rs2 as usize);
+
+                // Perform atomic add operation
+                let new_value = current_value.wrapping_add(add_value);
+                (addr as *mut u32).write_volatile(new_value);
+
+                // Write original value to rd register
+                // XXX check for rd = 0?
+                set_ureg(rd as usize, current_value);
+
+                let msg = str_format!(
+                    str256,
+                    "emulating amoadd.w: addr={:#010x}, old={:#010x}, add={:#010x}, new={:#010x}",
+                    addr,
+                    current_value,
+                    add_value,
+                    new_value
+                );
+                print(&msg);
+
+                mret()
+            }
+            _ => {
+                // Other atomic operations not implemented yet
+                let msg = str_format!(
+                    str256,
+                    "Unimplemented atomic operation: funct3={:#x}, funct5={:#x}",
+                    funct3,
+                    funct5
+                );
+                print(&msg);
+            }
+        }
     }
 
     // Log the illegal instruction event
