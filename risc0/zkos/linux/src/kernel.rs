@@ -1013,8 +1013,10 @@ fn emulate_fmv_if(insn: u32) -> ! {
     let precision = get_precision(insn);
     let rd = (insn >> 7) & 0x1f;
     let rs2 = (insn >> 20) & 0x1f;
+    let funct7 = (insn >> 25) & 0x7f;
+    let funct3 = (insn >> 12) & 0x7;
 
-    if rs2 == 0 {
+    if rs2 == 0 && funct7 == 0x70 && funct3 == 0x1 {
         // fclass instruction
         if precision == PRECISION_S {
             let rs1 = get_f32_rs1(insn);
@@ -1026,6 +1028,19 @@ fn emulate_fmv_if(insn: u32) -> ! {
             set_ureg(rd as usize, classification as u32);
         } else {
             let msg = str_format!(str256, "Unsupported fclass precision: {}", precision);
+            print(&msg);
+            host_terminate(1, 0);
+        }
+    } else if rs2 == 0 && funct7 == 0x70 && funct3 == 0x0 {
+        // fmv.x instruction - Float to integer move
+        if precision == PRECISION_S {
+            let rs1 = get_f32_rs1(insn);
+            set_ureg(rd as usize, rs1);
+        } else if precision == PRECISION_D {
+            let rs1 = get_f64_rs1(insn);
+            set_ureg(rd as usize, rs1 as u32);
+        } else {
+            let msg = str_format!(str256, "Unsupported fmv.x precision: {}", precision);
             print(&msg);
             host_terminate(1, 0);
         }
