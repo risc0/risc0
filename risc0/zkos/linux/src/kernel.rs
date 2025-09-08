@@ -252,6 +252,19 @@ unsafe extern "C" fn ecall_dispatch() -> ! {
     mret()
 }
 
+#[no_mangle]
+unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
+    // Get the saved PC from MEPC (where the illegal instruction occurred)
+    let mepc = MEPC_PTR.read_volatile();
+
+    // Log the illegal instruction event
+    let msg = str_format!(str256, "Illegal instruction at PC: {:#010x}", mepc);
+    print(&msg);
+
+    // Terminate the program with error code
+    host_terminate(1, 0);
+}
+
 fn print(msg: &str) {
     let msg = msg.as_bytes();
     host_log(msg.as_ptr(), msg.len());

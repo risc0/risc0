@@ -14,6 +14,7 @@
 
 .equ KSTACK_TOP, 0xfff00000
 .equ ECALL_DISPATCH, 0xffff1000
+.equ TRAP_DISPATCH, 0xffff2000
 
 .section .text
 .global _start
@@ -33,6 +34,13 @@ _start:
     li a1, ECALL_DISPATCH
     sw a0, 0(a1)
 
+    # Initialize the trap dispatch table
+    # Set up IllegalInstruction handler (cause = 2) at TRAP_DISPATCH + 2
+    la a0, _trap_illegal_instruction
+    li a1, TRAP_DISPATCH
+    addi a1, a1, 8  # 2 * 4 bytes (cause 2)
+    sw a0, 0(a1)
+
     tail kstart
 
 _ecall_dispatch:
@@ -40,4 +48,10 @@ _ecall_dispatch:
     li sp, KSTACK_TOP
 
     tail ecall_dispatch
+
+_trap_illegal_instruction:
+    # Set the kernel stack pointer near the top of kernel memory
+    li sp, KSTACK_TOP
+
+    tail illegal_instruction_dispatch
 
