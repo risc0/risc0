@@ -332,6 +332,52 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
                 mret()
             }
+            (0x2, 0x01) => {
+                // amoswap.w - atomic memory operation: swap word
+                let msg = str_format!(
+                    str256,
+                    "Emulating amoswap.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
+                    mepc,
+                    rd,
+                    rs1,
+                    rs2
+                );
+                print(&msg);
+
+                // Get address from rs1 register
+                let addr = get_ureg(rs1 as usize);
+
+                // Check alignment (4-byte aligned for 32-bit words)
+                if addr % 4 != 0 {
+                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+
+                // Read current value from memory
+                let current_value = (addr as *const u32).read_volatile();
+
+                // Get value to swap from rs2 register
+                let swap_value = get_ureg(rs2 as usize);
+
+                // Perform atomic swap operation
+                (addr as *mut u32).write_volatile(swap_value);
+
+                // Write original value to rd register
+                // XXX check for rd = 0?
+                set_ureg(rd as usize, current_value);
+
+                let msg = str_format!(
+                    str256,
+                    "emulating amoswap.w: addr={:#010x}, old={:#010x}, new={:#010x}",
+                    addr,
+                    current_value,
+                    swap_value
+                );
+                print(&msg);
+
+                mret()
+            }
             _ => {
                 // Other atomic operations not implemented yet
                 let msg = str_format!(
