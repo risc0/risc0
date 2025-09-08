@@ -207,7 +207,10 @@ fn get_f64_rs3(insn: u32) -> u64 {
 }
 
 fn set_f32_rd(insn: u32, value: u32) {
-    set_fp_reg_from_insn(insn, 7, value as u64);
+    // According to RISC-V spec, single-precision values stored in double-precision registers
+    // have their upper 32 bits set to 0xffffffff (NaN-boxing)
+    let extended_value = value as u64 | 0xffffffff00000000;
+    set_fp_reg_from_insn(insn, 7, extended_value);
 }
 
 fn set_f64_rd(insn: u32, value: u64) {
