@@ -1243,8 +1243,24 @@ fn emulate_fcvt_ff(insn: u32) -> ! {
     let precision = get_precision(insn);
     let rs2 = (insn >> 20) & 0x1f; // rs2 field indicates conversion type
 
+    let msg = str_format!(
+        str256,
+        "fcvt_ff: insn={:#010x}, precision={}, rs2={}",
+        insn,
+        precision,
+        rs2
+    );
+    print(&msg);
+
+    let rs1 = (insn >> 15) & 0x1f;
+    let rd = (insn >> 7) & 0x1f;
+    let msg2 = str_format!(str256, "fcvt_ff: rs1={}, rd={}", rs1, rd);
+    print(&msg2);
+
     if precision == PRECISION_S {
         // Single precision output - convert from double to single
+        let msg = str_format!(str256, "fcvt_ff: PRECISION_S branch, rs2={}", rs2);
+        print(&msg);
         if rs2 != 1 {
             let msg = str_format!(str256, "Invalid fcvt.s.d: rs2={}", rs2);
             print(&msg);
@@ -1254,12 +1270,21 @@ fn emulate_fcvt_ff(insn: u32) -> ! {
         // Clear softfloat flags before operation
         unsafe { softfloat_exceptionFlags_write_helper(0) };
 
+        // Set rounding mode to RNE (Round to Nearest, ties to Even)
+        unsafe { softfloat_roundingMode_write_helper(0) };
+
         let rs1 = get_f64_rs1(insn);
         let f64_rs1 = float64_t { v: rs1 };
+        let msg3 = str_format!(str256, "fcvt_ff: rs1=0x{:x}", rs1);
+        print(&msg3);
         let result = unsafe { f64_to_f32(f64_rs1) };
+        let msg4 = str_format!(str256, "fcvt_ff: result=0x{:x}", result.v);
+        print(&msg4);
 
         // Update our FCSR with softfloat's flags
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+        let msg5 = str_format!(str256, "fcvt_ff: softfloat_flags=0x{:x}", softfloat_flags);
+        print(&msg5);
         set_fflags(softfloat_flags as u32);
 
         set_f32_rd(insn, result.v);
