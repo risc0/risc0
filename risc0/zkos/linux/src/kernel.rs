@@ -287,6 +287,10 @@ unsafe fn emulate_fp_instruction(insn: u32, mepc: usize) -> ! {
         0x61 => emulate_fcvt_if(insn), // FCVT (double to int)
         0x68 => emulate_fcvt_fi(insn), // FCVT (int to float)
         0x69 => emulate_fcvt_fi(insn), // FCVT (int to double)
+        0x31 => emulate_fmadd(insn),   // FMADD.D (R4-type)
+        0x35 => emulate_fmadd(insn),   // FNMADD.D (R4-type)
+        0x39 => emulate_fmadd(insn),   // FMSUB.D (R4-type)
+        0x3d => emulate_fmadd(insn),   // FNMSUB.D (R4-type)
         0x43 => emulate_fmadd(insn),   // FMADD.S
         0x44 => emulate_fmadd(insn),   // FMADD.D
         0x47 => emulate_fmadd(insn),   // FMSUB.S
@@ -1333,13 +1337,28 @@ fn emulate_fmadd(insn: u32) -> ! {
     let funct7 = (insn >> 25) & 0x7f;
 
     // Determine the operation type based on funct7
-    let (neg_a, neg_c) = match funct7 {
-        0x43 => (false, false), // FMADD:  rs1 * rs2 + rs3
-        0x47 => (false, true),  // FMSUB:  rs1 * rs2 - rs3
-        0x4b => (true, true),   // FNMSUB: -(rs1 * rs2) - rs3
-        0x4f => (true, false),  // FNMADD: -(rs1 * rs2) + rs3
+    // For R4-type instructions, funct7[6:2] contains the operation type
+    let operation_type = (funct7 >> 2) & 0x1f;
+    let msg = str_format!(
+        str256,
+        "fmadd: funct7={:#02x}, operation_type={:#02x}",
+        funct7,
+        operation_type
+    );
+    print(&msg);
+
+    let (neg_a, neg_c) = match operation_type {
+        0x0c => (false, false), // FMADD:  rs1 * rs2 + rs3
+        0x0e => (true, false),  // FNMADD: -(rs1 * rs2) + rs3
+        0x0d => (false, true),  // FMSUB:  rs1 * rs2 - rs3
+        0x0f => (true, true),   // FNMSUB: -(rs1 * rs2) - rs3
         _ => {
-            let msg = str_format!(str256, "Invalid fmadd funct7: {:#02x}", funct7);
+            let msg = str_format!(
+                str256,
+                "Invalid fmadd operation_type: {:#02x} (funct7={:#02x})",
+                operation_type,
+                funct7
+            );
             print(&msg);
             host_terminate(1, 0);
         }
@@ -1368,9 +1387,11 @@ fn emulate_fmadd(insn: u32) -> ! {
 
         set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
+        // For R4-type instructions, field layout is different:
+        // rs1: bits 15-19, rs2: bits 20-24, rs3: bits 7-11, rd: bits 27-31
         let rs1 = get_f64_rs1(insn);
         let rs2 = get_f64_rs2(insn);
-        let rs3 = get_f64_rs3(insn);
+        let rs3 = get_fp_reg_from_insn(insn, 7); // rs3 is in rd field for R4-type
 
         // Apply negation by flipping the sign bit
         let rs1_val = if neg_a { rs1 ^ 0x8000000000000000 } else { rs1 };
@@ -1388,7 +1409,9 @@ fn emulate_fmadd(insn: u32) -> ! {
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
         set_fflags(softfloat_flags as u32);
 
-        set_f64_rd(insn, result.v);
+        // For R4-type instructions, rd is in bits 27-31
+        let rd = (insn >> 27) & 0x1f;
+        set_fp_reg(rd as usize, result.v);
     } else {
         let msg = str_format!(str256, "Unsupported precision for fmadd: {}", precision);
         print(&msg);
@@ -1974,6 +1997,15 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
     let funct3 = (instruction & 0x00007000) >> 12;
     let funct7 = (instruction & 0xfe000000) >> 25;
 
+    let msg = str_format!(
+        str256,
+        "Decoded instruction: {:#08x}, opcode={:#02x}, funct7={:#02x}",
+        instruction,
+        opcode,
+        funct7
+    );
+    print(&msg);
+
     // Check if this is a fence instruction (0x0ff0000f)
     if instruction == 0x0ff0000f {
         // Fence instruction - treat as null-op and continue
@@ -1983,8 +2015,56 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
         mret()
     }
 
+    // Check for floating point operations (opcode 0x43) - R4-type instructions
+    if opcode == 0x43 {
+        let msg = str_format!(
+            str256,
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        print(&msg);
+        return emulate_fp_instruction(instruction, mepc);
+    }
+
+    // Check for floating point operations (opcode 0x47) - R4-type instructions
+    if opcode == 0x47 {
+        let msg = str_format!(
+            str256,
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        print(&msg);
+        return emulate_fp_instruction(instruction, mepc);
+    }
+
+    // Check for floating point operations (opcode 0x4f) - R4-type instructions
+    if opcode == 0x4f {
+        let msg = str_format!(
+            str256,
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        print(&msg);
+        return emulate_fp_instruction(instruction, mepc);
+    }
+
     // Check for floating point operations (opcode 0x53)
     if opcode == 0x53 {
+        return emulate_fp_instruction(instruction, mepc);
+    }
+
+    // Check for floating point operations (opcode 0x63) - alternative encoding
+    if opcode == 0x63 {
+        let msg = str_format!(
+            str256,
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        print(&msg);
         return emulate_fp_instruction(instruction, mepc);
     }
 
