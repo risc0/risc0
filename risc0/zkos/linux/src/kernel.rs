@@ -257,8 +257,23 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
     // Get the saved PC from MEPC (where the illegal instruction occurred)
     let mepc = MEPC_PTR.read_volatile();
 
+    // Read the instruction as a u32
+    let instruction = (mepc as *const u32).read_volatile();
+
+    // Check if this is a fence instruction (0x0ff0000f)
+    if instruction == 0x0ff0000f {
+        // Fence instruction - treat as null-op and continue
+        // mret will automatically increment MEPC by 4, so we don't need to do anything
+        mret()
+    }
+
     // Log the illegal instruction event
-    let msg = str_format!(str256, "Illegal instruction at PC: {:#010x}", mepc);
+    let msg = str_format!(
+        str256,
+        "Illegal instruction at PC: {:#010x}, instr: {:#010x}",
+        mepc,
+        instruction
+    );
     print(&msg);
 
     // Terminate the program with error code
