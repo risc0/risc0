@@ -1,0 +1,383 @@
+// Copyright 2025 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#![allow(dead_code)]
+
+//! This module contains a piece of the actor system known as the "allocator"
+//!
+//! The allocator exists to provide coordination between different versions of r0vm actor clusters.
+//! To support fulfilling proof requests across different r0vm versions, multiple clusters of r0vm
+//! must be run on the same hardware. To handle this scenario the allocator takes care of the
+//! following responsibilities:
+//!
+//! - Routing proof requests to the appropriate versioned r0vm cluster.
+//! - Ensuring that workers which share hardware resources (such as GPUSs) do not schedule jobs
+//!   using said resources simultaneously.
+//!
+//! To accomplish this, the allocator must communicate with managers and workers.
+//!
+//! Workers advertise to the allocator what hardware resources they are using. Managers receive
+//! proof requests from the allocator, and they also talk to the allocator to reserve workers.
+//!
+
+use std::collections::{BTreeMap, HashMap, btree_map, hash_map};
+use std::net::SocketAddr;
+use std::num::NonZeroU32;
+
+use super::protocol::WorkerId;
+use anyhow::{Context as _, anyhow, bail};
+use kameo::{Reply, prelude::*};
+use tokio::net::TcpListener;
+use url::Url;
+use uuid::Uuid;
+
+/// This value is the globally unique immutable alphanumeric identifier of the GPU. It does not
+/// correspond to any physical label on the board.
+pub struct GpuUuid(Uuid);
+
+impl std::str::FromStr for GpuUuid {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> anyhow::Result<Self> {
+        let rest = s
+            .strip_prefix("GPU-")
+            .ok_or_else(|| anyhow!("UUID doesn't start with GPU-"))?;
+        Ok(Self(Uuid::from_str(rest)?))
+    }
+}
+
+/// Represents a GPU on some machine.
+pub struct Gpu {
+    /// The name of the GPU for logging purposes
+    name: String,
+    /// A globally unique ID representing the GPU.
+    uuid: GpuUuid,
+}
+
+/// Represents a CPU on some machine.
+pub struct Cpu {
+    /// The name of the CPU for logging purposes
+    name: String,
+    /// The number of cores this CPU has.
+    cores: u32,
+    /// The base clock speed of the CPU in Mhz.
+    speed_mhz: u32,
+}
+
+pub enum HardwareResource {
+    Gpu(Gpu),
+    Cpu(Cpu),
+}
+
+pub struct MachineId {
+    ip: std::net::IpAddr,
+}
+
+/// Description of a hardware resource to reserve while a worker is allocated.
+enum HardwareReservation {
+    /// A single GPU is reserved.
+    Gpu,
+    /// A portion of a CPU is reserved.
+    Cpu { reserved_cores: NonZeroU32 },
+}
+
+/// The allocator's representation of a worker.
+struct Worker {
+    machine: MachineId,
+    hardware: Vec<HardwareResource>,
+}
+
+/// Reply when a worker is successfully allocated.
+#[derive(Reply)]
+struct AllocateWorkerReply {
+    worker_id: WorkerId,
+}
+
+struct Manager {
+    endpoint: Url,
+}
+
+async fn send_api_request(_endpoint: Url, _req: ApiRequest) -> anyhow::Result<ApiResponse> {
+    todo!()
+}
+
+pub struct AllocatorActor {
+    workers: HashMap<WorkerId, Worker>,
+    managers: BTreeMap<semver::Version, Manager>,
+}
+
+impl AllocatorActor {
+    pub fn new() -> Self {
+        Self {
+            workers: HashMap::new(),
+            managers: BTreeMap::new(),
+        }
+    }
+}
+
+impl Actor for AllocatorActor {
+    type Error = std::convert::Infallible;
+
+    async fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
+        Ok(())
+    }
+}
+
+/// Request to register a worker with the allocator.
+struct RegisterWorker {
+    worker_id: WorkerId,
+    machine: MachineId,
+    hardware: Vec<HardwareResource>,
+}
+
+impl Message<RegisterWorker> for AllocatorActor {
+    type Reply = anyhow::Result<()>;
+
+    async fn handle(
+        &mut self,
+        msg: RegisterWorker,
+        _ctx: &mut Context<Self, Self::Reply>,
+    ) -> anyhow::Result<()> {
+        if let hash_map::Entry::Vacant(e) = self.workers.entry(msg.worker_id) {
+            e.insert(Worker {
+                machine: msg.machine,
+                hardware: msg.hardware,
+            });
+        } else {
+            bail!(
+                "duplicate registration from worker {} at {}",
+                msg.worker_id,
+                msg.machine.ip
+            );
+        }
+        Ok(())
+    }
+}
+
+/// Allocate a worker from the given eligibility pool. While the worker is allocated, another
+/// worker using the same hardware represented by `hardware_reservation` won't be allocated.
+struct AllocateWorker {
+    pool: Vec<WorkerId>,
+    hardware_reservations: Vec<HardwareReservation>,
+}
+
+impl Message<AllocateWorker> for AllocatorActor {
+    type Reply = DelegatedReply<AllocateWorkerReply>;
+
+    async fn handle(
+        &mut self,
+        _msg: AllocateWorker,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        let (delegated_reply, _reply_sender) = ctx.reply_sender();
+        // todo
+        delegated_reply
+    }
+}
+
+/// The given worker is now free again to accept other work.
+struct DeallocateWorker {
+    worker_id: WorkerId,
+}
+
+impl Message<DeallocateWorker> for AllocatorActor {
+    type Reply = ();
+
+    async fn handle(&mut self, _msg: DeallocateWorker, _ctx: &mut Context<Self, Self::Reply>) {
+        // todo
+    }
+}
+
+struct RegisterManager {
+    zkvm_version: semver::Version,
+    endpoint: Url,
+}
+
+impl Message<RegisterManager> for AllocatorActor {
+    type Reply = anyhow::Result<()>;
+
+    async fn handle(
+        &mut self,
+        msg: RegisterManager,
+        _ctx: &mut Context<Self, Self::Reply>,
+    ) -> anyhow::Result<()> {
+        if let btree_map::Entry::Vacant(e) = self.managers.entry(msg.zkvm_version.clone()) {
+            e.insert(Manager {
+                endpoint: msg.endpoint,
+            });
+        } else {
+            bail!(
+                "duplicate registration for manager with version {}",
+                msg.zkvm_version
+            );
+        }
+        Ok(())
+    }
+}
+
+pub struct ApiRequest {
+    pub request: http::Request<axum::body::Body>,
+}
+
+impl ApiRequest {
+    fn risc0_version(&self) -> anyhow::Result<semver::VersionReq> {
+        let version_value = self
+            .request
+            .headers()
+            .get("x-risc0-version")
+            .ok_or_else(|| anyhow!("request missing `x-risc0-version` header"))?;
+        Ok(version_value.to_str()?.parse()?)
+    }
+}
+
+pub struct ApiResponse {
+    pub response: http::Response<axum::body::Body>,
+}
+
+impl AllocatorActor {
+    fn handle_api_request(
+        &mut self,
+        request: ApiRequest,
+        reply_sender: &mut Option<ReplySender<anyhow::Result<ApiResponse>>>,
+    ) -> anyhow::Result<()> {
+        let version_req = request.risc0_version()?;
+
+        // Find a registered manager which satisfies the given request version.
+        // We prefer versions which are higher.
+        for (manager_version, manager) in self.managers.iter().rev() {
+            if version_req.matches(&manager_version) {
+                let endpoint = manager.endpoint.clone();
+                let reply_sender = reply_sender.take();
+                tokio::task::spawn(async move {
+                    if let Some(reply_sender) = reply_sender {
+                        reply_sender.send(send_api_request(endpoint, request).await)
+                    }
+                });
+                return Ok(());
+            }
+        }
+
+        bail!("no manager found to satisfy request with requirement {version_req}");
+    }
+}
+
+impl Message<ApiRequest> for AllocatorActor {
+    type Reply = DelegatedReply<anyhow::Result<ApiResponse>>;
+
+    async fn handle(
+        &mut self,
+        request: ApiRequest,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        let (delegated_reply, mut reply_sender) = ctx.reply_sender();
+        if let Err(error) = self.handle_api_request(request, &mut reply_sender)
+            && let Some(reply_sender) = reply_sender
+        {
+            reply_sender.send(Err(error));
+        }
+        delegated_reply
+    }
+}
+
+#[axum::debug_handler]
+async fn proxy_handler(
+    axum::extract::State(allocator): axum::extract::State<ActorRef<AllocatorActor>>,
+    request: http::Request<axum::body::Body>,
+) -> http::Response<axum::body::Body> {
+    allocator
+        .ask(ApiRequest { request })
+        .await
+        .unwrap()
+        .response
+}
+
+fn proxy_app(allocator: ActorRef<AllocatorActor>) -> axum::Router {
+    use axum::routing::*;
+
+    // This attempts to be a complete list of HTTP methods we would ever support.
+    axum::Router::new()
+        .route(
+            "/r0vm",
+            get(proxy_handler)
+                .post(proxy_handler)
+                .put(proxy_handler)
+                .delete(proxy_handler)
+                .patch(proxy_handler)
+                .options(proxy_handler)
+                .trace(proxy_handler)
+                .head(proxy_handler),
+        )
+        .with_state(allocator)
+}
+
+/// Runs HTTP proxy that forwards to all registered managers. The particular manager is selected
+/// via the `x-risc0-version` header.
+pub async fn run_proxy(
+    addr: SocketAddr,
+    allocator: ActorRef<AllocatorActor>,
+) -> anyhow::Result<()> {
+    let listener = TcpListener::bind(addr).await?;
+    tracing::info!("Allocator API listening on: {}", listener.local_addr()?);
+
+    axum::serve(listener, proxy_app(allocator))
+        .with_graceful_shutdown(crate::api::shutdown_signal())
+        .await
+        .context("Allocator API service failed")?;
+
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum_test::TestServer;
+    use httpmock::MockServer;
+
+    struct TestManager {
+        server: MockServer,
+    }
+
+    impl TestManager {
+        fn new() -> Self {
+            let server = MockServer::start();
+            Self { server }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_it() {
+        let manager = TestManager::new();
+
+        let alloc_ref = AllocatorActor::spawn(AllocatorActor::new());
+
+        alloc_ref
+            .ask(RegisterManager {
+                zkvm_version: semver::Version::new(1, 2, 3),
+                endpoint: manager.url("/"),
+            })
+            .await
+            .unwrap();
+
+        let proxy = TestServer::new(proxy_app(alloc_ref)).unwrap();
+
+        let hello_mock = manager.server.mock(|when, then| {
+            when.path("/hello");
+            then.status(200);
+        });
+        let response = proxy.get("/r0vm/hello").await.unwrap();
+        assert_eq!(response.status(), 200);
+
+        hello_mock.assert();
+    }
+}
