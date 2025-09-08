@@ -608,10 +608,39 @@ fn emulate_fmin(insn: u32) -> ! {
         let arg1 = if rm == 1 { f32_rs2 } else { f32_rs1 };
         let arg2 = if rm == 1 { f32_rs1 } else { f32_rs2 };
 
-        // riscv-pk logic: use_rs1 = f32_lt_quiet(arg1, arg2) || isNaNF32UI(rs2)
-        let use_rs1 = unsafe { f32_lt_quiet(arg1, arg2) } || rs2_is_nan;
-        
-        let result = if use_rs1 { rs1 } else { rs2 };
+        // Special case: handle signed zeros
+        let rs1_is_zero = (rs1 & 0x7fffffff) == 0;
+        let rs2_is_zero = (rs2 & 0x7fffffff) == 0;
+
+        let result = if rs1_is_nan && rs2_is_nan {
+            // Special case: if both operands are NaN, return canonical NaN (test expectation)
+            0x7fc00000 // canonical NaN for single precision
+        } else if rs1_is_zero && rs2_is_zero {
+            // Both are zeros, for fmin return the negative zero, for fmax return the positive zero
+            if rm == 0 {
+                // fmin
+                if rs1 == 0x80000000 || rs2 == 0x80000000 {
+                    0x80000000 // return negative zero
+                } else {
+                    0x00000000 // return positive zero
+                }
+            } else {
+                // fmax
+                if rs1 == 0x00000000 || rs2 == 0x00000000 {
+                    0x00000000 // return positive zero
+                } else {
+                    0x80000000 // return negative zero
+                }
+            }
+        } else {
+            // riscv-pk logic: use_rs1 = f32_lt_quiet(arg1, arg2) || isNaNF32UI(rs2)
+            let use_rs1 = unsafe { f32_lt_quiet(arg1, arg2) } || rs2_is_nan;
+            if use_rs1 {
+                rs1
+            } else {
+                rs2
+            }
+        };
 
         // Update FCSR with softfloat flags
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
@@ -637,16 +666,18 @@ fn emulate_fmin(insn: u32) -> ! {
             // Special case: handle signed zeros
             let rs1_is_zero = (rs1 & 0x7fffffffffffffff) == 0;
             let rs2_is_zero = (rs2 & 0x7fffffffffffffff) == 0;
-            
+
             if rs1_is_zero && rs2_is_zero {
                 // Both are zeros, for fmin return the negative zero, for fmax return the positive zero
-                if rm == 0 { // fmin
+                if rm == 0 {
+                    // fmin
                     if rs1 == 0x8000000000000000 || rs2 == 0x8000000000000000 {
                         0x8000000000000000 // return negative zero
                     } else {
                         0x0000000000000000 // return positive zero
                     }
-                } else { // fmax
+                } else {
+                    // fmax
                     if rs1 == 0x0000000000000000 || rs2 == 0x0000000000000000 {
                         0x0000000000000000 // return positive zero
                     } else {
