@@ -16,6 +16,13 @@ use core::{alloc::Layout, ptr::NonNull};
 
 use no_std_strings::{str256, str_format};
 use rlsf::Tlsf;
+use softfloat_sys::{
+    f32_add, f32_div, f32_eq, f32_le, f32_lt, f32_mul, f32_sqrt, f32_sub, f32_to_i32, f64_add,
+    f64_div, f64_eq, f64_le, f64_lt, f64_mul, f64_sqrt, f64_sub, f64_to_i32, float32_t, float64_t,
+    i32_to_f32, i32_to_f64, softfloat_exceptionFlags_read_helper,
+    softfloat_exceptionFlags_write_helper, softfloat_roundingMode_read_helper,
+    softfloat_roundingMode_write_helper,
+};
 
 const REG_SP: usize = 2;
 const REG_A0: usize = 10;
@@ -121,30 +128,36 @@ fn init_fp_regs() {
 }
 
 // FCSR (Floating Point Control and Status Register) access functions
+// These integrate with softfloat's global state
 fn get_fcsr() -> u32 {
-    unsafe { FCSR_PTR.read() }
+    let fflags = unsafe { softfloat_exceptionFlags_read_helper() } as u32;
+    let frm = unsafe { softfloat_roundingMode_read_helper() } as u32;
+    fflags | (frm << 5)
 }
 
 fn set_fcsr(value: u32) {
-    unsafe { FCSR_PTR.write_volatile(value) };
+    let fflags = value & 0x1F;
+    let frm = (value >> 5) & 0x7;
+    unsafe {
+        softfloat_exceptionFlags_write_helper(fflags as u8);
+        softfloat_roundingMode_write_helper(frm as u8);
+    }
 }
 
 fn get_fflags() -> u32 {
-    get_fcsr() & 0x1F // Lower 5 bits are the exception flags
+    (unsafe { softfloat_exceptionFlags_read_helper() }) as u32
 }
 
 fn set_fflags(value: u32) {
-    let fcsr = get_fcsr();
-    set_fcsr((fcsr & !0x1F) | (value & 0x1F));
+    unsafe { softfloat_exceptionFlags_write_helper((value & 0x1F) as u8) };
 }
 
 fn get_frm() -> u32 {
-    (get_fcsr() >> 5) & 0x7 // Bits 5-7 are the rounding mode
+    (unsafe { softfloat_roundingMode_read_helper() }) as u32
 }
 
 fn set_frm(value: u32) {
-    let fcsr = get_fcsr();
-    set_fcsr((fcsr & !0xE0) | ((value & 0x7) << 5));
+    unsafe { softfloat_roundingMode_write_helper((value & 0x7) as u8) };
 }
 
 // Floating point register access macros (similar to riscv-pk)
@@ -249,15 +262,40 @@ fn emulate_fadd(insn: u32) -> ! {
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
         let rs2 = get_f32_rs2(insn);
-        // For now, just do simple addition (we'll need proper softfloat later)
-        let result = rs1.wrapping_add(rs2);
-        set_f32_rd(insn, result);
+        // Use proper softfloat addition
+        let f32_rs1 = float32_t { v: rs1 };
+        let f32_rs2 = float32_t { v: rs2 };
+        let result = unsafe { f32_add(f32_rs1, f32_rs2) };
+
+        // Check if result is NaN and normalize to canonical NaN if needed
+        let normalized_result =
+            if (result.v & 0x7f800000) == 0x7f800000 && (result.v & 0x007fffff) != 0 {
+                // This is a NaN, normalize to canonical quiet NaN
+                0x7fc00000
+            } else {
+                result.v
+            };
+
+        set_f32_rd(insn, normalized_result);
     } else if precision == PRECISION_D {
         let rs1 = get_f64_rs1(insn);
         let rs2 = get_f64_rs2(insn);
-        // For now, just do simple addition (we'll need proper softfloat later)
-        let result = rs1.wrapping_add(rs2);
-        set_f64_rd(insn, result);
+        // Use proper softfloat addition
+        let f64_rs1 = float64_t { v: rs1 };
+        let f64_rs2 = float64_t { v: rs2 };
+        let result = unsafe { f64_add(f64_rs1, f64_rs2) };
+
+        // Check if result is NaN and normalize to canonical NaN if needed
+        let normalized_result = if (result.v & 0x7ff0000000000000) == 0x7ff0000000000000
+            && (result.v & 0x000fffffffffffff) != 0
+        {
+            // This is a NaN, normalize to canonical quiet NaN
+            0x7ff8000000000000
+        } else {
+            result.v
+        };
+
+        set_f64_rd(insn, normalized_result);
     } else {
         let msg = str_format!(str256, "Unsupported precision: {}", precision);
         print(&msg);
@@ -273,15 +311,54 @@ fn emulate_fsub(insn: u32) -> ! {
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
         let rs2 = get_f32_rs2(insn);
-        // For now, just do simple subtraction (we'll need proper softfloat later)
-        let result = rs1.wrapping_sub(rs2);
-        set_f32_rd(insn, result);
+
+        // Clear softfloat flags before operation
+        unsafe { softfloat_exceptionFlags_write_helper(0) };
+
+        // Use proper softfloat subtraction - this will automatically call our custom softfloat_raiseFlags
+        let f32_rs1 = float32_t { v: rs1 };
+        let f32_rs2 = float32_t { v: rs2 };
+        let result = unsafe { f32_sub(f32_rs1, f32_rs2) };
+
+        // Debug: Print operation details
+        let msg = str_format!(
+            str256,
+            "fsub.s: rs1={:#x}, rs2={:#x}, result={:#x}",
+            rs1,
+            rs2,
+            result.v
+        );
+        print(&msg);
+
+        // Check what softfloat set in its internal state
+        let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+        let msg2 = str_format!(str256, "softfloat internal flags: {:#x}", softfloat_flags);
+        print(&msg2);
+
+        // Update our FCSR with softfloat's flags
+        set_fflags(softfloat_flags as u32);
+
+        let msg3 = str_format!(str256, "FCSR after update: {:#x}", get_fflags());
+        print(&msg3);
+
+        set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
         let rs1 = get_f64_rs1(insn);
         let rs2 = get_f64_rs2(insn);
-        // For now, just do simple subtraction (we'll need proper softfloat later)
-        let result = rs1.wrapping_sub(rs2);
-        set_f64_rd(insn, result);
+
+        // Clear softfloat flags before operation
+        unsafe { softfloat_exceptionFlags_write_helper(0) };
+
+        // Use proper softfloat subtraction
+        let f64_rs1 = float64_t { v: rs1 };
+        let f64_rs2 = float64_t { v: rs2 };
+        let result = unsafe { f64_sub(f64_rs1, f64_rs2) };
+
+        // Update our FCSR with softfloat's flags
+        let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+        set_fflags(softfloat_flags as u32);
+
+        set_f64_rd(insn, result.v);
     } else {
         let msg = str_format!(str256, "Unsupported precision: {}", precision);
         print(&msg);
@@ -297,15 +374,54 @@ fn emulate_fmul(insn: u32) -> ! {
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
         let rs2 = get_f32_rs2(insn);
-        // For now, just do simple multiplication (we'll need proper softfloat later)
-        let result = rs1.wrapping_mul(rs2);
-        set_f32_rd(insn, result);
+
+        // Clear softfloat flags before operation
+        unsafe { softfloat_exceptionFlags_write_helper(0) };
+
+        // Use proper softfloat multiplication
+        let f32_rs1 = float32_t { v: rs1 };
+        let f32_rs2 = float32_t { v: rs2 };
+        let result = unsafe { f32_mul(f32_rs1, f32_rs2) };
+
+        // Debug: Print operation details
+        let msg = str_format!(
+            str256,
+            "fmul.s: rs1={:#x}, rs2={:#x}, result={:#x}",
+            rs1,
+            rs2,
+            result.v
+        );
+        print(&msg);
+
+        // Check what softfloat set in its internal state
+        let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+        let msg2 = str_format!(str256, "softfloat internal flags: {:#x}", softfloat_flags);
+        print(&msg2);
+
+        // Update our FCSR with softfloat's flags
+        set_fflags(softfloat_flags as u32);
+
+        let msg3 = str_format!(str256, "FCSR after update: {:#x}", get_fflags());
+        print(&msg3);
+
+        set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
         let rs1 = get_f64_rs1(insn);
         let rs2 = get_f64_rs2(insn);
-        // For now, just do simple multiplication (we'll need proper softfloat later)
-        let result = rs1.wrapping_mul(rs2);
-        set_f64_rd(insn, result);
+
+        // Clear softfloat flags before operation
+        unsafe { softfloat_exceptionFlags_write_helper(0) };
+
+        // Use proper softfloat multiplication
+        let f64_rs1 = float64_t { v: rs1 };
+        let f64_rs2 = float64_t { v: rs2 };
+        let result = unsafe { f64_mul(f64_rs1, f64_rs2) };
+
+        // Update our FCSR with softfloat's flags
+        let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
+        set_fflags(softfloat_flags as u32);
+
+        set_f64_rd(insn, result.v);
     } else {
         let msg = str_format!(str256, "Unsupported precision: {}", precision);
         print(&msg);
@@ -321,15 +437,19 @@ fn emulate_fdiv(insn: u32) -> ! {
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
         let rs2 = get_f32_rs2(insn);
-        // For now, just do simple division (we'll need proper softfloat later)
-        let result = if rs2 != 0 { rs1 / rs2 } else { 0 };
-        set_f32_rd(insn, result);
+        // Use proper softfloat division
+        let f32_rs1 = float32_t { v: rs1 };
+        let f32_rs2 = float32_t { v: rs2 };
+        let result = unsafe { f32_div(f32_rs1, f32_rs2) };
+        set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
         let rs1 = get_f64_rs1(insn);
         let rs2 = get_f64_rs2(insn);
-        // For now, just do simple division (we'll need proper softfloat later)
-        let result = if rs2 != 0 { rs1 / rs2 } else { 0 };
-        set_f64_rd(insn, result);
+        // Use proper softfloat division
+        let f64_rs1 = float64_t { v: rs1 };
+        let f64_rs2 = float64_t { v: rs2 };
+        let result = unsafe { f64_div(f64_rs1, f64_rs2) };
+        set_f64_rd(insn, result.v);
     } else {
         let msg = str_format!(str256, "Unsupported precision: {}", precision);
         print(&msg);
@@ -452,12 +572,16 @@ fn emulate_fsqrt(insn: u32) -> ! {
 
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
-        // For now, just return the input (we'll need proper softfloat later)
-        set_f32_rd(insn, rs1);
+        // Use proper softfloat square root
+        let f32_rs1 = float32_t { v: rs1 };
+        let result = unsafe { f32_sqrt(f32_rs1) };
+        set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
         let rs1 = get_f64_rs1(insn);
-        // For now, just return the input (we'll need proper softfloat later)
-        set_f64_rd(insn, rs1);
+        // Use proper softfloat square root
+        let f64_rs1 = float64_t { v: rs1 };
+        let result = unsafe { f64_sqrt(f64_rs1) };
+        set_f64_rd(insn, result.v);
     } else {
         let msg = str_format!(str256, "Unsupported precision: {}", precision);
         print(&msg);
@@ -475,28 +599,33 @@ fn emulate_fcmp(insn: u32) -> ! {
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
         let rs2 = get_f32_rs2(insn);
+        let f32_rs1 = float32_t { v: rs1 };
+        let f32_rs2 = float32_t { v: rs2 };
         let result = match rm {
             0 => {
-                if rs1 == rs2 {
+                // feq - floating point equal
+                if unsafe { f32_eq(f32_rs1, f32_rs2) } {
                     1
                 } else {
                     0
                 }
-            } // feq
+            }
             1 => {
-                if rs1 < rs2 {
+                // flt - floating point less than
+                if unsafe { f32_lt(f32_rs1, f32_rs2) } {
                     1
                 } else {
                     0
                 }
-            } // flt
+            }
             2 => {
-                if rs1 <= rs2 {
+                // fle - floating point less than or equal
+                if unsafe { f32_le(f32_rs1, f32_rs2) } {
                     1
                 } else {
                     0
                 }
-            } // fle
+            }
             _ => {
                 let msg = str_format!(str256, "Unsupported fcmp rm: {}", rm);
                 print(&msg);
@@ -507,28 +636,33 @@ fn emulate_fcmp(insn: u32) -> ! {
     } else if precision == PRECISION_D {
         let rs1 = get_f64_rs1(insn);
         let rs2 = get_f64_rs2(insn);
+        let f64_rs1 = float64_t { v: rs1 };
+        let f64_rs2 = float64_t { v: rs2 };
         let result = match rm {
             0 => {
-                if rs1 == rs2 {
+                // feq - floating point equal
+                if unsafe { f64_eq(f64_rs1, f64_rs2) } {
                     1
                 } else {
                     0
                 }
-            } // feq
+            }
             1 => {
-                if rs1 < rs2 {
+                // flt - floating point less than
+                if unsafe { f64_lt(f64_rs1, f64_rs2) } {
                     1
                 } else {
                     0
                 }
-            } // flt
+            }
             2 => {
-                if rs1 <= rs2 {
+                // fle - floating point less than or equal
+                if unsafe { f64_le(f64_rs1, f64_rs2) } {
                     1
                 } else {
                     0
                 }
-            } // fle
+            }
             _ => {
                 let msg = str_format!(str256, "Unsupported fcmp rm: {}", rm);
                 print(&msg);
@@ -551,16 +685,20 @@ fn emulate_fcvt_if(insn: u32) -> ! {
     #[allow(unused_variables)]
     let rs2 = (insn >> 20) & 0x1f;
     let rd = (insn >> 7) & 0x1f;
+    let rounding_mode = get_frm() as u8;
 
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
-        // For now, just use the value directly (we'll need proper softfloat later)
-        set_ureg(rd as usize, rs1);
+        let f32_rs1 = float32_t { v: rs1 };
+        // Use proper softfloat conversion
+        let result = unsafe { f32_to_i32(f32_rs1, rounding_mode, true) };
+        set_ureg(rd as usize, result as u32);
     } else if precision == PRECISION_D {
         let rs1 = get_f64_rs1(insn);
-        // For now, just cast (we'll need proper softfloat later)
-        let result = rs1 as u32;
-        set_ureg(rd as usize, result);
+        let f64_rs1 = float64_t { v: rs1 };
+        // Use proper softfloat conversion
+        let result = unsafe { f64_to_i32(f64_rs1, rounding_mode, true) };
+        set_ureg(rd as usize, result as u32);
     } else {
         let msg = str_format!(str256, "Unsupported precision: {}", precision);
         print(&msg);
@@ -575,13 +713,16 @@ fn emulate_fcvt_fi(insn: u32) -> ! {
     let precision = get_precision(insn);
     let rs1_idx = (insn >> 15) & 0x1f;
     let rs1 = get_ureg(rs1_idx as usize);
+    let _rounding_mode = get_frm() as u8;
 
     if precision == PRECISION_S {
-        // For now, just cast (we'll need proper softfloat later)
-        set_f32_rd(insn, rs1);
+        // Use proper softfloat conversion
+        let result = unsafe { i32_to_f32(rs1 as i32) };
+        set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
-        // For now, just cast (we'll need proper softfloat later)
-        set_f64_rd(insn, rs1 as u64);
+        // Use proper softfloat conversion
+        let result = unsafe { i32_to_f64(rs1 as i32) };
+        set_f64_rd(insn, result.v);
     } else {
         let msg = str_format!(str256, "Unsupported precision: {}", precision);
         print(&msg);
@@ -993,6 +1134,12 @@ unsafe extern "C" fn kstart() -> ! {
 
     // Initialize FCSR to zero at startup
     set_fcsr(0);
+
+    // Initialize softfloat library state
+    unsafe {
+        softfloat_roundingMode_write_helper(0); // Round to nearest even
+        softfloat_exceptionFlags_write_helper(0); // Clear all exception flags
+    }
 
     print("return from kstart");
     mret()
