@@ -53,10 +53,8 @@ use tokio::{
 };
 use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::actors::config::default_api_listen_addr;
-
 use self::{
-    config::{AppConfig, ManagerConfig, WorkerConfig},
+    config::{AppConfig, ManagerConfig, VersionConfig, WorkerConfig, default_api_listen_addr},
     factory::{FactoryActor, FactoryRouterActor, RemoteFactoryActor},
     manager::ManagerActor,
     protocol::{
@@ -72,6 +70,11 @@ use self::{
 pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<dyn StdError>> {
     let config: AppConfig = if let Some(ref path) = config_path {
         let str = tokio::fs::read_to_string(path).await?;
+        let version: VersionConfig = toml::from_str(&str)?;
+        let version = version.version;
+        if version != 1 {
+            return Err(anyhow::anyhow!("version {version} not supported").into());
+        }
         toml::from_str(&str)?
     } else {
         AppConfig::default()

@@ -145,7 +145,10 @@ mod tests {
         assert_eq!(
             app,
             AppConfig {
-                api: None,
+                api: Some(ApiConfig {
+                    listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
+                    manager: None,
+                }),
                 manager: Some(ManagerConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap())
                 }),
@@ -158,7 +161,7 @@ mod tests {
                 storage: Some(StorageConfig {
                     path: PathBuf::from_str("/mnt/storage/risc0").unwrap()
                 }),
-                telemetry: None
+                telemetry: Some(TelemetryConfig {})
             }
         );
     }
@@ -173,7 +176,7 @@ mod tests {
                 manager: None,
                 worker: Some(vec![
                     WorkerConfig {
-                        manager: Some(SocketAddr::from_str("1.2.3.4:9000").unwrap()),
+                        manager: Some(SocketAddr::from_str("10.0.3.24:9000").unwrap()),
                         count: None,
                         simulate: None,
                         subscribe: vec![
@@ -186,7 +189,7 @@ mod tests {
                         ]
                     },
                     WorkerConfig {
-                        manager: Some(SocketAddr::from_str("1.2.3.4:9000").unwrap()),
+                        manager: Some(SocketAddr::from_str("10.0.3.24:9000").unwrap()),
                         count: None,
                         simulate: None,
                         subscribe: vec![
@@ -198,7 +201,7 @@ mod tests {
                     }
                 ]),
                 storage: None,
-                telemetry: None
+                telemetry: Some(TelemetryConfig {})
             }
         );
     }
