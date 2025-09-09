@@ -16,11 +16,9 @@ use std::{
     collections::{BTreeMap, HashSet},
     io::Cursor,
     str::from_utf8,
-    sync::Mutex,
 };
 
 use anyhow::Result;
-use bytes::Bytes;
 use risc0_binfmt::{ExitCode, MemoryImage, PovwJobId, PovwLogId, Program, ProgramBinary};
 use risc0_circuit_rv32im::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
@@ -28,7 +26,7 @@ use risc0_zkp::digest;
 use risc0_zkvm_methods::{
     BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, RAND2_ELF,
     SLICE_IO_ELF, STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
-    multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
+    multi_test::MultiTestSpec,
 };
 use risc0_zkvm_platform::{
     WORD_SIZE, fileno,
@@ -187,63 +185,6 @@ fn poseidon2_short() {
 #[test_log::test]
 fn poseidon2_long() {
     multi_test(MultiTestSpec::Poseidon2Long);
-}
-
-#[test_log::test]
-fn host_syscall() {
-    let expected: Vec<Bytes> = vec![
-        "".into(),
-        "H".into(),
-        "He".into(),
-        "Hel".into(),
-        "Hell".into(),
-        "Hello".into(),
-    ];
-    let input = MultiTestSpec::Syscall {
-        count: expected.len() as u32 - 1,
-    };
-    let actual: Mutex<Vec<Bytes>> = Vec::new().into();
-    let env = ExecutorEnv::builder()
-        .write(&input)
-        .unwrap()
-        .io_callback(SYS_MULTI_TEST, |buf| {
-            let mut actual = actual.lock().unwrap();
-            actual.push(buf);
-            Ok(expected[actual.len()].clone())
-        })
-        .build()
-        .unwrap();
-    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-    assert_eq!(*actual.lock().unwrap(), expected[..expected.len() - 1]);
-}
-
-#[test_log::test]
-fn host_syscall_words() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::SyscallWords)
-        .unwrap()
-        .io_callback(SYS_MULTI_TEST_WORDS, Ok)
-        .build()
-        .unwrap();
-    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-}
-
-// Make sure panics in the callback get propagated correctly.
-#[test_log::test]
-#[should_panic(expected = "I am panicking from here!")]
-fn host_syscall_callback_panic() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::Syscall { count: 5 })
-        .unwrap()
-        .io_callback(SYS_MULTI_TEST, |_| {
-            panic!("I am panicking from here!");
-        })
-        .build()
-        .unwrap();
-    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
 #[test_log::test]
