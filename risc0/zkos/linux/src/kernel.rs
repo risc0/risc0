@@ -2082,6 +2082,15 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
         mret()
     }
 
+    // Check if this is a fence.i instruction (0x0000100f)
+    if instruction == 0x0000100f {
+        // Fence.i instruction - treat as null-op and continue
+        // mret will automatically increment MEPC by 4, so we don't need to do anything
+        let msg = str_format!(str256, "Emulating fence.i instruction at PC: {:#010x}", mepc);
+        print(&msg);
+        mret()
+    }
+
     // Check for floating point operations (opcode 0x43) - R4-type instructions
     if opcode == 0x43 {
         let msg = str_format!(
