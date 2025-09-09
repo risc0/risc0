@@ -41,7 +41,7 @@ use config::GuestMetadata;
 use rayon::prelude::*;
 use risc0_binfmt::{KERNEL_START_ADDR, ProgramBinary};
 use risc0_zkp::core::digest::Digest;
-// use risc0_zkvm_platform::memory;
+use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
 use self::{config::GuestInfo, docker::build_guest_package_docker};
@@ -325,8 +325,7 @@ fn guest_methods<G: GuestBuilder>(
     guest_info: &GuestInfo,
     profile: &str,
 ) -> Vec<G> {
-    let target_triple = "riscv32gc-unknown-linux-musl"; // guest_info.options.target();
-    tty_println(format!("{}", target_triple).as_str());
+    let target_triple = guest_info.options.target();
     pkg.targets
         .iter()
         .filter(|target| target.is_bin())
@@ -365,6 +364,15 @@ fn sanitized_cmd(tool: &str) -> Command {
     cmd
 }
 
+fn cpp_toolchain() -> Option<PathBuf> {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, path) = rzup
+        .get_default_version(&rzup::Component::CppToolchain)
+        .unwrap()?;
+    println!("Using C++ toolchain version {version}");
+    Some(path)
+}
+
 /// Creates a std::process::Command to execute the given cargo
 /// command in an environment suitable for targeting the zkvm guest.
 #[stability::unstable]
@@ -376,7 +384,6 @@ pub fn cargo_command(subcmd: &str, rustc_flags: &[String]) -> Command {
 
 pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Command {
     let toolchain = guest_info.options.toolchain();
-    tty_println(format!("toolchain {}", toolchain).as_str());
     let target = guest_info.options.target();
     let rustc = sanitized_cmd("rustup")
         .arg(format!("+{toolchain}"))
@@ -386,12 +393,10 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
         .stdout;
     let rustc = String::from_utf8(rustc).unwrap();
     let rustc = rustc.trim();
-    tty_println(format!("sing rustc: {rustc}").as_str());
+    println!("Using rustc: {rustc}");
 
-    let toolchain_arg = format!("+{toolchain}").clone();
     let mut cmd = sanitized_cmd("cargo");
-    let mut args = vec![toolchain_arg.as_str(), subcmd, "--target", &target];
-    
+    let mut args = vec![subcmd, "--target", &target];
 
     if !get_env_var("RISC0_BUILD_LOCKED").is_empty() {
         args.push("--locked");
@@ -402,16 +407,32 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
         args.push("-Z");
         args.push("build-std=alloc,core,proc_macro,panic_abort,std");
         args.push("-Z");
-        args.push("build-std-features=compiler-builtins-mem,panic_immediate_abort");
-//        cmd.env("__CARGO_TESTS_ONLY_SRC_ROOT", rust_src);
+        args.push("build-std-features=compiler-builtins-mem");
+        cmd.env("__CARGO_TESTS_ONLY_SRC_ROOT", rust_src);
     }
 
     let encoded_rust_flags = encode_rust_flags(guest_info, false);
-    cmd.env("CC", "/home/carsten/buildroot-2025.05.1-ima-musl/output/host/bin/riscv32-buildroot-linux-musl-cc");
-    cmd.env("CARGO_TARGET_RISCV32GC_UNKNOWN_LINUX_MUSL_LINKER", "/home/carsten/buildroot-2025.05.1-ima-musl/output/host/bin/riscv32-linux-gcc");
+
+    if !cpp_toolchain_override() {
+        if let Some(toolchain_path) = cpp_toolchain() {
+            cmd.env("CC", toolchain_path.join("bin/riscv32-unknown-elf-gcc"));
+        } else {
+            // If you aren't compiling any C/C++ code, it might be just fine to not have a C++
+            // toolchain installed, but if you are then your compilation will surely fail. To avoid
+            // a potentially confusing error message, set the CC path to a bogus path that will
+            // hopefully make the issue obvious.
+            cmd.env(
+                "CC",
+                "/no_risc0_cpp_toolchain_installed_run_rzup_install_cpp",
+            );
+        }
+
+        cmd.env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
+
         // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
         // feature is available.
-    cmd.env("RISC0_FEATURE_bigint2", "");
+        cmd.env("RISC0_FEATURE_bigint2", "");
+    }
 
     cmd.env("RUSTC", rustc)
         .env("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags)
@@ -483,24 +504,15 @@ pub(crate) fn encode_rust_flags(guest_info: &GuestInfo, escape_special_chars: bo
     );
 
     // Replace atomic ops with nonatomic versions since the guest is single threaded.
-    rustc_flags.push("-v");
     rustc_flags.push("-C");
     rustc_flags.push(lower_atomic);
-    rustc_flags.push("-C");
-    rustc_flags.push("panic=abort");
-    rustc_flags.push("-C");
-    rustc_flags.push("lto=false");
-    rustc_flags.push("-C");
-    rustc_flags.push("embed-bitcode=false");
-    rustc_flags.push("-C");
-    rustc_flags.push("target-feature=+crt-static");
-    rustc_flags.push("-L/home/carsten/buildroot-2025.05.1-ima-musl/output/host/lib/gcc/riscv32-buildroot-linux-musl/13.4.0");
-    rustc_flags.push("-L/home/carsten/buildroot-2025.05.1-ima-musl/output/host/riscv32-buildroot-linux-musl/sysroot/lib");
-    rustc_flags.push("-L/home/carsten/buildroot-2025.05.1-ima-musl/output/host/riscv32-buildroot-linux-musl/sysroot/usr/lib");
+
     // Apparently not having an entry point is only a linker warning(!), so
     // error out in this case.
+    rustc_flags.push("-C");
+    rustc_flags.push("link-arg=--fatal-warnings");
 
-/*    if guest_options.toolchain() != "risc0-linux" {
+    if guest_options.toolchain() != "risc0-linux" {
         let text_addr = if guest_meta.kernel {
             KERNEL_START_ADDR.0
         } else {
@@ -519,8 +531,15 @@ pub(crate) fn encode_rust_flags(guest_info: &GuestInfo, escape_special_chars: bo
         rustc_flags.push("--cfg");
         rustc_flags.push("getrandom_backend=\"custom\"");
     }
-*/
+
     rustc_flags.to_string()
+}
+
+fn cpp_toolchain_override() -> bool {
+    // detect if there's an attempt to override the Cpp toolchain.
+    // Overriding the toolchain useful for troubleshooting crates.
+    !get_env_var("CC_riscv32im_risc0_zkvm_elf").is_empty()
+        || !get_env_var("CFLAGS_riscv32im_risc0_zkvm_elf").is_empty()
 }
 
 /// Builds a static library providing a rust runtime.
@@ -549,7 +568,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
     let mut cmd = cargo_command_internal("rustc", &guest_info);
 
     if !is_debug() {
-//        cmd.arg("--release");
+        cmd.arg("--release");
     }
 
     // Add args to specify the package to be built, and to build is as a staticlib.
@@ -650,7 +669,7 @@ fn build_guest_package(pkg: &Package, target_dir: impl AsRef<Path>, guest_info: 
     ]);
 
     if !is_debug() {
-//        cmd.args(["--release"]);
+        cmd.args(["--release"]);
     }
 
     let mut child = cmd
@@ -659,7 +678,7 @@ fn build_guest_package(pkg: &Package, target_dir: impl AsRef<Path>, guest_info: 
         .expect("cargo build failed");
     let stderr = child.stderr.take().unwrap();
 
-    tty_println(&format!("{}: Starting builxxd for {target}", pkg.name));
+    tty_println(&format!("{}: Starting build for {target}", pkg.name));
 
     for line in BufReader::new(stderr).lines() {
         tty_println(&format!("{}: {}", pkg.name, line.unwrap()));
@@ -885,7 +904,7 @@ pub fn build_package(
         metadata: pkg.into(),
     };
 
-    let profile = if is_debug() { "debug" } else { "debug" };
+    let profile = if is_debug() { "debug" } else { "release" };
 
     if options.use_docker.is_some() {
         build_guest_package_docker(pkg, target_dir.as_ref(), &guest_info)?;
