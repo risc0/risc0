@@ -287,6 +287,7 @@ unsafe fn emulate_fp_instruction(insn: u32, mepc: usize) -> ! {
         0x61 => emulate_fcvt_if(insn), // FCVT (double to int)
         0x68 => emulate_fcvt_fi(insn), // FCVT (int to float)
         0x69 => emulate_fcvt_fi(insn), // FCVT (int to double)
+        0x30 => emulate_fmadd(insn),   // FMADD.S (R4-type)
         0x31 => emulate_fmadd(insn),   // FMADD.D (R4-type)
         0x35 => emulate_fmadd(insn),   // FNMADD.D (R4-type)
         0x39 => emulate_fmadd(insn),   // FMSUB.D (R4-type)
@@ -1333,36 +1334,58 @@ fn emulate_fcvt_ff(insn: u32) -> ! {
 }
 
 fn emulate_fmadd(insn: u32) -> ! {
-    let precision = get_precision(insn);
-    let funct7 = (insn >> 25) & 0x7f;
+    // R4-type instruction format:
+    // [31:27] rs3 (5 bits, 3rd source reg)
+    // [26:25] funct2 (2 bits, must be 00 for FMA ops)
+    // [24:20] rs2 (5 bits, 2nd source reg)
+    // [19:15] rs1 (5 bits, 1st source reg)
+    // [14:12] rm (3 bits, rounding mode)
+    // [11:7]  rd (5 bits, destination reg)
+    // [6:0]   opcode (7 bits, = 1000011 for F[SD]MADD)
 
-    // Determine the operation type based on funct7
-    // For R4-type instructions, funct7[6:2] contains the operation type
-    let operation_type = (funct7 >> 2) & 0x1f;
-    let msg = str_format!(
-        str256,
-        "fmadd: funct7={:#02x}, operation_type={:#02x}",
-        funct7,
-        operation_type
-    );
-    print(&msg);
+    let funct2 = (insn >> 25) & 0x3;
+    let rm = (insn >> 12) & 0x7; // rounding mode
+    let opcode = insn & 0x7f;
 
-    let (neg_a, neg_c) = match operation_type {
-        0x0c => (false, false), // FMADD:  rs1 * rs2 + rs3
-        0x0e => (true, false),  // FNMADD: -(rs1 * rs2) + rs3
-        0x0d => (false, true),  // FMSUB:  rs1 * rs2 - rs3
-        0x0f => (true, true),   // FNMSUB: -(rs1 * rs2) - rs3
+    // Determine precision from funct2 (00 = single, 01 = double)
+    let precision = if funct2 == 0 {
+        PRECISION_S
+    } else {
+        PRECISION_D
+    };
+
+    // Determine negation from bits 3 and 2 of the instruction (following riscv-pk)
+    let neg_a = (insn >> 3) & 1 != 0;
+    let neg_c = (insn >> 2) & 1 != 0;
+
+    // Validate that this is a supported R4-type opcode
+    match opcode {
+        0x43 | 0x47 | 0x4b | 0x4f => {
+            // Valid R4-type opcodes
+        }
         _ => {
             let msg = str_format!(
                 str256,
-                "Invalid fmadd operation_type: {:#02x} (funct7={:#02x})",
-                operation_type,
-                funct7
+                "Invalid fmadd opcode: {:#02x} (funct2={:#02x}, rm={:#02x})",
+                opcode,
+                funct2,
+                rm
             );
             print(&msg);
             host_terminate(1, 0);
         }
-    };
+    }
+
+    let msg = str_format!(
+        str256,
+        "fmadd: opcode={:#02x}, funct2={:#02x}, rm={:#02x}, neg_a={}, neg_c={}",
+        opcode,
+        funct2,
+        rm,
+        neg_a,
+        neg_c
+    );
+    print(&msg);
 
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
@@ -1373,8 +1396,16 @@ fn emulate_fmadd(insn: u32) -> ! {
         let rs1_val = if neg_a { rs1 ^ 0x80000000 } else { rs1 };
         let rs3_val = if neg_c { rs3 ^ 0x80000000 } else { rs3 };
 
-        // Clear softfloat flags before operation
-        unsafe { softfloat_exceptionFlags_write_helper(0) };
+        // Clear softfloat flags and set rounding mode before operation
+        let rounding_mode = if rm == 7 {
+            get_frm() as u8 // Dynamic rounding mode from FCSR
+        } else {
+            rm as u8 // Static rounding mode from instruction
+        };
+        unsafe {
+            softfloat_exceptionFlags_write_helper(0);
+            softfloat_roundingMode_write_helper(rounding_mode);
+        };
 
         let f32_rs1 = float32_t { v: rs1_val };
         let f32_rs2 = float32_t { v: rs2 };
@@ -1387,30 +1418,66 @@ fn emulate_fmadd(insn: u32) -> ! {
 
         set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
-        // For R4-type instructions, field layout is different:
-        // rs1: bits 15-19, rs2: bits 20-24, rs3: bits 7-11, rd: bits 27-31
+        // For R4-type instructions, field layout is:
+        // rs1: bits 19-15, rs2: bits 24-20, rs3: bits 31-27, rd: bits 11-7
         let rs1 = get_f64_rs1(insn);
         let rs2 = get_f64_rs2(insn);
-        let rs3 = get_fp_reg_from_insn(insn, 7); // rs3 is in rd field for R4-type
+        let rs3 = get_fp_reg_from_insn(insn, 27); // rs3 is in bits 31-27 for R4-type
 
         // Apply negation by flipping the sign bit
         let rs1_val = if neg_a { rs1 ^ 0x8000000000000000 } else { rs1 };
         let rs3_val = if neg_c { rs3 ^ 0x8000000000000000 } else { rs3 };
 
-        // Clear softfloat flags before operation
-        unsafe { softfloat_exceptionFlags_write_helper(0) };
+        // Clear softfloat flags and set rounding mode before operation
+        let rounding_mode = if rm == 7 {
+            get_frm() as u8 // Dynamic rounding mode from FCSR
+        } else {
+            rm as u8 // Static rounding mode from instruction
+        };
+        unsafe {
+            softfloat_exceptionFlags_write_helper(0);
+            softfloat_roundingMode_write_helper(rounding_mode);
+        };
 
         let f64_rs1 = float64_t { v: rs1_val };
         let f64_rs2 = float64_t { v: rs2 };
         let f64_rs3 = float64_t { v: rs3_val };
+
+        let msg = str_format!(
+            str256,
+            "fmadd.d: rs1={:#016x}, rs2={:#016x}, rs3={:#016x}, neg_a={}, neg_c={}, rm={}",
+            rs1_val,
+            rs2,
+            rs3_val,
+            neg_a,
+            neg_c,
+            rounding_mode
+        );
+        print(&msg);
+
+        let msg_debug = str_format!(
+            str256,
+            "fmadd.d debug: original_rs1={:#016x}, rs1_val={:#016x}, rs2={:#016x}, rs3_val={:#016x}, neg_a={}, neg_c={}",
+            rs1, 
+            rs1_val,
+            rs2,
+            rs3_val,
+            neg_a,
+            neg_c
+        );
+        print(&msg_debug);
+
         let result = unsafe { f64_mulAdd(f64_rs1, f64_rs2, f64_rs3) };
+
+        let msg2 = str_format!(str256, "fmadd.d: result={:#016x}", result.v);
+        print(&msg2);
 
         // Update our FCSR with softfloat's flags
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
         set_fflags(softfloat_flags as u32);
 
-        // For R4-type instructions, rd is in bits 27-31
-        let rd = (insn >> 27) & 0x1f;
+        // For R4-type instructions, rd is in bits 11-7
+        let rd = (insn >> 7) & 0x1f;
         set_fp_reg(rd as usize, result.v);
     } else {
         let msg = str_format!(str256, "Unsupported precision for fmadd: {}", precision);
@@ -2029,6 +2096,18 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
     // Check for floating point operations (opcode 0x47) - R4-type instructions
     if opcode == 0x47 {
+        let msg = str_format!(
+            str256,
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        print(&msg);
+        return emulate_fp_instruction(instruction, mepc);
+    }
+
+    // Check for floating point operations (opcode 0x4b) - R4-type instructions
+    if opcode == 0x4b {
         let msg = str_format!(
             str256,
             "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
