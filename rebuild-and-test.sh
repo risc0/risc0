@@ -3,8 +3,9 @@ cargo build
 cd ../../tools/elf-to-bin
 cargo build
 cd ../../risc0/zkos/linux
-CC=~/riscv/bin/riscv32-unknown-elf-gcc cargo +nightly-2025-08-29 build -Zbuild-std=core --target riscv32im-unknown-none-elf
-cp ~/risc0/target/riscv32im-unknown-none-elf/debug/vmlinuz elfs/vmlinuz.elf
+#CC=~/riscv/bin/riscv32-unknown-elf-gcc +nightly cargo build -Zbuild-std=core --target riscv32im-unknown-none-elf
+cargo risczero bake
+#cp ~/risc0/target/riscv32im-unknown-none-elf/debug/vmlinuz elfs/vmlinuz.elf
 cd ~/risc0
 mkdir -p test-bins test-logs
 (for x in ~/riscv-tests/isa/*-p-*.dump; do target/debug/elf-to-bin --guest-elf ~/riscv-tests/isa/`basename $x .dump` --kernel-elf ~/risc0/risc0/zkos/linux/elfs/vmlinuz.elf --output test-bins/`basename $x .dump`.bin; done)
