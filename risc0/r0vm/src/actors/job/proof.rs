@@ -412,8 +412,8 @@ impl JobActor {
                 return false;
             }
 
-            println!("required: {:?}", self.required_keccak_layers);
-            println!(
+            tracing::debug!("required: {:?}", self.required_keccak_layers);
+            tracing::debug!(
                 "actual:   {:?}",
                 self.unions.iter().map(|x| x.len()).collect::<Vec<_>>()
             );

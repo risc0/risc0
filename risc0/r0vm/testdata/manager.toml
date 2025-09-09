@@ -2,6 +2,9 @@
 
 version = 1
 
+[api]
+listen = "0.0.0.0:8000"
+
 [manager]
 listen = "0.0.0.0:9000"
 
@@ -11,3 +14,5 @@ subscribe = ["execute"]
 
 [storage]
 path = "/mnt/storage/risc0"
+
+[telemetry]

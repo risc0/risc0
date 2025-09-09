@@ -3,7 +3,7 @@
 version = 1
 
 [[worker]]
-manager = "1.2.3.4:9000"
+manager = "10.0.3.24:9000"
 subscribe = [
   "prove-segment",
   "prove-keccak",
@@ -14,5 +14,7 @@ subscribe = [
 ]
 
 [[worker]]
-manager = "1.2.3.4:9000"
+manager = "10.0.3.24:9000"
 subscribe = ["lift", "join", "union", "resolve"]
+
+[telemetry]
