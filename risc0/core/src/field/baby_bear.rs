@@ -18,8 +18,9 @@
 //! extension field. This field choice allows for 32-bit addition without
 //! overflow.
 
-use alloc::{fmt, vec::Vec};
+use alloc::vec::Vec;
 use core::{
+    fmt,
     cmp::{Ordering, PartialEq},
     ops,
 };
