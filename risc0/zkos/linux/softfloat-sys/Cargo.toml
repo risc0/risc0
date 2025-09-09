@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# See Notices.txt for copyright information
+[package]
+name = "softfloat-sys"
+version = "0.1.4"
+authors = ["Jacob Lifshay <programmerjake@gmail.com>"]
+license = "BSD-3-Clause"
+description = "Rust bindings for Berkeley SoftFloat 3"
+repository = "https://salsa.debian.org/Kazan-team/softfloat-sys"
+
+# [dependencies]
+# c99 = "0.1.1"  # Removed for no_std compatibility
+
+[build-dependencies]
+cc = "1.0"
+cc-version = "0.1.0"
+
+[features]
+default = ["8086-sse"]
+8086 = []
+8086-sse = []
+arm-vfpv2 = []
+arm-vfpv2-defaultnan = []
+riscv = []
