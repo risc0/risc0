@@ -14,9 +14,7 @@ if [ ! -d riscv-tests ]; then
     make XLEN=32 rv32ui rv32um rv32ud rv32uf rv32ua
     cd ../../
 fi
-cd risc0/r0vm
-cargo build
-cd ../../tools/elf-to-bin
+cd tools/elf-to-bin
 cargo build
 cd ../../risc0/zkos/linux
 cargo risczero bake
@@ -24,7 +22,7 @@ cd ~/risc0
 mkdir -p test-bins test-logs
 (for x in riscv-tests/isa/*-p-*.dump; do target/debug/elf-to-bin --guest-elf riscv-tests/isa/`basename $x .dump` --kernel-elf ~/risc0/risc0/zkos/linux/elfs/vmlinuz.elf --output test-bins/`basename $x .dump`.bin; done)
 for x in test-bins/*; do
-    echo `basename $x`
-    RISC0_DEV_MODE=1 RUST_LOG=trace target/debug/r0vm --elf $x &> test-logs/`basename $x`.log
+    echo -n `basename $x` " "
+    RISC0_DEV_MODE=1 RUST_LOG=trace r0vm --elf $x &> test-logs/`basename $x`.log
     grep sys_exit test-logs/`basename $x`.log || (echo -n "crash: no sys_exit, see "; grep -L sys_exit test-logs/`basename $x`.log)
 done
