@@ -49,14 +49,14 @@ sorting=ynt
 RISC Zero offers an open source virtual machine coupled with a zero-knowledge proof system.
 Together this is referred to as a zero-knowledge virtual machine, or \textit{zkVM}.
 When a RISC-V binary executes inside the zkVM, the output is paired with a computational receipt, which serves as a zero-knowledge argument of computational integrity.
-The RISC Zero proof system implements a zk-STARK instantiated using the FRI protocol, DEEP-ALI, and an HMAC-SHA-256 based PRF. 
+The RISC Zero proof system implements a zk-STARK instantiated using the FRI protocol, DEEP-ALI, and an HMAC-SHA-256 based PRF.
 In this paper, we formally articulate the RISC Zero Proof System with as few technical barriers to understanding as possible, including a detailed construction of a RISC Zero cryptographic seal.
 \end{abstract}
 
 \tableofcontents
 
 \section*{Acknowledgements}
-Many thanks to Bolton Bailey, Lennart Beringer, Tim Carstens, Victor Graf, Tim Zerrell, and the rest of the RISC Zero team for their support and feedback. 
+Many thanks to Bolton Bailey, Lennart Beringer, Tim Carstens, Victor Graf, Tim Zerrell, and the rest of the RISC Zero team for their support and feedback.
 
 \clearpage
 
@@ -64,40 +64,40 @@ Many thanks to Bolton Bailey, Lennart Beringer, Tim Carstens, Victor Graf, Tim Z
 \label{introduction}
 \subsection{Verifiable Computing}
 The era of verifiable computing is upon us: we now live in a world where the actions of untrusted parties in distributed systems can be authenticated as trustworthy quickly and easily, using \textit{arguments of computational integrity} \cite{stark}. \\
-This technology is the result of decades of incremental progress in the field of zero-knowledge cryptography and interactive proofs \cite{zkp,pcp,iop}. 
-Over the past few years, it has become practical and impactful to implement in real-world applications \cite{zcash,ethSTARK}. 
+This technology is the result of decades of incremental progress in the field of zero-knowledge cryptography and interactive proofs \cite{zkp,pcp,iop}.
+Over the past few years, it has become practical and impactful to implement in real-world applications \cite{zcash,ethSTARK}.
 Initial applications showed zero-knowledge proofs to be a powerful tool for ensuring privacy in blockchains, and the technology has evolved to the point that arguments of computational integrity are staged to become key infrastructure to the digital world.
-We expect that verifiable computation is not only the answer to the question of blockchain scaling, but also to fixing problems like Twitter bots and telephone spam. 
+We expect that verifiable computation is not only the answer to the question of blockchain scaling, but also to fixing problems like Twitter bots and telephone spam.
 In a world where trust is becoming more and more scarce, verifiable computing provides a path forward. \\
 \\
 Thousands upon thousands of developers are eager to start writing verifiable software.
-But current systems for writing verifiable software require developers to learn brand new languages with various limitations and challenges. 
-In order to make verifiable software development possible in languages like Rust and C++, \textbf{RISC Zero has built a mechanism for demonstrating the integrity of any RISC-V computation.} 
+But current systems for writing verifiable software require developers to learn brand new languages with various limitations and challenges.
+In order to make verifiable software development possible in languages like Rust and C++, \textbf{RISC Zero has built a mechanism for demonstrating the integrity of any RISC-V computation.}
 
 \subsection{Verifiable RISC-V}
 When a \href{https://riscv.org/} {RISC-V} binary executes in the RISC Zero zkVM, the output is paired with a computational receipt.
-The receipt contains a cryptographic seal, which serves as a zero-knowledge argument of computational integrity. 
+The receipt contains a cryptographic seal, which serves as a zero-knowledge argument of computational integrity.
 By offering computational receipts for any code that will compile to RISC-V, our zkVM offers a platform to build truly trustable software, where skeptical third parties can verify authenticity in milliseconds. The idea of ``running a verifier'' to assure the integrity of massive computations is a novel addition to the world of digital security.
 
 \subsection{A Formally Verified Verifier}
 Formal verification is a process of translating code into a model that can be reasoned about with mathematical tools to ensure properties relevant to security and correctness.
-Formal verification is used to ensure that a piece of code is actually doing what it's supposed to be doing. 
-To ensure that the RISC Zero verifier (which checks the receipts) is functioning without security bugs, we're working on a formal verification of the verifier implementation. 
+Formal verification is used to ensure that a piece of code is actually doing what it's supposed to be doing.
+To ensure that the RISC Zero verifier (which checks the receipts) is functioning without security bugs, we're working on a formal verification of the verifier implementation.
 This formal verification work is available at \url{https://www.github.com/risc0/risc0-lean4}.\\
 \\
 \subsection{The RISC Zero Argument System}
-RISC Zero's argument system is based on \cite{stark}; 
+RISC Zero's argument system is based on \cite{stark};
 the seal on a RISC Zero receipt is a zk-STARK.
 The arithmetization scheme is a randomized AIR with preprocessing \cite{RAP}.
 The randomized preprocessing constructs constraints for a PLONK-based memory permutation argument and a PLOOKUP-based range-check \cite{plonk, plookup}.
 After preprocessing, the STARK is instantiated using the DEEP-ALI protocol and the FRI protocol \cite{deepFRI, fri}.
 
 \subsection{Paper Organization}
-In this paper, we specify the RISC Zero protocol and analyze its knowledge soundness. 
+In this paper, we specify the RISC Zero protocol and analyze its knowledge soundness.
 The paper is organized as follows:\\
 \\
-In Section \ref{background}, we introduce some key ideas and background. 
-In particular, we introduce the following idea: 
+In Section \ref{background}, we introduce some key ideas and background.
+In particular, we introduce the following idea:
 \textit{An assertion of computational integrity can be viewed as an assertion that an execution trace satisfies a set of constraints.}\\
 \\
 In Section \ref{iop}, we present the interactive version of the protocol and analyze its soundness in the Interactive Oracle Proof model \cite{iop}. \\
@@ -113,11 +113,11 @@ It's typical to write an execution trace as a rectangular array, where each row 
 The columns of the RISC Zero execution trace are categorized as follows:
 \begin{description}
   \item[Control Columns - Public] The data in these columns describe the RISC-V architecture, and various control signals that define the stage of execution and therefore what constraints are applied.%
-  \footnote{In the source code, the Control Columns are referred to as ``Code" Columns; we intend to update the terminology to align with this document.} 
-  \item[Data Columns - Private] The data in these columns represents the running state of the processor and memory. 
-  In order to efficiently check the integrity of RISC-V memory operations, each register associated with RISC-V memory operations has two associated columns: one in the original execution order and the second sorted first by memory location and then by clock-cycle. 
-  \item[Accumulator Columns - Private] We use accumulators to instantiate grand-product constraints for a PLONK-based permutation check and a PLOOKUP-based range-check. 
-  The Accumulator Columns contain the associated accumulator data. 
+  \footnote{In the source code, the Control Columns are referred to as ``Code" Columns; we intend to update the terminology to align with this document.}
+  \item[Data Columns - Private] The data in these columns represents the running state of the processor and memory.
+  In order to efficiently check the integrity of RISC-V memory operations, each register associated with RISC-V memory operations has two associated columns: one in the original execution order and the second sorted first by memory location and then by clock-cycle.
+  \item[Accumulator Columns - Private] We use accumulators to instantiate grand-product constraints for a PLONK-based permutation check and a PLOOKUP-based range-check.
+  The Accumulator Columns contain the associated accumulator data.
   The entries in the Accumulator Columns and the associated constraints are constructed during the randomized preprocessing phase \cite{plonk, plookup, RAP}. \\
 \end{description}
 
@@ -126,151 +126,151 @@ An assertion of computational integrity can be re-framed as an assertion that an
 These constraints enforce that the zkVM execution is consistent with the RISC-V ISA.
 Each constraint is a low-degree polynomial relation over the constrained values; the execution trace is valid if and only if each constraint evaluates to 0.
 
-\textbf{Example 1.} The constraint $(k)(k-1)=0$ enforces that $k$ is either 0 or 1. 
+\textbf{Example 1.} The constraint $(k)(k-1)=0$ enforces that $k$ is either 0 or 1.
 
 \textbf{Example 2.} The constraint $j-2k=0$ enforces that $j=2k$.
 
 \noindent
 Enforcing computational integrity of our implementation of the RISC-V instruction set architecture involves thousands of constraints, each of which is expressed as a multi-variable polynomial.%
 \footnote{Inputs to these polynomials may include register-values at various clock-cycles, including previous cycles.}
-At a high level, the constraints enforce that each of the following phases of the zkVM operation was executed as claimed: 
+At a high level, the constraints enforce that each of the following phases of the zkVM operation was executed as claimed:
 % TODO: Adjust these phase descriptions to reflect ImageID
 \begin{itemize}
   \item $\mathsf{Init}$: Initialization of all registers to 0
   \item $\mathsf{Setup}$: Prepare to load ELF file
   \item $\mathsf{Load}$: Loading the RISC-V binary into memory
-  \item $\mathsf{Reset}$: Ends the loading phase and prepares for execution. 
+  \item $\mathsf{Reset}$: Ends the loading phase and prepares for execution.
   \item $\mathsf{Body}$: Main execution phase. This is where user-defined code is executed.
   \item $\mathsf{RamFini}$: Generates the memory-based grand product accumulation values for our memory permutation\cite{plonk}
   \item $\mathsf{BytesFini}$: Generates the bytes-based grand product accumulation values for PLOOKUP\cite{plookup}
 \end{itemize}
-Together, these constraints enforce that the purported output of the computation agrees with the expected rv32im \cite{rv32im} execution. 
-\subsection{Arguments and Proofs of Knowledge} 
+Together, these constraints enforce that the purported output of the computation agrees with the expected rv32im \cite{rv32im} execution.
+\subsection{Arguments and Proofs of Knowledge}
 \label{arguments}
-The seal on the RISC Zero receipt is a STARK -- a scalable, transparent argument of knowledge \cite{stark}. 
-An argument of knowledge allows a Prover to justify an ``assertion of knowledge.'' 
-More formally, the Prover asserts knowledge of a witness $\mathbb{w}$ that satisfies some constraints $\mathbb{x}$. 
+The seal on the RISC Zero receipt is a STARK -- a scalable, transparent argument of knowledge \cite{stark}.
+An argument of knowledge allows a Prover to justify an ``assertion of knowledge.''
+More formally, the Prover asserts knowledge of a witness $\mathbb{w}$ that satisfies some constraints $\mathbb{x}$.
 In the case of an assertion of computational integrity, the witness is the execution trace and the constraints are the various rules that define computational integrity. \\
 \\
-In Section \ref{IOP spec}, we present the protocol as an Interactive Oracle Proof (IOP) \cite{iop}.  
-IOPs involve a series of interactions between a Prover and a Verifier, where the Prover's messages depend on randomness supplied by the Verifier at various points throughout the protocol. 
+In Section \ref{IOP spec}, we present the protocol as an Interactive Oracle Proof (IOP) \cite{iop}.
+IOPs involve a series of interactions between a Prover and a Verifier, where the Prover's messages depend on randomness supplied by the Verifier at various points throughout the protocol.
 The IOP protocol is a theoretical model; in practice, the zkVM uses a non-interactive version of this protocol where the Verifier participation is replaced by HMAC-SHA-256 through the Fiat-Shamir transform.\\
 \\
 In the context of the IOP protocol, the seal constitutes a proof of knowledge. In code, the \textit{proof} becomes an \textit{argument}.%
 \footnote{The argument depends on the security of HMAC-SHA-256 as a random oracle whereas the proof has no cryptographic assumptions.}
-More specifically, the seal is a STARK. 
+More specifically, the seal is a STARK.
 The Fiat-Shamir Heuristic allows us to derive security results for our STARK based on soundness analysis of the IOP protocol \cite{fiat-shamir}.
 
 \section{The RISC Zero IOP Protocol}
 \label{iop}
-In this section, we present the interactive version of the RISC Zero protocol and analyze the knowledge soundness of the protocol in the context of the IOP model \cite{iop}. 
+In this section, we present the interactive version of the RISC Zero protocol and analyze the knowledge soundness of the protocol in the context of the IOP model \cite{iop}.
 
 \subsection{Overview of the Protocol}
-In an interactive oracle proof, a Prover convinces a skeptical Verifier of some assertion via a series of interactions. 
-In each round, the Prover commits to evaluations of one or more functions over a domain known to both parties. 
-The Verifier may \textit{query} these Prover messages without reading them in full. 
-The IOP model idealizes these queries using the concept of \textit{oracle access}. 
+In an interactive oracle proof, a Prover convinces a skeptical Verifier of some assertion via a series of interactions.
+In each round, the Prover commits to evaluations of one or more functions over a domain known to both parties.
+The Verifier may \textit{query} these Prover messages without reading them in full.
+The IOP model idealizes these queries using the concept of \textit{oracle access}.
 This theoretical model allows us to prove soundness of our protocol without reference to any cryptographic primitives.%
 \\
 The seal on a RISC Zero receipt is the transcript of the interactive protocol, with a random oracle as the verifier.
 When the zkVM finishes execution of a method, the resultant seal serves as a zero-knowledge proof of computational integrity, linking a cryptographic imageID (which identifies the RISC-V binary file that was executed) to the asserted code output in a way that third-parties can quickly verify.\\
 \\
-The protocol consists of a transparent \textit{set-up phase}, a \textit{randomized preprocessing phase}, and a \textit{main phase}. 
+The protocol consists of a transparent \textit{set-up phase}, a \textit{randomized preprocessing phase}, and a \textit{main phase}.
 The set-up phase establishes certain protocol parameters known to both the Prover and the Verifier, including the number and length of the trace columns as well as a full enumeration of the constraints that are to be enforced.
 
 \subsubsection{Set-up Phase}
-The set-up phase only needs to be done once for each program, and the public parameters can be used to generate an arbitrary number of execution proofs. 
-These public parameters include specification of the circuit and the constraints for the zkVM, a cryptographic identifier for the program to be executed, as well as various parameters that specify the handling of hashing, DEEP-ALI and FRI.  
+The set-up phase only needs to be done once for each program, and the public parameters can be used to generate an arbitrary number of execution proofs.
+These public parameters include specification of the circuit and the constraints for the zkVM, a cryptographic identifier for the program to be executed, as well as various parameters that specify the handling of hashing, DEEP-ALI and FRI.
 These parameters can either be distributed to provers and verifiers via a trusted channel, or calculated independently from the program definition (e.g. source code).
 This ability to recalculate the parameters independently, using only public information, is what defines the ``transparency'' property.
 
 \subsubsection{Randomized Preprocessing}
-With the set-up complete, the Prover runs the program, which generates the control columns and the data columns, and then begins the randomized preprocessing, which constructs the accumulators for memory and for bytes. 
-The Prover sends two trace commitments; one for the control columns and one for the data columns (see Section \ref{trace}). 
-To generate the trace commitments, the trace columns are encoded into trace blocks using Reed-Solomon encoding, and the trace blocks are committed to Merkle trees. 
-We write $\mathbb{w}_\mathsf{control}$ and $\mathbb{w}_\mathsf{data}$ to represent the witnesses, 
+With the set-up complete, the Prover runs the program, which generates the control columns and the data columns, and then begins the randomized preprocessing, which constructs the accumulators for memory and for bytes.
+The Prover sends two trace commitments; one for the control columns and one for the data columns (see Section \ref{trace}).
+To generate the trace commitments, the trace columns are encoded into trace blocks using Reed-Solomon encoding, and the trace blocks are committed to Merkle trees.
+We write $\mathbb{w}_\mathsf{control}$ and $\mathbb{w}_\mathsf{data}$ to represent the witnesses,
 and we write $\mathsf{Com}(\mathbb{w}_\mathsf{control})$ and $\mathsf{Com}(\mathbb{w}_\mathsf{data})$ to represent the associated commitments.
 After these first two commitments, the Prover uses verifier-randomness to construct the $\mathsf{accum}$ blocks and sends a third commitment $\mathsf{Com}(\mathbb{w}_\mathsf{accum})$, which allows for a permutation argument and a lookup argument.%
 %
-\footnote{Because we reveal many branches from each tree, we commit Merkle caps rather than Merkle roots. 
-See Appendix \ref{merkle} and \cite{merklecap} for more details.} 
+\footnote{Because we reveal many branches from each tree, we commit Merkle caps rather than Merkle roots.
+See Appendix \ref{merkle} and \cite{merklecap} for more details.}
 
 \subsubsection{Main Phase}
 The main phase consists of a standard AIR-FRI protocol, using DEEP-ALI\cite{deepFRI} and the batched FRI protocol\cite{proxGaps}, as in \cite{ethSTARK} and \cite{plonky2}.\\
 \\
-The Prover uses the constraints and the execution trace to generate the validity polynomial $f_\mathsf{validity}$, 
+The Prover uses the constraints and the execution trace to generate the validity polynomial $f_\mathsf{validity}$,
 uses $f_\mathsf{validity}$ to construct the validity witness $\mathbb{w}_\mathsf{validity}$,
-and sends $\mathsf{Com}(\mathbb{w}_\mathsf{validity})$ to the Verifier.  
-The Verifier responds with a random $z\in\GF{q}$, 
+and sends $\mathsf{Com}(\mathbb{w}_\mathsf{validity})$ to the Verifier.
+The Verifier responds with a random $z\in\GF{q}$,
 the Prover evaluates $f_\mathsf{validity}$ at $z$ and uses the DEEP quotienting technique to construct the $\mathsf{DEEPAnswerSequence}.$
 
 \subsection{IOP Definitions}
-Recall the definition of interactive oracle proof from \cite{iop}. 
+Recall the definition of interactive oracle proof from \cite{iop}.
 In the IOP model, our protocol satisfies the definition of STIK from \cite{stark}.%
-\footnote{The difference in acronyms between STIK and STARK is a substitution of ``IOP'' for ``ARgument.''} 
+\footnote{The difference in acronyms between STIK and STARK is a substitution of ``IOP'' for ``ARgument.''}
 \\
 \label{IOP notation}
 \label{AIR}
 \\
 Building on the definitions and notation of an AIR from Section 5 of \cite{ethSTARK}, as well as the notion of a randomized AIR with preprocessing from \cite{RAP}, our IOP proves knowledge of a witness that satisfies a RAP\cite{RAP} (randomized AIR with preprocessing) instance defined as
 \[\mathsf{A_{RAP}} = (
-  \mathbb{F}, 
-  \mathbb{K}, 
+  \mathbb{F},
+  \mathbb{K},
   \mathsf{e},
-  \mathsf{w}_\mathsf{RAP}, 
-  \mathsf{n}_{\sigma_\mathsf{mem}}, 
-  \mathsf{n}_{\sigma_\mathsf{bytes}}, 
-  \mathsf{h}, 
-  \mathsf{d}, 
-  \mathsf{s}, 
+  \mathsf{w}_\mathsf{RAP},
+  \mathsf{n}_{\sigma_\mathsf{mem}},
+  \mathsf{n}_{\sigma_\mathsf{bytes}},
+  \mathsf{h},
+  \mathsf{d},
+  \mathsf{s},
   \omega,
-  \beta, 
-  \mathsf{l}, 
-  \mathsf{C}_\mathsf{set})\] where 
+  \beta,
+  \mathsf{l},
+  \mathsf{C}_\mathsf{set})\] where
 \begin{itemize}
-  \item $\mathbb{F}=\mathbb{F}_{2^{31} - 2^{27} + 1}$, known commonly as the Baby Bear field. 
+  \item $\mathbb{F}=\mathbb{F}_{2^{31} - 2^{27} + 1}$, known commonly as the Baby Bear field.
   \item $\mathbb{K}$ is a degree $\mathsf{e}=4$ extension of $\mathbb{F}$.
-  \item $\mathsf{w}_\mathsf{RAP}$ is the number of columns in the RAP witness. 
-  We write 
-  $\mathsf{w}_\mathsf{RAP} = \mathsf{w}_\mathsf{control} + \mathsf{w}_\mathsf{data} + \mathsf{w}_\mathsf{accum}$ 
-  where 
+  \item $\mathsf{w}_\mathsf{RAP}$ is the number of columns in the RAP witness.
+  We write
+  $\mathsf{w}_\mathsf{RAP} = \mathsf{w}_\mathsf{control} + \mathsf{w}_\mathsf{data} + \mathsf{w}_\mathsf{accum}$
+  where
   \begin{itemize}
-    \item $\mathsf{w}_\mathsf{control}$ is the number of control columns, 
-    \item $\mathsf{w}_\mathsf{data}$ is the number of data columns, and 
+    \item $\mathsf{w}_\mathsf{control}$ is the number of control columns,
+    \item $\mathsf{w}_\mathsf{data}$ is the number of data columns, and
     \item $\mathsf{w}_\mathsf{accum}=
-    2\mathsf{e}\cdot\mathsf{n}_{\sigma_\mathsf{mem}}+2\mathsf{e}\cdot\mathsf{n}_{\sigma_\mathsf{bytes}}$ 
+    2\mathsf{e}\cdot\mathsf{n}_{\sigma_\mathsf{mem}}+2\mathsf{e}\cdot\mathsf{n}_{\sigma_\mathsf{bytes}}$
     is the number of accumulator columns generated in the randomized preprocessing.%
-    \footnote{These accumulator columns are used for a PLONK-based permutation check and a PLOOKUP-based range check. 
+    \footnote{These accumulator columns are used for a PLONK-based permutation check and a PLOOKUP-based range check.
     In our system, $\mathsf{n}_{\sigma_\mathsf{mem}}=5$ and $\mathsf{n}_{\sigma_\mathsf{bytes}}=15$}
   \end{itemize}
-  \item $\mathsf{n}_{\sigma_\mathsf{mem}}$ is the number of duplicated data columns in the witness that appear due to the permutation from $\mathsf{trace_{time}}$ to $\mathsf{trace_{mem}}$. 
-  \item $\mathsf{n}_{\sigma_\mathsf{bytes}}$ is the number of columns in the witness that appear due to the bytes-lookup in our PLOOKUP implementation. 
+  \item $\mathsf{n}_{\sigma_\mathsf{mem}}$ is the number of duplicated data columns in the witness that appear due to the permutation from $\mathsf{trace_{time}}$ to $\mathsf{trace_{mem}}$.
+  \item $\mathsf{n}_{\sigma_\mathsf{bytes}}$ is the number of columns in the witness that appear due to the bytes-lookup in our PLOOKUP implementation.
   \item $2^\mathsf{h}$ is the size of the trace domain, $\mathsf{H}$ (i.e., the length of the columns).
   \item $\mathsf{d}$ is the maximum degree of the rule-checking polynomials.
-  \item $\w\in\mathbb{F}$ has multiplicative order $\mathsf{e}\cdot2^\mathsf{h}$ and $\beta\in\mathbb{F}$ is non-zero. 
-  We define the commitment domain $\mathsf{D}$ as the coset $\beta \mathsf{D}_0$ where $\mathsf{D}_0\subseteq\GF{p}$ is generated by $\w$, 
-  and we define the trace domain $\mathsf{H}$ as the set generated by $\w^\frac{1}{\mathsf{\rho}}$, where $\rho$ is defined below. 
+  \item $\w\in\mathbb{F}$ has multiplicative order $\mathsf{e}\cdot2^\mathsf{h}$ and $\beta\in\mathbb{F}$ is non-zero.
+  We define the commitment domain $\mathsf{D}$ as the coset $\beta \mathsf{D}_0$ where $\mathsf{D}_0\subseteq\GF{p}$ is generated by $\w$,
+  and we define the trace domain $\mathsf{H}$ as the set generated by $\w^\frac{1}{\mathsf{\rho}}$, where $\rho$ is defined below.
   \item $\mathsf{l}$ is the set of indices for the tapset%
-  \footnote{A tap is a reference to an entry in the trace; the constraints are expressed as a function of various taps. For more details on taps, see Appendix \ref{taps}. Note that ethSTARK uses the term \textit{mask} where we use \textit{tapset}.}. 
-  \item $\mathsf{C}_\mathsf{set}$ is the set of constraints which enforce the computational integrity checks. 
-  Each constraint, $C_i\in\mathbb{F}^{\leq \mathsf{d}}[\mathsf{Y}]$ is a multi-variate polynomial over the tapset variables, of total degree at most $\mathsf{d}$, called the $i^\text{th}$ rule-checking polynomial. 
+  \footnote{A tap is a reference to an entry in the trace; the constraints are expressed as a function of various taps. For more details on taps, see Appendix \ref{taps}. Note that ethSTARK uses the term \textit{mask} where we use \textit{tapset}.}.
+  \item $\mathsf{C}_\mathsf{set}$ is the set of constraints which enforce the computational integrity checks.
+  Each constraint, $C_i\in\mathbb{F}^{\leq \mathsf{d}}[\mathsf{Y}]$ is a multi-variate polynomial over the tapset variables, of total degree at most $\mathsf{d}$, called the $i^\text{th}$ rule-checking polynomial.
   Each constraint is enforced over the entire trace domain.
   \item $\mathsf{s}$ is the number of RAP constraints.
-\end{itemize} 
+\end{itemize}
 In addition to the inputs to the RAP instance listed above, the IOP also uses the following auxiliary inputs, denoted $\mathsf{aux}=(\mathsf{D},\mathsf{k},\mathsf{aux}_\mathsf{FRI})$.
 \begin{itemize}
   \item $\mathsf{D}$ is the zk commitment domain%
   \footnote{ethSTARK calls this the evaluation domain.}, which is a non-trivial coset%
-  \footnote{Using $\mathsf{D}_0$ as a commitment domain would introduce divide-by-zero issues and would mean queries might reveal information about the execution trace. 
+  \footnote{Using $\mathsf{D}_0$ as a commitment domain would introduce divide-by-zero issues and would mean queries might reveal information about the execution trace.
   The coset $\mathsf{D}$ doesn't intersect $\mathsf{D}_0$, which is important for zero-knowledge purposes.}
   of a multiplicative subgroup $\mathsf{D}_0$ where $\mathsf{H}\subseteq\mathsf{D}_0\subseteq\mathbb{F}$.
   % Why does ethSTARK use $\mathsf{k}'$ here?
-  \item $2^\mathsf{k}$ is the size of the zk commitment domain, $\mathsf{D}$. 
-  We define the rate of the IOP by $\rho := \frac{2^\mathsf{h}}{2^\mathsf{k}}$. 
-  \item $\mathsf{aux}_\mathsf{FRI}$ is defined as $(\vec{\mathsf{t}},\mathsf{n_{queries}}, \mathsf{d_{final}})$ where 
+  \item $2^\mathsf{k}$ is the size of the zk commitment domain, $\mathsf{D}$.
+  We define the rate of the IOP by $\rho := \frac{2^\mathsf{h}}{2^\mathsf{k}}$.
+  \item $\mathsf{aux}_\mathsf{FRI}$ is defined as $(\vec{\mathsf{t}},\mathsf{n_{queries}}, \mathsf{d_{final}})$ where
     \begin{itemize}
-      \item $\vec{\mathsf{t}}=(t_1,...,t_r$) is a vector describing the the FRI-folding factor for each round of the COMMIT phase. In our system, $t_i=16$ for all $i$.
-      \item $\mathsf{n_{queries}}=50$ is the number of FRI queries, and 
+      \item $\vec{\mathsf{t}}=(t_1,...,t_r$) is a vector describing the FRI-folding factor for each round of the COMMIT phase. In our system, $t_i=16$ for all $i$.
+      \item $\mathsf{n_{queries}}=50$ is the number of FRI queries, and
       \item $\mathsf{d_{final}}=256$ is the degree at which we terminate our FRI algorithm.
     \end{itemize}
 \end{itemize}
@@ -280,29 +280,29 @@ After a transparent set-up, the IOP consists of three components: a randomized p
 \begin{enumerate}\addtocounter{enumi}{0}
 \subsubsection{Randomized Preprocessing}
   \item \textbf{Prover} generates IOP witness $\mathbb{w}_\mathsf{control}\cup\mathbb{w}_\mathsf{data}$ and sends commitments $\mathsf{Com}(\mathbb{w}_\mathsf{control})$ and $\mathsf{Com}(\mathbb{w}_\mathsf{data})$.%
-  \footnote{For details on this step, see Appendix \ref{committing trace}.} 
-  \item \textbf{Verifier} samples $\mathsf{n}_\sigma=\mathsf{n}_{\sigma_\mathsf{mem}}+\mathsf{n}_{\sigma_\mathsf{bytes}}$ elements of $\mathbb{K}$, the randomness used to generate the Accumulator Columns. 
+  \footnote{For details on this step, see Appendix \ref{committing trace}.}
+  \item \textbf{Verifier} samples $\mathsf{n}_\sigma=\mathsf{n}_{\sigma_\mathsf{mem}}+\mathsf{n}_{\sigma_\mathsf{bytes}}$ elements of $\mathbb{K}$, the randomness used to generate the Accumulator Columns.
   \item \textbf{Prover} generates witness $\mathbb{w}_\mathsf{accum}$ and sends $\mathsf{Com}(\mathbb{w}_\mathsf{accum})$.\\
   \\
   $\mathbb{w}_\mathsf{RAP}=\mathbb{w}_\mathsf{control}\cup\mathbb{w}_\mathsf{data}\cup\mathbb{w}_\mathsf{accum}$ is a witness that satisfies the RAP instance:
-  \[\mathsf{A}_\mathsf{RAP} = 
-  (\mathbb{F}, 
-  \mathbb{K}, 
+  \[\mathsf{A}_\mathsf{RAP} =
+  (\mathbb{F},
+  \mathbb{K},
   \mathsf{e},
-  \mathsf{w}_\mathsf{RAP}, 
-  \mathsf{n}_{\sigma_\mathsf{mem}}, 
-  \mathsf{n}_{\sigma_\mathsf{bytes}}, 
-  \mathsf{h}, 
-  \mathsf{d}, 
-  \mathsf{s}, 
-  \omega, 
+  \mathsf{w}_\mathsf{RAP},
+  \mathsf{n}_{\sigma_\mathsf{mem}},
+  \mathsf{n}_{\sigma_\mathsf{bytes}},
+  \mathsf{h},
+  \mathsf{d},
+  \mathsf{s},
+  \omega,
   \beta,
-  \mathsf{l}, 
+  \mathsf{l},
   \mathsf{C}_\mathsf{set})\]
   \\
-  The rest of the protocol implements DEEP-ALI + Batched FRI as in \cite{ethSTARK}, \cite{deepFRI}, \cite{proxGaps}, 
+  The rest of the protocol implements DEEP-ALI + Batched FRI as in \cite{ethSTARK}, \cite{deepFRI}, \cite{proxGaps},
   using auxiliary IOP parameters $\mathsf{aux} = (\mathsf{D},\mathsf{k},\mathsf{aux}_\mathsf{FRI})$.%
-  \footnote{Unlike those references, but as in \cite{FRIsummary} and \cite{plonky2}, we use powers of a single verifier randomness for constraint batching and a single verifier randomness for FRI batching.} 
+  \footnote{Unlike those references, but as in \cite{FRIsummary} and \cite{plonky2}, we use powers of a single verifier randomness for constraint batching and a single verifier randomness for FRI batching.}
   \subsubsection{Sub-Protocol: DEEP-ALI}
   \item \textbf{Verifier} samples $\alpha_\mathsf{constraints}\in\mathbb{K}$, the randomness used in DEEP-ALI constraint batching.%
   \footnote{ethSTARK samples 2 random parameters per constraint, whereas we use a single randomness parameter here. See affine batching vs. parametric batching in \cite{FRIsummary}.}
@@ -317,29 +317,29 @@ After a transparent set-up, the IOP consists of three components: a randomized p
           }
           \alpha_\mathsf{constraints}^i\cdot \mathsf{C}_i(P_0(x),\ldots,P_{\mathsf{w_{RAP}}-1})}
       {Z(x)}
-  \] 
+  \]
   where $P_j$ are the interpolations of the columns of $\mathbb{w}_\mathsf{RAP}$, $\mathsf{C_i}$ are the constraints, and $Z$ is the minimal polynomial that vanishes on the trace domain $\mathsf{H}$.%
   \footnote{
-    In the source code, $f_\mathsf{validity}$ is called the CheckPoly. The Prover \hyperref[split]{splits} $f_\mathsf{validity}$ into four low-degree validity polynomials in order to construct $\mathsf{Com}(\mathbb{w}_\mathsf{validity})$. 
+    In the source code, $f_\mathsf{validity}$ is called the CheckPoly. The Prover \hyperref[split]{splits} $f_\mathsf{validity}$ into four low-degree validity polynomials in order to construct $\mathsf{Com}(\mathbb{w}_\mathsf{validity})$.
     For details on this step, see Section \ref{committing validity polynomials}.
     }
-  \item \textbf{Verifier} samples $z\in\mathbb{K}\backslash(\mathsf{H}\cup\mathsf{D})$ the random evaluation point used as a query for DEEP-ALI. 
-  \item \textbf{Prover} uses $z$, $\mathbb{w}_\mathsf{RAP}$, and $\mathbb{w}_\mathsf{validity}$ to construct $\mathbb{w}_\mathsf{BatchedFRI}$. 
-  Rather than a Merkle commitment for $\mathbb{w}_\mathsf{BatchedFRI}$, the Prover sends enough information for the Verifier to reproduce the asserted values of $\mathbb{w}_\mathsf{BatchedFRI}$. 
-  This information is called the $\mathsf{DEEPAnswerSequence}$, and it consists of: 
+  \item \textbf{Verifier} samples $z\in\mathbb{K}\backslash(\mathsf{H}\cup\mathsf{D})$ the random evaluation point used as a query for DEEP-ALI.
+  \item \textbf{Prover} uses $z$, $\mathbb{w}_\mathsf{RAP}$, and $\mathbb{w}_\mathsf{validity}$ to construct $\mathbb{w}_\mathsf{BatchedFRI}$.
+  Rather than a Merkle commitment for $\mathbb{w}_\mathsf{BatchedFRI}$, the Prover sends enough information for the Verifier to reproduce the asserted values of $\mathbb{w}_\mathsf{BatchedFRI}$.
+  This information is called the $\mathsf{DEEPAnswerSequence}$, and it consists of:
   \begin{enumerate}
-    \item the full tapset of $\mathbb{w}_\mathsf{RAP}$ at the DEEP query point $z$, 
-    \item the evaluation of $\mathbb{w}_\mathsf{validity}$ at the DEEP query point $z$, and 
+    \item the full tapset of $\mathbb{w}_\mathsf{RAP}$ at the DEEP query point $z$,
+    \item the evaluation of $\mathbb{w}_\mathsf{validity}$ at the DEEP query point $z$, and
     \item the coefficients of column-by-column interpolations of the tapset.%
     \footnote{
-      These coefficients are called the $u$ coefficients in the Rust code. 
+      These coefficients are called the $u$ coefficients in the Rust code.
       There is one $u$ polynomial per trace column, using the taps from that column.
       For details on this step, see Section \ref{DEEP Polynomials}.
       }
   \end{enumerate}
   \subsubsection{Subprotocol: Batched FRI}
   \item \textbf{Verifier} samples $\alpha_\mathsf{FRI}\in\mathbb{K}$, the randomness used for FRI batching.
-  \item \textbf{Both parties} apply FRI with auxiliary information $\mathsf{aux}_\mathsf{FRI}$ to check proximity to the code $\mathsf{RS}[\mathbb{K},\mathsf{D},\rho]$ of the function 
+  \item \textbf{Both parties} apply FRI with auxiliary information $\mathsf{aux}_\mathsf{FRI}$ to check proximity to the code $\mathsf{RS}[\mathbb{K},\mathsf{D},\rho]$ of the function
     \[
       f_\mathsf{FRI}(x)=
       \mathlarger{
@@ -347,8 +347,8 @@ After a transparent set-up, the IOP consists of three components: a randomized p
         \mathsf{w}_\mathsf{RAP}+3
         }
         \alpha_\mathsf{FRI}^i\cdot d_i(x)
-    \] 
-    where $d_i$ are the DEEP polynomials defined in Appendix \ref{DEEP Polynomials}. 
+    \]
+    where $d_i$ are the DEEP polynomials defined in Appendix \ref{DEEP Polynomials}.
   This step involves a number of additional commitments from the \textbf{Prover}: one for the batching and one for each commit round of FRI.
 
   \subsubsection{Verification}
@@ -357,7 +357,7 @@ After a transparent set-up, the IOP consists of three components: a randomized p
     \begin{enumerate}
       \item Verifier uses the taps, $\mathsf{C_{set}}$ and $\alpha_\mathsf{constraints}$ to compute $f_\mathsf{validity}(z)$ and checks for a mismatch against the purported value of $f_\mathsf{validity}(z)$ on the seal.%
       \footnote{$f_\mathsf{validity}$ is called the Check Poly in the Rust source.}
-      \item Verifier checks the $\mathsf{DEEPAnswerSequence}$ for internal consistency, using the purported column-by-column interpolations to re-compute the purported $\mathsf{tapset}$. 
+      \item Verifier checks the $\mathsf{DEEPAnswerSequence}$ for internal consistency, using the purported column-by-column interpolations to re-compute the purported $\mathsf{tapset}$.
       \item For each FRI query $j$, the Verifier uses the $u$ coefficients and $\alpha_\mathsf{FRI}$ to compute $f_\mathsf{FRI}(j)$ and checks for a mismatch against the purported value of $f_\mathsf{FRI}(j)$ on the seal.
       \item Verifier checks the internals of each FRI query as described in Appendix \ref{queries}.
     \end{enumerate}
@@ -365,89 +365,89 @@ After a transparent set-up, the IOP consists of three components: a randomized p
 
 \subsection{Soundness Analysis in the IOP Model}
 \label{IOP soundness}
-We present soundness analysis of the IOP protocol using results from \cite{proxGaps} and \cite{deepFRI}. 
+We present soundness analysis of the IOP protocol using results from \cite{proxGaps} and \cite{deepFRI}.
 We use the Fiat-Shamir Heuristic to translate this IOP analysis into conclusions about our non-interactive protocol, instantiating the random oracle using HMAC-SHA-256.\\
 \\
 Our soundness analysis follows that of \cite{ethSTARK}, aside from the following differences:
 \begin{itemize}
-  \item \textbf{Randomized preprocessing}: Our protocol begins with a randomized preprocessing step which doesn't have an analog in \cite{ethSTARK}. 
+  \item \textbf{Randomized preprocessing}: Our protocol begins with a randomized preprocessing step which doesn't have an analog in \cite{ethSTARK}.
   This randomized preprocessing instantiates constraints for a PLONK-based permutation check and a PLOOKUP-based range check.
   We bound the soundness error here using the Schwartz-Zippel Lemma.
-  \item \textbf{Constraint Batching}: DEEP-ALI includes a step that compresses all the constraints into a single ``Combined Constraint.'' 
-  As in \cite{FRIsummary}, our protocol uses powers of a single random field element whereas \cite{ethSTARK} uses a vector of field elements. 
+  \item \textbf{Constraint Batching}: DEEP-ALI includes a step that compresses all the constraints into a single ``Combined Constraint.''
+  As in \cite{FRIsummary}, our protocol uses powers of a single random field element whereas \cite{ethSTARK} uses a vector of field elements.
   The technique we use is referred to as parametric batching in \cite{proxGaps} whereas ethSTARK uses affine batching.
-  \item \textbf{FRI Batching}: Similarly, the ``batched FRI protocol'' begins by using verifier randomness to compress a number of FRI instances into a single instance. As in \cite{FRIsummary}, our protocol uses parametric batching for the ``FRI batching'' step, whereas \cite{ethSTARK} uses affine batching. 
+  \item \textbf{FRI Batching}: Similarly, the ``batched FRI protocol'' begins by using verifier randomness to compress a number of FRI instances into a single instance. As in \cite{FRIsummary}, our protocol uses parametric batching for the ``FRI batching'' step, whereas \cite{ethSTARK} uses affine batching.
   \item \textbf{Degree reduction of $\mathbb{w}_\mathsf{validity}$}: The construction in \cite{stark} and \cite{ethSTARK} results in a pair of FRI assertions, one for the trace $(\mathbb{w}_\mathsf{control}\cup\mathbb{w}_\mathsf{data}\cup\mathbb{w}_\mathsf{accum})$ and one for the ``validity polynomial.'' As in \cite{FRIsummary}, we $\mathsf{split}$%
   \footnote{The $\mathsf{split}$ function is the same as the one used in the FRI commit rounds. For more details on this function, see Appendix \ref{split}.}
-  the validity polynomial into 4 low-degree validity polynomials so that we can compress this into a single FRI assertion. Each leaf of $\mathbb{w}_\mathsf{validity}$ contains one evaluation for each of the 4 low-degree validity polynomials. \cite{FRIsummary} uses the term ``segment polynomials'' to refer to this splitting technique. 
+  the validity polynomial into 4 low-degree validity polynomials so that we can compress this into a single FRI assertion. Each leaf of $\mathbb{w}_\mathsf{validity}$ contains one evaluation for each of the 4 low-degree validity polynomials. \cite{FRIsummary} uses the term ``segment polynomials'' to refer to this splitting technique.
 \end{itemize}
-We bound the soundness of our protocol by 
+We bound the soundness of our protocol by
 \[
   \epsilon_\mathsf{IOP}
     \leq
-  \epsilon_\mathsf{PLONK} + 
-  \epsilon_\mathsf{PLOOKUP} + 
-  \epsilon_\mathsf{DEEP-ALI} + 
+  \epsilon_\mathsf{PLONK} +
+  \epsilon_\mathsf{PLOOKUP} +
+  \epsilon_\mathsf{DEEP-ALI} +
   \epsilon_\mathsf{FRI}
 \]
-where 
-$\epsilon_\mathsf{PLONK}$, $\epsilon_\mathsf{PLOOKUP}$, $\epsilon_\mathsf{DEEP-ALI}$, and $\epsilon_\mathsf{FRI}$ 
-are the soundness error bounds for our PLOOKUP argument, our DEEP-ALI implementation, and our FRI implementation, respectively. 
-In the following subsections, we bound $\epsilon_\mathsf{PLONK}$, $\epsilon_\mathsf{PLOOKUP}$, $\epsilon_\mathsf{DEEP-ALI}$, and $\epsilon_\mathsf{FRI}$, respectively. 
+where
+$\epsilon_\mathsf{PLONK}$, $\epsilon_\mathsf{PLOOKUP}$, $\epsilon_\mathsf{DEEP-ALI}$, and $\epsilon_\mathsf{FRI}$
+are the soundness error bounds for our PLOOKUP argument, our DEEP-ALI implementation, and our FRI implementation, respectively.
+In the following subsections, we bound $\epsilon_\mathsf{PLONK}$, $\epsilon_\mathsf{PLOOKUP}$, $\epsilon_\mathsf{DEEP-ALI}$, and $\epsilon_\mathsf{FRI}$, respectively.
 
 \subsubsection{Notation for Soundness Analysis}
-Using $\theta$ as the proximity parameter for the FRI low-degree test, the analysis in this section is proven to hold within the list-decoding radius ($\theta < 1-\sqrt{\rho}$) 
-and conjectured to hold up to code capacity ($\theta < 1 - \rho$). 
-The proofs for these soundness results follow from Theorems 1.5 and 8.3 of \cite{proxGaps} and Theorem 6.2 of \cite{deepFRI}. 
-The conjectured security follows from Conjecture 8.4 in \cite{proxGaps} and Conjecture 2.3 of \cite{deepFRI}. 
+Using $\theta$ as the proximity parameter for the FRI low-degree test, the analysis in this section is proven to hold within the list-decoding radius ($\theta < 1-\sqrt{\rho}$)
+and conjectured to hold up to code capacity ($\theta < 1 - \rho$).
+The proofs for these soundness results follow from Theorems 1.5 and 8.3 of \cite{proxGaps} and Theorem 6.2 of \cite{deepFRI}.
+The conjectured security follows from Conjecture 8.4 in \cite{proxGaps} and Conjecture 2.3 of \cite{deepFRI}.
 We include these theorems and conjectures in Appendix \ref{soundness theorems}.\\
 \\
-In the following subsections, $\mathsf{L}$ and $m$ come from the Guruswami-Sudan list-decoding algorithm, 
-$\theta=1-\rho\cdot(1+\frac{1}{2m})$ as in \cite{FRIsummary}, 
-and all other variables are defined in Section \ref{IOP notation}. 
-We point readers to \cite{FRIsummary} and \cite{ethSTARK} for more detailed descriptions of the DEEP-ALI and FRI error bounds, and to \cite{plonky2} for more details on the error bounds for the permutation arguments. 
+In the following subsections, $\mathsf{L}$ and $m$ come from the Guruswami-Sudan list-decoding algorithm,
+$\theta=1-\rho\cdot(1+\frac{1}{2m})$ as in \cite{FRIsummary},
+and all other variables are defined in Section \ref{IOP notation}.
+We point readers to \cite{FRIsummary} and \cite{ethSTARK} for more detailed descriptions of the DEEP-ALI and FRI error bounds, and to \cite{plonky2} for more details on the error bounds for the permutation arguments.
 \subsubsection{Error Bound on PLONK and PLOOKUP}
 The randomized preprocessing phase instantiates accumulators and constraints for two grand-product arguments.
 One accumulator is used to prove memory integrity, and the other is used to prove tap integrity.
-For each, a simple application of the Schwartz-Zippel Lemma yields a bound on soundness error. 
-We bound the error on the first by 
-$\frac{\mathsf{e}\cdot\mathsf{n}_{\sigma_\mathsf{mem}}\cdot2^{\mathsf{h}}}{|\mathbb{K}|}$ 
-and the second by 
-$\frac{\mathsf{e}\cdot\mathsf{n}_{\sigma_\mathsf{bytes}}\cdot2^{\mathsf{h}}}{|\mathbb{K}|}$. 
+For each, a simple application of the Schwartz-Zippel Lemma yields a bound on soundness error.
+We bound the error on the first by
+$\frac{\mathsf{e}\cdot\mathsf{n}_{\sigma_\mathsf{mem}}\cdot2^{\mathsf{h}}}{|\mathbb{K}|}$
+and the second by
+$\frac{\mathsf{e}\cdot\mathsf{n}_{\sigma_\mathsf{bytes}}\cdot2^{\mathsf{h}}}{|\mathbb{K}|}$.
 \subsubsection{Error Bound on DEEP-ALI}
-In our implementation of DEEP-ALI, the verifier samples a single randomness $\alpha_\mathsf{constraints}$ for combining constraints and then $z\in\mathbb{K}\backslash(\mathsf{H}\cup\mathsf{D})$ as a DEEP query. 
-Each of these random samplings has an associated error term. 
-We write $\epsilon_\mathsf{DEEP-ALI} = \epsilon_\mathsf{ALI} + \epsilon_\mathsf{DEEP}$, 
-where $\epsilon_\mathsf{ALI}$ is the soundness error associated with combining constraints 
+In our implementation of DEEP-ALI, the verifier samples a single randomness $\alpha_\mathsf{constraints}$ for combining constraints and then $z\in\mathbb{K}\backslash(\mathsf{H}\cup\mathsf{D})$ as a DEEP query.
+Each of these random samplings has an associated error term.
+We write $\epsilon_\mathsf{DEEP-ALI} = \epsilon_\mathsf{ALI} + \epsilon_\mathsf{DEEP}$,
+where $\epsilon_\mathsf{ALI}$ is the soundness error associated with combining constraints
 and $\epsilon_\mathsf{DEEP}$ is the soundness error associated with the DEEP query point. \\
 \\
-We differ from \cite{ethSTARK} here in that we use powers of a single randomness for combining constraints. 
+We differ from \cite{ethSTARK} here in that we use powers of a single randomness for combining constraints.
 Our results here align with \cite{FRIsummary}, aside from the change from $\mathsf{d}$ to $\mathsf{d-1}$ in the numerator in $\epsilon_\mathsf{DEEP}$.%
 \footnote{
-  Although $\mathsf{d}$ is defined to be the maximum degree among the constraints, the $\mathsf{d}$ term in \cite{FRIsummary}'s Theorem 8 is actually counting the number of DEEP validity polynomials (i.e. segment polynomials). 
+  Although $\mathsf{d}$ is defined to be the maximum degree among the constraints, the $\mathsf{d}$ term in \cite{FRIsummary}'s Theorem 8 is actually counting the number of DEEP validity polynomials (i.e. segment polynomials).
   Because our selectors (i.e., the indicator flags that manage constraint enforcement) are built into the constraints themselves, we find the number of DEEP validity polynomials to be one less than $\mathsf{d}$.
 }
-We find 
+We find
 \[
-  \epsilon_\mathsf{ALI} = 
+  \epsilon_\mathsf{ALI} =
   \frac{\mathsf{s}\cdot \mathsf{L}}{\mathbb{K}}
-\] 
-and 
+\]
+and
 \[
-  \epsilon_\mathsf{DEEP} = 
+  \epsilon_\mathsf{DEEP} =
   \frac{
     \mathsf{L}\cdot(\mathsf{d}-1)((\mathsf{k}+1)+(\mathsf{k}-1))}
     {|\mathbb{K}|-|\mathsf{H}|-|\mathsf{D}|}
 \]
 \subsubsection{Error Bound on FRI}
-The major results for the soundness of FRI in the list-decoding regime are Theorems 1.5 and 8.3 from \cite{proxGaps}. 
-As above, our soundness results for this part differ from the presentation in \cite{proxGaps} and \cite{ethSTARK} in that we use powers of a single random field element for FRI batching. 
-Again, our results here align with \cite{FRIsummary} (with a batch size of $\mathsf{w_{RAP}}+\mathsf{d}-1$). We find 
+The major results for the soundness of FRI in the list-decoding regime are Theorems 1.5 and 8.3 from \cite{proxGaps}.
+As above, our soundness results for this part differ from the presentation in \cite{proxGaps} and \cite{ethSTARK} in that we use powers of a single random field element for FRI batching.
+Again, our results here align with \cite{FRIsummary} (with a batch size of $\mathsf{w_{RAP}}+\mathsf{d}-1$). We find
 
-\[ 
+\[
     \epsilon_\mathsf{FRI} =
-    ((\mathsf{w_{RAP}}+\mathsf{d}-1)-\frac{1}{2})\cdot\frac{(m+\frac{1}{2})^7}{3\sqrt{\rho}^3}\cdot\frac{|\mathsf{D}|^2}{|\mathbb{K}|} 
-    + 
+    ((\mathsf{w_{RAP}}+\mathsf{d}-1)-\frac{1}{2})\cdot\frac{(m+\frac{1}{2})^7}{3\sqrt{\rho}^3}\cdot\frac{|\mathsf{D}|^2}{|\mathbb{K}|}
+    +
     \frac{(2m+1)\cdot(|\mathsf{D}|+1)\cdot\sum^r_{i=1}t_i}{\sqrt{\rho}\cdot|\mathbb{K}|}
     +
     (1-\theta)^\mathsf{n_{queries}}
@@ -463,30 +463,30 @@ Again, our results here align with \cite{FRIsummary} (with a batch size of $\mat
 \label{cyclic domains}
 In this section, we define the indexing for an execution trace. RISC Zero's architecture is finite-field based, and the indexing is based on powers of $\w\in\GF{p}$. \\
 \\
-In order to index a sequence of $l$ elements of $\GF{q}$, we choose an element of the base field $\w\in\GF{p}$ with multiplicative order $l$ and use the sequence $\{\w^0, \w^1, \ldots, \w^{l-1}\}$ as an indexing set. 
-This indexing is cyclical, in the sense that $\w^z=\w^{z-l}$ for any integer $z$. 
+In order to index a sequence of $l$ elements of $\GF{q}$, we choose an element of the base field $\w\in\GF{p}$ with multiplicative order $l$ and use the sequence $\{\w^0, \w^1, \ldots, \w^{l-1}\}$ as an indexing set.
+This indexing is cyclical, in the sense that $\w^z=\w^{z-l}$ for any integer $z$.
 We call the indexing set a cyclic domain, which we formalize as follows: \\
 \\
 Let $\GF{p}$ be a field of prime order, and let $\GF{q}$ be an extension of $\GF{p}$.
-\begin{definition}[Domain] 
+\begin{definition}[Domain]
   We call any non-empty subset $\D\subseteq\GF{p}$ a \textbf{domain}.
 \end{definition}
-\begin{definition}[Cyclic domain] 
-  Given $\w\in\GF{p}$, the set $\D(\omega)=\{w^i:i\in\mathbb{N}\}$ is a domain. 
-  If $\D=\D(\w)$ for some non-zero $\w\in\GF{p}$, then $\D$ is said to be a \textbf{cyclic domain} with \textbf{counter} $\w$. 
+\begin{definition}[Cyclic domain]
+  Given $\w\in\GF{p}$, the set $\D(\omega)=\{w^i:i\in\mathbb{N}\}$ is a domain.
+  If $\D=\D(\w)$ for some non-zero $\w\in\GF{p}$, then $\D$ is said to be a \textbf{cyclic domain} with \textbf{counter} $\w$.
 \end{definition}
 \begin{definition}[Cycle]
-  Given a cyclic domain $\D(\w)$, we call $c$ a \textbf{cycle} if $c\in\D(\omega)$. 
+  Given a cyclic domain $\D(\w)$, we call $c$ a \textbf{cycle} if $c\in\D(\omega)$.
 \end{definition}
-\noindent 
+\noindent
 We use the term ``cycle'' here as a step in the computation, related to a ``processor cycle''.
 This usage is distinct from the concept of a ``cyclic domain''.\\
 \\
 We note that $|\D(\w)|$ is equal to the multiplicative order of $\w$ and therefore divides
-$|\GF{p}^*|=p-1$. 
+$|\GF{p}^*|=p-1$.
 \\
 \begin{definition}[Cyclic Indexing]
-Let $\D(\w)\subseteq\mathbb{F}_p$ be the cyclic domain with counter $\omega$. 
+Let $\D(\w)\subseteq\mathbb{F}_p$ be the cyclic domain with counter $\omega$.
 We use the powers of $\omega$ to define an indexing for $\D(w)$:
 \begin{align*}
   \text{Index-Cycle}:\mathbb{N}&\longrightarrow\D(\w)\\
@@ -494,8 +494,8 @@ We use the powers of $\omega$ to define an indexing for $\D(w)$:
 \end{align*}
 \end{definition}
 \noindent
-This cyclic indexing on $\D(\w)$ serves as our notion of sequential time throughout the protocol. 
-We write \textbf{the $k^{th}$ cycle} or \textbf{the cycle at clocktime k} to mean $\omega^k$. 
+This cyclic indexing on $\D(\w)$ serves as our notion of sequential time throughout the protocol.
+We write \textbf{the $k^{th}$ cycle} or \textbf{the cycle at clocktime k} to mean $\omega^k$.
 We'll also use sequential language like \textbf{next cycle} and \textbf{previous cycle} based on this indexing, which we define as follows:
 \begin{alignat*}{3}
  &\text{Next-Cycle}:&\text{ }\D(\w)&\longrightarrow\D(\w)\\
@@ -515,19 +515,19 @@ In this section, we articulate the mathematical structure of blocks, including a
 \subsubsection{The Structure of a Block}
 \label{defining block}
 A \textbf{block} $\mathbf{u}$ over a cyclic domain $\D(\w)$ is a function%
-\footnote{Intuitively, a ``block'' is just a sequence of elements of $\GF{q}$ indexed by powers of $\w$.} $\D(\w)\to\GF{q}$. 
+\footnote{Intuitively, a ``block'' is just a sequence of elements of $\GF{q}$ indexed by powers of $\w$.} $\D(\w)\to\GF{q}$.
 We define the $i^\text{th}$ \textbf{entry} of $\mathbf{u}$, denoted $\mathbf{u}[i]$ as follows: \[\mathbf{u}[i]=\mathbf{u}(\w^i)\]
-We also define a block over a coset of a cyclic domain $\beta\mathcal{D}(\w)$, where $\mathbf{u}[i]=\mathbf{u}(\beta\cdot\w^i)$. 
+We also define a block over a coset of a cyclic domain $\beta\mathcal{D}(\w)$, where $\mathbf{u}[i]=\mathbf{u}(\beta\cdot\w^i)$.
 In what follows, we'll focus on blocks over cyclic domains for simplicity. \\
-\\Given $\mathbf{u}[n]$, we'll use sequential language like \textbf{next entry}, $\mathbf{u}[n+1]$ and \textbf{previous entry}, $\mathbf{u}[n-1]$. 
+\\Given $\mathbf{u}[n]$, we'll use sequential language like \textbf{next entry}, $\mathbf{u}[n+1]$ and \textbf{previous entry}, $\mathbf{u}[n-1]$.
 The \textbf{length} of $\mathbf{u}$ is the number of entries of $\mathbf{u}$, which is equal to the multiplicative order of $\w$.\\
 \\
 \textbf{Example}\\
 The entry of $\mathbf{u}$ that appears $n$ cycles before $\mathbf{u}(c)$ can be written as $\mathbf{u}(w^{-n}c)$. \\
 \subsubsection{Block Distance and Divergence}
 \label{distance}
-Let $\D(\w)\subseteq\GF{q}$ be the cyclic domain with counter $\w$, and let $\mathbf{u},\mathbf{v}$ be blocks indexed by $\w$. 
-We define the \textbf{distance} between blocks (aka \textbf{Hamming Distance}) to be the number of entries that differ between $\mathbf{u}$ and $\mathbf{v}$. 
+Let $\D(\w)\subseteq\GF{q}$ be the cyclic domain with counter $\w$, and let $\mathbf{u},\mathbf{v}$ be blocks indexed by $\w$.
+We define the \textbf{distance} between blocks (aka \textbf{Hamming Distance}) to be the number of entries that differ between $\mathbf{u}$ and $\mathbf{v}$.
 Formally,
 $$\delta(\mathbf{u},\mathbf{v})=|\{\w^n\in\D(\w):\mathbf{u}(\w^n)\neq \mathbf{v}(\w^n)\}|$$
 We say that $\mathbf{u}$ is $\delta$-\textbf{close} to $\mathbf{v}$ if the distance from $\mathbf{u}$ to $\mathbf{v}$ is less than or equal to $\delta$.\\
@@ -537,7 +537,7 @@ $$\Delta(\mathbf{u},\mathbf{v})=\frac{\delta(\mathbf{u},\mathbf{v})}{|D(\w)|}$$
 We note that for any \textbf{divergence} and \textbf{distance} are both \href{https://en.wikipedia.org/wiki/Metric_(mathematics)#Definition} {metrics} over the set of blocks. \\
 \\
 \textbf{Defining Divergence of a Block and a Set}\\
-Let $\D(\w)\subseteq\GF{q}$ be the cyclic domain with counter $\w$. Let $\mathbf{u}$ be a block indexed by $\w$, and let $V$ be a set of blocks indexed by $\w$. 
+Let $\D(\w)\subseteq\GF{q}$ be the cyclic domain with counter $\w$. Let $\mathbf{u}$ be a block indexed by $\w$, and let $V$ be a set of blocks indexed by $\w$.
 We define the \textbf{distance} between $\mathbf{u}$ and $V$ to be the distance between $\mathbf{u}$ and the closest block of $V$.
 $$\delta(\mathbf{u},V)=\min_{\mathbf{v} \in V} \delta(\mathbf{u},\mathbf{v})$$
 \\
@@ -564,7 +564,7 @@ With these definitions, we see that the set of blocks indexed by $\w$ forms a ve
 \\
 \textbf{Mixing Blocks}
 \label{mix}
-We define a method of mixing $n$ blocks into one, using a mixing parameter $\alpha$. 
+We define a method of mixing $n$ blocks into one, using a mixing parameter $\alpha$.
 This method is used to mix the constraint polynomials, to mix the DEEP polynomials, and throughout the FRI protocol. \\
 \\
 Let $D(\w)\subseteq\mathbb{F}_q$ be a cyclic domain. Let $\mathbf{U}=\mathbf{u}_0,...,\mathbf{u}_{m-1}$ be a sequence of blocks, each indexed by $\w$, and let $\alpha\in\GF{q}$ be a \textbf{mixing parameter}.
@@ -575,7 +575,7 @@ We note that a mix of $\mathbf{U}$ is a linear combination of $\mathbf{u}_i$.\\
 \label{ntt}
 \label{intt}
 \noindent
-An \textbf{iNTT} converts an array of evaluations over a domain $\D$ to an array of coefficients of the minimal-degree interpolating polynomial. 
+An \textbf{iNTT} converts an array of evaluations over a domain $\D$ to an array of coefficients of the minimal-degree interpolating polynomial.
 Given a block $\mathbf{u}$ over cyclic domain $\D(\w)$, we write $f_{\mathbf{u}}=\text{iNTT}(\mathbf{u})$.  \\
 \\
 An \textbf{NTT} converts an array of coefficients to an array of evaluations over a domain $\D.$
@@ -583,18 +583,18 @@ Given a polynomial $f$, we write $\mathbf{u}_f = \text{NTT}(f,\D)$.\\
 \\
 \textbf{Splitting Blocks}
 \label{split}
-We define a method of splitting 1 block of length $b \cdot l$ into $b$ blocks of length $l$. 
+We define a method of splitting 1 block of length $b \cdot l$ into $b$ blocks of length $l$.
 This method is used once per FRI commit round (see Appendix \ref{FRI} and as a means of reducing the degree of the validity polynomial (see Appendix \ref{committing validity polynomials}).\\
 \\
-Given: 
+Given:
 \begin{enumerate}
   \item a block $\mathbf{u}$ over $\D^{(0)}=\beta\D(\w)$, where $\w$ has order $b \cdot l$, and
   \item a subset $\D^{(1)}\subset\D^{(0)}$ where $\frac{|\D^{(0)}|}{|\D^{(1)}|}=b$,
 \end{enumerate}
-we construct $b$-\textbf{split}$(\mathbf{u})=\mathbf{v}_0,\mathbf{v}_1,\ldots,\mathbf{v}_{b-1}$, as follows: 
+we construct $b$-\textbf{split}$(\mathbf{u})=\mathbf{v}_0,\mathbf{v}_1,\ldots,\mathbf{v}_{b-1}$, as follows:
 \begin{enumerate}
   \item Compute $P_{\mathbf{u}} = iNTT(\mathbf{u})$
-  \item Sort the coefficients of $P_{\mathbf{u}}$ to construct $P_{\mathbf{v}_0},\ldots,P_{\mathbf{v}_{b-1}}$, such that 
+  \item Sort the coefficients of $P_{\mathbf{u}}$ to construct $P_{\mathbf{v}_0},\ldots,P_{\mathbf{v}_{b-1}}$, such that
   \[P_{\mathbf{u}}(x)=\sum_{i=0}^{b-1}x^iP_{\mathbf{v}_i}(x^b)\]
   Succinctly, the coefficient of the degree $j$ term in $P_{\mathbf{v}_i}$ is the $(bj+i)^\text{th}$ coefficient of $P_\mathbf{u}$.
   \item Compute each $\mathbf{v_i} = \text{NTT}(P_{\mathbf{v}_i},\D^{(1)})$
@@ -603,8 +603,8 @@ we construct $b$-\textbf{split}$(\mathbf{u})=\mathbf{v}_0,\mathbf{v}_1,\ldots,\m
 \label{reed solomon}
 In this section, we define Reed Solomon codes and outline their place in the RISC Zero proof system.
 \subsubsection{Intuition}
-A Reed-Solomon encoding is a method of translating a \textit{message} into a \textit{codeword}. 
-Intuitively, you can think of the messages as columns of the execution trace; 
+A Reed-Solomon encoding is a method of translating a \textit{message} into a \textit{codeword}.
+Intuitively, you can think of the messages as columns of the execution trace;
 these messages are converted to codewords, which are then committed to Merkle trees.  \\
 \\
 Put succinctly, a Reed Solomon encoding $\mathcal{R}$ encodes a message $\mathbf{m}$ into a \textit{codeword} $\mathbf{u}$ by associating $\mathbf{m}$ with a polynomial $f_{\mathbf{m}} = \text{iNTT}(\mathbf{m})$, and evaluating $f_{\mathbf{m}}$ over a larger cyclic domain.%
@@ -617,24 +617,24 @@ For an RS encoding of \textit{rate} $\frac{1}{4}$, distinct codewords will agree
 This means that the Verifier's probabilistic queries are very likely to check a discrepancy in the trace.
 \\
 \\
-For zero-knowledge purposes, RISC Zero adds random padding to the trace columns before implementing Reed-Solomon encoding and evaluates the NTT on a domain that does not intersect the domain of the message. 
+For zero-knowledge purposes, RISC Zero adds random padding to the trace columns before implementing Reed-Solomon encoding and evaluates the NTT on a domain that does not intersect the domain of the message.
 
 \subsubsection{Formal Definition of Reed-Solomon Encoding}
-Let $\w\in\GF{q}$ have multiplicative order $bl$ and let $\D(\w^b)\subseteq\D(\omega)\subseteq\GF{q}$. 
+Let $\w\in\GF{q}$ have multiplicative order $bl$ and let $\D(\w^b)\subseteq\D(\omega)\subseteq\GF{q}$.
 Let $\mathcal{B}(\w^b)$ be the set of all blocks over $\D(\w^b)$ and $\mathcal{B}(\w)$ be the set of all blocks over $\D(\w)$.\\
 \\
 We define%
-\footnote{For simplicity, we state the definitions here in terms of cyclic domains. 
-We note that these definitions generalize easily to cosets of cyclic domains.} 
+\footnote{For simplicity, we state the definitions here in terms of cyclic domains.
+We note that these definitions generalize easily to cosets of cyclic domains.}
 a Reed-Solomon Encoding, $\mathcal{R}$, where
 \[\mathcal{R}:\mathcal{B}(\w^b)\to\mathcal{B}(\w)\]
 \[\mathcal{R}:u\mapsto \overline{u}\]
 \\
-where the $i^\text{th}$ entry of $\overline{u}$ is $P_\mathbf{u}(\omega^i)$ and $P_\mathbf{u}(x)$ is the unique polynomial of degree $l-1$ that agrees with $\mathbf{u}$ on $\D(\w^b)$. 
+where the $i^\text{th}$ entry of $\overline{u}$ is $P_\mathbf{u}(\omega^i)$ and $P_\mathbf{u}(x)$ is the unique polynomial of degree $l-1$ that agrees with $\mathbf{u}$ on $\D(\w^b)$.
 We say $\mathcal{R}$ has \textbf{rate} $\frac{1}{b}$. \\
 \\ \label{valid}
 \\
-Given $\mathcal{R}:\mathcal{B}(\w^b)\to\mathcal{B}(\w)$, we say a block $\mathbf{v}\in\mathcal{B}(\w)$ is a \textbf{codeword} if there exists $u\in\mathcal{B}(w^b)$ such that $\mathcal{R}(u)=v$. 
+Given $\mathcal{R}:\mathcal{B}(\w^b)\to\mathcal{B}(\w)$, we say a block $\mathbf{v}\in\mathcal{B}(\w)$ is a \textbf{codeword} if there exists $u\in\mathcal{B}(w^b)$ such that $\mathcal{R}(u)=v$.
 We write $\mathcal{R}(\w)$ to refer to the set of blocks over $\D(\w)$ that are codewords with respect to $\mathcal{R}$.
 Given $\mathcal{R}$, the \textbf{code} is the collection of all such codewords.
 
@@ -650,16 +650,16 @@ But because of the redundancy introduced by the error correcting code, once the 
 Generally, we will say that if the result of the operations is a (mostly) correct codeword, and the spot checks succeed with high likelihood, that input was (very likely) a (mostly) correct codeword as well, and that the operation was done correctly across the whole code, in the sense that if we corrected both codes, we would find the entire process was error free.
 Of course the details here matter a great deal, as do all of the precise probabilities and divergences.\\
 \\
-We often care that the \hyperref[divergence]{divergence} of a given block from the set of \hyperref[codeword]{RS codewords} is below some critical distance $\dd$. 
+We often care that the \hyperref[divergence]{divergence} of a given block from the set of \hyperref[codeword]{RS codewords} is below some critical distance $\dd$.
 We say such a block is \hyperref[delta-close]{$\dd$-close} to the code.\\
 \\
-In the next sub-sections we will introduce the the core building blocks we will use for the protocols, and provide proofs of their correctness (directly or via reference).\\
+In the next sub-sections we will introduce the core building blocks we will use for the protocols, and provide proofs of their correctness (directly or via reference).\\
 \\
 In all cases below, we presume $\dd$ is within the unique decode range.
 The key concepts are (informally):
 \begin{description}
   \item[Mixing] If we randomly \hyperref[mix]{mix} codewords, and the output is $\dd$ close, it is very likely that all of inputs were also $\dd$ close.
-  \item[Splitting] We can \hyperref[split]{split} a codeword of length $bl$ into $b$ smaller codewords of length $l$, and can evaluate the split is correct by spot checking, so long as the outputs are all $\dd$ close. 
+  \item[Splitting] We can \hyperref[split]{split} a codeword of length $bl$ into $b$ smaller codewords of length $l$, and can evaluate the split is correct by spot checking, so long as the outputs are all $\dd$ close.
   \item[Evaluating] Given a codeword, we can verify the evaluation of the underlying message polynomial at an arbitrary field element by using a quotient to compute a new codeword, and then spot checking the two codewords for the implied algebraic relationship (so long as both are $\dd$ close).
 \end{description}
 \noindent
@@ -667,21 +667,21 @@ One can immediately see that by applying splitting and mixing recursively, one c
 This is in fact how the FRI protocol works.
 \subsubsection{Operations on RS Codewords}
 \label{RS operations}
-For proving completeness of the protocol, we need to show that if we start with RS codewords and perform algebraic block operations, the results will also be codewords. 
+For proving completeness of the protocol, we need to show that if we start with RS codewords and perform algebraic block operations, the results will also be codewords.
 In this section, we show that the set of codewords, $\mathcal{R}(\w)$ is closed under block addition and scalar multiplication, mixing, and splitting. \\
 \\
-Let $\mathbf{u},\mathbf{v}$ be codewords and let $\alpha\in\GF{q}$. 
+Let $\mathbf{u},\mathbf{v}$ be codewords and let $\alpha\in\GF{q}$.
 Since $\mathbf{u}$ and $\mathbf{v}$ are codewords, we can associate each of them with a low-degree polynomial: $P_\mathbf{u}$ and $P_\mathbf{v}$.\\
 \\
 \textbf{Addition}\\
-Block addition is defined as pointwise addition, so $\mathbf{u}+\mathbf{v}$ can be expressed as $P_{\mathbf{u}+\mathbf{v}}$ where $P_{\mathbf{u}+\mathbf{v}}$ is the polynomial formed via point-wise addition of $P_\mathbf{u}$ and $P_\mathbf{v}$. 
+Block addition is defined as pointwise addition, so $\mathbf{u}+\mathbf{v}$ can be expressed as $P_{\mathbf{u}+\mathbf{v}}$ where $P_{\mathbf{u}+\mathbf{v}}$ is the polynomial formed via point-wise addition of $P_\mathbf{u}$ and $P_\mathbf{v}$.
 
 \[P_{\mathbf{u}+\mathbf{v}}(x)=P_\mathbf{u}(x)+P_\mathbf{v}(x)\]
 \\
 Given that $\mathbf{u}$ and $\mathbf{v}$ are codewords, we conclude that $\mathbf{u}+\mathbf{v}$ is also a codeword since $\text{deg}(P_{\mathbf{u}+\mathbf{v}})\leq\text{max}\left(\text{deg}(P_\mathbf{u}),\text{deg}(P_\mathbf{v})\right)$.\\
 \\
 \textbf{Scalar Multiplication}\\
-Similarly, $\alpha \mathbf{u}$ can be expressed as $P_{\alpha \mathbf{u}}$, where 
+Similarly, $\alpha \mathbf{u}$ can be expressed as $P_{\alpha \mathbf{u}}$, where
 \[P_{\alpha \mathbf{u}}(x)=\alpha P_\mathbf{u}(x)\]
 Given that $\mathbf{u}$ is a codeword, we conclude that $\alpha \mathbf{u}$ is a codeword since $\text{deg}(P_{\alpha \mathbf{u}})=\text{deg}(P_\mathbf{u})$. \\
 \\
@@ -689,7 +689,7 @@ Given that $\mathbf{u}$ is a codeword, we conclude that $\alpha \mathbf{u}$ is a
 It follows immediately that the \textbf{mix} of codewords is also a codeword, since \textbf{mix} is just a linear combination of blocks.\\
 \\
 \textbf{Split}\\
-It is similarly immediate that if $\mathbf{u}$ is a codeword on $\D(\w)$, then each $\mathbf{v}_i$ in $\textbf{b-split}(u)$ is a codeword on $\D(\w^b)$. 
+It is similarly immediate that if $\mathbf{u}$ is a codeword on $\D(\w)$, then each $\mathbf{v}_i$ in $\textbf{b-split}(u)$ is a codeword on $\D(\w^b)$.
 This follows from the definition of $\textbf{split}$, since each $\mathbf{v}_i$ is constructed as the evaluation of a low-degree polynomial $P_{\mathbf{v}_i}$.\\
 \\
 \textbf{Eval}\\
@@ -712,18 +712,18 @@ The \textbf{eval} function is used to verify the evaluation of an RS-code at an 
   \]
 \end{definition}
 \noindent
-The Prover's construction of the $\mathsf{DEEPAnswerSequence}$ involves evaluations of witness polynomials that aren't part of the associated Merkle commitments. 
-The $\textbf{eval}$ function allows the Verifier to validate the $\mathsf{DEEPAnswerSequence}$ without relying on Merkle branches. 
+The Prover's construction of the $\mathsf{DEEPAnswerSequence}$ involves evaluations of witness polynomials that aren't part of the associated Merkle commitments.
+The $\textbf{eval}$ function allows the Verifier to validate the $\mathsf{DEEPAnswerSequence}$ without relying on Merkle branches.
 The intuition here is that if $b(z)$ is not equal to $u(z)$, then $\mathbf{u}'$ will not be a codeword.
 \subsubsection{Operations and Block Proximity}
-Throughout the protocol, the Prover uses the \textbf{mix} function in order to consolidate multiple arguments about \textbf{block proximity} to a single argument about block proximity. 
+Throughout the protocol, the Prover uses the \textbf{mix} function in order to consolidate multiple arguments about \textbf{block proximity} to a single argument about block proximity.
 For proving soundness of the protocol, we need to show that if the block associated with the final FRI polynomial $f_r$ is $\delta$-close to a codeword, then the original trace blocks and validity blocks are also $\delta$-close to a codeword.  \\
 \\
-The major theorem we rely on for this argument is presented in Theorem 1.5 of \href{https://eprint.iacr.org/2020/654.pdf}{Eli Ben-Sasson et al, 2020}. 
-Put succinctly, the premise is that if $\mathbf{U}$ is a sequence of blocks and some \textbf{mix} of $\mathbf{U}$ gives a result that is $\delta$-close to $\mathcal{R}(\w)$, then it's extremely likely that each of the blocks of $\mathbf{U}$ are also $\delta$-close to $\mathcal{R}(\w)$. 
+The major theorem we rely on for this argument is presented in Theorem 1.5 of \href{https://eprint.iacr.org/2020/654.pdf}{Eli Ben-Sasson et al, 2020}.
+Put succinctly, the premise is that if $\mathbf{U}$ is a sequence of blocks and some \textbf{mix} of $\mathbf{U}$ gives a result that is $\delta$-close to $\mathcal{R}(\w)$, then it's extremely likely that each of the blocks of $\mathbf{U}$ are also $\delta$-close to $\mathcal{R}(\w)$.
 Moreover, the $\delta$-closeness of the \textbf{mix}$(\mathbf{U})$ allows us to conclude that the locations-of-agreement in the pre-mixed blocks are \textbf{correlated}. \\
 \\
-This correlation is non-trivial and quite useful: typically if $\mathbf{a}$ and $\mathbf{b}$ are blocks that are each $\delta$-close to $\mathcal{R}(\w)$, $\mathbf{a+b}$ will not be $\delta$-close. 
+This correlation is non-trivial and quite useful: typically if $\mathbf{a}$ and $\mathbf{b}$ are blocks that are each $\delta$-close to $\mathcal{R}(\w)$, $\mathbf{a+b}$ will not be $\delta$-close.
 But if $\mathbf{a}$ and $\mathbf{b}$ have correlated agreement, we can conclude that:
 \[\delta(\mathbf{a}+\mathbf{b},\mathcal{R}(\w)) \leq \text{max}[\delta(\mathbf{a},\mathcal{R}(\w)),\delta(\mathbf{b},\mathcal{R}(\w))]\]
 \\
@@ -744,7 +744,7 @@ We capture this simplified understanding below
   then all $u \in \bold{u}$ are also $\dd$-close.
 \end{corollary}
 \begin{proof}
-  By Theorem \ref*{delta-close}, there exists a set $\D'$ such that for each $\mathbf{u}_i$, $\mathbf{u}_i(x) = \mathbf{v}_i(x)$ for all $x$ in $\D'$, and $\mathbf{v}_i \in V$.  
+  By Theorem \ref*{delta-close}, there exists a set $\D'$ such that for each $\mathbf{u}_i$, $\mathbf{u}_i(x) = \mathbf{v}_i(x)$ for all $x$ in $\D'$, and $\mathbf{v}_i \in V$.
   Since $\mathbf{u}_i$ and $\mathbf{v}_i$ agree on all points of $\D'$, and $|\D'|/|\D| \ge 1 - \delta$, we have $\Delta(\mathbf{u}_i, \mathbf{v}_i) \le \dd$, and thus $\Delta(\mathbf{u}_i, \mathcal{V}) \le \dd$.
 \end{proof}
 \noindent
@@ -752,7 +752,7 @@ We capture this simplified understanding below
 Haven't thought about this yet.\\
 \\
 \textbf{Evaluate and $\delta$-closeness}\\
-The following theorem shows that spot-checking the output of \textbf{eval} is sufficient to ensure a unique decoding of the input. 
+The following theorem shows that spot-checking the output of \textbf{eval} is sufficient to ensure a unique decoding of the input.
 \begin{theorem}
   Let
   \begin{itemize}
@@ -776,8 +776,8 @@ The following theorem shows that spot-checking the output of \textbf{eval} is su
 
   If $\mathbf{v} = \mathbf{v'} \prod (z - x_i) + b$, then it is clear that $\mathbf{v}$ meets the requirements of claim 2, since $\mathbf{v'} \prod (z - x_i)$ will be 0 at all $x_i$, and thus adding $\mathbf{b}$ will thus satisfy claim 2.
 
-  On the other hand, if $\mathbf{v} \ne \mathbf{v'} \prod (z - x_i) + b$, then the difference $d = \mathbf{v} - (\mathbf{v'} \prod (z - x_i) + b)$ is a non-zero polynomial of degree at most $k + n - 1$. 
-  Thus it can have at most $k + m - 1$ zeros.  
+  On the other hand, if $\mathbf{v} \ne \mathbf{v'} \prod (z - x_i) + b$, then the difference $d = \mathbf{v} - (\mathbf{v'} \prod (z - x_i) + b)$ is a non-zero polynomial of degree at most $k + n - 1$.
+  Thus it can have at most $k + m - 1$ zeros.
   But this would contradict equation 1, since it implies at least $k + m$ zeros over the $n$ element of $\D$.
 \end{proof}
 
@@ -791,11 +791,11 @@ Given a particular rule of RISC-V that we want to check at clock cycle $c$, we c
 \\
 In other words, we can write a rule-checking function, $\mathbf{r}$, whose inputs are taps of the trace, such that when $\mathbf{T}$ is a valid trace over cyclic domain $\D(\w)$, $\mathbf{r}(t_1(c),...t_k(c))=0$ for all $c\in\D(\w)$. \\
 \\
-This gives a construction of a single-input constraint function $C$: 
+This gives a construction of a single-input constraint function $C$:
 \[C:\D(\w)\to\GF{q}\]
 \[C:c\mapsto \mathbf{r}(t_1(c),...,t_k(c))\]
 \\
-By writing the taps in terms of trace polynomials, the Prover can express $C$ as a polynomial. 
+By writing the taps in terms of trace polynomials, the Prover can express $C$ as a polynomial.
 Putting this all together, we construct \textbf{constraint polynomials}%
 \footnote{The key feature of the Constraint Polynomials is that they have roots at each $c\in\D(\w^4)$.}, $C$, as follows:
 \[C(c)=\mathbf{r}(\overline{t_1},...,\overline{t_n})\]
@@ -804,15 +804,15 @@ and each $\overline{t_i}$ is a polynomial tap of the trace. In practice, we have
 
 \subsubsection{Trace Taps and Polynomial Taps}
 \label{taps}
-Trace taps offer a way to express references across multiple blocks and across multiple cycles. 
-Concretely, the \textbf{tap} $(i,j)$ at $c$ is the entry in $\mathbf{u}_i$ that appears $j$ clock cycles after $c$. 
+Trace taps offer a way to express references across multiple blocks and across multiple cycles.
+Concretely, the \textbf{tap} $(i,j)$ at $c$ is the entry in $\mathbf{u}_i$ that appears $j$ clock cycles after $c$.
 Concretely, the tap (1,2) at $\w^3$ is $\mathbf{u}_1(\w^{(3+2)}).$\\
 \\
-Polynomial taps $\overline{t_i}=(a_i,b_i)$ are a natural extension taps. Whereas a tap points to an entry in a trace, a \textbf{polynomial tap} points to an evaluation of a trace polynomial. 
+Polynomial taps $\overline{t_i}=(a_i,b_i)$ are a natural extension taps. Whereas a tap points to an entry in a trace, a \textbf{polynomial tap} points to an evaluation of a trace polynomial.
 Formally, the polynomial tap $\overline{t_i}=(a_i,b_i)$ is defined as follows:
 \[\overline{t_i}(c)=P_{a_i}(w^{b_i}c)\]where $P_{a_i}$ is the trace polynomial specified by the $i^\text{th}$ tap. \\
 \\
-\subsubsection*{Formal Definitions} 
+\subsubsection*{Formal Definitions}
 Given a trace $\mathbf{T}=\mathbf{u}_1,\mathbf{u}_2,...,\mathbf{u}_n$ over cyclic domain $\D(\w)$, we define a \textbf{tap} $t=(i,j)$ as a function
 \[t:\D(\w)\to\GF{q}\]
 \[t:c\mapsto \mathbf{u}_i(\w^jc)\]
@@ -825,32 +825,32 @@ Given a collection of Trace Polynomials $P_1,P_2,\ldots,P_n$, we define a \textb
 
 \section{Merkle Tree Structure}
 \label{merkle}
-In this section, we describe the structure of the Merkle commitments and Merkle proofs. 
+In this section, we describe the structure of the Merkle commitments and Merkle proofs.
 
-\subsection*{Merkle Leaves and Trees} 
+\subsection*{Merkle Leaves and Trees}
 \label{polyGroup}
 Throughout the protocol, each Merkle leaf is a vector in $\mathbb{K}$, constructed by evaluating a sequence of polynomials at a single point in $\mathsf{D}$. \\
 \\
 These polynomials are organized into \textbf{polyGroups}, where one Merkle tree is constructed per polyGroup. \\
 \\
-The Prover generates a Merkle root associated with each of the following polyGroups: 
+The Prover generates a Merkle root associated with each of the following polyGroups:
 \begin{enumerate}
-  \item Control polyGroup 
-  \item Data polyGroup 
-  \item $\mathsf{accum}$ polyGroup 
-  \item Validity polyGroup 
+  \item Control polyGroup
+  \item Data polyGroup
+  \item $\mathsf{accum}$ polyGroup
+  \item Validity polyGroup
   \item FRI polyGroup (1 per round of FRI)
 \end{enumerate}
 \subsection*{Merkle Branch Structure}
 \label{merkle branch}
-Given that we're doing lots of queries from the same Merkle Tree, these queries are expected to have quite a bit of overlap close to the root. 
+Given that we're doing lots of queries from the same Merkle Tree, these queries are expected to have quite a bit of overlap close to the root.
 To minimize computation, rather than checking all the way to the root, we choose a cut-off point called \texttt{top\_layer}.\\
 \\
-We store that entire layer, and for each query, we check our Merkle branches from \texttt{leaf} to \texttt{top\_layer}. 
+We store that entire layer, and for each query, we check our Merkle branches from \texttt{leaf} to \texttt{top\_layer}.
 The paths from \texttt{top\_layer} to the Merkle root only need to be checked once.\\
 \\
 More concretely, we initialize a vector \texttt{top} that will hold the top of the Merkle Tree. We initialize a vector \texttt{top} of size \texttt{2 * top\_size}.%
-\footnote{You can think of \texttt{top-size} as the size of \texttt{top-layer}.} We populate the second half of this vector with digests from \texttt{iop.read-digests}. 
+\footnote{You can think of \texttt{top-size} as the size of \texttt{top-layer}.} We populate the second half of this vector with digests from \texttt{iop.read-digests}.
 Then, for \texttt{i} in \texttt{(1..top\_size)}, in reverse order, we compute \\
 \texttt{top[i] = hash(top[2*i], top[2*i +1])}. \\
 \\
@@ -866,7 +866,7 @@ We end with the top of the Merkle tree stored in \texttt{top}, with the \texttt{
               tier/.option=level,
               EL/.style = {edge label={node[midway, fill=white, inner sep=2pt,
                                             font=\footnotesize\itshape, anchor=center,
-                                            text depth=0.3ex]{#1}}, 
+                                            text depth=0.3ex]{#1}},
                           }% edge labels style
               }
 %
@@ -889,46 +889,46 @@ Now, to check the validity of a branch that passes through \texttt{top[4]}, this
 
 
 \section{Protocol Details}
-A concise description of the IOP protocol is presented in Section \ref{IOP spec}. 
-This section presents a more detailed explanation of each step. 
+A concise description of the IOP protocol is presented in Section \ref{IOP spec}.
+This section presents a more detailed explanation of each step.
 In this section, we use the notation $M_\mathsf{label}$ as shorthand for $\mathsf{Com}(\mathbb{w}_\mathsf{label})$.
 \subsection{Constructing $\mathbb{w}_\mathsf{control}$ and $\mathbb{w}_\mathsf{data}$}
 \label{committing trace}
-As in \cite{stark}, the trace columns are encoded into trace blocks using Reed-Solomon encoding \cite{reed-solomon}. 
+As in \cite{stark}, the trace columns are encoded into trace blocks using Reed-Solomon encoding \cite{reed-solomon}.
 $\mathbb{w}_\mathsf{control}$ and $\mathbb{w}_\mathsf{data}$ correspond to the control blocks and data blocks, respectively, as explained in Section \ref{trace}.\\
 \\
 The trace columns ($\mathbf{m}_i$) are encoded as \textbf{trace \hyperref[blocks]{blocks}}%
-\footnote{We define blocks in Appendix \ref{defining block} and Reed-Solomon encoding in Appendix \ref{reed solomon}.} ($\mathbf{u}_i$) as follows: 
+\footnote{We define blocks in Appendix \ref{defining block} and Reed-Solomon encoding in Appendix \ref{reed solomon}.} ($\mathbf{u}_i$) as follows:
 \begin{enumerate}
-\item Each (padded) column, $\mathbf{m}_i$ is treated as a Reed-Solomon\cite{reed-solomon} ``message.'' 
+\item Each (padded) column, $\mathbf{m}_i$ is treated as a Reed-Solomon\cite{reed-solomon} ``message.''
 Each message is used to construct a low-degree polynomial, $P_{\mathbf{u_i}}(x)$ using an iNTT (over $\D(\w^4)$, as defined in Appendix \ref{cyclic domains}).
 \item The resulting polynomial $P_{\mathbf{u_i}}(x)$ is then evaluated over $\beta\D(\w)$ using an NTT, where $\beta\D(\w)$ is a multiplicative coset%
-\footnote{Note that while most discussions of NTTs and iNTTs occur over a multiplicative subgroup of a finite field, RISC Zero's NTT and iNTT implementation works over a coset of a multiplicative subgroup as well. 
-We write NTTs and iNTTs as two-argument functions that receive (1) an array over an (implied) finite field and (2) a cyclic domain or a coset of a cyclic domain. 
+\footnote{Note that while most discussions of NTTs and iNTTs occur over a multiplicative subgroup of a finite field, RISC Zero's NTT and iNTT implementation works over a coset of a multiplicative subgroup as well.
+We write NTTs and iNTTs as two-argument functions that receive (1) an array over an (implied) finite field and (2) a cyclic domain or a coset of a cyclic domain.
 See Appendix \ref{ntt} for more details.} of $\D(\w)$:
 \begin{equation*}
 \beta\D(\w) = \{\beta x\in\GF{q} : x \in \D(\w)\}
 \end{equation*}
-The resulting array of evaluations is called a \textbf{block}. Succinctly, we define the $i^\text{th}$ trace block as follows: $\mathbf{u}_i = P_{\mathbf{u}_i}\big|_{\beta\D(\w)}$. 
-\end{enumerate} 
-We'll sometimes write this succinctly as $\mathbf{u}_i = \text{NTT}(\text{iNTT}(\mathbf{m}_i))$. 
-Note that $\mathbf{u}_i \neq \mathbf{m}_i$ since the domain of the NTT and the iNTT differ. 
+The resulting array of evaluations is called a \textbf{block}. Succinctly, we define the $i^\text{th}$ trace block as follows: $\mathbf{u}_i = P_{\mathbf{u}_i}\big|_{\beta\D(\w)}$.
+\end{enumerate}
+We'll sometimes write this succinctly as $\mathbf{u}_i = \text{NTT}(\text{iNTT}(\mathbf{m}_i))$.
+Note that $\mathbf{u}_i \neq \mathbf{m}_i$ since the domain of the NTT and the iNTT differ.
 \subsection{Constructing $\mathsf{Com}(\mathbb{w}_\mathsf{control})$ and $\mathsf{Com}(\mathbb{w}_\mathsf{data})$}
 \label{merkle trace}
-The Prover constructs two Merkle Trees, a \textbf{Control Tree} and a \textbf{Data Tree}, using the trace blocks (i.e., the evaluations of the Trace Polynomials on $\beta D(\w)$) as the leaves. 
+The Prover constructs two Merkle Trees, a \textbf{Control Tree} and a \textbf{Data Tree}, using the trace blocks (i.e., the evaluations of the Trace Polynomials on $\beta D(\w)$) as the leaves.
 Each leaf's address corresponds to a point of the coset $\beta\D(\w)$, and the contents of the leaf at address $z$ consist of the trace polynomials evaluated at $z$.
-As articulated in Appendix \ref{merkle}, the Prover computes the Merkle commitment for each tree, $\mathsf{Com}(\mathbb{w}_\mathsf{control})=M_\mathsf{control}$ and $\mathsf{Com}(\mathbb{w}_\mathsf{data})=M_\mathsf{data}$, and writes them to the seal. 
+As articulated in Appendix \ref{merkle}, the Prover computes the Merkle commitment for each tree, $\mathsf{Com}(\mathbb{w}_\mathsf{control})=M_\mathsf{control}$ and $\mathsf{Com}(\mathbb{w}_\mathsf{data})=M_\mathsf{data}$, and writes them to the seal.
 
 \subsection{Randomness for Accumulators}
 \label{accum randomness}
-In the interactive version of the protocol, the Verifier sends some randomly chosen Accumulation Parameters, after receiving the commitments $M_\mathsf{control}$ and $M_{D}$. 
+In the interactive version of the protocol, the Verifier sends some randomly chosen Accumulation Parameters, after receiving the commitments $M_\mathsf{control}$ and $M_{D}$.
 In the non-interactive version, we generate the Accumulation Parameters by running a SHA-2 CRNG on $M_\mathsf{control}||M_\mathsf{data}$.\footnote{We use $||$ to denote concatenation.}
 
 \subsection{Constructing $\mathsf{Com}(\mathbb{w}_\mathsf{accum})$ }
 \label{committing accum}
-As in \cite{cairo} and \cite{RAP}, we instantiate our system as a randomized AIR with preprocessing (RAP). 
+As in \cite{cairo} and \cite{RAP}, we instantiate our system as a randomized AIR with preprocessing (RAP).
 The random accumulation parameter defined in Appendix \ref{accum randomness} is used (along with $\mathbb{w}_\mathsf{data}$) to generate accumulator polynomials.
-The evaluations of these accumulator polynomials are called $\mathbb{w}_\mathsf{accum}$; the resulting Merkle cap, $M_\mathsf{accum}$, is committed to the seal. 
+The evaluations of these accumulator polynomials are called $\mathbb{w}_\mathsf{accum}$; the resulting Merkle cap, $M_\mathsf{accum}$, is committed to the seal.
 The seal now reads
 \[
   M_\mathsf{control}||
@@ -937,11 +937,11 @@ The seal now reads
 \]
 
 \subsection{DEEP-ALI: Constructing $\mathsf{Com}(\mathbb{w}_\mathsf{validity})$ and the $\mathsf{DEEPAnswerSequence}$}
-The DEEP-ALI portion of the protocol includes two elements of randomness and two Prover commitments. 
+The DEEP-ALI portion of the protocol includes two elements of randomness and two Prover commitments.
 \subsubsection{Randomness for Algebraic Linking}
 \label{constraint mixing parameter}
-In the interactive version of the protocol, the Verifier sends a randomly chosen Mixing Parameter, $\alpha_\mathsf{constraints}$, after receiving the Merkle root $M_{P}$. 
-In the non-interactive version, we generate the mixing parameter by running a SHA-2 CRNG on 
+In the interactive version of the protocol, the Verifier sends a randomly chosen Mixing Parameter, $\alpha_\mathsf{constraints}$, after receiving the Merkle root $M_{P}$.
+In the non-interactive version, we generate the mixing parameter by running a SHA-2 CRNG on
 $
   M_\mathsf{control}||
   M_\mathsf{data}||
@@ -950,18 +950,18 @@ $.
 
 \subsubsection{Constructing $\mathsf{Com}(\mathbb{w}_\mathsf{validity})$}
 \label{committing validity polynomials}
-The Prover first generates a number of \textbf{Constraint Blocks}, $\mathbf{c}_i$ using time-symmetric rule-checking functions and the Trace Blocks\footnote{We use ``trace block'' to refer to $\text{NTT}(P_{\mathbf{u}_i},\D(\w))$. 
-Note that the $i^\text{th}$ trace block has 4x the length of trace column $\mathbf{u}_i$}. 
-Then, these $\mathbf{c}_i$ are \hyperref[mix]{mixed} together using the Constraint Mixing Parameter $\alpha_\mathsf{constraints}$ to form the \textbf{Mixed Constraint Block}, $\mathbf{C}$: 
+The Prover first generates a number of \textbf{Constraint Blocks}, $\mathbf{c}_i$ using time-symmetric rule-checking functions and the Trace Blocks\footnote{We use ``trace block'' to refer to $\text{NTT}(P_{\mathbf{u}_i},\D(\w))$.
+Note that the $i^\text{th}$ trace block has 4x the length of trace column $\mathbf{u}_i$}.
+Then, these $\mathbf{c}_i$ are \hyperref[mix]{mixed} together using the Constraint Mixing Parameter $\alpha_\mathsf{constraints}$ to form the \textbf{Mixed Constraint Block}, $\mathbf{C}$:
 \[\mathbf{C}=\textbf{mix}_{\alpha_\mathsf{constraints}}(C_1,...C_v)=\alpha_\mathsf{constraints} C_1 + ... + \alpha_\mathsf{constraints}^n C_v\]\\
 We note that $\mathbf{C}$ is a uni-variate polynomial of degree at most $5|\D(\w)|$, and that $\mathbf{C}(c)=0$ for each $c\in\D(\w)$.
-The Prover divides $\mathbf{C}$ by a publicly known \textbf{Zeros Block}\footnote{The Zeros Block consists of evaluations of the Zeros Polynomial over $\beta\D(\w)$.} to form the \textbf{High Degree Validity Block}. 
+The Prover divides $\mathbf{C}$ by a publicly known \textbf{Zeros Block}\footnote{The Zeros Block consists of evaluations of the Zeros Polynomial over $\beta\D(\w)$.} to form the \textbf{High Degree Validity Block}.
 To wrap up the construction, the Prover \hyperref[split]{splits} the High Degree Validity Block into 4 \textbf{Low Degree Validity Blocks}.%
-\footnote{We abuse terminology here in referring to the ``degree'' of a block. 
-We write ``low degree block'' to mean that the polynomial associated with the block has degree less than or equal to the degree of the trace polynomials, $n$  (which is equal to the length of a column of the trace). 
-Enforcing RISC-V rules uses relations up to degree 5, which means the degree of the mixed constraint block is $5n$. 
-After dividing by the zeros block, the High Degree Validity Block has degree $4n$, and the Low Degree Validity Polynomials have degree $n$.}, then commits those blocks to a new Merkle Tree (the Validity Tree) and appends the root of the tree, $M_\mathsf{validity}$, to the seal. 
-At this stage, the seal reads as follows:  
+\footnote{We abuse terminology here in referring to the ``degree'' of a block.
+We write ``low degree block'' to mean that the polynomial associated with the block has degree less than or equal to the degree of the trace polynomials, $n$  (which is equal to the length of a column of the trace).
+Enforcing RISC-V rules uses relations up to degree 5, which means the degree of the mixed constraint block is $5n$.
+After dividing by the zeros block, the High Degree Validity Block has degree $4n$, and the Low Degree Validity Polynomials have degree $n$.}, then commits those blocks to a new Merkle Tree (the Validity Tree) and appends the root of the tree, $M_\mathsf{validity}$, to the seal.
+At this stage, the seal reads as follows:
 \[
   M_\mathsf{control}||
   M_\mathsf{data}||
@@ -971,7 +971,7 @@ At this stage, the seal reads as follows:
 
 \subsubsection{Randomness for DEEP}
 \label{choose test point}
-In the interactive version of the protocol, the Verifier sends a randomly chosen test point, $z\in\GF{q}$, after receiving the Merkle root $M_{v}$. 
+In the interactive version of the protocol, the Verifier sends a randomly chosen test point, $z\in\GF{q}$, after receiving the Merkle root $M_{v}$.
 In the non-interactive version, we generate $z$ by running a SHA-2 CRNG on $M_\mathsf{control}||M_\mathsf{data}||M_\mathsf{accum}||M_\mathsf{validity}$.
 
 \subsubsection{Intuition for DEEP technique}
@@ -979,19 +979,19 @@ In the non-interactive version, we generate $z$ by running a SHA-2 CRNG on $M_\m
 \label{necessary evaluations}
 The Prover will send the $\mathsf{DEEPAnswerSequence}$, which allows the Verifier to enforce to check the $\mathbf{C}(z)=Z(z)V(z)$ at the DEEP Test point, $z$. \\
 \\
-Since $z$ is not in the Merkle Tree commitments for the Trace Polynomials or the Validity Polynomials, the Prover sends additional information in order enforce that the values provided agree with the earlier Merkle commitments. 
+Since $z$ is not in the Merkle Tree commitments for the Trace Polynomials or the Validity Polynomials, the Prover sends additional information in order enforce that the values provided agree with the earlier Merkle commitments.
 This information is called the $\mathsf{DEEPAnswerSequence}$.\\
 \\
-The core of the DEEP technique is the insight that if $f(z)=a$, then $x-z$ divides $f(x)-a$ as polynomials. 
-Moreover, if $f(z_1)=a_1$ and $f(z_2)=a_2$, then the polynomial $(x-z_1)(x-z_2)$ divides $f(x)-\overline{f}(x)$, where $\overline{f}$ is the interpolation of $(z_1,a_1)$ and $(z_2,a_2)$. 
+The core of the DEEP technique is the insight that if $f(z)=a$, then $x-z$ divides $f(x)-a$ as polynomials.
+Moreover, if $f(z_1)=a_1$ and $f(z_2)=a_2$, then the polynomial $(x-z_1)(x-z_2)$ divides $f(x)-\overline{f}(x)$, where $\overline{f}$ is the interpolation of $(z_1,a_1)$ and $(z_2,a_2)$.
 \subsubsection{Constructing the $\mathsf{DEEPAnswerSequence}$}
 The $\mathsf{DEEPAnswerSequence}$ consists of the $\mathsf{tapset}$, the evaluation of $V$ at $z$, and the column-by-column interpolations of the $\mathsf{tapset}$.\\
 \label{DEEP Polynomials}
 \\
-We define a DEEP polynomial for each Trace Polynomial $P_i$ and each low-degree validity polynomial $\mathbf{v}_j$. Given trace polynomial $P_i$, we define the DEEP polynomial $d_i$ as: 
+We define a DEEP polynomial for each Trace Polynomial $P_i$ and each low-degree validity polynomial $\mathbf{v}_j$. Given trace polynomial $P_i$, we define the DEEP polynomial $d_i$ as:
 \[d_i(x)=\frac{P_i(x)-\overline{P_i}(x)}{(x-x_1)\cdots(x-x_n)}\]
 where $(x_1,P_i(x_1)),\ldots,(x_n,P_i(x_n))$ are the \hyperref[taps]{taps}%
-\footnote{For details on taps, see Appendix \ref*{taps}.} 
+\footnote{For details on taps, see Appendix \ref*{taps}.}
 of $P_i$ at $z$ and $\overline{P_i}(x)$ is the polynomial interpolation of those taps.%
 \footnote{In the Rust source, the coefficients of $\overline{P_i}$ are referred to as ``$u$ coefficients.'' }
 \\
@@ -1003,10 +1003,10 @@ We can define $d_i$ more succinctly using the $\textbf{eval}$ function defined i
     P_i,
     \mathsf{taps}
   )\]
-DEEP polynomials for $v'_j$ are defined analogously and denoted by $d_{\mathsf{w}_\mathsf{RAP}+j}$ where $\mathsf{w}_\mathsf{RAP}$ is the total number of trace polynomials. 
+DEEP polynomials for $v'_j$ are defined analogously and denoted by $d_{\mathsf{w}_\mathsf{RAP}+j}$ where $\mathsf{w}_\mathsf{RAP}$ is the total number of trace polynomials.
 Since there are always 4 validity polynomials in our use cases, we end up with 4 DEEP validity polynomials $d_{\mathsf{w}_\mathsf{RAP}},\ldots,d_{\mathsf{w}_\mathsf{RAP}+3}$. \\
 \\
-The Prover interpolates each $\overline{P_i}$ and sends the coefficients to the Verifier, unencrypted. The seal now reads: 
+The Prover interpolates each $\overline{P_i}$ and sends the coefficients to the Verifier, unencrypted. The seal now reads:
 
 \[
   M_\mathsf{control}||
@@ -1017,20 +1017,20 @@ The Prover interpolates each $\overline{P_i}$ and sends the coefficients to the 
 \]
 The Verifier can now check%
 \footnote{
-  The Verifier computes the LHS by evaluating the DEEP validity polynomials at $z^4$ and using those values to compute $V(z)$. 
+  The Verifier computes the LHS by evaluating the DEEP validity polynomials at $z^4$ and using those values to compute $V(z)$.
   The Verifier computes the RHS by evaluating $d_i(z)$ for each trace polynomial and uses those values to compute $C(z)$ and then $V(z)$.
   }
-that $V(z)C(z)=Z(z)$. 
+that $V(z)C(z)=Z(z)$.
 \subsection{The Batched FRI Protocol}
 \label{FRI}
 RISC Zero uses the batched FRI protocol as described in Section 8.2 of the Proximity Gaps for Reed-Solomon Codes paper. \\
 \\
-First, the DEEP blocks are batched and then re-indexed to form a single block $f^{(0)}$. 
+First, the DEEP blocks are batched and then re-indexed to form a single block $f^{(0)}$.
 At this stage, the Prover has reduced the assertion of computational integrity to an assertion that $\mathsf{deg}(f^{(0))}$ is less than some $n$. \\
 \\
-Then, over $r$ recursive steps, the Prover reduces the assertion that $\text{deg}(f^{(0)})<n$ to an assertion that $\text{deg}(f^{(r)})<256$. 
+Then, over $r$ recursive steps, the Prover reduces the assertion that $\text{deg}(f^{(0)})<n$ to an assertion that $\text{deg}(f^{(r)})<256$.
 \subsubsection*{Batching}
-The Verifier uses an HMAC to choose a FRI batching parameter, $\alpha_\mathsf{FRI}$. 
+The Verifier uses an HMAC to choose a FRI batching parameter, $\alpha_\mathsf{FRI}$.
 The Prover uses $\alpha_\mathsf{FRI}$ to mix $d_0,\ldots,d_{\mathsf{w}_\mathsf{RAP}+3}$. The result of this mixing is denoted $d(x):$
 
 \[d(x) = \textbf{mix}_{\alpha_\mathsf{FRI}}(d_0,\ldots,d_{\mathsf{w}_\mathsf{RAP}+3}) = \sum_{i=0}^{\mathsf{w}_\mathsf{RAP}+3}\alpha_\mathsf{FRI}^i d_i(x)\]
@@ -1038,7 +1038,7 @@ The Prover uses $\alpha_\mathsf{FRI}$ to mix $d_0,\ldots,d_{\mathsf{w}_\mathsf{R
 Rather than evaluating $d$ over the coset $\beta{\D(\w)}$, the Prover first defines $f^{(0)}$ as a re-indexing%
 \footnote{This re-indexing serves to simplify our application of the FRI protocol from ``coset FRI'' to ``subgroup FRI.''} of $d$:
 \[f^{(0)}(x)=d(\beta^{-1}x)\]
-Now, the Prover evaluates $f^{(0)}$ over $\D(\w)$ (which yields the same array as evaluating $d$ over $\beta{\D(\w)}$). 
+Now, the Prover evaluates $f^{(0)}$ over $\D(\w)$ (which yields the same array as evaluating $d$ over $\beta{\D(\w)}$).
 The Prover commits the evaluations to a Merkle tree and adds the associated Merkle root $M_{f^{(0)}}$ to the seal. \\
 \\
 The seal now reads:
@@ -1052,12 +1052,12 @@ RISC Zero uses a \textit{split factor} of 16 throughout FRI, but we write the sp
 Each Merkle tree $M_{f^{(i)}}$ is constructed by evaluating $f^{(i)}$ over $\D^{(i)}=\D(\w^{l^i})$.%
 \footnote{Note that $\D^{(r)}\subset\ldots\subset\D^{(0)}$ and that $\frac{|\D^{(i)}|}{|\D^{(i+1)}|}=l$.}
 \\
-\\For $i=1,\ldots,r$, each $f^{(i)}$ is constructed by computing $\textbf{mix}_{\alpha^{(i)}}(\textbf{split}(f^{(i-1)}))$. 
+\\For $i=1,\ldots,r$, each $f^{(i)}$ is constructed by computing $\textbf{mix}_{\alpha^{(i)}}(\textbf{split}(f^{(i-1)}))$.
 The functions \textbf{mix} and \textbf{split} are defined in Appendix \ref{blocks}, and the mixing parameters $\alpha^{(i)}$ are verifier-supplied%
 \footnote{Generated using the Fiat-Shamir Heuristic} random parameters.\\
 \\
-The Prover constructs a Merkle tree and commits a root for each $f^{(1)},\ldots,f^{(r-1)}$. 
-For $f^{(0)}$, the Prover interpolates the result and sends the coefficients. 
+The Prover constructs a Merkle tree and commits a root for each $f^{(1)},\ldots,f^{(r-1)}$.
+For $f^{(0)}$, the Prover interpolates the result and sends the coefficients.
 The seal now reads:
 \[
   M_\mathsf{control}||
@@ -1076,23 +1076,23 @@ The seal now reads:
 After the FRI commit rounds, the Verifier makes a number of \textbf{queries} to check the integrity of the FRI commitments. \\
 \\
 For a single query, the Verifier specifies an element $g^{(0)}\in\D^{(0)}$, which then induces:
-\begin{enumerate} 
+\begin{enumerate}
   \item a choice of $g^{(i)}\in\D^{(i)}$ for each $i=1,\ldots,r$. Specifically, $g^{(i)}=(g^{(i-1)})^l$.
-  \item a coset $C^{(i)}$ for each $i=0,\ldots,r-1$. Specifically, $C^{(i)}\subset\D^{(i)}$ contains the $l^\text{th}$ roots of $g^{i+1}\in\D^{(i+1)}$. 
+  \item a coset $C^{(i)}$ for each $i=0,\ldots,r-1$. Specifically, $C^{(i)}\subset\D^{(i)}$ contains the $l^\text{th}$ roots of $g^{i+1}\in\D^{(i+1)}$.
 \end{enumerate}
 The Prover returns $f^{(i)}|_{C^{(i)}}$ for each $i=0,\ldots,r-1$ and $f^{(r)}(g^{(r)})$. \\
 \\
 The verify checks:
 \begin{enumerate}
-  \item The FRI batching commitment matches against the DEEP polynomials at $g^{(0)}$. 
-  \item The \textbf{split} and \textbf{mix} operations match from round-to-round. 
-  This operation can be checked locally, using only the values revealed for the query. 
+  \item The FRI batching commitment matches against the DEEP polynomials at $g^{(0)}$.
+  \item The \textbf{split} and \textbf{mix} operations match from round-to-round.
+  This operation can be checked locally, using only the values revealed for the query.
   In particular, the value of $f^{(i+1)}(g^{(i+1)})$ can be computed using the values $f^{(i)}|_{C^{(i)}}$.\\
 \end{enumerate}
 
 \section{Key Theorems for Soundness Analysis}
 \label{soundness theorems}
-We state the key theorems for soundness analysis here. 
+We state the key theorems for soundness analysis here.
 \\
 \begin{theorem}[Reed-Solomon unique decoding]
   \label{uniq-decode}
@@ -1124,13 +1124,13 @@ We state the key theorems for soundness analysis here.
   \end{quote}
 An alternative statement of this theorem is given in \cite{FRIsummary}:
 \begin{theorem}
-  (Correlated Agreement Theorem) Let $\mathsf{RS}_k=\mathsf{RS}_k[F,D]$ be the Reed-Solomon code over a finite field $F$ with defining set $D\subseteq F$ and rate $\rho=\frac{k}{|D|}$. 
-  Given a proximity parameter $\theta\in(0,1-\sqrt{\rho})$ and words $f_0,f_1,\ldots,f_{N-1}\in F^D$ for which 
+  (Correlated Agreement Theorem) Let $\mathsf{RS}_k=\mathsf{RS}_k[F,D]$ be the Reed-Solomon code over a finite field $F$ with defining set $D\subseteq F$ and rate $\rho=\frac{k}{|D|}$.
+  Given a proximity parameter $\theta\in(0,1-\sqrt{\rho})$ and words $f_0,f_1,\ldots,f_{N-1}\in F^D$ for which
   \[
     \frac{|\{\lambda\in F:\delta(f_0+\lambda\cdot f_1 +\ldots+\lambda^{N-1}\cdot f_{N-1},\mathsf{RS}_k)\leq\theta\}|}{|F|}>\epsilon
   \]
-  where $\epsilon$ is as in $(1)$ and $(2)$ below. 
-  Then there exist polynomials $p_0(X),p_1(X),\ldots,p_{N-1}(X)$ belonging to $\mathsf{RS}_k$, and a set $A\subseteq D$ of density $\frac{|A|}{|D|}\geq 1-\theta$ on which $f_0,\ldots,f_{N-1}$ jointly coincide with $p_0,\ldots,p_{N-1},$ respectively. In particular, 
+  where $\epsilon$ is as in $(1)$ and $(2)$ below.
+  Then there exist polynomials $p_0(X),p_1(X),\ldots,p_{N-1}(X)$ belonging to $\mathsf{RS}_k$, and a set $A\subseteq D$ of density $\frac{|A|}{|D|}\geq 1-\theta$ on which $f_0,\ldots,f_{N-1}$ jointly coincide with $p_0,\ldots,p_{N-1},$ respectively. In particular,
   \[
     \delta(f_0+\lambda\cdot f_1 + \ldots + \lambda^{N-1}\cdot f_{N-1},\mathsf{RS}_k)\leq\theta
   \]
@@ -1138,18 +1138,18 @@ An alternative statement of this theorem is given in \cite{FRIsummary}:
 \end{theorem}
 \noindent
 Quoting \cite{FRIsummary}:
-Depending on the decoding regime, the following values for $\epsilon$ are obtained by \cite{proxGaps}: 
+Depending on the decoding regime, the following values for $\epsilon$ are obtained by \cite{proxGaps}:
 \begin{enumerate}
   \item Unique decoding regime. \\
-  For $\theta\in\left(0,\frac{1-\rho}{2}\right)$, the theorem above holds with 
+  For $\theta\in\left(0,\frac{1-\rho}{2}\right)$, the theorem above holds with
   \[\epsilon = (N-1)\cdot\frac{|D|}{|F|}\]
   \item List decoding regime. \\
-  For $\theta\in\left(\frac{1-\rho}{2},1-\sqrt{\rho}\right)$, the theorem above holds with 
+  For $\theta\in\left(\frac{1-\rho}{2},1-\sqrt{\rho}\right)$, the theorem above holds with
   \[
     \epsilon=
     (N-1)\cdot
     \frac{k^2}{|F|\cdot\text{min}\left(\frac{1}{m},\frac{1}{10}\right)^7}\approx
-    (N-1)\cdot 
+    (N-1)\cdot
     m^7\cdot
     \rho^{-\frac{3}{2}}\cdot
     \frac{|D|^2}{|F|}
@@ -1157,16 +1157,16 @@ Depending on the decoding regime, the following values for $\epsilon$ are obtain
 \end{enumerate}
 \begin{theorem}
   (Batched FRI soundness error) Suppose that $q_i\in F^D, i=0,\ldots,L-1$, is a batch of functions given by their domain evaluation oracles.
-  If an adversary passes batched FRI for $\mathsf{RS}_k[F,D]$ and proximity parameter $\theta=1-\sqrt{\rho}\cdot(1+\frac{1}{2m}),m\geq3$, with a probability larger than 
+  If an adversary passes batched FRI for $\mathsf{RS}_k[F,D]$ and proximity parameter $\theta=1-\sqrt{\rho}\cdot(1+\frac{1}{2m}),m\geq3$, with a probability larger than
   \[
     \epsilon=
-    (L-\frac{1}{2})\cdot\frac{(m+\frac{1}{2})^7}{3\sqrt{\rho}^3}\cdot\frac{|\mathsf{D}|^2}{|F|} 
-    + 
+    (L-\frac{1}{2})\cdot\frac{(m+\frac{1}{2})^7}{3\sqrt{\rho}^3}\cdot\frac{|\mathsf{D}|^2}{|F|}
+    +
     \frac{(2m+1)\cdot(|\mathsf{D}|+1)\cdot\sum^r_{i=1}a_i}{\sqrt{\rho}\cdot|F|}
     +
     (1-\theta)^s
   \]
-  then the functions $q_i\in F^D, i=0,\ldots,L-1$, have correlated agreement with $\mathsf{RS}_k[D,F]$ on a set of density of at least $\alpha>(1+\frac{1}{2m})\cdot\sqrt{\rho}$. 
+  then the functions $q_i\in F^D, i=0,\ldots,L-1$, have correlated agreement with $\mathsf{RS}_k[D,F]$ on a set of density of at least $\alpha>(1+\frac{1}{2m})\cdot\sqrt{\rho}$.
 \end{theorem}
 \noindent
 \textbf{RS Codes over Subfields}\\
@@ -1198,8 +1198,8 @@ Formally, we have:
   Therefore at most $\dd$ faction of the elements are not in $\mathbf{v}$, and we also have via \ref{u-mostly-p} that at most $\dd$ factions of elements are not in $\GF{p}$.
   Thus at least $b > 1 - 2 \dd$ elements must be both in $\mathbf{v}$ and in $\GF{p}$.
 
-  Since $\dd < \frac{1 - \p}{2}$, we have $b > \p$, or counting the number of elements rather than the fraction $B = b n > \p n > k$.  
-  Thus there are $k$ element in $\mathbf{v}$ which are in $\GF{p}$.  
+  Since $\dd < \frac{1 - \p}{2}$, we have $b > \p$, or counting the number of elements rather than the fraction $B = b n > \p n > k$.
+  Thus there are $k$ element in $\mathbf{v}$ which are in $\GF{p}$.
   But via interpolation over the field $\GF{p}$, we can find coefficients in $\GF{p}$, and therefore all all values in $\mathbf{v}$ are in $\GF{p}$, and thus $v \in V_p$, and thus $\mathbf{u'}$ is $\dd$ close to $V_p$.
 \end{proof}
 \end{appendices}
