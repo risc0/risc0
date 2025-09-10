@@ -24,7 +24,6 @@ mod panic;
 mod pipe;
 mod posix_io;
 mod random;
-mod slice_io;
 mod verify;
 mod verify2;
 
@@ -61,7 +60,7 @@ use crate::{
 use self::{
     args::SysArgs, cycle_count::SysCycleCount, getenv::SysGetenv, keccak::SysKeccak, log::SysLog,
     panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite, random::SysRandom,
-    slice_io::SysSliceIo, verify::SysVerify, verify2::SysVerify2,
+    verify::SysVerify, verify2::SysVerify2,
 };
 
 /// A host-side implementation of a system call.
@@ -147,7 +146,6 @@ impl<'a> SyscallTable<'a> {
 
     pub fn from_env(env: &ExecutorEnv<'a>) -> Self {
         let mut this = Self::new(env);
-
         this.with_syscall(SYS_ARGC, SysArgs(env.args.clone()))
             .with_syscall(SYS_ARGV, SysArgs(env.args.clone()))
             .with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
@@ -162,12 +160,6 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_VERIFY_INTEGRITY, SysVerify)
             .with_syscall(SYS_VERIFY_INTEGRITY2, SysVerify2)
             .with_syscall(SYS_WRITE, SysWrite);
-        for (syscall, handler) in env.slice_io.borrow().inner.iter() {
-            let handler = SysSliceIo::new(handler.clone());
-            this.inner
-                .insert(syscall.clone(), Rc::new(RefCell::new(handler)));
-        }
-
         this
     }
 
