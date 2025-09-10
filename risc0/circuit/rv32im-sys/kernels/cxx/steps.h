@@ -136,12 +136,12 @@ extern DigestRegStruct back_DigestReg(ExecContext& ctx,Index distance0, BoundLay
 extern DigestRegStruct exec_DigestReg(ExecContext& ctx,ValU32Struct8Array arg0, BoundLayout<DigestRegLayout> layout1)  ;
 extern InstOutputBaseStruct exec_ControlLoadRootAndNonce(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlLoadRootAndNonceLayout> layout2, GlobalBuf global3)  ;
 extern InstOutputBaseStruct exec_ControlResume(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlResumeLayout> layout2, GlobalBuf global3)  ;
-extern InstOutputBaseStruct exec_ControlUserECALL(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlUserECALLLayout> layout2)  ;
 extern InstOutputBaseStruct exec_ControlMRET(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlMRETLayout> layout2)  ;
 extern InstOutputBaseStruct exec_ControlSuspend(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlSuspendLayout> layout2, GlobalBuf global3)  ;
 extern InstOutputBaseStruct exec_ControlStoreRoot(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlStoreRootLayout> layout2, GlobalBuf global3)  ;
 extern InstOutputBaseStruct exec_ControlTable(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlTableLayout> layout2)  ;
 extern InstOutputBaseStruct exec_ControlDone(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlDoneLayout> layout2, GlobalBuf global3)  ;
+extern InstOutputBaseStruct exec_ControlUserEcallOrFence(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlUserEcallOrFenceLayout> layout2)  ;
 extern InstOutputBaseStruct exec_Control0(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<Control0Layout> layout2, GlobalBuf global3)  ;
 extern OneHot_6_Struct exec_OneHot_6_(ExecContext& ctx,Val arg0, BoundLayout<OneHot_6_Layout> layout1)  ;
 extern ECallOutputStruct exec_MachineECall(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, Val arg2_0, BoundLayout<MachineECallLayout> layout3)  ;

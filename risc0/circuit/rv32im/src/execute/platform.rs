@@ -165,6 +165,9 @@ pub mod major {
 pub mod control_minor {
     pub const RESUME: u8 = 1;
     pub const USER_ECALL: u8 = 2;
+    // FENCE shares its position with USER_ECALL and is differentiated
+    // in the circuit by inspection of the opcode
+    pub const FENCE: u8 = 2;
     pub const MRET: u8 = 3;
 }
 
