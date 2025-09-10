@@ -24,46 +24,53 @@ use crate::actors::protocol::TaskKind;
 
 pub const VERSION: usize = 1;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct VersionConfig {
     pub version: usize,
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub(crate) struct AppConfig {
     pub version: usize,
     pub api: Option<ApiConfig>,
     pub manager: Option<ManagerConfig>,
-    pub worker: Option<Vec<WorkerConfig>>,
+    pub executor: Option<ExecutorConfig>,
+    pub prover: Option<Vec<ProverConfig>>,
     pub storage: Option<StorageConfig>,
     pub telemetry: Option<TelemetryConfig>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub(crate) struct ApiConfig {
     pub listen: Option<SocketAddr>,
     pub manager: Option<SocketAddr>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub(crate) struct ManagerConfig {
     pub listen: Option<SocketAddr>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
-pub(crate) struct WorkerConfig {
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+pub(crate) struct ExecutorConfig {
+    pub manager: Option<SocketAddr>,
+    pub count: usize,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+pub(crate) struct ProverConfig {
     pub manager: Option<SocketAddr>,
     pub count: Option<usize>,
     pub subscribe: Vec<TaskKind>,
     pub simulate: Option<DevModeDelay>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub(crate) struct StorageConfig {
     pub path: PathBuf,
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub(crate) struct TelemetryConfig {
     // TODO
 }
@@ -79,11 +86,14 @@ impl Default for AppConfig {
             manager: Some(ManagerConfig {
                 listen: Some(default_manager_listen_addr()),
             }),
-            worker: Some(vec![WorkerConfig {
+            executor: Some(ExecutorConfig {
+                manager: None,
+                count: 1,
+            }),
+            prover: Some(vec![ProverConfig {
                 manager: None,
                 count: None,
                 subscribe: vec![
-                    TaskKind::Execute,
                     TaskKind::ProveSegment,
                     TaskKind::ProveKeccak,
                     TaskKind::Lift,
@@ -135,7 +145,8 @@ mod tests {
                     manager: Some(SocketAddr::from_str("1.2.3.4:9000").unwrap()),
                 }),
                 manager: None,
-                worker: None,
+                executor: None,
+                prover: None,
                 storage: Some(StorageConfig {
                     path: PathBuf::from_str("/mnt/storage/risc0").unwrap()
                 }),
@@ -158,12 +169,11 @@ mod tests {
                 manager: Some(ManagerConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap())
                 }),
-                worker: Some(vec![WorkerConfig {
+                executor: Some(ExecutorConfig {
                     manager: None,
-                    count: Some(4),
-                    simulate: None,
-                    subscribe: vec![TaskKind::Execute]
-                }]),
+                    count: 4,
+                }),
+                prover: None,
                 storage: Some(StorageConfig {
                     path: PathBuf::from_str("/mnt/storage/risc0").unwrap()
                 }),
@@ -181,8 +191,9 @@ mod tests {
                 version: 1,
                 api: None,
                 manager: None,
-                worker: Some(vec![
-                    WorkerConfig {
+                executor: None,
+                prover: Some(vec![
+                    ProverConfig {
                         manager: Some(SocketAddr::from_str("10.0.3.24:9000").unwrap()),
                         count: None,
                         simulate: None,
@@ -195,7 +206,7 @@ mod tests {
                             TaskKind::Resolve,
                         ]
                     },
-                    WorkerConfig {
+                    ProverConfig {
                         manager: Some(SocketAddr::from_str("10.0.3.24:9000").unwrap()),
                         count: None,
                         simulate: None,

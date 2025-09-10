@@ -12,11 +12,10 @@ listen = "0.0.0.0:9000"
 # path = "/mnt/storage/risc0"
 path = "/home/flaub/storage/risc0"
 
-[[worker]]
+[executor]
 count = 4
-subscribe = ["execute"]
 
-[[worker]]
+[[prover]]
 # manager = "10.0.3.24:9000"
 subscribe = [
   "prove-segment",
@@ -27,7 +26,7 @@ subscribe = [
   "resolve",
 ]
 
-[[worker]]
+[[prover]]
 # manager = "10.0.3.24:9000"
 subscribe = ["lift", "join", "union", "resolve"]
 
