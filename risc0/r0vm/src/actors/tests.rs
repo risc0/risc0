@@ -82,6 +82,7 @@ async fn do_test(remote: bool) {
     .unwrap();
 
     const ITERATIONS: u32 = 300000;
+    const ITERATIONS: u32 = 300000;
 
     let request = ProofRequest {
         binary: FIB_ELF.to_vec(),
@@ -93,7 +94,7 @@ async fn do_test(remote: bool) {
 
     let info = app.proof_request(request).await.unwrap();
 
-    tracing::info!("proof_request result = {info:#?}");
+    tracing::info!("xproof_request result = {info:#?}");
 
     let result = assert_matches!(info.status, JobStatus::Succeeded(r) => r);
 

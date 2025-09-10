@@ -302,6 +302,10 @@ impl Assembler {
     }
 
     pub fn die(&mut self) {
+        self.text.push(0x00000000);
+    }
+
+    pub fn fence(&mut self) {
         self.text.push(fence());
     }
 }
