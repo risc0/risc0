@@ -82,7 +82,6 @@ async fn do_test(remote: bool) {
     .unwrap();
 
     const ITERATIONS: u32 = 300000;
-    const ITERATIONS: u32 = 300000;
 
     let request = ProofRequest {
         binary: FIB_ELF.to_vec(),

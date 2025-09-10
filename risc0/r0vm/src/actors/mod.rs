@@ -13,7 +13,6 @@
 // limitations under the License.
 
 pub(crate) mod config;
-pub(crate) mod config;
 pub(crate) mod factory;
 pub(crate) mod job;
 pub(crate) mod manager;
@@ -74,8 +73,6 @@ use self::{
 #[tokio::main]
 pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<dyn StdError>> {
     let config: AppConfig = if let Some(ref path) = config_path {
-pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<dyn StdError>> {
-    let config: AppConfig = if let Some(ref path) = config_path {
         let str = tokio::fs::read_to_string(path).await?;
         let version: VersionConfig = toml::from_str(&str)?;
         let version = version.version;
@@ -83,14 +80,7 @@ pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<d
             return Err(anyhow::anyhow!("version {version} not supported").into());
         }
         toml::from_str(&str)?
-        let version: VersionConfig = toml::from_str(&str)?;
-        let version = version.version;
-        if version != VERSION {
-            return Err(anyhow::anyhow!("version {version} not supported").into());
-        }
-        toml::from_str(&str)?
     } else {
-        AppConfig::default()
         AppConfig::default()
     };
     tracing::info!("{config:#?}");
@@ -331,12 +321,10 @@ pub(crate) struct App {
 
 impl App {
     pub async fn new(cfg: AppConfig) -> Result<Self, Box<dyn StdError>> {
-    pub async fn new(cfg: AppConfig) -> Result<Self, Box<dyn StdError>> {
         let mut manager = None;
         let mut factory = None;
         let mut server = None;
         let mut local_addr = None;
-        let po2 = None;
         let po2 = None;
 
         let provider = cfg.telemetry.as_ref().map(|_| OpenTelemetryProvider::new());
@@ -350,7 +338,6 @@ impl App {
                 })
             } else {
                 None
-                None
             };
 
             let factory_ref = kameo::spawn(FactoryActor::new());
@@ -361,16 +348,13 @@ impl App {
             manager = Some(manager_ref.clone());
 
             if let Some(listen_addr) = cfg_manager.listen {
-            if let Some(listen_addr) = cfg_manager.listen {
                 server = Some(Server::new(listen_addr, factory_ref));
-                local_addr = server.as_mut().unwrap().start().await?;
                 local_addr = server.as_mut().unwrap().start().await?;
             }
 
             if let Some(cfg_api) = &cfg.api {
                 let api_addr = cfg_api.listen.unwrap_or_else(default_api_listen_addr);
                 tokio::spawn(crate::api::run(
-                    api_addr,
                     api_addr,
                     storage_root.unwrap(),
                     manager_ref,
