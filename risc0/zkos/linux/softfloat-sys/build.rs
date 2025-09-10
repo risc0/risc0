@@ -4,7 +4,7 @@
 extern crate cc;
 extern crate cc_version;
 
-use cc_version::{cc_version, Version};
+// use cc_version::{cc_version, Version}; // Unused imports
 use std::env;
 use std::path::Path;
 
@@ -14,7 +14,7 @@ const SPECIALIZED_PATH: &str = "RISCV";
 fn main() {
     let mut builder = cc::Build::new();
 
-    let tool = builder.get_compiler();
+    let _tool = builder.get_compiler();
     let thread_local = Some("");
 
     let softfloat_base = Path::new("berkeley-softfloat-3");

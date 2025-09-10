@@ -17,9 +17,9 @@ use core::{alloc::Layout, ptr::NonNull};
 use no_std_strings::{str256, str_format};
 use rlsf::Tlsf;
 use softfloat_sys::{
-    f32_add, f32_div, f32_eq, f32_isSignalingNaN, f32_le, f32_lt, f32_lt_quiet, f32_mul,
+    f32_add, f32_div, f32_eq, f32_le, f32_lt, f32_lt_quiet, f32_mul,
     f32_mulAdd, f32_sqrt, f32_sub, f32_to_f64, f32_to_i32, f32_to_ui32, f64_add, f64_div, f64_eq,
-    f64_isSignalingNaN, f64_le, f64_lt, f64_lt_quiet, f64_mul, f64_mulAdd, f64_sqrt, f64_sub,
+    f64_le, f64_lt, f64_lt_quiet, f64_mul, f64_mulAdd, f64_sqrt, f64_sub,
     f64_to_f32, f64_to_i32, f64_to_ui32, float32_t, float64_t, i32_to_f32, i32_to_f64,
     softfloat_exceptionFlags_read_helper, softfloat_exceptionFlags_write_helper,
     softfloat_roundingMode_read_helper, softfloat_roundingMode_write_helper, ui32_to_f32,
@@ -38,7 +38,9 @@ const REG_A7: usize = 17;
 
 // Floating point register constants
 const NUM_FP_REGS: usize = 32;
+#[allow(dead_code)]
 const FP_REG_SIZE: usize = 8; // 64-bit registers
+#[allow(dead_code)]
 const FP_REGS_SIZE: usize = NUM_FP_REGS * FP_REG_SIZE; // 256 bytes total
 
 const USER_REGS_PTR: *mut u32 = 0xffff_0080 as *mut u32;
@@ -46,14 +48,17 @@ const MEPC_PTR: *mut usize = 0xffff_0200 as *mut usize;
 // Floating point register storage area (32 x 64-bit registers = 256 bytes)
 const FP_REGS_PTR: *mut u64 = 0xfff_4000 as *mut u64;
 // Floating point control and status register (FCSR) storage
+#[allow(dead_code)]
 const FCSR_PTR: *mut u32 = 0xfff_4100 as *mut u32;
 const USER_START_PTR: *const usize = 0x0001_0000 as *const usize;
 const USER_STACK_ADDR: usize = 0xbfff_0000;
 const USER_STACK_PTR: *const usize = USER_STACK_ADDR as *const usize;
+#[allow(dead_code)]
 const USER_STACK_SIZE: usize = 2 * 1024 * 1024;
 const USER_HEAP_START_ADDR: usize = 0x0800_0000; // TODO: figure out where data ends in user program
 const USER_HEAP_START_PTR: *const u8 = USER_HEAP_START_ADDR as *const u8;
 const USER_HEAP_SIZE: usize = 0x40000000;
+#[allow(dead_code)]
 const USER_HEAP_END_ADDR: usize = USER_HEAP_START_ADDR + USER_HEAP_SIZE;
 const USER_PHENT_SIZE: usize = 32; // ELF32_Phdr size in bytes
 
@@ -202,6 +207,7 @@ fn get_f64_rs2(insn: u32) -> u64 {
     get_fp_reg_from_insn(insn, 20)
 }
 
+#[allow(dead_code)]
 fn get_f64_rs3(insn: u32) -> u64 {
     get_fp_reg_from_insn(insn, 27)
 }
@@ -252,7 +258,7 @@ unsafe fn emulate_fp_instruction(insn: u32, mepc: usize) -> ! {
     } else {
         rm as u8 // Static rounding mode from instruction
     };
-    softfloat_roundingMode_write_helper(rounding_mode);
+    unsafe { softfloat_roundingMode_write_helper(rounding_mode); }
 
     let msg = str_format!(
         str256,
@@ -1551,7 +1557,7 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             }
 
             // Load 32-bit value from memory
-            let value = (addr as *const u32).read_volatile();
+            let value = unsafe { (addr as *const u32).read_volatile() };
 
             // Store in floating point register (as 32-bit in 64-bit register)
             set_f32_rd(insn, value);
@@ -1574,7 +1580,7 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             }
 
             // Load 64-bit value from memory
-            let value = (addr as *const u64).read_volatile();
+            let value = unsafe { (addr as *const u64).read_volatile() };
 
             // Store in floating point register
             set_f64_rd(insn, value);
@@ -1600,7 +1606,7 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             let value = get_f32_rs2(insn);
 
             // Store 32-bit value to memory
-            (addr as *mut u32).write_volatile(value);
+            unsafe { (addr as *mut u32).write_volatile(value); }
 
             let msg = str_format!(str256, "fsw: stored {:#010x} from f{}", value, rs2);
             print(&msg);
@@ -1627,7 +1633,7 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             print(&msg_debug2);
 
             // Store 64-bit value to memory
-            (addr as *mut u64).write_volatile(value);
+            unsafe { (addr as *mut u64).write_volatile(value); }
 
             let msg = str_format!(
                 str256,
@@ -1942,10 +1948,10 @@ impl Err {
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn kstart() -> ! {
-    let user_start_addr = USER_START_PTR.read_volatile() - 4;
-    MEPC_PTR.write_volatile(user_start_addr);
+    let user_start_addr = unsafe { USER_START_PTR.read_volatile() } - 4;
+    unsafe { MEPC_PTR.write_volatile(user_start_addr); }
 
     let mut stack = UserStack::new();
 
@@ -1969,16 +1975,16 @@ unsafe extern "C" fn kstart() -> ! {
                                           //     Phnum = ...,
                                           //     Phent = ...,
                                           // Use the constants for addresses and sizes
-    stack.add_aux_word(AuxType::Phdr, USER_PHDR_ADDR_PTR.read_volatile()); // auxv[5]
-    stack.add_aux_word(AuxType::PhNum, USER_PHDR_NUM_ADDR_PTR.read_volatile()); // auxv[6]
+    stack.add_aux_word(AuxType::Phdr, unsafe { USER_PHDR_ADDR_PTR.read_volatile() }); // auxv[5]
+    stack.add_aux_word(AuxType::PhNum, unsafe { USER_PHDR_NUM_ADDR_PTR.read_volatile() }); // auxv[6]
     stack.add_aux_word(AuxType::PhEnt, USER_PHENT_SIZE); // auxv[7]
     stack.add_aux_word(AuxType::Null, 0); // auxv[8]
 
     set_ureg(REG_SP, USER_STACK_PTR as u32);
 
-    let block: &[u8] = core::slice::from_raw_parts(USER_HEAP_START_PTR, USER_HEAP_SIZE);
+    let block: &[u8] = unsafe { core::slice::from_raw_parts(USER_HEAP_START_PTR, USER_HEAP_SIZE) };
     #[allow(static_mut_refs)]
-    HEAP.insert_free_block_ptr(block.into());
+    unsafe { HEAP.insert_free_block_ptr(block.into()); }
 
     // Initialize floating point registers to zero at startup
     init_fp_regs();
@@ -2005,7 +2011,7 @@ fn mret() -> ! {
     unimplemented!()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn ecall_dispatch() -> ! {
     let nr = get_ureg(REG_A7);
 
@@ -2048,13 +2054,13 @@ unsafe extern "C" fn ecall_dispatch() -> ! {
     mret()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
     // Get the saved PC from MEPC (where the illegal instruction occurred)
-    let mepc = MEPC_PTR.read_volatile();
+    let mepc = unsafe { MEPC_PTR.read_volatile() };
 
     // Read the instruction as a u32
-    let instruction = (mepc as *const u32).read_volatile();
+    let instruction = unsafe { (mepc as *const u32).read_volatile() };
 
     // Decode instruction fields
     let opcode = instruction & 0x0000007f;
@@ -2100,7 +2106,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             mepc
         );
         print(&msg);
-        return emulate_fp_instruction(instruction, mepc);
+        unsafe { emulate_fp_instruction(instruction, mepc); }
     }
 
     // Check for floating point operations (opcode 0x47) - R4-type instructions
@@ -2112,7 +2118,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             mepc
         );
         print(&msg);
-        return emulate_fp_instruction(instruction, mepc);
+        unsafe { emulate_fp_instruction(instruction, mepc); }
     }
 
     // Check for floating point operations (opcode 0x4b) - R4-type instructions
@@ -2124,7 +2130,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             mepc
         );
         print(&msg);
-        return emulate_fp_instruction(instruction, mepc);
+        unsafe { emulate_fp_instruction(instruction, mepc); }
     }
 
     // Check for floating point operations (opcode 0x4f) - R4-type instructions
@@ -2136,12 +2142,12 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             mepc
         );
         print(&msg);
-        return emulate_fp_instruction(instruction, mepc);
+        unsafe { emulate_fp_instruction(instruction, mepc); }
     }
 
     // Check for floating point operations (opcode 0x53)
     if opcode == 0x53 {
-        return emulate_fp_instruction(instruction, mepc);
+        unsafe { emulate_fp_instruction(instruction, mepc); }
     }
 
     // Check for floating point operations (opcode 0x63) - alternative encoding
@@ -2153,17 +2159,17 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             mepc
         );
         print(&msg);
-        return emulate_fp_instruction(instruction, mepc);
+        unsafe { emulate_fp_instruction(instruction, mepc); }
     }
 
     // Check for floating point load/store operations (opcode 0x07 = Load-FP, 0x27 = Store-FP)
     if opcode == 0x07 || opcode == 0x27 {
-        return emulate_fp_load_store(instruction, mepc);
+        unsafe { emulate_fp_load_store(instruction, mepc); }
     }
 
     // Check for CSR operations (opcode 0x73)
     if opcode == 0x73 {
-        return emulate_csr_instruction(instruction, mepc);
+        unsafe { emulate_csr_instruction(instruction, mepc); }
     }
 
     // Check for RV32A atomic memory operations
@@ -2196,14 +2202,14 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 }
 
                 // Read current value from memory
-                let current_value = (addr as *const u32).read_volatile();
+                let current_value = unsafe { (addr as *const u32).read_volatile() };
 
                 // Get value to add from rs2 register
                 let add_value = get_ureg(rs2 as usize);
 
                 // Perform atomic add operation
                 let new_value = current_value.wrapping_add(add_value);
-                (addr as *mut u32).write_volatile(new_value);
+                unsafe { (addr as *mut u32).write_volatile(new_value); }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2234,13 +2240,13 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 }
 
                 // Read current value from memory
-                let current_value = (addr as *const u32).read_volatile();
+                let current_value = unsafe { (addr as *const u32).read_volatile() };
 
                 // Get value to swap from rs2 register
                 let swap_value = get_ureg(rs2 as usize);
 
                 // Perform atomic swap operation
-                (addr as *mut u32).write_volatile(swap_value);
+                unsafe { (addr as *mut u32).write_volatile(swap_value); }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2271,14 +2277,14 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 }
 
                 // Read current value from memory
-                let current_value = (addr as *const u32).read_volatile();
+                let current_value = unsafe { (addr as *const u32).read_volatile() };
 
                 // Get value to XOR from rs2 register
                 let xor_value = get_ureg(rs2 as usize);
 
                 // Perform atomic XOR operation
                 let new_value = current_value ^ xor_value;
-                (addr as *mut u32).write_volatile(new_value);
+                unsafe { (addr as *mut u32).write_volatile(new_value); }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2309,14 +2315,14 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 }
 
                 // Read current value from memory
-                let current_value = (addr as *const u32).read_volatile();
+                let current_value = unsafe { (addr as *const u32).read_volatile() };
 
                 // Get value to OR from rs2 register
                 let or_value = get_ureg(rs2 as usize);
 
                 // Perform atomic OR operation
                 let new_value = current_value | or_value;
-                (addr as *mut u32).write_volatile(new_value);
+                unsafe { (addr as *mut u32).write_volatile(new_value); }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2347,14 +2353,14 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 }
 
                 // Read current value from memory
-                let current_value = (addr as *const u32).read_volatile();
+                let current_value = unsafe { (addr as *const u32).read_volatile() };
 
                 // Get value to AND from rs2 register
                 let and_value = get_ureg(rs2 as usize);
 
                 // Perform atomic AND operation
                 let new_value = current_value & and_value;
-                (addr as *mut u32).write_volatile(new_value);
+                unsafe { (addr as *mut u32).write_volatile(new_value); }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2385,7 +2391,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 }
 
                 // Read current value from memory
-                let current_value = (addr as *const u32).read_volatile();
+                let current_value = unsafe { (addr as *const u32).read_volatile() };
 
                 // Get value to compare from rs2 register
                 let compare_value = get_ureg(rs2 as usize);
@@ -2398,7 +2404,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 } else {
                     compare_value
                 };
-                (addr as *mut u32).write_volatile(new_value);
+                unsafe { (addr as *mut u32).write_volatile(new_value); }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2429,7 +2435,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 }
 
                 // Read current value from memory
-                let current_value = (addr as *const u32).read_volatile();
+                let current_value = unsafe { (addr as *const u32).read_volatile() };
 
                 // Get value to compare from rs2 register
                 let compare_value = get_ureg(rs2 as usize);
@@ -2442,7 +2448,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 } else {
                     compare_value
                 };
-                (addr as *mut u32).write_volatile(new_value);
+                unsafe { (addr as *mut u32).write_volatile(new_value); }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2473,7 +2479,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 }
 
                 // Read current value from memory
-                let current_value = (addr as *const u32).read_volatile();
+                let current_value = unsafe { (addr as *const u32).read_volatile() };
 
                 // Get value to compare from rs2 register
                 let compare_value = get_ureg(rs2 as usize);
@@ -2484,7 +2490,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 } else {
                     compare_value
                 };
-                (addr as *mut u32).write_volatile(new_value);
+                unsafe { (addr as *mut u32).write_volatile(new_value); }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2515,7 +2521,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 }
 
                 // Read current value from memory
-                let current_value = (addr as *const u32).read_volatile();
+                let current_value = unsafe { (addr as *const u32).read_volatile() };
 
                 // Get value to compare from rs2 register
                 let compare_value = get_ureg(rs2 as usize);
@@ -2526,7 +2532,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 } else {
                     compare_value
                 };
-                (addr as *mut u32).write_volatile(new_value);
+                unsafe { (addr as *mut u32).write_volatile(new_value); }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
