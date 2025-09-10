@@ -23,7 +23,7 @@ use risc0_zkvm_methods::FIB_ELF;
 
 use super::{
     App,
-    config::{AppConfig, ManagerConfig, StorageConfig},
+    config::{AppConfig, ManagerConfig, StorageConfig, VERSION},
     protocol::{JobStatus, ProofRequest, ShrinkWrapKind, ShrinkWrapRequest, TaskKind},
 };
 
@@ -61,6 +61,7 @@ async fn do_test(remote: bool) {
     let po2 = Some(21);
     let addr = remote.then_some(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into());
     let mut app = App::new(AppConfig {
+        version: VERSION,
         api: None,
         manager: Some(ManagerConfig { listen: addr }),
         worker: Some(vec![crate::actors::config::WorkerConfig {

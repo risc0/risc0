@@ -54,7 +54,9 @@ use tokio::{
 use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::SubscriberInitExt};
 
 use self::{
-    config::{AppConfig, ManagerConfig, VersionConfig, WorkerConfig, default_api_listen_addr},
+    config::{
+        AppConfig, ManagerConfig, VERSION, VersionConfig, WorkerConfig, default_api_listen_addr,
+    },
     factory::{FactoryActor, FactoryRouterActor, RemoteFactoryActor},
     manager::ManagerActor,
     protocol::{
@@ -72,7 +74,7 @@ pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<d
         let str = tokio::fs::read_to_string(path).await?;
         let version: VersionConfig = toml::from_str(&str)?;
         let version = version.version;
-        if version != 1 {
+        if version != VERSION {
             return Err(anyhow::anyhow!("version {version} not supported").into());
         }
         toml::from_str(&str)?
@@ -175,6 +177,7 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
 
     let addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into();
     let mut app = App::new(AppConfig {
+        version: VERSION,
         api: None,
         manager: Some(ManagerConfig { listen: Some(addr) }),
         worker: Some(vec![execute_pool]),
@@ -259,6 +262,7 @@ struct TempConfig {
 impl TempConfig {
     fn new(worker: WorkerConfig) -> anyhow::Result<Self> {
         let config = AppConfig {
+            version: VERSION,
             api: None,
             manager: None,
             worker: Some(vec![worker]),

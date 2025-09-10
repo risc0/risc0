@@ -22,6 +22,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::actors::protocol::TaskKind;
 
+pub const VERSION: usize = 1;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct VersionConfig {
     pub version: usize,
@@ -29,6 +31,7 @@ pub(crate) struct VersionConfig {
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub(crate) struct AppConfig {
+    pub version: usize,
     pub api: Option<ApiConfig>,
     pub manager: Option<ManagerConfig>,
     pub worker: Option<Vec<WorkerConfig>>,
@@ -68,6 +71,7 @@ pub(crate) struct TelemetryConfig {
 impl Default for AppConfig {
     fn default() -> Self {
         Self {
+            version: VERSION,
             api: Some(ApiConfig {
                 listen: Some(default_api_listen_addr()),
                 manager: None,
@@ -125,6 +129,7 @@ mod tests {
         assert_eq!(
             app,
             AppConfig {
+                version: 1,
                 api: Some(ApiConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
                     manager: Some(SocketAddr::from_str("1.2.3.4:9000").unwrap()),
@@ -145,6 +150,7 @@ mod tests {
         assert_eq!(
             app,
             AppConfig {
+                version: 1,
                 api: Some(ApiConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
                     manager: None,
@@ -172,6 +178,7 @@ mod tests {
         assert_eq!(
             app,
             AppConfig {
+                version: 1,
                 api: None,
                 manager: None,
                 worker: Some(vec![
