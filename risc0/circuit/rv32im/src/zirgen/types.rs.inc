@@ -1434,12 +1434,27 @@ impl risc0_zkp::layout::Component for Misc2MiscOutputArm3Layout {
         Ok(())
     }
 }
+pub struct OpJALRLayout {
+    pub lsb: &'static NondetRegLayout,
+    pub half: &'static NondetU16RegLayout,
+}
+impl risc0_zkp::layout::Component for OpJALRLayout {
+    fn ty_name(&self) -> &'static str {
+        "OpJALRLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("lsb", self.lsb)?;
+        v.visit_component("half", self.half)?;
+        Ok(())
+    }
+}
 pub struct Misc2MiscOutputArm4Layout {
+    pub _super: &'static OpJALRLayout,
     pub _extra0: &'static ArgU16Layout,
     pub _extra1: &'static ArgU16Layout,
     pub _extra2: &'static ArgU16Layout,
     pub _extra3: &'static ArgU16Layout,
-    pub _extra4: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for Misc2MiscOutputArm4Layout {
     fn ty_name(&self) -> &'static str {
@@ -1447,11 +1462,11 @@ impl risc0_zkp::layout::Component for Misc2MiscOutputArm4Layout {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
         v.visit_component("_extra0", self._extra0)?;
         v.visit_component("_extra1", self._extra1)?;
         v.visit_component("_extra2", self._extra2)?;
         v.visit_component("_extra3", self._extra3)?;
-        v.visit_component("_extra4", self._extra4)?;
         Ok(())
     }
 }
