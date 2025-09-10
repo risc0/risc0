@@ -278,7 +278,7 @@ jobs:
       - name: test workspace
         run: ${{ matrix.test_command }} --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --exclude doc-test
       - name: test risc0-r0vm (disable-dev-mode)
-        run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
+        run: cargo test --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
       - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}-${{ matrix.partition }}
