@@ -1,0 +1,20 @@
+# r0vm --worker prove-segment,lift,join --addr 1.2.3.4:9000 --num-gpus 8
+
+version = 1
+
+[[worker]]
+manager = "10.0.3.24:9000"
+subscribe = [
+  "prove-segment",
+  "prove-keccak",
+  "lift",
+  "join",
+  "union",
+  "resolve",
+]
+
+[[worker]]
+manager = "10.0.3.24:9000"
+subscribe = ["lift", "join", "union", "resolve"]
+
+[telemetry]

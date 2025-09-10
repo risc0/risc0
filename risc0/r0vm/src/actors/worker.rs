@@ -103,6 +103,8 @@ impl Worker {
             return;
         }
 
+        tracing::info!("Starting worker: {:?}", self.task_kinds);
+
         let task_kinds = self.task_kinds.clone();
         let factory = self.factory.clone();
         let (send, mut recv) = channel(RECEIVE_QUEUE_DEPTH);

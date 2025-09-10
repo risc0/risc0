@@ -1,0 +1,18 @@
+version = 1
+
+[api]
+listen = "127.0.0.1:8000"
+
+[manager]
+listen = "127.0.0.1:9000"
+
+[[worker]]
+subscribe = [
+  "execute",
+  "prove-segment",
+  "prove-keccak",
+  "lift",
+  "join",
+  "union",
+  "resolve",
+]

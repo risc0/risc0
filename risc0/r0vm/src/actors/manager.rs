@@ -16,7 +16,7 @@ use std::{collections::HashMap, path::PathBuf};
 
 use derive_more::From;
 use kameo::prelude::*;
-use risc0_zkvm::{Journal, Receipt};
+use risc0_zkvm::{Journal, Receipt, rpc::JobRequest};
 use tokio::task::JoinSet;
 use uuid::Uuid;
 
@@ -24,8 +24,9 @@ use super::{
     factory::FactoryActor,
     job::JobActor,
     protocol::{
-        JobId, JobInfo, JobRequestReply, JobStatus, JobStatusReply, JobStatusRequest, ProofRequest,
-        ProofResult, ShrinkWrapRequest, ShrinkWrapResult,
+        CreateJobReply, CreateJobRequest, JobId, JobInfo, JobRequestReply, JobStatus,
+        JobStatusReply, JobStatusRequest, ProofRequest, ProofResult, ShrinkWrapRequest,
+        ShrinkWrapResult,
     },
 };
 
@@ -137,6 +138,28 @@ impl ManagerActor {
         tokio::fs::write(journal_path, encoded).await?;
 
         Ok(())
+    }
+}
+
+impl Message<CreateJobRequest> for ManagerActor {
+    type Reply = CreateJobReply;
+
+    async fn handle(
+        &mut self,
+        msg: CreateJobRequest,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        let job_id = match msg.request {
+            JobRequest::Proof(request) => {
+                self.job_request::<_, ProofResult>(request, ctx.actor_ref(), None)
+                    .await
+            }
+            JobRequest::ShrinkWrap(request) => {
+                self.job_request::<_, ShrinkWrapResult>(request, ctx.actor_ref(), None)
+                    .await
+            }
+        };
+        CreateJobReply { job_id }
     }
 }
 

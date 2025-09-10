@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub(crate) mod config;
 pub(crate) mod factory;
 pub(crate) mod job;
 pub(crate) mod manager;
@@ -42,7 +43,6 @@ use opentelemetry_sdk::{
     propagation::TraceContextPropagator,
     trace::SdkTracerProvider,
 };
-use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
 use tempfile::NamedTempFile;
 use tokio::{
@@ -53,9 +53,10 @@ use tokio::{
 };
 use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::Cli;
-
 use self::{
+    config::{
+        AppConfig, ManagerConfig, VERSION, VersionConfig, WorkerConfig, default_api_listen_addr,
+    },
     factory::{FactoryActor, FactoryRouterActor, RemoteFactoryActor},
     manager::ManagerActor,
     protocol::{
@@ -67,69 +68,23 @@ use self::{
     worker::Worker,
 };
 
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct WorkerConfig {
-    pub pools: Vec<PoolConfig>,
-}
-
-impl From<Vec<TaskKind>> for WorkerConfig {
-    fn from(task_kinds: Vec<TaskKind>) -> Self {
-        WorkerConfig {
-            pools: vec![PoolConfig {
-                count: 1,
-                profile: None,
-                task_kinds,
-            }],
-        }
-    }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) struct PoolConfig {
-    pub count: usize,
-    pub profile: Option<DevModeDelay>,
-    pub task_kinds: Vec<TaskKind>,
-}
-
 #[tokio::main]
-pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
-    let is_manager = args.mode.manager;
-
-    let config = if let Some(ref path) = args.mode.config {
+pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<dyn StdError>> {
+    let config: AppConfig = if let Some(ref path) = config_path {
         let str = tokio::fs::read_to_string(path).await?;
-        Some(toml::from_str(&str)?)
+        let version: VersionConfig = toml::from_str(&str)?;
+        let version = version.version;
+        if version != VERSION {
+            return Err(anyhow::anyhow!("version {version} not supported").into());
+        }
+        toml::from_str(&str)?
     } else {
-        Some(args.mode.worker.clone().into())
+        AppConfig::default()
     };
     tracing::info!("{config:#?}");
 
-    let mut app = App::new(
-        is_manager,
-        args.addr,
-        args.api,
-        args.storage.clone(),
-        config,
-        args.po2,
-        /* enable_telemetry */ true,
-    )
-    .await?;
-
-    if let Some(ref bin_path) = args.mode.elf {
-        let binary = tokio::fs::read(bin_path).await?;
-        let input = if let Some(ref input_path) = args.initial_input {
-            tokio::fs::read(input_path).await?
-        } else {
-            vec![]
-        };
-        let request = ProofRequest {
-            binary,
-            input,
-            assumptions: vec![],
-            segment_limit_po2: None,
-            execute_only: false,
-        };
-        app.proof_request(request).await.unwrap();
-    } else if is_manager {
+    let mut app = App::new(config).await?;
+    if app.manager.is_some() {
         println!("Use Ctrl-C to stop");
         tokio::signal::ctrl_c()
             .await
@@ -213,22 +168,38 @@ async fn relay_job_request(
 pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdError>> {
     let workers = num_gpus.unwrap_or_else(|| cuda_devices().unwrap_or(1));
 
-    let execute_pool = PoolConfig {
-        count: 1,
-        profile: None,
-        task_kinds: vec![TaskKind::Execute],
+    let execute_pool = WorkerConfig {
+        count: Some(1),
+        manager: None,
+        simulate: None,
+        subscribe: vec![TaskKind::Execute],
     };
 
-    let primary_pool = PoolConfig {
-        count: 1,
-        profile: None,
-        task_kinds: vec![TaskKind::ProveSegment, TaskKind::ProveKeccak],
+    let addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into();
+    let mut app = App::new(AppConfig {
+        version: VERSION,
+        api: None,
+        manager: Some(ManagerConfig { listen: Some(addr) }),
+        worker: Some(vec![execute_pool]),
+        storage: None,
+        telemetry: None,
+    })
+    .await?;
+
+    let local_addr = app.local_addr.unwrap();
+
+    let primary_pool = WorkerConfig {
+        count: Some(1),
+        manager: Some(local_addr),
+        simulate: None,
+        subscribe: vec![TaskKind::ProveSegment, TaskKind::ProveKeccak],
     };
 
-    let secondary_pool = PoolConfig {
-        count: 1,
-        profile: None,
-        task_kinds: vec![
+    let secondary_pool = WorkerConfig {
+        count: Some(1),
+        manager: Some(local_addr),
+        simulate: None,
+        subscribe: vec![
             TaskKind::Lift,
             TaskKind::Join,
             TaskKind::Union,
@@ -237,28 +208,9 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
         ],
     };
 
-    let addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into();
-    let mut app = App::new(
-        /* is_manager */ true,
-        Some(addr),
-        /* api_addr */ None,
-        /* storage_root */ None,
-        Some(WorkerConfig {
-            pools: vec![execute_pool],
-        }),
-        /* po2 */ None,
-        /* enable_telemetry */ false,
-    )
-    .await?;
-
-    let local_addr = app.local_addr.unwrap();
     let r0vm_path = std::env::current_exe()?;
-    let primary_config = TempConfig::new(WorkerConfig {
-        pools: vec![primary_pool],
-    })?;
-    let secondary_config = TempConfig::new(WorkerConfig {
-        pools: vec![secondary_pool],
-    })?;
+    let primary_config = TempConfig::new(primary_pool)?;
+    let secondary_config = TempConfig::new(secondary_pool)?;
 
     let mut children = vec![];
     for device_idx in 0..workers {
@@ -267,8 +219,6 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
             .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
             .arg("--config")
             .arg(primary_config.file.path())
-            .arg("--addr")
-            .arg(local_addr.to_string())
             .spawn()
             .with_context(|| spawn_fail(&r0vm_path))?;
         children.push(child);
@@ -278,8 +228,6 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
             .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
             .arg("--config")
             .arg(secondary_config.file.path())
-            .arg("--addr")
-            .arg(local_addr.to_string())
             .spawn()
             .with_context(|| spawn_fail(&r0vm_path))?;
         children.push(child);
@@ -312,7 +260,15 @@ struct TempConfig {
 }
 
 impl TempConfig {
-    fn new(config: WorkerConfig) -> anyhow::Result<Self> {
+    fn new(worker: WorkerConfig) -> anyhow::Result<Self> {
+        let config = AppConfig {
+            version: VERSION,
+            api: None,
+            manager: None,
+            worker: Some(vec![worker]),
+            storage: None,
+            telemetry: None,
+        };
         let toml = toml::to_string(&config)?;
         let mut file = tempfile::NamedTempFile::new()?;
         write!(file, "{toml}")?;
@@ -356,29 +312,25 @@ pub(crate) struct App {
 }
 
 impl App {
-    #[allow(clippy::too_many_arguments)]
-    pub async fn new(
-        is_manager: bool,
-        mut addr: Option<SocketAddr>,
-        api_addr: Option<SocketAddr>,
-        storage_root: Option<PathBuf>,
-        worker_config: Option<WorkerConfig>,
-        po2: Option<u32>,
-        enable_telemetry: bool,
-    ) -> Result<Self, Box<dyn StdError>> {
-        let provider = enable_telemetry.then(OpenTelemetryProvider::new);
-
+    pub async fn new(cfg: AppConfig) -> Result<Self, Box<dyn StdError>> {
         let mut manager = None;
         let mut factory = None;
         let mut workers = vec![];
         let mut server = None;
         let mut local_addr = None;
+        let po2 = None;
 
-        if is_manager {
-            let storage_root = if api_addr.is_some() {
-                Some(storage_root.unwrap_or_else(default_storage_root))
+        let provider = cfg.telemetry.map(|_| OpenTelemetryProvider::new());
+
+        if let Some(cfg_manager) = cfg.manager {
+            let storage_root = if cfg.api.is_some() {
+                Some(if let Some(cfg) = cfg.storage {
+                    cfg.path
+                } else {
+                    default_storage_root()
+                })
             } else {
-                storage_root
+                None
             };
 
             let factory_ref = kameo::spawn(FactoryActor::new());
@@ -388,15 +340,15 @@ impl App {
                 kameo::spawn(ManagerActor::new(factory_ref.clone(), storage_root.clone()));
             manager = Some(manager_ref.clone());
 
-            if let Some(listen_addr) = addr {
+            if let Some(listen_addr) = cfg_manager.listen {
                 server = Some(Server::new(listen_addr, factory_ref));
-                addr = server.as_mut().unwrap().start().await?;
-                local_addr = addr;
+                local_addr = server.as_mut().unwrap().start().await?;
             }
 
-            if let Some(addr) = api_addr {
+            if let Some(cfg_api) = cfg.api {
+                let api_addr = cfg_api.listen.unwrap_or_else(default_api_listen_addr);
                 tokio::spawn(crate::api::run(
-                    addr,
+                    api_addr,
                     storage_root.unwrap(),
                     manager_ref,
                     po2,
@@ -404,24 +356,26 @@ impl App {
             }
         }
 
-        let factory_ref = match addr {
-            Some(addr) => {
-                let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
-                kameo::spawn(FactoryRouterActor::Remote(remote))
-            }
-            None => kameo::spawn(FactoryRouterActor::Local(factory.as_ref().unwrap().clone())),
-        };
+        if let Some(cfg_worker) = cfg.worker {
+            for worker in cfg_worker {
+                tracing::info!("Starting worker: {worker:?}");
 
-        if let Some(config) = worker_config {
-            for pool in config.pools {
-                tracing::info!(
-                    "Starting worker pool: {}, task_kinds: {:?}",
-                    pool.count,
-                    pool.task_kinds
-                );
-                for _ in 0..pool.count {
-                    let mut worker =
-                        Worker::new(factory_ref.clone(), pool.task_kinds.clone(), pool.profile);
+                let factory_ref = match worker.manager {
+                    Some(addr) => {
+                        let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
+                        kameo::spawn(FactoryRouterActor::Remote(remote))
+                    }
+                    None => {
+                        kameo::spawn(FactoryRouterActor::Local(factory.as_ref().unwrap().clone()))
+                    }
+                };
+
+                for _ in 0..worker.count.unwrap_or(1) {
+                    let mut worker = Worker::new(
+                        factory_ref.clone(),
+                        worker.subscribe.clone(),
+                        worker.simulate,
+                    );
                     worker.start();
                     workers.push(worker);
                 }
