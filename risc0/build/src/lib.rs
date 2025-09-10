@@ -36,11 +36,10 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{Context, Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use cargo_metadata::{Message, MetadataCommand, Package};
-use config::GuestMetadata;
 use rayon::prelude::*;
-use risc0_binfmt::{KERNEL_START_ADDR, ProgramBinary};
+use risc0_binfmt::{ProgramBinary, KERNEL_START_ADDR};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
@@ -52,7 +51,7 @@ pub use self::{
         DockerOptions, DockerOptionsBuilder, DockerOptionsBuilderError, GuestOptions,
         GuestOptionsBuilder, GuestOptionsBuilderError,
     },
-    docker::{BuildStatus, TARGET_DIR, docker_build},
+    docker::{docker_build, BuildStatus, TARGET_DIR},
 };
 
 const DEFAULT_DOCKER_TAG: &str = "r0.1.88.0";
