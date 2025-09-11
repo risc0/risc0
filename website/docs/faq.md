@@ -118,7 +118,7 @@
 
   A: The ImageID is a unique identifier given to a zkVM application. It cryptographically relates the application binary (ELF) to its produced receipts. This bound is a critical security property that ensures applications run unaltered.
 
-  Specifically, the ImageID is a Merklization of the initial zkVM memory state, or MemoryImage, produced when the zkVM loads the application binary. The memory state is hashed to produce a single deterministic value via a pure function resembling:
+  Specifically, the ImageID is a Merkleization of the initial zkVM memory state, or MemoryImage, produced when the zkVM loads the application binary. The memory state is hashed to produce a single deterministic value via a pure function resembling:
 
   ```rust ignore
   fn compute_image_id(used_elf_pages, page_size, page_table_addr, pc) -> ImageID
