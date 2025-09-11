@@ -147,7 +147,16 @@ enum ReceiptKind {
 }
 
 pub fn main() {
-    let args = Cli::parse();
+    let mut cli_args = std::env::args().collect::<Vec<_>>();
+    let mut guest_args = Vec::new();
+
+    // Find the "--" separator and split arguments
+    if let Some(dash_dash_pos) = cli_args.iter().position(|arg| arg == "--") {
+        guest_args = cli_args.split_off(dash_dash_pos + 1);
+        cli_args.pop(); // Remove the "--" itself
+    }
+
+    let args = Cli::parse_from(cli_args);
 
     if args.mode.config.is_some() {
         self::actors::async_main(args.mode.config).unwrap();
@@ -193,6 +202,12 @@ pub fn main() {
 
     let env = {
         let mut builder = ExecutorEnv::builder();
+
+        // Add guest arguments if any were provided after "--"
+        if !guest_args.is_empty() {
+            println!("guest_args: {:?}", guest_args);
+            builder.args(&guest_args);
+        }
 
         for var in args.env.iter() {
             let (name, value) = var
