@@ -115,6 +115,7 @@ mod riscv {
     test_case!(fence);
     test_case!(jal);
     test_case!(jalr);
+    test_case!(misaligned_jalr);
     test_case!(lb);
     test_case!(lbu);
     test_case!(lh);
