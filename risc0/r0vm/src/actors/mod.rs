@@ -318,9 +318,9 @@ impl App {
         let provider = if cfg.telemetry.is_some() {
             Some(OpenTelemetryProvider::new())
         } else {
-            tracing_subscriber::fmt()
+            let _ = tracing_subscriber::fmt()
                 .with_env_filter(EnvFilter::from_default_env())
-                .init();
+                .try_init();
             None
         };
 
