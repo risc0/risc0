@@ -6,9 +6,11 @@ listen = "127.0.0.1:8000"
 [manager]
 listen = "127.0.0.1:9000"
 
-[[worker]]
+[executor]
+count = 1
+
+[[prover]]
 subscribe = [
-  "execute",
   "prove-segment",
   "prove-keccak",
   "lift",

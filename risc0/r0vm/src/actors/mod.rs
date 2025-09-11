@@ -29,6 +29,7 @@ use std::{
     net::{Ipv4Addr, SocketAddr, SocketAddrV4},
     os::{fd::AsFd as _, unix::net::UnixStream as StdUnixStream},
     path::{Path, PathBuf},
+    sync::Arc,
     time::Duration,
 };
 
@@ -48,14 +49,15 @@ use tempfile::NamedTempFile;
 use tokio::{
     io::{AsyncReadExt as _, AsyncWriteExt as _},
     net::{TcpListener, UnixStream, tcp},
-    process::Command,
+    process::{Child, Command},
     task::JoinHandle,
 };
 use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::SubscriberInitExt};
 
 use self::{
     config::{
-        AppConfig, ManagerConfig, VERSION, VersionConfig, WorkerConfig, default_api_listen_addr,
+        AppConfig, ExecutorConfig, ManagerConfig, ProverConfig, VERSION, VersionConfig,
+        default_api_listen_addr,
     },
     factory::{FactoryActor, FactoryRouterActor, RemoteFactoryActor},
     manager::ManagerActor,
@@ -85,11 +87,7 @@ pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<d
 
     let mut app = App::new(config).await?;
     if app.manager.is_some() {
-        println!("Use Ctrl-C to stop");
-        tokio::signal::ctrl_c()
-            .await
-            .expect("failed to listen for ctrl-c");
-        println!();
+        wait_for_shutdown().await;
     } else {
         app.wait_for_workers().await;
     }
@@ -97,6 +95,25 @@ pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<d
     app.stop().await;
 
     Ok(())
+}
+
+async fn wait_for_shutdown() {
+    use tokio::signal::unix::{SignalKind, signal};
+
+    let mut sigterm = signal(SignalKind::terminate()).expect("failed to bind SIGTERM");
+
+    println!("Use Ctrl-C");
+
+    tokio::select! {
+        _ = tokio::signal::ctrl_c() => {
+            eprintln!("Got SIGINT (Ctrl-C)");
+        }
+        _ = sigterm.recv() => {
+            eprintln!("Got SIGTERM");
+        }
+    }
+
+    println!();
 }
 
 async fn read_or_eof(socket: &mut UnixStream, buf: &mut [u8]) -> Result<bool, Box<dyn StdError>> {
@@ -165,73 +182,45 @@ async fn relay_job_request(
 }
 
 #[tokio::main]
-pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdError>> {
-    let workers = num_gpus.unwrap_or_else(|| cuda_devices().unwrap_or(1));
+pub(crate) async fn rpc_main(_num_gpus: Option<usize>) -> Result<(), Box<dyn StdError>> {
+    let small_tasks = vec![
+        TaskKind::Lift,
+        TaskKind::Join,
+        TaskKind::Union,
+        TaskKind::Resolve,
+        TaskKind::ShrinkWrap,
+    ];
 
-    let execute_pool = WorkerConfig {
-        count: Some(1),
-        manager: None,
-        simulate: None,
-        subscribe: vec![TaskKind::Execute],
-    };
+    let mut large_tasks = vec![TaskKind::ProveSegment, TaskKind::ProveKeccak];
+    large_tasks.extend_from_slice(&small_tasks);
 
     let addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into();
     let mut app = App::new(AppConfig {
         version: VERSION,
         api: None,
         manager: Some(ManagerConfig { listen: Some(addr) }),
-        worker: Some(vec![execute_pool]),
+        executor: Some(ExecutorConfig {
+            manager: None,
+            count: 1,
+        }),
+        prover: Some(vec![
+            ProverConfig {
+                manager: None,
+                count: None,
+                subscribe: large_tasks,
+                simulate: None,
+            },
+            ProverConfig {
+                manager: None,
+                count: None,
+                subscribe: small_tasks,
+                simulate: None,
+            },
+        ]),
         storage: None,
         telemetry: None,
     })
     .await?;
-
-    let local_addr = app.local_addr.unwrap();
-
-    let primary_pool = WorkerConfig {
-        count: Some(1),
-        manager: Some(local_addr),
-        simulate: None,
-        subscribe: vec![TaskKind::ProveSegment, TaskKind::ProveKeccak],
-    };
-
-    let secondary_pool = WorkerConfig {
-        count: Some(1),
-        manager: Some(local_addr),
-        simulate: None,
-        subscribe: vec![
-            TaskKind::Lift,
-            TaskKind::Join,
-            TaskKind::Union,
-            TaskKind::Resolve,
-            TaskKind::ShrinkWrap,
-        ],
-    };
-
-    let r0vm_path = std::env::current_exe()?;
-    let primary_config = TempConfig::new(primary_pool)?;
-    let secondary_config = TempConfig::new(secondary_pool)?;
-
-    let mut children = vec![];
-    for device_idx in 0..workers {
-        let child = Command::new(&r0vm_path)
-            .process_group(0)
-            .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
-            .arg("--config")
-            .arg(primary_config.file.path())
-            .spawn()
-            .with_context(|| spawn_fail(&r0vm_path))?;
-        children.push(child);
-
-        let child = Command::new(&r0vm_path)
-            .process_group(0)
-            .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
-            .arg("--config")
-            .arg(secondary_config.file.path())
-            .spawn()
-            .with_context(|| spawn_fail(&r0vm_path))?;
-        children.push(child);
-    }
 
     let socket: StdUnixStream = stdin().as_fd().try_clone_to_owned()?.into();
 
@@ -248,10 +237,6 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
 
     app.stop().await;
 
-    for mut child in children {
-        child.wait().await?;
-    }
-
     result
 }
 
@@ -260,12 +245,18 @@ struct TempConfig {
 }
 
 impl TempConfig {
-    fn new(worker: WorkerConfig) -> anyhow::Result<Self> {
+    fn new(manager_addr: SocketAddr, subscribe: Vec<TaskKind>) -> anyhow::Result<Self> {
         let config = AppConfig {
             version: VERSION,
             api: None,
             manager: None,
-            worker: Some(vec![worker]),
+            executor: None,
+            prover: Some(vec![ProverConfig {
+                manager: Some(manager_addr),
+                count: Some(1),
+                subscribe,
+                simulate: None,
+            }]),
             storage: None,
             telemetry: None,
         };
@@ -302,30 +293,41 @@ enum RemoteRequest {
     TaskDone(TaskDoneMsg),
 }
 
+struct ChildState {
+    child: Child,
+    // Pin the temporary file so that it stays alive for the lifetime of the child process.
+    _config: Arc<TempConfig>,
+}
+
 pub(crate) struct App {
     provider: Option<OpenTelemetryProvider>,
     manager: Option<ActorRef<ManagerActor>>,
     factory: Option<ActorRef<FactoryActor>>,
     workers: Vec<Worker>,
     server: Option<Server>,
-    local_addr: Option<SocketAddr>,
+    children: Vec<ChildState>,
 }
 
 impl App {
     pub async fn new(cfg: AppConfig) -> Result<Self, Box<dyn StdError>> {
         let mut manager = None;
         let mut factory = None;
-        let mut workers = vec![];
         let mut server = None;
         let mut local_addr = None;
-        let po2 = None;
 
-        let provider = cfg.telemetry.map(|_| OpenTelemetryProvider::new());
+        let provider = if cfg.telemetry.is_some() {
+            Some(OpenTelemetryProvider::new())
+        } else {
+            let _ = tracing_subscriber::fmt()
+                .with_env_filter(EnvFilter::from_default_env())
+                .try_init();
+            None
+        };
 
-        if let Some(cfg_manager) = cfg.manager {
+        if let Some(cfg_manager) = &cfg.manager {
             let storage_root = if cfg.api.is_some() {
-                Some(if let Some(cfg) = cfg.storage {
-                    cfg.path
+                Some(if let Some(cfg) = &cfg.storage {
+                    cfg.path.clone()
                 } else {
                     default_storage_root()
                 })
@@ -345,22 +347,82 @@ impl App {
                 local_addr = server.as_mut().unwrap().start().await?;
             }
 
-            if let Some(cfg_api) = cfg.api {
+            if let Some(cfg_api) = &cfg.api {
                 let api_addr = cfg_api.listen.unwrap_or_else(default_api_listen_addr);
                 tokio::spawn(crate::api::run(
                     api_addr,
                     storage_root.unwrap(),
                     manager_ref,
-                    po2,
+                    cfg_api.po2,
                 ));
             }
         }
 
-        if let Some(cfg_worker) = cfg.worker {
-            for worker in cfg_worker {
-                tracing::info!("Starting worker: {worker:?}");
+        let mut workers = vec![];
+        let mut children = vec![];
 
-                let factory_ref = match worker.manager {
+        if let Some(cfg_executor) = cfg.executor {
+            Self::create_executors(&cfg_executor, &factory, &mut workers).await?;
+        }
+
+        if let Some(cfg_prover) = cfg.prover {
+            Self::create_provers(
+                &cfg_prover,
+                local_addr,
+                &factory,
+                &mut workers,
+                &mut children,
+            )
+            .await?
+        }
+
+        Ok(Self {
+            provider,
+            manager,
+            factory,
+            workers,
+            server,
+            children,
+        })
+    }
+
+    async fn create_executors(
+        executor: &ExecutorConfig,
+        factory: &Option<ActorRef<FactoryActor>>,
+        workers: &mut Vec<Worker>,
+    ) -> Result<(), Box<dyn StdError>> {
+        tracing::info!("Starting executor: {executor:?}");
+
+        let factory_ref = match executor.manager {
+            Some(addr) => {
+                let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
+                kameo::spawn(FactoryRouterActor::Remote(remote))
+            }
+            None => kameo::spawn(FactoryRouterActor::Local(factory.as_ref().unwrap().clone())),
+        };
+
+        for _ in 0..executor.count {
+            let mut worker = Worker::new(factory_ref.clone(), vec![TaskKind::Execute], None);
+            worker.start();
+            workers.push(worker);
+        }
+
+        Ok(())
+    }
+
+    async fn create_provers(
+        cfg_prover: &[ProverConfig],
+        local_addr: Option<SocketAddr>,
+        factory: &Option<ActorRef<FactoryActor>>,
+        workers: &mut Vec<Worker>,
+        children: &mut Vec<ChildState>,
+    ) -> Result<(), Box<dyn StdError>> {
+        for prover in cfg_prover {
+            tracing::info!("Starting prover: {prover:?}");
+
+            let count = prover.count.unwrap_or_else(|| cuda_devices().unwrap_or(1));
+            if (cfg_prover.len() == 1 && count == 1) || prover.simulate.is_some() {
+                let factory_ref = match prover.manager {
                     Some(addr) => {
                         let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
                         kameo::spawn(FactoryRouterActor::Remote(remote))
@@ -370,26 +432,37 @@ impl App {
                     }
                 };
 
-                for _ in 0..worker.count.unwrap_or(1) {
-                    let mut worker = Worker::new(
-                        factory_ref.clone(),
-                        worker.subscribe.clone(),
-                        worker.simulate,
-                    );
-                    worker.start();
-                    workers.push(worker);
+                let mut worker = Worker::new(
+                    factory_ref.clone(),
+                    prover.subscribe.clone(),
+                    prover.simulate,
+                );
+                worker.start();
+                workers.push(worker);
+            } else {
+                let r0vm_path = std::env::current_exe()?;
+                if prover.manager.is_none() && local_addr.is_none() {
+                    return Err(anyhow::anyhow!("Invalid configuration: either manager must run locally or prover.manager must be set").into());
+                }
+                let manager_addr = prover.manager.unwrap_or_else(|| local_addr.unwrap());
+                let cfg_child = Arc::new(TempConfig::new(manager_addr, prover.subscribe.clone())?);
+                for device_idx in 0..count {
+                    let child = Command::new(&r0vm_path)
+                        .process_group(0)
+                        .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
+                        .arg("--config")
+                        .arg(cfg_child.file.path())
+                        .spawn()
+                        .with_context(|| spawn_fail(&r0vm_path))?;
+                    children.push(ChildState {
+                        child,
+                        _config: cfg_child.clone(),
+                    });
                 }
             }
         }
 
-        Ok(Self {
-            provider,
-            manager,
-            factory,
-            workers,
-            server,
-            local_addr,
-        })
+        Ok(())
     }
 
     pub async fn wait_for_workers(&mut self) {
@@ -425,6 +498,13 @@ impl App {
         {
             tracing::info!("factory: wait for stop");
             factory.wait_for_stop().await;
+        }
+
+        for mut child in self.children {
+            let result = child.child.wait().await;
+            if let Some(err) = result.err() {
+                tracing::warn!("Failed to wait on child: {err}");
+            }
         }
 
         if let Some(provider) = self.provider {

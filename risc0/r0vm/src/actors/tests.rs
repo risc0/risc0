@@ -23,7 +23,7 @@ use risc0_zkvm_methods::FIB_ELF;
 
 use super::{
     App,
-    config::{AppConfig, ManagerConfig, StorageConfig, VERSION},
+    config::{AppConfig, ExecutorConfig, ManagerConfig, StorageConfig, VERSION},
     protocol::{JobStatus, ProofRequest, ShrinkWrapKind, ShrinkWrapRequest, TaskKind},
 };
 
@@ -49,7 +49,6 @@ const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
 
 async fn do_test(remote: bool) {
     let task_kinds = vec![
-        TaskKind::Execute,
         TaskKind::ProveSegment,
         TaskKind::Lift,
         TaskKind::Join,
@@ -64,7 +63,11 @@ async fn do_test(remote: bool) {
         version: VERSION,
         api: None,
         manager: Some(ManagerConfig { listen: addr }),
-        worker: Some(vec![crate::actors::config::WorkerConfig {
+        executor: Some(ExecutorConfig {
+            manager: None,
+            count: 1,
+        }),
+        prover: Some(vec![crate::actors::config::ProverConfig {
             manager: None,
             count: Some(100),
             subscribe: task_kinds.clone(),
