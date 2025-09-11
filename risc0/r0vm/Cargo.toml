@@ -26,7 +26,6 @@ kameo = "0.16"
 multi_index_map = "0.15.0"
 nvml-wrapper = "0.11.0"
 opentelemetry = "0.30.0"
-opentelemetry-appender-tracing = "0.30.0"
 opentelemetry-otlp = "0.30.0"
 opentelemetry_sdk = "0.30.0"
 risc0-circuit-rv32im = { workspace = true }

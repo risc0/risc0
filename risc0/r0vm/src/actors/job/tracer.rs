@@ -17,7 +17,7 @@ use std::{borrow::Cow, collections::HashMap};
 use opentelemetry::{
     KeyValue,
     global::{BoxedSpan, BoxedTracer},
-    trace::{Span, SpanKind, TraceContextExt as _, Tracer},
+    trace::{Span, TraceContextExt as _, Tracer},
 };
 
 use crate::actors::protocol::{TaskHeader, TaskId};
@@ -33,7 +33,6 @@ impl JobTracer {
         let tracer = opentelemetry::global::tracer(name);
         let span = tracer
             .span_builder("job")
-            .with_kind(SpanKind::Client)
             .with_attributes([KeyValue::new("job_id", job_id.to_string())])
             .start(&tracer);
         let ctx = opentelemetry::Context::current_with_span(span);

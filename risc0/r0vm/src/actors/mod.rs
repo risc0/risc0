@@ -41,7 +41,6 @@ use opentelemetry_sdk::{
     Resource,
     logs::SdkLoggerProvider,
     metrics::{PeriodicReader, SdkMeterProvider},
-    propagation::TraceContextPropagator,
     trace::SdkTracerProvider,
 };
 use serde::{Deserialize, Serialize};
@@ -660,14 +659,12 @@ impl OpenTelemetryProvider {
             .with_batch_exporter(
                 opentelemetry_otlp::SpanExporter::builder()
                     .with_http()
-                    .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
                     .build()
                     .unwrap(),
             )
             .with_resource(resource.clone())
             .build();
 
-        opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
         opentelemetry::global::set_tracer_provider(tracer_provider.clone());
 
         let meter_provider = SdkMeterProvider::builder()
