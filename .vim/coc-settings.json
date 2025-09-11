@@ -4,7 +4,7 @@
     "benchmarks/Cargo.toml",
     "examples/Cargo.toml",
     "risc0/cargo-risczero/tests/test_crate",
-    "risc0/zkvm/methods/guest/Cargo.toml",
+    "risc0/zkvm/methods/guest/Cargo.toml",asds
     "risc0/zkvm/methods/std/Cargo.toml",
     "tools/crates-validator/Cargo.toml"
   ],
