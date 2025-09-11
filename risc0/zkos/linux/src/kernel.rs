@@ -14,16 +14,15 @@
 
 use core::{alloc::Layout, ptr::NonNull};
 
-use no_std_strings::{str256, str_format};
+use no_std_strings::{str_format, str256};
 use rlsf::Tlsf;
 use softfloat_sys::{
-    f32_add, f32_div, f32_eq, f32_le, f32_lt, f32_lt_quiet, f32_mul,
-    f32_mulAdd, f32_sqrt, f32_sub, f32_to_f64, f32_to_i32, f32_to_ui32, f64_add, f64_div, f64_eq,
-    f64_le, f64_lt, f64_lt_quiet, f64_mul, f64_mulAdd, f64_sqrt, f64_sub,
-    f64_to_f32, f64_to_i32, f64_to_ui32, float32_t, float64_t, i32_to_f32, i32_to_f64,
-    softfloat_exceptionFlags_read_helper, softfloat_exceptionFlags_write_helper,
-    softfloat_roundingMode_read_helper, softfloat_roundingMode_write_helper, ui32_to_f32,
-    ui32_to_f64,
+    f32_add, f32_div, f32_eq, f32_le, f32_lt, f32_lt_quiet, f32_mul, f32_mulAdd, f32_sqrt, f32_sub,
+    f32_to_f64, f32_to_i32, f32_to_ui32, f64_add, f64_div, f64_eq, f64_le, f64_lt, f64_lt_quiet,
+    f64_mul, f64_mulAdd, f64_sqrt, f64_sub, f64_to_f32, f64_to_i32, f64_to_ui32, float32_t,
+    float64_t, i32_to_f32, i32_to_f64, softfloat_exceptionFlags_read_helper,
+    softfloat_exceptionFlags_write_helper, softfloat_roundingMode_read_helper,
+    softfloat_roundingMode_write_helper, ui32_to_f32, ui32_to_f64,
 };
 
 const REG_SP: usize = 2;
@@ -62,8 +61,6 @@ const USER_HEAP_SIZE: usize = 0x40000000;
 const USER_HEAP_END_ADDR: usize = USER_HEAP_START_ADDR + USER_HEAP_SIZE;
 const USER_PHENT_SIZE: usize = 32; // ELF32_Phdr size in bytes
 
-const ARGC: usize = 1;
-const PROGRAM_NAME: &[u8] = b"r0vm";
 const PAGE_SIZE: usize = 4096;
 // const AT_VECTOR_SIZE_BASE: usize = 20;
 // const AT_VECTOR_SIZE_ARCH: usize = 7;
@@ -258,12 +255,20 @@ unsafe fn emulate_fp_instruction(insn: u32, mepc: usize) -> ! {
     } else {
         rm as u8 // Static rounding mode from instruction
     };
-    unsafe { softfloat_roundingMode_write_helper(rounding_mode); }
+    unsafe {
+        softfloat_roundingMode_write_helper(rounding_mode);
+    }
 
     let msg = str_format!(
         str256,
         "Emulating FP instruction at PC: {:#010x}, funct7={:#02x}, funct3={}, rd={}, rs1={}, rs2={}, rm={}",
-        mepc, funct7, funct3, rd, rs1, rs2, rm
+        mepc,
+        funct7,
+        funct3,
+        rd,
+        rs1,
+        rs2,
+        rm
     );
     print(&msg);
 
@@ -650,11 +655,7 @@ fn emulate_fmin(insn: u32) -> ! {
         } else {
             // riscv-pk logic: use_rs1 = f32_lt_quiet(arg1, arg2) || isNaNF32UI(rs2)
             let use_rs1 = unsafe { f32_lt_quiet(arg1, arg2) } || rs2_is_nan;
-            if use_rs1 {
-                rs1
-            } else {
-                rs2
-            }
+            if use_rs1 { rs1 } else { rs2 }
         };
 
         // Update FCSR with softfloat flags
@@ -706,11 +707,7 @@ fn emulate_fmin(insn: u32) -> ! {
 
                 // riscv-pk logic: use_rs1 = f64_lt_quiet(arg1, arg2) || isNaNF64UI(rs2)
                 let use_rs1 = unsafe { f64_lt_quiet(arg1, arg2) } || rs2_is_nan;
-                if use_rs1 {
-                    rs1
-                } else {
-                    rs2
-                }
+                if use_rs1 { rs1 } else { rs2 }
             }
         };
 
@@ -903,7 +900,7 @@ fn emulate_fcvt_if(insn: u32) -> ! {
     let funct3 = (insn >> 12) & 0x7; // This is the rounding mode (rm)
     let rd = (insn >> 7) & 0x1f;
     let rs2 = (insn >> 20) & 0x1f; // This determines signed (0) vs unsigned (1) conversion
-                                   // Use funct3 as rounding mode if it's not 111 (DYN), otherwise use FRM
+    // Use funct3 as rounding mode if it's not 111 (DYN), otherwise use FRM
     let rounding_mode = if funct3 == 7 {
         get_frm() as u8
     } else {
@@ -1092,27 +1089,15 @@ fn classify_f32(value: u32) -> u32 {
     if exp == 0 {
         if frac == 0 {
             // Zero
-            if sign == 0 {
-                1 << 4
-            } else {
-                1 << 3
-            } // +0 or -0
+            if sign == 0 { 1 << 4 } else { 1 << 3 } // +0 or -0
         } else {
             // Subnormal
-            if sign == 0 {
-                1 << 5
-            } else {
-                1 << 2
-            } // +subnormal or -subnormal
+            if sign == 0 { 1 << 5 } else { 1 << 2 } // +subnormal or -subnormal
         }
     } else if exp == 0xff {
         if frac == 0 {
             // Infinity
-            if sign == 0 {
-                1 << 7
-            } else {
-                1 << 0
-            } // +inf or -inf
+            if sign == 0 { 1 << 7 } else { 1 << 0 } // +inf or -inf
         } else {
             // NaN
             if (frac & 0x400000) != 0 {
@@ -1123,11 +1108,7 @@ fn classify_f32(value: u32) -> u32 {
         }
     } else {
         // Normal number
-        if sign == 0 {
-            1 << 6
-        } else {
-            1 << 1
-        } // +normal or -normal
+        if sign == 0 { 1 << 6 } else { 1 << 1 } // +normal or -normal
     }
 }
 
@@ -1139,27 +1120,15 @@ fn classify_f64(value: u64) -> u64 {
     if exp == 0 {
         if frac == 0 {
             // Zero
-            if sign == 0 {
-                1 << 4
-            } else {
-                1 << 3
-            } // +0 or -0
+            if sign == 0 { 1 << 4 } else { 1 << 3 } // +0 or -0
         } else {
             // Subnormal
-            if sign == 0 {
-                1 << 5
-            } else {
-                1 << 2
-            } // +subnormal or -subnormal
+            if sign == 0 { 1 << 5 } else { 1 << 2 } // +subnormal or -subnormal
         }
     } else if exp == 0x7ff {
         if frac == 0 {
             // Infinity
-            if sign == 0 {
-                1 << 7
-            } else {
-                1 << 0
-            } // +inf or -inf
+            if sign == 0 { 1 << 7 } else { 1 << 0 } // +inf or -inf
         } else {
             // NaN
             if (frac & 0x8000000000000) != 0 {
@@ -1170,11 +1139,7 @@ fn classify_f64(value: u64) -> u64 {
         }
     } else {
         // Normal number
-        if sign == 0 {
-            1 << 6
-        } else {
-            1 << 1
-        } // +normal or -normal
+        if sign == 0 { 1 << 6 } else { 1 << 1 } // +normal or -normal
     }
 }
 
@@ -1464,7 +1429,7 @@ fn emulate_fmadd(insn: u32) -> ! {
         let msg_debug = str_format!(
             str256,
             "fmadd.d debug: original_rs1={:#016x}, rs1_val={:#016x}, rs2={:#016x}, rs3_val={:#016x}, neg_a={}, neg_c={}",
-            rs1, 
+            rs1,
             rs1_val,
             rs2,
             rs3_val,
@@ -1606,7 +1571,9 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             let value = get_f32_rs2(insn);
 
             // Store 32-bit value to memory
-            unsafe { (addr as *mut u32).write_volatile(value); }
+            unsafe {
+                (addr as *mut u32).write_volatile(value);
+            }
 
             let msg = str_format!(str256, "fsw: stored {:#010x} from f{}", value, rs2);
             print(&msg);
@@ -1633,7 +1600,9 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             print(&msg_debug2);
 
             // Store 64-bit value to memory
-            unsafe { (addr as *mut u64).write_volatile(value); }
+            unsafe {
+                (addr as *mut u64).write_volatile(value);
+            }
 
             let msg = str_format!(
                 str256,
@@ -1951,13 +1920,65 @@ impl Err {
 #[unsafe(no_mangle)]
 unsafe extern "C" fn kstart() -> ! {
     let user_start_addr = unsafe { USER_START_PTR.read_volatile() } - 4;
-    unsafe { MEPC_PTR.write_volatile(user_start_addr); }
+    unsafe {
+        MEPC_PTR.write_volatile(user_start_addr);
+    }
 
     let mut stack = UserStack::new();
 
-    // args
-    stack.add_word(ARGC);
-    stack.add_str(PROGRAM_NAME);
+    print("kstart");
+    // args - get actual argc and argv from host
+    let argc = host_argc();
+    print(&str_format!(str256, "argc is {argc}"));
+    // Check if we have any arguments
+    if argc == 0 {
+        let msg = str_format!(
+            str256,
+            "Error: No command line arguments provided (argc = 0)"
+        );
+        print(&msg);
+        host_terminate(255, 0);
+    }
+
+    stack.add_word(argc as usize);
+
+    // Buffer to store argument strings (ensure word alignment)
+
+    // Get each argument from host and add to stack
+    for i in 0..argc {
+        let mut arg_buffer = [0u32; 256]; // 1024 bytes as u32 array for proper alignment
+        print(&str_format!(str256, "arg {i}"));
+        let arg_len = host_argv(i, arg_buffer.as_mut_ptr() as *mut u8, arg_buffer.len() * 4);
+        // we want to make this string null-terminated, so we add 1 to the length
+        let arg_len = arg_len + 1;
+        if arg_len > 0 && arg_len <= (arg_buffer.len() * 4) as u32 {
+            // Create a byte slice with the actual argument length
+            let arg_bytes: &[u8] = bytemuck::cast_slice(&arg_buffer);
+            let arg_slice = &arg_bytes[..arg_len as usize];
+            // Print the argument as a string (not null-terminated, may not be valid UTF-8)
+            // Now arg_slice is a null-terminated string; trim at the first null for display.
+            let nul_pos = arg_slice
+                .iter()
+                .position(|&b| b == 0)
+                .unwrap_or(arg_slice.len());
+            let arg_str = &arg_slice[..nul_pos];
+            match core::str::from_utf8(arg_str) {
+                Ok(s) => print(&str_format!(
+                    str256,
+                    "arg {i}: \"{s}\" ({arg_len}, null-terminated)"
+                )),
+                Err(_) => print(&str_format!(
+                    str256,
+                    "arg {i}: <non-utf8> {:?} ({arg_len}, null-terminated)",
+                    arg_str
+                )),
+            }
+            stack.add_str(arg_slice);
+        } else {
+            // Fallback to empty string if something goes wrong
+            stack.add_str(b"");
+        }
+    }
     stack.add_null();
 
     // env
@@ -1969,14 +1990,16 @@ unsafe extern "C" fn kstart() -> ! {
     stack.add_aux_word(AuxType::EUid, 1); // auxv[2]
     stack.add_aux_word(AuxType::Gid, 1); // auxv[3]
     stack.add_aux_word(AuxType::EGid, 1); // auxv[4]
-                                          // Add AT_PHDR, AT_PHNUM, AT_PHENT
-                                          // Define the AuxType variants if not already defined:
-                                          //     Phdr = ...,
-                                          //     Phnum = ...,
-                                          //     Phent = ...,
-                                          // Use the constants for addresses and sizes
+    // Add AT_PHDR, AT_PHNUM, AT_PHENT
+    // Define the AuxType variants if not already defined:
+    //     Phdr = ...,
+    //     Phnum = ...,
+    //     Phent = ...,
+    // Use the constants for addresses and sizes
     stack.add_aux_word(AuxType::Phdr, unsafe { USER_PHDR_ADDR_PTR.read_volatile() }); // auxv[5]
-    stack.add_aux_word(AuxType::PhNum, unsafe { USER_PHDR_NUM_ADDR_PTR.read_volatile() }); // auxv[6]
+    stack.add_aux_word(AuxType::PhNum, unsafe {
+        USER_PHDR_NUM_ADDR_PTR.read_volatile()
+    }); // auxv[6]
     stack.add_aux_word(AuxType::PhEnt, USER_PHENT_SIZE); // auxv[7]
     stack.add_aux_word(AuxType::Null, 0); // auxv[8]
 
@@ -1984,7 +2007,9 @@ unsafe extern "C" fn kstart() -> ! {
 
     let block: &[u8] = unsafe { core::slice::from_raw_parts(USER_HEAP_START_PTR, USER_HEAP_SIZE) };
     #[allow(static_mut_refs)]
-    unsafe { HEAP.insert_free_block_ptr(block.into()); }
+    unsafe {
+        HEAP.insert_free_block_ptr(block.into());
+    }
 
     // Initialize floating point registers to zero at startup
     init_fp_regs();
@@ -2092,7 +2117,11 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
     if instruction == 0x0000100f {
         // Fence.i instruction - treat as null-op and continue
         // mret will automatically increment MEPC by 4, so we don't need to do anything
-        let msg = str_format!(str256, "Emulating fence.i instruction at PC: {:#010x}", mepc);
+        let msg = str_format!(
+            str256,
+            "Emulating fence.i instruction at PC: {:#010x}",
+            mepc
+        );
         print(&msg);
         mret()
     }
@@ -2106,7 +2135,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             mepc
         );
         print(&msg);
-        unsafe { emulate_fp_instruction(instruction, mepc); }
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
     }
 
     // Check for floating point operations (opcode 0x47) - R4-type instructions
@@ -2118,7 +2149,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             mepc
         );
         print(&msg);
-        unsafe { emulate_fp_instruction(instruction, mepc); }
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
     }
 
     // Check for floating point operations (opcode 0x4b) - R4-type instructions
@@ -2130,7 +2163,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             mepc
         );
         print(&msg);
-        unsafe { emulate_fp_instruction(instruction, mepc); }
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
     }
 
     // Check for floating point operations (opcode 0x4f) - R4-type instructions
@@ -2142,12 +2177,16 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             mepc
         );
         print(&msg);
-        unsafe { emulate_fp_instruction(instruction, mepc); }
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
     }
 
     // Check for floating point operations (opcode 0x53)
     if opcode == 0x53 {
-        unsafe { emulate_fp_instruction(instruction, mepc); }
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
     }
 
     // Check for floating point operations (opcode 0x63) - alternative encoding
@@ -2159,17 +2198,23 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             mepc
         );
         print(&msg);
-        unsafe { emulate_fp_instruction(instruction, mepc); }
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
     }
 
     // Check for floating point load/store operations (opcode 0x07 = Load-FP, 0x27 = Store-FP)
     if opcode == 0x07 || opcode == 0x27 {
-        unsafe { emulate_fp_load_store(instruction, mepc); }
+        unsafe {
+            emulate_fp_load_store(instruction, mepc);
+        }
     }
 
     // Check for CSR operations (opcode 0x73)
     if opcode == 0x73 {
-        unsafe { emulate_csr_instruction(instruction, mepc); }
+        unsafe {
+            emulate_csr_instruction(instruction, mepc);
+        }
     }
 
     // Check for RV32A atomic memory operations
@@ -2209,7 +2254,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
                 // Perform atomic add operation
                 let new_value = current_value.wrapping_add(add_value);
-                unsafe { (addr as *mut u32).write_volatile(new_value); }
+                unsafe {
+                    (addr as *mut u32).write_volatile(new_value);
+                }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2246,7 +2293,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 let swap_value = get_ureg(rs2 as usize);
 
                 // Perform atomic swap operation
-                unsafe { (addr as *mut u32).write_volatile(swap_value); }
+                unsafe {
+                    (addr as *mut u32).write_volatile(swap_value);
+                }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2284,7 +2333,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
                 // Perform atomic XOR operation
                 let new_value = current_value ^ xor_value;
-                unsafe { (addr as *mut u32).write_volatile(new_value); }
+                unsafe {
+                    (addr as *mut u32).write_volatile(new_value);
+                }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2322,7 +2373,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
                 // Perform atomic OR operation
                 let new_value = current_value | or_value;
-                unsafe { (addr as *mut u32).write_volatile(new_value); }
+                unsafe {
+                    (addr as *mut u32).write_volatile(new_value);
+                }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2360,7 +2413,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
                 // Perform atomic AND operation
                 let new_value = current_value & and_value;
-                unsafe { (addr as *mut u32).write_volatile(new_value); }
+                unsafe {
+                    (addr as *mut u32).write_volatile(new_value);
+                }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2404,7 +2459,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 } else {
                     compare_value
                 };
-                unsafe { (addr as *mut u32).write_volatile(new_value); }
+                unsafe {
+                    (addr as *mut u32).write_volatile(new_value);
+                }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2448,7 +2505,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 } else {
                     compare_value
                 };
-                unsafe { (addr as *mut u32).write_volatile(new_value); }
+                unsafe {
+                    (addr as *mut u32).write_volatile(new_value);
+                }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2490,7 +2549,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 } else {
                     compare_value
                 };
-                unsafe { (addr as *mut u32).write_volatile(new_value); }
+                unsafe {
+                    (addr as *mut u32).write_volatile(new_value);
+                }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2532,7 +2593,9 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 } else {
                     compare_value
                 };
-                unsafe { (addr as *mut u32).write_volatile(new_value); }
+                unsafe {
+                    (addr as *mut u32).write_volatile(new_value);
+                }
 
                 // Write original value to rd register
                 // XXX check for rd = 0?
@@ -2597,6 +2660,97 @@ fn host_log(_msg_ptr: *const u8, _msg_len: usize) {
             in("a2") _msg_len,
         )
     };
+}
+
+fn host_argc() -> u32 {
+    #[cfg(target_arch = "riscv32")]
+    {
+        const HOST_ECALL_READ: u32 = 1;
+
+        // Create the syscall name string
+        let syscall_name = b"risc0_zkvm_platform::syscall::nr::SYS_ARGC\0";
+        let syscall_name_ptr = syscall_name.as_ptr() as u32;
+
+        // First do the syscall to get argc (like host_syscall)
+        let _rlen: u32;
+        unsafe {
+            core::arch::asm!("ecall",
+                in("a7") HOST_ECALL_READ,
+                inout("a0") syscall_name_ptr => _rlen,  // fd = syscall name pointer
+                in("a1") core::ptr::null_mut::<u8>(),
+                in("a2") 0u32,
+            )
+        };
+
+        // Read the result from registers a0, a1 (like read_a0_a1)
+        let mut buf = [0u32, 0u32];
+        let _rlen2: u32;
+        unsafe {
+            core::arch::asm!("ecall",
+                in("a7") HOST_ECALL_READ,
+                inout("a0") 0u32 => _rlen2,  // fd=0 to read cached values
+                in("a1") buf.as_mut_ptr() as *mut u8,
+                in("a2") core::mem::size_of_val(&buf) as u32,
+            )
+        };
+
+        buf[0] // Return argc from a0
+    }
+    #[cfg(not(target_arch = "riscv32"))]
+    {
+        0
+    }
+}
+
+#[allow(unused_variables)]
+fn host_argv(arg_index: u32, buf: *mut u8, buf_len: usize) -> u32 {
+    print(&str_format!(
+        str256,
+        "host_argv {arg_index} {buf:?} {buf_len}"
+    ));
+    #[cfg(target_arch = "riscv32")]
+    {
+        const HOST_ECALL_READ: u32 = 1;
+        const MAX_IO_BYTES: u32 = 1024;
+        const WORD_SIZE: u32 = 4;
+
+        // Create the syscall name string
+        let syscall_name = b"risc0_zkvm_platform::syscall::nr::SYS_ARGV\0";
+        let syscall_name_ptr = syscall_name.as_ptr() as u32;
+
+        // Truncate buffer size to MAX_IO_BYTES
+        let nbytes = core::cmp::min(buf_len as u32, MAX_IO_BYTES);
+        let nwords = nbytes / WORD_SIZE;
+
+        // First do the syscall to get argv (like host_syscall)
+        let _rlen: u32;
+        unsafe {
+            core::arch::asm!("ecall",
+                in("a7") HOST_ECALL_READ,
+                inout("a0") syscall_name_ptr => _rlen,  // fd = syscall name pointer
+                in("a1") buf,
+                in("a2") nwords * WORD_SIZE,
+                in("a3") arg_index,  // arg_index in a3
+            )
+        };
+
+        // Read the argument data into the buffer (like host_ecall_read_trunc)
+        let mut buf = [0u32, 0u32];
+        unsafe {
+            core::arch::asm!("ecall",
+                in("a7") HOST_ECALL_READ,
+                in("a0") 0u32,  // fd=0 to read cached values
+                in("a1") buf.as_mut_ptr() as *mut u8,
+                in("a2") core::mem::size_of_val(&buf) as u32,
+            )
+        };
+
+        buf[0] // Return the length read
+    }
+    #[cfg(not(target_arch = "riscv32"))]
+    {
+        0
+    }
 }
 
 fn set_result(result: Result<u32, Err>) {

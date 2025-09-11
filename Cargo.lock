@@ -7325,6 +7325,7 @@ dependencies = [
 name = "risc0-zkos-linux"
 version = "0.0.0"
 dependencies = [
+ "bytemuck",
  "include_bytes_aligned",
  "no_std_strings",
  "rlsf",
