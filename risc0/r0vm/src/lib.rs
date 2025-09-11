@@ -145,16 +145,16 @@ enum ReceiptKind {
 }
 
 pub fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-        .init();
-
     let args = Cli::parse();
 
     if args.mode.config.is_some() {
         self::actors::async_main(args.mode.config).unwrap();
         return;
     }
+
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();
 
     if args.mode.rpc {
         self::actors::rpc_main(args.num_gpus).unwrap();

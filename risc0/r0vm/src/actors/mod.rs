@@ -47,7 +47,7 @@ use opentelemetry_sdk::{
 use serde::{Deserialize, Serialize};
 use tempfile::NamedTempFile;
 use tokio::{
-    io::{self, AsyncBufReadExt as _, AsyncReadExt as _, AsyncWriteExt as _, BufReader},
+    io::{AsyncReadExt as _, AsyncWriteExt as _},
     net::{TcpListener, UnixStream, tcp},
     process::{Child, Command},
     task::JoinHandle,
@@ -101,9 +101,8 @@ async fn wait_for_shutdown() {
     use tokio::signal::unix::{SignalKind, signal};
 
     let mut sigterm = signal(SignalKind::terminate()).expect("failed to bind SIGTERM");
-    let mut stdin_lines = BufReader::new(io::stdin()).lines();
 
-    println!("Use Ctrl-C or Ctrl-D to stop");
+    println!("Use Ctrl-C");
 
     tokio::select! {
         _ = tokio::signal::ctrl_c() => {
@@ -111,16 +110,6 @@ async fn wait_for_shutdown() {
         }
         _ = sigterm.recv() => {
             eprintln!("Got SIGTERM");
-        }
-        maybe_line = stdin_lines.next_line() => {
-            match maybe_line {
-                Ok(None) => eprintln!("Got EOF (Ctrl-D)"),
-                Ok(Some(_line)) => {
-                    // You can ignore actual input lines, or use them.
-                    eprintln!("Got input instead of Ctrl-D, ignoring…");
-                }
-                Err(e) => eprintln!("stdin error: {e}"),
-            }
         }
     }
 
@@ -325,9 +314,15 @@ impl App {
         let mut factory = None;
         let mut server = None;
         let mut local_addr = None;
-        let po2 = None;
 
-        let provider = cfg.telemetry.as_ref().map(|_| OpenTelemetryProvider::new());
+        let provider = if cfg.telemetry.is_some() {
+            Some(OpenTelemetryProvider::new())
+        } else {
+            tracing_subscriber::fmt()
+                .with_env_filter(EnvFilter::from_default_env())
+                .init();
+            None
+        };
 
         if let Some(cfg_manager) = &cfg.manager {
             let storage_root = if cfg.api.is_some() {
@@ -358,7 +353,7 @@ impl App {
                     api_addr,
                     storage_root.unwrap(),
                     manager_ref,
-                    po2,
+                    cfg_api.po2,
                 ));
             }
         }

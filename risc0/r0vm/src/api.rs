@@ -37,7 +37,6 @@ use bonsai_sdk::responses::{
     SnarkReq, SnarkStatusRes, UploadRes,
 };
 use kameo::actor::ActorRef;
-use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkvm::{Receipt, compute_image_id, rpc::JobRequest};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;

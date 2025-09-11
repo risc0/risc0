@@ -44,6 +44,7 @@ pub(crate) struct AppConfig {
 pub(crate) struct ApiConfig {
     pub listen: Option<SocketAddr>,
     pub manager: Option<SocketAddr>,
+    pub po2: Option<u32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -82,6 +83,7 @@ impl Default for AppConfig {
             api: Some(ApiConfig {
                 listen: Some(default_api_listen_addr()),
                 manager: None,
+                po2: None,
             }),
             manager: Some(ManagerConfig {
                 listen: Some(default_manager_listen_addr()),
@@ -143,6 +145,7 @@ mod tests {
                 api: Some(ApiConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
                     manager: Some(SocketAddr::from_str("1.2.3.4:9000").unwrap()),
+                    po2: None,
                 }),
                 manager: None,
                 executor: None,
@@ -165,6 +168,7 @@ mod tests {
                 api: Some(ApiConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
                     manager: None,
+                    po2: None,
                 }),
                 manager: Some(ManagerConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap())
