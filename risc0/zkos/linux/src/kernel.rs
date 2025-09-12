@@ -1942,8 +1942,7 @@ unsafe extern "C" fn kstart() -> ! {
 
     stack.add_word(argc as usize);
 
-    // Buffer to store argument strings (ensure word alignment)
-
+    // XXX we should review this code from a security perspective
     // Get each argument from host and add to stack
     for i in 0..argc {
         let mut arg_buffer = [0u32; 256]; // 1024 bytes as u32 array for proper alignment
