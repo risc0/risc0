@@ -45,10 +45,10 @@ const FP_REGS_SIZE: usize = NUM_FP_REGS * FP_REG_SIZE; // 256 bytes total
 const USER_REGS_PTR: *mut u32 = 0xffff_0080 as *mut u32;
 const MEPC_PTR: *mut usize = 0xffff_0200 as *mut usize;
 // Floating point register storage area (32 x 64-bit registers = 256 bytes)
-const FP_REGS_PTR: *mut u64 = 0xfff_4000 as *mut u64;
+const FP_REGS_PTR: *mut u64 = 0xffff_4000 as *mut u64;
 // Floating point control and status register (FCSR) storage
 #[allow(dead_code)]
-const FCSR_PTR: *mut u32 = 0xfff_4100 as *mut u32;
+const FCSR_PTR: *mut u32 = 0xffff_4100 as *mut u32;
 const USER_START_PTR: *const usize = 0x0001_0000 as *const usize;
 const USER_STACK_ADDR: usize = 0xbfff_0000;
 const USER_STACK_PTR: *const usize = USER_STACK_ADDR as *const usize;
