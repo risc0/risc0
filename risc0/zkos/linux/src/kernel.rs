@@ -2723,15 +2723,19 @@ fn host_argv(arg_index: u32, buf: *mut u8, buf_len: usize) -> u32 {
 
         // First do the syscall to get argv (like host_syscall)
         let _rlen: u32;
+        // XXX workaround for the risc0 bug
+        let tmp: u32 = get_ureg(REG_A3);
+        set_ureg(REG_A3, arg_index);
         unsafe {
             core::arch::asm!("ecall",
                 in("a7") HOST_ECALL_READ,
                 inout("a0") syscall_name_ptr => _rlen,  // fd = syscall name pointer
                 in("a1") buf,
                 in("a2") nwords * WORD_SIZE,
-                in("a3") arg_index,  // arg_index in a3
+                in("a3") arg_index,  // arg_index in a3; XXX: bug, the kernel side reads user reg
             )
         };
+        set_ureg(REG_A3, tmp);
 
         // Read the argument data into the buffer (like host_ecall_read_trunc)
         let mut buf = [0u32, 0u32];
