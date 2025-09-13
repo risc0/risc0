@@ -332,6 +332,17 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install risc0-groth16 $RISC0_GROTH16_VERSION
       - run: ${{ matrix.test_command }} -p cargo-risczero -F experimental
+      - name: compute-sanitizer memcheck
+        run: |
+          cargo build --package risc0-r0vm -F cuda &&
+          cargo build --package risc0-zkvm-methods && \
+          /usr/local/cuda/bin/compute-sanitizer \
+              --tool memcheck \
+              target/debug/r0vm \
+              --elf target/riscv-guest/risc0-zkvm-methods/risc0-zkvm-methods-guest/riscv32im-risc0-zkvm-elf/release/hello_commit.bin \
+              --receipt-kind groth16
+        shell: bash
+        if: matrix.feature == 'cuda'
       - name: run datasheet generator (smoke test)
         run: cargo run --locked -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
       - name: run datasheet generator (CUDA full)
