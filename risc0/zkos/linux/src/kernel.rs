@@ -12,10 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(dead_code)]
+
 use core::{alloc::Layout, ptr::NonNull};
 
 use no_std_strings::{str_format, str256};
 use rlsf::Tlsf;
+
+// Debug configuration - set to true to enable debug prints, false to disable
+const DEBUG_ENABLED: bool = cfg!(debug_assertions);
+
+// Debug print macro that avoids str_format evaluation when debug is disabled
+macro_rules! debug_print {
+    ($($arg:tt)*) => {
+        if DEBUG_ENABLED {
+            let msg = str_format!(str256, $($arg)*);
+            print(&msg);
+        }
+    };
+}
+
+macro_rules! kprint {
+    ($($arg:tt)*) => {
+            let msg = str_format!(str256, $($arg)*);
+            print(&msg);
+    };
+}
+
+// Debug print macro for simple string literals (no formatting)
+macro_rules! debug_print_simple {
+    ($msg:literal) => {
+        if DEBUG_ENABLED {
+            print($msg);
+        }
+    };
+}
+
+macro_rules! kpanic {
+    ($($arg:tt)*) => {
+        kprint!($($arg)*);
+        host_terminate(1, 0);
+    };
+}
 use softfloat_sys::{
     f32_add, f32_div, f32_eq, f32_le, f32_lt, f32_lt_quiet, f32_mul, f32_mulAdd, f32_sqrt, f32_sub,
     f32_to_f64, f32_to_i32, f32_to_ui32, f64_add, f64_div, f64_eq, f64_le, f64_lt, f64_lt_quiet,
@@ -25,6 +63,76 @@ use softfloat_sys::{
     softfloat_roundingMode_write_helper, ui32_to_f32, ui32_to_f64,
 };
 
+// Embedded device tree blob (DTB) for RISC-V system
+#[allow(dead_code)]
+const DTB_DATA: [u8; 952] = [
+    0xd0, 0x0d, 0xfe, 0xed, 0x00, 0x00, 0x03, 0xb8, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x02, 0xf4,
+    0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x11, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0xc4, 0x00, 0x00, 0x02, 0xbc, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00, 0x1b, 0x7a, 0x6b, 0x76, 0x6d,
+    0x2c, 0x72, 0x76, 0x33, 0x32, 0x2d, 0x6e, 0x6f, 0x6d, 0x6d, 0x75, 0x00, 0x72, 0x69, 0x73, 0x63,
+    0x76, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x2a, 0x00, 0x00, 0x00, 0x26,
+    0x7a, 0x6b, 0x56, 0x4d, 0x20, 0x52, 0x56, 0x33, 0x32, 0x20, 0x4e, 0x4f, 0x4d, 0x4d, 0x55, 0x20,
+    0x28, 0x53, 0x42, 0x49, 0x2d, 0x74, 0x69, 0x6d, 0x65, 0x72, 0x20, 0x2b, 0x20, 0x68, 0x76, 0x63,
+    0x20, 0x63, 0x6f, 0x6e, 0x73, 0x6f, 0x6c, 0x65, 0x29, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+    0x63, 0x68, 0x6f, 0x73, 0x65, 0x6e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x33,
+    0x00, 0x00, 0x00, 0x2c, 0x65, 0x61, 0x72, 0x6c, 0x79, 0x70, 0x72, 0x69, 0x6e, 0x74, 0x6b, 0x20,
+    0x65, 0x61, 0x72, 0x6c, 0x79, 0x63, 0x6f, 0x6e, 0x3d, 0x73, 0x62, 0x69, 0x20, 0x63, 0x6f, 0x6e,
+    0x73, 0x6f, 0x6c, 0x65, 0x3d, 0x68, 0x76, 0x63, 0x30, 0x20, 0x69, 0x6e, 0x69, 0x74, 0x3d, 0x2f,
+    0x62, 0x69, 0x6e, 0x2f, 0x73, 0x68, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
+    0x63, 0x70, 0x75, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04,
+    0x00, 0x00, 0x00, 0x35, 0x00, 0x98, 0x96, 0x80, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04,
+    0x00, 0x00, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x63, 0x70, 0x75, 0x40,
+    0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x1b,
+    0x72, 0x69, 0x73, 0x63, 0x76, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04,
+    0x00, 0x00, 0x00, 0x48, 0x63, 0x70, 0x75, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04,
+    0x00, 0x00, 0x00, 0x54, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x0a,
+    0x00, 0x00, 0x00, 0x58, 0x72, 0x76, 0x33, 0x32, 0x69, 0x6d, 0x61, 0x66, 0x64, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x62, 0x6e, 0x6f, 0x6e, 0x65,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x6b,
+    0x6f, 0x6b, 0x61, 0x79, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x69, 0x6e, 0x74, 0x65,
+    0x72, 0x72, 0x75, 0x70, 0x74, 0x2d, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x6c, 0x65, 0x72,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x1b,
+    0x72, 0x69, 0x73, 0x63, 0x76, 0x2c, 0x63, 0x70, 0x75, 0x2d, 0x69, 0x6e, 0x74, 0x63, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x72, 0x00, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x83, 0x00, 0x00, 0x00, 0x03,
+    0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x98, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02,
+    0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01, 0x6d, 0x65, 0x6d, 0x6f,
+    0x72, 0x79, 0x40, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x07,
+    0x00, 0x00, 0x00, 0x48, 0x6d, 0x65, 0x6d, 0x6f, 0x72, 0x79, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03,
+    0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x54, 0x00, 0x01, 0x10, 0x00, 0x08, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01, 0x61, 0x63, 0x6c, 0x69, 0x6e, 0x74, 0x2d, 0x6d,
+    0x74, 0x69, 0x6d, 0x65, 0x72, 0x40, 0x63, 0x32, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x1b, 0x72, 0x69, 0x73, 0x63,
+    0x76, 0x2c, 0x61, 0x63, 0x6c, 0x69, 0x6e, 0x74, 0x2d, 0x6d, 0x74, 0x69, 0x6d, 0x65, 0x72, 0x00,
+    0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x54, 0xc2, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0xa0,
+    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04,
+    0x00, 0x00, 0x00, 0xb4, 0x00, 0x98, 0x96, 0x80, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02,
+    0x00, 0x00, 0x00, 0x09, 0x23, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x2d, 0x63, 0x65, 0x6c,
+    0x6c, 0x73, 0x00, 0x23, 0x73, 0x69, 0x7a, 0x65, 0x2d, 0x63, 0x65, 0x6c, 0x6c, 0x73, 0x00, 0x63,
+    0x6f, 0x6d, 0x70, 0x61, 0x74, 0x69, 0x62, 0x6c, 0x65, 0x00, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x00,
+    0x62, 0x6f, 0x6f, 0x74, 0x61, 0x72, 0x67, 0x73, 0x00, 0x74, 0x69, 0x6d, 0x65, 0x62, 0x61, 0x73,
+    0x65, 0x2d, 0x66, 0x72, 0x65, 0x71, 0x75, 0x65, 0x6e, 0x63, 0x79, 0x00, 0x64, 0x65, 0x76, 0x69,
+    0x63, 0x65, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x00, 0x72, 0x65, 0x67, 0x00, 0x72, 0x69, 0x73, 0x63,
+    0x76, 0x2c, 0x69, 0x73, 0x61, 0x00, 0x6d, 0x6d, 0x75, 0x2d, 0x74, 0x79, 0x70, 0x65, 0x00, 0x73,
+    0x74, 0x61, 0x74, 0x75, 0x73, 0x00, 0x23, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x72, 0x75, 0x70, 0x74,
+    0x2d, 0x63, 0x65, 0x6c, 0x6c, 0x73, 0x00, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x72, 0x75, 0x70, 0x74,
+    0x2d, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x6c, 0x65, 0x72, 0x00, 0x70, 0x68, 0x61, 0x6e,
+    0x64, 0x6c, 0x65, 0x00, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x72, 0x75, 0x70, 0x74, 0x73, 0x2d, 0x65,
+    0x78, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x00, 0x63, 0x6c, 0x6f, 0x63, 0x6b, 0x2d, 0x66, 0x72,
+    0x65, 0x71, 0x75, 0x65, 0x6e, 0x63, 0x79, 0x00,
+];
+#[allow(dead_code)]
+const fn get_dtb_data() -> &'static [u8] {
+    &DTB_DATA
+}
+
+#[allow(dead_code)]
 const REG_SP: usize = 2;
 const REG_A0: usize = 10;
 const REG_A1: usize = 11;
@@ -32,7 +140,7 @@ const REG_A2: usize = 12;
 const REG_A3: usize = 13;
 const REG_A4: usize = 14;
 const REG_A5: usize = 15;
-// const REG_A6: usize = 16;
+const REG_A6: usize = 16;
 const REG_A7: usize = 17;
 
 // Floating point register constants
@@ -55,10 +163,12 @@ const USER_STACK_PTR: *const usize = USER_STACK_ADDR as *const usize;
 #[allow(dead_code)]
 const USER_STACK_SIZE: usize = 2 * 1024 * 1024;
 const USER_HEAP_START_ADDR: usize = 0x0800_0000; // TODO: figure out where data ends in user program
+#[allow(dead_code)]
 const USER_HEAP_START_PTR: *const u8 = USER_HEAP_START_ADDR as *const u8;
 const USER_HEAP_SIZE: usize = 0x40000000;
 #[allow(dead_code)]
 const USER_HEAP_END_ADDR: usize = USER_HEAP_START_ADDR + USER_HEAP_SIZE;
+#[allow(dead_code)]
 const USER_PHENT_SIZE: usize = 32; // ELF32_Phdr size in bytes
 
 const PAGE_SIZE: usize = 4096;
@@ -68,8 +178,10 @@ const PAGE_SIZE: usize = 4096;
 const ASCII_TABLE_PTR: *const u8 = 0xbfff_0200 as *const u8;
 
 /// Program header table address (stored in memory)
+#[allow(dead_code)]
 const USER_PHDR_ADDR_PTR: *const usize = 0xffff_3000 as *const usize;
 /// Program header count address (stored in memory)
+#[allow(dead_code)]
 const USER_PHDR_NUM_ADDR_PTR: *const usize = 0xffff_3008 as *const usize;
 
 // Shadow register storage area for supervisor CSRs (starting at 0xffff_5000)
@@ -78,16 +190,17 @@ const SHADOW_REGS_PTR: *mut u32 = 0xffff_5000 as *mut u32;
 // Supervisor CSR offsets within shadow register area
 const STVEC_OFFSET: usize = 0; // Supervisor trap vector base address
 const SSCRATCH_OFFSET: usize = 1; // Supervisor scratch register
-const SIE_OFFSET: usize = 2; // Supervisor interrupt enable
-const SIP_OFFSET: usize = 3; // Supervisor interrupt pending
-const SCOUNTEREN_OFFSET: usize = 4; // Supervisor counter enable
-const SSTATUS_OFFSET: usize = 5; // Supervisor status register
-const SEPC_OFFSET: usize = 6; // Supervisor exception program counter
-const STVAL_OFFSET: usize = 7; // Supervisor trap value
-const SCAUSE_OFFSET: usize = 8; // Supervisor cause register
-const SENVCFG_OFFSET: usize = 9; // Supervisor environment configuration
-const ILRSC_OFFSET: usize = 10; // Instruction LR/SC register
-const ILRSC_SET_OFFSET: usize = 11; // Instruction LR/SC set register
+const SDELEG_OFFSET: usize = 2; // Supervisor delegation register
+const SIE_OFFSET: usize = 3; // Supervisor interrupt enable
+const SIP_OFFSET: usize = 4; // Supervisor interrupt pending
+const SCOUNTEREN_OFFSET: usize = 5; // Supervisor counter enable
+const SSTATUS_OFFSET: usize = 6; // Supervisor status register
+const SEPC_OFFSET: usize = 7; // Supervisor exception program counter
+const STVAL_OFFSET: usize = 8; // Supervisor trap value
+const SCAUSE_OFFSET: usize = 9; // Supervisor cause register
+const SENVCFG_OFFSET: usize = 10; // Supervisor environment configuration
+const ILRSC_OFFSET: usize = 11; // Instruction LR/SC register
+const ILRSC_SET_OFFSET: usize = 12; // Instruction LR/SC set register
 
 const SYS_IOCTL: u32 = 29;
 const SYS_READ: u32 = 63;
@@ -209,6 +322,16 @@ fn get_sscratch() -> u32 {
 fn set_sscratch(value: u32) {
     unsafe {
         *SHADOW_REGS_PTR.add(SSCRATCH_OFFSET) = value;
+    }
+}
+
+fn get_sdeleg() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(SDELEG_OFFSET) }
+}
+
+fn set_sdeleg(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(SDELEG_OFFSET) = value;
     }
 }
 
@@ -364,13 +487,7 @@ fn set_f32_rd(insn: u32, value: u32) {
 
 fn set_f64_rd(insn: u32, value: u64) {
     let rd = (insn >> 7) & 0x1f;
-    let msg_debug = str_format!(
-        str256,
-        "DEBUG: set_f64_rd: storing {:#016x} to f{}",
-        value,
-        rd
-    );
-    print(&msg_debug);
+    debug_print!("DEBUG: set_f64_rd: storing {:#016x} to f{}", value, rd);
     set_fp_reg_from_insn(insn, 7, value);
 }
 
@@ -405,8 +522,7 @@ unsafe fn emulate_fp_instruction(insn: u32, mepc: usize) -> ! {
         softfloat_roundingMode_write_helper(rounding_mode);
     }
 
-    let msg = str_format!(
-        str256,
+    debug_print!(
         "Emulating FP instruction at PC: {:#010x}, funct7={:#02x}, funct3={}, rd={}, rs1={}, rs2={}, rm={}",
         mepc,
         funct7,
@@ -416,7 +532,6 @@ unsafe fn emulate_fp_instruction(insn: u32, mepc: usize) -> ! {
         rs2,
         rm
     );
-    print(&msg);
 
     // Floating point registers should be initialized at startup, not on every instruction
 
@@ -461,9 +576,7 @@ unsafe fn emulate_fp_instruction(insn: u32, mepc: usize) -> ! {
         0x71 => emulate_fmv_if(insn),  // FCLASS.D
         0x78 => emulate_fmv_fi(insn),  // FMV (int to float)
         _ => {
-            let msg = str_format!(str256, "Unsupported FP instruction: funct7={:#02x}", funct7);
-            print(&msg);
-            host_terminate(1, 0);
+            kpanic!("Unsupported FP instruction: funct7={:#02x}", funct7);
         }
     }
 }
@@ -510,9 +623,7 @@ fn emulate_fadd(insn: u32) -> ! {
 
         set_f64_rd(insn, normalized_result);
     } else {
-        let msg = str_format!(str256, "Unsupported precision: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision: {}", precision);
     }
 
     mret()
@@ -534,25 +645,21 @@ fn emulate_fsub(insn: u32) -> ! {
         let result = unsafe { f32_sub(f32_rs1, f32_rs2) };
 
         // Debug: Print operation details
-        let msg = str_format!(
-            str256,
+        debug_print!(
             "fsub.s: rs1={:#x}, rs2={:#x}, result={:#x}",
             rs1,
             rs2,
             result.v
         );
-        print(&msg);
 
         // Check what softfloat set in its internal state
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
-        let msg2 = str_format!(str256, "softfloat internal flags: {:#x}", softfloat_flags);
-        print(&msg2);
+        debug_print!("softfloat internal flags: {:#x}", softfloat_flags);
 
         // Update our FCSR with softfloat's flags
         set_fflags(softfloat_flags as u32);
 
-        let msg3 = str_format!(str256, "FCSR after update: {:#x}", get_fflags());
-        print(&msg3);
+        debug_print!("FCSR after update: {:#x}", get_fflags());
 
         set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
@@ -573,9 +680,7 @@ fn emulate_fsub(insn: u32) -> ! {
 
         set_f64_rd(insn, result.v);
     } else {
-        let msg = str_format!(str256, "Unsupported precision: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision: {}", precision);
     }
 
     mret()
@@ -597,25 +702,21 @@ fn emulate_fmul(insn: u32) -> ! {
         let result = unsafe { f32_mul(f32_rs1, f32_rs2) };
 
         // Debug: Print operation details
-        let msg = str_format!(
-            str256,
+        debug_print!(
             "fmul.s: rs1={:#x}, rs2={:#x}, result={:#x}",
             rs1,
             rs2,
             result.v
         );
-        print(&msg);
 
         // Check what softfloat set in its internal state
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
-        let msg2 = str_format!(str256, "softfloat internal flags: {:#x}", softfloat_flags);
-        print(&msg2);
+        debug_print!("softfloat internal flags: {:#x}", softfloat_flags);
 
         // Update our FCSR with softfloat's flags
         set_fflags(softfloat_flags as u32);
 
-        let msg3 = str_format!(str256, "FCSR after update: {:#x}", get_fflags());
-        print(&msg3);
+        debug_print!("FCSR after update: {:#x}", get_fflags());
 
         set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
@@ -636,9 +737,7 @@ fn emulate_fmul(insn: u32) -> ! {
 
         set_f64_rd(insn, result.v);
     } else {
-        let msg = str_format!(str256, "Unsupported precision: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision: {}", precision);
     }
 
     mret()
@@ -694,9 +793,7 @@ fn emulate_fdiv(insn: u32) -> ! {
 
         set_f64_rd(insn, result.v);
     } else {
-        let msg = str_format!(str256, "Unsupported precision: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision: {}", precision);
     }
 
     mret()
@@ -715,9 +812,7 @@ fn emulate_fsgnj(insn: u32) -> ! {
             1 => (rs1 & 0x7fffffff) | (!rs2 & 0x80000000), // fsgnjn
             2 => (rs1 & 0x7fffffff) | ((rs1 ^ rs2) & 0x80000000), // fsgnjx
             _ => {
-                let msg = str_format!(str256, "Unsupported fsgnj rm: {}", rm);
-                print(&msg);
-                host_terminate(1, 0);
+                kpanic!("Unsupported fsgnj rm: {}", rm);
             }
         };
         set_f32_rd(insn, result);
@@ -730,16 +825,12 @@ fn emulate_fsgnj(insn: u32) -> ! {
             1 => (rs1 & 0x7fffffffffffffff) | (!rs2 & 0x8000000000000000), // fsgnjn
             2 => (rs1 & 0x7fffffffffffffff) | ((rs1 ^ rs2) & 0x8000000000000000), // fsgnjx
             _ => {
-                let msg = str_format!(str256, "Unsupported fsgnj rm: {}", rm);
-                print(&msg);
-                host_terminate(1, 0);
+                kpanic!("Unsupported fsgnj rm: {}", rm);
             }
         };
         set_f64_rd(insn, result);
     } else {
-        let msg = str_format!(str256, "Unsupported precision: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision: {}", precision);
     }
 
     mret()
@@ -750,9 +841,7 @@ fn emulate_fmin(insn: u32) -> ! {
     let rm = get_rm(insn);
 
     if rm >= 2 {
-        let msg = str_format!(str256, "Unsupported fmin/fmax rm: {}", rm);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported fmin/fmax rm: {}", rm);
     }
 
     // Clear softfloat flags before operation
@@ -861,22 +950,19 @@ fn emulate_fmin(insn: u32) -> ! {
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
         // Debug: print flags for NaN test
         if rs1_is_nan || rs2_is_nan {
-            let msg = str_format!(
-                str256,
+            debug_print!(
                 "fmin/fmax NaN: rs1={:x} rs2={:x} result={:x} flags={}",
                 rs1,
                 rs2,
                 result,
                 softfloat_flags
             );
-            print(&msg);
         }
         // Debug: print for zero test
         if (rs1 == 0x8000000000000000 && rs2 == 0x0000000000000000)
             || (rs1 == 0x0000000000000000 && rs2 == 0x8000000000000000)
         {
-            let msg = str_format!(
-                str256,
+            debug_print!(
                 "fmin/fmax zero: rs1=0x{:x}, rs2=0x{:x}, result=0x{:x}, rm={}, flags={}",
                 rs1,
                 rs2,
@@ -884,15 +970,12 @@ fn emulate_fmin(insn: u32) -> ! {
                 rm,
                 softfloat_flags
             );
-            print(&msg);
         }
         set_fflags(softfloat_flags as u32);
 
         set_f64_rd(insn, result);
     } else {
-        let msg = str_format!(str256, "Unsupported fmin/fmax precision: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported fmin/fmax precision: {}", precision);
     }
 
     mret()
@@ -944,9 +1027,7 @@ fn emulate_fsqrt(insn: u32) -> ! {
 
         set_f64_rd(insn, result.v);
     } else {
-        let msg = str_format!(str256, "Unsupported precision: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision: {}", precision);
     }
 
     mret()
@@ -988,9 +1069,7 @@ fn emulate_fcmp(insn: u32) -> ! {
                 }
             }
             _ => {
-                let msg = str_format!(str256, "Unsupported fcmp rm: {}", rm);
-                print(&msg);
-                host_terminate(1, 0);
+                kpanic!("Unsupported fcmp rm: {}", rm);
             }
         };
         set_ureg(rd as usize, result);
@@ -1025,16 +1104,12 @@ fn emulate_fcmp(insn: u32) -> ! {
                 }
             }
             _ => {
-                let msg = str_format!(str256, "Unsupported fcmp rm: {}", rm);
-                print(&msg);
-                host_terminate(1, 0);
+                kpanic!("Unsupported fcmp rm: {}", rm);
             }
         };
         set_ureg(rd as usize, result as u32);
     } else {
-        let msg = str_format!(str256, "Unsupported precision: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision: {}", precision);
     }
 
     mret()
@@ -1059,8 +1134,7 @@ fn emulate_fcvt_if(insn: u32) -> ! {
         softfloat_roundingMode_write_helper(rounding_mode);
     }
 
-    let msg = str_format!(
-        str256,
+    debug_print!(
         "fcvt_if: insn={:#010x}, precision={}, rs2={}, rd={}, rounding_mode={}",
         insn,
         precision,
@@ -1068,7 +1142,6 @@ fn emulate_fcvt_if(insn: u32) -> ! {
         rd,
         rounding_mode
     );
-    print(&msg);
 
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
@@ -1084,9 +1157,7 @@ fn emulate_fcvt_if(insn: u32) -> ! {
                 unsafe { f32_to_ui32(f32_rs1, rounding_mode, true) as u32 }
             }
             _ => {
-                let msg = str_format!(str256, "Unsupported fcvt rs2: {}", rs2);
-                print(&msg);
-                host_terminate(1, 0);
+                kpanic!("Unsupported fcvt rs2: {}", rs2);
             }
         };
         set_ureg(rd as usize, result);
@@ -1098,13 +1169,11 @@ fn emulate_fcvt_if(insn: u32) -> ! {
         let rs1_reg = (insn >> 15) & 0x1f;
         let rs1 = get_f64_rs1(insn);
         let f64_rs1 = float64_t { v: rs1 };
-        let msg = str_format!(
-            str256,
+        debug_print!(
             "fcvt_if: rs1_reg={}, double input value: {:#016x}",
             rs1_reg,
             rs1
         );
-        print(&msg);
         let result = match rs2 {
             0 => {
                 // fcvt.w.d - signed 32-bit conversion
@@ -1116,30 +1185,23 @@ fn emulate_fcvt_if(insn: u32) -> ! {
                 unsafe { f64_to_ui32(f64_rs1, rounding_mode, true) as u32 }
             }
             _ => {
-                let msg = str_format!(str256, "Unsupported fcvt rs2: {}", rs2);
-                print(&msg);
-                host_terminate(1, 0);
+                kpanic!("Unsupported fcvt rs2: {}", rs2);
             }
         };
         set_ureg(rd as usize, result);
-        let msg = str_format!(str256, "fcvt_if: result={:#010x}", result);
-        print(&msg);
+        debug_print!("fcvt_if: result={:#010x}", result);
 
         // Sync softfloat exception flags with FCSR for double precision
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
         set_fflags(softfloat_flags as u32);
-        let msg = str_format!(
-            str256,
+        debug_print!(
             "fcvt_if: result={:#08x}, softfloat_flags={:#02x}, fcsr_flags={:#02x}",
             result,
             softfloat_flags,
             get_fflags()
         );
-        print(&msg);
     } else {
-        let msg = str_format!(str256, "Unsupported precision: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision: {}", precision);
     }
 
     mret()
@@ -1157,8 +1219,7 @@ fn emulate_fcvt_fi(insn: u32) -> ! {
     // Clear softfloat exception flags before operation
     unsafe { softfloat_exceptionFlags_write_helper(0) };
 
-    let msg = str_format!(
-        str256,
+    debug_print!(
         "fcvt_fi: insn={:#010x}, precision={}, funct3={}, rs2={}, rs1={:#010x}",
         insn,
         precision,
@@ -1166,7 +1227,6 @@ fn emulate_fcvt_fi(insn: u32) -> ! {
         rs2,
         rs1
     );
-    print(&msg);
 
     if precision == PRECISION_S {
         // Single precision output
@@ -1180,9 +1240,7 @@ fn emulate_fcvt_fi(insn: u32) -> ! {
                 unsafe { ui32_to_f32(rs1) }
             }
             _ => {
-                let msg = str_format!(str256, "Unsupported fcvt rs2: {}", rs2);
-                print(&msg);
-                host_terminate(1, 0);
+                kpanic!("Unsupported fcvt rs2: {}", rs2);
             }
         };
         set_f32_rd(insn, result.v);
@@ -1198,30 +1256,23 @@ fn emulate_fcvt_fi(insn: u32) -> ! {
                 unsafe { ui32_to_f64(rs1) }
             }
             _ => {
-                let msg = str_format!(str256, "Unsupported fcvt rs2: {}", rs2);
-                print(&msg);
-                host_terminate(1, 0);
+                kpanic!("Unsupported fcvt rs2: {}", rs2);
             }
         };
         set_f64_rd(insn, result.v);
-        let msg = str_format!(str256, "fcvt_fi: result={:#016x}", result.v);
-        print(&msg);
+        debug_print!("fcvt_fi: result={:#016x}", result.v);
     } else {
-        let msg = str_format!(str256, "Unsupported precision: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision: {}", precision);
     }
 
     // Sync softfloat exception flags with FCSR
     let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
     set_fflags(softfloat_flags as u32);
-    let msg = str_format!(
-        str256,
+    debug_print!(
         "fcvt_if: softfloat_flags={:#02x}, fcsr_flags={:#02x}",
         softfloat_flags,
         get_fflags()
     );
-    print(&msg);
 
     mret()
 }
@@ -1309,14 +1360,11 @@ fn emulate_fmv_if(insn: u32) -> ! {
             let classification = classify_f64(rs1);
             set_ureg(rd as usize, classification as u32);
         } else {
-            let msg = str_format!(
-                str256,
+            kpanic!(
                 "Unsupported fclass: funct7=0x{:x}, precision={}",
                 funct7,
                 precision
             );
-            print(&msg);
-            host_terminate(1, 0);
         }
     } else if rs2 == 0 && funct7 == 0x70 && funct3 == 0x0 {
         // fmv.x instruction - Float to integer move
@@ -1327,9 +1375,7 @@ fn emulate_fmv_if(insn: u32) -> ! {
             let rs1 = get_f64_rs1(insn);
             set_ureg(rd as usize, rs1 as u32);
         } else {
-            let msg = str_format!(str256, "Unsupported fmv.x precision: {}", precision);
-            print(&msg);
-            host_terminate(1, 0);
+            kpanic!("Unsupported fmv.x precision: {}", precision);
         }
     } else if rs2 == 1 {
         // fmv.x instruction - Float to integer move
@@ -1340,14 +1386,10 @@ fn emulate_fmv_if(insn: u32) -> ! {
             let rs1 = get_f64_rs1(insn);
             set_ureg(rd as usize, rs1 as u32);
         } else {
-            let msg = str_format!(str256, "Unsupported fmv.x precision: {}", precision);
-            print(&msg);
-            host_terminate(1, 0);
+            kpanic!("Unsupported fmv.x precision: {}", precision);
         }
     } else {
-        let msg = str_format!(str256, "Unsupported rs2 value for 0x70: {}", rs2);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported rs2 value for 0x70: {}", rs2);
     }
 
     mret()
@@ -1364,9 +1406,7 @@ fn emulate_fmv_fi(insn: u32) -> ! {
     } else if precision == PRECISION_D {
         set_f64_rd(insn, rs1 as u64);
     } else {
-        let msg = str_format!(str256, "Unsupported precision: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision: {}", precision);
     }
 
     mret()
@@ -1376,28 +1416,22 @@ fn emulate_fcvt_ff(insn: u32) -> ! {
     let precision = get_precision(insn);
     let rs2 = (insn >> 20) & 0x1f; // rs2 field indicates conversion type
 
-    let msg = str_format!(
-        str256,
+    debug_print!(
         "fcvt_ff: insn={:#010x}, precision={}, rs2={}",
         insn,
         precision,
         rs2
     );
-    print(&msg);
 
     let rs1 = (insn >> 15) & 0x1f;
     let rd = (insn >> 7) & 0x1f;
-    let msg2 = str_format!(str256, "fcvt_ff: rs1={}, rd={}", rs1, rd);
-    print(&msg2);
+    debug_print!("fcvt_ff: rs1={}, rd={}", rs1, rd);
 
     if precision == PRECISION_S {
         // Single precision output - convert from double to single
-        let msg = str_format!(str256, "fcvt_ff: PRECISION_S branch, rs2={}", rs2);
-        print(&msg);
+        debug_print!("fcvt_ff: PRECISION_S branch, rs2={}", rs2);
         if rs2 != 1 {
-            let msg = str_format!(str256, "Invalid fcvt.s.d: rs2={}", rs2);
-            print(&msg);
-            host_terminate(1, 0);
+            kpanic!("Invalid fcvt.s.d: rs2={}", rs2);
         }
 
         // Clear softfloat flags before operation
@@ -1408,25 +1442,20 @@ fn emulate_fcvt_ff(insn: u32) -> ! {
 
         let rs1 = get_f64_rs1(insn);
         let f64_rs1 = float64_t { v: rs1 };
-        let msg3 = str_format!(str256, "fcvt_ff: rs1=0x{:x}", rs1);
-        print(&msg3);
+        debug_print!("fcvt_ff: rs1=0x{:x}", rs1);
         let result = unsafe { f64_to_f32(f64_rs1) };
-        let msg4 = str_format!(str256, "fcvt_ff: result=0x{:x}", result.v);
-        print(&msg4);
+        debug_print!("fcvt_ff: result=0x{:x}", result.v);
 
         // Update our FCSR with softfloat's flags
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
-        let msg5 = str_format!(str256, "fcvt_ff: softfloat_flags=0x{:x}", softfloat_flags);
-        print(&msg5);
+        debug_print!("fcvt_ff: softfloat_flags=0x{:x}", softfloat_flags);
         set_fflags(softfloat_flags as u32);
 
         set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
         // Double precision output - convert from single to double
         if rs2 != 0 {
-            let msg = str_format!(str256, "Invalid fcvt.d.s: rs2={}", rs2);
-            print(&msg);
-            host_terminate(1, 0);
+            kpanic!("Invalid fcvt.d.s: rs2={}", rs2);
         }
 
         // Clear softfloat flags before operation
@@ -1442,9 +1471,7 @@ fn emulate_fcvt_ff(insn: u32) -> ! {
 
         set_f64_rd(insn, result.v);
     } else {
-        let msg = str_format!(str256, "Unsupported precision for fcvt_ff: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision for fcvt_ff: {}", precision);
     }
 
     mret()
@@ -1481,20 +1508,16 @@ fn emulate_fmadd(insn: u32) -> ! {
             // Valid R4-type opcodes
         }
         _ => {
-            let msg = str_format!(
-                str256,
+            kpanic!(
                 "Invalid fmadd opcode: {:#02x} (funct2={:#02x}, rm={:#02x})",
                 opcode,
                 funct2,
                 rm
             );
-            print(&msg);
-            host_terminate(1, 0);
         }
     }
 
-    let msg = str_format!(
-        str256,
+    debug_print!(
         "fmadd: opcode={:#02x}, funct2={:#02x}, rm={:#02x}, neg_a={}, neg_c={}",
         opcode,
         funct2,
@@ -1502,7 +1525,6 @@ fn emulate_fmadd(insn: u32) -> ! {
         neg_a,
         neg_c
     );
-    print(&msg);
 
     if precision == PRECISION_S {
         let rs1 = get_f32_rs1(insn);
@@ -1560,8 +1582,7 @@ fn emulate_fmadd(insn: u32) -> ! {
         let f64_rs2 = float64_t { v: rs2 };
         let f64_rs3 = float64_t { v: rs3_val };
 
-        let msg = str_format!(
-            str256,
+        debug_print!(
             "fmadd.d: rs1={:#016x}, rs2={:#016x}, rs3={:#016x}, neg_a={}, neg_c={}, rm={}",
             rs1_val,
             rs2,
@@ -1570,10 +1591,8 @@ fn emulate_fmadd(insn: u32) -> ! {
             neg_c,
             rounding_mode
         );
-        print(&msg);
 
-        let msg_debug = str_format!(
-            str256,
+        debug_print!(
             "fmadd.d debug: original_rs1={:#016x}, rs1_val={:#016x}, rs2={:#016x}, rs3_val={:#016x}, neg_a={}, neg_c={}",
             rs1,
             rs1_val,
@@ -1582,12 +1601,10 @@ fn emulate_fmadd(insn: u32) -> ! {
             neg_a,
             neg_c
         );
-        print(&msg_debug);
 
         let result = unsafe { f64_mulAdd(f64_rs1, f64_rs2, f64_rs3) };
 
-        let msg2 = str_format!(str256, "fmadd.d: result={:#016x}", result.v);
-        print(&msg2);
+        debug_print!("fmadd.d: result={:#016x}", result.v);
 
         // Update our FCSR with softfloat's flags
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
@@ -1597,9 +1614,7 @@ fn emulate_fmadd(insn: u32) -> ! {
         let rd = (insn >> 7) & 0x1f;
         set_fp_reg(rd as usize, result.v);
     } else {
-        let msg = str_format!(str256, "Unsupported precision for fmadd: {}", precision);
-        print(&msg);
-        host_terminate(1, 0);
+        kpanic!("Unsupported precision for fmadd: {}", precision);
     }
 
     mret()
@@ -1640,8 +1655,7 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
     let base_addr = get_ureg(rs1 as usize);
     let addr = base_addr.wrapping_add(imm);
 
-    let msg = str_format!(
-        str256,
+    debug_print!(
         "Emulating FP load/store at PC: {:#010x}, opcode={:#02x}, funct3={}, rd={}, rs1={}, addr={:#010x}",
         mepc,
         opcode,
@@ -1650,19 +1664,16 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
         rs1,
         addr
     );
-    print(&msg);
 
     match (opcode, funct3) {
         (0x07, 2) => {
             // flw - floating point load word (32-bit)
             // Check 4-byte alignment
             if addr % 4 != 0 {
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Address misaligned for flw: {:#010x}, continuing anyway",
                     addr
                 );
-                print(&msg);
                 // For now, continue execution instead of terminating
                 // In a real implementation, this should raise a misalignment exception
             }
@@ -1673,19 +1684,16 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             // Store in floating point register (as 32-bit in 64-bit register)
             set_f32_rd(insn, value);
 
-            let msg = str_format!(str256, "flw: loaded {:#010x} into f{}", value, rd);
-            print(&msg);
+            debug_print!("flw: loaded {:#010x} into f{}", value, rd);
         }
         (0x07, 3) => {
             // fld - floating point load double (64-bit)
             // Check 8-byte alignment
             if addr % 8 != 0 {
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Address misaligned for fld: {:#010x}, continuing anyway",
                     addr
                 );
-                print(&msg);
                 // For now, continue execution instead of terminating
                 // In a real implementation, this should raise a misalignment exception
             }
@@ -1696,19 +1704,16 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             // Store in floating point register
             set_f64_rd(insn, value);
 
-            let msg = str_format!(str256, "fld: loaded {:#016x} into f{}", value, rd);
-            print(&msg);
+            debug_print!("fld: loaded {:#016x} into f{}", value, rd);
         }
         (0x27, 2) => {
             // fsw - floating point store word (32-bit)
             // Check 4-byte alignment
             if addr % 4 != 0 {
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Address misaligned for fsw: {:#010x}, continuing anyway",
                     addr
                 );
-                print(&msg);
                 // For now, continue execution instead of terminating
                 // In a real implementation, this should raise a misalignment exception
             }
@@ -1721,48 +1726,39 @@ unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
                 (addr as *mut u32).write_volatile(value);
             }
 
-            let msg = str_format!(str256, "fsw: stored {:#010x} from f{}", value, rs2);
-            print(&msg);
+            debug_print!("fsw: stored {:#010x} from f{}", value, rs2);
         }
         (0x27, 3) => {
             // fsd - floating point store double (64-bit)
             // Check 8-byte alignment
             if addr % 8 != 0 {
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Address misaligned for fsd: {:#010x}, continuing anyway",
                     addr
                 );
-                print(&msg);
                 // For now, continue execution instead of terminating
                 // In a real implementation, this should raise a misalignment exception
             }
 
             // Get 64-bit value from floating point register
-            let msg_debug = str_format!(str256, "DEBUG: About to read from f{} (rs2={})", rs2, rs2);
-            print(&msg_debug);
+            debug_print!("DEBUG: About to read from f{} (rs2={})", rs2, rs2);
             let value = get_f64_rs2(insn);
-            let msg_debug2 = str_format!(str256, "DEBUG: Read value {:#016x} from f{}", value, rs2);
-            print(&msg_debug2);
+            debug_print!("DEBUG: Read value {:#016x} from f{}", value, rs2);
 
             // Store 64-bit value to memory
             unsafe {
                 (addr as *mut u64).write_volatile(value);
             }
 
-            let msg = str_format!(
-                str256,
+            debug_print!(
                 "fsd: stored {:#016x} from f{} at addr {:#010x}",
                 value,
                 rs2,
                 addr
             );
-            print(&msg);
         }
         _ => {
-            let msg = str_format!(str256, "Unsupported FP load/store funct3: {}", funct3);
-            print(&msg);
-            host_terminate(1, 0);
+            kpanic!("Unsupported FP load/store funct3: {}", funct3);
         }
     }
 
@@ -1776,8 +1772,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
     let rs1 = (insn >> 15) & 0x1f;
     let csr_addr = (insn >> 20) & 0xfff;
 
-    let msg = str_format!(
-        str256,
+    debug_print!(
         "Emulating CSR instruction at PC: {:#010x}, funct3={}, rd={}, rs1={}, csr={:#03x}",
         mepc,
         funct3,
@@ -1785,7 +1780,6 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
         rs1,
         csr_addr
     );
-    print(&msg);
 
     // Handle floating point CSR operations
     match csr_addr {
@@ -1801,13 +1795,11 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     }
                     set_ureg(rd as usize, current_flags);
 
-                    let msg = str_format!(
-                        str256,
+                    debug_print!(
                         "fsflags: read flags {:#02x}, wrote {:#02x}",
                         current_flags,
                         if rs1 != 0 { get_ureg(rs1 as usize) } else { 0 }
                     );
-                    print(&msg);
                 }
                 0x2 => {
                     // csrrs (read and set) - fsflags rs1, fflags
@@ -1818,8 +1810,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     }
                     set_ureg(rd as usize, current_flags);
 
-                    let msg = str_format!(str256, "fsflags: read flags {:#02x}", current_flags);
-                    print(&msg);
+                    debug_print!("fsflags: read flags {:#02x}", current_flags);
                 }
                 0x3 => {
                     // csrrc (read and clear) - fsflags rs1, fflags
@@ -1830,13 +1821,11 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     }
                     set_ureg(rd as usize, current_flags);
 
-                    let msg = str_format!(
-                        str256,
+                    debug_print!(
                         "fsflags: read flags {:#02x}, cleared {:#02x}",
                         current_flags,
                         if rs1 != 0 { get_ureg(rs1 as usize) } else { 0 }
                     );
-                    print(&msg);
                 }
                 0x5 => {
                     // csrrwi (read and write immediate) - fsflags uimm, fflags
@@ -1845,13 +1834,11 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_fflags(imm);
                     set_ureg(rd as usize, current_flags);
 
-                    let msg = str_format!(
-                        str256,
+                    debug_print!(
                         "fsflags: read flags {:#02x}, wrote immediate {:#02x}",
                         current_flags,
                         imm
                     );
-                    print(&msg);
                 }
                 0x6 => {
                     // csrrsi (read and set immediate) - fsflags uimm, fflags
@@ -1860,13 +1847,11 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_fflags(current_flags | imm);
                     set_ureg(rd as usize, current_flags);
 
-                    let msg = str_format!(
-                        str256,
+                    debug_print!(
                         "fsflags: read flags {:#02x}, set immediate {:#02x}",
                         current_flags,
                         imm
                     );
-                    print(&msg);
                 }
                 0x7 => {
                     // csrrci (read and clear immediate) - fsflags uimm, fflags
@@ -1875,18 +1860,14 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_fflags(current_flags & !imm);
                     set_ureg(rd as usize, current_flags);
 
-                    let msg = str_format!(
-                        str256,
+                    debug_print!(
                         "fsflags: read flags {:#02x}, clear immediate {:#02x}",
                         current_flags,
                         imm
                     );
-                    print(&msg);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported fflags funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported fflags funct3: {}", funct3);
                 }
             }
         }
@@ -1902,8 +1883,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     }
                     set_ureg(rd as usize, current_frm);
 
-                    let msg = str_format!(str256, "fsrm: read frm {:#02x}", current_frm);
-                    print(&msg);
+                    debug_print!("fsrm: read frm {:#02x}", current_frm);
                 }
                 0x5 => {
                     // csrrwi (read and write immediate) - fsrm rs1, frm
@@ -1912,18 +1892,14 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_frm(immediate_value);
                     set_ureg(rd as usize, current_frm);
 
-                    let msg = str_format!(
-                        str256,
+                    debug_print!(
                         "fsrm: csrrwi frm {:#02x} -> {:#02x}",
                         current_frm,
                         immediate_value
                     );
-                    print(&msg);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported frm funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported frm funct3: {}", funct3);
                 }
             }
         }
@@ -1937,13 +1913,11 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_fcsr(rs1_value);
                     set_ureg(rd as usize, current_fcsr);
 
-                    let msg = str_format!(
-                        str256,
+                    debug_print!(
                         "fscsr: csrrw fcsr {:#02x} -> {:#02x}",
                         current_fcsr,
                         rs1_value
                     );
-                    print(&msg);
                 }
                 0x2 => {
                     // csrrs (read and set) - fscsr rs1, fcsr
@@ -1954,8 +1928,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     }
                     set_ureg(rd as usize, current_fcsr);
 
-                    let msg = str_format!(str256, "fscsr: read fcsr {:#02x}", current_fcsr);
-                    print(&msg);
+                    debug_print!("fscsr: read fcsr {:#02x}", current_fcsr);
                 }
                 0x5 => {
                     // csrrwi (read and write immediate) - fscsr rs1, fcsr
@@ -1964,18 +1937,14 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_fcsr(immediate_value);
                     set_ureg(rd as usize, current_fcsr);
 
-                    let msg = str_format!(
-                        str256,
+                    debug_print!(
                         "fscsr: csrrwi fcsr {:#02x} -> {:#02x}",
                         current_fcsr,
                         immediate_value
                     );
-                    print(&msg);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported fcsr funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported fcsr funct3: {}", funct3);
                 }
             }
         }
@@ -2032,9 +2001,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_ureg(rd as usize, current_value);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported stvec funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported stvec funct3: {}", funct3);
                 }
             }
         }
@@ -2084,9 +2051,74 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_ureg(rd as usize, current_value);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported sscratch funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported sscratch funct3: {}", funct3);
+                }
+            }
+        }
+        0x102 => {
+            // sdeleg - Supervisor delegation register
+            match funct3 {
+                0x1 => {
+                    // csrrw (read and write)
+                    let current_value = get_sdeleg();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sdeleg(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x2 => {
+                    // csrrs (read and set)
+                    let current_value = get_sdeleg();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sdeleg(current_value | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x3 => {
+                    // csrrc (read and clear)
+                    let current_value = get_sdeleg();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sdeleg(current_value & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x5 => {
+                    // csrrwi (read and write immediate)
+                    let current_value = get_sdeleg();
+                    let imm = rs1;
+                    set_sdeleg(imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x6 => {
+                    // csrrsi (read and set immediate)
+                    let current_value = get_sdeleg();
+                    let imm = rs1;
+                    set_sdeleg(current_value | imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x7 => {
+                    // csrrci (read and clear immediate)
+                    let current_value = get_sdeleg();
+                    let imm = rs1;
+                    set_sdeleg(current_value & !imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x0 => {
+                    // funct3 = 0 is not a valid CSR instruction according to RISC-V spec
+                    // This might be a misidentified instruction or a non-standard extension
+                    debug_print!("Warning: Invalid CSR funct3=0 for sdeleg, treating as csrrw");
+                    let current_value = get_sdeleg();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sdeleg(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                _ => {
+                    kpanic!("Unsupported sdeleg funct3: {}", funct3);
                 }
             }
         }
@@ -2136,9 +2168,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_ureg(rd as usize, current_value);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported sie funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported sie funct3: {}", funct3);
                 }
             }
         }
@@ -2188,9 +2218,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_ureg(rd as usize, current_value);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported sip funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported sip funct3: {}", funct3);
                 }
             }
         }
@@ -2240,9 +2268,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_ureg(rd as usize, current_value);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported scounteren funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported scounteren funct3: {}", funct3);
                 }
             }
         }
@@ -2292,9 +2318,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_ureg(rd as usize, current_value);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported sstatus funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported sstatus funct3: {}", funct3);
                 }
             }
         }
@@ -2344,9 +2368,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_ureg(rd as usize, current_value);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported sepc funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported sepc funct3: {}", funct3);
                 }
             }
         }
@@ -2396,9 +2418,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_ureg(rd as usize, current_value);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported stval funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported stval funct3: {}", funct3);
                 }
             }
         }
@@ -2448,9 +2468,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_ureg(rd as usize, current_value);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported scause funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported scause funct3: {}", funct3);
                 }
             }
         }
@@ -2500,16 +2518,150 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                     set_ureg(rd as usize, current_value);
                 }
                 _ => {
-                    let msg = str_format!(str256, "Unsupported senvcfg funct3: {}", funct3);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Unsupported senvcfg funct3: {}", funct3);
+                }
+            }
+        }
+        0xc01 => {
+            // time - Time counter (read-only)
+            match funct3 {
+                0x2 => {
+                    // csrrs (read and set) - rd, rs1, time
+                    let current_time = host_get_cycle();
+                    let time = (current_time & 0xFFFFFFFF) as u32;
+                    if rs1 != 0 {
+                        // For time CSR, we can't actually set it, so just return current value
+                        debug_print!("Warning: Attempted to set read-only time CSR");
+                    }
+                    set_ureg(rd as usize, time);
+                }
+                0x1 => {
+                    // csrrw (read and write) - rd, rs1, time
+                    let current_time = host_get_cycle();
+                    let time = (current_time & 0xFFFFFFFF) as u32;
+                    if rs1 != 0 {
+                        // For time CSR, we can't actually set it, so just return current value
+                        debug_print!("Warning: Attempted to write read-only time CSR");
+                    }
+                    set_ureg(rd as usize, time);
+                }
+                0x3 => {
+                    // csrrwi (read and write immediate) - rd, imm, time
+                    let current_time = host_get_cycle();
+                    let time = (current_time & 0xFFFFFFFF) as u32;
+                    if rs1 != 0 {
+                        // For time CSR, we can't actually set it, so just return current value
+                        debug_print!("Warning: Attempted to write immediate to read-only time CSR");
+                    }
+                    set_ureg(rd as usize, time);
+                }
+                0x5 => {
+                    // csrrci (read and clear immediate) - rd, imm, time
+                    let current_time = host_get_cycle();
+                    let time = (current_time & 0xFFFFFFFF) as u32;
+                    if rs1 != 0 {
+                        // For time CSR, we can't actually clear it, so just return current value
+                        debug_print!("Warning: Attempted to clear read-only time CSR");
+                    }
+                    set_ureg(rd as usize, time);
+                }
+                0x6 => {
+                    // csrrsi (read and set immediate) - rd, imm, time
+                    let current_time = host_get_cycle();
+                    let time = (current_time & 0xFFFFFFFF) as u32;
+                    if rs1 != 0 {
+                        // For time CSR, we can't actually set it, so just return current value
+                        debug_print!("Warning: Attempted to set immediate on read-only time CSR");
+                    }
+                    set_ureg(rd as usize, time);
+                }
+                0x7 => {
+                    // csrrci (read and clear immediate) - rd, imm, time
+                    let current_time = host_get_cycle();
+                    let time = (current_time & 0xFFFFFFFF) as u32;
+                    if rs1 != 0 {
+                        // For time CSR, we can't actually clear it, so just return current value
+                        debug_print!("Warning: Attempted to clear read-only time CSR");
+                    }
+                    set_ureg(rd as usize, time);
+                }
+                _ => {
+                    kpanic!("Unsupported time CSR funct3: {}", funct3);
+                }
+            }
+        }
+        0xc81 => {
+            // timeh - Time counter high (read-only)
+            match funct3 {
+                0x2 => {
+                    // csrrs (read and set) - rd, rs1, timeh
+                    let current_time = host_get_cycle();
+                    let timeh = (current_time >> 32) as u32;
+                    if rs1 != 0 {
+                        // For timeh CSR, we can't actually set it, so just return current value
+                        debug_print!("Warning: Attempted to set read-only timeh CSR");
+                    }
+                    set_ureg(rd as usize, timeh);
+                }
+                0x1 => {
+                    // csrrw (read and write) - rd, rs1, timeh
+                    let current_time = host_get_cycle();
+                    let timeh = (current_time >> 32) as u32;
+                    if rs1 != 0 {
+                        // For timeh CSR, we can't actually set it, so just return current value
+                        debug_print!("Warning: Attempted to write read-only timeh CSR");
+                    }
+                    set_ureg(rd as usize, timeh);
+                }
+                0x3 => {
+                    // csrrwi (read and write immediate) - rd, imm, timeh
+                    let current_time = host_get_cycle();
+                    let timeh = (current_time >> 32) as u32;
+                    if rs1 != 0 {
+                        // For timeh CSR, we can't actually set it, so just return current value
+                        debug_print!(
+                            "Warning: Attempted to write immediate to read-only timeh CSR"
+                        );
+                    }
+                    set_ureg(rd as usize, timeh);
+                }
+                0x5 => {
+                    // csrrci (read and clear immediate) - rd, imm, timeh
+                    let current_time = host_get_cycle();
+                    let timeh = (current_time >> 32) as u32;
+                    if rs1 != 0 {
+                        // For timeh CSR, we can't actually clear it, so just return current value
+                        debug_print!("Warning: Attempted to clear read-only timeh CSR");
+                    }
+                    set_ureg(rd as usize, timeh);
+                }
+                0x6 => {
+                    // csrrsi (read and set immediate) - rd, imm, timeh
+                    let current_time = host_get_cycle();
+                    let timeh = (current_time >> 32) as u32;
+                    if rs1 != 0 {
+                        // For timeh CSR, we can't actually set it, so just return current value
+                        debug_print!("Warning: Attempted to set immediate on read-only timeh CSR");
+                    }
+                    set_ureg(rd as usize, timeh);
+                }
+                0x7 => {
+                    // csrrci (read and clear immediate) - rd, imm, timeh
+                    let current_time = host_get_cycle();
+                    let timeh = (current_time >> 32) as u32;
+                    if rs1 != 0 {
+                        // For timeh CSR, we can't actually clear it, so just return current value
+                        debug_print!("Warning: Attempted to clear read-only timeh CSR");
+                    }
+                    set_ureg(rd as usize, timeh);
+                }
+                _ => {
+                    kpanic!("Unsupported timeh CSR funct3: {}", funct3);
                 }
             }
         }
         _ => {
-            let msg = str_format!(str256, "Unsupported CSR address: {:#03x}", csr_addr);
-            print(&msg);
-            host_terminate(1, 0);
+            kpanic!("Unsupported CSR address: {:#03x}", csr_addr);
         }
     }
 
@@ -2565,10 +2717,12 @@ impl UserStack {
         }
     }
 
+    #[allow(dead_code)]
     fn add_null(&mut self) {
         self.add_word(0);
     }
 
+    #[allow(dead_code)]
     fn add_aux_word(&mut self, atype: AuxType, word: usize) {
         self.add_word(atype as usize);
         self.add_word(word);
@@ -2597,19 +2751,16 @@ unsafe extern "C" fn kstart() -> ! {
         MEPC_PTR.write_volatile(user_start_addr);
     }
 
-    let mut stack = UserStack::new();
+    //let mut stack = UserStack::new();
 
-    print("kstart");
+    debug_print_simple!("kstart");
     // args - get actual argc and argv from host
+    /*
     let argc = host_argc();
-    print(&str_format!(str256, "argc is {argc}"));
+    debug_print!("argc is {argc}");
     // Check if we have any arguments
     if argc == 0 {
-        let msg = str_format!(
-            str256,
-            "Error: No command line arguments provided (argc = 0)"
-        );
-        print(&msg);
+        debug_print!("Error: No command line arguments provided (argc = 0)");
         host_terminate(255, 0);
     }
 
@@ -2619,7 +2770,7 @@ unsafe extern "C" fn kstart() -> ! {
     // Get each argument from host and add to stack
     for i in 0..argc {
         let mut arg_buffer = [0u32; 256]; // 1024 bytes as u32 array for proper alignment
-        print(&str_format!(str256, "arg {i}"));
+        debug_print!("arg {i}");
         let arg_len = host_argv(i, arg_buffer.as_mut_ptr() as *mut u8, arg_buffer.len() * 4);
         // we want to make this string null-terminated, so we add 1 to the length
         let arg_len = arg_len + 1;
@@ -2635,15 +2786,13 @@ unsafe extern "C" fn kstart() -> ! {
                 .unwrap_or(arg_slice.len());
             let arg_str = &arg_slice[..nul_pos];
             match core::str::from_utf8(arg_str) {
-                Ok(s) => print(&str_format!(
-                    str256,
+                Ok(s) => debug_print!(
                     "arg {i}: \"{s}\" ({arg_len}, null-terminated)"
-                )),
-                Err(_) => print(&str_format!(
-                    str256,
+                ),
+                Err(_) => debug_print!(
                     "arg {i}: <non-utf8> {:?} ({arg_len}, null-terminated)",
                     arg_str
-                )),
+                ),
             }
             stack.add_str(arg_slice);
         } else {
@@ -2675,13 +2824,14 @@ unsafe extern "C" fn kstart() -> ! {
     stack.add_aux_word(AuxType::PhEnt, USER_PHENT_SIZE); // auxv[7]
     stack.add_aux_word(AuxType::Null, 0); // auxv[8]
 
-    set_ureg(REG_SP, USER_STACK_PTR as u32);
+    set_ureg(REG_SP, USER_STACK_PTR as u32); */
 
-    let block: &[u8] = unsafe { core::slice::from_raw_parts(USER_HEAP_START_PTR, USER_HEAP_SIZE) };
+    /* let block: &[u8] = unsafe { core::slice::from_raw_parts(USER_HEAP_START_PTR, USER_HEAP_SIZE) };
     #[allow(static_mut_refs)]
     unsafe {
         HEAP.insert_free_block_ptr(block.into());
     }
+    */
 
     // Initialize floating point registers to zero at startup
     init_fp_regs();
@@ -2694,7 +2844,18 @@ unsafe extern "C" fn kstart() -> ! {
         softfloat_roundingMode_write_helper(0); // Round to nearest even
         softfloat_exceptionFlags_write_helper(0); // Clear all exception flags
     }
+    // Copy DTB_DATA to USER_STACK_ADDR
+    unsafe {
+        core::ptr::copy_nonoverlapping(
+            DTB_DATA.as_ptr(),
+            USER_STACK_ADDR as *mut u8,
+            DTB_DATA.len(),
+        );
+    }
+    //stack.add_str(&DTB_DATA);
+    set_ureg(REG_A0, 0); // hartid
 
+    set_ureg(REG_A1, USER_STACK_ADDR as u32);
     print("return from kstart");
     mret()
 }
@@ -2708,11 +2869,102 @@ fn mret() -> ! {
     unimplemented!()
 }
 
+const SBI_EXT_BASE: u32 = 0x10;
+const SBI_EXT_DBCN: u32 = 0x4442434E;
+
+// SBI constants
+const SBI_ECALL_VERSION_MAJOR: u32 = 3;
+const SBI_ECALL_VERSION_MINOR: u32 = 0;
+const SBI_OPENSBI_IMPID: u32 = 1;
+
+const SBI_SPEC_VERSION_MAJOR_OFFSET: u32 = 24;
+const SBI_SPEC_VERSION_MAJOR_MASK: u32 = 0x7f;
+const SBI_SPEC_VERSION_MINOR_MASK: u32 = 0xffffff;
+
+// SBI Base Extension function IDs
+const SBI_EXT_BASE_GET_SPEC_VERSION: u32 = 0x0;
+const SBI_EXT_BASE_GET_IMP_ID: u32 = 0x1;
+const SBI_EXT_BASE_GET_IMP_VERSION: u32 = 0x2;
+const SBI_EXT_BASE_PROBE_EXT: u32 = 0x3;
+const SBI_EXT_BASE_GET_MVENDORID: u32 = 0x4;
+const SBI_EXT_BASE_GET_MARCHID: u32 = 0x5;
+const SBI_EXT_BASE_GET_MIMPID: u32 = 0x6;
+const SBI_EXT_DBCN_CONSOLE_WRITE: u32 = 0x0;
+const SBI_EXT_DBCN_CONSOLE_READ: u32 = 0x1;
+const SBI_EXT_DBCN_CONSOLE_WRITE_BYTE: u32 = 0x2;
 #[unsafe(no_mangle)]
 unsafe extern "C" fn ecall_dispatch() -> ! {
+    debug_print!("ecall: {}", get_ureg(REG_A7));
     let nr = get_ureg(REG_A7);
+    if nr == SBI_EXT_DBCN {
+        // SBI_EXT_CONSOLE
+        if get_ureg(REG_A6) == SBI_EXT_DBCN_CONSOLE_WRITE {
+            // print the ascii character
+            let msg_ptr = get_ureg(REG_A1) as *const u8;
+            let msg = unsafe { core::slice::from_raw_parts(msg_ptr, get_ureg(REG_A0) as usize) };
+            host_log(msg.as_ptr(), msg.len());
+        }
+    } else if nr == SBI_EXT_BASE {
+        let msg = str_format!(str256, "sbi_ext_base: {}", get_ureg(REG_A6));
+        print(&msg);
+        match get_ureg(REG_A6) {
+            SBI_EXT_BASE_GET_SPEC_VERSION => {
+                // Return SBI spec version 3.0
+                let mut value = (SBI_ECALL_VERSION_MAJOR << SBI_SPEC_VERSION_MAJOR_OFFSET)
+                    & (SBI_SPEC_VERSION_MAJOR_MASK << SBI_SPEC_VERSION_MAJOR_OFFSET);
+                value |= SBI_ECALL_VERSION_MINOR;
+                set_ureg(REG_A0, 0); // Success
+                set_ureg(REG_A1, value); // Version value
+            }
+            SBI_EXT_BASE_GET_IMP_ID => {
+                // Return OpenSBI implementation ID
+                set_ureg(REG_A0, 0); // Success
+                set_ureg(REG_A1, SBI_OPENSBI_IMPID); // OpenSBI implementation ID
+            }
+            SBI_EXT_BASE_GET_IMP_VERSION => {
+                // TODO: Implement implementation version
+                set_ureg(REG_A0, 0); // Version 0
+                set_ureg(REG_A1, 0); // OpenSBI implementation ID
+            }
+            SBI_EXT_BASE_GET_MVENDORID => {
+                // TODO: Implement machine vendor ID
+                set_ureg(REG_A0, 0); // Unknown vendor
+                set_ureg(REG_A1, 0); // OpenSBI implementation ID
+            }
+            SBI_EXT_BASE_GET_MARCHID => {
+                // TODO: Implement machine architecture ID
+                set_ureg(REG_A0, 0); // Unknown architecture
+                set_ureg(REG_A1, 0); // OpenSBI implementation ID
+            }
+            SBI_EXT_BASE_GET_MIMPID => {
+                // TODO: Implement machine implementation ID
+                set_ureg(REG_A0, 0); // Unknown implementation
+                set_ureg(REG_A1, 0); // OpenSBI implementation ID
+            }
+            SBI_EXT_BASE_PROBE_EXT => {
+                let msg = str_format!(str256, "sbi_ext_base_probe_ext: {:x}", get_ureg(REG_A0));
+                print(&msg);
+                if get_ureg(REG_A0) == 0x4442434E {
+                    set_ureg(REG_A0, 0);
+                    set_ureg(REG_A1, 1);
+                } else {
+                    set_ureg(REG_A0, 0);
+                    set_ureg(REG_A1, 0);
+                }
+            }
+            _ => {
+                debug_print!("Unsupported SBI base function: {}", get_ureg(REG_A6));
+                set_ureg(REG_A0, 0); // Return 0 for unsupported functions
+            }
+        }
+    } else if nr == SYS_EXIT {
+        syscall1(sys_exit);
+    } else {
+        kpanic!("syscall: {nr}");
+    }
+    mret();
 
-    let msg = str_format!(str256, "syscall: {nr} (a7={})", get_ureg(17));
+    /*     let msg = str_format!(str256, "syscall: {nr} (a7={})", get_ureg(17));
     print(&msg);
 
     // Debug: check all registers around a7
@@ -2748,7 +3000,7 @@ unsafe extern "C" fn ecall_dispatch() -> ! {
         }
     }
 
-    mret()
+    mret() */
 }
 
 #[unsafe(no_mangle)]
@@ -2767,21 +3019,19 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
     let funct3 = (instruction & 0x00007000) >> 12;
     let funct7 = (instruction & 0xfe000000) >> 25;
 
-    let msg = str_format!(
-        str256,
+    debug_print!(
         "Decoded instruction: {:#08x}, opcode={:#02x}, funct7={:#02x}",
         instruction,
         opcode,
         funct7
     );
-    print(&msg);
 
     // Check if this is a fence instruction (0x0ff0000f)
     if instruction == 0x0ff0000f {
         // Fence instruction - treat as null-op and continue
         // mret will automatically increment MEPC by 4, so we don't need to do anything
-        let msg = str_format!(str256, "Emulating fence instruction at PC: {:#010x}", mepc);
-        print(&msg);
+        /* let msg = str_format!(str256, "Emulating fence instruction at PC: {:#010x}", mepc);
+        print(&msg); */
         mret()
     }
 
@@ -2789,24 +3039,46 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
     if instruction == 0x0000100f {
         // Fence.i instruction - treat as null-op and continue
         // mret will automatically increment MEPC by 4, so we don't need to do anything
-        let msg = str_format!(
+        /* let msg = str_format!(
             str256,
             "Emulating fence.i instruction at PC: {:#010x}",
             mepc
         );
-        print(&msg);
+        print(&msg); */
+        mret()
+    }
+
+    // Check if this is a fence rw,rw instruction (0x0330000f)
+    if instruction == 0x0330000f {
+        // Fence rw,rw instruction - ensure all read and write operations before this fence
+        // are completed before any read and write operations after this fence
+        // In our emulated environment, we can treat this as a memory barrier
+        debug_print!("Emulating fence rw,rw instruction at PC: {:#010x}", mepc);
+        // For now, treat as null-op since we don't have complex memory ordering
+        // In a real implementation, this would ensure memory ordering constraints
+        mret()
+    }
+
+    // Check if this is a fence ow,ow instruction (0x0550000f)
+    if instruction == 0x0550000f {
+        // Fence ow,ow instruction - ensure all "other" and write operations before this fence
+        // are completed before any "other" and write operations after this fence
+        // In our emulated environment, we can treat this as a memory barrier
+        debug_print!("Emulating fence ow,ow instruction at PC: {:#010x}", mepc);
+        // For now, treat as null-op since we don't have complex memory ordering
+        // In a real implementation, this would ensure memory ordering constraints
         mret()
     }
 
     // Check for floating point operations (opcode 0x43) - R4-type instructions
     if opcode == 0x43 {
-        let msg = str_format!(
+        /*let msg = str_format!(
             str256,
             "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
             instruction,
             mepc
         );
-        print(&msg);
+        print(&msg); */
         unsafe {
             emulate_fp_instruction(instruction, mepc);
         }
@@ -2814,13 +3086,13 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
     // Check for floating point operations (opcode 0x47) - R4-type instructions
     if opcode == 0x47 {
-        let msg = str_format!(
+        /* let msg = str_format!(
             str256,
             "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
             instruction,
             mepc
         );
-        print(&msg);
+        print(&msg); */
         unsafe {
             emulate_fp_instruction(instruction, mepc);
         }
@@ -2828,13 +3100,13 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
     // Check for floating point operations (opcode 0x4b) - R4-type instructions
     if opcode == 0x4b {
-        let msg = str_format!(
+        /* let msg = str_format!(
             str256,
             "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
             instruction,
             mepc
         );
-        print(&msg);
+        print(&msg); */
         unsafe {
             emulate_fp_instruction(instruction, mepc);
         }
@@ -2842,13 +3114,11 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
     // Check for floating point operations (opcode 0x4f) - R4-type instructions
     if opcode == 0x4f {
-        let msg = str_format!(
-            str256,
+        debug_print!(
             "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
             instruction,
             mepc
         );
-        print(&msg);
         unsafe {
             emulate_fp_instruction(instruction, mepc);
         }
@@ -2863,13 +3133,11 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
     // Check for floating point operations (opcode 0x63) - alternative encoding
     if opcode == 0x63 {
-        let msg = str_format!(
-            str256,
+        debug_print!(
             "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
             instruction,
             mepc
         );
-        print(&msg);
         unsafe {
             emulate_fp_instruction(instruction, mepc);
         }
@@ -2898,24 +3166,20 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
         match (funct3, funct5) {
             (0x2, 0x00) => {
                 // amoadd.w - atomic memory operation: add word
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Emulating amoadd.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                     mepc,
                     rd,
                     rs1,
                     rs2
                 );
-                print(&msg);
 
                 // Get address from rs1 register
                 let addr = get_ureg(rs1 as usize);
 
                 // Check alignment (4-byte aligned for 32-bit words)
                 if addr % 4 != 0 {
-                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Address misaligned: {:#010x}", addr);
                 }
 
                 // Read current value from memory
@@ -2938,24 +3202,20 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             }
             (0x2, 0x01) => {
                 // amoswap.w - atomic memory operation: swap word
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Emulating amoswap.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                     mepc,
                     rd,
                     rs1,
                     rs2
                 );
-                print(&msg);
 
                 // Get address from rs1 register
                 let addr = get_ureg(rs1 as usize);
 
                 // Check alignment (4-byte aligned for 32-bit words)
                 if addr % 4 != 0 {
-                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Address misaligned: {:#010x}", addr);
                 }
 
                 // Read current value from memory
@@ -2977,24 +3237,20 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             }
             (0x2, 0x04) => {
                 // amoxor.w - atomic memory operation: XOR word
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Emulating amoxor.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                     mepc,
                     rd,
                     rs1,
                     rs2
                 );
-                print(&msg);
 
                 // Get address from rs1 register
                 let addr = get_ureg(rs1 as usize);
 
                 // Check alignment (4-byte aligned for 32-bit words)
                 if addr % 4 != 0 {
-                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Address misaligned: {:#010x}", addr);
                 }
 
                 // Read current value from memory
@@ -3017,24 +3273,20 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             }
             (0x2, 0x08) => {
                 // amoor.w - atomic memory operation: OR word
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Emulating amoor.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                     mepc,
                     rd,
                     rs1,
                     rs2
                 );
-                print(&msg);
 
                 // Get address from rs1 register
                 let addr = get_ureg(rs1 as usize);
 
                 // Check alignment (4-byte aligned for 32-bit words)
                 if addr % 4 != 0 {
-                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Address misaligned: {:#010x}", addr);
                 }
 
                 // Read current value from memory
@@ -3057,24 +3309,20 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             }
             (0x2, 0x0c) => {
                 // amoand.w - atomic memory operation: AND word
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Emulating amoand.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                     mepc,
                     rd,
                     rs1,
                     rs2
                 );
-                print(&msg);
 
                 // Get address from rs1 register
                 let addr = get_ureg(rs1 as usize);
 
                 // Check alignment (4-byte aligned for 32-bit words)
                 if addr % 4 != 0 {
-                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Address misaligned: {:#010x}", addr);
                 }
 
                 // Read current value from memory
@@ -3097,24 +3345,20 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             }
             (0x2, 0x10) => {
                 // amomin.w - atomic memory operation: minimum word (signed)
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Emulating amomin.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                     mepc,
                     rd,
                     rs1,
                     rs2
                 );
-                print(&msg);
 
                 // Get address from rs1 register
                 let addr = get_ureg(rs1 as usize);
 
                 // Check alignment (4-byte aligned for 32-bit words)
                 if addr % 4 != 0 {
-                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Address misaligned: {:#010x}", addr);
                 }
 
                 // Read current value from memory
@@ -3143,24 +3387,20 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             }
             (0x2, 0x14) => {
                 // amomax.w - atomic memory operation: maximum word (signed)
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Emulating amomax.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                     mepc,
                     rd,
                     rs1,
                     rs2
                 );
-                print(&msg);
 
                 // Get address from rs1 register
                 let addr = get_ureg(rs1 as usize);
 
                 // Check alignment (4-byte aligned for 32-bit words)
                 if addr % 4 != 0 {
-                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Address misaligned: {:#010x}", addr);
                 }
 
                 // Read current value from memory
@@ -3189,24 +3429,20 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             }
             (0x2, 0x18) => {
                 // amominu.w - atomic memory operation: minimum word (unsigned)
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Emulating amominu.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                     mepc,
                     rd,
                     rs1,
                     rs2
                 );
-                print(&msg);
 
                 // Get address from rs1 register
                 let addr = get_ureg(rs1 as usize);
 
                 // Check alignment (4-byte aligned for 32-bit words)
                 if addr % 4 != 0 {
-                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Address misaligned: {:#010x}", addr);
                 }
 
                 // Read current value from memory
@@ -3233,24 +3469,20 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             }
             (0x2, 0x1c) => {
                 // amomaxu.w - atomic memory operation: maximum word (unsigned)
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Emulating amomaxu.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                     mepc,
                     rd,
                     rs1,
                     rs2
                 );
-                print(&msg);
 
                 // Get address from rs1 register
                 let addr = get_ureg(rs1 as usize);
 
                 // Check alignment (4-byte aligned for 32-bit words)
                 if addr % 4 != 0 {
-                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Address misaligned: {:#010x}", addr);
                 }
 
                 // Read current value from memory
@@ -3277,23 +3509,19 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             }
             (0x2, 0x02) => {
                 // lr.w - Load Reserved Word
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Emulating lr.w at PC: {:#010x}, rd={}, rs1={}",
                     mepc,
                     rd,
                     rs1
                 );
-                print(&msg);
 
                 // Get address from rs1 register
                 let addr = get_ureg(rs1 as usize);
 
                 // Check alignment (4-byte aligned for 32-bit words)
                 if addr % 4 != 0 {
-                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Address misaligned: {:#010x}", addr);
                 }
 
                 // Read value from memory
@@ -3308,36 +3536,30 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 // Write loaded value to rd register
                 set_ureg(rd as usize, value);
 
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "lr.w: loaded {:#010x} from {:#010x}, set reservation",
                     value,
                     addr
                 );
-                print(&msg);
 
                 mret()
             }
             (0x2, 0x03) => {
                 // sc.w - Store Conditional Word
-                let msg = str_format!(
-                    str256,
+                debug_print!(
                     "Emulating sc.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                     mepc,
                     rd,
                     rs1,
                     rs2
                 );
-                print(&msg);
 
                 // Get address from rs1 register
                 let addr = get_ureg(rs1 as usize);
 
                 // Check alignment (4-byte aligned for 32-bit words)
                 if addr % 4 != 0 {
-                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
-                    print(&msg);
-                    host_terminate(1, 0);
+                    kpanic!("Address misaligned: {:#010x}", addr);
                 }
 
                 // Get value to store from rs2 register
@@ -3359,13 +3581,11 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                     // Write 0 to rd register (success)
                     set_ureg(rd as usize, 0);
 
-                    let msg = str_format!(
-                        str256,
+                    debug_print!(
                         "sc.w: stored {:#010x} to {:#010x}, success",
                         store_value,
                         addr
                     );
-                    print(&msg);
                 } else {
                     // Reservation is invalid - don't store, write 1 to rd (failure)
                     set_ureg(rd as usize, 1);
@@ -3395,17 +3615,12 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
         }
     }
 
-    // Log the illegal instruction event
-    let msg = str_format!(
-        str256,
+    // Log the illegal instruction event and terminate
+    kpanic!(
         "Illegal instruction at PC: {:#010x}, instr: {:#010x}",
         mepc,
         instruction
     );
-    print(&msg);
-
-    // Terminate the program with error code
-    host_terminate(1, 0);
 }
 
 fn print(msg: &str) {
@@ -3441,6 +3656,7 @@ fn host_log(_msg_ptr: *const u8, _msg_len: usize) {
     };
 }
 
+#[allow(dead_code)]
 fn host_argc() -> u32 {
     #[cfg(target_arch = "riscv32")]
     {
@@ -3482,11 +3698,20 @@ fn host_argc() -> u32 {
 }
 
 #[allow(unused_variables)]
+fn host_get_cycle() -> u64 {
+    // Simple time counter implementation
+    // In a real implementation, this would read from a hardware cycle counter
+    // For now, we'll use a simple incrementing counter
+    static mut CYCLE_COUNTER: u64 = 0;
+    unsafe {
+        CYCLE_COUNTER = CYCLE_COUNTER.wrapping_add(10000);
+        CYCLE_COUNTER
+    }
+}
+
+#[allow(dead_code)]
 fn host_argv(arg_index: u32, buf: *mut u8, buf_len: usize) -> u32 {
-    print(&str_format!(
-        str256,
-        "host_argv {arg_index} {buf:?} {buf_len}"
-    ));
+    debug_print!("host_argv {arg_index} {buf:?} {buf_len}");
     #[cfg(target_arch = "riscv32")]
     {
         const HOST_ECALL_READ: u32 = 1;
