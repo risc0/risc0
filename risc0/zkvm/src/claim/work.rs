@@ -111,7 +111,7 @@ pub struct Work {
     pub value: u64,
 }
 
-/// Error returned when the
+/// Error returned when working with PoVW [Work] and [WorkClaim] operations fails.
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub enum WorkClaimError {
@@ -145,7 +145,7 @@ impl std::error::Error for WorkClaimError {}
 
 impl Work {
     /// Joins two work values by combining their nonce ranges and summing their values,
-    /// ensuring the nonce ranges are disjoint.
+    /// ensuring the nonce ranges are contiguous.
     pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
         // Check that the two nonce ranges are contiguous. This must match the implementation of
         // the join_povw recursion program.
@@ -188,7 +188,7 @@ impl Work {
 
 impl MaybePruned<Work> {
     /// Joins two possibly pruned work values by combining their nonce ranges and summing their
-    /// values, ensuring the nonce ranges are disjoint.
+    /// values, ensuring the nonce ranges are contiguous.
     pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
         Ok(self.as_value()?.join(other.as_value()?)?.into())
     }
