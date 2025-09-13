@@ -72,6 +72,23 @@ const USER_PHDR_ADDR_PTR: *const usize = 0xffff_3000 as *const usize;
 /// Program header count address (stored in memory)
 const USER_PHDR_NUM_ADDR_PTR: *const usize = 0xffff_3008 as *const usize;
 
+// Shadow register storage area for supervisor CSRs (starting at 0xffff_5000)
+const SHADOW_REGS_PTR: *mut u32 = 0xffff_5000 as *mut u32;
+
+// Supervisor CSR offsets within shadow register area
+const STVEC_OFFSET: usize = 0; // Supervisor trap vector base address
+const SSCRATCH_OFFSET: usize = 1; // Supervisor scratch register
+const SIE_OFFSET: usize = 2; // Supervisor interrupt enable
+const SIP_OFFSET: usize = 3; // Supervisor interrupt pending
+const SCOUNTEREN_OFFSET: usize = 4; // Supervisor counter enable
+const SSTATUS_OFFSET: usize = 5; // Supervisor status register
+const SEPC_OFFSET: usize = 6; // Supervisor exception program counter
+const STVAL_OFFSET: usize = 7; // Supervisor trap value
+const SCAUSE_OFFSET: usize = 8; // Supervisor cause register
+const SENVCFG_OFFSET: usize = 9; // Supervisor environment configuration
+const ILRSC_OFFSET: usize = 10; // Instruction LR/SC register
+const ILRSC_SET_OFFSET: usize = 11; // Instruction LR/SC set register
+
 const SYS_IOCTL: u32 = 29;
 const SYS_READ: u32 = 63;
 const SYS_WRITE: u32 = 64;
@@ -170,6 +187,135 @@ fn get_frm() -> u32 {
 
 fn set_frm(value: u32) {
     unsafe { softfloat_roundingMode_write_helper((value & 0x7) as u8) };
+}
+
+// Supervisor CSR access functions
+// These read/write from the shadow register area at 0xffff_5000
+
+fn get_stvec() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(STVEC_OFFSET) }
+}
+
+fn set_stvec(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(STVEC_OFFSET) = value;
+    }
+}
+
+fn get_sscratch() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(SSCRATCH_OFFSET) }
+}
+
+fn set_sscratch(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(SSCRATCH_OFFSET) = value;
+    }
+}
+
+fn get_sie() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(SIE_OFFSET) }
+}
+
+fn set_sie(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(SIE_OFFSET) = value;
+    }
+}
+
+fn get_sip() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(SIP_OFFSET) }
+}
+
+fn set_sip(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(SIP_OFFSET) = value;
+    }
+}
+
+fn get_scounteren() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(SCOUNTEREN_OFFSET) }
+}
+
+fn set_scounteren(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(SCOUNTEREN_OFFSET) = value;
+    }
+}
+
+fn get_sstatus() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(SSTATUS_OFFSET) }
+}
+
+fn set_sstatus(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(SSTATUS_OFFSET) = value;
+    }
+}
+
+fn get_sepc() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(SEPC_OFFSET) }
+}
+
+fn set_sepc(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(SEPC_OFFSET) = value;
+    }
+}
+
+fn get_stval() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(STVAL_OFFSET) }
+}
+
+fn set_stval(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(STVAL_OFFSET) = value;
+    }
+}
+
+fn get_scause() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(SCAUSE_OFFSET) }
+}
+
+fn set_scause(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(SCAUSE_OFFSET) = value;
+    }
+}
+
+fn get_senvcfg() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(SENVCFG_OFFSET) }
+}
+
+fn set_senvcfg(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(SENVCFG_OFFSET) = value;
+    }
+}
+
+fn get_ilrsc() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(ILRSC_OFFSET) }
+}
+
+fn set_ilrsc(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(ILRSC_OFFSET) = value;
+    }
+}
+
+fn get_ilrsc_set() -> u32 {
+    unsafe { *SHADOW_REGS_PTR.add(ILRSC_SET_OFFSET) }
+}
+
+fn set_ilrsc_set(value: u32) {
+    unsafe {
+        *SHADOW_REGS_PTR.add(ILRSC_SET_OFFSET) = value;
+    }
+}
+
+// Invalidate LR/SC reservation (call this when other memory operations occur)
+#[allow(dead_code)]
+fn invalidate_lrsc_reservation() {
+    set_ilrsc_set(0);
 }
 
 // Floating point register access macros (similar to riscv-pk)
@@ -1031,7 +1177,7 @@ fn emulate_fcvt_fi(insn: u32) -> ! {
             }
             1 => {
                 // WU - unsigned word (32-bit)
-                unsafe { ui32_to_f32(rs1 as u32) }
+                unsafe { ui32_to_f32(rs1) }
             }
             _ => {
                 let msg = str_format!(str256, "Unsupported fcvt rs2: {}", rs2);
@@ -1049,7 +1195,7 @@ fn emulate_fcvt_fi(insn: u32) -> ! {
             }
             1 => {
                 // WU - unsigned word (32-bit)
-                unsafe { ui32_to_f64(rs1 as u32) }
+                unsafe { ui32_to_f64(rs1) }
             }
             _ => {
                 let msg = str_format!(str256, "Unsupported fcvt rs2: {}", rs2);
@@ -1833,6 +1979,533 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
                 }
             }
         }
+        // Supervisor CSRs
+        0x105 => {
+            // stvec - Supervisor trap vector base address
+            match funct3 {
+                0x1 => {
+                    // csrrw (read and write)
+                    let current_value = get_stvec();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_stvec(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x2 => {
+                    // csrrs (read and set)
+                    let current_value = get_stvec();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_stvec(current_value | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x3 => {
+                    // csrrc (read and clear)
+                    let current_value = get_stvec();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_stvec(current_value & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x5 => {
+                    // csrrwi (read and write immediate)
+                    let current_value = get_stvec();
+                    let imm = rs1;
+                    set_stvec(imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x6 => {
+                    // csrrsi (read and set immediate)
+                    let current_value = get_stvec();
+                    let imm = rs1;
+                    set_stvec(current_value | imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x7 => {
+                    // csrrci (read and clear immediate)
+                    let current_value = get_stvec();
+                    let imm = rs1;
+                    set_stvec(current_value & !imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported stvec funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        0x140 => {
+            // sscratch - Supervisor scratch register
+            match funct3 {
+                0x1 => {
+                    let current_value = get_sscratch();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sscratch(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x2 => {
+                    let current_value = get_sscratch();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sscratch(current_value | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x3 => {
+                    let current_value = get_sscratch();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sscratch(current_value & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x5 => {
+                    let current_value = get_sscratch();
+                    let imm = rs1;
+                    set_sscratch(imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x6 => {
+                    let current_value = get_sscratch();
+                    let imm = rs1;
+                    set_sscratch(current_value | imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x7 => {
+                    let current_value = get_sscratch();
+                    let imm = rs1;
+                    set_sscratch(current_value & !imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported sscratch funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        0x104 => {
+            // sie - Supervisor interrupt enable
+            match funct3 {
+                0x1 => {
+                    let current_value = get_sie();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sie(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x2 => {
+                    let current_value = get_sie();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sie(current_value | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x3 => {
+                    let current_value = get_sie();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sie(current_value & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x5 => {
+                    let current_value = get_sie();
+                    let imm = rs1;
+                    set_sie(imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x6 => {
+                    let current_value = get_sie();
+                    let imm = rs1;
+                    set_sie(current_value | imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x7 => {
+                    let current_value = get_sie();
+                    let imm = rs1;
+                    set_sie(current_value & !imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported sie funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        0x144 => {
+            // sip - Supervisor interrupt pending
+            match funct3 {
+                0x1 => {
+                    let current_value = get_sip();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sip(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x2 => {
+                    let current_value = get_sip();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sip(current_value | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x3 => {
+                    let current_value = get_sip();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sip(current_value & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x5 => {
+                    let current_value = get_sip();
+                    let imm = rs1;
+                    set_sip(imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x6 => {
+                    let current_value = get_sip();
+                    let imm = rs1;
+                    set_sip(current_value | imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x7 => {
+                    let current_value = get_sip();
+                    let imm = rs1;
+                    set_sip(current_value & !imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported sip funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        0x106 => {
+            // scounteren - Supervisor counter enable
+            match funct3 {
+                0x1 => {
+                    let current_value = get_scounteren();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_scounteren(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x2 => {
+                    let current_value = get_scounteren();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_scounteren(current_value | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x3 => {
+                    let current_value = get_scounteren();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_scounteren(current_value & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x5 => {
+                    let current_value = get_scounteren();
+                    let imm = rs1;
+                    set_scounteren(imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x6 => {
+                    let current_value = get_scounteren();
+                    let imm = rs1;
+                    set_scounteren(current_value | imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x7 => {
+                    let current_value = get_scounteren();
+                    let imm = rs1;
+                    set_scounteren(current_value & !imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported scounteren funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        0x100 => {
+            // sstatus - Supervisor status register
+            match funct3 {
+                0x1 => {
+                    let current_value = get_sstatus();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sstatus(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x2 => {
+                    let current_value = get_sstatus();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sstatus(current_value | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x3 => {
+                    let current_value = get_sstatus();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sstatus(current_value & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x5 => {
+                    let current_value = get_sstatus();
+                    let imm = rs1;
+                    set_sstatus(imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x6 => {
+                    let current_value = get_sstatus();
+                    let imm = rs1;
+                    set_sstatus(current_value | imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x7 => {
+                    let current_value = get_sstatus();
+                    let imm = rs1;
+                    set_sstatus(current_value & !imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported sstatus funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        0x141 => {
+            // sepc - Supervisor exception program counter
+            match funct3 {
+                0x1 => {
+                    let current_value = get_sepc();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sepc(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x2 => {
+                    let current_value = get_sepc();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sepc(current_value | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x3 => {
+                    let current_value = get_sepc();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_sepc(current_value & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x5 => {
+                    let current_value = get_sepc();
+                    let imm = rs1;
+                    set_sepc(imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x6 => {
+                    let current_value = get_sepc();
+                    let imm = rs1;
+                    set_sepc(current_value | imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x7 => {
+                    let current_value = get_sepc();
+                    let imm = rs1;
+                    set_sepc(current_value & !imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported sepc funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        0x143 => {
+            // stval - Supervisor trap value
+            match funct3 {
+                0x1 => {
+                    let current_value = get_stval();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_stval(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x2 => {
+                    let current_value = get_stval();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_stval(current_value | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x3 => {
+                    let current_value = get_stval();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_stval(current_value & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x5 => {
+                    let current_value = get_stval();
+                    let imm = rs1;
+                    set_stval(imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x6 => {
+                    let current_value = get_stval();
+                    let imm = rs1;
+                    set_stval(current_value | imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x7 => {
+                    let current_value = get_stval();
+                    let imm = rs1;
+                    set_stval(current_value & !imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported stval funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        0x142 => {
+            // scause - Supervisor cause register
+            match funct3 {
+                0x1 => {
+                    let current_value = get_scause();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_scause(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x2 => {
+                    let current_value = get_scause();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_scause(current_value | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x3 => {
+                    let current_value = get_scause();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_scause(current_value & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x5 => {
+                    let current_value = get_scause();
+                    let imm = rs1;
+                    set_scause(imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x6 => {
+                    let current_value = get_scause();
+                    let imm = rs1;
+                    set_scause(current_value | imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x7 => {
+                    let current_value = get_scause();
+                    let imm = rs1;
+                    set_scause(current_value & !imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported scause funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
+        0x10A => {
+            // senvcfg - Supervisor environment configuration
+            match funct3 {
+                0x1 => {
+                    let current_value = get_senvcfg();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_senvcfg(rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x2 => {
+                    let current_value = get_senvcfg();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_senvcfg(current_value | rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x3 => {
+                    let current_value = get_senvcfg();
+                    if rs1 != 0 {
+                        let rs1_value = get_ureg(rs1 as usize);
+                        set_senvcfg(current_value & !rs1_value);
+                    }
+                    set_ureg(rd as usize, current_value);
+                }
+                0x5 => {
+                    let current_value = get_senvcfg();
+                    let imm = rs1;
+                    set_senvcfg(imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x6 => {
+                    let current_value = get_senvcfg();
+                    let imm = rs1;
+                    set_senvcfg(current_value | imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                0x7 => {
+                    let current_value = get_senvcfg();
+                    let imm = rs1;
+                    set_senvcfg(current_value & !imm);
+                    set_ureg(rd as usize, current_value);
+                }
+                _ => {
+                    let msg = str_format!(str256, "Unsupported senvcfg funct3: {}", funct3);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+            }
+        }
         _ => {
             let msg = str_format!(str256, "Unsupported CSR address: {:#03x}", csr_addr);
             print(&msg);
@@ -2599,6 +3272,113 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
                 // Write original value to rd register
                 // XXX check for rd = 0?
                 set_ureg(rd as usize, current_value);
+
+                mret()
+            }
+            (0x2, 0x02) => {
+                // lr.w - Load Reserved Word
+                let msg = str_format!(
+                    str256,
+                    "Emulating lr.w at PC: {:#010x}, rd={}, rs1={}",
+                    mepc,
+                    rd,
+                    rs1
+                );
+                print(&msg);
+
+                // Get address from rs1 register
+                let addr = get_ureg(rs1 as usize);
+
+                // Check alignment (4-byte aligned for 32-bit words)
+                if addr % 4 != 0 {
+                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+
+                // Read value from memory
+                let value = unsafe { (addr as *const u32).read_volatile() };
+
+                // Set reservation: store the reserved address in ILRSC shadow register
+                set_ilrsc(addr);
+
+                // Set reservation state: store 1 (valid) in ILRSC_SET shadow register
+                set_ilrsc_set(1);
+
+                // Write loaded value to rd register
+                set_ureg(rd as usize, value);
+
+                let msg = str_format!(
+                    str256,
+                    "lr.w: loaded {:#010x} from {:#010x}, set reservation",
+                    value,
+                    addr
+                );
+                print(&msg);
+
+                mret()
+            }
+            (0x2, 0x03) => {
+                // sc.w - Store Conditional Word
+                let msg = str_format!(
+                    str256,
+                    "Emulating sc.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
+                    mepc,
+                    rd,
+                    rs1,
+                    rs2
+                );
+                print(&msg);
+
+                // Get address from rs1 register
+                let addr = get_ureg(rs1 as usize);
+
+                // Check alignment (4-byte aligned for 32-bit words)
+                if addr % 4 != 0 {
+                    let msg = str_format!(str256, "Address misaligned: {:#010x}", addr);
+                    print(&msg);
+                    host_terminate(1, 0);
+                }
+
+                // Get value to store from rs2 register
+                let store_value = get_ureg(rs2 as usize);
+
+                // Check if reservation is valid
+                let reserved_addr = get_ilrsc();
+                let reservation_valid = get_ilrsc_set();
+
+                if reservation_valid == 1 && reserved_addr == addr {
+                    // Reservation is valid - perform the store
+                    unsafe {
+                        (addr as *mut u32).write_volatile(store_value);
+                    }
+
+                    // Clear reservation
+                    set_ilrsc_set(0);
+
+                    // Write 0 to rd register (success)
+                    set_ureg(rd as usize, 0);
+
+                    let msg = str_format!(
+                        str256,
+                        "sc.w: stored {:#010x} to {:#010x}, success",
+                        store_value,
+                        addr
+                    );
+                    print(&msg);
+                } else {
+                    // Reservation is invalid - don't store, write 1 to rd (failure)
+                    set_ureg(rd as usize, 1);
+
+                    let msg = str_format!(
+                        str256,
+                        "sc.w: reservation invalid (addr={:#010x}, reserved={:#010x}, valid={}), failure",
+                        addr,
+                        reserved_addr,
+                        reservation_valid
+                    );
+                    print(&msg);
+                }
 
                 mret()
             }
