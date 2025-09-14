@@ -31,10 +31,7 @@ use crate::{
     TraceEvent, Unknown, VerifierContext, get_prover_server, get_version,
     host::{
         api::convert::keccak_input_to_bytes,
-        client::{
-            env::{CoprocessorCallback, ProveKeccakRequest},
-            slice_io::SliceIo,
-        },
+        client::env::{CoprocessorCallback, ProveKeccakRequest},
         server::{
             exec::executor::ExecutorImpl, prove::keccak::prove_keccak, session::NullSegmentRef,
         },
@@ -118,41 +115,6 @@ impl Write for PosixIoProxy {
 
     fn flush(&mut self) -> std::io::Result<()> {
         Ok(())
-    }
-}
-
-#[derive(Clone)]
-struct SliceIoProxy {
-    conn: ConnectionWrapper,
-}
-
-impl SliceIoProxy {
-    fn new(conn: ConnectionWrapper) -> Self {
-        Self { conn }
-    }
-}
-
-impl SliceIo for SliceIoProxy {
-    fn handle_io(&mut self, syscall: &str, from_guest: Bytes) -> Result<Bytes> {
-        let request = pb::api::ServerReply {
-            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
-                    kind: Some(pb::api::on_io_request::Kind::Slice(pb::api::SliceIo {
-                        name: syscall.to_string(),
-                        from_guest: from_guest.into(),
-                    })),
-                })),
-            })),
-        };
-        tracing::trace!("tx: {request:?}");
-        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
-        tracing::trace!("rx: {reply:?}");
-
-        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
-        match kind {
-            pb::api::on_io_reply::Kind::Ok(buf) => Ok(buf.into()),
-            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
-        }
     }
 }
 
@@ -853,10 +815,6 @@ fn build_env<'a>(
     for fd in request.write_fds.iter() {
         let proxy = PosixIoProxy::new(*fd, conn.clone());
         env_builder.write_fd(*fd, proxy);
-    }
-    let proxy = SliceIoProxy::new(conn.clone());
-    for name in request.slice_ios.iter() {
-        env_builder.slice_io(name, proxy.clone());
     }
     if let Some(segment_limit_po2) = request.segment_limit_po2 {
         env_builder.segment_limit_po2(segment_limit_po2);

@@ -37,8 +37,7 @@ use bonsai_sdk::responses::{
     SnarkReq, SnarkStatusRes, UploadRes,
 };
 use kameo::actor::ActorRef;
-use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
-use risc0_zkvm::{Receipt, compute_image_id};
+use risc0_zkvm::{Receipt, compute_image_id, rpc::JobRequest};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tokio::net::TcpListener;
@@ -47,8 +46,8 @@ use uuid::Uuid;
 use crate::actors::{
     manager::ManagerActor,
     protocol::{
-        JobInfo, JobStatus, JobStatusReply, JobStatusRequest, ProofRequest, ProofResult,
-        ShrinkWrapKind, ShrinkWrapRequest, ShrinkWrapResult, TaskError,
+        CreateJobRequest, JobInfo, JobStatus, JobStatusReply, JobStatusRequest, ProofRequest,
+        ProofResult, ShrinkWrapKind, ShrinkWrapRequest, ShrinkWrapResult, TaskError,
     },
 };
 
@@ -411,12 +410,14 @@ async fn prove_stark(
 
     let reply = state
         .manager
-        .ask(ProofRequest {
-            binary,
-            input,
-            assumptions,
-            segment_limit_po2: state.po2,
-            execute_only: proof_req.execute_only,
+        .ask(CreateJobRequest {
+            request: JobRequest::Proof(ProofRequest {
+                binary,
+                input,
+                assumptions,
+                segment_limit_po2: state.po2,
+                execute_only: proof_req.execute_only,
+            }),
         })
         .await
         .context("Failed to create job")?;
@@ -589,9 +590,11 @@ async fn prove_groth16(
 
     let reply = state
         .manager
-        .ask(ShrinkWrapRequest {
-            kind: ShrinkWrapKind::Groth16,
-            receipt,
+        .ask(CreateJobRequest {
+            request: JobRequest::ShrinkWrap(ShrinkWrapRequest {
+                kind: ShrinkWrapKind::Groth16,
+                receipt,
+            }),
         })
         .await
         .context("Failed to create job")?;

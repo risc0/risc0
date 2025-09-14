@@ -25,6 +25,8 @@ use anyhow::Result;
 
 use crate::Seal;
 
+pub use self::seal_to_json::to_json;
+
 /// Produce a Groth16 proof from an `identity_p254` seal.
 pub fn shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
     cfg_if::cfg_if! {

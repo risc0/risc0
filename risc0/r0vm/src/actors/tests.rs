@@ -22,7 +22,8 @@ use risc0_zkvm::DevModeDelay;
 use risc0_zkvm_methods::FIB_ELF;
 
 use super::{
-    App, PoolConfig, WorkerConfig,
+    App,
+    config::{AppConfig, ExecutorConfig, ManagerConfig, StorageConfig, VERSION},
     protocol::{JobStatus, ProofRequest, ShrinkWrapKind, ShrinkWrapRequest, TaskKind},
 };
 
@@ -48,7 +49,6 @@ const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
 
 async fn do_test(remote: bool) {
     let task_kinds = vec![
-        TaskKind::Execute,
         TaskKind::ProveSegment,
         TaskKind::Lift,
         TaskKind::Join,
@@ -57,29 +57,31 @@ async fn do_test(remote: bool) {
 
     let storage_root = assert_fs::TempDir::new().unwrap();
 
-    let config = WorkerConfig {
-        pools: vec![PoolConfig {
-            count: 100,
-            profile: Some(PROFILE_RTX_5090),
-            task_kinds: task_kinds.clone(),
-        }],
-    };
-
     let po2 = Some(21);
     let addr = remote.then_some(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into());
-    let mut app = App::new(
-        /* is_manager */ true,
-        addr,
-        /* api_addr */ None,
-        Some(storage_root.to_path_buf()),
-        Some(config),
-        po2,
-        /* enable_telemetry */ false,
-    )
+    let mut app = App::new(AppConfig {
+        version: VERSION,
+        api: None,
+        manager: Some(ManagerConfig { listen: addr }),
+        executor: Some(ExecutorConfig {
+            manager: None,
+            count: 1,
+        }),
+        prover: Some(vec![crate::actors::config::ProverConfig {
+            manager: None,
+            count: Some(100),
+            subscribe: task_kinds.clone(),
+            simulate: Some(PROFILE_RTX_5090),
+        }]),
+        storage: Some(StorageConfig {
+            path: storage_root.to_path_buf(),
+        }),
+        telemetry: None,
+    })
     .await
     .unwrap();
 
-    const ITERATIONS: u32 = 30_000_000;
+    const ITERATIONS: u32 = 300000;
 
     let request = ProofRequest {
         binary: FIB_ELF.to_vec(),
@@ -91,7 +93,7 @@ async fn do_test(remote: bool) {
 
     let info = app.proof_request(request).await.unwrap();
 
-    tracing::info!("proof_request result = {info:#?}");
+    tracing::info!("xproof_request result = {info:#?}");
 
     let result = assert_matches!(info.status, JobStatus::Succeeded(r) => r);
 

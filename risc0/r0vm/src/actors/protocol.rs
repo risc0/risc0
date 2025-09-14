@@ -34,6 +34,20 @@ pub(crate) type JobId = uuid::Uuid;
 pub(crate) type TaskId = u64;
 pub(crate) type WorkerId = uuid::Uuid;
 
+/// This is an async message that should return immediately to the API.
+///
+/// The API is designed to have users poll for status, but the initial request
+/// must return immediately.
+#[derive(Serialize, Deserialize)]
+pub(crate) struct CreateJobRequest {
+    pub request: JobRequest,
+}
+
+#[derive(Reply, Serialize, Deserialize)]
+pub(crate) struct CreateJobReply {
+    pub job_id: JobId,
+}
+
 #[derive(Serialize, Deserialize)]
 pub(crate) struct JobStatusRequest {
     pub job_id: JobId,
@@ -54,6 +68,7 @@ pub(crate) enum JobStatusReply {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) enum TaskKind {
     Execute,
     ProveSegment,
