@@ -18,4 +18,7 @@
 #[cfg(not(target_arch = "riscv32"))]
 fn main() {}
 
+#[macro_use]
 mod kernel;
+mod constants;
+mod softfloat;
