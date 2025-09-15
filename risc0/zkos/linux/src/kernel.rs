@@ -88,7 +88,7 @@ pub fn set_ureg(idx: usize, word: u32) {
     unsafe { USER_REGS_PTR.add(idx).write_volatile(word) };
 }
 
-fn get_vm_machine_mode() -> u32 {
+pub fn get_vm_machine_mode() -> u32 {
     unsafe { *SHADOW_REGS_PTR.add(VM_MACHINE_MODE) }
 }
 
@@ -245,21 +245,6 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
     // Read the instruction as a u32
     let instruction = unsafe { (mepc as *const u32).read_volatile() };
 
-    // Decode instruction fields
-    let opcode = instruction & 0x0000007f;
-    let rd = (instruction & 0x00000f80) >> 7;
-    let rs1 = (instruction & 0x000f8000) >> 15;
-    let rs2 = (instruction & 0x01f00000) >> 20;
-    let funct3 = (instruction & 0x00007000) >> 12;
-    let funct7 = (instruction & 0xfe000000) >> 25;
-
-    debug_print!(
-        "Decoded instruction: {:#08x}, opcode={:#02x}, funct7={:#02x}",
-        instruction,
-        opcode,
-        funct7
-    );
-
     // Check if this is a fence instruction (0x0ff0000f)
     if instruction == 0x0ff0000f {
         // Fence instruction - treat as null-op and continue
@@ -304,6 +289,19 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
         mret()
     }
 
+    // Decode instruction fields
+    let opcode = instruction & 0x0000007f;
+    let rd = (instruction & 0x00000f80) >> 7;
+    let rs1 = (instruction & 0x000f8000) >> 15;
+    let rs2 = (instruction & 0x01f00000) >> 20;
+    let funct3 = (instruction & 0x00007000) >> 12;
+    let funct7 = (instruction & 0xfe000000) >> 25;
+    debug_print!(
+        "Decoded instruction: {:#08x}, opcode={:#02x}, funct7={:#02x}",
+        instruction,
+        opcode,
+        funct7
+    );
     // Check for floating point operations (opcode 0x43) - R4-type instructions
     if opcode == 0x43 {
         /*let msg = str_format!(

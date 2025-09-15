@@ -1,9 +1,18 @@
 use crate::{
     constants::*,
     host_calls::{host_get_cycle, host_log, host_terminate},
-    kernel::{DEBUG_ENABLED, get_ureg, mret, print, set_ureg},
+    kernel::{DEBUG_ENABLED, get_ureg, get_vm_machine_mode, mret, print, set_ureg},
 };
 use no_std_strings::{str_format, str256};
+
+// Trap routine for invalid VM mode access
+fn trap_invalid_vm_mode(csr_name: &str) -> ! {
+    kpanic!(
+        "CSR {} access not allowed in current VM mode {}",
+        csr_name,
+        get_vm_machine_mode()
+    );
+}
 
 const SBI_EXT_BASE: u32 = 0x10;
 const SBI_EXT_DBCN: u32 = 0x4442434E;
@@ -307,6 +316,11 @@ pub fn handle_smode_ecall() -> ! {
 }
 
 pub fn handle_timeh(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("timeh");
+    }
+
     // timeh - Time counter high (read-only)
     match funct3 {
         0x2 => {
@@ -376,6 +390,11 @@ pub fn handle_timeh(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_time(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("time");
+    }
+
     // time - Time counter (read-only)
     match funct3 {
         0x2 => {
@@ -445,6 +464,11 @@ pub fn handle_time(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_senvcfg(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("senvcfg");
+    }
+
     // senvcfg - Supervisor environment configuration
     match funct3 {
         0x1 => {
@@ -496,6 +520,11 @@ pub fn handle_senvcfg(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_scause(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("scause");
+    }
+
     // scause - Supervisor cause register
     match funct3 {
         0x1 => {
@@ -547,6 +576,11 @@ pub fn handle_scause(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_stval(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("stval");
+    }
+
     // stval - Supervisor trap value
     match funct3 {
         0x1 => {
@@ -598,6 +632,11 @@ pub fn handle_stval(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_sepc(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("sepc");
+    }
+
     // sepc - Supervisor exception program counter
     match funct3 {
         0x1 => {
@@ -649,6 +688,11 @@ pub fn handle_sepc(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_sstatus(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("sstatus");
+    }
+
     // sstatus - Supervisor status register
     match funct3 {
         0x1 => {
@@ -700,6 +744,11 @@ pub fn handle_sstatus(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_scounteren(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("scounteren");
+    }
+
     // scounteren - Supervisor counter enable
     match funct3 {
         0x1 => {
@@ -751,6 +800,11 @@ pub fn handle_scounteren(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_sip(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("sip");
+    }
+
     // sip - Supervisor interrupt pending
     match funct3 {
         0x1 => {
@@ -802,6 +856,11 @@ pub fn handle_sip(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_sie(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("sie");
+    }
+
     // sie - Supervisor interrupt enable
     match funct3 {
         0x1 => {
@@ -853,6 +912,11 @@ pub fn handle_sie(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_sdeleg(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("sdeleg");
+    }
+
     // sdeleg - Supervisor delegation register
     match funct3 {
         0x1 => {
@@ -921,6 +985,11 @@ pub fn handle_sdeleg(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_sscratch(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("sscratch");
+    }
+
     // sscratch - Supervisor scratch register
     match funct3 {
         0x1 => {
@@ -972,6 +1041,11 @@ pub fn handle_sscratch(funct3: u32, rd: u32, rs1: u32) {
 }
 
 pub fn handle_stvec(funct3: u32, rd: u32, rs1: u32) {
+    // Check if we're in emulated S-mode
+    if get_vm_machine_mode() != VM_MACHINE_MODE_EMULATED_S_MODE {
+        trap_invalid_vm_mode("stvec");
+    }
+
     // stvec - Supervisor trap vector base address
     match funct3 {
         0x1 => {
