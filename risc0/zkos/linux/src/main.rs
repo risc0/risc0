@@ -21,6 +21,7 @@ fn main() {}
 #[macro_use]
 mod kernel;
 mod atomic_emul;
+mod compressed_emul;
 mod constants;
 mod host_calls;
 mod linux_abi;

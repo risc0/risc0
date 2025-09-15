@@ -1,7 +1,9 @@
 use crate::{
     constants::*,
     host_calls::{host_get_cycle, host_log, host_terminate},
-    kernel::{DEBUG_ENABLED, get_ureg, get_vm_machine_mode, mret, print, set_ureg},
+    kernel::{
+        DEBUG_ENABLED, get_ureg, get_vm_machine_mode, mret, print, set_ureg, set_vm_machine_mode,
+    },
 };
 use no_std_strings::{str_format, str256};
 
@@ -118,6 +120,7 @@ pub fn start_vmlinux() -> ! {
     set_ureg(REG_A1, USER_STACK_ADDR as u32);
     print("starting vmlinux");
     let user_start_addr = unsafe { USER_START_PTR.read_volatile() } - 4;
+    set_vm_machine_mode(VM_MACHINE_MODE_EMULATED_S_MODE);
     unsafe {
         MEPC_PTR.write_volatile(user_start_addr);
     }

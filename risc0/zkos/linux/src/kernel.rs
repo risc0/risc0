@@ -96,7 +96,7 @@ pub fn get_vm_machine_mode() -> u32 {
 }
 
 #[allow(dead_code)]
-fn set_vm_machine_mode(value: u32) {
+pub fn set_vm_machine_mode(value: u32) {
     unsafe {
         *SHADOW_REGS_PTR.add(VM_MACHINE_MODE) = value;
     }
