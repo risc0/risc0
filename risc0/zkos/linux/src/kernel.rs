@@ -28,12 +28,21 @@ use crate::softfloat::{
 };
 // Debug configuration - set to true to enable debug prints, false to disable
 pub const DEBUG_ENABLED: bool = false;
-
+pub const TRACE_ENABLED: bool = false;
 // Debug print macro that avoids str_format evaluation when debug is disabled
 #[macro_export]
 macro_rules! debug_print {
     ($($arg:tt)*) => {
         if DEBUG_ENABLED {
+            let msg = str_format!(str256, $($arg)*);
+            print(&msg);
+        }
+    };
+}
+
+macro_rules! trace_print {
+    ($($arg:tt)*) => {
+        if TRACE_ENABLED {
             let msg = str_format!(str256, $($arg)*);
             print(&msg);
         }
@@ -109,7 +118,7 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
     let rs1 = (insn >> 15) & 0x1f;
     let csr_addr = (insn >> 20) & 0xfff;
 
-    debug_print!(
+    trace_print!(
         "Emulating CSR instruction at PC: {:#010x}, funct3={}, rd={}, rs1={}, csr={:#03x}",
         mepc,
         funct3,
@@ -129,20 +138,21 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
         0x7 => "csrrci",
         _ => "unknown",
     };
-
-    debug_print!(
-        "CSR {} {}: csr=0x{:03x}, rd=x{}, rs1=x{} (PC=0x{:08x})\n",
-        operation,
-        if funct3 >= 0x5 {
-            "immediate"
-        } else {
-            "register"
-        },
-        csr_addr,
-        rd,
-        rs1,
-        mepc
-    );
+    if DEBUG_ENABLED && csr_addr != 0x100 {
+        debug_print!(
+            "CSR {} {}: csr=0x{:03x}, rd=x{}, rs1=x{} (PC=0x{:08x})\n",
+            operation,
+            if funct3 >= 0x5 {
+                "immediate"
+            } else {
+                "register"
+            },
+            csr_addr,
+            rd,
+            rs1,
+            mepc
+        );
+    }
 
     // Handle floating point CSR operations
     match csr_addr {
@@ -234,6 +244,7 @@ unsafe extern "C" fn ecall_dispatch() -> ! {
     match get_vm_machine_mode() {
         VM_MACHINE_MODE_LINUX_ABI => handle_linux_syscall(),
         VM_MACHINE_MODE_EMULATED_S_MODE => handle_smode_ecall(),
+        VM_MACHINE_MODE_EMULATED_U_MODE => handle_umode_ecall(),
         _ => {
             kpanic!("unknown machine mode {}", get_vm_machine_mode());
         }
@@ -284,7 +295,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
         // Fence rw,rw instruction - ensure all read and write operations before this fence
         // are completed before any read and write operations after this fence
         // In our emulated environment, we can treat this as a memory barrier
-        debug_print!("Emulating fence rw,rw instruction at PC: {:#010x}", mepc);
+        trace_print!("Emulating fence rw,rw instruction at PC: {:#010x}", mepc);
         // For now, treat as null-op since we don't have complex memory ordering
         // In a real implementation, this would ensure memory ordering constraints
         mret()
@@ -295,7 +306,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
         // Fence ow,ow instruction - ensure all "other" and write operations before this fence
         // are completed before any "other" and write operations after this fence
         // In our emulated environment, we can treat this as a memory barrier
-        debug_print!("Emulating fence ow,ow instruction at PC: {:#010x}", mepc);
+        trace_print!("Emulating fence ow,ow instruction at PC: {:#010x}", mepc);
         // For now, treat as null-op since we don't have complex memory ordering
         // In a real implementation, this would ensure memory ordering constraints
         mret()
@@ -308,7 +319,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
     let rs2 = (instruction & 0x01f00000) >> 20;
     let funct3 = (instruction & 0x00007000) >> 12;
     let funct7 = (instruction & 0xfe000000) >> 25;
-    debug_print!(
+    trace_print!(
         "Decoded instruction: {:#08x}, opcode={:#02x}, funct7={:#02x}",
         instruction,
         opcode,
@@ -377,7 +388,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
     // Check for floating point operations (opcode 0x63) - alternative encoding
     if opcode == 0x63 {
-        debug_print!(
+        trace_print!(
             "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
             instruction,
             mepc
@@ -394,10 +405,41 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
         }
     }
 
-    // Check for CSR operations (opcode 0x73)
+    // Check for SYSTEM operations (opcode 0x73)
     if opcode == 0x73 {
-        unsafe {
-            emulate_csr_instruction(instruction, mepc);
+        // Check if this is a privileged system instruction (funct3=000)
+        if funct3 == 0x0 {
+            // Extract funct12 field (bits [31:20])
+            let funct12 = (instruction >> 20) & 0xfff;
+
+            // Check for sret instruction (funct12 = 0x102)
+            if funct12 == 0x102 {
+                if get_vm_machine_mode() == VM_MACHINE_MODE_EMULATED_S_MODE {
+                    set_vm_machine_mode(VM_MACHINE_MODE_EMULATED_U_MODE);
+                    unsafe {
+                        MEPC_PTR.write_volatile(get_sepc() as usize - 4);
+                    }
+                    mret()
+                } else {
+                    // should be
+                    kpanic!("sret instruction intercepted at PC: {:#010x}", mepc);
+                }
+            } else if funct12 == 0x105 {
+                // WFI, null-op
+                mret()
+            }
+
+            // Handle other privileged system instructions here if needed
+            kpanic!(
+                "Unsupported privileged system instruction: funct12={:#03x} at PC: {:#010x}",
+                funct12,
+                mepc
+            );
+        } else {
+            // This is a CSR instruction (funct3 != 000)
+            unsafe {
+                emulate_csr_instruction(instruction, mepc);
+            }
         }
     }
 

@@ -10,7 +10,7 @@ use softfloat_sys::{
 
 use crate::constants::*;
 use crate::host_calls::host_terminate;
-use crate::kernel::{DEBUG_ENABLED, get_ureg, mret, print, set_ureg};
+use crate::kernel::{TRACE_ENABLED, get_ureg, mret, print, set_ureg};
 
 pub fn init_softfloat() {
     init_fp_regs();
@@ -37,7 +37,7 @@ pub fn handle_float_csr_exception(funct3: u32, rs1: u32, rd: u32) {
             }
             set_ureg(rd as usize, current_flags);
 
-            debug_print!(
+            trace_print!(
                 "fsflags: read flags {:#02x}, wrote {:#02x}",
                 current_flags,
                 if rs1 != 0 { get_ureg(rs1 as usize) } else { 0 }
@@ -52,7 +52,7 @@ pub fn handle_float_csr_exception(funct3: u32, rs1: u32, rd: u32) {
             }
             set_ureg(rd as usize, current_flags);
 
-            debug_print!("fsflags: read flags {:#02x}", current_flags);
+            trace_print!("fsflags: read flags {:#02x}", current_flags);
         }
         0x3 => {
             // csrrc (read and clear) - fsflags rs1, fflags
@@ -63,7 +63,7 @@ pub fn handle_float_csr_exception(funct3: u32, rs1: u32, rd: u32) {
             }
             set_ureg(rd as usize, current_flags);
 
-            debug_print!(
+            trace_print!(
                 "fsflags: read flags {:#02x}, cleared {:#02x}",
                 current_flags,
                 if rs1 != 0 { get_ureg(rs1 as usize) } else { 0 }
@@ -76,7 +76,7 @@ pub fn handle_float_csr_exception(funct3: u32, rs1: u32, rd: u32) {
             set_fflags(imm);
             set_ureg(rd as usize, current_flags);
 
-            debug_print!(
+            trace_print!(
                 "fsflags: read flags {:#02x}, wrote immediate {:#02x}",
                 current_flags,
                 imm
@@ -89,7 +89,7 @@ pub fn handle_float_csr_exception(funct3: u32, rs1: u32, rd: u32) {
             set_fflags(current_flags | imm);
             set_ureg(rd as usize, current_flags);
 
-            debug_print!(
+            trace_print!(
                 "fsflags: read flags {:#02x}, set immediate {:#02x}",
                 current_flags,
                 imm
@@ -102,7 +102,7 @@ pub fn handle_float_csr_exception(funct3: u32, rs1: u32, rd: u32) {
             set_fflags(current_flags & !imm);
             set_ureg(rd as usize, current_flags);
 
-            debug_print!(
+            trace_print!(
                 "fsflags: read flags {:#02x}, clear immediate {:#02x}",
                 current_flags,
                 imm
@@ -126,7 +126,7 @@ pub fn handle_float_csr_frm(funct3: u32, rs1: u32, rd: u32) {
             }
             set_ureg(rd as usize, current_frm);
 
-            debug_print!("fsrm: read frm {:#02x}", current_frm);
+            trace_print!("fsrm: read frm {:#02x}", current_frm);
         }
         0x5 => {
             // csrrwi (read and write immediate) - fsrm rs1, frm
@@ -135,7 +135,7 @@ pub fn handle_float_csr_frm(funct3: u32, rs1: u32, rd: u32) {
             set_frm(immediate_value);
             set_ureg(rd as usize, current_frm);
 
-            debug_print!(
+            trace_print!(
                 "fsrm: csrrwi frm {:#02x} -> {:#02x}",
                 current_frm,
                 immediate_value
@@ -157,7 +157,7 @@ pub fn handle_float_csr_fcsr(funct3: u32, rs1: u32, rd: u32) {
             set_fcsr(rs1_value);
             set_ureg(rd as usize, current_fcsr);
 
-            debug_print!(
+            trace_print!(
                 "fscsr: csrrw fcsr {:#02x} -> {:#02x}",
                 current_fcsr,
                 rs1_value
@@ -172,7 +172,7 @@ pub fn handle_float_csr_fcsr(funct3: u32, rs1: u32, rd: u32) {
             }
             set_ureg(rd as usize, current_fcsr);
 
-            debug_print!("fscsr: read fcsr {:#02x}", current_fcsr);
+            trace_print!("fscsr: read fcsr {:#02x}", current_fcsr);
         }
         0x5 => {
             // csrrwi (read and write immediate) - fscsr rs1, fcsr
@@ -181,7 +181,7 @@ pub fn handle_float_csr_fcsr(funct3: u32, rs1: u32, rd: u32) {
             set_fcsr(immediate_value);
             set_ureg(rd as usize, current_fcsr);
 
-            debug_print!(
+            trace_print!(
                 "fscsr: csrrwi fcsr {:#02x} -> {:#02x}",
                 current_fcsr,
                 immediate_value
@@ -287,7 +287,7 @@ fn set_f32_rd(insn: u32, value: u32) {
 
 fn set_f64_rd(insn: u32, value: u64) {
     let rd = (insn >> 7) & 0x1f;
-    debug_print!("DEBUG: set_f64_rd: storing {:#016x} to f{}", value, rd);
+    trace_print!("DEBUG: set_f64_rd: storing {:#016x} to f{}", value, rd);
     set_fp_reg_from_insn(insn, 7, value);
 }
 
@@ -322,7 +322,7 @@ pub unsafe fn emulate_fp_instruction(insn: u32, mepc: usize) -> ! {
         softfloat_roundingMode_write_helper(rounding_mode);
     }
 
-    debug_print!(
+    trace_print!(
         "Emulating FP instruction at PC: {:#010x}, funct7={:#02x}, funct3={}, rd={}, rs1={}, rs2={}, rm={}",
         mepc,
         funct7,
@@ -445,7 +445,7 @@ fn emulate_fsub(insn: u32) -> ! {
         let result = unsafe { f32_sub(f32_rs1, f32_rs2) };
 
         // Debug: Print operation details
-        debug_print!(
+        trace_print!(
             "fsub.s: rs1={:#x}, rs2={:#x}, result={:#x}",
             rs1,
             rs2,
@@ -454,12 +454,12 @@ fn emulate_fsub(insn: u32) -> ! {
 
         // Check what softfloat set in its internal state
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
-        debug_print!("softfloat internal flags: {:#x}", softfloat_flags);
+        trace_print!("softfloat internal flags: {:#x}", softfloat_flags);
 
         // Update our FCSR with softfloat's flags
         set_fflags(softfloat_flags as u32);
 
-        debug_print!("FCSR after update: {:#x}", get_fflags());
+        trace_print!("FCSR after update: {:#x}", get_fflags());
 
         set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
@@ -502,7 +502,7 @@ fn emulate_fmul(insn: u32) -> ! {
         let result = unsafe { f32_mul(f32_rs1, f32_rs2) };
 
         // Debug: Print operation details
-        debug_print!(
+        trace_print!(
             "fmul.s: rs1={:#x}, rs2={:#x}, result={:#x}",
             rs1,
             rs2,
@@ -511,12 +511,12 @@ fn emulate_fmul(insn: u32) -> ! {
 
         // Check what softfloat set in its internal state
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
-        debug_print!("softfloat internal flags: {:#x}", softfloat_flags);
+        trace_print!("softfloat internal flags: {:#x}", softfloat_flags);
 
         // Update our FCSR with softfloat's flags
         set_fflags(softfloat_flags as u32);
 
-        debug_print!("FCSR after update: {:#x}", get_fflags());
+        trace_print!("FCSR after update: {:#x}", get_fflags());
 
         set_f32_rd(insn, result.v);
     } else if precision == PRECISION_D {
@@ -750,7 +750,7 @@ fn emulate_fmin(insn: u32) -> ! {
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
         // Debug: print flags for NaN test
         if rs1_is_nan || rs2_is_nan {
-            debug_print!(
+            trace_print!(
                 "fmin/fmax NaN: rs1={:x} rs2={:x} result={:x} flags={}",
                 rs1,
                 rs2,
@@ -762,7 +762,7 @@ fn emulate_fmin(insn: u32) -> ! {
         if (rs1 == 0x8000000000000000 && rs2 == 0x0000000000000000)
             || (rs1 == 0x0000000000000000 && rs2 == 0x8000000000000000)
         {
-            debug_print!(
+            trace_print!(
                 "fmin/fmax zero: rs1=0x{:x}, rs2=0x{:x}, result=0x{:x}, rm={}, flags={}",
                 rs1,
                 rs2,
@@ -934,7 +934,7 @@ fn emulate_fcvt_if(insn: u32) -> ! {
         softfloat_roundingMode_write_helper(rounding_mode);
     }
 
-    debug_print!(
+    trace_print!(
         "fcvt_if: insn={:#010x}, precision={}, rs2={}, rd={}, rounding_mode={}",
         insn,
         precision,
@@ -969,7 +969,7 @@ fn emulate_fcvt_if(insn: u32) -> ! {
         let rs1_reg = (insn >> 15) & 0x1f;
         let rs1 = get_f64_rs1(insn);
         let f64_rs1 = float64_t { v: rs1 };
-        debug_print!(
+        trace_print!(
             "fcvt_if: rs1_reg={}, double input value: {:#016x}",
             rs1_reg,
             rs1
@@ -989,12 +989,12 @@ fn emulate_fcvt_if(insn: u32) -> ! {
             }
         };
         set_ureg(rd as usize, result);
-        debug_print!("fcvt_if: result={:#010x}", result);
+        trace_print!("fcvt_if: result={:#010x}", result);
 
         // Sync softfloat exception flags with FCSR for double precision
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
         set_fflags(softfloat_flags as u32);
-        debug_print!(
+        trace_print!(
             "fcvt_if: result={:#08x}, softfloat_flags={:#02x}, fcsr_flags={:#02x}",
             result,
             softfloat_flags,
@@ -1019,7 +1019,7 @@ fn emulate_fcvt_fi(insn: u32) -> ! {
     // Clear softfloat exception flags before operation
     unsafe { softfloat_exceptionFlags_write_helper(0) };
 
-    debug_print!(
+    trace_print!(
         "fcvt_fi: insn={:#010x}, precision={}, funct3={}, rs2={}, rs1={:#010x}",
         insn,
         precision,
@@ -1060,7 +1060,7 @@ fn emulate_fcvt_fi(insn: u32) -> ! {
             }
         };
         set_f64_rd(insn, result.v);
-        debug_print!("fcvt_fi: result={:#016x}", result.v);
+        trace_print!("fcvt_fi: result={:#016x}", result.v);
     } else {
         kpanic!("Unsupported precision: {}", precision);
     }
@@ -1068,7 +1068,7 @@ fn emulate_fcvt_fi(insn: u32) -> ! {
     // Sync softfloat exception flags with FCSR
     let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
     set_fflags(softfloat_flags as u32);
-    debug_print!(
+    trace_print!(
         "fcvt_if: softfloat_flags={:#02x}, fcsr_flags={:#02x}",
         softfloat_flags,
         get_fflags()
@@ -1216,7 +1216,7 @@ fn emulate_fcvt_ff(insn: u32) -> ! {
     let precision = get_precision(insn);
     let rs2 = (insn >> 20) & 0x1f; // rs2 field indicates conversion type
 
-    debug_print!(
+    trace_print!(
         "fcvt_ff: insn={:#010x}, precision={}, rs2={}",
         insn,
         precision,
@@ -1225,11 +1225,11 @@ fn emulate_fcvt_ff(insn: u32) -> ! {
 
     let rs1 = (insn >> 15) & 0x1f;
     let rd = (insn >> 7) & 0x1f;
-    debug_print!("fcvt_ff: rs1={}, rd={}", rs1, rd);
+    trace_print!("fcvt_ff: rs1={}, rd={}", rs1, rd);
 
     if precision == PRECISION_S {
         // Single precision output - convert from double to single
-        debug_print!("fcvt_ff: PRECISION_S branch, rs2={}", rs2);
+        trace_print!("fcvt_ff: PRECISION_S branch, rs2={}", rs2);
         if rs2 != 1 {
             kpanic!("Invalid fcvt.s.d: rs2={}", rs2);
         }
@@ -1242,13 +1242,13 @@ fn emulate_fcvt_ff(insn: u32) -> ! {
 
         let rs1 = get_f64_rs1(insn);
         let f64_rs1 = float64_t { v: rs1 };
-        debug_print!("fcvt_ff: rs1=0x{:x}", rs1);
+        trace_print!("fcvt_ff: rs1=0x{:x}", rs1);
         let result = unsafe { f64_to_f32(f64_rs1) };
-        debug_print!("fcvt_ff: result=0x{:x}", result.v);
+        trace_print!("fcvt_ff: result=0x{:x}", result.v);
 
         // Update our FCSR with softfloat's flags
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
-        debug_print!("fcvt_ff: softfloat_flags=0x{:x}", softfloat_flags);
+        trace_print!("fcvt_ff: softfloat_flags=0x{:x}", softfloat_flags);
         set_fflags(softfloat_flags as u32);
 
         set_f32_rd(insn, result.v);
@@ -1317,7 +1317,7 @@ fn emulate_fmadd(insn: u32) -> ! {
         }
     }
 
-    debug_print!(
+    trace_print!(
         "fmadd: opcode={:#02x}, funct2={:#02x}, rm={:#02x}, neg_a={}, neg_c={}",
         opcode,
         funct2,
@@ -1382,7 +1382,7 @@ fn emulate_fmadd(insn: u32) -> ! {
         let f64_rs2 = float64_t { v: rs2 };
         let f64_rs3 = float64_t { v: rs3_val };
 
-        debug_print!(
+        trace_print!(
             "fmadd.d: rs1={:#016x}, rs2={:#016x}, rs3={:#016x}, neg_a={}, neg_c={}, rm={}",
             rs1_val,
             rs2,
@@ -1392,7 +1392,7 @@ fn emulate_fmadd(insn: u32) -> ! {
             rounding_mode
         );
 
-        debug_print!(
+        trace_print!(
             "fmadd.d debug: original_rs1={:#016x}, rs1_val={:#016x}, rs2={:#016x}, rs3_val={:#016x}, neg_a={}, neg_c={}",
             rs1,
             rs1_val,
@@ -1404,7 +1404,7 @@ fn emulate_fmadd(insn: u32) -> ! {
 
         let result = unsafe { f64_mulAdd(f64_rs1, f64_rs2, f64_rs3) };
 
-        debug_print!("fmadd.d: result={:#016x}", result.v);
+        trace_print!("fmadd.d: result={:#016x}", result.v);
 
         // Update our FCSR with softfloat's flags
         let softfloat_flags = unsafe { softfloat_exceptionFlags_read_helper() };
@@ -1455,7 +1455,7 @@ pub unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
     let base_addr = get_ureg(rs1 as usize);
     let addr = base_addr.wrapping_add(imm);
 
-    debug_print!(
+    trace_print!(
         "Emulating FP load/store at PC: {:#010x}, opcode={:#02x}, funct3={}, rd={}, rs1={}, addr={:#010x}",
         mepc,
         opcode,
@@ -1470,7 +1470,7 @@ pub unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             // flw - floating point load word (32-bit)
             // Check 4-byte alignment
             if addr % 4 != 0 {
-                debug_print!(
+                trace_print!(
                     "Address misaligned for flw: {:#010x}, continuing anyway",
                     addr
                 );
@@ -1484,13 +1484,13 @@ pub unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             // Store in floating point register (as 32-bit in 64-bit register)
             set_f32_rd(insn, value);
 
-            debug_print!("flw: loaded {:#010x} into f{}", value, rd);
+            trace_print!("flw: loaded {:#010x} into f{}", value, rd);
         }
         (0x07, 3) => {
             // fld - floating point load double (64-bit)
             // Check 8-byte alignment
             if addr % 8 != 0 {
-                debug_print!(
+                trace_print!(
                     "Address misaligned for fld: {:#010x}, continuing anyway",
                     addr
                 );
@@ -1504,13 +1504,13 @@ pub unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             // Store in floating point register
             set_f64_rd(insn, value);
 
-            debug_print!("fld: loaded {:#016x} into f{}", value, rd);
+            trace_print!("fld: loaded {:#016x} into f{}", value, rd);
         }
         (0x27, 2) => {
             // fsw - floating point store word (32-bit)
             // Check 4-byte alignment
             if addr % 4 != 0 {
-                debug_print!(
+                trace_print!(
                     "Address misaligned for fsw: {:#010x}, continuing anyway",
                     addr
                 );
@@ -1526,13 +1526,13 @@ pub unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
                 (addr as *mut u32).write_volatile(value);
             }
 
-            debug_print!("fsw: stored {:#010x} from f{}", value, rs2);
+            trace_print!("fsw: stored {:#010x} from f{}", value, rs2);
         }
         (0x27, 3) => {
             // fsd - floating point store double (64-bit)
             // Check 8-byte alignment
             if addr % 8 != 0 {
-                debug_print!(
+                trace_print!(
                     "Address misaligned for fsd: {:#010x}, continuing anyway",
                     addr
                 );
@@ -1541,16 +1541,16 @@ pub unsafe fn emulate_fp_load_store(insn: u32, mepc: usize) -> ! {
             }
 
             // Get 64-bit value from floating point register
-            debug_print!("DEBUG: About to read from f{} (rs2={})", rs2, rs2);
+            trace_print!("DEBUG: About to read from f{} (rs2={})", rs2, rs2);
             let value = get_f64_rs2(insn);
-            debug_print!("DEBUG: Read value {:#016x} from f{}", value, rs2);
+            trace_print!("DEBUG: Read value {:#016x} from f{}", value, rs2);
 
             // Store 64-bit value to memory
             unsafe {
                 (addr as *mut u64).write_volatile(value);
             }
 
-            debug_print!(
+            trace_print!(
                 "fsd: stored {:#016x} from f{} at addr {:#010x}",
                 value,
                 rs2,

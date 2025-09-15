@@ -36,6 +36,8 @@ const SBI_EXT_BASE_GET_MVENDORID: u32 = 0x4;
 const SBI_EXT_BASE_GET_MARCHID: u32 = 0x5;
 const SBI_EXT_BASE_GET_MIMPID: u32 = 0x6;
 const SBI_EXT_DBCN_CONSOLE_WRITE: u32 = 0x0;
+const SBI_EXT_DBCN_CONSOLE_READ: u32 = 0x1;
+const SBI_EXT_DBCN_CONSOLE_PUTCHAR: u32 = 0x2;
 
 // Embedded device tree blob (DTB) for RISC-V system
 #[allow(dead_code)]
@@ -199,7 +201,7 @@ fn set_sstatus(value: u32) {
     }
 }
 
-fn get_sepc() -> u32 {
+pub fn get_sepc() -> u32 {
     unsafe { *SHADOW_REGS_PTR.add(SEPC_OFFSET) }
 }
 
@@ -239,6 +241,17 @@ fn set_senvcfg(value: u32) {
     }
 }
 
+pub fn handle_umode_ecall() -> ! {
+    let mepc = unsafe { MEPC_PTR.read_volatile() };
+    debug_print!("handle_umode_ecall from PC: {:#010x}", mepc);
+    set_sepc(mepc as u32);
+    set_scause(8);
+    set_stval(0);
+    unsafe { *MEPC_PTR = get_stvec() as usize - 4 };
+    set_vm_machine_mode(VM_MACHINE_MODE_EMULATED_S_MODE);
+    mret();
+}
+
 pub fn handle_smode_ecall() -> ! {
     let nr = get_ureg(REG_A7);
     match nr {
@@ -251,6 +264,13 @@ pub fn handle_smode_ecall() -> ! {
                     let msg =
                         unsafe { core::slice::from_raw_parts(msg_ptr, get_ureg(REG_A0) as usize) };
                     host_log(msg.as_ptr(), msg.len());
+                }
+                SBI_EXT_DBCN_CONSOLE_READ => {
+                    set_ureg(REG_A0, 0);
+                    set_ureg(REG_A1, 0);
+                }
+                SBI_EXT_DBCN_CONSOLE_PUTCHAR => {
+                    kpanic!("SBI_EXT_DBCN_CONSOLE_PUTCHAR not implemented");
                 }
                 _ => {
                     kpanic!("unknown sbi_ext_dbcn function: {}", get_ureg(REG_A6));

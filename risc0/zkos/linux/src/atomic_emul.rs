@@ -1,6 +1,6 @@
 use crate::constants::*;
 use crate::host_calls::host_terminate;
-use crate::kernel::{DEBUG_ENABLED, print};
+use crate::kernel::{TRACE_ENABLED, print};
 use crate::kernel::{get_ureg, mret, set_ureg};
 use no_std_strings::{str_format, str256};
 
@@ -47,7 +47,7 @@ pub fn emulate_atomic_instruction(
     match (funct3, funct5) {
         (0x2, 0x00) => {
             // amoadd.w - atomic memory operation: add word
-            debug_print!(
+            trace_print!(
                 "Emulating amoadd.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                 mepc,
                 rd,
@@ -83,7 +83,7 @@ pub fn emulate_atomic_instruction(
         }
         (0x2, 0x01) => {
             // amoswap.w - atomic memory operation: swap word
-            debug_print!(
+            trace_print!(
                 "Emulating amoswap.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                 mepc,
                 rd,
@@ -118,7 +118,7 @@ pub fn emulate_atomic_instruction(
         }
         (0x2, 0x04) => {
             // amoxor.w - atomic memory operation: XOR word
-            debug_print!(
+            trace_print!(
                 "Emulating amoxor.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                 mepc,
                 rd,
@@ -154,7 +154,7 @@ pub fn emulate_atomic_instruction(
         }
         (0x2, 0x08) => {
             // amoor.w - atomic memory operation: OR word
-            debug_print!(
+            trace_print!(
                 "Emulating amoor.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                 mepc,
                 rd,
@@ -190,7 +190,7 @@ pub fn emulate_atomic_instruction(
         }
         (0x2, 0x0c) => {
             // amoand.w - atomic memory operation: AND word
-            debug_print!(
+            trace_print!(
                 "Emulating amoand.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                 mepc,
                 rd,
@@ -226,7 +226,7 @@ pub fn emulate_atomic_instruction(
         }
         (0x2, 0x10) => {
             // amomin.w - atomic memory operation: minimum word (signed)
-            debug_print!(
+            trace_print!(
                 "Emulating amomin.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                 mepc,
                 rd,
@@ -268,7 +268,7 @@ pub fn emulate_atomic_instruction(
         }
         (0x2, 0x14) => {
             // amomax.w - atomic memory operation: maximum word (signed)
-            debug_print!(
+            trace_print!(
                 "Emulating amomax.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                 mepc,
                 rd,
@@ -310,7 +310,7 @@ pub fn emulate_atomic_instruction(
         }
         (0x2, 0x18) => {
             // amominu.w - atomic memory operation: minimum word (unsigned)
-            debug_print!(
+            trace_print!(
                 "Emulating amominu.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                 mepc,
                 rd,
@@ -350,7 +350,7 @@ pub fn emulate_atomic_instruction(
         }
         (0x2, 0x1c) => {
             // amomaxu.w - atomic memory operation: maximum word (unsigned)
-            debug_print!(
+            trace_print!(
                 "Emulating amomaxu.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                 mepc,
                 rd,
@@ -390,7 +390,7 @@ pub fn emulate_atomic_instruction(
         }
         (0x2, 0x02) => {
             // lr.w - Load Reserved Word
-            debug_print!(
+            trace_print!(
                 "Emulating lr.w at PC: {:#010x}, rd={}, rs1={}",
                 mepc,
                 rd,
@@ -417,7 +417,7 @@ pub fn emulate_atomic_instruction(
             // Write loaded value to rd register
             set_ureg(rd as usize, value);
 
-            debug_print!(
+            trace_print!(
                 "lr.w: loaded {:#010x} from {:#010x}, set reservation",
                 value,
                 addr
@@ -427,7 +427,7 @@ pub fn emulate_atomic_instruction(
         }
         (0x2, 0x03) => {
             // sc.w - Store Conditional Word
-            debug_print!(
+            trace_print!(
                 "Emulating sc.w at PC: {:#010x}, rd={}, rs1={}, rs2={}",
                 mepc,
                 rd,
@@ -462,7 +462,7 @@ pub fn emulate_atomic_instruction(
                 // Write 0 to rd register (success)
                 set_ureg(rd as usize, 0);
 
-                debug_print!(
+                trace_print!(
                     "sc.w: stored {:#010x} to {:#010x}, success",
                     store_value,
                     addr
@@ -471,14 +471,12 @@ pub fn emulate_atomic_instruction(
                 // Reservation is invalid - don't store, write 1 to rd (failure)
                 set_ureg(rd as usize, 1);
 
-                let msg = str_format!(
-                    str256,
+                trace_print!(
                     "sc.w: reservation invalid (addr={:#010x}, reserved={:#010x}, valid={}), failure",
                     addr,
                     reserved_addr,
-                    reservation_valid
+                    reservation_valid,
                 );
-                print(&msg);
             }
 
             mret()
