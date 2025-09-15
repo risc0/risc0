@@ -25,8 +25,10 @@ pub const FP_REGS_PTR: *mut u64 = 0xffff_4000 as *mut u64;
 #[allow(dead_code)]
 pub const FCSR_PTR: *mut u32 = 0xffff_4100 as *mut u32;
 pub const USER_START_PTR: *const usize = 0x0001_0000 as *const usize;
-pub const USER_STACK_ADDR: usize = 0xbfff_0000;
+pub const USER_STACK_ADDR: usize = 0xbf00_0000;
 pub const USER_STACK_PTR: *const usize = USER_STACK_ADDR as *const usize;
+pub const USER_FIXUP_ADDR: usize = 0xbfff_0000;
+pub const USER_FIXUP_PTR: *mut u32 = USER_FIXUP_ADDR as *mut u32;
 #[allow(dead_code)]
 pub const USER_STACK_SIZE: usize = 2 * 1024 * 1024;
 pub const USER_HEAP_START_ADDR: usize = 0x0800_0000; // TODO: figure out where data ends in user program
@@ -42,7 +44,7 @@ pub const PAGE_SIZE: usize = 4096;
 // pub const AT_VECTOR_SIZE_BASE: usize = 20;
 // pub const AT_VECTOR_SIZE_ARCH: usize = 7;
 // pub const AT_VECTOR_SIZE: usize = 2 * (AT_VECTOR_SIZE_ARCH + AT_VECTOR_SIZE_BASE + 1);
-pub const ASCII_TABLE_PTR: *const u8 = 0xbfff_0200 as *const u8;
+pub const ASCII_TABLE_PTR: *const u8 = 0xbf00_0200 as *const u8;
 
 /// Program header table address (stored in memory)
 #[allow(dead_code)]
@@ -69,7 +71,7 @@ pub const SENVCFG_OFFSET: usize = 10; // Supervisor environment configuration
 pub const ILRSC_OFFSET: usize = 11; // Instruction LR/SC register
 pub const ILRSC_SET_OFFSET: usize = 12; // Instruction LR/SC set register
 pub const VM_MACHINE_MODE: usize = 13; // 0 = linux abi, 1 = emulated s-mode 2 = emulated u-mode
-
+pub const MEPC_FIXUP_OFFSET: usize = 14; // MEPC fixup offset
 pub const VM_MACHINE_MODE_LINUX_ABI: u32 = 0;
 pub const VM_MACHINE_MODE_EMULATED_S_MODE: u32 = 1;
 pub const VM_MACHINE_MODE_EMULATED_U_MODE: u32 = 2;

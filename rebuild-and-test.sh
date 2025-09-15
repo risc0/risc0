@@ -11,7 +11,7 @@ if [ ! -d riscv-tests ]; then
     ./configure
     cd env; patch -p1 < ../../patches/riscv-tests-env.patch; cd ..
     cd isa
-    make XLEN=32 rv32ui rv32um rv32ud rv32uf rv32ua
+    make XLEN=32 rv32ui rv32um rv32ud rv32uf rv32ua rv32uc
     cd ../../
 fi
 cd tools/elf-to-bin
