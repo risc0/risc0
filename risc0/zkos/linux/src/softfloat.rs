@@ -25,6 +25,174 @@ pub fn init_softfloat() {
     }
 }
 
+pub fn handle_float_csr_exception(funct3: u32, rs1: u32, rd: u32) {
+    // fflags - Floating point exception flags
+    match funct3 {
+        0x1 => {
+            // csrrw (read and write) - fsflags rs1, fflags
+            let current_flags = get_fflags();
+            if rs1 != 0 {
+                let rs1_value = get_ureg(rs1 as usize);
+                set_fflags(rs1_value);
+            }
+            set_ureg(rd as usize, current_flags);
+
+            debug_print!(
+                "fsflags: read flags {:#02x}, wrote {:#02x}",
+                current_flags,
+                if rs1 != 0 { get_ureg(rs1 as usize) } else { 0 }
+            );
+        }
+        0x2 => {
+            // csrrs (read and set) - fsflags rs1, fflags
+            let current_flags = get_fflags();
+            if rs1 != 0 {
+                let rs1_value = get_ureg(rs1 as usize);
+                set_fflags(current_flags | rs1_value);
+            }
+            set_ureg(rd as usize, current_flags);
+
+            debug_print!("fsflags: read flags {:#02x}", current_flags);
+        }
+        0x3 => {
+            // csrrc (read and clear) - fsflags rs1, fflags
+            let current_flags = get_fflags();
+            if rs1 != 0 {
+                let rs1_value = get_ureg(rs1 as usize);
+                set_fflags(current_flags & !rs1_value);
+            }
+            set_ureg(rd as usize, current_flags);
+
+            debug_print!(
+                "fsflags: read flags {:#02x}, cleared {:#02x}",
+                current_flags,
+                if rs1 != 0 { get_ureg(rs1 as usize) } else { 0 }
+            );
+        }
+        0x5 => {
+            // csrrwi (read and write immediate) - fsflags uimm, fflags
+            let current_flags = get_fflags();
+            let imm = rs1; // In csrrwi, rs1 field contains the immediate
+            set_fflags(imm);
+            set_ureg(rd as usize, current_flags);
+
+            debug_print!(
+                "fsflags: read flags {:#02x}, wrote immediate {:#02x}",
+                current_flags,
+                imm
+            );
+        }
+        0x6 => {
+            // csrrsi (read and set immediate) - fsflags uimm, fflags
+            let current_flags = get_fflags();
+            let imm = rs1; // In csrrsi, rs1 field contains the immediate
+            set_fflags(current_flags | imm);
+            set_ureg(rd as usize, current_flags);
+
+            debug_print!(
+                "fsflags: read flags {:#02x}, set immediate {:#02x}",
+                current_flags,
+                imm
+            );
+        }
+        0x7 => {
+            // csrrci (read and clear immediate) - fsflags uimm, fflags
+            let current_flags = get_fflags();
+            let imm = rs1; // In csrrci, rs1 field contains the immediate
+            set_fflags(current_flags & !imm);
+            set_ureg(rd as usize, current_flags);
+
+            debug_print!(
+                "fsflags: read flags {:#02x}, clear immediate {:#02x}",
+                current_flags,
+                imm
+            );
+        }
+        _ => {
+            kpanic!("Unsupported fflags funct3: {}", funct3);
+        }
+    }
+}
+
+pub fn handle_float_csr_frm(funct3: u32, rs1: u32, rd: u32) {
+    // frm - Floating point rounding mode
+    match funct3 {
+        0x2 => {
+            // csrrs (read and set) - fsrm rs1, frm
+            let current_frm = get_frm();
+            if rs1 != 0 {
+                let rs1_value = get_ureg(rs1 as usize);
+                set_frm(current_frm | rs1_value);
+            }
+            set_ureg(rd as usize, current_frm);
+
+            debug_print!("fsrm: read frm {:#02x}", current_frm);
+        }
+        0x5 => {
+            // csrrwi (read and write immediate) - fsrm rs1, frm
+            let current_frm = get_frm();
+            let immediate_value = rs1; // rs1 field contains the immediate value
+            set_frm(immediate_value);
+            set_ureg(rd as usize, current_frm);
+
+            debug_print!(
+                "fsrm: csrrwi frm {:#02x} -> {:#02x}",
+                current_frm,
+                immediate_value
+            );
+        }
+        _ => {
+            kpanic!("Unsupported frm funct3: {}", funct3);
+        }
+    }
+}
+
+pub fn handle_float_csr_fcsr(funct3: u32, rs1: u32, rd: u32) {
+    // fcsr - Floating point control and status register
+    match funct3 {
+        0x1 => {
+            // csrrw (read and write) - fscsr rs1, fcsr
+            let current_fcsr = get_fcsr();
+            let rs1_value = get_ureg(rs1 as usize);
+            set_fcsr(rs1_value);
+            set_ureg(rd as usize, current_fcsr);
+
+            debug_print!(
+                "fscsr: csrrw fcsr {:#02x} -> {:#02x}",
+                current_fcsr,
+                rs1_value
+            );
+        }
+        0x2 => {
+            // csrrs (read and set) - fscsr rs1, fcsr
+            let current_fcsr = get_fcsr();
+            if rs1 != 0 {
+                let rs1_value = get_ureg(rs1 as usize);
+                set_fcsr(current_fcsr | rs1_value);
+            }
+            set_ureg(rd as usize, current_fcsr);
+
+            debug_print!("fscsr: read fcsr {:#02x}", current_fcsr);
+        }
+        0x5 => {
+            // csrrwi (read and write immediate) - fscsr rs1, fcsr
+            let current_fcsr = get_fcsr();
+            let immediate_value = rs1; // rs1 field contains the immediate value
+            set_fcsr(immediate_value);
+            set_ureg(rd as usize, current_fcsr);
+
+            debug_print!(
+                "fscsr: csrrwi fcsr {:#02x} -> {:#02x}",
+                current_fcsr,
+                immediate_value
+            );
+        }
+        _ => {
+            kpanic!("Unsupported fcsr funct3: {}", funct3);
+        }
+    }
+}
+
 fn get_fp_reg(idx: usize) -> u64 {
     unsafe { FP_REGS_PTR.add(idx).read() }
 }

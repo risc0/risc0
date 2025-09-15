@@ -22,4 +22,6 @@ fn main() {}
 mod kernel;
 mod constants;
 mod host_calls;
+mod linux_abi;
+mod smode_emul;
 mod softfloat;

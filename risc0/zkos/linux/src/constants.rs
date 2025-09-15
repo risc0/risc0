@@ -68,19 +68,8 @@ pub const SCAUSE_OFFSET: usize = 9; // Supervisor cause register
 pub const SENVCFG_OFFSET: usize = 10; // Supervisor environment configuration
 pub const ILRSC_OFFSET: usize = 11; // Instruction LR/SC register
 pub const ILRSC_SET_OFFSET: usize = 12; // Instruction LR/SC set register
+pub const VM_MACHINE_MODE: usize = 13; // 0 = linux abi, 1 = emulated s-mode 2 = emulated u-mode
 
-pub const SYS_IOCTL: u32 = 29;
-pub const SYS_READ: u32 = 63;
-pub const SYS_WRITE: u32 = 64;
-pub const SYS_WRITEV: u32 = 66;
-pub const SYS_EXIT: u32 = 93;
-pub const SYS_EXIT_GROUP: u32 = 94;
-pub const SYS_SET_TID_ADDRESS: u32 = 96;
-pub const SYS_TKILL: u32 = 130;
-pub const SYS_SIGALTSTACK: u32 = 132;
-pub const SYS_RT_SIGACTION: u32 = 134;
-pub const SYS_RT_SIGPROCMASK: u32 = 135;
-pub const SYS_BRK: u32 = 214;
-pub const SYS_MUNMAP: u32 = 215;
-pub const SYS_MMAP: u32 = 222;
-pub const SYS_PPOLL: u32 = 414;
+pub const VM_MACHINE_MODE_LINUX_ABI: u32 = 0;
+pub const VM_MACHINE_MODE_EMULATED_S_MODE: u32 = 1;
+pub const VM_MACHINE_MODE_EMULATED_U_MODE: u32 = 2;
