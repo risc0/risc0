@@ -340,6 +340,7 @@ pub const SYS_WAITID: u32 = 95;
 enum Err {
     NoMem = -12,
     Inval = -22,
+    NoSys = -38, // ENOSYS - Function not implemented
 }
 
 impl Err {
@@ -956,7 +957,7 @@ fn sys_munmap(addr: u32, _len: u32) -> Result<u32, Err> {
         HEAP.deallocate(NonNull::new_unchecked(ptr), PAGE_SIZE)
     };
 
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 /// https://man7.org/linux/man-pages/man2/read.2.html
@@ -964,7 +965,7 @@ fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
     // const HOST_ECALL_READ: u32 = 1;
     // let msg = str_format!(str256, "sys_read({fd}, {buf:?}, {count})");
     // print(&msg);
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 /// https://man7.org/linux/man-pages/man2/write.2.html
@@ -1078,15 +1079,15 @@ fn sys_rt_sigprocmask(_how: u32, nset: u32, oset: u32, _sigsetsize: u32) -> Resu
 
 // Stub implementations for all additional syscalls
 fn sys_accept(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_accept4(_sockfd: u32, _addr: u32, _addrlen: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_acct(_filename: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_add_key(
@@ -1096,47 +1097,47 @@ fn sys_add_key(
     _plen: u32,
     _keyring: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_bind(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_bpf(_cmd: u32, _attr: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_cachestat(_fd: u32, _cstat: u32, _cstat_size: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_capget(_hdrp: u32, _datap: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_capset(_hdrp: u32, _datap: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_chdir(_filename: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_chroot(_filename: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_clock_adjtime64(_which_clock: u32, _tx: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_clock_getres_time64(_which_clock: u32, _tp: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_clock_gettime64(_which_clock: u32, _tp: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_clock_nanosleep_time64(
@@ -1145,11 +1146,11 @@ fn sys_clock_nanosleep_time64(
     _rqtp: u32,
     _rmtp: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_clock_settime64(_which_clock: u32, _tp: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_clone(
@@ -1159,23 +1160,23 @@ fn sys_clone(
     _tls: u32,
     _ctid: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_clone3(_cl_args: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_close(_fd: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_close_range(_first: u32, _last: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_connect(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_copy_file_range(
@@ -1186,31 +1187,31 @@ fn sys_copy_file_range(
     _len: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_delete_module(_name: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_dup(_fd: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_dup3(_oldfd: u32, _newfd: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_epoll_create1(_flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_epoll_ctl(_epfd: u32, _op: u32, _fd: u32, _event: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_epoll_pwait(_epfd: u32, _events: u32, _maxevents: u32, _timeout: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_epoll_pwait2(
@@ -1220,15 +1221,15 @@ fn sys_epoll_pwait2(
     _timeout: u32,
     _sigmask: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_eventfd2(_initval: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_execve(_filename: u32, _argv: u32, _envp: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_execveat(
@@ -1238,27 +1239,27 @@ fn sys_execveat(
     _envp: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_faccessat(_dfd: u32, _filename: u32, _mode: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fadvise64_64(_fd: u32, _offset: u32, _len: u32, _advice: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fallocate(_fd: u32, _mode: u32, _offset: u32, _len: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fanotify_init(_flags: u32, _event_f_flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fanotify_mark(
@@ -1268,27 +1269,27 @@ fn sys_fanotify_mark(
     _dirfd: u32,
     _pathname: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fchdir(_fd: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fchmod(_fd: u32, _mode: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fchmodat(_dfd: u32, _filename: u32, _mode: u32, _flag: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fchmodat2(_dfd: u32, _filename: u32, _mode: u32, _flag: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fchown(_fd: u32, _user: u32, _group: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fchownat(
@@ -1298,75 +1299,75 @@ fn sys_fchownat(
     _group: u32,
     _flag: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fdatasync(_fd: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fgetxattr(_fd: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_file_getattr(_dfd: u32, _filename: u32, _mask: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_file_setattr(_dfd: u32, _filename: u32, _mask: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_finit_module(_fd: u32, _param_values: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_flistxattr(_fd: u32, _list: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_flock(_fd: u32, _cmd: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fremovexattr(_fd: u32, _name: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fsconfig(_fs_fd: u32, _cmd: u32, _key: u32, _value: u32, _aux: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fsetxattr(_fd: u32, _name: u32, _value: u32, _size: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fsmount(_fs_fd: u32, _flags: u32, _attr_flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fsopen(_fs_name: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fspick(_dfd: u32, _path: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fstatfs64(_fd: u32, _buf: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_fsync(_fd: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_ftruncate64(_fd: u32, _length: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_futex_requeue(
@@ -1376,7 +1377,7 @@ fn sys_futex_requeue(
     _val1: u32,
     _val2: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_futex_time64(
@@ -1386,11 +1387,11 @@ fn sys_futex_time64(
     _timeout: u32,
     _uaddr2: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_futex_wait(_uaddr: u32, _val: u32, _flags: u32, _timeout: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_futex_waitv(
@@ -1400,11 +1401,11 @@ fn sys_futex_waitv(
     _timeout: u32,
     _clockid: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_futex_wake(_uaddr: u32, _nr_wake: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_get_mempolicy(
@@ -1414,87 +1415,87 @@ fn sys_get_mempolicy(
     _addr: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_get_robust_list(_pid: u32, _head: u32, _len: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getcpu(_cpu: u32, _node: u32, _cache: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getcwd(_buf: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getdents64(_fd: u32, _dirp: u32, _count: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getegid() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_geteuid() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getgid() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getgroups(_size: u32, _list: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getitimer(_which: u32, _value: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getpeername(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getpgid(_pid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getpid() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getppid() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getpriority(_which: u32, _who: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getrandom(_buf: u32, _buflen: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getresgid(_rgid: u32, _egid: u32, _sgid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getresuid(_ruid: u32, _euid: u32, _suid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getrusage(_who: u32, _usage: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getsid(_pid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getsockname(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getsockopt(
@@ -1504,47 +1505,47 @@ fn sys_getsockopt(
     _optval: u32,
     _optlen: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_gettid() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getuid() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_getxattrat(_dfd: u32, _filename: u32, _name: u32, _value: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_init_module(_module_image: u32, _len: u32, _param_values: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_inotify_add_watch(_fd: u32, _pathname: u32, _mask: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_inotify_init1(_flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_inotify_rm_watch(_fd: u32, _wd: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_io_cancel(_ctx_id: u32, _iocb: u32, _result: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_io_destroy(_ctx_id: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_io_pgetevents_time64(
@@ -1554,15 +1555,15 @@ fn sys_io_pgetevents_time64(
     _events: u32,
     _timeout: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_io_setup(_nr_events: u32, _ctx_idp: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_io_submit(_ctx_id: u32, _nr: u32, _iocbpp: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_io_uring_enter(
@@ -1573,27 +1574,27 @@ fn sys_io_uring_enter(
     _sig: u32,
     _sz: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_io_uring_register(_fd: u32, _opcode: u32, _arg: u32, _nr_args: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_io_uring_setup(_entries: u32, _params: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_ioprio_get(_which: u32, _who: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_ioprio_set(_which: u32, _who: u32, _ioprio: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_kcmp(_pid1: u32, _pid2: u32, _type: u32, _idx1: u32, _idx2: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_kexec_file_load(
@@ -1603,19 +1604,19 @@ fn sys_kexec_file_load(
     _cmdline: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_kexec_load(_entry: u32, _nr_segments: u32, _segments: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_keyctl(_operation: u32, _arg2: u32, _arg3: u32, _arg4: u32, _arg5: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_kill(_pid: u32, _sig: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_landlock_add_rule(
@@ -1624,19 +1625,19 @@ fn sys_landlock_add_rule(
     _rule_attr: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_landlock_create_ruleset(_attr: u32, _size: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_landlock_restrict_self(_ruleset_fd: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_lgetxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_linkat(
@@ -1646,39 +1647,39 @@ fn sys_linkat(
     _newpath: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_listen(_sockfd: u32, _backlog: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_listmount(_dfd: u32, _filename: u32, _buffer: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_listxattr(_pathname: u32, _list: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_listxattrat(_dfd: u32, _filename: u32, _list: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_llistxattr(_pathname: u32, _list: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_llseek(_fd: u32, _offset_high: u32, _offset_low: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_lookup_dcookie(_cookie64: u32, _buf: u32, _len: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_lremovexattr(_pathname: u32, _name: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_lsetxattr(
@@ -1688,27 +1689,27 @@ fn sys_lsetxattr(
     _size: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_lsm_get_self_attr(_attr: u32, _ctx: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_lsm_list_modules(_ids: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_lsm_set_self_attr(_attr: u32, _ctx: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_madvise(_start: u32, _len: u32, _advice: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_map_shadow_stack(_addr: u32, _size: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mbind(
@@ -1719,19 +1720,19 @@ fn sys_mbind(
     _maxnode: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_membarrier(_cmd: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_memfd_create(_name: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_memfd_secret(_flags: u32, _reserved: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_migrate_pages(
@@ -1742,31 +1743,31 @@ fn sys_migrate_pages(
     _status: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mincore(_start: u32, _len: u32, _vec: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mlock(_addr: u32, _len: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mlock2(_addr: u32, _len: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mlockall(_flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mount(
@@ -1776,7 +1777,7 @@ fn sys_mount(
     _mountflags: u32,
     _data: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mount_setattr(
@@ -1786,7 +1787,7 @@ fn sys_mount_setattr(
     _uattr: u32,
     _usize: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_move_mount(
@@ -1796,7 +1797,7 @@ fn sys_move_mount(
     _to_pathname: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_move_pages(
@@ -1807,23 +1808,23 @@ fn sys_move_pages(
     _status: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mprotect(_addr: u32, _len: u32, _prot: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mq_getsetattr(_mqdes: u32, _mqstat: u32, _omqstat: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mq_notify(_mqdes: u32, _notification: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mq_open(_name: u32, _oflag: u32, _mode: u32, _attr: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mq_timedreceive_time64(
@@ -1833,7 +1834,7 @@ fn sys_mq_timedreceive_time64(
     _msg_prio: u32,
     _abs_timeout: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mq_timedsend_time64(
@@ -1843,11 +1844,11 @@ fn sys_mq_timedsend_time64(
     _msg_prio: u32,
     _abs_timeout: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mq_unlink(_name: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mremap(
@@ -1857,19 +1858,19 @@ fn sys_mremap(
     _flags: u32,
     _new_addr: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_mseal(_addr: u32, _len: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_msgctl(_msqid: u32, _cmd: u32, _buf: u32, _version: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_msgget(_key: u32, _msgflg: u32, _version: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_msgrcv(
@@ -1879,23 +1880,23 @@ fn sys_msgrcv(
     _msgtyp: u32,
     _msgflg: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_msgsnd(_msqid: u32, _msgp: u32, _msgsz: u32, _msgflg: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_msync(_addr: u32, _len: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_munlock(_addr: u32, _len: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_munlockall() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_name_to_handle_at(
@@ -1905,27 +1906,27 @@ fn sys_name_to_handle_at(
     _mnt_id: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_open_by_handle_at(_mount_fd: u32, _handle: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_open_tree(_dfd: u32, _filename: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_open_tree_attr(_dfd: u32, _filename: u32, _flags: u32, _attr: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_openat2(_dfd: u32, _filename: u32, _how: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_perf_event_open(
@@ -1935,43 +1936,43 @@ fn sys_perf_event_open(
     _group_fd: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_personality(_personality: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pidfd_getfd(_pidfd: u32, _targetfd: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pidfd_open(_pid: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pidfd_send_signal(_pidfd: u32, _sig: u32, _info: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pipe2(_pipefd: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pivot_root(_new_root: u32, _put_old: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pkey_alloc(_flags: u32, _access_rights: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pkey_free(_pkey: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pkey_mprotect(_start: u32, _len: u32, _prot: u32, _pkey: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_ppoll_time64(
@@ -1981,27 +1982,27 @@ fn sys_ppoll_time64(
     _sigmask: u32,
     _sigsetsize: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_prctl(_option: u32, _arg2: u32, _arg3: u32, _arg4: u32, _arg5: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pread64(_fd: u32, _buf: u32, _count: u32, _pos: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_preadv(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_preadv2(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32, _pos_high: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_prlimit64(_pid: u32, _resource: u32, _new_limit: u32, _old_limit: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_process_madvise(
@@ -2011,11 +2012,11 @@ fn sys_process_madvise(
     _advice: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_process_mrelease(_pidfd: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_process_vm_readv(
@@ -2026,7 +2027,7 @@ fn sys_process_vm_readv(
     _riovcnt: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_process_vm_writev(
@@ -2037,7 +2038,7 @@ fn sys_process_vm_writev(
     _riovcnt: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pselect6_time64(
@@ -2048,19 +2049,19 @@ fn sys_pselect6_time64(
     _tsp: u32,
     _sigmask: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_ptrace(_request: u32, _pid: u32, _addr: u32, _data: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pwrite64(_fd: u32, _buf: u32, _count: u32, _pos: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pwritev(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_pwritev2(
@@ -2070,31 +2071,31 @@ fn sys_pwritev2(
     _pos_low: u32,
     _pos_high: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_quotactl(_cmd: u32, _special: u32, _id: u32, _addr: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_quotactl_fd(_fd: u32, _cmd: u32, _id: u32, _addr: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_readahead(_fd: u32, _offset: u32, _count: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_readlinkat(_dfd: u32, _pathname: u32, _buf: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_reboot(_magic1: u32, _magic2: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_recvfrom(
@@ -2105,7 +2106,7 @@ fn sys_recvfrom(
     _src_addr: u32,
     _addrlen: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_recvmmsg_time64(
@@ -2115,11 +2116,11 @@ fn sys_recvmmsg_time64(
     _flags: u32,
     _timeout: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_recvmsg(_sockfd: u32, _msg: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_remap_file_pages(
@@ -2129,15 +2130,15 @@ fn sys_remap_file_pages(
     _pgoff: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_removexattr(_pathname: u32, _name: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_removexattrat(_dfd: u32, _filename: u32, _name: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_renameat2(
@@ -2147,7 +2148,7 @@ fn sys_renameat2(
     _newpath: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_request_key(
@@ -2156,15 +2157,15 @@ fn sys_request_key(
     _callout_info: u32,
     _destringid: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_restart_syscall() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_riscv_flush_icache(_start: u32, _end: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_riscv_hwprobe(
@@ -2173,27 +2174,27 @@ fn sys_riscv_hwprobe(
     _cpu_set: u32,
     _cpu_set_size: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_rseq(_rseq: u32, _rseq_len: u32, _flags: u32, _sig: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_rt_sigpending(_set: u32, _sigsetsize: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_rt_sigqueueinfo(_pid: u32, _sig: u32, _uinfo: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_rt_sigreturn() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_rt_sigsuspend(_unewset: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_rt_sigtimedwait_time64(
@@ -2202,91 +2203,91 @@ fn sys_rt_sigtimedwait_time64(
     _uts: u32,
     _sigsetsize: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_rt_tgsigqueueinfo(_tgid: u32, _tid: u32, _sig: u32, _uinfo: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_get_priority_max(_policy: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_get_priority_min(_policy: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_getaffinity(_pid: u32, _len: u32, _user_mask_ptr: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_getattr(_pid: u32, _attr: u32, _size: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_getparam(_pid: u32, _param: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_getscheduler(_pid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_rr_get_interval_time64(_pid: u32, _interval: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_setaffinity(_pid: u32, _len: u32, _user_mask_ptr: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_setattr(_pid: u32, _attr: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_setparam(_pid: u32, _param: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_setscheduler(_pid: u32, _policy: u32, _param: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sched_yield() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_seccomp(_operation: u32, _flags: u32, _args: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_semctl(_semid: u32, _semnum: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_semget(_key: u32, _nsems: u32, _semflg: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_semop(_semid: u32, _sops: u32, _nsops: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_semtimedop_time64(_semid: u32, _sops: u32, _nsops: u32, _timeout: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sendfile64(_out_fd: u32, _in_fd: u32, _offset: u32, _count: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sendmmsg(_sockfd: u32, _msgvec: u32, _vlen: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sendmsg(_sockfd: u32, _msg: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sendto(
@@ -2297,7 +2298,7 @@ fn sys_sendto(
     _dest_addr: u32,
     _addrlen: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_set_mempolicy(
@@ -2308,7 +2309,7 @@ fn sys_set_mempolicy(
     _flags: u32,
     _home_node: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_set_mempolicy_home_node(
@@ -2317,71 +2318,71 @@ fn sys_set_mempolicy_home_node(
     _home_node: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_set_robust_list(_head: u32, _len: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setdomainname(_name: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setfsgid(_fsgid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setfsuid(_fsuid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setgid(_gid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setgroups(_size: u32, _list: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sethostname(_name: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setitimer(_which: u32, _value: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setns(_fd: u32, _nstype: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setpgid(_pid: u32, _pgid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setpriority(_which: u32, _who: u32, _niceval: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setregid(_rgid: u32, _egid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setresgid(_rgid: u32, _egid: u32, _sgid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setresuid(_ruid: u32, _euid: u32, _suid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setreuid(_ruid: u32, _euid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setsid() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setsockopt(
@@ -2391,11 +2392,11 @@ fn sys_setsockopt(
     _optval: u32,
     _optlen: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setuid(_uid: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setxattr(
@@ -2405,7 +2406,7 @@ fn sys_setxattr(
     _size: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_setxattrat(
@@ -2415,39 +2416,39 @@ fn sys_setxattrat(
     _value: u32,
     _size: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_shmat(_shmid: u32, _shmaddr: u32, _shmflg: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_shmctl(_shmid: u32, _cmd: u32, _buf: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_shmdt(_shmaddr: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_shmget(_key: u32, _size: u32, _shmflg: u32, _version: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_shutdown(_sockfd: u32, _how: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_signalfd4(_fd: u32, _mask: u32, _sizemask: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_socket(_domain: u32, _type: u32, _protocol: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_socketpair(_domain: u32, _type: u32, _protocol: u32, _sv: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_splice(
@@ -2458,15 +2459,15 @@ fn sys_splice(
     _len: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_statfs64(_path: u32, _buf: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_statmount(_dfd: u32, _filename: u32, _buffer: u32, _bufsize: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_statx(
@@ -2476,47 +2477,47 @@ fn sys_statx(
     _mask: u32,
     _statxbuf: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_swapoff(_specialfile: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_swapon(_specialfile: u32, _swapflags: u32, _version: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_symlinkat(_target: u32, _newdirfd: u32, _linkpath: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sync() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sync_file_range(_fd: u32, _offset: u32, _nbytes: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_syncfs(_fd: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_sysinfo(_info: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_syslog(_type: u32, _buf: u32, _len: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_tee(_fd_in: u32, _fd_out: u32, _len: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_tgkill(_tgid: u32, _tid: u32, _sig: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_timer_create(
@@ -2524,19 +2525,19 @@ fn sys_timer_create(
     _timer_event_spec: u32,
     _created_timer_id: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_timer_delete(_timer_id: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_timer_getoverrun(_timer_id: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_timer_gettime64(_timer_id: u32, _setting: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_timer_settime64(
@@ -2545,15 +2546,15 @@ fn sys_timer_settime64(
     _new_setting: u32,
     _old_setting: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_timerfd_create(_clockid: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_timerfd_gettime64(_fd: u32, _curr_value: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_timerfd_settime64(
@@ -2562,53 +2563,53 @@ fn sys_timerfd_settime64(
     _new_value: u32,
     _old_value: u32,
 ) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_times(_tbuf: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_truncate64(_path: u32, _length: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_umask(_mask: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_umount2(_target: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_uname(_buf: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_unlinkat(_dfd: u32, _pathname: u32, _flag: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_unshare(_flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_userfaultfd(_flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_utimensat_time64(_dfd: u32, _filename: u32, _times: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_vhangup() -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_vmsplice(_fd: u32, _iov: u32, _nr_segs: u32, _flags: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
 
 fn sys_waitid(_which: u32, _upid: u32, _infop: u32, _options: u32, _ru: u32) -> Result<u32, Err> {
-    Ok(0)
+    Err(Err::NoSys)
 }
