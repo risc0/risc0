@@ -77,13 +77,43 @@ pub fn host_argc() -> u32 {
 
 #[allow(unused_variables)]
 pub fn host_get_cycle() -> u64 {
-    // Simple time counter implementation
-    // In a real implementation, this would read from a hardware cycle counter
-    // For now, we'll use a simple incrementing counter
-    static mut CYCLE_COUNTER: u64 = 0;
-    unsafe {
-        CYCLE_COUNTER = CYCLE_COUNTER.wrapping_add(10000);
-        CYCLE_COUNTER
+    #[cfg(target_arch = "riscv32")]
+    {
+        const HOST_ECALL_READ: u32 = 1;
+
+        // Create the syscall name string
+        let syscall_name = b"risc0_zkvm_platform::syscall::nr::SYS_CYCLE_COUNT\0";
+        let syscall_name_ptr = syscall_name.as_ptr() as u32;
+
+        // First do the syscall to get cycle count (like host_syscall)
+        let _rlen: u32;
+        unsafe {
+            core::arch::asm!("ecall",
+                in("a7") HOST_ECALL_READ,
+                inout("a0") syscall_name_ptr => _rlen,  // fd = syscall name pointer
+                in("a1") core::ptr::null_mut::<u8>(),
+                in("a2") 0u32,
+            )
+        };
+
+        // Read the result from registers a0, a1 (like read_a0_a1)
+        let mut buf = [0u32, 0u32];
+        let _rlen2: u32;
+        unsafe {
+            core::arch::asm!("ecall",
+                in("a7") HOST_ECALL_READ,
+                inout("a0") 0u32 => _rlen2,  // fd=0 to read cached values
+                in("a1") buf.as_mut_ptr() as *mut u8,
+                in("a2") core::mem::size_of_val(&buf) as u32,
+            )
+        };
+
+        // Combine high (a0) and low (a1) parts into u64
+        ((buf[0] as u64) << 32) | (buf[1] as u64)
+    }
+    #[cfg(not(target_arch = "riscv32"))]
+    {
+        0
     }
 }
 
