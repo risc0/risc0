@@ -869,7 +869,9 @@ name = "c-guest-host"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "risc0-binfmt",
  "risc0-build",
+ "risc0-zkos-v1compat",
  "risc0-zkvm",
  "rzup",
  "tracing-subscriber 0.3.19",
@@ -943,6 +945,25 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.12",
+]
+
+[[package]]
+name = "cbindgen"
+version = "0.28.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eadd868a2ce9ca38de7eeafdcec9c7065ef89b42b32f0839278d55f35c54d1ff"
+dependencies = [
+ "clap",
+ "heck 0.4.1",
+ "indexmap",
+ "log",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn 2.0.99",
+ "tempfile",
+ "toml",
 ]
 
 [[package]]
@@ -6509,6 +6530,7 @@ dependencies = [
 name = "zkvm-platform"
 version = "0.1.0"
 dependencies = [
+ "cbindgen",
  "risc0-binfmt",
  "risc0-zkp",
  "risc0-zkvm-platform",

@@ -7,3 +7,6 @@ edition = "2024"
 risc0-binfmt = { path = "../../../risc0/binfmt", default-features = false }
 risc0-zkp = { path = "../../../risc0/zkp", default-features = false }
 risc0-zkvm-platform = { path = "../../../risc0/zkvm/platform", features = ["rust-runtime", "export-syscalls"] }
+
+[build-dependencies]
+cbindgen = { version = "0.28" }

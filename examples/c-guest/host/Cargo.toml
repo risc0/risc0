@@ -7,6 +7,8 @@ edition = "2024"
 anyhow = "1.0"
 risc0-zkvm = { path = "../../../risc0/zkvm" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+risc0-binfmt = { path = "../../../risc0/binfmt", default-features = false }
+risc0-zkos-v1compat = { path = "../../../risc0/zkos/v1compat" }
 
 [build-dependencies]
 risc0-build = { path = "../../../risc0/build/" }
