@@ -59,25 +59,28 @@ async fn do_test(remote: bool) {
 
     let po2 = Some(21);
     let addr = remote.then_some(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into());
-    let mut app = App::new(AppConfig {
-        version: VERSION,
-        api: None,
-        manager: Some(ManagerConfig { listen: addr }),
-        executor: Some(ExecutorConfig {
-            manager: None,
-            count: 1,
-        }),
-        prover: Some(vec![crate::actors::config::ProverConfig {
-            manager: None,
-            count: Some(100),
-            subscribe: task_kinds.clone(),
-            simulate: Some(PROFILE_RTX_5090),
-        }]),
-        storage: Some(StorageConfig {
-            path: storage_root.to_path_buf(),
-        }),
-        telemetry: None,
-    })
+    let mut app = App::new(
+        AppConfig {
+            version: VERSION,
+            api: None,
+            manager: Some(ManagerConfig { listen: addr }),
+            executor: Some(ExecutorConfig {
+                manager: None,
+                count: 1,
+            }),
+            prover: Some(vec![crate::actors::config::ProverConfig {
+                manager: None,
+                count: Some(100),
+                subscribe: task_kinds.clone(),
+                simulate: Some(PROFILE_RTX_5090),
+            }]),
+            storage: Some(StorageConfig {
+                path: storage_root.to_path_buf(),
+            }),
+            telemetry: None,
+        },
+        /*enable_logging=*/ false,
+    )
     .await
     .unwrap();
 
