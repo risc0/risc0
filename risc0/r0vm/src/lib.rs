@@ -16,6 +16,8 @@
 mod actors;
 mod api;
 
+use std::fs::File;
+use std::os::unix::io::FromRawFd;
 use std::{io, net::SocketAddr, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
@@ -224,6 +226,11 @@ pub fn main() {
             builder.stdin(std::fs::File::open(input).unwrap());
         } else {
             builder.stdin(io::stdin());
+        }
+        // use fd 3 for p9 reading, and 4 for p9 writing
+        unsafe {
+            builder.read_fd(3, io::BufReader::new(File::from_raw_fd(3)));
+            builder.write_fd(4, io::BufWriter::new(File::from_raw_fd(4)));
         }
 
         if let Some(pprof_out) = args.pprof_out.as_ref() {

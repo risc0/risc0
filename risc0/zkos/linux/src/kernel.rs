@@ -81,6 +81,7 @@ core::arch::global_asm!(include_str!("kernel.s"));
 #[cfg(target_arch = "riscv32")]
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
+    kpanic!("Panic: {}", _info);
     unsafe { core::arch::asm!("unimp", options(noreturn)) }
 }
 

@@ -5,8 +5,9 @@ use crate::{
         USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE, USER_STACK_PTR,
         USER_START_PTR,
     },
-    host_calls::{host_argv, host_log, host_terminate},
+    host_calls::{host_argv, host_log, host_read, host_terminate},
     kernel::{get_ureg, mret, print},
+    p9::{RversionMessage, TversionMessage},
 };
 
 use crate::kernel::{DEBUG_ENABLED, set_ureg};
@@ -419,8 +420,45 @@ impl UserStack {
     }
 }
 
+pub const P9_ENABLED: bool = false;
+
 pub fn start_linux_binary(argc: u32) -> ! {
+    if P9_ENABLED {
+        let msg = TversionMessage::default_9p2000l(1);
+
+        // Send the message via host_write to file descriptor 1
+        match msg.send_tversion() {
+            Ok(bytes_written) => {
+                kprint!("Sent {} bytes", bytes_written);
+            }
+            Err(_e) => {
+                kprint!("Failed to send Tversion");
+            }
+        }
+        let mut buf = [0u8; 8192];
+
+        let len_prefix = host_read(3, buf.as_mut_ptr(), 4);
+        if len_prefix == 4 {
+            let data_len = u32::from_le_bytes(buf[..4].try_into().unwrap());
+            kprint!("Data length: {}", data_len);
+            let len = host_read(3, buf[4..].as_mut_ptr(), (data_len - 4) as usize);
+            kprint!("Read {} bytes more ", len);
+            kprint!("Read data: {:?}", &buf);
+            match RversionMessage::deserialize(&buf[..data_len as usize]) {
+                Ok((rversion, bytes_consumed)) => {
+                    kprint!("Rversion: {:?}", rversion);
+                    kprint!("Bytes consumed: {}", bytes_consumed);
+                }
+                Err(e) => {
+                    kpanic!("Failed to deserialize Rversion: {:?}", e);
+                }
+            }
+        } else {
+            kpanic!("Failed to read data");
+        }
+    }
     let mut stack = UserStack::new();
+
     stack.add_word(argc as usize);
 
     // XXX we should review this code from a security perspective

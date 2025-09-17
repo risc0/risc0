@@ -25,6 +25,6 @@ mod compressed_emul;
 mod constants;
 mod host_calls;
 mod linux_abi;
-// mod p9;
+mod p9;
 mod smode_emul;
 mod softfloat;
