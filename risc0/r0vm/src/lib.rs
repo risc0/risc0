@@ -210,7 +210,6 @@ pub fn main() {
 
         // Add guest arguments if any were provided after "--"
         if !guest_args.is_empty() {
-            println!("guest_args: {:?}", guest_args);
             builder.args(&guest_args);
         }
 
