@@ -2,7 +2,7 @@ use crate::kernel::{DEBUG_ENABLED, print};
 use no_std_strings::{str_format, str256};
 
 #[cfg(target_arch = "riscv32")]
-use crate::constants::REG_A3;
+use crate::constants::*;
 #[cfg(target_arch = "riscv32")]
 use crate::kernel::{get_ureg, set_ureg};
 
@@ -32,6 +32,51 @@ pub fn host_log(_msg_ptr: *const u8, _msg_len: usize) {
             in("a2") _msg_len,
         )
     };
+}
+#[allow(dead_code)]
+#[allow(unused_variables)]
+pub fn host_write(fd: u32, msg_ptr: *const u8, msg_len: usize) -> u32 {
+    #[cfg(target_arch = "riscv32")]
+    unsafe {
+        const HOST_ECALL_READ: u32 = 1;
+
+        let syscall_name = b"risc0_zkvm_platform::syscall::nr::SYS_WRITE\0";
+        let syscall_name_ptr = syscall_name.as_ptr() as u32;
+        let _rlen: u32;
+        let tmp = get_ureg(REG_A3);
+        set_ureg(REG_A3, fd);
+        let tmp2 = get_ureg(REG_A4);
+        set_ureg(REG_A4, msg_ptr as u32);
+        let tmp3 = get_ureg(REG_A5);
+        set_ureg(REG_A5, msg_len as u32);
+        unsafe {
+            core::arch::asm!("ecall",
+                in("a7") HOST_ECALL_READ,
+                inout("a0") syscall_name_ptr => _rlen,  // fd = syscall name pointer
+                in("a1") core::ptr::null_mut::<u8>(),
+                in("a2") 0u32,
+            )
+        };
+        // Read the result from registers a0, a1 (like read_a0_a1)
+        let mut buf = [0u32, 0u32];
+        let _rlen2: u32;
+        unsafe {
+            core::arch::asm!("ecall",
+                in("a7") HOST_ECALL_READ,
+                inout("a0") 0u32 => _rlen2,  // fd=0 to read cached values
+                in("a1") buf.as_mut_ptr() as *mut u8,
+                in("a2") core::mem::size_of_val(&buf) as u32,
+            )
+        };
+        set_ureg(REG_A3, tmp);
+        set_ureg(REG_A4, tmp2);
+        set_ureg(REG_A5, tmp3);
+        buf[0] // Return written length from a0
+    }
+    #[cfg(not(target_arch = "riscv32"))]
+    {
+        0
+    }
 }
 
 #[allow(dead_code)]

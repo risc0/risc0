@@ -1,6 +1,6 @@
 use crate::{
     constants::*,
-    host_calls::{host_get_cycle, host_log, host_terminate},
+    host_calls::{host_get_cycle, host_terminate, host_write},
     kernel::{
         DEBUG_ENABLED, get_ureg, get_vm_machine_mode, mret, print, set_ureg, set_vm_machine_mode,
     },
@@ -263,7 +263,7 @@ pub fn handle_smode_ecall() -> ! {
                     let msg_ptr = get_ureg(REG_A1) as *const u8;
                     let msg =
                         unsafe { core::slice::from_raw_parts(msg_ptr, get_ureg(REG_A0) as usize) };
-                    host_log(msg.as_ptr(), msg.len());
+                    host_write(2, msg.as_ptr(), msg.len());
                 }
                 SBI_EXT_DBCN_CONSOLE_READ => {
                     set_ureg(REG_A0, 0);
