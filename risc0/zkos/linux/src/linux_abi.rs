@@ -1615,21 +1615,15 @@ fn sys_getdents64(_fd: u32, _dirp: u32, _count: u32) -> Result<u32, Err> {
 }
 
 fn sys_getegid() -> Result<u32, Err> {
-    let msg = b"sys_getegid not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    Ok(0)
 }
 
 fn sys_geteuid() -> Result<u32, Err> {
-    let msg = b"sys_geteuid not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    Ok(0)
 }
 
 fn sys_getgid() -> Result<u32, Err> {
-    let msg = b"sys_getgid not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    Ok(0)
 }
 
 fn sys_getgroups(_size: u32, _list: u32) -> Result<u32, Err> {
@@ -1729,9 +1723,7 @@ fn sys_gettid() -> Result<u32, Err> {
 }
 
 fn sys_getuid() -> Result<u32, Err> {
-    let msg = b"sys_getuid not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    Ok(0)
 }
 
 fn sys_getxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
@@ -3056,6 +3048,15 @@ fn sys_statx(
     _statxbuf: u32,
 ) -> Result<u32, Err> {
     let msg = b"sys_statx not implemented";
+    // let's print the filename we're trying to stat, it's a u32 pointer
+    // we need to search for the null-terminator
+    // XXX this is ugly
+    let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
+    let null_pos = filename.iter().position(|&b| b == 0).unwrap();
+    let filename = &filename[..null_pos];
+    // convert the filename, it's a 0-terminated utf-8 string
+    let filename = str::from_utf8(filename).unwrap();
+    kprint!("sys_statx: filename = {}", filename);
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }

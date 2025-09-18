@@ -29,6 +29,9 @@ _start:
     # Set the kernel stack pointer near the top of kernel memory
     li sp, KSTACK_TOP
 
+    # Initialize the kernel allocator
+    call init_kernel_allocator
+
     # Initialize the ecall dispatch address
     la a0, _ecall_dispatch
     li a1, ECALL_DISPATCH

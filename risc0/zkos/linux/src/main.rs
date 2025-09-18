@@ -15,11 +15,16 @@
 #![cfg_attr(target_arch = "riscv32", no_std)]
 #![cfg_attr(target_arch = "riscv32", no_main)]
 
+// Enable alloc crate for heap allocations
+#[cfg(target_arch = "riscv32")]
+extern crate alloc;
+
 #[cfg(not(target_arch = "riscv32"))]
 fn main() {}
 
 #[macro_use]
 mod kernel;
+mod allocator;
 mod atomic_emul;
 mod compressed_emul;
 mod constants;
@@ -28,3 +33,17 @@ mod linux_abi;
 mod p9;
 mod smode_emul;
 mod softfloat;
+
+// Set up the global allocator
+#[cfg(target_arch = "riscv32")]
+#[global_allocator]
+static GLOBAL_ALLOCATOR: allocator::KernelAllocator = allocator::KernelAllocator;
+
+// Make init_kernel_allocator available to assembly code
+#[cfg(target_arch = "riscv32")]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn init_kernel_allocator() {
+    unsafe {
+        allocator::init_kernel_allocator();
+    }
+}

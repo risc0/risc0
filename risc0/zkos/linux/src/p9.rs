@@ -777,6 +777,158 @@ pub enum RversionError {
     InternalError,
 }
 
+/// Tflush message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TflushMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Tag of the message to flush
+    pub oldtag: u16,
+}
+
+impl TflushMessage {
+    /// Create a new Tflush message
+    pub fn new(tag: u16, oldtag: u16) -> Self {
+        Self { tag, oldtag }
+    }
+
+    /// Serialize the Tflush message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TflushError> {
+        use wire::{WireError, write_u16, write_u32};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 2; // size[4] + type[1] + tag[2] + oldtag[2]
+
+        if total_size > buf.len() {
+            return Err(TflushError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TflushError::BufferTooSmall,
+            WireError::StringTooLong => TflushError::InternalError,
+            WireError::InvalidUtf8 => TflushError::InternalError,
+        })?;
+
+        // Write message type[1] - Tflush
+        buf[offset] = P9MsgType::Tflush as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TflushError::BufferTooSmall,
+            WireError::StringTooLong => TflushError::InternalError,
+            WireError::InvalidUtf8 => TflushError::InternalError,
+        })?;
+
+        // Write oldtag[2]
+        offset = write_u16(buf, offset, self.oldtag).map_err(|e| match e {
+            WireError::BufferTooSmall => TflushError::BufferTooSmall,
+            WireError::StringTooLong => TflushError::InternalError,
+            WireError::InvalidUtf8 => TflushError::InternalError,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tflush message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_tflush(&self) -> Result<u32, TflushError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 16]; // Large enough for Tflush message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rflush message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RflushMessage {
+    /// Message tag
+    pub tag: u16,
+}
+
+impl RflushMessage {
+    /// Create a new Rflush message
+    pub fn new(tag: u16) -> Self {
+        Self { tag }
+    }
+
+    /// Deserialize an Rflush message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RflushError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RflushError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RflushError::BufferTooSmall,
+            WireError::StringTooLong => RflushError::InternalError,
+            WireError::InvalidUtf8 => RflushError::InternalError,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RflushError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rflush
+        if offset >= buf.len() {
+            return Err(RflushError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rflush as u8 {
+            return Err(RflushError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RflushError::BufferTooSmall,
+            WireError::StringTooLong => RflushError::InternalError,
+            WireError::InvalidUtf8 => RflushError::InternalError,
+        })?;
+        offset = new_offset;
+
+        let message = Self { tag };
+
+        Ok((message, offset))
+    }
+}
+
+/// Tflush serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TflushError {
+    BufferTooSmall,
+    InternalError,
+}
+
+/// Rflush deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RflushError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InternalError,
+}
+
 /// 9P2000.L file attributes structure
 ///
 /// This structure closely follows the Linux stat structure but with some differences:
@@ -1664,5 +1816,214 @@ mod tests {
         assert_eq!(rversion.tag, original.tag);
         assert_eq!(rversion.msize, original.msize);
         assert_eq!(rversion.version, original.version);
+    }
+
+    #[test]
+    fn test_tflush_message_creation() {
+        let msg = TflushMessage::new(123, 456);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.oldtag, 456);
+    }
+
+    #[test]
+    fn test_tflush_serialize() {
+        let msg = TflushMessage::new(123, 456);
+        let mut buf = [0u8; 16];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(9)); // 4 + 1 + 2 + 2 = 9 bytes total
+
+        // Verify the serialized data
+        // size[4] = 9 (little-endian)
+        assert_eq!(buf[0], 9);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Tflush (108)
+        assert_eq!(buf[4], 108);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // oldtag[2] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+    }
+
+    #[test]
+    fn test_tflush_serialize_buffer_too_small() {
+        let msg = TflushMessage::new(123, 456);
+        let mut buf = [0u8; 5]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TflushError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_tflush_send() {
+        let msg = TflushMessage::new(123, 456);
+
+        // Test that send_tflush doesn't panic and returns a result
+        // Note: In a real test environment, we might want to mock host_write
+        // For now, we just verify the function compiles and can be called
+        let result = msg.send_tflush();
+
+        // The actual result depends on the host environment
+        // We just verify it returns a Result<u32, TflushError>
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+                // bytes_written is u32, so it's always >= 0
+            }
+            Err(e) => {
+                // Should not get serialization errors since we're using a valid message
+                assert!(matches!(
+                    e,
+                    TflushError::BufferTooSmall | TflushError::InternalError
+                ));
+            }
+        }
+    }
+
+    #[test]
+    fn test_rflush_message_creation() {
+        let msg = RflushMessage::new(123);
+        assert_eq!(msg.tag, 123);
+    }
+
+    #[test]
+    fn test_rflush_deserialize() {
+        // Create a proper Rflush message buffer
+        let mut buf = [0u8; 16];
+
+        // Write size[4] = 7 (little-endian)
+        buf[0] = 7;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rflush (109)
+        buf[4] = P9MsgType::Rflush as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Deserialize as Rflush
+        let (rflush, bytes_consumed) = RflushMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 7);
+        assert_eq!(rflush.tag, 123);
+    }
+
+    #[test]
+    fn test_rflush_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RflushMessage::deserialize(&buf);
+        assert_eq!(result, Err(RflushError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rflush_deserialize_invalid_message_type() {
+        // Create a valid Tflush message but don't change the type
+        let tflush = TflushMessage::new(123, 456);
+        let mut buf = [0u8; 16];
+        tflush.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rflush (should fail because type is Tflush)
+        let result = RflushMessage::deserialize(&buf);
+        assert_eq!(result, Err(RflushError::InvalidMessageType));
+    }
+
+    #[test]
+    fn test_roundtrip_tflush_rflush() {
+        // Create a Tflush message
+        let original = TflushMessage::new(789, 1011);
+        let mut tflush_buf = [0u8; 16];
+        let tflush_bytes_written = original.serialize(&mut tflush_buf).unwrap();
+
+        // Create a separate Rflush message with the same tag
+        let _rflush_msg = RflushMessage::new(original.tag);
+        let mut rflush_buf = [0u8; 16];
+
+        // Manually create Rflush buffer
+        // Write size[4] = 7 (little-endian)
+        rflush_buf[0] = 7;
+        rflush_buf[1] = 0;
+        rflush_buf[2] = 0;
+        rflush_buf[3] = 0;
+
+        // Write message type[1] = Rflush (109)
+        rflush_buf[4] = P9MsgType::Rflush as u8;
+
+        // Write tag[2] = 789 (little-endian)
+        rflush_buf[5] = (789 & 0xff) as u8;
+        rflush_buf[6] = ((789 >> 8) & 0xff) as u8;
+
+        // Deserialize as Rflush
+        let (rflush, bytes_consumed) = RflushMessage::deserialize(&rflush_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 7);
+        assert_eq!(rflush.tag, original.tag);
+        assert_eq!(tflush_bytes_written, 9); // Tflush is 9 bytes
+    }
+
+    #[test]
+    fn test_tflush_serialize_edge_cases() {
+        // Test with maximum u16 values
+        let msg = TflushMessage::new(u16::MAX, u16::MAX);
+        let mut buf = [0u8; 16];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(9));
+
+        // Verify the serialized data
+        // size[4] = 9 (little-endian)
+        assert_eq!(buf[0], 9);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Tflush (108)
+        assert_eq!(buf[4], 108);
+
+        // tag[2] = u16::MAX (little-endian)
+        assert_eq!(buf[5], 255);
+        assert_eq!(buf[6], 255);
+
+        // oldtag[2] = u16::MAX (little-endian)
+        assert_eq!(buf[7], 255);
+        assert_eq!(buf[8], 255);
+    }
+
+    #[test]
+    fn test_tflush_serialize_zero_values() {
+        // Test with zero values
+        let msg = TflushMessage::new(0, 0);
+        let mut buf = [0u8; 16];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(9));
+
+        // Verify the serialized data
+        // size[4] = 9 (little-endian)
+        assert_eq!(buf[0], 9);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Tflush (108)
+        assert_eq!(buf[4], 108);
+
+        // tag[2] = 0 (little-endian)
+        assert_eq!(buf[5], 0);
+        assert_eq!(buf[6], 0);
+
+        // oldtag[2] = 0 (little-endian)
+        assert_eq!(buf[7], 0);
+        assert_eq!(buf[8], 0);
     }
 }

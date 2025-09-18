@@ -75,3 +75,9 @@ pub const MEPC_FIXUP_OFFSET: usize = 14; // MEPC fixup offset
 pub const VM_MACHINE_MODE_LINUX_ABI: u32 = 0;
 pub const VM_MACHINE_MODE_EMULATED_S_MODE: u32 = 1;
 pub const VM_MACHINE_MODE_EMULATED_U_MODE: u32 = 2;
+
+// Kernel heap constants
+// Kernel stack is at 0xfff00000, heap is 16MB below it
+pub const KERNEL_HEAP_START_ADDR: usize = 0xfef00000; // 16MB below kernel stack
+pub const KERNEL_HEAP_SIZE: usize = 1024 * 1024; // 1MB heap
+pub const KERNEL_HEAP_END_ADDR: usize = KERNEL_HEAP_START_ADDR + KERNEL_HEAP_SIZE;
