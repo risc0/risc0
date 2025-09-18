@@ -185,7 +185,7 @@ async fn relay_job_request(
 }
 
 #[tokio::main]
-pub(crate) async fn rpc_main(_num_gpus: Option<usize>) -> Result<(), Box<dyn StdError>> {
+pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdError>> {
     let small_tasks = vec![
         TaskKind::Lift,
         TaskKind::Join,
@@ -210,13 +210,13 @@ pub(crate) async fn rpc_main(_num_gpus: Option<usize>) -> Result<(), Box<dyn Std
             prover: Some(vec![
                 ProverConfig {
                     manager: None,
-                    count: None,
+                    count: num_gpus,
                     subscribe: large_tasks,
                     simulate: None,
                 },
                 ProverConfig {
                     manager: None,
-                    count: None,
+                    count: num_gpus,
                     subscribe: small_tasks,
                     simulate: None,
                 },
