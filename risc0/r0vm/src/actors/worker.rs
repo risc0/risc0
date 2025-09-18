@@ -17,7 +17,6 @@ use std::{rc::Rc, sync::Arc};
 
 use anyhow::{Context, Result};
 use kameo::prelude::*;
-use nvml_wrapper::Nvml;
 use risc0_zkvm::{
     CoprocessorCallback, DevModeDelay, DevModeProver, ExecutorEnv, ExecutorImpl, NullSegmentRef,
     PreflightResults, ProveKeccakRequest, ProverOpts, ProverServer, VerifierContext,
@@ -29,7 +28,7 @@ use tokio::task::JoinHandle;
 use super::{
     allocator::{
         AllocateHardware, AllocatorRouterActor, CpuCores, CpuSpec, DeallocateHardware, GpuSpec,
-        GpuTokens, HardwareReservation, HardwareResource, RegisterWorker,
+        HardwareReservation, HardwareResource, RegisterWorker,
     },
     factory::FactoryRouterActor,
     protocol::{
@@ -81,7 +80,11 @@ const CPU_QUEUE_DEPTH: usize = 2;
 /// Number of tasks we queue up to do on GPU
 const GPU_QUEUE_DEPTH: usize = 2;
 
+#[cfg(feature = "cuda")]
 fn get_gpus_from_nvml() -> Result<Vec<GpuSpec>> {
+    use super::allocator::GpuTokens;
+    use nvml_wrapper::Nvml;
+
     let mut gpus = vec![];
     let nvml = Nvml::init()?;
     for idx in 0..nvml.device_count()? {
@@ -93,6 +96,11 @@ fn get_gpus_from_nvml() -> Result<Vec<GpuSpec>> {
         });
     }
     Ok(gpus)
+}
+
+#[cfg(not(feature = "cuda"))]
+fn get_gpus_from_nvml() -> Result<Vec<GpuSpec>> {
+    Ok(vec![])
 }
 
 pub(crate) struct Worker {
