@@ -11,6 +11,7 @@ use std::{collections::HashMap, net::SocketAddr};
 
 use kameo::{error::Infallible, prelude::*};
 use multi_index_map::MultiIndexMap;
+use rand::{SeedableRng, rngs::SmallRng, seq::IndexedRandom};
 use tokio::{
     net::{TcpStream, tcp},
     task::JoinHandle,
@@ -53,6 +54,7 @@ pub(crate) struct FactoryActor {
     pending_tasks: MultiIndexTaskRowMap,
     active_tasks: HashMap<GlobalId, TaskMsg>,
     reply_senders: HashMap<WorkerId, ReplySender<TaskMsg>>,
+    rng: SmallRng,
 }
 
 impl FactoryActor {
@@ -63,6 +65,7 @@ impl FactoryActor {
             pending_tasks: Default::default(),
             active_tasks: HashMap::default(),
             reply_senders: HashMap::default(),
+            rng: SmallRng::from_os_rng(),
         }
     }
 }
@@ -103,23 +106,28 @@ impl Message<SubmitTaskMsg> for FactoryActor {
         msg: SubmitTaskMsg,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        self.jobs.insert(msg.header.global_id.job_id, msg.job);
+        let global_id = msg.header.global_id;
+        let job_id = msg.header.global_id.job_id;
+        let task_kind = msg.header.task_kind;
+
+        self.jobs.insert(job_id, msg.job);
         let task = TaskMsg {
             header: msg.header.clone(),
             task: msg.task.clone(),
         };
 
-        let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
-        if let Some(worker) = workers.first() {
+        let workers = self.workers.get_by_task_kind(&task_kind);
+
+        if let Some(worker) = workers.choose(&mut self.rng) {
             let worker_id = worker.worker_id;
             self.workers.remove_by_worker_id(&worker_id);
             let reply_sender = self.reply_senders.remove(&worker_id).unwrap();
             reply_sender.send(task);
         } else {
             self.pending_tasks.insert(TaskRow {
-                job_id: msg.header.global_id.job_id,
-                global_id: msg.header.global_id,
-                task_kind: msg.header.task_kind,
+                job_id,
+                global_id,
+                task_kind,
                 task: msg.task,
             });
         }
