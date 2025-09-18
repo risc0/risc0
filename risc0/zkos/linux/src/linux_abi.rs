@@ -5,7 +5,7 @@ use crate::{
         USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE, USER_STACK_PTR,
         USER_START_PTR,
     },
-    host_calls::{host_argv, host_log, host_read, host_terminate},
+    host_calls::{host_argv, host_log, host_read, host_terminate, host_write},
     kernel::{get_ureg, mret, print},
     p9::{RversionMessage, TversionMessage},
 };
@@ -1016,7 +1016,7 @@ fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
     // print(&msg);
 
     if fd == 1 || fd == 2 {
-        host_log(buf, count);
+        host_write(fd as u32, buf, count);
     }
 
     Ok(count)
@@ -1117,14 +1117,20 @@ fn sys_rt_sigprocmask(_how: u32, nset: u32, oset: u32, _sigsetsize: u32) -> Resu
 
 // Stub implementations for all additional syscalls
 fn sys_accept(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
+    let msg = b"sys_accept not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_accept4(_sockfd: u32, _addr: u32, _addrlen: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_accept4 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_acct(_filename: u32) -> Result<u32, Err> {
+    let msg = b"sys_acct not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1135,46 +1141,68 @@ fn sys_add_key(
     _plen: u32,
     _keyring: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_add_key not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_bind(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
+    let msg = b"sys_bind not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_bpf(_cmd: u32, _attr: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_bpf not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_cachestat(_fd: u32, _cstat: u32, _cstat_size: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_cachestat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_capget(_hdrp: u32, _datap: u32) -> Result<u32, Err> {
+    let msg = b"sys_capget not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_capset(_hdrp: u32, _datap: u32) -> Result<u32, Err> {
+    let msg = b"sys_capset not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_chdir(_filename: u32) -> Result<u32, Err> {
+    let msg = b"sys_chdir not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_chroot(_filename: u32) -> Result<u32, Err> {
+    let msg = b"sys_chroot not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_clock_adjtime64(_which_clock: u32, _tx: u32) -> Result<u32, Err> {
+    let msg = b"sys_clock_adjtime64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_clock_getres_time64(_which_clock: u32, _tp: u32) -> Result<u32, Err> {
+    let msg = b"sys_clock_getres_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_clock_gettime64(_which_clock: u32, _tp: u32) -> Result<u32, Err> {
+    let msg = b"sys_clock_gettime64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1184,10 +1212,14 @@ fn sys_clock_nanosleep_time64(
     _rqtp: u32,
     _rmtp: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_clock_nanosleep_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_clock_settime64(_which_clock: u32, _tp: u32) -> Result<u32, Err> {
+    let msg = b"sys_clock_settime64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1198,22 +1230,32 @@ fn sys_clone(
     _tls: u32,
     _ctid: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_clone not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_clone3(_cl_args: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_clone3 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_close(_fd: u32) -> Result<u32, Err> {
+    let msg = b"sys_close not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_close_range(_first: u32, _last: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_close_range not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_connect(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
+    let msg = b"sys_connect not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1225,30 +1267,44 @@ fn sys_copy_file_range(
     _len: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_copy_file_range not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_delete_module(_name: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_delete_module not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_dup(_fd: u32) -> Result<u32, Err> {
+    let msg = b"sys_dup not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_dup3(_oldfd: u32, _newfd: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_dup3 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_epoll_create1(_flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_epoll_create1 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_epoll_ctl(_epfd: u32, _op: u32, _fd: u32, _event: u32) -> Result<u32, Err> {
+    let msg = b"sys_epoll_ctl not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_epoll_pwait(_epfd: u32, _events: u32, _maxevents: u32, _timeout: u32) -> Result<u32, Err> {
+    let msg = b"sys_epoll_pwait not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1259,14 +1315,20 @@ fn sys_epoll_pwait2(
     _timeout: u32,
     _sigmask: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_epoll_pwait2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_eventfd2(_initval: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_eventfd2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_execve(_filename: u32, _argv: u32, _envp: u32) -> Result<u32, Err> {
+    let msg = b"sys_execve not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1277,26 +1339,38 @@ fn sys_execveat(
     _envp: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_execveat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_faccessat(_dfd: u32, _filename: u32, _mode: u32) -> Result<u32, Err> {
+    let msg = b"sys_faccessat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32) -> Result<u32, Err> {
+    let msg = b"sys_faccessat2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fadvise64_64(_fd: u32, _offset: u32, _len: u32, _advice: u32) -> Result<u32, Err> {
+    let msg = b"sys_fadvise64_64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fallocate(_fd: u32, _mode: u32, _offset: u32, _len: u32) -> Result<u32, Err> {
+    let msg = b"sys_fallocate not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fanotify_init(_flags: u32, _event_f_flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_fanotify_init not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1307,26 +1381,38 @@ fn sys_fanotify_mark(
     _dirfd: u32,
     _pathname: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_fanotify_mark not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fchdir(_fd: u32) -> Result<u32, Err> {
+    let msg = b"sys_fchdir not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fchmod(_fd: u32, _mode: u32) -> Result<u32, Err> {
+    let msg = b"sys_fchmod not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fchmodat(_dfd: u32, _filename: u32, _mode: u32, _flag: u32) -> Result<u32, Err> {
+    let msg = b"sys_fchmodat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fchmodat2(_dfd: u32, _filename: u32, _mode: u32, _flag: u32) -> Result<u32, Err> {
+    let msg = b"sys_fchmodat2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fchown(_fd: u32, _user: u32, _group: u32) -> Result<u32, Err> {
+    let msg = b"sys_fchown not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1337,74 +1423,110 @@ fn sys_fchownat(
     _group: u32,
     _flag: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_fchownat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
+    let msg = b"sys_fcntl64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fdatasync(_fd: u32) -> Result<u32, Err> {
+    let msg = b"sys_fdatasync not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fgetxattr(_fd: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_fgetxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_file_getattr(_dfd: u32, _filename: u32, _mask: u32) -> Result<u32, Err> {
+    let msg = b"sys_file_getattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_file_setattr(_dfd: u32, _filename: u32, _mask: u32) -> Result<u32, Err> {
+    let msg = b"sys_file_setattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_finit_module(_fd: u32, _param_values: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_finit_module not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_flistxattr(_fd: u32, _list: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_flistxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_flock(_fd: u32, _cmd: u32) -> Result<u32, Err> {
+    let msg = b"sys_flock not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fremovexattr(_fd: u32, _name: u32) -> Result<u32, Err> {
+    let msg = b"sys_fremovexattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fsconfig(_fs_fd: u32, _cmd: u32, _key: u32, _value: u32, _aux: u32) -> Result<u32, Err> {
+    let msg = b"sys_fsconfig not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fsetxattr(_fd: u32, _name: u32, _value: u32, _size: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_fsetxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fsmount(_fs_fd: u32, _flags: u32, _attr_flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_fsmount not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fsopen(_fs_name: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_fsopen not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fspick(_dfd: u32, _path: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_fspick not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fstatfs64(_fd: u32, _buf: u32) -> Result<u32, Err> {
+    let msg = b"sys_fstatfs64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_fsync(_fd: u32) -> Result<u32, Err> {
+    let msg = b"sys_fsync not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_ftruncate64(_fd: u32, _length: u32) -> Result<u32, Err> {
+    let msg = b"sys_ftruncate64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1415,6 +1537,8 @@ fn sys_futex_requeue(
     _val1: u32,
     _val2: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_futex_requeue not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1425,10 +1549,14 @@ fn sys_futex_time64(
     _timeout: u32,
     _uaddr2: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_futex_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_futex_wait(_uaddr: u32, _val: u32, _flags: u32, _timeout: u32) -> Result<u32, Err> {
+    let msg = b"sys_futex_wait not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1439,10 +1567,14 @@ fn sys_futex_waitv(
     _timeout: u32,
     _clockid: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_futex_waitv not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_futex_wake(_uaddr: u32, _nr_wake: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_futex_wake not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1453,86 +1585,128 @@ fn sys_get_mempolicy(
     _addr: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_get_mempolicy not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_get_robust_list(_pid: u32, _head: u32, _len: u32) -> Result<u32, Err> {
+    let msg = b"sys_get_robust_list not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getcpu(_cpu: u32, _node: u32, _cache: u32) -> Result<u32, Err> {
+    let msg = b"sys_getcpu not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getcwd(_buf: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_getcwd not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getdents64(_fd: u32, _dirp: u32, _count: u32) -> Result<u32, Err> {
+    let msg = b"sys_getdents64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getegid() -> Result<u32, Err> {
+    let msg = b"sys_getegid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_geteuid() -> Result<u32, Err> {
+    let msg = b"sys_geteuid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getgid() -> Result<u32, Err> {
+    let msg = b"sys_getgid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getgroups(_size: u32, _list: u32) -> Result<u32, Err> {
+    let msg = b"sys_getgroups not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getitimer(_which: u32, _value: u32) -> Result<u32, Err> {
+    let msg = b"sys_getitimer not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getpeername(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
+    let msg = b"sys_getpeername not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getpgid(_pid: u32) -> Result<u32, Err> {
+    let msg = b"sys_getpgid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getpid() -> Result<u32, Err> {
+    let msg = b"sys_getpid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getppid() -> Result<u32, Err> {
+    let msg = b"sys_getppid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getpriority(_which: u32, _who: u32) -> Result<u32, Err> {
+    let msg = b"sys_getpriority not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getrandom(_buf: u32, _buflen: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_getrandom not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getresgid(_rgid: u32, _egid: u32, _sgid: u32) -> Result<u32, Err> {
+    let msg = b"sys_getresgid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getresuid(_ruid: u32, _euid: u32, _suid: u32) -> Result<u32, Err> {
+    let msg = b"sys_getresuid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getrusage(_who: u32, _usage: u32) -> Result<u32, Err> {
+    let msg = b"sys_getrusage not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getsid(_pid: u32) -> Result<u32, Err> {
+    let msg = b"sys_getsid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getsockname(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
+    let msg = b"sys_getsockname not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1543,46 +1717,68 @@ fn sys_getsockopt(
     _optval: u32,
     _optlen: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_getsockopt not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_gettid() -> Result<u32, Err> {
+    let msg = b"sys_gettid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getuid() -> Result<u32, Err> {
+    let msg = b"sys_getuid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_getxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_getxattrat(_dfd: u32, _filename: u32, _name: u32, _value: u32) -> Result<u32, Err> {
+    let msg = b"sys_getxattrat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_init_module(_module_image: u32, _len: u32, _param_values: u32) -> Result<u32, Err> {
+    let msg = b"sys_init_module not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_inotify_add_watch(_fd: u32, _pathname: u32, _mask: u32) -> Result<u32, Err> {
+    let msg = b"sys_inotify_add_watch not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_inotify_init1(_flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_inotify_init1 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_inotify_rm_watch(_fd: u32, _wd: u32) -> Result<u32, Err> {
+    let msg = b"sys_inotify_rm_watch not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_io_cancel(_ctx_id: u32, _iocb: u32, _result: u32) -> Result<u32, Err> {
+    let msg = b"sys_io_cancel not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_io_destroy(_ctx_id: u32) -> Result<u32, Err> {
+    let msg = b"sys_io_destroy not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1593,14 +1789,20 @@ fn sys_io_pgetevents_time64(
     _events: u32,
     _timeout: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_io_pgetevents_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_io_setup(_nr_events: u32, _ctx_idp: u32) -> Result<u32, Err> {
+    let msg = b"sys_io_setup not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_io_submit(_ctx_id: u32, _nr: u32, _iocbpp: u32) -> Result<u32, Err> {
+    let msg = b"sys_io_submit not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1612,26 +1814,38 @@ fn sys_io_uring_enter(
     _sig: u32,
     _sz: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_io_uring_enter not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_io_uring_register(_fd: u32, _opcode: u32, _arg: u32, _nr_args: u32) -> Result<u32, Err> {
+    let msg = b"sys_io_uring_register not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_io_uring_setup(_entries: u32, _params: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_io_uring_setup not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_ioprio_get(_which: u32, _who: u32) -> Result<u32, Err> {
+    let msg = b"sys_ioprio_get not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_ioprio_set(_which: u32, _who: u32, _ioprio: u32) -> Result<u32, Err> {
+    let msg = b"sys_ioprio_set not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_kcmp(_pid1: u32, _pid2: u32, _type: u32, _idx1: u32, _idx2: u32) -> Result<u32, Err> {
+    let msg = b"sys_kcmp not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1642,18 +1856,26 @@ fn sys_kexec_file_load(
     _cmdline: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_kexec_file_load not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_kexec_load(_entry: u32, _nr_segments: u32, _segments: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_kexec_load not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_keyctl(_operation: u32, _arg2: u32, _arg3: u32, _arg4: u32, _arg5: u32) -> Result<u32, Err> {
+    let msg = b"sys_keyctl not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_kill(_pid: u32, _sig: u32) -> Result<u32, Err> {
+    let msg = b"sys_kill not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1663,18 +1885,26 @@ fn sys_landlock_add_rule(
     _rule_attr: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_landlock_add_rule not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_landlock_create_ruleset(_attr: u32, _size: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_landlock_create_ruleset not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_landlock_restrict_self(_ruleset_fd: u32) -> Result<u32, Err> {
+    let msg = b"sys_landlock_restrict_self not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_lgetxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_lgetxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1685,38 +1915,56 @@ fn sys_linkat(
     _newpath: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_linkat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_listen(_sockfd: u32, _backlog: u32) -> Result<u32, Err> {
+    let msg = b"sys_listen not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_listmount(_dfd: u32, _filename: u32, _buffer: u32) -> Result<u32, Err> {
+    let msg = b"sys_listmount not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_listxattr(_pathname: u32, _list: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_listxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_listxattrat(_dfd: u32, _filename: u32, _list: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_listxattrat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_llistxattr(_pathname: u32, _list: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_llistxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_llseek(_fd: u32, _offset_high: u32, _offset_low: u32) -> Result<u32, Err> {
+    let msg = b"sys_llseek not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_lookup_dcookie(_cookie64: u32, _buf: u32, _len: u32) -> Result<u32, Err> {
+    let msg = b"sys_lookup_dcookie not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_lremovexattr(_pathname: u32, _name: u32) -> Result<u32, Err> {
+    let msg = b"sys_lremovexattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1727,26 +1975,38 @@ fn sys_lsetxattr(
     _size: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_lsetxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_lsm_get_self_attr(_attr: u32, _ctx: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_lsm_get_self_attr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_lsm_list_modules(_ids: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_lsm_list_modules not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_lsm_set_self_attr(_attr: u32, _ctx: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_lsm_set_self_attr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_madvise(_start: u32, _len: u32, _advice: u32) -> Result<u32, Err> {
+    let msg = b"sys_madvise not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_map_shadow_stack(_addr: u32, _size: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_map_shadow_stack not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1758,18 +2018,26 @@ fn sys_mbind(
     _maxnode: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_mbind not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_membarrier(_cmd: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_membarrier not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_memfd_create(_name: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_memfd_create not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_memfd_secret(_flags: u32, _reserved: u32) -> Result<u32, Err> {
+    let msg = b"sys_memfd_secret not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1781,30 +2049,44 @@ fn sys_migrate_pages(
     _status: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_migrate_pages not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mincore(_start: u32, _len: u32, _vec: u32) -> Result<u32, Err> {
+    let msg = b"sys_mincore not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
+    let msg = b"sys_mkdirat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u32, Err> {
+    let msg = b"sys_mknodat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mlock(_addr: u32, _len: u32) -> Result<u32, Err> {
+    let msg = b"sys_mlock not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mlock2(_addr: u32, _len: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_mlock2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mlockall(_flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_mlockall not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1815,6 +2097,8 @@ fn sys_mount(
     _mountflags: u32,
     _data: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_mount not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1825,6 +2109,8 @@ fn sys_mount_setattr(
     _uattr: u32,
     _usize: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_mount_setattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1835,6 +2121,8 @@ fn sys_move_mount(
     _to_pathname: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_move_mount not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1846,22 +2134,32 @@ fn sys_move_pages(
     _status: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_move_pages not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mprotect(_addr: u32, _len: u32, _prot: u32) -> Result<u32, Err> {
+    let msg = b"sys_mprotect not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mq_getsetattr(_mqdes: u32, _mqstat: u32, _omqstat: u32) -> Result<u32, Err> {
+    let msg = b"sys_mq_getsetattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mq_notify(_mqdes: u32, _notification: u32) -> Result<u32, Err> {
+    let msg = b"sys_mq_notify not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mq_open(_name: u32, _oflag: u32, _mode: u32, _attr: u32) -> Result<u32, Err> {
+    let msg = b"sys_mq_open not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1872,6 +2170,8 @@ fn sys_mq_timedreceive_time64(
     _msg_prio: u32,
     _abs_timeout: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_mq_timedreceive_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1882,10 +2182,14 @@ fn sys_mq_timedsend_time64(
     _msg_prio: u32,
     _abs_timeout: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_mq_timedsend_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mq_unlink(_name: u32) -> Result<u32, Err> {
+    let msg = b"sys_mq_unlink not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1896,18 +2200,26 @@ fn sys_mremap(
     _flags: u32,
     _new_addr: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_mremap not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_mseal(_addr: u32, _len: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_mseal not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_msgctl(_msqid: u32, _cmd: u32, _buf: u32, _version: u32) -> Result<u32, Err> {
+    let msg = b"sys_msgctl not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_msgget(_key: u32, _msgflg: u32, _version: u32) -> Result<u32, Err> {
+    let msg = b"sys_msgget not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1918,22 +2230,32 @@ fn sys_msgrcv(
     _msgtyp: u32,
     _msgflg: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_msgrcv not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_msgsnd(_msqid: u32, _msgp: u32, _msgsz: u32, _msgflg: u32) -> Result<u32, Err> {
+    let msg = b"sys_msgsnd not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_msync(_addr: u32, _len: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_msync not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_munlock(_addr: u32, _len: u32) -> Result<u32, Err> {
+    let msg = b"sys_munlock not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_munlockall() -> Result<u32, Err> {
+    let msg = b"sys_munlockall not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1944,26 +2266,38 @@ fn sys_name_to_handle_at(
     _mnt_id: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_name_to_handle_at not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_open_by_handle_at(_mount_fd: u32, _handle: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_open_by_handle_at not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_open_tree(_dfd: u32, _filename: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_open_tree not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_open_tree_attr(_dfd: u32, _filename: u32, _flags: u32, _attr: u32) -> Result<u32, Err> {
+    let msg = b"sys_open_tree_attr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32, Err> {
+    let msg = b"sys_openat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_openat2(_dfd: u32, _filename: u32, _how: u32) -> Result<u32, Err> {
+    let msg = b"sys_openat2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1974,42 +2308,62 @@ fn sys_perf_event_open(
     _group_fd: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_perf_event_open not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_personality(_personality: u32) -> Result<u32, Err> {
+    let msg = b"sys_personality not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_pidfd_getfd(_pidfd: u32, _targetfd: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_pidfd_getfd not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_pidfd_open(_pid: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_pidfd_open not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_pidfd_send_signal(_pidfd: u32, _sig: u32, _info: u32) -> Result<u32, Err> {
+    let msg = b"sys_pidfd_send_signal not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_pipe2(_pipefd: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_pipe2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_pivot_root(_new_root: u32, _put_old: u32) -> Result<u32, Err> {
+    let msg = b"sys_pivot_root not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_pkey_alloc(_flags: u32, _access_rights: u32) -> Result<u32, Err> {
+    let msg = b"sys_pkey_alloc not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_pkey_free(_pkey: u32) -> Result<u32, Err> {
+    let msg = b"sys_pkey_free not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_pkey_mprotect(_start: u32, _len: u32, _prot: u32, _pkey: u32) -> Result<u32, Err> {
+    let msg = b"sys_pkey_mprotect not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2020,26 +2374,38 @@ fn sys_ppoll_time64(
     _sigmask: u32,
     _sigsetsize: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_ppoll_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_prctl(_option: u32, _arg2: u32, _arg3: u32, _arg4: u32, _arg5: u32) -> Result<u32, Err> {
+    let msg = b"sys_prctl not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_pread64(_fd: u32, _buf: u32, _count: u32, _pos: u32) -> Result<u32, Err> {
+    let msg = b"sys_pread64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_preadv(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32, Err> {
+    let msg = b"sys_preadv not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_preadv2(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32, _pos_high: u32) -> Result<u32, Err> {
+    let msg = b"sys_preadv2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_prlimit64(_pid: u32, _resource: u32, _new_limit: u32, _old_limit: u32) -> Result<u32, Err> {
+    let msg = b"sys_prlimit64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2050,10 +2416,14 @@ fn sys_process_madvise(
     _advice: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_process_madvise not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_process_mrelease(_pidfd: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_process_mrelease not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2065,6 +2435,8 @@ fn sys_process_vm_readv(
     _riovcnt: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_process_vm_readv not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2076,6 +2448,8 @@ fn sys_process_vm_writev(
     _riovcnt: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_process_vm_writev not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2087,18 +2461,26 @@ fn sys_pselect6_time64(
     _tsp: u32,
     _sigmask: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_pselect6_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_ptrace(_request: u32, _pid: u32, _addr: u32, _data: u32) -> Result<u32, Err> {
+    let msg = b"sys_ptrace not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_pwrite64(_fd: u32, _buf: u32, _count: u32, _pos: u32) -> Result<u32, Err> {
+    let msg = b"sys_pwrite64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_pwritev(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32, Err> {
+    let msg = b"sys_pwritev not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2109,30 +2491,44 @@ fn sys_pwritev2(
     _pos_low: u32,
     _pos_high: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_pwritev2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_quotactl(_cmd: u32, _special: u32, _id: u32, _addr: u32) -> Result<u32, Err> {
+    let msg = b"sys_quotactl not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_quotactl_fd(_fd: u32, _cmd: u32, _id: u32, _addr: u32) -> Result<u32, Err> {
+    let msg = b"sys_quotactl_fd not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_readahead(_fd: u32, _offset: u32, _count: u32) -> Result<u32, Err> {
+    let msg = b"sys_readahead not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_readlinkat(_dfd: u32, _pathname: u32, _buf: u32) -> Result<u32, Err> {
+    let msg = b"sys_readlinkat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
+    let msg = b"sys_readv not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_reboot(_magic1: u32, _magic2: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
+    let msg = b"sys_reboot not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2144,6 +2540,8 @@ fn sys_recvfrom(
     _src_addr: u32,
     _addrlen: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_recvfrom not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2154,10 +2552,14 @@ fn sys_recvmmsg_time64(
     _flags: u32,
     _timeout: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_recvmmsg_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_recvmsg(_sockfd: u32, _msg: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_recvmsg not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2168,14 +2570,20 @@ fn sys_remap_file_pages(
     _pgoff: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_remap_file_pages not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_removexattr(_pathname: u32, _name: u32) -> Result<u32, Err> {
+    let msg = b"sys_removexattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_removexattrat(_dfd: u32, _filename: u32, _name: u32) -> Result<u32, Err> {
+    let msg = b"sys_removexattrat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2186,6 +2594,8 @@ fn sys_renameat2(
     _newpath: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_renameat2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2195,14 +2605,20 @@ fn sys_request_key(
     _callout_info: u32,
     _destringid: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_request_key not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_restart_syscall() -> Result<u32, Err> {
+    let msg = b"sys_restart_syscall not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_riscv_flush_icache(_start: u32, _end: u32) -> Result<u32, Err> {
+    let msg = b"sys_riscv_flush_icache not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2212,26 +2628,38 @@ fn sys_riscv_hwprobe(
     _cpu_set: u32,
     _cpu_set_size: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_riscv_hwprobe not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_rseq(_rseq: u32, _rseq_len: u32, _flags: u32, _sig: u32) -> Result<u32, Err> {
+    let msg = b"sys_rseq not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_rt_sigpending(_set: u32, _sigsetsize: u32) -> Result<u32, Err> {
+    let msg = b"sys_rt_sigpending not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_rt_sigqueueinfo(_pid: u32, _sig: u32, _uinfo: u32) -> Result<u32, Err> {
+    let msg = b"sys_rt_sigqueueinfo not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_rt_sigreturn() -> Result<u32, Err> {
+    let msg = b"sys_rt_sigreturn not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_rt_sigsuspend(_unewset: u32) -> Result<u32, Err> {
+    let msg = b"sys_rt_sigsuspend not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2241,90 +2669,134 @@ fn sys_rt_sigtimedwait_time64(
     _uts: u32,
     _sigsetsize: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_rt_sigtimedwait_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_rt_tgsigqueueinfo(_tgid: u32, _tid: u32, _sig: u32, _uinfo: u32) -> Result<u32, Err> {
+    let msg = b"sys_rt_tgsigqueueinfo not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_get_priority_max(_policy: u32) -> Result<u32, Err> {
+    let msg = b"sys_sched_get_priority_max not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_get_priority_min(_policy: u32) -> Result<u32, Err> {
+    let msg = b"sys_sched_get_priority_min not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_getaffinity(_pid: u32, _len: u32, _user_mask_ptr: u32) -> Result<u32, Err> {
+    let msg = b"sys_sched_getaffinity not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_getattr(_pid: u32, _attr: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_sched_getattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_getparam(_pid: u32, _param: u32) -> Result<u32, Err> {
+    let msg = b"sys_sched_getparam not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_getscheduler(_pid: u32) -> Result<u32, Err> {
+    let msg = b"sys_sched_getscheduler not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_rr_get_interval_time64(_pid: u32, _interval: u32) -> Result<u32, Err> {
+    let msg = b"sys_sched_rr_get_interval_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_setaffinity(_pid: u32, _len: u32, _user_mask_ptr: u32) -> Result<u32, Err> {
+    let msg = b"sys_sched_setaffinity not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_setattr(_pid: u32, _attr: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_sched_setattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_setparam(_pid: u32, _param: u32) -> Result<u32, Err> {
+    let msg = b"sys_sched_setparam not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_setscheduler(_pid: u32, _policy: u32, _param: u32) -> Result<u32, Err> {
+    let msg = b"sys_sched_setscheduler not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sched_yield() -> Result<u32, Err> {
+    let msg = b"sys_sched_yield not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_seccomp(_operation: u32, _flags: u32, _args: u32) -> Result<u32, Err> {
+    let msg = b"sys_seccomp not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_semctl(_semid: u32, _semnum: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
+    let msg = b"sys_semctl not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_semget(_key: u32, _nsems: u32, _semflg: u32) -> Result<u32, Err> {
+    let msg = b"sys_semget not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_semop(_semid: u32, _sops: u32, _nsops: u32) -> Result<u32, Err> {
+    let msg = b"sys_semop not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_semtimedop_time64(_semid: u32, _sops: u32, _nsops: u32, _timeout: u32) -> Result<u32, Err> {
+    let msg = b"sys_semtimedop_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sendfile64(_out_fd: u32, _in_fd: u32, _offset: u32, _count: u32) -> Result<u32, Err> {
+    let msg = b"sys_sendfile64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sendmmsg(_sockfd: u32, _msgvec: u32, _vlen: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_sendmmsg not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sendmsg(_sockfd: u32, _msg: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_sendmsg not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2336,6 +2808,8 @@ fn sys_sendto(
     _dest_addr: u32,
     _addrlen: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_sendto not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2347,6 +2821,8 @@ fn sys_set_mempolicy(
     _flags: u32,
     _home_node: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_set_mempolicy not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2356,70 +2832,104 @@ fn sys_set_mempolicy_home_node(
     _home_node: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_set_mempolicy_home_node not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_set_robust_list(_head: u32, _len: u32) -> Result<u32, Err> {
+    let msg = b"sys_set_robust_list not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setdomainname(_name: u32) -> Result<u32, Err> {
+    let msg = b"sys_setdomainname not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setfsgid(_fsgid: u32) -> Result<u32, Err> {
+    let msg = b"sys_setfsgid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setfsuid(_fsuid: u32) -> Result<u32, Err> {
+    let msg = b"sys_setfsuid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setgid(_gid: u32) -> Result<u32, Err> {
+    let msg = b"sys_setgid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setgroups(_size: u32, _list: u32) -> Result<u32, Err> {
+    let msg = b"sys_setgroups not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sethostname(_name: u32) -> Result<u32, Err> {
+    let msg = b"sys_sethostname not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setitimer(_which: u32, _value: u32) -> Result<u32, Err> {
+    let msg = b"sys_setitimer not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setns(_fd: u32, _nstype: u32) -> Result<u32, Err> {
+    let msg = b"sys_setns not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setpgid(_pid: u32, _pgid: u32) -> Result<u32, Err> {
+    let msg = b"sys_setpgid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setpriority(_which: u32, _who: u32, _niceval: u32) -> Result<u32, Err> {
+    let msg = b"sys_setpriority not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setregid(_rgid: u32, _egid: u32) -> Result<u32, Err> {
+    let msg = b"sys_setregid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setresgid(_rgid: u32, _egid: u32, _sgid: u32) -> Result<u32, Err> {
+    let msg = b"sys_setresgid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setresuid(_ruid: u32, _euid: u32, _suid: u32) -> Result<u32, Err> {
+    let msg = b"sys_setresuid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setreuid(_ruid: u32, _euid: u32) -> Result<u32, Err> {
+    let msg = b"sys_setreuid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setsid() -> Result<u32, Err> {
+    let msg = b"sys_setsid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2430,10 +2940,14 @@ fn sys_setsockopt(
     _optval: u32,
     _optlen: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_setsockopt not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_setuid(_uid: u32) -> Result<u32, Err> {
+    let msg = b"sys_setuid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2444,6 +2958,8 @@ fn sys_setxattr(
     _size: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_setxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2454,38 +2970,56 @@ fn sys_setxattrat(
     _value: u32,
     _size: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_setxattrat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_shmat(_shmid: u32, _shmaddr: u32, _shmflg: u32) -> Result<u32, Err> {
+    let msg = b"sys_shmat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_shmctl(_shmid: u32, _cmd: u32, _buf: u32) -> Result<u32, Err> {
+    let msg = b"sys_shmctl not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_shmdt(_shmaddr: u32) -> Result<u32, Err> {
+    let msg = b"sys_shmdt not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_shmget(_key: u32, _size: u32, _shmflg: u32, _version: u32) -> Result<u32, Err> {
+    let msg = b"sys_shmget not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_shutdown(_sockfd: u32, _how: u32) -> Result<u32, Err> {
+    let msg = b"sys_shutdown not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_signalfd4(_fd: u32, _mask: u32, _sizemask: u32) -> Result<u32, Err> {
+    let msg = b"sys_signalfd4 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_socket(_domain: u32, _type: u32, _protocol: u32) -> Result<u32, Err> {
+    let msg = b"sys_socket not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_socketpair(_domain: u32, _type: u32, _protocol: u32, _sv: u32) -> Result<u32, Err> {
+    let msg = b"sys_socketpair not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2497,14 +3031,20 @@ fn sys_splice(
     _len: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_splice not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_statfs64(_path: u32, _buf: u32) -> Result<u32, Err> {
+    let msg = b"sys_statfs64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_statmount(_dfd: u32, _filename: u32, _buffer: u32, _bufsize: u32) -> Result<u32, Err> {
+    let msg = b"sys_statmount not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2515,46 +3055,68 @@ fn sys_statx(
     _mask: u32,
     _statxbuf: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_statx not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_swapoff(_specialfile: u32) -> Result<u32, Err> {
+    let msg = b"sys_swapoff not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_swapon(_specialfile: u32, _swapflags: u32, _version: u32) -> Result<u32, Err> {
+    let msg = b"sys_swapon not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_symlinkat(_target: u32, _newdirfd: u32, _linkpath: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_symlinkat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sync() -> Result<u32, Err> {
+    let msg = b"sys_sync not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sync_file_range(_fd: u32, _offset: u32, _nbytes: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_sync_file_range not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_syncfs(_fd: u32) -> Result<u32, Err> {
+    let msg = b"sys_syncfs not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_sysinfo(_info: u32) -> Result<u32, Err> {
+    let msg = b"sys_sysinfo not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_syslog(_type: u32, _buf: u32, _len: u32) -> Result<u32, Err> {
+    let msg = b"sys_syslog not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_tee(_fd_in: u32, _fd_out: u32, _len: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_tee not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_tgkill(_tgid: u32, _tid: u32, _sig: u32) -> Result<u32, Err> {
+    let msg = b"sys_tgkill not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2563,18 +3125,26 @@ fn sys_timer_create(
     _timer_event_spec: u32,
     _created_timer_id: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_timer_create not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_timer_delete(_timer_id: u32) -> Result<u32, Err> {
+    let msg = b"sys_timer_delete not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_timer_getoverrun(_timer_id: u32) -> Result<u32, Err> {
+    let msg = b"sys_timer_getoverrun not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_timer_gettime64(_timer_id: u32, _setting: u32) -> Result<u32, Err> {
+    let msg = b"sys_timer_gettime64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2584,14 +3154,20 @@ fn sys_timer_settime64(
     _new_setting: u32,
     _old_setting: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_timer_settime64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_timerfd_create(_clockid: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_timerfd_create not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_timerfd_gettime64(_fd: u32, _curr_value: u32) -> Result<u32, Err> {
+    let msg = b"sys_timerfd_gettime64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -2601,53 +3177,79 @@ fn sys_timerfd_settime64(
     _new_value: u32,
     _old_value: u32,
 ) -> Result<u32, Err> {
+    let msg = b"sys_timerfd_settime64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_times(_tbuf: u32) -> Result<u32, Err> {
+    let msg = b"sys_times not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_truncate64(_path: u32, _length: u32) -> Result<u32, Err> {
+    let msg = b"sys_truncate64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_umask(_mask: u32) -> Result<u32, Err> {
+    let msg = b"sys_umask not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_umount2(_target: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_umount2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_uname(_buf: u32) -> Result<u32, Err> {
+    let msg = b"sys_uname not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_unlinkat(_dfd: u32, _pathname: u32, _flag: u32) -> Result<u32, Err> {
+    let msg = b"sys_unlinkat not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_unshare(_flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_unshare not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_userfaultfd(_flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_userfaultfd not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_utimensat_time64(_dfd: u32, _filename: u32, _times: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_utimensat_time64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_vhangup() -> Result<u32, Err> {
+    let msg = b"sys_vhangup not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_vmsplice(_fd: u32, _iov: u32, _nr_segs: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_vmsplice not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
 fn sys_waitid(_which: u32, _upid: u32, _infop: u32, _options: u32, _ru: u32) -> Result<u32, Err> {
+    let msg = b"sys_waitid not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
