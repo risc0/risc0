@@ -36,12 +36,11 @@ use std::{
 use anyhow::Context;
 use kameo::prelude::*;
 use nvml_wrapper::Nvml;
-use opentelemetry_otlp::WithExportConfig as _;
+use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
 use opentelemetry_sdk::{
     Resource,
     logs::SdkLoggerProvider,
     metrics::{PeriodicReader, SdkMeterProvider},
-    propagation::TraceContextPropagator,
     trace::SdkTracerProvider,
 };
 use serde::{Deserialize, Serialize};
@@ -52,7 +51,11 @@ use tokio::{
     process::{Child, Command},
     task::JoinHandle,
 };
-use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::{
+    EnvFilter, Layer as _, layer::SubscriberExt as _, util::SubscriberInitExt as _,
+};
+
+use crate::{actors::config::TelemetryConfig, init_logging};
 
 use self::{
     config::{
@@ -85,7 +88,7 @@ pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<d
     };
     tracing::info!("{config:#?}");
 
-    let mut app = App::new(config).await?;
+    let mut app = App::new(config, /*enable_logging=*/ true).await?;
     if app.manager.is_some() {
         wait_for_shutdown().await;
     } else {
@@ -182,7 +185,7 @@ async fn relay_job_request(
 }
 
 #[tokio::main]
-pub(crate) async fn rpc_main(_num_gpus: Option<usize>) -> Result<(), Box<dyn StdError>> {
+pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdError>> {
     let small_tasks = vec![
         TaskKind::Lift,
         TaskKind::Join,
@@ -195,31 +198,34 @@ pub(crate) async fn rpc_main(_num_gpus: Option<usize>) -> Result<(), Box<dyn Std
     large_tasks.extend_from_slice(&small_tasks);
 
     let addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into();
-    let mut app = App::new(AppConfig {
-        version: VERSION,
-        api: None,
-        manager: Some(ManagerConfig { listen: Some(addr) }),
-        executor: Some(ExecutorConfig {
-            manager: None,
-            count: 1,
-        }),
-        prover: Some(vec![
-            ProverConfig {
+    let mut app = App::new(
+        AppConfig {
+            version: VERSION,
+            api: None,
+            manager: Some(ManagerConfig { listen: Some(addr) }),
+            executor: Some(ExecutorConfig {
                 manager: None,
-                count: None,
-                subscribe: large_tasks,
-                simulate: None,
-            },
-            ProverConfig {
-                manager: None,
-                count: None,
-                subscribe: small_tasks,
-                simulate: None,
-            },
-        ]),
-        storage: None,
-        telemetry: None,
-    })
+                count: 1,
+            }),
+            prover: Some(vec![
+                ProverConfig {
+                    manager: None,
+                    count: num_gpus,
+                    subscribe: large_tasks,
+                    simulate: None,
+                },
+                ProverConfig {
+                    manager: None,
+                    count: num_gpus,
+                    subscribe: small_tasks,
+                    simulate: None,
+                },
+            ]),
+            storage: None,
+            telemetry: None,
+        },
+        /*enable_logging=*/ true,
+    )
     .await?;
 
     let socket: StdUnixStream = stdin().as_fd().try_clone_to_owned()?.into();
@@ -245,7 +251,11 @@ struct TempConfig {
 }
 
 impl TempConfig {
-    fn new(manager_addr: SocketAddr, subscribe: Vec<TaskKind>) -> anyhow::Result<Self> {
+    fn new(
+        manager_addr: SocketAddr,
+        subscribe: Vec<TaskKind>,
+        enable_telemetry: bool,
+    ) -> anyhow::Result<Self> {
         let config = AppConfig {
             version: VERSION,
             api: None,
@@ -258,7 +268,7 @@ impl TempConfig {
                 simulate: None,
             }]),
             storage: None,
-            telemetry: None,
+            telemetry: enable_telemetry.then_some(TelemetryConfig {}),
         };
         let toml = toml::to_string(&config)?;
         let mut file = tempfile::NamedTempFile::new()?;
@@ -309,7 +319,7 @@ pub(crate) struct App {
 }
 
 impl App {
-    pub async fn new(cfg: AppConfig) -> Result<Self, Box<dyn StdError>> {
+    pub async fn new(cfg: AppConfig, enable_logging: bool) -> Result<Self, Box<dyn StdError>> {
         let mut manager = None;
         let mut factory = None;
         let mut server = None;
@@ -318,9 +328,9 @@ impl App {
         let provider = if cfg.telemetry.is_some() {
             Some(OpenTelemetryProvider::new())
         } else {
-            let _ = tracing_subscriber::fmt()
-                .with_env_filter(EnvFilter::from_default_env())
-                .try_init();
+            if enable_logging {
+                init_logging();
+            }
             None
         };
 
@@ -372,6 +382,7 @@ impl App {
                 &factory,
                 &mut workers,
                 &mut children,
+                provider.is_some(),
             )
             .await?
         }
@@ -416,6 +427,7 @@ impl App {
         factory: &Option<ActorRef<FactoryActor>>,
         workers: &mut Vec<Worker>,
         children: &mut Vec<ChildState>,
+        enable_telemetry: bool,
     ) -> Result<(), Box<dyn StdError>> {
         for prover in cfg_prover {
             tracing::info!("Starting prover: {prover:?}");
@@ -445,7 +457,11 @@ impl App {
                     return Err(anyhow::anyhow!("Invalid configuration: either manager must run locally or prover.manager must be set").into());
                 }
                 let manager_addr = prover.manager.unwrap_or_else(|| local_addr.unwrap());
-                let cfg_child = Arc::new(TempConfig::new(manager_addr, prover.subscribe.clone())?);
+                let cfg_child = Arc::new(TempConfig::new(
+                    manager_addr,
+                    prover.subscribe.clone(),
+                    enable_telemetry,
+                )?);
                 for device_idx in 0..count {
                     let child = Command::new(&r0vm_path)
                         .process_group(0)
@@ -640,47 +656,51 @@ impl OpenTelemetryProvider {
     pub(crate) fn new() -> Self {
         let resource = Resource::builder().with_service_name("r0vm").build();
 
+        let log_exporter = opentelemetry_otlp::LogExporter::builder()
+            .with_http()
+            .build()
+            .unwrap();
+
         let logger_provider = SdkLoggerProvider::builder()
             .with_resource(resource.clone())
-            .with_batch_exporter(
-                opentelemetry_otlp::LogExporter::builder()
-                    .with_http()
-                    .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
-                    .build()
-                    .unwrap(),
-            )
+            .with_batch_exporter(log_exporter)
             .build();
 
         tracing_subscriber::registry()
-            // .with(OpenTelemetryTracingBridge::new(&logger_provider))
-            .with(tracing_subscriber::fmt::layer().with_filter(EnvFilter::from_default_env()))
+            .with(
+                OpenTelemetryTracingBridge::new(&logger_provider)
+                    .with_filter(EnvFilter::from_default_env()),
+            )
+            .with(
+                tracing_subscriber::fmt::layer()
+                    .with_ansi(false)
+                    .without_time()
+                    .with_filter(EnvFilter::from_default_env()),
+            )
             .init();
 
+        let span_exporter = opentelemetry_otlp::SpanExporter::builder()
+            .with_http()
+            .build()
+            .unwrap();
+
         let tracer_provider = SdkTracerProvider::builder()
-            .with_batch_exporter(
-                opentelemetry_otlp::SpanExporter::builder()
-                    .with_http()
-                    .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
-                    .build()
-                    .unwrap(),
-            )
+            .with_batch_exporter(span_exporter)
             .with_resource(resource.clone())
             .build();
 
-        opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
         opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+
+        let metric_exporter = opentelemetry_otlp::MetricExporter::builder()
+            .with_http()
+            .build()
+            .unwrap();
 
         let meter_provider = SdkMeterProvider::builder()
             .with_reader(
-                PeriodicReader::builder(
-                    opentelemetry_otlp::MetricExporter::builder()
-                        .with_http()
-                        .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
-                        .build()
-                        .unwrap(),
-                )
-                .with_interval(Duration::from_secs(1))
-                .build(),
+                PeriodicReader::builder(metric_exporter)
+                    .with_interval(Duration::from_secs(1))
+                    .build(),
             )
             .with_resource(resource.clone())
             .build();

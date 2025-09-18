@@ -23,6 +23,7 @@ use risc0_zkvm::{
     ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
     compute_image_id, compute_kernel_id, get_prover_server,
 };
+use tracing_subscriber::EnvFilter;
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -152,14 +153,12 @@ pub fn main() {
         return;
     }
 
-    tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-        .init();
-
     if args.mode.rpc {
         self::actors::rpc_main(args.num_gpus).unwrap();
         return;
     }
+
+    init_logging();
 
     if args.num_gpus.is_some_and(|v| v != 1) {
         eprintln!("num_gpus > 1 or 0 for current mode unsupported.");
@@ -274,4 +273,10 @@ fn run_server(port: u16) {
     let addr = format!("127.0.0.1:{port}");
     let server = ApiServer::new_tcp(addr);
     server.run().unwrap()
+}
+
+fn init_logging() {
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
 }

@@ -26,9 +26,10 @@ kameo = "0.16"
 multi_index_map = "0.15.0"
 nvml-wrapper = "0.11.0"
 opentelemetry = "0.30.0"
-opentelemetry-appender-tracing = "0.30.0"
+opentelemetry-appender-tracing = "0.30.1"
 opentelemetry-otlp = "0.30.0"
 opentelemetry_sdk = "0.30.0"
+rand = "0.9"
 risc0-circuit-rv32im = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["prove"] }
 serde = { version = "1.0.219", features = ["rc"] }
