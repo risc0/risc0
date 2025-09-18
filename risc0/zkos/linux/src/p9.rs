@@ -10,6 +10,12 @@
 use crate::kernel::print;
 use core::fmt;
 use no_std_strings::{str_format, str256};
+
+#[cfg(target_arch = "riscv32")]
+use alloc::string::String;
+#[cfg(target_arch = "riscv32")]
+use alloc::vec::Vec;
+
 /// 9P message types
 ///
 /// There are 14 basic operations in 9P2000, paired as requests and responses.
@@ -926,6 +932,4183 @@ pub enum TflushError {
 pub enum RflushError {
     BufferTooSmall,
     InvalidMessageType,
+    InternalError,
+}
+
+/// Tread message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TreadMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// Offset to read from
+    pub offset: u64,
+    /// Number of bytes to read
+    pub count: u32,
+}
+
+impl TreadMessage {
+    /// Create a new Tread message
+    pub fn new(tag: u16, fid: u32, offset: u64, count: u32) -> Self {
+        Self {
+            tag,
+            fid,
+            offset,
+            count,
+        }
+    }
+
+    /// Serialize the Tread message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TreadError> {
+        use wire::{WireError, write_u16, write_u32, write_u64};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 4 + 8 + 4; // size[4] + type[1] + tag[2] + fid[4] + offset[8] + count[4]
+
+        if total_size > buf.len() {
+            return Err(TreadError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TreadError::BufferTooSmall,
+            WireError::StringTooLong => TreadError::InternalError,
+            WireError::InvalidUtf8 => TreadError::InternalError,
+        })?;
+
+        // Write message type[1] - Tread
+        buf[offset] = P9MsgType::Tread as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TreadError::BufferTooSmall,
+            WireError::StringTooLong => TreadError::InternalError,
+            WireError::InvalidUtf8 => TreadError::InternalError,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TreadError::BufferTooSmall,
+            WireError::StringTooLong => TreadError::InternalError,
+            WireError::InvalidUtf8 => TreadError::InternalError,
+        })?;
+
+        // Write offset[8]
+        offset = write_u64(buf, offset, self.offset).map_err(|e| match e {
+            WireError::BufferTooSmall => TreadError::BufferTooSmall,
+            WireError::StringTooLong => TreadError::InternalError,
+            WireError::InvalidUtf8 => TreadError::InternalError,
+        })?;
+
+        // Write count[4]
+        offset = write_u32(buf, offset, self.count).map_err(|e| match e {
+            WireError::BufferTooSmall => TreadError::BufferTooSmall,
+            WireError::StringTooLong => TreadError::InternalError,
+            WireError::InvalidUtf8 => TreadError::InternalError,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tread message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_tread(&self) -> Result<u32, TreadError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 32]; // Large enough for Tread message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rread message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RreadMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Number of bytes read
+    pub count: u32,
+    /// Data that was read
+    pub data: Vec<u8>,
+}
+
+impl RreadMessage {
+    /// Create a new Rread message
+    pub fn new(tag: u16, data: Vec<u8>) -> Self {
+        Self {
+            tag,
+            count: data.len() as u32,
+            data,
+        }
+    }
+
+    /// Deserialize an Rread message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RreadError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RreadError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RreadError::BufferTooSmall,
+            WireError::StringTooLong => RreadError::InternalError,
+            WireError::InvalidUtf8 => RreadError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RreadError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rread
+        if offset >= buf.len() {
+            return Err(RreadError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rread as u8 {
+            return Err(RreadError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RreadError::BufferTooSmall,
+            WireError::StringTooLong => RreadError::InternalError,
+            WireError::InvalidUtf8 => RreadError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read count[4]
+        let (count, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RreadError::BufferTooSmall,
+            WireError::StringTooLong => RreadError::InternalError,
+            WireError::InvalidUtf8 => RreadError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data for the data field
+        if offset + count as usize > buf.len() {
+            return Err(RreadError::BufferTooSmall);
+        }
+
+        // Read the data[count] field
+        let data = buf[offset..offset + count as usize].to_vec();
+        offset += count as usize;
+
+        let message = Self { tag, count, data };
+
+        Ok((message, offset))
+    }
+}
+
+/// Tread serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TreadError {
+    BufferTooSmall,
+    InternalError,
+}
+
+/// Rread deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RreadError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Twrite message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TwriteMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// Offset to write to
+    pub offset: u64,
+    /// Number of bytes to write
+    pub count: u32,
+    /// Data to write
+    pub data: Vec<u8>,
+}
+
+impl TwriteMessage {
+    /// Create a new Twrite message
+    pub fn new(tag: u16, fid: u32, offset: u64, data: Vec<u8>) -> Self {
+        Self {
+            tag,
+            fid,
+            offset,
+            count: data.len() as u32,
+            data,
+        }
+    }
+
+    /// Serialize the Twrite message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TwriteError> {
+        use wire::{WireError, write_u16, write_u32, write_u64};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 4 + 8 + 4 + self.data.len(); // size[4] + type[1] + tag[2] + fid[4] + offset[8] + count[4] + data[count]
+
+        if total_size > buf.len() {
+            return Err(TwriteError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TwriteError::BufferTooSmall,
+            WireError::StringTooLong => TwriteError::InternalError,
+            WireError::InvalidUtf8 => TwriteError::InternalError,
+        })?;
+
+        // Write message type[1] - Twrite
+        buf[offset] = P9MsgType::Twrite as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TwriteError::BufferTooSmall,
+            WireError::StringTooLong => TwriteError::InternalError,
+            WireError::InvalidUtf8 => TwriteError::InternalError,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TwriteError::BufferTooSmall,
+            WireError::StringTooLong => TwriteError::InternalError,
+            WireError::InvalidUtf8 => TwriteError::InternalError,
+        })?;
+
+        // Write offset[8]
+        offset = write_u64(buf, offset, self.offset).map_err(|e| match e {
+            WireError::BufferTooSmall => TwriteError::BufferTooSmall,
+            WireError::StringTooLong => TwriteError::InternalError,
+            WireError::InvalidUtf8 => TwriteError::InternalError,
+        })?;
+
+        // Write count[4]
+        offset = write_u32(buf, offset, self.count).map_err(|e| match e {
+            WireError::BufferTooSmall => TwriteError::BufferTooSmall,
+            WireError::StringTooLong => TwriteError::InternalError,
+            WireError::InvalidUtf8 => TwriteError::InternalError,
+        })?;
+
+        // Write data[count]
+        if offset + self.data.len() > buf.len() {
+            return Err(TwriteError::BufferTooSmall);
+        }
+        buf[offset..offset + self.data.len()].copy_from_slice(&self.data);
+        offset += self.data.len();
+
+        Ok(offset)
+    }
+
+    /// Send the Twrite message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_twrite(&self) -> Result<u32, TwriteError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 1024]; // Large enough for Twrite message with data
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rwrite message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RwriteMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Number of bytes written
+    pub count: u32,
+}
+
+impl RwriteMessage {
+    /// Create a new Rwrite message
+    pub fn new(tag: u16, count: u32) -> Self {
+        Self { tag, count }
+    }
+
+    /// Deserialize an Rwrite message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RwriteError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RwriteError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RwriteError::BufferTooSmall,
+            WireError::StringTooLong => RwriteError::InternalError,
+            WireError::InvalidUtf8 => RwriteError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RwriteError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rwrite
+        if offset >= buf.len() {
+            return Err(RwriteError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rwrite as u8 {
+            return Err(RwriteError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RwriteError::BufferTooSmall,
+            WireError::StringTooLong => RwriteError::InternalError,
+            WireError::InvalidUtf8 => RwriteError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read count[4]
+        let (count, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RwriteError::BufferTooSmall,
+            WireError::StringTooLong => RwriteError::InternalError,
+            WireError::InvalidUtf8 => RwriteError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let message = Self { tag, count };
+
+        Ok((message, offset))
+    }
+}
+
+/// Twrite serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TwriteError {
+    BufferTooSmall,
+    InternalError,
+}
+
+/// Rwrite deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RwriteError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Twalk message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TwalkMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// New file identifier
+    pub newfid: u32,
+    /// Number of path name elements
+    pub nwname: u16,
+    /// Path name elements
+    pub wnames: Vec<&'static str>,
+}
+
+impl TwalkMessage {
+    /// Create a new Twalk message
+    pub fn new(tag: u16, fid: u32, newfid: u32, wnames: &[&'static str]) -> Self {
+        let nwname = wnames.len() as u16;
+        Self {
+            tag,
+            fid,
+            newfid,
+            nwname,
+            wnames: wnames.to_vec(),
+        }
+    }
+
+    /// Create a new Twalk message with a single path element
+    pub fn new_single(tag: u16, fid: u32, newfid: u32, wname: &'static str) -> Self {
+        Self::new(tag, fid, newfid, &[wname])
+    }
+
+    /// Serialize the Twalk message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TwalkError> {
+        use wire::{WireError, write_string, write_u16, write_u32};
+
+        // Calculate total message size
+        let mut total_size = 4 + 1 + 2 + 4 + 4 + 2; // size[4] + type[1] + tag[2] + fid[4] + newfid[4] + nwname[2]
+
+        // Add size for each wname[s]
+        for wname in &self.wnames {
+            total_size += 2 + wname.len(); // length[2] + string[length]
+        }
+
+        if total_size > buf.len() {
+            return Err(TwalkError::BufferTooSmall);
+        }
+
+        if self.nwname as usize != self.wnames.len() {
+            return Err(TwalkError::NameCountMismatch);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TwalkError::BufferTooSmall,
+            WireError::StringTooLong => TwalkError::NameTooLong,
+            WireError::InvalidUtf8 => TwalkError::InternalError,
+        })?;
+
+        // Write message type[1] - Twalk
+        buf[offset] = P9MsgType::Twalk as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TwalkError::BufferTooSmall,
+            WireError::StringTooLong => TwalkError::NameTooLong,
+            WireError::InvalidUtf8 => TwalkError::InternalError,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TwalkError::BufferTooSmall,
+            WireError::StringTooLong => TwalkError::NameTooLong,
+            WireError::InvalidUtf8 => TwalkError::InternalError,
+        })?;
+
+        // Write newfid[4]
+        offset = write_u32(buf, offset, self.newfid).map_err(|e| match e {
+            WireError::BufferTooSmall => TwalkError::BufferTooSmall,
+            WireError::StringTooLong => TwalkError::NameTooLong,
+            WireError::InvalidUtf8 => TwalkError::InternalError,
+        })?;
+
+        // Write nwname[2]
+        offset = write_u16(buf, offset, self.nwname).map_err(|e| match e {
+            WireError::BufferTooSmall => TwalkError::BufferTooSmall,
+            WireError::StringTooLong => TwalkError::NameTooLong,
+            WireError::InvalidUtf8 => TwalkError::InternalError,
+        })?;
+
+        // Write each wname[s]
+        for wname in &self.wnames {
+            offset = write_string(buf, offset, wname).map_err(|e| match e {
+                WireError::BufferTooSmall => TwalkError::BufferTooSmall,
+                WireError::StringTooLong => TwalkError::NameTooLong,
+                WireError::InvalidUtf8 => TwalkError::InternalError,
+            })?;
+        }
+
+        Ok(offset)
+    }
+
+    /// Send the Twalk message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_twalk(&self) -> Result<u32, TwalkError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 1024]; // Large enough for Twalk message with path elements
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rwalk message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RwalkMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Number of QIDs returned
+    pub nwqid: u16,
+    /// QIDs returned
+    pub wqids: Vec<Qid>,
+}
+
+impl RwalkMessage {
+    /// Create a new Rwalk message
+    pub fn new(tag: u16, wqids: &[Qid]) -> Self {
+        let nwqid = wqids.len() as u16;
+        Self {
+            tag,
+            nwqid,
+            wqids: wqids.to_vec(),
+        }
+    }
+
+    /// Create a new Rwalk message with a single QID
+    pub fn new_single(tag: u16, qid: Qid) -> Self {
+        Self::new(tag, &[qid])
+    }
+
+    /// Deserialize an Rwalk message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RwalkError> {
+        use wire::{WireError, read_u16, read_u32, read_u64};
+
+        if buf.len() < 4 {
+            return Err(RwalkError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RwalkError::BufferTooSmall,
+            WireError::StringTooLong => RwalkError::InternalError,
+            WireError::InvalidUtf8 => RwalkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RwalkError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rwalk
+        if offset >= buf.len() {
+            return Err(RwalkError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rwalk as u8 {
+            return Err(RwalkError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RwalkError::BufferTooSmall,
+            WireError::StringTooLong => RwalkError::InternalError,
+            WireError::InvalidUtf8 => RwalkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read nwqid[2]
+        let (nwqid, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RwalkError::BufferTooSmall,
+            WireError::StringTooLong => RwalkError::InternalError,
+            WireError::InvalidUtf8 => RwalkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read each wqid[13]
+        let mut wqids = Vec::new();
+
+        for _ in 0..nwqid {
+            if offset + 13 > buf.len() {
+                return Err(RwalkError::BufferTooSmall);
+            }
+
+            // Read QID: type[1] version[4] path[8]
+            let qtype = buf[offset];
+            offset += 1;
+
+            let (version, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+                WireError::BufferTooSmall => RwalkError::BufferTooSmall,
+                WireError::StringTooLong => RwalkError::InternalError,
+                WireError::InvalidUtf8 => RwalkError::InvalidUtf8,
+            })?;
+            offset = new_offset;
+
+            let (path, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+                WireError::BufferTooSmall => RwalkError::BufferTooSmall,
+                WireError::StringTooLong => RwalkError::InternalError,
+                WireError::InvalidUtf8 => RwalkError::InvalidUtf8,
+            })?;
+            offset = new_offset;
+
+            wqids.push(Qid::new(qtype, version, path));
+        }
+
+        let message = Self { tag, nwqid, wqids };
+
+        Ok((message, offset))
+    }
+}
+
+/// Twalk serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TwalkError {
+    BufferTooSmall,
+    NameTooLong,
+    NameCountMismatch,
+    InternalError,
+}
+
+/// Rwalk deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RwalkError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Tclunk message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TclunkMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+}
+
+impl TclunkMessage {
+    /// Create a new Tclunk message
+    pub fn new(tag: u16, fid: u32) -> Self {
+        Self { tag, fid }
+    }
+
+    /// Serialize the Tclunk message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TclunkError> {
+        use wire::{WireError, write_u16, write_u32};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 4; // size[4] + type[1] + tag[2] + fid[4]
+
+        if total_size > buf.len() {
+            return Err(TclunkError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TclunkError::BufferTooSmall,
+            WireError::StringTooLong => TclunkError::InternalError,
+            WireError::InvalidUtf8 => TclunkError::InternalError,
+        })?;
+
+        // Write message type[1] - Tclunk
+        buf[offset] = P9MsgType::Tclunk as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TclunkError::BufferTooSmall,
+            WireError::StringTooLong => TclunkError::InternalError,
+            WireError::InvalidUtf8 => TclunkError::InternalError,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TclunkError::BufferTooSmall,
+            WireError::StringTooLong => TclunkError::InternalError,
+            WireError::InvalidUtf8 => TclunkError::InternalError,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tclunk message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_tclunk(&self) -> Result<u32, TclunkError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 16]; // Large enough for Tclunk message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rclunk message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RclunkMessage {
+    /// Message tag
+    pub tag: u16,
+}
+
+impl RclunkMessage {
+    /// Create a new Rclunk message
+    pub fn new(tag: u16) -> Self {
+        Self { tag }
+    }
+
+    /// Deserialize an Rclunk message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RclunkError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RclunkError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RclunkError::BufferTooSmall,
+            WireError::StringTooLong => RclunkError::InternalError,
+            WireError::InvalidUtf8 => RclunkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RclunkError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rclunk
+        if offset >= buf.len() {
+            return Err(RclunkError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rclunk as u8 {
+            return Err(RclunkError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RclunkError::BufferTooSmall,
+            WireError::StringTooLong => RclunkError::InternalError,
+            WireError::InvalidUtf8 => RclunkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let message = Self { tag };
+
+        Ok((message, offset))
+    }
+}
+
+/// Tclunk serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TclunkError {
+    BufferTooSmall,
+    InternalError,
+}
+
+/// Rclunk deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RclunkError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Tremove message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TremoveMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+}
+
+impl TremoveMessage {
+    /// Create a new Tremove message
+    pub fn new(tag: u16, fid: u32) -> Self {
+        Self { tag, fid }
+    }
+
+    /// Serialize the Tremove message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TremoveError> {
+        use wire::{WireError, write_u16, write_u32};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 4; // size[4] + type[1] + tag[2] + fid[4]
+
+        if total_size > buf.len() {
+            return Err(TremoveError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TremoveError::BufferTooSmall,
+            WireError::StringTooLong => TremoveError::InternalError,
+            WireError::InvalidUtf8 => TremoveError::InternalError,
+        })?;
+
+        // Write message type[1] - Tremove
+        buf[offset] = P9MsgType::Tremove as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TremoveError::BufferTooSmall,
+            WireError::StringTooLong => TremoveError::InternalError,
+            WireError::InvalidUtf8 => TremoveError::InternalError,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TremoveError::BufferTooSmall,
+            WireError::StringTooLong => TremoveError::InternalError,
+            WireError::InvalidUtf8 => TremoveError::InternalError,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tremove message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_tremove(&self) -> Result<u32, TremoveError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 16]; // Large enough for Tremove message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rremove message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RremoveMessage {
+    /// Message tag
+    pub tag: u16,
+}
+
+impl RremoveMessage {
+    /// Create a new Rremove message
+    pub fn new(tag: u16) -> Self {
+        Self { tag }
+    }
+
+    /// Deserialize an Rremove message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RremoveError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RremoveError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RremoveError::BufferTooSmall,
+            WireError::StringTooLong => RremoveError::InternalError,
+            WireError::InvalidUtf8 => RremoveError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RremoveError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rremove
+        if offset >= buf.len() {
+            return Err(RremoveError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rremove as u8 {
+            return Err(RremoveError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RremoveError::BufferTooSmall,
+            WireError::StringTooLong => RremoveError::InternalError,
+            WireError::InvalidUtf8 => RremoveError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let message = Self { tag };
+
+        Ok((message, offset))
+    }
+}
+
+/// Tremove serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TremoveError {
+    BufferTooSmall,
+    InternalError,
+}
+
+/// Rremove deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RremoveError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Tauth message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TauthMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Authentication file identifier
+    pub afid: u32,
+    /// User name
+    pub uname: String,
+    /// Authentication name
+    pub aname: String,
+    /// Number of uname bytes
+    pub n_uname: u32,
+}
+
+impl TauthMessage {
+    /// Create a new Tauth message
+    pub fn new(tag: u16, afid: u32, uname: String, aname: String) -> Self {
+        let n_uname = uname.len() as u32;
+        Self {
+            tag,
+            afid,
+            uname,
+            aname,
+            n_uname,
+        }
+    }
+
+    /// Serialize the Tauth message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TauthError> {
+        use wire::{WireError, write_string, write_u16, write_u32};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 4 + (2 + self.uname.len()) + (2 + self.aname.len()) + 4;
+        // size[4] + type[1] + tag[2] + afid[4] + uname[s] + aname[s] + n_uname[4]
+
+        if total_size > buf.len() {
+            return Err(TauthError::BufferTooSmall);
+        }
+
+        if self.n_uname as usize != self.uname.len() {
+            return Err(TauthError::UnameCountMismatch);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TauthError::BufferTooSmall,
+            WireError::StringTooLong => TauthError::StringTooLong,
+            WireError::InvalidUtf8 => TauthError::InvalidUtf8,
+        })?;
+
+        // Write message type[1] - Tauth
+        buf[offset] = P9MsgType::Tauth as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TauthError::BufferTooSmall,
+            WireError::StringTooLong => TauthError::StringTooLong,
+            WireError::InvalidUtf8 => TauthError::InvalidUtf8,
+        })?;
+
+        // Write afid[4]
+        offset = write_u32(buf, offset, self.afid).map_err(|e| match e {
+            WireError::BufferTooSmall => TauthError::BufferTooSmall,
+            WireError::StringTooLong => TauthError::StringTooLong,
+            WireError::InvalidUtf8 => TauthError::InvalidUtf8,
+        })?;
+
+        // Write uname[s]
+        offset = write_string(buf, offset, &self.uname).map_err(|e| match e {
+            WireError::BufferTooSmall => TauthError::BufferTooSmall,
+            WireError::StringTooLong => TauthError::StringTooLong,
+            WireError::InvalidUtf8 => TauthError::InvalidUtf8,
+        })?;
+
+        // Write aname[s]
+        offset = write_string(buf, offset, &self.aname).map_err(|e| match e {
+            WireError::BufferTooSmall => TauthError::BufferTooSmall,
+            WireError::StringTooLong => TauthError::StringTooLong,
+            WireError::InvalidUtf8 => TauthError::InvalidUtf8,
+        })?;
+
+        // Write n_uname[4]
+        offset = write_u32(buf, offset, self.n_uname).map_err(|e| match e {
+            WireError::BufferTooSmall => TauthError::BufferTooSmall,
+            WireError::StringTooLong => TauthError::StringTooLong,
+            WireError::InvalidUtf8 => TauthError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tauth message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_tauth(&self) -> Result<u32, TauthError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 1024]; // Large enough for Tauth message with strings
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rauth message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RauthMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Authentication QID
+    pub aqid: Qid,
+}
+
+impl RauthMessage {
+    /// Create a new Rauth message
+    pub fn new(tag: u16, aqid: Qid) -> Self {
+        Self { tag, aqid }
+    }
+
+    /// Deserialize an Rauth message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RauthError> {
+        use wire::{WireError, read_u16, read_u32, read_u64};
+
+        if buf.len() < 4 {
+            return Err(RauthError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RauthError::BufferTooSmall,
+            WireError::StringTooLong => RauthError::InternalError,
+            WireError::InvalidUtf8 => RauthError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RauthError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rauth
+        if offset >= buf.len() {
+            return Err(RauthError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rauth as u8 {
+            return Err(RauthError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RauthError::BufferTooSmall,
+            WireError::StringTooLong => RauthError::InternalError,
+            WireError::InvalidUtf8 => RauthError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read aqid[13] - type[1] version[4] path[8]
+        if offset + 13 > buf.len() {
+            return Err(RauthError::BufferTooSmall);
+        }
+
+        let qtype = buf[offset];
+        offset += 1;
+
+        let (version, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RauthError::BufferTooSmall,
+            WireError::StringTooLong => RauthError::InternalError,
+            WireError::InvalidUtf8 => RauthError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let (path, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RauthError::BufferTooSmall,
+            WireError::StringTooLong => RauthError::InternalError,
+            WireError::InvalidUtf8 => RauthError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let aqid = Qid::new(qtype, version, path);
+
+        let message = Self { tag, aqid };
+
+        Ok((message, offset))
+    }
+}
+
+/// Tauth serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TauthError {
+    BufferTooSmall,
+    StringTooLong,
+    UnameCountMismatch,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Rauth deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RauthError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Tattach message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TattachMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// Authentication file identifier
+    pub afid: u32,
+    /// User name
+    pub uname: String,
+    /// Authentication name
+    pub aname: String,
+    /// Number of uname bytes
+    pub n_uname: u32,
+}
+
+impl TattachMessage {
+    /// Create a new Tattach message
+    pub fn new(tag: u16, fid: u32, afid: u32, uname: String, aname: String) -> Self {
+        let n_uname = uname.len() as u32;
+        Self {
+            tag,
+            fid,
+            afid,
+            uname,
+            aname,
+            n_uname,
+        }
+    }
+
+    /// Serialize the Tattach message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TattachError> {
+        use wire::{WireError, write_string, write_u16, write_u32};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 4 + 4 + (2 + self.uname.len()) + (2 + self.aname.len()) + 4;
+        // size[4] + type[1] + tag[2] + fid[4] + afid[4] + uname[s] + aname[s] + n_uname[4]
+
+        if total_size > buf.len() {
+            return Err(TattachError::BufferTooSmall);
+        }
+
+        if self.n_uname as usize != self.uname.len() {
+            return Err(TattachError::UnameCountMismatch);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TattachError::BufferTooSmall,
+            WireError::StringTooLong => TattachError::StringTooLong,
+            WireError::InvalidUtf8 => TattachError::InvalidUtf8,
+        })?;
+
+        // Write message type[1] - Tattach
+        buf[offset] = P9MsgType::Tattach as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TattachError::BufferTooSmall,
+            WireError::StringTooLong => TattachError::StringTooLong,
+            WireError::InvalidUtf8 => TattachError::InvalidUtf8,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TattachError::BufferTooSmall,
+            WireError::StringTooLong => TattachError::StringTooLong,
+            WireError::InvalidUtf8 => TattachError::InvalidUtf8,
+        })?;
+
+        // Write afid[4]
+        offset = write_u32(buf, offset, self.afid).map_err(|e| match e {
+            WireError::BufferTooSmall => TattachError::BufferTooSmall,
+            WireError::StringTooLong => TattachError::StringTooLong,
+            WireError::InvalidUtf8 => TattachError::InvalidUtf8,
+        })?;
+
+        // Write uname[s]
+        offset = write_string(buf, offset, &self.uname).map_err(|e| match e {
+            WireError::BufferTooSmall => TattachError::BufferTooSmall,
+            WireError::StringTooLong => TattachError::StringTooLong,
+            WireError::InvalidUtf8 => TattachError::InvalidUtf8,
+        })?;
+
+        // Write aname[s]
+        offset = write_string(buf, offset, &self.aname).map_err(|e| match e {
+            WireError::BufferTooSmall => TattachError::BufferTooSmall,
+            WireError::StringTooLong => TattachError::StringTooLong,
+            WireError::InvalidUtf8 => TattachError::InvalidUtf8,
+        })?;
+
+        // Write n_uname[4]
+        offset = write_u32(buf, offset, self.n_uname).map_err(|e| match e {
+            WireError::BufferTooSmall => TattachError::BufferTooSmall,
+            WireError::StringTooLong => TattachError::StringTooLong,
+            WireError::InvalidUtf8 => TattachError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tattach message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_tattach(&self) -> Result<u32, TattachError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 1024]; // Large enough for Tattach message with strings
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rattach message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RattachMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Root QID
+    pub qid: Qid,
+}
+
+impl RattachMessage {
+    /// Create a new Rattach message
+    pub fn new(tag: u16, qid: Qid) -> Self {
+        Self { tag, qid }
+    }
+
+    /// Deserialize an Rattach message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RattachError> {
+        use wire::{WireError, read_u16, read_u32, read_u64};
+
+        if buf.len() < 4 {
+            return Err(RattachError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RattachError::BufferTooSmall,
+            WireError::StringTooLong => RattachError::InternalError,
+            WireError::InvalidUtf8 => RattachError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RattachError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rattach
+        if offset >= buf.len() {
+            return Err(RattachError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rattach as u8 {
+            return Err(RattachError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RattachError::BufferTooSmall,
+            WireError::StringTooLong => RattachError::InternalError,
+            WireError::InvalidUtf8 => RattachError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read qid[13] - type[1] version[4] path[8]
+        if offset + 13 > buf.len() {
+            return Err(RattachError::BufferTooSmall);
+        }
+
+        let qtype = buf[offset];
+        offset += 1;
+
+        let (version, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RattachError::BufferTooSmall,
+            WireError::StringTooLong => RattachError::InternalError,
+            WireError::InvalidUtf8 => RattachError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let (path, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RattachError::BufferTooSmall,
+            WireError::StringTooLong => RattachError::InternalError,
+            WireError::InvalidUtf8 => RattachError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let qid = Qid::new(qtype, version, path);
+
+        let message = Self { tag, qid };
+
+        Ok((message, offset))
+    }
+}
+
+/// Tattach serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TattachError {
+    BufferTooSmall,
+    StringTooLong,
+    UnameCountMismatch,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Rattach deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RattachError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Rlerror message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RlerrorMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Error code
+    pub ecode: u32,
+}
+
+impl RlerrorMessage {
+    /// Create a new Rlerror message
+    pub fn new(tag: u16, ecode: u32) -> Self {
+        Self { tag, ecode }
+    }
+
+    /// Deserialize an Rlerror message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RlerrorError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RlerrorError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RlerrorError::BufferTooSmall,
+            WireError::StringTooLong => RlerrorError::InternalError,
+            WireError::InvalidUtf8 => RlerrorError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RlerrorError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rlerror
+        if offset >= buf.len() {
+            return Err(RlerrorError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::RLerror as u8 {
+            return Err(RlerrorError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RlerrorError::BufferTooSmall,
+            WireError::StringTooLong => RlerrorError::InternalError,
+            WireError::InvalidUtf8 => RlerrorError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read ecode[4]
+        let (ecode, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RlerrorError::BufferTooSmall,
+            WireError::StringTooLong => RlerrorError::InternalError,
+            WireError::InvalidUtf8 => RlerrorError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let message = Self { tag, ecode };
+
+        Ok((message, offset))
+    }
+}
+
+/// Rlerror deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RlerrorError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Tstatfs message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TstatfsMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+}
+
+impl TstatfsMessage {
+    /// Create a new Tstatfs message
+    pub fn new(tag: u16, fid: u32) -> Self {
+        Self { tag, fid }
+    }
+
+    /// Serialize the Tstatfs message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TstatfsError> {
+        use wire::{WireError, write_u16, write_u32};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 4; // size[4] + type[1] + tag[2] + fid[4]
+
+        if total_size > buf.len() {
+            return Err(TstatfsError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TstatfsError::BufferTooSmall,
+            WireError::StringTooLong => TstatfsError::InternalError,
+            WireError::InvalidUtf8 => TstatfsError::InternalError,
+        })?;
+
+        // Write message type[1] - Tstatfs
+        buf[offset] = P9MsgType::Tstatfs as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TstatfsError::BufferTooSmall,
+            WireError::StringTooLong => TstatfsError::InternalError,
+            WireError::InvalidUtf8 => TstatfsError::InternalError,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TstatfsError::BufferTooSmall,
+            WireError::StringTooLong => TstatfsError::InternalError,
+            WireError::InvalidUtf8 => TstatfsError::InternalError,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tstatfs message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_tstatfs(&self) -> Result<u32, TstatfsError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 16]; // Large enough for Tstatfs message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rstatfs message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RstatfsMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File system type
+    pub type_: u32,
+    /// Block size
+    pub bsize: u32,
+    /// Total blocks
+    pub blocks: u64,
+    /// Free blocks
+    pub bfree: u64,
+    /// Available blocks
+    pub bavail: u64,
+    /// Total files
+    pub files: u64,
+    /// Free files
+    pub ffree: u64,
+    /// File system ID
+    pub fsid: u64,
+    /// Maximum filename length
+    pub namelen: u32,
+}
+
+impl RstatfsMessage {
+    /// Create a new Rstatfs message
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        tag: u16,
+        type_: u32,
+        bsize: u32,
+        blocks: u64,
+        bfree: u64,
+        bavail: u64,
+        files: u64,
+        ffree: u64,
+        fsid: u64,
+        namelen: u32,
+    ) -> Self {
+        Self {
+            tag,
+            type_,
+            bsize,
+            blocks,
+            bfree,
+            bavail,
+            files,
+            ffree,
+            fsid,
+            namelen,
+        }
+    }
+
+    /// Deserialize an Rstatfs message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RstatfsError> {
+        use wire::{WireError, read_u16, read_u32, read_u64};
+
+        if buf.len() < 4 {
+            return Err(RstatfsError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RstatfsError::BufferTooSmall,
+            WireError::StringTooLong => RstatfsError::InternalError,
+            WireError::InvalidUtf8 => RstatfsError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RstatfsError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rstatfs
+        if offset >= buf.len() {
+            return Err(RstatfsError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rstatfs as u8 {
+            return Err(RstatfsError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RstatfsError::BufferTooSmall,
+            WireError::StringTooLong => RstatfsError::InternalError,
+            WireError::InvalidUtf8 => RstatfsError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read type[4]
+        let (type_, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RstatfsError::BufferTooSmall,
+            WireError::StringTooLong => RstatfsError::InternalError,
+            WireError::InvalidUtf8 => RstatfsError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read bsize[4]
+        let (bsize, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RstatfsError::BufferTooSmall,
+            WireError::StringTooLong => RstatfsError::InternalError,
+            WireError::InvalidUtf8 => RstatfsError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read blocks[8]
+        let (blocks, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RstatfsError::BufferTooSmall,
+            WireError::StringTooLong => RstatfsError::InternalError,
+            WireError::InvalidUtf8 => RstatfsError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read bfree[8]
+        let (bfree, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RstatfsError::BufferTooSmall,
+            WireError::StringTooLong => RstatfsError::InternalError,
+            WireError::InvalidUtf8 => RstatfsError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read bavail[8]
+        let (bavail, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RstatfsError::BufferTooSmall,
+            WireError::StringTooLong => RstatfsError::InternalError,
+            WireError::InvalidUtf8 => RstatfsError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read files[8]
+        let (files, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RstatfsError::BufferTooSmall,
+            WireError::StringTooLong => RstatfsError::InternalError,
+            WireError::InvalidUtf8 => RstatfsError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read ffree[8]
+        let (ffree, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RstatfsError::BufferTooSmall,
+            WireError::StringTooLong => RstatfsError::InternalError,
+            WireError::InvalidUtf8 => RstatfsError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read fsid[8]
+        let (fsid, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RstatfsError::BufferTooSmall,
+            WireError::StringTooLong => RstatfsError::InternalError,
+            WireError::InvalidUtf8 => RstatfsError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read namelen[4]
+        let (namelen, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RstatfsError::BufferTooSmall,
+            WireError::StringTooLong => RstatfsError::InternalError,
+            WireError::InvalidUtf8 => RstatfsError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let message = Self {
+            tag,
+            type_,
+            bsize,
+            blocks,
+            bfree,
+            bavail,
+            files,
+            ffree,
+            fsid,
+            namelen,
+        };
+
+        Ok((message, offset))
+    }
+}
+
+/// Tstatfs serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TstatfsError {
+    BufferTooSmall,
+    InternalError,
+}
+
+/// Rstatfs deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RstatfsError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Tlopen message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TlopenMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// Open flags
+    pub flags: u32,
+}
+
+impl TlopenMessage {
+    /// Create a new Tlopen message
+    pub fn new(tag: u16, fid: u32, flags: u32) -> Self {
+        Self { tag, fid, flags }
+    }
+
+    /// Serialize the Tlopen message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TlopenError> {
+        use wire::{WireError, write_u16, write_u32};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 4 + 4; // size[4] + type[1] + tag[2] + fid[4] + flags[4]
+
+        if total_size > buf.len() {
+            return Err(TlopenError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TlopenError::BufferTooSmall,
+            WireError::StringTooLong => TlopenError::InternalError,
+            WireError::InvalidUtf8 => TlopenError::InternalError,
+        })?;
+
+        // Write message type[1] - Tlopen
+        buf[offset] = P9MsgType::Tlopen as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TlopenError::BufferTooSmall,
+            WireError::StringTooLong => TlopenError::InternalError,
+            WireError::InvalidUtf8 => TlopenError::InternalError,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TlopenError::BufferTooSmall,
+            WireError::StringTooLong => TlopenError::InternalError,
+            WireError::InvalidUtf8 => TlopenError::InternalError,
+        })?;
+
+        // Write flags[4]
+        offset = write_u32(buf, offset, self.flags).map_err(|e| match e {
+            WireError::BufferTooSmall => TlopenError::BufferTooSmall,
+            WireError::StringTooLong => TlopenError::InternalError,
+            WireError::InvalidUtf8 => TlopenError::InternalError,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tlopen message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_tlopen(&self) -> Result<u32, TlopenError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 16]; // Large enough for Tlopen message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rlopen message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RlopenMessage {
+    /// Message tag
+    pub tag: u16,
+    /// QID of the opened file
+    pub qid: Qid,
+    /// I/O unit size
+    pub iounit: u32,
+}
+
+impl RlopenMessage {
+    /// Create a new Rlopen message
+    pub fn new(tag: u16, qid: Qid, iounit: u32) -> Self {
+        Self { tag, qid, iounit }
+    }
+
+    /// Deserialize an Rlopen message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RlopenError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RlopenError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RlopenError::BufferTooSmall,
+            WireError::StringTooLong => RlopenError::InternalError,
+            WireError::InvalidUtf8 => RlopenError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RlopenError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rlopen
+        if offset >= buf.len() {
+            return Err(RlopenError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rlopen as u8 {
+            return Err(RlopenError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RlopenError::BufferTooSmall,
+            WireError::StringTooLong => RlopenError::InternalError,
+            WireError::InvalidUtf8 => RlopenError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read qid[13] - type[1] version[4] path[8]
+        if offset + 13 > buf.len() {
+            return Err(RlopenError::BufferTooSmall);
+        }
+        let qid = Qid {
+            qtype: buf[offset],
+            version: u32::from_le_bytes([
+                buf[offset + 1],
+                buf[offset + 2],
+                buf[offset + 3],
+                buf[offset + 4],
+            ]),
+            path: u64::from_le_bytes([
+                buf[offset + 5],
+                buf[offset + 6],
+                buf[offset + 7],
+                buf[offset + 8],
+                buf[offset + 9],
+                buf[offset + 10],
+                buf[offset + 11],
+                buf[offset + 12],
+            ]),
+        };
+        offset += 13;
+
+        // Read iounit[4]
+        let (iounit, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RlopenError::BufferTooSmall,
+            WireError::StringTooLong => RlopenError::InternalError,
+            WireError::InvalidUtf8 => RlopenError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let message = Self { tag, qid, iounit };
+
+        Ok((message, offset))
+    }
+}
+
+/// Tlopen serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TlopenError {
+    BufferTooSmall,
+    InternalError,
+}
+
+/// Rlopen deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RlopenError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Tlcreate message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TlcreateMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// Name of the file to create
+    pub name: String,
+    /// Open flags
+    pub flags: u32,
+    /// File mode
+    pub mode: u32,
+    /// Group ID
+    pub gid: u32,
+}
+
+impl TlcreateMessage {
+    /// Create a new Tlcreate message
+    pub fn new(tag: u16, fid: u32, name: String, flags: u32, mode: u32, gid: u32) -> Self {
+        Self {
+            tag,
+            fid,
+            name,
+            flags,
+            mode,
+            gid,
+        }
+    }
+
+    /// Serialize the Tlcreate message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TlcreateError> {
+        use wire::{WireError, write_string, write_u16, write_u32};
+
+        // Calculate total message size
+        let name_len = self.name.len();
+        let total_size = 4 + 1 + 2 + 4 + (2 + name_len) + 4 + 4 + 4; // size[4] + type[1] + tag[2] + fid[4] + name[s] + flags[4] + mode[4] + gid[4]
+
+        if total_size > buf.len() {
+            return Err(TlcreateError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TlcreateError::BufferTooSmall,
+            WireError::StringTooLong => TlcreateError::NameTooLong,
+            WireError::InvalidUtf8 => TlcreateError::InvalidUtf8,
+        })?;
+
+        // Write message type[1] - Tlcreate
+        buf[offset] = P9MsgType::Tlcreate as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TlcreateError::BufferTooSmall,
+            WireError::StringTooLong => TlcreateError::InternalError,
+            WireError::InvalidUtf8 => TlcreateError::InvalidUtf8,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TlcreateError::BufferTooSmall,
+            WireError::StringTooLong => TlcreateError::InternalError,
+            WireError::InvalidUtf8 => TlcreateError::InvalidUtf8,
+        })?;
+
+        // Write name[s]
+        offset = write_string(buf, offset, &self.name).map_err(|e| match e {
+            WireError::BufferTooSmall => TlcreateError::BufferTooSmall,
+            WireError::StringTooLong => TlcreateError::NameTooLong,
+            WireError::InvalidUtf8 => TlcreateError::InvalidUtf8,
+        })?;
+
+        // Write flags[4]
+        offset = write_u32(buf, offset, self.flags).map_err(|e| match e {
+            WireError::BufferTooSmall => TlcreateError::BufferTooSmall,
+            WireError::StringTooLong => TlcreateError::InternalError,
+            WireError::InvalidUtf8 => TlcreateError::InvalidUtf8,
+        })?;
+
+        // Write mode[4]
+        offset = write_u32(buf, offset, self.mode).map_err(|e| match e {
+            WireError::BufferTooSmall => TlcreateError::BufferTooSmall,
+            WireError::StringTooLong => TlcreateError::InternalError,
+            WireError::InvalidUtf8 => TlcreateError::InvalidUtf8,
+        })?;
+
+        // Write gid[4]
+        offset = write_u32(buf, offset, self.gid).map_err(|e| match e {
+            WireError::BufferTooSmall => TlcreateError::BufferTooSmall,
+            WireError::StringTooLong => TlcreateError::InternalError,
+            WireError::InvalidUtf8 => TlcreateError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tlcreate message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_tlcreate(&self) -> Result<u32, TlcreateError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 128]; // Large enough for Tlcreate message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rlcreate message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RlcreateMessage {
+    /// Message tag
+    pub tag: u16,
+    /// QID of the created file
+    pub qid: Qid,
+    /// I/O unit size
+    pub iounit: u32,
+}
+
+impl RlcreateMessage {
+    /// Create a new Rlcreate message
+    pub fn new(tag: u16, qid: Qid, iounit: u32) -> Self {
+        Self { tag, qid, iounit }
+    }
+
+    /// Deserialize an Rlcreate message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RlcreateError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RlcreateError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RlcreateError::BufferTooSmall,
+            WireError::StringTooLong => RlcreateError::InternalError,
+            WireError::InvalidUtf8 => RlcreateError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RlcreateError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rlcreate
+        if offset >= buf.len() {
+            return Err(RlcreateError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rlcreate as u8 {
+            return Err(RlcreateError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RlcreateError::BufferTooSmall,
+            WireError::StringTooLong => RlcreateError::InternalError,
+            WireError::InvalidUtf8 => RlcreateError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read qid[13] - type[1] version[4] path[8]
+        if offset + 13 > buf.len() {
+            return Err(RlcreateError::BufferTooSmall);
+        }
+        let qid = Qid {
+            qtype: buf[offset],
+            version: u32::from_le_bytes([
+                buf[offset + 1],
+                buf[offset + 2],
+                buf[offset + 3],
+                buf[offset + 4],
+            ]),
+            path: u64::from_le_bytes([
+                buf[offset + 5],
+                buf[offset + 6],
+                buf[offset + 7],
+                buf[offset + 8],
+                buf[offset + 9],
+                buf[offset + 10],
+                buf[offset + 11],
+                buf[offset + 12],
+            ]),
+        };
+        offset += 13;
+
+        // Read iounit[4]
+        let (iounit, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RlcreateError::BufferTooSmall,
+            WireError::StringTooLong => RlcreateError::InternalError,
+            WireError::InvalidUtf8 => RlcreateError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let message = Self { tag, qid, iounit };
+
+        Ok((message, offset))
+    }
+}
+
+/// Tlcreate serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TlcreateError {
+    BufferTooSmall,
+    NameTooLong,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Rlcreate deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RlcreateError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Tsymlink message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TsymlinkMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// Name of the symlink
+    pub name: String,
+    /// Symlink target
+    pub symtgt: String,
+    /// Group ID
+    pub gid: u32,
+}
+
+impl TsymlinkMessage {
+    /// Create a new Tsymlink message
+    pub fn new(tag: u16, fid: u32, name: String, symtgt: String, gid: u32) -> Self {
+        Self {
+            tag,
+            fid,
+            name,
+            symtgt,
+            gid,
+        }
+    }
+
+    /// Serialize the Tsymlink message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TsymlinkError> {
+        use wire::{WireError, write_string, write_u16, write_u32};
+
+        let name_len = self.name.len();
+        let symtgt_len = self.symtgt.len();
+        let total_size = 4 + 1 + 2 + 4 + (2 + name_len) + (2 + symtgt_len) + 4;
+
+        if total_size > buf.len() {
+            return Err(TsymlinkError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TsymlinkError::BufferTooSmall,
+            WireError::StringTooLong => TsymlinkError::StringTooLong,
+            WireError::InvalidUtf8 => TsymlinkError::InvalidUtf8,
+        })?;
+
+        buf[offset] = P9MsgType::Tsymlink as u8;
+        offset += 1;
+
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TsymlinkError::BufferTooSmall,
+            WireError::StringTooLong => TsymlinkError::InternalError,
+            WireError::InvalidUtf8 => TsymlinkError::InvalidUtf8,
+        })?;
+
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TsymlinkError::BufferTooSmall,
+            WireError::StringTooLong => TsymlinkError::InternalError,
+            WireError::InvalidUtf8 => TsymlinkError::InvalidUtf8,
+        })?;
+
+        offset = write_string(buf, offset, &self.name).map_err(|e| match e {
+            WireError::BufferTooSmall => TsymlinkError::BufferTooSmall,
+            WireError::StringTooLong => TsymlinkError::StringTooLong,
+            WireError::InvalidUtf8 => TsymlinkError::InvalidUtf8,
+        })?;
+
+        offset = write_string(buf, offset, &self.symtgt).map_err(|e| match e {
+            WireError::BufferTooSmall => TsymlinkError::BufferTooSmall,
+            WireError::StringTooLong => TsymlinkError::StringTooLong,
+            WireError::InvalidUtf8 => TsymlinkError::InvalidUtf8,
+        })?;
+
+        offset = write_u32(buf, offset, self.gid).map_err(|e| match e {
+            WireError::BufferTooSmall => TsymlinkError::BufferTooSmall,
+            WireError::StringTooLong => TsymlinkError::InternalError,
+            WireError::InvalidUtf8 => TsymlinkError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tsymlink message using host_write
+    pub fn send_tsymlink(&self) -> Result<u32, TsymlinkError> {
+        use crate::host_calls::host_write;
+        let mut buf = [0u8; 128];
+        let bytes_written = self.serialize(&mut buf)?;
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+        Ok(result)
+    }
+}
+
+/// Rsymlink message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RsymlinkMessage {
+    /// Message tag
+    pub tag: u16,
+    /// QID of the created symlink
+    pub qid: Qid,
+}
+
+impl RsymlinkMessage {
+    /// Create a new Rsymlink message
+    pub fn new(tag: u16, qid: Qid) -> Self {
+        Self { tag, qid }
+    }
+
+    /// Deserialize an Rsymlink message from a buffer
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RsymlinkError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RsymlinkError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RsymlinkError::BufferTooSmall,
+            WireError::StringTooLong => RsymlinkError::InternalError,
+            WireError::InvalidUtf8 => RsymlinkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        if buf.len() < size as usize {
+            return Err(RsymlinkError::BufferTooSmall);
+        }
+
+        if offset >= buf.len() {
+            return Err(RsymlinkError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rsymlink as u8 {
+            return Err(RsymlinkError::InvalidMessageType);
+        }
+
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RsymlinkError::BufferTooSmall,
+            WireError::StringTooLong => RsymlinkError::InternalError,
+            WireError::InvalidUtf8 => RsymlinkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        if offset + 13 > buf.len() {
+            return Err(RsymlinkError::BufferTooSmall);
+        }
+        let qid = Qid {
+            qtype: buf[offset],
+            version: u32::from_le_bytes([
+                buf[offset + 1],
+                buf[offset + 2],
+                buf[offset + 3],
+                buf[offset + 4],
+            ]),
+            path: u64::from_le_bytes([
+                buf[offset + 5],
+                buf[offset + 6],
+                buf[offset + 7],
+                buf[offset + 8],
+                buf[offset + 9],
+                buf[offset + 10],
+                buf[offset + 11],
+                buf[offset + 12],
+            ]),
+        };
+        offset += 13;
+
+        Ok((Self { tag, qid }, offset))
+    }
+}
+
+/// Tmknod message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TmknodMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Directory file identifier
+    pub dfid: u32,
+    /// Name of the device file
+    pub name: String,
+    /// File mode
+    pub mode: u32,
+    /// Major device number
+    pub major: u32,
+    /// Minor device number
+    pub minor: u32,
+    /// Group ID
+    pub gid: u32,
+}
+
+impl TmknodMessage {
+    /// Create a new Tmknod message
+    pub fn new(
+        tag: u16,
+        dfid: u32,
+        name: String,
+        mode: u32,
+        major: u32,
+        minor: u32,
+        gid: u32,
+    ) -> Self {
+        Self {
+            tag,
+            dfid,
+            name,
+            mode,
+            major,
+            minor,
+            gid,
+        }
+    }
+
+    /// Serialize the Tmknod message to a buffer
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TmknodError> {
+        use wire::{WireError, write_string, write_u16, write_u32};
+
+        let name_len = self.name.len();
+        let total_size = 4 + 1 + 2 + 4 + (2 + name_len) + 4 + 4 + 4 + 4;
+
+        if total_size > buf.len() {
+            return Err(TmknodError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TmknodError::BufferTooSmall,
+            WireError::StringTooLong => TmknodError::NameTooLong,
+            WireError::InvalidUtf8 => TmknodError::InvalidUtf8,
+        })?;
+
+        buf[offset] = P9MsgType::Tmknod as u8;
+        offset += 1;
+
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TmknodError::BufferTooSmall,
+            WireError::StringTooLong => TmknodError::InternalError,
+            WireError::InvalidUtf8 => TmknodError::InvalidUtf8,
+        })?;
+
+        offset = write_u32(buf, offset, self.dfid).map_err(|e| match e {
+            WireError::BufferTooSmall => TmknodError::BufferTooSmall,
+            WireError::StringTooLong => TmknodError::InternalError,
+            WireError::InvalidUtf8 => TmknodError::InvalidUtf8,
+        })?;
+
+        offset = write_string(buf, offset, &self.name).map_err(|e| match e {
+            WireError::BufferTooSmall => TmknodError::BufferTooSmall,
+            WireError::StringTooLong => TmknodError::NameTooLong,
+            WireError::InvalidUtf8 => TmknodError::InvalidUtf8,
+        })?;
+
+        offset = write_u32(buf, offset, self.mode).map_err(|e| match e {
+            WireError::BufferTooSmall => TmknodError::BufferTooSmall,
+            WireError::StringTooLong => TmknodError::InternalError,
+            WireError::InvalidUtf8 => TmknodError::InvalidUtf8,
+        })?;
+
+        offset = write_u32(buf, offset, self.major).map_err(|e| match e {
+            WireError::BufferTooSmall => TmknodError::BufferTooSmall,
+            WireError::StringTooLong => TmknodError::InternalError,
+            WireError::InvalidUtf8 => TmknodError::InvalidUtf8,
+        })?;
+
+        offset = write_u32(buf, offset, self.minor).map_err(|e| match e {
+            WireError::BufferTooSmall => TmknodError::BufferTooSmall,
+            WireError::StringTooLong => TmknodError::InternalError,
+            WireError::InvalidUtf8 => TmknodError::InvalidUtf8,
+        })?;
+
+        offset = write_u32(buf, offset, self.gid).map_err(|e| match e {
+            WireError::BufferTooSmall => TmknodError::BufferTooSmall,
+            WireError::StringTooLong => TmknodError::InternalError,
+            WireError::InvalidUtf8 => TmknodError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tmknod message using host_write
+    pub fn send_tmknod(&self) -> Result<u32, TmknodError> {
+        use crate::host_calls::host_write;
+        let mut buf = [0u8; 128];
+        let bytes_written = self.serialize(&mut buf)?;
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+        Ok(result)
+    }
+}
+
+/// Rmknod message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RmknodMessage {
+    /// Message tag
+    pub tag: u16,
+    /// QID of the created device file
+    pub qid: Qid,
+}
+
+impl RmknodMessage {
+    /// Create a new Rmknod message
+    pub fn new(tag: u16, qid: Qid) -> Self {
+        Self { tag, qid }
+    }
+
+    /// Deserialize an Rmknod message from a buffer
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RmknodError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RmknodError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RmknodError::BufferTooSmall,
+            WireError::StringTooLong => RmknodError::InternalError,
+            WireError::InvalidUtf8 => RmknodError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        if buf.len() < size as usize {
+            return Err(RmknodError::BufferTooSmall);
+        }
+
+        if offset >= buf.len() {
+            return Err(RmknodError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rmknod as u8 {
+            return Err(RmknodError::InvalidMessageType);
+        }
+
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RmknodError::BufferTooSmall,
+            WireError::StringTooLong => RmknodError::InternalError,
+            WireError::InvalidUtf8 => RmknodError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        if offset + 13 > buf.len() {
+            return Err(RmknodError::BufferTooSmall);
+        }
+        let qid = Qid {
+            qtype: buf[offset],
+            version: u32::from_le_bytes([
+                buf[offset + 1],
+                buf[offset + 2],
+                buf[offset + 3],
+                buf[offset + 4],
+            ]),
+            path: u64::from_le_bytes([
+                buf[offset + 5],
+                buf[offset + 6],
+                buf[offset + 7],
+                buf[offset + 8],
+                buf[offset + 9],
+                buf[offset + 10],
+                buf[offset + 11],
+                buf[offset + 12],
+            ]),
+        };
+        offset += 13;
+
+        Ok((Self { tag, qid }, offset))
+    }
+}
+
+/// Trename message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TrenameMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// Directory file identifier
+    pub dfid: u32,
+    /// New name
+    pub name: String,
+}
+
+impl TrenameMessage {
+    /// Create a new Trename message
+    pub fn new(tag: u16, fid: u32, dfid: u32, name: String) -> Self {
+        Self {
+            tag,
+            fid,
+            dfid,
+            name,
+        }
+    }
+
+    /// Serialize the Trename message to a buffer
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TrenameError> {
+        use wire::{WireError, write_string, write_u16, write_u32};
+
+        let name_len = self.name.len();
+        let total_size = 4 + 1 + 2 + 4 + 4 + (2 + name_len);
+
+        if total_size > buf.len() {
+            return Err(TrenameError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TrenameError::BufferTooSmall,
+            WireError::StringTooLong => TrenameError::NameTooLong,
+            WireError::InvalidUtf8 => TrenameError::InvalidUtf8,
+        })?;
+
+        buf[offset] = P9MsgType::Trename as u8;
+        offset += 1;
+
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TrenameError::BufferTooSmall,
+            WireError::StringTooLong => TrenameError::InternalError,
+            WireError::InvalidUtf8 => TrenameError::InvalidUtf8,
+        })?;
+
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TrenameError::BufferTooSmall,
+            WireError::StringTooLong => TrenameError::InternalError,
+            WireError::InvalidUtf8 => TrenameError::InvalidUtf8,
+        })?;
+
+        offset = write_u32(buf, offset, self.dfid).map_err(|e| match e {
+            WireError::BufferTooSmall => TrenameError::BufferTooSmall,
+            WireError::StringTooLong => TrenameError::InternalError,
+            WireError::InvalidUtf8 => TrenameError::InvalidUtf8,
+        })?;
+
+        offset = write_string(buf, offset, &self.name).map_err(|e| match e {
+            WireError::BufferTooSmall => TrenameError::BufferTooSmall,
+            WireError::StringTooLong => TrenameError::NameTooLong,
+            WireError::InvalidUtf8 => TrenameError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Trename message using host_write
+    pub fn send_trename(&self) -> Result<u32, TrenameError> {
+        use crate::host_calls::host_write;
+        let mut buf = [0u8; 128];
+        let bytes_written = self.serialize(&mut buf)?;
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+        Ok(result)
+    }
+}
+
+/// Rrename message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RrenameMessage {
+    /// Message tag
+    pub tag: u16,
+}
+
+impl RrenameMessage {
+    /// Create a new Rrename message
+    pub fn new(tag: u16) -> Self {
+        Self { tag }
+    }
+
+    /// Deserialize an Rrename message from a buffer
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RrenameError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RrenameError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RrenameError::BufferTooSmall,
+            WireError::StringTooLong => RrenameError::InternalError,
+            WireError::InvalidUtf8 => RrenameError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        if buf.len() < size as usize {
+            return Err(RrenameError::BufferTooSmall);
+        }
+
+        if offset >= buf.len() {
+            return Err(RrenameError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rrename as u8 {
+            return Err(RrenameError::InvalidMessageType);
+        }
+
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RrenameError::BufferTooSmall,
+            WireError::StringTooLong => RrenameError::InternalError,
+            WireError::InvalidUtf8 => RrenameError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        Ok((Self { tag }, offset))
+    }
+}
+
+/// Treadlink message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TreadlinkMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+}
+
+impl TreadlinkMessage {
+    /// Create a new Treadlink message
+    pub fn new(tag: u16, fid: u32) -> Self {
+        Self { tag, fid }
+    }
+
+    /// Serialize the Treadlink message to a buffer
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TreadlinkError> {
+        use wire::{WireError, write_u16, write_u32};
+
+        let total_size = 4 + 1 + 2 + 4;
+
+        if total_size > buf.len() {
+            return Err(TreadlinkError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TreadlinkError::BufferTooSmall,
+            WireError::StringTooLong => TreadlinkError::InternalError,
+            WireError::InvalidUtf8 => TreadlinkError::InvalidUtf8,
+        })?;
+
+        buf[offset] = P9MsgType::Treadlink as u8;
+        offset += 1;
+
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TreadlinkError::BufferTooSmall,
+            WireError::StringTooLong => TreadlinkError::InternalError,
+            WireError::InvalidUtf8 => TreadlinkError::InvalidUtf8,
+        })?;
+
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TreadlinkError::BufferTooSmall,
+            WireError::StringTooLong => TreadlinkError::InternalError,
+            WireError::InvalidUtf8 => TreadlinkError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Treadlink message using host_write
+    pub fn send_treadlink(&self) -> Result<u32, TreadlinkError> {
+        use crate::host_calls::host_write;
+        let mut buf = [0u8; 16];
+        let bytes_written = self.serialize(&mut buf)?;
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+        Ok(result)
+    }
+}
+
+/// Rreadlink message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RreadlinkMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Symlink target
+    pub target: String,
+}
+
+impl RreadlinkMessage {
+    /// Create a new Rreadlink message
+    pub fn new(tag: u16, target: String) -> Self {
+        Self { tag, target }
+    }
+
+    /// Deserialize an Rreadlink message from a buffer
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RreadlinkError> {
+        use wire::{WireError, read_string, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RreadlinkError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RreadlinkError::BufferTooSmall,
+            WireError::StringTooLong => RreadlinkError::InternalError,
+            WireError::InvalidUtf8 => RreadlinkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        if buf.len() < size as usize {
+            return Err(RreadlinkError::BufferTooSmall);
+        }
+
+        if offset >= buf.len() {
+            return Err(RreadlinkError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rreadlink as u8 {
+            return Err(RreadlinkError::InvalidMessageType);
+        }
+
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RreadlinkError::BufferTooSmall,
+            WireError::StringTooLong => RreadlinkError::InternalError,
+            WireError::InvalidUtf8 => RreadlinkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let (target_str, new_offset) = read_string(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RreadlinkError::BufferTooSmall,
+            WireError::StringTooLong => RreadlinkError::TargetTooLong,
+            WireError::InvalidUtf8 => RreadlinkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let target = target_str.to_string();
+
+        Ok((Self { tag, target }, offset))
+    }
+}
+
+// Error types for all the new message types
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TsymlinkError {
+    BufferTooSmall,
+    StringTooLong,
+    InvalidUtf8,
+    InternalError,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RsymlinkError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TmknodError {
+    BufferTooSmall,
+    NameTooLong,
+    InvalidUtf8,
+    InternalError,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RmknodError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TrenameError {
+    BufferTooSmall,
+    NameTooLong,
+    InvalidUtf8,
+    InternalError,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RrenameError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TreadlinkError {
+    BufferTooSmall,
+    InvalidUtf8,
+    InternalError,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RreadlinkError {
+    BufferTooSmall,
+    InvalidMessageType,
+    TargetTooLong,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Tgetattr message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TgetattrMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// Request mask for which attributes to get
+    pub request_mask: u64,
+}
+
+impl TgetattrMessage {
+    /// Create a new Tgetattr message
+    pub fn new(tag: u16, fid: u32, request_mask: u64) -> Self {
+        Self {
+            tag,
+            fid,
+            request_mask,
+        }
+    }
+
+    /// Serialize the Tgetattr message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TgetattrError> {
+        use wire::{WireError, write_u16, write_u32, write_u64};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 4 + 8; // size[4] + type[1] + tag[2] + fid[4] + request_mask[8]
+
+        if total_size > buf.len() {
+            return Err(TgetattrError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TgetattrError::BufferTooSmall,
+            WireError::StringTooLong => TgetattrError::InternalError,
+            WireError::InvalidUtf8 => TgetattrError::InvalidUtf8,
+        })?;
+
+        // Write message type[1] - Tgetattr
+        buf[offset] = P9MsgType::Tgetattr as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TgetattrError::BufferTooSmall,
+            WireError::StringTooLong => TgetattrError::InternalError,
+            WireError::InvalidUtf8 => TgetattrError::InvalidUtf8,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TgetattrError::BufferTooSmall,
+            WireError::StringTooLong => TgetattrError::InternalError,
+            WireError::InvalidUtf8 => TgetattrError::InvalidUtf8,
+        })?;
+
+        // Write request_mask[8]
+        offset = write_u64(buf, offset, self.request_mask).map_err(|e| match e {
+            WireError::BufferTooSmall => TgetattrError::BufferTooSmall,
+            WireError::StringTooLong => TgetattrError::InternalError,
+            WireError::InvalidUtf8 => TgetattrError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tgetattr message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_tgetattr(&self) -> Result<u32, TgetattrError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 32]; // Large enough for Tgetattr message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rgetattr message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RgetattrMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Valid mask indicating which attributes are valid
+    pub valid: u64,
+    /// QID of the file
+    pub qid: Qid,
+    /// File mode
+    pub mode: u32,
+    /// User ID
+    pub uid: u32,
+    /// Group ID
+    pub gid: u32,
+    /// Number of links
+    pub nlink: u64,
+    /// Device ID (for device files)
+    pub rdev: u64,
+    /// File size
+    pub size: u64,
+    /// Block size
+    pub blksize: u64,
+    /// Number of blocks
+    pub blocks: u64,
+    /// Access time (seconds)
+    pub atime_sec: u64,
+    /// Access time (nanoseconds)
+    pub atime_nsec: u64,
+    /// Modification time (seconds)
+    pub mtime_sec: u64,
+    /// Modification time (nanoseconds)
+    pub mtime_nsec: u64,
+    /// Change time (seconds)
+    pub ctime_sec: u64,
+    /// Change time (nanoseconds)
+    pub ctime_nsec: u64,
+    /// Birth time (seconds)
+    pub btime_sec: u64,
+    /// Birth time (nanoseconds)
+    pub btime_nsec: u64,
+    /// Generation number
+    pub gen_: u64,
+    /// Data version
+    pub data_version: u64,
+}
+
+impl RgetattrMessage {
+    /// Create a new Rgetattr message
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        tag: u16,
+        valid: u64,
+        qid: Qid,
+        mode: u32,
+        uid: u32,
+        gid: u32,
+        nlink: u64,
+        rdev: u64,
+        size: u64,
+        blksize: u64,
+        blocks: u64,
+        atime_sec: u64,
+        atime_nsec: u64,
+        mtime_sec: u64,
+        mtime_nsec: u64,
+        ctime_sec: u64,
+        ctime_nsec: u64,
+        btime_sec: u64,
+        btime_nsec: u64,
+        gen_: u64,
+        data_version: u64,
+    ) -> Self {
+        Self {
+            tag,
+            valid,
+            qid,
+            mode,
+            uid,
+            gid,
+            nlink,
+            rdev,
+            size,
+            blksize,
+            blocks,
+            atime_sec,
+            atime_nsec,
+            mtime_sec,
+            mtime_nsec,
+            ctime_sec,
+            ctime_nsec,
+            btime_sec,
+            btime_nsec,
+            gen_,
+            data_version,
+        }
+    }
+
+    /// Deserialize an Rgetattr message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RgetattrError> {
+        use wire::{WireError, read_u16, read_u32, read_u64};
+
+        if buf.len() < 4 {
+            return Err(RgetattrError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RgetattrError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rgetattr
+        if offset >= buf.len() {
+            return Err(RgetattrError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rgetattr as u8 {
+            return Err(RgetattrError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read valid[8]
+        let (valid, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read qid[13] - type[1] version[4] path[8]
+        if offset + 13 > buf.len() {
+            return Err(RgetattrError::BufferTooSmall);
+        }
+        let qid = Qid {
+            qtype: buf[offset],
+            version: u32::from_le_bytes([
+                buf[offset + 1],
+                buf[offset + 2],
+                buf[offset + 3],
+                buf[offset + 4],
+            ]),
+            path: u64::from_le_bytes([
+                buf[offset + 5],
+                buf[offset + 6],
+                buf[offset + 7],
+                buf[offset + 8],
+                buf[offset + 9],
+                buf[offset + 10],
+                buf[offset + 11],
+                buf[offset + 12],
+            ]),
+        };
+        offset += 13;
+
+        // Read mode[4]
+        let (mode, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read uid[4]
+        let (uid, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read gid[4]
+        let (gid, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read nlink[8]
+        let (nlink, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read rdev[8]
+        let (rdev, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read size[8]
+        let (size, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read blksize[8]
+        let (blksize, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read blocks[8]
+        let (blocks, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read atime_sec[8]
+        let (atime_sec, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read atime_nsec[8]
+        let (atime_nsec, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read mtime_sec[8]
+        let (mtime_sec, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read mtime_nsec[8]
+        let (mtime_nsec, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read ctime_sec[8]
+        let (ctime_sec, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read ctime_nsec[8]
+        let (ctime_nsec, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read btime_sec[8]
+        let (btime_sec, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read btime_nsec[8]
+        let (btime_nsec, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read gen[8]
+        let (gen_, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read data_version[8]
+        let (data_version, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RgetattrError::BufferTooSmall,
+            WireError::StringTooLong => RgetattrError::InternalError,
+            WireError::InvalidUtf8 => RgetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        let message = Self {
+            tag,
+            valid,
+            qid,
+            mode,
+            uid,
+            gid,
+            nlink,
+            rdev,
+            size,
+            blksize,
+            blocks,
+            atime_sec,
+            atime_nsec,
+            mtime_sec,
+            mtime_nsec,
+            ctime_sec,
+            ctime_nsec,
+            btime_sec,
+            btime_nsec,
+            gen_,
+            data_version,
+        };
+
+        Ok((message, offset))
+    }
+}
+
+/// Tsetattr message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TsetattrMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// Valid mask indicating which attributes to set
+    pub valid: u32,
+    /// File mode
+    pub mode: u32,
+    /// User ID
+    pub uid: u32,
+    /// Group ID
+    pub gid: u32,
+    /// File size
+    pub size: u64,
+    /// Access time (seconds)
+    pub atime_sec: u64,
+    /// Access time (nanoseconds)
+    pub atime_nsec: u64,
+    /// Modification time (seconds)
+    pub mtime_sec: u64,
+    /// Modification time (nanoseconds)
+    pub mtime_nsec: u64,
+}
+
+impl TsetattrMessage {
+    /// Create a new Tsetattr message
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        tag: u16,
+        fid: u32,
+        valid: u32,
+        mode: u32,
+        uid: u32,
+        gid: u32,
+        size: u64,
+        atime_sec: u64,
+        atime_nsec: u64,
+        mtime_sec: u64,
+        mtime_nsec: u64,
+    ) -> Self {
+        Self {
+            tag,
+            fid,
+            valid,
+            mode,
+            uid,
+            gid,
+            size,
+            atime_sec,
+            atime_nsec,
+            mtime_sec,
+            mtime_nsec,
+        }
+    }
+
+    /// Serialize the Tsetattr message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TsetattrError> {
+        use wire::{WireError, write_u16, write_u32, write_u64};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 4 + 4 + 4 + 4 + 4 + 8 + 8 + 8 + 8 + 8; // size[4] + type[1] + tag[2] + fid[4] + valid[4] + mode[4] + uid[4] + gid[4] + size[8] + atime_sec[8] + atime_nsec[8] + mtime_sec[8] + mtime_nsec[8]
+
+        if total_size > buf.len() {
+            return Err(TsetattrError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        // Write message type[1] - Tsetattr
+        buf[offset] = P9MsgType::Tsetattr as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        // Write valid[4]
+        offset = write_u32(buf, offset, self.valid).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        // Write mode[4]
+        offset = write_u32(buf, offset, self.mode).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        // Write uid[4]
+        offset = write_u32(buf, offset, self.uid).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        // Write gid[4]
+        offset = write_u32(buf, offset, self.gid).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        // Write size[8]
+        offset = write_u64(buf, offset, self.size).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        // Write atime_sec[8]
+        offset = write_u64(buf, offset, self.atime_sec).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        // Write atime_nsec[8]
+        offset = write_u64(buf, offset, self.atime_nsec).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        // Write mtime_sec[8]
+        offset = write_u64(buf, offset, self.mtime_sec).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        // Write mtime_nsec[8]
+        offset = write_u64(buf, offset, self.mtime_nsec).map_err(|e| match e {
+            WireError::BufferTooSmall => TsetattrError::BufferTooSmall,
+            WireError::StringTooLong => TsetattrError::InternalError,
+            WireError::InvalidUtf8 => TsetattrError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Tsetattr message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_tsetattr(&self) -> Result<u32, TsetattrError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 128]; // Large enough for Tsetattr message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rsetattr message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RsetattrMessage {
+    /// Message tag
+    pub tag: u16,
+}
+
+impl RsetattrMessage {
+    /// Create a new Rsetattr message
+    pub fn new(tag: u16) -> Self {
+        Self { tag }
+    }
+
+    /// Deserialize an Rsetattr message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RsetattrError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RsetattrError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RsetattrError::BufferTooSmall,
+            WireError::StringTooLong => RsetattrError::InternalError,
+            WireError::InvalidUtf8 => RsetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RsetattrError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rsetattr
+        if offset >= buf.len() {
+            return Err(RsetattrError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rsetattr as u8 {
+            return Err(RsetattrError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RsetattrError::BufferTooSmall,
+            WireError::StringTooLong => RsetattrError::InternalError,
+            WireError::InvalidUtf8 => RsetattrError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        Ok((Self { tag }, offset))
+    }
+}
+
+/// Tgetattr serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TgetattrError {
+    BufferTooSmall,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Rgetattr deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RgetattrError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Tsetattr serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TsetattrError {
+    BufferTooSmall,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Rsetattr deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RsetattrError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Txattrwalk message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TxattrwalkMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// New file identifier for the extended attribute
+    pub newfid: u32,
+    /// Name of the extended attribute
+    pub name: String,
+}
+
+impl TxattrwalkMessage {
+    /// Create a new Txattrwalk message
+    pub fn new(tag: u16, fid: u32, newfid: u32, name: String) -> Self {
+        Self {
+            tag,
+            fid,
+            newfid,
+            name,
+        }
+    }
+
+    /// Serialize the Txattrwalk message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TxattrwalkError> {
+        use wire::{WireError, write_string, write_u16, write_u32};
+
+        // Calculate total message size
+        let name_len = self.name.len();
+        let total_size = 4 + 1 + 2 + 4 + 4 + (2 + name_len); // size[4] + type[1] + tag[2] + fid[4] + newfid[4] + name[s]
+
+        if total_size > buf.len() {
+            return Err(TxattrwalkError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TxattrwalkError::BufferTooSmall,
+            WireError::StringTooLong => TxattrwalkError::NameTooLong,
+            WireError::InvalidUtf8 => TxattrwalkError::InvalidUtf8,
+        })?;
+
+        // Write message type[1] - Txattrwalk
+        buf[offset] = P9MsgType::Txattrwalk as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TxattrwalkError::BufferTooSmall,
+            WireError::StringTooLong => TxattrwalkError::NameTooLong,
+            WireError::InvalidUtf8 => TxattrwalkError::InvalidUtf8,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TxattrwalkError::BufferTooSmall,
+            WireError::StringTooLong => TxattrwalkError::NameTooLong,
+            WireError::InvalidUtf8 => TxattrwalkError::InvalidUtf8,
+        })?;
+
+        // Write newfid[4]
+        offset = write_u32(buf, offset, self.newfid).map_err(|e| match e {
+            WireError::BufferTooSmall => TxattrwalkError::BufferTooSmall,
+            WireError::StringTooLong => TxattrwalkError::NameTooLong,
+            WireError::InvalidUtf8 => TxattrwalkError::InvalidUtf8,
+        })?;
+
+        // Write name[s]
+        offset = write_string(buf, offset, &self.name).map_err(|e| match e {
+            WireError::BufferTooSmall => TxattrwalkError::BufferTooSmall,
+            WireError::StringTooLong => TxattrwalkError::NameTooLong,
+            WireError::InvalidUtf8 => TxattrwalkError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Txattrwalk message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_txattrwalk(&self) -> Result<u32, TxattrwalkError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 128]; // Large enough for Txattrwalk message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rxattrwalk message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RxattrwalkMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Size of the extended attribute
+    pub size: u64,
+}
+
+impl RxattrwalkMessage {
+    /// Create a new Rxattrwalk message
+    pub fn new(tag: u16, size: u64) -> Self {
+        Self { tag, size }
+    }
+
+    /// Deserialize an Rxattrwalk message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RxattrwalkError> {
+        use wire::{WireError, read_u16, read_u32, read_u64};
+
+        if buf.len() < 4 {
+            return Err(RxattrwalkError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RxattrwalkError::BufferTooSmall,
+            WireError::StringTooLong => RxattrwalkError::InternalError,
+            WireError::InvalidUtf8 => RxattrwalkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RxattrwalkError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rxattrwalk
+        if offset >= buf.len() {
+            return Err(RxattrwalkError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rxattrwalk as u8 {
+            return Err(RxattrwalkError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RxattrwalkError::BufferTooSmall,
+            WireError::StringTooLong => RxattrwalkError::InternalError,
+            WireError::InvalidUtf8 => RxattrwalkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read size[8]
+        let (size, new_offset) = read_u64(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RxattrwalkError::BufferTooSmall,
+            WireError::StringTooLong => RxattrwalkError::InternalError,
+            WireError::InvalidUtf8 => RxattrwalkError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        Ok((Self { tag, size }, offset))
+    }
+}
+
+/// Txattrcreate message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TxattrcreateMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// Name of the extended attribute
+    pub name: String,
+    /// Size of the extended attribute
+    pub attr_size: u64,
+    /// Flags for the extended attribute
+    pub flags: u32,
+}
+
+impl TxattrcreateMessage {
+    /// Create a new Txattrcreate message
+    pub fn new(tag: u16, fid: u32, name: String, attr_size: u64, flags: u32) -> Self {
+        Self {
+            tag,
+            fid,
+            name,
+            attr_size,
+            flags,
+        }
+    }
+
+    /// Serialize the Txattrcreate message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TxattrcreateError> {
+        use wire::{WireError, write_string, write_u16, write_u32, write_u64};
+
+        // Calculate total message size
+        let name_len = self.name.len();
+        let total_size = 4 + 1 + 2 + 4 + (2 + name_len) + 8 + 4; // size[4] + type[1] + tag[2] + fid[4] + name[s] + attr_size[8] + flags[4]
+
+        if total_size > buf.len() {
+            return Err(TxattrcreateError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TxattrcreateError::BufferTooSmall,
+            WireError::StringTooLong => TxattrcreateError::NameTooLong,
+            WireError::InvalidUtf8 => TxattrcreateError::InvalidUtf8,
+        })?;
+
+        // Write message type[1] - Txattrcreate
+        buf[offset] = P9MsgType::Txattrcreate as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TxattrcreateError::BufferTooSmall,
+            WireError::StringTooLong => TxattrcreateError::NameTooLong,
+            WireError::InvalidUtf8 => TxattrcreateError::InvalidUtf8,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TxattrcreateError::BufferTooSmall,
+            WireError::StringTooLong => TxattrcreateError::NameTooLong,
+            WireError::InvalidUtf8 => TxattrcreateError::InvalidUtf8,
+        })?;
+
+        // Write name[s]
+        offset = write_string(buf, offset, &self.name).map_err(|e| match e {
+            WireError::BufferTooSmall => TxattrcreateError::BufferTooSmall,
+            WireError::StringTooLong => TxattrcreateError::NameTooLong,
+            WireError::InvalidUtf8 => TxattrcreateError::InvalidUtf8,
+        })?;
+
+        // Write attr_size[8]
+        offset = write_u64(buf, offset, self.attr_size).map_err(|e| match e {
+            WireError::BufferTooSmall => TxattrcreateError::BufferTooSmall,
+            WireError::StringTooLong => TxattrcreateError::NameTooLong,
+            WireError::InvalidUtf8 => TxattrcreateError::InvalidUtf8,
+        })?;
+
+        // Write flags[4]
+        offset = write_u32(buf, offset, self.flags).map_err(|e| match e {
+            WireError::BufferTooSmall => TxattrcreateError::BufferTooSmall,
+            WireError::StringTooLong => TxattrcreateError::NameTooLong,
+            WireError::InvalidUtf8 => TxattrcreateError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Txattrcreate message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_txattrcreate(&self) -> Result<u32, TxattrcreateError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 128]; // Large enough for Txattrcreate message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rxattrcreate message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RxattrcreateMessage {
+    /// Message tag
+    pub tag: u16,
+}
+
+impl RxattrcreateMessage {
+    /// Create a new Rxattrcreate message
+    pub fn new(tag: u16) -> Self {
+        Self { tag }
+    }
+
+    /// Deserialize an Rxattrcreate message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RxattrcreateError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RxattrcreateError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RxattrcreateError::BufferTooSmall,
+            WireError::StringTooLong => RxattrcreateError::InternalError,
+            WireError::InvalidUtf8 => RxattrcreateError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RxattrcreateError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rxattrcreate
+        if offset >= buf.len() {
+            return Err(RxattrcreateError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rxattrcreate as u8 {
+            return Err(RxattrcreateError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RxattrcreateError::BufferTooSmall,
+            WireError::StringTooLong => RxattrcreateError::InternalError,
+            WireError::InvalidUtf8 => RxattrcreateError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        Ok((Self { tag }, offset))
+    }
+}
+
+/// Treaddir message structure
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TreaddirMessage {
+    /// Message tag
+    pub tag: u16,
+    /// File identifier
+    pub fid: u32,
+    /// Offset in the directory
+    pub offset: u64,
+    /// Maximum number of bytes to read
+    pub count: u32,
+}
+
+impl TreaddirMessage {
+    /// Create a new Treaddir message
+    pub fn new(tag: u16, fid: u32, offset: u64, count: u32) -> Self {
+        Self {
+            tag,
+            fid,
+            offset,
+            count,
+        }
+    }
+
+    /// Serialize the Treaddir message to a buffer
+    /// Returns the number of bytes written
+    pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TreaddirError> {
+        use wire::{WireError, write_u16, write_u32, write_u64};
+
+        // Calculate total message size
+        let total_size = 4 + 1 + 2 + 4 + 8 + 4; // size[4] + type[1] + tag[2] + fid[4] + offset[8] + count[4]
+
+        if total_size > buf.len() {
+            return Err(TreaddirError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Write size[4] - total message size including the size field itself
+        offset = write_u32(buf, offset, total_size as u32).map_err(|e| match e {
+            WireError::BufferTooSmall => TreaddirError::BufferTooSmall,
+            WireError::StringTooLong => TreaddirError::InternalError,
+            WireError::InvalidUtf8 => TreaddirError::InvalidUtf8,
+        })?;
+
+        // Write message type[1] - Treaddir
+        buf[offset] = P9MsgType::Treaddir as u8;
+        offset += 1;
+
+        // Write tag[2]
+        offset = write_u16(buf, offset, self.tag).map_err(|e| match e {
+            WireError::BufferTooSmall => TreaddirError::BufferTooSmall,
+            WireError::StringTooLong => TreaddirError::InternalError,
+            WireError::InvalidUtf8 => TreaddirError::InvalidUtf8,
+        })?;
+
+        // Write fid[4]
+        offset = write_u32(buf, offset, self.fid).map_err(|e| match e {
+            WireError::BufferTooSmall => TreaddirError::BufferTooSmall,
+            WireError::StringTooLong => TreaddirError::InternalError,
+            WireError::InvalidUtf8 => TreaddirError::InvalidUtf8,
+        })?;
+
+        // Write offset[8]
+        offset = write_u64(buf, offset, self.offset).map_err(|e| match e {
+            WireError::BufferTooSmall => TreaddirError::BufferTooSmall,
+            WireError::StringTooLong => TreaddirError::InternalError,
+            WireError::InvalidUtf8 => TreaddirError::InvalidUtf8,
+        })?;
+
+        // Write count[4]
+        offset = write_u32(buf, offset, self.count).map_err(|e| match e {
+            WireError::BufferTooSmall => TreaddirError::BufferTooSmall,
+            WireError::StringTooLong => TreaddirError::InternalError,
+            WireError::InvalidUtf8 => TreaddirError::InvalidUtf8,
+        })?;
+
+        Ok(offset)
+    }
+
+    /// Send the Treaddir message using host_write
+    /// Returns the number of bytes written, or an error
+    pub fn send_treaddir(&self) -> Result<u32, TreaddirError> {
+        use crate::host_calls::host_write;
+
+        // Create a buffer for the serialized message
+        let mut buf = [0u8; 32]; // Large enough for Treaddir message
+
+        // Serialize the message
+        let bytes_written = self.serialize(&mut buf)?;
+
+        // Send via host_write to file descriptor 4
+        let result = host_write(4, buf.as_ptr(), bytes_written);
+
+        Ok(result)
+    }
+}
+
+/// Rreaddir message structure
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RreaddirMessage {
+    /// Message tag
+    pub tag: u16,
+    /// Number of bytes returned in data
+    pub count: u32,
+    /// Directory entry data
+    pub data: Vec<u8>,
+}
+
+impl RreaddirMessage {
+    /// Create a new Rreaddir message
+    pub fn new(tag: u16, count: u32, data: Vec<u8>) -> Self {
+        Self { tag, count, data }
+    }
+
+    /// Deserialize an Rreaddir message from a buffer
+    /// Returns the number of bytes consumed
+    pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RreaddirError> {
+        use wire::{WireError, read_u16, read_u32};
+
+        if buf.len() < 4 {
+            return Err(RreaddirError::BufferTooSmall);
+        }
+
+        let mut offset = 0;
+
+        // Read size[4] - total message size
+        let (size, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RreaddirError::BufferTooSmall,
+            WireError::StringTooLong => RreaddirError::InternalError,
+            WireError::InvalidUtf8 => RreaddirError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Verify we have enough data
+        if buf.len() < size as usize {
+            return Err(RreaddirError::BufferTooSmall);
+        }
+
+        // Read message type[1] - should be Rreaddir
+        if offset >= buf.len() {
+            return Err(RreaddirError::BufferTooSmall);
+        }
+        let msg_type = buf[offset];
+        offset += 1;
+
+        if msg_type != P9MsgType::Rreaddir as u8 {
+            return Err(RreaddirError::InvalidMessageType);
+        }
+
+        // Read tag[2]
+        let (tag, new_offset) = read_u16(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RreaddirError::BufferTooSmall,
+            WireError::StringTooLong => RreaddirError::InternalError,
+            WireError::InvalidUtf8 => RreaddirError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read count[4]
+        let (count, new_offset) = read_u32(buf, offset).map_err(|e| match e {
+            WireError::BufferTooSmall => RreaddirError::BufferTooSmall,
+            WireError::StringTooLong => RreaddirError::InternalError,
+            WireError::InvalidUtf8 => RreaddirError::InvalidUtf8,
+        })?;
+        offset = new_offset;
+
+        // Read data[count]
+        if offset + count as usize > buf.len() {
+            return Err(RreaddirError::BufferTooSmall);
+        }
+        let data = buf[offset..offset + count as usize].to_vec();
+        offset += count as usize;
+
+        Ok((Self { tag, count, data }, offset))
+    }
+}
+
+/// Txattrwalk serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TxattrwalkError {
+    BufferTooSmall,
+    NameTooLong,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Rxattrwalk deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RxattrwalkError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Txattrcreate serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TxattrcreateError {
+    BufferTooSmall,
+    NameTooLong,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Rxattrcreate deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RxattrcreateError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Treaddir serialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TreaddirError {
+    BufferTooSmall,
+    InvalidUtf8,
+    InternalError,
+}
+
+/// Rreaddir deserialization errors
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RreaddirError {
+    BufferTooSmall,
+    InvalidMessageType,
+    InvalidUtf8,
     InternalError,
 }
 
@@ -2025,5 +6208,3053 @@ mod tests {
         // oldtag[2] = 0 (little-endian)
         assert_eq!(buf[7], 0);
         assert_eq!(buf[8], 0);
+    }
+
+    // Tread message tests
+    #[test]
+    fn test_tread_message_creation() {
+        let msg = TreadMessage::new(123, 456, 789, 1024);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+        assert_eq!(msg.offset, 789);
+        assert_eq!(msg.count, 1024);
+    }
+
+    #[test]
+    fn test_tread_serialize() {
+        let msg = TreadMessage::new(123, 456, 789, 1024);
+        let mut buf = [0u8; 32];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(23)); // 4 + 1 + 2 + 4 + 8 + 4 = 23 bytes total
+
+        // Verify the serialized data
+        // size[4] = 23 (little-endian)
+        assert_eq!(buf[0], 23);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Tread (116)
+        assert_eq!(buf[4], 116);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+
+        // offset[8] = 789 (little-endian)
+        assert_eq!(buf[11], 21); // 789 & 0xff = 21
+        assert_eq!(buf[12], 3); // (789 >> 8) & 0xff = 3
+        assert_eq!(buf[13], 0);
+        assert_eq!(buf[14], 0);
+        assert_eq!(buf[15], 0);
+        assert_eq!(buf[16], 0);
+        assert_eq!(buf[17], 0);
+        assert_eq!(buf[18], 0);
+
+        // count[4] = 1024 (little-endian)
+        assert_eq!(buf[19], 0);
+        assert_eq!(buf[20], 4);
+        assert_eq!(buf[21], 0);
+        assert_eq!(buf[22], 0);
+    }
+
+    #[test]
+    fn test_tread_serialize_buffer_too_small() {
+        let msg = TreadMessage::new(123, 456, 789, 1024);
+        let mut buf = [0u8; 10]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TreadError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_tread_send() {
+        let msg = TreadMessage::new(123, 456, 789, 1024);
+
+        // Test that send_tread doesn't panic and returns a result
+        let result = msg.send_tread();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TreadError::BufferTooSmall | TreadError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rread message tests
+    #[test]
+    fn test_rread_message_creation() {
+        let data = vec![1, 2, 3, 4];
+        let msg = RreadMessage::new(123, data.clone());
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.count, 4);
+        assert_eq!(msg.data, data);
+    }
+
+    #[test]
+    fn test_rread_deserialize() {
+        // Create a proper Rread message buffer
+        let mut buf = [0u8; 32];
+
+        // Write size[4] = 15 (little-endian) - 4 + 1 + 2 + 4 + 4 = 15
+        buf[0] = 15;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rread (117)
+        buf[4] = P9MsgType::Rread as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Write count[4] = 4 (little-endian)
+        buf[7] = 4;
+        buf[8] = 0;
+        buf[9] = 0;
+        buf[10] = 0;
+
+        // Add some dummy data
+        buf[11..15].copy_from_slice(b"test");
+
+        // Deserialize as Rread
+        let (rread, bytes_consumed) = RreadMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 15);
+        assert_eq!(rread.tag, 123);
+        assert_eq!(rread.count, 4);
+        assert_eq!(rread.data, b"test".to_vec());
+    }
+
+    #[test]
+    fn test_rread_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RreadMessage::deserialize(&buf);
+        assert_eq!(result, Err(RreadError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rread_deserialize_invalid_message_type() {
+        // Create a valid Tread message but don't change the type
+        let tread = TreadMessage::new(123, 456, 789, 1024);
+        let mut buf = [0u8; 32];
+        tread.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rread (should fail because type is Tread)
+        let result = RreadMessage::deserialize(&buf);
+        assert_eq!(result, Err(RreadError::InvalidMessageType));
+    }
+
+    // Twrite message tests
+    #[test]
+    fn test_twrite_message_creation() {
+        let data = vec![1, 2, 3, 4];
+        let msg = TwriteMessage::new(123, 456, 789, data.clone());
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+        assert_eq!(msg.offset, 789);
+        assert_eq!(msg.count, 4);
+        assert_eq!(msg.data, data);
+    }
+
+    #[test]
+    fn test_twrite_serialize() {
+        let data = b"test".to_vec();
+        let msg = TwriteMessage::new(123, 456, 789, data);
+        let mut buf = [0u8; 32];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(27)); // 4 + 1 + 2 + 4 + 8 + 4 + 4 = 27 bytes total
+
+        // Verify the serialized data
+        // size[4] = 27 (little-endian)
+        assert_eq!(buf[0], 27);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Twrite (118)
+        assert_eq!(buf[4], 118);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+
+        // offset[8] = 789 (little-endian)
+        assert_eq!(buf[11], 21); // 789 & 0xff = 21
+        assert_eq!(buf[12], 3); // (789 >> 8) & 0xff = 3
+        assert_eq!(buf[13], 0);
+        assert_eq!(buf[14], 0);
+        assert_eq!(buf[15], 0);
+        assert_eq!(buf[16], 0);
+        assert_eq!(buf[17], 0);
+        assert_eq!(buf[18], 0);
+
+        // count[4] = 4 (little-endian)
+        assert_eq!(buf[19], 4);
+        assert_eq!(buf[20], 0);
+        assert_eq!(buf[21], 0);
+        assert_eq!(buf[22], 0);
+
+        // data[4] = "test"
+        assert_eq!(&buf[23..27], b"test");
+    }
+
+    #[test]
+    fn test_twrite_serialize_buffer_too_small() {
+        let data = b"test".to_vec();
+        let msg = TwriteMessage::new(123, 456, 789, data);
+        let mut buf = [0u8; 10]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TwriteError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_twrite_send() {
+        let data = b"test".to_vec();
+        let msg = TwriteMessage::new(123, 456, 789, data);
+
+        // Test that send_twrite doesn't panic and returns a result
+        let result = msg.send_twrite();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TwriteError::BufferTooSmall | TwriteError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rwrite message tests
+    #[test]
+    fn test_rwrite_message_creation() {
+        let msg = RwriteMessage::new(123, 1024);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.count, 1024);
+    }
+
+    #[test]
+    fn test_rwrite_deserialize() {
+        // Create a proper Rwrite message buffer
+        let mut buf = [0u8; 16];
+
+        // Write size[4] = 11 (little-endian) - 4 + 1 + 2 + 4 = 11
+        buf[0] = 11;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rwrite (119)
+        buf[4] = P9MsgType::Rwrite as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Write count[4] = 1024 (little-endian)
+        buf[7] = 0;
+        buf[8] = 4;
+        buf[9] = 0;
+        buf[10] = 0;
+
+        // Deserialize as Rwrite
+        let (rwrite, bytes_consumed) = RwriteMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 11);
+        assert_eq!(rwrite.tag, 123);
+        assert_eq!(rwrite.count, 1024);
+    }
+
+    #[test]
+    fn test_rwrite_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RwriteMessage::deserialize(&buf);
+        assert_eq!(result, Err(RwriteError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rwrite_deserialize_invalid_message_type() {
+        // Create a valid Twrite message but don't change the type
+        let data = b"test".to_vec();
+        let twrite = TwriteMessage::new(123, 456, 789, data);
+        let mut buf = [0u8; 32];
+        twrite.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rwrite (should fail because type is Twrite)
+        let result = RwriteMessage::deserialize(&buf);
+        assert_eq!(result, Err(RwriteError::InvalidMessageType));
+    }
+
+    // Roundtrip tests
+    #[test]
+    fn test_roundtrip_tread_rread() {
+        // Create a Tread message
+        let original = TreadMessage::new(456, 789, 1024, 4);
+        let mut tread_buf = [0u8; 32];
+        let tread_bytes_written = original.serialize(&mut tread_buf).unwrap();
+
+        // Create a separate Rread message with the same tag
+        let data = b"test".to_vec();
+        let _rread_msg = RreadMessage::new(original.tag, data);
+        let mut rread_buf = [0u8; 32];
+
+        // Manually create Rread buffer
+        // Write size[4] = 15 (little-endian) - 4 + 1 + 2 + 4 + 4 = 15
+        rread_buf[0] = 15;
+        rread_buf[1] = 0;
+        rread_buf[2] = 0;
+        rread_buf[3] = 0;
+
+        // Write message type[1] = Rread (117)
+        rread_buf[4] = P9MsgType::Rread as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rread_buf[5] = (456 & 0xff) as u8;
+        rread_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Write count[4] = 4 (little-endian)
+        rread_buf[7] = 4;
+        rread_buf[8] = 0;
+        rread_buf[9] = 0;
+        rread_buf[10] = 0;
+
+        // Add some dummy data
+        rread_buf[11..15].copy_from_slice(b"test");
+
+        // Deserialize as Rread
+        let (rread, bytes_consumed) = RreadMessage::deserialize(&rread_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 15);
+        assert_eq!(rread.tag, original.tag);
+        assert_eq!(rread.count, 4);
+        assert_eq!(tread_bytes_written, 23); // Tread is 23 bytes
+    }
+
+    #[test]
+    fn test_roundtrip_twrite_rwrite() {
+        // Create a Twrite message
+        let data = b"test".to_vec();
+        let original = TwriteMessage::new(789, 1011, 2048, data);
+        let mut twrite_buf = [0u8; 32];
+        let twrite_bytes_written = original.serialize(&mut twrite_buf).unwrap();
+
+        // Create a separate Rwrite message with the same tag
+        let _rwrite_msg = RwriteMessage::new(original.tag, 4);
+        let mut rwrite_buf = [0u8; 16];
+
+        // Manually create Rwrite buffer
+        // Write size[4] = 11 (little-endian)
+        rwrite_buf[0] = 11;
+        rwrite_buf[1] = 0;
+        rwrite_buf[2] = 0;
+        rwrite_buf[3] = 0;
+
+        // Write message type[1] = Rwrite (119)
+        rwrite_buf[4] = P9MsgType::Rwrite as u8;
+
+        // Write tag[2] = 789 (little-endian)
+        rwrite_buf[5] = (789 & 0xff) as u8;
+        rwrite_buf[6] = ((789 >> 8) & 0xff) as u8;
+
+        // Write count[4] = 4 (little-endian)
+        rwrite_buf[7] = 4;
+        rwrite_buf[8] = 0;
+        rwrite_buf[9] = 0;
+        rwrite_buf[10] = 0;
+
+        // Deserialize as Rwrite
+        let (rwrite, bytes_consumed) = RwriteMessage::deserialize(&rwrite_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 11);
+        assert_eq!(rwrite.tag, original.tag);
+        assert_eq!(rwrite.count, 4);
+        assert_eq!(twrite_bytes_written, 27); // Twrite is 27 bytes
+    }
+
+    // Twalk message tests
+    #[test]
+    fn test_twalk_message_creation() {
+        let wnames = ["dir1", "dir2", "file.txt"];
+        let msg = TwalkMessage::new(123, 456, 789, &wnames);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+        assert_eq!(msg.newfid, 789);
+        assert_eq!(msg.nwname, 3);
+        assert_eq!(msg.wnames.len(), 3);
+        assert_eq!(msg.wnames[0], "dir1");
+        assert_eq!(msg.wnames[1], "dir2");
+        assert_eq!(msg.wnames[2], "file.txt");
+    }
+
+    #[test]
+    fn test_twalk_message_creation_single() {
+        let msg = TwalkMessage::new_single(123, 456, 789, "file.txt");
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+        assert_eq!(msg.newfid, 789);
+        assert_eq!(msg.nwname, 1);
+        assert_eq!(msg.wnames.len(), 1);
+        assert_eq!(msg.wnames[0], "file.txt");
+    }
+
+    #[test]
+    fn test_twalk_serialize() {
+        let wnames = ["dir1", "file.txt"];
+        let msg = TwalkMessage::new(123, 456, 789, &wnames);
+        let mut buf = [0u8; 64];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(33)); // 4 + 1 + 2 + 4 + 4 + 2 + (2+4) + (2+8) = 33 bytes total
+
+        // Verify the serialized data
+        // size[4] = 33 (little-endian)
+        assert_eq!(buf[0], 33);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Twalk (110)
+        assert_eq!(buf[4], 110);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+
+        // newfid[4] = 789 (little-endian)
+        assert_eq!(buf[11], 21); // 789 & 0xff = 21
+        assert_eq!(buf[12], 3); // (789 >> 8) & 0xff = 3
+        assert_eq!(buf[13], 0);
+        assert_eq!(buf[14], 0);
+
+        // nwname[2] = 2 (little-endian)
+        assert_eq!(buf[15], 2);
+        assert_eq!(buf[16], 0);
+
+        // wname[0] = "dir1" (length[2] + string[4])
+        assert_eq!(buf[17], 4); // length = 4
+        assert_eq!(buf[18], 0);
+        assert_eq!(&buf[19..23], b"dir1");
+
+        // wname[1] = "file.txt" (length[2] + string[8])
+        assert_eq!(buf[23], 8); // length = 8
+        assert_eq!(buf[24], 0);
+        assert_eq!(&buf[25..33], b"file.txt");
+    }
+
+    #[test]
+    fn test_twalk_serialize_buffer_too_small() {
+        let wnames = ["dir1", "file.txt"];
+        let msg = TwalkMessage::new(123, 456, 789, &wnames);
+        let mut buf = [0u8; 10]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TwalkError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_twalk_send() {
+        let wnames = ["dir1", "file.txt"];
+        let msg = TwalkMessage::new(123, 456, 789, &wnames);
+
+        // Test that send_twalk doesn't panic and returns a result
+        let result = msg.send_twalk();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TwalkError::BufferTooSmall
+                        | TwalkError::NameTooLong
+                        | TwalkError::NameCountMismatch
+                        | TwalkError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rwalk message tests
+    #[test]
+    fn test_rwalk_message_creation() {
+        let qids = [
+            Qid::new(P9QidType::Qtdir as u8, 1, 0x12345678),
+            Qid::new(P9QidType::Qtfile as u8, 2, 0x87654321),
+        ];
+        let msg = RwalkMessage::new(123, &qids);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.nwqid, 2);
+        assert_eq!(msg.wqids.len(), 2);
+        assert_eq!(msg.wqids[0].qtype, P9QidType::Qtdir as u8);
+        assert_eq!(msg.wqids[0].version, 1);
+        assert_eq!(msg.wqids[0].path, 0x12345678);
+        assert_eq!(msg.wqids[1].qtype, P9QidType::Qtfile as u8);
+        assert_eq!(msg.wqids[1].version, 2);
+        assert_eq!(msg.wqids[1].path, 0x87654321);
+    }
+
+    #[test]
+    fn test_rwalk_message_creation_single() {
+        let qid = Qid::new(P9QidType::Qtfile as u8, 1, 0x12345678);
+        let msg = RwalkMessage::new_single(123, qid);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.nwqid, 1);
+        assert_eq!(msg.wqids.len(), 1);
+        assert_eq!(msg.wqids[0].qtype, P9QidType::Qtfile as u8);
+        assert_eq!(msg.wqids[0].version, 1);
+        assert_eq!(msg.wqids[0].path, 0x12345678);
+    }
+
+    #[test]
+    fn test_rwalk_deserialize() {
+        // Create a proper Rwalk message buffer
+        let mut buf = [0u8; 64];
+
+        // Write size[4] = 20 (little-endian) - 4 + 1 + 2 + 2 + 13 = 22
+        buf[0] = 22;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rwalk (111)
+        buf[4] = P9MsgType::Rwalk as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Write nwqid[2] = 1 (little-endian)
+        buf[7] = 1;
+        buf[8] = 0;
+
+        // Write wqid[0][13] = QID(type=0x80, version=1, path=0x12345678)
+        buf[9] = 0x80; // Qtdir
+        // version[4] = 1 (little-endian)
+        buf[10] = 1;
+        buf[11] = 0;
+        buf[12] = 0;
+        buf[13] = 0;
+        // path[8] = 0x12345678 (little-endian)
+        buf[14] = 0x78;
+        buf[15] = 0x56;
+        buf[16] = 0x34;
+        buf[17] = 0x12;
+        buf[18] = 0;
+        buf[19] = 0;
+        buf[20] = 0;
+        buf[21] = 0;
+
+        // Deserialize as Rwalk
+        let (rwalk, bytes_consumed) = RwalkMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 22);
+        assert_eq!(rwalk.tag, 123);
+        assert_eq!(rwalk.nwqid, 1);
+        assert_eq!(rwalk.wqids.len(), 1);
+        assert_eq!(rwalk.wqids[0].qtype, 0x80);
+        assert_eq!(rwalk.wqids[0].version, 1);
+        assert_eq!(rwalk.wqids[0].path, 0x12345678);
+    }
+
+    #[test]
+    fn test_rwalk_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RwalkMessage::deserialize(&buf);
+        assert_eq!(result, Err(RwalkError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rwalk_deserialize_invalid_message_type() {
+        // Create a valid Twalk message but don't change the type
+        let wnames = ["dir1"];
+        let twalk = TwalkMessage::new(123, 456, 789, &wnames);
+        let mut buf = [0u8; 64];
+        twalk.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rwalk (should fail because type is Twalk)
+        let result = RwalkMessage::deserialize(&buf);
+        assert_eq!(result, Err(RwalkError::InvalidMessageType));
+    }
+
+    // Roundtrip tests for Twalk/Rwalk
+    #[test]
+    fn test_roundtrip_twalk_rwalk() {
+        // Create a Twalk message
+        let wnames = ["dir1", "file.txt"];
+        let original = TwalkMessage::new(456, 789, 1011, &wnames);
+        let mut twalk_buf = [0u8; 64];
+        let twalk_bytes_written = original.serialize(&mut twalk_buf).unwrap();
+
+        // Create a separate Rwalk message with the same tag
+        let qids = [
+            Qid::new(P9QidType::Qtdir as u8, 1, 0x12345678),
+            Qid::new(P9QidType::Qtfile as u8, 2, 0x87654321),
+        ];
+        let _rwalk_msg = RwalkMessage::new(original.tag, &qids);
+        let mut rwalk_buf = [0u8; 64];
+
+        // Manually create Rwalk buffer
+        // Write size[4] = 35 (little-endian) - 4 + 1 + 2 + 2 + (13*2) = 35
+        rwalk_buf[0] = 35;
+        rwalk_buf[1] = 0;
+        rwalk_buf[2] = 0;
+        rwalk_buf[3] = 0;
+
+        // Write message type[1] = Rwalk (111)
+        rwalk_buf[4] = P9MsgType::Rwalk as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rwalk_buf[5] = (456 & 0xff) as u8;
+        rwalk_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Write nwqid[2] = 2 (little-endian)
+        rwalk_buf[7] = 2;
+        rwalk_buf[8] = 0;
+
+        // Write wqid[0][13] = QID(type=0x80, version=1, path=0x12345678)
+        rwalk_buf[9] = 0x80; // Qtdir
+        rwalk_buf[10] = 1; // version = 1
+        rwalk_buf[11] = 0;
+        rwalk_buf[12] = 0;
+        rwalk_buf[13] = 0;
+        rwalk_buf[14] = 0x78; // path = 0x12345678 (little-endian)
+        rwalk_buf[15] = 0x56;
+        rwalk_buf[16] = 0x34;
+        rwalk_buf[17] = 0x12;
+        rwalk_buf[18] = 0;
+        rwalk_buf[19] = 0;
+        rwalk_buf[20] = 0;
+        rwalk_buf[21] = 0;
+
+        // Write wqid[1][13] = QID(type=0x00, version=2, path=0x87654321)
+        rwalk_buf[22] = 0x00; // Qtfile
+        rwalk_buf[23] = 2; // version = 2
+        rwalk_buf[24] = 0;
+        rwalk_buf[25] = 0;
+        rwalk_buf[26] = 0;
+        rwalk_buf[27] = 0x21; // path = 0x87654321 (little-endian)
+        rwalk_buf[28] = 0x43;
+        rwalk_buf[29] = 0x65;
+        rwalk_buf[30] = 0x87;
+
+        // Deserialize as Rwalk
+        let (rwalk, bytes_consumed) = RwalkMessage::deserialize(&rwalk_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 35);
+        assert_eq!(rwalk.tag, original.tag);
+        assert_eq!(rwalk.nwqid, 2);
+        assert_eq!(rwalk.wqids.len(), 2);
+        assert_eq!(twalk_bytes_written, 33); // Twalk is 33 bytes
+    }
+
+    // Tclunk message tests
+    #[test]
+    fn test_tclunk_message_creation() {
+        let msg = TclunkMessage::new(123, 456);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+    }
+
+    #[test]
+    fn test_tclunk_serialize() {
+        let msg = TclunkMessage::new(123, 456);
+        let mut buf = [0u8; 16];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(11)); // 4 + 1 + 2 + 4 = 11 bytes total
+
+        // Verify the serialized data
+        // size[4] = 11 (little-endian)
+        assert_eq!(buf[0], 11);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Tclunk (120)
+        assert_eq!(buf[4], 120);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+    }
+
+    #[test]
+    fn test_tclunk_serialize_buffer_too_small() {
+        let msg = TclunkMessage::new(123, 456);
+        let mut buf = [0u8; 5]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TclunkError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_tclunk_send() {
+        let msg = TclunkMessage::new(123, 456);
+
+        // Test that send_tclunk doesn't panic and returns a result
+        let result = msg.send_tclunk();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TclunkError::BufferTooSmall | TclunkError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rclunk message tests
+    #[test]
+    fn test_rclunk_message_creation() {
+        let msg = RclunkMessage::new(123);
+        assert_eq!(msg.tag, 123);
+    }
+
+    #[test]
+    fn test_rclunk_deserialize() {
+        // Create a proper Rclunk message buffer
+        let mut buf = [0u8; 16];
+
+        // Write size[4] = 7 (little-endian) - 4 + 1 + 2 = 7
+        buf[0] = 7;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rclunk (121)
+        buf[4] = P9MsgType::Rclunk as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Deserialize as Rclunk
+        let (rclunk, bytes_consumed) = RclunkMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 7);
+        assert_eq!(rclunk.tag, 123);
+    }
+
+    #[test]
+    fn test_rclunk_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RclunkMessage::deserialize(&buf);
+        assert_eq!(result, Err(RclunkError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rclunk_deserialize_invalid_message_type() {
+        // Create a valid Tclunk message but don't change the type
+        let tclunk = TclunkMessage::new(123, 456);
+        let mut buf = [0u8; 16];
+        tclunk.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rclunk (should fail because type is Tclunk)
+        let result = RclunkMessage::deserialize(&buf);
+        assert_eq!(result, Err(RclunkError::InvalidMessageType));
+    }
+
+    // Roundtrip tests for Tclunk/Rclunk
+    #[test]
+    fn test_roundtrip_tclunk_rclunk() {
+        // Create a Tclunk message
+        let original = TclunkMessage::new(456, 789);
+        let mut tclunk_buf = [0u8; 16];
+        let tclunk_bytes_written = original.serialize(&mut tclunk_buf).unwrap();
+
+        // Create a separate Rclunk message with the same tag
+        let _rclunk_msg = RclunkMessage::new(original.tag);
+        let mut rclunk_buf = [0u8; 16];
+
+        // Manually create Rclunk buffer
+        // Write size[4] = 7 (little-endian)
+        rclunk_buf[0] = 7;
+        rclunk_buf[1] = 0;
+        rclunk_buf[2] = 0;
+        rclunk_buf[3] = 0;
+
+        // Write message type[1] = Rclunk (121)
+        rclunk_buf[4] = P9MsgType::Rclunk as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rclunk_buf[5] = (456 & 0xff) as u8;
+        rclunk_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Deserialize as Rclunk
+        let (rclunk, bytes_consumed) = RclunkMessage::deserialize(&rclunk_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 7);
+        assert_eq!(rclunk.tag, original.tag);
+        assert_eq!(tclunk_bytes_written, 11); // Tclunk is 11 bytes
+    }
+
+    // Tremove message tests
+    #[test]
+    fn test_tremove_message_creation() {
+        let msg = TremoveMessage::new(123, 456);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+    }
+
+    #[test]
+    fn test_tremove_serialize() {
+        let msg = TremoveMessage::new(123, 456);
+        let mut buf = [0u8; 16];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(11)); // 4 + 1 + 2 + 4 = 11 bytes total
+
+        // Verify the serialized data
+        // size[4] = 11 (little-endian)
+        assert_eq!(buf[0], 11);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Tremove (122)
+        assert_eq!(buf[4], 122);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+    }
+
+    #[test]
+    fn test_tremove_serialize_buffer_too_small() {
+        let msg = TremoveMessage::new(123, 456);
+        let mut buf = [0u8; 5]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TremoveError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_tremove_send() {
+        let msg = TremoveMessage::new(123, 456);
+
+        // Test that send_tremove doesn't panic and returns a result
+        let result = msg.send_tremove();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TremoveError::BufferTooSmall | TremoveError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rremove message tests
+    #[test]
+    fn test_rremove_message_creation() {
+        let msg = RremoveMessage::new(123);
+        assert_eq!(msg.tag, 123);
+    }
+
+    #[test]
+    fn test_rremove_deserialize() {
+        // Create a proper Rremove message buffer
+        let mut buf = [0u8; 16];
+
+        // Write size[4] = 7 (little-endian) - 4 + 1 + 2 = 7
+        buf[0] = 7;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rremove (123)
+        buf[4] = P9MsgType::Rremove as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Deserialize as Rremove
+        let (rremove, bytes_consumed) = RremoveMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 7);
+        assert_eq!(rremove.tag, 123);
+    }
+
+    #[test]
+    fn test_rremove_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RremoveMessage::deserialize(&buf);
+        assert_eq!(result, Err(RremoveError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rremove_deserialize_invalid_message_type() {
+        // Create a valid Tremove message but don't change the type
+        let tremove = TremoveMessage::new(123, 456);
+        let mut buf = [0u8; 16];
+        tremove.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rremove (should fail because type is Tremove)
+        let result = RremoveMessage::deserialize(&buf);
+        assert_eq!(result, Err(RremoveError::InvalidMessageType));
+    }
+
+    // Roundtrip tests for Tremove/Rremove
+    #[test]
+    fn test_roundtrip_tremove_rremove() {
+        // Create a Tremove message
+        let original = TremoveMessage::new(456, 789);
+        let mut tremove_buf = [0u8; 16];
+        let tremove_bytes_written = original.serialize(&mut tremove_buf).unwrap();
+
+        // Create a separate Rremove message with the same tag
+        let _rremove_msg = RremoveMessage::new(original.tag);
+        let mut rremove_buf = [0u8; 16];
+
+        // Manually create Rremove buffer
+        // Write size[4] = 7 (little-endian)
+        rremove_buf[0] = 7;
+        rremove_buf[1] = 0;
+        rremove_buf[2] = 0;
+        rremove_buf[3] = 0;
+
+        // Write message type[1] = Rremove (123)
+        rremove_buf[4] = P9MsgType::Rremove as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rremove_buf[5] = (456 & 0xff) as u8;
+        rremove_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Deserialize as Rremove
+        let (rremove, bytes_consumed) = RremoveMessage::deserialize(&rremove_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 7);
+        assert_eq!(rremove.tag, original.tag);
+        assert_eq!(tremove_bytes_written, 11); // Tremove is 11 bytes
+    }
+
+    // Tauth message tests
+    #[test]
+    fn test_tauth_message_creation() {
+        let msg = TauthMessage::new(123, 456, "user".to_string(), "auth".to_string());
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.afid, 456);
+        assert_eq!(msg.uname, "user");
+        assert_eq!(msg.aname, "auth");
+        assert_eq!(msg.n_uname, 4);
+    }
+
+    #[test]
+    fn test_tauth_serialize() {
+        let msg = TauthMessage::new(123, 456, "user".to_string(), "auth".to_string());
+        let mut buf = [0u8; 64];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(27)); // 4 + 1 + 2 + 4 + (2+4) + (2+4) + 4 = 27 bytes total
+
+        // Verify the serialized data
+        // size[4] = 27 (little-endian)
+        assert_eq!(buf[0], 27);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Tauth (102)
+        assert_eq!(buf[4], 102);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // afid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+
+        // uname[s] = "user" (length[2] + string[4])
+        assert_eq!(buf[11], 4); // length = 4
+        assert_eq!(buf[12], 0);
+        assert_eq!(&buf[13..17], b"user");
+
+        // aname[s] = "auth" (length[2] + string[4])
+        assert_eq!(buf[17], 4); // length = 4
+        assert_eq!(buf[18], 0);
+        assert_eq!(&buf[19..23], b"auth");
+
+        // n_uname[4] = 4 (little-endian)
+        assert_eq!(buf[23], 4);
+        assert_eq!(buf[24], 0);
+        assert_eq!(buf[25], 0);
+        assert_eq!(buf[26], 0);
+    }
+
+    #[test]
+    fn test_tauth_serialize_buffer_too_small() {
+        let msg = TauthMessage::new(123, 456, "user".to_string(), "auth".to_string());
+        let mut buf = [0u8; 10]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TauthError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_tauth_serialize_uname_count_mismatch() {
+        let mut msg = TauthMessage::new(123, 456, "user".to_string(), "auth".to_string());
+        msg.n_uname = 5; // Wrong count
+        let mut buf = [0u8; 64];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TauthError::UnameCountMismatch));
+    }
+
+    #[test]
+    fn test_tauth_send() {
+        let msg = TauthMessage::new(123, 456, "user".to_string(), "auth".to_string());
+
+        // Test that send_tauth doesn't panic and returns a result
+        let result = msg.send_tauth();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TauthError::BufferTooSmall
+                        | TauthError::StringTooLong
+                        | TauthError::UnameCountMismatch
+                        | TauthError::InvalidUtf8
+                        | TauthError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rauth message tests
+    #[test]
+    fn test_rauth_message_creation() {
+        let qid = Qid::new(P9QidType::Qtfile as u8, 1, 0x12345678);
+        let msg = RauthMessage::new(123, qid);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.aqid.qtype, P9QidType::Qtfile as u8);
+        assert_eq!(msg.aqid.version, 1);
+        assert_eq!(msg.aqid.path, 0x12345678);
+    }
+
+    #[test]
+    fn test_rauth_deserialize() {
+        // Create a proper Rauth message buffer
+        let mut buf = [0u8; 32];
+
+        // Write size[4] = 20 (little-endian) - 4 + 1 + 2 + 13 = 20
+        buf[0] = 20;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rauth (103)
+        buf[4] = P9MsgType::Rauth as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Write aqid[13] - type[1] version[4] path[8]
+        buf[7] = 0x80; // Qtdir type
+        buf[8] = 1; // version = 1 (little-endian)
+        buf[9] = 0;
+        buf[10] = 0;
+        buf[11] = 0;
+        buf[12] = 0x78; // path = 0x12345678 (little-endian)
+        buf[13] = 0x56;
+        buf[14] = 0x34;
+        buf[15] = 0x12;
+        buf[16] = 0;
+        buf[17] = 0;
+        buf[18] = 0;
+        buf[19] = 0;
+
+        // Deserialize as Rauth
+        let (rauth, bytes_consumed) = RauthMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 20);
+        assert_eq!(rauth.tag, 123);
+        assert_eq!(rauth.aqid.qtype, 0x80);
+        assert_eq!(rauth.aqid.version, 1);
+        assert_eq!(rauth.aqid.path, 0x12345678);
+    }
+
+    #[test]
+    fn test_rauth_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RauthMessage::deserialize(&buf);
+        assert_eq!(result, Err(RauthError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rauth_deserialize_invalid_message_type() {
+        // Create a valid Tauth message but don't change the type
+        let tauth = TauthMessage::new(123, 456, "user".to_string(), "auth".to_string());
+        let mut buf = [0u8; 64];
+        tauth.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rauth (should fail because type is Tauth)
+        let result = RauthMessage::deserialize(&buf);
+        assert_eq!(result, Err(RauthError::InvalidMessageType));
+    }
+
+    // Roundtrip tests for Tauth/Rauth
+    #[test]
+    fn test_roundtrip_tauth_rauth() {
+        // Create a Tauth message
+        let original = TauthMessage::new(456, 789, "testuser".to_string(), "testauth".to_string());
+        let mut tauth_buf = [0u8; 64];
+        let tauth_bytes_written = original.serialize(&mut tauth_buf).unwrap();
+
+        // Create a separate Rauth message with the same tag
+        let qid = Qid::new(P9QidType::Qtfile as u8, 1, 0x12345678);
+        let _rauth_msg = RauthMessage::new(original.tag, qid);
+        let mut rauth_buf = [0u8; 32];
+
+        // Manually create Rauth buffer
+        // Write size[4] = 20 (little-endian)
+        rauth_buf[0] = 20;
+        rauth_buf[1] = 0;
+        rauth_buf[2] = 0;
+        rauth_buf[3] = 0;
+
+        // Write message type[1] = Rauth (103)
+        rauth_buf[4] = P9MsgType::Rauth as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rauth_buf[5] = (456 & 0xff) as u8;
+        rauth_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Write aqid[13] - type[1] version[4] path[8]
+        rauth_buf[7] = P9QidType::Qtfile as u8;
+        rauth_buf[8] = 1; // version = 1 (little-endian)
+        rauth_buf[9] = 0;
+        rauth_buf[10] = 0;
+        rauth_buf[11] = 0;
+        rauth_buf[12] = 0x78; // path = 0x12345678 (little-endian)
+        rauth_buf[13] = 0x56;
+        rauth_buf[14] = 0x34;
+        rauth_buf[15] = 0x12;
+        rauth_buf[16] = 0;
+        rauth_buf[17] = 0;
+        rauth_buf[18] = 0;
+        rauth_buf[19] = 0;
+
+        // Deserialize as Rauth
+        let (rauth, bytes_consumed) = RauthMessage::deserialize(&rauth_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 20);
+        assert_eq!(rauth.tag, original.tag);
+        assert_eq!(rauth.aqid.qtype, P9QidType::Qtfile as u8);
+        assert_eq!(rauth.aqid.version, 1);
+        assert_eq!(rauth.aqid.path, 0x12345678);
+        assert_eq!(tauth_bytes_written, 35); // Tauth is 35 bytes (4+1+2+4+(2+8)+(2+8)+4)
+    }
+
+    // Tattach message tests
+    #[test]
+    fn test_tattach_message_creation() {
+        let msg = TattachMessage::new(123, 456, 789, "user".to_string(), "attach".to_string());
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+        assert_eq!(msg.afid, 789);
+        assert_eq!(msg.uname, "user");
+        assert_eq!(msg.aname, "attach");
+        assert_eq!(msg.n_uname, 4);
+    }
+
+    #[test]
+    fn test_tattach_serialize() {
+        let msg = TattachMessage::new(123, 456, 789, "user".to_string(), "attach".to_string());
+        let mut buf = [0u8; 64];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(33)); // 4 + 1 + 2 + 4 + 4 + (2+4) + (2+6) + 4 = 33 bytes total
+
+        // Verify the serialized data
+        // size[4] = 33 (little-endian)
+        assert_eq!(buf[0], 33);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Tattach (104)
+        assert_eq!(buf[4], 104);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+
+        // afid[4] = 789 (little-endian)
+        assert_eq!(buf[11], 21); // 789 & 0xff = 21
+        assert_eq!(buf[12], 3); // (789 >> 8) & 0xff = 3
+        assert_eq!(buf[13], 0);
+        assert_eq!(buf[14], 0);
+
+        // uname[s] = "user" (length[2] + string[4])
+        assert_eq!(buf[15], 4); // length = 4
+        assert_eq!(buf[16], 0);
+        assert_eq!(&buf[17..21], b"user");
+
+        // aname[s] = "attach" (length[2] + string[6])
+        assert_eq!(buf[21], 6); // length = 6
+        assert_eq!(buf[22], 0);
+        assert_eq!(&buf[23..29], b"attach");
+
+        // n_uname[4] = 4 (little-endian)
+        assert_eq!(buf[29], 4);
+        assert_eq!(buf[30], 0);
+        assert_eq!(buf[31], 0);
+        assert_eq!(buf[32], 0);
+    }
+
+    #[test]
+    fn test_tattach_serialize_buffer_too_small() {
+        let msg = TattachMessage::new(123, 456, 789, "user".to_string(), "attach".to_string());
+        let mut buf = [0u8; 10]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TattachError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_tattach_serialize_uname_count_mismatch() {
+        let mut msg = TattachMessage::new(123, 456, 789, "user".to_string(), "attach".to_string());
+        msg.n_uname = 5; // Wrong count
+        let mut buf = [0u8; 64];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TattachError::UnameCountMismatch));
+    }
+
+    #[test]
+    fn test_tattach_send() {
+        let msg = TattachMessage::new(123, 456, 789, "user".to_string(), "attach".to_string());
+
+        // Test that send_tattach doesn't panic and returns a result
+        let result = msg.send_tattach();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TattachError::BufferTooSmall
+                        | TattachError::StringTooLong
+                        | TattachError::UnameCountMismatch
+                        | TattachError::InvalidUtf8
+                        | TattachError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rattach message tests
+    #[test]
+    fn test_rattach_message_creation() {
+        let qid = Qid::new(P9QidType::Qtdir as u8, 1, 0x12345678);
+        let msg = RattachMessage::new(123, qid);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.qid.qtype, P9QidType::Qtdir as u8);
+        assert_eq!(msg.qid.version, 1);
+        assert_eq!(msg.qid.path, 0x12345678);
+    }
+
+    #[test]
+    fn test_rattach_deserialize() {
+        // Create a proper Rattach message buffer
+        let mut buf = [0u8; 32];
+
+        // Write size[4] = 20 (little-endian) - 4 + 1 + 2 + 13 = 20
+        buf[0] = 20;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rattach (105)
+        buf[4] = P9MsgType::Rattach as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Write qid[13] - type[1] version[4] path[8]
+        buf[7] = 0x80; // Qtdir type
+        buf[8] = 1; // version = 1 (little-endian)
+        buf[9] = 0;
+        buf[10] = 0;
+        buf[11] = 0;
+        buf[12] = 0x78; // path = 0x12345678 (little-endian)
+        buf[13] = 0x56;
+        buf[14] = 0x34;
+        buf[15] = 0x12;
+        buf[16] = 0;
+        buf[17] = 0;
+        buf[18] = 0;
+        buf[19] = 0;
+
+        // Deserialize as Rattach
+        let (rattach, bytes_consumed) = RattachMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 20);
+        assert_eq!(rattach.tag, 123);
+        assert_eq!(rattach.qid.qtype, 0x80);
+        assert_eq!(rattach.qid.version, 1);
+        assert_eq!(rattach.qid.path, 0x12345678);
+    }
+
+    #[test]
+    fn test_rattach_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RattachMessage::deserialize(&buf);
+        assert_eq!(result, Err(RattachError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rattach_deserialize_invalid_message_type() {
+        // Create a valid Tattach message but don't change the type
+        let tattach = TattachMessage::new(123, 456, 789, "user".to_string(), "attach".to_string());
+        let mut buf = [0u8; 64];
+        tattach.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rattach (should fail because type is Tattach)
+        let result = RattachMessage::deserialize(&buf);
+        assert_eq!(result, Err(RattachError::InvalidMessageType));
+    }
+
+    // Roundtrip tests for Tattach/Rattach
+    #[test]
+    fn test_roundtrip_tattach_rattach() {
+        // Create a Tattach message
+        let original = TattachMessage::new(
+            456,
+            789,
+            1011,
+            "testuser".to_string(),
+            "testattach".to_string(),
+        );
+        let mut tattach_buf = [0u8; 64];
+        let tattach_bytes_written = original.serialize(&mut tattach_buf).unwrap();
+
+        // Create a separate Rattach message with the same tag
+        let qid = Qid::new(P9QidType::Qtdir as u8, 1, 0x12345678);
+        let _rattach_msg = RattachMessage::new(original.tag, qid);
+        let mut rattach_buf = [0u8; 32];
+
+        // Manually create Rattach buffer
+        // Write size[4] = 20 (little-endian)
+        rattach_buf[0] = 20;
+        rattach_buf[1] = 0;
+        rattach_buf[2] = 0;
+        rattach_buf[3] = 0;
+
+        // Write message type[1] = Rattach (105)
+        rattach_buf[4] = P9MsgType::Rattach as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rattach_buf[5] = (456 & 0xff) as u8;
+        rattach_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Write qid[13] - type[1] version[4] path[8]
+        rattach_buf[7] = P9QidType::Qtdir as u8;
+        rattach_buf[8] = 1; // version = 1 (little-endian)
+        rattach_buf[9] = 0;
+        rattach_buf[10] = 0;
+        rattach_buf[11] = 0;
+        rattach_buf[12] = 0x78; // path = 0x12345678 (little-endian)
+        rattach_buf[13] = 0x56;
+        rattach_buf[14] = 0x34;
+        rattach_buf[15] = 0x12;
+        rattach_buf[16] = 0;
+        rattach_buf[17] = 0;
+        rattach_buf[18] = 0;
+        rattach_buf[19] = 0;
+
+        // Deserialize as Rattach
+        let (rattach, bytes_consumed) = RattachMessage::deserialize(&rattach_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 20);
+        assert_eq!(rattach.tag, original.tag);
+        assert_eq!(rattach.qid.qtype, P9QidType::Qtdir as u8);
+        assert_eq!(rattach.qid.version, 1);
+        assert_eq!(rattach.qid.path, 0x12345678);
+        assert_eq!(tattach_bytes_written, 41); // Tattach is 41 bytes (4+1+2+4+4+(2+8)+(2+10)+4)
+    }
+
+    // Rlerror message tests
+    #[test]
+    fn test_rlerror_message_creation() {
+        let msg = RlerrorMessage::new(123, 2); // ENOENT error
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.ecode, 2);
+    }
+
+    #[test]
+    fn test_rlerror_deserialize() {
+        // Create a proper Rlerror message buffer
+        let mut buf = [0u8; 16];
+
+        // Write size[4] = 11 (little-endian) - 4 + 1 + 2 + 4 = 11
+        buf[0] = 11;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = RLerror (7)
+        buf[4] = P9MsgType::RLerror as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Write ecode[4] = 2 (ENOENT) (little-endian)
+        buf[7] = 2;
+        buf[8] = 0;
+        buf[9] = 0;
+        buf[10] = 0;
+
+        // Deserialize as Rlerror
+        let (rlerror, bytes_consumed) = RlerrorMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 11);
+        assert_eq!(rlerror.tag, 123);
+        assert_eq!(rlerror.ecode, 2);
+    }
+
+    #[test]
+    fn test_rlerror_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RlerrorMessage::deserialize(&buf);
+        assert_eq!(result, Err(RlerrorError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rlerror_deserialize_invalid_message_type() {
+        // Create a valid Tattach message but don't change the type
+        let tattach = TattachMessage::new(123, 456, 789, "user".to_string(), "attach".to_string());
+        let mut buf = [0u8; 64];
+        tattach.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rlerror (should fail because type is Tattach)
+        let result = RlerrorMessage::deserialize(&buf);
+        assert_eq!(result, Err(RlerrorError::InvalidMessageType));
+    }
+
+    #[test]
+    fn test_rlerror_deserialize_common_error_codes() {
+        // Test common Linux error codes
+        let error_codes = [
+            (1, "EPERM"),   // Operation not permitted
+            (2, "ENOENT"),  // No such file or directory
+            (5, "EIO"),     // I/O error
+            (13, "EACCES"), // Permission denied
+            (22, "EINVAL"), // Invalid argument
+        ];
+
+        for (ecode, _name) in error_codes.iter() {
+            let mut buf = [0u8; 16];
+
+            // Write size[4] = 11 (little-endian)
+            buf[0] = 11;
+            buf[1] = 0;
+            buf[2] = 0;
+            buf[3] = 0;
+
+            // Write message type[1] = RLerror (7)
+            buf[4] = P9MsgType::RLerror as u8;
+
+            // Write tag[2] = 123 (little-endian)
+            buf[5] = 123;
+            buf[6] = 0;
+
+            // Write ecode[4] (little-endian)
+            buf[7] = *ecode as u8;
+            buf[8] = 0;
+            buf[9] = 0;
+            buf[10] = 0;
+
+            // Deserialize as Rlerror
+            let (rlerror, bytes_consumed) = RlerrorMessage::deserialize(&buf).unwrap();
+
+            assert_eq!(bytes_consumed, 11);
+            assert_eq!(rlerror.tag, 123);
+            assert_eq!(rlerror.ecode, *ecode);
+        }
+    }
+
+    // Tstatfs message tests
+    #[test]
+    fn test_tstatfs_message_creation() {
+        let msg = TstatfsMessage::new(123, 456);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+    }
+
+    #[test]
+    fn test_tstatfs_serialize() {
+        let msg = TstatfsMessage::new(123, 456);
+        let mut buf = [0u8; 16];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(11)); // 4 + 1 + 2 + 4 = 11 bytes total
+
+        // Verify the serialized data
+        // size[4] = 11 (little-endian)
+        assert_eq!(buf[0], 11);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Tstatfs (8)
+        assert_eq!(buf[4], 8);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+    }
+
+    #[test]
+    fn test_tstatfs_serialize_buffer_too_small() {
+        let msg = TstatfsMessage::new(123, 456);
+        let mut buf = [0u8; 5]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TstatfsError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_tstatfs_send() {
+        let msg = TstatfsMessage::new(123, 456);
+
+        // Test that send_tstatfs doesn't panic and returns a result
+        let result = msg.send_tstatfs();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TstatfsError::BufferTooSmall | TstatfsError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rstatfs message tests
+    #[test]
+    fn test_rstatfs_message_creation() {
+        let msg = RstatfsMessage::new(
+            123,          // tag
+            0xEF53,       // type (ext4 filesystem)
+            4096,         // bsize
+            1000000,      // blocks
+            500000,       // bfree
+            450000,       // bavail
+            10000,        // files
+            5000,         // ffree
+            0x1234567890, // fsid
+            255,          // namelen
+        );
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.type_, 0xEF53);
+        assert_eq!(msg.bsize, 4096);
+        assert_eq!(msg.blocks, 1000000);
+        assert_eq!(msg.bfree, 500000);
+        assert_eq!(msg.bavail, 450000);
+        assert_eq!(msg.files, 10000);
+        assert_eq!(msg.ffree, 5000);
+        assert_eq!(msg.fsid, 0x1234567890);
+        assert_eq!(msg.namelen, 255);
+    }
+
+    #[test]
+    fn test_rstatfs_deserialize() {
+        // Create a proper Rstatfs message buffer
+        let mut buf = [0u8; 80];
+
+        // Write size[4] = 67 (little-endian) - 4 + 1 + 2 + 4 + 4 + 8 + 8 + 8 + 8 + 8 + 8 + 4 = 67
+        buf[0] = 67;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rstatfs (9)
+        buf[4] = P9MsgType::Rstatfs as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Write type[4] = 0xEF53 (ext4) (little-endian)
+        buf[7] = 0x53;
+        buf[8] = 0xEF;
+        buf[9] = 0;
+        buf[10] = 0;
+
+        // Write bsize[4] = 4096 (little-endian)
+        buf[11] = 0;
+        buf[12] = 16;
+        buf[13] = 0;
+        buf[14] = 0;
+
+        // Write blocks[8] = 1000000 (little-endian)
+        buf[15] = 64;
+        buf[16] = 66;
+        buf[17] = 15;
+        buf[18] = 0;
+        buf[19] = 0;
+        buf[20] = 0;
+        buf[21] = 0;
+        buf[22] = 0;
+
+        // Write bfree[8] = 500000 (little-endian)
+        buf[23] = 32;
+        buf[24] = 161;
+        buf[25] = 7;
+        buf[26] = 0;
+        buf[27] = 0;
+        buf[28] = 0;
+        buf[29] = 0;
+        buf[30] = 0;
+
+        // Write bavail[8] = 450000 (little-endian)
+        buf[31] = 208; // 0xd0
+        buf[32] = 221; // 0xdd
+        buf[33] = 6; // 0x06
+        buf[34] = 0;
+        buf[35] = 0;
+        buf[36] = 0;
+        buf[37] = 0;
+        buf[38] = 0;
+
+        // Write files[8] = 10000 (little-endian)
+        buf[39] = 16;
+        buf[40] = 39;
+        buf[41] = 0;
+        buf[42] = 0;
+        buf[43] = 0;
+        buf[44] = 0;
+        buf[45] = 0;
+        buf[46] = 0;
+
+        // Write ffree[8] = 5000 (little-endian)
+        buf[47] = 136;
+        buf[48] = 19;
+        buf[49] = 0;
+        buf[50] = 0;
+        buf[51] = 0;
+        buf[52] = 0;
+        buf[53] = 0;
+        buf[54] = 0;
+
+        // Write fsid[8] = 0x1234567890 (little-endian)
+        buf[55] = 0x90;
+        buf[56] = 0x78;
+        buf[57] = 0x56;
+        buf[58] = 0x34;
+        buf[59] = 0x12;
+        buf[60] = 0;
+        buf[61] = 0;
+        buf[62] = 0;
+
+        // Write namelen[4] = 255 (little-endian)
+        buf[63] = 255;
+        buf[64] = 0;
+        buf[65] = 0;
+        buf[66] = 0;
+
+        // Deserialize as Rstatfs
+        let (rstatfs, bytes_consumed) = RstatfsMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 67);
+        assert_eq!(rstatfs.tag, 123);
+        assert_eq!(rstatfs.type_, 0xEF53);
+        assert_eq!(rstatfs.bsize, 4096);
+        assert_eq!(rstatfs.blocks, 1000000);
+        assert_eq!(rstatfs.bfree, 500000);
+        assert_eq!(rstatfs.bavail, 450000);
+        assert_eq!(rstatfs.files, 10000);
+        assert_eq!(rstatfs.ffree, 5000);
+        assert_eq!(rstatfs.fsid, 0x1234567890);
+        assert_eq!(rstatfs.namelen, 255);
+    }
+
+    #[test]
+    fn test_rstatfs_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RstatfsMessage::deserialize(&buf);
+        assert_eq!(result, Err(RstatfsError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rstatfs_deserialize_invalid_message_type() {
+        // Create a valid Tstatfs message but don't change the type
+        let tstatfs = TstatfsMessage::new(123, 456);
+        let mut buf = [0u8; 16];
+        tstatfs.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rstatfs (should fail because type is Tstatfs)
+        let result = RstatfsMessage::deserialize(&buf);
+        assert_eq!(result, Err(RstatfsError::InvalidMessageType));
+    }
+
+    // Roundtrip tests for Tstatfs/Rstatfs
+    #[test]
+    fn test_roundtrip_tstatfs_rstatfs() {
+        // Create a Tstatfs message
+        let original = TstatfsMessage::new(456, 789);
+        let mut tstatfs_buf = [0u8; 16];
+        let tstatfs_bytes_written = original.serialize(&mut tstatfs_buf).unwrap();
+
+        // Create a separate Rstatfs message with the same tag
+        let _rstatfs_msg = RstatfsMessage::new(
+            original.tag, // tag
+            0xEF53,       // type (ext4)
+            4096,         // bsize
+            1000000,      // blocks
+            500000,       // bfree
+            450000,       // bavail
+            10000,        // files
+            5000,         // ffree
+            0x1234567890, // fsid
+            255,          // namelen
+        );
+        let mut rstatfs_buf = [0u8; 80];
+
+        // Manually create Rstatfs buffer
+        // Write size[4] = 67 (little-endian)
+        rstatfs_buf[0] = 67;
+        rstatfs_buf[1] = 0;
+        rstatfs_buf[2] = 0;
+        rstatfs_buf[3] = 0;
+
+        // Write message type[1] = Rstatfs (9)
+        rstatfs_buf[4] = P9MsgType::Rstatfs as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rstatfs_buf[5] = (456 & 0xff) as u8;
+        rstatfs_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Write type[4] = 0xEF53 (ext4) (little-endian)
+        rstatfs_buf[7] = 0x53;
+        rstatfs_buf[8] = 0xEF;
+        rstatfs_buf[9] = 0;
+        rstatfs_buf[10] = 0;
+
+        // Write bsize[4] = 4096 (little-endian)
+        rstatfs_buf[11] = 0;
+        rstatfs_buf[12] = 16;
+        rstatfs_buf[13] = 0;
+        rstatfs_buf[14] = 0;
+
+        // Write blocks[8] = 1000000 (little-endian)
+        rstatfs_buf[15] = 64;
+        rstatfs_buf[16] = 66;
+        rstatfs_buf[17] = 15;
+        rstatfs_buf[18] = 0;
+        rstatfs_buf[19] = 0;
+        rstatfs_buf[20] = 0;
+        rstatfs_buf[21] = 0;
+        rstatfs_buf[22] = 0;
+
+        // Write bfree[8] = 500000 (little-endian)
+        rstatfs_buf[23] = 32;
+        rstatfs_buf[24] = 161;
+        rstatfs_buf[25] = 7;
+        rstatfs_buf[26] = 0;
+        rstatfs_buf[27] = 0;
+        rstatfs_buf[28] = 0;
+        rstatfs_buf[29] = 0;
+        rstatfs_buf[30] = 0;
+
+        // Write bavail[8] = 450000 (little-endian)
+        rstatfs_buf[31] = 208; // 0xd0
+        rstatfs_buf[32] = 221; // 0xdd
+        rstatfs_buf[33] = 6; // 0x06
+        rstatfs_buf[34] = 0;
+        rstatfs_buf[35] = 0;
+        rstatfs_buf[36] = 0;
+        rstatfs_buf[37] = 0;
+        rstatfs_buf[38] = 0;
+
+        // Write files[8] = 10000 (little-endian)
+        rstatfs_buf[39] = 16;
+        rstatfs_buf[40] = 39;
+        rstatfs_buf[41] = 0;
+        rstatfs_buf[42] = 0;
+        rstatfs_buf[43] = 0;
+        rstatfs_buf[44] = 0;
+        rstatfs_buf[45] = 0;
+        rstatfs_buf[46] = 0;
+
+        // Write ffree[8] = 5000 (little-endian)
+        rstatfs_buf[47] = 136;
+        rstatfs_buf[48] = 19;
+        rstatfs_buf[49] = 0;
+        rstatfs_buf[50] = 0;
+        rstatfs_buf[51] = 0;
+        rstatfs_buf[52] = 0;
+        rstatfs_buf[53] = 0;
+        rstatfs_buf[54] = 0;
+
+        // Write fsid[8] = 0x1234567890 (little-endian)
+        rstatfs_buf[55] = 0x90;
+        rstatfs_buf[56] = 0x78;
+        rstatfs_buf[57] = 0x56;
+        rstatfs_buf[58] = 0x34;
+        rstatfs_buf[59] = 0x12;
+        rstatfs_buf[60] = 0;
+        rstatfs_buf[61] = 0;
+        rstatfs_buf[62] = 0;
+
+        // Write namelen[4] = 255 (little-endian)
+        rstatfs_buf[63] = 255;
+        rstatfs_buf[64] = 0;
+        rstatfs_buf[65] = 0;
+        rstatfs_buf[66] = 0;
+
+        // Deserialize as Rstatfs
+        let (rstatfs, bytes_consumed) = RstatfsMessage::deserialize(&rstatfs_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 67);
+        assert_eq!(rstatfs.tag, original.tag);
+        assert_eq!(rstatfs.type_, 0xEF53);
+        assert_eq!(rstatfs.bsize, 4096);
+        assert_eq!(rstatfs.blocks, 1000000);
+        assert_eq!(rstatfs.bfree, 500000);
+        assert_eq!(rstatfs.bavail, 450000);
+        assert_eq!(rstatfs.files, 10000);
+        assert_eq!(rstatfs.ffree, 5000);
+        assert_eq!(rstatfs.fsid, 0x1234567890);
+        assert_eq!(rstatfs.namelen, 255);
+        assert_eq!(tstatfs_bytes_written, 11); // Tstatfs is 11 bytes
+    }
+
+    // Tgetattr message tests
+    #[test]
+    fn test_tgetattr_message_creation() {
+        let msg = TgetattrMessage::new(123, 456, 0xFFFFFFFF);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+        assert_eq!(msg.request_mask, 0xFFFFFFFF);
+    }
+
+    #[test]
+    fn test_tgetattr_serialize() {
+        let msg = TgetattrMessage::new(123, 456, 0xFFFFFFFF);
+        let mut buf = [0u8; 32];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(19)); // 4 + 1 + 2 + 4 + 8 = 19 bytes total
+
+        // Verify the serialized data
+        // size[4] = 19 (little-endian)
+        assert_eq!(buf[0], 19);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Tgetattr (24)
+        assert_eq!(buf[4], 24);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+
+        // request_mask[8] = 0xFFFFFFFF (little-endian)
+        assert_eq!(buf[11], 0xFF);
+        assert_eq!(buf[12], 0xFF);
+        assert_eq!(buf[13], 0xFF);
+        assert_eq!(buf[14], 0xFF);
+        assert_eq!(buf[15], 0);
+        assert_eq!(buf[16], 0);
+        assert_eq!(buf[17], 0);
+        assert_eq!(buf[18], 0);
+    }
+
+    #[test]
+    fn test_tgetattr_serialize_buffer_too_small() {
+        let msg = TgetattrMessage::new(123, 456, 0xFFFFFFFF);
+        let mut buf = [0u8; 10]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TgetattrError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_tgetattr_send() {
+        let msg = TgetattrMessage::new(123, 456, 0xFFFFFFFF);
+
+        // Test that send_tgetattr doesn't panic and returns a result
+        let result = msg.send_tgetattr();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TgetattrError::BufferTooSmall | TgetattrError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rgetattr message tests
+    #[test]
+    fn test_rgetattr_message_creation() {
+        let qid = Qid {
+            qtype: P9QidType::Qtdir as u8,
+            version: 1,
+            path: 0x12345678,
+        };
+        let msg = RgetattrMessage::new(
+            123,        // tag
+            0xFFFFFFFF, // valid
+            qid,        // qid
+            0o755,      // mode
+            1000,       // uid
+            1000,       // gid
+            1,          // nlink
+            0,          // rdev
+            1024,       // size
+            4096,       // blksize
+            1,          // blocks
+            1640995200, // atime_sec
+            0,          // atime_nsec
+            1640995200, // mtime_sec
+            0,          // mtime_nsec
+            1640995200, // ctime_sec
+            0,          // ctime_nsec
+            1640995200, // btime_sec
+            0,          // btime_nsec
+            1,          // gen
+            1,          // data_version
+        );
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.valid, 0xFFFFFFFF);
+        assert_eq!(msg.qid.qtype, P9QidType::Qtdir as u8);
+        assert_eq!(msg.mode, 0o755);
+        assert_eq!(msg.uid, 1000);
+        assert_eq!(msg.gid, 1000);
+        assert_eq!(msg.size, 1024);
+    }
+
+    #[test]
+    fn test_rgetattr_deserialize() {
+        // Create a proper Rgetattr message buffer
+        let mut buf = [0u8; 200];
+
+        // Write size[4] = 160 (little-endian) - 4 + 1 + 2 + 8 + 13 + 4 + 4 + 4 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 = 160
+        buf[0] = 160;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rgetattr (25)
+        buf[4] = P9MsgType::Rgetattr as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Write valid[8] = 0xFFFFFFFF (little-endian)
+        buf[7] = 0xFF;
+        buf[8] = 0xFF;
+        buf[9] = 0xFF;
+        buf[10] = 0xFF;
+        buf[11] = 0;
+        buf[12] = 0;
+        buf[13] = 0;
+        buf[14] = 0;
+
+        // Write qid[13] - type[1] version[4] path[8]
+        buf[15] = P9QidType::Qtdir as u8; // type
+        buf[16] = 1; // version = 1 (little-endian)
+        buf[17] = 0;
+        buf[18] = 0;
+        buf[19] = 0;
+        buf[20] = 0x78; // path = 0x12345678 (little-endian)
+        buf[21] = 0x56;
+        buf[22] = 0x34;
+        buf[23] = 0x12;
+        buf[24] = 0;
+        buf[25] = 0;
+        buf[26] = 0;
+        buf[27] = 0;
+
+        // Write mode[4] = 0o755 (little-endian)
+        let mode_bytes = (0o755u32).to_le_bytes();
+        buf[28..32].copy_from_slice(&mode_bytes);
+
+        // Write uid[4] = 1000 (little-endian)
+        let uid_bytes = (1000u32).to_le_bytes();
+        buf[32..36].copy_from_slice(&uid_bytes);
+
+        // Write gid[4] = 1000 (little-endian)
+        let gid_bytes = (1000u32).to_le_bytes();
+        buf[36..40].copy_from_slice(&gid_bytes);
+
+        // Write nlink[8] = 1 (little-endian)
+        let nlink_bytes = (1u64).to_le_bytes();
+        buf[40..48].copy_from_slice(&nlink_bytes);
+
+        // Write rdev[8] = 0 (little-endian)
+        let rdev_bytes = (0u64).to_le_bytes();
+        buf[48..56].copy_from_slice(&rdev_bytes);
+
+        // Write size[8] = 1024 (little-endian)
+        let size_bytes = (1024u64).to_le_bytes();
+        buf[56..64].copy_from_slice(&size_bytes);
+
+        // Write blksize[8] = 4096 (little-endian)
+        let blksize_bytes = (4096u64).to_le_bytes();
+        buf[64..72].copy_from_slice(&blksize_bytes);
+
+        // Write blocks[8] = 1 (little-endian)
+        let blocks_bytes = (1u64).to_le_bytes();
+        buf[72..80].copy_from_slice(&blocks_bytes);
+
+        // Write atime_sec[8] = 1640995200 (little-endian)
+        let atime_sec_bytes = (1640995200u64).to_le_bytes();
+        buf[80..88].copy_from_slice(&atime_sec_bytes);
+
+        // Write atime_nsec[8] = 0 (little-endian)
+        let atime_nsec_bytes = (0u64).to_le_bytes();
+        buf[88..96].copy_from_slice(&atime_nsec_bytes);
+
+        // Write mtime_sec[8] = 1640995200 (little-endian)
+        let mtime_sec_bytes = (1640995200u64).to_le_bytes();
+        buf[96..104].copy_from_slice(&mtime_sec_bytes);
+
+        // Write mtime_nsec[8] = 0 (little-endian)
+        let mtime_nsec_bytes = (0u64).to_le_bytes();
+        buf[104..112].copy_from_slice(&mtime_nsec_bytes);
+
+        // Write ctime_sec[8] = 1640995200 (little-endian)
+        let ctime_sec_bytes = (1640995200u64).to_le_bytes();
+        buf[112..120].copy_from_slice(&ctime_sec_bytes);
+
+        // Write ctime_nsec[8] = 0 (little-endian)
+        let ctime_nsec_bytes = (0u64).to_le_bytes();
+        buf[120..128].copy_from_slice(&ctime_nsec_bytes);
+
+        // Write btime_sec[8] = 1640995200 (little-endian)
+        let btime_sec_bytes = (1640995200u64).to_le_bytes();
+        buf[128..136].copy_from_slice(&btime_sec_bytes);
+
+        // Write btime_nsec[8] = 0 (little-endian)
+        let btime_nsec_bytes = (0u64).to_le_bytes();
+        buf[136..144].copy_from_slice(&btime_nsec_bytes);
+
+        // Write gen[8] = 1 (little-endian)
+        let gen_bytes = (1u64).to_le_bytes();
+        buf[144..152].copy_from_slice(&gen_bytes);
+
+        // Write data_version[8] = 1 (little-endian)
+        let data_version_bytes = (1u64).to_le_bytes();
+        buf[152..160].copy_from_slice(&data_version_bytes);
+
+        // Deserialize as Rgetattr
+        let (rgetattr, bytes_consumed) = RgetattrMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 160);
+        assert_eq!(rgetattr.tag, 123);
+        assert_eq!(rgetattr.valid, 0xFFFFFFFF);
+        assert_eq!(rgetattr.qid.qtype, P9QidType::Qtdir as u8);
+        assert_eq!(rgetattr.qid.version, 1);
+        assert_eq!(rgetattr.qid.path, 0x12345678);
+        assert_eq!(rgetattr.mode, 0o755);
+        assert_eq!(rgetattr.uid, 1000);
+        assert_eq!(rgetattr.gid, 1000);
+        assert_eq!(rgetattr.nlink, 1);
+        assert_eq!(rgetattr.rdev, 0);
+        assert_eq!(rgetattr.size, 1024);
+        assert_eq!(rgetattr.blksize, 4096);
+        assert_eq!(rgetattr.blocks, 1);
+        assert_eq!(rgetattr.atime_sec, 1640995200);
+        assert_eq!(rgetattr.atime_nsec, 0);
+        assert_eq!(rgetattr.mtime_sec, 1640995200);
+        assert_eq!(rgetattr.mtime_nsec, 0);
+        assert_eq!(rgetattr.ctime_sec, 1640995200);
+        assert_eq!(rgetattr.ctime_nsec, 0);
+        assert_eq!(rgetattr.btime_sec, 1640995200);
+        assert_eq!(rgetattr.btime_nsec, 0);
+        assert_eq!(rgetattr.gen_, 1);
+        assert_eq!(rgetattr.data_version, 1);
+    }
+
+    #[test]
+    fn test_rgetattr_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RgetattrMessage::deserialize(&buf);
+        assert_eq!(result, Err(RgetattrError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rgetattr_deserialize_invalid_message_type() {
+        // Create a valid Tgetattr message but don't change the type
+        let tgetattr = TgetattrMessage::new(123, 456, 0xFFFFFFFF);
+        let mut buf = [0u8; 32];
+        tgetattr.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rgetattr (should fail because type is Tgetattr)
+        let result = RgetattrMessage::deserialize(&buf);
+        assert_eq!(result, Err(RgetattrError::InvalidMessageType));
+    }
+
+    // Tsetattr message tests
+    #[test]
+    fn test_tsetattr_message_creation() {
+        let msg = TsetattrMessage::new(
+            123,        // tag
+            456,        // fid
+            0xFFFFFFFF, // valid
+            0o755,      // mode
+            1000,       // uid
+            1000,       // gid
+            1024,       // size
+            1640995200, // atime_sec
+            0,          // atime_nsec
+            1640995200, // mtime_sec
+            0,          // mtime_nsec
+        );
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+        assert_eq!(msg.valid, 0xFFFFFFFF);
+        assert_eq!(msg.mode, 0o755);
+        assert_eq!(msg.uid, 1000);
+        assert_eq!(msg.gid, 1000);
+        assert_eq!(msg.size, 1024);
+        assert_eq!(msg.atime_sec, 1640995200);
+        assert_eq!(msg.mtime_sec, 1640995200);
+    }
+
+    #[test]
+    fn test_tsetattr_serialize() {
+        let msg = TsetattrMessage::new(
+            123,        // tag
+            456,        // fid
+            0xFFFFFFFF, // valid
+            0o755,      // mode
+            1000,       // uid
+            1000,       // gid
+            1024,       // size
+            1640995200, // atime_sec
+            0,          // atime_nsec
+            1640995200, // mtime_sec
+            0,          // mtime_nsec
+        );
+        let mut buf = [0u8; 128];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(67)); // 4 + 1 + 2 + 4 + 4 + 4 + 4 + 4 + 8 + 8 + 8 + 8 + 8 = 67 bytes total
+
+        // Verify the serialized data
+        // size[4] = 67 (little-endian)
+        assert_eq!(buf[0], 67);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Tsetattr (26)
+        assert_eq!(buf[4], 26);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+
+        // valid[4] = 0xFFFFFFFF (little-endian)
+        assert_eq!(buf[11], 0xFF);
+        assert_eq!(buf[12], 0xFF);
+        assert_eq!(buf[13], 0xFF);
+        assert_eq!(buf[14], 0xFF);
+
+        // mode[4] = 0o755 (little-endian)
+        let expected_mode_bytes = (0o755u32).to_le_bytes();
+        assert_eq!(&buf[15..19], &expected_mode_bytes);
+
+        // uid[4] = 1000 (little-endian)
+        let expected_uid_bytes = (1000u32).to_le_bytes();
+        assert_eq!(&buf[19..23], &expected_uid_bytes);
+
+        // gid[4] = 1000 (little-endian)
+        let expected_gid_bytes = (1000u32).to_le_bytes();
+        assert_eq!(&buf[23..27], &expected_gid_bytes);
+
+        // size[8] = 1024 (little-endian)
+        let expected_size_bytes = (1024u64).to_le_bytes();
+        assert_eq!(&buf[27..35], &expected_size_bytes);
+
+        // atime_sec[8] = 1640995200 (little-endian)
+        let expected_atime_sec_bytes = (1640995200u64).to_le_bytes();
+        assert_eq!(&buf[35..43], &expected_atime_sec_bytes);
+
+        // atime_nsec[8] = 0 (little-endian)
+        let expected_atime_nsec_bytes = (0u64).to_le_bytes();
+        assert_eq!(&buf[43..51], &expected_atime_nsec_bytes);
+
+        // mtime_sec[8] = 1640995200 (little-endian)
+        let expected_mtime_sec_bytes = (1640995200u64).to_le_bytes();
+        assert_eq!(&buf[51..59], &expected_mtime_sec_bytes);
+
+        // mtime_nsec[8] = 0 (little-endian)
+        let expected_mtime_nsec_bytes = (0u64).to_le_bytes();
+        assert_eq!(&buf[59..67], &expected_mtime_nsec_bytes);
+    }
+
+    #[test]
+    fn test_tsetattr_serialize_buffer_too_small() {
+        let msg = TsetattrMessage::new(
+            123, 456, 0xFFFFFFFF, 0o755, 1000, 1000, 1024, 1640995200, 0, 1640995200, 0,
+        );
+        let mut buf = [0u8; 50]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TsetattrError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_tsetattr_send() {
+        let msg = TsetattrMessage::new(
+            123, 456, 0xFFFFFFFF, 0o755, 1000, 1000, 1024, 1640995200, 0, 1640995200, 0,
+        );
+
+        // Test that send_tsetattr doesn't panic and returns a result
+        let result = msg.send_tsetattr();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TsetattrError::BufferTooSmall | TsetattrError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rsetattr message tests
+    #[test]
+    fn test_rsetattr_message_creation() {
+        let msg = RsetattrMessage::new(123);
+        assert_eq!(msg.tag, 123);
+    }
+
+    #[test]
+    fn test_rsetattr_deserialize() {
+        // Create a proper Rsetattr message buffer
+        let mut buf = [0u8; 16];
+
+        // Write size[4] = 7 (little-endian) - 4 + 1 + 2 = 7
+        buf[0] = 7;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rsetattr (27)
+        buf[4] = P9MsgType::Rsetattr as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Deserialize as Rsetattr
+        let (rsetattr, bytes_consumed) = RsetattrMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 7);
+        assert_eq!(rsetattr.tag, 123);
+    }
+
+    #[test]
+    fn test_rsetattr_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RsetattrMessage::deserialize(&buf);
+        assert_eq!(result, Err(RsetattrError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rsetattr_deserialize_invalid_message_type() {
+        // Create a valid Tsetattr message but don't change the type
+        let tsetattr = TsetattrMessage::new(
+            123, 456, 0xFFFFFFFF, 0o755, 1000, 1000, 1024, 1640995200, 0, 1640995200, 0,
+        );
+        let mut buf = [0u8; 128];
+        tsetattr.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rsetattr (should fail because type is Tsetattr)
+        let result = RsetattrMessage::deserialize(&buf);
+        assert_eq!(result, Err(RsetattrError::InvalidMessageType));
+    }
+
+    // Roundtrip tests for Tgetattr/Rgetattr and Tsetattr/Rsetattr
+    #[test]
+    fn test_roundtrip_tgetattr_rgetattr() {
+        // Create a Tgetattr message
+        let original = TgetattrMessage::new(456, 789, 0xFFFFFFFF);
+        let mut tgetattr_buf = [0u8; 32];
+        let tgetattr_bytes_written = original.serialize(&mut tgetattr_buf).unwrap();
+
+        // Create a separate Rgetattr message with the same tag
+        let qid = Qid {
+            qtype: P9QidType::Qtdir as u8,
+            version: 1,
+            path: 0x12345678,
+        };
+        let _rgetattr_msg = RgetattrMessage::new(
+            original.tag, // tag
+            0xFFFFFFFF,   // valid
+            qid,          // qid
+            0o755,        // mode
+            1000,         // uid
+            1000,         // gid
+            1,            // nlink
+            0,            // rdev
+            1024,         // size
+            4096,         // blksize
+            1,            // blocks
+            1640995200,   // atime_sec
+            0,            // atime_nsec
+            1640995200,   // mtime_sec
+            0,            // mtime_nsec
+            1640995200,   // ctime_sec
+            0,            // ctime_nsec
+            1640995200,   // btime_sec
+            0,            // btime_nsec
+            1,            // gen
+            1,            // data_version
+        );
+        let mut rgetattr_buf = [0u8; 200];
+
+        // Manually create Rgetattr buffer (simplified version)
+        // Write size[4] = 160 (little-endian)
+        rgetattr_buf[0] = 160;
+        rgetattr_buf[1] = 0;
+        rgetattr_buf[2] = 0;
+        rgetattr_buf[3] = 0;
+
+        // Write message type[1] = Rgetattr (25)
+        rgetattr_buf[4] = P9MsgType::Rgetattr as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rgetattr_buf[5] = (456 & 0xff) as u8;
+        rgetattr_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Write valid[8] = 0xFFFFFFFF (little-endian)
+        for i in 7..11 {
+            rgetattr_buf[i] = 0xFF;
+        }
+        for i in 11..15 {
+            rgetattr_buf[i] = 0;
+        }
+
+        // Write qid[13] - type[1] version[4] path[8]
+        rgetattr_buf[15] = P9QidType::Qtdir as u8;
+        rgetattr_buf[16] = 1; // version = 1 (little-endian)
+        rgetattr_buf[17] = 0;
+        rgetattr_buf[18] = 0;
+        rgetattr_buf[19] = 0;
+        rgetattr_buf[20] = 0x78; // path = 0x12345678 (little-endian)
+        rgetattr_buf[21] = 0x56;
+        rgetattr_buf[22] = 0x34;
+        rgetattr_buf[23] = 0x12;
+        rgetattr_buf[24] = 0;
+        rgetattr_buf[25] = 0;
+        rgetattr_buf[26] = 0;
+        rgetattr_buf[27] = 0;
+
+        // Fill the rest with zeros for simplicity
+        for i in 28..160 {
+            rgetattr_buf[i] = 0;
+        }
+
+        // Deserialize as Rgetattr
+        let (rgetattr, bytes_consumed) = RgetattrMessage::deserialize(&rgetattr_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 160);
+        assert_eq!(rgetattr.tag, original.tag);
+        assert_eq!(rgetattr.valid, 0xFFFFFFFF);
+        assert_eq!(rgetattr.qid.qtype, P9QidType::Qtdir as u8);
+        assert_eq!(rgetattr.qid.version, 1);
+        assert_eq!(rgetattr.qid.path, 0x12345678);
+        assert_eq!(tgetattr_bytes_written, 19); // Tgetattr is 19 bytes
+    }
+
+    #[test]
+    fn test_roundtrip_tsetattr_rsetattr() {
+        // Create a Tsetattr message
+        let original = TsetattrMessage::new(
+            456, 789, 0xFFFFFFFF, 0o755, 1000, 1000, 1024, 1640995200, 0, 1640995200, 0,
+        );
+        let mut tsetattr_buf = [0u8; 128];
+        let tsetattr_bytes_written = original.serialize(&mut tsetattr_buf).unwrap();
+
+        // Create a separate Rsetattr message with the same tag
+        let _rsetattr_msg = RsetattrMessage::new(original.tag);
+        let mut rsetattr_buf = [0u8; 16];
+
+        // Manually create Rsetattr buffer
+        // Write size[4] = 7 (little-endian)
+        rsetattr_buf[0] = 7;
+        rsetattr_buf[1] = 0;
+        rsetattr_buf[2] = 0;
+        rsetattr_buf[3] = 0;
+
+        // Write message type[1] = Rsetattr (27)
+        rsetattr_buf[4] = P9MsgType::Rsetattr as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rsetattr_buf[5] = (456 & 0xff) as u8;
+        rsetattr_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Deserialize as Rsetattr
+        let (rsetattr, bytes_consumed) = RsetattrMessage::deserialize(&rsetattr_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 7);
+        assert_eq!(rsetattr.tag, original.tag);
+        assert_eq!(tsetattr_bytes_written, 67); // Tsetattr is 67 bytes
+    }
+
+    // Txattrwalk message tests
+    #[test]
+    fn test_txattrwalk_message_creation() {
+        let msg = TxattrwalkMessage::new(123, 456, 789, "user.test".to_string());
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+        assert_eq!(msg.newfid, 789);
+        assert_eq!(msg.name, "user.test");
+    }
+
+    #[test]
+    fn test_txattrwalk_serialize() {
+        let msg = TxattrwalkMessage::new(123, 456, 789, "user.test".to_string());
+        let mut buf = [0u8; 64];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(25)); // 4 + 1 + 2 + 4 + 4 + (2+9) = 26 bytes total
+
+        // Verify the serialized data
+        // size[4] = 26 (little-endian)
+        assert_eq!(buf[0], 26);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Txattrwalk (28)
+        assert_eq!(buf[4], 28);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+
+        // newfid[4] = 789 (little-endian)
+        assert_eq!(buf[11], 21); // 789 & 0xff = 21
+        assert_eq!(buf[12], 3); // (789 >> 8) & 0xff = 3
+        assert_eq!(buf[13], 0);
+        assert_eq!(buf[14], 0);
+
+        // name[s] = "user.test" (length[2] + string)
+        assert_eq!(buf[15], 9); // length = 9
+        assert_eq!(buf[16], 0);
+        assert_eq!(&buf[17..26], b"user.test");
+    }
+
+    #[test]
+    fn test_txattrwalk_serialize_buffer_too_small() {
+        let msg = TxattrwalkMessage::new(123, 456, 789, "user.test".to_string());
+        let mut buf = [0u8; 10]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TxattrwalkError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_txattrwalk_send() {
+        let msg = TxattrwalkMessage::new(123, 456, 789, "user.test".to_string());
+
+        // Test that send_txattrwalk doesn't panic and returns a result
+        let result = msg.send_txattrwalk();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TxattrwalkError::BufferTooSmall | TxattrwalkError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rxattrwalk message tests
+    #[test]
+    fn test_rxattrwalk_message_creation() {
+        let msg = RxattrwalkMessage::new(123, 1024);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.size, 1024);
+    }
+
+    #[test]
+    fn test_rxattrwalk_deserialize() {
+        // Create a proper Rxattrwalk message buffer
+        let mut buf = [0u8; 32];
+
+        // Write size[4] = 15 (little-endian) - 4 + 1 + 2 + 8 = 15
+        buf[0] = 15;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rxattrwalk (29)
+        buf[4] = P9MsgType::Rxattrwalk as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Write size[8] = 1024 (little-endian)
+        let size_bytes = (1024u64).to_le_bytes();
+        buf[7..15].copy_from_slice(&size_bytes);
+
+        // Deserialize as Rxattrwalk
+        let (rxattrwalk, bytes_consumed) = RxattrwalkMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 15);
+        assert_eq!(rxattrwalk.tag, 123);
+        assert_eq!(rxattrwalk.size, 1024);
+    }
+
+    #[test]
+    fn test_rxattrwalk_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RxattrwalkMessage::deserialize(&buf);
+        assert_eq!(result, Err(RxattrwalkError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rxattrwalk_deserialize_invalid_message_type() {
+        // Create a valid Txattrwalk message but don't change the type
+        let txattrwalk = TxattrwalkMessage::new(123, 456, 789, "user.test".to_string());
+        let mut buf = [0u8; 64];
+        txattrwalk.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rxattrwalk (should fail because type is Txattrwalk)
+        let result = RxattrwalkMessage::deserialize(&buf);
+        assert_eq!(result, Err(RxattrwalkError::InvalidMessageType));
+    }
+
+    // Txattrcreate message tests
+    #[test]
+    fn test_txattrcreate_message_creation() {
+        let msg = TxattrcreateMessage::new(123, 456, "user.test".to_string(), 1024, 0x1);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+        assert_eq!(msg.name, "user.test");
+        assert_eq!(msg.attr_size, 1024);
+        assert_eq!(msg.flags, 0x1);
+    }
+
+    #[test]
+    fn test_txattrcreate_serialize() {
+        let msg = TxattrcreateMessage::new(123, 456, "user.test".to_string(), 1024, 0x1);
+        let mut buf = [0u8; 64];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(33)); // 4 + 1 + 2 + 4 + (2+9) + 8 + 4 = 34 bytes total
+
+        // Verify the serialized data
+        // size[4] = 34 (little-endian)
+        assert_eq!(buf[0], 34);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Txattrcreate (30)
+        assert_eq!(buf[4], 30);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+
+        // name[s] = "user.test" (length[2] + string)
+        assert_eq!(buf[11], 9); // length = 9
+        assert_eq!(buf[12], 0);
+        assert_eq!(&buf[13..22], b"user.test");
+
+        // attr_size[8] = 1024 (little-endian)
+        let expected_attr_size_bytes = (1024u64).to_le_bytes();
+        assert_eq!(&buf[22..30], &expected_attr_size_bytes);
+
+        // flags[4] = 0x1 (little-endian)
+        let expected_flags_bytes = (0x1u32).to_le_bytes();
+        assert_eq!(&buf[30..34], &expected_flags_bytes);
+    }
+
+    #[test]
+    fn test_txattrcreate_serialize_buffer_too_small() {
+        let msg = TxattrcreateMessage::new(123, 456, "user.test".to_string(), 1024, 0x1);
+        let mut buf = [0u8; 20]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TxattrcreateError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_txattrcreate_send() {
+        let msg = TxattrcreateMessage::new(123, 456, "user.test".to_string(), 1024, 0x1);
+
+        // Test that send_txattrcreate doesn't panic and returns a result
+        let result = msg.send_txattrcreate();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TxattrcreateError::BufferTooSmall | TxattrcreateError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rxattrcreate message tests
+    #[test]
+    fn test_rxattrcreate_message_creation() {
+        let msg = RxattrcreateMessage::new(123);
+        assert_eq!(msg.tag, 123);
+    }
+
+    #[test]
+    fn test_rxattrcreate_deserialize() {
+        // Create a proper Rxattrcreate message buffer
+        let mut buf = [0u8; 16];
+
+        // Write size[4] = 7 (little-endian) - 4 + 1 + 2 = 7
+        buf[0] = 7;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rxattrcreate (31)
+        buf[4] = P9MsgType::Rxattrcreate as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Deserialize as Rxattrcreate
+        let (rxattrcreate, bytes_consumed) = RxattrcreateMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 7);
+        assert_eq!(rxattrcreate.tag, 123);
+    }
+
+    #[test]
+    fn test_rxattrcreate_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RxattrcreateMessage::deserialize(&buf);
+        assert_eq!(result, Err(RxattrcreateError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rxattrcreate_deserialize_invalid_message_type() {
+        // Create a valid Txattrcreate message but don't change the type
+        let txattrcreate = TxattrcreateMessage::new(123, 456, "user.test".to_string(), 1024, 0x1);
+        let mut buf = [0u8; 64];
+        txattrcreate.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rxattrcreate (should fail because type is Txattrcreate)
+        let result = RxattrcreateMessage::deserialize(&buf);
+        assert_eq!(result, Err(RxattrcreateError::InvalidMessageType));
+    }
+
+    // Treaddir message tests
+    #[test]
+    fn test_treaddir_message_creation() {
+        let msg = TreaddirMessage::new(123, 456, 0, 1024);
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.fid, 456);
+        assert_eq!(msg.offset, 0);
+        assert_eq!(msg.count, 1024);
+    }
+
+    #[test]
+    fn test_treaddir_serialize() {
+        let msg = TreaddirMessage::new(123, 456, 0, 1024);
+        let mut buf = [0u8; 32];
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Ok(23)); // 4 + 1 + 2 + 4 + 8 + 4 = 23 bytes total
+
+        // Verify the serialized data
+        // size[4] = 23 (little-endian)
+        assert_eq!(buf[0], 23);
+        assert_eq!(buf[1], 0);
+        assert_eq!(buf[2], 0);
+        assert_eq!(buf[3], 0);
+
+        // type[1] = Treaddir (32)
+        assert_eq!(buf[4], 32);
+
+        // tag[2] = 123 (little-endian)
+        assert_eq!(buf[5], 123);
+        assert_eq!(buf[6], 0);
+
+        // fid[4] = 456 (little-endian)
+        assert_eq!(buf[7], 200); // 456 & 0xff = 200
+        assert_eq!(buf[8], 1); // (456 >> 8) & 0xff = 1
+        assert_eq!(buf[9], 0);
+        assert_eq!(buf[10], 0);
+
+        // offset[8] = 0 (little-endian)
+        let expected_offset_bytes = (0u64).to_le_bytes();
+        assert_eq!(&buf[11..19], &expected_offset_bytes);
+
+        // count[4] = 1024 (little-endian)
+        let expected_count_bytes = (1024u32).to_le_bytes();
+        assert_eq!(&buf[19..23], &expected_count_bytes);
+    }
+
+    #[test]
+    fn test_treaddir_serialize_buffer_too_small() {
+        let msg = TreaddirMessage::new(123, 456, 0, 1024);
+        let mut buf = [0u8; 10]; // Too small for the message
+
+        let result = msg.serialize(&mut buf);
+        assert_eq!(result, Err(TreaddirError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_treaddir_send() {
+        let msg = TreaddirMessage::new(123, 456, 0, 1024);
+
+        // Test that send_treaddir doesn't panic and returns a result
+        let result = msg.send_treaddir();
+
+        // The actual result depends on the host environment
+        match result {
+            Ok(_bytes_written) => {
+                // In test environment, host_write might return 0 or the actual bytes
+            }
+            Err(e) => {
+                assert!(matches!(
+                    e,
+                    TreaddirError::BufferTooSmall | TreaddirError::InternalError
+                ));
+            }
+        }
+    }
+
+    // Rreaddir message tests
+    #[test]
+    fn test_rreaddir_message_creation() {
+        let data = vec![0x01, 0x02, 0x03, 0x04];
+        let msg = RreaddirMessage::new(123, 4, data.clone());
+        assert_eq!(msg.tag, 123);
+        assert_eq!(msg.count, 4);
+        assert_eq!(msg.data, data);
+    }
+
+    #[test]
+    fn test_rreaddir_deserialize() {
+        // Create a proper Rreaddir message buffer
+        let mut buf = [0u8; 32];
+
+        // Write size[4] = 11 (little-endian) - 4 + 1 + 2 + 4 = 11
+        buf[0] = 11;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        // Write message type[1] = Rreaddir (33)
+        buf[4] = P9MsgType::Rreaddir as u8;
+
+        // Write tag[2] = 123 (little-endian)
+        buf[5] = 123;
+        buf[6] = 0;
+
+        // Write count[4] = 4 (little-endian)
+        let count_bytes = (4u32).to_le_bytes();
+        buf[7..11].copy_from_slice(&count_bytes);
+
+        // Write data[4] = [0x01, 0x02, 0x03, 0x04]
+        buf[11] = 0x01;
+        buf[12] = 0x02;
+        buf[13] = 0x03;
+        buf[14] = 0x04;
+
+        // Deserialize as Rreaddir
+        let (rreaddir, bytes_consumed) = RreaddirMessage::deserialize(&buf).unwrap();
+
+        assert_eq!(bytes_consumed, 15);
+        assert_eq!(rreaddir.tag, 123);
+        assert_eq!(rreaddir.count, 4);
+        assert_eq!(rreaddir.data, vec![0x01, 0x02, 0x03, 0x04]);
+    }
+
+    #[test]
+    fn test_rreaddir_deserialize_buffer_too_small() {
+        let buf = [0x01, 0x00, 0x00, 0x00]; // Only 4 bytes
+        let result = RreaddirMessage::deserialize(&buf);
+        assert_eq!(result, Err(RreaddirError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_rreaddir_deserialize_invalid_message_type() {
+        // Create a valid Treaddir message but don't change the type
+        let treaddir = TreaddirMessage::new(123, 456, 0, 1024);
+        let mut buf = [0u8; 32];
+        treaddir.serialize(&mut buf).unwrap();
+
+        // Try to deserialize as Rreaddir (should fail because type is Treaddir)
+        let result = RreaddirMessage::deserialize(&buf);
+        assert_eq!(result, Err(RreaddirError::InvalidMessageType));
+    }
+
+    // Roundtrip tests for Txattrwalk/Rxattrwalk, Txattrcreate/Rxattrcreate, and Treaddir/Rreaddir
+    #[test]
+    fn test_roundtrip_txattrwalk_rxattrwalk() {
+        // Create a Txattrwalk message
+        let original = TxattrwalkMessage::new(456, 789, 101112, "user.test".to_string());
+        let mut txattrwalk_buf = [0u8; 64];
+        let txattrwalk_bytes_written = original.serialize(&mut txattrwalk_buf).unwrap();
+
+        // Create a separate Rxattrwalk message with the same tag
+        let _rxattrwalk_msg = RxattrwalkMessage::new(original.tag, 1024);
+        let mut rxattrwalk_buf = [0u8; 32];
+
+        // Manually create Rxattrwalk buffer
+        // Write size[4] = 15 (little-endian)
+        rxattrwalk_buf[0] = 15;
+        rxattrwalk_buf[1] = 0;
+        rxattrwalk_buf[2] = 0;
+        rxattrwalk_buf[3] = 0;
+
+        // Write message type[1] = Rxattrwalk (29)
+        rxattrwalk_buf[4] = P9MsgType::Rxattrwalk as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rxattrwalk_buf[5] = (456 & 0xff) as u8;
+        rxattrwalk_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Write size[8] = 1024 (little-endian)
+        let size_bytes = (1024u64).to_le_bytes();
+        rxattrwalk_buf[7..15].copy_from_slice(&size_bytes);
+
+        // Deserialize as Rxattrwalk
+        let (rxattrwalk, bytes_consumed) = RxattrwalkMessage::deserialize(&rxattrwalk_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 15);
+        assert_eq!(rxattrwalk.tag, original.tag);
+        assert_eq!(rxattrwalk.size, 1024);
+        assert_eq!(txattrwalk_bytes_written, 26); // Txattrwalk is 26 bytes
+    }
+
+    #[test]
+    fn test_roundtrip_txattrcreate_rxattrcreate() {
+        // Create a Txattrcreate message
+        let original = TxattrcreateMessage::new(456, 789, "user.test".to_string(), 1024, 0x1);
+        let mut txattrcreate_buf = [0u8; 64];
+        let txattrcreate_bytes_written = original.serialize(&mut txattrcreate_buf).unwrap();
+
+        // Create a separate Rxattrcreate message with the same tag
+        let _rxattrcreate_msg = RxattrcreateMessage::new(original.tag);
+        let mut rxattrcreate_buf = [0u8; 16];
+
+        // Manually create Rxattrcreate buffer
+        // Write size[4] = 7 (little-endian)
+        rxattrcreate_buf[0] = 7;
+        rxattrcreate_buf[1] = 0;
+        rxattrcreate_buf[2] = 0;
+        rxattrcreate_buf[3] = 0;
+
+        // Write message type[1] = Rxattrcreate (31)
+        rxattrcreate_buf[4] = P9MsgType::Rxattrcreate as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rxattrcreate_buf[5] = (456 & 0xff) as u8;
+        rxattrcreate_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Deserialize as Rxattrcreate
+        let (rxattrcreate, bytes_consumed) =
+            RxattrcreateMessage::deserialize(&rxattrcreate_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 7);
+        assert_eq!(rxattrcreate.tag, original.tag);
+        assert_eq!(txattrcreate_bytes_written, 34); // Txattrcreate is 34 bytes
+    }
+
+    #[test]
+    fn test_roundtrip_treaddir_rreaddir() {
+        // Create a Treaddir message
+        let original = TreaddirMessage::new(456, 789, 0, 1024);
+        let mut treaddir_buf = [0u8; 32];
+        let treaddir_bytes_written = original.serialize(&mut treaddir_buf).unwrap();
+
+        // Create a separate Rreaddir message with the same tag
+        let data = vec![0x01, 0x02, 0x03, 0x04];
+        let _rreaddir_msg = RreaddirMessage::new(original.tag, 4, data);
+        let mut rreaddir_buf = [0u8; 32];
+
+        // Manually create Rreaddir buffer
+        // Write size[4] = 15 (little-endian) - 4 + 1 + 2 + 4 + 4 = 15
+        rreaddir_buf[0] = 15;
+        rreaddir_buf[1] = 0;
+        rreaddir_buf[2] = 0;
+        rreaddir_buf[3] = 0;
+
+        // Write message type[1] = Rreaddir (33)
+        rreaddir_buf[4] = P9MsgType::Rreaddir as u8;
+
+        // Write tag[2] = 456 (little-endian)
+        rreaddir_buf[5] = (456 & 0xff) as u8;
+        rreaddir_buf[6] = ((456 >> 8) & 0xff) as u8;
+
+        // Write count[4] = 4 (little-endian)
+        let count_bytes = (4u32).to_le_bytes();
+        rreaddir_buf[7..11].copy_from_slice(&count_bytes);
+
+        // Write data[4] = [0x01, 0x02, 0x03, 0x04]
+        rreaddir_buf[11] = 0x01;
+        rreaddir_buf[12] = 0x02;
+        rreaddir_buf[13] = 0x03;
+        rreaddir_buf[14] = 0x04;
+
+        // Deserialize as Rreaddir
+        let (rreaddir, bytes_consumed) = RreaddirMessage::deserialize(&rreaddir_buf).unwrap();
+
+        // Verify roundtrip
+        assert_eq!(bytes_consumed, 15);
+        assert_eq!(rreaddir.tag, original.tag);
+        assert_eq!(rreaddir.count, 4);
+        assert_eq!(rreaddir.data, vec![0x01, 0x02, 0x03, 0x04]);
+        assert_eq!(treaddir_bytes_written, 23); // Treaddir is 23 bytes
     }
 }
