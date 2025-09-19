@@ -1,11 +1,11 @@
 use crate::{
     constants::{
         ASCII_TABLE_PTR, MEPC_PTR, PAGE_SIZE, REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5,
-        REG_A7, REG_SP, S_IFBLK, S_IFCHR, S_IFDIR, S_IFIFO, S_IFLNK, S_IFREG, S_IFSOCK,
-        STATX_ATIME, STATX_BLOCKS, STATX_BTIME, STATX_CTIME, STATX_GID, STATX_INO, STATX_MODE,
-        STATX_MTIME, STATX_NLINK, STATX_SIZE, STATX_TYPE, STATX_UID, Statx, StatxTimestamp,
-        USER_HEAP_SIZE, USER_HEAP_START_ADDR, USER_HEAP_START_PTR, USER_PHDR_ADDR_PTR,
-        USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE, USER_STACK_PTR, USER_START_PTR,
+        REG_A7, REG_SP, STATX_ATIME, STATX_BLOCKS, STATX_BTIME, STATX_CTIME, STATX_GID, STATX_INO,
+        STATX_MODE, STATX_MTIME, STATX_NLINK, STATX_SIZE, STATX_TYPE, STATX_UID, Statx,
+        StatxTimestamp, USER_HEAP_SIZE, USER_HEAP_START_ADDR, USER_HEAP_START_PTR,
+        USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE, USER_STACK_PTR,
+        USER_START_PTR,
     },
     host_calls::{host_argv, host_log, host_terminate, host_write},
     kernel::{get_ureg, mret, print},
@@ -3297,20 +3297,12 @@ fn convert_rgetattr_to_statx(rgetattr: &RgetattrMessage) -> Statx {
         stx_mask |= STATX_BTIME;
     }
 
-    // Convert QID type to Linux file mode
-    let file_type = match rgetattr.qid.qtype {
-        0 => S_IFREG as u16,  // Regular file
-        1 => S_IFDIR as u16,  // Directory
-        2 => S_IFCHR as u16,  // Character device
-        3 => S_IFBLK as u16,  // Block device
-        4 => S_IFIFO as u16,  // FIFO
-        5 => S_IFLNK as u16,  // Symbolic link
-        6 => S_IFSOCK as u16, // Socket
-        _ => S_IFREG as u16,  // Default to regular file
+    // Use the mode field directly from 9P (only if mode is valid)
+    let stx_mode = if (rgetattr.valid & P9_GETATTR_MODE) != 0 {
+        rgetattr.mode as u16 // The mode field already contains file type + permissions
+    } else {
+        0 // Mode not valid, set to 0
     };
-
-    // Combine file type with permission bits (lower 12 bits of mode)
-    let stx_mode = file_type | (rgetattr.mode & 0o777) as u16;
 
     Statx {
         stx_mask,
