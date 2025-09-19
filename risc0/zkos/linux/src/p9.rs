@@ -20,6 +20,9 @@ use alloc::string::ToString;
 #[cfg(target_arch = "riscv32")]
 use alloc::vec::Vec;
 
+#[cfg(target_arch = "riscv32")]
+use alloc::vec;
+
 /// 9P message types
 ///
 /// There are 14 basic operations in 9P2000, paired as requests and responses.
@@ -408,6 +411,25 @@ pub enum P9LFlags {
 
 /// Special 9P values
 pub mod constants {
+    /// 9P2000.L getattr request bitmasks
+    pub const P9_GETATTR_MODE: u64 = 0x0000_0001;
+    pub const P9_GETATTR_NLINK: u64 = 0x0000_0002;
+    pub const P9_GETATTR_UID: u64 = 0x0000_0004;
+    pub const P9_GETATTR_GID: u64 = 0x0000_0008;
+    pub const P9_GETATTR_RDEV: u64 = 0x0000_0010;
+    pub const P9_GETATTR_ATIME: u64 = 0x0000_0020;
+    pub const P9_GETATTR_MTIME: u64 = 0x0000_0040;
+    pub const P9_GETATTR_CTIME: u64 = 0x0000_0080;
+    pub const P9_GETATTR_INO: u64 = 0x0000_0100;
+    pub const P9_GETATTR_SIZE: u64 = 0x0000_0200;
+    pub const P9_GETATTR_BLOCKS: u64 = 0x0000_0400;
+
+    pub const P9_GETATTR_BTIME: u64 = 0x0000_0800;
+    pub const P9_GETATTR_GEN: u64 = 0x0000_1000;
+    pub const P9_GETATTR_DATA_VERSION: u64 = 0x0000_2000;
+
+    pub const P9_GETATTR_BASIC: u64 = 0x0000_07ff; // Mask for fields up to BLOCKS
+    pub const P9_GETATTR_ALL: u64 = 0x0000_3fff; // Mask for all fields above
     /// No FID (invalid FID)
     pub const P9_NOFID: u32 = 0xffffffff;
 
@@ -580,6 +602,13 @@ pub trait MessageError: core::fmt::Debug + Clone + Copy + PartialEq + Eq {
     fn invalid_message_type() -> Self;
 }
 
+/// A 9P response that can be either a success message or an error
+#[derive(Debug)]
+pub enum P9Response<T> {
+    Success(T),
+    Error(RlerrorMessage),
+}
+
 /// Trait for all R* message types that can be read from a file descriptor
 pub trait ReadableMessage: Sized {
     /// The error type for this message
@@ -588,39 +617,45 @@ pub trait ReadableMessage: Sized {
     /// Deserialize the message from a buffer
     fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error>;
 
-    /// Read the message from file descriptor 3
-    /// This is the generic implementation that all R* messages can use
-    fn read() -> Result<Self, Self::Error> {
+    /// Read a 9P response that can be either success or Rlerror
+    /// This is the preferred method for reading 9P responses
+    fn read_response() -> P9Response<Self> {
+        // Read the message data once
         let mut buf = [0u8; 8192];
 
         // Read the length prefix (4 bytes)
         let len_prefix = crate::host_calls::host_read(3, buf.as_mut_ptr(), 4);
         if len_prefix != 4 {
-            return Err(Self::Error::buffer_too_small());
+            return P9Response::Error(RlerrorMessage::new(0, 0)); // Generic error
         }
 
-        // Parse the data length from the first 4 bytes
-        let data_len = u32::from_le_bytes(buf[..4].try_into().unwrap());
-        // Ensure we don't exceed our buffer size
-        if data_len as usize > buf.len() {
-            return Err(Self::Error::buffer_too_small());
+        // Parse the length (little-endian)
+        let data_len = u32::from_le_bytes([buf[0], buf[1], buf[2], buf[3]]);
+        if !(5..=8192).contains(&data_len) {
+            return P9Response::Error(RlerrorMessage::new(0, 0)); // Generic error
         }
 
-        // Read the remaining data (excluding the 4-byte length prefix we already read)
-        let remaining_len = (data_len - 4) as usize;
-        let len = crate::host_calls::host_read(3, buf[4..].as_mut_ptr(), remaining_len);
-
-        // Verify we read the expected amount
-        if len != data_len - 4 {
-            return Err(Self::Error::buffer_too_small());
+        // Read the rest of the message
+        let len = crate::host_calls::host_read(3, buf[4..].as_mut_ptr(), (data_len - 4) as usize);
+        if len as u32 != data_len - 4 {
+            return P9Response::Error(RlerrorMessage::new(0, 0)); // Generic error
         }
 
-        kprint!("Read data: {:?}", &buf[..data_len as usize]);
+        // Check the message type
+        let msg_type = buf[4];
 
-        // Deserialize the message
-        match Self::deserialize(&buf[..data_len as usize]) {
-            Ok((message, _bytes_consumed)) => Ok(message),
-            Err(e) => Err(e),
+        if msg_type == P9MsgType::RLerror as u8 {
+            // This is an Rlerror message
+            match RlerrorMessage::deserialize(&buf[..data_len as usize]) {
+                Ok((rlerror, _)) => P9Response::Error(rlerror),
+                Err(_) => P9Response::Error(RlerrorMessage::new(0, 0)), // Generic error
+            }
+        } else {
+            // This should be the expected response type
+            match Self::deserialize(&buf[..data_len as usize]) {
+                Ok((response, _)) => P9Response::Success(response),
+                Err(_) => P9Response::Error(RlerrorMessage::new(0, 0)), // Generic error
+            }
         }
     }
 }
@@ -1420,25 +1455,25 @@ pub struct TwalkMessage {
     /// Number of path name elements
     pub nwname: u16,
     /// Path name elements
-    pub wnames: Vec<&'static str>,
+    pub wnames: Vec<String>,
 }
 
 impl TwalkMessage {
     /// Create a new Twalk message
-    pub fn new(tag: u16, fid: u32, newfid: u32, wnames: &[&'static str]) -> Self {
+    pub fn new(tag: u16, fid: u32, newfid: u32, wnames: Vec<String>) -> Self {
         let nwname = wnames.len() as u16;
         Self {
             tag,
             fid,
             newfid,
             nwname,
-            wnames: wnames.to_vec(),
+            wnames,
         }
     }
 
     /// Create a new Twalk message with a single path element
     pub fn new_single(tag: u16, fid: u32, newfid: u32, wname: &'static str) -> Self {
-        Self::new(tag, fid, newfid, &[wname])
+        Self::new(tag, fid, newfid, vec![wname.to_string()])
     }
 
     /// Serialize the Twalk message to a buffer
@@ -1646,6 +1681,14 @@ impl RwalkMessage {
     }
 }
 
+impl ReadableMessage for RwalkMessage {
+    type Error = RwalkError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        Self::deserialize(buf)
+    }
+}
+
 /// Twalk serialization errors
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TwalkError {
@@ -1662,6 +1705,16 @@ pub enum RwalkError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RwalkError {
+    fn buffer_too_small() -> Self {
+        RwalkError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RwalkError::InvalidMessageType
+    }
 }
 
 /// Tclunk message structure
@@ -1801,6 +1854,14 @@ impl RclunkMessage {
     }
 }
 
+impl ReadableMessage for RclunkMessage {
+    type Error = RclunkError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        Self::deserialize(buf)
+    }
+}
+
 /// Tclunk serialization errors
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TclunkError {
@@ -1815,6 +1876,16 @@ pub enum RclunkError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RclunkError {
+    fn buffer_too_small() -> Self {
+        RclunkError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RclunkError::InvalidMessageType
+    }
 }
 
 /// Tremove message structure
@@ -2403,6 +2474,14 @@ impl RattachMessage {
     }
 }
 
+impl ReadableMessage for RattachMessage {
+    type Error = RattachError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        Self::deserialize(buf)
+    }
+}
+
 /// Tattach serialization errors
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TattachError {
@@ -2420,6 +2499,16 @@ pub enum RattachError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RattachError {
+    fn buffer_too_small() -> Self {
+        RattachError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RattachError::InvalidMessageType
+    }
 }
 
 /// Rlerror message structure
@@ -2494,6 +2583,14 @@ impl RlerrorMessage {
     }
 }
 
+impl ReadableMessage for RlerrorMessage {
+    type Error = RlerrorError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        Self::deserialize(buf)
+    }
+}
+
 /// Rlerror deserialization errors
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RlerrorError {
@@ -2501,6 +2598,16 @@ pub enum RlerrorError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RlerrorError {
+    fn buffer_too_small() -> Self {
+        RlerrorError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RlerrorError::InvalidMessageType
+    }
 }
 
 /// Tstatfs message structure
@@ -2963,6 +3070,14 @@ impl RlopenMessage {
     }
 }
 
+impl ReadableMessage for RlopenMessage {
+    type Error = RlopenError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        Self::deserialize(buf)
+    }
+}
+
 /// Tlopen serialization errors
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TlopenError {
@@ -2977,6 +3092,16 @@ pub enum RlopenError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RlopenError {
+    fn buffer_too_small() -> Self {
+        RlopenError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RlopenError::InvalidMessageType
+    }
 }
 
 /// Tlcreate message structure
@@ -4345,6 +4470,14 @@ impl RgetattrMessage {
     }
 }
 
+impl ReadableMessage for RgetattrMessage {
+    type Error = RgetattrError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        Self::deserialize(buf)
+    }
+}
+
 /// Tsetattr message structure
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TsetattrMessage {
@@ -4601,6 +4734,16 @@ pub enum RgetattrError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RgetattrError {
+    fn buffer_too_small() -> Self {
+        RgetattrError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RgetattrError::InvalidMessageType
+    }
 }
 
 /// Tsetattr serialization errors
@@ -8115,8 +8258,12 @@ mod tests {
     // Twalk message tests
     #[test]
     fn test_twalk_message_creation() {
-        let wnames = ["dir1", "dir2", "file.txt"];
-        let msg = TwalkMessage::new(123, 456, 789, &wnames);
+        let wnames = vec![
+            "dir1".to_string(),
+            "dir2".to_string(),
+            "file.txt".to_string(),
+        ];
+        let msg = TwalkMessage::new(123, 456, 789, wnames);
         assert_eq!(msg.tag, 123);
         assert_eq!(msg.fid, 456);
         assert_eq!(msg.newfid, 789);
@@ -8140,8 +8287,8 @@ mod tests {
 
     #[test]
     fn test_twalk_serialize() {
-        let wnames = ["dir1", "file.txt"];
-        let msg = TwalkMessage::new(123, 456, 789, &wnames);
+        let wnames = vec!["dir1".to_string(), "file.txt".to_string()];
+        let msg = TwalkMessage::new(123, 456, 789, wnames);
         let mut buf = [0u8; 64];
 
         let result = msg.serialize(&mut buf);
@@ -8190,8 +8337,8 @@ mod tests {
 
     #[test]
     fn test_twalk_serialize_buffer_too_small() {
-        let wnames = ["dir1", "file.txt"];
-        let msg = TwalkMessage::new(123, 456, 789, &wnames);
+        let wnames = vec!["dir1".to_string(), "file.txt".to_string()];
+        let msg = TwalkMessage::new(123, 456, 789, wnames);
         let mut buf = [0u8; 10]; // Too small for the message
 
         let result = msg.serialize(&mut buf);
@@ -8200,8 +8347,8 @@ mod tests {
 
     #[test]
     fn test_twalk_send() {
-        let wnames = ["dir1", "file.txt"];
-        let msg = TwalkMessage::new(123, 456, 789, &wnames);
+        let wnames = vec!["dir1".to_string(), "file.txt".to_string()];
+        let msg = TwalkMessage::new(123, 456, 789, wnames);
 
         // Test that send_twalk doesn't panic and returns a result
         let result = msg.send_twalk();
@@ -8315,8 +8462,8 @@ mod tests {
     #[test]
     fn test_rwalk_deserialize_invalid_message_type() {
         // Create a valid Twalk message but don't change the type
-        let wnames = ["dir1"];
-        let twalk = TwalkMessage::new(123, 456, 789, &wnames);
+        let wnames = vec!["dir1".to_string()];
+        let twalk = TwalkMessage::new(123, 456, 789, wnames);
         let mut buf = [0u8; 64];
         twalk.serialize(&mut buf).unwrap();
 
@@ -8329,8 +8476,8 @@ mod tests {
     #[test]
     fn test_roundtrip_twalk_rwalk() {
         // Create a Twalk message
-        let wnames = ["dir1", "file.txt"];
-        let original = TwalkMessage::new(456, 789, 1011, &wnames);
+        let wnames = vec!["dir1".to_string(), "file.txt".to_string()];
+        let original = TwalkMessage::new(456, 789, 1011, wnames);
         let mut twalk_buf = [0u8; 64];
         let twalk_bytes_written = original.serialize(&mut twalk_buf).unwrap();
 

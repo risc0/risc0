@@ -1,18 +1,36 @@
 use crate::{
     constants::{
         ASCII_TABLE_PTR, MEPC_PTR, PAGE_SIZE, REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5,
-        REG_A7, REG_SP, USER_HEAP_SIZE, USER_HEAP_START_ADDR, USER_HEAP_START_PTR,
-        USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE, USER_STACK_PTR,
-        USER_START_PTR,
+        REG_A7, REG_SP, S_IFBLK, S_IFCHR, S_IFDIR, S_IFIFO, S_IFLNK, S_IFREG, S_IFSOCK,
+        STATX_ATIME, STATX_BLOCKS, STATX_BTIME, STATX_CTIME, STATX_GID, STATX_INO, STATX_MODE,
+        STATX_MTIME, STATX_NLINK, STATX_SIZE, STATX_TYPE, STATX_UID, Statx, StatxTimestamp,
+        USER_HEAP_SIZE, USER_HEAP_START_ADDR, USER_HEAP_START_PTR, USER_PHDR_ADDR_PTR,
+        USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE, USER_STACK_PTR, USER_START_PTR,
     },
     host_calls::{host_argv, host_log, host_terminate, host_write},
     kernel::{get_ureg, mret, print},
-    p9::{ReadableMessage, RversionMessage, TversionMessage},
+    p9::{
+        P9Response, RattachMessage, RclunkMessage, ReadableMessage, RgetattrMessage, RlopenMessage,
+        RversionMessage, RwalkMessage, TattachMessage, TlopenMessage, TversionMessage,
+        constants::*,
+    },
 };
 
 use crate::kernel::{DEBUG_ENABLED, set_ureg};
 use no_std_strings::{str_format, str256};
 static mut BRK: u32 = USER_HEAP_START_ADDR as u32;
+static mut ROOT_FID: u32 = 0;
+static mut CWD_FID: u32 = 0;
+
+static mut FD_TABLE: [u32; 256] = [0; 256];
+
+#[cfg(target_arch = "riscv32")]
+use alloc::string::String;
+#[cfg(target_arch = "riscv32")]
+use alloc::string::ToString;
+#[cfg(target_arch = "riscv32")]
+use alloc::vec::Vec;
+
 use core::{alloc::Layout, ptr::NonNull};
 use rlsf::Tlsf;
 
@@ -341,6 +359,7 @@ pub const SYS_WAITID: u32 = 95;
 enum Err {
     NoMem = -12,
     Inval = -22,
+    FileNotFound = -2,
     NoSys = -38, // ENOSYS - Function not implemented
 }
 
@@ -423,6 +442,11 @@ impl UserStack {
 pub const P9_ENABLED: bool = false;
 
 pub fn start_linux_binary(argc: u32) -> ! {
+    unsafe {
+        set_fd(0, 0xFFFF_FFFE);
+        set_fd(1, 0xFFFF_FFFE);
+        set_fd(2, 0xFFFF_FFFE);
+    }
     if P9_ENABLED {
         let msg = TversionMessage::default_9p2000l(1);
 
@@ -435,18 +459,55 @@ pub fn start_linux_binary(argc: u32) -> ! {
                 kprint!("Failed to send Tversion");
             }
         }
-        match RversionMessage::read() {
-            Ok(rversion) => {
+        match RversionMessage::read_response() {
+            P9Response::Success(rversion) => {
                 kprint!("Successfully read Rversion: {:?}", rversion);
                 // Process the message
             }
-            Err(e) => {
-                kpanic!("Failed to read Rversion: {:?}", e);
+            P9Response::Error(rlerror) => {
+                kpanic!(
+                    "Received Rlerror for Rversion: tag={}, ecode={}",
+                    rlerror.tag,
+                    rlerror.ecode
+                );
             }
         }
     }
-    let mut stack = UserStack::new();
+    // now we attach with Tattach, P9_NOFID as afid, to /risc0-root
+    let tattach = TattachMessage::new(
+        0,
+        0,
+        crate::p9::constants::P9_NOFID,
+        "root".to_string(),
+        "/risc0-root".to_string(),
+    );
+    match tattach.send_tattach() {
+        Ok(bytes_written) => {
+            kprint!("Sent {} bytes", bytes_written);
+        }
+        Err(e) => {
+            kpanic!("Failed to send Tattach: {:?}", e);
+        }
+    }
+    // and wait for Rattach
+    match RattachMessage::read_response() {
+        P9Response::Success(rattach) => {
+            kprint!("Received Rattach: {:?}", rattach);
+            unsafe {
+                ROOT_FID = 0;
+                CWD_FID = 0;
+            };
+        }
+        P9Response::Error(rlerror) => {
+            kpanic!(
+                "Received Rlerror for Rattach: tag={}, ecode={}",
+                rlerror.tag,
+                rlerror.ecode
+            );
+        }
+    }
 
+    let mut stack = UserStack::new();
     stack.add_word(argc as usize);
 
     // XXX we should review this code from a security perspective
@@ -1230,9 +1291,16 @@ fn sys_clone3(_cl_args: u32, _size: u32) -> Result<u32, Err> {
 }
 
 fn sys_close(_fd: u32) -> Result<u32, Err> {
-    let msg = b"sys_close not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    kprint!("sys_close: fd = {}", _fd);
+    unsafe {
+        if FD_TABLE[_fd as usize] != 0xFFFF_FFFE && FD_TABLE[_fd as usize] != 0 {
+            clunk(FD_TABLE[_fd as usize]);
+            FD_TABLE[_fd as usize] = 0;
+            Ok(0)
+        } else {
+            Err(Err::NoSys)
+        }
+    }
 }
 
 fn sys_close_range(_first: u32, _last: u32, _flags: u32) -> Result<u32, Err> {
@@ -2269,14 +2337,175 @@ fn sys_open_tree_attr(_dfd: u32, _filename: u32, _flags: u32, _attr: u32) -> Res
     Err(Err::NoSys)
 }
 
+// make a fd
+unsafe fn find_free_fd() -> u32 {
+    unsafe {
+        let mut fd = 0;
+        while FD_TABLE[fd] != 0 {
+            fd += 1;
+        }
+        return fd as u32;
+    }
+}
+
+#[allow(dead_code)]
+unsafe fn set_fd(fd: u32, fid: u32) {
+    unsafe {
+        FD_TABLE[fd as usize] = fid;
+    }
+}
+
+#[allow(dead_code)]
+// instead of wnames we take a path
+fn do_walk(starting_fid: u32, target_fid: u32, path: String) -> Result<u32, Err> {
+    let wnames: Vec<String> = path.split("/").skip(1).map(|s| s.to_string()).collect();
+    let wnames_len = wnames.len();
+    let twalk = crate::p9::TwalkMessage::new(0, starting_fid, target_fid, wnames);
+    match twalk.send_twalk() {
+        Ok(bytes_written) => {
+            kprint!("do_walk: bytes_written = {}", bytes_written);
+        }
+        Err(e) => {
+            kprint!("do_walk: error = {:?}", e);
+            return Err(Err::NoSys);
+        }
+    }
+    match RwalkMessage::read_response() {
+        P9Response::Success(rwalk) => {
+            if rwalk.wqids.len() != wnames_len {
+                clunk(target_fid);
+                Err(Err::FileNotFound)
+            } else {
+                Ok(0)
+            }
+        }
+        P9Response::Error(rlerror) => {
+            kprint!(
+                "do_walk: received Rlerror for walk operation: tag={}, ecode={}",
+                rlerror.tag,
+                rlerror.ecode
+            );
+            Err(Err::NoSys)
+        }
+    }
+}
+
 fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32, Err> {
-    let msg = b"sys_openat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    // Extract and print the filename
+    let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
+    let null_pos = filename
+        .iter()
+        .position(|&b| b == 0)
+        .unwrap_or(filename.len());
+    let filename = &filename[..null_pos];
+
+    // Convert the filename to a UTF-8 string
+    let filename_str = match str::from_utf8(filename) {
+        Ok(s) => s,
+        Err(_) => {
+            kprint!("sys_openat: invalid UTF-8 filename");
+            return Err(Err::NoSys);
+        }
+    };
+    kprint!("sys_openat: filename='{}'", filename_str);
+    // lets check if its an absolute path and panic otherwise
+    if !filename_str.starts_with("/") {
+        kpanic!("sys_openat: relative paths are not supported");
+    }
+    let fid = unsafe { find_free_fd() };
+    let walk_result = do_walk(0, fid, filename_str.to_string());
+    match walk_result {
+        Ok(ret_code) => {
+            if ret_code != 0 {
+                return Ok(ret_code);
+            }
+        }
+        Err(e) => {
+            return Err(e);
+        }
+    }
+
+    kprint!(
+        "sys_openat: dfd={}, filename='{}', flags=0x{:x}, mode=0x{:x}",
+        _dfd,
+        filename_str,
+        _flags,
+        _mode
+    );
+
+    // Convert Linux open flags to 9P open flags
+    // This is a simplified mapping - in reality, we'd need more sophisticated flag conversion
+    let p9_flags = if (_flags & 0o3) == 0o0 {
+        0
+    }
+    // O_RDONLY
+    else if (_flags & 0o3) == 0o1 {
+        1
+    }
+    // O_WRONLY
+    else {
+        2
+    }; // O_RDWR
+
+    let tlopen = TlopenMessage::new(0, fid, p9_flags);
+
+    match tlopen.send_tlopen() {
+        Ok(bytes_written) => {
+            kprint!("sys_openat: sent {} bytes for Tlopen", bytes_written);
+
+            // Read the response
+            match RlopenMessage::read_response() {
+                P9Response::Success(rlopen) => {
+                    kprint!("sys_openat: received Rlopen: {:?}", rlopen);
+                    unsafe { set_fd(fid, fid) };
+                    Ok(fid)
+                }
+                P9Response::Error(rlerror) => {
+                    clunk(fid);
+                    kprint!(
+                        "sys_openat: received Rlerror for Rlopen: tag={}, ecode={}",
+                        rlerror.tag,
+                        rlerror.ecode
+                    );
+                    Ok(-(rlerror.ecode as i32) as u32)
+                }
+            }
+        }
+        Err(e) => {
+            kprint!("sys_openat: error sending Tlopen: {:?}", e);
+            Err(Err::NoSys)
+        }
+    }
 }
 
 fn sys_openat2(_dfd: u32, _filename: u32, _how: u32) -> Result<u32, Err> {
-    let msg = b"sys_openat2 not implemented";
+    // Extract and print the filename
+    let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
+    let null_pos = filename
+        .iter()
+        .position(|&b| b == 0)
+        .unwrap_or(filename.len());
+    let filename = &filename[..null_pos];
+
+    // Convert the filename to a UTF-8 string
+    let filename_str = match str::from_utf8(filename) {
+        Ok(s) => s,
+        Err(_) => {
+            kprint!("sys_openat2: invalid UTF-8 filename");
+            return Err(Err::NoSys);
+        }
+    };
+
+    kprint!(
+        "sys_openat2: dfd={}, filename='{}', how=0x{:x}",
+        _dfd,
+        filename_str,
+        _how
+    );
+
+    // TODO: Implement actual file opening with 9P operations
+    // For now, just return not implemented
+    let msg = b"sys_openat2 not fully implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -3028,6 +3257,123 @@ fn sys_statmount(_dfd: u32, _filename: u32, _buffer: u32, _bufsize: u32) -> Resu
     Err(Err::NoSys)
 }
 
+/// Convert 9P RgetattrMessage to Linux statx structure
+fn convert_rgetattr_to_statx(rgetattr: &RgetattrMessage) -> Statx {
+    // Determine which fields are valid based on the valid mask
+    let mut stx_mask = 0u32;
+
+    // Map 9P valid mask to statx mask
+    if (rgetattr.valid & P9_GETATTR_MODE) != 0 {
+        stx_mask |= STATX_TYPE | STATX_MODE;
+    }
+    if (rgetattr.valid & P9_GETATTR_NLINK) != 0 {
+        stx_mask |= STATX_NLINK;
+    }
+    if (rgetattr.valid & P9_GETATTR_UID) != 0 {
+        stx_mask |= STATX_UID;
+    }
+    if (rgetattr.valid & P9_GETATTR_GID) != 0 {
+        stx_mask |= STATX_GID;
+    }
+    if (rgetattr.valid & P9_GETATTR_ATIME) != 0 {
+        stx_mask |= STATX_ATIME;
+    }
+    if (rgetattr.valid & P9_GETATTR_MTIME) != 0 {
+        stx_mask |= STATX_MTIME;
+    }
+    if (rgetattr.valid & P9_GETATTR_CTIME) != 0 {
+        stx_mask |= STATX_CTIME;
+    }
+    if (rgetattr.valid & P9_GETATTR_INO) != 0 {
+        stx_mask |= STATX_INO;
+    }
+    if (rgetattr.valid & P9_GETATTR_SIZE) != 0 {
+        stx_mask |= STATX_SIZE;
+    }
+    if (rgetattr.valid & P9_GETATTR_BLOCKS) != 0 {
+        stx_mask |= STATX_BLOCKS;
+    }
+    if (rgetattr.valid & P9_GETATTR_BTIME) != 0 {
+        stx_mask |= STATX_BTIME;
+    }
+
+    // Convert QID type to Linux file mode
+    let file_type = match rgetattr.qid.qtype {
+        0 => S_IFREG as u16,  // Regular file
+        1 => S_IFDIR as u16,  // Directory
+        2 => S_IFCHR as u16,  // Character device
+        3 => S_IFBLK as u16,  // Block device
+        4 => S_IFIFO as u16,  // FIFO
+        5 => S_IFLNK as u16,  // Symbolic link
+        6 => S_IFSOCK as u16, // Socket
+        _ => S_IFREG as u16,  // Default to regular file
+    };
+
+    // Combine file type with permission bits (lower 12 bits of mode)
+    let stx_mode = file_type | (rgetattr.mode & 0o777) as u16;
+
+    Statx {
+        stx_mask,
+        stx_blksize: rgetattr.blksize as u32,
+        stx_attributes: 0, // No special attributes for now
+        stx_nlink: rgetattr.nlink as u32,
+        stx_uid: rgetattr.uid,
+        stx_gid: rgetattr.gid,
+        stx_mode,
+        __spare0: [0],
+        stx_ino: rgetattr.qid.path, // Use QID path as inode number
+        stx_size: rgetattr.size,
+        stx_blocks: rgetattr.blocks,
+        stx_attributes_mask: 0, // No special attributes supported
+        stx_atime: StatxTimestamp {
+            tv_sec: rgetattr.atime_sec as i64,
+            tv_nsec: rgetattr.atime_nsec as u32,
+            __reserved: 0,
+        },
+        stx_btime: StatxTimestamp {
+            tv_sec: rgetattr.btime_sec as i64,
+            tv_nsec: rgetattr.btime_nsec as u32,
+            __reserved: 0,
+        },
+        stx_ctime: StatxTimestamp {
+            tv_sec: rgetattr.ctime_sec as i64,
+            tv_nsec: rgetattr.ctime_nsec as u32,
+            __reserved: 0,
+        },
+        stx_mtime: StatxTimestamp {
+            tv_sec: rgetattr.mtime_sec as i64,
+            tv_nsec: rgetattr.mtime_nsec as u32,
+            __reserved: 0,
+        },
+        stx_rdev_major: (rgetattr.rdev >> 8) as u32,
+        stx_rdev_minor: (rgetattr.rdev & 0xFF) as u32,
+        stx_dev_major: 0, // Not available from 9P
+        stx_dev_minor: 0, // Not available from 9P
+        stx_mnt_id: 0,    // Not available from 9P
+        stx_dio_mem_align: 0,
+        stx_dio_offset_align: 0,
+        __spare3: [0; 12],
+    }
+}
+
+fn clunk(fid: u32) {
+    let tclunk = crate::p9::TclunkMessage::new(0, fid);
+    tclunk.send_tclunk().unwrap();
+    let rclunk = RclunkMessage::read_response();
+    match rclunk {
+        P9Response::Success(rclunk) => {
+            kprint!("clunk {}: = {:?}", fid, rclunk);
+        }
+        P9Response::Error(rlerror) => {
+            kprint!(
+                "clunk: received Rlerror for clunk operation: tag={}, ecode={}",
+                rlerror.tag,
+                rlerror.ecode
+            );
+        }
+    }
+}
+
 fn sys_statx(
     _dfd: u32,
     _filename: u32,
@@ -3035,7 +3381,6 @@ fn sys_statx(
     _mask: u32,
     _statxbuf: u32,
 ) -> Result<u32, Err> {
-    let msg = b"sys_statx not implemented";
     // let's print the filename we're trying to stat, it's a u32 pointer
     // we need to search for the null-terminator
     // XXX this is ugly
@@ -3045,8 +3390,62 @@ fn sys_statx(
     // convert the filename, it's a 0-terminated utf-8 string
     let filename = str::from_utf8(filename).unwrap();
     kprint!("sys_statx: filename = {}", filename);
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    // if the first character is / it's a absolute path, otherwise it's a relative path
+    let start_fid;
+    let is_absolute_path = filename.starts_with("/");
+    if is_absolute_path {
+        unsafe {
+            start_fid = ROOT_FID;
+        }
+    } else {
+        kpanic!("sys_statx: relative paths are not supported");
+    }
+    // skip the first element of the vector
+    let walk_result = do_walk(start_fid, 0xFFFF_FFFE, filename.to_string());
+    match walk_result {
+        Ok(ret_code) => {
+            if ret_code != 0 {
+                return Ok(ret_code);
+            }
+            let tgetattr = crate::p9::TgetattrMessage::new(0, 0xFFFF_FFFE, P9_GETATTR_ALL);
+            match tgetattr.send_tgetattr() {
+                Ok(bytes_written) => {
+                    kprint!("sys_statx: bytes_written = {}", bytes_written);
+                }
+                Err(e) => {
+                    kprint!("sys_statx: error = {:?}", e);
+                }
+            }
+            match RgetattrMessage::read_response() {
+                P9Response::Success(rgetattr) => {
+                    kprint!("sys_statx: rgetattr = {:?}", rgetattr);
+
+                    // Convert 9P RgetattrMessage to Linux statx structure
+                    let statx = convert_rgetattr_to_statx(&rgetattr);
+
+                    // Write the statx structure to the user buffer
+                    unsafe {
+                        let statx_ptr = _statxbuf as *mut Statx;
+                        *statx_ptr = statx;
+                    }
+
+                    kprint!("sys_statx: successfully filled statx buffer");
+                    clunk(0xFFFF_FFFE);
+                    Ok(0) // Success
+                }
+                P9Response::Error(rlerror) => {
+                    kprint!(
+                        "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
+                        rlerror.tag,
+                        rlerror.ecode
+                    );
+                    clunk(0xFFFF_FFFE);
+                    Ok(-(rlerror.ecode as i32) as u32)
+                }
+            }
+        }
+        Err(e) => Err(e),
+    }
 }
 
 fn sys_swapoff(_specialfile: u32) -> Result<u32, Err> {
