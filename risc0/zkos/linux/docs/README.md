@@ -114,7 +114,7 @@ You can try with /bin/command-name as well for other embedded applets
 
 # Experimental: Linux nommu
 
-Grab https://github.com/riscv-collab/riscv-gnu-toolchain/releases/tag/2025.09.16 riscv64-glibc-ubuntu-gcc toolchain (we need this to make a relocatable kernel, bare metal isn't enough), unpack it so that ~/riscv/bin/riscv32-unknown-linux-gnu-gcc exists
+Grab https://github.com/riscv-collab/riscv-gnu-toolchain/releases/tag/2025.09.16 riscv32-glibc-ubuntu-gcc toolchain (we need this to make a relocatable kernel, bare metal isn't enough), unpack it so that ~/riscv/bin/riscv32-unknown-linux-gnu-gcc exists
 
 Get a copy of linux-6.16.7.tar.xz and unpack it, then in linux-6.16.7
 ```
