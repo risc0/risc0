@@ -49,6 +49,7 @@ You can now take one of these binaries, such as rv32um-p-mulh, merge it with the
 
 ```
 target/debug/elf-to-bin --guest-elf riscv-tests/isa/rv32um-p-mulh  --kernel-elf risc0/zkos/linux/elfs/vmlinuz.elf --output rv32um-p-mulh.bin
+
 RUST_BACKTRACE=1 RISC0_DEV_MODE=1 RUST_LOG=trace r0vm --elf rv32um-p-mulh.bin -- /bin/test 
 ```
 
@@ -100,6 +101,7 @@ Copy it into your risc0 directory and
 
 ```
 target/debug/elf-to-bin --guest-elf busybox --kernel-elf risc0/zkos/linux/elfs/vmlinuz.elf --output busybox.bin
+
 RUST_BACKTRACE=1 RISC0_DEV_MODE=1 r0vm --elf busybox.bin -- /bin/busybox --help
 ```
 
@@ -110,8 +112,6 @@ You can try with /bin/<command name> as well for other embedded applets
 # Experimental: Linux nommu
 
 Grab https://github.com/riscv-collab/riscv-gnu-toolchain/releases/tag/2025.09.16 riscv64-glibc-ubuntu-gcc toolchain (we need this to make a relocatable kernel, bare metal isn't enough), unpack it so that ~/riscv/bin/riscv32-unknown-linux-gnu-gcc exists
-
-Set PATH to include ~/riscv/bin
 
 Get a copy of linux-6.16.7.tar.xz and unpack it, then in linux-6.16.7
 ```
@@ -128,6 +128,7 @@ make ARCH=riscv CROSS_COMPILE=~/riscv/bin/riscv32-unknown-linux-gnu- -j$(nproc) 
 cp the vmlinux into your risc0 and
 ```
 target/debug/elf-to-bin --guest-elf vmlinux --kernel-elf risc0/zkos/linux/elfs/vmlinuz.elf --output vmlinux.bin
+
 RUST_BACKTRACE=1 RISC0_DEV_MODE=1 r0vm --elf vmlinux.bin
 ```
 
