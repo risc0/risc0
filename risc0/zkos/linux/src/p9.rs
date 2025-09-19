@@ -571,6 +571,60 @@ pub mod wire {
     }
 }
 
+/// Common error types that all R* message errors should have
+pub trait MessageError: core::fmt::Debug + Clone + Copy + PartialEq + Eq {
+    /// Create a BufferTooSmall error
+    fn buffer_too_small() -> Self;
+
+    /// Create an InvalidMessageType error  
+    fn invalid_message_type() -> Self;
+}
+
+/// Trait for all R* message types that can be read from a file descriptor
+pub trait ReadableMessage: Sized {
+    /// The error type for this message
+    type Error: MessageError;
+
+    /// Deserialize the message from a buffer
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error>;
+
+    /// Read the message from file descriptor 3
+    /// This is the generic implementation that all R* messages can use
+    fn read() -> Result<Self, Self::Error> {
+        let mut buf = [0u8; 8192];
+
+        // Read the length prefix (4 bytes)
+        let len_prefix = crate::host_calls::host_read(3, buf.as_mut_ptr(), 4);
+        if len_prefix != 4 {
+            return Err(Self::Error::buffer_too_small());
+        }
+
+        // Parse the data length from the first 4 bytes
+        let data_len = u32::from_le_bytes(buf[..4].try_into().unwrap());
+        // Ensure we don't exceed our buffer size
+        if data_len as usize > buf.len() {
+            return Err(Self::Error::buffer_too_small());
+        }
+
+        // Read the remaining data (excluding the 4-byte length prefix we already read)
+        let remaining_len = (data_len - 4) as usize;
+        let len = crate::host_calls::host_read(3, buf[4..].as_mut_ptr(), remaining_len);
+
+        // Verify we read the expected amount
+        if len != data_len - 4 {
+            return Err(Self::Error::buffer_too_small());
+        }
+
+        kprint!("Read data: {:?}", &buf[..data_len as usize]);
+
+        // Deserialize the message
+        match Self::deserialize(&buf[..data_len as usize]) {
+            Ok((message, _bytes_consumed)) => Ok(message),
+            Err(e) => Err(e),
+        }
+    }
+}
+
 /// Tversion message structure
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TversionMessage {
@@ -768,6 +822,14 @@ impl RversionMessage {
     }
 }
 
+impl ReadableMessage for RversionMessage {
+    type Error = RversionError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RversionMessage::deserialize(buf)
+    }
+}
+
 /// Tversion serialization errors
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TversionError {
@@ -785,6 +847,16 @@ pub enum RversionError {
     InvalidUtf8,
     UnknownVersion,
     InternalError,
+}
+
+impl MessageError for RversionError {
+    fn buffer_too_small() -> Self {
+        RversionError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RversionError::InvalidMessageType
+    }
 }
 
 /// Tflush message structure

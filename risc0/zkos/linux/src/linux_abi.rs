@@ -5,9 +5,9 @@ use crate::{
         USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE, USER_STACK_PTR,
         USER_START_PTR,
     },
-    host_calls::{host_argv, host_log, host_read, host_terminate, host_write},
+    host_calls::{host_argv, host_log, host_terminate, host_write},
     kernel::{get_ureg, mret, print},
-    p9::{RversionMessage, TversionMessage},
+    p9::{ReadableMessage, RversionMessage, TversionMessage},
 };
 
 use crate::kernel::{DEBUG_ENABLED, set_ureg};
@@ -435,26 +435,14 @@ pub fn start_linux_binary(argc: u32) -> ! {
                 kprint!("Failed to send Tversion");
             }
         }
-        let mut buf = [0u8; 8192];
-
-        let len_prefix = host_read(3, buf.as_mut_ptr(), 4);
-        if len_prefix == 4 {
-            let data_len = u32::from_le_bytes(buf[..4].try_into().unwrap());
-            kprint!("Data length: {}", data_len);
-            let len = host_read(3, buf[4..].as_mut_ptr(), (data_len - 4) as usize);
-            kprint!("Read {} bytes more ", len);
-            kprint!("Read data: {:?}", &buf);
-            match RversionMessage::deserialize(&buf[..data_len as usize]) {
-                Ok((rversion, bytes_consumed)) => {
-                    kprint!("Rversion: {:?}", rversion);
-                    kprint!("Bytes consumed: {}", bytes_consumed);
-                }
-                Err(e) => {
-                    kpanic!("Failed to deserialize Rversion: {:?}", e);
-                }
+        match RversionMessage::read() {
+            Ok(rversion) => {
+                kprint!("Successfully read Rversion: {:?}", rversion);
+                // Process the message
             }
-        } else {
-            kpanic!("Failed to read data");
+            Err(e) => {
+                kpanic!("Failed to read Rversion: {:?}", e);
+            }
         }
     }
     let mut stack = UserStack::new();
