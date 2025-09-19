@@ -107,7 +107,7 @@ RUST_BACKTRACE=1 RISC0_DEV_MODE=1 r0vm --elf busybox.bin -- /bin/busybox --help
 
 and you should see the busybox help :)
 
-You can try with /bin/<command name> as well for other embedded applets
+You can try with /bin/command-name as well for other embedded applets
 
 # Experimental: Linux nommu
 
