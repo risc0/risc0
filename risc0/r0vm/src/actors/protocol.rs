@@ -24,7 +24,7 @@ use risc0_zkvm::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::job::JobActor;
+use super::{WorkerRouterActor, job::JobActor};
 
 pub use risc0_zkvm::rpc::{
     JobInfo, JobRequest, JobStatus, ProofRequest, ProofResult, Session, ShrinkWrapKind,
@@ -81,13 +81,13 @@ pub(crate) enum TaskKind {
     ShrinkWrap,
 }
 
-#[derive(Clone, Copy, Hash, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct GlobalId {
     pub job_id: JobId,
     pub task_id: TaskId,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct TaskHeader {
     pub global_id: GlobalId,
     pub task_kind: TaskKind,
@@ -161,8 +161,10 @@ pub mod factory {
     use super::*;
 
     #[derive(Clone, Serialize, Deserialize)]
-    pub(crate) struct GetTask {
+    pub(crate) struct GetTasks {
         pub worker_id: WorkerId,
+        #[serde(skip)]
+        pub worker: Option<ActorRef<WorkerRouterActor>>,
         pub kinds: Vec<TaskKind>,
     }
 

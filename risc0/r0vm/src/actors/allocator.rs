@@ -83,6 +83,12 @@ impl From<uuid::Error> for Error {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct GpuUuid(Uuid);
 
+impl GpuUuid {
+    pub fn new_fake() -> Self {
+        Self(Uuid::new_v4())
+    }
+}
+
 impl std::str::FromStr for GpuUuid {
     type Err = Error;
 
@@ -120,7 +126,7 @@ impl fmt::Display for GpuUuid {
 pub struct GpuTokens(u64);
 
 impl GpuTokens {
-    const ZERO: Self = Self(0);
+    pub const ZERO: Self = Self(0);
 
     fn checked_sub(self, other: Self) -> Option<Self> {
         self.0.checked_sub(other.0).map(Self)
@@ -157,7 +163,7 @@ pub struct GpuSpec {
 pub struct CpuCores(u64);
 
 impl CpuCores {
-    const ZERO: Self = Self(0);
+    pub const ZERO: Self = Self(0);
 
     fn checked_sub(self, other: Self) -> Option<Self> {
         self.0.checked_sub(other.0).map(Self)
@@ -975,7 +981,8 @@ impl AllocatorRouterActor {
         local: &Option<ActorRef<AllocatorActor>>,
     ) -> std::result::Result<ActorRef<Self>, Box<dyn StdError>> {
         if let Some(addr) = addr {
-            let remote = kameo::spawn(RemoteAllocatorActor::new(*addr).await?);
+            let remote =
+                kameo::spawn(RemoteAllocatorActor::new(*addr, "RemoteAllocatorActor").await?);
             Ok(kameo::spawn(Self::Remote(remote)))
         } else {
             Ok(kameo::spawn(Self::Local(
