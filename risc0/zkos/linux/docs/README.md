@@ -133,7 +133,6 @@ RUST_BACKTRACE=1 RISC0_DEV_MODE=1 r0vm --elf vmlinux.bin
 ```
 
 and you should see it start up and fail to mount a root file system
-```
 
 # Buildroot with uclibc and flat binaries (static binaries), for Linux noMMU
 
