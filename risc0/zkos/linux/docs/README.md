@@ -26,8 +26,11 @@ cargo risczero bake
 
 # Building elf-to-bin tool
 
+```
 cd tools/elf-to-bin
+
 cargo build
+```
 
 # Running RISC-V test cases
 
