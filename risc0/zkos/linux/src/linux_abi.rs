@@ -11,18 +11,56 @@ use crate::{
     kernel::{get_ureg, mret, print},
     p9::{
         P9Response, RattachMessage, RclunkMessage, ReadableMessage, RgetattrMessage, RlopenMessage,
-        RversionMessage, RwalkMessage, TattachMessage, TlopenMessage, TversionMessage,
-        constants::*,
+        RreaddirMessage, RversionMessage, RwalkMessage, TattachMessage, TlopenMessage,
+        TreaddirMessage, TversionMessage, constants::*,
     },
 };
 
 use crate::kernel::{DEBUG_ENABLED, set_ureg};
 use no_std_strings::{str_format, str256};
+
+// Linux dirent64 structure
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+struct LinuxDirent64 {
+    d_ino: u64,      // inode number
+    d_off: i64,      // offset to next record
+    d_reclen: u16,   // length of this record
+    d_type: u8,      // file type
+    d_name: [u8; 1], // filename (variable length, but we use [u8; 1] for the struct)
+}
+
+// Directory entry types
+#[allow(dead_code)]
+const DT_UNKNOWN: u8 = 0;
+#[allow(dead_code)]
+const DT_FIFO: u8 = 1;
+#[allow(dead_code)]
+const DT_CHR: u8 = 2;
+const DT_DIR: u8 = 4;
+#[allow(dead_code)]
+const DT_BLK: u8 = 6;
+const DT_REG: u8 = 8;
+const DT_LNK: u8 = 10;
+#[allow(dead_code)]
+const DT_SOCK: u8 = 12;
+
 static mut BRK: u32 = USER_HEAP_START_ADDR as u32;
 static mut ROOT_FID: u32 = 0;
 static mut CWD_FID: u32 = 0;
 
-static mut FD_TABLE: [u32; 256] = [0; 256];
+#[derive(Copy, Clone)]
+struct FileDescriptor {
+    fid: u32,
+    cursor: u64,
+    is_dir: bool,
+}
+
+static mut FD_TABLE: [FileDescriptor; 256] = [FileDescriptor {
+    fid: 0,
+    cursor: 0,
+    is_dir: false,
+}; 256];
 
 #[cfg(target_arch = "riscv32")]
 use alloc::string::String;
@@ -1293,9 +1331,13 @@ fn sys_clone3(_cl_args: u32, _size: u32) -> Result<u32, Err> {
 fn sys_close(_fd: u32) -> Result<u32, Err> {
     kprint!("sys_close: fd = {}", _fd);
     unsafe {
-        if FD_TABLE[_fd as usize] != 0xFFFF_FFFE && FD_TABLE[_fd as usize] != 0 {
-            clunk(FD_TABLE[_fd as usize]);
-            FD_TABLE[_fd as usize] = 0;
+        if FD_TABLE[_fd as usize].fid != 0xFFFF_FFFE && FD_TABLE[_fd as usize].fid != 0 {
+            clunk(FD_TABLE[_fd as usize].fid);
+            FD_TABLE[_fd as usize] = FileDescriptor {
+                fid: 0,
+                cursor: 0,
+                is_dir: false,
+            };
             Ok(0)
         } else {
             Err(Err::NoSys)
@@ -1664,10 +1706,251 @@ fn sys_getcwd(_buf: u32, _size: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-fn sys_getdents64(_fd: u32, _dirp: u32, _count: u32) -> Result<u32, Err> {
-    let msg = b"sys_getdents64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+fn sys_getdents64(fd: u32, dirp: u32, count: u32) -> Result<u32, Err> {
+    kprint!(
+        "sys_getdents64: fd={}, dirp={:08x}, count={}",
+        fd,
+        dirp,
+        count
+    );
+
+    let offset = unsafe { FD_TABLE[fd as usize].cursor };
+
+    // Get the FID from the FD table
+    let fid = unsafe { FD_TABLE[fd as usize].fid };
+    if fid == 0 {
+        kprint!("sys_getdents64: invalid fd {}", fd);
+        return Err(Err::Inval);
+    }
+
+    // XXX we will read one dir entry at a a time
+    let treaddir = TreaddirMessage::new(0, fid, offset, count);
+    match treaddir.send_treaddir() {
+        Ok(bytes_written) => {
+            kprint!("sys_getdents64: bytes_written = {}", bytes_written);
+        }
+        Err(e) => {
+            kprint!("sys_getdents64: error = {:?}", e);
+            return Err(Err::NoSys);
+        }
+    }
+
+    // Read the Rreaddir response
+    match RreaddirMessage::read_response() {
+        P9Response::Success(rreaddir) => {
+            kprint!(
+                "sys_getdents64: received Rreaddir: count={}",
+                rreaddir.count
+            );
+
+            if rreaddir.count == 0 {
+                // No more entries
+                return Ok(0);
+            }
+
+            // Parse the directory entries and convert to Linux dirent64 format
+            let mut offset = 0;
+            let mut total_bytes = 0;
+            let mut user_offset = 0;
+
+            while offset < rreaddir.data.len() {
+                // Parse 9P directory entry: qid[13] offset[8] type[1] name[s]
+                if offset + 13 + 8 + 1 > rreaddir.data.len() {
+                    break;
+                }
+
+                // Read QID (13 bytes)
+                let qid_path = u64::from_le_bytes([
+                    rreaddir.data[offset],
+                    rreaddir.data[offset + 1],
+                    rreaddir.data[offset + 2],
+                    rreaddir.data[offset + 3],
+                    rreaddir.data[offset + 4],
+                    rreaddir.data[offset + 5],
+                    rreaddir.data[offset + 6],
+                    rreaddir.data[offset + 7],
+                ]);
+                let _qid_version = u32::from_le_bytes([
+                    rreaddir.data[offset + 8],
+                    rreaddir.data[offset + 9],
+                    rreaddir.data[offset + 10],
+                    rreaddir.data[offset + 11],
+                ]);
+                let _qid_type = rreaddir.data[offset + 12];
+                offset += 13;
+
+                // Read offset (8 bytes)
+                let entry_offset = u64::from_le_bytes([
+                    rreaddir.data[offset],
+                    rreaddir.data[offset + 1],
+                    rreaddir.data[offset + 2],
+                    rreaddir.data[offset + 3],
+                    rreaddir.data[offset + 4],
+                    rreaddir.data[offset + 5],
+                    rreaddir.data[offset + 6],
+                    rreaddir.data[offset + 7],
+                ]);
+                offset += 8;
+
+                // Read type (1 byte)
+                let entry_type = rreaddir.data[offset];
+                offset += 1;
+
+                // Read name length (2 bytes)
+                if offset + 2 > rreaddir.data.len() {
+                    break;
+                }
+                let name_len =
+                    u16::from_le_bytes([rreaddir.data[offset], rreaddir.data[offset + 1]]) as usize;
+                offset += 2;
+
+                // Read name
+                if offset + name_len > rreaddir.data.len() {
+                    break;
+                }
+                let name_bytes = &rreaddir.data[offset..offset + name_len];
+                offset += name_len;
+
+                // Convert 9P type to Linux DT_* type
+                let d_type = match entry_type {
+                    0 => DT_DIR, // Directory
+                    1 => DT_REG, // Regular file
+                    2 => DT_REG, // Append-only file
+                    3 => DT_REG, // Exclusive-use file
+                    4 => DT_REG, // Mounted file
+                    5 => DT_REG, // Authentication file
+                    6 => DT_REG, // Temporary file
+                    7 => DT_LNK, // Symbolic link
+                    _ => DT_UNKNOWN,
+                };
+
+                // Calculate record length (align to 8-byte boundary)
+                // C compiler adds padding to align d_name, so structure is 24 bytes
+                let c_struct_size = 24; // 8+8+2+1+5(padding) = 24 bytes in C
+                let name_len_aligned = (name_len + 7) & !7;
+                let reclen = (c_struct_size + name_len_aligned) as u16;
+
+                // Debug: verify structure size and reclen calculation
+                kprint!(
+                    "sys_getdents64: c_struct_size={}, name_len={}, name_len_aligned={}, reclen={}",
+                    c_struct_size,
+                    name_len,
+                    name_len_aligned,
+                    reclen
+                );
+
+                // Check if we have enough space in user buffer
+                if user_offset + reclen as usize > count as usize {
+                    break;
+                }
+
+                // Write Linux dirent64 structure directly to user buffer
+                unsafe {
+                    let user_ptr = (dirp + user_offset as u32) as *mut u8;
+                    let dirent_ptr = user_ptr as *mut LinuxDirent64;
+
+                    // Write structure fields directly to buffer at correct offsets
+                    // d_ino at offset 0-7
+                    let d_ino_ptr = user_ptr as *mut u64;
+                    *d_ino_ptr = qid_path;
+
+                    // d_off at offset 8-15
+                    let next_dirent_offset = (user_offset + reclen as usize + 7) & !7;
+                    let d_off_ptr = user_ptr.add(8) as *mut i64;
+                    *d_off_ptr = next_dirent_offset as i64;
+
+                    // d_reclen at offset 16-17
+                    let d_reclen_ptr = user_ptr.add(16) as *mut u16;
+                    *d_reclen_ptr = reclen;
+
+                    // d_type at offset 18
+                    let d_type_ptr = user_ptr.add(18) as *mut u8;
+                    *d_type_ptr = d_type;
+
+                    // Debug: verify structure fields
+                    kprint!(
+                        "sys_getdents64: d_ino={}, d_off={}, d_reclen={}, d_type={}",
+                        qid_path,
+                        next_dirent_offset,
+                        reclen,
+                        d_type
+                    );
+
+                    // Debug: check field offsets
+                    kprint!(
+                        "sys_getdents64: field offsets - d_ino: {}, d_off: {}, d_reclen: {}, d_type: {}",
+                        core::mem::offset_of!(LinuxDirent64, d_ino),
+                        core::mem::offset_of!(LinuxDirent64, d_off),
+                        core::mem::offset_of!(LinuxDirent64, d_reclen),
+                        core::mem::offset_of!(LinuxDirent64, d_type)
+                    );
+
+                    // Debug: check raw buffer after structure write
+                    kprint!(
+                        "sys_getdents64: raw buffer after struct write = {:?}",
+                        &core::slice::from_raw_parts(user_ptr, 24)
+                    );
+
+                    // Copy name (null-terminated) after the structure
+                    // C compiler adds padding between d_type and d_name for alignment
+                    let name_ptr = user_ptr.add(19);
+
+                    // Debug: verify name placement
+                    kprint!(
+                        "sys_getdents64: placing name at offset 19, name_bytes={:?}",
+                        name_bytes
+                    );
+
+                    for (i, &byte) in name_bytes.iter().enumerate().take(name_len) {
+                        *name_ptr.add(i) = byte;
+                    }
+                    *name_ptr.add(name_len) = 0; // null terminator
+
+                    // Debug: verify name was placed correctly
+                    kprint!(
+                        "sys_getdents64: name at offset 19 = {:?}",
+                        &core::slice::from_raw_parts(name_ptr, name_len + 1)
+                    );
+
+                    // Zero out padding
+                    for i in (name_len + 1)..name_len_aligned {
+                        *name_ptr.add(i) = 0;
+                    }
+
+                    // Print the dirent buffer as we gave it to user
+                    kprint!(
+                        "sys_getdents64: dirent buffer = {:?}",
+                        &core::slice::from_raw_parts(user_ptr, reclen as usize)
+                    );
+                }
+
+                unsafe {
+                    FD_TABLE[fd as usize].cursor = entry_offset;
+                }
+                // Ensure next dirent is 8-byte aligned
+                user_offset = (user_offset + reclen as usize + 7) & !7;
+                total_bytes += reclen as usize;
+
+                kprint!(
+                    "sys_getdents64: entry '{}' type={} ino={} off={}",
+                    core::str::from_utf8(name_bytes).unwrap_or("?"),
+                    d_type,
+                    qid_path,
+                    entry_offset
+                );
+            }
+
+            Ok(total_bytes as u32)
+        }
+        P9Response::Error(rlerror) => {
+            kprint!(
+                "sys_getdents64: received Rlerror: tag={}, ecode={}",
+                rlerror.tag,
+                rlerror.ecode
+            );
+            Err(Err::NoSys)
+        }
+    }
 }
 
 fn sys_getegid() -> Result<u32, Err> {
@@ -2341,7 +2624,7 @@ fn sys_open_tree_attr(_dfd: u32, _filename: u32, _flags: u32, _attr: u32) -> Res
 unsafe fn find_free_fd() -> u32 {
     unsafe {
         let mut fd = 0;
-        while FD_TABLE[fd] != 0 {
+        while FD_TABLE[fd].fid != 0 {
             fd += 1;
         }
         return fd as u32;
@@ -2351,7 +2634,11 @@ unsafe fn find_free_fd() -> u32 {
 #[allow(dead_code)]
 unsafe fn set_fd(fd: u32, fid: u32) {
     unsafe {
-        FD_TABLE[fd as usize] = fid;
+        FD_TABLE[fd as usize] = FileDescriptor {
+            fid,
+            cursor: 0,
+            is_dir: false,
+        };
     }
 }
 
@@ -3376,6 +3663,7 @@ fn sys_statx(
     // let's print the filename we're trying to stat, it's a u32 pointer
     // we need to search for the null-terminator
     // XXX this is ugly
+    kprint!("sys_statx: _statxbuf = {:08x}", _statxbuf);
     let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
     let null_pos = filename.iter().position(|&b| b == 0).unwrap();
     let filename = &filename[..null_pos];

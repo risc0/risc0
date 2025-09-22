@@ -5278,6 +5278,14 @@ impl RreaddirMessage {
     }
 }
 
+impl ReadableMessage for RreaddirMessage {
+    type Error = RreaddirError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        Self::deserialize(buf)
+    }
+}
+
 /// Txattrwalk serialization errors
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TxattrwalkError {
@@ -5329,6 +5337,16 @@ pub enum RreaddirError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RreaddirError {
+    fn buffer_too_small() -> Self {
+        RreaddirError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RreaddirError::InvalidMessageType
+    }
 }
 
 /// Tfsync message structure
