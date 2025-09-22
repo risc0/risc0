@@ -511,38 +511,38 @@ pub fn start_linux_binary(argc: u32) -> ! {
                 );
             }
         }
-    }
-    // now we attach with Tattach, P9_NOFID as afid, to /risc0-root
-    let tattach = TattachMessage::new(
-        0,
-        0,
-        crate::p9::constants::P9_NOFID,
-        "root".to_string(),
-        "/risc0-root".to_string(),
-    );
-    match tattach.send_tattach() {
-        Ok(bytes_written) => {
-            kprint!("Sent {} bytes", bytes_written);
+        // now we attach with Tattach, P9_NOFID as afid, to /risc0-root
+        let tattach = TattachMessage::new(
+            0,
+            0,
+            crate::p9::constants::P9_NOFID,
+            "root".to_string(),
+            "/risc0-root".to_string(),
+        );
+        match tattach.send_tattach() {
+            Ok(bytes_written) => {
+                kprint!("Sent {} bytes", bytes_written);
+            }
+            Err(e) => {
+                kpanic!("Failed to send Tattach: {:?}", e);
+            }
         }
-        Err(e) => {
-            kpanic!("Failed to send Tattach: {:?}", e);
-        }
-    }
-    // and wait for Rattach
-    match RattachMessage::read_response() {
-        P9Response::Success(rattach) => {
-            kprint!("Received Rattach: {:?}", rattach);
-            unsafe {
-                ROOT_FID = 0;
-                CWD_FID = 0;
-            };
-        }
-        P9Response::Error(rlerror) => {
-            kpanic!(
-                "Received Rlerror for Rattach: tag={}, ecode={}",
-                rlerror.tag,
-                rlerror.ecode
-            );
+        // and wait for Rattach
+        match RattachMessage::read_response() {
+            P9Response::Success(rattach) => {
+                kprint!("Received Rattach: {:?}", rattach);
+                unsafe {
+                    ROOT_FID = 0;
+                    CWD_FID = 0;
+                };
+            }
+            P9Response::Error(rlerror) => {
+                kpanic!(
+                    "Received Rlerror for Rattach: tag={}, ecode={}",
+                    rlerror.tag,
+                    rlerror.ecode
+                );
+            }
         }
     }
 
