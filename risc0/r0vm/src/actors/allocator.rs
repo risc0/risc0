@@ -840,7 +840,6 @@ impl AllocatorActor {
 #[cfg(test)]
 mod allocation_tests {
     use super::*;
-    use crate::actors::protocol::JobId;
 
     fn test_gpu_id(n: u32) -> GpuUuid {
         assert!(n < 10);
@@ -856,10 +855,12 @@ mod allocation_tests {
             .unwrap()
     }
 
-    fn test_task_id(n: u64) -> GlobalId {
+    fn test_task_id(i: u64, j: u64) -> GlobalId {
         GlobalId {
-            job_id: JobId::new_v4(),
-            task_id: n,
+            job_id: format!("00000000-0000-0000-0000-00000000000{i}")
+                .parse()
+                .unwrap(),
+            task_id: j,
         }
     }
 
@@ -896,11 +897,11 @@ mod allocation_tests {
             Self { workers, alloc_ref }
         }
 
-        async fn choose_worker(&self) -> ChooseWorkerReply {
+        async fn choose_worker(&self, i: u64, j: u64) -> ChooseWorkerReply {
             self.alloc_ref
                 .ask(ChooseWorker {
                     candidates: self.workers.clone(),
-                    task_id: test_task_id(1),
+                    task_id: test_task_id(i, j),
                     description: "test task".into(),
                 })
                 .await
@@ -913,7 +914,7 @@ mod allocation_tests {
         let fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
-        let response = fixture.choose_worker().await;
+        let response = fixture.choose_worker(1, 1).await;
         assert_eq!(response.worker_id, worker_id);
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -949,7 +950,7 @@ mod allocation_tests {
             .alloc_ref
             .ask(DeallocateHardware {
                 worker_id,
-                task_id: test_task_id(1),
+                task_id: test_task_id(1, 1),
                 hardware_reservations,
             })
             .await
@@ -966,7 +967,7 @@ mod allocation_tests {
         let worker2 = fixture.workers[1];
 
         // worker1 reserves the GPU
-        let response = fixture.choose_worker().await;
+        let response = fixture.choose_worker(1, 1).await;
         assert_eq!(response.worker_id, worker1);
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1020,15 +1021,15 @@ mod allocation_tests {
         let fixture = Fixture::new(8).await;
 
         // first GPU on first machine
-        let response = fixture.choose_worker().await;
+        let response = fixture.choose_worker(1, 1).await;
         assert_eq!(response.worker_id, fixture.workers[0]);
 
         // first GPU on second machine
-        let response = fixture.choose_worker().await;
+        let response = fixture.choose_worker(1, 2).await;
         assert_eq!(response.worker_id, fixture.workers[4]);
 
         // second GPU on first machine
-        let response = fixture.choose_worker().await;
+        let response = fixture.choose_worker(1, 3).await;
         assert_eq!(response.worker_id, fixture.workers[2]);
     }
 }
