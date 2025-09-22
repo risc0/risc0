@@ -11,8 +11,9 @@ use crate::{
     kernel::{get_ureg, mret, print},
     p9::{
         P9Response, RattachMessage, RclunkMessage, ReadableMessage, RgetattrMessage, RlopenMessage,
-        RreadMessage, RreaddirMessage, RversionMessage, RwalkMessage, TattachMessage,
-        TlopenMessage, TreadMessage, TreaddirMessage, TversionMessage, constants::*,
+        RreadMessage, RreaddirMessage, RversionMessage, RwalkMessage, RwriteMessage,
+        TattachMessage, TlopenMessage, TreadMessage, TreaddirMessage, TversionMessage,
+        TwriteMessage, constants::*,
     },
 };
 
@@ -1135,13 +1136,41 @@ fn sys_write(fd: u32, buf: u32, count: u32) -> Result<u32, Err> {
 }
 
 fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
-    // let msg = str_format!(str256, "do_write({fd}, {buf:?}, {count})");
-    // print(&msg);
-
     if fd == 1 || fd == 2 {
         host_write(fd as u32, buf, count);
     } else {
-        let msg = b"do_write for fd > 2 not implemented";
+        unsafe {
+            if FD_TABLE[fd as usize].fid != 0 {
+                // write with Twrite and Rwrite to the fid using 9p protocol and update .cursor in FD_TABLE
+                let twrite = TwriteMessage::new(
+                    0,
+                    FD_TABLE[fd as usize].fid,
+                    FD_TABLE[fd as usize].cursor,
+                    core::slice::from_raw_parts(buf, count).to_vec(),
+                );
+                match twrite.send_twrite() {
+                    Ok(bytes_written) => {
+                        kprint!("do_write: bytes_written = {}", bytes_written);
+                    }
+                    Err(e) => {
+                        kprint!("do_write: error = {:?}", e);
+                        return Err(Err::NoSys);
+                    }
+                }
+                match RwriteMessage::read_response() {
+                    P9Response::Success(rwrite) => {
+                        kprint!("do_write: rwrite = {:?}", rwrite);
+                        FD_TABLE[fd as usize].cursor += rwrite.count as u64;
+                        return Ok(rwrite.count as usize);
+                    }
+                    P9Response::Error(rlerror) => {
+                        kprint!("do_write: error = {:?}", rlerror);
+                        return Err(Err::NoSys);
+                    }
+                }
+            }
+        }
+        let msg = b"do_write for fd > 2 that are not FIDs not implemented";
         host_log(msg.as_ptr(), msg.len());
         return Err(Err::NoSys);
     }
@@ -2782,6 +2811,7 @@ fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32,
 
     // Convert Linux open flags to 9P open flags
     // This is a simplified mapping - in reality, we'd need more sophisticated flag conversion
+    kprint!("sys_openat: flags=0x{:x}", _flags);
     let p9_flags = if (_flags & 0o3) == 0o0 {
         0
     }

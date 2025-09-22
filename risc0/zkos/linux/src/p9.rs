@@ -1445,6 +1445,14 @@ impl RwriteMessage {
     }
 }
 
+impl ReadableMessage for RwriteMessage {
+    type Error = RwriteError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RwriteMessage::deserialize(buf)
+    }
+}
+
 /// Twrite serialization errors
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TwriteError {
@@ -1459,6 +1467,16 @@ pub enum RwriteError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RwriteError {
+    fn buffer_too_small() -> Self {
+        RwriteError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RwriteError::InvalidMessageType
+    }
 }
 
 /// Twalk message structure
