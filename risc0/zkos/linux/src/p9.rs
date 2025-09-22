@@ -1231,6 +1231,14 @@ impl RreadMessage {
     }
 }
 
+impl ReadableMessage for RreadMessage {
+    type Error = RreadError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RreadMessage::deserialize(buf)
+    }
+}
+
 /// Tread serialization errors
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TreadError {
@@ -1245,6 +1253,16 @@ pub enum RreadError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RreadError {
+    fn buffer_too_small() -> Self {
+        RreadError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RreadError::InvalidMessageType
+    }
 }
 
 /// Twrite message structure

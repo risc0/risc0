@@ -11,8 +11,8 @@ use crate::{
     kernel::{get_ureg, mret, print},
     p9::{
         P9Response, RattachMessage, RclunkMessage, ReadableMessage, RgetattrMessage, RlopenMessage,
-        RreaddirMessage, RversionMessage, RwalkMessage, TattachMessage, TlopenMessage,
-        TreaddirMessage, TversionMessage, constants::*,
+        RreadMessage, RreaddirMessage, RversionMessage, RwalkMessage, TattachMessage,
+        TlopenMessage, TreadMessage, TreaddirMessage, TversionMessage, constants::*,
     },
 };
 
@@ -1090,6 +1090,42 @@ fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
     // const HOST_ECALL_READ: u32 = 1;
     // let msg = str_format!(str256, "sys_read({fd}, {buf:?}, {count})");
     // print(&msg);
+    unsafe {
+        if FD_TABLE[_fd as usize].fid != 0 {
+            // read with Tread and Rread from the fid using 9p protocol and update .cursor in FD_TABLE
+            let tread = TreadMessage::new(
+                0,
+                FD_TABLE[_fd as usize].fid,
+                FD_TABLE[_fd as usize].cursor,
+                _count,
+            );
+            match tread.send_tread() {
+                Ok(bytes_written) => {
+                    kprint!("sys_read: bytes_written = {}", bytes_written);
+                }
+                Err(e) => {
+                    kprint!("sys_read: error = {:?}", e);
+                    return Err(Err::NoSys);
+                }
+            }
+            match RreadMessage::read_response() {
+                P9Response::Success(rread) => {
+                    kprint!("sys_read: rread = {:?}", rread);
+                    let user_ptr = _buf as *mut u8;
+                    let data = rread.data;
+                    core::ptr::copy_nonoverlapping(data.as_ptr(), user_ptr, rread.count as usize);
+                    FD_TABLE[_fd as usize].cursor += rread.count as u64;
+                    return Ok(rread.count);
+                }
+                P9Response::Error(rlerror) => {
+                    kprint!("sys_read: error = {:?}", rlerror);
+                    return Err(Err::NoSys);
+                }
+            }
+        }
+    }
+    let msg = b"sys_read not implemented";
+    host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
 
@@ -1104,6 +1140,10 @@ fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
 
     if fd == 1 || fd == 2 {
         host_write(fd as u32, buf, count);
+    } else {
+        let msg = b"do_write for fd > 2 not implemented";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
     }
 
     Ok(count)
@@ -1120,7 +1160,12 @@ fn sys_writev(fd: u32, vec_ptr: u32, vlen: u32) -> Result<u32, Err> {
     let fd = fd as i32;
     let vec_ptr = vec_ptr as *const IoVec;
     let vec = unsafe { core::slice::from_raw_parts(vec_ptr, vlen as usize) };
-
+    if (fd > 2) {
+        // For file descriptors > 2 (not stdout/stderr), return not implemented for now.
+        let msg = b"sys_writev for fd > 2 not implemented";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
     // let msg = str_format!(str256, "sys_writev({fd}, {vec_ptr:?}, {vlen})");
     // print(&msg);
 
@@ -1133,6 +1178,9 @@ fn sys_writev(fd: u32, vec_ptr: u32, vlen: u32) -> Result<u32, Err> {
 
 /// https://man7.org/linux/man-pages/man2/ioctl.2.html
 fn sys_ioctl(fd: u32, _cmd: u32, arg: u32) -> Result<u32, Err> {
+    // For now, sys_ioctl is not implemented. Log a message for debugging.
+    let msg = b"sys_ioctl not implemented";
+    host_log(msg.as_ptr(), msg.len());
     let _fd = fd as i32;
     let _arg = arg as *const u8;
     // let msg = str_format!(str256, "sys_ioctl({fd}, {cmd}, 0x{arg:08x})");
@@ -1526,8 +1574,20 @@ fn sys_fchownat(
     Err(Err::NoSys)
 }
 
+pub const F_DUPFD: u32 = 0; // Duplicate file descriptor.
+pub const F_GETFD: u32 = 1; // Get file descriptor flags.
+pub const F_SETFD: u32 = 2; // Set file descriptor flags.
+pub const F_GETFL: u32 = 3; // Get file status flags.
+pub const F_SETFL: u32 = 4; // Set file status flags.
+pub const FD_CLOEXEC: u32 = 1; // Close on exec flag.
+
 fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
-    let msg = b"sys_fcntl64 not implemented";
+    kprint!("sys_fcntl64: fd={}, cmd={}, arg={}", _fd, _cmd, _arg);
+    if _cmd == F_SETFD && _arg & FD_CLOEXEC == FD_CLOEXEC {
+        // mock and return ok
+        return Ok(0);
+    }
+    let msg = b"sys_fcntl64 not implemented for this cmd/arg";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
