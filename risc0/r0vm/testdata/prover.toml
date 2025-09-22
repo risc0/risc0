@@ -2,7 +2,7 @@
 
 version = 1
 
-[[worker]]
+[[prover]]
 manager = "10.0.3.24:9000"
 subscribe = [
   "prove-segment",
@@ -13,7 +13,7 @@ subscribe = [
   "resolve",
 ]
 
-[[worker]]
+[[prover]]
 manager = "10.0.3.24:9000"
 subscribe = ["lift", "join", "union", "resolve"]
 

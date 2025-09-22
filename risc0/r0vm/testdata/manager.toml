@@ -8,9 +8,8 @@ listen = "0.0.0.0:8000"
 [manager]
 listen = "0.0.0.0:9000"
 
-[[worker]]
+[executor]
 count = 4
-subscribe = ["execute"]
 
 [storage]
 path = "/mnt/storage/risc0"

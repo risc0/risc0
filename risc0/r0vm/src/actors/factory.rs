@@ -1,21 +1,23 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{collections::HashMap, net::SocketAddr};
 
 use kameo::{error::Infallible, prelude::*};
 use multi_index_map::MultiIndexMap;
+use rand::{SeedableRng, rngs::SmallRng, seq::IndexedRandom};
 use tokio::{
     net::{TcpStream, tcp},
     task::JoinHandle,
@@ -58,6 +60,7 @@ pub(crate) struct FactoryActor {
     pending_tasks: MultiIndexTaskRowMap,
     active_tasks: HashMap<GlobalId, TaskMsg>,
     reply_senders: HashMap<WorkerId, ReplySender<TaskMsg>>,
+    rng: SmallRng,
 }
 
 impl FactoryActor {
@@ -68,6 +71,7 @@ impl FactoryActor {
             pending_tasks: Default::default(),
             active_tasks: HashMap::default(),
             reply_senders: HashMap::default(),
+            rng: SmallRng::from_os_rng(),
         }
     }
 }
@@ -108,23 +112,28 @@ impl Message<SubmitTaskMsg> for FactoryActor {
         msg: SubmitTaskMsg,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        self.jobs.insert(msg.header.global_id.job_id, msg.job);
+        let global_id = msg.header.global_id;
+        let job_id = msg.header.global_id.job_id;
+        let task_kind = msg.header.task_kind;
+
+        self.jobs.insert(job_id, msg.job);
         let task = TaskMsg {
             header: msg.header.clone(),
             task: msg.task.clone(),
         };
 
-        let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
-        if let Some(worker) = workers.first() {
+        let workers = self.workers.get_by_task_kind(&task_kind);
+
+        if let Some(worker) = workers.choose(&mut self.rng) {
             let worker_id = worker.worker_id;
             self.workers.remove_by_worker_id(&worker_id);
             let reply_sender = self.reply_senders.remove(&worker_id).unwrap();
             reply_sender.send(task);
         } else {
             self.pending_tasks.insert(TaskRow {
-                job_id: msg.header.global_id.job_id,
-                global_id: msg.header.global_id,
-                task_kind: msg.header.task_kind,
+                job_id,
+                global_id,
+                task_kind,
                 task: msg.task,
             });
         }

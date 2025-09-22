@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 pub(crate) mod config;
 pub(crate) mod factory;
@@ -29,18 +30,18 @@ use std::{
     net::{Ipv4Addr, SocketAddr, SocketAddrV4},
     os::{fd::AsFd as _, unix::net::UnixStream as StdUnixStream},
     path::{Path, PathBuf},
+    sync::Arc,
     time::Duration,
 };
 
 use anyhow::Context;
 use kameo::prelude::*;
 use nvml_wrapper::Nvml;
-use opentelemetry_otlp::WithExportConfig as _;
+use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
 use opentelemetry_sdk::{
     Resource,
     logs::SdkLoggerProvider,
     metrics::{PeriodicReader, SdkMeterProvider},
-    propagation::TraceContextPropagator,
     trace::SdkTracerProvider,
 };
 use serde::{Deserialize, Serialize};
@@ -48,14 +49,19 @@ use tempfile::NamedTempFile;
 use tokio::{
     io::{AsyncReadExt as _, AsyncWriteExt as _},
     net::{TcpListener, UnixStream, tcp},
-    process::Command,
+    process::{Child, Command},
     task::JoinHandle,
 };
-use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::{
+    EnvFilter, Layer as _, layer::SubscriberExt as _, util::SubscriberInitExt as _,
+};
+
+use crate::{actors::config::TelemetryConfig, init_logging};
 
 use self::{
     config::{
-        AppConfig, ManagerConfig, VERSION, VersionConfig, WorkerConfig, default_api_listen_addr,
+        AppConfig, ExecutorConfig, ManagerConfig, ProverConfig, VERSION, VersionConfig,
+        default_api_listen_addr,
     },
     factory::{FactoryActor, FactoryRouterActor, RemoteFactoryActor},
     manager::ManagerActor,
@@ -83,13 +89,9 @@ pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<d
     };
     tracing::info!("{config:#?}");
 
-    let mut app = App::new(config).await?;
+    let mut app = App::new(config, /*enable_logging=*/ true).await?;
     if app.manager.is_some() {
-        println!("Use Ctrl-C to stop");
-        tokio::signal::ctrl_c()
-            .await
-            .expect("failed to listen for ctrl-c");
-        println!();
+        wait_for_shutdown().await;
     } else {
         app.wait_for_workers().await;
     }
@@ -97,6 +99,25 @@ pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<d
     app.stop().await;
 
     Ok(())
+}
+
+async fn wait_for_shutdown() {
+    use tokio::signal::unix::{SignalKind, signal};
+
+    let mut sigterm = signal(SignalKind::terminate()).expect("failed to bind SIGTERM");
+
+    println!("Use Ctrl-C");
+
+    tokio::select! {
+        _ = tokio::signal::ctrl_c() => {
+            eprintln!("Got SIGINT (Ctrl-C)");
+        }
+        _ = sigterm.recv() => {
+            eprintln!("Got SIGTERM");
+        }
+    }
+
+    println!();
 }
 
 async fn read_or_eof(socket: &mut UnixStream, buf: &mut [u8]) -> Result<bool, Box<dyn StdError>> {
@@ -166,72 +187,47 @@ async fn relay_job_request(
 
 #[tokio::main]
 pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdError>> {
-    let workers = num_gpus.unwrap_or_else(|| cuda_devices().unwrap_or(1));
+    let small_tasks = vec![
+        TaskKind::Lift,
+        TaskKind::Join,
+        TaskKind::Union,
+        TaskKind::Resolve,
+        TaskKind::ShrinkWrap,
+    ];
 
-    let execute_pool = WorkerConfig {
-        count: Some(1),
-        manager: None,
-        simulate: None,
-        subscribe: vec![TaskKind::Execute],
-    };
+    let mut large_tasks = vec![TaskKind::ProveSegment, TaskKind::ProveKeccak];
+    large_tasks.extend_from_slice(&small_tasks);
 
     let addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into();
-    let mut app = App::new(AppConfig {
-        version: VERSION,
-        api: None,
-        manager: Some(ManagerConfig { listen: Some(addr) }),
-        worker: Some(vec![execute_pool]),
-        storage: None,
-        telemetry: None,
-    })
+    let mut app = App::new(
+        AppConfig {
+            version: VERSION,
+            api: None,
+            manager: Some(ManagerConfig { listen: Some(addr) }),
+            executor: Some(ExecutorConfig {
+                manager: None,
+                count: 1,
+            }),
+            prover: Some(vec![
+                ProverConfig {
+                    manager: None,
+                    count: num_gpus,
+                    subscribe: large_tasks,
+                    simulate: None,
+                },
+                ProverConfig {
+                    manager: None,
+                    count: num_gpus,
+                    subscribe: small_tasks,
+                    simulate: None,
+                },
+            ]),
+            storage: None,
+            telemetry: None,
+        },
+        /*enable_logging=*/ true,
+    )
     .await?;
-
-    let local_addr = app.local_addr.unwrap();
-
-    let primary_pool = WorkerConfig {
-        count: Some(1),
-        manager: Some(local_addr),
-        simulate: None,
-        subscribe: vec![TaskKind::ProveSegment, TaskKind::ProveKeccak],
-    };
-
-    let secondary_pool = WorkerConfig {
-        count: Some(1),
-        manager: Some(local_addr),
-        simulate: None,
-        subscribe: vec![
-            TaskKind::Lift,
-            TaskKind::Join,
-            TaskKind::Union,
-            TaskKind::Resolve,
-            TaskKind::ShrinkWrap,
-        ],
-    };
-
-    let r0vm_path = std::env::current_exe()?;
-    let primary_config = TempConfig::new(primary_pool)?;
-    let secondary_config = TempConfig::new(secondary_pool)?;
-
-    let mut children = vec![];
-    for device_idx in 0..workers {
-        let child = Command::new(&r0vm_path)
-            .process_group(0)
-            .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
-            .arg("--config")
-            .arg(primary_config.file.path())
-            .spawn()
-            .with_context(|| spawn_fail(&r0vm_path))?;
-        children.push(child);
-
-        let child = Command::new(&r0vm_path)
-            .process_group(0)
-            .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
-            .arg("--config")
-            .arg(secondary_config.file.path())
-            .spawn()
-            .with_context(|| spawn_fail(&r0vm_path))?;
-        children.push(child);
-    }
 
     let socket: StdUnixStream = stdin().as_fd().try_clone_to_owned()?.into();
 
@@ -248,10 +244,6 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
 
     app.stop().await;
 
-    for mut child in children {
-        child.wait().await?;
-    }
-
     result
 }
 
@@ -260,14 +252,24 @@ struct TempConfig {
 }
 
 impl TempConfig {
-    fn new(worker: WorkerConfig) -> anyhow::Result<Self> {
+    fn new(
+        manager_addr: SocketAddr,
+        subscribe: Vec<TaskKind>,
+        enable_telemetry: bool,
+    ) -> anyhow::Result<Self> {
         let config = AppConfig {
             version: VERSION,
             api: None,
             manager: None,
-            worker: Some(vec![worker]),
+            executor: None,
+            prover: Some(vec![ProverConfig {
+                manager: Some(manager_addr),
+                count: Some(1),
+                subscribe,
+                simulate: None,
+            }]),
             storage: None,
-            telemetry: None,
+            telemetry: enable_telemetry.then_some(TelemetryConfig {}),
         };
         let toml = toml::to_string(&config)?;
         let mut file = tempfile::NamedTempFile::new()?;
@@ -302,30 +304,41 @@ enum RemoteRequest {
     TaskDone(TaskDoneMsg),
 }
 
+struct ChildState {
+    child: Child,
+    // Pin the temporary file so that it stays alive for the lifetime of the child process.
+    _config: Arc<TempConfig>,
+}
+
 pub(crate) struct App {
     provider: Option<OpenTelemetryProvider>,
     manager: Option<ActorRef<ManagerActor>>,
     factory: Option<ActorRef<FactoryActor>>,
     workers: Vec<Worker>,
     server: Option<Server>,
-    local_addr: Option<SocketAddr>,
+    children: Vec<ChildState>,
 }
 
 impl App {
-    pub async fn new(cfg: AppConfig) -> Result<Self, Box<dyn StdError>> {
+    pub async fn new(cfg: AppConfig, enable_logging: bool) -> Result<Self, Box<dyn StdError>> {
         let mut manager = None;
         let mut factory = None;
-        let mut workers = vec![];
         let mut server = None;
         let mut local_addr = None;
-        let po2 = None;
 
-        let provider = cfg.telemetry.map(|_| OpenTelemetryProvider::new());
+        let provider = if cfg.telemetry.is_some() {
+            Some(OpenTelemetryProvider::new())
+        } else {
+            if enable_logging {
+                init_logging();
+            }
+            None
+        };
 
-        if let Some(cfg_manager) = cfg.manager {
+        if let Some(cfg_manager) = &cfg.manager {
             let storage_root = if cfg.api.is_some() {
-                Some(if let Some(cfg) = cfg.storage {
-                    cfg.path
+                Some(if let Some(cfg) = &cfg.storage {
+                    cfg.path.clone()
                 } else {
                     default_storage_root()
                 })
@@ -345,22 +358,84 @@ impl App {
                 local_addr = server.as_mut().unwrap().start().await?;
             }
 
-            if let Some(cfg_api) = cfg.api {
+            if let Some(cfg_api) = &cfg.api {
                 let api_addr = cfg_api.listen.unwrap_or_else(default_api_listen_addr);
                 tokio::spawn(crate::api::run(
                     api_addr,
                     storage_root.unwrap(),
                     manager_ref,
-                    po2,
+                    cfg_api.po2,
                 ));
             }
         }
 
-        if let Some(cfg_worker) = cfg.worker {
-            for worker in cfg_worker {
-                tracing::info!("Starting worker: {worker:?}");
+        let mut workers = vec![];
+        let mut children = vec![];
 
-                let factory_ref = match worker.manager {
+        if let Some(cfg_executor) = cfg.executor {
+            Self::create_executors(&cfg_executor, &factory, &mut workers).await?;
+        }
+
+        if let Some(cfg_prover) = cfg.prover {
+            Self::create_provers(
+                &cfg_prover,
+                local_addr,
+                &factory,
+                &mut workers,
+                &mut children,
+                provider.is_some(),
+            )
+            .await?
+        }
+
+        Ok(Self {
+            provider,
+            manager,
+            factory,
+            workers,
+            server,
+            children,
+        })
+    }
+
+    async fn create_executors(
+        executor: &ExecutorConfig,
+        factory: &Option<ActorRef<FactoryActor>>,
+        workers: &mut Vec<Worker>,
+    ) -> Result<(), Box<dyn StdError>> {
+        tracing::info!("Starting executor: {executor:?}");
+
+        let factory_ref = match executor.manager {
+            Some(addr) => {
+                let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
+                kameo::spawn(FactoryRouterActor::Remote(remote))
+            }
+            None => kameo::spawn(FactoryRouterActor::Local(factory.as_ref().unwrap().clone())),
+        };
+
+        for _ in 0..executor.count {
+            let mut worker = Worker::new(factory_ref.clone(), vec![TaskKind::Execute], None);
+            worker.start();
+            workers.push(worker);
+        }
+
+        Ok(())
+    }
+
+    async fn create_provers(
+        cfg_prover: &[ProverConfig],
+        local_addr: Option<SocketAddr>,
+        factory: &Option<ActorRef<FactoryActor>>,
+        workers: &mut Vec<Worker>,
+        children: &mut Vec<ChildState>,
+        enable_telemetry: bool,
+    ) -> Result<(), Box<dyn StdError>> {
+        for prover in cfg_prover {
+            tracing::info!("Starting prover: {prover:?}");
+
+            let count = prover.count.unwrap_or_else(|| cuda_devices().unwrap_or(1));
+            if (cfg_prover.len() == 1 && count == 1) || prover.simulate.is_some() {
+                let factory_ref = match prover.manager {
                     Some(addr) => {
                         let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
                         kameo::spawn(FactoryRouterActor::Remote(remote))
@@ -370,26 +445,41 @@ impl App {
                     }
                 };
 
-                for _ in 0..worker.count.unwrap_or(1) {
-                    let mut worker = Worker::new(
-                        factory_ref.clone(),
-                        worker.subscribe.clone(),
-                        worker.simulate,
-                    );
-                    worker.start();
-                    workers.push(worker);
+                let mut worker = Worker::new(
+                    factory_ref.clone(),
+                    prover.subscribe.clone(),
+                    prover.simulate,
+                );
+                worker.start();
+                workers.push(worker);
+            } else {
+                let r0vm_path = std::env::current_exe()?;
+                if prover.manager.is_none() && local_addr.is_none() {
+                    return Err(anyhow::anyhow!("Invalid configuration: either manager must run locally or prover.manager must be set").into());
+                }
+                let manager_addr = prover.manager.unwrap_or_else(|| local_addr.unwrap());
+                let cfg_child = Arc::new(TempConfig::new(
+                    manager_addr,
+                    prover.subscribe.clone(),
+                    enable_telemetry,
+                )?);
+                for device_idx in 0..count {
+                    let child = Command::new(&r0vm_path)
+                        .process_group(0)
+                        .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
+                        .arg("--config")
+                        .arg(cfg_child.file.path())
+                        .spawn()
+                        .with_context(|| spawn_fail(&r0vm_path))?;
+                    children.push(ChildState {
+                        child,
+                        _config: cfg_child.clone(),
+                    });
                 }
             }
         }
 
-        Ok(Self {
-            provider,
-            manager,
-            factory,
-            workers,
-            server,
-            local_addr,
-        })
+        Ok(())
     }
 
     pub async fn wait_for_workers(&mut self) {
@@ -425,6 +515,13 @@ impl App {
         {
             tracing::info!("factory: wait for stop");
             factory.wait_for_stop().await;
+        }
+
+        for mut child in self.children {
+            let result = child.child.wait().await;
+            if let Some(err) = result.err() {
+                tracing::warn!("Failed to wait on child: {err}");
+            }
         }
 
         if let Some(provider) = self.provider {
@@ -560,47 +657,51 @@ impl OpenTelemetryProvider {
     pub(crate) fn new() -> Self {
         let resource = Resource::builder().with_service_name("r0vm").build();
 
+        let log_exporter = opentelemetry_otlp::LogExporter::builder()
+            .with_http()
+            .build()
+            .unwrap();
+
         let logger_provider = SdkLoggerProvider::builder()
             .with_resource(resource.clone())
-            .with_batch_exporter(
-                opentelemetry_otlp::LogExporter::builder()
-                    .with_http()
-                    .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
-                    .build()
-                    .unwrap(),
-            )
+            .with_batch_exporter(log_exporter)
             .build();
 
         tracing_subscriber::registry()
-            // .with(OpenTelemetryTracingBridge::new(&logger_provider))
-            .with(tracing_subscriber::fmt::layer().with_filter(EnvFilter::from_default_env()))
+            .with(
+                OpenTelemetryTracingBridge::new(&logger_provider)
+                    .with_filter(EnvFilter::from_default_env()),
+            )
+            .with(
+                tracing_subscriber::fmt::layer()
+                    .with_ansi(false)
+                    .without_time()
+                    .with_filter(EnvFilter::from_default_env()),
+            )
             .init();
 
+        let span_exporter = opentelemetry_otlp::SpanExporter::builder()
+            .with_http()
+            .build()
+            .unwrap();
+
         let tracer_provider = SdkTracerProvider::builder()
-            .with_batch_exporter(
-                opentelemetry_otlp::SpanExporter::builder()
-                    .with_http()
-                    .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
-                    .build()
-                    .unwrap(),
-            )
+            .with_batch_exporter(span_exporter)
             .with_resource(resource.clone())
             .build();
 
-        opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
         opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+
+        let metric_exporter = opentelemetry_otlp::MetricExporter::builder()
+            .with_http()
+            .build()
+            .unwrap();
 
         let meter_provider = SdkMeterProvider::builder()
             .with_reader(
-                PeriodicReader::builder(
-                    opentelemetry_otlp::MetricExporter::builder()
-                        .with_http()
-                        .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
-                        .build()
-                        .unwrap(),
-                )
-                .with_interval(Duration::from_secs(1))
-                .build(),
+                PeriodicReader::builder(metric_exporter)
+                    .with_interval(Duration::from_secs(1))
+                    .build(),
             )
             .with_resource(resource.clone())
             .build();
