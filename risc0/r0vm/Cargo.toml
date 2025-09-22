@@ -33,7 +33,7 @@ opentelemetry = "0.30.0"
 opentelemetry-appender-tracing = "0.30.1"
 opentelemetry-otlp = "0.30.0"
 opentelemetry_sdk = "0.30.0"
-reqwest = "0.12"
+reqwest = { version = "0.12", default-features = false }
 risc0-circuit-rv32im = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["prove"] }
 semver = "1"
