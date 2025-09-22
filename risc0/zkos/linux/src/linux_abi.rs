@@ -10,10 +10,10 @@ use crate::{
     host_calls::{host_argv, host_log, host_terminate, host_write},
     kernel::{get_ureg, mret, print},
     p9::{
-        P9Response, RattachMessage, RclunkMessage, ReadableMessage, RgetattrMessage, RlopenMessage,
-        RreadMessage, RreaddirMessage, RversionMessage, RwalkMessage, RwriteMessage,
-        TattachMessage, TlopenMessage, TreadMessage, TreaddirMessage, TversionMessage,
-        TwriteMessage, constants::*,
+        P9Response, RattachMessage, RclunkMessage, ReadableMessage, RgetattrMessage,
+        RlcreateMessage, RlopenMessage, RreadMessage, RreaddirMessage, RversionMessage,
+        RwalkMessage, RwriteMessage, TattachMessage, TlcreateMessage, TlopenMessage, TreadMessage,
+        TreaddirMessage, TversionMessage, TwriteMessage, constants::*,
     },
 };
 
@@ -1148,6 +1148,7 @@ fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
                     FD_TABLE[fd as usize].cursor,
                     core::slice::from_raw_parts(buf, count).to_vec(),
                 );
+                kprint!("do_write: twrite = {:?}", twrite);
                 match twrite.send_twrite() {
                     Ok(bytes_written) => {
                         kprint!("do_write: bytes_written = {}", bytes_written);
@@ -2766,6 +2767,25 @@ fn do_walk(starting_fid: u32, target_fid: u32, path: String) -> Result<u32, Err>
     }
 }
 
+/// Split a path into directory and filename components
+fn split_path(path: &str) -> (String, String) {
+    if let Some(last_slash) = path.rfind('/') {
+        if last_slash == 0 {
+            // Path is "/filename" - directory is "/"
+            ("/".to_string(), path[1..].to_string())
+        } else {
+            // Path is "/dir/filename" - directory is "/dir", filename is "filename"
+            (
+                path[..last_slash].to_string(),
+                path[last_slash + 1..].to_string(),
+            )
+        }
+    } else {
+        // No slash found - this shouldn't happen for absolute paths
+        ("/".to_string(), path.to_string())
+    }
+}
+
 fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32, Err> {
     // Extract and print the filename
     let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
@@ -2788,6 +2808,93 @@ fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32,
     if !filename_str.starts_with("/") {
         kpanic!("sys_openat: relative paths are not supported");
     }
+
+    // Check if O_CREAT flag is set
+    const O_CREAT: u32 = 0o100;
+    // const O_EXCL: u32 = 0o200; // TODO: Implement O_EXCL logic
+
+    let should_create = (_flags & O_CREAT) != 0;
+    // let should_fail_if_exists = (_flags & O_EXCL) != 0; // TODO: Implement O_EXCL logic
+
+    if should_create {
+        kprint!("sys_openat: O_CREAT flag detected, attempting file creation");
+
+        // Split path into directory and filename
+        let (dir_path, file_name) = split_path(filename_str);
+        kprint!(
+            "sys_openat: directory='{}', filename='{}'",
+            dir_path,
+            file_name
+        );
+
+        // Walk to the directory
+        // Get a FID for the new file
+        let file_fid = unsafe { find_free_fd() };
+
+        let dir_walk_result = do_walk(0, file_fid, dir_path.clone());
+        match dir_walk_result {
+            Ok(ret_code) => {
+                if ret_code != 0 {
+                    kprint!(
+                        "sys_openat: failed to walk to directory, error: {}",
+                        ret_code
+                    );
+                    return Ok(ret_code);
+                }
+            }
+            Err(e) => {
+                kprint!("sys_openat: error walking to directory");
+                return Err(e);
+            }
+        }
+
+        // Convert mode to 9P permissions (simplified)
+        let p9_mode = _mode & 0o777; // Basic permission bits
+
+        // Convert Linux open flags to 9P flags (same logic as Tlopen)
+        let p9_flags = if (_flags & 0o3) == 0o0 {
+            0 // O_RDONLY
+        } else if (_flags & 0o3) == 0o1 {
+            1 // O_WRONLY
+        } else {
+            2 // O_RDWR
+        };
+
+        // Create the file using Tlcreate
+        let tlcreate =
+            TlcreateMessage::new(0, file_fid, file_name.to_string(), p9_flags, p9_mode, 0); // flags=p9_flags, mode=p9_mode, gid=0
+        kprint!("sys_openat: tlcreate = {:?}", tlcreate);
+        match tlcreate.send_tlcreate() {
+            Ok(bytes_written) => {
+                kprint!("sys_openat: sent {} bytes for Tlcreate", bytes_written);
+
+                // Read the response
+                match RlcreateMessage::read_response() {
+                    P9Response::Success(rlcreate) => {
+                        kprint!("sys_openat: received Rlcreate: {:?}", rlcreate);
+                        unsafe { set_fd(file_fid, file_fid) };
+                        return Ok(file_fid);
+                    }
+                    P9Response::Error(rlerror) => {
+                        clunk(file_fid);
+                        kprint!(
+                            "sys_openat: received Rlerror for Rlcreate: tag={}, ecode={}",
+                            rlerror.tag,
+                            rlerror.ecode
+                        );
+                        return Ok(-(rlerror.ecode as i32) as u32);
+                    }
+                }
+            }
+            Err(e) => {
+                kprint!("sys_openat: error sending Tlcreate: {:?}", e);
+                clunk(file_fid);
+                return Err(Err::NoSys);
+            }
+        }
+    }
+
+    // Original logic for opening existing files
     let fid = unsafe { find_free_fd() };
     let walk_result = do_walk(0, fid, filename_str.to_string());
     match walk_result {

@@ -3358,6 +3358,14 @@ impl RlcreateMessage {
     }
 }
 
+impl ReadableMessage for RlcreateMessage {
+    type Error = RlcreateError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RlcreateMessage::deserialize(buf)
+    }
+}
+
 /// Tlcreate serialization errors
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TlcreateError {
@@ -3374,6 +3382,16 @@ pub enum RlcreateError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RlcreateError {
+    fn buffer_too_small() -> Self {
+        RlcreateError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RlcreateError::InvalidMessageType
+    }
 }
 
 /// Tsymlink message structure
