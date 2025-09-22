@@ -394,10 +394,12 @@ impl GpuProcessor {
         payload: Result<TaskDone, TaskError>,
         hardware_reservations: Vec<HardwareReservation>,
     ) -> anyhow::Result<()> {
+        let global_id = header.global_id;
         self.factory.tell(TaskDoneMsg { header, payload }).await?;
         self.allocator
             .tell(DeallocateHardware {
                 worker_id: self.worker_id,
+                task_id: global_id,
                 hardware_reservations,
             })
             .await?;
@@ -597,10 +599,12 @@ impl CpuProcessor {
         payload: Result<TaskDone, TaskError>,
         hardware_reservations: Vec<HardwareReservation>,
     ) -> anyhow::Result<()> {
+        let global_id = header.global_id;
         self.factory.tell(TaskDoneMsg { header, payload }).await?;
         self.allocator
             .tell(DeallocateHardware {
                 worker_id: self.worker_id,
+                task_id: global_id,
                 hardware_reservations,
             })
             .await?;

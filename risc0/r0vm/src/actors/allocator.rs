@@ -24,7 +24,7 @@
 //! following responsibilities:
 //!
 //! - Routing proof requests to the appropriate versioned r0vm cluster.
-//! - Ensuring that workers which share hardware resources (such as GPUSs) do not schedule jobs
+//! - Ensuring that workers which share hardware resources (such as GPUSs) do not schedule tasks
 //!   using said resources simultaneously.
 //!
 //! To accomplish this, the allocator must communicate with managers and workers.
@@ -42,8 +42,9 @@ use std::net::{IpAddr, Ipv4Addr};
 use std::sync::Arc;
 
 use super::{
-    RemoteActor, RemoteAllocatorRequest, RpcDisconnect, protocol::WorkerId, remote_actor_ask,
-    routing_actor_impl,
+    RemoteActor, RemoteAllocatorRequest, RpcDisconnect,
+    protocol::{GlobalId, WorkerId},
+    remote_actor_ask, routing_actor_impl,
 };
 use derive_more::{Add, AddAssign, From, Sub, SubAssign};
 use http_body_util::BodyExt as _;
@@ -214,11 +215,11 @@ struct Worker {
     machine: MachineId,
     /// What hardware does this worker have access to
     hardware: Vec<HardwareResource>,
-    /// What jobs (tasks) are currently running on this worker.
-    jobs: u32,
-    /// GPU tokens being used the running jobs
+    /// What tasks (tasks) are currently running on this worker.
+    tasks: HashMap<GlobalId, String>,
+    /// GPU tokens being used the running tasks
     used_gpu_tokens: HashMap<GpuUuid, GpuTokens>,
-    /// CPU cores being used the running jobs
+    /// CPU cores being used the running tasks
     used_cores: CpuCores,
 }
 
@@ -230,7 +231,7 @@ impl Worker {
     ) -> Self {
         Self {
             remote_address,
-            jobs: 0,
+            tasks: HashMap::new(),
             machine,
             hardware,
             used_gpu_tokens: HashMap::new(),
@@ -311,12 +312,12 @@ impl AllocatorActor {
             .collect()
     }
 
-    /// The number of jobs the GPU this worker is using is currently running.
-    fn get_worker_num_jobs(
+    /// The number of tasks the GPU this worker is using is currently running.
+    fn get_worker_num_tasks(
         &self,
         worker_id: &WorkerId,
         hardware_filter: HardwareFilter,
-    ) -> Result<u32> {
+    ) -> Result<usize> {
         let worker = self
             .workers
             .get(worker_id)
@@ -340,17 +341,26 @@ impl AllocatorActor {
 
         Ok(associated_workers
             .iter()
-            .map(|w| self.workers.get(w).unwrap().jobs)
+            .map(|w| self.workers.get(w).unwrap().tasks.len())
             .sum())
     }
 
-    /// Increase number of jobs we are tracking for this worker
-    fn increase_worker_num_jobs(&mut self, worker_id: &WorkerId) -> Result<()> {
+    /// Add to the tasks we are tracking for this worker
+    fn add_worker_task(
+        &mut self,
+        worker_id: &WorkerId,
+        task_id: GlobalId,
+        description: String,
+    ) -> Result<()> {
         let worker = self
             .workers
             .get_mut(worker_id)
             .ok_or_else(|| Error::new("unknown worker"))?;
-        worker.jobs += 1;
+        if let hash_map::Entry::Vacant(e) = worker.tasks.entry(task_id) {
+            e.insert(description);
+        } else {
+            return Err(Error::new("duplicate task_id"));
+        }
         Ok(())
     }
 
@@ -517,6 +527,8 @@ impl AllocatorActor {
 #[derive(Serialize, Deserialize)]
 pub struct ChooseWorker {
     pub candidates: Vec<WorkerId>,
+    pub task_id: GlobalId,
+    pub description: String,
 }
 
 /// Reply when a worker is successfully chosen.
@@ -547,8 +559,8 @@ impl AllocatorActor {
         // selection.
         #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
         struct CandidateWorker {
-            gpu_jobs: u32,
-            machine_jobs: u32,
+            gpu_tasks: usize,
+            machine_tasks: usize,
             id: WorkerId,
         }
 
@@ -558,17 +570,16 @@ impl AllocatorActor {
             .map(|c| {
                 Ok(CandidateWorker {
                     id: c,
-                    gpu_jobs: self.get_worker_num_jobs(&c, HardwareFilter::Gpu)?,
-                    machine_jobs: self.get_worker_num_jobs(&c, HardwareFilter::Cpu)?,
+                    gpu_tasks: self.get_worker_num_tasks(&c, HardwareFilter::Gpu)?,
+                    machine_tasks: self.get_worker_num_tasks(&c, HardwareFilter::Cpu)?,
                 })
             })
             .collect::<Result<Vec<_>>>()?;
         workers.sort();
         let chosen_worker = workers[0].id;
 
-        // Count that this worker has a new job now.
-        self.increase_worker_num_jobs(&chosen_worker)
-            .expect("chosen_worker should be valid");
+        // Count that this worker has a new task now.
+        self.add_worker_task(&chosen_worker, msg.task_id, msg.description)?;
 
         Ok(ChooseWorkerReply {
             worker_id: chosen_worker,
@@ -609,6 +620,7 @@ impl Message<AllocateHardware> for AllocatorActor {
 #[derive(Serialize, Deserialize)]
 pub struct DeallocateHardware {
     pub worker_id: WorkerId,
+    pub task_id: GlobalId,
     pub hardware_reservations: Vec<HardwareReservation>,
 }
 
@@ -631,7 +643,12 @@ impl AllocatorActor {
             .workers
             .get_mut(&worker_id)
             .ok_or_else(|| Error::new("unknown worker {worker_id}"))?;
-        worker.jobs = worker.jobs.saturating_sub(1);
+        if worker.tasks.remove(&msg.task_id).is_none() {
+            return Err(Error::new(format!(
+                "worker not running task: {:?}",
+                msg.task_id
+            )));
+        }
 
         for res in msg.hardware_reservations {
             match res {
@@ -751,7 +768,7 @@ impl AllocatorActor {
             // Remove any pending requests from this worker
             self.pending.retain(|r| r.request.worker_id != worker_id);
 
-            // Return all tokens for any pending jobs
+            // Return all tokens for any pending tasks
             for (uuid, tokens) in worker.used_gpu_tokens {
                 let gpu = self.gpus.get_mut(&uuid).expect("all worker GPUs exist");
                 gpu.free_tokens += tokens;
@@ -768,7 +785,7 @@ impl AllocatorActor {
             }
         }
 
-        // Now that potentially some tokens are returned, might be able to schedule some jobs
+        // Now that potentially some tokens are returned, might be able to schedule some tasks
         self.maybe_allocate_many();
     }
 
@@ -778,9 +795,52 @@ impl AllocatorActor {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct GetStatus;
+
+#[derive(Serialize, Deserialize)]
+pub struct GetStatusReply {
+    pub workers: BTreeMap<String, Vec<String>>,
+}
+
+impl Message<GetStatus> for AllocatorActor {
+    type Reply = DelegatedReply<Result<GetStatusReply>>;
+
+    async fn handle(
+        &mut self,
+        _msg: GetStatus,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        ctx.reply(self.get_status())
+    }
+}
+
+impl AllocatorActor {
+    fn get_status(&mut self) -> Result<GetStatusReply> {
+        Ok(GetStatusReply {
+            workers: self
+                .workers
+                .iter()
+                .map(|(worker_id, worker)| {
+                    let key = format!(
+                        "{}{worker_id}",
+                        worker
+                            .remote_address
+                            .map(|a| format!("{a}:"))
+                            .unwrap_or_default(),
+                    );
+                    let value = worker.tasks.values().cloned().collect();
+                    (key, value)
+                })
+                .collect(),
+        })
+    }
+}
+
 #[cfg(test)]
 mod allocation_tests {
     use super::*;
+    use crate::actors::protocol::JobId;
 
     fn test_gpu_id(n: u32) -> GpuUuid {
         assert!(n < 10);
@@ -794,6 +854,13 @@ mod allocation_tests {
         format!("00000000-0000-0000-0000-00000000000{n}")
             .parse()
             .unwrap()
+    }
+
+    fn test_task_id(n: u64) -> GlobalId {
+        GlobalId {
+            job_id: JobId::new_v4(),
+            task_id: n,
+        }
     }
 
     struct Fixture {
@@ -833,6 +900,8 @@ mod allocation_tests {
             self.alloc_ref
                 .ask(ChooseWorker {
                     candidates: self.workers.clone(),
+                    task_id: test_task_id(1),
+                    description: "test task".into(),
                 })
                 .await
                 .unwrap()
@@ -880,6 +949,7 @@ mod allocation_tests {
             .alloc_ref
             .ask(DeallocateHardware {
                 worker_id,
+                task_id: test_task_id(1),
                 hardware_reservations,
             })
             .await
@@ -1023,7 +1093,7 @@ routing_actor_impl!(
     DelegatedReply<Result<()>>
 );
 
-type RemoteAllocatorActor = RemoteActor<AllocatorActor>;
+pub type RemoteAllocatorActor = RemoteActor<AllocatorActor>;
 
 remote_actor_ask!(
     RemoteActor<AllocatorActor>,
@@ -1053,6 +1123,12 @@ remote_actor_ask!(
     RemoteActor<AllocatorActor>,
     RegisterManager,
     Result<()>,
+    RemoteAllocatorRequest
+);
+remote_actor_ask!(
+    RemoteActor<AllocatorActor>,
+    GetStatus,
+    Result<GetStatusReply>,
     RemoteAllocatorRequest
 );
 

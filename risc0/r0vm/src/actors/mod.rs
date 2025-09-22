@@ -264,6 +264,19 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
     result
 }
 
+#[tokio::main]
+pub(crate) async fn monitor_main(addr: SocketAddr) -> Result<(), Box<dyn StdError>> {
+    let remote_allocator =
+        kameo::spawn(allocator::RemoteAllocatorActor::new(addr, "RemoteAllocatorActor").await?);
+
+    loop {
+        let reply = remote_allocator.ask(allocator::GetStatus).await?;
+        println!("{}", serde_json::to_string_pretty(&reply)?);
+
+        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+    }
+}
+
 struct TempConfig {
     file: NamedTempFile,
 }
@@ -890,6 +903,7 @@ enum RemoteAllocatorRequest {
     AllocateHardware(allocator::AllocateHardware),
     DeallocateHardware(allocator::DeallocateHardware),
     RegisterManager(allocator::RegisterManager),
+    GetStatus(allocator::GetStatus),
 }
 
 impl DispatchRpcMessage<AllocatorActor> for RemoteAllocatorRequest {
@@ -917,6 +931,7 @@ impl DispatchRpcMessage<AllocatorActor> for RemoteAllocatorRequest {
                 msg.remote_address = Some(remote_address);
                 ops.ask(receiver, msg).await;
             }
+            RemoteAllocatorRequest::GetStatus(msg) => ops.ask(receiver, msg).await,
         }
     }
 }

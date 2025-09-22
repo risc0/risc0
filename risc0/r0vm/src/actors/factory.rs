@@ -121,6 +121,8 @@ impl FactoryActor {
                     .allocator
                     .ask(ChooseWorker {
                         candidates: workers.iter().map(|w| w.worker_id).collect(),
+                        task_id: msg.header.global_id,
+                        description: format!("{:?}", &msg.header.task_kind),
                     })
                     .await
                     .unwrap();

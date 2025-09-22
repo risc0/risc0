@@ -110,6 +110,9 @@ struct Mode {
     rpc: bool,
 
     #[arg(long)]
+    actor_monitor: Option<SocketAddr>,
+
+    #[arg(long)]
     port: Option<u16>,
 
     /// The ELF to execute
@@ -156,6 +159,11 @@ pub fn main() {
 
     if args.mode.rpc {
         self::actors::rpc_main(args.num_gpus).unwrap();
+        return;
+    }
+
+    if let Some(addr) = args.mode.actor_monitor {
+        self::actors::monitor_main(addr).unwrap();
         return;
     }
 
