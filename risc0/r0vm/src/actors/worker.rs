@@ -83,10 +83,27 @@ const GPU_QUEUE_DEPTH: usize = 2;
 #[cfg(feature = "cuda")]
 fn get_gpus_from_nvml() -> Result<Vec<GpuSpec>> {
     use nvml_wrapper::Nvml;
+    use std::collections::HashSet;
+
+    let visible_devices = std::env::var("CUDA_VISIBLE_DEVICES")
+        .ok()
+        .map(|v| {
+            v.split(",")
+                .map(|v| v.trim().parse())
+                .collect::<std::result::Result<HashSet<u32>, _>>()
+                .map_err(|_| anyhow::anyhow!("failed to parse CUDA_VISIBLE_DEVICES"))
+        })
+        .transpose()?;
 
     let mut gpus = vec![];
     let nvml = Nvml::init()?;
     for idx in 0..nvml.device_count()? {
+        if let Some(visible_devices) = &visible_devices
+            && !visible_devices.contains(&idx)
+        {
+            continue;
+        }
+
         let device = nvml.device_by_index(idx)?;
         gpus.push(GpuSpec {
             name: device.name()?,
