@@ -98,15 +98,14 @@ impl FactoryActor {
 
                 self.jobs.insert(job_id, msg.job);
 
-                let gpu_tokens = match msg.header.task_kind {
-                    TaskKind::Execute => GpuTokens::from(0),
-                    _ => {
-                        if self.require_gpu {
-                            GpuTokens::from(100)
-                        } else {
-                            GpuTokens::from(0)
-                        }
+                let gpu_tokens = if self.require_gpu {
+                    match msg.header.task_kind {
+                        TaskKind::Execute => GpuTokens::from(0),
+                        TaskKind::ProveSegment | TaskKind::ProveKeccak => GpuTokens::from(100),
+                        _ => GpuTokens::from(50),
                     }
+                } else {
+                    GpuTokens::from(0)
                 };
 
                 let task = TaskMsg {
