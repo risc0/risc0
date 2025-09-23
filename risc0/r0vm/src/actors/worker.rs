@@ -130,7 +130,10 @@ impl WorkerActor {
         let gpus = if delay.is_some() {
             fake_gpus()
         } else {
-            get_gpus_from_nvml()?
+            get_gpus_from_nvml().unwrap_or_else(|err| {
+                tracing::error!("Got error when searching for GPUs: {err}");
+                vec![]
+            })
         };
         let cpu = CpuSpec {
             cores: CpuCores::from(usize::from(std::thread::available_parallelism()?) as u64),
