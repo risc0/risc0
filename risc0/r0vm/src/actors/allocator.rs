@@ -822,12 +822,28 @@ impl AllocatorActor {
                 .workers
                 .iter()
                 .map(|(worker_id, worker)| {
+                    let worker_id = worker_id.to_string();
+                    let short_id = &worker_id[worker_id.len() - 5..];
+                    let hardware = worker
+                        .hardware
+                        .iter()
+                        .filter_map(|h| match h {
+                            HardwareResource::Gpu(gpu) => {
+                                let gpu_id = gpu.uuid.to_string();
+                                let gpu_short = &gpu_id[gpu_id.len() - 5..];
+                                Some(format!(":GPU-{gpu_short}"))
+                            }
+                            _ => None,
+                        })
+                        .collect::<Vec<_>>()
+                        .join("");
+
                     let key = format!(
-                        "{}{worker_id}",
+                        "{}:WID-{short_id}{hardware}",
                         worker
                             .remote_address
-                            .map(|a| format!("{a}:"))
-                            .unwrap_or_default(),
+                            .map(|a| a.to_string())
+                            .unwrap_or("localhost".into()),
                     );
                     let value = worker.tasks.values().cloned().collect();
                     (key, value)
