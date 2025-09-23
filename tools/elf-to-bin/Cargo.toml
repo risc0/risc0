@@ -13,5 +13,6 @@ path = "src/main.rs"
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
 risc0-binfmt = { path = "../../risc0/binfmt" }
+bincode = "1.3"
 
 

@@ -13,16 +13,18 @@
 // limitations under the License.
 
 use clap::Parser;
-use risc0_binfmt::ProgramBinary;
+use risc0_binfmt::{MemoryImage, Program, ProgramBinary};
 use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(name = "elf-to-bin")]
-#[command(about = "A simple tool to combine a guest ELF with a kernel ELF into a .bin file")]
+#[command(
+    about = "A simple tool to combine a guest ELF with a kernel ELF into a .bin file, or create a MemoryImage from just a kernel ELF"
+)]
 struct Args {
-    /// Path to the guest ELF file
+    /// Path to the guest ELF file (optional)
     #[arg(short, long)]
-    guest_elf: PathBuf,
+    guest_elf: Option<PathBuf>,
 
     /// Path to the kernel ELF file
     #[arg(short, long)]
@@ -36,10 +38,6 @@ struct Args {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
-    // Read the guest ELF
-    let guest_elf = std::fs::read(&args.guest_elf)
-        .map_err(|e| format!("Failed to read guest ELF from {:?}: {}", args.guest_elf, e))?;
-
     // Read the kernel ELF
     let kernel_elf = std::fs::read(&args.kernel_elf).map_err(|e| {
         format!(
@@ -48,18 +46,40 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
     })?;
 
-    // Create the combined binary
-    let binary = ProgramBinary::new(&guest_elf, &kernel_elf);
-    let bin_data = binary.encode();
+    let bin_data = if let Some(guest_elf_path) = &args.guest_elf {
+        // Read the guest ELF
+        let guest_elf = std::fs::read(guest_elf_path)
+            .map_err(|e| format!("Failed to read guest ELF from {:?}: {}", guest_elf_path, e))?;
+
+        // Create the combined binary
+        let binary = ProgramBinary::new(&guest_elf, &kernel_elf);
+        binary.encode()
+    } else {
+        // Create MemoryImage from kernel ELF only
+        let kernel_program = Program::load_elf(&kernel_elf, u32::MAX)
+            .map_err(|e| format!("Failed to load kernel ELF: {}", e))?;
+        let memory_image = MemoryImage::new_kernel(kernel_program);
+
+        // Serialize the MemoryImage
+        bincode::serialize(&memory_image)
+            .map_err(|e| format!("Failed to serialize MemoryImage: {}", e))?
+    };
 
     // Write the output file
     std::fs::write(&args.output, &bin_data)
         .map_err(|e| format!("Failed to write output to {:?}: {}", args.output, e))?;
 
-    println!(
-        "Successfully created {:?} from guest ELF {:?} and kernel ELF {:?}",
-        args.output, args.guest_elf, args.kernel_elf
-    );
+    if let Some(guest_elf_path) = &args.guest_elf {
+        println!(
+            "Successfully created {:?} from guest ELF {:?} and kernel ELF {:?}",
+            args.output, guest_elf_path, args.kernel_elf
+        );
+    } else {
+        println!(
+            "Successfully created {:?} from kernel ELF {:?} (MemoryImage)",
+            args.output, args.kernel_elf
+        );
+    }
     println!("Output size: {} bytes", bin_data.len());
 
     Ok(())
