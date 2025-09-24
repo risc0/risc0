@@ -113,6 +113,7 @@ extern InstOutputBaseStruct exec_Misc1(ExecContext& ctx,NondetRegStruct arg0, In
 extern MiscOutputStruct exec_OpBGE(ExecContext& ctx,MiscInputStruct arg0, BoundLayout<OpBGELayout> layout1)  ;
 extern MiscOutputStruct exec_OpBLTU(ExecContext& ctx,MiscInputStruct arg0, BoundLayout<OpBLTULayout> layout1)  ;
 extern MiscOutputStruct exec_OpBGEU(ExecContext& ctx,MiscInputStruct arg0, BoundLayout<OpBGEULayout> layout1)  ;
+extern MiscOutputStruct exec_OpJALR(ExecContext& ctx,MiscInputStruct arg0, BoundLayout<OpJALRLayout> layout1)  ;
 extern InstOutputBaseStruct exec_Misc2(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<Misc2Layout> layout2)  ;
 extern MulInputStruct exec_MulInput(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<MulInputLayout> layout2)  ;
 extern DoMulStruct exec_DoMul(ExecContext& ctx,ValU32Struct arg0, ValU32Struct arg1_0, Val arg2_0, Val arg3, BoundLayout<DoMulLayout> layout4)  ;

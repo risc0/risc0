@@ -343,6 +343,9 @@ extern __device__ MiscOutputStruct exec_OpBLTU(ExecContext& ctx,
 extern __device__ MiscOutputStruct exec_OpBGEU(ExecContext& ctx,
                                                MiscInputStruct arg0,
                                                BoundLayout<OpBGEULayout> layout1);
+extern __device__ MiscOutputStruct exec_OpJALR(ExecContext& ctx,
+                                               MiscInputStruct arg0,
+                                               BoundLayout<OpJALRLayout> layout1);
 extern __device__ InstOutputBaseStruct exec_Misc2(ExecContext& ctx,
                                                   NondetRegStruct arg0,
                                                   InstInputStruct arg1_0,

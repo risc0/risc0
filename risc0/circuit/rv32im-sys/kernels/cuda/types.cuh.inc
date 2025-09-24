@@ -421,12 +421,16 @@ struct Misc2MiscOutputArm3Layout {
   ArgU16Layout _extra3;
   ArgU16Layout _extra4;
 };
+struct OpJALRLayout {
+  NondetRegLayout lsb;
+  NondetU16RegLayout half;
+};
 struct Misc2MiscOutputArm4Layout {
+  OpJALRLayout _super;
   ArgU16Layout _extra0;
   ArgU16Layout _extra1;
   ArgU16Layout _extra2;
   ArgU16Layout _extra3;
-  ArgU16Layout _extra4;
 };
 struct Misc2MiscOutputArm5Layout {
   ArgU16Layout _extra0;
