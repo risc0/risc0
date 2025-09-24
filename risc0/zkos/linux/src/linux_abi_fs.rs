@@ -56,6 +56,7 @@ pub static mut FD_TABLE: [FileDescriptor; 256] = [FileDescriptor {
 // Linux dirent64 structure
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 pub struct LinuxDirent64 {
     d_ino: u64,      // inode number
     d_off: i64,      // offset to next record
@@ -277,6 +278,325 @@ pub fn sys_fanotify_mark(
     Err(Err::NoSys)
 }
 
+pub fn sys_fchdir(_fd: u32) -> Result<u32, Err> {
+    let msg = b"sys_fchdir not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_fchmod(_fd: u32, _mode: u32) -> Result<u32, Err> {
+    let msg = b"sys_fchmod not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_fchmodat(_dfd: u32, _filename: u32, _mode: u32, _flag: u32) -> Result<u32, Err> {
+    let msg = b"sys_fchmodat not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_fchmodat2(_dfd: u32, _filename: u32, _mode: u32, _flag: u32) -> Result<u32, Err> {
+    let msg = b"sys_fchmodat2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_fchown(_fd: u32, _user: u32, _group: u32) -> Result<u32, Err> {
+    let msg = b"sys_fchown not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_fchownat(
+    _dfd: u32,
+    _filename: u32,
+    _user: u32,
+    _group: u32,
+    _flag: u32,
+) -> Result<u32, Err> {
+    let msg = b"sys_fchownat not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_fdatasync(_fd: u32) -> Result<u32, Err> {
+    let msg = b"sys_fdatasync not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_fgetxattr(_fd: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_fgetxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_file_getattr(_dfd: u32, _filename: u32, _mask: u32) -> Result<u32, Err> {
+    let msg = b"sys_file_getattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_file_setattr(_dfd: u32, _filename: u32, _mask: u32) -> Result<u32, Err> {
+    let msg = b"sys_file_setattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_flistxattr(_fd: u32, _list: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_flistxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_flock(_fd: u32, _cmd: u32) -> Result<u32, Err> {
+    let msg = b"sys_flock not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_fremovexattr(_fd: u32, _name: u32) -> Result<u32, Err> {
+    let msg = b"sys_fremovexattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_ftruncate64(_fd: u32, _length: u32) -> Result<u32, Err> {
+    let msg = b"sys_ftruncate64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_fsync(_fd: u32) -> Result<u32, Err> {
+    let msg = b"sys_fsync not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_fsetxattr(
+    _fd: u32,
+    _name: u32,
+    _value: u32,
+    _size: u32,
+    _flags: u32,
+) -> Result<u32, Err> {
+    let msg = b"sys_fsetxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_getcwd(_buf: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_getcwd not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_getxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_getxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_getxattrat(_dfd: u32, _filename: u32, _name: u32, _value: u32) -> Result<u32, Err> {
+    let msg = b"sys_getxattrat not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_linkat(
+    _olddirfd: u32,
+    _oldpath: u32,
+    _newdirfd: u32,
+    _newpath: u32,
+    _flags: u32,
+) -> Result<u32, Err> {
+    let msg = b"sys_linkat not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_listxattr(_pathname: u32, _list: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_listxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_listxattrat(_dfd: u32, _filename: u32, _list: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_listxattrat not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_llistxattr(_pathname: u32, _list: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_llistxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_llseek(_fd: u32, _offset_high: u32, _offset_low: u32) -> Result<u32, Err> {
+    let msg = b"sys_llseek not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_lremovexattr(_pathname: u32, _name: u32) -> Result<u32, Err> {
+    let msg = b"sys_lremovexattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_lsetxattr(
+    _pathname: u32,
+    _name: u32,
+    _value: u32,
+    _size: u32,
+    _flags: u32,
+) -> Result<u32, Err> {
+    let msg = b"sys_lsetxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
+    let msg = b"sys_mkdirat not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u32, Err> {
+    let msg = b"sys_mknodat not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_openat2(_dfd: u32, _filename: u32, _how: u32) -> Result<u32, Err> {
+    // Extract and print the filename
+    let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
+    let null_pos = filename
+        .iter()
+        .position(|&b| b == 0)
+        .unwrap_or(filename.len());
+    let filename = &filename[..null_pos];
+
+    // Convert the filename to a UTF-8 string
+    let filename_str = match str::from_utf8(filename) {
+        Ok(s) => s,
+        Err(_) => {
+            kprint!("sys_openat2: invalid UTF-8 filename");
+            return Err(Err::NoSys);
+        }
+    };
+
+    kprint!(
+        "sys_openat2: dfd={}, filename='{}', how=0x{:x}",
+        _dfd,
+        filename_str,
+        _how
+    );
+
+    // TODO: Implement actual file opening with 9P operations
+    // For now, just return not implemented
+    let msg = b"sys_openat2 not fully implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_preadv(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32, Err> {
+    let msg = b"sys_preadv not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_preadv2(
+    _fd: u32,
+    _vec: u32,
+    _vlen: u32,
+    _pos_low: u32,
+    _pos_high: u32,
+) -> Result<u32, Err> {
+    let msg = b"sys_preadv2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_pwrite64(_fd: u32, _buf: u32, _count: u32, _pos: u32) -> Result<u32, Err> {
+    let msg = b"sys_pwrite64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_pwritev(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32, Err> {
+    let msg = b"sys_pwritev not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_pwritev2(
+    _fd: u32,
+    _vec: u32,
+    _vlen: u32,
+    _pos_low: u32,
+    _pos_high: u32,
+) -> Result<u32, Err> {
+    let msg = b"sys_pwritev2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
+    let msg = b"sys_readv not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_ioctl(fd: u32, _cmd: u32, arg: u32) -> Result<u32, Err> {
+    // For now, sys_ioctl is not implemented. Log a message for debugging.
+    let msg = b"sys_ioctl not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    let _fd = fd as i32;
+    let _arg = arg as *const u8;
+    // let msg = str_format!(str256, "sys_ioctl({fd}, {cmd}, 0x{arg:08x})");
+    // print(&msg);
+    Ok(0)
+}
+
+pub fn sys_pread64(_fd: u32, _buf: u32, _count: u32, _pos: u32) -> Result<u32, Err> {
+    let msg = b"sys_pread64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_readahead(_fd: u32, _offset: u32, _count: u32) -> Result<u32, Err> {
+    let msg = b"sys_readahead not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_readlinkat(_dfd: u32, _pathname: u32, _buf: u32) -> Result<u32, Err> {
+    let msg = b"sys_readlinkat not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_removexattr(_pathname: u32, _name: u32) -> Result<u32, Err> {
+    let msg = b"sys_removexattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_removexattrat(_dfd: u32, _filename: u32, _name: u32) -> Result<u32, Err> {
+    let msg = b"sys_removexattrat not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_lgetxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
+    let msg = b"sys_lgetxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
 pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
     if _cmd == F_SETFD && _arg & FD_CLOEXEC == FD_CLOEXEC {
         // mock and return ok
@@ -427,7 +747,7 @@ pub fn sys_getdents64(fd: u32, dirp: u32, count: u32) -> Result<u32, Err> {
                     *d_reclen_ptr = reclen;
 
                     // d_type at offset 18
-                    let d_type_ptr = user_ptr.add(18) as *mut u8;
+                    let d_type_ptr = user_ptr.add(18);
                     *d_type_ptr = d_type;
 
                     // Copy name (null-terminated) after the structure
