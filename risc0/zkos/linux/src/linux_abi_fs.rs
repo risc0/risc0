@@ -597,6 +597,54 @@ pub fn sys_lgetxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Res
     Err(Err::NoSys)
 }
 
+pub fn sys_cachestat(_fd: u32, _cstat: u32, _cstat_size: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_cachestat not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_renameat2(
+    _olddirfd: u32,
+    _oldpath: u32,
+    _newdirfd: u32,
+    _newpath: u32,
+    _flags: u32,
+) -> Result<u32, Err> {
+    let msg = b"sys_renameat2 not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_sendfile64(_out_fd: u32, _in_fd: u32, _offset: u32, _count: u32) -> Result<u32, Err> {
+    let msg = b"sys_sendfile64 not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_setxattr(
+    _pathname: u32,
+    _name: u32,
+    _value: u32,
+    _size: u32,
+    _flags: u32,
+) -> Result<u32, Err> {
+    let msg = b"sys_setxattr not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
+pub fn sys_setxattrat(
+    _dfd: u32,
+    _filename: u32,
+    _name: u32,
+    _value: u32,
+    _size: u32,
+) -> Result<u32, Err> {
+    let msg = b"sys_setxattrat not implemented";
+    host_log(msg.as_ptr(), msg.len());
+    Err(Err::NoSys)
+}
+
 pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
     if _cmd == F_SETFD && _arg & FD_CLOEXEC == FD_CLOEXEC {
         // mock and return ok

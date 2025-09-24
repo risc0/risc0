@@ -35,15 +35,16 @@ use crate::linux_abi_privileged::{
 
 // Import filesystem syscalls from the filesystem module
 use crate::linux_abi_fs::{
-    sys_chdir, sys_close, sys_dup, sys_dup3, sys_faccessat, sys_faccessat2, sys_fadvise64_64,
-    sys_fallocate, sys_fanotify_init, sys_fanotify_mark, sys_fchdir, sys_fchmod, sys_fchmodat,
-    sys_fchmodat2, sys_fchown, sys_fchownat, sys_fcntl64, sys_fdatasync, sys_fgetxattr,
-    sys_file_getattr, sys_file_setattr, sys_flistxattr, sys_flock, sys_fremovexattr, sys_fsetxattr,
-    sys_fsync, sys_ftruncate64, sys_getcwd, sys_getdents64, sys_getxattr, sys_getxattrat,
-    sys_ioctl, sys_lgetxattr, sys_linkat, sys_listxattr, sys_listxattrat, sys_llistxattr,
-    sys_llseek, sys_lremovexattr, sys_lsetxattr, sys_mkdirat, sys_mknodat, sys_openat, sys_openat2,
-    sys_pread64, sys_preadv, sys_preadv2, sys_pwrite64, sys_pwritev, sys_pwritev2, sys_read,
-    sys_readahead, sys_readlinkat, sys_readv, sys_removexattr, sys_removexattrat, sys_write,
+    sys_cachestat, sys_chdir, sys_close, sys_dup, sys_dup3, sys_faccessat, sys_faccessat2,
+    sys_fadvise64_64, sys_fallocate, sys_fanotify_init, sys_fanotify_mark, sys_fchdir, sys_fchmod,
+    sys_fchmodat, sys_fchmodat2, sys_fchown, sys_fchownat, sys_fcntl64, sys_fdatasync,
+    sys_fgetxattr, sys_file_getattr, sys_file_setattr, sys_flistxattr, sys_flock, sys_fremovexattr,
+    sys_fsetxattr, sys_fsync, sys_ftruncate64, sys_getcwd, sys_getdents64, sys_getxattr,
+    sys_getxattrat, sys_ioctl, sys_lgetxattr, sys_linkat, sys_listxattr, sys_listxattrat,
+    sys_llistxattr, sys_llseek, sys_lremovexattr, sys_lsetxattr, sys_mkdirat, sys_mknodat,
+    sys_openat, sys_openat2, sys_pread64, sys_preadv, sys_preadv2, sys_pwrite64, sys_pwritev,
+    sys_pwritev2, sys_read, sys_readahead, sys_readlinkat, sys_readv, sys_removexattr,
+    sys_removexattrat, sys_renameat2, sys_sendfile64, sys_setxattr, sys_setxattrat, sys_write,
     sys_writev,
 };
 
@@ -1196,12 +1197,6 @@ fn sys_rt_sigprocmask(_how: u32, nset: u32, oset: u32, _sigsetsize: u32) -> Resu
 
 // Stub implementations for all additional syscalls
 
-fn sys_cachestat(_fd: u32, _cstat: u32, _cstat_size: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_cachestat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_clock_getres_time64(_which_clock: u32, _tp: u32) -> Result<u32, Err> {
     let msg = b"sys_clock_getres_time64 not implemented";
     host_log(msg.as_ptr(), msg.len());
@@ -2071,18 +2066,6 @@ fn sys_remap_file_pages(
     Err(Err::NoSys)
 }
 
-fn sys_renameat2(
-    _olddirfd: u32,
-    _oldpath: u32,
-    _newdirfd: u32,
-    _newpath: u32,
-    _flags: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_renameat2 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_request_key(
     _type: u32,
     _description: u32,
@@ -2266,12 +2249,6 @@ fn sys_semtimedop_time64(_semid: u32, _sops: u32, _nsops: u32, _timeout: u32) ->
     Err(Err::NoSys)
 }
 
-fn sys_sendfile64(_out_fd: u32, _in_fd: u32, _offset: u32, _count: u32) -> Result<u32, Err> {
-    let msg = b"sys_sendfile64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_set_mempolicy(
     _mode: u32,
     _nmask: u32,
@@ -2388,30 +2365,6 @@ fn sys_setsid() -> Result<u32, Err> {
 
 fn sys_setuid(_uid: u32) -> Result<u32, Err> {
     let msg = b"sys_setuid not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_setxattr(
-    _pathname: u32,
-    _name: u32,
-    _value: u32,
-    _size: u32,
-    _flags: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_setxattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_setxattrat(
-    _dfd: u32,
-    _filename: u32,
-    _name: u32,
-    _value: u32,
-    _size: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_setxattrat not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
