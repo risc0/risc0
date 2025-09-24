@@ -21,9 +21,9 @@ use std::{
 const MIN_PO2: usize = 12;
 const MAX_PO2: usize = 23;
 
-const PLATFORM_CPU: Platform = Platform::new("cpu", "cpp", "hal/cpp");
+const PLATFORM_CPU: Platform = Platform::new("cpu", "cpp", "hal/cpu");
 const PLATFORM_CUDA: Platform = Platform::new("cuda", "cu", "hal/cuda/kernels");
-const PLATFORM_METAL: Platform = Platform::new("metal", "metal", "hal/metal/kernels");
+// const PLATFORM_METAL: Platform = Platform::new("metal", "metal", "hal/metal/kernels");
 
 fn main() {
     let output = "risc0_rv32im_m3";
@@ -41,9 +41,11 @@ fn main() {
     rerun_if_changed("cxx/zkp");
     rerun_if_changed("vendor");
 
-    let platform = if is_metal() {
-        PLATFORM_METAL
-    } else if is_cuda() {
+    let platform =
+    // if is_metal() {
+    //     PLATFORM_METAL
+    // } else
+    if is_cuda() {
         PLATFORM_CUDA
     } else {
         PLATFORM_CPU
@@ -76,11 +78,12 @@ fn main() {
         .files(glob_paths("cxx/zkp/*.cpp"))
         .files(generated_files);
 
-    if is_metal() {
-        build
-            .file("cxx/hal/metal/hal.cpp")
-            .files(glob_paths("cxx/hal/metal/kernel/*.metal"));
-    } else if is_cuda() {
+    // if is_metal() {
+    //     build
+    //         .file("cxx/hal/metal/hal.cpp")
+    //         .files(glob_paths("cxx/hal/metal/kernel/*.metal"));
+    // } else
+    if is_cuda() {
         build
             .cuda(true)
             .cudart("static")
@@ -182,6 +185,6 @@ fn is_cuda() -> bool {
     env::var("CARGO_FEATURE_CUDA").is_ok()
 }
 
-fn is_metal() -> bool {
-    env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios")
-}
+// fn is_metal() -> bool {
+//     env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios")
+// }
