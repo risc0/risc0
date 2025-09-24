@@ -194,6 +194,17 @@ fn check_image_id() {
 }
 
 #[test_log::test]
+fn p2_basic() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::Poseidon2Basic)
+        .unwrap()
+        .build()
+        .unwrap();
+    let receipt = prove_elf(env, MULTI_TEST_ELF).unwrap();
+    receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+#[test_log::test]
 fn sha_basics() {
     let run_sha = |msg: &str| -> String {
         let env = ExecutorEnv::builder()

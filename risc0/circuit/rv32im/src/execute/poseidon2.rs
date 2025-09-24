@@ -58,9 +58,9 @@ impl Poseidon2State {
         let is_elem = bits_count & PFLAG_IS_ELEM;
         let check_out = bits_count & PFLAG_CHECK_OUT;
         Self {
-            state_addr,
-            buf_in_addr,
-            buf_out_addr,
+            state_addr: state_addr / WORD_SIZE as u32,
+            buf_in_addr: buf_in_addr / WORD_SIZE as u32,
+            buf_out_addr: buf_out_addr / WORD_SIZE as u32,
             has_state: if state_addr == 0 { 0 } else { 1 },
             is_elem: if is_elem == 0 { 0 } else { 1 },
             check_out: if check_out == 0 { 0 } else { 1 },
