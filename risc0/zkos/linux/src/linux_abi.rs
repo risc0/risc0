@@ -1,24 +1,20 @@
 use crate::{
     constants::{
         ASCII_TABLE_PTR, MEPC_PTR, PAGE_SIZE, REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5,
-        REG_A7, REG_SP, STATX_ATIME, STATX_BLOCKS, STATX_BTIME, STATX_CTIME, STATX_GID, STATX_INO,
-        STATX_MODE, STATX_MTIME, STATX_NLINK, STATX_SIZE, STATX_TYPE, STATX_UID, Statx,
-        StatxTimestamp, USER_HEAP_SIZE, USER_HEAP_START_ADDR, USER_HEAP_START_PTR,
+        REG_A7, REG_SP, USER_HEAP_SIZE, USER_HEAP_START_ADDR, USER_HEAP_START_PTR,
         USER_MEMORY_LENGTH, USER_MEMORY_START_PTR, USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR,
         USER_PHENT_SIZE, USER_STACK_PTR, USER_START_PTR,
     },
-    host_calls::{host_argv, host_log, host_terminate, host_write},
+    host_calls::{host_argv, host_log, host_terminate},
     kernel::{get_ureg, mret, print},
-    p9::{
-        P9Response, Qid, RattachMessage, RclunkMessage, ReadableMessage, RgetattrMessage,
-        RlcreateMessage, RlopenMessage, RreadMessage, RreaddirMessage, RreadlinkMessage,
-        RversionMessage, RwalkMessage, RwriteMessage, TattachMessage, TlcreateMessage,
-        TlopenMessage, TreadMessage, TreaddirMessage, TversionMessage, TwriteMessage, constants::*,
+    linux_abi_fs::{
+        attach_to_p9, get_p9_enabled, load_file_aligned_to_page_size, set_fd, set_p9_enabled,
+        sys_statx,
     },
 };
 use elf::{ElfBytes, abi::PT_INTERP, endian::LittleEndian, file::Class};
 
-use crate::kernel::{DEBUG_ENABLED, set_ureg};
+use crate::kernel::set_ureg;
 use no_std_strings::{str_format, str256};
 
 // Import socket syscalls from the socket module
@@ -37,54 +33,21 @@ use crate::linux_abi_privileged::{
     sys_swapon, sys_umount2, sys_vhangup,
 };
 
-// Linux dirent64 structure
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
-struct LinuxDirent64 {
-    d_ino: u64,      // inode number
-    d_off: i64,      // offset to next record
-    d_reclen: u16,   // length of this record
-    d_type: u8,      // file type
-    d_name: [u8; 1], // filename (variable length, but we use [u8; 1] for the struct)
-}
-
-// Directory entry types
-#[allow(dead_code)]
-const DT_UNKNOWN: u8 = 0;
-#[allow(dead_code)]
-const DT_FIFO: u8 = 1;
-#[allow(dead_code)]
-const DT_CHR: u8 = 2;
-const DT_DIR: u8 = 4;
-#[allow(dead_code)]
-const DT_BLK: u8 = 6;
-const DT_REG: u8 = 8;
-const DT_LNK: u8 = 10;
-#[allow(dead_code)]
-const DT_SOCK: u8 = 12;
+// Import filesystem syscalls from the filesystem module
+use crate::linux_abi_fs::{
+    sys_chdir, sys_close, sys_dup, sys_dup3, sys_faccessat, sys_faccessat2, sys_fadvise64_64,
+    sys_fallocate, sys_fanotify_init, sys_fanotify_mark, sys_fcntl64, sys_getdents64, sys_openat,
+    sys_read, sys_write, sys_writev,
+};
 
 static mut BRK: u32 = USER_HEAP_START_ADDR as u32;
-static mut ROOT_FID: u32 = 0;
-static mut CWD_FID: u32 = 0;
-
-#[derive(Copy, Clone)]
-struct FileDescriptor {
-    fid: u32,
-    cursor: u64,
-    #[allow(dead_code)]
-    is_dir: bool,
-}
-
-static mut FD_TABLE: [FileDescriptor; 256] = [FileDescriptor {
-    fid: 0,
-    cursor: 0,
-    is_dir: false,
-}; 256];
 
 #[cfg(target_arch = "riscv32")]
 use alloc::string::String;
 #[cfg(target_arch = "riscv32")]
 use alloc::string::ToString;
+#[cfg(target_arch = "riscv32")]
+use alloc::vec;
 #[cfg(target_arch = "riscv32")]
 use alloc::vec::Vec;
 
@@ -496,83 +459,32 @@ impl UserStack {
     }
 }
 
-pub const P9_ENABLED: bool = true;
+pub fn allocate_aligned_to_page_size(file_size: u64) -> *const u8 {
+    #[allow(static_mut_refs)]
+    let ptr = unsafe {
+        let layout = Layout::from_size_align(file_size as usize, PAGE_SIZE).unwrap_unchecked();
+        let ptr = HEAP.allocate(layout).unwrap().as_ptr();
+        if !ptr.is_null() {
+            ptr.write_bytes(0, layout.size());
+        }
+        ptr
+    };
+    ptr
+}
 
 pub fn start_linux_binary(argc: u32) -> ! {
-    unsafe {
-        set_fd(0, 0xFFFF_FFFE);
-        set_fd(1, 0xFFFF_FFFE);
-        set_fd(2, 0xFFFF_FFFE);
-    }
-    if P9_ENABLED {
-        let msg = TversionMessage::default_9p2000l(1);
-
-        // Send the message via host_write to file descriptor 1
-        match msg.send_tversion() {
-            Ok(bytes_written) => {
-                kprint!("Sent {} bytes", bytes_written);
-            }
-            Err(_e) => {
-                kprint!("Failed to send Tversion");
-            }
-        }
-        match RversionMessage::read_response() {
-            P9Response::Success(rversion) => {
-                kprint!("Successfully read Rversion: {:?}", rversion);
-                // Process the message
-            }
-            P9Response::Error(rlerror) => {
-                kpanic!(
-                    "Received Rlerror for Rversion: tag={}, ecode={}",
-                    rlerror.tag,
-                    rlerror.ecode
-                );
-            }
-        }
-        // now we attach with Tattach, P9_NOFID as afid, to /risc0-root
-        let tattach = TattachMessage::new(
-            0,
-            0,
-            crate::p9::constants::P9_NOFID,
-            "root".to_string(),
-            "/risc0-root".to_string(),
-        );
-        match tattach.send_tattach() {
-            Ok(bytes_written) => {
-                kprint!("Sent {} bytes", bytes_written);
-            }
-            Err(e) => {
-                kpanic!("Failed to send Tattach: {:?}", e);
-            }
-        }
-        // and wait for Rattach
-        match RattachMessage::read_response() {
-            P9Response::Success(rattach) => {
-                kprint!("Received Rattach: {:?}", rattach);
-                unsafe {
-                    ROOT_FID = 0;
-                    CWD_FID = 0;
-                };
-            }
-            P9Response::Error(rlerror) => {
-                kpanic!(
-                    "Received Rlerror for Rattach: tag={}, ecode={}",
-                    rlerror.tag,
-                    rlerror.ecode
-                );
-            }
-        }
-    }
+    set_fd(0, 0xFFFF_FFFE);
+    set_fd(1, 0xFFFF_FFFE);
+    set_fd(2, 0xFFFF_FFFE);
 
     let mut stack = UserStack::new();
     stack.add_word(argc as usize);
-    let mut arg0 = None;
 
     // XXX we should review this code from a security perspective
     // Get each argument from host and add to stack
+    let mut argv = vec![];
     for i in 0..argc {
         let mut arg_buffer = [0u32; 256]; // 1024 bytes as u32 array for proper alignment
-        debug_print!("arg {i}");
         let arg_len = host_argv(i, arg_buffer.as_mut_ptr() as *mut u8, arg_buffer.len() * 4);
         // we want to make this string null-terminated, so we add 1 to the length
         let arg_len = arg_len + 1;
@@ -587,26 +499,28 @@ pub fn start_linux_binary(argc: u32) -> ! {
                 .position(|&b| b == 0)
                 .unwrap_or(arg_slice.len());
             let arg_str = &arg_slice[..nul_pos];
-            if i == 0 {
-                arg0 = Some(String::from_utf8(arg_str.to_vec()).unwrap());
-            }
-            match core::str::from_utf8(arg_str) {
-                Ok(s) => debug_print!("arg {i}: \"{s}\" ({arg_len}, null-terminated)"),
-                Err(_) => debug_print!(
-                    "arg {i}: <non-utf8> {:?} ({arg_len}, null-terminated)",
-                    arg_str
-                ),
-            }
-            stack.add_str(arg_slice);
-        } else {
-            // Fallback to empty string if something goes wrong
-            stack.add_str(b"");
+            argv.push(String::from_utf8(arg_str.to_vec()).unwrap());
         }
     }
+
+    if !argv.is_empty() {
+        if argv[0].starts_with("opts=p9") {
+            set_p9_enabled(true);
+        } else {
+            set_p9_enabled(false);
+        }
+        argv.remove(0);
+    }
+
+    if get_p9_enabled() {
+        attach_to_p9();
+    }
+
     let user_start_addr: usize = unsafe { USER_START_PTR.read_volatile() };
 
     if user_start_addr == 0 {
         // okay, so we should look for the path
+        let arg0 = argv.first();
         if let Some(arg0) = arg0 {
             // entire user memory is free cos ELF there
             let block: &[u8] =
@@ -617,7 +531,7 @@ pub fn start_linux_binary(argc: u32) -> ! {
             }
             let path = arg0;
             // let's first get the file size
-            let file = load_file_aligned_to_page_size(&path);
+            let file = load_file_aligned_to_page_size(path);
             let elf = ElfBytes::<LittleEndian>::minimal_parse(file).unwrap();
             kprint!("elf: {:?}", elf);
             // let's find if it's dynamic, the interpreter
@@ -700,6 +614,10 @@ pub fn start_linux_binary(argc: u32) -> ! {
             kpanic!("USER_START_PTR is 0, path: {}", path);
         }
     }
+    for arg in &argv {
+        stack.add_str(arg.as_bytes());
+    }
+
     stack.add_null();
 
     // env
@@ -746,52 +664,6 @@ pub fn start_linux_binary(argc: u32) -> ! {
         MEPC_PTR.write_volatile(user_start_addr);
     }
     mret()
-}
-
-fn load_file_aligned_to_page_size(path: &String) -> &[u8] {
-    let file_size = get_file_size(path, 0);
-    if let Ok(file_size) = file_size {
-        kprint!("elf_loader: file_size = {}", file_size);
-        #[allow(static_mut_refs)]
-        let ptr = unsafe {
-            let layout = Layout::from_size_align(file_size as usize, PAGE_SIZE).unwrap_unchecked();
-            let ptr = HEAP.allocate(layout).unwrap().as_ptr();
-            if !ptr.is_null() {
-                ptr.write_bytes(0, layout.size());
-            }
-            ptr
-        };
-        const O_RDONLY: u32 = 0;
-        let result = do_openat(-1i32 as u32, path, O_RDONLY, 0);
-
-        if let Ok(_fd) = result {
-            let mut file_ptr = ptr as u32;
-            let mut read_so_far = 0u64;
-
-            while read_so_far < file_size {
-                let read_this_much = if (file_size - read_so_far) > 128 {
-                    128
-                } else {
-                    file_size - read_so_far
-                };
-                kprint!("sys_read: read_this_much = {}", read_this_much);
-                let read_result = sys_read(_fd, file_ptr, read_this_much as u32);
-                if let Ok(read_count) = read_result {
-                    read_so_far += read_count as u64;
-                    file_ptr += read_count;
-                } else {
-                    kpanic!("Failed to read file: {}", path);
-                }
-            }
-            let _ = sys_close(_fd);
-            // turn ptr into a slice
-            unsafe { core::slice::from_raw_parts(ptr, file_size as usize) }
-        } else {
-            kpanic!("Failed to open path: {}", path);
-        }
-    } else {
-        kpanic!("Failed to get file size: {}", path);
-    }
 }
 
 pub fn handle_linux_syscall() -> ! {
@@ -1251,127 +1123,6 @@ fn sys_munmap(addr: u32, _len: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-/// https://man7.org/linux/man-pages/man2/read.2.html
-fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
-    // const HOST_ECALL_READ: u32 = 1;
-    // let msg = str_format!(str256, "sys_read({fd}, {buf:?}, {count})");
-    // print(&msg);
-    unsafe {
-        if FD_TABLE[_fd as usize].fid != 0 {
-            // read with Tread and Rread from the fid using 9p protocol and update .cursor in FD_TABLE
-            let tread = TreadMessage::new(
-                0,
-                FD_TABLE[_fd as usize].fid,
-                FD_TABLE[_fd as usize].cursor,
-                _count,
-            );
-            kprint!("sys_read: tread = {:?}", tread);
-            match tread.send_tread() {
-                Ok(bytes_written) => {
-                    kprint!("sys_read: bytes_written = {}", bytes_written);
-                }
-                Err(e) => {
-                    kprint!("sys_read: error = {:?}", e);
-                    return Err(Err::NoSys);
-                }
-            }
-            match RreadMessage::read_response() {
-                P9Response::Success(rread) => {
-                    kprint!("sys_read: rread = {:?}", rread);
-                    let user_ptr = _buf as *mut u8;
-                    let data = rread.data;
-                    core::ptr::copy_nonoverlapping(data.as_ptr(), user_ptr, rread.count as usize);
-                    FD_TABLE[_fd as usize].cursor += rread.count as u64;
-                    return Ok(rread.count);
-                }
-                P9Response::Error(rlerror) => {
-                    kprint!("sys_read 1: error = {:?}", rlerror);
-                    return Err(Err::NoSys);
-                }
-            }
-        }
-    }
-    let msg = b"sys_read not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-/// https://man7.org/linux/man-pages/man2/write.2.html
-fn sys_write(fd: u32, buf: u32, count: u32) -> Result<u32, Err> {
-    do_write(fd as i32, buf as *const u8, count as usize).map(|x| x as u32)
-}
-
-fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
-    if fd == 1 || fd == 2 {
-        host_write(fd as u32, buf, count);
-    } else {
-        unsafe {
-            if FD_TABLE[fd as usize].fid != 0 {
-                // write with Twrite and Rwrite to the fid using 9p protocol and update .cursor in FD_TABLE
-                let twrite = TwriteMessage::new(
-                    0,
-                    FD_TABLE[fd as usize].fid,
-                    FD_TABLE[fd as usize].cursor,
-                    core::slice::from_raw_parts(buf, count).to_vec(),
-                );
-                kprint!("do_write: twrite = {:?}", twrite);
-                match twrite.send_twrite() {
-                    Ok(bytes_written) => {
-                        kprint!("do_write: bytes_written = {}", bytes_written);
-                    }
-                    Err(e) => {
-                        kprint!("do_write: error = {:?}", e);
-                        return Err(Err::NoSys);
-                    }
-                }
-                match RwriteMessage::read_response() {
-                    P9Response::Success(rwrite) => {
-                        kprint!("do_write: rwrite = {:?}", rwrite);
-                        FD_TABLE[fd as usize].cursor += rwrite.count as u64;
-                        return Ok(rwrite.count as usize);
-                    }
-                    P9Response::Error(rlerror) => {
-                        kprint!("do_write: error = {:?}", rlerror);
-                        return Err(Err::NoSys);
-                    }
-                }
-            }
-        }
-        let msg = b"do_write for fd > 2 that are not FIDs not implemented";
-        host_log(msg.as_ptr(), msg.len());
-        return Err(Err::NoSys);
-    }
-
-    Ok(count)
-}
-
-#[repr(C)]
-struct IoVec {
-    iov_base: *mut u8,
-    iov_len: usize,
-}
-
-/// https://man7.org/linux/man-pages/man2/writev.2.html
-fn sys_writev(fd: u32, vec_ptr: u32, vlen: u32) -> Result<u32, Err> {
-    let fd = fd as i32;
-    let vec_ptr = vec_ptr as *const IoVec;
-    let vec = unsafe { core::slice::from_raw_parts(vec_ptr, vlen as usize) };
-    if fd > 2 {
-        // For file descriptors > 2 (not stdout/stderr), return not implemented for now.
-        let msg = b"sys_writev for fd > 2 not implemented";
-        host_log(msg.as_ptr(), msg.len());
-        return Err(Err::NoSys);
-    }
-    // let msg = str_format!(str256, "sys_writev({fd}, {vec_ptr:?}, {vlen})");
-    // print(&msg);
-
-    let mut total: usize = 0;
-    for iov in vec {
-        total += do_write(fd, iov.iov_base, iov.iov_len)?;
-    }
-    Ok(total as u32)
-}
-
 /// https://man7.org/linux/man-pages/man2/ioctl.2.html
 fn sys_ioctl(fd: u32, _cmd: u32, arg: u32) -> Result<u32, Err> {
     // For now, sys_ioctl is not implemented. Log a message for debugging.
@@ -1448,29 +1199,6 @@ fn sys_rt_sigprocmask(_how: u32, nset: u32, oset: u32, _sigsetsize: u32) -> Resu
 
 // Stub implementations for all additional syscalls
 
-fn sys_chdir(_filename: u32) -> Result<u32, Err> {
-    let msg = b"sys_chdir not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_close(_fd: u32) -> Result<u32, Err> {
-    kprint!("sys_close: fd = {}", _fd);
-    unsafe {
-        if FD_TABLE[_fd as usize].fid != 0xFFFF_FFFE && FD_TABLE[_fd as usize].fid != 0 {
-            clunk(FD_TABLE[_fd as usize].fid);
-            FD_TABLE[_fd as usize] = FileDescriptor {
-                fid: 0,
-                cursor: 0,
-                is_dir: false,
-            };
-            Ok(0)
-        } else {
-            Err(Err::NoSys)
-        }
-    }
-}
-
 fn sys_cachestat(_fd: u32, _cstat: u32, _cstat_size: u32, _flags: u32) -> Result<u32, Err> {
     let msg = b"sys_cachestat not implemented";
     host_log(msg.as_ptr(), msg.len());
@@ -1537,18 +1265,6 @@ fn sys_copy_file_range(
     Err(Err::NoSys)
 }
 
-fn sys_dup(_fd: u32) -> Result<u32, Err> {
-    let msg = b"sys_dup not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_dup3(_oldfd: u32, _newfd: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_dup3 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_epoll_create1(_flags: u32) -> Result<u32, Err> {
     let msg = b"sys_epoll_create1 not implemented";
     host_log(msg.as_ptr(), msg.len());
@@ -1603,48 +1319,6 @@ fn sys_execveat(
     Err(Err::NoSys)
 }
 
-fn sys_faccessat(_dfd: u32, _filename: u32, _mode: u32) -> Result<u32, Err> {
-    let msg = b"sys_faccessat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32) -> Result<u32, Err> {
-    let msg = b"sys_faccessat2 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_fadvise64_64(_fd: u32, _offset: u32, _len: u32, _advice: u32) -> Result<u32, Err> {
-    let msg = b"sys_fadvise64_64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_fallocate(_fd: u32, _mode: u32, _offset: u32, _len: u32) -> Result<u32, Err> {
-    let msg = b"sys_fallocate not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_fanotify_init(_flags: u32, _event_f_flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_fanotify_init not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_fanotify_mark(
-    _fanotify_fd: u32,
-    _flags: u32,
-    _mask: u32,
-    _dirfd: u32,
-    _pathname: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_fanotify_mark not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_fchdir(_fd: u32) -> Result<u32, Err> {
     let msg = b"sys_fchdir not implemented";
     host_log(msg.as_ptr(), msg.len());
@@ -1683,28 +1357,6 @@ fn sys_fchownat(
     _flag: u32,
 ) -> Result<u32, Err> {
     let msg = b"sys_fchownat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-#[allow(dead_code)]
-pub const F_DUPFD: u32 = 0; // Duplicate file descriptor.
-#[allow(dead_code)]
-pub const F_GETFD: u32 = 1; // Get file descriptor flags.
-pub const F_SETFD: u32 = 2; // Set file descriptor flags.
-#[allow(dead_code)]
-pub const F_GETFL: u32 = 3; // Get file status flags.
-#[allow(dead_code)]
-pub const F_SETFL: u32 = 4; // Set file status flags.
-pub const FD_CLOEXEC: u32 = 1; // Close on exec flag.
-
-fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
-    kprint!("sys_fcntl64: fd={}, cmd={}, arg={}", _fd, _cmd, _arg);
-    if _cmd == F_SETFD && _arg & FD_CLOEXEC == FD_CLOEXEC {
-        // mock and return ok
-        return Ok(0);
-    }
-    let msg = b"sys_fcntl64 not implemented for this cmd/arg";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -1875,253 +1527,6 @@ fn sys_getcwd(_buf: u32, _size: u32) -> Result<u32, Err> {
     let msg = b"sys_getcwd not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
-}
-
-fn sys_getdents64(fd: u32, dirp: u32, count: u32) -> Result<u32, Err> {
-    kprint!(
-        "sys_getdents64: fd={}, dirp={:08x}, count={}",
-        fd,
-        dirp,
-        count
-    );
-
-    let offset = unsafe { FD_TABLE[fd as usize].cursor };
-
-    // Get the FID from the FD table
-    let fid = unsafe { FD_TABLE[fd as usize].fid };
-    if fid == 0 {
-        kprint!("sys_getdents64: invalid fd {}", fd);
-        return Err(Err::Inval);
-    }
-
-    // XXX we will read one dir entry at a a time
-    let treaddir = TreaddirMessage::new(0, fid, offset, count);
-    match treaddir.send_treaddir() {
-        Ok(bytes_written) => {
-            kprint!("sys_getdents64: bytes_written = {}", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_getdents64: error = {:?}", e);
-            return Err(Err::NoSys);
-        }
-    }
-
-    // Read the Rreaddir response
-    match RreaddirMessage::read_response() {
-        P9Response::Success(rreaddir) => {
-            kprint!(
-                "sys_getdents64: received Rreaddir: count={}",
-                rreaddir.count
-            );
-
-            if rreaddir.count == 0 {
-                // No more entries
-                return Ok(0);
-            }
-
-            // Parse the directory entries and convert to Linux dirent64 format
-            let mut offset = 0;
-            let mut total_bytes = 0;
-            let mut user_offset = 0;
-
-            while offset < rreaddir.data.len() {
-                // Parse 9P directory entry: qid[13] offset[8] type[1] name[s]
-                if offset + 13 + 8 + 1 > rreaddir.data.len() {
-                    break;
-                }
-
-                // Read QID (13 bytes)
-                let qid_path = u64::from_le_bytes([
-                    rreaddir.data[offset],
-                    rreaddir.data[offset + 1],
-                    rreaddir.data[offset + 2],
-                    rreaddir.data[offset + 3],
-                    rreaddir.data[offset + 4],
-                    rreaddir.data[offset + 5],
-                    rreaddir.data[offset + 6],
-                    rreaddir.data[offset + 7],
-                ]);
-                let _qid_version = u32::from_le_bytes([
-                    rreaddir.data[offset + 8],
-                    rreaddir.data[offset + 9],
-                    rreaddir.data[offset + 10],
-                    rreaddir.data[offset + 11],
-                ]);
-                let _qid_type = rreaddir.data[offset + 12];
-                offset += 13;
-
-                // Read offset (8 bytes)
-                let entry_offset = u64::from_le_bytes([
-                    rreaddir.data[offset],
-                    rreaddir.data[offset + 1],
-                    rreaddir.data[offset + 2],
-                    rreaddir.data[offset + 3],
-                    rreaddir.data[offset + 4],
-                    rreaddir.data[offset + 5],
-                    rreaddir.data[offset + 6],
-                    rreaddir.data[offset + 7],
-                ]);
-                offset += 8;
-
-                // Read type (1 byte)
-                let entry_type = rreaddir.data[offset];
-                offset += 1;
-
-                // Read name length (2 bytes)
-                if offset + 2 > rreaddir.data.len() {
-                    break;
-                }
-                let name_len =
-                    u16::from_le_bytes([rreaddir.data[offset], rreaddir.data[offset + 1]]) as usize;
-                offset += 2;
-
-                // Read name
-                if offset + name_len > rreaddir.data.len() {
-                    break;
-                }
-                let name_bytes = &rreaddir.data[offset..offset + name_len];
-                offset += name_len;
-
-                // Convert 9P type to Linux DT_* type
-                let d_type = match entry_type {
-                    0 => DT_DIR, // Directory
-                    1 => DT_REG, // Regular file
-                    2 => DT_REG, // Append-only file
-                    3 => DT_REG, // Exclusive-use file
-                    4 => DT_REG, // Mounted file
-                    5 => DT_REG, // Authentication file
-                    6 => DT_REG, // Temporary file
-                    7 => DT_LNK, // Symbolic link
-                    _ => DT_UNKNOWN,
-                };
-
-                // Calculate record length (align to 8-byte boundary)
-                // C compiler adds padding to align d_name, so structure is 24 bytes
-                let c_struct_size = 24; // 8+8+2+1+5(padding) = 24 bytes in C
-                let name_len_aligned = (name_len + 7) & !7;
-                let reclen = (c_struct_size + name_len_aligned) as u16;
-
-                // Debug: verify structure size and reclen calculation
-                kprint!(
-                    "sys_getdents64: c_struct_size={}, name_len={}, name_len_aligned={}, reclen={}",
-                    c_struct_size,
-                    name_len,
-                    name_len_aligned,
-                    reclen
-                );
-
-                // Check if we have enough space in user buffer
-                if user_offset + reclen as usize > count as usize {
-                    break;
-                }
-
-                // Write Linux dirent64 structure directly to user buffer
-                unsafe {
-                    let user_ptr = (dirp + user_offset as u32) as *mut u8;
-                    let _dirent_ptr = user_ptr as *mut LinuxDirent64;
-
-                    // Write structure fields directly to buffer at correct offsets
-                    // d_ino at offset 0-7
-                    let d_ino_ptr = user_ptr as *mut u64;
-                    *d_ino_ptr = qid_path;
-
-                    // d_off at offset 8-15
-                    let next_dirent_offset = (user_offset + reclen as usize + 7) & !7;
-                    let d_off_ptr = user_ptr.add(8) as *mut i64;
-                    *d_off_ptr = next_dirent_offset as i64;
-
-                    // d_reclen at offset 16-17
-                    let d_reclen_ptr = user_ptr.add(16) as *mut u16;
-                    *d_reclen_ptr = reclen;
-
-                    // d_type at offset 18
-                    let d_type_ptr = user_ptr.add(18) as *mut u8;
-                    *d_type_ptr = d_type;
-
-                    // Debug: verify structure fields
-                    kprint!(
-                        "sys_getdents64: d_ino={}, d_off={}, d_reclen={}, d_type={}",
-                        qid_path,
-                        next_dirent_offset,
-                        reclen,
-                        d_type
-                    );
-
-                    // Debug: check field offsets
-                    kprint!(
-                        "sys_getdents64: field offsets - d_ino: {}, d_off: {}, d_reclen: {}, d_type: {}",
-                        core::mem::offset_of!(LinuxDirent64, d_ino),
-                        core::mem::offset_of!(LinuxDirent64, d_off),
-                        core::mem::offset_of!(LinuxDirent64, d_reclen),
-                        core::mem::offset_of!(LinuxDirent64, d_type)
-                    );
-
-                    // Debug: check raw buffer after structure write
-                    kprint!(
-                        "sys_getdents64: raw buffer after struct write = {:?}",
-                        &core::slice::from_raw_parts(user_ptr, 24)
-                    );
-
-                    // Copy name (null-terminated) after the structure
-                    // C compiler adds padding between d_type and d_name for alignment
-                    let name_ptr = user_ptr.add(19);
-
-                    // Debug: verify name placement
-                    kprint!(
-                        "sys_getdents64: placing name at offset 19, name_bytes={:?}",
-                        name_bytes
-                    );
-
-                    for (i, &byte) in name_bytes.iter().enumerate().take(name_len) {
-                        *name_ptr.add(i) = byte;
-                    }
-                    *name_ptr.add(name_len) = 0; // null terminator
-
-                    // Debug: verify name was placed correctly
-                    kprint!(
-                        "sys_getdents64: name at offset 19 = {:?}",
-                        &core::slice::from_raw_parts(name_ptr, name_len + 1)
-                    );
-
-                    // Zero out padding
-                    for i in (name_len + 1)..name_len_aligned {
-                        *name_ptr.add(i) = 0;
-                    }
-
-                    // Print the dirent buffer as we gave it to user
-                    kprint!(
-                        "sys_getdents64: dirent buffer = {:?}",
-                        &core::slice::from_raw_parts(user_ptr, reclen as usize)
-                    );
-                }
-
-                unsafe {
-                    FD_TABLE[fd as usize].cursor = entry_offset;
-                }
-                // Ensure next dirent is 8-byte aligned
-                user_offset = (user_offset + reclen as usize + 7) & !7;
-                total_bytes += reclen as usize;
-
-                kprint!(
-                    "sys_getdents64: entry '{}' type={} ino={} off={}",
-                    core::str::from_utf8(name_bytes).unwrap_or("?"),
-                    d_type,
-                    qid_path,
-                    entry_offset
-                );
-            }
-
-            Ok(total_bytes as u32)
-        }
-        P9Response::Error(rlerror) => {
-            kprint!(
-                "sys_getdents64: received Rlerror: tag={}, ecode={}",
-                rlerror.tag,
-                rlerror.ecode
-            );
-            Err(Err::NoSys)
-        }
-    }
 }
 
 fn sys_getegid() -> Result<u32, Err> {
@@ -2682,256 +2087,6 @@ fn sys_open_tree_attr(_dfd: u32, _filename: u32, _flags: u32, _attr: u32) -> Res
     let msg = b"sys_open_tree_attr not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
-}
-
-// make a fd
-unsafe fn find_free_fd() -> u32 {
-    unsafe {
-        let mut fd = 0;
-        while FD_TABLE[fd].fid != 0 {
-            fd += 1;
-        }
-        return fd as u32;
-    }
-}
-
-#[allow(dead_code)]
-unsafe fn set_fd(fd: u32, fid: u32) {
-    unsafe {
-        FD_TABLE[fd as usize] = FileDescriptor {
-            fid,
-            cursor: 0,
-            is_dir: false,
-        };
-    }
-}
-
-#[allow(dead_code)]
-// instead of wnames we take a path
-fn do_walk(starting_fid: u32, target_fid: u32, path: String) -> Result<(u32, Vec<Qid>), Err> {
-    let wnames: Vec<String> = path.split("/").skip(1).map(|s| s.to_string()).collect();
-    let wnames_len = wnames.len();
-    let twalk = crate::p9::TwalkMessage::new(0, starting_fid, target_fid, wnames);
-    match twalk.send_twalk() {
-        Ok(bytes_written) => {
-            kprint!("do_walk: bytes_written = {}", bytes_written);
-        }
-        Err(e) => {
-            kprint!("do_walk: error = {:?}", e);
-            return Err(Err::NoSys);
-        }
-    }
-    match RwalkMessage::read_response() {
-        P9Response::Success(rwalk) => {
-            if rwalk.wqids.len() != wnames_len {
-                clunk(target_fid);
-                Err(Err::FileNotFound)
-            } else {
-                Ok((0, rwalk.wqids))
-            }
-        }
-        P9Response::Error(rlerror) => {
-            kprint!(
-                "do_walk: received Rlerror for walk operation: tag={}, ecode={}",
-                rlerror.tag,
-                rlerror.ecode
-            );
-            Err(Err::NoSys)
-        }
-    }
-}
-
-/// Split a path into directory and filename components
-fn split_path(path: &str) -> (String, String) {
-    if let Some(last_slash) = path.rfind('/') {
-        if last_slash == 0 {
-            // Path is "/filename" - directory is "/"
-            ("/".to_string(), path[1..].to_string())
-        } else {
-            // Path is "/dir/filename" - directory is "/dir", filename is "filename"
-            (
-                path[..last_slash].to_string(),
-                path[last_slash + 1..].to_string(),
-            )
-        }
-    } else {
-        // No slash found - this shouldn't happen for absolute paths
-        ("/".to_string(), path.to_string())
-    }
-}
-
-fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32, Err> {
-    // Extract and print the filename
-    let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
-    let null_pos = filename
-        .iter()
-        .position(|&b| b == 0)
-        .unwrap_or(filename.len());
-    let filename = &filename[..null_pos];
-
-    let filename_str = match str::from_utf8(filename) {
-        Ok(s) => s,
-        Err(_) => {
-            kprint!("sys_openat: invalid UTF-8 filename");
-            return Err(Err::NoSys);
-        }
-    };
-    do_openat(_dfd, filename_str, _flags, _mode)
-}
-
-fn do_openat(_dfd: u32, filename_str: &str, _flags: u32, _mode: u32) -> Result<u32, Err> {
-    // Convert the filename to a UTF-8 s
-    kprint!("sys_openat: filename='{}'", filename_str);
-    // lets check if its an absolute path and panic otherwise
-    if !filename_str.starts_with("/") {
-        kpanic!("sys_openat: relative paths are not supported");
-    }
-
-    // Check if O_CREAT flag is set
-    const O_CREAT: u32 = 0o100;
-    // const O_EXCL: u32 = 0o200; // TODO: Implement O_EXCL logic
-
-    let should_create = (_flags & O_CREAT) != 0;
-    // let should_fail_if_exists = (_flags & O_EXCL) != 0; // TODO: Implement O_EXCL logic
-
-    if should_create {
-        kprint!("sys_openat: O_CREAT flag detected, attempting file creation");
-
-        // Split path into directory and filename
-        let (dir_path, file_name) = split_path(filename_str);
-        kprint!(
-            "sys_openat: directory='{}', filename='{}'",
-            dir_path,
-            file_name
-        );
-
-        // Walk to the directory
-        // Get a FID for the new file
-        let file_fid = unsafe { find_free_fd() };
-
-        let dir_walk_result = do_walk(0, file_fid, dir_path.clone());
-        match dir_walk_result {
-            Ok((ret_code, _)) => {
-                if ret_code != 0 {
-                    kprint!(
-                        "sys_openat: failed to walk to directory, error: {}",
-                        ret_code
-                    );
-                    return Ok(ret_code);
-                }
-            }
-            Err(e) => {
-                kprint!("sys_openat: error walking to directory");
-                return Err(e);
-            }
-        }
-
-        // Convert mode to 9P permissions (simplified)
-        let p9_mode = _mode & 0o777; // Basic permission bits
-
-        // Convert Linux open flags to 9P flags (same logic as Tlopen)
-        let p9_flags = if (_flags & 0o3) == 0o0 {
-            0 // O_RDONLY
-        } else if (_flags & 0o3) == 0o1 {
-            1 // O_WRONLY
-        } else {
-            2 // O_RDWR
-        };
-
-        // Create the file using Tlcreate
-        let tlcreate =
-            TlcreateMessage::new(0, file_fid, file_name.to_string(), p9_flags, p9_mode, 0); // flags=p9_flags, mode=p9_mode, gid=0
-        kprint!("sys_openat: tlcreate = {:?}", tlcreate);
-        match tlcreate.send_tlcreate() {
-            Ok(bytes_written) => {
-                kprint!("sys_openat: sent {} bytes for Tlcreate", bytes_written);
-
-                // Read the response
-                match RlcreateMessage::read_response() {
-                    P9Response::Success(rlcreate) => {
-                        kprint!("sys_openat: received Rlcreate: {:?}", rlcreate);
-                        unsafe { set_fd(file_fid, file_fid) };
-                        return Ok(file_fid);
-                    }
-                    P9Response::Error(rlerror) => {
-                        clunk(file_fid);
-                        kprint!(
-                            "sys_openat: received Rlerror for Rlcreate: tag={}, ecode={}",
-                            rlerror.tag,
-                            rlerror.ecode
-                        );
-                        return Ok(-(rlerror.ecode as i32) as u32);
-                    }
-                }
-            }
-            Err(e) => {
-                kprint!("sys_openat: error sending Tlcreate: {:?}", e);
-                clunk(file_fid);
-                return Err(Err::NoSys);
-            }
-        }
-    }
-
-    // Original logic for opening existing files
-    let fid = unsafe { find_free_fd() };
-    let resolve_result = resolve_path(filename_str, 0, fid);
-    if resolve_result.is_err() {
-        return Err(resolve_result.unwrap_err());
-    } else {
-        kprint!(
-            "sys_openat: dfd={}, filename='{}', real_filename='{}' flags=0x{:x}, mode=0x{:x}",
-            _dfd,
-            filename_str,
-            resolve_result.unwrap_or("".to_string()),
-            _flags,
-            _mode
-        );
-    }
-
-    // Convert Linux open flags to 9P open flags
-    // This is a simplified mapping - in reality, we'd need more sophisticated flag conversion
-    kprint!("sys_openat: flags=0x{:x}", _flags);
-    let p9_flags = if (_flags & 0o3) == 0o0 {
-        0
-    }
-    // O_RDONLY
-    else if (_flags & 0o3) == 0o1 {
-        1
-    }
-    // O_WRONLY
-    else {
-        2
-    }; // O_RDWR
-
-    let tlopen = TlopenMessage::new(0, fid, p9_flags);
-
-    match tlopen.send_tlopen() {
-        Ok(bytes_written) => {
-            kprint!("sys_openat: sent {} bytes for Tlopen", bytes_written);
-
-            // Read the response
-            match RlopenMessage::read_response() {
-                P9Response::Success(rlopen) => {
-                    kprint!("sys_openat: received Rlopen: {:?}", rlopen);
-                    unsafe { set_fd(fid, fid) };
-                    Ok(fid)
-                }
-                P9Response::Error(rlerror) => {
-                    clunk(fid);
-                    kprint!(
-                        "sys_openat: received Rlerror for Rlopen: tag={}, ecode={}",
-                        rlerror.tag,
-                        rlerror.ecode
-                    );
-                    Ok(-(rlerror.ecode as i32) as u32)
-                }
-            }
-        }
-        Err(e) => {
-            kprint!("sys_openat: error sending Tlopen: {:?}", e);
-            Err(Err::NoSys)
-        }
-    }
 }
 
 fn sys_openat2(_dfd: u32, _filename: u32, _how: u32) -> Result<u32, Err> {
@@ -3613,333 +2768,6 @@ fn sys_statmount(_dfd: u32, _filename: u32, _buffer: u32, _bufsize: u32) -> Resu
     let msg = b"sys_statmount not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
-}
-
-/// Convert 9P RgetattrMessage to Linux statx structure
-fn convert_rgetattr_to_statx(rgetattr: &RgetattrMessage) -> Statx {
-    // Determine which fields are valid based on the valid mask
-    let mut stx_mask = 0u32;
-
-    // Map 9P valid mask to statx mask
-    if (rgetattr.valid & P9_GETATTR_MODE) != 0 {
-        stx_mask |= STATX_TYPE | STATX_MODE;
-    }
-    if (rgetattr.valid & P9_GETATTR_NLINK) != 0 {
-        stx_mask |= STATX_NLINK;
-    }
-    if (rgetattr.valid & P9_GETATTR_UID) != 0 {
-        stx_mask |= STATX_UID;
-    }
-    if (rgetattr.valid & P9_GETATTR_GID) != 0 {
-        stx_mask |= STATX_GID;
-    }
-    if (rgetattr.valid & P9_GETATTR_ATIME) != 0 {
-        stx_mask |= STATX_ATIME;
-    }
-    if (rgetattr.valid & P9_GETATTR_MTIME) != 0 {
-        stx_mask |= STATX_MTIME;
-    }
-    if (rgetattr.valid & P9_GETATTR_CTIME) != 0 {
-        stx_mask |= STATX_CTIME;
-    }
-    if (rgetattr.valid & P9_GETATTR_INO) != 0 {
-        stx_mask |= STATX_INO;
-    }
-    if (rgetattr.valid & P9_GETATTR_SIZE) != 0 {
-        stx_mask |= STATX_SIZE;
-    }
-    if (rgetattr.valid & P9_GETATTR_BLOCKS) != 0 {
-        stx_mask |= STATX_BLOCKS;
-    }
-    if (rgetattr.valid & P9_GETATTR_BTIME) != 0 {
-        stx_mask |= STATX_BTIME;
-    }
-
-    // Use the mode field directly from 9P (only if mode is valid)
-    let stx_mode = if (rgetattr.valid & P9_GETATTR_MODE) != 0 {
-        rgetattr.mode as u16 // The mode field already contains file type + permissions
-    } else {
-        0 // Mode not valid, set to 0
-    };
-
-    Statx {
-        stx_mask,
-        stx_blksize: rgetattr.blksize as u32,
-        stx_attributes: 0, // No special attributes for now
-        stx_nlink: rgetattr.nlink as u32,
-        stx_uid: rgetattr.uid,
-        stx_gid: rgetattr.gid,
-        stx_mode,
-        __spare0: [0],
-        stx_ino: rgetattr.qid.path, // Use QID path as inode number
-        stx_size: rgetattr.size,
-        stx_blocks: rgetattr.blocks,
-        stx_attributes_mask: 0, // No special attributes supported
-        stx_atime: StatxTimestamp {
-            tv_sec: rgetattr.atime_sec as i64,
-            tv_nsec: rgetattr.atime_nsec as u32,
-            __reserved: 0,
-        },
-        stx_btime: StatxTimestamp {
-            tv_sec: rgetattr.btime_sec as i64,
-            tv_nsec: rgetattr.btime_nsec as u32,
-            __reserved: 0,
-        },
-        stx_ctime: StatxTimestamp {
-            tv_sec: rgetattr.ctime_sec as i64,
-            tv_nsec: rgetattr.ctime_nsec as u32,
-            __reserved: 0,
-        },
-        stx_mtime: StatxTimestamp {
-            tv_sec: rgetattr.mtime_sec as i64,
-            tv_nsec: rgetattr.mtime_nsec as u32,
-            __reserved: 0,
-        },
-        stx_rdev_major: (rgetattr.rdev >> 8) as u32,
-        stx_rdev_minor: (rgetattr.rdev & 0xFF) as u32,
-        stx_dev_major: 0, // Not available from 9P
-        stx_dev_minor: 0, // Not available from 9P
-        stx_mnt_id: 0,    // Not available from 9P
-        stx_dio_mem_align: 0,
-        stx_dio_offset_align: 0,
-        __spare3: [0; 12],
-    }
-}
-
-fn clunk(fid: u32) {
-    let tclunk = crate::p9::TclunkMessage::new(0, fid);
-    tclunk.send_tclunk().unwrap();
-    let rclunk = RclunkMessage::read_response();
-    match rclunk {
-        P9Response::Success(rclunk) => {
-            kprint!("clunk {}: = {:?}", fid, rclunk);
-        }
-        P9Response::Error(rlerror) => {
-            kprint!(
-                "clunk: received Rlerror for clunk operation: tag={}, ecode={}",
-                rlerror.tag,
-                rlerror.ecode
-            );
-        }
-    }
-}
-
-// This implementation mimics the behavior of the POSIX dirname utility.
-// It returns the parent directory of the given path, handling edge cases.
-fn dirname(path: &str) -> String {
-    // Remove trailing slashes except for root
-    let path = path.trim_end_matches('/');
-
-    // If the path is empty after trimming, return "/"
-    if path.is_empty() {
-        return "/".to_string();
-    }
-
-    // Find the last slash in the path
-    if let Some(pos) = path.rfind('/') {
-        if pos == 0 {
-            // Path is like "/foo" or "/"
-            "/".to_string()
-        } else {
-            // Path is like "/foo/bar" or "foo/bar"
-            path[..pos].to_string()
-        }
-    } else {
-        // No slash found, so return "/"
-        "/".to_string()
-    }
-}
-
-fn resolve_relative_path_to_absolute(relative_path: &str, relative_to: &str) -> String {
-    if relative_path.starts_with("/") {
-        relative_path.to_string()
-    } else {
-        // handle .. and . properly
-        let relative_path = relative_path.split("/").collect::<Vec<&str>>();
-        let relative_to = relative_to.split("/").collect::<Vec<&str>>();
-        let mut new_path = relative_to.clone();
-        for path in relative_path {
-            if path == ".." {
-                new_path.pop();
-            } else if path == "." {
-                continue;
-            } else {
-                new_path.push(path);
-            }
-        }
-        new_path.join("/")
-    }
-}
-
-// resolves path and fid 0xFFFF_FFFE points to it after
-fn resolve_path(path: &str, depth: u32, fid: u32) -> Result<String, Err> {
-    if depth > 40 {
-        // don't let it recurse too much
-        kprint!("resolve_path: depth too deep, returning error");
-        return Err(Err::NoSys);
-    }
-    let walk_result = unsafe { do_walk(ROOT_FID, fid, path.to_string()) };
-
-    match walk_result {
-        Ok((ret_code, qid)) => {
-            if ret_code != 0 {
-                return Err(Err::Inval);
-            }
-            if qid[qid.len() - 1].is_symlink() {
-                let dirname = dirname(path);
-
-                let treadlink = crate::p9::TreadlinkMessage::new(0, fid);
-                match treadlink.send_treadlink() {
-                    Ok(bytes_written) => {
-                        kprint!("resolve_path: bytes_written = {}", bytes_written);
-                    }
-                    Err(e) => {
-                        kprint!("resolve_path: error = {:?}", e);
-                    }
-                }
-                match RreadlinkMessage::read_response() {
-                    P9Response::Success(rreadlink) => {
-                        kprint!("resolve_path: rreadlink = {:?}", rreadlink);
-                        clunk(fid);
-                        let target = rreadlink.target;
-                        // now we need to resolve the symlink to an absolute path
-                        let target =
-                            resolve_relative_path_to_absolute(target.as_str(), dirname.as_str());
-                        kprint!("resolve_path: resolved target = {}", target);
-                        resolve_path(&target, depth + 1, fid)
-                    }
-                    P9Response::Error(rlerror) => {
-                        kprint!(
-                            "resolv_path: received Rlerror for readlink operation: tag={}, ecode={}",
-                            rlerror.tag,
-                            rlerror.ecode
-                        );
-                        Err(Err::NoSys)
-                    }
-                }
-            } else {
-                Ok(path.to_string())
-            }
-        }
-        Err(e) => Err(e),
-    }
-}
-
-fn get_file_size(path: &str, depth: u32) -> Result<u64, Err> {
-    if depth > 40 {
-        // don't let it recurse too much
-        kprint!("get_file_size: depth too deep, returning error");
-        return Err(Err::NoSys);
-    }
-
-    let resolve_result = resolve_path(path, depth, 0xFFFF_FFFE);
-    match resolve_result {
-        Ok(_) => {}
-        Err(e) => {
-            return Err(e);
-        }
-    }
-
-    let tgetattr = crate::p9::TgetattrMessage::new(0, 0xFFFF_FFFE, P9_GETATTR_ALL);
-    match tgetattr.send_tgetattr() {
-        Ok(bytes_written) => {
-            kprint!("sys_statx: bytes_written = {}", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_statx: error = {:?}", e);
-        }
-    }
-    match RgetattrMessage::read_response() {
-        P9Response::Success(rgetattr) => {
-            kprint!("sys_statx: rgetattr = {:?}", rgetattr);
-            clunk(0xFFFF_FFFE);
-            Ok(rgetattr.size)
-        }
-        P9Response::Error(rlerror) => {
-            kprint!(
-                "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
-                rlerror.tag,
-                rlerror.ecode
-            );
-            clunk(0xFFFF_FFFE);
-            Err(Err::NoSys)
-        }
-    }
-}
-
-fn sys_statx(
-    _dfd: u32,
-    _filename: u32,
-    _flags: u32,
-    _mask: u32,
-    _statxbuf: u32,
-) -> Result<u32, Err> {
-    // let's print the filename we're trying to stat, it's a u32 pointer
-    // we need to search for the null-terminator
-    // XXX this is ugly
-    kprint!("sys_statx: _statxbuf = {:08x}", _statxbuf);
-    let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
-    let null_pos = filename.iter().position(|&b| b == 0).unwrap();
-    let filename = &filename[..null_pos];
-    // convert the filename, it's a 0-terminated utf-8 string
-    let filename = str::from_utf8(filename).unwrap();
-    kprint!("sys_statx: filename = {}", filename);
-    // if the first character is / it's a absolute path, otherwise it's a relative path
-    let start_fid;
-    let is_absolute_path = filename.starts_with("/");
-    if is_absolute_path {
-        unsafe {
-            start_fid = ROOT_FID;
-        }
-    } else {
-        kpanic!("sys_statx: relative paths are not supported");
-    }
-    // skip the first element of the vector
-    let walk_result = do_walk(start_fid, 0xFFFF_FFFE, filename.to_string());
-    match walk_result {
-        Ok((ret_code, _)) => {
-            if ret_code != 0 {
-                return Ok(ret_code);
-            }
-            let tgetattr = crate::p9::TgetattrMessage::new(0, 0xFFFF_FFFE, P9_GETATTR_ALL);
-            match tgetattr.send_tgetattr() {
-                Ok(bytes_written) => {
-                    kprint!("sys_statx: bytes_written = {}", bytes_written);
-                }
-                Err(e) => {
-                    kprint!("sys_statx: error = {:?}", e);
-                }
-            }
-            match RgetattrMessage::read_response() {
-                P9Response::Success(rgetattr) => {
-                    kprint!("sys_statx: rgetattr = {:?}", rgetattr);
-
-                    // Convert 9P RgetattrMessage to Linux statx structure
-                    let statx = convert_rgetattr_to_statx(&rgetattr);
-
-                    // Write the statx structure to the user buffer
-                    unsafe {
-                        let statx_ptr = _statxbuf as *mut Statx;
-                        *statx_ptr = statx;
-                    }
-
-                    kprint!("sys_statx: successfully filled statx buffer");
-                    clunk(0xFFFF_FFFE);
-                    Ok(0) // Success
-                }
-                P9Response::Error(rlerror) => {
-                    kprint!(
-                        "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
-                        rlerror.tag,
-                        rlerror.ecode
-                    );
-                    clunk(0xFFFF_FFFE);
-                    Ok(-(rlerror.ecode as i32) as u32)
-                }
-            }
-        }
-        Err(e) => Err(e),
-    }
 }
 
 fn sys_symlinkat(_target: u32, _newdirfd: u32, _linkpath: u32, _flags: u32) -> Result<u32, Err> {

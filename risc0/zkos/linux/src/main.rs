@@ -30,6 +30,7 @@ mod compressed_emul;
 mod constants;
 mod host_calls;
 mod linux_abi;
+mod linux_abi_fs;
 mod linux_abi_privileged;
 mod linux_abi_sockets;
 mod p9;
