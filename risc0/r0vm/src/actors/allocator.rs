@@ -104,7 +104,13 @@ impl std::str::FromStr for GpuUuid {
 
 impl fmt::Display for GpuUuid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "GPU-{}", &self.0)
+        if f.alternate() {
+            let gpu_id = self.0.to_string();
+            let gpu_short = &gpu_id[gpu_id.len() - 5..];
+            write!(f, "GPU-{gpu_short}")
+        } else {
+            write!(f, "GPU-{}", &self.0)
+        }
     }
 }
 
@@ -209,6 +215,54 @@ pub enum HardwareReservation {
     Cpu { cores: CpuCores },
 }
 
+/// The allocator's representation of a task.
+struct Task {
+    /// A description of the task for display purposes
+    description: String,
+
+    /// GPU tokens being used the task
+    used_gpu_tokens: HashMap<GpuUuid, GpuTokens>,
+
+    /// CPU cores being used the task
+    used_cores: CpuCores,
+}
+
+impl Task {
+    fn hw_allocated(&self) -> bool {
+        self.used_cores > CpuCores::ZERO
+            || self.used_gpu_tokens.values().any(|t| *t > GpuTokens::ZERO)
+    }
+}
+
+impl fmt::Display for Task {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}{}",
+            &self.description,
+            if self.hw_allocated() {
+                ": HW in-use"
+            } else {
+                ""
+            }
+        )
+    }
+}
+
+struct WorkerIdFmt(WorkerId);
+
+impl fmt::Display for WorkerIdFmt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if f.alternate() {
+            let worker_id = self.0.to_string();
+            let short_id = &worker_id[worker_id.len() - 5..];
+            write!(f, "WID-{short_id}")
+        } else {
+            write!(f, "WID-{}", &self.0)
+        }
+    }
+}
+
 /// The allocator's representation of a worker.
 struct Worker {
     /// If the worker is on a remote machine, this is the socket address of the RPC connection
@@ -218,11 +272,7 @@ struct Worker {
     /// What hardware does this worker have access to
     hardware: Vec<HardwareResource>,
     /// What tasks (tasks) are currently running on this worker.
-    tasks: HashMap<GlobalId, String>,
-    /// GPU tokens being used the running tasks
-    used_gpu_tokens: HashMap<GpuUuid, GpuTokens>,
-    /// CPU cores being used the running tasks
-    used_cores: CpuCores,
+    tasks: HashMap<GlobalId, Task>,
 }
 
 impl Worker {
@@ -236,8 +286,6 @@ impl Worker {
             tasks: HashMap::new(),
             machine,
             hardware,
-            used_gpu_tokens: HashMap::new(),
-            used_cores: CpuCores(0),
         }
     }
 }
@@ -314,8 +362,8 @@ impl AllocatorActor {
             .collect()
     }
 
-    /// The number of tasks the GPU this worker is using is currently running.
-    fn get_worker_num_tasks(
+    /// The number of tasks the hardware this worker is using is currently running.
+    fn get_worker_num_hardware_tasks(
         &self,
         worker_id: &WorkerId,
         hardware_filter: HardwareFilter,
@@ -323,7 +371,7 @@ impl AllocatorActor {
         let worker = self
             .workers
             .get(worker_id)
-            .ok_or_else(|| Error::new("unknown worker"))?;
+            .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
 
         let mut associated_workers = HashSet::new();
         for hardware in &worker.hardware {
@@ -347,6 +395,16 @@ impl AllocatorActor {
             .sum())
     }
 
+    /// The number of tasks this worker is using is currently running.
+    fn get_worker_num_tasks(&self, worker_id: &WorkerId) -> Result<usize> {
+        let worker = self
+            .workers
+            .get(worker_id)
+            .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
+
+        Ok(worker.tasks.len())
+    }
+
     /// Add to the tasks we are tracking for this worker
     fn add_worker_task(
         &mut self,
@@ -357,9 +415,13 @@ impl AllocatorActor {
         let worker = self
             .workers
             .get_mut(worker_id)
-            .ok_or_else(|| Error::new("unknown worker"))?;
+            .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
         if let hash_map::Entry::Vacant(e) = worker.tasks.entry(task_id) {
-            e.insert(description);
+            e.insert(Task {
+                description,
+                used_gpu_tokens: HashMap::new(),
+                used_cores: CpuCores::ZERO,
+            });
         } else {
             return Err(Error::new("duplicate task_id"));
         }
@@ -402,13 +464,18 @@ impl AllocatorActor {
             .get_mut(&request.worker_id)
             .expect("all pending requests should be for workers that are still connected");
 
+        let task = worker
+            .tasks
+            .get_mut(&request.task_id)
+            .expect("all pending requests should be for tasks which are still scheduled");
+
         for res in &request.hardware_reservations {
             match res {
                 HardwareReservation::Gpu { id, tokens } => {
                     let gpu = self
                         .gpus
                         .get(id)
-                        .ok_or_else(|| Error::new("unknown GPU {id}"))?;
+                        .ok_or_else(|| Error::new(format!("unknown GPU {id}")))?;
                     if &gpu.free_tokens < tokens {
                         return Ok(false);
                     }
@@ -431,9 +498,9 @@ impl AllocatorActor {
                     let gpu = self
                         .gpus
                         .get_mut(id)
-                        .ok_or_else(|| Error::new("unknown GPU {id}"))?;
+                        .ok_or_else(|| Error::new(format!("unknown GPU {id}")))?;
                     gpu.free_tokens -= *tokens;
-                    *worker.used_gpu_tokens.entry(id.clone()).or_default() += *tokens;
+                    *task.used_gpu_tokens.entry(id.clone()).or_default() += *tokens;
                 }
                 HardwareReservation::Cpu { cores } => {
                     let cpu = self
@@ -441,7 +508,7 @@ impl AllocatorActor {
                         .get_mut(&worker.machine)
                         .expect("all worker CPUs should exist");
                     cpu.free_cores -= *cores;
-                    worker.used_cores += *cores;
+                    task.used_cores += *cores;
                 }
             }
         }
@@ -559,6 +626,7 @@ impl AllocatorActor {
         struct CandidateWorker {
             gpu_tasks: usize,
             machine_tasks: usize,
+            worker_tasks: usize,
             id: WorkerId,
         }
 
@@ -568,8 +636,9 @@ impl AllocatorActor {
             .map(|c| -> Result<_> {
                 Ok(CandidateWorker {
                     id: c,
-                    gpu_tasks: self.get_worker_num_tasks(&c, HardwareFilter::Gpu)?,
-                    machine_tasks: self.get_worker_num_tasks(&c, HardwareFilter::Cpu)?,
+                    gpu_tasks: self.get_worker_num_hardware_tasks(&c, HardwareFilter::Gpu)?,
+                    machine_tasks: self.get_worker_num_hardware_tasks(&c, HardwareFilter::Cpu)?,
+                    worker_tasks: self.get_worker_num_tasks(&c)?,
                 })
             })
             .filter_map(|res| match res {
@@ -602,6 +671,7 @@ impl AllocatorActor {
 #[derive(Serialize, Deserialize)]
 pub struct AllocateHardware {
     pub worker_id: WorkerId,
+    pub task_id: GlobalId,
     pub hardware_reservations: Vec<HardwareReservation>,
 }
 
@@ -613,16 +683,35 @@ impl Message<AllocateHardware> for AllocatorActor {
         request: AllocateHardware,
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        let (delegated_reply, reply_sender) = ctx.reply_sender();
+        match self.validate_allocation_request(&request) {
+            Ok(()) => {
+                let (delegated_reply, reply_sender) = ctx.reply_sender();
+                self.pending.push_back(PendingAllocation {
+                    request,
+                    reply_sender,
+                });
+                self.maybe_allocate_many();
 
-        self.pending.push_back(PendingAllocation {
-            request,
-            reply_sender,
-        });
+                delegated_reply
+            }
+            Err(error) => ctx.reply(Err(error)),
+        }
+    }
+}
 
-        self.maybe_allocate_many();
+impl AllocatorActor {
+    fn validate_allocation_request(&mut self, request: &AllocateHardware) -> Result<()> {
+        let worker = self
+            .workers
+            .get_mut(&request.worker_id)
+            .ok_or_else(|| Error::new(format!("unknown worker {}", request.worker_id)))?;
+        if !worker.tasks.contains_key(&request.task_id) {
+            return Err(Error::new(
+                "allocation request associated with task not running on worker",
+            ));
+        }
 
-        delegated_reply
+        Ok(())
     }
 }
 
@@ -630,6 +719,7 @@ impl Message<AllocateHardware> for AllocatorActor {
 #[derive(Serialize, Deserialize)]
 pub struct DeallocateHardware {
     pub worker_id: WorkerId,
+    pub task_id: GlobalId,
     pub hardware_reservations: Vec<HardwareReservation>,
 }
 
@@ -651,7 +741,12 @@ impl AllocatorActor {
         let worker = self
             .workers
             .get_mut(&worker_id)
-            .ok_or_else(|| Error::new("unknown worker {worker_id}"))?;
+            .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
+
+        let task = worker
+            .tasks
+            .get_mut(&msg.task_id)
+            .ok_or_else(|| Error::new(format!("worker not running task: {}", msg.task_id)))?;
 
         for res in msg.hardware_reservations {
             match res {
@@ -659,17 +754,17 @@ impl AllocatorActor {
                     let gpu = self
                         .gpus
                         .get_mut(&id)
-                        .ok_or_else(|| Error::new("unknown GPU {id}"))?;
+                        .ok_or_else(|| Error::new(format!("unknown GPU {id}")))?;
 
-                    let worker_tokens = worker
+                    let worker_tokens = task
                         .used_gpu_tokens
                         .get_mut(&id)
                         .ok_or_else(|| Error::new("worker returning GPU tokens it doesn't have"))?;
                     *worker_tokens = worker_tokens
                         .checked_sub(tokens)
-                        .ok_or_else(|| Error::new("worker returning GPU tokens it doens't have"))?;
+                        .ok_or_else(|| Error::new("worker returning GPU tokens it doesn't have"))?;
                     if *worker_tokens == GpuTokens::ZERO {
-                        worker.used_gpu_tokens.remove(&id);
+                        task.used_gpu_tokens.remove(&id);
                     }
 
                     gpu.free_tokens += tokens;
@@ -681,7 +776,7 @@ impl AllocatorActor {
                         .get_mut(&worker.machine)
                         .expect("all worker CPUs should exist");
 
-                    worker.used_cores = worker
+                    task.used_cores = task
                         .used_cores
                         .checked_sub(cores)
                         .ok_or_else(|| Error::new("worker returning CPU cores it doesn't have"))?;
@@ -719,15 +814,33 @@ impl AllocatorActor {
         let worker = self
             .workers
             .get_mut(&worker_id)
-            .ok_or_else(|| Error::new("unknown worker {worker_id}"))?;
-        if worker.tasks.remove(&msg.task_id).is_none() {
-            return Err(Error::new(format!(
-                "worker not running task: {:?}",
-                msg.task_id
-            )));
+            .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
+
+        if self
+            .pending
+            .iter()
+            .any(|req| req.request.task_id == msg.task_id)
+        {
+            return Err(Error::new(
+                "attempting to end task which has a pending allocation",
+            ));
         }
 
-        self.maybe_allocate_many();
+        let Some(task) = worker.tasks.get(&msg.task_id) else {
+            return Err(Error::new(format!(
+                "worker not running task: {}",
+                msg.task_id
+            )));
+        };
+
+        if task.hw_allocated() {
+            return Err(Error::new(
+                "attempting to end task which still has hardware allocated",
+            ));
+        }
+
+        let removed = worker.tasks.remove(&msg.task_id).is_some();
+        assert!(removed);
 
         Ok(())
     }
@@ -807,19 +920,21 @@ impl AllocatorActor {
             self.pending.retain(|r| r.request.worker_id != worker_id);
 
             // Return all tokens for any pending tasks
-            for (uuid, tokens) in worker.used_gpu_tokens {
-                let gpu = self.gpus.get_mut(&uuid).expect("all worker GPUs exist");
-                gpu.free_tokens += tokens;
-                assert!(gpu.free_tokens <= gpu.max_tokens);
-            }
-            if worker.used_cores > CpuCores::ZERO {
-                let cpu = self
-                    .cpus
-                    .get_mut(&worker.machine)
-                    .expect("all worker CPUs exist");
+            for (_, task) in worker.tasks {
+                for (uuid, tokens) in task.used_gpu_tokens {
+                    let gpu = self.gpus.get_mut(&uuid).expect("all worker GPUs exist");
+                    gpu.free_tokens += tokens;
+                    assert!(gpu.free_tokens <= gpu.max_tokens);
+                }
+                if task.used_cores > CpuCores::ZERO {
+                    let cpu = self
+                        .cpus
+                        .get_mut(&worker.machine)
+                        .expect("all worker CPUs exist");
 
-                cpu.free_cores += worker.used_cores;
-                assert!(cpu.free_cores <= cpu.total_cores);
+                    cpu.free_cores += task.used_cores;
+                    assert!(cpu.free_cores <= cpu.total_cores);
+                }
             }
         }
 
@@ -860,30 +975,23 @@ impl AllocatorActor {
                 .workers
                 .iter()
                 .map(|(worker_id, worker)| {
-                    let worker_id = worker_id.to_string();
-                    let short_id = &worker_id[worker_id.len() - 5..];
+                    let address = worker
+                        .remote_address
+                        .map(|a| a.to_string())
+                        .unwrap_or("localhost".into());
+                    let worker_id = WorkerIdFmt(*worker_id);
                     let hardware = worker
                         .hardware
                         .iter()
                         .filter_map(|h| match h {
-                            HardwareResource::Gpu(gpu) => {
-                                let gpu_id = gpu.uuid.to_string();
-                                let gpu_short = &gpu_id[gpu_id.len() - 5..];
-                                Some(format!(":GPU-{gpu_short}"))
-                            }
+                            HardwareResource::Gpu(gpu) => Some(format!(":{:#}", &gpu.uuid)),
                             _ => None,
                         })
                         .collect::<Vec<_>>()
                         .join("");
 
-                    let key = format!(
-                        "{}:WID-{short_id}{hardware}",
-                        worker
-                            .remote_address
-                            .map(|a| a.to_string())
-                            .unwrap_or("localhost".into()),
-                    );
-                    let value = worker.tasks.values().cloned().collect();
+                    let key = format!("{address}:{worker_id:#}{hardware}");
+                    let value = worker.tasks.values().map(|t| t.to_string()).collect();
                     (key, value)
                 })
                 .collect(),
@@ -969,14 +1077,17 @@ mod allocation_tests {
                 .unwrap()
         }
 
-        async fn end_task(&self, i: u64, j: u64, worker_id: WorkerId) {
+        async fn end_task(&self, i: u64, j: u64, worker_id: WorkerId) -> Result<()> {
             self.alloc_ref
                 .ask(EndTask {
                     worker_id,
                     task_id: test_task_id(i, j),
                 })
                 .await
-                .unwrap();
+                .map_err(|err| match err {
+                    SendError::HandlerError(err) => err,
+                    _ => panic!("kameo error: {err}"),
+                })
         }
 
         async fn disconnect_worker(&self, worker_id: WorkerId) {
@@ -1005,10 +1116,14 @@ mod allocation_tests {
             .alloc_ref
             .ask(AllocateHardware {
                 worker_id,
+                task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
             .unwrap();
+
+        let response = fixture.schedule_task(1, 2).await;
+        assert_eq!(response.worker_id, worker_id);
 
         let other_alloc_ref = fixture.alloc_ref.clone();
         let other_hardware_reservations = hardware_reservations.clone();
@@ -1016,6 +1131,7 @@ mod allocation_tests {
             other_alloc_ref
                 .ask(AllocateHardware {
                     worker_id,
+                    task_id: test_task_id(1, 2),
                     hardware_reservations: other_hardware_reservations,
                 })
                 .await
@@ -1029,12 +1145,355 @@ mod allocation_tests {
             .alloc_ref
             .ask(DeallocateHardware {
                 worker_id,
-                hardware_reservations,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
             })
             .await
             .unwrap();
 
         second_allocation.await.unwrap();
+
+        fixture.end_task(1, 1, worker_id).await.unwrap();
+
+        fixture
+            .alloc_ref
+            .ask(DeallocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 2),
+                hardware_reservations,
+            })
+            .await
+            .unwrap();
+        fixture.end_task(1, 2, worker_id).await.unwrap();
+    }
+
+    async fn double_dealloc(hardware_reservations: Vec<HardwareReservation>, expected_err: &str) {
+        let fixture = Fixture::new(1).await;
+        let worker_id = fixture.workers[0];
+
+        let response = fixture.schedule_task(1, 1).await;
+        assert_eq!(response.worker_id, worker_id);
+
+        fixture
+            .alloc_ref
+            .ask(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+
+        fixture
+            .alloc_ref
+            .ask(DeallocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+
+        // deallocate again should be an error
+        let err = fixture
+            .alloc_ref
+            .ask(DeallocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations,
+            })
+            .await
+            .unwrap_err();
+
+        assert_eq!(err.to_string(), expected_err);
+    }
+
+    #[tokio::test]
+    async fn end_task_before_dealloc() {
+        let fixture = Fixture::new(1).await;
+        let worker_id = fixture.workers[0];
+
+        let response = fixture.schedule_task(1, 1).await;
+        assert_eq!(response.worker_id, worker_id);
+
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(0),
+            tokens: GpuTokens(100),
+        }];
+
+        fixture
+            .alloc_ref
+            .ask(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+
+        // trying to end before deallocating hardware is an error
+        let err = fixture.end_task(1, 1, worker_id).await.unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "attempting to end task which still has hardware allocated"
+        );
+    }
+
+    #[tokio::test]
+    async fn end_task_before_full_dealloc() {
+        let fixture = Fixture::new(1).await;
+        let worker_id = fixture.workers[0];
+
+        let response = fixture.schedule_task(1, 1).await;
+        assert_eq!(response.worker_id, worker_id);
+
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(0),
+            tokens: GpuTokens(100),
+        }];
+
+        fixture
+            .alloc_ref
+            .ask(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(0),
+            tokens: GpuTokens(50),
+        }];
+        fixture
+            .alloc_ref
+            .ask(DeallocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations,
+            })
+            .await
+            .unwrap();
+
+        // trying to end before deallocating hardware is an error
+        let err = fixture.end_task(1, 1, worker_id).await.unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "attempting to end task which still has hardware allocated"
+        );
+    }
+
+    #[tokio::test]
+    async fn piecemeal_dealloc() {
+        let fixture = Fixture::new(1).await;
+        let worker_id = fixture.workers[0];
+
+        let response = fixture.schedule_task(1, 1).await;
+        assert_eq!(response.worker_id, worker_id);
+
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(0),
+            tokens: GpuTokens(100),
+        }];
+
+        fixture
+            .alloc_ref
+            .ask(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(0),
+            tokens: GpuTokens(50),
+        }];
+        fixture
+            .alloc_ref
+            .ask(DeallocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+        fixture
+            .alloc_ref
+            .ask(DeallocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations,
+            })
+            .await
+            .unwrap();
+
+        fixture.end_task(1, 1, worker_id).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn double_dealloc_gpu() {
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(0),
+            tokens: GpuTokens(100),
+        }];
+        double_dealloc(
+            hardware_reservations,
+            "worker returning GPU tokens it doesn't have",
+        )
+        .await;
+    }
+
+    #[tokio::test]
+    async fn double_dealloc_cpu() {
+        let hardware_reservations = vec![HardwareReservation::Cpu { cores: CpuCores(2) }];
+        double_dealloc(
+            hardware_reservations,
+            "worker returning CPU cores it doesn't have",
+        )
+        .await;
+    }
+
+    #[tokio::test]
+    async fn alloc_unknown_gpu() {
+        let fixture = Fixture::new(1).await;
+        let worker_id = fixture.workers[0];
+
+        let response = fixture.schedule_task(1, 1).await;
+        assert_eq!(response.worker_id, worker_id);
+
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(1),
+            tokens: GpuTokens(100),
+        }];
+
+        let err = fixture
+            .alloc_ref
+            .ask(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap_err();
+
+        assert_eq!(err.to_string(), format!("unknown GPU {}", test_gpu_id(1)));
+    }
+
+    #[tokio::test]
+    async fn dealloc_unknown_gpu() {
+        let fixture = Fixture::new(1).await;
+        let worker_id = fixture.workers[0];
+
+        let response = fixture.schedule_task(1, 1).await;
+        assert_eq!(response.worker_id, worker_id);
+
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(0),
+            tokens: GpuTokens(100),
+        }];
+
+        fixture
+            .alloc_ref
+            .ask(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(1),
+            tokens: GpuTokens(100),
+        }];
+        let err = fixture
+            .alloc_ref
+            .ask(DeallocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations,
+            })
+            .await
+            .unwrap_err();
+
+        assert_eq!(err.to_string(), format!("unknown GPU {}", test_gpu_id(1)));
+    }
+
+    #[tokio::test]
+    async fn end_task_pending() {
+        let fixture = Fixture::new(1).await;
+        let worker_id = fixture.workers[0];
+
+        let response = fixture.schedule_task(1, 1).await;
+        assert_eq!(response.worker_id, worker_id);
+
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(0),
+            tokens: GpuTokens(100),
+        }];
+
+        fixture
+            .alloc_ref
+            .ask(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+
+        let response = fixture.schedule_task(1, 2).await;
+        assert_eq!(response.worker_id, worker_id);
+
+        let other_alloc_ref = fixture.alloc_ref.clone();
+        let other_hardware_reservations = hardware_reservations.clone();
+        let second_allocation = tokio::task::spawn(async move {
+            other_alloc_ref
+                .ask(AllocateHardware {
+                    worker_id,
+                    task_id: test_task_id(1, 2),
+                    hardware_reservations: other_hardware_reservations,
+                })
+                .await
+                .unwrap();
+        });
+
+        tokio::task::yield_now().await;
+        assert!(!second_allocation.is_finished());
+
+        let err = fixture.end_task(1, 2, worker_id).await.unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "attempting to end task which has a pending allocation"
+        );
+
+        // Even after the error we can continue, the task is still running
+        fixture
+            .alloc_ref
+            .ask(DeallocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+        fixture.end_task(1, 1, worker_id).await.unwrap();
+
+        second_allocation.await.unwrap();
+
+        fixture
+            .alloc_ref
+            .ask(DeallocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 2),
+                hardware_reservations,
+            })
+            .await
+            .unwrap();
+        fixture.end_task(1, 2, worker_id).await.unwrap();
     }
 
     #[tokio::test]
@@ -1057,18 +1516,23 @@ mod allocation_tests {
             .alloc_ref
             .ask(AllocateHardware {
                 worker_id: worker1,
+                task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
             .unwrap();
 
         // worker2 tries to reserve the same GPU
+        let response = fixture.schedule_task(1, 2).await;
+        assert_eq!(response.worker_id, worker2);
+
         let other_alloc_ref = fixture.alloc_ref.clone();
         let other_hardware_reservations = hardware_reservations.clone();
         let second_allocation = tokio::task::spawn(async move {
             other_alloc_ref
                 .ask(AllocateHardware {
                     worker_id: worker2,
+                    task_id: test_task_id(1, 2),
                     hardware_reservations: other_hardware_reservations,
                 })
                 .await
@@ -1093,6 +1557,32 @@ mod allocation_tests {
     }
 
     #[tokio::test]
+    async fn alloc_for_task_not_running() {
+        let fixture = Fixture::new(1).await;
+        let worker_id = fixture.workers[0];
+
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(0),
+            tokens: GpuTokens(100),
+        }];
+
+        let error = fixture
+            .alloc_ref
+            .ask(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 1),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap_err();
+
+        assert_eq!(
+            error.to_string(),
+            "allocation request associated with task not running on worker"
+        );
+    }
+
+    #[tokio::test]
     async fn chooses_least_busy_worker() {
         // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
         // | (0, 1), (2, 3) | (4, 5), (6, 7) |
@@ -1111,7 +1601,7 @@ mod allocation_tests {
         assert_eq!(response.worker_id, fixture.workers[2]);
 
         // The first task ends
-        fixture.end_task(1, 1, fixture.workers[0]).await;
+        fixture.end_task(1, 1, fixture.workers[0]).await.unwrap();
 
         // first GPU on first machine is available again
         let response = fixture.schedule_task(1, 4).await;
@@ -1134,6 +1624,53 @@ mod allocation_tests {
         // second GPU on second machine
         let response = fixture.schedule_task(1, 2).await;
         assert_eq!(response.worker_id, fixture.workers[5]);
+    }
+
+    #[tokio::test]
+    async fn end_task_disconnected_worker() {
+        // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
+        // | (0, 1), (2, 3) | (4, 5), (6, 7) |
+        let fixture = Fixture::new(8).await;
+
+        // first GPU on first machine
+        let response = fixture.schedule_task(1, 1).await;
+        assert_eq!(response.worker_id, fixture.workers[0]);
+
+        // disconnect worker 1
+        fixture.disconnect_worker(fixture.workers[0]).await;
+
+        // ending the task at this point should be an error
+        assert_eq!(
+            fixture
+                .end_task(1, 1, fixture.workers[0])
+                .await
+                .unwrap_err()
+                .to_string(),
+            format!("unknown worker {}", fixture.workers[0])
+        );
+    }
+
+    #[tokio::test]
+    async fn end_task_twice() {
+        // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
+        // | (0, 1), (2, 3) | (4, 5), (6, 7) |
+        let fixture = Fixture::new(8).await;
+
+        // first GPU on first machine
+        let response = fixture.schedule_task(1, 1).await;
+        assert_eq!(response.worker_id, fixture.workers[0]);
+
+        fixture.end_task(1, 1, fixture.workers[0]).await.unwrap();
+
+        // ending the task at this point should be an error
+        assert_eq!(
+            fixture
+                .end_task(1, 1, fixture.workers[0])
+                .await
+                .unwrap_err()
+                .to_string(),
+            format!("worker not running task: {}", test_task_id(1, 1))
+        );
     }
 }
 

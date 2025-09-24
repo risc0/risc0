@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{ops::Range, sync::Arc};
+use std::{fmt, ops::Range, sync::Arc};
 
 use clap::ValueEnum;
 use derive_more::{Debug, TryInto};
@@ -85,6 +85,12 @@ pub(crate) enum TaskKind {
 pub(crate) struct GlobalId {
     pub job_id: JobId,
     pub task_id: TaskId,
+}
+
+impl fmt::Display for GlobalId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "TASK-{}:{}", &self.job_id, &self.task_id)
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

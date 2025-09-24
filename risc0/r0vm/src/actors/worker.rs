@@ -420,6 +420,7 @@ impl GpuProcessor {
         self.allocator
             .tell(DeallocateHardware {
                 worker_id: self.worker_id,
+                task_id: global_id,
                 hardware_reservations,
             })
             .await?;
@@ -447,6 +448,7 @@ impl GpuProcessor {
         self.allocator
             .ask(AllocateHardware {
                 worker_id: self.worker_id,
+                task_id: msg.header.global_id,
                 hardware_reservations: msg.to_reserve.clone(),
             })
             .await
@@ -642,6 +644,7 @@ impl CpuProcessor {
         self.allocator
             .tell(DeallocateHardware {
                 worker_id: self.worker_id,
+                task_id: global_id,
                 hardware_reservations,
             })
             .await?;
@@ -675,6 +678,7 @@ impl CpuProcessor {
         self.allocator
             .ask(AllocateHardware {
                 worker_id: self.worker_id,
+                task_id: msg.header.global_id,
                 hardware_reservations: to_reserve.clone(),
             })
             .await
