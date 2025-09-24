@@ -493,9 +493,9 @@ pub unsafe extern "C" fn sys_poseidon2(
     unsafe {
         ecall_3(
             ecall::POSEIDON2,
-            state_addr as u32 / WORD_SIZE as u32,
-            in_buf_addr as u32 / WORD_SIZE as u32,
-            out_buf_addr as u32 / WORD_SIZE as u32,
+            state_addr as u32,
+            in_buf_addr as u32,
+            out_buf_addr as u32,
             bits_count,
         )
     };

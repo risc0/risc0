@@ -54,14 +54,19 @@ pub(crate) struct Poseidon2State {
 }
 
 impl Poseidon2State {
-    fn new_ecall(state_addr: u32, buf_in_addr: u32, buf_out_addr: u32, bits_count: u32) -> Self {
+    fn new_ecall(
+        state_addr: WordAddr,
+        buf_in_addr: WordAddr,
+        buf_out_addr: WordAddr,
+        bits_count: u32,
+    ) -> Self {
         let is_elem = bits_count & PFLAG_IS_ELEM;
         let check_out = bits_count & PFLAG_CHECK_OUT;
         Self {
-            state_addr,
-            buf_in_addr,
-            buf_out_addr,
-            has_state: if state_addr == 0 { 0 } else { 1 },
+            state_addr: state_addr.0,
+            buf_in_addr: buf_in_addr.0,
+            buf_out_addr: buf_out_addr.0,
+            has_state: if state_addr.is_null() { 0 } else { 1 },
             is_elem: if is_elem == 0 { 0 } else { 1 },
             check_out: if check_out == 0 { 0 } else { 1 },
             count: bits_count & 0xffff,
@@ -285,9 +290,9 @@ pub(crate) struct Poseidon2;
 impl Poseidon2 {
     pub fn ecall(ctx: &mut impl Risc0Context) -> Result<()> {
         tracing::trace!("ecall");
-        let state_addr = ctx.load_machine_register(LoadOp::Record, REG_A0)?;
-        let buf_in_addr = ctx.load_machine_register(LoadOp::Record, REG_A1)?;
-        let buf_out_addr = ctx.load_machine_register(LoadOp::Record, REG_A2)?;
+        let state_addr = ctx.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A0)?;
+        let buf_in_addr = ctx.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A1)?;
+        let buf_out_addr = ctx.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A2)?;
         let bits_count = ctx.load_machine_register(LoadOp::Record, REG_A3)?;
         let mut p2 = Poseidon2State::new_ecall(state_addr, buf_in_addr, buf_out_addr, bits_count);
         p2.rest(ctx, CycleState::Decode)
