@@ -82,7 +82,7 @@ impl From<uuid::Error> for Error {
 
 /// This value is the globally unique immutable alphanumeric identifier of the GPU. It does not
 /// correspond to any physical label on the board.
-#[derive(Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct GpuUuid(Uuid);
 
 impl GpuUuid {
@@ -117,6 +117,7 @@ impl fmt::Display for GpuUuid {
     Copy,
     Clone,
     Default,
+    Debug,
     PartialEq,
     Eq,
     PartialOrd,
@@ -154,6 +155,7 @@ pub struct GpuSpec {
     SubAssign,
     Copy,
     Clone,
+    Debug,
     PartialEq,
     Eq,
     PartialOrd,
@@ -199,7 +201,7 @@ impl MachineId {
 }
 
 /// Description of a hardware resource to reserve while a worker is allocated.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum HardwareReservation {
     /// A portion of a GPU is reserved.
     Gpu { id: GpuUuid, tokens: GpuTokens },

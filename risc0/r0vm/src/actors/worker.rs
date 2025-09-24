@@ -60,7 +60,8 @@ enum GpuTask {
 struct GpuTaskMsg {
     header: TaskHeader,
     task: GpuTask,
-    hardware_reservations: Vec<HardwareReservation>,
+    to_reserve: Vec<HardwareReservation>,
+    reserved: Vec<HardwareReservation>,
 }
 
 enum CpuTask {
@@ -71,7 +72,8 @@ enum CpuTask {
 struct CpuTaskMsg {
     header: TaskHeader,
     task: CpuTask,
-    hardware_reservations: Vec<HardwareReservation>,
+    to_reserve: Vec<HardwareReservation>,
+    reserved: Vec<HardwareReservation>,
 }
 
 /// Number of tasks we queue up to do on CPU
@@ -217,27 +219,18 @@ impl Message<TaskMsg> for WorkerActor {
     type Reply = ();
 
     async fn handle(&mut self, msg: TaskMsg, _ctx: &mut Context<Self, Self::Reply>) {
-        let mut hardware_reservations = vec![HardwareReservation::Cpu { cores: msg.cores }];
+        let mut to_reserve = vec![HardwareReservation::Cpu { cores: msg.cores }];
         if msg.gpu_tokens > GpuTokens::ZERO {
             if self.gpus.is_empty() {
                 panic!("worker received a GPU task, but has no access to a GPU");
             }
-            hardware_reservations.push(HardwareReservation::Gpu {
+            to_reserve.push(HardwareReservation::Gpu {
                 id: self.gpus[0].uuid.clone(),
                 tokens: msg.gpu_tokens,
             });
         }
 
-        self.allocator
-            .ask(AllocateHardware {
-                worker_id: self.id,
-                hardware_reservations: hardware_reservations.clone(),
-            })
-            .await
-            .unwrap();
-        self.processor
-            .process_task(msg, hardware_reservations)
-            .await;
+        self.processor.process_task(msg, to_reserve).await;
     }
 }
 
@@ -292,14 +285,15 @@ impl Processor {
         }
     }
 
-    async fn process_task(&self, msg: TaskMsg, hardware_reservations: Vec<HardwareReservation>) {
+    async fn process_task(&self, msg: TaskMsg, to_reserve: Vec<HardwareReservation>) {
         match msg.task {
             Task::Execute(task) => {
                 self.cpu_queue
                     .send(CpuTaskMsg {
                         header: msg.header,
                         task: CpuTask::Execute(task),
-                        hardware_reservations,
+                        to_reserve,
+                        reserved: vec![],
                     })
                     .await
                     .unwrap();
@@ -309,7 +303,8 @@ impl Processor {
                     .send(CpuTaskMsg {
                         header: msg.header,
                         task: CpuTask::Preflight(task),
-                        hardware_reservations,
+                        to_reserve,
+                        reserved: vec![],
                     })
                     .await
                     .unwrap();
@@ -319,7 +314,8 @@ impl Processor {
                     .send(GpuTaskMsg {
                         header: msg.header,
                         task: GpuTask::Lift(task),
-                        hardware_reservations,
+                        to_reserve,
+                        reserved: vec![],
                     })
                     .await
                     .unwrap();
@@ -329,7 +325,8 @@ impl Processor {
                     .send(GpuTaskMsg {
                         header: msg.header,
                         task: GpuTask::Join(task),
-                        hardware_reservations,
+                        to_reserve,
+                        reserved: vec![],
                     })
                     .await
                     .unwrap();
@@ -339,7 +336,8 @@ impl Processor {
                     .send(GpuTaskMsg {
                         header: msg.header,
                         task: GpuTask::ProveKeccak(task),
-                        hardware_reservations,
+                        to_reserve,
+                        reserved: vec![],
                     })
                     .await
                     .unwrap();
@@ -349,7 +347,8 @@ impl Processor {
                     .send(GpuTaskMsg {
                         header: msg.header,
                         task: GpuTask::Union(task),
-                        hardware_reservations,
+                        to_reserve,
+                        reserved: vec![],
                     })
                     .await
                     .unwrap();
@@ -359,7 +358,8 @@ impl Processor {
                     .send(GpuTaskMsg {
                         header: msg.header,
                         task: GpuTask::Resolve(task),
-                        hardware_reservations,
+                        to_reserve,
+                        reserved: vec![],
                     })
                     .await
                     .unwrap();
@@ -369,7 +369,8 @@ impl Processor {
                     .send(GpuTaskMsg {
                         header: msg.header,
                         task: GpuTask::ShrinkWrap(task),
-                        hardware_reservations,
+                        to_reserve,
+                        reserved: vec![],
                     })
                     .await
                     .unwrap();
@@ -432,7 +433,21 @@ impl GpuProcessor {
         }
     }
 
-    async fn process_task(&self, msg: GpuTaskMsg) {
+    async fn process_task(&self, mut msg: GpuTaskMsg) {
+        tracing::info!(
+            "ALLOCATE: {} wait for {:?}",
+            &self.worker_id,
+            &msg.to_reserve
+        );
+        self.allocator
+            .ask(AllocateHardware {
+                worker_id: self.worker_id,
+                hardware_reservations: msg.to_reserve.clone(),
+            })
+            .await
+            .unwrap();
+        msg.reserved.extend(std::mem::take(&mut msg.to_reserve));
+
         let header = msg.header.clone();
 
         let result = match msg.task {
@@ -445,9 +460,7 @@ impl GpuProcessor {
             GpuTask::ShrinkWrap(task) => self.shrink_wrap(msg.header, task).await,
         };
 
-        let result = self
-            .send_done(header, result, msg.hardware_reservations)
-            .await;
+        let result = self.send_done(header, result, msg.reserved).await;
         if let Err(err) = result {
             tracing::error!("Failed to send error: {err}");
         }
@@ -637,18 +650,40 @@ impl CpuProcessor {
         }
     }
 
-    async fn process_task(&self, msg: CpuTaskMsg) {
+    async fn process_task(&self, mut msg: CpuTaskMsg) {
+        let mut to_reserve = vec![];
+
+        for r in std::mem::take(&mut msg.to_reserve) {
+            if matches!(r, HardwareReservation::Cpu { .. }) {
+                to_reserve.push(r);
+            } else {
+                msg.to_reserve.push(r);
+            }
+        }
+        tracing::info!("ALLOCATE: {} wait for {to_reserve:?}", &self.worker_id);
+        self.allocator
+            .ask(AllocateHardware {
+                worker_id: self.worker_id,
+                hardware_reservations: to_reserve.clone(),
+            })
+            .await
+            .unwrap();
+        msg.reserved.extend(to_reserve);
+
         let header = msg.header.clone();
 
         let result = match msg.task {
             CpuTask::Execute(task) => self.execute(msg.header, task).await,
             CpuTask::Preflight(task) => {
                 if let Err(error) = self
-                    .preflight(msg.header, task, msg.hardware_reservations.clone())
+                    .preflight(
+                        msg.header,
+                        task,
+                        msg.to_reserve.clone(),
+                        msg.reserved.clone(),
+                    )
                     .await
-                    && let Err(err) = self
-                        .send_done(header, Err(error), msg.hardware_reservations)
-                        .await
+                    && let Err(err) = self.send_done(header, Err(error), msg.reserved).await
                 {
                     tracing::error!("Failed to send error: {err}");
                 }
@@ -656,9 +691,7 @@ impl CpuProcessor {
             }
         };
 
-        let result = self
-            .send_done(header, result, msg.hardware_reservations)
-            .await;
+        let result = self.send_done(header, result, msg.reserved).await;
         if let Err(err) = result {
             tracing::error!("Failed to send error: {err}");
         }
@@ -734,7 +767,8 @@ impl CpuProcessor {
         &self,
         header: TaskHeader,
         task: Arc<ProveSegmentTask>,
-        hardware_reservations: Vec<HardwareReservation>,
+        to_reserve: Vec<HardwareReservation>,
+        reserved: Vec<HardwareReservation>,
     ) -> Result<(), TaskError> {
         tracing::info!("Preflight: {}", task.segment.index);
         self.task_start(header.clone()).await?;
@@ -748,7 +782,8 @@ impl CpuProcessor {
             .send(GpuTaskMsg {
                 header,
                 task: GpuTask::ProveSegmentCore(ProveSegmentCoreTask { preflight_results }),
-                hardware_reservations,
+                to_reserve,
+                reserved,
             })
             .await
             .unwrap();
