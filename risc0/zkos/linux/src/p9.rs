@@ -626,35 +626,66 @@ pub trait ReadableMessage: Sized {
         // Read the length prefix (4 bytes)
         let len_prefix = crate::host_calls::host_read(3, buf.as_mut_ptr(), 4);
         if len_prefix != 4 {
+            kprint!("ReadableMessage::read_response: len_prefix != 4");
             return P9Response::Error(RlerrorMessage::new(0, 0)); // Generic error
         }
 
         // Parse the length (little-endian)
         let data_len = u32::from_le_bytes([buf[0], buf[1], buf[2], buf[3]]);
         if !(5..=8192).contains(&data_len) {
+            kprint!(
+                "ReadableMessage::read_response: data_len out of range: {} {:x} {:x} {:x} {:x}",
+                data_len,
+                buf[0],
+                buf[1],
+                buf[2],
+                buf[3]
+            );
             return P9Response::Error(RlerrorMessage::new(0, 0)); // Generic error
+        } else {
+            kprint!("ReadableMessage::read_response: data_len = {}", data_len);
         }
 
         // Read the rest of the message
         let len = crate::host_calls::host_read(3, buf[4..].as_mut_ptr(), (data_len - 4) as usize);
         if len as u32 != data_len - 4 {
-            return P9Response::Error(RlerrorMessage::new(0, 0)); // Generic error
+            kprint!(
+                "ReadableMessage::read_response: length mismatch: {} != {}",
+                len,
+                data_len - 4
+            );
+            // P9Response::Error(RlerrorMessage::new(0, 0)) // Generic error
         }
+        // print the buffer up to data_len
+        kprint!(
+            "ReadableMessage::read_response: buf = {:?}",
+            &buf[..data_len as usize]
+        );
 
         // Check the message type
         let msg_type = buf[4];
+        kprint!("ReadableMessage::read_response: msg_type = {}", msg_type);
 
         if msg_type == P9MsgType::RLerror as u8 {
             // This is an Rlerror message
             match RlerrorMessage::deserialize(&buf[..data_len as usize]) {
                 Ok((rlerror, _)) => P9Response::Error(rlerror),
-                Err(_) => P9Response::Error(RlerrorMessage::new(0, 0)), // Generic error
+                Err(_) => {
+                    kprint!("ReadableMessage::read_response: error deserializing Rlerror message");
+                    P9Response::Error(RlerrorMessage::new(0, 0)) // Generic error
+                }
             }
         } else {
             // This should be the expected response type
             match Self::deserialize(&buf[..data_len as usize]) {
                 Ok((response, _)) => P9Response::Success(response),
-                Err(_) => P9Response::Error(RlerrorMessage::new(0, 0)), // Generic error
+                Err(err) => {
+                    kprint!(
+                        "ReadableMessage::read_response: error deserializing message: {:?}",
+                        err
+                    );
+                    P9Response::Error(RlerrorMessage::new(0, 0))
+                }
             }
         }
     }
@@ -4088,6 +4119,24 @@ pub enum RreadlinkError {
     TargetTooLong,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RreadlinkError {
+    fn buffer_too_small() -> Self {
+        RreadlinkError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RreadlinkError::InvalidMessageType
+    }
+}
+
+impl ReadableMessage for RreadlinkMessage {
+    type Error = RreadlinkError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RreadlinkMessage::deserialize(buf)
+    }
 }
 
 /// Tgetattr message structure

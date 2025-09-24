@@ -13,8 +13,10 @@
 // limitations under the License.
 
 use clap::Parser;
-use risc0_binfmt::{MemoryImage, Program, ProgramBinary};
+use risc0_binfmt::{ByteAddr, MemoryImage, Program, ProgramBinary};
 use std::path::PathBuf;
+
+pub const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
 
 #[derive(Parser)]
 #[command(name = "elf-to-bin")]
@@ -56,10 +58,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         binary.encode()
     } else {
         // Create MemoryImage from kernel ELF only
-        let kernel_program = Program::load_elf(&kernel_elf, u32::MAX)
+        let mut kernel_program = Program::load_elf(&kernel_elf, u32::MAX)
             .map_err(|e| format!("Failed to load kernel ELF: {}", e))?;
-        let memory_image = MemoryImage::new_kernel(kernel_program);
+        kernel_program.write_u32(USER_START_ADDR.0, 0);
 
+        let memory_image = MemoryImage::new_kernel(kernel_program);
         // Serialize the MemoryImage
         bincode::serialize(&memory_image)
             .map_err(|e| format!("Failed to serialize MemoryImage: {}", e))?

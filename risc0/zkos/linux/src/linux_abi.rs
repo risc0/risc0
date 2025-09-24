@@ -4,21 +4,38 @@ use crate::{
         REG_A7, REG_SP, STATX_ATIME, STATX_BLOCKS, STATX_BTIME, STATX_CTIME, STATX_GID, STATX_INO,
         STATX_MODE, STATX_MTIME, STATX_NLINK, STATX_SIZE, STATX_TYPE, STATX_UID, Statx,
         StatxTimestamp, USER_HEAP_SIZE, USER_HEAP_START_ADDR, USER_HEAP_START_PTR,
-        USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE, USER_STACK_PTR,
-        USER_START_PTR,
+        USER_MEMORY_LENGTH, USER_MEMORY_START_PTR, USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR,
+        USER_PHENT_SIZE, USER_STACK_PTR, USER_START_PTR,
     },
     host_calls::{host_argv, host_log, host_terminate, host_write},
     kernel::{get_ureg, mret, print},
     p9::{
-        P9Response, RattachMessage, RclunkMessage, ReadableMessage, RgetattrMessage,
-        RlcreateMessage, RlopenMessage, RreadMessage, RreaddirMessage, RversionMessage,
-        RwalkMessage, RwriteMessage, TattachMessage, TlcreateMessage, TlopenMessage, TreadMessage,
-        TreaddirMessage, TversionMessage, TwriteMessage, constants::*,
+        P9Response, Qid, RattachMessage, RclunkMessage, ReadableMessage, RgetattrMessage,
+        RlcreateMessage, RlopenMessage, RreadMessage, RreaddirMessage, RreadlinkMessage,
+        RversionMessage, RwalkMessage, RwriteMessage, TattachMessage, TlcreateMessage,
+        TlopenMessage, TreadMessage, TreaddirMessage, TversionMessage, TwriteMessage, constants::*,
     },
 };
+use elf::{ElfBytes, abi::PT_INTERP, endian::LittleEndian, file::Class};
 
 use crate::kernel::{DEBUG_ENABLED, set_ureg};
 use no_std_strings::{str_format, str256};
+
+// Import socket syscalls from the socket module
+use crate::linux_abi_sockets::{
+    sys_accept, sys_accept4, sys_bind, sys_connect, sys_getpeername, sys_getsockname,
+    sys_getsockopt, sys_listen, sys_recvfrom, sys_recvmmsg_time64, sys_recvmsg, sys_sendmmsg,
+    sys_sendmsg, sys_sendto, sys_setsockopt, sys_shutdown, sys_socket, sys_socketpair,
+};
+
+// Import privileged syscalls from the privileged module
+use crate::linux_abi_privileged::{
+    sys_acct, sys_add_key, sys_bpf, sys_capget, sys_capset, sys_chroot, sys_clock_adjtime64,
+    sys_clock_settime64, sys_delete_module, sys_finit_module, sys_init_module, sys_kexec_file_load,
+    sys_kexec_load, sys_keyctl, sys_landlock_add_rule, sys_landlock_create_ruleset,
+    sys_landlock_restrict_self, sys_mount, sys_mount_setattr, sys_reboot, sys_setns, sys_swapoff,
+    sys_swapon, sys_umount2, sys_vhangup,
+};
 
 // Linux dirent64 structure
 #[repr(C)]
@@ -54,6 +71,7 @@ static mut CWD_FID: u32 = 0;
 struct FileDescriptor {
     fid: u32,
     cursor: u64,
+    #[allow(dead_code)]
     is_dir: bool,
 }
 
@@ -70,7 +88,7 @@ use alloc::string::ToString;
 #[cfg(target_arch = "riscv32")]
 use alloc::vec::Vec;
 
-use core::{alloc::Layout, ptr::NonNull};
+use core::{alloc::Layout, ptr::NonNull, str};
 use rlsf::Tlsf;
 
 type Heap = Tlsf<'static, usize, usize, { usize::BITS as usize }, { usize::BITS as usize }>;
@@ -395,7 +413,7 @@ pub const SYS_VMSPLICE: u32 = 75;
 pub const SYS_WAITID: u32 = 95;
 
 #[derive(Clone, Copy)]
-enum Err {
+pub enum Err {
     NoMem = -12,
     Inval = -22,
     FileNotFound = -2,
@@ -478,7 +496,7 @@ impl UserStack {
     }
 }
 
-pub const P9_ENABLED: bool = false;
+pub const P9_ENABLED: bool = true;
 
 pub fn start_linux_binary(argc: u32) -> ! {
     unsafe {
@@ -548,6 +566,7 @@ pub fn start_linux_binary(argc: u32) -> ! {
 
     let mut stack = UserStack::new();
     stack.add_word(argc as usize);
+    let mut arg0 = None;
 
     // XXX we should review this code from a security perspective
     // Get each argument from host and add to stack
@@ -568,6 +587,9 @@ pub fn start_linux_binary(argc: u32) -> ! {
                 .position(|&b| b == 0)
                 .unwrap_or(arg_slice.len());
             let arg_str = &arg_slice[..nul_pos];
+            if i == 0 {
+                arg0 = Some(String::from_utf8(arg_str.to_vec()).unwrap());
+            }
             match core::str::from_utf8(arg_str) {
                 Ok(s) => debug_print!("arg {i}: \"{s}\" ({arg_len}, null-terminated)"),
                 Err(_) => debug_print!(
@@ -579,6 +601,103 @@ pub fn start_linux_binary(argc: u32) -> ! {
         } else {
             // Fallback to empty string if something goes wrong
             stack.add_str(b"");
+        }
+    }
+    let user_start_addr: usize = unsafe { USER_START_PTR.read_volatile() };
+
+    if user_start_addr == 0 {
+        // okay, so we should look for the path
+        if let Some(arg0) = arg0 {
+            // entire user memory is free cos ELF there
+            let block: &[u8] =
+                unsafe { core::slice::from_raw_parts(USER_MEMORY_START_PTR, USER_MEMORY_LENGTH) };
+            #[allow(static_mut_refs)]
+            unsafe {
+                HEAP.insert_free_block_ptr(block.into());
+            }
+            let path = arg0;
+            // let's first get the file size
+            let file = load_file_aligned_to_page_size(&path);
+            let elf = ElfBytes::<LittleEndian>::minimal_parse(file).unwrap();
+            kprint!("elf: {:?}", elf);
+            // let's find if it's dynamic, the interpreter
+            if elf.ehdr.e_type == elf::abi::ET_DYN {
+                // For ET_DYN (dynamic) ELF, find the interpreter (PT_INTERP) and print it, no-std style.
+                let mut interp_path = None;
+                for ph in elf.segments().unwrap() {
+                    if ph.p_type == PT_INTERP {
+                        // Read the interpreter path from the segment
+                        let _offset = ph.p_offset as usize;
+                        let filesz = ph.p_filesz as usize;
+                        if let Ok(interp_bytes) = elf.segment_data(&ph) {
+                            // PT_INTERP is a null-terminated string
+                            let nul_pos =
+                                interp_bytes.iter().position(|&b| b == 0).unwrap_or(filesz);
+                            let path_bytes = &interp_bytes[..nul_pos];
+                            // Try to print as UTF-8, fallback to hex if not valid
+                            interp_path = match core::str::from_utf8(path_bytes) {
+                                Ok(s) => Some(s.to_string()),
+                                Err(_) => None,
+                            }
+                        }
+                    }
+                }
+                if let Some(interp_path) = interp_path {
+                    let interp_file = load_file_aligned_to_page_size(&interp_path);
+                    let interp_elf = ElfBytes::<LittleEndian>::minimal_parse(interp_file).unwrap();
+                    kprint!("interp_elf: {:?}", interp_elf);
+                    if elf.ehdr.class != Class::ELF32 {
+                        kpanic!("Interpreter not a 32-bit ELF");
+                    }
+                    if elf.ehdr.e_machine != elf::abi::EM_RISCV {
+                        kpanic!("Interpreter has invalid machine type, must be RISC-V");
+                    }
+                    // Load interpreter ELF segments into memory, similar to ELF loader logic
+                    // This is a minimal, in-place version for the Linux ABI loader
+
+                    // We'll use the same logic as in the ELF loader to map PT_LOAD segments
+                    let max_mem = USER_MEMORY_LENGTH as u32;
+                    let word_size = core::mem::size_of::<usize>() as u32;
+                    let input = interp_file;
+
+                    for segment in interp_elf
+                        .segments()
+                        .unwrap()
+                        .iter()
+                        .filter(|x| x.p_type == elf::abi::PT_LOAD)
+                    {
+                        let file_size: u32 = segment.p_filesz.try_into().unwrap();
+                        if file_size >= max_mem {
+                            kpanic!("Invalid segment file_size");
+                        }
+                        let mem_size: u32 = segment.p_memsz.try_into().unwrap();
+                        if mem_size >= max_mem {
+                            kpanic!("Invalid segment mem_size");
+                        }
+                        let vaddr: u32 = segment.p_vaddr.try_into().unwrap();
+                        if vaddr % word_size != 0 {
+                            kpanic!("vaddr {:#08x} is unaligned", vaddr);
+                        }
+                        // allocate the memory for the segment
+                        let layout = Layout::from_size_align(mem_size as usize, PAGE_SIZE).unwrap();
+                        #[allow(static_mut_refs)]
+                        let ptr = unsafe { HEAP.allocate(layout).unwrap().as_ptr() };
+                        if ptr.is_null() {
+                            kpanic!("Failed to allocate memory for segment");
+                        }
+                        // copy the segment data to the allocated memory
+                        unsafe {
+                            ptr.copy_from(input.as_ptr(), mem_size as usize);
+                        }
+                    }
+                } else {
+                    kpanic!("No PT_INTERP found in ET_DYN ELF");
+                }
+            } else {
+                kprint!("elf is static");
+            }
+
+            kpanic!("USER_START_PTR is 0, path: {}", path);
         }
     }
     stack.add_null();
@@ -622,11 +741,57 @@ pub fn start_linux_binary(argc: u32) -> ! {
         HEAP.insert_free_block_ptr(block.into());
     }
     print("starting linux binary");
-    let user_start_addr = unsafe { USER_START_PTR.read_volatile() } - 4;
+    let user_start_addr: usize = unsafe { USER_START_PTR.read_volatile() } - 4;
     unsafe {
         MEPC_PTR.write_volatile(user_start_addr);
     }
     mret()
+}
+
+fn load_file_aligned_to_page_size(path: &String) -> &[u8] {
+    let file_size = get_file_size(path, 0);
+    if let Ok(file_size) = file_size {
+        kprint!("elf_loader: file_size = {}", file_size);
+        #[allow(static_mut_refs)]
+        let ptr = unsafe {
+            let layout = Layout::from_size_align(file_size as usize, PAGE_SIZE).unwrap_unchecked();
+            let ptr = HEAP.allocate(layout).unwrap().as_ptr();
+            if !ptr.is_null() {
+                ptr.write_bytes(0, layout.size());
+            }
+            ptr
+        };
+        const O_RDONLY: u32 = 0;
+        let result = do_openat(-1i32 as u32, path, O_RDONLY, 0);
+
+        if let Ok(_fd) = result {
+            let mut file_ptr = ptr as u32;
+            let mut read_so_far = 0u64;
+
+            while read_so_far < file_size {
+                let read_this_much = if (file_size - read_so_far) > 128 {
+                    128
+                } else {
+                    file_size - read_so_far
+                };
+                kprint!("sys_read: read_this_much = {}", read_this_much);
+                let read_result = sys_read(_fd, file_ptr, read_this_much as u32);
+                if let Ok(read_count) = read_result {
+                    read_so_far += read_count as u64;
+                    file_ptr += read_count;
+                } else {
+                    kpanic!("Failed to read file: {}", path);
+                }
+            }
+            let _ = sys_close(_fd);
+            // turn ptr into a slice
+            unsafe { core::slice::from_raw_parts(ptr, file_size as usize) }
+        } else {
+            kpanic!("Failed to open path: {}", path);
+        }
+    } else {
+        kpanic!("Failed to get file size: {}", path);
+    }
 }
 
 pub fn handle_linux_syscall() -> ! {
@@ -1100,6 +1265,7 @@ fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
                 FD_TABLE[_fd as usize].cursor,
                 _count,
             );
+            kprint!("sys_read: tread = {:?}", tread);
             match tread.send_tread() {
                 Ok(bytes_written) => {
                     kprint!("sys_read: bytes_written = {}", bytes_written);
@@ -1119,7 +1285,7 @@ fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
                     return Ok(rread.count);
                 }
                 P9Response::Error(rlerror) => {
-                    kprint!("sys_read: error = {:?}", rlerror);
+                    kprint!("sys_read 1: error = {:?}", rlerror);
                     return Err(Err::NoSys);
                 }
             }
@@ -1190,7 +1356,7 @@ fn sys_writev(fd: u32, vec_ptr: u32, vlen: u32) -> Result<u32, Err> {
     let fd = fd as i32;
     let vec_ptr = vec_ptr as *const IoVec;
     let vec = unsafe { core::slice::from_raw_parts(vec_ptr, vlen as usize) };
-    if (fd > 2) {
+    if fd > 2 {
         // For file descriptors > 2 (not stdout/stderr), return not implemented for now.
         let msg = b"sys_writev for fd > 2 not implemented";
         host_log(msg.as_ptr(), msg.len());
@@ -1281,65 +1447,6 @@ fn sys_rt_sigprocmask(_how: u32, nset: u32, oset: u32, _sigsetsize: u32) -> Resu
 }
 
 // Stub implementations for all additional syscalls
-fn sys_accept(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
-    let msg = b"sys_accept not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_accept4(_sockfd: u32, _addr: u32, _addrlen: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_accept4 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_acct(_filename: u32) -> Result<u32, Err> {
-    let msg = b"sys_acct not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_add_key(
-    _type: u32,
-    _description: u32,
-    _payload: u32,
-    _plen: u32,
-    _keyring: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_add_key not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_bind(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
-    let msg = b"sys_bind not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_bpf(_cmd: u32, _attr: u32, _size: u32) -> Result<u32, Err> {
-    let msg = b"sys_bpf not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_cachestat(_fd: u32, _cstat: u32, _cstat_size: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_cachestat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_capget(_hdrp: u32, _datap: u32) -> Result<u32, Err> {
-    let msg = b"sys_capget not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_capset(_hdrp: u32, _datap: u32) -> Result<u32, Err> {
-    let msg = b"sys_capset not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
 
 fn sys_chdir(_filename: u32) -> Result<u32, Err> {
     let msg = b"sys_chdir not implemented";
@@ -1347,14 +1454,25 @@ fn sys_chdir(_filename: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-fn sys_chroot(_filename: u32) -> Result<u32, Err> {
-    let msg = b"sys_chroot not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+fn sys_close(_fd: u32) -> Result<u32, Err> {
+    kprint!("sys_close: fd = {}", _fd);
+    unsafe {
+        if FD_TABLE[_fd as usize].fid != 0xFFFF_FFFE && FD_TABLE[_fd as usize].fid != 0 {
+            clunk(FD_TABLE[_fd as usize].fid);
+            FD_TABLE[_fd as usize] = FileDescriptor {
+                fid: 0,
+                cursor: 0,
+                is_dir: false,
+            };
+            Ok(0)
+        } else {
+            Err(Err::NoSys)
+        }
+    }
 }
 
-fn sys_clock_adjtime64(_which_clock: u32, _tx: u32) -> Result<u32, Err> {
-    let msg = b"sys_clock_adjtime64 not implemented";
+fn sys_cachestat(_fd: u32, _cstat: u32, _cstat_size: u32, _flags: u32) -> Result<u32, Err> {
+    let msg = b"sys_cachestat not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -1382,12 +1500,6 @@ fn sys_clock_nanosleep_time64(
     Err(Err::NoSys)
 }
 
-fn sys_clock_settime64(_which_clock: u32, _tp: u32) -> Result<u32, Err> {
-    let msg = b"sys_clock_settime64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_clone(
     _flags: u32,
     _child_stack: u32,
@@ -1406,31 +1518,8 @@ fn sys_clone3(_cl_args: u32, _size: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-fn sys_close(_fd: u32) -> Result<u32, Err> {
-    kprint!("sys_close: fd = {}", _fd);
-    unsafe {
-        if FD_TABLE[_fd as usize].fid != 0xFFFF_FFFE && FD_TABLE[_fd as usize].fid != 0 {
-            clunk(FD_TABLE[_fd as usize].fid);
-            FD_TABLE[_fd as usize] = FileDescriptor {
-                fid: 0,
-                cursor: 0,
-                is_dir: false,
-            };
-            Ok(0)
-        } else {
-            Err(Err::NoSys)
-        }
-    }
-}
-
 fn sys_close_range(_first: u32, _last: u32, _flags: u32) -> Result<u32, Err> {
     let msg = b"sys_close_range not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_connect(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
-    let msg = b"sys_connect not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -1444,12 +1533,6 @@ fn sys_copy_file_range(
     _flags: u32,
 ) -> Result<u32, Err> {
     let msg = b"sys_copy_file_range not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_delete_module(_name: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_delete_module not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -1604,10 +1687,14 @@ fn sys_fchownat(
     Err(Err::NoSys)
 }
 
+#[allow(dead_code)]
 pub const F_DUPFD: u32 = 0; // Duplicate file descriptor.
+#[allow(dead_code)]
 pub const F_GETFD: u32 = 1; // Get file descriptor flags.
 pub const F_SETFD: u32 = 2; // Set file descriptor flags.
+#[allow(dead_code)]
 pub const F_GETFL: u32 = 3; // Get file status flags.
+#[allow(dead_code)]
 pub const F_SETFL: u32 = 4; // Set file status flags.
 pub const FD_CLOEXEC: u32 = 1; // Close on exec flag.
 
@@ -1642,12 +1729,6 @@ fn sys_file_getattr(_dfd: u32, _filename: u32, _mask: u32) -> Result<u32, Err> {
 
 fn sys_file_setattr(_dfd: u32, _filename: u32, _mask: u32) -> Result<u32, Err> {
     let msg = b"sys_file_setattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_finit_module(_fd: u32, _param_values: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_finit_module not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -1937,7 +2018,7 @@ fn sys_getdents64(fd: u32, dirp: u32, count: u32) -> Result<u32, Err> {
                 // Write Linux dirent64 structure directly to user buffer
                 unsafe {
                     let user_ptr = (dirp + user_offset as u32) as *mut u8;
-                    let dirent_ptr = user_ptr as *mut LinuxDirent64;
+                    let _dirent_ptr = user_ptr as *mut LinuxDirent64;
 
                     // Write structure fields directly to buffer at correct offsets
                     // d_ino at offset 0-7
@@ -2067,12 +2148,6 @@ fn sys_getitimer(_which: u32, _value: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-fn sys_getpeername(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
-    let msg = b"sys_getpeername not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_getpgid(_pid: u32) -> Result<u32, Err> {
     let msg = b"sys_getpgid not implemented";
     host_log(msg.as_ptr(), msg.len());
@@ -2127,24 +2202,6 @@ fn sys_getsid(_pid: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-fn sys_getsockname(_sockfd: u32, _addr: u32, _addrlen: u32) -> Result<u32, Err> {
-    let msg = b"sys_getsockname not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_getsockopt(
-    _sockfd: u32,
-    _level: u32,
-    _optname: u32,
-    _optval: u32,
-    _optlen: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_getsockopt not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_gettid() -> Result<u32, Err> {
     let msg = b"sys_gettid not implemented";
     host_log(msg.as_ptr(), msg.len());
@@ -2163,12 +2220,6 @@ fn sys_getxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Result<u
 
 fn sys_getxattrat(_dfd: u32, _filename: u32, _name: u32, _value: u32) -> Result<u32, Err> {
     let msg = b"sys_getxattrat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_init_module(_module_image: u32, _len: u32, _param_values: u32) -> Result<u32, Err> {
-    let msg = b"sys_init_module not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -2270,55 +2321,8 @@ fn sys_kcmp(_pid1: u32, _pid2: u32, _type: u32, _idx1: u32, _idx2: u32) -> Resul
     Err(Err::NoSys)
 }
 
-fn sys_kexec_file_load(
-    _kernel_fd: u32,
-    _initrd_fd: u32,
-    _cmdline_len: u32,
-    _cmdline: u32,
-    _flags: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_kexec_file_load not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_kexec_load(_entry: u32, _nr_segments: u32, _segments: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_kexec_load not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_keyctl(_operation: u32, _arg2: u32, _arg3: u32, _arg4: u32, _arg5: u32) -> Result<u32, Err> {
-    let msg = b"sys_keyctl not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_kill(_pid: u32, _sig: u32) -> Result<u32, Err> {
     let msg = b"sys_kill not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_landlock_add_rule(
-    _ruleset_fd: u32,
-    _rule_type: u32,
-    _rule_attr: u32,
-    _flags: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_landlock_add_rule not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_landlock_create_ruleset(_attr: u32, _size: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_landlock_create_ruleset not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_landlock_restrict_self(_ruleset_fd: u32) -> Result<u32, Err> {
-    let msg = b"sys_landlock_restrict_self not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -2337,12 +2341,6 @@ fn sys_linkat(
     _flags: u32,
 ) -> Result<u32, Err> {
     let msg = b"sys_linkat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_listen(_sockfd: u32, _backlog: u32) -> Result<u32, Err> {
-    let msg = b"sys_listen not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -2507,30 +2505,6 @@ fn sys_mlock2(_addr: u32, _len: u32, _flags: u32) -> Result<u32, Err> {
 
 fn sys_mlockall(_flags: u32) -> Result<u32, Err> {
     let msg = b"sys_mlockall not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_mount(
-    _source: u32,
-    _target: u32,
-    _filesystemtype: u32,
-    _mountflags: u32,
-    _data: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_mount not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_mount_setattr(
-    _dfd: u32,
-    _path: u32,
-    _flags: u32,
-    _uattr: u32,
-    _usize: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_mount_setattr not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -2734,7 +2708,7 @@ unsafe fn set_fd(fd: u32, fid: u32) {
 
 #[allow(dead_code)]
 // instead of wnames we take a path
-fn do_walk(starting_fid: u32, target_fid: u32, path: String) -> Result<u32, Err> {
+fn do_walk(starting_fid: u32, target_fid: u32, path: String) -> Result<(u32, Vec<Qid>), Err> {
     let wnames: Vec<String> = path.split("/").skip(1).map(|s| s.to_string()).collect();
     let wnames_len = wnames.len();
     let twalk = crate::p9::TwalkMessage::new(0, starting_fid, target_fid, wnames);
@@ -2753,7 +2727,7 @@ fn do_walk(starting_fid: u32, target_fid: u32, path: String) -> Result<u32, Err>
                 clunk(target_fid);
                 Err(Err::FileNotFound)
             } else {
-                Ok(0)
+                Ok((0, rwalk.wqids))
             }
         }
         P9Response::Error(rlerror) => {
@@ -2795,7 +2769,6 @@ fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32,
         .unwrap_or(filename.len());
     let filename = &filename[..null_pos];
 
-    // Convert the filename to a UTF-8 string
     let filename_str = match str::from_utf8(filename) {
         Ok(s) => s,
         Err(_) => {
@@ -2803,6 +2776,11 @@ fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32,
             return Err(Err::NoSys);
         }
     };
+    do_openat(_dfd, filename_str, _flags, _mode)
+}
+
+fn do_openat(_dfd: u32, filename_str: &str, _flags: u32, _mode: u32) -> Result<u32, Err> {
+    // Convert the filename to a UTF-8 s
     kprint!("sys_openat: filename='{}'", filename_str);
     // lets check if its an absolute path and panic otherwise
     if !filename_str.starts_with("/") {
@@ -2833,7 +2811,7 @@ fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32,
 
         let dir_walk_result = do_walk(0, file_fid, dir_path.clone());
         match dir_walk_result {
-            Ok(ret_code) => {
+            Ok((ret_code, _)) => {
                 if ret_code != 0 {
                     kprint!(
                         "sys_openat: failed to walk to directory, error: {}",
@@ -2896,25 +2874,19 @@ fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32,
 
     // Original logic for opening existing files
     let fid = unsafe { find_free_fd() };
-    let walk_result = do_walk(0, fid, filename_str.to_string());
-    match walk_result {
-        Ok(ret_code) => {
-            if ret_code != 0 {
-                return Ok(ret_code);
-            }
-        }
-        Err(e) => {
-            return Err(e);
-        }
+    let resolve_result = resolve_path(filename_str, 0, fid);
+    if resolve_result.is_err() {
+        return Err(resolve_result.unwrap_err());
+    } else {
+        kprint!(
+            "sys_openat: dfd={}, filename='{}', real_filename='{}' flags=0x{:x}, mode=0x{:x}",
+            _dfd,
+            filename_str,
+            resolve_result.unwrap_or("".to_string()),
+            _flags,
+            _mode
+        );
     }
-
-    kprint!(
-        "sys_openat: dfd={}, filename='{}', flags=0x{:x}, mode=0x{:x}",
-        _dfd,
-        filename_str,
-        _flags,
-        _mode
-    );
 
     // Convert Linux open flags to 9P open flags
     // This is a simplified mapping - in reality, we'd need more sophisticated flag conversion
@@ -3219,43 +3191,6 @@ fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-fn sys_reboot(_magic1: u32, _magic2: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
-    let msg = b"sys_reboot not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_recvfrom(
-    _sockfd: u32,
-    _buf: u32,
-    _len: u32,
-    _flags: u32,
-    _src_addr: u32,
-    _addrlen: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_recvfrom not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_recvmmsg_time64(
-    _sockfd: u32,
-    _msgvec: u32,
-    _vlen: u32,
-    _flags: u32,
-    _timeout: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_recvmmsg_time64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_recvmsg(_sockfd: u32, _msg: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_recvmsg not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_remap_file_pages(
     _start: u32,
     _size: u32,
@@ -3481,31 +3416,6 @@ fn sys_sendfile64(_out_fd: u32, _in_fd: u32, _offset: u32, _count: u32) -> Resul
     Err(Err::NoSys)
 }
 
-fn sys_sendmmsg(_sockfd: u32, _msgvec: u32, _vlen: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_sendmmsg not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_sendmsg(_sockfd: u32, _msg: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_sendmsg not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_sendto(
-    _sockfd: u32,
-    _buf: u32,
-    _len: u32,
-    _flags: u32,
-    _dest_addr: u32,
-    _addrlen: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_sendto not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_set_mempolicy(
     _mode: u32,
     _nmask: u32,
@@ -3578,12 +3488,6 @@ fn sys_setitimer(_which: u32, _value: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-fn sys_setns(_fd: u32, _nstype: u32) -> Result<u32, Err> {
-    let msg = b"sys_setns not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_setpgid(_pid: u32, _pgid: u32) -> Result<u32, Err> {
     let msg = b"sys_setpgid not implemented";
     host_log(msg.as_ptr(), msg.len());
@@ -3622,18 +3526,6 @@ fn sys_setreuid(_ruid: u32, _euid: u32) -> Result<u32, Err> {
 
 fn sys_setsid() -> Result<u32, Err> {
     let msg = b"sys_setsid not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_setsockopt(
-    _sockfd: u32,
-    _level: u32,
-    _optname: u32,
-    _optval: u32,
-    _optlen: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_setsockopt not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -3692,26 +3584,8 @@ fn sys_shmget(_key: u32, _size: u32, _shmflg: u32, _version: u32) -> Result<u32,
     Err(Err::NoSys)
 }
 
-fn sys_shutdown(_sockfd: u32, _how: u32) -> Result<u32, Err> {
-    let msg = b"sys_shutdown not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_signalfd4(_fd: u32, _mask: u32, _sizemask: u32) -> Result<u32, Err> {
     let msg = b"sys_signalfd4 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_socket(_domain: u32, _type: u32, _protocol: u32) -> Result<u32, Err> {
-    let msg = b"sys_socket not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_socketpair(_domain: u32, _type: u32, _protocol: u32, _sv: u32) -> Result<u32, Err> {
-    let msg = b"sys_socketpair not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -3850,6 +3724,149 @@ fn clunk(fid: u32) {
     }
 }
 
+// This implementation mimics the behavior of the POSIX dirname utility.
+// It returns the parent directory of the given path, handling edge cases.
+fn dirname(path: &str) -> String {
+    // Remove trailing slashes except for root
+    let path = path.trim_end_matches('/');
+
+    // If the path is empty after trimming, return "/"
+    if path.is_empty() {
+        return "/".to_string();
+    }
+
+    // Find the last slash in the path
+    if let Some(pos) = path.rfind('/') {
+        if pos == 0 {
+            // Path is like "/foo" or "/"
+            "/".to_string()
+        } else {
+            // Path is like "/foo/bar" or "foo/bar"
+            path[..pos].to_string()
+        }
+    } else {
+        // No slash found, so return "/"
+        "/".to_string()
+    }
+}
+
+fn resolve_relative_path_to_absolute(relative_path: &str, relative_to: &str) -> String {
+    if relative_path.starts_with("/") {
+        relative_path.to_string()
+    } else {
+        // handle .. and . properly
+        let relative_path = relative_path.split("/").collect::<Vec<&str>>();
+        let relative_to = relative_to.split("/").collect::<Vec<&str>>();
+        let mut new_path = relative_to.clone();
+        for path in relative_path {
+            if path == ".." {
+                new_path.pop();
+            } else if path == "." {
+                continue;
+            } else {
+                new_path.push(path);
+            }
+        }
+        new_path.join("/")
+    }
+}
+
+// resolves path and fid 0xFFFF_FFFE points to it after
+fn resolve_path(path: &str, depth: u32, fid: u32) -> Result<String, Err> {
+    if depth > 40 {
+        // don't let it recurse too much
+        kprint!("resolve_path: depth too deep, returning error");
+        return Err(Err::NoSys);
+    }
+    let walk_result = unsafe { do_walk(ROOT_FID, fid, path.to_string()) };
+
+    match walk_result {
+        Ok((ret_code, qid)) => {
+            if ret_code != 0 {
+                return Err(Err::Inval);
+            }
+            if qid[qid.len() - 1].is_symlink() {
+                let dirname = dirname(path);
+
+                let treadlink = crate::p9::TreadlinkMessage::new(0, fid);
+                match treadlink.send_treadlink() {
+                    Ok(bytes_written) => {
+                        kprint!("resolve_path: bytes_written = {}", bytes_written);
+                    }
+                    Err(e) => {
+                        kprint!("resolve_path: error = {:?}", e);
+                    }
+                }
+                match RreadlinkMessage::read_response() {
+                    P9Response::Success(rreadlink) => {
+                        kprint!("resolve_path: rreadlink = {:?}", rreadlink);
+                        clunk(fid);
+                        let target = rreadlink.target;
+                        // now we need to resolve the symlink to an absolute path
+                        let target =
+                            resolve_relative_path_to_absolute(target.as_str(), dirname.as_str());
+                        kprint!("resolve_path: resolved target = {}", target);
+                        resolve_path(&target, depth + 1, fid)
+                    }
+                    P9Response::Error(rlerror) => {
+                        kprint!(
+                            "resolv_path: received Rlerror for readlink operation: tag={}, ecode={}",
+                            rlerror.tag,
+                            rlerror.ecode
+                        );
+                        Err(Err::NoSys)
+                    }
+                }
+            } else {
+                Ok(path.to_string())
+            }
+        }
+        Err(e) => Err(e),
+    }
+}
+
+fn get_file_size(path: &str, depth: u32) -> Result<u64, Err> {
+    if depth > 40 {
+        // don't let it recurse too much
+        kprint!("get_file_size: depth too deep, returning error");
+        return Err(Err::NoSys);
+    }
+
+    let resolve_result = resolve_path(path, depth, 0xFFFF_FFFE);
+    match resolve_result {
+        Ok(_) => {}
+        Err(e) => {
+            return Err(e);
+        }
+    }
+
+    let tgetattr = crate::p9::TgetattrMessage::new(0, 0xFFFF_FFFE, P9_GETATTR_ALL);
+    match tgetattr.send_tgetattr() {
+        Ok(bytes_written) => {
+            kprint!("sys_statx: bytes_written = {}", bytes_written);
+        }
+        Err(e) => {
+            kprint!("sys_statx: error = {:?}", e);
+        }
+    }
+    match RgetattrMessage::read_response() {
+        P9Response::Success(rgetattr) => {
+            kprint!("sys_statx: rgetattr = {:?}", rgetattr);
+            clunk(0xFFFF_FFFE);
+            Ok(rgetattr.size)
+        }
+        P9Response::Error(rlerror) => {
+            kprint!(
+                "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
+                rlerror.tag,
+                rlerror.ecode
+            );
+            clunk(0xFFFF_FFFE);
+            Err(Err::NoSys)
+        }
+    }
+}
+
 fn sys_statx(
     _dfd: u32,
     _filename: u32,
@@ -3880,7 +3897,7 @@ fn sys_statx(
     // skip the first element of the vector
     let walk_result = do_walk(start_fid, 0xFFFF_FFFE, filename.to_string());
     match walk_result {
-        Ok(ret_code) => {
+        Ok((ret_code, _)) => {
             if ret_code != 0 {
                 return Ok(ret_code);
             }
@@ -3923,18 +3940,6 @@ fn sys_statx(
         }
         Err(e) => Err(e),
     }
-}
-
-fn sys_swapoff(_specialfile: u32) -> Result<u32, Err> {
-    let msg = b"sys_swapoff not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_swapon(_specialfile: u32, _swapflags: u32, _version: u32) -> Result<u32, Err> {
-    let msg = b"sys_swapon not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
 }
 
 fn sys_symlinkat(_target: u32, _newdirfd: u32, _linkpath: u32, _flags: u32) -> Result<u32, Err> {
@@ -4065,12 +4070,6 @@ fn sys_umask(_mask: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-fn sys_umount2(_target: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_umount2 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 fn sys_uname(_buf: u32) -> Result<u32, Err> {
     let msg = b"sys_uname not implemented";
     host_log(msg.as_ptr(), msg.len());
@@ -4097,12 +4096,6 @@ fn sys_userfaultfd(_flags: u32) -> Result<u32, Err> {
 
 fn sys_utimensat_time64(_dfd: u32, _filename: u32, _times: u32, _flags: u32) -> Result<u32, Err> {
     let msg = b"sys_utimensat_time64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-fn sys_vhangup() -> Result<u32, Err> {
-    let msg = b"sys_vhangup not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
