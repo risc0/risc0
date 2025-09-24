@@ -11,6 +11,7 @@ use crate::{
         attach_to_p9, get_p9_enabled, init_fs, load_file_aligned_to_page_size, set_p9_enabled,
         sys_statx,
     },
+    p9::get_p9_traffic_hash,
 };
 use elf::{ElfBytes, abi::PT_INTERP, endian::LittleEndian, file::Class};
 
@@ -525,9 +526,6 @@ pub fn allocate_aligned_to_page_size(file_size: u64) -> *const u8 {
 pub fn start_linux_binary(argc: u32) -> ! {
     init_fs();
 
-    let mut stack = UserStack::new();
-    stack.add_word(argc as usize);
-
     // XXX we should review this code from a security perspective
     // Get each argument from host and add to stack
     let mut argv = vec![];
@@ -554,11 +552,13 @@ pub fn start_linux_binary(argc: u32) -> ! {
     if !argv.is_empty() {
         if argv[0].starts_with("opts=p9") {
             set_p9_enabled(true);
+            argv.remove(0);
         } else {
             set_p9_enabled(false);
         }
-        argv.remove(0);
     }
+    let mut stack = UserStack::new();
+    stack.add_word(argv.len());
 
     if get_p9_enabled() {
         attach_to_p9();
@@ -662,6 +662,7 @@ pub fn start_linux_binary(argc: u32) -> ! {
             kpanic!("USER_START_PTR is 0, path: {}", path);
         }
     }
+
     for arg in &argv {
         stack.add_str(arg.as_bytes());
     }
@@ -1174,6 +1175,11 @@ fn sys_munmap(addr: u32, _len: u32) -> Result<u32, Err> {
 /// https://man7.org/linux/man-pages/man2/ioctl.2.html
 /// https://man7.org/linux/man-pages/man2/_exit.2.html
 fn sys_exit(error_code: u32) -> Result<u32, Err> {
+    if get_p9_enabled() {
+        let traffic_hash = get_p9_traffic_hash();
+        // Commit to journal in future
+        kprint!("sys_exit: p9_traffic_hash = {:?}", traffic_hash);
+    }
     let msg = str_format!(str256, "sys_exit({error_code})");
     print(&msg);
     host_terminate(error_code, 0);

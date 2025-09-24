@@ -623,69 +623,52 @@ pub trait ReadableMessage: Sized {
         // Read the message data once
         let mut buf = [0u8; 8192];
 
-        // Read the length prefix (4 bytes)
-        let len_prefix = crate::host_calls::host_read(3, buf.as_mut_ptr(), 4);
-        if len_prefix != 4 {
-            kprint!("ReadableMessage::read_response: len_prefix != 4");
-            return P9Response::Error(RlerrorMessage::new(0, 0)); // Generic error
-        }
+        // Use p9_read_message to handle the length prefix and reading
+        match p9_read_message(3, &mut buf) {
+            Ok(data_len) => {
+                kprint!("ReadableMessage::read_response: data_len = {}", data_len);
 
-        // Parse the length (little-endian)
-        let data_len = u32::from_le_bytes([buf[0], buf[1], buf[2], buf[3]]);
-        if !(5..=8192).contains(&data_len) {
-            kprint!(
-                "ReadableMessage::read_response: data_len out of range: {} {:x} {:x} {:x} {:x}",
-                data_len,
-                buf[0],
-                buf[1],
-                buf[2],
-                buf[3]
-            );
-            return P9Response::Error(RlerrorMessage::new(0, 0)); // Generic error
-        } else {
-            kprint!("ReadableMessage::read_response: data_len = {}", data_len);
-        }
+                // print the buffer up to data_len
+                kprint!(
+                    "ReadableMessage::read_response: buf = {:?}",
+                    &buf[..data_len as usize]
+                );
 
-        // Read the rest of the message
-        let len = crate::host_calls::host_read(3, buf[4..].as_mut_ptr(), (data_len - 4) as usize);
-        if len as u32 != data_len - 4 {
-            kprint!(
-                "ReadableMessage::read_response: length mismatch: {} != {}",
-                len,
-                data_len - 4
-            );
-            // P9Response::Error(RlerrorMessage::new(0, 0)) // Generic error
-        }
-        // print the buffer up to data_len
-        kprint!(
-            "ReadableMessage::read_response: buf = {:?}",
-            &buf[..data_len as usize]
-        );
+                // Check the message type
+                let msg_type = buf[4];
+                kprint!("ReadableMessage::read_response: msg_type = {}", msg_type);
 
-        // Check the message type
-        let msg_type = buf[4];
-        kprint!("ReadableMessage::read_response: msg_type = {}", msg_type);
-
-        if msg_type == P9MsgType::RLerror as u8 {
-            // This is an Rlerror message
-            match RlerrorMessage::deserialize(&buf[..data_len as usize]) {
-                Ok((rlerror, _)) => P9Response::Error(rlerror),
-                Err(_) => {
-                    kprint!("ReadableMessage::read_response: error deserializing Rlerror message");
-                    P9Response::Error(RlerrorMessage::new(0, 0)) // Generic error
+                if msg_type == P9MsgType::RLerror as u8 {
+                    // This is an Rlerror message
+                    match RlerrorMessage::deserialize(&buf[..data_len as usize]) {
+                        Ok((rlerror, _)) => P9Response::Error(rlerror),
+                        Err(_) => {
+                            kprint!(
+                                "ReadableMessage::read_response: error deserializing Rlerror message"
+                            );
+                            P9Response::Error(RlerrorMessage::new(0, 0)) // Generic error
+                        }
+                    }
+                } else {
+                    // This should be the expected response type
+                    match Self::deserialize(&buf[..data_len as usize]) {
+                        Ok((response, _)) => P9Response::Success(response),
+                        Err(err) => {
+                            kprint!(
+                                "ReadableMessage::read_response: error deserializing message: {:?}",
+                                err
+                            );
+                            P9Response::Error(RlerrorMessage::new(0, 0))
+                        }
+                    }
                 }
             }
-        } else {
-            // This should be the expected response type
-            match Self::deserialize(&buf[..data_len as usize]) {
-                Ok((response, _)) => P9Response::Success(response),
-                Err(err) => {
-                    kprint!(
-                        "ReadableMessage::read_response: error deserializing message: {:?}",
-                        err
-                    );
-                    P9Response::Error(RlerrorMessage::new(0, 0))
-                }
+            Err(err) => {
+                kprint!(
+                    "ReadableMessage::read_response: p9_read_message error: {:?}",
+                    err
+                );
+                P9Response::Error(RlerrorMessage::new(0, 0)) // Generic error
             }
         }
     }
@@ -771,21 +754,20 @@ impl TversionMessage {
         Ok(offset)
     }
 
-    /// Send the Tversion message using host_write
+    /// Send the Tversion message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tversion(&self) -> Result<u32, TversionError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 64]; // Large enough for any reasonable version string
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TversionError::InternalError),
+        }
     }
 }
 
@@ -982,21 +964,20 @@ impl TflushMessage {
         Ok(offset)
     }
 
-    /// Send the Tflush message using host_write
+    /// Send the Tflush message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tflush(&self) -> Result<u32, TflushError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 16]; // Large enough for Tflush message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TflushError::InternalError),
+        }
     }
 }
 
@@ -1157,21 +1138,20 @@ impl TreadMessage {
         Ok(offset)
     }
 
-    /// Send the Tread message using host_write
+    /// Send the Tread message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tread(&self) -> Result<u32, TreadError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 32]; // Large enough for Tread message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TreadError::InternalError),
+        }
     }
 }
 
@@ -1389,18 +1369,17 @@ impl TwriteMessage {
     /// Send the Twrite message using host_write
     /// Returns the number of bytes written, or an error
     pub fn send_twrite(&self) -> Result<u32, TwriteError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 1024]; // Large enough for Twrite message with data
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TwriteError::InternalError),
+        }
     }
 }
 
@@ -1617,21 +1596,20 @@ impl TwalkMessage {
         Ok(offset)
     }
 
-    /// Send the Twalk message using host_write
+    /// Send the Twalk message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_twalk(&self) -> Result<u32, TwalkError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 1024]; // Large enough for Twalk message with path elements
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TwalkError::InternalError),
+        }
     }
 }
 
@@ -1841,21 +1819,20 @@ impl TclunkMessage {
         Ok(offset)
     }
 
-    /// Send the Tclunk message using host_write
+    /// Send the Tclunk message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tclunk(&self) -> Result<u32, TclunkError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 16]; // Large enough for Tclunk message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TclunkError::InternalError),
+        }
     }
 }
 
@@ -2012,21 +1989,20 @@ impl TremoveMessage {
         Ok(offset)
     }
 
-    /// Send the Tremove message using host_write
+    /// Send the Tremove message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tremove(&self) -> Result<u32, TremoveError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 16]; // Large enough for Tremove message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TremoveError::InternalError),
+        }
     }
 }
 
@@ -2204,21 +2180,20 @@ impl TauthMessage {
         Ok(offset)
     }
 
-    /// Send the Tauth message using host_write
+    /// Send the Tauth message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tauth(&self) -> Result<u32, TauthError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 1024]; // Large enough for Tauth message with strings
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TauthError::InternalError),
+        }
     }
 }
 
@@ -2435,21 +2410,20 @@ impl TattachMessage {
         Ok(offset)
     }
 
-    /// Send the Tattach message using host_write
+    /// Send the Tattach message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tattach(&self) -> Result<u32, TattachError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 1024]; // Large enough for Tattach message with strings
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TattachError::InternalError),
+        }
     }
 }
 
@@ -2734,21 +2708,20 @@ impl TstatfsMessage {
         Ok(offset)
     }
 
-    /// Send the Tstatfs message using host_write
+    /// Send the Tstatfs message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tstatfs(&self) -> Result<u32, TstatfsError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 16]; // Large enough for Tstatfs message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TstatfsError::InternalError),
+        }
     }
 }
 
@@ -3020,21 +2993,20 @@ impl TlopenMessage {
         Ok(offset)
     }
 
-    /// Send the Tlopen message using host_write
+    /// Send the Tlopen message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tlopen(&self) -> Result<u32, TlopenError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 16]; // Large enough for Tlopen message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TlopenError::InternalError),
+        }
     }
 }
 
@@ -3272,21 +3244,20 @@ impl TlcreateMessage {
         Ok(offset)
     }
 
-    /// Send the Tlcreate message using host_write
+    /// Send the Tlcreate message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tlcreate(&self) -> Result<u32, TlcreateError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 128]; // Large enough for Tlcreate message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TlcreateError::InternalError),
+        }
     }
 }
 
@@ -3508,13 +3479,14 @@ impl TsymlinkMessage {
         Ok(offset)
     }
 
-    /// Send the Tsymlink message using host_write
+    /// Send the Tsymlink message using p9_write
     pub fn send_tsymlink(&self) -> Result<u32, TsymlinkError> {
-        use crate::host_calls::host_write;
         let mut buf = [0u8; 128];
         let bytes_written = self.serialize(&mut buf)?;
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-        Ok(result)
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TsymlinkError::InternalError),
+        }
     }
 }
 
@@ -3705,13 +3677,14 @@ impl TmknodMessage {
         Ok(offset)
     }
 
-    /// Send the Tmknod message using host_write
+    /// Send the Tmknod message using p9_write
     pub fn send_tmknod(&self) -> Result<u32, TmknodError> {
-        use crate::host_calls::host_write;
         let mut buf = [0u8; 128];
         let bytes_written = self.serialize(&mut buf)?;
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-        Ok(result)
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TmknodError::InternalError),
+        }
     }
 }
 
@@ -3867,13 +3840,14 @@ impl TrenameMessage {
         Ok(offset)
     }
 
-    /// Send the Trename message using host_write
+    /// Send the Trename message using p9_write
     pub fn send_trename(&self) -> Result<u32, TrenameError> {
-        use crate::host_calls::host_write;
         let mut buf = [0u8; 128];
         let bytes_written = self.serialize(&mut buf)?;
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-        Ok(result)
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TrenameError::InternalError),
+        }
     }
 }
 
@@ -3981,13 +3955,14 @@ impl TreadlinkMessage {
         Ok(offset)
     }
 
-    /// Send the Treadlink message using host_write
+    /// Send the Treadlink message using p9_write
     pub fn send_treadlink(&self) -> Result<u32, TreadlinkError> {
-        use crate::host_calls::host_write;
         let mut buf = [0u8; 16];
         let bytes_written = self.serialize(&mut buf)?;
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-        Ok(result)
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TreadlinkError::InternalError),
+        }
     }
 }
 
@@ -4209,21 +4184,20 @@ impl TgetattrMessage {
         Ok(offset)
     }
 
-    /// Send the Tgetattr message using host_write
+    /// Send the Tgetattr message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tgetattr(&self) -> Result<u32, TgetattrError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 32]; // Large enough for Tgetattr message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TgetattrError::InternalError),
+        }
     }
 }
 
@@ -4744,21 +4718,20 @@ impl TsetattrMessage {
         Ok(offset)
     }
 
-    /// Send the Tsetattr message using host_write
+    /// Send the Tsetattr message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tsetattr(&self) -> Result<u32, TsetattrError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 128]; // Large enough for Tsetattr message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TsetattrError::InternalError),
+        }
     }
 }
 
@@ -4947,21 +4920,20 @@ impl TxattrwalkMessage {
         Ok(offset)
     }
 
-    /// Send the Txattrwalk message using host_write
+    /// Send the Txattrwalk message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_txattrwalk(&self) -> Result<u32, TxattrwalkError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 128]; // Large enough for Txattrwalk message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TxattrwalkError::InternalError),
+        }
     }
 }
 
@@ -5126,21 +5098,20 @@ impl TxattrcreateMessage {
         Ok(offset)
     }
 
-    /// Send the Txattrcreate message using host_write
+    /// Send the Txattrcreate message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_txattrcreate(&self) -> Result<u32, TxattrcreateError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 128]; // Large enough for Txattrcreate message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TxattrcreateError::InternalError),
+        }
     }
 }
 
@@ -5284,21 +5255,20 @@ impl TreaddirMessage {
         Ok(offset)
     }
 
-    /// Send the Treaddir message using host_write
+    /// Send the Treaddir message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_treaddir(&self) -> Result<u32, TreaddirError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 32]; // Large enough for Treaddir message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TreaddirError::InternalError),
+        }
     }
 }
 
@@ -5518,21 +5488,20 @@ impl TfsyncMessage {
         Ok(offset)
     }
 
-    /// Send the Tfsync message using host_write
+    /// Send the Tfsync message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tfsync(&self) -> Result<u32, TfsyncError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 32]; // Large enough for Tfsync message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TfsyncError::InternalError),
+        }
     }
 }
 
@@ -5723,21 +5692,20 @@ impl TlockMessage {
         Ok(offset)
     }
 
-    /// Send the Tlock message using host_write
+    /// Send the Tlock message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tlock(&self) -> Result<u32, TlockError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 128]; // Large enough for Tlock message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TlockError::InternalError),
+        }
     }
 }
 
@@ -5926,21 +5894,20 @@ impl TgetlockMessage {
         Ok(offset)
     }
 
-    /// Send the Tgetlock message using host_write
+    /// Send the Tgetlock message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tgetlock(&self) -> Result<u32, TgetlockError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 128]; // Large enough for Tgetlock message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TgetlockError::InternalError),
+        }
     }
 }
 
@@ -6158,21 +6125,20 @@ impl TlinkMessage {
         Ok(offset)
     }
 
-    /// Send the Tlink message using host_write
+    /// Send the Tlink message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tlink(&self) -> Result<u32, TlinkError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 128]; // Large enough for Tlink message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TlinkError::InternalError),
+        }
     }
 }
 
@@ -6398,21 +6364,20 @@ impl TmkdirMessage {
         Ok(offset)
     }
 
-    /// Send the Tmkdir message using host_write
+    /// Send the Tmkdir message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tmkdir(&self) -> Result<u32, TmkdirError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 128]; // Large enough for Tmkdir message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TmkdirError::InternalError),
+        }
     }
 }
 
@@ -6596,21 +6561,20 @@ impl TrenameatMessage {
         Ok(offset)
     }
 
-    /// Send the Trenameat message using host_write
+    /// Send the Trenameat message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_trenameat(&self) -> Result<u32, TrenameatError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 128]; // Large enough for Trenameat message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TrenameatError::InternalError),
+        }
     }
 }
 
@@ -6755,21 +6719,20 @@ impl TunlinkatMessage {
         Ok(offset)
     }
 
-    /// Send the Tunlinkat message using host_write
+    /// Send the Tunlinkat message using p9_write
     /// Returns the number of bytes written, or an error
     pub fn send_tunlinkat(&self) -> Result<u32, TunlinkatError> {
-        use crate::host_calls::host_write;
-
         // Create a buffer for the serialized message
         let mut buf = [0u8; 128]; // Large enough for Tunlinkat message
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
 
-        // Send via host_write to file descriptor 4
-        let result = host_write(4, buf.as_ptr(), bytes_written);
-
-        Ok(result)
+        // Send via p9_send_message
+        match p9_send_message(&buf, bytes_written) {
+            Ok(result) => Ok(result),
+            Err(_) => Err(TunlinkatError::InternalError),
+        }
     }
 }
 
@@ -7379,6 +7342,220 @@ pub enum P9Error {
 impl fmt::Display for P9Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "P9Error({})", *self as i32)
+    }
+}
+
+/// P9 wrapper functions for host I/O operations
+/// These functions provide a higher-level interface for reading and writing to the host
+/// while wrapping the existing host_read and host_write functions from host_calls.
+
+/// Static mutable global to store the traffic hash value
+static mut TRAFFIC_HASH: [u8; 32] = [0; 32];
+
+/// P9 traffic hash update function that performs a 32-byte hash on input data and updates the traffic hash
+///
+/// This function:
+/// 1. Performs a 32-byte hash operation on the input slice
+/// 2. Combines the result with the previous hash stored in TRAFFIC_HASH
+/// 3. Updates TRAFFIC_HASH with the new combined hash
+///
+/// # Arguments
+/// * `data` - The u8 slice to hash
+///
+/// # Safety
+/// This function uses unsafe code to access the static mutable TRAFFIC_HASH
+pub fn p9_update_traffic_hash(data: &[u8]) {
+    // Create a 32-byte hash of the input data
+    let mut data_hash = [0u8; 32];
+
+    // XXX this should be using real SHA eventually
+    // Simple hash algorithm: distribute input bytes across the 32-byte output
+    for (i, &byte) in data.iter().enumerate() {
+        let pos = i % 32;
+        data_hash[pos] ^= byte;
+        // Also mix with position to avoid simple patterns
+        data_hash[pos] = data_hash[pos].wrapping_add((i as u8).wrapping_mul(7));
+    }
+
+    // Combine with previous hash using XOR
+    unsafe {
+        let mut combined_hash = [0u8; 32];
+        for i in 0..32 {
+            combined_hash[i] = TRAFFIC_HASH[i] ^ data_hash[i];
+        }
+        TRAFFIC_HASH = combined_hash;
+    }
+}
+
+/// Get the current P9 traffic hash value
+///
+/// # Returns
+/// * `[u8; 32]` - The current 32-byte traffic hash value
+///
+/// # Safety
+/// This function uses unsafe code to access the static mutable TRAFFIC_HASH
+pub fn get_p9_traffic_hash() -> [u8; 32] {
+    unsafe { TRAFFIC_HASH }
+}
+
+/// Helper function to send a serialized message via p9_write
+/// Returns the number of bytes written, or an error
+fn p9_send_message(buf: &[u8], bytes_written: usize) -> Result<u32, HostWriteError> {
+    // Update traffic hash with the message being sent
+    p9_update_traffic_hash(&buf[..bytes_written]);
+
+    p9_write(4, buf.as_ptr(), bytes_written)
+}
+
+/// P9 function for reading messages with length prefix
+///
+/// This function implements the common P9 pattern of reading a 4-byte length prefix
+/// followed by the actual message data. It handles the length parsing and validation
+/// automatically.
+///
+/// # Arguments
+/// * `fd` - File descriptor to read from
+/// * `buf` - Buffer to read data into (must be at least 4 bytes)
+///
+/// # Returns
+/// * `Result<u32, HostReadError>` - Total number of bytes read (including 4-byte prefix) on success
+pub fn p9_read_message(fd: u32, buf: &mut [u8]) -> Result<u32, HostReadError> {
+    use crate::host_calls::host_read;
+
+    if buf.len() < 4 {
+        return Err(HostReadError::BufferTooSmall);
+    }
+
+    // Read the length prefix (4 bytes)
+    let len_prefix = host_read(fd, buf.as_mut_ptr(), 4);
+    if len_prefix != 4 {
+        return Err(HostReadError::IncompleteLengthPrefix);
+    }
+
+    // Parse the length (little-endian)
+    let data_len = u32::from_le_bytes([buf[0], buf[1], buf[2], buf[3]]);
+
+    // Validate the length is reasonable
+    if !(5..=buf.len() as u32).contains(&data_len) {
+        return Err(HostReadError::InvalidLength {
+            length: data_len,
+            max_allowed: buf.len() as u32,
+        });
+    }
+
+    // Read the rest of the message
+    let remaining_len = (data_len - 4) as usize;
+    let len = host_read(fd, unsafe { buf.as_mut_ptr().offset(4) }, remaining_len);
+
+    if len != data_len - 4 {
+        return Err(HostReadError::LengthMismatch {
+            expected: data_len - 4,
+            actual: len,
+        });
+    }
+    // Update traffic hash with the message being read
+    p9_update_traffic_hash(&buf[..len as usize]);
+
+    Ok(data_len)
+}
+
+/// P9 function for writing data to the host
+///
+/// This function wraps the existing `host_write` function and provides additional
+/// error handling and logging capabilities.
+///
+/// # Arguments
+/// * `fd` - File descriptor to write to
+/// * `buf` - Buffer containing data to write
+/// * `buf_len` - Number of bytes to write
+///
+/// # Returns
+/// * `Result<u32, HostWriteError>` - Number of bytes written on success, or error on failure
+pub fn p9_write(fd: u32, buf: *const u8, buf_len: usize) -> Result<u32, HostWriteError> {
+    use crate::host_calls::host_write;
+
+    if buf.is_null() {
+        return Err(HostWriteError::NullBuffer);
+    }
+
+    if buf_len == 0 {
+        return Err(HostWriteError::ZeroLength);
+    }
+
+    let _bytes_written = host_write(fd, buf, buf_len);
+
+    // XXX we currently ignore the bytes written, we get 0?
+    Ok(0)
+}
+
+/// Error types for custom host read operations
+#[derive(Debug, Clone, PartialEq)]
+pub enum HostReadError {
+    NullBuffer,
+    ZeroLength,
+    NoData,
+    BufferTooSmall,
+    IncompleteLengthPrefix,
+    InvalidLength { length: u32, max_allowed: u32 },
+    LengthMismatch { expected: u32, actual: u32 },
+}
+
+impl fmt::Display for HostReadError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            HostReadError::NullBuffer => write!(f, "Null buffer provided for host read"),
+            HostReadError::ZeroLength => write!(f, "Zero length buffer provided for host read"),
+            HostReadError::NoData => write!(f, "No data available to read from host"),
+            HostReadError::BufferTooSmall => {
+                write!(f, "Buffer too small for P9 message (minimum 4 bytes)")
+            }
+            HostReadError::IncompleteLengthPrefix => {
+                write!(f, "Failed to read complete 4-byte length prefix")
+            }
+            HostReadError::InvalidLength {
+                length,
+                max_allowed,
+            } => {
+                write!(
+                    f,
+                    "Invalid message length: {} (max allowed: {})",
+                    length, max_allowed
+                )
+            }
+            HostReadError::LengthMismatch { expected, actual } => {
+                write!(
+                    f,
+                    "Length mismatch: expected {} bytes, got {}",
+                    expected, actual
+                )
+            }
+        }
+    }
+}
+
+/// Error types for custom host write operations
+#[derive(Debug, Clone, PartialEq)]
+pub enum HostWriteError {
+    NullBuffer,
+    ZeroLength,
+    NoDataWritten,
+    PartialWrite { expected: usize, actual: usize },
+}
+
+impl fmt::Display for HostWriteError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            HostWriteError::NullBuffer => write!(f, "Null buffer provided for host write"),
+            HostWriteError::ZeroLength => write!(f, "Zero length buffer provided for host write"),
+            HostWriteError::NoDataWritten => write!(f, "No data was written to host"),
+            HostWriteError::PartialWrite { expected, actual } => {
+                write!(
+                    f,
+                    "Partial write: expected {} bytes, wrote {} bytes",
+                    expected, actual
+                )
+            }
+        }
     }
 }
 
@@ -12329,5 +12506,94 @@ mod tests {
         assert_eq!(bytes_consumed, 7);
         assert_eq!(runlinkat.tag, original.tag);
         assert_eq!(tunlinkat_bytes_written, 25); // Tunlinkat is 25 bytes
+    }
+
+    #[test]
+    fn test_p9_write_errors() {
+        // Test null buffer error
+        let result = p9_write(0, core::ptr::null(), 10);
+        assert_eq!(result, Err(HostWriteError::NullBuffer));
+
+        // Test zero length error
+        let buf = [0u8; 10];
+        let result = p9_write(0, buf.as_ptr(), 0);
+        assert_eq!(result, Err(HostWriteError::ZeroLength));
+    }
+
+    #[test]
+    fn test_p9_read_message_errors() {
+        // Test buffer too small error
+        let mut buf = [0u8; 3];
+        let result = p9_read_message(0, &mut buf);
+        assert_eq!(result, Err(HostReadError::BufferTooSmall));
+    }
+
+    #[test]
+    fn test_host_error_display() {
+        // Test HostReadError display
+        assert_eq!(
+            format!("{}", HostReadError::NullBuffer),
+            "Null buffer provided for host read"
+        );
+        assert_eq!(
+            format!("{}", HostReadError::ZeroLength),
+            "Zero length buffer provided for host read"
+        );
+        assert_eq!(
+            format!("{}", HostReadError::NoData),
+            "No data available to read from host"
+        );
+        assert_eq!(
+            format!("{}", HostReadError::BufferTooSmall),
+            "Buffer too small for P9 message (minimum 4 bytes)"
+        );
+        assert_eq!(
+            format!("{}", HostReadError::IncompleteLengthPrefix),
+            "Failed to read complete 4-byte length prefix"
+        );
+        assert_eq!(
+            format!(
+                "{}",
+                HostReadError::InvalidLength {
+                    length: 100,
+                    max_allowed: 50
+                }
+            ),
+            "Invalid message length: 100 (max allowed: 50)"
+        );
+        assert_eq!(
+            format!(
+                "{}",
+                HostReadError::LengthMismatch {
+                    expected: 10,
+                    actual: 5
+                }
+            ),
+            "Length mismatch: expected 10 bytes, got 5"
+        );
+
+        // Test HostWriteError display
+        assert_eq!(
+            format!("{}", HostWriteError::NullBuffer),
+            "Null buffer provided for host write"
+        );
+        assert_eq!(
+            format!("{}", HostWriteError::ZeroLength),
+            "Zero length buffer provided for host write"
+        );
+        assert_eq!(
+            format!("{}", HostWriteError::NoDataWritten),
+            "No data was written to host"
+        );
+        assert_eq!(
+            format!(
+                "{}",
+                HostWriteError::PartialWrite {
+                    expected: 10,
+                    actual: 5
+                }
+            ),
+            "Partial write: expected 10 bytes, wrote 5 bytes"
+        );
     }
 }
