@@ -93,6 +93,12 @@ pub fn get_p9_enabled() -> bool {
     unsafe { P9_ENABLED }
 }
 
+pub fn init_fs() {
+    set_fd(0, 0xFFFF_FFFE);
+    set_fd(1, 0xFFFF_FFFE);
+    set_fd(2, 0xFFFF_FFFE);
+}
+
 pub fn sys_close(_fd: u32) -> Result<u32, Err> {
     unsafe {
         if FD_TABLE[_fd as usize].fid != 0xFFFF_FFFE && FD_TABLE[_fd as usize].fid != 0 {
