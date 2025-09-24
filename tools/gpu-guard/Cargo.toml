@@ -3,6 +3,9 @@ name = "gpu-guard"
 version = "0.1.0"
 edition = "2021"
 
+[package.metadata.release]
+release = false
+
 [dependencies]
 fs2 = "0.4"
 gpu-guard-macros = { path = "macros" }

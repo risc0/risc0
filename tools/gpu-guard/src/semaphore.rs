@@ -48,9 +48,18 @@ pub fn acquire_gpu_semaphore() -> std::io::Result<File> {
                 .truncate(true)
                 .open(&lock_path)?;
 
-            if file.try_lock_exclusive().is_ok() {
-                println!("[gpu-guard] Acquired slot {i} (attempt {attempt})");
-                return Ok(file);
+            match file.try_lock_exclusive() {
+                Ok(_) => {
+                    println!("[gpu-guard] Acquired slot {i} (attempt {attempt})");
+                    return Ok(file);
+                }
+                Err(error) => {
+                    if error.kind() == fs2::lock_contended_error().kind() {
+                        continue;
+                    } else {
+                        return Err(error);
+                    }
+                }
             }
         }
 

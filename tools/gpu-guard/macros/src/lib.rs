@@ -26,25 +26,12 @@ pub fn gpu_guard(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let sig = &input.sig;
     let mut body = input.block.clone();
 
-    // let block = &input.block;
-    // let name = &sig.ident;
-
-    // let result = quote! {
-    //     #[test]
-    //     #(#attrs)*
-    //     #vis fn #name() {
-    //         let _guard = gpu_guard::acquire_gpu_semaphore()
-    //             .expect("Failed to acquire GPU semaphore");
-    //         #block
-    //     }
-    // };
-
     let injected = quote! {
-        let _guard = gpu_guard::acquire_gpu_semaphore()
+        let __gpu_guard = ::gpu_guard::acquire_gpu_semaphore()
             .expect("Failed to acquire GPU semaphore");
     };
 
-    body.stmts.insert(0, syn::parse2(injected).unwrap());
+    body.stmts.insert(0, ::syn::parse2(injected).unwrap());
 
     let result = quote! {
         #(#attrs)*

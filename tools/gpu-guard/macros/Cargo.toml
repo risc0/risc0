@@ -3,6 +3,9 @@ name = "gpu-guard-macros"
 version = "0.1.0"
 edition = "2021"
 
+[package.metadata.release]
+release = false
+
 [lib]
 proc-macro = true
 
