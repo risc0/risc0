@@ -1,0 +1,9 @@
+cc_binary(
+    name = "hello",
+    srcs = glob(["main.cpp"]),
+    deps = [
+        "//hal/pick",
+        "//prove",
+        "//verify",
+    ],
+)

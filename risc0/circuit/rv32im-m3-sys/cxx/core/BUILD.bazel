@@ -1,0 +1,6 @@
+cc_library(
+    name = "core",
+    srcs = glob(["*.cpp"]),
+    hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+)

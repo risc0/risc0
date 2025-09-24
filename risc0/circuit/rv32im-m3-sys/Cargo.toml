@@ -1,0 +1,25 @@
+[package]
+name = "risc0-circuit-rv32im-m3-sys"
+description = "RISC Zero circuit for rv32im"
+version = "0.0.0"
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+publish = false
+
+[package.metadata.release]
+release = false
+
+[dependencies]
+risc0-sys = { workspace = true, optional = true }
+
+[build-dependencies]
+cc = { version = "1.2.2", features = ["parallel"] }
+glob = "0.3"
+risc0-build-kernel = { workspace = true }
+
+[features]
+cuda = ["prove"]
+default = []
+prove = ["dep:risc0-sys"]

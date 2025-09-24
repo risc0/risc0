@@ -1,0 +1,14 @@
+filegroup(
+    name = "files",
+    srcs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "argument",
+    hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//rv32im/base",
+    ],
+)

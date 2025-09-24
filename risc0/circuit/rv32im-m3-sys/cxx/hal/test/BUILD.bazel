@@ -1,0 +1,10 @@
+cc_test(
+    name = "test",
+    size = "enormous",
+    srcs = glob(["*.cpp"]),
+    deps = [
+        "//core/test:gtest_main",
+        "//hal/pick",
+        "//rv32im/emu",
+    ],
+)

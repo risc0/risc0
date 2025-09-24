@@ -4125,6 +4125,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "gpu-guard"
+version = "0.1.0"
+dependencies = [
+ "fs2",
+ "gpu-guard-macros",
+ "once_cell",
+]
+
+[[package]]
+name = "gpu-guard-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
 name = "h2"
 version = "0.3.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7143,6 +7161,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-rv32im-m3"
+version = "0.0.0"
+dependencies = [
+ "flate2",
+ "gpu-guard",
+ "risc0-binfmt",
+ "risc0-circuit-rv32im-m3-sys",
+ "risc0-sys",
+ "tar",
+ "test-log",
+]
+
+[[package]]
+name = "risc0-circuit-rv32im-m3-sys"
+version = "0.0.0"
+dependencies = [
+ "cc",
+ "glob",
+ "risc0-build-kernel",
+ "risc0-sys",
+]
+
+[[package]]
 name = "risc0-circuit-rv32im-sys"
 version = "4.0.2"
 dependencies = [
@@ -8332,9 +8373,9 @@ dependencies = [
 
 [[package]]
 name = "sppark"
-version = "0.1.12"
+version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6bdc4f02f557e3037bbe2a379cac8be6e014a67beb7bf0996b536979392f6361"
+checksum = "d9c900139f3f6fdc8db217881a946adf00e935102fdd82b0e1bc19bacbffa311"
 dependencies = [
  "cc",
  "which 4.4.2",

@@ -1,0 +1,21 @@
+filegroup(
+    name = "files",
+    srcs = glob([
+        "*.h",
+        "*.ipp",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "circuit",
+    hdrs = glob([
+        "*.h",
+        "*.ipp",
+    ]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//rv32im/argument",
+        "//rv32im/witness",
+    ],
+)
