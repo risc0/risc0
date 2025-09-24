@@ -48,6 +48,7 @@ use super::{
 };
 use derive_more::{Add, AddAssign, From, Sub, SubAssign};
 use http_body_util::BodyExt as _;
+use indexmap::IndexMap;
 use kameo::{Reply, prelude::*};
 use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
@@ -272,7 +273,7 @@ struct Worker {
     /// What hardware does this worker have access to
     hardware: Vec<HardwareResource>,
     /// What tasks (tasks) are currently running on this worker.
-    tasks: HashMap<GlobalId, Task>,
+    tasks: IndexMap<GlobalId, Task>,
 }
 
 impl Worker {
@@ -283,7 +284,7 @@ impl Worker {
     ) -> Self {
         Self {
             remote_address,
-            tasks: HashMap::new(),
+            tasks: IndexMap::new(),
             machine,
             hardware,
         }
@@ -416,7 +417,7 @@ impl AllocatorActor {
             .workers
             .get_mut(worker_id)
             .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
-        if let hash_map::Entry::Vacant(e) = worker.tasks.entry(task_id) {
+        if let indexmap::map::Entry::Vacant(e) = worker.tasks.entry(task_id) {
             e.insert(Task {
                 description,
                 used_gpu_tokens: HashMap::new(),
@@ -839,7 +840,7 @@ impl AllocatorActor {
             ));
         }
 
-        let removed = worker.tasks.remove(&msg.task_id).is_some();
+        let removed = worker.tasks.shift_remove(&msg.task_id).is_some();
         assert!(removed);
 
         Ok(())

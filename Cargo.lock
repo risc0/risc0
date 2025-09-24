@@ -7449,6 +7449,7 @@ dependencies = [
  "http 1.3.1",
  "http-body-util",
  "httpmock",
+ "indexmap 2.11.0",
  "kameo",
  "multi_index_map",
  "nvml-wrapper",
