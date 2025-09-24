@@ -1845,21 +1845,36 @@ async fn proxy_api_request(
     endpoint: Url,
     req: ApiRequest,
 ) -> anyhow::Result<ApiResponse> {
+    use anyhow::Context as _;
+
     // Convert request into reqwest::Request
-    let (parts, body) = req.request.into_parts();
-    let request =
-        http::Request::from_parts(parts, reqwest::Body::wrap_stream(body.into_data_stream()));
-    let mut req: reqwest::Request = request.try_into()?;
+    let (mut parts, body) = req.request.into_parts();
+
+    let request_path = parts
+        .uri
+        .path()
+        .strip_prefix(PROXY_URL_PATH)
+        .ok_or_else(|| anyhow::anyhow!("url {} doesn't begin with {PROXY_URL_PATH}", parts.uri))?;
 
     // Join the URLs together
-    *req.url_mut() = endpoint.join(
-        req.url()
-            .path()
-            .strip_prefix(PROXY_URL_PATH)
-            .ok_or_else(|| anyhow::anyhow!("url doesn't begin with {PROXY_URL_PATH}"))?,
-    )?;
+    let joined_uri = endpoint.join(request_path).context("failed to join URLs")?;
+    parts.uri = joined_uri
+        .to_string()
+        .parse()
+        .with_context(|| format!("failed to convert {joined_uri} to reqwest::Uri"))?;
 
-    let response: http::Response<reqwest::Body> = http_client.execute(req).await?.into();
+    let request =
+        http::Request::from_parts(parts, reqwest::Body::wrap_stream(body.into_data_stream()));
+    let req: reqwest::Request = request
+        .try_into()
+        .context("failed to convert to reqwest::Request")?;
+
+    let req_url = req.url().clone();
+    let response: http::Response<reqwest::Body> = http_client
+        .execute(req)
+        .await
+        .with_context(|| format!("failed to contact remote manager at {req_url}"))?
+        .into();
     let (parts, body) = response.into_parts();
 
     Ok(ApiResponse {
