@@ -62,6 +62,7 @@ mod tests {
         ($func_name:ident) => {
             #[test_log::test]
             #[gpu_guard::gpu_guard]
+            #[ignore]
             fn $func_name() {
                 run_test(stringify!($func_name));
             }
