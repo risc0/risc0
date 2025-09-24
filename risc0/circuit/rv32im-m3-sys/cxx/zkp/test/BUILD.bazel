@@ -1,0 +1,9 @@
+cc_test(
+    name = "test",
+    size = "small",
+    srcs = glob(["*.cpp"]),
+    deps = [
+        "//core/test:gtest_main",
+        "//zkp",
+    ],
+)

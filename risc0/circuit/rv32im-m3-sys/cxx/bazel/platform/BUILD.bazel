@@ -1,0 +1,15 @@
+platform(
+    name = "risc0",
+    constraint_values = [
+        "//bazel/platform/cpu:riscv32im",
+        "//bazel/platform/os:risc0",
+    ],
+)
+
+platform(
+    name = "rv32im-linux",
+    constraint_values = [
+        "//bazel/platform/cpu:riscv32im",
+        "//bazel/platform/os:linux",
+    ],
+)

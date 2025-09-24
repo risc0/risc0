@@ -1,0 +1,4 @@
+exports_files([
+    "kernel.ld",
+    "kernel_v1.ld",
+])

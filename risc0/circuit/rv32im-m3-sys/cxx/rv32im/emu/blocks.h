@@ -1,0 +1,49 @@
+// Copyright 2025 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#pragma once
+
+#include "rv32im/emu/decode.h"
+#include "rv32im/witness/witness.h"
+
+namespace risc0::rv32im {
+
+inline constexpr const char* getBlockTypeName(BlockType type) {
+  switch(type) {
+#define BLOCK_TYPE(name, count) case BlockType::name: return #name;
+BLOCK_TYPES
+#undef BLOCK_TYPE
+    default: return "***UNKNOWN***";
+  }
+}
+
+inline constexpr size_t getBlockCountPerRow(BlockType type) {
+  switch(type) {
+#define BLOCK_TYPE(name, count) case BlockType::name: return count;
+BLOCK_TYPES
+#undef BLOCK_TYPE
+    default: return 0;
+  }
+}
+
+size_t computeMaxWitPerRow(bool tune = false);
+size_t computeMaxDataPerRow(bool tune = false);
+size_t computeMaxAccumPerRow(bool tune = false);
+size_t computeAccumTopSize();
+inline size_t computeTotalAccum() { return computeMaxAccumPerRow() + computeAccumTopSize(); }
+size_t computeMaxDegree(bool tune = false);
+
+FpExt computeConstraintPoly(const FpExt* data, const Fp* globals, const FpExt* accMix, FpExt ecMix, FpExt z);
+
+} // namespace risc0::rv32im

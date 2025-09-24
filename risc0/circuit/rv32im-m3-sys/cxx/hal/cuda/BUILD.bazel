@@ -1,0 +1,14 @@
+load("@rules_cuda//cuda:defs.bzl", "requires_cuda")
+
+cc_library(
+    name = "cuda",
+    srcs = glob(["*.cpp"]),
+    hdrs = glob(["*.h"]),
+    target_compatible_with = requires_cuda(),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core",
+        "//hal",
+        "//hal/cuda/kernels",
+    ],
+)
