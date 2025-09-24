@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import argparse
 
+
 PUBLIC_HEADER = """
 // Copyright {YEAR} RISC Zero, Inc.
 //
@@ -37,11 +38,8 @@ EXTENSIONS = [
 ]
 
 SKIP_DIRS = [
-    str(Path.cwd()) + "/risc0/cargo-risczero/templates/rust-starter",
+    str(Path.cwd()) + "/risc0/circuit/rv32im-m3-sys/vendor",
     str(Path.cwd()) + "/risc0/sys/cxx/vendor",
-    str(Path.cwd()) + "/risc0/zkvm/src/host/protos",
-    str(Path.cwd()) + "/risc0/zkvm/src/host/server/exec",
-    str(Path.cwd()) + "/risc0/cargo-risczero/tests/test_crate",
 ]
 
 
@@ -50,6 +48,38 @@ def fix_file(file_obj, file_contents, start, end, insert):
     file_obj.seek(0)
     file_obj.truncate()
     file_obj.write(file_contents)
+
+
+def is_comment_line(line: str) -> bool:
+    return line.strip().startswith("//")
+
+
+def is_probably_license_block(lines: list[str]) -> bool:
+    license_keywords = ["copyright", "license", "spdx", "apache", "mit"]
+    text = "\n".join(lines).lower()
+    return any(kw in text for kw in license_keywords)
+
+
+def find_license_block(file_contents: str) -> tuple[int, int] | None:
+    """Return (char_start, char_end) span of a license block, or None if not found."""
+    lines = file_contents.splitlines(keepends=True)
+
+    license_lines = []
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped == "" or is_comment_line(stripped):
+            license_lines.append(line)
+        else:
+            # As soon as we hit a non-comment line, stop scanning
+            break
+
+    # If we found a comment block at the top, check if it smells like a license
+    if license_lines and is_probably_license_block(license_lines):
+        char_start = 0
+        char_end = sum(len(line) for line in license_lines)
+        return char_start, char_end
+
+    return None
 
 
 def check_file(root, file, fix):
@@ -74,11 +104,23 @@ def check_file(root, file, fix):
                     return 1
         else:
             print(f"{rel_path}: invalid header!")
-            print("license completely missing")
+            print("license completely missing or unrecognized")
             if fix:
                 print(f"fixing {rel_path}")
-                header = PUBLIC_HEADER.replace("{YEAR}", expected_year) + "\n"
-                fix_file(file_obj, file_contents, 0, 0, header)
+                new_header = PUBLIC_HEADER.replace("{YEAR}", expected_year) + "\n\n"
+
+                span = find_license_block(file_contents)
+                if span:
+                    start, end = span
+                    fix_file(
+                        file_obj,
+                        file_contents,
+                        start,
+                        end,
+                        new_header,
+                    )
+                else:
+                    fix_file(file_obj, file_contents, 0, 0, new_header)
             else:
                 return 1
 
@@ -100,10 +142,10 @@ def tracked_files():
 
 
 def main():
-
     parser = argparse.ArgumentParser(
         description="to update years, use the --fix option"
     )
+    parser.add_argument("--file", type=Path)
     parser.add_argument(
         "--fix", action="store_true", help="modify files with correct year"
     )
@@ -111,6 +153,10 @@ def main():
 
     root = repo_root()
     ret = 0
+
+    if args.file:
+        sys.exit(check_file(root, args.file.resolve(), args.fix))
+
     for path in tracked_files():
         if path.suffix in EXTENSIONS and ".inc" not in path.suffixes:
             skip = False
