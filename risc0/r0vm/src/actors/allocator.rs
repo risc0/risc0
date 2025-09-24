@@ -527,7 +527,7 @@ impl AllocatorActor {
 /// the right to not reply immediately. It could be that all the workers already have deep queues
 /// and the best move is to wait until one becomes less busy.
 #[derive(Serialize, Deserialize)]
-pub struct ChooseWorker {
+pub struct ScheduleTask {
     pub candidates: Vec<WorkerId>,
     pub task_id: GlobalId,
     pub description: String,
@@ -535,28 +535,24 @@ pub struct ChooseWorker {
 
 /// Reply when a worker is successfully chosen.
 #[derive(Serialize, Deserialize, Reply)]
-pub struct ChooseWorkerReply {
+pub struct ScheduleTaskReply {
     pub worker_id: WorkerId,
 }
 
-impl Message<ChooseWorker> for AllocatorActor {
-    type Reply = DelegatedReply<Result<ChooseWorkerReply>>;
+impl Message<ScheduleTask> for AllocatorActor {
+    type Reply = DelegatedReply<Result<ScheduleTaskReply>>;
 
     async fn handle(
         &mut self,
-        msg: ChooseWorker,
+        msg: ScheduleTask,
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        ctx.reply(self.choose_worker(msg))
+        ctx.reply(self.schedule_task(msg))
     }
 }
 
 impl AllocatorActor {
-    fn choose_worker(&mut self, msg: ChooseWorker) -> Result<ChooseWorkerReply> {
-        if msg.candidates.is_empty() {
-            return Err(Error::new("no candidates provided"));
-        }
-
+    fn schedule_task(&mut self, msg: ScheduleTask) -> Result<ScheduleTaskReply> {
         // Choose a worker which is least busy. We prefer a quiet GPU over a quiet CPU in this
         // selection.
         #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
@@ -569,21 +565,33 @@ impl AllocatorActor {
         let mut workers = msg
             .candidates
             .into_iter()
-            .map(|c| {
+            .map(|c| -> Result<_> {
                 Ok(CandidateWorker {
                     id: c,
                     gpu_tasks: self.get_worker_num_tasks(&c, HardwareFilter::Gpu)?,
                     machine_tasks: self.get_worker_num_tasks(&c, HardwareFilter::Cpu)?,
                 })
             })
-            .collect::<Result<Vec<_>>>()?;
+            .filter_map(|res| match res {
+                Ok(w) => Some(w),
+                Err(error) => {
+                    tracing::error!("Not selecting worker due to error: {error}");
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
+        if workers.is_empty() {
+            return Err(Error::new("no eligible candidate workers"));
+        }
+
         workers.sort();
         let chosen_worker = workers[0].id;
 
         // Count that this worker has a new task now.
         self.add_worker_task(&chosen_worker, msg.task_id, msg.description)?;
 
-        Ok(ChooseWorkerReply {
+        Ok(ScheduleTaskReply {
             worker_id: chosen_worker,
         })
     }
@@ -622,7 +630,6 @@ impl Message<AllocateHardware> for AllocatorActor {
 #[derive(Serialize, Deserialize)]
 pub struct DeallocateHardware {
     pub worker_id: WorkerId,
-    pub task_id: GlobalId,
     pub hardware_reservations: Vec<HardwareReservation>,
 }
 
@@ -645,12 +652,6 @@ impl AllocatorActor {
             .workers
             .get_mut(&worker_id)
             .ok_or_else(|| Error::new("unknown worker {worker_id}"))?;
-        if worker.tasks.remove(&msg.task_id).is_none() {
-            return Err(Error::new(format!(
-                "worker not running task: {:?}",
-                msg.task_id
-            )));
-        }
 
         for res in msg.hardware_reservations {
             match res {
@@ -689,6 +690,41 @@ impl AllocatorActor {
                     assert!(cpu.free_cores <= cpu.total_cores);
                 }
             }
+        }
+
+        self.maybe_allocate_many();
+
+        Ok(())
+    }
+}
+
+/// The given task has completed
+#[derive(Serialize, Deserialize)]
+pub struct EndTask {
+    pub worker_id: WorkerId,
+    pub task_id: GlobalId,
+}
+
+impl Message<EndTask> for AllocatorActor {
+    type Reply = DelegatedReply<Result<()>>;
+
+    async fn handle(&mut self, msg: EndTask, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
+        ctx.reply(self.end_task(msg))
+    }
+}
+
+impl AllocatorActor {
+    fn end_task(&mut self, msg: EndTask) -> Result<()> {
+        let worker_id = msg.worker_id;
+        let worker = self
+            .workers
+            .get_mut(&worker_id)
+            .ok_or_else(|| Error::new("unknown worker {worker_id}"))?;
+        if worker.tasks.remove(&msg.task_id).is_none() {
+            return Err(Error::new(format!(
+                "worker not running task: {:?}",
+                msg.task_id
+            )));
         }
 
         self.maybe_allocate_many();
@@ -884,6 +920,7 @@ mod allocation_tests {
 
     struct Fixture {
         workers: Vec<WorkerId>,
+        worker_addresses: HashMap<WorkerId, SocketAddr>,
         alloc_ref: ActorRef<AllocatorActor>,
     }
 
@@ -892,13 +929,14 @@ mod allocation_tests {
             let alloc_ref = kameo::spawn(AllocatorActor::new());
 
             let workers: Vec<WorkerId> = (0..worker_count).map(test_worker_id).collect();
+            let mut worker_addresses = HashMap::new();
             for (i, worker_id) in workers.iter().enumerate() {
+                let worker_addr: SocketAddr =
+                    format!("1.2.3.{}:100{}", i / 4, i % 4).parse().unwrap();
                 alloc_ref
                     .ask(RegisterWorker {
                         worker_id: *worker_id,
-                        remote_address: Some(
-                            format!("1.2.3.{}:100{}", i / 4, i % 4).parse().unwrap(),
-                        ),
+                        remote_address: Some(worker_addr),
                         hardware: vec![
                             HardwareResource::Gpu(GpuSpec {
                                 name: "test GPU".into(),
@@ -910,20 +948,43 @@ mod allocation_tests {
                     })
                     .await
                     .unwrap();
+                worker_addresses.insert(*worker_id, worker_addr);
             }
 
-            Self { workers, alloc_ref }
+            Self {
+                workers,
+                worker_addresses,
+                alloc_ref,
+            }
         }
 
-        async fn choose_worker(&self, i: u64, j: u64) -> ChooseWorkerReply {
+        async fn schedule_task(&self, i: u64, j: u64) -> ScheduleTaskReply {
             self.alloc_ref
-                .ask(ChooseWorker {
+                .ask(ScheduleTask {
                     candidates: self.workers.clone(),
                     task_id: test_task_id(i, j),
                     description: "test task".into(),
                 })
                 .await
                 .unwrap()
+        }
+
+        async fn end_task(&self, i: u64, j: u64, worker_id: WorkerId) {
+            self.alloc_ref
+                .ask(EndTask {
+                    worker_id,
+                    task_id: test_task_id(i, j),
+                })
+                .await
+                .unwrap();
+        }
+
+        async fn disconnect_worker(&self, worker_id: WorkerId) {
+            let remote_address = *self.worker_addresses.get(&worker_id).unwrap();
+            self.alloc_ref
+                .ask(RpcDisconnect { remote_address })
+                .await
+                .unwrap();
         }
     }
 
@@ -932,7 +993,7 @@ mod allocation_tests {
         let fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
-        let response = fixture.choose_worker(1, 1).await;
+        let response = fixture.schedule_task(1, 1).await;
         assert_eq!(response.worker_id, worker_id);
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -968,7 +1029,6 @@ mod allocation_tests {
             .alloc_ref
             .ask(DeallocateHardware {
                 worker_id,
-                task_id: test_task_id(1, 1),
                 hardware_reservations,
             })
             .await
@@ -985,7 +1045,7 @@ mod allocation_tests {
         let worker2 = fixture.workers[1];
 
         // worker1 reserves the GPU
-        let response = fixture.choose_worker(1, 1).await;
+        let response = fixture.schedule_task(1, 1).await;
         assert_eq!(response.worker_id, worker1);
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1039,16 +1099,41 @@ mod allocation_tests {
         let fixture = Fixture::new(8).await;
 
         // first GPU on first machine
-        let response = fixture.choose_worker(1, 1).await;
+        let response = fixture.schedule_task(1, 1).await;
         assert_eq!(response.worker_id, fixture.workers[0]);
 
         // first GPU on second machine
-        let response = fixture.choose_worker(1, 2).await;
+        let response = fixture.schedule_task(1, 2).await;
         assert_eq!(response.worker_id, fixture.workers[4]);
 
         // second GPU on first machine
-        let response = fixture.choose_worker(1, 3).await;
+        let response = fixture.schedule_task(1, 3).await;
         assert_eq!(response.worker_id, fixture.workers[2]);
+
+        // The first task ends
+        fixture.end_task(1, 1, fixture.workers[0]).await;
+
+        // first GPU on first machine is available again
+        let response = fixture.schedule_task(1, 4).await;
+        assert_eq!(response.worker_id, fixture.workers[0]);
+    }
+
+    #[tokio::test]
+    async fn worker_disconnect() {
+        // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
+        // | (0, 1), (2, 3) | (4, 5), (6, 7) |
+        let fixture = Fixture::new(8).await;
+
+        // first GPU on first machine
+        let response = fixture.schedule_task(1, 1).await;
+        assert_eq!(response.worker_id, fixture.workers[0]);
+
+        // disconnect worker 4
+        fixture.disconnect_worker(fixture.workers[4]).await;
+
+        // second GPU on second machine
+        let response = fixture.schedule_task(1, 2).await;
+        assert_eq!(response.worker_id, fixture.workers[5]);
     }
 }
 
@@ -1090,8 +1175,8 @@ routing_actor_impl!(
 
 routing_actor_impl!(
     AllocatorRouterActor,
-    ChooseWorker,
-    DelegatedReply<Result<ChooseWorkerReply>>
+    ScheduleTask,
+    DelegatedReply<Result<ScheduleTaskReply>>
 );
 
 routing_actor_impl!(
@@ -1105,6 +1190,8 @@ routing_actor_impl!(
     DeallocateHardware,
     DelegatedReply<Result<()>>
 );
+
+routing_actor_impl!(AllocatorRouterActor, EndTask, DelegatedReply<Result<()>>);
 
 routing_actor_impl!(
     AllocatorRouterActor,
@@ -1122,8 +1209,8 @@ remote_actor_ask!(
 );
 remote_actor_ask!(
     RemoteActor<AllocatorActor>,
-    ChooseWorker,
-    Result<ChooseWorkerReply>,
+    ScheduleTask,
+    Result<ScheduleTaskReply>,
     RemoteAllocatorRequest
 );
 remote_actor_ask!(
@@ -1135,6 +1222,12 @@ remote_actor_ask!(
 remote_actor_ask!(
     RemoteActor<AllocatorActor>,
     DeallocateHardware,
+    Result<()>,
+    RemoteAllocatorRequest
+);
+remote_actor_ask!(
+    RemoteActor<AllocatorActor>,
+    EndTask,
     Result<()>,
     RemoteAllocatorRequest
 );

@@ -27,8 +27,8 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 use super::{
     RemoteActor, RemoteWorkerRequest, RpcSender, WriteStream,
     allocator::{
-        AllocateHardware, AllocatorRouterActor, CpuCores, CpuSpec, DeallocateHardware, GpuSpec,
-        GpuTokens, GpuUuid, HardwareReservation, HardwareResource, RegisterWorker,
+        AllocateHardware, AllocatorRouterActor, CpuCores, CpuSpec, DeallocateHardware, EndTask,
+        GpuSpec, GpuTokens, GpuUuid, HardwareReservation, HardwareResource, RegisterWorker,
     },
     factory::FactoryRouterActor,
     protocol::{
@@ -420,8 +420,13 @@ impl GpuProcessor {
         self.allocator
             .tell(DeallocateHardware {
                 worker_id: self.worker_id,
-                task_id: global_id,
                 hardware_reservations,
+            })
+            .await?;
+        self.allocator
+            .tell(EndTask {
+                worker_id: self.worker_id,
+                task_id: global_id,
             })
             .await?;
         Ok(())
@@ -637,10 +642,16 @@ impl CpuProcessor {
         self.allocator
             .tell(DeallocateHardware {
                 worker_id: self.worker_id,
-                task_id: global_id,
                 hardware_reservations,
             })
             .await?;
+        self.allocator
+            .tell(EndTask {
+                worker_id: self.worker_id,
+                task_id: global_id,
+            })
+            .await?;
+
         Ok(())
     }
 

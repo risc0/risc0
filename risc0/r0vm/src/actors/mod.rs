@@ -899,9 +899,10 @@ impl DispatchRpcMessage<FactoryActor> for RemoteFactoryRequest {
 #[derive(Serialize, Deserialize, From)]
 enum RemoteAllocatorRequest {
     RegisterWorker(allocator::RegisterWorker),
-    ChooseWorker(allocator::ChooseWorker),
+    ScheduleTask(allocator::ScheduleTask),
     AllocateHardware(allocator::AllocateHardware),
     DeallocateHardware(allocator::DeallocateHardware),
+    EndTask(allocator::EndTask),
     RegisterManager(allocator::RegisterManager),
     GetStatus(allocator::GetStatus),
 }
@@ -918,13 +919,16 @@ impl DispatchRpcMessage<AllocatorActor> for RemoteAllocatorRequest {
                 msg.remote_address = Some(remote_address);
                 ops.ask(receiver, msg).await;
             }
-            RemoteAllocatorRequest::ChooseWorker(msg) => {
+            RemoteAllocatorRequest::ScheduleTask(msg) => {
                 ops.ask(receiver, msg).await;
             }
             RemoteAllocatorRequest::AllocateHardware(msg) => {
                 ops.ask(receiver, msg).await;
             }
             RemoteAllocatorRequest::DeallocateHardware(msg) => {
+                ops.ask(receiver, msg).await;
+            }
+            RemoteAllocatorRequest::EndTask(msg) => {
                 ops.ask(receiver, msg).await;
             }
             RemoteAllocatorRequest::RegisterManager(mut msg) => {

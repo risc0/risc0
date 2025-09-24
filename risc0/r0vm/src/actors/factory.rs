@@ -22,7 +22,7 @@ use multi_index_map::MultiIndexMap;
 
 use super::{
     RemoteActor, RemoteFactoryRequest, RpcDisconnect, RpcMessageId, WorkerRouterActor,
-    allocator::{AllocatorRouterActor, ChooseWorker, CpuCores, GpuTokens},
+    allocator::{AllocatorRouterActor, CpuCores, GpuTokens, ScheduleTask},
     job::JobActor,
     protocol::{
         GlobalId, JobId, TaskKind, WorkerId,
@@ -118,7 +118,7 @@ impl FactoryActor {
 
                 let response = self
                     .allocator
-                    .ask(ChooseWorker {
+                    .ask(ScheduleTask {
                         candidates: workers.iter().map(|w| w.worker_id).collect(),
                         task_id: msg.header.global_id,
                         description: format!("{:?}", &msg.header.task_kind),
