@@ -229,24 +229,34 @@ struct Task {
 }
 
 impl Task {
-    fn hw_allocated(&self) -> bool {
+    fn cpu_allocated(&self) -> bool {
         self.used_cores > CpuCores::ZERO
-            || self.used_gpu_tokens.values().any(|t| *t > GpuTokens::ZERO)
+    }
+
+    fn gpu_allocated(&self) -> bool {
+        self.used_gpu_tokens.values().any(|t| *t > GpuTokens::ZERO)
+    }
+    fn hw_allocated(&self) -> bool {
+        self.cpu_allocated() || self.gpu_allocated()
     }
 }
 
 impl fmt::Display for Task {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}{}",
-            &self.description,
-            if self.hw_allocated() {
-                ": HW in-use"
-            } else {
-                ""
-            }
-        )
+        let mut hw = String::new();
+
+        if self.hw_allocated() {
+            hw += ":";
+        }
+
+        if self.cpu_allocated() {
+            hw += " CPU in-use";
+        }
+        if self.gpu_allocated() {
+            hw += " GPU in-use";
+        }
+
+        write!(f, "{}{hw}", &self.description,)
     }
 }
 

@@ -98,21 +98,11 @@ impl FactoryActor {
 
                 self.jobs.insert(job_id, msg.job);
 
-                let gpu_tokens = if self.require_gpu {
-                    match msg.header.task_kind {
-                        TaskKind::Execute => GpuTokens::from(0),
-                        TaskKind::ProveSegment | TaskKind::ProveKeccak => GpuTokens::from(100),
-                        _ => GpuTokens::from(50),
-                    }
-                } else {
-                    GpuTokens::from(0)
-                };
-
+                let (cores, gpu_tokens) = self.choose_tokens(msg.header.task_kind);
                 let task = TaskMsg {
                     header: msg.header.clone(),
                     task: msg.task.clone(),
-                    // XXX remi
-                    cores: CpuCores::from(0),
+                    cores,
                     gpu_tokens,
                 };
 
@@ -137,6 +127,20 @@ impl FactoryActor {
                 self.pending_tasks.push(msg);
             }
         }
+    }
+
+    fn choose_tokens(&self, task_kind: TaskKind) -> (CpuCores, GpuTokens) {
+        let (cores, mut gpu_tokens) = match task_kind {
+            TaskKind::Execute => (CpuCores::from(1), GpuTokens::from(0)),
+            TaskKind::ProveSegment => (CpuCores::from(1), GpuTokens::from(100)),
+            TaskKind::ProveKeccak => (CpuCores::ZERO, GpuTokens::from(100)),
+            _ => (CpuCores::ZERO, GpuTokens::from(50)),
+        };
+
+        if !self.require_gpu {
+            gpu_tokens = GpuTokens::ZERO;
+        }
+        (cores, gpu_tokens)
     }
 }
 
