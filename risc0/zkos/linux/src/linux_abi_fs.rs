@@ -623,10 +623,49 @@ pub fn sys_llistxattr(_pathname: u32, _list: u32, _size: u32) -> Result<u32, Err
     Err(Err::NoSys)
 }
 
-pub fn sys_llseek(_fd: u32, _offset_high: u32, _offset_low: u32) -> Result<u32, Err> {
-    let msg = b"sys_llseek not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+pub fn sys_llseek(
+    _fd: u32,
+    _offset_high: u32,
+    _offset_low: u32,
+    result: u32,
+    whence: u32,
+) -> Result<u32, Err> {
+    const SEEK_SET: u32 = 0;
+    const SEEK_CUR: u32 = 1;
+    const SEEK_END: u32 = 2;
+
+    if !get_p9_enabled() {
+        let msg = b"sys_llseek not implemented";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+
+    if whence != SEEK_SET && whence != SEEK_CUR && whence != SEEK_END {
+        let msg = b"sys_llseek: invalid whence";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+
+    let fd_entry = get_fd(_fd);
+    let mut updated_entry = fd_entry;
+    let new_cursor = match whence {
+        SEEK_SET => (_offset_high as u64) << 32 | _offset_low as u64,
+        SEEK_CUR => (fd_entry.cursor + (_offset_high as u64)) << 32 | _offset_low as u64,
+        SEEK_END => (fd_entry.cursor + (_offset_high as u64)) << 32 | _offset_low as u64,
+        _ => {
+            let msg = b"sys_llseek: invalid whence";
+            host_log(msg.as_ptr(), msg.len());
+            return Err(Err::Inval);
+        }
+    };
+    
+    updated_entry.cursor = new_cursor;
+    update_fd(_fd, updated_entry);
+    let result_ptr = result as *mut u64;
+    unsafe {
+        *result_ptr = new_cursor;
+    }
+    Ok(0)
 }
 
 pub fn sys_lremovexattr(_pathname: u32, _name: u32) -> Result<u32, Err> {

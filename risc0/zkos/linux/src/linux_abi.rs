@@ -853,7 +853,7 @@ pub fn handle_linux_syscall() -> ! {
         SYS_LISTXATTR => syscall3(sys_listxattr),
         SYS_LISTXATTRAT => syscall4(sys_listxattrat),
         SYS_LLISTXATTR => syscall3(sys_llistxattr),
-        SYS_LLSEEK => syscall3(sys_llseek),
+        SYS_LLSEEK => syscall5(sys_llseek),
         SYS_LOOKUP_DCOOKIE => syscall3(sys_lookup_dcookie),
         SYS_LREMOVEXATTR => syscall2(sys_lremovexattr),
         SYS_LSETXATTR => syscall5(sys_lsetxattr),
