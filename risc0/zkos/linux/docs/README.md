@@ -112,6 +112,19 @@ and you should see the busybox help :)
 
 You can try with /bin/command-name as well for other embedded applets
 
+# File system support with 9p
+
+This probably works best in a Ubuntu 22.04/24 container, not tested on MacOS
+
+```
+# diod is a 9p server, socat is a good to help us redirect sockets
+apt-get install diod socat
+mkdir -p /risc0-root
+# unpack your rootfs tar from buildroot into /risc0-root
+diod -l 127.0.0.1:40564 -e /risc0-root -n -f -d 0x01 -U yourusername -S &
+RISC0_DEV_MODE=1 RUST_LOG=debug  socat -ddd -t 30 -v EXEC:"r0vm --elf busybox.bin -- opts=p9 /bin/ls -al /",fdin=3,fdout=4 TCP:127.0.0.1:40564 2> log
+```
+
 # Experimental: Linux nommu
 
 Grab https://github.com/riscv-collab/riscv-gnu-toolchain/releases/tag/2025.09.16 riscv32-glibc-ubuntu-gcc toolchain (we need this to make a relocatable kernel, bare metal isn't enough), unpack it so that ~/riscv/bin/riscv32-unknown-linux-gnu-gcc exists
