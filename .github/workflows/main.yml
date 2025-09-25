@@ -175,7 +175,7 @@ jobs:
   clippy:
     if: needs.changes.outputs.risc0 == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -212,7 +212,7 @@ jobs:
   test:
     if: needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -289,7 +289,7 @@ jobs:
   extra:
     if: needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -351,7 +351,7 @@ jobs:
   examples:
     if: needs.changes.outputs.examples == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -409,7 +409,7 @@ jobs:
   test-crates:
     if: false # needs.changes.outputs.test-crates == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, Linux, cpu]
+    runs-on: [self-hosted, test, Linux, cpu]
     strategy:
       fail-fast: false
     steps:
@@ -435,7 +435,7 @@ jobs:
   doc:
     if: needs.changes.outputs.doc == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, macOS, cpu]
+    runs-on: [self-hosted, test, macOS, cpu]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -450,7 +450,7 @@ jobs:
   docs-rs:
     if: needs.changes.outputs.doc == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, macOS, cpu]
+    runs-on: [self-hosted, test, macOS, cpu]
     env:
       RUSTDOCFLAGS: "--cfg docsrs -D warnings"
       # Building with docs.rs config requires the nightly toolchain.
@@ -471,7 +471,7 @@ jobs:
   check-external:
     if: needs.changes.outputs.check-external == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, macOS, cpu]
+    runs-on: [self-hosted, test, macOS, cpu]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -483,7 +483,7 @@ jobs:
   check-semver:
     if: needs.changes.outputs.check-semver == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, test, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -511,7 +511,7 @@ jobs:
   check-template:
     if: needs.changes.outputs.check-template == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, test, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     env:
       RUST_TOOLCHAIN_VERSION: 1.88.0
     strategy:
@@ -561,7 +561,7 @@ jobs:
   browser:
     if: needs.changes.outputs.browser == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, Linux, X64, cpu]
+    runs-on: [self-hosted, test, Linux, X64, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
@@ -589,7 +589,7 @@ jobs:
   docker:
     if: needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, Linux, X64, cpu, docker]
+    runs-on: [self-hosted, test, Linux, X64, cpu, docker]
     steps:
       - uses: actions/checkout@v4
         with:
