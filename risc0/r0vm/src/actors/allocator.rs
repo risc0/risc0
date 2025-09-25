@@ -56,7 +56,7 @@ use url::Url;
 use uuid::Uuid;
 
 /// This is the URL path where requests are proxied to a manager of a specified version.
-const PROXY_URL_PATH: &str = "/r0vm";
+pub const PROXY_URL_PATH: &str = "/r0vm";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Error(String);
@@ -1863,7 +1863,12 @@ impl ApiRequest {
             .request
             .headers()
             .get("x-risc0-version")
-            .ok_or_else(|| anyhow::anyhow!("request missing `x-risc0-version` header"))?;
+            .ok_or_else(|| {
+                HttpError::new(
+                    http::StatusCode::BAD_REQUEST,
+                    "request missing `x-risc0-version` header",
+                )
+            })?;
         Ok(version_value.to_str()?.parse()?)
     }
 }
@@ -1881,6 +1886,8 @@ async fn proxy_api_request(
 
     // Convert request into reqwest::Request
     let (mut parts, body) = req.request.into_parts();
+
+    tracing::trace!("RECEIVED REQUEST TO PROXY: {parts:?}");
 
     let request_path = parts
         .uri
@@ -1989,6 +1996,9 @@ async fn proxy_handler(
                 .and_then(|e| e.downcast_ref::<HttpError>())
                 .map(|e| e.status_code)
                 .unwrap_or(http::StatusCode::INTERNAL_SERVER_ERROR);
+            tracing::error!(
+                "Allocator proxy REST API response error: code={status_code} msg={error}"
+            );
             http::Response::builder()
                 .status(status_code)
                 .body(axum::body::Body::new(error.to_string()))
@@ -2025,7 +2035,10 @@ pub async fn run_proxy(
     use anyhow::Context as _;
 
     let listener = TcpListener::bind(addr).await?;
-    tracing::info!("Allocator API listening on: {}", listener.local_addr()?);
+    tracing::info!(
+        "Allocator proxy REST API listening on: {}",
+        listener.local_addr()?
+    );
 
     axum::serve(listener, proxy_app(allocator))
         .with_graceful_shutdown(crate::api::shutdown_signal())

@@ -172,6 +172,8 @@ impl Message<GetTasks> for FactoryActor {
     type Reply = ();
 
     async fn handle(&mut self, msg: GetTasks, _ctx: &mut Context<Self, Self::Reply>) {
+        tracing::info!("factory received connection from worker: {}", msg.worker_id);
+
         self.worker_actors
             .insert(msg.worker_id, msg.worker.unwrap());
 
