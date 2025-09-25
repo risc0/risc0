@@ -562,6 +562,15 @@ impl AllocatorActor {
             }
         }
     }
+
+    fn get_gpu_tasks(&self, id: &GpuUuid) -> impl Iterator<Item = &Task> {
+        self.workers.values().flat_map(|worker| {
+            worker
+                .tasks
+                .values()
+                .filter(|t| t.used_gpu_tokens.contains_key(id))
+        })
+    }
 }
 
 /// Request to register a worker with the allocator.
@@ -1022,8 +1031,15 @@ pub struct GetStatusWorker {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct GetStatusGpu {
+    id: String,
+    tasks: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct GetStatusReply {
     pub workers: Vec<GetStatusWorker>,
+    pub gpus: Vec<GetStatusGpu>,
 }
 
 impl Message<GetStatus> for AllocatorActor {
@@ -1047,7 +1063,20 @@ impl AllocatorActor {
             .collect();
         workers.sort_by_key(|worker| worker.id.clone());
 
-        Ok(GetStatusReply { workers })
+        let mut gpus: Vec<_> = self
+            .gpus
+            .keys()
+            .map(|id| GetStatusGpu {
+                id: format!("{id:#}"),
+                tasks: self
+                    .get_gpu_tasks(id)
+                    .map(|t| t.description.clone())
+                    .collect(),
+            })
+            .collect();
+        gpus.sort_by_key(|gpu| gpu.id.clone());
+
+        Ok(GetStatusReply { workers, gpus })
     }
 }
 
