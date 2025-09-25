@@ -39,6 +39,29 @@ pub const FD_CLOEXEC: u32 = 1; // Close on exec flag.
 pub static mut ROOT_FID: u32 = 0;
 pub static mut CWD_FID: u32 = 0;
 
+pub fn get_root_fid() -> u32 {
+    unsafe { ROOT_FID }
+}
+
+#[allow(dead_code)]
+pub fn get_cwd_fid() -> u32 {
+    unsafe { CWD_FID }
+}
+
+#[allow(dead_code)]
+pub fn set_root_fid(fid: u32) {
+    unsafe {
+        ROOT_FID = fid;
+    }
+}
+
+#[allow(dead_code)]
+pub fn set_cwd_fid(fid: u32) {
+    unsafe {
+        CWD_FID = fid;
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct FileDescriptor {
     pub fid: u32,
@@ -52,6 +75,16 @@ pub static mut FD_TABLE: [FileDescriptor; 256] = [FileDescriptor {
     cursor: 0,
     is_dir: false,
 }; 256];
+
+pub fn get_fd(fd: u32) -> FileDescriptor {
+    unsafe { FD_TABLE[fd as usize] }
+}
+
+pub fn update_fd(fd: u32, file_descriptor: FileDescriptor) {
+    unsafe {
+        FD_TABLE[fd as usize] = file_descriptor;
+    }
+}
 
 // Linux dirent64 structure
 #[repr(C)]
@@ -100,18 +133,20 @@ pub fn init_fs() {
 }
 
 pub fn sys_close(_fd: u32) -> Result<u32, Err> {
-    unsafe {
-        if FD_TABLE[_fd as usize].fid != 0xFFFF_FFFE && FD_TABLE[_fd as usize].fid != 0 {
-            clunk(FD_TABLE[_fd as usize].fid);
-            FD_TABLE[_fd as usize] = FileDescriptor {
+    let fd_entry = get_fd(_fd);
+    if fd_entry.fid != 0xFFFF_FFFE && fd_entry.fid != 0 {
+        clunk(fd_entry.fid);
+        update_fd(
+            _fd,
+            FileDescriptor {
                 fid: 0,
                 cursor: 0,
                 is_dir: false,
-            };
-            Ok(0)
-        } else {
-            Err(Err::NoSys)
-        }
+            },
+        );
+        Ok(0)
+    } else {
+        Err(Err::NoSys)
     }
 }
 
@@ -121,34 +156,32 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
         host_log(msg.as_ptr(), msg.len());
         return Err(Err::NoSys);
     }
-    unsafe {
-        if FD_TABLE[_fd as usize].fid != 0 {
-            // read with Tread and Rread from the fid using 9p protocol and update .cursor in FD_TABLE
-            let tread = TreadMessage::new(
-                0,
-                FD_TABLE[_fd as usize].fid,
-                FD_TABLE[_fd as usize].cursor,
-                _count,
-            );
-            match tread.send_tread() {
-                Ok(_bytes_written) => {
-                    // Success
-                }
-                Err(_e) => {
-                    return Err(Err::NoSys);
-                }
+    let fd_entry = get_fd(_fd);
+    if fd_entry.fid != 0 {
+        // read with Tread and Rread from the fid using 9p protocol and update .cursor in FD_TABLE
+        let tread = TreadMessage::new(0, fd_entry.fid, fd_entry.cursor, _count);
+        match tread.send_tread() {
+            Ok(_bytes_written) => {
+                // Success
             }
-            match RreadMessage::read_response() {
-                P9Response::Success(rread) => {
-                    let user_ptr = _buf as *mut u8;
-                    let data = rread.data;
+            Err(_e) => {
+                return Err(Err::NoSys);
+            }
+        }
+        match RreadMessage::read_response() {
+            P9Response::Success(rread) => {
+                let user_ptr = _buf as *mut u8;
+                let data = rread.data;
+                unsafe {
                     core::ptr::copy_nonoverlapping(data.as_ptr(), user_ptr, rread.count as usize);
-                    FD_TABLE[_fd as usize].cursor += rread.count as u64;
-                    return Ok(rread.count);
                 }
-                P9Response::Error(_rlerror) => {
-                    return Err(Err::NoSys);
-                }
+                let mut updated_entry = fd_entry;
+                updated_entry.cursor += rread.count as u64;
+                update_fd(_fd, updated_entry);
+                return Ok(rread.count);
+            }
+            P9Response::Error(_rlerror) => {
+                return Err(Err::NoSys);
             }
         }
     }
@@ -170,31 +203,32 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
             host_log(msg.as_ptr(), msg.len());
             return Err(Err::NoSys);
         }
-        unsafe {
-            if FD_TABLE[fd as usize].fid != 0 {
-                // write with Twrite and Rwrite to the fid using 9p protocol and update .cursor in FD_TABLE
-                let twrite = TwriteMessage::new(
-                    0,
-                    FD_TABLE[fd as usize].fid,
-                    FD_TABLE[fd as usize].cursor,
-                    core::slice::from_raw_parts(buf, count).to_vec(),
-                );
-                match twrite.send_twrite() {
-                    Ok(_bytes_written) => {
-                        // Success
-                    }
-                    Err(_e) => {
-                        return Err(Err::NoSys);
-                    }
+        let fd_entry = get_fd(fd as u32);
+        if fd_entry.fid != 0 {
+            // write with Twrite and Rwrite to the fid using 9p protocol and update .cursor in FD_TABLE
+            let twrite = TwriteMessage::new(
+                0,
+                fd_entry.fid,
+                fd_entry.cursor,
+                unsafe { core::slice::from_raw_parts(buf, count) }.to_vec(),
+            );
+            match twrite.send_twrite() {
+                Ok(_bytes_written) => {
+                    // Success
                 }
-                match RwriteMessage::read_response() {
-                    P9Response::Success(rwrite) => {
-                        FD_TABLE[fd as usize].cursor += rwrite.count as u64;
-                        return Ok(rwrite.count as usize);
-                    }
-                    P9Response::Error(_rlerror) => {
-                        return Err(Err::NoSys);
-                    }
+                Err(_e) => {
+                    return Err(Err::NoSys);
+                }
+            }
+            match RwriteMessage::read_response() {
+                P9Response::Success(rwrite) => {
+                    let mut updated_entry = fd_entry;
+                    updated_entry.cursor += rwrite.count as u64;
+                    update_fd(fd as u32, updated_entry);
+                    return Ok(rwrite.count as usize);
+                }
+                P9Response::Error(_rlerror) => {
+                    return Err(Err::NoSys);
                 }
             }
         }
@@ -230,10 +264,19 @@ pub fn sys_chdir(_filename: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-pub fn sys_dup(_fd: u32) -> Result<u32, Err> {
-    let msg = b"sys_dup not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+pub fn sys_dup(fd: u32) -> Result<u32, Err> {
+    // diod/p9 protocol "fid can be cloned to newfid by calling walk with nwname set to zero."
+    let fd_entry = get_fd(fd);
+    let fid = fd_entry.fid;
+    let path = String::from("");
+    // use
+    if let Ok((new_fid, _)) = do_walk(get_root_fid(), fid, path) {
+        let new_fd = find_free_fd();
+        set_fd(new_fid, new_fid);
+        Ok(new_fd)
+    } else {
+        Err(Err::NoSys)
+    }
 }
 
 pub fn sys_dup3(_oldfd: u32, _newfd: u32, _flags: u32) -> Result<u32, Err> {
@@ -668,10 +711,11 @@ pub fn sys_getdents64(fd: u32, dirp: u32, count: u32) -> Result<u32, Err> {
         return Err(Err::NoSys);
     }
 
-    let offset = unsafe { FD_TABLE[fd as usize].cursor };
+    let fd_entry = get_fd(fd);
+    let offset = fd_entry.cursor;
 
     // Get the FID from the FD table
-    let fid = unsafe { FD_TABLE[fd as usize].fid };
+    let fid = fd_entry.fid;
     if fid == 0 {
         return Err(Err::Inval);
     }
@@ -819,9 +863,9 @@ pub fn sys_getdents64(fd: u32, dirp: u32, count: u32) -> Result<u32, Err> {
                     }
                 }
 
-                unsafe {
-                    FD_TABLE[fd as usize].cursor = entry_offset;
-                }
+                let mut updated_entry = fd_entry;
+                updated_entry.cursor = entry_offset;
+                update_fd(fd, updated_entry);
                 // Ensure next dirent is 8-byte aligned
                 user_offset = (user_offset + reclen as usize + 7) & !7;
                 total_bytes += reclen as usize;
@@ -1002,8 +1046,8 @@ fn do_openat(_dfd: u32, filename_str: &str, _flags: u32, _mode: u32) -> Result<u
     // Original logic for opening existing files
     let fid = find_free_fd();
     let resolve_result = resolve_path(filename_str, 0, fid);
-    if resolve_result.is_err() {
-        return Err(resolve_result.unwrap_err());
+    if let Err(e) = resolve_result {
+        return Err(e);
     } else {
         kprint!(
             "sys_openat: dfd={}, filename='{}', real_filename='{}' flags=0x{:x}, mode=0x{:x}",
@@ -1115,7 +1159,7 @@ fn resolve_path(path: &str, depth: u32, fid: u32) -> Result<String, Err> {
         kprint!("resolve_path: depth too deep, returning error");
         return Err(Err::NoSys);
     }
-    let walk_result = unsafe { do_walk(ROOT_FID, fid, path.to_string()) };
+    let walk_result = do_walk(get_root_fid(), fid, path.to_string());
 
     match walk_result {
         Ok((ret_code, qid)) => {
@@ -1228,15 +1272,12 @@ pub fn sys_statx(
     let filename = str::from_utf8(filename).unwrap();
     kprint!("sys_statx: filename = {}", filename);
     // if the first character is / it's a absolute path, otherwise it's a relative path
-    let start_fid;
     let is_absolute_path = filename.starts_with("/");
-    if is_absolute_path {
-        unsafe {
-            start_fid = ROOT_FID;
-        }
+    let start_fid = if is_absolute_path {
+        get_root_fid()
     } else {
         kpanic!("sys_statx: relative paths are not supported");
-    }
+    };
     // skip the first element of the vector
     let walk_result = do_walk(start_fid, 0xFFFF_FFFE, filename.to_string());
     match walk_result {
@@ -1378,24 +1419,23 @@ fn convert_rgetattr_to_statx(rgetattr: &RgetattrMessage) -> Statx {
 
 // make a fd
 pub fn find_free_fd() -> u32 {
-    unsafe {
-        let mut fd = 0;
-        while FD_TABLE[fd].fid != 0 {
-            fd += 1;
-        }
-        fd as u32
+    let mut fd = 0;
+    while get_fd(fd).fid != 0 {
+        fd += 1;
     }
+    fd
 }
 
 #[allow(dead_code)]
 pub fn set_fd(fd: u32, fid: u32) {
-    unsafe {
-        FD_TABLE[fd as usize] = FileDescriptor {
+    update_fd(
+        fd,
+        FileDescriptor {
             fid,
             cursor: 0,
             is_dir: false,
-        };
-    }
+        },
+    );
 }
 
 pub fn load_file_aligned_to_page_size(path: &String) -> &[u8] {
