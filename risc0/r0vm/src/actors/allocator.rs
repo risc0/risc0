@@ -43,7 +43,7 @@ use std::sync::Arc;
 
 use super::{
     RemoteActor, RemoteAllocatorRequest, RpcDisconnect,
-    protocol::{GlobalId, WorkerId},
+    protocol::{GlobalId, WorkerId, WorkerIdFmt},
     remote_actor_ask, routing_actor_impl,
 };
 use derive_more::{Add, AddAssign, From, Sub, SubAssign};
@@ -260,20 +260,6 @@ impl fmt::Display for Task {
     }
 }
 
-struct WorkerIdFmt(WorkerId);
-
-impl fmt::Display for WorkerIdFmt {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if f.alternate() {
-            let worker_id = self.0.to_string();
-            let short_id = &worker_id[worker_id.len() - 5..];
-            write!(f, "WID-{short_id}")
-        } else {
-            write!(f, "WID-{}", &self.0)
-        }
-    }
-}
-
 /// The allocator's representation of a worker.
 struct Worker {
     /// If the worker is on a remote machine, this is the socket address of the RPC connection
@@ -284,6 +270,8 @@ struct Worker {
     hardware: Vec<HardwareResource>,
     /// What tasks (tasks) are currently running on this worker.
     tasks: IndexMap<GlobalId, Task>,
+    /// From what version of the software is this worker
+    zkvm_version: semver::Version,
 }
 
 impl Worker {
@@ -291,12 +279,41 @@ impl Worker {
         remote_address: Option<SocketAddr>,
         machine: MachineId,
         hardware: Vec<HardwareResource>,
+        zkvm_version: semver::Version,
     ) -> Self {
         Self {
             remote_address,
             tasks: IndexMap::new(),
             machine,
             hardware,
+            zkvm_version,
+        }
+    }
+
+    fn to_get_status(&self, id: WorkerId) -> GetStatusWorker {
+        let host = self
+            .remote_address
+            .map(|a| a.ip().to_string())
+            .unwrap_or("localhost".into());
+        let port = self.remote_address.map(|a| a.port());
+
+        let hardware = self
+            .hardware
+            .iter()
+            .filter_map(|h| match h {
+                HardwareResource::Gpu(gpu) => Some(format!("{:#}", &gpu.uuid)),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+
+        let tasks = self.tasks.values().map(|t| t.to_string()).collect();
+        GetStatusWorker {
+            id: format!("{:#}", WorkerIdFmt(id)),
+            hardware,
+            host,
+            port,
+            version: self.zkvm_version.clone(),
+            tasks,
         }
     }
 }
@@ -591,6 +608,7 @@ impl AllocatorActor {
                 msg.remote_address,
                 machine.clone(),
                 msg.hardware.clone(),
+                msg.zkvm_version.clone(),
             ));
             let num_cpus = msg
                 .hardware
@@ -994,8 +1012,18 @@ impl AllocatorActor {
 pub struct GetStatus;
 
 #[derive(Serialize, Deserialize)]
+pub struct GetStatusWorker {
+    id: String,
+    hardware: Vec<String>,
+    host: String,
+    port: Option<u16>,
+    version: semver::Version,
+    tasks: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct GetStatusReply {
-    pub workers: BTreeMap<String, Vec<String>>,
+    pub workers: Vec<GetStatusWorker>,
 }
 
 impl Message<GetStatus> for AllocatorActor {
@@ -1012,32 +1040,14 @@ impl Message<GetStatus> for AllocatorActor {
 
 impl AllocatorActor {
     fn get_status(&mut self) -> Result<GetStatusReply> {
-        Ok(GetStatusReply {
-            workers: self
-                .workers
-                .iter()
-                .map(|(worker_id, worker)| {
-                    let address = worker
-                        .remote_address
-                        .map(|a| a.to_string())
-                        .unwrap_or("localhost".into());
-                    let worker_id = WorkerIdFmt(*worker_id);
-                    let hardware = worker
-                        .hardware
-                        .iter()
-                        .filter_map(|h| match h {
-                            HardwareResource::Gpu(gpu) => Some(format!(":{:#}", &gpu.uuid)),
-                            _ => None,
-                        })
-                        .collect::<Vec<_>>()
-                        .join("");
+        let mut workers: Vec<_> = self
+            .workers
+            .iter()
+            .map(|(worker_id, worker)| worker.to_get_status(*worker_id))
+            .collect();
+        workers.sort_by_key(|worker| worker.id.clone());
 
-                    let key = format!("{address}:{worker_id:#}{hardware}");
-                    let value = worker.tasks.values().map(|t| t.to_string()).collect();
-                    (key, value)
-                })
-                .collect(),
-        })
+        Ok(GetStatusReply { workers })
     }
 }
 

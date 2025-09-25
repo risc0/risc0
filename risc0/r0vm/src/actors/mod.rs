@@ -258,16 +258,21 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
 }
 
 #[tokio::main]
-pub(crate) async fn monitor_main(addr: SocketAddr) -> Result<(), Box<dyn StdError>> {
+pub(crate) async fn status_main(host: String) -> Result<(), Box<dyn StdError>> {
+    use std::net::ToSocketAddrs as _;
+
+    let addr = host
+        .to_socket_addrs()?
+        .next()
+        .ok_or_else(|| format!("failed to resolve {host}"))?;
+
     let remote_allocator =
         kameo::spawn(allocator::RemoteAllocatorActor::new(addr, "RemoteAllocatorActor").await?);
 
-    loop {
-        let reply = remote_allocator.ask(allocator::GetStatus).await?;
-        println!("{}", serde_json::to_string_pretty(&reply)?);
+    let reply = remote_allocator.ask(allocator::GetStatus).await?;
+    println!("{}", serde_json::to_string_pretty(&reply)?);
 
-        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-    }
+    Ok(())
 }
 
 struct TempConfig {

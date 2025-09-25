@@ -35,6 +35,20 @@ pub(crate) type JobId = uuid::Uuid;
 pub(crate) type TaskId = u64;
 pub(crate) type WorkerId = uuid::Uuid;
 
+pub struct WorkerIdFmt(pub WorkerId);
+
+impl fmt::Display for WorkerIdFmt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if f.alternate() {
+            let worker_id = self.0.to_string();
+            let short_id = &worker_id[worker_id.len() - 5..];
+            write!(f, "WID-{short_id}")
+        } else {
+            write!(f, "WID-{}", &self.0)
+        }
+    }
+}
+
 /// This is an async message that should return immediately to the API.
 ///
 /// The API is designed to have users poll for status, but the initial request
