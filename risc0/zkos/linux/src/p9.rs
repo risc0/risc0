@@ -3768,6 +3768,14 @@ impl RmknodMessage {
     }
 }
 
+impl ReadableMessage for RmknodMessage {
+    type Error = RmknodError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RmknodMessage::deserialize(buf)
+    }
+}
+
 /// Trename message structure
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TrenameMessage {
@@ -4062,6 +4070,16 @@ pub enum RmknodError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RmknodError {
+    fn buffer_too_small() -> Self {
+        RmknodError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RmknodError::InvalidMessageType
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -6469,6 +6487,14 @@ impl RmkdirMessage {
     }
 }
 
+impl ReadableMessage for RmkdirMessage {
+    type Error = RmkdirError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RmkdirMessage::deserialize(buf)
+    }
+}
+
 /// Trenameat message structure
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TrenameatMessage {
@@ -6812,6 +6838,16 @@ pub enum RmkdirError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RmkdirError {
+    fn buffer_too_small() -> Self {
+        RmkdirError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RmkdirError::InvalidMessageType
+    }
 }
 
 /// Trenameat serialization errors

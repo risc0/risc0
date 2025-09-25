@@ -1,17 +1,19 @@
 use crate::{
     constants::*,
-    host_calls::host_write,
-    host_calls::{host_log, host_terminate},
+    host_calls::{host_log, host_terminate, host_write},
     kernel::print,
     linux_abi::Err,
     p9::{
         P9Response, Qid, RattachMessage, RclunkMessage, ReadableMessage, RgetattrMessage,
-        RlcreateMessage, RlopenMessage, RreadMessage, RreaddirMessage, RreadlinkMessage,
-        RversionMessage, RwalkMessage, RwriteMessage, TattachMessage, TlcreateMessage,
-        TlopenMessage, TreadMessage, TreaddirMessage, TversionMessage, TwriteMessage, constants::*,
+        RlcreateMessage, RlopenMessage, RmkdirMessage, RmknodMessage, RreadMessage,
+        RreaddirMessage, RversionMessage, RwalkMessage, RwriteMessage, TattachMessage,
+        TlcreateMessage, TlopenMessage, TmkdirMessage, TmknodMessage, TreadMessage,
+        TreaddirMessage, TversionMessage, TwriteMessage, constants::*,
     },
 };
 
+#[cfg(target_arch = "riscv32")]
+use alloc::format;
 #[cfg(target_arch = "riscv32")]
 use alloc::string::String;
 #[cfg(target_arch = "riscv32")]
@@ -38,6 +40,7 @@ pub const FD_CLOEXEC: u32 = 1; // Close on exec flag.
 
 pub static mut ROOT_FID: u32 = 0;
 pub static mut CWD_FID: u32 = 0;
+pub static mut CWD_STR: String = String::new();
 
 pub fn get_root_fid() -> u32 {
     unsafe { ROOT_FID }
@@ -62,18 +65,35 @@ pub fn set_cwd_fid(fid: u32) {
     }
 }
 
+#[allow(dead_code)]
+pub fn set_cwd_str(cwd_str: String) {
+    unsafe {
+        CWD_STR = cwd_str;
+    }
+}
+
+#[allow(dead_code)]
+pub fn get_cwd_str() -> String {
+    #[allow(static_mut_refs)]
+    unsafe {
+        CWD_STR.clone()
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct FileDescriptor {
     pub fid: u32,
     pub cursor: u64,
     #[allow(dead_code)]
     pub is_dir: bool,
+    pub mode: u32,
 }
 
 pub static mut FD_TABLE: [FileDescriptor; 256] = [FileDescriptor {
     fid: 0,
     cursor: 0,
     is_dir: false,
+    mode: 0xFFFF_FFFF,
 }; 256];
 
 pub fn get_fd(fd: u32) -> FileDescriptor {
@@ -142,6 +162,7 @@ pub fn sys_close(_fd: u32) -> Result<u32, Err> {
                 fid: 0,
                 cursor: 0,
                 is_dir: false,
+                mode: 0xFFFF_FFFF,
             },
         );
         Ok(0)
@@ -156,6 +177,7 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
         host_log(msg.as_ptr(), msg.len());
         return Err(Err::NoSys);
     }
+    kprint!("sys_read: _fd={} _buf={} _count={}", _fd, _buf, _count);
     let fd_entry = get_fd(_fd);
     if fd_entry.fid != 0 {
         // read with Tread and Rread from the fid using 9p protocol and update .cursor in FD_TABLE
@@ -258,21 +280,108 @@ pub fn sys_writev(fd: u32, vec_ptr: u32, vlen: u32) -> Result<u32, Err> {
     Ok(total as u32)
 }
 
-pub fn sys_chdir(_filename: u32) -> Result<u32, Err> {
-    let msg = b"sys_chdir not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+pub fn sys_chdir(filename: u32) -> Result<u32, Err> {
+    if !get_p9_enabled() {
+        let msg = b"sys_chdir: p9 is not enabled";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+
+    let filename = unsafe { core::slice::from_raw_parts(filename as *const u8, 256) };
+    kprint!("sys_chdir: filename='{:?}'", filename);
+
+    let null_pos = filename
+        .iter()
+        .position(|&b| b == 0)
+        .unwrap_or(filename.len());
+    let filename = &filename[..null_pos];
+    let filename_str = match str::from_utf8(filename) {
+        Ok(s) => s,
+        Err(_) => {
+            kprint!("sys_chdir: invalid UTF-8 filename");
+            return Err(Err::NoSys);
+        }
+    };
+
+    kprint!("sys_chdir: filename='{}'", filename_str);
+
+    let starting_fid = if filename_str.starts_with("/") {
+        get_root_fid()
+    } else {
+        get_cwd_fid()
+    };
+    let wnames = normalize_path(filename_str);
+    let walk_result = do_walk(starting_fid, 0xFFFF_FFFC, wnames);
+    match walk_result {
+        Ok((ret_code, _)) => {
+            if ret_code != 0 {
+                return Ok(ret_code);
+            }
+        }
+        Err(e) => {
+            kprint!("sys_chdir: error walking to directory: {:?}", e.as_errno());
+            return Err(e);
+        }
+    }
+    if get_cwd_fid() == 0xFFFF_FFFD {
+        clunk(0xFFFF_FFFD); // remove the old cwd fix
+    }
+
+    // take previous cwd_str and apply the new (relative or not) path to it
+    // normalize it as well, remove ./ and ..
+    let new_cwd_str = if filename_str.starts_with("/") {
+        filename_str.to_string()
+    } else {
+        format!("{}{}", get_cwd_str(), filename_str)
+    };
+
+    // resolve ..'s
+    let new_cwd = normalize_path(&new_cwd_str);
+    let mut new_cwd_mod = new_cwd.clone();
+    for s in new_cwd {
+        if s == ".." {
+            new_cwd_mod.pop();
+            continue;
+        }
+        new_cwd_mod.push(s);
+    }
+    // make sure it ends with /
+    let mut new_cwd_str = new_cwd_mod.join("/");
+    if !new_cwd_str.ends_with("/") {
+        new_cwd_str.push('/');
+    }
+
+    set_cwd_str(new_cwd_str);
+    dup_fid_to(0xFFFF_FFFC, 0xFFFF_FFFD)?;
+    clunk(0xFFFF_FFFC);
+    set_cwd_fid(0xFFFF_FFFD);
+    Ok(0)
+}
+
+fn dup_fid_to(fid: u32, fid_to: u32) -> Result<u32, Err> {
+    let walk_result = do_walk(fid, fid_to, vec![]);
+    match walk_result {
+        Ok((ret_code, _)) => Ok(ret_code),
+        Err(e) => {
+            kprint!("sys_chdir: error walking to directory: {:?}", e.as_errno());
+            clunk(fid_to);
+            Err(e)
+        }
+    }
 }
 
 pub fn sys_dup(fd: u32) -> Result<u32, Err> {
+    if !get_p9_enabled() {
+        let msg = b"sys_dup: p9 is not enabled";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
     // diod/p9 protocol "fid can be cloned to newfid by calling walk with nwname set to zero."
     let fd_entry = get_fd(fd);
     let fid = fd_entry.fid;
-    let path = String::from("");
-    // use
-    if let Ok((new_fid, _)) = do_walk(get_root_fid(), fid, path) {
-        let new_fd = find_free_fd();
-        set_fd(new_fid, new_fid);
+    let new_fd = find_free_fd();
+    if let Ok(new_fid) = dup_fid_to(fid, new_fd) {
+        set_fd(new_fd, new_fid);
         Ok(new_fd)
     } else {
         Err(Err::NoSys)
@@ -327,10 +436,19 @@ pub fn sys_fanotify_mark(
     Err(Err::NoSys)
 }
 
-pub fn sys_fchdir(_fd: u32) -> Result<u32, Err> {
-    let msg = b"sys_fchdir not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+pub fn sys_fchdir(fd: u32) -> Result<u32, Err> {
+    if !get_p9_enabled() {
+        let msg = b"sys_fchdir: p9 is not enabled";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+    let fd_entry = get_fd(fd);
+    if fd_entry.fid != 0 {
+        set_cwd_fid(fd_entry.fid);
+        Ok(0)
+    } else {
+        Err(Err::NoSys)
+    }
 }
 
 pub fn sys_fchmod(_fd: u32, _mode: u32) -> Result<u32, Err> {
@@ -436,9 +554,31 @@ pub fn sys_fsetxattr(
 }
 
 pub fn sys_getcwd(_buf: u32, _size: u32) -> Result<u32, Err> {
-    let msg = b"sys_getcwd not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    if _buf == 0 {
+        let msg = b"sys_getcwd: _buf is null";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+    let mut cwd_str = get_cwd_str();
+    // strip the trailing / if it's not "/"
+    if cwd_str != "/" && cwd_str.ends_with("/") {
+        cwd_str = cwd_str[..cwd_str.len() - 1].to_string();
+    }
+    // add a null-terminator
+    cwd_str.push('\0');
+    let cwd_str_len = cwd_str.len();
+    if cwd_str_len > _size as usize {
+        return Err(Err::NoSys);
+    }
+    let buf = unsafe { core::slice::from_raw_parts_mut(_buf as *mut u8, cwd_str_len) };
+    // copy the string into buffer, null-terminated utf-8
+    buf.copy_from_slice(cwd_str.as_bytes());
+    kprint!(
+        "sys_getcwd: cwd_str='{:?}' cwd_str_len={}",
+        &buf[..cwd_str_len],
+        cwd_str_len
+    );
+    Ok(cwd_str_len as u32)
 }
 
 pub fn sys_getxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
@@ -508,15 +648,170 @@ pub fn sys_lsetxattr(
 }
 
 pub fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
-    let msg = b"sys_mkdirat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    if !get_p9_enabled() {
+        let msg = b"sys_mkdirat: p9 is not enabled";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+    let filename = unsafe { core::slice::from_raw_parts(_pathname as *const u8, 256) };
+    let null_pos = filename
+        .iter()
+        .position(|&b| b == 0)
+        .unwrap_or(filename.len());
+    let filename = &filename[..null_pos];
+    let filename_str = match str::from_utf8(filename) {
+        Ok(s) => s,
+        Err(_) => {
+            kprint!("sys_mkdirat: invalid UTF-8 filename");
+            return Err(Err::NoSys);
+        }
+    };
+
+    kprint!("sys_mkdirat: dfd={}, filename='{}'", _dfd, filename_str);
+
+    let starting_fid = get_starting_fid(_dfd, filename_str)?;
+    let mut wnames = normalize_path(filename_str);
+    // remove the last element of the vector
+    let last_wname = wnames.pop().unwrap();
+    let walk_result = do_walk(starting_fid, 0xFFFF_FFFE, wnames);
+    match walk_result {
+        Ok((ret_code, _)) => {
+            if ret_code != 0 {
+                kprint!(
+                    "sys_mkdirat: failed to walk to parent directory of {}: {}",
+                    filename_str,
+                    ret_code
+                );
+                return Ok(ret_code);
+            }
+            let tmkdir = TmkdirMessage::new(0, 0xFFFF_FFFE, last_wname.to_string(), _mode, 0);
+            match tmkdir.send_tmkdir() {
+                Ok(bytes_written) => {
+                    kprint!("sys_mkdirat: sent {} bytes for Tmkdir", bytes_written);
+                }
+                Err(e) => {
+                    kprint!("sys_mkdirat: error sending Tmkdir: {:?}", e);
+                    return Err(Err::NoSys);
+                }
+            }
+            match RmkdirMessage::read_response() {
+                P9Response::Success(rmkdir) => {
+                    kprint!("sys_mkdirat: rmkdir = {:?}", rmkdir);
+                    Ok(0)
+                }
+                P9Response::Error(rlerror) => {
+                    kprint!(
+                        "sys_mkdirat: received Rlerror for Rmkdir: tag={}, ecode={}",
+                        rlerror.tag,
+                        rlerror.ecode
+                    );
+                    Ok(-(rlerror.ecode as i32) as u32)
+                }
+            }
+        }
+        Err(e) => {
+            kprint!(
+                "sys_mkdirat: error walking to parent directory of {}: {:?}",
+                filename_str,
+                e.as_errno()
+            );
+            Err(e)
+        }
+    }
 }
 
 pub fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u32, Err> {
-    let msg = b"sys_mknodat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    if !get_p9_enabled() {
+        let msg = b"sys_mknodat: p9 is not enabled";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+    let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
+    let null_pos = filename
+        .iter()
+        .position(|&b| b == 0)
+        .unwrap_or(filename.len());
+    let filename = &filename[..null_pos];
+    let filename_str = match str::from_utf8(filename) {
+        Ok(s) => s,
+        Err(_) => {
+            kprint!("sys_mknodat: invalid UTF-8 filename");
+            return Err(Err::NoSys);
+        }
+    };
+
+    kprint!(
+        "sys_mknodat: dfd={}, filename='{}', mode=0x{:x}, dev=0x{:x}",
+        _dfd,
+        filename_str,
+        _mode,
+        _dev
+    );
+
+    let starting_fid = get_starting_fid(_dfd, filename_str)?;
+    let mut wnames = normalize_path(filename_str);
+    // remove the last element of the vector
+    let last_wname = wnames.pop().unwrap();
+    let walk_result = do_walk(starting_fid, 0xFFFF_FFFE, wnames);
+    match walk_result {
+        Ok((ret_code, _)) => {
+            if ret_code != 0 {
+                kprint!(
+                    "sys_mknodat: failed to walk to parent directory of {}: {}",
+                    filename_str,
+                    ret_code
+                );
+                return Ok(ret_code);
+            }
+
+            // Extract major and minor device numbers from _dev
+            // In Linux, the device number is encoded as (major << 8) | minor for 8-bit minor
+            // or (major << 20) | minor for 12-bit minor, but we'll use the simpler 8-bit version
+            let major = (_dev >> 8) & 0xFF;
+            let minor = _dev & 0xFF;
+
+            let tmknod = TmknodMessage::new(
+                0,
+                0xFFFF_FFFE,
+                last_wname.to_string(),
+                _mode,
+                major,
+                minor,
+                0,
+            );
+            match tmknod.send_tmknod() {
+                Ok(bytes_written) => {
+                    kprint!("sys_mknodat: sent {} bytes for Tmknod", bytes_written);
+                }
+                Err(e) => {
+                    kprint!("sys_mknodat: error sending Tmknod: {:?}", e);
+                    return Err(Err::NoSys);
+                }
+            }
+            match RmknodMessage::read_response() {
+                P9Response::Success(rmknod) => {
+                    kprint!("sys_mknodat: rmknod = {:?}", rmknod);
+                    Ok(0)
+                }
+                P9Response::Error(rlerror) => {
+                    kprint!(
+                        "sys_mknodat: received Rlerror for Rmknod: tag={}, ecode={}",
+                        rlerror.tag,
+                        rlerror.ecode
+                    );
+                    Ok(-(rlerror.ecode as i32) as u32)
+                }
+            }
+        }
+        Err(e) => {
+            kprint!(
+                "sys_mknodat: error walking to parent directory of {}: {:?}",
+                filename_str,
+                e.as_errno()
+            );
+            Err(e)
+        }
+    }
 }
 
 pub fn sys_openat2(_dfd: u32, _filename: u32, _how: u32) -> Result<u32, Err> {
@@ -694,11 +989,53 @@ pub fn sys_setxattrat(
     Err(Err::NoSys)
 }
 
+const F_DUPFD_CLOEXEC: u32 = 1030;
+
 pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
     if _cmd == F_SETFD && _arg & FD_CLOEXEC == FD_CLOEXEC {
         // mock and return ok
         return Ok(0);
+    } else if _cmd == F_DUPFD_CLOEXEC {
+        let fd = get_fd(_fd);
+        let dup = dup_fid_to(fd.fid, _arg)?;
+        update_fd(
+            _arg,
+            FileDescriptor {
+                fid: _arg,
+                cursor: fd.cursor,
+                is_dir: false,
+                mode: fd.mode,
+            },
+        );
+        if fd.mode != 0xFFFF_FFFF {
+            // call Tlopen with the mode
+            let tlopen = TlopenMessage::new(0, _arg, fd.mode);
+            match tlopen.send_tlopen() {
+                Ok(_bytes_written) => {
+                    // Success
+                }
+                Err(_e) => {
+                    return Err(Err::NoSys);
+                }
+            }
+            match RlopenMessage::read_response() {
+                P9Response::Success(_rlopen) => {
+                    // Success
+                }
+                P9Response::Error(_rlerror) => {
+                    return Err(Err::NoSys);
+                }
+            }
+        }
+        kprint!(
+            "sys_fcntl64: F_DUPFD_CLOEXEC: _fd={} _arg={} dup={}",
+            _fd,
+            _arg,
+            dup
+        );
+        return Ok(_arg);
     }
+    kprint!("sys_fcntl64: _fd={} _cmd={} _arg={}", _fd, _cmd, _arg);
     let msg = b"sys_fcntl64 not implemented for this cmd/arg";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
@@ -879,8 +1216,11 @@ pub fn sys_getdents64(fd: u32, dirp: u32, count: u32) -> Result<u32, Err> {
 
 #[allow(dead_code)]
 // instead of wnames we take a path
-fn do_walk(starting_fid: u32, target_fid: u32, path: String) -> Result<(u32, Vec<Qid>), Err> {
-    let wnames: Vec<String> = path.split("/").skip(1).map(|s| s.to_string()).collect();
+fn do_walk(
+    starting_fid: u32,
+    target_fid: u32,
+    wnames: Vec<String>,
+) -> Result<(u32, Vec<Qid>), Err> {
     let wnames_len = wnames.len();
     let twalk = crate::p9::TwalkMessage::new(0, starting_fid, target_fid, wnames);
     match twalk.send_twalk() {
@@ -913,22 +1253,10 @@ fn do_walk(starting_fid: u32, target_fid: u32, path: String) -> Result<(u32, Vec
 }
 
 /// Split a path into directory and filename components
+/// also supports relative paths
 fn split_path(path: &str) -> (String, String) {
-    if let Some(last_slash) = path.rfind('/') {
-        if last_slash == 0 {
-            // Path is "/filename" - directory is "/"
-            ("/".to_string(), path[1..].to_string())
-        } else {
-            // Path is "/dir/filename" - directory is "/dir", filename is "filename"
-            (
-                path[..last_slash].to_string(),
-                path[last_slash + 1..].to_string(),
-            )
-        }
-    } else {
-        // No slash found - this shouldn't happen for absolute paths
-        ("/".to_string(), path.to_string())
-    }
+    let split: Vec<String> = path.split("/").map(|s| s.to_string()).collect();
+    (split[0].to_string(), split[1].to_string())
 }
 
 pub fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32, Err> {
@@ -950,15 +1278,32 @@ pub fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<
     do_openat(_dfd, filename_str, _flags, _mode)
 }
 
+const AT_FDCWD: u32 = 0xFFFF_FF9C; // -100i32 as u32
+
+fn get_starting_fid(_dfd: u32, filename_str: &str) -> Result<u32, Err> {
+    // If the pathname given in pathname is relative, then it is interpreted relative to the directory referred to by the file descriptor dirfd (rather than relative to the current working directory of the calling process, as is done by open(2) for a relative pathname).
+    // If pathname is relative and dirfd is the special value AT_FDCWD, then pathname is interpreted relative to the current working directory of the calling process (like open(2)).
+    if filename_str.starts_with("/") {
+        Ok(get_root_fid())
+    } else if _dfd == AT_FDCWD {
+        // AT_FDCWD case
+        Ok(get_cwd_fid())
+    } else {
+        let fid = get_fd(_dfd).fid;
+        if fid == 0 {
+            return Err(Err::NoSys);
+        }
+        Ok(fid)
+    }
+}
+
 fn do_openat(_dfd: u32, filename_str: &str, _flags: u32, _mode: u32) -> Result<u32, Err> {
     // Convert the filename to a UTF-8 s
     kprint!("sys_openat: filename='{}'", filename_str);
     // lets check if its an absolute path and panic otherwise
-    if !filename_str.starts_with("/") {
-        kpanic!("sys_openat: relative paths are not supported");
-    }
 
-    // Check if O_CREAT flag is set
+    let starting_fid = get_starting_fid(_dfd, filename_str)?;
+
     const O_CREAT: u32 = 0o100;
     // const O_EXCL: u32 = 0o200; // TODO: Implement O_EXCL logic
 
@@ -980,7 +1325,7 @@ fn do_openat(_dfd: u32, filename_str: &str, _flags: u32, _mode: u32) -> Result<u
         // Get a FID for the new file
         let file_fid = find_free_fd();
 
-        let dir_walk_result = do_walk(0, file_fid, dir_path.clone());
+        let dir_walk_result = do_walk(starting_fid, file_fid, normalize_path(&dir_path));
         match dir_walk_result {
             Ok((ret_code, _)) => {
                 if ret_code != 0 {
@@ -1022,6 +1367,9 @@ fn do_openat(_dfd: u32, filename_str: &str, _flags: u32, _mode: u32) -> Result<u
                     P9Response::Success(rlcreate) => {
                         kprint!("sys_openat: received Rlcreate: {:?}", rlcreate);
                         set_fd(file_fid, file_fid);
+                        unsafe {
+                            FD_TABLE[file_fid as usize].mode = p9_flags;
+                        }
                         return Ok(file_fid);
                     }
                     P9Response::Error(rlerror) => {
@@ -1045,20 +1393,20 @@ fn do_openat(_dfd: u32, filename_str: &str, _flags: u32, _mode: u32) -> Result<u
 
     // Original logic for opening existing files
     let fid = find_free_fd();
-    let resolve_result = resolve_path(filename_str, 0, fid);
-    if let Err(e) = resolve_result {
-        return Err(e);
-    } else {
-        kprint!(
-            "sys_openat: dfd={}, filename='{}', real_filename='{}' flags=0x{:x}, mode=0x{:x}",
-            _dfd,
-            filename_str,
-            resolve_result.unwrap_or("".to_string()),
-            _flags,
-            _mode
-        );
-    }
+    let wnames = normalize_path(filename_str);
 
+    let walk_result = do_walk(starting_fid, fid, wnames);
+    match walk_result {
+        Ok((ret_code, _)) => {
+            if ret_code != 0 {
+                return Err(Err::Inval);
+            }
+        }
+        Err(e) => {
+            kprint!("sys_openat: error walking to file: {:?}", e.as_errno());
+            return Err(e);
+        }
+    }
     // Convert Linux open flags to 9P open flags
     // This is a simplified mapping - in reality, we'd need more sophisticated flag conversion
     kprint!("sys_openat: flags=0x{:x}", _flags);
@@ -1085,6 +1433,9 @@ fn do_openat(_dfd: u32, filename_str: &str, _flags: u32, _mode: u32) -> Result<u
                 P9Response::Success(rlopen) => {
                     kprint!("sys_openat: received Rlopen: {:?}", rlopen);
                     set_fd(fid, fid);
+                    unsafe {
+                        FD_TABLE[fid as usize].mode = p9_flags;
+                    }
                     Ok(fid)
                 }
                 P9Response::Error(rlerror) => {
@@ -1107,6 +1458,7 @@ fn do_openat(_dfd: u32, filename_str: &str, _flags: u32, _mode: u32) -> Result<u
 
 // This implementation mimics the behavior of the POSIX dirname utility.
 // It returns the parent directory of the given path, handling edge cases.
+#[allow(dead_code)]
 fn dirname(path: &str) -> String {
     // Remove trailing slashes except for root
     let path = path.trim_end_matches('/');
@@ -1131,95 +1483,27 @@ fn dirname(path: &str) -> String {
     }
 }
 
-fn resolve_relative_path_to_absolute(relative_path: &str, relative_to: &str) -> String {
-    if relative_path.starts_with("/") {
-        relative_path.to_string()
-    } else {
-        // handle .. and . properly
-        let relative_path = relative_path.split("/").collect::<Vec<&str>>();
-        let relative_to = relative_to.split("/").collect::<Vec<&str>>();
-        let mut new_path = relative_to.clone();
-        for path in relative_path {
-            if path == ".." {
-                new_path.pop();
-            } else if path == "." {
-                continue;
-            } else {
-                new_path.push(path);
-            }
+fn normalize_path(path: &str) -> Vec<String> {
+    let split: Vec<String> = path.split("/").map(|s| s.to_string()).collect();
+    // remove ./
+    let mut new_path = Vec::new();
+    for s in split {
+        if s == "." {
+            continue;
         }
-        new_path.join("/")
+        new_path.push(s);
     }
+    new_path
 }
 
-// resolves path and fid 0xFFFF_FFFE points to it after
-fn resolve_path(path: &str, depth: u32, fid: u32) -> Result<String, Err> {
-    if depth > 40 {
-        // don't let it recurse too much
-        kprint!("resolve_path: depth too deep, returning error");
-        return Err(Err::NoSys);
-    }
-    let walk_result = do_walk(get_root_fid(), fid, path.to_string());
-
-    match walk_result {
-        Ok((ret_code, qid)) => {
-            if ret_code != 0 {
-                return Err(Err::Inval);
-            }
-            if qid[qid.len() - 1].is_symlink() {
-                let dirname = dirname(path);
-
-                let treadlink = crate::p9::TreadlinkMessage::new(0, fid);
-                match treadlink.send_treadlink() {
-                    Ok(bytes_written) => {
-                        kprint!("resolve_path: bytes_written = {}", bytes_written);
-                    }
-                    Err(e) => {
-                        kprint!("resolve_path: error = {:?}", e);
-                    }
-                }
-                match RreadlinkMessage::read_response() {
-                    P9Response::Success(rreadlink) => {
-                        kprint!("resolve_path: rreadlink = {:?}", rreadlink);
-                        clunk(fid);
-                        let target = rreadlink.target;
-                        // now we need to resolve the symlink to an absolute path
-                        let target =
-                            resolve_relative_path_to_absolute(target.as_str(), dirname.as_str());
-                        kprint!("resolve_path: resolved target = {}", target);
-                        resolve_path(&target, depth + 1, fid)
-                    }
-                    P9Response::Error(rlerror) => {
-                        kprint!(
-                            "resolv_path: received Rlerror for readlink operation: tag={}, ecode={}",
-                            rlerror.tag,
-                            rlerror.ecode
-                        );
-                        Err(Err::NoSys)
-                    }
-                }
-            } else {
-                Ok(path.to_string())
-            }
-        }
-        Err(e) => Err(e),
-    }
-}
-
-fn get_file_size(path: &str, depth: u32) -> Result<u64, Err> {
+fn get_file_size(starting_fid: u32, path: &str, depth: u32) -> Result<u64, Err> {
     if depth > 40 {
         // don't let it recurse too much
         kprint!("get_file_size: depth too deep, returning error");
         return Err(Err::NoSys);
     }
-
-    let resolve_result = resolve_path(path, depth, 0xFFFF_FFFE);
-    match resolve_result {
-        Ok(_) => {}
-        Err(e) => {
-            return Err(e);
-        }
-    }
+    let wnames = normalize_path(path);
+    do_walk(starting_fid, 0xFFFF_FFFE, wnames)?;
 
     let tgetattr = crate::p9::TgetattrMessage::new(0, 0xFFFF_FFFE, P9_GETATTR_ALL);
     match tgetattr.send_tgetattr() {
@@ -1272,14 +1556,8 @@ pub fn sys_statx(
     let filename = str::from_utf8(filename).unwrap();
     kprint!("sys_statx: filename = {}", filename);
     // if the first character is / it's a absolute path, otherwise it's a relative path
-    let is_absolute_path = filename.starts_with("/");
-    let start_fid = if is_absolute_path {
-        get_root_fid()
-    } else {
-        kpanic!("sys_statx: relative paths are not supported");
-    };
-    // skip the first element of the vector
-    let walk_result = do_walk(start_fid, 0xFFFF_FFFE, filename.to_string());
+    let starting_fid = get_starting_fid(_dfd, filename)?;
+    let walk_result = do_walk(starting_fid, 0xFFFF_FFFE, normalize_path(filename));
     match walk_result {
         Ok((ret_code, _)) => {
             if ret_code != 0 {
@@ -1434,12 +1712,13 @@ pub fn set_fd(fd: u32, fid: u32) {
             fid,
             cursor: 0,
             is_dir: false,
+            mode: 0xFFFF_FFFF,
         },
     );
 }
 
 pub fn load_file_aligned_to_page_size(path: &String) -> &[u8] {
-    let file_size = get_file_size(path, 0);
+    let file_size = get_file_size(get_root_fid(), path, 0);
     if let Ok(file_size) = file_size {
         kprint!("elf_loader: file_size = {}", file_size);
         let ptr = crate::linux_abi::allocate_aligned_to_page_size(file_size);
@@ -1545,10 +1824,9 @@ pub fn attach_to_p9() {
     match RattachMessage::read_response() {
         P9Response::Success(rattach) => {
             kprint!("Received Rattach: {:?}", rattach);
-            unsafe {
-                ROOT_FID = 0;
-                CWD_FID = 0;
-            };
+            set_cwd_str("/".to_string());
+            set_cwd_fid(0);
+            set_root_fid(0);
         }
         P9Response::Error(rlerror) => {
             kpanic!(
