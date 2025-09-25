@@ -98,7 +98,7 @@ pub(crate) async fn async_main(config_path: Option<PathBuf>) -> Result<(), Box<d
     tracing::info!("{config:#?}");
 
     let mut app = App::new(config, /*enable_logging=*/ true).await?;
-    if app.manager.is_some() {
+    if app.manager.is_some() || app.allocator.is_some() {
         wait_for_shutdown().await;
     } else {
         app.wait_for_workers().await;
