@@ -26,11 +26,13 @@ use crate::actors::protocol::TaskKind;
 pub const VERSION: usize = 1;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct VersionConfig {
     pub version: usize,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct AppConfig {
     pub version: usize,
     pub api: Option<ApiConfig>,
@@ -43,35 +45,34 @@ pub(crate) struct AppConfig {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct ApiConfig {
     pub listen: Option<SocketAddr>,
-    pub manager: Option<SocketAddr>,
     pub po2: Option<u32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct ManagerConfig {
-    pub listen: Option<SocketAddr>,
     pub allocator: Option<SocketAddr>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct AllocatorConfig {
-    pub rpc_listen: Option<SocketAddr>,
-    pub proxy_listen: Option<SocketAddr>,
+    pub listen: Option<SocketAddr>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct ExecutorConfig {
-    pub manager: Option<SocketAddr>,
     pub allocator: Option<SocketAddr>,
     pub count: usize,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct ProverConfig {
-    pub manager: Option<SocketAddr>,
     pub allocator: Option<SocketAddr>,
     pub count: Option<usize>,
     pub subscribe: Vec<TaskKind>,
@@ -79,11 +80,13 @@ pub(crate) struct ProverConfig {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct StorageConfig {
     pub path: PathBuf,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct TelemetryConfig {
     // TODO
 }
@@ -94,24 +97,17 @@ impl Default for AppConfig {
             version: VERSION,
             api: Some(ApiConfig {
                 listen: Some(default_api_listen_addr()),
-                manager: None,
                 po2: None,
             }),
-            manager: Some(ManagerConfig {
-                listen: Some(default_manager_listen_addr()),
-                allocator: None,
-            }),
+            manager: Some(ManagerConfig { allocator: None }),
             allocator: Some(AllocatorConfig {
-                rpc_listen: Some(default_allocator_listen_addr()),
-                proxy_listen: None,
+                listen: Some(default_allocator_listen_addr()),
             }),
             executor: Some(ExecutorConfig {
-                manager: None,
                 allocator: None,
                 count: 1,
             }),
             prover: Some(vec![ProverConfig {
-                manager: None,
                 allocator: None,
                 count: None,
                 subscribe: vec![
@@ -134,12 +130,8 @@ pub(crate) fn default_api_listen_addr() -> SocketAddr {
     SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 8000)
 }
 
-pub(crate) fn default_manager_listen_addr() -> SocketAddr {
-    SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 9000)
-}
-
 pub(crate) fn default_allocator_listen_addr() -> SocketAddr {
-    SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 9001)
+    SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 9000)
 }
 
 #[cfg(test)]
@@ -167,7 +159,6 @@ mod tests {
                 version: 1,
                 api: Some(ApiConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
-                    manager: Some(SocketAddr::from_str("1.2.3.4:9000").unwrap()),
                     po2: None,
                 }),
                 manager: None,
@@ -191,16 +182,13 @@ mod tests {
                 version: 1,
                 api: Some(ApiConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
-                    manager: None,
                     po2: None,
                 }),
-                manager: Some(ManagerConfig {
-                    listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap()),
-                    allocator: None,
+                manager: Some(ManagerConfig { allocator: None }),
+                allocator: Some(AllocatorConfig {
+                    listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap())
                 }),
-                allocator: None,
                 executor: Some(ExecutorConfig {
-                    manager: None,
                     allocator: None,
                     count: 4,
                 }),
@@ -226,8 +214,7 @@ mod tests {
                 executor: None,
                 prover: Some(vec![
                     ProverConfig {
-                        manager: Some(SocketAddr::from_str("10.0.3.24:9000").unwrap()),
-                        allocator: None,
+                        allocator: Some(SocketAddr::from_str("10.0.3.24:9000").unwrap()),
                         count: None,
                         simulate: None,
                         subscribe: vec![
@@ -240,8 +227,7 @@ mod tests {
                         ]
                     },
                     ProverConfig {
-                        manager: Some(SocketAddr::from_str("10.0.3.24:9000").unwrap()),
-                        allocator: None,
+                        allocator: Some(SocketAddr::from_str("10.0.3.24:9000").unwrap()),
                         count: None,
                         simulate: None,
                         subscribe: vec![

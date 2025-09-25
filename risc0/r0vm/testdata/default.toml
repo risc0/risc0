@@ -4,10 +4,9 @@ version = 1
 listen = "127.0.0.1:8000"
 
 [manager]
-listen = "127.0.0.1:9000"
 
 [allocator]
-rpc-listen = "127.0.0.1:9001"
+listen = "127.0.0.1:9000"
 
 [executor]
 count = 1

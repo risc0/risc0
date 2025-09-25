@@ -28,7 +28,7 @@ use super::{
     RemoteActor, RemoteWorkerRequest, RpcSender, WriteStream,
     allocator::{
         AllocateHardware, AllocatorRouterActor, CpuCores, CpuSpec, DeallocateHardware, EndTask,
-        GpuSpec, GpuTokens, GpuUuid, HardwareReservation, HardwareResource, RegisterWorker,
+        GpuSpec, GpuTokens, GpuUuid, HardwareReservation, HardwareResource,
     },
     factory::FactoryRouterActor,
     protocol::{
@@ -129,43 +129,50 @@ fn fake_gpus() -> Vec<GpuSpec> {
     }]
 }
 
+pub(crate) fn worker_hardware(delay: Option<DevModeDelay>) -> Result<Vec<HardwareResource>> {
+    let gpus = if delay.is_some() {
+        fake_gpus()
+    } else {
+        get_gpus_from_nvml().unwrap_or_else(|err| {
+            tracing::error!("Got error when searching for GPUs: {err}");
+            vec![]
+        })
+    };
+    let cpu = CpuSpec {
+        cores: CpuCores::from(usize::from(std::thread::available_parallelism()?) as u64),
+    };
+
+    let mut hardware = gpus
+        .iter()
+        .map(|gpu| gpu.clone().into())
+        .collect::<Vec<HardwareResource>>();
+    hardware.push(cpu.clone().into());
+    Ok(hardware)
+}
+
 pub(crate) struct WorkerActor {
     processor: Processor,
     factory: ActorRef<FactoryRouterActor>,
-    allocator: ActorRef<AllocatorRouterActor>,
     task_kinds: Vec<TaskKind>,
     id: WorkerId,
     gpus: Vec<GpuSpec>,
-    cpu: CpuSpec,
 }
 
 impl WorkerActor {
     pub fn new(
+        worker_id: WorkerId,
         factory: ActorRef<FactoryRouterActor>,
         allocator: ActorRef<AllocatorRouterActor>,
         task_kinds: Vec<TaskKind>,
         delay: Option<DevModeDelay>,
+        gpus: Vec<GpuSpec>,
     ) -> Result<ActorRef<Self>> {
-        let gpus = if delay.is_some() {
-            fake_gpus()
-        } else {
-            get_gpus_from_nvml().unwrap_or_else(|err| {
-                tracing::error!("Got error when searching for GPUs: {err}");
-                vec![]
-            })
-        };
-        let cpu = CpuSpec {
-            cores: CpuCores::from(usize::from(std::thread::available_parallelism()?) as u64),
-        };
-        let worker_id = WorkerId::new_v4();
         let s = Self {
-            processor: Processor::new(factory.clone(), allocator.clone(), worker_id, delay),
+            processor: Processor::new(factory.clone(), allocator, worker_id, delay),
             factory,
-            allocator,
             task_kinds,
             id: worker_id,
             gpus,
-            cpu,
         };
 
         Ok(kameo::spawn(s))
@@ -176,24 +183,6 @@ impl Actor for WorkerActor {
     type Error = anyhow::Error;
 
     async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> Result<()> {
-        tracing::info!("Starting worker: {:?}", self.task_kinds);
-
-        let mut hardware = self
-            .gpus
-            .iter()
-            .map(|gpu| gpu.clone().into())
-            .collect::<Vec<HardwareResource>>();
-        hardware.push(self.cpu.clone().into());
-
-        self.allocator
-            .ask(RegisterWorker {
-                remote_address: None,
-                worker_id: self.id,
-                hardware,
-            })
-            .await
-            .unwrap();
-
         self.factory
             .tell(GetTasks {
                 worker_id: self.id,

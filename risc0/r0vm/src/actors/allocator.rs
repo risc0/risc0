@@ -302,8 +302,9 @@ impl Worker {
 }
 
 struct Manager {
-    endpoint: Url,
+    endpoint: Option<Url>,
     remote_address: Option<SocketAddr>,
+    rpc_port: Option<u16>,
 }
 
 struct Cpu {
@@ -552,10 +553,22 @@ pub struct RegisterWorker {
     pub remote_address: Option<SocketAddr>,
     pub worker_id: WorkerId,
     pub hardware: Vec<HardwareResource>,
+    pub zkvm_version: semver::Version,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ManagerAddress {
+    pub ip: Option<IpAddr>,
+    pub port: u16,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct RegisterWorkerReply {
+    pub manager_address: Option<ManagerAddress>,
 }
 
 impl Message<RegisterWorker> for AllocatorActor {
-    type Reply = DelegatedReply<Result<()>>;
+    type Reply = DelegatedReply<Result<RegisterWorkerReply>>;
 
     async fn handle(
         &mut self,
@@ -567,7 +580,7 @@ impl Message<RegisterWorker> for AllocatorActor {
 }
 
 impl AllocatorActor {
-    fn register_worker(&mut self, msg: RegisterWorker) -> Result<()> {
+    fn register_worker(&mut self, msg: RegisterWorker) -> Result<RegisterWorkerReply> {
         let machine = match &msg.remote_address {
             Some(addr) => MachineId { ip: addr.ip() },
             None => MachineId::new_localhost(),
@@ -595,7 +608,17 @@ impl AllocatorActor {
             )));
         }
 
-        Ok(())
+        let mut manager_address = None;
+        if let Some(manager) = self.managers.get(&msg.zkvm_version)
+            && let Some(rpc_port) = manager.rpc_port
+        {
+            manager_address = Some(ManagerAddress {
+                ip: manager.remote_address.map(|a| a.ip()),
+                port: rpc_port,
+            });
+        }
+
+        Ok(RegisterWorkerReply { manager_address })
     }
 }
 
@@ -861,7 +884,8 @@ impl AllocatorActor {
 pub struct RegisterManager {
     pub zkvm_version: semver::Version,
     pub path: String,
-    pub port: u16,
+    pub api_port: Option<u16>,
+    pub rpc_port: Option<u16>,
     pub remote_address: Option<SocketAddr>,
 }
 
@@ -885,16 +909,23 @@ impl AllocatorActor {
                 .map(|a| a.ip())
                 .unwrap_or(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)));
             e.insert(Manager {
-                endpoint: format!(
-                    "http://{}:{}/{}",
-                    host,
-                    msg.port,
-                    msg.path.trim_start_matches('/')
-                )
-                .parse()
-                .unwrap(),
+                endpoint: msg.api_port.map(|api_port| {
+                    format!(
+                        "http://{host}:{api_port}/{}",
+                        msg.path.trim_start_matches('/')
+                    )
+                    .parse()
+                    .expect("the formatted URL should always be valid")
+                }),
                 remote_address: msg.remote_address,
+                rpc_port: msg.rpc_port,
             });
+            tracing::info!(
+                "Registered manager with version {} at addr={host} api_port={:?}, rpc_port={:?}",
+                &msg.zkvm_version,
+                &msg.api_port,
+                &msg.rpc_port
+            );
         } else {
             return Err(Error::new(format!(
                 "duplicate registration for manager with version {}",
@@ -1064,6 +1095,7 @@ mod allocation_tests {
                             }),
                             HardwareResource::Cpu(CpuSpec { cores: CpuCores(4) }),
                         ],
+                        zkvm_version: semver::Version::new(1, 2, 3),
                     })
                     .await
                     .unwrap();
@@ -1718,7 +1750,7 @@ impl AllocatorRouterActor {
 routing_actor_impl!(
     AllocatorRouterActor,
     RegisterWorker,
-    DelegatedReply<Result<()>>
+    DelegatedReply<Result<RegisterWorkerReply>>
 );
 
 routing_actor_impl!(
@@ -1752,7 +1784,7 @@ pub type RemoteAllocatorActor = RemoteActor<AllocatorActor>;
 remote_actor_ask!(
     RemoteActor<AllocatorActor>,
     RegisterWorker,
-    Result<()>,
+    Result<RegisterWorkerReply>,
     RemoteAllocatorRequest
 );
 remote_actor_ask!(
@@ -1898,7 +1930,9 @@ impl AllocatorActor {
         for (manager_version, manager) in self.managers.iter().rev() {
             if version_req.matches(manager_version) {
                 let http_client = self.http_client.clone();
-                let endpoint = manager.endpoint.clone();
+                let Some(endpoint) = manager.endpoint.clone() else {
+                    continue;
+                };
                 let reply_sender = reply_sender.take();
                 tokio::task::spawn(async move {
                     if let Some(reply_sender) = reply_sender {
@@ -2052,13 +2086,16 @@ mod proxy_tests {
             alloc_ref
                 .ask(RegisterManager {
                     zkvm_version: version.clone(),
-                    port: manager
-                        .server
-                        .url("/")
-                        .parse::<Url>()
-                        .unwrap()
-                        .port()
-                        .unwrap(),
+                    api_port: Some(
+                        manager
+                            .server
+                            .url("/")
+                            .parse::<Url>()
+                            .unwrap()
+                            .port()
+                            .unwrap(),
+                    ),
+                    rpc_port: None,
                     path: "?".into(),
                     remote_address: None,
                 })
@@ -2195,7 +2232,8 @@ mod proxy_tests {
         alloc_ref
             .ask(RegisterManager {
                 zkvm_version: semver::Version::new(1, 2, 3),
-                port: 8080,
+                api_port: Some(8080),
+                rpc_port: None,
                 path: "/".into(),
                 remote_address: None,
             })
@@ -2205,7 +2243,8 @@ mod proxy_tests {
         let error = alloc_ref
             .ask(RegisterManager {
                 zkvm_version: semver::Version::new(1, 2, 3),
-                port: 8080,
+                api_port: Some(8080),
+                rpc_port: None,
                 path: "/".into(),
                 remote_address: None,
             })

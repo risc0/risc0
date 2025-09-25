@@ -258,7 +258,10 @@ impl FactoryRouterActor {
             Ok(kameo::spawn(Self::Remote(remote)))
         } else {
             Ok(kameo::spawn(Self::Local(
-                local.as_ref().ok_or("no factory configured")?.clone(),
+                local
+                    .as_ref()
+                    .ok_or("no manager found from allocator or locally")?
+                    .clone(),
             )))
         }
     }

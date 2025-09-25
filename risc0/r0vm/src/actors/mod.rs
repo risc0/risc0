@@ -29,7 +29,7 @@ use std::{
     error::Error as StdError,
     io::{Write, stdin},
     marker::PhantomData,
-    net::{Ipv4Addr, SocketAddr, SocketAddrV4},
+    net::{IpAddr, Ipv4Addr, SocketAddr, SocketAddrV4},
     os::{fd::AsFd as _, unix::net::UnixStream as StdUnixStream},
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
@@ -63,7 +63,9 @@ use tracing_subscriber::{
 use crate::init_logging;
 
 use self::{
-    allocator::{AllocatorActor, AllocatorRouterActor, RegisterManager},
+    allocator::{
+        AllocatorActor, AllocatorRouterActor, HardwareResource, RegisterManager, RegisterWorker,
+    },
     config::{
         AllocatorConfig, AppConfig, ExecutorConfig, ManagerConfig, ProverConfig, TelemetryConfig,
         VERSION, VersionConfig, default_api_listen_addr,
@@ -72,12 +74,12 @@ use self::{
     manager::ManagerActor,
     protocol::{
         JobInfo, JobRequest, ProofRequest, ProofResult, ShrinkWrapRequest, ShrinkWrapResult,
-        TaskKind,
+        TaskKind, WorkerId,
         factory::{GetTasks, TaskDoneMsg, TaskUpdateMsg},
         worker::TaskMsg,
     },
     rpc::{RpcMessageId, RpcSender, rpc_system},
-    worker::{WorkerActor, WorkerRouterActor},
+    worker::{WorkerActor, WorkerRouterActor, worker_hardware},
 };
 
 #[tokio::main]
@@ -209,29 +211,20 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
         AppConfig {
             version: VERSION,
             api: None,
-            manager: Some(ManagerConfig {
-                listen: Some(addr),
-                allocator: None,
-            }),
-            allocator: Some(AllocatorConfig {
-                rpc_listen: Some(addr),
-                proxy_listen: None,
-            }),
+            manager: Some(ManagerConfig { allocator: None }),
+            allocator: Some(AllocatorConfig { listen: Some(addr) }),
             executor: Some(ExecutorConfig {
-                manager: None,
                 allocator: None,
                 count: 1,
             }),
             prover: Some(vec![
                 ProverConfig {
-                    manager: None,
                     allocator: None,
                     count: num_gpus,
                     subscribe: large_tasks,
                     simulate: None,
                 },
                 ProverConfig {
-                    manager: None,
                     allocator: None,
                     count: num_gpus,
                     subscribe: small_tasks,
@@ -283,7 +276,6 @@ struct TempConfig {
 
 impl TempConfig {
     fn new(
-        manager_addr: SocketAddr,
         allocator_addr: SocketAddr,
         subscribe: Vec<TaskKind>,
         enable_telemetry: bool,
@@ -295,7 +287,6 @@ impl TempConfig {
             allocator: None,
             executor: None,
             prover: Some(vec![ProverConfig {
-                manager: Some(manager_addr),
                 allocator: Some(allocator_addr),
                 count: Some(1),
                 subscribe,
@@ -339,6 +330,14 @@ fn default_storage_root() -> PathBuf {
     dirs::home_dir().unwrap().join(".risc0").join("r0vm")
 }
 
+fn manager_listen_addr(remote: bool) -> SocketAddr {
+    if remote {
+        SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 0)
+    } else {
+        SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 0)
+    }
+}
+
 pub(crate) struct App {
     provider: Option<OpenTelemetryProvider>,
     manager: Option<ActorRef<ManagerActor>>,
@@ -348,6 +347,7 @@ pub(crate) struct App {
     factory_rpc_server: Option<FactoryRpcServer>,
     allocator_rpc_server: Option<AllocatorRpcServer>,
     children: Vec<ChildState>,
+    allocator_rpc_addr: Option<SocketAddr>,
 }
 
 impl App {
@@ -375,27 +375,25 @@ impl App {
             let alloc_ref = kameo::spawn(AllocatorActor::new());
             allocator = Some(alloc_ref.clone());
 
-            if let Some(rpc_listen_addr) = cfg_allocator.rpc_listen {
-                allocator_rpc_server =
-                    Some(AllocatorRpcServer::new(rpc_listen_addr, alloc_ref.clone()));
+            if let Some(listen) = cfg_allocator.listen {
+                allocator_rpc_server = Some(AllocatorRpcServer::new(listen, alloc_ref.clone()));
                 local_allocator_rpc_addr =
                     allocator_rpc_server.as_mut().unwrap().start(true).await?;
             }
 
-            if let Some(proxy_listen_addr) = cfg_allocator.proxy_listen {
-                tokio::spawn(allocator::run_proxy(proxy_listen_addr, alloc_ref));
+            if let Some(cfg_api) = &cfg.api {
+                let listen = cfg_api.listen.unwrap_or(default_api_listen_addr());
+                tokio::spawn(allocator::run_proxy(listen, alloc_ref));
             }
+        } else if cfg.api.is_some() {
+            return Err("cannot run API without an allocator".into());
         }
 
         if let Some(cfg_manager) = &cfg.manager {
-            let storage_root = if cfg.api.is_some() {
-                Some(if let Some(cfg) = &cfg.storage {
-                    cfg.path.clone()
-                } else {
-                    default_storage_root()
-                })
+            let storage_root = if let Some(cfg) = &cfg.storage {
+                cfg.path.clone()
             } else {
-                None
+                default_storage_root()
             };
 
             let alloc_ref = AllocatorRouterActor::new(&cfg_manager.allocator, &allocator).await?;
@@ -413,33 +411,50 @@ impl App {
             let factory_ref = kameo::spawn(FactoryActor::new(alloc_ref.clone(), require_gpu));
             factory = Some(factory_ref.clone());
 
-            let manager_ref =
-                kameo::spawn(ManagerActor::new(factory_ref.clone(), storage_root.clone()));
+            let remote_allocator = cfg_manager.allocator.is_some();
+            let have_api = remote_allocator || cfg.api.is_some();
+            let allocator_listening = cfg.allocator.is_some_and(|cfg| cfg.listen.is_some());
+
+            let manager_ref = kameo::spawn(ManagerActor::new(
+                factory_ref.clone(),
+                have_api.then(|| storage_root.clone()),
+            ));
             manager = Some(manager_ref.clone());
 
-            if let Some(listen_addr) = cfg_manager.listen {
-                factory_rpc_server = Some(FactoryRpcServer::new(listen_addr, factory_ref));
-                local_factory_rpc_addr = factory_rpc_server.as_mut().unwrap().start(false).await?;
-            }
-
-            if let Some(cfg_api) = &cfg.api {
-                let api_addr = cfg_api.listen.unwrap_or_else(default_api_listen_addr);
-                tokio::spawn(crate::api::run(
-                    api_addr,
-                    storage_root.unwrap(),
-                    manager_ref,
-                    cfg_api.po2,
+            if remote_allocator || allocator_listening {
+                factory_rpc_server = Some(FactoryRpcServer::new(
+                    manager_listen_addr(true),
+                    factory_ref,
                 ));
-
-                alloc_ref
-                    .ask(RegisterManager {
-                        zkvm_version: env!("CARGO_PKG_VERSION").parse().unwrap(),
-                        port: api_addr.port(),
-                        path: "/".into(),
-                        remote_address: None,
-                    })
+                local_factory_rpc_addr = factory_rpc_server
+                    .as_mut()
+                    .unwrap()
+                    .start(/* forward_errors= */ false)
                     .await?;
             }
+
+            let mut api_addr = None;
+            if have_api {
+                api_addr = Some(
+                    crate::api::run(
+                        manager_listen_addr(remote_allocator),
+                        storage_root,
+                        manager_ref,
+                        cfg.api.and_then(|c| c.po2),
+                    )
+                    .await?,
+                );
+            }
+
+            alloc_ref
+                .ask(RegisterManager {
+                    zkvm_version: env!("CARGO_PKG_VERSION").parse().unwrap(),
+                    api_port: api_addr.map(|a| a.port()),
+                    rpc_port: local_factory_rpc_addr.map(|a| a.port()),
+                    path: "/".into(),
+                    remote_address: None,
+                })
+                .await?;
         }
 
         let workers = Arc::new(Mutex::new(vec![]));
@@ -452,7 +467,6 @@ impl App {
         if let Some(cfg_prover) = cfg.prover {
             Self::create_provers(
                 &cfg_prover,
-                local_factory_rpc_addr,
                 local_allocator_rpc_addr,
                 &factory,
                 &allocator,
@@ -472,7 +486,13 @@ impl App {
             factory_rpc_server,
             allocator_rpc_server,
             children,
+            allocator_rpc_addr: local_allocator_rpc_addr,
         })
+    }
+
+    #[allow(dead_code)]
+    pub fn allocator_addr(&self) -> Option<SocketAddr> {
+        self.allocator_rpc_addr
     }
 
     async fn create_executors(
@@ -483,14 +503,18 @@ impl App {
     ) -> Result<(), Box<dyn StdError>> {
         tracing::info!("Starting executor: {executor:?}");
 
+        let alloc_ip = executor
+            .allocator
+            .map(|a| a.ip())
+            .unwrap_or(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)));
         let alloc_ref = AllocatorRouterActor::new(&executor.allocator, allocator).await?;
 
         for _ in 0..executor.count {
             start_worker(
                 alloc_ref.clone(),
+                alloc_ip,
                 factory,
                 workers.clone(),
-                &executor.manager,
                 vec![TaskKind::Execute],
                 None,
             )
@@ -503,7 +527,6 @@ impl App {
     #[allow(clippy::too_many_arguments)]
     async fn create_provers(
         cfg_prover: &[ProverConfig],
-        local_factory_addr: Option<SocketAddr>,
         local_allocator_addr: Option<SocketAddr>,
         factory: &Option<ActorRef<FactoryActor>>,
         allocator: &Option<ActorRef<AllocatorActor>>,
@@ -516,30 +539,23 @@ impl App {
 
             let count = prover.count.unwrap_or_else(|| cuda_devices().unwrap_or(1));
             if (cfg_prover.len() == 1 && count == 1) || prover.simulate.is_some() {
+                let alloc_ip = prover
+                    .allocator
+                    .map(|a| a.ip())
+                    .unwrap_or(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)));
                 let alloc_ref = AllocatorRouterActor::new(&prover.allocator, allocator).await?;
 
                 start_worker(
                     alloc_ref,
+                    alloc_ip,
                     factory,
                     workers.clone(),
-                    &prover.manager,
                     prover.subscribe.clone(),
                     prover.simulate,
                 )
                 .await?;
             } else {
                 let r0vm_path = std::env::current_exe()?;
-                if prover.manager.is_none() && local_factory_addr.is_none() {
-                    return Err(anyhow::anyhow!(
-                        "Invalid configuration: \
-                        either manager must run locally or prover.manager must be set"
-                    )
-                    .into());
-                }
-                let manager_addr = prover
-                    .manager
-                    .unwrap_or_else(|| local_factory_addr.unwrap());
-
                 if prover.allocator.is_none() && local_allocator_addr.is_none() {
                     return Err(anyhow::anyhow!(
                         "Invalid configuration: \
@@ -552,7 +568,6 @@ impl App {
                     .unwrap_or_else(|| local_allocator_addr.unwrap());
 
                 let cfg_child = Arc::new(TempConfig::new(
-                    manager_addr,
                     allocator_addr,
                     prover.subscribe.clone(),
                     enable_telemetry,
@@ -663,20 +678,57 @@ impl App {
 
 async fn start_worker(
     alloc_ref: ActorRef<AllocatorRouterActor>,
+    alloc_ip: IpAddr,
     factory: &Option<ActorRef<FactoryActor>>,
     workers: Arc<Mutex<Vec<ActorRef<WorkerActor>>>>,
-    manager: &Option<SocketAddr>,
     subscribe: Vec<TaskKind>,
     simulate: Option<DevModeDelay>,
 ) -> Result<(), Box<dyn StdError>> {
+    tracing::info!("Starting worker: {subscribe:?}");
+
+    let worker_id = WorkerId::new_v4();
+    let worker_hardware = worker_hardware(simulate)?;
+    let reply = alloc_ref
+        .ask(RegisterWorker {
+            remote_address: None,
+            worker_id,
+            hardware: worker_hardware.clone(),
+            zkvm_version: env!("CARGO_PKG_VERSION").parse().unwrap(),
+        })
+        .await?;
+
+    let manager_addr = reply
+        .manager_address
+        .map(|addr| SocketAddr::new(addr.ip.unwrap_or(alloc_ip), addr.port));
+    tracing::info!(
+        "Worker registered with allocator. Got manager = {:?}",
+        &manager_addr
+    );
+
     let workers_clone = workers.clone();
     let worker_idx = workers.lock().unwrap().len();
-    let factory_ref = FactoryRouterActor::new(manager, factory, move |msg, msg_id, addr| {
-        route_rpc_msg_to_worker(workers_clone.clone(), worker_idx, addr, msg, msg_id)
-    })
-    .await?;
+    let factory_factory =
+        FactoryRouterActor::new(&manager_addr, factory, move |msg, msg_id, addr| {
+            route_rpc_msg_to_worker(workers_clone.clone(), worker_idx, addr, msg, msg_id)
+        })
+        .await?;
+
+    let gpus = worker_hardware
+        .iter()
+        .filter_map(|h| match h {
+            HardwareResource::Gpu(gpu) => Some(gpu.clone()),
+            _ => None,
+        })
+        .collect();
     let mut workers = workers.lock().unwrap();
-    let worker = WorkerActor::new(factory_ref.clone(), alloc_ref.clone(), subscribe, simulate)?;
+    let worker = WorkerActor::new(
+        worker_id,
+        factory_factory,
+        alloc_ref.clone(),
+        subscribe,
+        simulate,
+        gpus,
+    )?;
     workers.push(worker);
     Ok(())
 }

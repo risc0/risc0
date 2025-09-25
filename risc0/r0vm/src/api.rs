@@ -661,7 +661,7 @@ pub(crate) async fn run(
     storage_root: PathBuf,
     manager: ActorRef<ManagerActor>,
     po2: Option<u32>,
-) -> Result<()> {
+) -> Result<SocketAddr> {
     let app_state = AppState::new(storage_root, manager, po2)
         .await
         .context("Failed to initialize AppState")?;
@@ -669,13 +669,17 @@ pub(crate) async fn run(
         .await
         .context("Failed to bind a TCP listener")?;
 
+    let addr = listener.local_addr()?;
     tracing::info!("REST API listening on: {addr}");
-    axum::serve(listener, self::app(app_state))
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-        .context("REST API service failed")?;
 
-    Ok(())
+    tokio::spawn(async move {
+        axum::serve(listener, self::app(app_state))
+            .with_graceful_shutdown(shutdown_signal())
+            .await
+            .expect("REST API service shouldn't fail");
+    });
+
+    Ok(addr)
 }
 
 pub async fn shutdown_signal() {
