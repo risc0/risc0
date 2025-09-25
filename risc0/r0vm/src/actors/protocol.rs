@@ -16,7 +16,7 @@
 use std::{fmt, ops::Range, sync::Arc};
 
 use clap::ValueEnum;
-use derive_more::{Debug, TryInto};
+use derive_more::{Debug, From, TryInto};
 use kameo::{Reply, actor::ActorRef};
 use risc0_zkvm::{
     ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt,
@@ -74,11 +74,12 @@ pub(crate) struct JobRequestReply {
     pub status: JobStatusReply,
 }
 
-#[derive(Reply, Serialize, Deserialize, TryInto, Debug, Clone)]
+#[derive(Reply, Serialize, Deserialize, TryInto, Debug, Clone, From)]
 pub(crate) enum JobStatusReply {
     Proof(JobInfo<ProofResult>),
     ShrinkWrap(JobInfo<ShrinkWrapResult>),
     #[try_into(ignore)]
+    #[from(ignore)]
     NotFound,
 }
 
