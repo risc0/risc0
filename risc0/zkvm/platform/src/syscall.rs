@@ -486,9 +486,9 @@ pub unsafe extern "C" fn sys_poseidon2(
     out_buf_addr: *mut [u32; DIGEST_WORDS],
     bits_count: u32,
 ) {
-    debug_assert!(state_addr as usize % WORD_SIZE == 0);
-    debug_assert!(in_buf_addr as usize % WORD_SIZE == 0);
-    debug_assert!(out_buf_addr as usize % WORD_SIZE == 0);
+    debug_assert!((state_addr as usize).is_multiple_of(WORD_SIZE));
+    debug_assert!((in_buf_addr as usize).is_multiple_of(WORD_SIZE));
+    debug_assert!((out_buf_addr as usize).is_multiple_of(WORD_SIZE));
 
     unsafe {
         ecall_3(
