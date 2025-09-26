@@ -64,7 +64,10 @@ async fn do_test(remote: bool) {
             AppConfig {
                 version: VERSION,
                 api: None,
-                manager: Some(ManagerConfig { allocator: None }),
+                manager: Some(ManagerConfig {
+                    allocator: None,
+                    listen: None,
+                }),
                 allocator: Some(AllocatorConfig {
                     listen: Some(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into()),
                 }),
@@ -113,7 +116,10 @@ async fn do_test(remote: bool) {
                 AppConfig {
                     version: VERSION,
                     api: None,
-                    manager: Some(ManagerConfig { allocator: None }),
+                    manager: Some(ManagerConfig {
+                        allocator: None,
+                        listen: None,
+                    }),
                     allocator: Some(AllocatorConfig { listen: None }),
                     executor: Some(ExecutorConfig {
                         allocator: None,

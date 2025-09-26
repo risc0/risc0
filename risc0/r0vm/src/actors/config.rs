@@ -54,6 +54,7 @@ pub(crate) struct ApiConfig {
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct ManagerConfig {
+    pub listen: Option<IpAddr>,
     pub allocator: Option<SocketAddr>,
 }
 
@@ -99,7 +100,10 @@ impl Default for AppConfig {
                 listen: Some(default_api_listen_addr()),
                 po2: None,
             }),
-            manager: Some(ManagerConfig { allocator: None }),
+            manager: Some(ManagerConfig {
+                allocator: None,
+                listen: None,
+            }),
             allocator: Some(AllocatorConfig {
                 listen: Some(default_allocator_listen_addr()),
             }),
@@ -184,7 +188,10 @@ mod tests {
                     listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
                     po2: None,
                 }),
-                manager: Some(ManagerConfig { allocator: None }),
+                manager: Some(ManagerConfig {
+                    allocator: None,
+                    listen: None
+                }),
                 allocator: Some(AllocatorConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap())
                 }),

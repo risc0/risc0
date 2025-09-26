@@ -211,7 +211,10 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
         AppConfig {
             version: VERSION,
             api: None,
-            manager: Some(ManagerConfig { allocator: None }),
+            manager: Some(ManagerConfig {
+                allocator: None,
+                listen: None,
+            }),
             allocator: Some(AllocatorConfig { listen: Some(addr) }),
             executor: Some(ExecutorConfig {
                 allocator: None,
@@ -335,12 +338,9 @@ fn default_storage_root() -> PathBuf {
     dirs::home_dir().unwrap().join(".risc0").join("r0vm")
 }
 
-fn manager_listen_addr(remote: bool) -> SocketAddr {
-    if remote {
-        SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 0)
-    } else {
-        SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 0)
-    }
+fn manager_listen_addr(ip: Option<IpAddr>) -> SocketAddr {
+    let ip = ip.unwrap_or(IpAddr::V4(Ipv4Addr::UNSPECIFIED));
+    SocketAddr::new(ip, 0)
 }
 
 pub(crate) struct App {
@@ -426,9 +426,9 @@ impl App {
             ));
             manager = Some(manager_ref.clone());
 
-            if remote_allocator || allocator_listening {
+            if remote_allocator || allocator_listening || cfg_manager.listen.is_some() {
                 factory_rpc_server = Some(FactoryRpcServer::new(
-                    manager_listen_addr(true),
+                    manager_listen_addr(cfg_manager.listen),
                     factory_ref,
                 ));
                 local_factory_rpc_addr = factory_rpc_server
@@ -442,7 +442,7 @@ impl App {
             if have_api {
                 api_addr = Some(
                     crate::api::run(
-                        manager_listen_addr(remote_allocator),
+                        manager_listen_addr(cfg_manager.listen),
                         storage_root,
                         manager_ref,
                         cfg.api.and_then(|c| c.po2),
