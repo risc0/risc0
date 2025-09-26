@@ -21,7 +21,7 @@ use std::{
 
 use anyhow::Result;
 use risc0_binfmt::{ExitCode, MemoryImage, PovwJobId, PovwLogId, Program, ProgramBinary};
-use risc0_circuit_rv32im::TerminateState;
+use risc0_circuit_rv32im::{MIN_CYCLES_PO2, TerminateState};
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
@@ -77,15 +77,15 @@ fn cpp_test() {
 }
 
 #[rstest]
-#[should_panic(expected = "too small")]
 fn insufficient_segment_limit() {
     let env = ExecutorEnv::builder()
-        .segment_limit_po2(13) // 8K cycles
+        .segment_limit_po2(MIN_CYCLES_PO2 as u32 - 1)
         .write(&MultiTestSpec::DoNothing)
         .unwrap()
         .build()
         .unwrap();
-    execute_elf(env, MULTI_TEST_ELF).unwrap();
+    let err = execute_elf(env, MULTI_TEST_ELF).err().unwrap();
+    assert!(err.to_string().starts_with("Invalid segment_limit_po2"));
 }
 
 #[test_log::test]
@@ -117,12 +117,12 @@ fn basic() {
 
 #[test_log::test]
 fn system_split_v2() {
-    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(5000);
     let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 
     let env = ExecutorEnv::builder()
-        .segment_limit_po2(13) // 8K cycles
+        .segment_limit_po2(MIN_CYCLES_PO2 as u32)
         .build()
         .unwrap();
     let mut exec = ExecutorImpl::new(env, image).unwrap();

@@ -177,8 +177,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
     /// either up or down, may result in better proving performance.
     ///
-    /// Given value must be between [risc0_zkp::MIN_CYCLES_PO2] and
-    /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive).
+    /// Given value must be between [risc0_circuit_rv32im::MIN_CYCLES_PO2] and
+    /// [risc0_circuit_rv32im::MAX_CYCLES_PO2] (inclusive).
     pub fn segment_limit_po2(&mut self, limit: u32) -> &mut Self {
         self.inner.segment_limit_po2 = Some(limit);
         self
