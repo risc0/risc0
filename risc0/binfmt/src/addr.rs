@@ -53,7 +53,7 @@ impl ByteAddr {
     /// Returns `true` if the address is aligned to a word boundary, otherwise
     /// returns `false`
     pub const fn is_aligned(&self) -> bool {
-        self.0 % WORD_SIZE as u32 == 0
+        self.0.is_multiple_of(WORD_SIZE as u32)
     }
 
     /// Reports if the address is null
