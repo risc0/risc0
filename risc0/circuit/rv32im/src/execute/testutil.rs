@@ -18,18 +18,14 @@ use std::collections::BTreeMap;
 use anyhow::{Result, bail};
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_core::scope;
-use risc0_zkp::{
-    MAX_CYCLES_PO2,
-    core::{digest::Digest, log2_ceil},
-};
+use risc0_zkp::core::digest::Digest;
 
 use super::{
-    Executor, SimpleSession, SyscallContext, executor::CycleLimit, pager::RESERVED_PAGING_CYCLES,
-    platform::*, syscall::Syscall,
+    Executor, SimpleSession, SyscallContext, executor::CycleLimit, platform::*, syscall::Syscall,
 };
+use crate::{MAX_CYCLES_PO2, MIN_CYCLES_PO2};
 
 pub const DEFAULT_SESSION_LIMIT: CycleLimit = CycleLimit::Hard(1 << 24);
-pub const MIN_CYCLES_PO2: usize = log2_ceil(RESERVED_CYCLES + RESERVED_PAGING_CYCLES as usize);
 
 #[derive(Default)]
 pub struct NullSyscall;

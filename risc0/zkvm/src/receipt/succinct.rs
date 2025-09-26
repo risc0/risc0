@@ -264,7 +264,7 @@ pub(crate) fn allowed_control_ids(
     po2_max: usize,
 ) -> anyhow::Result<impl Iterator<Item = Digest>> {
     // Recursion programs (ZKRs) that are to be included in the allowed set.
-    let po2_range = MIN_LIFT_PO2..=usize::min(po2_max, risc0_zkp::MAX_CYCLES_PO2);
+    let po2_range = MIN_LIFT_PO2..=usize::min(po2_max, risc0_circuit_rv32im::MAX_CYCLES_PO2);
     let allowed_zkr_names: BTreeSet<String> = [
         "join.zkr",
         "join_povw.zkr",

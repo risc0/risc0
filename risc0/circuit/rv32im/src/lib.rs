@@ -39,6 +39,12 @@ use self::zirgen::circuit::{LAYOUT_GLOBAL, Val};
 
 pub use self::zirgen::CircuitImpl;
 
+/// This is set to 14 because that is the smallest lift program.
+pub const MIN_CYCLES_PO2: usize = 14;
+
+/// The proof system can't support more than this.
+pub const MAX_CYCLES_PO2: usize = 24;
+
 // NOTE: Seal version two introduced with PoVW, changing the output size from 74 to 90.
 pub const RV32IM_SEAL_VERSION: u32 = 2;
 

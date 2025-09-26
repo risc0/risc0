@@ -518,11 +518,11 @@ fn pause_exit_nonzero() {
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
-    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(5000);
     let image = MemoryImage::new_kernel(program);
 
     let env = ExecutorEnv::builder()
-        .segment_limit_po2(13) // 8k cycles
+        .segment_limit_po2(risc0_circuit_rv32im::MIN_CYCLES_PO2 as u32)
         .build()
         .unwrap();
     let session = ExecutorImpl::new(env, image).unwrap().run().unwrap();

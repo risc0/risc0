@@ -31,7 +31,7 @@ use risc0_zkp::core::{
 };
 
 use crate::{
-    EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
+    EcallKind, EcallMetric, MAX_CYCLES_PO2, MIN_CYCLES_PO2, Rv32imV2Claim, TerminateState,
     execute::rv32im::disasm,
     trace::{TraceCallback, TraceEvent},
 };
@@ -211,6 +211,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         max_cycles: CycleLimit,
         callback: impl FnMut(Segment) -> Result<()> + Send,
     ) -> Result<ExecutorResult> {
+        if !(MIN_CYCLES_PO2..=MAX_CYCLES_PO2).contains(&segment_po2) {
+            bail!("Invalid segment_limit_po2: {segment_po2}");
+        }
+
         let segment_limit: u32 = 1 << segment_po2;
         assert!(max_insn_cycles < segment_limit as usize);
         let segment_threshold = segment_limit - max_insn_cycles as u32;
@@ -322,7 +326,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             Risc0Machine::suspend(self)?;
 
             let final_cycles = self.segment_cycles().next_power_of_two();
-            let final_po2 = log2_ceil(final_cycles as usize);
+            let final_po2 = std::cmp::max(log2_ceil(final_cycles as usize), MIN_CYCLES_PO2);
             let partial_image = self.pager.commit();
             let req = CreateSegmentRequest {
                 partial_image,
