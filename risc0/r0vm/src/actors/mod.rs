@@ -13,6 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+pub(crate) mod actor;
 pub(crate) mod allocator;
 pub(crate) mod config;
 pub(crate) mod factory;
@@ -38,7 +39,6 @@ use std::{
 
 use anyhow::Context as _;
 use derive_more::From;
-use kameo::prelude::*;
 use nvml_wrapper::Nvml;
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
 use opentelemetry_sdk::{
@@ -63,6 +63,7 @@ use tracing_subscriber::{
 use crate::init_logging;
 
 use self::{
+    actor::{Actor, ActorRef, Message},
     allocator::{
         AllocatorActor, AllocatorRouterActor, HardwareResource, RegisterManager, RegisterWorker,
     },
@@ -270,9 +271,9 @@ pub(crate) async fn status_main(host: String) -> Result<(), Box<dyn StdError>> {
         .ok_or_else(|| format!("failed to resolve {host}"))?;
 
     let remote_allocator =
-        kameo::spawn(allocator::RemoteAllocatorActor::new(addr, "RemoteAllocatorActor").await?);
+        actor::spawn(allocator::RemoteAllocatorActor::new(addr, "RemoteAllocatorActor").await?);
 
-    let reply = remote_allocator.ask(allocator::GetStatus).await?;
+    let reply = remote_allocator.ask(allocator::GetStatus).await??;
     println!("{}", serde_json::to_string_pretty(&reply)?);
 
     Ok(())
@@ -377,13 +378,12 @@ impl App {
         if let Some(cfg_allocator) = &cfg.allocator {
             tracing::info!("Starting allocator");
 
-            let alloc_ref = kameo::spawn(AllocatorActor::new());
+            let alloc_ref = actor::spawn(AllocatorActor::new());
             allocator = Some(alloc_ref.clone());
 
             if let Some(listen) = cfg_allocator.listen {
                 allocator_rpc_server = Some(AllocatorRpcServer::new(listen, alloc_ref.clone()));
-                local_allocator_rpc_addr =
-                    allocator_rpc_server.as_mut().unwrap().start(true).await?;
+                local_allocator_rpc_addr = allocator_rpc_server.as_mut().unwrap().start().await?;
             }
 
             if let Some(cfg_api) = &cfg.api {
@@ -413,14 +413,14 @@ impl App {
                 .map(|provers| provers.iter().any(|prover| prover.simulate.is_some()))
                 .is_some_and(|a| a);
 
-            let factory_ref = kameo::spawn(FactoryActor::new(alloc_ref.clone(), require_gpu));
+            let factory_ref = actor::spawn(FactoryActor::new(alloc_ref.clone(), require_gpu));
             factory = Some(factory_ref.clone());
 
             let remote_allocator = cfg_manager.allocator.is_some();
             let have_api = remote_allocator || cfg.api.is_some();
             let allocator_listening = cfg.allocator.is_some_and(|cfg| cfg.listen.is_some());
 
-            let manager_ref = kameo::spawn(ManagerActor::new(
+            let manager_ref = actor::spawn(ManagerActor::new(
                 factory_ref.clone(),
                 have_api.then(|| storage_root.clone()),
             ));
@@ -431,11 +431,7 @@ impl App {
                     manager_listen_addr(cfg_manager.listen),
                     factory_ref,
                 ));
-                local_factory_rpc_addr = factory_rpc_server
-                    .as_mut()
-                    .unwrap()
-                    .start(/* forward_errors= */ false)
-                    .await?;
+                local_factory_rpc_addr = factory_rpc_server.as_mut().unwrap().start().await?;
             }
 
             let mut api_addr = None;
@@ -459,7 +455,7 @@ impl App {
                     path: "/".into(),
                     remote_address: None,
                 })
-                .await?;
+                .await??;
         }
 
         let workers = Arc::new(Mutex::new(vec![]));
@@ -700,7 +696,7 @@ async fn start_worker(
             hardware: worker_hardware.clone(),
             zkvm_version: env!("CARGO_PKG_VERSION").parse().unwrap(),
         })
-        .await?;
+        .await??;
 
     let manager_addr = reply
         .manager_address
@@ -756,7 +752,6 @@ async fn route_rpc_msg_to_worker(
     let ops = RpcDispatchOps {
         rpc_sender: None,
         message_id,
-        forward_errors: false,
     };
     if let Some(msg) = msg {
         msg.dispatch(remote_address, worker, ops).await
@@ -793,7 +788,7 @@ where
         }
     }
 
-    pub async fn start(&mut self, forward_errors: bool) -> anyhow::Result<Option<SocketAddr>> {
+    pub async fn start(&mut self) -> anyhow::Result<Option<SocketAddr>> {
         if self.join_handle.is_some() {
             return Ok(None);
         }
@@ -826,7 +821,6 @@ where
                             let ops = RpcDispatchOps {
                                 rpc_sender: Some(rpc_sender),
                                 message_id,
-                                forward_errors,
                             };
                             req.dispatch(remote_address, receiver, ops)
                         })
@@ -854,7 +848,6 @@ type WriteStream = metrics::OwnedWriteHalfWithMetrics<tcp::OwnedWriteHalf>;
 struct RpcDispatchOps {
     rpc_sender: Option<RpcSender<WriteStream>>,
     message_id: Option<RpcMessageId>,
-    forward_errors: bool,
 }
 
 impl RpcDispatchOps {
@@ -862,43 +855,18 @@ impl RpcDispatchOps {
     where
         ReceiverT: Message<MessageT>,
         MessageT: Send + 'static,
-        <<ReceiverT as Message<MessageT>>::Reply as Reply>::Ok: serde::Serialize + Sync,
-        <<ReceiverT as Message<MessageT>>::Reply as Reply>::Error: serde::Serialize + Sync,
+        <ReceiverT as Message<MessageT>>::Reply: serde::Serialize + Sync,
     {
         let message_id = self.message_id.expect("request not expecting response");
 
-        // The PendingReply isn't Send, so I have to do this :/
-        let (tx, rx) = tokio::sync::oneshot::channel();
-        tokio::task::spawn(async move {
-            let pending_reply = receiver.ask(msg).enqueue().await.unwrap();
-            tx.send(()).unwrap();
+        let pending_reply = receiver.ask_enqueue(msg).await.unwrap();
 
+        tokio::task::spawn(async move {
             let rpc_sender = self.rpc_sender.as_ref().expect("ask on one-way rpc actor");
-            if self.forward_errors {
-                match pending_reply.await {
-                    Ok(reply) => {
-                        rpc_sender
-                            .respond(&std::result::Result::<_, ()>::Ok(reply), message_id)
-                            .await
-                            .unwrap();
-                    }
-                    Err(SendError::HandlerError(error)) => {
-                        rpc_sender
-                            .respond(&std::result::Result::<(), _>::Err(error), message_id)
-                            .await
-                            .unwrap();
-                    }
-                    Err(other_error) => {
-                        panic!("rpc actor send error: {other_error:?}")
-                    }
-                }
-            } else if let Ok(reply) = pending_reply.await {
+            if let Ok(reply) = pending_reply.recv().await {
                 rpc_sender.respond(&reply, message_id).await.unwrap();
             }
         });
-
-        // wait until message has been enqueued in mailbox to preserve ordering.
-        let _ = rx.await;
     }
 
     async fn tell<ReceiverT, MessageT>(self, receiver: ActorRef<ReceiverT>, msg: MessageT)
@@ -1020,13 +988,9 @@ impl DispatchRpcMessage<WorkerActor> for RemoteWorkerRequest {
 macro_rules! routing_actor_impl {
     ($type:ty, $request:ty, $reply:ty) => {
         impl Message<$request> for $type {
-            type Reply = ForwardedReply<$request, $reply>;
+            type Reply = $reply;
 
-            async fn handle(
-                &mut self,
-                msg: $request,
-                ctx: &mut Context<Self, Self::Reply>,
-            ) -> Self::Reply {
+            async fn handle(&mut self, msg: $request, ctx: &mut Context<Self, Self::Reply>) {
                 match self {
                     Self::Local(actor_ref) => ctx.forward(actor_ref, msg).await,
                     Self::Remote(actor_ref) => ctx.forward(actor_ref, msg).await,
@@ -1101,9 +1065,7 @@ impl<ActorT> RemoteActor<ActorT> {
 }
 
 impl<ActorT: Send + 'static> Actor for RemoteActor<ActorT> {
-    type Error = anyhow::Error;
-
-    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
+    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> anyhow::Result<()> {
         if let Some(rpc_death_recv) = self.rpc_death_recv.take() {
             tokio::task::spawn(async move {
                 let _ = rpc_death_recv.await;
@@ -1113,11 +1075,7 @@ impl<ActorT: Send + 'static> Actor for RemoteActor<ActorT> {
         Ok(())
     }
 
-    async fn on_stop(
-        &mut self,
-        _actor_ref: WeakActorRef<Self>,
-        _reason: ActorStopReason,
-    ) -> Result<(), Self::Error> {
+    async fn on_stop(&mut self) -> anyhow::Result<()> {
         self.rpc_sender.shutdown().await?;
         if let Some(handle) = &self.rpc_receiver_handle {
             handle.abort();
@@ -1130,14 +1088,10 @@ impl<ActorT: Send + 'static> Actor for RemoteActor<ActorT> {
 macro_rules! remote_actor_ask {
     ($type:ty, $request:ty, $reply:ty, $msg_ty:ty) => {
         impl Message<$request> for $type {
-            type Reply = DelegatedReply<$reply>;
+            type Reply = $reply;
 
-            async fn handle(
-                &mut self,
-                msg: $request,
-                ctx: &mut Context<Self, Self::Reply>,
-            ) -> Self::Reply {
-                let (delegated_reply, reply_sender) = ctx.reply_sender();
+            async fn handle(&mut self, msg: $request, ctx: &mut Context<Self, Self::Reply>) {
+                let reply_sender = ctx.reply_sender();
 
                 let msg: $msg_ty = msg.into();
                 self.rpc_sender
@@ -1148,7 +1102,6 @@ macro_rules! remote_actor_ask {
                     })
                     .await
                     .unwrap();
-                delegated_reply
             }
         }
     };

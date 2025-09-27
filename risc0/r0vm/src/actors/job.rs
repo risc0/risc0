@@ -19,11 +19,11 @@ mod shrink_wrap;
 mod tracer;
 
 use derive_more::From;
-use kameo::{error::Infallible, prelude::*};
 use tokio::task::JoinSet;
 
 use super::{
     TaskDoneMsg, TaskUpdateMsg,
+    actor::{self, Actor, ActorRef, Context, Message, ReplySender, WeakActorRef},
     factory::FactoryActor,
     protocol::{JobId, JobStatusReply, JobStatusRequest, ProofRequest, ShrinkWrapRequest},
 };
@@ -43,9 +43,7 @@ enum InnerJobActor {
 }
 
 impl Actor for JobActor {
-    type Error = Infallible;
-
-    async fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
+    async fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> anyhow::Result<()> {
         Ok(())
     }
 }
@@ -75,10 +73,10 @@ impl JobActor {
         reply_sender: Option<ReplySender<JobStatusReply>>,
     ) where
         InnerJobActor: From<ActorRef<ActorT>>,
-        ActorT: Message<RequestT, Reply = DelegatedReply<JobStatusReply>> + JobActorNew,
+        ActorT: Message<RequestT, Reply = JobStatusReply> + JobActorNew,
         RequestT: Send + 'static,
     {
-        let job = kameo::spawn(ActorT::new(
+        let job = actor::spawn(ActorT::new(
             self.job_id,
             self_ref.downgrade(),
             self.factory.clone(),
@@ -97,49 +95,35 @@ impl JobActor {
 }
 
 impl Message<ProofRequest> for JobActor {
-    type Reply = DelegatedReply<JobStatusReply>;
+    type Reply = JobStatusReply;
 
-    async fn handle(
-        &mut self,
-        request: ProofRequest,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        let (delegated_reply, reply_sender) = ctx.reply_sender();
+    async fn handle(&mut self, request: ProofRequest, ctx: &mut Context<Self, Self::Reply>) {
+        let reply_sender = ctx.reply_sender();
         if request.execute_only {
             self.request::<_, execute_only::JobActor>(request, ctx.actor_ref(), reply_sender);
         } else {
             self.request::<_, proof::JobActor>(request, ctx.actor_ref(), reply_sender);
         }
-        delegated_reply
     }
 }
 
 impl Message<ShrinkWrapRequest> for JobActor {
-    type Reply = DelegatedReply<JobStatusReply>;
+    type Reply = JobStatusReply;
 
-    async fn handle(
-        &mut self,
-        request: ShrinkWrapRequest,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        let (delegated_reply, reply_sender) = ctx.reply_sender();
+    async fn handle(&mut self, request: ShrinkWrapRequest, ctx: &mut Context<Self, Self::Reply>) {
+        let reply_sender = ctx.reply_sender();
         self.request::<_, shrink_wrap::JobActor>(request, ctx.actor_ref(), reply_sender);
-        delegated_reply
     }
 }
 
 impl Message<JobStatusRequest> for JobActor {
     type Reply = JobStatusReply;
 
-    async fn handle(
-        &mut self,
-        msg: JobStatusRequest,
-        _ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
+    async fn handle(&mut self, msg: JobStatusRequest, ctx: &mut Context<Self, Self::Reply>) {
         match self.inner.as_mut().unwrap() {
-            InnerJobActor::Proof(job) => job.ask(msg).await.unwrap(),
-            InnerJobActor::ShrinkWrap(job) => job.ask(msg).await.unwrap(),
-            InnerJobActor::ExecuteOnly(job) => job.ask(msg).await.unwrap(),
+            InnerJobActor::Proof(job) => ctx.forward(job, msg).await,
+            InnerJobActor::ShrinkWrap(job) => ctx.forward(job, msg).await,
+            InnerJobActor::ExecuteOnly(job) => ctx.forward(job, msg).await,
         }
     }
 }
@@ -147,15 +131,11 @@ impl Message<JobStatusRequest> for JobActor {
 impl Message<TaskUpdateMsg> for JobActor {
     type Reply = ();
 
-    async fn handle(
-        &mut self,
-        msg: TaskUpdateMsg,
-        _ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
+    async fn handle(&mut self, msg: TaskUpdateMsg, ctx: &mut Context<Self, Self::Reply>) {
         match self.inner.as_mut().unwrap() {
-            InnerJobActor::Proof(job) => job.ask(msg).await.unwrap(),
-            InnerJobActor::ShrinkWrap(job) => job.ask(msg).await.unwrap(),
-            InnerJobActor::ExecuteOnly(job) => job.ask(msg).await.unwrap(),
+            InnerJobActor::Proof(job) => ctx.forward(job, msg).await,
+            InnerJobActor::ShrinkWrap(job) => ctx.forward(job, msg).await,
+            InnerJobActor::ExecuteOnly(job) => ctx.forward(job, msg).await,
         }
     }
 }
@@ -163,15 +143,11 @@ impl Message<TaskUpdateMsg> for JobActor {
 impl Message<TaskDoneMsg> for JobActor {
     type Reply = ();
 
-    async fn handle(
-        &mut self,
-        msg: TaskDoneMsg,
-        _ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
+    async fn handle(&mut self, msg: TaskDoneMsg, ctx: &mut Context<Self, Self::Reply>) {
         match self.inner.as_mut().unwrap() {
-            InnerJobActor::Proof(job) => job.ask(msg).await.unwrap(),
-            InnerJobActor::ShrinkWrap(job) => job.ask(msg).await.unwrap(),
-            InnerJobActor::ExecuteOnly(job) => job.ask(msg).await.unwrap(),
+            InnerJobActor::Proof(job) => ctx.forward(job, msg).await,
+            InnerJobActor::ShrinkWrap(job) => ctx.forward(job, msg).await,
+            InnerJobActor::ExecuteOnly(job) => ctx.forward(job, msg).await,
         }
     }
 }
