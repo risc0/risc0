@@ -24,7 +24,7 @@ namespace risc0 {
 
 #define REQUIRE(x) do { \
   if (!(x)) { \
-    LOG(0, "Assetion: " #x " failed in Dual Hal");  \
+    LOG(0, "Assertion: " #x " failed in Dual Hal");  \
     throw std::runtime_error("Dual Hal failure"); \
   } \
 } while(0)
