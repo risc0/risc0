@@ -32,7 +32,7 @@ pub struct Args {
 
     /// Single crate mode
     ///
-    /// Will only create a profile for the single crate provide
+    /// Will only create a profile for the single crate provided
     #[arg(short, long, conflicts_with = "crate_count")]
     pub(crate) name: Option<String>,
 
