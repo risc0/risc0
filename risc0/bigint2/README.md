@@ -22,4 +22,4 @@ BigInt2 precompiles are automatically available in the RISC Zero zkVM environmen
 
 ## Documentation
 
-For detailed API documentation and examples, see the [RISC Zero documentation](https://docs.risczero.com).
+For detailed API documentation and examples, see the [RISC Zero documentation](https://dev.risczero.com).
