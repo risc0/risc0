@@ -4,7 +4,6 @@ version = 1
 
 [api]
 listen = "0.0.0.0:8000"
-manager = "1.2.3.4:9000"
 
 [storage]
 path = "/mnt/storage/risc0"
