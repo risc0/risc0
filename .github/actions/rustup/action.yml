@@ -24,7 +24,7 @@ runs:
     - run: |
         if ! command -v rustup &>/dev/null; then
           curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL "https://sh.rustup.rs" | sh -s -- -y
-          echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> $GITHUB_PATH
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         fi
       shell: bash
 
