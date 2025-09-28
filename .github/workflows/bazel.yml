@@ -55,5 +55,6 @@ jobs:
               --test_output=errors \
               --strategy=TestRunner=local \
               --@rules_cuda//cuda:archs=${{ matrix.nvcc_arch }}
+        working-directory: risc0/circuit/rv32im-m3-sys/cxx
       - run: 'rm -f $HOME/.netrc'
         continue-on-error: true
