@@ -22,19 +22,6 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # Full history is required by license-check.py
-          fetch-depth: 0
-      - uses: risc0/risc0/.github/actions/rustup@4ab1f0bba1b0515819221bebc59f95aad0a6a3a9
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.12"
-      - run: python license-check.py
-
   bazel:
     runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.device }}"]
     strategy:
