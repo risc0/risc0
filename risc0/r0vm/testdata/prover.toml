@@ -3,7 +3,7 @@
 version = 1
 
 [[prover]]
-manager = "10.0.3.24:9000"
+allocator = "10.0.3.24:9000"
 subscribe = [
   "prove-segment",
   "prove-keccak",
@@ -14,7 +14,7 @@ subscribe = [
 ]
 
 [[prover]]
-manager = "10.0.3.24:9000"
+allocator = "10.0.3.24:9000"
 subscribe = ["lift", "join", "union", "resolve"]
 
 [telemetry]
