@@ -15,6 +15,9 @@
 use no_std_strings::{str_format, str256};
 
 use crate::atomic_emul::emulate_atomic_instruction;
+use crate::compressed_emul::{
+    emulate_compressed_instruction, handle_mpec_fixup, unaligned_instruction_execution,
+};
 use crate::constants::*;
 use crate::host_calls::{host_argc, host_log, host_terminate};
 use crate::linux_abi::{handle_linux_syscall, start_linux_binary};
@@ -206,7 +209,19 @@ unsafe extern "C" fn ecall_dispatch() -> ! {
 unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
     // Get the saved PC from MEPC (where the illegal instruction occurred)
     let mepc = unsafe { MEPC_PTR.read_volatile() };
-    let instruction = unsafe { (mepc as *const u32).read_volatile() };
+    // Read the instruction as a u16 first
+    let instruction_h = unsafe { (mepc as *const u16).read_volatile() };
+    if instruction_h & 0x3 != 0x3 {
+        emulate_compressed_instruction(mepc, instruction_h)
+    } else if mepc % 4 != 0 {
+        unaligned_instruction_execution(mepc, instruction_h);
+    }
+
+    let instruction_l = unsafe { (mepc as *const u16).add(1).read_volatile() };
+    let instruction = (instruction_l as u32) << 16 | instruction_h as u32;
+    if instruction == 0xffff_ffff {
+        handle_mpec_fixup()
+    }
     // Check if this is a fence instruction (0x0ff0000f)
     if instruction == 0x0ff0000f {
         // Fence instruction - treat as null-op and continue
@@ -394,7 +409,133 @@ pub fn print(msg: &str) {
 
 #[unsafe(no_mangle)]
 unsafe extern "C" fn instruction_misaligned_dispatch() -> ! {
-    kpanic!("Instruction misaligned trap - not implemented");
+    // Get the saved PC from MEPC (where the misaligned instruction occurred)
+    let mepc = unsafe { MEPC_PTR.read_volatile() };
+
+    // Read the instruction that caused the misaligned jump
+    let instruction = unsafe { (mepc as *const u32).read_volatile() };
+
+    // Decode instruction fields
+    let opcode = instruction & 0x0000007f;
+    let rd = (instruction & 0x00000f80) >> 7;
+    let rs1 = (instruction & 0x000f8000) >> 15;
+    let rs2 = (instruction & 0x01f00000) >> 20;
+    let funct3 = (instruction & 0x00007000) >> 12;
+    let _funct7 = (instruction & 0xfe000000) >> 25;
+
+    debug_print!(
+        "Instruction misaligned dispatch: PC={:#010x}, instr={:#010x}, opcode={:#02x}",
+        mepc,
+        instruction,
+        opcode
+    );
+
+    match opcode {
+        0x63 => {
+            // Branch instructions (beq, bne, blt, bge, bltu, bgeu)
+            let imm = ((instruction & 0x80000000) >> 19) // imm[12]
+                | ((instruction & 0x7e000000) >> 20) // imm[10:5]
+                | ((instruction & 0x00000f00) >> 7) // imm[4:1]
+                | ((instruction & 0x00000080) << 4); // imm[11]
+
+            // Sign-extend the immediate
+            let offset = if (imm & 0x1000) != 0 {
+                imm | 0xffffe000
+            } else {
+                imm
+            };
+
+            let rs1_value = get_ureg(rs1 as usize);
+            let rs2_value = get_ureg(rs2 as usize);
+            let should_branch = match funct3 {
+                0x0 => rs1_value == rs2_value,                   // beq
+                0x1 => rs1_value != rs2_value,                   // bne
+                0x4 => (rs1_value as i32) < (rs2_value as i32),  // blt
+                0x5 => (rs1_value as i32) >= (rs2_value as i32), // bge
+                0x6 => rs1_value < rs2_value,                    // bltu
+                0x7 => rs1_value >= rs2_value,                   // bgeu
+                _ => false,
+            };
+
+            if should_branch {
+                let target_pc = (mepc as i32).wrapping_add(offset as i32) as usize;
+                debug_print!(
+                    "Branch taken: PC={:#010x} + {:#x} = {:#010x}",
+                    mepc,
+                    offset,
+                    target_pc
+                );
+                // Set MEPC to the target address (circuit bug: subtract 4)
+                unsafe { MEPC_PTR.write_volatile(target_pc.wrapping_sub(4)) };
+            } else {
+                debug_print!("Branch not taken, continuing sequentially");
+                // Set MEPC to next instruction
+                unsafe { MEPC_PTR.write_volatile(mepc) };
+            }
+            mret()
+        }
+        0x6f => {
+            // JAL (Jump and Link)
+            let imm = ((instruction & 0x80000000) >> 11) // imm[20]
+                | ((instruction & 0x7fe00000) >> 20) // imm[10:1]
+                | ((instruction & 0x00100000) >> 9) // imm[11]
+                | (instruction & 0x000ff000); // imm[19:12]
+
+            // Sign-extend the immediate
+            let offset = if (imm & 0x100000) != 0 {
+                imm | 0xffe00000
+            } else {
+                imm
+            };
+
+            let target_pc = (mepc as i32).wrapping_add(offset as i32) as usize;
+            let return_addr = mepc + 4;
+
+            debug_print!(
+                "JAL: PC={:#010x} + {:#x} = {:#010x}, return={:#010x}",
+                mepc,
+                offset,
+                target_pc,
+                return_addr
+            );
+
+            // Save return address in rd
+            set_ureg(rd as usize, return_addr as u32);
+            // Set MEPC to the target address (circuit bug: subtract 4)
+            unsafe { MEPC_PTR.write_volatile(target_pc.wrapping_sub(4)) };
+            mret()
+        }
+        0x67 => {
+            // JALR (Jump and Link Register)
+            let imm = (instruction & 0xfff00000) >> 20; // Sign-extended 12-bit immediate
+
+            let rs1_value = get_ureg(rs1 as usize);
+            let target_pc = ((rs1_value as i32).wrapping_add(imm as i32) as usize) & !1; // Clear LSB
+            let return_addr = mepc + 4;
+
+            debug_print!(
+                "JALR: x{}({:#010x}) + {:#x} = {:#010x}, return={:#010x}",
+                rs1,
+                rs1_value,
+                imm,
+                target_pc,
+                return_addr
+            );
+
+            // Save return address in rd
+            set_ureg(rd as usize, return_addr as u32);
+            // Set MEPC to the target address (circuit bug: subtract 4)
+            unsafe { MEPC_PTR.write_volatile(target_pc.wrapping_sub(4)) };
+            mret()
+        }
+        _ => {
+            kpanic!(
+                "Instruction address misaligned trap: unsupported opcode {:#02x} at PC {:#010x}",
+                opcode,
+                mepc
+            );
+        }
+    }
 }
 
 #[unsafe(no_mangle)]
