@@ -129,6 +129,11 @@ impl Program {
     pub fn read_u32(&self, address: &u32) -> Option<u32> {
         self.image.get(address).copied()
     }
+
+    /// Write a word to the image
+    pub fn write_u32(&mut self, address: u32, value: u32) {
+        self.image.insert(address, value);
+    }
 }
 
 const MAGIC: &[u8] = b"R0BF"; // RISC Zero Binary Format
