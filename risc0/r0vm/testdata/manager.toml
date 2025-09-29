@@ -5,8 +5,10 @@ version = 1
 [api]
 listen = "0.0.0.0:8000"
 
-[manager]
+[allocator]
 listen = "0.0.0.0:9000"
+
+[manager]
 
 [executor]
 count = 4

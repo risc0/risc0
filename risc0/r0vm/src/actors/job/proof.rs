@@ -359,7 +359,12 @@ impl JobActor {
                                     assumptions.push_back(keccak_root);
                                     continue;
                                 }
-                                panic!("Missing assumption: {assumption:?}");
+
+                                self.status = JobStatus::Failed(TaskError::Generic(format!(
+                                    "Missing assumption: {assumption:?}"
+                                )));
+                                self.self_ref().stop_gracefully().await.unwrap();
+                                return;
                             }
                         }
                     }

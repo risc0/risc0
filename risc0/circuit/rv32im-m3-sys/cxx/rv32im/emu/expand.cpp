@@ -16,6 +16,7 @@
 #include "rv32im/emu/expand.h"
 
 #include <assert.h>
+#include <stddef.h>
 
 namespace risc0::rv32im {
 

@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf, time::Duration};
 
 use derive_more::From;
 use kameo::prelude::*;
@@ -27,7 +27,7 @@ use super::{
     protocol::{
         CreateJobReply, CreateJobRequest, JobId, JobInfo, JobRequestReply, JobStatus,
         JobStatusReply, JobStatusRequest, ProofRequest, ProofResult, ShrinkWrapRequest,
-        ShrinkWrapResult,
+        ShrinkWrapResult, TaskError,
     },
 };
 
@@ -88,13 +88,20 @@ impl ManagerActor {
         JobInfo<ResultT>: TryFrom<JobStatusReply>,
         <JobInfo<ResultT> as TryFrom<JobStatusReply>>::Error: std::fmt::Debug,
         InactiveJobEntry: From<JobInfo<ResultT>>,
+        JobStatusReply: From<JobInfo<ResultT>>,
     {
         let job_id = JobId::new_v4();
         let actor_ref = actor_ref.clone();
         let job = kameo::spawn(JobActor::new(job_id, self.factory.clone()));
         self.jobs.insert(job_id, JobEntry::Active(job.clone()));
         self.join_set.spawn(async move {
-            let reply = job.ask(request).await.unwrap();
+            let reply = job.ask(request).await.unwrap_or_else(|error| {
+                JobInfo {
+                    status: JobStatus::<ResultT>::Failed(TaskError::Generic(error.to_string())),
+                    elapsed_time: Duration::MAX,
+                }
+                .into()
+            });
             actor_ref
                 .tell(JobDone::<ResultT> {
                     job_id,
@@ -243,10 +250,12 @@ impl Message<JobStatusRequest> for ManagerActor {
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         match self.jobs.get(&msg.job_id) {
-            Some(JobEntry::Active(job)) => job
-                .ask(JobStatusRequest { job_id: msg.job_id })
-                .await
-                .unwrap(),
+            Some(JobEntry::Active(job)) => {
+                match job.ask(JobStatusRequest { job_id: msg.job_id }).await {
+                    Ok(status) => status,
+                    Err(_) => JobStatusReply::NotFound,
+                }
+            }
             Some(JobEntry::Inactive(inactive)) => inactive.clone().into(),
             None => JobStatusReply::NotFound,
         }

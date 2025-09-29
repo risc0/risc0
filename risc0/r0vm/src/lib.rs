@@ -109,6 +109,10 @@ struct Mode {
     #[arg(long)]
     rpc: bool,
 
+    /// Connect to given actor allocator RPC port and print status as JSON
+    #[arg(long)]
+    actor_status: Option<String>,
+
     #[arg(long)]
     port: Option<u16>,
 
@@ -156,6 +160,11 @@ pub fn main() {
 
     if args.mode.rpc {
         self::actors::rpc_main(args.num_gpus).unwrap();
+        return;
+    }
+
+    if let Some(host) = args.mode.actor_status {
+        self::actors::status_main(host).unwrap();
         return;
     }
 

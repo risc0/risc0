@@ -15,7 +15,9 @@
 
 #pragma once
 
+#if !defined(METAL)
 #include <cstdint>
+#endif
 
 #ifndef CONSTANT
 #define CONSTANT constexpr
