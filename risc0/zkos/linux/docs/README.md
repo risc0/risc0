@@ -1,4 +1,4 @@
-# How to use risc0-linux abi
+# How to use risc0-linux (nommu or abi)
 
 This is done on a Ubuntu 22/24 machine/container, has not been tested on MacOS X or WSL2
 
@@ -15,6 +15,7 @@ As we need a custom r0vm to run all this stuff
 # Features
 - (A)tomic, F&D (soft float), C-extension instruction emulation. C-extension not recommended as it'll trap like mad.
 - Linux static binary execution, with sbrk/mmap to allocate memory, write to stdout and stderr support (tested with MUSL) + correct auxv setup, but not much more system call support
+- S-mode emulation (for running Linux noMMU) with SBI DBCN emulation
 - In progress 9P file system
 
 # Building the kernel 
@@ -124,3 +125,50 @@ diod -l 127.0.0.1:40564 -e /risc0-root -n -f -d 0x01 -U yourusername -S &
 RISC0_DEV_MODE=1 RUST_LOG=debug  socat -ddd -t 30 -v EXEC:"r0vm --elf busybox.bin -- opts=p9 /bin/ls -al /",fdin=3,fdout=4 TCP:127.0.0.1:40564 2> log
 ```
 
+# Experimental: Linux nommu
+
+Grab https://github.com/riscv-collab/riscv-gnu-toolchain/releases/tag/2025.09.16 riscv32-glibc-ubuntu-gcc toolchain (we need this to make a relocatable kernel, bare metal isn't enough), unpack it so that ~/riscv/bin/riscv32-unknown-linux-gnu-gcc exists
+
+Get a copy of linux-6.16.7.tar.xz and unpack it, then in linux-6.16.7
+```
+patch -p1 < ~/risc0/patches/linux-6.16.7-risc0-nommu-defconfig 
+cp ~/risc0/patches/linux-6.16.7-risc0-nommu-defconfig .config
+```
+
+And build it:
+
+```
+make ARCH=riscv CROSS_COMPILE=~/riscv/bin/riscv32-unknown-linux-gnu- -j$(nproc) vmlinux
+```
+
+cp the vmlinux into your risc0 and
+```
+target/debug/elf-to-bin --guest-elf vmlinux --kernel-elf risc0/zkos/linux/elfs/vmlinuz.elf --output vmlinux.bin
+
+RUST_BACKTRACE=1 RISC0_DEV_MODE=1 r0vm --elf vmlinux.bin
+```
+
+and you should see it start up and fail to mount a root file system
+
+# Buildroot with uclibc and flat binaries (static binaries), for Linux noMMU
+
+Do as before but now (in a new fresh directory) with these options instead:
+
+```
+Target options -> MMU support disabled
+Filesystem images -> cpio the root file system
+```
+
+and
+
+```
+make -j `nproc`
+```
+
+We now go over to the kernel and bundle the resulting initramfs with the kernel image:
+
+```
+make ARCH=riscv CROSS_COMPILE=~/riscv/bin/riscv32-unknown-linux-gnu- CONFIG_INITRAMFS_SOURCE=$HOME/buildroot-2025.05.1/output/images/rootfs.cpio -j$(nproc) vmlinux
+```
+
+and we now elf-to-bin and r0vm again -- and see it boot up a linux userland and then idle

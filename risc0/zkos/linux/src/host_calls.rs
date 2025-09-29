@@ -120,7 +120,6 @@ pub fn host_argc() -> u32 {
     }
 }
 
-#[allow(dead_code)]
 #[allow(unused_variables)]
 pub fn host_get_cycle() -> u64 {
     #[cfg(target_arch = "riscv32")]

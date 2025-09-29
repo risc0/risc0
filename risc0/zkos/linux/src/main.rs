@@ -35,6 +35,7 @@ mod linux_abi_misc;
 mod linux_abi_privileged;
 mod linux_abi_sockets;
 mod p9;
+mod smode_emul;
 mod softfloat;
 
 // Set up the global allocator

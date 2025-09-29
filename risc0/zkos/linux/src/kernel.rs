@@ -21,6 +21,7 @@ use crate::compressed_emul::{
 use crate::constants::*;
 use crate::host_calls::{host_argc, host_log, host_terminate};
 use crate::linux_abi::{handle_linux_syscall, start_linux_binary};
+use crate::smode_emul::*;
 use crate::softfloat::{
     emulate_fp_instruction, emulate_fp_load_store, handle_float_csr_exception,
     handle_float_csr_fcsr, handle_float_csr_frm, init_softfloat,
@@ -100,7 +101,6 @@ pub fn set_ureg(idx: usize, word: u32) {
     unsafe { USER_REGS_PTR.add(idx).write_volatile(word) };
 }
 
-#[allow(dead_code)]
 pub fn get_vm_machine_mode() -> u32 {
     unsafe { *SHADOW_REGS_PTR.add(VM_MACHINE_MODE) }
 }
@@ -166,6 +166,46 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
         0x003 => {
             handle_float_csr_fcsr(funct3, rs1, rd);
         }
+        // Supervisor CSRs
+        0x105 => {
+            handle_stvec(funct3, rd, rs1);
+        }
+        0x140 => {
+            handle_sscratch(funct3, rd, rs1);
+        }
+        0x102 => {
+            handle_sdeleg(funct3, rd, rs1);
+        }
+        0x104 => {
+            handle_sie(funct3, rd, rs1);
+        }
+        0x144 => {
+            handle_sip(funct3, rd, rs1);
+        }
+        0x106 => {
+            handle_scounteren(funct3, rd, rs1);
+        }
+        0x100 => {
+            handle_sstatus(funct3, rd, rs1);
+        }
+        0x141 => {
+            handle_sepc(funct3, rd, rs1);
+        }
+        0x143 => {
+            handle_stval(funct3, rd, rs1);
+        }
+        0x142 => {
+            handle_scause(funct3, rd, rs1);
+        }
+        0x10A => {
+            handle_senvcfg(funct3, rd, rs1);
+        }
+        0xc01 => {
+            handle_time(funct3, rd, rs1);
+        }
+        0xc81 => {
+            handle_timeh(funct3, rd, rs1);
+        }
         _ => {
             kpanic!("Unsupported CSR address: {:#03x}", csr_addr);
         }
@@ -185,7 +225,7 @@ unsafe extern "C" fn kstart() -> ! {
     debug_print!("argc is {argc}");
     // Check if we have any arguments
     if argc == 0 {
-        kpanic!("No arguments provided");
+        start_vmlinux()
     } else {
         start_linux_binary(argc)
     }
@@ -202,7 +242,14 @@ pub fn mret() -> ! {
 
 #[unsafe(no_mangle)]
 unsafe extern "C" fn ecall_dispatch() -> ! {
-    handle_linux_syscall()
+    match get_vm_machine_mode() {
+        VM_MACHINE_MODE_LINUX_ABI => handle_linux_syscall(),
+        VM_MACHINE_MODE_EMULATED_S_MODE => handle_smode_ecall(),
+        VM_MACHINE_MODE_EMULATED_U_MODE => handle_umode_ecall(),
+        _ => {
+            kpanic!("unknown machine mode {}", get_vm_machine_mode());
+        }
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -368,8 +415,16 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
             // Check for sret instruction (funct12 = 0x102)
             if funct12 == 0x102 {
-                // should be
-                kpanic!("sret instruction intercepted at PC: {:#010x}", mepc);
+                if get_vm_machine_mode() == VM_MACHINE_MODE_EMULATED_S_MODE {
+                    set_vm_machine_mode(VM_MACHINE_MODE_EMULATED_U_MODE);
+                    unsafe {
+                        MEPC_PTR.write_volatile(get_sepc() as usize - 4);
+                    }
+                    mret()
+                } else {
+                    // should be
+                    kpanic!("sret instruction intercepted at PC: {:#010x}", mepc);
+                }
             } else if funct12 == 0x105 {
                 // WFI, null-op
                 mret()

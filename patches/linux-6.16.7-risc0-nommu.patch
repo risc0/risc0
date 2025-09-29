@@ -1,0 +1,40 @@
+diff -ru linux-6.16.7/arch/riscv/kernel/sbi.c linux-6.16.7-risc0/arch/riscv/kernel/sbi.c
+--- linux-6.16.7/arch/riscv/kernel/sbi.c	2025-09-11 15:23:23.000000000 +0000
++++ linux-6.16.7-risc0/arch/riscv/kernel/sbi.c	2025-09-13 08:20:26.969261695 +0000
+@@ -13,7 +13,7 @@
+ #include <asm/sbi.h>
+ #include <asm/smp.h>
+ #include <asm/tlbflush.h>
+-
++#include <linux/serial_core.h>
+ /* default SBI version is 0.1 */
+ unsigned long sbi_spec_version __ro_after_init = SBI_SPEC_VERSION_DEFAULT;
+ EXPORT_SYMBOL(sbi_spec_version);
+@@ -691,6 +691,8 @@
+ 		    sbi_probe_extension(SBI_EXT_DBCN) > 0) {
+ 			pr_info("SBI DBCN extension detected\n");
+ 			sbi_debug_console_available = true;
++			sbi_debug_console_write("hi", 2);
++			setup_earlycon("sbi");
+ 		}
+ 		if (sbi_spec_version >= sbi_mk_version(3, 0) &&
+ 		    sbi_probe_extension(SBI_EXT_FWFT)) {
+@@ -702,4 +704,7 @@
+ 		__sbi_send_ipi	= __sbi_send_ipi_v01;
+ 		__sbi_rfence	= __sbi_rfence_v01;
+ 	}
++			sbi_srst_reboot_nb.notifier_call = sbi_srst_reboot;
++		sbi_srst_reboot_nb.priority = 192;
++		register_restart_handler(&sbi_srst_reboot_nb);
+ }
+diff -ru linux-6.16.7/kernel/panic.c linux-6.16.7-risc0/kernel/panic.c
+--- linux-6.16.7/kernel/panic.c	2025-09-11 15:23:23.000000000 +0000
++++ linux-6.16.7-risc0/kernel/panic.c	2025-09-13 06:26:36.548163505 +0000
+@@ -479,6 +479,7 @@
+ 			 "twice on console to return to the boot prom\n");
+ 	}
+ #endif
++	machine_restart("panic");
+ #if defined(CONFIG_S390)
+ 	disabled_wait();
+ #endif
