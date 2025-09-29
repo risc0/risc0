@@ -44,6 +44,7 @@ use std::sync::Arc;
 use super::{
     RemoteActor, RemoteAllocatorRequest, RpcDisconnect,
     actor::{self, Actor, ActorRef, Context, Message, ReplySender},
+    error::{Error, Result},
     protocol::{GlobalId, WorkerId, WorkerIdFmt},
     remote_actor_ask, routing_actor_impl,
 };
@@ -57,31 +58,6 @@ use uuid::Uuid;
 
 /// This is the URL path where requests are proxied to a manager of a specified version.
 pub const PROXY_URL_PATH: &str = "/r0vm";
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Error(String);
-
-impl Error {
-    fn new(msg: impl Into<String>) -> Self {
-        Self(msg.into())
-    }
-}
-
-impl std::error::Error for Error {}
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", &self.0)
-    }
-}
-
-type Result<T> = std::result::Result<T, Error>;
-
-impl From<uuid::Error> for Error {
-    fn from(e: uuid::Error) -> Self {
-        Self(e.to_string())
-    }
-}
 
 /// This value is the globally unique immutable alphanumeric identifier of the GPU. It does not
 /// correspond to any physical label on the board.
@@ -423,7 +399,13 @@ impl AllocatorActor {
 
         Ok(associated_workers
             .iter()
-            .map(|w| self.workers.get(w).unwrap().tasks.len())
+            .map(|w| {
+                self.workers
+                    .get(w)
+                    .expect("worker should still exist")
+                    .tasks
+                    .len()
+            })
             .sum())
     }
 

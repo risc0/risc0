@@ -7423,6 +7423,7 @@ dependencies = [
  "opentelemetry_sdk",
  "reqwest",
  "risc0-circuit-rv32im",
+ "risc0-zkp",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "rstest",
