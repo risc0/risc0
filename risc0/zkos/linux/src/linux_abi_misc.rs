@@ -1,6 +1,27 @@
-use crate::{host_calls::host_log, linux_abi::Err};
-
+use crate::{
+    host_calls::{host_get_cycle, host_log},
+    kernel::print,
+    linux_abi::Err,
+};
+use no_std_strings::{str_format, str256};
 // Miscellaneous syscalls - stub implementations
+
+// Clock constants
+const CLOCK_REALTIME: u32 = 0;
+const CLOCK_MONOTONIC: u32 = 1;
+const CLOCK_PROCESS_CPUTIME_ID: u32 = 2;
+const CLOCK_THREAD_CPUTIME_ID: u32 = 3;
+const CLOCK_MONOTONIC_RAW: u32 = 4;
+const CLOCK_REALTIME_COARSE: u32 = 5;
+const CLOCK_MONOTONIC_COARSE: u32 = 6;
+
+// Timespec structure for 64-bit time
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+struct Timespec {
+    tv_sec: i64,  // seconds
+    tv_nsec: i64, // nanoseconds
+}
 
 pub fn sys_clock_getres_time64(_which_clock: u32, _tp: u32) -> Result<u32, Err> {
     let msg = b"sys_clock_getres_time64 not implemented";
@@ -8,10 +29,62 @@ pub fn sys_clock_getres_time64(_which_clock: u32, _tp: u32) -> Result<u32, Err> 
     Err(Err::NoSys)
 }
 
-pub fn sys_clock_gettime64(_which_clock: u32, _tp: u32) -> Result<u32, Err> {
-    let msg = b"sys_clock_gettime64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+pub fn sys_clock_gettime64(which_clock: u32, tp: u32) -> Result<u32, Err> {
+    kprint!("sys_clock_gettime64: which_clock={} tp={}", which_clock, tp);
+
+    // Get current host cycle count
+    let cycles = host_get_cycle();
+    kprint!("sys_clock_gettime64: cycles={}", cycles);
+
+    // Convert cycles to time based on clock type
+    let (tv_sec, tv_nsec) = match which_clock {
+        CLOCK_REALTIME
+        | CLOCK_MONOTONIC
+        | CLOCK_MONOTONIC_RAW
+        | CLOCK_REALTIME_COARSE
+        | CLOCK_MONOTONIC_COARSE => {
+            // For now, use a simple conversion: assume 1GHz host frequency
+            // This is a placeholder - in a real implementation, you'd need to know the actual host frequency
+            const HOST_FREQUENCY_HZ: u64 = 1_000_000_000; // 1GHz
+            let seconds = cycles / HOST_FREQUENCY_HZ;
+            let nanoseconds = ((cycles % HOST_FREQUENCY_HZ) * 1_000_000_000) / HOST_FREQUENCY_HZ;
+            (seconds as i64, nanoseconds as i64)
+        }
+        CLOCK_PROCESS_CPUTIME_ID | CLOCK_THREAD_CPUTIME_ID => {
+            // For process/thread CPU time, we can use the same calculation
+            // In a real implementation, you might want to track per-process/thread cycles
+            const HOST_FREQUENCY_HZ: u64 = 1_000_000_000; // 1GHz
+            let seconds = cycles / HOST_FREQUENCY_HZ;
+            let nanoseconds = ((cycles % HOST_FREQUENCY_HZ) * 1_000_000_000) / HOST_FREQUENCY_HZ;
+            (seconds as i64, nanoseconds as i64)
+        }
+        _ => {
+            kprint!(
+                "sys_clock_gettime64: unsupported clock type {}",
+                which_clock
+            );
+            return Err(Err::NoSys);
+        }
+    };
+
+    kprint!(
+        "sys_clock_gettime64: tv_sec={}, tv_nsec={}",
+        tv_sec,
+        tv_nsec
+    );
+
+    // Create timespec structure
+    let timespec = Timespec { tv_sec, tv_nsec };
+
+    // Write timespec to user memory using copy_to_user
+    let timespec_bytes = unsafe { core::slice::from_raw_parts(&timespec as *const Timespec as *const u8, core::mem::size_of::<Timespec>()) };
+    let bytes_copied = crate::kernel::copy_to_user(tp as *mut u8, timespec_bytes.as_ptr(), core::mem::size_of::<Timespec>());
+    if bytes_copied == 0 {
+        kprint!("sys_clock_gettime64: failed to copy timespec structure to user memory");
+        return Err(Err::NoSys);
+    }
+
+    Ok(0)
 }
 
 pub fn sys_clock_nanosleep_time64(
@@ -237,12 +310,6 @@ pub fn sys_getitimer(_which: u32, _curr_value: u32) -> Result<u32, Err> {
 
 pub fn sys_getpgid(_pid: u32) -> Result<u32, Err> {
     let msg = b"sys_getpgid not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_getpid() -> Result<u32, Err> {
-    let msg = b"sys_getpid not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }
@@ -1216,12 +1283,6 @@ pub fn sys_splice(
     Err(Err::NoSys)
 }
 
-pub fn sys_statfs64(_path: u32, _buf: u32) -> Result<u32, Err> {
-    let msg = b"sys_statfs64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 pub fn sys_statmount(_dfd: u32, _filename: u32, _buffer: u32, _bufsize: u32) -> Result<u32, Err> {
     let msg = b"sys_statmount not implemented";
     host_log(msg.as_ptr(), msg.len());
@@ -1363,12 +1424,6 @@ pub fn sys_umask(_mask: u32) -> Result<u32, Err> {
 
 pub fn sys_uname(_buf: u32) -> Result<u32, Err> {
     let msg = b"sys_uname not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_unlinkat(_dfd: u32, _pathname: u32, _flag: u32) -> Result<u32, Err> {
-    let msg = b"sys_unlinkat not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }

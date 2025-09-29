@@ -571,3 +571,41 @@ unsafe extern "C" fn store_address_misaligned_dispatch() -> ! {
 unsafe extern "C" fn store_access_fault_dispatch() -> ! {
     kpanic!("Store access fault trap - not implemented");
 }
+
+/// Copy data from kernel memory to user memory
+/// Returns the number of bytes copied, or 0 if the copy failed
+/// This function checks that the destination is in user memory (below 0xC0000000)
+pub fn copy_to_user(dst: *mut u8, src: *const u8, len: usize) -> usize {
+    // Check if the destination pointer is in user memory
+    if (dst as usize) >= 0xC0000000 {
+        kprint!(
+            "copy_to_user: destination pointer 0x{:x} is in kernel memory",
+            dst as usize
+        );
+        return 0;
+    }
+
+    // Check if the source pointer is valid
+    if src.is_null() {
+        kprint!("copy_to_user: source pointer is null");
+        return 0;
+    }
+
+    // Check if the length is reasonable
+    if len == 0 {
+        return 0;
+    }
+
+    // Check if the destination range is in user memory
+    if (dst as usize) + len > 0xC0000000 {
+        kprint!("copy_to_user: destination range extends into kernel memory");
+        return 0;
+    }
+
+    // Perform the copy
+    unsafe {
+        core::ptr::copy_nonoverlapping(src, dst, len);
+    }
+
+    len
+}

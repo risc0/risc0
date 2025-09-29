@@ -1,14 +1,17 @@
+use no_std_strings::{str_format, str256};
+
 use crate::{
     constants::*,
     host_calls::{host_log, host_terminate, host_write},
     kernel::print,
     linux_abi::Err,
     p9::{
-        P9Response, Qid, RattachMessage, RclunkMessage, ReadableMessage, RgetattrMessage,
-        RlcreateMessage, RlopenMessage, RmkdirMessage, RmknodMessage, RreadMessage,
-        RreaddirMessage, RversionMessage, RwalkMessage, RwriteMessage, TattachMessage,
-        TlcreateMessage, TlopenMessage, TmkdirMessage, TmknodMessage, TreadMessage,
-        TreaddirMessage, TversionMessage, TwriteMessage, constants::*,
+        P9Response, P9SetattrMask, Qid, RattachMessage, RclunkMessage, ReadableMessage,
+        RgetattrMessage, RlcreateMessage, RlopenMessage, RmkdirMessage, RmknodMessage,
+        RreadMessage, RreaddirMessage, RremoveMessage, RsetattrMessage, RunlinkatMessage,
+        RversionMessage, RwalkMessage, RwriteMessage, TattachMessage, TlcreateMessage,
+        TlopenMessage, TmkdirMessage, TmknodMessage, TreadMessage, TreaddirMessage, TremoveMessage,
+        TsetattrMessage, TunlinkatMessage, TversionMessage, TwriteMessage, constants::*,
     },
 };
 
@@ -22,8 +25,9 @@ use alloc::string::ToString;
 use alloc::vec;
 #[cfg(target_arch = "riscv32")]
 use alloc::vec::Vec;
+#[cfg(target_arch = "riscv32")]
+use core::str;
 
-use no_std_strings::{str_format, str256};
 // Filesystem-related syscalls
 
 // fcntl constants
@@ -146,6 +150,228 @@ pub fn get_p9_enabled() -> bool {
     unsafe { P9_ENABLED }
 }
 
+pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
+    if !get_p9_enabled() {
+        let msg = b"sys_unlinkat: p9 is not enabled";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+
+    // Read the pathname from user space
+    let filename = unsafe { core::slice::from_raw_parts(pathname as *const u8, 256) };
+    let null_pos = filename
+        .iter()
+        .position(|&b| b == 0)
+        .unwrap_or(filename.len());
+    let filename = &filename[..null_pos];
+    let filename_str = match str::from_utf8(filename) {
+        Ok(s) => s,
+        Err(_) => {
+            kprint!("sys_unlinkat: invalid UTF-8 filename");
+            return Err(Err::NoSys);
+        }
+    };
+
+    kprint!(
+        "sys_unlinkat: dfd={}, filename='{}', flag={}",
+        dfd,
+        filename_str,
+        flag
+    );
+
+    let starting_fid = get_starting_fid(dfd, filename_str)?;
+    let mut wnames = normalize_path(filename_str);
+    // remove the last element of the vector (the file/directory to unlink)
+    let last_wname = wnames.pop().unwrap();
+    let walk_result = do_walk(starting_fid, 0xFFFF_FFFE, wnames);
+    match walk_result {
+        Ok((ret_code, _)) => {
+            if ret_code != 0 {
+                kprint!(
+                    "sys_unlinkat: failed to walk to parent directory of {}: {}",
+                    filename_str,
+                    ret_code
+                );
+                return Ok(ret_code);
+            }
+
+            // First try Tunlinkat
+            let tunlinkat = TunlinkatMessage::new(0, 0xFFFF_FFFE, last_wname.to_string(), flag);
+            match tunlinkat.send_tunlinkat() {
+                Ok(bytes_written) => {
+                    kprint!("sys_unlinkat: sent {} bytes for Tunlinkat", bytes_written);
+                }
+                Err(e) => {
+                    kprint!("sys_unlinkat: error sending Tunlinkat: {:?}", e);
+                    return Err(Err::NoSys);
+                }
+            }
+
+            match RunlinkatMessage::read_response() {
+                P9Response::Success(runlinkat) => {
+                    kprint!("sys_unlinkat: runlinkat = {:?}", runlinkat);
+                    Ok(0)
+                }
+                P9Response::Error(rlerror) => {
+                    kprint!(
+                        "sys_unlinkat: received Rlerror for Runlinkat: tag={}, ecode={}",
+                        rlerror.tag,
+                        rlerror.ecode
+                    );
+
+                    // Check if the error is ENOTSUPP (not supported)
+                    // ENOTSUPP is typically error code 95 in Linux
+                    if rlerror.ecode == 95 {
+                        kprint!("sys_unlinkat: Tunlinkat not supported, falling back to Tremove");
+
+                        // Fall back to Tremove: walk to the file to get its fid
+                        let file_walk_result =
+                            do_walk(0xFFFF_FFFE, 0xFFFF_FFFD, vec![last_wname.to_string()]);
+                        match file_walk_result {
+                            Ok((file_ret_code, _)) => {
+                                if file_ret_code != 0 {
+                                    kprint!(
+                                        "sys_unlinkat: failed to walk to file {}: {}",
+                                        last_wname,
+                                        file_ret_code
+                                    );
+                                    return Ok(file_ret_code);
+                                }
+
+                                // Now use Tremove with the file fid
+                                let tremove = TremoveMessage::new(0, 0xFFFF_FFFD);
+                                match tremove.send_tremove() {
+                                    Ok(bytes_written) => {
+                                        kprint!(
+                                            "sys_unlinkat: sent {} bytes for Tremove",
+                                            bytes_written
+                                        );
+                                    }
+                                    Err(e) => {
+                                        kprint!("sys_unlinkat: error sending Tremove: {:?}", e);
+                                        return Err(Err::NoSys);
+                                    }
+                                }
+
+                                match RremoveMessage::read_response() {
+                                    P9Response::Success(rremove) => {
+                                        kprint!("sys_unlinkat: rremove = {:?}", rremove);
+                                        Ok(0)
+                                    }
+                                    P9Response::Error(rlerror2) => {
+                                        kprint!(
+                                            "sys_unlinkat: received Rlerror for Rremove: tag={}, ecode={}",
+                                            rlerror2.tag,
+                                            rlerror2.ecode
+                                        );
+                                        Ok(-(rlerror2.ecode as i32) as u32)
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                kprint!(
+                                    "sys_unlinkat: error walking to file {}: {:?}",
+                                    last_wname,
+                                    e.as_errno()
+                                );
+                                Err(e)
+                            }
+                        }
+                    } else {
+                        // Other error, return it
+                        Ok(-(rlerror.ecode as i32) as u32)
+                    }
+                }
+            }
+        }
+        Err(e) => {
+            kprint!(
+                "sys_unlinkat: error walking to parent directory of {}: {:?}",
+                filename_str,
+                e.as_errno()
+            );
+            Err(e)
+        }
+    }
+}
+
+// Statfs64 structure matching the Linux kernel definition
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+struct Statfs64 {
+    f_type: u32,       // Filesystem type
+    f_bsize: u32,      // Block size
+    f_blocks: u64,     // Total blocks
+    f_bfree: u64,      // Free blocks
+    f_bavail: u64,     // Available blocks
+    f_files: u64,      // Total inodes
+    f_ffree: u64,      // Free inodes
+    f_fsid: u64,       // Filesystem ID (as u64 for simplicity)
+    f_namelen: u32,    // Maximum filename length
+    f_frsize: u32,     // Fragment size
+    f_flags: u32,      // Mount flags
+    f_spare: [u32; 4], // Spare fields
+}
+
+pub fn sys_statfs64(path: u32, sz: u32, buf: u32) -> Result<u32, Err> {
+    if !get_p9_enabled() {
+        let msg = b"sys_statfs64: p9 is not enabled";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+
+    kprint!("sys_statfs64: path={}, sz={}, buf={}", path, sz, buf);
+
+    // Validate the size parameter
+    if sz != core::mem::size_of::<Statfs64>() as u32 {
+        kprint!(
+            "sys_statfs64: invalid size parameter: expected {}, got {}",
+            core::mem::size_of::<Statfs64>(),
+            sz
+        );
+        return Err(Err::NoSys);
+    }
+
+    // Create statfs64 structure with the specified f_type
+    let statfs = Statfs64 {
+        f_type: 0x01021994,         // 9P filesystem type as requested
+        f_bsize: 4096,              // 4KB block size (typical for 9P)
+        f_blocks: 1000000,          // Total blocks (placeholder)
+        f_bfree: 500000,            // Free blocks (placeholder)
+        f_bavail: 500000,           // Available blocks (placeholder)
+        f_files: 10000,             // Total inodes (placeholder)
+        f_ffree: 5000,              // Free inodes (placeholder)
+        f_fsid: 0x1234567890ABCDEF, // Filesystem ID (placeholder)
+        f_namelen: 255,             // Maximum filename length
+        f_frsize: 4096,             // Fragment size (same as block size)
+        f_flags: 0,                 // No special mount flags
+        f_spare: [0; 4],            // Spare fields
+    };
+
+    // Write the statfs64 structure to user memory using copy_to_user
+    let statfs_bytes = unsafe {
+        core::slice::from_raw_parts(
+            &statfs as *const Statfs64 as *const u8,
+            core::mem::size_of::<Statfs64>(),
+        )
+    };
+    let bytes_copied = crate::kernel::copy_to_user(
+        buf as *mut u8,
+        statfs_bytes.as_ptr(),
+        core::mem::size_of::<Statfs64>(),
+    );
+    if bytes_copied == 0 {
+        kprint!("sys_statfs64: failed to copy statfs64 structure to user memory");
+        return Err(Err::NoSys);
+    }
+
+    kprint!(
+        "sys_statfs64: wrote statfs64 structure with f_type=0x{:x}",
+        statfs.f_type
+    );
+    Ok(0)
+}
+
 pub fn init_fs() {
     set_fd(0, 0xFFFF_FFFE);
     set_fd(1, 0xFFFF_FFFE);
@@ -194,8 +420,11 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
             P9Response::Success(rread) => {
                 let user_ptr = _buf as *mut u8;
                 let data = rread.data;
-                unsafe {
-                    core::ptr::copy_nonoverlapping(data.as_ptr(), user_ptr, rread.count as usize);
+                let bytes_copied =
+                    crate::kernel::copy_to_user(user_ptr, data.as_ptr(), rread.count as usize);
+                if bytes_copied == 0 {
+                    kprint!("sys_read: failed to copy data to user memory");
+                    return Err(Err::NoSys);
                 }
                 let mut updated_entry = fd_entry;
                 updated_entry.cursor += rread.count as u64;
@@ -457,10 +686,104 @@ pub fn sys_fchmod(_fd: u32, _mode: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-pub fn sys_fchmodat(_dfd: u32, _filename: u32, _mode: u32, _flag: u32) -> Result<u32, Err> {
-    let msg = b"sys_fchmodat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+pub fn sys_fchmodat(dfd: u32, filename: u32, mode: u32, flag: u32) -> Result<u32, Err> {
+    if !get_p9_enabled() {
+        let msg = b"sys_fchmodat: p9 is not enabled";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+
+    // Read the filename from user space
+    let filename_buf = unsafe { core::slice::from_raw_parts(filename as *const u8, 256) };
+    let null_pos = filename_buf
+        .iter()
+        .position(|&b| b == 0)
+        .unwrap_or(filename_buf.len());
+    let filename_slice = &filename_buf[..null_pos];
+    let filename_str = match str::from_utf8(filename_slice) {
+        Ok(s) => s,
+        Err(_) => {
+            kprint!("sys_fchmodat: invalid UTF-8 filename");
+            return Err(Err::NoSys);
+        }
+    };
+
+    kprint!(
+        "sys_fchmodat: dfd={}, filename='{}', mode={}, flag={}",
+        dfd,
+        filename_str,
+        mode,
+        flag
+    );
+
+    let starting_fid = get_starting_fid(dfd, filename_str)?;
+    let wnames = normalize_path(filename_str);
+    let walk_result = do_walk(starting_fid, 0xFFFF_FFFE, wnames);
+    match walk_result {
+        Ok((ret_code, _)) => {
+            if ret_code != 0 {
+                kprint!(
+                    "sys_fchmodat: failed to walk to file {}: {}",
+                    filename_str,
+                    ret_code
+                );
+                return Ok(ret_code);
+            }
+
+            // Create Tsetattr message for chmod operation
+            // We only want to set the mode, so we use the Mode valid flag
+            let valid = P9SetattrMask::Mode as u32;
+
+            // For chmod, we don't want to change other attributes, so we use default values
+            // and only set the mode
+            let tsetattr = TsetattrMessage::new(
+                0,           // tag
+                0xFFFF_FFFE, // fid (the file we walked to)
+                valid,       // valid mask (only Mode)
+                mode,        // mode (the new permissions)
+                0,           // uid (not changing)
+                0,           // gid (not changing)
+                0,           // size (not changing)
+                0,           // atime_sec (not changing)
+                0,           // atime_nsec (not changing)
+                0,           // mtime_sec (not changing)
+                0,           // mtime_nsec (not changing)
+            );
+
+            match tsetattr.send_tsetattr() {
+                Ok(bytes_written) => {
+                    kprint!("sys_fchmodat: sent {} bytes for Tsetattr", bytes_written);
+                }
+                Err(e) => {
+                    kprint!("sys_fchmodat: error sending Tsetattr: {:?}", e);
+                    return Err(Err::NoSys);
+                }
+            }
+
+            match RsetattrMessage::read_response() {
+                P9Response::Success(rsetattr) => {
+                    kprint!("sys_fchmodat: rsetattr = {:?}", rsetattr);
+                    Ok(0)
+                }
+                P9Response::Error(rlerror) => {
+                    kprint!(
+                        "sys_fchmodat: received Rlerror for Rsetattr: tag={}, ecode={}",
+                        rlerror.tag,
+                        rlerror.ecode
+                    );
+                    Ok(-(rlerror.ecode as i32) as u32)
+                }
+            }
+        }
+        Err(e) => {
+            kprint!(
+                "sys_fchmodat: error walking to file {}: {:?}",
+                filename_str,
+                e.as_errno()
+            );
+            Err(e)
+        }
+    }
 }
 
 pub fn sys_fchmodat2(_dfd: u32, _filename: u32, _mode: u32, _flag: u32) -> Result<u32, Err> {
@@ -475,16 +798,105 @@ pub fn sys_fchown(_fd: u32, _user: u32, _group: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-pub fn sys_fchownat(
-    _dfd: u32,
-    _filename: u32,
-    _user: u32,
-    _group: u32,
-    _flag: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_fchownat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -> Result<u32, Err> {
+    if !get_p9_enabled() {
+        let msg = b"sys_fchownat: p9 is not enabled";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+
+    // Read the filename from user space
+    let filename_buf = unsafe { core::slice::from_raw_parts(filename as *const u8, 256) };
+    let null_pos = filename_buf
+        .iter()
+        .position(|&b| b == 0)
+        .unwrap_or(filename_buf.len());
+    let filename_slice = &filename_buf[..null_pos];
+    let filename_str = match str::from_utf8(filename_slice) {
+        Ok(s) => s,
+        Err(_) => {
+            kprint!("sys_fchownat: invalid UTF-8 filename");
+            return Err(Err::NoSys);
+        }
+    };
+
+    kprint!(
+        "sys_fchownat: dfd={}, filename='{}', user={}, group={}, flag={}",
+        dfd,
+        filename_str,
+        user,
+        group,
+        flag
+    );
+
+    let starting_fid = get_starting_fid(dfd, filename_str)?;
+    let wnames = normalize_path(filename_str);
+    let walk_result = do_walk(starting_fid, 0xFFFF_FFFE, wnames);
+    match walk_result {
+        Ok((ret_code, _)) => {
+            if ret_code != 0 {
+                kprint!(
+                    "sys_fchownat: failed to walk to file {}: {}",
+                    filename_str,
+                    ret_code
+                );
+                return Ok(ret_code);
+            }
+
+            // Create Tsetattr message for chown operation
+            // We only want to set UID and GID, so we use the appropriate valid flags
+            let valid = P9SetattrMask::Uid as u32 | P9SetattrMask::Gid as u32;
+
+            // For chown, we don't want to change other attributes, so we use default values
+            // and only set the UID and GID
+            let tsetattr = TsetattrMessage::new(
+                0,           // tag
+                0xFFFF_FFFE, // fid (the file we walked to)
+                valid,       // valid mask (only UID and GID)
+                0,           // mode (not changing)
+                user,        // uid
+                group,       // gid
+                0,           // size (not changing)
+                0,           // atime_sec (not changing)
+                0,           // atime_nsec (not changing)
+                0,           // mtime_sec (not changing)
+                0,           // mtime_nsec (not changing)
+            );
+
+            match tsetattr.send_tsetattr() {
+                Ok(bytes_written) => {
+                    kprint!("sys_fchownat: sent {} bytes for Tsetattr", bytes_written);
+                }
+                Err(e) => {
+                    kprint!("sys_fchownat: error sending Tsetattr: {:?}", e);
+                    return Err(Err::NoSys);
+                }
+            }
+
+            match RsetattrMessage::read_response() {
+                P9Response::Success(rsetattr) => {
+                    kprint!("sys_fchownat: rsetattr = {:?}", rsetattr);
+                    Ok(0)
+                }
+                P9Response::Error(rlerror) => {
+                    kprint!(
+                        "sys_fchownat: received Rlerror for Rsetattr: tag={}, ecode={}",
+                        rlerror.tag,
+                        rlerror.ecode
+                    );
+                    Ok(-(rlerror.ecode as i32) as u32)
+                }
+            }
+        }
+        Err(e) => {
+            kprint!(
+                "sys_fchownat: error walking to file {}: {:?}",
+                filename_str,
+                e.as_errno()
+            );
+            Err(e)
+        }
+    }
 }
 
 pub fn sys_fdatasync(_fd: u32) -> Result<u32, Err> {
@@ -529,10 +941,67 @@ pub fn sys_fremovexattr(_fd: u32, _name: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-pub fn sys_ftruncate64(_fd: u32, _length: u32) -> Result<u32, Err> {
-    let msg = b"sys_ftruncate64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+pub fn sys_ftruncate64(fd: u32, length: u32) -> Result<u32, Err> {
+    if !get_p9_enabled() {
+        let msg = b"sys_ftruncate64: p9 is not enabled";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+
+    kprint!("sys_ftruncate64: fd={}, length={}", fd, length);
+
+    // Get the file descriptor entry
+    let fd_entry = get_fd(fd);
+    if fd_entry.fid == 0 {
+        kprint!("sys_ftruncate64: invalid file descriptor {}", fd);
+        return Err(Err::Inval);
+    }
+
+    // Create Tsetattr message for truncate operation
+    // We only want to set the size, so we use the Size valid flag
+    let valid = P9SetattrMask::Size as u32;
+    let new_size = length as u64;
+
+    // For ftruncate, we don't want to change other attributes, so we use default values
+    // and only set the size
+    let tsetattr = TsetattrMessage::new(
+        0,            // tag
+        fd_entry.fid, // fid (the file we want to truncate)
+        valid,        // valid mask (only Size)
+        0,            // mode (not changing)
+        0,            // uid (not changing)
+        0,            // gid (not changing)
+        new_size,     // size (the new file size)
+        0,            // atime_sec (not changing)
+        0,            // atime_nsec (not changing)
+        0,            // mtime_sec (not changing)
+        0,            // mtime_nsec (not changing)
+    );
+
+    match tsetattr.send_tsetattr() {
+        Ok(bytes_written) => {
+            kprint!("sys_ftruncate64: sent {} bytes for Tsetattr", bytes_written);
+        }
+        Err(e) => {
+            kprint!("sys_ftruncate64: error sending Tsetattr: {:?}", e);
+            return Err(Err::NoSys);
+        }
+    }
+
+    match RsetattrMessage::read_response() {
+        P9Response::Success(rsetattr) => {
+            kprint!("sys_ftruncate64: rsetattr = {:?}", rsetattr);
+            Ok(0)
+        }
+        P9Response::Error(rlerror) => {
+            kprint!(
+                "sys_ftruncate64: received Rlerror for Rsetattr: tag={}, ecode={}",
+                rlerror.tag,
+                rlerror.ecode
+            );
+            Ok(-(rlerror.ecode as i32) as u32)
+        }
+    }
 }
 
 pub fn sys_fsync(_fd: u32) -> Result<u32, Err> {
@@ -658,7 +1127,7 @@ pub fn sys_llseek(
             return Err(Err::Inval);
         }
     };
-    
+
     updated_entry.cursor = new_cursor;
     update_fd(_fd, updated_entry);
     let result_ptr = result as *mut u64;
@@ -1294,8 +1763,21 @@ fn do_walk(
 /// Split a path into directory and filename components
 /// also supports relative paths
 fn split_path(path: &str) -> (String, String) {
-    let split: Vec<String> = path.split("/").map(|s| s.to_string()).collect();
-    (split[0].to_string(), split[1].to_string())
+    // Find the last slash in the path
+    if let Some(pos) = path.rfind('/') {
+        let dir = if pos == 0 {
+            // Path is like "/foo" or "/"
+            "/".to_string()
+        } else {
+            // Path is like "/foo/bar" or "foo/bar"
+            path[..pos].to_string()
+        };
+        let filename = path[pos + 1..].to_string();
+        (dir, filename)
+    } else {
+        // No slash found, so it's a relative filename in current directory
+        (".".to_string(), path.to_string())
+    }
 }
 
 pub fn sys_openat(_dfd: u32, _filename: u32, _flags: u32, _mode: u32) -> Result<u32, Err> {
@@ -1618,10 +2100,21 @@ pub fn sys_statx(
                     // Convert 9P RgetattrMessage to Linux statx structure
                     let statx = convert_rgetattr_to_statx(&rgetattr);
 
-                    // Write the statx structure to the user buffer
-                    unsafe {
-                        let statx_ptr = _statxbuf as *mut Statx;
-                        *statx_ptr = statx;
+                    // Write the statx structure to the user buffer using copy_to_user
+                    let statx_bytes = unsafe {
+                        core::slice::from_raw_parts(
+                            &statx as *const Statx as *const u8,
+                            core::mem::size_of::<Statx>(),
+                        )
+                    };
+                    let bytes_copied = crate::kernel::copy_to_user(
+                        _statxbuf as *mut u8,
+                        statx_bytes.as_ptr(),
+                        core::mem::size_of::<Statx>(),
+                    );
+                    if bytes_copied == 0 {
+                        kprint!("sys_statx: failed to copy statx structure to user memory");
+                        return Err(Err::NoSys);
                     }
 
                     kprint!("sys_statx: successfully filled statx buffer");
