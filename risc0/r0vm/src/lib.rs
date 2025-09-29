@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 mod actors;
 mod api;
@@ -21,10 +22,9 @@ use clap::{Args, Parser, ValueEnum};
 use risc0_circuit_rv32im::execute::Segment;
 use risc0_zkvm::{
     ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
-    compute_image_id, get_prover_server,
+    compute_image_id, compute_kernel_id, get_prover_server,
 };
-
-use self::actors::protocol::TaskKind;
+use tracing_subscriber::EnvFilter;
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -78,6 +78,10 @@ struct Cli {
     #[arg(long)]
     id: bool,
 
+    /// Compute the kernel image ID for the specified binary.
+    #[arg(long, conflicts_with = "id")]
+    kernel_id: bool,
+
     #[arg(long)]
     with_debugger: bool,
 
@@ -105,6 +109,10 @@ struct Mode {
     #[arg(long)]
     rpc: bool,
 
+    /// Connect to given actor allocator RPC port and print status as JSON
+    #[arg(long)]
+    actor_status: Option<String>,
+
     #[arg(long)]
     port: Option<u16>,
 
@@ -119,14 +127,6 @@ struct Mode {
     /// Prove a pre-recorded segment.
     #[arg(long)]
     segment: Option<PathBuf>,
-
-    /// Start the manager.
-    #[arg(long)]
-    manager: bool,
-
-    /// Start a worker.
-    #[arg(long, value_enum, value_delimiter(','))]
-    worker: Vec<TaskKind>,
 
     #[arg(long)]
     config: Option<PathBuf>,
@@ -153,19 +153,22 @@ enum ReceiptKind {
 pub fn main() {
     let args = Cli::parse();
 
-    if args.mode.manager || !args.mode.worker.is_empty() || args.mode.config.is_some() {
-        self::actors::async_main(&args).unwrap();
+    if args.mode.config.is_some() {
+        self::actors::async_main(args.mode.config).unwrap();
         return;
     }
-
-    tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-        .init();
 
     if args.mode.rpc {
         self::actors::rpc_main(args.num_gpus).unwrap();
         return;
     }
+
+    if let Some(host) = args.mode.actor_status {
+        self::actors::status_main(host).unwrap();
+        return;
+    }
+
+    init_logging();
 
     if args.num_gpus.is_some_and(|v| v != 1) {
         eprintln!("num_gpus > 1 or 0 for current mode unsupported.");
@@ -175,6 +178,12 @@ pub fn main() {
     if args.id {
         let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();
         let image_id = compute_image_id(&blob).unwrap();
+        println!("{image_id}");
+        return;
+    }
+    if args.kernel_id {
+        let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();
+        let image_id = compute_kernel_id(&blob).unwrap();
         println!("{image_id}");
         return;
     }
@@ -274,4 +283,10 @@ fn run_server(port: u16) {
     let addr = format!("127.0.0.1:{port}");
     let server = ApiServer::new_tcp(addr);
     server.run().unwrap()
+}
+
+fn init_logging() {
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
 }

@@ -1,0 +1,39 @@
+load("//bazel/helpers:po2.bzl", "make_po2")
+
+make_po2(
+    name = "data_witgen_po2s",
+    ext = "cpp",
+    func = "data_witgen",
+    platform = "cpu",
+)
+
+make_po2(
+    name = "accum_witgen_po2s",
+    ext = "cpp",
+    func = "accum_witgen",
+    platform = "cpu",
+)
+
+make_po2(
+    name = "eval_check_po2s",
+    ext = "cpp",
+    func = "eval_check",
+    platform = "cpu",
+)
+
+cc_library(
+    name = "cpu",
+    srcs = glob(["*.cpp"]) + [
+        ":accum_witgen_po2s",
+        ":data_witgen_po2s",
+        ":eval_check_po2s",
+    ],
+    hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core",
+        "//hal",
+        "//rv32im/circuit",
+        "//zkp",
+    ],
+)

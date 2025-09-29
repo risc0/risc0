@@ -32,8 +32,6 @@ members = [
   "smartcore-ml",
   "voting-machine",
   "voting-machine/core",
-  "waldo",
-  "waldo/core",
   "wasm",
   "wordle",
   "wordle/core",

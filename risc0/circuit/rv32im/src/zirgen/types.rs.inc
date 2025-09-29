@@ -1434,12 +1434,27 @@ impl risc0_zkp::layout::Component for Misc2MiscOutputArm3Layout {
         Ok(())
     }
 }
+pub struct OpJALRLayout {
+    pub lsb: &'static NondetRegLayout,
+    pub half: &'static NondetU16RegLayout,
+}
+impl risc0_zkp::layout::Component for OpJALRLayout {
+    fn ty_name(&self) -> &'static str {
+        "OpJALRLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("lsb", self.lsb)?;
+        v.visit_component("half", self.half)?;
+        Ok(())
+    }
+}
 pub struct Misc2MiscOutputArm4Layout {
+    pub _super: &'static OpJALRLayout,
     pub _extra0: &'static ArgU16Layout,
     pub _extra1: &'static ArgU16Layout,
     pub _extra2: &'static ArgU16Layout,
     pub _extra3: &'static ArgU16Layout,
-    pub _extra4: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for Misc2MiscOutputArm4Layout {
     fn ty_name(&self) -> &'static str {
@@ -1447,11 +1462,11 @@ impl risc0_zkp::layout::Component for Misc2MiscOutputArm4Layout {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
         v.visit_component("_extra0", self._extra0)?;
         v.visit_component("_extra1", self._extra1)?;
         v.visit_component("_extra2", self._extra2)?;
         v.visit_component("_extra3", self._extra3)?;
-        v.visit_component("_extra4", self._extra4)?;
         Ok(())
     }
 }
@@ -3306,29 +3321,138 @@ impl risc0_zkp::layout::Component for Control0_SuperArm1Layout {
         Ok(())
     }
 }
-pub struct ControlUserECALLLayout {
-    pub safe_mode: &'static NondetRegLayout,
-    pub pc_addr: &'static AddrDecomposeBitsLayout,
-    pub load_inst: &'static MemoryReadLayout,
-    pub new_pc_addr: &'static MemoryReadLayout,
-    pub _0: &'static MemoryWriteLayout,
+pub struct ControlUserEcallOrFence_SuperArm0_SuperLayout {
+    pub new_pc: &'static NormalizeU32Layout,
 }
-impl risc0_zkp::layout::Component for ControlUserECALLLayout {
+impl risc0_zkp::layout::Component for ControlUserEcallOrFence_SuperArm0_SuperLayout {
     fn ty_name(&self) -> &'static str {
-        "ControlUserECALLLayout"
+        "ControlUserEcallOrFence_SuperArm0_SuperLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("safe_mode", self.safe_mode)?;
-        v.visit_component("pc_addr", self.pc_addr)?;
-        v.visit_component("load_inst", self.load_inst)?;
+        v.visit_component("new_pc", self.new_pc)?;
+        Ok(())
+    }
+}
+pub struct ControlUserEcallOrFence_SuperArm0Layout {
+    pub _super: &'static ControlUserEcallOrFence_SuperArm0_SuperLayout,
+    pub _extra0: &'static MemoryArgLayout,
+    pub _extra1: &'static MemoryArgLayout,
+    pub _extra2: &'static MemoryArgLayout,
+    pub _extra3: &'static MemoryArgLayout,
+    pub _extra4: &'static CycleArgLayout,
+    pub _extra5: &'static CycleArgLayout,
+}
+impl risc0_zkp::layout::Component for ControlUserEcallOrFence_SuperArm0Layout {
+    fn ty_name(&self) -> &'static str {
+        "ControlUserEcallOrFence_SuperArm0Layout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
+        v.visit_component("_extra0", self._extra0)?;
+        v.visit_component("_extra1", self._extra1)?;
+        v.visit_component("_extra2", self._extra2)?;
+        v.visit_component("_extra3", self._extra3)?;
+        v.visit_component("_extra4", self._extra4)?;
+        v.visit_component("_extra5", self._extra5)?;
+        Ok(())
+    }
+}
+pub struct ControlUserEcallOrFence_SuperArm1_SuperLayout {
+    pub new_pc_addr: &'static MemoryReadLayout,
+    pub _0: &'static MemoryWriteLayout,
+}
+impl risc0_zkp::layout::Component for ControlUserEcallOrFence_SuperArm1_SuperLayout {
+    fn ty_name(&self) -> &'static str {
+        "ControlUserEcallOrFence_SuperArm1_SuperLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("new_pc_addr", self.new_pc_addr)?;
         v.visit_component("_0", self._0)?;
         Ok(())
     }
 }
+pub struct ControlUserEcallOrFence_SuperArm1Layout {
+    pub _super: &'static ControlUserEcallOrFence_SuperArm1_SuperLayout,
+    pub _extra0: &'static ArgU16Layout,
+    pub _extra1: &'static ArgU16Layout,
+}
+impl risc0_zkp::layout::Component for ControlUserEcallOrFence_SuperArm1Layout {
+    fn ty_name(&self) -> &'static str {
+        "ControlUserEcallOrFence_SuperArm1Layout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
+        v.visit_component("_extra0", self._extra0)?;
+        v.visit_component("_extra1", self._extra1)?;
+        Ok(())
+    }
+}
+pub struct ControlUserEcallOrFence_SuperLayout {
+    pub arm0: &'static ControlUserEcallOrFence_SuperArm0Layout,
+    pub arm1: &'static ControlUserEcallOrFence_SuperArm1Layout,
+}
+impl risc0_zkp::layout::Component for ControlUserEcallOrFence_SuperLayout {
+    fn ty_name(&self) -> &'static str {
+        "ControlUserEcallOrFence_SuperLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("arm0", self.arm0)?;
+        v.visit_component("arm1", self.arm1)?;
+        Ok(())
+    }
+}
+pub type ArgU16Layout2LayoutArray = [&'static ArgU16Layout; 2];
+pub struct _Arguments_ControlUserEcallOrFence_SuperLayout {
+    pub arg_u16: &'static ArgU16Layout2LayoutArray,
+    pub memory_arg: &'static MemoryArgLayout4LayoutArray,
+    pub cycle_arg: &'static CycleArgLayout2LayoutArray,
+}
+impl risc0_zkp::layout::Component for _Arguments_ControlUserEcallOrFence_SuperLayout {
+    fn ty_name(&self) -> &'static str {
+        "_Arguments_ControlUserEcallOrFence_SuperLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("arg_u16", self.arg_u16)?;
+        v.visit_component("memory_arg", self.memory_arg)?;
+        v.visit_component("cycle_arg", self.cycle_arg)?;
+        Ok(())
+    }
+}
+pub struct ControlUserEcallOrFenceLayout {
+    pub _super: &'static ControlUserEcallOrFence_SuperLayout,
+    pub safe_mode: &'static NondetRegLayout,
+    pub pc_addr: &'static AddrDecomposeBitsLayout,
+    pub load_inst: &'static MemoryReadLayout,
+    pub is_fence: &'static NondetRegLayout,
+    pub _arguments_control_user_ecall_or_fence__super:
+        &'static _Arguments_ControlUserEcallOrFence_SuperLayout,
+}
+impl risc0_zkp::layout::Component for ControlUserEcallOrFenceLayout {
+    fn ty_name(&self) -> &'static str {
+        "ControlUserEcallOrFenceLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
+        v.visit_component("safe_mode", self.safe_mode)?;
+        v.visit_component("pc_addr", self.pc_addr)?;
+        v.visit_component("load_inst", self.load_inst)?;
+        v.visit_component("is_fence", self.is_fence)?;
+        v.visit_component(
+            "_arguments_control_user_ecall_or_fence__super",
+            self._arguments_control_user_ecall_or_fence__super,
+        )?;
+        Ok(())
+    }
+}
 pub struct Control0_SuperArm2Layout {
-    pub _super: &'static ControlUserECALLLayout,
+    pub _super: &'static ControlUserEcallOrFenceLayout,
     pub _extra0: &'static MemoryArgLayout,
     pub _extra1: &'static MemoryArgLayout,
     pub _extra2: &'static MemoryArgLayout,
@@ -3356,8 +3480,8 @@ pub struct Control0_SuperArm2Layout {
     pub _extra24: &'static ArgU16Layout,
     pub _extra25: &'static ArgU16Layout,
     pub _extra26: &'static ArgU16Layout,
-    pub _extra27: &'static ArgU16Layout,
-    pub _extra28: &'static ArgU16Layout,
+    pub _extra27: &'static ArgU8Layout,
+    pub _extra28: &'static ArgU8Layout,
     pub _extra29: &'static ArgU8Layout,
     pub _extra30: &'static ArgU8Layout,
     pub _extra31: &'static ArgU8Layout,
@@ -3372,8 +3496,6 @@ pub struct Control0_SuperArm2Layout {
     pub _extra40: &'static ArgU8Layout,
     pub _extra41: &'static ArgU8Layout,
     pub _extra42: &'static ArgU8Layout,
-    pub _extra43: &'static ArgU8Layout,
-    pub _extra44: &'static ArgU8Layout,
 }
 impl risc0_zkp::layout::Component for Control0_SuperArm2Layout {
     fn ty_name(&self) -> &'static str {
@@ -3425,8 +3547,6 @@ impl risc0_zkp::layout::Component for Control0_SuperArm2Layout {
         v.visit_component("_extra40", self._extra40)?;
         v.visit_component("_extra41", self._extra41)?;
         v.visit_component("_extra42", self._extra42)?;
-        v.visit_component("_extra43", self._extra43)?;
-        v.visit_component("_extra44", self._extra44)?;
         Ok(())
     }
 }
@@ -7256,7 +7376,6 @@ impl risc0_zkp::layout::Component for BigInt0StateArm0Layout {
         Ok(())
     }
 }
-pub type ArgU16Layout2LayoutArray = [&'static ArgU16Layout; 2];
 pub struct _Arguments_BigIntStepBytesLayout {
     pub arg_u16: &'static ArgU16Layout2LayoutArray,
     pub arg_u8: &'static ArgU8Layout16LayoutArray,

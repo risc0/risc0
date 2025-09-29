@@ -1,26 +1,25 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{
     collections::{BTreeMap, HashSet},
     io::Cursor,
     str::from_utf8,
-    sync::Mutex,
 };
 
 use anyhow::Result;
-use bytes::Bytes;
 use risc0_binfmt::{ExitCode, MemoryImage, PovwJobId, PovwLogId, Program, ProgramBinary};
 use risc0_circuit_rv32im::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
@@ -28,7 +27,7 @@ use risc0_zkp::digest;
 use risc0_zkvm_methods::{
     BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, RAND2_ELF,
     SLICE_IO_ELF, STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
-    multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
+    multi_test::MultiTestSpec,
 };
 use risc0_zkvm_platform::{
     WORD_SIZE, fileno,
@@ -187,63 +186,6 @@ fn poseidon2_short() {
 #[test_log::test]
 fn poseidon2_long() {
     multi_test(MultiTestSpec::Poseidon2Long);
-}
-
-#[test_log::test]
-fn host_syscall() {
-    let expected: Vec<Bytes> = vec![
-        "".into(),
-        "H".into(),
-        "He".into(),
-        "Hel".into(),
-        "Hell".into(),
-        "Hello".into(),
-    ];
-    let input = MultiTestSpec::Syscall {
-        count: expected.len() as u32 - 1,
-    };
-    let actual: Mutex<Vec<Bytes>> = Vec::new().into();
-    let env = ExecutorEnv::builder()
-        .write(&input)
-        .unwrap()
-        .io_callback(SYS_MULTI_TEST, |buf| {
-            let mut actual = actual.lock().unwrap();
-            actual.push(buf);
-            Ok(expected[actual.len()].clone())
-        })
-        .build()
-        .unwrap();
-    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-    assert_eq!(*actual.lock().unwrap(), expected[..expected.len() - 1]);
-}
-
-#[test_log::test]
-fn host_syscall_words() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::SyscallWords)
-        .unwrap()
-        .io_callback(SYS_MULTI_TEST_WORDS, Ok)
-        .build()
-        .unwrap();
-    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-}
-
-// Make sure panics in the callback get propagated correctly.
-#[test_log::test]
-#[should_panic(expected = "I am panicking from here!")]
-fn host_syscall_callback_panic() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::Syscall { count: 5 })
-        .unwrap()
-        .io_callback(SYS_MULTI_TEST, |_| {
-            panic!("I am panicking from here!");
-        })
-        .build()
-        .unwrap();
-    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
 #[test_log::test]

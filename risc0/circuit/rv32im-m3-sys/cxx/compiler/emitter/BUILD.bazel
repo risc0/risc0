@@ -1,0 +1,22 @@
+cc_library(
+    name = "emitterlib",
+    srcs = ["Emitter.cpp"],
+    hdrs = ["Emitter.h"],
+    deps = [
+        "@zirgen//zirgen/Main:Utils",
+        "@zirgen//zirgen/circuit/verify:lib",
+        "@zirgen//zirgen/compiler/codegen",
+        "@zirgen//zirgen/compiler/edsl",
+        "@zirgen//zirgen/dsl/passes",
+    ],
+)
+
+cc_binary(
+    name = "emitter",
+    srcs = ["main.cpp"],
+    deps = [
+        ":emitterlib",
+        "//compiler/extractor",
+        "//rv32im/circuit",
+    ],
+)
