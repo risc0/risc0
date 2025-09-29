@@ -180,7 +180,7 @@ impl WorkerActor {
 }
 
 impl Actor for WorkerActor {
-    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> Result<()> {
+    async fn on_start(&mut self, actor_ref: ActorRef<Self>) {
         self.factory
             .tell(GetTasks {
                 worker_id: self.id,
@@ -189,12 +189,6 @@ impl Actor for WorkerActor {
             })
             .await
             .unwrap();
-
-        Ok(())
-    }
-
-    async fn on_stop(&mut self) -> Result<()> {
-        Ok(())
     }
 }
 
@@ -821,18 +815,13 @@ pub(crate) enum WorkerRouterActor {
 }
 
 impl Actor for WorkerRouterActor {
-    async fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> anyhow::Result<()> {
-        Ok(())
-    }
-
-    async fn on_stop(&mut self) -> anyhow::Result<()> {
+    async fn on_stop(&mut self) {
         match self {
             Self::Local(_) => {}
             Self::Remote(r) => {
                 let _ = r.stop_gracefully().await;
             }
         }
-        Ok(())
     }
 }
 

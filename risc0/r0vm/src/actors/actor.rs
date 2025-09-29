@@ -22,15 +22,12 @@ use tokio::sync::{broadcast, mpsc, oneshot};
 
 /// An object that will run on a task receiving messages
 pub trait Actor: Sized + Send + 'static {
-    fn on_start(
-        &mut self,
-        _actor_ref: ActorRef<Self>,
-    ) -> impl Future<Output = anyhow::Result<()>> + Send {
-        async move { Ok(()) }
+    fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> impl Future<Output = ()> + Send {
+        async {}
     }
 
-    fn on_stop(&mut self) -> impl Future<Output = anyhow::Result<()>> + Send {
-        async move { Ok(()) }
+    fn on_stop(&mut self) -> impl Future<Output = ()> + Send {
+        async {}
     }
 }
 
@@ -115,15 +112,13 @@ async fn actor_task_main<ActorT: Actor>(
     actor_ref: ActorRef<ActorT>,
     mut recv: mpsc::Receiver<HandleMessageFn<ActorT>>,
 ) {
-    // XXX nowhere for the error to go
-    actor.on_start(actor_ref).await.unwrap();
+    actor.on_start(actor_ref).await;
 
     while let Some(handle_msg) = recv.recv().await {
         handle_msg(&mut actor).await
     }
 
-    // XXX nowhere for the error to go
-    actor.on_stop().await.unwrap();
+    actor.on_stop().await;
 }
 
 impl<ActorT: Actor> ActorTask<ActorT> {
@@ -477,14 +472,12 @@ mod tests {
     }
 
     impl Actor for TestActor {
-        async fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> anyhow::Result<()> {
+        async fn on_start(&mut self, _actor_ref: ActorRef<Self>) {
             self.started.store(true, Ordering::Release);
-            Ok(())
         }
 
-        async fn on_stop(&mut self) -> anyhow::Result<()> {
+        async fn on_stop(&mut self) {
             self.stopped.store(true, Ordering::Release);
-            Ok(())
         }
     }
 

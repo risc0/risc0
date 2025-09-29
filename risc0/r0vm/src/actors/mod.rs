@@ -1065,23 +1065,20 @@ impl<ActorT> RemoteActor<ActorT> {
 }
 
 impl<ActorT: Send + 'static> Actor for RemoteActor<ActorT> {
-    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> anyhow::Result<()> {
+    async fn on_start(&mut self, actor_ref: ActorRef<Self>) {
         if let Some(rpc_death_recv) = self.rpc_death_recv.take() {
             tokio::task::spawn(async move {
                 let _ = rpc_death_recv.await;
                 actor_ref.kill();
             });
         }
-        Ok(())
     }
 
-    async fn on_stop(&mut self) -> anyhow::Result<()> {
-        self.rpc_sender.shutdown().await?;
+    async fn on_stop(&mut self) {
+        let _ = self.rpc_sender.shutdown().await;
         if let Some(handle) = &self.rpc_receiver_handle {
             handle.abort();
         }
-
-        Ok(())
     }
 }
 

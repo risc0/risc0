@@ -42,11 +42,7 @@ enum InnerJobActor {
     ExecuteOnly(ActorRef<execute_only::JobActor>),
 }
 
-impl Actor for JobActor {
-    async fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> anyhow::Result<()> {
-        Ok(())
-    }
-}
+impl Actor for JobActor {}
 
 trait JobActorNew {
     fn new(

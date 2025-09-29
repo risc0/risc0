@@ -139,12 +139,11 @@ impl JobActor {
 }
 
 impl Actor for JobActor {
-    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> anyhow::Result<()> {
+    async fn on_start(&mut self, actor_ref: ActorRef<Self>) {
         self.self_ref = Some(actor_ref.downgrade());
-        Ok(())
     }
 
-    async fn on_stop(&mut self) -> anyhow::Result<()> {
+    async fn on_stop(&mut self) {
         let _ = self
             .factory
             .tell(DropJob {
@@ -163,7 +162,6 @@ impl Actor for JobActor {
         }
 
         self.tracer.end();
-        Ok(())
     }
 }
 

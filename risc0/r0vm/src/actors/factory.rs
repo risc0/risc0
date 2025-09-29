@@ -65,19 +65,13 @@ impl FactoryActor {
 }
 
 impl Actor for FactoryActor {
-    async fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> anyhow::Result<()> {
-        // start timer
-        Ok(())
-    }
-
-    async fn on_stop(&mut self) -> anyhow::Result<()> {
+    async fn on_stop(&mut self) {
         for worker in self.worker_actors.values() {
             let _ = worker.stop_gracefully().await;
         }
 
         // stop timer
         tracing::info!("Factory: on_stop");
-        Ok(())
     }
 }
 
