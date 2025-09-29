@@ -146,6 +146,10 @@ impl Program {
         self.image.insert(SUSPEND_PC_ADDR.0, self.entry);
         self.image.insert(SUSPEND_MODE_ADDR.0, 1);
     }
+    /// Write a word to the image
+    pub fn write_u32(&mut self, address: u32, value: u32) {
+        self.image.insert(address, value);
+    }
 }
 
 const MAGIC: &[u8] = b"R0BF"; // RISC Zero Binary Format

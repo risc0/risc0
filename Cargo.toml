@@ -30,6 +30,7 @@ members = [
   "risc0/zkvm/platform",
   "risc0/zkvm/receipts",
   "rzup",
+  "tools/elf-to-bin",
   "tools/gpu-guard",
   "tools/gpu-guard/macros",
   "tools/hotbench",
