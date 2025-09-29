@@ -52,6 +52,15 @@ const MERKLE_TREE_DEPTH: usize = MEMORY_PAGES.ilog2() as usize;
 /// Start address for kernel-mode memory.
 pub const KERNEL_START_ADDR: ByteAddr = ByteAddr(0xc000_0000);
 
+/// Program header table address (stored in memory)
+pub const USER_PHDR_ADDR: ByteAddr = ByteAddr(0xffff_3000);
+
+/// Program header count address (stored in memory)
+pub const USER_PHDR_NUM_ADDR: ByteAddr = ByteAddr(0xffff_3008);
+
+const SUSPEND_PC_ADDR: ByteAddr = ByteAddr(0xffff_0210);
+const SUSPEND_MODE_ADDR: ByteAddr = ByteAddr(0xffff_0214);
+
 lazy_static! {
     static ref ZERO_CACHE: ZeroCache = ZeroCache::new();
 }
@@ -176,6 +185,12 @@ impl MemoryImage {
     /// Creates the initial memory state for a kernel-mode `program`.
     pub fn new_kernel(mut program: Program) -> Self {
         program.prepare_kernel(None);
+        // Store program header information in memory
+        image.insert(USER_PHDR_ADDR.0, program.phdr_addr);
+        image.insert(USER_PHDR_NUM_ADDR.0, program.phnum);
+
+        image.insert(SUSPEND_PC_ADDR.0, program.entry);
+        image.insert(SUSPEND_MODE_ADDR.0, 1);
         Self::new(program.image)
     }
 
@@ -184,6 +199,16 @@ impl MemoryImage {
     pub fn with_kernel(mut user: Program, mut kernel: Program) -> Self {
         user.prepare_user();
         kernel.prepare_kernel(Some(&mut user));
+
+        user.image.insert(USER_START_ADDR.0, user.entry);
+
+        // Store program header information in memory
+        user.image.insert(USER_PHDR_ADDR.0, user.phdr_addr);
+        user.image.insert(USER_PHDR_NUM_ADDR.0, user.phnum);
+
+        kernel.image.append(&mut user.image);
+        kernel.image.insert(SUSPEND_PC_ADDR.0, kernel.entry);
+        kernel.image.insert(SUSPEND_MODE_ADDR.0, 1);
         Self::new(kernel.image)
     }
 
@@ -587,6 +612,8 @@ mod tests {
         let program = Program {
             entry,
             image: BTreeMap::from([(entry, 0x1234b337)]),
+            phdr_addr: 0,
+            phnum: 0,
         };
         let mut image = MemoryImage::new_kernel(program);
         assert_eq!(
