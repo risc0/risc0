@@ -1,0 +1,18 @@
+common --announce_rc
+common --enable_platform_specific_config
+
+build -c opt
+
+build --cxxopt=-std=c++17
+build --host_cxxopt=-std=c++17
+build --incompatible_enable_cc_toolchain_resolution
+build --flag_alias=cuda_archs=@rules_cuda//cuda:archs
+build --flag_alias=cuda_compiler=@rules_cuda//cuda:compiler
+
+build:dbg -c dbg
+build:dbg --strategy=ObjcLink=local
+build:dbg --strategy=CppLink=local
+
+build:macos --@rules_cuda//cuda:enable=false
+
+try-import %workspace%/.bazelrc.local

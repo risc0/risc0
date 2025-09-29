@@ -1,0 +1,14 @@
+load("//bazel/helpers:po2.bzl", "make_po2")
+
+cc_library(
+    name = "dual",
+    srcs = glob(["*.cpp"]),
+    hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core",
+        "//hal",
+        "//rv32im/circuit",
+        "//zkp",
+    ],
+)

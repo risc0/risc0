@@ -1,0 +1,11 @@
+cc_binary(
+    name = "benchmark",
+    srcs = glob(["*.cpp"]),
+    data = [
+        "//rv32im/test:benchmark_kernel",
+    ],
+    deps = [
+        "//hal/pick",
+        "//prove",
+    ],
+)

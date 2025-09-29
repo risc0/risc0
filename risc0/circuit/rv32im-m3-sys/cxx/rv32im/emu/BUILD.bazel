@@ -1,0 +1,28 @@
+load("//bazel/helpers:po2.bzl", "make_po2")
+
+make_po2(
+    name = "verify_po2s",
+    ext = "cpp",
+    func = "verify",
+    platform = "cpu",
+)
+
+cc_library(
+    name = "emu",
+    srcs = glob(["*.cpp"]) + [
+        "expand.inc",
+        ":verify_po2s",
+    ],
+    hdrs = glob(["*.h"]),
+    defines = ["RV32IM_BIGINT"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core",
+        "//hal",
+        "//rv32im/base",
+        "//rv32im/circuit",
+        "//zkp",
+        "@unordered_dense",
+        "@zirgen//zirgen/Dialect/BigInt/Bytecode",
+    ],
+)

@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{
     net::{Ipv4Addr, SocketAddrV4},
@@ -23,7 +24,7 @@ use risc0_zkvm_methods::FIB_ELF;
 
 use super::{
     App,
-    config::{AppConfig, ExecutorConfig, ManagerConfig, StorageConfig, VERSION},
+    config::{AllocatorConfig, AppConfig, ExecutorConfig, ManagerConfig, StorageConfig, VERSION},
     protocol::{JobStatus, ProofRequest, ShrinkWrapKind, ShrinkWrapRequest, TaskKind},
 };
 
@@ -58,28 +59,89 @@ async fn do_test(remote: bool) {
     let storage_root = assert_fs::TempDir::new().unwrap();
 
     let po2 = Some(21);
-    let addr = remote.then_some(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into());
-    let mut app = App::new(AppConfig {
-        version: VERSION,
-        api: None,
-        manager: Some(ManagerConfig { listen: addr }),
-        executor: Some(ExecutorConfig {
-            manager: None,
-            count: 1,
-        }),
-        prover: Some(vec![crate::actors::config::ProverConfig {
-            manager: None,
-            count: Some(100),
-            subscribe: task_kinds.clone(),
-            simulate: Some(PROFILE_RTX_5090),
-        }]),
-        storage: Some(StorageConfig {
-            path: storage_root.to_path_buf(),
-        }),
-        telemetry: None,
-    })
-    .await
-    .unwrap();
+    let mut apps = if remote {
+        let app1 = App::new(
+            AppConfig {
+                version: VERSION,
+                api: None,
+                manager: Some(ManagerConfig {
+                    allocator: None,
+                    listen: None,
+                }),
+                allocator: Some(AllocatorConfig {
+                    listen: Some(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into()),
+                }),
+                executor: None,
+                prover: None,
+                storage: Some(StorageConfig {
+                    path: storage_root.to_path_buf(),
+                }),
+                telemetry: None,
+            },
+            /*enable_logging=*/ false,
+        )
+        .await
+        .unwrap();
+        let alloc_addr = app1.allocator_addr().unwrap();
+
+        let app2 = App::new(
+            AppConfig {
+                version: VERSION,
+                api: None,
+                manager: None,
+                allocator: None,
+                executor: Some(ExecutorConfig {
+                    allocator: Some(alloc_addr),
+                    count: 1,
+                }),
+                prover: Some(vec![crate::actors::config::ProverConfig {
+                    allocator: Some(alloc_addr),
+                    count: Some(100),
+                    subscribe: task_kinds.clone(),
+                    simulate: Some(PROFILE_RTX_5090),
+                }]),
+                storage: Some(StorageConfig {
+                    path: storage_root.to_path_buf(),
+                }),
+                telemetry: None,
+            },
+            /*enable_logging=*/ false,
+        )
+        .await
+        .unwrap();
+        vec![app1, app2]
+    } else {
+        vec![
+            App::new(
+                AppConfig {
+                    version: VERSION,
+                    api: None,
+                    manager: Some(ManagerConfig {
+                        allocator: None,
+                        listen: None,
+                    }),
+                    allocator: Some(AllocatorConfig { listen: None }),
+                    executor: Some(ExecutorConfig {
+                        allocator: None,
+                        count: 1,
+                    }),
+                    prover: Some(vec![crate::actors::config::ProverConfig {
+                        allocator: None,
+                        count: Some(100),
+                        subscribe: task_kinds.clone(),
+                        simulate: Some(PROFILE_RTX_5090),
+                    }]),
+                    storage: Some(StorageConfig {
+                        path: storage_root.to_path_buf(),
+                    }),
+                    telemetry: None,
+                },
+                /*enable_logging=*/ false,
+            )
+            .await
+            .unwrap(),
+        ]
+    };
 
     const ITERATIONS: u32 = 300000;
 
@@ -91,7 +153,7 @@ async fn do_test(remote: bool) {
         execute_only: false,
     };
 
-    let info = app.proof_request(request).await.unwrap();
+    let info = apps[0].proof_request(request).await.unwrap();
 
     tracing::info!("xproof_request result = {info:#?}");
 
@@ -102,11 +164,13 @@ async fn do_test(remote: bool) {
         receipt: (*result.receipt.unwrap()).clone(),
     };
 
-    let info = app.shrink_wrap_request(request).await.unwrap();
+    let info = apps[0].shrink_wrap_request(request).await.unwrap();
 
     tracing::info!("shrink_wrap_request result = {info:#?}");
 
-    app.stop().await;
+    for app in apps {
+        app.stop().await;
+    }
 }
 
 #[test_log::test(tokio::test(flavor = "multi_thread"))]

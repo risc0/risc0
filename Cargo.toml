@@ -13,6 +13,8 @@ members = [
   "risc0/circuit/recursion",
   "risc0/circuit/recursion-sys",
   "risc0/circuit/rv32im",
+  "risc0/circuit/rv32im-m3",
+  "risc0/circuit/rv32im-m3-sys",
   "risc0/circuit/rv32im-sys",
   "risc0/core",
   "risc0/groth16",
@@ -29,6 +31,8 @@ members = [
   "risc0/zkvm/platform",
   "risc0/zkvm/receipts",
   "rzup",
+  "tools/gpu-guard",
+  "tools/gpu-guard/macros",
   "tools/hotbench",
   "website/doc-test/main",
   "xtask",
@@ -38,12 +42,13 @@ exclude = ["tools/crates-validator"]
 [workspace.package]
 version = "3.0.0"
 edition = "2024"
-license = "Apache-2.0"
+license = "Apache-2.0 OR MIT"
 homepage = "https://risczero.com/"
 repository = "https://github.com/risc0/risc0/"
 
 [workspace.dependencies]
 bonsai-sdk = { version = "1.4.2", default-features = false, path = "bonsai/sdk" }
+gpu-guard = { path = "tools/gpu-guard" }
 hotbench = { path = "tools/hotbench" }
 metal = "0.29"
 risc0-bigint2 = { version = "1.4.11", default-features = false, path = "risc0/bigint2" }
@@ -56,6 +61,8 @@ risc0-circuit-recursion = { version = "4.0.3", default-features = false, path = 
 risc0-circuit-recursion-sys = { version = "4.0.2", default-features = false, path = "risc0/circuit/recursion-sys" }
 risc0-circuit-rv32im = { version = "4.0.3", default-features = false, path = "risc0/circuit/rv32im" }
 risc0-circuit-rv32im-sys = { version = "4.0.2", default-features = false, path = "risc0/circuit/rv32im-sys" }
+risc0-circuit-rv32im-m3 = { version = "0.0.0", default-features = false, path = "risc0/circuit/rv32im-m3" }
+risc0-circuit-rv32im-m3-sys = { version = "0.0.0", default-features = false, path = "risc0/circuit/rv32im-m3-sys" }
 risc0-core = { version = "3.0.1", default-features = false, path = "risc0/core" }
 risc0-groth16 = { version = "3.0.3", default-features = false, path = "risc0/groth16" }
 risc0-groth16-sys = { version = "0.2.0", default-features = false, path = "risc0/groth16-sys" }

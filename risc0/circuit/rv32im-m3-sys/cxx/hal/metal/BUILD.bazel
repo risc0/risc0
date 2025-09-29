@@ -1,0 +1,15 @@
+objc_library(
+    name = "metal",
+    srcs = glob(["*.cpp"]),
+    sdk_frameworks = [
+        "Foundation",
+        "Metal",
+    ],
+    target_compatible_with = ["@platforms//os:macos"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core",
+        "//hal",
+        "@metal_cpp",
+    ],
+)

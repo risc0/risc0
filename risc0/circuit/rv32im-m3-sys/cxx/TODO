@@ -1,0 +1,21 @@
+System:
+
+Ecall
+Trap
+Read
+P2
+Mem Cycle Check
+Tables
+
+Framework:
+
+Support for U8/U16
+Actual kernels for addArguments
+Verify as polynomial compute
+Export to MLIR?  (Recursion / Picus / etc)
+
+End-to-end:
+
+CUDA Hal
+NTT / RS Expand
+Merkle tree

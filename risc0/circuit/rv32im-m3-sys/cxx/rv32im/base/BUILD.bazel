@@ -1,0 +1,23 @@
+filegroup(
+    name = "files",
+    srcs = glob([
+        "*.h",
+        "*.inc",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "base",
+    hdrs = glob([
+        "*.h",
+        "*.inc",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "platform",
+    hdrs = ["constants.h"],
+    visibility = ["//visibility:public"],
+)
