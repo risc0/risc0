@@ -2843,6 +2843,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4445909572dbd556c457c849c4ca58623d84b27c8fff1e74b0b4227d8b90d17b"
 
 [[package]]
+name = "elf-to-bin"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "clap 4.5.46",
+ "risc0-binfmt",
+]
+
+[[package]]
 name = "email_address"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"

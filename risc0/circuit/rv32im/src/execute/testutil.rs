@@ -218,7 +218,7 @@ impl Assembler {
 
         image.extend(self.data.iter());
 
-        Program::new_from_entry_and_image(entry, image)
+        Program::new_from_entry_and_image(entry, image, 0, 0) // FIXME
     }
 
     pub fn word(&mut self, addr: u32, word: u32) {

@@ -37,6 +37,12 @@ pub struct Program {
 
     /// The initial memory image
     pub(crate) image: BTreeMap<u32, u32>,
+
+    /// Program header table address (where phdrs are loaded in memory)
+    pub(crate) phdr_addr: u32,
+
+    /// Number of program headers
+    pub(crate) phnum: u32,
 }
 
 impl Program {
@@ -117,12 +123,56 @@ impl Program {
                 }
             }
         }
-        Ok(Program::new_from_entry_and_image(entry, image))
+
+        // Calculate Program Header table address (where phdrs are loaded in memory)
+        let mut phdr_addr = 0;
+        let phnum = segments.len() as u32;
+
+        // Find which segment contains the Program Header table and calculate its virtual address
+        for segment in segments.iter().filter(|x| x.p_type == elf::abi::PT_LOAD) {
+            let segment_offset: u32 = segment
+                .p_offset
+                .try_into()
+                .map_err(|err| anyhow!("segment offset is larger than 32 bits. {err}"))?;
+            let segment_vaddr: u32 = segment
+                .p_vaddr
+                .try_into()
+                .map_err(|err| anyhow!("segment vaddr is larger than 32 bits. {err}"))?;
+            let segment_filesz: u32 = segment
+                .p_filesz
+                .try_into()
+                .map_err(|err| anyhow!("segment filesz is larger than 32 bits. {err}"))?;
+
+            // Check if this segment contains the Program Header table
+            let phoff: u32 = elf
+                .ehdr
+                .e_phoff
+                .try_into()
+                .map_err(|err| anyhow!("e_phoff is larger than 32 bits. {err}"))?;
+            if segment_offset <= phoff && phoff < segment_offset + segment_filesz {
+                phdr_addr = phoff - segment_offset + segment_vaddr;
+                break;
+            }
+        }
+
+        Ok(Program::new_from_entry_and_image(
+            entry, image, phdr_addr, phnum,
+        ))
     }
 
     /// Create `Program` from given entry-point and image map
-    pub fn new_from_entry_and_image(entry: u32, image: BTreeMap<u32, u32>) -> Self {
-        Self { entry, image }
+    pub fn new_from_entry_and_image(
+        entry: u32,
+        image: BTreeMap<u32, u32>,
+        phdr_addr: u32,
+        phnum: u32,
+    ) -> Self {
+        Self {
+            entry,
+            image,
+            phdr_addr,
+            phnum,
+        }
     }
 
     /// The size of the image in a count of words
