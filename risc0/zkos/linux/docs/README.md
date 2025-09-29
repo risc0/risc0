@@ -13,6 +13,7 @@ cargo install --force --path risc0/cargo-risczero
 As we need a custom r0vm to run all this stuff
 
 # Features
+- (A)tomic, F&D (soft float), C-extension instruction emulation. C-extension not recommended as it'll trap like mad.
 - Linux static binary execution, with sbrk/mmap to allocate memory, write to stdout and stderr support (tested with MUSL) + correct auxv setup, but not much more system call support
 - In progress 9P file system
 
@@ -42,19 +43,21 @@ git submodule update --init --recursive
 ./configure
 cd env; patch -p1 < ../../patches/riscv-tests-env.patch; cd ..
 cd isa
-make XLEN=32 rv32ui rv32um rv32ua
+make XLEN=32 rv32ui rv32um rv32ud rv32uf rv32ua rv32uc
 cd ../../
 ```
 
 You can now take one of these binaries, such as rv32um-p-mulh, merge it with the kernel into a .bin
 
 ```
-target/debug/elf-to-bin --guest-elf riscv-tests/isa/rv32um-p-mulh  --kernel-elf risc0/zkos/linux/elfs/vmlinuz.elf --output rv32um-p-mulh.bin --RUST_BACKTRACE=1 RISC0_DEV_MODE=1 RUST_LOG=trace r0vm --elf rv32um-p-mulh.bin -- /bin/test 
+target/debug/elf-to-bin --guest-elf riscv-tests/isa/rv32um-p-mulh  --kernel-elf risc0/zkos/linux/elfs/vmlinuz.elf --output rv32um-p-mulh.bin
+
+RUST_BACKTRACE=1 RISC0_DEV_MODE=1 RUST_LOG=trace r0vm --elf rv32um-p-mulh.bin -- /bin/test 
 ```
 
 If the test passes you'll see sys_exit(0) in the debug log
 
-# rv32ima Buildroot with static binaries (not NOMMU)
+# rv32imafd Buildroot with static binaries (not NOMMU)
 
 Get buildroot 2025.05.1 from buildroot.org
 
@@ -68,9 +71,12 @@ Target options ->
    Target architecture variant -> pick Custom architecture
       Enable Integer Multiplication and Division (M)
       Enable Atomic Instructions (A)
+      Enable Single-precision Floating-point (F)
+      Enable Double-precision Floating-point (D)
+      Compressed instructions will work but not recommended as it'll trap like mad
    Target architecture size -> pick 32-bit
    Enable MMU-support
-   Target ABI -> ilp32
+   Target ABI -> ilp32d 
 
 Toolchain -->
     C library -> pick musl
@@ -91,7 +97,7 @@ make -j`nproc`
 
 Get busybox binary from your buildroot, buildroot-2025.05.1/output/target/bin/busybox
 
-A 'file' on it should say: "busybox: ELF 32-bit LSB executable, UCB RISC-V, soft-float ABI, version 1 (SYSV), statically linked, stripped"
+A 'file' on it should say: "busybox: ELF 32-bit LSB executable, UCB RISC-V, double-float ABI, version 1 (SYSV), statically linked, stripped"
 
 Copy it into your risc0 directory and
 
