@@ -18,7 +18,10 @@ use crate::atomic_emul::emulate_atomic_instruction;
 use crate::constants::*;
 use crate::host_calls::{host_argc, host_log, host_terminate};
 use crate::linux_abi::{handle_linux_syscall, start_linux_binary};
-
+use crate::softfloat::{
+    emulate_fp_instruction, emulate_fp_load_store, handle_float_csr_exception,
+    handle_float_csr_fcsr, handle_float_csr_frm, init_softfloat,
+};
 // Debug configuration - set to true to enable debug prints, false to disable
 pub const DEBUG_ENABLED: bool = false;
 pub const TRACE_ENABLED: bool = false;
@@ -149,12 +152,30 @@ unsafe fn emulate_csr_instruction(insn: u32, mepc: usize) -> ! {
         );
     }
 
-    kpanic!("Unsupported CSR address: {:#03x}", csr_addr);
+    // Handle floating point CSR operations
+    match csr_addr {
+        0x001 => {
+            handle_float_csr_exception(funct3, rs1, rd);
+        }
+        0x002 => {
+            handle_float_csr_frm(funct3, rs1, rd);
+        }
+        0x003 => {
+            handle_float_csr_fcsr(funct3, rs1, rd);
+        }
+        _ => {
+            kpanic!("Unsupported CSR address: {:#03x}", csr_addr);
+        }
+    }
+
     mret()
 }
 
 #[unsafe(no_mangle)]
 unsafe extern "C" fn kstart() -> ! {
+    // Initialize floating point registers to zero at startup
+    init_softfloat();
+
     debug_print_simple!("kstart");
     // args - get actual argc and argv from host
     let argc = host_argc();
@@ -243,6 +264,86 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
         opcode,
         funct7
     );
+    // Check for floating point operations (opcode 0x43) - R4-type instructions
+    if opcode == 0x43 {
+        /*let msg = str_format!(
+            str256,
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        print(&msg); */
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point operations (opcode 0x47) - R4-type instructions
+    if opcode == 0x47 {
+        /* let msg = str_format!(
+            str256,
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        print(&msg); */
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point operations (opcode 0x4b) - R4-type instructions
+    if opcode == 0x4b {
+        /* let msg = str_format!(
+            str256,
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        print(&msg); */
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point operations (opcode 0x4f) - R4-type instructions
+    if opcode == 0x4f {
+        debug_print!(
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point operations (opcode 0x53)
+    if opcode == 0x53 {
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point operations (opcode 0x63) - alternative encoding
+    if opcode == 0x63 {
+        trace_print!(
+            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+            instruction,
+            mepc
+        );
+        unsafe {
+            emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point load/store operations (opcode 0x07 = Load-FP, 0x27 = Store-FP)
+    if opcode == 0x07 || opcode == 0x27 {
+        unsafe {
+            emulate_fp_load_store(instruction, mepc);
+        }
+    }
+
     // Check for SYSTEM operations (opcode 0x73)
     if opcode == 0x73 {
         // Check if this is a privileged system instruction (funct3=000)

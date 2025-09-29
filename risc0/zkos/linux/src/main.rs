@@ -34,6 +34,7 @@ mod linux_abi_misc;
 mod linux_abi_privileged;
 mod linux_abi_sockets;
 mod p9;
+mod softfloat;
 
 // Set up the global allocator
 #[cfg(target_arch = "riscv32")]
