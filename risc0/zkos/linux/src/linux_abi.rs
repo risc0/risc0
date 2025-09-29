@@ -45,8 +45,8 @@ use crate::linux_abi_fs::{
     sys_llistxattr, sys_llseek, sys_lremovexattr, sys_lsetxattr, sys_mkdirat, sys_mknodat,
     sys_openat, sys_openat2, sys_pread64, sys_preadv, sys_preadv2, sys_pwrite64, sys_pwritev,
     sys_pwritev2, sys_read, sys_readahead, sys_readlinkat, sys_readv, sys_removexattr,
-    sys_removexattrat, sys_renameat2, sys_sendfile64, sys_setxattr, sys_setxattrat, sys_write,
-    sys_writev,
+    sys_removexattrat, sys_renameat2, sys_sendfile64, sys_setxattr, sys_setxattrat, sys_statfs64,
+    sys_unlinkat, sys_write, sys_writev,
 };
 
 // Import miscellaneous syscalls from the misc module
@@ -56,10 +56,10 @@ use crate::linux_abi_misc::{
     sys_epoll_pwait, sys_epoll_pwait2, sys_eventfd2, sys_execve, sys_execveat, sys_fsconfig,
     sys_fsmount, sys_fsopen, sys_fspick, sys_fstatfs64, sys_futex_requeue, sys_futex_time64,
     sys_futex_wait, sys_futex_waitv, sys_futex_wake, sys_get_mempolicy, sys_get_robust_list,
-    sys_getcpu, sys_getgroups, sys_getitimer, sys_getpgid, sys_getpid, sys_getppid,
-    sys_getpriority, sys_getrandom, sys_getresgid, sys_getresuid, sys_getrusage, sys_getsid,
-    sys_gettid, sys_inotify_add_watch, sys_inotify_init1, sys_inotify_rm_watch, sys_io_cancel,
-    sys_io_destroy, sys_io_pgetevents_time64, sys_io_setup, sys_io_submit, sys_io_uring_enter,
+    sys_getcpu, sys_getgroups, sys_getitimer, sys_getpgid, sys_getppid, sys_getpriority,
+    sys_getrandom, sys_getresgid, sys_getresuid, sys_getrusage, sys_getsid, sys_gettid,
+    sys_inotify_add_watch, sys_inotify_init1, sys_inotify_rm_watch, sys_io_cancel, sys_io_destroy,
+    sys_io_pgetevents_time64, sys_io_setup, sys_io_submit, sys_io_uring_enter,
     sys_io_uring_register, sys_io_uring_setup, sys_ioprio_get, sys_ioprio_set, sys_kcmp, sys_kill,
     sys_listmount, sys_lookup_dcookie, sys_lsm_get_self_attr, sys_lsm_list_modules,
     sys_lsm_set_self_attr, sys_madvise, sys_map_shadow_stack, sys_mbind, sys_membarrier,
@@ -83,12 +83,11 @@ use crate::linux_abi_misc::{
     sys_setdomainname, sys_setfsgid, sys_setfsuid, sys_setgid, sys_setgroups, sys_sethostname,
     sys_setitimer, sys_setpgid, sys_setpriority, sys_setregid, sys_setresgid, sys_setresuid,
     sys_setreuid, sys_setsid, sys_setuid, sys_shmat, sys_shmctl, sys_shmdt, sys_shmget,
-    sys_signalfd4, sys_splice, sys_statfs64, sys_statmount, sys_symlinkat, sys_sync,
-    sys_sync_file_range, sys_syncfs, sys_sysinfo, sys_syslog, sys_tee, sys_tgkill,
-    sys_timer_create, sys_timer_delete, sys_timer_getoverrun, sys_timer_gettime64,
-    sys_timer_settime64, sys_timerfd_create, sys_timerfd_gettime64, sys_timerfd_settime64,
-    sys_times, sys_truncate64, sys_umask, sys_uname, sys_unlinkat, sys_unshare, sys_userfaultfd,
-    sys_utimensat_time64, sys_vmsplice, sys_waitid,
+    sys_signalfd4, sys_splice, sys_statmount, sys_symlinkat, sys_sync, sys_sync_file_range,
+    sys_syncfs, sys_sysinfo, sys_syslog, sys_tee, sys_tgkill, sys_timer_create, sys_timer_delete,
+    sys_timer_getoverrun, sys_timer_gettime64, sys_timer_settime64, sys_timerfd_create,
+    sys_timerfd_gettime64, sys_timerfd_settime64, sys_times, sys_truncate64, sys_umask, sys_uname,
+    sys_unshare, sys_userfaultfd, sys_utimensat_time64, sys_vmsplice, sys_waitid,
 };
 
 static mut BRK: u32 = USER_HEAP_START_ADDR as u32;
@@ -1000,7 +999,7 @@ pub fn handle_linux_syscall() -> ! {
         SYS_SOCKET => syscall3(sys_socket),
         SYS_SOCKETPAIR => syscall4(sys_socketpair),
         SYS_SPLICE => syscall6(sys_splice),
-        SYS_STATFS64 => syscall2(sys_statfs64),
+        SYS_STATFS64 => syscall3(sys_statfs64),
         SYS_STATMOUNT => syscall4(sys_statmount),
         SYS_STATX => syscall5(sys_statx),
         SYS_SWAPOFF => syscall1(sys_swapoff),
@@ -1256,4 +1255,8 @@ fn sys_getgid() -> Result<u32, Err> {
 
 fn sys_getuid() -> Result<u32, Err> {
     Ok(0)
+}
+
+fn sys_getpid() -> Result<u32, Err> {
+    Ok(1)
 }
