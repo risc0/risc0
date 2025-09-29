@@ -325,7 +325,7 @@ $$
 = 31 + 64\cdot35=79
 $$
 
-The Prover sends evaluations of $f_3$ on powers of $28^8$ without Merklization; the Verifier can check for themselves that the evaluations for $f_3$ correspond to a constant polynomial.
+The Prover sends evaluations of $f_3$ on powers of $28^8$ without Merkleization; the Verifier can check for themselves that the evaluations for $f_3$ correspond to a constant polynomial.
 
 This completes the commit phase of the FRI protocol. In 3 rounds of folding, we've reduced a polynomial with 8 coefficients into a polynomial with 1 coefficient (i.e., a constant polynomial).
 

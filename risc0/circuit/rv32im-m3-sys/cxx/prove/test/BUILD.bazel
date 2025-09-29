@@ -1,0 +1,15 @@
+cc_test(
+    name = "test",
+    size = "large",
+    srcs = glob(["*.cpp"]),
+    data = [
+        "//rv32im/test:benchmark_kernel",
+    ],
+    deps = [
+        "//core/test:gtest_main",
+        "//hal/dual",
+        "//hal/pick",
+        "//prove",
+        "//verify",
+    ],
+)

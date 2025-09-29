@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use anyhow::Result;
 use derive_more::Debug;
@@ -158,8 +159,9 @@ pub enum InsnKind {
     Sh = 49, // major: 6, minor: 1
     Sw = 50, // major: 6, minor: 2
 
-    Eany = 56, // major: 7, minor: 0
-    Mret = 57, // major: 7, minor: 1
+    Eany = 56,  // major: 7, minor: 0
+    Mret = 57,  // major: 7, minor: 1
+    Fence = 58, // major: 7, minor: 2
 
     Invalid = 255,
 }
@@ -283,6 +285,8 @@ impl Emulator {
             // System instruction
             (0b1110011, 0b000, 0b0011000) => self.step_system(ctx, InsnKind::Mret, decoded),
             (0b1110011, 0b000, 0b0000000) => self.step_system(ctx, InsnKind::Eany, decoded),
+            // Fence instruction
+            (0b0001111, 0b000, _) => self.step_system(ctx, InsnKind::Fence, decoded),
             _ => Ok(ctx
                 .trap(Exception::IllegalInstruction(decoded.insn, line!()))?
                 .then_some(InsnKind::Invalid)),
@@ -568,6 +572,10 @@ impl Emulator {
                 _ => ctx.trap(Exception::IllegalInstruction(decoded.insn, 2)),
             },
             InsnKind::Mret => ctx.mret(),
+            InsnKind::Fence => {
+                ctx.set_pc(ctx.get_pc() + WORD_SIZE);
+                Ok(true)
+            }
             _ => unreachable!(),
         }?
         .then_some(kind))
@@ -657,5 +665,6 @@ pub fn disasm(kind: InsnKind, decoded: &DecodedInstruction) -> String {
             _ => "illegal eany".to_string(),
         },
         InsnKind::Mret => "mret".to_string(),
+        InsnKind::Fence => "fence".to_string(),
     }
 }

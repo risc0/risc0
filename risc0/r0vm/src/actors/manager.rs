@@ -1,22 +1,23 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf, time::Duration};
 
 use derive_more::From;
 use kameo::prelude::*;
-use risc0_zkvm::{Journal, Receipt};
+use risc0_zkvm::{Journal, Receipt, rpc::JobRequest};
 use tokio::task::JoinSet;
 use uuid::Uuid;
 
@@ -24,8 +25,9 @@ use super::{
     factory::FactoryActor,
     job::JobActor,
     protocol::{
-        JobId, JobInfo, JobRequestReply, JobStatus, JobStatusReply, JobStatusRequest, ProofRequest,
-        ProofResult, ShrinkWrapRequest, ShrinkWrapResult,
+        CreateJobReply, CreateJobRequest, JobId, JobInfo, JobRequestReply, JobStatus,
+        JobStatusReply, JobStatusRequest, ProofRequest, ProofResult, ShrinkWrapRequest,
+        ShrinkWrapResult, TaskError,
     },
 };
 
@@ -86,13 +88,20 @@ impl ManagerActor {
         JobInfo<ResultT>: TryFrom<JobStatusReply>,
         <JobInfo<ResultT> as TryFrom<JobStatusReply>>::Error: std::fmt::Debug,
         InactiveJobEntry: From<JobInfo<ResultT>>,
+        JobStatusReply: From<JobInfo<ResultT>>,
     {
         let job_id = JobId::new_v4();
         let actor_ref = actor_ref.clone();
         let job = kameo::spawn(JobActor::new(job_id, self.factory.clone()));
         self.jobs.insert(job_id, JobEntry::Active(job.clone()));
         self.join_set.spawn(async move {
-            let reply = job.ask(request).await.unwrap();
+            let reply = job.ask(request).await.unwrap_or_else(|error| {
+                JobInfo {
+                    status: JobStatus::<ResultT>::Failed(TaskError::Generic(error.to_string())),
+                    elapsed_time: Duration::MAX,
+                }
+                .into()
+            });
             actor_ref
                 .tell(JobDone::<ResultT> {
                     job_id,
@@ -137,6 +146,28 @@ impl ManagerActor {
         tokio::fs::write(journal_path, encoded).await?;
 
         Ok(())
+    }
+}
+
+impl Message<CreateJobRequest> for ManagerActor {
+    type Reply = CreateJobReply;
+
+    async fn handle(
+        &mut self,
+        msg: CreateJobRequest,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        let job_id = match msg.request {
+            JobRequest::Proof(request) => {
+                self.job_request::<_, ProofResult>(request, ctx.actor_ref(), None)
+                    .await
+            }
+            JobRequest::ShrinkWrap(request) => {
+                self.job_request::<_, ShrinkWrapResult>(request, ctx.actor_ref(), None)
+                    .await
+            }
+        };
+        CreateJobReply { job_id }
     }
 }
 
@@ -219,10 +250,12 @@ impl Message<JobStatusRequest> for ManagerActor {
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         match self.jobs.get(&msg.job_id) {
-            Some(JobEntry::Active(job)) => job
-                .ask(JobStatusRequest { job_id: msg.job_id })
-                .await
-                .unwrap(),
+            Some(JobEntry::Active(job)) => {
+                match job.ask(JobStatusRequest { job_id: msg.job_id }).await {
+                    Ok(status) => status,
+                    Err(_) => JobStatusReply::NotFound,
+                }
+            }
             Some(JobEntry::Inactive(inactive)) => inactive.clone().into(),
             None => JobStatusReply::NotFound,
         }

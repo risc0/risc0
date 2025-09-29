@@ -277,6 +277,8 @@ jobs:
         if: matrix.os == 'macOS'
       - name: test workspace
         run: ${{ matrix.test_command }} --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --exclude doc-test
+      - name: test risc0-r0vm (disable-dev-mode)
+        run: cargo test --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
       - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}-${{ matrix.partition }}
@@ -329,10 +331,6 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install risc0-groth16 $RISC0_GROTH16_VERSION
-      - name: test risc0-r0vm
-        run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE
-      - name: test risc0-r0vm (disable-dev-mode)
-        run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: ${{ matrix.test_command }} -p cargo-risczero -F experimental
       - name: run datasheet generator (smoke test)
         run: cargo run --locked -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift

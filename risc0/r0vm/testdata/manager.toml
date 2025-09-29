@@ -1,0 +1,19 @@
+# r0vm --manager --addr 0.0.0.0:9000 --worker executor
+
+version = 1
+
+[api]
+listen = "0.0.0.0:8000"
+
+[allocator]
+listen = "0.0.0.0:9000"
+
+[manager]
+
+[executor]
+count = 4
+
+[storage]
+path = "/mnt/storage/risc0"
+
+[telemetry]

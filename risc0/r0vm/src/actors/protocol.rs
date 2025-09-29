@@ -1,21 +1,22 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{ops::Range, sync::Arc};
+use std::{fmt, ops::Range, sync::Arc};
 
 use clap::ValueEnum;
-use derive_more::{Debug, TryInto};
+use derive_more::{Debug, From, TryInto};
 use kameo::{Reply, actor::ActorRef};
 use risc0_zkvm::{
     ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt,
@@ -23,7 +24,7 @@ use risc0_zkvm::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::job::JobActor;
+use super::{WorkerRouterActor, job::JobActor};
 
 pub use risc0_zkvm::rpc::{
     JobInfo, JobRequest, JobStatus, ProofRequest, ProofResult, Session, ShrinkWrapKind,
@@ -33,6 +34,34 @@ pub use risc0_zkvm::rpc::{
 pub(crate) type JobId = uuid::Uuid;
 pub(crate) type TaskId = u64;
 pub(crate) type WorkerId = uuid::Uuid;
+
+pub struct WorkerIdFmt(pub WorkerId);
+
+impl fmt::Display for WorkerIdFmt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if f.alternate() {
+            let worker_id = self.0.to_string();
+            let short_id = &worker_id[worker_id.len() - 5..];
+            write!(f, "WID-{short_id}")
+        } else {
+            write!(f, "WID-{}", &self.0)
+        }
+    }
+}
+
+/// This is an async message that should return immediately to the API.
+///
+/// The API is designed to have users poll for status, but the initial request
+/// must return immediately.
+#[derive(Serialize, Deserialize)]
+pub(crate) struct CreateJobRequest {
+    pub request: JobRequest,
+}
+
+#[derive(Reply, Serialize, Deserialize)]
+pub(crate) struct CreateJobReply {
+    pub job_id: JobId,
+}
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct JobStatusRequest {
@@ -45,15 +74,17 @@ pub(crate) struct JobRequestReply {
     pub status: JobStatusReply,
 }
 
-#[derive(Reply, Serialize, Deserialize, TryInto, Debug, Clone)]
+#[derive(Reply, Serialize, Deserialize, TryInto, Debug, Clone, From)]
 pub(crate) enum JobStatusReply {
     Proof(JobInfo<ProofResult>),
     ShrinkWrap(JobInfo<ShrinkWrapResult>),
     #[try_into(ignore)]
+    #[from(ignore)]
     NotFound,
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) enum TaskKind {
     Execute,
     ProveSegment,
@@ -65,13 +96,19 @@ pub(crate) enum TaskKind {
     ShrinkWrap,
 }
 
-#[derive(Clone, Copy, Hash, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct GlobalId {
     pub job_id: JobId,
     pub task_id: TaskId,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+impl fmt::Display for GlobalId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "TASK-{}:{}", &self.job_id, &self.task_id)
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct TaskHeader {
     pub global_id: GlobalId,
     pub task_kind: TaskKind,
@@ -145,8 +182,10 @@ pub mod factory {
     use super::*;
 
     #[derive(Clone, Serialize, Deserialize)]
-    pub(crate) struct GetTask {
+    pub(crate) struct GetTasks {
         pub worker_id: WorkerId,
+        #[serde(skip)]
+        pub worker: Option<ActorRef<WorkerRouterActor>>,
         pub kinds: Vec<TaskKind>,
     }
 
@@ -216,11 +255,14 @@ pub mod factory {
 
 pub mod worker {
     use super::*;
+    use crate::actors::allocator::{CpuCores, GpuTokens};
 
     #[derive(Clone, Reply, Serialize, Deserialize)]
     pub(crate) struct TaskMsg {
         pub header: TaskHeader,
         pub task: Task,
+        pub gpu_tokens: GpuTokens,
+        pub cores: CpuCores,
     }
 }
 

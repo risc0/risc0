@@ -421,12 +421,16 @@ struct Misc2MiscOutputArm3Layout {
   ArgU16Layout _extra3;
   ArgU16Layout _extra4;
 };
+struct OpJALRLayout {
+  NondetRegLayout lsb;
+  NondetU16RegLayout half;
+};
 struct Misc2MiscOutputArm4Layout {
+  OpJALRLayout _super;
   ArgU16Layout _extra0;
   ArgU16Layout _extra1;
   ArgU16Layout _extra2;
   ArgU16Layout _extra3;
-  ArgU16Layout _extra4;
 };
 struct Misc2MiscOutputArm5Layout {
   ArgU16Layout _extra0;
@@ -1034,15 +1038,47 @@ struct Control0_SuperArm1Layout {
   ArgU8Layout _extra30;
   ArgU8Layout _extra31;
 };
-struct ControlUserECALLLayout {
-  NondetRegLayout safeMode;
-  AddrDecomposeBitsLayout pcAddr;
-  MemoryReadLayout loadInst;
+struct ControlUserEcallOrFence_SuperArm0_SuperLayout {
+  NormalizeU32Layout newPc;
+};
+struct ControlUserEcallOrFence_SuperArm0Layout {
+  ControlUserEcallOrFence_SuperArm0_SuperLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  CycleArgLayout _extra4;
+  CycleArgLayout _extra5;
+};
+struct ControlUserEcallOrFence_SuperArm1_SuperLayout {
   MemoryReadLayout newPcAddr;
   MemoryWriteLayout _0;
 };
+struct ControlUserEcallOrFence_SuperArm1Layout {
+  ControlUserEcallOrFence_SuperArm1_SuperLayout _super;
+  ArgU16Layout _extra0;
+  ArgU16Layout _extra1;
+};
+struct ControlUserEcallOrFence_SuperLayout {
+  ControlUserEcallOrFence_SuperArm0Layout arm0;
+  ControlUserEcallOrFence_SuperArm1Layout arm1;
+};
+using ArgU16Layout2LayoutArray = std::array<ArgU16Layout, 2>;
+struct _Arguments_ControlUserEcallOrFence_SuperLayout {
+  ArgU16Layout2LayoutArray argU16;
+  MemoryArgLayout4LayoutArray memoryArg;
+  CycleArgLayout2LayoutArray cycleArg;
+};
+struct ControlUserEcallOrFenceLayout {
+  ControlUserEcallOrFence_SuperLayout _super;
+  NondetRegLayout safeMode;
+  AddrDecomposeBitsLayout pcAddr;
+  MemoryReadLayout loadInst;
+  NondetRegLayout isFence;
+  _Arguments_ControlUserEcallOrFence_SuperLayout _arguments_ControlUserEcallOrFence_Super;
+};
 struct Control0_SuperArm2Layout {
-  ControlUserECALLLayout _super;
+  ControlUserEcallOrFenceLayout _super;
   MemoryArgLayout _extra0;
   MemoryArgLayout _extra1;
   MemoryArgLayout _extra2;
@@ -1070,8 +1106,8 @@ struct Control0_SuperArm2Layout {
   ArgU16Layout _extra24;
   ArgU16Layout _extra25;
   ArgU16Layout _extra26;
-  ArgU16Layout _extra27;
-  ArgU16Layout _extra28;
+  ArgU8Layout _extra27;
+  ArgU8Layout _extra28;
   ArgU8Layout _extra29;
   ArgU8Layout _extra30;
   ArgU8Layout _extra31;
@@ -1086,8 +1122,6 @@ struct Control0_SuperArm2Layout {
   ArgU8Layout _extra40;
   ArgU8Layout _extra41;
   ArgU8Layout _extra42;
-  ArgU8Layout _extra43;
-  ArgU8Layout _extra44;
 };
 struct ControlMRETLayout {
   NondetRegLayout safeMode;
@@ -2515,7 +2549,6 @@ struct BigInt0StateArm0Layout {
   ArgU16Layout _extra32;
   ArgU16Layout _extra33;
 };
-using ArgU16Layout2LayoutArray = std::array<ArgU16Layout, 2>;
 struct _Arguments_BigIntStepBytesLayout {
   ArgU16Layout2LayoutArray argU16;
   ArgU8Layout16LayoutArray argU8;

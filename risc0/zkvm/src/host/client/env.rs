@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! This module defines the [ExecutorEnv] and [ExecutorEnvBuilder].
 
@@ -26,7 +27,6 @@ use std::{
 
 use anyhow::{Result, bail};
 use bytemuck::Pod;
-use bytes::Bytes;
 use risc0_binfmt::PovwJobId;
 use risc0_circuit_keccak::{KECCAK_PO2_RANGE, KeccakState};
 use risc0_zkp::core::digest::Digest;
@@ -34,14 +34,7 @@ use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 use tempfile::TempDir;
 
-use crate::{
-    AssumptionReceipt, TraceCallback,
-    host::client::{
-        posix_io::PosixIo,
-        slice_io::{SliceIo, SliceIoTable, slice_io_from_fn},
-    },
-    serde::to_vec,
-};
+use crate::{AssumptionReceipt, TraceCallback, host::client::posix_io::PosixIo, serde::to_vec};
 
 /// A builder pattern used to construct an [ExecutorEnv].
 #[derive(Default)]
@@ -106,7 +99,6 @@ pub struct ExecutorEnv<'a> {
     pub(crate) segment_limit_po2: Option<u32>,
     pub(crate) session_limit: Option<u64>,
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
-    pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
     pub(crate) assumptions: Rc<RefCell<AssumptionReceipts>>,
@@ -380,28 +372,6 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Add a posix-style file descriptor for writing.
     pub fn write_fd(&mut self, fd: u32, writer: impl Write + 'a) -> &mut Self {
         self.inner.posix_io.borrow_mut().with_write_fd(fd, writer);
-        self
-    }
-
-    /// Add a handler for simple I/O handling.
-    pub fn slice_io(&mut self, channel: &str, handler: impl SliceIo + 'a) -> &mut Self {
-        self.inner
-            .slice_io
-            .borrow_mut()
-            .with_handler(channel, handler);
-        self
-    }
-
-    /// Add a handler for simple I/O handling.
-    pub fn io_callback<C: AsRef<str>>(
-        &mut self,
-        channel: C,
-        callback: impl Fn(Bytes) -> Result<Bytes> + 'a,
-    ) -> &mut Self {
-        self.inner
-            .slice_io
-            .borrow_mut()
-            .with_handler(channel.as_ref(), slice_io_from_fn(callback));
         self
     }
 

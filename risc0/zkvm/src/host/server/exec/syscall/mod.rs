@@ -1,16 +1,17 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Handlers for two-way private I/O between host and guest.
 
@@ -24,7 +25,6 @@ mod panic;
 mod pipe;
 mod posix_io;
 mod random;
-mod slice_io;
 mod verify;
 mod verify2;
 
@@ -61,7 +61,7 @@ use crate::{
 use self::{
     args::SysArgs, cycle_count::SysCycleCount, getenv::SysGetenv, keccak::SysKeccak, log::SysLog,
     panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite, random::SysRandom,
-    slice_io::SysSliceIo, verify::SysVerify, verify2::SysVerify2,
+    verify::SysVerify, verify2::SysVerify2,
 };
 
 /// A host-side implementation of a system call.
@@ -147,7 +147,6 @@ impl<'a> SyscallTable<'a> {
 
     pub fn from_env(env: &ExecutorEnv<'a>) -> Self {
         let mut this = Self::new(env);
-
         this.with_syscall(SYS_ARGC, SysArgs(env.args.clone()))
             .with_syscall(SYS_ARGV, SysArgs(env.args.clone()))
             .with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
@@ -162,12 +161,6 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_VERIFY_INTEGRITY, SysVerify)
             .with_syscall(SYS_VERIFY_INTEGRITY2, SysVerify2)
             .with_syscall(SYS_WRITE, SysWrite);
-        for (syscall, handler) in env.slice_io.borrow().inner.iter() {
-            let handler = SysSliceIo::new(handler.clone());
-            this.inner
-                .insert(syscall.clone(), Rc::new(RefCell::new(handler)));
-        }
-
         this
     }
 

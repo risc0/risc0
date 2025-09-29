@@ -26,12 +26,12 @@
  * \section INITIALIZATION_SECTION Initialization
  *
  * Typically the tool's library that plugs into NVTX is indirectly 
- * loaded via enviromental properties that are platform specific. 
+ * loaded via environmental properties that are platform specific. 
  * For some platform or special cases, the user may be required 
- * to instead explicity initialize instead though.   This can also
+ * to explicitly initialize instead though.   This can also
  * be helpful to control when the API loads a tool's library instead
  * of what would typically be the first function call to emit info.
- * For these rare case, see \ref INITIALIZATION for additional information.
+ * For these rare cases, see \ref INITIALIZATION for additional information.
  *
  * \section MARKERS_AND_RANGES Markers and Ranges
  *
@@ -112,7 +112,7 @@
  * to enable filtering and sorting.  The category naming functions allow 
  * the application to associate a user friendly name with the integer 
  * category.  Support for domains have been added in NVTX_VERSION_2 to 
- * avoid collisions when domains are developed independantly. 
+ * avoid collisions when domains are developed independently. 
  *
  * \subsection RESOURCE_OBJECTS Resource Objects
  *
@@ -132,7 +132,7 @@
  * \subsection RESOURCE_NAMING_OS Resource Naming
  * 
  * Some operating system resources creation APIs do not support providing a user friendly 
- * name, such as some OS thread creation APIs.  This API support resource naming though 
+ * name, such as some OS thread creation APIs.  This API supports resource naming though 
  * both through resource objects and functions following the pattern 
  * nvtxName[RESOURCE_TYPE][A|W](identifier, name).  Resource objects introduced in NVTX_VERSION 2 
  * supersede the other functions with a more general method of assigning names to OS resources,

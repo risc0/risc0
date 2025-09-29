@@ -1,0 +1,43 @@
+[package]
+name = "ntt-cuda"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[features]
+# By default, compile with ADX extension if the host supports it.
+# Binary can be executed on systems similar to the host.
+default = []
+# Compile in portable mode, without ISA extensions.
+# Binary can be executed on all systems.
+portable = [ "blst/portable" ]
+# Enable ADX even if the host CPU doesn't support it.
+# Binary can be executed on Broadwell+ and Ryzen+ systems.
+force-adx = [ "blst/force-adx" ]
+bls12_377 = []
+bls12_381 = []
+pallas = [ "semolina" ]
+vesta = [ "semolina" ]
+bn254 = []
+gl64 = []
+bb31 = []
+quiet = []
+
+[dependencies]
+blst = "~0.3.11"
+semolina = { version = "~0.1.2", optional = true }
+sppark = { path = "../../rust" }
+
+[build-dependencies]
+cc = "^1.0.70"
+
+[dev-dependencies]
+rand = "^0"
+ark-std = "0.3.0"
+ark-ff = "0.3.0"
+ark-poly = { version = "0.3.0", features = [ "parallel"] }
+ark-bls12-381 = { version = "0.3.0" }
+ark-bls12-377 = { version = "0.3.0" }
+ark-pallas = { version = "0.3.0" }
+ark-vesta = { version = "0.3.0" }
+ark-bn254 = { version = "0.3.0" }
