@@ -118,7 +118,7 @@ impl field::Elem for Elem {
         // Even if we imagined that this failure to reject totally destroys soundness,
         // the probability of it occurring even once during proving is vanishingly low
         // (for the about 50 samples our current verifier pulls and at a probability of
-        // less than2^-161 per sample, this is less than 2^-155).  Even if we target
+        // less than 2^-161 per sample, this is less than 2^-155).  Even if we target
         // a soundness of 128 bits, we are millions of times more likely to let an
         // invalid proof by due to normal low probability events which are part of
         // soundness analysis than due to imperfect sampling.
