@@ -27,7 +27,7 @@ fn main() {
 ```
 
 This requires including `risc0-build` as a _build_ dependency. You will also
-need add a `[package.metadata.risc0]` section to your cargo file. In this
+need to add a `[package.metadata.risc0]` section to your cargo file. In this
 section, put a `methods` field with a list of relative paths containing the
 guest code. For example, if your guest code is in the `guest` directory,
 then `Cargo.toml` might include:
