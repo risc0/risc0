@@ -430,6 +430,7 @@ pub enum Err {
     NoMem = -12,
     Inval = -22,
     FileNotFound = -2,
+    FileExists = -17,
     NoSys = -38, // ENOSYS - Function not implemented
 }
 
