@@ -8,10 +8,11 @@ use crate::{
     p9::{
         P9Response, P9SetattrMask, Qid, RattachMessage, RclunkMessage, ReadableMessage,
         RgetattrMessage, RlcreateMessage, RlopenMessage, RmkdirMessage, RmknodMessage,
-        RreadMessage, RreaddirMessage, RremoveMessage, RsetattrMessage, RversionMessage,
-        RwalkMessage, RwriteMessage, TattachMessage, TlcreateMessage, TlopenMessage, TmkdirMessage,
-        TmknodMessage, TreadMessage, TreaddirMessage, TremoveMessage, TsetattrMessage,
-        TversionMessage, TwriteMessage, constants::*,
+        RreadMessage, RreaddirMessage, RreadlinkMessage, RremoveMessage, RsetattrMessage,
+        RversionMessage, RwalkMessage, RwriteMessage, TattachMessage, TlcreateMessage,
+        TlopenMessage, TmkdirMessage, TmknodMessage, TreadMessage, TreaddirMessage,
+        TreadlinkMessage, TremoveMessage, TsetattrMessage, TversionMessage, TwriteMessage,
+        constants::*,
     },
 };
 
@@ -1622,6 +1623,7 @@ fn do_walk(
     );
 
     let wnames_len = wnames.len();
+    let wnames_clone = wnames.clone();
     let twalk = crate::p9::TwalkMessage::new(0, starting_fid, target_fid, wnames);
     match twalk.send_twalk() {
         Ok(bytes_written) => {
@@ -1638,6 +1640,27 @@ fn do_walk(
                 clunk(target_fid, false);
                 Err(Err::FileNotFound)
             } else {
+                // Check if the final component is a symlink
+                if let Some(last_qid) = rwalk.wqids.last()
+                    && last_qid.is_symlink()
+                {
+                    kprint!("do_walk: final component is a symlink, resolving...");
+
+                    // Read the symlink contents
+                    let symlink_target = read_symlink(target_fid)?;
+                    kprint!("do_walk: symlink target = '{}'", symlink_target);
+                    let wnames = wnames_clone;
+                    // Resolve the target path relative to the symlink's directory
+                    let resolved_path = resolve_symlink_target(&symlink_target, &wnames)?;
+                    kprint!("do_walk: resolved path = '{}'", resolved_path);
+
+                    // Close the current target_fid since we're going to walk to a new path
+                    clunk(target_fid, false);
+
+                    // Walk to the resolved path
+                    let resolved_wnames = normalize_path(&resolved_path);
+                    return do_walk(starting_fid, target_fid, resolved_wnames);
+                }
                 Ok((0, rwalk.wqids))
             }
         }
@@ -1649,6 +1672,77 @@ fn do_walk(
             );
             Err(Err::NoSys)
         }
+    }
+}
+
+/// Read the contents of a symlink
+fn read_symlink(fid: u32) -> Result<String, Err> {
+    // Use Treadlink to read the symlink contents directly
+    let treadlink = TreadlinkMessage::new(0, fid);
+    match treadlink.send_treadlink() {
+        Ok(_bytes_written) => {
+            kprint!("read_symlink: sent treadlink request");
+        }
+        Err(e) => {
+            kprint!("read_symlink: error sending treadlink: {:?}", e);
+            return Err(Err::NoSys);
+        }
+    }
+
+    match RreadlinkMessage::read_response() {
+        P9Response::Success(rreadlink) => {
+            kprint!("read_symlink: readlink target = '{}'", rreadlink.target);
+            Ok(rreadlink.target)
+        }
+        P9Response::Error(rlerror) => {
+            kprint!(
+                "read_symlink: error reading symlink: tag={}, ecode={}",
+                rlerror.tag,
+                rlerror.ecode
+            );
+            Err(Err::NoSys)
+        }
+    }
+}
+
+/// Resolve a symlink target path relative to the symlink's directory
+fn resolve_symlink_target(target: &str, original_wnames: &[String]) -> Result<String, Err> {
+    if target.starts_with('/') {
+        // Absolute path - use as-is
+        Ok(target.to_string())
+    } else {
+        // Relative path - resolve relative to the symlink's directory
+        // Build the directory path from the original wnames (excluding the last component)
+        let mut dir_path = String::new();
+        if original_wnames.len() > 1 {
+            // There are parent directories
+            for (i, component) in original_wnames.iter().enumerate() {
+                if i == original_wnames.len() - 1 {
+                    // Skip the last component (the symlink itself)
+                    break;
+                }
+                dir_path.push('/');
+                dir_path.push_str(component);
+            }
+        } else {
+            // Symlink is in the root directory
+            dir_path.push('/');
+        }
+
+        // Combine directory path with target
+        let resolved = if dir_path.ends_with('/') {
+            format!("{}{}", dir_path, target)
+        } else {
+            format!("{}/{}", dir_path, target)
+        };
+
+        kprint!(
+            "resolve_symlink_target: dir_path='{}', target='{}', resolved='{}'",
+            dir_path,
+            target,
+            resolved
+        );
+        Ok(resolved)
     }
 }
 
