@@ -1,0 +1,79 @@
+diff -ru ltp-full-20250130/lib/tst_test.c ltp-full-20250130-patched/lib/tst_test.c
+--- ltp-full-20250130/lib/tst_test.c	2025-01-30 19:13:40.000000000 +0000
++++ ltp-full-20250130-patched/lib/tst_test.c	2025-09-30 09:09:57.357866793 +0000
+@@ -455,28 +455,8 @@
+ 
+ void tst_reap_children(void)
+ {
+-	int status;
+-	pid_t pid;
+-
+-	for (;;) {
+-		pid = wait(&status);
+-
+-		if (pid > 0) {
+-			check_child_status(pid, status);
+-			continue;
+-		}
+-
+-		if (errno == ECHILD)
+-			break;
+-
+-		if (errno == EINTR)
+-			continue;
+-
+-		tst_brk(TBROK | TERRNO, "wait() failed");
+-	}
+ }
+ 
+-
+ pid_t safe_fork(const char *filename, unsigned int lineno)
+ {
+ 	pid_t pid;
+@@ -1757,44 +1737,7 @@
+ 
+ 	show_failure_hints = 1;
+ 
+-	test_pid = fork();
+-	if (test_pid < 0)
+-		tst_brk(TBROK | TERRNO, "fork()");
+-
+-	if (!test_pid) {
+-		tst_disable_oom_protection(0);
+-		SAFE_SIGNAL(SIGALRM, SIG_DFL);
+-		SAFE_SIGNAL(SIGUSR1, SIG_DFL);
+-		SAFE_SIGNAL(SIGTERM, SIG_DFL);
+-		SAFE_SIGNAL(SIGINT, SIG_DFL);
+-		SAFE_SETPGID(0, 0);
+-		testrun();
+-	}
+-
+-	SAFE_WAITPID(test_pid, &status, 0);
+-	alarm(0);
+-	SAFE_SIGNAL(SIGTERM, SIG_DFL);
+-	SAFE_SIGNAL(SIGINT, SIG_DFL);
+-
+-	if (tst_test->taint_check && tst_taint_check()) {
+-		tst_res(TFAIL, "Kernel is now tainted.");
+-		return TFAIL;
+-	}
+-
+-	if (tst_test->forks_child && kill(-test_pid, SIGKILL) == 0)
+-		tst_res(TINFO, "Killed the leftover descendant processes");
+-
+-	if (WIFEXITED(status) && WEXITSTATUS(status))
+-		return WEXITSTATUS(status);
+-
+-	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGKILL) {
+-		tst_res(TINFO, "If you are running on slow machine, "
+-			       "try exporting LTP_TIMEOUT_MUL > 1");
+-		tst_brk(TBROK, "Test killed! (timeout?)");
+-	}
+-
+-	if (WIFSIGNALED(status))
+-		tst_brk(TBROK, "Test killed by %s!", tst_strsig(WTERMSIG(status)));
++	testrun();
+ 
+ 	return 0;
+ }
+Only in ltp-full-20250130-patched/lib: tst_test.c~
