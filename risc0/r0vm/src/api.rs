@@ -37,7 +37,6 @@ use bonsai_sdk::responses::{
     CreateSessRes, ImgUploadRes, ProofReq, ReceiptDownload, SessionStats, SessionStatusRes,
     SnarkReq, SnarkStatusRes, UploadRes,
 };
-use kameo::actor::ActorRef;
 use risc0_zkvm::{Receipt, compute_image_id, rpc::JobRequest};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -45,6 +44,7 @@ use tokio::net::TcpListener;
 use uuid::Uuid;
 
 use crate::actors::{
+    actor::ActorRef,
     allocator::PROXY_URL_PATH,
     manager::ManagerActor,
     protocol::{

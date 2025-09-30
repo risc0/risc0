@@ -43,13 +43,13 @@ use std::sync::Arc;
 
 use super::{
     RemoteActor, RemoteAllocatorRequest, RpcDisconnect,
+    actor::{self, Actor, ActorRef, Context, Message, ReplySender},
     protocol::{GlobalId, WorkerId, WorkerIdFmt},
     remote_actor_ask, routing_actor_impl,
 };
 use derive_more::{Add, AddAssign, From, Sub, SubAssign};
 use http_body_util::BodyExt as _;
 use indexmap::IndexMap;
-use kameo::{Reply, prelude::*};
 use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
 use url::Url;
@@ -66,6 +66,8 @@ impl Error {
         Self(msg.into())
     }
 }
+
+impl std::error::Error for Error {}
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -345,7 +347,6 @@ enum HardwareFilter {
     Gpu,
 }
 
-#[derive(Actor)]
 pub struct AllocatorActor {
     workers: HashMap<WorkerId, Worker>,
     managers: BTreeMap<semver::Version, Manager>,
@@ -355,6 +356,8 @@ pub struct AllocatorActor {
 
     pending: VecDeque<PendingAllocation>,
 }
+
+impl Actor for AllocatorActor {}
 
 impl AllocatorActor {
     pub fn new() -> Self {
@@ -594,13 +597,9 @@ pub struct RegisterWorkerReply {
 }
 
 impl Message<RegisterWorker> for AllocatorActor {
-    type Reply = DelegatedReply<Result<RegisterWorkerReply>>;
+    type Reply = Result<RegisterWorkerReply>;
 
-    async fn handle(
-        &mut self,
-        msg: RegisterWorker,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
+    async fn handle(&mut self, msg: RegisterWorker, ctx: &mut Context<Self, Self::Reply>) {
         ctx.reply(self.register_worker(msg))
     }
 }
@@ -662,19 +661,15 @@ pub struct ScheduleTask {
 }
 
 /// Reply when a worker is successfully chosen.
-#[derive(Serialize, Deserialize, Reply)]
+#[derive(Serialize, Deserialize)]
 pub struct ScheduleTaskReply {
     pub worker_id: WorkerId,
 }
 
 impl Message<ScheduleTask> for AllocatorActor {
-    type Reply = DelegatedReply<Result<ScheduleTaskReply>>;
+    type Reply = Result<ScheduleTaskReply>;
 
-    async fn handle(
-        &mut self,
-        msg: ScheduleTask,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
+    async fn handle(&mut self, msg: ScheduleTask, ctx: &mut Context<Self, Self::Reply>) {
         ctx.reply(self.schedule_task(msg))
     }
 }
@@ -737,23 +732,17 @@ pub struct AllocateHardware {
 }
 
 impl Message<AllocateHardware> for AllocatorActor {
-    type Reply = DelegatedReply<Result<()>>;
+    type Reply = Result<()>;
 
-    async fn handle(
-        &mut self,
-        request: AllocateHardware,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
+    async fn handle(&mut self, request: AllocateHardware, ctx: &mut Context<Self, Self::Reply>) {
         match self.validate_allocation_request(&request) {
             Ok(()) => {
-                let (delegated_reply, reply_sender) = ctx.reply_sender();
+                let reply_sender = ctx.reply_sender();
                 self.pending.push_back(PendingAllocation {
                     request,
                     reply_sender,
                 });
                 self.maybe_allocate_many();
-
-                delegated_reply
             }
             Err(error) => ctx.reply(Err(error)),
         }
@@ -785,13 +774,9 @@ pub struct DeallocateHardware {
 }
 
 impl Message<DeallocateHardware> for AllocatorActor {
-    type Reply = DelegatedReply<Result<()>>;
+    type Reply = Result<()>;
 
-    async fn handle(
-        &mut self,
-        msg: DeallocateHardware,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
+    async fn handle(&mut self, msg: DeallocateHardware, ctx: &mut Context<Self, Self::Reply>) {
         ctx.reply(self.deallocate_hardware(msg))
     }
 }
@@ -862,9 +847,9 @@ pub struct EndTask {
 }
 
 impl Message<EndTask> for AllocatorActor {
-    type Reply = DelegatedReply<Result<()>>;
+    type Reply = Result<()>;
 
-    async fn handle(&mut self, msg: EndTask, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
+    async fn handle(&mut self, msg: EndTask, ctx: &mut Context<Self, Self::Reply>) {
         ctx.reply(self.end_task(msg))
     }
 }
@@ -917,13 +902,9 @@ pub struct RegisterManager {
 }
 
 impl Message<RegisterManager> for AllocatorActor {
-    type Reply = DelegatedReply<Result<()>>;
+    type Reply = Result<()>;
 
-    async fn handle(
-        &mut self,
-        msg: RegisterManager,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
+    async fn handle(&mut self, msg: RegisterManager, ctx: &mut Context<Self, Self::Reply>) {
         ctx.reply(self.register_manager(msg))
     }
 }
@@ -1043,13 +1024,9 @@ pub struct GetStatusReply {
 }
 
 impl Message<GetStatus> for AllocatorActor {
-    type Reply = DelegatedReply<Result<GetStatusReply>>;
+    type Reply = Result<GetStatusReply>;
 
-    async fn handle(
-        &mut self,
-        _msg: GetStatus,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
+    async fn handle(&mut self, _msg: GetStatus, ctx: &mut Context<Self, Self::Reply>) {
         ctx.reply(self.get_status())
     }
 }
@@ -1115,7 +1092,7 @@ mod allocation_tests {
 
     impl Fixture {
         async fn new(worker_count: u32) -> Self {
-            let alloc_ref = kameo::spawn(AllocatorActor::new());
+            let alloc_ref = actor::spawn(AllocatorActor::new());
 
             let workers: Vec<WorkerId> = (0..worker_count).map(test_worker_id).collect();
             let mut worker_addresses = HashMap::new();
@@ -1137,6 +1114,7 @@ mod allocation_tests {
                         zkvm_version: semver::Version::new(1, 2, 3),
                     })
                     .await
+                    .unwrap()
                     .unwrap();
                 worker_addresses.insert(*worker_id, worker_addr);
             }
@@ -1157,6 +1135,7 @@ mod allocation_tests {
                 })
                 .await
                 .unwrap()
+                .unwrap()
         }
 
         async fn end_task(&self, i: u64, j: u64, worker_id: WorkerId) -> Result<()> {
@@ -1166,16 +1145,13 @@ mod allocation_tests {
                     task_id: test_task_id(i, j),
                 })
                 .await
-                .map_err(|err| match err {
-                    SendError::HandlerError(err) => err,
-                    _ => panic!("kameo error: {err}"),
-                })
+                .unwrap()
         }
 
         async fn disconnect_worker(&self, worker_id: WorkerId) {
             let remote_address = *self.worker_addresses.get(&worker_id).unwrap();
             self.alloc_ref
-                .ask(RpcDisconnect { remote_address })
+                .tell(RpcDisconnect { remote_address })
                 .await
                 .unwrap();
         }
@@ -1202,6 +1178,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
 
         let response = fixture.schedule_task(1, 2).await;
@@ -1217,6 +1194,7 @@ mod allocation_tests {
                     hardware_reservations: other_hardware_reservations,
                 })
                 .await
+                .unwrap()
                 .unwrap();
         });
 
@@ -1231,6 +1209,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
 
         second_allocation.await.unwrap();
@@ -1245,6 +1224,7 @@ mod allocation_tests {
                 hardware_reservations,
             })
             .await
+            .unwrap()
             .unwrap();
         fixture.end_task(1, 2, worker_id).await.unwrap();
     }
@@ -1264,6 +1244,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
 
         fixture
@@ -1274,6 +1255,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
 
         // deallocate again should be an error
@@ -1285,6 +1267,7 @@ mod allocation_tests {
                 hardware_reservations,
             })
             .await
+            .unwrap()
             .unwrap_err();
 
         assert_eq!(err.to_string(), expected_err);
@@ -1311,6 +1294,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
 
         // trying to end before deallocating hardware is an error
@@ -1342,6 +1326,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1356,6 +1341,7 @@ mod allocation_tests {
                 hardware_reservations,
             })
             .await
+            .unwrap()
             .unwrap();
 
         // trying to end before deallocating hardware is an error
@@ -1387,6 +1373,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1401,6 +1388,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
         fixture
             .alloc_ref
@@ -1410,6 +1398,7 @@ mod allocation_tests {
                 hardware_reservations,
             })
             .await
+            .unwrap()
             .unwrap();
 
         fixture.end_task(1, 1, worker_id).await.unwrap();
@@ -1459,6 +1448,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap_err();
 
         assert_eq!(err.to_string(), format!("unknown GPU {}", test_gpu_id(1)));
@@ -1485,6 +1475,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1499,6 +1490,7 @@ mod allocation_tests {
                 hardware_reservations,
             })
             .await
+            .unwrap()
             .unwrap_err();
 
         assert_eq!(err.to_string(), format!("unknown GPU {}", test_gpu_id(1)));
@@ -1525,6 +1517,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
 
         let response = fixture.schedule_task(1, 2).await;
@@ -1540,6 +1533,7 @@ mod allocation_tests {
                     hardware_reservations: other_hardware_reservations,
                 })
                 .await
+                .unwrap()
                 .unwrap();
         });
 
@@ -1561,6 +1555,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
         fixture.end_task(1, 1, worker_id).await.unwrap();
 
@@ -1574,6 +1569,7 @@ mod allocation_tests {
                 hardware_reservations,
             })
             .await
+            .unwrap()
             .unwrap();
         fixture.end_task(1, 2, worker_id).await.unwrap();
     }
@@ -1602,6 +1598,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
 
         // worker2 tries to reserve the same GPU
@@ -1618,6 +1615,7 @@ mod allocation_tests {
                     hardware_reservations: other_hardware_reservations,
                 })
                 .await
+                .unwrap()
                 .unwrap();
         });
 
@@ -1628,7 +1626,7 @@ mod allocation_tests {
         // worker1 disconnects
         fixture
             .alloc_ref
-            .ask(RpcDisconnect {
+            .tell(RpcDisconnect {
                 remote_address: "1.2.3.0:1000".parse().unwrap(),
             })
             .await
@@ -1656,6 +1654,7 @@ mod allocation_tests {
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
+            .unwrap()
             .unwrap_err();
 
         assert_eq!(
@@ -1763,11 +1762,12 @@ mod allocation_tests {
 // |_|  | .__/ \___|
 //      |_|
 
-#[derive(Actor)]
 pub(crate) enum AllocatorRouterActor {
     Local(ActorRef<AllocatorActor>),
     Remote(ActorRef<RemoteAllocatorActor>),
 }
+
+impl Actor for AllocatorRouterActor {}
 
 impl AllocatorRouterActor {
     pub async fn new(
@@ -1776,10 +1776,10 @@ impl AllocatorRouterActor {
     ) -> std::result::Result<ActorRef<Self>, Box<dyn StdError>> {
         if let Some(addr) = addr {
             let remote =
-                kameo::spawn(RemoteAllocatorActor::new(*addr, "RemoteAllocatorActor").await?);
-            Ok(kameo::spawn(Self::Remote(remote)))
+                actor::spawn(RemoteAllocatorActor::new(*addr, "RemoteAllocatorActor").await?);
+            Ok(actor::spawn(Self::Remote(remote)))
         } else {
-            Ok(kameo::spawn(Self::Local(
+            Ok(actor::spawn(Self::Local(
                 local.as_ref().ok_or("no allocator configured")?.clone(),
             )))
         }
@@ -1789,34 +1789,22 @@ impl AllocatorRouterActor {
 routing_actor_impl!(
     AllocatorRouterActor,
     RegisterWorker,
-    DelegatedReply<Result<RegisterWorkerReply>>
+    Result<RegisterWorkerReply>
 );
 
 routing_actor_impl!(
     AllocatorRouterActor,
     ScheduleTask,
-    DelegatedReply<Result<ScheduleTaskReply>>
+    Result<ScheduleTaskReply>
 );
 
-routing_actor_impl!(
-    AllocatorRouterActor,
-    AllocateHardware,
-    DelegatedReply<Result<()>>
-);
+routing_actor_impl!(AllocatorRouterActor, AllocateHardware, Result<()>);
 
-routing_actor_impl!(
-    AllocatorRouterActor,
-    DeallocateHardware,
-    DelegatedReply<Result<()>>
-);
+routing_actor_impl!(AllocatorRouterActor, DeallocateHardware, Result<()>);
 
-routing_actor_impl!(AllocatorRouterActor, EndTask, DelegatedReply<Result<()>>);
+routing_actor_impl!(AllocatorRouterActor, EndTask, Result<()>);
 
-routing_actor_impl!(
-    AllocatorRouterActor,
-    RegisterManager,
-    DelegatedReply<Result<()>>
-);
+routing_actor_impl!(AllocatorRouterActor, RegisterManager, Result<()>);
 
 pub type RemoteAllocatorActor = RemoteActor<AllocatorActor>;
 
@@ -1998,29 +1986,28 @@ impl AllocatorActor {
 }
 
 impl Message<ApiRequest> for AllocatorActor {
-    type Reply = DelegatedReply<anyhow::Result<ApiResponse>>;
+    type Reply = anyhow::Result<ApiResponse>;
 
-    async fn handle(
-        &mut self,
-        request: ApiRequest,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        let (delegated_reply, mut reply_sender) = ctx.reply_sender();
+    async fn handle(&mut self, request: ApiRequest, ctx: &mut Context<Self, Self::Reply>) {
+        let mut reply_sender = ctx.reply_sender();
         if let Err(error) = self.handle_api_request(request, &mut reply_sender)
             && let Some(reply_sender) = reply_sender
         {
             reply_sender.send(Err(error));
         }
-        delegated_reply
     }
 }
 
-fn send_error_err<M, E>(error: &SendError<M, E>) -> Option<&E> {
-    if let SendError::HandlerError(e) = error {
-        Some(e)
-    } else {
-        None
-    }
+fn http_error_response(error: anyhow::Error) -> http::Response<axum::body::Body> {
+    let status_code = error
+        .downcast_ref::<HttpError>()
+        .map(|e| e.status_code)
+        .unwrap_or(http::StatusCode::INTERNAL_SERVER_ERROR);
+    tracing::error!("Allocator proxy REST API response error: code={status_code} msg={error}");
+    http::Response::builder()
+        .status(status_code)
+        .body(axum::body::Body::new(error.to_string()))
+        .unwrap()
 }
 
 #[axum::debug_handler]
@@ -2029,20 +2016,9 @@ async fn proxy_handler(
     request: http::Request<axum::body::Body>,
 ) -> http::Response<axum::body::Body> {
     match allocator.ask(ApiRequest { request }).await {
-        Ok(resp) => resp.response,
-        Err(error) => {
-            let status_code = send_error_err(&error)
-                .and_then(|e| e.downcast_ref::<HttpError>())
-                .map(|e| e.status_code)
-                .unwrap_or(http::StatusCode::INTERNAL_SERVER_ERROR);
-            tracing::error!(
-                "Allocator proxy REST API response error: code={status_code} msg={error}"
-            );
-            http::Response::builder()
-                .status(status_code)
-                .body(axum::body::Body::new(error.to_string()))
-                .unwrap()
-        }
+        Ok(Ok(resp)) => resp.response,
+        Ok(Err(error)) => http_error_response(error),
+        Err(error) => http_error_response(error.into()),
     }
 }
 
@@ -2132,7 +2108,7 @@ mod proxy_tests {
             .map(|v| (v.clone(), TestManager::new()))
             .collect();
 
-        let alloc_ref = kameo::spawn(AllocatorActor::new());
+        let alloc_ref = actor::spawn(AllocatorActor::new());
 
         for (version, manager) in &managers {
             alloc_ref
@@ -2152,6 +2128,7 @@ mod proxy_tests {
                     remote_address: None,
                 })
                 .await
+                .unwrap()
                 .unwrap();
         }
 
@@ -2279,7 +2256,7 @@ mod proxy_tests {
 
     #[tokio::test]
     async fn multiple_managers_registered_error() {
-        let alloc_ref = kameo::spawn(AllocatorActor::new());
+        let alloc_ref = actor::spawn(AllocatorActor::new());
 
         alloc_ref
             .ask(RegisterManager {
@@ -2290,6 +2267,7 @@ mod proxy_tests {
                 remote_address: None,
             })
             .await
+            .unwrap()
             .unwrap();
 
         let error = alloc_ref
@@ -2301,6 +2279,7 @@ mod proxy_tests {
                 remote_address: None,
             })
             .await
+            .unwrap()
             .unwrap_err();
         assert_eq!(
             error.to_string(),

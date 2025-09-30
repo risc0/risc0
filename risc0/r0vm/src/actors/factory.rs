@@ -17,11 +17,11 @@ use std::collections::HashMap;
 use std::error::Error as StdError;
 use std::net::SocketAddr;
 
-use kameo::{error::Infallible, prelude::*};
 use multi_index_map::MultiIndexMap;
 
 use super::{
     RemoteActor, RemoteFactoryRequest, RpcDisconnect, RpcMessageId, WorkerRouterActor,
+    actor::{self, Actor, ActorRef, Context, Message},
     allocator::{AllocatorRouterActor, CpuCores, GpuTokens, ScheduleTask},
     job::JobActor,
     protocol::{
@@ -65,25 +65,13 @@ impl FactoryActor {
 }
 
 impl Actor for FactoryActor {
-    type Error = Infallible;
-
-    async fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
-        // start timer
-        Ok(())
-    }
-
-    async fn on_stop(
-        &mut self,
-        _actor_ref: WeakActorRef<Self>,
-        _reason: ActorStopReason,
-    ) -> Result<(), Self::Error> {
+    async fn on_stop(&mut self) {
         for worker in self.worker_actors.values() {
             let _ = worker.stop_gracefully().await;
         }
 
         // stop timer
         tracing::info!("Factory: on_stop");
-        Ok(())
     }
 }
 
@@ -114,6 +102,7 @@ impl FactoryActor {
                         description: format!("{:?}", &msg.header.task_kind),
                     })
                     .await
+                    .unwrap()
                     .unwrap();
 
                 let worker_id = response.worker_id;
@@ -234,11 +223,12 @@ impl Message<RpcDisconnect> for FactoryActor {
 // |_|  | .__/ \___|
 //      |_|
 
-#[derive(Actor)]
 pub(crate) enum FactoryRouterActor {
     Local(ActorRef<FactoryActor>),
     Remote(ActorRef<RemoteFactoryActor>),
 }
+
+impl Actor for FactoryRouterActor {}
 
 impl FactoryRouterActor {
     pub async fn new<RemoteMsgT, FutT>(
@@ -253,13 +243,13 @@ impl FactoryRouterActor {
         FutT: Future<Output = ()> + Send,
     {
         if let Some(addr) = addr {
-            let remote = kameo::spawn(
+            let remote = actor::spawn(
                 RemoteFactoryActor::new_with_remote_msg_callback(*addr, remote_msg_callback)
                     .await?,
             );
-            Ok(kameo::spawn(Self::Remote(remote)))
+            Ok(actor::spawn(Self::Remote(remote)))
         } else {
-            Ok(kameo::spawn(Self::Local(
+            Ok(actor::spawn(Self::Local(
                 local
                     .as_ref()
                     .ok_or("no manager found from allocator or locally")?
