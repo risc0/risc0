@@ -8,6 +8,7 @@ members = [
   "risc0/build",
   "risc0/build_kernel",
   "risc0/cargo-risczero",
+  "risc0/circuit/hello-m3",
   "risc0/circuit/keccak",
   "risc0/circuit/keccak-sys",
   "risc0/circuit/recursion",
