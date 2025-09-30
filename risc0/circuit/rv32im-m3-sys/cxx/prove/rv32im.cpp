@@ -23,7 +23,11 @@ namespace risc0 {
 
 using namespace rv32im;
 
-Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal, HalArray<RowInfo> rowInfo, HalArray<uint32_t> aux, HalArray<uint32_t> tables, bool doValidate) {
+Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal,
+                                 HalArray<RowInfo> rowInfo,
+                                 HalArray<uint32_t> aux,
+                                 HalArray<uint32_t> tables,
+                                 bool doValidate) {
   ci.groups.resize(2);
   size_t dataCols = computeMaxDataPerRow();
   GroupInfo& dataInfo = ci.groups[0];
@@ -50,7 +54,9 @@ Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal, HalArray<RowInfo> rowInfo, HalArra
   accumInfo.mixCount = ACCUM_MIX_SIZE;
   for (size_t i = 0; i < accumCols; i++) {
     ci.taps.addTap(1, i, 0);
-    if (i < 4 || i >= accumNormalCols) { ci.taps.addTap(1, i, 1); }
+    if (i < 4 || i >= accumNormalCols) {
+      ci.taps.addTap(1, i, 1);
+    }
   }
   accumInfo.witgen = [hal](std::vector<GroupState>& state) {
     LOG(0, "Computing accum witness");
@@ -64,15 +70,14 @@ Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal, HalArray<RowInfo> rowInfo, HalArra
 }
 
 Rv32imProver::Rv32imProver(IHalPtr hal, size_t po2, bool doValidate)
-  : hal(hal)
-  , rows(size_t(1) << po2)
-  , rowInfo(hal->allocateArray<RowInfo>(rows))
-  , aux(hal->allocateArray<uint32_t>(rows * computeMaxWitPerRow()))
-  // TODO: table size needs to handle max cycles * 2, this presumes no more than 10 cycles per row
-  , tables(hal->allocateArray<uint32_t>(256 + 65536 + 20*rows))
-  , ci(hal, rowInfo, aux, tables, doValidate)
-  , prover(hal, ci.ci, po2)
-{}
+    : hal(hal)
+    , rows(size_t(1) << po2)
+    , rowInfo(hal->allocateArray<RowInfo>(rows))
+    , aux(hal->allocateArray<uint32_t>(rows * computeMaxWitPerRow()))
+    // TODO: table size needs to handle max cycles * 2, this presumes no more than 10 cycles per row
+    , tables(hal->allocateArray<uint32_t>(256 + 65536 + 20 * rows))
+    , ci(hal, rowInfo, aux, tables, doValidate)
+    , prover(hal, ci.ci, po2) {}
 
 bool Rv32imProver::preflight(rv32im::MemoryImage& image, HostIO& io) {
   LOG(0, "Pinning");
@@ -91,4 +96,8 @@ void Rv32imProver::prove(WriteIop& iop) {
   prover.prove(iop);
 }
 
-}  // namespace risc0
+size_t Rv32imProver::po2() const {
+  return prover.po2;
+}
+
+} // namespace risc0

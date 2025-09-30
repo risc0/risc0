@@ -14,9 +14,9 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #[cfg(test)]
-#[cfg(feature = "cuda")]
 mod tests {
-    use risc0_circuit_rv32im_m3_sys::risc0_circuit_rv32im_m3_prove;
+    use cfg_if::cfg_if;
+    use risc0_circuit_rv32im_m3_sys::*;
     use risc0_sys::ffi_wrap;
 
     // These tests come from:
@@ -55,7 +55,19 @@ mod tests {
     }
 
     fn run_program(elf: &[u8]) {
-        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_prove(elf.as_ptr(), elf.len()) }).unwrap();
+        let po2 = 14;
+        cfg_if! {
+            if #[cfg(feature = "cuda")] {
+                let prover = unsafe { risc0_circuit_rv32im_m3_prover_new_cuda(po2) };
+            } else {
+                let prover = unsafe { risc0_circuit_rv32im_m3_prover_new_cpu(po2) };
+            }
+        }
+
+        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_preflight(prover, elf.as_ptr(), elf.len()) })
+            .unwrap();
+        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_prove(prover) }).unwrap();
+        unsafe { risc0_circuit_rv32im_m3_prover_free(prover) };
     }
 
     macro_rules! test_case {
@@ -70,7 +82,7 @@ mod tests {
     }
 
     test_case!(add);
-    // test_case!(addi);
+    test_case!(addi);
     // test_case!(and);
     // test_case!(andi);
     // test_case!(auipc);

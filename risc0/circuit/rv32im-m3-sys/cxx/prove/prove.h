@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include "zkp/taps.h"
 #include "prove/fri.h"
 #include "prove/poly_group.h"
+#include "zkp/taps.h"
 
 #include <functional>
 
@@ -42,12 +42,14 @@ struct GroupState {
 // the witness for this group.
 using WitgenFunc = std::function<void(std::vector<GroupState>& state)>;
 
-// Writes `out` (shape: 4 x po2) with the value of the validity polynomial evaltuated with state and mix
-using EvalCheckFunc = std::function<void(HalMatrix<Fp> out, std::vector<GroupState>& state, FpExt mix)>;
+// Writes `out` (shape: 4 x po2) with the value of the validity polynomial evaltuated with state and
+// mix
+using EvalCheckFunc =
+    std::function<void(HalMatrix<Fp> out, std::vector<GroupState>& state, FpExt mix)>;
 
 struct GroupInfo {
-  size_t globalCount;  // How many global values we need
-  size_t mixCount;  // How many elements of FS prng we need
+  size_t globalCount; // How many global values we need
+  size_t mixCount;    // How many elements of FS prng we need
   WitgenFunc witgen;  // Witgen function for the group
 };
 
@@ -67,10 +69,12 @@ public:
   // Per proof
   void prove(WriteIop& iop);
 
+public:
+  size_t po2;
+
 private:
   IHalPtr hal;
   const CircuitInfo& circuitInfo;
-  size_t po2;
   size_t rows;
   size_t domain;
   size_t checkSize;
@@ -90,4 +94,4 @@ private:
   FriProver fri;
 };
 
-}  // namespace risc0
+} // namespace risc0
