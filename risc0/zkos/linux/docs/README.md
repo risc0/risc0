@@ -116,11 +116,46 @@ You can try with /bin/command-name as well for other embedded applets
 This probably works best in a Ubuntu 22.04/24 Docker container, not tested on MacOS
 
 ```
+# run as root!
 # diod is a 9p server, socat is a good to help us redirect sockets
 apt-get install diod socat
 mkdir -p /risc0-root
 # unpack your rootfs tar from buildroot into /risc0-root
-diod -l 127.0.0.1:40564 -e /risc0-root -n -f -d 0x01 -U yourusername -S &
+diod -l 127.0.0.1:40564 -e /risc0-root -n -f -d 0x01 -U root -S &
 RISC0_DEV_MODE=1 RUST_LOG=debug  socat -ddd -t 30 -v EXEC:"r0vm --elf busybox.bin -- opts=p9 /bin/ls -al /",fdin=3,fdout=4 TCP:127.0.0.1:40564 2> log
 ```
+# Running LTP test cases
 
+Additionally, when configuring buildroot, go into Target Packages -> Debugging, profiling and benchmark -> Enable ltp-testsuite
+
+Copy patches/ltp-0003-nofork.patch to packages/ltp-testsuite/0003-nofork.patch
+
+Build your buildroot
+
+Then:
+
+```
+mkdir -p ~/risc0/ltp ~/risc0/ltp-bins
+cp -r output/target/usr/lib/ltp-testsuite/testcases/bin/* ~/risc0/ltp
+cd ~/risc0/ltp
+for x in *; do ~/risc0/target/debug/elf-to-bin --kernel-elf ../risc0/zkos/linux/elfs/vmlinuz.elf --output ../ltp-bins/$x.bin --guest-elf $x  ; done
+cd ../ltp-bins
+RISC0_DEV_MODE=1 socat EXEC:"r0vm --elf openat01.bin -- opts=p9 /bin/test",fdin=3,fdout=4 TCP:127.0.0.1:40564
+```
+
+and you should see something lke this
+
+```
+tst_tmpdir.c:316: TINFO: Using /tmp/LTP_tesgmLaAA as tmpdir (tmpfs filesystem)
+tst_memutils.c:152: TINFO: oom_score_adj does not exist, skipping the adjustment
+tst_test.c:1843: TINFO: LTP version: 20250130
+tst_test.c:1847: TINFO: Tested kernel:
+tst_kconfig.c:71: TINFO: Couldn't locate kernel config!
+tst_test.c:1702: TINFO: Overall timeout per run is 0h 00m 30s
+openat01.c:71: TPASS: openat(*tc->dir_fd, tc->pathname, O_RDWR, 0600) returned fd 5
+openat01.c:71: TPASS: openat(*tc->dir_fd, tc->pathname, O_RDWR, 0600) returned fd 5
+openat01.c:64: TFAIL: openat with a filefd instead of dirfd expected ENOTDIR: ENOENT (2)
+openat01.c:67: TFAIL: openat with invalid fd expected EBADF: ENOENT (2)
+openat01.c:71: TPASS: openat(*tc->dir_fd, tc->pathname, O_RDWR, 0600) returned fd 5
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+```
