@@ -48,7 +48,7 @@ pub struct RisczeroArgs {
 
 #[derive(Subcommand)]
 #[non_exhaustive]
-/// Primary commands  of `cargo risczero`.
+/// Primary commands of `cargo risczero`.
 pub enum Commands {
     /// Bake guest code.
     Bake(BakeCommand),
