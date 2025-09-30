@@ -49,6 +49,7 @@ release = false
 
 [features]
 default = ["zkvm"]
+cuda = ["risc0-zkvm/cuda"]
 setup-groth16 = ["dep:risc0-groth16-sys", "dep:memmap2"]
 zkvm = [
   "dep:risc0-circuit-keccak",

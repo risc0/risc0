@@ -25,7 +25,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-use anyhow::{Result, bail};
+use anyhow::{bail, Result};
 use tempfile::tempdir;
 
 use super::seal_to_json::to_json;
@@ -60,8 +60,12 @@ pub(crate) fn shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         .stderr(Stdio::piped())
         .output()?;
     if !output.status.success() {
+        let hint = match output.status.code() {
+            Some(126) => "\nThis process may not have permission to run containers.",
+            _ => "",
+        };
         bail!(
-            "docker returned failure exit code: {:?}",
+            "docker returned failure exit code: {:?}{hint}",
             output.status.code()
         );
     }
