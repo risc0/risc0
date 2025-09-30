@@ -17,14 +17,13 @@ use std::{fmt, ops::Range, sync::Arc};
 
 use clap::ValueEnum;
 use derive_more::{Debug, From, TryInto};
-use kameo::{Reply, actor::ActorRef};
 use risc0_zkvm::{
     ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt,
     UnionClaim, Unknown,
 };
 use serde::{Deserialize, Serialize};
 
-use super::{WorkerRouterActor, job::JobActor};
+use super::{WorkerRouterActor, actor::ActorRef, job::JobActor};
 
 pub use risc0_zkvm::rpc::{
     JobInfo, JobRequest, JobStatus, ProofRequest, ProofResult, Session, ShrinkWrapKind,
@@ -58,7 +57,7 @@ pub(crate) struct CreateJobRequest {
     pub request: JobRequest,
 }
 
-#[derive(Reply, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub(crate) struct CreateJobReply {
     pub job_id: JobId,
 }
@@ -68,13 +67,13 @@ pub(crate) struct JobStatusRequest {
     pub job_id: JobId,
 }
 
-#[derive(Reply, Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub(crate) struct JobRequestReply {
     pub job_id: JobId,
     pub status: JobStatusReply,
 }
 
-#[derive(Reply, Serialize, Deserialize, TryInto, Debug, Clone, From)]
+#[derive(Serialize, Deserialize, TryInto, Debug, Clone, From)]
 pub(crate) enum JobStatusReply {
     Proof(JobInfo<ProofResult>),
     ShrinkWrap(JobInfo<ShrinkWrapResult>),
@@ -126,17 +125,17 @@ pub(crate) enum Task {
     ShrinkWrap(Arc<ShrinkWrapTask>),
 }
 
-#[derive(Reply, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub(crate) struct ExecuteTask {
     pub request: ProofRequest,
 }
 
-#[derive(Reply, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub(crate) struct ProveSegmentTask {
     pub segment: Segment,
 }
 
-#[derive(Reply, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub(crate) struct ProveKeccakTask {
     pub index: usize,
     pub request: ProveKeccakRequest,
@@ -148,31 +147,31 @@ pub(crate) struct SegmentRange {
     pub end: usize,
 }
 
-#[derive(Reply, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub(crate) struct LiftTask {
     pub receipt: SegmentReceipt,
 }
 
-#[derive(Reply, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub(crate) struct JoinTask {
     pub range: SegmentRange,
     pub receipts: Vec<SuccinctReceipt<ReceiptClaim>>,
 }
 
-#[derive(Reply, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub(crate) struct UnionTask {
     pub height: usize,
     pub pos: usize,
     pub receipts: Vec<Arc<SuccinctReceipt<Unknown>>>,
 }
 
-#[derive(Reply, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub(crate) struct ResolveTask {
     pub conditional: Arc<SuccinctReceipt<ReceiptClaim>>,
     pub assumption: Arc<SuccinctReceipt<Unknown>>,
 }
 
-#[derive(Reply, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub(crate) struct ShrinkWrapTask {
     pub kind: ShrinkWrapKind,
     pub receipt: Arc<Receipt>,
@@ -189,7 +188,7 @@ pub mod factory {
         pub kinds: Vec<TaskKind>,
     }
 
-    #[derive(Clone, Reply)]
+    #[derive(Clone)]
     pub(crate) struct SubmitTaskMsg {
         pub job: ActorRef<JobActor>,
         pub header: TaskHeader,
@@ -202,7 +201,7 @@ pub mod factory {
         pub payload: TaskUpdate,
     }
 
-    #[derive(Reply, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     pub(crate) struct TaskDoneMsg {
         pub header: TaskHeader,
         pub payload: Result<TaskDone, TaskError>,
@@ -257,7 +256,7 @@ pub mod worker {
     use super::*;
     use crate::actors::allocator::{CpuCores, GpuTokens};
 
-    #[derive(Clone, Reply, Serialize, Deserialize)]
+    #[derive(Clone, Serialize, Deserialize)]
     pub(crate) struct TaskMsg {
         pub header: TaskHeader,
         pub task: Task,

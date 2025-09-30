@@ -15,15 +15,15 @@
 
 use std::sync::Arc;
 
-use kameo::{error::Infallible, prelude::*};
 use tokio::time::Instant;
 
 use super::{JobActorNew, tracer::JobTracer};
 use crate::actors::{
+    actor::{Actor, ActorRef, Context, Message, ReplySender, WeakActorRef},
     factory::FactoryActor,
     protocol::{
         ExecuteTask, GlobalId, JobId, JobInfo, JobStatus, JobStatusReply, JobStatusRequest,
-        ProofRequest, ProofResult, Task, TaskError, TaskHeader,
+        ProofRequest, ProofResult, Task, TaskHeader,
         factory::{DropJob, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
     },
 };
@@ -41,18 +41,11 @@ pub(crate) struct JobActor {
 }
 
 impl Actor for JobActor {
-    type Error = Infallible;
-
-    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
+    async fn on_start(&mut self, actor_ref: ActorRef<Self>) {
         self.self_ref = Some(actor_ref.downgrade());
-        Ok(())
     }
 
-    async fn on_stop(
-        &mut self,
-        _actor_ref: WeakActorRef<Self>,
-        reason: ActorStopReason,
-    ) -> Result<(), Self::Error> {
+    async fn on_stop(&mut self) {
         let _ = self
             .factory
             .tell(DropJob {
@@ -62,17 +55,7 @@ impl Actor for JobActor {
 
         let elapsed_time = self.start_time.elapsed();
 
-        if let ActorStopReason::Panicked(err) = reason {
-            tracing::error!("{err}");
-            self.tracer.record_error(&err);
-            if let Some(reply_sender) = self.reply_sender.take() {
-                let info = JobInfo {
-                    status: JobStatus::Failed(TaskError::Generic(err.to_string())),
-                    elapsed_time,
-                };
-                reply_sender.send(JobStatusReply::Proof(info));
-            }
-        } else if let Some(reply_sender) = self.reply_sender.take() {
+        if let Some(reply_sender) = self.reply_sender.take() {
             let info = JobInfo {
                 status: self.status.clone(),
                 elapsed_time,
@@ -81,7 +64,6 @@ impl Actor for JobActor {
         }
 
         self.tracer.end();
-        Ok(())
     }
 }
 
@@ -139,19 +121,14 @@ impl JobActor {
 }
 
 impl Message<ProofRequest> for JobActor {
-    type Reply = DelegatedReply<JobStatusReply>;
+    type Reply = JobStatusReply;
 
-    async fn handle(
-        &mut self,
-        request: ProofRequest,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
+    async fn handle(&mut self, request: ProofRequest, ctx: &mut Context<Self, Self::Reply>) {
         tracing::info!("execute_only ProofRequest");
-        let (delegated_reply, reply_sender) = ctx.reply_sender();
+        let reply_sender = ctx.reply_sender();
         self.reply_sender = reply_sender;
         self.submit_task(Task::Execute(Arc::new(ExecuteTask { request })))
             .await;
-        delegated_reply
     }
 }
 
@@ -205,14 +182,10 @@ impl Message<TaskDoneMsg> for JobActor {
 impl Message<JobStatusRequest> for JobActor {
     type Reply = JobStatusReply;
 
-    async fn handle(
-        &mut self,
-        _msg: JobStatusRequest,
-        _ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        JobStatusReply::Proof(JobInfo {
+    async fn handle(&mut self, _msg: JobStatusRequest, ctx: &mut Context<Self, Self::Reply>) {
+        ctx.reply(JobStatusReply::Proof(JobInfo {
             status: self.status.clone(),
             elapsed_time: self.start_time.elapsed(),
-        })
+        }))
     }
 }
