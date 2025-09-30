@@ -41,11 +41,8 @@ pub trait Elem: 'static
     + Debug
     + Sized
     + ops::Neg<Output = Self>
-    + ops::SubAssign
     + cmp::PartialEq
     + cmp::Eq
-    + core::clone::Clone
-    + core::marker::Copy
     + bytemuck::NoUninit
     + bytemuck::CheckedBitPattern
     + core::default::Default
