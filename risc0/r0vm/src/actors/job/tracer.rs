@@ -66,10 +66,6 @@ impl JobTracer {
         self.pending_spans.remove(&task_id).as_mut().unwrap().end();
     }
 
-    pub fn record_error(&mut self, error: &dyn std::error::Error) {
-        self.ctx.span().record_error(error);
-    }
-
     pub fn end(&mut self) {
         self.ctx.span().end();
     }

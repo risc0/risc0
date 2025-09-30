@@ -16,7 +16,6 @@
 use std::{rc::Rc, sync::Arc};
 
 use anyhow::{Context as _, Result};
-use kameo::{error::Infallible, prelude::*};
 use risc0_zkvm::{
     CoprocessorCallback, DevModeDelay, DevModeProver, ExecutorEnv, ExecutorImpl, NullSegmentRef,
     PreflightResults, ProveKeccakRequest, ProverOpts, ProverServer, VerifierContext,
@@ -26,6 +25,7 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 
 use super::{
     RemoteActor, RemoteWorkerRequest, RpcSender, WriteStream,
+    actor::{self, Actor, ActorRef, Context, Message},
     allocator::{
         AllocateHardware, AllocatorRouterActor, CpuCores, CpuSpec, DeallocateHardware, EndTask,
         GpuSpec, GpuTokens, GpuUuid, HardwareReservation, HardwareResource,
@@ -175,14 +175,12 @@ impl WorkerActor {
             gpus,
         };
 
-        Ok(kameo::spawn(s))
+        Ok(actor::spawn(s))
     }
 }
 
 impl Actor for WorkerActor {
-    type Error = anyhow::Error;
-
-    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> Result<()> {
+    async fn on_start(&mut self, actor_ref: ActorRef<Self>) {
         self.factory
             .tell(GetTasks {
                 worker_id: self.id,
@@ -191,16 +189,6 @@ impl Actor for WorkerActor {
             })
             .await
             .unwrap();
-
-        Ok(())
-    }
-
-    async fn on_stop(
-        &mut self,
-        _actor_ref: WeakActorRef<Self>,
-        _s_reason: ActorStopReason,
-    ) -> Result<()> {
-        Ok(())
     }
 }
 
@@ -441,6 +429,7 @@ impl GpuProcessor {
                 hardware_reservations: msg.to_reserve.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
         msg.reserved.extend(std::mem::take(&mut msg.to_reserve));
 
@@ -671,6 +660,7 @@ impl CpuProcessor {
                 hardware_reservations: to_reserve.clone(),
             })
             .await
+            .unwrap()
             .unwrap();
         msg.reserved.extend(to_reserve);
 
@@ -739,7 +729,7 @@ impl CpuProcessor {
                     header: header_copy.clone(),
                     payload: TaskUpdate::Segment(segment),
                 };
-                factory.tell(msg).blocking_send()?;
+                factory.tell_blocking(msg)?;
                 Ok(Box::new(NullSegmentRef))
             })?;
 
@@ -804,11 +794,10 @@ struct Coprocessor {
 impl CoprocessorCallback for Coprocessor {
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> anyhow::Result<()> {
         self.factory
-            .tell(TaskUpdateMsg {
+            .tell_blocking(TaskUpdateMsg {
                 header: self.header.clone(),
                 payload: TaskUpdate::Keccak(request),
             })
-            .blocking_send()
             .context("Failed to send ProveKeccakRequest")
     }
 }
@@ -826,35 +815,24 @@ pub(crate) enum WorkerRouterActor {
 }
 
 impl Actor for WorkerRouterActor {
-    type Error = Infallible;
-
-    async fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
-        Ok(())
-    }
-
-    async fn on_stop(
-        &mut self,
-        _actor_ref: WeakActorRef<Self>,
-        _reason: ActorStopReason,
-    ) -> Result<(), Self::Error> {
+    async fn on_stop(&mut self) {
         match self {
             Self::Local(_) => {}
             Self::Remote(r) => {
                 let _ = r.stop_gracefully().await;
             }
         }
-        Ok(())
     }
 }
 
 impl WorkerRouterActor {
     pub(crate) fn new_remote(rpc_sender: RpcSender<WriteStream>) -> ActorRef<Self> {
-        let remote = kameo::spawn(RemoteWorkerActor::new_from_rpc_sender(rpc_sender));
-        kameo::spawn(Self::Remote(remote))
+        let remote = actor::spawn(RemoteWorkerActor::new_from_rpc_sender(rpc_sender));
+        actor::spawn(Self::Remote(remote))
     }
 
     pub(crate) fn new_local(local: ActorRef<WorkerActor>) -> ActorRef<Self> {
-        kameo::spawn(Self::Local(local))
+        actor::spawn(Self::Local(local))
     }
 }
 
