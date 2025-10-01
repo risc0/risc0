@@ -35,7 +35,6 @@
 //!
 
 use std::collections::{BTreeMap, HashMap, HashSet, VecDeque, btree_map, hash_map};
-use std::error::Error as StdError;
 use std::fmt;
 use std::net::SocketAddr;
 use std::net::{IpAddr, Ipv4Addr};
@@ -43,10 +42,10 @@ use std::sync::Arc;
 
 use super::{
     RemoteActor, RemoteAllocatorRequest, RpcDisconnect,
-    actor::{self, Actor, ActorRef, Context, Message, ReplySender},
+    actor::{Actor, ActorRef, Context, Message, ReplySender},
     error::{Error, Result},
     protocol::{GlobalId, WorkerId, WorkerIdFmt},
-    remote_actor_ask, routing_actor_impl,
+    remote_actor_ask,
 };
 use derive_more::{Add, AddAssign, From, Sub, SubAssign};
 use http_body_util::BodyExt as _;
@@ -1042,6 +1041,7 @@ impl AllocatorActor {
 #[cfg(test)]
 mod allocation_tests {
     use super::*;
+    use crate::actors::actor;
 
     fn test_gpu_id(n: u32) -> GpuUuid {
         assert!(n < 10);
@@ -1744,50 +1744,6 @@ mod allocation_tests {
 // |_|  | .__/ \___|
 //      |_|
 
-pub(crate) enum AllocatorRouterActor {
-    Local(ActorRef<AllocatorActor>),
-    Remote(ActorRef<RemoteAllocatorActor>),
-}
-
-impl Actor for AllocatorRouterActor {}
-
-impl AllocatorRouterActor {
-    pub async fn new(
-        addr: &Option<SocketAddr>,
-        local: &Option<ActorRef<AllocatorActor>>,
-    ) -> std::result::Result<ActorRef<Self>, Box<dyn StdError>> {
-        if let Some(addr) = addr {
-            let remote =
-                actor::spawn(RemoteAllocatorActor::new(*addr, "RemoteAllocatorActor").await?);
-            Ok(actor::spawn(Self::Remote(remote)))
-        } else {
-            Ok(actor::spawn(Self::Local(
-                local.as_ref().ok_or("no allocator configured")?.clone(),
-            )))
-        }
-    }
-}
-
-routing_actor_impl!(
-    AllocatorRouterActor,
-    RegisterWorker,
-    Result<RegisterWorkerReply>
-);
-
-routing_actor_impl!(
-    AllocatorRouterActor,
-    ScheduleTask,
-    Result<ScheduleTaskReply>
-);
-
-routing_actor_impl!(AllocatorRouterActor, AllocateHardware, Result<()>);
-
-routing_actor_impl!(AllocatorRouterActor, DeallocateHardware, Result<()>);
-
-routing_actor_impl!(AllocatorRouterActor, EndTask, Result<()>);
-
-routing_actor_impl!(AllocatorRouterActor, RegisterManager, Result<()>);
-
 pub type RemoteAllocatorActor = RemoteActor<AllocatorActor>;
 
 remote_actor_ask!(
@@ -2048,6 +2004,7 @@ pub async fn run_proxy(
 #[cfg(test)]
 mod proxy_tests {
     use super::*;
+    use crate::actors::actor;
     use axum_test::TestServer;
     use httpmock::MockServer;
     use rstest::rstest;
