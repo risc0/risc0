@@ -207,10 +207,26 @@ impl Message<TaskMsg> for WorkerActor {
     type Reply = ();
 
     async fn handle(&mut self, msg: TaskMsg, ctx: &mut Context<Self, Self::Reply>) {
+        let res = self.handle_task(msg).await;
+        if let Err(error) = res {
+            tracing::error!("worker has died: {error}");
+            let _ = ctx.actor_ref().stop_gracefully().await;
+        }
+    }
+}
+
+impl WorkerActor {
+    async fn handle_task(&mut self, msg: TaskMsg) -> Result<()> {
         let mut to_reserve = vec![HardwareReservation::Cpu { cores: msg.cores }];
         if msg.gpu_tokens > GpuTokens::ZERO {
             if self.gpus.is_empty() {
-                panic!("worker received a GPU task, but has no access to a GPU");
+                self.fail_task(
+                    msg,
+                    "worker received a GPU task, but has no access to a GPU",
+                )
+                .await?;
+
+                return Ok(());
             }
             to_reserve.push(HardwareReservation::Gpu {
                 id: self.gpus[0].uuid.clone(),
@@ -218,11 +234,20 @@ impl Message<TaskMsg> for WorkerActor {
             });
         }
 
-        let res = self.processor.process_task(msg, to_reserve).await;
-        if let Err(error) = res {
-            tracing::error!("worker has died: {error}");
-            let _ = ctx.actor_ref().stop_gracefully().await;
-        }
+        self.processor.process_task(msg, to_reserve).await?;
+
+        Ok(())
+    }
+
+    async fn fail_task(&mut self, msg: TaskMsg, message: &str) -> Result<()> {
+        self.factory
+            .tell(TaskDoneMsg {
+                header: msg.header,
+                payload: Err(TaskError::Generic(message.into())),
+            })
+            .await?;
+
+        Ok(())
     }
 }
 
