@@ -6,7 +6,10 @@ extern "C" const char* risc0_circuit_rv32im_m3_prove(const uint8_t* elf_ptr, siz
 void runTest(const std::string& name) {
   auto fullname = "rv32im/rvtest/" + name;
   auto elf = risc0::loadFile(fullname);
-  risc0_circuit_rv32im_m3_prove(elf.data(), elf.size());
+  const char* err = risc0_circuit_rv32im_m3_prove(elf.data(), elf.size());
+  if (err != nullptr) {
+    throw std::runtime_error(err);
+  }
 }
 
 int main() {
