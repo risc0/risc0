@@ -24,7 +24,7 @@ int main() {
   size_t po2 = 12;
 
   IHalPtr hal = getCpuHal();
-  CircuitInfo& ci = *getCircuitInfo(hal, po2);
+  CircuitInfo& ci = *hello_m3::getCircuitInfo(hal, po2);
   Prover prover(hal, ci, po2);
 
   WriteIop wiop;
@@ -33,7 +33,7 @@ int main() {
 
   LOG(0, "Finished proving, begin verifying...");
 
-  VerifyCircuitInfo& vci = *getVerifyCircuitInfo();
+  VerifyCircuitInfo& vci = *hello_m3::getVerifyCircuitInfo();
   ReadIop riop(transcript.data(), transcript.size());
   verify(vci, riop, po2);
   riop.done();

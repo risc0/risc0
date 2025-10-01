@@ -21,6 +21,10 @@
 
 using namespace risc0;
 
+namespace hello_m3 {
+
+namespace {
+
 template <typename RegT, typename ValT, typename ValExtT>
 struct Context {
   FpExt total;
@@ -42,6 +46,8 @@ struct Context {
   template<typename T>
   inline void pull(T argument) {}
 };
+
+} // end namespace
 
 CircuitInfo* getCircuitInfo(IHalPtr hal, size_t po2) {
   CircuitInfo& ci = *(new CircuitInfo());
@@ -164,3 +170,5 @@ VerifyCircuitInfo* getVerifyCircuitInfo() {
 
   return &ci;
 }
+
+} // end namespace hello_m3
