@@ -38,8 +38,8 @@ impl From<super::actor::SendError> for Error {
     }
 }
 
-impl From<risc0_zkp::verify::VerificationError> for Error {
-    fn from(e: risc0_zkp::verify::VerificationError) -> Self {
+impl From<risc0_zkvm::VerificationError> for Error {
+    fn from(e: risc0_zkvm::VerificationError) -> Self {
         Self(e.to_string())
     }
 }
