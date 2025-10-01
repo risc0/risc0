@@ -54,6 +54,7 @@ cuda = [
   "risc0-zkp/cuda",
   "risc0-zkvm/cuda",
 ]
+# Required for the setup-groth16 command.
 setup-groth16 = ["dep:risc0-groth16-sys", "dep:memmap2", "cuda"]
 zkvm = [
   "dep:risc0-circuit-keccak",
