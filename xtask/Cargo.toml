@@ -25,7 +25,6 @@ risc0-circuit-recursion = { workspace = true, features = [
 ], optional = true }
 risc0-core = { workspace = true }
 risc0-groth16-sys = { workspace = true, optional = true, features = [
-  "cuda",
   "setup",
 ] }
 risc0-zkp = { workspace = true, optional = true }
