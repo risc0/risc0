@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use alloc::{
     collections::{BTreeSet, VecDeque},
@@ -121,7 +122,7 @@ impl<Claim> SuccinctReceipt<Claim> {
 
         // Check that the proof system and circuit info strings match what is implemented by this
         // function. Info strings are used a version identifiers, and this verify implementation
-        // supports exactly one proof systema and circuit version at a time.
+        // supports exactly one proof system and circuit version at a time.
         if params.proof_system_info != PROOF_SYSTEM_INFO {
             return Err(VerificationError::ProofSystemInfoMismatch {
                 expected: PROOF_SYSTEM_INFO,
@@ -397,7 +398,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("ece5e9b8ae2cd6ea6b1827b464ff0348f9a7f4decd269c0087fdfd75098da013")
+            digest!("94f670f5cf097d46551a1294da551fe953fee0310cb227f22c865ff8d97ffc33")
         );
     }
 

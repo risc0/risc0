@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::collections::HashMap;
 use std::future::Future;
@@ -25,7 +26,7 @@ use tokio::net::{TcpStream, UnixStream, tcp, unix};
 use tokio::sync::Mutex as TokioMutex;
 
 /// Create a pair of RPC sender and receiver. The sender is used to send messages to the remote
-/// side, the recevier is used to get responses and remote requests.
+/// side, the receiver is used to get responses and remote requests.
 pub fn rpc_system<StreamT: RpcStream>(
     stream: StreamT,
     meter: Meter,
@@ -543,7 +544,7 @@ mod tests {
             Ok(())
         }
 
-        fn tx_and_rx_mesages_metrics(&self) -> (u64, u64) {
+        fn tx_and_rx_messages_metrics(&self) -> (u64, u64) {
             self.meter_provider.force_flush().unwrap();
             let finished_metrics = self.exporter.get_finished_metrics().unwrap();
             (
@@ -579,7 +580,7 @@ mod tests {
             }
         );
 
-        assert_eq!(fix.tx_and_rx_mesages_metrics(), (2, 2));
+        assert_eq!(fix.tx_and_rx_messages_metrics(), (2, 2));
     }
 
     #[tokio::test]
@@ -592,7 +593,7 @@ mod tests {
         assert_eq!(req, Request::A);
         assert!(message_id.is_none());
 
-        assert_eq!(fix.tx_and_rx_mesages_metrics(), (1, 1));
+        assert_eq!(fix.tx_and_rx_messages_metrics(), (1, 1));
     }
 
     #[tokio::test]
@@ -613,7 +614,7 @@ mod tests {
             "received response RPC which didn't have matching request"
         );
 
-        assert_eq!(fix.tx_and_rx_mesages_metrics(), (1, 1));
+        assert_eq!(fix.tx_and_rx_messages_metrics(), (1, 1));
     }
 
     #[tokio::test]

@@ -1,0 +1,9 @@
+# r0vm --api 0.0.0.0:8000 --addr 1.2.3.4:9000 --storage /mnt/storage/risc0
+
+version = 1
+
+[api]
+listen = "0.0.0.0:8000"
+
+[storage]
+path = "/mnt/storage/risc0"

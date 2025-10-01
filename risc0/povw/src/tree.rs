@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{
     cmp::Ordering,
@@ -36,7 +37,7 @@ use crate::{
 
 type U96 = Uint<96, 2>;
 
-// NOTE: The ruint U256 type is not special here. It's just a convinient bitmap.
+// NOTE: The ruint U256 type is not special here. It's just a convenient bitmap.
 /// 256-bit bitmap for tracking used nonces within PoVW jobs.
 ///
 /// Used as leaves in Merkle trees to efficiently represent which nonce indices
@@ -111,7 +112,7 @@ impl From<Bitmap> for [u8; 32] {
 ///
 /// Organizes work logs by their 160-bit log IDs and provides Merkle tree operations
 /// for proving nonce inclusion/non-inclusion across all logs.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[non_exhaustive]
 pub struct WorkSet {
     /// Map of work log IDs to their corresponding work logs.
@@ -191,7 +192,7 @@ impl WorkSet {
         let index: PovwLogId = index.to();
         let height_offset = height - WorkLog::TREE_HEIGHT;
 
-        // A level of the tree, holding only roots of non-empty subtrees that are decendents of the
+        // A level of the tree, holding only roots of non-empty subtrees that are descendants of the
         // desired root.
         let mut level: BTreeMap<PovwLogId, Digest> = self
             .logs
@@ -240,7 +241,7 @@ impl WorkSet {
 ///
 /// Organizes jobs by their 64-bit job IDs and provides Merkle tree operations
 /// for proving nonce inclusion/non-inclusion within this log.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[non_exhaustive]
 pub struct WorkLog {
     /// Map of job IDs to their corresponding jobs.
@@ -349,8 +350,8 @@ impl WorkLog {
         let index: u64 = index.to();
         let height_offset = height - Job::TREE_HEIGHT;
 
-        // A level of the tree, holding only roots of non-empty subtrees that are decendents of the
-        // desired root. Starts holding all decendent nodes at Job::TREE_HEIGHT + 1.
+        // A level of the tree, holding only roots of non-empty subtrees that are descendants of the
+        // desired root. Starts holding all descendent nodes at Job::TREE_HEIGHT + 1.
         let mut level: BTreeMap<u64, Digest> = self
             .jobs
             .iter()
@@ -395,7 +396,7 @@ impl WorkLog {
 ///
 /// Stores the maximum used nonce index as a shorthand for the range [0, index_max].
 /// When set to None, represents an empty job with no used nonces.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[non_exhaustive]
 pub struct Job {
     /// Only store the max used index, as a shorthand for the range [0, index_max]. When set to
@@ -464,16 +465,16 @@ impl Job {
             return EMPTY_SUBTREE_ROOTS[height];
         };
 
-        // Check whether the requested subtree contains the boundry.
-        let boundry_level_index = index_max.checked_shr(8 + height as u32).unwrap_or(0);
-        match index.cmp(&boundry_level_index) {
+        // Check whether the requested subtree contains the boundary.
+        let boundary_level_index = index_max.checked_shr(8 + height as u32).unwrap_or(0);
+        match index.cmp(&boundary_level_index) {
             Ordering::Less => FULL_SUBTREE_ROOTS[height],
-            Ordering::Equal => self.boundry_subtree_root(height),
+            Ordering::Equal => self.boundary_subtree_root(height),
             Ordering::Greater => EMPTY_SUBTREE_ROOTS[height],
         }
     }
 
-    fn boundry_subtree_root(&self, height: usize) -> Digest {
+    fn boundary_subtree_root(&self, height: usize) -> Digest {
         let mut index: u32 = self.index_max.unwrap();
 
         // Get the leaf and consume the first 8 bits.

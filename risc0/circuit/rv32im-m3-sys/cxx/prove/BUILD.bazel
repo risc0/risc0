@@ -1,0 +1,11 @@
+cc_library(
+    name = "prove",
+    srcs = glob(["*.cpp"]),
+    hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core",
+        "//hal",
+        "//rv32im/emu",
+    ],
+)

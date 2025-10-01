@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #![allow(unused)]
 
@@ -36,19 +37,19 @@ use bonsai_sdk::responses::{
     CreateSessRes, ImgUploadRes, ProofReq, ReceiptDownload, SessionStats, SessionStatusRes,
     SnarkReq, SnarkStatusRes, UploadRes,
 };
-use kameo::actor::ActorRef;
-use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
-use risc0_zkvm::{Receipt, compute_image_id};
+use risc0_zkvm::{Receipt, compute_image_id, rpc::JobRequest};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tokio::net::TcpListener;
 use uuid::Uuid;
 
 use crate::actors::{
+    actor::ActorRef,
+    allocator::PROXY_URL_PATH,
     manager::ManagerActor,
     protocol::{
-        JobInfo, JobStatus, JobStatusReply, JobStatusRequest, ProofRequest, ProofResult,
-        ShrinkWrapKind, ShrinkWrapRequest, ShrinkWrapResult, TaskError,
+        CreateJobRequest, JobInfo, JobStatus, JobStatusReply, JobStatusRequest, ProofRequest,
+        ProofResult, ShrinkWrapKind, ShrinkWrapRequest, ShrinkWrapResult, TaskError,
     },
 };
 
@@ -280,7 +281,7 @@ async fn image_upload(
         return Err(AppError::ImgAlreadyExists(image_id));
     }
     Ok(Json(ImgUploadRes {
-        url: format!("http://{hostname}/images/upload/{image_id}"),
+        url: format!("http://{hostname}{PROXY_URL_PATH}/images/upload/{image_id}"),
     }))
 }
 
@@ -319,7 +320,7 @@ async fn input_upload(
 ) -> Result<Json<UploadRes>, AppError> {
     let input_id = Uuid::new_v4();
     Ok(Json(UploadRes {
-        url: format!("http://{hostname}/inputs/upload/{input_id}"),
+        url: format!("http://{hostname}{PROXY_URL_PATH}/inputs/upload/{input_id}"),
         uuid: input_id.to_string(),
     }))
 }
@@ -351,7 +352,7 @@ async fn receipt_upload(
 ) -> Result<Json<UploadRes>, AppError> {
     let receipt_id = Uuid::new_v4();
     Ok(Json(UploadRes {
-        url: format!("http://{hostname}/receipts/upload/{receipt_id}"),
+        url: format!("http://{hostname}{PROXY_URL_PATH}/receipts/upload/{receipt_id}"),
         uuid: receipt_id.to_string(),
     }))
 }
@@ -411,12 +412,14 @@ async fn prove_stark(
 
     let reply = state
         .manager
-        .ask(ProofRequest {
-            binary,
-            input,
-            assumptions,
-            segment_limit_po2: state.po2,
-            execute_only: proof_req.execute_only,
+        .ask(CreateJobRequest {
+            request: JobRequest::Proof(ProofRequest {
+                binary,
+                input,
+                assumptions,
+                segment_limit_po2: state.po2,
+                execute_only: proof_req.execute_only,
+            }),
         })
         .await
         .context("Failed to create job")?;
@@ -498,7 +501,7 @@ async fn stark_status(
         let receipt_url = result
             .receipt
             .is_some()
-            .then(|| format!("http://{hostname}/receipts/stark/receipt/{job_id}"));
+            .then(|| format!("http://{hostname}{PROXY_URL_PATH}/receipts/stark/receipt/{job_id}"));
         (Some(stats), receipt_url)
     } else {
         (None, None)
@@ -552,7 +555,7 @@ async fn receipt_download(
 ) -> Result<Json<ReceiptDownload>, AppError> {
     let _receipt_path = get_receipt_path(&state, &job_id)?;
     Ok(Json(ReceiptDownload {
-        url: format!("http://{hostname}/receipts/stark/receipt/{job_id}"),
+        url: format!("http://{hostname}{PROXY_URL_PATH}/receipts/stark/receipt/{job_id}"),
     }))
 }
 
@@ -589,9 +592,11 @@ async fn prove_groth16(
 
     let reply = state
         .manager
-        .ask(ShrinkWrapRequest {
-            kind: ShrinkWrapKind::Groth16,
-            receipt,
+        .ask(CreateJobRequest {
+            request: JobRequest::ShrinkWrap(ShrinkWrapRequest {
+                kind: ShrinkWrapKind::Groth16,
+                receipt,
+            }),
         })
         .await
         .context("Failed to create job")?;
@@ -612,7 +617,7 @@ async fn groth16_status(
     let output = status
         .result
         .is_some()
-        .then(|| format!("http://{hostname}/receipts/groth16/receipt/{job_id}"));
+        .then(|| format!("http://{hostname}{PROXY_URL_PATH}/receipts/groth16/receipt/{job_id}"));
     Ok(Json(SnarkStatusRes {
         output,
         error_msg: status.error_msg,
@@ -657,7 +662,7 @@ pub(crate) async fn run(
     storage_root: PathBuf,
     manager: ActorRef<ManagerActor>,
     po2: Option<u32>,
-) -> Result<()> {
+) -> Result<SocketAddr> {
     let app_state = AppState::new(storage_root, manager, po2)
         .await
         .context("Failed to initialize AppState")?;
@@ -665,16 +670,20 @@ pub(crate) async fn run(
         .await
         .context("Failed to bind a TCP listener")?;
 
-    tracing::info!("REST API listening on: {addr}");
-    axum::serve(listener, self::app(app_state))
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-        .context("REST API service failed")?;
+    let addr = listener.local_addr()?;
+    tracing::info!("Manager version-specific REST API listening on: {addr}");
 
-    Ok(())
+    tokio::spawn(async move {
+        axum::serve(listener, self::app(app_state))
+            .with_graceful_shutdown(shutdown_signal())
+            .await
+            .expect("REST API service shouldn't fail");
+    });
+
+    Ok(addr)
 }
 
-async fn shutdown_signal() {
+pub async fn shutdown_signal() {
     let ctrl_c = async {
         tokio::signal::ctrl_c()
             .await

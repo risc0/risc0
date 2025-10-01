@@ -1,0 +1,12 @@
+filegroup(
+    name = "files",
+    srcs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "hal",
+    hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+    deps = ["//zkp"],
+)

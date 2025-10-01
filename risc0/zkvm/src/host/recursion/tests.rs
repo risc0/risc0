@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{collections::VecDeque, sync::LazyLock};
 
@@ -225,10 +226,10 @@ fn test_recursion_lift_then_unwrap_povw() {
 
     // Unwrap the receipt over WorkClaim<ReceiptClaim> into a receipt over ReceiptClaim
     tracing::info!("Proving unwrap_povw");
-    let unwraped: SuccinctReceipt<ReceiptClaim> = unwrap_povw(&lifted).unwrap();
-    unwraped.verify_integrity_with_context(&ctx).unwrap();
+    let unwrapped: SuccinctReceipt<ReceiptClaim> = unwrap_povw(&lifted).unwrap();
+    unwrapped.verify_integrity_with_context(&ctx).unwrap();
 
-    let receipt = Receipt::new(InnerReceipt::Succinct(unwraped), journal.bytes);
+    let receipt = Receipt::new(InnerReceipt::Succinct(unwrapped), journal.bytes);
     receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
@@ -567,7 +568,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("a54dc85ac99f851c92d7c96d7318af41dbe7c0194edfcc37eb4d422a998c1f56")
+        digest!("c9cd2d004642e46838bdef0c4f426d2608af844fd193ee594658ce5947faa218")
     );
 }
 

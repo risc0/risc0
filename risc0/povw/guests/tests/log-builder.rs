@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use anyhow::{Context, anyhow};
 use risc0_binfmt::{PovwJobId, PovwLogId, PovwNonce};
@@ -29,7 +30,7 @@ use ruint::uint;
 
 fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     let mut env_builder = ExecutorEnv::builder();
-    env_builder.write_frame(&borsh::to_vec(&input)?);
+    env_builder.write_frame(&input.encode()?);
 
     for update in &input.updates {
         env_builder.add_assumption(FakeReceipt::new(update.claim.clone()));
@@ -38,7 +39,7 @@ fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     if let State::Continuation { ref journal } = input.state {
         env_builder.add_assumption(FakeReceipt::new(ReceiptClaim::ok(
             RISC0_POVW_LOG_BUILDER_ID,
-            borsh::to_vec(journal)?,
+            journal.encode()?,
         )));
     }
 
@@ -47,7 +48,7 @@ fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     let session_info = default_executor().execute(env, RISC0_POVW_LOG_BUILDER_ELF)?;
     assert_eq!(session_info.exit_code, ExitCode::Halted(0));
 
-    let decoded_journal: Journal = borsh::from_slice(&session_info.journal.bytes)?;
+    let decoded_journal = Journal::decode(&session_info.journal.bytes)?;
     println!("decoded_journal: {decoded_journal:#?}");
 
     Ok(decoded_journal)
@@ -74,7 +75,7 @@ fn rand_claim() -> MaybePruned<Unknown> {
     MaybePruned::Pruned(Digest::new(rand::random()))
 }
 
-/// Proves the busy loop test utility, using default_prover, which is guarenteed to run for at
+/// Proves the busy loop test utility, using default_prover, which is guaranteed to run for at
 /// least as many user cycles as is given in the cycles argument.
 fn prove_busy_loop(job_id: PovwJobId, cycles: u64) -> anyhow::Result<ProveInfo> {
     let env = ExecutorEnv::builder()
@@ -289,7 +290,7 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
         .context("failed to prover work log update")?;
 
     proven_log_info.receipt.verify(RISC0_POVW_LOG_BUILDER_ID)?;
-    let journal: Journal = borsh::from_slice(&proven_log_info.receipt.journal.bytes)?;
+    let journal = Journal::decode(&proven_log_info.receipt.journal.bytes)?;
 
     let first_update_commit = prover.work_log.commit();
     let expected_journal = Journal::builder()
@@ -323,7 +324,7 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
         .context("failed to prover work log update")?;
 
     proven_log_info.receipt.verify(RISC0_POVW_LOG_BUILDER_ID)?;
-    let journal: Journal = borsh::from_slice(&proven_log_info.receipt.journal.bytes)?;
+    let journal = Journal::decode(&proven_log_info.receipt.journal.bytes)?;
 
     let second_update_commit = prover.work_log.commit();
     let expected_journal = Journal::builder()
@@ -339,7 +340,7 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
 
     // Prove another update, this time rebuilding the prover with provided work log and receipt to
     // resume the previous state, like what might be done if the state is being deserialized from
-    // peristent storage.
+    // persistent storage.
 
     let work_info = prove_busy_loop(
         PovwJobId {
@@ -367,7 +368,7 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
         .context("failed to prover work log update")?;
 
     proven_log_info.receipt.verify(RISC0_POVW_LOG_BUILDER_ID)?;
-    let journal: Journal = borsh::from_slice(&proven_log_info.receipt.journal.bytes)?;
+    let journal = Journal::decode(&proven_log_info.receipt.journal.bytes)?;
 
     let expected_journal = Journal::builder()
         .work_log_id(work_log_id)
@@ -435,7 +436,7 @@ fn reject_invalid_continuation_journal_verification() {
 
     // Execute without adding FakeReceipt for continuation journal
     let env = ExecutorEnv::builder()
-        .write_frame(&borsh::to_vec(&input).unwrap())
+        .write_frame(&input.encode().unwrap())
         .build()
         .unwrap();
     let result = default_executor().execute(env, RISC0_POVW_LOG_BUILDER_ELF);
@@ -466,11 +467,11 @@ fn reject_mismatched_self_image_id_in_journal() {
         .expect("failed to build input");
 
     let env = ExecutorEnv::builder()
-        .write_frame(&borsh::to_vec(&input).unwrap())
+        .write_frame(&input.encode().unwrap())
         // Add the journal assumption so it passes verification
         .add_assumption(FakeReceipt::new(ReceiptClaim::ok(
             RISC0_POVW_LOG_BUILDER_ID,
-            borsh::to_vec(&journal).unwrap(),
+            journal.encode().unwrap(),
         )))
         .build()
         .unwrap();
@@ -507,7 +508,7 @@ fn reject_work_assumption_verification_fails() {
 
     // Execute without adding the work claim assumption
     let env = ExecutorEnv::builder()
-        .write_frame(&borsh::to_vec(&input).unwrap())
+        .write_frame(&input.encode().unwrap())
         .build()
         .unwrap();
     let result = default_executor().execute(env, RISC0_POVW_LOG_BUILDER_ELF);

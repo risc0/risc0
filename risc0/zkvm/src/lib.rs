@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(rustdoc::broken_intra_doc_links)]
@@ -155,9 +156,9 @@ pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest};
 pub use {
     self::host::{
         prove_info::{ProveInfo, SessionStats},
-        recursion::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
+        recursion::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID},
     },
-    risc0_binfmt::compute_image_id,
+    risc0_binfmt::{compute_image_id, compute_kernel_id},
     risc0_groth16::Seal as Groth16Seal,
 };
 
@@ -191,7 +192,7 @@ pub fn get_version() -> Result<Version, semver::Error> {
 /// Returns `true` if dev mode is enabled.
 #[cfg(feature = "std")]
 #[deprecated(
-    note = "dev-mode can be enabled programatically, so this function is no longer authoritative. \
+    note = "dev-mode can be enabled programmatically, so this function is no longer authoritative. \
             Use `ProverOpts::is_dev_mode` or `VerifierContext::is_dev_mode`"
 )]
 pub fn is_dev_mode() -> bool {

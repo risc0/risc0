@@ -1,0 +1,16 @@
+cc_library(
+    name = "pick",
+    srcs = [],
+    data = select({
+        "@platforms//os:osx": ["//hal/metal/kernels"],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//hal/cpu",
+    ] + select({
+        "@platforms//os:osx": ["//hal/metal"],
+        "@rules_cuda//cuda:is_enabled": ["//hal/cuda"],
+        "//conditions:default": ["//hal/fakegpu"],
+    }),
+)

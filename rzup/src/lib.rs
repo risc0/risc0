@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 mod build;
 #[cfg(feature = "cli")]
@@ -159,9 +160,9 @@ impl Rzup {
     /// # Arguments
     /// * `force` - If true, reinstalls even if already installed
     #[cfg_attr(not(feature = "cli"), expect(dead_code))]
-    pub(crate) fn install_all(&mut self, force: bool) -> Result<()> {
+    pub(crate) fn install_default(&mut self, force: bool) -> Result<()> {
         self.registry
-            .install_all_components(&self.environment, force)?;
+            .install_default_components(&self.environment, force)?;
         Ok(())
     }
 
@@ -2935,7 +2936,7 @@ mod tests {
     }
 
     #[test]
-    fn list_legacy_versions_cargo_risczero_install_aaple_aarch64() {
+    fn list_legacy_versions_cargo_risczero_install_apple_aarch64() {
         list_legacy_versions(
             "rust_aarch64-apple-darwin_r0.1.79.0",
             "rust_aarch64-apple-darwin_r0.1.81.0",

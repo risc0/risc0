@@ -1,0 +1,29 @@
+[package]
+name = "risc0-circuit-rv32im-m3"
+description = "RISC Zero circuit for rv32im"
+version = "0.0.0"
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+publish = false
+
+[package.metadata.release]
+release = false
+
+[dependencies]
+risc0-binfmt = { workspace = true }
+risc0-circuit-rv32im-m3-sys = { workspace = true }
+risc0-sys = { workspace = true, optional = true }
+
+[dev-dependencies]
+flate2 = "1.0"
+gpu-guard = { workspace = true }
+tar = "0.4"
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
+
+[features]
+cuda = ["prove", "risc0-circuit-rv32im-m3-sys/cuda", "risc0-sys/cuda"]
+default = []
+prove = ["dep:risc0-sys", "std"]
+std = []

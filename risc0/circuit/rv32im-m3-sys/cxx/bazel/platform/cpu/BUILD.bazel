@@ -1,0 +1,5 @@
+constraint_value(
+    name = "riscv32im",
+    constraint_setting = "@platforms//cpu",
+    visibility = ["//visibility:public"],
+)

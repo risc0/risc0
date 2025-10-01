@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{borrow::Cow, convert::Infallible};
 
@@ -18,7 +19,8 @@ use anyhow::{Context, anyhow, ensure};
 use derive_builder::Builder;
 use risc0_binfmt::PovwLogId;
 use risc0_zkvm::{
-    Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, Receipt, WorkClaim, compute_image_id,
+    Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, ProverOpts, Receipt, VerifierContext,
+    WorkClaim, compute_image_id,
 };
 
 use crate::{
@@ -28,9 +30,11 @@ use crate::{
     },
 };
 
+// NOTE: The owned pattern is used here because verifier_ctx does not impl Clone.
 /// A stateful prover for work log updates which runs the Log Builder to produce a receipt for each
 /// update to the work log.
-#[derive(Clone, Debug, Builder)]
+#[derive(Builder)]
+#[builder(pattern = "owned")]
 #[non_exhaustive]
 pub struct WorkLogUpdateProver<P> {
     /// The underlying RISC Zero zkVM [Prover].
@@ -58,11 +62,19 @@ pub struct WorkLogUpdateProver<P> {
     /// Defaults to the Log Builder program that is built into this crate.
     #[builder(setter(custom), default = "RISC0_POVW_LOG_BUILDER_ELF.into()")]
     pub log_builder_program: Cow<'static, [u8]>,
+    /// [ProverOpts] to use when proving the log update.
+    #[builder(default)]
+    pub prover_opts: ProverOpts,
+    /// [VerifierContext] to use when proving the log update. This only needs to be set when using
+    /// non-standard verifier parameters.
+    #[builder(default)]
+    pub verifier_ctx: VerifierContext,
 }
 
 impl<P> WorkLogUpdateProverBuilder<P> {
     /// Set the underlying RISC Zero zkVM [Prover].
-    pub fn prover<Q>(&mut self, prover: Q) -> WorkLogUpdateProverBuilder<Q> {
+    #[must_use]
+    pub fn prover<Q>(self, prover: Q) -> WorkLogUpdateProverBuilder<Q> {
         WorkLogUpdateProverBuilder {
             prover: Some(prover),
             log_id: self.log_id,
@@ -70,16 +82,18 @@ impl<P> WorkLogUpdateProverBuilder<P> {
             continuation: self.continuation.clone(),
             log_builder_id: self.log_builder_id,
             log_builder_program: self.log_builder_program.clone(),
+            prover_opts: self.prover_opts.clone(),
+            verifier_ctx: self.verifier_ctx,
         }
     }
 
     /// Set the work log, continuing proving from a prior proven state.
     pub fn work_log(
-        &mut self,
+        self,
         work_log: WorkLog,
         continuation_receipt: Receipt,
-    ) -> anyhow::Result<&mut Self> {
-        let journal: Journal = borsh::from_slice(&continuation_receipt.journal.bytes)
+    ) -> anyhow::Result<Self> {
+        let journal = Journal::decode(&continuation_receipt.journal.bytes)
             .context("failed to deserialize continuation receipt journal")?;
 
         // NOTE: We could also check the self_image_id and work_log_id. However, these values may
@@ -92,21 +106,26 @@ impl<P> WorkLogUpdateProverBuilder<P> {
             journal.updated_commit
         );
 
-        self.work_log = Some(work_log);
-        self.continuation = Some(Some((journal, continuation_receipt)));
-        Ok(self)
+        Ok(Self {
+            work_log: Some(work_log),
+            continuation: Some(Some((journal, continuation_receipt))),
+            ..self
+        })
     }
 
-    /// Set the Log Builder program, returning error is the image ID cannot be calculated.
+    /// Set the Log Builder program, returning error if the image ID cannot be calculated.
     pub fn log_builder_program(
-        &mut self,
+        self,
         program: impl Into<Cow<'static, [u8]>>,
-    ) -> anyhow::Result<&mut Self> {
+    ) -> anyhow::Result<Self> {
         let program = program.into();
         let image_id = compute_image_id(&program)?;
-        self.log_builder_program = Some(program);
-        self.log_builder_id = Some(image_id);
-        Ok(self)
+
+        Ok(Self {
+            log_builder_program: Some(program),
+            log_builder_id: Some(image_id),
+            ..self
+        })
     }
 }
 
@@ -161,7 +180,7 @@ impl<P: Prover> WorkLogUpdateProver<P> {
             );
             ensure!(
                 self.log_id == work.nonce_max.log,
-                "work claim nonce min log id is not equal to the expected log id: {} != {}",
+                "work claim nonce max log id is not equal to the expected log id: {} != {}",
                 work.nonce_max.log,
                 self.log_id
             );
@@ -195,18 +214,27 @@ impl<P: Prover> WorkLogUpdateProver<P> {
         };
 
         let env = env_builder
-            .write_frame(&borsh::to_vec(&input)?)
+            .write_frame(&input.encode()?)
             .build()
             .context("failed to build ExecutorEnv")?;
 
+        // NOTE: This may block the current thread for a significant amount of time. It is not
+        // trivial to wrap this statement in e.g. tokio's spawn_blocking because self contains
+        // a VerifierContext which does not implement Send. If this causes any issues, the caller
+        // can mitigate the issue by building and calling the prover in a separate thread.
         let prove_info = self
             .prover
-            .prove(env, &self.log_builder_program)
+            .prove_with_ctx(
+                env,
+                &self.verifier_ctx,
+                &self.log_builder_program,
+                &self.prover_opts,
+            )
             .context("failed to prove work log builder")?;
 
         // Set the continuation update on this prover such that if this method is called again, the
         // Log Builder state will be loaded.
-        let journal: Journal = borsh::from_slice(&prove_info.receipt.journal.bytes)
+        let journal = Journal::decode(&prove_info.receipt.journal.bytes)
             .context("failed to deserialize journal from proven work log update")?;
         self.continuation = Some((journal, prove_info.receipt.clone()));
 

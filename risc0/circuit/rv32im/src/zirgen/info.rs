@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 // This code is automatically generated
 
@@ -51,11 +52,11 @@ pub const POLY_MIX_POWERS: &[usize] = &[
     362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380,
     381, 382, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399,
     400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418,
-    419, 420, 453, 456, 471, 487, 513, 521, 578, 586, 621, 635, 651, 658, 670, 681, 704, 705, 706,
-    707, 708, 709, 710, 711, 712, 713, 714, 715, 716, 717, 718, 719, 720, 721, 722, 723, 724, 725,
-    726, 727, 728, 729, 761, 825, 828, 853, 854, 855, 856, 857, 858, 859, 860, 861, 862, 863, 864,
-    865, 866, 867, 868, 869, 870, 871, 872, 1007, 1040, 1127, 1214, 1428, 1544, 1825, 2301, 2452,
-    2620, 3504, 3924, 5931, 6340, 7044, 7760, 7761, 7762, 7763, 7764, 7765, 7766, 7767, 7768, 7769,
-    7770, 7771, 7772, 7773, 7776, 7779, 7782, 7786, 7789, 7792, 7796, 7806, 7816, 7826, 7840, 7857,
-    7867, 7878, 7898, 7908, 7927, 7929, 7936,
+    419, 420, 456, 467, 471, 487, 513, 521, 578, 586, 635, 651, 658, 670, 681, 704, 705, 706, 707,
+    708, 709, 710, 711, 712, 713, 714, 715, 716, 717, 718, 719, 720, 721, 722, 723, 724, 725, 726,
+    727, 728, 729, 740, 761, 828, 839, 853, 854, 855, 856, 857, 858, 859, 860, 861, 862, 863, 864,
+    865, 866, 867, 868, 869, 870, 871, 872, 1009, 1040, 1127, 1214, 1430, 1544, 1825, 2303, 2454,
+    2622, 3520, 3940, 5947, 6356, 7060, 7776, 7777, 7778, 7779, 7780, 7781, 7782, 7783, 7784, 7785,
+    7786, 7787, 7788, 7789, 7792, 7795, 7798, 7802, 7805, 7808, 7812, 7822, 7832, 7842, 7856, 7873,
+    7883, 7894, 7914, 7924, 7943, 7945, 7952,
 ];

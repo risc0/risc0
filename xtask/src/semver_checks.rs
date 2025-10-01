@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Runs `cargo-semver-checks` on the crates in the workspace found in the current directory.
 //! Additionally, for any crates which have the same version as their baseline, we check if it has
@@ -76,7 +77,7 @@ impl Write for PrintStdout {
     }
 }
 
-/// Receive output from `ChannelWriter`, echos them to `eprint` calls and also saves the output and
+/// Receive output from `ChannelWriter`, echoes it to `eprint` calls and also saves the output and
 /// returns it.
 fn tee_semver_output(recv: std::sync::mpsc::Receiver<Vec<u8>>) -> Vec<u8> {
     let mut output = vec![];
@@ -222,7 +223,7 @@ fn vendor_packages(
     Ok(project_dir.join("vendor"))
 }
 
-/// Runs some command, checks for errors, and forwards output from stdout / stderr to `print and
+/// Runs some command, checks for errors, and forwards output from stdout / stderr to `print` and
 /// `eprint` which allows the test fixture to capture the output.
 fn run_command(cmd: &mut Command, error_message: &str) -> Result<()> {
     let context = format!(
@@ -784,7 +785,7 @@ mod tests {
     use std::collections::HashMap;
 
     #[test]
-    fn sermver_output_parsing() {
+    fn semver_output_parsing() {
         let output = SemverOutput::parse(
             "
             Building risc0-foobar v1.4.0 (current)

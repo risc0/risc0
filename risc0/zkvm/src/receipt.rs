@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Manages the output and cryptographic data for a proven computation.
 
@@ -125,7 +126,7 @@ pub struct Receipt {
     /// Metadata providing context on the receipt, about the proving system, SDK versions, and other
     /// information to help with interoperability. It is not cryptographically bound to the receipt,
     /// and should not be used for security-relevant decisions, such as choosing whether or not to
-    /// accept a receipt based on it's stated version.
+    /// accept a receipt based on its stated version.
     pub metadata: ReceiptMetadata,
 }
 
@@ -228,8 +229,8 @@ impl Receipt {
             journal: MaybePruned::Pruned(self.journal.digest()),
             // TODO(#982): It would be reasonable for this method to allow integrity verification
             // for receipts that have a non-empty assumptions list, but it is not supported here
-            // because we don't have a enough information to open the assumptions list unless we
-            // require it be empty.
+            // because we don't have enough information to open the assumptions list unless we
+            // require it to be empty.
             assumptions: Assumptions(vec![]).into(),
         });
 
@@ -309,10 +310,10 @@ pub enum InnerReceipt {
     /// A non-succinct [CompositeReceipt], made up of one inner receipt per segment.
     Composite(CompositeReceipt),
 
-    /// A [SuccinctReceipt], proving arbitrarily long zkVM computions with a single STARK.
+    /// A [SuccinctReceipt], proving arbitrarily long zkVM computations with a single STARK.
     Succinct(SuccinctReceipt<ReceiptClaim>),
 
-    /// A [Groth16Receipt], proving arbitrarily long zkVM computions with a single Groth16 SNARK.
+    /// A [Groth16Receipt], proving arbitrarily long zkVM computations with a single Groth16 SNARK.
     Groth16(Groth16Receipt<ReceiptClaim>),
 
     /// A [FakeReceipt], with no cryptographic integrity, used only for development.
@@ -607,7 +608,7 @@ impl<Claim> FakeReceipt<Claim> {
 impl TryFrom<FakeReceipt<ReceiptClaim>> for Receipt {
     type Error = PrunedValueError;
 
-    /// Try to create a [Receipt] from a [FakeReceipt]. In order to succeed, the jounal must be
+    /// Try to create a [Receipt] from a [FakeReceipt]. In order to succeed, the journal must be
     /// populated on the receipt claim (i.e. it cannot be pruned).
     fn try_from(fake_receipt: FakeReceipt<ReceiptClaim>) -> Result<Self, Self::Error> {
         // Attempt to copy the journal from the receipt claim, returning an error if pruned.

@@ -1,0 +1,41 @@
+name: bazelisk installer
+description: Install bazelisk
+runs:
+  using: composite
+  steps:
+    - if: runner.os == 'Linux'
+      run: |
+        echo "BAZELISK_OS=linux" >> $GITHUB_ENV
+      shell: bash
+
+    - if: runner.os == 'macOS'
+      run: |
+        echo "BAZELISK_OS=darwin" >> $GITHUB_ENV
+      shell: bash
+
+    - if: runner.arch == 'X64'
+      run: |
+        echo "BAZELISK_ARCH=amd64" >> $GITHUB_ENV
+      shell: bash
+
+    - if: runner.arch == 'ARM64'
+      run: |
+        echo "BAZELISK_ARCH=arm64" >> $GITHUB_ENV
+      shell: bash
+
+    - env:
+        BAZELISK_URL: https://github.com/bazelbuild/bazelisk/releases/download
+        BAZELISK_VERSION: v1.16.0
+      run: |
+        if ! command -v bazelisk &>/dev/null; then
+          BAZELISK_FILE=bazelisk-$BAZELISK_OS-$BAZELISK_ARCH
+          curl -L -O "$BAZELISK_URL/$BAZELISK_VERSION/$BAZELISK_FILE"
+          mkdir -p $HOME/.local/bin
+          mv -f $BAZELISK_FILE $HOME/.local/bin/bazelisk
+          chmod +x $HOME/.local/bin/bazelisk
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        fi
+      shell: bash
+
+    - run: bazelisk --version
+      shell: bash

@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use alloc::{collections::BTreeSet, string::String, vec::Vec};
 
@@ -54,7 +55,7 @@ pub struct SegmentReceipt {
 
     /// A digest of the verifier parameters that can be used to verify this receipt.
     ///
-    /// Acts as a fingerprint to identity differing proof system or circuit versions between a
+    /// Acts as a fingerprint to identify differing proof system or circuit versions between a
     /// prover and a verifier. Is not intended to contain the full verifier parameters, which must
     /// be provided by a trusted source (e.g. packaged with the verifier code).
     pub verifier_parameters: Digest,

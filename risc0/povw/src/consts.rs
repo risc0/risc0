@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use risc0_zkvm::{Digest, digest};
 
@@ -18,7 +19,7 @@ use crate::WorkSet;
 
 /// List of pre-calculated subtree roots with all-empty bitmaps for leaves.
 ///
-/// Indexed by the hieght with height zero defined as the value of the leaf.
+/// Indexed by the height with height zero defined as the value of the leaf.
 pub(crate) const EMPTY_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
     digest!("a505c1affa9b6d2ed829d837d14eb8614f198bfc7f40e3c438ac9e366f410073"),
     digest!("6603858652cd6a283a3df113a010d2b05e56d65539bd1fba68d732529eaa88da"),
@@ -273,7 +274,7 @@ pub(crate) const EMPTY_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
 
 /// List of pre-calculated subtree roots with all-full bitmaps for leaves.
 ///
-/// Indexed by the hieght with height zero defined as the value of the leaf.
+/// Indexed by the height with height zero defined as the value of the leaf.
 pub(crate) const FULL_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
     digest!("db015763e201a3f7e51178938859ce0f6c6d9c3457f42b0dc9244c3ab65ebe89"),
     digest!("bb025bc4bcfefdbd43a39e0507738a3efc6137465e70f4682926cb3b7d201103"),
