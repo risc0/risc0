@@ -25,6 +25,9 @@
 #include "poseidon2.cuh"
 //#include "poseidon254.cuh"
 
+#include <thrust/execution_policy.h>
+#include <thrust/scan.h>
+
 extern "C" RustError::by_value
 sppark_poseidon2_fold(poseidon_out_t* d_out, const poseidon_in_t* d_in, size_t num_hashes) {
   const gpu_t& gpu = select_gpu();
@@ -153,18 +156,8 @@ sppark_poseidon254_rows(alt_bn128::fr_t* d_out, const fr_t* d_in, size_t count, 
 
 #endif
 
-extern "C" RustError::by_value sppark_prefix_sum(fr_t d_inout[/*count*/], uint32_t count) {
-  const gpu_t& gpu = select_gpu();
-
-  try {
-    prefix_op<Add<fr_t>>(d_inout, count, gpu);
-    gpu.sync();
-  } catch (const cuda_error& e) {
-    gpu.sync();
-    return RustError{e.code(), e.what()};
-  }
-
-  return RustError{cudaSuccess};
+extern "C" void prefix_sum(fr_t* buf, uint32_t count) {
+  thrust::inclusive_scan(thrust::device, buf, buf + count, buf);
 }
 
 extern "C" RustError::by_value
