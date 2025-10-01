@@ -22,10 +22,10 @@
 
 use std::{
     path::Path,
-    process::{Command, Stdio},
+    process::{Command, ExitStatus, Stdio},
 };
 
-use anyhow::{Result, bail};
+use anyhow::{Result, anyhow, bail};
 use tempfile::tempdir;
 
 use super::seal_to_json::to_json;
@@ -60,14 +60,7 @@ pub(crate) fn shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         .stderr(Stdio::piped())
         .output()?;
     if !output.status.success() {
-        let hint = match output.status.code() {
-            Some(126) => "\nThis process may not have permission to run containers.",
-            _ => "",
-        };
-        bail!(
-            "docker returned failure exit code: {:?}{hint}",
-            output.status.code()
-        );
+        return Err(error_from_status(output.status));
     }
 
     tracing::debug!("Parsing proof");
@@ -82,4 +75,14 @@ fn is_docker_installed() -> bool {
         .output()
         .map(|output| output.status.success())
         .unwrap_or(false)
+}
+
+fn error_from_status(status: ExitStatus) -> anyhow::Error {
+    let err = anyhow!("docker returned failure exit code: {:?}", status.code());
+
+    // Add a hint to the error context for certain error codes.
+    match status.code() {
+        Some(126) => err.context("This process may not have permission to run containers."),
+        _ => err,
+    }
 }
