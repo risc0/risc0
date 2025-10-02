@@ -634,7 +634,7 @@ impl AllocatorActor {
 /// The idea is for the allocator to choose which worker is the least busy. The allocator reserves
 /// the right to not reply immediately. It could be that all the workers already have deep queues
 /// and the best move is to wait until one becomes less busy.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ScheduleTask {
     pub candidates: Vec<WorkerId>,
     pub task_id: GlobalId,
