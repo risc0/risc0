@@ -67,7 +67,7 @@ impl FactoryActor {
 impl Actor for FactoryActor {
     async fn on_stop(&mut self) {
         for worker in self.worker_actors.values() {
-            let _ = worker.stop_gracefully().await;
+            let _ = worker.stop_gracefully();
         }
 
         for task in self.pending_tasks.iter().chain(self.active_tasks.values()) {
@@ -152,7 +152,7 @@ impl FactoryActor {
         if let Err(error) = res {
             tracing::error!("Factory has encountered fatal error: {error:?}");
 
-            let _ = self_ref.stop_gracefully().await;
+            let _ = self_ref.stop_gracefully();
         }
     }
 }

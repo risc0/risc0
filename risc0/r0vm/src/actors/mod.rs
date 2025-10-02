@@ -622,14 +622,14 @@ impl App {
         self.allocator_rpc_server = None;
 
         if let Some(allocator) = self.allocator.take()
-            && allocator.stop_gracefully().await.is_ok()
+            && allocator.stop_gracefully().is_ok()
         {
             tracing::info!("allocator: wait for stop");
             allocator.wait_for_stop().await;
         }
 
         if let Some(manager) = self.manager.take()
-            && manager.stop_gracefully().await.is_ok()
+            && manager.stop_gracefully().is_ok()
         {
             tracing::info!("manager: wait for stop");
             manager.wait_for_stop().await;
@@ -638,12 +638,12 @@ impl App {
         tracing::info!("worker: stop");
         let workers = self.workers.lock().unwrap().clone();
         for worker in workers {
-            let _ = worker.stop_gracefully().await;
+            let _ = worker.stop_gracefully();
             worker.wait_for_stop().await;
         }
 
         if let Some(factory) = self.factory
-            && factory.stop_gracefully().await.is_ok()
+            && factory.stop_gracefully().is_ok()
         {
             tracing::info!("factory: wait for stop");
             factory.wait_for_stop().await;
@@ -780,7 +780,7 @@ async fn route_rpc_msg_to_worker(
     if let Some(msg) = msg {
         msg.dispatch(remote_address, worker, ops).await
     } else {
-        let _ = worker.stop_gracefully().await;
+        let _ = worker.stop_gracefully();
     }
 }
 
@@ -1091,7 +1091,7 @@ impl<ActorT: Send + 'static> Actor for RemoteActor<ActorT> {
         if let Some(rpc_death_recv) = self.rpc_death_recv.take() {
             tokio::task::spawn(async move {
                 let _ = rpc_death_recv.await;
-                let _ = actor_ref.stop_gracefully().await;
+                let _ = actor_ref.stop_gracefully();
             });
         }
     }
@@ -1123,7 +1123,7 @@ macro_rules! remote_actor_ask {
                     .await;
                 if let Err(error) = res {
                     tracing::error!("error communicating with remote actor: {error}");
-                    let _ = ctx.actor_ref().stop_gracefully().await;
+                    let _ = ctx.actor_ref().stop_gracefully();
                 }
             }
         }
@@ -1145,7 +1145,7 @@ macro_rules! remote_actor_tell {
                 let res = self.rpc_sender.tell(&msg).await;
                 if let Err(error) = res {
                     tracing::error!("error communicating with remote actor: {error}");
-                    let _ = ctx.actor_ref().stop_gracefully().await;
+                    let _ = ctx.actor_ref().stop_gracefully();
                 }
             }
         }

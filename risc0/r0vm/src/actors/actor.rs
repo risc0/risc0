@@ -283,7 +283,7 @@ impl<ActorT: Actor> ActorRef<ActorT> {
     /// Tell the actor to stop. After this call returns, any attempt to send a message to the actor
     /// will error with `SendError::ActorNotRunning`. The actor will process all existing messages
     /// in its queue before exiting.
-    pub async fn stop_gracefully(&self) -> Result<(), SendError> {
+    pub fn stop_gracefully(&self) -> Result<(), SendError> {
         if self.task.lock().unwrap().stop() {
             Ok(())
         } else {
@@ -596,7 +596,7 @@ mod tests {
         assert!(spy.started.load(Ordering::Acquire));
         assert!(!spy.stopped.load(Ordering::Acquire));
 
-        actor_ref.stop_gracefully().await.unwrap();
+        actor_ref.stop_gracefully().unwrap();
         actor_ref.wait_for_stop().await;
 
         assert!(spy.stopped.load(Ordering::Acquire));
@@ -608,7 +608,7 @@ mod tests {
         let actor_ref = spawn(actor);
 
         actor_ref.tell(Ping(12)).await.unwrap();
-        actor_ref.stop_gracefully().await.unwrap();
+        actor_ref.stop_gracefully().unwrap();
 
         assert_eq!(spy.ping.recv().await.unwrap(), Ping(12));
 
@@ -626,7 +626,7 @@ mod tests {
         tokio::task::yield_now().await;
         assert!(!wait_handle.is_finished());
 
-        actor_ref.stop_gracefully().await.unwrap();
+        actor_ref.stop_gracefully().unwrap();
 
         wait_handle.await.unwrap();
     }

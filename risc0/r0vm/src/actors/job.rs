@@ -86,7 +86,7 @@ impl JobActor {
             if let Some(reply_sender) = reply_sender {
                 reply_sender.send(reply);
             }
-            let _ = self_ref.stop_gracefully().await;
+            let _ = self_ref.stop_gracefully();
         });
     }
 }
