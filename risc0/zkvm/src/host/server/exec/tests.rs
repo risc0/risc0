@@ -1284,8 +1284,8 @@ fn keccak_update2() {
 }
 
 #[test_log::test]
-fn sha_single_keccak() {
-    multi_test(MultiTestSpec::ShaSingleKeccak);
+fn commit_single_keccak() {
+    multi_test(MultiTestSpec::CommitSingleKeccak);
 }
 
 #[test_log::test]

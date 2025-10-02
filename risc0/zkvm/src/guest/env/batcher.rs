@@ -48,10 +48,10 @@ impl KeccakBatcher {
 
     #[allow(dead_code)]
     pub(crate) fn update(&mut self, keccak_state: &mut KeccakState) {
-        sha_single_keccak(&mut self.claim_state, keccak_state);
+        commit_single_keccak(&mut self.claim_state, keccak_state);
         let status = unsafe { sys_keccak(keccak_state, keccak_state) };
         // at this point the keccak_state is output state resulting from keccak permutation.
-        sha_single_keccak(&mut self.claim_state, keccak_state);
+        commit_single_keccak(&mut self.claim_state, keccak_state);
         if status == 1 {
             // we've reached the limit. Create a proof request.
             self.flush();
@@ -104,7 +104,7 @@ impl KeccakBatcher {
     }
 }
 
-pub(crate) fn sha_single_keccak(claim_state: &mut Digest, keccak_state: &KeccakState) {
+pub(crate) fn commit_single_keccak(claim_state: &mut Digest, keccak_state: &KeccakState) {
     const ZEROES: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
 
     let keccak_state_u32 = keccak_state.as_ptr() as *const u32;
