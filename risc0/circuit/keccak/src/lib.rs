@@ -48,8 +48,8 @@ pub fn max_keccak_inputs(po2: usize) -> usize {
 /// Given a slice of `KeccakState`, encoded as `[u8]`, produce the SHA-256 digest matching what is produced by the keccak circuit.
 #[cfg(feature = "prove")]
 pub fn compute_keccak_digest(input: &[u8]) -> Digest {
-    use risc0_zkp::core::digest::{DIGEST_WORDS, Digest};
     use risc0_core::field::baby_bear::BabyBearElem;
+    use risc0_zkp::core::digest::{DIGEST_WORDS, Digest};
     use risc0_zkp::core::hash::poseidon2::{CELLS, poseidon2_mix};
 
     let mut transcript = vec![];

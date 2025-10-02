@@ -17,8 +17,8 @@ use core::ptr::{addr_of, addr_of_mut};
 
 use risc0_circuit_keccak::{KECCAK_CONTROL_ROOT, KeccakState};
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
-use risc0_zkp::core::{digest::Digest};
-use risc0_zkvm_platform::syscall::{DIGEST_WORDS, sys_keccak, sys_prove_keccak, sys_poseidon2};
+use risc0_zkp::core::digest::Digest;
+use risc0_zkvm_platform::syscall::{DIGEST_WORDS, sys_keccak, sys_poseidon2, sys_prove_keccak};
 
 use crate::{
     Assumption,
@@ -91,7 +91,9 @@ impl KeccakBatcher {
         }
     }
 
-    fn claim_digest(&self) -> Digest { self.claim_state }
+    fn claim_digest(&self) -> Digest {
+        self.claim_state
+    }
 
     fn reset(&mut self) {
         self.claim_state = Digest::ZERO;
@@ -107,7 +109,7 @@ pub(crate) fn commit_single_keccak(claim_state: &mut Digest, keccak_state: &Kecc
             claim_state.as_mut(),
             keccak_state_u32 as *const u8,
             addr_of_mut!(DONT_CARE),
-            6  // Process 6 * 8 = 48 words
+            6, // Process 6 * 8 = 48 words
         )
     }
 
@@ -123,7 +125,7 @@ pub(crate) fn commit_single_keccak(claim_state: &mut Digest, keccak_state: &Kecc
             claim_state.as_mut(),
             addr_of!(LAST_WORDS) as *const u8,
             addr_of_mut!(DONT_CARE),
-            1
+            1,
         )
     };
 }

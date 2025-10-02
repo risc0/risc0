@@ -14,15 +14,14 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use risc0_circuit_keccak_sys::ScatterInfo;
-use risc0_core::scope;
 use risc0_core::field::baby_bear::BabyBearElem;
+use risc0_core::scope;
 use risc0_zkp::core::hash::poseidon2::{CELLS, poseidon2_mix};
 use std::collections::BTreeMap;
 use std::marker::PhantomData;
 
 use super::KeccakState;
 use crate::zirgen::circuit::LAYOUT_TOP;
-
 
 type ThetaB = [u64; 5];
 
@@ -322,8 +321,8 @@ impl<Order: PreflightCycleOrder> PreflightTrace<Order> {
         for round in 0..7 {
             for i in 0..8 {
                 let word = data[round * 8 + i];
-                cells[2*i] = BabyBearElem::new(word & 0xffff);
-                cells[2*i + 1] = BabyBearElem::new(word >> 16);
+                cells[2 * i] = BabyBearElem::new(word & 0xffff);
+                cells[2 * i + 1] = BabyBearElem::new(word >> 16);
             }
             poseidon2_mix(cells);
             *pflat = self.write_pflat(cells);
