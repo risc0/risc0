@@ -102,7 +102,6 @@ impl<ActorT: Actor> ActorSender<ActorT> {
 /// Represents the tokio task which is receiving messages and delivering them to an actor.
 struct ActorTask<ActorT: Actor> {
     sender: Option<ActorSender<ActorT>>,
-    task_handle: tokio::task::JoinHandle<()>,
     stop: broadcast::Receiver<()>,
 }
 
@@ -127,7 +126,7 @@ impl<ActorT: Actor> ActorTask<ActorT> {
 
         let (stop_send, stop_recv) = broadcast::channel(1);
         let (actor_ref_send, actor_ref_recv) = oneshot::channel();
-        let task_handle = tokio::task::spawn(async move {
+        tokio::task::spawn(async move {
             let actor_ref = actor_ref_recv
                 .await
                 .expect("actor_ref_send should still exist");
@@ -137,7 +136,6 @@ impl<ActorT: Actor> ActorTask<ActorT> {
 
         let actor_task = Arc::new(Mutex::new(Self {
             sender: Some(ActorSender(send)),
-            task_handle,
             stop: stop_recv,
         }));
 
@@ -155,10 +153,6 @@ impl<ActorT: Actor> ActorTask<ActorT> {
 
     fn stop(&mut self) -> bool {
         self.sender.take().is_some()
-    }
-
-    fn kill(&mut self) {
-        self.task_handle.abort();
     }
 
     fn stop_waiter(&self) -> broadcast::Receiver<()> {
@@ -301,12 +295,6 @@ impl<ActorT: Actor> ActorRef<ActorT> {
     pub async fn wait_for_stop(&self) {
         let mut waiter = self.task.lock().unwrap().stop_waiter();
         let _ = waiter.recv().await;
-    }
-
-    /// Abort the task running the actor. This will cause it to exit as soon as it reaches an await
-    /// point.
-    pub fn kill(&self) {
-        self.task.lock().unwrap().kill();
     }
 
     /// Receive a weak reference to this actor.
@@ -623,19 +611,6 @@ mod tests {
         actor_ref.stop_gracefully().await.unwrap();
 
         assert_eq!(spy.ping.recv().await.unwrap(), Ping(12));
-
-        actor_ref.wait_for_stop().await;
-    }
-
-    #[tokio::test]
-    async fn kill() {
-        let (actor, mut spy) = TestActor::new();
-        let actor_ref = spawn(actor);
-
-        actor_ref.tell(Ping(12)).await.unwrap();
-        actor_ref.kill();
-
-        assert!(spy.ping.recv().await.is_none());
 
         actor_ref.wait_for_stop().await;
     }

@@ -648,7 +648,7 @@ impl App {
         tracing::info!("worker: stop");
         let workers = self.workers.lock().unwrap().clone();
         for worker in workers {
-            worker.kill();
+            let _ = worker.stop_gracefully().await;
             worker.wait_for_stop().await;
         }
 
@@ -790,7 +790,7 @@ async fn route_rpc_msg_to_worker(
     if let Some(msg) = msg {
         msg.dispatch(remote_address, worker, ops).await
     } else {
-        worker.kill();
+        let _ = worker.stop_gracefully().await;
     }
 }
 
@@ -1106,7 +1106,7 @@ impl<ActorT: Send + 'static> Actor for RemoteActor<ActorT> {
         if let Some(rpc_death_recv) = self.rpc_death_recv.take() {
             tokio::task::spawn(async move {
                 let _ = rpc_death_recv.await;
-                actor_ref.kill();
+                let _ = actor_ref.stop_gracefully().await;
             });
         }
     }
