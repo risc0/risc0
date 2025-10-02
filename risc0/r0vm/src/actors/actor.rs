@@ -128,7 +128,10 @@ impl<ActorT: Actor> ActorTask<ActorT> {
         let (stop_send, stop_recv) = broadcast::channel(1);
         let (actor_ref_send, actor_ref_recv) = oneshot::channel();
         let task_handle = tokio::task::spawn(async move {
-            actor_task_main(actor, actor_ref_recv.await.unwrap(), recv).await;
+            let actor_ref = actor_ref_recv
+                .await
+                .expect("actor_ref_send should still exist");
+            actor_task_main(actor, actor_ref, recv).await;
             drop(stop_send);
         });
 
@@ -142,7 +145,7 @@ impl<ActorT: Actor> ActorTask<ActorT> {
         actor_ref_send
             .send(actor_ref.clone())
             .map_err(|_| ())
-            .unwrap();
+            .expect("task should still be running");
         actor_ref
     }
 

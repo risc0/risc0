@@ -58,12 +58,16 @@ impl JobTracer {
     {
         self.pending_spans
             .get_mut(&header.global_id.task_id)
-            .unwrap()
+            .expect("span_start should be called before span_event for given task")
             .add_event(name, vec![]);
     }
 
     pub fn span_end(&mut self, task_id: TaskId) {
-        self.pending_spans.remove(&task_id).as_mut().unwrap().end();
+        self.pending_spans
+            .remove(&task_id)
+            .as_mut()
+            .expect("span_start should be called before span_start for given task")
+            .end();
     }
 
     pub fn end(&mut self) {
