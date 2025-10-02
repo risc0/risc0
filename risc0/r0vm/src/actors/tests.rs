@@ -13,10 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{
-    net::{Ipv4Addr, SocketAddrV4},
-    time::Duration,
-};
+use std::time::Duration;
 
 use assert_matches::assert_matches;
 use risc0_zkvm::DevModeDelay;
@@ -48,7 +45,9 @@ const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
 //     resolve: Duration::from_millis(350),
 // };
 
-async fn do_test(remote: bool) {
+#[test_log::test(tokio::test(flavor = "multi_thread"))]
+#[cfg_attr(feature = "disable-dev-mode", ignore)]
+async fn basic() {
     let task_kinds = vec![
         TaskKind::ProveSegment,
         TaskKind::Lift,
@@ -59,89 +58,34 @@ async fn do_test(remote: bool) {
     let storage_root = assert_fs::TempDir::new().unwrap();
 
     let po2 = Some(21);
-    let mut apps = if remote {
-        let app1 = App::new(
-            AppConfig {
-                version: VERSION,
-                api: None,
-                manager: Some(ManagerConfig {
-                    allocator: None,
-                    listen: None,
-                }),
-                allocator: Some(AllocatorConfig {
-                    listen: Some(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into()),
-                }),
-                executor: None,
-                prover: None,
-                storage: Some(StorageConfig {
-                    path: storage_root.to_path_buf(),
-                }),
-                telemetry: None,
-            },
-            /*enable_logging=*/ false,
-        )
-        .await
-        .unwrap();
-        let alloc_addr = app1.allocator_addr().unwrap();
-
-        let app2 = App::new(
-            AppConfig {
-                version: VERSION,
-                api: None,
-                manager: None,
+    let mut app = App::new(
+        AppConfig {
+            version: VERSION,
+            api: None,
+            manager: Some(ManagerConfig {
                 allocator: None,
-                executor: Some(ExecutorConfig {
-                    allocator: Some(alloc_addr),
-                    count: 1,
-                }),
-                prover: Some(vec![crate::actors::config::ProverConfig {
-                    allocator: Some(alloc_addr),
-                    count: Some(100),
-                    subscribe: task_kinds.clone(),
-                    simulate: Some(PROFILE_RTX_5090),
-                }]),
-                storage: Some(StorageConfig {
-                    path: storage_root.to_path_buf(),
-                }),
-                telemetry: None,
-            },
-            /*enable_logging=*/ false,
-        )
-        .await
-        .unwrap();
-        vec![app1, app2]
-    } else {
-        vec![
-            App::new(
-                AppConfig {
-                    version: VERSION,
-                    api: None,
-                    manager: Some(ManagerConfig {
-                        allocator: None,
-                        listen: None,
-                    }),
-                    allocator: Some(AllocatorConfig { listen: None }),
-                    executor: Some(ExecutorConfig {
-                        allocator: None,
-                        count: 1,
-                    }),
-                    prover: Some(vec![crate::actors::config::ProverConfig {
-                        allocator: None,
-                        count: Some(100),
-                        subscribe: task_kinds.clone(),
-                        simulate: Some(PROFILE_RTX_5090),
-                    }]),
-                    storage: Some(StorageConfig {
-                        path: storage_root.to_path_buf(),
-                    }),
-                    telemetry: None,
-                },
-                /*enable_logging=*/ false,
-            )
-            .await
-            .unwrap(),
-        ]
-    };
+                listen: None,
+            }),
+            allocator: Some(AllocatorConfig { listen: None }),
+            executor: Some(ExecutorConfig {
+                allocator: None,
+                count: 1,
+            }),
+            prover: Some(vec![crate::actors::config::ProverConfig {
+                allocator: None,
+                count: Some(100),
+                subscribe: task_kinds.clone(),
+                simulate: Some(PROFILE_RTX_5090),
+            }]),
+            storage: Some(StorageConfig {
+                path: storage_root.to_path_buf(),
+            }),
+            telemetry: None,
+        },
+        /*enable_logging=*/ false,
+    )
+    .await
+    .unwrap();
 
     const ITERATIONS: u32 = 300000;
 
@@ -153,7 +97,7 @@ async fn do_test(remote: bool) {
         execute_only: false,
     };
 
-    let info = apps[0].proof_request(request).await.unwrap();
+    let info = app.proof_request(request).await.unwrap();
 
     tracing::info!("xproof_request result = {info:#?}");
 
@@ -164,27 +108,9 @@ async fn do_test(remote: bool) {
         receipt: (*result.receipt.unwrap()).clone(),
     };
 
-    let info = apps[0].shrink_wrap_request(request).await.unwrap();
+    let info = app.shrink_wrap_request(request).await.unwrap();
 
     tracing::info!("shrink_wrap_request result = {info:#?}");
 
-    for app in apps {
-        app.stop().await;
-    }
-}
-
-#[test_log::test(tokio::test(flavor = "multi_thread"))]
-#[cfg_attr(feature = "disable-dev-mode", ignore)]
-async fn basic_local() {
-    tracing::info!("basic (local)");
-
-    do_test(/* remote */ false).await
-}
-
-#[test_log::test(tokio::test(flavor = "multi_thread"))]
-#[cfg_attr(feature = "disable-dev-mode", ignore)]
-async fn basic_remote() {
-    tracing::info!("basic (remote)");
-
-    do_test(/* remote */ true).await
+    app.stop().await;
 }

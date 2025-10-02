@@ -27,6 +27,7 @@ use tokio::time::Instant;
 use super::{JobActorNew, tracer::JobTracer};
 use crate::actors::{
     actor::{Actor, ActorRef, Context, Message, ReplySender, WeakActorRef},
+    error::{Error, Result},
     factory::FactoryActor,
     protocol::{
         ExecuteTask, GlobalId, JobId, JobInfo, JobStatus, JobStatusReply, JobStatusRequest,
@@ -49,7 +50,6 @@ enum KeccakPhase {
 pub(crate) struct JobActor {
     job_id: JobId,
     parent_ref: WeakActorRef<super::JobActor>,
-    self_ref: Option<WeakActorRef<Self>>,
     factory: ActorRef<FactoryActor>,
     joins: BTreeMap<SegmentRange, Arc<SuccinctReceipt<ReceiptClaim>>>,
     next_task_id: u64,
@@ -72,45 +72,63 @@ pub(crate) struct JobActor {
 type UnknownReceipt = Arc<SuccinctReceipt<Unknown>>;
 
 impl JobActor {
-    async fn prove_keccak_done(&mut self, done: Arc<ProveKeccakDone>) {
+    async fn prove_keccak_done(
+        &mut self,
+        done: Arc<ProveKeccakDone>,
+        self_ref: ActorRef<Self>,
+    ) -> Result<()> {
         tracing::info!("ProveKeccakDone: {}", done.index);
         let receipt = Arc::new(done.receipt.clone());
-        self.process_union(done.index, 0, receipt).await;
+        self.process_union(done.index, 0, receipt, self_ref).await?;
+        Ok(())
     }
 
-    async fn union_done(&mut self, done: Arc<UnionDone>) {
+    async fn union_done(&mut self, done: Arc<UnionDone>, self_ref: ActorRef<Self>) -> Result<()> {
         let receipt = Arc::new(done.receipt.clone().into_unknown());
         match self.keccak_phase {
             KeccakPhase::Build => {
                 tracing::info!("UnionDone: {}/{}", done.height, done.pos);
-                self.process_union(done.pos, done.height, receipt).await;
+                self.process_union(done.pos, done.height, receipt, self_ref)
+                    .await?;
             }
             KeccakPhase::MergePeaks => {
                 if let Some(rhs) = self.pending_keccak_peaks.pop_front() {
-                    self.union(0, 0, receipt, rhs).await;
+                    self.union(0, 0, receipt, rhs).await?;
                 } else {
                     assert!(self.keccak_root.is_none());
                     self.keccak_root = Some(receipt);
                     self.keccak_phase = KeccakPhase::Done;
                     tracing::info!("KeccakPhase::Done from UnionDone");
-                    self.maybe_finish().await;
+                    self.maybe_finish(self_ref).await?;
                 }
             }
             KeccakPhase::Done => {
-                unreachable!();
+                return Err(Error::new("unexpected TaskDone::Union"));
             }
-        }
+        };
+        Ok(())
     }
 
-    async fn process_union(&mut self, pos: usize, height: usize, receipt: UnknownReceipt) {
+    async fn process_union(
+        &mut self,
+        pos: usize,
+        height: usize,
+        receipt: UnknownReceipt,
+        self_ref: ActorRef<Self>,
+    ) -> Result<()> {
         if self.unions.len() < height + 1 {
             self.unions.resize_with(height + 1, Vec::new);
         }
-        let layer = self.unions.get_mut(height).unwrap();
+        let layer = self
+            .unions
+            .get_mut(height)
+            .ok_or_else(|| Error::new("union mismatch: bad height"))?;
         if layer.len() < pos + 1 {
             layer.resize(pos + 1, None);
         }
-        layer[pos] = Some(receipt.clone());
+        *layer
+            .get_mut(pos)
+            .ok_or_else(|| Error::new("union mismatch: bad pos"))? = Some(receipt.clone());
         let (lhs_pos, rhs_pos) = if pos % 2 == 0 {
             (pos, pos + 1)
         } else {
@@ -122,27 +140,31 @@ impl JobActor {
             let up_height = height + 1;
             let up_pos = pos / 2;
             tracing::info!("Union: {height}/({lhs_pos}, {rhs_pos}) -> {up_height}/{up_pos}");
-            self.union(up_height, up_pos, lhs, rhs).await;
+            self.union(up_height, up_pos, lhs, rhs).await?;
         } else {
-            self.maybe_finish().await;
+            self.maybe_finish(self_ref).await?;
         }
+        Ok(())
     }
 
-    async fn union(&mut self, height: usize, pos: usize, lhs: UnknownReceipt, rhs: UnknownReceipt) {
+    async fn union(
+        &mut self,
+        height: usize,
+        pos: usize,
+        lhs: UnknownReceipt,
+        rhs: UnknownReceipt,
+    ) -> Result<()> {
         self.submit_task(Task::Union(Arc::new(UnionTask {
             height,
             pos,
             receipts: vec![lhs, rhs],
         })))
-        .await;
+        .await?;
+        Ok(())
     }
 }
 
 impl Actor for JobActor {
-    async fn on_start(&mut self, actor_ref: ActorRef<Self>) {
-        self.self_ref = Some(actor_ref.downgrade());
-    }
-
     async fn on_stop(&mut self) {
         let _ = self
             .factory
@@ -175,7 +197,6 @@ impl JobActorNew for JobActor {
         Self {
             job_id,
             parent_ref,
-            self_ref: None,
             factory,
             joins: BTreeMap::new(),
             next_task_id: 0,
@@ -198,10 +219,6 @@ impl JobActorNew for JobActor {
 }
 
 impl JobActor {
-    fn self_ref(&self) -> ActorRef<Self> {
-        self.self_ref.as_ref().unwrap().upgrade().unwrap()
-    }
-
     fn next_task_id(&mut self) -> u64 {
         let id = self.next_task_id;
         self.next_task_id += 1;
@@ -219,62 +236,80 @@ impl JobActor {
         self.tracer.span_start(header.global_id.task_id, name);
     }
 
-    async fn prove_segment(&mut self, header: TaskHeader, segment: Segment) {
+    async fn prove_segment(&mut self, header: TaskHeader, segment: Segment) -> Result<()> {
         self.tracer.span_event(header, "segment");
         tracing::info!("ProveSegment: {}", segment.index);
         self.submit_task(Task::ProveSegment(Arc::new(ProveSegmentTask { segment })))
-            .await;
+            .await?;
+        Ok(())
     }
 
-    async fn prove_keccak(&mut self, request: ProveKeccakRequest) {
+    async fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()> {
         tracing::info!("ProveKeccak: {} hashes", request.input.len());
         let index = self.next_keccak_index();
         self.submit_task(Task::ProveKeccak(Arc::new(ProveKeccakTask {
             index,
             request,
         })))
-        .await;
+        .await?;
+        Ok(())
     }
 
-    async fn session_done(&mut self, session: Arc<Session>) {
+    async fn session_done(
+        &mut self,
+        session: Arc<Session>,
+        self_ref: ActorRef<Self>,
+    ) -> Result<()> {
         tracing::info!("SessionDone");
         for ref receipt in session.assumptions.iter() {
             tracing::info!("{receipt:#?}");
         }
         self.session = Some(session);
         self.required_keccak_layers = mmr_layers(self.keccak_count);
-        self.maybe_finish().await;
+        self.maybe_finish(self_ref).await?;
+        Ok(())
     }
 
-    async fn prove_segment_done(&mut self, receipt: Box<SegmentReceipt>) {
+    async fn prove_segment_done(&mut self, receipt: Box<SegmentReceipt>) -> Result<()> {
         tracing::info!("ProveSegmentDone: {}", receipt.index);
         self.submit_task(Task::Lift(Arc::new(LiftTask { receipt: *receipt })))
-            .await;
+            .await?;
+        Ok(())
     }
 
-    async fn lift_done(&mut self, node: Box<JoinNode>) {
+    async fn lift_done(&mut self, node: Box<JoinNode>, self_ref: ActorRef<Self>) -> Result<()> {
         tracing::info!("LiftDone: {:?}", node.range);
         self.joins.insert(node.range, Arc::new(node.receipt));
-        self.maybe_join().await;
-        self.maybe_finish().await;
+        self.maybe_join().await?;
+        self.maybe_finish(self_ref).await?;
+        Ok(())
     }
 
-    async fn join_done(&mut self, node: Box<JoinNode>) {
+    async fn join_done(&mut self, node: Box<JoinNode>, self_ref: ActorRef<Self>) -> Result<()> {
         tracing::info!("JoinDone: {:?}", node.range);
         self.joins.insert(node.range, Arc::new(node.receipt));
-        self.maybe_join().await;
-        self.maybe_finish().await;
+        self.maybe_join().await?;
+        self.maybe_finish(self_ref).await?;
+        Ok(())
     }
 
-    async fn resolve_done(&mut self, receipt: Arc<SuccinctReceipt<ReceiptClaim>>) {
+    async fn resolve_done(
+        &mut self,
+        receipt: Arc<SuccinctReceipt<ReceiptClaim>>,
+        self_ref: ActorRef<Self>,
+    ) -> Result<()> {
         self.final_receipt = Some(receipt);
-        self.maybe_finish().await;
+        self.maybe_finish(self_ref).await?;
+        Ok(())
     }
 
-    async fn submit_task(&mut self, task: Task) {
+    async fn submit_task(&mut self, task: Task) -> Result<()> {
         let task_id = self.next_task_id();
         let msg = SubmitTaskMsg {
-            job: self.parent_ref.upgrade().unwrap(),
+            job: self
+                .parent_ref
+                .upgrade()
+                .ok_or_else(|| Error::new("parent job has stopped"))?,
             header: TaskHeader {
                 global_id: GlobalId {
                     job_id: self.job_id,
@@ -284,10 +319,12 @@ impl JobActor {
             },
             task,
         };
-        self.factory.tell(msg).await.unwrap();
+        self.factory.tell(msg).await?;
+
+        Ok(())
     }
 
-    async fn maybe_join(&mut self) {
+    async fn maybe_join(&mut self) -> Result<()> {
         if let Some(((a_range, a_receipt), (b_range, b_receipt))) = self
             .joins
             .iter()
@@ -304,79 +341,111 @@ impl JobActor {
             let range = (a_range.start..b_range.end).into();
             let receipts = vec![(*a_receipt).clone(), (*b_receipt).clone()];
             self.submit_task(Task::Join(Arc::new(JoinTask { range, receipts })))
-                .await;
+                .await?;
         }
+        Ok(())
     }
 
-    async fn maybe_finish(&mut self) {
-        if self.session.is_some() && !self.maybe_finish_keccak_mmr().await {
-            return;
-        }
-
-        if let Some(ref session) = self.session {
-            // tracing::info!("maybe_finish: session done");
-
-            if let Some(join_root) = self.join_root(session) {
-                let final_receipt = self
-                    .final_receipt
-                    .get_or_insert_with(|| join_root.clone())
-                    .clone();
-
-                if self.assumptions.is_none() {
-                    let mut assumptions = VecDeque::new();
-                    for receipt in session.assumptions.iter() {
-                        match receipt.as_ref() {
-                            AssumptionReceipt::Proven(inner) => {
-                                tracing::info!(
-                                    "Adding proven assumption: {:?}",
-                                    inner.claim_digest()
-                                );
-                                assumptions.push_back(Arc::new(inner.succinct().unwrap().clone()));
-                            }
-                            AssumptionReceipt::Unresolved(assumption) => {
-                                if let Some(keccak_root) = self.keccak_root.clone()
-                                    && keccak_root.claim.digest() == assumption.claim
-                                {
-                                    tracing::info!("Using keccak_root");
-                                    assumptions.push_back(keccak_root);
-                                    continue;
-                                }
-
-                                self.status = JobStatus::Failed(TaskError::Generic(format!(
-                                    "Missing assumption: {assumption:?}"
-                                )));
-                                self.self_ref().stop_gracefully().await.unwrap();
-                                return;
-                            }
-                        }
+    async fn resolve_assumptions(
+        &mut self,
+        session: &Arc<Session>,
+        final_receipt: &Arc<SuccinctReceipt<ReceiptClaim>>,
+    ) -> Result<bool> {
+        if self.assumptions.is_none() {
+            let mut assumptions = VecDeque::new();
+            for receipt in session.assumptions.iter() {
+                match receipt.as_ref() {
+                    AssumptionReceipt::Proven(inner) => {
+                        tracing::info!("Adding proven assumption: {:?}", inner.claim_digest());
+                        assumptions.push_back(Arc::new(inner.succinct()?.clone()));
                     }
-                    self.assumptions = Some(assumptions);
-                }
+                    AssumptionReceipt::Unresolved(assumption) => {
+                        if let Some(keccak_root) = self.keccak_root.clone()
+                            && keccak_root.claim.digest() == assumption.claim
+                        {
+                            tracing::info!("Using keccak_root");
+                            assumptions.push_back(keccak_root);
+                            continue;
+                        }
 
-                let assumptions = self.assumptions.as_mut().unwrap();
-                if let Some(assumption) = assumptions.pop_front() {
-                    tracing::info!("Resolve: {:?}", assumption.claim.digest());
-                    self.submit_task(Task::Resolve(Arc::new(ResolveTask {
-                        conditional: final_receipt.clone(),
-                        assumption: assumption.clone(),
-                    })))
-                    .await;
-                    return;
+                        return Err(Error::new(format!("Missing assumption: {assumption:?}")));
+                    }
                 }
-
-                tracing::info!("done");
-                let receipt = Receipt::new(
-                    InnerReceipt::Succinct(final_receipt.as_ref().clone()),
-                    session.journal.clone().unwrap().bytes,
-                );
-                let result = ProofResult {
-                    session: session.clone(),
-                    receipt: Some(Arc::new(receipt)),
-                };
-                self.status = JobStatus::Succeeded(result);
-                self.self_ref().stop_gracefully().await.unwrap();
             }
+            self.assumptions = Some(assumptions);
         }
+        let assumptions = self
+            .assumptions
+            .as_mut()
+            .expect("previous code should have set assumptions to Some");
+
+        if let Some(assumption) = assumptions.pop_front() {
+            tracing::info!("Resolve: {:?}", assumption.claim.digest());
+            self.submit_task(Task::Resolve(Arc::new(ResolveTask {
+                conditional: final_receipt.clone(),
+                assumption: assumption.clone(),
+            })))
+            .await?;
+
+            return Ok(false);
+        }
+
+        Ok(true)
+    }
+
+    async fn finish(
+        &mut self,
+        session: &Arc<Session>,
+        final_receipt: Arc<SuccinctReceipt<ReceiptClaim>>,
+        self_ref: ActorRef<Self>,
+    ) -> Result<()> {
+        tracing::info!("done");
+        let receipt = Receipt::new(
+            InnerReceipt::Succinct(final_receipt.as_ref().clone()),
+            session
+                .journal
+                .clone()
+                .ok_or_else(|| Error::new("missing journal"))?
+                .bytes,
+        );
+        let result = ProofResult {
+            session: session.clone(),
+            receipt: Some(Arc::new(receipt)),
+        };
+
+        self.status = JobStatus::Succeeded(result);
+
+        // on_stop will reply
+        let _ = self_ref.stop_gracefully().await;
+
+        Ok(())
+    }
+
+    async fn maybe_finish(&mut self, self_ref: ActorRef<Self>) -> Result<()> {
+        if self.session.is_some() && !self.maybe_finish_keccak_mmr().await? {
+            return Ok(());
+        }
+
+        let Some(session) = self.session.clone() else {
+            return Ok(());
+        };
+
+        let Some(join_root) = self.join_root(&session) else {
+            return Ok(());
+        };
+
+        let final_receipt = self
+            .final_receipt
+            .get_or_insert_with(|| join_root.clone())
+            .clone();
+
+        if !self.resolve_assumptions(&session, &final_receipt).await? {
+            return Ok(());
+        }
+
+        self.finish(&session, final_receipt, self_ref).await?;
+
+        Ok(())
     }
 
     fn join_root(&self, session: &Arc<Session>) -> Option<Arc<SuccinctReceipt<ReceiptClaim>>> {
@@ -389,15 +458,15 @@ impl JobActor {
         None
     }
 
-    async fn maybe_finish_keccak_mmr(&mut self) -> bool {
+    async fn maybe_finish_keccak_mmr(&mut self) -> Result<bool> {
         if self.keccak_count == 0 || self.keccak_phase == KeccakPhase::Done {
             self.keccak_phase = KeccakPhase::Done;
-            return true;
+            return Ok(true);
         }
 
         if self.keccak_phase == KeccakPhase::Build {
             if self.unions.is_empty() || self.unions[0].len() != self.keccak_count {
-                return false;
+                return Ok(false);
             }
 
             tracing::debug!("required: {:?}", self.required_keccak_layers);
@@ -412,35 +481,71 @@ impl JobActor {
                     .zip(self.unions.iter().map(|x| x.len()))
                     .any(|(x, y)| *x != y)
             {
-                return false;
+                return Ok(false);
             }
 
             for layer_pos in mmr_peaks(&self.required_keccak_layers) {
-                let receipt = self.unions[layer_pos].last().unwrap().clone().unwrap();
+                let receipt = self
+                    .unions
+                    .get(layer_pos)
+                    .ok_or_else(|| Error::new("union mismatch: wrong length"))?
+                    .last()
+                    .ok_or_else(|| Error::new("union mismatch: empty layer"))?
+                    .clone()
+                    .ok_or_else(|| Error::new("union mismatch: missing receipt"))?;
                 self.pending_keccak_peaks.push_back(receipt);
             }
 
             if self.pending_keccak_peaks.len() > 1 {
-                let lhs = self.pending_keccak_peaks.pop_front().unwrap();
-                let rhs = self.pending_keccak_peaks.pop_front().unwrap();
-                self.union(0, 0, lhs, rhs).await;
+                let lhs = self
+                    .pending_keccak_peaks
+                    .pop_front()
+                    .expect("len should be > 1");
+                let rhs = self
+                    .pending_keccak_peaks
+                    .pop_front()
+                    .expect("len should be > 1");
+                self.union(0, 0, lhs, rhs).await?;
                 self.keccak_phase = KeccakPhase::MergePeaks;
             }
         }
 
         if self.keccak_phase == KeccakPhase::MergePeaks {
             tracing::info!("MergePeaks");
-            return false;
+            return Ok(false);
         }
 
         if self.pending_keccak_peaks.len() == 1 {
-            assert!(self.keccak_root.is_none());
-            self.keccak_root = Some(self.pending_keccak_peaks.pop_front().unwrap());
+            if self.keccak_root.is_some() {
+                return Err(Error::new("completed keccak root twice"));
+            }
+            self.keccak_root = Some(
+                self.pending_keccak_peaks
+                    .pop_front()
+                    .expect("len should be == 1"),
+            );
             self.keccak_phase = KeccakPhase::Done;
             tracing::info!("KeccakPhase::Done from Singleton");
         }
 
-        true
+        Ok(true)
+    }
+
+    async fn maybe_fail(
+        &mut self,
+        self_ref: ActorRef<Self>,
+        res: std::result::Result<(), impl Into<TaskError>>,
+    ) {
+        if let Err(error) = res {
+            self.fail_with_error(self_ref, error).await;
+        }
+    }
+
+    async fn fail_with_error(&mut self, self_ref: ActorRef<Self>, error: impl Into<TaskError>) {
+        self.status = JobStatus::Failed(error.into());
+
+        // on_stop will reply
+        let _ = self_ref.stop_gracefully().await;
     }
 }
 
@@ -448,11 +553,27 @@ impl Message<ProofRequest> for JobActor {
     type Reply = JobStatusReply;
 
     async fn handle(&mut self, request: ProofRequest, ctx: &mut Context<Self, Self::Reply>) {
+        let res = self.handle_proof(request, ctx).await;
+        self.maybe_fail(ctx.actor_ref(), res).await;
+    }
+}
+
+impl JobActor {
+    async fn handle_proof(
+        &mut self,
+        request: ProofRequest,
+        ctx: &mut Context<Self, JobStatusReply>,
+    ) -> Result<()> {
         tracing::info!("ProofRequest");
-        let reply_sender = ctx.reply_sender();
-        self.reply_sender = reply_sender;
+
+        if self.reply_sender.is_some() {
+            return Err(Error::new("received duplicate ProofRequest"));
+        }
+        self.reply_sender = ctx.reply_sender();
+
         self.submit_task(Task::Execute(Arc::new(ExecuteTask { request })))
-            .await;
+            .await?;
+        Ok(())
     }
 }
 
@@ -462,14 +583,21 @@ impl Message<TaskUpdateMsg> for JobActor {
     async fn handle(
         &mut self,
         msg: TaskUpdateMsg,
-        _ctx: &mut Context<Self, Self::Reply>,
+        ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        // tracing::info!("TaskUpdateMsg: {}", msg.header.global_id.task_id);
+        let res = self.handle_task_update(msg).await;
+        self.maybe_fail(ctx.actor_ref(), res).await;
+    }
+}
+
+impl JobActor {
+    async fn handle_task_update(&mut self, msg: TaskUpdateMsg) -> Result<()> {
         match msg.payload {
             TaskUpdate::Start => self.task_start(msg.header),
-            TaskUpdate::Segment(segment) => self.prove_segment(msg.header, segment).await,
-            TaskUpdate::Keccak(request) => self.prove_keccak(request).await,
-        }
+            TaskUpdate::Segment(segment) => self.prove_segment(msg.header, segment).await?,
+            TaskUpdate::Keccak(request) => self.prove_keccak(request).await?,
+        };
+        Ok(())
     }
 }
 
@@ -481,39 +609,44 @@ impl Message<TaskDoneMsg> for JobActor {
         msg: TaskDoneMsg,
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        // tracing::info!("TaskDoneMsg: {}", msg.header.global_id.task_id);
-        let task_done = match msg.payload {
-            Ok(task_done) => task_done,
-            Err(err) => {
-                self.status = JobStatus::Failed(err);
-                let _ = ctx.actor_ref().stop_gracefully().await;
-                return;
+        let res = self.handle_task_done(msg, ctx.actor_ref()).await;
+        self.maybe_fail(ctx.actor_ref(), res).await;
+    }
+}
+
+impl JobActor {
+    async fn handle_task_done(
+        &mut self,
+        msg: TaskDoneMsg,
+        self_ref: ActorRef<Self>,
+    ) -> std::result::Result<(), TaskError> {
+        self.tracer.span_end(msg.header.global_id.task_id);
+        match msg.payload? {
+            TaskDone::Session(session) => self.session_done(session, self_ref).await?,
+            TaskDone::ProveSegment(receipt) => self.prove_segment_done(receipt).await?,
+            TaskDone::ProveKeccak(done) => self.prove_keccak_done(done, self_ref).await?,
+            TaskDone::Lift(node) => self.lift_done(node, self_ref).await?,
+            TaskDone::Join(node) => self.join_done(node, self_ref).await?,
+            TaskDone::Union(done) => self.union_done(done, self_ref).await?,
+            TaskDone::Resolve(receipt) => self.resolve_done(receipt, self_ref).await?,
+            TaskDone::ShrinkWrap(_) => {
+                return Err(
+                    Error::new("Proof JobActor received unexpected TaskDone::ShrinkWrap").into(),
+                );
             }
         };
-        self.tracer.span_end(msg.header.global_id.task_id);
-        match task_done {
-            TaskDone::Session(session) => self.session_done(session).await,
-            TaskDone::ProveSegment(receipt) => self.prove_segment_done(receipt).await,
-            TaskDone::ProveKeccak(done) => self.prove_keccak_done(done).await,
-            TaskDone::Lift(node) => self.lift_done(node).await,
-            TaskDone::Join(node) => self.join_done(node).await,
-            TaskDone::Union(done) => self.union_done(done).await,
-            TaskDone::Resolve(receipt) => self.resolve_done(receipt).await,
-            TaskDone::ShrinkWrap(_) => {
-                panic!("Proof JobActor received unexpected TaskDone::ShrinkWrap")
-            }
-        }
+        Ok(())
     }
 }
 
 impl Message<JobStatusRequest> for JobActor {
-    type Reply = JobStatusReply;
+    type Reply = Result<JobStatusReply>;
 
     async fn handle(&mut self, _msg: JobStatusRequest, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(JobStatusReply::Proof(JobInfo {
+        ctx.reply(Ok(JobStatusReply::Proof(JobInfo {
             status: self.status.clone(),
             elapsed_time: self.start_time.elapsed(),
-        }))
+        })))
     }
 }
 

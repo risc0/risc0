@@ -83,10 +83,13 @@ const char* risc0_circuit_rv32im_m3_prove(RawProver* raw) {
     verifyRv32im(readIop, raw->prover.po2());
     readIop.done();
   } catch (const std::exception& err) {
+    LOG(0, "ERROR: " << err.what());
     return strdup(err.what());
   } catch (...) {
+    LOG(0, "UNKNOWN ERROR");
     return strdup("Generic exception");
   }
+  LOG(0, "Completed successfuly");
   return nullptr;
 }
 
