@@ -23,14 +23,14 @@ use risc0_zkvm::{
 use tokio::sync::mpsc::{Receiver, Sender, channel};
 
 use super::{
-    RemoteActor, RemoteWorkerRequest, RpcSender, WriteStream,
+    RemoteActor, RemoteWorkerRequest,
     actor::{self, Actor, ActorRef, Context, Message},
     allocator::{
-        AllocateHardware, AllocatorRouterActor, CpuCores, CpuSpec, DeallocateHardware, EndTask,
-        GpuSpec, GpuTokens, GpuUuid, HardwareReservation, HardwareResource,
+        AllocateHardware, CpuCores, CpuSpec, DeallocateHardware, EndTask, GpuSpec, GpuTokens,
+        GpuUuid, HardwareReservation, HardwareResource, RemoteAllocatorActor,
     },
     error::{Error, Result},
-    factory::FactoryRouterActor,
+    factory::RemoteFactoryActor,
     protocol::{
         ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Session,
         ShrinkWrapKind, ShrinkWrapTask, Task, TaskError, TaskHeader, TaskKind, UnionTask, WorkerId,
@@ -40,7 +40,7 @@ use super::{
         },
         worker::TaskMsg,
     },
-    remote_actor_tell, routing_actor_impl,
+    remote_actor_tell,
 };
 
 type TaskResult<T> = std::result::Result<T, TaskError>;
@@ -159,7 +159,7 @@ pub(crate) fn worker_hardware(
 
 pub(crate) struct WorkerActor {
     processor: Processor,
-    factory: ActorRef<FactoryRouterActor>,
+    factory: ActorRef<RemoteFactoryActor>,
     task_kinds: Vec<TaskKind>,
     id: WorkerId,
     gpus: Vec<GpuSpec>,
@@ -168,8 +168,8 @@ pub(crate) struct WorkerActor {
 impl WorkerActor {
     pub fn new(
         worker_id: WorkerId,
-        factory: ActorRef<FactoryRouterActor>,
-        allocator: ActorRef<AllocatorRouterActor>,
+        factory: ActorRef<RemoteFactoryActor>,
+        allocator: ActorRef<RemoteAllocatorActor>,
         task_kinds: Vec<TaskKind>,
         delay: Option<DevModeDelay>,
         gpus: Vec<GpuSpec>,
@@ -192,7 +192,7 @@ impl Actor for WorkerActor {
             .factory
             .tell(GetTasks {
                 worker_id: self.id,
-                worker: Some(WorkerRouterActor::new_local(actor_ref.clone())),
+                worker: None,
                 kinds: self.task_kinds.clone(),
             })
             .await;
@@ -272,8 +272,8 @@ struct Processor {
 
 impl Processor {
     fn new(
-        factory: ActorRef<FactoryRouterActor>,
-        allocator: ActorRef<AllocatorRouterActor>,
+        factory: ActorRef<RemoteFactoryActor>,
+        allocator: ActorRef<RemoteAllocatorActor>,
         worker_id: WorkerId,
         delay: Option<DevModeDelay>,
     ) -> Self {
@@ -404,16 +404,16 @@ impl Processor {
 }
 
 struct GpuProcessor {
-    factory: ActorRef<FactoryRouterActor>,
-    allocator: ActorRef<AllocatorRouterActor>,
+    factory: ActorRef<RemoteFactoryActor>,
+    allocator: ActorRef<RemoteAllocatorActor>,
     delay: Option<DevModeDelay>,
     worker_id: WorkerId,
 }
 
 impl GpuProcessor {
     fn new(
-        factory: ActorRef<FactoryRouterActor>,
-        allocator: ActorRef<AllocatorRouterActor>,
+        factory: ActorRef<RemoteFactoryActor>,
+        allocator: ActorRef<RemoteAllocatorActor>,
         worker_id: WorkerId,
         delay: Option<DevModeDelay>,
     ) -> Self {
@@ -622,8 +622,8 @@ impl GpuProcessor {
 }
 
 struct CpuProcessor {
-    factory: ActorRef<FactoryRouterActor>,
-    allocator: ActorRef<AllocatorRouterActor>,
+    factory: ActorRef<RemoteFactoryActor>,
+    allocator: ActorRef<RemoteAllocatorActor>,
     delay: Option<DevModeDelay>,
     worker_id: WorkerId,
 
@@ -632,8 +632,8 @@ struct CpuProcessor {
 
 impl CpuProcessor {
     fn new(
-        factory: ActorRef<FactoryRouterActor>,
-        allocator: ActorRef<AllocatorRouterActor>,
+        factory: ActorRef<RemoteFactoryActor>,
+        allocator: ActorRef<RemoteAllocatorActor>,
         worker_id: WorkerId,
         delay: Option<DevModeDelay>,
         gpu_queue: Sender<GpuTaskMsg>,
@@ -824,7 +824,7 @@ impl CpuProcessor {
 }
 
 struct Coprocessor {
-    factory: ActorRef<FactoryRouterActor>,
+    factory: ActorRef<RemoteFactoryActor>,
     header: TaskHeader,
 }
 
@@ -848,34 +848,6 @@ impl CoprocessorCallback for Coprocessor {
 // |_|  | .__/ \___|
 //      |_|
 
-pub(crate) enum WorkerRouterActor {
-    Local(ActorRef<WorkerActor>),
-    Remote(ActorRef<RemoteWorkerActor>),
-}
+pub type RemoteWorkerActor = RemoteActor<WorkerActor>;
 
-impl Actor for WorkerRouterActor {
-    async fn on_stop(&mut self) {
-        match self {
-            Self::Local(_) => {}
-            Self::Remote(r) => {
-                let _ = r.stop_gracefully().await;
-            }
-        }
-    }
-}
-
-impl WorkerRouterActor {
-    pub(crate) fn new_remote(rpc_sender: RpcSender<WriteStream>) -> ActorRef<Self> {
-        let remote = actor::spawn(RemoteWorkerActor::new_from_rpc_sender(rpc_sender));
-        actor::spawn(Self::Remote(remote))
-    }
-
-    pub(crate) fn new_local(local: ActorRef<WorkerActor>) -> ActorRef<Self> {
-        actor::spawn(Self::Local(local))
-    }
-}
-
-type RemoteWorkerActor = RemoteActor<WorkerActor>;
-
-routing_actor_impl!(WorkerRouterActor, TaskMsg, ());
 remote_actor_tell!(RemoteActor<WorkerActor>, TaskMsg, RemoteWorkerRequest);

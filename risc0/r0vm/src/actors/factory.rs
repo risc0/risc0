@@ -14,15 +14,13 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::collections::HashMap;
-use std::error::Error as StdError;
-use std::net::SocketAddr;
 
 use multi_index_map::MultiIndexMap;
 
 use super::{
-    RemoteActor, RemoteFactoryRequest, RpcDisconnect, RpcMessageId, WorkerRouterActor,
-    actor::{self, Actor, ActorRef, Context, Message},
-    allocator::{AllocatorRouterActor, CpuCores, GpuTokens, ScheduleTask},
+    RemoteActor, RemoteFactoryRequest, RpcDisconnect,
+    actor::{Actor, ActorRef, Context, Message},
+    allocator::{CpuCores, GpuTokens, RemoteAllocatorActor, ScheduleTask},
     error::{Error, Result as ActorResult},
     job::JobActor,
     protocol::{
@@ -30,7 +28,8 @@ use super::{
         factory::{DropJob, GetTasks, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
         worker::TaskMsg,
     },
-    remote_actor_tell, routing_actor_impl,
+    remote_actor_tell,
+    worker::RemoteWorkerActor,
 };
 
 #[derive(MultiIndexMap)]
@@ -46,13 +45,13 @@ pub(crate) struct FactoryActor {
     workers: MultiIndexWorkerRowMap,
     pending_tasks: Vec<SubmitTaskMsg>,
     active_tasks: HashMap<GlobalId, SubmitTaskMsg>,
-    worker_actors: HashMap<WorkerId, ActorRef<WorkerRouterActor>>,
-    allocator: ActorRef<AllocatorRouterActor>,
+    worker_actors: HashMap<WorkerId, ActorRef<RemoteWorkerActor>>,
+    allocator: ActorRef<RemoteAllocatorActor>,
     require_gpu: bool,
 }
 
 impl FactoryActor {
-    pub fn new(allocator: ActorRef<AllocatorRouterActor>, require_gpu: bool) -> Self {
+    pub fn new(allocator: ActorRef<RemoteAllocatorActor>, require_gpu: bool) -> Self {
         Self {
             jobs: HashMap::default(),
             workers: Default::default(),
@@ -247,46 +246,6 @@ impl Message<RpcDisconnect> for FactoryActor {
 // | |  | |_) | (__
 // |_|  | .__/ \___|
 //      |_|
-
-pub(crate) enum FactoryRouterActor {
-    Local(ActorRef<FactoryActor>),
-    Remote(ActorRef<RemoteFactoryActor>),
-}
-
-impl Actor for FactoryRouterActor {}
-
-impl FactoryRouterActor {
-    pub async fn new<RemoteMsgT, FutT>(
-        addr: &Option<SocketAddr>,
-        local: &Option<ActorRef<FactoryActor>>,
-        remote_msg_callback: impl FnMut(Option<RemoteMsgT>, Option<RpcMessageId>, SocketAddr) -> FutT
-        + Send
-        + 'static,
-    ) -> Result<ActorRef<Self>, Box<dyn StdError>>
-    where
-        RemoteMsgT: serde::de::DeserializeOwned,
-        FutT: Future<Output = ()> + Send,
-    {
-        if let Some(addr) = addr {
-            let remote = actor::spawn(
-                RemoteFactoryActor::new_with_remote_msg_callback(*addr, remote_msg_callback)
-                    .await?,
-            );
-            Ok(actor::spawn(Self::Remote(remote)))
-        } else {
-            Ok(actor::spawn(Self::Local(
-                local
-                    .as_ref()
-                    .ok_or("no manager found from allocator or locally")?
-                    .clone(),
-            )))
-        }
-    }
-}
-
-routing_actor_impl!(FactoryRouterActor, GetTasks, ());
-routing_actor_impl!(FactoryRouterActor, TaskUpdateMsg, ());
-routing_actor_impl!(FactoryRouterActor, TaskDoneMsg, ());
 
 pub type RemoteFactoryActor = RemoteActor<FactoryActor>;
 
