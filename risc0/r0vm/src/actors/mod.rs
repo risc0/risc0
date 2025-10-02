@@ -398,7 +398,7 @@ impl App {
                 allocator_listen_addr(cfg_allocator.listen),
                 alloc_ref.clone(),
             );
-            local_allocator_rpc_addr = rpc_server.start().await?;
+            local_allocator_rpc_addr = Some(rpc_server.bind_and_listen().await?);
             allocator_rpc_server = Some(rpc_server);
 
             if let Some(cfg_api) = &cfg.api {
@@ -448,10 +448,7 @@ impl App {
 
             let mut rpc_server =
                 FactoryRpcServer::new(manager_listen_addr(cfg_manager.listen), factory_ref);
-            let local_factory_rpc_addr = rpc_server
-                .start()
-                .await?
-                .expect("start called for first time");
+            let local_factory_rpc_addr = rpc_server.bind_and_listen().await?;
             factory_rpc_server = Some(rpc_server);
 
             let mut api_addr = None;
@@ -621,15 +618,8 @@ impl App {
     pub async fn stop(mut self) {
         tracing::info!("app: stop");
 
-        if let Some(server) = self.factory_rpc_server.take() {
-            tracing::info!("factory_rpc_server: stop");
-            server.stop().await;
-        }
-
-        if let Some(server) = self.allocator_rpc_server.take() {
-            tracing::info!("allocator_rpc_server: stop");
-            server.stop().await;
-        }
+        self.factory_rpc_server = None;
+        self.allocator_rpc_server = None;
 
         if let Some(allocator) = self.allocator.take()
             && allocator.stop_gracefully().await.is_ok()
@@ -804,7 +794,7 @@ struct RpcDisconnect {
 struct RpcServer<ReceiverT: Actor, MessageT> {
     listen_addr: SocketAddr,
     receiver: ActorRef<ReceiverT>,
-    join_handle: Option<JoinHandle<()>>,
+    join_set: tokio::task::JoinSet<()>,
     _msg: PhantomData<MessageT>,
 }
 
@@ -817,21 +807,22 @@ where
         Self {
             listen_addr,
             receiver,
-            join_handle: None,
+            join_set: tokio::task::JoinSet::new(),
             _msg: PhantomData,
         }
     }
 
-    pub async fn start(&mut self) -> anyhow::Result<Option<SocketAddr>> {
-        if self.join_handle.is_some() {
-            return Ok(None);
-        }
+    pub async fn bind_and_listen(&mut self) -> anyhow::Result<SocketAddr> {
+        assert!(
+            self.join_set.is_empty(),
+            "bind_and_listen called more than once"
+        );
 
         let receiver = self.receiver.clone();
         let listener = TcpListener::bind(self.listen_addr).await?;
         let local_addr = listener.local_addr()?;
 
-        self.join_handle = Some(tokio::spawn(async move {
+        self.join_set.spawn(async move {
             let mut join_set = tokio::task::JoinSet::new();
             loop {
                 let (stream, remote_address) = match listener.accept().await {
@@ -864,15 +855,9 @@ where
                     let _ = receiver.tell(RpcDisconnect { remote_address }).await;
                 });
             }
-        }));
+        });
 
-        Ok(Some(local_addr))
-    }
-
-    pub async fn stop(self) {
-        if let Some(join_handle) = self.join_handle {
-            join_handle.abort();
-        }
+        Ok(local_addr)
     }
 }
 
