@@ -33,12 +33,7 @@ pub const USER_FIXUP_ADDR: usize = 0xbfff_0000;
 pub const USER_FIXUP_PTR: *mut u32 = USER_FIXUP_ADDR as *mut u32;
 #[allow(dead_code)]
 pub const USER_STACK_SIZE: usize = 2 * 1024 * 1024;
-pub const USER_HEAP_START_ADDR: usize = 0x0800_0000; // TODO: figure out where data ends in user program
-#[allow(dead_code)]
-pub const USER_HEAP_START_PTR: *const u8 = USER_HEAP_START_ADDR as *const u8;
-pub const USER_HEAP_SIZE: usize = 0x40000000;
-#[allow(dead_code)]
-pub const USER_HEAP_END_ADDR: usize = USER_HEAP_START_ADDR + USER_HEAP_SIZE;
+
 #[allow(dead_code)]
 pub const USER_PHENT_SIZE: usize = 32; // ELF32_Phdr size in bytes
 
@@ -54,6 +49,15 @@ pub const USER_PHDR_ADDR_PTR: *const usize = 0xffff_3000 as *const usize;
 /// Program header count address (stored in memory)
 #[allow(dead_code)]
 pub const USER_PHDR_NUM_ADDR_PTR: *const usize = 0xffff_3008 as *const usize;
+
+/// Interpreter base address (stored in memory)
+pub const USER_INTERP_BASE_ADDR: *const usize = 0xffff_3010 as *const usize;
+
+/// Interpreter address (stored in memory)
+pub const USER_INTERP_ADDR: *const usize = 0xffff_3018 as *const usize;
+
+/// Brk address (stored in memory)
+pub const USER_BRK_ADDR: *const usize = 0xffff_3020 as *const usize;
 
 // Shadow register storage area for supervisor CSRs (starting at 0xffff_5000)
 pub const SHADOW_REGS_PTR: *mut u32 = 0xffff_5000 as *mut u32;

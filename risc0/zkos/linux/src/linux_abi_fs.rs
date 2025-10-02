@@ -311,6 +311,50 @@ pub fn sys_close(_fd: u32) -> Result<u32, Err> {
     }
 }
 
+pub fn read_file_to_user_memory(fd: u32, buf: u32, count: u32, offset: u64) -> Result<u32, Err> {
+    let fd_entry = get_fd(fd);
+    if fd_entry.fid != 0 {
+        let mut cursor = offset;
+        while cursor < offset + (count as u64) {
+            // read 128 bytes at a time
+            let count = count.min(128);
+            let tread = TreadMessage::new(0, fd_entry.fid, cursor, count);
+            match tread.send_tread() {
+                Ok(_bytes_written) => {
+                    // Success
+                }
+                Err(_e) => {
+                    kprint!("read_file_to_user_memory: error sending tread: {:?}", _e);
+                    return Err(Err::NoSys);
+                }
+            }
+            match RreadMessage::read_response() {
+                P9Response::Success(rread) => {
+                    let user_ptr = buf as *mut u8;
+                    let user_ptr = unsafe { user_ptr.add(cursor as usize).sub(offset as usize) };
+                    let data = rread.data;
+                    kprint!(
+                        "read_file_to_user_memory: user_ptr = {:?}, rread.count = {:?}",
+                        user_ptr,
+                        rread.count
+                    );
+                    let _bytes_copied =
+                        crate::kernel::copy_to_user(user_ptr, data.as_ptr(), rread.count as usize);
+                    cursor += rread.count as u64;
+                }
+                P9Response::Error(_rlerror) => {
+                    if _rlerror.ecode == 0 {
+                        return Ok(0);
+                    }
+                    return Err(Err::NoSys);
+                }
+            }
+        }
+        return Ok(0);
+    }
+    Err(Err::NoSys)
+}
+
 pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
     if !get_p9_enabled() {
         let msg = b"sys_read: p9 is not enabled";
@@ -2219,44 +2263,6 @@ pub fn set_fd(fd: u32, fid: u32) {
             mode: 0xFFFF_FFFF,
         },
     );
-}
-
-pub fn load_file_aligned_to_page_size(path: &String) -> &[u8] {
-    let file_size = get_file_size(get_root_fid(), path, 0);
-    if let Ok(file_size) = file_size {
-        kprint!("elf_loader: file_size = {}", file_size);
-        let ptr = crate::linux_abi::allocate_aligned_to_page_size(file_size);
-        const O_RDONLY: u32 = 0;
-        let result = do_openat(-1i32 as u32, path, O_RDONLY, 0);
-
-        if let Ok(_fd) = result {
-            let mut file_ptr = ptr as u32;
-            let mut read_so_far = 0u64;
-
-            while read_so_far < file_size {
-                let read_this_much = if (file_size - read_so_far) > 128 {
-                    128
-                } else {
-                    file_size - read_so_far
-                };
-                kprint!("sys_read: read_this_much = {}", read_this_much);
-                let read_result = sys_read(_fd, file_ptr, read_this_much as u32);
-                if let Ok(read_count) = read_result {
-                    read_so_far += read_count as u64;
-                    file_ptr += read_count;
-                } else {
-                    kpanic!("Failed to read file: {}", path);
-                }
-            }
-            let _ = sys_close(_fd);
-            // turn ptr into a slice
-            unsafe { core::slice::from_raw_parts(ptr, file_size as usize) }
-        } else {
-            kpanic!("Failed to open path: {}", path);
-        }
-    } else {
-        kpanic!("Failed to get file size: {}", path);
-    }
 }
 
 #[repr(C)]

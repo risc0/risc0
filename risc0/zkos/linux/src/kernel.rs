@@ -550,7 +550,19 @@ unsafe extern "C" fn breakpoint_dispatch() -> ! {
 
 #[unsafe(no_mangle)]
 unsafe extern "C" fn load_address_misaligned_dispatch() -> ! {
-    kpanic!("Load address misaligned trap - not implemented");
+    for i in 0..32 {
+        kprint!(
+            "load_address_misaligned_dispatch: x{} = {:?}",
+            i,
+            get_ureg(i)
+        );
+    }
+    let epc = unsafe { MEPC_PTR.read_volatile() };
+
+    kpanic!(
+        "Load address misaligned trap - not implemented, at PC: {:#010x}",
+        epc
+    );
 }
 
 #[unsafe(no_mangle)]
