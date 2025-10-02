@@ -31,14 +31,14 @@ return ;
 void step_Top_22(ExecContext& ctx,MutableBuf arg0, GlobalBuf arg1)   {
 // TopState(zirgen/circuit/keccak/top.zir:40)
 // Top(zirgen/circuit/keccak/top.zir:378)
-Val x2 = get(ctx,arg0, 914, 1);
-Val x3 = get(ctx,arg0, 915, 1);
-Val x4 = get(ctx,arg0, 916, 1);
-Val x5 = get(ctx,arg0, 917, 1);
-Val x6 = get(ctx,arg0, 918, 1);
-Val x7 = get(ctx,arg0, 919, 1);
-Val x8 = get(ctx,arg0, 920, 1);
-Val x9 = get(ctx,arg0, 921, 1);
+Val x2 = get(ctx,arg0, 930, 1);
+Val x3 = get(ctx,arg0, 931, 1);
+Val x4 = get(ctx,arg0, 932, 1);
+Val x5 = get(ctx,arg0, 933, 1);
+Val x6 = get(ctx,arg0, 934, 1);
+Val x7 = get(ctx,arg0, 935, 1);
+Val x8 = get(ctx,arg0, 936, 1);
+Val x9 = get(ctx,arg0, 937, 1);
 // DigestReg(zirgen/circuit/keccak/top.zir:284)
 // ShutdownCycle(zirgen/circuit/keccak/top.zir:289)
 setGlobal(ctx,arg1, 0, x2);
@@ -953,14 +953,14 @@ set(ctx,arg0, 911, Val(0));
 set(ctx,arg0, 912, Val(0));
 set(ctx,arg0, 913, Val(0));
 // TopState(zirgen/circuit/keccak/top.zir:40)
-set(ctx,arg0, 914, x2);
-set(ctx,arg0, 915, x3);
-set(ctx,arg0, 916, x4);
-set(ctx,arg0, 917, x5);
-set(ctx,arg0, 918, x6);
-set(ctx,arg0, 919, x7);
-set(ctx,arg0, 920, x8);
-set(ctx,arg0, 921, x9);
+set(ctx,arg0, 914, get(ctx,arg0, 914, 1));
+set(ctx,arg0, 915, get(ctx,arg0, 915, 1));
+set(ctx,arg0, 916, get(ctx,arg0, 916, 1));
+set(ctx,arg0, 917, get(ctx,arg0, 917, 1));
+set(ctx,arg0, 918, get(ctx,arg0, 918, 1));
+set(ctx,arg0, 919, get(ctx,arg0, 919, 1));
+set(ctx,arg0, 920, get(ctx,arg0, 920, 1));
+set(ctx,arg0, 921, get(ctx,arg0, 921, 1));
 set(ctx,arg0, 922, get(ctx,arg0, 922, 1));
 set(ctx,arg0, 923, get(ctx,arg0, 923, 1));
 set(ctx,arg0, 924, get(ctx,arg0, 924, 1));
@@ -969,14 +969,14 @@ set(ctx,arg0, 926, get(ctx,arg0, 926, 1));
 set(ctx,arg0, 927, get(ctx,arg0, 927, 1));
 set(ctx,arg0, 928, get(ctx,arg0, 928, 1));
 set(ctx,arg0, 929, get(ctx,arg0, 929, 1));
-set(ctx,arg0, 930, get(ctx,arg0, 930, 1));
-set(ctx,arg0, 931, get(ctx,arg0, 931, 1));
-set(ctx,arg0, 932, get(ctx,arg0, 932, 1));
-set(ctx,arg0, 933, get(ctx,arg0, 933, 1));
-set(ctx,arg0, 934, get(ctx,arg0, 934, 1));
-set(ctx,arg0, 935, get(ctx,arg0, 935, 1));
-set(ctx,arg0, 936, get(ctx,arg0, 936, 1));
-set(ctx,arg0, 937, get(ctx,arg0, 937, 1));
+set(ctx,arg0, 930, x2);
+set(ctx,arg0, 931, x3);
+set(ctx,arg0, 932, x4);
+set(ctx,arg0, 933, x5);
+set(ctx,arg0, 934, x6);
+set(ctx,arg0, 935, x7);
+set(ctx,arg0, 936, x8);
+set(ctx,arg0, 937, x9);
 return ;
 }
 

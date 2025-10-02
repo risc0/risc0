@@ -48,45 +48,37 @@ pub fn max_keccak_inputs(po2: usize) -> usize {
 /// Given a slice of `KeccakState`, encoded as `[u8]`, produce the SHA-256 digest matching what is produced by the keccak circuit.
 #[cfg(feature = "prove")]
 pub fn compute_keccak_digest(input: &[u8]) -> Digest {
-    use risc0_zkp::core::digest::{DIGEST_BYTES, Digest};
-    use risc0_zkp::core::hash::{
-        sha,
-        sha::{SHA256_INIT, Sha256},
-    };
+    use risc0_zkp::core::digest::{DIGEST_WORDS, Digest};
+    use risc0_core::field::baby_bear::BabyBearElem;
+    use risc0_zkp::core::hash::poseidon2::{CELLS, poseidon2_mix};
 
     let mut transcript = vec![];
 
     let mut input: Vec<u8> = input.to_vec();
+    let mut data = [0u64; 28];
     let input_states: &mut [KeccakState] = bytemuck::cast_slice_mut(&mut input);
     for input in input_states.iter_mut() {
-        let mut data = [0u64; 32];
         data[0..25].clone_from_slice(input);
-        transcript.push(data);
+        transcript.extend(data);
 
         keccak::f1600(input);
 
         data[0..25].clone_from_slice(input);
-        transcript.push(data);
+        transcript.extend(data);
     }
 
-    let mut digest = SHA256_INIT;
-    for halfs in bytemuck::cast_slice::<[u64; 32], [u64; 8]>(transcript.as_slice()) {
-        let mut first_half = [0u8; DIGEST_BYTES];
-        first_half.clone_from_slice(bytemuck::cast_slice(&halfs[0..4]));
-
-        let mut second_half = [0u8; DIGEST_BYTES];
-        second_half.clone_from_slice(bytemuck::cast_slice(&halfs[4..8]));
-
-        digest = *sha::Impl::compress(
-            &digest,
-            &Digest::from_bytes(first_half),
-            &Digest::from_bytes(second_half),
-        );
+    let mut cells = [BabyBearElem::new(0); CELLS];
+    for chunk in transcript.chunks(4) {
+        for i in 0..4 {
+            for j in 0..4 {
+                cells[i * 4 + j] = BabyBearElem::new((chunk[i] >> (j * 16) & 0xffff) as u32);
+            }
+        }
+        poseidon2_mix(&mut cells);
     }
-
-    // reorder to match the keccak accelerator
-    for word in digest.as_mut_words() {
-        *word = word.to_be();
+    let mut digest_words = [0u32; DIGEST_WORDS];
+    for i in 0..8 {
+        digest_words[i] = cells[16 + i].as_u32();
     }
-    digest
+    Digest::new(digest_words)
 }
