@@ -125,14 +125,6 @@ impl<ActorT: Actor> ActorTask<ActorT> {
         let (send, recv) = mpsc::channel(MAILBOX_SIZE);
 
         let (stop_send, stop_recv) = broadcast::channel(1);
-        let (actor_ref_send, actor_ref_recv) = oneshot::channel();
-        tokio::task::spawn(async move {
-            let actor_ref = actor_ref_recv
-                .await
-                .expect("actor_ref_send should still exist");
-            actor_task_main(actor, actor_ref, recv).await;
-            drop(stop_send);
-        });
 
         let actor_task = Arc::new(Mutex::new(Self {
             sender: Some(ActorSender(send)),
@@ -140,10 +132,13 @@ impl<ActorT: Actor> ActorTask<ActorT> {
         }));
 
         let actor_ref = ActorRef { task: actor_task };
-        actor_ref_send
-            .send(actor_ref.clone())
-            .map_err(|_| ())
-            .expect("task should still be running");
+
+        let other_actor_ref = actor_ref.clone();
+        tokio::task::spawn(async move {
+            actor_task_main(actor, other_actor_ref, recv).await;
+            drop(stop_send);
+        });
+
         actor_ref
     }
 
