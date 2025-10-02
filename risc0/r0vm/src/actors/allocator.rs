@@ -1041,7 +1041,7 @@ impl AllocatorActor {
 #[cfg(test)]
 mod allocation_tests {
     use super::*;
-    use crate::actors::actor;
+    use crate::actors::actor::{self, ActorRunner};
 
     fn test_gpu_id(n: u32) -> GpuUuid {
         assert!(n < 10);
@@ -1070,11 +1070,12 @@ mod allocation_tests {
         workers: Vec<WorkerId>,
         worker_addresses: HashMap<WorkerId, SocketAddr>,
         alloc_ref: ActorRef<AllocatorActor>,
+        alloc_runner: ActorRunner<AllocatorActor>,
     }
 
     impl Fixture {
         async fn new(worker_count: u32) -> Self {
-            let alloc_ref = actor::spawn(AllocatorActor::new());
+            let (alloc_ref, mut alloc_runner) = actor::run(AllocatorActor::new()).await;
 
             let workers: Vec<WorkerId> = (0..worker_count).map(test_worker_id).collect();
             let mut worker_addresses = HashMap::new();
@@ -1082,19 +1083,22 @@ mod allocation_tests {
                 let worker_addr: SocketAddr =
                     format!("1.2.3.{}:100{}", i / 4, i % 4).parse().unwrap();
                 alloc_ref
-                    .ask(RegisterWorker {
-                        worker_id: *worker_id,
-                        remote_address: Some(worker_addr),
-                        hardware: vec![
-                            HardwareResource::Gpu(GpuSpec {
-                                name: "test GPU".into(),
-                                uuid: test_gpu_id(i as u32 / 2),
-                                tokens: GpuTokens(100),
-                            }),
-                            HardwareResource::Cpu(CpuSpec { cores: CpuCores(4) }),
-                        ],
-                        zkvm_version: semver::Version::new(1, 2, 3),
-                    })
+                    .ask_with_runner(
+                        RegisterWorker {
+                            worker_id: *worker_id,
+                            remote_address: Some(worker_addr),
+                            hardware: vec![
+                                HardwareResource::Gpu(GpuSpec {
+                                    name: "test GPU".into(),
+                                    uuid: test_gpu_id(i as u32 / 2),
+                                    tokens: GpuTokens(100),
+                                }),
+                                HardwareResource::Cpu(CpuSpec { cores: CpuCores(4) }),
+                            ],
+                            zkvm_version: semver::Version::new(1, 2, 3),
+                        },
+                        &mut alloc_runner,
+                    )
                     .await
                     .unwrap()
                     .unwrap();
@@ -1105,43 +1109,64 @@ mod allocation_tests {
                 workers,
                 worker_addresses,
                 alloc_ref,
+                alloc_runner,
             }
         }
 
-        async fn schedule_task(&self, i: u64, j: u64) -> ScheduleTaskReply {
+        async fn schedule_task(&mut self, i: u64, j: u64) -> ScheduleTaskReply {
             self.alloc_ref
-                .ask(ScheduleTask {
-                    candidates: self.workers.clone(),
-                    task_id: test_task_id(i, j),
-                    description: "test task".into(),
-                })
+                .ask_with_runner(
+                    ScheduleTask {
+                        candidates: self.workers.clone(),
+                        task_id: test_task_id(i, j),
+                        description: "test task".into(),
+                    },
+                    &mut self.alloc_runner,
+                )
                 .await
                 .unwrap()
                 .unwrap()
         }
 
-        async fn end_task(&self, i: u64, j: u64, worker_id: WorkerId) -> Result<()> {
+        async fn end_task(&mut self, i: u64, j: u64, worker_id: WorkerId) -> Result<()> {
             self.alloc_ref
-                .ask(EndTask {
-                    worker_id,
-                    task_id: test_task_id(i, j),
-                })
+                .ask_with_runner(
+                    EndTask {
+                        worker_id,
+                        task_id: test_task_id(i, j),
+                    },
+                    &mut self.alloc_runner,
+                )
                 .await
                 .unwrap()
         }
 
-        async fn disconnect_worker(&self, worker_id: WorkerId) {
+        async fn disconnect_worker(&mut self, worker_id: WorkerId) {
             let remote_address = *self.worker_addresses.get(&worker_id).unwrap();
             self.alloc_ref
-                .tell(RpcDisconnect { remote_address })
+                .tell_with_runner(RpcDisconnect { remote_address }, &mut self.alloc_runner)
                 .await
                 .unwrap();
+        }
+
+        async fn allocate_hardware(&mut self, alloc: AllocateHardware) -> Result<()> {
+            self.alloc_ref
+                .ask_with_runner(alloc, &mut self.alloc_runner)
+                .await
+                .unwrap()
+        }
+
+        async fn deallocate_hardware(&mut self, dealloc: DeallocateHardware) -> Result<()> {
+            self.alloc_ref
+                .ask_with_runner(dealloc, &mut self.alloc_runner)
+                .await
+                .unwrap()
         }
     }
 
     #[tokio::test]
     async fn alloc_dealloc_realloc() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1153,103 +1178,87 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         let response = fixture.schedule_task(1, 2).await;
         assert_eq!(response.worker_id, worker_id);
 
-        let other_alloc_ref = fixture.alloc_ref.clone();
-        let other_hardware_reservations = hardware_reservations.clone();
-        let second_allocation = tokio::task::spawn(async move {
-            other_alloc_ref
-                .ask(AllocateHardware {
-                    worker_id,
-                    task_id: test_task_id(1, 2),
-                    hardware_reservations: other_hardware_reservations,
-                })
-                .await
-                .unwrap()
-                .unwrap();
-        });
+        let second_allocation = fixture
+            .alloc_ref
+            .ask_enqueue(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 2),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+        fixture.alloc_runner.handle_one().await;
 
-        tokio::task::yield_now().await;
-        assert!(!second_allocation.is_finished());
+        assert!(!second_allocation.has_reply());
 
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
-        second_allocation.await.unwrap();
+        second_allocation.recv().await.unwrap().unwrap();
 
         fixture.end_task(1, 1, worker_id).await.unwrap();
 
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 2),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap();
         fixture.end_task(1, 2, worker_id).await.unwrap();
     }
 
     async fn double_dealloc(hardware_reservations: Vec<HardwareReservation>, expected_err: &str) {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
         assert_eq!(response.worker_id, worker_id);
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         // deallocate again should be an error
         let err = fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap_err();
 
         assert_eq!(err.to_string(), expected_err);
@@ -1257,7 +1266,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn end_task_before_dealloc() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1269,14 +1278,12 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         // trying to end before deallocating hardware is an error
@@ -1289,7 +1296,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn end_task_before_full_dealloc() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1301,14 +1308,12 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1316,14 +1321,12 @@ mod allocation_tests {
             tokens: GpuTokens(50),
         }];
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap();
 
         // trying to end before deallocating hardware is an error
@@ -1336,7 +1339,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn piecemeal_dealloc() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1348,14 +1351,12 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1363,24 +1364,20 @@ mod allocation_tests {
             tokens: GpuTokens(50),
         }];
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap();
 
         fixture.end_task(1, 1, worker_id).await.unwrap();
@@ -1411,7 +1408,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn alloc_unknown_gpu() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1423,14 +1420,12 @@ mod allocation_tests {
         }];
 
         let err = fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap_err();
 
         assert_eq!(err.to_string(), format!("unknown GPU {}", test_gpu_id(1)));
@@ -1438,7 +1433,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn dealloc_unknown_gpu() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1450,14 +1445,12 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1465,14 +1458,12 @@ mod allocation_tests {
             tokens: GpuTokens(100),
         }];
         let err = fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap_err();
 
         assert_eq!(err.to_string(), format!("unknown GPU {}", test_gpu_id(1)));
@@ -1480,7 +1471,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn end_task_pending() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1492,35 +1483,29 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         let response = fixture.schedule_task(1, 2).await;
         assert_eq!(response.worker_id, worker_id);
 
-        let other_alloc_ref = fixture.alloc_ref.clone();
-        let other_hardware_reservations = hardware_reservations.clone();
-        let second_allocation = tokio::task::spawn(async move {
-            other_alloc_ref
-                .ask(AllocateHardware {
-                    worker_id,
-                    task_id: test_task_id(1, 2),
-                    hardware_reservations: other_hardware_reservations,
-                })
-                .await
-                .unwrap()
-                .unwrap();
-        });
+        let second_allocation = fixture
+            .alloc_ref
+            .ask_enqueue(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 2),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+        fixture.alloc_runner.handle_one().await;
 
-        tokio::task::yield_now().await;
-        assert!(!second_allocation.is_finished());
+        assert!(!second_allocation.has_reply());
 
         let err = fixture.end_task(1, 2, worker_id).await.unwrap_err();
         assert_eq!(
@@ -1530,28 +1515,24 @@ mod allocation_tests {
 
         // Even after the error we can continue, the task is still running
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
         fixture.end_task(1, 1, worker_id).await.unwrap();
 
-        second_allocation.await.unwrap();
+        second_allocation.recv().await.unwrap().unwrap();
 
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 2),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap();
         fixture.end_task(1, 2, worker_id).await.unwrap();
     }
@@ -1559,7 +1540,7 @@ mod allocation_tests {
     #[tokio::test]
     async fn alloc_disconnect_realloc() {
         // 2 workers on the same machine sharing a GPU
-        let fixture = Fixture::new(2).await;
+        let mut fixture = Fixture::new(2).await;
         let worker1 = fixture.workers[0];
         let worker2 = fixture.workers[1];
 
@@ -1573,54 +1554,42 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id: worker1,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         // worker2 tries to reserve the same GPU
         let response = fixture.schedule_task(1, 2).await;
         assert_eq!(response.worker_id, worker2);
 
-        let other_alloc_ref = fixture.alloc_ref.clone();
-        let other_hardware_reservations = hardware_reservations.clone();
-        let second_allocation = tokio::task::spawn(async move {
-            other_alloc_ref
-                .ask(AllocateHardware {
-                    worker_id: worker2,
-                    task_id: test_task_id(1, 2),
-                    hardware_reservations: other_hardware_reservations,
-                })
-                .await
-                .unwrap()
-                .unwrap();
-        });
-
-        // worker2 has to wait
-        tokio::task::yield_now().await;
-        assert!(!second_allocation.is_finished());
-
-        // worker1 disconnects
-        fixture
+        let second_allocation = fixture
             .alloc_ref
-            .tell(RpcDisconnect {
-                remote_address: "1.2.3.0:1000".parse().unwrap(),
+            .ask_enqueue(AllocateHardware {
+                worker_id: worker2,
+                task_id: test_task_id(1, 2),
+                hardware_reservations: hardware_reservations.clone(),
             })
             .await
             .unwrap();
+        fixture.alloc_runner.handle_one().await;
+
+        // worker2 has to wait
+        assert!(!second_allocation.has_reply());
+
+        // worker1 disconnects
+        fixture.disconnect_worker(worker1).await;
 
         // worker2 should be able to get the hardware now
-        second_allocation.await.unwrap();
+        second_allocation.recv().await.unwrap().unwrap();
     }
 
     #[tokio::test]
     async fn alloc_for_task_not_running() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1629,14 +1598,12 @@ mod allocation_tests {
         }];
 
         let error = fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap_err();
 
         assert_eq!(
@@ -1649,7 +1616,7 @@ mod allocation_tests {
     async fn chooses_least_busy_worker() {
         // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
         // | (0, 1), (2, 3) | (4, 5), (6, 7) |
-        let fixture = Fixture::new(8).await;
+        let mut fixture = Fixture::new(8).await;
 
         // first GPU on first machine
         let response = fixture.schedule_task(1, 1).await;
@@ -1675,7 +1642,7 @@ mod allocation_tests {
     async fn worker_disconnect() {
         // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
         // | (0, 1), (2, 3) | (4, 5), (6, 7) |
-        let fixture = Fixture::new(8).await;
+        let mut fixture = Fixture::new(8).await;
 
         // first GPU on first machine
         let response = fixture.schedule_task(1, 1).await;
@@ -1693,7 +1660,7 @@ mod allocation_tests {
     async fn end_task_disconnected_worker() {
         // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
         // | (0, 1), (2, 3) | (4, 5), (6, 7) |
-        let fixture = Fixture::new(8).await;
+        let mut fixture = Fixture::new(8).await;
 
         // first GPU on first machine
         let response = fixture.schedule_task(1, 1).await;
@@ -1717,7 +1684,7 @@ mod allocation_tests {
     async fn end_task_twice() {
         // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
         // | (0, 1), (2, 3) | (4, 5), (6, 7) |
-        let fixture = Fixture::new(8).await;
+        let mut fixture = Fixture::new(8).await;
 
         // first GPU on first machine
         let response = fixture.schedule_task(1, 1).await;
