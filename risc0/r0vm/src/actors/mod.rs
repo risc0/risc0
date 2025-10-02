@@ -615,40 +615,52 @@ impl App {
         }
     }
 
-    pub async fn stop(mut self) {
-        tracing::info!("app: stop");
-
+    fn stop_actors(&mut self) {
         self.factory_rpc_server = None;
         self.allocator_rpc_server = None;
 
-        if let Some(allocator) = self.allocator.take()
-            && allocator.stop_gracefully().is_ok()
-        {
+        if let Some(allocator) = &self.allocator {
+            let _ = allocator.stop_gracefully();
+        }
+
+        if let Some(manager) = &self.manager {
+            let _ = manager.stop_gracefully();
+        }
+
+        let workers = self.workers.lock().unwrap().clone();
+        for worker in workers {
+            let _ = worker.stop_gracefully();
+        }
+
+        if let Some(factory) = &self.factory {
+            let _ = factory.stop_gracefully();
+        }
+    }
+
+    async fn wait_for_actors(&mut self) {
+        if let Some(allocator) = &self.allocator {
             tracing::info!("allocator: wait for stop");
             allocator.wait_for_stop().await;
         }
 
-        if let Some(manager) = self.manager.take()
-            && manager.stop_gracefully().is_ok()
-        {
+        if let Some(manager) = &self.manager {
             tracing::info!("manager: wait for stop");
             manager.wait_for_stop().await;
         }
 
-        tracing::info!("worker: stop");
+        tracing::info!("worker: wait for stop");
         let workers = self.workers.lock().unwrap().clone();
         for worker in workers {
-            let _ = worker.stop_gracefully();
             worker.wait_for_stop().await;
         }
 
-        if let Some(factory) = self.factory
-            && factory.stop_gracefully().is_ok()
-        {
+        if let Some(factory) = &self.factory {
             tracing::info!("factory: wait for stop");
             factory.wait_for_stop().await;
         }
+    }
 
+    async fn wait_for_children(&mut self) {
         tracing::info!(
             "waiting for children: {:?}",
             self.children
@@ -656,16 +668,20 @@ impl App {
                 .filter_map(|c| c.child.id())
                 .collect::<Vec<_>>()
         );
-        for mut child in self.children {
+        for child in &mut self.children {
             let result = child.child.wait().await;
             if let Some(err) = result.err() {
                 tracing::warn!("Failed to wait on child: {err}");
             }
         }
+    }
 
-        if let Some(provider) = self.provider {
-            provider.stop();
-        }
+    pub async fn stop(mut self) {
+        tracing::info!("app: stop");
+
+        self.stop_actors();
+        self.wait_for_actors().await;
+        self.wait_for_children().await;
     }
 
     pub async fn proof_request(
@@ -698,6 +714,16 @@ impl App {
             .status
             .try_into()
             .map_err(|e| error::Error::new(format!("unexpected ShrinkWrapRequest reply: {e}")))
+    }
+}
+
+impl Drop for App {
+    fn drop(&mut self) {
+        self.stop_actors();
+
+        if let Some(provider) = self.provider.take() {
+            provider.stop();
+        }
     }
 }
 
