@@ -87,7 +87,9 @@ impl BuildCommand {
             .context("failed to build guest options")?;
 
         let mut guest_list = vec![];
-        let (included, _excluded) = self.workspace.partition_packages(&meta);
+        let (included, excluded) = self.workspace.partition_packages(&meta);
+        tracing::debug!("Included packages: {included:?}");
+        tracing::trace!("Excluded packages: {excluded:?}");
         for pkg in included {
             // TODO: This filtering picks up all bin targets, including ones that cannot be built
             // for RISC Zero.
