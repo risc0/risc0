@@ -36,11 +36,11 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{Context, Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use cargo_metadata::{Message, MetadataCommand, Package};
 use config::GuestMetadata;
 use rayon::prelude::*;
-use risc0_binfmt::{KERNEL_START_ADDR, ProgramBinary};
+use risc0_binfmt::{ProgramBinary, KERNEL_START_ADDR};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
@@ -52,7 +52,7 @@ pub use self::{
         DockerOptions, DockerOptionsBuilder, DockerOptionsBuilderError, GuestOptions,
         GuestOptionsBuilder, GuestOptionsBuilderError,
     },
-    docker::{BuildStatus, TARGET_DIR, docker_build},
+    docker::{docker_build, BuildStatus, TARGET_DIR},
 };
 
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
@@ -70,7 +70,7 @@ impl Risc0Metadata {
     }
 }
 
-trait GuestBuilder: Sized + Send {
+trait GuestListEntryBuilder: Sized + Send {
     fn build(guest_info: &GuestInfo, name: &str, elf_path: &str) -> Result<Self>;
 
     fn codegen_consts(&self) -> String;
@@ -89,7 +89,7 @@ pub struct MinGuestListEntry {
     pub path: Cow<'static, str>,
 }
 
-impl GuestBuilder for MinGuestListEntry {
+impl GuestListEntryBuilder for MinGuestListEntry {
     fn build(_guest_info: &GuestInfo, name: &str, elf_path: &str) -> Result<Self> {
         Ok(Self {
             name: Cow::Owned(name.to_owned()),
@@ -171,7 +171,7 @@ fn compute_image_id(elf: &[u8], elf_path: &str) -> Result<Digest> {
     })
 }
 
-impl GuestBuilder for GuestListEntry {
+impl GuestListEntryBuilder for GuestListEntry {
     /// Builds the [GuestListEntry] by reading the ELF from disk, and calculating the associated
     /// image ID.
     fn build(guest_info: &GuestInfo, name: &str, elf_path: &str) -> Result<Self> {
@@ -322,8 +322,9 @@ fn get_env_var(name: &str) -> String {
     ret
 }
 
-/// Returns all methods associated with the given guest crate.
-fn guest_methods<G: GuestBuilder>(
+/// Returns a list of guest data entries (e.g. name, image ID, path) for each RISC Zero guest
+/// target in the given [Package], combined with the given [GuestInfo].
+fn guest_list_entries<G: GuestListEntryBuilder>(
     pkg: &Package,
     target_dir: impl AsRef<Path>,
     guest_info: &GuestInfo,
@@ -730,7 +731,9 @@ struct GuestPackageWithOptions {
 /// Embeds methods built for RISC-V for use by host-side dependencies.
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
-fn do_embed_methods<G: GuestBuilder>(mut guest_opts: HashMap<&str, GuestOptions>) -> Vec<G> {
+fn do_embed_methods<G: GuestListEntryBuilder>(
+    mut guest_opts: HashMap<&str, GuestOptions>,
+) -> Vec<G> {
     // Read the cargo metadata for info from `[package.metadata.risc0]`.
     let pkg = current_package();
     let guest_packages = guest_packages(&pkg);
@@ -759,7 +762,7 @@ fn do_embed_methods<G: GuestBuilder>(mut guest_opts: HashMap<&str, GuestOptions>
     build_methods(&pkg_opts)
 }
 
-fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) -> Vec<G> {
+fn build_methods<G: GuestListEntryBuilder>(guest_packages: &[GuestPackageWithOptions]) -> Vec<G> {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
 
@@ -780,10 +783,10 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
 
             if guest.opts.use_docker.is_some() {
                 build_guest_package_docker(&guest.pkg, &guest.target_dir, &guest_info).unwrap();
-                guest_methods(&guest.pkg, &guest.target_dir, &guest_info, "docker")
+                guest_list_entries(&guest.pkg, &guest.target_dir, &guest_info, "docker")
             } else {
                 build_guest_package(&guest.pkg, &guest.target_dir, &guest_info);
-                guest_methods(&guest.pkg, &guest.target_dir, &guest_info, profile)
+                guest_list_entries(&guest.pkg, &guest.target_dir, &guest_info, profile)
             }
         })
         .collect();
@@ -811,7 +814,7 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
 }
 
 #[cfg(feature = "guest-list")]
-fn build_guest_list<G: GuestBuilder>(guest_list: &[G], mut methods_file: File) {
+fn build_guest_list<G: GuestListEntryBuilder>(guest_list: &[G], mut methods_file: File) {
     // NOTE: Codegen of the guest list is gated behind the "guest-list" feature flag,
     // although the data structure are not, because when the `GuestListEntry` type
     // is referenced in the generated code, this requires `risc0-build` be declared
@@ -884,10 +887,10 @@ pub fn build_package(
 
     if options.use_docker.is_some() {
         build_guest_package_docker(pkg, target_dir.as_ref(), &guest_info)?;
-        Ok(guest_methods(pkg, &target_dir, &guest_info, "docker"))
+        Ok(guest_list_entries(pkg, &target_dir, &guest_info, "docker"))
     } else {
         build_guest_package(pkg, &target_dir, &guest_info);
-        Ok(guest_methods(pkg, &target_dir, &guest_info, profile))
+        Ok(guest_list_entries(pkg, &target_dir, &guest_info, profile))
     }
 }
 
