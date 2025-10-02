@@ -348,8 +348,6 @@ fn test_recursion_identity_sha256() {
 
     let mut prover = Prover::new_identity(&default_receipt, opts.clone()).unwrap();
     let sha256_recursion_receipt = prover.run().unwrap();
-    let mut out_stream = VecDeque::<u32>::new();
-    out_stream.extend(sha256_recursion_receipt.output.iter());
 
     // Include an inclusion proof for control_id to allow verification against a root.
     let hashfn = opts.hash_suite().unwrap().hashfn;
