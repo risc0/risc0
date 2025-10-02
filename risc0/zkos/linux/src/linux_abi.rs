@@ -1,15 +1,14 @@
 use crate::{
     constants::{
         ASCII_TABLE_PTR, MEPC_PTR, PAGE_SIZE, REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5,
-        REG_A7, REG_SP, USER_HEAP_SIZE, USER_HEAP_START_ADDR, USER_HEAP_START_PTR,
-        USER_MEMORY_LENGTH, USER_MEMORY_START_PTR, USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR,
-        USER_PHENT_SIZE, USER_STACK_PTR, USER_START_PTR,
+        REG_A7, REG_SP, USER_BRK_ADDR, USER_INTERP_ADDR, USER_INTERP_BASE_ADDR, USER_MEMORY_LENGTH,
+        USER_MEMORY_START_PTR, USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE,
+        USER_STACK_PTR, USER_START_PTR,
     },
     host_calls::{host_argv, host_terminate},
     kernel::{get_ureg, mret, print},
     linux_abi_fs::{
-        attach_to_p9, get_p9_enabled, init_fs, load_file_aligned_to_page_size, set_p9_enabled,
-        sys_statx,
+        attach_to_p9, get_p9_enabled, init_fs, read_file_to_user_memory, set_p9_enabled, sys_statx,
     },
     p9::get_p9_traffic_hash,
 };
@@ -90,7 +89,7 @@ use crate::linux_abi_misc::{
     sys_unshare, sys_userfaultfd, sys_utimensat_time64, sys_vmsplice, sys_waitid,
 };
 
-static mut BRK: u32 = USER_HEAP_START_ADDR as u32;
+static mut BRK: u32 = 0u32;
 
 #[cfg(target_arch = "riscv32")]
 use alloc::string::String;
@@ -102,10 +101,16 @@ use alloc::vec;
 use alloc::vec::Vec;
 
 use core::{alloc::Layout, ptr::NonNull};
-use rlsf::Tlsf;
 
-type Heap = Tlsf<'static, usize, usize, { usize::BITS as usize }, { usize::BITS as usize }>;
-static mut HEAP: Heap = Heap::new();
+static mut MMAP_BASE: u32 = 0x8000_0000;
+
+fn get_mmap_base() -> u32 {
+    unsafe { MMAP_BASE }
+}
+
+fn set_mmap_base(base: u32) {
+    unsafe { MMAP_BASE = base }
+}
 
 pub const SYS_IOCTL: u32 = 29;
 pub const SYS_READ: u32 = 63;
@@ -441,6 +446,7 @@ impl Err {
 }
 
 #[allow(unused)]
+#[derive(Clone, Copy)]
 enum AuxType {
     Null = 0,
     Ignore = 1,
@@ -496,6 +502,11 @@ impl UserStack {
 
     #[allow(dead_code)]
     fn add_aux_word(&mut self, atype: AuxType, word: usize) {
+        kprint!(
+            "UserStack::add_aux_word: atype={:?}, word={:08x}",
+            atype as usize,
+            word
+        );
         self.add_word(atype as usize);
         self.add_word(word);
     }
@@ -508,19 +519,6 @@ impl UserStack {
         }
         self.add_word(strs_ptr as usize);
     }
-}
-
-pub fn allocate_aligned_to_page_size(file_size: u64) -> *const u8 {
-    #[allow(static_mut_refs)]
-    let ptr = unsafe {
-        let layout = Layout::from_size_align(file_size as usize, PAGE_SIZE).unwrap_unchecked();
-        let ptr = HEAP.allocate(layout).unwrap().as_ptr();
-        if !ptr.is_null() {
-            ptr.write_bytes(0, layout.size());
-        }
-        ptr
-    };
-    ptr
 }
 
 pub fn start_linux_binary(argc: u32) -> ! {
@@ -565,103 +563,8 @@ pub fn start_linux_binary(argc: u32) -> ! {
     }
 
     let user_start_addr: usize = unsafe { USER_START_PTR.read_volatile() };
-
-    if user_start_addr == 0 {
-        // okay, so we should look for the path
-        let arg0 = argv.first();
-        if let Some(arg0) = arg0 {
-            // entire user memory is free cos ELF there
-            let block: &[u8] =
-                unsafe { core::slice::from_raw_parts(USER_MEMORY_START_PTR, USER_MEMORY_LENGTH) };
-            #[allow(static_mut_refs)]
-            unsafe {
-                HEAP.insert_free_block_ptr(block.into());
-            }
-            let path = arg0;
-            // let's first get the file size
-            let file = load_file_aligned_to_page_size(path);
-            let elf = ElfBytes::<LittleEndian>::minimal_parse(file).unwrap();
-            kprint!("elf: {:?}", elf);
-            // let's find if it's dynamic, the interpreter
-            if elf.ehdr.e_type == elf::abi::ET_DYN {
-                // For ET_DYN (dynamic) ELF, find the interpreter (PT_INTERP) and print it, no-std style.
-                let mut interp_path = None;
-                for ph in elf.segments().unwrap() {
-                    if ph.p_type == PT_INTERP {
-                        // Read the interpreter path from the segment
-                        let _offset = ph.p_offset as usize;
-                        let filesz = ph.p_filesz as usize;
-                        if let Ok(interp_bytes) = elf.segment_data(&ph) {
-                            // PT_INTERP is a null-terminated string
-                            let nul_pos =
-                                interp_bytes.iter().position(|&b| b == 0).unwrap_or(filesz);
-                            let path_bytes = &interp_bytes[..nul_pos];
-                            // Try to print as UTF-8, fallback to hex if not valid
-                            interp_path = match core::str::from_utf8(path_bytes) {
-                                Ok(s) => Some(s.to_string()),
-                                Err(_) => None,
-                            }
-                        }
-                    }
-                }
-                if let Some(interp_path) = interp_path {
-                    let interp_file = load_file_aligned_to_page_size(&interp_path);
-                    let interp_elf = ElfBytes::<LittleEndian>::minimal_parse(interp_file).unwrap();
-                    kprint!("interp_elf: {:?}", interp_elf);
-                    if elf.ehdr.class != Class::ELF32 {
-                        kpanic!("Interpreter not a 32-bit ELF");
-                    }
-                    if elf.ehdr.e_machine != elf::abi::EM_RISCV {
-                        kpanic!("Interpreter has invalid machine type, must be RISC-V");
-                    }
-                    // Load interpreter ELF segments into memory, similar to ELF loader logic
-                    // This is a minimal, in-place version for the Linux ABI loader
-
-                    // We'll use the same logic as in the ELF loader to map PT_LOAD segments
-                    let max_mem = USER_MEMORY_LENGTH as u32;
-                    let word_size = core::mem::size_of::<usize>() as u32;
-                    let input = interp_file;
-
-                    for segment in interp_elf
-                        .segments()
-                        .unwrap()
-                        .iter()
-                        .filter(|x| x.p_type == elf::abi::PT_LOAD)
-                    {
-                        let file_size: u32 = segment.p_filesz.try_into().unwrap();
-                        if file_size >= max_mem {
-                            kpanic!("Invalid segment file_size");
-                        }
-                        let mem_size: u32 = segment.p_memsz.try_into().unwrap();
-                        if mem_size >= max_mem {
-                            kpanic!("Invalid segment mem_size");
-                        }
-                        let vaddr: u32 = segment.p_vaddr.try_into().unwrap();
-                        if vaddr % word_size != 0 {
-                            kpanic!("vaddr {:#08x} is unaligned", vaddr);
-                        }
-                        // allocate the memory for the segment
-                        let layout = Layout::from_size_align(mem_size as usize, PAGE_SIZE).unwrap();
-                        #[allow(static_mut_refs)]
-                        let ptr = unsafe { HEAP.allocate(layout).unwrap().as_ptr() };
-                        if ptr.is_null() {
-                            kpanic!("Failed to allocate memory for segment");
-                        }
-                        // copy the segment data to the allocated memory
-                        unsafe {
-                            ptr.copy_from(input.as_ptr(), mem_size as usize);
-                        }
-                    }
-                } else {
-                    kpanic!("No PT_INTERP found in ET_DYN ELF");
-                }
-            } else {
-                kprint!("elf is static");
-            }
-
-            kpanic!("USER_START_PTR is 0, path: {}", path);
-        }
-    }
+    let interp_base_addr = unsafe { USER_INTERP_BASE_ADDR.read_volatile() };
+    let interp_addr = unsafe { USER_INTERP_ADDR.read_volatile() };
 
     for arg in &argv {
         stack.add_str(arg.as_bytes());
@@ -682,6 +585,14 @@ pub fn start_linux_binary(argc: u32) -> ! {
     stack.add_aux_word(AuxType::Gid, 1);
     // auxv[3]
     stack.add_aux_word(AuxType::EGid, 1);
+
+    let user_start_addr: usize = unsafe { USER_START_PTR.read_volatile() } - 4;
+
+    if interp_base_addr != 0 {
+        stack.add_aux_word(AuxType::Entry, user_start_addr);
+        stack.add_aux_word(AuxType::Base, interp_base_addr);
+        unsafe { BRK = USER_BRK_ADDR.read_volatile() as u32 };
+    }
     // auxv[4]
     // Add AT_PHDR, AT_PHNUM, AT_PHENT
     // Define the AuxType variants if not already defined:
@@ -689,6 +600,7 @@ pub fn start_linux_binary(argc: u32) -> ! {
     //     Phnum = ...,
     //     Phent = ...,
     // Use the constants for addresses and sizes
+
     stack.add_aux_word(AuxType::Phdr, unsafe { USER_PHDR_ADDR_PTR.read_volatile() });
     // auxv[5]
     stack.add_aux_word(AuxType::PhNum, unsafe {
@@ -702,21 +614,26 @@ pub fn start_linux_binary(argc: u32) -> ! {
 
     set_ureg(REG_SP, USER_STACK_PTR as u32);
 
-    let block: &[u8] = unsafe { core::slice::from_raw_parts(USER_HEAP_START_PTR, USER_HEAP_SIZE) };
-    #[allow(static_mut_refs)]
-    unsafe {
-        HEAP.insert_free_block_ptr(block.into());
-    }
-    print("starting linux binary");
-    let user_start_addr: usize = unsafe { USER_START_PTR.read_volatile() } - 4;
-    unsafe {
-        MEPC_PTR.write_volatile(user_start_addr);
+    if interp_addr != 0 {
+        kprint!(
+            "starting linux binary with interpreter at 0x{:08x}",
+            interp_addr,
+        );
+        unsafe {
+            MEPC_PTR.write_volatile(interp_addr - 4);
+        }
+    } else {
+        print("starting linux binary");
+        unsafe {
+            MEPC_PTR.write_volatile(user_start_addr);
+        }
     }
     mret()
 }
 
 pub fn handle_linux_syscall() -> ! {
     let nr = get_ureg(REG_A7);
+    kprint!("handle_linux_syscall: nr={}", nr);
     match nr {
         SYS_IOCTL => syscall3(sys_ioctl),
         SYS_READ => syscall3(sys_read),
@@ -1098,17 +1015,23 @@ fn syscall6<F: Fn(u32, u32, u32, u32, u32, u32) -> Result<u32, Err>>(inner: F) {
 /// https://elixir.bootlin.com/linux/v5.15.5/source/mm/mmap.c#L194
 /// https://elixir.bootlin.com/linux/v5.15.5/source/mm/nommu.c#L381
 fn sys_brk(addr: u32) -> Result<u32, Err> {
+    kprint!("sys_brk: addr = {:08x}", addr);
     let ret = unsafe {
-        if addr > USER_HEAP_START_ADDR as u32 {
+        let original_brk = USER_BRK_ADDR.read_volatile() as u32;
+        if addr > original_brk {
             BRK = addr;
         }
         BRK
     };
-
+    kprint!("sys_brk: ret = {:08x}", ret);
     // let msg = str_format!(str256, "sys_brk(0x{addr:08x}) -> 0x{ret:08x}");
     // print(&msg);
 
     Ok(ret)
+}
+
+fn align_up(addr: usize, align: usize) -> usize {
+    (addr + align - 1) & !(align - 1)
 }
 
 /// https://man7.org/linux/man-pages/man2/mmap.2.html
@@ -1123,34 +1046,107 @@ fn sys_mmap(
     _prot: u32,
     _flags: u32,
     fd: u32,
-    _offset: u32,
+    pgoffset: u32,
 ) -> Result<u32, Err> {
     let _fd = fd as i32;
-
+    kprint!("sys_mmap(0x{_addr:08x}, {len}, {_prot}, 0x{_flags:08x}, {_fd}, {pgoffset})");
     // let msg = str_format!(
     //     str256,
     //     "sys_mmap(0x{_addr:08x}, {len}, {_prot}, 0x{_flags:08x}, {_fd}, {_offset})"
     // );
     // print(&msg);
-
     if len == 0 {
         return Err(Err::Inval);
     }
 
-    #[allow(static_mut_refs)]
-    let ptr = unsafe {
-        let layout = Layout::from_size_align(len as usize, PAGE_SIZE).unwrap_unchecked();
-        let ptr = HEAP.allocate(layout).ok_or(Err::NoMem)?.as_ptr();
-        if !ptr.is_null() {
-            ptr.write_bytes(0, layout.size());
+    kprint!("user_brk_start = {:08x}", unsafe {
+        USER_BRK_ADDR.read_volatile() as u32
+    });
+    kprint!("brk = {:08x}", unsafe { BRK });
+    if _addr >= unsafe { USER_BRK_ADDR.read_volatile() as u32 }
+        && _addr + len <= unsafe { BRK }
+        && _flags & MAP_FIXED == MAP_FIXED
+        && _prot == 0
+    {
+        // musl wants to make this unavailable, we just happily comply
+        kprint!(
+            "sys_mmap: musl wants to make {:08x}-{:08x} unavailable with PROT_NONE, we just OK(0)",
+            _addr,
+            _addr + len
+        );
+        return Ok(0);
+    }
+
+    let offset = pgoffset as u64 * PAGE_SIZE as u64;
+    const MAP_FIXED: u32 = 0x10;
+    if _flags & MAP_FIXED == MAP_FIXED {
+        kprint!("sys_mmap: MAP_FIXED is set");
+    }
+
+    // XXX this should be kernel stack max not 0xc000_0000
+    if _addr != 0 && _addr + len > 0xc000_0000 {
+        kprint!(
+            "sys_mmap: addr outside mmap space = {:08x}, returning Inval",
+            _addr
+        );
+        return Err(Err::Inval);
+    }
+
+    if _fd == -1 && _flags & MAP_FIXED != MAP_FIXED {
+        let mmap_base = get_mmap_base();
+        let aligned_length = align_up(len as usize, PAGE_SIZE);
+        // mmap grows down
+        let new_mmap_base = (mmap_base as usize - aligned_length) as u32;
+
+        if new_mmap_base
+            != align_up(new_mmap_base as usize, PAGE_SIZE)
+                .try_into()
+                .unwrap()
+        {
+            kpanic!("sys_mmap: mmap base is not aligned to page size anymore");
         }
-        ptr
-    };
+        let ptr: *mut u8 = new_mmap_base as *mut u8;
+        unsafe {
+            ptr.write_bytes(0, aligned_length);
+        }
+        kprint!("sys_mmap: new mmap base = {:08x}", new_mmap_base);
+        set_mmap_base(new_mmap_base);
+        Ok(ptr as u32)
+    } else if _fd != -1 && _flags & MAP_FIXED != MAP_FIXED {
+        let mmap_base = get_mmap_base();
+        let aligned_length = align_up(len as usize, PAGE_SIZE);
+        // mmap grows down
+        let new_mmap_base = (mmap_base as usize - aligned_length) as u32;
 
-    // let msg = str_format!(str256, "{ptr:?}");
-    // print(&msg);
-
-    Ok(ptr as u32)
+        if new_mmap_base
+            != align_up(new_mmap_base as usize, PAGE_SIZE)
+                .try_into()
+                .unwrap()
+        {
+            kpanic!("sys_mmap: mmap base is not aligned to page size anymore");
+        }
+        kprint!("sys_mmap: new mmap base = {:08x}", new_mmap_base);
+        set_mmap_base(new_mmap_base);
+        let ptr: *mut u8 = new_mmap_base as *mut u8;
+        read_file_to_user_memory(fd, ptr as u32, len, offset)?;
+        Ok(ptr as u32)
+    } else if _fd != -1 && _flags & MAP_FIXED == MAP_FIXED && _addr != 0 {
+        kprint!(
+            "sys_mmap: wishing {:08x}-{:08x} to be mapped, and our mmap base is {:08x}",
+            _addr,
+            _addr + len,
+            get_mmap_base()
+        );
+        let ptr: *mut u8 = _addr as *mut u8;
+        read_file_to_user_memory(fd, _addr, len, offset)?;
+        if _addr + len < get_mmap_base() {
+            kpanic!("sys_mmap: mmap base + len < get_mmap_base()");
+        }
+        kprint!("sys_mmap: returning {:08x}", ptr as u32);
+        Ok(ptr as u32)
+    } else {
+        kpanic!("sys_mmap: unsupported scenario");
+    }
 }
 
 /// https://man7.org/linux/man-pages/man2/mmap.2.html
@@ -1160,14 +1156,11 @@ fn sys_munmap(addr: u32, _len: u32) -> Result<u32, Err> {
     // let msg = str_format!(str256, "sys_munmap({ptr:?}, {_len})");
     // print(&msg);
 
+    kprint!("sys_munmap: ptr = {:?}", ptr);
     if ptr.is_null() {
+        kprint!("sys_munmap: ptr is null");
         return Err(Err::Inval);
     }
-
-    #[allow(static_mut_refs)]
-    unsafe {
-        HEAP.deallocate(NonNull::new_unchecked(ptr), PAGE_SIZE)
-    };
 
     Err(Err::NoSys)
 }

@@ -20,7 +20,7 @@ use alloc::{collections::BTreeMap, vec, vec::Vec};
 use anyhow::{Context, Result, anyhow, bail, ensure};
 use elf::{ElfBytes, endian::LittleEndian, file::Class};
 use risc0_zkp::core::{digest::Digest, hash::sha::Impl};
-use risc0_zkvm_platform::WORD_SIZE;
+use risc0_zkvm_platform::{PAGE_SIZE, WORD_SIZE};
 use serde::{Deserialize, Serialize};
 
 use crate::{ByteAddr, Digestible as _, KERNEL_START_ADDR, MemoryImage, SystemState};
@@ -43,9 +43,258 @@ pub struct Program {
 
     /// Number of program headers
     pub(crate) phnum: u32,
+
+    /// Base address of the interpreter
+    pub(crate) interp_base_addr: u32,
+
+    /// Address of the interpreter
+    pub(crate) interp_addr: u32,
+
+    /// The base address of the brk
+    pub(crate) brk: u32,
 }
 
 impl Program {
+    /// Loads an ELF file for a dynamic program, including the interpreter.
+    pub fn load_elf_dyn(input: &[u8], max_mem: u32, interp: &[u8]) -> Result<Program> {
+        let mut brk = 0u32;
+        let mut image: BTreeMap<u32, u32> = BTreeMap::new();
+        let elf = ElfBytes::<LittleEndian>::minimal_parse(input)
+            .map_err(|err| anyhow!("Elf parse error: {err}"))?;
+        if elf.ehdr.class != Class::ELF32 {
+            bail!("Not a 32-bit ELF");
+        }
+        if elf.ehdr.e_machine != elf::abi::EM_RISCV {
+            bail!("Invalid machine type, must be RISC-V");
+        }
+        if elf.ehdr.e_type != elf::abi::ET_DYN {
+            bail!("Invalid ELF type, must be dynamic");
+        }
+
+        let load_base = 0x11000u32;
+        let entry: u32 = elf
+            .ehdr
+            .e_entry
+            .try_into()
+            .map_err(|err| anyhow!("e_entry was larger than 32 bits. {err}"))?;
+        if entry >= max_mem || entry % WORD_SIZE as u32 != 0 {
+            bail!("Invalid entrypoint");
+        }
+        let segments = elf
+            .segments()
+            .ok_or_else(|| anyhow!("Missing segment table"))?;
+        if segments.len() > 256 {
+            bail!("Too many program headers");
+        }
+        for segment in segments.iter().filter(|x| x.p_type == elf::abi::PT_LOAD) {
+            let file_size: u32 = segment
+                .p_filesz
+                .try_into()
+                .map_err(|err| anyhow!("filesize was larger than 32 bits. {err}"))?;
+            if file_size >= max_mem {
+                bail!("Invalid segment file_size");
+            }
+            let mem_size: u32 = segment
+                .p_memsz
+                .try_into()
+                .map_err(|err| anyhow!("mem_size was larger than 32 bits {err}"))?;
+            if mem_size >= max_mem {
+                bail!("Invalid segment mem_size");
+            }
+            let mut vaddr: u32 = segment
+                .p_vaddr
+                .try_into()
+                .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?;
+            vaddr += load_base;
+            if vaddr % WORD_SIZE as u32 != 0 {
+                bail!("vaddr {vaddr:08x} is unaligned");
+            }
+            let offset: u32 = segment
+                .p_offset
+                .try_into()
+                .map_err(|err| anyhow!("offset is larger than 32 bits. {err}"))?;
+            for i in (0..mem_size).step_by(WORD_SIZE) {
+                let addr = vaddr.checked_add(i).context("Invalid segment vaddr")?;
+                if addr >= max_mem {
+                    bail!(
+                        "Address [0x{addr:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
+                    );
+                }
+                if i >= file_size {
+                    // Past the file size, all zeros.
+                    image.insert(addr, 0);
+                } else {
+                    let mut word = 0;
+                    // Don't read past the end of the file.
+                    let len = core::cmp::min(file_size - i, WORD_SIZE as u32);
+                    for j in 0..len {
+                        let offset = (offset + i + j) as usize;
+                        let byte = input.get(offset).context("Invalid segment offset")?;
+                        word |= (*byte as u32) << (j * 8);
+                    }
+                    image.insert(addr, word);
+                }
+            }
+            if vaddr + mem_size > brk {
+                brk = vaddr + mem_size;
+                // align up to PAGE_SIZE
+            }
+        }
+
+        // Calculate Program Header table address (where phdrs are loaded in memory)
+        let mut phdr_addr = 0;
+        let phnum = segments.len() as u32;
+
+        // Find which segment contains the Program Header table and calculate its virtual address
+        for segment in segments.iter().filter(|x| x.p_type == elf::abi::PT_LOAD) {
+            let segment_offset: u32 = segment
+                .p_offset
+                .try_into()
+                .map_err(|err| anyhow!("segment offset is larger than 32 bits. {err}"))?;
+            let segment_vaddr: u32 = segment
+                .p_vaddr
+                .try_into()
+                .map_err(|err| anyhow!("segment vaddr is larger than 32 bits. {err}"))?;
+            let segment_filesz: u32 = segment
+                .p_filesz
+                .try_into()
+                .map_err(|err| anyhow!("segment filesz is larger than 32 bits. {err}"))?;
+
+            // Check if this segment contains the Program Header table
+            let phoff: u32 = elf
+                .ehdr
+                .e_phoff
+                .try_into()
+                .map_err(|err| anyhow!("e_phoff is larger than 32 bits. {err}"))?;
+            if segment_offset <= phoff && phoff < segment_offset + segment_filesz {
+                phdr_addr = phoff - segment_offset + segment_vaddr + load_base;
+                break;
+            }
+        }
+
+        let executable = (load_base + entry, phdr_addr, phnum);
+        // load_bias is place in memory we want to place the interpreter, after the executable
+        // calculate it based on iterating over the executable segments in memory ending vaddr + memsz and align with 0x1000
+        let mut load_bias = 0;
+        for segment in segments.iter().filter(|x| x.p_type == elf::abi::PT_LOAD) {
+            let mem_size: u32 = segment
+                .p_memsz
+                .try_into()
+                .map_err(|err| anyhow!("mem_size was larger than 32 bits {err}"))?;
+            let vaddr: u32 = segment
+                .p_vaddr
+                .try_into()
+                .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?;
+            load_bias = vaddr
+                .checked_add(mem_size)
+                .context("Invalid segment vaddr")?;
+        }
+        // align with 0x1000
+        load_bias = load_base
+            + load_bias
+                .checked_add(0x1000 - 1)
+                .context("Invalid load bias")?;
+        load_bias = load_bias / 0x1000 * 0x1000;
+
+        let elf = ElfBytes::<LittleEndian>::minimal_parse(interp)
+            .map_err(|err| anyhow!("Elf parse error: {err}"))?;
+        if elf.ehdr.class != Class::ELF32 {
+            bail!("Not a 32-bit ELF");
+        }
+        if elf.ehdr.e_machine != elf::abi::EM_RISCV {
+            bail!("Invalid machine type, must be RISC-V");
+        }
+        if elf.ehdr.e_type != elf::abi::ET_DYN {
+            bail!("Invalid ELF type, must be dynamic");
+        }
+
+        let entry: u32 = elf
+            .ehdr
+            .e_entry
+            .try_into()
+            .map_err(|err| anyhow!("e_entry was larger than 32 bits. {err}"))?;
+        if entry >= max_mem || entry % WORD_SIZE as u32 != 0 {
+            bail!("Invalid entrypoint");
+        }
+        let segments = elf
+            .segments()
+            .ok_or_else(|| anyhow!("Missing segment table"))?;
+        if segments.len() > 256 {
+            bail!("Too many program headers");
+        }
+        for segment in segments.iter().filter(|x| x.p_type == elf::abi::PT_LOAD) {
+            let file_size: u32 = segment
+                .p_filesz
+                .try_into()
+                .map_err(|err| anyhow!("filesize was larger than 32 bits. {err}"))?;
+            if file_size >= max_mem {
+                bail!("Invalid segment file_size");
+            }
+            let mem_size: u32 = segment
+                .p_memsz
+                .try_into()
+                .map_err(|err| anyhow!("mem_size was larger than 32 bits {err}"))?;
+            if mem_size >= max_mem {
+                bail!("Invalid segment mem_size");
+            }
+            let mut vaddr: u32 = segment
+                .p_vaddr
+                .try_into()
+                .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?;
+            vaddr += load_bias;
+            if vaddr % WORD_SIZE as u32 != 0 {
+                bail!("vaddr {vaddr:08x} is unaligned");
+            }
+
+            let offset: u32 = segment
+                .p_offset
+                .try_into()
+                .map_err(|err| anyhow!("offset is larger than 32 bits. {err}"))?;
+            for i in (0..mem_size).step_by(WORD_SIZE) {
+                let addr = vaddr.checked_add(i).context("Invalid segment vaddr")?;
+                if addr >= max_mem {
+                    bail!(
+                        "Address [0x{addr:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
+                    );
+                }
+                if i >= file_size {
+                    // Past the file size, all zeros.
+                    image.insert(addr, 0);
+                } else {
+                    let mut word = 0;
+                    // Don't read past the end of the file.
+                    let len = core::cmp::min(file_size - i, WORD_SIZE as u32);
+                    for j in 0..len {
+                        let offset = (offset + i + j) as usize;
+                        let byte = interp.get(offset).context("Invalid segment offset")?;
+                        word |= (*byte as u32) << (j * 8);
+                    }
+                    image.insert(addr, word);
+                }
+            }
+            if vaddr + mem_size > brk {
+                brk = vaddr + mem_size;
+            }
+        }
+        brk = (brk + PAGE_SIZE as u32 - 1) & !(PAGE_SIZE as u32 - 1);
+
+        println!("entry: {:08x}", executable.0);
+        println!("phdr_addr: {:08x}", executable.1);
+        println!("phnum: {}", executable.2);
+        println!("load_bias: {:08x}", load_bias);
+        println!("interp_entry(biased): {:08x}", load_bias + entry);
+        println!("brk: {:08x}", brk);
+        Ok(Program::new_from_entry_and_image(
+            executable.0,
+            image,
+            executable.1,
+            executable.2,
+            load_bias,
+            load_bias + entry,
+            brk,
+        ))
+    }
+
     /// Initialize a RISC Zero Program from an appropriate ELF file
     pub fn load_elf(input: &[u8], max_mem: u32) -> Result<Program> {
         let mut image: BTreeMap<u32, u32> = BTreeMap::new();
@@ -119,6 +368,7 @@ impl Program {
                         let byte = input.get(offset).context("Invalid segment offset")?;
                         word |= (*byte as u32) << (j * 8);
                     }
+
                     image.insert(addr, word);
                 }
             }
@@ -156,7 +406,7 @@ impl Program {
         }
 
         Ok(Program::new_from_entry_and_image(
-            entry, image, phdr_addr, phnum,
+            entry, image, phdr_addr, phnum, 0, 0, 0,
         ))
     }
 
@@ -166,12 +416,18 @@ impl Program {
         image: BTreeMap<u32, u32>,
         phdr_addr: u32,
         phnum: u32,
+        interp_base_addr: u32,
+        interp_addr: u32,
+        brk: u32,
     ) -> Self {
         Self {
             entry,
             image,
             phdr_addr,
             phnum,
+            interp_base_addr,
+            interp_addr,
+            brk,
         }
     }
 

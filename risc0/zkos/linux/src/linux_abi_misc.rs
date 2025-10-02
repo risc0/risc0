@@ -77,8 +77,17 @@ pub fn sys_clock_gettime64(which_clock: u32, tp: u32) -> Result<u32, Err> {
     let timespec = Timespec { tv_sec, tv_nsec };
 
     // Write timespec to user memory using copy_to_user
-    let timespec_bytes = unsafe { core::slice::from_raw_parts(&timespec as *const Timespec as *const u8, core::mem::size_of::<Timespec>()) };
-    let bytes_copied = crate::kernel::copy_to_user(tp as *mut u8, timespec_bytes.as_ptr(), core::mem::size_of::<Timespec>());
+    let timespec_bytes = unsafe {
+        core::slice::from_raw_parts(
+            &timespec as *const Timespec as *const u8,
+            core::mem::size_of::<Timespec>(),
+        )
+    };
+    let bytes_copied = crate::kernel::copy_to_user(
+        tp as *mut u8,
+        timespec_bytes.as_ptr(),
+        core::mem::size_of::<Timespec>(),
+    );
     if bytes_copied == 0 {
         kprint!("sys_clock_gettime64: failed to copy timespec structure to user memory");
         return Err(Err::NoSys);
@@ -601,9 +610,13 @@ pub fn sys_move_pages(
 }
 
 pub fn sys_mprotect(_addr: u32, _len: u32, _prot: u32) -> Result<u32, Err> {
-    let msg = b"sys_mprotect not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    kprint!(
+        "sys_mprotect(_addr={}, _len={}, _prot={})",
+        _addr,
+        _len,
+        _prot
+    );
+    Ok(0)
 }
 
 pub fn sys_mq_getsetattr(_mqdes: u32, _mqstat: u32, _omqstat: u32) -> Result<u32, Err> {

@@ -26,6 +26,9 @@ pub const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
 struct Args {
     /// Path to the guest ELF file (optional)
     #[arg(short, long)]
+    interp_elf: Option<PathBuf>,
+
+    #[arg(short, long)]
     guest_elf: Option<PathBuf>,
 
     /// Path to the kernel ELF file
@@ -48,8 +51,33 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
     })?;
 
-    let bin_data = if let Some(guest_elf_path) = &args.guest_elf {
-        // Read the guest ELF
+    let bin_data = if let Some(interp_elf_path) = &args.interp_elf {
+        if let Some(guest_elf_path) = &args.guest_elf {
+            let kernel_elf = std::fs::read(&args.kernel_elf).map_err(|e| {
+                format!(
+                    "Failed to read kernel ELF from {:?}: {}",
+                    args.kernel_elf, e
+                )
+            })?;
+            let kernel_program = Program::load_elf(&kernel_elf, u32::MAX)
+                .map_err(|e| format!("Failed to load kernel ELF: {}", e))?;
+            let interp_elf = std::fs::read(interp_elf_path).map_err(|e| {
+                format!("Failed to read guest ELF from {:?}: {}", interp_elf_path, e)
+            })?;
+            let guest_elf = std::fs::read(guest_elf_path).map_err(|e| {
+                format!("Failed to read guest ELF from {:?}: {}", guest_elf_path, e)
+            })?;
+
+            let elf = Program::load_elf_dyn(&guest_elf, u32::MAX, &interp_elf).map_err(|e| {
+                format!("Failed to read guest ELF from {:?}: {}", guest_elf_path, e)
+            })?;
+            let memory_image = MemoryImage::new_dyn(elf, kernel_program);
+            bincode::serialize(&memory_image)
+                .map_err(|e| format!("Failed to serialize MemoryImage: {}", e))?
+        } else {
+            panic!("Guest ELF path is required");
+        }
+    } else if let Some(guest_elf_path) = &args.guest_elf {
         let guest_elf = std::fs::read(guest_elf_path)
             .map_err(|e| format!("Failed to read guest ELF from {:?}: {}", guest_elf_path, e))?;
 
