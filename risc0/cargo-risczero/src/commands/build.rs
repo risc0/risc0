@@ -92,7 +92,9 @@ impl BuildCommand {
         tracing::trace!("Excluded packages: {excluded:?}");
         for pkg in included {
             // TODO: This filtering picks up all bin targets, including ones that cannot be built
-            // for RISC Zero.
+            // for RISC Zero. Implement a default set of filtering rules that includes:
+            // * Binary targets in packages marked with [package.metadata.risc0] within this workspace
+            // * Binary targets in packages in workspaces pointed to by [package.metadata.risc0.methods]
             if pkg.targets.iter().any(|x| x.is_bin()) {
                 let guests = risc0_build::build_package(pkg, target_dir, guest_opts.clone())?;
                 guest_list.extend_from_slice(&guests);
