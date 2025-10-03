@@ -111,6 +111,7 @@ impl BuildCommand {
             // This picks up packages specified using the standard convention of using a workspace
             // nested in the methods directory to contains the guest bins. Note that the packages
             // in the child workspace do not generally have any risc0 metadata themselves.
+            // TODO: This needs to filter packages based on required features.
             let pkg_children = risc0_build::guest_packages(pkg)
                 .with_context(|| format!("Failed to determine guest packages for {}", pkg.name))?;
             for guest_pkg in pkg_children {
