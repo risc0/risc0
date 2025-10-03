@@ -58,15 +58,19 @@ pub use self::{
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
 const DEFAULT_DOCKER_TAG: &str = "r0.1.88.0";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
+#[non_exhaustive]
 struct Risc0Metadata {
+    #[serde(default)]
     methods: Vec<String>,
 }
 
 impl Risc0Metadata {
-    fn from_package(pkg: &Package) -> Option<Risc0Metadata> {
-        let obj = pkg.metadata.get("risc0").unwrap();
-        serde_json::from_value(obj.clone()).unwrap()
+    fn from_package(pkg: &Package) -> Result<Risc0Metadata> {
+        let Some(obj) = pkg.metadata.get("risc0") else {
+            return Ok(Risc0Metadata::default());
+        };
+        serde_json::from_value(obj.clone()).context("Failed to parse risc0 metadata")
     }
 }
 
@@ -244,6 +248,7 @@ impl GuestListEntryBuilder for GuestListEntry {
     }
 }
 
+// TODO(victor): Make this return `Result` rather than panicking at the next major version bump.
 /// Returns the given cargo Package from the metadata in the Cargo.toml manifest
 /// within the provided `manifest_dir`.
 pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
@@ -265,16 +270,15 @@ pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
         })
         .collect();
     if matching.is_empty() {
-        eprintln!("ERROR: No package found in {manifest_dir:?}");
-        std::process::exit(-1);
+        panic!("No package found in {manifest_dir:?}");
     }
     if matching.len() > 1 {
-        eprintln!("ERROR: Multiple packages found in {manifest_dir:?}",);
-        std::process::exit(-1);
+        panic!("Multiple packages found in {manifest_dir:?}",);
     }
     matching.pop().unwrap()
 }
 
+// TODO(victor): Make this return `Result` rather than panicking at the next major version bump.
 /// Determines and returns the build target directory from the Cargo manifest at
 /// the given `manifest_path`.
 pub fn get_target_dir(manifest_path: impl AsRef<Path>) -> PathBuf {
@@ -287,21 +291,26 @@ pub fn get_target_dir(manifest_path: impl AsRef<Path>) -> PathBuf {
         .into()
 }
 
-/// When called from a build.rs, returns the current package being built.
-fn current_package() -> Package {
-    get_package(env::var("CARGO_MANIFEST_DIR").unwrap())
+/// When called from a build.rs, returns the current package being built based on
+/// `CARGO_MANIFEST_DIR`.
+fn current_package() -> Result<Package> {
+    Ok(get_package(
+        env::var("CARGO_MANIFEST_DIR").context("CARGO_MANIFEST_DIR env var is not set")?,
+    ))
 }
 
 /// Returns all inner packages specified the "methods" list inside
 /// "package.metadata.risc0".
-fn guest_packages(pkg: &Package) -> Vec<Package> {
-    let manifest_dir = pkg.manifest_path.parent().unwrap();
-    Risc0Metadata::from_package(pkg)
-        .unwrap()
+pub fn guest_packages(pkg: &Package) -> Result<Vec<Package>> {
+    let manifest_dir = pkg
+        .manifest_path
+        .parent()
+        .context("Package meanifest path has no parent")?;
+    Ok(Risc0Metadata::from_package(pkg)?
         .methods
         .iter()
         .map(|inner| get_package(manifest_dir.join(inner)))
-        .collect()
+        .collect())
 }
 
 fn is_debug() -> bool {
@@ -735,8 +744,8 @@ fn do_embed_methods<G: GuestListEntryBuilder>(
     mut guest_opts: HashMap<&str, GuestOptions>,
 ) -> Vec<G> {
     // Read the cargo metadata for info from `[package.metadata.risc0]`.
-    let pkg = current_package();
-    let guest_packages = guest_packages(&pkg);
+    let pkg = current_package().expect("Failed to determine current package");
+    let guest_packages = guest_packages(&pkg).expect("Failed to determine guest packages");
 
     let mut pkg_opts = vec![];
     for guest_pkg in guest_packages {
