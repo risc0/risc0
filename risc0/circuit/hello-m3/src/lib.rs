@@ -20,14 +20,17 @@ mod test {
     use risc0_circuit_recursion::{CircuitImpl, prove::Program};
     use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
     use risc0_zkp::{
-        adapter::{CircuitCoreDefV3, CircuitInfo, CircuitInfoV3, GroupInfo, MixState, PolyExt, PROOF_SYSTEM_INFO, TapsProvider},
+        adapter::{
+            CircuitCoreDefV3, CircuitInfo, CircuitInfoV3, GroupInfo, MixState, PROOF_SYSTEM_INFO,
+            PolyExt, PolyExtStep, PolyExtStepDef, TapsProvider,
+        },
         core::hash::poseidon2::Poseidon2HashSuite,
         taps::{TapData, TapSet},
         verify::verify_v3,
     };
-    use risc0_zkvm::{prove_zkr, recursion::MerkleGroup, SuccinctReceiptVerifierParameters, VerifierContext};
-    use risc0_zkp::adapter::{PolyExtStep, PolyExtStepDef};
-
+    use risc0_zkvm::{
+        SuccinctReceiptVerifierParameters, VerifierContext, prove_zkr, recursion::MerkleGroup,
+    };
 
     pub const TAPSET: &TapSet = &TapSet::<'static> {
         taps: &[
@@ -83,16 +86,16 @@ mod test {
     }
     const DEF: PolyExtStepDef = PolyExtStepDef {
         block: &[
-            PolyExtStep::True, // mix_vars 0
-            PolyExtStep::Get(0), // fp_vars 0
-            PolyExtStep::Get(1), // fp_vars 1
-            PolyExtStep::Get(2), // fp_vars 2
-            PolyExtStep::Const(0), // fp_vars 3
-            PolyExtStep::Const(1), // fp_vars 4
+            PolyExtStep::True,         // mix_vars 0
+            PolyExtStep::Get(0),       // fp_vars 0
+            PolyExtStep::Get(1),       // fp_vars 1
+            PolyExtStep::Get(2),       // fp_vars 2
+            PolyExtStep::Const(0),     // fp_vars 3
+            PolyExtStep::Const(1),     // fp_vars 4
             PolyExtStep::AndEqz(0, 0), // mix_vars 1
             PolyExtStep::AndEqz(1, 1), // mix_vars 2
-            PolyExtStep::Sub(2, 4), // fp_vars 5
-            PolyExtStep::Mul(2, 5), // fp_vars 6
+            PolyExtStep::Sub(2, 4),    // fp_vars 5
+            PolyExtStep::Mul(2, 5),    // fp_vars 6
             PolyExtStep::AndEqz(2, 6), // mix_vars 3
         ],
         ret: 3,
@@ -133,9 +136,9 @@ mod test {
 
     fn get_hello_zkr() -> Result<Program> {
         let words: Vec<u32> = include_bytes!("hello_lift_12.zkr")
-                .chunks_exact(4)
-                .map(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()))
-                .collect();
+            .chunks_exact(4)
+            .map(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()))
+            .collect();
 
         // Use recursion PO2 = 17 because of the size of the hello ZKR
         Ok(Program::from_encoded(&words, 17))
@@ -164,21 +167,20 @@ mod test {
             program,
             &control_id,
             control_ids,
-            bytemuck::cast_slice(&input))?;
+            bytemuck::cast_slice(&input),
+        )?;
 
         // Verify, swapping out the default control root for one that includes our ZKR
-        let ctx = VerifierContext::default()
-            .with_succinct_verifier_parameters(
-                SuccinctReceiptVerifierParameters {
-                    control_root,
-                    inner_control_root: None,
-                    proof_system_info: PROOF_SYSTEM_INFO,
-                    circuit_info: CircuitImpl::CIRCUIT_INFO,
-                }
-            );
+        let ctx = VerifierContext::default().with_succinct_verifier_parameters(
+            SuccinctReceiptVerifierParameters {
+                control_root,
+                inner_control_root: None,
+                proof_system_info: PROOF_SYSTEM_INFO,
+                circuit_info: CircuitImpl::CIRCUIT_INFO,
+            },
+        );
 
         receipt.verify_integrity_with_context(&ctx)?;
         Ok(())
     }
 }
-

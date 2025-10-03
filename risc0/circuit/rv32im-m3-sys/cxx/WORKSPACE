@@ -136,7 +136,7 @@ maybe(
 
 git_repository(
     name = "zirgen",
-    commit = "c942819362ad1edbfa2da241d1055ef2b4cf79aa",  # TODO: update commit
+    commit = "9823fac68da2e95366f7a3a4caa02a0ebb6b59e2",
     remote = "https://github.com/risc0/zirgen.git",
 )
 
