@@ -40,7 +40,9 @@ int main() {
     using C = RecordingContext;
     mlir::MLIRContext mlirCtx;
     RecordingContext ctx(&mlirCtx);
-    RecordingVal::setContext(&ctx);
+    RecordingReg::setContext(&ctx);
+    BuilderSingleton::set(&ctx.builder);
+
 
     ctx.enterComponent("Top");
     Top<C> component;

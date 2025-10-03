@@ -1,0 +1,9 @@
+cc_binary(
+    name = "bootstrap",
+    srcs = glob(["*.cpp"]),
+    deps = [
+        "//compiler/extractor",
+        "//rv32im/circuit",
+        "//rv32im/emu",
+    ],
+)

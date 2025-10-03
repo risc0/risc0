@@ -20,6 +20,8 @@
 
 using namespace mlir;
 
+RecordingContext* RecordingReg::ctx = nullptr;
+
 RecordingContext::RecordingContext(MLIRContext* mlirCtx) : mlirCtx(mlirCtx), builder(mlirCtx) {
     mlirCtx->getOrLoadDialect<zirgen::Zhlt::ZhltDialect>();
     mlirCtx->getOrLoadDialect<zirgen::ZStruct::ZStructDialect>();
