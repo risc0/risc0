@@ -23,116 +23,116 @@ use crate::{
     SessionStats,
 };
 
-/// TODO
+/// Request to start a proof job.
 #[derive(Serialize, Deserialize)]
 pub struct ProofRequest {
-    /// TODO
+    /// Program binary to be proved.
     pub binary: Vec<u8>,
 
-    /// TODO
+    /// Serialized input for the guest program.
     pub input: Vec<u8>,
 
-    /// TODO
+    /// Assumption receipts required by the proof.
     pub assumptions: Vec<AssumptionReceipt>,
 
-    /// TODO
+    /// Optional segment size limit as log2 (po2).
     pub segment_limit_po2: Option<u32>,
 
-    /// TODO
+    /// If true, execute without generating a receipt.
     pub execute_only: bool,
 }
 
-/// TODO
+/// Supported shrink-wrap proof kinds.
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 pub enum ShrinkWrapKind {
-    /// TODO
+    /// Groth16 proof format.
     Groth16,
 }
 
-/// TODO
+/// Request to shrink-wrap a receipt.
 #[derive(Serialize, Deserialize)]
 pub struct ShrinkWrapRequest {
-    /// TODO
+    /// Desired shrink-wrap kind.
     pub kind: ShrinkWrapKind,
-    /// TODO
+    /// Receipt to shrink-wrap.
     pub receipt: Receipt,
 }
 
-/// TODO
+/// Union of supported job requests.
 #[allow(clippy::large_enum_variant)]
 #[derive(Serialize, Deserialize, From)]
 pub enum JobRequest {
-    /// TODO
+    /// Start a proof job.
     Proof(ProofRequest),
-    /// TODO
+    /// Perform receipt shrink-wrapping.
     ShrinkWrap(ShrinkWrapRequest),
 }
 
-/// TODO
+/// Status metadata for a submitted job.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct JobInfo<JobResultT> {
-    /// TODO
+    /// Current status of the job.
     pub status: JobStatus<JobResultT>,
 
-    /// TODO
+    /// Time elapsed since the job started.
     pub elapsed_time: Duration,
 }
 
-/// TODO
+/// Execution status of a job.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum JobStatus<JobResultT> {
-    /// TODO
+    /// In progress with a status message.
     Running(String),
 
-    /// TODO
+    /// Completed successfully with a result.
     Succeeded(JobResultT),
 
-    /// TODO
+    /// Failed with an error.
     Failed(TaskError),
 
-    /// TODO
+    /// Job exceeded its time limit.
     TimedOut,
 
-    /// TODO
+    /// Aborted before completion.
     Aborted,
 }
 
-/// TODO
+/// Result payload for a proof job.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ProofResult {
-    /// TODO
+    /// Execution session details.
     pub session: Arc<Session>,
 
-    /// TODO
+    /// Proof receipt if generated.
     pub receipt: Option<Arc<Receipt>>,
 }
 
-/// TODO
+/// Result payload for a shrink-wrap job.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ShrinkWrapResult {
-    /// TODO
+    /// Shrink-wrapped receipt.
     pub receipt: Arc<Receipt>,
 }
 
-/// TODO
+/// Summary of an execution session.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Session {
-    /// TODO
+    /// Aggregated execution statistics.
     pub stats: SessionStats,
 
-    /// TODO
+    /// Program journal, if any.
     pub journal: Option<Journal>,
 
-    /// TODO
+    /// Assumption receipts referenced by this session.
     pub assumptions: Vec<Arc<AssumptionReceipt>>,
 
-    /// TODO
+    /// Execution segments.
     pub segments: Vec<SegmentInfo>,
 
-    /// TODO
+    /// Guest exit code.
     pub exit_code: ExitCode,
 
-    /// TODO
+    /// Receipt claim produced by the session.
     pub receipt_claim: ReceiptClaim,
 }
 
@@ -147,15 +147,15 @@ impl From<Session> for SessionInfo {
     }
 }
 
-/// TODO
+/// Error type for job execution.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum TaskError {
-    /// TODO
+    /// Generic error message.
     Generic(String),
 }
 
 impl<JobResultT> JobStatus<JobResultT> {
-    /// TODO
+    /// Returns a Bonsai-compatible status string.
     pub fn bonsai_status(&self) -> &str {
         match self {
             JobStatus::Running(_) => "RUNNING",
@@ -172,3 +172,4 @@ impl From<anyhow::Error> for TaskError {
         Self::Generic(value.to_string())
     }
 }
+
