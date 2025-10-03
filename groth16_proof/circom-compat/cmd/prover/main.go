@@ -8,6 +8,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
+	"path"
+	"path/filepath"
+	"time"
+
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
 	"github.com/consensys/gnark/backend/groth16"
@@ -15,9 +20,6 @@ import (
 	"github.com/consensys/gnark/constraint"
 	bn254r1cs "github.com/consensys/gnark/constraint/bn254"
 	"github.com/consensys/gnark/logger"
-	"os"
-	"path"
-	"time"
 )
 
 func main() {
@@ -35,7 +37,8 @@ func main() {
 }
 
 func help() {
-	fmt.Printf("Usage of %s:\n", os.Args[0])
+	programName := filepath.Base(os.Args[0])
+	fmt.Printf("Usage of %s:\n", programName)
 	fmt.Printf("\t<constraint file> <proving key file> <witness file> <output proof> [output public]\n")
 	os.Exit(2)
 }

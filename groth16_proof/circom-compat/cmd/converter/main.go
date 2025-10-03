@@ -7,12 +7,14 @@ import (
 	"compress/gzip"
 	"flag"
 	"fmt"
-	"github.com/consensys/gnark/backend/groth16"
-	"github.com/consensys/gnark/constraint"
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
+
+	"github.com/consensys/gnark/backend/groth16"
+	"github.com/consensys/gnark/constraint"
 )
 
 var dumpPK = flag.Bool("dump", false, "use very unsafe memory dump to serialize the proving key")
@@ -32,7 +34,8 @@ func main() {
 }
 
 func help() {
-	fmt.Printf("Usage of %s:\n", os.Args[0])
+	programName := filepath.Base(os.Args[0])
+	fmt.Printf("Usage of %s:\n", programName)
 	fmt.Printf("\t<r1cs file> <zkey file>\n")
 	os.Exit(2)
 }
