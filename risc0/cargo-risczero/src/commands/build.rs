@@ -166,6 +166,7 @@ impl BuildCommand {
         }
 
         // TODO: List the archive path here when set.
+        // TODO: Kernel targets list of image ID of all zeroes.
         println!("Guest programs ready at:");
         for guest in &guest_list {
             println!("ImageID: {} - {}", guest.image_id, guest.path);
