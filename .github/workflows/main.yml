@@ -454,8 +454,8 @@ jobs:
     env:
       RUSTDOCFLAGS: "--cfg docsrs -D warnings"
       # Building with docs.rs config requires the nightly toolchain.
-      # nightly-2025-05-09 corresponds to 1.88
-      NIGHTLY_RUST_TOOLCHAIN: nightly-2025-05-09
+      # nightly-2025-06-20 corresponds to 1.89
+      NIGHTLY_RUST_TOOLCHAIN: nightly-2025-06-20
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup

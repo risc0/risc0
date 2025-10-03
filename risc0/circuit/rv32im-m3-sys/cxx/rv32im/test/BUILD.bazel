@@ -74,3 +74,10 @@ cc_test(
     ],
     deps = ["//rv32im/test:test_prove"],
 )
+
+cc_test(
+    name = "test_ffi",
+    srcs = ["test_ffi.cpp"],
+    data = ["//rv32im/rvtest:riscv_test_bins"],
+    deps = ["//rv32im"],
+)

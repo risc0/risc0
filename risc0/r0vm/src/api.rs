@@ -46,6 +46,7 @@ use uuid::Uuid;
 use crate::actors::{
     actor::ActorRef,
     allocator::PROXY_URL_PATH,
+    error::Error as ActorError,
     manager::ManagerActor,
     protocol::{
         CreateJobRequest, JobInfo, JobStatus, JobStatusReply, JobStatusRequest, ProofRequest,
@@ -448,6 +449,8 @@ where
         .manager
         .ask(JobStatusRequest { job_id: *job_id })
         .await
+        .map_err(ActorError::from)
+        .flatten()
         .context("Failed to get job status")?
         .try_into()
         .map_err(|_| AppError::InternalErr(anyhow!("Invalid job_id")))?;
