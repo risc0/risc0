@@ -46,7 +46,7 @@ extern "C" bool cuda_zero_dev(void* buf, size_t size);
 // api.cu
 extern "C" SparkError sppark_poseidon2_fold(void* d_out, const void* d_in, size_t num_hashes);
 extern "C" SparkError sppark_poseidon2_rows(void* d_out, const void* d_in, uint32_t count, uint32_t col_size);
-extern "C" SparkError sppark_prefix_sum(void* d_inout, uint32_t count);
+extern "C" void prefix_sum(Fp* d_inout, uint32_t count);
 extern "C" SparkError supra_poly_divide(void* d_inout, size_t len, void* remainder, FpExt pow);
 
 // query.cu
@@ -290,10 +290,7 @@ public:
     size_t po2 = checkPo2(accum.rows());
     accum_witgen_cuda(toDevPtr(accum), toDevPtr(data), toDevPtr(globals), toDevPtr(accMix), risc0::ROU_FWD[po2], accum.rows());
     for (size_t i = 0; i < 4; i++) {
-      auto err = sppark_prefix_sum(toDevPtr(accum) + accum.rows() * i, accum.rows());
-      if (err.code != 0) {
-        throw std::runtime_error(std::string("Error during computeAccumWitness:") + err.message);
-      }
+      prefix_sum(toDevPtr(accum) + accum.rows() * i, accum.rows());
     }
   }
 

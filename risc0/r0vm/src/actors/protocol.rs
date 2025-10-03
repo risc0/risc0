@@ -23,7 +23,7 @@ use risc0_zkvm::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{WorkerRouterActor, actor::ActorRef, job::JobActor};
+use super::{actor::ActorRef, job::JobActor, worker::RemoteWorkerActor};
 
 pub use risc0_zkvm::rpc::{
     JobInfo, JobRequest, JobStatus, ProofRequest, ProofResult, Session, ShrinkWrapKind,
@@ -184,7 +184,7 @@ pub mod factory {
     pub(crate) struct GetTasks {
         pub worker_id: WorkerId,
         #[serde(skip)]
-        pub worker: Option<ActorRef<WorkerRouterActor>>,
+        pub worker: Option<ActorRef<RemoteWorkerActor>>,
         pub kinds: Vec<TaskKind>,
     }
 
