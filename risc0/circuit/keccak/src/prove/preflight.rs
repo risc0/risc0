@@ -303,7 +303,7 @@ impl<Order: PreflightCycleOrder> PreflightTrace<Order> {
 
     fn write_pflat(&mut self, state: &[BabyBearElem; CELLS]) -> u32 {
         let offset = self.data.len() as u32;
-        for s in &state {
+        for s in state {
             self.data.push(s.as_u32());
         }
         offset
