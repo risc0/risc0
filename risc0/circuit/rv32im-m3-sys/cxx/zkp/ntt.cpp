@@ -27,8 +27,8 @@ namespace {
 // input size is bigger than the output size for the evaluation case (basically for Reed-Solomon).
 // We do a bit-reversal/butterfly for the simple case.
 //
-// Annoyningly, since we want to do interpolation followed by evaluation without doing any bit
-// reversals, we need to support both decimation in time and decimation in freqency based the
+// Annoyingly, since we want to do interpolation followed by evaluation without doing any bit
+// reversals, we need to support both decimation in time and decimation in frequency based the
 // direction.
 //
 // Thsese are the primary recurvsive implementations.  Here T is the datatype (presumed to support
