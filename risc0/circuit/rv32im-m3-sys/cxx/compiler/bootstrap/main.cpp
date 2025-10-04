@@ -3,6 +3,9 @@
 #include "rv32im/circuit/verify.h"
 #include "rv32im/emu/blocks.h"
 
+#include "mlir/Pass/PassManager.h"
+#include "mlir/Transforms/Passes.h"
+
 using namespace mlir;
 using namespace zirgen::Zll;
 
@@ -43,6 +46,25 @@ static std::vector<T> makeGlobals(Value buffer) {
   return ret;
 }
 
+struct ZllEqzContext {
+  using MixStateT = Value;
+  Value getTrue() {
+    OpBuilder& builder = *BuilderSingleton::get();
+    return builder.create<TrueOp>(builder.getUnknownLoc());
+  }
+  Value andEqz(Value chain, RecordingVal v) {
+    OpBuilder& builder = *BuilderSingleton::get();
+    return builder.create<AndEqzOp>(builder.getUnknownLoc(), chain, v.value);
+  }
+  Value andEqz(Value chain, RecordingValExt v) {
+    OpBuilder& builder = *BuilderSingleton::get();
+    return builder.create<AndEqzOp>(builder.getUnknownLoc(), chain, v.value);
+  }
+  Value andCond(Value chain, RecordingVal v, Value inner) {
+    OpBuilder& builder = *BuilderSingleton::get();
+    return builder.create<AndCondOp>(builder.getUnknownLoc(), chain, v.value, inner);
+  }
+};
 
 int main() {
   MLIRContext mlirCtx;
@@ -60,9 +82,8 @@ int main() {
   inTypes.push_back(getBufType(mlirCtx, 1, accumSize, BufferKind::Constant));
   inTypes.push_back(getBufType(mlirCtx, 1, NUM_GLOBALS, BufferKind::Global));
   inTypes.push_back(getBufType(mlirCtx, 4, ACCUM_MIX_SIZE, BufferKind::Global));
-  inTypes.push_back(ValType::get(&mlirCtx, kFieldPrimeDefault, 4));
   inTypes.push_back(ValType::get(&mlirCtx, kFieldPrimeDefault, 1));
-  outTypes.push_back(ValType::get(&mlirCtx, kFieldPrimeDefault, 4));
+  outTypes.push_back(ConstraintType::get(&mlirCtx));
   auto funcType = FunctionType::get(&mlirCtx, inTypes, outTypes);
   auto func = builder.create<func::FuncOp>(loc, "verify", funcType);
   builder.setInsertionPointToStart(func.addEntryBlock());
@@ -71,16 +92,26 @@ int main() {
   auto prevAccum = makeRegs(func.getArgument(1), 1);
   auto globals = makeGlobals<RecordingVal>(func.getArgument(2));
   auto accumMix = makeGlobals<RecordingValExt>(func.getArgument(3));
-  auto ecMix = RecordingValExt(func.getArgument(4));
-  auto x  = RecordingVal(func.getArgument(5));
-  auto ret = verifyCircuit<TrivialRecordingReg, RecordingVal, RecordingValExt>(
+  auto x  = RecordingVal(func.getArgument(4));
+  ZllEqzContext eqzCtx;
+  auto ret = verifyCircuitCtx<TrivialRecordingReg, RecordingVal, RecordingValExt, ZllEqzContext>(
+      eqzCtx,
       data.data(),
       accum.data(),
       prevAccum.data(),
       globals.data(),
       accumMix.data(),
-      ecMix,
       x);
-  builder.create<func::ReturnOp>(loc, ret.value);
+  builder.create<func::ReturnOp>(loc, ret);
+
+  mlir::PassManager pm(&mlirCtx);
+  pm.addPass(mlir::createCanonicalizerPass());
+  pm.addPass(mlir::createCSEPass());
+  
+  if (failed(pm.run(moduleOp))) {
+    llvm::errs() << "an internal error occurred while optimizing this module:\n";
+    return 1;
+  }
+
   moduleOp.print(llvm::errs());
 }
