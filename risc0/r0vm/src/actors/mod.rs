@@ -961,7 +961,7 @@ enum RemoteFactoryRequest {
 impl DispatchRpcMessage<FactoryActor> for RemoteFactoryRequest {
     async fn dispatch(
         self,
-        _remote_address: SocketAddr,
+        remote_address: SocketAddr,
         receiver: ActorRef<FactoryActor>,
         ops: RpcDispatchOps,
     ) {
@@ -972,6 +972,7 @@ impl DispatchRpcMessage<FactoryActor> for RemoteFactoryRequest {
                         .clone()
                         .expect("ask should not be called on one-way RPC actor"),
                 )));
+                msg.remote_address = Some(remote_address);
                 ops.tell(receiver, msg).await;
             }
             RemoteFactoryRequest::TaskUpdate(msg) => {

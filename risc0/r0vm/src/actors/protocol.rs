@@ -178,6 +178,8 @@ pub(crate) struct ShrinkWrapTask {
 }
 
 pub mod factory {
+    use std::net::SocketAddr;
+
     use super::*;
     use crate::actors::actor::Actor;
 
@@ -187,14 +189,24 @@ pub mod factory {
         pub worker_id: WorkerId,
         #[serde(skip)]
         pub worker: Option<ActorRef<WorkerT>>,
+        pub remote_address: Option<SocketAddr>,
         pub kinds: Vec<TaskKind>,
     }
 
-    #[derive(Clone)]
     pub(crate) struct SubmitTaskMsg<JobT: Actor> {
         pub job: ActorRef<JobT>,
         pub header: TaskHeader,
         pub task: Task,
+    }
+
+    impl<JobT: Actor> Clone for SubmitTaskMsg<JobT> {
+        fn clone(&self) -> Self {
+            Self {
+                job: self.job.clone(),
+                header: self.header.clone(),
+                task: self.task.clone(),
+            }
+        }
     }
 
     #[derive(Serialize, Deserialize)]
@@ -251,6 +263,22 @@ pub mod factory {
         pub height: usize,
         pub pos: usize,
         pub receipt: SuccinctReceipt<UnionClaim>,
+    }
+
+    #[cfg(test)]
+    impl TaskDone {
+        pub fn kind(&self) -> TaskKind {
+            match self {
+                Self::Session(_) => TaskKind::Execute,
+                Self::ProveSegment(_) => TaskKind::ProveSegment,
+                Self::ProveKeccak(_) => TaskKind::ProveKeccak,
+                Self::Lift(_) => TaskKind::Lift,
+                Self::Join(_) => TaskKind::Join,
+                Self::Union(_) => TaskKind::Union,
+                Self::Resolve(_) => TaskKind::Resolve,
+                Self::ShrinkWrap(_) => TaskKind::ShrinkWrap,
+            }
+        }
     }
 }
 

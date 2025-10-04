@@ -642,7 +642,7 @@ pub struct ScheduleTask {
 }
 
 /// Reply when a worker is successfully chosen.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ScheduleTaskReply {
     pub worker_id: WorkerId,
 }
