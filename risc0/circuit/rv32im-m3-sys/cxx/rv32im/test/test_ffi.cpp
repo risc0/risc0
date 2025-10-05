@@ -16,15 +16,24 @@
 #include "core/log.h"
 #include "core/util.h"
 
-extern "C" const char* risc0_circuit_rv32im_m3_prove(const uint8_t* elf_ptr, size_t elf_len);
+struct ProofResult {
+  bool isError;
+  uint32_t* data;
+  uint8_t* error;
+  size_t len;
+};
+
+extern "C" ProofResult* risc0_circuit_rv32im_m3_prove(const uint8_t* elf_ptr, size_t elf_len);
+extern "C" void proof_dealloc(ProofResult* result);
 
 void runTest(const std::string& name) {
   auto fullname = "rv32im/rvtest/" + name;
   auto elf = risc0::loadFile(fullname);
-  const char* err = risc0_circuit_rv32im_m3_prove(elf.data(), elf.size());
-  if (err != nullptr) {
-    throw std::runtime_error(err);
-  }
+  ProofResult* res = risc0_circuit_rv32im_m3_prove(elf.data(), elf.size());
+  if (res->isError) {
+    throw std::runtime_error(std::string(reinterpret_cast<const char*>(res->error), res->len));
+  } 
+  proof_dealloc(res);
 }
 
 int main() {

@@ -101,6 +101,7 @@ fn main() {
         }
     } else {
         build.files(glob_paths("cxx/hal/cpu/*.cpp"));
+        build.files(glob_paths("cxx/hal/fakegpu/*.cpp"));
     }
 
     build.compile(output);

@@ -14,10 +14,9 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #[cfg(test)]
-#[cfg(feature = "cuda")]
+#[cfg(feature = "prove")]
 mod tests {
-    use risc0_circuit_rv32im_m3_sys::risc0_circuit_rv32im_m3_prove;
-    use risc0_sys::ffi_wrap;
+    use risc0_circuit_rv32im_m3_sys::prove;
 
     // These tests come from:
     // https://github.com/riscv-software-src/riscv-tests
@@ -55,7 +54,7 @@ mod tests {
     }
 
     fn run_program(elf: &[u8]) {
-        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_prove(elf.as_ptr(), elf.len()) }).unwrap();
+        prove(elf).unwrap();
     }
 
     macro_rules! test_case {
@@ -70,7 +69,7 @@ mod tests {
     }
 
     test_case!(add);
-    // test_case!(addi);
+    test_case!(addi);
     // test_case!(and);
     // test_case!(andi);
     // test_case!(auipc);
