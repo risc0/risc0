@@ -25,22 +25,22 @@ unsafe extern "C" {
     pub fn risc0_circuit_rv32im_m3_prove(
         elf_ptr: *const u8,
         elf_len: usize,
-    ) -> ProofResult;
+    ) -> *const ProofResult;
     pub fn proof_dealloc(res: *const ProofResult) -> ();
 }
 
 pub fn prove(elf: &[u8]) -> Result<Vec<u32>, String> {
     unsafe {
         let result = risc0_circuit_rv32im_m3_prove(elf.as_ptr(), elf.len());
-        if result.is_error {
-            let slice = std::slice::from_raw_parts(result.error, result.len);
+        if (*result).is_error {
+            let slice = std::slice::from_raw_parts((*result).error, (*result).len);
             let s = std::str::from_utf8(slice).unwrap();
             let string = s.to_owned();
-            proof_dealloc(&result);
+            proof_dealloc(result);
             Err(string)
         } else {
-            let vec = std::slice::from_raw_parts(result.data, result.len).to_vec();
-            proof_dealloc(&result);
+            let vec = std::slice::from_raw_parts((*result).data, (*result).len).to_vec();
+            proof_dealloc(result);
             Ok(vec)
         }
     }

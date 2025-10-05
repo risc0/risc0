@@ -105,6 +105,10 @@ fn main() {
     }
 
     build.compile(output);
+
+    if cfg!(target_os = "macos") {
+      println!("cargo:rustc-link-lib=c++");
+    }
 }
 
 fn rerun_if_changed<P: AsRef<Path>>(path: P) {
