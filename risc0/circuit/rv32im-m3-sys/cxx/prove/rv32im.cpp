@@ -97,7 +97,7 @@ void Rv32imProver::prove(WriteIop& iop) {
 }
 
 size_t Rv32imProver::po2() const {
-  return prover.po2;
+  return prover.getPo2();
 }
 
 } // namespace risc0

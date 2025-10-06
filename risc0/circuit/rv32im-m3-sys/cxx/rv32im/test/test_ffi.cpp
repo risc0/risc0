@@ -16,12 +16,27 @@
 #include "core/log.h"
 #include "core/util.h"
 
-extern "C" const char* risc0_circuit_rv32im_m3_prove(const uint8_t* elf_ptr, size_t elf_len);
+#include "rv32im/ffi.h"
+
+struct RawWrapper {
+  RawProver* raw;
+
+  RawWrapper(RawProver* raw) : raw(raw) {}
+  ~RawWrapper() { risc0_circuit_rv32im_m3_prover_free(raw); }
+};
 
 void runTest(const std::string& name) {
   auto fullname = "rv32im/rvtest/" + name;
   auto elf = risc0::loadFile(fullname);
-  const char* err = risc0_circuit_rv32im_m3_prove(elf.data(), elf.size());
+
+  RawWrapper wrapper(risc0_circuit_rv32im_m3_prover_new_cpu(14));
+
+  const char* err = risc0_circuit_rv32im_m3_preflight(wrapper.raw, elf.data(), elf.size());
+  if (err != nullptr) {
+    throw std::runtime_error(err);
+  }
+
+  err = risc0_circuit_rv32im_m3_prove(wrapper.raw);
   if (err != nullptr) {
     throw std::runtime_error(err);
   }

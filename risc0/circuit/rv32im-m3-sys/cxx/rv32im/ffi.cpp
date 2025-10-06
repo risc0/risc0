@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#include "rv32im/ffi.h"
+
 #include "hal/hal.h"
 #include "prove/rv32im.h"
 #include "verify/rv32im.h"
@@ -31,11 +33,6 @@ struct RawProver {
   std::vector<Fp> transcript;
 
   RawProver(IHalPtr hal, size_t po2) : prover(hal, po2) {}
-};
-
-struct RawSlice {
-  const Fp* ptr;
-  size_t len;
 };
 
 RawProver* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {

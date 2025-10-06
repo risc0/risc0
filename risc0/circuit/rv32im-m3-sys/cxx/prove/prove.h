@@ -69,12 +69,12 @@ public:
   // Per proof
   void prove(WriteIop& iop);
 
-public:
-  size_t po2;
+  size_t getPo2() const { return po2; }
 
 private:
   IHalPtr hal;
   const CircuitInfo& circuitInfo;
+  size_t po2;
   size_t rows;
   size_t domain;
   size_t checkSize;
