@@ -18,7 +18,7 @@ use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc, sync::OnceLock
 use anyhow::{Context as _, Result, bail};
 use cust::{
     device::DeviceAttribute,
-    memory::{DeviceCopy, DevicePointer, GpuBuffer},
+    memory::{DevicePointer, GpuBuffer},
     prelude::*,
 };
 use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
@@ -49,16 +49,6 @@ pub fn singleton() -> &'static ReentrantMutex<()> {
     static ONCE: OnceLock<ReentrantMutex<()>> = OnceLock::new();
     ONCE.get_or_init(|| ReentrantMutex::new(()))
 }
-
-#[derive(Clone, Copy)]
-#[repr(transparent)]
-pub struct DeviceElem(pub BabyBearElem);
-
-#[derive(Clone, Copy)]
-#[repr(transparent)]
-pub struct DeviceExtElem(pub BabyBearExtElem);
-
-unsafe impl DeviceCopy for DeviceExtElem {}
 
 pub trait CudaHash {
     /// Create a hash implementation
