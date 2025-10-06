@@ -54,7 +54,25 @@ mod tests {
     }
 
     fn run_program(elf: &[u8]) {
-        prove(elf).unwrap();
+        use super::super::verify::verify_m3;
+        let transcript = prove(elf).unwrap();
+        verify_m3(&transcript, 14).unwrap();
+    }
+
+    #[test_log::test]
+    fn test_verify_v3() {
+        use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
+        use risc0_zkp::verify::verify_v3;
+        use tracing::info;
+        let transcript: Vec<u32> = include_bytes!("testdata/proof.bin")
+            .chunks_exact(4)
+            .map(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()))
+            .collect();
+
+        let circuit = super::super::verify::CircuitInfo {};
+        let suite = Poseidon2HashSuite::new_suite();
+        info!("Verifying");
+        verify_v3(&circuit, &suite, &transcript, 14).unwrap();
     }
 
     macro_rules! test_case {

@@ -107,7 +107,7 @@ fn main() {
     build.compile(output);
 
     if cfg!(target_os = "macos") {
-      println!("cargo:rustc-link-lib=c++");
+        println!("cargo:rustc-link-lib=c++");
     }
 }
 

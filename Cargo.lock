@@ -7280,8 +7280,11 @@ dependencies = [
  "risc0-binfmt",
  "risc0-circuit-rv32im-m3-sys",
  "risc0-sys",
+ "risc0-zkp",
  "tar",
  "test-log",
+ "tracing",
+ "tracing-subscriber 0.3.19",
 ]
 
 [[package]]

@@ -13,13 +13,19 @@ release = false
 
 [dependencies]
 risc0-binfmt = { workspace = true }
+risc0-zkp = { workspace = true }
 risc0-circuit-rv32im-m3-sys = { workspace = true }
 risc0-sys = { workspace = true, optional = true }
+tracing = { version = "0.1", default-features = false, features = [
+  "attributes",
+] }
+
 
 [dev-dependencies]
 flate2 = "1.0"
 gpu-guard = { workspace = true }
 tar = "0.4"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]

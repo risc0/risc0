@@ -15,17 +15,14 @@
 
 #[repr(C)]
 pub struct ProofResult {
-    is_error: bool, // Is this an error
+    is_error: bool,   // Is this an error
     data: *const u32, // Transcript or null
-    error: *const u8, // Error string or null 
-    len: usize, // Size of transcript or string
+    error: *const u8, // Error string or null
+    len: usize,       // Size of transcript or string
 }
 
 unsafe extern "C" {
-    pub fn risc0_circuit_rv32im_m3_prove(
-        elf_ptr: *const u8,
-        elf_len: usize,
-    ) -> *const ProofResult;
+    pub fn risc0_circuit_rv32im_m3_prove(elf_ptr: *const u8, elf_len: usize) -> *const ProofResult;
     pub fn proof_dealloc(res: *const ProofResult) -> ();
 }
 
@@ -46,11 +43,7 @@ pub fn prove(elf: &[u8]) -> Result<Vec<u32>, String> {
     }
 }
 
-
-
-
-
-            // Convert the &str to an owned
-                    //                                             String
-                    //                                                     s.to_owned()
-                    //
+// Convert the &str to an owned
+//                                             String
+//                                                     s.to_owned()
+//
