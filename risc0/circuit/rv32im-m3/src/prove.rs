@@ -16,7 +16,8 @@
 #[cfg(test)]
 #[cfg(feature = "cuda")]
 mod tests {
-    use risc0_circuit_rv32im_m3_sys::risc0_circuit_rv32im_m3_prove;
+    use cfg_if::cfg_if;
+    use risc0_circuit_rv32im_m3_sys::*;
     use risc0_sys::ffi_wrap;
 
     // These tests come from:
@@ -55,14 +56,25 @@ mod tests {
     }
 
     fn run_program(elf: &[u8]) {
-        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_prove(elf.as_ptr(), elf.len()) }).unwrap();
+        let po2 = 14;
+        cfg_if! {
+            if #[cfg(feature = "cuda")] {
+                let prover = unsafe { risc0_circuit_rv32im_m3_prover_new_cuda(po2) };
+            } else {
+                let prover = unsafe { risc0_circuit_rv32im_m3_prover_new_cpu(po2) };
+            }
+        }
+
+        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_preflight(prover, elf.as_ptr(), elf.len()) })
+            .unwrap();
+        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_prove(prover) }).unwrap();
+        unsafe { risc0_circuit_rv32im_m3_prover_free(prover) };
     }
 
     macro_rules! test_case {
         ($func_name:ident) => {
             #[test_log::test]
             #[gpu_guard::gpu_guard]
-            #[ignore]
             fn $func_name() {
                 run_test(stringify!($func_name));
             }
@@ -70,50 +82,50 @@ mod tests {
     }
 
     test_case!(add);
-    // test_case!(addi);
-    // test_case!(and);
-    // test_case!(andi);
-    // test_case!(auipc);
-    // test_case!(beq);
-    // test_case!(bge);
-    // test_case!(bgeu);
-    // test_case!(blt);
-    // test_case!(bltu);
-    // test_case!(bne);
-    // test_case!(div);
-    // test_case!(divu);
+    test_case!(addi);
+    test_case!(and);
+    test_case!(andi);
+    test_case!(auipc);
+    test_case!(beq);
+    test_case!(bge);
+    test_case!(bgeu);
+    test_case!(blt);
+    test_case!(bltu);
+    test_case!(bne);
+    test_case!(div);
+    test_case!(divu);
     // test_case!(fence);
-    // test_case!(jal);
-    // test_case!(jalr);
-    // test_case!(lb);
-    // test_case!(lbu);
-    // test_case!(lh);
-    // test_case!(lhu);
-    // test_case!(lui);
-    // test_case!(lw);
-    // test_case!(mul);
-    // test_case!(mulh);
-    // test_case!(mulhsu);
-    // test_case!(mulhu);
-    // test_case!(or);
-    // test_case!(ori);
-    // test_case!(rem);
-    // test_case!(remu);
-    // test_case!(sb);
-    // test_case!(sh);
-    // test_case!(simple);
-    // test_case!(sll);
-    // test_case!(slli);
-    // test_case!(slt);
-    // test_case!(slti);
-    // test_case!(sltiu);
-    // test_case!(sltu);
-    // test_case!(sra);
-    // test_case!(srai);
-    // test_case!(srl);
-    // test_case!(srli);
-    // test_case!(sub);
-    // test_case!(sw);
-    // test_case!(xor);
-    // test_case!(xori);
+    test_case!(jal);
+    test_case!(jalr);
+    test_case!(lb);
+    test_case!(lbu);
+    test_case!(lh);
+    test_case!(lhu);
+    test_case!(lui);
+    test_case!(lw);
+    test_case!(mul);
+    test_case!(mulh);
+    test_case!(mulhsu);
+    test_case!(mulhu);
+    test_case!(or);
+    test_case!(ori);
+    test_case!(rem);
+    test_case!(remu);
+    test_case!(sb);
+    test_case!(sh);
+    test_case!(simple);
+    test_case!(sll);
+    test_case!(slli);
+    test_case!(slt);
+    test_case!(slti);
+    test_case!(sltiu);
+    test_case!(sltu);
+    test_case!(sra);
+    test_case!(srai);
+    test_case!(srl);
+    test_case!(srli);
+    test_case!(sub);
+    test_case!(sw);
+    test_case!(xor);
+    test_case!(xori);
 }

@@ -36,11 +36,11 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use cargo_metadata::{Message, MetadataCommand, Package};
 use config::GuestMetadata;
 use rayon::prelude::*;
-use risc0_binfmt::{ProgramBinary, KERNEL_START_ADDR};
+use risc0_binfmt::{KERNEL_START_ADDR, ProgramBinary};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
@@ -52,7 +52,7 @@ pub use self::{
         DockerOptions, DockerOptionsBuilder, DockerOptionsBuilderError, GuestOptions,
         GuestOptionsBuilder, GuestOptionsBuilderError,
     },
-    docker::{docker_build, BuildStatus, TARGET_DIR},
+    docker::{BuildStatus, TARGET_DIR, docker_build},
 };
 
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";

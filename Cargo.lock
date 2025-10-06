@@ -7276,6 +7276,7 @@ dependencies = [
 name = "risc0-circuit-rv32im-m3"
 version = "0.0.0"
 dependencies = [
+ "cfg-if",
  "flate2",
  "gpu-guard",
  "risc0-binfmt",

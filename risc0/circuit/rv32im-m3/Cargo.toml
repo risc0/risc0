@@ -12,6 +12,7 @@ publish = false
 release = false
 
 [dependencies]
+cfg-if = { version = "1.0", optional = true }
 risc0-binfmt = { workspace = true }
 risc0-circuit-rv32im-m3-sys = { workspace = true }
 risc0-sys = { workspace = true, optional = true }
@@ -25,5 +26,10 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 [features]
 cuda = ["prove", "risc0-circuit-rv32im-m3-sys/cuda", "risc0-sys/cuda"]
 default = []
-prove = ["dep:risc0-sys", "std"]
+prove = [
+  "dep:cfg-if",
+  "dep:risc0-sys",
+  "risc0-circuit-rv32im-m3-sys/prove",
+  "std",
+]
 std = []
