@@ -19,7 +19,7 @@
 
 template<typename ValExtT>
 struct DefaultMixState {
-  DefaultMixState(ValExtT tot, ValExtT mul) : tot(tot), mul(mul) {}
+  FDEV DefaultMixState(ValExtT tot, ValExtT mul) : tot(tot), mul(mul) {}
   ValExtT tot;
   ValExtT mul;
 };
@@ -29,24 +29,24 @@ struct DefaultEqzHandler {
   using MixStateT = DefaultMixState<ValExtT>;
   ValExtT ecMix;
 
-  DefaultEqzHandler(ValExtT ecMix) : ecMix(ecMix) {}
+  FDEV DefaultEqzHandler(ValExtT ecMix) : ecMix(ecMix) {}
 
-  MixStateT getTrue() {
+  FDEV MixStateT getTrue() {
     return MixStateT(ValExtT(ValT(0)), ValExtT(ValT(1)));
   }
-  MixStateT andEqz(MixStateT chain, ValT expr) {
+  FDEV MixStateT andEqz(MixStateT chain, ValT expr) {
     return MixStateT(
         chain.tot + chain.mul * expr,
         chain.mul * ecMix
     );
   }
-  MixStateT andEqz(MixStateT chain, ValExtT expr) {
+  FDEV MixStateT andEqz(MixStateT chain, ValExtT expr) {
     return MixStateT(
         chain.tot + chain.mul * expr,
         chain.mul * ecMix
     );
   }
-  MixStateT andCond(MixStateT chain, ValT cond, MixStateT inner) {
+  FDEV MixStateT andCond(MixStateT chain, ValT cond, MixStateT inner) {
     return MixStateT(
         chain.tot + chain.mul * inner.tot * cond,
         chain.mul * inner.mul
