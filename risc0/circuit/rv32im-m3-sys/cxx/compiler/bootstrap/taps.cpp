@@ -49,7 +49,8 @@ impl TapsProvider for CircuitInfo {
     fn get_taps(&self) -> &'static TapSet<'static> {
         TAPSET
     }
-})***";
+}
+)***";
 
 using namespace risc0;
 

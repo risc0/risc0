@@ -258,5 +258,5 @@ void emitPolyExt(const std::string path) {
   outs << "    ],\n";
   auto returnOp = func.front().getTerminator();
   outs << "    ret: " << condMap.at(returnOp->getOperand(0)) << ",\n";
-  outs << "};";
+  outs << "};\n";
 }
