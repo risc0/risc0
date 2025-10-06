@@ -70,7 +70,8 @@ mod tests {
             .unwrap();
         ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_prove(prover) }).unwrap();
         let raw_transcript = unsafe { risc0_circuit_rv32im_m3_prover_transcript(prover) };
-        let transcript = unsafe { std::slice::from_raw_parts(raw_transcript.ptr, raw_transcript.len) };
+        let transcript =
+            unsafe { std::slice::from_raw_parts(raw_transcript.ptr, raw_transcript.len) };
         verify_m3(transcript, 14).unwrap();
         unsafe { risc0_circuit_rv32im_m3_prover_free(prover) };
     }
