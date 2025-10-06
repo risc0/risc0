@@ -53,5 +53,5 @@ impl CircuitCoreDefV3<BabyBear> for CircuitInfo {}
 pub fn verify_m3(transcript: &[u32], po2: usize) -> Result<(), VerificationError> {
     let circuit = CircuitInfo {};
     let suite = Poseidon2HashSuite::new_suite();
-    verify_v3(&circuit, &suite, &transcript, po2)
+    verify_v3(&circuit, &suite, transcript, po2)
 }
