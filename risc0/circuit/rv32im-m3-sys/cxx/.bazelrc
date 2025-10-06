@@ -29,4 +29,7 @@ build:clang-format --config=clang-format-base
 build:clang-format --aspects=@bazel_clang_format//:defs.bzl%fix_aspect
 build:clang-format --use_action_cache=false
 
+test --test_env=ASDF_PYTHON_VERSION=3.12.5
+build --action_env=ASDF_PYTHON_VERSION=3.12.5
+
 try-import %workspace%/.bazelrc.local
