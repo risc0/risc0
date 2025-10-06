@@ -249,6 +249,8 @@ jobs:
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
