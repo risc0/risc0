@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #[cfg(test)]
-#[cfg(feature = "prove")]
+#[cfg(feature = "cuda")]
 mod tests {
     use cfg_if::cfg_if;
     use risc0_circuit_rv32im_m3_sys::*;
