@@ -13,9 +13,32 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#[repr(C)]
+pub struct RawProver {
+    _private: (),
+}
+
+#[repr(C)]
+pub struct RawSlice {
+    pub ptr: *const u32,
+    pub len: usize,
+}
+
 unsafe extern "C" {
-    pub fn risc0_circuit_rv32im_m3_prove(
+    pub fn risc0_circuit_rv32im_m3_prover_new_cpu(po2: usize) -> *const RawProver;
+
+    #[cfg(feature = "cuda")]
+    pub fn risc0_circuit_rv32im_m3_prover_new_cuda(po2: usize) -> *const RawProver;
+
+    pub fn risc0_circuit_rv32im_m3_prover_free(prover: *const RawProver);
+
+    pub fn risc0_circuit_rv32im_m3_prover_transcript(prover: *const RawProver) -> RawSlice;
+
+    pub fn risc0_circuit_rv32im_m3_preflight(
+        prover: *const RawProver,
         elf_ptr: *const u8,
         elf_len: usize,
     ) -> *const std::os::raw::c_char;
+
+    pub fn risc0_circuit_rv32im_m3_prove(prover: *const RawProver) -> *const std::os::raw::c_char;
 }
