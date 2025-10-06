@@ -23,7 +23,7 @@ build_circuit(
 
 cc_binary(
     name = "hello",
-    srcs = glob(["main.cpp"]),
+    srcs = ["main.cpp"],
     deps = [
         ":hello-circuit",
     ],

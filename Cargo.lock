@@ -7152,25 +7152,15 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-hello-m3"
-version = "0.0.1"
+version = "0.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
- "cfg-if",
- "clap 4.5.46",
- "liblzma",
- "paste",
- "rand 0.9.2",
- "rayon",
- "risc0-binfmt",
  "risc0-circuit-recursion",
  "risc0-core",
- "risc0-sys",
  "risc0-zkp",
  "risc0-zkvm",
  "test-log",
- "tracing",
- "tracing-subscriber 0.3.19",
 ]
 
 [[package]]

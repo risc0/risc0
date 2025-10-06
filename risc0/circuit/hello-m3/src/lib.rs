@@ -15,7 +15,6 @@
 
 #[cfg(test)]
 mod test {
-
     use anyhow::Result;
     use risc0_circuit_recursion::{CircuitImpl, prove::Program};
     use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
@@ -31,6 +30,11 @@ mod test {
     use risc0_zkvm::{
         SuccinctReceiptVerifierParameters, VerifierContext, prove_zkr, recursion::MerkleGroup,
     };
+
+    const PROOF_BIN: &[u8] = include_bytes!("testdata/proof.bin");
+    const HELLO_LIFT_12_ZKR: &[u8] = include_bytes!("testdata/hello_lift_12.zkr");
+    const HELLO_LIFT_PO2: usize = 12;
+    const WORD_SIZE: usize = size_of::<u32>();
 
     pub const TAPSET: &TapSet = &TapSet::<'static> {
         taps: &[
@@ -65,7 +69,8 @@ mod test {
         group_names: &["accum", "code", "data"],
     };
 
-    struct HelloCircuit {}
+    struct HelloCircuit;
+
     impl CircuitInfoV3 for HelloCircuit {
         fn get_groups(&self) -> &'static [GroupInfo] {
             &[
@@ -84,6 +89,7 @@ mod test {
             ]
         }
     }
+
     const DEF: PolyExtStepDef = PolyExtStepDef {
         block: &[
             PolyExtStep::True,         // mix_vars 0
@@ -100,6 +106,7 @@ mod test {
         ],
         ret: 3,
     };
+
     impl PolyExt<BabyBear> for HelloCircuit {
         fn poly_ext(
             &self,
@@ -110,65 +117,61 @@ mod test {
             DEF.step::<BabyBear>(mix, u, args)
         }
     }
+
     impl TapsProvider for HelloCircuit {
         fn get_taps(&self) -> &'static TapSet<'static> {
             TAPSET
         }
     }
+
     impl CircuitCoreDefV3<BabyBear> for HelloCircuit {}
 
-    #[test]
-    fn verify_v3_stark_proof() {
-        let transcript: Vec<u32> = include_bytes!("proof.bin")
-            .chunks_exact(4)
+    fn bytes_as_words(bytes: &[u8]) -> Vec<u32> {
+        bytes
+            .chunks_exact(WORD_SIZE)
             .map(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()))
-            // .map(|x| BabyBearElem::new(x).as_u32_montgomery())
-            .collect();
-
-        let circuit = HelloCircuit {};
-        let suite = Poseidon2HashSuite::new_suite();
-        let x = verify_v3(&circuit, &suite, &transcript, 12);
-        match x {
-            Ok(_) => {}
-            Err(e) => panic!("Failed to verify: {e}"),
-        }
+            .collect()
     }
 
     fn get_hello_zkr() -> Result<Program> {
-        let words: Vec<u32> = include_bytes!("hello_lift_12.zkr")
-            .chunks_exact(4)
-            .map(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()))
-            .collect();
+        let words = bytes_as_words(HELLO_LIFT_12_ZKR);
 
         // Use recursion PO2 = 17 because of the size of the hello ZKR
-        Ok(Program::from_encoded(&words, 17))
+        const RECURSION_PO2: usize = 17;
+        Ok(Program::from_encoded(&words, RECURSION_PO2))
     }
 
-    #[test]
-    fn verify_with_zkr() -> Result<()> {
+    #[test_log::test]
+    fn verify_v3_stark_proof() {
+        let transcript = bytes_as_words(PROOF_BIN);
+        let circuit = HelloCircuit;
+        let suite = Poseidon2HashSuite::new_suite();
+        verify_v3(&circuit, &suite, &transcript, HELLO_LIFT_PO2).unwrap();
+    }
+
+    #[test_log::test]
+    fn verify_with_zkr() {
         // Compute the control ID for our ZKR, as well as the corresponding control root
         let hash_suite = Poseidon2HashSuite::new_suite();
-        let program = get_hello_zkr()?;
-        let control_id = program.compute_control_id(hash_suite.clone())?;
-        let control_ids = vec![control_id];
-        let group = MerkleGroup::new(vec![control_id])?;
+        let program = get_hello_zkr().unwrap();
+        let control_id = program.compute_control_id(hash_suite.clone()).unwrap();
+        let group = MerkleGroup::new(vec![control_id]).unwrap();
         let control_root = group.calc_root(hash_suite.hashfn.as_ref());
 
         // Compute the input, which should be the control ID followed by the seal
         let mut input: Vec<u32> = vec![];
         input.extend(control_root.as_words());
-        let seal = include_bytes!("proof.bin")
-            .chunks_exact(4)
-            .map(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()));
+        let seal = bytes_as_words(PROOF_BIN);
         input.extend(seal);
 
         // Prove
         let receipt = prove_zkr(
             program,
             &control_id,
-            control_ids,
+            group.leaves,
             bytemuck::cast_slice(&input),
-        )?;
+        )
+        .unwrap();
 
         // Verify, swapping out the default control root for one that includes our ZKR
         let ctx = VerifierContext::default().with_succinct_verifier_parameters(
@@ -180,7 +183,6 @@ mod test {
             },
         );
 
-        receipt.verify_integrity_with_context(&ctx)?;
-        Ok(())
+        receipt.verify_integrity_with_context(&ctx).unwrap();
     }
 }

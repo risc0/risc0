@@ -802,7 +802,7 @@ impl SemverChecks {
         };
 
         if let Err(e) = run_inner(self, &current_dir, baseline_factory, real_cargo_vendor) {
-            panic!("{e}");
+            panic!("{e:?}");
         }
     }
 }
