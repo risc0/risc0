@@ -32,28 +32,27 @@ std::vector<Tap> makeCheckTaps(size_t group, size_t comboId) {
 }
 
 Prover::Prover(IHalPtr hal, const CircuitInfo& _circuitInfo, size_t po2)
-  : hal(hal)
-  , circuitInfo(_circuitInfo)
-  , po2(po2)
-  , rows(1 << po2)
-  , domain(rows * kExpansionFactor)
-  , checkSize(kExtSize * kExpansionFactor)
-  , evalSize(circuitInfo.taps.getTaps().size() + checkSize)
-  , checkComboId(circuitInfo.taps.getCombos().size())
-  , totCombos(checkComboId + 1)
-  , checkTaps(makeCheckTaps(circuitInfo.groups.size(), checkComboId))
-  , checkRaw(hal->allocateMatrix<Fp>(domain, kExtSize))
-  , check(hal,
-      checkRaw.reshape(rows, kExtSize * kExpansionFactor),
-      checkTaps,
-      kExtSize * kExpansionFactor)
-  , combos(hal->allocateMatrix<FpExt>(rows, totCombos))
-  , evalCoeffs(hal->allocateArray<FpExt>(evalSize))
-  , evalInfo(hal->allocateArray<EvalInfo>(evalSize))
-  , divideInfo(hal->allocateArray<DivideInfo>(circuitInfo.taps.comboSizeTot() + 1))
-  , friCoeffs(hal->allocateMatrix<Fp>(rows, kExtSize))
-  , fri(hal, friCoeffs)
-{
+    : hal(hal)
+    , circuitInfo(_circuitInfo)
+    , po2(po2)
+    , rows(1 << po2)
+    , domain(rows * kExpansionFactor)
+    , checkSize(kExtSize * kExpansionFactor)
+    , evalSize(circuitInfo.taps.getTaps().size() + checkSize)
+    , checkComboId(circuitInfo.taps.getCombos().size())
+    , totCombos(checkComboId + 1)
+    , checkTaps(makeCheckTaps(circuitInfo.groups.size(), checkComboId))
+    , checkRaw(hal->allocateMatrix<Fp>(domain, kExtSize))
+    , check(hal,
+            checkRaw.reshape(rows, kExtSize * kExpansionFactor),
+            checkTaps,
+            kExtSize * kExpansionFactor)
+    , combos(hal->allocateMatrix<FpExt>(rows, totCombos))
+    , evalCoeffs(hal->allocateArray<FpExt>(evalSize))
+    , evalInfo(hal->allocateArray<EvalInfo>(evalSize))
+    , divideInfo(hal->allocateArray<DivideInfo>(circuitInfo.taps.comboSizeTot() + 1))
+    , friCoeffs(hal->allocateMatrix<Fp>(rows, kExtSize))
+    , fri(hal, friCoeffs) {
   LOG(0, "circuitInfo.groups.size() = " << circuitInfo.groups.size());
   groups.resize(circuitInfo.groups.size());
   for (size_t i = 0; i < circuitInfo.groups.size(); i++) {
@@ -222,4 +221,4 @@ void Prover::prove(WriteIop& iop) {
   });
 }
 
-}  // namespace risc0
+} // namespace risc0

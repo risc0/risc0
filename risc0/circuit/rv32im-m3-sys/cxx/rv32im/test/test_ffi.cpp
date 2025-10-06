@@ -16,24 +16,30 @@
 #include "core/log.h"
 #include "core/util.h"
 
-struct ProofResult {
-  bool isError;
-  uint32_t* data;
-  uint8_t* error;
-  size_t len;
-};
+#include "rv32im/ffi.h"
 
-extern "C" ProofResult* risc0_circuit_rv32im_m3_prove(const uint8_t* elf_ptr, size_t elf_len);
-extern "C" void proof_dealloc(ProofResult* result);
+struct RawWrapper {
+  RawProver* raw;
+
+  RawWrapper(RawProver* raw) : raw(raw) {}
+  ~RawWrapper() { risc0_circuit_rv32im_m3_prover_free(raw); }
+};
 
 void runTest(const std::string& name) {
   auto fullname = "rv32im/rvtest/" + name;
   auto elf = risc0::loadFile(fullname);
-  ProofResult* res = risc0_circuit_rv32im_m3_prove(elf.data(), elf.size());
-  if (res->isError) {
-    throw std::runtime_error(std::string(reinterpret_cast<const char*>(res->error), res->len));
-  } 
-  proof_dealloc(res);
+
+  RawWrapper wrapper(risc0_circuit_rv32im_m3_prover_new_cpu(14));
+
+  const char* err = risc0_circuit_rv32im_m3_preflight(wrapper.raw, elf.data(), elf.size());
+  if (err != nullptr) {
+    throw std::runtime_error(err);
+  }
+
+  err = risc0_circuit_rv32im_m3_prove(wrapper.raw);
+  if (err != nullptr) {
+    throw std::runtime_error(err);
+  }
 }
 
 int main() {

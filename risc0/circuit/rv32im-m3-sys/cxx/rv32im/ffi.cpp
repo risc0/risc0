@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#include "rv32im/ffi.h"
+
 #include "hal/hal.h"
 #include "prove/rv32im.h"
 #include "verify/rv32im.h"
@@ -20,75 +22,72 @@
 #include <cstdint>
 #include <exception>
 #include <string.h>
-#include <string.h>
 
 extern "C" {
 
 using namespace risc0;
 using namespace risc0::rv32im;
 
-struct ProofResult {
-  bool isError;
-  uint32_t* data;
-  uint8_t* error;
-  size_t len;
+struct RawProver {
+  Rv32imProver prover;
+  std::vector<Fp> transcript;
 
-  ProofResult(const std::vector<Fp>& vdata) 
-      : isError(false)
-      , data(new uint32_t[vdata.size()])
-      , error(nullptr)
-      , len(vdata.size()) {
-    memcpy(data, vdata.data(), len * sizeof(uint32_t));
-  }
-  ProofResult(const std::string& err)
-      : isError(true)
-      , data(nullptr)
-      , error(new uint8_t[err.size()])
-      , len(err.size()) {
-    memcpy(error, err.data(), len);
-  }
-  ~ProofResult() {
-    delete[] data;
-    delete[] error;
-  }
+  RawProver(IHalPtr hal, size_t po2) : prover(hal, po2) {}
 };
 
-ProofResult* risc0_circuit_rv32im_m3_prove(const uint8_t* elf_ptr, size_t elf_len) {
+RawProver* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {
+  IHalPtr hal = getCpuHal();
+  return new RawProver(hal, po2);
+}
+
+RawProver* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2) {
+  IHalPtr hal = getGpuHal();
+  return new RawProver(hal, po2);
+}
+
+void risc0_circuit_rv32im_m3_prover_free(RawProver* raw) {
+  delete raw;
+}
+
+RawSlice risc0_circuit_rv32im_m3_prover_transcript(RawProver* raw) {
+  return RawSlice{raw->transcript.data(), raw->transcript.size()};
+}
+
+const char*
+risc0_circuit_rv32im_m3_preflight(RawProver* raw, const uint8_t* elf_ptr, size_t elf_len) {
   try {
-    size_t po2 = 14;
-
-    IHalPtr hal = getGpuHal();
-    Rv32imProver prover(hal, po2);
-
     LOG(0, "Loading elf");
     ArrayRef<uint8_t> elf(elf_ptr, elf_len);
     MemoryImage image = MemoryImage::fromRawElfBytes(elf);
 
     NullHostIO io;
-    prover.preflight(image, io);
-
-    WriteIop writeIop;
-    prover.prove(writeIop);
-    std::vector<Fp> transcript = writeIop.getTranscript();
-
-    ReadIop readIop(transcript.data(), transcript.size());
-    verifyRv32im(readIop, po2);
-    readIop.done();
-
-    return new ProofResult(transcript);
+    raw->prover.preflight(image, io);
   } catch (const std::exception& err) {
-    LOG(0, "ERROR: " << err.what());
-    return new ProofResult(err.what());
+    return strdup(err.what());
   } catch (...) {
-    LOG(0, "UNKNOWN ERROR");
-    return new ProofResult("Generic exception");
+    return strdup("Generic exception");
   }
-  // unreachable
   return nullptr;
 }
 
-void proof_dealloc(ProofResult* result) {
-  delete result;
+const char* risc0_circuit_rv32im_m3_prove(RawProver* raw) {
+  try {
+    WriteIop writeIop;
+    raw->prover.prove(writeIop);
+    raw->transcript = writeIop.getTranscript();
+
+    ReadIop readIop(raw->transcript.data(), raw->transcript.size());
+    verifyRv32im(readIop, raw->prover.po2());
+    readIop.done();
+  } catch (const std::exception& err) {
+    LOG(0, "ERROR: " << err.what());
+    return strdup(err.what());
+  } catch (...) {
+    LOG(0, "UNKNOWN ERROR");
+    return strdup("Generic exception");
+  }
+  LOG(0, "Completed successfuly");
+  return nullptr;
 }
 
 } // extern "C"

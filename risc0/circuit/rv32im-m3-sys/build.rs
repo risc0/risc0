@@ -65,12 +65,14 @@ fn main() {
 
     let mut build = cc::Build::new();
     build
+        .cpp(true)
         .debug(false)
         .warnings(false)
         .flag("-std=c++17")
         .include("cxx")
         .include("vendor")
         .files(glob_paths("cxx/core/*.cpp"))
+        .files(glob_paths("cxx/hal/cpu/*.cpp"))
         .files(glob_paths("cxx/prove/*.cpp"))
         .files(glob_paths("cxx/rv32im/*.cpp"))
         .files(glob_paths("cxx/rv32im/emu/*.cpp"))
@@ -99,16 +101,9 @@ fn main() {
         {
             build.flag("-arch=native");
         }
-    } else {
-        build.files(glob_paths("cxx/hal/cpu/*.cpp"));
-        build.files(glob_paths("cxx/hal/fakegpu/*.cpp"));
     }
 
     build.compile(output);
-
-    if cfg!(target_os = "macos") {
-        println!("cargo:rustc-link-lib=c++");
-    }
 }
 
 fn rerun_if_changed<P: AsRef<Path>>(path: P) {
