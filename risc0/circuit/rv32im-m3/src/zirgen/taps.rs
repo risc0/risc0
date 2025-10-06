@@ -1,4 +1,3 @@
-
 // Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
@@ -16,8 +15,8 @@
 
 use super::super::verify::CircuitInfo;
 use risc0_zkp::{
-    taps::{TapData, TapSet},
     adapter::TapsProvider,
+    taps::{TapData, TapSet},
 };
 
 pub const TAPSET: &TapSet = &TapSet::<'static> {

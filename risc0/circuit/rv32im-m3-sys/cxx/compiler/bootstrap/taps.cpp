@@ -19,8 +19,7 @@
 #include <string>
 #include <fstream>
 
-static std::string prefix = R"***(
-// Copyright 2025 RISC Zero, Inc.
+static std::string prefix = R"***(// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -37,8 +36,8 @@ static std::string prefix = R"***(
 
 use super::super::verify::CircuitInfo;
 use risc0_zkp::{
-    taps::{TapData, TapSet},
     adapter::TapsProvider,
+    taps::{TapData, TapSet},
 };
 
 pub const TAPSET: &TapSet = &TapSet::<'static> {
@@ -50,8 +49,7 @@ impl TapsProvider for CircuitInfo {
     fn get_taps(&self) -> &'static TapSet<'static> {
         TAPSET
     }
-}
-)***";
+})***";
 
 using namespace risc0;
 
