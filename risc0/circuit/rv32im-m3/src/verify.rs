@@ -13,14 +13,16 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use super::zirgen::poly_ext::POLY_EXT_DEF;
 use risc0_zkp::{
     adapter::{CircuitCoreDefV3, CircuitInfoV3, GroupInfo, MixState, PolyExt},
     core::hash::poseidon2::Poseidon2HashSuite,
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     verify::{VerificationError, verify_v3},
 };
-pub struct CircuitInfo {}
+
+use crate::zirgen::poly_ext::POLY_EXT_DEF;
+
+pub struct CircuitInfo;
 
 impl CircuitInfoV3 for CircuitInfo {
     fn get_groups(&self) -> &'static [GroupInfo] {
@@ -51,7 +53,7 @@ impl PolyExt<BabyBear> for CircuitInfo {
 impl CircuitCoreDefV3<BabyBear> for CircuitInfo {}
 
 pub fn verify_m3(transcript: &[u32], po2: usize) -> Result<(), VerificationError> {
-    let circuit = CircuitInfo {};
+    let circuit = CircuitInfo;
     let suite = Poseidon2HashSuite::new_suite();
     verify_v3(&circuit, &suite, transcript, po2)
 }

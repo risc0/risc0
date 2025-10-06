@@ -20,6 +20,8 @@ mod tests {
     use risc0_circuit_rv32im_m3_sys::*;
     use risc0_sys::ffi_wrap;
 
+    use crate::verify::verify_m3;
+
     // These tests come from:
     // https://github.com/riscv-software-src/riscv-tests
     // They were built using the toolchain from:
@@ -27,7 +29,7 @@ mod tests {
     // The exception is the test of fence, which was built with
     // https://archlinux.org/packages/extra/x86_64/riscv64-elf-gcc/ v14.0.1-1
 
-    fn run_test(test_name: &str) {
+    fn run_test(test_name: &str, po2: usize) {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
@@ -49,15 +51,13 @@ mod tests {
             let mut elf = Vec::new();
             entry.read_to_end(&mut elf).unwrap();
 
-            run_program(&elf);
+            run_program(&elf, po2);
             return;
         }
-        panic!("No filename matching '{}'", test_name);
+        panic!("No filename matching '{test_name}'");
     }
 
-    fn run_program(elf: &[u8]) {
-        use super::super::verify::verify_m3;
-        let po2 = 14;
+    fn run_program(elf: &[u8], po2: usize) {
         cfg_if! {
             if #[cfg(feature = "cuda")] {
                 let prover = unsafe { risc0_circuit_rv32im_m3_prover_new_cuda(po2) };
@@ -72,16 +72,18 @@ mod tests {
         let raw_transcript = unsafe { risc0_circuit_rv32im_m3_prover_transcript(prover) };
         let transcript =
             unsafe { std::slice::from_raw_parts(raw_transcript.ptr, raw_transcript.len) };
-        verify_m3(transcript, 14).unwrap();
+        verify_m3(transcript, po2).unwrap();
         unsafe { risc0_circuit_rv32im_m3_prover_free(prover) };
     }
+
+    const DEFAULT_PO2: usize = 12;
 
     macro_rules! test_case {
         ($func_name:ident) => {
             #[test_log::test]
             #[gpu_guard::gpu_guard]
             fn $func_name() {
-                run_test(stringify!($func_name));
+                run_test(stringify!($func_name), DEFAULT_PO2);
             }
         };
     }
