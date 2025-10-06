@@ -20,7 +20,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use clap::Parser;
 use risc0_build::{DockerOptionsBuilder, GuestOptionsBuilder};
 
@@ -161,7 +161,9 @@ impl BuildCommand {
             eprintln!("No guest bin targets were found in included packages");
             eprintln!("Guest bin targets are identified either by:");
             eprintln!("1. Adding a [package.metadata.risc0] section to the guest Cargo.toml");
-            eprintln!("2. Specifying the guest dir [package.metadata.risc0.methods] in the Cargo.toml of a parent directory");
+            eprintln!(
+                "2. Specifying the guest dir [package.metadata.risc0.methods] in the Cargo.toml of a parent directory"
+            );
             bail!("No guest bin targets were found in included packages")
         }
 
