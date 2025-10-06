@@ -9,8 +9,7 @@
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Transforms/Passes.h"
 
-static std::string prefix = R"***(
-// Copyright 2025 RISC Zero, Inc.
+static std::string prefix = R"***(// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or

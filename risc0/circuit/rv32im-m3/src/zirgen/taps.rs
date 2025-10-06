@@ -2908,7 +2908,6 @@ pub const TAPSET: &TapSet = &TapSet::<'static> {
     group_names: &["data", "accum"],
 };
 
-
 impl TapsProvider for CircuitInfo {
     fn get_taps(&self) -> &'static TapSet<'static> {
         TAPSET

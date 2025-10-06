@@ -109,7 +109,7 @@ void emitTaps(const std::string path) {
   outs << "    tot_combo_backs: " << taps.comboSizeTot() << ",\n";
   // TODO: group_names is hardcoded
   outs << "    group_names: &[\"data\", \"accum\"],\n";
-  outs << "};\n\n";
+  outs << "};\n";
   outs << suffix;
 }
 
