@@ -939,8 +939,9 @@ impl FromStr for DeploymentVersion {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self> {
-        let (release_channel, version) =
-            s.split_once(":").ok_or_else(|| Error::new("missing ':'"))?;
+        let (release_channel, version) = s
+            .rsplit_once(":")
+            .ok_or_else(|| Error::new("missing ':'"))?;
         Ok(Self {
             release_channel: release_channel.into(),
             zkvm_version: version
@@ -955,6 +956,10 @@ fn deployment_version_parse() {
     assert_eq!(
         DeploymentVersion::from_str("foo:1.2.3").unwrap(),
         DeploymentVersion::new("foo", semver::Version::new(1, 2, 3))
+    );
+    assert_eq!(
+        DeploymentVersion::from_str("foo:bar:1.2.3").unwrap(),
+        DeploymentVersion::new("foo:bar", semver::Version::new(1, 2, 3))
     );
     assert_eq!(
         DeploymentVersion::from_str("1.2.3")
