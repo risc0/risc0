@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#include "rv32im/ffi.h"
+
 #include "hal/hal.h"
 #include "prove/rv32im.h"
 #include "verify/rv32im.h"
@@ -26,26 +28,56 @@ extern "C" {
 using namespace risc0;
 using namespace risc0::rv32im;
 
-const char* risc0_circuit_rv32im_m3_prove(const uint8_t* elf_ptr, size_t elf_len) {
+struct RawProver {
+  Rv32imProver prover;
+  std::vector<Fp> transcript;
+
+  RawProver(IHalPtr hal, size_t po2) : prover(hal, po2) {}
+};
+
+RawProver* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {
+  IHalPtr hal = getCpuHal();
+  return new RawProver(hal, po2);
+}
+
+RawProver* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2) {
+  IHalPtr hal = getGpuHal();
+  return new RawProver(hal, po2);
+}
+
+void risc0_circuit_rv32im_m3_prover_free(RawProver* raw) {
+  delete raw;
+}
+
+RawSlice risc0_circuit_rv32im_m3_prover_transcript(RawProver* raw) {
+  return RawSlice{raw->transcript.data(), raw->transcript.size()};
+}
+
+const char*
+risc0_circuit_rv32im_m3_preflight(RawProver* raw, const uint8_t* elf_ptr, size_t elf_len) {
   try {
-    size_t po2 = 14;
-
-    IHalPtr hal = getGpuHal();
-    Rv32imProver prover(hal, po2);
-
     LOG(0, "Loading elf");
     ArrayRef<uint8_t> elf(elf_ptr, elf_len);
     MemoryImage image = MemoryImage::fromRawElfBytes(elf);
 
     NullHostIO io;
-    prover.preflight(image, io);
+    raw->prover.preflight(image, io);
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
+  }
+  return nullptr;
+}
 
+const char* risc0_circuit_rv32im_m3_prove(RawProver* raw) {
+  try {
     WriteIop writeIop;
-    prover.prove(writeIop);
-    std::vector<Fp> transcript = writeIop.getTranscript();
+    raw->prover.prove(writeIop);
+    raw->transcript = writeIop.getTranscript();
 
-    ReadIop readIop(transcript.data(), transcript.size());
-    verifyRv32im(readIop, po2);
+    ReadIop readIop(raw->transcript.data(), raw->transcript.size());
+    verifyRv32im(readIop, raw->prover.po2());
     readIop.done();
   } catch (const std::exception& err) {
     LOG(0, "ERROR: " << err.what());
