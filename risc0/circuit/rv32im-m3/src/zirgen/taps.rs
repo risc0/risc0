@@ -1,3 +1,4 @@
+
 // Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
@@ -15,8 +16,8 @@
 
 use super::super::verify::CircuitInfo;
 use risc0_zkp::{
-    adapter::TapsProvider,
     taps::{TapData, TapSet},
+    adapter::TapsProvider,
 };
 
 pub const TAPSET: &TapSet = &TapSet::<'static> {
@@ -2907,6 +2908,7 @@ pub const TAPSET: &TapSet = &TapSet::<'static> {
     tot_combo_backs: 3,
     group_names: &["data", "accum"],
 };
+
 
 impl TapsProvider for CircuitInfo {
     fn get_taps(&self) -> &'static TapSet<'static> {

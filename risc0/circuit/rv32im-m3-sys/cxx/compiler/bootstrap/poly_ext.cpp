@@ -181,14 +181,12 @@ void emitPolyExt(const std::string path) {
   builder.create<func::ReturnOp>(loc, ret);
 
   // Simplify
-  /*
   mlir::PassManager pm(&mlirCtx);
   pm.addPass(mlir::createCanonicalizerPass());
   pm.addPass(mlir::createCSEPass());
   if (failed(pm.run(moduleOp))) {
     throw std::runtime_error("Unable to optimize polyext");
   }
-  */
 
   // Open output 
   std::error_code EC;

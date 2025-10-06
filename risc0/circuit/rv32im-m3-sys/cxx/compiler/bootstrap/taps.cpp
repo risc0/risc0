@@ -37,8 +37,8 @@ static std::string prefix = R"***(
 
 use super::super::verify::CircuitInfo;
 use risc0_zkp::{
-   taps::{TapData, TapSet},
-   adapter::TapsProvider,
+    taps::{TapData, TapSet},
+    adapter::TapsProvider,
 };
 
 pub const TAPSET: &TapSet = &TapSet::<'static> {
