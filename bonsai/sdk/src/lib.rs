@@ -154,12 +154,16 @@ use thiserror::Error;
 pub const API_KEY_HEADER: &str = "x-api-key";
 /// HTTP header for the risc0 version string
 pub const VERSION_HEADER: &str = "x-risc0-version";
+/// HTTP header for the risc0 release-channel string
+pub const RELEASE_CHANNEL_HEADER: &str = "x-risc0-release-channel";
 /// Environment variable name for the API url
 pub const API_URL_ENVVAR: &str = "BONSAI_API_URL";
 /// Environment variable name for the API key
 pub const API_KEY_ENVVAR: &str = "BONSAI_API_KEY";
 /// Environment variable name for the timeout, either a number in ms or "none" for no timeout
 pub const TIMEOUT_ENVVAR: &str = "BONSAI_TIMEOUT_MS";
+/// Environment variable which controls which release channel we are requesting software from.
+pub const RELEASE_CHANNEL_ENVVAR: &str = "RISC0_RELEASE_CHANNEL";
 /// Default timeout in ms if env var is not set
 const DEFAULT_TIMEOUT: u64 = 30000;
 
@@ -488,10 +492,20 @@ pub mod module_type {
     }
 
     /// Creates a [reqwest::Client] for internal connection pooling
-    fn construct_req_client(api_key: &str, version: &str) -> Result<HttpClient, SdkErr> {
+    fn construct_req_client(
+        api_key: &str,
+        version: &str,
+        release_channel: Option<&str>,
+    ) -> Result<HttpClient, SdkErr> {
         let mut headers = header::HeaderMap::new();
         headers.insert(API_KEY_HEADER, header::HeaderValue::from_str(api_key)?);
         headers.insert(VERSION_HEADER, header::HeaderValue::from_str(version)?);
+        if let Some(release_channel) = release_channel {
+            headers.insert(
+                RELEASE_CHANNEL_HEADER,
+                header::HeaderValue::from_str(release_channel)?,
+            );
+        }
 
         let timeout = match std::env::var(TIMEOUT_ENVVAR).as_deref() {
             Ok("none") => None,
@@ -545,7 +559,7 @@ bonsai_sdk::non_blocking::Client::from_parts(url, api_key, risc0_zkvm::VERSION)
 "##
         )]
         pub fn from_parts(url: String, key: String, risc0_version: &str) -> Result<Self, SdkErr> {
-            let client = construct_req_client(&key, risc0_version)?;
+            let client = construct_req_client(&key, risc0_version, None)?;
             let url = url.strip_suffix('/').unwrap_or(&url).to_string();
             Ok(Self { url, client })
         }
@@ -581,8 +595,9 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
             let api_url = std::env::var(API_URL_ENVVAR).map_err(|_| SdkErr::MissingApiUrl)?;
             let api_url = api_url.strip_suffix('/').unwrap_or(&api_url);
             let api_key = std::env::var(API_KEY_ENVVAR).map_err(|_| SdkErr::MissingApiKey)?;
+            let release_channel = std::env::var(RELEASE_CHANNEL_ENVVAR).ok();
 
-            let client = construct_req_client(&api_key, risc0_version)?;
+            let client = construct_req_client(&api_key, risc0_version, release_channel.as_deref())?;
 
             Ok(Self {
                 url: api_url.to_string(),
