@@ -22,7 +22,8 @@ int main() {
     using C = RecordingContext;
     mlir::MLIRContext mlirCtx;
     RecordingContext ctx(&mlirCtx);
-    RecordingVal::setContext(&ctx);
+    RecordingReg::setContext(&ctx);
+    BuilderSingleton::set(&ctx.builder);
 
     #define BLOCK_TYPE(name, count) EXTRACT(name ## Block)
     BLOCK_TYPES

@@ -13,26 +13,5 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "compiler/extractor/base.h"
-#include "rv32im/circuit/circuit.ipp"
-
-#include "mlir/IR/Verifier.h"
-
-int main() {
-    using C = RecordingContext;
-    mlir::MLIRContext mlirCtx;
-    RecordingContext ctx(&mlirCtx);
-    RecordingReg::setContext(&ctx);
-    BuilderSingleton::set(&ctx.builder);
-
-    ctx.enterComponent("IsZero");
-    Val<C> x = ctx.addValParameter();
-    IsZero<C> component;
-    mlir::Type layoutType = getLayoutType(ctx, component, x);
-    component.verify(ctx, x);
-    ctx.materializeLayout(layoutType);
-    ctx.exitComponent();
-
-    ctx.getModuleOp().print(llvm::outs());
-    return failed(mlir::verify(ctx.getModuleOp()));
-}
+pub mod poly_ext;
+pub mod taps;
