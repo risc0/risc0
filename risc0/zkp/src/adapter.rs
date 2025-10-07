@@ -23,6 +23,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::taps::TapSet;
 
+#[cfg(feature = "circuit_debug")]
+use alloc::{format, string::String};
+
 // TODO: Remove references to these constants so we don't depend on a
 // fixed set of register groups.
 pub const REGISTER_GROUP_ACCUM: usize = 0;

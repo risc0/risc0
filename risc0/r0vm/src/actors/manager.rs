@@ -16,18 +16,19 @@
 use std::{collections::HashMap, path::PathBuf, time::Duration};
 
 use derive_more::From;
-use kameo::prelude::*;
 use risc0_zkvm::{Journal, Receipt, rpc::JobRequest};
 use tokio::task::JoinSet;
 use uuid::Uuid;
 
 use super::{
+    actor::{self, Actor, ActorRef, Context, Message, ReplySender},
+    error::{Error, Result},
     factory::FactoryActor,
     job::JobActor,
     protocol::{
         CreateJobReply, CreateJobRequest, JobId, JobInfo, JobRequestReply, JobStatus,
         JobStatusReply, JobStatusRequest, ProofRequest, ProofResult, ShrinkWrapRequest,
-        ShrinkWrapResult, TaskError,
+        ShrinkWrapResult,
     },
 };
 
@@ -56,13 +57,60 @@ struct JobDone<ResultT> {
     pub info: JobInfo<ResultT>,
 }
 
-#[derive(Actor)]
+async fn job_request_task<RequestT, ResultT>(
+    request: RequestT,
+    reply_sender: Option<ReplySender<JobRequestReply>>,
+    job_id: Uuid,
+    self_ref: ActorRef<ManagerActor>,
+    job: ActorRef<JobActor>,
+) where
+    JobActor: Message<RequestT, Reply = Result<JobStatusReply>>,
+    JobInfo<ResultT>: TryFrom<JobStatusReply>,
+    JobStatusReply: From<JobInfo<ResultT>>,
+    ManagerActor: Message<JobDone<ResultT>>,
+    RequestT: Send + 'static,
+    ResultT: Send + 'static,
+{
+    // Send the request to the job and wait for it to finish.
+    // If it fails, we change the error into a failed job status.
+    let res = job.ask(request).await.map_err(Error::from).flatten();
+    let reply = res.unwrap_or_else(|error| {
+        JobInfo {
+            status: JobStatus::<ResultT>::Failed(error.into()),
+            // XXX remi: This is lame, we should somehow avoid this.
+            elapsed_time: Duration::MAX,
+        }
+        .into()
+    });
+
+    // We should always be getting some job status which matches our request type, but if not, just
+    // ignore it.
+    if let Ok(info) = reply.clone().try_into() {
+        // If the manager it shutting down for some reason, don't worry about delivering this
+        // message.
+        let _ = self_ref.tell(JobDone::<ResultT> { job_id, info }).await;
+    }
+
+    // After the job sends its reply it should be done, but lets wait for it to clean up resources.
+    job.wait_for_stop().await;
+
+    // If the job requester is waiting for a response send it to them
+    if let Some(reply_sender) = reply_sender {
+        reply_sender.send(JobRequestReply {
+            job_id,
+            status: reply,
+        });
+    }
+}
+
 pub(crate) struct ManagerActor {
     factory: ActorRef<FactoryActor>,
     jobs: HashMap<JobId, JobEntry>,
     join_set: JoinSet<()>,
     storage_root: Option<PathBuf>,
 }
+
+impl Actor for ManagerActor {}
 
 impl ManagerActor {
     pub fn new(factory: ActorRef<FactoryActor>, storage_root: Option<PathBuf>) -> Self {
@@ -77,50 +125,29 @@ impl ManagerActor {
     async fn job_request<RequestT, ResultT>(
         &mut self,
         request: RequestT,
-        actor_ref: ActorRef<ManagerActor>,
+        self_ref: ActorRef<Self>,
         reply_sender: Option<ReplySender<JobRequestReply>>,
     ) -> JobId
     where
-        JobActor: Message<RequestT, Reply = DelegatedReply<JobStatusReply>>,
+        <JobInfo<ResultT> as TryFrom<JobStatusReply>>::Error: Send,
+        JobActor: Message<RequestT, Reply = Result<JobStatusReply>>,
+        JobInfo<ResultT>: TryFrom<JobStatusReply>,
+        JobStatusReply: From<JobInfo<ResultT>>,
+        ManagerActor: Message<JobDone<ResultT>>,
         RequestT: Send + 'static,
         ResultT: Send + 'static,
-        ManagerActor: Message<JobDone<ResultT>>,
-        JobInfo<ResultT>: TryFrom<JobStatusReply>,
-        <JobInfo<ResultT> as TryFrom<JobStatusReply>>::Error: std::fmt::Debug,
-        InactiveJobEntry: From<JobInfo<ResultT>>,
-        JobStatusReply: From<JobInfo<ResultT>>,
     {
         let job_id = JobId::new_v4();
-        let actor_ref = actor_ref.clone();
-        let job = kameo::spawn(JobActor::new(job_id, self.factory.clone()));
+        let self_ref = self_ref.clone();
+        let job = actor::spawn(JobActor::new(job_id, self.factory.clone()));
         self.jobs.insert(job_id, JobEntry::Active(job.clone()));
         self.join_set.spawn(async move {
-            let reply = job.ask(request).await.unwrap_or_else(|error| {
-                JobInfo {
-                    status: JobStatus::<ResultT>::Failed(TaskError::Generic(error.to_string())),
-                    elapsed_time: Duration::MAX,
-                }
-                .into()
-            });
-            actor_ref
-                .tell(JobDone::<ResultT> {
-                    job_id,
-                    info: reply.clone().try_into().unwrap(),
-                })
-                .await
-                .unwrap();
-            job.wait_for_stop().await;
-            if let Some(reply_sender) = reply_sender {
-                reply_sender.send(JobRequestReply {
-                    job_id,
-                    status: reply,
-                });
-            }
+            job_request_task(request, reply_sender, job_id, self_ref, job).await;
         });
         job_id
     }
 
-    async fn write_receipt(&self, job_id: &Uuid, receipt: &Receipt) -> anyhow::Result<()> {
+    async fn write_receipt(&self, job_id: &Uuid, receipt: &Receipt) -> Result<()> {
         let Some(storage_root) = &self.storage_root else {
             return Ok(());
         };
@@ -134,7 +161,7 @@ impl ManagerActor {
         Ok(())
     }
 
-    async fn write_journal(&self, job_id: &Uuid, journal: &Journal) -> anyhow::Result<()> {
+    async fn write_journal(&self, job_id: &Uuid, journal: &Journal) -> Result<()> {
         let Some(storage_root) = &self.storage_root else {
             return Ok(());
         };
@@ -152,11 +179,7 @@ impl ManagerActor {
 impl Message<CreateJobRequest> for ManagerActor {
     type Reply = CreateJobReply;
 
-    async fn handle(
-        &mut self,
-        msg: CreateJobRequest,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
+    async fn handle(&mut self, msg: CreateJobRequest, ctx: &mut Context<Self, Self::Reply>) {
         let job_id = match msg.request {
             JobRequest::Proof(request) => {
                 self.job_request::<_, ProofResult>(request, ctx.actor_ref(), None)
@@ -167,37 +190,27 @@ impl Message<CreateJobRequest> for ManagerActor {
                     .await
             }
         };
-        CreateJobReply { job_id }
+        ctx.reply(CreateJobReply { job_id })
     }
 }
 
 impl Message<ProofRequest> for ManagerActor {
-    type Reply = DelegatedReply<JobRequestReply>;
+    type Reply = JobRequestReply;
 
-    async fn handle(
-        &mut self,
-        msg: ProofRequest,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        let (delegated_reply, reply_sender) = ctx.reply_sender();
+    async fn handle(&mut self, msg: ProofRequest, ctx: &mut Context<Self, Self::Reply>) {
+        let reply_sender = ctx.reply_sender();
         self.job_request::<_, ProofResult>(msg, ctx.actor_ref(), reply_sender)
             .await;
-        delegated_reply
     }
 }
 
 impl Message<ShrinkWrapRequest> for ManagerActor {
-    type Reply = DelegatedReply<JobRequestReply>;
+    type Reply = JobRequestReply;
 
-    async fn handle(
-        &mut self,
-        msg: ShrinkWrapRequest,
-        ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        let (delegated_reply, reply_sender) = ctx.reply_sender();
+    async fn handle(&mut self, msg: ShrinkWrapRequest, ctx: &mut Context<Self, Self::Reply>) {
+        let reply_sender = ctx.reply_sender();
         self.job_request::<_, ShrinkWrapResult>(msg, ctx.actor_ref(), reply_sender)
             .await;
-        delegated_reply
     }
 }
 
@@ -206,17 +219,29 @@ impl Message<JobDone<ShrinkWrapResult>> for ManagerActor {
 
     async fn handle(
         &mut self,
-        msg: JobDone<ShrinkWrapResult>,
+        mut msg: JobDone<ShrinkWrapResult>,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         tracing::info!("JobDone: {}", msg.job_id);
-        if let JobStatus::Succeeded(result) = &msg.info.status {
-            self.write_receipt(&msg.job_id, &result.receipt)
-                .await
-                .unwrap();
+
+        if let JobStatus::Succeeded(result) = &msg.info.status
+            && let Err(error) = self.shrink_wrap_success(&msg.job_id, result).await
+        {
+            msg.info.status = JobStatus::Failed(error.into());
         }
         self.jobs
             .insert(msg.job_id, JobEntry::Inactive(msg.info.into()));
+    }
+}
+
+impl ManagerActor {
+    async fn shrink_wrap_success(
+        &mut self,
+        job_id: &Uuid,
+        result: &ShrinkWrapResult,
+    ) -> Result<()> {
+        self.write_receipt(job_id, &result.receipt).await?;
+        Ok(())
     }
 }
 
@@ -225,39 +250,44 @@ impl Message<JobDone<ProofResult>> for ManagerActor {
 
     async fn handle(
         &mut self,
-        msg: JobDone<ProofResult>,
+        mut msg: JobDone<ProofResult>,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         tracing::info!("JobDone: {}", msg.job_id);
-        if let JobStatus::Succeeded(ref result) = msg.info.status {
-            if let Some(receipt) = &result.receipt {
-                self.write_receipt(&msg.job_id, receipt).await.unwrap();
-            } else if let Some(journal) = &result.session.journal {
-                self.write_journal(&msg.job_id, journal).await.unwrap();
-            }
+
+        if let JobStatus::Succeeded(result) = &msg.info.status
+            && let Err(error) = self.proof_success(&msg.job_id, result).await
+        {
+            msg.info.status = JobStatus::Failed(error.into());
         }
         self.jobs
             .insert(msg.job_id, JobEntry::Inactive(msg.info.into()));
     }
 }
 
-impl Message<JobStatusRequest> for ManagerActor {
-    type Reply = JobStatusReply;
-
-    async fn handle(
-        &mut self,
-        msg: JobStatusRequest,
-        _ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        match self.jobs.get(&msg.job_id) {
-            Some(JobEntry::Active(job)) => {
-                match job.ask(JobStatusRequest { job_id: msg.job_id }).await {
-                    Ok(status) => status,
-                    Err(_) => JobStatusReply::NotFound,
-                }
-            }
-            Some(JobEntry::Inactive(inactive)) => inactive.clone().into(),
-            None => JobStatusReply::NotFound,
+impl ManagerActor {
+    async fn proof_success(&mut self, job_id: &Uuid, result: &ProofResult) -> Result<()> {
+        if let Some(receipt) = &result.receipt {
+            self.write_receipt(job_id, receipt).await?;
+        } else if let Some(journal) = &result.session.journal {
+            self.write_journal(job_id, journal).await?;
         }
+        Ok(())
+    }
+}
+
+impl Message<JobStatusRequest> for ManagerActor {
+    type Reply = Result<JobStatusReply>;
+
+    async fn handle(&mut self, msg: JobStatusRequest, ctx: &mut Context<Self, Self::Reply>) {
+        ctx.reply(match self.jobs.get(&msg.job_id) {
+            Some(JobEntry::Active(job)) => job
+                .ask(JobStatusRequest { job_id: msg.job_id })
+                .await
+                .map_err(Error::from)
+                .flatten(),
+            Some(JobEntry::Inactive(inactive)) => Ok(inactive.clone().into()),
+            None => Ok(JobStatusReply::NotFound),
+        })
     }
 }

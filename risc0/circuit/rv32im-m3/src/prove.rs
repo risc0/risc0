@@ -16,8 +16,11 @@
 #[cfg(test)]
 #[cfg(feature = "cuda")]
 mod tests {
-    use risc0_circuit_rv32im_m3_sys::risc0_circuit_rv32im_m3_prove;
+    use cfg_if::cfg_if;
+    use risc0_circuit_rv32im_m3_sys::*;
     use risc0_sys::ffi_wrap;
+
+    use crate::verify::verify_m3;
 
     // These tests come from:
     // https://github.com/riscv-software-src/riscv-tests
@@ -26,7 +29,7 @@ mod tests {
     // The exception is the test of fence, which was built with
     // https://archlinux.org/packages/extra/x86_64/riscv64-elf-gcc/ v14.0.1-1
 
-    fn run_test(test_name: &str) {
+    fn run_test(test_name: &str, po2: usize) {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
@@ -48,72 +51,88 @@ mod tests {
             let mut elf = Vec::new();
             entry.read_to_end(&mut elf).unwrap();
 
-            run_program(&elf);
+            run_program(&elf, po2);
             return;
         }
-        panic!("No filename matching '{}'", test_name);
+        panic!("No filename matching '{test_name}'");
     }
 
-    fn run_program(elf: &[u8]) {
-        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_prove(elf.as_ptr(), elf.len()) }).unwrap();
+    fn run_program(elf: &[u8], po2: usize) {
+        cfg_if! {
+            if #[cfg(feature = "cuda")] {
+                let prover = unsafe { risc0_circuit_rv32im_m3_prover_new_cuda(po2) };
+            } else {
+                let prover = unsafe { risc0_circuit_rv32im_m3_prover_new_cpu(po2) };
+            }
+        }
+
+        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_preflight(prover, elf.as_ptr(), elf.len()) })
+            .unwrap();
+        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_prove(prover) }).unwrap();
+        let raw_transcript = unsafe { risc0_circuit_rv32im_m3_prover_transcript(prover) };
+        let transcript =
+            unsafe { std::slice::from_raw_parts(raw_transcript.ptr, raw_transcript.len) };
+        verify_m3(transcript, po2).unwrap();
+        unsafe { risc0_circuit_rv32im_m3_prover_free(prover) };
     }
+
+    const DEFAULT_PO2: usize = 12;
 
     macro_rules! test_case {
         ($func_name:ident) => {
             #[test_log::test]
             #[gpu_guard::gpu_guard]
-            #[ignore]
             fn $func_name() {
-                run_test(stringify!($func_name));
+                run_test(stringify!($func_name), DEFAULT_PO2);
             }
         };
     }
 
     test_case!(add);
-    // test_case!(addi);
-    // test_case!(and);
-    // test_case!(andi);
-    // test_case!(auipc);
-    // test_case!(beq);
-    // test_case!(bge);
-    // test_case!(bgeu);
-    // test_case!(blt);
-    // test_case!(bltu);
-    // test_case!(bne);
-    // test_case!(div);
-    // test_case!(divu);
+    test_case!(addi);
+    test_case!(and);
+    test_case!(andi);
+    test_case!(auipc);
+    test_case!(beq);
+    test_case!(bge);
+    test_case!(bgeu);
+    test_case!(blt);
+    test_case!(bltu);
+    test_case!(bne);
+    test_case!(div);
+    test_case!(divu);
     // test_case!(fence);
-    // test_case!(jal);
-    // test_case!(jalr);
-    // test_case!(lb);
-    // test_case!(lbu);
-    // test_case!(lh);
-    // test_case!(lhu);
-    // test_case!(lui);
-    // test_case!(lw);
-    // test_case!(mul);
-    // test_case!(mulh);
-    // test_case!(mulhsu);
-    // test_case!(mulhu);
-    // test_case!(or);
-    // test_case!(ori);
-    // test_case!(rem);
-    // test_case!(remu);
-    // test_case!(sb);
-    // test_case!(sh);
-    // test_case!(simple);
-    // test_case!(sll);
-    // test_case!(slli);
-    // test_case!(slt);
-    // test_case!(slti);
-    // test_case!(sltiu);
-    // test_case!(sltu);
-    // test_case!(sra);
-    // test_case!(srai);
-    // test_case!(srl);
-    // test_case!(srli);
-    // test_case!(sub);
-    // test_case!(sw);
-    // test_case!(xor);
-    // test_case!(xori);
+    test_case!(jal);
+    test_case!(jalr);
+    test_case!(lb);
+    test_case!(lbu);
+    test_case!(lh);
+    test_case!(lhu);
+    test_case!(lui);
+    test_case!(lw);
+    test_case!(mul);
+    test_case!(mulh);
+    test_case!(mulhsu);
+    test_case!(mulhu);
+    test_case!(or);
+    test_case!(ori);
+    test_case!(rem);
+    test_case!(remu);
+    test_case!(sb);
+    test_case!(sh);
+    test_case!(simple);
+    test_case!(sll);
+    test_case!(slli);
+    test_case!(slt);
+    test_case!(slti);
+    test_case!(sltiu);
+    test_case!(sltu);
+    test_case!(sra);
+    test_case!(srai);
+    test_case!(srl);
+    test_case!(srli);
+    test_case!(sub);
+    test_case!(sw);
+    test_case!(xor);
+    test_case!(xori);
 }

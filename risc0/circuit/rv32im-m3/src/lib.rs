@@ -17,3 +17,5 @@
 
 #[cfg(feature = "prove")]
 pub mod prove;
+pub mod verify;
+mod zirgen;

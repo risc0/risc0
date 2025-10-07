@@ -85,7 +85,10 @@ pub mod sha;
 pub use ::serde::de::DeserializeOwned;
 pub use anyhow::Result;
 pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
-pub use risc0_zkp::core::digest::{Digest, digest};
+pub use risc0_zkp::{
+    core::digest::{Digest, digest},
+    verify::VerificationError,
+};
 pub use risc0_zkvm_platform::{PAGE_SIZE, align_up, declare_syscall, memory::GUEST_MAX_MEM};
 
 #[cfg(not(target_os = "zkvm"))]

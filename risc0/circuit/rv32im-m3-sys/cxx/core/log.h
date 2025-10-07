@@ -52,13 +52,6 @@ void logTimestamp();
     }                                                                                              \
   } while (0)
 
-// template <typename T> struct ArrayRef {
-//   const T* ptr;
-//   size_t size;
-
-//   ArrayRef(const T* ptr, size_t size) : ptr(ptr), size(size) {}
-// };
-
 template <typename Iterator>
 std::ostream& stringify_collection(std::ostream& os, Iterator it, Iterator itEnd) {
   os << '[';
@@ -71,10 +64,6 @@ std::ostream& stringify_collection(std::ostream& os, Iterator it, Iterator itEnd
   os << ']';
   return os;
 }
-
-// template <typename T> inline std::ostream& operator<<(std::ostream& os, ArrayRef<T> x) {
-//   return stringify_collection(os, x.ptr, x.ptr + x.size);
-// }
 
 template <typename T> inline std::ostream& operator<<(std::ostream& os, const std::vector<T>& x) {
   return stringify_collection(os, x.begin(), x.end());

@@ -37,7 +37,6 @@ use bonsai_sdk::responses::{
     CreateSessRes, ImgUploadRes, ProofReq, ReceiptDownload, SessionStats, SessionStatusRes,
     SnarkReq, SnarkStatusRes, UploadRes,
 };
-use kameo::actor::ActorRef;
 use risc0_zkvm::{Receipt, compute_image_id, rpc::JobRequest};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -45,7 +44,9 @@ use tokio::net::TcpListener;
 use uuid::Uuid;
 
 use crate::actors::{
+    actor::ActorRef,
     allocator::PROXY_URL_PATH,
+    error::Error as ActorError,
     manager::ManagerActor,
     protocol::{
         CreateJobRequest, JobInfo, JobStatus, JobStatusReply, JobStatusRequest, ProofRequest,
@@ -448,6 +449,8 @@ where
         .manager
         .ask(JobStatusRequest { job_id: *job_id })
         .await
+        .map_err(ActorError::from)
+        .flatten()
         .context("Failed to get job status")?
         .try_into()
         .map_err(|_| AppError::InternalErr(anyhow!("Invalid job_id")))?;

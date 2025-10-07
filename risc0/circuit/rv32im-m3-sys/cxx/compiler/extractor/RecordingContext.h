@@ -113,7 +113,7 @@ private:
 struct RecordingReg {
     RecordingVal val;
 
-    RecordingReg() : val(RecordingVal::getContext()->getNextRef()) {}
+    RecordingReg() : val(ctx->getNextRef()) {}
     explicit RecordingReg(RecordingVal val) : val(val) {}
 
     void set(RecordingContext& ctx, RecordingVal val) {}
@@ -123,4 +123,9 @@ struct RecordingReg {
     void applyInner(RecordingContext& ctx) {}
     void verify(RecordingContext& ctx) {}
     void addArguments(RecordingContext& ctx) {}
+
+    static void setContext(RecordingContext* value) { ctx = value; } 
+private:
+    static RecordingContext* ctx;
+
 };

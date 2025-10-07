@@ -50,7 +50,9 @@ int main(int argc, char** argv) {
   Module module;
   using C = RecordingContext;
   RecordingContext ctx(module.getCtx());
-  RecordingVal::setContext(&ctx);
+  RecordingReg::setContext(&ctx);
+  BuilderSingleton::set(&ctx.builder);
+
   #define BLOCK_TYPE(name, count) EXTRACT(name ## Block)
   BLOCK_TYPES
   #undef BLOCK_TYPE

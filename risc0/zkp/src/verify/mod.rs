@@ -344,7 +344,7 @@ impl<'a, F: Field> Verifier<'a, F> {
 
         // Now, convert U polynomials from coefficient form to evaluation form
         let mut cur_pos = 0;
-        let mut eval_u = Vec::with_capacity(num_taps);
+        let mut eval_u = Vec::with_capacity(num_taps + 1);
         for reg in self.taps.regs() {
             for i in 0..reg.size() {
                 let x = z * back_one.pow(reg.back(i));
@@ -353,7 +353,14 @@ impl<'a, F: Field> Verifier<'a, F> {
             }
             cur_pos += reg.size();
         }
-        assert_eq!(eval_u.len(), num_taps, "Miscalculated capacity for eval_us");
+        // Add 'x' as a final element of eval_u (only used in v3)
+        let three = F::Elem::from_u64(3);
+        eval_u.push(z * three);
+        assert_eq!(
+            eval_u.len(),
+            num_taps + 1,
+            "Miscalculated capacity for eval_us"
+        );
 
         // Compute the core constraint polynomial.
         // I.e. the set of all constraints mixed by poly_mix
@@ -387,7 +394,6 @@ impl<'a, F: Field> Verifier<'a, F> {
                 * z.pow(i)
                 * F::ExtElem::from_subelems([fp0, fp0, fp0, fp1]);
         }
-        let three = F::Elem::from_u64(3);
         check *= (F::ExtElem::from_subfield(&three) * z).pow(self.tot_cycles) - F::ExtElem::ONE;
         trace_if_enabled!("Check = {check:?}");
         if check != result {
