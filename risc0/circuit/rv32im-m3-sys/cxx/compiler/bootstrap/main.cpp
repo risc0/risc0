@@ -13,26 +13,30 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "compiler/extractor/base.h"
-#include "rv32im/circuit/circuit.ipp"
+#include "core/log.h"
+#include "compiler/extractor/RecordingVal.h"
+#include "rv32im/circuit/verify.h"
+#include "rv32im/emu/blocks.h"
 
-#include "mlir/IR/Verifier.h"
+#include "mlir/Pass/PassManager.h"
+#include "mlir/Transforms/Passes.h"
 
-int main() {
-    using C = RecordingContext;
-    mlir::MLIRContext mlirCtx;
-    RecordingContext ctx(&mlirCtx);
-    RecordingReg::setContext(&ctx);
-    BuilderSingleton::set(&ctx.builder);
+void emitTaps(const std::string path);
+void emitPolyExt(const std::string path);
 
-    ctx.enterComponent("IsZero");
-    Val<C> x = ctx.addValParameter();
-    IsZero<C> component;
-    mlir::Type layoutType = getLayoutType(ctx, component, x);
-    component.verify(ctx, x);
-    ctx.materializeLayout(layoutType);
-    ctx.exitComponent();
-
-    ctx.getModuleOp().print(llvm::outs());
-    return failed(mlir::verify(ctx.getModuleOp()));
+int main(int argc, char* argv[]) {
+  if (argc != 2) {
+    LOG(0, "usage: " << argv[0] << " <output_path>");
+    return 1;
+  }
+  std::string path = argv[1];
+  try {
+    emitTaps(path + "/taps.rs");
+    emitPolyExt(path + "/poly_ext.rs");
+  } catch (const std::exception& err) {
+    LOG(0, "Caught exception: " << err.what());
+    return 1;
+  }
+  return 0;
 }
+
