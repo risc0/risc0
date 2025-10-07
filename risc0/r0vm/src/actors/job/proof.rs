@@ -416,7 +416,7 @@ impl JobActor {
         self.status = JobStatus::Succeeded(result);
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully().await;
+        let _ = self_ref.stop_gracefully();
 
         Ok(())
     }
@@ -545,7 +545,7 @@ impl JobActor {
         self.status = JobStatus::Failed(error.into());
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully().await;
+        let _ = self_ref.stop_gracefully();
     }
 }
 

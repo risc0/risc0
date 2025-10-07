@@ -12,7 +12,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-
 use std::fmt;
 use std::future::Future;
 use std::pin::Pin;
@@ -20,7 +19,7 @@ use std::sync::{Arc, Mutex, Weak};
 
 use tokio::sync::{broadcast, mpsc, oneshot};
 
-/// An object that will run on a task receiving messages
+/// An object that will run in a loop receiving messages
 pub trait Actor: Sized + Send + 'static {
     fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> impl Future<Output = ()> + Send {
         async {}
@@ -53,9 +52,80 @@ impl fmt::Display for SendError {
 /// The number of messages that will queue up for an actor before tell/ask start waiting for room.
 const MAILBOX_SIZE: usize = 64;
 
+pub struct ActorRunner<ActorT: Actor> {
+    actor: ActorT,
+    recv: mpsc::Receiver<HandleMessageFn<ActorT>>,
+    actor_ref: Option<ActorRef<ActorT>>,
+    _stop_send: broadcast::Sender<()>,
+}
+
+impl<ActorT: Actor> ActorRunner<ActorT> {
+    fn new(
+        actor: ActorT,
+        recv: mpsc::Receiver<HandleMessageFn<ActorT>>,
+        stop_send: broadcast::Sender<()>,
+        actor_ref: ActorRef<ActorT>,
+    ) -> Self {
+        Self {
+            actor,
+            recv,
+            actor_ref: Some(actor_ref),
+            _stop_send: stop_send,
+        }
+    }
+
+    /// Call on_start on the actor. Must only be called once.
+    async fn start(&mut self) {
+        let actor_ref = self
+            .actor_ref
+            .take()
+            .expect("start should be called only once");
+        self.actor.on_start(actor_ref).await;
+    }
+
+    /// Receive and potentially reply to a single message
+    pub async fn handle_one(&mut self) -> bool {
+        assert!(self.actor_ref.is_none(), "start not called");
+
+        if let Some(handle_msg) = self.recv.recv().await {
+            handle_msg(&mut self.actor).await;
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Call on_stop on the actor
+    pub async fn stop(mut self) {
+        assert!(self.actor_ref.is_none(), "start not called");
+
+        self.actor.on_stop().await;
+    }
+
+    /// The main loop an actor does.
+    pub async fn run(mut self) {
+        self.start().await;
+        while self.handle_one().await {}
+        self.stop().await;
+    }
+}
+
 /// Spawn a new task which receives messages for the actor.
 pub fn spawn<ActorT: Actor>(actor: ActorT) -> ActorRef<ActorT> {
-    ActorTask::spawn(actor)
+    let (actor_ref, actor_runner) = ActorController::run(actor);
+    tokio::task::spawn(async move { actor_runner.run().await });
+    actor_ref
+}
+
+/// Run an actor without spawning a task. Instead return an object that can be used to control the
+/// actor on the current task. This is useful for testing to be able to control the message
+/// scheduling.
+#[allow(dead_code)]
+pub async fn run<ActorT: Actor>(actor: ActorT) -> (ActorRef<ActorT>, ActorRunner<ActorT>) {
+    let (actor_ref, mut actor_runner) = ActorController::run(actor);
+    actor_runner.start().await;
+
+    (actor_ref, actor_runner)
 }
 
 /// An object that can receive a reply from an actor to a previously sent message.
@@ -69,6 +139,13 @@ impl<ReplyT: 'static> PendingReply<ReplyT> {
     /// `lSendError::NoReply` is returned.
     pub async fn recv(self) -> Result<ReplyT, SendError> {
         self.reply.await.map_err(|_| SendError::ActorNotRunning)?
+    }
+
+    /// Returns true if we have received a reply (either a `ReplyT` or an error) and `recv` will
+    /// return immediately if called.
+    #[allow(dead_code)]
+    pub fn has_reply(&self) -> bool {
+        !self.reply.is_empty()
     }
 }
 
@@ -100,53 +177,26 @@ impl<ActorT: Actor> ActorSender<ActorT> {
 }
 
 /// Represents the tokio task which is receiving messages and delivering them to an actor.
-struct ActorTask<ActorT: Actor> {
+struct ActorController<ActorT: Actor> {
     sender: Option<ActorSender<ActorT>>,
-    task_handle: tokio::task::JoinHandle<()>,
     stop: broadcast::Receiver<()>,
 }
 
-/// The main recv loop for an actor
-async fn actor_task_main<ActorT: Actor>(
-    mut actor: ActorT,
-    actor_ref: ActorRef<ActorT>,
-    mut recv: mpsc::Receiver<HandleMessageFn<ActorT>>,
-) {
-    actor.on_start(actor_ref).await;
-
-    while let Some(handle_msg) = recv.recv().await {
-        handle_msg(&mut actor).await
-    }
-
-    actor.on_stop().await;
-}
-
-impl<ActorT: Actor> ActorTask<ActorT> {
-    fn spawn(actor: ActorT) -> ActorRef<ActorT> {
+impl<ActorT: Actor> ActorController<ActorT> {
+    fn run(actor: ActorT) -> (ActorRef<ActorT>, ActorRunner<ActorT>) {
         let (send, recv) = mpsc::channel(MAILBOX_SIZE);
 
         let (stop_send, stop_recv) = broadcast::channel(1);
-        let (actor_ref_send, actor_ref_recv) = oneshot::channel();
-        let task_handle = tokio::task::spawn(async move {
-            let actor_ref = actor_ref_recv
-                .await
-                .expect("actor_ref_send should still exist");
-            actor_task_main(actor, actor_ref, recv).await;
-            drop(stop_send);
-        });
 
-        let actor_task = Arc::new(Mutex::new(Self {
+        let controller = Arc::new(Mutex::new(Self {
             sender: Some(ActorSender(send)),
-            task_handle,
             stop: stop_recv,
         }));
 
-        let actor_ref = ActorRef { task: actor_task };
-        actor_ref_send
-            .send(actor_ref.clone())
-            .map_err(|_| ())
-            .expect("task should still be running");
-        actor_ref
+        let actor_ref = ActorRef { controller };
+        let actor_runner = ActorRunner::new(actor, recv, stop_send, actor_ref.clone());
+
+        (actor_ref, actor_runner)
     }
 
     fn sender(&self) -> Result<ActorSender<ActorT>, SendError> {
@@ -157,23 +207,19 @@ impl<ActorT: Actor> ActorTask<ActorT> {
         self.sender.take().is_some()
     }
 
-    fn kill(&mut self) {
-        self.task_handle.abort();
-    }
-
     fn stop_waiter(&self) -> broadcast::Receiver<()> {
         self.stop.resubscribe()
     }
 }
 
 pub struct ActorRef<ActorT: Actor> {
-    task: Arc<Mutex<ActorTask<ActorT>>>,
+    controller: Arc<Mutex<ActorController<ActorT>>>,
 }
 
 impl<ActorT: Actor> Clone for ActorRef<ActorT> {
     fn clone(&self) -> Self {
         Self {
-            task: self.task.clone(),
+            controller: self.controller.clone(),
         }
     }
 }
@@ -194,6 +240,24 @@ impl<ActorT: Actor> ActorRef<ActorT> {
         pending_reply.recv().await
     }
 
+    /// Send a message to an actor and receive a response. This is a single-task variant that
+    /// receives and replies to the response in the same task. If the actor doesn't reply,
+    /// `SendError::NoReply` is returned.
+    #[allow(dead_code)]
+    pub async fn ask_with_runner<MessageT>(
+        &self,
+        msg: MessageT,
+        runner: &mut ActorRunner<ActorT>,
+    ) -> Result<<ActorT as Message<MessageT>>::Reply, SendError>
+    where
+        MessageT: Send + 'static,
+        ActorT: Message<MessageT>,
+    {
+        let pending_reply = self.ask_enqueue(msg).await?;
+        runner.handle_one().await;
+        pending_reply.recv().await
+    }
+
     /// Send a message to an actor and return an object which can be used to wait for a reply.
     pub async fn ask_enqueue<MessageT>(
         &self,
@@ -207,7 +271,7 @@ impl<ActorT: Actor> ActorRef<ActorT> {
         let (sender, reply) = oneshot::channel();
         let reply_sender = ReplySender { sender };
 
-        let sender = self.task.lock().unwrap().sender()?;
+        let sender = self.controller.lock().unwrap().sender()?;
         sender
             .send(Box::new(move |actor| {
                 Box::pin(async move {
@@ -229,7 +293,7 @@ impl<ActorT: Actor> ActorRef<ActorT> {
         ActorT: Message<MessageT>,
     {
         let actor_ref = self.clone();
-        let sender = self.task.lock().unwrap().sender()?;
+        let sender = self.controller.lock().unwrap().sender()?;
         sender
             .send(Box::new(move |actor| {
                 Box::pin(async move {
@@ -243,6 +307,23 @@ impl<ActorT: Actor> ActorRef<ActorT> {
             .await
     }
 
+    /// Send a message to an actor and don't get a reply. This is a single-task variant that
+    /// receives and handles the message in the same task.
+    #[allow(dead_code)]
+    pub async fn tell_with_runner<MessageT>(
+        &self,
+        msg: MessageT,
+        runner: &mut ActorRunner<ActorT>,
+    ) -> Result<(), SendError>
+    where
+        MessageT: Send + 'static,
+        ActorT: Message<MessageT>,
+    {
+        self.tell(msg).await?;
+        runner.handle_one().await;
+        Ok(())
+    }
+
     /// Send a message to an actor and don't wait for a reply and do so by blocking.
     pub fn tell_blocking<MessageT>(&self, msg: MessageT) -> Result<(), SendError>
     where
@@ -250,7 +331,7 @@ impl<ActorT: Actor> ActorRef<ActorT> {
         ActorT: Message<MessageT>,
     {
         let actor_ref = self.clone();
-        let sender = self.task.lock().unwrap().sender()?;
+        let sender = self.controller.lock().unwrap().sender()?;
         sender.blocking_send(Box::new(move |actor| {
             Box::pin(async move {
                 let mut context = Context {
@@ -272,7 +353,7 @@ impl<ActorT: Actor> ActorRef<ActorT> {
         ActorT: Message<MessageT>,
     {
         let actor_ref = self.clone();
-        let sender = self.task.lock().unwrap().sender()?;
+        let sender = self.controller.lock().unwrap().sender()?;
         sender
             .send(Box::new(move |actor| {
                 Box::pin(async move {
@@ -289,8 +370,8 @@ impl<ActorT: Actor> ActorRef<ActorT> {
     /// Tell the actor to stop. After this call returns, any attempt to send a message to the actor
     /// will error with `SendError::ActorNotRunning`. The actor will process all existing messages
     /// in its queue before exiting.
-    pub async fn stop_gracefully(&self) -> Result<(), SendError> {
-        if self.task.lock().unwrap().stop() {
+    pub fn stop_gracefully(&self) -> Result<(), SendError> {
+        if self.controller.lock().unwrap().stop() {
             Ok(())
         } else {
             Err(SendError::ActorNotRunning)
@@ -299,20 +380,14 @@ impl<ActorT: Actor> ActorRef<ActorT> {
 
     /// Wait for an actor to be no longer processing messages and destroyed.
     pub async fn wait_for_stop(&self) {
-        let mut waiter = self.task.lock().unwrap().stop_waiter();
+        let mut waiter = self.controller.lock().unwrap().stop_waiter();
         let _ = waiter.recv().await;
-    }
-
-    /// Abort the task running the actor. This will cause it to exit as soon as it reaches an await
-    /// point.
-    pub fn kill(&self) {
-        self.task.lock().unwrap().kill();
     }
 
     /// Receive a weak reference to this actor.
     pub fn downgrade(&self) -> WeakActorRef<ActorT> {
         WeakActorRef {
-            task: Arc::downgrade(&self.task),
+            controller: Arc::downgrade(&self.controller),
         }
     }
 }
@@ -320,21 +395,23 @@ impl<ActorT: Actor> ActorRef<ActorT> {
 /// A weak reference to an actor. Holding this reference will not stop an actor from being
 /// destroyed once all `ActorRef` are destroyed.
 pub struct WeakActorRef<ActorT: Actor> {
-    task: Weak<Mutex<ActorTask<ActorT>>>,
+    controller: Weak<Mutex<ActorController<ActorT>>>,
 }
 
 impl<ActorT: Actor> WeakActorRef<ActorT> {
     /// Attempt to upgrade to an `ActorRef`. If the underlying actor has already been destroyed,
     /// this will return `None`.
     pub fn upgrade(&self) -> Option<ActorRef<ActorT>> {
-        self.task.upgrade().map(|task| ActorRef { task })
+        self.controller
+            .upgrade()
+            .map(|controller| ActorRef { controller })
     }
 }
 
 impl<ActorT: Actor> Clone for WeakActorRef<ActorT> {
     fn clone(&self) -> Self {
         Self {
-            task: self.task.clone(),
+            controller: self.controller.clone(),
         }
     }
 }
@@ -540,11 +617,69 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn ask_with_runner() {
+        let (actor, mut spy) = TestActor::new();
+        let (actor_ref, mut actor_runner) = run(actor).await;
+
+        let reply = actor_ref
+            .ask_with_runner(Ping(12), &mut actor_runner)
+            .await
+            .unwrap();
+        assert_eq!(reply, Pong(12));
+
+        assert_eq!(spy.ping.recv().await.unwrap(), Ping(12));
+    }
+
+    #[tokio::test]
+    async fn pending_reply_has_reply_ok() {
+        let (actor, mut spy) = TestActor::new();
+        let (actor_ref, mut actor_runner) = run(actor).await;
+
+        let pending_reply = actor_ref.ask_enqueue(Ping(12)).await.unwrap();
+        assert!(!pending_reply.has_reply());
+
+        actor_runner.handle_one().await;
+        assert!(pending_reply.has_reply());
+
+        assert_eq!(pending_reply.recv().await.unwrap(), Pong(12));
+
+        assert_eq!(spy.ping.recv().await.unwrap(), Ping(12));
+    }
+
+    #[tokio::test]
+    async fn pending_reply_has_reply_error() {
+        let (actor, mut spy) = TestActor::new();
+        let (actor_ref, mut actor_runner) = run(actor).await;
+
+        let pending_reply = actor_ref.ask_enqueue(Bang(12)).await.unwrap();
+        assert!(!pending_reply.has_reply());
+
+        actor_runner.handle_one().await;
+        assert!(pending_reply.has_reply());
+        assert_eq!(pending_reply.recv().await.unwrap_err(), SendError::NoReply);
+
+        assert_eq!(spy.bang.recv().await.unwrap(), Bang(12));
+    }
+
+    #[tokio::test]
     async fn tell() {
         let (actor, mut spy) = TestActor::new();
         let actor_ref = spawn(actor);
 
         actor_ref.tell(Ping(12)).await.unwrap();
+
+        assert_eq!(spy.ping.recv().await.unwrap(), Ping(12));
+    }
+
+    #[tokio::test]
+    async fn tell_with_runner() {
+        let (actor, mut spy) = TestActor::new();
+        let (actor_ref, mut actor_runner) = run(actor).await;
+
+        actor_ref
+            .tell_with_runner(Ping(12), &mut actor_runner)
+            .await
+            .unwrap();
 
         assert_eq!(spy.ping.recv().await.unwrap(), Ping(12));
     }
@@ -608,7 +743,7 @@ mod tests {
         assert!(spy.started.load(Ordering::Acquire));
         assert!(!spy.stopped.load(Ordering::Acquire));
 
-        actor_ref.stop_gracefully().await.unwrap();
+        actor_ref.stop_gracefully().unwrap();
         actor_ref.wait_for_stop().await;
 
         assert!(spy.stopped.load(Ordering::Acquire));
@@ -620,22 +755,9 @@ mod tests {
         let actor_ref = spawn(actor);
 
         actor_ref.tell(Ping(12)).await.unwrap();
-        actor_ref.stop_gracefully().await.unwrap();
+        actor_ref.stop_gracefully().unwrap();
 
         assert_eq!(spy.ping.recv().await.unwrap(), Ping(12));
-
-        actor_ref.wait_for_stop().await;
-    }
-
-    #[tokio::test]
-    async fn kill() {
-        let (actor, mut spy) = TestActor::new();
-        let actor_ref = spawn(actor);
-
-        actor_ref.tell(Ping(12)).await.unwrap();
-        actor_ref.kill();
-
-        assert!(spy.ping.recv().await.is_none());
 
         actor_ref.wait_for_stop().await;
     }
@@ -651,7 +773,7 @@ mod tests {
         tokio::task::yield_now().await;
         assert!(!wait_handle.is_finished());
 
-        actor_ref.stop_gracefully().await.unwrap();
+        actor_ref.stop_gracefully().unwrap();
 
         wait_handle.await.unwrap();
     }

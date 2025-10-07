@@ -20,7 +20,7 @@ use multi_index_map::MultiIndexMap;
 use super::{
     RemoteActor, RemoteFactoryRequest, RpcDisconnect,
     actor::{Actor, ActorRef, Context, Message},
-    allocator::{CpuCores, GpuTokens, RemoteAllocatorActor, ScheduleTask},
+    allocator::{CpuCores, GpuTokens, RemoteAllocatorActor, ScheduleTask, ScheduleTaskReply},
     error::{Error, Result as ActorResult},
     job::JobActor,
     protocol::{
@@ -40,18 +40,32 @@ struct WorkerRow {
     worker_id: WorkerId,
 }
 
-pub(crate) struct FactoryActor {
-    jobs: HashMap<JobId, ActorRef<JobActor>>,
+pub(crate) trait FactoryDeps: 'static {
+    type Allocator: Actor + Message<ScheduleTask, Reply = ActorResult<ScheduleTaskReply>>;
+    type Worker: Actor + Message<TaskMsg, Reply = ()>;
+    type Job: Actor + Message<TaskDoneMsg, Reply = ()> + Message<TaskUpdateMsg, Reply = ()>;
+}
+
+pub(crate) struct DefaultFactoryDeps;
+
+impl FactoryDeps for DefaultFactoryDeps {
+    type Allocator = RemoteAllocatorActor;
+    type Worker = RemoteWorkerActor;
+    type Job = JobActor;
+}
+
+pub(crate) struct FactoryActor<DepsT: FactoryDeps = DefaultFactoryDeps> {
+    jobs: HashMap<JobId, ActorRef<DepsT::Job>>,
     workers: MultiIndexWorkerRowMap,
-    pending_tasks: Vec<SubmitTaskMsg>,
-    active_tasks: HashMap<GlobalId, SubmitTaskMsg>,
-    worker_actors: HashMap<WorkerId, ActorRef<RemoteWorkerActor>>,
-    allocator: ActorRef<RemoteAllocatorActor>,
+    pending_tasks: Vec<SubmitTaskMsg<DepsT::Job>>,
+    active_tasks: HashMap<GlobalId, SubmitTaskMsg<DepsT::Job>>,
+    worker_actors: HashMap<WorkerId, ActorRef<DepsT::Worker>>,
+    allocator: ActorRef<DepsT::Allocator>,
     require_gpu: bool,
 }
 
-impl FactoryActor {
-    pub fn new(allocator: ActorRef<RemoteAllocatorActor>, require_gpu: bool) -> Self {
+impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
+    pub fn new(allocator: ActorRef<DepsT::Allocator>, require_gpu: bool) -> Self {
         Self {
             jobs: HashMap::default(),
             workers: Default::default(),
@@ -64,10 +78,10 @@ impl FactoryActor {
     }
 }
 
-impl Actor for FactoryActor {
+impl<DepsT: FactoryDeps> Actor for FactoryActor<DepsT> {
     async fn on_stop(&mut self) {
         for worker in self.worker_actors.values() {
-            let _ = worker.stop_gracefully().await;
+            let _ = worker.stop_gracefully();
         }
 
         for task in self.pending_tasks.iter().chain(self.active_tasks.values()) {
@@ -85,7 +99,7 @@ impl Actor for FactoryActor {
     }
 }
 
-impl FactoryActor {
+impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
     async fn maybe_schedule_tasks(&mut self) -> ActorResult<()> {
         for msg in std::mem::take(&mut self.pending_tasks) {
             let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
@@ -152,12 +166,12 @@ impl FactoryActor {
         if let Err(error) = res {
             tracing::error!("Factory has encountered fatal error: {error:?}");
 
-            let _ = self_ref.stop_gracefully().await;
+            let _ = self_ref.stop_gracefully();
         }
     }
 }
 
-impl Message<DropJob> for FactoryActor {
+impl<DepsT: FactoryDeps> Message<DropJob> for FactoryActor<DepsT> {
     type Reply = ();
 
     async fn handle(&mut self, msg: DropJob, _ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
@@ -167,10 +181,14 @@ impl Message<DropJob> for FactoryActor {
     }
 }
 
-impl Message<SubmitTaskMsg> for FactoryActor {
+impl<DepsT: FactoryDeps> Message<SubmitTaskMsg<DepsT::Job>> for FactoryActor<DepsT> {
     type Reply = ActorResult<()>;
 
-    async fn handle(&mut self, msg: SubmitTaskMsg, ctx: &mut Context<Self, Self::Reply>) {
+    async fn handle(
+        &mut self,
+        msg: SubmitTaskMsg<DepsT::Job>,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) {
         self.pending_tasks.push(msg);
 
         let res = self.maybe_schedule_tasks().await;
@@ -178,10 +196,10 @@ impl Message<SubmitTaskMsg> for FactoryActor {
     }
 }
 
-impl Message<GetTasks> for FactoryActor {
+impl<DepsT: FactoryDeps> Message<GetTasks<DepsT::Worker>> for FactoryActor<DepsT> {
     type Reply = ();
 
-    async fn handle(&mut self, msg: GetTasks, ctx: &mut Context<Self, Self::Reply>) {
+    async fn handle(&mut self, msg: GetTasks<DepsT::Worker>, ctx: &mut Context<Self, Self::Reply>) {
         tracing::info!("factory received connection from worker: {}", msg.worker_id);
 
         self.worker_actors.insert(
@@ -203,7 +221,7 @@ impl Message<GetTasks> for FactoryActor {
     }
 }
 
-impl Message<TaskUpdateMsg> for FactoryActor {
+impl<DepsT: FactoryDeps> Message<TaskUpdateMsg> for FactoryActor<DepsT> {
     type Reply = ();
 
     async fn handle(
@@ -217,7 +235,7 @@ impl Message<TaskUpdateMsg> for FactoryActor {
     }
 }
 
-impl Message<TaskDoneMsg> for FactoryActor {
+impl<DepsT: FactoryDeps> Message<TaskDoneMsg> for FactoryActor<DepsT> {
     type Reply = ();
 
     async fn handle(
@@ -232,11 +250,238 @@ impl Message<TaskDoneMsg> for FactoryActor {
     }
 }
 
-impl Message<RpcDisconnect> for FactoryActor {
+impl<DepsT: FactoryDeps> Message<RpcDisconnect> for FactoryActor<DepsT> {
     type Reply = ();
 
     async fn handle(&mut self, _msg: RpcDisconnect, _ctx: &mut Context<Self, Self::Reply>) {
         // XXX remi: We should remove any workers associated with the RPC connection here.
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::actors::actor::{self, Actor, ActorRunner};
+    use crate::actors::protocol::{ExecuteTask, ProofRequest, Task, TaskHeader};
+    use std::collections::VecDeque;
+    use std::sync::{Arc, Mutex};
+
+    #[derive(Clone, Default)]
+    struct TestAllocator {
+        #[allow(clippy::type_complexity)]
+        messages: Arc<Mutex<VecDeque<(ScheduleTask, ActorResult<ScheduleTaskReply>)>>>,
+    }
+
+    impl Actor for TestAllocator {}
+
+    impl Message<ScheduleTask> for TestAllocator {
+        type Reply = ActorResult<ScheduleTaskReply>;
+
+        async fn handle(&mut self, msg: ScheduleTask, ctx: &mut Context<Self, Self::Reply>) {
+            let (expected_msg, reply) = self
+                .messages
+                .lock()
+                .unwrap()
+                .pop_front()
+                .unwrap_or_else(|| panic!("unexpected message: {msg:?}"));
+
+            assert_eq!(msg, expected_msg);
+            ctx.reply_sender().unwrap().send(reply);
+        }
+    }
+
+    impl TestAllocator {
+        fn expect(&self, msg: ScheduleTask, reply: ActorResult<ScheduleTaskReply>) {
+            self.messages.lock().unwrap().push_back((msg, reply));
+        }
+    }
+
+    #[derive(PartialEq, Eq, Debug)]
+    struct TaskMsgExpectation {
+        header: TaskHeader,
+        task: TaskKind,
+        gpu_tokens: GpuTokens,
+        cores: CpuCores,
+    }
+
+    impl From<TaskMsg> for TaskMsgExpectation {
+        fn from(msg: TaskMsg) -> Self {
+            Self {
+                header: msg.header,
+                task: msg.task.kind(),
+                gpu_tokens: msg.gpu_tokens,
+                cores: msg.cores,
+            }
+        }
+    }
+
+    #[derive(Clone, Default)]
+    struct TestWorker {
+        messages: Arc<Mutex<VecDeque<TaskMsgExpectation>>>,
+    }
+
+    impl Actor for TestWorker {}
+
+    impl Message<TaskMsg> for TestWorker {
+        type Reply = ();
+
+        async fn handle(&mut self, msg: TaskMsg, _ctx: &mut Context<Self, Self::Reply>) {
+            let msg = TaskMsgExpectation::from(msg);
+            let expected_msg = self
+                .messages
+                .lock()
+                .unwrap()
+                .pop_front()
+                .unwrap_or_else(|| panic!("unexpected message: {msg:?}"));
+
+            assert_eq!(msg, expected_msg);
+        }
+    }
+
+    impl TestWorker {
+        fn expect(&self, msg: TaskMsgExpectation) {
+            self.messages.lock().unwrap().push_back(msg);
+        }
+    }
+
+    struct TestJob;
+
+    impl Actor for TestJob {}
+
+    impl Message<TaskDoneMsg> for TestJob {
+        type Reply = ();
+
+        async fn handle(&mut self, _msg: TaskDoneMsg, _ctx: &mut Context<Self, Self::Reply>) {
+            todo!()
+        }
+    }
+
+    impl Message<TaskUpdateMsg> for TestJob {
+        type Reply = ();
+
+        async fn handle(&mut self, _msg: TaskUpdateMsg, _ctx: &mut Context<Self, Self::Reply>) {
+            todo!()
+        }
+    }
+
+    struct TestFactoryDeps;
+
+    impl FactoryDeps for TestFactoryDeps {
+        type Allocator = TestAllocator;
+        type Worker = TestWorker;
+        type Job = TestJob;
+    }
+
+    struct Fixture {
+        factory_ref: ActorRef<FactoryActor<TestFactoryDeps>>,
+        factory_runner: ActorRunner<FactoryActor<TestFactoryDeps>>,
+
+        test_alloc: TestAllocator,
+        alloc_runner: ActorRunner<TestAllocator>,
+
+        worker_ref: ActorRef<TestWorker>,
+        test_worker: TestWorker,
+        worker_runner: ActorRunner<TestWorker>,
+
+        job_ref: ActorRef<TestJob>,
+        #[allow(dead_code)]
+        job_runner: ActorRunner<TestJob>,
+    }
+
+    impl Fixture {
+        async fn new() -> Self {
+            let test_alloc = TestAllocator::default();
+            let (alloc_ref, alloc_runner) = actor::run(test_alloc.clone()).await;
+            let (factory_ref, factory_runner) = actor::run(FactoryActor::<TestFactoryDeps>::new(
+                alloc_ref, /* require_gpu= */ false,
+            ))
+            .await;
+            let test_worker = TestWorker::default();
+            let (worker_ref, worker_runner) = actor::run(test_worker.clone()).await;
+            let (job_ref, job_runner) = actor::run(TestJob).await;
+
+            Self {
+                factory_ref,
+                factory_runner,
+                test_alloc,
+                alloc_runner,
+                worker_ref,
+                test_worker,
+                worker_runner,
+                job_ref,
+                job_runner,
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn simple_job_schedule() {
+        let mut fixture = Fixture::new().await;
+
+        let worker_id = WorkerId::new_v4();
+        fixture
+            .factory_ref
+            .tell_with_runner(
+                GetTasks {
+                    worker_id,
+                    worker: Some(fixture.worker_ref.clone()),
+                    kinds: vec![TaskKind::Execute],
+                },
+                &mut fixture.factory_runner,
+            )
+            .await
+            .unwrap();
+
+        let task_id = GlobalId {
+            job_id: JobId::new_v4(),
+            task_id: 1,
+        };
+
+        let task_header = TaskHeader {
+            global_id: task_id,
+            task_kind: TaskKind::Execute,
+        };
+        let task = Task::Execute(Arc::new(ExecuteTask {
+            request: ProofRequest {
+                binary: vec![],
+                input: vec![],
+                assumptions: vec![],
+                segment_limit_po2: None,
+                execute_only: false,
+            },
+        }));
+
+        fixture
+            .factory_ref
+            .tell(SubmitTaskMsg {
+                job: fixture.job_ref.clone(),
+                header: task_header.clone(),
+                task: task.clone(),
+            })
+            .await
+            .unwrap();
+
+        fixture.test_alloc.expect(
+            ScheduleTask {
+                candidates: vec![worker_id],
+                task_id,
+                description: "Execute".into(),
+            },
+            Ok(ScheduleTaskReply { worker_id }),
+        );
+
+        tokio::join!(
+            fixture.factory_runner.handle_one(),
+            fixture.alloc_runner.handle_one(),
+        );
+
+        fixture.test_worker.expect(TaskMsgExpectation {
+            header: task_header.clone(),
+            task: task.kind(),
+            gpu_tokens: GpuTokens::ZERO,
+            cores: CpuCores::from(1),
+        });
+        fixture.worker_runner.handle_one().await;
     }
 }
 

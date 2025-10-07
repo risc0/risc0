@@ -23,7 +23,7 @@ use risc0_zkvm::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{actor::ActorRef, job::JobActor, worker::RemoteWorkerActor};
+use super::{RemoteWorkerActor, actor::ActorRef};
 
 pub use risc0_zkvm::rpc::{
     JobInfo, JobRequest, JobStatus, ProofRequest, ProofResult, Session, ShrinkWrapKind,
@@ -107,7 +107,7 @@ impl fmt::Display for GlobalId {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct TaskHeader {
     pub global_id: GlobalId,
     pub task_kind: TaskKind,
@@ -179,18 +179,20 @@ pub(crate) struct ShrinkWrapTask {
 
 pub mod factory {
     use super::*;
+    use crate::actors::actor::Actor;
 
     #[derive(Clone, Serialize, Deserialize)]
-    pub(crate) struct GetTasks {
+    #[serde(bound = "")]
+    pub(crate) struct GetTasks<WorkerT: Actor = RemoteWorkerActor> {
         pub worker_id: WorkerId,
         #[serde(skip)]
-        pub worker: Option<ActorRef<RemoteWorkerActor>>,
+        pub worker: Option<ActorRef<WorkerT>>,
         pub kinds: Vec<TaskKind>,
     }
 
     #[derive(Clone)]
-    pub(crate) struct SubmitTaskMsg {
-        pub job: ActorRef<JobActor>,
+    pub(crate) struct SubmitTaskMsg<JobT: Actor> {
+        pub job: ActorRef<JobT>,
         pub header: TaskHeader,
         pub task: Task,
     }
@@ -253,8 +255,9 @@ pub mod factory {
 }
 
 pub mod worker {
-    use super::*;
+    use super::{Task, TaskHeader};
     use crate::actors::allocator::{CpuCores, GpuTokens};
+    use serde::{Deserialize, Serialize};
 
     #[derive(Clone, Serialize, Deserialize)]
     pub(crate) struct TaskMsg {
