@@ -7151,6 +7151,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-hello-m3"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "risc0-circuit-recursion",
+ "risc0-core",
+ "risc0-zkp",
+ "risc0-zkvm",
+ "test-log",
+]
+
+[[package]]
 name = "risc0-circuit-keccak"
 version = "4.0.3"
 dependencies = [
