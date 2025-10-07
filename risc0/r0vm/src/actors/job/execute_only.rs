@@ -95,7 +95,7 @@ impl JobActor {
         self.status = JobStatus::Succeeded(result);
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully();
+        let _ = self_ref.stop_gracefully("job shutdown");
     }
 
     async fn submit_task(&mut self, task: Task) -> Result<()> {
@@ -128,10 +128,12 @@ impl JobActor {
     }
 
     async fn fail_with_error(&mut self, self_ref: ActorRef<Self>, error: impl Into<TaskError>) {
-        self.status = JobStatus::Failed(error.into());
+        let error: TaskError = error.into();
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully();
+        let _ = self_ref.stop_gracefully(format!("job failure: {error:?}"));
+
+        self.status = JobStatus::Failed(error);
     }
 }
 

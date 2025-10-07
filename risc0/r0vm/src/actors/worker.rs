@@ -199,7 +199,7 @@ impl Actor for WorkerActor {
             .await;
         if let Err(error) = res {
             tracing::error!("worker dead: failed to talk to factory: {error}");
-            let _ = actor_ref.stop_gracefully();
+            let _ = actor_ref.stop_gracefully(format!("failed to talk to factory: {error}"));
         }
     }
 }
@@ -211,7 +211,7 @@ impl Message<TaskMsg> for WorkerActor {
         let res = self.handle_task(msg).await;
         if let Err(error) = res {
             tracing::error!("worker has died: {error}");
-            let _ = ctx.actor_ref().stop_gracefully();
+            let _ = ctx.actor_ref().stop_gracefully(error.to_string());
         }
     }
 }
