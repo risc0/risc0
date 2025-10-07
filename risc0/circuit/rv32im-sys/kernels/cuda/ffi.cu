@@ -512,4 +512,15 @@ const char* risc0_circuit_rv32im_cuda_accum(AccumBuffers* buffers,
   return nullptr;
 }
 
+const char* risc0_circuit_rv32im_cuda_reset() {
+  try {
+    CUDA_OK(cudaDeviceSetLimit(cudaLimit::cudaLimitStackSize, 0));
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
+  }
+  return nullptr;
+}
+
 } // extern "C"
