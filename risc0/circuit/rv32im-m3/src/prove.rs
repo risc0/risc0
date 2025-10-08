@@ -57,6 +57,28 @@ mod tests {
         panic!("No filename matching '{test_name}'");
     }
 
+    /*  This test code was used to verify that recursion lift works (and fails if
+     *  transcript is modified), but relies on bringing in recursion circuit
+     *  as a test-dep and some hand done copies, and is slow
+    fn lift(transcript: &[u32]) -> () {
+        use bytemuck::cast_slice;
+        let mut transcript_vec = transcript.to_vec();
+        // transcript_vec[100] += 1;
+        use risc0_circuit_recursion::prove::{Program, Prover};
+        tracing::info!("Loading ZKR");
+        let zkr_bytes = std::fs::read("/tmp/rv32im_m3_lift_12.zkr").unwrap();
+        const RECURSION_PO2: usize = 18;
+        tracing::info!("Creating program");
+        let program = Program::from_encoded(cast_slice::<u8, u32>(&zkr_bytes), RECURSION_PO2);
+        tracing::info!("Creating prover");
+        let mut prover = Prover::new(program, "poseidon2"); 
+        prover.add_input(&transcript_vec);
+        tracing::info!("Running prover");
+        prover.run().unwrap();
+        tracing::info!("It worked");
+    }
+    */
+
     fn run_program(elf: &[u8], po2: usize) {
         cfg_if! {
             if #[cfg(feature = "cuda")] {
@@ -73,6 +95,7 @@ mod tests {
         let transcript =
             unsafe { std::slice::from_raw_parts(raw_transcript.ptr, raw_transcript.len) };
         verify_m3(transcript, po2).unwrap();
+        // lift(transcript);
         unsafe { risc0_circuit_rv32im_m3_prover_free(prover) };
     }
 
