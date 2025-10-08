@@ -653,15 +653,12 @@ jobs:
             arch: ARM64
             feature: default
             device: apple_m2_pro
-            #config: --config=ci
     steps:
       - uses: actions/checkout@v4
-        # with:
-        #   persist-credentials: false
-      # - run: '(echo machine github.com; echo login x-access-token; echo password $ZIRGEN_TOKEN) > $HOME/.netrc'
-      #   env:
-      #      ZIRGEN_TOKEN: ${{ secrets.GHA_ZIRGEN_TOKEN }}
       - uses: ./.github/actions/bazelisk
+      - name: clang-format check
+        run: bazelisk build //... --config=clang-format-check
+        working-directory: risc0/circuit/rv32im-m3-sys/cxx
       - name: Build & test
         env:
           CONFIG: ${{ matrix.config }}
@@ -672,5 +669,3 @@ jobs:
               --strategy=TestRunner=local \
               --@rules_cuda//cuda:archs=${{ matrix.nvcc_arch }}
         working-directory: risc0/circuit/rv32im-m3-sys/cxx
-      # - run: 'rm -f $HOME/.netrc'
-      #   continue-on-error: true
