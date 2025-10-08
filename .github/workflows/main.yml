@@ -642,6 +642,7 @@ jobs:
 
   bazel:
     if: needs.changes.outputs.bazel == 'true'
+    needs: changes
     runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
