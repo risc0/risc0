@@ -46,6 +46,7 @@ use opentelemetry_sdk::{
     Resource,
     logs::SdkLoggerProvider,
     metrics::{PeriodicReader, SdkMeterProvider},
+    propagation::TraceContextPropagator,
     trace::SdkTracerProvider,
 };
 use risc0_zkvm::DevModeDelay;
@@ -1279,6 +1280,8 @@ impl OpenTelemetryProvider {
             .build();
 
         opentelemetry::global::set_meter_provider(meter_provider.clone());
+
+        opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
 
         Ok(Self {
             tracer_provider,

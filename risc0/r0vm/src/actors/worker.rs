@@ -13,8 +13,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{rc::Rc, sync::Arc};
+use std::{borrow::Cow, rc::Rc, sync::Arc};
 
+use opentelemetry::{
+    global::BoxedSpan,
+    trace::{Span as _, Tracer as _},
+};
 use risc0_zkvm::{
     CoprocessorCallback, DevModeDelay, DevModeProver, ExecutorEnv, ExecutorImpl, NullSegmentRef,
     PreflightResults, ProveKeccakRequest, ProverOpts, ProverServer, VerifierContext,
@@ -31,6 +35,7 @@ use super::{
     },
     error::{Error, Result},
     factory::RemoteFactoryActor,
+    job,
     protocol::{
         ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Session,
         ShrinkWrapKind, ShrinkWrapTask, Task, TaskError, TaskHeader, TaskKind, UnionTask, WorkerId,
@@ -64,6 +69,7 @@ struct GpuTaskMsg {
     task: GpuTask,
     to_reserve: Vec<HardwareReservation>,
     reserved: Vec<HardwareReservation>,
+    tracing: job::tracer::SavedContext,
 }
 
 enum CpuTask {
@@ -76,6 +82,7 @@ struct CpuTaskMsg {
     task: CpuTask,
     to_reserve: Vec<HardwareReservation>,
     reserved: Vec<HardwareReservation>,
+    tracing: job::tracer::SavedContext,
 }
 
 /// Number of tasks we queue up to do on CPU
@@ -318,6 +325,7 @@ impl Processor {
                         task: CpuTask::Execute(task),
                         to_reserve,
                         reserved: vec![],
+                        tracing: msg.tracing,
                     })
                     .await
                     .map_err(|e| Error::new(format!("CPU processor dead: {e}")))?;
@@ -329,6 +337,7 @@ impl Processor {
                         task: CpuTask::Preflight(task),
                         to_reserve,
                         reserved: vec![],
+                        tracing: msg.tracing,
                     })
                     .await
                     .map_err(|e| Error::new(format!("CPU processor dead: {e}")))?;
@@ -340,6 +349,7 @@ impl Processor {
                         task: GpuTask::Lift(task),
                         to_reserve,
                         reserved: vec![],
+                        tracing: msg.tracing,
                     })
                     .await
                     .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
@@ -351,6 +361,7 @@ impl Processor {
                         task: GpuTask::Join(task),
                         to_reserve,
                         reserved: vec![],
+                        tracing: msg.tracing,
                     })
                     .await
                     .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
@@ -362,6 +373,7 @@ impl Processor {
                         task: GpuTask::ProveKeccak(task),
                         to_reserve,
                         reserved: vec![],
+                        tracing: msg.tracing,
                     })
                     .await
                     .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
@@ -373,6 +385,7 @@ impl Processor {
                         task: GpuTask::Union(task),
                         to_reserve,
                         reserved: vec![],
+                        tracing: msg.tracing,
                     })
                     .await
                     .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
@@ -384,6 +397,7 @@ impl Processor {
                         task: GpuTask::Resolve(task),
                         to_reserve,
                         reserved: vec![],
+                        tracing: msg.tracing,
                     })
                     .await
                     .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
@@ -395,12 +409,37 @@ impl Processor {
                         task: GpuTask::ShrinkWrap(task),
                         to_reserve,
                         reserved: vec![],
+                        tracing: msg.tracing,
                     })
                     .await
                     .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
             }
         }
         Ok(())
+    }
+}
+
+struct TaskTracer {
+    span: BoxedSpan,
+}
+
+impl TaskTracer {
+    fn new(tracing: &job::tracer::SavedContext, name: String) -> Self {
+        let ctx = tracing.to_context();
+        let tracer = opentelemetry::global::tracer("worker");
+
+        let span = tracer.start_with_context(name, &ctx);
+        Self { span }
+    }
+
+    fn add_event(&mut self, event: impl Into<Cow<'static, str>>) {
+        self.span.add_event(event, vec![]);
+    }
+}
+
+impl Drop for TaskTracer {
+    fn drop(&mut self) {
+        self.span.end();
     }
 }
 
@@ -466,6 +505,11 @@ impl GpuProcessor {
     }
 
     async fn process_task(&self, mut msg: GpuTaskMsg) -> Result<()> {
+        let mut tracer = TaskTracer::new(
+            &msg.tracing,
+            format!("WorkerGPU({:?})", msg.header.task_kind),
+        );
+
         tracing::info!(
             "ALLOCATE: {} wait for {:?}",
             &self.worker_id,
@@ -478,6 +522,7 @@ impl GpuProcessor {
                 hardware_reservations: msg.to_reserve.clone(),
             })
             .await??;
+        tracer.add_event("allocate complete");
 
         msg.reserved.extend(std::mem::take(&mut msg.to_reserve));
 
@@ -698,6 +743,12 @@ impl CpuProcessor {
                 msg.to_reserve.push(r);
             }
         }
+
+        let mut tracer = TaskTracer::new(
+            &msg.tracing,
+            format!("WorkerCPU({:?})", msg.header.task_kind),
+        );
+
         tracing::info!("ALLOCATE: {} wait for {to_reserve:?}", &self.worker_id);
         self.allocator
             .ask(AllocateHardware {
@@ -706,6 +757,8 @@ impl CpuProcessor {
                 hardware_reservations: to_reserve.clone(),
             })
             .await??;
+        tracer.add_event("allocate complete");
+
         msg.reserved.extend(to_reserve);
 
         let header = msg.header.clone();
@@ -719,6 +772,7 @@ impl CpuProcessor {
                         task,
                         msg.to_reserve.clone(),
                         msg.reserved.clone(),
+                        msg.tracing.clone(),
                     )
                     .await
                 {
@@ -801,6 +855,7 @@ impl CpuProcessor {
         task: Arc<ProveSegmentTask>,
         to_reserve: Vec<HardwareReservation>,
         reserved: Vec<HardwareReservation>,
+        tracing: job::tracer::SavedContext,
     ) -> TaskResult<()> {
         tracing::info!("Preflight: {}", task.segment.index);
         self.task_start(header.clone()).await?;
@@ -816,6 +871,7 @@ impl CpuProcessor {
                 task: GpuTask::ProveSegmentCore(ProveSegmentCoreTask { preflight_results }),
                 to_reserve,
                 reserved,
+                tracing,
             })
             .await
             .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
