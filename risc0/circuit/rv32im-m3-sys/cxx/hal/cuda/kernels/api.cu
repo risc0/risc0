@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #define FEATURE_BABY_BEAR
-//#include <ff/alt_bn128.hpp>
+// #include <ff/alt_bn128.hpp>
 #include <ff/baby_bear.hpp>
 
 #include <util/gpu_t.cuh>
@@ -23,7 +23,7 @@
 #include <polynomial/prefix_op.cuh>
 
 #include "poseidon2.cuh"
-//#include "poseidon254.cuh"
+// #include "poseidon254.cuh"
 
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>

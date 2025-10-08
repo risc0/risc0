@@ -19,5 +19,4 @@ namespace risc0 {
 
 IHalPtr getDualHal(IHalPtr a, IHalPtr b);
 
-}  // namespace risc0
-
+} // namespace risc0

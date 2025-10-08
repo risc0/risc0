@@ -23,4 +23,4 @@ constexpr size_t kFriFold = 16;
 constexpr size_t kQueries = 50;
 constexpr size_t kFriMinDegree = 256;
 
-}  // namespace risc0
+} // namespace risc0

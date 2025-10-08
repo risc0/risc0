@@ -152,3 +152,54 @@ http_archive(
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 
 rules_pkg_dependencies()
+
+CLANG_FORMAT_VERSION = "17.0.6"
+
+http_archive(
+    name = "clang-format-linux",
+    build_file_content = """
+package(default_visibility = ["//visibility:public"])
+filegroup(
+    name = "clang-format-bin",
+    srcs = ["bin/clang-format"],
+)
+sh_binary(
+    name = "clang-format",
+    srcs = ["bin/clang-format"],
+    visibility = ["//visibility:public"],
+)
+""",
+    strip_prefix = "clang+llvm-{}-x86_64-linux-gnu-ubuntu-22.04".format(CLANG_FORMAT_VERSION),
+    urls = [
+        "https://github.com/llvm/llvm-project/releases/download/llvmorg-{0}/clang+llvm-{0}-x86_64-linux-gnu-ubuntu-22.04.tar.xz".format(CLANG_FORMAT_VERSION),
+    ],
+)
+
+http_archive(
+    name = "clang-format-macos",
+    build_file_content = """
+package(default_visibility = ["//visibility:public"])
+filegroup(
+    name = "clang-format-bin",
+    srcs = ["bin/clang-format"],
+)
+sh_binary(
+    name = "clang-format",
+    srcs = ["bin/clang-format"],
+    visibility = ["//visibility:public"],
+)
+""",
+    strip_prefix = "clang+llvm-{}-apple-darwin".format(CLANG_FORMAT_VERSION),
+    urls = [
+        "https://github.com/llvm/llvm-project/releases/download/llvmorg-{0}/clang+llvm-{0}-apple-darwin.tar.xz".format(CLANG_FORMAT_VERSION),
+    ],
+)
+
+BAZEL_CLANG_FORMAT_SHA256 = "f3f93a086ab2dcdfc8859e146b39a25c6653372c3f875797784f736d30bec18d"
+
+http_archive(
+    name = "bazel_clang_format",
+    sha256 = BAZEL_CLANG_FORMAT_SHA256,
+    strip_prefix = "bazel_clang_format-0.0.1",
+    urls = ["https://github.com/oliverlee/bazel_clang_format/archive/refs/tags/0.0.1.tar.gz"],
+)

@@ -13,16 +13,16 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "core/log.h"
 #include "compiler/extractor/RecordingVal.h"
+#include "core/log.h"
 #include "rv32im/circuit/verify.h"
 #include "rv32im/emu/blocks.h"
 #include "verify/rv32im.h"
 #include "zkp/taps.h"
 
-#include "llvm/ADT/TypeSwitch.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Transforms/Passes.h"
+#include "llvm/ADT/TypeSwitch.h"
 
 static std::string prefix = R"***(// Copyright 2025 RISC Zero, Inc.
 //
@@ -52,20 +52,21 @@ using namespace zirgen::Zll;
 struct TrivialRecordingReg {
   Value val;
   TrivialRecordingReg(Value val) : val(val) {}
-  template<typename T, typename C> void applyInner(C& ctx) {}
-  template<typename C> void applyInner(C& ctx) {}
-  template<typename C> void verify(C& ctx) {}
-  template<typename C> void addArguments(C& ctx) {}
+  template <typename T, typename C> void applyInner(C& ctx) {}
+  template <typename C> void applyInner(C& ctx) {}
+  template <typename C> void verify(C& ctx) {}
+  template <typename C> void addArguments(C& ctx) {}
   RecordingVal get() { return RecordingVal(val); }
 };
 
 static Type getBufType(MLIRContext& ctx, uint32_t deg, uint32_t size, BufferKind kind) {
-  return BufferType::get(&ctx, ValType::get(&ctx, kFieldPrimeDefault, deg), size, kind); 
+  return BufferType::get(&ctx, ValType::get(&ctx, kFieldPrimeDefault, deg), size, kind);
 }
 
 using TapMap = std::map<Tap, size_t>;
 
-static std::vector<TrivialRecordingReg> makeRegs(Value uBuf, const Group& group, const TapMap& tapMap, size_t back) {
+static std::vector<TrivialRecordingReg>
+makeRegs(Value uBuf, const Group& group, const TapMap& tapMap, size_t back) {
   OpBuilder& builder = *BuilderSingleton::get();
   Value zero = RecordingVal(0).value;
   auto loc = builder.getUnknownLoc();
@@ -99,10 +100,10 @@ static std::vector<RecordingValExt> makeMix(Value buffer, size_t size) {
   OpBuilder& builder = *BuilderSingleton::get();
   auto loc = builder.getUnknownLoc();
   for (size_t i = 0; i < size; i++) {
-    auto v0 = RecordingVal(builder.create<GetGlobalOp>(loc, buffer, 4*i + 0));
-    auto v1 = RecordingVal(builder.create<GetGlobalOp>(loc, buffer, 4*i + 1));
-    auto v2 = RecordingVal(builder.create<GetGlobalOp>(loc, buffer, 4*i + 2));
-    auto v3 = RecordingVal(builder.create<GetGlobalOp>(loc, buffer, 4*i + 3));
+    auto v0 = RecordingVal(builder.create<GetGlobalOp>(loc, buffer, 4 * i + 0));
+    auto v1 = RecordingVal(builder.create<GetGlobalOp>(loc, buffer, 4 * i + 1));
+    auto v2 = RecordingVal(builder.create<GetGlobalOp>(loc, buffer, 4 * i + 2));
+    auto v3 = RecordingVal(builder.create<GetGlobalOp>(loc, buffer, 4 * i + 3));
     ret.emplace_back(v0, v1, v2, v3);
   }
   return ret;
@@ -155,7 +156,7 @@ void emitPolyExt(const std::string path) {
   size_t totTaps = taps.getTaps().size();
   inTypes.push_back(getBufType(mlirCtx, 1, totTaps + 1, BufferKind::Constant));
   inTypes.push_back(getBufType(mlirCtx, 1, NUM_GLOBALS, BufferKind::Global));
-  inTypes.push_back(getBufType(mlirCtx, 1, 4*ACCUM_MIX_SIZE, BufferKind::Global));
+  inTypes.push_back(getBufType(mlirCtx, 1, 4 * ACCUM_MIX_SIZE, BufferKind::Global));
 
   // Return a 'truthy' value
   std::vector<Type> outTypes;
@@ -172,7 +173,7 @@ void emitPolyExt(const std::string path) {
   Value mBuf = func.getArgument(2);
 
   // Convert to 'registers'
-  auto data = makeRegs(uBuf, taps.getGroups()[0], tapMap,  0);
+  auto data = makeRegs(uBuf, taps.getGroups()[0], tapMap, 0);
   auto accum = makeRegs(uBuf, taps.getGroups()[1], tapMap, 0);
   auto prevAccum = makeRegs(uBuf, taps.getGroups()[1], tapMap, 1);
 
@@ -180,18 +181,12 @@ void emitPolyExt(const std::string path) {
   auto globals = makeGlobals(gBuf, NUM_GLOBALS);
   auto accumMix = makeMix(mBuf, ACCUM_MIX_SIZE);
   Value xVal = builder.create<GetOp>(loc, uBuf, totTaps, 0, IntegerAttr());
-  auto x  = RecordingVal(xVal);
+  auto x = RecordingVal(xVal);
 
   // Apply circuit + finalize function
   ZllEqzContext eqzCtx;
   auto ret = verifyCircuitCtx<TrivialRecordingReg, RecordingVal, RecordingValExt, ZllEqzContext>(
-      eqzCtx,
-      data.data(),
-      accum.data(),
-      prevAccum.data(),
-      globals.data(),
-      accumMix.data(),
-      x);
+      eqzCtx, data.data(), accum.data(), prevAccum.data(), globals.data(), accumMix.data(), x);
   builder.create<func::ReturnOp>(loc, ret);
 
   // Simplify
@@ -202,7 +197,7 @@ void emitPolyExt(const std::string path) {
     throw std::runtime_error("Unable to optimize polyext");
   }
 
-  // Open output 
+  // Open output
   std::error_code EC;
   llvm::raw_fd_ostream outs(path, EC);
   if (EC) {
@@ -216,59 +211,59 @@ void emitPolyExt(const std::string path) {
   outs << "        PolyExtStep::Const(0),\n";
   for (Operation& origOp : func.front().without_terminator()) {
     TypeSwitch<Operation*>(&origOp)
-      .Case<ConstOp>([&](auto op) {
-          auto co= op.getCoefficients();
+        .Case<ConstOp>([&](auto op) {
+          auto co = op.getCoefficients();
           if (co.size() == 1) {
             outs << "        PolyExtStep::Const(" << co[0] << "),\n";
           } else {
-            outs << "        PolyExtStep::ConstExt(" << co[0] << ", " << co[1] << ", " << co[2] << ", " << co[3] << "),\n";
+            outs << "        PolyExtStep::ConstExt(" << co[0] << ", " << co[1] << ", " << co[2]
+                 << ", " << co[3] << "),\n";
           }
-      })
-      .Case<GetOp>([&](auto op) {
-          outs << "        PolyExtStep::Get(" << op.getOffset() << "),\n";
-      })
-      .Case<GetGlobalOp>([&](auto op) {
-          size_t idx = (op.getBuf() == gBuf ? 0 : 1); 
+        })
+        .Case<GetOp>(
+            [&](auto op) { outs << "        PolyExtStep::Get(" << op.getOffset() << "),\n"; })
+        .Case<GetGlobalOp>([&](auto op) {
+          size_t idx = (op.getBuf() == gBuf ? 0 : 1);
           outs << "        PolyExtStep::GetGlobal(" << idx << ", " << op.getOffset() << "),\n";
-      })
-      .Case<AddOp>([&](auto op) {
-          outs << "        PolyExtStep::Add(" << valMap.at(op.getLhs()) << ", " << valMap.at(op.getRhs()) << "),\n";
-      })
-      .Case<SubOp>([&](auto op) {
-          outs << "        PolyExtStep::Sub(" << valMap.at(op.getLhs()) << ", " << valMap.at(op.getRhs()) << "),\n";
-      })
-      .Case<MulOp>([&](auto op) {
-          outs << "        PolyExtStep::Mul(" << valMap.at(op.getLhs()) << ", " << valMap.at(op.getRhs()) << "),\n";
-      })
-      .Case<NegOp>([&](auto op) {
+        })
+        .Case<AddOp>([&](auto op) {
+          outs << "        PolyExtStep::Add(" << valMap.at(op.getLhs()) << ", "
+               << valMap.at(op.getRhs()) << "),\n";
+        })
+        .Case<SubOp>([&](auto op) {
+          outs << "        PolyExtStep::Sub(" << valMap.at(op.getLhs()) << ", "
+               << valMap.at(op.getRhs()) << "),\n";
+        })
+        .Case<MulOp>([&](auto op) {
+          outs << "        PolyExtStep::Mul(" << valMap.at(op.getLhs()) << ", "
+               << valMap.at(op.getRhs()) << "),\n";
+        })
+        .Case<NegOp>([&](auto op) {
           outs << "        PolyExtStep::Sub(0, " << valMap.at(op.getIn()) << "),\n";
-      })
-      .Case<TrueOp>([&](auto op) {
-          outs << "        PolyExtStep::True,\n";
-      })
-      .Case<AndEqzOp>([&](auto op) {
-          outs << "        PolyExtStep::AndEqz(" << condMap.at(op.getIn()) << ", " << valMap.at(op.getVal()) << "),\n";
-      })
-      .Case<AndCondOp>([&](auto op) {
-          outs << "        PolyExtStep::AndCond(" << condMap.at(op.getIn()) << ", " << 
-          valMap.at(op.getCond()) << ", " << condMap.at(op.getInner()) << "),\n";
-      })
-      .Default([&](Operation* op) {
+        })
+        .Case<TrueOp>([&](auto op) { outs << "        PolyExtStep::True,\n"; })
+        .Case<AndEqzOp>([&](auto op) {
+          outs << "        PolyExtStep::AndEqz(" << condMap.at(op.getIn()) << ", "
+               << valMap.at(op.getVal()) << "),\n";
+        })
+        .Case<AndCondOp>([&](auto op) {
+          outs << "        PolyExtStep::AndCond(" << condMap.at(op.getIn()) << ", "
+               << valMap.at(op.getCond()) << ", " << condMap.at(op.getInner()) << "),\n";
+        })
+        .Default([&](Operation* op) {
           llvm::errs() << *op;
           throw std::runtime_error("Invalid op");
-      });
+        });
     TypeSwitch<Type>(origOp.getResult(0).getType())
-      .Case<ConstraintType>([&](auto t) {
+        .Case<ConstraintType>([&](auto t) {
           size_t id = condMap.size();
           condMap[origOp.getResult(0)] = id;
-      })
-      .Case<ValType>([&](auto t) {
-          size_t id = valMap.size() + 1;  // +1 due to fake 0 const
+        })
+        .Case<ValType>([&](auto t) {
+          size_t id = valMap.size() + 1; // +1 due to fake 0 const
           valMap[origOp.getResult(0)] = id;
-      })
-      .Default([&](Type t) {
-          throw std::runtime_error("Invalid type");
-      });
+        })
+        .Default([&](Type t) { throw std::runtime_error("Invalid type"); });
   }
   outs << "    ],\n";
   auto returnOp = func.front().getTerminator();

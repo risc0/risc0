@@ -13,13 +13,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "compiler/extractor/base.h"
 #include "compiler/emitter/Emitter.h"
+#include "compiler/extractor/base.h"
 
 #include "mlir/Transforms/Passes.h"
-#include "llvm/Support/InitLLVM.h"
 #include "zirgen/compiler/codegen/codegen.h"
 #include "zirgen/compiler/edsl/edsl.h"
+#include "llvm/Support/InitLLVM.h"
 
 #include "rv32im/circuit/circuit.ipp"
 
@@ -39,7 +39,6 @@ static cl::opt<enum Action>
                           clEnumValN(ZHLT, "zhlt", "Emit basic ZHLT components"),
                           clEnumValN(CHECK, "check", "Emit check function")));
 
-
 int main(int argc, char** argv) {
   llvm::InitLLVM y(argc, argv);
   registerEdslCLOptions();
@@ -53,9 +52,9 @@ int main(int argc, char** argv) {
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
-  #define BLOCK_TYPE(name, count) EXTRACT(name ## Block)
+#define BLOCK_TYPE(name, count) EXTRACT(name##Block)
   BLOCK_TYPES
-  #undef BLOCK_TYPE
+#undef BLOCK_TYPE
 
   // Mark all blocks as entry points
   ctx.getModuleOp().walk([&](zirgen::Zhlt::ComponentOp component) {
@@ -75,7 +74,7 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  if(failed(translateToCheckFunc(ctx.getModuleOp()))) {
+  if (failed(translateToCheckFunc(ctx.getModuleOp()))) {
     return 1;
   }
 

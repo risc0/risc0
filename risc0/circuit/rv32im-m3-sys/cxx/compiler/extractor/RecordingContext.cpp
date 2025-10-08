@@ -23,75 +23,81 @@ using namespace mlir;
 RecordingContext* RecordingReg::ctx = nullptr;
 
 RecordingContext::RecordingContext(MLIRContext* mlirCtx) : mlirCtx(mlirCtx), builder(mlirCtx) {
-    mlirCtx->getOrLoadDialect<zirgen::Zhlt::ZhltDialect>();
-    mlirCtx->getOrLoadDialect<zirgen::ZStruct::ZStructDialect>();
-    mlirCtx->getOrLoadDialect<zirgen::Zll::ZllDialect>();
-    moduleOp = mlir::ModuleOp::create(builder.getUnknownLoc());
-    builder.setInsertionPointToEnd(moduleOp.getBody());
+  mlirCtx->getOrLoadDialect<zirgen::Zhlt::ZhltDialect>();
+  mlirCtx->getOrLoadDialect<zirgen::ZStruct::ZStructDialect>();
+  mlirCtx->getOrLoadDialect<zirgen::Zll::ZllDialect>();
+  moduleOp = mlir::ModuleOp::create(builder.getUnknownLoc());
+  builder.setInsertionPointToEnd(moduleOp.getBody());
 }
 
 void RecordingContext::enterComponent(std::string name) {
-    assert(!componentBody && "starting a new component without ending the previous one");
+  assert(!componentBody && "starting a new component without ending the previous one");
 
-    // Create a temporary region in the module where the component will be built
-    componentName = builder.getStringAttr(name);
-    componentBody = new Region(moduleOp);
-    builder.setInsertionPointToStart(builder.createBlock(componentBody));
-    zero = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), builder.getIndexAttr(0));
+  // Create a temporary region in the module where the component will be built
+  componentName = builder.getStringAttr(name);
+  componentBody = new Region(moduleOp);
+  builder.setInsertionPointToStart(builder.createBlock(componentBody));
+  zero = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), builder.getIndexAttr(0));
 }
 
 void RecordingContext::exitComponent() {
-    assert(componentBody && "ending a component without starting one");
+  assert(componentBody && "ending a component without starting one");
 
-    // Add a trivial return
-    auto compType = zirgen::Zhlt::getComponentType(mlirCtx);
-    auto ret = builder.create<zirgen::ZStruct::PackOp>(builder.getUnknownLoc(), compType, ValueRange());
-    builder.create<zirgen::Zhlt::ReturnOp>(builder.getUnknownLoc(), ret);
+  // Add a trivial return
+  auto compType = zirgen::Zhlt::getComponentType(mlirCtx);
+  auto ret =
+      builder.create<zirgen::ZStruct::PackOp>(builder.getUnknownLoc(), compType, ValueRange());
+  builder.create<zirgen::Zhlt::ReturnOp>(builder.getUnknownLoc(), ret);
 
-    // Now move the temporary body into a function with the right signature
-    builder.setInsertionPointToEnd(moduleOp.getBody());
-    auto funcType = FunctionType::get(mlirCtx, componentBody->getArgumentTypes(), {compType});
-    auto component = builder.create<zirgen::Zhlt::ComponentOp>(
-        builder.getUnknownLoc(), componentName, funcType, nullptr, nullptr, nullptr);
-    component.getBody().takeBody(*componentBody);
-    component->setAttr("picus_analyze", builder.getUnitAttr());
-    componentBody = nullptr;
-    zero = nullptr;
+  // Now move the temporary body into a function with the right signature
+  builder.setInsertionPointToEnd(moduleOp.getBody());
+  auto funcType = FunctionType::get(mlirCtx, componentBody->getArgumentTypes(), {compType});
+  auto component = builder.create<zirgen::Zhlt::ComponentOp>(
+      builder.getUnknownLoc(), componentName, funcType, nullptr, nullptr, nullptr);
+  component.getBody().takeBody(*componentBody);
+  component->setAttr("picus_analyze", builder.getUnitAttr());
+  componentBody = nullptr;
+  zero = nullptr;
 }
 
 RecordingVal RecordingContext::addValParameter() {
-    assert(componentBody && "adding parameter without a component");
-    mlir::Type val = zirgen::Zhlt::getValType(mlirCtx);
-    mlir::Value param = componentBody->addArgument(val, builder.getUnknownLoc());
-    return RecordingVal(param);
+  assert(componentBody && "adding parameter without a component");
+  mlir::Type val = zirgen::Zhlt::getValType(mlirCtx);
+  mlir::Value param = componentBody->addArgument(val, builder.getUnknownLoc());
+  return RecordingVal(param);
 }
 
 RecordingVal RecordingContext::getNextRef() {
-    assert(componentBody && "adding parameter without a component");
-    mlir::Value ref = builder.create<mlir::UnrealizedConversionCastOp>(
-        builder.getUnknownLoc(), zirgen::Zll::ValType::get(mlirCtx), ValueRange {}).getResult(0);
-    refs.push_back(ref);
-    return ref;
+  assert(componentBody && "adding parameter without a component");
+  mlir::Value ref =
+      builder
+          .create<mlir::UnrealizedConversionCastOp>(
+              builder.getUnknownLoc(), zirgen::Zll::ValType::get(mlirCtx), ValueRange{})
+          .getResult(0);
+  refs.push_back(ref);
+  return ref;
 }
 
 void RecordingContext::unifyRefsIntoLayout(mlir::Value layout, size_t& i) {
   assert(i < refs.size() && "there should be the same number of refs in the context and layout");
 
   if (isa<zirgen::ZStruct::RefType>(layout.getType())) {
-    mlir::Value val = builder.create<zirgen::ZStruct::LoadOp>(builder.getUnknownLoc(), layout, zero);
+    mlir::Value val =
+        builder.create<zirgen::ZStruct::LoadOp>(builder.getUnknownLoc(), layout, zero);
     refs[i].replaceAllUsesWith(val);
     refs[i].getDefiningOp()->erase();
     i++;
   } else if (auto str = dyn_cast<zirgen::ZStruct::LayoutType>(layout.getType())) {
     for (auto field : str.getFields()) {
-      mlir::Value sublayout = builder.create<zirgen::ZStruct::LookupOp>(builder.getUnknownLoc(), layout, field.name);
+      mlir::Value sublayout =
+          builder.create<zirgen::ZStruct::LookupOp>(builder.getUnknownLoc(), layout, field.name);
       unifyRefsIntoLayout(sublayout, i);
     }
   } else if (auto arr = dyn_cast<zirgen::ZStruct::LayoutArrayType>(layout.getType())) {
     for (size_t j = 0; j < arr.getSize(); j++) {
       auto index = builder.create<arith::ConstantIndexOp>(builder.getUnknownLoc(), j);
-      mlir::Value sublayout = builder.create<zirgen::ZStruct::SubscriptOp>(
-          builder.getUnknownLoc(), layout, index);
+      mlir::Value sublayout =
+          builder.create<zirgen::ZStruct::SubscriptOp>(builder.getUnknownLoc(), layout, index);
       unifyRefsIntoLayout(sublayout, i);
     }
   } else {
@@ -100,12 +106,12 @@ void RecordingContext::unifyRefsIntoLayout(mlir::Value layout, size_t& i) {
 }
 
 void RecordingContext::materializeLayout(mlir::Type layoutType) {
-    assert(componentBody && "materializing layout of a component that doesn't exist");
+  assert(componentBody && "materializing layout of a component that doesn't exist");
 
-    mlir::Value layout = componentBody->addArgument(layoutType, builder.getUnknownLoc());
-    builder.setInsertionPointAfter(refs.back().getDefiningOp());
-    size_t i = 0;
-    unifyRefsIntoLayout(layout, i);
-    builder.setInsertionPointToEnd(&componentBody->back());
-    refs.clear();
+  mlir::Value layout = componentBody->addArgument(layoutType, builder.getUnknownLoc());
+  builder.setInsertionPointAfter(refs.back().getDefiningOp());
+  size_t i = 0;
+  unifyRefsIntoLayout(layout, i);
+  builder.setInsertionPointToEnd(&componentBody->back());
+  refs.clear();
 }

@@ -1,0 +1,4 @@
+filegroup(
+    name = "clang-format-config",
+    srcs = [".clang-format"],
+)

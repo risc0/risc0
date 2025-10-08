@@ -15,20 +15,20 @@
 
 #include <gtest/gtest.h>
 
-#include <set>
 #include <random>
+#include <set>
 
 #include "core/log.h"
 #include "core/util.h"
-#include "zkp/poly.h"
-#include "zkp/rou.h"
 #include "prove/fri.h"
 #include "verify/fri.h"
+#include "zkp/poly.h"
+#include "zkp/rou.h"
 
 using namespace risc0;
 
 // TODO: Maybe move this somewhere common
-HalMatrix<Fp> generateRandomMatrix(IHalPtr hal, size_t rows, size_t cols, size_t seed=42) {
+HalMatrix<Fp> generateRandomMatrix(IHalPtr hal, size_t rows, size_t cols, size_t seed = 42) {
   std::default_random_engine rng(seed);
   std::uniform_int_distribution<uint32_t> fpDist(0, Fp::P - 1);
   HalMatrix<Fp> out = hal->allocateMatrix<Fp>(rows, cols);
@@ -45,19 +45,14 @@ std::vector<FpExt> getCoeffs(IHalPtr hal, HalMatrix<Fp> coeffs) {
   std::vector<FpExt> coeffsOut;
   PinnedMatrixRO<Fp> pCoeffs(hal, coeffs);
   for (size_t i = 0; i < coeffs.rows(); i++) {
-    coeffsOut.push_back(FpExt(
-          pCoeffs(i, 0),
-          pCoeffs(i, 1),
-          pCoeffs(i, 2),
-          pCoeffs(i, 3)
-    ));
+    coeffsOut.push_back(FpExt(pCoeffs(i, 0), pCoeffs(i, 1), pCoeffs(i, 2), pCoeffs(i, 3)));
   }
   hal->batchBitReverse(coeffs);
   return coeffsOut;
 }
 
 void runFriTest(IHalPtr hal) {
-  size_t kExampleSize = 8192;  // Gives us 2 folds
+  size_t kExampleSize = 8192; // Gives us 2 folds
   auto polyCoeffsMat = generateRandomMatrix(hal, kExampleSize, kExtSize);
   auto polyCoeffs = getCoeffs(hal, polyCoeffsMat);
   FriProver prover(hal, polyCoeffsMat);
@@ -113,4 +108,3 @@ TEST(fri, cpu) {
 TEST(fri, gpu) {
   runFriTest(getGpuHal());
 }
-

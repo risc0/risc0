@@ -18,20 +18,15 @@
 #include "rv32im/base/base.h"
 
 // Verify a value is binary, i.e. in { 0, 1 }
-template<typename C>
-FDEV void AssertBit(CTX, Val<C> val);
+template <typename C> FDEV void AssertBit(CTX, Val<C> val);
 
 // A register which is also constrained to be a bit
-template<typename C>
-struct BitReg {
+template <typename C> struct BitReg {
   CONSTANT static char NAME[] = "BitReg";
 
   Reg<C> inner;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, inner);
-  }
+  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, inner); }
 
   FDEV void set(CTX, Val<C> v) DEV;
   FDEV inline void finalize(CTX) DEV {}
@@ -41,8 +36,6 @@ struct BitReg {
 };
 
 // Choose a or b based on the value of c
-template<typename C>
-inline FDEV Val<C> cond(Val<C> c, Val<C> a, Val<C> b) {
+template <typename C> inline FDEV Val<C> cond(Val<C> c, Val<C> a, Val<C> b) {
   return c * a + (Val<C>(1) - c) * b;
 };
-

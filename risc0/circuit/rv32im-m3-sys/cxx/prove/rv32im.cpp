@@ -74,7 +74,8 @@ Rv32imProver::Rv32imProver(IHalPtr hal, size_t po2, bool doValidate)
     , rows(size_t(1) << po2)
     , rowInfo(hal->allocateArray<RowInfo>(rows))
     , aux(hal->allocateArray<uint32_t>(rows * computeMaxWitPerRow()))
-    // TODO: table size needs to handle max cycles * 2, this presumes no more than 10 cycles per row
+    // TODO: table size needs to handle max cycles * 2, this presumes no more
+    // than 10 cycles per row
     , tables(hal->allocateArray<uint32_t>(256 + 65536 + 20 * rows))
     , ci(hal, rowInfo, aux, tables, doValidate)
     , prover(hal, ci.ci, po2) {}

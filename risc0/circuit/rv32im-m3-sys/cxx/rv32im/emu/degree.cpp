@@ -27,6 +27,7 @@ namespace {
 class DegVal {
 private:
   uint32_t degree;
+
 public:
   // Constants are degree 0
   DegVal() : degree(0) {}
@@ -40,18 +41,10 @@ public:
     return val;
   }
 
-  DegVal operator+(const DegVal& rhs) const {
-    return makeDegree(std::max(degree, rhs.degree));
-  }
-  DegVal operator-(const DegVal& rhs) const {
-    return makeDegree(std::max(degree, rhs.degree));
-  }
-  DegVal operator*(const DegVal& rhs) const {
-    return makeDegree(degree + rhs.degree);
-  }
-  DegVal operator-() const {
-    return *this;
-  }
+  DegVal operator+(const DegVal& rhs) const { return makeDegree(std::max(degree, rhs.degree)); }
+  DegVal operator-(const DegVal& rhs) const { return makeDegree(std::max(degree, rhs.degree)); }
+  DegVal operator*(const DegVal& rhs) const { return makeDegree(degree + rhs.degree); }
+  DegVal operator-() const { return *this; }
   DegVal& operator+=(const DegVal& rhs) {
     degree = std::max(degree, rhs.degree);
     return *this;
@@ -65,12 +58,13 @@ public:
 class DegValExt {
 private:
   uint32_t degree;
+
 public:
   DegValExt() : degree(0) {}
   explicit DegValExt(FpExt x) : degree(0) {}
   explicit DegValExt(DegVal e0) : degree(e0.getDegree()) {}
-  explicit DegValExt(DegVal e0, DegVal e1, DegVal e2, DegVal e3) 
-    : degree(std::max({e0.getDegree(), e1.getDegree(), e2.getDegree(), e3.getDegree()})) {}
+  explicit DegValExt(DegVal e0, DegVal e1, DegVal e2, DegVal e3)
+      : degree(std::max({e0.getDegree(), e1.getDegree(), e2.getDegree(), e3.getDegree()})) {}
   explicit DegValExt(uint32_t x) : degree(0) {}
 
   uint32_t getDegree() const { return degree; }
@@ -80,41 +74,41 @@ public:
     return val;
   }
 
-  DegValExt operator+(const DegValExt& rhs) const { 
-    return DegValExt::makeDegree(std::max(degree, rhs.degree)); 
+  DegValExt operator+(const DegValExt& rhs) const {
+    return DegValExt::makeDegree(std::max(degree, rhs.degree));
   }
   DegValExt operator-(const DegValExt& rhs) const {
-    return DegValExt::makeDegree(std::max(degree, rhs.degree)); 
+    return DegValExt::makeDegree(std::max(degree, rhs.degree));
   }
 
   DegValExt operator*(const DegVal& rhs) const {
-    return DegValExt::makeDegree(degree + rhs.getDegree()); 
+    return DegValExt::makeDegree(degree + rhs.getDegree());
   }
   DegValExt operator*(const DegValExt& rhs) const {
-    return DegValExt::makeDegree(degree + rhs.degree); 
+    return DegValExt::makeDegree(degree + rhs.degree);
   }
   DegValExt& operator+=(const DegValExt& rhs) {
     degree = std::max(degree, rhs.degree);
-    return *this; 
+    return *this;
   }
   DegValExt& operator*=(const DegValExt& rhs) {
     degree += rhs.degree;
-    return *this; 
+    return *this;
   }
-  DegValExt& operator*=(const DegVal& rhs) { 
+  DegValExt& operator*=(const DegVal& rhs) {
     degree += rhs.getDegree();
-    return *this; 
+    return *this;
   }
 };
 
 struct DegReg {
   DegVal get() { return DegVal::makeDegree(1); }
-  template<typename T, typename C> void applyInner(C& ctx) {}
-  template<typename C> void verify(C& ctx) {}
-  template<typename C> void addArguments(C& ctx) {}
+  template <typename T, typename C> void applyInner(C& ctx) {}
+  template <typename C> void verify(C& ctx) {}
+  template <typename C> void addArguments(C& ctx) {}
 };
 
-} // namespace 
+} // namespace
 
 namespace risc0::rv32im {
 
@@ -124,7 +118,13 @@ size_t computeMaxDegree(bool tune) {
   std::vector<DegVal> globals(1000);
   std::vector<DegValExt> fakeMixing(1000, DegValExt());
   DegReg* fakePtr = fakeRegs.data();
-  DegValExt r = verifyCircuit(fakePtr, fakePtr, fakePtr, globals.data(), fakeMixing.data(), DegValExt(), DegVal::makeDegree(1));
+  DegValExt r = verifyCircuit(fakePtr,
+                              fakePtr,
+                              fakePtr,
+                              globals.data(),
+                              fakeMixing.data(),
+                              DegValExt(),
+                              DegVal::makeDegree(1));
   return r.getDegree();
 }
 

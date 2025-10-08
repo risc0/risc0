@@ -20,14 +20,12 @@
 namespace risc0 {
 
 MerkleVerifier::MerkleVerifier(ReadIop& iop, size_t _rows, size_t _cols, size_t queries)
-    : _rows(_rows)
-    , _cols(_cols)
-{
+    : _rows(_rows), _cols(_cols) {
   topSize = std::min(greatestLePo2(queries), _rows);
   top.resize(topSize * 2);
   iop.read(top.data() + topSize, topSize);
-  for (size_t i = topSize - 1; i > 0; i--)  {
-    top[i] = poseidon2HashPair(top[2*i], top[2*i + 1]);
+  for (size_t i = topSize - 1; i > 0; i--) {
+    top[i] = poseidon2HashPair(top[2 * i], top[2 * i + 1]);
   }
   iop.commit(top[1]);
 }
@@ -41,7 +39,7 @@ std::vector<Fp> MerkleVerifier::query(ReadIop& iop, size_t idx) {
   iop.read(out.data(), _cols);
   Digest cur = poseidon2Hash(out.data(), _cols);
   Digest other;
-  while(idx >= topSize * 2) {
+  while (idx >= topSize * 2) {
     // Retrieve the other parent from the IOP.
     iop.read(&other, 1);
     // Now ascend to the parent index, and compute the hash there.
@@ -58,4 +56,4 @@ std::vector<Fp> MerkleVerifier::query(ReadIop& iop, size_t idx) {
   return out;
 }
 
-}  // namespace risc0
+} // namespace risc0

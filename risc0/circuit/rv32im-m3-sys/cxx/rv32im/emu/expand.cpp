@@ -21,7 +21,8 @@
 namespace risc0::rv32im {
 
 namespace {
-// Setup some heavy syntactic sugar to make implementing spec not horrible to read
+// Setup some heavy syntactic sugar to make implementing spec not horrible to
+// read
 
 // Bit range
 class B {
@@ -45,9 +46,7 @@ public:
     return B((bits >> lower) & mask, newSize);
   }
   // Concatenate two bit ranges
-  B  operator|(const B& rhs) const {
-    return B(bits << rhs.size | rhs.bits, size + rhs.size);
-  }
+  B operator|(const B& rhs) const { return B(bits << rhs.size | rhs.bits, size + rhs.size); }
 
   uint32_t bits;
   uint32_t size;
@@ -81,7 +80,7 @@ public:
 
 class Loop {
 public:
-  Loop(uint32_t size, uint32_t step=1) : size(size), step(step) {}
+  Loop(uint32_t size, uint32_t step = 1) : size(size), step(step) {}
   BIter begin() const { return BIter(0, size, step); }
   BIter end() const { return BIter((uint32_t(1) << size), size, step); }
 
@@ -92,7 +91,6 @@ public:
 uint32_t EXPANSION_TABLE[] = {
 #include "expand.inc"
 };
-
 
 } // namespace
 
@@ -113,17 +111,17 @@ std::vector<uint32_t> generateExpandTable() {
     // c.JL -> JAL rd = 1
     addEntry(
         // 001 | imm[11|4|9:8|10|6|7|3:1|5] | 01
-        B(0b001, 3) | imm(11) | imm(4) | imm(9,8) | imm(10) | imm(6) | imm(7) | imm(3, 1) | imm(5) | B(0b01, 2),
+        B(0b001, 3) | imm(11) | imm(4) | imm(9, 8) | imm(10) | imm(6) | imm(7) | imm(3, 1) |
+            imm(5) | B(0b01, 2),
         // imm[20|10:1|11|19:12] | rd = 1 | 1101111
-        SE(imm) | imm(10, 1) | imm(11) | SE(imm, 8) | B(1, 5) | B(0b1101111, 7)
-    );
+        SE(imm) | imm(10, 1) | imm(11) | SE(imm, 8) | B(1, 5) | B(0b1101111, 7));
     // c.J -> JAL rd = 0
     addEntry(
         // 101 | imm[11|4|9:8|10|6|7|3:1|5] | 01
-        B(0b101, 3) | imm(11) | imm(4) | imm(9,8) | imm(10) | imm(6) | imm(7) | imm(3, 1) | imm(5) | B(0b01, 2),
+        B(0b101, 3) | imm(11) | imm(4) | imm(9, 8) | imm(10) | imm(6) | imm(7) | imm(3, 1) |
+            imm(5) | B(0b01, 2),
         // imm[20|10:1|11|19:12] | rd = 0 | 1101111
-        SE(imm) | imm(10, 1) | imm(11) | SE(imm, 8) | B(0, 5) | B(0b1101111, 7)
-    );
+        SE(imm) | imm(10, 1) | imm(11) | SE(imm, 8) | B(0, 5) | B(0b1101111, 7));
   }
   // Branches
   for (auto imm : Loop(9, 2)) {
@@ -133,18 +131,18 @@ std::vector<uint32_t> generateExpandTable() {
           // 110 | imm[8|4:3] | rs1' | imm[7:6|2:1|5] | 01
           B(0b110, 3) | imm(8) | imm(4, 3) | rs1 | imm(7, 6) | imm(2, 1) | imm(5) | B(0b01, 2),
           // imm[12|10:5] | rs2 = 0 | rs1 | func3 = 000 | imm[4:1|11] | 1100011
-          SE(imm, 3) | imm(8, 5) | B(0, 5) | UR(rs1) | B(0, 3) | imm(4, 1) | SE(imm) | B(0b1100011, 7)
-      );
+          SE(imm, 3) | imm(8, 5) | B(0, 5) | UR(rs1) | B(0, 3) | imm(4, 1) | SE(imm) |
+              B(0b1100011, 7));
       // c.BNEZ -> BNE rs2 = 0
       addEntry(
           // 111 | imm[8|4:3] | rs1' | imm[7:6|2:1|5] | 01
           B(0b111, 3) | imm(8) | imm(4, 3) | rs1 | imm(7, 6) | imm(2, 1) | imm(5) | B(0b01, 2),
           // imm[12|10:5] | rs2 = 0 | rs1 | func3 = 001 | imm[4:1|11] | 1100011
-          SE(imm, 3) | imm(8, 5) | B(0, 5) | UR(rs1) | B(1, 3) | imm(4, 1) | SE(imm) | B(0b1100011, 7)
-      );
+          SE(imm, 3) | imm(8, 5) | B(0, 5) | UR(rs1) | B(1, 3) | imm(4, 1) | SE(imm) |
+              B(0b1100011, 7));
     }
   }
   return table;
 }
 
-}  // namespace risc0::rv32im
+} // namespace risc0::rv32im

@@ -19,39 +19,21 @@
 namespace NAMESPACE {
 
 __global__ void kernel_set(
-    Fp* data,
-    Fp* globals,
-    const RowInfo* info,
-    const uint32_t* aux,
-    uint32_t* tables,
-    Fp rou
-) {
+    Fp* data, Fp* globals, const RowInfo* info, const uint32_t* aux, uint32_t* tables, Fp rou) {
   uint32_t row = blockDim.x * blockIdx.x + threadIdx.x;
   computeRowSet<NUM_ROWS_PO2>(data, globals, info, aux, tables, rou, row);
 }
 
 __global__ void kernel_finalize(
-    Fp* data,
-    Fp* globals,
-    const RowInfo* info,
-    const uint32_t* aux,
-    uint32_t* tables,
-    Fp rou
-) {
+    Fp* data, Fp* globals, const RowInfo* info, const uint32_t* aux, uint32_t* tables, Fp rou) {
   uint32_t row = blockDim.x * blockIdx.x + threadIdx.x;
   computeRowFinalize<NUM_ROWS_PO2>(data, globals, info, aux, tables, rou, row);
 }
 
-}  // namespace NAMESPACE
+} // namespace NAMESPACE
 
 extern "C" void FUNCNAME(
-    Fp* data,
-    Fp* globals,
-    const RowInfo* info,
-    const uint32_t* aux,
-    uint32_t* tables,
-    Fp rou
-) {
+    Fp* data, Fp* globals, const RowInfo* info, const uint32_t* aux, uint32_t* tables, Fp rou) {
   constexpr size_t NUM_ROWS = size_t(1) << NUM_ROWS_PO2;
   constexpr size_t block_size = NUM_ROWS < 256 ? NUM_ROWS : 256;
   constexpr size_t num_blocks = (NUM_ROWS + block_size - 1) / block_size;

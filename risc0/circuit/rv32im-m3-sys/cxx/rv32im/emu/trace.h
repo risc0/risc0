@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include "zkp/fp.h"
 #include "hal/hal.h"
 #include "rv32im/emu/blocks.h"
+#include "zkp/fp.h"
 
 #include <deque>
 
@@ -32,11 +32,11 @@ private:
   uint32_t* auxNext;
   GlobalsWitness* globals;
 
-#define BLOCK_TYPE(name, count) \
-  RowInfo* row ## name = nullptr; \
-  name ## Witness* wit ## name ## Begin = nullptr; \
-  name ## Witness* wit ## name ## End = nullptr;
-BLOCK_TYPES
+#define BLOCK_TYPE(name, count)                                                                    \
+  RowInfo* row##name = nullptr;                                                                    \
+  name##Witness* wit##name##Begin = nullptr;                                                       \
+  name##Witness* wit##name##End = nullptr;
+  BLOCK_TYPES
 #undef BLOCK_TYPE
 
 public:
@@ -48,21 +48,21 @@ public:
   inline size_t getRowCount() const { return rowNext - rowBegin; }
   inline size_t getAuxSize() const { return auxNext - auxBegin; }
 
-#define BLOCK_TYPE(name, count) \
-  inline name ## Witness& make ## name() { \
-    if (wit ## name ## Begin == wit ## name ## End) { \
-      wit ## name ## Begin = reinterpret_cast<name ## Witness*>(auxNext); \
-      wit ## name ## End = wit ## name ## Begin + count; \
-      row ## name = rowNext++; \
-      row ## name->rowType = size_t(BlockType::name); \
-      row ## name->blockCount = 0; \
-      row ## name->auxOffset = auxNext - auxBegin; \
-      auxNext = reinterpret_cast<uint32_t*>(wit ## name ## End); \
-    } \
-    row ## name->blockCount++; \
-    return *wit ## name ## Begin++; \
+#define BLOCK_TYPE(name, count)                                                                    \
+  inline name##Witness& make##name() {                                                             \
+    if (wit##name##Begin == wit##name##End) {                                                      \
+      wit##name##Begin = reinterpret_cast<name##Witness*>(auxNext);                                \
+      wit##name##End = wit##name##Begin + count;                                                   \
+      row##name = rowNext++;                                                                       \
+      row##name->rowType = size_t(BlockType::name);                                                \
+      row##name->blockCount = 0;                                                                   \
+      row##name->auxOffset = auxNext - auxBegin;                                                   \
+      auxNext = reinterpret_cast<uint32_t*>(wit##name##End);                                       \
+    }                                                                                              \
+    row##name->blockCount++;                                                                       \
+    return *wit##name##Begin++;                                                                    \
   }
-BLOCK_TYPES
+  BLOCK_TYPES
 #undef BLOCK_TYPE
 
   // Must be called before the accessors below
@@ -71,6 +71,5 @@ BLOCK_TYPES
   const RowInfo* getRows() const { return rowBegin; }
   const uint32_t* getAux() const { return auxBegin; }
 };
-
 
 } // namespace risc0::rv32im

@@ -18,19 +18,22 @@
 
 namespace NAMESPACE {
 
-__global__ void kernel_phase1(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou) {
+__global__ void
+kernel_phase1(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou) {
   uint32_t row = blockDim.x * blockIdx.x + threadIdx.x;
   computeRowPhase1<NUM_ROWS_PO2>(accum, data, globals, accMix, rou, row);
 }
 
-__global__ void kernel_phase2(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou) {
+__global__ void
+kernel_phase2(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou) {
   uint32_t row = blockDim.x * blockIdx.x + threadIdx.x;
   computeRowPhase2<NUM_ROWS_PO2>(accum, data, globals, accMix, rou, row);
 }
 
-}  // namespace NAMESPACE
+} // namespace NAMESPACE
 
-extern "C" void FUNCNAME(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou) {
+extern "C" void
+FUNCNAME(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou) {
   constexpr size_t NUM_ROWS = size_t(1) << NUM_ROWS_PO2;
   constexpr size_t block_size = NUM_ROWS < 256 ? NUM_ROWS : 256;
   constexpr size_t num_blocks = (NUM_ROWS + block_size - 1) / block_size;

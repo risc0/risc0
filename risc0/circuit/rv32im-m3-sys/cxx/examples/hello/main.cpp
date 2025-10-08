@@ -38,10 +38,8 @@ struct Context {
     curMix *= ecMix;
   }
 
-  template<typename T>
-  inline void push(T argument) {}
-  template<typename T>
-  inline void pull(T argument) {}
+  template <typename T> inline void push(T argument) {}
+  template <typename T> inline void pull(T argument) {}
 };
 
 CircuitInfo* getCircuitInfo(IHalPtr hal, size_t po2) {
@@ -108,9 +106,9 @@ CircuitInfo* getCircuitInfo(IHalPtr hal, size_t po2) {
       ctx.eqz(data(row, 0) * (data(row, 0) - Fp(1)));
 
       // Divide by 3x^n - 1 TODO: In reality this simplifies for each po2 to
-      // multiplication by 4 constants, one at each row % 4, but it's annoying to
-      // precompute + pass them, and impact of this code relative to the entire
-      // validity polynomial is small
+      // multiplication by 4 constants, one at each row % 4, but it's annoying
+      // to precompute + pass them, and impact of this code relative to the
+      // entire validity polynomial is small
       auto ret = ctx.total;
       Fp rou = ROU_FWD[po2 + 2];
       Fp x = Fp(3) * pow(rou, row);
@@ -187,8 +185,9 @@ int main() {
   // This code can be used to write the proof to a file for consumption by the
   // Rust verifier. This artifact is checked into the risc0 repo as
   // `/risc0/zkp/src/prove/proof.bin`
-  // auto myfile = std::fstream("/path/to/risc0/zkp/src/prove/proof.bin", std::ios::out | std::ios::binary);
-  // myfile.write((const char*) (wiop.getTranscript().data()), 4 * wiop.getTranscript().size());
+  // auto myfile = std::fstream("/path/to/risc0/zkp/src/prove/proof.bin",
+  // std::ios::out | std::ios::binary); myfile.write((const char*)
+  // (wiop.getTranscript().data()), 4 * wiop.getTranscript().size());
   // myfile.close();
 
   return 0;

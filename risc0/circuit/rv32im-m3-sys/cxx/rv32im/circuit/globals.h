@@ -15,11 +15,10 @@
 
 #pragma once
 
-#include "rv32im/witness/globals.h"
 #include "rv32im/circuit/poseidon2.h"
+#include "rv32im/witness/globals.h"
 
-template<typename C>
-struct GlobalsBlock {
+template <typename C> struct GlobalsBlock {
   CONSTANT static char NAME[] = "GlobalsBlock";
 
   RegDigest<C> rootIn;
@@ -30,8 +29,7 @@ struct GlobalsBlock {
   RegU8<C> checkRoundedGT;
   RegU8<C> checkRoundedLT;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, rootIn);
     T::apply(ctx, rootOut);
     T::apply(ctx, p2Count);

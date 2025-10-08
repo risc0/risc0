@@ -15,25 +15,22 @@
 
 #include "core/log.h"
 #include "core/util.h"
-#include "zkp/fp.h"
-#include "zkp/rou.h"
 #include "hal/hal.h"
 #include "hal/po2s.h"
+#include "zkp/fp.h"
+#include "zkp/rou.h"
 
 namespace risc0 {
 
-#define PO2(x) \
-void accum_witgen_cpu_ ## x(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou);
+#define PO2(x)                                                                                     \
+  void accum_witgen_cpu_##x(                                                                       \
+      Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou);
 PO2S
 #undef PO2
 
-void computeAccumWitnessCpu(
-    Fp* accum,
-    const Fp* data,
-    const Fp* globals,
-    const FpExt* accMix,
-    size_t numRows
-) {
+    void
+    computeAccumWitnessCpu(
+        Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, size_t numRows) {
   size_t po2 = log2Ceil(numRows);
   if (po2 < MIN_PO2 || po2 > MAX_PO2) {
     LOG(0, "PO2 = " << po2);
@@ -43,12 +40,14 @@ void computeAccumWitnessCpu(
     throw std::runtime_error("numRows is not a power of 2");
   }
 
-  switch(po2) {
-#define PO2(x) \
-    case x: accum_witgen_cpu_ ## x(accum, data, globals, accMix, ROU_FWD[po2]); break;
+  switch (po2) {
+#define PO2(x)                                                                                     \
+  case x:                                                                                          \
+    accum_witgen_cpu_##x(accum, data, globals, accMix, ROU_FWD[po2]);                              \
+    break;
     PO2S
 #undef PO2
-    default: throw std::runtime_error("Unreachable");
+        default : throw std::runtime_error("Unreachable");
   }
 }
 

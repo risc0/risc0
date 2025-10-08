@@ -18,10 +18,11 @@
 /// \file
 /// Logging Support.
 ///
-/// The logging system has support for multiple log levels, and automatically adds timetamps,
-/// including time delta's between log lines.  Logging is automatically disabled in GPU device code.
-/// Logging uses C++ ostream as it's basis, and currently always outputs to stderr.  Newlines are
-/// automatically added for each log line.
+/// The logging system has support for multiple log levels, and automatically
+/// adds timetamps, including time delta's between log lines.  Logging is
+/// automatically disabled in GPU device code. Logging uses C++ ostream as it's
+/// basis, and currently always outputs to stderr.  Newlines are automatically
+/// added for each log line.
 ///
 /// Example:
 /// \code

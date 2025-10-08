@@ -64,7 +64,8 @@ uint32_t loadElf(const ArrayRef<uint8_t>& elfBytes,
                  uint32_t maxWord) {
 
   using namespace std;
-  // TODO(nils): Avoid this extra copy here.  Perhaps using basic_spanbuf once we support C++23?
+  // TODO(nils): Avoid this extra copy here.  Perhaps using basic_spanbuf once
+  // we support C++23?
   std::string contents(reinterpret_cast<const char*>(elfBytes.begin()),
                        reinterpret_cast<const char*>(elfBytes.end()));
   std::istringstream is(contents);
