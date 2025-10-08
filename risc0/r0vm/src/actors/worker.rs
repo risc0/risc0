@@ -193,12 +193,13 @@ impl Actor for WorkerActor {
             .tell(GetTasks {
                 worker_id: self.id,
                 worker: None,
+                remote_address: None,
                 kinds: self.task_kinds.clone(),
             })
             .await;
         if let Err(error) = res {
             tracing::error!("worker dead: failed to talk to factory: {error}");
-            let _ = actor_ref.stop_gracefully().await;
+            let _ = actor_ref.stop_gracefully();
         }
     }
 }
@@ -210,7 +211,7 @@ impl Message<TaskMsg> for WorkerActor {
         let res = self.handle_task(msg).await;
         if let Err(error) = res {
             tracing::error!("worker has died: {error}");
-            let _ = ctx.actor_ref().stop_gracefully().await;
+            let _ = ctx.actor_ref().stop_gracefully();
         }
     }
 }

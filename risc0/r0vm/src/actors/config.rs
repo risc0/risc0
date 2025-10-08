@@ -35,6 +35,7 @@ pub(crate) struct VersionConfig {
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct AppConfig {
     pub version: usize,
+    pub release_channel: Option<String>,
     pub api: Option<ApiConfig>,
     pub manager: Option<ManagerConfig>,
     pub allocator: Option<AllocatorConfig>,
@@ -62,6 +63,7 @@ pub(crate) struct ManagerConfig {
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct AllocatorConfig {
     pub listen: Option<SocketAddr>,
+    pub default_release_channel: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -96,6 +98,7 @@ impl Default for AppConfig {
     fn default() -> Self {
         Self {
             version: VERSION,
+            release_channel: None,
             api: Some(ApiConfig {
                 listen: Some(default_api_listen_addr()),
                 po2: None,
@@ -106,6 +109,7 @@ impl Default for AppConfig {
             }),
             allocator: Some(AllocatorConfig {
                 listen: Some(default_allocator_listen_addr()),
+                default_release_channel: None,
             }),
             executor: Some(ExecutorConfig {
                 allocator: None,
@@ -161,6 +165,7 @@ mod tests {
             app,
             AppConfig {
                 version: 1,
+                release_channel: None,
                 api: Some(ApiConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
                     po2: None,
@@ -184,6 +189,7 @@ mod tests {
             app,
             AppConfig {
                 version: 1,
+                release_channel: None,
                 api: Some(ApiConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
                     po2: None,
@@ -193,7 +199,8 @@ mod tests {
                     listen: None
                 }),
                 allocator: Some(AllocatorConfig {
-                    listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap())
+                    listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap()),
+                    default_release_channel: None,
                 }),
                 executor: Some(ExecutorConfig {
                     allocator: None,
@@ -215,6 +222,7 @@ mod tests {
             app,
             AppConfig {
                 version: 1,
+                release_channel: None,
                 api: None,
                 manager: None,
                 allocator: None,
