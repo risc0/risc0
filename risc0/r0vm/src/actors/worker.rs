@@ -667,6 +667,7 @@ impl GpuProcessor {
     }
 }
 
+#[derive(Clone)]
 struct CpuProcessor {
     factory: ActorRef<RemoteFactoryActor>,
     allocator: ActorRef<RemoteAllocatorActor>,
@@ -763,6 +764,21 @@ impl CpuProcessor {
 
         let header = msg.header.clone();
 
+        let processor = self.clone();
+
+        tokio::task::spawn(async move {
+            let res = processor.run_task(msg, header).await;
+            if let Err(error) = res {
+                tracing::error!("CPU task runner failed: {error}");
+            }
+
+            drop(tracer);
+        });
+
+        Ok(())
+    }
+
+    async fn run_task(&self, msg: CpuTaskMsg, header: TaskHeader) -> Result<()> {
         let result = match msg.task {
             CpuTask::Execute(task) => self.execute(msg.header, task).await,
             CpuTask::Preflight(task) => {
@@ -781,7 +797,6 @@ impl CpuProcessor {
                 return Ok(());
             }
         };
-
         self.send_done(header, result, msg.reserved).await?;
 
         Ok(())
