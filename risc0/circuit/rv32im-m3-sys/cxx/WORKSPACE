@@ -157,18 +157,7 @@ CLANG_FORMAT_VERSION = "17.0.6"
 
 http_archive(
     name = "clang-format-linux",
-    build_file_content = """
-package(default_visibility = ["//visibility:public"])
-filegroup(
-    name = "clang-format-bin",
-    srcs = ["bin/clang-format"],
-)
-sh_binary(
-    name = "clang-format",
-    srcs = ["bin/clang-format"],
-    visibility = ["//visibility:public"],
-)
-""",
+    build_file = "//bazel/third_party:clang-format.BUILD",
     strip_prefix = "clang+llvm-{}-x86_64-linux-gnu-ubuntu-22.04".format(CLANG_FORMAT_VERSION),
     urls = [
         "https://github.com/llvm/llvm-project/releases/download/llvmorg-{0}/clang+llvm-{0}-x86_64-linux-gnu-ubuntu-22.04.tar.xz".format(CLANG_FORMAT_VERSION),
@@ -177,21 +166,10 @@ sh_binary(
 
 http_archive(
     name = "clang-format-macos",
-    build_file_content = """
-package(default_visibility = ["//visibility:public"])
-filegroup(
-    name = "clang-format-bin",
-    srcs = ["bin/clang-format"],
-)
-sh_binary(
-    name = "clang-format",
-    srcs = ["bin/clang-format"],
-    visibility = ["//visibility:public"],
-)
-""",
-    strip_prefix = "clang+llvm-{}-apple-darwin".format(CLANG_FORMAT_VERSION),
+    build_file = "//bazel/third_party:clang-format.BUILD",
+    strip_prefix = "clang+llvm-{}-arm64-apple-darwin22.0".format(CLANG_FORMAT_VERSION),
     urls = [
-        "https://github.com/llvm/llvm-project/releases/download/llvmorg-{0}/clang+llvm-{0}-apple-darwin.tar.xz".format(CLANG_FORMAT_VERSION),
+        "https://github.com/llvm/llvm-project/releases/download/llvmorg-{0}/clang+llvm-{0}-arm64-apple-darwin22.0.tar.xz".format(CLANG_FORMAT_VERSION),
     ],
 )
 
