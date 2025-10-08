@@ -38,6 +38,7 @@ use std::collections::{BTreeMap, HashMap, HashSet, VecDeque, btree_map, hash_map
 use std::fmt;
 use std::net::SocketAddr;
 use std::net::{IpAddr, Ipv4Addr};
+use std::str::FromStr;
 use std::sync::Arc;
 
 use super::{
@@ -69,7 +70,7 @@ impl GpuUuid {
     }
 }
 
-impl std::str::FromStr for GpuUuid {
+impl FromStr for GpuUuid {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self> {
@@ -247,8 +248,8 @@ struct Worker {
     hardware: Vec<HardwareResource>,
     /// What tasks (tasks) are currently running on this worker.
     tasks: IndexMap<GlobalId, Task>,
-    /// From what version of the software is this worker
-    zkvm_version: semver::Version,
+    /// From what version of the software is this worker and what release channel
+    deployment_version: DeploymentVersion,
 }
 
 impl Worker {
@@ -256,14 +257,14 @@ impl Worker {
         remote_address: Option<SocketAddr>,
         machine: MachineId,
         hardware: Vec<HardwareResource>,
-        zkvm_version: semver::Version,
+        deployment_version: DeploymentVersion,
     ) -> Self {
         Self {
             remote_address,
             tasks: IndexMap::new(),
             machine,
             hardware,
-            zkvm_version,
+            deployment_version,
         }
     }
 
@@ -289,7 +290,7 @@ impl Worker {
             hardware,
             host,
             port,
-            version: self.zkvm_version.clone(),
+            version: self.deployment_version.clone(),
             tasks,
         }
     }
@@ -322,9 +323,46 @@ enum HardwareFilter {
     Gpu,
 }
 
+#[derive(Default)]
+struct ManagerMap(HashMap<String, BTreeMap<semver::Version, Manager>>);
+
+impl ManagerMap {
+    fn get(&self, key: &DeploymentVersion) -> Option<&Manager> {
+        self.0.get(&key.release_channel)?.get(&key.zkvm_version)
+    }
+
+    fn entry(&mut self, key: DeploymentVersion) -> btree_map::Entry<'_, semver::Version, Manager> {
+        self.0
+            .entry(key.release_channel)
+            .or_default()
+            .entry(key.zkvm_version)
+    }
+
+    fn retain(&mut self, mut f: impl FnMut(&DeploymentVersion, &mut Manager) -> bool) {
+        for (release_channel, managers) in &mut self.0 {
+            managers.retain(|version, manager| {
+                let sw_version = DeploymentVersion {
+                    release_channel: release_channel.clone(),
+                    zkvm_version: version.clone(),
+                };
+                f(&sw_version, manager)
+            });
+        }
+        self.0.retain(|_, managers| !managers.is_empty());
+    }
+
+    fn iter_channel(
+        &self,
+        release_channel: &str,
+    ) -> Option<btree_map::Iter<'_, semver::Version, Manager>> {
+        self.0.get(release_channel).map(|managers| managers.iter())
+    }
+}
+
 pub struct AllocatorActor {
+    default_release_channel: String,
     workers: HashMap<WorkerId, Worker>,
-    managers: BTreeMap<semver::Version, Manager>,
+    managers: ManagerMap,
     gpus: HashMap<GpuUuid, Gpu>,
     cpus: HashMap<MachineId, Cpu>,
     http_client: Arc<reqwest::Client>,
@@ -335,10 +373,11 @@ pub struct AllocatorActor {
 impl Actor for AllocatorActor {}
 
 impl AllocatorActor {
-    pub fn new() -> Self {
+    pub fn new(default_release_channel: impl Into<String>) -> Self {
         Self {
+            default_release_channel: default_release_channel.into(),
             workers: HashMap::new(),
-            managers: BTreeMap::new(),
+            managers: Default::default(),
             gpus: HashMap::new(),
             cpus: HashMap::new(),
             http_client: Arc::new(reqwest::Client::new()),
@@ -563,7 +602,7 @@ pub struct RegisterWorker {
     pub remote_address: Option<SocketAddr>,
     pub worker_id: WorkerId,
     pub hardware: Vec<HardwareResource>,
-    pub zkvm_version: semver::Version,
+    pub deployment_version: DeploymentVersion,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -597,7 +636,7 @@ impl AllocatorActor {
                 msg.remote_address,
                 machine.clone(),
                 msg.hardware.clone(),
-                msg.zkvm_version.clone(),
+                msg.deployment_version.clone(),
             ));
             let num_cpus = msg
                 .hardware
@@ -616,7 +655,7 @@ impl AllocatorActor {
         }
 
         let mut manager_address = None;
-        if let Some(manager) = self.managers.get(&msg.zkvm_version)
+        if let Some(manager) = self.managers.get(&msg.deployment_version)
             && let Some(rpc_port) = manager.rpc_port
         {
             manager_address = Some(ManagerAddress {
@@ -873,9 +912,70 @@ impl AllocatorActor {
     }
 }
 
+/// A particular deployed version of r0vm
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub struct DeploymentVersion {
+    pub release_channel: String,
+    pub zkvm_version: semver::Version,
+}
+
+impl DeploymentVersion {
+    #[cfg(test)]
+    pub fn new(release_channel: impl Into<String>, zkvm_version: semver::Version) -> Self {
+        Self {
+            release_channel: release_channel.into(),
+            zkvm_version,
+        }
+    }
+}
+
+impl fmt::Display for DeploymentVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}:{}", &self.release_channel, &self.zkvm_version)
+    }
+}
+
+impl FromStr for DeploymentVersion {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        let (release_channel, version) = s
+            .rsplit_once(":")
+            .ok_or_else(|| Error::new("missing ':'"))?;
+        Ok(Self {
+            release_channel: release_channel.into(),
+            zkvm_version: version
+                .parse()
+                .map_err(|err| Error::new(format!("failed to parse version: {err}")))?,
+        })
+    }
+}
+
+#[test]
+fn deployment_version_parse() {
+    assert_eq!(
+        DeploymentVersion::from_str("foo:1.2.3").unwrap(),
+        DeploymentVersion::new("foo", semver::Version::new(1, 2, 3))
+    );
+    assert_eq!(
+        DeploymentVersion::from_str("foo:bar:1.2.3").unwrap(),
+        DeploymentVersion::new("foo:bar", semver::Version::new(1, 2, 3))
+    );
+    assert_eq!(
+        DeploymentVersion::from_str("1.2.3")
+            .unwrap_err()
+            .to_string(),
+        "missing ':'"
+    );
+    assert_eq!(
+        DeploymentVersion::from_str("foo:").unwrap_err().to_string(),
+        "failed to parse version: empty string, expected a semver version"
+    );
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct RegisterManager {
-    pub zkvm_version: semver::Version,
+    pub deployment_version: DeploymentVersion,
     pub path: String,
     pub api_port: Option<u16>,
     pub rpc_port: Option<u16>,
@@ -892,7 +992,7 @@ impl Message<RegisterManager> for AllocatorActor {
 
 impl AllocatorActor {
     fn register_manager(&mut self, msg: RegisterManager) -> Result<()> {
-        if let btree_map::Entry::Vacant(e) = self.managers.entry(msg.zkvm_version.clone()) {
+        if let btree_map::Entry::Vacant(e) = self.managers.entry(msg.deployment_version.clone()) {
             let host = msg
                 .remote_address
                 .map(|a| a.ip())
@@ -911,14 +1011,14 @@ impl AllocatorActor {
             });
             tracing::info!(
                 "Registered manager with version {} at addr={host} api_port={:?}, rpc_port={:?}",
-                &msg.zkvm_version,
+                &msg.deployment_version,
                 &msg.api_port,
                 &msg.rpc_port
             );
         } else {
             return Err(Error::new(format!(
-                "duplicate registration for manager with version {}",
-                msg.zkvm_version
+                "duplicate registration for manager with deployment version {}",
+                msg.deployment_version
             )));
         }
         Ok(())
@@ -988,7 +1088,7 @@ pub struct GetStatusWorker {
     hardware: Vec<String>,
     host: String,
     port: Option<u16>,
-    version: semver::Version,
+    version: DeploymentVersion,
     tasks: Vec<String>,
 }
 
@@ -1075,7 +1175,8 @@ mod allocation_tests {
 
     impl Fixture {
         async fn new(worker_count: u32) -> Self {
-            let (alloc_ref, mut alloc_runner) = actor::run(AllocatorActor::new()).await;
+            let (alloc_ref, mut alloc_runner) =
+                actor::run(AllocatorActor::new("default-channel")).await;
 
             let workers: Vec<WorkerId> = (0..worker_count).map(test_worker_id).collect();
             let mut worker_addresses = HashMap::new();
@@ -1095,7 +1196,10 @@ mod allocation_tests {
                                 }),
                                 HardwareResource::Cpu(CpuSpec { cores: CpuCores(4) }),
                             ],
-                            zkvm_version: semver::Version::new(1, 2, 3),
+                            deployment_version: DeploymentVersion::new(
+                                "test",
+                                semver::Version::new(1, 2, 3),
+                            ),
                         },
                         &mut alloc_runner,
                     )
@@ -1785,6 +1889,9 @@ impl std::fmt::Display for HttpError {
     }
 }
 
+/// If no release channel is configured, this is what we use by default.
+pub const DEFAULT_RELEASE_CHANNEL: &str = "unknown-alpha";
+
 pub struct ApiRequest {
     pub request: http::Request<axum::body::Body>,
 }
@@ -1802,6 +1909,15 @@ impl ApiRequest {
                 )
             })?;
         Ok(version_value.to_str()?.parse()?)
+    }
+
+    fn risc0_release_channel(&self, default_release_channel: &str) -> anyhow::Result<String> {
+        Ok(self
+            .request
+            .headers()
+            .get("x-risc0-release-channel")
+            .map(|v| v.to_str().map(|v| v.to_string()))
+            .unwrap_or(Ok(default_release_channel.into()))?)
     }
 }
 
@@ -1862,29 +1978,36 @@ impl AllocatorActor {
         request: ApiRequest,
         reply_sender: &mut Option<ReplySender<anyhow::Result<ApiResponse>>>,
     ) -> anyhow::Result<()> {
+        let release_channel = request.risc0_release_channel(&self.default_release_channel)?;
         let version_req = request.risc0_version()?;
 
         // Find a registered manager which satisfies the given request version.
         // We prefer versions which are higher.
-        for (manager_version, manager) in self.managers.iter().rev() {
-            if version_req.matches(manager_version) {
-                let http_client = self.http_client.clone();
-                let Some(endpoint) = manager.endpoint.clone() else {
-                    continue;
-                };
-                let reply_sender = reply_sender.take();
-                tokio::task::spawn(async move {
-                    if let Some(reply_sender) = reply_sender {
-                        reply_sender.send(proxy_api_request(http_client, endpoint, request).await)
-                    }
-                });
-                return Ok(());
+        if let Some(iter) = self.managers.iter_channel(&release_channel) {
+            for (manager_version, manager) in iter.rev() {
+                if version_req.matches(manager_version) {
+                    let http_client = self.http_client.clone();
+                    let Some(endpoint) = manager.endpoint.clone() else {
+                        continue;
+                    };
+                    let reply_sender = reply_sender.take();
+                    tokio::task::spawn(async move {
+                        if let Some(reply_sender) = reply_sender {
+                            reply_sender
+                                .send(proxy_api_request(http_client, endpoint, request).await)
+                        }
+                    });
+                    return Ok(());
+                }
             }
         }
 
         Err(HttpError::new(
             http::StatusCode::BAD_REQUEST,
-            format!("no manager found to satisfy request with requirement {version_req}"),
+            format!(
+                "no manager found to satisfy request with requirement {version_req} \
+                in software channel {release_channel}"
+            ),
         )
         .into())
     }
@@ -2004,9 +2127,10 @@ mod proxy_tests {
     }
 
     async fn manager_proxy_test(
-        manager_versions: Vec<semver::Version>,
-        expected_replied_manager_version: Option<semver::Version>,
+        manager_versions: Vec<DeploymentVersion>,
+        expected_replied_manager_version: Option<DeploymentVersion>,
         method: http::Method,
+        request_release_channel: Option<&str>,
         request_version: &str,
     ) -> axum_test::TestResponse {
         let managers: HashMap<_, _> = manager_versions
@@ -2014,12 +2138,12 @@ mod proxy_tests {
             .map(|v| (v.clone(), TestManager::new()))
             .collect();
 
-        let alloc_ref = actor::spawn(AllocatorActor::new());
+        let alloc_ref = actor::spawn(AllocatorActor::new("default-channel"));
 
         for (version, manager) in &managers {
             alloc_ref
                 .ask(RegisterManager {
-                    zkvm_version: version.clone(),
+                    deployment_version: version.clone(),
                     api_port: Some(
                         manager
                             .server
@@ -2059,6 +2183,9 @@ mod proxy_tests {
         if method_req_has_body(&method) {
             test_req = test_req.text("ping");
         }
+        if let Some(request_release_channel) = request_release_channel {
+            test_req = test_req.add_header("x-risc0-release-channel", request_release_channel);
+        }
         let response = test_req
             .add_header("x-risc0-version", request_version)
             .await;
@@ -2068,6 +2195,15 @@ mod proxy_tests {
         }
 
         response
+    }
+
+    fn dver(
+        release_channel: impl Into<String>,
+        major: u64,
+        minor: u64,
+        patch: u64,
+    ) -> DeploymentVersion {
+        DeploymentVersion::new(release_channel, semver::Version::new(major, minor, patch))
     }
 
     #[rstest]
@@ -2083,9 +2219,10 @@ mod proxy_tests {
     async fn proxy_manager_not_found(#[case] method: &str) {
         let method = http::Method::from_bytes(method.as_bytes()).unwrap();
         let response = manager_proxy_test(
-            vec![semver::Version::new(1, 2, 3)],
+            vec![dver("test", 1, 2, 3)],
             None,
             method.clone(),
+            Some("test"),
             "1.2.4",
         )
         .await;
@@ -2093,7 +2230,7 @@ mod proxy_tests {
         if method_resp_has_body(&method) {
             assert_eq!(
                 response.text(),
-                "no manager found to satisfy request with requirement ^1.2.4"
+                "no manager found to satisfy request with requirement ^1.2.4 in software channel test"
             );
         }
     }
@@ -2111,9 +2248,10 @@ mod proxy_tests {
     async fn proxy_manager_exact_match(#[case] method: &str) {
         let method = http::Method::from_bytes(method.as_bytes()).unwrap();
         let response = manager_proxy_test(
-            vec![semver::Version::new(1, 2, 3), semver::Version::new(1, 2, 4)],
-            Some(semver::Version::new(1, 2, 3)),
+            vec![dver("test", 1, 2, 3), dver("test", 1, 2, 4)],
+            Some(dver("test", 1, 2, 3)),
             method.clone(),
+            Some("test"),
             "=1.2.3",
         )
         .await;
@@ -2128,12 +2266,13 @@ mod proxy_tests {
         let method = http::Method::PUT;
         let response = manager_proxy_test(
             vec![
-                semver::Version::new(1, 2, 3),
-                semver::Version::new(1, 2, 4),
-                semver::Version::new(3, 0, 0),
+                dver("test", 1, 2, 3),
+                dver("test", 1, 2, 4),
+                dver("test", 3, 0, 0),
             ],
-            Some(semver::Version::new(1, 2, 4)),
+            Some(dver("test", 1, 2, 4)),
             method,
+            Some("test"),
             "1.2.3",
         )
         .await;
@@ -2146,13 +2285,14 @@ mod proxy_tests {
         let method = http::Method::PUT;
         let response = manager_proxy_test(
             vec![
-                semver::Version::new(1, 2, 3),
-                semver::Version::new(1, 2, 4),
-                semver::Version::new(3, 0, 0),
-                "3.0.0-rc.1".parse().unwrap(),
+                dver("test", 1, 2, 3),
+                dver("test", 1, 2, 4),
+                dver("test", 3, 0, 0),
+                "test:3.0.0-rc.1".parse().unwrap(),
             ],
-            Some(semver::Version::new(3, 0, 0)),
+            Some(dver("test", 3, 0, 0)),
             method,
+            Some("test"),
             "3.0.0",
         )
         .await;
@@ -2161,12 +2301,50 @@ mod proxy_tests {
     }
 
     #[tokio::test]
+    async fn proxy_manager_different_channel() {
+        let method = http::Method::PUT;
+        let response = manager_proxy_test(
+            vec![
+                dver("test", 1, 2, 3),
+                dver("test2", 1, 2, 4),
+                dver("test", 3, 0, 0),
+            ],
+            Some(dver("test", 1, 2, 3)),
+            method,
+            Some("test"),
+            "1.2.3",
+        )
+        .await;
+        response.assert_status_success();
+        response.assert_text("pong");
+    }
+
+    #[tokio::test]
+    async fn proxy_manager_default_channel() {
+        let method = http::Method::PUT;
+        let response = manager_proxy_test(
+            vec![
+                dver("default-channel", 1, 2, 3),
+                dver("test2", 1, 2, 4),
+                dver("test", 3, 0, 0),
+            ],
+            Some(dver("default-channel", 1, 2, 3)),
+            method,
+            None,
+            "1.2.3",
+        )
+        .await;
+        response.assert_status_success();
+        response.assert_text("pong");
+    }
+
+    #[tokio::test]
     async fn multiple_managers_registered_error() {
-        let alloc_ref = actor::spawn(AllocatorActor::new());
+        let alloc_ref = actor::spawn(AllocatorActor::new("default-channel"));
 
         alloc_ref
             .ask(RegisterManager {
-                zkvm_version: semver::Version::new(1, 2, 3),
+                deployment_version: dver("test", 1, 2, 3),
                 api_port: Some(8080),
                 rpc_port: None,
                 path: "/".into(),
@@ -2178,7 +2356,7 @@ mod proxy_tests {
 
         let error = alloc_ref
             .ask(RegisterManager {
-                zkvm_version: semver::Version::new(1, 2, 3),
+                deployment_version: dver("test", 1, 2, 3),
                 api_port: Some(8080),
                 rpc_port: None,
                 path: "/".into(),
@@ -2189,7 +2367,7 @@ mod proxy_tests {
             .unwrap_err();
         assert_eq!(
             error.to_string(),
-            "duplicate registration for manager with version 1.2.3"
+            "duplicate registration for manager with deployment version test:1.2.3"
         );
     }
 }

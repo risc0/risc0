@@ -66,7 +66,8 @@ use crate::init_logging;
 use self::{
     actor::{Actor, ActorRef, Message},
     allocator::{
-        AllocatorActor, HardwareResource, RegisterManager, RegisterWorker, RemoteAllocatorActor,
+        AllocatorActor, DEFAULT_RELEASE_CHANNEL, DeploymentVersion, HardwareResource,
+        RegisterManager, RegisterWorker, RemoteAllocatorActor,
     },
     config::{
         AllocatorConfig, AppConfig, ExecutorConfig, ManagerConfig, ProverConfig, TelemetryConfig,
@@ -211,12 +212,16 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
     let mut app = App::new(
         AppConfig {
             version: VERSION,
+            release_channel: None,
             api: None,
             manager: Some(ManagerConfig {
                 allocator: None,
                 listen: None,
             }),
-            allocator: Some(AllocatorConfig { listen: None }),
+            allocator: Some(AllocatorConfig {
+                listen: None,
+                default_release_channel: None,
+            }),
             executor: Some(ExecutorConfig {
                 allocator: None,
                 count: 1,
@@ -288,9 +293,11 @@ impl TempConfig {
         allocator_addr: SocketAddr,
         subscribe: Vec<TaskKind>,
         enable_telemetry: bool,
+        release_channel: &Option<String>,
     ) -> anyhow::Result<Self> {
         let config = AppConfig {
             version: VERSION,
+            release_channel: release_channel.clone(),
             api: None,
             manager: None,
             allocator: None,
@@ -391,7 +398,12 @@ impl App {
         if let Some(cfg_allocator) = &cfg.allocator {
             tracing::info!("Starting allocator");
 
-            let alloc_ref = actor::spawn(AllocatorActor::new());
+            let alloc_ref = actor::spawn(AllocatorActor::new(
+                cfg_allocator
+                    .default_release_channel
+                    .as_deref()
+                    .unwrap_or(DEFAULT_RELEASE_CHANNEL),
+            ));
             allocator = Some(alloc_ref.clone());
 
             let mut rpc_server = AllocatorRpcServer::new(
@@ -466,9 +478,7 @@ impl App {
 
             alloc_ref
                 .ask(RegisterManager {
-                    zkvm_version: env!("CARGO_PKG_VERSION")
-                        .parse()
-                        .expect("CARGO_PKG_VERSION should be a valid semver::Version"),
+                    deployment_version: deployment_version(&cfg.release_channel),
                     api_port: api_addr.map(|a| a.port()),
                     rpc_port: Some(local_factory_rpc_addr.port()),
                     path: "/".into(),
@@ -481,13 +491,19 @@ impl App {
         let mut children = vec![];
 
         if let Some(cfg_executor) = cfg.executor {
-            Self::create_executors(&cfg_executor, local_allocator_rpc_addr, workers.clone())
-                .await?;
+            Self::create_executors(
+                &cfg_executor,
+                &cfg.release_channel,
+                local_allocator_rpc_addr,
+                workers.clone(),
+            )
+            .await?;
         }
 
         if let Some(cfg_prover) = cfg.prover {
             Self::create_provers(
                 &cfg_prover,
+                &cfg.release_channel,
                 local_allocator_rpc_addr,
                 workers.clone(),
                 &mut children,
@@ -516,6 +532,7 @@ impl App {
 
     async fn create_executors(
         executor: &ExecutorConfig,
+        release_channel: &Option<String>,
         local_allocator_addr: Option<SocketAddr>,
         workers: Arc<Mutex<Vec<ActorRef<WorkerActor>>>>,
     ) -> Result<(), Box<dyn StdError>> {
@@ -534,6 +551,7 @@ impl App {
 
         for _ in 0..executor.count {
             start_worker(
+                release_channel,
                 alloc_ref.clone(),
                 alloc_ip,
                 workers.clone(),
@@ -549,6 +567,7 @@ impl App {
     #[allow(clippy::too_many_arguments)]
     async fn create_provers(
         cfg_prover: &[ProverConfig],
+        release_channel: &Option<String>,
         local_allocator_addr: Option<SocketAddr>,
         workers: Arc<Mutex<Vec<ActorRef<WorkerActor>>>>,
         children: &mut Vec<ChildState>,
@@ -568,6 +587,7 @@ impl App {
                 );
 
                 start_worker(
+                    release_channel,
                     alloc_ref,
                     alloc_addr.ip(),
                     workers.clone(),
@@ -587,6 +607,7 @@ impl App {
                     allocator_addr,
                     prover.subscribe.clone(),
                     enable_telemetry,
+                    release_channel,
                 )?);
                 for device_idx in 0..count {
                     let child = Command::new(&r0vm_path)
@@ -728,6 +749,7 @@ impl Drop for App {
 }
 
 async fn start_worker(
+    release_channel: &Option<String>,
     alloc_ref: ActorRef<RemoteAllocatorActor>,
     alloc_ip: IpAddr,
     workers: Arc<Mutex<Vec<ActorRef<WorkerActor>>>>,
@@ -743,9 +765,7 @@ async fn start_worker(
             remote_address: None,
             worker_id,
             hardware: worker_hardware.clone(),
-            zkvm_version: env!("CARGO_PKG_VERSION")
-                .parse()
-                .expect("CARGO_PKG_VERSION should be a valid semver::Version"),
+            deployment_version: deployment_version(release_channel),
         })
         .await??;
 
@@ -782,6 +802,17 @@ async fn start_worker(
     )?;
     workers.push(worker);
     Ok(())
+}
+
+pub fn deployment_version(release_channel: &Option<String>) -> DeploymentVersion {
+    DeploymentVersion {
+        release_channel: release_channel
+            .clone()
+            .unwrap_or(DEFAULT_RELEASE_CHANNEL.into()),
+        zkvm_version: env!("CARGO_PKG_VERSION")
+            .parse()
+            .expect("CARGO_PKG_VERSION should be a valid semver::Version"),
+    }
 }
 
 //

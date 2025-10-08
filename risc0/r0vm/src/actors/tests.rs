@@ -61,12 +61,16 @@ async fn basic() {
     let mut app = App::new(
         AppConfig {
             version: VERSION,
+            release_channel: None,
             api: None,
             manager: Some(ManagerConfig {
                 allocator: None,
                 listen: None,
             }),
-            allocator: Some(AllocatorConfig { listen: None }),
+            allocator: Some(AllocatorConfig {
+                listen: None,
+                default_release_channel: None,
+            }),
             executor: Some(ExecutorConfig {
                 allocator: None,
                 count: 1,
