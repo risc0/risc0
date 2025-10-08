@@ -95,11 +95,28 @@ impl<ActorT: Actor> ActorRunner<ActorT> {
         }
     }
 
-    /// Call on_stop on the actor
-    pub async fn stop(mut self) {
+    /// Receive and potentially reply to a single message without blocking.
+    #[allow(dead_code)]
+    pub async fn try_handle_one(&mut self) -> Result<(), tokio::sync::mpsc::error::TryRecvError> {
         assert!(self.actor_ref.is_none(), "start not called");
 
+        let handle_msg = self.recv.try_recv()?;
+        handle_msg(&mut self.actor).await;
+        Ok(())
+    }
+
+    /// Returns true if the message queue is not empty.
+    pub fn has_messages(&self) -> bool {
+        !self.recv.is_empty()
+    }
+
+    /// Call on_stop on the actor
+    pub async fn stop(&mut self) {
+        assert!(self.actor_ref.is_none(), "start not called");
+        assert!(!self.has_messages(), "stop called with messages in queue");
+
         self.actor.on_stop().await;
+        self.recv.close();
     }
 
     /// The main loop an actor does.
