@@ -25,8 +25,7 @@ namespace hello_m3 {
 
 namespace {
 
-template <typename RegT, typename ValT, typename ValExtT>
-struct Context {
+template <typename RegT, typename ValT, typename ValExtT> struct Context {
   FpExt total;
   FpExt ecMix;
   FpExt curMix;
@@ -41,10 +40,8 @@ struct Context {
     curMix *= ecMix;
   }
 
-  template<typename T>
-  inline void push(T argument) {}
-  template<typename T>
-  inline void pull(T argument) {}
+  template <typename T> inline void push(T argument) {}
+  template <typename T> inline void pull(T argument) {}
 };
 
 } // end namespace
