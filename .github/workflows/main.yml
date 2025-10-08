@@ -33,7 +33,6 @@ jobs:
       pull-requests: read
     outputs:
       bazel: ${{ steps.filter.outputs.bazel }}
-      bazel: ${{ steps.filter.outputs.bazel }}
       browser: ${{ steps.filter.outputs.browser }}
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
