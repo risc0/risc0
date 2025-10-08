@@ -398,7 +398,7 @@ impl App {
                 allocator_listen_addr(cfg_allocator.listen),
                 alloc_ref.clone(),
             );
-            local_allocator_rpc_addr = rpc_server.start().await?;
+            local_allocator_rpc_addr = Some(rpc_server.bind_and_listen().await?);
             allocator_rpc_server = Some(rpc_server);
 
             if let Some(cfg_api) = &cfg.api {
@@ -448,10 +448,7 @@ impl App {
 
             let mut rpc_server =
                 FactoryRpcServer::new(manager_listen_addr(cfg_manager.listen), factory_ref);
-            let local_factory_rpc_addr = rpc_server
-                .start()
-                .await?
-                .expect("start called for first time");
+            let local_factory_rpc_addr = rpc_server.bind_and_listen().await?;
             factory_rpc_server = Some(rpc_server);
 
             let mut api_addr = None;
@@ -618,47 +615,52 @@ impl App {
         }
     }
 
-    pub async fn stop(mut self) {
-        tracing::info!("app: stop");
+    fn stop_actors(&mut self) {
+        self.factory_rpc_server = None;
+        self.allocator_rpc_server = None;
 
-        if let Some(server) = self.factory_rpc_server.take() {
-            tracing::info!("factory_rpc_server: stop");
-            server.stop().await;
+        if let Some(allocator) = &self.allocator {
+            let _ = allocator.stop_gracefully();
         }
 
-        if let Some(server) = self.allocator_rpc_server.take() {
-            tracing::info!("allocator_rpc_server: stop");
-            server.stop().await;
+        if let Some(manager) = &self.manager {
+            let _ = manager.stop_gracefully();
         }
 
-        if let Some(allocator) = self.allocator.take()
-            && allocator.stop_gracefully().await.is_ok()
-        {
+        let workers = self.workers.lock().unwrap().clone();
+        for worker in workers {
+            let _ = worker.stop_gracefully();
+        }
+
+        if let Some(factory) = &self.factory {
+            let _ = factory.stop_gracefully();
+        }
+    }
+
+    async fn wait_for_actors(&mut self) {
+        if let Some(allocator) = &self.allocator {
             tracing::info!("allocator: wait for stop");
             allocator.wait_for_stop().await;
         }
 
-        if let Some(manager) = self.manager.take()
-            && manager.stop_gracefully().await.is_ok()
-        {
+        if let Some(manager) = &self.manager {
             tracing::info!("manager: wait for stop");
             manager.wait_for_stop().await;
         }
 
-        tracing::info!("worker: stop");
+        tracing::info!("worker: wait for stop");
         let workers = self.workers.lock().unwrap().clone();
         for worker in workers {
-            worker.kill();
             worker.wait_for_stop().await;
         }
 
-        if let Some(factory) = self.factory
-            && factory.stop_gracefully().await.is_ok()
-        {
+        if let Some(factory) = &self.factory {
             tracing::info!("factory: wait for stop");
             factory.wait_for_stop().await;
         }
+    }
 
+    async fn wait_for_children(&mut self) {
         tracing::info!(
             "waiting for children: {:?}",
             self.children
@@ -666,16 +668,20 @@ impl App {
                 .filter_map(|c| c.child.id())
                 .collect::<Vec<_>>()
         );
-        for mut child in self.children {
+        for child in &mut self.children {
             let result = child.child.wait().await;
             if let Some(err) = result.err() {
                 tracing::warn!("Failed to wait on child: {err}");
             }
         }
+    }
 
-        if let Some(provider) = self.provider {
-            provider.stop();
-        }
+    pub async fn stop(mut self) {
+        tracing::info!("app: stop");
+
+        self.stop_actors();
+        self.wait_for_actors().await;
+        self.wait_for_children().await;
     }
 
     pub async fn proof_request(
@@ -708,6 +714,16 @@ impl App {
             .status
             .try_into()
             .map_err(|e| error::Error::new(format!("unexpected ShrinkWrapRequest reply: {e}")))
+    }
+}
+
+impl Drop for App {
+    fn drop(&mut self) {
+        self.stop_actors();
+
+        if let Some(provider) = self.provider.take() {
+            provider.stop();
+        }
     }
 }
 
@@ -790,7 +806,7 @@ async fn route_rpc_msg_to_worker(
     if let Some(msg) = msg {
         msg.dispatch(remote_address, worker, ops).await
     } else {
-        worker.kill();
+        let _ = worker.stop_gracefully();
     }
 }
 
@@ -804,7 +820,7 @@ struct RpcDisconnect {
 struct RpcServer<ReceiverT: Actor, MessageT> {
     listen_addr: SocketAddr,
     receiver: ActorRef<ReceiverT>,
-    join_handle: Option<JoinHandle<()>>,
+    join_set: tokio::task::JoinSet<()>,
     _msg: PhantomData<MessageT>,
 }
 
@@ -817,21 +833,22 @@ where
         Self {
             listen_addr,
             receiver,
-            join_handle: None,
+            join_set: tokio::task::JoinSet::new(),
             _msg: PhantomData,
         }
     }
 
-    pub async fn start(&mut self) -> anyhow::Result<Option<SocketAddr>> {
-        if self.join_handle.is_some() {
-            return Ok(None);
-        }
+    pub async fn bind_and_listen(&mut self) -> anyhow::Result<SocketAddr> {
+        assert!(
+            self.join_set.is_empty(),
+            "bind_and_listen called more than once"
+        );
 
         let receiver = self.receiver.clone();
         let listener = TcpListener::bind(self.listen_addr).await?;
         let local_addr = listener.local_addr()?;
 
-        self.join_handle = Some(tokio::spawn(async move {
+        self.join_set.spawn(async move {
             let mut join_set = tokio::task::JoinSet::new();
             loop {
                 let (stream, remote_address) = match listener.accept().await {
@@ -864,15 +881,9 @@ where
                     let _ = receiver.tell(RpcDisconnect { remote_address }).await;
                 });
             }
-        }));
+        });
 
-        Ok(Some(local_addr))
-    }
-
-    pub async fn stop(self) {
-        if let Some(join_handle) = self.join_handle {
-            join_handle.abort();
-        }
+        Ok(local_addr)
     }
 }
 
@@ -1106,7 +1117,7 @@ impl<ActorT: Send + 'static> Actor for RemoteActor<ActorT> {
         if let Some(rpc_death_recv) = self.rpc_death_recv.take() {
             tokio::task::spawn(async move {
                 let _ = rpc_death_recv.await;
-                actor_ref.kill();
+                let _ = actor_ref.stop_gracefully();
             });
         }
     }
@@ -1138,7 +1149,7 @@ macro_rules! remote_actor_ask {
                     .await;
                 if let Err(error) = res {
                     tracing::error!("error communicating with remote actor: {error}");
-                    let _ = ctx.actor_ref().stop_gracefully().await;
+                    let _ = ctx.actor_ref().stop_gracefully();
                 }
             }
         }
@@ -1160,7 +1171,7 @@ macro_rules! remote_actor_tell {
                 let res = self.rpc_sender.tell(&msg).await;
                 if let Err(error) = res {
                     tracing::error!("error communicating with remote actor: {error}");
-                    let _ = ctx.actor_ref().stop_gracefully().await;
+                    let _ = ctx.actor_ref().stop_gracefully();
                 }
             }
         }

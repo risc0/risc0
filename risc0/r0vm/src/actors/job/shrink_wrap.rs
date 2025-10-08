@@ -119,7 +119,7 @@ impl JobActor {
         self.status = JobStatus::Succeeded(result);
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully().await;
+        let _ = self_ref.stop_gracefully();
     }
 
     fn task_start(&mut self, header: TaskHeader) {
@@ -141,7 +141,7 @@ impl JobActor {
         self.status = JobStatus::Failed(error.into());
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully().await;
+        let _ = self_ref.stop_gracefully();
     }
 }
 
