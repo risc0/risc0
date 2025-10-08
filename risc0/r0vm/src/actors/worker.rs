@@ -86,10 +86,10 @@ struct CpuTaskMsg {
 }
 
 /// Number of tasks we queue up to do on CPU
-const CPU_QUEUE_DEPTH: usize = 2;
+const CPU_QUEUE_DEPTH: usize = 50;
 
 /// Number of tasks we queue up to do on GPU
-const GPU_QUEUE_DEPTH: usize = 2;
+const GPU_QUEUE_DEPTH: usize = 50;
 
 #[cfg(feature = "cuda")]
 fn get_gpus_from_nvml() -> anyhow::Result<Vec<GpuSpec>> {
@@ -424,16 +424,12 @@ struct TaskTracer {
 }
 
 impl TaskTracer {
-    fn new(tracing: &job::tracer::SavedContext, name: String) -> Self {
+    fn new(tracing: &job::tracer::SavedContext, name: impl Into<Cow<'static, str>>) -> Self {
         let ctx = tracing.to_context();
         let tracer = opentelemetry::global::tracer("worker");
 
         let span = tracer.start_with_context(name, &ctx);
         Self { span }
-    }
-
-    fn add_event(&mut self, event: impl Into<Cow<'static, str>>) {
-        self.span.add_event(event, vec![]);
     }
 }
 
@@ -505,11 +501,7 @@ impl GpuProcessor {
     }
 
     async fn process_task(&self, mut msg: GpuTaskMsg) -> Result<()> {
-        let mut tracer = TaskTracer::new(
-            &msg.tracing,
-            format!("WorkerGPU({:?})", msg.header.task_kind),
-        );
-
+        let allocate_tracer = TaskTracer::new(&msg.tracing, "allocate GPU");
         tracing::info!(
             "ALLOCATE: {} wait for {:?}",
             &self.worker_id,
@@ -522,7 +514,12 @@ impl GpuProcessor {
                 hardware_reservations: msg.to_reserve.clone(),
             })
             .await??;
-        tracer.add_event("allocate complete");
+        drop(allocate_tracer);
+
+        let _tracer = TaskTracer::new(
+            &msg.tracing,
+            format!("WorkerGPU({:?})", msg.header.task_kind),
+        );
 
         msg.reserved.extend(std::mem::take(&mut msg.to_reserve));
 
@@ -745,11 +742,7 @@ impl CpuProcessor {
             }
         }
 
-        let mut tracer = TaskTracer::new(
-            &msg.tracing,
-            format!("WorkerCPU({:?})", msg.header.task_kind),
-        );
-
+        let allocate_tracer = TaskTracer::new(&msg.tracing, "allocate CPU");
         tracing::info!("ALLOCATE: {} wait for {to_reserve:?}", &self.worker_id);
         self.allocator
             .ask(AllocateHardware {
@@ -758,7 +751,7 @@ impl CpuProcessor {
                 hardware_reservations: to_reserve.clone(),
             })
             .await??;
-        tracer.add_event("allocate complete");
+        drop(allocate_tracer);
 
         msg.reserved.extend(to_reserve);
 
@@ -766,6 +759,10 @@ impl CpuProcessor {
 
         let processor = self.clone();
 
+        let tracer = TaskTracer::new(
+            &msg.tracing,
+            format!("WorkerCPU({:?})", msg.header.task_kind),
+        );
         tokio::task::spawn(async move {
             let res = processor.run_task(msg, header).await;
             if let Err(error) = res {
