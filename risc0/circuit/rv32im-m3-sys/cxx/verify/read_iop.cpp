@@ -19,11 +19,7 @@
 
 namespace risc0 {
 
-ReadIop::ReadIop(const Fp* buf, uint32_t size)
-  : buf(buf)
-  , size(size)
-  , offset(0)
-{}
+ReadIop::ReadIop(const Fp* buf, uint32_t size) : buf(buf), size(size), offset(0) {}
 
 void ReadIop::read(Fp* buf, size_t size) {
   if (offset + size > this->size) {
@@ -66,4 +62,3 @@ size_t ReadIop::rngBits(size_t bits) {
 }
 
 } // namespace risc0
-

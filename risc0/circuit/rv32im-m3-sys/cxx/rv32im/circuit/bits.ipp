@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-template<typename C>
-FDEV void AssertBit(CTX, Val<C> val) {
+template <typename C> FDEV void AssertBit(CTX, Val<C> val) {
   EQZ(val * (val - 1));
 }
 
-template<typename C>
-FDEV void BitReg<C>::set(CTX, Val<C> v) DEV { inner.set(ctx, v); }
+template <typename C> FDEV void BitReg<C>::set(CTX, Val<C> v) DEV {
+  inner.set(ctx, v);
+}
 
-template<typename C>
-FDEV Val<C> BitReg<C>::get() DEV { return inner.get(); }
+template <typename C> FDEV Val<C> BitReg<C>::get() DEV {
+  return inner.get();
+}
 
-template<typename C>
-FDEV void BitReg<C>::verify(CTX) DEV {
+template <typename C> FDEV void BitReg<C>::verify(CTX) DEV {
   AssertBit(ctx, inner.get());
 }

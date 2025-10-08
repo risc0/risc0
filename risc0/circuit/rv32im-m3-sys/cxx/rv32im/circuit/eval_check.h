@@ -17,18 +17,17 @@
 
 #include "rv32im/circuit/verify.h"
 
-template<size_t po2>
-struct EvalCheckReg {
+template <size_t po2> struct EvalCheckReg {
   static CONSTANT size_t numRows = (1 << (po2 + 2));
 
   FDEV Fp get() DEV { return data[0]; }
-  template<typename T, typename C> FDEV void applyInner(MTHR C& ctx) DEV {}
-  template<typename C> FDEV void verify(MTHR C& ctx) DEV {}
-  template<typename C> FDEV void addArguments(MTHR C& ctx) DEV {}
+  template <typename T, typename C> FDEV void applyInner(MTHR C& ctx) DEV {}
+  template <typename C> FDEV void verify(MTHR C& ctx) DEV {}
+  template <typename C> FDEV void addArguments(MTHR C& ctx) DEV {}
   Fp data[numRows];
 };
 
-template<size_t po2>
+template <size_t po2>
 FDEV void computeRow(MDEV Fp* check,
                      const MDEV Fp* dataConst,
                      const MDEV Fp* accumConst,
@@ -36,20 +35,19 @@ FDEV void computeRow(MDEV Fp* check,
                      const MDEV FpExt* accMix,
                      FpExt ecMix,
                      Fp rou,
-                     uint row
-) {
+                     uint row) {
   using RegT = EvalCheckReg<po2>;
   constexpr size_t numRows = (1 << (po2 + 2));
   size_t back1 = (row + numRows - 4) % numRows;
   Fp x = Fp(3) * pow(rou, row);
   FpExt ret = verifyCircuit<RegT, Fp, FpExt>(
-    reinterpret_cast<MDEV RegT*>(const_cast<MDEV Fp*>(dataConst) + row),
-    reinterpret_cast<MDEV RegT*>(const_cast<MDEV Fp*>(accumConst) + row),
-    reinterpret_cast<MDEV RegT*>(const_cast<MDEV Fp*>(accumConst) + back1),
-    const_cast<MDEV Fp*>(globals),
-    const_cast<MDEV FpExt*>(accMix),
-    ecMix,
-    x);
+      reinterpret_cast<MDEV RegT*>(const_cast<MDEV Fp*>(dataConst) + row),
+      reinterpret_cast<MDEV RegT*>(const_cast<MDEV Fp*>(accumConst) + row),
+      reinterpret_cast<MDEV RegT*>(const_cast<MDEV Fp*>(accumConst) + back1),
+      const_cast<MDEV Fp*>(globals),
+      const_cast<MDEV FpExt*>(accMix),
+      ecMix,
+      x);
   // Divide by 3x^n - 1: In reality this simplifies for each po2 to
   // multiplication by 4 constants, one at each row % 4, but it's annoying to
   // precompute + pass them, and impact of this code relative to the entire

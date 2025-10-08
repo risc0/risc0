@@ -27,32 +27,28 @@ struct ArgCountContext {
   using ValExtImpl = FpExt;
   struct RegImpl {
     Fp get() { return 0; }
-    template<typename T> void applyInner(ArgCountContext& ctx) {}
+    template <typename T> void applyInner(ArgCountContext& ctx) {}
     void addArguments(ArgCountContext& ctx) {}
     Fp data;
   };
   using ArgCountRegImpl = RegImpl;
   size_t argCount = 0;
 
-  template<typename T>
-  inline void push(T argument) { argCount++; }
-  template<typename T>
-  inline void pull(T argument) { argCount++; }
-  template<typename T>
-  inline void addArgument(Fp count, T argument) { argCount++; }
-  //inline Val globalGet(uint32_t offset) { return 0;}
-  //inline Val getX() { return 0; }
+  template <typename T> inline void push(T argument) { argCount++; }
+  template <typename T> inline void pull(T argument) { argCount++; }
+  template <typename T> inline void addArgument(Fp count, T argument) { argCount++; }
+  // inline Val globalGet(uint32_t offset) { return 0;}
+  // inline Val getX() { return 0; }
 };
 
 struct AddArgsFwd {
-  template<typename T, typename... Args>
+  template <typename T, typename... Args>
   static void apply(ArgCountContext& ctx, T& obj, Args... args) {
     obj.template applyInner<AddArgsFwd>(ctx, args...);
     obj.addArguments(ctx, args...);
   }
 
-  template <typename T, size_t N>
-  static void apply(ArgCountContext& ctx, T (&t)[N]) {
+  template <typename T, size_t N> static void apply(ArgCountContext& ctx, T (&t)[N]) {
     for (size_t i = 0; i < N; i++) {
       AddArgsFwd::apply(ctx, t[i]);
     }
@@ -63,14 +59,16 @@ struct AddArgsFwd {
 
 size_t computeMaxWitPerRow(bool tune) {
   size_t ret = 0;
-#define BLOCK_TYPE(name, count) \
-  { \
-    size_t witSize = sizeof(name ## Witness) / sizeof(Fp); \
-    size_t tot = count * witSize; \
-    if (tune) { \
-      LOG(2, "  Block type: " << #name << ": size = " << witSize << ", count = " << count << ", tot = " << tot); \
-    } \
-    ret = std::max(ret, tot); \
+#define BLOCK_TYPE(name, count)                                                                    \
+  {                                                                                                \
+    size_t witSize = sizeof(name##Witness) / sizeof(Fp);                                           \
+    size_t tot = count * witSize;                                                                  \
+    if (tune) {                                                                                    \
+      LOG(2,                                                                                       \
+          "  Block type: " << #name << ": size = " << witSize << ", count = " << count             \
+                           << ", tot = " << tot);                                                  \
+    }                                                                                              \
+    ret = std::max(ret, tot);                                                                      \
   }
   BLOCK_TYPES
 #undef BLOCK_TYPE
@@ -80,14 +78,16 @@ size_t computeMaxWitPerRow(bool tune) {
 size_t computeMaxDataPerRow(bool tune) {
   size_t ret = 0;
   size_t base = MAJOR_SPLIT_SIZE + MINOR_SPLIT_SIZE;
-#define BLOCK_TYPE(name, count) \
-  { \
-    size_t blockSize = sizeof(name ## Block<ArgCountContext>) / sizeof(Fp); \
-    size_t tot = base + count + count * blockSize; \
-    if (tune) { \
-      LOG(2, "  Block type: " << #name << ":size = " << blockSize << ", count = " << count << ", tot = " << tot); \
-    } \
-    ret = std::max(ret, tot); \
+#define BLOCK_TYPE(name, count)                                                                    \
+  {                                                                                                \
+    size_t blockSize = sizeof(name##Block<ArgCountContext>) / sizeof(Fp);                          \
+    size_t tot = base + count + count * blockSize;                                                 \
+    if (tune) {                                                                                    \
+      LOG(2,                                                                                       \
+          "  Block type: " << #name << ":size = " << blockSize << ", count = " << count            \
+                           << ", tot = " << tot);                                                  \
+    }                                                                                              \
+    ret = std::max(ret, tot);                                                                      \
   }
   BLOCK_TYPES
 #undef BLOCK_TYPE
@@ -96,22 +96,23 @@ size_t computeMaxDataPerRow(bool tune) {
 
 size_t computeMaxAccumPerRow(bool tune) {
   size_t ret = 0;
-#define BLOCK_TYPE(name, count) \
-  { \
-    ArgCountContext ctx; \
-    name ## Block<ArgCountContext> block; \
-    AddArgsFwd::apply(ctx, block); \
-    size_t tot = count * ctx.argCount; \
-    if (tune) { \
-      LOG(2, "  Block type: " << #name << ": args = " << ctx.argCount << ", count = " << count << ", tot = " << tot); \
-    } \
-    ret = std::max(ret, tot); \
+#define BLOCK_TYPE(name, count)                                                                    \
+  {                                                                                                \
+    ArgCountContext ctx;                                                                           \
+    name##Block<ArgCountContext> block;                                                            \
+    AddArgsFwd::apply(ctx, block);                                                                 \
+    size_t tot = count * ctx.argCount;                                                             \
+    if (tune) {                                                                                    \
+      LOG(2,                                                                                       \
+          "  Block type: " << #name << ": args = " << ctx.argCount << ", count = " << count        \
+                           << ", tot = " << tot);                                                  \
+    }                                                                                              \
+    ret = std::max(ret, tot);                                                                      \
   }
   BLOCK_TYPES
 #undef BLOCK_TYPE
   return 4 + ceilDiv(ret, 2) * 4;
 }
-
 
 size_t computeAccumTopSize() {
   return sizeof(AccumTop<ArgCountContext>) / sizeof(Fp);

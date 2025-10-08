@@ -15,21 +15,19 @@
 
 #pragma once
 
-#include "rv32im/witness/decode.h"
 #include "rv32im/circuit/mem.h"
 #include "rv32im/circuit/one_hot.h"
 #include "rv32im/circuit/u32.h"
+#include "rv32im/witness/decode.h"
 
-template<typename C>
-struct FetchBlock {
+template <typename C> struct FetchBlock {
   CONSTANT static char NAME[] = "FetchBlock";
 
   Reg<C> iCacheCycle;
   RegU32<C> pc;
   RegU32<C> nextPc;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, iCacheCycle);
     T::apply(ctx, pc);
     T::apply(ctx, nextPc);
@@ -42,8 +40,7 @@ struct FetchBlock {
   FDEV void addArguments(CTX) DEV {}
 };
 
-template<typename C>
-struct DecodeBlock {
+template <typename C> struct DecodeBlock {
   CONSTANT static char NAME[] = "DecodeBlock";
 
   ArgCountReg<C> count;
@@ -67,8 +64,7 @@ struct DecodeBlock {
     return cond<C>(pcDecomp.low1.get(), load0.data.high.get(), load0.data.low.get());
   }
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, count);
     T::apply(ctx, fetch);
     T::apply(ctx, loadCycle);

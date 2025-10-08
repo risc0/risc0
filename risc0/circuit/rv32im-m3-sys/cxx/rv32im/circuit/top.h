@@ -15,31 +15,30 @@
 
 #pragma once
 
-#include "rv32im/witness/witness.h"
 #include "rv32im/circuit/regext.h"
+#include "rv32im/witness/witness.h"
 
-template<typename C>
-struct Top {
+template <typename C> struct Top {
   TwoHot<C, MAJOR_SPLIT_SIZE, MINOR_SPLIT_SIZE> select;
   union {
-#define BLOCK_TYPE(name, count) struct { \
-      BitReg<C> isValid[count]; \
-      name ## Block<C> data[count]; \
-    } name;
+#define BLOCK_TYPE(name, count)                                                                    \
+  struct {                                                                                         \
+    BitReg<C> isValid[count];                                                                      \
+    name##Block<C> data[count];                                                                    \
+  } name;
     BLOCK_TYPES
 #undef BLOCK_TYPE
   } mux;
 };
 
-template<typename C>
-struct AccumTop {
+template <typename C> struct AccumTop {
   OneHot<C, POLY_OP_SIZE> polyOp;
   RegExt<C> local;
   RegExt<C> poly;
   RegExt<C> term;
   RegExt<C> total;
-  
-  template<typename T>
+
+  template <typename T>
   FDEV void applyInner(CTX, MDEV Top<C>* top, MDEV AccumTop<C>* prev, ValExt<C> z) DEV {
     T::apply(ctx, polyOp);
     T::apply(ctx, local);
@@ -52,7 +51,8 @@ struct AccumTop {
   FDEV void setPhase1(CTX, MDEV Top<C>* top, ValExt<C> z) DEV;
   FDEV bool isSimple() DEV;
   // Sets poly/term/total based on prev state
-  FDEV void setPhase2(CTX, MDEV Top<C>* top, MDEV AccumTop<C>* prev, ValExt<C> z16, ValExt<C> neg) DEV;
+  FDEV void
+  setPhase2(CTX, MDEV Top<C>* top, MDEV AccumTop<C>* prev, ValExt<C> z16, ValExt<C> neg) DEV;
   // Verifies everything
   FDEV void verify(CTX, MDEV Top<C>* top, MDEV AccumTop<C>* prev, ValExt<C> z) DEV;
   FDEV void addArguments(CTX, MDEV Top<C>* top, MDEV AccumTop<C>* prev, ValExt<C> z) DEV {}

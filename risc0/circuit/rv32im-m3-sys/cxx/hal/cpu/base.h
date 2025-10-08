@@ -31,11 +31,15 @@ using risc0::RowInfo;
 
 #define CONSTANT constexpr
 #define CTX Context& ctx
-#define DEV /**/
+#define DEV  /**/
 #define FDEV /**/
 #define MDEV /**/
 #define ATOMIC_U32 std::atomic<uint32_t>
-inline void ATOMIC_ADD(ATOMIC_U32& data, uint32_t toAdd) { data.fetch_add(toAdd, std::memory_order_relaxed); }
-inline uint32_t ATOMIC_GET(ATOMIC_U32& data) { return data.load(std::memory_order_relaxed); }
+inline void ATOMIC_ADD(ATOMIC_U32& data, uint32_t toAdd) {
+  data.fetch_add(toAdd, std::memory_order_relaxed);
+}
+inline uint32_t ATOMIC_GET(ATOMIC_U32& data) {
+  return data.load(std::memory_order_relaxed);
+}
 
 x

@@ -22,37 +22,28 @@
 struct BuilderSingleton {
   static void set(mlir::OpBuilder* value) { builder = value; }
   static mlir::OpBuilder* get() { return builder; }
-    
+
 protected:
   static mlir::OpBuilder* builder;
 };
-
 
 struct RecordingVal {
   mlir::Value value;
 
   RecordingVal();
-  RecordingVal(mlir::Value v) : value(v) {} 
+  RecordingVal(mlir::Value v) : value(v) {}
   RecordingVal(uint32_t c);
   RecordingVal(risc0::Fp c);
 
   RecordingVal operator+(const RecordingVal& rhs) const;
-  RecordingVal operator+=(const RecordingVal& rhs) {
-    return *this = *this + rhs;
-  }
+  RecordingVal operator+=(const RecordingVal& rhs) { return *this = *this + rhs; }
   RecordingVal operator-(const RecordingVal& rhs) const;
-  RecordingVal operator-=(const RecordingVal& rhs) {
-    return *this = *this - rhs;
-  }
+  RecordingVal operator-=(const RecordingVal& rhs) { return *this = *this - rhs; }
   RecordingVal operator-() const;
   RecordingVal operator*(const RecordingVal& rhs) const;
-  RecordingVal operator*=(const RecordingVal& rhs) {
-    return *this = *this * rhs;
-  }
+  RecordingVal operator*=(const RecordingVal& rhs) { return *this = *this * rhs; }
 
-  operator risc0::Fp() const {
-    return risc0::Fp();
-  }
+  operator risc0::Fp() const { return risc0::Fp(); }
 };
 
 struct RecordingValExt {
@@ -69,13 +60,7 @@ struct RecordingValExt {
   RecordingValExt operator-(RecordingValExt rhs) const;
   RecordingValExt operator*(RecordingValExt rhs) const;
   RecordingValExt operator*(RecordingVal rhs) const;
-  RecordingValExt& operator+=(RecordingValExt rhs) {
-    return *this = *this + rhs;
-  }
-  RecordingValExt& operator*=(RecordingValExt rhs) {
-    return *this = *this * rhs;
-  }
-  RecordingValExt& operator*=(RecordingVal rhs) {
-    return *this = *this * rhs;
-  }
+  RecordingValExt& operator+=(RecordingValExt rhs) { return *this = *this + rhs; }
+  RecordingValExt& operator*=(RecordingValExt rhs) { return *this = *this * rhs; }
+  RecordingValExt& operator*=(RecordingVal rhs) { return *this = *this * rhs; }
 };

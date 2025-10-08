@@ -16,11 +16,11 @@
 #include "compiler/emitter/Emitter.h"
 #include "zirgen/Main/Utils.h"
 
+#include "zirgen/Dialect/ZHLT/Transforms/Passes.h"
+#include "zirgen/Dialect/ZStruct/Transforms/Passes.h"
 #include "zirgen/circuit/verify/wrap_zirgen.h"
 #include "zirgen/compiler/codegen/codegen.h"
 #include "zirgen/dsl/passes/Passes.h"
-#include "zirgen/Dialect/ZHLT/Transforms/Passes.h"
-#include "zirgen/Dialect/ZStruct/Transforms/Passes.h"
 
 using namespace mlir;
 using namespace zirgen;
@@ -28,7 +28,8 @@ using namespace zirgen;
 LogicalResult translateToCheckFunc(ModuleOp mod) {
   PassManager pm(mod.getContext());
   // Generate layout
-  // TODO: does this give the right field ordering guarantees in the layout? It works in this case!
+  // TODO: does this give the right field ordering guarantees in the layout? It
+  // works in this case!
   pm.addPass(dsl::createGenerateCheckLayoutPass());
   pm.addPass(dsl::createGenerateLayoutPass());
 
@@ -57,6 +58,5 @@ LogicalResult translateToCheckFunc(ModuleOp mod) {
 void emitRustVerifierCode(ModuleOp mod, std::string circuitName, std::string protocolInfo) {
   auto circuitNameAttr = Zll::lookupModuleAttr<Zll::CircuitNameAttr>(mod);
   emitPoly(mod, circuitName, protocolInfo);
-  emitTarget(
-      RustCodegenTarget(circuitNameAttr), mod, mod, codegen::getRustCodegenOpts());
-  }
+  emitTarget(RustCodegenTarget(circuitNameAttr), mod, mod, codegen::getRustCodegenOpts());
+}

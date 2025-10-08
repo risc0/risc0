@@ -27,31 +27,22 @@
 namespace risc0::rv32im {
 
 Trace::Trace(size_t maxRows, RowInfo* rows, uint32_t* aux)
-    : rowBegin(rows)
-    , rowNext(rows)
-    , rowEnd(rows + maxRows)
-    , auxBegin(aux)
-    , auxNext(aux)
-{
+    : rowBegin(rows), rowNext(rows), rowEnd(rows + maxRows), auxBegin(aux), auxNext(aux) {
   globals = &makeGlobals();
   memset(globals, 0, sizeof(GlobalsWitness));
 }
 
-Trace::~Trace() {
-}
+Trace::~Trace() {}
 
 void Trace::finalize() {
-  while(rowNext != rowEnd) {
+  while (rowNext != rowEnd) {
     rowNext->rowType = uint32_t(BlockType::Empty);
     rowNext->blockCount = 0;
     rowNext->auxOffset = 0;
     rowNext++;
   }
-  std::stable_sort(rowBegin, rowEnd, [](const RowInfo& a, const RowInfo& b) {
-      return a.rowType < b.rowType;
-  });
+  std::stable_sort(
+      rowBegin, rowEnd, [](const RowInfo& a, const RowInfo& b) { return a.rowType < b.rowType; });
 }
 
-
-
-}  // namespace risc0::rv32im
+} // namespace risc0::rv32im

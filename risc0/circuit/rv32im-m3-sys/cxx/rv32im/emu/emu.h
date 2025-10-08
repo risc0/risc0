@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include "rv32im/emu/trace.h"
 #include "rv32im/emu/image.h"
+#include "rv32im/emu/trace.h"
 
 namespace risc0::rv32im {
 
@@ -38,4 +38,4 @@ public:
 
 bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t count);
 
-}  // namespace risc0::rv32im
+} // namespace risc0::rv32im

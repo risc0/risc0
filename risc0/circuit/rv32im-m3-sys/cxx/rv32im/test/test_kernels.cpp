@@ -16,8 +16,8 @@
 #include "core/log.h"
 #include "rv32im/test/test_prove.h"
 
-#include <string>
 #include <iostream>
+#include <string>
 
 using namespace risc0;
 

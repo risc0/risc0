@@ -19,9 +19,8 @@
 #include "rv32im/circuit/globals.h"
 #include "rv32im/circuit/inst.h"
 #include "rv32im/circuit/io.h"
-#include "rv32im/circuit/poseidon2.h"
 #include "rv32im/circuit/paging.h"
+#include "rv32im/circuit/poseidon2.h"
 #include "rv32im/circuit/units.h"
 
 #include "rv32im/circuit/top.h"
-

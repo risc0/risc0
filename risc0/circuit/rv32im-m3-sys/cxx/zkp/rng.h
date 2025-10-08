@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include "zkp/poseidon2.h"
 #include "zkp/fpext.h"
+#include "zkp/poseidon2.h"
 
 namespace risc0 {
 

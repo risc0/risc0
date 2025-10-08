@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-template<typename C>
-FDEV void ReadByteBlock<C>::set(CTX, ReadByteWitness wit) DEV {
+template <typename C> FDEV void ReadByteBlock<C>::set(CTX, ReadByteWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   lowBit0.set(ctx, wit.lowBits % 2);
   lowBit1.set(ctx, wit.lowBits / 2);
@@ -26,8 +25,7 @@ FDEV void ReadByteBlock<C>::set(CTX, ReadByteWitness wit) DEV {
   sizeMinus1.set(ctx, wit.size - 1);
 }
 
-template<typename C>
-FDEV void ReadByteBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void ReadByteBlock<C>::verify(CTX) DEV {
   Val<C> lb1 = lowBit1.get();
   // Verify we don't change non-selected short
   EQ(lb1 * io.prevData.low.get() + (Val<C>(1) - lb1) * io.prevData.high.get(),
@@ -46,8 +44,7 @@ FDEV void ReadByteBlock<C>::verify(CTX) DEV {
   EQ(is3.get(), lb0 * lb1);
 }
 
-template<typename C>
-FDEV void ReadByteBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void ReadByteBlock<C>::addArguments(CTX) DEV {
   Val<C> newAddr = io.wordAddr.get() + is3.get();
   Val<C> low3 = lowBit0.get() + lowBit1.get() * 2;
   Val<C> newLow3 = Val<C>(1) + low3 - is3.get() * 4;
@@ -56,21 +53,17 @@ FDEV void ReadByteBlock<C>::addArguments(CTX) DEV {
   ctx.push(ReadStateArgument<C>(cycle.get() + 1, newAddr, newLow3, sizeMinus1.get()));
 }
 
-template<typename C>
-FDEV void ReadWordBlock<C>::set(CTX, ReadWordWitness wit) DEV {
+template <typename C> FDEV void ReadWordBlock<C>::set(CTX, ReadWordWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   sizeMinus4.set(ctx, wit.size - 4);
   io.set(ctx, wit.io, wit.cycle);
 }
 
-template<typename C>
-FDEV void ReadWordBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void ReadWordBlock<C>::verify(CTX) DEV {
   // NOTHING TO DO
 }
 
-template<typename C>
-FDEV void ReadWordBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void ReadWordBlock<C>::addArguments(CTX) DEV {
   ctx.pull(ReadStateArgument<C>(cycle.get(), io.wordAddr.get(), 0, sizeMinus4.get() + 4));
   ctx.push(ReadStateArgument<C>(cycle.get() + 1, io.wordAddr.get() + 1, 0, sizeMinus4.get()));
 }
-

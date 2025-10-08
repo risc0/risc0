@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include "zkp/taps.h"
 #include "prove/merkle.h"
+#include "zkp/taps.h"
 
 namespace risc0 {
 
@@ -49,4 +49,4 @@ public:
   Fp rou;
 };
 
-}  // namespace risc0
+} // namespace risc0

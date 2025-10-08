@@ -66,10 +66,10 @@ __device__ inline uint32_t asUInt32(Fp val) {
   return val.asUInt32();
 }
 
-
 class FpExt {
 private:
   bb31_4_t val;
+
 public:
   __device__ inline FpExt() { val.zero(); }
   __device__ inline FpExt(int val) : val(val) {}
@@ -77,7 +77,7 @@ public:
   __device__ inline FpExt(bb31_4_t val) : val(val) {}
   __device__ inline FpExt(int a, int b, int c, int d) : val(a, b, c, d) {}
   __device__ inline FpExt(Fp a, Fp b, Fp c, Fp d)
-    : val(a.asUInt32(), b.asUInt32(), c.asUInt32(), d.asUInt32()) {}
+      : val(a.asUInt32(), b.asUInt32(), c.asUInt32(), d.asUInt32()) {}
 
   __device__ inline Fp elem(size_t i) { return val[i]; }
 
@@ -106,7 +106,9 @@ public:
   __device__ inline FpExt inv() const { return val.reciprocal(); }
 };
 
-__device__ inline Fp elem(FpExt a, size_t i) { return a.elem(i); }
+__device__ inline Fp elem(FpExt a, size_t i) {
+  return a.elem(i);
+}
 
 __device__ inline FpExt pow(FpExt val, uint32_t i) {
   return val.pow(i);
@@ -115,4 +117,3 @@ __device__ inline FpExt pow(FpExt val, uint32_t i) {
 __device__ inline FpExt inv(FpExt val) {
   return val.inv();
 }
-

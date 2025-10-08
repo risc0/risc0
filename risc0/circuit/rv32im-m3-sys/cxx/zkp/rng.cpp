@@ -66,4 +66,3 @@ size_t Rng::rngBits(size_t bits) {
 }
 
 } // namespace risc0
-

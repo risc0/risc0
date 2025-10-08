@@ -12,16 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-template<typename C>
-FDEV void PageInNodeBlock<C>::set(CTX, PageInNodeWitness wit) DEV {
+template <typename C> FDEV void PageInNodeBlock<C>::set(CTX, PageInNodeWitness wit) DEV {
   index.set(ctx, wit.index);
   SET_ARR(node, wit.node, CELLS_DIGEST);
   SET_ARR(left, wit.left, CELLS_DIGEST);
   SET_ARR(right, wit.right, CELLS_DIGEST);
 }
 
-template<typename C>
-FDEV void PageInNodeBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void PageInNodeBlock<C>::addArguments(CTX) DEV {
   PageInArgument<C> piNode;
   piNode.index = index.get();
   GET_ARR(piNode.node, node, CELLS_DIGEST);
@@ -43,8 +41,7 @@ FDEV void PageInNodeBlock<C>::addArguments(CTX) DEV {
   ctx.pull(call);
 }
 
-template<typename C>
-FDEV void PageInPartBlock<C>::set(CTX, PageInPartWitness wit) DEV {
+template <typename C> FDEV void PageInPartBlock<C>::set(CTX, PageInPartWitness wit) DEV {
   uint32_t part = (wit.addr / PAGE_PART_SIZE) % NUM_PARTS;
   addr.set(ctx, wit.addr);
   partNum.set(ctx, part);
@@ -56,8 +53,7 @@ FDEV void PageInPartBlock<C>::set(CTX, PageInPartWitness wit) DEV {
   lastPart.set(ctx, NUM_PARTS - 1 - part);
 }
 
-template<typename C>
-FDEV void PageInPartBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void PageInPartBlock<C>::addArguments(CTX) DEV {
   Val<C> addrVal = addr.get();
   for (size_t i = 0; i < PAGE_PART_SIZE; i++) {
     ctx.push(MemoryArgument<C>(addrVal + i, 0, data[i].low.get(), data[i].high.get()));
@@ -75,21 +71,19 @@ FDEV void PageInPartBlock<C>::addArguments(CTX) DEV {
   call.isFinal = lastPart.isZero.get();
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     call.in[i] = in[i].get();
-    call.data[2* i] = Val<C>(943718400) * data[i].low.get();
-    call.data[2 *i + 1] = Val<C>(943718400) * data[i].high.get();
+    call.data[2 * i] = Val<C>(943718400) * data[i].low.get();
+    call.data[2 * i + 1] = Val<C>(943718400) * data[i].high.get();
     call.out[i] = out[i].get();
   }
   ctx.pull(call);
 }
 
-template<typename C>
-FDEV void PageInPageBlock<C>::set(CTX, PageInPageWitness wit) DEV {
+template <typename C> FDEV void PageInPageBlock<C>::set(CTX, PageInPageWitness wit) DEV {
   addr.set(ctx, wit.addr);
   SET_ARR(node, wit.node, CELLS_DIGEST);
 }
 
-template<typename C>
-FDEV void PageInPageBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void PageInPageBlock<C>::addArguments(CTX) DEV {
   PageInArgument<C> pi;
   pi.index = addr.get() * inv(Fp(uint32_t(PAGE_SIZE_WORDS))) + MEMORY_SIZE_PAGES;
   GET_ARR(pi.node, node, CELLS_DIGEST);
@@ -104,16 +98,14 @@ FDEV void PageInPageBlock<C>::addArguments(CTX) DEV {
   ctx.pull(pip);
 }
 
-template<typename C>
-FDEV void PageOutNodeBlock<C>::set(CTX, PageOutNodeWitness wit) DEV {
+template <typename C> FDEV void PageOutNodeBlock<C>::set(CTX, PageOutNodeWitness wit) DEV {
   index.set(ctx, wit.index);
   SET_ARR(node, wit.node, CELLS_DIGEST);
   SET_ARR(left, wit.left, CELLS_DIGEST);
   SET_ARR(right, wit.right, CELLS_DIGEST);
 }
 
-template<typename C>
-FDEV void PageOutNodeBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void PageOutNodeBlock<C>::addArguments(CTX) DEV {
   PageOutArgument<C> piNode;
   piNode.index = index.get();
   GET_ARR(piNode.node, node, CELLS_DIGEST);
@@ -135,8 +127,7 @@ FDEV void PageOutNodeBlock<C>::addArguments(CTX) DEV {
   ctx.pull(call);
 }
 
-template<typename C>
-FDEV void PageOutPartBlock<C>::set(CTX, PageOutPartWitness wit) DEV {
+template <typename C> FDEV void PageOutPartBlock<C>::set(CTX, PageOutPartWitness wit) DEV {
   uint32_t part = (wit.addr / PAGE_PART_SIZE) % NUM_PARTS;
   addr.set(ctx, wit.addr);
   partNum.set(ctx, part);
@@ -149,8 +140,7 @@ FDEV void PageOutPartBlock<C>::set(CTX, PageOutPartWitness wit) DEV {
   lastPart.set(ctx, NUM_PARTS - 1 - part);
 }
 
-template<typename C>
-FDEV void PageOutPartBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void PageOutPartBlock<C>::addArguments(CTX) DEV {
   Val<C> addrVal = addr.get();
   for (size_t i = 0; i < PAGE_PART_SIZE; i++) {
     ctx.pull(MemoryArgument<C>(addrVal + i, cycle[i].get(), data[i].low.get(), data[i].high.get()));
@@ -168,21 +158,19 @@ FDEV void PageOutPartBlock<C>::addArguments(CTX) DEV {
   call.isFinal = lastPart.isZero.get();
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     call.in[i] = in[i].get();
-    call.data[2* i] = Val<C>(943718400) * data[i].low.get();
-    call.data[2 *i + 1] = Val<C>(943718400) * data[i].high.get();
+    call.data[2 * i] = Val<C>(943718400) * data[i].low.get();
+    call.data[2 * i + 1] = Val<C>(943718400) * data[i].high.get();
     call.out[i] = out[i].get();
   }
   ctx.pull(call);
 }
 
-template<typename C>
-FDEV void PageOutPageBlock<C>::set(CTX, PageOutPageWitness wit) DEV {
+template <typename C> FDEV void PageOutPageBlock<C>::set(CTX, PageOutPageWitness wit) DEV {
   addr.set(ctx, wit.addr);
   SET_ARR(node, wit.node, CELLS_DIGEST);
 }
 
-template<typename C>
-FDEV void PageOutPageBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void PageOutPageBlock<C>::addArguments(CTX) DEV {
   PageOutArgument<C> po;
   po.index = addr.get() * inv(Fp(uint32_t(PAGE_SIZE_WORDS))) + MEMORY_SIZE_PAGES;
   GET_ARR(po.node, node, CELLS_DIGEST);
@@ -197,14 +185,12 @@ FDEV void PageOutPageBlock<C>::addArguments(CTX) DEV {
   ctx.pull(pop);
 }
 
-template<typename C>
-FDEV void PageUncleBlock<C>::set(CTX, PageUncleWitness wit) DEV {
+template <typename C> FDEV void PageUncleBlock<C>::set(CTX, PageUncleWitness wit) DEV {
   index.set(ctx, wit.index);
   SET_ARR(node, wit.node, CELLS_DIGEST);
 }
 
-template<typename C>
-FDEV void PageUncleBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void PageUncleBlock<C>::addArguments(CTX) DEV {
   PageInArgument<C> pi;
   pi.index = index.get();
   GET_ARR(pi.node, node, CELLS_DIGEST);

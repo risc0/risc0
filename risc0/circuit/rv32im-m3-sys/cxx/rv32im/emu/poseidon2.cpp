@@ -16,9 +16,9 @@
 #include "rv32im/emu/poseidon2.h"
 
 using risc0::p2impl::cells_t;
-using risc0::p2impl::poseidonMultiplyByMExt;
 using risc0::p2impl::poseidonDoExtRound;
 using risc0::p2impl::poseidonDoIntRounds;
+using risc0::p2impl::poseidonMultiplyByMExt;
 
 namespace risc0::rv32im {
 
@@ -105,4 +105,4 @@ Digest Poseidon2Witgen::doBlock(Digest in, const std::array<Fp, CELLS_RATE>& dat
   return out;
 }
 
-}  // namespace risc0::rv32im
+} // namespace risc0::rv32im

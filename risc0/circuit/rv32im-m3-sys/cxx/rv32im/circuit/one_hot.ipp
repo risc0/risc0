@@ -13,16 +13,14 @@
 // limitations under the License.
 
 // Set the selected bit to 1, zero all others
-template<typename C, size_t N>
-FDEV void OneHot<C, N>::set(CTX, uint32_t val) DEV {
+template <typename C, size_t N> FDEV void OneHot<C, N>::set(CTX, uint32_t val) DEV {
   for (uint32_t i = 0; i < N; i++) {
     bits[i].set(ctx, i == val ? 1 : 0);
   }
 }
 
 // Recover the original value by multiplying each bit by a constant
-template<typename C, size_t N>
-FDEV Val<C> OneHot<C, N>::get() DEV {
+template <typename C, size_t N> FDEV Val<C> OneHot<C, N>::get() DEV {
   Val<C> tot = 0;
   for (uint32_t i = 0; i < N; i++) {
     tot += bits[i].get() * Val<C>(i);
@@ -31,8 +29,7 @@ FDEV Val<C> OneHot<C, N>::get() DEV {
 }
 
 // In addition to being bits, they must sum to 1
-template<typename C, size_t N>
-FDEV void OneHot<C, N>::verify(CTX) DEV {
+template <typename C, size_t N> FDEV void OneHot<C, N>::verify(CTX) DEV {
   Val<C> sum = 0;
   for (uint32_t i = 0; i < N; i++) {
     sum += bits[i].get();
@@ -40,18 +37,15 @@ FDEV void OneHot<C, N>::verify(CTX) DEV {
   EQ(sum, 1);
 }
 
-template<typename C, size_t N, size_t M>
-FDEV void TwoHot<C, N, M>::set(CTX, uint32_t val) DEV {
+template <typename C, size_t N, size_t M> FDEV void TwoHot<C, N, M>::set(CTX, uint32_t val) DEV {
   major.set(ctx, val / M);
   minor.set(ctx, val % M);
 }
 
-template<typename C, size_t N, size_t M>
-FDEV Val<C> TwoHot<C, N, M>::get() DEV {
+template <typename C, size_t N, size_t M> FDEV Val<C> TwoHot<C, N, M>::get() DEV {
   return major.get() * M + minor.get();
 }
 
-template<typename C, size_t N, size_t M>
-FDEV Val<C> TwoHot<C, N, M>::at(uint32_t offset) DEV {
+template <typename C, size_t N, size_t M> FDEV Val<C> TwoHot<C, N, M>::at(uint32_t offset) DEV {
   return major.bits[offset / M].get() * minor.bits[offset % M].get();
 }

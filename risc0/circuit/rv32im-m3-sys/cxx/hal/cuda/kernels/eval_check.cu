@@ -15,19 +15,33 @@
 #include "fp.h"
 #include "hal/po2s.h"
 
-#define PO2(x) \
-extern "C" void eval_check_cuda_ ## x(Fp* check, const Fp* data, const Fp* accum, const Fp* globals, const FpExt* accMix, FpExt ecMix, Fp rou);
+#define PO2(x)                                                                                     \
+  extern "C" void eval_check_cuda_##x(Fp* check,                                                   \
+                                      const Fp* data,                                              \
+                                      const Fp* accum,                                             \
+                                      const Fp* globals,                                           \
+                                      const FpExt* accMix,                                         \
+                                      FpExt ecMix,                                                 \
+                                      Fp rou);
 PO2S
 #undef PO2
 
-extern "C" void eval_check_cuda(Fp* check, const Fp* data, const Fp* accum, const Fp* globals, const FpExt* accMix, FpExt ecMix, Fp rou, uint32_t numRows) {
+    extern "C" void
+    eval_check_cuda(Fp* check,
+                    const Fp* data,
+                    const Fp* accum,
+                    const Fp* globals,
+                    const FpExt* accMix,
+                    FpExt ecMix,
+                    Fp rou,
+                    uint32_t numRows) {
   uint32_t po2 = (31 - __builtin_clz(numRows)) - 2;
-  switch(po2) {
-#define PO2(x) \
-    case x: \
-      eval_check_cuda_ ## x(check, data, accum, globals, accMix, ecMix, rou); \
-      break;
-PO2S
+  switch (po2) {
+#define PO2(x)                                                                                     \
+  case x:                                                                                          \
+    eval_check_cuda_##x(check, data, accum, globals, accMix, ecMix, rou);                          \
+    break;
+    PO2S
 #undef PO2
   }
 }

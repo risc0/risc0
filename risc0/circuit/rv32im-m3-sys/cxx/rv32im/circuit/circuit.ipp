@@ -16,18 +16,21 @@
 
 #include "rv32im/circuit/circuit.h"
 
-#include "rv32im/base/opt.h"
 #include "rv32im/argument/argument.h"
+#include "rv32im/base/opt.h"
 
 #define EQ(a, b) ctx.eqz((a) - (b))
 #define EQZ(a) ctx.eqz(a)
 
-#define GET_ARR(out, in, n) \
-      for (size_t i = 0; i < n; i++) { out[i] = in[i].get(); }
+#define GET_ARR(out, in, n)                                                                        \
+  for (size_t i = 0; i < n; i++) {                                                                 \
+    out[i] = in[i].get();                                                                          \
+  }
 
-#define SET_ARR(out, in, n) \
-      for (size_t i = 0; i < n; i++) { out[i].set(ctx, in[i]); }
-
+#define SET_ARR(out, in, n)                                                                        \
+  for (size_t i = 0; i < n; i++) {                                                                 \
+    out[i].set(ctx, in[i]);                                                                        \
+  }
 
 #include "rv32im/circuit/bigint.ipp"
 #include "rv32im/circuit/bits.ipp"

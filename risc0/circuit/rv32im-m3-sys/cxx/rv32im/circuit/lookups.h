@@ -19,16 +19,12 @@
 #include "rv32im/witness/lookups.h"
 
 // A register that is constrained to be [0, 255]
-template<typename C>
-struct RegU8 {
+template <typename C> struct RegU8 {
   CONSTANT static char NAME[] = "RegU8";
 
   Reg<C> inner;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, inner);
-  }
+  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, inner); }
 
   FDEV void set(CTX, Val<C> in) DEV;
   FDEV inline void finalize(CTX) DEV {}
@@ -38,16 +34,12 @@ struct RegU8 {
 };
 
 // A register that is constrained to be [0, 65535]
-template<typename C>
-struct RegU16 {
+template <typename C> struct RegU16 {
   CONSTANT static char NAME[] = "RegU16";
 
   Reg<C> inner;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, inner);
-  }
+  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, inner); }
 
   FDEV void set(CTX, Val<C> in) DEV;
   FDEV inline void finalize(CTX) DEV {}
@@ -57,16 +49,14 @@ struct RegU16 {
 };
 
 // A thing that generates table entries
-template<typename C>
-struct MakeTableBlock {
+template <typename C> struct MakeTableBlock {
   CONSTANT static char NAME[] = "MakeTableBlock";
 
   Reg<C> table;
   Reg<C> start;
   ArgCountReg<C> useCount[16];
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, table);
     T::apply(ctx, start);
     T::apply(ctx, useCount);
@@ -77,4 +67,3 @@ struct MakeTableBlock {
   FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
-

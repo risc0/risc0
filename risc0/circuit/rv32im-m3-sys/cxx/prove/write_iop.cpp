@@ -54,4 +54,3 @@ size_t WriteIop::rngBits(size_t bits) {
 }
 
 } // namespace risc0
-
