@@ -148,7 +148,7 @@ impl From<Session> for SessionInfo {
 }
 
 /// TODO
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TaskError {
     /// TODO
     Generic(String),

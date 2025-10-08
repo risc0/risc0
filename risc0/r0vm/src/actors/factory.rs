@@ -13,13 +13,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet, VecDeque};
+use std::net::SocketAddr;
 
+use derive_more::From;
 use multi_index_map::MultiIndexMap;
 
 use super::{
     RemoteActor, RemoteFactoryRequest, RpcDisconnect,
-    actor::{Actor, ActorRef, Context, Message},
+    actor::{Actor, ActorRef, Context, Message, SendError},
     allocator::{CpuCores, GpuTokens, RemoteAllocatorActor, ScheduleTask, ScheduleTaskReply},
     error::{Error, Result as ActorResult},
     job::JobActor,
@@ -38,6 +40,8 @@ struct WorkerRow {
     task_kind: TaskKind,
     #[multi_index(hashed_non_unique)]
     worker_id: WorkerId,
+    #[multi_index(hashed_non_unique)]
+    remote_address: SocketAddr,
 }
 
 pub(crate) trait FactoryDeps: 'static {
@@ -54,11 +58,16 @@ impl FactoryDeps for DefaultFactoryDeps {
     type Job = JobActor;
 }
 
+struct ActiveTask<JobT: Actor> {
+    worker_id: WorkerId,
+    msg: SubmitTaskMsg<JobT>,
+}
+
 pub(crate) struct FactoryActor<DepsT: FactoryDeps = DefaultFactoryDeps> {
     jobs: HashMap<JobId, ActorRef<DepsT::Job>>,
     workers: MultiIndexWorkerRowMap,
-    pending_tasks: Vec<SubmitTaskMsg<DepsT::Job>>,
-    active_tasks: HashMap<GlobalId, SubmitTaskMsg<DepsT::Job>>,
+    pending_tasks: VecDeque<SubmitTaskMsg<DepsT::Job>>,
+    active_tasks: HashMap<GlobalId, ActiveTask<DepsT::Job>>,
     worker_actors: HashMap<WorkerId, ActorRef<DepsT::Worker>>,
     allocator: ActorRef<DepsT::Allocator>,
     require_gpu: bool,
@@ -84,7 +93,11 @@ impl<DepsT: FactoryDeps> Actor for FactoryActor<DepsT> {
             let _ = worker.stop_gracefully();
         }
 
-        for task in self.pending_tasks.iter().chain(self.active_tasks.values()) {
+        for task in self
+            .pending_tasks
+            .iter()
+            .chain(self.active_tasks.values().map(|t| &t.msg))
+        {
             let _ = task
                 .job
                 .tell(TaskDoneMsg {
@@ -99,53 +112,96 @@ impl<DepsT: FactoryDeps> Actor for FactoryActor<DepsT> {
     }
 }
 
+type ScheduleResult<T> = std::result::Result<T, ScheduleError>;
+
+#[derive(From)]
+enum ScheduleError {
+    #[from(skip)]
+    WorkerDisconnected {
+        worker_id: WorkerId,
+    },
+    ActorError(Error),
+}
+
+impl From<SendError> for ScheduleError {
+    fn from(e: SendError) -> Self {
+        Self::ActorError(e.into())
+    }
+}
+
 impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
-    async fn maybe_schedule_tasks(&mut self) -> ActorResult<()> {
-        for msg in std::mem::take(&mut self.pending_tasks) {
-            let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
+    async fn maybe_schedule_task(
+        &mut self,
+        msg: SubmitTaskMsg<DepsT::Job>,
+    ) -> ScheduleResult<bool> {
+        let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
 
-            if !workers.is_empty() {
-                tracing::info!("Factory: scheduling job {:?}", &msg.header);
-                let job_id = msg.header.global_id.job_id;
+        if workers.is_empty() {
+            return Ok(false);
+        }
 
-                self.jobs.insert(job_id, msg.job.clone());
+        tracing::info!("Factory: scheduling job {:?}", &msg.header);
 
-                let (cores, gpu_tokens) = self.choose_tokens(msg.header.task_kind);
-                let task = TaskMsg {
-                    header: msg.header.clone(),
-                    task: msg.task.clone(),
-                    cores,
-                    gpu_tokens,
-                };
+        let (cores, gpu_tokens) = self.choose_tokens(msg.header.task_kind);
+        let task = TaskMsg {
+            header: msg.header.clone(),
+            task: msg.task.clone(),
+            cores,
+            gpu_tokens,
+        };
 
-                let response = self
-                    .allocator
-                    .ask(ScheduleTask {
-                        candidates: workers.iter().map(|w| w.worker_id).collect(),
-                        task_id: msg.header.global_id,
-                        description: format!("{:?}", &msg.header.task_kind),
-                    })
-                    .await??;
+        let mut candidates: Vec<_> = workers.iter().map(|w| w.worker_id).collect();
+        candidates.sort();
+        let response = self
+            .allocator
+            .ask(ScheduleTask {
+                candidates,
+                task_id: msg.header.global_id,
+                description: format!("{:?}", &msg.header.task_kind),
+            })
+            .await??;
 
-                let worker_id = response.worker_id;
-                let worker_actor = self.worker_actors.get(&worker_id).ok_or_else(|| {
-                    Error::new("received candidate worker from allocator outside given set")
-                })?;
-                tracing::info!(
-                    "Factory: sending job {:?} to worker {worker_id:?}",
-                    &msg.header
-                );
+        let worker_id = response.worker_id;
+        let worker_actor = self.worker_actors.get(&worker_id).ok_or_else(|| {
+            Error::new("received candidate worker from allocator outside given set")
+        })?;
+        tracing::info!(
+            "Factory: sending job {:?} to worker {worker_id:?}",
+            &msg.header
+        );
 
-                // XXX remi: If we error when talking with a worker, we should instead remove the
-                // worker and reschedule
-                worker_actor.tell(task).await?;
-                self.active_tasks.insert(msg.header.global_id, msg);
-            } else {
-                self.pending_tasks.push(msg);
+        if worker_actor.tell(task).await.is_err() {
+            return Err(ScheduleError::WorkerDisconnected { worker_id });
+        }
+
+        let job_id = msg.header.global_id.job_id;
+        self.jobs.insert(job_id, msg.job.clone());
+        self.active_tasks
+            .insert(msg.header.global_id, ActiveTask { worker_id, msg });
+
+        Ok(true)
+    }
+
+    async fn maybe_schedule_tasks_inner(&mut self) -> ScheduleResult<()> {
+        let mut skipped_tasks = VecDeque::new();
+
+        let mut res: ScheduleResult<bool> = Ok(false);
+
+        while let Some(msg) = self.pending_tasks.pop_front() {
+            res = self.maybe_schedule_task(msg.clone()).await;
+
+            // If the task wasn't scheduled, skip it
+            if matches!(&res, Ok(false) | Err(_)) {
+                skipped_tasks.push_back(msg);
+            }
+
+            if res.is_err() {
+                break;
             }
         }
 
-        Ok(())
+        self.pending_tasks.extend(skipped_tasks);
+        res.map(|_| ())
     }
 
     fn choose_tokens(&self, task_kind: TaskKind) -> (CpuCores, GpuTokens) {
@@ -162,11 +218,45 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
         (cores, gpu_tokens)
     }
 
-    async fn maybe_fail(&mut self, res: ActorResult<()>, self_ref: ActorRef<Self>) {
-        if let Err(error) = res {
-            tracing::error!("Factory has encountered fatal error: {error:?}");
+    async fn fail(&mut self, error: Error, self_ref: ActorRef<Self>) {
+        tracing::error!("Factory has encountered fatal error: {error:?}");
+        let _ = self_ref.stop_gracefully();
+    }
 
-            let _ = self_ref.stop_gracefully();
+    async fn remove_workers(&mut self, workers: HashSet<WorkerId>) {
+        for worker_id in &workers {
+            self.workers.remove_by_worker_id(worker_id);
+        }
+
+        self.worker_actors
+            .retain(|worker_id, _| !workers.contains(worker_id));
+
+        for (id, task) in std::mem::take(&mut self.active_tasks) {
+            if workers.contains(&task.worker_id) {
+                self.pending_tasks.push_back(task.msg);
+            } else {
+                self.active_tasks.insert(id, task);
+            }
+        }
+    }
+
+    async fn remove_worker(&mut self, worker_id: WorkerId) {
+        let mut workers = HashSet::new();
+        workers.insert(worker_id);
+        self.remove_workers(workers).await;
+    }
+
+    async fn maybe_schedule_tasks(&mut self, self_ref: ActorRef<Self>) {
+        while let Err(error) = self.maybe_schedule_tasks_inner().await {
+            match error {
+                ScheduleError::WorkerDisconnected { worker_id } => {
+                    self.remove_worker(worker_id).await;
+                }
+                ScheduleError::ActorError(error) => {
+                    self.fail(error, self_ref).await;
+                    break;
+                }
+            }
         }
     }
 }
@@ -189,10 +279,9 @@ impl<DepsT: FactoryDeps> Message<SubmitTaskMsg<DepsT::Job>> for FactoryActor<Dep
         msg: SubmitTaskMsg<DepsT::Job>,
         ctx: &mut Context<Self, Self::Reply>,
     ) {
-        self.pending_tasks.push(msg);
+        self.pending_tasks.push_back(msg);
 
-        let res = self.maybe_schedule_tasks().await;
-        self.maybe_fail(res, ctx.actor_ref()).await;
+        self.maybe_schedule_tasks(ctx.actor_ref()).await;
     }
 }
 
@@ -212,12 +301,14 @@ impl<DepsT: FactoryDeps> Message<GetTasks<DepsT::Worker>> for FactoryActor<DepsT
             let worker = WorkerRow {
                 task_kind,
                 worker_id: msg.worker_id,
+                remote_address: msg
+                    .remote_address
+                    .expect("remote_address should always be filled in locally"),
             };
             self.workers.insert(worker);
         }
 
-        let res = self.maybe_schedule_tasks().await;
-        self.maybe_fail(res, ctx.actor_ref()).await;
+        self.maybe_schedule_tasks(ctx.actor_ref()).await;
     }
 }
 
@@ -253,18 +344,27 @@ impl<DepsT: FactoryDeps> Message<TaskDoneMsg> for FactoryActor<DepsT> {
 impl<DepsT: FactoryDeps> Message<RpcDisconnect> for FactoryActor<DepsT> {
     type Reply = ();
 
-    async fn handle(&mut self, _msg: RpcDisconnect, _ctx: &mut Context<Self, Self::Reply>) {
-        // XXX remi: We should remove any workers associated with the RPC connection here.
+    async fn handle(&mut self, msg: RpcDisconnect, ctx: &mut Context<Self, Self::Reply>) {
+        let worker_ids: HashSet<_> = self
+            .workers
+            .get_by_remote_address(&msg.remote_address)
+            .into_iter()
+            .map(|w| w.worker_id)
+            .collect();
+
+        self.remove_workers(worker_ids).await;
+
+        self.maybe_schedule_tasks(ctx.actor_ref()).await;
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::sync::{Arc, Mutex};
+
     use super::*;
     use crate::actors::actor::{self, Actor, ActorRunner};
-    use crate::actors::protocol::{ExecuteTask, ProofRequest, Task, TaskHeader};
-    use std::collections::VecDeque;
-    use std::sync::{Arc, Mutex};
+    use crate::actors::protocol::{ExecuteTask, ProofRequest, Task, TaskError, TaskHeader};
 
     #[derive(Clone, Default)]
     struct TestAllocator {
@@ -293,6 +393,13 @@ mod tests {
     impl TestAllocator {
         fn expect(&self, msg: ScheduleTask, reply: ActorResult<ScheduleTaskReply>) {
             self.messages.lock().unwrap().push_back((msg, reply));
+        }
+    }
+
+    impl Drop for TestAllocator {
+        fn drop(&mut self) {
+            let messages = self.messages.lock().unwrap();
+            assert!(messages.is_empty(), "{messages:?}");
         }
     }
 
@@ -344,23 +451,94 @@ mod tests {
         }
     }
 
-    struct TestJob;
+    impl Drop for TestWorker {
+        fn drop(&mut self) {
+            let messages = self.messages.lock().unwrap();
+            assert!(messages.is_empty(), "{messages:?}");
+        }
+    }
+
+    #[derive(Debug, From, PartialEq, Eq)]
+    struct TaskDoneExpectation {
+        header: TaskHeader,
+        payload: Result<TaskKind, TaskError>,
+    }
+
+    #[derive(Debug, From, PartialEq, Eq)]
+    struct TaskUpdateExpectation {
+        header: TaskHeader,
+    }
+
+    #[derive(Debug, From, PartialEq, Eq)]
+    enum TestJobMsg {
+        Done(TaskDoneExpectation),
+        Update(TaskUpdateExpectation),
+    }
+
+    impl From<TaskUpdateMsg> for TestJobMsg {
+        fn from(u: TaskUpdateMsg) -> Self {
+            Self::Update(TaskUpdateExpectation { header: u.header })
+        }
+    }
+
+    impl From<TaskDoneMsg> for TestJobMsg {
+        fn from(d: TaskDoneMsg) -> Self {
+            Self::Done(TaskDoneExpectation {
+                header: d.header,
+                payload: d.payload.map(|t| t.kind()),
+            })
+        }
+    }
+
+    #[derive(Clone, Default)]
+    struct TestJob {
+        messages: Arc<Mutex<VecDeque<TestJobMsg>>>,
+    }
 
     impl Actor for TestJob {}
 
     impl Message<TaskDoneMsg> for TestJob {
         type Reply = ();
 
-        async fn handle(&mut self, _msg: TaskDoneMsg, _ctx: &mut Context<Self, Self::Reply>) {
-            todo!()
+        async fn handle(&mut self, msg: TaskDoneMsg, _ctx: &mut Context<Self, Self::Reply>) {
+            let msg = TestJobMsg::from(msg);
+            let expected_msg = self
+                .messages
+                .lock()
+                .unwrap()
+                .pop_front()
+                .unwrap_or_else(|| panic!("unexpected message: {msg:?}"));
+
+            assert_eq!(msg, expected_msg);
         }
     }
 
     impl Message<TaskUpdateMsg> for TestJob {
         type Reply = ();
 
-        async fn handle(&mut self, _msg: TaskUpdateMsg, _ctx: &mut Context<Self, Self::Reply>) {
-            todo!()
+        async fn handle(&mut self, msg: TaskUpdateMsg, _ctx: &mut Context<Self, Self::Reply>) {
+            let msg = TestJobMsg::from(msg);
+            let expected_msg = self
+                .messages
+                .lock()
+                .unwrap()
+                .pop_front()
+                .unwrap_or_else(|| panic!("unexpected message: {msg:?}"));
+
+            assert_eq!(msg, expected_msg);
+        }
+    }
+
+    impl TestJob {
+        fn expect(&self, msg: impl Into<TestJobMsg>) {
+            self.messages.lock().unwrap().push_back(msg.into());
+        }
+    }
+
+    impl Drop for TestJob {
+        fn drop(&mut self) {
+            let messages = self.messages.lock().unwrap();
+            assert!(messages.is_empty(), "{messages:?}");
         }
     }
 
@@ -372,6 +550,13 @@ mod tests {
         type Job = TestJob;
     }
 
+    struct FixtureWorker {
+        id: WorkerId,
+        test_worker: TestWorker,
+        worker_runner: ActorRunner<TestWorker>,
+        remote_address: SocketAddr,
+    }
+
     struct Fixture {
         factory_ref: ActorRef<FactoryActor<TestFactoryDeps>>,
         factory_runner: ActorRunner<FactoryActor<TestFactoryDeps>>,
@@ -379,58 +564,240 @@ mod tests {
         test_alloc: TestAllocator,
         alloc_runner: ActorRunner<TestAllocator>,
 
-        worker_ref: ActorRef<TestWorker>,
-        test_worker: TestWorker,
-        worker_runner: ActorRunner<TestWorker>,
+        workers: Vec<FixtureWorker>,
 
         job_ref: ActorRef<TestJob>,
-        #[allow(dead_code)]
         job_runner: ActorRunner<TestJob>,
+        test_job: TestJob,
     }
 
     impl Fixture {
-        async fn new() -> Self {
+        async fn new(num_workers: usize) -> Self {
             let test_alloc = TestAllocator::default();
             let (alloc_ref, alloc_runner) = actor::run(test_alloc.clone()).await;
-            let (factory_ref, factory_runner) = actor::run(FactoryActor::<TestFactoryDeps>::new(
-                alloc_ref, /* require_gpu= */ false,
-            ))
+            let (factory_ref, mut factory_runner) = actor::run(
+                FactoryActor::<TestFactoryDeps>::new(alloc_ref, /* require_gpu= */ false),
+            )
             .await;
-            let test_worker = TestWorker::default();
-            let (worker_ref, worker_runner) = actor::run(test_worker.clone()).await;
-            let (job_ref, job_runner) = actor::run(TestJob).await;
+
+            let mut workers = Vec::new();
+            for i in 0..num_workers {
+                let worker_id = WorkerId::new_v4();
+                let test_worker = TestWorker::default();
+                let (worker_ref, worker_runner) = actor::run(test_worker.clone()).await;
+                let remote_address: SocketAddr = format!("1.2.3.4:100{i}").parse().unwrap();
+                factory_ref
+                    .tell_with_runner(
+                        GetTasks {
+                            worker_id,
+                            worker: Some(worker_ref),
+                            remote_address: Some(remote_address),
+                            kinds: vec![TaskKind::Execute],
+                        },
+                        &mut factory_runner,
+                    )
+                    .await
+                    .unwrap();
+
+                workers.push(FixtureWorker {
+                    id: worker_id,
+                    test_worker,
+                    worker_runner,
+                    remote_address,
+                });
+            }
+
+            workers.sort_by_key(|w| w.id);
+
+            let test_job = TestJob::default();
+            let (job_ref, job_runner) = actor::run(test_job.clone()).await;
 
             Self {
                 factory_ref,
                 factory_runner,
                 test_alloc,
                 alloc_runner,
-                worker_ref,
-                test_worker,
-                worker_runner,
+                workers,
                 job_ref,
                 job_runner,
+                test_job,
+            }
+        }
+
+        async fn disconnect_worker(&mut self, worker_id: WorkerId) {
+            let worker_idx = self.workers.iter().position(|w| w.id == worker_id).unwrap();
+            let worker = self.workers.remove(worker_idx);
+            let remote_address = worker.remote_address;
+            drop(worker);
+
+            self.factory_ref
+                .tell(RpcDisconnect { remote_address })
+                .await
+                .unwrap();
+        }
+
+        fn worker(&self, worker_id: WorkerId) -> &FixtureWorker {
+            self.workers.iter().find(|w| w.id == worker_id).unwrap()
+        }
+
+        fn worker_mut(&mut self, worker_id: WorkerId) -> &mut FixtureWorker {
+            self.workers.iter_mut().find(|w| w.id == worker_id).unwrap()
+        }
+    }
+
+    impl Drop for Fixture {
+        fn drop(&mut self) {
+            assert!(!self.factory_runner.has_messages());
+            assert!(!self.alloc_runner.has_messages());
+            assert!(!self.job_runner.has_messages());
+
+            for worker in &self.workers {
+                assert!(!worker.worker_runner.has_messages());
             }
         }
     }
 
-    #[tokio::test]
-    async fn simple_job_schedule() {
-        let mut fixture = Fixture::new().await;
+    fn test_exec_task() -> (TaskHeader, Task) {
+        let task_id = GlobalId {
+            job_id: JobId::new_v4(),
+            task_id: 1,
+        };
 
-        let worker_id = WorkerId::new_v4();
+        let task_header = TaskHeader {
+            global_id: task_id,
+            task_kind: TaskKind::Execute,
+        };
+        let task = Task::Execute(Arc::new(ExecuteTask {
+            request: ProofRequest {
+                binary: vec![],
+                input: vec![],
+                assumptions: vec![],
+                segment_limit_po2: None,
+                execute_only: false,
+            },
+        }));
+
+        (task_header, task)
+    }
+
+    async fn schedule_task_on_worker(
+        fixture: &mut Fixture,
+        worker_id: WorkerId,
+        task_header: TaskHeader,
+        task: Task,
+    ) {
         fixture
             .factory_ref
-            .tell_with_runner(
-                GetTasks {
-                    worker_id,
-                    worker: Some(fixture.worker_ref.clone()),
-                    kinds: vec![TaskKind::Execute],
-                },
-                &mut fixture.factory_runner,
-            )
+            .tell(SubmitTaskMsg {
+                job: fixture.job_ref.clone(),
+                header: task_header.clone(),
+                task: task.clone(),
+            })
             .await
             .unwrap();
+
+        fixture.test_alloc.expect(
+            ScheduleTask {
+                candidates: fixture.workers.iter().map(|w| w.id).collect(),
+                task_id: task_header.global_id,
+                description: "Execute".into(),
+            },
+            Ok(ScheduleTaskReply { worker_id }),
+        );
+
+        // Process SubmitTaskMsg
+        tokio::join!(
+            async { fixture.factory_runner.try_handle_one().await.unwrap() },
+            fixture.alloc_runner.handle_one(),
+        );
+
+        fixture
+            .worker(worker_id)
+            .test_worker
+            .expect(TaskMsgExpectation {
+                header: task_header.clone(),
+                task: task.kind(),
+                gpu_tokens: GpuTokens::ZERO,
+                cores: CpuCores::from(1),
+            });
+        fixture
+            .worker_mut(worker_id)
+            .worker_runner
+            .try_handle_one()
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test]
+    async fn simple_task_schedule() {
+        let mut fixture = Fixture::new(/* num_workers= */ 1).await;
+
+        let worker1 = fixture.workers[0].id;
+        let (task_header, task) = test_exec_task();
+        schedule_task_on_worker(&mut fixture, worker1, task_header, task).await;
+    }
+
+    #[tokio::test]
+    async fn schedule_task_no_worker() {
+        let mut fixture = Fixture::new(/* num_workers= */ 0).await;
+
+        let (task_header, task) = test_exec_task();
+
+        fixture
+            .factory_ref
+            .tell(SubmitTaskMsg {
+                job: fixture.job_ref.clone(),
+                header: task_header.clone(),
+                task: task.clone(),
+            })
+            .await
+            .unwrap();
+
+        fixture.factory_runner.handle_one().await;
+    }
+
+    #[tokio::test]
+    async fn schedule_task_bad_allocator_reply() {
+        let mut fixture = Fixture::new(/* num_workers= */ 1).await;
+
+        let (task_header, task) = test_exec_task();
+
+        fixture
+            .factory_ref
+            .tell(SubmitTaskMsg {
+                job: fixture.job_ref.clone(),
+                header: task_header.clone(),
+                task: task.clone(),
+            })
+            .await
+            .unwrap();
+
+        fixture.test_alloc.expect(
+            ScheduleTask {
+                candidates: fixture.workers.iter().map(|w| w.id).collect(),
+                task_id: task_header.global_id,
+                description: "Execute".into(),
+            },
+            // reply with some worker not found in the candidates, this is invalid
+            Ok(ScheduleTaskReply {
+                worker_id: WorkerId::new_v4(),
+            }),
+        );
+
+        // Process SubmitTaskMsg
+        tokio::join!(
+            async { fixture.factory_runner.try_handle_one().await.unwrap() },
+            fixture.alloc_runner.handle_one(),
+        );
+
+        // show the factory has stopped
+        let err = fixture.factory_runner.try_handle_one().await.unwrap_err();
+        assert_eq!(err, tokio::sync::mpsc::error::TryRecvError::Disconnected);
+    }
+
+    #[tokio::test]
+    async fn worker_disconnect_before_scheduling_task() {
+        let mut fixture = Fixture::new(/* num_workers= */ 2).await;
 
         let task_id = GlobalId {
             job_id: JobId::new_v4(),
@@ -451,6 +818,9 @@ mod tests {
             },
         }));
 
+        let worker1 = fixture.workers[0].id;
+        let worker2 = fixture.workers[1].id;
+
         fixture
             .factory_ref
             .tell(SubmitTaskMsg {
@@ -461,13 +831,93 @@ mod tests {
             .await
             .unwrap();
 
+        fixture.disconnect_worker(worker1).await;
+
         fixture.test_alloc.expect(
             ScheduleTask {
-                candidates: vec![worker_id],
+                candidates: vec![worker1, worker2],
                 task_id,
                 description: "Execute".into(),
             },
-            Ok(ScheduleTaskReply { worker_id }),
+            Ok(ScheduleTaskReply { worker_id: worker1 }),
+        );
+
+        fixture.test_alloc.expect(
+            ScheduleTask {
+                candidates: vec![worker2],
+                task_id,
+                description: "Execute".into(),
+            },
+            Ok(ScheduleTaskReply { worker_id: worker2 }),
+        );
+
+        // process SubmitTaskMsg
+        tokio::join!(
+            async { fixture.factory_runner.try_handle_one().await.unwrap() },
+            async {
+                fixture.alloc_runner.handle_one().await;
+                fixture.alloc_runner.handle_one().await;
+            }
+        );
+
+        // process RpcDisconnect
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        fixture
+            .worker(worker2)
+            .test_worker
+            .expect(TaskMsgExpectation {
+                header: task_header.clone(),
+                task: task.kind(),
+                gpu_tokens: GpuTokens::ZERO,
+                cores: CpuCores::from(1),
+            });
+        fixture
+            .worker_mut(worker2)
+            .worker_runner
+            .try_handle_one()
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test]
+    async fn factory_stop_while_running_task() {
+        let mut fixture = Fixture::new(/* num_workers= */ 2).await;
+
+        let worker1 = fixture.workers[0].id;
+
+        let (task_header, task) = test_exec_task();
+        schedule_task_on_worker(&mut fixture, worker1, task_header.clone(), task).await;
+
+        fixture.factory_runner.stop().await;
+
+        fixture.test_job.expect(TaskDoneMsg {
+            header: task_header,
+            payload: Err(Error::new("factory has stopped").into()),
+        });
+        fixture.job_runner.handle_one().await;
+    }
+
+    #[tokio::test]
+    async fn worker_disconnect_while_running_task() {
+        let mut fixture = Fixture::new(/* num_workers= */ 2).await;
+
+        let worker1 = fixture.workers[0].id;
+        let worker2 = fixture.workers[1].id;
+
+        let (task_header, task) = test_exec_task();
+        schedule_task_on_worker(&mut fixture, worker1, task_header.clone(), task.clone()).await;
+
+        fixture.disconnect_worker(worker1).await;
+
+        // show that when processing the disconnect, we reschedule the task on another worker.
+        fixture.test_alloc.expect(
+            ScheduleTask {
+                candidates: fixture.workers.iter().map(|w| w.id).collect(),
+                task_id: task_header.global_id,
+                description: "Execute".into(),
+            },
+            Ok(ScheduleTaskReply { worker_id: worker2 }),
         );
 
         tokio::join!(
@@ -475,13 +925,21 @@ mod tests {
             fixture.alloc_runner.handle_one(),
         );
 
-        fixture.test_worker.expect(TaskMsgExpectation {
-            header: task_header.clone(),
-            task: task.kind(),
-            gpu_tokens: GpuTokens::ZERO,
-            cores: CpuCores::from(1),
-        });
-        fixture.worker_runner.handle_one().await;
+        fixture
+            .worker(worker2)
+            .test_worker
+            .expect(TaskMsgExpectation {
+                header: task_header.clone(),
+                task: task.kind(),
+                gpu_tokens: GpuTokens::ZERO,
+                cores: CpuCores::from(1),
+            });
+        fixture
+            .worker_mut(worker2)
+            .worker_runner
+            .try_handle_one()
+            .await
+            .unwrap();
     }
 }
 

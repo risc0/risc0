@@ -193,6 +193,7 @@ impl Actor for WorkerActor {
             .tell(GetTasks {
                 worker_id: self.id,
                 worker: None,
+                remote_address: None,
                 kinds: self.task_kinds.clone(),
             })
             .await;
