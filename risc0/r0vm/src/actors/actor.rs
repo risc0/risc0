@@ -33,7 +33,7 @@ pub trait Actor: Sized + Send + 'static {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum SendError {
     /// The actor we are trying to communicate is no longer accepting messages.
-    ActorNotRunning,
+    ActorNotRunning { stop_reason: String },
     /// The actor didn't reply to our message when the caller was expecting a reply.
     NoReply,
 }
@@ -43,7 +43,9 @@ impl std::error::Error for SendError {}
 impl fmt::Display for SendError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::ActorNotRunning => write!(f, "actor not running"),
+            Self::ActorNotRunning { stop_reason } => {
+                write!(f, "actor not running due to: {stop_reason}")
+            }
             Self::NoReply => write!(f, "actor didn't reply"),
         }
     }
@@ -155,7 +157,9 @@ impl<ReplyT: 'static> PendingReply<ReplyT> {
     /// `SendError::ActorNotRunning` is returned. If the actor doesn't reply to the message,
     /// `lSendError::NoReply` is returned.
     pub async fn recv(self) -> Result<ReplyT, SendError> {
-        self.reply.await.map_err(|_| SendError::ActorNotRunning)?
+        self.reply.await.map_err(|_| SendError::ActorNotRunning {
+            stop_reason: "actor crash".into(),
+        })?
     }
 
     /// Returns true if we have received a reply (either a `ReplyT` or an error) and `recv` will
@@ -183,19 +187,28 @@ impl<ActorT: Actor> ActorSender<ActorT> {
         self.0
             .send(msg_fn)
             .await
-            .map_err(|_| SendError::ActorNotRunning)
+            .map_err(|_| SendError::ActorNotRunning {
+                stop_reason: "actor crash".into(),
+            })
     }
 
     fn blocking_send(&self, msg_fn: HandleMessageFn<ActorT>) -> Result<(), SendError> {
         self.0
             .blocking_send(msg_fn)
-            .map_err(|_| SendError::ActorNotRunning)
+            .map_err(|_| SendError::ActorNotRunning {
+                stop_reason: "actor crash".into(),
+            })
     }
+}
+
+enum SenderState<ActorT: Actor> {
+    Running(ActorSender<ActorT>),
+    Stopped { stop_reason: String },
 }
 
 /// Represents the tokio task which is receiving messages and delivering them to an actor.
 struct ActorController<ActorT: Actor> {
-    sender: Option<ActorSender<ActorT>>,
+    sender: SenderState<ActorT>,
     stop: broadcast::Receiver<()>,
 }
 
@@ -206,7 +219,7 @@ impl<ActorT: Actor> ActorController<ActorT> {
         let (stop_send, stop_recv) = broadcast::channel(1);
 
         let controller = Arc::new(Mutex::new(Self {
-            sender: Some(ActorSender(send)),
+            sender: SenderState::Running(ActorSender(send)),
             stop: stop_recv,
         }));
 
@@ -217,11 +230,24 @@ impl<ActorT: Actor> ActorController<ActorT> {
     }
 
     fn sender(&self) -> Result<ActorSender<ActorT>, SendError> {
-        self.sender.clone().ok_or(SendError::ActorNotRunning)
+        match &self.sender {
+            SenderState::Running(sender) => Ok(sender.clone()),
+            SenderState::Stopped { stop_reason } => Err(SendError::ActorNotRunning {
+                stop_reason: stop_reason.clone(),
+            }),
+        }
     }
 
-    fn stop(&mut self) -> bool {
-        self.sender.take().is_some()
+    fn stop(&mut self, stop_reason: impl Into<String>) -> Option<String> {
+        match &self.sender {
+            SenderState::Running(_) => {
+                self.sender = SenderState::Stopped {
+                    stop_reason: stop_reason.into(),
+                };
+                None
+            }
+            SenderState::Stopped { stop_reason } => Some(stop_reason.clone()),
+        }
     }
 
     fn stop_waiter(&self) -> broadcast::Receiver<()> {
@@ -387,11 +413,13 @@ impl<ActorT: Actor> ActorRef<ActorT> {
     /// Tell the actor to stop. After this call returns, any attempt to send a message to the actor
     /// will error with `SendError::ActorNotRunning`. The actor will process all existing messages
     /// in its queue before exiting.
-    pub fn stop_gracefully(&self) -> Result<(), SendError> {
-        if self.controller.lock().unwrap().stop() {
-            Ok(())
+    pub fn stop_gracefully(&self, stop_reason: impl Into<String>) -> Result<(), SendError> {
+        if let Some(existing_reason) = self.controller.lock().unwrap().stop(stop_reason) {
+            Err(SendError::ActorNotRunning {
+                stop_reason: existing_reason,
+            })
         } else {
-            Err(SendError::ActorNotRunning)
+            Ok(())
         }
     }
 
@@ -760,7 +788,7 @@ mod tests {
         assert!(spy.started.load(Ordering::Acquire));
         assert!(!spy.stopped.load(Ordering::Acquire));
 
-        actor_ref.stop_gracefully().unwrap();
+        actor_ref.stop_gracefully("test stop").unwrap();
         actor_ref.wait_for_stop().await;
 
         assert!(spy.stopped.load(Ordering::Acquire));
@@ -772,11 +800,19 @@ mod tests {
         let actor_ref = spawn(actor);
 
         actor_ref.tell(Ping(12)).await.unwrap();
-        actor_ref.stop_gracefully().unwrap();
+        actor_ref.stop_gracefully("test stop").unwrap();
 
         assert_eq!(spy.ping.recv().await.unwrap(), Ping(12));
 
         actor_ref.wait_for_stop().await;
+
+        let error = actor_ref.ask(Ping(13)).await.unwrap_err();
+        assert_eq!(
+            error,
+            SendError::ActorNotRunning {
+                stop_reason: "test stop".into()
+            }
+        );
     }
 
     #[tokio::test]
@@ -790,7 +826,7 @@ mod tests {
         tokio::task::yield_now().await;
         assert!(!wait_handle.is_finished());
 
-        actor_ref.stop_gracefully().unwrap();
+        actor_ref.stop_gracefully("test stop").unwrap();
 
         wait_handle.await.unwrap();
     }

@@ -90,7 +90,7 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
 impl<DepsT: FactoryDeps> Actor for FactoryActor<DepsT> {
     async fn on_stop(&mut self) {
         for worker in self.worker_actors.values() {
-            let _ = worker.stop_gracefully();
+            let _ = worker.stop_gracefully("factory shutdown");
         }
 
         for task in self
@@ -220,7 +220,7 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
 
     async fn fail(&mut self, error: Error, self_ref: ActorRef<Self>) {
         tracing::error!("Factory has encountered fatal error: {error:?}");
-        let _ = self_ref.stop_gracefully();
+        let _ = self_ref.stop_gracefully(format!("fatal error: {error:?}"));
     }
 
     async fn remove_workers(&mut self, workers: HashSet<WorkerId>) {
