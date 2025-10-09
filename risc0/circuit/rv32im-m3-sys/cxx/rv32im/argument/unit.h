@@ -13,6 +13,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#pragma once
+
+#include "rv32im/base/base.h"
+#include "rv32im/base/platform.h"
+
 template <typename C> struct UnitArgument {
   FDEV UnitArgument() = default;
   FDEV UnitArgument(uint32_t opts, uint32_t a, uint32_t b, uint32_t out0, uint32_t out1)

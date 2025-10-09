@@ -12,14 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/argument/unit.h"
+#include "rv32im/base/opt.h"
+#include "rv32im/circuit/units.h"
+
 template <typename C> FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness wit) DEV {
   count.set(ctx, wit.count);
   Option opts(wit.opts);
   opts.pop<UnitKind>();
-  doSub.set(ctx, opts.val);
+  uint32_t asSub = opts.val;
+  doSub.set(ctx, asSub);
   a.set(ctx, wit.a);
   b.set(ctx, wit.b);
-  out.set(ctx, wit.a, (opts.val ? ~wit.b : wit.b), opts.val);
+  out.set(ctx, wit.a, (asSub ? ~wit.b : wit.b), asSub);
 }
 
 template <typename C> FDEV void UnitAddSubBlock<C>::addArguments(CTX) DEV {

@@ -13,7 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include <array>
+#pragma once
+
 #include <map>
 
 #include "rv32im/circuit/circuit.ipp"

@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/argument/argument.h"
+#include "rv32im/base/constants.h"
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/inst.h"
+
 template <typename C> FDEV void InstResumeBlock<C>::set(CTX, InstResumeWitness wit) DEV {
   readPc.set(ctx, wit.pc, 1);
   readMm.set(ctx, wit.mm, 1);

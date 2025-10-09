@@ -17,7 +17,6 @@
 #include "rv32im/test/test_prove.h"
 
 #include <assert.h>
-#include <iostream>
 
 using namespace risc0;
 

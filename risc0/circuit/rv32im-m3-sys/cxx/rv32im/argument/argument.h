@@ -56,6 +56,13 @@ template <typename T> struct GetArgumentType {};
 ARGUMENT_TYPES
 #undef ARGUMENT_TYPE
 
+// Flatten the given argument of type T into a single ValExt using the supplied mix values.
+//
+// PRECONDITIONS:
+// * mix must be generated such that it unpredictable when the value of argument is selected (e.g.
+//   it must be derived from a Fiat-Shamir transcript that includes the value of argument).
+// * argument must be safe to reinterpret as a pointer to Val<C>.
+// * mix must point to a slice of at least sizeof(T) / sizeof(Val<C> + 1 elements.
 template <typename T, typename C>
 FDEV ValExt<C> flattenArgument(const MTHR T& argument, const MDEV ValExt<C>* mix) {
   ValExt<C> tot;

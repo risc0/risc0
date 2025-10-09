@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "rv32im/base/base.h"
+#include <cstdint>
 
 #define UNIT_WITNESS(x)                                                                            \
   struct Unit##x##Witness {                                                                        \

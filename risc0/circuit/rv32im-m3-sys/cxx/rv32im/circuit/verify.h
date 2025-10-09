@@ -70,6 +70,7 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
   using ValExtImpl = ValExtT;
   using C = VerifyContext;
 
+  // VerifyFwd calls `verify` and `addArguments` on the given object in depth-first search order.
   struct VerifyFwd {
     template <typename T, typename... Args>
     FDEV static void apply(MTHR VerifyContext& ctx, MDEV T& obj, Args... args) {
@@ -98,7 +99,7 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
 
   Val<C> isValid = true;
 
-  uint32_t accCol = 0;
+  uint32_t accCol = 1;
   uint32_t accSubstep = 0;
   ValExt<C> accTot = ValExtT(0);
   Val<C> numers[2];
@@ -122,6 +123,8 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
       , innerMix(eqzCtx.getTrue()) {}
 
   // Main entry point
+  //
+  // verify should be called at most once on a given instance of VerifyContext.
   FDEV typename EqzCtx::MixStateT verify() {
     // Verify the selector
     VerifyFwd::apply(*this, top->select);
@@ -160,7 +163,17 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
   }
   FDEV void eqz(ValT val) { innerMix = eqzCtx.andEqz(innerMix, val); }
   FDEV void eqz(ValExtT val) { innerMix = eqzCtx.andEqz(innerMix, val); }
+  // Push an argument value into the permutation argument, if the isValid field is set.
+  // Pushing an argument effectively increases its count by one in the permutation argument.
+  //
+  // This function is called by components within each block. The value of isValid is determined
+  // from the associated register in the Top component.
   template <typename T> FDEV void push(const MTHR T& argument) { addArgument(isValid, argument); }
+  // Pull an argument value into the permutation argument, if the isValid field is set.
+  // Pushing an argument effectively decreases its count by one in the permutation argument.
+  //
+  // This function is called by components within each block. The value of isValid is determined
+  // from the associated register in the Top component.
   template <typename T> FDEV void pull(const MTHR T& argument) { addArgument(-isValid, argument); }
   template <typename T> FDEV void addArgument(ValT count, const MTHR T& argument) {
     ValExtT flat = flattenArgument<T, VerifyContext>(argument, accMix + 1);
@@ -182,7 +195,9 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
     ValExtT lhs = cur * denoms[0] * denoms[1];
     ValExtT rhs = denoms[0] * numers[1] + denoms[1] * numers[0];
     eqz(lhs - rhs);
-    // Bump forward
+    // Bump to the next column in the accum group.
+    //
+    // NOTE: accCol should never be allowed to reach or exceed MAX_ACCUM_PER_ROW / 4.
     accCol++;
     accSubstep = 0;
     accTot += cur;

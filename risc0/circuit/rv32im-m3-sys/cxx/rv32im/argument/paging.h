@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "rv32im/base/base.h"
 #include "rv32im/base/poseidon2.h"
 
 template <typename C> struct PageInArgument {

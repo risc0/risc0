@@ -100,6 +100,7 @@ FpExt computeConstraintPoly(
   size_t offset = 0;
   for (size_t i = 0; i < accumCols; i++) {
     accum.push_back(accumBase[offset++]);
+    // TODO(victor): Figure out why this makes sense.
     if (i < 4 || i >= accumNormalCols) {
       prevAccum.push_back(accumBase[offset++]);
     } else {

@@ -15,9 +15,19 @@
 
 #pragma once
 
+#include "rv32im/circuit/bigint.h"
+#include "rv32im/circuit/decode.h"
+#include "rv32im/circuit/ecall.h"
+#include "rv32im/circuit/globals.h"
+#include "rv32im/circuit/inst.h"
+#include "rv32im/circuit/io.h"
+#include "rv32im/circuit/one_hot.h"
+#include "rv32im/circuit/paging.h"
 #include "rv32im/circuit/regext.h"
+#include "rv32im/circuit/units.h"
 #include "rv32im/witness/witness.h"
 
+// NOTE: For any given row, it appears to be the case that a single block type is used.
 template <typename C> struct Top {
   TwoHot<C, MAJOR_SPLIT_SIZE, MINOR_SPLIT_SIZE> select;
   union {
@@ -31,6 +41,10 @@ template <typename C> struct Top {
   } mux;
 };
 
+// Top component used in the accum group.
+//
+// This component provides constraints for the bigint instructions, which use a challenge value
+// generated from the data trace in their constraints.
 template <typename C> struct AccumTop {
   OneHot<C, POLY_OP_SIZE> polyOp;
   RegExt<C> local;

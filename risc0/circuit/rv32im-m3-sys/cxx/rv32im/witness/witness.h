@@ -71,6 +71,8 @@ struct EmptyWitness {
   BLOCK_TYPE(PageUncle, 18)                                                                        \
   BLOCK_TYPE(MakeTable, 3)
 
+// QUESTION: I think the leading 1 is wrong, but it does not matter because the only usage below is
+// in a truncating divide. Oh, unless Empty countes as a real BlockType.
 CONSTANT size_t NUM_BLOCK_TYPES = 1
 #define BLOCK_TYPE(name, count) +1
     BLOCK_TYPES
@@ -84,6 +86,7 @@ enum class BlockType {
       Empty,
 };
 
+// NOTE: NUM_BLOCK_TYPES = 39 => ceil(sqrt(NUM_BLOCK_TYPES)) = 7 != 6
 // Should be ceil(sqrt(NUM_BLOCK_TYPES)), but sqrt is not a constexpr...
 CONSTANT size_t MAJOR_SPLIT_SIZE = 6;
 CONSTANT size_t MINOR_SPLIT_SIZE = (NUM_BLOCK_TYPES + (MAJOR_SPLIT_SIZE - 1)) / MAJOR_SPLIT_SIZE;

@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/top.h"
+
 template <typename C> FDEV void AccumTop<C>::setPhase1(CTX, MDEV Top<C>* top, ValExt<C> z) DEV {
   Val<C> isBigInt = top->select.major.bits[size_t(BlockType::BigInt) / MINOR_SPLIT_SIZE].get() *
                     top->select.minor.bits[size_t(BlockType::BigInt) % MINOR_SPLIT_SIZE].get();

@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/base/base.h"
+#include "rv32im/circuit/bits.h"
+
 template <typename C> FDEV void AssertBit(CTX, Val<C> val) {
   EQZ(val * (val - 1));
 }

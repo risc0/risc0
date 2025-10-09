@@ -41,6 +41,8 @@ void verify(VerifyCircuitInfo& ci, ReadIop& iop, size_t po2) {
     size_t numCols = ci.taps.getGroups()[i].getColumns().size();
     totalTaps += numTaps;
     for (size_t j = 0; j < ci.groups[i].mixCount; j++) {
+      // QUESTION: It needs like this determines the mix value before the necessary data has been
+      // written to the iop.
       mix.push_back(iop.rngFpExt());
     }
     size_t prevGlobals = globals.size();
