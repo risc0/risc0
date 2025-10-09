@@ -151,6 +151,20 @@ http_archive(
 
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 
+git_repository(
+    name = "num",
+    build_file_content = """
+cc_library(
+    name = "num",
+    hdrs = ["num.hpp"],
+    include_prefix = "num",
+    visibility = ["//visibility:public"],
+)
+    """,
+    commit = "0e6dbee134346d57aeb70fe2066cfc9eb2cd36ea",
+    remote = "https://github.com/983/Num.git",
+)
+
 rules_pkg_dependencies()
 
 CLANG_FORMAT_VERSION = "17.0.6"

@@ -14,7 +14,7 @@ cc_library(
         ":verify_po2s",
     ],
     hdrs = glob(["*.h"]),
-    defines = ["RV32IM_BIGINT"],
+    # defines = ["RV32IM_BIGINT"],
     visibility = ["//visibility:public"],
     deps = [
         "//core",
@@ -22,6 +22,7 @@ cc_library(
         "//rv32im/base",
         "//rv32im/circuit",
         "//zkp",
+        "@num",
         "@unordered_dense",
         "@zirgen//zirgen/Dialect/BigInt/Bytecode",
     ],
