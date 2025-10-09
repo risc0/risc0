@@ -13,86 +13,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#include "num/num.hpp"
+
 #include "rv32im/emu/bigint.h"
 
 #include "bigint.h"
 #include "rv32im/base/constants.h"
 
-#if defined(RV32IM_BIGINT)
-
-#include "zirgen/Dialect/BigInt/Bytecode/decode.h"
-#include "zirgen/Dialect/BigInt/Bytecode/file.h"
-#include "zirgen/Dialect/BigInt/IR/BigInt.h"
-#include "zirgen/Dialect/BigInt/IR/Eval.h"
-
-# else
-
-#include "num/num.hpp"
-
-#endif
 
 namespace risc0::rv32im {
-
-#if defined(RV32IM_BIGINT)
-
-namespace {
-
-struct BigIntIO : public zirgen::BigInt::BigIntIO {
-  uint32_t mm;
-  PeekFunc peek;
-  std::map<uint32_t, uint32_t>& polyWitness;
-
-  BigIntIO(uint32_t mm, PeekFunc peek, std::map<uint32_t, uint32_t>& polyWitness)
-      : mm(mm), peek(peek), polyWitness(polyWitness) {}
-
-  llvm::APInt load(uint32_t arena, uint32_t offset, uint32_t count) override;
-  void store(uint32_t arena, uint32_t offset, uint32_t count, llvm::APInt val) override;
-};
-
-std::string toString(llvm::APInt val) {
-  llvm::SmallVector<char, 128> out;
-  val.toStringUnsigned(out, /*Radix=*/16);
-  return std::string(out.data(), out.size());
-}
-
-llvm::APInt BigIntIO::load(uint32_t arena, uint32_t offset, uint32_t count) {
-  uint32_t regVal = peek((mm ? MACHINE_REGS_WORD : USER_REGS_WORD) + arena);
-  uint32_t addr = regVal + offset * 16;
-  uint32_t baseWord = addr / 4;
-  std::vector<uint64_t> limbs64;
-  for (size_t i = 0; i < count; i++) {
-    std::array<uint32_t, 4> words;
-    for (size_t j = 0; j < 4; j++) {
-      words[j] = peek(baseWord + i * 4 + j);
-      LOG(0, "host peek [" << (baseWord + i * 4 + j) << "] = " << words[j]);
-    }
-    limbs64.push_back(uint64_t(words[0]) | ((uint64_t(words[1])) << 32));
-    limbs64.push_back(uint64_t(words[2]) | ((uint64_t(words[3])) << 32));
-  }
-  llvm::APInt val(count * 128, limbs64);
-  LOG(2, "Load, arena=" << arena << ", offset=" << offset);
-  LOG(2, "  Addr = " << addr);
-  LOG(2, "  Val = " << toString(val));
-  return val;
-}
-
-void BigIntIO::store(uint32_t arena, uint32_t offset, uint32_t count, llvm::APInt val) {
-  uint32_t regVal = peek((mm ? MACHINE_REGS_WORD : USER_REGS_WORD) + arena);
-  uint32_t addr = regVal + offset * 16;
-  uint32_t baseWord = addr / 4;
-  LOG(2, "Store, arena=" << arena << ", offset=" << offset);
-  LOG(2, "  Addr = " << addr);
-  LOG(2, "  Val = " << toString(val));
-  val = val.zext(count * 128);
-  for (size_t i = 0; i < count * 4; i++) {
-    LOG(2, "  Polywitness[" << baseWord + i << "] = " << val.extractBitsAsZExtValue(32, i * 32));
-    polyWitness[baseWord + i] = val.extractBitsAsZExtValue(32, i * 32);
-  }
-}
-
-} // namespace
-
-#else
 
 namespace {
 
@@ -104,16 +33,6 @@ BigInt bigIntFromWords(std::vector<Num::word>&& words) {
     return result;
 }
 
-uint32_t getBigIntByte(const BigInt& val, size_t index) {
-    size_t wordIndex = index / 8;
-    size_t byteIndex = index % 8;
-    if (wordIndex >= val.words.size()) {
-      // If we read past the end, pretend that we extended with zeros
-      return 0;
-    }
-    return (val.words[wordIndex] >> (byteIndex * 8)) & 0xff;
-}
-
 uint32_t getBigIntWord(const BigInt& val, size_t index) {
     size_t wordIndex = index / 2;
     size_t halfIndex = index % 2;
@@ -122,25 +41,6 @@ uint32_t getBigIntWord(const BigInt& val, size_t index) {
       return 0;
     }
     return (val.words[wordIndex] >> (halfIndex * 32)) & 0xffffffff;
-}
-
-BigInt toBigInt(const BytePolynomial& val) {
-    BigInt out(0);
-    BigInt mul(1);
-    for (size_t i = 0; i < val.coeffs.size(); i++) {
-      BigInt term(val.coeffs[i]);
-      out += mul * term;
-      mul *= (1 << 8);
-    }
-    return out;
-}
-
-BytePolynomial fromBigInt(const BigInt& val, size_t coeffs) {
-    BytePolynomial out;
-    for (size_t i = 0; i < coeffs; i++) {
-      out.coeffs.push_back(getBigIntByte(val, i));
-    }
-    return out;
 }
 
 struct BigIntIO {
@@ -387,8 +287,6 @@ void BigIntIO::store(uint32_t arena, uint32_t offset, uint32_t count, BigInt val
 
 } // namespace
 
-#endif
-
 size_t witgenBigInt(std::map<uint32_t, uint32_t>& polyWitness, PeekFunc peek) {
   // TODO: Proper error handling
   uint32_t blobWordAddr = peek(MACHINE_REGS_WORD + REG_A0) / 4;
@@ -400,36 +298,11 @@ size_t witgenBigInt(std::map<uint32_t, uint32_t>& polyWitness, PeekFunc peek) {
     code.push_back(peek(bibcWordAddr + i));
   }
 
-#if defined(RV32IM_BIGINT)
-
-  // Deserialize
-  zirgen::BigInt::Bytecode::Program prog;
-  zirgen::BigInt::Bytecode::read(prog, code.data(), code.size() * 4);
-
-  // Build a module + func
-  mlir::DialectRegistry registry;
-  registry.insert<mlir::func::FuncDialect>();
-  registry.insert<zirgen::BigInt::BigIntDialect>();
-  mlir::MLIRContext mlirContext(registry);
-  mlirContext.loadAllAvailableDialects();
-  auto loc = mlir::UnknownLoc::get(&mlirContext);
-  auto module = mlir::ModuleOp::create(loc);
-  auto func = zirgen::BigInt::Bytecode::decode(module, prog);
-
-  // evaluate the program to compute the polyWitness
-  uint32_t mm = peek(MACHINE_REGS_WORD + REG_T0);
-  BigIntIO io(mm, peek, polyWitness);
-  zirgen::BigInt::eval(func, io, false);
-
-#else
-
   void* stream = (void*) code.data();
   Program prog = Program::decode(stream);
   uint32_t mm = peek(MACHINE_REGS_WORD + REG_T0);
   BigIntIO io(mm, peek, polyWitness);
   prog.eval(io);
-
-#endif
 
   // Count # of steps
   // TODO, should be have a max size, error handling?
