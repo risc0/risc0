@@ -148,6 +148,7 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
             task: msg.task.clone(),
             cores,
             gpu_tokens,
+            tracing: msg.tracing.clone(),
         };
 
         let mut candidates: Vec<_> = workers.iter().map(|w| w.worker_id).collect();
@@ -692,6 +693,7 @@ mod tests {
                 job: fixture.job_ref.clone(),
                 header: task_header.clone(),
                 task: task.clone(),
+                tracing: Default::default(),
             })
             .await
             .unwrap();
@@ -748,6 +750,7 @@ mod tests {
             .tell(SubmitTaskMsg {
                 job: fixture.job_ref.clone(),
                 header: task_header.clone(),
+                tracing: Default::default(),
                 task: task.clone(),
             })
             .await
@@ -768,6 +771,7 @@ mod tests {
                 job: fixture.job_ref.clone(),
                 header: task_header.clone(),
                 task: task.clone(),
+                tracing: Default::default(),
             })
             .await
             .unwrap();
@@ -827,6 +831,7 @@ mod tests {
                 job: fixture.job_ref.clone(),
                 header: task_header.clone(),
                 task: task.clone(),
+                tracing: Default::default(),
             })
             .await
             .unwrap();

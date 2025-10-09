@@ -16,7 +16,7 @@
 mod execute_only;
 mod proof;
 mod shrink_wrap;
-mod tracer;
+pub(crate) mod tracer;
 
 use derive_more::From;
 use tokio::task::JoinSet;

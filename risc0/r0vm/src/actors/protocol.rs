@@ -181,7 +181,7 @@ pub mod factory {
     use std::net::SocketAddr;
 
     use super::*;
-    use crate::actors::actor::Actor;
+    use crate::actors::{actor::Actor, job::tracer};
 
     #[derive(Clone, Serialize, Deserialize)]
     #[serde(bound = "")]
@@ -197,6 +197,7 @@ pub mod factory {
         pub job: ActorRef<JobT>,
         pub header: TaskHeader,
         pub task: Task,
+        pub tracing: tracer::SavedContext,
     }
 
     impl<JobT: Actor> Clone for SubmitTaskMsg<JobT> {
@@ -205,6 +206,7 @@ pub mod factory {
                 job: self.job.clone(),
                 header: self.header.clone(),
                 task: self.task.clone(),
+                tracing: self.tracing.clone(),
             }
         }
     }
@@ -284,7 +286,10 @@ pub mod factory {
 
 pub mod worker {
     use super::{Task, TaskHeader};
-    use crate::actors::allocator::{CpuCores, GpuTokens};
+    use crate::actors::{
+        allocator::{CpuCores, GpuTokens},
+        job::tracer,
+    };
     use serde::{Deserialize, Serialize};
 
     #[derive(Clone, Serialize, Deserialize)]
@@ -293,6 +298,7 @@ pub mod worker {
         pub task: Task,
         pub gpu_tokens: GpuTokens,
         pub cores: CpuCores,
+        pub tracing: tracer::SavedContext,
     }
 }
 
