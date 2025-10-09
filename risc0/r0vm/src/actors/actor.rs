@@ -320,6 +320,9 @@ impl<ActorT: Actor> ActorRef<ActorT> {
     }
 
     /// Send a message to an actor and return an object which can be used to wait for a reply.
+    /// If the remote actor panic handling the message, the `PendingReply` will return
+    /// `Err(SendError::ActorNotRunning)`. If the remote actor doesn't reply, it will return
+    /// `Err(SendError::NoReply)`.
     pub async fn ask_enqueue<MessageT>(
         &self,
         msg: MessageT,
@@ -328,9 +331,31 @@ impl<ActorT: Actor> ActorRef<ActorT> {
         MessageT: Send + 'static,
         ActorT: Message<MessageT>,
     {
-        let actor_ref = self.clone();
         let (sender, reply) = oneshot::channel();
-        let reply_sender = ReplySender { sender };
+        self.ask_callback(msg, async |res| {
+            let _ = sender.send(res);
+        })
+        .await?;
+        Ok(PendingReply { reply })
+    }
+
+    /// Send a message to an actor and call a callback with the response.
+    /// If the remote actor panics handling the message the callback isn't called. If the remote
+    /// actor doesn't reply, the callback is called with `Err(SendError::NoReply)`.
+    pub async fn ask_callback<MessageT, FutT>(
+        &self,
+        msg: MessageT,
+        callback: impl FnOnce(Result<<ActorT as Message<MessageT>>::Reply, SendError>) -> FutT
+        + Send
+        + 'static,
+    ) -> Result<(), SendError>
+    where
+        MessageT: Send + 'static,
+        ActorT: Message<MessageT>,
+        FutT: Future<Output = ()> + Send + 'static,
+    {
+        let actor_ref = self.clone();
+        let reply_sender = ReplySender::new(callback);
 
         let sender = self.controller.lock().unwrap().sender()?;
         sender
@@ -338,7 +363,7 @@ impl<ActorT: Actor> ActorRef<ActorT> {
                 Box::pin(actor_msg(actor, actor_ref, Some(reply_sender), msg))
             }))
             .await?;
-        Ok(PendingReply { reply })
+        Ok(())
     }
 
     /// Send a message to an actor and don't wait for a reply.
@@ -455,18 +480,29 @@ impl<ActorT: Actor> Clone for WeakActorRef<ActorT> {
     }
 }
 
+type ReplySenderAsyncCb<ValueT> =
+    Box<dyn FnOnce(Result<ValueT, SendError>) -> Pin<Box<dyn Future<Output = ()> + Send>> + Send>;
+
 pub struct ReplySender<ValueT: Send + 'static> {
-    sender: oneshot::Sender<Result<ValueT, SendError>>,
+    sender: ReplySenderAsyncCb<ValueT>,
 }
 
 impl<ValueT: Send + 'static> ReplySender<ValueT> {
+    fn new<FutT>(sender_fn: impl FnOnce(Result<ValueT, SendError>) -> FutT + Send + 'static) -> Self
+    where
+        FutT: Future<Output = ()> + Send + 'static,
+    {
+        Self {
+            sender: Box::new(|res| Box::pin(sender_fn(res))),
+        }
+    }
+
     pub async fn send(self, value: ValueT) {
-        // If the other side is no longer listening, we throw away the reply
-        let _ = self.sender.send(Ok(value));
+        (self.sender)(Ok(value)).await;
     }
 
     pub async fn no_reply(self) {
-        let _ = self.sender.send(Err(SendError::NoReply));
+        (self.sender)(Err(SendError::NoReply)).await;
     }
 }
 
@@ -649,6 +685,23 @@ mod tests {
 
         let pending_reply = actor_ref.ask_enqueue(Ping(12)).await.unwrap();
         assert_eq!(pending_reply.recv().await.unwrap(), Pong(12));
+
+        assert_eq!(spy.ping.recv().await.unwrap(), Ping(12));
+    }
+
+    #[tokio::test]
+    async fn ask_callback() {
+        let (actor, mut spy) = TestActor::new();
+        let actor_ref = spawn(actor);
+
+        let (sender, reply) = oneshot::channel();
+        actor_ref
+            .ask_callback(Ping(12), async |res| {
+                sender.send(res.unwrap()).unwrap();
+            })
+            .await
+            .unwrap();
+        assert_eq!(reply.await.unwrap(), Pong(12));
 
         assert_eq!(spy.ping.recv().await.unwrap(), Ping(12));
     }
