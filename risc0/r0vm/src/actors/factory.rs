@@ -18,13 +18,17 @@ use std::net::SocketAddr;
 
 use derive_more::From;
 use multi_index_map::MultiIndexMap;
+use opentelemetry::{
+    global::BoxedSpan,
+    trace::{Span as _, Tracer as _},
+};
 
 use super::{
     RemoteActor, RemoteFactoryRequest, RpcDisconnect,
     actor::{Actor, ActorRef, Context, Message, SendError},
     allocator::{CpuCores, GpuTokens, RemoteAllocatorActor, ScheduleTask, ScheduleTaskReply},
     error::{Error, Result as ActorResult},
-    job::JobActor,
+    job::{self, JobActor},
     protocol::{
         GlobalId, JobId, TaskKind, WorkerId,
         factory::{DropJob, GetTasks, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
@@ -69,9 +73,40 @@ enum PendingTaskState {
     ReadyForWorker { worker_id: WorkerId, task: TaskMsg },
 }
 
+struct PendingTaskTracer {
+    span: BoxedSpan,
+}
+
+impl PendingTaskTracer {
+    fn new(tracing: &job::tracer::SavedContext) -> Self {
+        let ctx = tracing.to_context();
+        let tracer = opentelemetry::global::tracer("factory");
+
+        let span = tracer.start_with_context("waiting for worker", &ctx);
+        Self { span }
+    }
+}
+
+impl Drop for PendingTaskTracer {
+    fn drop(&mut self) {
+        self.span.end();
+    }
+}
+
 struct PendingTask<JobT: Actor> {
     msg: SubmitTaskMsg<JobT>,
     state: PendingTaskState,
+    _tracer: PendingTaskTracer,
+}
+
+impl<JobT: Actor> PendingTask<JobT> {
+    fn new(msg: SubmitTaskMsg<JobT>) -> Self {
+        Self {
+            _tracer: PendingTaskTracer::new(&msg.tracing),
+            state: PendingTaskState::Submitted,
+            msg,
+        }
+    }
 }
 
 pub(crate) struct FactoryActor<DepsT: FactoryDeps = DefaultFactoryDeps> {
@@ -374,10 +409,7 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
 
         for (id, task) in std::mem::take(&mut self.active_tasks) {
             if workers.contains(&task.worker_id) {
-                self.pending_tasks.push_back(PendingTask {
-                    state: PendingTaskState::Submitted,
-                    msg: task.msg,
-                });
+                self.pending_tasks.push_back(PendingTask::new(task.msg));
             } else {
                 self.active_tasks.insert(id, task);
             }
@@ -424,10 +456,7 @@ impl<DepsT: FactoryDeps> Message<SubmitTaskMsg<DepsT::Job>> for FactoryActor<Dep
         msg: SubmitTaskMsg<DepsT::Job>,
         ctx: &mut Context<Self, Self::Reply>,
     ) {
-        self.pending_tasks.push_back(PendingTask {
-            state: PendingTaskState::Submitted,
-            msg,
-        });
+        self.pending_tasks.push_back(PendingTask::new(msg));
 
         self.maybe_schedule_tasks(ctx.actor_ref()).await;
     }
