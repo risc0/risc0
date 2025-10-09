@@ -1174,7 +1174,7 @@ macro_rules! remote_actor_ask {
                 let msg: $msg_ty = msg.into();
                 let res = self
                     .rpc_sender
-                    .ask(&msg, move |response: $reply| {
+                    .ask(&msg, async move |response: $reply| {
                         if let Some(reply_sender) = reply_sender {
                             reply_sender.send(response);
                         }
