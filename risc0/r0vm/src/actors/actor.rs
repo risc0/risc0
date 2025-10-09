@@ -271,6 +271,13 @@ impl<ActorT: Actor> ActorController<ActorT> {
     fn stop_waiter(&self) -> broadcast::Receiver<()> {
         self.stop.resubscribe()
     }
+
+    fn stop_reason(&self) -> Option<String> {
+        match &self.sender {
+            SenderState::Stopped { stop_reason } => Some(stop_reason.clone()),
+            _ => None,
+        }
+    }
 }
 
 pub struct ActorRef<ActorT: Actor> {
@@ -453,6 +460,12 @@ impl<ActorT: Actor> ActorRef<ActorT> {
         WeakActorRef {
             controller: Arc::downgrade(&self.controller),
         }
+    }
+
+    /// If the actor is stopped, get the reason.
+    #[allow(dead_code)]
+    pub fn stop_reason(&self) -> Option<String> {
+        self.controller.lock().unwrap().stop_reason()
     }
 }
 

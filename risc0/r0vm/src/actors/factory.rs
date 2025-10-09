@@ -63,10 +63,21 @@ struct ActiveTask<JobT: Actor> {
     msg: SubmitTaskMsg<JobT>,
 }
 
+enum PendingTaskState {
+    Submitted,
+    WaitingForWorker { task: TaskMsg },
+    ReadyForWorker { worker_id: WorkerId, task: TaskMsg },
+}
+
+struct PendingTask<JobT: Actor> {
+    msg: SubmitTaskMsg<JobT>,
+    state: PendingTaskState,
+}
+
 pub(crate) struct FactoryActor<DepsT: FactoryDeps = DefaultFactoryDeps> {
     jobs: HashMap<JobId, ActorRef<DepsT::Job>>,
     workers: MultiIndexWorkerRowMap,
-    pending_tasks: VecDeque<SubmitTaskMsg<DepsT::Job>>,
+    pending_tasks: VecDeque<PendingTask<DepsT::Job>>,
     active_tasks: HashMap<GlobalId, ActiveTask<DepsT::Job>>,
     worker_actors: HashMap<WorkerId, ActorRef<DepsT::Worker>>,
     allocator: ActorRef<DepsT::Allocator>,
@@ -96,6 +107,7 @@ impl<DepsT: FactoryDeps> Actor for FactoryActor<DepsT> {
         for task in self
             .pending_tasks
             .iter()
+            .map(|pt| &pt.msg)
             .chain(self.active_tasks.values().map(|t| &t.msg))
         {
             let _ = task
@@ -129,20 +141,93 @@ impl From<SendError> for ScheduleError {
     }
 }
 
-impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
-    async fn maybe_schedule_task(
-        &mut self,
-        msg: SubmitTaskMsg<DepsT::Job>,
-    ) -> ScheduleResult<bool> {
-        let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
+struct TaskGotWorker {
+    worker_id: WorkerId,
+    task_id: GlobalId,
+}
 
+impl<DepsT: FactoryDeps> Message<TaskGotWorker> for FactoryActor<DepsT> {
+    type Reply = ();
+
+    async fn handle(
+        &mut self,
+        msg: TaskGotWorker,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        let res = self.handle_task_got_worker(msg, ctx.actor_ref()).await;
+        if let Err(error) = res {
+            self.fail(error, ctx.actor_ref()).await;
+        }
+    }
+}
+
+async fn schedule_task_cb<DepsT: FactoryDeps>(
+    factory_ref: ActorRef<FactoryActor<DepsT>>,
+    task_id: GlobalId,
+    res: Result<ActorResult<ScheduleTaskReply>, SendError>,
+) {
+    let response = match res.map_err(|err| err.into()).flatten() {
+        Ok(resp) => resp,
+        Err(error) => {
+            let msg = format!("ScheduleTask reply error: {error}");
+            tracing::error!("{msg}");
+            let _ = factory_ref.stop_gracefully(msg);
+            return;
+        }
+    };
+    let _ = factory_ref
+        .tell(TaskGotWorker {
+            worker_id: response.worker_id,
+            task_id,
+        })
+        .await;
+}
+
+impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
+    async fn handle_task_got_worker(
+        &mut self,
+        TaskGotWorker { task_id, worker_id }: TaskGotWorker,
+        self_ref: ActorRef<Self>,
+    ) -> ActorResult<()> {
+        let Some(pending) = self
+            .pending_tasks
+            .iter_mut()
+            .find(|pending| pending.msg.header.global_id == task_id)
+        else {
+            // The task is for a job that is gone.
+            return Ok(());
+        };
+
+        let PendingTaskState::WaitingForWorker { task } = &pending.state else {
+            return Err(Error::new(format!(
+                "received unexpected ScheduleTask response: task {task_id} not waiting for worker"
+            )));
+        };
+
+        pending.state = PendingTaskState::ReadyForWorker {
+            worker_id,
+            task: task.clone(),
+        };
+
+        self.maybe_schedule_tasks(self_ref).await;
+
+        Ok(())
+    }
+
+    async fn maybe_allocate_submitted_task(
+        &mut self,
+        pending_task_state: &mut PendingTaskState,
+        self_ref: ActorRef<FactoryActor<DepsT>>,
+        msg: &SubmitTaskMsg<<DepsT as FactoryDeps>::Job>,
+    ) -> Result<(), ScheduleError> {
+        let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
         if workers.is_empty() {
-            return Ok(false);
+            return Ok(());
         }
 
         tracing::info!("Factory: scheduling job {:?}", &msg.header);
-
         let (cores, gpu_tokens) = self.choose_tokens(msg.header.task_kind);
+
         let task = TaskMsg {
             header: msg.header.clone(),
             task: msg.task.clone(),
@@ -151,45 +236,92 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
             tracing: msg.tracing.clone(),
         };
 
+        let task_id = msg.header.global_id;
         let mut candidates: Vec<_> = workers.iter().map(|w| w.worker_id).collect();
         candidates.sort();
-        let response = self
-            .allocator
-            .ask(ScheduleTask {
-                candidates,
-                task_id: msg.header.global_id,
-                description: format!("{:?}", &msg.header.task_kind),
-            })
-            .await??;
 
-        let worker_id = response.worker_id;
-        let worker_actor = self.worker_actors.get(&worker_id).ok_or_else(|| {
-            Error::new("received candidate worker from allocator outside given set")
-        })?;
+        self.allocator
+            .ask_callback(
+                ScheduleTask {
+                    candidates,
+                    task_id,
+                    description: format!("{:?}", &msg.header.task_kind),
+                },
+                move |res| schedule_task_cb(self_ref, task_id, res),
+            )
+            .await?;
+
+        *pending_task_state = PendingTaskState::WaitingForWorker { task };
+
+        Ok(())
+    }
+
+    async fn maybe_schedule_ready_task(
+        &mut self,
+        pending_task_state: &mut PendingTaskState,
+        msg: &SubmitTaskMsg<<DepsT as FactoryDeps>::Job>,
+        worker_id: uuid::Uuid,
+        task: TaskMsg,
+    ) -> Result<(), ScheduleError> {
+        let job_id = task.header.global_id.job_id;
+
+        let Some(worker_actor) = self.worker_actors.get(&worker_id) else {
+            *pending_task_state = PendingTaskState::Submitted;
+            return Err(ScheduleError::WorkerDisconnected { worker_id });
+        };
+
         tracing::info!(
             "Factory: sending job {:?} to worker {worker_id:?}",
-            &msg.header
+            &task.header
         );
-
         if worker_actor.tell(task).await.is_err() {
+            *pending_task_state = PendingTaskState::Submitted;
             return Err(ScheduleError::WorkerDisconnected { worker_id });
         }
 
-        let job_id = msg.header.global_id.job_id;
         self.jobs.insert(job_id, msg.job.clone());
-        self.active_tasks
-            .insert(msg.header.global_id, ActiveTask { worker_id, msg });
+        self.active_tasks.insert(
+            msg.header.global_id,
+            ActiveTask {
+                worker_id,
+                msg: msg.clone(),
+            },
+        );
 
-        Ok(true)
+        Ok(())
     }
 
-    async fn maybe_schedule_tasks_inner(&mut self) -> ScheduleResult<()> {
+    async fn maybe_schedule_task(
+        &mut self,
+        pending_task: &mut PendingTask<DepsT::Job>,
+        self_ref: ActorRef<Self>,
+    ) -> ScheduleResult<bool> {
+        let msg = &pending_task.msg;
+
+        match &pending_task.state {
+            PendingTaskState::Submitted => {
+                self.maybe_allocate_submitted_task(&mut pending_task.state, self_ref, msg)
+                    .await?;
+                Ok(false)
+            }
+            PendingTaskState::ReadyForWorker { worker_id, task } => {
+                let worker_id = *worker_id;
+                let task = task.clone();
+                self.maybe_schedule_ready_task(&mut pending_task.state, msg, worker_id, task)
+                    .await?;
+                Ok(true)
+            }
+            _ => Ok(false),
+        }
+    }
+
+    async fn maybe_schedule_tasks_inner(&mut self, self_ref: ActorRef<Self>) -> ScheduleResult<()> {
         let mut skipped_tasks = VecDeque::new();
 
         let mut res: ScheduleResult<bool> = Ok(false);
 
-        while let Some(msg) = self.pending_tasks.pop_front() {
-            res = self.maybe_schedule_task(msg.clone()).await;
+        while let Some(mut msg) = self.pending_tasks.pop_front() {
+            res = self.maybe_schedule_task(&mut msg, self_ref.clone()).await;
 
             // If the task wasn't scheduled, skip it
             if matches!(&res, Ok(false) | Err(_)) {
@@ -234,7 +366,10 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
 
         for (id, task) in std::mem::take(&mut self.active_tasks) {
             if workers.contains(&task.worker_id) {
-                self.pending_tasks.push_back(task.msg);
+                self.pending_tasks.push_back(PendingTask {
+                    state: PendingTaskState::Submitted,
+                    msg: task.msg,
+                });
             } else {
                 self.active_tasks.insert(id, task);
             }
@@ -248,7 +383,7 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
     }
 
     async fn maybe_schedule_tasks(&mut self, self_ref: ActorRef<Self>) {
-        while let Err(error) = self.maybe_schedule_tasks_inner().await {
+        while let Err(error) = self.maybe_schedule_tasks_inner(self_ref.clone()).await {
             match error {
                 ScheduleError::WorkerDisconnected { worker_id } => {
                     self.remove_worker(worker_id).await;
@@ -268,7 +403,8 @@ impl<DepsT: FactoryDeps> Message<DropJob> for FactoryActor<DepsT> {
     async fn handle(&mut self, msg: DropJob, _ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
         self.jobs.remove(&msg.job_id);
         self.pending_tasks
-            .retain(|t| t.header.global_id.job_id != msg.job_id);
+            .retain(|t| t.msg.header.global_id.job_id != msg.job_id);
+        self.active_tasks.retain(|id, _| id.job_id != msg.job_id);
     }
 }
 
@@ -280,7 +416,10 @@ impl<DepsT: FactoryDeps> Message<SubmitTaskMsg<DepsT::Job>> for FactoryActor<Dep
         msg: SubmitTaskMsg<DepsT::Job>,
         ctx: &mut Context<Self, Self::Reply>,
     ) {
-        self.pending_tasks.push_back(msg);
+        self.pending_tasks.push_back(PendingTask {
+            state: PendingTaskState::Submitted,
+            msg,
+        });
 
         self.maybe_schedule_tasks(ctx.actor_ref()).await;
     }
@@ -649,6 +788,9 @@ mod tests {
     impl Drop for Fixture {
         fn drop(&mut self) {
             assert!(!self.factory_runner.has_messages());
+
+            assert_eq!(self.factory_ref.stop_reason(), None);
+
             assert!(!self.alloc_runner.has_messages());
             assert!(!self.job_runner.has_messages());
 
@@ -708,10 +850,13 @@ mod tests {
         );
 
         // Process SubmitTaskMsg
-        tokio::join!(
-            async { fixture.factory_runner.try_handle_one().await.unwrap() },
-            fixture.alloc_runner.handle_one(),
-        );
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        // Process ScheduleTask
+        fixture.alloc_runner.try_handle_one().await.unwrap();
+
+        // Process TaskGotWorker
+        fixture.factory_runner.try_handle_one().await.unwrap();
 
         fixture
             .worker(worker_id)
@@ -760,7 +905,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn schedule_task_bad_allocator_reply() {
+    async fn schedule_task_missing_worker() {
         let mut fixture = Fixture::new(/* num_workers= */ 1).await;
 
         let (task_header, task) = test_exec_task();
@@ -782,21 +927,53 @@ mod tests {
                 task_id: task_header.global_id,
                 description: "Execute".into(),
             },
-            // reply with some worker not found in the candidates, this is invalid
+            // reply with some worker the factory doesn't know about
             Ok(ScheduleTaskReply {
                 worker_id: WorkerId::new_v4(),
             }),
         );
 
         // Process SubmitTaskMsg
-        tokio::join!(
-            async { fixture.factory_runner.try_handle_one().await.unwrap() },
-            fixture.alloc_runner.handle_one(),
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        // Process ScheduleTask
+        fixture.alloc_runner.try_handle_one().await.unwrap();
+
+        // Process TaskGotWorker
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        let worker1 = fixture.workers[0].id;
+        fixture.test_alloc.expect(
+            ScheduleTask {
+                candidates: fixture.workers.iter().map(|w| w.id).collect(),
+                task_id: task_header.global_id,
+                description: "Execute".into(),
+            },
+            // reply with a worker it can use now
+            Ok(ScheduleTaskReply { worker_id: worker1 }),
         );
 
-        // show the factory has stopped
-        let err = fixture.factory_runner.try_handle_one().await.unwrap_err();
-        assert_eq!(err, tokio::sync::mpsc::error::TryRecvError::Disconnected);
+        // Process 2nd ScheduleTask
+        fixture.alloc_runner.try_handle_one().await.unwrap();
+
+        // Process 2nd TaskGotWorker
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        fixture
+            .worker(worker1)
+            .test_worker
+            .expect(TaskMsgExpectation {
+                header: task_header.clone(),
+                task: task.kind(),
+                gpu_tokens: GpuTokens::ZERO,
+                cores: CpuCores::from(1),
+            });
+        fixture
+            .worker_mut(worker1)
+            .worker_runner
+            .try_handle_one()
+            .await
+            .unwrap();
     }
 
     #[tokio::test]
@@ -857,15 +1034,21 @@ mod tests {
         );
 
         // process SubmitTaskMsg
-        tokio::join!(
-            async { fixture.factory_runner.try_handle_one().await.unwrap() },
-            async {
-                fixture.alloc_runner.handle_one().await;
-                fixture.alloc_runner.handle_one().await;
-            }
-        );
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        // process ScheduleTask
+        fixture.alloc_runner.try_handle_one().await.unwrap();
 
         // process RpcDisconnect
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        // process TaskGotWorker
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        // process 2nd ScheduleTask
+        fixture.alloc_runner.try_handle_one().await.unwrap();
+
+        // process 2nd TaskGotWorker
         fixture.factory_runner.try_handle_one().await.unwrap();
 
         fixture
@@ -883,6 +1066,73 @@ mod tests {
             .try_handle_one()
             .await
             .unwrap();
+    }
+
+    #[tokio::test]
+    async fn job_drop_before_scheduling_task() {
+        let mut fixture = Fixture::new(/* num_workers= */ 2).await;
+
+        let task_id = GlobalId {
+            job_id: JobId::new_v4(),
+            task_id: 1,
+        };
+
+        let task_header = TaskHeader {
+            global_id: task_id,
+            task_kind: TaskKind::Execute,
+        };
+        let task = Task::Execute(Arc::new(ExecuteTask {
+            request: ProofRequest {
+                binary: vec![],
+                input: vec![],
+                assumptions: vec![],
+                segment_limit_po2: None,
+                execute_only: false,
+            },
+        }));
+
+        let worker1 = fixture.workers[0].id;
+        let worker2 = fixture.workers[1].id;
+
+        fixture
+            .factory_ref
+            .tell(SubmitTaskMsg {
+                job: fixture.job_ref.clone(),
+                header: task_header.clone(),
+                task: task.clone(),
+                tracing: Default::default(),
+            })
+            .await
+            .unwrap();
+
+        fixture.test_alloc.expect(
+            ScheduleTask {
+                candidates: vec![worker1, worker2],
+                task_id,
+                description: "Execute".into(),
+            },
+            Ok(ScheduleTaskReply { worker_id: worker1 }),
+        );
+
+        fixture
+            .factory_ref
+            .tell(DropJob {
+                job_id: task_id.job_id,
+            })
+            .await
+            .unwrap();
+
+        // process SubmitTaskMsg
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        // process ScheduleTask
+        fixture.alloc_runner.try_handle_one().await.unwrap();
+
+        // process DropJob
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        // process TaskGotWorker
+        fixture.factory_runner.try_handle_one().await.unwrap();
     }
 
     #[tokio::test]
@@ -925,10 +1175,14 @@ mod tests {
             Ok(ScheduleTaskReply { worker_id: worker2 }),
         );
 
-        tokio::join!(
-            fixture.factory_runner.handle_one(),
-            fixture.alloc_runner.handle_one(),
-        );
+        // Process RpcDisconnect
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        // Process ScheduleTask
+        fixture.alloc_runner.try_handle_one().await.unwrap();
+
+        // Process TaskGotWorker
+        fixture.factory_runner.try_handle_one().await.unwrap();
 
         fixture
             .worker(worker2)
