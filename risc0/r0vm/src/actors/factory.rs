@@ -142,7 +142,7 @@ impl From<SendError> for ScheduleError {
 }
 
 struct TaskGotWorker {
-    worker_id: WorkerId,
+    worker_id: ActorResult<WorkerId>,
     task_id: GlobalId,
 }
 
@@ -166,7 +166,7 @@ async fn schedule_task_cb<DepsT: FactoryDeps>(
     task_id: GlobalId,
     res: Result<ActorResult<ScheduleTaskReply>, SendError>,
 ) {
-    let response = match res.map_err(|err| err.into()).flatten() {
+    let response = match res {
         Ok(resp) => resp,
         Err(error) => {
             let msg = format!("ScheduleTask reply error: {error}");
@@ -177,7 +177,7 @@ async fn schedule_task_cb<DepsT: FactoryDeps>(
     };
     let _ = factory_ref
         .tell(TaskGotWorker {
-            worker_id: response.worker_id,
+            worker_id: response.map(|resp| resp.worker_id),
             task_id,
         })
         .await;
@@ -204,10 +204,18 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
             )));
         };
 
-        pending.state = PendingTaskState::ReadyForWorker {
-            worker_id,
-            task: task.clone(),
-        };
+        match worker_id {
+            Ok(worker_id) => {
+                pending.state = PendingTaskState::ReadyForWorker {
+                    worker_id,
+                    task: task.clone(),
+                };
+            }
+            Err(error) => {
+                tracing::error!("received allocator error when scheduling task: {error}");
+                pending.state = PendingTaskState::Submitted;
+            }
+        }
 
         self.maybe_schedule_tasks(self_ref).await;
 
@@ -882,6 +890,75 @@ mod tests {
         let worker1 = fixture.workers[0].id;
         let (task_header, task) = test_exec_task();
         schedule_task_on_worker(&mut fixture, worker1, task_header, task).await;
+    }
+
+    #[tokio::test]
+    async fn allocator_schedule_error() {
+        let mut fixture = Fixture::new(/* num_workers= */ 1).await;
+
+        let worker1 = fixture.workers[0].id;
+        let (task_header, task) = test_exec_task();
+
+        fixture
+            .factory_ref
+            .tell(SubmitTaskMsg {
+                job: fixture.job_ref.clone(),
+                header: task_header.clone(),
+                task: task.clone(),
+                tracing: Default::default(),
+            })
+            .await
+            .unwrap();
+
+        fixture.test_alloc.expect(
+            ScheduleTask {
+                candidates: fixture.workers.iter().map(|w| w.id).collect(),
+                task_id: task_header.global_id,
+                description: "Execute".into(),
+            },
+            Err(Error::new("no eligible candidate workers")),
+        );
+
+        // Process SubmitTaskMsg
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        // Process ScheduleTask
+        fixture.alloc_runner.try_handle_one().await.unwrap();
+
+        // Process TaskGotWorker, it should retry
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        // this time we make it succeed
+        fixture.test_alloc.expect(
+            ScheduleTask {
+                candidates: fixture.workers.iter().map(|w| w.id).collect(),
+                task_id: task_header.global_id,
+                description: "Execute".into(),
+            },
+            Ok(ScheduleTaskReply { worker_id: worker1 }),
+        );
+        // Process ScheduleTask
+        fixture.alloc_runner.try_handle_one().await.unwrap();
+
+        // Process TaskGotWorker
+        fixture.factory_runner.try_handle_one().await.unwrap();
+
+        // worker1 gets the task
+        fixture
+            .worker(worker1)
+            .test_worker
+            .expect(TaskMsgExpectation {
+                header: task_header.clone(),
+                task: task.kind(),
+                gpu_tokens: GpuTokens::ZERO,
+                cores: CpuCores::from(1),
+            });
+        fixture
+            .worker_mut(worker1)
+            .worker_runner
+            .try_handle_one()
+            .await
+            .unwrap();
     }
 
     #[tokio::test]
