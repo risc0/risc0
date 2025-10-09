@@ -71,7 +71,7 @@ mod tests {
         tracing::info!("Creating program");
         let program = Program::from_encoded(cast_slice::<u8, u32>(&zkr_bytes), RECURSION_PO2);
         tracing::info!("Creating prover");
-        let mut prover = Prover::new(program, "poseidon2"); 
+        let mut prover = Prover::new(program, "poseidon2");
         prover.add_input(&transcript_vec);
         tracing::info!("Running prover");
         prover.run().unwrap();
