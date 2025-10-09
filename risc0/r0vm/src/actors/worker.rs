@@ -95,7 +95,7 @@ fn get_gpus_from_nvml() -> anyhow::Result<Vec<GpuSpec>> {
             v.split(",")
                 .map(|v| v.trim().parse())
                 .collect::<std::result::Result<HashSet<u32>, _>>()
-                .map_err(|_| anyhow::anyhow!("failed to parse CUDA_VISIBLE_DEVICES"))
+                .map_err(|e| anyhow::anyhow!("failed to parse CUDA_VISIBLE_DEVICES: {e}"))
         })
         .transpose()?;
 
@@ -199,7 +199,7 @@ impl Actor for WorkerActor {
             .await;
         if let Err(error) = res {
             tracing::error!("worker dead: failed to talk to factory: {error}");
-            let _ = actor_ref.stop_gracefully();
+            let _ = actor_ref.stop_gracefully(format!("failed to talk to factory: {error}"));
         }
     }
 }
@@ -211,7 +211,7 @@ impl Message<TaskMsg> for WorkerActor {
         let res = self.handle_task(msg).await;
         if let Err(error) = res {
             tracing::error!("worker has died: {error}");
-            let _ = ctx.actor_ref().stop_gracefully();
+            let _ = ctx.actor_ref().stop_gracefully(error.to_string());
         }
     }
 }
@@ -320,7 +320,7 @@ impl Processor {
                         reserved: vec![],
                     })
                     .await
-                    .map_err(|_| Error::new("CPU processor dead"))?;
+                    .map_err(|e| Error::new(format!("CPU processor dead: {e}")))?;
             }
             Task::ProveSegment(task) => {
                 self.cpu_queue
@@ -331,7 +331,7 @@ impl Processor {
                         reserved: vec![],
                     })
                     .await
-                    .map_err(|_| Error::new("CPU processor dead"))?;
+                    .map_err(|e| Error::new(format!("CPU processor dead: {e}")))?;
             }
             Task::Lift(task) => {
                 self.gpu_queue
@@ -342,7 +342,7 @@ impl Processor {
                         reserved: vec![],
                     })
                     .await
-                    .map_err(|_| Error::new("GPU processor dead"))?;
+                    .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
             }
             Task::Join(task) => {
                 self.gpu_queue
@@ -353,7 +353,7 @@ impl Processor {
                         reserved: vec![],
                     })
                     .await
-                    .map_err(|_| Error::new("GPU processor dead"))?;
+                    .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
             }
             Task::ProveKeccak(task) => {
                 self.gpu_queue
@@ -364,7 +364,7 @@ impl Processor {
                         reserved: vec![],
                     })
                     .await
-                    .map_err(|_| Error::new("GPU processor dead"))?;
+                    .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
             }
             Task::Union(task) => {
                 self.gpu_queue
@@ -375,7 +375,7 @@ impl Processor {
                         reserved: vec![],
                     })
                     .await
-                    .map_err(|_| Error::new("GPU processor dead"))?;
+                    .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
             }
             Task::Resolve(task) => {
                 self.gpu_queue
@@ -386,7 +386,7 @@ impl Processor {
                         reserved: vec![],
                     })
                     .await
-                    .map_err(|_| Error::new("GPU processor dead"))?;
+                    .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
             }
             Task::ShrinkWrap(task) => {
                 self.gpu_queue
@@ -397,7 +397,7 @@ impl Processor {
                         reserved: vec![],
                     })
                     .await
-                    .map_err(|_| Error::new("GPU processor dead"))?;
+                    .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
             }
         }
         Ok(())
@@ -516,7 +516,7 @@ impl GpuProcessor {
                 .prove_segment_core(&ctx, *task.preflight_results)
         })
         .await
-        .map_err(|_| Error::new("JoinHandle error: prove_segment task"))??;
+        .map_err(|e| Error::new(format!("JoinHandle error: prove_segment task: {e}")))??;
         Ok(TaskDone::ProveSegment(Box::new(receipt)))
     }
 
@@ -532,7 +532,7 @@ impl GpuProcessor {
         let receipt =
             tokio::task::spawn_blocking(move || prover.get()?.prove_keccak(&task.request))
                 .await
-                .map_err(|_| Error::new("JoinHandle error: prove_keccak task"))??;
+                .map_err(|e| Error::new(format!("JoinHandle error: prove_keccak task: {e}")))??;
         Ok(TaskDone::ProveKeccak(Arc::new(ProveKeccakDone {
             index,
             receipt,
@@ -546,7 +546,7 @@ impl GpuProcessor {
         let prover = Prover { delay: self.delay };
         let receipt = tokio::task::spawn_blocking(move || prover.get()?.lift(&task.receipt))
             .await
-            .map_err(|_| Error::new("JoinHandle error: lift task"))??;
+            .map_err(|e| Error::new(format!("JoinHandle error: lift task: {e}")))??;
         Ok(TaskDone::Lift(Box::new(JoinNode {
             range: (segment_idx..segment_idx + 1).into(),
             receipt,
@@ -562,7 +562,7 @@ impl GpuProcessor {
             prover.get()?.join(&task.receipts[0], &task.receipts[1])
         })
         .await
-        .map_err(|_| Error::new("JoinHandle error: join task"))??;
+        .map_err(|e| Error::new(format!("JoinHandle error: join task: {e}")))??;
         Ok(TaskDone::Join(Box::new(JoinNode { range, receipt })))
     }
 
@@ -576,7 +576,7 @@ impl GpuProcessor {
             prover.get()?.union(&task.receipts[0], &task.receipts[1])
         })
         .await
-        .map_err(|_| Error::new("JoinHandle error: union task"))??;
+        .map_err(|e| Error::new(format!("JoinHandle error: union task: {e}")))??;
         Ok(TaskDone::Union(Arc::new(UnionDone {
             height,
             pos,
@@ -592,7 +592,7 @@ impl GpuProcessor {
             prover.get()?.resolve(&task.conditional, &task.assumption)
         })
         .await
-        .map_err(|_| Error::new("JoinHandle error: resolve task"))??;
+        .map_err(|e| Error::new(format!("JoinHandle error: resolve task: {e}")))??;
         Ok(TaskDone::Resolve(Arc::new(receipt)))
     }
 
@@ -791,7 +791,7 @@ impl CpuProcessor {
             Ok(session)
         })
         .await
-        .map_err(|_| Error::new("JoinHandle error: execute task"))?;
+        .map_err(|e| Error::new(format!("JoinHandle error: execute task: {e}")))?;
         Ok(TaskDone::Session(Arc::new(session?)))
     }
 
@@ -809,7 +809,7 @@ impl CpuProcessor {
             Ok(Box::new(prover.get()?.segment_preflight(&task.segment)?))
         })
         .await
-        .map_err(|_| Error::new("JoinHandle error: preflight task"))??;
+        .map_err(|e| Error::new(format!("JoinHandle error: preflight task: {e}")))??;
         self.gpu_queue
             .send(GpuTaskMsg {
                 header,
@@ -818,7 +818,7 @@ impl CpuProcessor {
                 reserved,
             })
             .await
-            .map_err(|_| Error::new("GPU processor dead"))?;
+            .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
 
         Ok(())
     }

@@ -24,9 +24,8 @@
 namespace risc0 {
 
 FriRoundVerifier::FriRoundVerifier(ReadIop& iop, size_t degreeIn)
-  : degree(degreeIn / kFriFold)
-  , merkle(iop, degree * kExpansionFactor, kFriFold * kExtSize, kQueries)
-{
+    : degree(degreeIn / kFriFold)
+    , merkle(iop, degree * kExpansionFactor, kFriFold * kExtSize, kQueries) {
   mix = iop.rngFpExt();
 }
 
@@ -40,11 +39,10 @@ void FriRoundVerifier::query(ReadIop& iop, size_t& pos, FpExt& goal) {
   // Reformat into ext fields
   std::vector<FpExt> dataExt(kFriFold);
   for (size_t i = 0; i < kFriFold; i++) {
-    dataExt[i] = FpExt(
-        data[0 * kFriFold + i],
-        data[1 * kFriFold + i],
-        data[2 * kFriFold + i],
-        data[3 * kFriFold + i]);
+    dataExt[i] = FpExt(data[0 * kFriFold + i],
+                       data[1 * kFriFold + i],
+                       data[2 * kFriFold + i],
+                       data[3 * kFriFold + i]);
   }
   // Check the existing goal
   if (dataExt[quot] != goal) {
@@ -59,10 +57,8 @@ void FriRoundVerifier::query(ReadIop& iop, size_t& pos, FpExt& goal) {
   pos = group;
 }
 
-FriVerifier::FriVerifier(ReadIop& iop, size_t degree)
-  : initDegree(degree)
-{
-  while(degree > kFriMinDegree) {
+FriVerifier::FriVerifier(ReadIop& iop, size_t degree) : initDegree(degree) {
+  while (degree > kFriMinDegree) {
     rounds.emplace_back(iop, degree);
     degree /= kFriFold;
   }
@@ -74,11 +70,10 @@ FriVerifier::FriVerifier(ReadIop& iop, size_t degree)
   iop.commit(digest);
   // Reformat into FpExt
   for (size_t i = 0; i < finalDegree; i++) {
-    coeffs.push_back(FpExt(
-          coeffsFlat[0 * finalDegree + i],
-          coeffsFlat[1 * finalDegree + i],
-          coeffsFlat[2 * finalDegree + i],
-          coeffsFlat[3 * finalDegree + i]));
+    coeffs.push_back(FpExt(coeffsFlat[0 * finalDegree + i],
+                           coeffsFlat[1 * finalDegree + i],
+                           coeffsFlat[2 * finalDegree + i],
+                           coeffsFlat[3 * finalDegree + i]));
   }
 }
 
@@ -100,4 +95,4 @@ void FriVerifier::run(ReadIop& iop, VerifyPointFunction func) {
   }
 }
 
-}  // namespace risc0
+} // namespace risc0

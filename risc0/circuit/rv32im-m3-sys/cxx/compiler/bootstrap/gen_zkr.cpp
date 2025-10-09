@@ -21,7 +21,6 @@ namespace cl = llvm::cl;
 static cl::opt<std::string>
     outputDir("output-dir", cl::desc("Output directory"), cl::value_desc("dir"), cl::Required);
 
-
 int main(int argc, char* argv[]) {
   llvm::InitLLVM y(argc, argv);
   zirgen::registerEdslCLOptions();
@@ -29,7 +28,7 @@ int main(int argc, char* argv[]) {
 
   zirgen::Module module;
   size_t po2 = 12;
-  risc0::addLift(module, po2);  // TODO: Loop here
+  risc0::addLift(module, po2); // TODO: Loop here
   module.optimize();
   // module.dump(true);
   module.getModule().walk([&](mlir::func::FuncOp func) { zirgen::emitRecursion(outputDir, func); });

@@ -13,22 +13,30 @@
 // limitations under the License.
 
 #include "fp.h"
-#include "hal/po2s.h"
 #include "hal/cuda/kernels/base.h"
+#include "hal/po2s.h"
 
-#define PO2(x) \
-extern "C" void data_witgen_cuda_ ## x(Fp* data, Fp* globals, const RowInfo* info, const uint32_t* aux, uint32_t* tables, Fp rou);
+#define PO2(x)                                                                                     \
+  extern "C" void data_witgen_cuda_##x(                                                            \
+      Fp* data, Fp* globals, const RowInfo* info, const uint32_t* aux, uint32_t* tables, Fp rou);
 PO2S
 #undef PO2
 
-extern "C" void data_witgen_cuda(Fp* data, Fp* globals, const RowInfo* info, const uint32_t* aux, uint32_t* tables, Fp rou, uint32_t numRows) {
+    extern "C" void
+    data_witgen_cuda(Fp* data,
+                     Fp* globals,
+                     const RowInfo* info,
+                     const uint32_t* aux,
+                     uint32_t* tables,
+                     Fp rou,
+                     uint32_t numRows) {
   uint32_t po2 = 31 - __builtin_clz(numRows);
-  switch(po2) {
-#define PO2(x) \
-    case x: \
-      data_witgen_cuda_ ## x(data, globals, info, aux, tables, rou); \
-      break;
-PO2S
+  switch (po2) {
+#define PO2(x)                                                                                     \
+  case x:                                                                                          \
+    data_witgen_cuda_##x(data, globals, info, aux, tables, rou);                                   \
+    break;
+    PO2S
 #undef PO2
   }
 }

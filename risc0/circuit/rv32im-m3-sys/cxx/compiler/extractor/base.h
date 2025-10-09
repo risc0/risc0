@@ -24,27 +24,25 @@
 using namespace risc0;
 
 struct VerifyFwd {
-  template<typename T, typename... Args>
+  template <typename T, typename... Args>
   static void apply(RecordingContext& ctx, T& obj, Args... args) {
     obj.template applyInner<VerifyFwd>(ctx, args...);
     obj.verify(ctx, args...);
   }
 
-  template <typename T, size_t N>
-  static void apply(RecordingContext& ctx, T (&t)[N]) {
+  template <typename T, size_t N> static void apply(RecordingContext& ctx, T (&t)[N]) {
     for (size_t i = 0; i < N; i++) {
       VerifyFwd::apply(ctx, t[i]);
     }
   }
 };
 
-#define EXTRACT(Comp) \
-  { \
-    ctx.enterComponent(Comp<C>::NAME); \
-    Comp<C> component; \
-    mlir::Type layoutType = getLayoutType(ctx, component); \
-    VerifyFwd::apply(ctx, component); \
-    ctx.materializeLayout(layoutType); \
-    ctx.exitComponent(); \
+#define EXTRACT(Comp)                                                                              \
+  {                                                                                                \
+    ctx.enterComponent(Comp<C>::NAME);                                                             \
+    Comp<C> component;                                                                             \
+    mlir::Type layoutType = getLayoutType(ctx, component);                                         \
+    VerifyFwd::apply(ctx, component);                                                              \
+    ctx.materializeLayout(layoutType);                                                             \
+    ctx.exitComponent();                                                                           \
   }
-

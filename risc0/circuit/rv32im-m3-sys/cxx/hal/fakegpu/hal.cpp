@@ -17,7 +17,8 @@
 
 namespace risc0 {
 
-IHalPtr getGpuHal() { return getCpuHal(); }
+IHalPtr getGpuHal() {
+  return getCpuHal();
+}
 
-}  // namespace risc0
-
+} // namespace risc0

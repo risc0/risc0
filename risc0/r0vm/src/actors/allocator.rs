@@ -302,6 +302,22 @@ struct Manager {
     rpc_port: Option<u16>,
 }
 
+impl Manager {
+    fn to_get_status(&self, version: DeploymentVersion) -> GetStatusManager {
+        let host = self
+            .remote_address
+            .map(|a| a.ip().to_string())
+            .unwrap_or("localhost".into());
+
+        GetStatusManager {
+            version,
+            host,
+            endpoint: self.endpoint.clone(),
+            rpc_port: self.rpc_port,
+        }
+    }
+}
+
 struct Cpu {
     total_cores: CpuCores,
     free_cores: CpuCores,
@@ -351,11 +367,29 @@ impl ManagerMap {
         self.0.retain(|_, managers| !managers.is_empty());
     }
 
+    fn release_channels(&self) -> impl Iterator<Item = &String> {
+        self.0.keys()
+    }
+
     fn iter_channel(
         &self,
         release_channel: &str,
     ) -> Option<btree_map::Iter<'_, semver::Version, Manager>> {
         self.0.get(release_channel).map(|managers| managers.iter())
+    }
+
+    fn iter(&self) -> impl Iterator<Item = (DeploymentVersion, &Manager)> {
+        self.0.iter().flat_map(|(release_channel, managers)| {
+            managers.iter().map(|(zkvm_version, manager)| {
+                (
+                    DeploymentVersion {
+                        release_channel: release_channel.clone(),
+                        zkvm_version: zkvm_version.clone(),
+                    },
+                    manager,
+                )
+            })
+        })
     }
 }
 
@@ -1083,23 +1117,39 @@ impl AllocatorActor {
 pub struct GetStatus;
 
 #[derive(Serialize, Deserialize)]
+pub struct GetStatusManager {
+    pub version: DeploymentVersion,
+    pub host: String,
+    pub endpoint: Option<Url>,
+    pub rpc_port: Option<u16>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct GetStatusWorker {
-    id: String,
-    hardware: Vec<String>,
-    host: String,
-    port: Option<u16>,
-    version: DeploymentVersion,
-    tasks: Vec<String>,
+    pub id: String,
+    pub hardware: Vec<String>,
+    pub host: String,
+    pub port: Option<u16>,
+    pub version: DeploymentVersion,
+    pub tasks: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct GetStatusGpu {
-    id: String,
-    tasks: Vec<String>,
+    pub id: String,
+    pub tasks: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GetStatusReleaseChannel {
+    pub name: String,
+    pub versions: Vec<semver::Version>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct GetStatusReply {
+    pub release_channels: Vec<GetStatusReleaseChannel>,
+    pub managers: Vec<GetStatusManager>,
     pub workers: Vec<GetStatusWorker>,
     pub gpus: Vec<GetStatusGpu>,
 }
@@ -1114,6 +1164,27 @@ impl Message<GetStatus> for AllocatorActor {
 
 impl AllocatorActor {
     fn get_status(&mut self) -> Result<GetStatusReply> {
+        let release_channels: Vec<_> = self
+            .managers
+            .release_channels()
+            .map(|release_channel| GetStatusReleaseChannel {
+                name: release_channel.clone(),
+                versions: self
+                    .managers
+                    .iter_channel(release_channel)
+                    .unwrap()
+                    .map(|(version, _)| version.clone())
+                    .collect(),
+            })
+            .collect();
+
+        let mut managers: Vec<_> = self
+            .managers
+            .iter()
+            .map(|(version, manager)| manager.to_get_status(version))
+            .collect();
+        managers.sort_by_key(|manager| manager.version.clone());
+
         let mut workers: Vec<_> = self
             .workers
             .iter()
@@ -1134,7 +1205,12 @@ impl AllocatorActor {
             .collect();
         gpus.sort_by_key(|gpu| gpu.id.clone());
 
-        Ok(GetStatusReply { workers, gpus })
+        Ok(GetStatusReply {
+            release_channels,
+            managers,
+            workers,
+            gpus,
+        })
     }
 }
 

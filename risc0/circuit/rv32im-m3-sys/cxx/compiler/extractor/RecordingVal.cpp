@@ -36,12 +36,14 @@ RecordingVal::RecordingVal(risc0::Fp c) : RecordingVal(c.asUInt32()) {}
 
 RecordingVal RecordingVal::operator+(const RecordingVal& rhs) const {
   OpBuilder& builder = *BuilderSingleton::get();
-  return RecordingVal(builder.create<zirgen::Zll::AddOp>(builder.getUnknownLoc(), this->value, rhs.value));
+  return RecordingVal(
+      builder.create<zirgen::Zll::AddOp>(builder.getUnknownLoc(), this->value, rhs.value));
 }
 
 RecordingVal RecordingVal::operator-(const RecordingVal& rhs) const {
   OpBuilder& builder = *BuilderSingleton::get();
-  return RecordingVal(builder.create<zirgen::Zll::SubOp>(builder.getUnknownLoc(), this->value, rhs.value));
+  return RecordingVal(
+      builder.create<zirgen::Zll::SubOp>(builder.getUnknownLoc(), this->value, rhs.value));
 }
 
 RecordingVal RecordingVal::operator-() const {
@@ -51,34 +53,40 @@ RecordingVal RecordingVal::operator-() const {
 
 RecordingVal RecordingVal::operator*(const RecordingVal& rhs) const {
   OpBuilder& builder = *BuilderSingleton::get();
-  return RecordingVal(builder.create<zirgen::Zll::MulOp>(builder.getUnknownLoc(), this->value, rhs.value));
+  return RecordingVal(
+      builder.create<zirgen::Zll::MulOp>(builder.getUnknownLoc(), this->value, rhs.value));
 }
 
 RecordingValExt::RecordingValExt() {
   OpBuilder& builder = *BuilderSingleton::get();
-  mlir::PolynomialAttr attr = mlir::PolynomialAttr::get(builder.getContext(), { 0, 0, 0, 0 });
+  mlir::PolynomialAttr attr = mlir::PolynomialAttr::get(builder.getContext(), {0, 0, 0, 0});
   this->value = builder.create<zirgen::Zll::ConstOp>(builder.getUnknownLoc(), attr);
 }
 
 RecordingValExt::RecordingValExt(uint32_t x) {
   OpBuilder& builder = *BuilderSingleton::get();
-  mlir::PolynomialAttr attr = mlir::PolynomialAttr::get(builder.getContext(), { x, 0, 0, 0 });
+  mlir::PolynomialAttr attr = mlir::PolynomialAttr::get(builder.getContext(), {x, 0, 0, 0});
   this->value = builder.create<zirgen::Zll::ConstOp>(builder.getUnknownLoc(), attr);
 }
 
 RecordingValExt::RecordingValExt(risc0::FpExt v) {
   OpBuilder& builder = *BuilderSingleton::get();
-  mlir::PolynomialAttr attr = mlir::PolynomialAttr::get(builder.getContext(), 
-      { v.elem(0).asUInt32(), v.elem(1).asUInt32(), v.elem(2).asUInt32(), v.elem(3).asUInt32() });
+  mlir::PolynomialAttr attr = mlir::PolynomialAttr::get(
+      builder.getContext(),
+      {v.elem(0).asUInt32(), v.elem(1).asUInt32(), v.elem(2).asUInt32(), v.elem(3).asUInt32()});
   this->value = builder.create<zirgen::Zll::ConstOp>(builder.getUnknownLoc(), attr);
 }
 
 RecordingValExt::RecordingValExt(RecordingVal v) {
-  // Technically, we don't need to do anything here since arithemetic ops in zll are autocasting
+  // Technically, we don't need to do anything here since arithemetic ops in zll
+  // are autocasting
   this->value = v.value;
 }
 
-RecordingValExt::RecordingValExt(RecordingVal v0, RecordingVal v1, RecordingVal v2, RecordingVal v3) {
+RecordingValExt::RecordingValExt(RecordingVal v0,
+                                 RecordingVal v1,
+                                 RecordingVal v2,
+                                 RecordingVal v3) {
   // TODO: Cache the constants somewhere
   RecordingValExt m1 = RecordingValExt(risc0::FpExt(0, 1, 0, 0));
   RecordingValExt m2 = RecordingValExt(risc0::FpExt(0, 0, 1, 0));
@@ -89,20 +97,24 @@ RecordingValExt::RecordingValExt(RecordingVal v0, RecordingVal v1, RecordingVal 
 
 RecordingValExt RecordingValExt::operator+(RecordingValExt rhs) const {
   OpBuilder& builder = *BuilderSingleton::get();
-  return RecordingValExt(builder.create<zirgen::Zll::AddOp>(builder.getUnknownLoc(), this->value, rhs.value));
+  return RecordingValExt(
+      builder.create<zirgen::Zll::AddOp>(builder.getUnknownLoc(), this->value, rhs.value));
 }
 
 RecordingValExt RecordingValExt::operator-(RecordingValExt rhs) const {
   OpBuilder& builder = *BuilderSingleton::get();
-  return RecordingValExt(builder.create<zirgen::Zll::SubOp>(builder.getUnknownLoc(), this->value, rhs.value));
+  return RecordingValExt(
+      builder.create<zirgen::Zll::SubOp>(builder.getUnknownLoc(), this->value, rhs.value));
 }
 
 RecordingValExt RecordingValExt::operator*(RecordingValExt rhs) const {
   OpBuilder& builder = *BuilderSingleton::get();
-  return RecordingValExt(builder.create<zirgen::Zll::MulOp>(builder.getUnknownLoc(), this->value, rhs.value));
+  return RecordingValExt(
+      builder.create<zirgen::Zll::MulOp>(builder.getUnknownLoc(), this->value, rhs.value));
 }
 
 RecordingValExt RecordingValExt::operator*(RecordingVal rhs) const {
   OpBuilder& builder = *BuilderSingleton::get();
-  return RecordingValExt(builder.create<zirgen::Zll::MulOp>(builder.getUnknownLoc(), this->value, rhs.value));
+  return RecordingValExt(
+      builder.create<zirgen::Zll::MulOp>(builder.getUnknownLoc(), this->value, rhs.value));
 }

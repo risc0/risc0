@@ -15,12 +15,12 @@
 
 #include "verify/verify.h"
 
-#include "zkp/params.h"
-#include "zkp/rou.h"
-#include "zkp/poly.h"
+#include "rv32im/emu/blocks.h"
 #include "verify/fri.h"
 #include "verify/merkle.h"
-#include "rv32im/emu/blocks.h"
+#include "zkp/params.h"
+#include "zkp/poly.h"
+#include "zkp/rou.h"
 
 namespace risc0 {
 
@@ -96,7 +96,7 @@ void verify(VerifyCircuitInfo& ci, ReadIop& iop, size_t po2) {
   LOG(0, "constraintPoly = " << constraintPoly);
   const FpExt* checkData = eval.data() + offset;
   FpExt check;
-  size_t remap[] = { 0, 2, 1, 3 };
+  size_t remap[] = {0, 2, 1, 3};
   for (size_t i = 0; i < kExpansionFactor; i++) {
     size_t rmi = remap[i];
     check += checkData[rmi + 0] * pow(z, i) * FpExt(1, 0, 0, 0);
@@ -117,8 +117,7 @@ void verify(VerifyCircuitInfo& ci, ReadIop& iop, size_t po2) {
   // Normal columns
   for (const Column& col : ci.taps.getColumns()) {
     for (size_t i = 0; i < col.getTaps().size(); i++) {
-      comboU[ci.taps.getCombos()[col.comboId].offset + i] +=
-        curMix * coeffs[curPos + i];
+      comboU[ci.taps.getCombos()[col.comboId].offset + i] += curMix * coeffs[curPos + i];
     }
     curPos += col.getTaps().size();
     curMix *= comboMix;
@@ -167,4 +166,4 @@ void verify(VerifyCircuitInfo& ci, ReadIop& iop, size_t po2) {
   });
 };
 
-}  // risc0
+} // namespace risc0

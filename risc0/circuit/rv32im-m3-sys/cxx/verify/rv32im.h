@@ -21,4 +21,4 @@ void setupVerifyInfo(VerifyCircuitInfo& info);
 
 void verifyRv32im(ReadIop& iop, size_t po2);
 
-}  // namespace risc0
+} // namespace risc0

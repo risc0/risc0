@@ -40,9 +40,9 @@ int main() {
 
   // This code can be used to write the proof to a file for consumption by the
   // Rust verifier.
-  // auto myfile = std::fstream("/path/to/risc0/zkp/src/prove/proof.bin", std::ios::out | std::ios::binary);
-  // myfile.write((const char*) (wiop.getTranscript().data()), 4 * wiop.getTranscript().size());
-  // myfile.close();
+  // auto myfile = std::fstream("/path/to/risc0/zkp/src/prove/proof.bin", std::ios::out |
+  // std::ios::binary); myfile.write((const char*) (wiop.getTranscript().data()), 4 *
+  // wiop.getTranscript().size()); myfile.close();
 
   return 0;
 }

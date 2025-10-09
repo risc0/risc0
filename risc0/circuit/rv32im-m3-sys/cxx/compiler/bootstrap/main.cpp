@@ -13,8 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "core/log.h"
 #include "compiler/extractor/RecordingVal.h"
+#include "core/log.h"
 #include "rv32im/circuit/verify.h"
 #include "rv32im/emu/blocks.h"
 
@@ -39,4 +39,3 @@ int main(int argc, char* argv[]) {
   }
   return 0;
 }
-

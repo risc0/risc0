@@ -641,20 +641,20 @@ impl App {
         self.allocator_rpc_server = None;
 
         if let Some(allocator) = &self.allocator {
-            let _ = allocator.stop_gracefully();
+            let _ = allocator.stop_gracefully("app shutdown");
         }
 
         if let Some(manager) = &self.manager {
-            let _ = manager.stop_gracefully();
+            let _ = manager.stop_gracefully("app shutdown");
         }
 
         let workers = self.workers.lock().unwrap().clone();
         for worker in workers {
-            let _ = worker.stop_gracefully();
+            let _ = worker.stop_gracefully("app shutdown");
         }
 
         if let Some(factory) = &self.factory {
-            let _ = factory.stop_gracefully();
+            let _ = factory.stop_gracefully("app shutdown");
         }
     }
 
@@ -837,7 +837,7 @@ async fn route_rpc_msg_to_worker(
     if let Some(msg) = msg {
         msg.dispatch(remote_address, worker, ops).await
     } else {
-        let _ = worker.stop_gracefully();
+        let _ = worker.stop_gracefully("rpc end");
     }
 }
 
@@ -1149,7 +1149,7 @@ impl<ActorT: Send + 'static> Actor for RemoteActor<ActorT> {
         if let Some(rpc_death_recv) = self.rpc_death_recv.take() {
             tokio::task::spawn(async move {
                 let _ = rpc_death_recv.await;
-                let _ = actor_ref.stop_gracefully();
+                let _ = actor_ref.stop_gracefully("rpc connection closed");
             });
         }
     }
@@ -1181,7 +1181,9 @@ macro_rules! remote_actor_ask {
                     .await;
                 if let Err(error) = res {
                     tracing::error!("error communicating with remote actor: {error}");
-                    let _ = ctx.actor_ref().stop_gracefully();
+                    let _ = ctx
+                        .actor_ref()
+                        .stop_gracefully(format!("rpc error: {error}"));
                 }
             }
         }
@@ -1203,7 +1205,9 @@ macro_rules! remote_actor_tell {
                 let res = self.rpc_sender.tell(&msg).await;
                 if let Err(error) = res {
                     tracing::error!("error communicating with remote actor: {error}");
-                    let _ = ctx.actor_ref().stop_gracefully();
+                    let _ = ctx
+                        .actor_ref()
+                        .stop_gracefully(format!("rpc error: {error}"));
                 }
             }
         }

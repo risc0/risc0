@@ -26,7 +26,8 @@ FpExt polyEval(const std::vector<FpExt>& coeffs, FpExt x);
 
 std::vector<FpExt> polyInterpolate(const std::vector<FpExt>& xs, const std::vector<FpExt>& fxs);
 
-// Divides a polynomail f(x) represented by 'coeffs' by (x - z), returns remainder
+// Divides a polynomail f(x) represented by 'coeffs' by (x - z), returns
+// remainder
 FpExt polyDivide(FpExt* coeffs, size_t deg, FpExt z);
 
-}  // namespace risc0
+} // namespace risc0

@@ -131,7 +131,8 @@ void Prover::prove(WriteIop& iop) {
   //   PinnedMatrixRO<Fp> checkRawPinned(hal, checkRaw);
   //   for (size_t i = 0; i < checkRaw.rows(); i++) {
   //     if (checkRawPinned(i, 0) != 0) {
-  //       LOG(0, "checkRaw coefficients: " << i << "; " << checkRawPinned(i, 0));
+  //       LOG(0, "checkRaw coefficients: " << i << "; " << checkRawPinned(i,
+  //       0));
   //     }
   //   }
   // }
@@ -198,7 +199,8 @@ void Prover::prove(WriteIop& iop) {
     size_t pos = 0;
     for (const Combo& combo : circuitInfo.taps.getCombos()) {
       for (size_t back : combo.backs) {
-        // LOG(0, "Divide combo " << combo.comboId << " by (x - " << pow(rou, back) * z << ")");
+        // LOG(0, "Divide combo " << combo.comboId << " by (x - " << pow(rou,
+        // back) * z << ")");
         pDivideInfo[pos].comboId = combo.comboId;
         pDivideInfo[pos].z = pow(rou, back) * z;
         pos++;
@@ -206,7 +208,8 @@ void Prover::prove(WriteIop& iop) {
     }
     pDivideInfo[divideInfo.size() - 1].comboId = checkComboId;
     pDivideInfo[divideInfo.size() - 1].z = pow(z, kExpansionFactor);
-    // LOG(0, "Divide combo " << checkComboId << " by (x - " << pow(z, kExpansionFactor) << ")");
+    // LOG(0, "Divide combo " << checkComboId << " by (x - " << pow(z,
+    // kExpansionFactor) << ")");
   }
   hal->combosDivide(combos, divideInfo);
   LOG(0, "Prepare final polynomial");

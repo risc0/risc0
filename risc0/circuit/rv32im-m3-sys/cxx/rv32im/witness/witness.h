@@ -31,57 +31,57 @@ struct EmptyWitness {
 };
 
 // For each block type, define name of block and count per row
-#define BLOCK_TYPES \
-  BLOCK_TYPE(Globals, 1) \
-  BLOCK_TYPE(Decode, 2) \
-  BLOCK_TYPE(InstResume, 1) \
-  BLOCK_TYPE(InstSuspend, 1) \
-  BLOCK_TYPE(InstReg, 5) \
-  BLOCK_TYPE(InstImm, 5) \
-  BLOCK_TYPE(InstLoad, 3) \
-  BLOCK_TYPE(InstStore, 3) \
-  BLOCK_TYPE(InstBranch, 5) \
-  BLOCK_TYPE(InstJal, 7) \
-  BLOCK_TYPE(InstJalr, 6) \
-  BLOCK_TYPE(InstLui, 9) \
-  BLOCK_TYPE(InstAuipc, 7) \
-  BLOCK_TYPE(InstEcall, 7) \
-  BLOCK_TYPE(EcallTerminate, 1) \
-  BLOCK_TYPE(EcallRead, 3) \
-  BLOCK_TYPE(EcallWrite, 5) \
-  BLOCK_TYPE(EcallBigInt, 4) \
-  BLOCK_TYPE(ReadByte, 6) \
-  BLOCK_TYPE(ReadWord, 10) \
-  BLOCK_TYPE(BigInt, 1) \
-  BLOCK_TYPE(UnitAddSub, 16) \
-  BLOCK_TYPE(UnitBit, 2) \
-  BLOCK_TYPE(UnitLt, 9) \
-  BLOCK_TYPE(UnitMul, 2) \
-  BLOCK_TYPE(UnitDiv, 3) \
-  BLOCK_TYPE(UnitShift, 5) \
-  BLOCK_TYPE(P2ExtRound, 2) \
-  BLOCK_TYPE(P2IntRounds, 2) \
-  BLOCK_TYPE(P2Block, 3) \
-  BLOCK_TYPE(PageInNode, 7) \
-  BLOCK_TYPE(PageInPart, 4) \
-  BLOCK_TYPE(PageInPage, 18) \
-  BLOCK_TYPE(PageOutNode, 7) \
-  BLOCK_TYPE(PageOutPart, 4) \
-  BLOCK_TYPE(PageOutPage, 18) \
-  BLOCK_TYPE(PageUncle, 18) \
+#define BLOCK_TYPES                                                                                \
+  BLOCK_TYPE(Globals, 1)                                                                           \
+  BLOCK_TYPE(Decode, 2)                                                                            \
+  BLOCK_TYPE(InstResume, 1)                                                                        \
+  BLOCK_TYPE(InstSuspend, 1)                                                                       \
+  BLOCK_TYPE(InstReg, 5)                                                                           \
+  BLOCK_TYPE(InstImm, 5)                                                                           \
+  BLOCK_TYPE(InstLoad, 3)                                                                          \
+  BLOCK_TYPE(InstStore, 3)                                                                         \
+  BLOCK_TYPE(InstBranch, 5)                                                                        \
+  BLOCK_TYPE(InstJal, 7)                                                                           \
+  BLOCK_TYPE(InstJalr, 6)                                                                          \
+  BLOCK_TYPE(InstLui, 9)                                                                           \
+  BLOCK_TYPE(InstAuipc, 7)                                                                         \
+  BLOCK_TYPE(InstEcall, 7)                                                                         \
+  BLOCK_TYPE(EcallTerminate, 1)                                                                    \
+  BLOCK_TYPE(EcallRead, 3)                                                                         \
+  BLOCK_TYPE(EcallWrite, 5)                                                                        \
+  BLOCK_TYPE(EcallBigInt, 4)                                                                       \
+  BLOCK_TYPE(ReadByte, 6)                                                                          \
+  BLOCK_TYPE(ReadWord, 10)                                                                         \
+  BLOCK_TYPE(BigInt, 1)                                                                            \
+  BLOCK_TYPE(UnitAddSub, 16)                                                                       \
+  BLOCK_TYPE(UnitBit, 2)                                                                           \
+  BLOCK_TYPE(UnitLt, 9)                                                                            \
+  BLOCK_TYPE(UnitMul, 2)                                                                           \
+  BLOCK_TYPE(UnitDiv, 3)                                                                           \
+  BLOCK_TYPE(UnitShift, 5)                                                                         \
+  BLOCK_TYPE(P2ExtRound, 2)                                                                        \
+  BLOCK_TYPE(P2IntRounds, 2)                                                                       \
+  BLOCK_TYPE(P2Block, 3)                                                                           \
+  BLOCK_TYPE(PageInNode, 7)                                                                        \
+  BLOCK_TYPE(PageInPart, 4)                                                                        \
+  BLOCK_TYPE(PageInPage, 18)                                                                       \
+  BLOCK_TYPE(PageOutNode, 7)                                                                       \
+  BLOCK_TYPE(PageOutPart, 4)                                                                       \
+  BLOCK_TYPE(PageOutPage, 18)                                                                      \
+  BLOCK_TYPE(PageUncle, 18)                                                                        \
   BLOCK_TYPE(MakeTable, 3)
 
 CONSTANT size_t NUM_BLOCK_TYPES = 1
-#define BLOCK_TYPE(name, count) + 1
-  BLOCK_TYPES
+#define BLOCK_TYPE(name, count) +1
+    BLOCK_TYPES
 #undef BLOCK_TYPE
-  ;
+    ;
 
 enum class BlockType {
 #define BLOCK_TYPE(name, count) name,
   BLOCK_TYPES
 #undef BLOCK_TYPE
-  Empty,
+      Empty,
 };
 
 // Should be ceil(sqrt(NUM_BLOCK_TYPES)), but sqrt is not a constexpr...
@@ -94,4 +94,3 @@ struct Globals {
 };
 
 CONSTANT size_t NUM_GLOBALS = sizeof(Globals) / sizeof(Fp);
-

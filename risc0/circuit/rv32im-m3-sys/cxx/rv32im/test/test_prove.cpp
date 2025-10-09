@@ -38,5 +38,4 @@ void runTestBinary(const std::string& elf, rv32im::HostIO& io, size_t po2) {
   LOG(0, "Verify succeeded");
 }
 
-}
-
+} // namespace risc0

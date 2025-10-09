@@ -19,4 +19,4 @@ namespace risc0 {
 
 void addLift(zirgen::Module& module, size_t po2);
 
-}  // namespace risc0
+} // namespace risc0

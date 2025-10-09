@@ -16,8 +16,8 @@
 #include "core/log.h"
 #include "verify/rv32im.h"
 
-#include <string>
 #include <fstream>
+#include <string>
 
 static std::string prefix = R"***(// Copyright 2025 RISC Zero, Inc.
 //
@@ -43,8 +43,7 @@ use risc0_zkp::{
 pub const TAPSET: &TapSet = &TapSet::<'static> {
 )***";
 
-
-static std::string suffix= R"***(
+static std::string suffix = R"***(
 impl TapsProvider for CircuitInfo {
     fn get_taps(&self) -> &'static TapSet<'static> {
         TAPSET
@@ -68,9 +67,9 @@ void emitTaps(const std::string path) {
 
   outs << prefix;
   outs << "    taps: &[\n";
-  for (const Column& col: taps.getColumns()) {
+  for (const Column& col : taps.getColumns()) {
     size_t count = col.getTaps().size();
-    for (const Tap& tap: col.getTaps()) {
+    for (const Tap& tap : col.getTaps()) {
       outs << "        TapData {\n";
       outs << "            offset: " << tap.column << ",\n";
       outs << "            back: " << tap.back << ",\n";
@@ -83,24 +82,25 @@ void emitTaps(const std::string path) {
   outs << "    ],\n";
   outs << "    combo_taps: &[";
   bool first = true;
-  for (const Combo& combo: taps.getCombos()) {
-    for (uint32_t back: combo.backs) {
-      if (!first) outs << ", ";
+  for (const Combo& combo : taps.getCombos()) {
+    for (uint32_t back : combo.backs) {
+      if (!first)
+        outs << ", ";
       first = false;
       outs << back;
-    } 
+    }
   }
   outs << "],\n";
   outs << "    combo_begin: &[";
   size_t idx = 0;
-  for (const Combo& combo: taps.getCombos()) {
+  for (const Combo& combo : taps.getCombos()) {
     outs << idx << ", ";
     idx += combo.backs.size();
   }
   outs << idx << "],\n";
   outs << "    group_begin: &[";
   idx = 0;
-  for (const Group& group: taps.getGroups()) {
+  for (const Group& group : taps.getGroups()) {
     outs << idx << ", ";
     idx += group.getTaps().size();
   }
@@ -113,4 +113,3 @@ void emitTaps(const std::string path) {
   outs << "};\n";
   outs << suffix;
 }
-

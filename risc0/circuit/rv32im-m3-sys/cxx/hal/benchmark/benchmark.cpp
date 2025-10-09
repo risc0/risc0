@@ -37,4 +37,3 @@ int main() {
   }
   LOG(0, "Done");
 }
-

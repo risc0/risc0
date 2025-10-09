@@ -17,7 +17,13 @@
 
 namespace risc0 {
 
-void FUNCNAME(Fp* check, const Fp* data, const Fp* accum, const Fp* globals, const FpExt* accMix, FpExt ecMix, Fp rou) {
+void FUNCNAME(Fp* check,
+              const Fp* data,
+              const Fp* accum,
+              const Fp* globals,
+              const FpExt* accMix,
+              FpExt ecMix,
+              Fp rou) {
   size_t NUM_ROWS = size_t(1) << (NUM_ROWS_PO2 + 2);
   // TODO: Parallel for?
   for (size_t i = 0; i < NUM_ROWS; i++) {
@@ -26,5 +32,3 @@ void FUNCNAME(Fp* check, const Fp* data, const Fp* accum, const Fp* globals, con
 }
 
 } // namespace risc0
-
-

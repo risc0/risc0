@@ -45,12 +45,14 @@ int main() {
   module.optimize();
 
   LOG(0, "Emulate");
-  auto func = module.getModule().lookupSymbol<mlir::func::FuncOp>("rv32im_m3_lift_" + std::to_string(po2));
+  auto func =
+      module.getModule().lookupSymbol<mlir::func::FuncOp>("rv32im_m3_lift_" + std::to_string(po2));
   zirgen::Zll::ExternHandler baseExternHandler;
   zirgen::Zll::Interpreter interp(module.getCtx(), zirgen::poseidon2HashSuite());
   interp.setExternHandler(&baseExternHandler);
   auto rng = interp.getHashSuite().makeRng();
-  zirgen::ReadIop zriop(std::move(rng), reinterpret_cast<const uint32_t*>(transcript.data()), transcript.size());
+  zirgen::ReadIop zriop(
+      std::move(rng), reinterpret_cast<const uint32_t*>(transcript.data()), transcript.size());
   interp.setIop(func.getArgument(0), &zriop);
   if (failed(interp.runBlock(func.front()))) {
     LOG(0, "Failed to evaluate");

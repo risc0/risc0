@@ -17,103 +17,68 @@
 
 #include "rv32im/circuit/circuit.ipp"
 
-template<typename ValExtT>
-struct DefaultMixState {
+template <typename ValExtT> struct DefaultMixState {
   FDEV DefaultMixState(ValExtT tot, ValExtT mul) : tot(tot), mul(mul) {}
   ValExtT tot;
   ValExtT mul;
 };
 
-template<typename ValT, typename ValExtT>
-struct DefaultEqzHandler {
+template <typename ValT, typename ValExtT> struct DefaultEqzHandler {
   using MixStateT = DefaultMixState<ValExtT>;
   ValExtT ecMix;
 
   FDEV DefaultEqzHandler(ValExtT ecMix) : ecMix(ecMix) {}
 
-  FDEV MixStateT getTrue() {
-    return MixStateT(ValExtT(ValT(0)), ValExtT(ValT(1)));
-  }
+  FDEV MixStateT getTrue() { return MixStateT(ValExtT(ValT(0)), ValExtT(ValT(1))); }
   FDEV MixStateT andEqz(MixStateT chain, ValT expr) {
-    return MixStateT(
-        chain.tot + chain.mul * expr,
-        chain.mul * ecMix
-    );
+    return MixStateT(chain.tot + chain.mul * expr, chain.mul * ecMix);
   }
   FDEV MixStateT andEqz(MixStateT chain, ValExtT expr) {
-    return MixStateT(
-        chain.tot + chain.mul * expr,
-        chain.mul * ecMix
-    );
+    return MixStateT(chain.tot + chain.mul * expr, chain.mul * ecMix);
   }
   FDEV MixStateT andCond(MixStateT chain, ValT cond, MixStateT inner) {
-    return MixStateT(
-        chain.tot + chain.mul * inner.tot * cond,
-        chain.mul * inner.mul
-    );
+    return MixStateT(chain.tot + chain.mul * inner.tot * cond, chain.mul * inner.mul);
   }
 };
 
-template<typename ValT>
-struct SameTypeEqzHandler {
+template <typename ValT> struct SameTypeEqzHandler {
   using MixStateT = DefaultMixState<ValT>;
   ValT ecMix;
 
   FDEV SameTypeEqzHandler(ValT ecMix) : ecMix(ecMix) {}
 
-  FDEV MixStateT getTrue() {
-    return MixStateT(ValT(0), ValT(1));
-  }
+  FDEV MixStateT getTrue() { return MixStateT(ValT(0), ValT(1)); }
   FDEV MixStateT andEqz(MixStateT chain, ValT expr) {
-    return MixStateT(
-        chain.tot + chain.mul * expr,
-        chain.mul * ecMix
-    );
+    return MixStateT(chain.tot + chain.mul * expr, chain.mul * ecMix);
   }
   FDEV MixStateT andCond(MixStateT chain, ValT cond, MixStateT inner) {
-    return MixStateT(
-        chain.tot + chain.mul * inner.tot * cond,
-        chain.mul * inner.mul
-    );
+    return MixStateT(chain.tot + chain.mul * inner.tot * cond, chain.mul * inner.mul);
   }
 };
 
-template<typename ValT, typename ValExtT>
-struct DebugEqzHandler {
+template <typename ValT, typename ValExtT> struct DebugEqzHandler {
   using MixStateT = DefaultMixState<ValExtT>;
   ValExtT ecMix;
 
   DebugEqzHandler(ValExtT ecMix) : ecMix(ecMix) {}
 
-  MixStateT getTrue() {
-    return MixStateT(ValExtT(ValT(0)), ValExtT(ValT(1)));
-  }
+  MixStateT getTrue() { return MixStateT(ValExtT(ValT(0)), ValExtT(ValT(1))); }
   MixStateT andEqz(MixStateT chain, ValT expr) {
     LOG(0, "EQZ: " << expr);
-    return MixStateT(
-        chain.tot + chain.mul * expr,
-        chain.mul * ecMix
-    );
+    return MixStateT(chain.tot + chain.mul * expr, chain.mul * ecMix);
   }
   MixStateT andEqz(MixStateT chain, ValExtT expr) {
     LOG(0, "EQZ: " << expr);
-    return MixStateT(
-        chain.tot + chain.mul * expr,
-        chain.mul * ecMix
-    );
+    return MixStateT(chain.tot + chain.mul * expr, chain.mul * ecMix);
   }
   MixStateT andCond(MixStateT chain, ValT cond, MixStateT inner) {
-    auto ret = MixStateT(
-        chain.tot + chain.mul * inner.tot * cond,
-        chain.mul * inner.mul
-    );
+    auto ret = MixStateT(chain.tot + chain.mul * inner.tot * cond, chain.mul * inner.mul);
     LOG(0, "AND COND: " << ret.tot);
     return ret;
   }
 };
 
-template<typename RegT, typename ValT, typename ValExtT, typename EqzCtx>
-struct VerifyContext {
+template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struct VerifyContext {
   using RegImpl = RegT;
   using ArgCountRegImpl = RegT;
   using ValImpl = ValT;
@@ -121,7 +86,7 @@ struct VerifyContext {
   using C = VerifyContext;
 
   struct VerifyFwd {
-    template<typename T, typename... Args>
+    template <typename T, typename... Args>
     FDEV static void apply(MTHR VerifyContext& ctx, MDEV T& obj, Args... args) {
       obj.template applyInner<VerifyFwd>(ctx, args...);
       obj.verify(ctx, args...);
@@ -154,41 +119,48 @@ struct VerifyContext {
   Val<C> numers[2];
   ValExt<C> denoms[2];
 
-  FDEV VerifyContext(MTHR EqzCtx& eqzCtx, MDEV RegT* data, MDEV RegT* accum, MDEV RegT* prevAccum, MDEV ValT* globals, MDEV ValExtT* accMix, ValT x)
-    : eqzCtx(eqzCtx) 
-    , top(reinterpret_cast<MDEV Top<C>*>(data))
-    , accum(reinterpret_cast<MDEV RegExt<C>*>(accum))
-    , prevAccum(reinterpret_cast<MDEV RegExt<C>*>(prevAccum))
-    , globals(globals)
-    , accMix(accMix)
-    , x(x) 
-    , outerMix(eqzCtx.getTrue())
-    , innerMix(eqzCtx.getTrue())
-  {}
+  FDEV VerifyContext(MTHR EqzCtx& eqzCtx,
+                     MDEV RegT* data,
+                     MDEV RegT* accum,
+                     MDEV RegT* prevAccum,
+                     MDEV ValT* globals,
+                     MDEV ValExtT* accMix,
+                     ValT x)
+      : eqzCtx(eqzCtx)
+      , top(reinterpret_cast<MDEV Top<C>*>(data))
+      , accum(reinterpret_cast<MDEV RegExt<C>*>(accum))
+      , prevAccum(reinterpret_cast<MDEV RegExt<C>*>(prevAccum))
+      , globals(globals)
+      , accMix(accMix)
+      , x(x)
+      , outerMix(eqzCtx.getTrue())
+      , innerMix(eqzCtx.getTrue()) {}
 
   // Main entry point
   FDEV typename EqzCtx::MixStateT verify() {
     // Verify the selector
     VerifyFwd::apply(*this, top->select);
     outerMix = innerMix;
-    // Verify inner data
-    #define BLOCK_TYPE(name, count) \
-    { \
-      reset(); \
-      for (size_t i = 0; i < count; i++) { \
-        isValid = top->mux.name.isValid[i].get(); \
-        VerifyFwd::apply(*this, top->mux.name.data[i]); \
-      } \
-      finalize(); \
-      ValT cond = top->select.at(uint32_t(BlockType::name)); \
-      outerMix = eqzCtx.andCond(outerMix, cond, innerMix); \
-    }
+// Verify inner data
+#define BLOCK_TYPE(name, count)                                                                    \
+  {                                                                                                \
+    reset();                                                                                       \
+    for (size_t i = 0; i < count; i++) {                                                           \
+      isValid = top->mux.name.isValid[i].get();                                                    \
+      VerifyFwd::apply(*this, top->mux.name.data[i]);                                              \
+    }                                                                                              \
+    finalize();                                                                                    \
+    ValT cond = top->select.at(uint32_t(BlockType::name));                                         \
+    outerMix = eqzCtx.andCond(outerMix, cond, innerMix);                                           \
+  }
     BLOCK_TYPES
-    #undef BLOCK_TYPE
+#undef BLOCK_TYPE
     // Verify accumTop
     // TODO: this is very ugly
-    auto accumTop = reinterpret_cast<MDEV AccumTop<C>*>(reinterpret_cast<MDEV RegT*>(accum) + MAX_ACCUM_PER_ROW);
-    auto prevAccumTop = reinterpret_cast<MDEV AccumTop<C>*>(reinterpret_cast<MDEV RegT*>(prevAccum) + MAX_ACCUM_PER_ROW);
+    auto accumTop = reinterpret_cast<MDEV AccumTop<C>*>(reinterpret_cast<MDEV RegT*>(accum) +
+                                                        MAX_ACCUM_PER_ROW);
+    auto prevAccumTop = reinterpret_cast<MDEV AccumTop<C>*>(
+        reinterpret_cast<MDEV RegT*>(prevAccum) + MAX_ACCUM_PER_ROW);
     innerMix = eqzCtx.getTrue();
     VerifyFwd::apply(*this, *accumTop, top, prevAccumTop, accMix[ACCUM_BIGINT_Z]);
     outerMix = eqzCtx.andCond(outerMix, ValT(1), innerMix);
@@ -201,17 +173,14 @@ struct VerifyContext {
     accSubstep = 0;
     accTot = ValExtT(0);
   }
-  template<typename T> 
-  FDEV void eqz(T val) {
-    innerMix = eqzCtx.andEqz(innerMix, val);
-  }
-  template<typename T> FDEV void push(const MTHR T& argument) {
-    addArgument(isValid, argument);
-  }
-  template<typename T> FDEV void pull(const MTHR T& argument) {
-    addArgument(-isValid, argument);
-  }
-  template<typename T> FDEV void addArgument(ValT count, const MTHR T& argument) {
+
+  template <typename T> FDEV void eqz(T val) { innerMix = eqzCtx.andEqz(innerMix, val); }
+
+  template <typename T> FDEV void push(const MTHR T& argument) { addArgument(isValid, argument); }
+
+  template <typename T> FDEV void pull(const MTHR T& argument) { addArgument(-isValid, argument); }
+
+  template <typename T> FDEV void addArgument(ValT count, const MTHR T& argument) {
     ValExtT flat = flattenArgument<T, VerifyContext>(argument, accMix + 1);
     denoms[accSubstep] = accMix[0] - flat;
     numers[accSubstep] = count;
@@ -246,16 +215,32 @@ struct VerifyContext {
   FDEV inline ValT getX() { return x; }
 };
 
-template<typename RegT, typename ValT, typename ValExtT, typename EqzCtx>
-FDEV typename EqzCtx::MixStateT verifyCircuitCtx(MTHR EqzCtx& eqzCtx, MDEV RegT* data, MDEV RegT* accum, MDEV RegT* prevAccum, MDEV ValT* globals, MDEV ValExtT* accMix, ValT x) {
-  VerifyContext<RegT, ValT, ValExtT, EqzCtx> verifier(eqzCtx, data, accum, prevAccum, globals, accMix, x);
+template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx>
+FDEV typename EqzCtx::MixStateT verifyCircuitCtx(MTHR EqzCtx& eqzCtx,
+                                                 MDEV RegT* data,
+                                                 MDEV RegT* accum,
+                                                 MDEV RegT* prevAccum,
+                                                 MDEV ValT* globals,
+                                                 MDEV ValExtT* accMix,
+                                                 ValT x) {
+  VerifyContext<RegT, ValT, ValExtT, EqzCtx> verifier(
+      eqzCtx, data, accum, prevAccum, globals, accMix, x);
   return verifier.verify();
 }
 
-template<typename RegT, typename ValT, typename ValExtT, typename EqzCtx = DefaultEqzHandler<ValT, ValExtT>>
-FDEV ValExtT verifyCircuit(MDEV RegT* data, MDEV RegT* accum, MDEV RegT* prevAccum, MDEV ValT* globals, MDEV ValExtT* accMix, ValExtT ecMix, ValT x) {
+template <typename RegT,
+          typename ValT,
+          typename ValExtT,
+          typename EqzCtx = DefaultEqzHandler<ValT, ValExtT>>
+FDEV ValExtT verifyCircuit(MDEV RegT* data,
+                           MDEV RegT* accum,
+                           MDEV RegT* prevAccum,
+                           MDEV ValT* globals,
+                           MDEV ValExtT* accMix,
+                           ValExtT ecMix,
+                           ValT x) {
   EqzCtx eqzCtx(ecMix);
-  VerifyContext<RegT, ValT, ValExtT, EqzCtx> verifier(eqzCtx, data, accum, prevAccum, globals, accMix, x);
+  VerifyContext<RegT, ValT, ValExtT, EqzCtx> verifier(
+      eqzCtx, data, accum, prevAccum, globals, accMix, x);
   return verifier.verify().tot;
 }
-

@@ -15,14 +15,13 @@
 
 #pragma once
 
-#include "rv32im/witness/bigint.h"
 #include "rv32im/circuit/is_zero.h"
 #include "rv32im/circuit/mem.h"
 #include "rv32im/circuit/one_hot.h"
 #include "rv32im/circuit/u32.h"
+#include "rv32im/witness/bigint.h"
 
-template<typename C>
-struct BigIntBlock {
+template <typename C> struct BigIntBlock {
   CONSTANT static char NAME[] = "BigInt";
 
   Reg<C> cycle;
@@ -44,8 +43,7 @@ struct BigIntBlock {
   Reg<C> prevCycle[4];
   RegU32<C> prevValue[4];
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, mm);
     T::apply(ctx, readInst, cycle.get());
@@ -57,7 +55,8 @@ struct BigIntBlock {
     T::apply(ctx, offset);
     T::apply(ctx, offset16High);
     T::apply(ctx, offset16Low);
-    T::apply(ctx, computeAddr, readBaseReg.data.get(), ValU32<C>(offset16Low.get(), offset16High.get()));
+    T::apply(
+        ctx, computeAddr, readBaseReg.data.get(), ValU32<C>(offset16Low.get(), offset16High.get()));
     T::apply(ctx, isLastPage, computeAddr.get().high - Val<C>(0xbfff));
     T::apply(ctx, wordBase, computeAddr.get());
     T::apply(ctx, checkBase, computeAddr.get(), mm.get());

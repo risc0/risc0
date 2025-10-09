@@ -88,19 +88,22 @@ public:
   }
 
   const Zll::TapSet& getTaps() const override { return tapSet; }
-  const llvm::ArrayRef<zirgen::verify::GroupInfoV3> getGroupInfo() const override { return groupInfo; }
+  const llvm::ArrayRef<zirgen::verify::GroupInfoV3> getGroupInfo() const override {
+    return groupInfo;
+  }
 
   struct FakeReg {
     ValWrap val;
     FakeReg(zirgen::Val val) : val(val) {}
-    template<typename T, typename C> void applyInner(C& ctx) {}
-    template<typename C> void applyInner(C& ctx) {}
-    template<typename C> void verify(C& ctx) {}
-    template<typename C> void addArguments(C& ctx) {}
+    template <typename T, typename C> void applyInner(C& ctx) {}
+    template <typename C> void applyInner(C& ctx) {}
+    template <typename C> void verify(C& ctx) {}
+    template <typename C> void addArguments(C& ctx) {}
     ValWrap get() { return val; }
   };
 
-  std::vector<FakeReg> makeRegs(llvm::ArrayRef<zirgen::Val> u, const risc0::Group& group, uint32_t back) const {
+  std::vector<FakeReg>
+  makeRegs(llvm::ArrayRef<zirgen::Val> u, const risc0::Group& group, uint32_t back) const {
     std::vector<FakeReg> ret;
     for (const risc0::Column& col : group.getColumns()) {
       zirgen::Val val(uint64_t(0));
@@ -115,10 +118,10 @@ public:
   }
 
   virtual zirgen::Val computePolyExt(llvm::ArrayRef<zirgen::Val> u,
-                             llvm::ArrayRef<zirgen::Val> globalsIn,
-                             llvm::ArrayRef<zirgen::Val> mixIn,
-                             zirgen::Val polyMix,
-                             zirgen::Val z) const override {
+                                     llvm::ArrayRef<zirgen::Val> globalsIn,
+                                     llvm::ArrayRef<zirgen::Val> mixIn,
+                                     zirgen::Val polyMix,
+                                     zirgen::Val z) const override {
     auto data = makeRegs(u, info.taps.getGroups()[0], 0);
     auto accum = makeRegs(u, info.taps.getGroups()[1], 0);
     auto prevAccum = makeRegs(u, info.taps.getGroups()[1], 1);
@@ -128,20 +131,19 @@ public:
     }
     std::vector<ValWrap> mix;
     for (size_t i = 0; i < mixIn.size() / 4; i++) {
-      mix.emplace_back(
-          ValWrap(mixIn[i * 4]), 
-          ValWrap(mixIn[i * 4 + 1]), 
-          ValWrap(mixIn[i * 4 + 2]), 
-          ValWrap(mixIn[i * 4 + 3]));
+      mix.emplace_back(ValWrap(mixIn[i * 4]),
+                       ValWrap(mixIn[i * 4 + 1]),
+                       ValWrap(mixIn[i * 4 + 2]),
+                       ValWrap(mixIn[i * 4 + 3]));
     }
-    return verifyCircuit<FakeReg, ValWrap, ValWrap, SameTypeEqzHandler<ValWrap>>(
-        data.data(),
-        accum.data(),
-        prevAccum.data(),
-        globals.data(),
-        mix.data(),
-        ValWrap(polyMix),
-        ValWrap(3*z)).val;
+    return verifyCircuit<FakeReg, ValWrap, ValWrap, SameTypeEqzHandler<ValWrap>>(data.data(),
+                                                                                 accum.data(),
+                                                                                 prevAccum.data(),
+                                                                                 globals.data(),
+                                                                                 mix.data(),
+                                                                                 ValWrap(polyMix),
+                                                                                 ValWrap(3 * z))
+        .val;
   }
 
 private:
@@ -151,7 +153,7 @@ private:
   llvm::SmallVector<zirgen::verify::GroupInfoV3> groupInfo;
 };
 
-}  // namespace 
+} // namespace
 
 namespace risc0 {
 
@@ -167,7 +169,6 @@ void addLift(zirgen::Module& module, size_t po2) {
                       zirgen::verify::verifyV3(seal, po2, circuit);
                       // out.setDigest(0, root, "root");
                     });
-
 }
 
-}  // namespace risc0
+} // namespace risc0
