@@ -129,6 +129,24 @@ impl<ActorT: Actor> ActorRunner<ActorT> {
     }
 }
 
+/// Called when an actor handles a message
+async fn actor_msg<ActorT, MessageT>(
+    actor: &mut ActorT,
+    actor_ref: ActorRef<ActorT>,
+    reply_sender: Option<ReplySender<<ActorT as Message<MessageT>>::Reply>>,
+    msg: MessageT,
+) where
+    ActorT: Actor + Message<MessageT>,
+{
+    let mut context = Context {
+        actor_ref,
+        reply_sender,
+    };
+    Message::handle(actor, msg, &mut context).await;
+
+    context.maybe_send_no_reply().await;
+}
+
 /// Spawn a new task which receives messages for the actor.
 pub fn spawn<ActorT: Actor>(actor: ActorT) -> ActorRef<ActorT> {
     let (actor_ref, actor_runner) = ActorController::run(actor);
@@ -317,13 +335,7 @@ impl<ActorT: Actor> ActorRef<ActorT> {
         let sender = self.controller.lock().unwrap().sender()?;
         sender
             .send(Box::new(move |actor| {
-                Box::pin(async move {
-                    let mut context = Context {
-                        actor_ref,
-                        reply_sender: Some(reply_sender),
-                    };
-                    Message::handle(actor, msg, &mut context).await;
-                })
+                Box::pin(actor_msg(actor, actor_ref, Some(reply_sender), msg))
             }))
             .await?;
         Ok(PendingReply { reply })
@@ -339,13 +351,7 @@ impl<ActorT: Actor> ActorRef<ActorT> {
         let sender = self.controller.lock().unwrap().sender()?;
         sender
             .send(Box::new(move |actor| {
-                Box::pin(async move {
-                    let mut context = Context {
-                        actor_ref,
-                        reply_sender: None,
-                    };
-                    Message::handle(actor, msg, &mut context).await;
-                })
+                Box::pin(actor_msg(actor, actor_ref, None, msg))
             }))
             .await
     }
@@ -376,13 +382,7 @@ impl<ActorT: Actor> ActorRef<ActorT> {
         let actor_ref = self.clone();
         let sender = self.controller.lock().unwrap().sender()?;
         sender.blocking_send(Box::new(move |actor| {
-            Box::pin(async move {
-                let mut context = Context {
-                    actor_ref,
-                    reply_sender: None,
-                };
-                Message::handle(actor, msg, &mut context).await;
-            })
+            Box::pin(actor_msg(actor, actor_ref, None, msg))
         }))
     }
 
@@ -399,13 +399,7 @@ impl<ActorT: Actor> ActorRef<ActorT> {
         let sender = self.controller.lock().unwrap().sender()?;
         sender
             .send(Box::new(move |actor| {
-                Box::pin(async move {
-                    let mut context = Context {
-                        actor_ref,
-                        reply_sender,
-                    };
-                    Message::handle(actor, msg, &mut context).await;
-                })
+                Box::pin(actor_msg(actor, actor_ref, reply_sender, msg))
             }))
             .await
     }
@@ -466,12 +460,12 @@ pub struct ReplySender<ValueT: Send + 'static> {
 }
 
 impl<ValueT: Send + 'static> ReplySender<ValueT> {
-    pub fn send(self, value: ValueT) {
+    pub async fn send(self, value: ValueT) {
         // If the other side is no longer listening, we throw away the reply
         let _ = self.sender.send(Ok(value));
     }
 
-    pub fn no_reply(self) {
+    pub async fn no_reply(self) {
         let _ = self.sender.send(Err(SendError::NoReply));
     }
 }
@@ -481,14 +475,6 @@ impl<ValueT: Send + 'static> ReplySender<ValueT> {
 pub struct Context<ActorT: Actor, ReplyT: Send + 'static> {
     actor_ref: ActorRef<ActorT>,
     reply_sender: Option<ReplySender<ReplyT>>,
-}
-
-impl<ActorT: Actor, ReplyT: Send + 'static> Drop for Context<ActorT, ReplyT> {
-    fn drop(&mut self) {
-        if let Some(reply_sender) = self.reply_sender.take() {
-            reply_sender.no_reply()
-        }
-    }
 }
 
 impl<ActorT: Actor, ReplyT: Send + 'static> fmt::Debug for Context<ActorT, ReplyT> {
@@ -507,9 +493,9 @@ impl<ActorT: Actor, ReplyT: Send + 'static> Context<ActorT, ReplyT> {
 
     /// If the sender of the message is expecting a reply, send the given message as a reply to
     /// them. Otherwise, if they aren't just ignore the given message.
-    pub fn reply(&mut self, msg: ReplyT) {
+    pub async fn reply(&mut self, msg: ReplyT) {
         if let Some(reply_sender) = self.reply_sender.take() {
-            reply_sender.send(msg);
+            reply_sender.send(msg).await;
         }
     }
 
@@ -529,6 +515,12 @@ impl<ActorT: Actor, ReplyT: Send + 'static> Context<ActorT, ReplyT> {
     /// Get a ref to the current actor.
     pub fn actor_ref(&self) -> ActorRef<ActorT> {
         self.actor_ref.clone()
+    }
+
+    async fn maybe_send_no_reply(&mut self) {
+        if let Some(reply_sender) = self.reply_sender.take() {
+            reply_sender.no_reply().await
+        }
     }
 }
 
@@ -613,7 +605,7 @@ mod tests {
             self.ping
                 .send(msg.clone())
                 .expect("messages should only be received when expected");
-            ctx.reply(Pong(msg.0));
+            ctx.reply(Pong(msg.0)).await;
         }
     }
 

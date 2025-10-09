@@ -602,17 +602,17 @@ impl AllocatorActor {
         Ok(true)
     }
 
-    fn maybe_allocate_many(&mut self) {
+    async fn maybe_allocate_many(&mut self) {
         for p in std::mem::take(&mut self.pending) {
             match self.maybe_allocate(&p.request) {
                 Ok(true) => {
                     if let Some(reply_sender) = p.reply_sender {
-                        reply_sender.send(Ok(()));
+                        reply_sender.send(Ok(())).await;
                     }
                 }
                 Err(error) => {
                     if let Some(reply_sender) = p.reply_sender {
-                        reply_sender.send(Err(error));
+                        reply_sender.send(Err(error)).await;
                     }
                 }
                 Ok(false) => self.pending.push_back(p),
@@ -654,7 +654,7 @@ impl Message<RegisterWorker> for AllocatorActor {
     type Reply = Result<RegisterWorkerReply>;
 
     async fn handle(&mut self, msg: RegisterWorker, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.register_worker(msg))
+        ctx.reply(self.register_worker(msg)).await
     }
 }
 
@@ -724,7 +724,7 @@ impl Message<ScheduleTask> for AllocatorActor {
     type Reply = Result<ScheduleTaskReply>;
 
     async fn handle(&mut self, msg: ScheduleTask, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.schedule_task(msg))
+        ctx.reply(self.schedule_task(msg)).await
     }
 }
 
@@ -796,9 +796,9 @@ impl Message<AllocateHardware> for AllocatorActor {
                     request,
                     reply_sender,
                 });
-                self.maybe_allocate_many();
+                self.maybe_allocate_many().await;
             }
-            Err(error) => ctx.reply(Err(error)),
+            Err(error) => ctx.reply(Err(error)).await,
         }
     }
 }
@@ -831,12 +831,12 @@ impl Message<DeallocateHardware> for AllocatorActor {
     type Reply = Result<()>;
 
     async fn handle(&mut self, msg: DeallocateHardware, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.deallocate_hardware(msg))
+        ctx.reply(self.deallocate_hardware(msg).await).await
     }
 }
 
 impl AllocatorActor {
-    fn deallocate_hardware(&mut self, msg: DeallocateHardware) -> Result<()> {
+    async fn deallocate_hardware(&mut self, msg: DeallocateHardware) -> Result<()> {
         let worker_id = msg.worker_id;
         let worker = self
             .workers
@@ -887,7 +887,7 @@ impl AllocatorActor {
             }
         }
 
-        self.maybe_allocate_many();
+        self.maybe_allocate_many().await;
 
         Ok(())
     }
@@ -904,7 +904,7 @@ impl Message<EndTask> for AllocatorActor {
     type Reply = Result<()>;
 
     async fn handle(&mut self, msg: EndTask, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.end_task(msg))
+        ctx.reply(self.end_task(msg)).await
     }
 }
 
@@ -1020,7 +1020,7 @@ impl Message<RegisterManager> for AllocatorActor {
     type Reply = Result<()>;
 
     async fn handle(&mut self, msg: RegisterManager, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.register_manager(msg))
+        ctx.reply(self.register_manager(msg)).await
     }
 }
 
@@ -1063,13 +1063,13 @@ impl Message<RpcDisconnect> for AllocatorActor {
     type Reply = ();
 
     async fn handle(&mut self, msg: RpcDisconnect, _ctx: &mut Context<Self, Self::Reply>) {
-        self.maybe_remove_workers(&msg);
+        self.maybe_remove_workers(&msg).await;
         self.maybe_remove_managers(&msg);
     }
 }
 
 impl AllocatorActor {
-    fn maybe_remove_workers(&mut self, msg: &RpcDisconnect) {
+    async fn maybe_remove_workers(&mut self, msg: &RpcDisconnect) {
         // Take out any workers with the given remote_address
         let mut workers_to_remove = vec![];
         for (worker_id, worker) in std::mem::take(&mut self.workers) {
@@ -1104,7 +1104,7 @@ impl AllocatorActor {
         }
 
         // Now that potentially some tokens are returned, might be able to schedule some tasks
-        self.maybe_allocate_many();
+        self.maybe_allocate_many().await;
     }
 
     fn maybe_remove_managers(&mut self, msg: &RpcDisconnect) {
@@ -1158,7 +1158,7 @@ impl Message<GetStatus> for AllocatorActor {
     type Reply = Result<GetStatusReply>;
 
     async fn handle(&mut self, _msg: GetStatus, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.get_status())
+        ctx.reply(self.get_status()).await
     }
 }
 
@@ -2071,6 +2071,7 @@ impl AllocatorActor {
                         if let Some(reply_sender) = reply_sender {
                             reply_sender
                                 .send(proxy_api_request(http_client, endpoint, request).await)
+                                .await;
                         }
                     });
                     return Ok(());
@@ -2097,7 +2098,7 @@ impl Message<ApiRequest> for AllocatorActor {
         if let Err(error) = self.handle_api_request(request, &mut reply_sender)
             && let Some(reply_sender) = reply_sender
         {
-            reply_sender.send(Err(error));
+            reply_sender.send(Err(error)).await;
         }
     }
 }

@@ -1176,7 +1176,7 @@ macro_rules! remote_actor_ask {
                     .rpc_sender
                     .ask(&msg, async move |response: $reply| {
                         if let Some(reply_sender) = reply_sender {
-                            reply_sender.send(response);
+                            reply_sender.send(response).await;
                         }
                     })
                     .await;

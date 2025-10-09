@@ -387,7 +387,7 @@ mod tests {
                 .unwrap_or_else(|| panic!("unexpected message: {msg:?}"));
 
             assert_eq!(msg, expected_msg);
-            ctx.reply_sender().unwrap().send(reply);
+            ctx.reply_sender().unwrap().send(reply).await;
         }
     }
 
