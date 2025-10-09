@@ -64,6 +64,7 @@ pub(crate) struct ManagerConfig {
 pub(crate) struct AllocatorConfig {
     pub listen: Option<SocketAddr>,
     pub default_release_channel: Option<String>,
+    pub worker_task_limit: Option<usize>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -110,6 +111,7 @@ impl Default for AppConfig {
             allocator: Some(AllocatorConfig {
                 listen: Some(default_allocator_listen_addr()),
                 default_release_channel: None,
+                worker_task_limit: None,
             }),
             executor: Some(ExecutorConfig {
                 allocator: None,
@@ -201,6 +203,7 @@ mod tests {
                 allocator: Some(AllocatorConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap()),
                     default_release_channel: None,
+                    worker_task_limit: None
                 }),
                 executor: Some(ExecutorConfig {
                     allocator: None,
