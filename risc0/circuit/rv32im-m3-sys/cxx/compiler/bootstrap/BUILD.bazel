@@ -37,7 +37,11 @@ build_circuit(
 
 cc_binary(
     name = "bootstrap",
-    srcs = glob(["*.cpp"]),
+    srcs = [
+        "main.cpp",
+        "poly_ext.cpp",
+        "taps.cpp",
+    ],
     deps = [
         "//compiler/extractor",
         "//rv32im/circuit",
