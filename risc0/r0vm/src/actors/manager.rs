@@ -96,10 +96,12 @@ async fn job_request_task<RequestT, ResultT>(
 
     // If the job requester is waiting for a response send it to them
     if let Some(reply_sender) = reply_sender {
-        reply_sender.send(JobRequestReply {
-            job_id,
-            status: reply,
-        });
+        reply_sender
+            .send(JobRequestReply {
+                job_id,
+                status: reply,
+            })
+            .await;
     }
 }
 
@@ -190,7 +192,7 @@ impl Message<CreateJobRequest> for ManagerActor {
                     .await
             }
         };
-        ctx.reply(CreateJobReply { job_id })
+        ctx.reply(CreateJobReply { job_id }).await
     }
 }
 
@@ -289,5 +291,6 @@ impl Message<JobStatusRequest> for ManagerActor {
             Some(JobEntry::Inactive(inactive)) => Ok(inactive.clone().into()),
             None => Ok(JobStatusReply::NotFound),
         })
+        .await
     }
 }

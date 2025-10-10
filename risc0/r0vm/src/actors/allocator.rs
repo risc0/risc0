@@ -393,6 +393,13 @@ impl ManagerMap {
     }
 }
 
+pub const DEFAULT_WORKER_TASK_LIMIT: usize = 3;
+
+struct PendingTask {
+    msg: ScheduleTask,
+    reply: Option<ReplySender<Result<ScheduleTaskReply>>>,
+}
+
 pub struct AllocatorActor {
     default_release_channel: String,
     workers: HashMap<WorkerId, Worker>,
@@ -401,13 +408,15 @@ pub struct AllocatorActor {
     cpus: HashMap<MachineId, Cpu>,
     http_client: Arc<reqwest::Client>,
 
-    pending: VecDeque<PendingAllocation>,
+    pending_allocations: VecDeque<PendingAllocation>,
+    pending_tasks: VecDeque<PendingTask>,
+    worker_task_limit: usize,
 }
 
 impl Actor for AllocatorActor {}
 
 impl AllocatorActor {
-    pub fn new(default_release_channel: impl Into<String>) -> Self {
+    pub fn new(default_release_channel: impl Into<String>, worker_task_limit: usize) -> Self {
         Self {
             default_release_channel: default_release_channel.into(),
             workers: HashMap::new(),
@@ -415,7 +424,9 @@ impl AllocatorActor {
             gpus: HashMap::new(),
             cpus: HashMap::new(),
             http_client: Arc::new(reqwest::Client::new()),
-            pending: VecDeque::new(),
+            pending_allocations: VecDeque::new(),
+            pending_tasks: VecDeque::new(),
+            worker_task_limit,
         }
     }
 
@@ -602,20 +613,20 @@ impl AllocatorActor {
         Ok(true)
     }
 
-    fn maybe_allocate_many(&mut self) {
-        for p in std::mem::take(&mut self.pending) {
+    async fn maybe_allocate_many(&mut self) {
+        for p in std::mem::take(&mut self.pending_allocations) {
             match self.maybe_allocate(&p.request) {
                 Ok(true) => {
                     if let Some(reply_sender) = p.reply_sender {
-                        reply_sender.send(Ok(()));
+                        reply_sender.send(Ok(())).await;
                     }
                 }
                 Err(error) => {
                     if let Some(reply_sender) = p.reply_sender {
-                        reply_sender.send(Err(error));
+                        reply_sender.send(Err(error)).await;
                     }
                 }
-                Ok(false) => self.pending.push_back(p),
+                Ok(false) => self.pending_allocations.push_back(p),
             }
         }
     }
@@ -654,7 +665,7 @@ impl Message<RegisterWorker> for AllocatorActor {
     type Reply = Result<RegisterWorkerReply>;
 
     async fn handle(&mut self, msg: RegisterWorker, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.register_worker(msg))
+        ctx.reply(self.register_worker(msg)).await
     }
 }
 
@@ -724,12 +735,17 @@ impl Message<ScheduleTask> for AllocatorActor {
     type Reply = Result<ScheduleTaskReply>;
 
     async fn handle(&mut self, msg: ScheduleTask, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.schedule_task(msg))
+        self.pending_tasks.push_back(PendingTask {
+            msg,
+            reply: ctx.reply_sender(),
+        });
+
+        self.maybe_schedule_tasks().await;
     }
 }
 
 impl AllocatorActor {
-    fn schedule_task(&mut self, msg: ScheduleTask) -> Result<ScheduleTaskReply> {
+    fn maybe_schedule_task(&mut self, msg: &ScheduleTask) -> Option<Result<ScheduleTaskReply>> {
         // Choose a worker which is least busy. We prefer a quiet GPU over a quiet CPU in this
         // selection.
         #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
@@ -740,15 +756,15 @@ impl AllocatorActor {
             id: WorkerId,
         }
 
-        let mut workers = msg
+        let workers = msg
             .candidates
-            .into_iter()
+            .iter()
             .map(|c| -> Result<_> {
                 Ok(CandidateWorker {
-                    id: c,
-                    gpu_tasks: self.get_worker_num_hardware_tasks(&c, HardwareFilter::Gpu)?,
-                    machine_tasks: self.get_worker_num_hardware_tasks(&c, HardwareFilter::Cpu)?,
-                    worker_tasks: self.get_worker_num_tasks(&c)?,
+                    id: *c,
+                    gpu_tasks: self.get_worker_num_hardware_tasks(c, HardwareFilter::Gpu)?,
+                    machine_tasks: self.get_worker_num_hardware_tasks(c, HardwareFilter::Cpu)?,
+                    worker_tasks: self.get_worker_num_tasks(c)?,
                 })
             })
             .filter_map(|res| match res {
@@ -761,18 +777,45 @@ impl AllocatorActor {
             .collect::<Vec<_>>();
 
         if workers.is_empty() {
-            return Err(Error::new("no eligible candidate workers"));
+            return Some(Err(Error::new("no eligible candidate workers")));
+        }
+
+        let mut workers = workers
+            .into_iter()
+            .filter(|w| w.worker_tasks < self.worker_task_limit)
+            .collect::<Vec<_>>();
+
+        if workers.is_empty() {
+            return None;
         }
 
         workers.sort();
         let chosen_worker = workers[0].id;
 
         // Count that this worker has a new task now.
-        self.add_worker_task(&chosen_worker, msg.task_id, msg.description)?;
+        if let Err(error) =
+            self.add_worker_task(&chosen_worker, msg.task_id, msg.description.clone())
+        {
+            return Some(Err(error));
+        }
 
-        Ok(ScheduleTaskReply {
+        Some(Ok(ScheduleTaskReply {
             worker_id: chosen_worker,
-        })
+        }))
+    }
+
+    async fn maybe_schedule_tasks(&mut self) {
+        let mut skipped = VecDeque::new();
+        while let Some(task) = self.pending_tasks.pop_front() {
+            if let Some(reply) = self.maybe_schedule_task(&task.msg) {
+                if let Some(reply_sender) = task.reply {
+                    reply_sender.send(reply).await;
+                }
+            } else {
+                skipped.push_back(task);
+            }
+        }
+        self.pending_tasks.extend(skipped);
     }
 }
 
@@ -792,13 +835,13 @@ impl Message<AllocateHardware> for AllocatorActor {
         match self.validate_allocation_request(&request) {
             Ok(()) => {
                 let reply_sender = ctx.reply_sender();
-                self.pending.push_back(PendingAllocation {
+                self.pending_allocations.push_back(PendingAllocation {
                     request,
                     reply_sender,
                 });
-                self.maybe_allocate_many();
+                self.maybe_allocate_many().await;
             }
-            Err(error) => ctx.reply(Err(error)),
+            Err(error) => ctx.reply(Err(error)).await,
         }
     }
 }
@@ -831,12 +874,12 @@ impl Message<DeallocateHardware> for AllocatorActor {
     type Reply = Result<()>;
 
     async fn handle(&mut self, msg: DeallocateHardware, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.deallocate_hardware(msg))
+        ctx.reply(self.deallocate_hardware(msg).await).await
     }
 }
 
 impl AllocatorActor {
-    fn deallocate_hardware(&mut self, msg: DeallocateHardware) -> Result<()> {
+    async fn deallocate_hardware(&mut self, msg: DeallocateHardware) -> Result<()> {
         let worker_id = msg.worker_id;
         let worker = self
             .workers
@@ -887,14 +930,14 @@ impl AllocatorActor {
             }
         }
 
-        self.maybe_allocate_many();
+        self.maybe_allocate_many().await;
 
         Ok(())
     }
 }
 
 /// The given task has completed
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EndTask {
     pub worker_id: WorkerId,
     pub task_id: GlobalId,
@@ -904,12 +947,12 @@ impl Message<EndTask> for AllocatorActor {
     type Reply = Result<()>;
 
     async fn handle(&mut self, msg: EndTask, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.end_task(msg))
+        ctx.reply(self.end_task(msg).await).await
     }
 }
 
 impl AllocatorActor {
-    fn end_task(&mut self, msg: EndTask) -> Result<()> {
+    async fn end_task(&mut self, msg: EndTask) -> Result<()> {
         let worker_id = msg.worker_id;
         let worker = self
             .workers
@@ -917,7 +960,7 @@ impl AllocatorActor {
             .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
 
         if self
-            .pending
+            .pending_allocations
             .iter()
             .any(|req| req.request.task_id == msg.task_id)
         {
@@ -941,6 +984,8 @@ impl AllocatorActor {
 
         let removed = worker.tasks.shift_remove(&msg.task_id).is_some();
         assert!(removed);
+
+        self.maybe_schedule_tasks().await;
 
         Ok(())
     }
@@ -1020,7 +1065,7 @@ impl Message<RegisterManager> for AllocatorActor {
     type Reply = Result<()>;
 
     async fn handle(&mut self, msg: RegisterManager, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.register_manager(msg))
+        ctx.reply(self.register_manager(msg)).await
     }
 }
 
@@ -1063,13 +1108,13 @@ impl Message<RpcDisconnect> for AllocatorActor {
     type Reply = ();
 
     async fn handle(&mut self, msg: RpcDisconnect, _ctx: &mut Context<Self, Self::Reply>) {
-        self.maybe_remove_workers(&msg);
+        self.maybe_remove_workers(&msg).await;
         self.maybe_remove_managers(&msg);
     }
 }
 
 impl AllocatorActor {
-    fn maybe_remove_workers(&mut self, msg: &RpcDisconnect) {
+    async fn maybe_remove_workers(&mut self, msg: &RpcDisconnect) {
         // Take out any workers with the given remote_address
         let mut workers_to_remove = vec![];
         for (worker_id, worker) in std::mem::take(&mut self.workers) {
@@ -1082,7 +1127,8 @@ impl AllocatorActor {
 
         for (worker_id, worker) in workers_to_remove {
             // Remove any pending requests from this worker
-            self.pending.retain(|r| r.request.worker_id != worker_id);
+            self.pending_allocations
+                .retain(|r| r.request.worker_id != worker_id);
 
             // Return all tokens for any pending tasks
             for (_, task) in worker.tasks {
@@ -1104,7 +1150,7 @@ impl AllocatorActor {
         }
 
         // Now that potentially some tokens are returned, might be able to schedule some tasks
-        self.maybe_allocate_many();
+        self.maybe_allocate_many().await;
     }
 
     fn maybe_remove_managers(&mut self, msg: &RpcDisconnect) {
@@ -1158,7 +1204,7 @@ impl Message<GetStatus> for AllocatorActor {
     type Reply = Result<GetStatusReply>;
 
     async fn handle(&mut self, _msg: GetStatus, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.get_status())
+        ctx.reply(self.get_status()).await
     }
 }
 
@@ -1251,8 +1297,11 @@ mod allocation_tests {
 
     impl Fixture {
         async fn new(worker_count: u32) -> Self {
-            let (alloc_ref, mut alloc_runner) =
-                actor::run(AllocatorActor::new("default-channel")).await;
+            let (alloc_ref, mut alloc_runner) = actor::run(AllocatorActor::new(
+                "default-channel",
+                /* worker_task_limit= */ 3,
+            ))
+            .await;
 
             let workers: Vec<WorkerId> = (0..worker_count).map(test_worker_id).collect();
             let mut worker_addresses = HashMap::new();
@@ -1819,6 +1868,44 @@ mod allocation_tests {
     }
 
     #[tokio::test]
+    async fn allocate_pauses_at_worker_limit() {
+        // create 2 workers both on the same machine and GPU
+        // | (0, 1) |
+        let mut fixture = Fixture::new(2).await;
+
+        // Fill up the workers with jobs
+        for i in 0..3 {
+            let response = fixture.schedule_task(1, i * 2).await;
+            assert_eq!(response.worker_id, fixture.workers[0]);
+
+            let response = fixture.schedule_task(1, i * 2 + 1).await;
+            assert_eq!(response.worker_id, fixture.workers[1]);
+        }
+
+        let pending = fixture
+            .alloc_ref
+            .ask_enqueue(ScheduleTask {
+                candidates: fixture.workers.clone(),
+                task_id: test_task_id(1, 8),
+                description: "test task".into(),
+            })
+            .await
+            .unwrap();
+        fixture.alloc_runner.try_handle_one().await.unwrap();
+
+        // The next request should be pending
+        assert!(!pending.has_reply());
+
+        // The first task ends, freeing up space
+        fixture.end_task(1, 0, fixture.workers[0]).await.unwrap();
+
+        // Now our task is scheduled
+        assert!(pending.has_reply());
+        let resp = pending.recv().await.unwrap().unwrap();
+        assert_eq!(resp.worker_id, fixture.workers[0]);
+    }
+
+    #[tokio::test]
     async fn worker_disconnect() {
         // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
         // | (0, 1), (2, 3) | (4, 5), (6, 7) |
@@ -2071,6 +2158,7 @@ impl AllocatorActor {
                         if let Some(reply_sender) = reply_sender {
                             reply_sender
                                 .send(proxy_api_request(http_client, endpoint, request).await)
+                                .await;
                         }
                     });
                     return Ok(());
@@ -2097,7 +2185,7 @@ impl Message<ApiRequest> for AllocatorActor {
         if let Err(error) = self.handle_api_request(request, &mut reply_sender)
             && let Some(reply_sender) = reply_sender
         {
-            reply_sender.send(Err(error));
+            reply_sender.send(Err(error)).await;
         }
     }
 }
@@ -2214,7 +2302,10 @@ mod proxy_tests {
             .map(|v| (v.clone(), TestManager::new()))
             .collect();
 
-        let alloc_ref = actor::spawn(AllocatorActor::new("default-channel"));
+        let alloc_ref = actor::spawn(AllocatorActor::new(
+            "default-channel",
+            /* worker_task_limit= */ 3,
+        ));
 
         for (version, manager) in &managers {
             alloc_ref
@@ -2416,7 +2507,10 @@ mod proxy_tests {
 
     #[tokio::test]
     async fn multiple_managers_registered_error() {
-        let alloc_ref = actor::spawn(AllocatorActor::new("default-channel"));
+        let alloc_ref = actor::spawn(AllocatorActor::new(
+            "default-channel",
+            /* worker_task_limit= */ 3,
+        ));
 
         alloc_ref
             .ask(RegisterManager {

@@ -84,7 +84,7 @@ impl JobActor {
             let reply = job.ask(request).await.map_err(Error::from);
             job.wait_for_stop().await;
             if let Some(reply_sender) = reply_sender {
-                reply_sender.send(reply);
+                reply_sender.send(reply).await;
             }
             let _ = self_ref.stop_gracefully("job shutdown");
         });
@@ -118,7 +118,8 @@ impl Message<JobStatusRequest> for JobActor {
 
     async fn handle(&mut self, msg: JobStatusRequest, ctx: &mut Context<Self, Self::Reply>) {
         let Some(inner) = self.inner.as_mut() else {
-            ctx.reply(Err(Error::new("JobActor hasn't received job request yet")));
+            ctx.reply(Err(Error::new("JobActor hasn't received job request yet")))
+                .await;
             return;
         };
 
