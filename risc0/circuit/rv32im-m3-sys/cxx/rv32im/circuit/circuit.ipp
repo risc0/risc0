@@ -14,11 +14,6 @@
 
 #pragma once
 
-#include "rv32im/circuit/circuit.h"
-
-#include "rv32im/argument/argument.h"
-#include "rv32im/base/opt.h"
-
 #define EQ(a, b) ctx.eqz((a) - (b))
 #define EQZ(a) ctx.eqz(a)
 

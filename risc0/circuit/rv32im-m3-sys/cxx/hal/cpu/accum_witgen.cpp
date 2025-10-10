@@ -15,8 +15,8 @@
 
 #include "core/log.h"
 #include "core/util.h"
-#include "hal/hal.h"
 #include "hal/po2s.h"
+#include "rv32im/base/platform.h"
 #include "zkp/fp.h"
 #include "zkp/rou.h"
 

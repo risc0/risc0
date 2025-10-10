@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "rv32im/circuit/lookups.h"
 #include "rv32im/circuit/poseidon2.h"
 #include "rv32im/witness/globals.h"
 

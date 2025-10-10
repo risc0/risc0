@@ -1,3 +1,9 @@
+filegroup(
+    name = "files",
+    srcs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+)
+
 cc_library(
     name = "zkp",
     srcs = glob(["*.cpp"]),

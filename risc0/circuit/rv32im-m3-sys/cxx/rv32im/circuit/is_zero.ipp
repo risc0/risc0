@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/is_zero.h"
+
 template <typename C> FDEV void IsZero<C>::set(CTX, Fp val) DEV {
   if (Val<C>(val) == Val<C>(0)) {
     isZero.set(ctx, 1);

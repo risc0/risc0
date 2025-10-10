@@ -12,6 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/argument/cpu_state.h"
+#include "rv32im/argument/lookup.h"
+#include "rv32im/argument/paging.h"
+#include "rv32im/argument/poseidon2.h"
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/globals.h"
+#include "rv32im/witness/witness.h"
+
 #define GLOBAL_OFFSET(member)                                                                      \
   (reinterpret_cast<MDEV Fp*>(&reinterpret_cast<MDEV Globals*>(0x10000)->member) -                 \
    reinterpret_cast<MDEV Fp*>(0x10000))

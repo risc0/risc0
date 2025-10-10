@@ -84,6 +84,7 @@ enum class BlockType {
       Empty,
 };
 
+// NOTE: NUM_BLOCK_TYPES = 39 => ceil(sqrt(NUM_BLOCK_TYPES)) = 7 != 6
 // Should be ceil(sqrt(NUM_BLOCK_TYPES)), but sqrt is not a constexpr...
 CONSTANT size_t MAJOR_SPLIT_SIZE = 6;
 CONSTANT size_t MINOR_SPLIT_SIZE = (NUM_BLOCK_TYPES + (MAJOR_SPLIT_SIZE - 1)) / MAJOR_SPLIT_SIZE;
