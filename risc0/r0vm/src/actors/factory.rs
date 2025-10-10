@@ -26,7 +26,9 @@ use opentelemetry::{
 use super::{
     RemoteActor, RemoteFactoryRequest, RpcDisconnect,
     actor::{Actor, ActorRef, Context, Message, SendError},
-    allocator::{CpuCores, GpuTokens, RemoteAllocatorActor, ScheduleTask, ScheduleTaskReply},
+    allocator::{
+        CpuCores, EndTask, GpuTokens, RemoteAllocatorActor, ScheduleTask, ScheduleTaskReply,
+    },
     error::{Error, Result as ActorResult},
     job::{self, JobActor},
     protocol::{
@@ -49,7 +51,9 @@ struct WorkerRow {
 }
 
 pub(crate) trait FactoryDeps: 'static {
-    type Allocator: Actor + Message<ScheduleTask, Reply = ActorResult<ScheduleTaskReply>>;
+    type Allocator: Actor
+        + Message<ScheduleTask, Reply = ActorResult<ScheduleTaskReply>>
+        + Message<EndTask, Reply = ActorResult<()>>;
     type Worker: Actor + Message<TaskMsg, Reply = ()>;
     type Job: Actor + Message<TaskDoneMsg, Reply = ()> + Message<TaskUpdateMsg, Reply = ()>;
 }
@@ -230,10 +234,18 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
             .find(|pending| pending.msg.header.global_id == task_id)
         else {
             // The task is for a job that is gone.
+            if let Ok(worker_id) = worker_id {
+                self.allocator.tell(EndTask { worker_id, task_id }).await?;
+            }
+
             return Ok(());
         };
 
         let PendingTaskState::WaitingForWorker { task } = &pending.state else {
+            if let Ok(worker_id) = worker_id {
+                self.allocator.tell(EndTask { worker_id, task_id }).await?;
+            }
+
             return Err(Error::new(format!(
                 "received unexpected ScheduleTask response: task {task_id} not waiting for worker"
             )));
@@ -543,10 +555,21 @@ mod tests {
     use crate::actors::actor::{self, Actor, ActorRunner};
     use crate::actors::protocol::{ExecuteTask, ProofRequest, Task, TaskError, TaskHeader};
 
+    #[derive(Debug)]
+    enum TestAllocatorMsg {
+        ScheduleTask {
+            expected: ScheduleTask,
+            reply: ActorResult<ScheduleTaskReply>,
+        },
+        EndTask {
+            expected: EndTask,
+            reply: ActorResult<()>,
+        },
+    }
+
     #[derive(Clone, Default)]
     struct TestAllocator {
-        #[allow(clippy::type_complexity)]
-        messages: Arc<Mutex<VecDeque<(ScheduleTask, ActorResult<ScheduleTaskReply>)>>>,
+        messages: Arc<Mutex<VecDeque<TestAllocatorMsg>>>,
     }
 
     impl Actor for TestAllocator {}
@@ -555,21 +578,63 @@ mod tests {
         type Reply = ActorResult<ScheduleTaskReply>;
 
         async fn handle(&mut self, msg: ScheduleTask, ctx: &mut Context<Self, Self::Reply>) {
-            let (expected_msg, reply) = self
+            let test_exp = self
                 .messages
                 .lock()
                 .unwrap()
                 .pop_front()
                 .unwrap_or_else(|| panic!("unexpected message: {msg:?}"));
 
-            assert_eq!(msg, expected_msg);
+            let TestAllocatorMsg::ScheduleTask { expected, reply } = test_exp else {
+                panic!("unexpected message {msg:?}, expected {test_exp:?}");
+            };
+
+            assert_eq!(msg, expected);
             ctx.reply_sender().unwrap().send(reply).await;
         }
     }
 
+    impl Message<EndTask> for TestAllocator {
+        type Reply = ActorResult<()>;
+
+        async fn handle(&mut self, msg: EndTask, ctx: &mut Context<Self, Self::Reply>) {
+            let test_exp = self
+                .messages
+                .lock()
+                .unwrap()
+                .pop_front()
+                .unwrap_or_else(|| panic!("unexpected message: {msg:?}"));
+
+            let TestAllocatorMsg::EndTask { expected, reply } = test_exp else {
+                panic!("unexpected message {msg:?}, expected {test_exp:?}");
+            };
+
+            assert_eq!(msg, expected);
+
+            if let Some(reply_sender) = ctx.reply_sender() {
+                reply_sender.send(reply).await;
+            }
+        }
+    }
+
     impl TestAllocator {
-        fn expect(&self, msg: ScheduleTask, reply: ActorResult<ScheduleTaskReply>) {
-            self.messages.lock().unwrap().push_back((msg, reply));
+        fn expect_schedule_task(
+            &self,
+            expected: ScheduleTask,
+            reply: ActorResult<ScheduleTaskReply>,
+        ) {
+            self.messages
+                .lock()
+                .unwrap()
+                .push_back(TestAllocatorMsg::ScheduleTask { expected, reply });
+        }
+
+        #[allow(dead_code)]
+        fn expect_end_task(&self, expected: EndTask, reply: ActorResult<()>) {
+            self.messages
+                .lock()
+                .unwrap()
+                .push_back(TestAllocatorMsg::EndTask { expected, reply });
         }
     }
 
@@ -877,7 +942,7 @@ mod tests {
             .await
             .unwrap();
 
-        fixture.test_alloc.expect(
+        fixture.test_alloc.expect_schedule_task(
             ScheduleTask {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,
@@ -939,7 +1004,7 @@ mod tests {
             .await
             .unwrap();
 
-        fixture.test_alloc.expect(
+        fixture.test_alloc.expect_schedule_task(
             ScheduleTask {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,
@@ -958,7 +1023,7 @@ mod tests {
         fixture.factory_runner.try_handle_one().await.unwrap();
 
         // this time we make it succeed
-        fixture.test_alloc.expect(
+        fixture.test_alloc.expect_schedule_task(
             ScheduleTask {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,
@@ -1027,7 +1092,7 @@ mod tests {
             .await
             .unwrap();
 
-        fixture.test_alloc.expect(
+        fixture.test_alloc.expect_schedule_task(
             ScheduleTask {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,
@@ -1049,7 +1114,7 @@ mod tests {
         fixture.factory_runner.try_handle_one().await.unwrap();
 
         let worker1 = fixture.workers[0].id;
-        fixture.test_alloc.expect(
+        fixture.test_alloc.expect_schedule_task(
             ScheduleTask {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,
@@ -1121,7 +1186,7 @@ mod tests {
 
         fixture.disconnect_worker(worker1).await;
 
-        fixture.test_alloc.expect(
+        fixture.test_alloc.expect_schedule_task(
             ScheduleTask {
                 candidates: vec![worker1, worker2],
                 task_id,
@@ -1130,7 +1195,7 @@ mod tests {
             Ok(ScheduleTaskReply { worker_id: worker1 }),
         );
 
-        fixture.test_alloc.expect(
+        fixture.test_alloc.expect_schedule_task(
             ScheduleTask {
                 candidates: vec![worker2],
                 task_id,
@@ -1211,7 +1276,7 @@ mod tests {
             .await
             .unwrap();
 
-        fixture.test_alloc.expect(
+        fixture.test_alloc.expect_schedule_task(
             ScheduleTask {
                 candidates: vec![worker1, worker2],
                 task_id,
@@ -1239,6 +1304,16 @@ mod tests {
 
         // process TaskGotWorker
         fixture.factory_runner.try_handle_one().await.unwrap();
+
+        fixture.test_alloc.expect_end_task(
+            EndTask {
+                worker_id: worker1,
+                task_id,
+            },
+            Ok(()),
+        );
+        // process EndTask
+        fixture.alloc_runner.try_handle_one().await.unwrap();
     }
 
     #[tokio::test]
@@ -1272,7 +1347,7 @@ mod tests {
         fixture.disconnect_worker(worker1).await;
 
         // show that when processing the disconnect, we reschedule the task on another worker.
-        fixture.test_alloc.expect(
+        fixture.test_alloc.expect_schedule_task(
             ScheduleTask {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,

@@ -937,7 +937,7 @@ impl AllocatorActor {
 }
 
 /// The given task has completed
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EndTask {
     pub worker_id: WorkerId,
     pub task_id: GlobalId,
