@@ -129,7 +129,7 @@ impl JobActor {
         *layer
             .get_mut(pos)
             .ok_or_else(|| Error::new("union mismatch: bad pos"))? = Some(receipt.clone());
-        let (lhs_pos, rhs_pos) = if pos % 2 == 0 {
+        let (lhs_pos, rhs_pos) = if pos.is_multiple_of(2) {
             (pos, pos + 1)
         } else {
             (pos - 1, pos)

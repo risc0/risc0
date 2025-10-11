@@ -51,7 +51,7 @@ fn extract_zkr(zip: &mut zip::ZipArchive<Cursor<&[u8]>>, name: &str) -> Result<V
         .with_context(|| format!("Failed to read {name}"))?;
     let uncompressed_size = f.size() as usize;
 
-    if uncompressed_size % std::mem::size_of::<u32>() != 0 {
+    if !uncompressed_size.is_multiple_of(std::mem::size_of::<u32>()) {
         bail!(".zkr is incorrect size");
     }
 
