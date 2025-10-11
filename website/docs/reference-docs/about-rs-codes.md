@@ -4,7 +4,7 @@
 
 ## Documentation
 
-Implementation and documentation for Reed-Solomon encoding is in the `risc0-zkp-core` [Rust crate](https://github.com/risc0/risc0#rust-crates).
+Implementation and documentation for Reed-Solomon encoding is in the `risc0-zkp-core` [Rust crate](https://docs.rs/risc0-zkp-core/latest/risc0_zkp_core/).
 
 ## Basic Function
 
