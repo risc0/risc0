@@ -36,10 +36,10 @@ use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
     Assumption, GUEST_MAX_MEM, ReceiptClaim,
     guest::{
-        env::{self, FdReader, FdWriter, Read as _, Write as _, testing::sha_single_keccak},
+        env::{self, FdReader, FdWriter, Read as _, Write as _, testing::commit_single_keccak},
         memory_barrier, sha,
     },
-    sha::{Digest, SHA256_INIT, Sha256},
+    sha::{Digest, Sha256},
 };
 use risc0_zkvm_methods::multi_test::MultiTestSpec;
 use risc0_zkvm_platform::{
@@ -483,20 +483,20 @@ fn main() {
                 ]
             );
         }
-        MultiTestSpec::ShaSingleKeccak => {
-            let mut sha_state = SHA256_INIT;
+        MultiTestSpec::CommitSingleKeccak => {
+            let mut commit_state = Digest::ZERO;
             let mut keccak_state = KeccakState::default();
             unsafe { sys_keccak(&keccak_state, &mut keccak_state) };
-            sha_single_keccak(&mut sha_state, &keccak_state);
+            commit_single_keccak(&mut commit_state, &keccak_state);
             assert_eq!(
-                sha_state,
-                digest!("60ad7130b65fa874a29b3f44aeb6f46bb57cc45aa7f4a9a8db8ab4d378a66f06")
+                commit_state,
+                digest!("3479d5185c29125e82254e6aa1223d1ec1563c2adf5678507192da2a29e94356")
             );
 
-            sha_single_keccak(&mut sha_state, &keccak_state);
+            commit_single_keccak(&mut commit_state, &keccak_state);
             assert_eq!(
-                sha_state,
-                digest!("d72929ecbe90afdba8444f4b4e4dae6a3cb0465f67ee5dc12321a390dc7911b3")
+                commit_state,
+                digest!("b702a73769da83164c85332308cab412b94fe215fddf3229c2f77968d0fad233")
             );
         }
         MultiTestSpec::KeccakUpdate => {

@@ -93,7 +93,7 @@ pub enum MultiTestSpec {
         data: Vec<u8>,
         num_iter: u32,
     },
-    ShaSingleKeccak,
+    CommitSingleKeccak,
     SysFork,
     SysForkFork,
     SysForkJournalPanic,
