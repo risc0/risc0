@@ -3939,6 +3939,7 @@ dependencies = [
  "cust",
  "digest 0.10.7",
  "ff",
+ "generic-array",
  "hex",
  "hex-literal",
  "metal",

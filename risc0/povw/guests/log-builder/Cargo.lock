@@ -1522,6 +1522,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "digest 0.10.7",
+ "generic-array",
  "hex",
  "hex-literal",
  "metal",
