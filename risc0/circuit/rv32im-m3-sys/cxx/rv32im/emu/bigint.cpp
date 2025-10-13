@@ -20,7 +20,6 @@
 #include "bigint.h"
 #include "rv32im/base/constants.h"
 
-
 namespace risc0::rv32im {
 
 namespace {
@@ -28,19 +27,19 @@ namespace {
 using BigInt = Num;
 
 BigInt bigIntFromWords(std::vector<Num::word>&& words) {
-    BigInt result;
-    result.words = std::move(words);
-    return result;
+  BigInt result;
+  result.words = std::move(words);
+  return result;
 }
 
 uint32_t getBigIntWord(const BigInt& val, size_t index) {
-    size_t wordIndex = index / 2;
-    size_t halfIndex = index % 2;
-    if (wordIndex >= val.words.size()) {
-      // If we read past the end, pretend that we extended with zeros
-      return 0;
-    }
-    return (val.words[wordIndex] >> (halfIndex * 32)) & 0xffffffff;
+  size_t wordIndex = index / 2;
+  size_t halfIndex = index % 2;
+  if (wordIndex >= val.words.size()) {
+    // If we read past the end, pretend that we extended with zeros
+    return 0;
+  }
+  return (val.words[wordIndex] >> (halfIndex * 32)) & 0xffffffff;
 }
 
 struct BigIntIO {
@@ -55,199 +54,196 @@ struct BigIntIO {
   void store(uint32_t arena, uint32_t offset, uint32_t count, BigInt val);
 };
 
-template <typename int_t>
-int_t read(void** stream) {
-    auto* casted = (int_t*) *stream;
-    int_t value = *(casted++);
-    *stream = (void*) casted;
-    return value;
+template <typename int_t> int_t read(void** stream) {
+  auto* casted = (int_t*)*stream;
+  int_t value = *(casted++);
+  *stream = (void*)casted;
+  return value;
 }
 
 struct Type {
-    uint64_t coeffs;
-    uint64_t maxPos;
-    uint64_t maxNeg;
-    uint64_t minBits;
+  uint64_t coeffs;
+  uint64_t maxPos;
+  uint64_t maxNeg;
+  uint64_t minBits;
 
-    static Type decode(void*& stream) {
-        uint64_t coeffs = read<uint64_t>(&stream);
-        uint64_t maxPos = read<uint64_t>(&stream);
-        uint64_t maxNeg = read<uint64_t>(&stream);
-        uint64_t minBits = read<uint64_t>(&stream);
-        return Type {coeffs, maxPos, maxNeg, minBits};
-    }
+  static Type decode(void*& stream) {
+    uint64_t coeffs = read<uint64_t>(&stream);
+    uint64_t maxPos = read<uint64_t>(&stream);
+    uint64_t maxNeg = read<uint64_t>(&stream);
+    uint64_t minBits = read<uint64_t>(&stream);
+    return Type{coeffs, maxPos, maxNeg, minBits};
+  }
 };
 
 struct Input {
-    uint64_t label;
-    uint32_t bitWidth;
-    uint16_t minBits;
-    bool isPublic;
+  uint64_t label;
+  uint32_t bitWidth;
+  uint16_t minBits;
+  bool isPublic;
 
-    static Input decode(void*& stream) {
-        uint64_t label = read<uint64_t>(&stream);
-        uint32_t bitWidth = read<uint32_t>(&stream);
-        uint16_t minBits = read<uint16_t>(&stream);
-        bool isPublic = read<uint16_t>(&stream) != 0;
-        return Input {label, bitWidth, minBits, isPublic};
-    }
+  static Input decode(void*& stream) {
+    uint64_t label = read<uint64_t>(&stream);
+    uint32_t bitWidth = read<uint32_t>(&stream);
+    uint16_t minBits = read<uint16_t>(&stream);
+    bool isPublic = read<uint16_t>(&stream) != 0;
+    return Input{label, bitWidth, minBits, isPublic};
+  }
 };
 
 enum class OpCode {
-    Const = 0x2, // unary: constant index
-    Load = 0x3,  // unary: constant index
-    Store = 0x4, // unary: constant index
-    Add = 0x8,   // binary
-    Sub = 0x9,   // binary
-    Mul = 0xA,   // binary
-    Rem = 0xB,   // binary
-    Quo = 0xC,   // binary
-    Inv = 0xE,   // binary
+  Const = 0x2, // unary: constant index
+  Load = 0x3,  // unary: constant index
+  Store = 0x4, // unary: constant index
+  Add = 0x8,   // binary
+  Sub = 0x9,   // binary
+  Mul = 0xA,   // binary
+  Rem = 0xB,   // binary
+  Quo = 0xC,   // binary
+  Inv = 0xE,   // binary
 };
 
 struct Op {
-    OpCode code;
-    size_t resultType;
-    size_t a;
-    size_t b;
+  OpCode code;
+  size_t resultType;
+  size_t a;
+  size_t b;
 
-    uint32_t arena() const {
-        return (uint32_t) (a >> 16);
-    }
+  uint32_t arena() const { return (uint32_t)(a >> 16); }
 
-    uint32_t offset() const {
-        return (uint32_t) (a & 0xffff);
-    }
+  uint32_t offset() const { return (uint32_t)(a & 0xffff); }
 
-    static Op decode(void*& stream) {
-        uint64_t bits = read<uint64_t>(&stream);
-        return Op {
-            .code = static_cast<OpCode>(bits & 0x0F),
-            .resultType = (bits >> 4) & 0x0FFF,
-            .a = (bits >> 16) & 0x00FFFFFF,
-            .b = (bits >> 40) & 0x00FFFFFF,
-        };
-    }
+  static Op decode(void*& stream) {
+    uint64_t bits = read<uint64_t>(&stream);
+    return Op{
+        .code = static_cast<OpCode>(bits & 0x0F),
+        .resultType = (bits >> 4) & 0x0FFF,
+        .a = (bits >> 16) & 0x00FFFFFF,
+        .b = (bits >> 40) & 0x00FFFFFF,
+    };
+  }
 };
 
 struct Program {
-    std::vector<Input> inputs;
-    std::vector<Type> types;
-    std::vector<uint64_t> constants;
-    std::vector<Op> ops;
+  std::vector<Input> inputs;
+  std::vector<Type> types;
+  std::vector<uint64_t> constants;
+  std::vector<Op> ops;
 
-    static Program decode(void*& stream) {
-        uint32_t magic = read<uint32_t>(&stream);
-        if (magic != 0x63626962) {
-            throw std::runtime_error("Bad magic");
-        }
-
-        uint32_t version = read<uint32_t>(&stream);
-        if (version != 1) {
-            throw std::runtime_error("Bad version");
-        }
-
-        uint32_t numInputs = read<uint32_t>(&stream);
-        uint32_t numTypes = read<uint32_t>(&stream);
-        uint32_t numConstants = read<uint32_t>(&stream);
-        uint32_t numOps = read<uint32_t>(&stream);
-
-        // Allocate storage for the program sections, then read each one.
-        Program result;
-        for (size_t i = 0; i < numInputs; i++) {
-            result.inputs.push_back(Input::decode(stream));
-        }
-        for (size_t i = 0; i < numTypes; i++) {
-            result.types.push_back(Type::decode(stream));
-        }
-        for (size_t i = 0; i < numConstants; i++) {
-            result.constants.push_back(read<uint64_t>(&stream));
-        }
-        for (size_t i = 0; i < numOps; i++) {
-            result.ops.push_back(Op::decode(stream));
-        }
-        return result;
+  static Program decode(void*& stream) {
+    uint32_t magic = read<uint32_t>(&stream);
+    if (magic != 0x63626962) {
+      throw std::runtime_error("Bad magic");
     }
 
-    void eval(BigIntIO& io) {
-        std::vector<BigInt> regs;
-        regs.resize(ops.size());
-        for (size_t opIndex = 0; opIndex < ops.size(); opIndex++) {
-            auto& op = ops[opIndex];
-            switch (op.code) {
-            case OpCode::Const: {
-                uint32_t offset = op.a;
-                uint32_t words = op.b;
-                BigInt value = 0;
-                for (size_t i = 0; i < words; i++) {
-                    uint64_t word = constants[offset + i];
-                    value.words.push_back(word);
-                }
-                regs[opIndex] = value;
-
-                std::vector<char> text;
-                value.print(text, 16);
-                LOG(0, "[" << opIndex << "] CONST 0x" << &text[0]);
-            } break;
-            case OpCode::Load: {
-                auto& typ = types[op.resultType];
-                uint32_t count = (typ.coeffs + 15) / 16;
-                auto value = io.load(op.arena(), op.offset(), count);
-                LOG(0, "[" << opIndex << "] LOAD " << count << " FpExts from arena " << op.arena() << ", offset " << op.offset());
-                regs[opIndex] = value;
-            } break;
-            case OpCode::Store: {
-                LOG(0, "[" << opIndex << "] STORE " << op.a << ", " << op.b);
-                auto& typ = types[op.resultType];
-                uint32_t count = (typ.coeffs + 15) / 16;
-                auto& value = regs[op.b];
-                io.store(op.arena(), op.offset(), count, value);
-            } break;
-            case OpCode::Add: {
-                auto& lhs = regs[op.a];
-                auto& rhs = regs[op.b];
-                auto& dst = regs[opIndex];
-                LOG(0, "[" << opIndex << "] ADD " << op.a << ", " << op.b);
-                dst = lhs + rhs;
-            } break;
-            case OpCode::Sub: {
-                LOG(0, "[" << opIndex << "] SUB " << op.a << ", " << op.b);
-                auto& lhs = regs[op.a];
-                auto& rhs = regs[op.b];
-                auto& dst = regs[opIndex];
-                dst = lhs - rhs;
-            } break;
-            case OpCode::Mul: {
-                LOG(0, "[" << opIndex << "] MUL " << op.a << ", " << op.b);
-                auto& lhs = regs[op.a];
-                auto& rhs = regs[op.b];
-                auto& dst = regs[opIndex];
-                dst = lhs * rhs;
-            } break;
-            case OpCode::Rem: {
-                LOG(0, "[" << opIndex << "] REM " << op.a << ", " << op.b);
-                auto& lhs = regs[op.a];
-                auto& rhs = regs[op.b];
-                auto& dst = regs[opIndex];
-                dst = lhs % rhs;
-            } break;
-            case OpCode::Quo: {
-                LOG(0, "[" << opIndex << "] QUO " << op.a << ", " << op.b);
-                auto& lhs = regs[op.a];
-                auto& rhs = regs[op.b];
-                auto& dst = regs[opIndex];
-                dst = lhs / rhs;
-            } break;
-            case OpCode::Inv: {
-                LOG(0, "[" << opIndex << "] INV " << op.a << ", " << op.b);
-                auto& lhs = regs[op.a];
-                auto& rhs = regs[op.b];
-                auto& dst = regs[opIndex];
-                dst = lhs.mod_pow(rhs - 2, rhs);
-            } break;
-            }
-        }
+    uint32_t version = read<uint32_t>(&stream);
+    if (version != 1) {
+      throw std::runtime_error("Bad version");
     }
+
+    uint32_t numInputs = read<uint32_t>(&stream);
+    uint32_t numTypes = read<uint32_t>(&stream);
+    uint32_t numConstants = read<uint32_t>(&stream);
+    uint32_t numOps = read<uint32_t>(&stream);
+
+    // Allocate storage for the program sections, then read each one.
+    Program result;
+    for (size_t i = 0; i < numInputs; i++) {
+      result.inputs.push_back(Input::decode(stream));
+    }
+    for (size_t i = 0; i < numTypes; i++) {
+      result.types.push_back(Type::decode(stream));
+    }
+    for (size_t i = 0; i < numConstants; i++) {
+      result.constants.push_back(read<uint64_t>(&stream));
+    }
+    for (size_t i = 0; i < numOps; i++) {
+      result.ops.push_back(Op::decode(stream));
+    }
+    return result;
+  }
+
+  void eval(BigIntIO& io) {
+    std::vector<BigInt> regs;
+    regs.resize(ops.size());
+    for (size_t opIndex = 0; opIndex < ops.size(); opIndex++) {
+      auto& op = ops[opIndex];
+      switch (op.code) {
+      case OpCode::Const: {
+        uint32_t offset = op.a;
+        uint32_t words = op.b;
+        BigInt value = 0;
+        for (size_t i = 0; i < words; i++) {
+          uint64_t word = constants[offset + i];
+          value.words.push_back(word);
+        }
+        regs[opIndex] = value;
+
+        std::vector<char> text;
+        value.print(text, 16);
+        LOG(0, "[" << opIndex << "] CONST 0x" << &text[0]);
+      } break;
+      case OpCode::Load: {
+        auto& typ = types[op.resultType];
+        uint32_t count = (typ.coeffs + 15) / 16;
+        auto value = io.load(op.arena(), op.offset(), count);
+        LOG(0,
+            "[" << opIndex << "] LOAD " << count << " FpExts from arena " << op.arena()
+                << ", offset " << op.offset());
+        regs[opIndex] = value;
+      } break;
+      case OpCode::Store: {
+        LOG(0, "[" << opIndex << "] STORE " << op.a << ", " << op.b);
+        auto& typ = types[op.resultType];
+        uint32_t count = (typ.coeffs + 15) / 16;
+        auto& value = regs[op.b];
+        io.store(op.arena(), op.offset(), count, value);
+      } break;
+      case OpCode::Add: {
+        auto& lhs = regs[op.a];
+        auto& rhs = regs[op.b];
+        auto& dst = regs[opIndex];
+        LOG(0, "[" << opIndex << "] ADD " << op.a << ", " << op.b);
+        dst = lhs + rhs;
+      } break;
+      case OpCode::Sub: {
+        LOG(0, "[" << opIndex << "] SUB " << op.a << ", " << op.b);
+        auto& lhs = regs[op.a];
+        auto& rhs = regs[op.b];
+        auto& dst = regs[opIndex];
+        dst = lhs - rhs;
+      } break;
+      case OpCode::Mul: {
+        LOG(0, "[" << opIndex << "] MUL " << op.a << ", " << op.b);
+        auto& lhs = regs[op.a];
+        auto& rhs = regs[op.b];
+        auto& dst = regs[opIndex];
+        dst = lhs * rhs;
+      } break;
+      case OpCode::Rem: {
+        LOG(0, "[" << opIndex << "] REM " << op.a << ", " << op.b);
+        auto& lhs = regs[op.a];
+        auto& rhs = regs[op.b];
+        auto& dst = regs[opIndex];
+        dst = lhs % rhs;
+      } break;
+      case OpCode::Quo: {
+        LOG(0, "[" << opIndex << "] QUO " << op.a << ", " << op.b);
+        auto& lhs = regs[op.a];
+        auto& rhs = regs[op.b];
+        auto& dst = regs[opIndex];
+        dst = lhs / rhs;
+      } break;
+      case OpCode::Inv: {
+        LOG(0, "[" << opIndex << "] INV " << op.a << ", " << op.b);
+        auto& lhs = regs[op.a];
+        auto& rhs = regs[op.b];
+        auto& dst = regs[opIndex];
+        dst = lhs.mod_pow(rhs - 2, rhs);
+      } break;
+      }
+    }
+  }
 };
 
 BigInt BigIntIO::load(uint32_t arena, uint32_t offset, uint32_t count) {
@@ -298,7 +294,7 @@ size_t witgenBigInt(std::map<uint32_t, uint32_t>& polyWitness, PeekFunc peek) {
     code.push_back(peek(bibcWordAddr + i));
   }
 
-  void* stream = (void*) code.data();
+  void* stream = (void*)code.data();
   Program prog = Program::decode(stream);
   uint32_t mm = peek(MACHINE_REGS_WORD + REG_T0);
   BigIntIO io(mm, peek, polyWitness);
