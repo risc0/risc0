@@ -1,0 +1,13 @@
+[package]
+name = "risc0-sppark"
+version = "0.1.14"
+edition = "2021"
+description = "Zero-knowledge template library"
+repository = "https://github.com/supranational/sppark"
+categories = ["cryptography"]
+keywords = ["crypto", "zero-knowledge", "cuda"]
+license = "Apache-2.0"
+links = "risc0-sppark"
+
+[build-dependencies]
+cc = { version = "1.2.2", features = ["parallel"] }

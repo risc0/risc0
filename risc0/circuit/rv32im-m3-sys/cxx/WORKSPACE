@@ -70,20 +70,16 @@ rules_cuda_dependencies()
 
 rules_cuda_toolchains(register_toolchains = True)
 
-http_archive(
+new_local_repository(
     name = "sppark",
     build_file = "//bazel/third_party:sppark.BUILD",
-    sha256 = "243be435ac64de72d7e8c12dbebace1ada45bf7a580fee0803976820a0a0dcde",
-    strip_prefix = "sppark-b5ad221cc17e49ceeb7e845f3d3e84a2e9ee1aaa",
-    urls = ["https://github.com/jbruestle/sppark/archive/b5ad221cc17e49ceeb7e845f3d3e84a2e9ee1aaa.tar.gz"],
+    path = "../../../../vendor/sppark",
 )
 
-http_archive(
+new_local_repository(
     name = "unordered_dense",
     build_file = "//bazel/third_party:unordered_dense.BUILD",
-    sha256 = "e06af1bde91f043734c9528860ecebf740ed513a219650bafc6c587d9dddb646",
-    strip_prefix = "unordered_dense-73f3cbb237e84d483afafc743f1f14ec53e12314",
-    url = "https://github.com/martinus/unordered_dense/archive/73f3cbb237e84d483afafc743f1f14ec53e12314.zip",
+    path = "../vendor/unordered_dense",
 )
 
 #

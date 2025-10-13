@@ -18,7 +18,7 @@ use std::ffi::{CStr, c_char};
 use anyhow::{Result, anyhow};
 
 #[cfg(feature = "cuda")]
-pub use sppark::Error as SpparkError;
+pub use risc0_sppark::Error as SpparkError;
 
 pub struct ProveParams<'a> {
     pub pcoeffs: &'a [u8],

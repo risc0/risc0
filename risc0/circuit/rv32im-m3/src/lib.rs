@@ -15,7 +15,8 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(feature = "prove")]
-pub mod prove;
+// TODO(flaub): disable for now, will fix later
+// #[cfg(feature = "prove")]
+// pub mod prove;
 pub mod verify;
 mod zirgen;

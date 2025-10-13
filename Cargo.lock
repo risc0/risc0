@@ -7205,8 +7205,8 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
@@ -7243,8 +7243,8 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
@@ -7308,7 +7308,7 @@ dependencies = [
  "cc",
  "glob",
  "risc0-build-kernel",
- "risc0-sys",
+ "risc0-sppark",
 ]
 
 [[package]]
@@ -7321,8 +7321,8 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
@@ -7373,7 +7373,7 @@ dependencies = [
  "anyhow",
  "blst",
  "risc0-build-kernel",
- "sppark",
+ "risc0-sppark",
  "test-log",
  "tracing",
 ]
@@ -7460,6 +7460,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-sppark"
+version = "0.1.14"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "risc0-sys"
 version = "1.5.1"
 dependencies = [
@@ -7467,7 +7474,7 @@ dependencies = [
  "blst",
  "cust",
  "risc0-build-kernel",
- "sppark",
+ "risc0-sppark",
 ]
 
 [[package]]
@@ -8520,16 +8527,6 @@ checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
 dependencies = [
  "base64ct",
  "der",
-]
-
-[[package]]
-name = "sppark"
-version = "0.1.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9c900139f3f6fdc8db217881a946adf00e935102fdd82b0e1bc19bacbffa311"
-dependencies = [
- "cc",
- "which 4.4.2",
 ]
 
 [[package]]
