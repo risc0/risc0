@@ -517,7 +517,7 @@ mod tests {
     const HELLO_WORLD2_DUMMY_TAR_XZ_SHA256: &str =
         "68ec421acb728e69d0b4497fe6a622f7347b116649039b48fd00c5a062ceddb4";
 
-    /// pre-calculated SHA256 sum of tar.xz with `hello-world2/tar_contents.bin`
+    /// pre-calculated SHA256 sum of tar.xz with `hello-world3/tar_contents.bin`
     const HELLO_WORLD3_DUMMY_TAR_XZ_SHA256: &str =
         "ed9efde9a314a9063a9b91d21e9eb1508defce0817ee6a81142d8bf6fb1f045e";
 
