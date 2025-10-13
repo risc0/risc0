@@ -86,6 +86,13 @@ http_archive(
     url = "https://github.com/martinus/unordered_dense/archive/73f3cbb237e84d483afafc743f1f14ec53e12314.zip",
 )
 
+git_repository(
+    name = "num",
+    build_file = "//bazel/third_party:num.BUILD",
+    commit = "0e6dbee134346d57aeb70fe2066cfc9eb2cd36ea",
+    remote = "https://github.com/983/Num.git",
+)
+
 #
 # Zirgen + MLIR
 #
@@ -150,20 +157,6 @@ http_archive(
 )
 
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
-
-git_repository(
-    name = "num",
-    build_file_content = """
-cc_library(
-    name = "num",
-    hdrs = ["num.hpp"],
-    include_prefix = "num",
-    visibility = ["//visibility:public"],
-)
-    """,
-    commit = "0e6dbee134346d57aeb70fe2066cfc9eb2cd36ea",
-    remote = "https://github.com/983/Num.git",
-)
 
 rules_pkg_dependencies()
 
