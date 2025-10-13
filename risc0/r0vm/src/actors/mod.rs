@@ -67,8 +67,8 @@ use crate::init_logging;
 use self::{
     actor::{Actor, ActorRef, Message},
     allocator::{
-        AllocatorActor, DEFAULT_RELEASE_CHANNEL, DeploymentVersion, HardwareResource,
-        RegisterManager, RegisterWorker, RemoteAllocatorActor,
+        AllocatorActor, DEFAULT_RELEASE_CHANNEL, DEFAULT_WORKER_TASK_LIMIT, DeploymentVersion,
+        HardwareResource, RegisterManager, RegisterWorker, RemoteAllocatorActor,
     },
     config::{
         AllocatorConfig, AppConfig, ExecutorConfig, ManagerConfig, ProverConfig, TelemetryConfig,
@@ -222,6 +222,7 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
             allocator: Some(AllocatorConfig {
                 listen: None,
                 default_release_channel: None,
+                worker_task_limit: None,
             }),
             executor: Some(ExecutorConfig {
                 allocator: None,
@@ -404,6 +405,9 @@ impl App {
                     .default_release_channel
                     .as_deref()
                     .unwrap_or(DEFAULT_RELEASE_CHANNEL),
+                cfg_allocator
+                    .worker_task_limit
+                    .unwrap_or(DEFAULT_WORKER_TASK_LIMIT),
             ));
             allocator = Some(alloc_ref.clone());
 
@@ -1174,9 +1178,9 @@ macro_rules! remote_actor_ask {
                 let msg: $msg_ty = msg.into();
                 let res = self
                     .rpc_sender
-                    .ask(&msg, move |response: $reply| {
+                    .ask(&msg, async move |response: $reply| {
                         if let Some(reply_sender) = reply_sender {
-                            reply_sender.send(response);
+                            reply_sender.send(response).await;
                         }
                     })
                     .await;

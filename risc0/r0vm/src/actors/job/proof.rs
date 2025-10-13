@@ -180,7 +180,7 @@ impl Actor for JobActor {
                 status: self.status.clone(),
                 elapsed_time,
             };
-            reply_sender.send(JobStatusReply::Proof(info));
+            reply_sender.send(JobStatusReply::Proof(info)).await;
         }
 
         self.tracer.end();
@@ -652,6 +652,7 @@ impl Message<JobStatusRequest> for JobActor {
             status: self.status.clone(),
             elapsed_time: self.start_time.elapsed(),
         })))
+        .await
     }
 }
 
