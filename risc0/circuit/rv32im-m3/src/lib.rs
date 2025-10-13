@@ -15,7 +15,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(feature = "prove")]
-pub mod prove;
+// #[cfg(feature = "prove")]
+// pub mod prove;
 pub mod verify;
 mod zirgen;
