@@ -5,6 +5,10 @@
 use std::{env, path::PathBuf};
 
 fn main() {
+    if env::var("CARGO_FEATURE_CUDA").is_err() {
+        return;
+    }
+
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
 
     let mut build = cc::Build::new();
@@ -14,7 +18,8 @@ fn main() {
     build
         .cuda(true)
         .cudart("static")
-        .flags(["-Xcompiler", "-Wno-unused-function"])
+        // .flag("-Xcompiler")
+        // .flag("-Wno-unused-function")
         .file("util/all_gpus.cpp")
         .include(".")
         .compile("sppark");

@@ -19,5 +19,5 @@ risc0-sppark = { workspace = true, optional = true }
 
 [features]
 default = []
-cuda = ["dep:blst", "dep:cust", "dep:risc0-sppark"]
+cuda = ["dep:blst", "dep:cust", "risc0-sppark/cuda"]
 metal = []

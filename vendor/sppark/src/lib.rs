@@ -170,6 +170,3 @@ impl<U> Slice<U> {
         }
     }
 }
-
-#[cfg(feature = "build")]
-pub mod build;

@@ -70,7 +70,7 @@ fn main() {
         .warnings(false)
         .flag("-std=c++17")
         .include("cxx")
-        .include("vendor")
+        .include("vendor/unordered_dense/include")
         .files(glob_paths("cxx/core/*.cpp"))
         .files(glob_paths("cxx/hal/cpu/*.cpp"))
         .files(glob_paths("cxx/prove/*.cpp"))

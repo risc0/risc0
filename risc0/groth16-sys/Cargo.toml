@@ -24,7 +24,7 @@ tracing = "0.1.41"
 
 [features]
 default = []
-cuda = ["dep:blst", "dep:risc0-sppark"]
+cuda = ["dep:blst", "risc0-sppark/cuda"]
 metal = []
 # Build code used for preprocessing of prover parameters.
 # Used in the xtask setup-groth16 command for the development of this crate.
