@@ -76,17 +76,18 @@ new_local_repository(
     path = "../../../../vendor/sppark",
 )
 
+# https://github.com/martinus/unordered_dense
 new_local_repository(
     name = "unordered_dense",
     build_file = "//bazel/third_party:unordered_dense.BUILD",
-    path = "../vendor/unordered_dense",
+    path = "../vendor/ankerl",
 )
 
-git_repository(
+# https://github.com/983/Num
+new_local_repository(
     name = "num",
     build_file = "//bazel/third_party:num.BUILD",
-    commit = "0e6dbee134346d57aeb70fe2066cfc9eb2cd36ea",
-    remote = "https://github.com/983/Num.git",
+    path = "../vendor/num",
 )
 
 #
