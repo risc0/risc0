@@ -79,7 +79,7 @@ fn build_cuda_kernels() {
         .flag("-O3")
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
-        .include(env::var("DEP_SPPARK_ROOT").unwrap());
+        .include(env::var("DEP_RISC0_SPPARK_ROOT").unwrap());
     if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {
         build.flag("-arch=native");
     }

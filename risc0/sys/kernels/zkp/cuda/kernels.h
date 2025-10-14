@@ -15,10 +15,9 @@
 
 #pragma once
 
-#include "fp.h"
-#include "fpext.h"
-
 struct ShaDigest;
+struct Fp;
+struct FpExt;
 
 __global__ void eltwise_add_fp(Fp* out, const Fp* x, const Fp* y, const uint32_t count);
 
@@ -42,13 +41,13 @@ __global__ void eltwise_zeroize_fp(Fp* elems, uint32_t count);
 
 __global__ void eltwise_zeroize_fpext(FpExt* elems, uint32_t count);
 
-__global__ void fri_fold(Fp* out, const Fp* in, const FpExt* mix, const uint32_t count);
+__global__ void fri_fold(Fp* out, const Fp* in, const FpExt mix, const uint32_t count);
 
 __global__ void mix_poly_coeffs(FpExt* out,
                                 const Fp* in,
                                 const uint32_t* combos,
-                                const FpExt* mixStart,
-                                const FpExt* mix,
+                                const FpExt mixStart,
+                                const FpExt mix,
                                 const uint32_t inputSize,
                                 const uint32_t count);
 

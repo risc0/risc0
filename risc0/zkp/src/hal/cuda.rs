@@ -720,28 +720,13 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         input_size: usize,
         count: usize,
     ) {
-        let mix_start = self.copy_from_extelem("mix_start", &[*mix_start]);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
-
-        unsafe extern "C" {
-            fn risc0_zkp_cuda_mix_poly_coeffs(
-                output: DevicePointer<u8>,
-                input: DevicePointer<u8>,
-                combos: DevicePointer<u8>,
-                mix_start: DevicePointer<u8>,
-                mix: DevicePointer<u8>,
-                input_size: u32,
-                count: u32,
-            ) -> *const std::os::raw::c_char;
-        }
-
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_mix_poly_coeffs(
                 output.as_device_ptr(),
                 input.as_device_ptr(),
                 combos.as_device_ptr(),
-                mix_start.as_device_ptr(),
-                mix.as_device_ptr(),
+                mix_start as *const _ as *const u32,
+                mix as *const _ as *const u32,
                 input_size as u32,
                 count as u32,
             )
@@ -941,22 +926,12 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         let count = output.size() / Self::ExtElem::EXT_SIZE;
         assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), output.size() * FRI_FOLD);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
-
-        unsafe extern "C" {
-            fn risc0_zkp_cuda_fri_fold(
-                output: DevicePointer<u8>,
-                input: DevicePointer<u8>,
-                mix: DevicePointer<u8>,
-                count: u32,
-            ) -> *const std::os::raw::c_char;
-        }
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_fri_fold(
                 output.as_device_ptr(),
                 input.as_device_ptr(),
-                mix.as_device_ptr(),
+                mix as *const _ as *const u32,
                 count as u32,
             )
         })

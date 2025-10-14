@@ -44,7 +44,7 @@ fn build_cuda_kernels() {
         .flag("-DFEATURE_BABY_BEAR")
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
-        .include(env::var("DEP_SPPARK_ROOT").unwrap())
+        .include(env::var("DEP_RISC0_SPPARK_ROOT").unwrap())
         .compile("risc0_recursion_cuda");
 }
 

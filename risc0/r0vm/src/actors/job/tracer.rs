@@ -17,16 +17,17 @@ use std::{borrow::Cow, collections::HashMap};
 
 use opentelemetry::{
     KeyValue,
-    global::{BoxedSpan, BoxedTracer},
-    trace::{Span, TraceContextExt as _, Tracer},
+    global::BoxedTracer,
+    trace::{TraceContextExt as _, Tracer},
 };
+use serde::{Deserialize, Serialize};
 
 use crate::actors::protocol::{TaskHeader, TaskId};
 
 pub struct JobTracer {
     ctx: opentelemetry::Context,
     tracer: BoxedTracer,
-    pending_spans: HashMap<TaskId, BoxedSpan>,
+    pending_spans: HashMap<TaskId, opentelemetry::Context>,
 }
 
 impl JobTracer {
@@ -48,8 +49,11 @@ impl JobTracer {
     where
         T: Into<Cow<'static, str>>,
     {
-        self.pending_spans
-            .insert(task_id, self.tracer.start_with_context(name, &self.ctx));
+        self.pending_spans.insert(
+            task_id,
+            self.ctx
+                .with_span(self.tracer.start_with_context(name, &self.ctx)),
+        );
     }
 
     pub fn span_event<T>(&mut self, header: TaskHeader, name: T)
@@ -59,6 +63,7 @@ impl JobTracer {
         self.pending_spans
             .get_mut(&header.global_id.task_id)
             .expect("span_start should be called before span_event for given task")
+            .span()
             .add_event(name, vec![]);
     }
 
@@ -67,10 +72,37 @@ impl JobTracer {
             .remove(&task_id)
             .as_mut()
             .expect("span_start should be called before span_start for given task")
+            .span()
             .end();
     }
 
     pub fn end(&mut self) {
         self.ctx.span().end();
+    }
+
+    pub fn saved_task_context(&self, task_id: TaskId) -> SavedContext {
+        let ctx = self
+            .pending_spans
+            .get(&task_id)
+            .expect("span_start should be called before to_task_saved_context for given task");
+
+        let mut saved = SavedContext {
+            context: Default::default(),
+        };
+        opentelemetry::global::get_text_map_propagator(|prop| {
+            prop.inject_context(ctx, &mut saved.context)
+        });
+        saved
+    }
+}
+
+#[derive(Clone, Default, Serialize, Deserialize)]
+pub struct SavedContext {
+    context: HashMap<String, String>,
+}
+
+impl SavedContext {
+    pub fn to_context(&self) -> opentelemetry::Context {
+        opentelemetry::global::get_text_map_propagator(|prop| prop.extract(&self.context))
     }
 }

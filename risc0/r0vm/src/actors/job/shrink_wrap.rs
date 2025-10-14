@@ -26,7 +26,7 @@ use crate::actors::{
     protocol::{
         GlobalId, JobId, JobStatus, JobStatusReply, JobStatusRequest, ShrinkWrapRequest,
         ShrinkWrapResult, ShrinkWrapTask, Task, TaskError, TaskHeader,
-        factory::{DropJob, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
+        factory::{DropJob, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdateMsg},
     },
 };
 
@@ -58,7 +58,7 @@ impl Actor for JobActor {
                 status: self.status.clone(),
                 elapsed_time,
             };
-            reply_sender.send(JobStatusReply::ShrinkWrap(info));
+            reply_sender.send(JobStatusReply::ShrinkWrap(info)).await;
         }
 
         self.tracer.end();
@@ -95,19 +95,22 @@ impl JobActor {
 
     async fn submit_task(&mut self, task: Task) -> Result<()> {
         let task_id = self.next_task_id();
+        let header = TaskHeader {
+            global_id: GlobalId {
+                job_id: self.job_id,
+                task_id,
+            },
+            task_kind: task.kind(),
+        };
+        self.task_start(header.clone());
         let msg = SubmitTaskMsg {
             job: self
                 .parent_ref
                 .upgrade()
                 .ok_or_else(|| Error::new("parent job not running"))?,
-            header: TaskHeader {
-                global_id: GlobalId {
-                    job_id: self.job_id,
-                    task_id,
-                },
-                task_kind: task.kind(),
-            },
+            header,
             task,
+            tracing: self.tracer.saved_task_context(task_id),
         };
         self.factory.tell(msg).await?;
 
@@ -184,12 +187,9 @@ impl Message<TaskUpdateMsg> for JobActor {
 
     async fn handle(
         &mut self,
-        msg: TaskUpdateMsg,
+        _msg: TaskUpdateMsg,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        if matches!(msg.payload, TaskUpdate::Start) {
-            self.task_start(msg.header);
-        }
     }
 }
 
@@ -228,5 +228,6 @@ impl Message<JobStatusRequest> for JobActor {
             status: self.status.clone(),
             elapsed_time: self.start_time.elapsed(),
         })))
+        .await
     }
 }
