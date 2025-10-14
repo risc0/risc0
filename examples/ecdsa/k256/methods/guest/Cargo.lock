@@ -1162,7 +1162,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1176,7 +1176,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1189,7 +1189,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bit-vec",
