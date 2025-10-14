@@ -1111,7 +1111,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blake2",
