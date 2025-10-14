@@ -57,12 +57,12 @@ risc0-bigint2 = { version = "1.4.11", default-features = false, path = "risc0/bi
 risc0-binfmt = { version = "3.0.3", default-features = false, path = "risc0/binfmt" }
 risc0-build = { version = "4.0.0", default-features = false, path = "risc0/build" }
 risc0-build-kernel = { version = "2.0.2", default-features = false, path = "risc0/build_kernel" }
-risc0-circuit-keccak = { version = "4.0.3", default-features = false, path = "risc0/circuit/keccak" }
-risc0-circuit-keccak-sys = { version = "4.0.2", default-features = false, path = "risc0/circuit/keccak-sys" }
-risc0-circuit-recursion = { version = "4.0.3", default-features = false, path = "risc0/circuit/recursion" }
-risc0-circuit-recursion-sys = { version = "4.0.2", default-features = false, path = "risc0/circuit/recursion-sys" }
-risc0-circuit-rv32im = { version = "4.0.3", default-features = false, path = "risc0/circuit/rv32im" }
-risc0-circuit-rv32im-sys = { version = "4.0.2", default-features = false, path = "risc0/circuit/rv32im-sys" }
+risc0-circuit-keccak = { version = "5.0.0", default-features = false, path = "risc0/circuit/keccak" }
+risc0-circuit-keccak-sys = { version = "5.0.0", default-features = false, path = "risc0/circuit/keccak-sys" }
+risc0-circuit-recursion = { version = "5.0.0", default-features = false, path = "risc0/circuit/recursion" }
+risc0-circuit-recursion-sys = { version = "5.0.0", default-features = false, path = "risc0/circuit/recursion-sys" }
+risc0-circuit-rv32im = { version = "5.0.0", default-features = false, path = "risc0/circuit/rv32im" }
+risc0-circuit-rv32im-sys = { version = "5.0.0", default-features = false, path = "risc0/circuit/rv32im-sys" }
 risc0-circuit-rv32im-m3 = { version = "0.0.0", default-features = false, path = "risc0/circuit/rv32im-m3" }
 risc0-circuit-rv32im-m3-sys = { version = "0.0.0", default-features = false, path = "risc0/circuit/rv32im-m3-sys" }
 risc0-core = { version = "3.0.1", default-features = false, path = "risc0/core" }
@@ -91,9 +91,6 @@ codegen-units = 256
 debug = 1
 lto = "off"
 incremental = true
-
-[profile.release]
-lto = true
 
 [workspace.lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = [
