@@ -1659,7 +1659,7 @@ checksum = "7a66a03ae7c801facd77a29370b4faec201768915ac14a721ba36f20bc9c209b"
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1746,7 +1746,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "3.0.1"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "rand_core 0.9.3",
@@ -1754,7 +1754,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1834,7 +1834,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "3.0.0"
+version = "5.0.0"
 dependencies = [
  "bincode",
  "borsh",

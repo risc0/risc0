@@ -1045,7 +1045,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1109,7 +1109,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "3.0.1"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "rand_core 0.9.3",
@@ -1117,7 +1117,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
