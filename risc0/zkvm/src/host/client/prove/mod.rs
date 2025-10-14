@@ -232,6 +232,7 @@ pub fn default_executor() -> Rc<dyn Executor> {
     let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
+            "actor" => Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap()),
             "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap())),
             #[cfg(feature = "prove")]
             "local" => Rc::new(self::local::LocalProver::new("local")),
@@ -244,7 +245,7 @@ pub fn default_executor() -> Rc<dyn Executor> {
         return Rc::new(self::local::LocalProver::new("local"));
     }
 
-    Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
+    Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap())
 }
 
 /// Return a local [Executor].
