@@ -583,6 +583,7 @@ struct Emulator {
   void do_ECALL_BIG_INT() {
     std::map<uint32_t, uint32_t> polyWitness;
     size_t count = witgenBigInt(polyWitness, [&](uint32_t addr) { return peekMemory(addr); });
+    LOG(0, "BIGINT ecall with count = " << count);
     // TODO: Based on count + polyWitness paging, decide if we need to abort
     auto& wit = trace.makeEcallBigInt();
     wit.cycle = curCycle;
