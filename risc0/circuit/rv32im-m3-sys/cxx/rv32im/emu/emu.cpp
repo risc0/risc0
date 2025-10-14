@@ -30,7 +30,7 @@ namespace risc0::rv32im {
 namespace {
 
 #define DLOG(...) LOG(2, __VA_ARGS__)
-//#define DLOG(...) /**/
+// #define DLOG(...) /**/
 
 struct Emulator {
   Emulator(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount)
@@ -38,8 +38,7 @@ struct Emulator {
       , memory(trace, image)
       , io(io)
       , pages(MEMORY_SIZE_PAGES)
-      , regPage(memory.pageIn(MACHINE_REGS_WORD >> 8))
-  {
+      , regPage(memory.pageIn(MACHINE_REGS_WORD >> 8)) {
     pages[MACHINE_REGS_WORD >> 8] = regPage;
   }
 
@@ -60,7 +59,7 @@ struct Emulator {
   }
 
   inline uint32_t readMemory(MemReadWitness& record, uint32_t wordAddr) {
-    PageDetails* page = pages[wordAddr>> 8];
+    PageDetails* page = pages[wordAddr >> 8];
     if (!page) {
       page = memory.pageIn(wordAddr >> 8);
       pages[wordAddr >> 8] = page;
@@ -107,64 +106,76 @@ struct Emulator {
     record.value = value;
   }
 
-#define UNIT_COMMON(name) \
-    auto& unit = trace.makeUnit ## name(); \
-    unit.count = 1; \
-    unit.opts = opt; \
-    unit.a = a; \
-    unit.b = b; \
-    [[maybe_unused]] constexpr Option optInner = Option(opt).popRet<UnitKind>()
+#define UNIT_COMMON(name)                                                                          \
+  auto& unit = trace.makeUnit##name();                                                             \
+  unit.count = 1;                                                                                  \
+  unit.opts = opt;                                                                                 \
+  unit.a = a;                                                                                      \
+  unit.b = b;                                                                                      \
+  [[maybe_unused]] constexpr Option optInner = Option(opt).popRet<UnitKind>()
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitAddSub(uint32_t a, uint32_t b) {
+  template <uint32_t opt> inline UnitBaseWitness* unitAddSub(uint32_t a, uint32_t b) {
     UNIT_COMMON(AddSub);
-    switch(optInner.peek<AsKind>()) {
-      case AS_ADD: unit.out0 = a + b; break;
-      case AS_SUB: unit.out0 = a - b; break;
+    switch (optInner.peek<AsKind>()) {
+    case AS_ADD:
+      unit.out0 = a + b;
+      break;
+    case AS_SUB:
+      unit.out0 = a - b;
+      break;
     }
     unit.out1 = 0;
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitBit(uint32_t a, uint32_t b) {
+  template <uint32_t opt> inline UnitBaseWitness* unitBit(uint32_t a, uint32_t b) {
     UNIT_COMMON(Bit);
-    switch(optInner.peek<BitKind>()) {
-      case BIT_XOR: unit.out0 = a ^ b; break;
-      case BIT_OR: unit.out0 = a | b; break;
-      case BIT_AND: unit.out0 = a & b; break;
+    switch (optInner.peek<BitKind>()) {
+    case BIT_XOR:
+      unit.out0 = a ^ b;
+      break;
+    case BIT_OR:
+      unit.out0 = a | b;
+      break;
+    case BIT_AND:
+      unit.out0 = a & b;
+      break;
     }
     unit.out1 = 0;
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitLt(uint32_t a, uint32_t b) {
+  template <uint32_t opt> inline UnitBaseWitness* unitLt(uint32_t a, uint32_t b) {
     UNIT_COMMON(Lt);
     unit.out0 = int32_t(a) < int32_t(b);
     unit.out1 = a < b;
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitMul(uint32_t a, uint32_t b) {
+  template <uint32_t opt> inline UnitBaseWitness* unitMul(uint32_t a, uint32_t b) {
     UNIT_COMMON(Mul);
     uint64_t out;
-    switch(optInner.peek<MulKind>()) {
-      case MUL_SS: out = int64_t(int32_t(a)) * int64_t(int32_t(b)); break;
-      case MUL_SU: out = int64_t(int32_t(a)) * uint64_t(b); break;
-      case MUL_UU: out = uint64_t(a) * uint64_t(b); break;
+    switch (optInner.peek<MulKind>()) {
+    case MUL_SS:
+      out = int64_t(int32_t(a)) * int64_t(int32_t(b));
+      break;
+    case MUL_SU:
+      out = int64_t(int32_t(a)) * uint64_t(b);
+      break;
+    case MUL_UU:
+      out = uint64_t(a) * uint64_t(b);
+      break;
     }
-    unit.out0 = uint32_t(out); \
-    unit.out1 = out >> 32; \
+    unit.out0 = uint32_t(out);
+    unit.out1 = out >> 32;
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitDiv(uint32_t a, uint32_t b) {
+  template <uint32_t opt> inline UnitBaseWitness* unitDiv(uint32_t a, uint32_t b) {
     UNIT_COMMON(Div);
     if (optInner.peek<DivKind>() == DIV_S) {
-      // Intel processors actually fault if you do a signed division on MIN_INT by 1/-1
+      // Intel processors actually fault if you do a signed division on MIN_INT
+      // by 1/-1
       if (a == 0x80000000 && std::abs(int32_t(b)) == 1) {
         unit.out0 = 0x80000000;
         unit.out1 = 0;
@@ -192,8 +203,7 @@ struct Emulator {
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitShift(uint32_t a, uint32_t b) {
+  template <uint32_t opt> inline UnitBaseWitness* unitShift(uint32_t a, uint32_t b) {
     UNIT_COMMON(Shift);
     uint32_t po2 = (1 << (b & 0x1f));
     if (optInner.peek<ShiftKind>() == SHIFT_LL) {
@@ -201,24 +211,33 @@ struct Emulator {
       unit.out0 = (a << (b & 0x1f));
     } else {
       bool neg = optInner.peek<ShiftKind>() == SHIFT_RA && (a & 0x80000000) != 0;
-      if (neg) { a = ~a; }
+      if (neg) {
+        a = ~a;
+      }
       unitDiv<EncodeOptions(UNIT_DIV, DIV_U).val>(a, po2);
       unit.out0 = a >> (b & 0x1f);
-      if (neg) { unit.out0 = ~unit.out0; }
+      if (neg) {
+        unit.out0 = ~unit.out0;
+      }
     }
     unit.out1 = 0;
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* doUnit(uint32_t a, uint32_t b) {
-    switch(Option(opt).peek<UnitKind>()) {
-      case UNIT_ADDSUB: return unitAddSub<opt>(a, b);
-      case UNIT_BIT: return unitBit<opt>(a, b);
-      case UNIT_LT: return unitLt<opt>(a, b);
-      case UNIT_MUL: return unitMul<opt>(a, b);
-      case UNIT_DIV: return unitDiv<opt>(a, b);
-      case UNIT_SHIFT: return unitShift<opt>(a, b);
+  template <uint32_t opt> inline UnitBaseWitness* doUnit(uint32_t a, uint32_t b) {
+    switch (Option(opt).peek<UnitKind>()) {
+    case UNIT_ADDSUB:
+      return unitAddSub<opt>(a, b);
+    case UNIT_BIT:
+      return unitBit<opt>(a, b);
+    case UNIT_LT:
+      return unitLt<opt>(a, b);
+    case UNIT_MUL:
+      return unitMul<opt>(a, b);
+    case UNIT_DIV:
+      return unitDiv<opt>(a, b);
+    case UNIT_SHIFT:
+      return unitShift<opt>(a, b);
     }
   }
 
@@ -244,8 +263,7 @@ struct Emulator {
     throw std::runtime_error("Trap: " + reason);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_REG() {
+  template <uint32_t opt> inline void do_INST_REG() {
     constexpr Option opts(opt);
     constexpr Option opts2 = opts.popRet<InstKind>();
     auto ok = opts2.peek<OutKind>();
@@ -266,8 +284,7 @@ struct Emulator {
     DLOG("  rdVal = " << rdVal);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_IMM() {
+  template <uint32_t opt> inline void do_INST_IMM() {
     constexpr Option opts(opt);
     constexpr Option opts2 = opts.popRet<InstKind>();
     auto ok = opts2.peek<OutKind>();
@@ -289,8 +306,7 @@ struct Emulator {
     DLOG("  rdVal = " << rdVal);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_LOAD() {
+  template <uint32_t opt> inline void do_INST_LOAD() {
     auto& wit = trace.makeInstLoad();
     wit.cycle = curCycle;
     wit.mm = mm;
@@ -300,29 +316,35 @@ struct Emulator {
     wit.imm = decoded.immI();
     uint32_t addr = rs1Val + wit.imm;
     uint32_t shift = 8 * (addr % 4);
-    uint32_t in = readMemory(wit.mem, addr/4);
+    uint32_t in = readMemory(wit.mem, addr / 4);
     wit.options = opt;
     constexpr Option optInner = Option(opt).popRet<InstKind>();
     uint32_t out;
-    switch(optInner.peek<LoadKind>()) {
-      case LOAD_LB:
-        out = uint32_t(int32_t(int8_t((in >> shift) & 0xff)));
-        break;
-      case LOAD_LH:
-        if (shift % 16 != 0) { trap("Alignment error"); }
-        out = uint32_t(int32_t(int16_t((in >> shift) & 0xfffff)));
-        break;
-      case LOAD_LW:
-        if (shift != 0) { trap("Alignment error"); }
-        out = in;
-        break;
-      case LOAD_LBU:
-        out = (in >> shift) & 0xff;
-        break;
-      case LOAD_LHU:
-        if (shift % 16 != 0) { trap("Alignment error"); }
-        out = (in >> shift) & 0xffff;
-        break;
+    switch (optInner.peek<LoadKind>()) {
+    case LOAD_LB:
+      out = uint32_t(int32_t(int8_t((in >> shift) & 0xff)));
+      break;
+    case LOAD_LH:
+      if (shift % 16 != 0) {
+        trap("Alignment error");
+      }
+      out = uint32_t(int32_t(int16_t((in >> shift) & 0xfffff)));
+      break;
+    case LOAD_LW:
+      if (shift != 0) {
+        trap("Alignment error");
+      }
+      out = in;
+      break;
+    case LOAD_LBU:
+      out = (in >> shift) & 0xff;
+      break;
+    case LOAD_LHU:
+      if (shift % 16 != 0) {
+        trap("Alignment error");
+      }
+      out = (in >> shift) & 0xffff;
+      break;
     }
     writeReg(wit.rd, decoded.rd, out);
     DLOG("  RS1 = " << decoded.rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
@@ -330,8 +352,7 @@ struct Emulator {
     DLOG("  RD = " << decoded.rd << ", value = " << std::hex << wit.rd.value << std::dec);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_STORE() {
+  template <uint32_t opt> inline void do_INST_STORE() {
     auto& wit = trace.makeInstStore();
     wit.cycle = curCycle;
     wit.mm = mm;
@@ -344,30 +365,33 @@ struct Emulator {
     constexpr Option optInner = Option(opt).popRet<InstKind>();
     uint32_t addr = rs1Val + wit.imm;
     uint32_t shift = 8 * (addr % 4);
-    uint32_t in = peekMemory(addr/4);
+    uint32_t in = peekMemory(addr / 4);
     uint32_t out;
-    switch(optInner.peek<StoreKind>()) {
-      case STORE_SB:
-        out = (in & ~(0xff << shift)) | ((data & 0xff)  << shift);
-        break;
-      case STORE_SH:
-        if (shift % 16 != 0) { trap("Alignment error"); }
-        out = (in & ~(0xffff << shift)) | ((data & 0xffff)  << shift);
-        break;
-      case STORE_SW:
-        if (shift != 0) { trap("Alignment error"); }
-        out = data;
-        break;
+    switch (optInner.peek<StoreKind>()) {
+    case STORE_SB:
+      out = (in & ~(0xff << shift)) | ((data & 0xff) << shift);
+      break;
+    case STORE_SH:
+      if (shift % 16 != 0) {
+        trap("Alignment error");
+      }
+      out = (in & ~(0xffff << shift)) | ((data & 0xffff) << shift);
+      break;
+    case STORE_SW:
+      if (shift != 0) {
+        trap("Alignment error");
+      }
+      out = data;
+      break;
     }
-    writeMemory(wit.mem, addr/4, out);
+    writeMemory(wit.mem, addr / 4, out);
     DLOG("  RS1 = " << decoded.rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
     DLOG("  RS2 = " << decoded.rs2 << ", value = " << std::hex << wit.rs2.value << std::dec);
     DLOG("  IMM = " << std::hex << wit.imm << std::dec);
     DLOG("  MEM addr = " << std::hex << addr << ", value = " << out << std::dec);
-}
+  }
 
-  template<uint32_t opt>
-  inline void do_INST_BRANCH() {
+  template <uint32_t opt> inline void do_INST_BRANCH() {
     constexpr Option opts(opt);
     constexpr Option opts2 = opts.popRet<InstKind>();
     auto br = opts2.peek<BrKind>();
@@ -389,13 +413,14 @@ struct Emulator {
     uint32_t ret = (ok == OUT_0 ? unit->out0 : unit->out1);
     bool doBr = (br == BR_Z ? ret == 0 : ret != 0);
     wit.didBranch = doBr;
-    if (doBr) { newPc = pc + wit.imm; }
+    if (doBr) {
+      newPc = pc + wit.imm;
+    }
     DLOG("  rs1Val = " << rs1Val << ", rs2Val = " << rs2Val);
     DLOG("  PC = " << std::hex << pc << std::dec);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_JAL() {
+  template <uint32_t opt> inline void do_INST_JAL() {
     auto& wit = trace.makeInstJal();
     wit.cycle = curCycle;
     wit.mm = mm;
@@ -409,13 +434,12 @@ struct Emulator {
     DLOG("  PC = " << std::hex << pc << std::dec);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_JALR() {
+  template <uint32_t opt> inline void do_INST_JALR() {
     auto& wit = trace.makeInstJalr();
     wit.cycle = curCycle;
     wit.mm = mm;
     wit.fetch = *curFetch;
-    uint32_t rs1Val= readReg(wit.rs1, decoded.rs1);
+    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
     wit.rs2 = decoded.rs2;
     writeReg(wit.rd, decoded.rd, newPc);
     wit.imm = decoded.immI();
@@ -425,8 +449,7 @@ struct Emulator {
     DLOG("  PC = " << std::hex << pc << std::dec);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_LUI() {
+  template <uint32_t opt> inline void do_INST_LUI() {
     auto& wit = trace.makeInstLui();
     wit.cycle = curCycle;
     wit.mm = mm;
@@ -436,8 +459,7 @@ struct Emulator {
     writeReg(wit.rd, decoded.rd, decoded.immU());
   }
 
-  template<uint32_t opt>
-  inline void do_INST_AUIPC() {
+  template <uint32_t opt> inline void do_INST_AUIPC() {
     auto& wit = trace.makeInstAuipc();
     wit.cycle = curCycle;
     wit.mm = mm;
@@ -448,8 +470,7 @@ struct Emulator {
     wit.imm = decoded.immU();
   }
 
-  template<uint32_t opt>
-  inline void do_INST_ECALL() {
+  template <uint32_t opt> inline void do_INST_ECALL() {
     if (!mm) {
       // Save PC + jump to dispatch address
       auto& wit = trace.makeInstEcall();
@@ -461,21 +482,21 @@ struct Emulator {
       return;
     }
     uint32_t which = peekMemory(MACHINE_REGS_WORD + REG_A7);
-    switch(which) {
-      case HOST_ECALL_TERMINATE:
-        do_ECALL_TERMINATE();
-        break;
-      case HOST_ECALL_READ:
-        do_ECALL_READ();
-        break;
-      case HOST_ECALL_WRITE:
-        do_ECALL_WRITE();
-        break;
-      case HOST_ECALL_BIGINT:
-        do_ECALL_BIG_INT();
-        break;
-      default:
-        trap("Invalid ECALL in machine mode");
+    switch (which) {
+    case HOST_ECALL_TERMINATE:
+      do_ECALL_TERMINATE();
+      break;
+    case HOST_ECALL_READ:
+      do_ECALL_READ();
+      break;
+    case HOST_ECALL_WRITE:
+      do_ECALL_WRITE();
+      break;
+    case HOST_ECALL_BIGINT:
+      do_ECALL_BIG_INT();
+      break;
+    default:
+      trap("Invalid ECALL in machine mode");
     }
   }
 
@@ -514,8 +535,8 @@ struct Emulator {
         bWit.size = ret;
         bWit.lowBits = buf % 4;
         uint32_t data = peekMemory(buf / 4);
-        data &= ~(0xff << (buf % 4)*8);
-        data |= hostData[offset++] << (buf%4)*8;
+        data &= ~(0xff << (buf % 4) * 8);
+        data |= hostData[offset++] << (buf % 4) * 8;
         writeMemory(bWit.io, buf / 4, data);
         ret--;
         buf++;
@@ -525,12 +546,12 @@ struct Emulator {
         bWit.cycle = curCycle;
         bWit.size = ret;
         uint32_t data = 0;
-        for (size_t i=0; i < 4; i++) {
-          data |= hostData[offset++] << (i*8);
+        for (size_t i = 0; i < 4; i++) {
+          data |= hostData[offset++] << (i * 8);
         }
         writeMemory(bWit.io, buf / 4, data);
-        ret-=4;
-        buf+=4;
+        ret -= 4;
+        buf += 4;
         curCycle++;
       }
     }
@@ -562,6 +583,7 @@ struct Emulator {
   void do_ECALL_BIG_INT() {
     std::map<uint32_t, uint32_t> polyWitness;
     size_t count = witgenBigInt(polyWitness, [&](uint32_t addr) { return peekMemory(addr); });
+    LOG(0, "BIGINT ecall with count = " << count);
     // TODO: Based on count + polyWitness paging, decide if we need to abort
     auto& wit = trace.makeEcallBigInt();
     wit.cycle = curCycle;
@@ -578,7 +600,8 @@ struct Emulator {
       biWit.mm = biMm;
       uint32_t inst = readMemory(biWit.inst, biPcWord++);
       auto decoded = BigIntInstruction::decode(inst);
-      uint32_t base = readMemory(biWit.baseReg, (biMm ? MACHINE_REGS_WORD : USER_REGS_WORD) + decoded.reg);
+      uint32_t base =
+          readMemory(biWit.baseReg, (biMm ? MACHINE_REGS_WORD : USER_REGS_WORD) + decoded.reg);
       uint32_t addr = base / 4 + decoded.offset * 4;
       switch (decoded.memOp) {
       case 0: { // read
@@ -592,7 +615,7 @@ struct Emulator {
       case 1: { // write
         for (size_t i = 0; i < 4; i++) {
           MemWriteWitness mw;
-          writeMemory(mw, addr + i, polyWitness[addr+i]);
+          writeMemory(mw, addr + i, polyWitness[addr + i]);
           biWit.data[i] = mw.value;
           biWit.prevCycle[i] = mw.prevCycle;
           biWit.prevValue[i] = mw.prevValue;
@@ -613,14 +636,14 @@ struct Emulator {
 
   void fetchAndDecode(DecodeWitness* wit) {
     // We always read the memory address at pc/4
-    uint32_t l0 = readMemory(wit->load0, pc/4);
+    uint32_t l0 = readMemory(wit->load0, pc / 4);
     // If pc == 2 (mod 4), shift to lower value
     uint32_t inst = (pc % 4 == 2) ? l0 >> 16 : l0;
     bool compressed = false;
     // Check is low bits are 11 (normal) or anything else (compressed)
     if ((inst & 3) == 3) {
       // For normal instructions, always read next address
-      uint32_t l1 = readMemory(wit->load1, pc/4 + 1);
+      uint32_t l1 = readMemory(wit->load1, pc / 4 + 1);
       // if needed, add in second half to inst
       if (pc % 4 == 2) {
         inst |= l1 << 16;
@@ -641,10 +664,10 @@ struct Emulator {
 
   bool run(size_t rowCount) {
     doResume();
-    while(!done &&
-        trace.getRowCount() +
-        ceilDiv(curCycle, 24) + // How many rows we need for cycle table
-        memory.getPagingCost() < rowCount) {
+    while (!done && trace.getRowCount() +
+                            ceilDiv(curCycle, 24) + // How many rows we need for cycle table
+                            memory.getPagingCost() <
+                        rowCount) {
       DecodeWitness*& decodeWit = iCache[pc];
       if (!decodeWit) {
         decodeWit = &trace.makeDecode();
@@ -656,15 +679,18 @@ struct Emulator {
       newPc = curFetch->nextPc;
       decoded = DecodedInst(decodeWit->inst);
       Opcode opcode = getOpcode(decoded);
-      DLOG("cycle: " << curCycle << ", pc: " << std::hex << pc << std::dec << ", inst: " << getOpcodeName(opcode));
-      switch(opcode) {
-#define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...) \
-        case Opcode::name: do_ ## itype <EncodeOptions(itype, ## __VA_ARGS__).val>(); break;
+      DLOG("cycle: " << curCycle << ", pc: " << std::hex << pc << std::dec
+                     << ", inst: " << getOpcodeName(opcode));
+      switch (opcode) {
+#define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...)                                \
+  case Opcode::name:                                                                               \
+    do_##itype<EncodeOptions(itype, ##__VA_ARGS__).val>();                                         \
+    break;
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
-        case Opcode::INVALID:
-          trap("Invalid opcde");
-          break;
+      case Opcode::INVALID:
+        trap("Invalid opcde");
+        break;
       }
       curCycle++;
       pc = newPc;
@@ -696,9 +722,7 @@ struct Emulator {
     }
   }
 
-  void commit() {
-    memory.commit(pages);
-  }
+  void commit() { memory.commit(pages); }
 
   // The trace
   Trace& trace;
@@ -739,4 +763,4 @@ bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount) {
   return done;
 }
 
-} // namespace risc0;:rv32im
+} // namespace risc0::rv32im

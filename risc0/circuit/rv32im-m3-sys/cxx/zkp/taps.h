@@ -30,28 +30,32 @@ public:
   Tap() = default;
   Tap(uint32_t group, uint32_t column, uint32_t back) : group(group), column(column), back(back) {}
   bool operator<(const Tap& rhs) const {
-    if (group != rhs.group) { return group < rhs.group; }
-    if (column != rhs.column) { return column < rhs.column; }
+    if (group != rhs.group) {
+      return group < rhs.group;
+    }
+    if (column != rhs.column) {
+      return column < rhs.column;
+    }
     return back < rhs.back;
   }
   bool operator==(const Tap& rhs) const {
     return group == rhs.group && column == rhs.column && back == rhs.back;
   }
-  uint32_t group;  // Which group # this tap belongs to
+  uint32_t group;   // Which group # this tap belongs to
   uint32_t column;  // Which column is it
-  uint32_t back;  // How far back does it go
-  uint32_t comboId;  // Which 'combo' is this part of
+  uint32_t back;    // How far back does it go
+  uint32_t comboId; // Which 'combo' is this part of
 };
 
-template<typename T>
-class PtrRange {
+template <typename T> class PtrRange {
 public:
   PtrRange(const std::vector<T>& vec) : _begin(vec.data()), _end(vec.data() + vec.size()) {}
   PtrRange(const T* begin, const T* end) : _begin(begin), _end(end) {}
-  size_t size() const{ return _end - _begin; }
+  size_t size() const { return _end - _begin; }
   const T* begin() const { return _begin; }
   const T* end() const { return _end; }
   const T& operator[](size_t i) const { return *(_begin + i); }
+
 private:
   const T* _begin;
   const T* _end;
@@ -59,11 +63,13 @@ private:
 
 class Column {
   friend class TapManager;
+
 public:
   uint32_t group;
   uint32_t column;
   uint32_t comboId;
   PtrRange<Tap> getTaps() const { return PtrRange<Tap>(begin, end); }
+
 private:
   const Tap* begin;
   const Tap* end;
@@ -71,10 +77,12 @@ private:
 
 class Group {
   friend class TapManager;
+
 public:
   uint32_t group;
   PtrRange<Tap> getTaps() const { return PtrRange<Tap>(tapBegin, tapEnd); }
   PtrRange<Column> getColumns() const { return PtrRange<Column>(colBegin, colEnd); }
+
 private:
   const Tap* tapBegin;
   const Tap* tapEnd;
@@ -84,6 +92,7 @@ private:
 
 class Combo {
   friend class TapManager;
+
 public:
   uint32_t comboId;
   uint32_t offset;
@@ -118,4 +127,4 @@ private:
   std::vector<Combo> combos;
 };
 
-}  // namespace risc0
+} // namespace risc0

@@ -17,8 +17,7 @@
 
 #include "rv32im/base/base.h"
 
-template<typename C>
-struct DecodeArgument {
+template <typename C> struct DecodeArgument {
   Val<C> iCacheCycle;
   Val<C> pcLow;
   Val<C> pcHigh;

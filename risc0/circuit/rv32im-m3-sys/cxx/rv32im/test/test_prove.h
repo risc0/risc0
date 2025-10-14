@@ -19,7 +19,6 @@
 
 namespace risc0 {
 
-void runTestBinary(const std::string& elf, rv32im::HostIO& io, size_t po2=12);
+void runTestBinary(const std::string& elf, rv32im::HostIO& io, size_t po2 = 12);
 
 }
-

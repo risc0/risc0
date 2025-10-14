@@ -17,13 +17,12 @@
 
 #include "rv32im/base/base.h"
 
-template<typename C>
-struct CpuStateArgument {
+template <typename C> struct CpuStateArgument {
   FDEV CpuStateArgument() = default;
-  FDEV CpuStateArgument(Val<C> cycle, Val<C> pcLow, Val<C> pcHigh, Val<C> mm, Val<C> iCache) 
-    : cycle(cycle), pcLow(pcLow), pcHigh(pcHigh), mm(mm), iCache(iCache) {}
-  FDEV CpuStateArgument(Val<C> cycle, ValU32<C> pc, Val<C> mm, Val<C> iCache) 
-    : cycle(cycle), pcLow(pc.low), pcHigh(pc.high), mm(mm), iCache(iCache) {}
+  FDEV CpuStateArgument(Val<C> cycle, Val<C> pcLow, Val<C> pcHigh, Val<C> mm, Val<C> iCache)
+      : cycle(cycle), pcLow(pcLow), pcHigh(pcHigh), mm(mm), iCache(iCache) {}
+  FDEV CpuStateArgument(Val<C> cycle, ValU32<C> pc, Val<C> mm, Val<C> iCache)
+      : cycle(cycle), pcLow(pc.low), pcHigh(pc.high), mm(mm), iCache(iCache) {}
 
   Val<C> cycle;
   Val<C> pcLow;
@@ -32,14 +31,12 @@ struct CpuStateArgument {
   Val<C> iCache;
 };
 
-template<typename C>
-struct BigIntCpuStateArgument {
+template <typename C> struct BigIntCpuStateArgument {
   FDEV BigIntCpuStateArgument() = default;
-  FDEV BigIntCpuStateArgument(Val<C> cycle, Val<C> pcWord, Val<C> mm) 
-    : cycle(cycle), pcWord(pcWord), mm(mm) {}
+  FDEV BigIntCpuStateArgument(Val<C> cycle, Val<C> pcWord, Val<C> mm)
+      : cycle(cycle), pcWord(pcWord), mm(mm) {}
 
   Val<C> cycle;
   Val<C> pcWord;
   Val<C> mm;
 };
-

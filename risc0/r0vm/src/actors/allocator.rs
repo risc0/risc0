@@ -38,6 +38,7 @@ use std::collections::{BTreeMap, HashMap, HashSet, VecDeque, btree_map, hash_map
 use std::fmt;
 use std::net::SocketAddr;
 use std::net::{IpAddr, Ipv4Addr};
+use std::str::FromStr;
 use std::sync::Arc;
 
 use super::{
@@ -69,7 +70,7 @@ impl GpuUuid {
     }
 }
 
-impl std::str::FromStr for GpuUuid {
+impl FromStr for GpuUuid {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self> {
@@ -247,8 +248,8 @@ struct Worker {
     hardware: Vec<HardwareResource>,
     /// What tasks (tasks) are currently running on this worker.
     tasks: IndexMap<GlobalId, Task>,
-    /// From what version of the software is this worker
-    zkvm_version: semver::Version,
+    /// From what version of the software is this worker and what release channel
+    deployment_version: DeploymentVersion,
 }
 
 impl Worker {
@@ -256,14 +257,14 @@ impl Worker {
         remote_address: Option<SocketAddr>,
         machine: MachineId,
         hardware: Vec<HardwareResource>,
-        zkvm_version: semver::Version,
+        deployment_version: DeploymentVersion,
     ) -> Self {
         Self {
             remote_address,
             tasks: IndexMap::new(),
             machine,
             hardware,
-            zkvm_version,
+            deployment_version,
         }
     }
 
@@ -289,7 +290,7 @@ impl Worker {
             hardware,
             host,
             port,
-            version: self.zkvm_version.clone(),
+            version: self.deployment_version.clone(),
             tasks,
         }
     }
@@ -299,6 +300,22 @@ struct Manager {
     endpoint: Option<Url>,
     remote_address: Option<SocketAddr>,
     rpc_port: Option<u16>,
+}
+
+impl Manager {
+    fn to_get_status(&self, version: DeploymentVersion) -> GetStatusManager {
+        let host = self
+            .remote_address
+            .map(|a| a.ip().to_string())
+            .unwrap_or("localhost".into());
+
+        GetStatusManager {
+            version,
+            host,
+            endpoint: self.endpoint.clone(),
+            rpc_port: self.rpc_port,
+        }
+    }
 }
 
 struct Cpu {
@@ -322,27 +339,94 @@ enum HardwareFilter {
     Gpu,
 }
 
+#[derive(Default)]
+struct ManagerMap(HashMap<String, BTreeMap<semver::Version, Manager>>);
+
+impl ManagerMap {
+    fn get(&self, key: &DeploymentVersion) -> Option<&Manager> {
+        self.0.get(&key.release_channel)?.get(&key.zkvm_version)
+    }
+
+    fn entry(&mut self, key: DeploymentVersion) -> btree_map::Entry<'_, semver::Version, Manager> {
+        self.0
+            .entry(key.release_channel)
+            .or_default()
+            .entry(key.zkvm_version)
+    }
+
+    fn retain(&mut self, mut f: impl FnMut(&DeploymentVersion, &mut Manager) -> bool) {
+        for (release_channel, managers) in &mut self.0 {
+            managers.retain(|version, manager| {
+                let sw_version = DeploymentVersion {
+                    release_channel: release_channel.clone(),
+                    zkvm_version: version.clone(),
+                };
+                f(&sw_version, manager)
+            });
+        }
+        self.0.retain(|_, managers| !managers.is_empty());
+    }
+
+    fn release_channels(&self) -> impl Iterator<Item = &String> {
+        self.0.keys()
+    }
+
+    fn iter_channel(
+        &self,
+        release_channel: &str,
+    ) -> Option<btree_map::Iter<'_, semver::Version, Manager>> {
+        self.0.get(release_channel).map(|managers| managers.iter())
+    }
+
+    fn iter(&self) -> impl Iterator<Item = (DeploymentVersion, &Manager)> {
+        self.0.iter().flat_map(|(release_channel, managers)| {
+            managers.iter().map(|(zkvm_version, manager)| {
+                (
+                    DeploymentVersion {
+                        release_channel: release_channel.clone(),
+                        zkvm_version: zkvm_version.clone(),
+                    },
+                    manager,
+                )
+            })
+        })
+    }
+}
+
+pub const DEFAULT_WORKER_TASK_LIMIT: usize = 3;
+
+struct PendingTask {
+    msg: ScheduleTask,
+    reply: Option<ReplySender<Result<ScheduleTaskReply>>>,
+}
+
 pub struct AllocatorActor {
+    default_release_channel: String,
     workers: HashMap<WorkerId, Worker>,
-    managers: BTreeMap<semver::Version, Manager>,
+    managers: ManagerMap,
     gpus: HashMap<GpuUuid, Gpu>,
     cpus: HashMap<MachineId, Cpu>,
     http_client: Arc<reqwest::Client>,
 
-    pending: VecDeque<PendingAllocation>,
+    pending_allocations: VecDeque<PendingAllocation>,
+    pending_tasks: VecDeque<PendingTask>,
+    worker_task_limit: usize,
 }
 
 impl Actor for AllocatorActor {}
 
 impl AllocatorActor {
-    pub fn new() -> Self {
+    pub fn new(default_release_channel: impl Into<String>, worker_task_limit: usize) -> Self {
         Self {
+            default_release_channel: default_release_channel.into(),
             workers: HashMap::new(),
-            managers: BTreeMap::new(),
+            managers: Default::default(),
             gpus: HashMap::new(),
             cpus: HashMap::new(),
             http_client: Arc::new(reqwest::Client::new()),
-            pending: VecDeque::new(),
+            pending_allocations: VecDeque::new(),
+            pending_tasks: VecDeque::new(),
+            worker_task_limit,
         }
     }
 
@@ -529,20 +613,20 @@ impl AllocatorActor {
         Ok(true)
     }
 
-    fn maybe_allocate_many(&mut self) {
-        for p in std::mem::take(&mut self.pending) {
+    async fn maybe_allocate_many(&mut self) {
+        for p in std::mem::take(&mut self.pending_allocations) {
             match self.maybe_allocate(&p.request) {
                 Ok(true) => {
                     if let Some(reply_sender) = p.reply_sender {
-                        reply_sender.send(Ok(()));
+                        reply_sender.send(Ok(())).await;
                     }
                 }
                 Err(error) => {
                     if let Some(reply_sender) = p.reply_sender {
-                        reply_sender.send(Err(error));
+                        reply_sender.send(Err(error)).await;
                     }
                 }
-                Ok(false) => self.pending.push_back(p),
+                Ok(false) => self.pending_allocations.push_back(p),
             }
         }
     }
@@ -563,7 +647,7 @@ pub struct RegisterWorker {
     pub remote_address: Option<SocketAddr>,
     pub worker_id: WorkerId,
     pub hardware: Vec<HardwareResource>,
-    pub zkvm_version: semver::Version,
+    pub deployment_version: DeploymentVersion,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -581,7 +665,7 @@ impl Message<RegisterWorker> for AllocatorActor {
     type Reply = Result<RegisterWorkerReply>;
 
     async fn handle(&mut self, msg: RegisterWorker, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.register_worker(msg))
+        ctx.reply(self.register_worker(msg)).await
     }
 }
 
@@ -597,7 +681,7 @@ impl AllocatorActor {
                 msg.remote_address,
                 machine.clone(),
                 msg.hardware.clone(),
-                msg.zkvm_version.clone(),
+                msg.deployment_version.clone(),
             ));
             let num_cpus = msg
                 .hardware
@@ -616,7 +700,7 @@ impl AllocatorActor {
         }
 
         let mut manager_address = None;
-        if let Some(manager) = self.managers.get(&msg.zkvm_version)
+        if let Some(manager) = self.managers.get(&msg.deployment_version)
             && let Some(rpc_port) = manager.rpc_port
         {
             manager_address = Some(ManagerAddress {
@@ -634,7 +718,7 @@ impl AllocatorActor {
 /// The idea is for the allocator to choose which worker is the least busy. The allocator reserves
 /// the right to not reply immediately. It could be that all the workers already have deep queues
 /// and the best move is to wait until one becomes less busy.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ScheduleTask {
     pub candidates: Vec<WorkerId>,
     pub task_id: GlobalId,
@@ -642,7 +726,7 @@ pub struct ScheduleTask {
 }
 
 /// Reply when a worker is successfully chosen.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ScheduleTaskReply {
     pub worker_id: WorkerId,
 }
@@ -651,12 +735,17 @@ impl Message<ScheduleTask> for AllocatorActor {
     type Reply = Result<ScheduleTaskReply>;
 
     async fn handle(&mut self, msg: ScheduleTask, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.schedule_task(msg))
+        self.pending_tasks.push_back(PendingTask {
+            msg,
+            reply: ctx.reply_sender(),
+        });
+
+        self.maybe_schedule_tasks().await;
     }
 }
 
 impl AllocatorActor {
-    fn schedule_task(&mut self, msg: ScheduleTask) -> Result<ScheduleTaskReply> {
+    fn maybe_schedule_task(&mut self, msg: &ScheduleTask) -> Option<Result<ScheduleTaskReply>> {
         // Choose a worker which is least busy. We prefer a quiet GPU over a quiet CPU in this
         // selection.
         #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
@@ -667,15 +756,15 @@ impl AllocatorActor {
             id: WorkerId,
         }
 
-        let mut workers = msg
+        let workers = msg
             .candidates
-            .into_iter()
+            .iter()
             .map(|c| -> Result<_> {
                 Ok(CandidateWorker {
-                    id: c,
-                    gpu_tasks: self.get_worker_num_hardware_tasks(&c, HardwareFilter::Gpu)?,
-                    machine_tasks: self.get_worker_num_hardware_tasks(&c, HardwareFilter::Cpu)?,
-                    worker_tasks: self.get_worker_num_tasks(&c)?,
+                    id: *c,
+                    gpu_tasks: self.get_worker_num_hardware_tasks(c, HardwareFilter::Gpu)?,
+                    machine_tasks: self.get_worker_num_hardware_tasks(c, HardwareFilter::Cpu)?,
+                    worker_tasks: self.get_worker_num_tasks(c)?,
                 })
             })
             .filter_map(|res| match res {
@@ -688,18 +777,45 @@ impl AllocatorActor {
             .collect::<Vec<_>>();
 
         if workers.is_empty() {
-            return Err(Error::new("no eligible candidate workers"));
+            return Some(Err(Error::new("no eligible candidate workers")));
+        }
+
+        let mut workers = workers
+            .into_iter()
+            .filter(|w| w.worker_tasks < self.worker_task_limit)
+            .collect::<Vec<_>>();
+
+        if workers.is_empty() {
+            return None;
         }
 
         workers.sort();
         let chosen_worker = workers[0].id;
 
         // Count that this worker has a new task now.
-        self.add_worker_task(&chosen_worker, msg.task_id, msg.description)?;
+        if let Err(error) =
+            self.add_worker_task(&chosen_worker, msg.task_id, msg.description.clone())
+        {
+            return Some(Err(error));
+        }
 
-        Ok(ScheduleTaskReply {
+        Some(Ok(ScheduleTaskReply {
             worker_id: chosen_worker,
-        })
+        }))
+    }
+
+    async fn maybe_schedule_tasks(&mut self) {
+        let mut skipped = VecDeque::new();
+        while let Some(task) = self.pending_tasks.pop_front() {
+            if let Some(reply) = self.maybe_schedule_task(&task.msg) {
+                if let Some(reply_sender) = task.reply {
+                    reply_sender.send(reply).await;
+                }
+            } else {
+                skipped.push_back(task);
+            }
+        }
+        self.pending_tasks.extend(skipped);
     }
 }
 
@@ -719,13 +835,13 @@ impl Message<AllocateHardware> for AllocatorActor {
         match self.validate_allocation_request(&request) {
             Ok(()) => {
                 let reply_sender = ctx.reply_sender();
-                self.pending.push_back(PendingAllocation {
+                self.pending_allocations.push_back(PendingAllocation {
                     request,
                     reply_sender,
                 });
-                self.maybe_allocate_many();
+                self.maybe_allocate_many().await;
             }
-            Err(error) => ctx.reply(Err(error)),
+            Err(error) => ctx.reply(Err(error)).await,
         }
     }
 }
@@ -758,12 +874,12 @@ impl Message<DeallocateHardware> for AllocatorActor {
     type Reply = Result<()>;
 
     async fn handle(&mut self, msg: DeallocateHardware, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.deallocate_hardware(msg))
+        ctx.reply(self.deallocate_hardware(msg).await).await
     }
 }
 
 impl AllocatorActor {
-    fn deallocate_hardware(&mut self, msg: DeallocateHardware) -> Result<()> {
+    async fn deallocate_hardware(&mut self, msg: DeallocateHardware) -> Result<()> {
         let worker_id = msg.worker_id;
         let worker = self
             .workers
@@ -814,14 +930,14 @@ impl AllocatorActor {
             }
         }
 
-        self.maybe_allocate_many();
+        self.maybe_allocate_many().await;
 
         Ok(())
     }
 }
 
 /// The given task has completed
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EndTask {
     pub worker_id: WorkerId,
     pub task_id: GlobalId,
@@ -831,12 +947,12 @@ impl Message<EndTask> for AllocatorActor {
     type Reply = Result<()>;
 
     async fn handle(&mut self, msg: EndTask, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.end_task(msg))
+        ctx.reply(self.end_task(msg).await).await
     }
 }
 
 impl AllocatorActor {
-    fn end_task(&mut self, msg: EndTask) -> Result<()> {
+    async fn end_task(&mut self, msg: EndTask) -> Result<()> {
         let worker_id = msg.worker_id;
         let worker = self
             .workers
@@ -844,7 +960,7 @@ impl AllocatorActor {
             .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
 
         if self
-            .pending
+            .pending_allocations
             .iter()
             .any(|req| req.request.task_id == msg.task_id)
         {
@@ -869,13 +985,76 @@ impl AllocatorActor {
         let removed = worker.tasks.shift_remove(&msg.task_id).is_some();
         assert!(removed);
 
+        self.maybe_schedule_tasks().await;
+
         Ok(())
     }
 }
 
+/// A particular deployed version of r0vm
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub struct DeploymentVersion {
+    pub release_channel: String,
+    pub zkvm_version: semver::Version,
+}
+
+impl DeploymentVersion {
+    #[cfg(test)]
+    pub fn new(release_channel: impl Into<String>, zkvm_version: semver::Version) -> Self {
+        Self {
+            release_channel: release_channel.into(),
+            zkvm_version,
+        }
+    }
+}
+
+impl fmt::Display for DeploymentVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}:{}", &self.release_channel, &self.zkvm_version)
+    }
+}
+
+impl FromStr for DeploymentVersion {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        let (release_channel, version) = s
+            .rsplit_once(":")
+            .ok_or_else(|| Error::new("missing ':'"))?;
+        Ok(Self {
+            release_channel: release_channel.into(),
+            zkvm_version: version
+                .parse()
+                .map_err(|err| Error::new(format!("failed to parse version: {err}")))?,
+        })
+    }
+}
+
+#[test]
+fn deployment_version_parse() {
+    assert_eq!(
+        DeploymentVersion::from_str("foo:1.2.3").unwrap(),
+        DeploymentVersion::new("foo", semver::Version::new(1, 2, 3))
+    );
+    assert_eq!(
+        DeploymentVersion::from_str("foo:bar:1.2.3").unwrap(),
+        DeploymentVersion::new("foo:bar", semver::Version::new(1, 2, 3))
+    );
+    assert_eq!(
+        DeploymentVersion::from_str("1.2.3")
+            .unwrap_err()
+            .to_string(),
+        "missing ':'"
+    );
+    assert_eq!(
+        DeploymentVersion::from_str("foo:").unwrap_err().to_string(),
+        "failed to parse version: empty string, expected a semver version"
+    );
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct RegisterManager {
-    pub zkvm_version: semver::Version,
+    pub deployment_version: DeploymentVersion,
     pub path: String,
     pub api_port: Option<u16>,
     pub rpc_port: Option<u16>,
@@ -886,13 +1065,13 @@ impl Message<RegisterManager> for AllocatorActor {
     type Reply = Result<()>;
 
     async fn handle(&mut self, msg: RegisterManager, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.register_manager(msg))
+        ctx.reply(self.register_manager(msg)).await
     }
 }
 
 impl AllocatorActor {
     fn register_manager(&mut self, msg: RegisterManager) -> Result<()> {
-        if let btree_map::Entry::Vacant(e) = self.managers.entry(msg.zkvm_version.clone()) {
+        if let btree_map::Entry::Vacant(e) = self.managers.entry(msg.deployment_version.clone()) {
             let host = msg
                 .remote_address
                 .map(|a| a.ip())
@@ -911,14 +1090,14 @@ impl AllocatorActor {
             });
             tracing::info!(
                 "Registered manager with version {} at addr={host} api_port={:?}, rpc_port={:?}",
-                &msg.zkvm_version,
+                &msg.deployment_version,
                 &msg.api_port,
                 &msg.rpc_port
             );
         } else {
             return Err(Error::new(format!(
-                "duplicate registration for manager with version {}",
-                msg.zkvm_version
+                "duplicate registration for manager with deployment version {}",
+                msg.deployment_version
             )));
         }
         Ok(())
@@ -929,13 +1108,13 @@ impl Message<RpcDisconnect> for AllocatorActor {
     type Reply = ();
 
     async fn handle(&mut self, msg: RpcDisconnect, _ctx: &mut Context<Self, Self::Reply>) {
-        self.maybe_remove_workers(&msg);
+        self.maybe_remove_workers(&msg).await;
         self.maybe_remove_managers(&msg);
     }
 }
 
 impl AllocatorActor {
-    fn maybe_remove_workers(&mut self, msg: &RpcDisconnect) {
+    async fn maybe_remove_workers(&mut self, msg: &RpcDisconnect) {
         // Take out any workers with the given remote_address
         let mut workers_to_remove = vec![];
         for (worker_id, worker) in std::mem::take(&mut self.workers) {
@@ -948,7 +1127,8 @@ impl AllocatorActor {
 
         for (worker_id, worker) in workers_to_remove {
             // Remove any pending requests from this worker
-            self.pending.retain(|r| r.request.worker_id != worker_id);
+            self.pending_allocations
+                .retain(|r| r.request.worker_id != worker_id);
 
             // Return all tokens for any pending tasks
             for (_, task) in worker.tasks {
@@ -970,7 +1150,7 @@ impl AllocatorActor {
         }
 
         // Now that potentially some tokens are returned, might be able to schedule some tasks
-        self.maybe_allocate_many();
+        self.maybe_allocate_many().await;
     }
 
     fn maybe_remove_managers(&mut self, msg: &RpcDisconnect) {
@@ -983,23 +1163,39 @@ impl AllocatorActor {
 pub struct GetStatus;
 
 #[derive(Serialize, Deserialize)]
+pub struct GetStatusManager {
+    pub version: DeploymentVersion,
+    pub host: String,
+    pub endpoint: Option<Url>,
+    pub rpc_port: Option<u16>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct GetStatusWorker {
-    id: String,
-    hardware: Vec<String>,
-    host: String,
-    port: Option<u16>,
-    version: semver::Version,
-    tasks: Vec<String>,
+    pub id: String,
+    pub hardware: Vec<String>,
+    pub host: String,
+    pub port: Option<u16>,
+    pub version: DeploymentVersion,
+    pub tasks: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct GetStatusGpu {
-    id: String,
-    tasks: Vec<String>,
+    pub id: String,
+    pub tasks: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GetStatusReleaseChannel {
+    pub name: String,
+    pub versions: Vec<semver::Version>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct GetStatusReply {
+    pub release_channels: Vec<GetStatusReleaseChannel>,
+    pub managers: Vec<GetStatusManager>,
     pub workers: Vec<GetStatusWorker>,
     pub gpus: Vec<GetStatusGpu>,
 }
@@ -1008,12 +1204,33 @@ impl Message<GetStatus> for AllocatorActor {
     type Reply = Result<GetStatusReply>;
 
     async fn handle(&mut self, _msg: GetStatus, ctx: &mut Context<Self, Self::Reply>) {
-        ctx.reply(self.get_status())
+        ctx.reply(self.get_status()).await
     }
 }
 
 impl AllocatorActor {
     fn get_status(&mut self) -> Result<GetStatusReply> {
+        let release_channels: Vec<_> = self
+            .managers
+            .release_channels()
+            .map(|release_channel| GetStatusReleaseChannel {
+                name: release_channel.clone(),
+                versions: self
+                    .managers
+                    .iter_channel(release_channel)
+                    .unwrap()
+                    .map(|(version, _)| version.clone())
+                    .collect(),
+            })
+            .collect();
+
+        let mut managers: Vec<_> = self
+            .managers
+            .iter()
+            .map(|(version, manager)| manager.to_get_status(version))
+            .collect();
+        managers.sort_by_key(|manager| manager.version.clone());
+
         let mut workers: Vec<_> = self
             .workers
             .iter()
@@ -1034,14 +1251,19 @@ impl AllocatorActor {
             .collect();
         gpus.sort_by_key(|gpu| gpu.id.clone());
 
-        Ok(GetStatusReply { workers, gpus })
+        Ok(GetStatusReply {
+            release_channels,
+            managers,
+            workers,
+            gpus,
+        })
     }
 }
 
 #[cfg(test)]
 mod allocation_tests {
     use super::*;
-    use crate::actors::actor;
+    use crate::actors::actor::{self, ActorRunner};
 
     fn test_gpu_id(n: u32) -> GpuUuid {
         assert!(n < 10);
@@ -1070,11 +1292,16 @@ mod allocation_tests {
         workers: Vec<WorkerId>,
         worker_addresses: HashMap<WorkerId, SocketAddr>,
         alloc_ref: ActorRef<AllocatorActor>,
+        alloc_runner: ActorRunner<AllocatorActor>,
     }
 
     impl Fixture {
         async fn new(worker_count: u32) -> Self {
-            let alloc_ref = actor::spawn(AllocatorActor::new());
+            let (alloc_ref, mut alloc_runner) = actor::run(AllocatorActor::new(
+                "default-channel",
+                /* worker_task_limit= */ 3,
+            ))
+            .await;
 
             let workers: Vec<WorkerId> = (0..worker_count).map(test_worker_id).collect();
             let mut worker_addresses = HashMap::new();
@@ -1082,19 +1309,25 @@ mod allocation_tests {
                 let worker_addr: SocketAddr =
                     format!("1.2.3.{}:100{}", i / 4, i % 4).parse().unwrap();
                 alloc_ref
-                    .ask(RegisterWorker {
-                        worker_id: *worker_id,
-                        remote_address: Some(worker_addr),
-                        hardware: vec![
-                            HardwareResource::Gpu(GpuSpec {
-                                name: "test GPU".into(),
-                                uuid: test_gpu_id(i as u32 / 2),
-                                tokens: GpuTokens(100),
-                            }),
-                            HardwareResource::Cpu(CpuSpec { cores: CpuCores(4) }),
-                        ],
-                        zkvm_version: semver::Version::new(1, 2, 3),
-                    })
+                    .ask_with_runner(
+                        RegisterWorker {
+                            worker_id: *worker_id,
+                            remote_address: Some(worker_addr),
+                            hardware: vec![
+                                HardwareResource::Gpu(GpuSpec {
+                                    name: "test GPU".into(),
+                                    uuid: test_gpu_id(i as u32 / 2),
+                                    tokens: GpuTokens(100),
+                                }),
+                                HardwareResource::Cpu(CpuSpec { cores: CpuCores(4) }),
+                            ],
+                            deployment_version: DeploymentVersion::new(
+                                "test",
+                                semver::Version::new(1, 2, 3),
+                            ),
+                        },
+                        &mut alloc_runner,
+                    )
                     .await
                     .unwrap()
                     .unwrap();
@@ -1105,43 +1338,64 @@ mod allocation_tests {
                 workers,
                 worker_addresses,
                 alloc_ref,
+                alloc_runner,
             }
         }
 
-        async fn schedule_task(&self, i: u64, j: u64) -> ScheduleTaskReply {
+        async fn schedule_task(&mut self, i: u64, j: u64) -> ScheduleTaskReply {
             self.alloc_ref
-                .ask(ScheduleTask {
-                    candidates: self.workers.clone(),
-                    task_id: test_task_id(i, j),
-                    description: "test task".into(),
-                })
+                .ask_with_runner(
+                    ScheduleTask {
+                        candidates: self.workers.clone(),
+                        task_id: test_task_id(i, j),
+                        description: "test task".into(),
+                    },
+                    &mut self.alloc_runner,
+                )
                 .await
                 .unwrap()
                 .unwrap()
         }
 
-        async fn end_task(&self, i: u64, j: u64, worker_id: WorkerId) -> Result<()> {
+        async fn end_task(&mut self, i: u64, j: u64, worker_id: WorkerId) -> Result<()> {
             self.alloc_ref
-                .ask(EndTask {
-                    worker_id,
-                    task_id: test_task_id(i, j),
-                })
+                .ask_with_runner(
+                    EndTask {
+                        worker_id,
+                        task_id: test_task_id(i, j),
+                    },
+                    &mut self.alloc_runner,
+                )
                 .await
                 .unwrap()
         }
 
-        async fn disconnect_worker(&self, worker_id: WorkerId) {
+        async fn disconnect_worker(&mut self, worker_id: WorkerId) {
             let remote_address = *self.worker_addresses.get(&worker_id).unwrap();
             self.alloc_ref
-                .tell(RpcDisconnect { remote_address })
+                .tell_with_runner(RpcDisconnect { remote_address }, &mut self.alloc_runner)
                 .await
                 .unwrap();
+        }
+
+        async fn allocate_hardware(&mut self, alloc: AllocateHardware) -> Result<()> {
+            self.alloc_ref
+                .ask_with_runner(alloc, &mut self.alloc_runner)
+                .await
+                .unwrap()
+        }
+
+        async fn deallocate_hardware(&mut self, dealloc: DeallocateHardware) -> Result<()> {
+            self.alloc_ref
+                .ask_with_runner(dealloc, &mut self.alloc_runner)
+                .await
+                .unwrap()
         }
     }
 
     #[tokio::test]
     async fn alloc_dealloc_realloc() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1153,103 +1407,87 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         let response = fixture.schedule_task(1, 2).await;
         assert_eq!(response.worker_id, worker_id);
 
-        let other_alloc_ref = fixture.alloc_ref.clone();
-        let other_hardware_reservations = hardware_reservations.clone();
-        let second_allocation = tokio::task::spawn(async move {
-            other_alloc_ref
-                .ask(AllocateHardware {
-                    worker_id,
-                    task_id: test_task_id(1, 2),
-                    hardware_reservations: other_hardware_reservations,
-                })
-                .await
-                .unwrap()
-                .unwrap();
-        });
+        let second_allocation = fixture
+            .alloc_ref
+            .ask_enqueue(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 2),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+        fixture.alloc_runner.handle_one().await;
 
-        tokio::task::yield_now().await;
-        assert!(!second_allocation.is_finished());
+        assert!(!second_allocation.has_reply());
 
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
-        second_allocation.await.unwrap();
+        second_allocation.recv().await.unwrap().unwrap();
 
         fixture.end_task(1, 1, worker_id).await.unwrap();
 
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 2),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap();
         fixture.end_task(1, 2, worker_id).await.unwrap();
     }
 
     async fn double_dealloc(hardware_reservations: Vec<HardwareReservation>, expected_err: &str) {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
         assert_eq!(response.worker_id, worker_id);
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         // deallocate again should be an error
         let err = fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap_err();
 
         assert_eq!(err.to_string(), expected_err);
@@ -1257,7 +1495,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn end_task_before_dealloc() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1269,14 +1507,12 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         // trying to end before deallocating hardware is an error
@@ -1289,7 +1525,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn end_task_before_full_dealloc() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1301,14 +1537,12 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1316,14 +1550,12 @@ mod allocation_tests {
             tokens: GpuTokens(50),
         }];
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap();
 
         // trying to end before deallocating hardware is an error
@@ -1336,7 +1568,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn piecemeal_dealloc() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1348,14 +1580,12 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1363,24 +1593,20 @@ mod allocation_tests {
             tokens: GpuTokens(50),
         }];
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap();
 
         fixture.end_task(1, 1, worker_id).await.unwrap();
@@ -1411,7 +1637,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn alloc_unknown_gpu() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1423,14 +1649,12 @@ mod allocation_tests {
         }];
 
         let err = fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap_err();
 
         assert_eq!(err.to_string(), format!("unknown GPU {}", test_gpu_id(1)));
@@ -1438,7 +1662,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn dealloc_unknown_gpu() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1450,14 +1674,12 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1465,14 +1687,12 @@ mod allocation_tests {
             tokens: GpuTokens(100),
         }];
         let err = fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap_err();
 
         assert_eq!(err.to_string(), format!("unknown GPU {}", test_gpu_id(1)));
@@ -1480,7 +1700,7 @@ mod allocation_tests {
 
     #[tokio::test]
     async fn end_task_pending() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let response = fixture.schedule_task(1, 1).await;
@@ -1492,35 +1712,29 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         let response = fixture.schedule_task(1, 2).await;
         assert_eq!(response.worker_id, worker_id);
 
-        let other_alloc_ref = fixture.alloc_ref.clone();
-        let other_hardware_reservations = hardware_reservations.clone();
-        let second_allocation = tokio::task::spawn(async move {
-            other_alloc_ref
-                .ask(AllocateHardware {
-                    worker_id,
-                    task_id: test_task_id(1, 2),
-                    hardware_reservations: other_hardware_reservations,
-                })
-                .await
-                .unwrap()
-                .unwrap();
-        });
+        let second_allocation = fixture
+            .alloc_ref
+            .ask_enqueue(AllocateHardware {
+                worker_id,
+                task_id: test_task_id(1, 2),
+                hardware_reservations: hardware_reservations.clone(),
+            })
+            .await
+            .unwrap();
+        fixture.alloc_runner.handle_one().await;
 
-        tokio::task::yield_now().await;
-        assert!(!second_allocation.is_finished());
+        assert!(!second_allocation.has_reply());
 
         let err = fixture.end_task(1, 2, worker_id).await.unwrap_err();
         assert_eq!(
@@ -1530,28 +1744,24 @@ mod allocation_tests {
 
         // Even after the error we can continue, the task is still running
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
         fixture.end_task(1, 1, worker_id).await.unwrap();
 
-        second_allocation.await.unwrap();
+        second_allocation.recv().await.unwrap().unwrap();
 
         fixture
-            .alloc_ref
-            .ask(DeallocateHardware {
+            .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 2),
                 hardware_reservations,
             })
             .await
-            .unwrap()
             .unwrap();
         fixture.end_task(1, 2, worker_id).await.unwrap();
     }
@@ -1559,7 +1769,7 @@ mod allocation_tests {
     #[tokio::test]
     async fn alloc_disconnect_realloc() {
         // 2 workers on the same machine sharing a GPU
-        let fixture = Fixture::new(2).await;
+        let mut fixture = Fixture::new(2).await;
         let worker1 = fixture.workers[0];
         let worker2 = fixture.workers[1];
 
@@ -1573,54 +1783,42 @@ mod allocation_tests {
         }];
 
         fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id: worker1,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap();
 
         // worker2 tries to reserve the same GPU
         let response = fixture.schedule_task(1, 2).await;
         assert_eq!(response.worker_id, worker2);
 
-        let other_alloc_ref = fixture.alloc_ref.clone();
-        let other_hardware_reservations = hardware_reservations.clone();
-        let second_allocation = tokio::task::spawn(async move {
-            other_alloc_ref
-                .ask(AllocateHardware {
-                    worker_id: worker2,
-                    task_id: test_task_id(1, 2),
-                    hardware_reservations: other_hardware_reservations,
-                })
-                .await
-                .unwrap()
-                .unwrap();
-        });
-
-        // worker2 has to wait
-        tokio::task::yield_now().await;
-        assert!(!second_allocation.is_finished());
-
-        // worker1 disconnects
-        fixture
+        let second_allocation = fixture
             .alloc_ref
-            .tell(RpcDisconnect {
-                remote_address: "1.2.3.0:1000".parse().unwrap(),
+            .ask_enqueue(AllocateHardware {
+                worker_id: worker2,
+                task_id: test_task_id(1, 2),
+                hardware_reservations: hardware_reservations.clone(),
             })
             .await
             .unwrap();
+        fixture.alloc_runner.handle_one().await;
+
+        // worker2 has to wait
+        assert!(!second_allocation.has_reply());
+
+        // worker1 disconnects
+        fixture.disconnect_worker(worker1).await;
 
         // worker2 should be able to get the hardware now
-        second_allocation.await.unwrap();
+        second_allocation.recv().await.unwrap().unwrap();
     }
 
     #[tokio::test]
     async fn alloc_for_task_not_running() {
-        let fixture = Fixture::new(1).await;
+        let mut fixture = Fixture::new(1).await;
         let worker_id = fixture.workers[0];
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
@@ -1629,14 +1827,12 @@ mod allocation_tests {
         }];
 
         let error = fixture
-            .alloc_ref
-            .ask(AllocateHardware {
+            .allocate_hardware(AllocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
                 hardware_reservations: hardware_reservations.clone(),
             })
             .await
-            .unwrap()
             .unwrap_err();
 
         assert_eq!(
@@ -1649,7 +1845,7 @@ mod allocation_tests {
     async fn chooses_least_busy_worker() {
         // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
         // | (0, 1), (2, 3) | (4, 5), (6, 7) |
-        let fixture = Fixture::new(8).await;
+        let mut fixture = Fixture::new(8).await;
 
         // first GPU on first machine
         let response = fixture.schedule_task(1, 1).await;
@@ -1672,10 +1868,48 @@ mod allocation_tests {
     }
 
     #[tokio::test]
+    async fn allocate_pauses_at_worker_limit() {
+        // create 2 workers both on the same machine and GPU
+        // | (0, 1) |
+        let mut fixture = Fixture::new(2).await;
+
+        // Fill up the workers with jobs
+        for i in 0..3 {
+            let response = fixture.schedule_task(1, i * 2).await;
+            assert_eq!(response.worker_id, fixture.workers[0]);
+
+            let response = fixture.schedule_task(1, i * 2 + 1).await;
+            assert_eq!(response.worker_id, fixture.workers[1]);
+        }
+
+        let pending = fixture
+            .alloc_ref
+            .ask_enqueue(ScheduleTask {
+                candidates: fixture.workers.clone(),
+                task_id: test_task_id(1, 8),
+                description: "test task".into(),
+            })
+            .await
+            .unwrap();
+        fixture.alloc_runner.try_handle_one().await.unwrap();
+
+        // The next request should be pending
+        assert!(!pending.has_reply());
+
+        // The first task ends, freeing up space
+        fixture.end_task(1, 0, fixture.workers[0]).await.unwrap();
+
+        // Now our task is scheduled
+        assert!(pending.has_reply());
+        let resp = pending.recv().await.unwrap().unwrap();
+        assert_eq!(resp.worker_id, fixture.workers[0]);
+    }
+
+    #[tokio::test]
     async fn worker_disconnect() {
         // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
         // | (0, 1), (2, 3) | (4, 5), (6, 7) |
-        let fixture = Fixture::new(8).await;
+        let mut fixture = Fixture::new(8).await;
 
         // first GPU on first machine
         let response = fixture.schedule_task(1, 1).await;
@@ -1693,7 +1927,7 @@ mod allocation_tests {
     async fn end_task_disconnected_worker() {
         // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
         // | (0, 1), (2, 3) | (4, 5), (6, 7) |
-        let fixture = Fixture::new(8).await;
+        let mut fixture = Fixture::new(8).await;
 
         // first GPU on first machine
         let response = fixture.schedule_task(1, 1).await;
@@ -1717,7 +1951,7 @@ mod allocation_tests {
     async fn end_task_twice() {
         // create 8 workers, adjacent pairs are on same GPU, adjacent 4 are on same machine.
         // | (0, 1), (2, 3) | (4, 5), (6, 7) |
-        let fixture = Fixture::new(8).await;
+        let mut fixture = Fixture::new(8).await;
 
         // first GPU on first machine
         let response = fixture.schedule_task(1, 1).await;
@@ -1818,6 +2052,9 @@ impl std::fmt::Display for HttpError {
     }
 }
 
+/// If no release channel is configured, this is what we use by default.
+pub const DEFAULT_RELEASE_CHANNEL: &str = "unknown-alpha";
+
 pub struct ApiRequest {
     pub request: http::Request<axum::body::Body>,
 }
@@ -1835,6 +2072,15 @@ impl ApiRequest {
                 )
             })?;
         Ok(version_value.to_str()?.parse()?)
+    }
+
+    fn risc0_release_channel(&self, default_release_channel: &str) -> anyhow::Result<String> {
+        Ok(self
+            .request
+            .headers()
+            .get("x-risc0-release-channel")
+            .map(|v| v.to_str().map(|v| v.to_string()))
+            .unwrap_or(Ok(default_release_channel.into()))?)
     }
 }
 
@@ -1895,29 +2141,37 @@ impl AllocatorActor {
         request: ApiRequest,
         reply_sender: &mut Option<ReplySender<anyhow::Result<ApiResponse>>>,
     ) -> anyhow::Result<()> {
+        let release_channel = request.risc0_release_channel(&self.default_release_channel)?;
         let version_req = request.risc0_version()?;
 
         // Find a registered manager which satisfies the given request version.
         // We prefer versions which are higher.
-        for (manager_version, manager) in self.managers.iter().rev() {
-            if version_req.matches(manager_version) {
-                let http_client = self.http_client.clone();
-                let Some(endpoint) = manager.endpoint.clone() else {
-                    continue;
-                };
-                let reply_sender = reply_sender.take();
-                tokio::task::spawn(async move {
-                    if let Some(reply_sender) = reply_sender {
-                        reply_sender.send(proxy_api_request(http_client, endpoint, request).await)
-                    }
-                });
-                return Ok(());
+        if let Some(iter) = self.managers.iter_channel(&release_channel) {
+            for (manager_version, manager) in iter.rev() {
+                if version_req.matches(manager_version) {
+                    let http_client = self.http_client.clone();
+                    let Some(endpoint) = manager.endpoint.clone() else {
+                        continue;
+                    };
+                    let reply_sender = reply_sender.take();
+                    tokio::task::spawn(async move {
+                        if let Some(reply_sender) = reply_sender {
+                            reply_sender
+                                .send(proxy_api_request(http_client, endpoint, request).await)
+                                .await;
+                        }
+                    });
+                    return Ok(());
+                }
             }
         }
 
         Err(HttpError::new(
             http::StatusCode::BAD_REQUEST,
-            format!("no manager found to satisfy request with requirement {version_req}"),
+            format!(
+                "no manager found to satisfy request with requirement {version_req} \
+                in software channel {release_channel}"
+            ),
         )
         .into())
     }
@@ -1931,7 +2185,7 @@ impl Message<ApiRequest> for AllocatorActor {
         if let Err(error) = self.handle_api_request(request, &mut reply_sender)
             && let Some(reply_sender) = reply_sender
         {
-            reply_sender.send(Err(error));
+            reply_sender.send(Err(error)).await;
         }
     }
 }
@@ -2037,9 +2291,10 @@ mod proxy_tests {
     }
 
     async fn manager_proxy_test(
-        manager_versions: Vec<semver::Version>,
-        expected_replied_manager_version: Option<semver::Version>,
+        manager_versions: Vec<DeploymentVersion>,
+        expected_replied_manager_version: Option<DeploymentVersion>,
         method: http::Method,
+        request_release_channel: Option<&str>,
         request_version: &str,
     ) -> axum_test::TestResponse {
         let managers: HashMap<_, _> = manager_versions
@@ -2047,12 +2302,15 @@ mod proxy_tests {
             .map(|v| (v.clone(), TestManager::new()))
             .collect();
 
-        let alloc_ref = actor::spawn(AllocatorActor::new());
+        let alloc_ref = actor::spawn(AllocatorActor::new(
+            "default-channel",
+            /* worker_task_limit= */ 3,
+        ));
 
         for (version, manager) in &managers {
             alloc_ref
                 .ask(RegisterManager {
-                    zkvm_version: version.clone(),
+                    deployment_version: version.clone(),
                     api_port: Some(
                         manager
                             .server
@@ -2092,6 +2350,9 @@ mod proxy_tests {
         if method_req_has_body(&method) {
             test_req = test_req.text("ping");
         }
+        if let Some(request_release_channel) = request_release_channel {
+            test_req = test_req.add_header("x-risc0-release-channel", request_release_channel);
+        }
         let response = test_req
             .add_header("x-risc0-version", request_version)
             .await;
@@ -2101,6 +2362,15 @@ mod proxy_tests {
         }
 
         response
+    }
+
+    fn dver(
+        release_channel: impl Into<String>,
+        major: u64,
+        minor: u64,
+        patch: u64,
+    ) -> DeploymentVersion {
+        DeploymentVersion::new(release_channel, semver::Version::new(major, minor, patch))
     }
 
     #[rstest]
@@ -2116,9 +2386,10 @@ mod proxy_tests {
     async fn proxy_manager_not_found(#[case] method: &str) {
         let method = http::Method::from_bytes(method.as_bytes()).unwrap();
         let response = manager_proxy_test(
-            vec![semver::Version::new(1, 2, 3)],
+            vec![dver("test", 1, 2, 3)],
             None,
             method.clone(),
+            Some("test"),
             "1.2.4",
         )
         .await;
@@ -2126,7 +2397,7 @@ mod proxy_tests {
         if method_resp_has_body(&method) {
             assert_eq!(
                 response.text(),
-                "no manager found to satisfy request with requirement ^1.2.4"
+                "no manager found to satisfy request with requirement ^1.2.4 in software channel test"
             );
         }
     }
@@ -2144,9 +2415,10 @@ mod proxy_tests {
     async fn proxy_manager_exact_match(#[case] method: &str) {
         let method = http::Method::from_bytes(method.as_bytes()).unwrap();
         let response = manager_proxy_test(
-            vec![semver::Version::new(1, 2, 3), semver::Version::new(1, 2, 4)],
-            Some(semver::Version::new(1, 2, 3)),
+            vec![dver("test", 1, 2, 3), dver("test", 1, 2, 4)],
+            Some(dver("test", 1, 2, 3)),
             method.clone(),
+            Some("test"),
             "=1.2.3",
         )
         .await;
@@ -2161,12 +2433,13 @@ mod proxy_tests {
         let method = http::Method::PUT;
         let response = manager_proxy_test(
             vec![
-                semver::Version::new(1, 2, 3),
-                semver::Version::new(1, 2, 4),
-                semver::Version::new(3, 0, 0),
+                dver("test", 1, 2, 3),
+                dver("test", 1, 2, 4),
+                dver("test", 3, 0, 0),
             ],
-            Some(semver::Version::new(1, 2, 4)),
+            Some(dver("test", 1, 2, 4)),
             method,
+            Some("test"),
             "1.2.3",
         )
         .await;
@@ -2179,13 +2452,14 @@ mod proxy_tests {
         let method = http::Method::PUT;
         let response = manager_proxy_test(
             vec![
-                semver::Version::new(1, 2, 3),
-                semver::Version::new(1, 2, 4),
-                semver::Version::new(3, 0, 0),
-                "3.0.0-rc.1".parse().unwrap(),
+                dver("test", 1, 2, 3),
+                dver("test", 1, 2, 4),
+                dver("test", 3, 0, 0),
+                "test:3.0.0-rc.1".parse().unwrap(),
             ],
-            Some(semver::Version::new(3, 0, 0)),
+            Some(dver("test", 3, 0, 0)),
             method,
+            Some("test"),
             "3.0.0",
         )
         .await;
@@ -2194,12 +2468,53 @@ mod proxy_tests {
     }
 
     #[tokio::test]
+    async fn proxy_manager_different_channel() {
+        let method = http::Method::PUT;
+        let response = manager_proxy_test(
+            vec![
+                dver("test", 1, 2, 3),
+                dver("test2", 1, 2, 4),
+                dver("test", 3, 0, 0),
+            ],
+            Some(dver("test", 1, 2, 3)),
+            method,
+            Some("test"),
+            "1.2.3",
+        )
+        .await;
+        response.assert_status_success();
+        response.assert_text("pong");
+    }
+
+    #[tokio::test]
+    async fn proxy_manager_default_channel() {
+        let method = http::Method::PUT;
+        let response = manager_proxy_test(
+            vec![
+                dver("default-channel", 1, 2, 3),
+                dver("test2", 1, 2, 4),
+                dver("test", 3, 0, 0),
+            ],
+            Some(dver("default-channel", 1, 2, 3)),
+            method,
+            None,
+            "1.2.3",
+        )
+        .await;
+        response.assert_status_success();
+        response.assert_text("pong");
+    }
+
+    #[tokio::test]
     async fn multiple_managers_registered_error() {
-        let alloc_ref = actor::spawn(AllocatorActor::new());
+        let alloc_ref = actor::spawn(AllocatorActor::new(
+            "default-channel",
+            /* worker_task_limit= */ 3,
+        ));
 
         alloc_ref
             .ask(RegisterManager {
-                zkvm_version: semver::Version::new(1, 2, 3),
+                deployment_version: dver("test", 1, 2, 3),
                 api_port: Some(8080),
                 rpc_port: None,
                 path: "/".into(),
@@ -2211,7 +2526,7 @@ mod proxy_tests {
 
         let error = alloc_ref
             .ask(RegisterManager {
-                zkvm_version: semver::Version::new(1, 2, 3),
+                deployment_version: dver("test", 1, 2, 3),
                 api_port: Some(8080),
                 rpc_port: None,
                 path: "/".into(),
@@ -2222,7 +2537,7 @@ mod proxy_tests {
             .unwrap_err();
         assert_eq!(
             error.to_string(),
-            "duplicate registration for manager with version 1.2.3"
+            "duplicate registration for manager with deployment version test:1.2.3"
         );
     }
 }

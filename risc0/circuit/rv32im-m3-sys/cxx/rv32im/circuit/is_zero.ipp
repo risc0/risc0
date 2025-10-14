@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-template<typename C>
-FDEV void IsZero<C>::set(CTX, Fp val) DEV {
+template <typename C> FDEV void IsZero<C>::set(CTX, Fp val) DEV {
   if (Val<C>(val) == Val<C>(0)) {
     isZero.set(ctx, 1);
     invReg.set(ctx, 0);
@@ -23,8 +22,7 @@ FDEV void IsZero<C>::set(CTX, Fp val) DEV {
   }
 }
 
-template<typename C>
-FDEV void IsZero<C>::verify(CTX, Val<C> val) DEV {
+template <typename C> FDEV void IsZero<C>::verify(CTX, Val<C> val) DEV {
   // If isZero is 0 (i.e. nonzero) then val must have an inverse
   EQ(val * invReg.get(), Val<C>(1) - isZero.get());
   // If isZero is 1, then val must be zero

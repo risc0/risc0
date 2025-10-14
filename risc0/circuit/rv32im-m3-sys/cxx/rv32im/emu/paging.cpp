@@ -13,8 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "core/log.h"
 #include "rv32im/emu/paging.h"
+#include "core/log.h"
 
 namespace risc0::rv32im {
 
@@ -35,7 +35,7 @@ void PagedMemory::addCostNode() {
   counts[size_t(BlockType::P2IntRounds)] += 2;
   counts[size_t(BlockType::PageInNode)]++;
   counts[size_t(BlockType::PageOutNode)]++;
-  counts[size_t(BlockType::PageUncle)]++;  // Technically we don't always need this
+  counts[size_t(BlockType::PageUncle)]++; // Technically we don't always need this
 }
 
 void PagedMemory::recomputeCost() {
@@ -46,7 +46,6 @@ void PagedMemory::recomputeCost() {
   }
   pagingCost = tot;
 }
-
 
 void PagedMemory::commit(const std::vector<PageDetails*>& pages) {
   // Set initial root
@@ -96,8 +95,8 @@ void PagedMemory::pageInPage(uint32_t page) {
     for (size_t j = 0; j < PAGE_PART_SIZE; j++) {
       uint32_t word = (*pagePtr)[i * PAGE_PART_SIZE + j];
       pip.data[j] = word;
-      data[2*j] = Fp::fromRaw(word & 0xffff);
-      data[2*j + 1] = Fp::fromRaw(word >> 16);
+      data[2 * j] = Fp::fromRaw(word & 0xffff);
+      data[2 * j + 1] = Fp::fromRaw(word >> 16);
     }
     cur = p2.doBlock(cur, data, i == NUM_PARTS - 1);
     toFpDigest(pip.out, cur);
@@ -114,7 +113,7 @@ void PagedMemory::pageInNode(uint32_t idx) {
   toFpDigest(wit.left, image.getDigest(idx * 2));
   toFpDigest(wit.right, image.getDigest(idx * 2 + 1));
   std::array<Fp, p2impl::CELLS_RATE> data;
-  for(size_t i = 0; i < p2impl::CELLS_DIGEST; i++) {
+  for (size_t i = 0; i < p2impl::CELLS_DIGEST; i++) {
     data[i] = wit.right[i];
     data[CELLS_DIGEST + i] = wit.left[i];
   }
@@ -136,8 +135,8 @@ void PagedMemory::pageOutPage(uint32_t page, const PageDetails* pageData) {
       (*newPage)[i * PAGE_PART_SIZE + j] = word;
       pop.data[j] = word;
       pop.cycle[j] = (*pageData)[i * PAGE_PART_SIZE + j].cycle;
-      data[2*j] = Fp::fromRaw(word & 0xffff);
-      data[2*j + 1] = Fp::fromRaw(word >> 16);
+      data[2 * j] = Fp::fromRaw(word & 0xffff);
+      data[2 * j + 1] = Fp::fromRaw(word >> 16);
     }
     cur = p2.doBlock(cur, data, i == NUM_PARTS - 1);
     toFpDigest(pop.out, cur);
@@ -155,7 +154,7 @@ void PagedMemory::pageOutNode(uint32_t idx) {
   toFpDigest(wit.left, image.getDigest(idx * 2));
   toFpDigest(wit.right, image.getDigest(idx * 2 + 1));
   std::array<Fp, p2impl::CELLS_RATE> data;
-  for(size_t i = 0; i < p2impl::CELLS_DIGEST; i++) {
+  for (size_t i = 0; i < p2impl::CELLS_DIGEST; i++) {
     data[i] = wit.right[i];
     data[CELLS_DIGEST + i] = wit.left[i];
   }

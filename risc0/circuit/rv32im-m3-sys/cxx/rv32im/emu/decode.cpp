@@ -29,7 +29,9 @@ public:
   }
 
   Opcode lookup(const DecodedInst inst) const {
-    if ((inst.opcode & 0x3) != 3) { return Opcode::INVALID; }
+    if ((inst.opcode & 0x3) != 3) {
+      return Opcode::INVALID;
+    }
     return table[map10(inst.opcode, inst.func3, inst.func7)];
   }
 
@@ -66,7 +68,7 @@ private:
   void addRV32IM() {
 #define XF7 -1
 #define XF3 -1
-#define ENTRY(name, idx, opcode, immType, func3, func7, ...) \
+#define ENTRY(name, idx, opcode, immType, func3, func7, ...)                                       \
   addInst(opcode, func3, func7, Opcode::name);
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
@@ -77,7 +79,7 @@ private:
 
 FastDecodeTable gDecode;
 
-}  // namespace
+} // namespace
 
 Opcode getOpcode(const DecodedInst& inst) {
   return gDecode.lookup(inst);

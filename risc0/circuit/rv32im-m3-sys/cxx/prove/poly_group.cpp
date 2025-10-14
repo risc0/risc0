@@ -16,23 +16,22 @@
 #include "prove/poly_group.h"
 
 #include "core/util.h"
-#include "zkp/rou.h"
 #include "zkp/params.h"
+#include "zkp/rou.h"
 
 namespace risc0 {
 
 PolyGroup::PolyGroup(IHalPtr hal, HalMatrix<Fp> coeffs, PtrRange<Tap> taps, size_t numCols)
-  : hal(hal)
-  , coeffs(coeffs)
-  , taps(taps)
-  , numCols(numCols)
-  , expanded(hal->allocateMatrix<Fp>(coeffs.rows() * kExpansionFactor, coeffs.cols()))
-  , merkle(hal, expanded, kQueries)
-  , out(hal->allocateArray<FpExt>(taps.size()))
-  , cols(hal->allocateArray<uint32_t>(taps.size()))
-  , xs(hal->allocateArray<FpExt>(taps.size()))
-  , whichCombo(hal->allocateArray<uint32_t>(numCols))
-{
+    : hal(hal)
+    , coeffs(coeffs)
+    , taps(taps)
+    , numCols(numCols)
+    , expanded(hal->allocateMatrix<Fp>(coeffs.rows() * kExpansionFactor, coeffs.cols()))
+    , merkle(hal, expanded, kQueries)
+    , out(hal->allocateArray<FpExt>(taps.size()))
+    , cols(hal->allocateArray<uint32_t>(taps.size()))
+    , xs(hal->allocateArray<FpExt>(taps.size()))
+    , whichCombo(hal->allocateArray<uint32_t>(numCols)) {
   PinnedArrayWO<uint32_t> pCols(hal, cols);
   PinnedArrayWO<uint32_t> pWhichCombo(hal, whichCombo);
   for (size_t i = 0; i < taps.size(); i++) {
@@ -71,4 +70,4 @@ void PolyGroup::mix(HalMatrix<FpExt> combos, FpExt& curMix, FpExt comboMix) {
   curMix *= pow(comboMix, numCols);
 }
 
-}  // namespace risc0
+} // namespace risc0

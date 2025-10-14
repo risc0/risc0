@@ -137,13 +137,15 @@ constexpr Fp _M_EXT[576] = {
     1,  1,  4,  6,  1,  1,  4,  6,  1,  1,  4,  6,  1,  1,  4,  6,  1,  1,  4,  6,  2,  2,  8,  12,
 };
 
-// Standardizing on the same coefficients as https://github.com/HorizenLabs/poseidon2.git
-// (as used in its plain implementation of Poseidon2 for BabyBear)
+// Standardizing on the same coefficients as
+// https://github.com/HorizenLabs/poseidon2.git (as used in its plain
+// implementation of Poseidon2 for BabyBear)
 //
-// These parameters are have been confirmed to pass the algorithms given in Grassi, Rechberger, and
-// Schofnegger's paper "Proving Resistance Against Infinitely Long Subspace Trails: How to Choose
-// the Linear Layer" by running a version of the code provided with the paper adapted to include
-// these parameters in what's tested.
+// These parameters are have been confirmed to pass the algorithms given in
+// Grassi, Rechberger, and Schofnegger's paper "Proving Resistance Against
+// Infinitely Long Subspace Trails: How to Choose the Linear Layer" by running a
+// version of the code provided with the paper adapted to include these
+// parameters in what's tested.
 //
 // The full matrix can be constructed by as follows:
 // - Initialize a matrix with all 1s.
@@ -153,4 +155,4 @@ constexpr Fp M_INT_DIAG_HZN[24] = {
     0x5cdef81d, 0x01393285, 0x46daee06, 0x065d7ba6, 0x52d72d6f, 0x05dd05e0, 0x3bab4b63, 0x6ada3842,
     0x2fc5fbec, 0x770d61b0, 0x5715aae9, 0x03ef0e90, 0x75b6c770, 0x242adf5f, 0x00d0ca4c, 0x36c0e388};
 
-}  // namespace risc0::p2impl
+} // namespace risc0::p2impl

@@ -16,7 +16,8 @@
 
 constexpr size_t kFriFold = 16;
 
-/// Compute `ceil(log_2(in))`, i.e. find the smallest value `out` such that `2^out >= in`.
+/// Compute `ceil(log_2(in))`, i.e. find the smallest value `out` such that
+/// `2^out >= in`.
 __device__ inline constexpr size_t log2Ceil(size_t in) {
   size_t r = 0;
   while ((1 << r) < in) {
@@ -78,10 +79,16 @@ __global__ void batch_evaluate_any(
   }
 }
 
-extern "C" bool cuda_batch_evaluate_any(FpExt* out, const Fp* coeffs, const uint32_t* which, const FpExt* xs, uint32_t outSize, uint32_t deg) {
+extern "C" bool cuda_batch_evaluate_any(FpExt* out,
+                                        const Fp* coeffs,
+                                        const uint32_t* which,
+                                        const FpExt* xs,
+                                        uint32_t outSize,
+                                        uint32_t deg) {
   size_t block_size = (deg < 256 ? deg : 256);
   size_t num_blocks = outSize;
-  batch_evaluate_any<<<num_blocks, block_size, block_size * sizeof(FpExt)>>>(out, coeffs, which, xs, deg);
+  batch_evaluate_any<<<num_blocks, block_size, block_size * sizeof(FpExt)>>>(
+      out, coeffs, which, xs, deg);
   return true;
 }
 
@@ -121,11 +128,8 @@ __global__ void gather_sample(
   }
 }
 
-__global__ void scatter(Fp* into,
-                        const uint32_t* index,
-                        const uint32_t* offsets,
-                        const Fp* values,
-                        uint32_t count) {
+__global__ void scatter(
+    Fp* into, const uint32_t* index, const uint32_t* offsets, const Fp* values, uint32_t count) {
   uint gid = blockIdx.x * blockDim.x + threadIdx.x;
   if (gid < count) {
     for (uint32_t idx = index[gid]; idx < index[gid + 1]; idx++) {
@@ -180,14 +184,20 @@ __global__ void combos_prepare(FpExt* combos,
                                uint32_t evalSize) {
   FpExt cur(1);
   for (size_t i = 0; i < evalSize; i++) {
-    combos[info[i].coeffIndex + info[i].comboId*rows] -= cur * eval[i];
-    if (i + 1 < evalSize && (info[i + 1].group != info[i].group || info[i + 1].column != info[i].column)) {
+    combos[info[i].coeffIndex + info[i].comboId * rows] -= cur * eval[i];
+    if (i + 1 < evalSize &&
+        (info[i + 1].group != info[i].group || info[i + 1].column != info[i].column)) {
       cur *= mix;
     }
   }
 }
 
-extern "C" bool cuda_combos_prepare(FpExt* combos, const FpExt* eval, const EvalInfo* info, FpExt mix, uint32_t rows, uint32_t evalSize) {
+extern "C" bool cuda_combos_prepare(FpExt* combos,
+                                    const FpExt* eval,
+                                    const EvalInfo* info,
+                                    FpExt mix,
+                                    uint32_t rows,
+                                    uint32_t evalSize) {
   combos_prepare<<<1, 1, 0>>>(combos, eval, info, mix, rows, evalSize);
   return true;
 }
@@ -205,10 +215,10 @@ __global__ void combos_finalize(Fp* out, const FpExt* combos, uint32_t numCombos
   }
 }
 
-extern "C" bool cuda_combos_finalize(Fp* out, const FpExt* combos, uint32_t numCombos, uint32_t count) {
+extern "C" bool
+cuda_combos_finalize(Fp* out, const FpExt* combos, uint32_t numCombos, uint32_t count) {
   size_t block_size = count < 256 ? count : 256;
   size_t num_blocks = (count + block_size - 1) / block_size;
   combos_finalize<<<num_blocks, block_size, 0>>>(out, combos, numCombos, count);
   return true;
 }
-

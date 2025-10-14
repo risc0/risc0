@@ -13,8 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "core/log.h"
 #include "zkp/poly.h"
+#include "core/log.h"
 
 namespace risc0 {
 
@@ -47,12 +47,12 @@ std::vector<FpExt> polyInterpolate(const std::vector<FpExt>& xs, const std::vect
   }
   FpExt c1 = (fxs[0] - fxs[1]) * inv(xs[0] - xs[1]);
   FpExt c0 = fxs[0] - c1 * xs[0];
-  return { c0, c1 };
+  return {c0, c1};
 }
 
 FpExt polyDivide(FpExt* coeffs, size_t deg, FpExt z) {
   FpExt cur;
-  for (size_t i = deg; i-->0; ) {
+  for (size_t i = deg; i-- > 0;) {
     FpExt next = z * cur + coeffs[i];
     coeffs[i] = cur;
     cur = next;
@@ -61,4 +61,3 @@ FpExt polyDivide(FpExt* coeffs, size_t deg, FpExt z) {
 }
 
 } // namespace risc0
-

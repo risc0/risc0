@@ -16,16 +16,15 @@
 #define MIN_PO2 12
 #define MAX_PO2 22
 
-#define PO2S \
-PO2(12) \
-PO2(13) \
-PO2(14) \
-PO2(15) \
-PO2(16) \
-PO2(17) \
-PO2(18) \
-PO2(19) \
-PO2(20) \
-PO2(21) \
-PO2(22)
-
+#define PO2S                                                                                       \
+  PO2(12)                                                                                          \
+  PO2(13)                                                                                          \
+  PO2(14)                                                                                          \
+  PO2(15)                                                                                          \
+  PO2(16)                                                                                          \
+  PO2(17)                                                                                          \
+  PO2(18)                                                                                          \
+  PO2(19)                                                                                          \
+  PO2(20)                                                                                          \
+  PO2(21)                                                                                          \
+  PO2(22)

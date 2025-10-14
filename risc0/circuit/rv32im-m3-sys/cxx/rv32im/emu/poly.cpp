@@ -50,25 +50,15 @@ struct PolyValExt {
   PolyValExt() {}
   explicit PolyValExt(FpExt val) : val(val) {}
   explicit PolyValExt(PolyVal val) : val(val.val) {}
-  explicit PolyValExt(PolyVal e0, PolyVal e1, PolyVal e2, PolyVal e3) : val(
-    e0.val * FpExt(1, 0, 0, 0) + 
-    e1.val * FpExt(0, 1, 0, 0) + 
-    e2.val * FpExt(0, 0, 1, 0) + 
-    e3.val * FpExt(0, 0, 0, 1)) {}
+  explicit PolyValExt(PolyVal e0, PolyVal e1, PolyVal e2, PolyVal e3)
+      : val(e0.val * FpExt(1, 0, 0, 0) + e1.val * FpExt(0, 1, 0, 0) + e2.val * FpExt(0, 0, 1, 0) +
+            e3.val * FpExt(0, 0, 0, 1)) {}
   explicit PolyValExt(uint32_t x) : val(x) {}
 
-  PolyValExt operator+(const PolyValExt& rhs) const {
-    return PolyValExt(val + rhs.val);
-  }
-  PolyValExt operator-(const PolyValExt& rhs) const {
-    return PolyValExt(val - rhs.val);
-  }
-  PolyValExt operator*(const PolyVal& rhs) const {
-    return PolyValExt(val * rhs.val);
-  }
-  PolyValExt operator*(const PolyValExt& rhs) const {
-    return PolyValExt(val * rhs.val);
-  }
+  PolyValExt operator+(const PolyValExt& rhs) const { return PolyValExt(val + rhs.val); }
+  PolyValExt operator-(const PolyValExt& rhs) const { return PolyValExt(val - rhs.val); }
+  PolyValExt operator*(const PolyVal& rhs) const { return PolyValExt(val * rhs.val); }
+  PolyValExt operator*(const PolyValExt& rhs) const { return PolyValExt(val * rhs.val); }
   PolyValExt& operator+=(const PolyVal& rhs) {
     val += rhs.val;
     return *this;
@@ -88,19 +78,18 @@ struct PolyValExt {
 };
 
 struct PolyReg {
-  PolyVal get() {
-    return value;
-  }
-  template<typename T, typename C> void applyInner(C& ctx) {}
-  template<typename C> void verify(C& ctx) {}
-  template<typename C> void addArguments(C& ctx) {}
+  PolyVal get() { return value; }
+  template <typename T, typename C> void applyInner(C& ctx) {}
+  template <typename C> void verify(C& ctx) {}
+  template <typename C> void addArguments(C& ctx) {}
 
   PolyVal value;
 };
 
 } // namespace
 
-FpExt computeConstraintPoly(const FpExt* eval, const Fp* globals, const FpExt* accMix, FpExt ecMix, FpExt z) {
+FpExt computeConstraintPoly(
+    const FpExt* eval, const Fp* globals, const FpExt* accMix, FpExt ecMix, FpExt z) {
   size_t dataCols = computeMaxDataPerRow();
   size_t accumCols = computeTotalAccum();
   size_t accumNormalCols = computeMaxAccumPerRow();
@@ -121,16 +110,14 @@ FpExt computeConstraintPoly(const FpExt* eval, const Fp* globals, const FpExt* a
   for (size_t i = 0; i < NUM_GLOBALS; i++) {
     gvals.push_back(PolyVal(globals[i]));
   }
-  PolyValExt val = verifyCircuit(
-    reinterpret_cast<PolyReg*>(data),
-    reinterpret_cast<PolyReg*>(accum.data()),
-    reinterpret_cast<PolyReg*>(prevAccum.data()),
-    gvals.data(),
-    reinterpret_cast<PolyValExt*>(const_cast<FpExt*>(accMix)),
-    PolyValExt(ecMix),
-    PolyVal(Fp(3) * z));
+  PolyValExt val = verifyCircuit(reinterpret_cast<PolyReg*>(data),
+                                 reinterpret_cast<PolyReg*>(accum.data()),
+                                 reinterpret_cast<PolyReg*>(prevAccum.data()),
+                                 gvals.data(),
+                                 reinterpret_cast<PolyValExt*>(const_cast<FpExt*>(accMix)),
+                                 PolyValExt(ecMix),
+                                 PolyVal(Fp(3) * z));
   return val.val;
 }
 
 } // namespace risc0::rv32im
-

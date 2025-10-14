@@ -33,7 +33,7 @@ fn build_cuda_kernels() {
         .deps(["kernels/cuda"])
         .flag("-D__ADX__")
         .include(env::var("DEP_BLST_C_SRC").unwrap())
-        .include(env::var("DEP_SPPARK_ROOT").unwrap())
+        .include(env::var("DEP_RISC0_SPPARK_ROOT").unwrap())
         .compile("risc0_groth16_cuda");
 
     println!("cargo:rustc-link-lib=static=blst");

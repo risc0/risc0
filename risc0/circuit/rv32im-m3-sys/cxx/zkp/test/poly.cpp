@@ -13,8 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "zkp/rng.h"
 #include "zkp/poly.h"
+#include "zkp/rng.h"
 #include <gtest/gtest.h>
 
 namespace risc0 {

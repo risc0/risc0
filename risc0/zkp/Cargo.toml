@@ -20,6 +20,7 @@ cfg-if = "1.0"
 cust = { version = "0.3", optional = true }
 digest = { version = "0.10", features = ["oid"] }
 ff = { version = "0.13", features = ["derive", "bits"], optional = true }
+generic-array = "=0.14.7"
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 hex-literal = "0.4.1"
 paste = "1.0"

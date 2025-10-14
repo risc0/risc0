@@ -38,12 +38,12 @@ struct GroupState {
   HalMatrix<Fp> expTable;
 };
 
-// Take in the state of all groups (preceding groups are all defined) and compute
-// the witness for this group.
+// Take in the state of all groups (preceding groups are all defined) and
+// compute the witness for this group.
 using WitgenFunc = std::function<void(std::vector<GroupState>& state)>;
 
-// Writes `out` (shape: 4 x po2) with the value of the validity polynomial evaltuated with state and
-// mix
+// Writes `out` (shape: 4 x po2) with the value of the validity polynomial
+// evaltuated with state and mix
 using EvalCheckFunc =
     std::function<void(HalMatrix<Fp> out, std::vector<GroupState>& state, FpExt mix)>;
 

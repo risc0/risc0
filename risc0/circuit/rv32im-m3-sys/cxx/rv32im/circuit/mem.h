@@ -15,19 +15,17 @@
 
 #pragma once
 
-#include "rv32im/witness/mem.h"
 #include "rv32im/circuit/u32.h"
+#include "rv32im/witness/mem.h"
 
-template<typename C>
-struct MemReadBlock {
+template <typename C> struct MemReadBlock {
   CONSTANT static char NAME[] = "MemReadBlock";
 
   Reg<C> wordAddr;
   Reg<C> prevCycle;
   RegU32<C> data;
 
-  template<typename T>
-  FDEV void applyInner(CTX, Val<C> cycle) DEV {
+  template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
     T::apply(ctx, wordAddr);
     T::apply(ctx, prevCycle);
     T::apply(ctx, data);
@@ -39,8 +37,7 @@ struct MemReadBlock {
   FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
 
-template<typename C>
-struct MemWriteBlock {
+template <typename C> struct MemWriteBlock {
   CONSTANT static char NAME[] = "MemWriteBlock";
 
   Reg<C> wordAddr;
@@ -48,8 +45,7 @@ struct MemWriteBlock {
   RegU32<C> prevData;
   RegU32<C> data;
 
-  template<typename T>
-  FDEV void applyInner(CTX, Val<C> cycle) DEV {
+  template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
     T::apply(ctx, wordAddr);
     T::apply(ctx, prevCycle);
     T::apply(ctx, prevData);

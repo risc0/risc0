@@ -20,12 +20,13 @@
 namespace risc0 {
 
 FriProverRound::FriProverRound(IHalPtr hal, HalMatrix<Fp> coeffsIn)
-  : hal(hal)
-  , coeffsIn(coeffsIn)
-  , evaluated(hal->allocateMatrix<Fp>(coeffsIn.rows() * kExpansionFactor, coeffsIn.cols()))
-  , merkle(hal, evaluated.reshape(evaluated.rows() / kFriFold, evaluated.cols() * kFriFold), kQueries)
-  , coeffsOut(hal->allocateMatrix<Fp>(coeffsIn.rows() / kFriFold, coeffsIn.cols()))
-{}
+    : hal(hal)
+    , coeffsIn(coeffsIn)
+    , evaluated(hal->allocateMatrix<Fp>(coeffsIn.rows() * kExpansionFactor, coeffsIn.cols()))
+    , merkle(hal,
+             evaluated.reshape(evaluated.rows() / kFriFold, evaluated.cols() * kFriFold),
+             kQueries)
+    , coeffsOut(hal->allocateMatrix<Fp>(coeffsIn.rows() / kFriFold, coeffsIn.cols())) {}
 
 void FriProverRound::compute(WriteIop& iop) {
   hal->batchExpandAndEvaluate(evaluated, coeffsIn);
@@ -44,11 +45,8 @@ void FriProverRound::query(WriteIop& iop, size_t& pos) {
 }
 
 FriProver::FriProver(IHalPtr hal, HalMatrix<Fp> coeffs)
-  : hal(hal)
-  , degree(coeffs.rows())
-  , domain(degree * kExpansionFactor)
-{
-  while(coeffs.rows() > kFriMinDegree) {
+    : hal(hal), degree(coeffs.rows()), domain(degree * kExpansionFactor) {
+  while (coeffs.rows() > kFriMinDegree) {
     rounds.emplace_back(hal, coeffs);
     coeffs = rounds.back().coeffsOut;
   }
@@ -80,5 +78,4 @@ void FriProver::compute(WriteIop& iop, ProvePointFunction func) {
   }
 }
 
-}  // namespace risc0
-
+} // namespace risc0

@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include <set>
 #include <random>
+#include <set>
 
 #include "prove/write_iop.h"
 

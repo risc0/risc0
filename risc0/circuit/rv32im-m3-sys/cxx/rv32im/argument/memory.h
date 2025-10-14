@@ -17,13 +17,12 @@
 
 #include "rv32im/base/base.h"
 
-template<typename C>
-struct MemoryArgument {
+template <typename C> struct MemoryArgument {
   FDEV MemoryArgument() = default;
   FDEV MemoryArgument(uint32_t wordAddr, uint32_t cycle, uint32_t data)
-    : wordAddr(wordAddr), cycle(cycle), dataLow(data & 0xffff), dataHigh(data >> 16) {}
+      : wordAddr(wordAddr), cycle(cycle), dataLow(data & 0xffff), dataHigh(data >> 16) {}
   FDEV MemoryArgument(Val<C> wordAddr, Val<C> cycle, Val<C> dataLow, Val<C> dataHigh)
-    : wordAddr(wordAddr), cycle(cycle), dataLow(dataLow), dataHigh(dataHigh) {}
+      : wordAddr(wordAddr), cycle(cycle), dataLow(dataLow), dataHigh(dataHigh) {}
 
   Val<C> wordAddr;
   Val<C> cycle;

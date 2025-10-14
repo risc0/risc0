@@ -180,7 +180,7 @@ impl Actor for JobActor {
                 status: self.status.clone(),
                 elapsed_time,
             };
-            reply_sender.send(JobStatusReply::Proof(info));
+            reply_sender.send(JobStatusReply::Proof(info)).await;
         }
 
         self.tracer.end();
@@ -305,19 +305,22 @@ impl JobActor {
 
     async fn submit_task(&mut self, task: Task) -> Result<()> {
         let task_id = self.next_task_id();
+        let header = TaskHeader {
+            global_id: GlobalId {
+                job_id: self.job_id,
+                task_id,
+            },
+            task_kind: task.kind(),
+        };
+        self.task_start(header.clone());
         let msg = SubmitTaskMsg {
             job: self
                 .parent_ref
                 .upgrade()
                 .ok_or_else(|| Error::new("parent job has stopped"))?,
-            header: TaskHeader {
-                global_id: GlobalId {
-                    job_id: self.job_id,
-                    task_id,
-                },
-                task_kind: task.kind(),
-            },
             task,
+            tracing: self.tracer.saved_task_context(task_id),
+            header,
         };
         self.factory.tell(msg).await?;
 
@@ -416,7 +419,7 @@ impl JobActor {
         self.status = JobStatus::Succeeded(result);
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully().await;
+        let _ = self_ref.stop_gracefully("job shutdown");
 
         Ok(())
     }
@@ -542,10 +545,12 @@ impl JobActor {
     }
 
     async fn fail_with_error(&mut self, self_ref: ActorRef<Self>, error: impl Into<TaskError>) {
-        self.status = JobStatus::Failed(error.into());
+        let error: TaskError = error.into();
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully().await;
+        let _ = self_ref.stop_gracefully(format!("job failure: {error:?}"));
+
+        self.status = JobStatus::Failed(error);
     }
 }
 
@@ -593,7 +598,7 @@ impl Message<TaskUpdateMsg> for JobActor {
 impl JobActor {
     async fn handle_task_update(&mut self, msg: TaskUpdateMsg) -> Result<()> {
         match msg.payload {
-            TaskUpdate::Start => self.task_start(msg.header),
+            TaskUpdate::Start => {}
             TaskUpdate::Segment(segment) => self.prove_segment(msg.header, segment).await?,
             TaskUpdate::Keccak(request) => self.prove_keccak(request).await?,
         };
@@ -647,6 +652,7 @@ impl Message<JobStatusRequest> for JobActor {
             status: self.status.clone(),
             elapsed_time: self.start_time.elapsed(),
         })))
+        .await
     }
 }
 

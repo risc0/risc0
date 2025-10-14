@@ -17,25 +17,22 @@
 
 #include "rv32im/base/poseidon2.h"
 
-template<typename C>
-struct P2CallArgument {
+template <typename C> struct P2CallArgument {
   Val<C> isFinal;
   ValDigest<C> in;
   ValData<C> data;
   ValDigest<C> out;
 };
 
-template<typename C>
-struct P2IdArgument {
+template <typename C> struct P2IdArgument {
   FDEV P2IdArgument() = default;
   FDEV P2IdArgument(Val<C> id) : id(id) {}
 
   Val<C> id;
 };
 
-template<typename C>
-struct P2StateArgument {
+template <typename C> struct P2StateArgument {
   Val<C> id;
-  Val<C> round;  // [0,3] ext 9 int [4, 7] ext 8 done
+  Val<C> round; // [0,3] ext 9 int [4, 7] ext 8 done
   ValCells<C> state;
 };
