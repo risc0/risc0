@@ -111,6 +111,7 @@ impl fmt::Display for GpuUuid {
     Deserialize,
     From,
 )]
+#[serde(transparent)]
 pub struct GpuTokens(u64);
 
 impl From<GpuTokens> for u64 {
@@ -1275,6 +1276,8 @@ pub struct GetStatusWorker {
 pub struct GetStatusGpu {
     pub id: String,
     pub tasks: Vec<String>,
+    pub max_tokens: GpuTokens,
+    pub free_tokens: GpuTokens,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -1331,12 +1334,24 @@ impl AllocatorActor {
 
         let mut gpus: Vec<_> = self
             .gpus
-            .keys()
-            .map(|id| GetStatusGpu {
+            .iter()
+            .map(|(id, gpu)| GetStatusGpu {
                 id: format!("{id:#}"),
+                max_tokens: gpu.max_tokens,
+                free_tokens: gpu.free_tokens,
                 tasks: self
                     .get_gpu_tasks(id)
-                    .map(|t| t.description.clone())
+                    .map(|t| {
+                        format!(
+                            "{} ({})",
+                            t.description,
+                            t.used_gpu_tokens
+                                .get(id)
+                                .cloned()
+                                .unwrap_or(GpuTokens::ZERO)
+                                .0
+                        )
+                    })
                     .collect(),
             })
             .collect();
