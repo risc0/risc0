@@ -210,7 +210,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
         return Rc::new(self::local::LocalProver::new("local"));
     }
 
-    Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
+    Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap())
 }
 
 /// Return a default [Executor] based on environment variables and feature
