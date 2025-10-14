@@ -1,6 +1,6 @@
 cc_library(
     name = "unordered_dense",
-    hdrs = glob(["**/*.h"]),
-    includes = ["include"],
+    hdrs = ["unordered_dense.h"],
+    include_prefix = "ankerl",
     visibility = ["//visibility:public"],
 )

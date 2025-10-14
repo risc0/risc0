@@ -12,8 +12,8 @@ links = "risc0-circuit-rv32im-sys"
 cust = { version = "0.3", optional = true }
 derive_more = { version = "2.0.1", features = ["debug"] }
 risc0-core = { workspace = true }
+risc0-sppark = { workspace = true, optional = true }
 risc0-sys = { workspace = true }
-sppark = { workspace = true, optional = true }
 
 [build-dependencies]
 cc = { version = "1.2.2", features = ["parallel"] }
@@ -22,5 +22,5 @@ risc0-build-kernel = { workspace = true }
 
 [features]
 default = []
-cuda = ["dep:cust", "dep:sppark", "risc0-sys/cuda"]
+cuda = ["dep:cust", "risc0-sppark/cuda", "risc0-sys/cuda"]
 metal = []

@@ -1911,10 +1911,11 @@ checksum = "37b2a672a2cb129a2e41c10b1224bb368f9f37a2b16b612598138befd7b37eb5"
 
 [[package]]
 name = "cc"
-version = "1.2.34"
+version = "1.2.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42bc4aea80032b7bf409b0bc7ccad88853858911b7713a8062fdc0623867bedc"
+checksum = "ac9fe6cdbb24b6ade63616c0a0688e45bb56732262c158df3c0c4bea4ca47cb7"
 dependencies = [
+ "find-msvc-tools",
  "jobserver",
  "libc",
  "shlex",
@@ -3071,6 +3072,12 @@ dependencies = [
  "libredox",
  "windows-sys 0.60.2",
 ]
+
+[[package]]
+name = "find-msvc-tools"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52051878f80a721bb68ebfbc930e07b65ba72f2da88968ea5c06fd6ca3d3a127"
 
 [[package]]
 name = "find_cuda_helper"
@@ -7205,8 +7212,8 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
@@ -7243,8 +7250,8 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
@@ -7308,7 +7315,7 @@ dependencies = [
  "cc",
  "glob",
  "risc0-build-kernel",
- "risc0-sys",
+ "risc0-sppark",
 ]
 
 [[package]]
@@ -7321,8 +7328,8 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
@@ -7373,7 +7380,7 @@ dependencies = [
  "anyhow",
  "blst",
  "risc0-build-kernel",
- "sppark",
+ "risc0-sppark",
  "test-log",
  "tracing",
 ]
@@ -7460,6 +7467,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-sppark"
+version = "0.1.14"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "risc0-sys"
 version = "1.5.1"
 dependencies = [
@@ -7467,7 +7481,7 @@ dependencies = [
  "blst",
  "cust",
  "risc0-build-kernel",
- "sppark",
+ "risc0-sppark",
 ]
 
 [[package]]
@@ -8521,16 +8535,6 @@ checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
 dependencies = [
  "base64ct",
  "der",
-]
-
-[[package]]
-name = "sppark"
-version = "0.1.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9c900139f3f6fdc8db217881a946adf00e935102fdd82b0e1bc19bacbffa311"
-dependencies = [
- "cc",
- "which 4.4.2",
 ]
 
 [[package]]

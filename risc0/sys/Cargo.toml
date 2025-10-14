@@ -15,9 +15,9 @@ risc0-build-kernel = { workspace = true }
 anyhow = { version = "1.0", default-features = false }
 blst = { version = "~0.3.11", optional = true }
 cust = { version = "0.3", optional = true }
-sppark = { workspace = true, optional = true }
+risc0-sppark = { workspace = true, optional = true }
 
 [features]
 default = []
-cuda = ["dep:blst", "dep:cust", "dep:sppark"]
+cuda = ["dep:blst", "dep:cust", "risc0-sppark/cuda"]
 metal = []
