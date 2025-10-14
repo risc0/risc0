@@ -16,7 +16,6 @@
 #[cfg(feature = "bonsai")]
 pub(crate) mod bonsai;
 pub(crate) mod default;
-pub(crate) mod external;
 #[cfg(feature = "prove")]
 pub(crate) mod local;
 pub(crate) mod opts;
@@ -29,7 +28,7 @@ use anyhow::{Result, anyhow};
 #[cfg(feature = "bonsai")]
 use self::bonsai::BonsaiProver;
 
-use self::{default::DefaultProver, external::ExternalProver, opts::ProverOpts};
+use self::{default::DefaultProver, opts::ProverOpts};
 
 use crate::{
     ExecutorEnv, Receipt, SessionInfo, VerifierContext, get_version, host::prove_info::ProveInfo,
@@ -172,7 +171,7 @@ pub trait Executor {
 /// * `bonsai`: [BonsaiProver] to prove on Bonsai.
 /// * `local`: LocalProver to prove locally in-process. Note: this
 ///   requires the `prove` feature flag.
-/// * `ipc`: [ExternalProver] to prove using an `r0vm` sub-process. Note: `r0vm`
+/// * `actor`: [DefaultProver] to prove using an `r0vm` sub-process. Note: `r0vm`
 ///   must be installed. To specify the path to `r0vm`, use `RISC0_SERVER_PATH`.
 ///
 /// If `RISC0_PROVER` is not specified, the following rules are used to select a
@@ -180,7 +179,7 @@ pub trait Executor {
 /// * [BonsaiProver] if the `BONSAI_API_URL` and `BONSAI_API_KEY` environment
 ///   variables are set unless `RISC0_DEV_MODE` is enabled.
 /// * LocalProver if the `prove` feature flag is enabled.
-/// * [ExternalProver] otherwise.
+/// * [DefaultProver] otherwise.
 pub fn default_prover() -> Rc<dyn Prover> {
     let explicit = std::env::var("RISC0_PROVER").unwrap_or_default();
     if !explicit.is_empty() {
@@ -188,7 +187,6 @@ pub fn default_prover() -> Rc<dyn Prover> {
             "actor" => Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap()),
             #[cfg(feature = "bonsai")]
             "bonsai" => Rc::new(BonsaiProver::new("bonsai")),
-            "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap())),
             #[cfg(feature = "prove")]
             "local" => Rc::new(self::local::LocalProver::new("local")),
             _ => unimplemented!("Unsupported prover: {explicit}"),
@@ -220,20 +218,19 @@ pub fn default_prover() -> Rc<dyn Prover> {
 /// following [Executor] implementation:
 /// * `local`: LocalProver to execute locally in-process. Note: this is
 ///   only available when the `prove` feature is enabled.
-/// * `ipc`: [ExternalProver] to execute using an `r0vm` sub-process. Note:
+/// * `actor`: [DefaultProver] to execute using an `r0vm` sub-process. Note:
 ///   `r0vm` must be installed. To specify the path to `r0vm`, use
 ///   `RISC0_SERVER_PATH`.
 ///
 /// If `RISC0_EXECUTOR` is not specified, the following rules are used to select
 /// an [Executor]:
 /// * LocalProver if the `prove` feature flag is enabled.
-/// * [ExternalProver] otherwise.
+/// * [DefaultProver] otherwise.
 pub fn default_executor() -> Rc<dyn Executor> {
     let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
             "actor" => Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap()),
-            "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap())),
             #[cfg(feature = "prove")]
             "local" => Rc::new(self::local::LocalProver::new("local")),
             _ => unimplemented!("Unsupported executor: {explicit}"),

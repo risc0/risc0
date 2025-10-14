@@ -46,7 +46,7 @@ curl -L https://risczero.com/install | bash
 rzup install
 ```
 
-> NOTE: It is only important that you install `cargo-risczero` with a matching version of the `zkvm` crate when interacting with the proof system as a separate, pre-built process ([`ExternalProver`](https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExternalProver.html)), which is currently the default. If you are using the `prove` feature on the `risc0-zkvm` crate for the host, this will compile the proving system into the host binary.
+> NOTE: It is only important that you install `cargo-risczero` with a matching version of the `zkvm` crate when interacting with the proof system as a separate, pre-built process ([`DefaultProver`](https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.DefaultProver.html)), which is currently the default. If you are using the `prove` feature on the `risc0-zkvm` crate for the host, this will compile the proving system into the host binary.
 
 #### xtask wasm tools (if testing [browser-verify](./examples/browser-verify))
 
