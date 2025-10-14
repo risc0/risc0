@@ -78,4 +78,21 @@ unsafe extern "C" {
         remainder: *mut u32,
         pow: *const u32,
     ) -> risc0_sppark::Error;
+
+    pub fn risc0_zkp_cuda_fri_fold(
+        output: DevicePointer<u8>,
+        input: DevicePointer<u8>,
+        mix: *const u32, // FpExt*
+        count: u32,
+    ) -> *const std::os::raw::c_char;
+
+    pub fn risc0_zkp_cuda_mix_poly_coeffs(
+        output: DevicePointer<u8>,
+        input: DevicePointer<u8>,
+        combos: DevicePointer<u8>,
+        mix_start: *const u32, // FpExt*
+        mix: *const u32,       // FpExt*
+        input_size: u32,
+        count: u32,
+    ) -> *const std::os::raw::c_char;
 }

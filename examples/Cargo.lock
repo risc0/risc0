@@ -4405,7 +4405,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.5.1"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "blst",

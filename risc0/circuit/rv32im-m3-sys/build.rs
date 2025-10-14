@@ -91,9 +91,9 @@ fn main() {
             .cudart("static")
             .flag("-diag-suppress=20012")
             .flag("--expt-relaxed-constexpr")
-            // .flag("-O3")
-            // .flag("--dopt on")
+            .flag("-DFEATURE_BABY_BEAR")
             .include(env::var("DEP_RISC0_SPPARK_ROOT").unwrap())
+            .include(env::var("DEP_RISC0_SYS_KERNELS_ROOT").unwrap())
             .files(glob_paths("cxx/hal/cuda/*.cpp"))
             .files(glob_paths("cxx/hal/cuda/kernels/*.cu"));
         if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none()
