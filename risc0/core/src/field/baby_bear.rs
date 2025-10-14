@@ -333,7 +333,7 @@ fn sub(lhs: u32, rhs: u32) -> u32 {
     if x > P { x.wrapping_add(P) } else { x }
 }
 
-/// Wrapping multiplication of [Elem]  using Baby Bear field modulus
+/// Wrapping multiplication of [Elem] using Baby Bear field modulus
 // Copied from the C++ implementation (fp.h)
 const fn mul(lhs: u32, rhs: u32) -> u32 {
     // uint64_t o64 = uint64_t(a) * uint64_t(b);
