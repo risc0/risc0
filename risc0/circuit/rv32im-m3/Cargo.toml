@@ -29,12 +29,18 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
-cuda = ["prove", "risc0-circuit-rv32im-m3-sys/cuda"]
+cuda = [
+  "prove",
+  "risc0-circuit-rv32im-m3-sys/cuda",
+  "risc0-sys/cuda",
+  "risc0-zkp/cuda",
+]
 default = []
 prove = [
   "dep:cfg-if",
   "dep:risc0-circuit-rv32im-m3-sys",
   "dep:risc0-sys",
+  "risc0-zkp/prove",
   "std",
 ]
-std = []
+std = ["risc0-binfmt/std", "risc0-zkp/std"]

@@ -71,6 +71,12 @@ rules_cuda_dependencies()
 rules_cuda_toolchains(register_toolchains = True)
 
 new_local_repository(
+    name = "risc0_sys",
+    build_file = "//bazel/third_party:risc0_sys.BUILD",
+    path = "../../../sys",
+)
+
+new_local_repository(
     name = "sppark",
     build_file = "//bazel/third_party:sppark.BUILD",
     path = "../../../../vendor/sppark",

@@ -74,7 +74,7 @@ const char* risc0_zkp_cuda_eltwise_zeroize_fpext(FpExt* elems, const uint32_t co
 }
 
 const char* risc0_zkp_cuda_fri_fold(Fp* out, const Fp* in, const FpExt* mix, const uint32_t count) {
-  return launchKernel(fri_fold, count, 0, out, in, mix, count);
+  return launchKernel(fri_fold, count, 0, out, in, *mix, count);
 }
 
 const char* risc0_zkp_cuda_mix_poly_coeffs(FpExt* out,
@@ -84,7 +84,8 @@ const char* risc0_zkp_cuda_mix_poly_coeffs(FpExt* out,
                                            const FpExt* mix,
                                            const uint32_t inputSize,
                                            const uint32_t count) {
-  return launchKernel(mix_poly_coeffs, count, 0, out, in, combos, mixStart, mix, inputSize, count);
+  return launchKernel(
+      mix_poly_coeffs, count, 0, out, in, combos, *mixStart, *mix, inputSize, count);
 }
 
 const char* risc0_zkp_cuda_batch_bit_reverse(Fp* io, const uint32_t nBits, const uint32_t count) {

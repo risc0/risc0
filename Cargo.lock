@@ -7094,14 +7094,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-bigint2-methods"
-version = "3.0.0"
+version = "5.0.0"
 dependencies = [
  "risc0-build",
 ]
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -7172,7 +7172,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -7204,7 +7204,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "4.0.2"
+version = "5.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -7218,7 +7218,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -7245,7 +7245,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "4.0.2"
+version = "5.0.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -7256,7 +7256,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bit-vec 0.8.0",
@@ -7316,11 +7316,12 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-sppark",
+ "risc0-sys",
 ]
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "4.0.2"
+version = "5.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -7334,7 +7335,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "3.0.1"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "nvtx",
@@ -7345,7 +7346,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -7475,7 +7476,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.5.1"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blst",
@@ -7506,7 +7507,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -7616,7 +7617,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "3.0.0"
+version = "5.0.0"
 dependencies = [
  "bincode",
  "borsh",
@@ -7648,7 +7649,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "3.0.0"
+version = "5.0.0"
 
 [[package]]
 name = "rlimit"

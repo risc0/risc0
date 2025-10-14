@@ -48,7 +48,8 @@ extern "C" SparkError sppark_poseidon2_fold(void* d_out, const void* d_in, size_
 extern "C" SparkError
 sppark_poseidon2_rows(void* d_out, const void* d_in, uint32_t count, uint32_t col_size);
 extern "C" void prefix_sum(Fp* d_inout, uint32_t count);
-extern "C" SparkError supra_poly_divide(void* d_inout, size_t len, void* remainder, FpExt pow);
+extern "C" SparkError
+rv32im_m3_poly_divide(FpExt* d_inout, size_t len, FpExt* remainder, FpExt pow);
 
 // query.cu
 extern "C" bool cuda_query(
@@ -302,7 +303,7 @@ public:
     for (size_t i = 0; i < info.size(); i++) {
       FpExt* poly = reinterpret_cast<FpExt*>(toDevPtr(combos)) + pInfo[i].comboId * combos.rows();
       LOG(0, "Do divide");
-      auto err = supra_poly_divide(poly, combos.rows(), &rem, pInfo[i].z);
+      auto err = rv32im_m3_poly_divide(poly, combos.rows(), &rem, pInfo[i].z);
       if (err.code != 0) {
         throw std::runtime_error(std::string("Error during combosDivide:") + err.message);
       }

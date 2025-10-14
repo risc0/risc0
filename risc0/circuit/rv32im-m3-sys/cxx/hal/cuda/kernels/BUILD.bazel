@@ -39,7 +39,7 @@ cuda_library(
         "//rv32im/circuit:files",
         "//rv32im/witness:files",
     ],
-    # TODO: Is there a better way to disable the warnding below?
+    # TODO: Is there a better way to disable the warnings below?
     copts = [
         "--forward-unknown-to-host-compiler",
         "-Wno-unused-but-set-variable",
@@ -47,5 +47,8 @@ cuda_library(
     ],
     target_compatible_with = requires_cuda(),
     visibility = ["//visibility:public"],
-    deps = ["@sppark"],
+    deps = [
+        "@risc0_sys",
+        "@sppark",
+    ],
 )
