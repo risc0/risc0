@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Interface between the circuit and prover/verifier
 
@@ -21,6 +22,9 @@ use risc0_core::field::{Elem, ExtElem, Field};
 use serde::{Deserialize, Serialize};
 
 use crate::taps::TapSet;
+
+#[cfg(feature = "circuit_debug")]
+use alloc::{format, string::String};
 
 // TODO: Remove references to these constants so we don't depend on a
 // fixed set of register groups.
@@ -125,8 +129,19 @@ pub trait CircuitInfo {
     const MIX_SIZE: usize;
 }
 
+pub struct GroupInfo {
+    pub global_count: usize,
+    pub mix_count: usize,
+}
+
+pub trait CircuitInfoV3 {
+    fn get_groups(&self) -> &'static [GroupInfo];
+}
+
 /// traits implemented by generated rust code used in both prover and verifier
 pub trait CircuitCoreDef<F: Field>: CircuitInfo + PolyExt<F> + TapsProvider {}
+
+pub trait CircuitCoreDefV3<F: Field>: CircuitInfoV3 + PolyExt<F> + TapsProvider {}
 
 pub type Arg = usize;
 pub type Var = usize;

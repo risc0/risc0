@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Runs `cargo-semver-checks` on the crates in the workspace found in the current directory.
 //! Additionally, for any crates which have the same version as their baseline, we check if it has
@@ -76,7 +77,7 @@ impl Write for PrintStdout {
     }
 }
 
-/// Receive output from `ChannelWriter`, echos them to `eprint` calls and also saves the output and
+/// Receive output from `ChannelWriter`, echoes it to `eprint` calls and also saves the output and
 /// returns it.
 fn tee_semver_output(recv: std::sync::mpsc::Receiver<Vec<u8>>) -> Vec<u8> {
     let mut output = vec![];
@@ -222,7 +223,7 @@ fn vendor_packages(
     Ok(project_dir.join("vendor"))
 }
 
-/// Runs some command, checks for errors, and forwards output from stdout / stderr to `print and
+/// Runs some command, checks for errors, and forwards output from stdout / stderr to `print` and
 /// `eprint` which allows the test fixture to capture the output.
 fn run_command(cmd: &mut Command, error_message: &str) -> Result<()> {
     let context = format!(
@@ -668,6 +669,33 @@ fn semver_compatible_test() {
     ));
 }
 
+fn missing_baseline_error(package: &str) -> anyhow::Error {
+    anyhow!(
+        "\
+    No SemVer baseline found for {package}
+
+    If this is a new crate that you intend to publish:
+        - Add '{package} = \"none\"' to semver-baselines.lock
+
+    If this is a crate that you intend to never publish:
+        - Add to {package}'s Cargo.toml:
+            [package.metadata.release]
+            release = false\
+        "
+    )
+}
+
+fn catch_missing_baseline_error(package: &str, error: anyhow::Error) -> anyhow::Error {
+    let error_str = format!("{error:?}");
+    if error_str.contains(&format!("{package} not found in"))
+        || error_str.contains(&format!("`{package}` not found in"))
+    {
+        missing_baseline_error(package)
+    } else {
+        error
+    }
+}
+
 /// Entrypoint for the tests. See the module doc-comment about what it does.
 ///
 /// `workspace_root`         : The path to the workspace we are checking
@@ -700,7 +728,8 @@ fn run_inner(
             continue;
         }
         let baseline = semver_baseline_factory(version.and_then(|v| v.as_option()));
-        let output = run_semver_checks(workspace_root, baseline, vec![package.into()])?;
+        let output = run_semver_checks(workspace_root, baseline, vec![package.into()])
+            .map_err(|error| catch_missing_baseline_error(package, error))?;
         semver_output.extend(output);
     }
 
@@ -773,7 +802,7 @@ impl SemverChecks {
         };
 
         if let Err(e) = run_inner(self, &current_dir, baseline_factory, real_cargo_vendor) {
-            panic!("{e}");
+            panic!("{e:?}");
         }
     }
 }
@@ -1087,6 +1116,7 @@ mod tests {
                 baseline_version,
             )],
         );
+
         run_with_temp_dir(
             tempdir,
             &baseline_name,
@@ -1449,6 +1479,76 @@ mod tests {
             true,  /* locked */
         )
         .unwrap();
+    }
+
+    #[test]
+    fn add_new_crate_errors() {
+        let tempdir = tempdir().unwrap();
+
+        create_current(
+            &tempdir,
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo() {}",
+                Version::new(2, 0, 0),
+            )][..],
+        );
+
+        let baseline1_version = Version::new(1, 0, 0);
+        let baseline1_name = format!("baseline_{baseline1_version}");
+        create_baseline(
+            &tempdir,
+            &baseline1_name,
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo(_a: u32) {}",
+                baseline1_version,
+            )][..],
+        );
+
+        // Run once to populate the lock-file
+        run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            false, /* update */
+            false, /* locked */
+        )
+        .unwrap();
+
+        // Add a new crate
+        std::fs::write(
+            tempdir.path().join("current").join("Cargo.toml"),
+            "
+            [workspace]
+            members = [\"foobar\", \"baz\"]
+            resolve = \"2\"
+            ",
+        )
+        .unwrap();
+
+        let current_baz = tempdir.path().join("current/baz");
+        std::fs::create_dir_all(current_baz.join("src")).unwrap();
+        write_cargo_toml(
+            &current_baz,
+            "baz",
+            &Version::new(1, 0, 0),
+            &HashMap::new(),
+            &HashMap::new(),
+        );
+        std::fs::write(current_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
+
+        let err = run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            false, /* update */
+            true,  /* locked */
+        )
+        .unwrap_err();
+        assert!(
+            err.to_string()
+                .starts_with("No SemVer baseline found for baz"),
+            "{err:?}"
+        );
     }
 
     #[test]

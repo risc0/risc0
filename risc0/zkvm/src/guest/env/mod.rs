@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Functions for interacting with the host environment.
 //!
@@ -74,20 +75,14 @@ mod read;
 mod verify;
 mod write;
 
-use alloc::{
-    alloc::{Layout, alloc},
-    vec,
-};
+use alloc::vec;
 use core::cell::OnceCell;
 
 use anyhow::Result;
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
-    WORD_SIZE, align_up, fileno,
-    syscall::{
-        self, Syscall, SyscallName, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input,
-        sys_log, sys_pause, syscall_2_nr,
-    },
+    fileno,
+    syscall::{self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause},
 };
 use serde::{Serialize, de::DeserializeOwned};
 
@@ -188,40 +183,6 @@ pub fn exit(exit_code: u8) -> ! {
 pub fn pause(exit_code: u8) {
     finalize(false, exit_code);
     init();
-}
-
-/// Exchange data with the host.
-pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> syscall::Return {
-    unsafe {
-        syscall_2_nr(
-            Syscall::User.into(),
-            syscall,
-            from_host.as_mut_ptr(),
-            from_host.len(),
-            to_host.as_ptr() as u32,
-            to_host.len() as u32,
-        )
-    }
-}
-
-/// Exchanges slices of plain old data with the host.
-///
-/// This makes two calls to the given syscall; the first gets the length of the
-/// buffer to allocate for the return data, and the second actually
-/// receives the return data.
-///
-/// On the host side, implement SliceIo to provide a handler for this call.
-///
-/// NOTE: This method never frees up the buffer memory storing the host's response.
-pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T]) -> &'static [U] {
-    let syscall::Return(nbytes, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
-    let nwords = align_up(nbytes as usize, WORD_SIZE) / WORD_SIZE;
-    let from_host_buf = unsafe {
-        let layout = Layout::from_size_align(nwords * WORD_SIZE, WORD_SIZE).unwrap();
-        core::slice::from_raw_parts_mut(alloc(layout) as *mut u32, nwords)
-    };
-    syscall(syscall_name, &[], from_host_buf);
-    &bytemuck::cast_slice(from_host_buf)[..nbytes as usize / core::mem::size_of::<U>()]
 }
 
 /// Read private data from the STDIN of the zkVM and deserializes it.

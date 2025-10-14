@@ -1,20 +1,22 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::collections::HashMap;
 use std::future::Future;
 use std::num::NonZeroU32;
+use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 
 use anyhow::{Context as _, Result, anyhow, bail};
@@ -65,11 +67,14 @@ pub struct RpcMessageId(NonZeroU32);
 impl<StreamT: AsyncWrite + Unpin> RpcSender<StreamT> {
     /// Send a message to the remote machine and expect a response. When the response is received,
     /// the given callback will be called.
-    pub async fn ask<ResponseT: DeserializeOwned>(
+    pub async fn ask<ResponseT: DeserializeOwned, FutT>(
         &self,
         msg: &impl Serialize,
-        callback: impl FnOnce(ResponseT) + Send + 'static,
-    ) -> Result<()> {
+        callback: impl FnOnce(ResponseT) -> FutT + Send + 'static,
+    ) -> Result<()>
+    where
+        FutT: Future<Output = ()> + Send + 'static,
+    {
         let message_id = self.registry.lock().unwrap().add_request(callback);
         self.send(msg, message_id, RpcMessageKind::ExpectsResponse)
             .await
@@ -172,7 +177,9 @@ const RPC_HEADER_SIZE: usize = 4 + 4 + 4;
 /// The maximum size of an RPC body
 const RPC_BODY_MAX: usize = 2 * GIGABYTE;
 
-type RpcRegistryCallback = Box<dyn FnOnce(&[u8]) -> Result<()> + Send>;
+type RpcRegistryCallback = Box<
+    dyn for<'a> FnOnce(&'a [u8]) -> Pin<Box<dyn Future<Output = Result<()>> + 'a + Send>> + Send,
+>;
 
 struct RpcRegistry {
     pending_requests: HashMap<RpcMessageId, RpcRegistryCallback>,
@@ -199,10 +206,13 @@ impl RpcRegistry {
             .ok_or_else(|| anyhow!("received response RPC which didn't have matching request"))
     }
 
-    fn add_request<ResponseT: DeserializeOwned>(
+    fn add_request<ResponseT: DeserializeOwned, FutT>(
         &mut self,
-        callback: impl FnOnce(ResponseT) + Send + 'static,
-    ) -> RpcMessageId {
+        callback: impl FnOnce(ResponseT) -> FutT + Send + 'static,
+    ) -> RpcMessageId
+    where
+        FutT: Future<Output = ()> + Send + 'static,
+    {
         let message_id = self.next_message_id();
 
         let inserted = self
@@ -210,12 +220,17 @@ impl RpcRegistry {
             .insert(
                 message_id,
                 Box::new(move |body_bytes| {
-                    let response: ResponseT =
-                        bincode::deserialize(body_bytes).with_context(|| {
-                            format!("error deserializing {}", std::any::type_name::<ResponseT>())
-                        })?;
-                    callback(response);
-                    Ok(())
+                    Box::pin(async move {
+                        let response: ResponseT =
+                            bincode::deserialize(body_bytes).with_context(|| {
+                                format!(
+                                    "error deserializing {}",
+                                    std::any::type_name::<ResponseT>()
+                                )
+                            })?;
+                        callback(response).await;
+                        Ok(())
+                    })
                 }),
             )
             .is_none();
@@ -386,7 +401,7 @@ impl<StreamT: AsyncRead + Unpin> RpcReceiver<StreamT> {
                     .lock()
                     .unwrap()
                     .remove_request(header.message_id)?;
-                callback(&body)?;
+                callback(&body).await?;
             }
         }
 
@@ -498,7 +513,7 @@ mod tests {
             let (send, recv) = unbounded_channel();
 
             self.sender_a
-                .ask(req, move |res: ResponseT| send.send(res).unwrap())
+                .ask(req, async move |res: ResponseT| send.send(res).unwrap())
                 .await
                 .unwrap();
 

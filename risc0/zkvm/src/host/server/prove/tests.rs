@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::sync::OnceLock;
 
@@ -193,6 +194,17 @@ fn check_image_id() {
 }
 
 #[test_log::test]
+fn p2_basic() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::Poseidon2Basic)
+        .unwrap()
+        .build()
+        .unwrap();
+    let receipt = prove_elf(env, MULTI_TEST_ELF).unwrap();
+    receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+#[test_log::test]
 fn sha_basics() {
     let run_sha = |msg: &str| -> String {
         let env = ExecutorEnv::builder()
@@ -355,6 +367,8 @@ fn session_events() {
 // https://github.com/riscv-software-src/riscv-tests
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
+// The exception is the test of fence, which was built with
+// https://archlinux.org/packages/extra/x86_64/riscv64-elf-gcc/ v14.0.1-1
 mod riscv {
     use super::*;
     use crate::ExecutorEnv;
@@ -390,7 +404,9 @@ mod riscv {
 
             let env = ExecutorEnv::default();
             prove_elf(env, &elf).unwrap();
+            return;
         }
+        panic!("No filename matching '{}'", test_name);
     }
 
     macro_rules! test_case {
@@ -415,8 +431,10 @@ mod riscv {
     test_case!(bne);
     test_case!(div);
     test_case!(divu);
+    test_case!(fence);
     test_case!(jal);
     test_case!(jalr);
+    test_case!(misaligned_jalr);
     test_case!(lb);
     test_case!(lbu);
     test_case!(lh);

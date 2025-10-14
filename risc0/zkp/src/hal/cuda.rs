@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc, sync::OnceLock};
 
@@ -719,28 +720,13 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         input_size: usize,
         count: usize,
     ) {
-        let mix_start = self.copy_from_extelem("mix_start", &[*mix_start]);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
-
-        unsafe extern "C" {
-            fn risc0_zkp_cuda_mix_poly_coeffs(
-                output: DevicePointer<u8>,
-                input: DevicePointer<u8>,
-                combos: DevicePointer<u8>,
-                mix_start: DevicePointer<u8>,
-                mix: DevicePointer<u8>,
-                input_size: u32,
-                count: u32,
-            ) -> *const std::os::raw::c_char;
-        }
-
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_mix_poly_coeffs(
                 output.as_device_ptr(),
                 input.as_device_ptr(),
                 combos.as_device_ptr(),
-                mix_start.as_device_ptr(),
-                mix.as_device_ptr(),
+                mix_start as *const _ as *const u32,
+                mix as *const _ as *const u32,
                 input_size as u32,
                 count as u32,
             )
@@ -940,22 +926,12 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         let count = output.size() / Self::ExtElem::EXT_SIZE;
         assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), output.size() * FRI_FOLD);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
-
-        unsafe extern "C" {
-            fn risc0_zkp_cuda_fri_fold(
-                output: DevicePointer<u8>,
-                input: DevicePointer<u8>,
-                mix: DevicePointer<u8>,
-                count: u32,
-            ) -> *const std::os::raw::c_char;
-        }
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_fri_fold(
                 output.as_device_ptr(),
                 input.as_device_ptr(),
-                mix.as_device_ptr(),
+                mix as *const _ as *const u32,
                 count as u32,
             )
         })

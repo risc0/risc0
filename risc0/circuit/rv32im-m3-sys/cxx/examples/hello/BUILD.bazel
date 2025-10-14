@@ -1,0 +1,30 @@
+load("@zirgen//bazel/rules/zirgen:edsl-defs.bzl", "build_circuit")
+
+cc_library(
+    name = "hello-circuit",
+    srcs = ["hello.cpp"],
+    hdrs = ["hello.h"],
+    deps = [
+        "//hal/pick",
+        "//prove",
+        "//verify",
+    ],
+)
+
+build_circuit(
+    name = "zkr",
+    srcs = ["gen_zkr.cpp"],
+    outs = ["hello_lift_12.zkr"],
+    deps = [
+        ":hello-circuit",
+        "@zirgen//zirgen/circuit/predicates:lib",
+    ],
+)
+
+cc_binary(
+    name = "hello",
+    srcs = ["main.cpp"],
+    deps = [
+        ":hello-circuit",
+    ],
+)

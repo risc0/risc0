@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Manages formatted binaries used by the RISC Zero zkVM
 
@@ -48,4 +49,12 @@ pub(crate) const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
 /// Compute and return the ImageID of the specified combined user ELF + kernel ELF binary.
 pub fn compute_image_id(blob: &[u8]) -> Result<Digest> {
     ProgramBinary::decode(blob)?.compute_image_id()
+}
+
+/// Compute and return the kernel ID of the specified binary.
+///
+/// The given binary is expected to be a combined user ELF + kernel ELF binary. The returned digest
+/// is of the kernel, and is constant with respect to the user program.
+pub fn compute_kernel_id(blob: &[u8]) -> Result<Digest> {
+    ProgramBinary::decode(blob)?.kernel_id()
 }

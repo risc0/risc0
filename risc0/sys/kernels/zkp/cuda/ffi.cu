@@ -1,16 +1,17 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #include "cuda.h"
 #include "fp.h"
@@ -73,7 +74,7 @@ const char* risc0_zkp_cuda_eltwise_zeroize_fpext(FpExt* elems, const uint32_t co
 }
 
 const char* risc0_zkp_cuda_fri_fold(Fp* out, const Fp* in, const FpExt* mix, const uint32_t count) {
-  return launchKernel(fri_fold, count, 0, out, in, mix, count);
+  return launchKernel(fri_fold, count, 0, out, in, *mix, count);
 }
 
 const char* risc0_zkp_cuda_mix_poly_coeffs(FpExt* out,
@@ -83,7 +84,8 @@ const char* risc0_zkp_cuda_mix_poly_coeffs(FpExt* out,
                                            const FpExt* mix,
                                            const uint32_t inputSize,
                                            const uint32_t count) {
-  return launchKernel(mix_poly_coeffs, count, 0, out, in, combos, mixStart, mix, inputSize, count);
+  return launchKernel(
+      mix_poly_coeffs, count, 0, out, in, combos, *mixStart, *mix, inputSize, count);
 }
 
 const char* risc0_zkp_cuda_batch_bit_reverse(Fp* io, const uint32_t nBits, const uint32_t count) {

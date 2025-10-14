@@ -1,16 +1,17 @@
 // Copyright 2025 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{
     env, fs,
@@ -195,7 +196,16 @@ impl KernelBuild {
 
         let cudart = env::var("RISC0_CUDART_LINKAGE").unwrap_or("static".to_string());
 
+        let warnings = [
+            "-Wno-missing-braces",
+            "-Wno-unused-function",
+            "-Wno-unknown-pragmas",
+            "-Wno-unused-parameter",
+        ]
+        .join(",");
+
         build
+            .cpp(true)
             .cuda(true)
             .cudart(&cudart)
             .debug(false)
@@ -206,9 +216,7 @@ impl KernelBuild {
             .flag("-Xcudafe")
             .flag("--display_error_number")
             .flag("-Xcompiler")
-            .flag(
-                "-Wno-missing-braces,-Wno-unused-function,-Wno-unknown-pragmas,-Wno-unused-parameter",
-            )
+            .flag(warnings)
             .compile(output);
     }
 

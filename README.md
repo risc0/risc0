@@ -12,7 +12,7 @@
 </p>
 
 [![Crates.io][crates-badge]][crates-url]
-[![MIT licensed][licence-badge]][licence-url]
+[![Dual licensed: Apache-2.0 OR MIT][licence-badge]][licence-url]
 [![Build Status][actions-badge]][actions-url]
 [![Discord chat][discord-badge]][discord-url]
 [![Twitter][twitter-badge]][twitter-url]
@@ -173,7 +173,10 @@ The following feature flags are present in one or more of the crates listed abov
 
 ## License
 
-This project is licensed under the Apache2 license. See [LICENSE](LICENSE).
+This project is dual-licensed under either:
+
+* [Apache License, Version 2.0](LICENSE-APACHE)
+* [MIT License](LICENSE-MIT)
 
 [actions-badge]: https://img.shields.io/github/actions/workflow/status/risc0/risc0/main.yml?branch=main
 [actions-url]: https://github.com/risc0/risc0/actions?query=workflow%3ACI+branch%3Amain
@@ -184,8 +187,8 @@ This project is licensed under the Apache2 license. See [LICENSE](LICENSE).
 [discord-badge]: https://img.shields.io/discord/953703904086994974.svg?logo=discord&style=flat-square
 [discord-url]: https://discord.gg/risczero
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[licence-badge]: https://img.shields.io/github/license/risc0/risc0?color=blue
-[licence-url]: https://github.com/risc0/risc0/blob/main/LICENSE
+[licence-badge]: https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue
+[licence-url]: #license
 [proof-system-in-detail]: https://dev.risczero.com/proof-system-in-detail.pdf
 [quickstart]: https://dev.risczero.com/api/zkvm/quickstart
 [risc-v]: https://en.wikipedia.org/wiki/RISC-V
