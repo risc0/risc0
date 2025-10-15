@@ -55,7 +55,7 @@ pub enum LogLevel {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn risc0_log_callback(level: c_int, msg: *const c_char) {
+pub unsafe extern "C" fn risc0_log_callback(level: c_int, msg: *const c_char) {
     let s = unsafe { CStr::from_ptr(msg).to_string_lossy().into_owned() };
     match level {
         0 => tracing::error!("{s}"),
