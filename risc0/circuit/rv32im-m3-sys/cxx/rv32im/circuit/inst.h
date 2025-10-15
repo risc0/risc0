@@ -522,3 +522,25 @@ template <typename C> struct InstEcallBlock {
   FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
+
+template <typename C> struct InstMretBlock {
+  CONSTANT static char NAME[] = "InstMretBlock";
+
+  Reg<C> cycle;
+  FetchBlock<C> fetch;
+  MemReadBlock<C> readPc;
+  AddU32<C> sumPc;
+
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, cycle);
+    T::apply(ctx, fetch);
+    T::apply(ctx, readPc, cycle.get());
+    T::apply(ctx, sumPc, readPc.data.get(), ValU32<C>(4, 0));
+  }
+
+  FDEV void set(CTX, InstMretWitness wit) DEV;
+  FDEV inline void finalize(CTX) DEV {}
+
+  FDEV void verify(CTX) DEV;
+  FDEV void addArguments(CTX) DEV;
+};

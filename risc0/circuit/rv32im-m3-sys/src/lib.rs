@@ -13,32 +13,81 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use std::ffi::CStr;
+use std::os::raw::{c_char, c_int};
+
 #[repr(C)]
-pub struct RawProver {
+pub struct ProverContext {
     _private: (),
 }
 
 #[repr(C)]
-pub struct RawSlice {
-    pub ptr: *const u32,
+pub struct RawSlice<T> {
+    pub ptr: *const T,
     pub len: usize,
 }
 
+#[repr(C)]
+pub struct RawPage {
+    pub addr: u32,
+    pub data: *const u32,
+}
+
+#[repr(C)]
+pub struct RawMemoryImage {
+    pub pages: RawSlice<RawPage>,
+}
+
+#[repr(C)]
+pub struct RawSegment {
+    pub image: RawMemoryImage,
+}
+
+type RawError = *const std::os::raw::c_char;
+
 unsafe extern "C" {
-    pub fn risc0_circuit_rv32im_m3_prover_new_cpu(po2: usize) -> *const RawProver;
+    pub fn risc0_circuit_rv32im_m3_prover_new_cpu(po2: usize) -> *const ProverContext;
 
     #[cfg(feature = "cuda")]
-    pub fn risc0_circuit_rv32im_m3_prover_new_cuda(po2: usize) -> *const RawProver;
+    pub fn risc0_circuit_rv32im_m3_prover_new_cuda(po2: usize) -> *const ProverContext;
 
-    pub fn risc0_circuit_rv32im_m3_prover_free(prover: *const RawProver);
+    pub fn risc0_circuit_rv32im_m3_prover_free(ctx: *const ProverContext);
 
-    pub fn risc0_circuit_rv32im_m3_prover_transcript(prover: *const RawProver) -> RawSlice;
+    pub fn risc0_circuit_rv32im_m3_prover_transcript(ctx: *const ProverContext) -> RawSlice<u32>;
 
-    pub fn risc0_circuit_rv32im_m3_preflight(
-        prover: *const RawProver,
-        elf_ptr: *const u8,
-        elf_len: usize,
-    ) -> *const std::os::raw::c_char;
+    pub fn risc0_circuit_rv32im_m3_load_segment(
+        ctx: *const ProverContext,
+        segment: *const RawSegment,
+    ) -> RawError;
 
-    pub fn risc0_circuit_rv32im_m3_prove(prover: *const RawProver) -> *const std::os::raw::c_char;
+    pub fn risc0_circuit_rv32im_m3_preflight(ctx: *const ProverContext) -> RawError;
+
+    pub fn risc0_circuit_rv32im_m3_prove(ctx: *const ProverContext) -> RawError;
+}
+
+#[repr(C)]
+pub enum LogLevel {
+    Error = 0,
+    Info = 1,
+    Debug = 2,
+    Trace = 3,
+}
+
+/// Callback into the Rust logging system from C/C++ code.
+///
+/// # Safety
+///
+/// - `msg` must be a valid, non-null pointer to a NUL-terminated C string.
+/// - The string pointed to by `msg` must remain valid for the duration of this call.
+/// - `level` should be an integer corresponding to a known log level (0 = error, 1 = info, etc).
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn risc0_log_callback(level: c_int, msg: *const c_char) {
+    let str = unsafe { CStr::from_ptr(msg) }.to_string_lossy();
+    match level {
+        0 => tracing::error!("{str}"),
+        1 => tracing::info!("{str}"),
+        2 => tracing::debug!("{str}"),
+        3 => tracing::trace!("{str}"),
+        _ => (),
+    }
 }

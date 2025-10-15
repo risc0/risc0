@@ -476,9 +476,10 @@ struct Emulator {
       auto& wit = trace.makeInstEcall();
       wit.cycle = curCycle;
       wit.fetch = *curFetch;
-      writeMemory(wit.savePc, MEPC_WORD, newPc);
+      writeMemory(wit.savePc, MEPC_WORD, pc);
       mm = 1;
-      pc = readMemory(wit.dispatch, ECALL_DISPATCH_WORD);
+      regOffset = MACHINE_REGS_WORD & 0xff;
+      newPc = readMemory(wit.dispatch, ECALL_DISPATCH_WORD);
       return;
     }
     uint32_t which = peekMemory(MACHINE_REGS_WORD + REG_A7);
@@ -498,6 +499,18 @@ struct Emulator {
     default:
       trap("Invalid ECALL in machine mode");
     }
+  }
+
+  template <uint32_t opt> inline void do_INST_MRET() {
+    if (!mm) {
+      trap("MRET not in machine mode");
+    }
+    auto& wit = trace.makeInstMret();
+    wit.cycle = curCycle;
+    wit.fetch = *curFetch;
+    mm = 0;
+    regOffset = USER_REGS_WORD & 0xff;
+    newPc = readMemory(wit.readPc, MEPC_WORD) + 4;
   }
 
   void do_ECALL_TERMINATE() {
@@ -583,7 +596,7 @@ struct Emulator {
   void do_ECALL_BIG_INT() {
     std::map<uint32_t, uint32_t> polyWitness;
     size_t count = witgenBigInt(polyWitness, [&](uint32_t addr) { return peekMemory(addr); });
-    LOG(0, "BIGINT ecall with count = " << count);
+    LOG(1, "BIGINT ecall with count = " << count);
     // TODO: Based on count + polyWitness paging, decide if we need to abort
     auto& wit = trace.makeEcallBigInt();
     wit.cycle = curCycle;
@@ -758,7 +771,7 @@ bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount) {
   Emulator emu(trace, image, io, rowCount);
   emu.addTables();
   bool done = emu.run(rowCount);
-  LOG(0, "Cycle = " << emu.curCycle);
+  LOG(1, "Cycle = " << emu.curCycle);
   emu.commit();
   return done;
 }

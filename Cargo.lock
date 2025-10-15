@@ -7295,10 +7295,13 @@ dependencies = [
 name = "risc0-circuit-rv32im-m3"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
+ "bytemuck",
  "cfg-if",
  "flate2",
  "gpu-guard",
  "risc0-binfmt",
+ "risc0-circuit-rv32im",
  "risc0-circuit-rv32im-m3-sys",
  "risc0-sys",
  "risc0-zkp",
@@ -7317,6 +7320,7 @@ dependencies = [
  "risc0-build-kernel",
  "risc0-sppark",
  "risc0-sys",
+ "tracing",
 ]
 
 [[package]]
@@ -7586,6 +7590,7 @@ dependencies = [
  "risc0-circuit-keccak-methods",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
+ "risc0-circuit-rv32im-m3",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",

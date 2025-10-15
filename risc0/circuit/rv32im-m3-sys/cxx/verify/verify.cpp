@@ -52,26 +52,26 @@ void verify(VerifyCircuitInfo& ci, ReadIop& iop, size_t po2) {
       iop.commit(globalsDigest);
     }
     merkles.emplace_back(iop, domain, numCols, kQueries);
-    LOG(0, "Merkle root = " << merkles.back().getRoot());
+    LOG(1, "Merkle root = " << merkles.back().getRoot());
   }
 
   FpExt evalCheckMix = iop.rngFpExt();
-  LOG(0, "evalCheckMix = " << evalCheckMix);
+  LOG(1, "evalCheckMix = " << evalCheckMix);
 
   MerkleVerifier checkMerkle(iop, domain, kExtSize * kExpansionFactor, kQueries);
   totalTaps += kExtSize * kExpansionFactor;
-  LOG(0, "Check root = " << checkMerkle.getRoot());
+  LOG(1, "Check root = " << checkMerkle.getRoot());
 
   FpExt z = iop.rngFpExt();
-  LOG(0, "Selected z = " << z);
+  LOG(1, "Selected z = " << z);
 
   std::vector<FpExt> coeffs(totalTaps);
   iop.read(coeffs.data(), coeffs.size());
   Digest coeffsDigest = poseidon2Hash(coeffs.data(), coeffs.size());
-  LOG(0, "Coeffs digest = " << coeffsDigest);
+  LOG(1, "Coeffs digest = " << coeffsDigest);
   iop.commit(coeffsDigest);
   FpExt comboMix = iop.rngFpExt();
-  LOG(0, "Combo mix = " << comboMix);
+  LOG(1, "Combo mix = " << comboMix);
 
   // Convert coeffs into evaluations
   std::vector<FpExt> eval(totalTaps);
@@ -93,7 +93,7 @@ void verify(VerifyCircuitInfo& ci, ReadIop& iop, size_t po2) {
   }
 
   FpExt constraintPoly = ci.evalCheck(eval.data(), globals.data(), mix.data(), evalCheckMix, z);
-  LOG(0, "constraintPoly = " << constraintPoly);
+  LOG(1, "constraintPoly = " << constraintPoly);
   const FpExt* checkData = eval.data() + offset;
   FpExt check;
   size_t remap[] = {0, 2, 1, 3};
@@ -105,7 +105,7 @@ void verify(VerifyCircuitInfo& ci, ReadIop& iop, size_t po2) {
     check += checkData[rmi + 12] * pow(z, i) * FpExt(0, 0, 0, 1);
   }
   check *= pow(Fp(3) * z, rows) - FpExt(1);
-  LOG(0, "check = " << check);
+  LOG(1, "check = " << check);
   if (constraintPoly != check) {
     throw std::runtime_error("Poly check failed");
   }

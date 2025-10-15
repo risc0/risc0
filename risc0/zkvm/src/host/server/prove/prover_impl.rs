@@ -225,6 +225,33 @@ impl ProverServer for ProverImpl {
         );
     }
 
+    #[cfg(feature = "rv32im-m3")]
+    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(segment.po2())?;
+        let seal = prover.prove(&segment.inner)?;
+
+        let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, None)?;
+        claim.output = segment.output.clone().into();
+
+        let verifier_parameters = ctx
+            .segment_verifier_parameters
+            .as_ref()
+            .ok_or_else(|| anyhow!("segment receipt verifier parameters missing from context"))?
+            .digest();
+        let receipt = SegmentReceipt {
+            seal,
+            index: segment.index,
+            hashfn: self.opts.hashfn.clone(),
+            claim,
+            verifier_parameters,
+        };
+        receipt
+            .verify_integrity_with_context(ctx)
+            .context("verify segment")?;
+
+        Ok(receipt)
+    }
+
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
         tracing::debug!("segment_preflight");
 
