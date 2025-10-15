@@ -211,7 +211,7 @@ pub trait Executor {
 /// * `bonsai`: [BonsaiProver] to prove on Bonsai.
 /// * `local`: LocalProver to prove locally in-process. Note: this
 ///   requires the `prove` feature flag.
-/// * `actor`: [DefaultProver] to prove using an `r0vm` sub-process. Note: `r0vm`
+/// * `ipc`: [DefaultProver] to prove using an `r0vm` sub-process. Note: `r0vm`
 ///   must be installed. To specify the path to `r0vm`, use `RISC0_SERVER_PATH`.
 ///
 /// If `RISC0_PROVER` is not specified, the following rules are used to select a
@@ -224,7 +224,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
     let explicit = std::env::var("RISC0_PROVER").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
-            "actor" => Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap()),
+            "ipc" => Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap()),
             #[cfg(feature = "bonsai")]
             "bonsai" => Rc::new(BonsaiProver::new("bonsai")),
             #[cfg(feature = "prove")]
@@ -258,7 +258,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
 /// following [Executor] implementation:
 /// * `local`: LocalProver to execute locally in-process. Note: this is
 ///   only available when the `prove` feature is enabled.
-/// * `actor`: [DefaultProver] to execute using an `r0vm` sub-process. Note:
+/// * `ipc`: [DefaultProver] to execute using an `r0vm` sub-process. Note:
 ///   `r0vm` must be installed. To specify the path to `r0vm`, use
 ///   `RISC0_SERVER_PATH`.
 ///
@@ -270,7 +270,7 @@ pub fn default_executor() -> Rc<dyn Executor> {
     let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
-            "actor" => Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap()),
+            "ipc" => Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap()),
             #[cfg(feature = "prove")]
             "local" => Rc::new(self::local::LocalProver::new("local")),
             _ => unimplemented!("Unsupported executor: {explicit}"),
