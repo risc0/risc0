@@ -36,8 +36,6 @@ impl SegmentProver for SegmentProverImpl {
     fn prove(&self, segment: &Segment) -> Result<Seal> {
         tracing::debug!("{segment:#?}");
 
-        // unsafe { risc0_circuit_rv32im_m3_set_log_level(2) };
-
         self.load_segment(segment)?;
         self.preflight()?;
         self.prove()?;

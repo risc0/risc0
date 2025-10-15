@@ -64,10 +64,6 @@ struct RustSegment {
   // pub povw_nonce: Option<PovwNonce>,
 };
 
-void risc0_circuit_rv32im_m3_set_log_level(unsigned level) {
-  setLogLevel(level);
-}
-
 ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {
   IHalPtr hal = getCpuHal();
   return new ProverContext(hal, po2);
@@ -96,8 +92,10 @@ const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustS
       ctx->image.setPage(page.addr, data);
     }
   } catch (const std::exception& err) {
+    LOG(0, "ERROR: " << err.what());
     return strdup(err.what());
   } catch (...) {
+    LOG(0, "UNKNOWN ERROR");
     return strdup("Generic exception");
   }
   return nullptr;

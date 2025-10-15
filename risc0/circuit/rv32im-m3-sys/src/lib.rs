@@ -46,8 +46,6 @@ pub struct RawSegment {
 type RawError = *const std::os::raw::c_char;
 
 unsafe extern "C" {
-    pub fn risc0_circuit_rv32im_m3_set_log_level(level: usize);
-
     pub fn risc0_circuit_rv32im_m3_prover_new_cpu(po2: usize) -> *const ProverContext;
 
     #[cfg(feature = "cuda")]
@@ -84,12 +82,12 @@ pub enum LogLevel {
 /// - `level` should be an integer corresponding to a known log level (0 = error, 1 = info, etc).
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn risc0_log_callback(level: c_int, msg: *const c_char) {
-    let s = unsafe { CStr::from_ptr(msg).to_string_lossy().into_owned() };
+    let str = unsafe { CStr::from_ptr(msg) }.to_string_lossy();
     match level {
-        0 => tracing::error!("{s}"),
-        1 => tracing::info!("{s}"),
-        2 => tracing::debug!("{s}"),
-        3 => tracing::trace!("{s}"),
+        0 => tracing::error!("{str}"),
+        1 => tracing::info!("{str}"),
+        2 => tracing::debug!("{str}"),
+        3 => tracing::trace!("{str}"),
         _ => (),
     }
 }
