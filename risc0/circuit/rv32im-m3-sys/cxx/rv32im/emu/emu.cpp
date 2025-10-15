@@ -680,7 +680,7 @@ struct Emulator {
       decoded = DecodedInst(decodeWit->inst);
       Opcode opcode = getOpcode(decoded);
       DLOG("cycle: " << curCycle << ", pc: " << std::hex << pc << std::dec
-                     << ", inst: " << getOpcodeName(opcode));
+                     << ", inst: " << getOpcodeName(opcode) << "(" << ")");
       switch (opcode) {
 #define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...)                                \
   case Opcode::name:                                                                               \

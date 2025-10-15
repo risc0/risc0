@@ -106,15 +106,15 @@ pub struct Page(Vec<u8>);
 /// [Program].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MemoryImage {
-    /// TODO(flaub)
+    /// The pages of the memory image, by address.
     #[debug("{}", pages.len())]
     // #[debug("{:#010x?}", pages.keys())]
-    pages: BTreeMap<u32, Page>,
+    pub pages: BTreeMap<u32, Page>,
 
-    /// TODO(flaub)
+    /// The digests of the memory image, representing a merkle tree.
     #[debug("{}", digests.len())]
     // #[debug("{:#010x?}", digests.keys())]
-    digests: BTreeMap<u32, Digest>,
+    pub digests: BTreeMap<u32, Digest>,
 
     #[debug("{}", dirty.len())]
     dirty: BTreeSet<u32>,

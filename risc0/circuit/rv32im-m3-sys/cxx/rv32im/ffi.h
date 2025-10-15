@@ -20,24 +20,27 @@
 
 extern "C" {
 
-struct RawProver;
+struct ProverContext;
 
-struct RawSlice {
+struct RustSegment;
+
+struct RustSliceFp {
   const risc0::Fp* ptr;
   size_t len;
 };
 
-RawProver* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2);
+ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2);
 
-RawProver* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2);
+ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2);
 
-void risc0_circuit_rv32im_m3_prover_free(RawProver* raw);
+void risc0_circuit_rv32im_m3_prover_free(ProverContext* ctx);
 
-RawSlice risc0_circuit_rv32im_m3_prover_transcript(RawProver* raw);
+RustSliceFp risc0_circuit_rv32im_m3_prover_transcript(ProverContext* ctx);
 
-const char*
-risc0_circuit_rv32im_m3_preflight(RawProver* raw, const uint8_t* elf_ptr, size_t elf_len);
+const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustSegment* segment);
 
-const char* risc0_circuit_rv32im_m3_prove(RawProver* raw);
+const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx);
+
+const char* risc0_circuit_rv32im_m3_prove(ProverContext* ctx);
 
 } // extern "C"
