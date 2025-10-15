@@ -27,9 +27,6 @@ void runTest(const std::string& name, size_t po2 = 12) {
 }
 
 int main() {
-  if (const char* level = std::getenv("RISC0_LOG")) {
-    risc0::setLogLevel(std::atoi(level));
-  }
   runTest("rvc", 14);
   runTest("add");
   runTest("sub");

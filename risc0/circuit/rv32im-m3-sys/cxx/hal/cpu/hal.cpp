@@ -319,7 +319,6 @@ public:
     }
     computeAccumWitnessCpu(
         pAccum.data(), pData.data(), pGlobals.data(), pAccMix.data(), accum.rows());
-    LOG(0, "Doing prefix sum");
     FpExt tot;
     for (size_t i = 0; i < pAccum.rows(); i++) {
       tot += FpExt(pAccum(i, 0), pAccum(i, 1), pAccum(i, 2), pAccum(i, 3));
@@ -328,7 +327,7 @@ public:
       pAccum(i, 2) = tot.elem(2);
       pAccum(i, 3) = tot.elem(3);
     }
-    LOG(0, "Accum tot = " << tot);
+    LOG(1, "Accum tot = " << tot);
   }
 
   void evalCheck(HalMatrix<Fp> check,

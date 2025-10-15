@@ -108,8 +108,10 @@ const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx) {
     NullHostIO io;
     ctx->prover.preflight(ctx->image, io);
   } catch (const std::exception& err) {
+    LOG(0, "ERROR: " << err.what());
     return strdup(err.what());
   } catch (...) {
+    LOG(0, "UNKNOWN ERROR");
     return strdup("Generic exception");
   }
   return nullptr;
@@ -131,7 +133,7 @@ const char* risc0_circuit_rv32im_m3_prove(ProverContext* ctx) {
     LOG(0, "UNKNOWN ERROR");
     return strdup("Generic exception");
   }
-  LOG(0, "Completed successfuly");
+  LOG(1, "Completed successfuly");
   return nullptr;
 }
 
