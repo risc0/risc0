@@ -583,7 +583,7 @@ struct Emulator {
   void do_ECALL_BIG_INT() {
     std::map<uint32_t, uint32_t> polyWitness;
     size_t count = witgenBigInt(polyWitness, [&](uint32_t addr) { return peekMemory(addr); });
-    LOG(0, "BIGINT ecall with count = " << count);
+    LOG(1, "BIGINT ecall with count = " << count);
     // TODO: Based on count + polyWitness paging, decide if we need to abort
     auto& wit = trace.makeEcallBigInt();
     wit.cycle = curCycle;
@@ -758,7 +758,7 @@ bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount) {
   Emulator emu(trace, image, io, rowCount);
   emu.addTables();
   bool done = emu.run(rowCount);
-  LOG(0, "Cycle = " << emu.curCycle);
+  LOG(1, "Cycle = " << emu.curCycle);
   emu.commit();
   return done;
 }

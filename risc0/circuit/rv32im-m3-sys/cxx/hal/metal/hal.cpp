@@ -71,7 +71,7 @@ public:
     device = all->object<MTL::Device>(0);
     device->retain();
     all->release();
-    LOG(0, "Opening metal device: " << device->name()->utf8String());
+    LOG(1, "Opening metal device: " << device->name()->utf8String());
 
     // Create the command queue
     commandQueue = device->newCommandQueue();
@@ -422,7 +422,6 @@ public:
     setBufArg(encoder, 3, extract(accMix), getOffset(accMix));
     dispatchEasy(encoder, accum.rows(), groupSize);
     PinnedMatrixRW<Fp> pAccum(shared_from_this(), accum);
-    LOG(0, "Doing prefix sum");
     FpExt tot;
     for (size_t i = 0; i < pAccum.rows(); i++) {
       tot += FpExt(pAccum(i, 0), pAccum(i, 1), pAccum(i, 2), pAccum(i, 3));
@@ -431,7 +430,7 @@ public:
       pAccum(i, 2) = tot.elem(2);
       pAccum(i, 3) = tot.elem(3);
     }
-    LOG(0, "Accum tot = " << tot);
+    LOG(1, "Accum tot = " << tot);
   }
 
   void evalCheck(HalMatrix<Fp> check,

@@ -13,6 +13,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use std::ffi::CStr;
+use std::os::raw::{c_char, c_int};
+
 #[repr(C)]
 pub struct RawProver {
     _private: (),
@@ -41,4 +44,31 @@ unsafe extern "C" {
     ) -> *const std::os::raw::c_char;
 
     pub fn risc0_circuit_rv32im_m3_prove(prover: *const RawProver) -> *const std::os::raw::c_char;
+}
+
+#[repr(C)]
+pub enum LogLevel {
+    Error = 0,
+    Info = 1,
+    Debug = 2,
+    Trace = 3,
+}
+
+/// Callback into the Rust logging system from C/C++ code.
+///
+/// # Safety
+///
+/// - `msg` must be a valid, non-null pointer to a NUL-terminated C string.
+/// - The string pointed to by `msg` must remain valid for the duration of this call.
+/// - `level` should be an integer corresponding to a known log level (0 = error, 1 = info, etc).
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn risc0_log_callback(level: c_int, msg: *const c_char) {
+    let s = unsafe { CStr::from_ptr(msg).to_string_lossy().into_owned() };
+    match level {
+        0 => tracing::error!("{s}"),
+        1 => tracing::info!("{s}"),
+        2 => tracing::debug!("{s}"),
+        3 => tracing::trace!("{s}"),
+        _ => (),
+    }
 }

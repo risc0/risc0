@@ -24,7 +24,7 @@ using namespace risc0;
 using namespace risc0::rv32im;
 
 int main() {
-  setLogLevel(2);
+  setR0LogLevel(2);
   size_t maxWitPerRow = computeMaxWitPerRow(true);
   LOG(2, "MaxWitPerRow = " << maxWitPerRow);
   size_t maxDataPerRow = computeMaxDataPerRow(true);
