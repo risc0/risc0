@@ -175,6 +175,7 @@ impl JobActor {
         self.submit_task(Task::ShrinkWrap(Arc::new(ShrinkWrapTask {
             kind: request.kind,
             receipt: Arc::new(request.receipt),
+            dev_mode: request.dev_mode,
         })))
         .await?;
 

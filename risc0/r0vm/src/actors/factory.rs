@@ -919,6 +919,7 @@ mod tests {
                 assumptions: vec![],
                 segment_limit_po2: None,
                 execute_only: false,
+                dev_mode: false,
             },
         }));
 
@@ -1167,6 +1168,7 @@ mod tests {
                 assumptions: vec![],
                 segment_limit_po2: None,
                 execute_only: false,
+                dev_mode: false,
             },
         }));
 
@@ -1259,6 +1261,7 @@ mod tests {
                 assumptions: vec![],
                 segment_limit_po2: None,
                 execute_only: false,
+                dev_mode: false,
             },
         }));
 
