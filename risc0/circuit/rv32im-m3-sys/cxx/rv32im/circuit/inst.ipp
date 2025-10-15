@@ -643,4 +643,3 @@ template <typename C> FDEV void InstMretBlock<C>::addArguments(CTX) DEV {
   arg.options = Val<C>(uint32_t(INST_MRET));
   ctx.pull(arg);
 }
-

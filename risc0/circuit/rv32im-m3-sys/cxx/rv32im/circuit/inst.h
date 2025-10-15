@@ -544,4 +544,3 @@ template <typename C> struct InstMretBlock {
   FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
-

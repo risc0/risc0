@@ -25,13 +25,17 @@ class TestIO : public rv32im::HostIO {
 public:
   uint32_t val = 0;
   uint32_t onRead(uint32_t fd, uint8_t* buf, uint32_t len) override {
-    if (len != 4) { throw std::runtime_error("Expecting a read of a single word"); }
+    if (len != 4) {
+      throw std::runtime_error("Expecting a read of a single word");
+    }
     // Set buf to 5
     reinterpret_cast<uint32_t*>(buf)[0] = 5;
     return 4;
   };
   uint32_t onWrite(uint32_t fd, const uint8_t* buf, uint32_t len) override {
-    if (len != 4) { throw std::runtime_error("Expecting a write of a single word"); }
+    if (len != 4) {
+      throw std::runtime_error("Expecting a write of a single word");
+    }
     val = reinterpret_cast<const uint32_t*>(buf)[0];
     return len;
   }

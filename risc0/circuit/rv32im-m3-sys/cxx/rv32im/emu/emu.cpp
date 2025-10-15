@@ -512,7 +512,7 @@ struct Emulator {
     regOffset = USER_REGS_WORD & 0xff;
     newPc = readMemory(wit.readPc, MEPC_WORD) + 4;
   }
-      
+
   void do_ECALL_TERMINATE() {
     auto& wit = trace.makeEcallTerminate();
     wit.cycle = curCycle;

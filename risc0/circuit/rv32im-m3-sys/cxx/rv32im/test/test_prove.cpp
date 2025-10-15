@@ -38,7 +38,10 @@ void runTestBinary(const std::string& elf, rv32im::HostIO& io, size_t po2) {
   LOG(0, "Verify succeeded");
 }
 
-void runTestBinary(const std::string& kernel, const std::string& guest, rv32im::HostIO& io, size_t po2) {
+void runTestBinary(const std::string& kernel,
+                   const std::string& guest,
+                   rv32im::HostIO& io,
+                   size_t po2) {
   IHalPtr hal = getCpuHal();
   LOG(2, "Loading ELFs");
   auto image = rv32im::MemoryImage::fromElfs(kernel, guest);

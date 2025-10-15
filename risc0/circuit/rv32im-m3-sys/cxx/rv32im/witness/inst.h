@@ -143,4 +143,3 @@ struct InstMretWitness {
   FetchWitness fetch;
   MemReadWitness readPc;
 };
-
