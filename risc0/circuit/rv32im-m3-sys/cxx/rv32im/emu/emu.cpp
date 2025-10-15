@@ -476,9 +476,10 @@ struct Emulator {
       auto& wit = trace.makeInstEcall();
       wit.cycle = curCycle;
       wit.fetch = *curFetch;
-      writeMemory(wit.savePc, MEPC_WORD, newPc);
+      writeMemory(wit.savePc, MEPC_WORD, pc);
       mm = 1;
-      pc = readMemory(wit.dispatch, ECALL_DISPATCH_WORD);
+      regOffset = MACHINE_REGS_WORD & 0xff;
+      newPc = readMemory(wit.dispatch, ECALL_DISPATCH_WORD);
       return;
     }
     uint32_t which = peekMemory(MACHINE_REGS_WORD + REG_A7);
@@ -500,6 +501,18 @@ struct Emulator {
     }
   }
 
+  template <uint32_t opt> inline void do_INST_MRET() {
+    if (!mm) {
+      trap("MRET not in machine mode");
+    }
+    auto& wit = trace.makeInstMret();
+    wit.cycle = curCycle;
+    wit.fetch = *curFetch;
+    mm = 0;
+    regOffset = USER_REGS_WORD & 0xff;
+    newPc = readMemory(wit.readPc, MEPC_WORD) + 4;
+  }
+      
   void do_ECALL_TERMINATE() {
     auto& wit = trace.makeEcallTerminate();
     wit.cycle = curCycle;

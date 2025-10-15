@@ -583,8 +583,8 @@ template <typename C> FDEV void InstEcallBlock<C>::set(CTX, InstEcallWitness wit
 
 template <typename C> FDEV void InstEcallBlock<C>::verify(CTX) DEV {
   // Make sure next PC is being saved
-  EQ(fetch.nextPc.low.get(), writeSavePc.data.low.get());
-  EQ(fetch.nextPc.high.get(), writeSavePc.data.high.get());
+  EQ(fetch.pc.low.get(), writeSavePc.data.low.get());
+  EQ(fetch.pc.high.get(), writeSavePc.data.high.get());
   // Make sure address constants are right
   EQ(writeSavePc.wordAddr.get(), MEPC_WORD);
   EQ(readDispatch.wordAddr.get(), ECALL_DISPATCH_WORD);
@@ -610,3 +610,37 @@ template <typename C> FDEV void InstEcallBlock<C>::addArguments(CTX) DEV {
   arg.options = Val<C>(uint32_t(INST_ECALL));
   ctx.pull(arg);
 }
+
+template <typename C> FDEV void InstMretBlock<C>::set(CTX, InstMretWitness wit) DEV {
+  cycle.set(ctx, wit.cycle);
+  fetch.set(ctx, wit.fetch);
+  readPc.set(ctx, wit.readPc, wit.cycle);
+  sumPc.set(ctx, wit.readPc.value, 4);
+}
+
+template <typename C> FDEV void InstMretBlock<C>::verify(CTX) DEV {
+  // Make sure address constants is right
+  EQ(readPc.wordAddr.get(), MEPC_WORD);
+}
+
+template <typename C> FDEV void InstMretBlock<C>::addArguments(CTX) DEV {
+  Val<C> cycleVal = cycle.get();
+  // Move from mm = 1 -> mm = 0
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.push(CpuStateArgument<C>(cycleVal + 1, sumPc.get(), 0, fetch.iCacheCycle.get()));
+  // Verify decoding
+  DecodeArgument<C> arg;
+  arg.iCacheCycle = fetch.iCacheCycle.get();
+  arg.pcLow = fetch.pc.low.get();
+  arg.pcLow = fetch.pc.high.get();
+  arg.newPcLow = fetch.nextPc.low.get();
+  arg.newPcLow = fetch.nextPc.high.get();
+  arg.rs1 = 0;
+  arg.rs2 = 2;
+  arg.rd = 0;
+  arg.immLow = 770;
+  arg.immHigh = 0;
+  arg.options = Val<C>(uint32_t(INST_MRET));
+  ctx.pull(arg);
+}
+

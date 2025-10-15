@@ -137,3 +137,10 @@ struct InstEcallWitness {
   MemWriteWitness savePc;
   MemReadWitness dispatch;
 };
+
+struct InstMretWitness {
+  uint32_t cycle;
+  FetchWitness fetch;
+  MemReadWitness readPc;
+};
+
