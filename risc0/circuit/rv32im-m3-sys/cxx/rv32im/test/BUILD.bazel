@@ -55,6 +55,20 @@ risc0_cc_kernel_binary(
     ],
 )
 
+risc0_cc_kernel_binary(
+    name = "linux_kernel",
+    hdrs = ["//rv32im/base:files"],
+    srcs = [
+        "linux_kernel.cpp",
+        "entry.s",
+    ],
+)
+
+risc0_cc_binary(
+    name = "linux_guest",
+    srcs = ["linux_guest.cpp"],
+)
+
 cc_test(
     name = "tune",
     srcs = [
@@ -80,4 +94,14 @@ cc_test(
     srcs = ["test_ffi.cpp"],
     data = ["//rv32im/rvtest:riscv_test_bins"],
     deps = ["//rv32im"],
+)
+
+cc_test(
+    name = "test_linux",
+    srcs = ["linux_test.cpp"],
+    data = [
+        ":linux_kernel",
+        ":linux_guest",
+    ],
+    deps = ["//rv32im/test:test_prove"],
 )

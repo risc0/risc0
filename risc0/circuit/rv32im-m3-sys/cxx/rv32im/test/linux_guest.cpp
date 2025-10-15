@@ -13,16 +13,18 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include <string>
+#include <unistd.h>
 
-#include "rv32im/emu/emu.h"
-
-namespace risc0 {
-
-void runTestBinary(const std::string& elf, rv32im::HostIO& io, size_t po2 = 12);
-void runTestBinary(const std::string& kernel,
-                   const std::string& guest,
-                   rv32im::HostIO& io,
-                   size_t po2 = 12);
-
-} // namespace risc0
+int main() {
+  uint32_t x = 0;
+  uint32_t tot = 0;
+  read(0, &x, sizeof(uint32_t));
+  for (uint32_t i = 0; i < x; i++) {
+    for (uint32_t j = 0; j < x; j++) {
+      tot += i * j % 17;
+      tot %= 107;
+    }
+  }
+  write(1, &tot, sizeof(uint32_t));
+  return 0;
+}
