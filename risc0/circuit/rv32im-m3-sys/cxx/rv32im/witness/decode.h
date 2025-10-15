@@ -18,6 +18,7 @@
 #include "rv32im/witness/mem.h"
 
 struct FetchWitness {
+  uint32_t mode;
   uint32_t iCacheCycle;
   uint32_t pc;
   uint32_t nextPc;

@@ -24,11 +24,13 @@ template <typename C> struct FetchBlock {
   CONSTANT static char NAME[] = "FetchBlock";
 
   Reg<C> iCacheCycle;
+  Reg<C> mode;
   RegU32<C> pc;
   RegU32<C> nextPc;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, iCacheCycle);
+    T::apply(ctx, mode);
     T::apply(ctx, pc);
     T::apply(ctx, nextPc);
   }
@@ -36,6 +38,8 @@ template <typename C> struct FetchBlock {
   FDEV void set(CTX, FetchWitness witness) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
+  // Return 1 if in machine mode
+  FDEV Val<C> isMM() DEV { return mode.get(); }
   FDEV void verify(CTX) DEV {}
   FDEV void addArguments(CTX) DEV {}
 };
@@ -47,6 +51,7 @@ template <typename C> struct DecodeBlock {
   FetchBlock<C> fetch;
   Reg<C> loadCycle;
   AddressDecompose<C> pcDecomp;
+  AddressVerify<C> verifyPc;
   MemReadBlock<C> load0;
   MemReadBlock<C> load1;
   AddressDecompose<C> low16Decomp;
@@ -69,6 +74,7 @@ template <typename C> struct DecodeBlock {
     T::apply(ctx, fetch);
     T::apply(ctx, loadCycle);
     T::apply(ctx, pcDecomp, fetch.pc.get());
+    T::apply(ctx, verifyPc, fetch.pc.get(), fetch.isMM());
     T::apply(ctx, load0, loadCycle.get());
     T::apply(ctx, load1, loadCycle.get());
     T::apply(ctx, low16Decomp, ValU32<C>{low16(), 0});

@@ -244,8 +244,8 @@ struct Emulator {
   void doResume() {
     auto& resumeWit = trace.makeInstResume();
     pc = readMemory(resumeWit.pc, SUSPEND_PC_WORD);
-    mm = readMemory(resumeWit.mm, SUSPEND_MODE_WORD);
-    regOffset = (mm ? (MACHINE_REGS_WORD & 0xff) : (USER_REGS_WORD & 0xff));
+    mode = readMemory(resumeWit.mode, SUSPEND_MODE_WORD);
+    regOffset = (mode == MODE_MACHINE) ? (MACHINE_REGS_WORD & 0xff) : (USER_REGS_WORD & 0xff);
     curCycle++;
   }
 
@@ -254,7 +254,7 @@ struct Emulator {
     suspendWit.cycle = curCycle;
     suspendWit.iCacheCycle = iCacheCycle;
     writeMemory(suspendWit.pc, SUSPEND_PC_WORD, pc);
-    writeMemory(suspendWit.mm, SUSPEND_MODE_WORD, mm);
+    writeMemory(suspendWit.mode, SUSPEND_MODE_WORD, mode);
     curCycle++;
   }
 
@@ -270,7 +270,6 @@ struct Emulator {
     constexpr Option opts3 = opts2.popRet<OutKind>();
     auto& wit = trace.makeInstReg();
     wit.cycle = curCycle;
-    wit.mm = mm;
     wit.fetch = *curFetch;
     uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
     uint32_t rs2Val = readReg(wit.rs2, decoded.rs2, decoded.rs1 == decoded.rs2);
@@ -291,7 +290,6 @@ struct Emulator {
     constexpr Option opts3 = opts2.popRet<OutKind>();
     auto& wit = trace.makeInstImm();
     wit.cycle = curCycle;
-    wit.mm = mm;
     wit.fetch = *curFetch;
     uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
     wit.rs2 = decoded.rs2;
@@ -309,7 +307,6 @@ struct Emulator {
   template <uint32_t opt> inline void do_INST_LOAD() {
     auto& wit = trace.makeInstLoad();
     wit.cycle = curCycle;
-    wit.mm = mm;
     wit.fetch = *curFetch;
     uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
     wit.rs2 = decoded.rs2;
@@ -355,7 +352,6 @@ struct Emulator {
   template <uint32_t opt> inline void do_INST_STORE() {
     auto& wit = trace.makeInstStore();
     wit.cycle = curCycle;
-    wit.mm = mm;
     wit.fetch = *curFetch;
     uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
     uint32_t data = readReg(wit.rs2, decoded.rs2, decoded.rs1 == decoded.rs2);
@@ -400,7 +396,6 @@ struct Emulator {
     constexpr Option opts4 = opts3.popRet<OutKind>();
     auto& wit = trace.makeInstBranch();
     wit.cycle = curCycle;
-    wit.mm = mm;
     wit.fetch = *curFetch;
     uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
     uint32_t rs2Val = readReg(wit.rs2, decoded.rs2, decoded.rs1 == decoded.rs2);
@@ -423,7 +418,6 @@ struct Emulator {
   template <uint32_t opt> inline void do_INST_JAL() {
     auto& wit = trace.makeInstJal();
     wit.cycle = curCycle;
-    wit.mm = mm;
     wit.fetch = *curFetch;
     wit.rs1 = decoded.rs1;
     wit.rs2 = decoded.rs2;
@@ -437,7 +431,6 @@ struct Emulator {
   template <uint32_t opt> inline void do_INST_JALR() {
     auto& wit = trace.makeInstJalr();
     wit.cycle = curCycle;
-    wit.mm = mm;
     wit.fetch = *curFetch;
     uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
     wit.rs2 = decoded.rs2;
@@ -452,7 +445,6 @@ struct Emulator {
   template <uint32_t opt> inline void do_INST_LUI() {
     auto& wit = trace.makeInstLui();
     wit.cycle = curCycle;
-    wit.mm = mm;
     wit.fetch = *curFetch;
     wit.rs1 = decoded.rs1;
     wit.rs2 = decoded.rs2;
@@ -462,7 +454,6 @@ struct Emulator {
   template <uint32_t opt> inline void do_INST_AUIPC() {
     auto& wit = trace.makeInstAuipc();
     wit.cycle = curCycle;
-    wit.mm = mm;
     wit.fetch = *curFetch;
     wit.rs1 = decoded.rs1;
     wit.rs2 = decoded.rs2;
@@ -471,13 +462,13 @@ struct Emulator {
   }
 
   template <uint32_t opt> inline void do_INST_ECALL() {
-    if (!mm) {
+    if (mode == MODE_USER) {
       // Save PC + jump to dispatch address
       auto& wit = trace.makeInstEcall();
       wit.cycle = curCycle;
       wit.fetch = *curFetch;
       writeMemory(wit.savePc, MEPC_WORD, pc);
-      mm = 1;
+      mode = MODE_MACHINE;
       regOffset = MACHINE_REGS_WORD & 0xff;
       newPc = readMemory(wit.dispatch, ECALL_DISPATCH_WORD);
       return;
@@ -502,13 +493,13 @@ struct Emulator {
   }
 
   template <uint32_t opt> inline void do_INST_MRET() {
-    if (!mm) {
+    if (mode != MODE_MACHINE) {
       trap("MRET not in machine mode");
     }
     auto& wit = trace.makeInstMret();
     wit.cycle = curCycle;
     wit.fetch = *curFetch;
-    mm = 0;
+    mode = MODE_USER;
     regOffset = USER_REGS_WORD & 0xff;
     newPc = readMemory(wit.readPc, MEPC_WORD) + 4;
   }
@@ -668,6 +659,7 @@ struct Emulator {
       inst = readMemory(wit->load1, COMPRESSED_INST_LOOKUP_WORD + inst);
     }
     wit->fetch.iCacheCycle = iCacheCycle;
+    wit->fetch.mode = mode;
     wit->fetch.pc = pc;
     wit->fetch.nextPc = pc + (compressed ? 2 : 4);
     wit->loadCycle = curCycle;
@@ -681,7 +673,7 @@ struct Emulator {
                             ceilDiv(curCycle, 24) + // How many rows we need for cycle table
                             memory.getPagingCost() <
                         rowCount) {
-      DecodeWitness*& decodeWit = iCache[pc];
+      DecodeWitness*& decodeWit = iCache[computeInstKey(mode, pc)];
       if (!decodeWit) {
         decodeWit = &trace.makeDecode();
         fetchAndDecode(decodeWit);
@@ -754,15 +746,17 @@ struct Emulator {
   uint32_t regOffset = 0;
   uint32_t curCycle = 1;
   uint32_t iCacheCycle = 1;
-  uint32_t mm = 0;
+  uint32_t mode = 0;
   uint32_t pc = 0;
   uint32_t newPc = 0;
   DecodedInst decoded;
   FetchWitness* curFetch;
 
   // Keep track of decoded instructions (and how many times each is used).
-  // 'FetchKey' is (iCacheCyce, PC)
-  ankerl::unordered_dense::map<uint32_t, DecodeWitness*> iCache;
+  uint64_t computeInstKey(uint32_t mode, uint32_t pc) { 
+    return (uint64_t(mode) << 32) | pc;
+  }
+  ankerl::unordered_dense::map<uint64_t, DecodeWitness*> iCache;
 };
 
 } // namespace

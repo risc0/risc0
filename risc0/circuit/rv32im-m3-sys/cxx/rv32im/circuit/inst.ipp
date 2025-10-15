@@ -14,21 +14,20 @@
 
 template <typename C> FDEV void InstResumeBlock<C>::set(CTX, InstResumeWitness wit) DEV {
   readPc.set(ctx, wit.pc, 1);
-  readMm.set(ctx, wit.mm, 1);
-  verifyPc.set(ctx, wit.pc.value, wit.mm.value);
+  readMode.set(ctx, wit.mode, 1);
 }
 
 template <typename C> FDEV void InstResumeBlock<C>::verify(CTX) DEV {
   // Verify mm is binary
-  EQZ(readMm.data.high.get());
-  Val<C> mode = readMm.data.low.get();
+  EQZ(readMode.data.high.get());
+  Val<C> mode = readMode.data.low.get();
   AssertBit(ctx, mode);
 }
 
 template <typename C> FDEV void InstResumeBlock<C>::addArguments(CTX) DEV {
   ctx.pull(CpuStateArgument<C>(1, 0, 0, 0, 1));
   ValU32<C> pc = readPc.data.get();
-  Val<C> mode = readMm.data.low.get();
+  Val<C> mode = readMode.data.low.get();
   ctx.push(CpuStateArgument<C>(2, pc, mode, 1));
 }
 
@@ -36,14 +35,13 @@ template <typename C> FDEV void InstSuspendBlock<C>::set(CTX, InstSuspendWitness
   cycle.set(ctx, wit.cycle);
   iCacheCycle.set(ctx, wit.iCacheCycle);
   writePc.set(ctx, wit.pc, wit.cycle);
-  writeMm.set(ctx, wit.mm, wit.cycle);
-  verifyPc.set(ctx, wit.pc.value, wit.mm.value);
+  writeMode.set(ctx, wit.mode, wit.cycle);
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
   ValU32<C> pc = writePc.data.get();
-  Val<C> mode = writeMm.data.low.get();
+  Val<C> mode = writeMode.data.low.get();
   ctx.pull(CpuStateArgument<C>(cycleVal, pc, mode, iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, 0, 0, 0, 0));
 }
@@ -124,9 +122,7 @@ makeUnit(Val<C> opts, ValU32<C> a, ValU32<C> b, ValU32<C> out0, ValU32<C> out1) 
 
 template <typename C> FDEV void InstRegBlock<C>::set(CTX, InstRegWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  mm.set(ctx, wit.mm);
   fetch.set(ctx, wit.fetch);
-  verifyPc.set(ctx, wit.fetch.pc, wit.mm);
   dr.set(ctx, wit.rs1, wit.rs2, wit.cycle);
   writeRd.set(ctx, wit.rd, wit.cycle);
   rd.set(ctx, wit.rd.wordAddr);
@@ -146,7 +142,7 @@ template <typename C> FDEV void InstRegBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void InstRegBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  Val<C> mode = mm.get();
+  Val<C> mode = fetch.mode.get();
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), mode, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), mode, fetch.iCacheCycle.get()));
   ctx.pull(makeUnit(optOut.get(), dr.getRS1(), dr.getRS2(), out0.get(), out1.get()));
@@ -168,9 +164,7 @@ template <typename C> FDEV void InstRegBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstImmBlock<C>::set(CTX, InstImmWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  mm.set(ctx, wit.mm);
   fetch.set(ctx, wit.fetch);
-  verifyPc.set(ctx, wit.fetch.pc, wit.mm);
   readRs1.set(ctx, wit.rs1, wit.cycle);
   writeRd.set(ctx, wit.rd, wit.cycle);
   rs1.set(ctx, wit.rs1.wordAddr);
@@ -193,7 +187,7 @@ template <typename C> FDEV void InstImmBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void InstImmBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  Val<C> mode = mm.get();
+  Val<C> mode = fetch.mode.get();
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), mode, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), mode, fetch.iCacheCycle.get()));
   ctx.pull(makeUnit(optOut.get(), readRs1.data.get(), imm.get(), out0.get(), out1.get()));
@@ -215,9 +209,7 @@ template <typename C> FDEV void InstImmBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstLoadBlock<C>::set(CTX, InstLoadWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  mm.set(ctx, wit.mm);
   fetch.set(ctx, wit.fetch);
-  verifyPc.set(ctx, wit.fetch.pc, wit.mm);
   Option opts(wit.options);
   opts.pop<InstKind>();
   opt.set(ctx, opts.val);
@@ -230,7 +222,7 @@ template <typename C> FDEV void InstLoadBlock<C>::set(CTX, InstLoadWitness wit) 
   imm.set(ctx, wit.imm);
   computeAddr.set(ctx, wit.rs1.value, wit.imm);
   readAddr.set(ctx, wit.rs1.value + wit.imm);
-  checkAddr.set(ctx, wit.rs1.value + wit.imm, wit.mm);
+  checkAddr.set(ctx, wit.rs1.value + wit.imm, wit.fetch.mode);
   readMem.set(ctx, wit.mem, wit.cycle);
   uint32_t valU32 = wit.mem.value;
   uint32_t valU16 = (readAddr.low1.get() == Val<C>(1)) ? (valU32 >> 16) : (valU32 & 0xffff);
@@ -276,7 +268,7 @@ template <typename C> FDEV void InstLoadBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void InstLoadBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  Val<C> mode = mm.get();
+  Val<C> mode = fetch.mode.get();
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), mode, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), mode, fetch.iCacheCycle.get()));
   DecodeArgument<C> arg;
@@ -296,9 +288,7 @@ template <typename C> FDEV void InstLoadBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstStoreBlock<C>::set(CTX, InstStoreWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  mm.set(ctx, wit.mm);
   fetch.set(ctx, wit.fetch);
-  verifyPc.set(ctx, wit.fetch.pc, wit.mm);
   Option opts(wit.options);
   opts.pop<InstKind>();
   opt.set(ctx, opts.val);
@@ -308,7 +298,7 @@ template <typename C> FDEV void InstStoreBlock<C>::set(CTX, InstStoreWitness wit
   imm.set(ctx, wit.imm);
   computeAddr.set(ctx, wit.rs1.value, wit.imm);
   writeAddr.set(ctx, wit.rs1.value + wit.imm);
-  checkAddr.set(ctx, wit.rs1.value + wit.imm, wit.mm);
+  checkAddr.set(ctx, wit.rs1.value + wit.imm, wit.fetch.mode);
   writeMem.set(ctx, wit.mem, wit.cycle);
   uint32_t valU32 = wit.mem.prevValue;
   uint32_t valU16 = (writeAddr.low1.get() == Val<C>(1)) ? (valU32 >> 16) : (valU32 & 0xffff);
@@ -353,7 +343,7 @@ template <typename C> FDEV void InstStoreBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void InstStoreBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  Val<C> mode = mm.get();
+  Val<C> mode = fetch.mode.get();
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), mode, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), mode, fetch.iCacheCycle.get()));
   DecodeArgument<C> arg;
@@ -373,9 +363,7 @@ template <typename C> FDEV void InstStoreBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstBranchBlock<C>::set(CTX, InstBranchWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  mm.set(ctx, wit.mm);
   fetch.set(ctx, wit.fetch);
-  verifyPc.set(ctx, wit.fetch.pc, wit.mm);
   dr.set(ctx, wit.rs1, wit.rs2, wit.cycle);
   rd.set(ctx, wit.rd);
   imm.set(ctx, wit.imm);
@@ -404,7 +392,7 @@ template <typename C> FDEV void InstBranchBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void InstBranchBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  Val<C> mode = mm.get();
+  Val<C> mode = fetch.mode.get();
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), mode, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, newPc.get(), mode, fetch.iCacheCycle.get()));
   ctx.pull(makeUnit(optOut.get(), dr.getRS1(), dr.getRS2(), out0.get(), out1.get()));
@@ -429,9 +417,7 @@ template <typename C> FDEV void InstBranchBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstJalBlock<C>::set(CTX, InstJalWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  mm.set(ctx, wit.mm);
   fetch.set(ctx, wit.fetch);
-  verifyPc.set(ctx, wit.fetch.pc, wit.mm);
   rs1.set(ctx, wit.rs1);
   rs2.set(ctx, wit.rs2);
   writeRd.set(ctx, wit.rd, wit.cycle);
@@ -447,7 +433,7 @@ template <typename C> FDEV void InstJalBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void InstJalBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  Val<C> mode = mm.get();
+  Val<C> mode = fetch.mode.get();
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), mode, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, sumPc.get(), mode, fetch.iCacheCycle.get()));
   DecodeArgument<C> arg;
@@ -467,9 +453,7 @@ template <typename C> FDEV void InstJalBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstJalrBlock<C>::set(CTX, InstJalrWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  mm.set(ctx, wit.mm);
   fetch.set(ctx, wit.fetch);
-  verifyPc.set(ctx, wit.fetch.pc, wit.mm);
   readRs1.set(ctx, wit.rs1, wit.cycle);
   rs1.set(ctx, wit.rs1.wordAddr);
   rs2.set(ctx, wit.rs2);
@@ -486,7 +470,7 @@ template <typename C> FDEV void InstJalrBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void InstJalrBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  Val<C> mode = mm.get();
+  Val<C> mode = fetch.mode.get();
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), mode, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, sumPc.get(), mode, fetch.iCacheCycle.get()));
   DecodeArgument<C> arg;
@@ -506,9 +490,7 @@ template <typename C> FDEV void InstJalrBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstLuiBlock<C>::set(CTX, InstLuiWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  mm.set(ctx, wit.mm);
   fetch.set(ctx, wit.fetch);
-  verifyPc.set(ctx, wit.fetch.pc, wit.mm);
   rs1.set(ctx, wit.rs1);
   rs2.set(ctx, wit.rs2);
   writeRd.set(ctx, wit.rd, wit.cycle);
@@ -517,7 +499,7 @@ template <typename C> FDEV void InstLuiBlock<C>::set(CTX, InstLuiWitness wit) DE
 
 template <typename C> FDEV void InstLuiBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  Val<C> mode = mm.get();
+  Val<C> mode = fetch.mode.get();
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), mode, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), mode, fetch.iCacheCycle.get()));
   DecodeArgument<C> arg;
@@ -537,9 +519,7 @@ template <typename C> FDEV void InstLuiBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstAuipcBlock<C>::set(CTX, InstAuipcWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  mm.set(ctx, wit.mm);
   fetch.set(ctx, wit.fetch);
-  verifyPc.set(ctx, wit.fetch.pc, wit.mm);
   rs1.set(ctx, wit.rs1);
   rs2.set(ctx, wit.rs2);
   writeRd.set(ctx, wit.rd, wit.cycle);
@@ -555,7 +535,7 @@ template <typename C> FDEV void InstAuipcBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void InstAuipcBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  Val<C> mode = mm.get();
+  Val<C> mode = fetch.mode.get();
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), mode, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), mode, fetch.iCacheCycle.get()));
   DecodeArgument<C> arg;
@@ -576,7 +556,6 @@ template <typename C> FDEV void InstAuipcBlock<C>::addArguments(CTX) DEV {
 template <typename C> FDEV void InstEcallBlock<C>::set(CTX, InstEcallWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   fetch.set(ctx, wit.fetch);
-  verifyPc.set(ctx, wit.fetch.pc, 0);
   writeSavePc.set(ctx, wit.savePc, wit.cycle);
   readDispatch.set(ctx, wit.dispatch, wit.cycle);
 }

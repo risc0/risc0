@@ -14,6 +14,7 @@
 
 template <typename C> FDEV void FetchBlock<C>::set(CTX, FetchWitness witness) DEV {
   iCacheCycle.set(ctx, witness.iCacheCycle);
+  mode.set(ctx, witness.mode);
   pc.set(ctx, witness.pc);
   nextPc.set(ctx, witness.nextPc);
 }
@@ -108,6 +109,7 @@ template <typename C> FDEV void DecodeBlock<C>::set(CTX, DecodeWitness witness) 
   uint32_t cycleDiff = witness.loadCycle - witness.fetch.iCacheCycle;
   ctx.tableAdd(256 + 65536 + cycleDiff * 2, 1);
   pcDecomp.set(ctx, witness.fetch.pc);
+  verifyPc.set(ctx, witness.fetch.pc, witness.fetch.mode);
   load0.set(ctx, witness.load0, witness.loadCycle);
   load1.set(ctx, witness.load1, witness.loadCycle);
   uint32_t baseInst = witness.load0.value;

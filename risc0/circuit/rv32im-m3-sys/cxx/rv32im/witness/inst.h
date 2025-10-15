@@ -19,19 +19,18 @@
 
 struct InstResumeWitness {
   MemReadWitness pc;
-  MemReadWitness mm;
+  MemReadWitness mode;
 };
 
 struct InstSuspendWitness {
   uint32_t cycle;
   uint32_t iCacheCycle;
   MemWriteWitness pc;
-  MemWriteWitness mm;
+  MemWriteWitness mode;
 };
 
 struct InstRegWitness {
   uint32_t cycle;
-  uint32_t mm;
   FetchWitness fetch;
   MemReadWitness rs1;
   MemReadWitness rs2;
@@ -43,7 +42,6 @@ struct InstRegWitness {
 
 struct InstImmWitness {
   uint32_t cycle;
-  uint32_t mm;
   FetchWitness fetch;
   MemReadWitness rs1;
   uint32_t rs2;
@@ -56,7 +54,6 @@ struct InstImmWitness {
 
 struct InstLoadWitness {
   uint32_t cycle;
-  uint32_t mm;
   FetchWitness fetch;
   MemReadWitness rs1;
   uint32_t rs2;
@@ -68,7 +65,6 @@ struct InstLoadWitness {
 
 struct InstStoreWitness {
   uint32_t cycle;
-  uint32_t mm;
   FetchWitness fetch;
   MemReadWitness rs1;
   MemReadWitness rs2;
@@ -80,7 +76,6 @@ struct InstStoreWitness {
 
 struct InstBranchWitness {
   uint32_t cycle;
-  uint32_t mm;
   FetchWitness fetch;
   MemReadWitness rs1;
   MemReadWitness rs2;
@@ -94,7 +89,6 @@ struct InstBranchWitness {
 
 struct InstJalWitness {
   uint32_t cycle;
-  uint32_t mm;
   FetchWitness fetch;
   uint32_t rs1;
   uint32_t rs2;
@@ -104,7 +98,6 @@ struct InstJalWitness {
 
 struct InstJalrWitness {
   uint32_t cycle;
-  uint32_t mm;
   FetchWitness fetch;
   MemReadWitness rs1;
   uint32_t rs2;
@@ -114,7 +107,6 @@ struct InstJalrWitness {
 
 struct InstLuiWitness {
   uint32_t cycle;
-  uint32_t mm;
   FetchWitness fetch;
   uint32_t rs1;
   uint32_t rs2;
@@ -123,7 +115,6 @@ struct InstLuiWitness {
 
 struct InstAuipcWitness {
   uint32_t cycle;
-  uint32_t mm;
   FetchWitness fetch;
   uint32_t rs1;
   uint32_t rs2;
