@@ -60,11 +60,11 @@ static int getInitialLogLevel() {
 unsigned gR0LogLevel = getInitialLogLevel();
 
 void setR0LogLevel(unsigned level) {
-  gLogLevel = level;
+  gR0LogLevel = level;
 }
 
 unsigned getR0LogLevel() {
-  return gLogLevel;
+  return gR0LogLevel;
 }
 
 } // namespace risc0
