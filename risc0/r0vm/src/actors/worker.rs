@@ -849,32 +849,35 @@ impl CpuProcessor {
                 header,
             };
 
-            let mut env = ExecutorEnv::builder();
-            for assumption in task.request.assumptions.iter() {
-                env.add_assumption(assumption.clone());
-            }
-            if let Some(po2) = task.request.segment_limit_po2 {
-                env.segment_limit_po2(po2);
-            }
-            let env = env
-                // .stdout(writer) // TODO
-                .write_slice(&task.request.input)
-                .coprocessor_callback(coproc)
-                // .session_limit(limit) // TODO
-                .build()?;
-
-            // TODO(povw): Add PoVW here
-            let mut exec = ExecutorImpl::from_elf(env, &task.request.binary)?;
+            let mut stdout = Vec::new();
             let mut segments = vec![];
-            let session = exec.run_with_callback(|segment| {
-                segments.push(segment.get_info());
-                let msg = TaskUpdateMsg {
-                    header: header_copy.clone(),
-                    payload: TaskUpdate::Segment(segment),
-                };
-                factory.tell_blocking(msg)?;
-                Ok(Box::new(NullSegmentRef))
-            })?;
+            let session = {
+                let mut env = ExecutorEnv::builder();
+                for assumption in task.request.assumptions.iter() {
+                    env.add_assumption(assumption.clone());
+                }
+                if let Some(po2) = task.request.segment_limit_po2 {
+                    env.segment_limit_po2(po2);
+                }
+                let env = env
+                    .stdout(&mut stdout)
+                    .write_slice(&task.request.input)
+                    .coprocessor_callback(coproc)
+                    // .session_limit(limit) // TODO
+                    .build()?;
+
+                // TODO(povw): Add PoVW here
+                let mut exec = ExecutorImpl::from_elf(env, &task.request.binary)?;
+                exec.run_with_callback(|segment| {
+                    segments.push(segment.get_info());
+                    let msg = TaskUpdateMsg {
+                        header: header_copy.clone(),
+                        payload: TaskUpdate::Segment(segment),
+                    };
+                    factory.tell_blocking(msg)?;
+                    Ok(Box::new(NullSegmentRef))
+                })?
+            };
 
             let stats = session.stats();
             let receipt_claim = session.claim()?;
@@ -891,6 +894,7 @@ impl CpuProcessor {
                 segments,
                 exit_code: session.exit_code,
                 receipt_claim,
+                stdout,
             };
 
             Ok(session)

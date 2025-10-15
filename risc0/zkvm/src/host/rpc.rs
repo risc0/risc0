@@ -139,6 +139,9 @@ pub struct Session {
 
     /// TODO
     pub receipt_claim: ReceiptClaim,
+
+    /// TOOD
+    pub stdout: Vec<u8>,
 }
 
 impl From<Session> for SessionInfo {

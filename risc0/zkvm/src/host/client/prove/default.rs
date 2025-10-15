@@ -22,6 +22,7 @@ use std::{
 };
 
 use anyhow::{Context as _, Result, bail, ensure};
+use risc0_zkvm_platform::fileno;
 use serde::de::DeserializeOwned;
 
 use crate::{
@@ -93,6 +94,13 @@ impl Prover for DefaultProver {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<ProveInfo> {
+        let stdout_writer = env
+            .posix_io
+            .borrow()
+            .get_writer(fileno::STDOUT)
+            .ok()
+            .clone();
+
         let dev_mode = opts.dev_mode();
         let result = self.prove(env, elf, false /* execute_only */, dev_mode)?;
 
@@ -106,6 +114,12 @@ impl Prover for DefaultProver {
 
         if opts.receipt_kind == ReceiptKind::Groth16 {
             prove_info.receipt = self.shrink_wrap_groth16(&prove_info.receipt, dev_mode)?;
+        }
+
+        if let Some(stdout_writer) = stdout_writer {
+            stdout_writer
+                .borrow_mut()
+                .write_all(&result.session.stdout)?;
         }
 
         Ok(prove_info)

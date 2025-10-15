@@ -20,7 +20,6 @@ use std::{
     rc::Rc,
 };
 
-#[cfg(feature = "prove")]
 use anyhow::{Result, anyhow};
 
 use risc0_zkvm_platform::fileno;
@@ -85,7 +84,6 @@ impl<'a> PosixIo<'a> {
             .cloned()
     }
 
-    #[cfg(feature = "prove")]
     pub fn get_writer(&self, fd: u32) -> Result<SharedWrite<'a>> {
         self.write_fds
             .get(&fd)
