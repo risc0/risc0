@@ -20,6 +20,7 @@
 #include "verify/rv32im.h"
 
 #include <cstdint>
+#include <cstring>
 #include <exception>
 #include <string.h>
 
@@ -28,40 +29,68 @@ extern "C" {
 using namespace risc0;
 using namespace risc0::rv32im;
 
-struct RawProver {
+struct ProverContext {
   Rv32imProver prover;
+  MemoryImage image;
   std::vector<Fp> transcript;
 
-  RawProver(IHalPtr hal, size_t po2) : prover(hal, po2) {}
+  ProverContext(IHalPtr hal, size_t po2) : prover(hal, po2) {}
 };
 
-RawProver* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {
+struct RustPage {
+  uint32_t addr;
+  const uint32_t* data;
+};
+
+struct RustSlicePage {
+  const RustPage* ptr;
+  size_t len;
+};
+
+struct RustMemoryImage {
+  RustSlicePage pages;
+};
+
+struct RustSegment {
+  RustMemoryImage image;
+  // pub claim: Rv32imV2Claim,
+  // pub read_record: Vec<Vec<u8>>,
+  // pub write_record: Vec<u32>,
+  // pub suspend_cycle: u32,
+  // pub paging_cycles: u32,
+  // pub segment_threshold: u32,
+  // pub po2: u32,
+  // pub index: u64,
+  // pub povw_nonce: Option<PovwNonce>,
+};
+
+ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {
   IHalPtr hal = getCpuHal();
-  return new RawProver(hal, po2);
+  return new ProverContext(hal, po2);
 }
 
-RawProver* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2) {
+ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2) {
   IHalPtr hal = getGpuHal();
-  return new RawProver(hal, po2);
+  return new ProverContext(hal, po2);
 }
 
-void risc0_circuit_rv32im_m3_prover_free(RawProver* raw) {
-  delete raw;
+void risc0_circuit_rv32im_m3_prover_free(ProverContext* ctx) {
+  delete ctx;
 }
 
-RawSlice risc0_circuit_rv32im_m3_prover_transcript(RawProver* raw) {
-  return RawSlice{raw->transcript.data(), raw->transcript.size()};
+RustSliceFp risc0_circuit_rv32im_m3_prover_transcript(ProverContext* ctx) {
+  return RustSliceFp{ctx->transcript.data(), ctx->transcript.size()};
 }
 
-const char*
-risc0_circuit_rv32im_m3_preflight(RawProver* raw, const uint8_t* elf_ptr, size_t elf_len) {
+const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustSegment* segment) {
   try {
-    LOG(1, "Loading elf");
-    ArrayRef<uint8_t> elf(elf_ptr, elf_len);
-    MemoryImage image = MemoryImage::fromRawElfBytes(elf);
-
-    NullHostIO io;
-    raw->prover.preflight(image, io);
+    ctx->image = MemoryImage::zeros();
+    for (size_t i = 0; i < segment->image.pages.len; i++) {
+      const RustPage& page = segment->image.pages.ptr[i];
+      auto data = std::make_shared<Page>();
+      std::memcpy(data->data(), page.data, PAGE_SIZE_BYTES);
+      ctx->image.setPage(page.addr, data);
+    }
   } catch (const std::exception& err) {
     LOG(0, "ERROR: " << err.what());
     return strdup(err.what());
@@ -72,14 +101,28 @@ risc0_circuit_rv32im_m3_preflight(RawProver* raw, const uint8_t* elf_ptr, size_t
   return nullptr;
 }
 
-const char* risc0_circuit_rv32im_m3_prove(RawProver* raw) {
+const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx) {
+  try {
+    NullHostIO io;
+    ctx->prover.preflight(ctx->image, io);
+  } catch (const std::exception& err) {
+    LOG(0, "ERROR: " << err.what());
+    return strdup(err.what());
+  } catch (...) {
+    LOG(0, "UNKNOWN ERROR");
+    return strdup("Generic exception");
+  }
+  return nullptr;
+}
+
+const char* risc0_circuit_rv32im_m3_prove(ProverContext* ctx) {
   try {
     WriteIop writeIop;
-    raw->prover.prove(writeIop);
-    raw->transcript = writeIop.getTranscript();
+    ctx->prover.prove(writeIop);
+    ctx->transcript = writeIop.getTranscript();
 
-    ReadIop readIop(raw->transcript.data(), raw->transcript.size());
-    verifyRv32im(readIop, raw->prover.po2());
+    ReadIop readIop(ctx->transcript.data(), ctx->transcript.size());
+    verifyRv32im(readIop, ctx->prover.po2());
     readIop.done();
   } catch (const std::exception& err) {
     LOG(0, "ERROR: " << err.what());

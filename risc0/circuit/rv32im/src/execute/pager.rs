@@ -120,6 +120,7 @@ impl PageStates {
         }
     }
 
+    #[cfg(feature = "prove")]
     pub(crate) fn iter(&self) -> impl Iterator<Item = (u32, PageState)> + '_ {
         self.indexes.iter().map(|index| (*index, self.get(*index)))
     }
@@ -135,6 +136,7 @@ impl PageStates {
 }
 
 #[test]
+#[cfg(feature = "prove")]
 fn page_states() {
     use PageState::*;
 
@@ -249,6 +251,7 @@ impl WorkingImage {
         self.pages.insert(page_idx, page);
     }
 
+    #[cfg(feature = "prove")]
     pub(crate) fn get_page_indexes(&self) -> BTreeSet<u32> {
         self.pages.keys().copied().collect()
     }
