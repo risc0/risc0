@@ -49,6 +49,7 @@ pub enum SegmentPath {
     Path(PathBuf),
 }
 
+#[cfg(feature = "prove")]
 impl SegmentPath {
     pub(crate) fn path(&self) -> &Path {
         match self {

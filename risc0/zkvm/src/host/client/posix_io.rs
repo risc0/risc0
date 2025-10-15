@@ -20,6 +20,7 @@ use std::{
     rc::Rc,
 };
 
+#[cfg(feature = "prove")]
 use anyhow::{Result, anyhow};
 
 use risc0_zkvm_platform::fileno;
@@ -52,14 +53,6 @@ impl<'a> PosixIo<'a> {
         }
     }
 
-    pub fn read_fds(&self) -> Vec<u32> {
-        self.read_fds.keys().copied().collect()
-    }
-
-    pub fn write_fds(&self) -> Vec<u32> {
-        self.write_fds.keys().copied().collect()
-    }
-
     pub fn with_read_fd(&mut self, fd: u32, reader: impl Read + 'a) -> &mut Self {
         self.with_shared_read_fd(fd, Rc::new(RefCell::new(reader)))
     }
@@ -84,6 +77,7 @@ impl<'a> PosixIo<'a> {
         self
     }
 
+    #[cfg(feature = "prove")]
     pub fn get_reader(&self, fd: u32) -> Result<SharedRead<'a>> {
         self.read_fds
             .get(&fd)
@@ -91,6 +85,7 @@ impl<'a> PosixIo<'a> {
             .cloned()
     }
 
+    #[cfg(feature = "prove")]
     pub fn get_writer(&self, fd: u32) -> Result<SharedWrite<'a>> {
         self.write_fds
             .get(&fd)

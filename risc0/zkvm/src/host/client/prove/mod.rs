@@ -21,6 +21,7 @@ pub(crate) mod local;
 pub(crate) mod opts;
 
 use core::ops::Deref;
+use serde::{Deserialize, Serialize};
 use std::{path::PathBuf, rc::Rc};
 
 use anyhow::{Result, anyhow};
@@ -31,8 +32,47 @@ use self::bonsai::BonsaiProver;
 use self::{default::DefaultProver, opts::ProverOpts};
 
 use crate::{
-    ExecutorEnv, Receipt, SessionInfo, VerifierContext, get_version, host::prove_info::ProveInfo,
+    ExecutorEnv, ExitCode, Journal, Receipt, ReceiptClaim, VerifierContext, get_version,
+    host::prove_info::ProveInfo,
 };
+
+/// Provides information about a segment of execution.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SegmentInfo {
+    /// The number of cycles used for proving in powers of 2.
+    pub po2: u32,
+
+    /// The number of user cycles without any overhead for continuations or po2
+    /// padding.
+    pub cycles: u32,
+}
+
+/// Provides information about the result of execution.
+#[derive(Clone, Debug)]
+#[non_exhaustive]
+pub struct SessionInfo {
+    /// The number of user cycles for each segment.
+    pub segments: Vec<SegmentInfo>,
+
+    /// The data publicly committed by the guest program.
+    pub journal: Journal,
+
+    /// The [ExitCode] of the session.
+    pub exit_code: ExitCode,
+
+    /// The [ReceiptClaim] associated with the executed session. This receipt claim is what will be
+    /// proven if this session is passed to the Prover.
+    pub receipt_claim: Option<ReceiptClaim>,
+}
+
+impl SessionInfo {
+    /// The total number of user cycles across all segments, without any
+    /// overhead for continuations or po2 padding.
+    pub fn cycles(&self) -> u64 {
+        self.segments.iter().map(|s| s.cycles as u64).sum()
+    }
+}
 
 /// A Prover can execute a given ELF binary and produce a
 /// [Receipt] that can be used to verify correct computation.

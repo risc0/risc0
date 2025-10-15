@@ -31,17 +31,5 @@ impl BootstrapProtos {
                 &["risc0/zkvm/src/host/server/exec"],
             )
             .unwrap();
-
-        prost_build::Config::new()
-            .out_dir("risc0/zkvm/src/host/protos")
-            .skip_debug(["api.Asset", "api.OnIoReply", "api.SliceIo", "api.PosixCmd"])
-            .compile_protos(
-                &[
-                    "risc0/zkvm/src/host/protos/api.proto",
-                    "risc0/zkvm/src/host/protos/core.proto",
-                ],
-                &["risc0/zkvm/src/host/protos"],
-            )
-            .unwrap();
     }
 }
