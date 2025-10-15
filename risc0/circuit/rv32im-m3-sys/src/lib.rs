@@ -54,6 +54,13 @@ pub enum LogLevel {
     Trace = 3,
 }
 
+/// Callback into the Rust logging system from C/C++ code.
+///
+/// # Safety
+///
+/// - `msg` must be a valid, non-null pointer to a NUL-terminated C string.
+/// - The string pointed to by `msg` must remain valid for the duration of this call.
+/// - `level` should be an integer corresponding to a known log level (0 = error, 1 = info, etc).
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn risc0_log_callback(level: c_int, msg: *const c_char) {
     let s = unsafe { CStr::from_ptr(msg).to_string_lossy().into_owned() };
