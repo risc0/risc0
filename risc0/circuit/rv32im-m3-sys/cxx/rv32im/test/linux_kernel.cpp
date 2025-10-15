@@ -23,7 +23,7 @@ inline void mret() {
 }
 
 inline void die() {
-  asm("fence\n");
+  asm("unimp\n");
 }
 
 // Implement machine mode ECALLS
