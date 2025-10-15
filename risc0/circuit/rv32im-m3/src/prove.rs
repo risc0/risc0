@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #[cfg(test)]
-#[cfg(feature = "cuda")]
+#[cfg(feature = "prove")]
 mod tests {
     use cfg_if::cfg_if;
     use risc0_circuit_rv32im_m3_sys::*;
@@ -104,7 +104,7 @@ mod tests {
     macro_rules! test_case {
         ($func_name:ident) => {
             #[test_log::test]
-            #[gpu_guard::gpu_guard]
+            //#[gpu_guard::gpu_guard]
             fn $func_name() {
                 run_test(stringify!($func_name), DEFAULT_PO2);
             }

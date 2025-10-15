@@ -56,15 +56,17 @@ RawSlice risc0_circuit_rv32im_m3_prover_transcript(RawProver* raw) {
 const char*
 risc0_circuit_rv32im_m3_preflight(RawProver* raw, const uint8_t* elf_ptr, size_t elf_len) {
   try {
-    LOG(0, "Loading elf");
+    LOG(1, "Loading elf");
     ArrayRef<uint8_t> elf(elf_ptr, elf_len);
     MemoryImage image = MemoryImage::fromRawElfBytes(elf);
 
     NullHostIO io;
     raw->prover.preflight(image, io);
   } catch (const std::exception& err) {
+    LOG(0, "ERROR: " << err.what());
     return strdup(err.what());
   } catch (...) {
+    LOG(0, "UNKNOWN ERROR");
     return strdup("Generic exception");
   }
   return nullptr;
@@ -86,7 +88,7 @@ const char* risc0_circuit_rv32im_m3_prove(RawProver* raw) {
     LOG(0, "UNKNOWN ERROR");
     return strdup("Generic exception");
   }
-  LOG(0, "Completed successfuly");
+  LOG(1, "Completed successfuly");
   return nullptr;
 }
 

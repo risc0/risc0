@@ -31,7 +31,11 @@
 
 #include <cstdint>
 #include <iostream>
+#include <sstream>
 #include <vector>
+
+/// Declare the low level logging function, either callback to rust or normal stderr
+extern "C" void risc0_log_callback(int level, const char* str);
 
 namespace risc0 {
 
@@ -42,14 +46,12 @@ void setLogLevel(unsigned level);
 /// Usually used to optionally do extra computation required only for logging.
 unsigned getLogLevel();
 
-/// Logs a timestamp to cerr (the first part of a log message)
-void logTimestamp();
-
 #define LOG(num, vals)                                                                             \
   do {                                                                                             \
     if (::risc0::getLogLevel() >= num) {                                                           \
-      ::risc0::logTimestamp();                                                                     \
-      std::cerr << vals << std::endl;                                                              \
+      std::ostringstream oss;                                                                      \
+      oss << vals;                                                                                 \
+      risc0_log_callback(num, oss.str().c_str());                                                  \
     }                                                                                              \
   } while (0)
 

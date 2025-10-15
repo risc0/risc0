@@ -15,6 +15,10 @@ release = false
 [dependencies]
 risc0-sppark = { workspace = true, optional = true }
 risc0-sys = { workspace = true }
+tracing = { version = "0.1", default-features = false, features = [
+  "attributes",
+] }
+
 
 [build-dependencies]
 cc = { version = "1.2.2", features = ["parallel"] }
