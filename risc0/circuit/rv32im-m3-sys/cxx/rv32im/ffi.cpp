@@ -19,7 +19,6 @@
 #include "prove/rv32im.h"
 #include "verify/rv32im.h"
 
-#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <exception>
