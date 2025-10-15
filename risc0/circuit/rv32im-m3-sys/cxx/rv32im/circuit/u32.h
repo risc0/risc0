@@ -18,6 +18,9 @@
 #include "rv32im/circuit/bits.h"
 #include "rv32im/circuit/lookups.h"
 
+// Choose a or b based on the value of c
+//
+// PRECONDITION: c must be constrained to be a bit.
 template <typename C> inline FDEV ValU32<C> cond(Val<C> c, ValU32<C> a, ValU32<C> b) {
   return ValU32<C>(c * a.low + (Val<C>(1) - c) * b.low, c * a.high + (Val<C>(1) - c) * b.high);
 }
@@ -42,7 +45,7 @@ template <typename C> struct RegU32 {
   FDEV void addArguments(CTX) DEV {}
 };
 
-// An adder that takes two (presumably valid) ValU32<C>'s and add them
+// An adder that takes two (presumably valid) ValU32<C>'s and adds them
 // Propagates carrys + range checks the output (i.e. if the inputs)
 // are valid, the output will be.
 template <typename C> struct AddU32 {

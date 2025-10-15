@@ -12,6 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/argument/memory.h"
+#include "rv32im/argument/paging.h"
+#include "rv32im/argument/poseidon2.h"
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/paging.h"
+
 template <typename C> FDEV void PageInNodeBlock<C>::set(CTX, PageInNodeWitness wit) DEV {
   index.set(ctx, wit.index);
   SET_ARR(node, wit.node, CELLS_DIGEST);

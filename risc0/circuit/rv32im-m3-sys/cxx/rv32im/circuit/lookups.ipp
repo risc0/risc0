@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/argument/lookup.h"
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/lookups.h"
+
 template <typename C> FDEV void RegU8<C>::set(CTX, Val<C> in) DEV {
   inner.set(ctx, in);
   uint32_t val = in.asUInt32();

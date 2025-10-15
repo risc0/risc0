@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include "hal/hal.h"
+
 #include "rv32im/circuit/circuit.ipp"
 
 // During data witgen, we ignore eqz, and all arguments

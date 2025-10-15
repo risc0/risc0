@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/argument/lookup.h"
+#include "rv32im/argument/memory.h"
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/mem.h"
+
 template <typename C> FDEV void MemReadBlock<C>::set(CTX, MemReadWitness wit, uint32_t cycle) DEV {
   wordAddr.set(ctx, wit.wordAddr);
   prevCycle.set(ctx, wit.prevCycle);

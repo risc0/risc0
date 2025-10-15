@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/one_hot.h"
+#include <cstddef>
+
 // Set the selected bit to 1, zero all others
 template <typename C, size_t N> FDEV void OneHot<C, N>::set(CTX, uint32_t val) DEV {
   for (uint32_t i = 0; i < N; i++) {
