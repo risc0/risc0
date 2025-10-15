@@ -57,13 +57,13 @@ static int getInitialLogLevel() {
   }
 }
 
-unsigned gLogLevel = getInitialLogLevel();
+unsigned gR0LogLevel = getInitialLogLevel();
 
-void setLogLevel(unsigned level) {
+void setR0LogLevel(unsigned level) {
   gLogLevel = level;
 }
 
-unsigned getLogLevel() {
+unsigned getR0LogLevel() {
   return gLogLevel;
 }
 

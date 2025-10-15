@@ -40,15 +40,15 @@ extern "C" void risc0_log_callback(int level, const char* str);
 namespace risc0 {
 
 /// Set the logging level so that logs of level <= \p level are printed
-void setLogLevel(unsigned level);
+void setR0LogLevel(unsigned level);
 
 /// Get the currently log level.
 /// Usually used to optionally do extra computation required only for logging.
-unsigned getLogLevel();
+unsigned getR0LogLevel();
 
 #define LOG(num, vals)                                                                             \
   do {                                                                                             \
-    if (::risc0::getLogLevel() >= num) {                                                           \
+    if (::risc0::getR0LogLevel() >= num) {                                                         \
       std::ostringstream oss;                                                                      \
       oss << vals;                                                                                 \
       risc0_log_callback(num, oss.str().c_str());                                                  \
