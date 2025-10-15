@@ -524,7 +524,7 @@ template <typename C> struct InstEcallBlock {
 };
 
 template <typename C> struct InstMretBlock {
-  CONSTANT static char NAME[] = "InstEcallBlock";
+  CONSTANT static char NAME[] = "InstMretBlock";
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
