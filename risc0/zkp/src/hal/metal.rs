@@ -13,15 +13,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{
-    collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, mem, slice, sync::OnceLock,
-};
+use std::{collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, mem, slice};
 
 use metal::{
     Buffer as MetalBuffer, CommandQueue, ComputeCommandEncoderRef, ComputePipelineDescriptor,
     Device, MTLArgumentBuffersTier, MTLResourceOptions, MTLSize,
 };
-use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use rayon::prelude::*;
 use risc0_core::{
     field::{
@@ -68,12 +65,6 @@ const KERNEL_NAMES: &[&str] = &[
     "sha_rows",
     "zk_shift",
 ];
-
-// The GPU becomes unstable as the number of concurrent provers grow.
-fn singleton() -> &'static ReentrantMutex<()> {
-    static ONCE: OnceLock<ReentrantMutex<()>> = OnceLock::new();
-    ONCE.get_or_init(|| ReentrantMutex::new(()))
-}
 
 pub trait MetalHash {
     /// Create a hash implementation
@@ -195,7 +186,6 @@ pub struct MetalHal<Hash: MetalHash + ?Sized> {
     pub cmd_queue: CommandQueue,
     kernels: HashMap<String, ComputePipelineDescriptor>,
     hash: Option<Box<Hash>>,
-    _lock: ReentrantMutexGuard<'static, ()>,
 }
 
 pub type MetalHalSha256 = MetalHal<MetalHashSha256>;
@@ -381,7 +371,6 @@ impl<MH: MetalHash> Default for MetalHal<MH> {
 
 impl<MH: MetalHash> MetalHal<MH> {
     pub fn new() -> Self {
-        let lock = singleton().lock();
         let device = Device::system_default().expect("no device found");
         assert_eq!(
             device.argument_buffers_support(),
@@ -401,7 +390,6 @@ impl<MH: MetalHash> MetalHal<MH> {
             cmd_queue,
             kernels,
             hash: None,
-            _lock: lock,
         };
         hal.hash = Some(Box::new(MH::new(&hal)));
         hal
