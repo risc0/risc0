@@ -404,10 +404,7 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - name: test in dev mode
-        run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace --exclude prover-example
-        working-directory: examples
-      - name: test prover example
-        run: ${{ matrix.test_command }} --release --locked -F $FEATURE -p prover-example
+        run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:

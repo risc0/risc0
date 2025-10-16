@@ -133,12 +133,14 @@ pub(crate) struct ExecuteTask {
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ProveSegmentTask {
     pub segment: Segment,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ProveKeccakTask {
     pub index: usize,
     pub request: ProveKeccakRequest,
+    pub dev_mode: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -150,12 +152,14 @@ pub(crate) struct SegmentRange {
 #[derive(Serialize, Deserialize)]
 pub(crate) struct LiftTask {
     pub receipt: SegmentReceipt,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct JoinTask {
     pub range: SegmentRange,
     pub receipts: Vec<SuccinctReceipt<ReceiptClaim>>,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -163,18 +167,21 @@ pub(crate) struct UnionTask {
     pub height: usize,
     pub pos: usize,
     pub receipts: Vec<Arc<SuccinctReceipt<Unknown>>>,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ResolveTask {
     pub conditional: Arc<SuccinctReceipt<ReceiptClaim>>,
     pub assumption: Arc<SuccinctReceipt<Unknown>>,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ShrinkWrapTask {
     pub kind: ShrinkWrapKind,
     pub receipt: Arc<Receipt>,
+    pub dev_mode: bool,
 }
 
 pub mod factory {
