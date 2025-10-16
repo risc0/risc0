@@ -501,7 +501,7 @@ struct Emulator {
     wit.fetch = *curFetch;
     mode = MODE_USER;
     regOffset = USER_REGS_WORD & 0xff;
-    newPc = readMemory(wit.readPc, CSR_WORD(MEPC) + 4);
+    newPc = readMemory(wit.readPc, CSR_WORD(MEPC)) + 4;
   }
 
   void do_ECALL_TERMINATE() {
