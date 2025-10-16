@@ -29,10 +29,17 @@ template <typename C> using ArgCountReg = typename C::ArgCountRegImpl;
 // Declared early because it is used in some arguments
 template <typename C> struct ValU32 {
   FDEV ValU32() = default;
-  FDEV ValU32(Val<C> low, Val<C> high) : low(low), high(high) {}
+  FDEV ValU32(Val<C> low, Val<C> high) : low(low),
+high(high) {}
   Val<C> low;
   Val<C> high;
 };
 
 // Reduce typing a bit
 #define CTX MTHR C& ctx
+
+// Picus directives are no-ops when not using the extractor
+#ifndef PICUS
+#define PICUS_INPUT(ctx, x)
+#define ASSUME_RANGE(ctx, low, x, high)
+#endif

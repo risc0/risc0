@@ -3,11 +3,13 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "extractor",
     srcs = [
+        "PicusDirectives.cpp",
         "RecordingContext.cpp",
         "RecordingVal.cpp",
     ],
     hdrs = [
         "LayoutBuilderVisitor.h",
+        "PicusDirectives.h",
         "RecordingContext.h",
         "RecordingVal.h",
         "base.h",

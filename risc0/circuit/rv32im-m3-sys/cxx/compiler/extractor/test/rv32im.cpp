@@ -15,6 +15,7 @@
 
 #include "compiler/extractor/base.h"
 #include "rv32im/circuit/circuit.ipp"
+#include "zirgen/compiler/picus/picus.h"
 
 #include "mlir/IR/Verifier.h"
 
@@ -25,11 +26,17 @@ int main() {
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
-#define BLOCK_TYPE(name, count) EXTRACT(name##Block)
-  BLOCK_TYPES
-#undef BLOCK_TYPE
+  EXTRACT(UnitAddSubBlock);
+// #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
+//   BLOCK_TYPES
+// #undef BLOCK_TYPE
 
-  ctx.getModuleOp().print(llvm::outs());
-  llvm::outs().flush();
-  return failed(mlir::verify(ctx.getModuleOp()));
+  if (failed(mlir::verify(ctx.getModuleOp()))) {
+    llvm::errs() << "Module verification error\n";
+    return 1;
+  }
+
+  printPicus(ctx.getModuleOp(),
+llvm::outs());
+  return 0;
 }

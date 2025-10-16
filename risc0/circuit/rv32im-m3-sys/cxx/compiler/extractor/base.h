@@ -16,6 +16,7 @@
 #pragma once
 
 #include "compiler/extractor/LayoutBuilderVisitor.h"
+#include "compiler/extractor/PicusDirectives.h"
 #include "compiler/extractor/RecordingContext.h"
 #include "compiler/extractor/RecordingVal.h"
 #include "zkp/fp.h"
@@ -47,3 +48,8 @@ struct VerifyFwd {
     ctx.materializeLayout(layoutType);                                                             \
     ctx.exitComponent();                                                                           \
   }
+
+#define PICUS
+#define PICUS_INPUT(ctx, x) picusInput(ctx, x)
+#define RANGE_PRECONDITION(ctx, low, x, high) rangePrecondition(ctx, low, x, high)
+#define RANGE_POSTCONDITION(ctx, low, x, high) rangePostcondition(ctx, low, x, high)
