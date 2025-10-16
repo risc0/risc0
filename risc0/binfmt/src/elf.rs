@@ -23,7 +23,15 @@ use risc0_zkp::core::{digest::Digest, hash::sha::Impl};
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
-use crate::{Digestible as _, KERNEL_START_ADDR, MemoryImage, SystemState};
+use crate::{ByteAddr, Digestible as _, KERNEL_START_ADDR, MemoryImage, SystemState};
+
+const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
+
+const SUSPEND_PC_ADDR: ByteAddr = ByteAddr(0xffff_0210);
+const SUSPEND_MODE_ADDR: ByteAddr = ByteAddr(0xffff_0214);
+
+#[cfg(feature = "rv32im-m3")]
+const RV32IM_VERSION_ADDR: ByteAddr = ByteAddr(0xffff_0300);
 
 /// A RISC Zero program
 pub struct Program {
@@ -128,6 +136,21 @@ impl Program {
     /// Read a word from the image
     pub fn read_u32(&self, address: &u32) -> Option<u32> {
         self.image.get(address).copied()
+    }
+
+    pub(crate) fn prepare_user(&mut self) {
+        self.image.insert(USER_START_ADDR.0, self.entry);
+    }
+
+    pub(crate) fn prepare_kernel(&mut self, user: Option<&mut Program>) {
+        if let Some(user) = user {
+            self.image.append(&mut user.image);
+        }
+        self.image.insert(SUSPEND_PC_ADDR.0, self.entry);
+        self.image.insert(SUSPEND_MODE_ADDR.0, 1);
+        // This is a temporary hack until we have CSRs to detect host/circuit/zkvm versions.
+        #[cfg(feature = "rv32im-m3")]
+        self.image.insert(RV32IM_VERSION_ADDR.0, 3);
     }
 }
 
