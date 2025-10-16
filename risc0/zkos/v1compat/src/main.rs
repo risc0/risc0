@@ -347,15 +347,15 @@ mod zkvm {
         count: u32,
     ) {
         let count = count as usize;
-        println!(
-            "sha_software> out_state: {out_state:?}, in_state: {in_state:?}, block1_ptr: {block1_ptr:?}, block2_ptr: {block2_ptr:?}, count: {count}"
-        );
+        // println!(
+        //     "sha_software> out_state: {out_state:?}, in_state: {in_state:?}, block1_ptr: {block1_ptr:?}, block2_ptr: {block2_ptr:?}, count: {count}"
+        // );
 
         let block_ptr = if block2_ptr == unsafe { block1_ptr.add(DIGEST_WORDS) } {
-            println!("buffer");
+            // println!("buffer");
             block1_ptr
         } else {
-            println!("compress");
+            // println!("compress");
 
             static mut TEMP_BLOCK: [u32; BLOCK_WORDS] = [0u32; BLOCK_WORDS];
             unsafe {
