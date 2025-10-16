@@ -497,6 +497,7 @@ struct Emulator {
       do_ECALL_BIG_INT();
       break;
     default:
+      LOG(0, "Invalid ECALL in machine mode: " << which);
       trap("Invalid ECALL in machine mode");
     }
   }

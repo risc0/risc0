@@ -71,12 +71,32 @@ impl SegmentProverImpl {
             });
         }
 
-        let raw_pages = RawSlice {
-            ptr: pages.as_ptr(),
-            len: pages.len(),
+        let image = RawMemoryImage {
+            pages: RawSlice {
+                ptr: pages.as_ptr(),
+                len: pages.len(),
+            },
         };
-        let image = RawMemoryImage { pages: raw_pages };
-        let raw_segment = RawSegment { image };
+
+        let mut reads: Vec<RawSlice<u8>> = Vec::with_capacity(segment.read_record.len());
+        for record in segment.read_record.iter() {
+            reads.push(RawSlice {
+                ptr: record.as_ptr(),
+                len: record.len(),
+            });
+        }
+
+        let raw_segment = RawSegment {
+            image,
+            reads: RawSlice {
+                ptr: reads.as_ptr(),
+                len: reads.len(),
+            },
+            writes: RawSlice {
+                ptr: segment.write_record.as_ptr(),
+                len: segment.write_record.len(),
+            },
+        };
 
         ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_load_segment(self.ctx, &raw_segment) })
     }
