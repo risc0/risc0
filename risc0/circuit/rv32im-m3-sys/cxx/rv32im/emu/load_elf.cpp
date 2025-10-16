@@ -38,16 +38,16 @@ void loadWithKernel(std::map<uint32_t, uint32_t>& words,
   // Set MEPC so MRET jumpts to start of user mode code
   uint32_t userEntry = risc0::loadElf(ArrayRef(userElfBytes.data(), userElfBytes.size()),
                                       words,
-                                      ZERO_PAGE_END_WORD,
-                                      KERNEL_START_WORD);
-  words[MEPC_WORD] = userEntry - 4;
+                                      USER_START_WORD,
+                                      USER_END_WORD);
+  words[CSR_WORD(MEPC)] = userEntry - 4;
   // Put start info into the memory image
   uint32_t kernelEntry = risc0::loadElf(ArrayRef(kernelElfBytes.data(), kernelElfBytes.size()),
                                         words,
                                         KERNEL_START_WORD,
                                         KERNEL_END_WORD);
-  words[SUSPEND_PC_WORD] = kernelEntry;
-  words[SUSPEND_MODE_WORD] = 1;
+  words[CSR_WORD(MSPC)] = kernelEntry;
+  words[CSR_WORD(MSMODE)] = MODE_MACHINE;
   // Load expansion table
   fillExpandTable(words);
 }
@@ -59,9 +59,9 @@ void loadRaw(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
 }
 
 void loadRawBytes(std::map<uint32_t, uint32_t>& words, const ArrayRef<uint8_t>& elfBytes) {
-  uint32_t entry = risc0::loadElf(elfBytes, words, ZERO_PAGE_END_WORD, KERNEL_END_WORD);
-  words[SUSPEND_PC_WORD] = entry;
-  words[SUSPEND_MODE_WORD] = 1;
+  uint32_t entry = risc0::loadElf(elfBytes, words);
+  words[CSR_WORD(MSPC)] = entry;
+  words[CSR_WORD(MSMODE)] = MODE_MACHINE;
   // Load expansion table
   fillExpandTable(words);
 }

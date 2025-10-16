@@ -58,7 +58,7 @@ template <typename C> struct InstSuspendBlock {
   FDEV void set(CTX, InstSuspendWitness) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 

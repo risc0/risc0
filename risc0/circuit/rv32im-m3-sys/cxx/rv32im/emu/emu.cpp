@@ -243,8 +243,8 @@ struct Emulator {
 
   void doResume() {
     auto& resumeWit = trace.makeInstResume();
-    pc = readMemory(resumeWit.pc, SUSPEND_PC_WORD);
-    mode = readMemory(resumeWit.mode, SUSPEND_MODE_WORD);
+    pc = readMemory(resumeWit.pc, CSR_WORD(MSPC));
+    mode = readMemory(resumeWit.mode, CSR_WORD(MSMODE));
     regOffset = (mode == MODE_MACHINE) ? (MACHINE_REGS_WORD & 0xff) : (USER_REGS_WORD & 0xff);
     curCycle++;
   }
@@ -253,8 +253,8 @@ struct Emulator {
     auto& suspendWit = trace.makeInstSuspend();
     suspendWit.cycle = curCycle;
     suspendWit.iCacheCycle = iCacheCycle;
-    writeMemory(suspendWit.pc, SUSPEND_PC_WORD, pc);
-    writeMemory(suspendWit.mode, SUSPEND_MODE_WORD, mode);
+    writeMemory(suspendWit.pc, CSR_WORD(MSPC), pc);
+    writeMemory(suspendWit.mode, CSR_WORD(MSMODE), mode);
     curCycle++;
   }
 
@@ -467,10 +467,10 @@ struct Emulator {
       auto& wit = trace.makeInstEcall();
       wit.cycle = curCycle;
       wit.fetch = *curFetch;
-      writeMemory(wit.savePc, MEPC_WORD, pc);
+      writeMemory(wit.savePc, CSR_WORD(MEPC), pc);
       mode = MODE_MACHINE;
       regOffset = MACHINE_REGS_WORD & 0xff;
-      newPc = readMemory(wit.dispatch, ECALL_DISPATCH_WORD);
+      newPc = readMemory(wit.dispatch, CSR_WORD(MTVEC));
       return;
     }
     uint32_t which = peekMemory(MACHINE_REGS_WORD + REG_A7);
@@ -501,7 +501,7 @@ struct Emulator {
     wit.fetch = *curFetch;
     mode = MODE_USER;
     regOffset = USER_REGS_WORD & 0xff;
-    newPc = readMemory(wit.readPc, MEPC_WORD) + 4;
+    newPc = readMemory(wit.readPc, CSR_WORD(MEPC) + 4);
   }
 
   void do_ECALL_TERMINATE() {

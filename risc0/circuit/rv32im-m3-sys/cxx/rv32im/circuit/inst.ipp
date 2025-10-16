@@ -22,6 +22,9 @@ template <typename C> FDEV void InstResumeBlock<C>::verify(CTX) DEV {
   EQZ(readMode.data.high.get());
   Val<C> mode = readMode.data.low.get();
   AssertBit(ctx, mode);
+  // Verify we loaded from the right addresses
+  EQ(readPc.wordAddr.get(), CSR_WORD(MSPC));
+  EQ(readMode.wordAddr.get(), CSR_WORD(MSMODE));
 }
 
 template <typename C> FDEV void InstResumeBlock<C>::addArguments(CTX) DEV {
@@ -36,6 +39,12 @@ template <typename C> FDEV void InstSuspendBlock<C>::set(CTX, InstSuspendWitness
   iCacheCycle.set(ctx, wit.iCacheCycle);
   writePc.set(ctx, wit.pc, wit.cycle);
   writeMode.set(ctx, wit.mode, wit.cycle);
+}
+
+template <typename C> FDEV void InstSuspendBlock<C>::verify(CTX) DEV {
+  // Verify we stored to the right addresses
+  EQ(writePc.wordAddr.get(), CSR_WORD(MSPC));
+  EQ(writeMode.wordAddr.get(), CSR_WORD(MSMODE));
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::addArguments(CTX) DEV {
@@ -565,8 +574,8 @@ template <typename C> FDEV void InstEcallBlock<C>::verify(CTX) DEV {
   EQ(fetch.pc.low.get(), writeSavePc.data.low.get());
   EQ(fetch.pc.high.get(), writeSavePc.data.high.get());
   // Make sure address constants are right
-  EQ(writeSavePc.wordAddr.get(), MEPC_WORD);
-  EQ(readDispatch.wordAddr.get(), ECALL_DISPATCH_WORD);
+  EQ(writeSavePc.wordAddr.get(), CSR_WORD(MEPC));
+  EQ(readDispatch.wordAddr.get(), CSR_WORD(MTVEC));
 }
 
 template <typename C> FDEV void InstEcallBlock<C>::addArguments(CTX) DEV {
@@ -599,7 +608,7 @@ template <typename C> FDEV void InstMretBlock<C>::set(CTX, InstMretWitness wit) 
 
 template <typename C> FDEV void InstMretBlock<C>::verify(CTX) DEV {
   // Make sure address constants is right
-  EQ(readPc.wordAddr.get(), MEPC_WORD);
+  EQ(readPc.wordAddr.get(), CSR_WORD(MEPC));
 }
 
 template <typename C> FDEV void InstMretBlock<C>::addArguments(CTX) DEV {
