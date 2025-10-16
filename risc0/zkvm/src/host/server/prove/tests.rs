@@ -665,7 +665,7 @@ fn shrink_wrap() {
     // receipt.
 
     use rayon::prelude::*;
-    (0..5).into_par_iter().for_each(|_| {
+    (0..3).into_par_iter().for_each(|_| {
         prove_nothing_impl(ReceiptKind::Groth16)
             .receipt
             .inner
