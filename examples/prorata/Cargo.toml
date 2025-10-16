@@ -11,6 +11,9 @@ prorata-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 rust_decimal = "1.29"
 
+[dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []

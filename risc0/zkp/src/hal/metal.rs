@@ -371,6 +371,9 @@ impl<MH: MetalHash> Default for MetalHal<MH> {
 
 impl<MH: MetalHash> MetalHal<MH> {
     pub fn new() -> Self {
+        #[cfg(all(test, feature = "cuda"))]
+        gpu_guard::assert_gpu_semaphore_held();
+
         let device = Device::system_default().expect("no device found");
         assert_eq!(
             device.argument_buffers_support(),
@@ -907,92 +910,110 @@ mod tests {
     use crate::hal::testutil;
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_bit_reverse() {
         testutil::batch_bit_reverse(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_evaluate_any() {
         testutil::batch_evaluate_any(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_expand_into_evaluate_ntt() {
         testutil::batch_expand_into_evaluate_ntt(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_interpolate_ntt() {
         testutil::batch_interpolate_ntt(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     #[should_panic]
     fn check_req() {
         testutil::check_req(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_add_fp() {
         testutil::eltwise_add_elem(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_copy_fp() {
         testutil::eltwise_copy_elem(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_sum_extelem() {
         testutil::eltwise_sum_extelem(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn fri_fold() {
         testutil::fri_fold(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn mix_poly_coeffs() {
         testutil::mix_poly_coeffs(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_fold_sha256() {
         testutil::hash_fold(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_rows_sha256() {
         testutil::hash_rows(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_fold_poseidon2() {
         testutil::hash_fold(MetalHalPoseidon2::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_rows_poseidon2() {
         testutil::hash_rows(MetalHalPoseidon2::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn slice() {
         testutil::slice(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn zk_shift() {
         testutil::zk_shift(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn gather_sample() {
         testutil::gather_sample(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn prefix_products() {
         use crate::hal::{Hal as _, cpu::CpuHal, dual::DualHal};
         use risc0_core::field::baby_bear::BabyBearExtElem;

@@ -134,13 +134,12 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use serial_test::serial;
     use wordle_core::LetterFeedback;
 
     use crate::{Player, Server};
 
     #[test]
-    #[serial]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn main() {
         const TEST_GUESS_WRONG: &str = "roofs";
         const TEST_GUESS_RIGHT: &str = "proof";
@@ -167,7 +166,7 @@ mod tests {
     /// appear, and also in an incorrect position, the 'bonus' letter
     /// shouldn't flag yellow
     #[test]
-    #[serial]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn test_partial_match_false_positives() {
         let server = Server::new("spare");
         let player = Player {

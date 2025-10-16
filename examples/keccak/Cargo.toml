@@ -9,6 +9,7 @@ keccak-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 
 [dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
 hex = "0.4"
 
 [features]

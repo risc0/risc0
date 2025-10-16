@@ -126,11 +126,13 @@ fn fwd_rev_ab_test(program: Program) {
 }
 
 #[test]
+#[gpu_guard::gpu_guard]
 fn fwd_rev_ab_basic() {
     fwd_rev_ab_test(testutil::kernel::basic());
 }
 
 #[test]
+#[gpu_guard::gpu_guard]
 fn fwd_rev_ab_split() {
     fwd_rev_ab_test(testutil::kernel::simple_loop(2000));
 }

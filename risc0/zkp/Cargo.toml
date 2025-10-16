@@ -50,6 +50,9 @@ rand = { version = "0.9.1", features = ["small_rng"] }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+gpu-guard = { workspace = true }
+
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
 # NOTE: cuda and metal are excluded because their build scripts require external tools.

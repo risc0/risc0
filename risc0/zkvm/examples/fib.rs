@@ -47,6 +47,7 @@ struct Metrics {
     seal: usize,
 }
 
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
