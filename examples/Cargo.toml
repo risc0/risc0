@@ -27,7 +27,6 @@ members = [
   "profiling",
   "prorata",
   "prorata/core",
-  "prover",
   "sha",
   "smartcore-ml",
   "voting-machine",

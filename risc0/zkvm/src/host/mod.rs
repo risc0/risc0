@@ -13,12 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#[cfg(any(feature = "client", feature = "prove"))]
-pub(crate) mod api;
 #[cfg(feature = "client")]
 pub(crate) mod client;
-#[cfg(any(feature = "client", feature = "prove"))]
-mod protos;
 pub(crate) mod prove_info;
 pub mod recursion;
 #[cfg(feature = "client")]

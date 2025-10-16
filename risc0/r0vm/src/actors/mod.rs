@@ -618,6 +618,7 @@ impl App {
                     let child = Command::new(&r0vm_path)
                         .process_group(0)
                         .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
+                        .env_remove("RISC0_DEV_MODE")
                         .arg("--config")
                         .arg(cfg_child.file.path())
                         .spawn()
