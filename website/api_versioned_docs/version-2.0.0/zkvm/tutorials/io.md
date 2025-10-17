@@ -315,8 +315,8 @@ Happy coding!
 [source-executor-env]: https://docs.rs/risc0-zkvm/2.0/struct.ExecutorEnv.html
 [source-ExecutorEnvBuilder::stderr]: https://docs.rs/risc0-zkvm/2.0/struct.ExecutorEnvBuilder.html#method.stderr
 [source-ExecutorEnvBuilder::stdout]: https://docs.rs/risc0-zkvm/2.0/struct.ExecutorEnvBuilder.html#method.stdout
-[source-ExecutorEnvBuilder::write]: https://docs.rs/risc0-zkvm/2.0/struct.ExecutorEnvBuilder.html#method.write
-[source-ExecutorEnvBuilder::write_slice]: https://docs.rs/risc0-zkvm/2.0/struct.ExecutorEnvBuilder.html#method.write_slice
+[source-ExecutorEnvBuilder::write]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/struct.ExecutorEnvBuilder.html
+[source-ExecutorEnvBuilder::write_slice]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.write_slice
 [source-fileno]: https://docs.rs/risc0-zkvm-platform/2.0/fileno/index.html
 [source-from_slice]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/serde/fn.from_slice.html
 [source-Journal]: https://docs.rs/risc0-zkvm/2.0/struct.Journal.html
