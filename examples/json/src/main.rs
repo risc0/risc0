@@ -47,6 +47,7 @@ fn search_json(data: &str) -> Outputs {
 #[cfg(test)]
 mod tests {
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn main() {
         let data = include_str!("../res/example.json");
         let outputs = super::search_json(data);

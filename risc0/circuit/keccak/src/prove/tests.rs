@@ -29,6 +29,7 @@ use crate::{
 };
 
 #[test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn basic() {
     let po2 = 8; // 256
     let inputs = test_inputs(po2);
@@ -38,6 +39,7 @@ fn basic() {
 }
 
 #[test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn fwd_rev_ab() {
     cfg_if! {
         if #[cfg(feature = "cuda")] {

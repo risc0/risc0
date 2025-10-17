@@ -118,6 +118,7 @@ mod tests {
     }
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn wasm_fib() {
         let fib_iters: i32 = 10;
         let result = super::run_guest(fib_iters);

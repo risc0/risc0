@@ -61,6 +61,7 @@ assert_cmd = "2.0"
 assert_fs = "1.0"
 assert_matches = "1.5"
 axum-test = "18"
+gpu-guard = { workspace = true }
 httpmock = "0.7.0"
 opentelemetry_sdk = { version = "0.30.0", features = ["testing"] }
 risc0-zkvm-methods = { path = "../zkvm/methods" }

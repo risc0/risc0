@@ -12,6 +12,9 @@ smartcore = { git = "https://github.com/risc0/smartcore.git", rev = "4bd3cadd50e
 ] }
 smartcore-ml-methods = { path = "methods" }
 
+[dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []

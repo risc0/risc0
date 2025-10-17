@@ -69,6 +69,7 @@ fn main() {
 }
 
 #[test]
+#[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
 fn test_pairing() {
     assert!(
         prove_pairing().journal.decode::<bool>().unwrap(),

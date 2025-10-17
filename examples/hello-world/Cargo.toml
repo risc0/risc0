@@ -8,6 +8,9 @@ hello-world-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+[dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
