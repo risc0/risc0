@@ -27,7 +27,9 @@ int main() {
   BuilderSingleton::set(&ctx.builder);
 
   // EXTRACT(UnitAddSubBlock);
-  EXTRACT(UnitBitBlock);
+  // EXTRACT(UnitBitBlock);
+  EXTRACT(UnitMulBlock);
+
 // #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
 //   BLOCK_TYPES
 // #undef BLOCK_TYPE
