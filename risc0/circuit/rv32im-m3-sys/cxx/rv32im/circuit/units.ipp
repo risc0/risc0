@@ -12,6 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx) \
+  PICUS_INPUT(ctx, count); \
+  PICUS_INPUT(ctx, a); \
+  PICUS_INPUT(ctx, b); \
+  RANGE_PRECONDITION(ctx, 0, a.get().low, 0x10000); \
+  RANGE_PRECONDITION(ctx, 0, a.get().high, 0x10000); \
+  RANGE_PRECONDITION(ctx, 0, b.get().low, 0x10000); \
+  RANGE_PRECONDITION(ctx, 0, b.get().high, 0x10000)
+
 template <typename C> FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness wit) DEV {
   count.set(ctx, wit.count);
   Option opts(wit.opts);
@@ -20,6 +29,11 @@ template <typename C> FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness w
   a.set(ctx, wit.a);
   b.set(ctx, wit.b);
   out.set(ctx, wit.a, (opts.val ? ~wit.b : wit.b), opts.val);
+}
+
+template <typename C> FDEV void UnitAddSubBlock<C>::verify(CTX) DEV {
+  UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx);
+  PICUS_INPUT(ctx, doSub);
 }
 
 template <typename C> FDEV void UnitAddSubBlock<C>::addArguments(CTX) DEV {
@@ -52,6 +66,12 @@ template <typename C> FDEV void UnitBitBlock<C>::set(CTX, UnitBitWitness wit) DE
 }
 
 template <typename C> FDEV void UnitBitBlock<C>::verify(CTX) DEV {
+  UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx);
+  PICUS_INPUT(ctx, op);
+
+  // Assert that aBits and bBits are bit decompositions of a and b. Also compute
+  // the "recomposition" of aBits, bBits, and their product into shorts for use
+  // in a moment.
   Val<C> aParts[2], bParts[2], andParts[2];
   for (size_t p = 0; p < 2; p++) {
     for (size_t i = 0; i < 16; i++) {
@@ -63,10 +83,25 @@ template <typename C> FDEV void UnitBitBlock<C>::verify(CTX) DEV {
       andParts[p] += aVal * bVal * po2;
     }
   }
+
+  // Assert that aBits and bBits recompose into a and b.
   EQ(aParts[0], a.low.get());
   EQ(aParts[1], a.high.get());
   EQ(bParts[0], b.low.get());
   EQ(bParts[1], b.high.get());
+
+  // Now we want to assert that out is computed correctly from a and b, and bits
+  // encodes whether we're computing XOR, OR, or AND. Noting that we've already
+  // computed AND(a, b), we can relate XOR(a, b) and OR(a, b) with ordinary
+  // addition (and therefore field addition without overflow) with some
+  // manipulation of the equations of a ripple-carry adder:
+  //
+  // XOR(a, b) = a + b - 2 * AND(a, b)
+  // OR(a, b) = a + b - AND(a, b)
+  // AND(a, b) = AND(a, b)
+  //
+  // Since these equations have common structure, we can write the result of
+  // each possible operation in the form c1 * (a + b) + c2 * AND(a, b).
   Val<C> c1 = op.bits[0].get() + op.bits[1].get();
   Val<C> c2 = op.bits[0].get() * (-Val<C>(2)) + op.bits[1].get() * (-Val<C>(1)) + op.bits[2].get();
   // LOG(0, "c1 = " << c1 << ", c2 = " << c2);
@@ -360,3 +395,5 @@ template <typename C> FDEV void UnitShiftBlock<C>::addArguments(CTX) DEV {
   arg.out1High = out2.high.get();
   ctx.pull(arg);
 }
+
+#undef UNIT_BLOCK_PICUS_ASSUMPTIONS
