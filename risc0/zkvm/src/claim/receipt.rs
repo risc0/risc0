@@ -152,6 +152,40 @@ impl ReceiptClaim {
         Ok(())
     }
 
+    #[cfg(feature = "rv32im-m3")]
+    pub(crate) fn decode_m3_with_output(
+        seal: &[u32],
+        output: Option<Output>,
+    ) -> anyhow::Result<ReceiptClaim> {
+        use risc0_circuit_rv32im_m3::Rv32imM3Claim;
+
+        let claim = Rv32imM3Claim::decode(seal)?;
+        let exit_code = claim.exit_code()?;
+        let post_state = match exit_code {
+            ExitCode::Halted(_) => Digest::ZERO,
+            _ => claim.post_state,
+        };
+
+        Ok(ReceiptClaim {
+            pre: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: claim.pre_state,
+            }),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: post_state,
+            }),
+            exit_code,
+            input: MaybePruned::Pruned(claim.input),
+            output: output.into(),
+        })
+    }
+
+    #[cfg(feature = "rv32im-m3")]
+    pub(crate) fn decode_from_seal_v3(seal: &[u32]) -> anyhow::Result<ReceiptClaim> {
+        Self::decode_m3_with_output(seal, None)
+    }
+
     pub(crate) fn decode_from_seal_v2(
         seal: &[u32],
         _po2: Option<u32>,

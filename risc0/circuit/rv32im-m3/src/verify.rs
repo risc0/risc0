@@ -17,10 +17,10 @@ use risc0_zkp::{
     adapter::{CircuitCoreDefV3, CircuitInfoV3, GroupInfo, MixState, PolyExt},
     core::hash::poseidon2::Poseidon2HashSuite,
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-    verify::{VerificationError, verify_v3},
+    verify::VerificationError,
 };
 
-use crate::zirgen::poly_ext::POLY_EXT_DEF;
+use crate::{RV32IM_SEAL_VERSION, zirgen::poly_ext::POLY_EXT_DEF};
 
 pub struct CircuitInfo;
 
@@ -52,8 +52,18 @@ impl PolyExt<BabyBear> for CircuitInfo {
 
 impl CircuitCoreDefV3<BabyBear> for CircuitInfo {}
 
-pub fn verify_m3(transcript: &[u32], po2: usize) -> Result<(), VerificationError> {
+pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
     let circuit = CircuitInfo;
     let suite = Poseidon2HashSuite::new_suite();
-    verify_v3(&circuit, &suite, transcript, po2)
+
+    if seal[0] != RV32IM_SEAL_VERSION {
+        tracing::error!("seal[0]: {}", seal[0]);
+        return Err(VerificationError::ReceiptFormatError);
+    }
+
+    let po2 = seal[1];
+    tracing::debug!("po2: {po2}");
+
+    let seal = &seal[2..]; // skip past version, po2
+    risc0_zkp::verify::verify_v3(&circuit, &suite, seal, po2 as usize)
 }

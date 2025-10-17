@@ -37,6 +37,7 @@ required-features = ["prove"]
 anyhow = { version = "1.0", default-features = false }
 borsh = { version = "1.5", default-features = false, features = ["derive"] }
 bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
+cfg-if = "1.0"
 derive_more = { version = "2.0.1", default-features = false, features = [
   "debug",
   "from",

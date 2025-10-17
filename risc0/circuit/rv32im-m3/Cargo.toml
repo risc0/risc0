@@ -20,6 +20,11 @@ risc0-circuit-rv32im = { workspace = true, optional = true }
 risc0-circuit-rv32im-m3-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 risc0-zkp = { workspace = true }
+risc0-zkvm-platform = { workspace = true }
+serde = { version = "1.0", default-features = false, features = [
+  "derive",
+  "alloc",
+] }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
@@ -47,4 +52,4 @@ prove = [
   "risc0-zkp/prove",
   "std",
 ]
-std = ["anyhow/std", "risc0-binfmt/std", "risc0-zkp/std"]
+std = ["anyhow/std", "risc0-binfmt/std", "risc0-zkp/std", "serde/std"]

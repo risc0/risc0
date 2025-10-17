@@ -230,8 +230,8 @@ impl ProverServer for ProverImpl {
         let prover = risc0_circuit_rv32im_m3::prove::segment_prover(segment.po2())?;
         let seal = prover.prove(&segment.inner)?;
 
-        let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, None)?;
-        claim.output = segment.output.clone().into();
+        let claim = ReceiptClaim::decode_m3_with_output(&seal, segment.output.clone())
+            .context("Decode ReceiptClaim from seal")?;
 
         let verifier_parameters = ctx
             .segment_verifier_parameters
