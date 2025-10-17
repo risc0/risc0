@@ -26,7 +26,8 @@ int main() {
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
-  EXTRACT(UnitAddSubBlock);
+  // EXTRACT(UnitAddSubBlock);
+  EXTRACT(UnitBitBlock);
 // #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
 //   BLOCK_TYPES
 // #undef BLOCK_TYPE
@@ -36,7 +37,6 @@ int main() {
     return 1;
   }
 
-  printPicus(ctx.getModuleOp(),
-llvm::outs());
+  printPicus(ctx.getModuleOp(), llvm::outs());
   return 0;
 }

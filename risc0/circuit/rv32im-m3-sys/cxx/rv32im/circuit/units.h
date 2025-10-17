@@ -41,17 +41,7 @@ template <typename C> struct UnitAddSubBlock {
 
   FDEV void set(CTX, UnitAddSubWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
-
-  FDEV void verify(CTX) DEV {
-    PICUS_INPUT(ctx, count);
-    PICUS_INPUT(ctx, doSub);
-    PICUS_INPUT(ctx, a);
-    PICUS_INPUT(ctx, b);
-    RANGE_PRECONDITION(ctx, 0, a.get().low, 0x10000);
-    RANGE_PRECONDITION(ctx, 0, a.get().high, 0x10000);
-    RANGE_PRECONDITION(ctx, 0, b.get().low, 0x10000);
-    RANGE_PRECONDITION(ctx, 0, b.get().high, 0x10000);
-  }
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 
