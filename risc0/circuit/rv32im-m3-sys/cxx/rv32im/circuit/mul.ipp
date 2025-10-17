@@ -26,6 +26,7 @@ template <typename C> FDEV ValU32<C> ExpandU32<C>::get() DEV {
 }
 
 template <typename C> FDEV void ExpandU32<C>::verify(CTX) DEV {
+  // Assert that topBit and b3Low7Times2 properly decompose b3
   EQ(b3.get(), topBit.get() * 128 + b3Low7times2.get() * inv(Fp(2)));
 }
 
@@ -41,6 +42,7 @@ template <typename C> FDEV Val<C> SplitTotal<C>::carry() DEV {
 }
 
 template <typename C> FDEV void SplitTotal<C>::verify(CTX, Val<C> val) DEV {
+  // Assert that this component properly decomposes val
   EQ(val,
      out.get() + carryByte.get() * 0x10000 + carryBit0.get() * 0x1000000 +
          carryBit1.get() * 0x2000000);
@@ -80,14 +82,25 @@ template <typename C> FDEV ValU32<C> Multiply<C>::getOutHigh() DEV {
 }
 
 template <typename C> FDEV void Multiply<C>::verify(CTX) DEV {
+  // Since s0, s1, and s2 are already checked by SplitTotal, we only need to
+  // check s3 here.
   EQ(s3Out.get() + Val<C>(0x10000) * s3Carry.get(), valS3());
 }
 
+// We decompoes the two multiplicands into bytes, and compute the full product
+// as a sum of their partial products. These partial products are stored in s0,
+// s1, s2, s3, such that the `out` member of each is the corresponding 16-bit
+// chunk of the full product. Each one also holds a carry value that is used to
+// compute the next one. The computations for s2 and s3 also
+
+// The sum of all partial products that affect the first 16 bits of the product.
 template <typename C> FDEV Val<C> Multiply<C>::valS0() DEV {
   return ax.b0.get() * bx.b0.get() +
          Val<C>(0x100) * (ax.b0.get() * bx.b1.get() + ax.b1.get() * bx.b0.get());
 }
 
+// The sum of all partial products that affect the second 16 bits of the product,
+// plus the carry from s0.
 template <typename C> FDEV Val<C> Multiply<C>::valS1() DEV {
   return s0.carry() + ax.b0.get() * bx.b2.get() + ax.b1.get() * bx.b1.get() +
          ax.b2.get() * bx.b0.get() +
@@ -95,6 +108,8 @@ template <typename C> FDEV Val<C> Multiply<C>::valS1() DEV {
                           ax.b2.get() * bx.b1.get() + ax.b3.get() * bx.b0.get());
 }
 
+// The sum of all partial products that affect the third 16 bits of the product,
+// plus the carry from s1. It also includes corrections related to sign.
 template <typename C> FDEV Val<C> Multiply<C>::valS2() DEV {
   Val<C> aNeg = signA.get() * ax.topBit.get();
   Val<C> bNeg = signB.get() * bx.topBit.get();
@@ -104,6 +119,8 @@ template <typename C> FDEV Val<C> Multiply<C>::valS2() DEV {
          Val<C>(0x100) * (ax.b2.get() * bx.b3.get() + ax.b3.get() * bx.b2.get());
 }
 
+// The sum of all partial products that affect the last 16 bits of the product,
+// plus the carry from s2. It also includes corrections related to sign.
 template <typename C> FDEV Val<C> Multiply<C>::valS3() DEV {
   Val<C> aNeg = signA.get() * ax.topBit.get();
   Val<C> bNeg = signB.get() * bx.topBit.get();

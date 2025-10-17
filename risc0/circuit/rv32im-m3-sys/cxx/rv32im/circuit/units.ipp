@@ -148,6 +148,22 @@ template <typename C> FDEV void UnitMulBlock<C>::set(CTX, UnitMulWitness wit) DE
 }
 
 template <typename C> FDEV void UnitMulBlock<C>::verify(CTX) DEV {
+  PICUS_INPUT(ctx, count);
+  PICUS_INPUT(ctx, mul.signA);
+  PICUS_INPUT(ctx, mul.signB);
+
+  // Only the fields used in the argument are guaranteed to be determinstic. In
+  // particular, ExpandU32::topBit and ExpandU32::b3Low7times2 cannot be assumed.
+  // TODO: is there a more robust way to flag the correct fields?
+  PICUS_INPUT(ctx, mul.ax.b0);
+  PICUS_INPUT(ctx, mul.ax.b1);
+  PICUS_INPUT(ctx, mul.ax.b2);
+  PICUS_INPUT(ctx, mul.ax.b3);
+  PICUS_INPUT(ctx, mul.bx.b0);
+  PICUS_INPUT(ctx, mul.bx.b1);
+  PICUS_INPUT(ctx, mul.bx.b2);
+  PICUS_INPUT(ctx, mul.bx.b3);
+
   // Disallow signA = 0, sign B = 1
   EQZ((Val<C>(1) - mul.signA.get()) * mul.signB.get());
 }
