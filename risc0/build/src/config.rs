@@ -114,6 +114,7 @@ impl GuestOptions {
 
 /// Metadata defining options to build a guest
 #[derive(Serialize, Deserialize, Clone, Default)]
+#[non_exhaustive]
 pub(crate) struct GuestMetadata {
     /// Configuration flags to build the guest with.
     #[serde(rename = "rustc-flags")]
