@@ -311,15 +311,15 @@ struct Emulator {
     constexpr Option opts3 = opts2.popRet<OutKind>();
     auto& wit = trace.makeInstReg();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
-    uint32_t rs2Val = readReg(wit.rs2, decoded.rs2, decoded.rs1 == decoded.rs2);
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    uint32_t rs2Val = readReg(wit.rs2, dinst->rs2, dinst->rs1 == dinst->rs2);
     wit.options = opt;
     UnitBaseWitness* unit = doUnit<opts3.val>(rs1Val, rs2Val);
     wit.out0 = unit->out0;
     wit.out1 = unit->out1;
     uint32_t rdVal = (ok == OUT_0 ? unit->out0 : unit->out1);
-    writeReg(wit.rd, decoded.rd, rdVal);
+    writeReg(wit.rd, dinst->rd, rdVal);
     DLOG("  rs1Val = " << rs1Val << ", rs2Val = " << rs2Val);
     DLOG("  rdVal = " << rdVal);
   }
@@ -331,16 +331,16 @@ struct Emulator {
     constexpr Option opts3 = opts2.popRet<OutKind>();
     auto& wit = trace.makeInstImm();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
-    wit.rs2 = decoded.rs2;
-    wit.imm = opts3.is(UNIT_SHIFT) ? decoded.immIL() : decoded.immI();
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    wit.rs2 = dinst->rs2;
+    wit.imm = dinst->imm;
     wit.options = opt;
     UnitBaseWitness* unit = doUnit<opts3.val>(rs1Val, wit.imm);
     wit.out0 = unit->out0;
     wit.out1 = unit->out1;
     uint32_t rdVal = (ok == OUT_0 ? unit->out0 : unit->out1);
-    writeReg(wit.rd, decoded.rd, rdVal);
+    writeReg(wit.rd, dinst->rd, rdVal);
     DLOG("  rs1Val = " << rs1Val << ", imm = " << wit.imm);
     DLOG("  rdVal = " << rdVal);
   }
@@ -348,10 +348,10 @@ struct Emulator {
   template <uint32_t opt> inline void do_INST_LOAD() {
     auto& wit = trace.makeInstLoad();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
-    wit.rs2 = decoded.rs2;
-    wit.imm = decoded.immI();
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    wit.rs2 = dinst->rs2;
+    wit.imm = dinst->imm;
     uint32_t addr = rs1Val + wit.imm;
     uint32_t shift = BITS_PER_BYTE * (addr % BYTES_PER_WORD);
     uint32_t in = readVirtMemory(wit.mem, addr / BYTES_PER_WORD);
@@ -387,20 +387,20 @@ struct Emulator {
       out = (in >> shift) & 0xffff;
       break;
     }
-    writeReg(wit.rd, decoded.rd, out);
-    DLOG("  RS1 = " << decoded.rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
+    writeReg(wit.rd, dinst->rd, out);
+    DLOG("  RS1 = " << dinst->rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
     DLOG("  IMM = " << std::hex << wit.imm << std::dec);
-    DLOG("  RD = " << decoded.rd << ", value = " << std::hex << wit.rd.value << std::dec);
+    DLOG("  RD = " << dinst->rd << ", value = " << std::hex << wit.rd.value << std::dec);
   }
 
   template <uint32_t opt> inline void do_INST_STORE() {
     auto& wit = trace.makeInstStore();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
-    uint32_t data = readReg(wit.rs2, decoded.rs2, decoded.rs1 == decoded.rs2);
-    wit.rd = decoded.rd;
-    wit.imm = decoded.immS();
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    uint32_t data = readReg(wit.rs2, dinst->rs2, dinst->rs1 == dinst->rs2);
+    wit.rd = dinst->rd;
+    wit.imm = dinst->imm;
     wit.options = opt;
     constexpr Option optInner = Option(opt).popRet<InstKind>();
     uint32_t addr = rs1Val + wit.imm;
@@ -421,8 +421,8 @@ struct Emulator {
     case STORE_SW:
       if (shift != 0) {
         LOG(0, "Alignment error in SW, addr = " << addr);
-        LOG(0, "  RS1 = " << decoded.rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
-        LOG(0, "  RS2 = " << decoded.rs2 << ", value = " << std::hex << wit.rs2.value << std::dec);
+        LOG(0, "  RS1 = " << dinst->rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
+        LOG(0, "  RS2 = " << dinst->rs2 << ", value = " << std::hex << wit.rs2.value << std::dec);
         LOG(0, "  IMM = " << std::hex << wit.imm << std::dec);
         trap("Alignment error");
       }
@@ -430,8 +430,8 @@ struct Emulator {
       break;
     }
     writeVirtMemory(wit.mem, addr / BYTES_PER_WORD, out);
-    DLOG("  RS1 = " << decoded.rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
-    DLOG("  RS2 = " << decoded.rs2 << ", value = " << std::hex << wit.rs2.value << std::dec);
+    DLOG("  RS1 = " << dinst->rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
+    DLOG("  RS2 = " << dinst->rs2 << ", value = " << std::hex << wit.rs2.value << std::dec);
     DLOG("  IMM = " << std::hex << wit.imm << std::dec);
     DLOG("  MEM addr = " << std::hex << addr << ", value = " << out << std::dec);
   }
@@ -445,11 +445,11 @@ struct Emulator {
     constexpr Option opts4 = opts3.popRet<OutKind>();
     auto& wit = trace.makeInstBranch();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
-    uint32_t rs2Val = readReg(wit.rs2, decoded.rs2, decoded.rs1 == decoded.rs2);
-    wit.rd = decoded.rd;
-    wit.imm = decoded.immB();
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    uint32_t rs2Val = readReg(wit.rs2, dinst->rs2, dinst->rs1 == dinst->rs2);
+    wit.rd = dinst->rd;
+    wit.imm = dinst->imm;
     wit.options = opt;
     UnitBaseWitness* unit = doUnit<opts4.val>(rs1Val, rs2Val);
     wit.out0 = unit->out0;
@@ -467,47 +467,47 @@ struct Emulator {
   template <uint32_t opt> inline void do_INST_JAL() {
     auto& wit = trace.makeInstJal();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    wit.rs1 = decoded.rs1;
-    wit.rs2 = decoded.rs2;
-    writeReg(wit.rd, decoded.rd, newPc);
-    wit.imm = decoded.immJ();
+    wit.fetch = dinst->fetch;
+    wit.rs1 = dinst->rs1;
+    wit.rs2 = dinst->rs2;
+    writeReg(wit.rd, dinst->rd, newPc);
+    wit.imm = dinst->imm;
     newPc = pc + wit.imm;
-    DLOG("  RD = " << decoded.rd << ", value = " << std::hex << wit.rd.value << std::dec);
+    DLOG("  RD = " << dinst->rd << ", value = " << std::hex << wit.rd.value << std::dec);
     DLOG("  PC = " << std::hex << pc << std::dec);
   }
 
   template <uint32_t opt> inline void do_INST_JALR() {
     auto& wit = trace.makeInstJalr();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
-    wit.rs2 = decoded.rs2;
-    writeReg(wit.rd, decoded.rd, newPc);
-    wit.imm = decoded.immI();
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    wit.rs2 = dinst->rs2;
+    writeReg(wit.rd, dinst->rd, newPc);
+    wit.imm = dinst->imm;
     newPc = rs1Val + wit.imm;
-    DLOG("  RS1 = " << decoded.rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
-    DLOG("  RD = " << decoded.rd << ", value = " << std::hex << wit.rd.value << std::dec);
+    DLOG("  RS1 = " << dinst->rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
+    DLOG("  RD = " << dinst->rd << ", value = " << std::hex << wit.rd.value << std::dec);
     DLOG("  PC = " << std::hex << pc << std::dec);
   }
 
   template <uint32_t opt> inline void do_INST_LUI() {
     auto& wit = trace.makeInstLui();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    wit.rs1 = decoded.rs1;
-    wit.rs2 = decoded.rs2;
-    writeReg(wit.rd, decoded.rd, decoded.immU());
+    wit.fetch = dinst->fetch;
+    wit.rs1 = dinst->rs1;
+    wit.rs2 = dinst->rs2;
+    writeReg(wit.rd, dinst->rd, dinst->imm);
   }
 
   template <uint32_t opt> inline void do_INST_AUIPC() {
     auto& wit = trace.makeInstAuipc();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    wit.rs1 = decoded.rs1;
-    wit.rs2 = decoded.rs2;
-    writeReg(wit.rd, decoded.rd, pc + decoded.immU());
-    wit.imm = decoded.immU();
+    wit.fetch = dinst->fetch;
+    wit.rs1 = dinst->rs1;
+    wit.rs2 = dinst->rs2;
+    writeReg(wit.rd, dinst->rd, pc + dinst->imm);
+    wit.imm = dinst->imm;
   }
 
   template <uint32_t opt> inline void do_INST_ECALL() {
@@ -515,7 +515,7 @@ struct Emulator {
       // Save PC + jump to dispatch address
       auto& wit = trace.makeInstEcall();
       wit.cycle = curCycle;
-      wit.fetch = *curFetch;
+      wit.fetch = dinst->fetch;
       writePhysMemory(wit.savePc, CSR_WORD(MEPC), pc);
       setMode(MODE_MACHINE);
       newPc = readPhysMemory(wit.dispatch, CSR_WORD(MTVEC));
@@ -546,7 +546,7 @@ struct Emulator {
     }
     auto& wit = trace.makeInstMret();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
+    wit.fetch = dinst->fetch;
     setMode(MODE_USER);
     newPc = readPhysMemory(wit.readPc, CSR_WORD(MEPC)) + 4;
   }
@@ -554,7 +554,7 @@ struct Emulator {
   void do_ECALL_TERMINATE() {
     auto& wit = trace.makeEcallTerminate();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
+    wit.fetch = dinst->fetch;
     readReg(wit.a7, REG_A7);
     done = true;
   }
@@ -562,7 +562,7 @@ struct Emulator {
   void do_ECALL_READ() {
     auto& wit = trace.makeEcallRead();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
+    wit.fetch = dinst->fetch;
     readReg(wit.a7, REG_A7);
     uint32_t fd = peekReg(REG_A0);
     uint32_t buf = readReg(wit.a1, REG_A1);
@@ -612,7 +612,7 @@ struct Emulator {
   void do_ECALL_WRITE() {
     auto& wit = trace.makeEcallWrite();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
+    wit.fetch = dinst->fetch;
     readReg(wit.a7, REG_A7);
     uint32_t fd = peekReg(REG_A0);
     uint32_t buf = peekReg(REG_A1);
@@ -638,7 +638,7 @@ struct Emulator {
     // TODO: Based on count + polyWitness paging, decide if we need to abort
     auto& wit = trace.makeEcallBigInt();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
+    wit.fetch = dinst->fetch;
     wit.count = count;
     readReg(wit.a7, REG_A7);
     uint32_t biMm = readReg(wit.t0, REG_T0);
@@ -712,8 +712,18 @@ struct Emulator {
     wit->loadCycle = curCycle;
     wit->inst = inst;
     wit->count = 1;
-    decoded = DecodedInst(wit->inst);
+    auto decoded = DecodedInst(wit->inst);
     wit->opcode = uint32_t(getOpcode(decoded));
+    wit->rd = decoded.rd;
+    wit->rs1 = decoded.rs1;
+    wit->rs2 = decoded.rs2;
+    switch(Opcode(wit->opcode)) {
+#define ENTRY(name, idx, opcode, immType, ...)                                                     \
+      case Opcode::name: wit->imm = decoded.imm ## immType(); break;
+#include "rv32im/base/rv32im.inc"
+#undef ENTRY
+      default: wit->imm = 0;
+    }
   }
 
   bool run(size_t rowCount) {
@@ -729,11 +739,10 @@ struct Emulator {
       } else {
         decodeWit->count++;
       }
-      curFetch = &decodeWit->fetch;
-      decoded = DecodedInst(decodeWit->inst);  // TODO: Dont redo
-      newPc = curFetch->nextPc;
+      dinst = decodeWit;
+      newPc = dinst->fetch.nextPc;
       DLOG("cycle: " << curCycle << ", pc: " << std::hex << pc << std::dec
-                     << ", inst: " << getOpcodeName(Opcode(decodeWit->opcode)));
+                     << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
       switch (Opcode(decodeWit->opcode)) {
 #define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...)                                \
   case Opcode::name:                                                                               \
@@ -800,8 +809,7 @@ struct Emulator {
   uint32_t mode = 0;
   uint32_t pc = 0;
   uint32_t newPc = 0;
-  DecodedInst decoded;
-  FetchWitness* curFetch;
+  DecodeWitness* dinst;
 };
 
 } // namespace
