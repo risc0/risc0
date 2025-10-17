@@ -25,10 +25,11 @@ struct FetchWitness {
 };
 
 struct DecodeWitness {
+  uint32_t opcode;
   FetchWitness fetch;
   uint32_t loadCycle;
-  MemReadWitness load0;
-  MemReadWitness load1;
+  VirtMemReadWitness load0;
+  VirtMemReadWitness load1;
   uint32_t inst;
   uint32_t count;
 };

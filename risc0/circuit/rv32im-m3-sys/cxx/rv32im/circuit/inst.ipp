@@ -90,7 +90,7 @@ template <typename C> FDEV ValU32<C> DualReg<C>::getRS2() DEV {
 }
 
 template <typename C>
-FDEV void DualReg<C>::set(CTX, MemReadWitness rs1Wit, MemReadWitness rs2Wit, uint32_t cycle) DEV {
+FDEV void DualReg<C>::set(CTX, RegMemReadWitness rs1Wit, RegMemReadWitness rs2Wit, uint32_t cycle) DEV {
   rs1Idx.set(ctx, rs1Wit.wordAddr % 32);
   rs2Idx.set(ctx, rs2Wit.wordAddr % 32);
   readRs1.set(ctx, rs1Wit, cycle);
@@ -257,7 +257,7 @@ template <typename C> FDEV Val<C> InstLoadBlock<C>::getSignBitInput() DEV {
 }
 
 template <typename C> FDEV void InstLoadBlock<C>::verify(CTX) DEV {
-  EQ(readAddr.wordAddr(computeAddr.get()), readMem.wordAddr.get());
+  EQ(readAddr.wordAddr(computeAddr.get()), readMem.getWordAddr());
   EQ(pickShort.get(),
      cond<C>(readAddr.low1.get(), readMem.data.high.get(), readMem.data.low.get()));
   EQ(pickShort.get(), b1.get() * 256 + b0.get());
@@ -329,7 +329,7 @@ template <typename C> FDEV void InstStoreBlock<C>::set(CTX, InstStoreWitness wit
 }
 
 template <typename C> FDEV void InstStoreBlock<C>::verify(CTX) DEV {
-  EQ(writeAddr.wordAddr(computeAddr.get()), writeMem.wordAddr.get());
+  EQ(writeAddr.wordAddr(computeAddr.get()), writeMem.getWordAddr());
   EQ(pickShort.get(),
      cond<C>(writeAddr.low1.get(), writeMem.prevData.high.get(), writeMem.prevData.low.get()));
   EQ(pickShort.get(), psB1.get() * 256 + psB0.get());

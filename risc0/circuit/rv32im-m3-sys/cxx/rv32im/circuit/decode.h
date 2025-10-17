@@ -52,8 +52,8 @@ template <typename C> struct DecodeBlock {
   Reg<C> loadCycle;
   AddressDecompose<C> pcDecomp;
   AddressVerify<C> verifyPc;
-  MemReadBlock<C> load0;
-  MemReadBlock<C> load1;
+  VirtMemReadBlock<C> load0;
+  VirtMemReadBlock<C> load1;
   AddressDecompose<C> low16Decomp;
   BitReg<C> isCompressed;
   AddU32<C> computeNext;

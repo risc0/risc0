@@ -24,8 +24,8 @@
 template <typename C> struct InstResumeBlock {
   CONSTANT static char NAME[] = "InstResumeBlock";
 
-  MemReadBlock<C> readPc;
-  MemReadBlock<C> readMode;
+  PhysMemReadBlock<C> readPc;
+  PhysMemReadBlock<C> readMode;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, readPc, 1);
@@ -46,8 +46,8 @@ template <typename C> struct InstSuspendBlock {
 
   Reg<C> cycle;
   Reg<C> iCacheCycle;
-  MemWriteBlock<C> writePc;
-  MemWriteBlock<C> writeMode;
+  PhysMemWriteBlock<C> writePc;
+  PhysMemWriteBlock<C> writeMode;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
@@ -104,8 +104,8 @@ template <typename C> struct DualReg {
   CONSTANT static char NAME[] = "DestReg";
 
   BitReg<C> sameReg;
-  MemReadBlock<C> readRs1;
-  MemReadBlock<C> readRs2;
+  RegMemReadBlock<C> readRs1;
+  RegMemReadBlock<C> readRs2;
   Reg<C> rs1Idx;
   Reg<C> rs2Idx;
   RegU32<C> rs2Data;
@@ -121,7 +121,7 @@ template <typename C> struct DualReg {
   FDEV ValU32<C> getRS1() DEV;
   FDEV ValU32<C> getRS2() DEV;
 
-  FDEV void set(CTX, MemReadWitness rs1Wit, MemReadWitness rs2Wit, uint32_t cycle) DEV;
+  FDEV void set(CTX, RegMemReadWitness rs1Wit, RegMemReadWitness rs2Wit, uint32_t cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
   FDEV void verify(CTX, Val<C> cycle, Val<C> mode) DEV;
@@ -135,7 +135,7 @@ template <typename C> struct InstRegBlock {
   Reg<C> cycle;
   FetchBlock<C> fetch;
   DualReg<C> dr;
-  MemWriteBlock<C> writeRd;
+  RegMemWriteBlock<C> writeRd;
   DestReg<C> rd;
   Reg<C> optOut;
   BitReg<C> outIdx;
@@ -166,8 +166,8 @@ template <typename C> struct InstImmBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readRs1;
-  MemWriteBlock<C> writeRd;
+  RegMemReadBlock<C> readRs1;
+  RegMemWriteBlock<C> writeRd;
   SourceReg<C> rs1;
   Reg<C> rs2;
   DestReg<C> rd;
@@ -205,8 +205,8 @@ template <typename C> struct InstLoadBlock {
   Reg<C> cycle;
   OneHot<C, 5> opt;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readRs1;
-  MemWriteBlock<C> writeRd;
+  RegMemReadBlock<C> readRs1;
+  RegMemWriteBlock<C> writeRd;
   SourceReg<C> rs1;
   Reg<C> rs2;
   DestReg<C> rd;
@@ -214,7 +214,7 @@ template <typename C> struct InstLoadBlock {
   AddU32<C> computeAddr;
   AddressDecompose<C> readAddr;
   AddressVerify<C> checkAddr;
-  MemReadBlock<C> readMem;
+  VirtMemReadBlock<C> readMem;
   Reg<C> pickShort;
   RegU8<C> b0;
   RegU8<C> b1;
@@ -260,7 +260,7 @@ template <typename C> struct InstStoreBlock {
   AddU32<C> computeAddr;
   AddressDecompose<C> writeAddr;
   AddressVerify<C> checkAddr;
-  MemWriteBlock<C> writeMem;
+  VirtMemWriteBlock<C> writeMem;
   // Pick a short based on address
   Reg<C> pickShort;
   // Decompose
@@ -348,7 +348,7 @@ template <typename C> struct InstJalBlock {
   FetchBlock<C> fetch;
   Reg<C> rs1;
   Reg<C> rs2;
-  MemWriteBlock<C> writeRd;
+  RegMemWriteBlock<C> writeRd;
   DestReg<C> rd;
   RegU32<C> imm;
   AddU32<C> sumPc;
@@ -376,10 +376,10 @@ template <typename C> struct InstJalrBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readRs1;
+  RegMemReadBlock<C> readRs1;
   SourceReg<C> rs1;
   Reg<C> rs2;
-  MemWriteBlock<C> writeRd;
+  RegMemWriteBlock<C> writeRd;
   DestReg<C> rd;
   RegU32<C> imm;
   AddU32<C> sumPc;
@@ -410,7 +410,7 @@ template <typename C> struct InstLuiBlock {
   FetchBlock<C> fetch;
   Reg<C> rs1;
   Reg<C> rs2;
-  MemWriteBlock<C> writeRd;
+  RegMemWriteBlock<C> writeRd;
   DestReg<C> rd;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
@@ -436,7 +436,7 @@ template <typename C> struct InstAuipcBlock {
   FetchBlock<C> fetch;
   Reg<C> rs1;
   Reg<C> rs2;
-  MemWriteBlock<C> writeRd;
+  RegMemWriteBlock<C> writeRd;
   DestReg<C> rd;
   RegU32<C> imm;
   AddU32<C> sumPc;
@@ -464,8 +464,8 @@ template <typename C> struct InstEcallBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  MemWriteBlock<C> writeSavePc;
-  MemReadBlock<C> readDispatch;
+  PhysMemWriteBlock<C> writeSavePc;
+  PhysMemReadBlock<C> readDispatch;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
@@ -486,7 +486,7 @@ template <typename C> struct InstMretBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readPc;
+  PhysMemReadBlock<C> readPc;
   AddU32<C> sumPc;
 
   template <typename T> FDEV void applyInner(CTX) DEV {

@@ -29,7 +29,7 @@ namespace risc0::rv32im {
 
 constexpr size_t MERKLE_TREE_DEPTH = 22;
 
-using Page = std::array<uint32_t, PAGE_SIZE_WORDS>;
+using Page = std::array<uint32_t, MPAGE_SIZE_WORDS>;
 using PagePtr = std::shared_ptr<const Page>;
 
 // A class to hold 'memory images'.  A memory image may not know all page data

@@ -26,8 +26,8 @@ template <typename C> struct BigIntBlock {
 
   Reg<C> cycle;
   BitReg<C> mm;
-  MemReadBlock<C> readInst;
-  MemReadBlock<C> readBaseReg;
+  PhysMemReadBlock<C> readInst;
+  PhysMemReadBlock<C> readBaseReg;
   OneHot<C, 3> memOp;
   OneHot<C, POLY_OP_SIZE> polyOp;
   BitReg<C> coeffBits[3];

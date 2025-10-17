@@ -22,13 +22,13 @@
 
 namespace risc0::rv32im {
 
-size_t MEMORY_SIZE_PAGES = (1 << MERKLE_TREE_DEPTH);
+size_t MEMORY_SIZE_MPAGES = (1 << MERKLE_TREE_DEPTH);
 
 Digest hashPage(const uint32_t* data) {
   std::array<Fp, 24> cells;
   cells.fill(0);
   // Load data into felts as 16 bit values
-  for (size_t i = 0; i < PAGE_SIZE_WORDS / 8; i++) {
+  for (size_t i = 0; i < MPAGE_SIZE_WORDS / 8; i++) {
     for (size_t j = 0; j < 8; j++) {
       cells[2 * j] = Fp::fromRaw(data[i * 8 + j] & 0xffff);
       cells[2 * j + 1] = Fp::fromRaw(data[i * 8 + j] >> 16);
@@ -72,7 +72,7 @@ MemoryImage MemoryImage::fromWords(const std::map<uint32_t, uint32_t>& words) {
   uint32_t curPageID = 0xffffffff;
   std::shared_ptr<Page> curPage;
   for (const auto& kvp : words) {
-    uint32_t pageID = kvp.first / PAGE_SIZE_WORDS;
+    uint32_t pageID = kvp.first / MPAGE_SIZE_WORDS;
     if (pageID != curPageID) {
       if (curPage) {
         ret.setPage(curPageID, curPage);
@@ -81,7 +81,7 @@ MemoryImage MemoryImage::fromWords(const std::map<uint32_t, uint32_t>& words) {
       curPageID = pageID;
     }
     // printf("store(0x%08x, 0x%08x)\n", kvp.first, kvp.second);
-    (*curPage)[kvp.first % PAGE_SIZE_WORDS] = kvp.second;
+    (*curPage)[kvp.first % MPAGE_SIZE_WORDS] = kvp.second;
   }
   if (curPage) {
     ret.setPage(curPageID, curPage);
@@ -114,7 +114,7 @@ PagePtr MemoryImage::getPage(size_t page) {
     return it->second;
   }
   // Otherwise try an expand
-  if (expandIfZero(MEMORY_SIZE_PAGES + page)) {
+  if (expandIfZero(MEMORY_SIZE_MPAGES + page)) {
     pages[page] = zeroPage;
     return zeroPage;
   }
@@ -127,13 +127,13 @@ PagePtr MemoryImage::getPage(size_t page) {
 void MemoryImage::setPage(size_t page, PagePtr data) {
   // printf("setPage(0x%08zx)\n", page);
   // If page is zero, reify it so I have proper uncles
-  expandIfZero(MEMORY_SIZE_PAGES + page);
+  expandIfZero(MEMORY_SIZE_MPAGES + page);
   // Set page
   pages[page] = data;
   // Set the diest value
-  digests[MEMORY_SIZE_PAGES + page] = hashPage(data->data());
+  digests[MEMORY_SIZE_MPAGES + page] = hashPage(data->data());
   // Fixup digest values
-  fixupDigests(MEMORY_SIZE_PAGES + page);
+  fixupDigests(MEMORY_SIZE_MPAGES + page);
 }
 
 const Digest& MemoryImage::getDigest(size_t idx) const {

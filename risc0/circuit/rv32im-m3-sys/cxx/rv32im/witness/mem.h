@@ -17,14 +17,37 @@
 
 #include "rv32im/base/base.h"
 
-struct MemReadWitness {
+struct PhysMemReadWitness {
   uint32_t wordAddr;
   uint32_t prevCycle;
   uint32_t value;
 };
 
-struct MemWriteWitness {
+struct PhysMemWriteWitness {
   uint32_t wordAddr;
+  uint32_t prevCycle;
+  uint32_t prevValue;
+  uint32_t value;
+};
+
+// Just in case we want to specialize later
+using RegMemReadWitness = PhysMemReadWitness;
+using RegMemWriteWitness = PhysMemWriteWitness;
+
+struct VirtAddrWitness {
+  uint32_t vpage;
+  uint32_t ppage;
+  uint32_t wordOffset;
+};
+
+struct VirtMemReadWitness {
+  VirtAddrWitness addr;
+  uint32_t prevCycle;
+  uint32_t value;
+};
+
+struct VirtMemWriteWitness {
+  VirtAddrWitness addr;
   uint32_t prevCycle;
   uint32_t prevValue;
   uint32_t value;

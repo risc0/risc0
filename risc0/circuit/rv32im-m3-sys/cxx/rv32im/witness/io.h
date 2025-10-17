@@ -21,11 +21,11 @@ struct ReadByteWitness {
   uint32_t cycle;
   uint32_t size;
   uint32_t lowBits;
-  MemWriteWitness io;
+  PhysMemWriteWitness io;
 };
 
 struct ReadWordWitness {
   uint32_t cycle;
   uint32_t size;
-  MemWriteWitness io;
+  PhysMemWriteWitness io;
 };

@@ -18,23 +18,23 @@
 #include "rv32im/witness/decode.h"
 
 struct InstResumeWitness {
-  MemReadWitness pc;
-  MemReadWitness mode;
+  PhysMemReadWitness pc;
+  PhysMemReadWitness mode;
 };
 
 struct InstSuspendWitness {
   uint32_t cycle;
   uint32_t iCacheCycle;
-  MemWriteWitness pc;
-  MemWriteWitness mode;
+  PhysMemWriteWitness pc;
+  PhysMemWriteWitness mode;
 };
 
 struct InstRegWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness rs1;
-  MemReadWitness rs2;
-  MemWriteWitness rd;
+  RegMemReadWitness rs1;
+  RegMemReadWitness rs2;
+  RegMemWriteWitness rd;
   uint32_t options;
   uint32_t out0;
   uint32_t out1;
@@ -43,9 +43,9 @@ struct InstRegWitness {
 struct InstImmWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness rs1;
+  RegMemReadWitness rs1;
   uint32_t rs2;
-  MemWriteWitness rd;
+  RegMemWriteWitness rd;
   uint32_t imm;
   uint32_t options;
   uint32_t out0;
@@ -55,10 +55,10 @@ struct InstImmWitness {
 struct InstLoadWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness rs1;
+  RegMemReadWitness rs1;
   uint32_t rs2;
-  MemReadWitness mem;
-  MemWriteWitness rd;
+  VirtMemReadWitness mem;
+  RegMemWriteWitness rd;
   uint32_t imm;
   uint32_t options;
 };
@@ -66,9 +66,9 @@ struct InstLoadWitness {
 struct InstStoreWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness rs1;
-  MemReadWitness rs2;
-  MemWriteWitness mem;
+  RegMemReadWitness rs1;
+  RegMemReadWitness rs2;
+  VirtMemWriteWitness mem;
   uint32_t rd;
   uint32_t imm;
   uint32_t options;
@@ -77,8 +77,8 @@ struct InstStoreWitness {
 struct InstBranchWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness rs1;
-  MemReadWitness rs2;
+  RegMemReadWitness rs1;
+  RegMemReadWitness rs2;
   uint32_t rd;
   uint32_t imm;
   uint32_t options;
@@ -92,16 +92,16 @@ struct InstJalWitness {
   FetchWitness fetch;
   uint32_t rs1;
   uint32_t rs2;
-  MemWriteWitness rd;
+  RegMemWriteWitness rd;
   uint32_t imm;
 };
 
 struct InstJalrWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness rs1;
+  RegMemReadWitness rs1;
   uint32_t rs2;
-  MemWriteWitness rd;
+  RegMemWriteWitness rd;
   uint32_t imm;
 };
 
@@ -110,7 +110,7 @@ struct InstLuiWitness {
   FetchWitness fetch;
   uint32_t rs1;
   uint32_t rs2;
-  MemWriteWitness rd;
+  RegMemWriteWitness rd;
 };
 
 struct InstAuipcWitness {
@@ -118,19 +118,19 @@ struct InstAuipcWitness {
   FetchWitness fetch;
   uint32_t rs1;
   uint32_t rs2;
-  MemWriteWitness rd;
+  RegMemWriteWitness rd;
   uint32_t imm;
 };
 
 struct InstEcallWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemWriteWitness savePc;
-  MemReadWitness dispatch;
+  PhysMemWriteWitness savePc;
+  PhysMemReadWitness dispatch;
 };
 
 struct InstMretWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness readPc;
+  PhysMemReadWitness readPc;
 };

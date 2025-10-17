@@ -24,7 +24,7 @@ template <typename C> struct EcallTerminateBlock {
   // TODO: pass A0/A1 on?  Clear suspend data?
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readA7;
+  RegMemReadBlock<C> readA7;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
@@ -44,10 +44,10 @@ template <typename C> struct EcallReadBlock {
   Reg<C> cycle;
   Reg<C> finalCycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readA7;
-  MemReadBlock<C> readA1;
-  MemReadBlock<C> readA2;
-  MemWriteBlock<C> writeA0;
+  RegMemReadBlock<C> readA7;
+  RegMemReadBlock<C> readA1;
+  RegMemReadBlock<C> readA2;
+  RegMemWriteBlock<C> writeA0;
   AddressDecompose<C> decomp;
   RegU16<C> verifyRet;
   Reg<C> finalAddrWord;
@@ -78,9 +78,9 @@ template <typename C> struct EcallWriteBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readA7;
-  MemReadBlock<C> readA2;
-  MemWriteBlock<C> writeA0;
+  RegMemReadBlock<C> readA7;
+  RegMemReadBlock<C> readA2;
+  RegMemWriteBlock<C> writeA0;
   RegU16<C> verifyRet;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
@@ -103,9 +103,9 @@ template <typename C> struct EcallBigIntBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readA7;
-  MemReadBlock<C> readT0;
-  MemReadBlock<C> readT2;
+  RegMemReadBlock<C> readA7;
+  RegMemReadBlock<C> readT0;
+  RegMemReadBlock<C> readT2;
   Reg<C> cycleCount;
   BitReg<C> mm;
   AddressDecompose<C> pcDecomp;
