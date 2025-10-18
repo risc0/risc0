@@ -20,12 +20,11 @@ pub struct BootstrapProtos;
 
 impl BootstrapProtos {
     pub fn run(&self) {
-        unsafe {
-            std::env::set_var("PROTOC", protobuf_src::protoc());
-        }
+        std::env::set_var("PROTOC", protobuf_src::protoc());
 
+        let out_dir = std::env::var("OUT_DIR").unwrap();
         prost_build::Config::new()
-            .out_dir("risc0/zkvm/src/host/server/exec")
+            .out_dir(&out_dir)
             .compile_protos(
                 &["risc0/zkvm/src/host/server/exec/profile.proto"],
                 &["risc0/zkvm/src/host/server/exec"],
