@@ -67,4 +67,12 @@ unsigned getR0LogLevel() {
   return gR0LogLevel;
 }
 
+std::ostream& operator<<(std::ostream& os, HexWord word) {
+  os << "0x"                                          //
+     << std::hex << std::setw(8) << std::setfill('0') //
+     << word.word                                     //
+     << std::dec << std::setw(0);
+  return os;
+}
+
 } // namespace risc0

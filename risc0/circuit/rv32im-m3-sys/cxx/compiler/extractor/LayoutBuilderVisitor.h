@@ -54,7 +54,8 @@ public:
     ctx.visitorData = builder;
   }
 
-  template <typename T, size_t N> static void apply(RecordingContext& ctx, T (&t)[N]) {
+  template <typename T, size_t N, typename... Args>
+  static void apply(RecordingContext& ctx, T (&t)[N], Args... args) {
     auto builder = static_cast<LayoutBuilder*>(ctx.visitorData);
 
     // Get the layout type of an element. Note that we still need to visit every
@@ -62,7 +63,7 @@ public:
     LayoutBuilder container("$tmp");
     ctx.visitorData = &container;
     for (size_t i = 0; i < N; i++) {
-      LayoutBuilderVisitor::apply(ctx, t[i]);
+      LayoutBuilderVisitor::apply(ctx, t[i], args...);
     }
     mlir::Type elementType = container.members.front().type;
     ctx.visitorData = builder;

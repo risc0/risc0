@@ -25,11 +25,17 @@ template <typename C> struct EcallTerminateBlock {
   Reg<C> cycle;
   FetchBlock<C> fetch;
   MemReadBlock<C> readA7;
+  MemReadBlock<C> readA0;
+  MemReadBlock<C> readA1;
+  MemReadBlock<C> readOutput[8];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, fetch);
     T::apply(ctx, readA7, cycle.get());
+    T::apply(ctx, readA0, cycle.get());
+    T::apply(ctx, readA1, cycle.get());
+    T::apply(ctx, readOutput, cycle.get());
   }
 
   FDEV void set(CTX, EcallTerminateWitness wit) DEV;

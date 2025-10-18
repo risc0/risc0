@@ -19,7 +19,7 @@ use risc0_circuit_rv32im::execute::Segment;
 use risc0_circuit_rv32im_m3_sys::*;
 use risc0_sys::ffi_wrap;
 
-use crate::verify::verify_m3;
+use crate::verify::verify;
 
 pub type Seal = Vec<u32>;
 
@@ -29,7 +29,6 @@ pub trait SegmentProver {
 
 struct SegmentProverImpl {
     ctx: *const ProverContext,
-    po2: usize,
 }
 
 impl SegmentProver for SegmentProverImpl {
@@ -41,7 +40,7 @@ impl SegmentProver for SegmentProverImpl {
         self.prove()?;
 
         let transcript = self.transcript()?;
-        verify_m3(&transcript, self.po2)?;
+        verify(&transcript)?;
 
         Ok(transcript)
     }
@@ -50,14 +49,16 @@ impl SegmentProver for SegmentProverImpl {
 impl SegmentProverImpl {
     #[allow(dead_code)]
     fn new_cpu(po2: usize) -> Self {
-        let ctx = unsafe { risc0_circuit_rv32im_m3_prover_new_cpu(po2) };
-        Self { ctx, po2 }
+        Self {
+            ctx: unsafe { risc0_circuit_rv32im_m3_prover_new_cpu(po2) },
+        }
     }
 
     #[cfg(feature = "cuda")]
     fn new_cuda(po2: usize) -> Self {
-        let ctx = unsafe { risc0_circuit_rv32im_m3_prover_new_cuda(po2) };
-        Self { ctx, po2 }
+        Self {
+            ctx: unsafe { risc0_circuit_rv32im_m3_prover_new_cuda(po2) },
+        }
     }
 
     fn load_segment(&self, segment: &Segment) -> Result<()> {

@@ -48,9 +48,10 @@ struct AddArgsFwd {
     obj.addArguments(ctx, args...);
   }
 
-  template <typename T, size_t N> static void apply(ArgCountContext& ctx, T (&t)[N]) {
+  template <typename T, size_t N, typename... Args>
+  static void apply(ArgCountContext& ctx, T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; i++) {
-      AddArgsFwd::apply(ctx, t[i]);
+      AddArgsFwd::apply(ctx, t[i], args...);
     }
   }
 };

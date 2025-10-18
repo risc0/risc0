@@ -183,10 +183,17 @@ const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx) {
 const char* risc0_circuit_rv32im_m3_prove(ProverContext* ctx) {
   try {
     WriteIop writeIop;
+    writeIop.write(RV32IM_SEAL_VERSION);
+    uint32_t po2 = ctx->prover.po2();
+    // LOG(0, "po2: " << po2);
+    writeIop.write(po2);
     ctx->prover.prove(writeIop);
     ctx->transcript = writeIop.getTranscript();
 
     ReadIop readIop(ctx->transcript.data(), ctx->transcript.size());
+    uint32_t readVersion = readIop.readU32(); // skip past version
+    uint32_t readPo2 = readIop.readU32();     // skip past po2
+    // LOG(0, "version: " << readVersion << ", po2: " << readPo2);
     verifyRv32im(readIop, ctx->prover.po2());
     readIop.done();
   } catch (const std::exception& err) {

@@ -55,4 +55,3 @@ std = [
   "tracing/std",
 ]
 rand = ["dep:rand", "ruint/rand-09"]
-rv32im-m3 = []

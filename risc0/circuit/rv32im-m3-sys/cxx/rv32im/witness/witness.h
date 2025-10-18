@@ -89,9 +89,18 @@ enum class BlockType {
 CONSTANT size_t MAJOR_SPLIT_SIZE = 6;
 CONSTANT size_t MINOR_SPLIT_SIZE = (NUM_BLOCK_TYPES + (MAJOR_SPLIT_SIZE - 1)) / MAJOR_SPLIT_SIZE;
 
+struct OutU32 {
+  Fp low;
+  Fp high;
+};
+
 struct Globals {
   FpDigest rootIn;
   FpDigest rootOut;
+  Fp isTerminate;
+  OutU32 termA0;
+  OutU32 termA1;
+  OutU32 out[8];
 };
 
 CONSTANT size_t NUM_GLOBALS = sizeof(Globals) / sizeof(Fp);

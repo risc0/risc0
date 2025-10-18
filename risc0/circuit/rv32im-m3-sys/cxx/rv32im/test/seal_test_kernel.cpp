@@ -13,42 +13,27 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#pragma once
+#include <stdint.h>
+#include <sys/errno.h>
 
-#include "rv32im/witness/decode.h"
+#include "rv32im/base/constants.h"
 
-struct EcallTerminateWitness {
-  uint32_t cycle;
-  FetchWitness fetch;
-  MemReadWitness a7;
-  MemReadWitness a0;
-  MemReadWitness a1;
-  MemReadWitness output[8];
-};
+inline void terminate(uint32_t val) {
+  register uintptr_t a0 asm("a0") = 0;
+  register uintptr_t a1 asm("a1") = val;
+  register uintptr_t a7 asm("a7") = 0;
+  asm volatile("ecall\n"
+               :                  // no outputs
+               : "r"(a0), "r"(a1), "r"(a7) // inputs
+               :                  // no clobbers
+  );
+}
 
-struct EcallReadWitness {
-  uint32_t cycle;
-  uint32_t finalCycle;
-  FetchWitness fetch;
-  MemReadWitness a7;
-  MemReadWitness a1;
-  MemReadWitness a2;
-  MemWriteWitness a0;
-};
-
-struct EcallWriteWitness {
-  uint32_t cycle;
-  FetchWitness fetch;
-  MemReadWitness a7;
-  MemReadWitness a2;
-  MemWriteWitness a0;
-};
-
-struct EcallBigIntWitness {
-  uint32_t cycle;
-  FetchWitness fetch;
-  MemReadWitness a7;
-  MemReadWitness t0;
-  MemReadWitness t2;
-  uint32_t count;
-};
+extern "C" void start() {
+  uint32_t* inAddr = reinterpret_cast<uint32_t*>(OUTPUT_ADDR);
+  uint32_t* outAddr = reinterpret_cast<uint32_t*>(OUTPUT_ADDR);
+  for (size_t i = 0; i < 8; i++) {
+    outAddr[i] = inAddr[i] + i;
+  }
+  terminate(17);
+}

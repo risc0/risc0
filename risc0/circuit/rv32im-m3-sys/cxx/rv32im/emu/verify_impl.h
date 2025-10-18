@@ -111,9 +111,10 @@ struct BothFwd {
     obj.addArguments(ctx, args...);
   }
 
-  template <typename T, size_t N> static void apply(Context& ctx, T (&t)[N]) {
+  template <typename T, size_t N, typename... Args>
+  static void apply(Context& ctx, T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; ++i) {
-      BothFwd::apply(ctx, t[i]);
+      BothFwd::apply(ctx, t[i], args...);
     }
   }
 };

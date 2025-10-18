@@ -1061,6 +1061,8 @@ dependencies = [
  "bytemuck",
  "risc0-binfmt",
  "risc0-zkp",
+ "risc0-zkvm-platform",
+ "serde",
  "tracing",
 ]
 
@@ -1133,6 +1135,7 @@ dependencies = [
  "anyhow",
  "borsh",
  "bytemuck",
+ "cfg-if",
  "derive_more",
  "enum-map",
  "hex",

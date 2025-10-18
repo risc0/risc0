@@ -26,11 +26,13 @@ template <typename C> struct InstResumeBlock {
 
   MemReadBlock<C> readPc;
   MemReadBlock<C> readMm;
+  MemWriteBlock<C> writeVersion;
   AddressVerify<C> verifyPc;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, readPc, 1);
     T::apply(ctx, readMm, 1);
+    T::apply(ctx, writeVersion, 1);
     T::apply(ctx, verifyPc, readPc.data.get(), readMm.data.low.get());
   }
 
@@ -62,7 +64,7 @@ template <typename C> struct InstSuspendBlock {
   FDEV void set(CTX, InstSuspendWitness) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 

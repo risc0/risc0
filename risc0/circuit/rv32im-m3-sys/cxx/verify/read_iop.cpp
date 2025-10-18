@@ -39,6 +39,12 @@ void ReadIop::read(Digest* buf, size_t size) {
   read(castBuf, size * 8);
 }
 
+uint32_t ReadIop::readU32() {
+  Fp value;
+  read(&value, 1);
+  return value.asRaw();
+}
+
 void ReadIop::done() {
   if (offset != size) {
     throw std::runtime_error("Unread data");

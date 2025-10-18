@@ -20,6 +20,7 @@
 struct InstResumeWitness {
   MemReadWitness pc;
   MemReadWitness mm;
+  MemWriteWitness version;
 };
 
 struct InstSuspendWitness {

@@ -30,9 +30,6 @@ const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
 const SUSPEND_PC_ADDR: ByteAddr = ByteAddr(0xffff_0210);
 const SUSPEND_MODE_ADDR: ByteAddr = ByteAddr(0xffff_0214);
 
-#[cfg(feature = "rv32im-m3")]
-const RV32IM_VERSION_ADDR: ByteAddr = ByteAddr(0xffff_0300);
-
 /// A RISC Zero program
 pub struct Program {
     /// The entrypoint of the program
@@ -148,9 +145,6 @@ impl Program {
         }
         self.image.insert(SUSPEND_PC_ADDR.0, self.entry);
         self.image.insert(SUSPEND_MODE_ADDR.0, 1);
-        // This is a temporary hack until we have CSRs to detect host/circuit/zkvm versions.
-        #[cfg(feature = "rv32im-m3")]
-        self.image.insert(RV32IM_VERSION_ADDR.0, 3);
     }
 }
 
