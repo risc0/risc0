@@ -26,6 +26,9 @@ use super::{
 };
 use crate::EcallKind;
 
+#[cfg(feature = "rv32im-m3")]
+const RV32IM_M3_CIRCUIT_VERSION: u32 = 3;
+
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub(crate) enum LoadOp {
     Peek,
@@ -332,6 +335,8 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
         let mut this = Risc0Machine { ctx };
         let pc = guest_addr(this.load_memory(SUSPEND_PC_ADDR.waddr())?)?;
         let machine_mode = this.load_memory(SUSPEND_MODE_ADDR.waddr())?;
+        #[cfg(feature = "rv32im-m3")]
+        this.store_memory(RV32IM_VERSION_ADDR.waddr(), RV32IM_M3_CIRCUIT_VERSION)?;
         // tracing::debug!("resume(entry: {pc:?}, mode: {machine_mode})");
         this.ctx.set_pc(pc);
         this.ctx.set_machine_mode(machine_mode);

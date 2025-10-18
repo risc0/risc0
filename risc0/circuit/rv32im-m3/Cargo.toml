@@ -16,7 +16,9 @@ anyhow = { version = "1.0", default-features = false }
 bytemuck = "1.13"
 cfg-if = { version = "1.0", optional = true }
 risc0-binfmt = { workspace = true }
-risc0-circuit-rv32im = { workspace = true, optional = true }
+risc0-circuit-rv32im = { workspace = true, optional = true, features = [
+  "rv32im-m3",
+] }
 risc0-circuit-rv32im-m3-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 risc0-zkp = { workspace = true }

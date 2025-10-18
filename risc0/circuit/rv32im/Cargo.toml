@@ -93,6 +93,7 @@ prove = [
   "execute",
   "risc0-zkp/prove",
 ]
+rv32im-m3 = []
 std = [
   "anyhow/std",
   "derive_more/std",

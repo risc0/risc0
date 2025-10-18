@@ -245,7 +245,7 @@ struct Emulator {
     auto& resumeWit = trace.makeInstResume();
     pc = readMemory(resumeWit.pc, SUSPEND_PC_WORD);
     mm = readMemory(resumeWit.mm, SUSPEND_MODE_WORD);
-    writeMemory(resumeWit.version, RV32IM_VERSION_WORD, 3);
+    writeMemory(resumeWit.version, RV32IM_VERSION_WORD, RV32IM_CIRCUIT_VERSION);
     regOffset = (mm ? (MACHINE_REGS_WORD & 0xff) : (USER_REGS_WORD & 0xff));
     curCycle++;
   }

@@ -42,6 +42,7 @@ pub const SUSPEND_CYCLE_LOW_ADDR: ByteAddr = ByteAddr(0xffff_0218);
 pub const SUSPEND_CYCLE_HIGH_ADDR: ByteAddr = ByteAddr(0xffff_021c);
 pub const GLOBAL_OUTPUT_ADDR: ByteAddr = ByteAddr(0xffff_0240);
 pub const GLOBAL_INPUT_ADDR: ByteAddr = ByteAddr(0xffff_0260);
+pub const RV32IM_VERSION_ADDR: ByteAddr = ByteAddr(0xffff_0300);
 
 pub const ECALL_DISPATCH_ADDR: ByteAddr = ByteAddr(0xffff_1000);
 pub const TRAP_DISPATCH_ADDR: ByteAddr = ByteAddr(0xffff_2000);
