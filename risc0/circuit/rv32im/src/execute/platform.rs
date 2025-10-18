@@ -16,6 +16,9 @@
 use num_derive::FromPrimitive;
 use risc0_binfmt::{ByteAddr, WordAddr};
 
+pub const RV32IM_V2_CIRCUIT_VERSION: u32 = 0;
+pub const RV32IM_M3_CIRCUIT_VERSION: u32 = 3;
+
 pub const WORD_SIZE: usize = 4;
 pub const PAGE_BYTES: usize = 1024;
 pub const MEMORY_BYTES: u64 = 1 << 32;

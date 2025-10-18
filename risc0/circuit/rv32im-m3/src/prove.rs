@@ -144,7 +144,9 @@ pub fn segment_prover(po2: usize) -> Result<Box<dyn SegmentProver>> {
 #[cfg(feature = "cuda")]
 mod tests {
     use risc0_binfmt::{MemoryImage, Program};
-    use risc0_circuit_rv32im::execute::{CycleLimit, Executor, Syscall, SyscallContext};
+    use risc0_circuit_rv32im::execute::{
+        CycleLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, Syscall, SyscallContext,
+    };
 
     use super::*;
 
@@ -230,12 +232,19 @@ mod tests {
         let mut segments = Vec::new();
         let trace = Vec::new();
         let session_limit = CycleLimit::Hard(1 << 24);
-        Executor::new(image, &NullSyscall, None, trace, None)
-            .run(po2, 0, session_limit, |segment| {
-                segments.push(segment);
-                Ok(())
-            })
-            .unwrap();
+        Executor::new(
+            image,
+            &NullSyscall,
+            None,
+            trace,
+            None,
+            RV32IM_M3_CIRCUIT_VERSION,
+        )
+        .run(po2, 0, session_limit, |segment| {
+            segments.push(segment);
+            Ok(())
+        })
+        .unwrap();
         let segment = segments.first().unwrap();
 
         let prover = segment_prover(po2).unwrap();

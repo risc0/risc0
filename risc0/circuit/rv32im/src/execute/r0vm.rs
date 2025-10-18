@@ -26,9 +26,6 @@ use super::{
 };
 use crate::EcallKind;
 
-#[cfg(feature = "rv32im-m3")]
-const RV32IM_M3_CIRCUIT_VERSION: u32 = 3;
-
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub(crate) enum LoadOp {
     Peek,
@@ -37,6 +34,8 @@ pub(crate) enum LoadOp {
 }
 
 pub(crate) trait Risc0Context {
+    fn circuit_version(&self) -> u32;
+
     /// Get the program counter
     fn get_pc(&self) -> ByteAddr;
 
@@ -214,6 +213,10 @@ impl TestRisc0Context {
 
 #[cfg(test)]
 impl Risc0Context for TestRisc0Context {
+    fn circuit_version(&self) -> u32 {
+        RV32IM_V2_CIRCUIT_VERSION
+    }
+
     fn get_pc(&self) -> ByteAddr {
         self.pc
     }
@@ -332,11 +335,13 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
     }
 
     pub fn resume(ctx: &'a mut C) -> Result<()> {
+        let circuit_version = ctx.circuit_version();
         let mut this = Risc0Machine { ctx };
         let pc = guest_addr(this.load_memory(SUSPEND_PC_ADDR.waddr())?)?;
         let machine_mode = this.load_memory(SUSPEND_MODE_ADDR.waddr())?;
-        #[cfg(feature = "rv32im-m3")]
-        this.store_memory(RV32IM_VERSION_ADDR.waddr(), RV32IM_M3_CIRCUIT_VERSION)?;
+        if circuit_version == RV32IM_M3_CIRCUIT_VERSION {
+            this.store_memory(RV32IM_VERSION_ADDR.waddr(), RV32IM_M3_CIRCUIT_VERSION)?;
+        }
         // tracing::debug!("resume(entry: {pc:?}, mode: {machine_mode})");
         this.ctx.set_pc(pc);
         this.ctx.set_machine_mode(machine_mode);

@@ -483,6 +483,10 @@ impl<'a> Preflight<'a> {
 }
 
 impl Risc0Context for Preflight<'_> {
+    fn circuit_version(&self) -> u32 {
+        RV32IM_V2_CIRCUIT_VERSION
+    }
+
     fn get_pc(&self) -> ByteAddr {
         self.pc
     }
