@@ -97,7 +97,7 @@ struct OutU32 {
 struct Globals {
   FpDigest rootIn;
   FpDigest rootOut;
-  Fp isSuspend;
+  Fp isTerminate;
   OutU32 termA0;
   OutU32 termA1;
   OutU32 out[8];

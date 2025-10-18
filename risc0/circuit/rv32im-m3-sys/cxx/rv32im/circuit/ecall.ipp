@@ -47,7 +47,7 @@ template <typename C> FDEV void EcallTerminateBlock<C>::set(CTX, EcallTerminateW
   readA7.set(ctx, wit.a7, wit.cycle);
   readA0.set(ctx, wit.a0, wit.cycle);
   readA1.set(ctx, wit.a1, wit.cycle);
-  GLOBAL_SET(isSuspend, 0);
+  GLOBAL_SET(isTerminate, 1);
   GLOBAL_SET_U32(termA0, readA0.data.get());
   GLOBAL_SET_U32(termA1, readA1.data.get());
   for (size_t i = 0; i < 8; i++) {
@@ -63,7 +63,7 @@ template <typename C> FDEV void EcallTerminateBlock<C>::verify(CTX) DEV {
   EQ(readA7.data.high.get(), 0);
   EQ(readA0.wordAddr.get(), MACHINE_REGS_WORD + REG_A0);
   EQ(readA1.wordAddr.get(), MACHINE_REGS_WORD + REG_A1);
-  EQ(GLOBAL_GET(isSuspend), 0);
+  EQ(GLOBAL_GET(isTerminate), 1);
   GLOBAL_CHECK_U32(termA0, readA0.data.get());
   GLOBAL_CHECK_U32(termA1, readA1.data.get());
   for (size_t i = 0; i < 8; i++) {

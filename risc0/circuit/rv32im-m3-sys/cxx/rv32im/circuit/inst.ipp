@@ -45,11 +45,11 @@ template <typename C> FDEV void InstSuspendBlock<C>::set(CTX, InstSuspendWitness
   writePc.set(ctx, wit.pc, wit.cycle);
   writeMm.set(ctx, wit.mm, wit.cycle);
   verifyPc.set(ctx, wit.pc.value, wit.mm.value);
-  GLOBAL_SET(isSuspend, 1);
+  GLOBAL_SET(isTerminate, 0);
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::verify(CTX) DEV {
-  EQ(GLOBAL_GET(isSuspend), 1);
+  EQ(GLOBAL_GET(isTerminate), 0);
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::addArguments(CTX) DEV {

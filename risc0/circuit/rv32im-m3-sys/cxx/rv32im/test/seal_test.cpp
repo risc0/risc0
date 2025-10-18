@@ -17,6 +17,7 @@
 #include "prove/rv32im.h"
 #include "verify/rv32im.h"
 
+#include <cassert>
 #include <iostream>
 #include <string>
 
@@ -54,13 +55,13 @@ int main() {
   if (sealOut != finalDigest) {
     throw std::runtime_error("Out digest mismatch");
   }
-  LOG(0, "isSuspend = " << globals->isSuspend);
+  LOG(0, "isTerminate = " << globals->isTerminate);
   LOG(0, "termA0 = " << readU32(globals->termA0));
   LOG(0, "termA1 = " << readU32(globals->termA1));
   for (size_t i = 0; i < 8; i++) {
     LOG(0, "Output[" << i << "] = " << readU32(globals->out[i]));
   }
-  assert(globals->isSuspend == 0);
+  assert(globals->isTerminate == 1);
   assert(readU32(globals->termA0) == 0);
   assert(readU32(globals->termA0) == 17);
   for (size_t i = 0; i < 8; i++) {
