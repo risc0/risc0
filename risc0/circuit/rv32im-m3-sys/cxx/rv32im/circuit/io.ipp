@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/argument/io.h"
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/io.h"
+
 template <typename C> FDEV void ReadByteBlock<C>::set(CTX, ReadByteWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   lowBit0.set(ctx, wit.lowBits % 2);

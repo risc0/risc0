@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/mul.h"
+
 template <typename C> FDEV void ExpandU32<C>::set(CTX, uint32_t val) DEV {
   b0.set(ctx, val & 0xff);
   b1.set(ctx, (val >> 8) & 0xff);

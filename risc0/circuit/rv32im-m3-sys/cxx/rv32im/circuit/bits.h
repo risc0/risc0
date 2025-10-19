@@ -36,6 +36,8 @@ template <typename C> struct BitReg {
 };
 
 // Choose a or b based on the value of c
+//
+// PRECONDITION: c must be constrained to be a bit.
 template <typename C> inline FDEV Val<C> cond(Val<C> c, Val<C> a, Val<C> b) {
   return c * a + (Val<C>(1) - c) * b;
 };

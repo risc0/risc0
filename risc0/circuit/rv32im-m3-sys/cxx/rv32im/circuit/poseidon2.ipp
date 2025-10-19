@@ -12,6 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/argument/poseidon2.h"
+#include "rv32im/base/base.h"
+#include "rv32im/base/platform.h"
+#include "rv32im/base/poseidon2.h"
+#include "rv32im/circuit/poseidon2.h"
+
 FDEV CONSTANT Fp INT_ROUND_CONSTANTS[21] = {
     0x1DA78EC2, 0x730B0924, 0x3EB56CF3, 0x5BD93073, 0x37204C97, 0x51642D89, 0x66E943E8,
     0x1A3E72DE, 0x70BEB1E9, 0x30FF3B3F, 0x4240D1C4, 0x12647B8D, 0x65D86965, 0x49EF4D7C,

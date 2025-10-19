@@ -12,6 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/argument/cpu_state.h"
+#include "rv32im/argument/lookup.h"
+#include "rv32im/argument/memory.h"
+#include "rv32im/base/constants.h"
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/bigint.h"
+
 template <typename C> FDEV void BigIntBlock<C>::set(CTX, BigIntWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   mm.set(ctx, wit.mm);

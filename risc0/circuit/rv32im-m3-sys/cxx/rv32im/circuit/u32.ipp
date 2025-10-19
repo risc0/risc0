@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
+#include "rv32im/base/platform.h"
+#include "rv32im/circuit/u32.h"
+
 template <typename C> FDEV void RegU32<C>::set(CTX, uint32_t val) DEV {
   low.set(ctx, val & 0xffff);
   high.set(ctx, val >> 16);

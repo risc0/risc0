@@ -15,8 +15,14 @@
 
 #pragma once
 
+#include "rv32im/base/platform.h"
+
 template <typename T> struct OptSize {};
 
+// A macro to impl OptSize<T> the given enum, so that it can be used with Option<T>.
+//
+// T is the name of the enum and L must be the last variant of the enum. If L is not the last
+// variant, the resulting size will be incorrect.
 #define IMPL_SIZE(T, L)                                                                            \
   template <> struct OptSize<T> {                                                                  \
     static CONSTANT int32_t value = uint32_t(L) + 1;                                               \
@@ -119,6 +125,13 @@ enum ShiftKind {
 
 IMPL_SIZE(ShiftKind, SHIFT_RA);
 
+// Option represents a stack of heterogeneous enum option fields (e.g. UintKind, ShiftKind, etc).
+//
+// An enum field can be pushed onto the options stack, and then later peeked or popped via the
+// provided methods. Only the head of the stack is accessible. When accessing the head value, its
+// type must be specified. If the given type is incorrect to the last field pushed, the result is
+// undefined. Pushing too many fields to a single option value, such that it overflows the
+// underlying uint32_t, will yield an undefined result.
 struct Option {
   uint32_t val;
 
@@ -129,14 +142,17 @@ struct Option {
     return (val % OptSize<T>::value) == uint32_t(cmp);
   }
 
+  // NOTE: peek will return the first enum variant if the option is empty.
   template <typename T> FDEV constexpr T peek() const { return T(val % OptSize<T>::value); }
 
+  // NOTE: If T does not match the head of the options stack, the result is undefined.
   template <typename T> FDEV constexpr T pop() {
     T ret = peek<T>();
     val /= OptSize<T>::value;
     return ret;
   }
 
+  // NOTE: If T does not match the head of the options stack, the result is undefined.
   template <typename T> FDEV constexpr Option popRet() const {
     return Option(val / OptSize<T>::value);
   }
@@ -151,6 +167,10 @@ FDEV constexpr inline Option EncodeOptions() {
   return Option();
 }
 
+// Create an Option value from the given list of options.
+//
+// Option fields are pushed in reverse argument order, e.g. EncodeOptions(A, B, C) will result in
+// the head of the stack being A.
 template <typename T, typename... Rest>
 FDEV constexpr inline Option EncodeOptions(T a, Rest... args) {
   Option r = EncodeOptions(args...);

@@ -15,9 +15,25 @@
 
 #pragma once
 
+#include "rv32im/circuit/bigint.h"
+#include "rv32im/circuit/decode.h"
+#include "rv32im/circuit/ecall.h"
+#include "rv32im/circuit/globals.h"
+#include "rv32im/circuit/inst.h"
+#include "rv32im/circuit/io.h"
+#include "rv32im/circuit/one_hot.h"
+#include "rv32im/circuit/paging.h"
 #include "rv32im/circuit/regext.h"
+#include "rv32im/circuit/units.h"
 #include "rv32im/witness/witness.h"
 
+// The Top component is the root of the circuit's data group.
+//
+// It is where the blocks are combined to construct the full circuit. It specifies a selector, which
+// is used to indicate which block is active in a given row of the trace. On a given row, a single
+// block type can be active, and for that block type an array of one or more blocks are provided.
+// The max size of this array depends on the block type. When the array is not full, inactive
+// entries are indicated with the `isValid` bit.
 template <typename C> struct Top {
   TwoHot<C, MAJOR_SPLIT_SIZE, MINOR_SPLIT_SIZE> select;
   union {
@@ -31,6 +47,10 @@ template <typename C> struct Top {
   } mux;
 };
 
+// Top component used in the accum group.
+//
+// This component provides constraints for the bigint instructions, which use a challenge value
+// generated from the data trace in their constraints.
 template <typename C> struct AccumTop {
   OneHot<C, POLY_OP_SIZE> polyOp;
   RegExt<C> local;
