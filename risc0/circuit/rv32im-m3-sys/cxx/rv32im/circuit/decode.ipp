@@ -12,11 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-template <typename C> FDEV void FetchBlock<C>::set(CTX, FetchWitness witness) DEV {
+template <typename C> FDEV void FetchBlock<C>::set(CTX, FetchWitness witness, Val<C> cycle) DEV {
   iCacheCycle.set(ctx, witness.iCacheCycle);
+  loadCycle.set(ctx, witness.loadCycle);
   mode.set(ctx, witness.mode);
   pc.set(ctx, witness.pc);
   nextPc.set(ctx, witness.nextPc);
+  uint32_t cycleDiff = cycle.asUInt32() - witness.loadCycle;
+  ctx.tableAdd(256 + 65536 + cycleDiff * 2, 1);
+}
+
+template <typename C> FDEV void FetchBlock<C>::addArguments(CTX, Val<C> cycle) DEV {
+  ctx.pull(LookupArgument<C>(2, (cycle - loadCycle.get()) * 2));
 }
 
 template <typename C> FDEV Val<C> DecodeBlock<C>::recomposeRange(uint32_t start, uint32_t end) DEV {
@@ -104,14 +111,13 @@ template <typename C> FDEV ValU32<C> DecodeBlock<C>::getImmU() DEV {
 
 template <typename C> FDEV void DecodeBlock<C>::set(CTX, DecodeWitness witness) DEV {
   count.set(ctx, witness.count);
-  fetch.set(ctx, witness.fetch);
-  loadCycle.set(ctx, witness.loadCycle);
-  uint32_t cycleDiff = witness.loadCycle - witness.fetch.iCacheCycle;
+  fetch.set(ctx, witness.fetch, witness.fetch.loadCycle);
+  uint32_t cycleDiff = witness.fetch.loadCycle - witness.fetch.iCacheCycle;
   ctx.tableAdd(256 + 65536 + cycleDiff * 2, 1);
   pcDecomp.set(ctx, witness.fetch.pc);
   verifyPc.set(ctx, witness.fetch.pc, witness.fetch.mode);
-  load0.set(ctx, witness.load0, witness.loadCycle);
-  load1.set(ctx, witness.load1, witness.loadCycle);
+  load0.set(ctx, witness.load0, witness.fetch.loadCycle);
+  load1.set(ctx, witness.load1, witness.fetch.loadCycle);
   uint32_t baseInst = witness.load0.value;
   uint32_t low16 = witness.fetch.pc % 4 == 2 ? baseInst >> 16 : baseInst & 0xffff;
   low16Decomp.set(ctx, low16);
@@ -238,7 +244,7 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
 }
 
 template <typename C> FDEV void DecodeBlock<C>::addArguments(CTX) DEV {
-  ctx.pull(LookupArgument<C>(2, (loadCycle.get() - fetch.iCacheCycle.get()) * 2));
+  ctx.pull(LookupArgument<C>(2, (fetch.loadCycle.get() - fetch.iCacheCycle.get()) * 2));
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();

@@ -144,7 +144,7 @@ template <typename C> struct InstRegBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, dr, cycle.get(), fetch.isMM());
     T::apply(ctx, writeRd, cycle.get());
     T::apply(ctx, rd, writeRd.wordAddr.get(), fetch.isMM());
@@ -179,7 +179,7 @@ template <typename C> struct InstImmBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readRs1, cycle.get());
     T::apply(ctx, writeRd, cycle.get());
     T::apply(ctx, rs1, readRs1.wordAddr.get(), fetch.isMM());
@@ -224,7 +224,7 @@ template <typename C> struct InstLoadBlock {
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, opt);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readRs1, cycle.get());
     T::apply(ctx, writeRd, cycle.get());
     T::apply(ctx, rs1, readRs1.wordAddr.get(), fetch.isMM());
@@ -277,7 +277,7 @@ template <typename C> struct InstStoreBlock {
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, opt);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, dr, cycle.get(), fetch.isMM());
     T::apply(ctx, rd);
     T::apply(ctx, imm);
@@ -318,7 +318,7 @@ template <typename C> struct InstBranchBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, dr, cycle.get(), fetch.isMM());
     T::apply(ctx, rd);
     T::apply(ctx, imm);
@@ -355,7 +355,7 @@ template <typename C> struct InstJalBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, writeRd, cycle.get());
     T::apply(ctx, rs1);
     T::apply(ctx, rs2);
@@ -386,7 +386,7 @@ template <typename C> struct InstJalrBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readRs1, cycle.get());
     T::apply(ctx, rs1, readRs1.wordAddr.get(), fetch.isMM());
     T::apply(ctx, rs2);
@@ -415,7 +415,7 @@ template <typename C> struct InstLuiBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, rs1);
     T::apply(ctx, rs2);
     T::apply(ctx, writeRd, cycle.get());
@@ -443,7 +443,7 @@ template <typename C> struct InstAuipcBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, rs1);
     T::apply(ctx, rs2);
     T::apply(ctx, writeRd, cycle.get());
@@ -469,7 +469,7 @@ template <typename C> struct InstEcallBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, writeSavePc, cycle.get());
     T::apply(ctx, readDispatch, cycle.get());
   }
@@ -491,7 +491,7 @@ template <typename C> struct InstMretBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readPc, cycle.get());
     T::apply(ctx, sumPc, readPc.data.get(), ValU32<C>(4, 0));
   }

@@ -29,7 +29,7 @@
 
 template <typename C> FDEV void EcallTerminateBlock<C>::set(CTX, EcallTerminateWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   readA7.set(ctx, wit.a7, wit.cycle);
 }
 
@@ -50,7 +50,7 @@ template <typename C> FDEV void EcallTerminateBlock<C>::addArguments(CTX) DEV {
 template <typename C> FDEV void EcallReadBlock<C>::set(CTX, EcallReadWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   finalCycle.set(ctx, wit.finalCycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   readA7.set(ctx, wit.a7, wit.cycle);
   readA1.set(ctx, wit.a1, wit.cycle);
   readA2.set(ctx, wit.a2, wit.cycle);
@@ -92,7 +92,7 @@ template <typename C> FDEV void EcallReadBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void EcallWriteBlock<C>::set(CTX, EcallWriteWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   readA7.set(ctx, wit.a7, wit.cycle);
   readA2.set(ctx, wit.a2, wit.cycle);
   writeA0.set(ctx, wit.a0, wit.cycle);
@@ -123,7 +123,7 @@ template <typename C> FDEV void EcallWriteBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void EcallBigIntBlock<C>::set(CTX, EcallBigIntWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   readA7.set(ctx, wit.a7, wit.cycle);
   readT0.set(ctx, wit.t0, wit.cycle);
   readT2.set(ctx, wit.t2, wit.cycle);

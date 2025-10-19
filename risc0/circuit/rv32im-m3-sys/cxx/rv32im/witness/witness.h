@@ -40,7 +40,7 @@ struct EmptyWitness {
   BLOCK_TYPE(InstImm, 5)                                                                           \
   BLOCK_TYPE(InstLoad, 3)                                                                          \
   BLOCK_TYPE(InstStore, 3)                                                                         \
-  BLOCK_TYPE(InstBranch, 5)                                                                        \
+  BLOCK_TYPE(InstBranch, 4)                                                                        \
   BLOCK_TYPE(InstJal, 7)                                                                           \
   BLOCK_TYPE(InstJalr, 6)                                                                          \
   BLOCK_TYPE(InstLui, 9)                                                                           \

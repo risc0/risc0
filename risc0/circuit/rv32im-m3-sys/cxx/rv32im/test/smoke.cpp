@@ -13,27 +13,16 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#pragma once
+#include "core/log.h"
+#include "rv32im/test/test_prove.h"
 
-#include "rv32im/witness/mem.h"
+#include <iostream>
+#include <string>
 
-struct FetchWitness {
-  uint32_t mode;
-  uint32_t iCacheCycle;
-  uint32_t loadCycle;
-  uint32_t pc;
-  uint32_t nextPc;
-};
+using namespace risc0;
 
-struct DecodeWitness {
-  uint8_t opcode;
-  uint8_t rd;
-  uint8_t rs1;
-  uint8_t rs2;
-  uint32_t imm;
-  FetchWitness fetch;
-  VirtMemReadWitness load0;
-  VirtMemReadWitness load1;
-  uint32_t inst;
-  uint32_t count;
-};
+int main() {
+  rv32im::NullHostIO io;
+  runTestBinary("rv32im/test/smoke_kernel", io, 12);
+  return 0;
+}

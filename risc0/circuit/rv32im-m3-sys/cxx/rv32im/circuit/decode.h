@@ -24,24 +24,26 @@ template <typename C> struct FetchBlock {
   CONSTANT static char NAME[] = "FetchBlock";
 
   Reg<C> iCacheCycle;
+  Reg<C> loadCycle;
   Reg<C> mode;
   RegU32<C> pc;
   RegU32<C> nextPc;
 
-  template <typename T> FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
     T::apply(ctx, iCacheCycle);
+    T::apply(ctx, loadCycle);
     T::apply(ctx, mode);
     T::apply(ctx, pc);
     T::apply(ctx, nextPc);
   }
 
-  FDEV void set(CTX, FetchWitness witness) DEV;
+  FDEV void set(CTX, FetchWitness witness, Val<C> cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
   // Return 1 if in machine mode
   FDEV Val<C> isMM() DEV { return mode.get(); }
-  FDEV void verify(CTX) DEV {}
-  FDEV void addArguments(CTX) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
 
 template <typename C> struct DecodeBlock {
@@ -49,7 +51,6 @@ template <typename C> struct DecodeBlock {
 
   ArgCountReg<C> count;
   FetchBlock<C> fetch;
-  Reg<C> loadCycle;
   AddressDecompose<C> pcDecomp;
   AddressVerify<C> verifyPc;
   VirtMemReadBlock<C> load0;
@@ -71,12 +72,11 @@ template <typename C> struct DecodeBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, count);
-    T::apply(ctx, fetch);
-    T::apply(ctx, loadCycle);
+    T::apply(ctx, fetch, fetch.loadCycle.get());
     T::apply(ctx, pcDecomp, fetch.pc.get());
     T::apply(ctx, verifyPc, fetch.pc.get(), fetch.isMM());
-    T::apply(ctx, load0, loadCycle.get());
-    T::apply(ctx, load1, loadCycle.get());
+    T::apply(ctx, load0, fetch.loadCycle.get());
+    T::apply(ctx, load1, fetch.loadCycle.get());
     T::apply(ctx, low16Decomp, ValU32<C>{low16(), 0});
     T::apply(ctx, computeNext, fetch.pc.get(), ValU32<C>(Val<C>(4) - isCompressed.get() * 2, 0));
     T::apply(ctx, bits);

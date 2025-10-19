@@ -28,7 +28,7 @@ template <typename C> struct EcallTerminateBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readA7, cycle.get());
   }
 
@@ -56,7 +56,7 @@ template <typename C> struct EcallReadBlock {
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, finalCycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readA7, cycle.get());
     T::apply(ctx, readA1, cycle.get());
     T::apply(ctx, readA2, cycle.get());
@@ -85,7 +85,7 @@ template <typename C> struct EcallWriteBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readA7, cycle.get());
     T::apply(ctx, readA2, cycle.get());
     T::apply(ctx, writeA0, cycle.get());
@@ -113,7 +113,7 @@ template <typename C> struct EcallBigIntBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readA7, cycle.get());
     T::apply(ctx, readT0, cycle.get());
     T::apply(ctx, readT2, cycle.get());

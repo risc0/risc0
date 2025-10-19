@@ -131,7 +131,7 @@ makeUnit(Val<C> opts, ValU32<C> a, ValU32<C> b, ValU32<C> out0, ValU32<C> out1) 
 
 template <typename C> FDEV void InstRegBlock<C>::set(CTX, InstRegWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   dr.set(ctx, wit.rs1, wit.rs2, wit.cycle);
   writeRd.set(ctx, wit.rd, wit.cycle);
   rd.set(ctx, wit.rd.wordAddr);
@@ -173,7 +173,7 @@ template <typename C> FDEV void InstRegBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstImmBlock<C>::set(CTX, InstImmWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   readRs1.set(ctx, wit.rs1, wit.cycle);
   writeRd.set(ctx, wit.rd, wit.cycle);
   rs1.set(ctx, wit.rs1.wordAddr);
@@ -218,11 +218,10 @@ template <typename C> FDEV void InstImmBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstLoadBlock<C>::set(CTX, InstLoadWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   Option opts(wit.options);
   opts.pop<InstKind>();
   opt.set(ctx, opts.val);
-  fetch.set(ctx, wit.fetch);
   readRs1.set(ctx, wit.rs1, wit.cycle);
   writeRd.set(ctx, wit.rd, wit.cycle);
   rs1.set(ctx, wit.rs1.wordAddr);
@@ -297,11 +296,10 @@ template <typename C> FDEV void InstLoadBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstStoreBlock<C>::set(CTX, InstStoreWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   Option opts(wit.options);
   opts.pop<InstKind>();
   opt.set(ctx, opts.val);
-  fetch.set(ctx, wit.fetch);
   dr.set(ctx, wit.rs1, wit.rs2, wit.cycle);
   rd.set(ctx, wit.rd);
   imm.set(ctx, wit.imm);
@@ -372,7 +370,7 @@ template <typename C> FDEV void InstStoreBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstBranchBlock<C>::set(CTX, InstBranchWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   dr.set(ctx, wit.rs1, wit.rs2, wit.cycle);
   rd.set(ctx, wit.rd);
   imm.set(ctx, wit.imm);
@@ -426,7 +424,7 @@ template <typename C> FDEV void InstBranchBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstJalBlock<C>::set(CTX, InstJalWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   rs1.set(ctx, wit.rs1);
   rs2.set(ctx, wit.rs2);
   writeRd.set(ctx, wit.rd, wit.cycle);
@@ -462,7 +460,7 @@ template <typename C> FDEV void InstJalBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstJalrBlock<C>::set(CTX, InstJalrWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   readRs1.set(ctx, wit.rs1, wit.cycle);
   rs1.set(ctx, wit.rs1.wordAddr);
   rs2.set(ctx, wit.rs2);
@@ -499,7 +497,7 @@ template <typename C> FDEV void InstJalrBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstLuiBlock<C>::set(CTX, InstLuiWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   rs1.set(ctx, wit.rs1);
   rs2.set(ctx, wit.rs2);
   writeRd.set(ctx, wit.rd, wit.cycle);
@@ -528,7 +526,7 @@ template <typename C> FDEV void InstLuiBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstAuipcBlock<C>::set(CTX, InstAuipcWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   rs1.set(ctx, wit.rs1);
   rs2.set(ctx, wit.rs2);
   writeRd.set(ctx, wit.rd, wit.cycle);
@@ -564,7 +562,7 @@ template <typename C> FDEV void InstAuipcBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstEcallBlock<C>::set(CTX, InstEcallWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   writeSavePc.set(ctx, wit.savePc, wit.cycle);
   readDispatch.set(ctx, wit.dispatch, wit.cycle);
 }
@@ -601,7 +599,7 @@ template <typename C> FDEV void InstEcallBlock<C>::addArguments(CTX) DEV {
 
 template <typename C> FDEV void InstMretBlock<C>::set(CTX, InstMretWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   readPc.set(ctx, wit.readPc, wit.cycle);
   sumPc.set(ctx, wit.readPc.value, 4);
 }

@@ -388,9 +388,9 @@ struct Emulator {
       break;
     }
     writeReg(wit.rd, dinst->rd, out);
-    DLOG("  RS1 = " << dinst->rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value << std::dec);
     DLOG("  IMM = " << std::hex << wit.imm << std::dec);
-    DLOG("  RD = " << dinst->rd << ", value = " << std::hex << wit.rd.value << std::dec);
+    DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);
   }
 
   template <uint32_t opt> inline void do_INST_STORE() {
@@ -706,10 +706,10 @@ struct Emulator {
       inst = readVirtMemory(wit->load1, COMPRESSED_INST_LOOKUP_WORD + inst);
     }
     wit->fetch.iCacheCycle = iCacheCycle;
+    wit->fetch.loadCycle = curCycle;
     wit->fetch.mode = mode;
     wit->fetch.pc = pc;
     wit->fetch.nextPc = pc + (compressed ? 2 : 4);
-    wit->loadCycle = curCycle;
     wit->inst = inst;
     wit->count = 1;
     auto decoded = DecodedInst(wit->inst);
