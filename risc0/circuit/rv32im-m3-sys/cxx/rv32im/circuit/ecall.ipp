@@ -42,7 +42,7 @@ template <typename C> FDEV void EcallTerminateBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void EcallTerminateBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, 0, 0, 0, 0));
   VERIFY_DECODE
 }
@@ -83,10 +83,10 @@ template <typename C> FDEV void EcallReadBlock<C>::addArguments(CTX) DEV {
   Val<C> finalCycleVal = finalCycle.get();
   Val<C> addrWord = decomp.wordAddr(readA1.data.get());
   Val<C> lowBits = decomp.low0.get() + decomp.low1.get() * 2;
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   ctx.push(ReadStateArgument<C>(cycleVal + 1, addrWord, lowBits, writeA0.data.low.get()));
   ctx.pull(ReadStateArgument<C>(finalCycleVal, finalAddrWord.get(), finalAddrBits.get(), 0));
-  ctx.push(CpuStateArgument<C>(finalCycleVal + 1, fetch.nextPc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.push(CpuStateArgument<C>(finalCycleVal + 1, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   VERIFY_DECODE
 }
 
@@ -116,8 +116,8 @@ template <typename C> FDEV void EcallWriteBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void EcallWriteBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), 1, fetch.iCacheCycle.get()));
-  ctx.push(CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  ctx.push(CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   VERIFY_DECODE
 }
 
@@ -152,10 +152,10 @@ template <typename C> FDEV void EcallBigIntBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
   Val<C> countVal = cycleCount.get();
   Val<C> biPc = pcDecomp.wordAddr(readT2.data.get());
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   ctx.push(BigIntCpuStateArgument<C>(cycleVal + 1, biPc, mm.get()));
   ctx.pull(BigIntCpuStateArgument<C>(cycleVal + countVal + 1, biPc + countVal, mm.get()));
   ctx.push(
-      CpuStateArgument<C>(cycleVal + countVal + 2, fetch.nextPc.get(), 1, fetch.iCacheCycle.get()));
+      CpuStateArgument<C>(cycleVal + countVal + 2, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   VERIFY_DECODE
 }

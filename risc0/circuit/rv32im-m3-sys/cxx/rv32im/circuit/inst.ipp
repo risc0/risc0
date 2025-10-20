@@ -18,10 +18,10 @@ template <typename C> FDEV void InstResumeBlock<C>::set(CTX, InstResumeWitness w
 }
 
 template <typename C> FDEV void InstResumeBlock<C>::verify(CTX) DEV {
-  // Verify mm is binary
+  // Verify mm is one of the valid options
   EQZ(readMode.data.high.get());
   Val<C> mode = readMode.data.low.get();
-  AssertBit(ctx, mode);
+  EQZ((mode - MODE_USER) * (mode - MODE_SUPERVISOR) * (mode - MODE_MACHINE));
   // Verify we loaded from the right addresses
   EQ(readPc.wordAddr.get(), CSR_WORD(MSPC));
   EQ(readMode.wordAddr.get(), CSR_WORD(MSMODE));
@@ -62,7 +62,8 @@ template <typename C> FDEV void SourceReg<C>::set(CTX, Val<C> wordAddr) DEV {
 
 template <typename C> FDEV void SourceReg<C>::verify(CTX, Val<C> wordAddr, Val<C> mode) DEV {
   // Recompute register address from mode + index, verify it matches
-  EQ(cond<C>(mode, MACHINE_REGS_WORD, USER_REGS_WORD) + idx.get(), wordAddr);
+  Val<C> isMM = (mode - MODE_USER) * (mode - MODE_SUPERVISOR) * Val<C>(inv(Fp(6)));
+  EQ(cond<C>(isMM, MACHINE_REGS_WORD, USER_REGS_WORD) + idx.get(), wordAddr);
 }
 
 template <typename C> FDEV void DestReg<C>::set(CTX, Val<C> wordAddr) DEV {
@@ -77,7 +78,8 @@ template <typename C> FDEV void DestReg<C>::verify(CTX, Val<C> wordAddr, Val<C> 
   // Recompute register address from mode + index, verify it matches
   // If the register is zero, add 64 so we write into empty space past the
   // main register file (i.e. write to zero reg dont change the register)
-  EQ(cond<C>(mode, MACHINE_REGS_WORD, USER_REGS_WORD) + isZero.isZero.get() * 64 + idx.get(),
+  Val<C> isMM = (mode - MODE_USER) * (mode - MODE_SUPERVISOR) * Val<C>(inv(Fp(6)));
+  EQ(cond<C>(isMM, MACHINE_REGS_WORD, USER_REGS_WORD) + isZero.isZero.get() * 64 + idx.get(),
      wordAddr);
 }
 
@@ -104,8 +106,9 @@ FDEV void DualReg<C>::set(CTX, RegMemReadWitness rs1Wit, RegMemReadWitness rs2Wi
 }
 
 template <typename C> FDEV void DualReg<C>::verify(CTX, Val<C> cycle, Val<C> mode) DEV {
-  EQ(cond<C>(mode, MACHINE_REGS_WORD, USER_REGS_WORD) + rs1Idx.get(), readRs1.wordAddr.get());
-  EQ(cond<C>(mode, MACHINE_REGS_WORD, USER_REGS_WORD) + sameReg.get() * 64 + rs2Idx.get(),
+  Val<C> isMM = (mode - MODE_USER) * (mode - MODE_SUPERVISOR) * Val<C>(inv(Fp(6)));
+  EQ(cond<C>(isMM, MACHINE_REGS_WORD, USER_REGS_WORD) + rs1Idx.get(), readRs1.wordAddr.get());
+  EQ(cond<C>(isMM, MACHINE_REGS_WORD, USER_REGS_WORD) + sameReg.get() * 64 + rs2Idx.get(),
      readRs2.wordAddr.get());
   EQZ(sameReg.get() * (rs1Idx.get() - rs2Idx.get()));
   EQ(cond<C>(sameReg.get(), readRs1.data.low.get(), readRs2.data.low.get()), rs2Data.low.get());
@@ -578,9 +581,9 @@ template <typename C> FDEV void InstEcallBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void InstEcallBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  // Move from mm = 0 -> mm = 1
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), 0, fetch.iCacheCycle.get()));
-  ctx.push(CpuStateArgument<C>(cycleVal + 1, readDispatch.data.get(), 1, fetch.iCacheCycle.get()));
+  // Move from mode = USER to mode = MACHINE
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_USER, fetch.iCacheCycle.get()));
+  ctx.push(CpuStateArgument<C>(cycleVal + 1, readDispatch.data.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   // Verify decoding
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
@@ -611,9 +614,9 @@ template <typename C> FDEV void InstMretBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void InstMretBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  // Move from mm = 1 -> mm = 0
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), 1, fetch.iCacheCycle.get()));
-  ctx.push(CpuStateArgument<C>(cycleVal + 1, sumPc.get(), 0, fetch.iCacheCycle.get()));
+  // Move from mode = MACHINE to mode = USER
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  ctx.push(CpuStateArgument<C>(cycleVal + 1, sumPc.get(), MODE_USER, fetch.iCacheCycle.get()));
   // Verify decoding
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();

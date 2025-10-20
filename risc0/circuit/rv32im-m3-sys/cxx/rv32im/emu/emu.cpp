@@ -430,8 +430,8 @@ struct Emulator {
       break;
     }
     writeVirtMemory(wit.mem, addr / BYTES_PER_WORD, out);
-    DLOG("  RS1 = " << dinst->rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
-    DLOG("  RS2 = " << dinst->rs2 << ", value = " << std::hex << wit.rs2.value << std::dec);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value << std::dec);
+    DLOG("  RS2 = " << uint32_t(dinst->rs2) << ", value = " << std::hex << wit.rs2.value << std::dec);
     DLOG("  IMM = " << std::hex << wit.imm << std::dec);
     DLOG("  MEM addr = " << std::hex << addr << ", value = " << out << std::dec);
   }
@@ -473,7 +473,7 @@ struct Emulator {
     writeReg(wit.rd, dinst->rd, newPc);
     wit.imm = dinst->imm;
     newPc = pc + wit.imm;
-    DLOG("  RD = " << dinst->rd << ", value = " << std::hex << wit.rd.value << std::dec);
+    DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);
     DLOG("  PC = " << std::hex << pc << std::dec);
   }
 
@@ -486,8 +486,8 @@ struct Emulator {
     writeReg(wit.rd, dinst->rd, newPc);
     wit.imm = dinst->imm;
     newPc = rs1Val + wit.imm;
-    DLOG("  RS1 = " << dinst->rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
-    DLOG("  RD = " << dinst->rd << ", value = " << std::hex << wit.rd.value << std::dec);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value << std::dec);
+    DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);
     DLOG("  PC = " << std::hex << pc << std::dec);
   }
 
@@ -544,6 +544,18 @@ struct Emulator {
     if (mode != MODE_MACHINE) {
       trap("MRET not in machine mode");
     }
+    auto& wit = trace.makeInstMret();
+    wit.cycle = curCycle;
+    wit.fetch = dinst->fetch;
+    setMode(MODE_USER);
+    newPc = readPhysMemory(wit.readPc, CSR_WORD(MEPC)) + 4;
+  }
+
+  template <uint32_t opt> inline void do_INST_SRET() {
+    if (mode != MODE_SUPERVISOR) {
+      trap("MRET not in machine mode");
+    }
+    // Actually do MRET anyway for now
     auto& wit = trace.makeInstMret();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;

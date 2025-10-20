@@ -54,11 +54,19 @@ template <typename C> FDEV void AddressDecompose<C>::verify(CTX, ValU32<C> val) 
 }
 
 template <typename C> FDEV void AddressVerify<C>::set(CTX, uint32_t val, uint32_t mode) DEV {
-  highSub.set(ctx, (mode ? 0xffff : 0xbfff) - (val >> 16));
+  isMM.set(ctx, mode == MODE_MACHINE);
+  uint32_t max = (mode == MODE_MACHINE ? 0xffff : (GLOBAL_GET(isUM) == 0 ? 0xefff : 0xbfff));
+  highSub.set(ctx, max - (val >> 16));
 }
 
 template <typename C> FDEV void AddressVerify<C>::verify(CTX, ValU32<C> val, Val<C> mode) DEV {
-  EQ(Val<C>(0xbfff) + mode * Val<C>(0x4000) - val.high, highSub.get());
+  Val<C> topAddr = 
+    isMM.get() * Val<C>(0xffff) +
+    (Val<C>(1) - isMM.get()) * (
+        GLOBAL_GET(isUM) * Val<C>(0xbfff) +
+        (Val<C>(1) - GLOBAL_GET(isUM)) * Val<C>(0xefff));
+  EQZ(isMM.get() * (mode - Val<C>(MODE_MACHINE)));
+  EQ(topAddr - val.high, highSub.get());
 }
 
 template <typename C> FDEV void GetSign<C>::set(CTX, uint32_t val) DEV {

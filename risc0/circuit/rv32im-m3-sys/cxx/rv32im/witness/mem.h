@@ -35,6 +35,7 @@ using RegMemReadWitness = PhysMemReadWitness;
 using RegMemWriteWitness = PhysMemWriteWitness;
 
 struct VirtAddrWitness {
+  uint32_t readCycle;
   uint32_t vpage;
   uint32_t ppage;
   uint32_t wordOffset;
@@ -51,4 +52,12 @@ struct VirtMemWriteWitness {
   uint32_t prevCycle;
   uint32_t prevValue;
   uint32_t value;
+};
+
+struct VirtAddrResolve {
+  uint32_t cacheCycle;
+  VirtAddrWitness addr;
+  PhysMemReadWitness satp;
+  PhysMemReadWitness pte1;
+  PhysMemReadWitness pte2;
 };

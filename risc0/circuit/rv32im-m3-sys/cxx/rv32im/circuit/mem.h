@@ -130,6 +130,29 @@ template <typename C> struct VirtMemWriteBlock {
   FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
 
+template <typename C> struct VirtAddrResolveBlock {
+  CONSTANT static char NAME[] = "VirtAddrResolveBlock";
+
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, cacheCycle);
+    T::apply(ctx, addr, addr.readCycle.get());
+    T::apply(ctx, vinfo, addr.readCycle.get());
+    T::apply(ctx, pte1, addr.readCycle.get());
+    T::apply(ctx, pte2, addr.readCycle.get());
+  }
+
+  Reg<C> cacheCycle;
+  VirtAddrBlock<C> addr;
+  PhysMemReadBlock<C> vinfo;
+  PhysMemReadBlock<C> pte1;
+  PhysMemReadBlock<C> pte2;
+
+  FDEV void set(CTX, VirtAddrResolveBlock wit) DEV;
+  FDEV inline void finalize(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
+  FDEV void addArguments(CTX) DEV;
+};
+
 template <typename C>
 using RegMemReadBlock = PhysMemReadBlock<C>;
 

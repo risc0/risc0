@@ -86,4 +86,12 @@ template <typename C> FDEV void VirtMemWriteBlock<C>::addArguments(CTX, Val<C> c
   ctx.pull(LookupArgument<C>(2, cycle * 2 + 1 - prevCycle.get() - 1));
 }
 
+template <typename C> FDEV void VirtAddrResolveBlock<C>::set(CTX, VirtAddrResolveBlock wit) DEV {
+}
+
+template <typename C> FDEV void VirtAddrResolveBlock<C>::verify(CTX) DEV {
+}
+
+template <typename C> FDEV void VirtAddrResolveBlock<C>::addArguments(CTX) DEV {
+}
 
