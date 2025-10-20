@@ -15,12 +15,14 @@
 
 #pragma once
 
+#include "rv32im/base/constants.h"
 #include "rv32im/circuit/is_zero.h"
 #include "rv32im/circuit/mem.h"
 #include "rv32im/circuit/one_hot.h"
 #include "rv32im/circuit/u32.h"
 #include "rv32im/witness/bigint.h"
 
+// TODO: handling of user / machine mode doesn't really work unless isUM is set
 template <typename C> struct BigIntBlock {
   CONSTANT static char NAME[] = "BigInt";
 
@@ -59,7 +61,7 @@ template <typename C> struct BigIntBlock {
         ctx, computeAddr, readBaseReg.data.get(), ValU32<C>(offset16Low.get(), offset16High.get()));
     T::apply(ctx, isLastPage, computeAddr.get().high - Val<C>(0xbfff));
     T::apply(ctx, wordBase, computeAddr.get());
-    T::apply(ctx, checkBase, computeAddr.get(), mm.get());
+    T::apply(ctx, checkBase, computeAddr.get(), mm.get() * Val<C>(MODE_MACHINE));
     for (size_t i = 0; i < 16; i++) {
       T::apply(ctx, bytes[i]);
     }

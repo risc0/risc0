@@ -32,7 +32,7 @@ template <typename C> FDEV void BigIntBlock<C>::set(CTX, BigIntWitness wit) DEV 
   computeAddr.set(ctx, wit.baseReg.value, offsetVal * 16);
   isLastPage.set(ctx, computeAddr.get().high - 0xbfff);
   wordBase.set(ctx, wit.baseReg.value + offsetVal * 16);
-  checkBase.set(ctx, wit.baseReg.value + offsetVal * 16, wit.mm);
+  checkBase.set(ctx, wit.baseReg.value + offsetVal * 16, wit.mm * MODE_MACHINE);
   for (size_t i = 0; i < 4; i++) {
     for (size_t j = 0; j < 4; j++) {
       bytes[i * 4 + j].set(ctx, (wit.data[i] >> (j * 8)) & 0xff);
