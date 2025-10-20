@@ -27,7 +27,6 @@ members = [
   "profiling",
   "prorata",
   "prorata/core",
-  "prover",
   "sha",
   "smartcore-ml",
   "voting-machine",
@@ -40,6 +39,9 @@ members = [
 
 [workspace.package]
 edition = "2024"
+
+[workspace.dependencies]
+gpu-guard = { path = "../tools/gpu-guard" }
 
 # Always optimize; otherwise tests take excessively long.
 [profile.dev]

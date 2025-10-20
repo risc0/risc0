@@ -33,4 +33,5 @@ all-features = true
 [features]
 docker = []
 guest-list = []
+rv32im-m3 = ["risc0-binfmt/rv32im-m3"]
 unstable = []

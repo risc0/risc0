@@ -1035,6 +1035,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-rv32im-m3"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "risc0-binfmt",
+ "risc0-zkp",
+ "tracing",
+]
+
+[[package]]
 name = "risc0-core"
 version = "5.0.0"
 dependencies = [
@@ -1069,6 +1080,7 @@ dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
  "risc0-zkvm-platform",
+ "sha2",
 ]
 
 [[package]]
@@ -1109,6 +1121,7 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
+ "risc0-circuit-rv32im-m3",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
@@ -1205,9 +1218,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.8"
+version = "0.10.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793db75ad2bcafc3ffa7c68b215fee268f537982cd901d132f89c6343f3a3dc8"
+checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
 dependencies = [
  "cfg-if",
  "cpufeatures",

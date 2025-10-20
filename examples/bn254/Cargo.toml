@@ -12,6 +12,9 @@ hex = "0.4.3"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 substrate-bn = "=0.6.0"
 
+[dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []

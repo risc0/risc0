@@ -46,14 +46,8 @@ const MEMORY_BYTES: u64 = 1 << 32;
 const MEMORY_PAGES: usize = (MEMORY_BYTES / PAGE_BYTES as u64) as usize;
 const MERKLE_TREE_DEPTH: usize = MEMORY_PAGES.ilog2() as usize;
 
-/// Start address for user-mode memory.
-pub const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
-
 /// Start address for kernel-mode memory.
 pub const KERNEL_START_ADDR: ByteAddr = ByteAddr(0xc000_0000);
-
-const SUSPEND_PC_ADDR: ByteAddr = ByteAddr(0xffff_0210);
-const SUSPEND_MODE_ADDR: ByteAddr = ByteAddr(0xffff_0214);
 
 lazy_static! {
     static ref ZERO_CACHE: ZeroCache = ZeroCache::new();
@@ -106,15 +100,15 @@ pub struct Page(Vec<u8>);
 /// [Program].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MemoryImage {
-    /// TODO(flaub)
+    /// The pages of the memory image, by address.
     #[debug("{}", pages.len())]
     // #[debug("{:#010x?}", pages.keys())]
-    pages: BTreeMap<u32, Page>,
+    pub pages: BTreeMap<u32, Page>,
 
-    /// TODO(flaub)
+    /// The digests of the memory image, representing a merkle tree.
     #[debug("{}", digests.len())]
     // #[debug("{:#010x?}", digests.keys())]
-    digests: BTreeMap<u32, Digest>,
+    pub digests: BTreeMap<u32, Digest>,
 
     #[debug("{}", dirty.len())]
     dirty: BTreeSet<u32>,
@@ -160,27 +154,22 @@ impl MemoryImage {
     }
 
     /// Creates the initial memory state for a user-mode `program`.
-    pub fn new_user(program: Program) -> Self {
-        let mut image = program.image;
-        image.insert(USER_START_ADDR.0, program.entry);
-        Self::new(image)
+    pub fn new_user(mut program: Program) -> Self {
+        program.prepare_user();
+        Self::new(program.image)
     }
 
     /// Creates the initial memory state for a kernel-mode `program`.
-    pub fn new_kernel(program: Program) -> Self {
-        let mut image = program.image;
-        image.insert(SUSPEND_PC_ADDR.0, program.entry);
-        image.insert(SUSPEND_MODE_ADDR.0, 1);
-        Self::new(image)
+    pub fn new_kernel(mut program: Program) -> Self {
+        program.prepare_kernel(None);
+        Self::new(program.image)
     }
 
     /// Creates the initial memory state for a user-mode `user` [Program] with a
     /// kernel-mode `kernel` [Program].
     pub fn with_kernel(mut user: Program, mut kernel: Program) -> Self {
-        user.image.insert(USER_START_ADDR.0, user.entry);
-        kernel.image.append(&mut user.image);
-        kernel.image.insert(SUSPEND_PC_ADDR.0, kernel.entry);
-        kernel.image.insert(SUSPEND_MODE_ADDR.0, 1);
+        user.prepare_user();
+        kernel.prepare_kernel(Some(&mut user));
         Self::new(kernel.image)
     }
 

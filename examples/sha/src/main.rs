@@ -76,6 +76,7 @@ mod tests {
     use sha_methods::{HASH_ID, HASH_RUST_CRYPTO_ID};
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn hash_abc() {
         let (digest, receipt) = super::provably_hash("abc", false);
         receipt.verify(HASH_ID).unwrap();
@@ -87,6 +88,7 @@ mod tests {
     }
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn hash_abc_rust_crypto() {
         let (digest, receipt) = super::provably_hash("abc", true);
         receipt.verify(HASH_RUST_CRYPTO_ID).unwrap();

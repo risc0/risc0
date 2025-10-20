@@ -85,6 +85,8 @@ fn prove_busy_loop(job_id: PovwJobId, cycles: u64) -> anyhow::Result<ProveInfo> 
         .build()
         .unwrap();
 
+    gpu_guard::assert_gpu_semaphore_held();
+
     // NOTE: If the compression level is not succinct or groth16, a work receipt will not be
     // produced. A work receipt can be produced from a composite receipt.
     default_prover()
@@ -263,6 +265,7 @@ fn two_batched_updates() -> anyhow::Result<()> {
 
 #[test]
 #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
+#[gpu_guard::gpu_guard]
 fn prove_three_sequential_updates() -> anyhow::Result<()> {
     let work_log_id = uint!(0xdeafbee7_U160);
 

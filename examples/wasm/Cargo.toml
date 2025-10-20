@@ -8,6 +8,9 @@ risc0-zkvm = { path = "../../risc0/zkvm" }
 wasm-methods = { path = "methods" }
 wat = "<1.0.72"
 
+[dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []

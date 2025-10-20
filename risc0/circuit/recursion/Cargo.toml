@@ -37,6 +37,9 @@ zip = { version = "2.1", default-features = false, optional = true, features = [
   "deflate",
 ] }
 
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+gpu-guard = { workspace = true }
+
 [dev-dependencies]
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-forest = "0.1"

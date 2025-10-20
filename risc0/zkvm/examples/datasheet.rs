@@ -56,7 +56,7 @@ const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
 const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
 
 /// The number of iterations of the LOOP_ELF needed to fill up a po2=20 segment.
-const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 494 + 817;
+const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 494 + 785;
 
 /// The maximum number of cycles in a segment that can be reserved (for fitting the
 /// potential next instruction and for lookup table + control when proving)
@@ -570,6 +570,7 @@ impl Datasheet {
     }
 }
 
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

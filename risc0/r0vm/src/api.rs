@@ -420,6 +420,7 @@ async fn prove_stark(
                 assumptions,
                 segment_limit_po2: state.po2,
                 execute_only: proof_req.execute_only,
+                dev_mode: false,
             }),
         })
         .await
@@ -599,6 +600,7 @@ async fn prove_groth16(
             request: JobRequest::ShrinkWrap(ShrinkWrapRequest {
                 kind: ShrinkWrapKind::Groth16,
                 receipt,
+                dev_mode: false,
             }),
         })
         .await

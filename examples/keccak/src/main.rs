@@ -68,6 +68,7 @@ mod tests {
     use keccak_methods::KECCAK_ID;
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn hash_abc() {
         let (digest, receipt) = super::provably_hash("abc");
         receipt.verify(KECCAK_ID).unwrap();
@@ -79,6 +80,7 @@ mod tests {
     }
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn hash_long() {
         let input = [0xau8; 100_000];
         let (digest, receipt) = super::provably_hash(core::str::from_utf8(&input).unwrap());

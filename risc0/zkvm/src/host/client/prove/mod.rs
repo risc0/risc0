@@ -16,12 +16,12 @@
 #[cfg(feature = "bonsai")]
 pub(crate) mod bonsai;
 pub(crate) mod default;
-pub(crate) mod external;
 #[cfg(feature = "prove")]
 pub(crate) mod local;
 pub(crate) mod opts;
 
 use core::ops::Deref;
+use serde::{Deserialize, Serialize};
 use std::{path::PathBuf, rc::Rc};
 
 use anyhow::{Result, anyhow};
@@ -29,11 +29,50 @@ use anyhow::{Result, anyhow};
 #[cfg(feature = "bonsai")]
 use self::bonsai::BonsaiProver;
 
-use self::{default::DefaultProver, external::ExternalProver, opts::ProverOpts};
+use self::{default::DefaultProver, opts::ProverOpts};
 
 use crate::{
-    ExecutorEnv, Receipt, SessionInfo, VerifierContext, get_version, host::prove_info::ProveInfo,
+    ExecutorEnv, ExitCode, Journal, Receipt, ReceiptClaim, VerifierContext, get_version,
+    host::prove_info::ProveInfo,
 };
+
+/// Provides information about a segment of execution.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SegmentInfo {
+    /// The number of cycles used for proving in powers of 2.
+    pub po2: u32,
+
+    /// The number of user cycles without any overhead for continuations or po2
+    /// padding.
+    pub cycles: u32,
+}
+
+/// Provides information about the result of execution.
+#[derive(Clone, Debug)]
+#[non_exhaustive]
+pub struct SessionInfo {
+    /// The number of user cycles for each segment.
+    pub segments: Vec<SegmentInfo>,
+
+    /// The data publicly committed by the guest program.
+    pub journal: Journal,
+
+    /// The [ExitCode] of the session.
+    pub exit_code: ExitCode,
+
+    /// The [ReceiptClaim] associated with the executed session. This receipt claim is what will be
+    /// proven if this session is passed to the Prover.
+    pub receipt_claim: Option<ReceiptClaim>,
+}
+
+impl SessionInfo {
+    /// The total number of user cycles across all segments, without any
+    /// overhead for continuations or po2 padding.
+    pub fn cycles(&self) -> u64 {
+        self.segments.iter().map(|s| s.cycles as u64).sum()
+    }
+}
 
 /// A Prover can execute a given ELF binary and produce a
 /// [Receipt] that can be used to verify correct computation.
@@ -172,7 +211,7 @@ pub trait Executor {
 /// * `bonsai`: [BonsaiProver] to prove on Bonsai.
 /// * `local`: LocalProver to prove locally in-process. Note: this
 ///   requires the `prove` feature flag.
-/// * `ipc`: [ExternalProver] to prove using an `r0vm` sub-process. Note: `r0vm`
+/// * `ipc`: [DefaultProver] to prove using an `r0vm` sub-process. Note: `r0vm`
 ///   must be installed. To specify the path to `r0vm`, use `RISC0_SERVER_PATH`.
 ///
 /// If `RISC0_PROVER` is not specified, the following rules are used to select a
@@ -180,15 +219,14 @@ pub trait Executor {
 /// * [BonsaiProver] if the `BONSAI_API_URL` and `BONSAI_API_KEY` environment
 ///   variables are set unless `RISC0_DEV_MODE` is enabled.
 /// * LocalProver if the `prove` feature flag is enabled.
-/// * [ExternalProver] otherwise.
+/// * [DefaultProver] otherwise.
 pub fn default_prover() -> Rc<dyn Prover> {
     let explicit = std::env::var("RISC0_PROVER").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
-            "actor" => Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap()),
+            "ipc" => Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap()),
             #[cfg(feature = "bonsai")]
             "bonsai" => Rc::new(BonsaiProver::new("bonsai")),
-            "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap())),
             #[cfg(feature = "prove")]
             "local" => Rc::new(self::local::LocalProver::new("local")),
             _ => unimplemented!("Unsupported prover: {explicit}"),
@@ -210,7 +248,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
         return Rc::new(self::local::LocalProver::new("local"));
     }
 
-    Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
+    Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap())
 }
 
 /// Return a default [Executor] based on environment variables and feature
@@ -220,19 +258,19 @@ pub fn default_prover() -> Rc<dyn Prover> {
 /// following [Executor] implementation:
 /// * `local`: LocalProver to execute locally in-process. Note: this is
 ///   only available when the `prove` feature is enabled.
-/// * `ipc`: [ExternalProver] to execute using an `r0vm` sub-process. Note:
+/// * `ipc`: [DefaultProver] to execute using an `r0vm` sub-process. Note:
 ///   `r0vm` must be installed. To specify the path to `r0vm`, use
 ///   `RISC0_SERVER_PATH`.
 ///
 /// If `RISC0_EXECUTOR` is not specified, the following rules are used to select
 /// an [Executor]:
 /// * LocalProver if the `prove` feature flag is enabled.
-/// * [ExternalProver] otherwise.
+/// * [DefaultProver] otherwise.
 pub fn default_executor() -> Rc<dyn Executor> {
     let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
-            "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap())),
+            "ipc" => Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap()),
             #[cfg(feature = "prove")]
             "local" => Rc::new(self::local::LocalProver::new("local")),
             _ => unimplemented!("Unsupported executor: {explicit}"),
@@ -244,7 +282,7 @@ pub fn default_executor() -> Rc<dyn Executor> {
         return Rc::new(self::local::LocalProver::new("local"));
     }
 
-    Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
+    Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap())
 }
 
 /// Return a local [Executor].

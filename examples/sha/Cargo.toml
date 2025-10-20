@@ -9,6 +9,7 @@ risc0-zkvm = { path = "../../risc0/zkvm" }
 sha-methods = { path = "methods" }
 
 [dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
 hex = "0.4"
 
 [features]

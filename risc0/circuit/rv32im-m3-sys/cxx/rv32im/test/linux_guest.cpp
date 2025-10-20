@@ -13,27 +13,18 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#undef NDEBUG
-#include <assert.h>
-
-#include "core/log.h"
-#include "rv32im/base/constants.h"
-#include "rv32im/emu/blocks.h"
-
-using namespace risc0;
-using namespace risc0::rv32im;
+#include <unistd.h>
 
 int main() {
-  setR0LogLevel(2);
-  size_t maxWitPerRow = computeMaxWitPerRow(true);
-  LOG(2, "MaxWitPerRow = " << maxWitPerRow);
-  size_t maxDataPerRow = computeMaxDataPerRow(true);
-  LOG(2, "MaxDataPerRow = " << maxDataPerRow);
-  size_t maxAccumPerRow = computeMaxAccumPerRow(true);
-  LOG(2, "MaxAccumPerRow = " << maxAccumPerRow);
-  size_t maxDegree = computeMaxDegree(true);
-  LOG(2, "MaxDegree = " << maxDegree);
-  assert(maxDegree <= 5 && "Max degree should not exceed 5");
-  assert(MAX_ACCUM_PER_ROW == maxAccumPerRow);
+  uint32_t x = 0;
+  uint32_t tot = 0;
+  read(0, &x, sizeof(uint32_t));
+  for (uint32_t i = 0; i < x; i++) {
+    for (uint32_t j = 0; j < x; j++) {
+      tot += i * j % 17;
+      tot %= 107;
+    }
+  }
+  write(1, &tot, sizeof(uint32_t));
   return 0;
 }
