@@ -44,9 +44,7 @@ struct Emulator {
 
   static constexpr uint32_t regPageAddr = MACHINE_REGS_WORD & ~MPAGE_MASK_WORDS;
 
-  inline uint32_t peekReg(uint32_t reg) {
-    return (*regPage)[regOffset + reg].value;
-  }
+  inline uint32_t peekReg(uint32_t reg) { return (*regPage)[regOffset + reg].value; }
 
   inline uint32_t readReg(RegMemReadWitness& record, uint32_t reg, bool sameReg = false) {
     uint32_t wordNum = regOffset + reg + (sameReg ? 64 : 0);
@@ -66,7 +64,7 @@ struct Emulator {
     (*regPage)[wordNum].cycle = curCycle * 2 + 1;
     record.value = value;
   }
-  
+
   inline uint32_t peekPhysMemory(uint32_t wordAddr) {
     uint32_t pageId = wordAddr >> MPAGE_SIZE_WORDS_PO2;
     PageDetails* page = pages[pageId];
@@ -114,12 +112,12 @@ struct Emulator {
   }
 
   inline uint32_t peekVirtMemory(uint32_t wordAddr) {
-    return peekPhysMemory(wordAddr);  // TODO
+    return peekPhysMemory(wordAddr); // TODO
   }
 
   inline uint32_t translateAddress(VirtAddrWitness& record, uint32_t vWordAddr) {
     record.vpage = vWordAddr >> VPAGE_SIZE_WORDS_PO2;
-    record.ppage = record.vpage;  // TODO: Translate
+    record.ppage = record.vpage; // TODO: Translate
     record.wordOffset = vWordAddr & VPAGE_MASK_WORDS;
     return (record.ppage << VPAGE_SIZE_WORDS_PO2) | record.wordOffset;
   }
@@ -279,9 +277,9 @@ struct Emulator {
 
   void setMode(uint32_t newMode) {
     mode = newMode;
-    regOffset = (mode == MODE_MACHINE) ? (MACHINE_REGS_WORD & MPAGE_MASK_WORDS) : (USER_REGS_WORD & MPAGE_MASK_WORDS);
+    regOffset = (mode == MODE_MACHINE) ? (MACHINE_REGS_WORD & MPAGE_MASK_WORDS)
+                                       : (USER_REGS_WORD & MPAGE_MASK_WORDS);
   }
-
 
   void doResume() {
     auto& resumeWit = trace.makeInstResume();
@@ -388,7 +386,8 @@ struct Emulator {
       break;
     }
     writeReg(wit.rd, dinst->rd, out);
-    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value << std::dec);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value
+                    << std::dec);
     DLOG("  IMM = " << std::hex << wit.imm << std::dec);
     DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);
   }
@@ -430,8 +429,10 @@ struct Emulator {
       break;
     }
     writeVirtMemory(wit.mem, addr / BYTES_PER_WORD, out);
-    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value << std::dec);
-    DLOG("  RS2 = " << uint32_t(dinst->rs2) << ", value = " << std::hex << wit.rs2.value << std::dec);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value
+                    << std::dec);
+    DLOG("  RS2 = " << uint32_t(dinst->rs2) << ", value = " << std::hex << wit.rs2.value
+                    << std::dec);
     DLOG("  IMM = " << std::hex << wit.imm << std::dec);
     DLOG("  MEM addr = " << std::hex << addr << ", value = " << out << std::dec);
   }
@@ -486,7 +487,8 @@ struct Emulator {
     writeReg(wit.rd, dinst->rd, newPc);
     wit.imm = dinst->imm;
     newPc = rs1Val + wit.imm;
-    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value << std::dec);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value
+                    << std::dec);
     DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);
     DLOG("  PC = " << std::hex << pc << std::dec);
   }
@@ -729,12 +731,15 @@ struct Emulator {
     wit->rd = decoded.rd;
     wit->rs1 = decoded.rs1;
     wit->rs2 = decoded.rs2;
-    switch(Opcode(wit->opcode)) {
+    switch (Opcode(wit->opcode)) {
 #define ENTRY(name, idx, opcode, immType, ...)                                                     \
-      case Opcode::name: wit->imm = decoded.imm ## immType(); break;
+  case Opcode::name:                                                                               \
+    wit->imm = decoded.imm##immType();                                                             \
+    break;
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
-      default: wit->imm = 0;
+    default:
+      wit->imm = 0;
     }
   }
 

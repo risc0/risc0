@@ -43,7 +43,10 @@ public:
 
 int main() {
   TestIO io;
-  runTestBinary("rv32im/test/linux_kernel", "rv32im/test/linux_guest", io, 13);
+  std::map<uint32_t, uint32_t> words;
+  rv32im::loadUserMachine(words, "rv32im/test/linux_kernel", "rv32im/test/linux_guest");
+  auto image = rv32im::MemoryImage::fromWords(words);
+  runTest(image, io, 13);
   if (io.val != 100) {
     throw std::runtime_error("Write of val didn't produce correct output");
   }

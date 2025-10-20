@@ -60,11 +60,9 @@ template <typename C> FDEV void AddressVerify<C>::set(CTX, uint32_t val, uint32_
 }
 
 template <typename C> FDEV void AddressVerify<C>::verify(CTX, ValU32<C> val, Val<C> mode) DEV {
-  Val<C> topAddr = 
-    isMM.get() * Val<C>(0xffff) +
-    (Val<C>(1) - isMM.get()) * (
-        GLOBAL_GET(isUM) * Val<C>(0xbfff) +
-        (Val<C>(1) - GLOBAL_GET(isUM)) * Val<C>(0xefff));
+  Val<C> topAddr = isMM.get() * Val<C>(0xffff) +
+                   (Val<C>(1) - isMM.get()) * (GLOBAL_GET(isUM) * Val<C>(0xbfff) +
+                                               (Val<C>(1) - GLOBAL_GET(isUM)) * Val<C>(0xefff));
   EQZ(isMM.get() * (mode - Val<C>(MODE_MACHINE)));
   EQ(topAddr - val.high, highSub.get());
 }

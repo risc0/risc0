@@ -33,8 +33,12 @@ public:
       return Opcode::INVALID;
     }
     // Annoyingly SRET + MRET don't fit in the 10 bit table
-    if (inst.inst == 0x10200073) { return Opcode::SRET; }
-    if (inst.inst == 0x30200073) { return Opcode::MRET; }
+    if (inst.inst == 0x10200073) {
+      return Opcode::SRET;
+    }
+    if (inst.inst == 0x30200073) {
+      return Opcode::MRET;
+    }
     return table[map10(inst.opcode, inst.func3, inst.func7)];
   }
 

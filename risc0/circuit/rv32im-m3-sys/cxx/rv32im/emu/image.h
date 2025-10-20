@@ -43,12 +43,6 @@ public:
   static MemoryImage zeros();
   // Construct an image for a 'word map'
   static MemoryImage fromWords(const std::map<uint32_t, uint32_t>& words);
-  // Construct an image from elf files
-  static MemoryImage fromElfs(const std::string& kernel, const std::string& user);
-  // Construct an image from a single MM elf file
-  static MemoryImage fromRawElf(const std::string& elf);
-  // Construct an image from a single elf span.
-  static MemoryImage fromRawElfBytes(const ArrayRef<uint8_t>& elf);
 
   // Returns a pointer to the page data, fails if unavailable
   PagePtr getPage(size_t page);

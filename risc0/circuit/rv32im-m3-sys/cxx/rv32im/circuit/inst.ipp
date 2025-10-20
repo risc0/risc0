@@ -92,7 +92,8 @@ template <typename C> FDEV ValU32<C> DualReg<C>::getRS2() DEV {
 }
 
 template <typename C>
-FDEV void DualReg<C>::set(CTX, RegMemReadWitness rs1Wit, RegMemReadWitness rs2Wit, uint32_t cycle) DEV {
+FDEV void
+DualReg<C>::set(CTX, RegMemReadWitness rs1Wit, RegMemReadWitness rs2Wit, uint32_t cycle) DEV {
   rs1Idx.set(ctx, rs1Wit.wordAddr % 32);
   rs2Idx.set(ctx, rs2Wit.wordAddr % 32);
   readRs1.set(ctx, rs1Wit, cycle);
@@ -583,7 +584,8 @@ template <typename C> FDEV void InstEcallBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
   // Move from mode = USER to mode = MACHINE
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_USER, fetch.iCacheCycle.get()));
-  ctx.push(CpuStateArgument<C>(cycleVal + 1, readDispatch.data.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  ctx.push(CpuStateArgument<C>(
+      cycleVal + 1, readDispatch.data.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   // Verify decoding
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();

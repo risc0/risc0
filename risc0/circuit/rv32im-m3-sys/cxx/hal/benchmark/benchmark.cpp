@@ -24,7 +24,9 @@ int main() {
   LOG(0, "Opening GPU");
   IHalPtr hal = getGpuHal();
   LOG(0, "Loading elf");
-  auto image = MemoryImage::fromRawElf("rv32im/test/benchmark_kernel");
+  std::map<uint32_t, uint32_t> words;
+  rv32im::loadKernel(words, "rv32im/test/benchmark_kernel");
+  auto image = MemoryImage::fromWords(words);
   size_t po2 = 20;
   NullHostIO io;
   Rv32imProver prover(hal, po2);

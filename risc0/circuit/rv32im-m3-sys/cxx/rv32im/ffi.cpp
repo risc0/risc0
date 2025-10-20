@@ -58,7 +58,9 @@ risc0_circuit_rv32im_m3_preflight(RawProver* raw, const uint8_t* elf_ptr, size_t
   try {
     LOG(1, "Loading elf");
     ArrayRef<uint8_t> elf(elf_ptr, elf_len);
-    MemoryImage image = MemoryImage::fromRawElfBytes(elf);
+    std::map<uint32_t, uint32_t> words;
+    loadFFI(words, elf);
+    MemoryImage image = MemoryImage::fromWords(words);
 
     NullHostIO io;
     raw->prover.preflight(image, io);

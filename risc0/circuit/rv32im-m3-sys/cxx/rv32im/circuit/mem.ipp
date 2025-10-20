@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-template <typename C> FDEV void PhysMemReadBlock<C>::set(CTX, PhysMemReadWitness wit, uint32_t cycle) DEV {
+template <typename C>
+FDEV void PhysMemReadBlock<C>::set(CTX, PhysMemReadWitness wit, uint32_t cycle) DEV {
   wordAddr.set(ctx, wit.wordAddr);
   prevCycle.set(ctx, wit.prevCycle);
   data.set(ctx, wit.value);
@@ -53,7 +54,8 @@ template <typename C> FDEV void VirtAddrBlock<C>::set(CTX, VirtAddrWitness wit) 
   bit9.set(ctx, (wit.wordOffset >> 9) & 0x1);
 }
 
-template <typename C> FDEV void VirtMemReadBlock<C>::set(CTX, VirtMemReadWitness wit, uint32_t cycle) DEV {
+template <typename C>
+FDEV void VirtMemReadBlock<C>::set(CTX, VirtMemReadWitness wit, uint32_t cycle) DEV {
   addr.set(ctx, wit.addr);
   prevCycle.set(ctx, wit.prevCycle);
   data.set(ctx, wit.value);
@@ -80,18 +82,14 @@ FDEV void VirtMemWriteBlock<C>::set(CTX, VirtMemWriteWitness wit, uint32_t cycle
 }
 
 template <typename C> FDEV void VirtMemWriteBlock<C>::addArguments(CTX, Val<C> cycle) DEV {
-  ctx.pull(
-      MemoryArgument<C>(addr.getWordAddr(), prevCycle.get(), prevData.low.get(), prevData.high.get()));
+  ctx.pull(MemoryArgument<C>(
+      addr.getWordAddr(), prevCycle.get(), prevData.low.get(), prevData.high.get()));
   ctx.push(MemoryArgument<C>(addr.getWordAddr(), cycle * 2 + 1, data.low.get(), data.high.get()));
   ctx.pull(LookupArgument<C>(2, cycle * 2 + 1 - prevCycle.get() - 1));
 }
 
-template <typename C> FDEV void VirtAddrResolveBlock<C>::set(CTX, VirtAddrResolveBlock wit) DEV {
-}
+template <typename C> FDEV void VirtAddrResolveBlock<C>::set(CTX, VirtAddrResolveBlock wit) DEV {}
 
-template <typename C> FDEV void VirtAddrResolveBlock<C>::verify(CTX) DEV {
-}
+template <typename C> FDEV void VirtAddrResolveBlock<C>::verify(CTX) DEV {}
 
-template <typename C> FDEV void VirtAddrResolveBlock<C>::addArguments(CTX) DEV {
-}
-
+template <typename C> FDEV void VirtAddrResolveBlock<C>::addArguments(CTX) DEV {}

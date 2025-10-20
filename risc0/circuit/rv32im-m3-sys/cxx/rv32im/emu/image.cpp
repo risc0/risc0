@@ -89,24 +89,6 @@ MemoryImage MemoryImage::fromWords(const std::map<uint32_t, uint32_t>& words) {
   return ret;
 }
 
-MemoryImage MemoryImage::fromElfs(const std::string& kernel, const std::string& user) {
-  std::map<uint32_t, uint32_t> words;
-  loadWithKernel(words, kernel, user);
-  return MemoryImage::fromWords(words);
-}
-
-MemoryImage MemoryImage::fromRawElf(const std::string& elf) {
-  std::map<uint32_t, uint32_t> words;
-  loadRaw(words, elf);
-  return MemoryImage::fromWords(words);
-}
-
-MemoryImage MemoryImage::fromRawElfBytes(const ArrayRef<uint8_t>& elf) {
-  std::map<uint32_t, uint32_t> words;
-  loadRawBytes(words, elf);
-  return MemoryImage::fromWords(words);
-}
-
 PagePtr MemoryImage::getPage(size_t page) {
   // If page exists, return it
   auto it = pages.find(page);

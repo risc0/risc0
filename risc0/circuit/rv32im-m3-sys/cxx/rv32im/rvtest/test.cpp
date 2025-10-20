@@ -22,8 +22,12 @@
 using namespace risc0;
 
 void runTest(const std::string& name, size_t po2 = 12) {
+  LOG(0, "Running test: " << name);
   rv32im::NullHostIO io;
-  runTestBinary("rv32im/rvtest/" + name, io, po2);
+  std::map<uint32_t, uint32_t> words;
+  rv32im::loadKernel(words, "rv32im/rvtest/" + name);
+  auto image = rv32im::MemoryImage::fromWords(words);
+  runTest(image, io, po2);
 }
 
 int main() {

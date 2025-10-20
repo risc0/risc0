@@ -20,23 +20,27 @@
 #include "rv32im/base/opt.h"
 
 #ifdef IN_VERIFY
-#define EQ(a, b) do { \
-    Fp aVal = (a); \
-    Fp bVal = (b); \
-    if (aVal != bVal) { \
-      LOG(0, "INVALID EQ: " << __FILE__ << ": " << __LINE__ << ", " <<  \
-        #a << " [ actual = " << aVal << "] != " <<  #b << " [ actual = " << bVal << "]"); \
-    } \
-    ctx.eqz(aVal - bVal); \
-  } while(0) 
-#define EQZ(a) do { \
-    Fp aVal = (a); \
-    if (aVal != 0) { \
-      LOG(0, "INVALID EQZ: " << __FILE__ << ": " << __LINE__ << ", " <<  \
-        #a << " [ actual = " << aVal << "]"); \
-    } \
-    ctx.eqz(aVal); \
-  } while(0) 
+#define EQ(a, b)                                                                                   \
+  do {                                                                                             \
+    Fp aVal = (a);                                                                                 \
+    Fp bVal = (b);                                                                                 \
+    if (aVal != bVal) {                                                                            \
+      LOG(0,                                                                                       \
+          "INVALID EQ: " << __FILE__ << ": " << __LINE__ << ", " << #a << " [ actual = " << aVal   \
+                         << "] != " << #b << " [ actual = " << bVal << "]");                       \
+    }                                                                                              \
+    ctx.eqz(aVal - bVal);                                                                          \
+  } while (0)
+#define EQZ(a)                                                                                     \
+  do {                                                                                             \
+    Fp aVal = (a);                                                                                 \
+    if (aVal != 0) {                                                                               \
+      LOG(0,                                                                                       \
+          "INVALID EQZ: " << __FILE__ << ": " << __LINE__ << ", " << #a << " [ actual = " << aVal  \
+                          << "]");                                                                 \
+    }                                                                                              \
+    ctx.eqz(aVal);                                                                                 \
+  } while (0)
 #else
 #define EQ(a, b) ctx.eqz((a) - (b))
 #define EQZ(a) ctx.eqz(a)
@@ -54,7 +58,7 @@
 
 #define GLOBAL_OFFSET(member)                                                                      \
   (reinterpret_cast<MDEV Fp*>(&reinterpret_cast<MDEV Globals*>(0x10000)->member) -                 \
-  reinterpret_cast<MDEV Fp*>(0x10000))
+   reinterpret_cast<MDEV Fp*>(0x10000))
 #define GLOBAL_GET(member) ctx.globalGet(GLOBAL_OFFSET(member))
 #define GLOBAL_SET(member, val) ctx.globalSet(GLOBAL_OFFSET(member), (val))
 

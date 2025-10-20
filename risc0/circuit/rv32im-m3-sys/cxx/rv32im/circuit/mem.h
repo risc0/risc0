@@ -153,9 +153,6 @@ template <typename C> struct VirtAddrResolveBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template <typename C>
-using RegMemReadBlock = PhysMemReadBlock<C>;
+template <typename C> using RegMemReadBlock = PhysMemReadBlock<C>;
 
-template <typename C>
-using RegMemWriteBlock = PhysMemWriteBlock<C>;
-
+template <typename C> using RegMemWriteBlock = PhysMemWriteBlock<C>;

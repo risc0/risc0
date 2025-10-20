@@ -27,7 +27,9 @@ void testProve(IHalPtr hal) {
   size_t po2 = 12;
   Rv32imProver prover(hal, po2);
   LOG(0, "Loading elf");
-  auto image = rv32im::MemoryImage::fromRawElf("rv32im/test/benchmark_kernel");
+  std::map<uint32_t, uint32_t> words;
+  rv32im::loadKernel(words, "rv32im/test/benchmark_kernel");
+  auto image = rv32im::MemoryImage::fromWords(words);
   LOG(0, "Running first segment");
   rv32im::NullHostIO io;
   prover.preflight(image, io);

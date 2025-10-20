@@ -14,7 +14,7 @@ cc_library(
         "test_prove.h",
     ],
     deps = [
-        "//hal/cpu",
+        "//hal/pick",
         "//prove",
         "//verify",
     ],

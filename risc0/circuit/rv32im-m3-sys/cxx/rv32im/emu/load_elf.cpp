@@ -30,16 +30,29 @@ void fillExpandTable(std::map<uint32_t, uint32_t>& words) {
   }
 }
 
-void loadWithKernel(std::map<uint32_t, uint32_t>& words,
-                    const std::string& kernelElf,
-                    const std::string& userElf) {
+void loadFFI(std::map<uint32_t, uint32_t>& words, const ArrayRef<uint8_t>& elfBytes) {
+  uint32_t entry = risc0::loadElf(elfBytes, words);
+  words[CSR_WORD(MSPC)] = entry;
+  words[CSR_WORD(MSMODE)] = MODE_MACHINE;
+  fillExpandTable(words);
+}
+
+void loadKernel(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
+  auto elfBytes = risc0::loadFile(elf);
+  uint32_t entry = risc0::loadElf(ArrayRef(elfBytes.data(), elfBytes.size()), words);
+  words[CSR_WORD(MSPC)] = entry;
+  words[CSR_WORD(MSMODE)] = MODE_MACHINE;
+  fillExpandTable(words);
+}
+
+void loadUserMachine(std::map<uint32_t, uint32_t>& words,
+                     const std::string& kernelElf,
+                     const std::string& userElf) {
   auto kernelElfBytes = risc0::loadFile(kernelElf);
   auto userElfBytes = risc0::loadFile(userElf);
   // Set MEPC so MRET jumpts to start of user mode code
-  uint32_t userEntry = risc0::loadElf(ArrayRef(userElfBytes.data(), userElfBytes.size()),
-                                      words,
-                                      USER_START_WORD,
-                                      USER_END_WORD);
+  uint32_t userEntry = risc0::loadElf(
+      ArrayRef(userElfBytes.data(), userElfBytes.size()), words, USER_START_WORD, USER_END_WORD);
   words[CSR_WORD(MEPC)] = userEntry - 4;
   // Put start info into the memory image
   uint32_t kernelEntry = risc0::loadElf(ArrayRef(kernelElfBytes.data(), kernelElfBytes.size()),
@@ -47,20 +60,6 @@ void loadWithKernel(std::map<uint32_t, uint32_t>& words,
                                         KERNEL_START_WORD,
                                         KERNEL_END_WORD);
   words[CSR_WORD(MSPC)] = kernelEntry;
-  words[CSR_WORD(MSMODE)] = MODE_MACHINE;
-  // Load expansion table
-  fillExpandTable(words);
-}
-
-void loadRaw(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
-  auto elfBytes = risc0::loadFile(elf);
-
-  loadRawBytes(words, ArrayRef(elfBytes.data(), elfBytes.size()));
-}
-
-void loadRawBytes(std::map<uint32_t, uint32_t>& words, const ArrayRef<uint8_t>& elfBytes) {
-  uint32_t entry = risc0::loadElf(elfBytes, words);
-  words[CSR_WORD(MSPC)] = entry;
   words[CSR_WORD(MSMODE)] = MODE_MACHINE;
   // Load expansion table
   fillExpandTable(words);
