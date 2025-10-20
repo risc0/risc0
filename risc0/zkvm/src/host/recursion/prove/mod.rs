@@ -559,6 +559,9 @@ macro_rules! ensure_poseidon2 {
 
 impl Prover {
     pub(crate) fn new(program: Program, control_id: Digest, opts: ProverOpts) -> Self {
+        #[cfg(all(test, feature = "cuda"))]
+        gpu_guard::assert_gpu_semaphore_held();
+
         Self {
             prover: risc0_circuit_recursion::prove::Prover::new(program, &opts.hashfn),
             control_id,

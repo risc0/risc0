@@ -63,6 +63,7 @@ fn predict() -> f64 {
 #[cfg(test)]
 mod test {
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn basic() {
         const EXPECTED: f64 = 30.528042544062632;
         let result = super::predict();

@@ -81,6 +81,9 @@ impl ProverServer for ProverImpl {
             &self.opts.hashfn
         );
 
+        #[cfg(all(test, feature = "cuda"))]
+        gpu_guard::assert_gpu_semaphore_held();
+
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;

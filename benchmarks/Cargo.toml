@@ -16,6 +16,7 @@ ed25519-dalek = { version = "2.0.0-rc.3", default-features = false, features = [
   "rand_core",
 ] }
 enum-iterator = "2.0"
+gpu-guard = { path = "../tools/gpu-guard" }
 human-repr = { version = "1.0", features = ["1024"] }
 k256 = { version = "0.13", features = ["serde"] }
 rand = "0.9.1"

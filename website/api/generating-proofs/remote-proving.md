@@ -6,7 +6,7 @@ Bonsai lets users generate proofs for their zkVM applications, without using the
 Users specify which zkVM application they want to run, as well as the inputs to that program, and Bonsai returns a proof.
 
 Bonsai is highly parallelized and highly performant: proving work on Bonsai is split among a dynamically-sized GPU cluster, offering ultra-fast proving.
-To get a taste of what you can do with Bonsai, check out [Zeth][external-zeth], our [Governance Showcase][external-governance-showcase], and our blog post about using [RISC Zero as a zk coprocessor with Bonsai proving][external-zkcoprocessor].
+To get a taste of what you can do with Bonsai, check out [Zeth][external-zeth] and our blog post about using [RISC Zero as a zk coprocessor with Bonsai proving][external-zkcoprocessor].
 
 If you already have an API key, you can request proofs from Bonsai in any of the following ways:
 
@@ -57,7 +57,6 @@ Boundless is highly decentralized, offering high reliability and reducing the im
 [external-boundless-quick-start]: https://docs.beboundless.xyz/developers/quick-start
 [external-boundless-request-tutorial]: https://docs.beboundless.xyz/developers/tutorials/request
 [external-default-prover-fn]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/fn.default_prover.html
-[external-governance-showcase]: https://github.com/risc0/risc0-ethereum/tree/main/examples/governance#readme
 [external-zeth]: https://www.risczero.com/blog/zeth-release
 [external-zkcoprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [term-cycles]: /terminology#clock-cycles

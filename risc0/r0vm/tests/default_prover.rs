@@ -21,6 +21,7 @@ use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 
 #[test_log::test]
 #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
+#[gpu_guard::gpu_guard]
 fn basic_proof() {
     let r0vm_path = cargo_bin("r0vm");
     let prover = DefaultProver::new(r0vm_path).unwrap();

@@ -85,7 +85,9 @@ mod test {
         },
     };
     use smartcore_ml_methods::ML_TEMPLATE_ELF;
+
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn basic() {
         const EXPECTED: &[u32] = &[
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -98,7 +100,9 @@ mod test {
         let result = super::predict();
         assert_eq!(EXPECTED, result);
     }
+
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn svc() {
         // We set is_svm equal to true for a SVC model.
         let is_svm: bool = true;

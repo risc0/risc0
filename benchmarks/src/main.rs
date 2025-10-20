@@ -81,6 +81,7 @@ fn init_logging() {
         .init();
 }
 
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn main() {
     init_logging();
 

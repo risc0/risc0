@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc, sync::OnceLock};
+use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc};
 
 use anyhow::{Context as _, Result, bail};
 use cust::{
@@ -21,7 +21,6 @@ use cust::{
     memory::{DeviceCopy, DevicePointer, GpuBuffer},
     prelude::*,
 };
-use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use risc0_core::{
     field::{
         Elem, ExtElem, RootsOfUnity,
@@ -43,12 +42,6 @@ use crate::{
         log2_ceil,
     },
 };
-
-// The GPU becomes unstable as the number of concurrent provers grow.
-pub fn singleton() -> &'static ReentrantMutex<()> {
-    static ONCE: OnceLock<ReentrantMutex<()>> = OnceLock::new();
-    ONCE.get_or_init(|| ReentrantMutex::new(()))
-}
 
 #[derive(Clone, Copy)]
 #[repr(transparent)]
@@ -226,7 +219,6 @@ pub struct CudaHal<Hash: CudaHash + ?Sized> {
     pub max_threads: u32,
     hash: Option<Box<Hash>>,
     _context: Context,
-    _lock: ReentrantMutexGuard<'static, ()>,
 }
 
 pub type CudaHalSha256 = CudaHal<CudaHashSha256>;
@@ -396,7 +388,8 @@ impl<CH: CudaHash + ?Sized> CudaHal<CH> {
     }
 
     fn new_from_hash(hash: Box<CH>) -> Self {
-        let _lock = singleton().lock();
+        #[cfg(all(test, feature = "cuda"))]
+        gpu_guard::assert_gpu_semaphore_held();
 
         let err = unsafe { sppark_init() };
         if err.code != 0 {
@@ -415,7 +408,6 @@ impl<CH: CudaHash + ?Sized> CudaHal<CH> {
             max_threads: max_threads as u32,
             _context: context,
             hash: None,
-            _lock,
         };
         hal.hash = Some(hash);
         hal
@@ -1032,82 +1024,98 @@ mod tests {
     use crate::hal::testutil;
 
     #[test]
+    #[gpu_guard::gpu_guard]
     #[should_panic]
     fn check_req() {
         testutil::check_req(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_add_elem() {
         testutil::eltwise_add_elem(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_copy_elem() {
         testutil::eltwise_copy_elem(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_sum_extelem() {
         testutil::eltwise_sum_extelem(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_rows_sha256() {
         testutil::hash_rows(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_fold_sha256() {
         testutil::hash_fold(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_rows_poseidon2() {
         testutil::hash_rows(CudaHalPoseidon2::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_fold_poseidon2() {
         testutil::hash_fold(CudaHalPoseidon2::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn fri_fold() {
         testutil::fri_fold(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_expand_into_evaluate_ntt() {
         testutil::batch_expand_into_evaluate_ntt(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_interpolate_ntt() {
         testutil::batch_interpolate_ntt(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_bit_reverse() {
         testutil::batch_bit_reverse(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_evaluate_any() {
         testutil::batch_evaluate_any(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn gather_sample() {
         testutil::gather_sample(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn zk_shift() {
         testutil::zk_shift(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn mix_poly_coeffs() {
         testutil::mix_poly_coeffs(CudaHalSha256::new());
     }

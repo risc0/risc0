@@ -57,6 +57,7 @@ fn run_test(po2: u32, claim_digest: Digest) {
 }
 
 #[test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn keccak_po2_16() {
     run_test(
         16,
@@ -65,6 +66,7 @@ fn keccak_po2_16() {
 }
 
 #[test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 #[ignore]
 fn keccak_po2_17() {
     run_test(

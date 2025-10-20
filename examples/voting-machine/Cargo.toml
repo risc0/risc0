@@ -10,6 +10,7 @@ voting-machine-core = { path = "core" }
 voting-machine-methods = { path = "methods" }
 
 [dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
 hex = "0.4"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

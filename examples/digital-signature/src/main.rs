@@ -67,6 +67,7 @@ mod tests {
     const PASSPHRASE: &str = "passw0rd";
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn main() {
         let signing_receipt = sign(PASSPHRASE, MESSAGE).unwrap();
         let message_hash = signing_receipt.get_message().unwrap();
