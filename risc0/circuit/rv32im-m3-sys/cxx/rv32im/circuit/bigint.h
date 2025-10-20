@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "rv32im/base/base.h"
 #include "rv32im/base/constants.h"
 #include "rv32im/circuit/is_zero.h"
 #include "rv32im/circuit/mem.h"
