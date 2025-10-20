@@ -31,6 +31,7 @@ camino = "1.1.9"
 cargo-semver-checks = "0.45.0"
 cargo_metadata = "0.21.0"
 clap = { version = "4.5", features = ["derive", "env"] }
+flate2 = "1.0"
 hex = "0.4"
 liblzma = { version = "0.4", features = ["static"] }
 log = "0.4"
@@ -54,6 +55,7 @@ rlimit = "0.10.2"
 semver = "1"
 serde = { version = "1", features = ["derive"] }
 serde_with = "3"
+tar = "0.4"
 tempfile = "3.12"
 toml = "0.9.2"
 toml_edit = "0.23.1"

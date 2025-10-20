@@ -1123,11 +1123,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-common"
+version = "2.2.1"
+dependencies = [
+ "risc0-zkvm-platform",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
 version = "2.2.2"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkos-common",
  "risc0-zkvm-platform",
  "sha2",
 ]
