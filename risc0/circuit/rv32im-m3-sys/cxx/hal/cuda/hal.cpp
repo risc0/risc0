@@ -302,7 +302,6 @@ public:
     FpExt rem;
     for (size_t i = 0; i < info.size(); i++) {
       FpExt* poly = reinterpret_cast<FpExt*>(toDevPtr(combos)) + pInfo[i].comboId * combos.rows();
-      LOG(0, "Do divide");
       auto err = rv32im_m3_poly_divide(poly, combos.rows(), &rem, pInfo[i].z);
       if (err.code != 0) {
         throw std::runtime_error(std::string("Error during combosDivide:") + err.message);

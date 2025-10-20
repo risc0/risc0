@@ -19,19 +19,8 @@
 #include <iomanip>
 #include <sstream>
 
-namespace risc0 {
-
-unsigned gLogLevel = 0;
-
-void setLogLevel(unsigned level) {
-  gLogLevel = level;
-}
-
-unsigned getLogLevel() {
-  return gLogLevel;
-}
-
-void logTimestamp() {
+#if defined(FROM_BAZEL)
+static void logTimestamp() {
   auto& cerr = std::cerr;
   using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
   static time_point timeBase = std::chrono::high_resolution_clock::now();
@@ -50,6 +39,32 @@ void logTimestamp() {
   cerr << "): ";
   cerr.width(origWidth);
   cerr.fill(origFill);
+}
+
+extern "C" void risc0_log_callback(int level, const char* data) {
+  logTimestamp();
+  std::cerr << data << std::endl;
+}
+#endif
+
+namespace risc0 {
+
+static int getInitialLogLevel() {
+  if (const char* level = std::getenv("RISC0_LOG")) {
+    return std::atoi(level);
+  } else {
+    return 0;
+  }
+}
+
+unsigned gR0LogLevel = getInitialLogLevel();
+
+void setR0LogLevel(unsigned level) {
+  gR0LogLevel = level;
+}
+
+unsigned getR0LogLevel() {
+  return gR0LogLevel;
 }
 
 } // namespace risc0

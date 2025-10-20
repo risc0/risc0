@@ -10,6 +10,9 @@ rmp-serde = "1.1.2"
 serde_json = "1.0.108"
 xgboost-methods = { path = "methods" }
 
+[dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []

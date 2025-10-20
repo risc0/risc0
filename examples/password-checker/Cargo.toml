@@ -9,6 +9,9 @@ password-checker-methods = { path = "methods" }
 rand = "0.9.1"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 
+[dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []

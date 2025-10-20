@@ -54,6 +54,9 @@ pub struct CudaCircuitHal<CH: CudaHash> {
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
     pub fn new(_hal: Rc<CudaHal<CH>>) -> Self {
+        #[cfg(test)]
+        gpu_guard::assert_gpu_semaphore_held();
+
         Self { _hal }
     }
 }
@@ -323,6 +326,7 @@ mod tests {
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eval_check() {
         const PO2: usize = 4;
         let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());

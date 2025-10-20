@@ -108,6 +108,7 @@ MemoryImage MemoryImage::fromRawElfBytes(const ArrayRef<uint8_t>& elf) {
 }
 
 PagePtr MemoryImage::getPage(size_t page) {
+  // printf("getPage(0x%08zx)\n", page);
   // If page exists, return it
   auto it = pages.find(page);
   if (it != pages.end()) {

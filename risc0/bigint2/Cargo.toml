@@ -16,6 +16,7 @@ stability = "0.2"
 [dev-dependencies]
 anyhow = "1.0"
 clap = { version = "4.5", features = ["derive"] }
+gpu-guard = { workspace = true }
 num-bigint = { version = "0.4", default-features = false, features = ["serde"] }
 num-bigint-dig = { version = "0.8", default-features = false, features = [
   "serde",

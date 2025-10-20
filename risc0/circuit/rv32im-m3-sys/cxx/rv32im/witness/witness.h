@@ -46,6 +46,7 @@ struct EmptyWitness {
   BLOCK_TYPE(InstLui, 9)                                                                           \
   BLOCK_TYPE(InstAuipc, 7)                                                                         \
   BLOCK_TYPE(InstEcall, 7)                                                                         \
+  BLOCK_TYPE(InstMret, 4)                                                                          \
   BLOCK_TYPE(EcallTerminate, 1)                                                                    \
   BLOCK_TYPE(EcallRead, 3)                                                                         \
   BLOCK_TYPE(EcallWrite, 5)                                                                        \

@@ -181,19 +181,19 @@ struct Program {
 
         std::vector<char> text;
         value.print(text, 16);
-        LOG(0, "[" << opIndex << "] CONST 0x" << &text[0]);
+        LOG(2, "[" << opIndex << "] CONST 0x" << &text[0]);
       } break;
       case OpCode::Load: {
         auto& typ = types[op.resultType];
         uint32_t count = (typ.coeffs + 15) / 16;
         auto value = io.load(op.arena(), op.offset(), count);
-        LOG(0,
+        LOG(2,
             "[" << opIndex << "] LOAD " << count << " FpExts from arena " << op.arena()
                 << ", offset " << op.offset());
         regs[opIndex] = value;
       } break;
       case OpCode::Store: {
-        LOG(0, "[" << opIndex << "] STORE " << op.a << ", " << op.b);
+        LOG(2, "[" << opIndex << "] STORE " << op.a << ", " << op.b);
         auto& typ = types[op.resultType];
         uint32_t count = (typ.coeffs + 15) / 16;
         auto& value = regs[op.b];
@@ -203,39 +203,39 @@ struct Program {
         auto& lhs = regs[op.a];
         auto& rhs = regs[op.b];
         auto& dst = regs[opIndex];
-        LOG(0, "[" << opIndex << "] ADD " << op.a << ", " << op.b);
+        LOG(2, "[" << opIndex << "] ADD " << op.a << ", " << op.b);
         dst = lhs + rhs;
       } break;
       case OpCode::Sub: {
-        LOG(0, "[" << opIndex << "] SUB " << op.a << ", " << op.b);
+        LOG(2, "[" << opIndex << "] SUB " << op.a << ", " << op.b);
         auto& lhs = regs[op.a];
         auto& rhs = regs[op.b];
         auto& dst = regs[opIndex];
         dst = lhs - rhs;
       } break;
       case OpCode::Mul: {
-        LOG(0, "[" << opIndex << "] MUL " << op.a << ", " << op.b);
+        LOG(2, "[" << opIndex << "] MUL " << op.a << ", " << op.b);
         auto& lhs = regs[op.a];
         auto& rhs = regs[op.b];
         auto& dst = regs[opIndex];
         dst = lhs * rhs;
       } break;
       case OpCode::Rem: {
-        LOG(0, "[" << opIndex << "] REM " << op.a << ", " << op.b);
+        LOG(2, "[" << opIndex << "] REM " << op.a << ", " << op.b);
         auto& lhs = regs[op.a];
         auto& rhs = regs[op.b];
         auto& dst = regs[opIndex];
         dst = lhs % rhs;
       } break;
       case OpCode::Quo: {
-        LOG(0, "[" << opIndex << "] QUO " << op.a << ", " << op.b);
+        LOG(2, "[" << opIndex << "] QUO " << op.a << ", " << op.b);
         auto& lhs = regs[op.a];
         auto& rhs = regs[op.b];
         auto& dst = regs[opIndex];
         dst = lhs / rhs;
       } break;
       case OpCode::Inv: {
-        LOG(0, "[" << opIndex << "] INV " << op.a << ", " << op.b);
+        LOG(2, "[" << opIndex << "] INV " << op.a << ", " << op.b);
         auto& lhs = regs[op.a];
         auto& rhs = regs[op.b];
         auto& dst = regs[opIndex];
