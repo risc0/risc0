@@ -19,6 +19,7 @@
 .equ GLOBAL_OUTPUT_ADDR, 0xffff0240
 .equ GLOBAL_INPUT_ADDR, 0xffff0260
 .equ ECALL_DISPATCH_ADDR, 0xffff1000
+.equ TRAP_DISPATCH, 0xffff2000
 .equ ECALL_TABLE_SIZE, 8
 .equ HOST_ECALL_TERMINATE, 0
 .equ HOST_ECALL_READ, 1
@@ -60,6 +61,11 @@ _start:
     li t0, ECALL_DISPATCH_ADDR
     la t1, _ecall_dispatch
     sw t1, 0(t0)
+
+    # Initialize the trap dispatch address
+    la a0, _trap_handler
+    li a1, TRAP_DISPATCH
+    sw a0, 0(a1)
 
     # Initialize useful constants
     li tp, USER_REGS_ADDR
@@ -238,3 +244,9 @@ _ecall_bigint:
 
     # return back to userspace
     mret
+
+_trap_handler:
+    # Set the kernel stack pointer near the top of kernel memory
+    li sp, STACK_TOP
+
+    tail trap_handler
