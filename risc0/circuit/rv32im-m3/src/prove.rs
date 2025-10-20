@@ -18,6 +18,7 @@ use cfg_if::cfg_if;
 use risc0_circuit_rv32im::execute::Segment;
 use risc0_circuit_rv32im_m3_sys::*;
 use risc0_sys::ffi_wrap;
+use risc0_zkp::{core::digest::DIGEST_WORDS, field::baby_bear::Elem};
 
 use crate::verify::verify;
 
@@ -34,6 +35,8 @@ struct SegmentProverImpl {
 impl SegmentProver for SegmentProverImpl {
     fn prove(&self, segment: &Segment) -> Result<Seal> {
         tracing::debug!("{segment:#?}");
+
+        // segment.partial_image.dump();
 
         self.load_segment(segment)?;
         self.preflight()?;
@@ -72,10 +75,24 @@ impl SegmentProverImpl {
             });
         }
 
+        let mut digests: Vec<RawDigestEntry> =
+            Vec::with_capacity(segment.partial_image.digests.len());
+        for (&idx, &digest) in segment.partial_image.digests.iter() {
+            let mut words = [0; DIGEST_WORDS];
+            for (i, word) in words.iter_mut().enumerate() {
+                *word = Elem::new(digest.as_words()[i]).as_u32_montgomery();
+            }
+            digests.push(RawDigestEntry { idx, digest: words })
+        }
+
         let image = RawMemoryImage {
             pages: RawSlice {
                 ptr: pages.as_ptr(),
                 len: pages.len(),
+            },
+            digests: RawSlice {
+                ptr: digests.as_ptr(),
+                len: digests.len(),
             },
         };
 
@@ -246,6 +263,7 @@ mod tests {
         })
         .unwrap();
         let segment = segments.first().unwrap();
+        // segment.partial_image.dump();
 
         let prover = segment_prover(po2).unwrap();
         prover.prove(segment).unwrap();

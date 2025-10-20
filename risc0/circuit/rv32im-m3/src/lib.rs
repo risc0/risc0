@@ -93,7 +93,11 @@ impl<'a> Decoder<'a> {
 
     fn read_digest_from_words(&mut self) -> Result<Digest> {
         let slice = self.read(DIGEST_WORDS);
-        Ok(Digest::try_from(slice)?)
+        let mut buf = slice.to_vec();
+        for word in buf.iter_mut() {
+            *word = Elem::new_raw(*word).as_u32();
+        }
+        Ok(Digest::try_from(buf.as_slice())?)
     }
 
     fn read_digest_from_shorts(&mut self) -> Result<Digest> {

@@ -333,6 +333,14 @@ impl MemoryImage {
     pub fn into_pages(self) -> BTreeMap<u32, Page> {
         self.pages
     }
+
+    /// Dump the internal memory image state for diagnostics.
+    pub fn dump(&self) {
+        tracing::debug!("MemoryImage");
+        for (&idx, digest) in self.digests.iter() {
+            tracing::debug!("digest: {idx:#010x}: {digest}");
+        }
+    }
 }
 
 impl Default for Page {
