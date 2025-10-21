@@ -92,7 +92,7 @@ CONSTANT size_t MINOR_SPLIT_SIZE = (NUM_BLOCK_TYPES + (MAJOR_SPLIT_SIZE - 1)) / 
 struct Globals {
   FpDigest rootIn;
   FpDigest rootOut;
-  Fp isUM = 1;
+  Fp v2Compat;
 };
 
 CONSTANT size_t NUM_GLOBALS = sizeof(Globals) / sizeof(Fp);

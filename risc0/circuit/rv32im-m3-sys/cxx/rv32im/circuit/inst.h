@@ -24,10 +24,12 @@
 template <typename C> struct InstResumeBlock {
   CONSTANT static char NAME[] = "InstResumeBlock";
 
+  PhysMemReadBlock<C> readV2Compat;
   PhysMemReadBlock<C> readPc;
   PhysMemReadBlock<C> readMode;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, readV2Compat, 1);
     T::apply(ctx, readPc, 1);
     T::apply(ctx, readMode, 1);
   }

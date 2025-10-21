@@ -31,11 +31,14 @@ void fillExpandTable(std::map<uint32_t, uint32_t>& words);
 void loadFFI(std::map<uint32_t, uint32_t>& words, const ArrayRef<uint8_t>& elfBytes);
 
 // Loads as only a machine mode kernel for machine mode test
-void loadKernel(std::map<uint32_t, uint32_t>& words, const std::string& elf);
+void loadKernelV2(std::map<uint32_t, uint32_t>& words, const std::string& elf);
 
 // Loads for UM kernel mode tests
-void loadUserMachine(std::map<uint32_t, uint32_t>& words,
+void loadUserMachineV2(std::map<uint32_t, uint32_t>& words,
                      const std::string& kernelElf,
                      const std::string& userElf);
+
+// Loads raw elf + firmware combo
+void loadV3(std::map<uint32_t, uint32_t>& words, const std::string& elf);
 
 } // namespace risc0::rv32im

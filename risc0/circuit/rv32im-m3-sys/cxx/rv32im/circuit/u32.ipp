@@ -8,7 +8,7 @@
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// WITHOUT WARRANTIES OR condITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
@@ -55,14 +55,13 @@ template <typename C> FDEV void AddressDecompose<C>::verify(CTX, ValU32<C> val) 
 
 template <typename C> FDEV void AddressVerify<C>::set(CTX, uint32_t val, uint32_t mode) DEV {
   isMM.set(ctx, mode == MODE_MACHINE);
-  uint32_t max = (mode == MODE_MACHINE ? 0xffff : (GLOBAL_GET(isUM) == 0 ? 0xefff : 0xbfff));
+  uint32_t max = (mode == MODE_MACHINE ? 0xffff : (GLOBAL_GET(v2Compat) == 0 ? 0xefff : 0xbfff));
   highSub.set(ctx, max - (val >> 16));
 }
 
 template <typename C> FDEV void AddressVerify<C>::verify(CTX, ValU32<C> val, Val<C> mode) DEV {
   Val<C> topAddr = isMM.get() * Val<C>(0xffff) +
-                   (Val<C>(1) - isMM.get()) * (GLOBAL_GET(isUM) * Val<C>(0xbfff) +
-                                               (Val<C>(1) - GLOBAL_GET(isUM)) * Val<C>(0xefff));
+                   (Val<C>(1) - isMM.get()) * cond<C>(GLOBAL_GET(v2Compat), Val<C>(0xbfff), Val<C>(0xefff));
   EQZ(isMM.get() * (mode - Val<C>(MODE_MACHINE)));
   EQ(topAddr - val.high, highSub.get());
 }

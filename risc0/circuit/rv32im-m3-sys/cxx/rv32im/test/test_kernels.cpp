@@ -38,7 +38,7 @@ public:
 
 void runTestBinary(const std::string& kernel, rv32im::HostIO& io, size_t po2) {
   std::map<uint32_t, uint32_t> words;
-  rv32im::loadKernel(words, kernel);
+  rv32im::loadKernelV2(words, kernel);
   auto image = rv32im::MemoryImage::fromWords(words);
   runTest(image, io, po2);
 }

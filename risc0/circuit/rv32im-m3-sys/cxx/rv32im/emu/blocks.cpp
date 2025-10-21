@@ -37,8 +37,7 @@ struct ArgCountContext {
   template <typename T> inline void push(T argument) { argCount++; }
   template <typename T> inline void pull(T argument) { argCount++; }
   template <typename T> inline void addArgument(Fp count, T argument) { argCount++; }
-  // inline Val globalGet(uint32_t offset) { return 0;}
-  // inline Val getX() { return 0; }
+  inline Fp globalGet(uint32_t offset) { return 0; }
 };
 
 struct AddArgsFwd {

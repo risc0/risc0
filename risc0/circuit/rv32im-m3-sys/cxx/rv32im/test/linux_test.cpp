@@ -44,7 +44,7 @@ public:
 int main() {
   TestIO io;
   std::map<uint32_t, uint32_t> words;
-  rv32im::loadUserMachine(words, "rv32im/test/linux_kernel", "rv32im/test/linux_guest");
+  rv32im::loadUserMachineV2(words, "rv32im/test/linux_kernel", "rv32im/test/linux_guest");
   auto image = rv32im::MemoryImage::fromWords(words);
   runTest(image, io, 13);
   if (io.val != 100) {

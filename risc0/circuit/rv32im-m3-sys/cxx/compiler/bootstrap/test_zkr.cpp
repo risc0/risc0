@@ -26,7 +26,7 @@ int main() {
   // Do a prove
   IHalPtr hal = getGpuHal();
   std::map<uint32_t, uint32_t> words;
-  rv32im::loadKernel(words, "rv32im/test/benchmark_kernel");
+  rv32im::loadKernelV2(words, "rv32im/test/benchmark_kernel");
   auto image = rv32im::MemoryImage::fromWords(words);
   Rv32imProver prover(hal, po2);
   rv32im::NullHostIO io;

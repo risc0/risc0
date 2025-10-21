@@ -24,7 +24,7 @@ using namespace risc0;
 int main() {
   rv32im::NullHostIO io;
   std::map<uint32_t, uint32_t> words;
-  rv32im::loadKernel(words, "rv32im/test/smoke_kernel");
+  rv32im::loadKernelV2(words, "rv32im/test/smoke_kernel");
   auto image = rv32im::MemoryImage::fromWords(words);
   runTest(image, io, 12);
   return 0;

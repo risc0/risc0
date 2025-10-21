@@ -8,29 +8,36 @@
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// WITHOUT WARRANTIES OR condITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
 template <typename C> FDEV void InstResumeBlock<C>::set(CTX, InstResumeWitness wit) DEV {
+  readV2Compat.set(ctx, wit.v2Compat, 1);
   readPc.set(ctx, wit.pc, 1);
   readMode.set(ctx, wit.mode, 1);
+  GLOBAL_SET(v2Compat, 1 - wit.v2Compat.value);
 }
 
 template <typename C> FDEV void InstResumeBlock<C>::verify(CTX) DEV {
+  // Verify V2 compat is set correctly
+  EQZ(readV2Compat.data.high.get());
+  AssertBit<C>(ctx, readV2Compat.data.low.get());
+  EQ(GLOBAL_GET(v2Compat), Val<C>(1) - readV2Compat.data.low.get());
   // Verify mm is one of the valid options
   EQZ(readMode.data.high.get());
-  Val<C> mode = readMode.data.low.get();
+  Val<C> mode = readMode.data.low.get() * cond<C>(GLOBAL_GET(v2Compat), MODE_MACHINE, 1);
   EQZ((mode - MODE_USER) * (mode - MODE_SUPERVISOR) * (mode - MODE_MACHINE));
   // Verify we loaded from the right addresses
-  EQ(readPc.wordAddr.get(), CSR_WORD(MSPC));
-  EQ(readMode.wordAddr.get(), CSR_WORD(MSMODE));
+  EQ(readV2Compat.wordAddr.get(), CSR_WORD(MNOV2COMPAT));
+  EQ(readPc.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SPC,  CSR_WORD(MSPC)));
+  EQ(readMode.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SMODE,  CSR_WORD(MSMODE)));
 }
 
 template <typename C> FDEV void InstResumeBlock<C>::addArguments(CTX) DEV {
   ctx.pull(CpuStateArgument<C>(1, 0, 0, 0, 1));
   ValU32<C> pc = readPc.data.get();
-  Val<C> mode = readMode.data.low.get();
+  Val<C> mode = readMode.data.low.get() * cond<C>(GLOBAL_GET(v2Compat), MODE_MACHINE, 1);
   ctx.push(CpuStateArgument<C>(2, pc, mode, 1));
 }
 
@@ -42,15 +49,17 @@ template <typename C> FDEV void InstSuspendBlock<C>::set(CTX, InstSuspendWitness
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::verify(CTX) DEV {
+  // Verify we stored to the right values
+  EQZ(writeMode.data.high.get());
   // Verify we stored to the right addresses
-  EQ(writePc.wordAddr.get(), CSR_WORD(MSPC));
-  EQ(writeMode.wordAddr.get(), CSR_WORD(MSMODE));
+  EQ(writePc.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SPC,  CSR_WORD(MSPC)));
+  EQ(writeMode.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SMODE,  CSR_WORD(MSMODE)));
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
   ValU32<C> pc = writePc.data.get();
-  Val<C> mode = writeMode.data.low.get();
+  Val<C> mode = writeMode.data.low.get() * cond<C>(GLOBAL_GET(v2Compat), MODE_MACHINE, 1);
   ctx.pull(CpuStateArgument<C>(cycleVal, pc, mode, iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, 0, 0, 0, 0));
 }

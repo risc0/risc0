@@ -25,7 +25,7 @@ int main() {
   IHalPtr hal = getGpuHal();
   LOG(0, "Loading elf");
   std::map<uint32_t, uint32_t> words;
-  rv32im::loadKernel(words, "rv32im/test/benchmark_kernel");
+  rv32im::loadKernelV2(words, "rv32im/test/benchmark_kernel");
   auto image = MemoryImage::fromWords(words);
   size_t po2 = 20;
   NullHostIO io;

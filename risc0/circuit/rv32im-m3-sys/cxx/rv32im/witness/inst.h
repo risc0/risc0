@@ -20,6 +20,7 @@
 struct InstResumeWitness {
   PhysMemReadWitness pc;
   PhysMemReadWitness mode;
+  PhysMemReadWitness v2Compat;
 };
 
 struct InstSuspendWitness {

@@ -283,8 +283,14 @@ struct Emulator {
 
   void doResume() {
     auto& resumeWit = trace.makeInstResume();
-    pc = readPhysMemory(resumeWit.pc, CSR_WORD(MSPC));
-    setMode(readPhysMemory(resumeWit.mode, CSR_WORD(MSMODE)));
+    v2Compat = 1 - readPhysMemory(resumeWit.v2Compat, CSR_WORD(MNOV2COMPAT));
+    if (v2Compat) {
+      pc = readPhysMemory(resumeWit.pc, V2_COMPAT_SPC);
+      setMode(readPhysMemory(resumeWit.mode, V2_COMPAT_SMODE) ? MODE_MACHINE : MODE_USER);
+    } else {
+      pc = readPhysMemory(resumeWit.pc, CSR_WORD(MSPC));
+      setMode(readPhysMemory(resumeWit.pc, CSR_WORD(MSMODE)));
+    }
     curCycle++;
   }
 
@@ -292,8 +298,13 @@ struct Emulator {
     auto& suspendWit = trace.makeInstSuspend();
     suspendWit.cycle = curCycle;
     suspendWit.iCacheCycle = iCacheCycle;
-    writePhysMemory(suspendWit.pc, CSR_WORD(MSPC), pc);
-    writePhysMemory(suspendWit.mode, CSR_WORD(MSMODE), mode);
+    if (v2Compat) {
+      writePhysMemory(suspendWit.pc, V2_COMPAT_SPC, pc);
+      writePhysMemory(suspendWit.mode, V2_COMPAT_SMODE, mode == MODE_MACHINE);
+    } else {
+      writePhysMemory(suspendWit.pc, CSR_WORD(MSPC), pc);
+      writePhysMemory(suspendWit.mode, CSR_WORD(MSMODE), mode);
+    }
     curCycle++;
   }
 
@@ -819,6 +830,7 @@ struct Emulator {
   ankerl::unordered_dense::map<uint32_t, DecodeWitness*> usInstCache;
 
   // Machine state
+  bool v2Compat = true;
   bool done = false;
   uint32_t regOffset = 0;
   uint32_t curCycle = 1;

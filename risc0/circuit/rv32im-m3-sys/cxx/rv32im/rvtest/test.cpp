@@ -25,7 +25,7 @@ void runTest(const std::string& name, size_t po2 = 12) {
   LOG(0, "Running test: " << name);
   rv32im::NullHostIO io;
   std::map<uint32_t, uint32_t> words;
-  rv32im::loadKernel(words, "rv32im/rvtest/" + name);
+  rv32im::loadKernelV2(words, "rv32im/rvtest/" + name);
   auto image = rv32im::MemoryImage::fromWords(words);
   runTest(image, io, po2);
 }
