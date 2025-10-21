@@ -27,4 +27,4 @@ pub const KECCAK_CONTROL_IDS: &[Digest] = &[
 ];
 
 pub const KECCAK_CONTROL_ROOT: Digest =
-    digest!("abd93866a6878528f29ffc6ea6d9e428cc9ad020a540dd11f1d45e5e9bb6db71");
+    digest!("7bd95f35f83ad259c16020210f036058e9d7f9725c8ef628f8b6770cde3d176a");

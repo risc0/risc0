@@ -66,7 +66,7 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
 
 /// Root of the Merkle tree constructed from [ALLOWED_CONTROL_IDS], using Poseidon2.
 pub const ALLOWED_CONTROL_ROOT: Digest =
-    digest!("8627220be3e0800464cd69389ecfe865ff6aa70fd376ce3273ed453b6343733b");
+    digest!("2140b403a40a0833e7fcb173685de72bf918bf747c1eca5faed07346ef721d6c");
 
 /// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
 pub const BN254_IDENTITY_CONTROL_ID: Digest =
