@@ -19,6 +19,8 @@
 #include <cstdlib>
 #include <string>
 
+#include "zkp/fp.h"
+
 namespace risc0 {
 
 // A digest (still in uint32_t parts for easy rolling up in merkle trees).
@@ -43,7 +45,7 @@ inline std::string hexDigest(const Digest& digest) {
   const char* hexdigits = "0123456789abcdef";
   std::string r(64, 0);
   for (size_t i = 0; i < 8; i++) {
-    uint32_t word = digest.words[i];
+    uint32_t word = Fp::fromRaw(digest.words[i]).asUInt32();
     for (size_t j = 0; j < 4; j++) {
       uint8_t byte = word >> 24;
       r[i * 8 + (3 - j) * 2] = hexdigits[byte >> 4];

@@ -1104,6 +1104,7 @@ dependencies = [
  "anyhow",
  "borsh",
  "bytemuck",
+ "cfg-if",
  "derive_more",
  "enum-map",
  "hex",

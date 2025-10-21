@@ -94,7 +94,6 @@ impl SegmentReceipt {
         }
 
         let expected = risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO;
-
         if params.circuit_info != expected {
             return Err(VerificationError::CircuitInfoMismatch {
                 expected,
@@ -107,9 +106,17 @@ impl SegmentReceipt {
         }
 
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
-        risc0_circuit_rv32im::verify(&self.seal)?;
-        let decoded_claim = ReceiptClaim::decode_from_seal_v2(&self.seal, None)
-            .or(Err(VerificationError::ReceiptFormatError))?;
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "rv32im-m3")] {
+                risc0_circuit_rv32im_m3::verify::verify(&self.seal)?;
+                let decoded_claim = ReceiptClaim::decode_from_seal_v3(&self.seal)
+                    .or(Err(VerificationError::ReceiptFormatError))?;
+            } else {
+                risc0_circuit_rv32im::verify(&self.seal)?;
+                let decoded_claim = ReceiptClaim::decode_from_seal_v2(&self.seal, None)
+                    .or(Err(VerificationError::ReceiptFormatError))?;
+            }
+        }
 
         // Receipt is consistent with the claim encoded on the seal. Now check against the
         // claim on the struct.

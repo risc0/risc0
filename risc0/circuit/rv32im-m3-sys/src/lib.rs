@@ -34,8 +34,15 @@ pub struct RawPage {
 }
 
 #[repr(C)]
+pub struct RawDigestEntry {
+    pub idx: u32,
+    pub digest: [u32; 8],
+}
+
+#[repr(C)]
 pub struct RawMemoryImage {
     pub pages: RawSlice<RawPage>,
+    pub digests: RawSlice<RawDigestEntry>,
 }
 
 #[repr(C)]

@@ -245,6 +245,7 @@ struct Emulator {
     auto& resumeWit = trace.makeInstResume();
     pc = readMemory(resumeWit.pc, SUSPEND_PC_WORD);
     mm = readMemory(resumeWit.mm, SUSPEND_MODE_WORD);
+    writeMemory(resumeWit.version, RV32IM_VERSION_WORD, RV32IM_CIRCUIT_VERSION);
     regOffset = (mm ? (MACHINE_REGS_WORD & 0xff) : (USER_REGS_WORD & 0xff));
     curCycle++;
   }
@@ -519,6 +520,11 @@ struct Emulator {
     wit.cycle = curCycle;
     wit.fetch = *curFetch;
     readMemory(wit.a7, MACHINE_REGS_WORD + REG_A7);
+    readMemory(wit.a0, MACHINE_REGS_WORD + REG_A0);
+    readMemory(wit.a1, MACHINE_REGS_WORD + REG_A1);
+    for (size_t i = 0; i < 8; i++) {
+      readMemory(wit.output[i], OUTPUT_WORD + i);
+    }
     done = true;
   }
 

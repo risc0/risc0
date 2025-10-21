@@ -3914,6 +3914,8 @@ dependencies = [
  "risc0-circuit-rv32im-m3-sys",
  "risc0-sys",
  "risc0-zkp",
+ "risc0-zkvm-platform",
+ "serde",
  "tracing",
 ]
 
@@ -4062,6 +4064,7 @@ dependencies = [
  "borsh",
  "bytemuck",
  "bytes",
+ "cfg-if",
  "derive_more",
  "elf",
  "enum-map",

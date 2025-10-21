@@ -63,6 +63,12 @@ public:
   // Return a map of all 'known' digests
   std::map<uint32_t, Digest> getKnownDigests() const;
 
+  void setPageRaw(size_t pidx, PagePtr page);
+  void setDigestRaw(size_t didx, const Digest& digest);
+
+  void dumpZeros();
+  void dump();
+
 private:
   PagePtr zeroPage;
   std::vector<Digest> zeroDigests;

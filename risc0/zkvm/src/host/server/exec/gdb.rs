@@ -17,7 +17,7 @@ use std::io::Write as _;
 use std::net::{SocketAddr, TcpListener};
 use std::path::Path;
 
-use super::executor::ExecutorImpl;
+use super::executor::{ExecutorImpl, circuit_version};
 use anyhow::Result;
 use anyhow::anyhow;
 use gdbstub::{conn::ConnectionExt, stub::GdbStub};
@@ -58,6 +58,7 @@ impl<'a, 'b, 'c> GdbExecutor<'a, 'b, 'c> {
             exec.env.trace.clone(),
             // NOTE: PoVW nonce has no effect on execution.
             None,
+            circuit_version(),
         );
         Ok(Self {
             elf,

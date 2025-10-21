@@ -18,8 +18,9 @@ use cfg_if::cfg_if;
 use risc0_circuit_rv32im::execute::Segment;
 use risc0_circuit_rv32im_m3_sys::*;
 use risc0_sys::ffi_wrap;
+use risc0_zkp::{core::digest::DIGEST_WORDS, field::baby_bear::Elem};
 
-use crate::verify::verify_m3;
+use crate::verify::verify;
 
 pub type Seal = Vec<u32>;
 
@@ -29,19 +30,20 @@ pub trait SegmentProver {
 
 struct SegmentProverImpl {
     ctx: *const ProverContext,
-    po2: usize,
 }
 
 impl SegmentProver for SegmentProverImpl {
     fn prove(&self, segment: &Segment) -> Result<Seal> {
         tracing::debug!("{segment:#?}");
 
+        // segment.partial_image.dump();
+
         self.load_segment(segment)?;
         self.preflight()?;
         self.prove()?;
 
         let transcript = self.transcript()?;
-        verify_m3(&transcript, self.po2)?;
+        verify(&transcript)?;
 
         Ok(transcript)
     }
@@ -50,14 +52,16 @@ impl SegmentProver for SegmentProverImpl {
 impl SegmentProverImpl {
     #[allow(dead_code)]
     fn new_cpu(po2: usize) -> Self {
-        let ctx = unsafe { risc0_circuit_rv32im_m3_prover_new_cpu(po2) };
-        Self { ctx, po2 }
+        Self {
+            ctx: unsafe { risc0_circuit_rv32im_m3_prover_new_cpu(po2) },
+        }
     }
 
     #[cfg(feature = "cuda")]
     fn new_cuda(po2: usize) -> Self {
-        let ctx = unsafe { risc0_circuit_rv32im_m3_prover_new_cuda(po2) };
-        Self { ctx, po2 }
+        Self {
+            ctx: unsafe { risc0_circuit_rv32im_m3_prover_new_cuda(po2) },
+        }
     }
 
     fn load_segment(&self, segment: &Segment) -> Result<()> {
@@ -71,10 +75,24 @@ impl SegmentProverImpl {
             });
         }
 
+        let mut digests: Vec<RawDigestEntry> =
+            Vec::with_capacity(segment.partial_image.digests.len());
+        for (&idx, &digest) in segment.partial_image.digests.iter() {
+            let mut words = [0; DIGEST_WORDS];
+            for (i, word) in words.iter_mut().enumerate() {
+                *word = Elem::new(digest.as_words()[i]).as_u32_montgomery();
+            }
+            digests.push(RawDigestEntry { idx, digest: words })
+        }
+
         let image = RawMemoryImage {
             pages: RawSlice {
                 ptr: pages.as_ptr(),
                 len: pages.len(),
+            },
+            digests: RawSlice {
+                ptr: digests.as_ptr(),
+                len: digests.len(),
             },
         };
 
@@ -143,7 +161,9 @@ pub fn segment_prover(po2: usize) -> Result<Box<dyn SegmentProver>> {
 #[cfg(feature = "cuda")]
 mod tests {
     use risc0_binfmt::{MemoryImage, Program};
-    use risc0_circuit_rv32im::execute::{CycleLimit, Executor, Syscall, SyscallContext};
+    use risc0_circuit_rv32im::execute::{
+        CycleLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, Syscall, SyscallContext,
+    };
 
     use super::*;
 
@@ -229,13 +249,21 @@ mod tests {
         let mut segments = Vec::new();
         let trace = Vec::new();
         let session_limit = CycleLimit::Hard(1 << 24);
-        Executor::new(image, &NullSyscall, None, trace, None)
-            .run(po2, 0, session_limit, |segment| {
-                segments.push(segment);
-                Ok(())
-            })
-            .unwrap();
+        Executor::new(
+            image,
+            &NullSyscall,
+            None,
+            trace,
+            None,
+            RV32IM_M3_CIRCUIT_VERSION,
+        )
+        .run(po2, 0, session_limit, |segment| {
+            segments.push(segment);
+            Ok(())
+        })
+        .unwrap();
         let segment = segments.first().unwrap();
+        // segment.partial_image.dump();
 
         let prover = segment_prover(po2).unwrap();
         prover.prove(segment).unwrap();

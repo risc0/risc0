@@ -71,8 +71,8 @@ template <typename C> FDEV void PageInPartBlock<C>::addArguments(CTX) DEV {
   call.isFinal = lastPart.isZero.get();
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     call.in[i] = in[i].get();
-    call.data[2 * i] = Val<C>(943718400) * data[i].low.get();
-    call.data[2 * i + 1] = Val<C>(943718400) * data[i].high.get();
+    call.data[2 * i] = data[i].low.get();
+    call.data[2 * i + 1] = data[i].high.get();
     call.out[i] = out[i].get();
   }
   ctx.pull(call);
@@ -158,8 +158,8 @@ template <typename C> FDEV void PageOutPartBlock<C>::addArguments(CTX) DEV {
   call.isFinal = lastPart.isZero.get();
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     call.in[i] = in[i].get();
-    call.data[2 * i] = Val<C>(943718400) * data[i].low.get();
-    call.data[2 * i + 1] = Val<C>(943718400) * data[i].high.get();
+    call.data[2 * i] = data[i].low.get();
+    call.data[2 * i + 1] = data[i].high.get();
     call.out[i] = out[i].get();
   }
   ctx.pull(call);

@@ -23,6 +23,9 @@
 #define CONSTANT constexpr
 #endif
 
+CONSTANT uint32_t RV32IM_SEAL_VERSION = 3;
+CONSTANT uint32_t RV32IM_CIRCUIT_VERSION = 3;
+
 // Platform specific constants
 CONSTANT uint64_t PAGE_SIZE_BYTES = 1024;
 CONSTANT uint64_t MEMORY_SIZE_BYTES = uint64_t(1) << 32;
