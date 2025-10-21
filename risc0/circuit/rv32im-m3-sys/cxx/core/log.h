@@ -30,6 +30,7 @@
 /// \endcode
 
 #include <cstdint>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -71,5 +72,11 @@ std::ostream& stringify_collection(std::ostream& os, Iterator it, Iterator itEnd
 template <typename T> inline std::ostream& operator<<(std::ostream& os, const std::vector<T>& x) {
   return stringify_collection(os, x.begin(), x.end());
 }
+
+struct HexWord {
+  uint32_t word;
+};
+
+std::ostream& operator<<(std::ostream& os, HexWord word);
 
 } // End namespace risc0

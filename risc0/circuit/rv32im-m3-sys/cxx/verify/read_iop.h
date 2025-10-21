@@ -33,6 +33,9 @@ public:
   // Read from the prover
   void read(Digest* buf, size_t size);
 
+  // Read a scalar value from the IOP.
+  uint32_t readU32();
+
   // Verify we have fully read transcript
   void done();
 

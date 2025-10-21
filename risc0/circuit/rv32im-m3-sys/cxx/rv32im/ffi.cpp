@@ -34,8 +34,18 @@ struct RustPage {
   const uint32_t* data;
 };
 
+struct RustDigestEntry {
+  uint32_t idx;
+  Digest digest;
+};
+
 struct RustSlicePage {
   const RustPage* ptr;
+  size_t len;
+};
+
+struct RustSliceDigestEntry {
+  const RustDigestEntry* ptr;
   size_t len;
 };
 
@@ -56,6 +66,7 @@ struct RustSliceReadRecord {
 
 struct RustMemoryImage {
   RustSlicePage pages;
+  RustSliceDigestEntry digests;
 };
 
 struct RustSegment {
@@ -150,12 +161,18 @@ RustSliceFp risc0_circuit_rv32im_m3_prover_transcript(ProverContext* ctx) {
 const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustSegment* segment) {
   try {
     ctx->image = MemoryImage::zeros();
+    // ctx->image.dumpZeros();
     for (size_t i = 0; i < segment->image.pages.len; i++) {
       const RustPage& page = segment->image.pages.ptr[i];
       auto data = std::make_shared<Page>();
       std::memcpy(data->data(), page.data, PAGE_SIZE_BYTES);
-      ctx->image.setPage(page.addr, data);
+      ctx->image.setPageRaw(page.addr, data);
     }
+    for (size_t i = 0; i < segment->image.digests.len; i++) {
+      const RustDigestEntry& entry = segment->image.digests.ptr[i];
+      ctx->image.setDigestRaw(entry.idx, entry.digest);
+    }
+    // ctx->image.dump();
     ctx->io.loadSegment(segment);
   } catch (const std::exception& err) {
     LOG(0, "ERROR: " << err.what());
@@ -183,10 +200,17 @@ const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx) {
 const char* risc0_circuit_rv32im_m3_prove(ProverContext* ctx) {
   try {
     WriteIop writeIop;
+    writeIop.write(RV32IM_SEAL_VERSION);
+    uint32_t po2 = ctx->prover.po2();
+    // LOG(0, "po2: " << po2);
+    writeIop.write(po2);
     ctx->prover.prove(writeIop);
     ctx->transcript = writeIop.getTranscript();
 
     ReadIop readIop(ctx->transcript.data(), ctx->transcript.size());
+    uint32_t readVersion = readIop.readU32(); // skip past version
+    uint32_t readPo2 = readIop.readU32();     // skip past po2
+    // LOG(0, "version: " << readVersion << ", po2: " << readPo2);
     verifyRv32im(readIop, ctx->prover.po2());
     readIop.done();
   } catch (const std::exception& err) {

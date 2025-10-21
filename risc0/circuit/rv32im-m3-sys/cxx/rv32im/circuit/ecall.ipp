@@ -12,6 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define GLOBAL_OFFSET(member)                                                                      \
+  (reinterpret_cast<MDEV Fp*>(&reinterpret_cast<MDEV Globals*>(0x10000)->member) -                 \
+   reinterpret_cast<MDEV Fp*>(0x10000))
+#define GLOBAL_GET(member) ctx.globalGet(GLOBAL_OFFSET(member))
+#define GLOBAL_SET(member, val) ctx.globalSet(GLOBAL_OFFSET(member), (val))
+
+#define GLOBAL_SET_U32(member, val)                                                                \
+  GLOBAL_SET(member.low, val.low);                                                                 \
+  GLOBAL_SET(member.high, val.high)
+
+#define GLOBAL_CHECK_U32(member, val)                                                              \
+  EQ(GLOBAL_GET(member.low), val.low);                                                             \
+  EQ(GLOBAL_GET(member.high), val.high)
+
 #define VERIFY_DECODE                                                                              \
   DecodeArgument<C> arg;                                                                           \
   arg.iCacheCycle = fetch.iCacheCycle.get();                                                       \
@@ -31,6 +45,15 @@ template <typename C> FDEV void EcallTerminateBlock<C>::set(CTX, EcallTerminateW
   cycle.set(ctx, wit.cycle);
   fetch.set(ctx, wit.fetch);
   readA7.set(ctx, wit.a7, wit.cycle);
+  readA0.set(ctx, wit.a0, wit.cycle);
+  readA1.set(ctx, wit.a1, wit.cycle);
+  GLOBAL_SET(isTerminate, 1);
+  GLOBAL_SET_U32(termA0, readA0.data.get());
+  GLOBAL_SET_U32(termA1, readA1.data.get());
+  for (size_t i = 0; i < 8; i++) {
+    readOutput[i].set(ctx, wit.output[i], wit.cycle);
+    GLOBAL_SET_U32(out[i], readOutput[i].data.get());
+  }
 }
 
 template <typename C> FDEV void EcallTerminateBlock<C>::verify(CTX) DEV {
@@ -38,6 +61,15 @@ template <typename C> FDEV void EcallTerminateBlock<C>::verify(CTX) DEV {
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_TERMINATE);
   EQ(readA7.data.high.get(), 0);
+  EQ(readA0.wordAddr.get(), MACHINE_REGS_WORD + REG_A0);
+  EQ(readA1.wordAddr.get(), MACHINE_REGS_WORD + REG_A1);
+  EQ(GLOBAL_GET(isTerminate), 1);
+  GLOBAL_CHECK_U32(termA0, readA0.data.get());
+  GLOBAL_CHECK_U32(termA1, readA1.data.get());
+  for (size_t i = 0; i < 8; i++) {
+    EQ(readOutput[i].wordAddr.get(), OUTPUT_WORD + i);
+    GLOBAL_CHECK_U32(out[i], readOutput[i].data.get());
+  }
 }
 
 template <typename C> FDEV void EcallTerminateBlock<C>::addArguments(CTX) DEV {

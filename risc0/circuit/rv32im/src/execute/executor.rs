@@ -67,6 +67,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     ecall_metrics: EnumMap<EcallKind, EcallMetric>,
     ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
     povw_job_id: Option<PovwJobId>,
+    circuit_version: u32,
 }
 
 #[non_exhaustive]
@@ -182,6 +183,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         input_digest: Option<Digest>,
         trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
         povw_job_id: Option<PovwJobId>,
+        circuit_version: u32,
     ) -> Self {
         Self {
             pc: ByteAddr(0),
@@ -201,6 +203,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             ecall_metrics: Default::default(),
             ring: AllocRingBuffer::new(10),
             povw_job_id,
+            circuit_version,
         }
     }
 
@@ -497,6 +500,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 }
 
 impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
+    fn circuit_version(&self) -> u32 {
+        self.circuit_version
+    }
+
     fn get_pc(&self) -> ByteAddr {
         self.pc
     }

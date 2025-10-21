@@ -2,26 +2,27 @@ load("@zirgen//bazel/rules/zirgen:edsl-defs.bzl", "build_circuit")
 
 cc_library(
     name = "extract_zkr",
-    hdrs = ["extract_zkr.h"],
     srcs = ["extract_zkr.cpp"],
+    hdrs = ["extract_zkr.h"],
     deps = [
         "//rv32im/circuit",
         "//verify",
-        "@zirgen//zirgen/compiler/codegen",
         "@zirgen//zirgen/circuit/predicates:lib",
-    ]
+        "@zirgen//zirgen/compiler/codegen",
+    ],
 )
 
 cc_test(
     name = "test_zkr",
+    size = "large",
     srcs = ["test_zkr.cpp"],
-    deps = [
-        ":extract_zkr",
-        "//prove",
-        "//hal/pick",
-    ],
     data = [
         "//rv32im/test:benchmark_kernel",
+    ],
+    deps = [
+        ":extract_zkr",
+        "//hal/pick",
+        "//prove",
     ],
 )
 
@@ -33,7 +34,6 @@ build_circuit(
         ":extract_zkr",
     ],
 )
-
 
 cc_binary(
     name = "bootstrap",

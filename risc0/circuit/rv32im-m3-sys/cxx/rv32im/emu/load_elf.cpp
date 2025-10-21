@@ -48,8 +48,6 @@ void loadWithKernel(std::map<uint32_t, uint32_t>& words,
                                         KERNEL_END_WORD);
   words[SUSPEND_PC_WORD] = kernelEntry;
   words[SUSPEND_MODE_WORD] = 1;
-  // This is a temporary hack until we have CSRs to detect host/circuit/zkvm versions.
-  words[RV32IM_VERSION_WORD] = 3;
   // Load expansion table
   fillExpandTable(words);
 }
@@ -64,8 +62,6 @@ void loadRawBytes(std::map<uint32_t, uint32_t>& words, const ArrayRef<uint8_t>& 
   uint32_t entry = risc0::loadElf(elfBytes, words, ZERO_PAGE_END_WORD, KERNEL_END_WORD);
   words[SUSPEND_PC_WORD] = entry;
   words[SUSPEND_MODE_WORD] = 1;
-  // This is a temporary hack until we have CSRs to detect host/circuit/zkvm versions.
-  words[RV32IM_VERSION_WORD] = 3;
   // Load expansion table
   fillExpandTable(words);
 }

@@ -93,10 +93,10 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
       obj.addArguments(ctx, args...);
     }
 
-    template <typename T, size_t N>
-    FDEV static void apply(MTHR VerifyContext& ctx, MDEV T (&t)[N]) {
+    template <typename T, size_t N, typename... Args>
+    FDEV static void apply(MTHR VerifyContext& ctx, MDEV T (&t)[N], Args... args) {
       for (size_t i = 0; i < N; i++) {
-        VerifyFwd::apply(ctx, t[i]);
+        VerifyFwd::apply(ctx, t[i], args...);
       }
     }
   };

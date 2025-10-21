@@ -30,9 +30,10 @@ struct VerifyFwd {
     obj.verify(ctx, args...);
   }
 
-  template <typename T, size_t N> static void apply(RecordingContext& ctx, T (&t)[N]) {
+  template <typename T, size_t N, typename... Args>
+  static void apply(RecordingContext& ctx, T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; i++) {
-      VerifyFwd::apply(ctx, t[i]);
+      VerifyFwd::apply(ctx, t[i], args...);
     }
   }
 };
