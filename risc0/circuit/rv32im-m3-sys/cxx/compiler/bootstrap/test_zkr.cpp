@@ -46,7 +46,7 @@ int main() {
 
   LOG(0, "Emulate");
   auto func =
-      module.getModule().lookupSymbol<mlir::func::FuncOp>("rv32im_m3_lift_" + std::to_string(po2));
+      module.getModule().lookupSymbol<mlir::func::FuncOp>("lift_rv32im_m3_" + std::to_string(po2));
   zirgen::Zll::ExternHandler baseExternHandler;
   zirgen::Zll::Interpreter interp(module.getCtx(), zirgen::poseidon2HashSuite());
   interp.setExternHandler(&baseExternHandler);
