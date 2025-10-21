@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use no_std_strings::{str_format, str256};
+use no_std_strings::{str256, str_format};
 
 use crate::atomic_emul::emulate_atomic_instruction;
 use crate::compressed_emul::{
@@ -581,7 +581,18 @@ unsafe extern "C" fn store_address_misaligned_dispatch() -> ! {
 
 #[unsafe(no_mangle)]
 unsafe extern "C" fn store_access_fault_dispatch() -> ! {
-    kpanic!("Store access fault trap - not implemented");
+    let epc = unsafe { MEPC_PTR.read_volatile() };
+    for i in 0..32 {
+        kprint!(
+            "store_access_fault_dispatch: x{} = {:?}",
+            i,
+            get_ureg(i)
+        );
+    }
+    kpanic!(
+        "Store access fault trap - not implemented, at PC: {:#010x}",
+        epc
+    );
 }
 
 /// Copy data from kernel memory to user memory

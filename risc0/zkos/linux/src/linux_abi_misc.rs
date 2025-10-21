@@ -611,7 +611,7 @@ pub fn sys_move_pages(
 
 pub fn sys_mprotect(_addr: u32, _len: u32, _prot: u32) -> Result<u32, Err> {
     kprint!(
-        "sys_mprotect(_addr={}, _len={}, _prot={})",
+        "sys_mprotect(addr=0x{:08x}, len=0x{:x}, prot={}) -> returning success",
         _addr,
         _len,
         _prot
@@ -716,9 +716,10 @@ pub fn sys_msgsnd(_msqid: u32, _msgp: u32, _msgsz: u32, _msgflg: u32) -> Result<
 }
 
 pub fn sys_msync(_addr: u32, _len: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_msync not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    // msync() synchronizes a mapped memory region with the underlying file
+    // In a zkVM environment without real virtual memory management,
+    // this is a no-op that always succeeds
+    Ok(0)
 }
 
 pub fn sys_munlock(_addr: u32, _len: u32) -> Result<u32, Err> {
@@ -847,15 +848,71 @@ pub fn sys_prctl(_option: u32, _arg2: u32, _arg3: u32, _arg4: u32, _arg5: u32) -
     Err(Err::NoSys)
 }
 
+// rlimit structure for prlimit64
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+struct Rlimit64 {
+    rlim_cur: u64, // Soft limit
+    rlim_max: u64, // Hard limit
+}
+
 pub fn sys_prlimit64(
     _pid: u32,
-    _resource: u32,
+    resource: u32,
     _new_limit: u32,
-    _old_limit: u32,
+    old_limit: u32,
 ) -> Result<u32, Err> {
-    let msg = b"sys_prlimit64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    const RLIMIT_NOFILE: u32 = 7; // Max number of open file descriptors
+
+    kprint!(
+        "sys_prlimit64: pid={}, resource={}, new_limit=0x{:08x}, old_limit=0x{:08x}",
+        _pid,
+        resource,
+        _new_limit,
+        old_limit
+    );
+
+    // Only handle RLIMIT_NOFILE for now
+    if resource != RLIMIT_NOFILE {
+        let msg = b"sys_prlimit64: only RLIMIT_NOFILE is supported";
+        host_log(msg.as_ptr(), msg.len());
+        return Err(Err::NoSys);
+    }
+
+    // Return our current fd limit (256)
+    if old_limit != 0 {
+        let rlimit = Rlimit64 {
+            rlim_cur: 256, // Soft limit
+            rlim_max: 256, // Hard limit
+        };
+
+        let rlimit_bytes = unsafe {
+            core::slice::from_raw_parts(
+                &rlimit as *const Rlimit64 as *const u8,
+                core::mem::size_of::<Rlimit64>(),
+            )
+        };
+
+        let bytes_copied = crate::kernel::copy_to_user(
+            old_limit as *mut u8,
+            rlimit_bytes.as_ptr(),
+            core::mem::size_of::<Rlimit64>(),
+        );
+
+        if bytes_copied == 0 {
+            kprint!("sys_prlimit64: failed to copy rlimit to user memory");
+            return Err(Err::Fault);
+        }
+
+        kprint!("sys_prlimit64: returned rlim_cur=256, rlim_max=256");
+    }
+
+    // Ignore new_limit - we don't allow changing the limit
+    if _new_limit != 0 {
+        kprint!("sys_prlimit64: ignoring new_limit (not supported)");
+    }
+
+    Ok(0)
 }
 
 pub fn sys_process_madvise(
@@ -1302,17 +1359,6 @@ pub fn sys_statmount(_dfd: u32, _filename: u32, _buffer: u32, _bufsize: u32) -> 
     Err(Err::NoSys)
 }
 
-pub fn sys_symlinkat(
-    _target: u32,
-    _newdirfd: u32,
-    _linkpath: u32,
-    _flags: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_symlinkat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
 pub fn sys_sync() -> Result<u32, Err> {
     let msg = b"sys_sync not implemented";
     host_log(msg.as_ptr(), msg.len());
@@ -1423,17 +1469,12 @@ pub fn sys_times(_tbuf: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-pub fn sys_truncate64(_path: u32, _length: u32) -> Result<u32, Err> {
-    let msg = b"sys_truncate64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_umask(_mask: u32) -> Result<u32, Err> {
-    let msg = b"sys_umask not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+// sys_truncate64 is now implemented in linux_abi_fs.rs
+// pub fn sys_truncate64(_path: u32, _length: u32) -> Result<u32, Err> {
+//     let msg = b"sys_truncate64 not implemented";
+//     host_log(msg.as_ptr(), msg.len());
+//     Err(Err::NoSys)
+// }
 
 pub fn sys_uname(_buf: u32) -> Result<u32, Err> {
     let msg = b"sys_uname not implemented";
@@ -1449,17 +1490,6 @@ pub fn sys_unshare(_flags: u32) -> Result<u32, Err> {
 
 pub fn sys_userfaultfd(_flags: u32) -> Result<u32, Err> {
     let msg = b"sys_userfaultfd not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_utimensat_time64(
-    _dfd: u32,
-    _filename: u32,
-    _times: u32,
-    _flags: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_utimensat_time64 not implemented";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }

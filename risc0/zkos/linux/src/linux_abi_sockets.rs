@@ -1,4 +1,5 @@
-use crate::{host_calls::host_log, linux_abi::Err};
+use crate::{host_calls::host_log, kernel::print, linux_abi::Err};
+use no_std_strings::{str_format, str256};
 
 // Socket-related syscalls
 
@@ -130,8 +131,21 @@ pub fn sys_shutdown(_sockfd: u32, _how: u32) -> Result<u32, Err> {
     Err(Err::NoSys)
 }
 
-pub fn sys_socket(_domain: u32, _type: u32, _protocol: u32) -> Result<u32, Err> {
-    let msg = b"sys_socket not implemented";
+pub fn sys_socket(domain: u32, socket_type: u32, protocol: u32) -> Result<u32, Err> {
+    kprint!(
+        "sys_socket: domain={}, type={}, protocol={}",
+        domain,
+        socket_type,
+        protocol
+    );
+
+    // Socket domains (address families)
+    // AF_UNIX/AF_LOCAL = 1
+    // AF_INET = 2
+    // AF_INET6 = 10
+    // AF_NETLINK = 16
+
+    let msg = b"sys_socket: sockets not supported in zkVM";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
 }

@@ -308,9 +308,8 @@ impl<'a> ExecutorImpl<'a> {
     pub fn run_with_debugger(&mut self) -> Result<()> {
         let debugger = super::gdb::GdbExecutor::new(self)?;
         eprintln!(
-            "connect gdb by running `riscv32im-gdb -ex \"target remote {}\" {}`",
-            debugger.local_addr()?,
-            debugger.elf_path().display()
+            "connect gdb by running `riscv32im-gdb -ex \"target remote {}\" path-to-elf`",
+            debugger.local_addr()?
         );
 
         debugger.run()
