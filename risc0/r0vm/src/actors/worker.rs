@@ -99,6 +99,8 @@ fn get_gpus_from_nvml() -> anyhow::Result<Vec<GpuSpec>> {
     use nvml_wrapper::Nvml;
     use std::collections::HashSet;
 
+    const GIGABYTE: u64 = 1024 * 1024 * 1024;
+
     let visible_devices = std::env::var("CUDA_VISIBLE_DEVICES")
         .ok()
         .map(|v| {
@@ -119,13 +121,14 @@ fn get_gpus_from_nvml() -> anyhow::Result<Vec<GpuSpec>> {
         }
 
         let device = nvml.device_by_index(idx)?;
+        let memory_info = device.memory_info()?;
         gpus.push(GpuSpec {
             name: device.name()?,
             uuid: device
                 .uuid()?
                 .parse()
                 .expect("nvml device should have valid UUID"),
-            tokens: GpuTokens::from(100),
+            tokens: GpuTokens::from(memory_info.total / GIGABYTE),
         });
     }
     Ok(gpus)

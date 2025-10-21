@@ -394,12 +394,13 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
         res.map(|_| ())
     }
 
+    /// XXX remi: These token amounts are for po2=21. We should generalize to other po2 vaules.
     fn choose_tokens(&self, task_kind: TaskKind) -> (CpuCores, GpuTokens) {
         let (cores, mut gpu_tokens) = match task_kind {
             TaskKind::Execute => (CpuCores::from(1), GpuTokens::from(0)),
-            TaskKind::ProveSegment => (CpuCores::from(1), GpuTokens::from(100)),
-            TaskKind::ProveKeccak => (CpuCores::ZERO, GpuTokens::from(100)),
-            _ => (CpuCores::ZERO, GpuTokens::from(50)),
+            TaskKind::ProveSegment => (CpuCores::from(1), GpuTokens::from(15)),
+            TaskKind::ProveKeccak => (CpuCores::ZERO, GpuTokens::from(27)),
+            _ => (CpuCores::ZERO, GpuTokens::from(3)),
         };
 
         if !self.require_gpu {
