@@ -87,7 +87,7 @@ impl<F: Field> Clone for HashSuite<F> {
     }
 }
 
-/// Construct a supported hash function given its name. Returns None is the name does not
+/// Construct a supported hash function given its name. Returns None if the name does not
 /// correspond to a supported hash function.
 pub fn hash_suite_from_name(name: impl AsRef<str>) -> Option<HashSuite<BabyBear>> {
     match name.as_ref() {
