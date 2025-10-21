@@ -56,6 +56,7 @@ pub struct ExecutorImpl<'a> {
     pub(crate) env: ExecutorEnv<'a>,
     pub(crate) image: MemoryImage,
     pub(crate) syscall_table: SyscallTable<'a>,
+    #[allow(dead_code)]
     pub(crate) elf: Option<Vec<u8>>,
     profiler: Option<Rc<RefCell<Profiler>>>,
     return_cache: Cell<(u32, u32)>,
@@ -166,9 +167,8 @@ impl<'a> ExecutorImpl<'a> {
     pub fn run_with_debugger(&mut self) -> Result<()> {
         let debugger = super::gdb::GdbExecutor::new(self)?;
         eprintln!(
-            "connect gdb by running `riscv32im-gdb -ex \"target remote {}\" {}`",
-            debugger.local_addr()?,
-            debugger.elf_path().display()
+            "connect gdb by running `riscv32im-gdb -ex \"target remote {}\" path-to-elf`",
+            debugger.local_addr()?
         );
 
         debugger.run()
