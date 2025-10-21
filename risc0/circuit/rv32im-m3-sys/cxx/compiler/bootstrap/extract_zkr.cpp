@@ -159,7 +159,7 @@ namespace risc0 {
 
 void addLift(zirgen::Module& module, size_t po2) {
   RV32IMM3CircuitInterface circuit;
-  module.addFunc<1>("rv32im_m3_lift_" + std::to_string(po2),
+  module.addFunc<1>("lift_rv32im_m3_" + std::to_string(po2),
                     // {zirgen::gbuf(recursion::kOutSize), zirgen::ioparg(), zirgen::ioparg()},
                     {zirgen::ioparg()},
                     [&](zirgen::ReadIopVal seal) {

@@ -13,6 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+mod bazel;
 #[cfg(feature = "zkvm")]
 mod bootstrap;
 #[cfg(feature = "zkvm")]
@@ -31,13 +32,13 @@ mod update_lock_files;
 
 use clap::{Parser, Subcommand};
 
-#[cfg(feature = "zkvm")]
-use self::{bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16, gen_receipt::GenReceipt};
 use self::{
-    bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos,
+    bazel::Bazel, bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos,
     extract_elf::ExtractElf, install::Install, semver_checks::SemverChecks,
     update_crate_version::UpdateCrateVersion, update_lock_files::UpdateLockFiles,
 };
+#[cfg(feature = "zkvm")]
+use self::{bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16, gen_receipt::GenReceipt};
 
 #[derive(Parser)]
 struct Cli {
@@ -47,6 +48,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    Bazel(Bazel),
     #[cfg(feature = "zkvm")]
     Bootstrap(Bootstrap),
     #[cfg(feature = "zkvm")]
@@ -67,6 +69,7 @@ enum Commands {
 impl Commands {
     fn run(&self) {
         match self {
+            Commands::Bazel(cmd) => cmd.run(),
             #[cfg(feature = "zkvm")]
             Commands::Bootstrap(cmd) => cmd.run(),
             #[cfg(feature = "zkvm")]
