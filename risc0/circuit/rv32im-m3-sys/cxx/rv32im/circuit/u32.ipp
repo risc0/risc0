@@ -55,13 +55,13 @@ template <typename C> FDEV void AddressDecompose<C>::verify(CTX, ValU32<C> val) 
 
 template <typename C> FDEV void AddressVerify<C>::set(CTX, uint32_t val, uint32_t mode) DEV {
   isMM.set(ctx, mode == MODE_MACHINE);
-  uint32_t max = (mode == MODE_MACHINE ? 0xffff : (GLOBAL_GET(v2Compat) == 0 ? 0xefff : 0xbfff));
+  uint32_t max = (mode == MODE_MACHINE ? 0xffff : (GLOBAL_GET(v2Compat) != 0 ? 0xbfff : 0xefff));
   highSub.set(ctx, max - (val >> 16));
 }
 
 template <typename C> FDEV void AddressVerify<C>::verify(CTX, ValU32<C> val, Val<C> mode) DEV {
-  Val<C> topAddr = isMM.get() * Val<C>(0xffff) +
-                   (Val<C>(1) - isMM.get()) * cond<C>(GLOBAL_GET(v2Compat), Val<C>(0xbfff), Val<C>(0xefff));
+  Val<C> topAddr = cond<C>(isMM.get(), 0xffff,
+                   cond<C>(GLOBAL_GET(v2Compat), Val<C>(0xbfff), Val<C>(0xefff)));
   EQZ(isMM.get() * (mode - Val<C>(MODE_MACHINE)));
   EQ(topAddr - val.high, highSub.get());
 }

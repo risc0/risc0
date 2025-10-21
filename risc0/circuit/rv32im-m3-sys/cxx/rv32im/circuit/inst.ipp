@@ -16,7 +16,6 @@ template <typename C> FDEV void InstResumeBlock<C>::set(CTX, InstResumeWitness w
   readV2Compat.set(ctx, wit.v2Compat, 1);
   readPc.set(ctx, wit.pc, 1);
   readMode.set(ctx, wit.mode, 1);
-  GLOBAL_SET(v2Compat, 1 - wit.v2Compat.value);
 }
 
 template <typename C> FDEV void InstResumeBlock<C>::verify(CTX) DEV {
@@ -586,8 +585,9 @@ template <typename C> FDEV void InstEcallBlock<C>::verify(CTX) DEV {
   EQ(fetch.pc.high.get(), writeSavePc.data.high.get());
   // Make sure address constants are right
   Val<C> mepcWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_MEPC, CSR_WORD(MEPC));
+  Val<C> mtvecWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_ECALL_DISPATCH, CSR_WORD(MTVEC));
   EQ(writeSavePc.wordAddr.get(), mepcWord);
-  EQ(readDispatch.wordAddr.get(), CSR_WORD(MTVEC));
+  EQ(readDispatch.wordAddr.get(), mtvecWord);
 }
 
 template <typename C> FDEV void InstEcallBlock<C>::addArguments(CTX) DEV {

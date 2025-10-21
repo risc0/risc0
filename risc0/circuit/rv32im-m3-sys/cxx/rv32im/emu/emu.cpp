@@ -284,6 +284,7 @@ struct Emulator {
   void doResume() {
     auto& resumeWit = trace.makeInstResume();
     v2Compat = 1 - readPhysMemory(resumeWit.v2Compat, CSR_WORD(MNOV2COMPAT));
+    trace.getGlobals().v2Compat = v2Compat;
     if (v2Compat) {
       pc = readPhysMemory(resumeWit.pc, V2_COMPAT_SPC);
       setMode(readPhysMemory(resumeWit.mode, V2_COMPAT_SMODE) ? MODE_MACHINE : MODE_USER);

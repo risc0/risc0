@@ -64,7 +64,7 @@ public:
   size_t size() const { return _size / sizeof(T); }
 
   // Slice user # of elements
-  HalArray<T> slice(size_t offset, size_t size) {
+  HalArray<T> slice(size_t offset, size_t size) const {
     if ((offset + size) * sizeof(T) > _size) {
       throw std::runtime_error("Invalid slice");
     }

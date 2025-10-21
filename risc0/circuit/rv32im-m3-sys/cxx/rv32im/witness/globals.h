@@ -23,4 +23,5 @@ struct GlobalsWitness {
   FpDigest rootOut;
   uint32_t p2Count = 0;
   uint32_t finalCycle;
+  uint32_t v2Compat;
 };
