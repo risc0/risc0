@@ -42,7 +42,7 @@ const MIN_LIFT_PO2: usize = 14;
 impl Bootstrap {
     pub fn run(&self) {
         Self::generate_recursion_control_ids();
-        // Self::bootstrap_keccak();
+        Self::bootstrap_keccak();
     }
 
     fn generate_recursion_control_ids() {
