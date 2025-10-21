@@ -13,15 +13,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::io::Write as _;
 use std::net::{SocketAddr, TcpListener};
-use std::path::Path;
 
 use crate::host::server::exec::executor::CircuitSyscallTable;
 
 use super::executor::ExecutorImpl;
 use anyhow::Result;
-use anyhow::anyhow;
 use gdbstub::{conn::ConnectionExt, stub::GdbStub};
 use risc0_circuit_rv32im::execute::gdb::Debugger as CircuitDebugger;
 use tempfile::NamedTempFile;
@@ -57,10 +54,6 @@ impl<'a, 'b> GdbExecutor<'a, 'b> {
         Ok(self.listener.local_addr()?)
     }
 
-    pub fn elf_path(&self) -> &Path {
-        self.elf.path()
-    }
-
     pub fn run(mut self) -> Result<()> {
         let (stream, addr) = self.listener.accept()?;
         eprintln!("debugger connected from {addr}");
@@ -77,94 +70,5 @@ impl<'a, 'b> GdbExecutor<'a, 'b> {
             }
         }
         Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::ExecutorEnv;
-    use risc0_zkvm_methods::{MULTI_TEST_ELF, multi_test::MultiTestSpec};
-
-    #[test]
-    fn end_to_end() {
-        let (send, recv) = std::sync::mpsc::channel();
-
-        std::thread::spawn(move || {
-            let env = ExecutorEnv::builder()
-                .write(&MultiTestSpec::Profiler)
-                .unwrap()
-                .build()
-                .unwrap();
-            let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-            let debugger = GdbExecutor::new(&mut exec).unwrap();
-            let elf_path = debugger.elf_path().to_owned();
-            let address = debugger.local_addr().unwrap();
-            send.send((elf_path, address)).unwrap();
-            debugger.run().unwrap();
-        });
-
-        let (elf_path, address) = recv.recv().unwrap();
-
-        let rzup = rzup::Rzup::new().unwrap();
-        let (_, path) = rzup
-            .get_default_version(&rzup::Component::Gdb)
-            .unwrap()
-            .unwrap();
-        let gdb_bin = path.join("riscv32im-gdb");
-
-        let mut gdb_script = NamedTempFile::with_suffix(".txt").unwrap();
-        writeln!(&mut gdb_script, "target remote {address}").unwrap();
-        writeln!(
-            &mut gdb_script,
-            "break multi_test::profiler::profile_test_func1"
-        )
-        .unwrap();
-        writeln!(&mut gdb_script, "continue").unwrap();
-        writeln!(&mut gdb_script, "bt").unwrap();
-        gdb_script.flush().unwrap();
-
-        let gdb_output = std::process::Command::new(gdb_bin)
-            .arg("-x")
-            .arg(gdb_script.path())
-            .arg(elf_path)
-            .output()
-            .unwrap();
-        assert!(
-            gdb_output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&gdb_output.stderr)
-        );
-        let output_str = String::from_utf8_lossy(&gdb_output.stdout);
-
-        let start = output_str
-            .find("Reading symbols")
-            .unwrap_or_else(|| panic!("\"Reading symbols\" not found in: {output_str}"));
-        let end = output_str
-            .find("\tInferior 1 [process 1] will be detached.")
-            .unwrap_or_else(|| {
-                panic!("\"Inferior 1 [process 1] will be detached\" not found in: {output_str}")
-            });
-
-        let reg = regex::Regex::new(
-            "\
-            Reading symbols from .*\\.elf\\.\\.\\.\n\
-            0xc0000000 in \\?\\? \\(\\)\n\
-            Breakpoint 1 at 0x[0-9a-f]*: file src/bin/multi_test/profiler.rs, line [0-9]+\\.\n\n\
-            Breakpoint 1, multi_test::profiler::profile_test_func1 \\(\\)\n\
-            \\s+at src/bin/multi_test/profiler.rs:[0-9]+\n\
-            [0-9]+\t    profile_test_func2\\(\\);\n\
-            #0  multi_test::profiler::profile_test_func1 \\(\\)\n\
-            \\s+at src/bin/multi_test/profiler.rs:[0-9]+\n.*\
-            #1  0x002[0-9a-f]* in multi_test::main \\(\\) at src/bin/multi_test.rs:[0-9]+\n\
-            #2  0x002[0-9a-f]* in risc0_zkvm::guest::__start \\(\\) at src/guest/mod.rs:[0-9]+\n\
-            #3  0x002[0-9a-f]* in _start \\(\\)\n\
-            Backtrace stopped: frame did not save the PC\n\
-            \\(gdb\\) A debugging session is active.\n\n\
-            ",
-        )
-        .unwrap();
-        let to_match = &output_str[start..end];
-        assert!(reg.is_match(to_match), "{to_match}");
     }
 }

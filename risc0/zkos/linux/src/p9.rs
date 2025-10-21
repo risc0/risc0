@@ -9,7 +9,7 @@
 #![allow(dead_code)]
 use crate::kernel::print;
 use core::fmt;
-use no_std_strings::{str256, str_format};
+use no_std_strings::{str_format, str256};
 
 #[cfg(target_arch = "riscv32")]
 use alloc::string::String;
@@ -698,7 +698,7 @@ impl TversionMessage {
     /// Serialize the Tversion message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TversionError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         // Calculate total message size first
         let version_len = self.version.len();
@@ -786,7 +786,7 @@ impl RversionMessage {
     /// Deserialize an Rversion message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RversionError> {
-        use wire::{read_string, read_u16, read_u32, WireError};
+        use wire::{WireError, read_string, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RversionError::BufferTooSmall);
@@ -916,7 +916,7 @@ impl TflushMessage {
     /// Serialize the Tflush message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TflushError> {
-        use wire::{write_u16, write_u32, WireError};
+        use wire::{WireError, write_u16, write_u32};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 2; // size[4] + type[1] + tag[2] + oldtag[2]
@@ -988,7 +988,7 @@ impl RflushMessage {
     /// Deserialize an Rflush message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RflushError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RflushError::BufferTooSmall);
@@ -1076,7 +1076,7 @@ impl TreadMessage {
     /// Serialize the Tread message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TreadError> {
-        use wire::{write_u16, write_u32, write_u64, WireError};
+        use wire::{WireError, write_u16, write_u32, write_u64};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4 + 8 + 4; // size[4] + type[1] + tag[2] + fid[4] + offset[8] + count[4]
@@ -1170,7 +1170,7 @@ impl RreadMessage {
     /// Deserialize an Rread message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RreadError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RreadError::BufferTooSmall);
@@ -1297,7 +1297,7 @@ impl TwriteMessage {
     /// Serialize the Twrite message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TwriteError> {
-        use wire::{write_u16, write_u32, write_u64, WireError};
+        use wire::{WireError, write_u16, write_u32, write_u64};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4 + 8 + 4 + self.data.len(); // size[4] + type[1] + tag[2] + fid[4] + offset[8] + count[4] + data[count]
@@ -1361,7 +1361,9 @@ impl TwriteMessage {
     /// Returns the number of bytes written, or an error
     pub fn send_twrite(&self) -> Result<u32, TwriteError> {
         // Create a buffer for the serialized message
-        let mut buf = [0u8; 1024]; // Large enough for Twrite message with data
+        // Need to fit MAX_9P_IO_CHUNK (8000) + overhead (23 bytes) = 8023 bytes minimum
+        // Using 8192 to match P9_DEFAULT_MSIZE
+        let mut buf = [0u8; 8192];
 
         // Serialize the message
         let bytes_written = self.serialize(&mut buf)?;
@@ -1392,7 +1394,7 @@ impl RwriteMessage {
     /// Deserialize an Rwrite message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RwriteError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RwriteError::BufferTooSmall);
@@ -1516,7 +1518,7 @@ impl TwalkMessage {
     /// Serialize the Twalk message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TwalkError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         // Calculate total message size
         let mut total_size = 4 + 1 + 2 + 4 + 4 + 2; // size[4] + type[1] + tag[2] + fid[4] + newfid[4] + nwname[2]
@@ -1634,7 +1636,7 @@ impl RwalkMessage {
     /// Deserialize an Rwalk message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RwalkError> {
-        use wire::{read_u16, read_u32, read_u64, WireError};
+        use wire::{WireError, read_u16, read_u32, read_u64};
 
         if buf.len() < 4 {
             return Err(RwalkError::BufferTooSmall);
@@ -1771,7 +1773,7 @@ impl TclunkMessage {
     /// Serialize the Tclunk message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TclunkError> {
-        use wire::{write_u16, write_u32, WireError};
+        use wire::{WireError, write_u16, write_u32};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4; // size[4] + type[1] + tag[2] + fid[4]
@@ -1843,7 +1845,7 @@ impl RclunkMessage {
     /// Deserialize an Rclunk message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RclunkError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RclunkError::BufferTooSmall);
@@ -1941,7 +1943,7 @@ impl TremoveMessage {
     /// Serialize the Tremove message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TremoveError> {
-        use wire::{write_u16, write_u32, WireError};
+        use wire::{WireError, write_u16, write_u32};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4; // size[4] + type[1] + tag[2] + fid[4]
@@ -2013,7 +2015,7 @@ impl RremoveMessage {
     /// Deserialize an Rremove message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RremoveError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RremoveError::BufferTooSmall);
@@ -2124,7 +2126,7 @@ impl TauthMessage {
     /// Serialize the Tauth message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TauthError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4 + (2 + self.uname.len()) + (2 + self.aname.len()) + 4;
@@ -2224,7 +2226,7 @@ impl RauthMessage {
     /// Deserialize an Rauth message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RauthError> {
-        use wire::{read_u16, read_u32, read_u64, WireError};
+        use wire::{WireError, read_u16, read_u32, read_u64};
 
         if buf.len() < 4 {
             return Err(RauthError::BufferTooSmall);
@@ -2347,7 +2349,7 @@ impl TattachMessage {
     /// Serialize the Tattach message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TattachError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4 + 4 + (2 + self.uname.len()) + (2 + self.aname.len()) + 4;
@@ -2454,7 +2456,7 @@ impl RattachMessage {
     /// Deserialize an Rattach message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RattachError> {
-        use wire::{read_u16, read_u32, read_u64, WireError};
+        use wire::{WireError, read_u16, read_u32, read_u64};
 
         if buf.len() < 4 {
             return Err(RattachError::BufferTooSmall);
@@ -2579,7 +2581,7 @@ impl RlerrorMessage {
     /// Deserialize an Rlerror message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RlerrorError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RlerrorError::BufferTooSmall);
@@ -2678,7 +2680,7 @@ impl TstatfsMessage {
     /// Serialize the Tstatfs message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TstatfsError> {
-        use wire::{write_u16, write_u32, WireError};
+        use wire::{WireError, write_u16, write_u32};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4; // size[4] + type[1] + tag[2] + fid[4]
@@ -2791,7 +2793,7 @@ impl RstatfsMessage {
     /// Deserialize an Rstatfs message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RstatfsError> {
-        use wire::{read_u16, read_u32, read_u64, WireError};
+        use wire::{WireError, read_u16, read_u32, read_u64};
 
         if buf.len() < 4 {
             return Err(RstatfsError::BufferTooSmall);
@@ -2956,7 +2958,7 @@ impl TlopenMessage {
     /// Serialize the Tlopen message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TlopenError> {
-        use wire::{write_u16, write_u32, WireError};
+        use wire::{WireError, write_u16, write_u32};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4 + 4; // size[4] + type[1] + tag[2] + fid[4] + flags[4]
@@ -3039,7 +3041,7 @@ impl RlopenMessage {
     /// Deserialize an Rlopen message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RlopenError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RlopenError::BufferTooSmall);
@@ -3185,7 +3187,7 @@ impl TlcreateMessage {
     /// Serialize the Tlcreate message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TlcreateError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         // Calculate total message size
         let name_len = self.name.len();
@@ -3290,7 +3292,7 @@ impl RlcreateMessage {
     /// Deserialize an Rlcreate message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RlcreateError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RlcreateError::BufferTooSmall);
@@ -3435,7 +3437,7 @@ impl TsymlinkMessage {
     /// Serialize the Tsymlink message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TsymlinkError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         let name_len = self.name.len();
         let symtgt_len = self.symtgt.len();
@@ -3516,7 +3518,7 @@ impl RsymlinkMessage {
 
     /// Deserialize an Rsymlink message from a buffer
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RsymlinkError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RsymlinkError::BufferTooSmall);
@@ -3622,7 +3624,7 @@ impl TmknodMessage {
 
     /// Serialize the Tmknod message to a buffer
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TmknodError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         let name_len = self.name.len();
         let total_size = 4 + 1 + 2 + 4 + (2 + name_len) + 4 + 4 + 4 + 4;
@@ -3714,7 +3716,7 @@ impl RmknodMessage {
 
     /// Deserialize an Rmknod message from a buffer
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RmknodError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RmknodError::BufferTooSmall);
@@ -3811,7 +3813,7 @@ impl TrenameMessage {
 
     /// Serialize the Trename message to a buffer
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TrenameError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         let name_len = self.name.len();
         let total_size = 4 + 1 + 2 + 4 + 4 + (2 + name_len);
@@ -3883,7 +3885,7 @@ impl RrenameMessage {
 
     /// Deserialize an Rrename message from a buffer
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RrenameError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RrenameError::BufferTooSmall);
@@ -3939,7 +3941,7 @@ impl TreadlinkMessage {
 
     /// Serialize the Treadlink message to a buffer
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TreadlinkError> {
-        use wire::{write_u16, write_u32, WireError};
+        use wire::{WireError, write_u16, write_u32};
 
         let total_size = 4 + 1 + 2 + 4;
 
@@ -4000,7 +4002,7 @@ impl RreadlinkMessage {
 
     /// Deserialize an Rreadlink message from a buffer
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RreadlinkError> {
-        use wire::{read_string, read_u16, read_u32, WireError};
+        use wire::{WireError, read_string, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RreadlinkError::BufferTooSmall);
@@ -4065,6 +4067,24 @@ pub enum RsymlinkError {
     InternalError,
 }
 
+impl MessageError for RsymlinkError {
+    fn buffer_too_small() -> Self {
+        RsymlinkError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RsymlinkError::InvalidMessageType
+    }
+}
+
+impl ReadableMessage for RsymlinkMessage {
+    type Error = RsymlinkError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RsymlinkMessage::deserialize(buf)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TmknodError {
     BufferTooSmall,
@@ -4105,6 +4125,24 @@ pub enum RrenameError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RrenameError {
+    fn buffer_too_small() -> Self {
+        RrenameError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RrenameError::InvalidMessageType
+    }
+}
+
+impl ReadableMessage for RrenameMessage {
+    type Error = RrenameError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        Self::deserialize(buf)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -4165,7 +4203,7 @@ impl TgetattrMessage {
     /// Serialize the Tgetattr message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TgetattrError> {
-        use wire::{write_u16, write_u32, write_u64, WireError};
+        use wire::{WireError, write_u16, write_u32, write_u64};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4 + 8; // size[4] + type[1] + tag[2] + fid[4] + request_mask[8]
@@ -4329,7 +4367,7 @@ impl RgetattrMessage {
     /// Deserialize an Rgetattr message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RgetattrError> {
-        use wire::{read_u16, read_u32, read_u64, WireError};
+        use wire::{WireError, read_u16, read_u32, read_u64};
 
         if buf.len() < 4 {
             return Err(RgetattrError::BufferTooSmall);
@@ -4643,7 +4681,7 @@ impl TsetattrMessage {
     /// Serialize the Tsetattr message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TsetattrError> {
-        use wire::{write_u16, write_u32, write_u64, WireError};
+        use wire::{WireError, write_u16, write_u32, write_u64};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4 + 4 + 4 + 4 + 4 + 8 + 8 + 8 + 8 + 8; // size[4] + type[1] + tag[2] + fid[4] + valid[4] + mode[4] + uid[4] + gid[4] + size[8] + atime_sec[8] + atime_nsec[8] + mtime_sec[8] + mtime_nsec[8]
@@ -4778,7 +4816,7 @@ impl RsetattrMessage {
     /// Deserialize an Rsetattr message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RsetattrError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RsetattrError::BufferTooSmall);
@@ -4911,7 +4949,7 @@ impl TxattrwalkMessage {
     /// Serialize the Txattrwalk message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TxattrwalkError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         // Calculate total message size
         let name_len = self.name.len();
@@ -5000,7 +5038,7 @@ impl RxattrwalkMessage {
     /// Deserialize an Rxattrwalk message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RxattrwalkError> {
-        use wire::{read_u16, read_u32, read_u64, WireError};
+        use wire::{WireError, read_u16, read_u32, read_u64};
 
         if buf.len() < 4 {
             return Err(RxattrwalkError::BufferTooSmall);
@@ -5052,6 +5090,24 @@ impl RxattrwalkMessage {
     }
 }
 
+impl MessageError for RxattrwalkError {
+    fn buffer_too_small() -> Self {
+        RxattrwalkError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RxattrwalkError::InvalidMessageType
+    }
+}
+
+impl ReadableMessage for RxattrwalkMessage {
+    type Error = RxattrwalkError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RxattrwalkMessage::deserialize(buf)
+    }
+}
+
 /// Txattrcreate message structure
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TxattrcreateMessage {
@@ -5082,7 +5138,7 @@ impl TxattrcreateMessage {
     /// Serialize the Txattrcreate message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TxattrcreateError> {
-        use wire::{write_string, write_u16, write_u32, write_u64, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32, write_u64};
 
         // Calculate total message size
         let name_len = self.name.len();
@@ -5176,7 +5232,7 @@ impl RxattrcreateMessage {
     /// Deserialize an Rxattrcreate message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RxattrcreateError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RxattrcreateError::BufferTooSmall);
@@ -5220,6 +5276,24 @@ impl RxattrcreateMessage {
     }
 }
 
+impl MessageError for RxattrcreateError {
+    fn buffer_too_small() -> Self {
+        RxattrcreateError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RxattrcreateError::InvalidMessageType
+    }
+}
+
+impl ReadableMessage for RxattrcreateMessage {
+    type Error = RxattrcreateError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RxattrcreateMessage::deserialize(buf)
+    }
+}
+
 /// Treaddir message structure
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TreaddirMessage {
@@ -5247,7 +5321,7 @@ impl TreaddirMessage {
     /// Serialize the Treaddir message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TreaddirError> {
-        use wire::{write_u16, write_u32, write_u64, WireError};
+        use wire::{WireError, write_u16, write_u32, write_u64};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4 + 8 + 4; // size[4] + type[1] + tag[2] + fid[4] + offset[8] + count[4]
@@ -5337,7 +5411,7 @@ impl RreaddirMessage {
     /// Deserialize an Rreaddir message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RreaddirError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RreaddirError::BufferTooSmall);
@@ -5487,7 +5561,7 @@ impl TfsyncMessage {
     /// Serialize the Tfsync message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TfsyncError> {
-        use wire::{write_u16, write_u32, WireError};
+        use wire::{WireError, write_u16, write_u32};
 
         // Calculate total message size
         let total_size = 4 + 1 + 2 + 4 + 4; // size[4] + type[1] + tag[2] + fid[4] + datasync[4]
@@ -5566,7 +5640,7 @@ impl RfsyncMessage {
     /// Deserialize an Rfsync message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RfsyncError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RfsyncError::BufferTooSmall);
@@ -5658,7 +5732,7 @@ impl TlockMessage {
     /// Serialize the Tlock message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TlockError> {
-        use wire::{write_string, write_u16, write_u32, write_u64, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32, write_u64};
 
         // Calculate total message size
         let client_id_len = self.client_id.len();
@@ -5772,7 +5846,7 @@ impl RlockMessage {
     /// Deserialize an Rlock message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RlockError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RlockError::BufferTooSmall);
@@ -5867,7 +5941,7 @@ impl TgetlockMessage {
     /// Serialize the Tgetlock message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TgetlockError> {
-        use wire::{write_string, write_u16, write_u32, write_u64, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32, write_u64};
 
         // Calculate total message size
         let client_id_len = self.client_id.len();
@@ -5996,7 +6070,7 @@ impl RgetlockMessage {
     /// Deserialize an Rgetlock message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RgetlockError> {
-        use wire::{read_string, read_u16, read_u32, read_u64, WireError};
+        use wire::{WireError, read_string, read_u16, read_u32, read_u64};
 
         if buf.len() < 4 {
             return Err(RgetlockError::BufferTooSmall);
@@ -6116,7 +6190,7 @@ impl TlinkMessage {
     /// Serialize the Tlink message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TlinkError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         // Calculate total message size
         let name_len = self.name.len();
@@ -6203,7 +6277,7 @@ impl RlinkMessage {
     /// Deserialize an Rlink message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RlinkError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RlinkError::BufferTooSmall);
@@ -6244,6 +6318,24 @@ impl RlinkMessage {
         offset = new_offset;
 
         Ok((Self { tag }, offset))
+    }
+}
+
+impl MessageError for RlinkError {
+    fn buffer_too_small() -> Self {
+        RlinkError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RlinkError::InvalidMessageType
+    }
+}
+
+impl ReadableMessage for RlinkMessage {
+    type Error = RlinkError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RlinkMessage::deserialize(buf)
     }
 }
 
@@ -6348,7 +6440,7 @@ impl TmkdirMessage {
     /// Serialize the Tmkdir message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TmkdirError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         // Calculate total message size
         let name_len = self.name.len();
@@ -6444,7 +6536,7 @@ impl RmkdirMessage {
     /// Deserialize an Rmkdir message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RmkdirError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RmkdirError::BufferTooSmall);
@@ -6552,7 +6644,7 @@ impl TrenameatMessage {
     /// Serialize the Trenameat message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TrenameatError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         // Calculate total message size
         let oldname_len = self.oldname.len();
@@ -6647,7 +6739,7 @@ impl RrenameatMessage {
     /// Deserialize an Rrenameat message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RrenameatError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RrenameatError::BufferTooSmall);
@@ -6691,6 +6783,14 @@ impl RrenameatMessage {
     }
 }
 
+impl ReadableMessage for RrenameatMessage {
+    type Error = RrenameatError;
+
+    fn deserialize(buf: &[u8]) -> Result<(Self, usize), Self::Error> {
+        RrenameatMessage::deserialize(buf)
+    }
+}
+
 /// Tunlinkat message structure
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TunlinkatMessage {
@@ -6718,7 +6818,7 @@ impl TunlinkatMessage {
     /// Serialize the Tunlinkat message to a buffer
     /// Returns the number of bytes written
     pub fn serialize(&self, buf: &mut [u8]) -> Result<usize, TunlinkatError> {
-        use wire::{write_string, write_u16, write_u32, WireError};
+        use wire::{WireError, write_string, write_u16, write_u32};
 
         // Calculate total message size
         let name_len = self.name.len();
@@ -6805,7 +6905,7 @@ impl RunlinkatMessage {
     /// Deserialize an Runlinkat message from a buffer
     /// Returns the number of bytes consumed
     pub fn deserialize(buf: &[u8]) -> Result<(Self, usize), RunlinkatError> {
-        use wire::{read_u16, read_u32, WireError};
+        use wire::{WireError, read_u16, read_u32};
 
         if buf.len() < 4 {
             return Err(RunlinkatError::BufferTooSmall);
@@ -6893,6 +6993,16 @@ pub enum RrenameatError {
     InvalidMessageType,
     InvalidUtf8,
     InternalError,
+}
+
+impl MessageError for RrenameatError {
+    fn buffer_too_small() -> Self {
+        RrenameatError::BufferTooSmall
+    }
+
+    fn invalid_message_type() -> Self {
+        RrenameatError::InvalidMessageType
+    }
 }
 
 /// Tunlinkat serialization errors
@@ -8825,7 +8935,7 @@ mod tests {
 
         // Write wqid[0][13] = QID(type=0x80, version=1, path=0x12345678)
         buf[9] = 0x80; // Qtdir
-                       // version[4] = 1 (little-endian)
+        // version[4] = 1 (little-endian)
         buf[10] = 1;
         buf[11] = 0;
         buf[12] = 0;

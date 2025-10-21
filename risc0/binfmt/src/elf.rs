@@ -20,7 +20,7 @@ use alloc::{collections::BTreeMap, vec, vec::Vec};
 use anyhow::{Context, Result, anyhow, bail, ensure};
 use elf::{ElfBytes, endian::LittleEndian, file::Class};
 use risc0_zkp::core::{digest::Digest, hash::sha::Impl};
-use risc0_zkvm_platform::{PAGE_SIZE, WORD_SIZE};
+use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{ByteAddr, Digestible as _, KERNEL_START_ADDR, MemoryImage, SystemState};
@@ -70,8 +70,12 @@ impl Program {
         if elf.ehdr.e_type != elf::abi::ET_DYN {
             bail!("Invalid ELF type, must be dynamic");
         }
+        // ELF_ET_DYN_BASE = (2/3) * TASK_SIZE = (2/3) * 0x9c800000 ≈ 0x68555555
+        // → page-align → 0x68555000
+        let load_base = 0x68555000u32;
 
-        let load_base = 0x11000u32;
+        // Linux page size (4096 bytes), not zkVM PAGE_SIZE (1024 bytes)
+        const LINUX_PAGE_SIZE: u32 = 0x1000;
         let entry: u32 = elf
             .ehdr
             .e_entry
@@ -101,45 +105,102 @@ impl Program {
             if mem_size >= max_mem {
                 bail!("Invalid segment mem_size");
             }
-            let mut vaddr: u32 = segment
+            let p_vaddr: u32 = segment
                 .p_vaddr
                 .try_into()
                 .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?;
-            vaddr += load_base;
-            if vaddr % WORD_SIZE as u32 != 0 {
-                bail!("vaddr {vaddr:08x} is unaligned");
-            }
-            let offset: u32 = segment
+
+            // Get segment alignment
+            let p_align: u32 = segment
+                .p_align
+                .try_into()
+                .map_err(|err| anyhow!("p_align is larger than 32 bits. {err}"))?;
+            let p_align = u32::max(p_align, LINUX_PAGE_SIZE);
+
+            // Calculate page offset (where data starts within the page)
+            let page_offset = p_vaddr & (p_align - 1);
+
+            // Align segment start down to page boundary, then add load_bias
+            let segment_start = (p_vaddr & !(p_align - 1)) + load_base;
+
+            // Actual data starts at segment_start + page_offset
+            let vaddr = segment_start + page_offset;
+
+            println!(
+                "Segment p_vaddr={:08x}, load_base={:08x}",
+                p_vaddr, load_base
+            );
+            println!(
+                "  segment_start={:08x}, data_vaddr={:08x}",
+                segment_start, vaddr
+            );
+            // Note: vaddr may not be word-aligned; we handle this by iterating from segment_start
+
+            let p_offset: u32 = segment
                 .p_offset
                 .try_into()
                 .map_err(|err| anyhow!("offset is larger than 32 bits. {err}"))?;
-            for i in (0..mem_size).step_by(WORD_SIZE) {
-                let addr = vaddr.checked_add(i).context("Invalid segment vaddr")?;
+
+            // Calculate file offset for the page-aligned segment start
+            // The file is also offset by the same page_offset from its page boundary
+            let file_segment_start = p_offset - page_offset;
+
+            // Fill entire page-aligned segment region
+            let segment_end = segment_start + page_offset + mem_size;
+            let total_size = segment_end - segment_start;
+
+            for i in (0..total_size).step_by(WORD_SIZE) {
+                let addr = segment_start
+                    .checked_add(i)
+                    .context("Invalid segment vaddr")?;
                 if addr >= max_mem {
                     bail!(
                         "Address [0x{addr:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
                     );
                 }
-                if i >= file_size {
-                    // Past the file size, all zeros.
-                    image.insert(addr, 0);
-                } else {
+
+                // Calculate file offset for this address relative to segment_start
+                let offset_from_seg_start = (addr - segment_start) as usize;
+                let file_offset = (file_segment_start as usize) + offset_from_seg_start;
+
+                // Check if within file data range (page_offset + file_size from segment_start)
+                if offset_from_seg_start < (page_offset + file_size) as usize {
+                    // Load from file
                     let mut word = 0;
-                    // Don't read past the end of the file.
-                    let len = core::cmp::min(file_size - i, WORD_SIZE as u32);
+                    let bytes_available =
+                        ((page_offset + file_size) as usize) - offset_from_seg_start;
+                    let len = core::cmp::min(bytes_available as u32, WORD_SIZE as u32);
                     for j in 0..len {
-                        let offset = (offset + i + j) as usize;
-                        let byte = input.get(offset).context("Invalid segment offset")?;
+                        let file_byte_offset = file_offset + (j as usize);
+                        let byte = input
+                            .get(file_byte_offset)
+                            .context("Invalid segment offset")?;
                         word |= (*byte as u32) << (j * 8);
                     }
                     image.insert(addr, word);
+                } else {
+                    // Zero-fill BSS (beyond page_offset + filesz)
+                    image.insert(addr, 0);
                 }
             }
-            if vaddr + mem_size > brk {
-                brk = vaddr + mem_size;
-                // align up to PAGE_SIZE
+            // Compute segment end for brk calculation (data end aligned up)
+            let data_end = vaddr + mem_size;
+            let segment_end_aligned = (data_end + p_align - 1) & !(p_align - 1);
+
+            println!(
+                "Main LOAD: vaddr={:08x}, p_align={:08x}, memsz={:08x}, data_end={:08x}, aligned_end={:08x}",
+                vaddr, p_align, mem_size, data_end, segment_end_aligned
+            );
+            if segment_end_aligned > brk {
+                println!(
+                    "  -> updating brk from {:08x} to {:08x}",
+                    brk, segment_end_aligned
+                );
+                brk = segment_end_aligned;
             }
         }
+        // brk is now already page-aligned from per-segment calculations
+        println!("Final main executable brk: {:08x}", brk);
 
         // Calculate Program Header table address (where phdrs are loaded in memory)
         let mut phdr_addr = 0;
@@ -173,28 +234,14 @@ impl Program {
         }
 
         let executable = (load_base + entry, phdr_addr, phnum);
-        // load_bias is place in memory we want to place the interpreter, after the executable
-        // calculate it based on iterating over the executable segments in memory ending vaddr + memsz and align with 0x1000
-        let mut load_bias = 0;
-        for segment in segments.iter().filter(|x| x.p_type == elf::abi::PT_LOAD) {
-            let mem_size: u32 = segment
-                .p_memsz
-                .try_into()
-                .map_err(|err| anyhow!("mem_size was larger than 32 bits {err}"))?;
-            let vaddr: u32 = segment
-                .p_vaddr
-                .try_into()
-                .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?;
-            load_bias = vaddr
-                .checked_add(mem_size)
-                .context("Invalid segment vaddr")?;
-        }
-        // align with 0x1000
-        load_bias = load_base
-            + load_bias
-                .checked_add(0x1000 - 1)
-                .context("Invalid load bias")?;
-        load_bias = load_bias / 0x1000 * 0x1000;
+
+        // Compute top-down DSO arena base (matching Linux's memory layout)
+        const TASK_SIZE: u32 = 0x9C80_0000; // User VA ceiling (STACK_TOP / FIXADDR_START)
+        const STACK_GAP: u32 = 0x0800_0000; // Stack gap (128 MiB)
+        const BIG_ALIGN: u32 = 0x0080_0000; // 8 MiB alignment for mmap_base
+        const PAGE: u32 = 0x1000;
+
+        let mmap_base: u32 = (TASK_SIZE - STACK_GAP) & !(BIG_ALIGN - 1); // → 0x94800000
 
         let elf = ElfBytes::<LittleEndian>::minimal_parse(interp)
             .map_err(|err| anyhow!("Elf parse error: {err}"))?;
@@ -222,6 +269,60 @@ impl Program {
         if segments.len() > 256 {
             bail!("Too many program headers");
         }
+
+        // Compute interpreter's max virtual extent across all PT_LOAD segments
+        println!("\n=== Interpreter Extent Calculation ===");
+        let mut interp_max_end = 0u32;
+        for segment in segments.iter().filter(|x| x.p_type == elf::abi::PT_LOAD) {
+            let p_align: u32 = segment
+                .p_align
+                .try_into()
+                .map_err(|err| anyhow!("p_align is larger than 32 bits. {err}"))?;
+            let p_align = u32::max(p_align, PAGE);
+            let p_vaddr: u32 = segment
+                .p_vaddr
+                .try_into()
+                .map_err(|err| anyhow!("p_vaddr is larger than 32 bits. {err}"))?;
+            let vstart = p_vaddr & !(p_align - 1); // align down
+            let mem_size: u32 = segment
+                .p_memsz
+                .try_into()
+                .map_err(|err| anyhow!("p_memsz is larger than 32 bits. {err}"))?;
+            let vend = (vstart
+                .checked_add(mem_size)
+                .context("Invalid segment size")?
+                .checked_add(p_align - 1)
+                .context("Invalid segment size")?)
+                & !(p_align - 1); // align up
+            println!(
+                "Interp LOAD: p_vaddr={:08x}, p_align={:08x}, vstart={:08x}, memsz={:08x}, vend={:08x}",
+                p_vaddr, p_align, vstart, mem_size, vend
+            );
+            if vend > interp_max_end {
+                println!(
+                    "  -> updating max_end from {:08x} to {:08x}",
+                    interp_max_end, vend
+                );
+                interp_max_end = vend;
+            }
+        }
+        println!("Interp max extent: {:08x}", interp_max_end);
+
+        // Place interpreter so its top ends exactly at mmap_base (top-down placement)
+        let load_bias = mmap_base
+            .checked_sub(interp_max_end)
+            .context("Not enough VA space for interpreter")?;
+        println!(
+            "Placing interpreter: mmap_base={:08x} - max_extent={:08x} = load_bias={:08x}",
+            mmap_base, interp_max_end, load_bias
+        );
+        println!(
+            "Interpreter will occupy: {:08x} - {:08x}\n",
+            load_bias,
+            load_bias + interp_max_end
+        );
+
+        println!("=== Loading Interpreter Segments ===");
         for segment in segments.iter().filter(|x| x.p_type == elf::abi::PT_LOAD) {
             let file_size: u32 = segment
                 .p_filesz
@@ -237,53 +338,113 @@ impl Program {
             if mem_size >= max_mem {
                 bail!("Invalid segment mem_size");
             }
-            let mut vaddr: u32 = segment
+            let p_vaddr: u32 = segment
                 .p_vaddr
                 .try_into()
                 .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?;
-            vaddr += load_bias;
-            if vaddr % WORD_SIZE as u32 != 0 {
-                bail!("vaddr {vaddr:08x} is unaligned");
-            }
 
-            let offset: u32 = segment
+            // Get segment alignment
+            let p_align: u32 = segment
+                .p_align
+                .try_into()
+                .map_err(|err| anyhow!("p_align is larger than 32 bits. {err}"))?;
+            let p_align = u32::max(p_align, LINUX_PAGE_SIZE);
+
+            // Calculate page offset (where data starts within the page)
+            let page_offset = p_vaddr & (p_align - 1);
+
+            // Align segment start down to page boundary, then add load_bias
+            let segment_start = (p_vaddr & !(p_align - 1)) + load_bias;
+
+            // Actual data starts at segment_start + page_offset
+            let vaddr = segment_start + page_offset;
+
+            println!(
+                "Interp segment: p_vaddr={:08x}, p_align={:08x}, page_offset={:08x}",
+                p_vaddr, p_align, page_offset
+            );
+            println!(
+                "  segment_start={:08x}, data_vaddr={:08x}, filesz={:08x}, memsz={:08x}",
+                segment_start, vaddr, file_size, mem_size
+            );
+            // Note: vaddr may not be word-aligned; we handle this by iterating from segment_start
+
+            let p_offset: u32 = segment
                 .p_offset
                 .try_into()
                 .map_err(|err| anyhow!("offset is larger than 32 bits. {err}"))?;
-            for i in (0..mem_size).step_by(WORD_SIZE) {
-                let addr = vaddr.checked_add(i).context("Invalid segment vaddr")?;
+
+            // Calculate file offset for the page-aligned segment start
+            let file_segment_start = p_offset - page_offset;
+
+            // Fill entire page-aligned segment region
+            let segment_end = segment_start + page_offset + mem_size;
+            let total_size = segment_end - segment_start;
+
+            for i in (0..total_size).step_by(WORD_SIZE) {
+                let addr = segment_start
+                    .checked_add(i)
+                    .context("Invalid segment vaddr")?;
                 if addr >= max_mem {
                     bail!(
                         "Address [0x{addr:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
                     );
                 }
-                if i >= file_size {
-                    // Past the file size, all zeros.
-                    image.insert(addr, 0);
-                } else {
+
+                // Calculate file offset for this address relative to segment_start
+                let offset_from_seg_start = (addr - segment_start) as usize;
+                let file_offset = (file_segment_start as usize) + offset_from_seg_start;
+
+                // Check if within file data range
+                if offset_from_seg_start < (page_offset + file_size) as usize {
+                    // Load from file
                     let mut word = 0;
-                    // Don't read past the end of the file.
-                    let len = core::cmp::min(file_size - i, WORD_SIZE as u32);
+                    let bytes_available =
+                        ((page_offset + file_size) as usize) - offset_from_seg_start;
+                    let len = core::cmp::min(bytes_available as u32, WORD_SIZE as u32);
                     for j in 0..len {
-                        let offset = (offset + i + j) as usize;
-                        let byte = interp.get(offset).context("Invalid segment offset")?;
+                        let file_byte_offset = file_offset + (j as usize);
+                        let byte = interp
+                            .get(file_byte_offset)
+                            .context("Invalid segment offset")?;
                         word |= (*byte as u32) << (j * 8);
                     }
+                    // Debug output for specific addresses
+                    if (0x947fe000..0x947fe010).contains(&addr) {
+                        println!(
+                            "  DEBUG .data: addr={:08x}, file_offset={:08x}, word={:08x}",
+                            addr, file_offset, word
+                        );
+                    }
+                    // Also check DYNAMIC section (0x947fdecc to 0x947fdf84)
+                    if (0x947fdecc..0x947fdf84).contains(&addr) {
+                        println!(
+                            "  DEBUG DYNAMIC: addr={:08x}, file_offset={:08x}, word={:08x}",
+                            addr, file_offset, word
+                        );
+                    }
                     image.insert(addr, word);
+                } else {
+                    // Zero-fill BSS (beyond page_offset + filesz)
+                    if (0x947fdd84..0x947fe010).contains(&addr) {
+                        println!("  DEBUG: addr={:08x}, zero-fill BSS", addr);
+                    }
+                    image.insert(addr, 0);
                 }
             }
-            if vaddr + mem_size > brk {
-                brk = vaddr + mem_size;
-            }
+            // Note: brk is NOT updated for interpreter segments - it tracks only the main executable
         }
-        brk = (brk + PAGE_SIZE as u32 - 1) & !(PAGE_SIZE as u32 - 1);
 
-        println!("entry: {:08x}", executable.0);
-        println!("phdr_addr: {:08x}", executable.1);
-        println!("phnum: {}", executable.2);
-        println!("load_bias: {:08x}", load_bias);
-        println!("interp_entry(biased): {:08x}", load_bias + entry);
-        println!("brk: {:08x}", brk);
+        println!("=== Memory Layout ===");
+        println!("Main entry:           {:08x}", executable.0);
+        println!("Main phdr_addr:       {:08x}", executable.1);
+        println!("Main phnum:           {}", executable.2);
+        println!("Main brk (heap):      {:08x}", brk);
+        println!("DSO mmap_base:        {:08x}", mmap_base);
+        println!("Interp max extent:    {:08x}", interp_max_end);
+        println!("Interp load_bias:     {:08x}", load_bias);
+        println!("Interp entry:         {:08x}", load_bias + entry);
+        println!("Interp top:           {:08x}", load_bias + interp_max_end);
         Ok(Program::new_from_entry_and_image(
             executable.0,
             image,

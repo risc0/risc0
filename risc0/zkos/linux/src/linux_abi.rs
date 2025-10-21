@@ -1,18 +1,17 @@
 use crate::{
     constants::{
         ASCII_TABLE_PTR, MEPC_PTR, PAGE_SIZE, REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5,
-        REG_A7, REG_SP, USER_BRK_ADDR, USER_INTERP_ADDR, USER_INTERP_BASE_ADDR, USER_MEMORY_LENGTH,
-        USER_MEMORY_START_PTR, USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE,
-        USER_STACK_PTR, USER_START_PTR,
+        REG_A7, REG_SP, USER_BRK_ADDR, USER_INTERP_ADDR, USER_INTERP_BASE_ADDR, USER_PHDR_ADDR_PTR,
+        USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE, USER_STACK_PTR, USER_START_PTR,
     },
     host_calls::{host_argv, host_terminate},
     kernel::{get_ureg, mret, print},
     linux_abi_fs::{
-        attach_to_p9, get_p9_enabled, init_fs, read_file_to_user_memory, set_p9_enabled, sys_statx,
+        attach_to_p9, get_fd, get_file_desc, get_p9_enabled, init_fs, read_file_to_user_memory,
+        set_p9_enabled, sys_statx,
     },
     p9::get_p9_traffic_hash,
 };
-use elf::{ElfBytes, abi::PT_INTERP, endian::LittleEndian, file::Class};
 
 use crate::kernel::set_ureg;
 use no_std_strings::{str_format, str256};
@@ -45,7 +44,8 @@ use crate::linux_abi_fs::{
     sys_openat, sys_openat2, sys_pread64, sys_preadv, sys_preadv2, sys_pwrite64, sys_pwritev,
     sys_pwritev2, sys_read, sys_readahead, sys_readlinkat, sys_readv, sys_removexattr,
     sys_removexattrat, sys_renameat2, sys_sendfile64, sys_setxattr, sys_setxattrat, sys_statfs64,
-    sys_unlinkat, sys_write, sys_writev,
+    sys_symlinkat, sys_truncate64, sys_umask, sys_unlinkat, sys_utimensat_time64, sys_write,
+    sys_writev,
 };
 
 // Import miscellaneous syscalls from the misc module
@@ -82,11 +82,11 @@ use crate::linux_abi_misc::{
     sys_setdomainname, sys_setfsgid, sys_setfsuid, sys_setgid, sys_setgroups, sys_sethostname,
     sys_setitimer, sys_setpgid, sys_setpriority, sys_setregid, sys_setresgid, sys_setresuid,
     sys_setreuid, sys_setsid, sys_setuid, sys_shmat, sys_shmctl, sys_shmdt, sys_shmget,
-    sys_signalfd4, sys_splice, sys_statmount, sys_symlinkat, sys_sync, sys_sync_file_range,
-    sys_syncfs, sys_sysinfo, sys_syslog, sys_tee, sys_tgkill, sys_timer_create, sys_timer_delete,
+    sys_signalfd4, sys_splice, sys_statmount, sys_sync, sys_sync_file_range, sys_syncfs,
+    sys_sysinfo, sys_syslog, sys_tee, sys_tgkill, sys_timer_create, sys_timer_delete,
     sys_timer_getoverrun, sys_timer_gettime64, sys_timer_settime64, sys_timerfd_create,
-    sys_timerfd_gettime64, sys_timerfd_settime64, sys_times, sys_truncate64, sys_umask, sys_uname,
-    sys_unshare, sys_userfaultfd, sys_utimensat_time64, sys_vmsplice, sys_waitid,
+    sys_timerfd_gettime64, sys_timerfd_settime64, sys_times, sys_uname, sys_unshare,
+    sys_userfaultfd, sys_vmsplice, sys_waitid,
 };
 
 static mut BRK: u32 = 0u32;
@@ -100,9 +100,7 @@ use alloc::vec;
 #[cfg(target_arch = "riscv32")]
 use alloc::vec::Vec;
 
-use core::{alloc::Layout, ptr::NonNull};
-
-static mut MMAP_BASE: u32 = 0x8000_0000;
+static mut MMAP_BASE: u32 = 0x94800000;
 
 fn get_mmap_base() -> u32 {
     unsafe { MMAP_BASE }
@@ -432,11 +430,25 @@ pub const SYS_WAITID: u32 = 95;
 
 #[derive(Clone, Copy)]
 pub enum Err {
-    NoMem = -12,
-    Inval = -22,
-    FileNotFound = -2,
-    FileExists = -17,
-    NoSys = -38, // ENOSYS - Function not implemented
+    FileNotFound = -2, // ENOENT
+    IO = -5,           // EIO - I/O error
+    BadFd = -9,        // EBADF - Bad file descriptor
+    #[allow(dead_code)]
+    NoMem = -12, // ENOMEM
+    Access = -13,      // EACCES - Permission denied
+    Fault = -14,       // EFAULT - Bad address
+    FileExists = -17,  // EEXIST
+    NotDir = -20,      // ENOTDIR - Not a directory
+    IsDir = -21,       // EISDIR - Is a directory
+    Inval = -22,       // EINVAL
+    MFile = -24,       // EMFILE - Too many open files
+    FileTooBig = -27,  // EFBIG - File too large
+    NameTooLong = -36, // ENAMETOOLONG - File name too long
+    NoSys = -38,       // ENOSYS - Function not implemented
+    Loop = -40,        // ELOOP - Too many symbolic links encountered
+    Range = -34,       // ERANGE - Result too large / Math result not representable
+    NoData = -61,      // ENODATA - No data available
+    OpNotSupp = -95,   // EOPNOTSUPP - Operation not supported
 }
 
 impl Err {
@@ -562,9 +574,19 @@ pub fn start_linux_binary(argc: u32) -> ! {
         attach_to_p9();
     }
 
-    let user_start_addr: usize = unsafe { USER_START_PTR.read_volatile() };
+    let _user_start_addr: usize = unsafe { USER_START_PTR.read_volatile() };
     let interp_base_addr = unsafe { USER_INTERP_BASE_ADDR.read_volatile() };
     let interp_addr = unsafe { USER_INTERP_ADDR.read_volatile() };
+
+    // Set mmap_base to start of interpreter (for top-down allocation below it)
+    // The interpreter was placed to end at the initial mmap_base (0x94800000),
+    // so we need to set mmap_base to its start address to avoid overlap with
+    // future mmap allocations (which grow downward from mmap_base)
+    if interp_base_addr != 0 {
+        // 0x3000 is vvar, vdso, to align with memory offsets in real rv32
+        let _mmap_base = interp_base_addr as u32 - 0x3000;
+        set_mmap_base(interp_base_addr as u32);
+    }
 
     for arg in &argv {
         stack.add_str(arg.as_bytes());
@@ -586,7 +608,7 @@ pub fn start_linux_binary(argc: u32) -> ! {
     // auxv[3]
     stack.add_aux_word(AuxType::EGid, 1);
 
-    let user_start_addr: usize = unsafe { USER_START_PTR.read_volatile() } - 4;
+    let user_start_addr: usize = unsafe { USER_START_PTR.read_volatile() };
 
     if interp_base_addr != 0 {
         stack.add_aux_word(AuxType::Entry, user_start_addr);
@@ -619,13 +641,19 @@ pub fn start_linux_binary(argc: u32) -> ! {
             "starting linux binary with interpreter at 0x{:08x}",
             interp_addr,
         );
+        kprint!("AT_BASE (interp load addr) = 0x{:08x}", interp_base_addr);
+        kprint!("AT_ENTRY (main entry) = 0x{:08x}", user_start_addr);
+        kprint!("AT_PHDR (main phdr) = 0x{:08x}", unsafe {
+            USER_PHDR_ADDR_PTR.read_volatile()
+        });
         unsafe {
             MEPC_PTR.write_volatile(interp_addr - 4);
         }
     } else {
         print("starting linux binary");
         unsafe {
-            MEPC_PTR.write_volatile(user_start_addr);
+            // Apply -4 adjustment for MEPC circuit bug
+            MEPC_PTR.write_volatile(user_start_addr - 4);
         }
     }
     mret()
@@ -682,9 +710,9 @@ pub fn handle_linux_syscall() -> ! {
         SYS_EXECVE => syscall3(sys_execve),
         SYS_EXECVEAT => syscall5(sys_execveat),
         SYS_FACCESSAT => syscall3(sys_faccessat),
-        SYS_FACCESSAT2 => syscall3(sys_faccessat2),
+        SYS_FACCESSAT2 => syscall4(sys_faccessat2),
         SYS_FADVISE64_64 => syscall4(sys_fadvise64_64),
-        SYS_FALLOCATE => syscall4(sys_fallocate),
+        SYS_FALLOCATE => syscall6(sys_fallocate),
         SYS_FANOTIFY_INIT => syscall2(sys_fanotify_init),
         SYS_FANOTIFY_MARK => syscall5(sys_fanotify_mark),
         SYS_FCHDIR => syscall1(sys_fchdir),
@@ -844,7 +872,7 @@ pub fn handle_linux_syscall() -> ! {
         SYS_QUOTACTL => syscall4(sys_quotactl),
         SYS_QUOTACTL_FD => syscall4(sys_quotactl_fd),
         SYS_READAHEAD => syscall3(sys_readahead),
-        SYS_READLINKAT => syscall3(sys_readlinkat),
+        SYS_READLINKAT => syscall4(sys_readlinkat),
         SYS_READV => syscall3(sys_readv),
         SYS_REBOOT => syscall4(sys_reboot),
         SYS_RECVFROM => syscall6(sys_recvfrom),
@@ -922,7 +950,7 @@ pub fn handle_linux_syscall() -> ! {
         SYS_STATX => syscall5(sys_statx),
         SYS_SWAPOFF => syscall1(sys_swapoff),
         SYS_SWAPON => syscall3(sys_swapon),
-        SYS_SYMLINKAT => syscall4(sys_symlinkat),
+        SYS_SYMLINKAT => syscall3(sys_symlinkat),
         SYS_SYNC => syscall0(sys_sync),
         SYS_SYNC_FILE_RANGE => syscall4(sys_sync_file_range),
         SYS_SYNCFS => syscall1(sys_syncfs),
@@ -1016,18 +1044,55 @@ fn syscall6<F: Fn(u32, u32, u32, u32, u32, u32) -> Result<u32, Err>>(inner: F) {
 /// https://elixir.bootlin.com/linux/v5.15.5/source/mm/nommu.c#L381
 fn sys_brk(addr: u32) -> Result<u32, Err> {
     kprint!("sys_brk: addr = {:08x}", addr);
-    let ret = unsafe {
-        let original_brk = USER_BRK_ADDR.read_volatile() as u32;
-        if addr > original_brk {
-            BRK = addr;
-        }
-        BRK
-    };
-    kprint!("sys_brk: ret = {:08x}", ret);
-    // let msg = str_format!(str256, "sys_brk(0x{addr:08x}) -> 0x{ret:08x}");
-    // print(&msg);
 
-    Ok(ret)
+    unsafe {
+        // Get current BRK value
+        let current_brk = core::ptr::addr_of!(BRK).read_volatile();
+
+        // Initialize BRK to the original break address if it's not set
+        if current_brk == 0 {
+            let original_brk = USER_BRK_ADDR.read_volatile() as u32;
+            core::ptr::addr_of_mut!(BRK).write_volatile(original_brk);
+            kprint!("sys_brk: initialized BRK to {:08x}", original_brk);
+
+            // If addr is 0, return the initialized break
+            if addr == 0 {
+                return Ok(original_brk);
+            }
+        } else {
+            // If addr is 0, return the current break
+            if addr == 0 {
+                kprint!("sys_brk: returning current BRK = {:08x}", current_brk);
+                return Ok(current_brk);
+            }
+        }
+
+        let original_brk = USER_BRK_ADDR.read_volatile() as u32;
+        let current_brk = core::ptr::addr_of!(BRK).read_volatile();
+
+        // Validate the new address
+        // Don't allow setting it below the original break
+        if addr < original_brk {
+            kprint!(
+                "sys_brk: addr {:08x} < original_brk {:08x}, returning current BRK",
+                addr,
+                original_brk
+            );
+            return Ok(current_brk);
+        }
+
+        // Don't allow setting it too high (arbitrary limit to prevent abuse)
+        const MAX_BRK_SIZE: u32 = 64 * 1024 * 1024; // 64 MB
+        if addr > original_brk + MAX_BRK_SIZE {
+            kprint!("sys_brk: addr {:08x} too high, returning current BRK", addr);
+            return Ok(current_brk);
+        }
+
+        // Update the break
+        core::ptr::addr_of_mut!(BRK).write_volatile(addr);
+        kprint!("sys_brk: updated BRK to {:08x}", addr);
+        Ok(addr)
+    }
 }
 
 fn align_up(addr: usize, align: usize) -> usize {
@@ -1050,13 +1115,87 @@ fn sys_mmap(
 ) -> Result<u32, Err> {
     let _fd = fd as i32;
     kprint!("sys_mmap(0x{_addr:08x}, {len}, {_prot}, 0x{_flags:08x}, {_fd}, {pgoffset})");
-    // let msg = str_format!(
-    //     str256,
-    //     "sys_mmap(0x{_addr:08x}, {len}, {_prot}, 0x{_flags:08x}, {_fd}, {_offset})"
-    // );
-    // print(&msg);
+
+    // Check file descriptor validity for file-backed mappings first
+    // (EBADF has priority over EINVAL for length/flags)
+    // Note: fd=-1 is only valid if MAP_ANONYMOUS flag is set
+    let has_anon_flag = (_flags & 0x20) == 0x20; // MAP_ANONYMOUS
+    let is_file_backed = !has_anon_flag; // File-backed if no MAP_ANONYMOUS flag
+
+    if is_file_backed {
+        // For file-backed mappings, validate fd first (before length/flags)
+        // fd=-1 without MAP_ANONYMOUS is invalid
+        if _fd == -1 || fd >= 256 {
+            kprint!(
+                "sys_mmap: EBADF - invalid fd {} for file-backed mapping",
+                _fd
+            );
+            return Err(Err::BadFd);
+        }
+        let fd_entry = get_fd(fd);
+        if fd_entry.file_desc_id == 0xFF {
+            kprint!("sys_mmap: EBADF - fd {} is not open", fd);
+            return Err(Err::BadFd);
+        }
+    }
+
+    // Validate length
     if len == 0 {
         return Err(Err::Inval);
+    }
+
+    // Validate flags - must contain one of MAP_PRIVATE, MAP_SHARED, or MAP_SHARED_VALIDATE
+    const MAP_PRIVATE: u32 = 0x02;
+    const MAP_SHARED: u32 = 0x01;
+    const MAP_SHARED_VALIDATE: u32 = 0x03;
+
+    let has_valid_sharing = (_flags & MAP_PRIVATE) != 0
+        || (_flags & MAP_SHARED) != 0
+        || (_flags & MAP_SHARED_VALIDATE) != 0;
+
+    if !has_valid_sharing {
+        kprint!("sys_mmap: invalid flags - missing MAP_PRIVATE/MAP_SHARED");
+        return Err(Err::Inval);
+    }
+
+    // Check file descriptor permissions for file-backed mappings
+    if is_file_backed {
+        // For file-backed mappings, check fd permissions
+        if fd < 256 {
+            let fd_entry = get_fd(fd);
+            // We already checked fd is valid above, so this should always succeed
+            if fd_entry.file_desc_id != 0xFF {
+                let file_desc = get_file_desc(fd_entry.file_desc_id);
+                let open_mode = file_desc.flags & 0x3; // O_RDONLY=0, O_WRONLY=1, O_RDWR=2
+
+                kprint!(
+                    "sys_mmap: checking permissions - open_mode={}, prot=0x{:x}, flags=0x{:x}",
+                    open_mode,
+                    _prot,
+                    _flags
+                );
+
+                // Check if fd has read permission when PROT_READ or PROT_WRITE is requested
+                // (even PROT_WRITE requires read permission for private mappings)
+                if ((_prot & 0x1) != 0 || (_prot & 0x2) != 0) && open_mode == 1 {
+                    // File opened write-only but read/write access requested
+                    kprint!(
+                        "sys_mmap: EACCES - fd opened write-only but PROT_READ/WRITE requested"
+                    );
+                    return Err(Err::Access);
+                }
+
+                // Check if fd has write permission when PROT_WRITE with MAP_SHARED is requested
+                if (_prot & 0x2) != 0 && (_flags & MAP_SHARED) != 0 && open_mode == 0 {
+                    // PROT_WRITE=0x2
+                    // File opened read-only but write with MAP_SHARED is requested
+                    kprint!(
+                        "sys_mmap: EACCES - fd opened read-only but PROT_WRITE+MAP_SHARED requested"
+                    );
+                    return Err(Err::Access);
+                }
+            }
+        }
     }
 
     kprint!("user_brk_start = {:08x}", unsafe {
@@ -1079,20 +1218,48 @@ fn sys_mmap(
 
     let offset = pgoffset as u64 * PAGE_SIZE as u64;
     const MAP_FIXED: u32 = 0x10;
+    // MAP_ANONYMOUS already defined above
     if _flags & MAP_FIXED == MAP_FIXED {
         kprint!("sys_mmap: MAP_FIXED is set");
     }
 
-    // XXX this should be kernel stack max not 0xc000_0000
-    if _addr != 0 && _addr + len > 0xc000_0000 {
-        kprint!(
-            "sys_mmap: addr outside mmap space = {:08x}, returning Inval",
-            _addr
-        );
-        return Err(Err::Inval);
+    // Check for address overflow and invalid high memory regions
+    // Reject any attempt to map into kernel space (>= 0xC0000000)
+    if _addr != 0 {
+        // Check if starting address is in kernel space
+        if _addr >= 0xc000_0000 {
+            kprint!(
+                "sys_mmap: address in kernel space - addr=0x{:08x}, returning EINVAL",
+                _addr
+            );
+            return Err(Err::Inval);
+        }
+        // Check for overflow when adding length to address
+        let end_addr = _addr.wrapping_add(len);
+        if end_addr < _addr {
+            // Overflow occurred - address wraps around
+            kprint!(
+                "sys_mmap: address overflow - addr=0x{:08x} len={}, returning EINVAL",
+                _addr,
+                len
+            );
+            return Err(Err::Inval);
+        }
+        // Check if address range extends into kernel space
+        if end_addr > 0xc000_0000 {
+            kprint!(
+                "sys_mmap: addr outside mmap space - end=0x{:08x}, returning EINVAL",
+                end_addr
+            );
+            return Err(Err::Inval);
+        }
     }
 
-    if _fd == -1 && _flags & MAP_FIXED != MAP_FIXED {
+    // Use the is_file_backed variable we computed earlier
+    // is_file_backed = true means not anonymous
+    let is_anonymous = !is_file_backed;
+
+    if is_anonymous && _flags & MAP_FIXED != MAP_FIXED {
         let mmap_base = get_mmap_base();
         let aligned_length = align_up(len as usize, PAGE_SIZE);
         // mmap grows down
@@ -1112,7 +1279,7 @@ fn sys_mmap(
         kprint!("sys_mmap: new mmap base = {:08x}", new_mmap_base);
         set_mmap_base(new_mmap_base);
         Ok(ptr as u32)
-    } else if _fd != -1 && _flags & MAP_FIXED != MAP_FIXED {
+    } else if !is_anonymous && _flags & MAP_FIXED != MAP_FIXED {
         let mmap_base = get_mmap_base();
         let aligned_length = align_up(len as usize, PAGE_SIZE);
         // mmap grows down
@@ -1128,9 +1295,23 @@ fn sys_mmap(
         kprint!("sys_mmap: new mmap base = {:08x}", new_mmap_base);
         set_mmap_base(new_mmap_base);
         let ptr: *mut u8 = new_mmap_base as *mut u8;
-        read_file_to_user_memory(fd, ptr as u32, len, offset)?;
+        let bytes_read = read_file_to_user_memory(fd, ptr as u32, len, offset)?;
+        // Zero-fill beyond EOF up to aligned length (Linux behavior)
+        if bytes_read < aligned_length as u32 {
+            let zero_len = aligned_length - bytes_read as usize;
+            unsafe {
+                let zero_start = ptr.add(bytes_read as usize);
+                zero_start.write_bytes(0, zero_len);
+            }
+            kprint!(
+                "sys_mmap: zero-filled from {:08x} to {:08x} ({} bytes beyond EOF)",
+                ptr as u32 + bytes_read,
+                ptr as u32 + aligned_length as u32,
+                zero_len
+            );
+        }
         Ok(ptr as u32)
-    } else if _fd != -1 && _flags & MAP_FIXED == MAP_FIXED && _addr != 0 {
+    } else if !is_anonymous && _flags & MAP_FIXED == MAP_FIXED && _addr != 0 {
         kprint!(
             "sys_mmap: wishing {:08x}-{:08x} to be mapped, and our mmap base is {:08x}",
             _addr,
@@ -1138,9 +1319,32 @@ fn sys_mmap(
             get_mmap_base()
         );
         let ptr: *mut u8 = _addr as *mut u8;
-        read_file_to_user_memory(fd, _addr, len, offset)?;
+        let aligned_length = align_up(len as usize, PAGE_SIZE);
+        let bytes_read = read_file_to_user_memory(fd, _addr, len, offset)?;
+        // Zero-fill beyond EOF up to aligned length (Linux behavior)
+        if bytes_read < aligned_length as u32 {
+            let zero_len = aligned_length - bytes_read as usize;
+            unsafe {
+                let zero_start = ptr.add(bytes_read as usize);
+                zero_start.write_bytes(0, zero_len);
+            }
+            kprint!(
+                "sys_mmap: zero-filled from {:08x} to {:08x} ({} bytes beyond EOF)",
+                _addr + bytes_read,
+                _addr + aligned_length as u32,
+                zero_len
+            );
+        }
         if _addr + len < get_mmap_base() {
             kpanic!("sys_mmap: mmap base + len < get_mmap_base()");
+        }
+        kprint!("sys_mmap: returning {:08x}", ptr as u32);
+        Ok(ptr as u32)
+    } else if is_anonymous && _flags & MAP_FIXED == MAP_FIXED && _addr != 0 {
+        let ptr: *mut u8 = _addr as *mut u8;
+        let aligned_length = align_up(len as usize, PAGE_SIZE);
+        unsafe {
+            ptr.write_bytes(0, aligned_length);
         }
         kprint!("sys_mmap: returning {:08x}", ptr as u32);
         Ok(ptr as u32)
@@ -1151,18 +1355,26 @@ fn sys_mmap(
 
 /// https://man7.org/linux/man-pages/man2/mmap.2.html
 fn sys_munmap(addr: u32, _len: u32) -> Result<u32, Err> {
-    let ptr = addr as *mut u8;
+    // munmap() unmaps the specified address range
+    // In a zkVM environment without real virtual memory management,
+    // we implement this as a validated no-op
 
-    // let msg = str_format!(str256, "sys_munmap({ptr:?}, {_len})");
-    // print(&msg);
+    kprint!("sys_munmap: addr=0x{:08x}, len={}", addr, _len);
 
-    kprint!("sys_munmap: ptr = {:?}", ptr);
-    if ptr.is_null() {
-        kprint!("sys_munmap: ptr is null");
+    // Validate address is not NULL
+    if addr == 0 {
+        kprint!("sys_munmap: addr is NULL");
         return Err(Err::Inval);
     }
 
-    Err(Err::NoSys)
+    // Validate address is page-aligned
+    if addr % PAGE_SIZE as u32 != 0 {
+        kprint!("sys_munmap: addr is not page-aligned");
+        return Err(Err::Inval);
+    }
+
+    // munmap succeeds as a no-op in zkVM
+    Ok(0)
 }
 
 /// https://man7.org/linux/man-pages/man2/ioctl.2.html
@@ -1252,5 +1464,6 @@ fn sys_getuid() -> Result<u32, Err> {
 }
 
 fn sys_getpid() -> Result<u32, Err> {
+    kprint!("sys_getpid: returning 1");
     Ok(1)
 }
