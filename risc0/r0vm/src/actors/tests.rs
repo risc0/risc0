@@ -70,7 +70,7 @@ async fn basic() {
             allocator: Some(AllocatorConfig {
                 listen: None,
                 default_release_channel: None,
-                worker_task_limit: None,
+                worker_queuing_factor: None,
             }),
             executor: Some(ExecutorConfig {
                 allocator: None,

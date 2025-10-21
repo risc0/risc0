@@ -113,11 +113,31 @@ impl fmt::Display for GpuUuid {
 )]
 pub struct GpuTokens(u64);
 
+impl From<GpuTokens> for u64 {
+    fn from(t: GpuTokens) -> Self {
+        t.0
+    }
+}
+
 impl GpuTokens {
     pub const ZERO: Self = Self(0);
 
     fn checked_sub(self, other: Self) -> Option<Self> {
         self.0.checked_sub(other.0).map(Self)
+    }
+
+    fn saturating_sub(self, other: Self) -> Self {
+        Self(self.0.saturating_sub(other.0))
+    }
+}
+
+impl std::iter::Sum<GpuTokens> for GpuTokens {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        let mut s = Self::ZERO;
+        for v in iter {
+            s += v;
+        }
+        s
     }
 }
 
@@ -159,6 +179,16 @@ impl CpuCores {
     }
 }
 
+impl std::iter::Sum<CpuCores> for CpuCores {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        let mut s = Self::ZERO;
+        for v in iter {
+            s += v;
+        }
+        s
+    }
+}
+
 /// Represents a CPU on some machine.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CpuSpec {
@@ -196,13 +226,19 @@ pub enum HardwareReservation {
 
 /// The allocator's representation of a task.
 struct Task {
-    /// A description of the task for display purposes
+    /// A description of the task for display purposes.
     description: String,
 
-    /// GPU tokens being used the task
+    /// GPU tokens the task requires to run.
+    scheduled_gpu_tokens: GpuTokens,
+
+    /// CPU cores the task requires to run.
+    scheduled_cores: CpuCores,
+
+    /// GPU tokens currently being used by the task.
     used_gpu_tokens: HashMap<GpuUuid, GpuTokens>,
 
-    /// CPU cores being used the task
+    /// CPU cores being used the task.
     used_cores: CpuCores,
 }
 
@@ -294,6 +330,17 @@ impl Worker {
             tasks,
         }
     }
+
+    fn total_scheduled_tokens(&self) -> GpuTokens {
+        self.tasks
+            .values()
+            .map(|task| task.scheduled_gpu_tokens)
+            .sum()
+    }
+
+    fn total_scheduled_cores(&self) -> CpuCores {
+        self.tasks.values().map(|task| task.scheduled_cores).sum()
+    }
 }
 
 struct Manager {
@@ -331,12 +378,6 @@ struct Gpu {
 struct PendingAllocation {
     request: AllocateHardware,
     reply_sender: Option<ReplySender<Result<()>>>,
-}
-
-#[derive(Copy, Clone, PartialEq, Eq)]
-enum HardwareFilter {
-    Cpu,
-    Gpu,
 }
 
 #[derive(Default)]
@@ -393,7 +434,7 @@ impl ManagerMap {
     }
 }
 
-pub const DEFAULT_WORKER_TASK_LIMIT: usize = 3;
+pub const DEFAULT_WORKER_QUEUING_FACTOR: f32 = 2.0;
 
 struct PendingTask {
     msg: ScheduleTask,
@@ -410,13 +451,13 @@ pub struct AllocatorActor {
 
     pending_allocations: VecDeque<PendingAllocation>,
     pending_tasks: VecDeque<PendingTask>,
-    worker_task_limit: usize,
+    worker_queuing_factor: f32,
 }
 
 impl Actor for AllocatorActor {}
 
 impl AllocatorActor {
-    pub fn new(default_release_channel: impl Into<String>, worker_task_limit: usize) -> Self {
+    pub fn new(default_release_channel: impl Into<String>, worker_queuing_factor: f32) -> Self {
         Self {
             default_release_channel: default_release_channel.into(),
             workers: HashMap::new(),
@@ -426,7 +467,7 @@ impl AllocatorActor {
             http_client: Arc::new(reqwest::Client::new()),
             pending_allocations: VecDeque::new(),
             pending_tasks: VecDeque::new(),
-            worker_task_limit,
+            worker_queuing_factor,
         }
     }
 
@@ -445,20 +486,8 @@ impl AllocatorActor {
             .collect()
     }
 
-    fn get_workers_using_machine(&self, machine_id: &MachineId) -> HashSet<WorkerId> {
-        self.workers
-            .iter()
-            .filter(|(_, w)| &w.machine == machine_id)
-            .map(|(w, _)| *w)
-            .collect()
-    }
-
-    /// The number of tasks the hardware this worker is using is currently running.
-    fn get_worker_num_hardware_tasks(
-        &self,
-        worker_id: &WorkerId,
-        hardware_filter: HardwareFilter,
-    ) -> Result<usize> {
+    /// The number tokens the worker's GPUs are scheduled to use.
+    fn get_worker_gpu_scheduled_tokens(&self, worker_id: &WorkerId) -> Result<GpuTokens> {
         let worker = self
             .workers
             .get(worker_id)
@@ -466,17 +495,8 @@ impl AllocatorActor {
 
         let mut associated_workers = HashSet::new();
         for hardware in &worker.hardware {
-            match hardware {
-                HardwareResource::Gpu(gpu) => {
-                    if hardware_filter == HardwareFilter::Gpu {
-                        associated_workers.extend(self.get_workers_using_gpu(&gpu.uuid));
-                    }
-                }
-                HardwareResource::Cpu(_) => {
-                    if hardware_filter == HardwareFilter::Cpu {
-                        associated_workers.extend(self.get_workers_using_machine(&worker.machine));
-                    }
-                }
+            if let HardwareResource::Gpu(gpu) = hardware {
+                associated_workers.extend(self.get_workers_using_gpu(&gpu.uuid));
             }
         }
 
@@ -486,36 +506,93 @@ impl AllocatorActor {
                 self.workers
                     .get(w)
                     .expect("worker should still exist")
-                    .tasks
-                    .len()
+                    .total_scheduled_tokens()
             })
             .sum())
     }
 
-    /// The number of tasks this worker is using is currently running.
-    fn get_worker_num_tasks(&self, worker_id: &WorkerId) -> Result<usize> {
+    /// The number of GPU tokens this worker is scheduled to use.
+    fn get_worker_scheduled_tokens(&self, worker_id: &WorkerId) -> Result<GpuTokens> {
         let worker = self
             .workers
             .get(worker_id)
             .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
 
-        Ok(worker.tasks.len())
+        Ok(worker.total_scheduled_tokens())
+    }
+
+    /// The number of cores this worker's machine has scheduled to use.
+    fn get_machine_scheduled_cores(&self, worker_id: &WorkerId) -> Result<CpuCores> {
+        let worker = self
+            .workers
+            .get(worker_id)
+            .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
+
+        Ok(self
+            .workers
+            .values()
+            .filter(|w| &w.machine == &worker.machine)
+            .map(|w| w.total_scheduled_cores())
+            .sum())
+    }
+
+    /// The remaining capacity for a particular worker's tasks on this GPU.
+    fn gpu_remaining_worker_capacity(
+        &self,
+        uuid: &GpuUuid,
+        worker_id: &WorkerId,
+    ) -> Result<GpuTokens> {
+        let gpu = self
+            .gpus
+            .get(uuid)
+            .ok_or_else(|| Error::new(format!("unknown GPU {uuid}")))?;
+
+        let mut capacity = GpuTokens::from(
+            (u64::from(gpu.max_tokens) as f32 * self.worker_queuing_factor).round() as u64,
+        );
+
+        let worker = self
+            .workers
+            .get(worker_id)
+            .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
+
+        for task in worker.tasks.values() {
+            capacity = capacity.saturating_sub(task.scheduled_gpu_tokens);
+        }
+
+        Ok(capacity)
+    }
+
+    /// The sum of the remaining capacity of the all the worker's GPUs.
+    fn worker_remaining_capacity(&self, worker_id: &WorkerId) -> Result<GpuTokens> {
+        let worker = self
+            .workers
+            .get(worker_id)
+            .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
+
+        let mut total = GpuTokens::ZERO;
+        for hardware in &worker.hardware {
+            if let HardwareResource::Gpu(gpu) = hardware {
+                total += self
+                    .gpu_remaining_worker_capacity(&gpu.uuid, worker_id)
+                    .expect("worker should still exist and have valid GPU");
+            }
+        }
+
+        Ok(total)
     }
 
     /// Add to the tasks we are tracking for this worker
-    fn add_worker_task(
-        &mut self,
-        worker_id: &WorkerId,
-        task_id: GlobalId,
-        description: String,
-    ) -> Result<()> {
+    fn add_worker_task(&mut self, worker_id: &WorkerId, msg: &ScheduleTask) -> Result<()> {
         let worker = self
             .workers
             .get_mut(worker_id)
             .ok_or_else(|| Error::new(format!("unknown worker {worker_id}")))?;
-        if let indexmap::map::Entry::Vacant(e) = worker.tasks.entry(task_id) {
+        if let indexmap::map::Entry::Vacant(e) = worker.tasks.entry(msg.task_id) {
             e.insert(Task {
-                description,
+                description: msg.description.clone(),
+                scheduled_gpu_tokens: msg.gpu_tokens,
+                scheduled_cores: msg.cores,
                 used_gpu_tokens: HashMap::new(),
                 used_cores: CpuCores::ZERO,
             });
@@ -723,6 +800,8 @@ pub struct ScheduleTask {
     pub candidates: Vec<WorkerId>,
     pub task_id: GlobalId,
     pub description: String,
+    pub cores: CpuCores,
+    pub gpu_tokens: GpuTokens,
 }
 
 /// Reply when a worker is successfully chosen.
@@ -744,27 +823,35 @@ impl Message<ScheduleTask> for AllocatorActor {
     }
 }
 
-impl AllocatorActor {
-    fn maybe_schedule_task(&mut self, msg: &ScheduleTask) -> Option<Result<ScheduleTaskReply>> {
-        // Choose a worker which is least busy. We prefer a quiet GPU over a quiet CPU in this
-        // selection.
-        #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
-        struct CandidateWorker {
-            gpu_tasks: usize,
-            machine_tasks: usize,
-            worker_tasks: usize,
-            id: WorkerId,
-        }
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
+struct CandidateWorker {
+    /// The amount of tokens scheduled to run on the worker's GPUs.
+    gpu_tokens: GpuTokens,
 
+    /// The amount of cores the worker machine has scheduled.
+    used_cores: CpuCores,
+
+    /// The amount of tokens that worker specifically has scheduled.
+    worker_tokens: GpuTokens,
+
+    /// The worker's id.
+    id: WorkerId,
+}
+
+impl AllocatorActor {
+    /// Choose a worker which is least busy in terms of subscribed GPU token usage.
+    ///
+    /// The id is used to break ties in a deterministic way.
+    fn maybe_schedule_task(&mut self, msg: &ScheduleTask) -> Option<Result<ScheduleTaskReply>> {
         let workers = msg
             .candidates
             .iter()
             .map(|c| -> Result<_> {
                 Ok(CandidateWorker {
+                    gpu_tokens: self.get_worker_gpu_scheduled_tokens(c)?,
+                    used_cores: self.get_machine_scheduled_cores(c)?,
+                    worker_tokens: self.get_worker_scheduled_tokens(c)?,
                     id: *c,
-                    gpu_tasks: self.get_worker_num_hardware_tasks(c, HardwareFilter::Gpu)?,
-                    machine_tasks: self.get_worker_num_hardware_tasks(c, HardwareFilter::Cpu)?,
-                    worker_tasks: self.get_worker_num_tasks(c)?,
                 })
             })
             .filter_map(|res| match res {
@@ -782,7 +869,12 @@ impl AllocatorActor {
 
         let mut workers = workers
             .into_iter()
-            .filter(|w| w.worker_tasks < self.worker_task_limit)
+            .filter(|w| {
+                msg.gpu_tokens
+                    <= self
+                        .worker_remaining_capacity(&w.id)
+                        .expect("worker should still exist")
+            })
             .collect::<Vec<_>>();
 
         if workers.is_empty() {
@@ -793,9 +885,8 @@ impl AllocatorActor {
         let chosen_worker = workers[0].id;
 
         // Count that this worker has a new task now.
-        if let Err(error) =
-            self.add_worker_task(&chosen_worker, msg.task_id, msg.description.clone())
-        {
+        let res = self.add_worker_task(&chosen_worker, &msg);
+        if let Err(error) = res {
             return Some(Err(error));
         }
 
@@ -1299,7 +1390,7 @@ mod allocation_tests {
         async fn new(worker_count: u32) -> Self {
             let (alloc_ref, mut alloc_runner) = actor::run(AllocatorActor::new(
                 "default-channel",
-                /* worker_task_limit= */ 3,
+                /* worker_queuing_factor= */ 2.0,
             ))
             .await;
 
@@ -1317,9 +1408,11 @@ mod allocation_tests {
                                 HardwareResource::Gpu(GpuSpec {
                                     name: "test GPU".into(),
                                     uuid: test_gpu_id(i as u32 / 2),
-                                    tokens: GpuTokens(100),
+                                    tokens: GpuTokens(3),
                                 }),
-                                HardwareResource::Cpu(CpuSpec { cores: CpuCores(4) }),
+                                HardwareResource::Cpu(CpuSpec {
+                                    cores: CpuCores(24),
+                                }),
                             ],
                             deployment_version: DeploymentVersion::new(
                                 "test",
@@ -1349,6 +1442,8 @@ mod allocation_tests {
                         candidates: self.workers.clone(),
                         task_id: test_task_id(i, j),
                         description: "test task".into(),
+                        cores: CpuCores::from(1),
+                        gpu_tokens: GpuTokens::from(2),
                     },
                     &mut self.alloc_runner,
                 )
@@ -1403,7 +1498,7 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(0),
-            tokens: GpuTokens(100),
+            tokens: GpuTokens(3),
         }];
 
         fixture
@@ -1503,7 +1598,7 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(0),
-            tokens: GpuTokens(100),
+            tokens: GpuTokens(3),
         }];
 
         fixture
@@ -1533,7 +1628,7 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(0),
-            tokens: GpuTokens(100),
+            tokens: GpuTokens(3),
         }];
 
         fixture
@@ -1547,7 +1642,7 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(0),
-            tokens: GpuTokens(50),
+            tokens: GpuTokens(1),
         }];
         fixture
             .deallocate_hardware(DeallocateHardware {
@@ -1576,7 +1671,7 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(0),
-            tokens: GpuTokens(100),
+            tokens: GpuTokens(3),
         }];
 
         fixture
@@ -1590,16 +1685,20 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(0),
-            tokens: GpuTokens(50),
+            tokens: GpuTokens(2),
         }];
         fixture
             .deallocate_hardware(DeallocateHardware {
                 worker_id,
                 task_id: test_task_id(1, 1),
-                hardware_reservations: hardware_reservations.clone(),
+                hardware_reservations,
             })
             .await
             .unwrap();
+        let hardware_reservations = vec![HardwareReservation::Gpu {
+            id: test_gpu_id(0),
+            tokens: GpuTokens(1),
+        }];
         fixture
             .deallocate_hardware(DeallocateHardware {
                 worker_id,
@@ -1616,7 +1715,7 @@ mod allocation_tests {
     async fn double_dealloc_gpu() {
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(0),
-            tokens: GpuTokens(100),
+            tokens: GpuTokens(3),
         }];
         double_dealloc(
             hardware_reservations,
@@ -1645,7 +1744,7 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(1),
-            tokens: GpuTokens(100),
+            tokens: GpuTokens(3),
         }];
 
         let err = fixture
@@ -1670,7 +1769,7 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(0),
-            tokens: GpuTokens(100),
+            tokens: GpuTokens(3),
         }];
 
         fixture
@@ -1684,7 +1783,7 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(1),
-            tokens: GpuTokens(100),
+            tokens: GpuTokens(3),
         }];
         let err = fixture
             .deallocate_hardware(DeallocateHardware {
@@ -1708,7 +1807,7 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(0),
-            tokens: GpuTokens(100),
+            tokens: GpuTokens(3),
         }];
 
         fixture
@@ -1779,7 +1878,7 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(0),
-            tokens: GpuTokens(100),
+            tokens: GpuTokens(3),
         }];
 
         fixture
@@ -1823,7 +1922,7 @@ mod allocation_tests {
 
         let hardware_reservations = vec![HardwareReservation::Gpu {
             id: test_gpu_id(0),
-            tokens: GpuTokens(100),
+            tokens: GpuTokens(3),
         }];
 
         let error = fixture
@@ -1888,6 +1987,8 @@ mod allocation_tests {
                 candidates: fixture.workers.clone(),
                 task_id: test_task_id(1, 8),
                 description: "test task".into(),
+                cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::from(1),
             })
             .await
             .unwrap();
@@ -2304,7 +2405,7 @@ mod proxy_tests {
 
         let alloc_ref = actor::spawn(AllocatorActor::new(
             "default-channel",
-            /* worker_task_limit= */ 3,
+            /* worker_queuing_factor= */ 2.0,
         ));
 
         for (version, manager) in &managers {
@@ -2509,7 +2610,7 @@ mod proxy_tests {
     async fn multiple_managers_registered_error() {
         let alloc_ref = actor::spawn(AllocatorActor::new(
             "default-channel",
-            /* worker_task_limit= */ 3,
+            /* worker_queuing_factor= */ 2.0,
         ));
 
         alloc_ref

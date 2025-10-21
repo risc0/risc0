@@ -301,6 +301,8 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
                     candidates,
                     task_id,
                     description: format!("{:?}", &msg.header.task_kind),
+                    cores,
+                    gpu_tokens,
                 },
                 move |res| schedule_task_cb(self_ref, task_id, res),
             )
@@ -948,6 +950,8 @@ mod tests {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,
                 description: "Execute".into(),
+                cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::ZERO,
             },
             Ok(ScheduleTaskReply { worker_id }),
         );
@@ -1010,6 +1014,8 @@ mod tests {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,
                 description: "Execute".into(),
+                cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::ZERO,
             },
             Err(Error::new("no eligible candidate workers")),
         );
@@ -1029,6 +1035,8 @@ mod tests {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,
                 description: "Execute".into(),
+                cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::ZERO,
             },
             Ok(ScheduleTaskReply { worker_id: worker1 }),
         );
@@ -1098,6 +1106,8 @@ mod tests {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,
                 description: "Execute".into(),
+                cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::ZERO,
             },
             // reply with some worker the factory doesn't know about
             Ok(ScheduleTaskReply {
@@ -1120,6 +1130,8 @@ mod tests {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,
                 description: "Execute".into(),
+                cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::ZERO,
             },
             // reply with a worker it can use now
             Ok(ScheduleTaskReply { worker_id: worker1 }),
@@ -1193,6 +1205,8 @@ mod tests {
                 candidates: vec![worker1, worker2],
                 task_id,
                 description: "Execute".into(),
+                cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::ZERO,
             },
             Ok(ScheduleTaskReply { worker_id: worker1 }),
         );
@@ -1202,6 +1216,8 @@ mod tests {
                 candidates: vec![worker2],
                 task_id,
                 description: "Execute".into(),
+                cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::ZERO,
             },
             Ok(ScheduleTaskReply { worker_id: worker2 }),
         );
@@ -1230,8 +1246,8 @@ mod tests {
             .expect(TaskMsgExpectation {
                 header: task_header.clone(),
                 task: task.kind(),
-                gpu_tokens: GpuTokens::ZERO,
                 cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::ZERO,
             });
         fixture
             .worker_mut(worker2)
@@ -1284,6 +1300,8 @@ mod tests {
                 candidates: vec![worker1, worker2],
                 task_id,
                 description: "Execute".into(),
+                cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::ZERO,
             },
             Ok(ScheduleTaskReply { worker_id: worker1 }),
         );
@@ -1355,6 +1373,8 @@ mod tests {
                 candidates: fixture.workers.iter().map(|w| w.id).collect(),
                 task_id: task_header.global_id,
                 description: "Execute".into(),
+                cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::ZERO,
             },
             Ok(ScheduleTaskReply { worker_id: worker2 }),
         );
@@ -1374,8 +1394,8 @@ mod tests {
             .expect(TaskMsgExpectation {
                 header: task_header.clone(),
                 task: task.kind(),
-                gpu_tokens: GpuTokens::ZERO,
                 cores: CpuCores::from(1),
+                gpu_tokens: GpuTokens::ZERO,
             });
         fixture
             .worker_mut(worker2)
