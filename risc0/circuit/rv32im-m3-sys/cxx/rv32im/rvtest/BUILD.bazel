@@ -14,7 +14,10 @@ cc_test(
     name = "test_atomics",
     size = "enormous",
     srcs = ["test_atomics.cpp"],
-    data = [":riscv_test_bins"],
+    data = [
+        "//firmware",
+        ":riscv_test_bins"
+    ],
     deps = ["//rv32im/test:test_prove"],
 )
 
