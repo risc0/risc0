@@ -119,7 +119,7 @@ template <typename C> struct EcallBigIntBlock {
     T::apply(ctx, readT2, cycle.get());
     T::apply(ctx, cycleCount);
     T::apply(ctx, pcDecomp, readT2.data.get());
-    T::apply(ctx, pcVerify, readT2.data.get(), mm.get());
+    T::apply(ctx, pcVerify, readT2.data.get(), mm.get() * Val<C>(MODE_MACHINE));
   }
 
   FDEV void set(CTX, EcallBigIntWitness wit) DEV;

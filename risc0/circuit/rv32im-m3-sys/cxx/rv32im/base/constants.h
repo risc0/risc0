@@ -135,6 +135,7 @@ CONSTANT uint32_t CSR_MNOPTE2 = 0x7C5;
 
 // V2 Compatibility constants
 CONSTANT uint32_t V2_COMPAT_MEPC = 0xffff0200 / 4;
+CONSTANT uint32_t V2_COMPAT_ECALL_DISPATCH = 0xffff1000 / 4;
 CONSTANT uint32_t V2_COMPAT_SPC = 0xffff0210 / 4;
 CONSTANT uint32_t V2_COMPAT_SMODE = 0xffff0214 / 4;
 

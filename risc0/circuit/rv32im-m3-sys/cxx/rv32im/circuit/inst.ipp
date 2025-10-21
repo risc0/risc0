@@ -585,7 +585,8 @@ template <typename C> FDEV void InstEcallBlock<C>::verify(CTX) DEV {
   EQ(fetch.pc.low.get(), writeSavePc.data.low.get());
   EQ(fetch.pc.high.get(), writeSavePc.data.high.get());
   // Make sure address constants are right
-  EQ(writeSavePc.wordAddr.get(), CSR_WORD(MEPC));
+  Val<C> mepcWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_MEPC, CSR_WORD(MEPC));
+  EQ(writeSavePc.wordAddr.get(), mepcWord);
   EQ(readDispatch.wordAddr.get(), CSR_WORD(MTVEC));
 }
 
@@ -620,7 +621,8 @@ template <typename C> FDEV void InstMretBlock<C>::set(CTX, InstMretWitness wit) 
 
 template <typename C> FDEV void InstMretBlock<C>::verify(CTX) DEV {
   // Make sure address constants is right
-  EQ(readPc.wordAddr.get(), CSR_WORD(MEPC));
+  Val<C> mepcWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_MEPC, CSR_WORD(MEPC));
+  EQ(readPc.wordAddr.get(), mepcWord);
 }
 
 template <typename C> FDEV void InstMretBlock<C>::addArguments(CTX) DEV {

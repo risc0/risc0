@@ -529,9 +529,11 @@ struct Emulator {
       auto& wit = trace.makeInstEcall();
       wit.cycle = curCycle;
       wit.fetch = dinst->fetch;
-      writePhysMemory(wit.savePc, CSR_WORD(MEPC), pc);
+      uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
+      writePhysMemory(wit.savePc, mepcWord, pc);
       setMode(MODE_MACHINE);
-      newPc = readPhysMemory(wit.dispatch, CSR_WORD(MTVEC));
+      uint32_t mtvecWord = v2Compat ? V2_COMPAT_ECALL_DISPATCH : CSR_WORD(MTVEC);
+      newPc = readPhysMemory(wit.dispatch, mtvecWord);
       return;
     }
     uint32_t which = peekReg(REG_A7);
@@ -561,7 +563,8 @@ struct Emulator {
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
     setMode(MODE_USER);
-    newPc = readPhysMemory(wit.readPc, CSR_WORD(MEPC)) + 4;
+    uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
+    newPc = readPhysMemory(wit.readPc, mepcWord) + 4;
   }
 
   template <uint32_t opt> inline void do_INST_SRET() {
@@ -573,7 +576,8 @@ struct Emulator {
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
     setMode(MODE_USER);
-    newPc = readPhysMemory(wit.readPc, CSR_WORD(MEPC)) + 4;
+    uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
+    newPc = readPhysMemory(wit.readPc, mepcWord) + 4;
   }
 
   void do_ECALL_TERMINATE() {

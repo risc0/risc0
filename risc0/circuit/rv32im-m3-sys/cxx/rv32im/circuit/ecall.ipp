@@ -132,7 +132,7 @@ template <typename C> FDEV void EcallBigIntBlock<C>::set(CTX, EcallBigIntWitness
   cycleCount.set(ctx, wit.count);
   mm.set(ctx, wit.t0.value);
   pcDecomp.set(ctx, wit.t2.value);
-  pcVerify.set(ctx, wit.t2.value, wit.t0.value);
+  pcVerify.set(ctx, wit.t2.value, wit.t0.value * MODE_MACHINE);
 }
 
 template <typename C> FDEV void EcallBigIntBlock<C>::verify(CTX) DEV {
