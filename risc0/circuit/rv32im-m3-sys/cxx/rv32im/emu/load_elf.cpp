@@ -46,8 +46,8 @@ void loadKernelV2(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
 }
 
 void loadUserMachineV2(std::map<uint32_t, uint32_t>& words,
-                     const std::string& kernelElf,
-                     const std::string& userElf) {
+                       const std::string& kernelElf,
+                       const std::string& userElf) {
   auto kernelElfBytes = risc0::loadFile(kernelElf);
   auto userElfBytes = risc0::loadFile(userElf);
   // Set MEPC so MRET jumpts to start of user mode code
@@ -67,7 +67,8 @@ void loadUserMachineV2(std::map<uint32_t, uint32_t>& words,
 
 void loadV3(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
   auto firmwareBytes = risc0::loadFile("firmware/firmware");
-  uint32_t firmwareEntry = risc0::loadElf(ArrayRef(firmwareBytes.data(), firmwareBytes.size()), words);
+  uint32_t firmwareEntry =
+      risc0::loadElf(ArrayRef(firmwareBytes.data(), firmwareBytes.size()), words);
   auto elfBytes = risc0::loadFile(elf);
   uint32_t entry = risc0::loadElf(ArrayRef(elfBytes.data(), elfBytes.size()), words);
   words[CSR_WORD(MNOV2COMPAT)] = 1;

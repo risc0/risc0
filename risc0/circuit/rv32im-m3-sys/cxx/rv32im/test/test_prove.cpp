@@ -20,7 +20,7 @@
 namespace risc0 {
 
 void runTest(rv32im::MemoryImage& image, rv32im::HostIO& io, size_t po2) {
-  //IHalPtr hal = getGpuHal();
+  // IHalPtr hal = getGpuHal();
   IHalPtr hal = getCpuHal();
   Rv32imProver prover(hal, po2, true);
   bool complete = prover.preflight(image, io);

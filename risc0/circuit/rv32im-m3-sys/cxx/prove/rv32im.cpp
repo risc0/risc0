@@ -40,7 +40,8 @@ Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal,
     LOG(1, "Computing data witness");
     {
       // Copy across any input globals
-      PinnedArrayRO<uint32_t> globalAux(hal, aux.slice(0, sizeof(GlobalsWitness) / sizeof(uint32_t)));
+      PinnedArrayRO<uint32_t> globalAux(hal,
+                                        aux.slice(0, sizeof(GlobalsWitness) / sizeof(uint32_t)));
       PinnedArrayWO<Fp> globalFp(hal, state[0].global);
       const GlobalsWitness* wit = reinterpret_cast<const GlobalsWitness*>(globalAux.data());
       Globals* globals = reinterpret_cast<Globals*>(globalFp.data());

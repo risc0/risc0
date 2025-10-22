@@ -36,8 +36,8 @@ template <typename C> FDEV void InstResumeBlock<C>::verify(CTX) DEV {
   EQZ((mode - MODE_USER) * (mode - MODE_SUPERVISOR) * (mode - MODE_MACHINE));
   // Verify we loaded from the right addresses
   EQ(readV2Compat.wordAddr.get(), CSR_WORD(MNOV2COMPAT));
-  EQ(readPc.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SPC,  CSR_WORD(MSPC)));
-  EQ(readMode.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SMODE,  CSR_WORD(MSMODE)));
+  EQ(readPc.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SPC, CSR_WORD(MSPC)));
+  EQ(readMode.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SMODE, CSR_WORD(MSMODE)));
 }
 
 template <typename C> FDEV void InstResumeBlock<C>::addArguments(CTX) DEV {
@@ -61,8 +61,8 @@ template <typename C> FDEV void InstSuspendBlock<C>::verify(CTX) DEV {
   // Verify we stored to the right values
   EQZ(writeMode.data.high.get());
   // Verify we stored to the right addresses
-  EQ(writePc.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SPC,  CSR_WORD(MSPC)));
-  EQ(writeMode.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SMODE,  CSR_WORD(MSMODE)));
+  EQ(writePc.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SPC, CSR_WORD(MSPC)));
+  EQ(writeMode.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SMODE, CSR_WORD(MSMODE)));
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::addArguments(CTX) DEV {
