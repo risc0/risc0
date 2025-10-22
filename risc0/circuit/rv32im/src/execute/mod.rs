@@ -42,6 +42,29 @@ pub(crate) fn node_idx(page_idx: u32) -> u32 {
     MEMORY_PAGES as u32 + page_idx
 }
 
+/// A macro used to add a trace statement to the hot path of the executor which is gated behind the
+/// exec_debug feature flag. Checking the current tracing level requires an atomic load, which can
+/// take a non-trivial amount of cycles when on the hot path of the executor loop.
+macro_rules! exec_trace {
+    ($($arg:tt)*) => {
+        #[cfg(feature = "exec_debug")]
+        {
+            ::tracing::trace!($($arg)*);
+        }
+    };
+}
+use exec_trace;
+
+macro_rules! exec_debug {
+    ($($arg:tt)*) => {
+        #[cfg(feature = "exec_debug")]
+        {
+            ::tracing::debug!($($arg)*);
+        }
+    };
+}
+use exec_debug;
+
 #[inline]
 #[cold]
 fn cold() {}

@@ -23,6 +23,7 @@ use smallvec::SmallVec;
 
 use super::{
     bibc::{self, BigIntIO},
+    exec_debug, exec_trace,
     platform::*,
     r0vm::{LoadOp, Risc0Context},
 };
@@ -62,7 +63,7 @@ fn check_bigint_addr(addr: WordAddr, mode: u32) -> Result<()> {
 
 impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
-        tracing::trace!("load(arena: {arena}, offset: {offset}, count: {count})");
+        exec_trace!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = self
             .ctx
             .load_aligned_addr_from_machine_register(LoadOp::Load, arena as usize)?;
@@ -97,7 +98,7 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
         let addr = base + offset * BIGINT_WIDTH_WORDS as u32;
         check_bigint_addr(addr, self.mode)?;
 
-        tracing::trace!("store(arena: {arena}, offset: {offset}, count: {count}, addr: {addr:?}, value: {value})");
+        exec_trace!("store(arena: {arena}, offset: {offset}, count: {count}, addr: {addr:?}, value: {value})");
 
         let limbs = value.to_limbs_asc();
         ensure!(
@@ -158,7 +159,7 @@ pub fn ecall_execute(ctx: &mut impl Risc0Context) -> Result<usize> {
 }
 
 pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
-    tracing::debug!("ecall");
+    exec_debug!("ecall");
 
     let mode = ctx.load_machine_register(LoadOp::Record, REG_T0)?;
     ensure!(
@@ -174,8 +175,8 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
     let nondet_program_size = ctx.load_u32(LoadOp::Load, blob_ptr)?;
     let verify_program_size = ctx.load_u32(LoadOp::Load, blob_ptr + 1)? as usize;
     let consts_size = ctx.load_u32(LoadOp::Load, blob_ptr + 2)?;
-    tracing::debug!("blob_ptr: {blob_ptr:?}");
-    tracing::debug!(
+    exec_debug!("blob_ptr: {blob_ptr:?}");
+    exec_debug!(
         "nondet_program_ptr: {nondet_program_ptr:?}, nondet_program_size: {nondet_program_size}"
     );
 
@@ -184,7 +185,7 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
         nondet_program_ptr.baddr(),
         nondet_program_size as usize * WORD_SIZE,
     )?;
-    tracing::debug!("program_bytes: {}", program_bytes.len());
+    exec_debug!("program_bytes: {}", program_bytes.len());
     let mut cursor = Cursor::new(program_bytes);
     let program = bibc::Program::decode(&mut cursor)?;
 
