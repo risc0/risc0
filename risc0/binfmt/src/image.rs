@@ -212,7 +212,10 @@ impl MemoryImage {
         bail!("Unavailable page: {page_idx}")
     }
 
-    /// Set the data for a page
+    /// Set the data for a page.
+    ///
+    /// Inner nodes which are ancestors of this page will be marked as dirty. The caller must call
+    /// [MemoryImage::update_digests] to recompute these nodes after calling this function.
     pub fn set_page(&mut self, page_idx: u32, page: Page) {
         // tracing::trace!("set_page({page_idx:#08x})");
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
@@ -223,6 +226,9 @@ impl MemoryImage {
     }
 
     /// Set the data for a page and with the given digest
+    ///
+    /// Inner nodes which are ancestors of this page will be marked as dirty. The caller must call
+    /// [MemoryImage::update_digests] to recompute these nodes after calling this function.
     pub fn set_page_with_digest(&mut self, page_idx: u32, page: Page, digest: Digest) {
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
         self.expand_if_zero(digest_idx);
@@ -240,7 +246,10 @@ impl MemoryImage {
             .ok_or_else(|| anyhow!("Unavailable digest: {digest_idx}"))
     }
 
-    /// Set a digest
+    /// Set a digest.
+    ///
+    /// Inner nodes which are ancestors of this page will be marked as dirty. The caller must call
+    /// [MemoryImage::update_digests] to recompute these nodes after calling this function.
     pub fn set_digest(&mut self, digest_idx: u32, digest: Digest) {
         // If digest is in a zero region, reify for proper uncles
         self.expand_if_zero(digest_idx);
