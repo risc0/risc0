@@ -11,6 +11,7 @@ cargo-semver-checks = "0.43.0"
 cargo_metadata = "0.21.0"
 clap = { version = "4.5", features = ["derive", "env"] }
 hex = "0.4"
+liblzma = { version = "0.4", features = ["static"] }
 log = "0.4"
 memmap2 = { version = "0.9", optional = true }
 prost-build = "0.14.1"
@@ -24,9 +25,7 @@ risc0-circuit-recursion = { workspace = true, features = [
   "prove",
 ], optional = true }
 risc0-core = { workspace = true }
-risc0-groth16-sys = { workspace = true, optional = true, features = [
-  "setup",
-] }
+risc0-groth16-sys = { workspace = true, optional = true, features = ["setup"] }
 risc0-zkp = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, features = ["prove"], optional = true }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods", optional = true }

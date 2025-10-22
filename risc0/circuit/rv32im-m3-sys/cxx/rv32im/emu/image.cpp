@@ -108,7 +108,8 @@ MemoryImage MemoryImage::fromRawElfBytes(const ArrayRef<uint8_t>& elf) {
 }
 
 PagePtr MemoryImage::getPage(size_t page) {
-  // printf("getPage(0x%08zx)\n", page);
+  // LOG(1, "getPage: " << HexWord{static_cast<uint32_t>(page)});
+
   // If page exists, return it
   auto it = pages.find(page);
   if (it != pages.end()) {
@@ -120,7 +121,7 @@ PagePtr MemoryImage::getPage(size_t page) {
     return zeroPage;
   }
   // Otherwise fail
-  std::cerr << "Unavailable page: " << page << "\n";
+  LOG(0, "Unavailable page: " << HexWord{static_cast<uint32_t>(page)});
   throw std::runtime_error("Attempting to read unavailable page");
 }
 

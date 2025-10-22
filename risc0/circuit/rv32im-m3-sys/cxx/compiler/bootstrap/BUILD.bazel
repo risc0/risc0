@@ -26,10 +26,17 @@ cc_test(
     ],
 )
 
+ZKRS = [
+    ("lift_rv32im_m3_" + str(po2))
+    for po2 in range(12, 25)
+]
+
 build_circuit(
     name = "zkr",
     srcs = ["gen_zkr.cpp"],
-    outs = ["rv32im_m3_lift_12.zkr"],
+    outs = [fn for zkr in ZKRS for fn in [
+        zkr + ".zkr",
+    ]],
     deps = [
         ":extract_zkr",
     ],

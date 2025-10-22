@@ -29,6 +29,7 @@ metal = { workspace = true }
 bytemuck = "1.12"
 cust = { version = "0.3", optional = true }
 lazy-regex = { version = "3.3", optional = true }
+liblzma = { version = "0.4", optional = true, features = ["static"] }
 rand = { version = "0.9.1", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion-sys = { workspace = true, optional = true }
@@ -51,6 +52,7 @@ downloader = { version = "0.2", default-features = false, features = [
   "verify",
 ], optional = true }
 hex = "0.4"
+liblzma = { version = "0.4", optional = true, features = ["static"] }
 sha2 = { version = "0.10", optional = true }
 
 [features]
@@ -68,6 +70,7 @@ prove = [
   "dep:cfg-if",
   "dep:downloader",
   "dep:lazy-regex",
+  "dep:liblzma",
   "dep:rand",
   "dep:rayon",
   "dep:risc0-sys",
