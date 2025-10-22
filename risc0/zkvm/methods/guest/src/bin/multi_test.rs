@@ -31,7 +31,7 @@ use alloc::{
 use core::{arch::asm, ptr::null_mut};
 
 use getrandom::fill;
-use risc0_circuit_keccak::{KECCAK_DEFAULT_PO2, KeccakState};
+use risc0_circuit_keccak::{KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2, KeccakState};
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
     Assumption, GUEST_MAX_MEM, ReceiptClaim,
@@ -46,7 +46,7 @@ use risc0_zkvm_platform::{
     PAGE_SIZE, fileno,
     syscall::{
         DIGEST_WORDS, bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
-        sys_poseidon2, sys_read, sys_read_words, sys_write,
+        sys_poseidon2, sys_prove_keccak, sys_read, sys_read_words, sys_write,
     },
 };
 
@@ -642,6 +642,27 @@ fn main() {
             }
 
             assert_eq!(expected, out);
+        }
+        MultiTestSpec::KeccakProve { claim_digest, po2 } => {
+            fn test_input(po2: usize) -> Vec<KeccakState> {
+                let mut state = KeccakState::default();
+                let mut pows = 987654321_u64;
+                for part in state.as_mut_slice() {
+                    *part = pows;
+                    pows = pows.wrapping_mul(123456789);
+                }
+
+                let cycles = 1 << po2;
+                let count = cycles / 200; // roughly 200 cycles per keccakf
+                vec![state; count]
+            }
+
+            for mut input in test_input(po2 as usize) {
+                unsafe { sys_keccak(&input, &mut input) };
+            }
+
+            unsafe { sys_prove_keccak(claim_digest.as_ref(), KECCAK_CONTROL_ROOT.as_ref()) };
+            env::verify_assumption2(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
         }
     }
 }
