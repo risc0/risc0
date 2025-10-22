@@ -48,7 +48,11 @@ pub enum BuildStatus {
 pub fn docker_build(manifest_path: &Path, guest_opts: &GuestOptions) -> Result<BuildStatus> {
     let manifest_dir = manifest_path.parent().unwrap().canonicalize().unwrap();
     let pkg = get_package(manifest_dir);
-    let src_dir = guest_opts.use_docker.clone().unwrap_or_default().root_dir();
+    let src_dir = guest_opts
+        .use_docker
+        .clone()
+        .unwrap_or_default()
+        .root_dir()?;
     let guest_opts = guest_opts.clone();
     let guest_info = GuestInfo {
         options: guest_opts.clone(),
@@ -74,7 +78,7 @@ pub(crate) fn build_guest_package_docker(
         .use_docker
         .clone()
         .unwrap_or_default()
-        .root_dir()
+        .root_dir()?
         .canonicalize()?;
 
     eprintln!("Docker context: {src_dir:?}");
