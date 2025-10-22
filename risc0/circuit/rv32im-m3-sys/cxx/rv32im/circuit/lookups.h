@@ -24,7 +24,7 @@ template <typename C> struct RegU8 {
 
   Reg<C> inner;
 
-  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, inner); }
+  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, "inner", inner); }
 
   FDEV void set(CTX, Val<C> in) DEV;
   FDEV inline void finalize(CTX) DEV {}
@@ -41,7 +41,7 @@ template <typename C> struct RegU16 {
 
   Reg<C> inner;
 
-  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, inner); }
+  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, "inner", inner); }
 
   FDEV void set(CTX, Val<C> in) DEV;
   FDEV inline void finalize(CTX) DEV {}
@@ -61,9 +61,9 @@ template <typename C> struct MakeTableBlock {
   ArgCountReg<C> useCount[16];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, table);
-    T::apply(ctx, start);
-    T::apply(ctx, useCount);
+    T::apply(ctx, "table", table);
+    T::apply(ctx, "start", start);
+    T::apply(ctx, "useCount", useCount);
   }
 
   FDEV void set(CTX, MakeTableWitness wit) DEV;

@@ -87,6 +87,11 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
 
   struct VerifyFwd {
     template <typename T, typename... Args>
+    static void apply(MTHR VerifyContext& ctx, const char*, MDEV T& obj, Args... args) {
+      VerifyFwd::apply(ctx, obj, args...);
+    }
+
+    template <typename T, typename... Args>
     FDEV static void apply(MTHR VerifyContext& ctx, MDEV T& obj, Args... args) {
       obj.template applyInner<VerifyFwd>(ctx, args...);
       obj.verify(ctx, args...);

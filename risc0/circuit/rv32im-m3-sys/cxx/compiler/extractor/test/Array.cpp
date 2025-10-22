@@ -24,7 +24,7 @@ template <typename C> struct Top {
 
   Reg<C> array[4];
 
-  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, array); }
+  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, "array", array); }
 
   FDEV void set(CTX, Fp val) DEV {}
   FDEV inline void finalize(CTX) DEV {}

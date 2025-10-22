@@ -26,6 +26,11 @@ using namespace risc0;
 
 struct VerifyFwd {
   template <typename T, typename... Args>
+  static void apply(RecordingContext& ctx, const char*, T& obj, Args... args) {
+    VerifyFwd::apply(ctx, obj, args...);
+  }
+
+  template <typename T, typename... Args>
   static void apply(RecordingContext& ctx, T& obj, Args... args) {
     obj.template applyInner<VerifyFwd>(ctx, args...);
     obj.verify(ctx, args...);

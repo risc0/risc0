@@ -47,25 +47,23 @@ template <typename C> struct BigIntBlock {
   RegU32<C> prevValue[4];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, mm);
-    T::apply(ctx, readInst, cycle.get());
-    T::apply(ctx, readBaseReg, cycle.get());
-    T::apply(ctx, memOp);
-    T::apply(ctx, polyOp);
-    T::apply(ctx, coeffBits);
-    T::apply(ctx, regBits);
-    T::apply(ctx, offset);
-    T::apply(ctx, offset16High);
-    T::apply(ctx, offset16Low);
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "mm", mm);
+    T::apply(ctx, "readInst", readInst, cycle.get());
+    T::apply(ctx, "readBaseReg", readBaseReg, cycle.get());
+    T::apply(ctx, "memOp", memOp);
+    T::apply(ctx, "polyOp", polyOp);
+    T::apply(ctx, "coeffBits", coeffBits);
+    T::apply(ctx, "regBits", regBits);
+    T::apply(ctx, "offset", offset);
+    T::apply(ctx, "offset16High", offset16High);
+    T::apply(ctx, "offset16Low", offset16Low);
     T::apply(
-        ctx, computeAddr, readBaseReg.data.get(), ValU32<C>(offset16Low.get(), offset16High.get()));
-    T::apply(ctx, isLastPage, computeAddr.get().high - Val<C>(0xbfff));
-    T::apply(ctx, wordBase, computeAddr.get());
-    T::apply(ctx, checkBase, computeAddr.get(), mm.get() * Val<C>(MODE_MACHINE));
-    for (size_t i = 0; i < 16; i++) {
-      T::apply(ctx, bytes[i]);
-    }
+        ctx, "computeAddr", computeAddr, readBaseReg.data.get(), ValU32<C>(offset16Low.get(), offset16High.get()));
+    T::apply(ctx, "isLastPage", isLastPage, computeAddr.get().high - Val<C>(0xbfff));
+    T::apply(ctx, "wordBase", wordBase, computeAddr.get());
+    T::apply(ctx, "checkBase", checkBase, computeAddr.get(), mm.get() * Val<C>(MODE_MACHINE));
+    T::apply(ctx, "bytes", bytes);
   }
 
   FDEV Val<C> getCoeff() DEV {

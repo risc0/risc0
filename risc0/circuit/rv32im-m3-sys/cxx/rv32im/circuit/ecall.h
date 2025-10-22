@@ -30,12 +30,12 @@ template <typename C> struct EcallTerminateBlock {
   PhysMemReadBlock<C> readOutput[8];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readA7, cycle.get());
-    T::apply(ctx, readA0, cycle.get());
-    T::apply(ctx, readA1, cycle.get());
-    T::apply(ctx, readOutput, cycle.get());
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "fetch", fetch, cycle.get());
+    T::apply(ctx, "readA7", readA7, cycle.get());
+    T::apply(ctx, "readA0", readA0, cycle.get());
+    T::apply(ctx, "readA1", readA1, cycle.get());
+    T::apply(ctx, "readOutput", readOutput, cycle.get());
   }
 
   FDEV void set(CTX, EcallTerminateWitness wit) DEV;
@@ -60,17 +60,17 @@ template <typename C> struct EcallReadBlock {
   Reg<C> finalAddrBits;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, finalCycle);
-    T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readA7, cycle.get());
-    T::apply(ctx, readA1, cycle.get());
-    T::apply(ctx, readA2, cycle.get());
-    T::apply(ctx, writeA0, cycle.get());
-    T::apply(ctx, decomp, readA1.data.get());
-    T::apply(ctx, verifyRet);
-    T::apply(ctx, finalAddrWord);
-    T::apply(ctx, finalAddrBits);
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "finalCycle", finalCycle);
+    T::apply(ctx, "fetch", fetch, cycle.get());
+    T::apply(ctx, "readA7", readA7, cycle.get());
+    T::apply(ctx, "readA1", readA1, cycle.get());
+    T::apply(ctx, "readA2", readA2, cycle.get());
+    T::apply(ctx, "writeA0", writeA0, cycle.get());
+    T::apply(ctx, "decomp", decomp, readA1.data.get());
+    T::apply(ctx, "verifyRet", verifyRet);
+    T::apply(ctx, "finalAddrWord", finalAddrWord);
+    T::apply(ctx, "finalAddrBits", finalAddrBits);
   }
 
   FDEV void set(CTX, EcallReadWitness wit) DEV;
@@ -90,12 +90,12 @@ template <typename C> struct EcallWriteBlock {
   RegU16<C> verifyRet;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readA7, cycle.get());
-    T::apply(ctx, readA2, cycle.get());
-    T::apply(ctx, writeA0, cycle.get());
-    T::apply(ctx, verifyRet);
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "fetch", fetch, cycle.get());
+    T::apply(ctx, "readA7", readA7, cycle.get());
+    T::apply(ctx, "readA2", readA2, cycle.get());
+    T::apply(ctx, "writeA0", writeA0, cycle.get());
+    T::apply(ctx, "verifyRet", verifyRet);
   }
 
   FDEV void set(CTX, EcallWriteWitness wit) DEV;
@@ -202,14 +202,14 @@ template <typename C> struct EcallBigIntBlock {
   AddressVerify<C> pcVerify;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readA7, cycle.get());
-    T::apply(ctx, readT0, cycle.get());
-    T::apply(ctx, readT2, cycle.get());
-    T::apply(ctx, cycleCount);
-    T::apply(ctx, pcDecomp, readT2.data.get());
-    T::apply(ctx, pcVerify, readT2.data.get(), mm.get() * Val<C>(MODE_MACHINE));
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "fetch", fetch, cycle.get());
+    T::apply(ctx, "readA7", readA7, cycle.get());
+    T::apply(ctx, "readT0", readT0, cycle.get());
+    T::apply(ctx, "readT2", readT2, cycle.get());
+    T::apply(ctx, "cycleCount", cycleCount);
+    T::apply(ctx, "pcDecomp", pcDecomp, readT2.data.get());
+    T::apply(ctx, "pcVerify", pcVerify, readT2.data.get(), mm.get() * Val<C>(MODE_MACHINE));
   }
 
   FDEV void set(CTX, EcallBigIntWitness wit) DEV;

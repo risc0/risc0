@@ -20,6 +20,11 @@
 class PicusDeclareInputVisitor {
 public:
   template <typename T, typename... Args>
+  static void apply(RecordingContext& ctx, const char* memberName, T& t, Args... args) {
+    PicusDeclareInputVisitor::apply(ctx, t, args...);
+  }
+
+  template <typename T, typename... Args>
   static void apply(RecordingContext& ctx, T& t, Args... args) {
     t.template applyInner<PicusDeclareInputVisitor>(ctx, args...);
   }

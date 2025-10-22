@@ -26,9 +26,9 @@ template <typename C> struct PhysMemReadBlock {
   RegU32<C> data;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
-    T::apply(ctx, wordAddr);
-    T::apply(ctx, prevCycle);
-    T::apply(ctx, data);
+    T::apply(ctx, "wordAddr", wordAddr);
+    T::apply(ctx, "prevCycle", prevCycle);
+    T::apply(ctx, "data", data);
   }
 
   FDEV void set(CTX, PhysMemReadWitness wit, uint32_t cycle) DEV;
@@ -50,10 +50,10 @@ template <typename C> struct PhysMemWriteBlock {
   RegU32<C> data;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
-    T::apply(ctx, wordAddr);
-    T::apply(ctx, prevCycle);
-    T::apply(ctx, prevData);
-    T::apply(ctx, data);
+    T::apply(ctx, "wordAddr", wordAddr);
+    T::apply(ctx, "prevCycle", prevCycle);
+    T::apply(ctx, "prevData", prevData);
+    T::apply(ctx, "data", data);
   }
 
   FDEV void set(CTX, PhysMemWriteWitness wit, uint32_t cycle) DEV;
