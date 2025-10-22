@@ -178,18 +178,19 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
   // Verify low 2 bits relate to isCompressed
   EQ(isCompressed.get(), Val<C>(1) - low16Decomp.low0.get() * low16Decomp.low1.get());
   // Compute address of second read + verify
-  Val<C> load1Addr =
-      cond<C>(isCompressed.get(), Val<C>(COMPRESSED_INST_LOOKUP_WORD) + low16(), instWordAddr + 1);
-  EQ(load1Addr, load1.getWordAddr());
+  Val<C> isUnaligned = pcDecomp.low1.get();
+  Val<C> load1Addr = cond<C>(isCompressed.get(),
+                             Val<C>(COMPRESSED_INST_LOOKUP_WORD) + low16(),
+                             cond<C>(isUnaligned, instWordAddr + 1, COMPRESSED_INST_LOOKUP_WORD));
+  EQ(load1Addr, load1.wordAddr.get());
   // Verify next instruction is right
   EQ(computeNext.low.get(), fetch.nextPc.low.get());
   EQ(computeNext.high.get(), fetch.nextPc.high.get());
   // Get actual instruction data
   Val<C> instLow = cond<C>(isCompressed.get(), load1.data.low.get(), low16());
-  Val<C> instHigh =
-      cond<C>(isCompressed.get(),
-              load1.data.high.get(),
-              cond<C>(pcDecomp.low1.get(), load1.data.low.get(), load0.data.high.get()));
+  Val<C> instHigh = cond<C>(isCompressed.get(),
+                            load1.data.high.get(),
+                            cond<C>(isUnaligned, load1.data.low.get(), load0.data.high.get()));
   // Make sure the instruction matches the bits
   EQ(instLow, recomposeRange(0, 16));
   EQ(instHigh, recomposeRange(16, 32));

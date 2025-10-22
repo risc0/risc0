@@ -280,6 +280,7 @@ pub(crate) fn allowed_control_ids(
     .into_iter()
     .chain(po2_range.clone().map(|i| format!("lift_rv32im_v2_{i}.zkr")))
     .chain(po2_range.map(|i| format!("lift_rv32im_v2_povw_{i}.zkr")))
+    .chain((risc0_circuit_recursion::LIFT_PO2_RANGE).map(|i| format!("lift_rv32im_m3_{i}.zkr")))
     .collect();
 
     let zkr_control_ids = match hash_name.as_ref() {
@@ -398,7 +399,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("94f670f5cf097d46551a1294da551fe953fee0310cb227f22c865ff8d97ffc33")
+            digest!("77b791a2a6aacfb374026c5779b2fb21881ce9344f73261131a407c78f6a1eab")
         );
     }
 

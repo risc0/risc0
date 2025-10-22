@@ -27,8 +27,9 @@ int main(int argc, char* argv[]) {
   llvm::cl::ParseCommandLineOptions(argc, argv, "rv32im-m3 predicates");
 
   zirgen::Module module;
-  size_t po2 = 12;
-  risc0::addLift(module, po2); // TODO: Loop here
+  for (size_t po2 = 12; po2 < 25; ++po2) {
+    risc0::addLift(module, po2);
+  }
   module.optimize();
   // module.dump(true);
   module.getModule().walk([&](mlir::func::FuncOp func) { zirgen::emitRecursion(outputDir, func); });

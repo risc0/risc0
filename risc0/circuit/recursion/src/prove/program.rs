@@ -55,7 +55,9 @@ impl Program {
             po2,
         };
         assert_eq!(prog.code.len() % RECURSION_CODE_SIZE, 0);
-        assert!(prog.code.len() <= (RECURSION_CODE_SIZE * ((1 << po2) - ZK_CYCLES)));
+        let lhs = prog.code.len();
+        let rhs = RECURSION_CODE_SIZE * ((1 << po2) - ZK_CYCLES);
+        assert!(lhs <= rhs, "{lhs} <= {rhs}");
         prog
     }
 

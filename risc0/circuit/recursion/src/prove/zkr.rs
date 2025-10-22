@@ -21,10 +21,22 @@ use super::Program;
 
 const ZKR_ZIP: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/recursion_zkr.zip"));
 
+include!(concat!(env!("OUT_DIR"), "/zkr_table.rs"));
+
 pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
     let mut zip = zip::ZipArchive::new(Cursor::new(ZKR_ZIP))?;
     let encoded = extract_zkr(&mut zip, name)?;
     Ok(Program::from_encoded(&encoded, po2))
+}
+
+pub fn get_zkr_m3(name: &str, po2: usize, recursion_po2: usize) -> Result<Program> {
+    let encoded = if name.contains("rv32im_m3") {
+        extract_zkr_m3(po2)?
+    } else {
+        let mut zip = zip::ZipArchive::new(Cursor::new(ZKR_ZIP))?;
+        extract_zkr(&mut zip, name)?
+    };
+    Ok(Program::from_encoded(&encoded, recursion_po2))
 }
 
 /// Iterate over all provided zkr programs.
@@ -42,7 +54,26 @@ pub fn get_all_zkrs() -> Result<Vec<(String, Vec<u32>)>> {
             let encoded = extract_zkr(&mut zip, &name)?;
             Ok((name, encoded))
         })
+        .chain(crate::LIFT_PO2_RANGE.map(|po2| {
+            let encoded = extract_zkr_m3(po2)?;
+            let name = format!("lift_rv32im_m3_{po2}.zkr");
+            Ok((name, encoded))
+        }))
         .collect()
+}
+
+fn extract_zkr_m3(po2: usize) -> Result<Vec<u32>> {
+    let idx = po2 - crate::LIFT_PO2_RANGE.min().unwrap();
+    let (xz_bytes, uncompressed_size) = ZKRS[idx];
+
+    if uncompressed_size % std::mem::size_of::<u32>() != 0 {
+        bail!(".zkr is incorrect size");
+    }
+
+    let mut decoder = liblzma::read::XzDecoder::new(xz_bytes);
+    let mut u32s = vec![0u32; uncompressed_size / std::mem::size_of::<u32>()];
+    decoder.read_exact(bytemuck::cast_slice_mut(&mut u32s))?;
+    Ok(u32s)
 }
 
 fn extract_zkr(zip: &mut zip::ZipArchive<Cursor<&[u8]>>, name: &str) -> Result<Vec<u32>> {

@@ -729,13 +729,16 @@ struct Emulator {
     // If pc == 2 (mod 4), shift to lower value
     uint32_t inst = (pc % 4 == 2) ? l0 >> 16 : l0;
     bool compressed = false;
-    // Check is low bits are 11 (normal) or anything else (compressed)
+    // Check if low bits are 11 (normal) or anything else (compressed)
     if ((inst & 3) == 3) {
-      // For normal instructions, always read next address
-      uint32_t l1 = readVirtMemory(wit->load1, pc / 4 + 1);
       // if needed, add in second half to inst
       if (pc % 4 == 2) {
+        // For unaligned addresses, always read next address
+        uint32_t l1 = VirtreadMemory(wit->load1, pc / 4 + 1);
         inst |= l1 << 16;
+      } else {
+        // For aligned addresses, read from a `null` word (and ignore the value)
+        readMemory(wit->load1, COMPRESSED_INST_LOOKUP_WORD);
       }
     } else {
       // Remove any high bits, and then do a lookup to convert
