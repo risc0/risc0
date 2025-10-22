@@ -1,7 +1,7 @@
 [alias]
 risc0 = "run --bin cargo-risczero -- risczero"
 xfast = "run --package xtask --no-default-features --"
-xtask = "run --package xtask --release --"
+xtask = "run --package xtask --profile xtask --"
 xtask-groth16 = "run --package xtask --no-default-features -F setup-groth16 -- setup-groth16"
 
 [build]
