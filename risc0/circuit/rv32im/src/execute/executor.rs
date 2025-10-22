@@ -255,6 +255,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     CycleLimit::None => {}
                 }
 
+                // TODO(victor/perf): Try wrapping the conditional in unlikely to see if that helps.
                 if self.segment_cycles() > segment_threshold {
                     tracing::debug!(
                         "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
@@ -311,6 +312,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
                 let result = Risc0Machine::step(&mut emu, self);
 
+                // TODO(victor/perf): See if marking this as cold might help.
                 if let Err(err) = result {
                     self.dump();
                     let result = self.dump_segment(
@@ -534,6 +536,9 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(())
     }
 
+    // TODO(victor/perf): This function includes a number of `unlikely` branches. Would it be worth
+    // going further by adding a const generic that allows us to turn off tracing in a way that
+    // allows the compiler to completely optimize out these branches?
     #[inline(always)]
     fn on_insn_start(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
