@@ -491,6 +491,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
     #[inline(always)]
     fn trace_instruction(&mut self, cycle: u64, kind: InsnKind, decoded: &DecodedInstruction) {
+        // TODO(victor/perf): This tracing enabled check is showing up in the trace.
         if unlikely(tracing::enabled!(tracing::Level::TRACE)) {
             tracing::trace!(
                 "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
@@ -575,6 +576,8 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
             self.ecall_metrics.0[kind].count += 1;
         }
         self.inc_user_cycles(1, Some(kind));
+        // TODO(victor/perf): This check is not marked as unlikely, although that may not matter
+        // since trace_pager is marked as cold.
         if !self.trace.is_empty() {
             self.trace_pager()?;
         }
