@@ -25,6 +25,9 @@ use lazy_static::lazy_static;
 #[cfg(feature = "std")]
 use std::sync::Arc;
 
+#[cfg(not(feature = "std"))]
+use alloc::boxed::Box;
+
 use anyhow::{anyhow, bail, Result};
 use derive_more::Debug;
 use risc0_zkp::{
@@ -87,7 +90,7 @@ impl ZeroCache {
 /// segment, at which point it is paged out.
 #[cfg(feature = "std")]
 #[derive(Clone)]
-pub struct Page(Arc<Vec<u8>>);
+pub struct Page(Arc<[u8; PAGE_BYTES]>);
 
 /// A page of memory
 ///
@@ -96,7 +99,7 @@ pub struct Page(Arc<Vec<u8>>);
 /// segment, at which point it is paged out.
 #[cfg(not(feature = "std"))]
 #[derive(Clone)]
-pub struct Page(Vec<u8>);
+pub struct Page(Box<[u8; PAGE_BYTES]>);
 
 /// A memory image
 ///
@@ -356,17 +359,16 @@ impl MemoryImage {
 
 impl Default for Page {
     fn default() -> Self {
-        Self::from_vec(vec![0; PAGE_BYTES])
+        Self::from_arr([0; PAGE_BYTES])
     }
 }
 
 impl Page {
-    /// Caller must ensure given Vec is of length `PAGE_BYTES`
-    fn from_vec(v: Vec<u8>) -> Self {
+    fn from_arr(arr: [u8; PAGE_BYTES]) -> Self {
         #[cfg(not(feature = "std"))]
-        return Self(v);
+        return Self(Box::new(arr));
         #[cfg(feature = "std")]
-        return Self(Arc::new(v));
+        return Self(Arc::new(arr));
     }
 
     /// Produce the digest of this page
@@ -407,14 +409,14 @@ impl Page {
 
     #[cfg(feature = "std")]
     #[inline(always)]
-    fn ensure_writable(&mut self) -> &mut [u8] {
-        &mut Arc::make_mut(&mut self.0)[..]
+    fn ensure_writable(&mut self) -> &mut [u8; PAGE_BYTES] {
+        &mut *Arc::make_mut(&mut self.0)
     }
 
     #[cfg(not(feature = "std"))]
     #[inline(always)]
-    fn ensure_writable(&mut self) -> &mut [u8] {
-        &mut self.0
+    fn ensure_writable(&mut self) -> &mut [u8; PAGE_BYTES] {
+        &mut *self.0
     }
 
     /// Store a word to this page
@@ -435,7 +437,7 @@ impl Page {
 
     /// Get a shared reference to the underlying data in the page
     #[inline(always)]
-    pub fn data(&self) -> &Vec<u8> {
+    pub fn data(&self) -> &[u8; PAGE_BYTES] {
         &self.0
     }
 }
@@ -457,14 +459,14 @@ impl<'de> Deserialize<'de> for Page {
         use serde::de::Error as _;
 
         let vec = <Vec<u8> as Deserialize>::deserialize(deserializer)?;
-        if vec.len() != PAGE_BYTES {
-            return Err(D::Error::custom(format!(
+        let arr = vec.try_into().map_err(|vec: Vec<u8>| {
+            D::Error::custom(format!(
                 "serialized page has wrong length {} != {}",
                 vec.len(),
                 PAGE_BYTES
-            )));
-        }
-        Ok(Self::from_vec(vec))
+            ))
+        })?;
+        Ok(Self::from_arr(arr))
     }
 }
 
