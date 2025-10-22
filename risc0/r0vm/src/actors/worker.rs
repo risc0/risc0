@@ -122,14 +122,16 @@ fn get_gpus_from_nvml() -> anyhow::Result<Vec<GpuSpec>> {
 
         let device = nvml.device_by_index(idx)?;
         let memory_info = device.memory_info()?;
-        gpus.push(GpuSpec {
-            name: device.name()?,
-            uuid: device
-                .uuid()?
-                .parse()
-                .expect("nvml device should have valid UUID"),
-            tokens: GpuTokens::from(memory_info.total / GIGABYTE),
-        });
+
+        let name = device.name()?;
+        let uuid = device
+            .uuid()?
+            .parse()
+            .expect("nvml device should have valid UUID");
+        let tokens = GpuTokens::from(memory_info.total / GIGABYTE);
+
+        tracing::info!("found GPU {name} {uuid} with memory {}", memory_info.total);
+        gpus.push(GpuSpec { name, uuid, tokens });
     }
     Ok(gpus)
 }
