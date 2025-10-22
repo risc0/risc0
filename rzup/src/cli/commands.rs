@@ -421,7 +421,7 @@ impl PublishCommand {
                     .target_triple
                     .map(|tt| {
                         crate::Platform::from_target_triple(&tt).ok_or_else(|| {
-                            RzupError::Other("unsupported target-triple {tt}".into())
+                            RzupError::Other(format!("unsupported target-triple {tt}").into())
                         })
                     })
                     .transpose()?;
