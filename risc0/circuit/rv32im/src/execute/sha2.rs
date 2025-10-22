@@ -18,6 +18,7 @@ use risc0_binfmt::WordAddr;
 use risc0_zkp::core::hash::sha::BLOCK_WORDS;
 
 use crate::execute::{
+    exec_trace,
     platform::*,
     r0vm::{LoadOp, Risc0Context, guest_addr},
 };
@@ -62,7 +63,7 @@ pub fn ecall(ctx: &mut impl Risc0Context) -> Result<()> {
     let data_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A2)?)?.waddr();
     let count = ctx.load_machine_register(LoadOp::Record, REG_A3)? & 0xffff;
     let k_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A4)?)?.waddr();
-    tracing::trace!("sha2: {count} blocks");
+    exec_trace!("sha2: {count} blocks");
 
     if count > MAX_SHA_COUNT {
         bail!("Invalid count (too big) in sha2 ecall: {count}");
@@ -99,7 +100,6 @@ pub fn ecall(ctx: &mut impl Risc0Context) -> Result<()> {
         ctx.store_u32(sha2.state_out_addr + 7u32 - i, e)?;
     }
 
-    // HERE!
     while sha2.count != 0 {
         for i in 0..SHA2_LOAD_DATA_CYCLES {
             sha2.round = i;
