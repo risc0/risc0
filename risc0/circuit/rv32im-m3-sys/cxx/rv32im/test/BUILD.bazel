@@ -57,11 +57,11 @@ risc0_cc_kernel_binary(
 
 risc0_cc_kernel_binary(
     name = "linux_kernel",
-    hdrs = ["//rv32im/base:files"],
     srcs = [
-        "linux_kernel.cpp",
         "entry.s",
+        "linux_kernel.cpp",
     ],
+    hdrs = ["//rv32im/base:files"],
 )
 
 risc0_cc_binary(
@@ -90,18 +90,11 @@ cc_test(
 )
 
 cc_test(
-    name = "test_ffi",
-    srcs = ["test_ffi.cpp"],
-    data = ["//rv32im/rvtest:riscv_test_bins"],
-    deps = ["//rv32im"],
-)
-
-cc_test(
     name = "test_linux",
     srcs = ["linux_test.cpp"],
     data = [
-        ":linux_kernel",
         ":linux_guest",
+        ":linux_kernel",
     ],
     deps = ["//rv32im/test:test_prove"],
 )
@@ -117,6 +110,24 @@ cc_test(
     srcs = ["smoke.cpp"],
     data = [
         ":smoke_kernel",
+    ],
+    deps = ["//rv32im/test:test_prove"],
+)
+
+risc0_cc_kernel_binary(
+    name = "seal_test_kernel",
+    srcs = [
+        "seal_test_kernel.cpp",
+        "entry.s",
+    ],
+    hdrs = ["//rv32im/base:files"],
+)
+
+cc_test(
+    name = "seal_test",
+    srcs = ["seal_test.cpp"],
+    data = [
+        ":seal_test_kernel",
     ],
     deps = ["//rv32im/test:test_prove"],
 )

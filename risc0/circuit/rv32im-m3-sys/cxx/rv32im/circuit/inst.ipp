@@ -12,10 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define GLOBAL_OFFSET(member)                                                                      \
+  (reinterpret_cast<MDEV Fp*>(&reinterpret_cast<MDEV Globals*>(0x10000)->member) -                 \
+   reinterpret_cast<MDEV Fp*>(0x10000))
+#define GLOBAL_GET(member) ctx.globalGet(GLOBAL_OFFSET(member))
+#define GLOBAL_SET(member, val) ctx.globalSet(GLOBAL_OFFSET(member), (val))
+
 template <typename C> FDEV void InstResumeBlock<C>::set(CTX, InstResumeWitness wit) DEV {
   readV2Compat.set(ctx, wit.v2Compat, 1);
   readPc.set(ctx, wit.pc, 1);
   readMode.set(ctx, wit.mode, 1);
+  writeVersion.set(ctx, wit.version, 1);
 }
 
 template <typename C> FDEV void InstResumeBlock<C>::verify(CTX) DEV {
@@ -45,9 +52,12 @@ template <typename C> FDEV void InstSuspendBlock<C>::set(CTX, InstSuspendWitness
   iCacheCycle.set(ctx, wit.iCacheCycle);
   writePc.set(ctx, wit.pc, wit.cycle);
   writeMode.set(ctx, wit.mode, wit.cycle);
+  GLOBAL_SET(isTerminate, 0);
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::verify(CTX) DEV {
+  // Verify terminate
+  EQ(GLOBAL_GET(isTerminate), 0);
   // Verify we stored to the right values
   EQZ(writeMode.data.high.get());
   // Verify we stored to the right addresses

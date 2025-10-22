@@ -108,9 +108,10 @@ struct FinalizeFwd {
     obj.finalize(ctx);
   }
 
-  template <typename T, typename C, size_t N> FDEV static void apply(MTHR C& ctx, MDEV T (&t)[N]) {
+  template <typename T, typename C, size_t N, typename... Args>
+  FDEV static void apply(MTHR C& ctx, MDEV T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; i++) {
-      FinalizeFwd::apply(ctx, t[i]);
+      FinalizeFwd::apply(ctx, t[i], args...);
     }
   }
 };

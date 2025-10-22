@@ -81,6 +81,9 @@ impl ProverServer for ProverImpl {
             &self.opts.hashfn
         );
 
+        #[cfg(all(test, feature = "cuda"))]
+        gpu_guard::assert_gpu_semaphore_held();
+
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
@@ -223,6 +226,33 @@ impl ProverServer for ProverImpl {
             "proving not implemented for receipt kind {:?}",
             self.opts.receipt_kind
         );
+    }
+
+    #[cfg(feature = "rv32im-m3")]
+    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(segment.po2())?;
+        let seal = prover.prove(&segment.inner)?;
+
+        let claim = ReceiptClaim::decode_m3_with_output(&seal, segment.output.clone())
+            .context("Decode ReceiptClaim from seal")?;
+
+        let verifier_parameters = ctx
+            .segment_verifier_parameters
+            .as_ref()
+            .ok_or_else(|| anyhow!("segment receipt verifier parameters missing from context"))?
+            .digest();
+        let receipt = SegmentReceipt {
+            seal,
+            index: segment.index,
+            hashfn: self.opts.hashfn.clone(),
+            claim,
+            verifier_parameters,
+        };
+        receipt
+            .verify_integrity_with_context(ctx)
+            .context("verify segment")?;
+
+        Ok(receipt)
     }
 
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {

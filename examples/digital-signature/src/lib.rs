@@ -67,6 +67,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn protocol() {
         let pass_str = "passphr4ase";
         let msg_str = "This message was signed by me";

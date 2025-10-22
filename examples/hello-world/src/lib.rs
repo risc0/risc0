@@ -56,6 +56,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn test_hello_world() {
         const TEST_FACTOR_ONE: u64 = 17;
         const TEST_FACTOR_TWO: u64 = 23;

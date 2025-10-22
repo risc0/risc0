@@ -228,7 +228,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
             partition: 1
             ci_profile: slow
           - os: macOS
@@ -287,7 +287,7 @@ jobs:
       - name: test workspace
         run: ${{ matrix.test_command }} --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --exclude doc-test
       - name: test risc0-r0vm (disable-dev-mode)
-        run: cargo test --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
+        run: cargo nextest run --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
       - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}-${{ matrix.partition }}
@@ -308,7 +308,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
             ci_profile: slow
           - os: macOS
             arch: ARM64
@@ -370,7 +370,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
           - os: macOS
             arch: ARM64
             feature: default
@@ -404,10 +404,7 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - name: test in dev mode
-        run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace --exclude prover-example
-        working-directory: examples
-      - name: test prover example
-        run: ${{ matrix.test_command }} --release --locked -F $FEATURE -p prover-example
+        run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:

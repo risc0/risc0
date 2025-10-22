@@ -19,8 +19,8 @@ use std::{
 };
 
 use risc0_zkvm::{
-    AssumptionReceipt, InnerReceipt, ProveKeccakRequest, Receipt, ReceiptClaim, Segment,
-    SegmentReceipt, SuccinctReceipt, Unknown, sha::Digestible,
+    AssumptionReceipt, FakeReceipt, InnerReceipt, ProveKeccakRequest, Receipt, ReceiptClaim,
+    Segment, SegmentReceipt, SuccinctReceipt, Unknown, sha::Digestible,
 };
 use tokio::time::Instant;
 
@@ -65,11 +65,15 @@ pub(crate) struct JobActor {
     keccak_root: Option<UnknownReceipt>,
     assumptions: Option<VecDeque<UnknownReceipt>>,
     final_receipt: Option<Arc<SuccinctReceipt<ReceiptClaim>>>,
+    dev_mode: Option<bool>,
 
     tracer: JobTracer,
 }
 
 type UnknownReceipt = Arc<SuccinctReceipt<Unknown>>;
+
+const ERR_DEV_MODE_DISABLED: &str =
+    "zkVM: dev mode is disabled. Unset RISC0_DEV_MODE environment variable to produce valid proofs";
 
 impl JobActor {
     async fn prove_keccak_done(
@@ -147,6 +151,16 @@ impl JobActor {
         Ok(())
     }
 
+    fn dev_mode(&self) -> Result<bool> {
+        let dev_mode = self
+            .dev_mode
+            .ok_or_else(|| Error::new("proof request should come first"))?;
+        if dev_mode && cfg!(feature = "disable-dev-mode") {
+            return Err(Error::new(ERR_DEV_MODE_DISABLED));
+        }
+        Ok(dev_mode)
+    }
+
     async fn union(
         &mut self,
         height: usize,
@@ -158,6 +172,7 @@ impl JobActor {
             height,
             pos,
             receipts: vec![lhs, rhs],
+            dev_mode: self.dev_mode()?,
         })))
         .await?;
         Ok(())
@@ -212,6 +227,7 @@ impl JobActorNew for JobActor {
             pending_keccak_peaks: VecDeque::new(),
             assumptions: None,
             final_receipt: None,
+            dev_mode: None,
 
             tracer,
         }
@@ -239,8 +255,11 @@ impl JobActor {
     async fn prove_segment(&mut self, header: TaskHeader, segment: Segment) -> Result<()> {
         self.tracer.span_event(header, "segment");
         tracing::info!("ProveSegment: {}", segment.index);
-        self.submit_task(Task::ProveSegment(Arc::new(ProveSegmentTask { segment })))
-            .await?;
+        self.submit_task(Task::ProveSegment(Arc::new(ProveSegmentTask {
+            segment,
+            dev_mode: self.dev_mode()?,
+        })))
+        .await?;
         Ok(())
     }
 
@@ -250,6 +269,7 @@ impl JobActor {
         self.submit_task(Task::ProveKeccak(Arc::new(ProveKeccakTask {
             index,
             request,
+            dev_mode: self.dev_mode()?,
         })))
         .await?;
         Ok(())
@@ -272,8 +292,11 @@ impl JobActor {
 
     async fn prove_segment_done(&mut self, receipt: Box<SegmentReceipt>) -> Result<()> {
         tracing::info!("ProveSegmentDone: {}", receipt.index);
-        self.submit_task(Task::Lift(Arc::new(LiftTask { receipt: *receipt })))
-            .await?;
+        self.submit_task(Task::Lift(Arc::new(LiftTask {
+            receipt: *receipt,
+            dev_mode: self.dev_mode()?,
+        })))
+        .await?;
         Ok(())
     }
 
@@ -343,8 +366,12 @@ impl JobActor {
             self.joins.remove(&b_range);
             let range = (a_range.start..b_range.end).into();
             let receipts = vec![(*a_receipt).clone(), (*b_receipt).clone()];
-            self.submit_task(Task::Join(Arc::new(JoinTask { range, receipts })))
-                .await?;
+            self.submit_task(Task::Join(Arc::new(JoinTask {
+                range,
+                receipts,
+                dev_mode: self.dev_mode()?,
+            })))
+            .await?;
         }
         Ok(())
     }
@@ -387,6 +414,7 @@ impl JobActor {
             self.submit_task(Task::Resolve(Arc::new(ResolveTask {
                 conditional: final_receipt.clone(),
                 assumption: assumption.clone(),
+                dev_mode: self.dev_mode()?,
             })))
             .await?;
 
@@ -403,14 +431,24 @@ impl JobActor {
         self_ref: ActorRef<Self>,
     ) -> Result<()> {
         tracing::info!("done");
-        let receipt = Receipt::new(
-            InnerReceipt::Succinct(final_receipt.as_ref().clone()),
-            session
-                .journal
-                .clone()
-                .ok_or_else(|| Error::new("missing journal"))?
-                .bytes,
-        );
+
+        let journal_bytes = session
+            .journal
+            .clone()
+            .ok_or_else(|| Error::new("missing journal"))?
+            .bytes;
+        let receipt = if self.dev_mode()? {
+            Receipt::new(
+                FakeReceipt::new(final_receipt.claim.clone()).into(),
+                journal_bytes,
+            )
+        } else {
+            Receipt::new(
+                InnerReceipt::Succinct(final_receipt.as_ref().clone()),
+                journal_bytes,
+            )
+        };
+
         let result = ProofResult {
             session: session.clone(),
             receipt: Some(Arc::new(receipt)),
@@ -433,7 +471,7 @@ impl JobActor {
             return Ok(());
         };
 
-        let Some(join_root) = self.join_root(&session) else {
+        let Some(join_root) = self.join_root(&session)? else {
             return Ok(());
         };
 
@@ -451,14 +489,22 @@ impl JobActor {
         Ok(())
     }
 
-    fn join_root(&self, session: &Arc<Session>) -> Option<Arc<SuccinctReceipt<ReceiptClaim>>> {
+    fn join_root(
+        &self,
+        session: &Arc<Session>,
+    ) -> Result<Option<Arc<SuccinctReceipt<ReceiptClaim>>>> {
         if let Some((range, join_root)) = self.joins.first_key_value()
             && range.start == 0
             && range.end == session.stats.segments
         {
-            return Some(join_root.clone());
+            if self.dev_mode()? {
+                let mut join_root = SuccinctReceipt::clone(join_root);
+                join_root.claim = session.receipt_claim.clone().into();
+                return Ok(Some(Arc::new(join_root)));
+            }
+            return Ok(Some(join_root.clone()));
         }
-        None
+        Ok(None)
     }
 
     async fn maybe_finish_keccak_mmr(&mut self) -> Result<bool> {
@@ -575,6 +621,7 @@ impl JobActor {
             return Err(Error::new("received duplicate ProofRequest"));
         }
         self.reply_sender = ctx.reply_sender();
+        self.dev_mode = Some(request.dev_mode);
 
         self.submit_task(Task::Execute(Arc::new(ExecuteTask { request })))
             .await?;

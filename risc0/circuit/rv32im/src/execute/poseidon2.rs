@@ -25,12 +25,9 @@ use risc0_zkp::{
     field::baby_bear::{self},
 };
 
-use crate::{
-    execute::{
-        platform::*,
-        r0vm::{LoadOp, Risc0Context},
-    },
-    zirgen::circuit::ExtVal,
+use crate::execute::{
+    platform::*,
+    r0vm::{LoadOp, Risc0Context},
 };
 
 const BABY_BEAR_P_U32: u32 = baby_bear::P;
@@ -43,14 +40,17 @@ pub(crate) struct Poseidon2State {
     pub buf_out_addr: u32,
     pub is_elem: u32,
     pub check_out: u32,
+    #[cfg(feature = "prove")]
     pub load_tx_type: u32,
     pub next_state: CycleState,
     pub sub_state: u32,
     pub buf_in_addr: u32,
     pub count: u32,
+    #[cfg(feature = "prove")]
     pub mode: u32,
     pub inner: [u32; CELLS],
-    pub zcheck: ExtVal,
+    #[cfg(feature = "prove")]
+    pub zcheck: crate::zirgen::circuit::ExtVal,
 }
 
 impl Poseidon2State {
@@ -70,7 +70,9 @@ impl Poseidon2State {
             is_elem: if is_elem == 0 { 0 } else { 1 },
             check_out: if check_out == 0 { 0 } else { 1 },
             count: bits_count & 0xffff,
+            #[cfg(feature = "prove")]
             mode: 1,
+            #[cfg(feature = "prove")]
             load_tx_type: tx::READ,
             next_state: CycleState::PoseidonEntry,
             ..Default::default()

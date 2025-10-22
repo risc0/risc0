@@ -21,6 +21,9 @@ struct EcallTerminateWitness {
   uint32_t cycle;
   FetchWitness fetch;
   RegMemReadWitness a7;
+  RegMemReadWitness a0;
+  RegMemReadWitness a1;
+  PhysMemReadWitness output[8];
 };
 
 struct EcallReadWitness {

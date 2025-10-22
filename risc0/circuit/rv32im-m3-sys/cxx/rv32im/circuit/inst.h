@@ -27,11 +27,13 @@ template <typename C> struct InstResumeBlock {
   PhysMemReadBlock<C> readV2Compat;
   PhysMemReadBlock<C> readPc;
   PhysMemReadBlock<C> readMode;
+  PhysMemWriteBlock<C> writeVersion;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, readV2Compat, 1);
     T::apply(ctx, readPc, 1);
     T::apply(ctx, readMode, 1);
+    T::apply(ctx, writeVersion, 1);
   }
 
   FDEV void set(CTX, InstResumeWitness wit) DEV;

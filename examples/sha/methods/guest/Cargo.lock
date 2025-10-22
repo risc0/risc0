@@ -895,9 +895,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.85"
+version = "1.0.101"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22244ce15aa966053a896d1accb3a6e68469b97c7f33f284b99f0d576879fc23"
+checksum = "89ae43fd86e4158d6db51ad8e2b80f313af9cc74f5c0e03ccb87de09998732de"
 dependencies = [
  "unicode-ident",
 ]
@@ -1056,6 +1056,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-rv32im-m3"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "risc0-binfmt",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
+ "serde",
+ "tracing",
+]
+
+[[package]]
 name = "risc0-core"
 version = "5.0.0"
 dependencies = [
@@ -1090,6 +1103,7 @@ dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
  "risc0-zkvm-platform",
+ "sha2",
 ]
 
 [[package]]
@@ -1123,6 +1137,7 @@ dependencies = [
  "anyhow",
  "borsh",
  "bytemuck",
+ "cfg-if",
  "derive_more",
  "enum-map",
  "hex",
@@ -1130,6 +1145,7 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
+ "risc0-circuit-rv32im-m3",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
@@ -1226,8 +1242,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.6"
-source = "git+https://github.com/risc0/RustCrypto-hashes?tag=sha2-v0.10.6-risczero.0#7fd6900c4f637bd15ee2642dfa77110f8f1ad065"
+version = "0.10.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -1457,3 +1474,8 @@ dependencies = [
  "quote",
  "syn 2.0.87",
 ]
+
+[[patch.unused]]
+name = "sha2"
+version = "0.10.6"
+source = "git+https://github.com/risc0/RustCrypto-hashes?tag=sha2-v0.10.6-risczero.0#7fd6900c4f637bd15ee2642dfa77110f8f1ad065"

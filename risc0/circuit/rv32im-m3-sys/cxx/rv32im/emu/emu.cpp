@@ -288,9 +288,11 @@ struct Emulator {
     if (v2Compat) {
       pc = readPhysMemory(resumeWit.pc, V2_COMPAT_SPC);
       setMode(readPhysMemory(resumeWit.mode, V2_COMPAT_SMODE) ? MODE_MACHINE : MODE_USER);
+      writeMemory(resumeWit.version, RV32IM_VERSION_WORD, RV32IM_CIRCUIT_VERSION);
     } else {
       pc = readPhysMemory(resumeWit.pc, CSR_WORD(MSPC));
       setMode(readPhysMemory(resumeWit.pc, CSR_WORD(MSMODE)));
+      writeMemory(resumeWit.version, RV32IM_VERSION_WORD, RV32IM_CIRCUIT_VERSION);
     }
     curCycle++;
   }
@@ -552,6 +554,7 @@ struct Emulator {
       do_ECALL_BIG_INT();
       break;
     default:
+      LOG(0, "Invalid ECALL in machine mode: " << which);
       trap("Invalid ECALL in machine mode");
     }
   }
@@ -586,6 +589,11 @@ struct Emulator {
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
     readReg(wit.a7, REG_A7);
+    readReg(wit.a0, REG_A7);
+    readReg(wit.a1, REG_A7);
+    for (size_t i = 0; i < 8; i++) {
+      readMemory(wit.output[i], OUTPUT_WORD + i);
+    }
     done = true;
   }
 

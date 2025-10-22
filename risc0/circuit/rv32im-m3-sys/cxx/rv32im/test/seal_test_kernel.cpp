@@ -13,17 +13,27 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-mod semaphore;
+#include <stdint.h>
+#include <sys/errno.h>
 
-pub use gpu_guard_macros::gpu_guard;
-pub use semaphore::{acquire_gpu_semaphore, assert_gpu_semaphore_held};
+#include "rv32im/base/constants.h"
 
-/// Checks if RISC0_DEV_MODE environment variable is set. Useful so the macro can potentially
-/// disable itself if dev-mode is enabled.
-pub fn __is_dev_mode() -> bool {
-    std::env::var("RISC0_DEV_MODE")
-        .ok()
-        .map(|x| x.to_lowercase())
-        .filter(|x| x == "1" || x == "true" || x == "yes")
-        .is_some()
+inline void terminate(uint32_t val) {
+  register uintptr_t a0 asm("a0") = 0;
+  register uintptr_t a1 asm("a1") = val;
+  register uintptr_t a7 asm("a7") = 0;
+  asm volatile("ecall\n"
+               :                  // no outputs
+               : "r"(a0), "r"(a1), "r"(a7) // inputs
+               :                  // no clobbers
+  );
+}
+
+extern "C" void start() {
+  uint32_t* inAddr = reinterpret_cast<uint32_t*>(OUTPUT_ADDR);
+  uint32_t* outAddr = reinterpret_cast<uint32_t*>(OUTPUT_ADDR);
+  for (size_t i = 0; i < 8; i++) {
+    outAddr[i] = inAddr[i] + i;
+  }
+  terminate(17);
 }

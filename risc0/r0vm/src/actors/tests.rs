@@ -100,6 +100,7 @@ async fn basic() {
         assumptions: vec![],
         segment_limit_po2: po2,
         execute_only: false,
+        dev_mode: false,
     };
 
     let info = app.proof_request(request).await.unwrap();
@@ -111,6 +112,7 @@ async fn basic() {
     let request = ShrinkWrapRequest {
         kind: ShrinkWrapKind::Groth16,
         receipt: (*result.receipt.unwrap()).clone(),
+        dev_mode: false,
     };
 
     let info = app.shrink_wrap_request(request).await.unwrap();

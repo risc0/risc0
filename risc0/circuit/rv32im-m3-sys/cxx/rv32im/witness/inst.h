@@ -18,9 +18,10 @@
 #include "rv32im/witness/decode.h"
 
 struct InstResumeWitness {
+  PhysMemReadWitness v2Compat;
   PhysMemReadWitness pc;
   PhysMemReadWitness mode;
-  PhysMemReadWitness v2Compat;
+  PhysMemWriteWitness version;
 };
 
 struct InstSuspendWitness {

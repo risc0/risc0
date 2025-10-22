@@ -10,7 +10,7 @@ wordle-core = { path = "core" }
 wordle-methods = { path = "methods" }
 
 [dev-dependencies]
-serial_test = "3.1"
+gpu-guard = { path = "../../tools/gpu-guard" }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

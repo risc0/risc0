@@ -21,15 +21,20 @@
 template <typename C> struct EcallTerminateBlock {
   CONSTANT static char NAME[] = "EcallTerminate";
 
-  // TODO: pass A0/A1 on?  Clear suspend data?
   Reg<C> cycle;
   FetchBlock<C> fetch;
   RegMemReadBlock<C> readA7;
+  RegMemReadBlock<C> readA0;
+  RegMemReadBlock<C> readA1;
+  PhysMemReadBlock<C> readOutput[8];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readA7, cycle.get());
+    T::apply(ctx, readA0, cycle.get());
+    T::apply(ctx, readA1, cycle.get());
+    T::apply(ctx, readOutput, cycle.get());
   }
 
   FDEV void set(CTX, EcallTerminateWitness wit) DEV;

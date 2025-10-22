@@ -95,8 +95,8 @@ void PagedMemory::pageInPage(uint32_t page) {
     for (size_t j = 0; j < MPAGE_PART_SIZE; j++) {
       uint32_t word = (*pagePtr)[i * MPAGE_PART_SIZE + j];
       pip.data[j] = word;
-      data[2 * j] = Fp::fromRaw(word & 0xffff);
-      data[2 * j + 1] = Fp::fromRaw(word >> 16);
+      data[2 * j] = word & 0xffff;
+      data[2 * j + 1] = word >> 16;
     }
     cur = p2.doBlock(cur, data, i == NUM_PARTS - 1);
     toFpDigest(pip.out, cur);
@@ -134,9 +134,9 @@ void PagedMemory::pageOutPage(uint32_t page, const PageDetails* pageData) {
       uint32_t word = (*pageData)[i * MPAGE_PART_SIZE + j].value;
       (*newPage)[i * MPAGE_PART_SIZE + j] = word;
       pop.data[j] = word;
-      pop.cycle[j] = (*pageData)[i * MPAGE_PART_SIZE + j].cycle;
-      data[2 * j] = Fp::fromRaw(word & 0xffff);
-      data[2 * j + 1] = Fp::fromRaw(word >> 16);
+      pop.cycle[j] = (*pageData)[i * PAGE_PART_SIZE + j].cycle;
+      data[2 * j] = word & 0xffff;
+      data[2 * j + 1] = word >> 16;
     }
     cur = p2.doBlock(cur, data, i == NUM_PARTS - 1);
     toFpDigest(pop.out, cur);

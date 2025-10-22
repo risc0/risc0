@@ -30,8 +30,8 @@ Digest hashPage(const uint32_t* data) {
   // Load data into felts as 16 bit values
   for (size_t i = 0; i < MPAGE_SIZE_WORDS / 8; i++) {
     for (size_t j = 0; j < 8; j++) {
-      cells[2 * j] = Fp::fromRaw(data[i * 8 + j] & 0xffff);
-      cells[2 * j + 1] = Fp::fromRaw(data[i * 8 + j] >> 16);
+      cells[2 * j] = Fp(data[i * 8 + j] & 0xffff);
+      cells[2 * j + 1] = Fp(data[i * 8 + j] >> 16);
     }
     p2impl::poseidonSponge(cells);
   }
@@ -90,6 +90,7 @@ MemoryImage MemoryImage::fromWords(const std::map<uint32_t, uint32_t>& words) {
 }
 
 PagePtr MemoryImage::getPage(size_t page) {
+  // printf("getPage(0x%08zx)\n", page);
   // If page exists, return it
   auto it = pages.find(page);
   if (it != pages.end()) {
@@ -214,6 +215,28 @@ bool MemoryImage::expandIfZero(size_t idx) {
     return true;
   }
   return false;
+}
+
+void MemoryImage::setPageRaw(size_t pidx, PagePtr page) {
+  pages[pidx] = page;
+}
+
+void MemoryImage::setDigestRaw(size_t didx, const Digest& digest) {
+  digests[didx] = digest;
+}
+
+void MemoryImage::dumpZeros() {
+  LOG(0, "Zero Digests");
+  for (auto& digest : zeroDigests) {
+    LOG(0, "digest: " << digest);
+  }
+}
+
+void MemoryImage::dump() {
+  LOG(0, "MemoryImage Digests");
+  for (auto& digest : getKnownDigests()) {
+    LOG(0, "digest: " << HexWord{digest.first} << ": " << digest.second);
+  }
 }
 
 } // namespace risc0::rv32im
