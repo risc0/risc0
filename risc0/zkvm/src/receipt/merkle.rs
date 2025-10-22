@@ -60,12 +60,13 @@ pub struct MerkleProof {
 impl MerkleGroup {
     /// Create a new [MerkleGroup] from the given leaves.
     /// Will fail if too many leaves are given for the default depth.
-    pub fn new(leaves: Vec<Digest>) -> Result<Self> {
+    pub fn new(mut leaves: Vec<Digest>) -> Result<Self> {
         let max_len = 1 << ALLOWED_CODE_MERKLE_DEPTH;
         ensure!(
             leaves.len() < max_len,
             "a maximum of {max_len} leaves can be added to a MerkleGroup"
         );
+        leaves.sort();
         Ok(Self {
             depth: ALLOWED_CODE_MERKLE_DEPTH as u32,
             leaves,

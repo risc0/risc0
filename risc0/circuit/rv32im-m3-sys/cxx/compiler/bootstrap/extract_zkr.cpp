@@ -17,6 +17,7 @@
 
 #include "rv32im/circuit/verify.h"
 #include "verify/rv32im.h"
+#include "zirgen/circuit/predicates/predicates.h"
 #include "zirgen/circuit/recursion/code.h"
 #include "zirgen/circuit/verify/verify.h"
 
@@ -159,15 +160,19 @@ namespace risc0 {
 
 void addLift(zirgen::Module& module, size_t po2) {
   RV32IMM3CircuitInterface circuit;
-  module.addFunc<1>("rv32im_m3_lift_" + std::to_string(po2),
-                    // {zirgen::gbuf(recursion::kOutSize), zirgen::ioparg(), zirgen::ioparg()},
-                    {zirgen::ioparg()},
-                    [&](zirgen::ReadIopVal seal) {
-                      // [&](zirgen::Buffer out, ReadIopVal rootIop, zirgen::ReadIopVal seal) {
+  module.addFunc<3>("lift_rv32im_m3_" + std::to_string(po2),
+                    {zirgen::gbuf(recursion::kOutSize), zirgen::ioparg(), zirgen::ioparg()},
+                    [&](zirgen::Buffer out, zirgen::ReadIopVal rootIop, zirgen::ReadIopVal seal) {
                       // TODO: Consider what I need to actually commit to
-                      // DigestVal root = rootIop.readDigests(1)[0];
-                      zirgen::verify::verifyV3(seal, po2, circuit);
-                      // out.setDigest(0, root, "root");
+                      zirgen::DigestVal root = rootIop.readDigests(1)[0];
+                      auto globals = zirgen::verify::verifyV3(seal, po2, circuit);
+                      llvm::ArrayRef inStream(globals);
+                      auto claim = zirgen::predicates::ReceiptClaim::fromRv32imV3(inStream, po2);
+                      std::vector<zirgen::Val> outStream;
+                      claim.write(outStream);
+                      doExtern("write", "", 0, outStream);
+                      out.setDigest(0, root, "root");
+                      out.setDigest(1, claim.digest(), "outDigest");
                     });
 }
 

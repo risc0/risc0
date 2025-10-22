@@ -157,9 +157,7 @@ impl ReceiptClaim {
         seal: &[u32],
         output: Option<Output>,
     ) -> anyhow::Result<ReceiptClaim> {
-        use risc0_circuit_rv32im_m3::Rv32imM3Claim;
-
-        let claim = Rv32imM3Claim::decode(seal)?;
+        let claim = risc0_circuit_rv32im_m3::Claim::decode(seal)?;
         tracing::debug!("claim: {claim:#?}");
 
         let exit_code = claim.exit_code()?;
