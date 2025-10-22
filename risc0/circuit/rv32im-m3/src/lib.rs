@@ -54,7 +54,8 @@ pub struct TerminateState {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct Rv32imM3Claim {
+pub struct Claim {
+    pub po2: u32,
     pub pre_state: Digest,
     pub post_state: Digest,
     pub output: Option<Digest>,
@@ -114,14 +115,14 @@ impl<'a> Decoder<'a> {
     }
 }
 
-impl Rv32imM3Claim {
+impl Claim {
     pub fn decode(seal: &[u32]) -> Result<Self> {
         let mut decoder = Decoder::new(seal);
 
         let version = decoder.read_u32();
         ensure!(version == RV32IM_SEAL_VERSION, "seal version mismatch");
 
-        let _po2 = decoder.read_u32();
+        let po2 = decoder.read_u32();
 
         let pre_state = decoder.read_digest_from_words()?;
         let post_state = decoder.read_digest_from_words()?;
@@ -143,6 +144,7 @@ impl Rv32imM3Claim {
         };
 
         Ok(Self {
+            po2,
             pre_state,
             post_state,
             output,

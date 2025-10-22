@@ -79,9 +79,6 @@ risc0-zkvm = { version = "4.0.0", default-features = false, path = "risc0/zkvm" 
 risc0-zkvm-platform = { version = "2.3.0", default-features = false, path = "risc0/zkvm/platform" }
 rzup = { version = "0.6.0", default-features = false, path = "rzup" }
 
-[profile.bench]
-lto = true
-
 # Always optimize; otherwise tests take excessively long.
 [profile.dev]
 opt-level = 3
@@ -95,6 +92,11 @@ incremental = true
 
 [profile.release]
 lto = true
+
+[profile.xtask]
+inherits = "release"
+lto = false
+incremental = true
 
 [workspace.lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = [

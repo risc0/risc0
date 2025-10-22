@@ -38,38 +38,9 @@ const CONTROL_ID_PATH_KECCAK: &str = "risc0/circuit/keccak/src/control_id.rs";
 const MIN_LIFT_PO2: usize = 14;
 
 impl Bootstrap {
-    // Format a list of control IDs, including a description as comments.
-    fn format_control_ids(ids: impl IntoIterator<Item = impl Borrow<(String, Digest)>>) -> String {
-        let mut out = String::new();
-        for elem in ids.into_iter() {
-            let (description, digest) = elem.borrow();
-            writeln!(out, r#"digest!("{digest}"), // {description}"#).unwrap();
-        }
-        out
-    }
-
-    // Format a list of control IDs, including the names as data in a tuple of (&str, Digest)
-    fn format_control_ids_with_name(
-        ids: impl IntoIterator<Item = impl Borrow<(String, Digest)>>,
-    ) -> String {
-        let mut out = String::new();
-        for elem in ids.into_iter() {
-            let (name, digest) = elem.borrow();
-            writeln!(out, r#"("{name}", digest!("{digest}")),"#).unwrap();
-        }
-        out
-    }
-
     pub fn run(&self) {
         Self::generate_recursion_control_ids();
         Self::bootstrap_keccak();
-    }
-
-    fn rustfmt(path: &str) {
-        Command::new("rustfmt")
-            .arg(path)
-            .status()
-            .unwrap_or_else(|_| panic!("failed to format {path}"));
     }
 
     fn generate_recursion_control_ids() {
@@ -94,6 +65,7 @@ impl Bootstrap {
         .into_iter()
         .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
         .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_povw_{i}.zkr")))
+        .chain((risc0_circuit_recursion::LIFT_PO2_RANGE).map(|i| format!("lift_rv32im_m3_{i}.zkr")))
         .collect();
 
         tracing::info!("Using allowed_zkr_names {allowed_zkr_names:#?}");
@@ -215,5 +187,34 @@ impl Bootstrap {
         let hashfn = hash_suite.hashfn.as_ref();
         let group = MerkleGroup::new(control_ids).unwrap();
         group.calc_root(hashfn)
+    }
+
+    // Format a list of control IDs, including a description as comments.
+    fn format_control_ids(ids: impl IntoIterator<Item = impl Borrow<(String, Digest)>>) -> String {
+        let mut out = String::new();
+        for elem in ids.into_iter() {
+            let (description, digest) = elem.borrow();
+            writeln!(out, r#"digest!("{digest}"), // {description}"#).unwrap();
+        }
+        out
+    }
+
+    // Format a list of control IDs, including the names as data in a tuple of (&str, Digest)
+    fn format_control_ids_with_name(
+        ids: impl IntoIterator<Item = impl Borrow<(String, Digest)>>,
+    ) -> String {
+        let mut out = String::new();
+        for elem in ids.into_iter() {
+            let (name, digest) = elem.borrow();
+            writeln!(out, r#"("{name}", digest!("{digest}")),"#).unwrap();
+        }
+        out
+    }
+
+    fn rustfmt(path: &str) {
+        Command::new("rustfmt")
+            .arg(path)
+            .status()
+            .unwrap_or_else(|_| panic!("failed to format {path}"));
     }
 }

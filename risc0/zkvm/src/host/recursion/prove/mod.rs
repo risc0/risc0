@@ -22,6 +22,7 @@ use std::{
 };
 
 use anyhow::{Context, Result, anyhow, bail, ensure};
+use cfg_if::cfg_if;
 use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_recursion::{
     CircuitImpl,
@@ -75,7 +76,7 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptC
     tracing::debug!("Proving lift: claim = {:#?}", segment_receipt.claim);
     let mut prover = Prover::new_lift(segment_receipt, ProverOpts::succinct())?;
 
-    let receipt = prover.prover.run()?;
+    let receipt = prover.prover.run().context("lift recursion proof")?;
     let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
     tracing::debug!("Proving lift finished: decoded claim = {claim_decoded:#?}");
 
@@ -601,7 +602,13 @@ impl Prover {
     /// then used as the input to all other recursion programs (e.g. join, resolve, and
     /// identity_p254).
     pub fn new_lift(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
-        Self::new_lift_inner(segment, opts, false)
+        cfg_if! {
+            if #[cfg(feature="rv32im-m3")] {
+                Self::new_lift_m3(segment, opts)
+            } else {
+                Self::new_lift_inner(segment, opts, false)
+            }
+        }
     }
 
     /// Create a prover job for the lift program that produces a work claim receipt.
@@ -610,6 +617,27 @@ impl Prover {
     /// verifiable work by computing the work value from the segment proof.
     pub fn new_lift_povw(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
         Self::new_lift_inner(segment, opts, true)
+    }
+
+    #[cfg(feature = "rv32im-m3")]
+    fn new_lift_m3(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
+        ensure_poseidon2!(segment);
+
+        let inner_hash_suite = hash_suite_from_name(&segment.hashfn)
+            .ok_or_else(|| anyhow!("unsupported hash function: {}", segment.hashfn))?;
+        let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
+        let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
+
+        let claim = risc0_circuit_rv32im_m3::Claim::decode(&segment.seal)?;
+
+        // Instantiate the prover with the lift recursion program and its control ID.
+        let (program, control_id) = zkr::lift_m3(claim.po2 as usize)?;
+        let mut prover = Prover::new(program, control_id, opts);
+
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        prover.add_input(&segment.seal[2..]);
+
+        Ok(prover)
     }
 
     /// Instantiate a lift program, with the option of PoVW or not. Note that these programs

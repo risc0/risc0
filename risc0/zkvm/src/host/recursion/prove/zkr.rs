@@ -52,6 +52,22 @@ pub fn lift(po2: usize, hashfn: &str) -> Result<(Program, Digest)> {
     }
 }
 
+#[cfg(feature = "rv32im-m3")]
+pub(crate) fn lift_m3(po2: usize) -> Result<(Program, Digest)> {
+    if risc0_circuit_recursion::LIFT_PO2_RANGE.contains(&po2) {
+        let name = format!("lift_rv32im_m3_{po2}.zkr");
+        let program = risc0_circuit_recursion::prove::zkr::get_zkr_m3(&name, po2, RECURSION_PO2)?;
+        let control_id = POSEIDON2_CONTROL_IDS
+            .iter()
+            .copied()
+            .find_map(|(n, id)| (n == name).then_some(id))
+            .ok_or_else(|| anyhow!("failed to find {name} in the list of control IDs"))?;
+        Ok((program, control_id))
+    } else {
+        bail!("No rv32im-m3 verifier available for po2={po2}")
+    }
+}
+
 pub fn join(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("join.zkr", hashfn)
 }

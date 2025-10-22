@@ -16,8 +16,22 @@
 #include "compiler/bootstrap/extract_zkr.h"
 #include "prove/rv32im.h"
 #include "verify/rv32im.h"
+#include "zirgen/circuit/recursion/code.h"
 
 using namespace risc0;
+
+struct MyExternHandler : public zirgen::Zll::ExternHandler {
+  std::optional<std::vector<uint64_t>> doExtern(llvm::StringRef name,
+                                                llvm::StringRef extra,
+                                                llvm::ArrayRef<const zirgen::Zll::InterpVal*> args,
+                                                size_t outCount) override {
+    std::vector<uint64_t> results;
+    if (name == "write") {
+      return results;
+    }
+    return ExternHandler::doExtern(name, extra, args, outCount);
+  }
+};
 
 int main() {
   zirgen::registerEdslCLOptions();
@@ -46,18 +60,31 @@ int main() {
 
   LOG(0, "Emulate");
   auto func =
-      module.getModule().lookupSymbol<mlir::func::FuncOp>("rv32im_m3_lift_" + std::to_string(po2));
-  zirgen::Zll::ExternHandler baseExternHandler;
+      module.getModule().lookupSymbol<mlir::func::FuncOp>("lift_rv32im_m3_" + std::to_string(po2));
+  MyExternHandler externHandler;
   zirgen::Zll::Interpreter interp(module.getCtx(), zirgen::poseidon2HashSuite());
-  interp.setExternHandler(&baseExternHandler);
-  auto rng = interp.getHashSuite().makeRng();
-  zirgen::ReadIop zriop(
-      std::move(rng), reinterpret_cast<const uint32_t*>(transcript.data()), transcript.size());
-  interp.setIop(func.getArgument(0), &zriop);
+  interp.setExternHandler(&externHandler);
+  Digest whatever;
+  size_t outSize = zirgen::recursion::kOutSize;
+  for (size_t i = 0; i < 8; i++) {
+    whatever.words[i] = i;
+  }
+  zirgen::ReadIop root(
+      interp.getHashSuite().makeRng(), reinterpret_cast<const uint32_t*>(&whatever), 8);
+  zirgen::ReadIop seal(interp.getHashSuite().makeRng(),
+                       reinterpret_cast<const uint32_t*>(transcript.data()),
+                       transcript.size());
+  auto outBuf = interp.makeBuf(func.getArgument(0), outSize, zirgen::Zll::BufferKind::Global);
+  interp.setIop(func.getArgument(1), &root);
+  interp.setIop(func.getArgument(2), &seal);
   if (failed(interp.runBlock(func.front()))) {
     LOG(0, "Failed to evaluate");
     throw std::runtime_error("BAD");
   }
   LOG(0, "DONE!");
+  // Print outputs
+  for (size_t i = 0; i < outSize; i++) {
+    LOG(0, "out[" << i << "] = " << outBuf[i][0]);
+  }
   // module.dump(true);
 }

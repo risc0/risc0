@@ -77,7 +77,7 @@ impl Sha256 for Impl {
         Box::new(Digest::from(state))
     }
 
-    // Digest two digest into one
+    // Digest two digests into one
     #[inline]
     fn compress(
         orig_state: &Digest,

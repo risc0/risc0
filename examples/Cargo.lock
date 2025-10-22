@@ -4312,6 +4312,7 @@ dependencies = [
  "downloader",
  "hex",
  "lazy-regex",
+ "liblzma",
  "metal",
  "rand 0.9.1",
  "rayon",
