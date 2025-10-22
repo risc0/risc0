@@ -13,8 +13,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(dead_code)]
-
 use std::{borrow::Borrow, collections::HashSet, fmt::Write, process::Command};
 
 use clap::Parser;

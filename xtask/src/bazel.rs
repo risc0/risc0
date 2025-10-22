@@ -13,8 +13,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(dead_code)]
-
 use std::{
     fs::File,
     io::{BufRead as _, BufReader},
@@ -32,11 +30,26 @@ pub struct Bazel;
 
 impl Bazel {
     pub fn run(&self) {
-        let bazel_args = ["build", "//compiler/bootstrap:zkr"];
+        Self::bootstrap_rust_verifier();
+        Self::bootstrap_zkr();
+    }
+
+    fn bootstrap_rust_verifier() {
+        let pwd = std::env::current_dir().unwrap();
+        let dst_dir = pwd.join("risc0/circuit/rv32im-m3/src/zirgen");
         let bazel_root = Path::new("risc0/circuit/rv32im-m3-sys/cxx");
         let mut command = Command::new("bazelisk");
         command
-            .args(bazel_args)
+            .args(["run", "//compiler/bootstrap", "--"])
+            .arg(dst_dir)
+            .current_dir(bazel_root);
+    }
+
+    fn bootstrap_zkr() {
+        let bazel_root = Path::new("risc0/circuit/rv32im-m3-sys/cxx");
+        let mut command = Command::new("bazelisk");
+        command
+            .args(["build", "//compiler/bootstrap:zkr"])
             .current_dir(bazel_root)
             .stdout(Stdio::inherit())
             .stderr(Stdio::piped());
