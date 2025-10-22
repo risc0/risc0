@@ -288,11 +288,11 @@ struct Emulator {
     if (v2Compat) {
       pc = readPhysMemory(resumeWit.pc, V2_COMPAT_SPC);
       setMode(readPhysMemory(resumeWit.mode, V2_COMPAT_SMODE) ? MODE_MACHINE : MODE_USER);
-      writeMemory(resumeWit.version, RV32IM_VERSION_WORD, RV32IM_CIRCUIT_VERSION);
+      writePhysMemory(resumeWit.version, V2_COMPAT_VERSION, RV32IM_CIRCUIT_VERSION);
     } else {
       pc = readPhysMemory(resumeWit.pc, CSR_WORD(MSPC));
       setMode(readPhysMemory(resumeWit.pc, CSR_WORD(MSMODE)));
-      writeMemory(resumeWit.version, RV32IM_VERSION_WORD, RV32IM_CIRCUIT_VERSION);
+      writePhysMemory(resumeWit.version, CSR_WORD(MVERSION), RV32IM_CIRCUIT_VERSION);
     }
     curCycle++;
   }
@@ -589,10 +589,10 @@ struct Emulator {
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
     readReg(wit.a7, REG_A7);
-    readReg(wit.a0, REG_A7);
-    readReg(wit.a1, REG_A7);
+    readReg(wit.a0, REG_A0);
+    readReg(wit.a1, REG_A1);
     for (size_t i = 0; i < 8; i++) {
-      readMemory(wit.output[i], OUTPUT_WORD + i);
+      readPhysMemory(wit.output[i], OUTPUT_WORD + i);
     }
     done = true;
   }

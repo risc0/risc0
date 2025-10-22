@@ -134,7 +134,7 @@ void PagedMemory::pageOutPage(uint32_t page, const PageDetails* pageData) {
       uint32_t word = (*pageData)[i * MPAGE_PART_SIZE + j].value;
       (*newPage)[i * MPAGE_PART_SIZE + j] = word;
       pop.data[j] = word;
-      pop.cycle[j] = (*pageData)[i * PAGE_PART_SIZE + j].cycle;
+      pop.cycle[j] = (*pageData)[i * MPAGE_PART_SIZE + j].cycle;
       data[2 * j] = word & 0xffff;
       data[2 * j + 1] = word >> 16;
     }

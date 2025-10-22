@@ -138,12 +138,13 @@ CONSTANT uint32_t CSR_MCAUSE = 0x342;
 CONSTANT uint32_t CSR_MTVAL = 0x343;
 
 // Custom machine CSRs
-CONSTANT uint32_t CSR_MNOV2COMPAT = 0x7C0;  // Turn off V2 compat in global
+CONSTANT uint32_t CSR_MVERSION = 0x7C0;  // Turn off V2 compat in global
 CONSTANT uint32_t CSR_MSPC = 0x7C1;  // Suspend/Resume PC
 CONSTANT uint32_t CSR_MSMODE = 0x7C2;  // Suspend/Resume Mode
 CONSTANT uint32_t CSR_MVINFO = 0x7C3;
 CONSTANT uint32_t CSR_MNOPTE1 = 0x7C4;
 CONSTANT uint32_t CSR_MNOPTE2 = 0x7C5;
+CONSTANT uint32_t CSR_MNOV2COMPAT = 0x7FF;  // Turn off V2 compat in global
 
 // V2 Compatibility constants
 CONSTANT uint32_t V2_COMPAT_MEPC = 0xffff0200 / 4;

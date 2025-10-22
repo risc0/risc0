@@ -97,14 +97,11 @@ struct OutU32 {
 struct Globals {
   FpDigest rootIn;
   FpDigest rootOut;
-<<<<<<< HEAD
-  Fp v2Compat;
-=======
   Fp isTerminate;
   OutU32 termA0;
   OutU32 termA1;
   OutU32 out[8];
->>>>>>> 01f5836e389150b1b6472df0b712a737000826d4
+  Fp v2Compat;
 };
 
 CONSTANT size_t NUM_GLOBALS = sizeof(Globals) / sizeof(Fp);
