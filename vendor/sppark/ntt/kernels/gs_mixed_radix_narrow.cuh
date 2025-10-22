@@ -39,7 +39,6 @@ void _GS_NTT(const unsigned int radix, const unsigned int lg_domain_size,
         coalesced_load<z_count>(r[0], d_inout, idx0, stage - iterations);
         coalesced_load<z_count>(r[1], d_inout, idx1, stage - iterations);
         transpose<z_count>(r[0]);
-        __syncwarp();
         transpose<z_count>(r[1]);
     } else {
         unsigned int z_shift = out_mask==0 ? iterations : 0;
@@ -66,8 +65,6 @@ void _GS_NTT(const unsigned int radix, const unsigned int lg_domain_size,
             r[1][z] = t;
         }
 
-        __syncthreads();
-
         fr_t (*xchg)[z_count] = reinterpret_cast<decltype(xchg)>(shared_exchange);
 
         #pragma unroll
@@ -84,6 +81,9 @@ void _GS_NTT(const unsigned int radix, const unsigned int lg_domain_size,
             r[0][z] = fr_t::csel(r[0][z], t, pos);
             r[1][z] = fr_t::csel(t, r[1][z], pos);
         }
+
+        __syncthreads();
+
         noop();
     }
 
@@ -171,7 +171,6 @@ void _GS_NTT(const unsigned int radix, const unsigned int lg_domain_size,
 
     if (coalesced) {
         transpose<z_count>(r[0]);
-        __syncwarp();
         transpose<z_count>(r[1]);
         coalesced_store<z_count>(d_inout, idx0, r[0], stage - iterations + 1);
         coalesced_store<z_count>(d_inout, idx1, r[1], stage - iterations + 1);

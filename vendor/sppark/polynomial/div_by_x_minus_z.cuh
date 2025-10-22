@@ -200,6 +200,8 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
 
             carry_over = xchg[laneid];
 
+            __syncthreads();
+
             my::madd_up(carry_over, z_pow, nwarps);
 
             if (warpid != 0) {
@@ -240,6 +242,8 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
 
                         fr_t temp = xchg[laneid];
 
+                        __syncthreads();
+
                         my::madd_up(temp, z_pow,
                                     (gridDim.x + WARP_SZ - 1)/WARP_SZ);
 
@@ -257,6 +261,8 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
 
                     carry_over = xchg[blockIdx.x-1];
                     coeff[N-1] += carry_over * z_pow_block;
+
+                    __syncthreads();
                 }
             }
 
@@ -298,6 +304,8 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
                     __syncthreads();
 
                     acc = xchg[laneid];
+
+                    __syncthreads();
 
                     limit = nwarps;
                     adjust = warpid;
@@ -345,6 +353,8 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
 
                         acc = xchg[laneid];
 
+                        __syncthreads();
+
                         limit = (gridDim.x + WARP_SZ - 1)/WARP_SZ;
                         adjust = warpid;
                         z_pow_adjust = z_pow_carry[laneid];
@@ -358,6 +368,9 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
 
                     coeff[N-1] = carry_over;
                     acc = xchg[blockIdx.x-1];
+
+                    __syncthreads();
+
                     z_pow_adjust = z_pow_block;
                     if (N > 1)
                         carry_over = acc;
@@ -410,6 +423,8 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
 
             if (laneid == 0 && warpid != 0)
                 carry_over = xchg[warpid-1];
+
+            __syncthreads();
 
             carry = fr_t::csel(carry_over, carry, laneid == 0);
 
