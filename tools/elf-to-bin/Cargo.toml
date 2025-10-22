@@ -1,0 +1,18 @@
+[package]
+name = "elf-to-bin"
+version = "0.1.0"
+edition = "2021"
+authors = ["RISC Zero Contributors"]
+license = "Apache-2.0"
+description = "A simple tool to combine a guest ELF with a kernel ELF into a .bin file"
+
+[[bin]]
+name = "elf-to-bin"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+risc0-binfmt = { path = "../../risc0/binfmt" }
+bincode = "1.3"
+
+

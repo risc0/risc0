@@ -19,6 +19,7 @@
 .equ GLOBAL_OUTPUT_ADDR, 0xffff0240
 .equ GLOBAL_INPUT_ADDR, 0xffff0260
 .equ ECALL_DISPATCH_ADDR, 0xffff1000
+.equ TRAP_DISPATCH, 0xffff2000
 .equ ECALL_TABLE_SIZE, 8
 .equ HOST_ECALL_TERMINATE, 0
 .equ HOST_ECALL_READ, 1
@@ -60,6 +61,13 @@ _start:
     li t0, ECALL_DISPATCH_ADDR
     la t1, _ecall_dispatch
     sw t1, 0(t0)
+
+    # Initialize the trap dispatch table
+    # Set up IllegalInstruction handler (cause = 2) at TRAP_DISPATCH + 2
+    la a0, _trap_illegal_instruction
+    li a1, TRAP_DISPATCH
+    addi a1, a1, 8  # 2 * 4 bytes (cause 2)
+    sw a0, 0(a1)
 
     # Initialize useful constants
     li tp, USER_REGS_ADDR
@@ -238,3 +246,6 @@ _ecall_bigint:
 
     # return back to userspace
     mret
+
+_trap_illegal_instruction:
+    tail illegal_instruction_dispatch
