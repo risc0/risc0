@@ -734,11 +734,11 @@ struct Emulator {
       // if needed, add in second half to inst
       if (pc % 4 == 2) {
         // For unaligned addresses, always read next address
-        uint32_t l1 = VirtreadMemory(wit->load1, pc / 4 + 1);
+        uint32_t l1 = readVirtMemory(wit->load1, pc / 4 + 1);
         inst |= l1 << 16;
       } else {
         // For aligned addresses, read from a `null` word (and ignore the value)
-        readMemory(wit->load1, COMPRESSED_INST_LOOKUP_WORD);
+        readVirtMemory(wit->load1, COMPRESSED_INST_LOOKUP_WORD);
       }
     } else {
       // Remove any high bits, and then do a lookup to convert

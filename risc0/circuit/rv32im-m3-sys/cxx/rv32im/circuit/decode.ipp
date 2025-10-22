@@ -182,7 +182,7 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
   Val<C> load1Addr = cond<C>(isCompressed.get(),
                              Val<C>(COMPRESSED_INST_LOOKUP_WORD) + low16(),
                              cond<C>(isUnaligned, instWordAddr + 1, COMPRESSED_INST_LOOKUP_WORD));
-  EQ(load1Addr, load1.wordAddr.get());
+  EQ(load1Addr, load1.getWordAddr());
   // Verify next instruction is right
   EQ(computeNext.low.get(), fetch.nextPc.low.get());
   EQ(computeNext.high.get(), fetch.nextPc.high.get());

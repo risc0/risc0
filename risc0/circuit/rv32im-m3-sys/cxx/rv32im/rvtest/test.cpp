@@ -74,7 +74,7 @@ int main() {
   runTest("lw");
   runTest("lbu");
   runTest("lhu");
-  runTest("sb");
+  runTest("sb", 13);
   runTest("sh", 13);
   runTest("sw", 13);
   return 0;
