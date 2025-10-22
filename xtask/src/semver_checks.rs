@@ -669,6 +669,33 @@ fn semver_compatible_test() {
     ));
 }
 
+fn missing_baseline_error(package: &str) -> anyhow::Error {
+    anyhow!(
+        "\
+    No SemVer baseline found for {package}
+
+    If this is a new crate that you intend to publish:
+        - Add '{package} = \"none\"' to semver-baselines.lock
+
+    If this is a crate that you intend to never publish:
+        - Add to {package}'s Cargo.toml:
+            [package.metadata.release]
+            release = false\
+        "
+    )
+}
+
+fn catch_missing_baseline_error(package: &str, error: anyhow::Error) -> anyhow::Error {
+    let error_str = format!("{error:?}");
+    if error_str.contains(&format!("{package} not found in"))
+        || error_str.contains(&format!("`{package}` not found in"))
+    {
+        missing_baseline_error(package)
+    } else {
+        error
+    }
+}
+
 /// Entrypoint for the tests. See the module doc-comment about what it does.
 ///
 /// `workspace_root`         : The path to the workspace we are checking
@@ -701,7 +728,8 @@ fn run_inner(
             continue;
         }
         let baseline = semver_baseline_factory(version.and_then(|v| v.as_option()));
-        let output = run_semver_checks(workspace_root, baseline, vec![package.into()])?;
+        let output = run_semver_checks(workspace_root, baseline, vec![package.into()])
+            .map_err(|error| catch_missing_baseline_error(package, error))?;
         semver_output.extend(output);
     }
 
@@ -774,7 +802,7 @@ impl SemverChecks {
         };
 
         if let Err(e) = run_inner(self, &current_dir, baseline_factory, real_cargo_vendor) {
-            panic!("{e}");
+            panic!("{e:?}");
         }
     }
 }
@@ -1088,6 +1116,7 @@ mod tests {
                 baseline_version,
             )],
         );
+
         run_with_temp_dir(
             tempdir,
             &baseline_name,
@@ -1450,6 +1479,76 @@ mod tests {
             true,  /* locked */
         )
         .unwrap();
+    }
+
+    #[test]
+    fn add_new_crate_errors() {
+        let tempdir = tempdir().unwrap();
+
+        create_current(
+            &tempdir,
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo() {}",
+                Version::new(2, 0, 0),
+            )][..],
+        );
+
+        let baseline1_version = Version::new(1, 0, 0);
+        let baseline1_name = format!("baseline_{baseline1_version}");
+        create_baseline(
+            &tempdir,
+            &baseline1_name,
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo(_a: u32) {}",
+                baseline1_version,
+            )][..],
+        );
+
+        // Run once to populate the lock-file
+        run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            false, /* update */
+            false, /* locked */
+        )
+        .unwrap();
+
+        // Add a new crate
+        std::fs::write(
+            tempdir.path().join("current").join("Cargo.toml"),
+            "
+            [workspace]
+            members = [\"foobar\", \"baz\"]
+            resolve = \"2\"
+            ",
+        )
+        .unwrap();
+
+        let current_baz = tempdir.path().join("current/baz");
+        std::fs::create_dir_all(current_baz.join("src")).unwrap();
+        write_cargo_toml(
+            &current_baz,
+            "baz",
+            &Version::new(1, 0, 0),
+            &HashMap::new(),
+            &HashMap::new(),
+        );
+        std::fs::write(current_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
+
+        let err = run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            false, /* update */
+            true,  /* locked */
+        )
+        .unwrap_err();
+        assert!(
+            err.to_string()
+                .starts_with("No SemVer baseline found for baz"),
+            "{err:?}"
+        );
     }
 
     #[test]

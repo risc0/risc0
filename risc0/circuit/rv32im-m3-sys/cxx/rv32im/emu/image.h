@@ -33,8 +33,8 @@ using Page = std::array<uint32_t, PAGE_SIZE_WORDS>;
 using PagePtr = std::shared_ptr<const Page>;
 
 // A class to hold 'memory images'.  A memory image may not know all page data
-// (for example partial transfer of image for proving).  Internally, the memory image
-// is an actual tree of pages, with null pointer to 'unknown' pages.
+// (for example partial transfer of image for proving).  Internally, the memory
+// image is an actual tree of pages, with null pointer to 'unknown' pages.
 class MemoryImage {
 public:
   // Construct an 'all-unknown' memory image
@@ -62,6 +62,12 @@ public:
   std::map<uint32_t, PagePtr> getKnownPages() const;
   // Return a map of all 'known' digests
   std::map<uint32_t, Digest> getKnownDigests() const;
+
+  void setPageRaw(size_t pidx, PagePtr page);
+  void setDigestRaw(size_t didx, const Digest& digest);
+
+  void dumpZeros();
+  void dump();
 
 private:
   PagePtr zeroPage;

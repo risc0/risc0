@@ -28,9 +28,10 @@ class Poseidon2Witgen {
 public:
   Poseidon2Witgen(Trace& trace);
   Digest doBlock(Digest in, const std::array<Fp, p2impl::CELLS_RATE>& data, bool isFinal);
+
 private:
   Trace& trace;
   std::map<p2impl::cells_t, P2BlockWitness*> saved;
 };
 
-}  // namespace risc0::rv32im
+} // namespace risc0::rv32im

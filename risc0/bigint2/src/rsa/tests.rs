@@ -49,6 +49,7 @@ use crate::BigUintWrap;
     "0"
 )]
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn modpow_65537(
     #[case] base: BigUintWrap,
     #[case] modulus: BigUintWrap,

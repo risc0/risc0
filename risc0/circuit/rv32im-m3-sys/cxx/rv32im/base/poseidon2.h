@@ -27,12 +27,8 @@ using FpCells = Fp[CELLS];
 using FpData = Fp[CELLS_RATE];
 using FpDigest = Fp[CELLS_DIGEST];
 
-template<typename C>
-using ValCells = Val<C>[CELLS];
+template <typename C> using ValCells = Val<C>[CELLS];
 
-template<typename C>
-using ValData = Val<C>[CELLS_RATE];
+template <typename C> using ValData = Val<C>[CELLS_RATE];
 
-template<typename C>
-using ValDigest = Val<C>[CELLS_DIGEST];
-
+template <typename C> using ValDigest = Val<C>[CELLS_DIGEST];

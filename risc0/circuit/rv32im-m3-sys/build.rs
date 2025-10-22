@@ -65,12 +65,14 @@ fn main() {
 
     let mut build = cc::Build::new();
     build
+        .cpp(true)
         .debug(false)
         .warnings(false)
         .flag("-std=c++17")
         .include("cxx")
         .include("vendor")
         .files(glob_paths("cxx/core/*.cpp"))
+        .files(glob_paths("cxx/hal/cpu/*.cpp"))
         .files(glob_paths("cxx/prove/*.cpp"))
         .files(glob_paths("cxx/rv32im/*.cpp"))
         .files(glob_paths("cxx/rv32im/emu/*.cpp"))
@@ -89,18 +91,15 @@ fn main() {
             .cudart("static")
             .flag("-diag-suppress=20012")
             .flag("--expt-relaxed-constexpr")
-            // .flag("-O3")
-            // .flag("--dopt on")
-            .include("vendor/sppark")
-            .file("vendor/sppark/util/all_gpus.cpp")
+            .flag("-DFEATURE_BABY_BEAR")
+            .include(env::var("DEP_RISC0_SPPARK_ROOT").unwrap())
+            .include(env::var("DEP_RISC0_SYS_KERNELS_ROOT").unwrap())
             .files(glob_paths("cxx/hal/cuda/*.cpp"))
             .files(glob_paths("cxx/hal/cuda/kernels/*.cu"));
         if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none()
         {
             build.flag("-arch=native");
         }
-    } else {
-        build.files(glob_paths("cxx/hal/cpu/*.cpp"));
     }
 
     build.compile(output);

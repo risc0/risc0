@@ -26,7 +26,7 @@ use crate::actors::{
     protocol::{
         GlobalId, JobId, JobStatus, JobStatusReply, JobStatusRequest, ShrinkWrapRequest,
         ShrinkWrapResult, ShrinkWrapTask, Task, TaskError, TaskHeader,
-        factory::{DropJob, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
+        factory::{DropJob, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdateMsg},
     },
 };
 
@@ -58,7 +58,7 @@ impl Actor for JobActor {
                 status: self.status.clone(),
                 elapsed_time,
             };
-            reply_sender.send(JobStatusReply::ShrinkWrap(info));
+            reply_sender.send(JobStatusReply::ShrinkWrap(info)).await;
         }
 
         self.tracer.end();
@@ -95,19 +95,22 @@ impl JobActor {
 
     async fn submit_task(&mut self, task: Task) -> Result<()> {
         let task_id = self.next_task_id();
+        let header = TaskHeader {
+            global_id: GlobalId {
+                job_id: self.job_id,
+                task_id,
+            },
+            task_kind: task.kind(),
+        };
+        self.task_start(header.clone());
         let msg = SubmitTaskMsg {
             job: self
                 .parent_ref
                 .upgrade()
                 .ok_or_else(|| Error::new("parent job not running"))?,
-            header: TaskHeader {
-                global_id: GlobalId {
-                    job_id: self.job_id,
-                    task_id,
-                },
-                task_kind: task.kind(),
-            },
+            header,
             task,
+            tracing: self.tracer.saved_task_context(task_id),
         };
         self.factory.tell(msg).await?;
 
@@ -119,7 +122,7 @@ impl JobActor {
         self.status = JobStatus::Succeeded(result);
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully().await;
+        let _ = self_ref.stop_gracefully("job shutdown");
     }
 
     fn task_start(&mut self, header: TaskHeader) {
@@ -138,10 +141,12 @@ impl JobActor {
     }
 
     async fn fail_with_error(&mut self, self_ref: ActorRef<Self>, error: impl Into<TaskError>) {
-        self.status = JobStatus::Failed(error.into());
+        let error: TaskError = error.into();
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully().await;
+        let _ = self_ref.stop_gracefully(format!("job failure: {error:?}"));
+
+        self.status = JobStatus::Failed(error);
     }
 }
 
@@ -170,6 +175,7 @@ impl JobActor {
         self.submit_task(Task::ShrinkWrap(Arc::new(ShrinkWrapTask {
             kind: request.kind,
             receipt: Arc::new(request.receipt),
+            dev_mode: request.dev_mode,
         })))
         .await?;
 
@@ -182,12 +188,9 @@ impl Message<TaskUpdateMsg> for JobActor {
 
     async fn handle(
         &mut self,
-        msg: TaskUpdateMsg,
+        _msg: TaskUpdateMsg,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        if matches!(msg.payload, TaskUpdate::Start) {
-            self.task_start(msg.header);
-        }
     }
 }
 
@@ -226,5 +229,6 @@ impl Message<JobStatusRequest> for JobActor {
             status: self.status.clone(),
             elapsed_time: self.start_time.elapsed(),
         })))
+        .await
     }
 }

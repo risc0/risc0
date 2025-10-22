@@ -15,11 +15,10 @@
 
 #pragma once
 
-#include "rv32im/witness/io.h"
 #include "rv32im/circuit/mem.h"
+#include "rv32im/witness/io.h"
 
-template<typename C>
-struct ReadByteBlock {
+template <typename C> struct ReadByteBlock {
   CONSTANT static char NAME[] = "ReadByte";
 
   Reg<C> cycle;
@@ -32,8 +31,7 @@ struct ReadByteBlock {
   Reg<C> is3;
   RegU16<C> sizeMinus1;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, lowBit0);
     T::apply(ctx, lowBit1);
@@ -51,16 +49,14 @@ struct ReadByteBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct ReadWordBlock {
+template <typename C> struct ReadWordBlock {
   CONSTANT static char NAME[] = "ReadWord";
 
   Reg<C> cycle;
   RegU16<C> sizeMinus4;
   MemWriteBlock<C> io;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, sizeMinus4);
     T::apply(ctx, io, cycle.get());
@@ -71,4 +67,3 @@ struct ReadWordBlock {
   FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
-

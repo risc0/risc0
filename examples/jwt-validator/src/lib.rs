@@ -72,6 +72,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn test_token_validation() {
         let claims = CustomClaims {
             subject: "Hello, world!".to_string(),

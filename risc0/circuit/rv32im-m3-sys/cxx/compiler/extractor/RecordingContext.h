@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include <mlir/IR/MLIRContext.h>
 #include "compiler/extractor/RecordingVal.h"
 #include "zirgen/Dialect/ZHLT/IR/ZHLT.h"
+#include <mlir/IR/MLIRContext.h>
 // #include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
 
 #define ZIRGEN
@@ -25,102 +25,101 @@
 struct RecordingReg;
 
 struct RecordingContext {
-    using ValImpl = RecordingVal;
-    using ValExtImpl = RecordingValExt;
-    using RegImpl = RecordingReg;
-    using ArgCountRegImpl = RecordingReg;
+  using ValImpl = RecordingVal;
+  using ValExtImpl = RecordingValExt;
+  using RegImpl = RecordingReg;
+  using ArgCountRegImpl = RecordingReg;
 
-    RecordingContext(mlir::MLIRContext* ctx);
+  RecordingContext(mlir::MLIRContext* ctx);
 
-    void eqz(RecordingVal val) {
-        builder.create<zirgen::Zll::EqualZeroOp>(builder.getUnknownLoc(), val.value);
-    }
-    void eqz(RecordingValExt val) {
-        // TODO
-    }
+  void eqz(RecordingVal val) {
+    builder.create<zirgen::Zll::EqualZeroOp>(builder.getUnknownLoc(), val.value);
+  }
+  void eqz(RecordingValExt val) {
+    // TODO
+  }
 
-    template<typename T>
-    void push(const T& arg) {
-        // TODO: implement this
-    }
+  template <typename T> void push(const T& arg) {
+    // TODO: implement this
+  }
 
-    template<typename T>
-    void pull(const T& arg) {
-        // TODO: implement this
-    }
+  template <typename T> void pull(const T& arg) {
+    // TODO: implement this
+  }
 
-    template<typename T>
-    void addArgument(RecordingVal count, const T& arg) {
-        // TODO: implement this
-    }
+  template <typename T> void addArgument(RecordingVal count, const T& arg) {
+    // TODO: implement this
+  }
 
-    // Since tables are only used in witgen, we have dummy implementations
-    inline void tableAdd(uint32_t entry, uint32_t val) {}
-    inline uint32_t tableGet(uint32_t offset) { return 0; }
+  // Since tables are only used in witgen, we have dummy implementations
+  inline void tableAdd(uint32_t entry, uint32_t val) {}
+  inline uint32_t tableGet(uint32_t offset) { return 0; }
 
-    void globalSet(uint32_t entry, RecordingVal val) {
-      // TODO: Actual do a global set here
-    }
-    RecordingVal globalGet(uint32_t entry) {
-      // TODO: Actually do a global get
-      return RecordingVal(uint64_t(0));
-    }
-    RecordingVal getX() {
-      // TODO: Add support for 'x' in zirgen + existing proof system
-      return RecordingVal(uint64_t(0));
-    }
+  void globalSet(uint32_t entry, RecordingVal val) {
+    // TODO: Actual do a global set here
+  }
+  RecordingVal globalGet(uint32_t entry) {
+    // TODO: Actually do a global get
+    return RecordingVal(uint64_t(0));
+  }
+  RecordingVal getX() {
+    // TODO: Add support for 'x' in zirgen + existing proof system
+    return RecordingVal(uint64_t(0));
+  }
 
-    mlir::ModuleOp getModuleOp() {
-        return moduleOp;
-    }
+  mlir::ModuleOp getModuleOp() { return moduleOp; }
 
-    void enterComponent(std::string name);
-    void exitComponent();
+  void enterComponent(std::string name);
+  void exitComponent();
 
-    RecordingVal addValParameter();
-    RecordingVal getNextRef();
+  RecordingVal addValParameter();
+  RecordingVal getNextRef();
 
-    void materializeLayout(mlir::Type layoutType);
+  void materializeLayout(mlir::Type layoutType);
 
-    mlir::MLIRContext* mlirCtx;
-    mlir::ModuleOp moduleOp;
-    mlir::OpBuilder builder;
+  mlir::MLIRContext* mlirCtx;
+  mlir::ModuleOp moduleOp;
+  mlir::OpBuilder builder;
 
-    // Metadata used by a visitor can be stored in this member, for example a
-    // `LayoutBuilderVisitor` can store a `LayoutBuilder` here which will be
-    // accessible in its `apply` methods.
-    void* visitorData;
+  // Metadata used by a visitor can be stored in this member, for example a
+  // `LayoutBuilderVisitor` can store a `LayoutBuilder` here which will be
+  // accessible in its `apply` methods.
+  void* visitorData;
 
 private:
-    void unifyRefsIntoLayout(mlir::Value layout, size_t& i);
+  void unifyRefsIntoLayout(mlir::Value layout, size_t& i);
 
-    mlir::StringAttr componentName;
+  mlir::StringAttr componentName;
 
-    // A temporary region on `moduleOp` that holds the body of a component being
-    // built until `exitComponent` is called
-    mlir::Region* componentBody;
+  // A temporary region on `moduleOp` that holds the body of a component being
+  // built until `exitComponent` is called
+  mlir::Region* componentBody;
 
-    // A flattened list of all `ref`s that will ultimately be contained in the
-    // component's layout
-    std::vector<mlir::Value> refs;
+  // A flattened list of all `ref`s that will ultimately be contained in the
+  // component's layout
+  std::vector<mlir::Value> refs;
 
-    // The index 0 used for load ops
-    mlir::Value zero;
+  // The index 0 used for load ops
+  mlir::Value zero;
 
-    friend struct RecordingVal;
+  friend struct RecordingVal;
 };
 
 struct RecordingReg {
-    RecordingVal val;
+  RecordingVal val;
 
-    RecordingReg() : val(RecordingVal::getContext()->getNextRef()) {}
-    explicit RecordingReg(RecordingVal val) : val(val) {}
+  RecordingReg() : val(ctx->getNextRef()) {}
+  explicit RecordingReg(RecordingVal val) : val(val) {}
 
-    void set(RecordingContext& ctx, RecordingVal val) {}
-    RecordingVal get() { return val; }
+  void set(RecordingContext& ctx, RecordingVal val) {}
+  RecordingVal get() { return val; }
 
-    template<typename T>
-    void applyInner(RecordingContext& ctx) {}
-    void verify(RecordingContext& ctx) {}
-    void addArguments(RecordingContext& ctx) {}
+  template <typename T> void applyInner(RecordingContext& ctx) {}
+  void verify(RecordingContext& ctx) {}
+  void addArguments(RecordingContext& ctx) {}
+
+  static void setContext(RecordingContext* value) { ctx = value; }
+
+private:
+  static RecordingContext* ctx;
 };

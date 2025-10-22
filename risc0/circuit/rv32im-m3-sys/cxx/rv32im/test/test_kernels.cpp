@@ -16,8 +16,8 @@
 #include "core/log.h"
 #include "rv32im/test/test_prove.h"
 
-#include <string>
 #include <iostream>
+#include <string>
 
 using namespace risc0;
 
@@ -37,9 +37,6 @@ public:
 };
 
 int main() {
-  if (const char* level = std::getenv("RISC0_LOG")) {
-    risc0::setLogLevel(std::atoi(level));
-  }
   TestIO io;
   runTestBinary("rv32im/test/test_bigint_kernel", io, 13);
   runTestBinary("rv32im/test/test_io_kernel", io, 13);

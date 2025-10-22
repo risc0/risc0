@@ -38,5 +38,26 @@ void runTestBinary(const std::string& elf, rv32im::HostIO& io, size_t po2) {
   LOG(0, "Verify succeeded");
 }
 
+void runTestBinary(const std::string& kernel,
+                   const std::string& guest,
+                   rv32im::HostIO& io,
+                   size_t po2) {
+  IHalPtr hal = getCpuHal();
+  LOG(2, "Loading ELFs");
+  auto image = rv32im::MemoryImage::fromElfs(kernel, guest);
+  LOG(0, "Running test");
+  Rv32imProver prover(hal, po2, true);
+  bool complete = prover.preflight(image, io);
+  if (!complete) {
+    std::cerr << "FAILED TO COMPLETE\n";
+    exit(1);
+  }
+  WriteIop wiop;
+  prover.prove(wiop);
+  ReadIop riop(wiop.getTranscript().data(), wiop.getTranscript().size());
+  LOG(0, "Running verify");
+  verifyRv32im(riop, po2);
+  LOG(0, "Verify succeeded");
 }
 
+} // namespace risc0

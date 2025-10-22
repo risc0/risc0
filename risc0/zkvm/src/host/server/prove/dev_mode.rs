@@ -16,6 +16,7 @@
 use std::time::Duration;
 
 use anyhow::{Context, Result, ensure};
+use risc0_circuit_keccak::KECCAK_CONTROL_ROOT;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -32,6 +33,7 @@ use crate::{
     },
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     recursion::MerkleProof,
+    sha::Digestible as _,
 };
 
 const ERR_DEV_MODE_DISABLED: &str =
@@ -220,7 +222,7 @@ impl ProverServer for DevModeProver {
 
     fn prove_keccak(
         &self,
-        _request: &crate::ProveKeccakRequest,
+        request: &crate::ProveKeccakRequest,
     ) -> Result<SuccinctReceipt<Unknown>> {
         ensure_dev_mode_allowed!();
 
@@ -228,7 +230,9 @@ impl ProverServer for DevModeProver {
             std::thread::sleep(delay.prove_keccak);
         }
 
-        Ok(fake_succinct_receipt())
+        Ok(fake_succinct_receipt(MaybePruned::Pruned(
+            request.claim_digest,
+        )))
     }
 
     fn lift(&self, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
@@ -268,10 +272,23 @@ impl ProverServer for DevModeProver {
 
     fn resolve(
         &self,
-        _conditional: &SuccinctReceipt<ReceiptClaim>,
-        _assumption: &SuccinctReceipt<Unknown>,
+        conditional: &SuccinctReceipt<ReceiptClaim>,
+        assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        fake_recursion(self.delay.map(|d| d.resolve))
+        ensure_dev_mode_allowed!();
+
+        if let Some(ref delay) = self.delay {
+            std::thread::sleep(delay.resolve);
+        }
+
+        let claim = conditional
+            .claim
+            .as_value()
+            .context("conditional receipt claim is pruned")?
+            .resolve(&assumption.claim)
+            .context("failed to compute resolved claim")?;
+
+        Ok(fake_succinct_receipt(claim))
     }
 
     fn resolve_povw(
@@ -292,10 +309,30 @@ impl ProverServer for DevModeProver {
 
     fn union(
         &self,
-        _a: &SuccinctReceipt<Unknown>,
-        _b: &SuccinctReceipt<Unknown>,
+        a: &SuccinctReceipt<Unknown>,
+        b: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<UnionClaim>> {
-        fake_recursion(self.delay.map(|d| d.union))
+        ensure_dev_mode_allowed!();
+
+        if let Some(delay) = self.delay {
+            std::thread::sleep(delay.union);
+        }
+
+        let mut a = a.to_assumption(true)?;
+        a.control_root = KECCAK_CONTROL_ROOT;
+
+        let mut b = b.to_assumption(true)?;
+        b.control_root = KECCAK_CONTROL_ROOT;
+
+        let mut assumptions = [a.digest(), b.digest()];
+        assumptions.sort();
+
+        let claim = UnionClaim {
+            left: assumptions[0],
+            right: assumptions[1],
+        };
+
+        Ok(fake_succinct_receipt(claim))
     }
 
     fn unwrap_povw(
@@ -350,14 +387,14 @@ fn fake_recursion<Claim>(delay: Option<Duration>) -> Result<SuccinctReceipt<Clai
         std::thread::sleep(delay);
     }
 
-    Ok(fake_succinct_receipt())
+    Ok(fake_succinct_receipt(MaybePruned::Pruned(Digest::ZERO)))
 }
 
-fn fake_succinct_receipt<Claim>() -> SuccinctReceipt<Claim> {
+fn fake_succinct_receipt<Claim>(claim: impl Into<MaybePruned<Claim>>) -> SuccinctReceipt<Claim> {
     SuccinctReceipt {
         seal: vec![],
         control_id: Digest::ZERO,
-        claim: MaybePruned::Pruned(Digest::ZERO),
+        claim: claim.into(),
         hashfn: "fake".into(),
         verifier_parameters: Digest::ZERO,
         control_inclusion_proof: MerkleProof {

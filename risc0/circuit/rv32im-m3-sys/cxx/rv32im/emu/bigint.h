@@ -17,8 +17,8 @@
 
 #include <array>
 #include <cstdint>
-#include <map>
 #include <functional>
+#include <map>
 
 #include "rv32im/emu/trace.h"
 
@@ -44,7 +44,8 @@ struct BigIntInstruction {
   }
 };
 
-// Given access to system memory via peek, preflight a BigInt function, return of validate
+// Given access to system memory via peek, preflight a BigInt function, return
+// of validate
 size_t witgenBigInt(std::map<uint32_t, uint32_t>& polyWitness, PeekFunc peek);
 
 struct BytePolynomial {
@@ -71,6 +72,5 @@ struct BigIntPreflight {
   bool inCarry;
   BytePolynomial totCarry;
 };
-
 
 } // namespace risc0::rv32im

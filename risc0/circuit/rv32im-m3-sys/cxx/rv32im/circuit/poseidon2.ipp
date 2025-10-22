@@ -13,10 +13,9 @@
 // limitations under the License.
 
 FDEV CONSTANT Fp INT_ROUND_CONSTANTS[21] = {
-    0x1DA78EC2, 0x730B0924, 0x3EB56CF3, 0x5BD93073, 0x37204C97, 0x51642D89, 0x66E943E8, 0x1A3E72DE,
-    0x70BEB1E9, 0x30FF3B3F, 0x4240D1C4, 0x12647B8D, 0x65D86965, 0x49EF4D7C, 0x47785697, 0x46B3969F,
-    0x5C7B7A0E, 0x7078FC60, 0x4F22D482, 0x482A9AEE, 0x6BEB839D
-};
+    0x1DA78EC2, 0x730B0924, 0x3EB56CF3, 0x5BD93073, 0x37204C97, 0x51642D89, 0x66E943E8,
+    0x1A3E72DE, 0x70BEB1E9, 0x30FF3B3F, 0x4240D1C4, 0x12647B8D, 0x65D86965, 0x49EF4D7C,
+    0x47785697, 0x46B3969F, 0x5C7B7A0E, 0x7078FC60, 0x4F22D482, 0x482A9AEE, 0x6BEB839D};
 
 FDEV CONSTANT Fp EXT_ROUND_CONSTANTS[8 * CELLS] = {
     0x0FA20C37, 0x0795BB97, 0x12C60B9C, 0x0EABD88E, 0x096485CA, 0x07093527, 0x1B1D4E50, 0x30A01ACE,
@@ -50,8 +49,7 @@ FDEV CONSTANT Fp M_INT_DIAG_HZN[CELLS] = {
     0x5cdef81d, 0x01393285, 0x46daee06, 0x065d7ba6, 0x52d72d6f, 0x05dd05e0, 0x3bab4b63, 0x6ada3842,
     0x2fc5fbec, 0x770d61b0, 0x5715aae9, 0x03ef0e90, 0x75b6c770, 0x242adf5f, 0x00d0ca4c, 0x36c0e388};
 
-template<typename C>
-inline FDEV array<Val<C>, 4> multiply4x4(array<Val<C>, 4> in) {
+template <typename C> inline FDEV array<Val<C>, 4> multiply4x4(array<Val<C>, 4> in) {
   Val<C> circ_factor_2 = 2;
   Val<C> circ_factor_4 = 4;
   Val<C> t0 = in[0] + in[1];
@@ -65,8 +63,7 @@ inline FDEV array<Val<C>, 4> multiply4x4(array<Val<C>, 4> in) {
   return {t6, t5, t7, t4};
 }
 
-template<typename C>
-inline FDEV void multiplyByMExt(ValCells<C> in) {
+template <typename C> inline FDEV void multiplyByMExt(ValCells<C> in) {
   // Optimized method for multiplication by M_EXT.
   // See appendix B of Poseidon2 paper for additional details.
   ValCells<C> out;
@@ -87,8 +84,7 @@ inline FDEV void multiplyByMExt(ValCells<C> in) {
   }
 }
 
-template<typename C>
-FDEV void P2ExtRoundBlock<C>::set(CTX, P2ExtRoundWitness wit) DEV {
+template <typename C> FDEV void P2ExtRoundBlock<C>::set(CTX, P2ExtRoundWitness wit) DEV {
   id.set(ctx, wit.id);
   round.set(ctx, wit.round);
   ValCells<C> cells;
@@ -106,8 +102,7 @@ FDEV void P2ExtRoundBlock<C>::set(CTX, P2ExtRoundWitness wit) DEV {
   }
 }
 
-template<typename C>
-FDEV void P2ExtRoundBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void P2ExtRoundBlock<C>::verify(CTX) DEV {
   ValCells<C> cells;
   for (size_t i = 0; i < CELLS; i++) {
     Val<C> cur = inputs[i].get();
@@ -125,8 +120,7 @@ FDEV void P2ExtRoundBlock<C>::verify(CTX) DEV {
   }
 }
 
-template<typename C>
-FDEV void P2ExtRoundBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void P2ExtRoundBlock<C>::addArguments(CTX) DEV {
   Val<C> idVal = id.get();
   Val<C> roundVal = round.get();
   Val<C> nextRound = 0;
@@ -148,8 +142,7 @@ FDEV void P2ExtRoundBlock<C>::addArguments(CTX) DEV {
   ctx.push(state);
 }
 
-template<typename C>
-inline FDEV void multiplyByMInt(ValCells<C> in) {
+template <typename C> inline FDEV void multiplyByMInt(ValCells<C> in) {
   // Exploit the fact that off-diagonal entries of M_INT are all 1.
   Val<C> sum = 0;
   for (size_t i = 0; i < CELLS; i++) {
@@ -160,9 +153,7 @@ inline FDEV void multiplyByMInt(ValCells<C> in) {
   }
 }
 
-
-template<typename C>
-FDEV void P2IntRoundsBlock<C>::set(CTX, P2IntRoundsWitness wit) DEV {
+template <typename C> FDEV void P2IntRoundsBlock<C>::set(CTX, P2IntRoundsWitness wit) DEV {
   id.set(ctx, wit.id);
   ValCells<C> cells;
   for (size_t i = 0; i < CELLS; i++) {
@@ -183,8 +174,7 @@ FDEV void P2IntRoundsBlock<C>::set(CTX, P2IntRoundsWitness wit) DEV {
   }
 }
 
-template<typename C>
-FDEV void P2IntRoundsBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void P2IntRoundsBlock<C>::verify(CTX) DEV {
   Val<C> cells[CELLS];
   for (size_t i = 0; i < CELLS; i++) {
     cells[i] = inputs[i].get();
@@ -204,8 +194,7 @@ FDEV void P2IntRoundsBlock<C>::verify(CTX) DEV {
   }
 }
 
-template<typename C>
-FDEV void P2IntRoundsBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void P2IntRoundsBlock<C>::addArguments(CTX) DEV {
   Val<C> idVal = id.get();
   P2StateArgument<C> state;
   state.id = idVal;
@@ -217,8 +206,7 @@ FDEV void P2IntRoundsBlock<C>::addArguments(CTX) DEV {
   ctx.push(state);
 }
 
-template<typename C>
-FDEV void P2BlockBlock<C>::set(CTX, P2BlockWitness wit) DEV {
+template <typename C> FDEV void P2BlockBlock<C>::set(CTX, P2BlockWitness wit) DEV {
   id.set(ctx, wit.id);
   outUseCount.set(ctx, wit.outUseCount);
   contUseCount.set(ctx, wit.contUseCount);
@@ -228,8 +216,7 @@ FDEV void P2BlockBlock<C>::set(CTX, P2BlockWitness wit) DEV {
   }
 }
 
-template<typename C>
-FDEV void P2BlockBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void P2BlockBlock<C>::addArguments(CTX) DEV {
   Val<C> idVal = id.get();
   ctx.pull(P2IdArgument<C>(idVal));
   ctx.push(P2IdArgument<C>(idVal + 1));

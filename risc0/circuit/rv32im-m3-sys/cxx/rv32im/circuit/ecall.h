@@ -15,23 +15,27 @@
 
 #pragma once
 
-#include "rv32im/witness/ecall.h"
 #include "rv32im/circuit/decode.h"
+#include "rv32im/witness/ecall.h"
 
-template<typename C>
-struct EcallTerminateBlock {
+template <typename C> struct EcallTerminateBlock {
   CONSTANT static char NAME[] = "EcallTerminate";
 
   // TODO: pass A0/A1 on?  Clear suspend data?
   Reg<C> cycle;
   FetchBlock<C> fetch;
   MemReadBlock<C> readA7;
+  MemReadBlock<C> readA0;
+  MemReadBlock<C> readA1;
+  MemReadBlock<C> readOutput[8];
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, fetch);
     T::apply(ctx, readA7, cycle.get());
+    T::apply(ctx, readA0, cycle.get());
+    T::apply(ctx, readA1, cycle.get());
+    T::apply(ctx, readOutput, cycle.get());
   }
 
   FDEV void set(CTX, EcallTerminateWitness wit) DEV;
@@ -40,8 +44,7 @@ struct EcallTerminateBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct EcallReadBlock {
+template <typename C> struct EcallReadBlock {
   CONSTANT static char NAME[] = "EcallRead";
 
   Reg<C> cycle;
@@ -56,8 +59,7 @@ struct EcallReadBlock {
   Reg<C> finalAddrWord;
   Reg<C> finalAddrBits;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, finalCycle);
     T::apply(ctx, fetch);
@@ -77,8 +79,7 @@ struct EcallReadBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct EcallWriteBlock {
+template <typename C> struct EcallWriteBlock {
   CONSTANT static char NAME[] = "EcallWrite";
 
   Reg<C> cycle;
@@ -88,8 +89,7 @@ struct EcallWriteBlock {
   MemWriteBlock<C> writeA0;
   RegU16<C> verifyRet;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, fetch);
     T::apply(ctx, readA7, cycle.get());
@@ -104,8 +104,7 @@ struct EcallWriteBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct EcallBigIntBlock {
+template <typename C> struct EcallBigIntBlock {
   CONSTANT static char NAME[] = "EcallBigInt";
 
   Reg<C> cycle;
@@ -118,8 +117,7 @@ struct EcallBigIntBlock {
   AddressDecompose<C> pcDecomp;
   AddressVerify<C> pcVerify;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, fetch);
     T::apply(ctx, readA7, cycle.get());
@@ -135,4 +133,3 @@ struct EcallBigIntBlock {
   FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
-

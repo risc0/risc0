@@ -137,7 +137,8 @@ cells_t poseidon2_mix(const cells_t& in) {
   return cur;
 }
 
-// TODO: Many of these are basically just renames due to differing naming conventions
+// TODO: Many of these are basically just renames due to differing naming
+// conventions
 void poseidonMultiplyByMExt(cells_t& cells) {
   cells = multiply_by_m_ext(cells);
 }

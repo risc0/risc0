@@ -16,6 +16,9 @@
 use num_derive::FromPrimitive;
 use risc0_binfmt::{ByteAddr, WordAddr};
 
+pub const RV32IM_V2_CIRCUIT_VERSION: u32 = 0;
+pub const RV32IM_M3_CIRCUIT_VERSION: u32 = 3;
+
 pub const WORD_SIZE: usize = 4;
 pub const PAGE_BYTES: usize = 1024;
 pub const MEMORY_BYTES: u64 = 1 << 32;
@@ -42,6 +45,7 @@ pub const SUSPEND_CYCLE_LOW_ADDR: ByteAddr = ByteAddr(0xffff_0218);
 pub const SUSPEND_CYCLE_HIGH_ADDR: ByteAddr = ByteAddr(0xffff_021c);
 pub const GLOBAL_OUTPUT_ADDR: ByteAddr = ByteAddr(0xffff_0240);
 pub const GLOBAL_INPUT_ADDR: ByteAddr = ByteAddr(0xffff_0260);
+pub const RV32IM_VERSION_ADDR: ByteAddr = ByteAddr(0xffff_0300);
 
 pub const ECALL_DISPATCH_ADDR: ByteAddr = ByteAddr(0xffff_1000);
 pub const TRAP_DISPATCH_ADDR: ByteAddr = ByteAddr(0xffff_2000);

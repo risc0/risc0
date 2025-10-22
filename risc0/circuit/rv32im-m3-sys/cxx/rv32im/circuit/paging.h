@@ -16,15 +16,14 @@
 #pragma once
 
 #include "rv32im/base/constants.h"
-#include "rv32im/witness/paging.h"
 #include "rv32im/circuit/is_zero.h"
 #include "rv32im/circuit/poseidon2.h"
 #include "rv32im/circuit/u32.h"
+#include "rv32im/witness/paging.h"
 
 CONSTANT uint32_t NUM_PARTS = PAGE_SIZE_WORDS / PAGE_PART_SIZE;
 
-template<typename C>
-struct PageInNodeBlock {
+template <typename C> struct PageInNodeBlock {
   CONSTANT static char NAME[] = "PageInNodeBlock";
 
   Reg<C> index;
@@ -32,8 +31,7 @@ struct PageInNodeBlock {
   RegDigest<C> left;
   RegDigest<C> right;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, index);
     T::apply(ctx, node);
     T::apply(ctx, left);
@@ -47,8 +45,7 @@ struct PageInNodeBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct PageInPartBlock {
+template <typename C> struct PageInPartBlock {
   CONSTANT static char NAME[] = "PageInPartBlock";
 
   Reg<C> addr;
@@ -58,14 +55,13 @@ struct PageInPartBlock {
   RegU32<C> data[PAGE_PART_SIZE];
   IsZero<C> lastPart;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, addr);
     T::apply(ctx, partNum);
     T::apply(ctx, in);
     T::apply(ctx, out);
     T::apply(ctx, data);
-    T::apply(ctx, lastPart,  Val<C>(NUM_PARTS - 1) - partNum.get());
+    T::apply(ctx, lastPart, Val<C>(NUM_PARTS - 1) - partNum.get());
   }
 
   FDEV void set(CTX, PageInPartWitness wit) DEV;
@@ -75,15 +71,13 @@ struct PageInPartBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct PageInPageBlock {
+template <typename C> struct PageInPageBlock {
   CONSTANT static char NAME[] = "PageInPageBlock";
 
   Reg<C> addr;
   RegDigest<C> node;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, addr);
     T::apply(ctx, node);
   }
@@ -95,8 +89,7 @@ struct PageInPageBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct PageOutNodeBlock {
+template <typename C> struct PageOutNodeBlock {
   CONSTANT static char NAME[] = "PageOutNodeBlock";
 
   Reg<C> index;
@@ -104,8 +97,7 @@ struct PageOutNodeBlock {
   RegDigest<C> left;
   RegDigest<C> right;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, index);
     T::apply(ctx, node);
     T::apply(ctx, left);
@@ -119,8 +111,7 @@ struct PageOutNodeBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct PageOutPartBlock {
+template <typename C> struct PageOutPartBlock {
   CONSTANT static char NAME[] = "PageOutPartBlock";
 
   Reg<C> addr;
@@ -131,15 +122,14 @@ struct PageOutPartBlock {
   Reg<C> cycle[PAGE_PART_SIZE];
   IsZero<C> lastPart;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, addr);
     T::apply(ctx, partNum);
     T::apply(ctx, in);
     T::apply(ctx, out);
     T::apply(ctx, data);
     T::apply(ctx, cycle);
-    T::apply(ctx, lastPart,  Val<C>(NUM_PARTS - 1) - partNum.get());
+    T::apply(ctx, lastPart, Val<C>(NUM_PARTS - 1) - partNum.get());
   }
 
   FDEV void set(CTX, PageOutPartWitness wit) DEV;
@@ -149,15 +139,13 @@ struct PageOutPartBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct PageOutPageBlock {
+template <typename C> struct PageOutPageBlock {
   CONSTANT static char NAME[] = "PageOutPageBlock";
 
   Reg<C> addr;
   RegDigest<C> node;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, addr);
     T::apply(ctx, node);
   }
@@ -169,15 +157,13 @@ struct PageOutPageBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct PageUncleBlock {
+template <typename C> struct PageUncleBlock {
   CONSTANT static char NAME[] = "PageUncleBlock";
 
   Reg<C> index;
   RegDigest<C> node;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, index);
     T::apply(ctx, node);
   }
@@ -188,4 +174,3 @@ struct PageUncleBlock {
   FDEV void verify(CTX) DEV {}
   FDEV void addArguments(CTX) DEV;
 };
-

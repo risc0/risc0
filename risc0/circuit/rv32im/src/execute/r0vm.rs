@@ -34,6 +34,8 @@ pub(crate) enum LoadOp {
 }
 
 pub(crate) trait Risc0Context {
+    fn circuit_version(&self) -> u32;
+
     /// Get the program counter
     fn get_pc(&self) -> ByteAddr;
 
@@ -89,7 +91,7 @@ pub(crate) trait Risc0Context {
     #[inline(always)]
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
         let mut region = Vec::with_capacity(size);
-        if addr.is_aligned() && (0 == size % WORD_SIZE) {
+        if addr.is_aligned() && size.is_multiple_of(WORD_SIZE) {
             let mut waddr = addr.waddr();
             for _ in (0..size).step_by(WORD_SIZE) {
                 let word = self.load_u32(op, waddr.postfix_inc())?;
@@ -108,7 +110,7 @@ pub(crate) trait Risc0Context {
     #[inline(always)]
     fn store_region(&mut self, addr: ByteAddr, input: &[u8]) -> Result<()> {
         let size = input.len();
-        if addr.is_aligned() && (0 == size % WORD_SIZE) {
+        if addr.is_aligned() && size.is_multiple_of(WORD_SIZE) {
             let mut waddr = addr.waddr();
             for i in (0..size).step_by(WORD_SIZE) {
                 self.store_u32(
@@ -211,6 +213,10 @@ impl TestRisc0Context {
 
 #[cfg(test)]
 impl Risc0Context for TestRisc0Context {
+    fn circuit_version(&self) -> u32 {
+        RV32IM_V2_CIRCUIT_VERSION
+    }
+
     fn get_pc(&self) -> ByteAddr {
         self.pc
     }
@@ -329,9 +335,13 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
     }
 
     pub fn resume(ctx: &'a mut C) -> Result<()> {
+        let circuit_version = ctx.circuit_version();
         let mut this = Risc0Machine { ctx };
         let pc = guest_addr(this.load_memory(SUSPEND_PC_ADDR.waddr())?)?;
         let machine_mode = this.load_memory(SUSPEND_MODE_ADDR.waddr())?;
+        if circuit_version == RV32IM_M3_CIRCUIT_VERSION {
+            this.store_memory(RV32IM_VERSION_ADDR.waddr(), RV32IM_M3_CIRCUIT_VERSION)?;
+        }
         // tracing::debug!("resume(entry: {pc:?}, mode: {machine_mode})");
         this.ctx.set_pc(pc);
         this.ctx.set_machine_mode(machine_mode);

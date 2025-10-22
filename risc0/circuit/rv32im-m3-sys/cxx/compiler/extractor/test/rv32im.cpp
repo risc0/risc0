@@ -19,16 +19,17 @@
 #include "mlir/IR/Verifier.h"
 
 int main() {
-    using C = RecordingContext;
-    mlir::MLIRContext mlirCtx;
-    RecordingContext ctx(&mlirCtx);
-    RecordingVal::setContext(&ctx);
+  using C = RecordingContext;
+  mlir::MLIRContext mlirCtx;
+  RecordingContext ctx(&mlirCtx);
+  RecordingReg::setContext(&ctx);
+  BuilderSingleton::set(&ctx.builder);
 
-    #define BLOCK_TYPE(name, count) EXTRACT(name ## Block)
-    BLOCK_TYPES
-    #undef BLOCK_TYPE
+#define BLOCK_TYPE(name, count) EXTRACT(name##Block)
+  BLOCK_TYPES
+#undef BLOCK_TYPE
 
-    ctx.getModuleOp().print(llvm::outs());
-    llvm::outs().flush();
-    return failed(mlir::verify(ctx.getModuleOp()));
+  ctx.getModuleOp().print(llvm::outs());
+  llvm::outs().flush();
+  return failed(mlir::verify(ctx.getModuleOp()));
 }

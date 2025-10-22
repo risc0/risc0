@@ -46,6 +46,7 @@ use opentelemetry_sdk::{
     Resource,
     logs::SdkLoggerProvider,
     metrics::{PeriodicReader, SdkMeterProvider},
+    propagation::TraceContextPropagator,
     trace::SdkTracerProvider,
 };
 use risc0_zkvm::DevModeDelay;
@@ -66,7 +67,8 @@ use crate::init_logging;
 use self::{
     actor::{Actor, ActorRef, Message},
     allocator::{
-        AllocatorActor, HardwareResource, RegisterManager, RegisterWorker, RemoteAllocatorActor,
+        AllocatorActor, DEFAULT_RELEASE_CHANNEL, DEFAULT_WORKER_TASK_LIMIT, DeploymentVersion,
+        HardwareResource, RegisterManager, RegisterWorker, RemoteAllocatorActor,
     },
     config::{
         AllocatorConfig, AppConfig, ExecutorConfig, ManagerConfig, ProverConfig, TelemetryConfig,
@@ -211,12 +213,17 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
     let mut app = App::new(
         AppConfig {
             version: VERSION,
+            release_channel: None,
             api: None,
             manager: Some(ManagerConfig {
                 allocator: None,
                 listen: None,
             }),
-            allocator: Some(AllocatorConfig { listen: None }),
+            allocator: Some(AllocatorConfig {
+                listen: None,
+                default_release_channel: None,
+                worker_task_limit: None,
+            }),
             executor: Some(ExecutorConfig {
                 allocator: None,
                 count: 1,
@@ -288,9 +295,11 @@ impl TempConfig {
         allocator_addr: SocketAddr,
         subscribe: Vec<TaskKind>,
         enable_telemetry: bool,
+        release_channel: &Option<String>,
     ) -> anyhow::Result<Self> {
         let config = AppConfig {
             version: VERSION,
+            release_channel: release_channel.clone(),
             api: None,
             manager: None,
             allocator: None,
@@ -391,14 +400,22 @@ impl App {
         if let Some(cfg_allocator) = &cfg.allocator {
             tracing::info!("Starting allocator");
 
-            let alloc_ref = actor::spawn(AllocatorActor::new());
+            let alloc_ref = actor::spawn(AllocatorActor::new(
+                cfg_allocator
+                    .default_release_channel
+                    .as_deref()
+                    .unwrap_or(DEFAULT_RELEASE_CHANNEL),
+                cfg_allocator
+                    .worker_task_limit
+                    .unwrap_or(DEFAULT_WORKER_TASK_LIMIT),
+            ));
             allocator = Some(alloc_ref.clone());
 
             let mut rpc_server = AllocatorRpcServer::new(
                 allocator_listen_addr(cfg_allocator.listen),
                 alloc_ref.clone(),
             );
-            local_allocator_rpc_addr = rpc_server.start().await?;
+            local_allocator_rpc_addr = Some(rpc_server.bind_and_listen().await?);
             allocator_rpc_server = Some(rpc_server);
 
             if let Some(cfg_api) = &cfg.api {
@@ -448,10 +465,7 @@ impl App {
 
             let mut rpc_server =
                 FactoryRpcServer::new(manager_listen_addr(cfg_manager.listen), factory_ref);
-            let local_factory_rpc_addr = rpc_server
-                .start()
-                .await?
-                .expect("start called for first time");
+            let local_factory_rpc_addr = rpc_server.bind_and_listen().await?;
             factory_rpc_server = Some(rpc_server);
 
             let mut api_addr = None;
@@ -469,9 +483,7 @@ impl App {
 
             alloc_ref
                 .ask(RegisterManager {
-                    zkvm_version: env!("CARGO_PKG_VERSION")
-                        .parse()
-                        .expect("CARGO_PKG_VERSION should be a valid semver::Version"),
+                    deployment_version: deployment_version(&cfg.release_channel),
                     api_port: api_addr.map(|a| a.port()),
                     rpc_port: Some(local_factory_rpc_addr.port()),
                     path: "/".into(),
@@ -484,13 +496,19 @@ impl App {
         let mut children = vec![];
 
         if let Some(cfg_executor) = cfg.executor {
-            Self::create_executors(&cfg_executor, local_allocator_rpc_addr, workers.clone())
-                .await?;
+            Self::create_executors(
+                &cfg_executor,
+                &cfg.release_channel,
+                local_allocator_rpc_addr,
+                workers.clone(),
+            )
+            .await?;
         }
 
         if let Some(cfg_prover) = cfg.prover {
             Self::create_provers(
                 &cfg_prover,
+                &cfg.release_channel,
                 local_allocator_rpc_addr,
                 workers.clone(),
                 &mut children,
@@ -519,6 +537,7 @@ impl App {
 
     async fn create_executors(
         executor: &ExecutorConfig,
+        release_channel: &Option<String>,
         local_allocator_addr: Option<SocketAddr>,
         workers: Arc<Mutex<Vec<ActorRef<WorkerActor>>>>,
     ) -> Result<(), Box<dyn StdError>> {
@@ -537,6 +556,7 @@ impl App {
 
         for _ in 0..executor.count {
             start_worker(
+                release_channel,
                 alloc_ref.clone(),
                 alloc_ip,
                 workers.clone(),
@@ -552,6 +572,7 @@ impl App {
     #[allow(clippy::too_many_arguments)]
     async fn create_provers(
         cfg_prover: &[ProverConfig],
+        release_channel: &Option<String>,
         local_allocator_addr: Option<SocketAddr>,
         workers: Arc<Mutex<Vec<ActorRef<WorkerActor>>>>,
         children: &mut Vec<ChildState>,
@@ -571,6 +592,7 @@ impl App {
                 );
 
                 start_worker(
+                    release_channel,
                     alloc_ref,
                     alloc_addr.ip(),
                     workers.clone(),
@@ -590,11 +612,13 @@ impl App {
                     allocator_addr,
                     prover.subscribe.clone(),
                     enable_telemetry,
+                    release_channel,
                 )?);
                 for device_idx in 0..count {
                     let child = Command::new(&r0vm_path)
                         .process_group(0)
                         .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
+                        .env_remove("RISC0_DEV_MODE")
                         .arg("--config")
                         .arg(cfg_child.file.path())
                         .spawn()
@@ -618,47 +642,52 @@ impl App {
         }
     }
 
-    pub async fn stop(mut self) {
-        tracing::info!("app: stop");
+    fn stop_actors(&mut self) {
+        self.factory_rpc_server = None;
+        self.allocator_rpc_server = None;
 
-        if let Some(server) = self.factory_rpc_server.take() {
-            tracing::info!("factory_rpc_server: stop");
-            server.stop().await;
+        if let Some(allocator) = &self.allocator {
+            let _ = allocator.stop_gracefully("app shutdown");
         }
 
-        if let Some(server) = self.allocator_rpc_server.take() {
-            tracing::info!("allocator_rpc_server: stop");
-            server.stop().await;
+        if let Some(manager) = &self.manager {
+            let _ = manager.stop_gracefully("app shutdown");
         }
 
-        if let Some(allocator) = self.allocator.take()
-            && allocator.stop_gracefully().await.is_ok()
-        {
+        let workers = self.workers.lock().unwrap().clone();
+        for worker in workers {
+            let _ = worker.stop_gracefully("app shutdown");
+        }
+
+        if let Some(factory) = &self.factory {
+            let _ = factory.stop_gracefully("app shutdown");
+        }
+    }
+
+    async fn wait_for_actors(&mut self) {
+        if let Some(allocator) = &self.allocator {
             tracing::info!("allocator: wait for stop");
             allocator.wait_for_stop().await;
         }
 
-        if let Some(manager) = self.manager.take()
-            && manager.stop_gracefully().await.is_ok()
-        {
+        if let Some(manager) = &self.manager {
             tracing::info!("manager: wait for stop");
             manager.wait_for_stop().await;
         }
 
-        tracing::info!("worker: stop");
+        tracing::info!("worker: wait for stop");
         let workers = self.workers.lock().unwrap().clone();
         for worker in workers {
-            worker.kill();
             worker.wait_for_stop().await;
         }
 
-        if let Some(factory) = self.factory
-            && factory.stop_gracefully().await.is_ok()
-        {
+        if let Some(factory) = &self.factory {
             tracing::info!("factory: wait for stop");
             factory.wait_for_stop().await;
         }
+    }
 
+    async fn wait_for_children(&mut self) {
         tracing::info!(
             "waiting for children: {:?}",
             self.children
@@ -666,16 +695,20 @@ impl App {
                 .filter_map(|c| c.child.id())
                 .collect::<Vec<_>>()
         );
-        for mut child in self.children {
+        for child in &mut self.children {
             let result = child.child.wait().await;
             if let Some(err) = result.err() {
                 tracing::warn!("Failed to wait on child: {err}");
             }
         }
+    }
 
-        if let Some(provider) = self.provider {
-            provider.stop();
-        }
+    pub async fn stop(mut self) {
+        tracing::info!("app: stop");
+
+        self.stop_actors();
+        self.wait_for_actors().await;
+        self.wait_for_children().await;
     }
 
     pub async fn proof_request(
@@ -711,7 +744,18 @@ impl App {
     }
 }
 
+impl Drop for App {
+    fn drop(&mut self) {
+        self.stop_actors();
+
+        if let Some(provider) = self.provider.take() {
+            provider.stop();
+        }
+    }
+}
+
 async fn start_worker(
+    release_channel: &Option<String>,
     alloc_ref: ActorRef<RemoteAllocatorActor>,
     alloc_ip: IpAddr,
     workers: Arc<Mutex<Vec<ActorRef<WorkerActor>>>>,
@@ -727,9 +771,7 @@ async fn start_worker(
             remote_address: None,
             worker_id,
             hardware: worker_hardware.clone(),
-            zkvm_version: env!("CARGO_PKG_VERSION")
-                .parse()
-                .expect("CARGO_PKG_VERSION should be a valid semver::Version"),
+            deployment_version: deployment_version(release_channel),
         })
         .await??;
 
@@ -768,6 +810,17 @@ async fn start_worker(
     Ok(())
 }
 
+pub fn deployment_version(release_channel: &Option<String>) -> DeploymentVersion {
+    DeploymentVersion {
+        release_channel: release_channel
+            .clone()
+            .unwrap_or(DEFAULT_RELEASE_CHANNEL.into()),
+        zkvm_version: env!("CARGO_PKG_VERSION")
+            .parse()
+            .expect("CARGO_PKG_VERSION should be a valid semver::Version"),
+    }
+}
+
 //
 //  _ __ _ __   ___
 // | '__| '_ \ / __|
@@ -790,7 +843,7 @@ async fn route_rpc_msg_to_worker(
     if let Some(msg) = msg {
         msg.dispatch(remote_address, worker, ops).await
     } else {
-        worker.kill();
+        let _ = worker.stop_gracefully("rpc end");
     }
 }
 
@@ -804,7 +857,7 @@ struct RpcDisconnect {
 struct RpcServer<ReceiverT: Actor, MessageT> {
     listen_addr: SocketAddr,
     receiver: ActorRef<ReceiverT>,
-    join_handle: Option<JoinHandle<()>>,
+    join_set: tokio::task::JoinSet<()>,
     _msg: PhantomData<MessageT>,
 }
 
@@ -817,21 +870,22 @@ where
         Self {
             listen_addr,
             receiver,
-            join_handle: None,
+            join_set: tokio::task::JoinSet::new(),
             _msg: PhantomData,
         }
     }
 
-    pub async fn start(&mut self) -> anyhow::Result<Option<SocketAddr>> {
-        if self.join_handle.is_some() {
-            return Ok(None);
-        }
+    pub async fn bind_and_listen(&mut self) -> anyhow::Result<SocketAddr> {
+        assert!(
+            self.join_set.is_empty(),
+            "bind_and_listen called more than once"
+        );
 
         let receiver = self.receiver.clone();
         let listener = TcpListener::bind(self.listen_addr).await?;
         let local_addr = listener.local_addr()?;
 
-        self.join_handle = Some(tokio::spawn(async move {
+        self.join_set.spawn(async move {
             let mut join_set = tokio::task::JoinSet::new();
             loop {
                 let (stream, remote_address) = match listener.accept().await {
@@ -864,15 +918,9 @@ where
                     let _ = receiver.tell(RpcDisconnect { remote_address }).await;
                 });
             }
-        }));
+        });
 
-        Ok(Some(local_addr))
-    }
-
-    pub async fn stop(self) {
-        if let Some(join_handle) = self.join_handle {
-            join_handle.abort();
-        }
+        Ok(local_addr)
     }
 }
 
@@ -950,7 +998,7 @@ enum RemoteFactoryRequest {
 impl DispatchRpcMessage<FactoryActor> for RemoteFactoryRequest {
     async fn dispatch(
         self,
-        _remote_address: SocketAddr,
+        remote_address: SocketAddr,
         receiver: ActorRef<FactoryActor>,
         ops: RpcDispatchOps,
     ) {
@@ -961,6 +1009,7 @@ impl DispatchRpcMessage<FactoryActor> for RemoteFactoryRequest {
                         .clone()
                         .expect("ask should not be called on one-way RPC actor"),
                 )));
+                msg.remote_address = Some(remote_address);
                 ops.tell(receiver, msg).await;
             }
             RemoteFactoryRequest::TaskUpdate(msg) => {
@@ -1106,7 +1155,7 @@ impl<ActorT: Send + 'static> Actor for RemoteActor<ActorT> {
         if let Some(rpc_death_recv) = self.rpc_death_recv.take() {
             tokio::task::spawn(async move {
                 let _ = rpc_death_recv.await;
-                actor_ref.kill();
+                let _ = actor_ref.stop_gracefully("rpc connection closed");
             });
         }
     }
@@ -1130,15 +1179,17 @@ macro_rules! remote_actor_ask {
                 let msg: $msg_ty = msg.into();
                 let res = self
                     .rpc_sender
-                    .ask(&msg, move |response: $reply| {
+                    .ask(&msg, async move |response: $reply| {
                         if let Some(reply_sender) = reply_sender {
-                            reply_sender.send(response);
+                            reply_sender.send(response).await;
                         }
                     })
                     .await;
                 if let Err(error) = res {
                     tracing::error!("error communicating with remote actor: {error}");
-                    let _ = ctx.actor_ref().stop_gracefully().await;
+                    let _ = ctx
+                        .actor_ref()
+                        .stop_gracefully(format!("rpc error: {error}"));
                 }
             }
         }
@@ -1160,7 +1211,9 @@ macro_rules! remote_actor_tell {
                 let res = self.rpc_sender.tell(&msg).await;
                 if let Err(error) = res {
                     tracing::error!("error communicating with remote actor: {error}");
-                    let _ = ctx.actor_ref().stop_gracefully().await;
+                    let _ = ctx
+                        .actor_ref()
+                        .stop_gracefully(format!("rpc error: {error}"));
                 }
             }
         }
@@ -1232,6 +1285,8 @@ impl OpenTelemetryProvider {
             .build();
 
         opentelemetry::global::set_meter_provider(meter_provider.clone());
+
+        opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
 
         Ok(Self {
             tracer_provider,

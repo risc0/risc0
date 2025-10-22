@@ -35,6 +35,9 @@ public:
   // Write from the prover
   void write(const Digest* buf, size_t size);
 
+  // Write a scalar value to the IOP.
+  void write(uint32_t value);
+
   // Get final transcript
   const std::vector<Fp>& getTranscript();
 

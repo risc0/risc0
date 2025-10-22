@@ -23,7 +23,7 @@ use risc0_zkvm::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{actor::ActorRef, job::JobActor, worker::RemoteWorkerActor};
+use super::{RemoteWorkerActor, actor::ActorRef};
 
 pub use risc0_zkvm::rpc::{
     JobInfo, JobRequest, JobStatus, ProofRequest, ProofResult, Session, ShrinkWrapKind,
@@ -107,7 +107,7 @@ impl fmt::Display for GlobalId {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct TaskHeader {
     pub global_id: GlobalId,
     pub task_kind: TaskKind,
@@ -133,12 +133,14 @@ pub(crate) struct ExecuteTask {
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ProveSegmentTask {
     pub segment: Segment,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ProveKeccakTask {
     pub index: usize,
     pub request: ProveKeccakRequest,
+    pub dev_mode: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -150,12 +152,14 @@ pub(crate) struct SegmentRange {
 #[derive(Serialize, Deserialize)]
 pub(crate) struct LiftTask {
     pub receipt: SegmentReceipt,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct JoinTask {
     pub range: SegmentRange,
     pub receipts: Vec<SuccinctReceipt<ReceiptClaim>>,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -163,36 +167,55 @@ pub(crate) struct UnionTask {
     pub height: usize,
     pub pos: usize,
     pub receipts: Vec<Arc<SuccinctReceipt<Unknown>>>,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ResolveTask {
     pub conditional: Arc<SuccinctReceipt<ReceiptClaim>>,
     pub assumption: Arc<SuccinctReceipt<Unknown>>,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ShrinkWrapTask {
     pub kind: ShrinkWrapKind,
     pub receipt: Arc<Receipt>,
+    pub dev_mode: bool,
 }
 
 pub mod factory {
+    use std::net::SocketAddr;
+
     use super::*;
+    use crate::actors::{actor::Actor, job::tracer};
 
     #[derive(Clone, Serialize, Deserialize)]
-    pub(crate) struct GetTasks {
+    #[serde(bound = "")]
+    pub(crate) struct GetTasks<WorkerT: Actor = RemoteWorkerActor> {
         pub worker_id: WorkerId,
         #[serde(skip)]
-        pub worker: Option<ActorRef<RemoteWorkerActor>>,
+        pub worker: Option<ActorRef<WorkerT>>,
+        pub remote_address: Option<SocketAddr>,
         pub kinds: Vec<TaskKind>,
     }
 
-    #[derive(Clone)]
-    pub(crate) struct SubmitTaskMsg {
-        pub job: ActorRef<JobActor>,
+    pub(crate) struct SubmitTaskMsg<JobT: Actor> {
+        pub job: ActorRef<JobT>,
         pub header: TaskHeader,
         pub task: Task,
+        pub tracing: tracer::SavedContext,
+    }
+
+    impl<JobT: Actor> Clone for SubmitTaskMsg<JobT> {
+        fn clone(&self) -> Self {
+            Self {
+                job: self.job.clone(),
+                header: self.header.clone(),
+                task: self.task.clone(),
+                tracing: self.tracing.clone(),
+            }
+        }
     }
 
     #[derive(Serialize, Deserialize)]
@@ -250,11 +273,31 @@ pub mod factory {
         pub pos: usize,
         pub receipt: SuccinctReceipt<UnionClaim>,
     }
+
+    #[cfg(test)]
+    impl TaskDone {
+        pub fn kind(&self) -> TaskKind {
+            match self {
+                Self::Session(_) => TaskKind::Execute,
+                Self::ProveSegment(_) => TaskKind::ProveSegment,
+                Self::ProveKeccak(_) => TaskKind::ProveKeccak,
+                Self::Lift(_) => TaskKind::Lift,
+                Self::Join(_) => TaskKind::Join,
+                Self::Union(_) => TaskKind::Union,
+                Self::Resolve(_) => TaskKind::Resolve,
+                Self::ShrinkWrap(_) => TaskKind::ShrinkWrap,
+            }
+        }
+    }
 }
 
 pub mod worker {
-    use super::*;
-    use crate::actors::allocator::{CpuCores, GpuTokens};
+    use super::{Task, TaskHeader};
+    use crate::actors::{
+        allocator::{CpuCores, GpuTokens},
+        job::tracer,
+    };
+    use serde::{Deserialize, Serialize};
 
     #[derive(Clone, Serialize, Deserialize)]
     pub(crate) struct TaskMsg {
@@ -262,6 +305,7 @@ pub mod worker {
         pub task: Task,
         pub gpu_tokens: GpuTokens,
         pub cores: CpuCores,
+        pub tracing: tracer::SavedContext,
     }
 }
 

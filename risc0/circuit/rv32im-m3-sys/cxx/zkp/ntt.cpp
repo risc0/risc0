@@ -14,8 +14,8 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #include "zkp/ntt.h"
-#include "zkp/rou.h"
 #include "core/util.h"
+#include "zkp/rou.h"
 
 #include <assert.h>
 
@@ -23,17 +23,19 @@ namespace risc0 {
 
 namespace {
 
-// Basically we use a radix-2 Cooley–Tukey algorithm.  We have some special casing for when the
-// input size is bigger than the output size for the evaluation case (basically for Reed-Solomon).
-// We do a bit-reversal/butterfly for the simple case.
+// Basically we use a radix-2 Cooley–Tukey algorithm.  We have some special
+// casing for when the input size is bigger than the output size for the
+// evaluation case (basically for Reed-Solomon). We do a bit-reversal/butterfly
+// for the simple case.
 //
-// Annoyningly, since we want to do interpolation followed by evaluation without doing any bit
-// reversals, we need to support both decimation in time and decimation in freqency based the
-// direction.
+// Annoyningly, since we want to do interpolation followed by evaluation without
+// doing any bit reversals, we need to support both decimation in time and
+// decimation in freqency based the direction.
 //
-// Thsese are the primary recurvsive implementations.  Here T is the datatype (presumed to support
-// add, sub and mul), (1 << N) is the size of the buffer, (1 << L) is the expansion size.
-// Basically, L just causes an early termination, since we 'precompute' the constant evaluations.
+// Thsese are the primary recurvsive implementations.  Here T is the datatype
+// (presumed to support add, sub and mul), (1 << N) is the size of the buffer,
+// (1 << L) is the expansion size. Basically, L just causes an early
+// termination, since we 'precompute' the constant evaluations.
 
 template <typename T, size_t N, size_t L> struct FwdNTTButterfly {
   static void run(T* io) {
@@ -174,7 +176,8 @@ template <typename T, bool Rev> void runtimeN(T* io, size_t N, size_t L, bool do
 #undef DO_CASE
 }
 
-template <typename T, bool Rev> void parallelNTT(T* io, size_t size, size_t count, bool doBitRev=true) {
+template <typename T, bool Rev>
+void parallelNTT(T* io, size_t size, size_t count, bool doBitRev = true) {
   size_t N = log2Ceil(size);
   assert((size_t(1) << N) == size);
   // TODO: parallel
@@ -208,11 +211,11 @@ void multiBitReverse(Fp* io, size_t size, size_t count) {
     throw std::runtime_error("Invalid bit reversal");
   }
   // TODO: parallel
-  for(size_t i = 0; i < count; i++) {
+  for (size_t i = 0; i < count; i++) {
     for (size_t j = 0; j < size; j++) {
       size_t revIdx = bitReverse(j) >> (32 - N);
       if (j < revIdx) {
-        std::swap(io[i*size + j], io[i*size + revIdx]);
+        std::swap(io[i * size + j], io[i * size + revIdx]);
       }
     }
   }
@@ -224,11 +227,11 @@ void multiBitReverse(FpExt* io, size_t size, size_t count) {
     throw std::runtime_error("Invalid bit reversal");
   }
   // This is only used for FRI, so count == 16
-  for(size_t i = 0; i < count; i++) {
+  for (size_t i = 0; i < count; i++) {
     for (size_t j = 0; j < size; j++) {
       size_t revIdx = bitReverse(j) >> (32 - N);
       if (j < revIdx) {
-        std::swap(io[i*size + j], io[i*size + revIdx]);
+        std::swap(io[i * size + j], io[i * size + revIdx]);
       }
     }
   }
@@ -258,9 +261,9 @@ void multiShift(Fp* io, size_t size, size_t count) {
     size_t revIdx = bitReverse(j) >> (32 - N);
     Fp mul = pow(Fp(3), revIdx);
     for (size_t i = 0; i < count; i++) {
-      io[i*size + j] *= mul;
+      io[i * size + j] *= mul;
     }
   }
 }
 
-} // namespace byz
+} // namespace risc0

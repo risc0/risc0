@@ -61,12 +61,17 @@ async fn basic() {
     let mut app = App::new(
         AppConfig {
             version: VERSION,
+            release_channel: None,
             api: None,
             manager: Some(ManagerConfig {
                 allocator: None,
                 listen: None,
             }),
-            allocator: Some(AllocatorConfig { listen: None }),
+            allocator: Some(AllocatorConfig {
+                listen: None,
+                default_release_channel: None,
+                worker_task_limit: None,
+            }),
             executor: Some(ExecutorConfig {
                 allocator: None,
                 count: 1,
@@ -95,6 +100,7 @@ async fn basic() {
         assumptions: vec![],
         segment_limit_po2: po2,
         execute_only: false,
+        dev_mode: false,
     };
 
     let info = app.proof_request(request).await.unwrap();
@@ -106,6 +112,7 @@ async fn basic() {
     let request = ShrinkWrapRequest {
         kind: ShrinkWrapKind::Groth16,
         receipt: (*result.receipt.unwrap()).clone(),
+        dev_mode: false,
     };
 
     let info = app.shrink_wrap_request(request).await.unwrap();

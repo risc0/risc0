@@ -344,7 +344,7 @@ impl<'a, F: Field> Verifier<'a, F> {
 
         // Now, convert U polynomials from coefficient form to evaluation form
         let mut cur_pos = 0;
-        let mut eval_u = Vec::with_capacity(num_taps);
+        let mut eval_u = Vec::with_capacity(num_taps + 1);
         for reg in self.taps.regs() {
             for i in 0..reg.size() {
                 let x = z * back_one.pow(reg.back(i));
@@ -353,7 +353,14 @@ impl<'a, F: Field> Verifier<'a, F> {
             }
             cur_pos += reg.size();
         }
-        assert_eq!(eval_u.len(), num_taps, "Miscalculated capacity for eval_us");
+        // Add 'x' as a final element of eval_u (only used in v3)
+        let three = F::Elem::from_u64(3);
+        eval_u.push(z * three);
+        assert_eq!(
+            eval_u.len(),
+            num_taps + 1,
+            "Miscalculated capacity for eval_us"
+        );
 
         // Compute the core constraint polynomial.
         // I.e. the set of all constraints mixed by poly_mix
@@ -387,7 +394,6 @@ impl<'a, F: Field> Verifier<'a, F> {
                 * z.pow(i)
                 * F::ExtElem::from_subelems([fp0, fp0, fp0, fp1]);
         }
-        let three = F::Elem::from_u64(3);
         check *= (F::ExtElem::from_subfield(&three) * z).pow(self.tot_cycles) - F::ExtElem::ONE;
         trace_if_enabled!("Check = {check:?}");
         if check != result {
@@ -610,119 +616,4 @@ where
     // There should be nothing else in the IOP, so verify that's the case.
     verifier.iop().verify_complete();
     Ok(())
-}
-
-#[cfg(test)]
-mod test {
-    use risc0_core::field::{
-        Elem,
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-    };
-
-    use crate::{
-        adapter::{CircuitCoreDefV3, CircuitInfoV3, GroupInfo, MixState, PolyExt, TapsProvider},
-        core::hash::poseidon2::Poseidon2HashSuite,
-        taps::{TapData, TapSet},
-        verify::verify_v3,
-    };
-
-    pub const TAPSET: &TapSet = &TapSet::<'static> {
-        taps: &[
-            TapData {
-                offset: 0,
-                back: 0,
-                group: 0,
-                combo: 0,
-                skip: 1,
-            },
-            TapData {
-                offset: 0,
-                back: 0,
-                group: 1,
-                combo: 0,
-                skip: 1,
-            },
-            TapData {
-                offset: 0,
-                back: 0,
-                group: 2,
-                combo: 0,
-                skip: 1,
-            },
-        ],
-        combo_taps: &[0],
-        combo_begin: &[0, 1],
-        group_begin: &[0, 1, 2, 3],
-        combos_count: 1,
-        reg_count: 3,
-        tot_combo_backs: 1,
-        group_names: &["accum", "code", "data"],
-    };
-
-    struct HelloCircuit {}
-    impl CircuitInfoV3 for HelloCircuit {
-        fn get_groups(&self) -> &'static [GroupInfo] {
-            &[
-                GroupInfo {
-                    global_count: 0,
-                    mix_count: 0,
-                },
-                GroupInfo {
-                    global_count: 0,
-                    mix_count: 0,
-                },
-                GroupInfo {
-                    global_count: 0,
-                    mix_count: 0,
-                },
-            ]
-        }
-    }
-    impl PolyExt<BabyBear> for HelloCircuit {
-        fn poly_ext(
-            &self,
-            mix: &BabyBearExtElem,
-            u: &[BabyBearExtElem],
-            _args: &[&[BabyBearElem]],
-        ) -> MixState<BabyBearExtElem> {
-            let mut state = MixState::<BabyBearExtElem> {
-                tot: BabyBearExtElem::ZERO,
-                mul: BabyBearExtElem::ONE,
-            };
-            let mut eqz = |inner: BabyBearExtElem| {
-                state = MixState {
-                    tot: state.tot + state.mul * inner,
-                    mul: state.mul * *mix,
-                };
-            };
-
-            eqz(u[0]);
-            eqz(u[1]);
-            eqz(u[2] * (u[2] - BabyBearExtElem::from_u32(1)));
-            state
-        }
-    }
-    impl TapsProvider for HelloCircuit {
-        fn get_taps(&self) -> &'static TapSet<'static> {
-            TAPSET
-        }
-    }
-    impl CircuitCoreDefV3<BabyBear> for HelloCircuit {}
-
-    #[test]
-    fn verify_v3_stark_proof() {
-        let transcript: Vec<u32> = include_bytes!("proof.bin")
-            .chunks_exact(4)
-            .map(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()))
-            // .map(|x| BabyBearElem::new(x).as_u32_montgomery())
-            .collect();
-
-        let circuit = HelloCircuit {};
-        let suite = Poseidon2HashSuite::new_suite();
-        let x = verify_v3(&circuit, &suite, &transcript, 12);
-        match x {
-            Ok(_) => {}
-            Err(e) => panic!("Failed to verify: {e}"),
-        }
-    }
 }

@@ -54,4 +54,4 @@ private:
   HalMatrix<Fp> finalCoeffs;
 };
 
-}  // namespace risc0
+} // namespace risc0

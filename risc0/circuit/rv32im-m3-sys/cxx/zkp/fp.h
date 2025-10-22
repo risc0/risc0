@@ -16,7 +16,8 @@
 #pragma once
 
 /// \file
-/// Defines the core finite field data type, Fp, and some free functions on the type.
+/// Defines the core finite field data type, Fp, and some free functions on the
+/// type.
 
 #include <cstddef>
 #include <cstdint>
@@ -26,22 +27,25 @@
 
 namespace risc0 {
 
-/// The Fp class is an element of the finite field F_p, where P is the prime number 15*2^27 + 1.
-/// Put another way, Fp is basically integer arithmetic modulo P.
+/// The Fp class is an element of the finite field F_p, where P is the prime
+/// number 15*2^27 + 1. Put another way, Fp is basically integer arithmetic
+/// modulo P.
 ///
-/// The 'Fp' datatype is the core type of all of the operations done within the zero knowledge
-/// proofs, and is smallest 'addressable' datatype, and the base type of which all composite types
-/// are built.  In many ways, one can imagine it as the word size of a very strange architecture.
+/// The 'Fp' datatype is the core type of all of the operations done within the
+/// zero knowledge proofs, and is smallest 'addressable' datatype, and the base
+/// type of which all composite types are built.  In many ways, one can imagine
+/// it as the word size of a very strange architecture.
 ///
 /// This specific prime P was chosen to:
-/// - Be less than 2^31 so that it fits within a 32 bit word and doesn't overflow on addition.
+/// - Be less than 2^31 so that it fits within a 32 bit word and doesn't
+/// overflow on addition.
 /// - Otherwise have as large a power of 2 in the factors of P-1 as possible.
 ///
-/// This last property is useful for number theoretical transforms (the fast fourier transform
-/// equivelant on finite fields).  See NTT.h for details.
+/// This last property is useful for number theoretical transforms (the fast
+/// fourier transform equivelant on finite fields).  See NTT.h for details.
 ///
-/// The Fp class wraps all the standard arithmatic operations to make the finite field elements look
-/// basically like ordinary numbers (which they mostly are).
+/// The Fp class wraps all the standard arithmatic operations to make the finite
+/// field elements look basically like ordinary numbers (which they mostly are).
 class Fp {
 public:
   /// The value of P, the modulus of Fp.
@@ -53,9 +57,10 @@ private:
   // The actual value, always < P.
   uint32_t val;
 
-  // We make 'impls' of the core ops which all the other uses call.  This is done to allow for
-  // tweaking of the implementation later, for example switching to montgomery representation or
-  // doing inline assembly or some crazy CUDA stuff.
+  // We make 'impls' of the core ops which all the other uses call.  This is
+  // done to allow for tweaking of the implementation later, for example
+  // switching to montgomery representation or doing inline assembly or some
+  // crazy CUDA stuff.
 
   // Add two numbers
   static constexpr inline uint32_t add(uint32_t a, uint32_t b) {
@@ -182,11 +187,12 @@ constexpr inline Fp pow(Fp x, size_t n) {
   return tot;
 }
 
-/// Compute the multiplicative inverse of x, or `1/x` in finite field terms.  Since `x^(P-1) == 1
-/// (mod P)` for any x != 0 (as a consequence of Fermat's little therorm), it follows that `x *
-/// x^(P-2) == 1 (mod P)` for x != 0.  That is, `x^(P-2)` is the multiplicative inverse of x.
-/// Computed this way, the 'inverse' of zero comes out as zero, which is convient in many cases, so
-/// we leave it.
+/// Compute the multiplicative inverse of x, or `1/x` in finite field terms.
+/// Since `x^(P-1) == 1 (mod P)` for any x != 0 (as a consequence of Fermat's
+/// little therorm), it follows that `x * x^(P-2) == 1 (mod P)` for x != 0. That
+/// is, `x^(P-2)` is the multiplicative inverse of x. Computed this way, the
+/// 'inverse' of zero comes out as zero, which is convient in many cases, so we
+/// leave it.
 constexpr inline Fp inv(Fp x) {
   return pow(x, Fp::P - 2);
 }

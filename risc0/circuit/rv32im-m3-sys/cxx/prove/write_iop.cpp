@@ -33,6 +33,11 @@ void WriteIop::write(const Digest* buf, size_t size) {
   write(castBuf, size * 8);
 }
 
+void WriteIop::write(uint32_t value) {
+  Fp fpValue = Fp::fromRaw(value);
+  write(&fpValue, 1);
+}
+
 const std::vector<Fp>& WriteIop::getTranscript() {
   return transcript;
 }
@@ -54,4 +59,3 @@ size_t WriteIop::rngBits(size_t bits) {
 }
 
 } // namespace risc0
-

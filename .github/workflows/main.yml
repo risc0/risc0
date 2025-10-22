@@ -32,6 +32,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      bazel: ${{ steps.filter.outputs.bazel }}
       browser: ${{ steps.filter.outputs.browser }}
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
@@ -55,6 +56,10 @@ jobs:
               - rust-toolchain.toml
               - Cargo.lock
               - rzup/**
+            bazel:
+              - .github/actions/**
+              - .github/workflows/main.yml
+              - risc0/circuit/rv32im-m3-sys/cxx/**
             browser:
               - *base
               - examples/browser-verify/**
@@ -102,6 +107,7 @@ jobs:
   main-status-check:
     if: always()
     needs:
+      - bazel
       - browser
       - check
       - check-external
@@ -222,7 +228,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
             partition: 1
             ci_profile: slow
           - os: macOS
@@ -249,6 +255,9 @@ jobs:
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
@@ -278,7 +287,7 @@ jobs:
       - name: test workspace
         run: ${{ matrix.test_command }} --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --exclude doc-test
       - name: test risc0-r0vm (disable-dev-mode)
-        run: cargo test --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
+        run: cargo nextest run --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
       - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}-${{ matrix.partition }}
@@ -299,7 +308,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
             ci_profile: slow
           - os: macOS
             arch: ARM64
@@ -361,7 +370,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
           - os: macOS
             arch: ARM64
             feature: default
@@ -395,10 +404,7 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - name: test in dev mode
-        run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace --exclude prover-example
-        working-directory: examples
-      - name: test prover example
-        run: ${{ matrix.test_command }} --release --locked -F $FEATURE -p prover-example
+        run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:
@@ -630,3 +636,37 @@ jobs:
         working-directory: web
       - run: bun run test
         working-directory: web
+
+  bazel:
+    if: needs.changes.outputs.bazel == 'true'
+    needs: changes
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.device }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            arch: X64
+            feature: cuda
+            device: nvidia_rtx_4000_ada
+            nvcc_arch: sm_89
+          - os: macOS
+            arch: ARM64
+            feature: default
+            device: apple_m2_pro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/bazelisk
+      - name: clang-format check
+        run: bazelisk build //... --config=clang-format-check
+        working-directory: risc0/circuit/rv32im-m3-sys/cxx
+      - name: Build & test
+        env:
+          CONFIG: ${{ matrix.config }}
+        run: |
+          bazelisk test //... \
+              --spawn_strategy=local \
+              --test_output=errors \
+              --strategy=TestRunner=local \
+              --@rules_cuda//cuda:archs=${{ matrix.nvcc_arch }}
+        working-directory: risc0/circuit/rv32im-m3-sys/cxx

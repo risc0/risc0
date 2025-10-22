@@ -15,13 +15,17 @@
 
 #pragma once
 
-#include "rv32im/emu/emu.h"
 #include "prove/prove.h"
+#include "rv32im/emu/emu.h"
 
 namespace risc0 {
 
 struct Rv32CircuitInfo {
-  Rv32CircuitInfo(IHalPtr hal, HalArray<RowInfo> rowInfo, HalArray<uint32_t> aux, HalArray<uint32_t> tables, bool doValidate);
+  Rv32CircuitInfo(IHalPtr hal,
+                  HalArray<RowInfo> rowInfo,
+                  HalArray<uint32_t> aux,
+                  HalArray<uint32_t> tables,
+                  bool doValidate);
   CircuitInfo ci;
 };
 
@@ -31,6 +35,8 @@ public:
 
   bool preflight(rv32im::MemoryImage& image, rv32im::HostIO& io);
   void prove(WriteIop& iop);
+
+  size_t po2() const;
 
 private:
   IHalPtr hal;
@@ -42,4 +48,4 @@ private:
   Prover prover;
 };
 
-}  // namespace risc0
+} // namespace risc0

@@ -13,22 +13,29 @@
 // limitations under the License.
 
 #include "fp.h"
-#include "hal/po2s.h"
 #include "hal/cuda/kernels/base.h"
+#include "hal/po2s.h"
 
-#define PO2(x) \
-extern "C" void accum_witgen_cuda_ ## x(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou);
+#define PO2(x)                                                                                     \
+  extern "C" void accum_witgen_cuda_##x(                                                           \
+      Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou);
 PO2S
 #undef PO2
 
-extern "C" void accum_witgen_cuda(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou, uint32_t numRows) {
+    extern "C" void
+    accum_witgen_cuda(Fp* accum,
+                      const Fp* data,
+                      const Fp* globals,
+                      const FpExt* accMix,
+                      Fp rou,
+                      uint32_t numRows) {
   uint32_t po2 = 31 - __builtin_clz(numRows);
-  switch(po2) {
-#define PO2(x) \
-    case x: \
-      accum_witgen_cuda_ ## x(accum, data, globals, accMix, rou); \
-      break;
-PO2S
+  switch (po2) {
+#define PO2(x)                                                                                     \
+  case x:                                                                                          \
+    accum_witgen_cuda_##x(accum, data, globals, accMix, rou);                                      \
+    break;
+    PO2S
 #undef PO2
   }
 }

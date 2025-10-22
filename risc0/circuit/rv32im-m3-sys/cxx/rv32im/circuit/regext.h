@@ -17,16 +17,12 @@
 
 #include "rv32im/base/base.h"
 
-template<typename C>
-struct RegExt {
+template <typename C> struct RegExt {
   CONSTANT static char NAME[] = "RegExt";
 
   Reg<C> elems[4];
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, elems);
-  }
+  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, elems); }
 
   FDEV void set(CTX, ValExt<C> val) DEV {
     for (size_t i = 0; i < 4; i++) {

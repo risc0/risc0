@@ -17,22 +17,17 @@
 
 #include "rv32im/base/platform.h"
 
-template<typename C>
-using Val = typename C::ValImpl;
+template <typename C> using Val = typename C::ValImpl;
 
-template<typename C>
-using ValExt = typename C::ValExtImpl;
+template <typename C> using ValExt = typename C::ValExtImpl;
 
-template<typename C>
-using Reg = typename C::RegImpl;
+template <typename C> using Reg = typename C::RegImpl;
 
-template<typename C>
-using ArgCountReg = typename C::ArgCountRegImpl;
+template <typename C> using ArgCountReg = typename C::ArgCountRegImpl;
 
 // A 32 bit value represented by high/low parts
 // Declared early because it is used in some arguments
-template<typename C>
-struct ValU32 {
+template <typename C> struct ValU32 {
   FDEV ValU32() = default;
   FDEV ValU32(Val<C> low, Val<C> high) : low(low), high(high) {}
   Val<C> low;

@@ -15,17 +15,14 @@
 
 #pragma once
 
-#include "rv32im/witness/poseidon2.h"
 #include "rv32im/circuit/one_hot.h"
+#include "rv32im/witness/poseidon2.h"
 
-template<typename C>
-using RegCells = Reg<C>[CELLS];
+template <typename C> using RegCells = Reg<C>[CELLS];
 
-template<typename C>
-using RegDigest = Reg<C>[CELLS_DIGEST];
+template <typename C> using RegDigest = Reg<C>[CELLS_DIGEST];
 
-template<typename C>
-struct P2ExtRoundBlock {
+template <typename C> struct P2ExtRoundBlock {
   CONSTANT static char NAME[] = "P2ExtRoundBlock";
 
   Reg<C> id;
@@ -34,8 +31,7 @@ struct P2ExtRoundBlock {
   RegCells<C> sBoxTmp;
   RegCells<C> outputs;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, id);
     T::apply(ctx, round);
     T::apply(ctx, inputs);
@@ -50,8 +46,7 @@ struct P2ExtRoundBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct P2IntRoundsBlock {
+template <typename C> struct P2IntRoundsBlock {
   CONSTANT static char NAME[] = "P2IntRoundsBlock";
 
   Reg<C> id;
@@ -60,8 +55,7 @@ struct P2IntRoundsBlock {
   Reg<C> sBoxT2[ROUNDS_PARTIAL];
   RegCells<C> outputs;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, id);
     T::apply(ctx, inputs);
     T::apply(ctx, sBoxT1);
@@ -76,8 +70,7 @@ struct P2IntRoundsBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct P2BlockBlock {
+template <typename C> struct P2BlockBlock {
   CONSTANT static char NAME[] = "P2BlockBlock";
 
   Reg<C> id;
@@ -86,8 +79,7 @@ struct P2BlockBlock {
   RegCells<C> inputs;
   RegCells<C> outputs;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, id);
     T::apply(ctx, outUseCount);
     T::apply(ctx, contUseCount);

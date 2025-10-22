@@ -15,24 +15,24 @@
 
 #pragma once
 
-#include "rv32im/witness/inst.h"
 #include "rv32im/circuit/decode.h"
 #include "rv32im/circuit/is_zero.h"
+#include "rv32im/witness/inst.h"
 
 // A 'resume' instruction reads the PC and the machine mode
 // and initiates normal executions, always occurs on cycle 1
-template<typename C>
-struct InstResumeBlock {
+template <typename C> struct InstResumeBlock {
   CONSTANT static char NAME[] = "InstResumeBlock";
 
   MemReadBlock<C> readPc;
   MemReadBlock<C> readMm;
+  MemWriteBlock<C> writeVersion;
   AddressVerify<C> verifyPc;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, readPc, 1);
     T::apply(ctx, readMm, 1);
+    T::apply(ctx, writeVersion, 1);
     T::apply(ctx, verifyPc, readPc.data.get(), readMm.data.low.get());
   }
 
@@ -45,8 +45,7 @@ struct InstResumeBlock {
 
 // A 'suspend' instruction writes the PC and machine mode and
 // terminates execution.
-template<typename C>
-struct InstSuspendBlock {
+template <typename C> struct InstSuspendBlock {
   CONSTANT static char NAME[] = "InstSuspendBlock";
 
   Reg<C> cycle;
@@ -55,8 +54,7 @@ struct InstSuspendBlock {
   MemWriteBlock<C> writeMm;
   AddressVerify<C> verifyPc;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, writePc, cycle.get());
     T::apply(ctx, writeMm, cycle.get());
@@ -66,19 +64,17 @@ struct InstSuspendBlock {
   FDEV void set(CTX, InstSuspendWitness) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 
 // A helper to extract + verify a source register given a word address
-template<typename C>
-struct SourceReg {
+template <typename C> struct SourceReg {
   CONSTANT static char NAME[] = "SourceReg";
 
   Reg<C> idx;
 
-  template<typename T>
-  FDEV void applyInner(CTX, Val<C> wordAddr, Val<C> mode) DEV {
+  template <typename T> FDEV void applyInner(CTX, Val<C> wordAddr, Val<C> mode) DEV {
     T::apply(ctx, idx);
   }
 
@@ -90,15 +86,13 @@ struct SourceReg {
 };
 
 // A helper to extract + verify the destination register given a word address
-template<typename C>
-struct DestReg {
+template <typename C> struct DestReg {
   CONSTANT static char NAME[] = "DestReg";
 
   Reg<C> idx;
   IsZero<C> isZero;
 
-  template<typename T>
-  FDEV void applyInner(CTX, Val<C> wordAddr, Val<C> mode) DEV {
+  template <typename T> FDEV void applyInner(CTX, Val<C> wordAddr, Val<C> mode) DEV {
     T::apply(ctx, idx);
     T::apply(ctx, isZero, idx.get());
   }
@@ -112,8 +106,7 @@ struct DestReg {
 
 // Handle reading from both rs1 + rs2, and make sure we only make
 // one real memory transaction if rs1 == rs2
-template<typename C>
-struct DualReg {
+template <typename C> struct DualReg {
   CONSTANT static char NAME[] = "DestReg";
 
   BitReg<C> sameReg;
@@ -123,8 +116,7 @@ struct DualReg {
   Reg<C> rs2Idx;
   RegU32<C> rs2Data;
 
-  template<typename T>
-  FDEV void applyInner(CTX, Val<C> cycle, Val<C> mm) DEV {
+  template <typename T> FDEV void applyInner(CTX, Val<C> cycle, Val<C> mm) DEV {
     T::apply(ctx, sameReg);
     T::apply(ctx, readRs1, cycle);
     T::apply(ctx, readRs2, cycle);
@@ -132,8 +124,8 @@ struct DualReg {
     T::apply(ctx, rs2Idx);
   }
 
-  FDEV ValU32<C> getRS1() DEV; 
-  FDEV ValU32<C> getRS2() DEV; 
+  FDEV ValU32<C> getRS1() DEV;
+  FDEV ValU32<C> getRS2() DEV;
 
   FDEV void set(CTX, MemReadWitness rs1Wit, MemReadWitness rs2Wit, uint32_t cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
@@ -143,8 +135,7 @@ struct DualReg {
 };
 
 // Handle 3 register style instructions
-template<typename C>
-struct InstRegBlock {
+template <typename C> struct InstRegBlock {
   CONSTANT static char NAME[] = "InstRegBlock";
 
   Reg<C> cycle;
@@ -159,8 +150,7 @@ struct InstRegBlock {
   RegU32<C> out0;
   RegU32<C> out1;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, mm);
     T::apply(ctx, fetch);
@@ -181,8 +171,7 @@ struct InstRegBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct InstImmBlock {
+template <typename C> struct InstImmBlock {
   CONSTANT static char NAME[] = "InstImmBlock";
 
   Reg<C> cycle;
@@ -200,8 +189,7 @@ struct InstImmBlock {
   RegU32<C> out0;
   RegU32<C> out1;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, mm);
     T::apply(ctx, fetch);
@@ -225,8 +213,7 @@ struct InstImmBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct InstLoadBlock {
+template <typename C> struct InstLoadBlock {
   CONSTANT static char NAME[] = "InstLoadBlock";
 
   Reg<C> cycle;
@@ -250,8 +237,7 @@ struct InstLoadBlock {
   Reg<C> pickByte;
   GetSign<C> signBit;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, mm);
     T::apply(ctx, opt);
@@ -280,8 +266,7 @@ struct InstLoadBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct InstStoreBlock {
+template <typename C> struct InstStoreBlock {
   CONSTANT static char NAME[] = "InstStoreBlock";
 
   Reg<C> cycle;
@@ -309,8 +294,7 @@ struct InstStoreBlock {
   // Reconstruct short
   Reg<C> newShort;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, mm);
     T::apply(ctx, opt);
@@ -337,8 +321,7 @@ struct InstStoreBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct InstBranchBlock {
+template <typename C> struct InstBranchBlock {
   CONSTANT static char NAME[] = "InstBranchBlock";
 
   Reg<C> cycle;
@@ -357,8 +340,7 @@ struct InstBranchBlock {
   AddU32<C> sumPc;
   RegU32<C> newPc;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, mm);
     T::apply(ctx, fetch);
@@ -385,8 +367,7 @@ struct InstBranchBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct InstJalBlock {
+template <typename C> struct InstJalBlock {
   CONSTANT static char NAME[] = "InstJalBlock";
 
   Reg<C> cycle;
@@ -400,8 +381,7 @@ struct InstJalBlock {
   RegU32<C> imm;
   AddU32<C> sumPc;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, mm);
     T::apply(ctx, fetch);
@@ -421,8 +401,7 @@ struct InstJalBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct InstJalrBlock {
+template <typename C> struct InstJalrBlock {
   CONSTANT static char NAME[] = "InstJalrBlock";
 
   Reg<C> cycle;
@@ -437,8 +416,7 @@ struct InstJalrBlock {
   RegU32<C> imm;
   AddU32<C> sumPc;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, mm);
     T::apply(ctx, fetch);
@@ -459,8 +437,7 @@ struct InstJalrBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct InstLuiBlock {
+template <typename C> struct InstLuiBlock {
   CONSTANT static char NAME[] = "InstLuiBlock";
 
   Reg<C> cycle;
@@ -472,8 +449,7 @@ struct InstLuiBlock {
   MemWriteBlock<C> writeRd;
   DestReg<C> rd;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, mm);
     T::apply(ctx, fetch);
@@ -491,8 +467,7 @@ struct InstLuiBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct InstAuipcBlock {
+template <typename C> struct InstAuipcBlock {
   CONSTANT static char NAME[] = "InstAuipcBlock";
 
   Reg<C> cycle;
@@ -506,8 +481,7 @@ struct InstAuipcBlock {
   RegU32<C> imm;
   AddU32<C> sumPc;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, mm);
     T::apply(ctx, fetch);
@@ -527,8 +501,7 @@ struct InstAuipcBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct InstEcallBlock {
+template <typename C> struct InstEcallBlock {
   CONSTANT static char NAME[] = "InstEcallBlock";
 
   Reg<C> cycle;
@@ -537,8 +510,7 @@ struct InstEcallBlock {
   MemWriteBlock<C> writeSavePc;
   MemReadBlock<C> readDispatch;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, fetch);
     T::apply(ctx, verifyPc, fetch.pc.get(), 0);
@@ -553,3 +525,24 @@ struct InstEcallBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
+template <typename C> struct InstMretBlock {
+  CONSTANT static char NAME[] = "InstMretBlock";
+
+  Reg<C> cycle;
+  FetchBlock<C> fetch;
+  MemReadBlock<C> readPc;
+  AddU32<C> sumPc;
+
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, cycle);
+    T::apply(ctx, fetch);
+    T::apply(ctx, readPc, cycle.get());
+    T::apply(ctx, sumPc, readPc.data.get(), ValU32<C>(4, 0));
+  }
+
+  FDEV void set(CTX, InstMretWitness wit) DEV;
+  FDEV inline void finalize(CTX) DEV {}
+
+  FDEV void verify(CTX) DEV;
+  FDEV void addArguments(CTX) DEV;
+};

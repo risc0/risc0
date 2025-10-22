@@ -120,6 +120,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn protocol() {
         let polling_station_state = VotingMachineState {
             polls_open: true,

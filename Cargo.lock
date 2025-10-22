@@ -1911,10 +1911,11 @@ checksum = "37b2a672a2cb129a2e41c10b1224bb368f9f37a2b16b612598138befd7b37eb5"
 
 [[package]]
 name = "cc"
-version = "1.2.34"
+version = "1.2.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42bc4aea80032b7bf409b0bc7ccad88853858911b7713a8062fdc0623867bedc"
+checksum = "ac9fe6cdbb24b6ade63616c0a0688e45bb56732262c158df3c0c4bea4ca47cb7"
 dependencies = [
+ "find-msvc-tools",
  "jobserver",
  "libc",
  "shlex",
@@ -2473,8 +2474,18 @@ version = "0.20.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc7f46116c46ff9ab3eb1597a45688b6715c6e628b5c133e288e709a29bcb4ee"
 dependencies = [
- "darling_core",
- "darling_macro",
+ "darling_core 0.20.11",
+ "darling_macro 0.20.11",
+]
+
+[[package]]
+name = "darling"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9cdf337090841a411e2a7f3deb9187445851f91b309c0c0a29e05f74a00a48c0"
+dependencies = [
+ "darling_core 0.21.3",
+ "darling_macro 0.21.3",
 ]
 
 [[package]]
@@ -2492,12 +2503,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "darling_core"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1247195ecd7e3c85f83c8d2a366e4210d588e802133e1e355180a9870b517ea4"
+dependencies = [
+ "fnv",
+ "ident_case",
+ "proc-macro2",
+ "quote",
+ "strsim 0.11.1",
+ "syn 2.0.106",
+]
+
+[[package]]
 name = "darling_macro"
 version = "0.20.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc34b93ccb385b40dc71c6fceac4b2ad23662c7eeb248cf10d529b7e055b6ead"
 dependencies = [
- "darling_core",
+ "darling_core 0.20.11",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
+name = "darling_macro"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d38308df82d1080de0afee5d069fa14b0326a88c14f15c5ccda35b4a6c414c81"
+dependencies = [
+ "darling_core 0.21.3",
  "quote",
  "syn 2.0.106",
 ]
@@ -2560,7 +2596,7 @@ version = "0.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2d5bcf7b024d6835cfb3d473887cd966994907effbe9227e8c8219824d06c4e8"
 dependencies = [
- "darling",
+ "darling 0.20.11",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -3071,6 +3107,12 @@ dependencies = [
  "libredox",
  "windows-sys 0.60.2",
 ]
+
+[[package]]
+name = "find-msvc-tools"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52051878f80a721bb68ebfbc930e07b65ba72f2da88968ea5c06fd6ca3d3a127"
 
 [[package]]
 name = "find_cuda_helper"
@@ -4233,6 +4275,7 @@ dependencies = [
 name = "gpu-guard-macros"
 version = "0.1.0"
 dependencies = [
+ "darling 0.21.3",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -7070,6 +7113,7 @@ version = "1.4.11"
 dependencies = [
  "anyhow",
  "clap 4.5.46",
+ "gpu-guard",
  "include_bytes_aligned",
  "num-bigint 0.4.6",
  "num-bigint-dig",
@@ -7087,14 +7131,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-bigint2-methods"
-version = "3.0.0"
+version = "5.0.0"
 dependencies = [
  "risc0-build",
 ]
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -7151,13 +7195,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-hello-m3"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "risc0-circuit-recursion",
+ "risc0-core",
+ "risc0-zkp",
+ "risc0-zkvm",
+ "test-log",
+]
+
+[[package]]
 name = "risc0-circuit-keccak"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
  "clap 4.5.46",
+ "gpu-guard",
  "keccak",
  "liblzma",
  "paste",
@@ -7184,7 +7242,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "4.0.2"
+version = "5.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -7192,19 +7250,20 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
  "cust",
  "downloader",
+ "gpu-guard",
  "hex",
  "lazy-regex",
  "metal",
@@ -7225,18 +7284,18 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "4.0.2"
+version = "5.0.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bit-vec 0.8.0",
@@ -7249,6 +7308,7 @@ dependencies = [
  "flate2",
  "gdbstub",
  "gdbstub_arch",
+ "gpu-guard",
  "malachite",
  "num-derive",
  "num-traits",
@@ -7275,13 +7335,22 @@ dependencies = [
 name = "risc0-circuit-rv32im-m3"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
+ "bytemuck",
+ "cfg-if",
  "flate2",
  "gpu-guard",
  "risc0-binfmt",
+ "risc0-circuit-rv32im",
  "risc0-circuit-rv32im-m3-sys",
  "risc0-sys",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
+ "serde",
  "tar",
  "test-log",
+ "tracing",
+ "tracing-subscriber 0.3.19",
 ]
 
 [[package]]
@@ -7291,12 +7360,14 @@ dependencies = [
  "cc",
  "glob",
  "risc0-build-kernel",
+ "risc0-sppark",
  "risc0-sys",
+ "tracing",
 ]
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "4.0.2"
+version = "5.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -7304,13 +7375,13 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
 name = "risc0-core"
-version = "3.0.1"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "nvtx",
@@ -7321,7 +7392,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -7356,7 +7427,7 @@ dependencies = [
  "anyhow",
  "blst",
  "risc0-build-kernel",
- "sppark",
+ "risc0-sppark",
  "test-log",
  "tracing",
 ]
@@ -7384,6 +7455,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "borsh",
+ "gpu-guard",
  "rand 0.8.5",
  "risc0-binfmt",
  "risc0-build",
@@ -7411,6 +7483,7 @@ dependencies = [
  "derive_more",
  "dirs",
  "futures",
+ "gpu-guard",
  "http 1.3.1",
  "http-body-util",
  "httpmock",
@@ -7443,14 +7516,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-sppark"
+version = "0.1.14"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "risc0-sys"
-version = "1.5.1"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blst",
  "cust",
  "risc0-build-kernel",
- "sppark",
+ "risc0-sppark",
 ]
 
 [[package]]
@@ -7471,11 +7551,12 @@ dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
  "risc0-zkvm-platform",
+ "sha2",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -7486,6 +7567,8 @@ dependencies = [
  "cust",
  "digest 0.10.7",
  "ff",
+ "generic-array",
+ "gpu-guard",
  "hex",
  "hex-literal",
  "metal",
@@ -7517,6 +7600,7 @@ dependencies = [
  "borsh",
  "bytemuck",
  "bytes",
+ "cfg-if",
  "chrono",
  "ciborium",
  "clap 4.5.46",
@@ -7529,6 +7613,7 @@ dependencies = [
  "gdbstub",
  "gdbstub_arch",
  "gimli",
+ "gpu-guard",
  "hex",
  "hotbench",
  "human-repr",
@@ -7553,6 +7638,7 @@ dependencies = [
  "risc0-circuit-keccak-methods",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
+ "risc0-circuit-rv32im-m3",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
@@ -7584,7 +7670,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "3.0.0"
+version = "5.0.0"
 dependencies = [
  "bincode",
  "borsh",
@@ -7616,7 +7702,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "3.0.0"
+version = "5.0.0"
 
 [[package]]
 name = "rlimit"
@@ -8339,7 +8425,7 @@ version = "3.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "de90945e6565ce0d9a25098082ed4ee4002e047cb59892c318d66821e14bb30f"
 dependencies = [
- "darling",
+ "darling 0.20.11",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -8503,16 +8589,6 @@ checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
 dependencies = [
  "base64ct",
  "der",
-]
-
-[[package]]
-name = "sppark"
-version = "0.1.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9c900139f3f6fdc8db217881a946adf00e935102fdd82b0e1bc19bacbffa311"
-dependencies = [
- "cc",
- "which 4.4.2",
 ]
 
 [[package]]
@@ -10243,7 +10319,7 @@ version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a76ff259533532054cfbaefb115c613203c73707017459206380f03b3b3f266e"
 dependencies = [
- "darling",
+ "darling 0.20.11",
  "proc-macro2",
  "quote",
  "syn 2.0.106",

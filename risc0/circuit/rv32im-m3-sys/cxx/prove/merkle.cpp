@@ -13,12 +13,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "core/util.h"
 #include "prove/merkle.h"
+#include "core/util.h"
 
 namespace risc0 {
 
-MerkleProver::MerkleProver(IHalPtr hal, HalMatrix<Fp> input, size_t queries) : hal(hal), input(input) {
+MerkleProver::MerkleProver(IHalPtr hal, HalMatrix<Fp> input, size_t queries)
+    : hal(hal), input(input) {
   topSize = std::min(greatestLePo2(queries), input.rows());
   size_t steps = log2Ceil(input.rows()) - log2Ceil(topSize);
   size_t querySize = steps * p2impl::CELLS_DIGEST + input.cols();
@@ -29,12 +30,12 @@ MerkleProver::MerkleProver(IHalPtr hal, HalMatrix<Fp> input, size_t queries) : h
 void MerkleProver::compute(WriteIop& iop) {
   size_t size = input.rows();
   hal->hashRows(tree.slice(size, size), input);
-  while(size != 1) {
-    hal->hashFold(tree.slice(size/2, size/2), tree.slice(size, size));
+  while (size != 1) {
+    hal->hashFold(tree.slice(size / 2, size / 2), tree.slice(size, size));
     size /= 2;
   }
   // Get 'top' of tree
-  PinnedArrayRO<Digest> topBuf(hal, tree.slice(1, 2*topSize));
+  PinnedArrayRO<Digest> topBuf(hal, tree.slice(1, 2 * topSize));
   // Set the root
   root = topBuf[0];
   // Write top to iop
@@ -44,7 +45,7 @@ void MerkleProver::compute(WriteIop& iop) {
 }
 
 void MerkleProver::query(WriteIop& iop, size_t idx) {
-  if (idx > 2*input.rows()) {
+  if (idx > 2 * input.rows()) {
     throw std::runtime_error("MerkleProver: idx out of range");
   }
   hal->query(queryTmp, input, tree, topSize, idx);
@@ -52,4 +53,4 @@ void MerkleProver::query(WriteIop& iop, size_t idx) {
   iop.write(queryCopy.data(), queryCopy.size());
 }
 
-}  // namespace risc0
+} // namespace risc0

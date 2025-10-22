@@ -22,4 +22,4 @@ namespace risc0::rv32im {
 
 std::vector<uint32_t> generateExpandTable();
 
-}  // namespace risc0::rv32im
+} // namespace risc0::rv32im

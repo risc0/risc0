@@ -20,6 +20,7 @@
 struct InstResumeWitness {
   MemReadWitness pc;
   MemReadWitness mm;
+  MemWriteWitness version;
 };
 
 struct InstSuspendWitness {
@@ -136,4 +137,10 @@ struct InstEcallWitness {
   FetchWitness fetch;
   MemWriteWitness savePc;
   MemReadWitness dispatch;
+};
+
+struct InstMretWitness {
+  uint32_t cycle;
+  FetchWitness fetch;
+  MemReadWitness readPc;
 };

@@ -15,14 +15,13 @@
 
 #pragma once
 
-#include "rv32im/witness/units.h"
 #include "rv32im/circuit/is_zero.h"
 #include "rv32im/circuit/mul.h"
 #include "rv32im/circuit/one_hot.h"
 #include "rv32im/circuit/u32.h"
+#include "rv32im/witness/units.h"
 
-template<typename C>
-struct UnitAddSubBlock {
+template <typename C> struct UnitAddSubBlock {
   CONSTANT static char NAME[] = "UnitAddSubBlock";
 
   ArgCountReg<C> count;
@@ -31,8 +30,7 @@ struct UnitAddSubBlock {
   RegU32<C> b;
   AddU32<C> out;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, count);
     T::apply(ctx, doSub);
     T::apply(ctx, a);
@@ -48,8 +46,7 @@ struct UnitAddSubBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct UnitBitBlock {
+template <typename C> struct UnitBitBlock {
   CONSTANT static char NAME[] = "UnitBitBlock";
 
   ArgCountReg<C> count;
@@ -60,8 +57,7 @@ struct UnitBitBlock {
   BitReg<C> aBits[32];
   BitReg<C> bBits[32];
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, count);
     T::apply(ctx, op);
     T::apply(ctx, a);
@@ -78,15 +74,13 @@ struct UnitBitBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct UnitMulBlock {
+template <typename C> struct UnitMulBlock {
   CONSTANT static char NAME[] = "UnitMulBlock";
 
   ArgCountReg<C> count;
   Multiply<C> mul;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, count);
     T::apply(ctx, mul);
   }
@@ -98,8 +92,7 @@ struct UnitMulBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct UnitDivBlock {
+template <typename C> struct UnitDivBlock {
   CONSTANT static char NAME[] = "UnitDivBlock";
 
   ArgCountReg<C> count;
@@ -121,8 +114,7 @@ struct UnitDivBlock {
   NegU32<C> flipQuot;
   NegU32<C> flipRem;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     ValU32<C> absRem = ValU32<C>(absRemLow.get(), absRemHigh.get());
     T::apply(ctx, count);
     T::apply(ctx, isSigned);
@@ -134,8 +126,10 @@ struct UnitDivBlock {
     T::apply(ctx, absRemHigh);
     T::apply(ctx, addTotRem, total.get(), absRem);
     T::apply(ctx, denomZero, denom.in.low.get() + denom.in.high.get());
-    T::apply(ctx, verifyRem, ValU32<C>(denom.absLow.get(), denom.absHigh.get()),
-        ValU32<C>(Val<C>(0xffff) - absRemLow.get(), Val<C>(0xffff) - absRemHigh.get()));
+    T::apply(ctx,
+             verifyRem,
+             ValU32<C>(denom.absLow.get(), denom.absHigh.get()),
+             ValU32<C>(Val<C>(0xffff) - absRemLow.get(), Val<C>(0xffff) - absRemHigh.get()));
     T::apply(ctx, negQuot);
     T::apply(ctx, flipQuot, absQuot.get(), negQuot.get());
     T::apply(ctx, flipRem, absRem, numer.neg.get());
@@ -147,8 +141,7 @@ struct UnitDivBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct UnitLtBlock {
+template <typename C> struct UnitLtBlock {
   CONSTANT static char NAME[] = "UnitLtBlock";
 
   ArgCountReg<C> count;
@@ -161,8 +154,7 @@ struct UnitLtBlock {
   BitReg<C> overflow;
   BitReg<C> isLt;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, count);
     T::apply(ctx, a);
     T::apply(ctx, b);
@@ -183,8 +175,7 @@ struct UnitLtBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct UnitShiftBlock {
+template <typename C> struct UnitShiftBlock {
   CONSTANT static char NAME[] = "UnitShiftBlock";
 
   ArgCountReg<C> count;
@@ -202,8 +193,7 @@ struct UnitShiftBlock {
   RegU32<C> out;
   RegU32<C> out2;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
+  template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, count);
     T::apply(ctx, a);
     T::apply(ctx, b);

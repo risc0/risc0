@@ -18,7 +18,8 @@ use std::rc::Rc;
 use anyhow::Result;
 use risc0_circuit_rv32im_sys::{
     RawAccumBuffers, RawBuffer, RawExecBuffers, RawPreflightTrace, risc0_circuit_rv32im_cuda_accum,
-    risc0_circuit_rv32im_cuda_eval_check, risc0_circuit_rv32im_cuda_witgen,
+    risc0_circuit_rv32im_cuda_eval_check, risc0_circuit_rv32im_cuda_reset,
+    risc0_circuit_rv32im_cuda_witgen,
 };
 use risc0_core::{
     field::{Elem, ExtElem as _, RootsOfUnity, map_pow},
@@ -53,8 +54,21 @@ pub struct CudaCircuitHal<CH: CudaHash> {
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
     pub fn new(_hal: Rc<CudaHal<CH>>) -> Self {
+        #[cfg(test)]
+        gpu_guard::assert_gpu_semaphore_held();
+
         Self { _hal }
     }
+}
+
+impl<CH: CudaHash> Drop for CudaCircuitHal<CH> {
+    fn drop(&mut self) {
+        cuda_reset();
+    }
+}
+
+fn cuda_reset() {
+    ffi_wrap(|| unsafe { risc0_circuit_rv32im_cuda_reset() }).unwrap();
 }
 
 impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
@@ -312,6 +326,7 @@ mod tests {
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eval_check() {
         const PO2: usize = 4;
         let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());

@@ -17,11 +17,10 @@
 
 #include "rv32im/base/base.h"
 
-template<typename C>
-struct ReadStateArgument {
+template <typename C> struct ReadStateArgument {
   FDEV ReadStateArgument() = default;
-  FDEV ReadStateArgument(Val<C> cycle, Val<C> addrWord, Val<C> addrLowBits, Val<C> size) 
-    : cycle(cycle), addrWord(addrWord), addrLowBits(addrLowBits), size(size) {}
+  FDEV ReadStateArgument(Val<C> cycle, Val<C> addrWord, Val<C> addrLowBits, Val<C> size)
+      : cycle(cycle), addrWord(addrWord), addrLowBits(addrLowBits), size(size) {}
 
   Val<C> cycle;
   Val<C> addrWord;

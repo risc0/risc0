@@ -40,6 +40,9 @@ pub struct ProofRequest {
 
     /// TODO
     pub execute_only: bool,
+
+    /// TODO
+    pub dev_mode: bool,
 }
 
 /// TODO
@@ -56,6 +59,8 @@ pub struct ShrinkWrapRequest {
     pub kind: ShrinkWrapKind,
     /// TODO
     pub receipt: Receipt,
+    /// TODO
+    pub dev_mode: bool,
 }
 
 /// TODO
@@ -134,6 +139,9 @@ pub struct Session {
 
     /// TODO
     pub receipt_claim: ReceiptClaim,
+
+    /// TOOD
+    pub stdout: Vec<u8>,
 }
 
 impl From<Session> for SessionInfo {
@@ -148,7 +156,7 @@ impl From<Session> for SessionInfo {
 }
 
 /// TODO
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TaskError {
     /// TODO
     Generic(String),

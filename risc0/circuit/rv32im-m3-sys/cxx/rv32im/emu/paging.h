@@ -23,8 +23,8 @@
 #include <ankerl/unordered_dense.h>
 
 #include "rv32im/emu/image.h"
-#include "rv32im/emu/trace.h"
 #include "rv32im/emu/poseidon2.h"
+#include "rv32im/emu/trace.h"
 
 namespace risc0::rv32im {
 
@@ -39,11 +39,7 @@ class PagedMemory {
 public:
   // Make a paging structure based a memory image
   inline PagedMemory(Trace& trace, MemoryImage& image)
-    : trace(trace)
-    , p2(trace)
-    , image(image)
-    , pagingCost(0)
-  {
+      : trace(trace), p2(trace), image(image), pagingCost(0) {
     counts.fill(0);
   }
 
@@ -59,7 +55,9 @@ public:
     loaded.insert(idx);
     idx /= 2;
     while (idx != 0) {
-      if (loaded.count(idx)) { break; }
+      if (loaded.count(idx)) {
+        break;
+      }
       addCostNode();
       loaded.insert(idx);
       idx /= 2;
