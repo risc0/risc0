@@ -239,7 +239,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 scope.spawn(move || create_segments(initial_image, commit_recv, callback));
 
             while self.terminate_state.is_none() {
-                // TODO(victor/perf) Try moving this check into the split_segment check.
                 match max_cycles {
                     CycleLimit::Hard(max_cycles) => {
                         if self.cycles.user >= max_cycles {
