@@ -76,6 +76,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     ecall_metrics: EcallMetrics,
     ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
     povw_job_id: Option<PovwJobId>,
+    segment_counter: u32,
 }
 
 #[non_exhaustive]
@@ -210,6 +211,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             ecall_metrics: EcallMetrics::default(),
             ring: AllocRingBuffer::new(10),
             povw_job_id,
+            segment_counter: 0,
         }
     }
 
@@ -223,7 +225,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let segment_limit: u32 = 1 << segment_po2;
         assert!(max_insn_cycles < segment_limit as usize);
         let segment_threshold = segment_limit - max_insn_cycles as u32;
-        let mut segment_counter = 0u32;
 
         self.reset();
 
@@ -238,6 +239,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 scope.spawn(move || create_segments(initial_image, commit_recv, callback));
 
             while self.terminate_state.is_none() {
+                // TODO(victor/perf) Try moving this check into the split_segment check.
                 match max_cycles {
                     CycleLimit::Hard(max_cycles) => {
                         if self.cycles.user >= max_cycles {
@@ -255,64 +257,20 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     CycleLimit::None => {}
                 }
 
-                // TODO(victor/perf): Try wrapping the conditional in unlikely to see if that helps.
                 if self.segment_cycles() > segment_threshold {
-                    tracing::debug!(
-                        "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
-                        self.user_cycles,
-                        self.pager.cycles,
-                        self.segment_cycles()
-                    );
-
                     assert!(
                         self.segment_cycles() < segment_limit,
                         "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
                         self.pc
                     );
+
                     Risc0Machine::suspend(self)?;
-
-                    let partial_image = self.pager.commit();
-
-                    let req = CreateSegmentRequest {
-                        partial_image,
-                        page_indexes: self.pager.page_indexes(),
-                        input_digest: self.input_digest,
-                        output_digest: self.output_digest,
-                        read_record: std::mem::take(&mut self.read_record),
-                        write_record: std::mem::take(&mut self.write_record),
-                        user_cycles: self.user_cycles,
-                        pager_cycles: self.pager.cycles,
-                        terminate_state: self.terminate_state,
-                        segment_threshold,
-                        po2: segment_po2 as u32,
-                        index: segment_counter as u64,
-                        dump_path: None,
-                        povw_nonce: self.povw_nonce(segment_counter),
-                    };
-                    if commit_sender.send(req).is_err() {
-                        return Err(segment_callback_thread.join().unwrap().unwrap_err());
-                    }
-
-                    // NOTE: There is no reasonable scenario where a session will have more than 4B
-                    // segments, but its possible.
-                    segment_counter = segment_counter
-                        .checked_add(1)
-                        .context("segment_counter overflow")?;
-                    let total_cycles = 1 << segment_po2;
-                    let pager_cycles = self.pager.cycles as u64;
-                    let user_cycles = self.user_cycles as u64;
-                    self.cycles.total += total_cycles;
-                    self.cycles.paging += pager_cycles;
-                    self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
-                    self.user_cycles = 0;
-                    self.pager.reset();
-
+                    self.split_segment(&commit_sender, segment_po2, segment_threshold)?;
                     Risc0Machine::resume(self)?;
                 }
 
                 let result = Risc0Machine::step(&mut emu, self);
 
-                // TODO(victor/perf): See if marking this as cold might help.
                 if let Err(err) = result {
                     self.dump();
                     let result = self.dump_segment(
@@ -320,7 +278,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                         segment_callback_thread,
                         segment_po2,
                         segment_threshold,
-                        segment_counter,
+                        self.segment_counter,
                     );
                     return Err(if let Err(inner) = result {
                         err.context(inner)
@@ -334,33 +292,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
             let final_cycles = self.segment_cycles().next_power_of_two();
             let final_po2 = log2_ceil(final_cycles as usize);
-            let partial_image = self.pager.commit();
-            let req = CreateSegmentRequest {
-                partial_image,
-                page_indexes: self.pager.page_indexes(),
-                input_digest: self.input_digest,
-                output_digest: self.output_digest,
-                read_record: std::mem::take(&mut self.read_record),
-                write_record: std::mem::take(&mut self.write_record),
-                user_cycles: self.user_cycles,
-                pager_cycles: self.pager.cycles,
-                terminate_state: self.terminate_state,
-                segment_threshold: 0, // meaningless for final segment
-                po2: final_po2 as u32,
-                index: segment_counter as u64,
-                dump_path: None,
-                povw_nonce: self.povw_nonce(segment_counter),
-            };
-            if commit_sender.send(req).is_err() {
-                return Err(segment_callback_thread.join().unwrap().unwrap_err());
-            }
-
-            let final_cycles = final_cycles as u64;
-            let user_cycles = self.user_cycles as u64;
-            let pager_cycles = self.pager.cycles as u64;
-            self.cycles.total += final_cycles;
-            self.cycles.paging += pager_cycles;
-            self.cycles.reserved += final_cycles - pager_cycles - user_cycles;
+            self.split_segment(
+                &commit_sender,
+                final_po2,
+                0, // theshold is meaningless for final segment
+            )?;
 
             drop(commit_sender);
 
@@ -377,7 +313,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         };
 
         Ok(ExecutorResult {
-            segments: segment_counter as u64 + 1,
+            segments: self.segment_counter as u64 + 1,
             post_image,
             user_cycles: self.cycles.user,
             total_cycles: self.cycles.total,
@@ -385,6 +321,61 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             reserved_cycles: self.cycles.reserved,
             claim: session_claim,
         })
+    }
+
+    fn split_segment(
+        &mut self,
+        commit_sender: &SyncSender<CreateSegmentRequest>,
+        segment_po2: usize,
+        segment_threshold: u32,
+    ) -> Result<()> {
+        tracing::debug!(
+            "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
+            self.user_cycles,
+            self.pager.cycles,
+            self.segment_cycles()
+        );
+
+        let partial_image = self.pager.commit();
+
+        let req = CreateSegmentRequest {
+            partial_image,
+            page_indexes: self.pager.page_indexes(),
+            input_digest: self.input_digest,
+            output_digest: self.output_digest,
+            read_record: std::mem::take(&mut self.read_record),
+            write_record: std::mem::take(&mut self.write_record),
+            user_cycles: self.user_cycles,
+            pager_cycles: self.pager.cycles,
+            terminate_state: self.terminate_state,
+            segment_threshold,
+            po2: segment_po2 as u32,
+            index: self.segment_counter as u64,
+            dump_path: None,
+            povw_nonce: self.povw_nonce(self.segment_counter),
+        };
+        if commit_sender.send(req).is_err() {
+            //return Err(segment_callback_thread.join().unwrap().unwrap_err());
+            bail!("DO NOT MERGE")
+        }
+
+        // NOTE: There is no reasonable scenario where a session will have more than 4B
+        // segments, but its possible.
+        self.segment_counter = self
+            .segment_counter
+            .checked_add(1)
+            .context("segment_counter overflow")?;
+
+        let total_cycles = 1 << segment_po2;
+        let pager_cycles = self.pager.cycles as u64;
+        let user_cycles = self.user_cycles as u64;
+        self.cycles.total += total_cycles;
+        self.cycles.paging += pager_cycles;
+        self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
+        self.user_cycles = 0;
+        self.pager.reset();
+
+        Ok(())
     }
 
     pub(crate) fn terminate_state(&self) -> Option<&TerminateState> {
@@ -451,6 +442,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
         self.ecall_metrics = EcallMetrics::default();
+        self.segment_counter = 0;
     }
 
     fn segment_cycles(&self) -> u32 {
