@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#include <chrono>
+
 #include "core/log.h"
 #include "core/util.h"
 #include "prove/rv32im.h"
@@ -32,10 +34,16 @@ int main() {
   Rv32imProver prover(hal, po2);
   for (size_t i = 0; i < 3; i++) {
     LOG(0, "Preflight");
-    prover.preflight(image, io);
-    LOG(0, "Proving");
+    uint32_t cycles;
+    prover.preflight(image, io, &cycles);
+    using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
+    LOG(0, "Proving " << cycles << " cycles");
+    static time_point pre = std::chrono::high_resolution_clock::now();
     WriteIop writeIop;
     prover.prove(writeIop);
+    static time_point post = std::chrono::high_resolution_clock::now();
+    auto diff = std::chrono::duration<double>(post - pre).count();
+    LOG(0, "MCycles/second = " << double(cycles) / 1000000.0 / diff);
   }
   LOG(0, "Done");
 }
