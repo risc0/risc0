@@ -427,8 +427,6 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             guest_addr(ptr.0)?;
         }
         // tracing::trace!("ecall_read({fd}, {ptr:?}, {len})");
-        // TODO(victor/perf): This line is implicated in about 5% of execution time, but there is
-        // something funky about that because it claims the Rust allocator is calling host_read.
         let mut bytes = vec![0u8; len as usize];
         let mut rlen = self.ctx.host_read(fd, &mut bytes)?;
         self.store_register(REG_A0, rlen)?;

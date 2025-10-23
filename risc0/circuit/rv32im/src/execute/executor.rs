@@ -536,9 +536,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(())
     }
 
-    // TODO(victor/perf): This function includes a number of `unlikely` branches. Would it be worth
-    // going further by adding a const generic that allows us to turn off tracing in a way that
-    // allows the compiler to completely optimize out these branches?
     #[inline(always)]
     fn on_insn_start(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
@@ -575,8 +572,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
             self.ecall_metrics.0[kind].count += 1;
         }
         self.inc_user_cycles(1, Some(kind));
-        // TODO(victor/perf): This check is not marked as unlikely, although that may not matter
-        // since trace_pager is marked as cold.
         if !self.trace.is_empty() {
             self.trace_pager()?;
         }
