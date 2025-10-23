@@ -9,13 +9,16 @@ import (
 	"strings"
 )
 
+// FullExt extracts the file extension from the given filename.
 func FullExt(name string) string {
 	_, file := path.Split(name)
 	return file[strings.IndexRune(file, '.')+1:]
 }
 
+// WriteFunc is a function type that writes data to an io.Writer and returns the number of bytes written and any error.
 type WriteFunc func(io.Writer) (int64, error)
 
+// WriteToBufferedFile creates a new file with the given name and writes data to it using the provided WriteFunc with buffering.
 func WriteToBufferedFile(name string, write WriteFunc) error {
 	f, err := os.Create(name)
 	if err != nil {
@@ -34,6 +37,7 @@ func WriteToBufferedFile(name string, write WriteFunc) error {
 	return nil
 }
 
+// OpenBufferedFile opens a file with the given name and returns a buffered io.ReadCloser.
 func OpenBufferedFile(name string) (io.ReadCloser, error) {
 	f, err := os.Open(name)
 	if err != nil {
