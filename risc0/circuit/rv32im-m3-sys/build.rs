@@ -93,6 +93,7 @@ fn main() {
             .flag("--expt-relaxed-constexpr")
             .flag("-DFEATURE_BABY_BEAR")
             .include(env::var("DEP_RISC0_SPPARK_ROOT").unwrap())
+            .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
             .include(env::var("DEP_RISC0_SYS_KERNELS_ROOT").unwrap())
             .files(glob_paths("cxx/hal/cuda/*.cpp"))
             .files(glob_paths("cxx/hal/cuda/kernels/*.cu"));

@@ -13,9 +13,15 @@ cuda_library(
         "kernels/zkp/cuda/kernels.h",
         "kernels/zkp/cuda/supra/poseidon2.cuh",
         "kernels/zkp/cuda/supra/poseidon2_constants.cuh",
-    ],
+    ] + glob([
+        "cxx/vendor/nvtx3/**/*.h",
+        "cxx/vendor/nvtx3/**/*.hpp",
+    ]),
     defines = ["FEATURE_BABY_BEAR"],
-    includes = ["kernels"],
+    includes = [
+        "cxx",
+        "kernels",
+    ],
     target_compatible_with = requires_cuda(),
     visibility = ["//visibility:public"],
     deps = ["@sppark"],
