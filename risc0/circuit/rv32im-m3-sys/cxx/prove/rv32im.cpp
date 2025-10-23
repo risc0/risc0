@@ -45,6 +45,7 @@ Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal,
       PinnedArrayWO<Fp> globalFp(hal, state[0].global);
       const GlobalsWitness* wit = reinterpret_cast<const GlobalsWitness*>(globalAux.data());
       Globals* globals = reinterpret_cast<Globals*>(globalFp.data());
+      memset(globals, 0, sizeof(Globals));
       globals->v2Compat = wit->v2Compat;
     }
     hal->zero(tables);

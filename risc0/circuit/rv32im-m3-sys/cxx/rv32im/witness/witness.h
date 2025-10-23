@@ -62,12 +62,12 @@ struct EmptyWitness {
   BLOCK_TYPE(UnitShift, 5)                                                                         \
   BLOCK_TYPE(P2ExtRound, 2)                                                                        \
   BLOCK_TYPE(P2IntRounds, 2)                                                                       \
-  BLOCK_TYPE(P2Block, 1)                                                                           \
+  BLOCK_TYPE(P2Block, 3)                                                                           \
   BLOCK_TYPE(PageInNode, 1)                                                                        \
-  BLOCK_TYPE(PageInPart, 1)                                                                        \
+  BLOCK_TYPE(PageInPart, 4)                                                                        \
   BLOCK_TYPE(PageInPage, 1)                                                                        \
   BLOCK_TYPE(PageOutNode, 1)                                                                       \
-  BLOCK_TYPE(PageOutPart, 1)                                                                       \
+  BLOCK_TYPE(PageOutPart, 4)                                                                       \
   BLOCK_TYPE(PageOutPage, 1)                                                                       \
   BLOCK_TYPE(PageUncle, 1)                                                                         \
   BLOCK_TYPE(MakeTable, 3)
