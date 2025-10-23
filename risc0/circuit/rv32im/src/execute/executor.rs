@@ -103,8 +103,10 @@ pub enum CycleLimit {
 }
 
 struct CreateSegmentRequest {
-    partial_image: WorkingImage,
-    page_indexes: BTreeSet<u32>,
+    // Partial image containing pages that were written to in the segment.
+    update_partial_image: WorkingImage,
+    // Indices of all pages that were accessed in the segment.
+    access_page_indexes: BTreeSet<u32>,
 
     input_digest: Digest,
     output_digest: Option<Digest>,
@@ -133,10 +135,13 @@ fn create_segments(
     let initial_digest = existing_image.image_id();
 
     while let Ok(req) = recv.recv() {
+        // Compute the partial image that from the initial memory state that will be sent to
+        // preflight for re-execution of the segment.
         let pre_digest = existing_image.image_id();
-        let partial_image = compute_partial_image(&mut existing_image, req.page_indexes);
+        let partial_image = compute_partial_image(&mut existing_image, req.access_page_indexes);
 
-        for (idx, page) in req.partial_image.pages {
+        // Update the image held locally to the state after segment execution.
+        for (idx, page) in req.update_partial_image.pages {
             existing_image.set_page(idx, page);
         }
         existing_image.update_digests();
@@ -339,8 +344,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let partial_image = self.pager.commit();
 
         let req = CreateSegmentRequest {
-            partial_image,
-            page_indexes: self.pager.page_indexes(),
+            update_partial_image: partial_image,
+            access_page_indexes: self.pager.page_indexes(),
             input_digest: self.input_digest,
             output_digest: self.output_digest,
             read_record: std::mem::take(&mut self.read_record),
@@ -406,8 +411,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             let partial_image = self.pager.commit();
 
             let req = CreateSegmentRequest {
-                partial_image,
-                page_indexes: self.pager.page_indexes(),
+                update_partial_image: partial_image,
+                access_page_indexes: self.pager.page_indexes(),
                 input_digest: self.input_digest,
                 output_digest: self.output_digest,
                 read_record: std::mem::take(&mut self.read_record),
@@ -534,9 +539,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(())
     }
 
-    // TODO(victor/perf): This function includes a number of `unlikely` branches. Would it be worth
-    // going further by adding a const generic that allows us to turn off tracing in a way that
-    // allows the compiler to completely optimize out these branches?
     #[inline(always)]
     fn on_insn_start(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
@@ -573,8 +575,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
             self.ecall_metrics[kind].count += 1;
         }
         self.inc_user_cycles(1, Some(kind));
-        // TODO(victor/perf): This check is not marked as unlikely, although that may not matter
-        // since trace_pager is marked as cold.
         if !self.trace.is_empty() {
             self.trace_pager()?;
         }
