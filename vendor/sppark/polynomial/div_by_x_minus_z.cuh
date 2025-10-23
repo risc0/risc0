@@ -194,6 +194,8 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
 
         my::madd_up(coeff[N-1], z_pow = z_n);
 
+        __syncthreads();
+
         if (laneid == WARP_SZ-1)
             xchg[warpid] = coeff[N-1];
 
@@ -236,6 +238,8 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
                             min(WARP_SZ, gridDim.x));
 
                 if (gridDim.x > WARP_SZ) {
+                    __syncthreads();
+
                     if (laneid == WARP_SZ-1)
                         xchg[warpid] = carry_over;
 
@@ -254,6 +258,8 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
                         carry_over += temp;
                     }
                 }
+
+                __syncthreads();
 
                 if (threadIdx.x < gridDim.x)
                     xchg[threadIdx.x] = carry_over;
@@ -280,12 +286,16 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
         }
 
         if (N > 1) {
+            __syncthreads();
+
             if (laneid == WARP_SZ-1)
                 xchg[warpid] = coeff[N-1];
 
             __syncthreads();
 
             fr_t carry = shfl_up(coeff[N-1], 1);
+
+            __syncthreads();
 
             if (laneid == 0 && warpid != 0)
                 carry_over = xchg[warpid-1];
