@@ -677,7 +677,6 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
         Ok(false)
     }
 
-    // TODO(victor/perf): This showed up on a profile. Try adding #[inline(always)] here.
     fn on_insn_decoded(
         &mut self,
         kind: InsnKind,
