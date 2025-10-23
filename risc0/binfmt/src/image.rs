@@ -108,17 +108,15 @@ pub struct Page(Box<[u8; PAGE_BYTES]>);
 /// [Program].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MemoryImage {
-    /// TODO(flaub)
-    #[debug("{}", pages.len())]
+    #[debug("{} entries", pages.len())]
     // #[debug("{:#010x?}", pages.keys())]
     pages: BTreeMap<u32, Page>,
 
-    /// TODO(flaub)
-    #[debug("{}", digests.len())]
+    #[debug("{} entries", digests.len())]
     // #[debug("{:#010x?}", digests.keys())]
     digests: BTreeMap<u32, Digest>,
 
-    #[debug("{}", dirty.len())]
+    #[debug("{} entries", dirty.len())]
     dirty: BTreeSet<u32>,
 }
 
@@ -266,12 +264,12 @@ impl MemoryImage {
         *self.get_digest(1).unwrap()
     }
 
-    /// Return the user portion of the MT
+    /// Return the user portion of the Merkle tree.
     pub fn user_id(&mut self) -> Digest {
         *self.get_digest(2).unwrap()
     }
 
-    /// Return the kernel portion of the MT
+    /// Return the kernel portion of the Merkle tree.
     pub fn kernel_id(&mut self) -> Digest {
         *self.get_digest(3).unwrap()
     }
@@ -285,7 +283,7 @@ impl MemoryImage {
             .is_some()
     }
 
-    /// Check if given MT node is a zero
+    /// Check if given Merkle tree node is a zero
     fn is_zero(&self, mut digest_idx: u32) -> bool {
         // Compute the depth in the tree of this node
         let mut depth = digest_idx.ilog2() as usize;
@@ -301,7 +299,7 @@ impl MemoryImage {
         }
     }
 
-    /// Expand zero MT node.
+    /// Expand zero Merkle tree node.
     ///
     /// Presumes `is_zero(digest_idx)` returned true.
     fn expand_zero(&mut self, mut digest_idx: u32) {
@@ -339,7 +337,7 @@ impl MemoryImage {
     /// After making changes to the image, call this to update all the digests
     /// that need to be updated.
     pub fn update_digests(&mut self) {
-        let dirty: Vec<_> = mem::take(&mut self.dirty).into_iter().collect();
+        let dirty = mem::take(&mut self.dirty);
         for idx in dirty.into_iter().rev() {
             let lhs_idx = idx * 2;
             let rhs_idx = idx * 2 + 1;
