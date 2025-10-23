@@ -96,7 +96,9 @@ bool Rv32imProver::preflight(rv32im::MemoryImage& image, HostIO& io, uint32_t* c
   LOG(1, "Executing");
   Trace trace(rows, cpuRI.data(), cpuAux.data());
   bool ret = emulate(trace, image, io, rows);
-  if (cyclesOut) { *cyclesOut = trace.getGlobals().finalCycle; }
+  if (cyclesOut) {
+    *cyclesOut = trace.getGlobals().finalCycle;
+  }
   LOG(1, "Finalizing, trace row count = " << trace.getRowCount());
   trace.finalize();
   LOG(1, "Copying to GPU");
