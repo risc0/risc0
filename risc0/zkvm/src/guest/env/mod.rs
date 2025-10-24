@@ -110,11 +110,11 @@ pub(crate) use self::verify::verify_assumption2;
 #[doc(hidden)]
 pub mod testing {
     #[cfg(feature = "unstable")]
-    pub fn sha_single_keccak(
+    pub fn commit_single_keccak(
         claim_state: &mut risc0_zkp::core::digest::Digest,
         keccak_state: &risc0_circuit_keccak::KeccakState,
     ) {
-        super::batcher::sha_single_keccak(claim_state, keccak_state)
+        super::batcher::commit_single_keccak(claim_state, keccak_state)
     }
 }
 

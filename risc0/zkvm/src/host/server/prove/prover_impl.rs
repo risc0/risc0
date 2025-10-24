@@ -21,7 +21,7 @@ use super::{ProverServer, keccak::prove_keccak};
 use crate::{
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
     MaybePruned, Output, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
-    UnionClaim, Unknown, VerifierContext, WorkClaim,
+    SuccinctReceiptVerifierParameters, UnionClaim, Unknown, VerifierContext, WorkClaim,
     claim::merge::Merge,
     host::{
         client::prove::opts::ReceiptKind,
@@ -125,8 +125,14 @@ impl ProverServer for ProverImpl {
         let mut zkr_receipts = HashMap::new();
         let mut keccak_receipts: MerkleMountainAccumulator<UnionPeak> =
             MerkleMountainAccumulator::new();
+
+        let keccak_ctx = VerifierContext::default()
+            .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters::for_keccak());
+
         for proof_request in session.pending_keccaks.iter() {
-            let receipt = prove_keccak(proof_request)?;
+            let receipt = prove_keccak(proof_request).context("prove keccak")?;
+            receipt.verify_integrity_with_context(&keccak_ctx)?;
+
             tracing::debug!("adding keccak assumption: {}", receipt.claim.digest());
             keccak_receipts.insert(receipt)?;
         }

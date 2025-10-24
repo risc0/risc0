@@ -17,6 +17,7 @@
 
 #include "hal/hal.h"
 #include "prove/rv32im.h"
+#include "vendor/nvtx3/nvtx3.hpp"
 #include "verify/rv32im.h"
 
 #include <cstdint>
@@ -159,6 +160,7 @@ RustSliceFp risc0_circuit_rv32im_m3_prover_transcript(ProverContext* ctx) {
 }
 
 const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustSegment* segment) {
+  nvtx3::scoped_range range("load_segment");
   try {
     ctx->image = MemoryImage::zeros();
     // ctx->image.dumpZeros();
@@ -185,6 +187,7 @@ const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustS
 }
 
 const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx) {
+  nvtx3::scoped_range range("preflight");
   try {
     ctx->prover.preflight(ctx->image, ctx->io);
   } catch (const std::exception& err) {
@@ -198,6 +201,7 @@ const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx) {
 }
 
 const char* risc0_circuit_rv32im_m3_prove(ProverContext* ctx) {
+  nvtx3::scoped_range range("prove");
   try {
     WriteIop writeIop;
     writeIop.write(RV32IM_SEAL_VERSION);

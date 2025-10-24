@@ -409,12 +409,9 @@ pub fn prove_zkr(
 
     // Read the claim digest from the second of the global output slots.
     let claim_digest: Digest = read_sha_halfs(&mut VecDeque::from_iter(
-        bytemuck::checked::cast_slice::<_, BabyBearElem>(
-            &receipt.seal[DIGEST_SHORTS..2 * DIGEST_SHORTS],
-        )
-        .iter()
-        .copied()
-        .map(u32::from),
+        receipt.seal[DIGEST_SHORTS..2 * DIGEST_SHORTS]
+            .iter()
+            .map(|x| BabyBearElem::new_raw(*x).as_u32()),
     ))?;
 
     let hashfn = opts.hash_suite()?.hashfn;
@@ -511,12 +508,9 @@ pub fn test_zkr(
 
     // Read the claim digest from the second of the global output slots.
     let claim_digest = read_sha_halfs(&mut VecDeque::from_iter(
-        bytemuck::checked::cast_slice::<_, BabyBearElem>(
-            &receipt.seal[DIGEST_SHORTS..2 * DIGEST_SHORTS],
-        )
-        .iter()
-        .copied()
-        .map(u32::from),
+        receipt.seal[DIGEST_SHORTS..2 * DIGEST_SHORTS]
+            .iter()
+            .map(|x| BabyBearElem::new_raw(*x).as_u32()),
     ))?;
 
     // Include an inclusion proof for control_id to allow verification against a root.
