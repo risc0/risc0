@@ -325,11 +325,13 @@ void transpose(fr_t r[z_count])
     for (int z = 0; z < z_count; z++)
         xchg[y + z][x] = r[z];
 
-    __syncwarp();
+    __syncthreads();
 
     #pragma unroll
     for (int z = 0; z < z_count; z++)
         r[z] = xchg[y + x][z];
+
+    __syncthreads();
 }
 
 template<int z_count, class fr_t>

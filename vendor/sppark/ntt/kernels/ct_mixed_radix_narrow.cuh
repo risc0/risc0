@@ -39,7 +39,6 @@ void _CT_NTT(const unsigned int radix, const unsigned int lg_domain_size,
         coalesced_load<z_count>(r[0], d_inout, idx0, stage + 1);
         coalesced_load<z_count>(r[1], d_inout, idx1, stage + 1);
         transpose<z_count>(r[0]);
-        __syncwarp();
         transpose<z_count>(r[1]);
     } else {
         unsigned int z_shift = inp_mask==0 ? iterations : 0;
@@ -144,6 +143,7 @@ void _CT_NTT(const unsigned int radix, const unsigned int lg_domain_size,
             r[1][z] = r[0][z] - t;
             r[0][z] = t + r[0][z];
         }
+
         noop();
 
         __syncthreads();
@@ -168,7 +168,6 @@ void _CT_NTT(const unsigned int radix, const unsigned int lg_domain_size,
 
     if (coalesced) {
         transpose<z_count>(r[0]);
-        __syncwarp();
         transpose<z_count>(r[1]);
         coalesced_store<z_count>(d_inout, idx0, r[0], stage);
         coalesced_store<z_count>(d_inout, idx1, r[1], stage);

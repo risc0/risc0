@@ -145,6 +145,7 @@ static void upper_sort(uint2 dst[], const uint32_t src[], uint32_t len,
         histogram[2 + (i<<digit) + blockIdx.x] = counters[i];
 
     cooperative_groups::this_grid().sync();
+
     __syncthreads();    // eliminate BRA.DIV?
 
     const uint32_t warpid = threadIdx.x / WARP_SZ;
@@ -177,6 +178,8 @@ static void upper_sort(uint2 dst[], const uint32_t src[], uint32_t len,
 
         h.x = __shfl_sync(0xffffffff, sum, WARP_SZ-1, WARP_SZ);
     }
+
+    __syncthreads();
 
     if (warpid == 0)    // offload some counters to registers
         sum = counters[laneid];
@@ -219,6 +222,7 @@ static void upper_sort(uint2 dst[], const uint32_t src[], uint32_t len,
     }
 
     cooperative_groups::this_grid().sync();
+
     __syncthreads();
 }
 
@@ -272,6 +276,8 @@ static void lower_sort(uint32_t dst[], const uint2 src[],
 
         prefix_sums[i] = sum;
     }
+
+    __syncthreads();
 
     // carry over most significant prefix sums from each warp
     if (laneid == WARP_SZ-1)
@@ -334,6 +340,7 @@ void sort_row(uint32_t inout[], size_t len, uint2 temp[],
         }
     } else if (blockIdx.x == 0) {
         counters[0] = 0;
+
         __syncthreads();
 
         uint32_t lshift = wbits - lsbits;
