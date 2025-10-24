@@ -24,7 +24,7 @@ template <typename C> struct ReadByteBlock {
   Reg<C> cycle;
   BitReg<C> lowBit0;
   BitReg<C> lowBit1;
-  MemWriteBlock<C> io;
+  PhysMemWriteBlock<C> io;
   RegU8<C> lowByte;
   RegU8<C> highByte;
   RegU8<C> newByte;
@@ -54,7 +54,7 @@ template <typename C> struct ReadWordBlock {
 
   Reg<C> cycle;
   RegU16<C> sizeMinus4;
-  MemWriteBlock<C> io;
+  PhysMemWriteBlock<C> io;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);

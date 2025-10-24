@@ -16,6 +16,7 @@ filegroup(
     srcs = glob(["*/**"]) + [
         "@byz9//bazel/toolchain/rv32im-linux:kernel.ld",
         "@byz9//bazel/toolchain/rv32im-linux:kernel_v1.ld",
+        "@byz9//bazel/toolchain/rv32im-linux:firmware.ld",
     ],
 )
 

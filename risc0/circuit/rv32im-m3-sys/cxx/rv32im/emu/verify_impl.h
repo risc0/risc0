@@ -16,6 +16,8 @@
 #include <array>
 #include <map>
 
+#define IN_VERIFY 1
+
 #include "rv32im/circuit/circuit.ipp"
 
 namespace NAMESPACE {

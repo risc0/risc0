@@ -38,6 +38,16 @@ Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal,
   }
   dataInfo.witgen = [hal, rowInfo, aux, tables, doValidate](std::vector<GroupState>& state) {
     LOG(1, "Computing data witness");
+    {
+      // Copy across any input globals
+      PinnedArrayRO<uint32_t> globalAux(hal,
+                                        aux.slice(0, sizeof(GlobalsWitness) / sizeof(uint32_t)));
+      PinnedArrayWO<Fp> globalFp(hal, state[0].global);
+      const GlobalsWitness* wit = reinterpret_cast<const GlobalsWitness*>(globalAux.data());
+      Globals* globals = reinterpret_cast<Globals*>(globalFp.data());
+      memset(globals, 0, sizeof(Globals));
+      globals->v2Compat = wit->v2Compat;
+    }
     hal->zero(tables);
     hal->computeDataWitness(state[0].table, state[0].global, rowInfo, aux, tables);
     if (doValidate) {
@@ -80,13 +90,16 @@ Rv32imProver::Rv32imProver(IHalPtr hal, size_t po2, bool doValidate)
     , ci(hal, rowInfo, aux, tables, doValidate)
     , prover(hal, ci.ci, po2) {}
 
-bool Rv32imProver::preflight(rv32im::MemoryImage& image, HostIO& io) {
+bool Rv32imProver::preflight(rv32im::MemoryImage& image, HostIO& io, uint32_t* cyclesOut) {
   LOG(1, "Pinning");
   PinnedArrayWO cpuRI(hal, rowInfo);
   PinnedArrayWO cpuAux(hal, aux);
   LOG(1, "Executing");
   Trace trace(rows, cpuRI.data(), cpuAux.data());
   bool ret = emulate(trace, image, io, rows);
+  if (cyclesOut) {
+    *cyclesOut = trace.getGlobals().finalCycle;
+  }
   LOG(1, "Finalizing, trace row count = " << trace.getRowCount());
   trace.finalize();
   LOG(1, "Copying to GPU");

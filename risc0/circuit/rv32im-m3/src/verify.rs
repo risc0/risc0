@@ -28,7 +28,7 @@ impl CircuitInfoV3 for CircuitInfo {
     fn get_groups(&self) -> &'static [GroupInfo] {
         &[
             GroupInfo {
-                global_count: 37,
+                global_count: 38,
                 mix_count: 0,
             },
             GroupInfo {

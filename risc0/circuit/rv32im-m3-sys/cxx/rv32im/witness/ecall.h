@@ -20,35 +20,35 @@
 struct EcallTerminateWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness a7;
-  MemReadWitness a0;
-  MemReadWitness a1;
-  MemReadWitness output[8];
+  RegMemReadWitness a7;
+  RegMemReadWitness a0;
+  RegMemReadWitness a1;
+  PhysMemReadWitness output[8];
 };
 
 struct EcallReadWitness {
   uint32_t cycle;
   uint32_t finalCycle;
   FetchWitness fetch;
-  MemReadWitness a7;
-  MemReadWitness a1;
-  MemReadWitness a2;
-  MemWriteWitness a0;
+  RegMemReadWitness a7;
+  RegMemReadWitness a1;
+  RegMemReadWitness a2;
+  RegMemWriteWitness a0;
 };
 
 struct EcallWriteWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness a7;
-  MemReadWitness a2;
-  MemWriteWitness a0;
+  RegMemReadWitness a7;
+  RegMemReadWitness a2;
+  RegMemWriteWitness a0;
 };
 
 struct EcallBigIntWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness a7;
-  MemReadWitness t0;
-  MemReadWitness t2;
+  RegMemReadWitness a7;
+  RegMemReadWitness t0;
+  RegMemReadWitness t2;
   uint32_t count;
 };

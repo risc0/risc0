@@ -24,16 +24,16 @@
 template <typename C> struct InstResumeBlock {
   CONSTANT static char NAME[] = "InstResumeBlock";
 
-  MemReadBlock<C> readPc;
-  MemReadBlock<C> readMm;
-  MemWriteBlock<C> writeVersion;
-  AddressVerify<C> verifyPc;
+  PhysMemReadBlock<C> readV2Compat;
+  PhysMemReadBlock<C> readPc;
+  PhysMemReadBlock<C> readMode;
+  PhysMemWriteBlock<C> writeVersion;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, readV2Compat, 1);
     T::apply(ctx, readPc, 1);
-    T::apply(ctx, readMm, 1);
+    T::apply(ctx, readMode, 1);
     T::apply(ctx, writeVersion, 1);
-    T::apply(ctx, verifyPc, readPc.data.get(), readMm.data.low.get());
   }
 
   FDEV void set(CTX, InstResumeWitness wit) DEV;
@@ -50,15 +50,13 @@ template <typename C> struct InstSuspendBlock {
 
   Reg<C> cycle;
   Reg<C> iCacheCycle;
-  MemWriteBlock<C> writePc;
-  MemWriteBlock<C> writeMm;
-  AddressVerify<C> verifyPc;
+  PhysMemWriteBlock<C> writePc;
+  PhysMemWriteBlock<C> writeMode;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, writePc, cycle.get());
-    T::apply(ctx, writeMm, cycle.get());
-    T::apply(ctx, verifyPc, writePc.data.get(), writeMm.data.low.get());
+    T::apply(ctx, writeMode, cycle.get());
   }
 
   FDEV void set(CTX, InstSuspendWitness) DEV;
@@ -110,8 +108,8 @@ template <typename C> struct DualReg {
   CONSTANT static char NAME[] = "DestReg";
 
   BitReg<C> sameReg;
-  MemReadBlock<C> readRs1;
-  MemReadBlock<C> readRs2;
+  RegMemReadBlock<C> readRs1;
+  RegMemReadBlock<C> readRs2;
   Reg<C> rs1Idx;
   Reg<C> rs2Idx;
   RegU32<C> rs2Data;
@@ -127,7 +125,7 @@ template <typename C> struct DualReg {
   FDEV ValU32<C> getRS1() DEV;
   FDEV ValU32<C> getRS2() DEV;
 
-  FDEV void set(CTX, MemReadWitness rs1Wit, MemReadWitness rs2Wit, uint32_t cycle) DEV;
+  FDEV void set(CTX, RegMemReadWitness rs1Wit, RegMemReadWitness rs2Wit, uint32_t cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
   FDEV void verify(CTX, Val<C> cycle, Val<C> mode) DEV;
@@ -139,11 +137,9 @@ template <typename C> struct InstRegBlock {
   CONSTANT static char NAME[] = "InstRegBlock";
 
   Reg<C> cycle;
-  BitReg<C> mm;
   FetchBlock<C> fetch;
-  AddressVerify<C> verifyPc;
   DualReg<C> dr;
-  MemWriteBlock<C> writeRd;
+  RegMemWriteBlock<C> writeRd;
   DestReg<C> rd;
   Reg<C> optOut;
   BitReg<C> outIdx;
@@ -152,12 +148,10 @@ template <typename C> struct InstRegBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, mm);
-    T::apply(ctx, fetch);
-    T::apply(ctx, verifyPc, fetch.pc.get(), mm.get());
-    T::apply(ctx, dr, cycle.get(), mm.get());
+    T::apply(ctx, fetch, cycle.get());
+    T::apply(ctx, dr, cycle.get(), fetch.isMM());
     T::apply(ctx, writeRd, cycle.get());
-    T::apply(ctx, rd, writeRd.wordAddr.get(), mm.get());
+    T::apply(ctx, rd, writeRd.wordAddr.get(), fetch.isMM());
     T::apply(ctx, optOut);
     T::apply(ctx, outIdx);
     T::apply(ctx, out0);
@@ -175,11 +169,9 @@ template <typename C> struct InstImmBlock {
   CONSTANT static char NAME[] = "InstImmBlock";
 
   Reg<C> cycle;
-  BitReg<C> mm;
   FetchBlock<C> fetch;
-  AddressVerify<C> verifyPc;
-  MemReadBlock<C> readRs1;
-  MemWriteBlock<C> writeRd;
+  RegMemReadBlock<C> readRs1;
+  RegMemWriteBlock<C> writeRd;
   SourceReg<C> rs1;
   Reg<C> rs2;
   DestReg<C> rd;
@@ -191,14 +183,12 @@ template <typename C> struct InstImmBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, mm);
-    T::apply(ctx, fetch);
-    T::apply(ctx, verifyPc, fetch.pc.get(), mm.get());
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readRs1, cycle.get());
     T::apply(ctx, writeRd, cycle.get());
-    T::apply(ctx, rs1, readRs1.wordAddr.get(), mm.get());
+    T::apply(ctx, rs1, readRs1.wordAddr.get(), fetch.isMM());
     T::apply(ctx, rs2);
-    T::apply(ctx, rd, writeRd.wordAddr.get(), mm.get());
+    T::apply(ctx, rd, writeRd.wordAddr.get(), fetch.isMM());
     T::apply(ctx, imm);
     T::apply(ctx, optOut);
     T::apply(ctx, outIdx);
@@ -217,12 +207,10 @@ template <typename C> struct InstLoadBlock {
   CONSTANT static char NAME[] = "InstLoadBlock";
 
   Reg<C> cycle;
-  BitReg<C> mm;
   OneHot<C, 5> opt;
   FetchBlock<C> fetch;
-  AddressVerify<C> verifyPc;
-  MemReadBlock<C> readRs1;
-  MemWriteBlock<C> writeRd;
+  RegMemReadBlock<C> readRs1;
+  RegMemWriteBlock<C> writeRd;
   SourceReg<C> rs1;
   Reg<C> rs2;
   DestReg<C> rd;
@@ -230,7 +218,7 @@ template <typename C> struct InstLoadBlock {
   AddU32<C> computeAddr;
   AddressDecompose<C> readAddr;
   AddressVerify<C> checkAddr;
-  MemReadBlock<C> readMem;
+  VirtMemReadBlock<C> readMem;
   Reg<C> pickShort;
   RegU8<C> b0;
   RegU8<C> b1;
@@ -239,19 +227,17 @@ template <typename C> struct InstLoadBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, mm);
     T::apply(ctx, opt);
-    T::apply(ctx, fetch);
-    T::apply(ctx, verifyPc, fetch.pc.get(), mm.get());
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readRs1, cycle.get());
     T::apply(ctx, writeRd, cycle.get());
-    T::apply(ctx, rs1, readRs1.wordAddr.get(), mm.get());
+    T::apply(ctx, rs1, readRs1.wordAddr.get(), fetch.isMM());
     T::apply(ctx, rs2);
-    T::apply(ctx, rd, writeRd.wordAddr.get(), mm.get());
+    T::apply(ctx, rd, writeRd.wordAddr.get(), fetch.isMM());
     T::apply(ctx, imm);
     T::apply(ctx, computeAddr, readRs1.data.get(), imm.get());
     T::apply(ctx, readAddr, computeAddr.get());
-    T::apply(ctx, checkAddr, computeAddr.get(), mm.get());
+    T::apply(ctx, checkAddr, computeAddr.get(), fetch.isMM());
     T::apply(ctx, readMem, cycle.get());
     T::apply(ctx, pickShort);
     T::apply(ctx, b0);
@@ -270,17 +256,15 @@ template <typename C> struct InstStoreBlock {
   CONSTANT static char NAME[] = "InstStoreBlock";
 
   Reg<C> cycle;
-  BitReg<C> mm;
   OneHot<C, 3> opt;
   FetchBlock<C> fetch;
-  AddressVerify<C> verifyPc;
   DualReg<C> dr;
   Reg<C> rd;
   RegU32<C> imm;
   AddU32<C> computeAddr;
   AddressDecompose<C> writeAddr;
   AddressVerify<C> checkAddr;
-  MemWriteBlock<C> writeMem;
+  VirtMemWriteBlock<C> writeMem;
   // Pick a short based on address
   Reg<C> pickShort;
   // Decompose
@@ -296,16 +280,14 @@ template <typename C> struct InstStoreBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, mm);
     T::apply(ctx, opt);
-    T::apply(ctx, fetch);
-    T::apply(ctx, verifyPc, fetch.pc.get(), mm.get());
-    T::apply(ctx, dr, cycle.get(), mm.get());
+    T::apply(ctx, fetch, cycle.get());
+    T::apply(ctx, dr, cycle.get(), fetch.isMM());
     T::apply(ctx, rd);
     T::apply(ctx, imm);
     T::apply(ctx, computeAddr, dr.getRS1(), imm.get());
     T::apply(ctx, writeAddr, computeAddr.get());
-    T::apply(ctx, checkAddr, computeAddr.get(), mm.get());
+    T::apply(ctx, checkAddr, computeAddr.get(), fetch.isMM());
     T::apply(ctx, writeMem, cycle.get());
     T::apply(ctx, pickShort);
     T::apply(ctx, psB0);
@@ -325,9 +307,7 @@ template <typename C> struct InstBranchBlock {
   CONSTANT static char NAME[] = "InstBranchBlock";
 
   Reg<C> cycle;
-  BitReg<C> mm;
   FetchBlock<C> fetch;
-  AddressVerify<C> verifyPc;
   DualReg<C> dr;
   Reg<C> rd;
   RegU32<C> imm;
@@ -342,10 +322,8 @@ template <typename C> struct InstBranchBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, mm);
-    T::apply(ctx, fetch);
-    T::apply(ctx, verifyPc, fetch.pc.get(), mm.get());
-    T::apply(ctx, dr, cycle.get(), mm.get());
+    T::apply(ctx, fetch, cycle.get());
+    T::apply(ctx, dr, cycle.get(), fetch.isMM());
     T::apply(ctx, rd);
     T::apply(ctx, imm);
     T::apply(ctx, optOut);
@@ -371,25 +349,21 @@ template <typename C> struct InstJalBlock {
   CONSTANT static char NAME[] = "InstJalBlock";
 
   Reg<C> cycle;
-  BitReg<C> mm;
   FetchBlock<C> fetch;
-  AddressVerify<C> verifyPc;
   Reg<C> rs1;
   Reg<C> rs2;
-  MemWriteBlock<C> writeRd;
+  RegMemWriteBlock<C> writeRd;
   DestReg<C> rd;
   RegU32<C> imm;
   AddU32<C> sumPc;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, mm);
-    T::apply(ctx, fetch);
-    T::apply(ctx, verifyPc, fetch.pc.get(), mm.get());
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, writeRd, cycle.get());
     T::apply(ctx, rs1);
     T::apply(ctx, rs2);
-    T::apply(ctx, rd, writeRd.wordAddr.get(), mm.get());
+    T::apply(ctx, rd, writeRd.wordAddr.get(), fetch.isMM());
     T::apply(ctx, imm);
     T::apply(ctx, sumPc, fetch.pc.get(), imm.get());
   }
@@ -405,27 +379,23 @@ template <typename C> struct InstJalrBlock {
   CONSTANT static char NAME[] = "InstJalrBlock";
 
   Reg<C> cycle;
-  BitReg<C> mm;
   FetchBlock<C> fetch;
-  AddressVerify<C> verifyPc;
-  MemReadBlock<C> readRs1;
+  RegMemReadBlock<C> readRs1;
   SourceReg<C> rs1;
   Reg<C> rs2;
-  MemWriteBlock<C> writeRd;
+  RegMemWriteBlock<C> writeRd;
   DestReg<C> rd;
   RegU32<C> imm;
   AddU32<C> sumPc;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, mm);
-    T::apply(ctx, fetch);
-    T::apply(ctx, verifyPc, fetch.pc.get(), mm.get());
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readRs1, cycle.get());
-    T::apply(ctx, rs1, readRs1.wordAddr.get(), mm.get());
+    T::apply(ctx, rs1, readRs1.wordAddr.get(), fetch.isMM());
     T::apply(ctx, rs2);
     T::apply(ctx, writeRd, cycle.get());
-    T::apply(ctx, rd, writeRd.wordAddr.get(), mm.get());
+    T::apply(ctx, rd, writeRd.wordAddr.get(), fetch.isMM());
     T::apply(ctx, imm);
     T::apply(ctx, sumPc, readRs1.data.get(), imm.get());
   }
@@ -441,23 +411,19 @@ template <typename C> struct InstLuiBlock {
   CONSTANT static char NAME[] = "InstLuiBlock";
 
   Reg<C> cycle;
-  BitReg<C> mm;
   FetchBlock<C> fetch;
-  AddressVerify<C> verifyPc;
   Reg<C> rs1;
   Reg<C> rs2;
-  MemWriteBlock<C> writeRd;
+  RegMemWriteBlock<C> writeRd;
   DestReg<C> rd;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, mm);
-    T::apply(ctx, fetch);
-    T::apply(ctx, verifyPc, fetch.pc.get(), mm.get());
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, rs1);
     T::apply(ctx, rs2);
     T::apply(ctx, writeRd, cycle.get());
-    T::apply(ctx, rd, writeRd.wordAddr.get(), mm.get());
+    T::apply(ctx, rd, writeRd.wordAddr.get(), fetch.isMM());
   }
 
   FDEV void set(CTX, InstLuiWitness wit) DEV;
@@ -471,25 +437,21 @@ template <typename C> struct InstAuipcBlock {
   CONSTANT static char NAME[] = "InstAuipcBlock";
 
   Reg<C> cycle;
-  BitReg<C> mm;
   FetchBlock<C> fetch;
-  AddressVerify<C> verifyPc;
   Reg<C> rs1;
   Reg<C> rs2;
-  MemWriteBlock<C> writeRd;
+  RegMemWriteBlock<C> writeRd;
   DestReg<C> rd;
   RegU32<C> imm;
   AddU32<C> sumPc;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, mm);
-    T::apply(ctx, fetch);
-    T::apply(ctx, verifyPc, fetch.pc.get(), mm.get());
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, rs1);
     T::apply(ctx, rs2);
     T::apply(ctx, writeRd, cycle.get());
-    T::apply(ctx, rd, writeRd.wordAddr.get(), mm.get());
+    T::apply(ctx, rd, writeRd.wordAddr.get(), fetch.isMM());
     T::apply(ctx, imm);
     T::apply(ctx, sumPc, fetch.pc.get(), imm.get());
   }
@@ -506,14 +468,12 @@ template <typename C> struct InstEcallBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  AddressVerify<C> verifyPc;
-  MemWriteBlock<C> writeSavePc;
-  MemReadBlock<C> readDispatch;
+  PhysMemWriteBlock<C> writeSavePc;
+  PhysMemReadBlock<C> readDispatch;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
-    T::apply(ctx, verifyPc, fetch.pc.get(), 0);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, writeSavePc, cycle.get());
     T::apply(ctx, readDispatch, cycle.get());
   }
@@ -530,12 +490,12 @@ template <typename C> struct InstMretBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readPc;
+  PhysMemReadBlock<C> readPc;
   AddU32<C> sumPc;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readPc, cycle.get());
     T::apply(ctx, sumPc, readPc.data.get(), ValU32<C>(4, 0));
   }

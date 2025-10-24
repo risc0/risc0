@@ -21,7 +21,7 @@
 #include "rv32im/circuit/u32.h"
 #include "rv32im/witness/paging.h"
 
-CONSTANT uint32_t NUM_PARTS = PAGE_SIZE_WORDS / PAGE_PART_SIZE;
+CONSTANT uint32_t NUM_PARTS = MPAGE_SIZE_WORDS / MPAGE_PART_SIZE;
 
 template <typename C> struct PageInNodeBlock {
   CONSTANT static char NAME[] = "PageInNodeBlock";
@@ -52,7 +52,7 @@ template <typename C> struct PageInPartBlock {
   Reg<C> partNum;
   RegDigest<C> in;
   RegDigest<C> out;
-  RegU32<C> data[PAGE_PART_SIZE];
+  RegU32<C> data[MPAGE_PART_SIZE];
   IsZero<C> lastPart;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
@@ -118,8 +118,8 @@ template <typename C> struct PageOutPartBlock {
   Reg<C> partNum;
   RegDigest<C> in;
   RegDigest<C> out;
-  RegU32<C> data[PAGE_PART_SIZE];
-  Reg<C> cycle[PAGE_PART_SIZE];
+  RegU32<C> data[MPAGE_PART_SIZE];
+  Reg<C> cycle[MPAGE_PART_SIZE];
   IsZero<C> lastPart;
 
   template <typename T> FDEV void applyInner(CTX) DEV {

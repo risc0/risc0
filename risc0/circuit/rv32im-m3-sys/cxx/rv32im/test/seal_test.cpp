@@ -30,7 +30,9 @@ uint32_t readU32(OutU32 val) {
 int main() {
   IHalPtr hal = getCpuHal();
   size_t po2 = 12;
-  auto image = rv32im::MemoryImage::fromRawElf("rv32im/test/seal_test_kernel");
+  std::map<uint32_t, uint32_t> words;
+  rv32im::loadKernelV2(words, "rv32im/test/seal_test_kernel");
+  auto image = rv32im::MemoryImage::fromWords(words);
   Digest initialDigest = image.getDigest(1);
   Rv32imProver prover(hal, po2, true);
   rv32im::NullHostIO io;

@@ -14,7 +14,7 @@ cc_library(
         "test_prove.h",
     ],
     deps = [
-        "//hal/cpu",
+        "//hal/pick",
         "//prove",
         "//verify",
     ],
@@ -95,6 +95,21 @@ cc_test(
     data = [
         ":linux_guest",
         ":linux_kernel",
+    ],
+    deps = ["//rv32im/test:test_prove"],
+)
+
+risc0_cc_kernel_binary(
+    name = "smoke_kernel",
+    srcs = [
+        "smoke_kernel.s",
+    ],
+)
+cc_test(
+    name = "smoke",
+    srcs = ["smoke.cpp"],
+    data = [
+        ":smoke_kernel",
     ],
     deps = ["//rv32im/test:test_prove"],
 )

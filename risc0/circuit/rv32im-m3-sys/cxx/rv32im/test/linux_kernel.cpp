@@ -172,7 +172,7 @@ extern "C" void start() {
   // Set up user stack
   set_ureg(REG_SP, 0xbffffffc);
   // Set up syscall dispatch table
-  uint32_t* dispatchAddr = reinterpret_cast<uint32_t*>(ECALL_DISPATCH_ADDR);
+  uint32_t* dispatchAddr = reinterpret_cast<uint32_t*>(V2_COMPAT_ECALL_DISPATCH * 4);
   *dispatchAddr = reinterpret_cast<uint32_t>(ecall_dispatch);
 #define SyscallEntry(id, name, args)                                                               \
   syscallTable[id] = reinterpret_cast<uint32_t>(sys_##name##_wrap);

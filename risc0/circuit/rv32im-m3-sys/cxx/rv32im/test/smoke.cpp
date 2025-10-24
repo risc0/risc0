@@ -13,28 +13,19 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#pragma once
+#include "core/log.h"
+#include "rv32im/test/test_prove.h"
 
-#include "rv32im/witness/mem.h"
+#include <iostream>
+#include <string>
 
-enum class PolyOp {
-  NOP = 0,
-  SHIFT = 1,
-  SET_TERM = 2,
-  ADD_TOTAL = 3,
-  CARRY_1 = 4,
-  CARRY_2 = 5,
-  EQZ = 6,
-};
+using namespace risc0;
 
-CONSTANT uint32_t POLY_OP_SIZE = 7;
-
-struct BigIntWitness {
-  uint32_t cycle;
-  uint32_t mm;
-  PhysMemReadWitness inst;
-  PhysMemReadWitness baseReg;
-  uint32_t data[4];
-  uint32_t prevCycle[4];
-  uint32_t prevValue[4];
-};
+int main() {
+  rv32im::NullHostIO io;
+  std::map<uint32_t, uint32_t> words;
+  rv32im::loadKernelV2(words, "rv32im/test/smoke_kernel");
+  auto image = rv32im::MemoryImage::fromWords(words);
+  runTest(image, io, 12);
+  return 0;
+}

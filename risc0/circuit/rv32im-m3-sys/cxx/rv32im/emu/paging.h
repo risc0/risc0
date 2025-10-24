@@ -33,7 +33,7 @@ struct MemoryInfo {
   uint32_t value;
 };
 
-using PageDetails = std::array<MemoryInfo, PAGE_SIZE_WORDS>;
+using PageDetails = std::array<MemoryInfo, MPAGE_SIZE_WORDS>;
 
 class PagedMemory {
 public:
@@ -46,12 +46,12 @@ public:
   PageDetails* pageIn(uint32_t pageId) {
     auto pageSrc = image.getPage(pageId);
     PageDetails* page = new PageDetails;
-    for (size_t i = 0; i < PAGE_SIZE_WORDS; i++) {
+    for (size_t i = 0; i < MPAGE_SIZE_WORDS; i++) {
       (*page)[i].cycle = 0;
       (*page)[i].value = (*pageSrc)[i];
     }
     addCostPage();
-    uint32_t idx = (pageId + MEMORY_SIZE_PAGES);
+    uint32_t idx = (pageId + MEMORY_SIZE_MPAGES);
     loaded.insert(idx);
     idx /= 2;
     while (idx != 0) {

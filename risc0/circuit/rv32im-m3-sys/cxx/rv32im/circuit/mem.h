@@ -18,8 +18,8 @@
 #include "rv32im/circuit/u32.h"
 #include "rv32im/witness/mem.h"
 
-template <typename C> struct MemReadBlock {
-  CONSTANT static char NAME[] = "MemReadBlock";
+template <typename C> struct PhysMemReadBlock {
+  CONSTANT static char NAME[] = "PhysMemReadBlock";
 
   Reg<C> wordAddr;
   Reg<C> prevCycle;
@@ -31,14 +31,14 @@ template <typename C> struct MemReadBlock {
     T::apply(ctx, data);
   }
 
-  FDEV void set(CTX, MemReadWitness wit, uint32_t cycle) DEV;
+  FDEV void set(CTX, PhysMemReadWitness wit, uint32_t cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
   FDEV void verify(CTX, Val<C> cycle) DEV {}
   FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
 
-template <typename C> struct MemWriteBlock {
-  CONSTANT static char NAME[] = "MemWriteBlock";
+template <typename C> struct PhysMemWriteBlock {
+  CONSTANT static char NAME[] = "PhysMemWriteBlock";
 
   Reg<C> wordAddr;
   Reg<C> prevCycle;
@@ -52,8 +52,107 @@ template <typename C> struct MemWriteBlock {
     T::apply(ctx, data);
   }
 
-  FDEV void set(CTX, MemWriteWitness wit, uint32_t cycle) DEV;
+  FDEV void set(CTX, PhysMemWriteWitness wit, uint32_t cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
   FDEV void verify(CTX, Val<C> cycle) DEV {}
   FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
+
+template <typename C> struct VirtAddrBlock {
+  CONSTANT static char NAME[] = "VirtAddrBlock";
+
+  Reg<C> vpage;
+  Reg<C> ppage;
+  RegU8<C> lowByte;
+  BitReg<C> bit8;
+  BitReg<C> bit9;
+
+  template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
+    T::apply(ctx, vpage);
+    T::apply(ctx, ppage);
+    T::apply(ctx, lowByte);
+    T::apply(ctx, bit8);
+    T::apply(ctx, bit9);
+  }
+
+  FDEV Val<C> getWordAddr() DEV {
+    return ppage.get() * 0x400 + bit9.get() * 0x200 + bit8.get() * 0x100 + lowByte.get();
+  }
+
+  // TODO: Actual verification of address mapping
+  FDEV void set(CTX, VirtAddrWitness wit) DEV;
+  FDEV inline void finalize(CTX) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void addArguments(CTX, Val<C> cycle) DEV {}
+};
+
+template <typename C> struct VirtMemReadBlock {
+  CONSTANT static char NAME[] = "VirtMemReadBlock";
+
+  VirtAddrBlock<C> addr;
+  Reg<C> prevCycle;
+  RegU32<C> data;
+
+  template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
+    T::apply(ctx, addr, cycle);
+    T::apply(ctx, prevCycle);
+    T::apply(ctx, data);
+  }
+
+  FDEV Val<C> getWordAddr() DEV { return addr.getWordAddr(); }
+
+  FDEV void set(CTX, VirtMemReadWitness wit, uint32_t cycle) DEV;
+  FDEV inline void finalize(CTX) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void addArguments(CTX, Val<C> cycle) DEV;
+};
+
+template <typename C> struct VirtMemWriteBlock {
+  CONSTANT static char NAME[] = "VirtMemWriteBlock";
+
+  VirtAddrBlock<C> addr;
+  Reg<C> prevCycle;
+  RegU32<C> prevData;
+  RegU32<C> data;
+
+  template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
+    T::apply(ctx, addr, cycle);
+    T::apply(ctx, prevCycle);
+    T::apply(ctx, prevData);
+    T::apply(ctx, data);
+  }
+
+  FDEV Val<C> getWordAddr() DEV { return addr.getWordAddr(); }
+
+  FDEV void set(CTX, VirtMemWriteWitness wit, uint32_t cycle) DEV;
+  FDEV inline void finalize(CTX) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void addArguments(CTX, Val<C> cycle) DEV;
+};
+
+template <typename C> struct VirtAddrResolveBlock {
+  CONSTANT static char NAME[] = "VirtAddrResolveBlock";
+
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, cacheCycle);
+    T::apply(ctx, addr, addr.readCycle.get());
+    T::apply(ctx, vinfo, addr.readCycle.get());
+    T::apply(ctx, pte1, addr.readCycle.get());
+    T::apply(ctx, pte2, addr.readCycle.get());
+  }
+
+  Reg<C> cacheCycle;
+  VirtAddrBlock<C> addr;
+  PhysMemReadBlock<C> vinfo;
+  PhysMemReadBlock<C> pte1;
+  PhysMemReadBlock<C> pte2;
+
+  FDEV void set(CTX, VirtAddrResolveBlock wit) DEV;
+  FDEV inline void finalize(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
+  FDEV void addArguments(CTX) DEV;
+};
+
+template <typename C> using RegMemReadBlock = PhysMemReadBlock<C>;
+
+template <typename C> using RegMemWriteBlock = PhysMemWriteBlock<C>;

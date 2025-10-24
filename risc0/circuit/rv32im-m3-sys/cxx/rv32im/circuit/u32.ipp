@@ -8,7 +8,7 @@
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// WITHOUT WARRANTIES OR condITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
@@ -54,11 +54,16 @@ template <typename C> FDEV void AddressDecompose<C>::verify(CTX, ValU32<C> val) 
 }
 
 template <typename C> FDEV void AddressVerify<C>::set(CTX, uint32_t val, uint32_t mode) DEV {
-  highSub.set(ctx, (mode ? 0xffff : 0xbfff) - (val >> 16));
+  isMM.set(ctx, mode == MODE_MACHINE);
+  uint32_t max = (mode == MODE_MACHINE ? 0xffff : (GLOBAL_GET(v2Compat) != 0 ? 0xbfff : 0xefff));
+  highSub.set(ctx, max - (val >> 16));
 }
 
 template <typename C> FDEV void AddressVerify<C>::verify(CTX, ValU32<C> val, Val<C> mode) DEV {
-  EQ(Val<C>(0xbfff) + mode * Val<C>(0x4000) - val.high, highSub.get());
+  Val<C> topAddr =
+      cond<C>(isMM.get(), 0xffff, cond<C>(GLOBAL_GET(v2Compat), Val<C>(0xbfff), Val<C>(0xefff)));
+  EQZ(isMM.get() * (mode - Val<C>(MODE_MACHINE)));
+  EQ(topAddr - val.high, highSub.get());
 }
 
 template <typename C> FDEV void GetSign<C>::set(CTX, uint32_t val) DEV {

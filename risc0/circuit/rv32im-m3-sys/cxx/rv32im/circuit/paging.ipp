@@ -42,12 +42,12 @@ template <typename C> FDEV void PageInNodeBlock<C>::addArguments(CTX) DEV {
 }
 
 template <typename C> FDEV void PageInPartBlock<C>::set(CTX, PageInPartWitness wit) DEV {
-  uint32_t part = (wit.addr / PAGE_PART_SIZE) % NUM_PARTS;
+  uint32_t part = (wit.addr / MPAGE_PART_SIZE) % NUM_PARTS;
   addr.set(ctx, wit.addr);
   partNum.set(ctx, part);
   SET_ARR(in, wit.in, CELLS_DIGEST);
   SET_ARR(out, wit.out, CELLS_DIGEST);
-  for (size_t i = 0; i < PAGE_PART_SIZE; i++) {
+  for (size_t i = 0; i < MPAGE_PART_SIZE; i++) {
     data[i].set(ctx, wit.data[i]);
   }
   lastPart.set(ctx, NUM_PARTS - 1 - part);
@@ -55,7 +55,7 @@ template <typename C> FDEV void PageInPartBlock<C>::set(CTX, PageInPartWitness w
 
 template <typename C> FDEV void PageInPartBlock<C>::addArguments(CTX) DEV {
   Val<C> addrVal = addr.get();
-  for (size_t i = 0; i < PAGE_PART_SIZE; i++) {
+  for (size_t i = 0; i < MPAGE_PART_SIZE; i++) {
     ctx.push(MemoryArgument<C>(addrVal + i, 0, data[i].low.get(), data[i].high.get()));
   }
   PageInPartArgument<C> pip;
@@ -63,7 +63,7 @@ template <typename C> FDEV void PageInPartBlock<C>::addArguments(CTX) DEV {
   pip.partNum = partNum.get();
   GET_ARR(pip.node, in, CELLS_DIGEST);
   ctx.pull(pip);
-  pip.addr = addrVal + PAGE_PART_SIZE;
+  pip.addr = addrVal + MPAGE_PART_SIZE;
   pip.partNum = partNum.get() + 1;
   GET_ARR(pip.node, out, CELLS_DIGEST);
   ctx.push(pip);
@@ -85,14 +85,14 @@ template <typename C> FDEV void PageInPageBlock<C>::set(CTX, PageInPageWitness w
 
 template <typename C> FDEV void PageInPageBlock<C>::addArguments(CTX) DEV {
   PageInArgument<C> pi;
-  pi.index = addr.get() * inv(Fp(uint32_t(PAGE_SIZE_WORDS))) + MEMORY_SIZE_PAGES;
+  pi.index = addr.get() * inv(Fp(uint32_t(MPAGE_SIZE_WORDS))) + MEMORY_SIZE_MPAGES;
   GET_ARR(pi.node, node, CELLS_DIGEST);
   ctx.pull(pi);
   PageInPartArgument<C> pip;
   pip.addr = addr.get();
   pip.partNum = 0;
   ctx.push(pip);
-  pip.addr = addr.get() + PAGE_SIZE_WORDS;
+  pip.addr = addr.get() + MPAGE_SIZE_WORDS;
   pip.partNum = NUM_PARTS;
   GET_ARR(pip.node, node, CELLS_DIGEST);
   ctx.pull(pip);
@@ -128,12 +128,12 @@ template <typename C> FDEV void PageOutNodeBlock<C>::addArguments(CTX) DEV {
 }
 
 template <typename C> FDEV void PageOutPartBlock<C>::set(CTX, PageOutPartWitness wit) DEV {
-  uint32_t part = (wit.addr / PAGE_PART_SIZE) % NUM_PARTS;
+  uint32_t part = (wit.addr / MPAGE_PART_SIZE) % NUM_PARTS;
   addr.set(ctx, wit.addr);
   partNum.set(ctx, part);
   SET_ARR(in, wit.in, CELLS_DIGEST);
   SET_ARR(out, wit.out, CELLS_DIGEST);
-  for (size_t i = 0; i < PAGE_PART_SIZE; i++) {
+  for (size_t i = 0; i < MPAGE_PART_SIZE; i++) {
     data[i].set(ctx, wit.data[i]);
     cycle[i].set(ctx, wit.cycle[i]);
   }
@@ -142,7 +142,7 @@ template <typename C> FDEV void PageOutPartBlock<C>::set(CTX, PageOutPartWitness
 
 template <typename C> FDEV void PageOutPartBlock<C>::addArguments(CTX) DEV {
   Val<C> addrVal = addr.get();
-  for (size_t i = 0; i < PAGE_PART_SIZE; i++) {
+  for (size_t i = 0; i < MPAGE_PART_SIZE; i++) {
     ctx.pull(MemoryArgument<C>(addrVal + i, cycle[i].get(), data[i].low.get(), data[i].high.get()));
   }
   PageOutPartArgument<C> pop;
@@ -150,7 +150,7 @@ template <typename C> FDEV void PageOutPartBlock<C>::addArguments(CTX) DEV {
   pop.partNum = partNum.get();
   GET_ARR(pop.node, in, CELLS_DIGEST);
   ctx.pull(pop);
-  pop.addr = addrVal + PAGE_PART_SIZE;
+  pop.addr = addrVal + MPAGE_PART_SIZE;
   pop.partNum = partNum.get() + 1;
   GET_ARR(pop.node, out, CELLS_DIGEST);
   ctx.push(pop);
@@ -172,14 +172,14 @@ template <typename C> FDEV void PageOutPageBlock<C>::set(CTX, PageOutPageWitness
 
 template <typename C> FDEV void PageOutPageBlock<C>::addArguments(CTX) DEV {
   PageOutArgument<C> po;
-  po.index = addr.get() * inv(Fp(uint32_t(PAGE_SIZE_WORDS))) + MEMORY_SIZE_PAGES;
+  po.index = addr.get() * inv(Fp(uint32_t(MPAGE_SIZE_WORDS))) + MEMORY_SIZE_MPAGES;
   GET_ARR(po.node, node, CELLS_DIGEST);
   ctx.push(po);
   PageOutPartArgument<C> pop;
   pop.addr = addr.get();
   pop.partNum = 0;
   ctx.push(pop);
-  pop.addr = addr.get() + PAGE_SIZE_WORDS;
+  pop.addr = addr.get() + MPAGE_SIZE_WORDS;
   pop.partNum = NUM_PARTS;
   GET_ARR(pop.node, node, CELLS_DIGEST);
   ctx.pull(pop);

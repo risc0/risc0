@@ -12,12 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define GLOBAL_OFFSET(member)                                                                      \
-  (reinterpret_cast<MDEV Fp*>(&reinterpret_cast<MDEV Globals*>(0x10000)->member) -                 \
-   reinterpret_cast<MDEV Fp*>(0x10000))
-#define GLOBAL_GET(member) ctx.globalGet(GLOBAL_OFFSET(member))
-#define GLOBAL_SET(member, val) ctx.globalSet(GLOBAL_OFFSET(member), (val))
-
 #define GLOBAL_SET_U32(member, val)                                                                \
   GLOBAL_SET(member.low, val.low);                                                                 \
   GLOBAL_SET(member.high, val.high)
@@ -43,7 +37,7 @@
 
 template <typename C> FDEV void EcallTerminateBlock<C>::set(CTX, EcallTerminateWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   readA7.set(ctx, wit.a7, wit.cycle);
   readA0.set(ctx, wit.a0, wit.cycle);
   readA1.set(ctx, wit.a1, wit.cycle);
@@ -74,7 +68,7 @@ template <typename C> FDEV void EcallTerminateBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void EcallTerminateBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, 0, 0, 0, 0));
   VERIFY_DECODE
 }
@@ -82,7 +76,7 @@ template <typename C> FDEV void EcallTerminateBlock<C>::addArguments(CTX) DEV {
 template <typename C> FDEV void EcallReadBlock<C>::set(CTX, EcallReadWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   finalCycle.set(ctx, wit.finalCycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   readA7.set(ctx, wit.a7, wit.cycle);
   readA1.set(ctx, wit.a1, wit.cycle);
   readA2.set(ctx, wit.a2, wit.cycle);
@@ -115,16 +109,17 @@ template <typename C> FDEV void EcallReadBlock<C>::addArguments(CTX) DEV {
   Val<C> finalCycleVal = finalCycle.get();
   Val<C> addrWord = decomp.wordAddr(readA1.data.get());
   Val<C> lowBits = decomp.low0.get() + decomp.low1.get() * 2;
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   ctx.push(ReadStateArgument<C>(cycleVal + 1, addrWord, lowBits, writeA0.data.low.get()));
   ctx.pull(ReadStateArgument<C>(finalCycleVal, finalAddrWord.get(), finalAddrBits.get(), 0));
-  ctx.push(CpuStateArgument<C>(finalCycleVal + 1, fetch.nextPc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.push(CpuStateArgument<C>(
+      finalCycleVal + 1, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   VERIFY_DECODE
 }
 
 template <typename C> FDEV void EcallWriteBlock<C>::set(CTX, EcallWriteWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   readA7.set(ctx, wit.a7, wit.cycle);
   readA2.set(ctx, wit.a2, wit.cycle);
   writeA0.set(ctx, wit.a0, wit.cycle);
@@ -148,21 +143,22 @@ template <typename C> FDEV void EcallWriteBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void EcallWriteBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), 1, fetch.iCacheCycle.get()));
-  ctx.push(CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  ctx.push(
+      CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   VERIFY_DECODE
 }
 
 template <typename C> FDEV void EcallBigIntBlock<C>::set(CTX, EcallBigIntWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
-  fetch.set(ctx, wit.fetch);
+  fetch.set(ctx, wit.fetch, wit.cycle);
   readA7.set(ctx, wit.a7, wit.cycle);
   readT0.set(ctx, wit.t0, wit.cycle);
   readT2.set(ctx, wit.t2, wit.cycle);
   cycleCount.set(ctx, wit.count);
   mm.set(ctx, wit.t0.value);
   pcDecomp.set(ctx, wit.t2.value);
-  pcVerify.set(ctx, wit.t2.value, wit.t0.value);
+  pcVerify.set(ctx, wit.t2.value, wit.t0.value * MODE_MACHINE);
 }
 
 template <typename C> FDEV void EcallBigIntBlock<C>::verify(CTX) DEV {
@@ -184,10 +180,10 @@ template <typename C> FDEV void EcallBigIntBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
   Val<C> countVal = cycleCount.get();
   Val<C> biPc = pcDecomp.wordAddr(readT2.data.get());
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   ctx.push(BigIntCpuStateArgument<C>(cycleVal + 1, biPc, mm.get()));
   ctx.pull(BigIntCpuStateArgument<C>(cycleVal + countVal + 1, biPc + countVal, mm.get()));
-  ctx.push(
-      CpuStateArgument<C>(cycleVal + countVal + 2, fetch.nextPc.get(), 1, fetch.iCacheCycle.get()));
+  ctx.push(CpuStateArgument<C>(
+      cycleVal + countVal + 2, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   VERIFY_DECODE
 }

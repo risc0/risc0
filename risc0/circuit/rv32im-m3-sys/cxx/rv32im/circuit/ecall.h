@@ -21,17 +21,16 @@
 template <typename C> struct EcallTerminateBlock {
   CONSTANT static char NAME[] = "EcallTerminate";
 
-  // TODO: pass A0/A1 on?  Clear suspend data?
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readA7;
-  MemReadBlock<C> readA0;
-  MemReadBlock<C> readA1;
-  MemReadBlock<C> readOutput[8];
+  RegMemReadBlock<C> readA7;
+  RegMemReadBlock<C> readA0;
+  RegMemReadBlock<C> readA1;
+  PhysMemReadBlock<C> readOutput[8];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readA7, cycle.get());
     T::apply(ctx, readA0, cycle.get());
     T::apply(ctx, readA1, cycle.get());
@@ -50,10 +49,10 @@ template <typename C> struct EcallReadBlock {
   Reg<C> cycle;
   Reg<C> finalCycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readA7;
-  MemReadBlock<C> readA1;
-  MemReadBlock<C> readA2;
-  MemWriteBlock<C> writeA0;
+  RegMemReadBlock<C> readA7;
+  RegMemReadBlock<C> readA1;
+  RegMemReadBlock<C> readA2;
+  RegMemWriteBlock<C> writeA0;
   AddressDecompose<C> decomp;
   RegU16<C> verifyRet;
   Reg<C> finalAddrWord;
@@ -62,7 +61,7 @@ template <typename C> struct EcallReadBlock {
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, finalCycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readA7, cycle.get());
     T::apply(ctx, readA1, cycle.get());
     T::apply(ctx, readA2, cycle.get());
@@ -84,14 +83,14 @@ template <typename C> struct EcallWriteBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readA7;
-  MemReadBlock<C> readA2;
-  MemWriteBlock<C> writeA0;
+  RegMemReadBlock<C> readA7;
+  RegMemReadBlock<C> readA2;
+  RegMemWriteBlock<C> writeA0;
   RegU16<C> verifyRet;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readA7, cycle.get());
     T::apply(ctx, readA2, cycle.get());
     T::apply(ctx, writeA0, cycle.get());
@@ -109,9 +108,9 @@ template <typename C> struct EcallBigIntBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  MemReadBlock<C> readA7;
-  MemReadBlock<C> readT0;
-  MemReadBlock<C> readT2;
+  RegMemReadBlock<C> readA7;
+  RegMemReadBlock<C> readT0;
+  RegMemReadBlock<C> readT2;
   Reg<C> cycleCount;
   BitReg<C> mm;
   AddressDecompose<C> pcDecomp;
@@ -119,13 +118,13 @@ template <typename C> struct EcallBigIntBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
-    T::apply(ctx, fetch);
+    T::apply(ctx, fetch, cycle.get());
     T::apply(ctx, readA7, cycle.get());
     T::apply(ctx, readT0, cycle.get());
     T::apply(ctx, readT2, cycle.get());
     T::apply(ctx, cycleCount);
     T::apply(ctx, pcDecomp, readT2.data.get());
-    T::apply(ctx, pcVerify, readT2.data.get(), mm.get());
+    T::apply(ctx, pcVerify, readT2.data.get(), mm.get() * Val<C>(MODE_MACHINE));
   }
 
   FDEV void set(CTX, EcallBigIntWitness wit) DEV;

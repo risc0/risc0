@@ -40,19 +40,19 @@ struct EmptyWitness {
   BLOCK_TYPE(InstImm, 5)                                                                           \
   BLOCK_TYPE(InstLoad, 3)                                                                          \
   BLOCK_TYPE(InstStore, 3)                                                                         \
-  BLOCK_TYPE(InstBranch, 5)                                                                        \
+  BLOCK_TYPE(InstBranch, 4)                                                                        \
   BLOCK_TYPE(InstJal, 7)                                                                           \
   BLOCK_TYPE(InstJalr, 6)                                                                          \
   BLOCK_TYPE(InstLui, 9)                                                                           \
   BLOCK_TYPE(InstAuipc, 7)                                                                         \
-  BLOCK_TYPE(InstEcall, 7)                                                                         \
-  BLOCK_TYPE(InstMret, 4)                                                                          \
+  BLOCK_TYPE(InstEcall, 1)                                                                         \
+  BLOCK_TYPE(InstMret, 1)                                                                          \
   BLOCK_TYPE(EcallTerminate, 1)                                                                    \
-  BLOCK_TYPE(EcallRead, 3)                                                                         \
-  BLOCK_TYPE(EcallWrite, 5)                                                                        \
-  BLOCK_TYPE(EcallBigInt, 4)                                                                       \
-  BLOCK_TYPE(ReadByte, 6)                                                                          \
-  BLOCK_TYPE(ReadWord, 10)                                                                         \
+  BLOCK_TYPE(EcallRead, 1)                                                                         \
+  BLOCK_TYPE(EcallWrite, 1)                                                                        \
+  BLOCK_TYPE(EcallBigInt, 1)                                                                       \
+  BLOCK_TYPE(ReadByte, 1)                                                                          \
+  BLOCK_TYPE(ReadWord, 4)                                                                          \
   BLOCK_TYPE(BigInt, 1)                                                                            \
   BLOCK_TYPE(UnitAddSub, 16)                                                                       \
   BLOCK_TYPE(UnitBit, 2)                                                                           \
@@ -63,13 +63,13 @@ struct EmptyWitness {
   BLOCK_TYPE(P2ExtRound, 2)                                                                        \
   BLOCK_TYPE(P2IntRounds, 2)                                                                       \
   BLOCK_TYPE(P2Block, 3)                                                                           \
-  BLOCK_TYPE(PageInNode, 7)                                                                        \
+  BLOCK_TYPE(PageInNode, 1)                                                                        \
   BLOCK_TYPE(PageInPart, 4)                                                                        \
-  BLOCK_TYPE(PageInPage, 18)                                                                       \
-  BLOCK_TYPE(PageOutNode, 7)                                                                       \
+  BLOCK_TYPE(PageInPage, 1)                                                                        \
+  BLOCK_TYPE(PageOutNode, 1)                                                                       \
   BLOCK_TYPE(PageOutPart, 4)                                                                       \
-  BLOCK_TYPE(PageOutPage, 18)                                                                      \
-  BLOCK_TYPE(PageUncle, 18)                                                                        \
+  BLOCK_TYPE(PageOutPage, 1)                                                                       \
+  BLOCK_TYPE(PageUncle, 1)                                                                         \
   BLOCK_TYPE(MakeTable, 3)
 
 CONSTANT size_t NUM_BLOCK_TYPES = 1
@@ -101,6 +101,7 @@ struct Globals {
   OutU32 termA0;
   OutU32 termA1;
   OutU32 out[8];
+  Fp v2Compat;
 };
 
 CONSTANT size_t NUM_GLOBALS = sizeof(Globals) / sizeof(Fp);
