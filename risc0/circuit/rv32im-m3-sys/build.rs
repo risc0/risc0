@@ -71,6 +71,7 @@ fn main() {
         .flag("-std=c++17")
         .include("cxx")
         .include("vendor")
+        .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .files(glob_paths("cxx/core/*.cpp"))
         .files(glob_paths("cxx/hal/cpu/*.cpp"))
         .files(glob_paths("cxx/prove/*.cpp"))
