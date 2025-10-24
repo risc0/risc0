@@ -81,10 +81,6 @@ struct RecordingContext {
   mlir::ModuleOp moduleOp;
   mlir::OpBuilder builder;
 
-  // Metadata used by a visitor can be stored in this member, for example a
-  // `LayoutBuilderVisitor` can store a `LayoutBuilder` here which will be
-  // accessible in its `apply` methods.
-  void* visitorData;
 
 private:
   void unifyRefsIntoLayout(mlir::Value layout, size_t& i);

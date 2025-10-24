@@ -15,8 +15,42 @@
 
 #pragma once
 
-#include "compiler/extractor/RecordingContext.h"
 #include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
+#include "zkp/fp.h"
+
+namespace layoutbuilder {
+
+class LayoutBuilder;
+struct NopVal {
+  NopVal() {}
+  NopVal(uint32_t) {}
+  NopVal(risc0::Fp) {}
+
+  NopVal operator+(const NopVal& rhs) const { return NopVal {}; }
+  NopVal operator+=(const NopVal& rhs) { return NopVal {}; }
+  NopVal operator-(const NopVal& rhs) const { return NopVal {}; }
+  NopVal operator-=(const NopVal& rhs) { return NopVal {}; }
+  NopVal operator-() const { return NopVal {}; }
+  NopVal operator*(const NopVal& rhs) const { return NopVal {}; }
+  NopVal operator*=(const NopVal& rhs) { return NopVal {}; }
+  operator risc0::Fp() const { return risc0::Fp(); }
+};
+
+struct NopReg {
+  NopVal get() { return NopVal {}; }
+};
+
+struct Context {
+  using ValImpl = NopVal;
+  using ValExtImpl = NopVal;
+  using RegImpl = NopReg;
+  using ArgCountRegImpl = NopReg;
+
+  Context(mlir::MLIRContext* mlirCtx, LayoutBuilder* builder) : mlirCtx(mlirCtx), builder(builder) {}
+
+  mlir::MLIRContext* mlirCtx;
+  LayoutBuilder* builder;
+};
 
 /// A helper class for collecting the members of a `LayoutType`
 class LayoutBuilder {
@@ -35,51 +69,54 @@ public:
 
 /// A visitor class for building ZStruct layouts for components.
 /// See also: `getLayoutType`
-class LayoutBuilderVisitor {
+class Visitor {
 public:
   template <typename T, typename... Args>
-  static void apply(RecordingContext& ctx, const char* memberName, T& t, Args... args) {
-    auto builder = static_cast<LayoutBuilder*>(ctx.visitorData);
+  static void apply(Context& ctx, const char* memberName, T& t, Args... args) {
+    LayoutBuilder* builder = ctx.builder;
     LayoutBuilder subBuilder(T::NAME);
-    ctx.visitorData = &subBuilder;
-    t.template applyInner<LayoutBuilderVisitor>(ctx, args...);
-    builder->addMember(ctx.builder.getStringAttr(memberName),
+    ctx.builder = &subBuilder;
+    t.template applyInner<Visitor>(ctx, args...);
+    builder->addMember(mlir::StringAttr::get(ctx.mlirCtx, memberName),
                        subBuilder.getType(ctx.mlirCtx));
-    ctx.visitorData = builder;
+    ctx.builder = builder;
   }
 
-  template <typename T, size_t N, typename... Args> static void apply(RecordingContext& ctx, const char* memberName, T (&t)[N], Args... args) {
-    auto builder = static_cast<LayoutBuilder*>(ctx.visitorData);
+  template <typename T, size_t N, typename... Args> static void apply(Context& ctx, const char* memberName, T (&t)[N], Args... args) {
+    LayoutBuilder* builder = ctx.builder;
 
     // Get the layout type of an element. Note that we still need to visit every
     // element to ensure there are the right number of refs in the context.
     LayoutBuilder container("$tmp");
-    ctx.visitorData = &container;
+    ctx.builder = &container;
     for (size_t i = 0; i < N; i++) {
-      LayoutBuilderVisitor::apply(ctx, t[i], args...);
+      Visitor::apply(ctx, t[i], args...);
     }
     mlir::Type elementType = container.members.front().type;
-    ctx.visitorData = builder;
+    ctx.builder = builder;
 
-    builder->addMember(ctx.builder.getStringAttr(memberName),
+    builder->addMember(mlir::StringAttr::get(ctx.mlirCtx, memberName),
                        zirgen::ZStruct::LayoutArrayType::get(ctx.mlirCtx, elementType, N));
   }
 
-  static void apply(RecordingContext& ctx, const char* memberName, RecordingReg&) {
+  static void apply(Context& ctx, const char* memberName, NopReg&) {
     mlir::Type ref = zirgen::Zhlt::getRefType(ctx.mlirCtx);
-    auto builder = static_cast<LayoutBuilder*>(ctx.visitorData);
-    builder->addMember(ctx.builder.getStringAttr(memberName), ref);
+    ctx.builder->addMember(mlir::StringAttr::get(ctx.mlirCtx, memberName), ref);
   }
 
-  static void apply(RecordingContext& ctx, const char* memberName, RecordingVal&) {
+  static void apply(Context& ctx, const char* memberName, NopVal&) {
     // Vals have no layout, so do nothing and stop recursion
   }
 };
 
-template <typename T, typename... Args>
-mlir::Type getLayoutType(RecordingContext& ctx, T& t, Args... args) {
-  LayoutBuilder layoutBuilder(T::NAME);
-  ctx.visitorData = &layoutBuilder;
-  t.template applyInner<LayoutBuilderVisitor>(ctx, args...);
-  return layoutBuilder.getType(ctx.mlirCtx);
+} // end namespace layoutbuilder
+
+template <template <typename Ctx> typename Component, typename... Args>
+mlir::Type getLayoutType(mlir::MLIRContext* mlirCtx) {
+  using namespace layoutbuilder;
+  LayoutBuilder layoutBuilder(Component<Context>::NAME);
+  Context ctx(mlirCtx, &layoutBuilder);
+  Component<Context> component;
+  component.template applyInner<Visitor>(ctx, Args{}...);
+  return layoutBuilder.getType(mlirCtx);
 }
