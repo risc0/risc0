@@ -181,8 +181,11 @@ impl MemoryImage {
         self.pages.keys().copied().collect()
     }
 
-    /// Sorted iterator over page digests (page_idx -> Digest)
+    /// Sorted iterator over page digests (digest_idx -> Digest)
     pub fn digests(&self) -> impl Iterator<Item = (&'_ u32, &'_ Digest)> + '_ {
+        if !self.dirty.is_empty() {
+            panic!("attempted to get digests on a dirty memory image")
+        }
         self.digests.iter()
     }
 
@@ -234,6 +237,9 @@ impl MemoryImage {
     pub fn get_digest(&mut self, digest_idx: u32) -> Result<&Digest> {
         // Expand if needed
         self.expand_if_zero(digest_idx);
+        if self.dirty.contains(&digest_idx) {
+            bail!("digest marked as dirty: {digest_idx}");
+        }
         self.digests
             .get(&digest_idx)
             .ok_or_else(|| anyhow!("Unavailable digest: {digest_idx}"))
@@ -293,7 +299,8 @@ impl MemoryImage {
 
     /// Expand zero Merkle tree node.
     ///
-    /// Presumes `is_zero(digest_idx)` returned true.
+    /// Presumes `is_zero(digest_idx)` returned true. Populates the digests BTreeMap at the given
+    /// digest_idx, its sibling and all empty parents and uncles with zero-subtree digests.
     fn expand_zero(&mut self, mut digest_idx: u32) {
         // Compute the depth in the tree of this node
         let mut depth = digest_idx.ilog2() as usize;
@@ -318,10 +325,13 @@ impl MemoryImage {
             let lhs = self.digests.get(&lhs_idx);
             let rhs = self.digests.get(&rhs_idx);
             if let (Some(_), Some(_)) = (lhs, rhs) {
-                self.dirty.insert(parent_idx);
+                if !self.dirty.insert(parent_idx) {
+                    // Node already marked dirty. All parents will also be marked dirty already.
+                    break;
+                }
                 digest_idx = parent_idx;
             } else {
-                break;
+                unreachable!("corrupted MemoryImage");
             };
         }
     }
