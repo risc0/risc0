@@ -215,6 +215,7 @@ impl KernelBuild {
             .flag("-diag-suppress=2922")
             .flag("-Xcudafe")
             .flag("--display_error_number")
+            .flag("-lineinfo")
             .flag("-Xcompiler")
             .flag(warnings)
             .compile(output);

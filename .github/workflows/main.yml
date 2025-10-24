@@ -114,11 +114,12 @@ jobs:
       - check-semver
       - check-template
       - clippy
+      - compute-sanitizer
       - doc
+      - docker
       - docs-rs
       - examples
       - extra
-      - docker
       # - test-crates
       - test
       - web
@@ -355,6 +356,55 @@ jobs:
       - run: cargo check -p risc0-zkp -F $FEATURE
       - run: cargo check -p risc0-zkvm -F $FEATURE
       - run: cargo check -p bonsai-sdk --all-features
+      - run: sccache --show-stats
+
+  compute-sanitizer:
+    if: needs.changes.outputs.test == 'true'
+    needs: changes
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            arch: X64
+            device: nvidia_rtx_4000_ada
+            nvcc_arch: sm_89
+    env:
+      FEATURE: cuda
+      NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
+      RISC0_DEFAULT_PROVER_NUM_GPUS: 1
+      RISC0_BUILD_LOCKED: 1
+      RUST_BACKTRACE: full
+      # SCCACHE_RECACHE: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cuda
+      - run: nvidia-smi
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install risc0-groth16 $RISC0_GROTH16_VERSION
+      - run: cargo build --package risc0-r0vm -F cuda
+      - run: cargo build --package risc0-zkvm-methods
+      - name: compute-sanitizer memcheck
+        run: |
+          /usr/local/cuda/bin/compute-sanitizer \
+              --tool memcheck \
+              target/debug/r0vm \
+              --elf target/riscv-guest/risc0-zkvm-methods/risc0-zkvm-methods-guest/riscv32im-risc0-zkvm-elf/release/hello_commit.bin \
+              --receipt-kind groth16
+        shell: bash
+      - name: compute-sanitizer racecheck
+        run: |
+          /usr/local/cuda/bin/compute-sanitizer \
+              --tool racecheck \
+              target/debug/r0vm \
+              --elf target/riscv-guest/risc0-zkvm-methods/risc0-zkvm-methods-guest/riscv32im-risc0-zkvm-elf/release/hello_commit.bin \
+              --receipt-kind groth16
+        shell: bash
       - run: sccache --show-stats
 
   examples:

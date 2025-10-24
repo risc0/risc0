@@ -190,217 +190,104 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
         fr_t carry_over;
         bool tail_sync = false;
 
-        if (sizeof(fr_t) <= 32) {
-            my::madd_up(coeff[N-1], z_pow = z_n);
+        assert(sizeof(fr_t) <= 32);
 
-            if (laneid == WARP_SZ-1)
-                xchg[warpid] = coeff[N-1];
+        my::madd_up(coeff[N-1], z_pow = z_n);
 
+        __syncthreads();
+
+        if (laneid == WARP_SZ-1)
+            xchg[warpid] = coeff[N-1];
+
+        __syncthreads();
+
+        carry_over = xchg[laneid];
+
+        __syncthreads();
+
+        my::madd_up(carry_over, z_pow, nwarps);
+
+        if (warpid != 0) {
+            carry_over = shfl_idx(carry_over, warpid - 1);
+            carry_over *= z_pow_warp;
+            coeff[N-1] += carry_over;
+        }
+
+        carry_over.zero();
+
+        size_t remaining = len - chunk;
+
+        if (gridDim.x > 1 && remaining > N*blockDim.x) {
+            tail_sync = remaining <= 2*stride - N*blockDim.x;
+            uint32_t bias = tail_sync ? 0 : stride;
+            size_t grid_idx = chunk + (blockIdx.x*N*blockDim.x + bias
+                                    + N*(rotate && blockIdx.x == 0));
+            if (threadIdx.x == blockDim.x-1 && grid_idx < len)
+                inout[grid_idx] = coeff[N-1];
+
+            __grid.sync();
             __syncthreads();
 
-            carry_over = xchg[laneid];
+            if (blockIdx.x != 0) {
+                grid_idx = chunk + (threadIdx.x*N*blockDim.x + bias
+                                 + N*(rotate && threadIdx.x == 0));
+                if (threadIdx.x < gridDim.x && grid_idx < len)
+                    carry_over = inout[grid_idx];
 
-            my::madd_up(carry_over, z_pow, nwarps);
+                my::madd_up(carry_over, z_pow = z_top_block,
+                            min(WARP_SZ, gridDim.x));
 
-            if (warpid != 0) {
-                carry_over = shfl_idx(carry_over, warpid - 1);
-                carry_over *= z_pow_warp;
-                coeff[N-1] += carry_over;
-            }
-
-            carry_over.zero();
-
-            size_t remaining = len - chunk;
-
-            if (gridDim.x > 1 && remaining > N*blockDim.x) {
-                tail_sync = remaining <= 2*stride - N*blockDim.x;
-                uint32_t bias = tail_sync ? 0 : stride;
-                size_t grid_idx = chunk + (blockIdx.x*N*blockDim.x + bias
-                                        + N*(rotate && blockIdx.x == 0));
-                if (threadIdx.x == blockDim.x-1 && grid_idx < len)
-                    inout[grid_idx] = coeff[N-1];
-
-                __grid.sync();
-                __syncthreads();
-
-                if (blockIdx.x != 0) {
-                    grid_idx = chunk + (threadIdx.x*N*blockDim.x + bias
-                                     + N*(rotate && threadIdx.x == 0));
-                    if (threadIdx.x < gridDim.x && grid_idx < len)
-                        carry_over = inout[grid_idx];
-
-                    my::madd_up(carry_over, z_pow = z_top_block,
-                                min(WARP_SZ, gridDim.x));
-
-                    if (gridDim.x > WARP_SZ) {
-                        if (laneid == WARP_SZ-1)
-                            xchg[warpid] = carry_over;
-
-                        __syncthreads();
-
-                        fr_t temp = xchg[laneid];
-
-                        my::madd_up(temp, z_pow,
-                                    (gridDim.x + WARP_SZ - 1)/WARP_SZ);
-
-                        if (warpid != 0) {
-                            temp = shfl_idx(temp, warpid - 1);
-                            temp *= (z_pow = z_pow_carry[laneid]);
-                            carry_over += temp;
-                        }
-                    }
-
-                    if (threadIdx.x < gridDim.x)
-                        xchg[threadIdx.x] = carry_over;
-
+                if (gridDim.x > WARP_SZ) {
                     __syncthreads();
-
-                    carry_over = xchg[blockIdx.x-1];
-                    coeff[N-1] += carry_over * z_pow_block;
-                }
-            }
-
-            if (chunk != 0) {
-                fr_t carry = inout[chunk - !rotate];
-                coeff[N-1] += carry * z_pow_grid;
-
-                if (N > 1) {
-                    if (blockIdx.x == 0)
-                        carry_over = carry;
-                    else
-                        carry_over += carry * (z_pow = z_top_carry);
-                }
-            }
-        } else {    // ~14KB loop size with 256-bit field, yet unused...
-            fr_t z_pow_adjust, offload, acc = coeff[N-1];
-
-            z_pow = z_n;
-            uint32_t limit = WARP_SZ;
-            uint32_t adjust = 0;
-            int pc = -1;
-
-            do {
-                my::madd_up(acc, z_pow, limit);
-
-                if (adjust != 0) {
-                    acc = shfl_idx(acc, adjust - 1);
-                tail_mul:
-                    coeff[N-1] += acc * z_pow_adjust;
-                }
-
-                switch (++pc) {
-                case 0:
-                    coeff[N-1] = acc;
 
                     if (laneid == WARP_SZ-1)
-                        xchg[warpid] = acc;
+                        xchg[warpid] = carry_over;
 
                     __syncthreads();
 
-                    acc = xchg[laneid];
-
-                    limit = nwarps;
-                    adjust = warpid;
-                    z_pow_adjust = z_pow_warp;
-                    if (N > 1)
-                        carry_over.zero();
-                    break;
-                case 1:
-                    if (gridDim.x > 1 && len - chunk > N*blockDim.x) {
-                        tail_sync = len - chunk <= 2*stride - N*blockDim.x;
-                        uint32_t bias = tail_sync ? 0 : stride;
-                        size_t xchg_idx = chunk + (blockIdx.x*N*blockDim.x + bias
-                                                + N*(rotate && blockIdx.x == 0));
-                        if (threadIdx.x == blockDim.x-1 && xchg_idx < len)
-                            inout[xchg_idx] = coeff[N-1];
-
-                        __grid.sync();
-                        __syncthreads();
-
-                        if (blockIdx.x != 0) {
-                            xchg_idx = chunk + (threadIdx.x*N*blockDim.x + bias
-                                             + N*(rotate && threadIdx.x == 0));
-                            if (threadIdx.x < gridDim.x && xchg_idx < len)
-                                acc = inout[xchg_idx];
-
-                            z_pow = z_top_block;
-                            limit = min(WARP_SZ, gridDim.x);
-                            adjust = 0;
-                        } else {
-                            goto final;
-                        }
-                    } else {
-                        goto final;
-                    }
-                    break;
-                case 2: // blockIdx.x != 0
-                    carry_over = coeff[N-1];
-                    coeff[N-1] = acc;
-
-                    if (gridDim.x > WARP_SZ) {
-                        if (laneid == WARP_SZ-1)
-                            xchg[warpid] = acc;
-
-                        __syncthreads();
-
-                        acc = xchg[laneid];
-
-                        limit = (gridDim.x + WARP_SZ - 1)/WARP_SZ;
-                        adjust = warpid;
-                        z_pow_adjust = z_pow_carry[laneid];
-                        break;
-                    }   // else fall through
-                case 3: // blockIdx.x != 0
-                    if (threadIdx.x < gridDim.x)
-                        xchg[threadIdx.x] = coeff[N-1];
+                    fr_t temp = xchg[laneid];
 
                     __syncthreads();
 
-                    coeff[N-1] = carry_over;
-                    acc = xchg[blockIdx.x-1];
-                    z_pow_adjust = z_pow_block;
-                    if (N > 1)
-                        carry_over = acc;
-                    pc = 3;
-                    goto tail_mul;
-                case 4:
-                final:
-                    if (chunk == 0) {
-                        pc = -1;
-                        break;
-                    }
+                    my::madd_up(temp, z_pow,
+                                (gridDim.x + WARP_SZ - 1)/WARP_SZ);
 
-                    acc = inout[chunk - !rotate];
-                    z_pow_adjust = z_pow_grid;
-                    pc = 4;
-                    goto tail_mul;
-                case 5:
-                    if (N > 1) {
-                        if (blockIdx.x == 0) {
-                            carry_over = acc;
-                        } else {
-                            offload = coeff[N-1];
-                            coeff[N-1] = carry_over;
-                            z_pow_adjust = z_top_carry;
-                            goto tail_mul;
-                        }
+                    if (warpid != 0) {
+                        temp = shfl_idx(temp, warpid - 1);
+                        temp *= (z_pow = z_pow_carry[laneid]);
+                        carry_over += temp;
                     }
-                    pc = -1;
-                    break;
-                case 6:
-                    if (N > 1) {
-                        carry_over = coeff[N-1];
-                        coeff[N-1] = offload;
-                    }
-                    // fall through
-                default:
-                    pc = -1;
-                    break;
                 }
-            } while (pc >= 0);
+
+                __syncthreads();
+
+                if (threadIdx.x < gridDim.x)
+                    xchg[threadIdx.x] = carry_over;
+
+                __syncthreads();
+
+                carry_over = xchg[blockIdx.x-1];
+                coeff[N-1] += carry_over * z_pow_block;
+
+                __syncthreads();
+            }
+        }
+
+        if (chunk != 0) {
+            fr_t carry = inout[chunk - !rotate];
+            coeff[N-1] += carry * z_pow_grid;
+
+            if (N > 1) {
+                if (blockIdx.x == 0)
+                    carry_over = carry;
+                else
+                    carry_over += carry * (z_pow = z_top_carry);
+            }
         }
 
         if (N > 1) {
+            __syncthreads();
+
             if (laneid == WARP_SZ-1)
                 xchg[warpid] = coeff[N-1];
 
@@ -408,8 +295,12 @@ void d_div_by_x_minus_z(fr_t d_inout[], size_t len, fr_t z)
 
             fr_t carry = shfl_up(coeff[N-1], 1);
 
+            __syncthreads();
+
             if (laneid == 0 && warpid != 0)
                 carry_over = xchg[warpid-1];
+
+            __syncthreads();
 
             carry = fr_t::csel(carry_over, carry, laneid == 0);
 
