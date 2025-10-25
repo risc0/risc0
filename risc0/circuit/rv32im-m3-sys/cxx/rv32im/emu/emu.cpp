@@ -550,6 +550,9 @@ struct Emulator {
     case HOST_ECALL_WRITE:
       do_ECALL_WRITE();
       break;
+    case HOST_ECALL_POSEIDON2:
+      do_ECALL_P2();
+      break;
     case HOST_ECALL_BIGINT:
       do_ECALL_BIG_INT();
       break;
@@ -667,6 +670,66 @@ struct Emulator {
       throw std::runtime_error("Invalid host write");
     }
     writeReg(wit.a0, REG_A0, ret);
+  }
+
+  void do_ECALL_P2() {
+    auto& wit = trace.makeEcallP2();
+    wit.cycle = curCycle;
+    wit.fetch = dinst->fetch;
+    readReg(wit.a0, REG_A0);
+    readReg(wit.a1, REG_A1);
+    readReg(wit.a2, REG_A2);
+    readReg(wit.a3, REG_A3);
+    readReg(wit.a7, REG_A7);
+    for (size_t i = 0; i < 8; i++) {
+      writePhysMemory(wit.clearTmp[i], P2_TMP1_WORD + i, 0);
+    }
+    P2State p2;
+    p2.cycle = curCycle + 1;
+    p2.count = wit.a3.value & 0xffff;
+    p2.stateWordAddr = wit.a0.value ? wit.a0.value / 4 : P2_TMP1_WORD;
+    p2.inWordAddr = wit.a1.value / 4;
+    p2.outWordAddr = wit.a2.value / 4;
+    p2.isElem = (wit.a3.value & PFLAG_IS_ELEM) != 0;
+    p2.isCheck = (wit.a3.value & PFLAG_CHECK_OUT) != 0;
+    while (p2.count > 0) {
+      auto& p2Wit = trace.makeP2Step();
+      p2Wit.state = p2;
+      Digest state;
+      std::array<Fp, CELLS_RATE> in;
+      for (size_t i = 0; i < 8; i++) {
+        state.words[i] = peekPhysMemory(p2.stateWordAddr + i);
+        if (p2.isElem) {
+          in[i] = readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i);
+          in[8 + i] = readPhysMemory(p2Wit.dataIn[8 + i], p2.inWordAddr + 8 + i);
+        } else {
+          uint32_t word = readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i);
+          readPhysMemory(p2Wit.dataIn[8 + i], P2_TMP2_WORD + i);
+          in[2*i] = word & 0xffff;
+          in[2*i + 1] = word >> 16;
+        }
+      }
+      Digest out = memory.getP2().doBlock(state, in, true);
+      state = memory.getP2().doBlock(state, in, false);
+      uint32_t outAddr = (p2.isCheck && p2.count != 1) ? P2_TMP2_WORD : p2.outWordAddr;
+      for (size_t i = 0; i < 8; i++) {
+        writePhysMemory(p2Wit.stateIO[i], p2.stateWordAddr + i, state.words[i]);
+        writePhysMemory(p2Wit.dataOut[i], p2.outWordAddr + i, Fp::fromRaw(out.words[i]).asUInt32());
+        if (p2.isCheck && p2.count == 1) {
+          if (p2Wit.dataOut[i].prevValue != p2Wit.dataOut[i].value) {
+            DLOG("Mismatch on check");
+            throw std::runtime_error("BAD");
+          }
+        }
+      }
+      if (p2.isElem) {
+        p2.inWordAddr += 16;
+      } else {
+        p2.inWordAddr += 8;
+      }
+      p2.cycle++;
+      p2.count--;
+    }
   }
 
   void do_ECALL_BIG_INT() {

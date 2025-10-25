@@ -44,6 +44,35 @@ struct EcallWriteWitness {
   RegMemWriteWitness a0;
 };
 
+struct P2State {
+  uint32_t cycle;
+  uint8_t isElem;
+  uint8_t isCheck;
+  uint16_t count;
+  uint32_t inWordAddr;
+  uint32_t outWordAddr;
+  uint32_t stateWordAddr;
+};
+
+struct P2StepWitness {
+  P2State state;
+  PhysMemWriteWitness stateIO[8];
+  PhysMemReadWitness dataIn[16];
+  uint32_t dataInValues[16];
+  PhysMemWriteWitness dataOut[8];
+};
+
+struct EcallP2Witness {
+  uint32_t cycle;
+  FetchWitness fetch;
+  RegMemReadWitness a0;
+  RegMemReadWitness a1;
+  RegMemReadWitness a2;
+  RegMemReadWitness a3;
+  RegMemReadWitness a7;
+  PhysMemWriteWitness clearTmp[8];
+};
+
 struct EcallBigIntWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -52,3 +81,4 @@ struct EcallBigIntWitness {
   RegMemReadWitness t2;
   uint32_t count;
 };
+

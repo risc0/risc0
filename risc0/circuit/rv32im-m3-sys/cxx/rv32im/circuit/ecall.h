@@ -103,6 +103,30 @@ template <typename C> struct EcallWriteBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
+template <typename C> struct P2StepBlock {
+  CONSTANT static char NAME[] = "P2Step";
+
+  template <typename T> FDEV void applyInner(CTX) DEV {
+  }
+
+  FDEV void set(CTX, P2StepWitness wit) DEV {}
+  FDEV inline void finalize(CTX) DEV {}
+  FDEV void verify(CTX) DEV {}
+  FDEV void addArguments(CTX) DEV {}
+};
+
+template <typename C> struct EcallP2Block {
+  CONSTANT static char NAME[] = "EcallP2";
+
+  template <typename T> FDEV void applyInner(CTX) DEV {
+  }
+
+  FDEV void set(CTX, EcallP2Witness wit) DEV {}
+  FDEV inline void finalize(CTX) DEV {}
+  FDEV void verify(CTX) DEV {}
+  FDEV void addArguments(CTX) DEV {}
+};
+
 template <typename C> struct EcallBigIntBlock {
   CONSTANT static char NAME[] = "EcallBigInt";
 
