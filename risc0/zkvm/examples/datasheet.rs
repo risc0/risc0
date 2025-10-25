@@ -25,11 +25,11 @@ use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
 use risc0_circuit_rv32im::{
-    MAX_INSN_CYCLES,
+    MAX_CYCLES_PO2, MAX_INSN_CYCLES,
     execute::{DEFAULT_SEGMENT_LIMIT_PO2, RESERVED_CYCLES},
 };
 use risc0_zkos_v1compat::V1COMPAT_ELF;
-use risc0_zkp::{MAX_CYCLES_PO2, hal::tracker};
+use risc0_zkp::hal::tracker;
 use risc0_zkvm::{
     ExecutorEnv, ExecutorImpl, ProverOpts, RECURSION_PO2, ReceiptKind, Segment, Session,
     SimpleSegmentRef, VerifierContext, get_prover_server,
