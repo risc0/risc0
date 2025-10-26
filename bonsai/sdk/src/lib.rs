@@ -1338,7 +1338,7 @@ mod tests {
                 .header(VERSION_HEADER, TEST_VERSION);
             then.status(200)
                 .header("content-type", "text/plain")
-                .json_body_obj(&response);
+                .body(response);
         });
 
         let server_url = format!("http://{}", server.address());
@@ -1346,7 +1346,7 @@ mod tests {
 
         let logs = session_id.logs(&client).unwrap();
 
-        assert_eq!(logs, "\"Hello\\nWorld\"");
+        assert_eq!(logs, "Hello\nWorld");
 
         create_mock.assert();
     }
