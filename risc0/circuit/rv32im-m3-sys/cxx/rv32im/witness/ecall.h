@@ -82,4 +82,3 @@ struct EcallBigIntWitness {
   RegMemReadWitness t2;
   uint32_t count;
 };
-

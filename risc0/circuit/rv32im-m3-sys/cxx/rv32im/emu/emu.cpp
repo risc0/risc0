@@ -708,8 +708,8 @@ struct Emulator {
         } else {
           uint32_t word = readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i);
           readPhysMemory(p2Wit.dataIn[i2], P2_ZEROS_WORD + i);
-          in[2*i] = word & 0xffff;
-          in[2*i + 1] = word >> 16;
+          in[2 * i] = word & 0xffff;
+          in[2 * i + 1] = word >> 16;
         }
       }
       Digest out = memory.getP2().doBlock(*reinterpret_cast<Digest*>(&state), in, true);
@@ -735,7 +735,8 @@ struct Emulator {
       p2.count--;
     }
     for (size_t i = 0; i < CELLS_DIGEST; i++) {
-      writePhysMemory(wit.stateOut[i], stateOutWordAddr + i, Fp::fromRaw(state.words[i]).asUInt32());
+      writePhysMemory(
+          wit.stateOut[i], stateOutWordAddr + i, Fp::fromRaw(state.words[i]).asUInt32());
     }
   }
 

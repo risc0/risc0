@@ -157,9 +157,9 @@ template <typename C> struct EcallP2Block {
   AddressDecompose<C> decompIn;
   AddressDecompose<C> decompOut;
   IsZero<C> iszState;
-  Reg<C> stateInWordAddr; 
-  Reg<C> stateOutWordAddr; 
-  Reg<C> inWordAddrFinal; 
+  Reg<C> stateInWordAddr;
+  Reg<C> stateOutWordAddr;
+  Reg<C> inWordAddrFinal;
   PhysMemReadBlock<C> stateIn[CELLS_DIGEST];
   PhysMemWriteBlock<C> stateOut[CELLS_DIGEST];
 

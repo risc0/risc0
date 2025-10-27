@@ -169,8 +169,8 @@ template <typename C> FDEV void P2StepBlock<C>::set(CTX, P2StepWitness wit) DEV 
       inValues[i2].set(ctx, wit.dataIn[i2].value);
     } else {
       uint32_t word = wit.dataIn[i].value;
-      inValues[2*i].set(ctx, word & 0xffff);
-      inValues[2*i + 1].set(ctx, word >> 16);
+      inValues[2 * i].set(ctx, word & 0xffff);
+      inValues[2 * i + 1].set(ctx, word >> 16);
     }
   }
 }
@@ -181,14 +181,15 @@ template <typename C> FDEV void P2StepBlock<C>::verify(CTX) DEV {
     uint32_t i2 = i + CELLS_DIGEST;
     EQ(dataIn[i].wordAddr.get(), inWordAddr.get() + i);
     EQ(dataIn[i2].wordAddr.get(), cond<C>(isElem.get(), inWordAddr.get() + i2, P2_ZEROS_WORD + i));
-    EQ(dataOut[i].wordAddr.get(), cond<C>(countOne.isZero.get(), outWordAddr.get() + i, P2_TRASH_WORD + i));
+    EQ(dataOut[i].wordAddr.get(),
+       cond<C>(countOne.isZero.get(), outWordAddr.get() + i, P2_TRASH_WORD + i));
     EQZ(verifyCheck * (dataOut[i].prevData.low.get() - dataOut[i].data.low.get()));
     EQZ(verifyCheck * (dataOut[i].prevData.high.get() - dataOut[i].data.high.get()));
     // Relate inValues to dataIn
     EQZ(isElem.get() * (inValues[i].get() - dataIn[i].data.flat()));
     EQZ(isElem.get() * (inValues[i2].get() - dataIn[i2].data.flat()));
-    EQZ((Val<C>(1) - isElem.get()) * (inValues[2*i].get() - dataIn[i].data.low.get()));
-    EQZ((Val<C>(1) - isElem.get()) * (inValues[2*i + 1].get() - dataIn[i].data.high.get()));
+    EQZ((Val<C>(1) - isElem.get()) * (inValues[2 * i].get() - dataIn[i].data.low.get()));
+    EQZ((Val<C>(1) - isElem.get()) * (inValues[2 * i + 1].get() - dataIn[i].data.high.get()));
   }
 }
 
@@ -201,14 +202,14 @@ template <typename C> FDEV void P2StepBlock<C>::addArguments(CTX) DEV {
   p2Arg.outWordAddr = outWordAddr.get();
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     p2Arg.state[i] = stateIn[i].get();
-  } 
+  }
   ctx.pull(p2Arg);
   p2Arg.cycle += 1;
   p2Arg.countBits = countBits - 1;
   p2Arg.inWordAddr += isElem.get() * CELLS_DIGEST + CELLS_DIGEST;
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     p2Arg.state[i] = stateOut[i].get();
-  } 
+  }
   ctx.push(p2Arg);
   P2CallArgument<C> call;
   call.isFinal = 1;
@@ -273,7 +274,8 @@ template <typename C> FDEV void EcallP2Block<C>::verify(CTX) DEV {
     EQ(stateOut[i].wordAddr.get(), stateOutWordAddr.get() + i);
   }
   Val<C> count = readA3.data.low.get();
-  EQ(inWordAddrFinal.get(), decompIn.wordAddr(readA1.data.get()) + count * cond<C>(isElem.get(), 16, 8));
+  EQ(inWordAddrFinal.get(),
+     decompIn.wordAddr(readA1.data.get()) + count * cond<C>(isElem.get(), 16, 8));
 }
 
 template <typename C> FDEV void EcallP2Block<C>::addArguments(CTX) DEV {
@@ -340,4 +342,3 @@ template <typename C> FDEV void EcallBigIntBlock<C>::addArguments(CTX) DEV {
       cycleVal + countVal + 2, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   VERIFY_DECODE
 }
-
