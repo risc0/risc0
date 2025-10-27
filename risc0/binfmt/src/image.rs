@@ -337,15 +337,13 @@ impl MemoryImage {
         }
     }
 
-    /// Mark digests as dirty after a change
+    /// Mark the given digest and all ancestors as dirty after a change.
     fn mark_dirty(&mut self, mut digest_idx: u32) {
         while digest_idx != 0 {
-            // TODO(victor): This optimization may not be worth the complexity.
             if !self.dirty.insert(digest_idx) {
                 // Node already marked dirty. All parents will also be marked dirty already.
                 break;
             }
-            // NOTE: This formula works for both digests of memory pages and inner nodes.
             digest_idx /= 2;
         }
     }
@@ -383,7 +381,6 @@ impl MemoryImage {
             .insert(digest_idx, self.compute_digest(digest_idx));
     }
 
-    // TODO(victor/perf): Check the assumption that these inline attributes are helpful.
     #[inline]
     fn compute_inner_digest(&self, digest_idx: u32) -> Digest {
         assert!(digest_idx < MEMORY_PAGES as u32);
@@ -402,7 +399,6 @@ impl MemoryImage {
         self.pages.get(&page_idx).unwrap().digest()
     }
 
-    #[inline]
     fn compute_digest(&self, digest_idx: u32) -> Digest {
         if digest_idx < MEMORY_PAGES as u32 {
             self.compute_inner_digest(digest_idx)

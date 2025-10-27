@@ -184,8 +184,6 @@ fn create_segments(
     }
 
     // Update the final image before returning it to the parent thread.
-    // TODO(victor/perf): It does not appear that this is always needed. When it is not, maybe we
-    // can avoid computing the root even at this last step.
     existing_image.update_digests();
     Ok((initial_digest, existing_image.image_id(), existing_image))
 }
