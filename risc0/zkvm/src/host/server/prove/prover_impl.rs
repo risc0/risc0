@@ -274,7 +274,7 @@ impl ProverServer for ProverImpl {
 
         Ok(PreflightResults {
             inner,
-            terminate_state: segment.inner.claim.terminate_state,
+            terminate_state: segment.inner.terminate_state,
             output: segment.output.clone(),
             segment_index: segment.index,
         })
