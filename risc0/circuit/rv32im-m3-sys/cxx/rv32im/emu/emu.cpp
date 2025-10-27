@@ -681,13 +681,16 @@ struct Emulator {
     readReg(wit.a2, REG_A2);
     readReg(wit.a3, REG_A3);
     readReg(wit.a7, REG_A7);
-    for (size_t i = 0; i < 8; i++) {
-      writePhysMemory(wit.clearTmp[i], P2_TMP1_WORD + i, 0);
+    uint32_t stateInWordAddr = wit.a0.value ? wit.a0.value / 4 : P2_ZEROS_WORD;
+    uint32_t stateOutWordAddr = wit.a0.value ? wit.a0.value / 4 : P2_TRASH_WORD;
+    Digest state;
+    for (size_t i = 0; i < CELLS_DIGEST; i++) {
+      state.words[i] = Fp(readPhysMemory(wit.stateIn[i], stateInWordAddr + i)).asRaw();
     }
+    curCycle++;
     P2State p2;
-    p2.cycle = curCycle + 1;
+    p2.cycle = curCycle;
     p2.count = wit.a3.value & 0xffff;
-    p2.stateWordAddr = wit.a0.value ? wit.a0.value / 4 : P2_TMP1_WORD;
     p2.inWordAddr = wit.a1.value / 4;
     p2.outWordAddr = wit.a2.value / 4;
     p2.isElem = (wit.a3.value & PFLAG_IS_ELEM) != 0;
@@ -695,26 +698,26 @@ struct Emulator {
     while (p2.count > 0) {
       auto& p2Wit = trace.makeP2Step();
       p2Wit.state = p2;
-      Digest state;
       std::array<Fp, CELLS_RATE> in;
-      for (size_t i = 0; i < 8; i++) {
-        state.words[i] = peekPhysMemory(p2.stateWordAddr + i);
+      for (size_t i = 0; i < CELLS_DIGEST; i++) {
+        uint32_t i2 = CELLS_DIGEST + i;
+        p2Wit.stateIn[i] = Fp::fromRaw(state.words[i]).asUInt32();
         if (p2.isElem) {
           in[i] = readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i);
-          in[8 + i] = readPhysMemory(p2Wit.dataIn[8 + i], p2.inWordAddr + 8 + i);
+          in[i2] = readPhysMemory(p2Wit.dataIn[i2], p2.inWordAddr + i2);
         } else {
           uint32_t word = readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i);
-          readPhysMemory(p2Wit.dataIn[8 + i], P2_TMP2_WORD + i);
+          readPhysMemory(p2Wit.dataIn[i2], P2_ZEROS_WORD + i);
           in[2*i] = word & 0xffff;
           in[2*i + 1] = word >> 16;
         }
       }
-      Digest out = memory.getP2().doBlock(state, in, true);
-      state = memory.getP2().doBlock(state, in, false);
-      uint32_t outAddr = (p2.isCheck && p2.count != 1) ? P2_TMP2_WORD : p2.outWordAddr;
-      for (size_t i = 0; i < 8; i++) {
-        writePhysMemory(p2Wit.stateIO[i], p2.stateWordAddr + i, state.words[i]);
-        writePhysMemory(p2Wit.dataOut[i], p2.outWordAddr + i, Fp::fromRaw(out.words[i]).asUInt32());
+      Digest out = memory.getP2().doBlock(*reinterpret_cast<Digest*>(&state), in, true);
+      state = memory.getP2().doBlock(*reinterpret_cast<Digest*>(&state), in, false);
+      uint32_t outAddr = (p2.count != 1) ? P2_TRASH_WORD : p2.outWordAddr;
+      for (size_t i = 0; i < CELLS_DIGEST; i++) {
+        p2Wit.stateOut[i] = Fp::fromRaw(state.words[i]).asUInt32();
+        writePhysMemory(p2Wit.dataOut[i], outAddr + i, Fp::fromRaw(out.words[i]).asUInt32());
         if (p2.isCheck && p2.count == 1) {
           if (p2Wit.dataOut[i].prevValue != p2Wit.dataOut[i].value) {
             DLOG("Mismatch on check");
@@ -727,8 +730,12 @@ struct Emulator {
       } else {
         p2.inWordAddr += 8;
       }
-      p2.cycle++;
+      curCycle++;
+      p2.cycle = curCycle;
       p2.count--;
+    }
+    for (size_t i = 0; i < CELLS_DIGEST; i++) {
+      writePhysMemory(wit.stateOut[i], stateOutWordAddr + i, Fp::fromRaw(state.words[i]).asUInt32());
     }
   }
 

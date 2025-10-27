@@ -149,6 +149,159 @@ template <typename C> FDEV void EcallWriteBlock<C>::addArguments(CTX) DEV {
   VERIFY_DECODE
 }
 
+template <typename C> FDEV void P2StepBlock<C>::set(CTX, P2StepWitness wit) DEV {
+  cycle.set(ctx, wit.state.cycle);
+  isElem.set(ctx, wit.state.isElem);
+  isCheck.set(ctx, wit.state.isCheck);
+  count.set(ctx, wit.state.count);
+  countOne.set(ctx, wit.state.count - 1);
+  inWordAddr.set(ctx, wit.state.inWordAddr);
+  outWordAddr.set(ctx, wit.state.outWordAddr);
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    uint32_t i2 = i + CELLS_DIGEST;
+    stateIn[i].set(ctx, wit.stateIn[i]);
+    stateOut[i].set(ctx, wit.stateOut[i]);
+    dataIn[i].set(ctx, wit.dataIn[i], wit.state.cycle);
+    dataIn[i2].set(ctx, wit.dataIn[i2], wit.state.cycle);
+    dataOut[i].set(ctx, wit.dataOut[i], wit.state.cycle);
+    if (wit.state.isElem) {
+      inValues[i].set(ctx, wit.dataIn[i].value);
+      inValues[i2].set(ctx, wit.dataIn[i2].value);
+    } else {
+      uint32_t word = wit.dataIn[i].value;
+      inValues[2*i].set(ctx, word & 0xffff);
+      inValues[2*i + 1].set(ctx, word >> 16);
+    }
+  }
+}
+
+template <typename C> FDEV void P2StepBlock<C>::verify(CTX) DEV {
+  Val<C> verifyCheck = countOne.isZero.get() * isCheck.get();
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    uint32_t i2 = i + CELLS_DIGEST;
+    EQ(dataIn[i].wordAddr.get(), inWordAddr.get() + i);
+    EQ(dataIn[i2].wordAddr.get(), cond<C>(isElem.get(), inWordAddr.get() + i2, P2_ZEROS_WORD + i));
+    EQ(dataOut[i].wordAddr.get(), cond<C>(countOne.isZero.get(), outWordAddr.get() + i, P2_TRASH_WORD + i));
+    EQZ(verifyCheck * (dataOut[i].prevData.low.get() - dataOut[i].data.low.get()));
+    EQZ(verifyCheck * (dataOut[i].prevData.high.get() - dataOut[i].data.high.get()));
+    // Relate inValues to dataIn
+    EQZ(isElem.get() * (inValues[i].get() - dataIn[i].data.flat()));
+    EQZ(isElem.get() * (inValues[i2].get() - dataIn[i2].data.flat()));
+    EQZ((Val<C>(1) - isElem.get()) * (inValues[2*i].get() - dataIn[i].data.low.get()));
+    EQZ((Val<C>(1) - isElem.get()) * (inValues[2*i + 1].get() - dataIn[i].data.high.get()));
+  }
+}
+
+template <typename C> FDEV void P2StepBlock<C>::addArguments(CTX) DEV {
+  Val<C> countBits = count.get() + isElem.get() * 0x20000 + isCheck.get() * 0x10000;
+  P2StepArgument<C> p2Arg;
+  p2Arg.cycle = cycle.get();
+  p2Arg.countBits = countBits;
+  p2Arg.inWordAddr = inWordAddr.get();
+  p2Arg.outWordAddr = outWordAddr.get();
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    p2Arg.state[i] = stateIn[i].get();
+  } 
+  ctx.pull(p2Arg);
+  p2Arg.cycle += 1;
+  p2Arg.countBits = countBits - 1;
+  p2Arg.inWordAddr += isElem.get() * CELLS_DIGEST + CELLS_DIGEST;
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    p2Arg.state[i] = stateOut[i].get();
+  } 
+  ctx.push(p2Arg);
+  P2CallArgument<C> call;
+  call.isFinal = 1;
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    uint32_t i2 = i + CELLS_DIGEST;
+    call.in[i] = stateIn[i].get();
+    call.data[i] = inValues[i].get();
+    call.data[i2] = inValues[i2].get();
+    call.out[i] = dataOut[i].data.high.get() * 0x10000 + dataOut[i].data.low.get();
+  }
+  ctx.pull(call);
+  call.isFinal = 0;
+  for (size_t i = 0; i < 8; i++) {
+    call.out[i] = stateOut[i].get();
+  }
+  ctx.pull(call);
+}
+
+template <typename C> FDEV void EcallP2Block<C>::set(CTX, EcallP2Witness wit) DEV {
+  cycle.set(ctx, wit.cycle);
+  fetch.set(ctx, wit.fetch, wit.cycle);
+  readA0.set(ctx, wit.a0, wit.cycle);
+  readA1.set(ctx, wit.a1, wit.cycle);
+  readA2.set(ctx, wit.a2, wit.cycle);
+  readA3.set(ctx, wit.a3, wit.cycle);
+  readA7.set(ctx, wit.a7, wit.cycle);
+  decompState.set(ctx, wit.a0.value);
+  decompIn.set(ctx, wit.a1.value);
+  decompOut.set(ctx, wit.a2.value);
+  bool isElemBool = (wit.a3.value & PFLAG_IS_ELEM) != 0;
+  isElem.set(ctx, isElemBool);
+  isCheck.set(ctx, (wit.a3.value & PFLAG_CHECK_OUT) != 0);
+  iszState.set(ctx, wit.a0.value / 4);
+  stateInWordAddr.set(ctx, wit.a0.value ? wit.a0.value / 4 : P2_ZEROS_WORD);
+  stateOutWordAddr.set(ctx, wit.a0.value ? wit.a0.value / 4 : P2_TRASH_WORD);
+  uint32_t count = wit.a3.value & 0xffff;
+  inWordAddrFinal.set(ctx, wit.a1.value / 4 + count * (isElemBool ? 16 : 8));
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    stateIn[i].set(ctx, wit.stateIn[i], wit.cycle);
+    stateOut[i].set(ctx, wit.stateOut[i], 1 + wit.cycle + count);
+  }
+}
+
+template <typename C> FDEV void EcallP2Block<C>::verify(CTX) DEV {
+  // Make sure A7 = HOST_ECALL_POSEIDON2
+  EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
+  EQ(readA7.data.low.get(), HOST_ECALL_POSEIDON2);
+  EQ(readA7.data.high.get(), 0);
+  // Verify other register addressed
+  EQ(readA0.wordAddr.get(), MACHINE_REGS_WORD + REG_A0);
+  EQ(readA1.wordAddr.get(), MACHINE_REGS_WORD + REG_A1);
+  EQ(readA2.wordAddr.get(), MACHINE_REGS_WORD + REG_A2);
+  EQ(readA3.wordAddr.get(), MACHINE_REGS_WORD + REG_A3);
+  Val<C> stateWordAddr = decompState.wordAddr(readA0.data.get());
+  EQ(stateInWordAddr.get(), cond<C>(iszState.isZero.get(), P2_ZEROS_WORD, stateWordAddr));
+  EQ(stateOutWordAddr.get(), cond<C>(iszState.isZero.get(), P2_TRASH_WORD, stateWordAddr));
+  // Verify bits
+  EQ(readA3.data.high.get(), isElem.get() * 0x8000 + isCheck.get() * 0x4000);
+  // Verify load + store addresses
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    EQ(stateIn[i].wordAddr.get(), stateInWordAddr.get() + i);
+    EQ(stateOut[i].wordAddr.get(), stateOutWordAddr.get() + i);
+  }
+  Val<C> count = readA3.data.low.get();
+  EQ(inWordAddrFinal.get(), decompIn.wordAddr(readA1.data.get()) + count * cond<C>(isElem.get(), 16, 8));
+}
+
+template <typename C> FDEV void EcallP2Block<C>::addArguments(CTX) DEV {
+  Val<C> cycleVal = cycle.get();
+  Val<C> count = readA3.data.low.get();
+  Val<C> bits = readA3.data.high.get() * 4;
+  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  P2StepArgument<C> p2Arg;
+  p2Arg.cycle = cycleVal + 1;
+  p2Arg.countBits = count + bits;
+  p2Arg.inWordAddr = decompIn.wordAddr(readA1.data.get());
+  p2Arg.outWordAddr = decompOut.wordAddr(readA2.data.get());
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    p2Arg.state[i] = stateIn[i].data.flat();
+  }
+  ctx.push(p2Arg);
+  p2Arg.cycle += count;
+  p2Arg.countBits = bits;
+  p2Arg.inWordAddr = inWordAddrFinal.get();
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    p2Arg.state[i] = stateOut[i].data.flat();
+  }
+  ctx.pull(p2Arg);
+  ctx.push(CpuStateArgument<C>(
+      cycleVal + count + 2, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  VERIFY_DECODE
+}
+
 template <typename C> FDEV void EcallBigIntBlock<C>::set(CTX, EcallBigIntWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   fetch.set(ctx, wit.fetch, wit.cycle);
@@ -187,3 +340,4 @@ template <typename C> FDEV void EcallBigIntBlock<C>::addArguments(CTX) DEV {
       cycleVal + countVal + 2, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   VERIFY_DECODE
 }
+

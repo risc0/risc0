@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "rv32im/base/poseidon2.h"
 #include "rv32im/witness/decode.h"
 
 struct EcallTerminateWitness {
@@ -51,15 +52,14 @@ struct P2State {
   uint16_t count;
   uint32_t inWordAddr;
   uint32_t outWordAddr;
-  uint32_t stateWordAddr;
 };
 
 struct P2StepWitness {
   P2State state;
-  PhysMemWriteWitness stateIO[8];
-  PhysMemReadWitness dataIn[16];
-  uint32_t dataInValues[16];
-  PhysMemWriteWitness dataOut[8];
+  Fp stateIn[CELLS_DIGEST];
+  Fp stateOut[CELLS_DIGEST];
+  PhysMemReadWitness dataIn[CELLS_RATE];
+  PhysMemWriteWitness dataOut[CELLS_DIGEST];
 };
 
 struct EcallP2Witness {
@@ -70,7 +70,8 @@ struct EcallP2Witness {
   RegMemReadWitness a2;
   RegMemReadWitness a3;
   RegMemReadWitness a7;
-  PhysMemWriteWitness clearTmp[8];
+  PhysMemReadWitness stateIn[CELLS_DIGEST];
+  PhysMemWriteWitness stateOut[CELLS_DIGEST];
 };
 
 struct EcallBigIntWitness {
