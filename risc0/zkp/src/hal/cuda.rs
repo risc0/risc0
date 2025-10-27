@@ -524,7 +524,8 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         {
             let out_size = output.size() / poly_count;
             let in_size = input.size() / poly_count;
-            let expand_bits = log2_ceil(out_size / in_size);
+            let expected_expand_bits = log2_ceil(out_size / in_size);
+            assert_eq!(expand_bits, expected_expand_bits);
             assert_eq!(output.size(), out_size * poly_count);
             assert_eq!(input.size(), in_size * poly_count);
             assert_eq!(out_size, in_size * (1 << expand_bits));
