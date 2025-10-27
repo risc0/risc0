@@ -540,7 +540,8 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             );
             let out_size = output.size() / count;
             let in_size = input.size() / count;
-            let expand_bits = log2_ceil(out_size / in_size);
+            let expected_expand_bits = log2_ceil(out_size / in_size);
+            assert_eq!(expand_bits, expected_expand_bits);
             assert_eq!(output.size(), out_size * count);
             assert_eq!(input.size(), in_size * count);
             assert_eq!(out_size, in_size * (1 << expand_bits));
