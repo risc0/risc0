@@ -314,7 +314,8 @@ impl<F: Field> Hal for CpuHal<F> {
         {
             let out_size = output.size() / count;
             let in_size = input.size() / count;
-            let expand_bits = log2_ceil(out_size / in_size);
+            let expected_expand_bits = log2_ceil(out_size / in_size);
+            assert_eq!(expand_bits, expected_expand_bits);
             assert_eq!(out_size, in_size * (1 << expand_bits));
             assert_eq!(out_size * count, output.size());
             assert_eq!(in_size * count, input.size());
