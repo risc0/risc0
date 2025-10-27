@@ -208,13 +208,11 @@ impl<'a> ExecutorImpl<'a> {
         let start_time = Instant::now();
         let result = exec.run(segment_limit_po2, max_insn_cycles, session_limit, |inner| {
             let output = inner
-                .claim
                 .terminate_state
                 .is_some()
                 .then(|| -> Option<Result<_>> {
                     inner
-                        .claim
-                        .output
+                        .output_digest
                         .and_then(|digest| {
                             (digest != Digest::ZERO).then(|| journal.buf.lock().unwrap().clone())
                         })

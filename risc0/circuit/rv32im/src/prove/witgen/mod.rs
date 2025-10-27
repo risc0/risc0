@@ -275,7 +275,7 @@ fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
     let mut global = vec![Val::INVALID; REGCOUNT_GLOBAL];
 
     // state in
-    for (i, word) in segment.claim.pre_state.as_words().iter().enumerate() {
+    for (i, word) in trace.pre_state.as_words().iter().enumerate() {
         let low = word & 0xffff;
         let high = word >> 16;
         global[LAYOUT_GLOBAL.state_in.values[i].low._super.offset] = low.into();
@@ -283,7 +283,7 @@ fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
     }
 
     // input digest
-    for (i, word) in segment.claim.input.as_words().iter().enumerate() {
+    for (i, word) in segment.input_digest.as_words().iter().enumerate() {
         let low = word & 0xffff;
         let high = word >> 16;
         global[LAYOUT_GLOBAL.input.values[i].low._super.offset] = low.into();
@@ -296,7 +296,7 @@ fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
     }
 
     // is_terminate
-    let is_terminate = if segment.claim.terminate_state.is_some() {
+    let is_terminate = if segment.terminate_state.is_some() {
         1u32
     } else {
         0u32

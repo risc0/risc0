@@ -42,14 +42,12 @@ fn basic() {
     let segments = session.segments;
     assert_eq!(segments.len(), 1);
     let segment = segments.first().unwrap();
-    assert_eq!(segment.claim.pre_state, pre_image_id);
-    assert_ne!(segment.claim.post_state, pre_image_id);
-    assert_eq!(segment.claim.input, Digest::ZERO);
-    assert_eq!(segment.claim.output, Some(Digest::ZERO));
-    assert_eq!(
-        segment.claim.terminate_state,
-        Some(TerminateState::default())
-    );
+    let segment_claim = segment.execute().unwrap().claim;
+    assert_eq!(segment_claim.pre_state, pre_image_id);
+    assert_ne!(segment_claim.post_state, pre_image_id);
+    assert_eq!(segment.input_digest, Digest::ZERO);
+    assert_eq!(segment.output_digest, Some(Digest::ZERO));
+    assert_eq!(segment.terminate_state, Some(TerminateState::default()));
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
     assert_eq!(segment.suspend_cycle, expected_cycles as u32 + 1);
@@ -73,20 +71,19 @@ fn system_split() {
 
     let segments = session.segments;
     assert_eq!(segments.len(), 2);
-    assert_eq!(segments[0].claim.pre_state, pre_image_id);
-    assert_ne!(segments[0].claim.post_state, pre_image_id);
-    assert_eq!(segments[0].claim.input, Digest::ZERO);
-    assert_eq!(segments[0].claim.output, None);
-    assert_eq!(segments[0].claim.terminate_state, None);
+    let segment0_claim = segments[0].execute().unwrap().claim;
+    assert_eq!(segment0_claim.pre_state, pre_image_id);
+    assert_ne!(segment0_claim.post_state, pre_image_id);
+    assert_eq!(segments[0].input_digest, Digest::ZERO);
+    assert_eq!(segments[0].output_digest, None);
+    assert_eq!(segments[0].terminate_state, None);
 
-    assert_eq!(segments[1].claim.pre_state, segments[0].claim.post_state);
-    assert_ne!(segments[1].claim.post_state, segments[1].claim.pre_state);
-    assert_eq!(segments[1].claim.input, Digest::ZERO);
-    assert_eq!(segments[1].claim.output, Some(Digest::ZERO));
-    assert_eq!(
-        segments[1].claim.terminate_state,
-        Some(TerminateState::default())
-    );
+    let segment1_claim = segments[1].execute().unwrap().claim;
+    assert_eq!(segment1_claim.pre_state, segment0_claim.post_state);
+    assert_ne!(segment1_claim.post_state, segment1_claim.pre_state);
+    assert_eq!(segments[1].input_digest, Digest::ZERO);
+    assert_eq!(segments[1].output_digest, Some(Digest::ZERO));
+    assert_eq!(segments[1].terminate_state, Some(TerminateState::default()));
 
     assert!(segments[0].read_record.is_empty());
     assert!(segments[0].write_record.is_empty());

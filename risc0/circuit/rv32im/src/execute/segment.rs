@@ -17,11 +17,12 @@ use std::cell::Cell;
 use anyhow::Result;
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, PovwNonce};
+use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    execute::{CycleLimit, Executor},
-    Rv32imV2Claim, MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2,
+    execute::{CycleLimit, Executor, ExecutorResult},
+    TerminateState, MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2,
 };
 
 use super::{Syscall, SyscallContext};
@@ -30,9 +31,18 @@ use super::{Syscall, SyscallContext};
 #[non_exhaustive]
 pub struct Segment {
     /// Initial sparse memory state for the segment
+    ///
+    /// It is not madated that this have all digests up to date, as long as the dirty digests are
+    /// marked. A process that receives a Segment must call [MemoryImage::update_digests] before
+    /// any operation that accesses the digest values.
     pub partial_image: MemoryImage,
 
-    pub claim: Rv32imV2Claim,
+    // Digest written to the input slot of the globals and claim.
+    pub input_digest: Digest,
+    // Digest written to the output slot of the globals and claim.
+    pub output_digest: Option<Digest>,
+
+    pub terminate_state: Option<TerminateState>,
 
     /// Recorded host->guest IO, one entry per read
     #[debug("{}", read_record.len())]
@@ -66,7 +76,10 @@ impl Segment {
         Ok(postcard::from_bytes(bytes)?)
     }
 
-    pub fn execute(&self) -> Result<()> {
+    /// Execute the [Segment], returning the execution result.
+    ///
+    /// This method can be used to compute the [crate::Rv32imV2Claim] from this segment.
+    pub fn execute(&self) -> Result<ExecutorResult> {
         let handler = SegmentSyscallHandler {
             segment: self,
             read_pos: Cell::new(0),
@@ -83,8 +96,7 @@ impl Segment {
             max_insn_cycles,
             CycleLimit::Soft(self.suspend_cycle.into()),
             |_| Ok(()),
-        )?;
-        Ok(())
+        )
     }
 }
 

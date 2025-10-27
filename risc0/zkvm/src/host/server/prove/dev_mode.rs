@@ -179,7 +179,7 @@ impl ProverServer for DevModeProver {
 
         Ok(PreflightResults {
             inner: Default::default(),
-            terminate_state: segment.inner.claim.terminate_state,
+            terminate_state: segment.inner.terminate_state,
             output: segment.output.clone(),
             segment_index: segment.index,
         })

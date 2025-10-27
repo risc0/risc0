@@ -140,38 +140,26 @@ fn create_segments(
     mut callback: impl FnMut(Segment) -> Result<()>,
 ) -> Result<(Digest, Digest, MemoryImage)> {
     let mut existing_image = initial_image;
+    // NOTE: Calling MemoryImage::image_id here triggers hashing of the memory pages, updating all
+    // the internal node digests. A benefit of this is that memory pages that do not change during
+    // execution will not need to be hashed by the callback receiver.
     let initial_digest = existing_image.image_id();
 
     while let Ok(req) = recv.recv() {
         // Compute the partial image that from the initial memory state that will be sent to
         // preflight for re-execution of the segment.
-        let pre_digest = existing_image.image_id();
         let partial_image = compute_partial_image(&mut existing_image, req.access_page_indexes);
 
         // Update the image held locally to the state after segment execution.
         for (idx, page) in req.update_partial_image.pages {
             existing_image.set_page(idx, page);
         }
-        existing_image.update_digests();
-        let post_digest = existing_image.image_id();
 
         let segment = Segment {
-            // TODO(victor/perf): Can we get away with sending a WorkingImage (i.e. without the
-            // hashes) here instead? Without the uncles, it would not be possible to reconstruct
-            // the claim. But maybe it would be cheaper if we could compute _just_ the uncles, and
-            // avoid hashing pages that are included in the message. We'd also need to drop the
-            // claim field from Segment, as it includes the root digests. It would no longer be
-            // possible to compute the claim without re-executing the segment, to get the final
-            // memory state and hash it.
             partial_image,
-            claim: Rv32imV2Claim {
-                pre_state: pre_digest,
-                post_state: post_digest,
-                input: req.input_digest,
-                output: req.output_digest,
-                terminate_state: req.terminate_state,
-                shutdown_cycle: None,
-            },
+            input_digest: req.input_digest,
+            output_digest: req.output_digest,
+            terminate_state: req.terminate_state,
             read_record: req.read_record,
             write_record: req.write_record,
             suspend_cycle: req.user_cycles,
@@ -194,6 +182,11 @@ fn create_segments(
 
         callback(segment)?;
     }
+
+    // Update the final image before returning it to the parent thread.
+    // TODO(victor/perf): It does not appear that this is always needed. When it is not, maybe we
+    // can avoid computing the root even at this last step.
+    existing_image.update_digests();
     Ok((initial_digest, existing_image.image_id(), existing_image))
 }
 

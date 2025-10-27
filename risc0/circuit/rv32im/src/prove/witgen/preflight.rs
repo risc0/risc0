@@ -20,7 +20,7 @@ use num_traits::FromPrimitive as _;
 use risc0_binfmt::{ByteAddr, WordAddr};
 use risc0_circuit_rv32im_sys::{RawMemoryTransaction, RawPreflightCycle};
 use risc0_core::scope;
-use risc0_zkp::core::digest::DIGEST_WORDS;
+use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 
 use crate::{
     execute::{
@@ -56,6 +56,7 @@ pub(crate) enum Back {
 }
 
 #[derive(Clone, Debug, Default)]
+#[non_exhaustive]
 pub(crate) struct PreflightTrace {
     #[debug("{}", cycles.len())]
     pub cycles: Vec<RawPreflightCycle>,
@@ -67,8 +68,10 @@ pub(crate) struct PreflightTrace {
     pub backs: Vec<Back>,
     pub table_split_cycle: u32,
     pub rand_z: ExtVal,
+    pub pre_state: Digest,
 }
 
+// TODO(victor): Add the pre-state and post-state here?
 pub(crate) struct Preflight<'a> {
     pub trace: PreflightTrace,
     segment: &'a Segment,
@@ -115,8 +118,14 @@ impl<'a> Preflight<'a> {
         tracing::debug!("po2: {}", segment.po2);
         let total_cycles = 1 << segment.po2;
 
+        // NOTE: The executor may not have updated the digests in this memory_image, instead
+        // leaving them marked as dirty. If the memory_image is fully updated, this will be a nop.
+        // If it is not, this will hash all the required nodes.
+        let mut memory_image = segment.partial_image.clone();
+        memory_image.update_digests();
+
         let mut page_memory = PagedMap::default();
-        for (&node_idx, digest) in segment.partial_image.digests() {
+        for (&node_idx, digest) in memory_image.digests() {
             let node_addr = node_idx_to_addr(node_idx);
             for i in 0..DIGEST_WORDS {
                 page_memory.insert(&(node_addr + i), digest.as_words()[i]);
@@ -126,14 +135,12 @@ impl<'a> Preflight<'a> {
             trace: PreflightTrace {
                 cycles: Vec::with_capacity(total_cycles),
                 backs: Vec::with_capacity(total_cycles),
+                pre_state: memory_image.image_id(),
                 rand_z,
                 ..Default::default()
             },
             segment,
-            pager: PagedMemory::new(
-                segment.partial_image.clone(),
-                false, /* tracing_enabled */
-            ),
+            pager: PagedMemory::new(memory_image, false /* tracing_enabled */),
             pc: ByteAddr(0),
             machine_mode: 0,
             cur_write: 0,
@@ -292,7 +299,7 @@ impl<'a> Preflight<'a> {
             Back::None,
         );
 
-        if self.segment.claim.terminate_state.is_none() {
+        if self.segment.terminate_state.is_none() {
             let segment_threshold = self.segment.segment_threshold as usize;
             if self.trace.cycles.len() < segment_threshold {
                 bail!("Stopping segment too early");
@@ -500,7 +507,7 @@ impl Risc0Context for Preflight<'_> {
             0,
             Back::None,
         );
-        let input_words = self.segment.claim.input.as_words();
+        let input_words = self.segment.input_digest.as_words();
         for (i, word) in input_words.iter().enumerate() {
             self.store_u32(GLOBAL_INPUT_ADDR.waddr() + i, *word)?;
         }

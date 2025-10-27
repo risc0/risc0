@@ -556,15 +556,14 @@ pub(crate) fn compute_partial_image(
     input_image: &mut MemoryImage,
     indexes: BTreeSet<u32>,
 ) -> MemoryImage {
-    let mut image = MemoryImage::default();
+    let mut partial_image = MemoryImage::default();
 
     for &node_idx in indexes.range((MEMORY_PAGES as u32)..) {
         let page_idx = page_idx(node_idx);
 
         // Copy original state of all pages accessed in this segment.
         let page = input_image.get_page(page_idx).unwrap();
-        let page_digest = *input_image.get_digest(node_idx).unwrap();
-        image.set_page_with_digest(page_idx, page, page_digest);
+        partial_image.set_page(page_idx, page);
     }
 
     // Add minimal needed 'uncles'
@@ -574,14 +573,12 @@ pub(crate) fn compute_partial_image(
 
         // Otherwise, add whichever child digest (if any) is not loaded
         if !indexes.contains(&lhs_idx) {
-            image.set_digest(lhs_idx, *input_image.get_digest(lhs_idx).unwrap());
+            partial_image.set_digest(lhs_idx, *input_image.get_or_update_digest(lhs_idx).unwrap());
         }
         if !indexes.contains(&rhs_idx) {
-            image.set_digest(rhs_idx, *input_image.get_digest(rhs_idx).unwrap());
+            partial_image.set_digest(rhs_idx, *input_image.get_or_update_digest(rhs_idx).unwrap());
         }
     }
 
-    image.update_digests();
-
-    image
+    partial_image
 }

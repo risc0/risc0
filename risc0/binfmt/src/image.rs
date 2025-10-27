@@ -116,6 +116,7 @@ pub struct MemoryImage {
     // #[debug("{:#010x?}", digests.keys())]
     digests: BTreeMap<u32, Digest>,
 
+    // TODO(victor) Would it be better overall if this were a HashSet?
     #[debug("{} entries", dirty.len())]
     dirty: BTreeSet<u32>,
 }
@@ -131,6 +132,11 @@ impl Default for MemoryImage {
 }
 
 impl MemoryImage {
+    /// Create a new [MemoryImage] from the given mapping of word address to work value.
+    ///
+    /// This function does not compute the page digests. Page digests are computed lazily, as
+    /// needed in response to e.g. [MemoryImage::image_id]. To eagerly compute the digests, call
+    /// [MemoryImage::update_digests].
     fn new(image: BTreeMap<u32, u32>) -> Self {
         let mut this = Self::default();
         let mut cur_page_idx = u32::MAX;
@@ -153,8 +159,6 @@ impl MemoryImage {
         if let Some(page) = cur_page.take() {
             this.set_page(cur_page_idx, page);
         }
-
-        this.update_digests();
 
         this
     }
@@ -224,8 +228,8 @@ impl MemoryImage {
         // tracing::trace!("set_page({page_idx:#08x})");
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
         self.expand_if_zero(digest_idx);
-        self.digests.insert(digest_idx, page.digest());
         self.pages.insert(page_idx, page);
+        // Mark the page digest and all ancestors as dirty.
         self.mark_dirty(digest_idx);
     }
 
@@ -238,7 +242,8 @@ impl MemoryImage {
         self.expand_if_zero(digest_idx);
         self.digests.insert(digest_idx, digest);
         self.pages.insert(page_idx, page);
-        self.mark_dirty(digest_idx);
+        // Mark ancestor digests as dirty.
+        self.mark_dirty(digest_idx / 2);
     }
 
     /// Get a digest, fails if unavailable
@@ -246,11 +251,17 @@ impl MemoryImage {
         // Expand if needed
         self.expand_if_zero(digest_idx);
         if self.dirty.contains(&digest_idx) {
-            bail!("digest marked as dirty: {digest_idx}");
+            bail!("Digest marked as dirty: {digest_idx}");
         }
         self.digests
             .get(&digest_idx)
             .ok_or_else(|| anyhow!("Unavailable digest: {digest_idx}"))
+    }
+
+    /// Get the digest of a node in the Merkle tree, updating it if marked as dirty.
+    pub fn get_or_update_digest(&mut self, digest_idx: u32) -> Result<&Digest> {
+        self.update_subtree_digests(digest_idx);
+        self.get_digest(digest_idx)
     }
 
     /// Set a digest.
@@ -260,24 +271,26 @@ impl MemoryImage {
     pub fn set_digest(&mut self, digest_idx: u32, digest: Digest) {
         // If digest is in a zero region, reify for proper uncles
         self.expand_if_zero(digest_idx);
-        // Set the digest value
         self.digests.insert(digest_idx, digest);
-        self.mark_dirty(digest_idx);
+        // Mark ancestor digests as dirty.
+        self.mark_dirty(digest_idx / 2);
     }
 
     /// Return the root digest
     pub fn image_id(&mut self) -> Digest {
+        // When updating the whole tree, it is slightly faster to use the update_digests.
+        self.update_digests();
         *self.get_digest(1).unwrap()
     }
 
     /// Return the user portion of the Merkle tree.
     pub fn user_id(&mut self) -> Digest {
-        *self.get_digest(2).unwrap()
+        *self.get_or_update_digest(2).unwrap()
     }
 
     /// Return the kernel portion of the Merkle tree.
     pub fn kernel_id(&mut self) -> Digest {
-        *self.get_digest(3).unwrap()
+        *self.get_or_update_digest(3).unwrap()
     }
 
     /// Expand if digest at `digest_idx` is a zero, return if expanded
@@ -324,23 +337,16 @@ impl MemoryImage {
         }
     }
 
-    /// Mark inner digests as dirty after a change
+    /// Mark digests as dirty after a change
     fn mark_dirty(&mut self, mut digest_idx: u32) {
-        while digest_idx != 1 {
-            let parent_idx = digest_idx / 2;
-            let lhs_idx = parent_idx * 2;
-            let rhs_idx = parent_idx * 2 + 1;
-            let lhs = self.digests.get(&lhs_idx);
-            let rhs = self.digests.get(&rhs_idx);
-            if let (Some(_), Some(_)) = (lhs, rhs) {
-                if !self.dirty.insert(parent_idx) {
-                    // Node already marked dirty. All parents will also be marked dirty already.
-                    break;
-                }
-                digest_idx = parent_idx;
-            } else {
-                unreachable!("corrupted MemoryImage");
-            };
+        while digest_idx != 0 {
+            // TODO(victor): This optimization may not be worth the complexity.
+            if !self.dirty.insert(digest_idx) {
+                // Node already marked dirty. All parents will also be marked dirty already.
+                break;
+            }
+            // NOTE: This formula works for both digests of memory pages and inner nodes.
+            digest_idx /= 2;
         }
     }
 
@@ -349,19 +355,60 @@ impl MemoryImage {
     pub fn update_digests(&mut self) {
         let dirty = mem::take(&mut self.dirty);
         for idx in dirty.into_iter().rev() {
-            let lhs_idx = idx * 2;
-            let rhs_idx = idx * 2 + 1;
-            let lhs = *self.digests.get(&lhs_idx).unwrap();
-            let rhs = *self.digests.get(&rhs_idx).unwrap();
-
-            let parent_digest = DigestPair { lhs, rhs }.digest();
-            self.digests.insert(idx, parent_digest);
+            self.digests.insert(idx, self.compute_digest(idx));
         }
     }
 
     /// Discard the hashes and turn the MemoryImage into just its pages
     pub fn into_pages(self) -> BTreeMap<u32, Page> {
         self.pages
+    }
+
+    /// Update the Merkle tree node digest, and the digests of all children.
+    fn update_subtree_digests(&mut self, digest_idx: u32) {
+        // Return early if the given node is already updated.
+        if !self.dirty.remove(&digest_idx) {
+            return;
+        }
+
+        // If this is an inner node, check to see if the children are dirty.
+        if digest_idx < MEMORY_PAGES as u32 {
+            let lhs_idx = digest_idx * 2;
+            let rhs_idx = digest_idx * 2 + 1;
+            self.update_subtree_digests(lhs_idx);
+            self.update_subtree_digests(rhs_idx);
+        }
+
+        self.digests
+            .insert(digest_idx, self.compute_digest(digest_idx));
+    }
+
+    // TODO(victor/perf): Check the assumption that these inline attributes are helpful.
+    #[inline]
+    fn compute_inner_digest(&self, digest_idx: u32) -> Digest {
+        assert!(digest_idx < MEMORY_PAGES as u32);
+        let lhs_idx = digest_idx * 2;
+        let rhs_idx = digest_idx * 2 + 1;
+        let lhs = *self.digests.get(&lhs_idx).unwrap();
+        let rhs = *self.digests.get(&rhs_idx).unwrap();
+
+        DigestPair { lhs, rhs }.digest()
+    }
+
+    #[inline]
+    fn compute_page_digest(&self, digest_idx: u32) -> Digest {
+        assert!(digest_idx >= MEMORY_PAGES as u32);
+        let page_idx = digest_idx - MEMORY_PAGES as u32;
+        self.pages.get(&page_idx).unwrap().digest()
+    }
+
+    #[inline]
+    fn compute_digest(&self, digest_idx: u32) -> Digest {
+        if digest_idx < MEMORY_PAGES as u32 {
+            self.compute_inner_digest(digest_idx)
+        } else {
+            self.compute_page_digest(digest_idx)
+        }
     }
 }
 
