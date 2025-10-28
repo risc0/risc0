@@ -16,6 +16,7 @@
 use std::{
     cell::RefCell,
     collections::BTreeSet,
+    fmt::Debug,
     rc::Rc,
     sync::mpsc::{SyncSender, sync_channel},
     thread::{self, ScopedJoinHandle},
@@ -241,8 +242,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         let initial_image = self.initial_image.clone();
         let (initial_digest, post_digest, post_image) = thread::scope(|scope| {
-            let segment_callback_thread =
-                scope.spawn(move || create_segments(initial_image, commit_recv, callback));
+            let mut segment_callback_thread =
+                Some(scope.spawn(move || create_segments(initial_image, commit_recv, callback)));
 
             while self.terminate_state.is_none() {
                 match max_cycles {
@@ -270,7 +271,12 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     );
 
                     Risc0Machine::suspend(self)?;
-                    self.split_segment(&commit_sender, segment_po2, segment_threshold)?;
+                    self.split_segment(
+                        &commit_sender,
+                        &mut segment_callback_thread,
+                        segment_po2,
+                        segment_threshold,
+                    )?;
                     Risc0Machine::resume(self)?;
                 }
 
@@ -280,7 +286,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     self.dump();
                     let result = self.dump_segment(
                         commit_sender,
-                        segment_callback_thread,
+                        segment_callback_thread.unwrap(),
                         segment_po2,
                         segment_threshold,
                         self.segment_counter,
@@ -299,13 +305,18 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             let final_po2 = log2_ceil(final_cycles as usize);
             self.split_segment(
                 &commit_sender,
+                &mut segment_callback_thread,
                 final_po2,
                 0, // theshold is meaningless for final segment
             )?;
 
             drop(commit_sender);
 
-            segment_callback_thread.join().unwrap()
+            segment_callback_thread
+                .take()
+                .expect("segment_callback_thread is None")
+                .join()
+                .expect("segment_callback_thread panicked")
         })?;
 
         let session_claim = Rv32imV2Claim {
@@ -328,9 +339,15 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         })
     }
 
+    /// Execute a segment split, committing the current pager state, sending the segment to the
+    /// segment callback thread thread, and resetting the pager and segment stats.
+    ///
+    /// Takes a handle to the segment callback thread so that it can get the error if the thread
+    /// fails to receive the segment request (e.g. the thread has died).
     fn split_segment(
         &mut self,
         commit_sender: &SyncSender<CreateSegmentRequest>,
+        segment_callback_thread: &mut Option<ScopedJoinHandle<'_, Result<impl Debug>>>,
         segment_po2: usize,
         segment_threshold: u32,
     ) -> Result<()> {
@@ -360,8 +377,12 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             povw_nonce: self.povw_nonce(self.segment_counter),
         };
         if commit_sender.send(req).is_err() {
-            //return Err(segment_callback_thread.join().unwrap().unwrap_err());
-            bail!("DO NOT MERGE")
+            return Err(segment_callback_thread
+                .take()
+                .expect("segment_callback_thread is None")
+                .join()
+                .expect("segment_callback_thread panicked")
+                .expect_err("send to segment_callback_thread failed, but thread returned Ok"));
         }
 
         // NOTE: There is no reasonable scenario where a session will have more than 4B
