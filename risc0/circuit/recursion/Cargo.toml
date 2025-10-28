@@ -66,6 +66,7 @@ metal = ["prove"]
 prove = [
   "dep:cfg-if",
   "dep:downloader",
+  "downloader/rustls-tls",
   "dep:lazy-regex",
   "dep:liblzma",
   "dep:rand",
