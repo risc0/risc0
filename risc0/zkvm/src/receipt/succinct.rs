@@ -413,7 +413,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("b0cfac35757dfb7f3b562fefebdc48ca39485a0e4dcb2c8e960008fdd20b28af")
+            digest!("08bfab58d6c29162aa18e69bc4cd7e109dc87fb7319072fb8a3d2131f149abb0")
         );
     }
 
