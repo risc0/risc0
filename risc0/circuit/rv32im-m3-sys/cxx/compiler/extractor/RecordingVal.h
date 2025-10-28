@@ -44,6 +44,11 @@ struct RecordingVal {
   RecordingVal operator*=(const RecordingVal& rhs) { return *this = *this * rhs; }
 
   operator risc0::Fp() const { return risc0::Fp(); }
+
+  static void startRecording() { recording = true; }
+  static void stopRecording() { recording = false; }
+private:
+  static bool recording;
 };
 
 struct RecordingValExt {

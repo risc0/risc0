@@ -14,6 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #include "compiler/extractor/PicusDirectives.h"
+#include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
 
 using namespace mlir;
 
@@ -37,4 +38,14 @@ void rangePostcondition(RecordingContext& ctx, uint32_t low, RecordingVal x, uin
   Value highConst = builder.create<zirgen::Zll::ConstOp>(builder.getUnknownLoc(), high);
   SmallVector<Value> args = {lowConst, x.value, highConst};
   builder.create<zirgen::Zhlt::DirectiveOp>(builder.getUnknownLoc(), "AssertRange", args);
+}
+
+void picusCall(RecordingContext& ctx, const char* name, llvm::ArrayRef<RecordingVal> inputs, mlir::Value layout) {
+  mlir::OpBuilder& builder = *BuilderSingleton::get();
+  auto compType = zirgen::Zhlt::getComponentType(ctx.mlirCtx);
+  llvm::SmallVector<mlir::Value> arguments;
+  for (auto val : inputs) {
+    arguments.push_back(val.value);
+  }
+  builder.create<zirgen::Zhlt::ConstructOp>(builder.getUnknownLoc(), name, compType, arguments, layout);
 }

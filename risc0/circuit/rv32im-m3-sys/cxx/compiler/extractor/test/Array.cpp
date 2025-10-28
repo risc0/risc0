@@ -39,13 +39,7 @@ int main() {
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
-  ctx.enterComponent("Top");
-  Top<C> component;
-  mlir::Type layoutType = getLayoutType(ctx, component);
-  llvm::outs() << "Layout type: " << layoutType << "\n";
-  component.verify(ctx);
-  ctx.materializeLayout(layoutType);
-  ctx.exitComponent();
+  extract<Top>(ctx);
 
   ctx.getModuleOp().print(llvm::outs());
   return failed(mlir::verify(ctx.getModuleOp()));

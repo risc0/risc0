@@ -24,6 +24,25 @@
 
 struct RecordingReg;
 
+struct ComponentIRMap {
+  ComponentIRMap() {}
+
+  template <typename Component>
+  void insert(Component* component, mlir::Value irValue) {
+    map.insert({{component, Component::NAME}, irValue});
+  }
+
+  template <typename Component>
+  mlir::Value get(Component* component) {
+    return map.at({component, Component::NAME});
+  }
+
+private:
+  using Key = std::pair<void*, const char*>;
+
+  std::map<Key, mlir::Value> map;
+};
+
 struct RecordingContext {
   using ValImpl = RecordingVal;
   using ValExtImpl = RecordingValExt;
@@ -69,7 +88,7 @@ struct RecordingContext {
 
   mlir::ModuleOp getModuleOp() { return moduleOp; }
 
-  void enterComponent(std::string name);
+  void enterComponent(const char* name, mlir::Type layoutType);
   void exitComponent();
 
   RecordingVal addValParameter();
@@ -81,11 +100,11 @@ struct RecordingContext {
   mlir::ModuleOp moduleOp;
   mlir::OpBuilder builder;
 
+  const char* componentName;
+  ComponentIRMap componentIRMap;
 
-private:
+// private:
   void unifyRefsIntoLayout(mlir::Value layout, size_t& i);
-
-  mlir::StringAttr componentName;
 
   // A temporary region on `moduleOp` that holds the body of a component being
   // built until `exitComponent` is called
@@ -102,9 +121,11 @@ private:
 };
 
 struct RecordingReg {
+  static constexpr char NAME[] = "Reg";
+
   RecordingVal val;
 
-  RecordingReg() : val(ctx->getNextRef()) {}
+  RecordingReg() : val(mlir::Value {}) {}
   explicit RecordingReg(RecordingVal val) : val(val) {}
 
   void set(RecordingContext& ctx, RecordingVal val) {}

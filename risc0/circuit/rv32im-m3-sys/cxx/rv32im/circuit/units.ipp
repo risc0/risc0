@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define PICUS_U32_INPUT(ctx, x) \
+  PICUS_INPUT(ctx, x); \
+  RANGE_PRECONDITION(ctx, 0, x.low.get(), 0x10000); \
+  RANGE_PRECONDITION(ctx, 0, x.high.get(), 0x10000)
+
 #define UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx) \
   PICUS_INPUT(ctx, count); \
-  PICUS_INPUT(ctx, a); \
-  PICUS_INPUT(ctx, b); \
-  RANGE_PRECONDITION(ctx, 0, a.get().low, 0x10000); \
-  RANGE_PRECONDITION(ctx, 0, a.get().high, 0x10000); \
-  RANGE_PRECONDITION(ctx, 0, b.get().low, 0x10000); \
-  RANGE_PRECONDITION(ctx, 0, b.get().high, 0x10000)
+  PICUS_U32_INPUT(ctx, a); \
+  PICUS_U32_INPUT(ctx, b)
 
 template <typename C> FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness wit) DEV {
   count.set(ctx, wit.count);
@@ -224,6 +225,11 @@ template <typename C> FDEV void UnitDivBlock<C>::set(CTX, UnitDivWitness wit) DE
 }
 
 template <typename C> FDEV void UnitDivBlock<C>::verify(CTX) DEV {
+  PICUS_INPUT(ctx, count);
+  PICUS_INPUT(ctx, isSigned);
+  PICUS_U32_INPUT(ctx, numer.in);
+  PICUS_U32_INPUT(ctx, denom.in);
+
   /*
   LOG(0, std::hex);
   LOG(0, "isSigned = " << isSigned.get());
@@ -413,3 +419,4 @@ template <typename C> FDEV void UnitShiftBlock<C>::addArguments(CTX) DEV {
 }
 
 #undef UNIT_BLOCK_PICUS_ASSUMPTIONS
+#undef PICUS_U32_INPUT

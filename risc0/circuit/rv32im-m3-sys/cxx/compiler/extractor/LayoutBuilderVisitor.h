@@ -15,30 +15,12 @@
 
 #pragma once
 
+#include "compiler/extractor/NopVal.h"
 #include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
-#include "zkp/fp.h"
 
 namespace layoutbuilder {
 
 class LayoutBuilder;
-struct NopVal {
-  NopVal() {}
-  NopVal(uint32_t) {}
-  NopVal(risc0::Fp) {}
-
-  NopVal operator+(const NopVal& rhs) const { return NopVal {}; }
-  NopVal operator+=(const NopVal& rhs) { return NopVal {}; }
-  NopVal operator-(const NopVal& rhs) const { return NopVal {}; }
-  NopVal operator-=(const NopVal& rhs) { return NopVal {}; }
-  NopVal operator-() const { return NopVal {}; }
-  NopVal operator*(const NopVal& rhs) const { return NopVal {}; }
-  NopVal operator*=(const NopVal& rhs) { return NopVal {}; }
-  operator risc0::Fp() const { return risc0::Fp(); }
-};
-
-struct NopReg {
-  NopVal get() { return NopVal {}; }
-};
 
 struct Context {
   using ValImpl = NopVal;
@@ -90,7 +72,8 @@ public:
     LayoutBuilder container("$tmp");
     ctx.builder = &container;
     for (size_t i = 0; i < N; i++) {
-      Visitor::apply(ctx, t[i], args...);
+      std::string name = "elem" + std::to_string(i);
+      Visitor::apply(ctx, name.c_str(), t[i], args...);
     }
     mlir::Type elementType = container.members.front().type;
     ctx.builder = builder;

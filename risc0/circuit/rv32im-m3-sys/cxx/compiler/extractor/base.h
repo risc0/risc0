@@ -15,6 +15,9 @@
 
 #pragma once
 
+#include "LayoutBuilderVisitor.h"
+#include "PopulateComponentVisitor.h"
+#include "RecordingContext.h"
 #include "compiler/extractor/LayoutBuilderVisitor.h"
 #include "compiler/extractor/PicusDirectives.h"
 #include "compiler/extractor/RecordingContext.h"
@@ -44,17 +47,35 @@ struct VerifyFwd {
   }
 };
 
-#define EXTRACT(Comp)                                                                              \
-  {                                                                                                \
-    ctx.enterComponent(Comp<C>::NAME);                                                             \
-    Comp<C> component;                                                                             \
-    mlir::Type layoutType = getLayoutType(ctx, component);                                         \
-    VerifyFwd::apply(ctx, component);                                                              \
-    ctx.materializeLayout(layoutType);                                                             \
-    ctx.exitComponent();                                                                           \
-  }
+template<template <typename Ctx> typename Component> void extract(RecordingContext& ctx) {
+  mlir::Type layoutType = getLayoutType<Component>(ctx.mlirCtx);
+  ctx.enterComponent(Component<RecordingContext>::NAME, layoutType);
+  Component<RecordingContext> component;
+  ctx.componentIRMap = populateComponent<Component>(ctx, component);
+  VerifyFwd::apply(ctx, component);
+  ctx.exitComponent();
+}
+
+template<template <typename Ctx> typename Component> void extract1(RecordingContext& ctx) {
+  mlir::Type layoutType = getLayoutType<Component, NopVal>(ctx.mlirCtx);
+  ctx.enterComponent(Component<RecordingContext>::NAME, layoutType);
+  auto arg1 = ctx.addValParameter();
+  Component<RecordingContext> component;
+  ctx.componentIRMap = populateComponent<Component, RecordingVal>(ctx, component);
+  VerifyFwd::apply(ctx, component, arg1);
+  ctx.exitComponent();
+}
+
+#define EXTRACT(Comp) extract<Comp>(ctx)
 
 #define PICUS
 #define PICUS_INPUT(ctx, x) picusInput(ctx, x)
 #define RANGE_PRECONDITION(ctx, low, x, high) rangePrecondition(ctx, low, x, high)
 #define RANGE_POSTCONDITION(ctx, low, x, high) rangePostcondition(ctx, low, x, high)
+#define PICUS_CALL(ctx, name, inputs, layout) picusCall(ctx, name, llvm::SmallVector<Val<C>> inputs, layout)
+
+#define PICUS_BEGIN_OUTLINE(...) \
+  if (NAME != ctx.componentName) { \
+    PICUS_CALL(ctx, NAME, {__VA_ARGS__}, ctx.componentIRMap.get(this)); \
+  } else {
+#define PICUS_END_OUTLINE }

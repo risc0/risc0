@@ -56,3 +56,16 @@ void rangePrecondition(RecordingContext& ctx, uint32_t low, RecordingVal x, uint
 // to be in the indicated range, the same as an assertion from a polynomial
 // constraint. This should primarily be used on registers that are range checked.
 void rangePostcondition(RecordingContext& ctx, uint32_t low, RecordingVal x, uint32_t high);
+
+// Emit a constructor call to the indicated component constructor with the given
+// (flattened) list of inputs, which constrains the given componentLayout.
+//
+// Example:
+// PICUS_CALL(ctx, "IsZero", {x}, xIsZero);
+//
+// Zirgen IR:
+// %trivial = zhlt.construct @IsZero(%x, %layout) : (!zll.val<BabyBear>, !zlayout$IsZero) -> !zstruct$Component
+//
+// Picus constraint language:
+// (call [layout_denomZero_invReg, layout_denomZero_isZero_inner] IsZero [x])
+void picusCall(RecordingContext& ctx, const char* name, llvm::ArrayRef<RecordingVal> inputs, mlir::Value layout);

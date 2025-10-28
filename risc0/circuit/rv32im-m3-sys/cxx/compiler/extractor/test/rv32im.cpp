@@ -26,9 +26,13 @@ int main() {
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
+  extract1<IsZero>(ctx);
+
+  // EXTRACT(IsZero);
   // EXTRACT(UnitAddSubBlock);
   // EXTRACT(UnitBitBlock);
-  EXTRACT(UnitMulBlock);
+  // EXTRACT(UnitMulBlock);
+  EXTRACT(UnitDivBlock);
 
 // #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
 //   BLOCK_TYPES
@@ -39,6 +43,16 @@ int main() {
     return 1;
   }
 
+  llvm::outs() << ctx.getModuleOp() << "\n\n";
   printPicus(ctx.getModuleOp(), llvm::outs());
+
+  // llvm::outs() << "(begin-module UnitArgument)\n"
+  //                 "(input a_low)\n"
+  //                 "(input a_high)\n"
+  //                 "(input b_low)\n"
+  //                 "(input b_high)\n"
+  //                 "(output out_low)\n"
+  //                 "(output out_high)\n"
+  //                 "(end-module)\n";
   return 0;
 }
