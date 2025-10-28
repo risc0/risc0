@@ -13,8 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "compiler/extractor/base.h"
 #include "compiler/extractor/PopulateComponentVisitor.h"
+#include "compiler/extractor/base.h"
 #include "rv32im/circuit/circuit.ipp"
 
 #include "mlir/IR/Verifier.h"

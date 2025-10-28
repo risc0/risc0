@@ -27,7 +27,7 @@ mlir::Value Populator::lookup(const char* memberName) {
   mlir::Value layout = path.back();
   mlir::StringAttr name = builder.getStringAttr(memberName);
   mlir::Value sublayout =
-        builder.create<zirgen::ZStruct::LookupOp>(builder.getUnknownLoc(), layout, name);
+      builder.create<zirgen::ZStruct::LookupOp>(builder.getUnknownLoc(), layout, name);
   path.push_back(sublayout);
   return sublayout;
 }
@@ -45,7 +45,6 @@ mlir::Value Populator::load() {
   mlir::Value layout = path.back();
   return builder.create<zirgen::ZStruct::LoadOp>(builder.getUnknownLoc(), layout, zero);
 }
-
 
 Populator* PopulatorSingleton::populator;
 

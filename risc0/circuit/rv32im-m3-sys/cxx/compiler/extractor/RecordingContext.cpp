@@ -53,8 +53,12 @@ void RecordingContext::exitComponent() {
   // Now move the temporary body into a function with the right signature
   builder.setInsertionPointToEnd(moduleOp.getBody());
   auto funcType = FunctionType::get(mlirCtx, componentBody->getArgumentTypes(), {compType});
-  auto component = builder.create<zirgen::Zhlt::ComponentOp>(
-      builder.getUnknownLoc(), builder.getStringAttr(componentName), funcType, nullptr, nullptr, nullptr);
+  auto component = builder.create<zirgen::Zhlt::ComponentOp>(builder.getUnknownLoc(),
+                                                             builder.getStringAttr(componentName),
+                                                             funcType,
+                                                             nullptr,
+                                                             nullptr,
+                                                             nullptr);
   component.getBody().takeBody(*componentBody);
   component->setAttr("picus_analyze", builder.getUnitAttr());
   componentBody = nullptr;

@@ -40,12 +40,16 @@ void rangePostcondition(RecordingContext& ctx, uint32_t low, RecordingVal x, uin
   builder.create<zirgen::Zhlt::DirectiveOp>(builder.getUnknownLoc(), "AssertRange", args);
 }
 
-void picusCall(RecordingContext& ctx, const char* name, llvm::ArrayRef<RecordingVal> inputs, mlir::Value layout) {
+void picusCall(RecordingContext& ctx,
+               const char* name,
+               llvm::ArrayRef<RecordingVal> inputs,
+               mlir::Value layout) {
   mlir::OpBuilder& builder = *BuilderSingleton::get();
   auto compType = zirgen::Zhlt::getComponentType(ctx.mlirCtx);
   llvm::SmallVector<mlir::Value> arguments;
   for (auto val : inputs) {
     arguments.push_back(val.value);
   }
-  builder.create<zirgen::Zhlt::ConstructOp>(builder.getUnknownLoc(), name, compType, arguments, layout);
+  builder.create<zirgen::Zhlt::ConstructOp>(
+      builder.getUnknownLoc(), name, compType, arguments, layout);
 }

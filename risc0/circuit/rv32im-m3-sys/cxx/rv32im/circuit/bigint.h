@@ -58,8 +58,11 @@ template <typename C> struct BigIntBlock {
     T::apply(ctx, "offset", offset);
     T::apply(ctx, "offset16High", offset16High);
     T::apply(ctx, "offset16Low", offset16Low);
-    T::apply(
-        ctx, "computeAddr", computeAddr, readBaseReg.data.get(), ValU32<C>(offset16Low.get(), offset16High.get()));
+    T::apply(ctx,
+             "computeAddr",
+             computeAddr,
+             readBaseReg.data.get(),
+             ValU32<C>(offset16Low.get(), offset16High.get()));
     T::apply(ctx, "isLastPage", isLastPage, computeAddr.get().high - Val<C>(0xbfff));
     T::apply(ctx, "wordBase", wordBase, computeAddr.get());
     T::apply(ctx, "checkBase", checkBase, computeAddr.get(), mm.get() * Val<C>(MODE_MACHINE));

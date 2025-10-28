@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define PICUS_U32_INPUT(ctx, x) \
-  PICUS_INPUT(ctx, x); \
-  RANGE_PRECONDITION(ctx, 0, x.low.get(), 0x10000); \
+#define PICUS_U32_INPUT(ctx, x)                                                                    \
+  PICUS_INPUT(ctx, x);                                                                             \
+  RANGE_PRECONDITION(ctx, 0, x.low.get(), 0x10000);                                                \
   RANGE_PRECONDITION(ctx, 0, x.high.get(), 0x10000)
 
-#define UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx) \
-  PICUS_INPUT(ctx, count); \
-  PICUS_U32_INPUT(ctx, a); \
+#define UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx)                                                          \
+  PICUS_INPUT(ctx, count);                                                                         \
+  PICUS_U32_INPUT(ctx, a);                                                                         \
   PICUS_U32_INPUT(ctx, b)
 
 template <typename C> FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness wit) DEV {

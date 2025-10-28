@@ -22,16 +22,16 @@ struct NopVal {
   NopVal(uint32_t) {}
   NopVal(risc0::Fp) {}
 
-  NopVal operator+(const NopVal& rhs) const { return NopVal {}; }
-  NopVal operator+=(const NopVal& rhs) { return NopVal {}; }
-  NopVal operator-(const NopVal& rhs) const { return NopVal {}; }
-  NopVal operator-=(const NopVal& rhs) { return NopVal {}; }
-  NopVal operator-() const { return NopVal {}; }
-  NopVal operator*(const NopVal& rhs) const { return NopVal {}; }
-  NopVal operator*=(const NopVal& rhs) { return NopVal {}; }
+  NopVal operator+(const NopVal& rhs) const { return NopVal{}; }
+  NopVal operator+=(const NopVal& rhs) { return NopVal{}; }
+  NopVal operator-(const NopVal& rhs) const { return NopVal{}; }
+  NopVal operator-=(const NopVal& rhs) { return NopVal{}; }
+  NopVal operator-() const { return NopVal{}; }
+  NopVal operator*(const NopVal& rhs) const { return NopVal{}; }
+  NopVal operator*=(const NopVal& rhs) { return NopVal{}; }
   operator risc0::Fp() const { return risc0::Fp(); }
 };
 
 struct NopReg {
-  NopVal get() { return NopVal {}; }
+  NopVal get() { return NopVal{}; }
 };

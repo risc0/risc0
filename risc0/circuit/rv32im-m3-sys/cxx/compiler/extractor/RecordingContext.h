@@ -27,13 +27,11 @@ struct RecordingReg;
 struct ComponentIRMap {
   ComponentIRMap() {}
 
-  template <typename Component>
-  void insert(Component* component, mlir::Value irValue) {
+  template <typename Component> void insert(Component* component, mlir::Value irValue) {
     map.insert({{component, Component::NAME}, irValue});
   }
 
-  template <typename Component>
-  mlir::Value get(Component* component) {
+  template <typename Component> mlir::Value get(Component* component) {
     return map.at({component, Component::NAME});
   }
 
@@ -103,7 +101,7 @@ struct RecordingContext {
   const char* componentName;
   ComponentIRMap componentIRMap;
 
-// private:
+  // private:
   void unifyRefsIntoLayout(mlir::Value layout, size_t& i);
 
   // A temporary region on `moduleOp` that holds the body of a component being
@@ -125,7 +123,7 @@ struct RecordingReg {
 
   RecordingVal val;
 
-  RecordingReg() : val(mlir::Value {}) {}
+  RecordingReg() : val(mlir::Value{}) {}
   explicit RecordingReg(RecordingVal val) : val(val) {}
 
   void set(RecordingContext& ctx, RecordingVal val) {}

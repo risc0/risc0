@@ -31,9 +31,9 @@ using risc0::RowInfo;
 
 #define CONSTANT constexpr
 #define CTX Context& ctx
-#define DEV  /**/
-#define FDEV /**/
-#define MDEV /**/
+#define DEV      /**/
+#define FDEV     /**/
+#define MDEV     /**/
 #define CONSTARG /**/
 #define ATOMIC_U32 std::atomic<uint32_t>
 inline void ATOMIC_ADD(ATOMIC_U32& data, uint32_t toAdd) {

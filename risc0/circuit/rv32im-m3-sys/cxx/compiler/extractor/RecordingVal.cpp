@@ -39,7 +39,8 @@ RecordingVal::RecordingVal(uint32_t c) {
 RecordingVal::RecordingVal(risc0::Fp c) : RecordingVal(c.asUInt32()) {}
 
 RecordingVal RecordingVal::operator+(const RecordingVal& rhs) const {
-  if (!recording) return *this;
+  if (!recording)
+    return *this;
 
   OpBuilder& builder = *BuilderSingleton::get();
   return RecordingVal(
@@ -47,7 +48,8 @@ RecordingVal RecordingVal::operator+(const RecordingVal& rhs) const {
 }
 
 RecordingVal RecordingVal::operator-(const RecordingVal& rhs) const {
-  if (!recording) return *this;
+  if (!recording)
+    return *this;
 
   OpBuilder& builder = *BuilderSingleton::get();
   return RecordingVal(
@@ -55,14 +57,16 @@ RecordingVal RecordingVal::operator-(const RecordingVal& rhs) const {
 }
 
 RecordingVal RecordingVal::operator-() const {
-  if (!recording) return *this;
+  if (!recording)
+    return *this;
 
   OpBuilder& builder = *BuilderSingleton::get();
   return RecordingVal(builder.create<zirgen::Zll::NegOp>(builder.getUnknownLoc(), this->value));
 }
 
 RecordingVal RecordingVal::operator*(const RecordingVal& rhs) const {
-  if (!recording) return *this;
+  if (!recording)
+    return *this;
 
   OpBuilder& builder = *BuilderSingleton::get();
   return RecordingVal(

@@ -28,7 +28,8 @@ struct Context {
   using RegImpl = NopReg;
   using ArgCountRegImpl = NopReg;
 
-  Context(mlir::MLIRContext* mlirCtx, LayoutBuilder* builder) : mlirCtx(mlirCtx), builder(builder) {}
+  Context(mlir::MLIRContext* mlirCtx, LayoutBuilder* builder)
+      : mlirCtx(mlirCtx), builder(builder) {}
 
   mlir::MLIRContext* mlirCtx;
   LayoutBuilder* builder;
@@ -64,7 +65,8 @@ public:
     ctx.builder = builder;
   }
 
-  template <typename T, size_t N, typename... Args> static void apply(Context& ctx, const char* memberName, T (&t)[N], Args... args) {
+  template <typename T, size_t N, typename... Args>
+  static void apply(Context& ctx, const char* memberName, T (&t)[N], Args... args) {
     LayoutBuilder* builder = ctx.builder;
 
     // Get the layout type of an element. Note that we still need to visit every

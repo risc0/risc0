@@ -29,8 +29,7 @@ template <typename C> using ArgCountReg = typename C::ArgCountRegImpl;
 // Declared early because it is used in some arguments
 template <typename C> struct ValU32 {
   FDEV ValU32() = default;
-  FDEV ValU32(Val<C> low, Val<C> high) : low(low),
-high(high) {}
+  FDEV ValU32(Val<C> low, Val<C> high) : low(low), high(high) {}
   Val<C> low;
   Val<C> high;
 };

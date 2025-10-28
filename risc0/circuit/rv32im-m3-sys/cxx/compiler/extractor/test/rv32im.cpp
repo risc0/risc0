@@ -34,9 +34,9 @@ int main() {
   // EXTRACT(UnitMulBlock);
   EXTRACT(UnitDivBlock);
 
-// #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
-//   BLOCK_TYPES
-// #undef BLOCK_TYPE
+  // #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
+  //   BLOCK_TYPES
+  // #undef BLOCK_TYPE
 
   if (failed(mlir::verify(ctx.getModuleOp()))) {
     llvm::errs() << "Module verification error\n";

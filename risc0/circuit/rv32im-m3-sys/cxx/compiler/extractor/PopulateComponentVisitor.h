@@ -29,9 +29,7 @@ struct Populator {
   mlir::Value subscript(size_t index);
   mlir::Value load();
 
-  void pop() {
-    path.pop_back();
-  }
+  void pop() { path.pop_back(); }
 
   ComponentIRMap map;
 
@@ -60,7 +58,8 @@ public:
     populator->pop();
   }
 
-  template <typename T, size_t N> static void apply(RecordingContext& ctx, const char* memberName, T (&t)[N]) {
+  template <typename T, size_t N>
+  static void apply(RecordingContext& ctx, const char* memberName, T (&t)[N]) {
     Populator* populator = PopulatorSingleton::get();
     populator->lookup(memberName);
     for (size_t i = 0; i < N; i++) {

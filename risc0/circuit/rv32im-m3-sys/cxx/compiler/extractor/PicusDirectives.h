@@ -38,9 +38,7 @@ public:
   static void apply(RecordingContext& ctx, RecordingReg& x);
 };
 
-
-template <typename Component>
-void picusInput(RecordingContext& ctx, Component component) {
+template <typename Component> void picusInput(RecordingContext& ctx, Component component) {
   PicusDeclareInputVisitor::apply(ctx, component);
 }
 
@@ -64,8 +62,12 @@ void rangePostcondition(RecordingContext& ctx, uint32_t low, RecordingVal x, uin
 // PICUS_CALL(ctx, "IsZero", {x}, xIsZero);
 //
 // Zirgen IR:
-// %trivial = zhlt.construct @IsZero(%x, %layout) : (!zll.val<BabyBear>, !zlayout$IsZero) -> !zstruct$Component
+// %trivial = zhlt.construct @IsZero(%x, %layout) : (!zll.val<BabyBear>, !zlayout$IsZero) ->
+// !zstruct$Component
 //
 // Picus constraint language:
 // (call [layout_denomZero_invReg, layout_denomZero_isZero_inner] IsZero [x])
-void picusCall(RecordingContext& ctx, const char* name, llvm::ArrayRef<RecordingVal> inputs, mlir::Value layout);
+void picusCall(RecordingContext& ctx,
+               const char* name,
+               llvm::ArrayRef<RecordingVal> inputs,
+               mlir::Value layout);

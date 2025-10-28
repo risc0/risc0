@@ -47,6 +47,7 @@ struct RecordingVal {
 
   static void startRecording() { recording = true; }
   static void stopRecording() { recording = false; }
+
 private:
   static bool recording;
 };
