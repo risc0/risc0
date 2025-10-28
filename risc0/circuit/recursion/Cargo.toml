@@ -47,10 +47,7 @@ tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [build-dependencies]
-downloader = { version = "0.2", default-features = false, features = [
-  "rustls-tls",
-  "verify",
-], optional = true }
+downloader = { version = "0.2", default-features = false, features = ["verify"], optional = true }
 hex = "0.4"
 liblzma = { version = "0.4", optional = true, features = ["static"] }
 sha2 = { version = "0.10", optional = true }
