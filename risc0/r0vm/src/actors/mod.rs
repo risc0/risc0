@@ -938,7 +938,7 @@ impl RpcDispatchOps {
         MessageT: Send + 'static,
         <ReceiverT as Message<MessageT>>::Reply: serde::Serialize + Sync,
     {
-        let message_id = self.message_id.expect("request should not have a response");
+        let message_id = self.message_id.expect("request should have a response");
         let rpc_sender = self
             .rpc_sender
             .expect("ask should not be called on one-way RPC actor");
