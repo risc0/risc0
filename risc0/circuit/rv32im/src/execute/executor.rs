@@ -175,9 +175,6 @@ fn create_segments(
 
         callback(segment)?;
     }
-
-    // Update the final image before returning it to the parent thread.
-    existing_image.update_digests();
     Ok((initial_digest, existing_image.image_id(), existing_image))
 }
 
