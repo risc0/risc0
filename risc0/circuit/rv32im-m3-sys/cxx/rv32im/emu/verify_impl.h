@@ -107,6 +107,11 @@ struct Context {
 };
 
 struct BothFwd {
+  template <typename T, typename... Args>
+  static void apply(Context& ctx, const char*, T& obj, Args... args) {
+    BothFwd::apply(ctx, obj, args...);
+  }
+
   template <typename T, typename... Args> static void apply(Context& ctx, T& obj, Args... args) {
     obj.template applyInner<BothFwd>(ctx, args...);
     obj.verify(ctx, args...);

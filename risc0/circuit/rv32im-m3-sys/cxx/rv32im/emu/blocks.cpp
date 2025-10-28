@@ -42,6 +42,11 @@ struct ArgCountContext {
 
 struct AddArgsFwd {
   template <typename T, typename... Args>
+  static void apply(ArgCountContext& ctx, const char*, T& obj, Args... args) {
+    AddArgsFwd::apply(ctx, obj, args...);
+  }
+
+  template <typename T, typename... Args>
   static void apply(ArgCountContext& ctx, T& obj, Args... args) {
     obj.template applyInner<AddArgsFwd>(ctx, args...);
     obj.addArguments(ctx, args...);

@@ -128,11 +128,11 @@ template <typename C> struct UnitDivBlock {
     T::apply(ctx,
              "verifyRem",
              verifyRem,
-             ValU32<C>(denom.absLow.get(), denom.absHigh.get()),
+             denom.getAbs(),
              ValU32<C>(Val<C>(0xffff) - absRemLow.get(), Val<C>(0xffff) - absRemHigh.get()));
-    T::apply(ctx, negQuot);
-    T::apply(ctx, flipQuot, absQuot.get(), negQuot.get());
-    T::apply(ctx, flipRem, absRem, numer.neg.get());
+    T::apply(ctx, "negQuot", negQuot);
+    T::apply(ctx, "flipQuot", flipQuot, absQuot.get(), negQuot.get());
+    T::apply(ctx, "flipRem", flipRem, absRem, numer.neg.get());
   }
 
   FDEV void set(CTX, UnitDivWitness wit) DEV;

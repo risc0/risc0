@@ -103,6 +103,11 @@ FDEV void computeRowSet(MDEV Fp* data,
 
 struct FinalizeFwd {
   template <typename T, typename C, typename... Args>
+  static void apply(MTHR C& ctx, CONSTARG const char*, MDEV T& obj, Args... args) {
+    FinalizeFwd::apply(ctx, obj, args...);
+  }
+
+  template <typename T, typename C, typename... Args>
   FDEV static void apply(MTHR C& ctx, MDEV T& obj, Args... args) {
     obj.template applyInner<FinalizeFwd>(ctx, args...);
     obj.finalize(ctx);

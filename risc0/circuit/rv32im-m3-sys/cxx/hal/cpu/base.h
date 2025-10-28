@@ -34,6 +34,7 @@ using risc0::RowInfo;
 #define DEV  /**/
 #define FDEV /**/
 #define MDEV /**/
+#define CONSTARG /**/
 #define ATOMIC_U32 std::atomic<uint32_t>
 inline void ATOMIC_ADD(ATOMIC_U32& data, uint32_t toAdd) {
   data.fetch_add(toAdd, std::memory_order_relaxed);

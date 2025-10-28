@@ -41,5 +41,6 @@ high(high) {}
 // Picus directives are no-ops when not using the extractor
 #ifndef PICUS
 #define PICUS_INPUT(ctx, x)
-#define ASSUME_RANGE(ctx, low, x, high)
+#define RANGE_PRECONDITION(ctx, low, x, high)
+#define RANGE_POSTCONDITION(ctx, low, x, high)
 #endif
