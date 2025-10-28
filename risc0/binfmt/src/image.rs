@@ -458,16 +458,16 @@ impl Page {
         word
     }
 
-    #[cfg(feature = "std")]
     #[inline(always)]
     fn ensure_writable(&mut self) -> &mut [u8; PAGE_BYTES] {
-        &mut *Arc::make_mut(&mut self.0)
-    }
-
-    #[cfg(not(feature = "std"))]
-    #[inline(always)]
-    fn ensure_writable(&mut self) -> &mut [u8; PAGE_BYTES] {
-        &mut *self.0
+        #[cfg(feature = "std")]
+        {
+            &mut *Arc::make_mut(&mut self.0)
+        }
+        #[cfg(not(feature = "std"))]
+        {
+            &mut *self.0
+        }
     }
 
     /// Store a word to this page
