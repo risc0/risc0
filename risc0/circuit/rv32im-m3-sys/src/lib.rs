@@ -69,7 +69,10 @@ unsafe extern "C" {
         segment: *const RawSegment,
     ) -> RawError;
 
-    pub fn risc0_circuit_rv32im_m3_preflight(ctx: *const ProverContext) -> RawError;
+    pub fn risc0_circuit_rv32im_m3_preflight(
+        ctx: *const ProverContext,
+        is_done: *mut u32,
+    ) -> RawError;
 
     pub fn risc0_circuit_rv32im_m3_prove(ctx: *const ProverContext) -> RawError;
 }

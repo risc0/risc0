@@ -770,7 +770,7 @@ struct Emulator {
     }
   }
 
-  bool run(size_t rowCount) {
+  bool run(size_t rowCount, uint32_t endCycle) {
     doResume();
     while (!done && trace.getRowCount() +
                             ceilDiv(curCycle, 24) + // How many rows we need for cycle table
@@ -859,10 +859,10 @@ struct Emulator {
 
 } // namespace
 
-bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount) {
+bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount, uint32_t endCycle) {
   Emulator emu(trace, image, io, rowCount);
   emu.addTables();
-  bool done = emu.run(rowCount);
+  bool done = emu.run(rowCount, endCycle);
   LOG(1, "Cycle = " << emu.curCycle);
   emu.commit();
   return done;

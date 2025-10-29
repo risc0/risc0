@@ -280,12 +280,13 @@ impl Datasheet {
 
         let session = execute_elf(env, &LOOP_ELF).unwrap();
         let segment = session.segments[0].resolve().unwrap();
-        let receipt = prover.prove_segment(&ctx, &segment).unwrap();
+        let receipts = prover.prove_segment(&ctx, &segment).unwrap();
+        let receipt = receipts.first().unwrap();
 
         tracker().lock().unwrap().reset();
 
         let start = Instant::now();
-        let receipt = black_box(prover.lift(&receipt).unwrap());
+        let receipt = black_box(prover.lift(receipt).unwrap());
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;

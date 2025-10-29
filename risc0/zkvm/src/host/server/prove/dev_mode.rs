@@ -20,6 +20,7 @@ use risc0_circuit_keccak::KECCAK_CONTROL_ROOT;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Deserializer, Serialize};
 
+use super::PreflightIter;
 use crate::{
     ExecutorEnv, MaybePruned, PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim,
     ReceiptKind, Segment, Session, VerifierContext, WorkClaim,
@@ -99,16 +100,6 @@ pub struct DevModeProver {
     delay: Option<DevModeDelay>,
 }
 
-/// Utility macro to compress repeated checks that dev mode is not disabled.
-macro_rules! ensure_dev_mode_allowed {
-    () => {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
-    };
-}
-
 impl DevModeProver {
     /// Create a DevModeProver without delay.
     pub fn new() -> Self {
@@ -140,7 +131,7 @@ impl ProverServer for DevModeProver {
         );
 
         ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
-        ensure_dev_mode_allowed!();
+        ensure_dev_mode_allowed()?;
 
         let session_claim = session
             .claim()
@@ -177,28 +168,33 @@ impl ProverServer for DevModeProver {
         self.prove_session(ctx, &session)
     }
 
-    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
-        ensure_dev_mode_allowed!();
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
+        ensure_dev_mode_allowed()?;
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.segment_preflight);
         }
 
-        Ok(PreflightResults {
+        let preflight_results = PreflightResults {
+            #[cfg(not(feature = "rv32im-m3"))]
             inner: Default::default(),
+            #[cfg(feature = "rv32im-m3")]
+            prover: None,
             terminate_state: segment.inner.claim.terminate_state,
             output: segment.output.clone(),
             segment_index: segment.index,
-        })
+        };
+
+        Ok(Box::new(std::iter::once(Ok(preflight_results))))
     }
 
-    fn prove_segment_core(
+    fn prove_preflight(
         &self,
         ctx: &VerifierContext,
         preflight_results: PreflightResults,
     ) -> Result<SegmentReceipt> {
         ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
-        ensure_dev_mode_allowed!();
+        ensure_dev_mode_allowed()?;
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.prove_segment_core);
@@ -224,7 +220,7 @@ impl ProverServer for DevModeProver {
         &self,
         request: &crate::ProveKeccakRequest,
     ) -> Result<SuccinctReceipt<Unknown>> {
-        ensure_dev_mode_allowed!();
+        ensure_dev_mode_allowed()?;
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.prove_keccak);
@@ -275,7 +271,7 @@ impl ProverServer for DevModeProver {
         conditional: &SuccinctReceipt<ReceiptClaim>,
         assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure_dev_mode_allowed!();
+        ensure_dev_mode_allowed()?;
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.resolve);
@@ -312,7 +308,7 @@ impl ProverServer for DevModeProver {
         a: &SuccinctReceipt<Unknown>,
         b: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<UnionClaim>> {
-        ensure_dev_mode_allowed!();
+        ensure_dev_mode_allowed()?;
 
         if let Some(delay) = self.delay {
             std::thread::sleep(delay.union);
@@ -353,7 +349,7 @@ impl ProverServer for DevModeProver {
 
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
         ensure!(opts.dev_mode(), ERR_DEV_MODE_DISABLED);
-        ensure_dev_mode_allowed!();
+        ensure_dev_mode_allowed()?;
 
         if let Some(delay) = &self.delay {
             match opts.receipt_kind {
@@ -381,7 +377,7 @@ impl ProverServer for DevModeProver {
 /// Private function used to simulate the delay of a lift.
 /// Return type is generic to handle any type of output claim.
 fn fake_recursion<Claim>(delay: Option<Duration>) -> Result<SuccinctReceipt<Claim>> {
-    ensure_dev_mode_allowed!();
+    ensure_dev_mode_allowed()?;
 
     if let Some(delay) = delay {
         std::thread::sleep(delay);
@@ -410,4 +406,13 @@ where
 {
     let secs = f64::deserialize(deserializer)?;
     Ok(Duration::from_secs_f64(secs))
+}
+
+/// Utility macro to compress repeated checks that dev mode is not disabled.
+fn ensure_dev_mode_allowed() -> Result<()> {
+    ensure!(
+        cfg!(not(feature = "disable-dev-mode")),
+        ERR_DEV_MODE_DISABLED
+    );
+    Ok(())
 }

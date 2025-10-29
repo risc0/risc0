@@ -78,6 +78,7 @@ dual = ["risc0-zkvm/dual"]
 metal = ["risc0-zkvm/metal"]
 redis = ["risc0-zkvm/redis"]
 r0vm-ver-compat = ["risc0-zkvm/r0vm-ver-compat"]
+rv32im-m3 = ["risc0-zkvm/rv32im-m3"]
 
 [lints]
 workspace = true

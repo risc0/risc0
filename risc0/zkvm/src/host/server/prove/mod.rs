@@ -50,6 +50,8 @@ mod private {
     impl Sealed for DevModeProver {}
 }
 
+pub type PreflightIter = Box<dyn Iterator<Item = Result<PreflightResults>>>;
+
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a
 /// [Receipt][crate::Receipt] that can be used to verify correct computation.
 pub trait ProverServer: private::Sealed {
@@ -70,17 +72,26 @@ pub trait ProverServer: private::Sealed {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo>;
 
     /// Prove the specified [Segment].
-    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+    fn prove_segment(
+        &self,
+        ctx: &VerifierContext,
+        segment: &Segment,
+    ) -> Result<Vec<SegmentReceipt>> {
         tracing::debug!("prove_segment");
-        let results = self.segment_preflight(segment)?;
-        self.prove_segment_core(ctx, results)
+        let mut receipts = vec![];
+        for chunk in self.segment_preflight(segment)? {
+            tracing::debug!("chunk");
+            let receipt = self.prove_preflight(ctx, chunk?)?;
+            receipts.push(receipt);
+        }
+        Ok(receipts)
     }
 
-    /// Run preflight on the specified [Segment].
-    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults>;
+    /// Perform preflight on a [Segment] to produce a sequence of [PreflightResults].
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter>;
 
-    /// Prove the specified [Segment] which has had preflight run on it.
-    fn prove_segment_core(
+    /// Prove the specified [PreflightResults].
+    fn prove_preflight(
         &self,
         ctx: &VerifierContext,
         preflight_results: PreflightResults,

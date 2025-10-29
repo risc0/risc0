@@ -96,7 +96,7 @@ bool Rv32imProver::preflight(rv32im::MemoryImage& image, HostIO& io, uint32_t* c
   PinnedArrayWO cpuAux(hal, aux);
   LOG(1, "Executing");
   Trace trace(rows, cpuRI.data(), cpuAux.data());
-  bool ret = emulate(trace, image, io, rows);
+  bool ret = emulate(trace, image, io, rows, 0);
   if (cyclesOut) {
     *cyclesOut = trace.getGlobals().finalCycle;
   }

@@ -186,10 +186,10 @@ const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustS
   return nullptr;
 }
 
-const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx) {
+const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx, uint32_t* isDone) {
   nvtx3::scoped_range range("preflight");
   try {
-    ctx->prover.preflight(ctx->image, ctx->io);
+    *isDone = ctx->prover.preflight(ctx->image, ctx->io);
   } catch (const std::exception& err) {
     LOG(0, "ERROR: " << err.what());
     return strdup(err.what());
