@@ -921,7 +921,7 @@ impl CpuProcessor {
 
         let gpu_queue = self.gpu_queue.clone();
         tokio::task::spawn_blocking(move || -> Result<_> {
-            for preflight_results in prover.get()?.preflight(&task.segment)? {
+            for preflight_results in prover.get()?.segment_preflight(&task.segment)? {
                 let tracing = tracing.clone();
                 gpu_queue
                     .blocking_send(GpuTaskMsg {
