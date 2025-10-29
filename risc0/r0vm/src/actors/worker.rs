@@ -570,9 +570,7 @@ impl GpuProcessor {
         let receipt = tokio::task::spawn_blocking(move || {
             let ctx =
                 VerifierContext::default().with_dev_mode(prover.delay.is_some() || prover.dev_mode);
-            prover
-                .get()?
-                .prove_segment_core(&ctx, *task.preflight_results)
+            prover.get()?.prove_preflight(&ctx, *task.preflight_results)
         })
         .await
         .map_err(|e| Error::new(format!("JoinHandle error: prove_segment task: {e}")))??;
@@ -920,25 +918,29 @@ impl CpuProcessor {
             delay: self.delay,
             dev_mode,
         };
-        let preflight_results = tokio::task::spawn_blocking(move || -> Result<_> {
-            Ok(Box::new(prover.get()?.segment_preflight(&task.segment)?))
+
+        let gpu_queue = self.gpu_queue.clone();
+        tokio::task::spawn_blocking(move || -> Result<_> {
+            for preflight_results in prover.get()?.preflight(&task.segment)? {
+                let tracing = tracing.clone();
+                gpu_queue
+                    .blocking_send(GpuTaskMsg {
+                        header: header.clone(),
+                        task: GpuTask::ProveSegmentCore(ProveSegmentCoreTask {
+                            preflight_results: Box::new(preflight_results?),
+                            dev_mode,
+                        }),
+                        to_reserve: to_reserve.clone(),
+                        reserved: reserved.clone(),
+                        allocate_tracer: TaskTracer::new(&tracing, "allocate GPU"),
+                        tracing,
+                    })
+                    .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
+            }
+            Ok(())
         })
         .await
         .map_err(|e| Error::new(format!("JoinHandle error: preflight task: {e}")))??;
-        self.gpu_queue
-            .send(GpuTaskMsg {
-                header,
-                task: GpuTask::ProveSegmentCore(ProveSegmentCoreTask {
-                    preflight_results,
-                    dev_mode,
-                }),
-                to_reserve,
-                reserved,
-                allocate_tracer: TaskTracer::new(&tracing, "allocate GPU"),
-                tracing,
-            })
-            .await
-            .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
 
         Ok(())
     }

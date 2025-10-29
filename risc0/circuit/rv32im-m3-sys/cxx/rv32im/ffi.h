@@ -39,7 +39,7 @@ RustSliceFp risc0_circuit_rv32im_m3_prover_transcript(ProverContext* ctx);
 
 const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustSegment* segment);
 
-const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx);
+const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx, uint32_t* isDone);
 
 const char* risc0_circuit_rv32im_m3_prove(ProverContext* ctx);
 
