@@ -40,3 +40,11 @@ template <typename C> struct BigIntCpuStateArgument {
   Val<C> pcWord;
   Val<C> mm;
 };
+
+template <typename C> struct P2StepArgument {
+  Val<C> cycle;
+  Val<C> countBits;
+  Val<C> inWordAddr;
+  Val<C> outWordAddr;
+  ValDigest<C> state;
+};

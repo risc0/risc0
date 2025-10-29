@@ -550,6 +550,9 @@ struct Emulator {
     case HOST_ECALL_WRITE:
       do_ECALL_WRITE();
       break;
+    case HOST_ECALL_POSEIDON2:
+      do_ECALL_P2();
+      break;
     case HOST_ECALL_BIGINT:
       do_ECALL_BIG_INT();
       break;
@@ -667,6 +670,74 @@ struct Emulator {
       throw std::runtime_error("Invalid host write");
     }
     writeReg(wit.a0, REG_A0, ret);
+  }
+
+  void do_ECALL_P2() {
+    auto& wit = trace.makeEcallP2();
+    wit.cycle = curCycle;
+    wit.fetch = dinst->fetch;
+    readReg(wit.a0, REG_A0);
+    readReg(wit.a1, REG_A1);
+    readReg(wit.a2, REG_A2);
+    readReg(wit.a3, REG_A3);
+    readReg(wit.a7, REG_A7);
+    uint32_t stateInWordAddr = wit.a0.value ? wit.a0.value / 4 : P2_ZEROS_WORD;
+    uint32_t stateOutWordAddr = wit.a0.value ? wit.a0.value / 4 : P2_TRASH_WORD;
+    Digest state;
+    for (size_t i = 0; i < CELLS_DIGEST; i++) {
+      state.words[i] = Fp(readPhysMemory(wit.stateIn[i], stateInWordAddr + i)).asRaw();
+    }
+    curCycle++;
+    P2State p2;
+    p2.cycle = curCycle;
+    p2.count = wit.a3.value & 0xffff;
+    p2.inWordAddr = wit.a1.value / 4;
+    p2.outWordAddr = wit.a2.value / 4;
+    p2.isElem = (wit.a3.value & PFLAG_IS_ELEM) != 0;
+    p2.isCheck = (wit.a3.value & PFLAG_CHECK_OUT) != 0;
+    while (p2.count > 0) {
+      auto& p2Wit = trace.makeP2Step();
+      p2Wit.state = p2;
+      std::array<Fp, CELLS_RATE> in;
+      for (size_t i = 0; i < CELLS_DIGEST; i++) {
+        uint32_t i2 = CELLS_DIGEST + i;
+        p2Wit.stateIn[i] = Fp::fromRaw(state.words[i]).asUInt32();
+        if (p2.isElem) {
+          in[i] = readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i);
+          in[i2] = readPhysMemory(p2Wit.dataIn[i2], p2.inWordAddr + i2);
+        } else {
+          uint32_t word = readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i);
+          readPhysMemory(p2Wit.dataIn[i2], P2_ZEROS_WORD + i);
+          in[2 * i] = word & 0xffff;
+          in[2 * i + 1] = word >> 16;
+        }
+      }
+      Digest out = memory.getP2().doBlock(*reinterpret_cast<Digest*>(&state), in, true);
+      state = memory.getP2().doBlock(*reinterpret_cast<Digest*>(&state), in, false);
+      uint32_t outAddr = (p2.count != 1) ? P2_TRASH_WORD : p2.outWordAddr;
+      for (size_t i = 0; i < CELLS_DIGEST; i++) {
+        p2Wit.stateOut[i] = Fp::fromRaw(state.words[i]).asUInt32();
+        writePhysMemory(p2Wit.dataOut[i], outAddr + i, Fp::fromRaw(out.words[i]).asUInt32());
+        if (p2.isCheck && p2.count == 1) {
+          if (p2Wit.dataOut[i].prevValue != p2Wit.dataOut[i].value) {
+            DLOG("Mismatch on check");
+            throw std::runtime_error("BAD");
+          }
+        }
+      }
+      if (p2.isElem) {
+        p2.inWordAddr += 16;
+      } else {
+        p2.inWordAddr += 8;
+      }
+      curCycle++;
+      p2.cycle = curCycle;
+      p2.count--;
+    }
+    for (size_t i = 0; i < CELLS_DIGEST; i++) {
+      writePhysMemory(
+          wit.stateOut[i], stateOutWordAddr + i, Fp::fromRaw(state.words[i]).asUInt32());
+    }
   }
 
   void do_ECALL_BIG_INT() {

@@ -39,6 +39,7 @@
   ARGUMENT_TYPE(PageInPart)                                                                        \
   ARGUMENT_TYPE(PageOut)                                                                           \
   ARGUMENT_TYPE(PageOutPart)                                                                       \
+  ARGUMENT_TYPE(P2Step)                                                                            \
   ARGUMENT_TYPE(ReadState)
 
 enum class ArgumentType {

@@ -45,6 +45,7 @@ void runTestBinary(const std::string& kernel, rv32im::HostIO& io, size_t po2) {
 
 int main() {
   TestIO io;
+  runTestBinary("rv32im/test/test_p2_kernel", io, 13);
   runTestBinary("rv32im/test/test_bigint_kernel", io, 13);
   runTestBinary("rv32im/test/test_io_kernel", io, 13);
   if (io.out != "Hello World") {

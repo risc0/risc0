@@ -38,6 +38,7 @@ template <typename C> struct RegU32 {
   FDEV void set(CTX, uint32_t val) DEV;
   FDEV inline void finalize(CTX) DEV {}
   FDEV ValU32<C> get() DEV;
+  FDEV Val<C> flat() DEV;
   FDEV void verify(CTX) DEV {}
   FDEV void addArguments(CTX) DEV {}
 };

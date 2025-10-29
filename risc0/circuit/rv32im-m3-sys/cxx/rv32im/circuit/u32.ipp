@@ -21,6 +21,10 @@ template <typename C> FDEV ValU32<C> RegU32<C>::get() DEV {
   return ValU32<C>(low.get(), high.get());
 }
 
+template <typename C> FDEV Val<C> RegU32<C>::flat() DEV {
+  return high.get() * 0x10000 + low.get();
+}
+
 template <typename C> FDEV void AddU32<C>::set(CTX, uint32_t a, uint32_t b, bool carryIn) DEV {
   uint32_t low17 = (a & 0xffff) + (b & 0xffff) + carryIn;
   low.set(ctx, low17 & 0xffff);

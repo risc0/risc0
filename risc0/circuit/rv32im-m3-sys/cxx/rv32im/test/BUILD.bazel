@@ -14,7 +14,7 @@ cc_library(
         "test_prove.h",
     ],
     deps = [
-        "//hal/pick",
+        "//hal/cpu",
         "//prove",
         "//verify",
     ],
@@ -30,6 +30,17 @@ risc0_cc_kernel_binary(
     srcs = [
         "benchmark_kernel.cpp",
         "entry.s",
+    ],
+)
+
+risc0_cc_kernel_binary(
+    name = "test_p2_kernel",
+    srcs = [
+        "entry.s",
+        "test_p2_kernel.cpp",
+    ],
+    deps = [
+        "//rv32im/base:platform",
     ],
 )
 
@@ -83,6 +94,7 @@ cc_test(
     name = "test_kernels",
     srcs = ["test_kernels.cpp"],
     data = [
+        ":test_p2_kernel",
         ":test_bigint_kernel",
         ":test_io_kernel",
     ],
