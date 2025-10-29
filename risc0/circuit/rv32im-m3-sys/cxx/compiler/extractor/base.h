@@ -25,6 +25,8 @@
 #include "zkp/fp.h"
 #include "zkp/fpext.h"
 
+#include <type_traits>
+
 using namespace risc0;
 
 struct VerifyFwd {
@@ -33,13 +35,18 @@ struct VerifyFwd {
     VerifyFwd::apply(ctx, obj, args...);
   }
 
-  template <typename T, typename... Args>
+  template <typename T,
+            typename... Args,
+            std::enable_if_t<!std::is_same<std::remove_cv_t<T>, char>::value, int> = 0>
   static void apply(RecordingContext& ctx, T& obj, Args... args) {
     obj.template applyInner<VerifyFwd>(ctx, args...);
     obj.verify(ctx, args...);
   }
 
-  template <typename T, size_t N, typename... Args>
+  template <typename T,
+            size_t N,
+            typename... Args,
+            std::enable_if_t<!std::is_same<std::remove_cv_t<T>, char>::value, int> = 0>
   static void apply(RecordingContext& ctx, T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; i++) {
       VerifyFwd::apply(ctx, t[i], args...);

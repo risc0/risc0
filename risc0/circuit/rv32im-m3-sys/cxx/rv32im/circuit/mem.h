@@ -77,11 +77,11 @@ template <typename C> struct VirtAddrBlock {
   BitReg<C> bit9;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
-    T::apply(ctx, vpage);
-    T::apply(ctx, ppage);
-    T::apply(ctx, lowByte);
-    T::apply(ctx, bit8);
-    T::apply(ctx, bit9);
+    T::apply(ctx, "vpage", vpage);
+    T::apply(ctx, "ppage", ppage);
+    T::apply(ctx, "lowByte", lowByte);
+    T::apply(ctx, "bit8", bit8);
+    T::apply(ctx, "bit9", bit9);
   }
 
   FDEV Val<C> getWordAddr() DEV {
@@ -103,9 +103,9 @@ template <typename C> struct VirtMemReadBlock {
   RegU32<C> data;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
-    T::apply(ctx, addr, cycle);
-    T::apply(ctx, prevCycle);
-    T::apply(ctx, data);
+    T::apply(ctx, "addr", addr, cycle);
+    T::apply(ctx, "prevCycle", prevCycle);
+    T::apply(ctx, "data", data);
   }
 
   FDEV Val<C> getWordAddr() DEV { return addr.getWordAddr(); }
@@ -125,10 +125,10 @@ template <typename C> struct VirtMemWriteBlock {
   RegU32<C> data;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
-    T::apply(ctx, addr, cycle);
-    T::apply(ctx, prevCycle);
-    T::apply(ctx, prevData);
-    T::apply(ctx, data);
+    T::apply(ctx, "addr", addr, cycle);
+    T::apply(ctx, "prevCycle", prevCycle);
+    T::apply(ctx, "prevData", prevData);
+    T::apply(ctx, "data", data);
   }
 
   FDEV Val<C> getWordAddr() DEV { return addr.getWordAddr(); }
@@ -143,11 +143,11 @@ template <typename C> struct VirtAddrResolveBlock {
   CONSTANT static char NAME[] = "VirtAddrResolveBlock";
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cacheCycle);
-    T::apply(ctx, addr, addr.readCycle.get());
-    T::apply(ctx, vinfo, addr.readCycle.get());
-    T::apply(ctx, pte1, addr.readCycle.get());
-    T::apply(ctx, pte2, addr.readCycle.get());
+    T::apply(ctx, "cacheCycle", cacheCycle);
+    T::apply(ctx, "addr", addr, addr.readCycle.get());
+    T::apply(ctx, "vinfo", vinfo, addr.readCycle.get());
+    T::apply(ctx, "pte1", pte1, addr.readCycle.get());
+    T::apply(ctx, "pte2", pte2, addr.readCycle.get());
   }
 
   Reg<C> cacheCycle;

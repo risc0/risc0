@@ -58,14 +58,14 @@ public:
     populator->pop();
   }
 
-  template <typename T, size_t N>
-  static void apply(RecordingContext& ctx, const char* memberName, T (&t)[N]) {
+  template <typename T, size_t N, typename... Args>
+  static void apply(RecordingContext& ctx, const char* memberName, T (&t)[N], Args... args) {
     Populator* populator = PopulatorSingleton::get();
     populator->lookup(memberName);
     for (size_t i = 0; i < N; i++) {
       mlir::Value element = populator->subscript(i);
       populator->map.insert(&(t[i]), element);
-      t[i].template applyInner<Visitor>(ctx);
+      t[i].template applyInner<Visitor>(ctx, args...);
       populator->pop();
     }
     populator->pop();

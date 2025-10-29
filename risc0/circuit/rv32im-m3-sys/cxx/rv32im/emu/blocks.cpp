@@ -52,7 +52,10 @@ struct AddArgsFwd {
     obj.addArguments(ctx, args...);
   }
 
-  template <typename T, size_t N, typename... Args>
+  template <typename T,
+            size_t N,
+            typename... Args,
+            std::enable_if_t<!std::is_same<std::remove_cv_t<T>, char>::value, int> = 0>
   static void apply(ArgCountContext& ctx, T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; i++) {
       AddArgsFwd::apply(ctx, t[i], args...);

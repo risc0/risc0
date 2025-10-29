@@ -108,13 +108,13 @@ struct FinalizeFwd {
   }
 
   template <typename T, typename C, typename... Args>
-  FDEV static void apply(MTHR C& ctx, MDEV T& obj, Args... args) {
+  FDEV static typename if_not_char<T, void>::type apply(MTHR C& ctx, MDEV T& obj, Args... args) {
     obj.template applyInner<FinalizeFwd>(ctx, args...);
     obj.finalize(ctx);
   }
 
   template <typename T, typename C, size_t N, typename... Args>
-  FDEV static void apply(MTHR C& ctx, MDEV T (&t)[N], Args... args) {
+  FDEV static typename if_not_char<T, void>::type apply(MTHR C& ctx, MDEV T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; i++) {
       FinalizeFwd::apply(ctx, t[i], args...);
     }

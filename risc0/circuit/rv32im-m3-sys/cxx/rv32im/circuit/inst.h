@@ -54,9 +54,9 @@ template <typename C> struct InstSuspendBlock {
   PhysMemWriteBlock<C> writeMode;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, writePc, cycle.get());
-    T::apply(ctx, writeMode, cycle.get());
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "writePc", writePc, cycle.get());
+    T::apply(ctx, "writeMode", writeMode, cycle.get());
   }
 
   FDEV void set(CTX, InstSuspendWitness) DEV;
@@ -73,7 +73,7 @@ template <typename C> struct SourceReg {
   Reg<C> idx;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> wordAddr, Val<C> mode) DEV {
-    T::apply(ctx, idx);
+    T::apply(ctx, "idx", idx);
   }
 
   FDEV void set(CTX, Val<C> wordAddr) DEV;
