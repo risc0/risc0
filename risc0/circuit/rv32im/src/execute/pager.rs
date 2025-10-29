@@ -23,7 +23,7 @@ use bit_vec::BitVec;
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
 
-use super::{node_idx, platform::*};
+use super::{exec_trace, node_idx, platform::*};
 use crate::execute::unlikely;
 
 pub const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
@@ -199,8 +199,7 @@ impl PageTable {
     }
 
     fn clear(&mut self) {
-        // You would think its faster to reuse the memory, but filling it with zeros is
-        // slower
+        // You would think its faster to reuse the memory, but filling it with zeros is slower
         // than just allocating a new piece of zeroed memory.
         self.table = vec![Self::INVALID_IDX; NUM_PAGES];
     }
@@ -359,16 +358,6 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
-        if let Some(cache_idx) = self.page_table.get(page_idx) {
-            // Loaded, get from cache
-            Ok(self.page_cache[cache_idx].data().clone())
-        } else {
-            // Unloaded, peek into image
-            Ok(self.image.get_page(page_idx)?.data().clone())
-        }
-    }
-
     #[inline(always)]
     fn load_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
@@ -490,7 +479,7 @@ impl PagedMemory {
 
             let page_state = self.page_states.get(node_idx);
             let page_idx = page_idx(node_idx);
-            tracing::trace!("commit: {page_idx:#08x}, state: {page_state:?}");
+            exec_trace!("commit: {page_idx:#08x}, state: {page_state:?}");
 
             // Update dirty pages into the image that accumulates over a session.
             if page_state == PageState::Dirty {
@@ -506,7 +495,7 @@ impl PagedMemory {
 
     #[inline(always)]
     fn load_page(&mut self, page_idx: u32) -> Result<()> {
-        tracing::trace!("load_page: {page_idx:#08x}");
+        exec_trace!("load_page: {page_idx:#08x}");
         let page = self.image.get_page(page_idx)?;
         self.page_table.set(page_idx, self.page_cache.len());
         self.page_cache.push(page);
@@ -518,7 +507,7 @@ impl PagedMemory {
 
     #[inline(always)]
     fn fixup_costs(&mut self, mut node_idx: u32, goal: PageState) {
-        tracing::trace!("fixup: {node_idx:#010x}: {goal:?}");
+        exec_trace!("fixup: {node_idx:#010x}: {goal:?}");
         while node_idx != 0 {
             let state = self.page_states.get(node_idx);
             if goal > state {

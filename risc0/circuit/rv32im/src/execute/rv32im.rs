@@ -303,11 +303,6 @@ impl Emulator {
         }
 
         let word = ctx.load_memory(pc.waddr())?;
-        if word & 0x03 != 0x03 {
-            ctx.trap(Exception::IllegalInstruction(word, 0))?;
-            return Ok(());
-        }
-
         if let Some(kind) = self.exec_rv32im(ctx, word)? {
             ctx.on_normal_end(kind)?
         }
