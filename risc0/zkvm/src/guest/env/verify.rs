@@ -182,7 +182,24 @@ pub fn verify_assumption(claim: Digest, control_root: Digest) -> Result<(), Infa
     Ok(())
 }
 
-/// TODO
+/// Register a generic assumption for later resolution by the host (union/accelerators).
+///
+/// This is similar to [`verify_assumption`] but does not require a matching receipt to be
+/// present on the host at call time. Instead, it enqueues an unresolved [Assumption] with the
+/// given `claim` and `control_root`. The host is expected to later provide a receipt that
+/// resolves this assumption (for example, a union-aggregated accelerator proof).
+///
+/// - `claim`: Digest of the claimed statement (often a non-zkVM claim such as an accelerator
+///   or union root).
+/// - `control_root`: Commitment to the set of recursion programs allowed to resolve the claim.
+///   Use [`Digest::ZERO`] for self-composition; otherwise provide a specific control root (e.g.
+///   `KECCAK_CONTROL_ROOT` for a single accelerator, or `ALLOWED_CONTROL_ROOT` for unions).
+///
+/// Returns `Ok(())` and records the assumption unconditionally.
+///
+/// Do not use this for verifying zkVM receipts directly. Prefer [`verify`] or
+/// [`verify_integrity`] (and [`verify_assumption`]) when a matching receipt is expected to be
+/// available on the host immediately, as those variants enforce existence.
 pub fn verify_assumption2(claim: Digest, control_root: Digest) -> Result<(), Infallible> {
     unsafe {
         sys_verify_integrity2(claim.as_ref(), control_root.as_ref());
