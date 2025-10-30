@@ -73,6 +73,7 @@ void loadV3(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
   uint32_t entry = risc0::loadElf(ArrayRef(elfBytes.data(), elfBytes.size()), words);
   words[CSR_WORD(MNOV2COMPAT)] = 1;
   words[CSR_WORD(MEPC)] = entry;
+  words[CSR_WORD(MPREVMODE)] = MODE_SUPERVISOR;
   words[CSR_WORD(MSPC)] = firmwareEntry;
   words[CSR_WORD(MSMODE)] = MODE_MACHINE;
   fillExpandTable(words);

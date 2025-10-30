@@ -21,13 +21,21 @@
 
 using namespace risc0;
 
+class LogIO : public rv32im::HostIO {
+  uint32_t onWrite(uint32_t fd, const uint8_t* data, uint32_t size) override {
+    LOG(fd, std::string(reinterpret_cast<const char*>(data), size));
+    return size;
+  }
+  uint32_t onRead(uint32_t fd, uint8_t* data, uint32_t size) override { return 0; }
+};
+
 void runTest(const std::string& name, size_t po2 = 13) {
-  rv32im::NullHostIO io;
+  LOG(0, "Running test: " << name);
+  LogIO io;
   std::map<uint32_t, uint32_t> words;
   rv32im::loadV3(words, "rv32im/rvtest/" + name);
   auto image = rv32im::MemoryImage::fromWords(words);
-  // TODO: Make this work
-  // runTest(image, io, po2);
+  runTest(image, io, po2);
 }
 
 int main() {
@@ -40,6 +48,6 @@ int main() {
   runTest("amoor_w");
   runTest("amoswap_w");
   runTest("amoxor_w");
-  runTest("lrsc");
+  runTest("lrsc", 17);
   return 0;
 }

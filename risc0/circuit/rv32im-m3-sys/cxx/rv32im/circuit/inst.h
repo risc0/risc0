@@ -19,53 +19,6 @@
 #include "rv32im/circuit/is_zero.h"
 #include "rv32im/witness/inst.h"
 
-// A 'resume' instruction reads the PC and the machine mode
-// and initiates normal executions, always occurs on cycle 1
-template <typename C> struct InstResumeBlock {
-  CONSTANT static char NAME[] = "InstResumeBlock";
-
-  PhysMemReadBlock<C> readV2Compat;
-  PhysMemReadBlock<C> readPc;
-  PhysMemReadBlock<C> readMode;
-  PhysMemWriteBlock<C> writeVersion;
-
-  template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, readV2Compat, 1);
-    T::apply(ctx, readPc, 1);
-    T::apply(ctx, readMode, 1);
-    T::apply(ctx, writeVersion, 1);
-  }
-
-  FDEV void set(CTX, InstResumeWitness wit) DEV;
-  FDEV inline void finalize(CTX) DEV {}
-
-  FDEV void verify(CTX) DEV;
-  FDEV void addArguments(CTX) DEV;
-};
-
-// A 'suspend' instruction writes the PC and machine mode and
-// terminates execution.
-template <typename C> struct InstSuspendBlock {
-  CONSTANT static char NAME[] = "InstSuspendBlock";
-
-  Reg<C> cycle;
-  Reg<C> iCacheCycle;
-  PhysMemWriteBlock<C> writePc;
-  PhysMemWriteBlock<C> writeMode;
-
-  template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, writePc, cycle.get());
-    T::apply(ctx, writeMode, cycle.get());
-  }
-
-  FDEV void set(CTX, InstSuspendWitness) DEV;
-  FDEV inline void finalize(CTX) DEV {}
-
-  FDEV void verify(CTX) DEV;
-  FDEV void addArguments(CTX) DEV;
-};
-
 // A helper to extract + verify a source register given a word address
 template <typename C> struct SourceReg {
   CONSTANT static char NAME[] = "SourceReg";
@@ -457,50 +410,6 @@ template <typename C> struct InstAuipcBlock {
   }
 
   FDEV void set(CTX, InstAuipcWitness wit) DEV;
-  FDEV inline void finalize(CTX) DEV {}
-
-  FDEV void verify(CTX) DEV;
-  FDEV void addArguments(CTX) DEV;
-};
-
-template <typename C> struct InstEcallBlock {
-  CONSTANT static char NAME[] = "InstEcallBlock";
-
-  Reg<C> cycle;
-  FetchBlock<C> fetch;
-  PhysMemWriteBlock<C> writeSavePc;
-  PhysMemReadBlock<C> readDispatch;
-
-  template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, writeSavePc, cycle.get());
-    T::apply(ctx, readDispatch, cycle.get());
-  }
-
-  FDEV void set(CTX, InstEcallWitness wit) DEV;
-  FDEV inline void finalize(CTX) DEV {}
-
-  FDEV void verify(CTX) DEV;
-  FDEV void addArguments(CTX) DEV;
-};
-
-template <typename C> struct InstMretBlock {
-  CONSTANT static char NAME[] = "InstMretBlock";
-
-  Reg<C> cycle;
-  FetchBlock<C> fetch;
-  PhysMemReadBlock<C> readPc;
-  AddU32<C> sumPc;
-
-  template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readPc, cycle.get());
-    T::apply(ctx, sumPc, readPc.data.get(), ValU32<C>(4, 0));
-  }
-
-  FDEV void set(CTX, InstMretWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
   FDEV void verify(CTX) DEV;

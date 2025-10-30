@@ -13,9 +13,15 @@ _start:
   call start
 
 .extern onTrap
+.extern onEcall
 
 .global _trapEntry
 _trapEntry:
   call onTrap 
+  mret
+
+.global _ecallEntry
+_ecallEntry:
+  call onEcall
   mret
 

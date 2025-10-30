@@ -18,6 +18,7 @@
 #include "rv32im/circuit/ecall.h"
 #include "rv32im/circuit/globals.h"
 #include "rv32im/circuit/inst.h"
+#include "rv32im/circuit/sys.h"
 #include "rv32im/circuit/io.h"
 #include "rv32im/circuit/paging.h"
 #include "rv32im/circuit/poseidon2.h"

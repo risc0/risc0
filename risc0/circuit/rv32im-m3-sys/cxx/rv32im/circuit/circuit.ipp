@@ -68,6 +68,7 @@
 #include "rv32im/circuit/ecall.ipp"
 #include "rv32im/circuit/globals.ipp"
 #include "rv32im/circuit/inst.ipp"
+#include "rv32im/circuit/sys.ipp"
 #include "rv32im/circuit/io.ipp"
 #include "rv32im/circuit/is_zero.ipp"
 #include "rv32im/circuit/lookups.ipp"

@@ -111,6 +111,13 @@ struct Emulator {
     record.value = value;
   }
 
+  inline void undoPhysMemory(PhysMemReadWitness& record) {
+    uint32_t pageId = record.wordAddr >> MPAGE_SIZE_WORDS_PO2;
+    PageDetails* page = pages[pageId];
+    uint32_t wordNum = record.wordAddr & MPAGE_MASK_WORDS;
+    (*page)[wordNum].cycle = record.prevCycle;
+  }
+
   inline uint32_t peekVirtMemory(uint32_t wordAddr) {
     return peekPhysMemory(wordAddr); // TODO
   }
@@ -138,6 +145,13 @@ struct Emulator {
     record.prevCycle = phys.prevCycle;
     record.prevValue = phys.prevValue;
     record.value = phys.value;
+  }
+
+  inline void undoVirtMemory(VirtMemReadWitness& record) {
+    PhysMemReadWitness phys;
+    phys.wordAddr = (record.addr.ppage << VPAGE_SIZE_WORDS_PO2) | record.addr.wordOffset;
+    phys.prevCycle = record.prevCycle;
+    undoPhysMemory(phys);
   }
 
 #define UNIT_COMMON(name)                                                                          \
@@ -291,7 +305,7 @@ struct Emulator {
       writePhysMemory(resumeWit.version, V2_COMPAT_VERSION, RV32IM_CIRCUIT_VERSION);
     } else {
       pc = readPhysMemory(resumeWit.pc, CSR_WORD(MSPC));
-      setMode(readPhysMemory(resumeWit.pc, CSR_WORD(MSMODE)));
+      setMode(readPhysMemory(resumeWit.mode, CSR_WORD(MSMODE)));
       writePhysMemory(resumeWit.version, CSR_WORD(MVERSION), RV32IM_CIRCUIT_VERSION);
     }
     curCycle++;
@@ -312,8 +326,22 @@ struct Emulator {
   }
 
   void trap(const std::string& reason) {
-    // TODO: Properly implement trap handling
-    throw std::runtime_error("Trap: " + reason);
+    DLOG("Trapping: " << reason);
+    if (mode == MODE_MACHINE) {
+      throw std::runtime_error("Double Trap: " + reason);
+    }
+
+    auto& trapWit = trace.makeInstTrap();
+    trapWit.cycle = curCycle;
+    trapWit.iCacheCycle = iCacheCycle;
+    writePhysMemory(trapWit.MEPC, CSR_WORD(MEPC), pc);
+    writePhysMemory(trapWit.MPREVMODE, CSR_WORD(MPREVMODE), mode);
+    newPc = readPhysMemory(trapWit.MNONDETTRAP, CSR_WORD(MNONDETTRAP));
+    setMode(MODE_MACHINE);
+  }
+
+  void fatal(const std::string& reason) {
+    throw std::runtime_error("Fatal Error: " + reason);
   }
 
   template <uint32_t opt> inline void do_INST_REG() {
@@ -332,8 +360,9 @@ struct Emulator {
     wit.out1 = unit->out1;
     uint32_t rdVal = (ok == OUT_0 ? unit->out0 : unit->out1);
     writeReg(wit.rd, dinst->rd, rdVal);
-    DLOG("  rs1Val = " << rs1Val << ", rs2Val = " << rs2Val);
-    DLOG("  rdVal = " << rdVal);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{rs1Val});
+    DLOG("  RS2 = " << uint32_t(dinst->rs2) << ", val = " << HexWord{rs2Val});
+    DLOG("  RD = " << uint32_t(dinst->rd) << ", val = " << HexWord{rdVal});
   }
 
   template <uint32_t opt> inline void do_INST_IMM() {
@@ -353,11 +382,32 @@ struct Emulator {
     wit.out1 = unit->out1;
     uint32_t rdVal = (ok == OUT_0 ? unit->out0 : unit->out1);
     writeReg(wit.rd, dinst->rd, rdVal);
-    DLOG("  rs1Val = " << rs1Val << ", imm = " << wit.imm);
-    DLOG("  rdVal = " << rdVal);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{rs1Val});
+    DLOG("  IMM= " << HexWord{dinst->imm});
+    DLOG("  RD = " << uint32_t(dinst->rd) << ", val = " << HexWord{rdVal});
   }
 
   template <uint32_t opt> inline void do_INST_LOAD() {
+    constexpr Option optInner = Option(opt).popRet<InstKind>();
+    auto kind = optInner.peek<LoadKind>();
+    // Check alignment + trap if reqired
+    uint32_t peekAddr = peekReg(dinst->rs1) + dinst->imm;
+    uint32_t alignmentReq = 1;
+    switch (kind) {
+      case LOAD_LH: 
+      case LOAD_LHU:
+        alignmentReq = 2;
+        break;
+      case LOAD_LW:
+        alignmentReq = 4;
+        break;
+      default: break;
+    }
+    if (peekAddr % alignmentReq != 0) {
+      dinst->count--;
+      trap("Alignement error on load");
+      return;
+    }
     auto& wit = trace.makeInstLoad();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
@@ -368,45 +418,50 @@ struct Emulator {
     uint32_t shift = BITS_PER_BYTE * (addr % BYTES_PER_WORD);
     uint32_t in = readVirtMemory(wit.mem, addr / BYTES_PER_WORD);
     wit.options = opt;
-    constexpr Option optInner = Option(opt).popRet<InstKind>();
     uint32_t out;
-    switch (optInner.peek<LoadKind>()) {
+    switch (kind) {
     case LOAD_LB:
       out = uint32_t(int32_t(int8_t((in >> shift) & 0xff)));
       break;
     case LOAD_LH:
-      if (shift % 16 != 0) {
-        LOG(0, "Alignment error is LH, addr = " << addr);
-        trap("Alignment error");
-      }
       out = uint32_t(int32_t(int16_t((in >> shift) & 0xfffff)));
       break;
     case LOAD_LW:
-      if (shift != 0) {
-        LOG(0, "Alignment error in LW, addr = " << addr);
-        trap("Alignment error");
-      }
       out = in;
       break;
     case LOAD_LBU:
       out = (in >> shift) & 0xff;
       break;
     case LOAD_LHU:
-      if (shift % 16 != 0) {
-        LOG(0, "Alignment error in LHU, addr = " << addr);
-        trap("Alignment error");
-      }
       out = (in >> shift) & 0xffff;
       break;
     }
     writeReg(wit.rd, dinst->rd, out);
-    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value
-                    << std::dec);
-    DLOG("  IMM = " << std::hex << wit.imm << std::dec);
-    DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{rs1Val});
+    DLOG("  IMM = " << HexWord{dinst->imm});
+    DLOG("  RD = " << uint32_t(dinst->rd) << ", val = " << HexWord{out});
   }
 
   template <uint32_t opt> inline void do_INST_STORE() {
+    constexpr Option optInner = Option(opt).popRet<InstKind>();
+    auto kind = optInner.peek<StoreKind>();
+    // Check alignement
+    uint32_t peekAddr = peekReg(dinst->rs1) + dinst->imm;
+    uint32_t alignmentReq = 1;
+    switch (kind) {
+      case STORE_SH: 
+        alignmentReq = 2;
+        break;
+      case STORE_SW:
+        alignmentReq = 4;
+        break;
+      default: break;
+    }
+    if (peekAddr % alignmentReq != 0) {
+      dinst->count--;
+      trap("Alignement error on store");
+      return;
+    }
     auto& wit = trace.makeInstStore();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
@@ -415,7 +470,6 @@ struct Emulator {
     wit.rd = dinst->rd;
     wit.imm = dinst->imm;
     wit.options = opt;
-    constexpr Option optInner = Option(opt).popRet<InstKind>();
     uint32_t addr = rs1Val + wit.imm;
     uint32_t shift = BITS_PER_BYTE * (addr % BYTES_PER_WORD);
     uint32_t in = peekVirtMemory(addr / BYTES_PER_WORD);
@@ -425,30 +479,16 @@ struct Emulator {
       out = (in & ~(0xff << shift)) | ((data & 0xff) << shift);
       break;
     case STORE_SH:
-      if (shift % 16 != 0) {
-        LOG(0, "Alignment error in SH, addr = " << addr);
-        trap("Alignment error");
-      }
       out = (in & ~(0xffff << shift)) | ((data & 0xffff) << shift);
       break;
     case STORE_SW:
-      if (shift != 0) {
-        LOG(0, "Alignment error in SW, addr = " << addr);
-        LOG(0, "  RS1 = " << dinst->rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
-        LOG(0, "  RS2 = " << dinst->rs2 << ", value = " << std::hex << wit.rs2.value << std::dec);
-        LOG(0, "  IMM = " << std::hex << wit.imm << std::dec);
-        trap("Alignment error");
-      }
       out = data;
       break;
     }
     writeVirtMemory(wit.mem, addr / BYTES_PER_WORD, out);
-    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value
-                    << std::dec);
-    DLOG("  RS2 = " << uint32_t(dinst->rs2) << ", value = " << std::hex << wit.rs2.value
-                    << std::dec);
-    DLOG("  IMM = " << std::hex << wit.imm << std::dec);
-    DLOG("  MEM addr = " << std::hex << addr << ", value = " << out << std::dec);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{rs1Val});
+    DLOG("  RS1 = " << uint32_t(dinst->rs2) << ", val = " << HexWord{data});
+    DLOG("  IMM = " << HexWord{dinst->imm});
   }
 
   template <uint32_t opt> inline void do_INST_BRANCH() {
@@ -475,8 +515,9 @@ struct Emulator {
     if (doBr) {
       newPc = pc + wit.imm;
     }
-    DLOG("  rs1Val = " << rs1Val << ", rs2Val = " << rs2Val);
-    DLOG("  PC = " << std::hex << pc << std::dec);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{rs1Val});
+    DLOG("  RS2 = " << uint32_t(dinst->rs2) << ", val = " << HexWord{rs2Val});
+    DLOG("  NEW PC = " << HexWord{newPc});
   }
 
   template <uint32_t opt> inline void do_INST_JAL() {
@@ -488,8 +529,8 @@ struct Emulator {
     writeReg(wit.rd, dinst->rd, newPc);
     wit.imm = dinst->imm;
     newPc = pc + wit.imm;
-    DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);
-    DLOG("  PC = " << std::hex << pc << std::dec);
+    DLOG("  RD = " << uint32_t(dinst->rd) << ", val = " << HexWord{wit.rd.value});
+    DLOG("  PC = " << HexWord{pc});
   }
 
   template <uint32_t opt> inline void do_INST_JALR() {
@@ -501,10 +542,9 @@ struct Emulator {
     writeReg(wit.rd, dinst->rd, newPc);
     wit.imm = dinst->imm;
     newPc = rs1Val + wit.imm;
-    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value
-                    << std::dec);
-    DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);
-    DLOG("  PC = " << std::hex << pc << std::dec);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{wit.rs1.value});
+    DLOG("  RD = " << uint32_t(dinst->rd) << ", val = " << HexWord{wit.rd.value});
+    DLOG("  PC = " << HexWord{pc});
   }
 
   template <uint32_t opt> inline void do_INST_LUI() {
@@ -558,25 +598,30 @@ struct Emulator {
       break;
     default:
       LOG(0, "Invalid ECALL in machine mode: " << which);
-      trap("Invalid ECALL in machine mode");
+      fatal("Invalid ECALL in machine mode");
     }
   }
 
   template <uint32_t opt> inline void do_INST_MRET() {
     if (mode != MODE_MACHINE) {
+      dinst->count--;
       trap("MRET not in machine mode");
+      return;
     }
     auto& wit = trace.makeInstMret();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
     setMode(MODE_USER);
     uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
-    newPc = readPhysMemory(wit.readPc, mepcWord) + 4;
+    uint32_t add = v2Compat ? 4 : 0;
+    newPc = readPhysMemory(wit.readPc, mepcWord) + add;
   }
 
   template <uint32_t opt> inline void do_INST_SRET() {
     if (mode != MODE_SUPERVISOR) {
-      trap("MRET not in machine mode");
+      dinst->count--;
+      trap("SRET not in supervisor mode");
+      return;
     }
     // Actually do MRET anyway for now
     auto& wit = trace.makeInstMret();
@@ -609,7 +654,7 @@ struct Emulator {
     uint32_t buf = readReg(wit.a1, REG_A1);
     uint32_t len = readReg(wit.a2, REG_A2);
     if (len > 0xffff) {
-      trap("Invalid READ, too long");
+      fatal("Invalid READ, too long");
     }
     // TODO: Based on read length, decide if we have enough room for read
     std::vector<uint8_t> hostData(len);
@@ -659,7 +704,7 @@ struct Emulator {
     uint32_t buf = peekReg(REG_A1);
     uint32_t len = readReg(wit.a2, REG_A2);
     if (len > 0xffff) {
-      trap("Invalid WRITE, too long");
+      fatal("Invalid WRITE, too long");
     }
     std::vector<uint8_t> hostData(len);
     for (size_t i = 0; i < len; i++) {
@@ -794,7 +839,7 @@ struct Emulator {
     }
   }
 
-  void fetchAndDecode(DecodeWitness* wit) {
+  bool fetchAndDecode(DecodeWitness* wit) {
     // We always read the memory address at pc/4
     uint32_t l0 = readVirtMemory(wit->load0, pc / 4);
     // If pc == 2 (mod 4), shift to lower value
@@ -839,6 +884,12 @@ struct Emulator {
     default:
       wit->imm = 0;
     }
+    if (wit->opcode == uint32_t(Opcode::INVALID)) {
+      undoVirtMemory(wit->load0);
+      undoVirtMemory(wit->load1);
+      return false;
+    }
+    return true;
   }
 
   bool run(size_t rowCount) {
@@ -849,14 +900,21 @@ struct Emulator {
                         rowCount) {
       DecodeWitness*& decodeWit = (mode == MODE_MACHINE) ? mInstCache[pc] : usInstCache[pc];
       if (!decodeWit) {
+        DecodeWitness maybeSave;
+        if (!fetchAndDecode(&maybeSave)) {
+          trap("Invalid opcode");
+          curCycle++;
+          pc = newPc;
+          continue;
+        }
         decodeWit = &trace.makeDecode();
-        fetchAndDecode(decodeWit);
+        *decodeWit = maybeSave;
       } else {
         decodeWit->count++;
       }
       dinst = decodeWit;
       newPc = dinst->fetch.nextPc;
-      DLOG("cycle: " << curCycle << ", pc: " << std::hex << pc << std::dec
+      DLOG("cycle: " << curCycle << ", pc: " << HexWord{pc} << ", mode: " << mode
                      << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
       switch (Opcode(decodeWit->opcode)) {
 #define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...)                                \
@@ -866,8 +924,7 @@ struct Emulator {
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
       case Opcode::INVALID:
-        trap("Invalid opcde");
-        break;
+        throw std::runtime_error("Unreachable");
       }
       curCycle++;
       pc = newPc;

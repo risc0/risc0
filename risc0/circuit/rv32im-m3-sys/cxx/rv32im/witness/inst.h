@@ -17,20 +17,6 @@
 
 #include "rv32im/witness/decode.h"
 
-struct InstResumeWitness {
-  PhysMemReadWitness v2Compat;
-  PhysMemReadWitness pc;
-  PhysMemReadWitness mode;
-  PhysMemWriteWitness version;
-};
-
-struct InstSuspendWitness {
-  uint32_t cycle;
-  uint32_t iCacheCycle;
-  PhysMemWriteWitness pc;
-  PhysMemWriteWitness mode;
-};
-
 struct InstRegWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -122,17 +108,4 @@ struct InstAuipcWitness {
   uint32_t rs2;
   RegMemWriteWitness rd;
   uint32_t imm;
-};
-
-struct InstEcallWitness {
-  uint32_t cycle;
-  FetchWitness fetch;
-  PhysMemWriteWitness savePc;
-  PhysMemReadWitness dispatch;
-};
-
-struct InstMretWitness {
-  uint32_t cycle;
-  FetchWitness fetch;
-  PhysMemReadWitness readPc;
 };
