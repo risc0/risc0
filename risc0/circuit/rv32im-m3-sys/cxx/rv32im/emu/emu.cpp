@@ -340,9 +340,7 @@ struct Emulator {
     setMode(MODE_MACHINE);
   }
 
-  void fatal(const std::string& reason) {
-    throw std::runtime_error("Fatal Error: " + reason);
-  }
+  void fatal(const std::string& reason) { throw std::runtime_error("Fatal Error: " + reason); }
 
   template <uint32_t opt> inline void do_INST_REG() {
     constexpr Option opts(opt);
@@ -394,14 +392,15 @@ struct Emulator {
     uint32_t peekAddr = peekReg(dinst->rs1) + dinst->imm;
     uint32_t alignmentReq = 1;
     switch (kind) {
-      case LOAD_LH: 
-      case LOAD_LHU:
-        alignmentReq = 2;
-        break;
-      case LOAD_LW:
-        alignmentReq = 4;
-        break;
-      default: break;
+    case LOAD_LH:
+    case LOAD_LHU:
+      alignmentReq = 2;
+      break;
+    case LOAD_LW:
+      alignmentReq = 4;
+      break;
+    default:
+      break;
     }
     if (peekAddr % alignmentReq != 0) {
       dinst->count--;
@@ -449,13 +448,14 @@ struct Emulator {
     uint32_t peekAddr = peekReg(dinst->rs1) + dinst->imm;
     uint32_t alignmentReq = 1;
     switch (kind) {
-      case STORE_SH: 
-        alignmentReq = 2;
-        break;
-      case STORE_SW:
-        alignmentReq = 4;
-        break;
-      default: break;
+    case STORE_SH:
+      alignmentReq = 2;
+      break;
+    case STORE_SW:
+      alignmentReq = 4;
+      break;
+    default:
+      break;
     }
     if (peekAddr % alignmentReq != 0) {
       dinst->count--;

@@ -130,7 +130,8 @@ template <typename C> FDEV void InstTrapBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
   Val<C> oldMode = writeMPREVMODE.data.low.get();
   ctx.pull(CpuStateArgument<C>(cycleVal, writeMEPC.data.get(), oldMode, iCacheCycle.get()));
-  ctx.push(CpuStateArgument<C>(cycleVal + 1, readMNONDETTRAP.data.get(), MODE_MACHINE, iCacheCycle.get()));
+  ctx.push(CpuStateArgument<C>(
+      cycleVal + 1, readMNONDETTRAP.data.get(), MODE_MACHINE, iCacheCycle.get()));
 }
 
 template <typename C> FDEV void InstMretBlock<C>::set(CTX, InstMretWitness wit) DEV {

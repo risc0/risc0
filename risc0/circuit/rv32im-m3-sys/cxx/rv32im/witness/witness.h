@@ -20,11 +20,11 @@
 #include "rv32im/witness/ecall.h"
 #include "rv32im/witness/globals.h"
 #include "rv32im/witness/inst.h"
-#include "rv32im/witness/sys.h"
 #include "rv32im/witness/io.h"
 #include "rv32im/witness/lookups.h"
 #include "rv32im/witness/paging.h"
 #include "rv32im/witness/poseidon2.h"
+#include "rv32im/witness/sys.h"
 #include "rv32im/witness/units.h"
 
 struct EmptyWitness {
