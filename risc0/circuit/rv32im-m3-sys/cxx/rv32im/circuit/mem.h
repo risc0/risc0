@@ -26,14 +26,18 @@ template <typename C> struct PhysMemReadBlock {
   RegU32<C> data;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
-    T::apply(ctx, wordAddr);
-    T::apply(ctx, prevCycle);
-    T::apply(ctx, data);
+    T::apply(ctx, "wordAddr", wordAddr);
+    T::apply(ctx, "prevCycle", prevCycle);
+    T::apply(ctx, "data", data);
   }
 
   FDEV void set(CTX, PhysMemReadWitness wit, uint32_t cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
-  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV {
+    RANGE_PRECONDITION(ctx, 0, data.get().low, 0xffff);
+    RANGE_PRECONDITION(ctx, 0, data.get().high, 0xffff);
+    PICUS_INPUT(ctx, data);
+  }
   FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
 
@@ -46,15 +50,20 @@ template <typename C> struct PhysMemWriteBlock {
   RegU32<C> data;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
-    T::apply(ctx, wordAddr);
-    T::apply(ctx, prevCycle);
-    T::apply(ctx, prevData);
-    T::apply(ctx, data);
+    T::apply(ctx, "wordAddr", wordAddr);
+    T::apply(ctx, "prevCycle", prevCycle);
+    T::apply(ctx, "prevData", prevData);
+    T::apply(ctx, "data", data);
   }
 
   FDEV void set(CTX, PhysMemWriteWitness wit, uint32_t cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
-  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV {
+    RANGE_PRECONDITION(ctx, 0, prevData.get().low, 0xffff);
+    RANGE_PRECONDITION(ctx, 0, prevData.get().high, 0xffff);
+    RANGE_POSTCONDITION(ctx, 0, data.get().low, 0xffff);
+    RANGE_POSTCONDITION(ctx, 0, data.get().high, 0xffff);
+  }
   FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
 
@@ -68,11 +77,11 @@ template <typename C> struct VirtAddrBlock {
   BitReg<C> bit9;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
-    T::apply(ctx, vpage);
-    T::apply(ctx, ppage);
-    T::apply(ctx, lowByte);
-    T::apply(ctx, bit8);
-    T::apply(ctx, bit9);
+    T::apply(ctx, "vpage", vpage);
+    T::apply(ctx, "ppage", ppage);
+    T::apply(ctx, "lowByte", lowByte);
+    T::apply(ctx, "bit8", bit8);
+    T::apply(ctx, "bit9", bit9);
   }
 
   FDEV Val<C> getWordAddr() DEV {
@@ -94,9 +103,9 @@ template <typename C> struct VirtMemReadBlock {
   RegU32<C> data;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
-    T::apply(ctx, addr, cycle);
-    T::apply(ctx, prevCycle);
-    T::apply(ctx, data);
+    T::apply(ctx, "addr", addr, cycle);
+    T::apply(ctx, "prevCycle", prevCycle);
+    T::apply(ctx, "data", data);
   }
 
   FDEV Val<C> getWordAddr() DEV { return addr.getWordAddr(); }
@@ -116,10 +125,10 @@ template <typename C> struct VirtMemWriteBlock {
   RegU32<C> data;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
-    T::apply(ctx, addr, cycle);
-    T::apply(ctx, prevCycle);
-    T::apply(ctx, prevData);
-    T::apply(ctx, data);
+    T::apply(ctx, "addr", addr, cycle);
+    T::apply(ctx, "prevCycle", prevCycle);
+    T::apply(ctx, "prevData", prevData);
+    T::apply(ctx, "data", data);
   }
 
   FDEV Val<C> getWordAddr() DEV { return addr.getWordAddr(); }
@@ -134,11 +143,11 @@ template <typename C> struct VirtAddrResolveBlock {
   CONSTANT static char NAME[] = "VirtAddrResolveBlock";
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cacheCycle);
-    T::apply(ctx, addr, addr.readCycle.get());
-    T::apply(ctx, vinfo, addr.readCycle.get());
-    T::apply(ctx, pte1, addr.readCycle.get());
-    T::apply(ctx, pte2, addr.readCycle.get());
+    T::apply(ctx, "cacheCycle", cacheCycle);
+    T::apply(ctx, "addr", addr, addr.readCycle.get());
+    T::apply(ctx, "vinfo", vinfo, addr.readCycle.get());
+    T::apply(ctx, "pte1", pte1, addr.readCycle.get());
+    T::apply(ctx, "pte2", pte2, addr.readCycle.get());
   }
 
   Reg<C> cacheCycle;

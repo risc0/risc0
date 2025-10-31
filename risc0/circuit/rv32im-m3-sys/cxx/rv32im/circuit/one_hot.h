@@ -26,7 +26,7 @@ template <typename C, size_t N> struct OneHot {
 
   BitReg<C> bits[N];
 
-  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, bits); }
+  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, "bits", bits); }
 
   FDEV void set(CTX, uint32_t val) DEV;
   FDEV inline void finalize(CTX) DEV {}
@@ -44,8 +44,8 @@ template <typename C, size_t N, size_t M> struct TwoHot {
   OneHot<C, M> minor;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, major);
-    T::apply(ctx, minor);
+    T::apply(ctx, "major", major);
+    T::apply(ctx, "minor", minor);
   }
 
   FDEV void set(CTX, uint32_t val) DEV;

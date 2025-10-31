@@ -83,13 +83,18 @@ template <size_t po2> struct AccumWitgenContext {
 
 struct AddArgumentsFwd {
   template <typename T, typename C, typename... Args>
-  FDEV static void apply(MTHR C& ctx, MDEV T& obj, Args... args) {
+  FDEV static void apply(MTHR C& ctx, CONSTARG const char*, MDEV T& obj, Args... args) {
+    AddArgumentsFwd::apply(ctx, obj, args...);
+  }
+
+  template <typename T, typename C, typename... Args>
+  FDEV static typename if_not_char<T, void>::type apply(MTHR C& ctx, MDEV T& obj, Args... args) {
     obj.template applyInner<AddArgumentsFwd>(ctx, args...);
     obj.addArguments(ctx, args...);
   }
 
   template <typename T, typename C, size_t N, typename... Args>
-  FDEV static void apply(MTHR C& ctx, MDEV T (&t)[N], Args... args) {
+  FDEV static typename if_not_char<T, void>::type apply(MTHR C& ctx, MDEV T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; i++) {
       AddArgumentsFwd::apply(ctx, t[i], args...);
     }

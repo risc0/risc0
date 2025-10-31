@@ -25,8 +25,8 @@ template <typename C> struct IsZero {
   Reg<C> invReg;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> val) DEV {
-    T::apply(ctx, isZero);
-    T::apply(ctx, invReg);
+    T::apply(ctx, "isZero", isZero);
+    T::apply(ctx, "invReg", invReg);
   }
 
   FDEV void set(CTX, Fp val) DEV;

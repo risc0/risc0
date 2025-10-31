@@ -36,3 +36,13 @@ template <typename C> struct ValU32 {
 
 // Reduce typing a bit
 #define CTX MTHR C& ctx
+
+// Picus directives are no-ops when not using the extractor
+#ifndef PICUS
+#define PICUS_INPUT(ctx, x)
+#define RANGE_PRECONDITION(ctx, low, x, high)
+#define RANGE_POSTCONDITION(ctx, low, x, high)
+#define PICUS_CALL(ctx, outputs, name, inputs)
+#define PICUS_BEGIN_OUTLINE(...)
+#define PICUS_END_OUTLINE
+#endif

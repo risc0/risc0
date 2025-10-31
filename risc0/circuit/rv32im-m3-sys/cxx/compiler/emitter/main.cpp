@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
-#define BLOCK_TYPE(name, count) EXTRACT(name##Block)
+#define BLOCK_TYPE(name, count) EXTRACT(name##Block);
   BLOCK_TYPES
 #undef BLOCK_TYPE
 

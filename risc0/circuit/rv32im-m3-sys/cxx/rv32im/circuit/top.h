@@ -40,11 +40,11 @@ template <typename C> struct AccumTop {
 
   template <typename T>
   FDEV void applyInner(CTX, MDEV Top<C>* top, MDEV AccumTop<C>* prev, ValExt<C> z) DEV {
-    T::apply(ctx, polyOp);
-    T::apply(ctx, local);
-    T::apply(ctx, poly);
-    T::apply(ctx, term);
-    T::apply(ctx, total);
+    T::apply(ctx, "polyOp", polyOp);
+    T::apply(ctx, "local", local);
+    T::apply(ctx, "poly", poly);
+    T::apply(ctx, "term", term);
+    T::apply(ctx, "total", total);
   }
 
   // Sets polyOp + local

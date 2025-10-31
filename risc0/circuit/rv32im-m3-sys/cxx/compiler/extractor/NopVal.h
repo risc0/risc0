@@ -13,21 +13,25 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "compiler/extractor/PopulateComponentVisitor.h"
-#include "compiler/extractor/base.h"
-#include "rv32im/circuit/circuit.ipp"
+#pragma once
 
-#include "mlir/IR/Verifier.h"
+#include "zkp/fp.h"
 
-int main() {
-  using C = RecordingContext;
-  mlir::MLIRContext mlirCtx;
-  RecordingContext ctx(&mlirCtx);
-  RecordingReg::setContext(&ctx);
-  BuilderSingleton::set(&ctx.builder);
+struct NopVal {
+  NopVal() {}
+  NopVal(uint32_t) {}
+  NopVal(risc0::Fp) {}
 
-  extract1<IsZero>(ctx);
+  NopVal operator+(const NopVal& rhs) const { return NopVal{}; }
+  NopVal operator+=(const NopVal& rhs) { return NopVal{}; }
+  NopVal operator-(const NopVal& rhs) const { return NopVal{}; }
+  NopVal operator-=(const NopVal& rhs) { return NopVal{}; }
+  NopVal operator-() const { return NopVal{}; }
+  NopVal operator*(const NopVal& rhs) const { return NopVal{}; }
+  NopVal operator*=(const NopVal& rhs) { return NopVal{}; }
+  operator risc0::Fp() const { return risc0::Fp(); }
+};
 
-  ctx.getModuleOp().print(llvm::outs());
-  return failed(mlir::verify(ctx.getModuleOp()));
-}
+struct NopReg {
+  NopVal get() { return NopVal{}; }
+};

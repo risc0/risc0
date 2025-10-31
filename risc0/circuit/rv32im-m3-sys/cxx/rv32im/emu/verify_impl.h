@@ -107,13 +107,21 @@ struct Context {
 };
 
 struct BothFwd {
+  template <typename T, typename... Args>
+  static void apply(Context& ctx, const char*, T& obj, Args... args) {
+    BothFwd::apply(ctx, obj, args...);
+  }
+
   template <typename T, typename... Args> static void apply(Context& ctx, T& obj, Args... args) {
     obj.template applyInner<BothFwd>(ctx, args...);
     obj.verify(ctx, args...);
     obj.addArguments(ctx, args...);
   }
 
-  template <typename T, size_t N, typename... Args>
+  template <typename T,
+            size_t N,
+            typename... Args,
+            std::enable_if_t<!std::is_same<std::remove_cv_t<T>, char>::value, int> = 0>
   static void apply(Context& ctx, T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; ++i) {
       BothFwd::apply(ctx, t[i], args...);

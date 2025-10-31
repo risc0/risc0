@@ -62,6 +62,12 @@
 #define GLOBAL_GET(member) ctx.globalGet(GLOBAL_OFFSET(member))
 #define GLOBAL_SET(member, val) ctx.globalSet(GLOBAL_OFFSET(member), (val))
 
+template <typename T, typename U> struct if_not_char {
+  using type = U;
+};
+template <typename U> struct if_not_char<char, U> {};
+template <typename U> struct if_not_char<const char, U> {};
+
 #include "rv32im/circuit/bigint.ipp"
 #include "rv32im/circuit/bits.ipp"
 #include "rv32im/circuit/decode.ipp"

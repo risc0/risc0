@@ -15,6 +15,7 @@
 
 #include "compiler/extractor/base.h"
 #include "rv32im/circuit/circuit.ipp"
+#include "zirgen/compiler/picus/picus.h"
 
 #include "mlir/IR/Verifier.h"
 
@@ -25,11 +26,33 @@ int main() {
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
-#define BLOCK_TYPE(name, count) EXTRACT(name##Block)
-  BLOCK_TYPES
-#undef BLOCK_TYPE
+  extract1<IsZero>(ctx);
 
-  ctx.getModuleOp().print(llvm::outs());
-  llvm::outs().flush();
-  return failed(mlir::verify(ctx.getModuleOp()));
+  // EXTRACT(IsZero);
+  // EXTRACT(UnitAddSubBlock);
+  // EXTRACT(UnitBitBlock);
+  // EXTRACT(UnitMulBlock);
+  EXTRACT(UnitDivBlock);
+
+  // #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
+  //   BLOCK_TYPES
+  // #undef BLOCK_TYPE
+
+  if (failed(mlir::verify(ctx.getModuleOp()))) {
+    llvm::errs() << "Module verification error\n";
+    return 1;
+  }
+
+  llvm::outs() << ctx.getModuleOp() << "\n\n";
+  printPicus(ctx.getModuleOp(), llvm::outs());
+
+  // llvm::outs() << "(begin-module UnitArgument)\n"
+  //                 "(input a_low)\n"
+  //                 "(input a_high)\n"
+  //                 "(input b_low)\n"
+  //                 "(input b_high)\n"
+  //                 "(output out_low)\n"
+  //                 "(output out_high)\n"
+  //                 "(end-module)\n";
+  return 0;
 }
