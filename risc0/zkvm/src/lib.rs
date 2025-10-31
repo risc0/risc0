@@ -136,7 +136,11 @@ pub use {
     risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
 
-/// TODO
+/// Types for RPC communication in distributed proving systems.
+///
+/// This module provides serializable types for remote procedure calls used in
+/// distributed proving workflows, including job requests, status tracking, and
+/// result handling.
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 pub mod rpc {
