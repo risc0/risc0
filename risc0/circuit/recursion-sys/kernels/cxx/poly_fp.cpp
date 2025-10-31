@@ -2261,515 +2261,515 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1114 = x345 - x864;
   // zirgen/circuit/recursion/wom.cpp:92
   FpExt x1115 = x1113 + x1114 * poly_mix[1];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1116 = x868 * x870;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1117 = x872 * x874;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1118 = x872 * x2;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1119 = x874 * x2;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1120 = x1117 * x2;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1121 = x868 + x1118;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1122 = x870 + x1119;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1123 = x1116 + x1120;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1124 = x876 * x878;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1125 = x876 * x4;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1126 = x878 * x4;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1127 = x1124 * x4;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1128 = x1121 + x1125;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1129 = x1122 + x1126;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1130 = x1123 + x1127;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1131 = x880 * x882;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1132 = x880 * x8;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1133 = x882 * x8;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1134 = x1131 * x8;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1135 = x1128 + x1132;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1136 = x1129 + x1133;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1137 = x1130 + x1134;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1138 = x884 * x886;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1139 = x884 * x14;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1140 = x886 * x14;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1141 = x1138 * x14;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1142 = x1135 + x1139;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1143 = x1136 + x1140;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1144 = x1137 + x1141;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1145 = x889 * x892;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1146 = x889 * x15;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1147 = x892 * x15;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1148 = x1145 * x15;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1149 = x1142 + x1146;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1150 = x1143 + x1147;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1151 = x1144 + x1148;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1152 = x895 * x898;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1153 = x895 * x16;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1154 = x898 * x16;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1155 = x1152 * x16;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1156 = x1149 + x1153;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1157 = x1150 + x1154;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1158 = x1151 + x1155;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[7](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1159 = /*data=*/args[2][50 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[7](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1160 = /*data=*/args[2][51 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1161 = x1159 * x1160;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1162 = x1159 * x17;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1163 = x1160 * x17;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1164 = x1161 * x17;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1165 = x1156 + x1162;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1166 = x1157 + x1163;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1167 = x1158 + x1164;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[8](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1168 = /*data=*/args[2][52 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[8](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1169 = /*data=*/args[2][53 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1170 = x1168 * x1169;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1171 = x1168 * x19;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1172 = x1169 * x19;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1173 = x1170 * x19;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1174 = x1165 + x1171;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1175 = x1166 + x1172;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1176 = x1167 + x1173;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[9](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1177 = /*data=*/args[2][54 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[9](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1178 = /*data=*/args[2][55 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1179 = x1177 * x1178;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1180 = x1177 * x20;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1181 = x1178 * x20;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1182 = x1179 * x20;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1183 = x1174 + x1180;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1184 = x1175 + x1181;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1185 = x1176 + x1182;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[10](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1186 = /*data=*/args[2][56 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[10](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1187 = /*data=*/args[2][57 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1188 = x1186 * x1187;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1189 = x1186 * x21;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1190 = x1187 * x21;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1191 = x1188 * x21;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1192 = x1183 + x1189;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1193 = x1184 + x1190;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1194 = x1185 + x1191;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[11](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1195 = /*data=*/args[2][58 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[11](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1196 = /*data=*/args[2][59 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1197 = x1195 * x1196;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1198 = x1195 * x22;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1199 = x1196 * x22;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1200 = x1197 * x22;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1201 = x1192 + x1198;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1202 = x1193 + x1199;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1203 = x1194 + x1200;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[12](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1204 = /*data=*/args[2][60 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[12](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1205 = /*data=*/args[2][61 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1206 = x1204 * x1205;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1207 = x1204 * x23;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1208 = x1205 * x23;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1209 = x1206 * x23;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1210 = x1201 + x1207;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1211 = x1202 + x1208;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1212 = x1203 + x1209;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[13](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1213 = /*data=*/args[2][62 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[13](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1214 = /*data=*/args[2][63 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1215 = x1213 * x1214;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1216 = x1213 * x24;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1217 = x1214 * x24;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1218 = x1215 * x24;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1219 = x1210 + x1216;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1220 = x1211 + x1217;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1221 = x1212 + x1218;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[14](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1222 = /*data=*/args[2][64 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[14](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1223 = /*data=*/args[2][65 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1224 = x1222 * x1223;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1225 = x1222 * x25;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1226 = x1223 * x25;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1227 = x1224 * x25;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1228 = x1219 + x1225;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1229 = x1220 + x1226;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1230 = x1221 + x1227;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[15](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1231 = /*data=*/args[2][66 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[15](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1232 = /*data=*/args[2][67 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1233 = x1231 * x1232;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1234 = x1231 * x26;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1235 = x1232 * x26;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1236 = x1233 * x26;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1237 = x1228 + x1234;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1238 = x1229 + x1235;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1239 = x1230 + x1236;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[16](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1240 = /*data=*/args[2][68 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[16](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1241 = /*data=*/args[2][69 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1242 = x1240 * x1241;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1243 = x1240 * x12;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1244 = x1241 * x12;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1245 = x1242 * x12;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1246 = x1237 + x1243;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1247 = x1238 + x1244;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1248 = x1239 + x1245;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[17](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1249 = /*data=*/args[2][70 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[17](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1250 = /*data=*/args[2][71 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1251 = x1249 * x1250;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1252 = x1249 * x28;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1253 = x1250 * x28;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1254 = x1251 * x28;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1255 = x1246 + x1252;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1256 = x1247 + x1253;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1257 = x1248 + x1254;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[18](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1258 = /*data=*/args[2][72 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[18](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1259 = /*data=*/args[2][73 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1260 = x1258 * x1259;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1261 = x1258 * x29;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1262 = x1259 * x29;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1263 = x1260 * x29;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1264 = x1255 + x1261;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1265 = x1256 + x1262;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1266 = x1257 + x1263;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[19](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1267 = /*data=*/args[2][74 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[19](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1268 = /*data=*/args[2][75 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1269 = x1267 * x1268;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1270 = x1267 * x30;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1271 = x1268 * x30;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1272 = x1269 * x30;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1273 = x1264 + x1270;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1274 = x1265 + x1271;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1275 = x1266 + x1272;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[20](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1276 = /*data=*/args[2][76 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[20](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1277 = /*data=*/args[2][77 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1278 = x1276 * x1277;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1279 = x1276 * x31;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1280 = x1277 * x31;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1281 = x1278 * x31;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1282 = x1273 + x1279;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1283 = x1274 + x1280;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1284 = x1275 + x1281;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[21](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1285 = /*data=*/args[2][78 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[21](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1286 = /*data=*/args[2][79 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1287 = x1285 * x1286;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1288 = x1285 * x32;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1289 = x1286 * x32;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1290 = x1287 * x32;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1291 = x1282 + x1288;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1292 = x1283 + x1289;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1293 = x1284 + x1290;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[22](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1294 = /*data=*/args[2][80 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[22](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1295 = /*data=*/args[2][81 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1296 = x1294 * x1295;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1297 = x1294 * x33;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1298 = x1295 * x33;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1299 = x1296 * x33;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1300 = x1291 + x1297;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1301 = x1292 + x1298;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1302 = x1293 + x1299;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[23](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1303 = /*data=*/args[2][82 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[23](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1304 = /*data=*/args[2][83 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1305 = x1303 * x1304;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1306 = x1303 * x34;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1307 = x1304 * x34;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1308 = x1305 * x34;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1309 = x1300 + x1306;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1310 = x1301 + x1307;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1311 = x1302 + x1308;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[24](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1312 = /*data=*/args[2][84 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[24](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1313 = /*data=*/args[2][85 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1314 = x1312 * x1313;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1315 = x1312 * x35;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1316 = x1313 * x35;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1317 = x1314 * x35;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1318 = x1309 + x1315;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1319 = x1310 + x1316;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1320 = x1311 + x1317;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[25](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1321 = /*data=*/args[2][86 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[25](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1322 = /*data=*/args[2][87 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1323 = x1321 * x1322;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1324 = x1321 * x36;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1325 = x1322 * x36;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1326 = x1323 * x36;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1327 = x1318 + x1324;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1328 = x1319 + x1325;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1329 = x1320 + x1326;
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_a[26](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1330 = /*data=*/args[2][88 * steps + ((cycle - kInvRate * 0) & mask)];
   // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[26](Bit)/bit(Reg)(compiler/edsl/component.h:164)
   auto x1331 = /*data=*/args[2][89 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1332 = x1330 * x1331;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1333 = x1330 * x37;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1334 = x1331 * x37;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1335 = x1332 * x37;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1336 = x1327 + x1333;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1337 = x1328 + x1334;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1338 = x1329 + x1335;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1339 = x318 * x289;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1340 = x318 * x38;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1341 = x289 * x38;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1342 = x1339 * x38;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1343 = x1336 + x1340;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1344 = x1337 + x1341;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1345 = x1338 + x1342;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1346 = x290 * x291;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1347 = x290 * x39;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1348 = x291 * x39;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1349 = x1346 * x39;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1350 = x1343 + x1347;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1351 = x1344 + x1348;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1352 = x1345 + x1349;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1353 = x292 * x293;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1354 = x292 * x40;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1355 = x293 * x40;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1356 = x1353 * x40;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1357 = x1350 + x1354;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1358 = x1351 + x1355;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1359 = x1352 + x1356;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1360 = x294 * x295;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1361 = x294 * x41;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1362 = x295 * x41;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1363 = x1360 * x41;
-  // zirgen/circuit/recursion/bits.cpp:88
+  // zirgen/circuit/recursion/bits.cpp:93
   auto x1364 = x1357 + x1361;
-  // zirgen/circuit/recursion/bits.cpp:89
+  // zirgen/circuit/recursion/bits.cpp:94
   auto x1365 = x1358 + x1362;
-  // zirgen/circuit/recursion/bits.cpp:90
+  // zirgen/circuit/recursion/bits.cpp:95
   auto x1366 = x1359 + x1363;
-  // zirgen/circuit/recursion/bits.cpp:92
+  // zirgen/circuit/recursion/bits.cpp:97
   auto x1367 = x1364 - x336;
-  // zirgen/circuit/recursion/bits.cpp:92
+  // zirgen/circuit/recursion/bits.cpp:97
   FpExt x1368 = x1115 + x1367 * poly_mix[2];
-  // zirgen/circuit/recursion/bits.cpp:93
+  // zirgen/circuit/recursion/bits.cpp:98
   auto x1369 = x1365 - x348;
-  // zirgen/circuit/recursion/bits.cpp:93
+  // zirgen/circuit/recursion/bits.cpp:98
   FpExt x1370 = x1368 + x1369 * poly_mix[3];
   // zirgen/circuit/recursion/wom.cpp:97
   auto x1371 = x596 - x287;
@@ -2789,447 +2789,447 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1378 = x1111 + x320 * x1377 * poly_mix[5];
   // top(recursion::Top)/code(recursion::Code)/inst(Mux)/macro_ops(recursion::MacroInst)/operand[2](Reg)(compiler/edsl/component.h:164)
   auto x1379 = /*code=*/args[0][20 * steps + ((cycle - kInvRate * 0) & mask)];
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1380 = x868 * x1240;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1381 = x870 * x1241;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1382 = x870 * x2;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1383 = x1241 * x2;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1384 = x1381 * x2;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1385 = x868 + x1382;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1386 = x1240 + x1383;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1387 = x1380 + x1384;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1388 = x872 * x1249;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1389 = x872 * x4;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1390 = x1249 * x4;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1391 = x1388 * x4;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1392 = x1385 + x1389;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1393 = x1386 + x1390;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1394 = x1387 + x1391;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1395 = x874 * x1250;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1396 = x874 * x8;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1397 = x1250 * x8;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1398 = x1395 * x8;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1399 = x1392 + x1396;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1400 = x1393 + x1397;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1401 = x1394 + x1398;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1402 = x876 * x1258;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1403 = x876 * x14;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1404 = x1258 * x14;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1405 = x1402 * x14;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1406 = x1399 + x1403;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1407 = x1400 + x1404;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1408 = x1401 + x1405;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1409 = x878 * x1259;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1410 = x878 * x15;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1411 = x1259 * x15;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1412 = x1409 * x15;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1413 = x1406 + x1410;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1414 = x1407 + x1411;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1415 = x1408 + x1412;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1416 = x880 * x1267;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1417 = x880 * x16;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1418 = x1267 * x16;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1419 = x1416 * x16;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1420 = x1413 + x1417;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1421 = x1414 + x1418;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1422 = x1415 + x1419;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1423 = x882 * x1268;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1424 = x882 * x17;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1425 = x1268 * x17;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1426 = x1423 * x17;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1427 = x1420 + x1424;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1428 = x1421 + x1425;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1429 = x1422 + x1426;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1430 = x884 * x1276;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1431 = x884 * x19;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1432 = x1276 * x19;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1433 = x1430 * x19;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1434 = x1427 + x1431;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1435 = x1428 + x1432;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1436 = x1429 + x1433;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1437 = x886 * x1277;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1438 = x886 * x20;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1439 = x1277 * x20;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1440 = x1437 * x20;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1441 = x1434 + x1438;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1442 = x1435 + x1439;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1443 = x1436 + x1440;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1444 = x889 * x1285;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1445 = x889 * x21;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1446 = x1285 * x21;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1447 = x1444 * x21;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1448 = x1441 + x1445;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1449 = x1442 + x1446;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1450 = x1443 + x1447;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1451 = x892 * x1286;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1452 = x892 * x22;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1453 = x1286 * x22;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1454 = x1451 * x22;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1455 = x1448 + x1452;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1456 = x1449 + x1453;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1457 = x1450 + x1454;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1458 = x895 * x1294;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1459 = x895 * x23;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1460 = x1294 * x23;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1461 = x1458 * x23;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1462 = x1455 + x1459;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1463 = x1456 + x1460;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1464 = x1457 + x1461;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1465 = x898 * x1295;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1466 = x898 * x24;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1467 = x1295 * x24;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1468 = x1465 * x24;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1469 = x1462 + x1466;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1470 = x1463 + x1467;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1471 = x1464 + x1468;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1472 = x1159 * x1303;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1473 = x1159 * x25;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1474 = x1303 * x25;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1475 = x1472 * x25;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1476 = x1469 + x1473;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1477 = x1470 + x1474;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1478 = x1471 + x1475;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1479 = x1160 * x1304;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1480 = x1160 * x26;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1481 = x1304 * x26;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1482 = x1479 * x26;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1483 = x1476 + x1480;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1484 = x1477 + x1481;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1485 = x1478 + x1482;
-  // zirgen/circuit/recursion/bits.cpp:48
+  // zirgen/circuit/recursion/bits.cpp:51
   auto x1486 = x1483 - x336;
-  // zirgen/circuit/recursion/bits.cpp:48
+  // zirgen/circuit/recursion/bits.cpp:51
   FpExt x1487 = x1115 + x1486 * poly_mix[2];
-  // zirgen/circuit/recursion/bits.cpp:49
+  // zirgen/circuit/recursion/bits.cpp:52
   auto x1488 = x1484 - x348;
-  // zirgen/circuit/recursion/bits.cpp:49
+  // zirgen/circuit/recursion/bits.cpp:52
   FpExt x1489 = x1487 + x1488 * poly_mix[3];
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1490 = x1168 * x1312;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1491 = x1169 * x1313;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1492 = x1169 * x2;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1493 = x1313 * x2;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1494 = x1491 * x2;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1495 = x1168 + x1492;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1496 = x1312 + x1493;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1497 = x1490 + x1494;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1498 = x1177 * x1321;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1499 = x1177 * x4;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1500 = x1321 * x4;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1501 = x1498 * x4;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1502 = x1495 + x1499;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1503 = x1496 + x1500;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1504 = x1497 + x1501;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1505 = x1178 * x1322;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1506 = x1178 * x8;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1507 = x1322 * x8;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1508 = x1505 * x8;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1509 = x1502 + x1506;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1510 = x1503 + x1507;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1511 = x1504 + x1508;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1512 = x1186 * x1330;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1513 = x1186 * x14;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1514 = x1330 * x14;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1515 = x1512 * x14;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1516 = x1509 + x1513;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1517 = x1510 + x1514;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1518 = x1511 + x1515;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1519 = x1187 * x1331;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1520 = x1187 * x15;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1521 = x1331 * x15;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1522 = x1519 * x15;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1523 = x1516 + x1520;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1524 = x1517 + x1521;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1525 = x1518 + x1522;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1526 = x1195 * x318;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1527 = x1195 * x16;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1528 = x318 * x16;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1529 = x1526 * x16;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1530 = x1523 + x1527;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1531 = x1524 + x1528;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1532 = x1525 + x1529;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1533 = x1196 * x289;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1534 = x1196 * x17;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1535 = x289 * x17;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1536 = x1533 * x17;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1537 = x1530 + x1534;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1538 = x1531 + x1535;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1539 = x1532 + x1536;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1540 = x1204 * x290;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1541 = x1204 * x19;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1542 = x290 * x19;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1543 = x1540 * x19;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1544 = x1537 + x1541;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1545 = x1538 + x1542;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1546 = x1539 + x1543;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1547 = x1205 * x291;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1548 = x1205 * x20;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1549 = x291 * x20;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1550 = x1547 * x20;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1551 = x1544 + x1548;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1552 = x1545 + x1549;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1553 = x1546 + x1550;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1554 = x1213 * x292;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1555 = x1213 * x21;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1556 = x292 * x21;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1557 = x1554 * x21;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1558 = x1551 + x1555;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1559 = x1552 + x1556;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1560 = x1553 + x1557;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1561 = x1214 * x293;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1562 = x1214 * x22;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1563 = x293 * x22;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1564 = x1561 * x22;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1565 = x1558 + x1562;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1566 = x1559 + x1563;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1567 = x1560 + x1564;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1568 = x1222 * x294;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1569 = x1222 * x23;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1570 = x294 * x23;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1571 = x1568 * x23;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1572 = x1565 + x1569;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1573 = x1566 + x1570;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1574 = x1567 + x1571;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1575 = x1223 * x295;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1576 = x1223 * x24;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1577 = x295 * x24;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1578 = x1575 * x24;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1579 = x1572 + x1576;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1580 = x1573 + x1577;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1581 = x1574 + x1578;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1582 = x1231 * x296;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1583 = x1231 * x25;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1584 = x296 * x25;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1585 = x1582 * x25;
-  // zirgen/circuit/recursion/bits.cpp:44
+  // zirgen/circuit/recursion/bits.cpp:45
   auto x1586 = x1579 + x1583;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1587 = x1580 + x1584;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1588 = x1581 + x1585;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1589 = x1232 * x297;
-  // zirgen/circuit/recursion/bits.cpp:45
+  // zirgen/circuit/recursion/bits.cpp:46
   auto x1590 = x297 * x26;
-  // zirgen/circuit/recursion/bits.cpp:46
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1591 = x1589 * x26;
-  // zirgen/circuit/recursion/bits.cpp:44
-  auto x1592 = x1586 + x1235;
   // zirgen/circuit/recursion/bits.cpp:45
-  auto x1593 = x1587 + x1590;
+  auto x1592 = x1586 + x1235;
   // zirgen/circuit/recursion/bits.cpp:46
+  auto x1593 = x1587 + x1590;
+  // zirgen/circuit/recursion/bits.cpp:48
   auto x1594 = x1588 + x1591;
-  // zirgen/circuit/recursion/bits.cpp:48
+  // zirgen/circuit/recursion/bits.cpp:51
   auto x1595 = x1592 - x338;
-  // zirgen/circuit/recursion/bits.cpp:48
+  // zirgen/circuit/recursion/bits.cpp:51
   FpExt x1596 = x1489 + x1595 * poly_mix[4];
-  // zirgen/circuit/recursion/bits.cpp:49
+  // zirgen/circuit/recursion/bits.cpp:52
   auto x1597 = x1593 - x351;
-  // zirgen/circuit/recursion/bits.cpp:49
+  // zirgen/circuit/recursion/bits.cpp:52
   FpExt x1598 = x1596 + x1597 * poly_mix[5];
-  // zirgen/circuit/recursion/bits.cpp:54
+  // zirgen/circuit/recursion/bits.cpp:58
   auto x1599 = x1594 * x12;
-  // zirgen/circuit/recursion/bits.cpp:54
+  // zirgen/circuit/recursion/bits.cpp:58
   auto x1600 = x1599 + x1485;
   // zirgen/circuit/recursion/wom.cpp:97
   FpExt x1601 = x284 + x1371 * poly_mix[0];
@@ -3243,21 +3243,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1605 = x1604 + x602 * poly_mix[3];
   // zirgen/circuit/recursion/wom.cpp:61
   FpExt x1606 = x1605 + x604 * poly_mix[4];
-  // zirgen/circuit/recursion/bits.cpp:52
+  // zirgen/circuit/recursion/bits.cpp:56
   FpExt x1607 = x1598 + x1379 * x1606 * poly_mix[6];
-  // zirgen/circuit/recursion/bits.cpp:57
+  // zirgen/circuit/recursion/bits.cpp:61
   auto x1608 = x1 - x1379;
-  // zirgen/circuit/recursion/bits.cpp:61
+  // zirgen/circuit/recursion/bits.cpp:66
   auto x1609 = x1594 * x2;
-  // zirgen/circuit/recursion/bits.cpp:60
+  // zirgen/circuit/recursion/bits.cpp:65
   auto x1610 = x1485 * x2;
-  // zirgen/circuit/recursion/bits.cpp:60
+  // zirgen/circuit/recursion/bits.cpp:65
   auto x1611 = x336 + x348;
-  // zirgen/circuit/recursion/bits.cpp:61
+  // zirgen/circuit/recursion/bits.cpp:66
   auto x1612 = x338 + x351;
-  // zirgen/circuit/recursion/bits.cpp:60
+  // zirgen/circuit/recursion/bits.cpp:65
   auto x1613 = x1611 - x1610;
-  // zirgen/circuit/recursion/bits.cpp:61
+  // zirgen/circuit/recursion/bits.cpp:66
   auto x1614 = x1612 - x1609;
   // zirgen/circuit/recursion/wom.cpp:61
   auto x1615 = x598 - x1613;
@@ -3271,7 +3271,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1619 = x1618 + x602 * poly_mix[3];
   // zirgen/circuit/recursion/wom.cpp:61
   FpExt x1620 = x1619 + x604 * poly_mix[4];
-  // zirgen/circuit/recursion/bits.cpp:57
+  // zirgen/circuit/recursion/bits.cpp:61
   FpExt x1621 = x1607 + x1608 * x1620 * poly_mix[11];
   // components/mux.h:59
   FpExt x1622 = x1378 + x559 * x1621 * poly_mix[14];
