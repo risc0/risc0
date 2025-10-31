@@ -140,7 +140,7 @@ pub struct Session {
     /// TODO
     pub receipt_claim: ReceiptClaim,
 
-    /// TOOD
+    /// TODO
     pub stdout: Vec<u8>,
 }
 
