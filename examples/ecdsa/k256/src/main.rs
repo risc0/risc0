@@ -21,7 +21,7 @@ use k256_methods::{K256_VERIFY_ELF, K256_VERIFY_ID};
 use rand_core::OsRng;
 use risc0_zkvm::{ExecutorEnv, Receipt, default_prover};
 
-/// Given an secp256k1 verifier key (i.e. public key), message and signature,
+/// Given a secp256k1 verifier key (i.e. public key), message and signature,
 /// runs the ECDSA verifier inside the zkVM and returns a receipt, including a
 /// journal and seal attesting to the fact that the prover knows a valid
 /// signature from the committed public key over the committed message.
