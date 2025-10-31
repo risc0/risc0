@@ -99,92 +99,12 @@ struct LogHelper {
 } while(0)
 
 #if 0
-uint32_t expandCsrVal(uint32_t reg, uint32_t isImm) {
-  if (isImm) {
-    if (reg & 0x10) {
-      return 0xfffffff0 | reg;
-    } else {
-      return reg;
-    }
-  } else {
-    return AT(USER_REGS_ADDR)[reg];
-  }
-}
 
 
 bool forwardInvalidInst(uint32_t inst) {
   return supervisorTrap(MCAUSE_ILLEGAL_INSTRUCTION, inst);
 } 
 
-bool handleInstSystem(uint32_t pc, uint32_t inst) {
-  if (inst == 0x10500073) {
-    // TODO: this is wait for interrupt, maybe actual skip ahead?
-    // debug("WFI");
-    return true; // NO-OP
-  }
-  uint32_t csrt = (inst >> 12) & 3;
-  if (csrt == 0) {
-    if ((inst & (~0x01ff8000)) == 0x12000073) {
-      // debug("SFENCE.VMA"); 
-      CSR(MCLEARCACHE) = 1;
-      return true;
-    }
-    return forwardInvalidInst(inst);
-  }
-  uint32_t rd = (inst >> 7) & 0x1f;
-  uint32_t isImm = (inst >> 14) & 1;
-  uint32_t rs1 = (inst >> 15) & 0x1f;
-  uint32_t csr = (inst >> 20);
-  uint32_t newVal = expandCsrVal(rs1, isImm);;
-  // TODO: check permissions
-  uint32_t curVal = AT(CSR_BASE_ADDR)[csr];
-  if (csr == CSR_SIP) {
-    uint64_t timer64 = (uint64_t(CSR(MTIMERH)) << 32) | CSR(MTIMER);
-    uint64_t time64 = (uint64_t(CSR(TIMEH)) << 32) | CSR(TIME);
-    curVal = (timer64 <= time64) ? 0x20 : 0x00;
-  }
-  if (rd != 0) {
-    AT(USER_REGS_ADDR)[rd] = curVal;
-  }
-  uint32_t prevVal = curVal;
-  switch(csrt) {
-    case 1: curVal = newVal; break;
-    case 2: curVal |= newVal; break;
-    case 3: curVal &= newVal; break;
-    default:
-      return forwardInvalidInst(inst);
-  }
-  // debug("MEPC (", CSR(MEPC), ") CSR: ", csr, ", orig=", prevVal, ", new=", curVal);
-  AT(CSR_BASE_ADDR)[csr] = curVal;
-  if (prevVal == curVal) { return true; }
-  switch(csr) {
-    case CSR_SIE:
-      info("SIE WRITE: ", CSR(SIE));
-      break;
-    case CSR_SIP:
-      info("SIP WRITE of ", curVal, ", prev = ", prevVal, ": reverting");
-      CSR(SIP) = prevVal;
-      break;
-    case CSR_SSTATUS:
-      AT(VM_INFO_ADDR)[0] = 
-        (CSR(SATP) & (0x803fffff)) +
-        (((CSR(SSTATUS) >> 18) & 3) << 29);
-      CSR(MCLEARCACHE) = 1;
-      break;
-    case CSR_SENVCFG:
-      error("SENVCFG WRITE");
-    case CSR_SATP:
-      //info("New SATP: ", CSR(SATP));
-      AT(VM_INFO_ADDR)[0] = 
-        (CSR(SATP) & (0x803fffff)) +
-        (((CSR(SSTATUS) >> 18) & 3) << 29);
-      CSR(MCLEARCACHE) = 1;
-      break;
-    default:
-      break;
-  }
-  return true;
-}
 
 void vmTrap(uint32_t cause, uint32_t vaddr) {
   CSR(SCAUSE) = cause;
@@ -207,27 +127,6 @@ void vmTrap(uint32_t cause, uint32_t vaddr) {
 }
 
 
-
-uint32_t handleSbiDebugConsole() {
-  uint32_t func_id = UREG(A6);
-  // debug("SBI debug console: ", func_id);
-  char c;
-  switch(func_id) {
-    case 0: // sbi_debug_console_write
-      return hostWrite(1, reinterpret_cast<char*>(UREG(A1)), UREG(A0));
-    case 1: // sbi_debug_console_read
-      //return hostRead(1, reinterpret_cast<char*>(UREG(A1)), UREG(A0));
-      return 0;
-    case 2: // sbi_debug_console_write_byte 
-      c = UREG(A0);
-      hostWrite(1, &c, 1);
-      return 0;
-    default:
-      error("Invalid SBI debug console function: ", func_id);
-  }
-  return 0;
-}
-
 uint32_t handleSystemReset() {
   uint32_t func_id = UREG(A6);
   if (func_id != 0) {
@@ -248,60 +147,7 @@ uint32_t handleTimer() {
   return 0;
 }
 
-uint32_t handleSbiBaseExt() {
-  uint32_t func_id = UREG(A6);
-  //debug("SBI base: ", func_id);
-  switch(func_id) {
-    case 0: // sbi_get_spec_version
-      return 0x03000000;  // 3.0
-    case 1: // sbi_get_impl_id
-      return 1;  // SBI_OPENSBI_IMPID
-    case 2: // sbi_get_impl_version
-      return 0;  // TODO
-    case 3: // sbi_probe_extension
-      debug("Seeking extension: ", UREG(A0));
-      switch(UREG(A0)) {
-        case 0x4442434E: // DBCN: Debug console
-        //case 0x53525354: // SRST: System reset 
-        case 0x54494D45: // Time: Timer
-          return 1;
-        default:
-          return 0;
-      }
-    case 4: // sbi_get_mvendorid 
-    case 5: // sbi_get_marchid 
-    case 6: // sbi_get_mimpid 
-      return 0;
-    default:
-      error("Invalid base function: ", func_id);
-  }
-  return 0;
-}
 
-void handleEcall() {
-  uint32_t ext_id = UREG(A7);
-  uint32_t ret;
-  switch(ext_id) {
-    case 0x10:
-      ret = handleSbiBaseExt();
-      break;
-    case 0x4442434E:
-      ret = handleSbiDebugConsole();
-      break;
-    case 0x53525354:
-      ret = handleSystemReset();
-      break;
-    case 0x54494D45:
-      ret = handleTimer();
-      break;
-    default:
-      ret = 0;
-      error("Invalid SBI extension: ", ext_id);
-  }
-  UREG(A0) = 0;
-  UREG(A1) = ret;
-  CSR(MEPC) += 4;
-}
 #endif 
 
 uint32_t causeAccessFault(uint32_t aType) {
@@ -329,7 +175,7 @@ uint32_t translate(uint32_t& addr, uint32_t aType) {
     return MCAUSE_NONE;
   }
   uint32_t a = CSR(SATP) << 12;
-  uint32_t smode = CSR(MPREVMODE);
+  uint32_t smode = CSR(MEMODE);
   uint32_t sum = (CSR(SSTATUS) >> 18) & 1;
   uint32_t mxr = (CSR(SSTATUS) >> 19) & 1;
   uint32_t vPage = addr >> 12;
@@ -383,16 +229,85 @@ void supervisorTrap(uint32_t cause) {
   // Make SPIE = SIE
   cur |= (sie << 5);
   // Set SPP
-  cur |= CSR(MPREVMODE) << 8;
+  cur |= CSR(MEMODE) << 8;
   CSR(SSTATUS) = cur;
   // Set new mode to supervisor
-  CSR(MPREVMODE) = 1;
+  CSR(MEMODE) = 1;
   // Set supervisor return to original trap locaion
   CSR(SEPC) = CSR(MEPC);
   // Make mret point at STVEC
   CSR(MEPC) = CSR(STVEC);
 }
 
+// Helper to save some redundant work
+uint32_t forwardInvalid(uint32_t inst) {
+  CSR(STVAL) = inst;
+  return MCAUSE_ILLEGAL_INSTRUCTION;
+}
+
+// Interpret CSR rs1  as reg or imm
+uint32_t expandCsrVal(uint32_t reg, uint32_t isImm) {
+  if (isImm) {
+    if (reg & 0x10) {
+      return 0xfffffff0 | reg;
+    } else {
+      return reg;
+    }
+  } else {
+    return AT(USER_REGS_ADDR)[reg];
+  }
+}
+
+// Handle system instructions
+uint32_t handleInstSystem(uint32_t inst) {
+  if (inst == 0x10500073) {
+    // TODO: this is wait for interrupt, maybe actual skip ahead?
+    return MCAUSE_NONE;  // No-op
+  }
+  uint32_t csrt = (inst >> 12) & 3;
+  if (csrt == 0) {
+    if ((inst & (~0x01ff8000)) == 0x12000073) {
+      // SFENCE.VMA
+      // TODO: make this clear cache
+      return MCAUSE_NONE;  // No-op
+    }
+    return forwardInvalid(inst);
+  }
+  // Bascially, a CSR intruciton, deocde
+  uint32_t rd = (inst >> 7) & 0x1f;
+  uint32_t isImm = (inst >> 14) & 1;
+  uint32_t rs1 = (inst >> 15) & 0x1f;
+  uint32_t csr = (inst >> 20);
+  uint32_t newVal = expandCsrVal(rs1, isImm);;
+  // TODO: check permissions
+  // Load current value
+  uint32_t curVal = AT(CSR_BASE_ADDR)[csr];
+  if (rd != 0) {
+    // Write to rd
+    AT(USER_REGS_ADDR)[rd] = curVal;
+  }
+  uint32_t prevVal = curVal;
+  // Modify value as per instruction type
+  switch(csrt) {
+    case 1: curVal = newVal; break;
+    case 2: curVal |= newVal; break;
+    case 3: curVal &= newVal; break;
+    default:
+      return forwardInvalid(inst);
+  }
+  // Store new value
+  AT(CSR_BASE_ADDR)[csr] = curVal;
+  // If not modified, we are done
+  if (prevVal == curVal) { return MCAUSE_NONE; }
+  switch(csr) {
+    // Special CSR handling goes here
+    case CSR_SATP:
+      LOG(0, "NEW SATP: " << curVal);
+    default:
+      break;
+  }
+  return MCAUSE_NONE;
+}
 // Handle atomic instructions
 uint32_t handleInstAtomic(uint32_t inst) {
   // Extract parts of the instruction
@@ -403,8 +318,7 @@ uint32_t handleInstAtomic(uint32_t inst) {
   uint32_t op = (inst >> 27);
   // If 64-bit, fail
   if (func3 != 2) {
-    CSR(STVAL) = inst;
-    return MCAUSE_ILLEGAL_INSTRUCTION;
+    return forwardInvalid(inst);
   }
   // Get the address
   uint32_t addr = AT(USER_REGS_ADDR)[rs1];
@@ -430,8 +344,7 @@ uint32_t handleInstAtomic(uint32_t inst) {
   // Process instruction
   if (op == 0b00010) { // LR
     if (rs2 != 0) {
-      CSR(STVAL) = inst;
-      return MCAUSE_ILLEGAL_INSTRUCTION;
+      return forwardInvalid(inst);
     }
     active = true;
     lastAddr = addr;
@@ -476,8 +389,7 @@ uint32_t handleInstAtomic(uint32_t inst) {
       val = (val < in) ? in : val; break;
     default:
       // Invalid instruction!
-      CSR(STVAL) = inst;
-      return MCAUSE_ILLEGAL_INSTRUCTION;
+      return forwardInvalid(inst);
   }
   AT(addr)[0] = val;
   return MCAUSE_NONE;
@@ -488,8 +400,8 @@ uint32_t handleInstAtomic(uint32_t inst) {
 // STVAL should be set directly
 uint32_t handleInst(uint32_t inst) {
   switch((inst >> 2) & 0x1f) {
-    //case(0b11100):
-    //  return handleInstSystem(inst);
+    case(0b11100):
+      return handleInstSystem(inst);
     case(0b01011):
       return handleInstAtomic(inst);
     case(0b00011):  // Fence, ignore
@@ -507,6 +419,7 @@ uint32_t handleInst(uint32_t inst) {
 // 2) Forward trap to supervisor
 // 3) Die (i.e. nondet trap on valid instruction, etc)
 extern "C" void onTrap() {
+  /*
   // Get PC we trapped on
   uint32_t pc = CSR(MEPC);
   // Translate address
@@ -548,9 +461,12 @@ extern "C" void onTrap() {
     instLong = inst;
     instLen = 4;
   }
+  */
+  uint32_t instLong = CSR(MTVAL);
+  uint32_t instLen = 4; // TODO
   // Try to process instruction
   // LOG(0, "Handling inst " << inst << " at " << CSR(MEPC));
-  mcause = handleInst(instLong);
+  uint32_t mcause = handleInst(instLong);
   if (mcause == MCAUSE_NONE) {
     // Success, bump PC + continue
     CSR(MEPC) += instLen;
@@ -560,14 +476,82 @@ extern "C" void onTrap() {
   }
 }
 
+uint32_t handleSbiBaseExt() {
+  uint32_t func_id = UREG(A6);
+  switch(func_id) {
+    case 0: // sbi_get_spec_version
+      return 0x03000000;  // 3.0
+    case 1: // sbi_get_impl_id
+      return 1;  // SBI_OPENSBI_IMPID
+    case 2: // sbi_get_impl_version
+      return 0;  // TODO
+    case 3: // sbi_probe_extension
+      switch(UREG(A0)) {
+        case 0x4442434E: // DBCN: Debug console
+        //case 0x53525354: // SRST: System reset 
+        case 0x54494D45: // Time: Timer
+          return 1;
+        default:
+          return 0;
+      }
+    case 4: // sbi_get_mvendorid 
+    case 5: // sbi_get_marchid 
+    case 6: // sbi_get_mimpid 
+      return 0;
+    default:
+      LOG(0, "Invalid base function: " << func_id);
+      die();
+  }
+  return 0;
+}
+
+uint32_t handleSbiDebugConsole() {
+  uint32_t func_id = UREG(A6);
+  char c;
+  switch(func_id) {
+    case 0: // sbi_debug_console_write
+      return hostWrite(-1, reinterpret_cast<char*>(UREG(A1)), UREG(A0));
+    case 1: // sbi_debug_console_read
+      // TODO: Check is there is data to read and read it
+      return 0;
+    case 2: // sbi_debug_console_write_byte 
+      c = UREG(A0);
+      hostWrite(-1, &c, 1);
+      return 0;
+    default:
+      LOG(0, "Invalid SBI debug console function: " << func_id);
+      die();
+  }
+  return 0;
+}
+
 extern "C" void onEcall() {
-  switch(UREG(A7)) {
+  uint32_t ext_id = UREG(A7);
+  uint32_t ret = 0;
+  switch(ext_id) {
     case 0:
       terminate(UREG(A0), UREG(A1));
       break;
+    case 0x10:
+      ret = handleSbiBaseExt();
+      break;
+    case 0x4442434E:
+      ret = handleSbiDebugConsole();
+      break;
+    /*
+    case 0x53525354:
+      ret = handleSystemReset();
+      break;
+    case 0x54494D45:
+      ret = handleTimer();
+      break;
+    */
     default:
-      FATAL("Invalid ECALL: " << UREG(A7));
+      LOG(0, "Request for invalid SBI extension: " << ext_id);
   }
+  UREG(A0) = 0;
+  UREG(A1) = ret;
+  CSR(MEPC) += 4;
 }
 
 extern "C" void _trapEntry();
@@ -575,16 +559,11 @@ extern "C" void _ecallEntry();
 
 void initializeCsrs() {
   // Only initialize ones that are explicitly non-zero
-  CSR(MNONDETTRAP) = reinterpret_cast<uint32_t>(_trapEntry);  // Set trap handler address, calls onTrap
+  CSR(MTRAP) = reinterpret_cast<uint32_t>(_trapEntry);  // Set trap handler address, calls onTrap
   CSR(MTVEC) = reinterpret_cast<uint32_t>(_ecallEntry);  // Set trap handler address, calls onEcall
 }
 
 extern "C" void start() {
   initializeCsrs();
   asm volatile("mret\n" : : :);
-  //UREG(A0) = 0;  // Set A0 to hart 0
-  //UREG(A1) = 0xe0000000;  // Set A1 to pointer to dtb
-  // MRET back into kernel entry
-  //CSR(MPREVMODE) = MODE_SUPERVISOR;  // Set trap return mode for mret
-  //CSR(MEPC) = 0xc0000000;  // Set trap return address to kernel entry point
 }

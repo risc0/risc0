@@ -23,7 +23,7 @@ enum class Opcode : uint8_t {
 #define ENTRY(name, ...) name,
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
-  INVALID,
+  ANY,
 };
 
 inline const char* getOpcodeName(Opcode opcode) {
@@ -33,6 +33,8 @@ inline const char* getOpcodeName(Opcode opcode) {
     return #name;
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
+  case Opcode::ANY:
+    return "ANY";
   default:
     return "***UNKNOWN***";
   }

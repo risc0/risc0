@@ -30,6 +30,7 @@ namespace risc0::rv32im {
 namespace {
 
 #define DLOG(...) LOG(2, __VA_ARGS__)
+// #define DLOG(...) if (mode != MODE_MACHINE) LOG(2, __VA_ARGS__)
 // #define DLOG(...) /**/
 
 struct Emulator {
@@ -326,17 +327,24 @@ struct Emulator {
   }
 
   void trap(const std::string& reason) {
-    DLOG("Trapping: " << reason);
     if (mode == MODE_MACHINE) {
-      throw std::runtime_error("Double Trap: " + reason);
+      fatal("Double Trap: " + reason);
     }
-
-    auto& trapWit = trace.makeInstTrap();
-    trapWit.cycle = curCycle;
-    trapWit.iCacheCycle = iCacheCycle;
-    writePhysMemory(trapWit.MEPC, CSR_WORD(MEPC), pc);
-    writePhysMemory(trapWit.MPREVMODE, CSR_WORD(MPREVMODE), mode);
-    newPc = readPhysMemory(trapWit.MNONDETTRAP, CSR_WORD(MNONDETTRAP));
+    auto& wit = trace.makeInstTrap();
+    wit.cycle = curCycle;
+    wit.fetch = dinst->fetch;
+    uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
+    bool isEcall = (dinst->inst == 0x00000073);
+    wit.isEcall = isEcall;
+    writePhysMemory(wit.writePc, mepcWord, pc);
+    writePhysMemory(wit.writeMode, CSR_WORD(MEMODE), mode);
+    uint32_t imm = isEcall ? 0 : dinst->inst;
+    writePhysMemory(wit.writeVal, CSR_WORD(MTVAL), imm);
+    uint32_t dispatchWord = CSR_WORD(MTRAP);
+    if (isEcall) {
+      dispatchWord = v2Compat ? V2_COMPAT_ECALL_DISPATCH : CSR_WORD(MTVEC);
+    }
+    newPc = readPhysMemory(wit.readDispatch, dispatchWord);
     setMode(MODE_MACHINE);
   }
 
@@ -403,7 +411,6 @@ struct Emulator {
       break;
     }
     if (peekAddr % alignmentReq != 0) {
-      dinst->count--;
       trap("Alignement error on load");
       return;
     }
@@ -458,7 +465,6 @@ struct Emulator {
       break;
     }
     if (peekAddr % alignmentReq != 0) {
-      dinst->count--;
       trap("Alignement error on store");
       return;
     }
@@ -567,16 +573,8 @@ struct Emulator {
   }
 
   template <uint32_t opt> inline void do_INST_ECALL() {
-    if (mode == MODE_USER) {
-      // Save PC + jump to dispatch address
-      auto& wit = trace.makeInstEcall();
-      wit.cycle = curCycle;
-      wit.fetch = dinst->fetch;
-      uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
-      writePhysMemory(wit.savePc, mepcWord, pc);
-      setMode(MODE_MACHINE);
-      uint32_t mtvecWord = v2Compat ? V2_COMPAT_ECALL_DISPATCH : CSR_WORD(MTVEC);
-      newPc = readPhysMemory(wit.dispatch, mtvecWord);
+    if (mode != MODE_MACHINE) {
+      trap("ECALL");
       return;
     }
     uint32_t which = peekReg(REG_A7);
@@ -604,32 +602,18 @@ struct Emulator {
 
   template <uint32_t opt> inline void do_INST_MRET() {
     if (mode != MODE_MACHINE) {
-      dinst->count--;
       trap("MRET not in machine mode");
       return;
     }
     auto& wit = trace.makeInstMret();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
-    setMode(MODE_USER);
-    uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
     uint32_t add = v2Compat ? 4 : 0;
-    newPc = readPhysMemory(wit.readPc, mepcWord) + add;
-  }
-
-  template <uint32_t opt> inline void do_INST_SRET() {
-    if (mode != MODE_SUPERVISOR) {
-      dinst->count--;
-      trap("SRET not in supervisor mode");
-      return;
-    }
-    // Actually do MRET anyway for now
-    auto& wit = trace.makeInstMret();
-    wit.cycle = curCycle;
-    wit.fetch = dinst->fetch;
-    setMode(MODE_USER);
     uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
-    newPc = readPhysMemory(wit.readPc, mepcWord) + 4;
+    newPc = readPhysMemory(wit.MEPC, mepcWord) + add;
+    uint32_t newMode = readPhysMemory(wit.MEMODE, CSR_WORD(MEMODE));
+    DLOG("  NEW PC = " << HexWord{newPc});
+    setMode(newMode);
   }
 
   void do_ECALL_TERMINATE() {
@@ -839,7 +823,7 @@ struct Emulator {
     }
   }
 
-  bool fetchAndDecode(DecodeWitness* wit) {
+  void fetchAndDecode(DecodeWitness* wit) {
     // We always read the memory address at pc/4
     uint32_t l0 = readVirtMemory(wit->load0, pc / 4);
     // If pc == 2 (mod 4), shift to lower value
@@ -884,12 +868,6 @@ struct Emulator {
     default:
       wit->imm = 0;
     }
-    if (wit->opcode == uint32_t(Opcode::INVALID)) {
-      undoVirtMemory(wit->load0);
-      undoVirtMemory(wit->load1);
-      return false;
-    }
-    return true;
   }
 
   bool run(size_t rowCount) {
@@ -900,15 +878,8 @@ struct Emulator {
                         rowCount) {
       DecodeWitness*& decodeWit = (mode == MODE_MACHINE) ? mInstCache[pc] : usInstCache[pc];
       if (!decodeWit) {
-        DecodeWitness maybeSave;
-        if (!fetchAndDecode(&maybeSave)) {
-          trap("Invalid opcode");
-          curCycle++;
-          pc = newPc;
-          continue;
-        }
         decodeWit = &trace.makeDecode();
-        *decodeWit = maybeSave;
+        fetchAndDecode(decodeWit);
       } else {
         decodeWit->count++;
       }
@@ -916,6 +887,7 @@ struct Emulator {
       newPc = dinst->fetch.nextPc;
       DLOG("cycle: " << curCycle << ", pc: " << HexWord{pc} << ", mode: " << mode
                      << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
+
       switch (Opcode(decodeWit->opcode)) {
 #define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...)                                \
   case Opcode::name:                                                                               \
@@ -923,8 +895,8 @@ struct Emulator {
     break;
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
-      case Opcode::INVALID:
-        throw std::runtime_error("Unreachable");
+      case Opcode::ANY:
+        trap("INVALID INSTRUCTION");
       }
       curCycle++;
       pc = newPc;

@@ -46,7 +46,6 @@ struct EmptyWitness {
   BLOCK_TYPE(InstJalr, 6)                                                                          \
   BLOCK_TYPE(InstLui, 9)                                                                           \
   BLOCK_TYPE(InstAuipc, 7)                                                                         \
-  BLOCK_TYPE(InstEcall, 1)                                                                         \
   BLOCK_TYPE(InstTrap, 1)                                                                          \
   BLOCK_TYPE(InstMret, 1)                                                                          \
   BLOCK_TYPE(EcallTerminate, 1)                                                                    \

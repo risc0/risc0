@@ -66,43 +66,27 @@ template <typename C> struct InstSuspendBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template <typename C> struct InstEcallBlock {
-  CONSTANT static char NAME[] = "InstEcallBlock";
+template <typename C> struct InstTrapBlock {
+  CONSTANT static char NAME[] = "InstTrapBlock";
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  PhysMemWriteBlock<C> writeSavePc;
+  BitReg<C> isEcall;
+  Reg<C> rs1;
+  Reg<C> rs2;
+  Reg<C> rd;
+  PhysMemWriteBlock<C> writePc;
+  PhysMemWriteBlock<C> writeMode;
+  PhysMemWriteBlock<C> writeVal;
   PhysMemReadBlock<C> readDispatch;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, writeSavePc, cycle.get());
+    T::apply(ctx, writePc, cycle.get());
+    T::apply(ctx, writeMode, cycle.get());
+    T::apply(ctx, writeVal, cycle.get());
     T::apply(ctx, readDispatch, cycle.get());
-  }
-
-  FDEV void set(CTX, InstEcallWitness wit) DEV;
-  FDEV inline void finalize(CTX) DEV {}
-
-  FDEV void verify(CTX) DEV;
-  FDEV void addArguments(CTX) DEV;
-};
-
-template <typename C> struct InstTrapBlock {
-  CONSTANT static char NAME[] = "InstTrapBlock";
-
-  Reg<C> cycle;
-  Reg<C> iCacheCycle;
-  PhysMemWriteBlock<C> writeMEPC;
-  PhysMemWriteBlock<C> writeMPREVMODE;
-  PhysMemReadBlock<C> readMNONDETTRAP;
-
-  template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, iCacheCycle);
-    T::apply(ctx, writeMEPC, cycle.get());
-    T::apply(ctx, writeMPREVMODE, cycle.get());
-    T::apply(ctx, readMNONDETTRAP, cycle.get());
   }
 
   FDEV void set(CTX, InstTrapWitness wit) DEV;
@@ -117,16 +101,18 @@ template <typename C> struct InstMretBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  PhysMemReadBlock<C> readPc;
+  PhysMemReadBlock<C> readMEPC;
+  PhysMemReadBlock<C> readMEMODE;
   Reg<C> toAdd;
   AddU32<C> sumPc;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readPc, cycle.get());
+    T::apply(ctx, readMEPC, cycle.get());
+    T::apply(ctx, readMEMODE, cycle.get());
     T::apply(ctx, toAdd);
-    T::apply(ctx, sumPc, readPc.data.get(), ValU32<C>(toAdd.get(), 0));
+    T::apply(ctx, sumPc, readMEPC.data.get(), ValU32<C>(toAdd.get(), 0));
   }
 
   FDEV void set(CTX, InstMretWitness wit) DEV;

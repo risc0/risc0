@@ -30,11 +30,10 @@ void fillExpandTable(std::map<uint32_t, uint32_t>& words) {
   }
 }
 
-void loadFFI(std::map<uint32_t, uint32_t>& words, const ArrayRef<uint8_t>& elfBytes) {
-  uint32_t entry = risc0::loadElf(elfBytes, words);
-  words[V2_COMPAT_SPC] = entry;
-  words[V2_COMPAT_SMODE] = 1;
-  fillExpandTable(words);
+uint32_t loadRaw(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
+  LOG(0, "Loading elf: " << elf);
+  auto elfBytes = risc0::loadFile(elf);
+  return risc0::loadElf(ArrayRef(elfBytes.data(), elfBytes.size()), words);
 }
 
 void loadKernelV2(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
@@ -73,7 +72,7 @@ void loadV3(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
   uint32_t entry = risc0::loadElf(ArrayRef(elfBytes.data(), elfBytes.size()), words);
   words[CSR_WORD(MNOV2COMPAT)] = 1;
   words[CSR_WORD(MEPC)] = entry;
-  words[CSR_WORD(MPREVMODE)] = MODE_SUPERVISOR;
+  words[CSR_WORD(MEMODE)] = MODE_SUPERVISOR;
   words[CSR_WORD(MSPC)] = firmwareEntry;
   words[CSR_WORD(MSMODE)] = MODE_MACHINE;
   fillExpandTable(words);

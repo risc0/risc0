@@ -154,7 +154,7 @@ template <typename C> FDEV void DecodeBlock<C>::set(CTX, DecodeWitness witness) 
   uint32_t immJ = (topBit * 0xfff00000) | (rs1 << 15) | (f3 << 12) | ((rs2 & 1) << 11) |
                   ((f7 & 0x3f) << 5) | (rs2 & 0x1e);
   uint32_t immU = inst & 0xfffff000;
-  uint32_t idx = 48; // Will fail to verify if we don't find a match
+  uint32_t idx = 48; // Special case for 'IANY'
 #define XF3 f3
 #define XF7 f7
 #define ENTRY(name, gidx, gopcode, gimmType, gf3, gf7, ...)                                        \
@@ -167,6 +167,11 @@ template <typename C> FDEV void DecodeBlock<C>::set(CTX, DecodeWitness witness) 
 #undef ENTRY
 #undef XF7
 #undef XF3
+  if (idx == 48) {
+    imm.set(ctx, inst);
+    imm.set(ctx, inst);
+    options.set(ctx, uint32_t(INST_ANY));
+  }
   idx1.set(ctx, idx / 7);
   idx2.set(ctx, idx % 7);
 }
@@ -192,8 +197,10 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
                             load1.data.high.get(),
                             cond<C>(isUnaligned, load1.data.low.get(), load0.data.high.get()));
   // Make sure the instruction matches the bits
-  EQ(instLow, recomposeRange(0, 16));
-  EQ(instHigh, recomposeRange(16, 32));
+  Val<C> instLowVal = recomposeRange(0, 16);
+  Val<C> instHighVal = recomposeRange(16, 32);
+  EQ(instLow, instLowVal);
+  EQ(instHigh, instHighVal);
 
   // Make the various parts
   Val<C> f7 = getFunct7();
@@ -234,6 +241,15 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
 #undef ENTRY
 #undef XF7
 #undef XF3
+  // Special case handling of 'ANY' instruction
+  Val<C> isAny = idx1.bits[6].get() * idx2.bits[6].get();
+  reqF3 += isAny * f3;
+  reqF7 += isAny * f7;
+  reqImm.low += isAny * instLowVal;
+  reqImm.high += isAny * instHighVal;
+  reqOptions += isAny * Val<C>(uint32_t(INST_ANY));
+  reqOpcode += isAny * opcode.get();
+  validCount += isAny;
   // Do final validation
   EQ(validCount, 1);
   EQ(reqF3, f3);

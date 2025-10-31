@@ -24,18 +24,15 @@ namespace {
 class FastDecodeTable {
 public:
   FastDecodeTable() {
-    table.resize(1 << 10, Opcode::INVALID);
+    table.resize(1 << 10, Opcode::ANY);
     addRV32IM();
   }
 
   Opcode lookup(const DecodedInst inst) const {
     if ((inst.opcode & 0x3) != 3) {
-      return Opcode::INVALID;
+      return Opcode::ANY;
     }
-    // Annoyingly SRET + MRET don't fit in the 10 bit table
-    if (inst.inst == 0x10200073) {
-      return Opcode::SRET;
-    }
+    // Annoyingly MRET don't fit in the 10 bit table
     if (inst.inst == 0x30200073) {
       return Opcode::MRET;
     }
@@ -54,8 +51,8 @@ private:
   }
 
   void addInst(uint32_t opcode, int32_t func3, int32_t func7, Opcode inst) {
-    // Annoyingly SRET + MRET don't fit in the 10 bit table
-    if (inst == Opcode::SRET || inst == Opcode::MRET) {
+    // Annoyingly MRET don't fit in the 10 bit table
+    if (inst == Opcode::MRET) {
       return;
     }
     uint32_t opHigh = opcode >> 2;

@@ -31,23 +31,19 @@ struct InstSuspendWitness {
   PhysMemWriteWitness mode;
 };
 
-struct InstEcallWitness {
-  uint32_t cycle;
-  FetchWitness fetch;
-  PhysMemWriteWitness savePc;
-  PhysMemReadWitness dispatch;
-};
-
 struct InstTrapWitness {
   uint32_t cycle;
-  uint32_t iCacheCycle;
-  PhysMemWriteWitness MEPC;
-  PhysMemWriteWitness MPREVMODE;
-  PhysMemReadWitness MNONDETTRAP;
+  uint32_t isEcall;
+  FetchWitness fetch;
+  PhysMemWriteWitness writePc;
+  PhysMemWriteWitness writeMode;
+  PhysMemWriteWitness writeVal;
+  PhysMemReadWitness readDispatch;
 };
 
 struct InstMretWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  PhysMemReadWitness readPc;
+  PhysMemReadWitness MEPC;
+  PhysMemReadWitness MEMODE;
 };
