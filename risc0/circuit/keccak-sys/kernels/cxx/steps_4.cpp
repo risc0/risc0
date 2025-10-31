@@ -20,19 +20,19 @@ namespace risc0::circuit::keccak::cpu {
 void step_Top_3(ExecContext& ctx,MutableBuf arg0)   {
 // builtin NondetReg
 // Reg(<preamble>:5)
-// ControlState(zirgen/circuit/keccak/top.zir:296)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:338)
+// ControlState(zirgen/circuit/keccak/top.zir:295)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:337)
 set(ctx,arg0, 11, Val(4));
-// ControlState(zirgen/circuit/keccak/top.zir:297)
+// ControlState(zirgen/circuit/keccak/top.zir:296)
 set(ctx,arg0, 12, Val(0));
-// ControlState(zirgen/circuit/keccak/top.zir:298)
+// ControlState(zirgen/circuit/keccak/top.zir:297)
 set(ctx,arg0, 13, Val(0));
 return ;
 }
 void step_Top_19(ExecContext& ctx,MutableBuf arg0)   {
 // builtin Sub
-// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:311)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:348)
+// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:310)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:347)
 Val x1 = (get(ctx,arg0, 13, 1) - Val(6));
 // builtin NondetReg
 // IsZero(zirgen/circuit/keccak/is_zero.zir:8)
@@ -41,15 +41,15 @@ Val x2 = get(ctx,arg0, 942, 0);
 // IsZero(zirgen/circuit/keccak/is_zero.zir:11)
 set(ctx,arg0, 943, inv_0(x1));
 // Reg(<preamble>:5)
-// ControlState(zirgen/circuit/keccak/top.zir:297)
+// ControlState(zirgen/circuit/keccak/top.zir:296)
 Val x3 = get(ctx,arg0, 12, 1);
-// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:312)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:348)
+// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:311)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:347)
 set(ctx,arg0, 944, (x2 * (Val(1) - x3)));
-// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:313)
+// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:312)
 set(ctx,arg0, 945, (x2 * x3));
 if (to_size_t((Val(1) - x2))) {
-// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:314)
+// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:313)
 step_Top_14(ctx,arg0);
 }
 if (to_size_t(get(ctx,arg0, 944, 0))) {
