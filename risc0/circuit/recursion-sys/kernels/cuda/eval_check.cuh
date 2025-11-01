@@ -16,5 +16,3 @@
 #pragma once
 
 constexpr size_t INV_RATE = 4;
-
-__constant__ FpExt poly_mix[158];

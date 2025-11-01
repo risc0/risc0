@@ -18,26 +18,26 @@
 
 namespace risc0::circuit::keccak::cpu {
 void step_Top_2(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak/top.zir:296)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:336)
+// ControlState(zirgen/circuit/keccak/top.zir:295)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:335)
 set(ctx,arg0, 11, Val(9));
-// ControlState(zirgen/circuit/keccak/top.zir:297)
+// ControlState(zirgen/circuit/keccak/top.zir:296)
 set(ctx,arg0, 12, Val(0));
-// ControlState(zirgen/circuit/keccak/top.zir:298)
+// ControlState(zirgen/circuit/keccak/top.zir:297)
 set(ctx,arg0, 13, Val(0));
 return ;
 }
 void step_Top_18(ExecContext& ctx,MutableBuf arg0)   {
-// NextPreimage(zirgen/circuit/keccak/top.zir:184)
-// CheckNextPreimage(zirgen/circuit/keccak/top.zir:322)
-// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:317)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:348)
+// NextPreimage(zirgen/circuit/keccak/top.zir:183)
+// CheckNextPreimage(zirgen/circuit/keccak/top.zir:321)
+// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:316)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:347)
 Val x1 = INVOKE_EXTERN(ctx,nextPreimage);
 // builtin NondetReg
 set(ctx,arg0, 941, x1);
 Val x2 = get(ctx,arg0, 941, 0);
 if (to_size_t(x2)) {
-// CheckNextPreimage(zirgen/circuit/keccak/top.zir:325)
+// CheckNextPreimage(zirgen/circuit/keccak/top.zir:324)
 step_Top_16(ctx,arg0);
 }
 if (to_size_t((Val(1) - x2))) {

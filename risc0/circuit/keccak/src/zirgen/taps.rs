@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+// This code is automatically generated
+
 use risc0_zkp::taps::{TapData, TapSet};
 
 #[allow(missing_docs)]

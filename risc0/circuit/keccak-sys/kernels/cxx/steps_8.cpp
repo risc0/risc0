@@ -18,422 +18,422 @@
 
 namespace risc0::circuit::keccak::cpu {
 void step_Top_7(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak/top.zir:296)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:343)
-// Top(zirgen/circuit/keccak/top.zir:369)
+// ControlState(zirgen/circuit/keccak/top.zir:295)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:342)
+// Top(zirgen/circuit/keccak/top.zir:368)
 set(ctx,arg0, 11, Val(5));
-// ControlState(zirgen/circuit/keccak/top.zir:297)
+// ControlState(zirgen/circuit/keccak/top.zir:296)
 set(ctx,arg0, 12, Val(0));
-// ControlState(zirgen/circuit/keccak/top.zir:298)
+// ControlState(zirgen/circuit/keccak/top.zir:297)
 set(ctx,arg0, 13, get(ctx,arg0, 13, 1));
 return ;
 }
 void step_Top_23(ExecContext& ctx,MutableBuf arg0)   {
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
-// ReadCycle(zirgen/circuit/keccak/top.zir:232)
-// Top(zirgen/circuit/keccak/top.zir:379)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
+// ReadCycle(zirgen/circuit/keccak/top.zir:231)
+// Top(zirgen/circuit/keccak/top.zir:378)
 Val x1 = INVOKE_EXTERN(ctx,getPreimage, Val(0));
 // builtin NondetReg
 set(ctx,arg0, 814, x1);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x2 = INVOKE_EXTERN(ctx,getPreimage, Val(1));
 // builtin NondetReg
 set(ctx,arg0, 815, x2);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x3 = INVOKE_EXTERN(ctx,getPreimage, Val(2));
 // builtin NondetReg
 set(ctx,arg0, 816, x3);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x4 = INVOKE_EXTERN(ctx,getPreimage, Val(3));
 // builtin NondetReg
 set(ctx,arg0, 817, x4);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x5 = INVOKE_EXTERN(ctx,getPreimage, Val(4));
 // builtin NondetReg
 set(ctx,arg0, 818, x5);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x6 = INVOKE_EXTERN(ctx,getPreimage, Val(5));
 // builtin NondetReg
 set(ctx,arg0, 819, x6);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x7 = INVOKE_EXTERN(ctx,getPreimage, Val(6));
 // builtin NondetReg
 set(ctx,arg0, 820, x7);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x8 = INVOKE_EXTERN(ctx,getPreimage, Val(7));
 // builtin NondetReg
 set(ctx,arg0, 821, x8);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x9 = INVOKE_EXTERN(ctx,getPreimage, Val(8));
 // builtin NondetReg
 set(ctx,arg0, 822, x9);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x10 = INVOKE_EXTERN(ctx,getPreimage, Val(9));
 // builtin NondetReg
 set(ctx,arg0, 823, x10);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x11 = INVOKE_EXTERN(ctx,getPreimage, Val(10));
 // builtin NondetReg
 set(ctx,arg0, 824, x11);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x12 = INVOKE_EXTERN(ctx,getPreimage, Val(11));
 // builtin NondetReg
 set(ctx,arg0, 825, x12);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x13 = INVOKE_EXTERN(ctx,getPreimage, Val(12));
 // builtin NondetReg
 set(ctx,arg0, 826, x13);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x14 = INVOKE_EXTERN(ctx,getPreimage, Val(13));
 // builtin NondetReg
 set(ctx,arg0, 827, x14);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x15 = INVOKE_EXTERN(ctx,getPreimage, Val(14));
 // builtin NondetReg
 set(ctx,arg0, 828, x15);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x16 = INVOKE_EXTERN(ctx,getPreimage, Val(15));
 // builtin NondetReg
 set(ctx,arg0, 829, x16);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x17 = INVOKE_EXTERN(ctx,getPreimage, Val(16));
 // builtin NondetReg
 set(ctx,arg0, 830, x17);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x18 = INVOKE_EXTERN(ctx,getPreimage, Val(17));
 // builtin NondetReg
 set(ctx,arg0, 831, x18);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x19 = INVOKE_EXTERN(ctx,getPreimage, Val(18));
 // builtin NondetReg
 set(ctx,arg0, 832, x19);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x20 = INVOKE_EXTERN(ctx,getPreimage, Val(19));
 // builtin NondetReg
 set(ctx,arg0, 833, x20);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x21 = INVOKE_EXTERN(ctx,getPreimage, Val(20));
 // builtin NondetReg
 set(ctx,arg0, 834, x21);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x22 = INVOKE_EXTERN(ctx,getPreimage, Val(21));
 // builtin NondetReg
 set(ctx,arg0, 835, x22);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x23 = INVOKE_EXTERN(ctx,getPreimage, Val(22));
 // builtin NondetReg
 set(ctx,arg0, 836, x23);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x24 = INVOKE_EXTERN(ctx,getPreimage, Val(23));
 // builtin NondetReg
 set(ctx,arg0, 837, x24);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x25 = INVOKE_EXTERN(ctx,getPreimage, Val(24));
 // builtin NondetReg
 set(ctx,arg0, 838, x25);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x26 = INVOKE_EXTERN(ctx,getPreimage, Val(25));
 // builtin NondetReg
 set(ctx,arg0, 839, x26);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x27 = INVOKE_EXTERN(ctx,getPreimage, Val(26));
 // builtin NondetReg
 set(ctx,arg0, 840, x27);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x28 = INVOKE_EXTERN(ctx,getPreimage, Val(27));
 // builtin NondetReg
 set(ctx,arg0, 841, x28);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x29 = INVOKE_EXTERN(ctx,getPreimage, Val(28));
 // builtin NondetReg
 set(ctx,arg0, 842, x29);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x30 = INVOKE_EXTERN(ctx,getPreimage, Val(29));
 // builtin NondetReg
 set(ctx,arg0, 843, x30);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x31 = INVOKE_EXTERN(ctx,getPreimage, Val(30));
 // builtin NondetReg
 set(ctx,arg0, 844, x31);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x32 = INVOKE_EXTERN(ctx,getPreimage, Val(31));
 // builtin NondetReg
 set(ctx,arg0, 845, x32);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x33 = INVOKE_EXTERN(ctx,getPreimage, Val(32));
 // builtin NondetReg
 set(ctx,arg0, 846, x33);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x34 = INVOKE_EXTERN(ctx,getPreimage, Val(33));
 // builtin NondetReg
 set(ctx,arg0, 847, x34);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x35 = INVOKE_EXTERN(ctx,getPreimage, Val(34));
 // builtin NondetReg
 set(ctx,arg0, 848, x35);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x36 = INVOKE_EXTERN(ctx,getPreimage, Val(35));
 // builtin NondetReg
 set(ctx,arg0, 849, x36);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x37 = INVOKE_EXTERN(ctx,getPreimage, Val(36));
 // builtin NondetReg
 set(ctx,arg0, 850, x37);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x38 = INVOKE_EXTERN(ctx,getPreimage, Val(37));
 // builtin NondetReg
 set(ctx,arg0, 851, x38);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x39 = INVOKE_EXTERN(ctx,getPreimage, Val(38));
 // builtin NondetReg
 set(ctx,arg0, 852, x39);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x40 = INVOKE_EXTERN(ctx,getPreimage, Val(39));
 // builtin NondetReg
 set(ctx,arg0, 853, x40);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x41 = INVOKE_EXTERN(ctx,getPreimage, Val(40));
 // builtin NondetReg
 set(ctx,arg0, 854, x41);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x42 = INVOKE_EXTERN(ctx,getPreimage, Val(41));
 // builtin NondetReg
 set(ctx,arg0, 855, x42);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x43 = INVOKE_EXTERN(ctx,getPreimage, Val(42));
 // builtin NondetReg
 set(ctx,arg0, 856, x43);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x44 = INVOKE_EXTERN(ctx,getPreimage, Val(43));
 // builtin NondetReg
 set(ctx,arg0, 857, x44);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x45 = INVOKE_EXTERN(ctx,getPreimage, Val(44));
 // builtin NondetReg
 set(ctx,arg0, 858, x45);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x46 = INVOKE_EXTERN(ctx,getPreimage, Val(45));
 // builtin NondetReg
 set(ctx,arg0, 859, x46);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x47 = INVOKE_EXTERN(ctx,getPreimage, Val(46));
 // builtin NondetReg
 set(ctx,arg0, 860, x47);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x48 = INVOKE_EXTERN(ctx,getPreimage, Val(47));
 // builtin NondetReg
 set(ctx,arg0, 861, x48);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x49 = INVOKE_EXTERN(ctx,getPreimage, Val(48));
 // builtin NondetReg
 set(ctx,arg0, 862, x49);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x50 = INVOKE_EXTERN(ctx,getPreimage, Val(49));
 // builtin NondetReg
 set(ctx,arg0, 863, x50);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x51 = INVOKE_EXTERN(ctx,getPreimage, Val(50));
 // builtin NondetReg
 set(ctx,arg0, 864, x51);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x52 = INVOKE_EXTERN(ctx,getPreimage, Val(51));
 // builtin NondetReg
 set(ctx,arg0, 865, x52);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x53 = INVOKE_EXTERN(ctx,getPreimage, Val(52));
 // builtin NondetReg
 set(ctx,arg0, 866, x53);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x54 = INVOKE_EXTERN(ctx,getPreimage, Val(53));
 // builtin NondetReg
 set(ctx,arg0, 867, x54);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x55 = INVOKE_EXTERN(ctx,getPreimage, Val(54));
 // builtin NondetReg
 set(ctx,arg0, 868, x55);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x56 = INVOKE_EXTERN(ctx,getPreimage, Val(55));
 // builtin NondetReg
 set(ctx,arg0, 869, x56);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x57 = INVOKE_EXTERN(ctx,getPreimage, Val(56));
 // builtin NondetReg
 set(ctx,arg0, 870, x57);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x58 = INVOKE_EXTERN(ctx,getPreimage, Val(57));
 // builtin NondetReg
 set(ctx,arg0, 871, x58);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x59 = INVOKE_EXTERN(ctx,getPreimage, Val(58));
 // builtin NondetReg
 set(ctx,arg0, 872, x59);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x60 = INVOKE_EXTERN(ctx,getPreimage, Val(59));
 // builtin NondetReg
 set(ctx,arg0, 873, x60);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x61 = INVOKE_EXTERN(ctx,getPreimage, Val(60));
 // builtin NondetReg
 set(ctx,arg0, 874, x61);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x62 = INVOKE_EXTERN(ctx,getPreimage, Val(61));
 // builtin NondetReg
 set(ctx,arg0, 875, x62);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x63 = INVOKE_EXTERN(ctx,getPreimage, Val(62));
 // builtin NondetReg
 set(ctx,arg0, 876, x63);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x64 = INVOKE_EXTERN(ctx,getPreimage, Val(63));
 // builtin NondetReg
 set(ctx,arg0, 877, x64);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x65 = INVOKE_EXTERN(ctx,getPreimage, Val(64));
 // builtin NondetReg
 set(ctx,arg0, 878, x65);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x66 = INVOKE_EXTERN(ctx,getPreimage, Val(65));
 // builtin NondetReg
 set(ctx,arg0, 879, x66);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x67 = INVOKE_EXTERN(ctx,getPreimage, Val(66));
 // builtin NondetReg
 set(ctx,arg0, 880, x67);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x68 = INVOKE_EXTERN(ctx,getPreimage, Val(67));
 // builtin NondetReg
 set(ctx,arg0, 881, x68);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x69 = INVOKE_EXTERN(ctx,getPreimage, Val(68));
 // builtin NondetReg
 set(ctx,arg0, 882, x69);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x70 = INVOKE_EXTERN(ctx,getPreimage, Val(69));
 // builtin NondetReg
 set(ctx,arg0, 883, x70);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x71 = INVOKE_EXTERN(ctx,getPreimage, Val(70));
 // builtin NondetReg
 set(ctx,arg0, 884, x71);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x72 = INVOKE_EXTERN(ctx,getPreimage, Val(71));
 // builtin NondetReg
 set(ctx,arg0, 885, x72);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x73 = INVOKE_EXTERN(ctx,getPreimage, Val(72));
 // builtin NondetReg
 set(ctx,arg0, 886, x73);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x74 = INVOKE_EXTERN(ctx,getPreimage, Val(73));
 // builtin NondetReg
 set(ctx,arg0, 887, x74);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x75 = INVOKE_EXTERN(ctx,getPreimage, Val(74));
 // builtin NondetReg
 set(ctx,arg0, 888, x75);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x76 = INVOKE_EXTERN(ctx,getPreimage, Val(75));
 // builtin NondetReg
 set(ctx,arg0, 889, x76);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x77 = INVOKE_EXTERN(ctx,getPreimage, Val(76));
 // builtin NondetReg
 set(ctx,arg0, 890, x77);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x78 = INVOKE_EXTERN(ctx,getPreimage, Val(77));
 // builtin NondetReg
 set(ctx,arg0, 891, x78);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x79 = INVOKE_EXTERN(ctx,getPreimage, Val(78));
 // builtin NondetReg
 set(ctx,arg0, 892, x79);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x80 = INVOKE_EXTERN(ctx,getPreimage, Val(79));
 // builtin NondetReg
 set(ctx,arg0, 893, x80);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x81 = INVOKE_EXTERN(ctx,getPreimage, Val(80));
 // builtin NondetReg
 set(ctx,arg0, 894, x81);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x82 = INVOKE_EXTERN(ctx,getPreimage, Val(81));
 // builtin NondetReg
 set(ctx,arg0, 895, x82);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x83 = INVOKE_EXTERN(ctx,getPreimage, Val(82));
 // builtin NondetReg
 set(ctx,arg0, 896, x83);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x84 = INVOKE_EXTERN(ctx,getPreimage, Val(83));
 // builtin NondetReg
 set(ctx,arg0, 897, x84);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x85 = INVOKE_EXTERN(ctx,getPreimage, Val(84));
 // builtin NondetReg
 set(ctx,arg0, 898, x85);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x86 = INVOKE_EXTERN(ctx,getPreimage, Val(85));
 // builtin NondetReg
 set(ctx,arg0, 899, x86);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x87 = INVOKE_EXTERN(ctx,getPreimage, Val(86));
 // builtin NondetReg
 set(ctx,arg0, 900, x87);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x88 = INVOKE_EXTERN(ctx,getPreimage, Val(87));
 // builtin NondetReg
 set(ctx,arg0, 901, x88);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x89 = INVOKE_EXTERN(ctx,getPreimage, Val(88));
 // builtin NondetReg
 set(ctx,arg0, 902, x89);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x90 = INVOKE_EXTERN(ctx,getPreimage, Val(89));
 // builtin NondetReg
 set(ctx,arg0, 903, x90);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x91 = INVOKE_EXTERN(ctx,getPreimage, Val(90));
 // builtin NondetReg
 set(ctx,arg0, 904, x91);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x92 = INVOKE_EXTERN(ctx,getPreimage, Val(91));
 // builtin NondetReg
 set(ctx,arg0, 905, x92);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x93 = INVOKE_EXTERN(ctx,getPreimage, Val(92));
 // builtin NondetReg
 set(ctx,arg0, 906, x93);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x94 = INVOKE_EXTERN(ctx,getPreimage, Val(93));
 // builtin NondetReg
 set(ctx,arg0, 907, x94);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x95 = INVOKE_EXTERN(ctx,getPreimage, Val(94));
 // builtin NondetReg
 set(ctx,arg0, 908, x95);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x96 = INVOKE_EXTERN(ctx,getPreimage, Val(95));
 // builtin NondetReg
 set(ctx,arg0, 909, x96);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x97 = INVOKE_EXTERN(ctx,getPreimage, Val(96));
 // builtin NondetReg
 set(ctx,arg0, 910, x97);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x98 = INVOKE_EXTERN(ctx,getPreimage, Val(97));
 // builtin NondetReg
 set(ctx,arg0, 911, x98);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x99 = INVOKE_EXTERN(ctx,getPreimage, Val(98));
 // builtin NondetReg
 set(ctx,arg0, 912, x99);
-// GetPreimage(zirgen/circuit/keccak/top.zir:183)
+// GetPreimage(zirgen/circuit/keccak/top.zir:182)
 Val x100 = INVOKE_EXTERN(ctx,getPreimage, Val(99));
 // builtin NondetReg
 set(ctx,arg0, 913, x100);
 // Reg(<preamble>:5)
 // TopState(zirgen/circuit/keccak/top.zir:33)
-// ReadCycle(zirgen/circuit/keccak/top.zir:235)
+// ReadCycle(zirgen/circuit/keccak/top.zir:234)
 set(ctx,arg0, 14, Val(0));
 set(ctx,arg0, 15, Val(0));
 set(ctx,arg0, 16, Val(0));

@@ -16,8 +16,6 @@
 #include "cuda.h"
 #include "supra/fp.h"
 
-extern __constant__ FpExt poly_mix[158];
-
 namespace risc0::circuit::recursion::cuda {
 
 __device__ FpExt poly_fp(uint32_t idx,
@@ -26,7 +24,8 @@ __device__ FpExt poly_fp(uint32_t idx,
                          const Fp* out,
                          const Fp* data,
                          const Fp* mix,
-                         const Fp* accum);
+                         const Fp* accum,
+                         const FpExt* poly_mix);
 
 __global__ void eval_check(Fp* check,
                            const Fp* ctrl,
@@ -36,10 +35,11 @@ __global__ void eval_check(Fp* check,
                            const Fp* out,
                            const Fp rou,
                            uint32_t po2,
-                           uint32_t domain) {
+                           uint32_t domain,
+                           const FpExt* poly_mix) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle < domain) {
-    FpExt tot = poly_fp(cycle, domain, ctrl, out, data, mix, accum);
+    FpExt tot = poly_fp(cycle, domain, ctrl, out, data, mix, accum, poly_mix);
     Fp x = pow(rou, cycle);
     Fp y = pow(Fp(3) * x, 1 << po2);
     FpExt ret = tot * inv(y - Fp(1));
@@ -67,9 +67,8 @@ extern "C" const char* risc0_circuit_recursion_cuda_eval_check(Fp* check,
     CUDA_OK(cudaDeviceSynchronize());
     CudaStream stream;
     LaunchConfig cfg = getSimpleConfig(domain);
-    cudaMemcpyToSymbol(poly_mix, poly_mix_pows, sizeof(poly_mix));
     risc0::circuit::recursion::cuda::eval_check<<<cfg.grid, cfg.block, 0, stream>>>(
-        check, ctrl, data, accum, mix, out, rou, po2, domain);
+        check, ctrl, data, accum, mix, out, rou, po2, domain, poly_mix_pows);
     CUDA_OK(cudaStreamSynchronize(stream));
   } catch (const std::exception& err) {
     return strdup(err.what());

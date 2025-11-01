@@ -18,13 +18,13 @@
 
 namespace risc0::circuit::keccak::cpu {
 void step_Top_10(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak/top.zir:296)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:346)
-// Top(zirgen/circuit/keccak/top.zir:369)
+// ControlState(zirgen/circuit/keccak/top.zir:295)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:345)
+// Top(zirgen/circuit/keccak/top.zir:368)
 set(ctx,arg0, 11, Val(8));
-// ControlState(zirgen/circuit/keccak/top.zir:297)
+// ControlState(zirgen/circuit/keccak/top.zir:296)
 set(ctx,arg0, 12, Val(0));
-// ControlState(zirgen/circuit/keccak/top.zir:298)
+// ControlState(zirgen/circuit/keccak/top.zir:297)
 set(ctx,arg0, 13, get(ctx,arg0, 13, 1));
 return ;
 }
@@ -33,7 +33,7 @@ void step_Top_26(ExecContext& ctx,MutableBuf arg0)   {
 // Xor5(zirgen/circuit/keccak/xor5.zir:7)
 // ThetaP1(zirgen/circuit/keccak/keccak.zir:13)
 // KeccakRound0(zirgen/circuit/keccak/top.zir:94)
-// Top(zirgen/circuit/keccak/top.zir:382)
+// Top(zirgen/circuit/keccak/top.zir:381)
 Val x1 = ((get(ctx,arg0, 14, 2) + get(ctx,arg0, 174, 2)) + get(ctx,arg0, 334, 2));
 // builtin BitAnd
 // Xor5(zirgen/circuit/keccak/xor5.zir:8)

@@ -18,19 +18,19 @@
 
 namespace risc0::circuit::keccak::cpu {
 void step_Top_8(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak/top.zir:296)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:344)
-// Top(zirgen/circuit/keccak/top.zir:369)
+// ControlState(zirgen/circuit/keccak/top.zir:295)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:343)
+// Top(zirgen/circuit/keccak/top.zir:368)
 set(ctx,arg0, 11, Val(6));
-// ControlState(zirgen/circuit/keccak/top.zir:297)
+// ControlState(zirgen/circuit/keccak/top.zir:296)
 set(ctx,arg0, 12, Val(0));
-// ControlState(zirgen/circuit/keccak/top.zir:298)
+// ControlState(zirgen/circuit/keccak/top.zir:297)
 set(ctx,arg0, 13, get(ctx,arg0, 13, 1));
 return ;
 }
 void step_Top_24(ExecContext& ctx,MutableBuf arg0)   {
 // TopState(zirgen/circuit/keccak/top.zir:37)
-// Top(zirgen/circuit/keccak/top.zir:380)
+// Top(zirgen/circuit/keccak/top.zir:379)
 Val x1 = get(ctx,arg0, 814, 1);
 Val x2 = get(ctx,arg0, 815, 1);
 Val x3 = get(ctx,arg0, 816, 1);
@@ -131,12 +131,12 @@ Val x97 = get(ctx,arg0, 910, 1);
 Val x98 = get(ctx,arg0, 911, 1);
 Val x99 = get(ctx,arg0, 912, 1);
 Val x100 = get(ctx,arg0, 913, 1);
-// ControlState(zirgen/circuit/keccak/top.zir:297)
-// Top(zirgen/circuit/keccak/top.zir:365)
+// ControlState(zirgen/circuit/keccak/top.zir:296)
+// Top(zirgen/circuit/keccak/top.zir:364)
 Val x101 = get(ctx,arg0, 12, 0);
 // builtin Sub
-// ExpandCycle(zirgen/circuit/keccak/top.zir:245)
-// Top(zirgen/circuit/keccak/top.zir:380)
+// ExpandCycle(zirgen/circuit/keccak/top.zir:244)
+// Top(zirgen/circuit/keccak/top.zir:379)
 Val x102 = (Val(1) - x101);
 Val x103 = ((x3 * x101) + (x1 * x102));
 Val x104 = ((x4 * x101) + (x2 * x102));
@@ -191,7 +191,7 @@ Val x152 = ((x100 * x101) + (x98 * x102));
 // builtin NondetReg
 // NondetBitReg(zirgen/circuit/keccak/bits.zir:13)
 // UnpackReg(zirgen/circuit/keccak/pack.zir:53)
-// ExpandCycle(zirgen/circuit/keccak/top.zir:244)
+// ExpandCycle(zirgen/circuit/keccak/top.zir:243)
 set(ctx,arg0, 14, bitAnd(x103, Val(1)));
 set(ctx,arg0, 15, (bitAnd(x103, Val(2)) * Val(1006632961)));
 set(ctx,arg0, 16, (bitAnd(x103, Val(4)) * Val(1509949441)));
@@ -994,7 +994,7 @@ set(ctx,arg0, 812, (bitAnd(x152, Val(16384)) * Val(2013143041)));
 set(ctx,arg0, 813, (bitAnd(x152, Val(32768)) * Val(2013204481)));
 // Reg(<preamble>:5)
 // TopState(zirgen/circuit/keccak/top.zir:33)
-// ExpandCycle(zirgen/circuit/keccak/top.zir:259)
+// ExpandCycle(zirgen/circuit/keccak/top.zir:258)
 set(ctx,arg0, 14, get(ctx,arg0, 14, 0));
 set(ctx,arg0, 15, get(ctx,arg0, 15, 0));
 set(ctx,arg0, 16, get(ctx,arg0, 16, 0));

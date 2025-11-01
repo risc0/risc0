@@ -18,21 +18,21 @@
 
 namespace risc0::circuit::keccak::cpu {
 void step_Top_9(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak/top.zir:296)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:345)
-// Top(zirgen/circuit/keccak/top.zir:369)
+// ControlState(zirgen/circuit/keccak/top.zir:295)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:344)
+// Top(zirgen/circuit/keccak/top.zir:368)
 set(ctx,arg0, 11, Val(7));
-// ControlState(zirgen/circuit/keccak/top.zir:297)
+// ControlState(zirgen/circuit/keccak/top.zir:296)
 set(ctx,arg0, 12, Val(0));
-// ControlState(zirgen/circuit/keccak/top.zir:298)
+// ControlState(zirgen/circuit/keccak/top.zir:297)
 set(ctx,arg0, 13, get(ctx,arg0, 13, 1));
 return ;
 }
 void step_Top_25(ExecContext& ctx,MutableBuf arg0)   {
 // builtin Add
 // Pack(zirgen/circuit/keccak/pack.zir:35)
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
-// Top(zirgen/circuit/keccak/top.zir:381)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
+// Top(zirgen/circuit/keccak/top.zir:380)
 Val x1 = (get(ctx,arg0, 14, 2) + (get(ctx,arg0, 15, 2) * Val(2)));
 Val x2 = ((x1 + (get(ctx,arg0, 16, 2) * Val(4))) + (get(ctx,arg0, 17, 2) * Val(8)));
 Val x3 = ((x2 + (get(ctx,arg0, 18, 2) * Val(16))) + (get(ctx,arg0, 19, 2) * Val(32)));
@@ -41,7 +41,7 @@ Val x5 = ((x4 + (get(ctx,arg0, 22, 2) * Val(256))) + (get(ctx,arg0, 23, 2) * Val
 Val x6 = ((x5 + (get(ctx,arg0, 24, 2) * Val(1024))) + (get(ctx,arg0, 25, 2) * Val(2048)));
 Val x7 = ((x6 + (get(ctx,arg0, 26, 2) * Val(4096))) + (get(ctx,arg0, 27, 2) * Val(8192)));
 Val x8 = ((x7 + (get(ctx,arg0, 28, 2) * Val(16384))) + (get(ctx,arg0, 29, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x9 = (get(ctx,arg0, 30, 2) + (get(ctx,arg0, 31, 2) * Val(2)));
 Val x10 = ((x9 + (get(ctx,arg0, 32, 2) * Val(4))) + (get(ctx,arg0, 33, 2) * Val(8)));
 Val x11 = ((x10 + (get(ctx,arg0, 34, 2) * Val(16))) + (get(ctx,arg0, 35, 2) * Val(32)));
@@ -50,7 +50,7 @@ Val x13 = ((x12 + (get(ctx,arg0, 38, 2) * Val(256))) + (get(ctx,arg0, 39, 2) * V
 Val x14 = ((x13 + (get(ctx,arg0, 40, 2) * Val(1024))) + (get(ctx,arg0, 41, 2) * Val(2048)));
 Val x15 = ((x14 + (get(ctx,arg0, 42, 2) * Val(4096))) + (get(ctx,arg0, 43, 2) * Val(8192)));
 Val x16 = ((x15 + (get(ctx,arg0, 44, 2) * Val(16384))) + (get(ctx,arg0, 45, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x17 = (get(ctx,arg0, 14, 1) + (get(ctx,arg0, 15, 1) * Val(2)));
 Val x18 = ((x17 + (get(ctx,arg0, 16, 1) * Val(4))) + (get(ctx,arg0, 17, 1) * Val(8)));
 Val x19 = ((x18 + (get(ctx,arg0, 18, 1) * Val(16))) + (get(ctx,arg0, 19, 1) * Val(32)));
@@ -59,7 +59,7 @@ Val x21 = ((x20 + (get(ctx,arg0, 22, 1) * Val(256))) + (get(ctx,arg0, 23, 1) * V
 Val x22 = ((x21 + (get(ctx,arg0, 24, 1) * Val(1024))) + (get(ctx,arg0, 25, 1) * Val(2048)));
 Val x23 = ((x22 + (get(ctx,arg0, 26, 1) * Val(4096))) + (get(ctx,arg0, 27, 1) * Val(8192)));
 Val x24 = ((x23 + (get(ctx,arg0, 28, 1) * Val(16384))) + (get(ctx,arg0, 29, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x25 = (get(ctx,arg0, 30, 1) + (get(ctx,arg0, 31, 1) * Val(2)));
 Val x26 = ((x25 + (get(ctx,arg0, 32, 1) * Val(4))) + (get(ctx,arg0, 33, 1) * Val(8)));
 Val x27 = ((x26 + (get(ctx,arg0, 34, 1) * Val(16))) + (get(ctx,arg0, 35, 1) * Val(32)));
@@ -68,7 +68,7 @@ Val x29 = ((x28 + (get(ctx,arg0, 38, 1) * Val(256))) + (get(ctx,arg0, 39, 1) * V
 Val x30 = ((x29 + (get(ctx,arg0, 40, 1) * Val(1024))) + (get(ctx,arg0, 41, 1) * Val(2048)));
 Val x31 = ((x30 + (get(ctx,arg0, 42, 1) * Val(4096))) + (get(ctx,arg0, 43, 1) * Val(8192)));
 Val x32 = ((x31 + (get(ctx,arg0, 44, 1) * Val(16384))) + (get(ctx,arg0, 45, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x33 = (get(ctx,arg0, 46, 2) + (get(ctx,arg0, 47, 2) * Val(2)));
 Val x34 = ((x33 + (get(ctx,arg0, 48, 2) * Val(4))) + (get(ctx,arg0, 49, 2) * Val(8)));
 Val x35 = ((x34 + (get(ctx,arg0, 50, 2) * Val(16))) + (get(ctx,arg0, 51, 2) * Val(32)));
@@ -77,7 +77,7 @@ Val x37 = ((x36 + (get(ctx,arg0, 54, 2) * Val(256))) + (get(ctx,arg0, 55, 2) * V
 Val x38 = ((x37 + (get(ctx,arg0, 56, 2) * Val(1024))) + (get(ctx,arg0, 57, 2) * Val(2048)));
 Val x39 = ((x38 + (get(ctx,arg0, 58, 2) * Val(4096))) + (get(ctx,arg0, 59, 2) * Val(8192)));
 Val x40 = ((x39 + (get(ctx,arg0, 60, 2) * Val(16384))) + (get(ctx,arg0, 61, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x41 = (get(ctx,arg0, 62, 2) + (get(ctx,arg0, 63, 2) * Val(2)));
 Val x42 = ((x41 + (get(ctx,arg0, 64, 2) * Val(4))) + (get(ctx,arg0, 65, 2) * Val(8)));
 Val x43 = ((x42 + (get(ctx,arg0, 66, 2) * Val(16))) + (get(ctx,arg0, 67, 2) * Val(32)));
@@ -86,7 +86,7 @@ Val x45 = ((x44 + (get(ctx,arg0, 70, 2) * Val(256))) + (get(ctx,arg0, 71, 2) * V
 Val x46 = ((x45 + (get(ctx,arg0, 72, 2) * Val(1024))) + (get(ctx,arg0, 73, 2) * Val(2048)));
 Val x47 = ((x46 + (get(ctx,arg0, 74, 2) * Val(4096))) + (get(ctx,arg0, 75, 2) * Val(8192)));
 Val x48 = ((x47 + (get(ctx,arg0, 76, 2) * Val(16384))) + (get(ctx,arg0, 77, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x49 = (get(ctx,arg0, 46, 1) + (get(ctx,arg0, 47, 1) * Val(2)));
 Val x50 = ((x49 + (get(ctx,arg0, 48, 1) * Val(4))) + (get(ctx,arg0, 49, 1) * Val(8)));
 Val x51 = ((x50 + (get(ctx,arg0, 50, 1) * Val(16))) + (get(ctx,arg0, 51, 1) * Val(32)));
@@ -95,7 +95,7 @@ Val x53 = ((x52 + (get(ctx,arg0, 54, 1) * Val(256))) + (get(ctx,arg0, 55, 1) * V
 Val x54 = ((x53 + (get(ctx,arg0, 56, 1) * Val(1024))) + (get(ctx,arg0, 57, 1) * Val(2048)));
 Val x55 = ((x54 + (get(ctx,arg0, 58, 1) * Val(4096))) + (get(ctx,arg0, 59, 1) * Val(8192)));
 Val x56 = ((x55 + (get(ctx,arg0, 60, 1) * Val(16384))) + (get(ctx,arg0, 61, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x57 = (get(ctx,arg0, 62, 1) + (get(ctx,arg0, 63, 1) * Val(2)));
 Val x58 = ((x57 + (get(ctx,arg0, 64, 1) * Val(4))) + (get(ctx,arg0, 65, 1) * Val(8)));
 Val x59 = ((x58 + (get(ctx,arg0, 66, 1) * Val(16))) + (get(ctx,arg0, 67, 1) * Val(32)));
@@ -104,7 +104,7 @@ Val x61 = ((x60 + (get(ctx,arg0, 70, 1) * Val(256))) + (get(ctx,arg0, 71, 1) * V
 Val x62 = ((x61 + (get(ctx,arg0, 72, 1) * Val(1024))) + (get(ctx,arg0, 73, 1) * Val(2048)));
 Val x63 = ((x62 + (get(ctx,arg0, 74, 1) * Val(4096))) + (get(ctx,arg0, 75, 1) * Val(8192)));
 Val x64 = ((x63 + (get(ctx,arg0, 76, 1) * Val(16384))) + (get(ctx,arg0, 77, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x65 = (get(ctx,arg0, 78, 2) + (get(ctx,arg0, 79, 2) * Val(2)));
 Val x66 = ((x65 + (get(ctx,arg0, 80, 2) * Val(4))) + (get(ctx,arg0, 81, 2) * Val(8)));
 Val x67 = ((x66 + (get(ctx,arg0, 82, 2) * Val(16))) + (get(ctx,arg0, 83, 2) * Val(32)));
@@ -113,7 +113,7 @@ Val x69 = ((x68 + (get(ctx,arg0, 86, 2) * Val(256))) + (get(ctx,arg0, 87, 2) * V
 Val x70 = ((x69 + (get(ctx,arg0, 88, 2) * Val(1024))) + (get(ctx,arg0, 89, 2) * Val(2048)));
 Val x71 = ((x70 + (get(ctx,arg0, 90, 2) * Val(4096))) + (get(ctx,arg0, 91, 2) * Val(8192)));
 Val x72 = ((x71 + (get(ctx,arg0, 92, 2) * Val(16384))) + (get(ctx,arg0, 93, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x73 = (get(ctx,arg0, 94, 2) + (get(ctx,arg0, 95, 2) * Val(2)));
 Val x74 = ((x73 + (get(ctx,arg0, 96, 2) * Val(4))) + (get(ctx,arg0, 97, 2) * Val(8)));
 Val x75 = ((x74 + (get(ctx,arg0, 98, 2) * Val(16))) + (get(ctx,arg0, 99, 2) * Val(32)));
@@ -122,7 +122,7 @@ Val x77 = ((x76 + (get(ctx,arg0, 102, 2) * Val(256))) + (get(ctx,arg0, 103, 2) *
 Val x78 = ((x77 + (get(ctx,arg0, 104, 2) * Val(1024))) + (get(ctx,arg0, 105, 2) * Val(2048)));
 Val x79 = ((x78 + (get(ctx,arg0, 106, 2) * Val(4096))) + (get(ctx,arg0, 107, 2) * Val(8192)));
 Val x80 = ((x79 + (get(ctx,arg0, 108, 2) * Val(16384))) + (get(ctx,arg0, 109, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x81 = (get(ctx,arg0, 78, 1) + (get(ctx,arg0, 79, 1) * Val(2)));
 Val x82 = ((x81 + (get(ctx,arg0, 80, 1) * Val(4))) + (get(ctx,arg0, 81, 1) * Val(8)));
 Val x83 = ((x82 + (get(ctx,arg0, 82, 1) * Val(16))) + (get(ctx,arg0, 83, 1) * Val(32)));
@@ -131,7 +131,7 @@ Val x85 = ((x84 + (get(ctx,arg0, 86, 1) * Val(256))) + (get(ctx,arg0, 87, 1) * V
 Val x86 = ((x85 + (get(ctx,arg0, 88, 1) * Val(1024))) + (get(ctx,arg0, 89, 1) * Val(2048)));
 Val x87 = ((x86 + (get(ctx,arg0, 90, 1) * Val(4096))) + (get(ctx,arg0, 91, 1) * Val(8192)));
 Val x88 = ((x87 + (get(ctx,arg0, 92, 1) * Val(16384))) + (get(ctx,arg0, 93, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x89 = (get(ctx,arg0, 94, 1) + (get(ctx,arg0, 95, 1) * Val(2)));
 Val x90 = ((x89 + (get(ctx,arg0, 96, 1) * Val(4))) + (get(ctx,arg0, 97, 1) * Val(8)));
 Val x91 = ((x90 + (get(ctx,arg0, 98, 1) * Val(16))) + (get(ctx,arg0, 99, 1) * Val(32)));
@@ -140,7 +140,7 @@ Val x93 = ((x92 + (get(ctx,arg0, 102, 1) * Val(256))) + (get(ctx,arg0, 103, 1) *
 Val x94 = ((x93 + (get(ctx,arg0, 104, 1) * Val(1024))) + (get(ctx,arg0, 105, 1) * Val(2048)));
 Val x95 = ((x94 + (get(ctx,arg0, 106, 1) * Val(4096))) + (get(ctx,arg0, 107, 1) * Val(8192)));
 Val x96 = ((x95 + (get(ctx,arg0, 108, 1) * Val(16384))) + (get(ctx,arg0, 109, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x97 = (get(ctx,arg0, 110, 2) + (get(ctx,arg0, 111, 2) * Val(2)));
 Val x98 = ((x97 + (get(ctx,arg0, 112, 2) * Val(4))) + (get(ctx,arg0, 113, 2) * Val(8)));
 Val x99 = ((x98 + (get(ctx,arg0, 114, 2) * Val(16))) + (get(ctx,arg0, 115, 2) * Val(32)));
@@ -149,7 +149,7 @@ Val x101 = ((x100 + (get(ctx,arg0, 118, 2) * Val(256))) + (get(ctx,arg0, 119, 2)
 Val x102 = ((x101 + (get(ctx,arg0, 120, 2) * Val(1024))) + (get(ctx,arg0, 121, 2) * Val(2048)));
 Val x103 = ((x102 + (get(ctx,arg0, 122, 2) * Val(4096))) + (get(ctx,arg0, 123, 2) * Val(8192)));
 Val x104 = ((x103 + (get(ctx,arg0, 124, 2) * Val(16384))) + (get(ctx,arg0, 125, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x105 = (get(ctx,arg0, 126, 2) + (get(ctx,arg0, 127, 2) * Val(2)));
 Val x106 = ((x105 + (get(ctx,arg0, 128, 2) * Val(4))) + (get(ctx,arg0, 129, 2) * Val(8)));
 Val x107 = ((x106 + (get(ctx,arg0, 130, 2) * Val(16))) + (get(ctx,arg0, 131, 2) * Val(32)));
@@ -158,7 +158,7 @@ Val x109 = ((x108 + (get(ctx,arg0, 134, 2) * Val(256))) + (get(ctx,arg0, 135, 2)
 Val x110 = ((x109 + (get(ctx,arg0, 136, 2) * Val(1024))) + (get(ctx,arg0, 137, 2) * Val(2048)));
 Val x111 = ((x110 + (get(ctx,arg0, 138, 2) * Val(4096))) + (get(ctx,arg0, 139, 2) * Val(8192)));
 Val x112 = ((x111 + (get(ctx,arg0, 140, 2) * Val(16384))) + (get(ctx,arg0, 141, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x113 = (get(ctx,arg0, 110, 1) + (get(ctx,arg0, 111, 1) * Val(2)));
 Val x114 = ((x113 + (get(ctx,arg0, 112, 1) * Val(4))) + (get(ctx,arg0, 113, 1) * Val(8)));
 Val x115 = ((x114 + (get(ctx,arg0, 114, 1) * Val(16))) + (get(ctx,arg0, 115, 1) * Val(32)));
@@ -167,7 +167,7 @@ Val x117 = ((x116 + (get(ctx,arg0, 118, 1) * Val(256))) + (get(ctx,arg0, 119, 1)
 Val x118 = ((x117 + (get(ctx,arg0, 120, 1) * Val(1024))) + (get(ctx,arg0, 121, 1) * Val(2048)));
 Val x119 = ((x118 + (get(ctx,arg0, 122, 1) * Val(4096))) + (get(ctx,arg0, 123, 1) * Val(8192)));
 Val x120 = ((x119 + (get(ctx,arg0, 124, 1) * Val(16384))) + (get(ctx,arg0, 125, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x121 = (get(ctx,arg0, 126, 1) + (get(ctx,arg0, 127, 1) * Val(2)));
 Val x122 = ((x121 + (get(ctx,arg0, 128, 1) * Val(4))) + (get(ctx,arg0, 129, 1) * Val(8)));
 Val x123 = ((x122 + (get(ctx,arg0, 130, 1) * Val(16))) + (get(ctx,arg0, 131, 1) * Val(32)));
@@ -176,7 +176,7 @@ Val x125 = ((x124 + (get(ctx,arg0, 134, 1) * Val(256))) + (get(ctx,arg0, 135, 1)
 Val x126 = ((x125 + (get(ctx,arg0, 136, 1) * Val(1024))) + (get(ctx,arg0, 137, 1) * Val(2048)));
 Val x127 = ((x126 + (get(ctx,arg0, 138, 1) * Val(4096))) + (get(ctx,arg0, 139, 1) * Val(8192)));
 Val x128 = ((x127 + (get(ctx,arg0, 140, 1) * Val(16384))) + (get(ctx,arg0, 141, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x129 = (get(ctx,arg0, 142, 2) + (get(ctx,arg0, 143, 2) * Val(2)));
 Val x130 = ((x129 + (get(ctx,arg0, 144, 2) * Val(4))) + (get(ctx,arg0, 145, 2) * Val(8)));
 Val x131 = ((x130 + (get(ctx,arg0, 146, 2) * Val(16))) + (get(ctx,arg0, 147, 2) * Val(32)));
@@ -185,7 +185,7 @@ Val x133 = ((x132 + (get(ctx,arg0, 150, 2) * Val(256))) + (get(ctx,arg0, 151, 2)
 Val x134 = ((x133 + (get(ctx,arg0, 152, 2) * Val(1024))) + (get(ctx,arg0, 153, 2) * Val(2048)));
 Val x135 = ((x134 + (get(ctx,arg0, 154, 2) * Val(4096))) + (get(ctx,arg0, 155, 2) * Val(8192)));
 Val x136 = ((x135 + (get(ctx,arg0, 156, 2) * Val(16384))) + (get(ctx,arg0, 157, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x137 = (get(ctx,arg0, 158, 2) + (get(ctx,arg0, 159, 2) * Val(2)));
 Val x138 = ((x137 + (get(ctx,arg0, 160, 2) * Val(4))) + (get(ctx,arg0, 161, 2) * Val(8)));
 Val x139 = ((x138 + (get(ctx,arg0, 162, 2) * Val(16))) + (get(ctx,arg0, 163, 2) * Val(32)));
@@ -194,7 +194,7 @@ Val x141 = ((x140 + (get(ctx,arg0, 166, 2) * Val(256))) + (get(ctx,arg0, 167, 2)
 Val x142 = ((x141 + (get(ctx,arg0, 168, 2) * Val(1024))) + (get(ctx,arg0, 169, 2) * Val(2048)));
 Val x143 = ((x142 + (get(ctx,arg0, 170, 2) * Val(4096))) + (get(ctx,arg0, 171, 2) * Val(8192)));
 Val x144 = ((x143 + (get(ctx,arg0, 172, 2) * Val(16384))) + (get(ctx,arg0, 173, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x145 = (get(ctx,arg0, 142, 1) + (get(ctx,arg0, 143, 1) * Val(2)));
 Val x146 = ((x145 + (get(ctx,arg0, 144, 1) * Val(4))) + (get(ctx,arg0, 145, 1) * Val(8)));
 Val x147 = ((x146 + (get(ctx,arg0, 146, 1) * Val(16))) + (get(ctx,arg0, 147, 1) * Val(32)));
@@ -203,7 +203,7 @@ Val x149 = ((x148 + (get(ctx,arg0, 150, 1) * Val(256))) + (get(ctx,arg0, 151, 1)
 Val x150 = ((x149 + (get(ctx,arg0, 152, 1) * Val(1024))) + (get(ctx,arg0, 153, 1) * Val(2048)));
 Val x151 = ((x150 + (get(ctx,arg0, 154, 1) * Val(4096))) + (get(ctx,arg0, 155, 1) * Val(8192)));
 Val x152 = ((x151 + (get(ctx,arg0, 156, 1) * Val(16384))) + (get(ctx,arg0, 157, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x153 = (get(ctx,arg0, 158, 1) + (get(ctx,arg0, 159, 1) * Val(2)));
 Val x154 = ((x153 + (get(ctx,arg0, 160, 1) * Val(4))) + (get(ctx,arg0, 161, 1) * Val(8)));
 Val x155 = ((x154 + (get(ctx,arg0, 162, 1) * Val(16))) + (get(ctx,arg0, 163, 1) * Val(32)));
@@ -212,7 +212,7 @@ Val x157 = ((x156 + (get(ctx,arg0, 166, 1) * Val(256))) + (get(ctx,arg0, 167, 1)
 Val x158 = ((x157 + (get(ctx,arg0, 168, 1) * Val(1024))) + (get(ctx,arg0, 169, 1) * Val(2048)));
 Val x159 = ((x158 + (get(ctx,arg0, 170, 1) * Val(4096))) + (get(ctx,arg0, 171, 1) * Val(8192)));
 Val x160 = ((x159 + (get(ctx,arg0, 172, 1) * Val(16384))) + (get(ctx,arg0, 173, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x161 = (get(ctx,arg0, 174, 2) + (get(ctx,arg0, 175, 2) * Val(2)));
 Val x162 = ((x161 + (get(ctx,arg0, 176, 2) * Val(4))) + (get(ctx,arg0, 177, 2) * Val(8)));
 Val x163 = ((x162 + (get(ctx,arg0, 178, 2) * Val(16))) + (get(ctx,arg0, 179, 2) * Val(32)));
@@ -221,7 +221,7 @@ Val x165 = ((x164 + (get(ctx,arg0, 182, 2) * Val(256))) + (get(ctx,arg0, 183, 2)
 Val x166 = ((x165 + (get(ctx,arg0, 184, 2) * Val(1024))) + (get(ctx,arg0, 185, 2) * Val(2048)));
 Val x167 = ((x166 + (get(ctx,arg0, 186, 2) * Val(4096))) + (get(ctx,arg0, 187, 2) * Val(8192)));
 Val x168 = ((x167 + (get(ctx,arg0, 188, 2) * Val(16384))) + (get(ctx,arg0, 189, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x169 = (get(ctx,arg0, 190, 2) + (get(ctx,arg0, 191, 2) * Val(2)));
 Val x170 = ((x169 + (get(ctx,arg0, 192, 2) * Val(4))) + (get(ctx,arg0, 193, 2) * Val(8)));
 Val x171 = ((x170 + (get(ctx,arg0, 194, 2) * Val(16))) + (get(ctx,arg0, 195, 2) * Val(32)));
@@ -230,7 +230,7 @@ Val x173 = ((x172 + (get(ctx,arg0, 198, 2) * Val(256))) + (get(ctx,arg0, 199, 2)
 Val x174 = ((x173 + (get(ctx,arg0, 200, 2) * Val(1024))) + (get(ctx,arg0, 201, 2) * Val(2048)));
 Val x175 = ((x174 + (get(ctx,arg0, 202, 2) * Val(4096))) + (get(ctx,arg0, 203, 2) * Val(8192)));
 Val x176 = ((x175 + (get(ctx,arg0, 204, 2) * Val(16384))) + (get(ctx,arg0, 205, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x177 = (get(ctx,arg0, 174, 1) + (get(ctx,arg0, 175, 1) * Val(2)));
 Val x178 = ((x177 + (get(ctx,arg0, 176, 1) * Val(4))) + (get(ctx,arg0, 177, 1) * Val(8)));
 Val x179 = ((x178 + (get(ctx,arg0, 178, 1) * Val(16))) + (get(ctx,arg0, 179, 1) * Val(32)));
@@ -239,7 +239,7 @@ Val x181 = ((x180 + (get(ctx,arg0, 182, 1) * Val(256))) + (get(ctx,arg0, 183, 1)
 Val x182 = ((x181 + (get(ctx,arg0, 184, 1) * Val(1024))) + (get(ctx,arg0, 185, 1) * Val(2048)));
 Val x183 = ((x182 + (get(ctx,arg0, 186, 1) * Val(4096))) + (get(ctx,arg0, 187, 1) * Val(8192)));
 Val x184 = ((x183 + (get(ctx,arg0, 188, 1) * Val(16384))) + (get(ctx,arg0, 189, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x185 = (get(ctx,arg0, 190, 1) + (get(ctx,arg0, 191, 1) * Val(2)));
 Val x186 = ((x185 + (get(ctx,arg0, 192, 1) * Val(4))) + (get(ctx,arg0, 193, 1) * Val(8)));
 Val x187 = ((x186 + (get(ctx,arg0, 194, 1) * Val(16))) + (get(ctx,arg0, 195, 1) * Val(32)));
@@ -248,7 +248,7 @@ Val x189 = ((x188 + (get(ctx,arg0, 198, 1) * Val(256))) + (get(ctx,arg0, 199, 1)
 Val x190 = ((x189 + (get(ctx,arg0, 200, 1) * Val(1024))) + (get(ctx,arg0, 201, 1) * Val(2048)));
 Val x191 = ((x190 + (get(ctx,arg0, 202, 1) * Val(4096))) + (get(ctx,arg0, 203, 1) * Val(8192)));
 Val x192 = ((x191 + (get(ctx,arg0, 204, 1) * Val(16384))) + (get(ctx,arg0, 205, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x193 = (get(ctx,arg0, 206, 2) + (get(ctx,arg0, 207, 2) * Val(2)));
 Val x194 = ((x193 + (get(ctx,arg0, 208, 2) * Val(4))) + (get(ctx,arg0, 209, 2) * Val(8)));
 Val x195 = ((x194 + (get(ctx,arg0, 210, 2) * Val(16))) + (get(ctx,arg0, 211, 2) * Val(32)));
@@ -257,7 +257,7 @@ Val x197 = ((x196 + (get(ctx,arg0, 214, 2) * Val(256))) + (get(ctx,arg0, 215, 2)
 Val x198 = ((x197 + (get(ctx,arg0, 216, 2) * Val(1024))) + (get(ctx,arg0, 217, 2) * Val(2048)));
 Val x199 = ((x198 + (get(ctx,arg0, 218, 2) * Val(4096))) + (get(ctx,arg0, 219, 2) * Val(8192)));
 Val x200 = ((x199 + (get(ctx,arg0, 220, 2) * Val(16384))) + (get(ctx,arg0, 221, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x201 = (get(ctx,arg0, 222, 2) + (get(ctx,arg0, 223, 2) * Val(2)));
 Val x202 = ((x201 + (get(ctx,arg0, 224, 2) * Val(4))) + (get(ctx,arg0, 225, 2) * Val(8)));
 Val x203 = ((x202 + (get(ctx,arg0, 226, 2) * Val(16))) + (get(ctx,arg0, 227, 2) * Val(32)));
@@ -266,7 +266,7 @@ Val x205 = ((x204 + (get(ctx,arg0, 230, 2) * Val(256))) + (get(ctx,arg0, 231, 2)
 Val x206 = ((x205 + (get(ctx,arg0, 232, 2) * Val(1024))) + (get(ctx,arg0, 233, 2) * Val(2048)));
 Val x207 = ((x206 + (get(ctx,arg0, 234, 2) * Val(4096))) + (get(ctx,arg0, 235, 2) * Val(8192)));
 Val x208 = ((x207 + (get(ctx,arg0, 236, 2) * Val(16384))) + (get(ctx,arg0, 237, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x209 = (get(ctx,arg0, 206, 1) + (get(ctx,arg0, 207, 1) * Val(2)));
 Val x210 = ((x209 + (get(ctx,arg0, 208, 1) * Val(4))) + (get(ctx,arg0, 209, 1) * Val(8)));
 Val x211 = ((x210 + (get(ctx,arg0, 210, 1) * Val(16))) + (get(ctx,arg0, 211, 1) * Val(32)));
@@ -275,7 +275,7 @@ Val x213 = ((x212 + (get(ctx,arg0, 214, 1) * Val(256))) + (get(ctx,arg0, 215, 1)
 Val x214 = ((x213 + (get(ctx,arg0, 216, 1) * Val(1024))) + (get(ctx,arg0, 217, 1) * Val(2048)));
 Val x215 = ((x214 + (get(ctx,arg0, 218, 1) * Val(4096))) + (get(ctx,arg0, 219, 1) * Val(8192)));
 Val x216 = ((x215 + (get(ctx,arg0, 220, 1) * Val(16384))) + (get(ctx,arg0, 221, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x217 = (get(ctx,arg0, 222, 1) + (get(ctx,arg0, 223, 1) * Val(2)));
 Val x218 = ((x217 + (get(ctx,arg0, 224, 1) * Val(4))) + (get(ctx,arg0, 225, 1) * Val(8)));
 Val x219 = ((x218 + (get(ctx,arg0, 226, 1) * Val(16))) + (get(ctx,arg0, 227, 1) * Val(32)));
@@ -284,7 +284,7 @@ Val x221 = ((x220 + (get(ctx,arg0, 230, 1) * Val(256))) + (get(ctx,arg0, 231, 1)
 Val x222 = ((x221 + (get(ctx,arg0, 232, 1) * Val(1024))) + (get(ctx,arg0, 233, 1) * Val(2048)));
 Val x223 = ((x222 + (get(ctx,arg0, 234, 1) * Val(4096))) + (get(ctx,arg0, 235, 1) * Val(8192)));
 Val x224 = ((x223 + (get(ctx,arg0, 236, 1) * Val(16384))) + (get(ctx,arg0, 237, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x225 = (get(ctx,arg0, 238, 2) + (get(ctx,arg0, 239, 2) * Val(2)));
 Val x226 = ((x225 + (get(ctx,arg0, 240, 2) * Val(4))) + (get(ctx,arg0, 241, 2) * Val(8)));
 Val x227 = ((x226 + (get(ctx,arg0, 242, 2) * Val(16))) + (get(ctx,arg0, 243, 2) * Val(32)));
@@ -293,7 +293,7 @@ Val x229 = ((x228 + (get(ctx,arg0, 246, 2) * Val(256))) + (get(ctx,arg0, 247, 2)
 Val x230 = ((x229 + (get(ctx,arg0, 248, 2) * Val(1024))) + (get(ctx,arg0, 249, 2) * Val(2048)));
 Val x231 = ((x230 + (get(ctx,arg0, 250, 2) * Val(4096))) + (get(ctx,arg0, 251, 2) * Val(8192)));
 Val x232 = ((x231 + (get(ctx,arg0, 252, 2) * Val(16384))) + (get(ctx,arg0, 253, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x233 = (get(ctx,arg0, 254, 2) + (get(ctx,arg0, 255, 2) * Val(2)));
 Val x234 = ((x233 + (get(ctx,arg0, 256, 2) * Val(4))) + (get(ctx,arg0, 257, 2) * Val(8)));
 Val x235 = ((x234 + (get(ctx,arg0, 258, 2) * Val(16))) + (get(ctx,arg0, 259, 2) * Val(32)));
@@ -302,7 +302,7 @@ Val x237 = ((x236 + (get(ctx,arg0, 262, 2) * Val(256))) + (get(ctx,arg0, 263, 2)
 Val x238 = ((x237 + (get(ctx,arg0, 264, 2) * Val(1024))) + (get(ctx,arg0, 265, 2) * Val(2048)));
 Val x239 = ((x238 + (get(ctx,arg0, 266, 2) * Val(4096))) + (get(ctx,arg0, 267, 2) * Val(8192)));
 Val x240 = ((x239 + (get(ctx,arg0, 268, 2) * Val(16384))) + (get(ctx,arg0, 269, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x241 = (get(ctx,arg0, 238, 1) + (get(ctx,arg0, 239, 1) * Val(2)));
 Val x242 = ((x241 + (get(ctx,arg0, 240, 1) * Val(4))) + (get(ctx,arg0, 241, 1) * Val(8)));
 Val x243 = ((x242 + (get(ctx,arg0, 242, 1) * Val(16))) + (get(ctx,arg0, 243, 1) * Val(32)));
@@ -311,7 +311,7 @@ Val x245 = ((x244 + (get(ctx,arg0, 246, 1) * Val(256))) + (get(ctx,arg0, 247, 1)
 Val x246 = ((x245 + (get(ctx,arg0, 248, 1) * Val(1024))) + (get(ctx,arg0, 249, 1) * Val(2048)));
 Val x247 = ((x246 + (get(ctx,arg0, 250, 1) * Val(4096))) + (get(ctx,arg0, 251, 1) * Val(8192)));
 Val x248 = ((x247 + (get(ctx,arg0, 252, 1) * Val(16384))) + (get(ctx,arg0, 253, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x249 = (get(ctx,arg0, 254, 1) + (get(ctx,arg0, 255, 1) * Val(2)));
 Val x250 = ((x249 + (get(ctx,arg0, 256, 1) * Val(4))) + (get(ctx,arg0, 257, 1) * Val(8)));
 Val x251 = ((x250 + (get(ctx,arg0, 258, 1) * Val(16))) + (get(ctx,arg0, 259, 1) * Val(32)));
@@ -320,7 +320,7 @@ Val x253 = ((x252 + (get(ctx,arg0, 262, 1) * Val(256))) + (get(ctx,arg0, 263, 1)
 Val x254 = ((x253 + (get(ctx,arg0, 264, 1) * Val(1024))) + (get(ctx,arg0, 265, 1) * Val(2048)));
 Val x255 = ((x254 + (get(ctx,arg0, 266, 1) * Val(4096))) + (get(ctx,arg0, 267, 1) * Val(8192)));
 Val x256 = ((x255 + (get(ctx,arg0, 268, 1) * Val(16384))) + (get(ctx,arg0, 269, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x257 = (get(ctx,arg0, 270, 2) + (get(ctx,arg0, 271, 2) * Val(2)));
 Val x258 = ((x257 + (get(ctx,arg0, 272, 2) * Val(4))) + (get(ctx,arg0, 273, 2) * Val(8)));
 Val x259 = ((x258 + (get(ctx,arg0, 274, 2) * Val(16))) + (get(ctx,arg0, 275, 2) * Val(32)));
@@ -329,7 +329,7 @@ Val x261 = ((x260 + (get(ctx,arg0, 278, 2) * Val(256))) + (get(ctx,arg0, 279, 2)
 Val x262 = ((x261 + (get(ctx,arg0, 280, 2) * Val(1024))) + (get(ctx,arg0, 281, 2) * Val(2048)));
 Val x263 = ((x262 + (get(ctx,arg0, 282, 2) * Val(4096))) + (get(ctx,arg0, 283, 2) * Val(8192)));
 Val x264 = ((x263 + (get(ctx,arg0, 284, 2) * Val(16384))) + (get(ctx,arg0, 285, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x265 = (get(ctx,arg0, 286, 2) + (get(ctx,arg0, 287, 2) * Val(2)));
 Val x266 = ((x265 + (get(ctx,arg0, 288, 2) * Val(4))) + (get(ctx,arg0, 289, 2) * Val(8)));
 Val x267 = ((x266 + (get(ctx,arg0, 290, 2) * Val(16))) + (get(ctx,arg0, 291, 2) * Val(32)));
@@ -338,7 +338,7 @@ Val x269 = ((x268 + (get(ctx,arg0, 294, 2) * Val(256))) + (get(ctx,arg0, 295, 2)
 Val x270 = ((x269 + (get(ctx,arg0, 296, 2) * Val(1024))) + (get(ctx,arg0, 297, 2) * Val(2048)));
 Val x271 = ((x270 + (get(ctx,arg0, 298, 2) * Val(4096))) + (get(ctx,arg0, 299, 2) * Val(8192)));
 Val x272 = ((x271 + (get(ctx,arg0, 300, 2) * Val(16384))) + (get(ctx,arg0, 301, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x273 = (get(ctx,arg0, 270, 1) + (get(ctx,arg0, 271, 1) * Val(2)));
 Val x274 = ((x273 + (get(ctx,arg0, 272, 1) * Val(4))) + (get(ctx,arg0, 273, 1) * Val(8)));
 Val x275 = ((x274 + (get(ctx,arg0, 274, 1) * Val(16))) + (get(ctx,arg0, 275, 1) * Val(32)));
@@ -347,7 +347,7 @@ Val x277 = ((x276 + (get(ctx,arg0, 278, 1) * Val(256))) + (get(ctx,arg0, 279, 1)
 Val x278 = ((x277 + (get(ctx,arg0, 280, 1) * Val(1024))) + (get(ctx,arg0, 281, 1) * Val(2048)));
 Val x279 = ((x278 + (get(ctx,arg0, 282, 1) * Val(4096))) + (get(ctx,arg0, 283, 1) * Val(8192)));
 Val x280 = ((x279 + (get(ctx,arg0, 284, 1) * Val(16384))) + (get(ctx,arg0, 285, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x281 = (get(ctx,arg0, 286, 1) + (get(ctx,arg0, 287, 1) * Val(2)));
 Val x282 = ((x281 + (get(ctx,arg0, 288, 1) * Val(4))) + (get(ctx,arg0, 289, 1) * Val(8)));
 Val x283 = ((x282 + (get(ctx,arg0, 290, 1) * Val(16))) + (get(ctx,arg0, 291, 1) * Val(32)));
@@ -356,7 +356,7 @@ Val x285 = ((x284 + (get(ctx,arg0, 294, 1) * Val(256))) + (get(ctx,arg0, 295, 1)
 Val x286 = ((x285 + (get(ctx,arg0, 296, 1) * Val(1024))) + (get(ctx,arg0, 297, 1) * Val(2048)));
 Val x287 = ((x286 + (get(ctx,arg0, 298, 1) * Val(4096))) + (get(ctx,arg0, 299, 1) * Val(8192)));
 Val x288 = ((x287 + (get(ctx,arg0, 300, 1) * Val(16384))) + (get(ctx,arg0, 301, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x289 = (get(ctx,arg0, 302, 2) + (get(ctx,arg0, 303, 2) * Val(2)));
 Val x290 = ((x289 + (get(ctx,arg0, 304, 2) * Val(4))) + (get(ctx,arg0, 305, 2) * Val(8)));
 Val x291 = ((x290 + (get(ctx,arg0, 306, 2) * Val(16))) + (get(ctx,arg0, 307, 2) * Val(32)));
@@ -365,7 +365,7 @@ Val x293 = ((x292 + (get(ctx,arg0, 310, 2) * Val(256))) + (get(ctx,arg0, 311, 2)
 Val x294 = ((x293 + (get(ctx,arg0, 312, 2) * Val(1024))) + (get(ctx,arg0, 313, 2) * Val(2048)));
 Val x295 = ((x294 + (get(ctx,arg0, 314, 2) * Val(4096))) + (get(ctx,arg0, 315, 2) * Val(8192)));
 Val x296 = ((x295 + (get(ctx,arg0, 316, 2) * Val(16384))) + (get(ctx,arg0, 317, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x297 = (get(ctx,arg0, 318, 2) + (get(ctx,arg0, 319, 2) * Val(2)));
 Val x298 = ((x297 + (get(ctx,arg0, 320, 2) * Val(4))) + (get(ctx,arg0, 321, 2) * Val(8)));
 Val x299 = ((x298 + (get(ctx,arg0, 322, 2) * Val(16))) + (get(ctx,arg0, 323, 2) * Val(32)));
@@ -374,7 +374,7 @@ Val x301 = ((x300 + (get(ctx,arg0, 326, 2) * Val(256))) + (get(ctx,arg0, 327, 2)
 Val x302 = ((x301 + (get(ctx,arg0, 328, 2) * Val(1024))) + (get(ctx,arg0, 329, 2) * Val(2048)));
 Val x303 = ((x302 + (get(ctx,arg0, 330, 2) * Val(4096))) + (get(ctx,arg0, 331, 2) * Val(8192)));
 Val x304 = ((x303 + (get(ctx,arg0, 332, 2) * Val(16384))) + (get(ctx,arg0, 333, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x305 = (get(ctx,arg0, 302, 1) + (get(ctx,arg0, 303, 1) * Val(2)));
 Val x306 = ((x305 + (get(ctx,arg0, 304, 1) * Val(4))) + (get(ctx,arg0, 305, 1) * Val(8)));
 Val x307 = ((x306 + (get(ctx,arg0, 306, 1) * Val(16))) + (get(ctx,arg0, 307, 1) * Val(32)));
@@ -383,7 +383,7 @@ Val x309 = ((x308 + (get(ctx,arg0, 310, 1) * Val(256))) + (get(ctx,arg0, 311, 1)
 Val x310 = ((x309 + (get(ctx,arg0, 312, 1) * Val(1024))) + (get(ctx,arg0, 313, 1) * Val(2048)));
 Val x311 = ((x310 + (get(ctx,arg0, 314, 1) * Val(4096))) + (get(ctx,arg0, 315, 1) * Val(8192)));
 Val x312 = ((x311 + (get(ctx,arg0, 316, 1) * Val(16384))) + (get(ctx,arg0, 317, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x313 = (get(ctx,arg0, 318, 1) + (get(ctx,arg0, 319, 1) * Val(2)));
 Val x314 = ((x313 + (get(ctx,arg0, 320, 1) * Val(4))) + (get(ctx,arg0, 321, 1) * Val(8)));
 Val x315 = ((x314 + (get(ctx,arg0, 322, 1) * Val(16))) + (get(ctx,arg0, 323, 1) * Val(32)));
@@ -392,7 +392,7 @@ Val x317 = ((x316 + (get(ctx,arg0, 326, 1) * Val(256))) + (get(ctx,arg0, 327, 1)
 Val x318 = ((x317 + (get(ctx,arg0, 328, 1) * Val(1024))) + (get(ctx,arg0, 329, 1) * Val(2048)));
 Val x319 = ((x318 + (get(ctx,arg0, 330, 1) * Val(4096))) + (get(ctx,arg0, 331, 1) * Val(8192)));
 Val x320 = ((x319 + (get(ctx,arg0, 332, 1) * Val(16384))) + (get(ctx,arg0, 333, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x321 = (get(ctx,arg0, 334, 2) + (get(ctx,arg0, 335, 2) * Val(2)));
 Val x322 = ((x321 + (get(ctx,arg0, 336, 2) * Val(4))) + (get(ctx,arg0, 337, 2) * Val(8)));
 Val x323 = ((x322 + (get(ctx,arg0, 338, 2) * Val(16))) + (get(ctx,arg0, 339, 2) * Val(32)));
@@ -401,7 +401,7 @@ Val x325 = ((x324 + (get(ctx,arg0, 342, 2) * Val(256))) + (get(ctx,arg0, 343, 2)
 Val x326 = ((x325 + (get(ctx,arg0, 344, 2) * Val(1024))) + (get(ctx,arg0, 345, 2) * Val(2048)));
 Val x327 = ((x326 + (get(ctx,arg0, 346, 2) * Val(4096))) + (get(ctx,arg0, 347, 2) * Val(8192)));
 Val x328 = ((x327 + (get(ctx,arg0, 348, 2) * Val(16384))) + (get(ctx,arg0, 349, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x329 = (get(ctx,arg0, 350, 2) + (get(ctx,arg0, 351, 2) * Val(2)));
 Val x330 = ((x329 + (get(ctx,arg0, 352, 2) * Val(4))) + (get(ctx,arg0, 353, 2) * Val(8)));
 Val x331 = ((x330 + (get(ctx,arg0, 354, 2) * Val(16))) + (get(ctx,arg0, 355, 2) * Val(32)));
@@ -410,7 +410,7 @@ Val x333 = ((x332 + (get(ctx,arg0, 358, 2) * Val(256))) + (get(ctx,arg0, 359, 2)
 Val x334 = ((x333 + (get(ctx,arg0, 360, 2) * Val(1024))) + (get(ctx,arg0, 361, 2) * Val(2048)));
 Val x335 = ((x334 + (get(ctx,arg0, 362, 2) * Val(4096))) + (get(ctx,arg0, 363, 2) * Val(8192)));
 Val x336 = ((x335 + (get(ctx,arg0, 364, 2) * Val(16384))) + (get(ctx,arg0, 365, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x337 = (get(ctx,arg0, 334, 1) + (get(ctx,arg0, 335, 1) * Val(2)));
 Val x338 = ((x337 + (get(ctx,arg0, 336, 1) * Val(4))) + (get(ctx,arg0, 337, 1) * Val(8)));
 Val x339 = ((x338 + (get(ctx,arg0, 338, 1) * Val(16))) + (get(ctx,arg0, 339, 1) * Val(32)));
@@ -419,7 +419,7 @@ Val x341 = ((x340 + (get(ctx,arg0, 342, 1) * Val(256))) + (get(ctx,arg0, 343, 1)
 Val x342 = ((x341 + (get(ctx,arg0, 344, 1) * Val(1024))) + (get(ctx,arg0, 345, 1) * Val(2048)));
 Val x343 = ((x342 + (get(ctx,arg0, 346, 1) * Val(4096))) + (get(ctx,arg0, 347, 1) * Val(8192)));
 Val x344 = ((x343 + (get(ctx,arg0, 348, 1) * Val(16384))) + (get(ctx,arg0, 349, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x345 = (get(ctx,arg0, 350, 1) + (get(ctx,arg0, 351, 1) * Val(2)));
 Val x346 = ((x345 + (get(ctx,arg0, 352, 1) * Val(4))) + (get(ctx,arg0, 353, 1) * Val(8)));
 Val x347 = ((x346 + (get(ctx,arg0, 354, 1) * Val(16))) + (get(ctx,arg0, 355, 1) * Val(32)));
@@ -428,7 +428,7 @@ Val x349 = ((x348 + (get(ctx,arg0, 358, 1) * Val(256))) + (get(ctx,arg0, 359, 1)
 Val x350 = ((x349 + (get(ctx,arg0, 360, 1) * Val(1024))) + (get(ctx,arg0, 361, 1) * Val(2048)));
 Val x351 = ((x350 + (get(ctx,arg0, 362, 1) * Val(4096))) + (get(ctx,arg0, 363, 1) * Val(8192)));
 Val x352 = ((x351 + (get(ctx,arg0, 364, 1) * Val(16384))) + (get(ctx,arg0, 365, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x353 = (get(ctx,arg0, 366, 2) + (get(ctx,arg0, 367, 2) * Val(2)));
 Val x354 = ((x353 + (get(ctx,arg0, 368, 2) * Val(4))) + (get(ctx,arg0, 369, 2) * Val(8)));
 Val x355 = ((x354 + (get(ctx,arg0, 370, 2) * Val(16))) + (get(ctx,arg0, 371, 2) * Val(32)));
@@ -437,7 +437,7 @@ Val x357 = ((x356 + (get(ctx,arg0, 374, 2) * Val(256))) + (get(ctx,arg0, 375, 2)
 Val x358 = ((x357 + (get(ctx,arg0, 376, 2) * Val(1024))) + (get(ctx,arg0, 377, 2) * Val(2048)));
 Val x359 = ((x358 + (get(ctx,arg0, 378, 2) * Val(4096))) + (get(ctx,arg0, 379, 2) * Val(8192)));
 Val x360 = ((x359 + (get(ctx,arg0, 380, 2) * Val(16384))) + (get(ctx,arg0, 381, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x361 = (get(ctx,arg0, 382, 2) + (get(ctx,arg0, 383, 2) * Val(2)));
 Val x362 = ((x361 + (get(ctx,arg0, 384, 2) * Val(4))) + (get(ctx,arg0, 385, 2) * Val(8)));
 Val x363 = ((x362 + (get(ctx,arg0, 386, 2) * Val(16))) + (get(ctx,arg0, 387, 2) * Val(32)));
@@ -446,7 +446,7 @@ Val x365 = ((x364 + (get(ctx,arg0, 390, 2) * Val(256))) + (get(ctx,arg0, 391, 2)
 Val x366 = ((x365 + (get(ctx,arg0, 392, 2) * Val(1024))) + (get(ctx,arg0, 393, 2) * Val(2048)));
 Val x367 = ((x366 + (get(ctx,arg0, 394, 2) * Val(4096))) + (get(ctx,arg0, 395, 2) * Val(8192)));
 Val x368 = ((x367 + (get(ctx,arg0, 396, 2) * Val(16384))) + (get(ctx,arg0, 397, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x369 = (get(ctx,arg0, 366, 1) + (get(ctx,arg0, 367, 1) * Val(2)));
 Val x370 = ((x369 + (get(ctx,arg0, 368, 1) * Val(4))) + (get(ctx,arg0, 369, 1) * Val(8)));
 Val x371 = ((x370 + (get(ctx,arg0, 370, 1) * Val(16))) + (get(ctx,arg0, 371, 1) * Val(32)));
@@ -455,7 +455,7 @@ Val x373 = ((x372 + (get(ctx,arg0, 374, 1) * Val(256))) + (get(ctx,arg0, 375, 1)
 Val x374 = ((x373 + (get(ctx,arg0, 376, 1) * Val(1024))) + (get(ctx,arg0, 377, 1) * Val(2048)));
 Val x375 = ((x374 + (get(ctx,arg0, 378, 1) * Val(4096))) + (get(ctx,arg0, 379, 1) * Val(8192)));
 Val x376 = ((x375 + (get(ctx,arg0, 380, 1) * Val(16384))) + (get(ctx,arg0, 381, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x377 = (get(ctx,arg0, 382, 1) + (get(ctx,arg0, 383, 1) * Val(2)));
 Val x378 = ((x377 + (get(ctx,arg0, 384, 1) * Val(4))) + (get(ctx,arg0, 385, 1) * Val(8)));
 Val x379 = ((x378 + (get(ctx,arg0, 386, 1) * Val(16))) + (get(ctx,arg0, 387, 1) * Val(32)));
@@ -464,7 +464,7 @@ Val x381 = ((x380 + (get(ctx,arg0, 390, 1) * Val(256))) + (get(ctx,arg0, 391, 1)
 Val x382 = ((x381 + (get(ctx,arg0, 392, 1) * Val(1024))) + (get(ctx,arg0, 393, 1) * Val(2048)));
 Val x383 = ((x382 + (get(ctx,arg0, 394, 1) * Val(4096))) + (get(ctx,arg0, 395, 1) * Val(8192)));
 Val x384 = ((x383 + (get(ctx,arg0, 396, 1) * Val(16384))) + (get(ctx,arg0, 397, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x385 = (get(ctx,arg0, 398, 2) + (get(ctx,arg0, 399, 2) * Val(2)));
 Val x386 = ((x385 + (get(ctx,arg0, 400, 2) * Val(4))) + (get(ctx,arg0, 401, 2) * Val(8)));
 Val x387 = ((x386 + (get(ctx,arg0, 402, 2) * Val(16))) + (get(ctx,arg0, 403, 2) * Val(32)));
@@ -473,7 +473,7 @@ Val x389 = ((x388 + (get(ctx,arg0, 406, 2) * Val(256))) + (get(ctx,arg0, 407, 2)
 Val x390 = ((x389 + (get(ctx,arg0, 408, 2) * Val(1024))) + (get(ctx,arg0, 409, 2) * Val(2048)));
 Val x391 = ((x390 + (get(ctx,arg0, 410, 2) * Val(4096))) + (get(ctx,arg0, 411, 2) * Val(8192)));
 Val x392 = ((x391 + (get(ctx,arg0, 412, 2) * Val(16384))) + (get(ctx,arg0, 413, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x393 = (get(ctx,arg0, 414, 2) + (get(ctx,arg0, 415, 2) * Val(2)));
 Val x394 = ((x393 + (get(ctx,arg0, 416, 2) * Val(4))) + (get(ctx,arg0, 417, 2) * Val(8)));
 Val x395 = ((x394 + (get(ctx,arg0, 418, 2) * Val(16))) + (get(ctx,arg0, 419, 2) * Val(32)));
@@ -482,7 +482,7 @@ Val x397 = ((x396 + (get(ctx,arg0, 422, 2) * Val(256))) + (get(ctx,arg0, 423, 2)
 Val x398 = ((x397 + (get(ctx,arg0, 424, 2) * Val(1024))) + (get(ctx,arg0, 425, 2) * Val(2048)));
 Val x399 = ((x398 + (get(ctx,arg0, 426, 2) * Val(4096))) + (get(ctx,arg0, 427, 2) * Val(8192)));
 Val x400 = ((x399 + (get(ctx,arg0, 428, 2) * Val(16384))) + (get(ctx,arg0, 429, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x401 = (get(ctx,arg0, 398, 1) + (get(ctx,arg0, 399, 1) * Val(2)));
 Val x402 = ((x401 + (get(ctx,arg0, 400, 1) * Val(4))) + (get(ctx,arg0, 401, 1) * Val(8)));
 Val x403 = ((x402 + (get(ctx,arg0, 402, 1) * Val(16))) + (get(ctx,arg0, 403, 1) * Val(32)));
@@ -491,7 +491,7 @@ Val x405 = ((x404 + (get(ctx,arg0, 406, 1) * Val(256))) + (get(ctx,arg0, 407, 1)
 Val x406 = ((x405 + (get(ctx,arg0, 408, 1) * Val(1024))) + (get(ctx,arg0, 409, 1) * Val(2048)));
 Val x407 = ((x406 + (get(ctx,arg0, 410, 1) * Val(4096))) + (get(ctx,arg0, 411, 1) * Val(8192)));
 Val x408 = ((x407 + (get(ctx,arg0, 412, 1) * Val(16384))) + (get(ctx,arg0, 413, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x409 = (get(ctx,arg0, 414, 1) + (get(ctx,arg0, 415, 1) * Val(2)));
 Val x410 = ((x409 + (get(ctx,arg0, 416, 1) * Val(4))) + (get(ctx,arg0, 417, 1) * Val(8)));
 Val x411 = ((x410 + (get(ctx,arg0, 418, 1) * Val(16))) + (get(ctx,arg0, 419, 1) * Val(32)));
@@ -500,7 +500,7 @@ Val x413 = ((x412 + (get(ctx,arg0, 422, 1) * Val(256))) + (get(ctx,arg0, 423, 1)
 Val x414 = ((x413 + (get(ctx,arg0, 424, 1) * Val(1024))) + (get(ctx,arg0, 425, 1) * Val(2048)));
 Val x415 = ((x414 + (get(ctx,arg0, 426, 1) * Val(4096))) + (get(ctx,arg0, 427, 1) * Val(8192)));
 Val x416 = ((x415 + (get(ctx,arg0, 428, 1) * Val(16384))) + (get(ctx,arg0, 429, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x417 = (get(ctx,arg0, 430, 2) + (get(ctx,arg0, 431, 2) * Val(2)));
 Val x418 = ((x417 + (get(ctx,arg0, 432, 2) * Val(4))) + (get(ctx,arg0, 433, 2) * Val(8)));
 Val x419 = ((x418 + (get(ctx,arg0, 434, 2) * Val(16))) + (get(ctx,arg0, 435, 2) * Val(32)));
@@ -509,7 +509,7 @@ Val x421 = ((x420 + (get(ctx,arg0, 438, 2) * Val(256))) + (get(ctx,arg0, 439, 2)
 Val x422 = ((x421 + (get(ctx,arg0, 440, 2) * Val(1024))) + (get(ctx,arg0, 441, 2) * Val(2048)));
 Val x423 = ((x422 + (get(ctx,arg0, 442, 2) * Val(4096))) + (get(ctx,arg0, 443, 2) * Val(8192)));
 Val x424 = ((x423 + (get(ctx,arg0, 444, 2) * Val(16384))) + (get(ctx,arg0, 445, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x425 = (get(ctx,arg0, 446, 2) + (get(ctx,arg0, 447, 2) * Val(2)));
 Val x426 = ((x425 + (get(ctx,arg0, 448, 2) * Val(4))) + (get(ctx,arg0, 449, 2) * Val(8)));
 Val x427 = ((x426 + (get(ctx,arg0, 450, 2) * Val(16))) + (get(ctx,arg0, 451, 2) * Val(32)));
@@ -518,7 +518,7 @@ Val x429 = ((x428 + (get(ctx,arg0, 454, 2) * Val(256))) + (get(ctx,arg0, 455, 2)
 Val x430 = ((x429 + (get(ctx,arg0, 456, 2) * Val(1024))) + (get(ctx,arg0, 457, 2) * Val(2048)));
 Val x431 = ((x430 + (get(ctx,arg0, 458, 2) * Val(4096))) + (get(ctx,arg0, 459, 2) * Val(8192)));
 Val x432 = ((x431 + (get(ctx,arg0, 460, 2) * Val(16384))) + (get(ctx,arg0, 461, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x433 = (get(ctx,arg0, 430, 1) + (get(ctx,arg0, 431, 1) * Val(2)));
 Val x434 = ((x433 + (get(ctx,arg0, 432, 1) * Val(4))) + (get(ctx,arg0, 433, 1) * Val(8)));
 Val x435 = ((x434 + (get(ctx,arg0, 434, 1) * Val(16))) + (get(ctx,arg0, 435, 1) * Val(32)));
@@ -527,7 +527,7 @@ Val x437 = ((x436 + (get(ctx,arg0, 438, 1) * Val(256))) + (get(ctx,arg0, 439, 1)
 Val x438 = ((x437 + (get(ctx,arg0, 440, 1) * Val(1024))) + (get(ctx,arg0, 441, 1) * Val(2048)));
 Val x439 = ((x438 + (get(ctx,arg0, 442, 1) * Val(4096))) + (get(ctx,arg0, 443, 1) * Val(8192)));
 Val x440 = ((x439 + (get(ctx,arg0, 444, 1) * Val(16384))) + (get(ctx,arg0, 445, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x441 = (get(ctx,arg0, 446, 1) + (get(ctx,arg0, 447, 1) * Val(2)));
 Val x442 = ((x441 + (get(ctx,arg0, 448, 1) * Val(4))) + (get(ctx,arg0, 449, 1) * Val(8)));
 Val x443 = ((x442 + (get(ctx,arg0, 450, 1) * Val(16))) + (get(ctx,arg0, 451, 1) * Val(32)));
@@ -536,7 +536,7 @@ Val x445 = ((x444 + (get(ctx,arg0, 454, 1) * Val(256))) + (get(ctx,arg0, 455, 1)
 Val x446 = ((x445 + (get(ctx,arg0, 456, 1) * Val(1024))) + (get(ctx,arg0, 457, 1) * Val(2048)));
 Val x447 = ((x446 + (get(ctx,arg0, 458, 1) * Val(4096))) + (get(ctx,arg0, 459, 1) * Val(8192)));
 Val x448 = ((x447 + (get(ctx,arg0, 460, 1) * Val(16384))) + (get(ctx,arg0, 461, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x449 = (get(ctx,arg0, 462, 2) + (get(ctx,arg0, 463, 2) * Val(2)));
 Val x450 = ((x449 + (get(ctx,arg0, 464, 2) * Val(4))) + (get(ctx,arg0, 465, 2) * Val(8)));
 Val x451 = ((x450 + (get(ctx,arg0, 466, 2) * Val(16))) + (get(ctx,arg0, 467, 2) * Val(32)));
@@ -545,7 +545,7 @@ Val x453 = ((x452 + (get(ctx,arg0, 470, 2) * Val(256))) + (get(ctx,arg0, 471, 2)
 Val x454 = ((x453 + (get(ctx,arg0, 472, 2) * Val(1024))) + (get(ctx,arg0, 473, 2) * Val(2048)));
 Val x455 = ((x454 + (get(ctx,arg0, 474, 2) * Val(4096))) + (get(ctx,arg0, 475, 2) * Val(8192)));
 Val x456 = ((x455 + (get(ctx,arg0, 476, 2) * Val(16384))) + (get(ctx,arg0, 477, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x457 = (get(ctx,arg0, 478, 2) + (get(ctx,arg0, 479, 2) * Val(2)));
 Val x458 = ((x457 + (get(ctx,arg0, 480, 2) * Val(4))) + (get(ctx,arg0, 481, 2) * Val(8)));
 Val x459 = ((x458 + (get(ctx,arg0, 482, 2) * Val(16))) + (get(ctx,arg0, 483, 2) * Val(32)));
@@ -554,7 +554,7 @@ Val x461 = ((x460 + (get(ctx,arg0, 486, 2) * Val(256))) + (get(ctx,arg0, 487, 2)
 Val x462 = ((x461 + (get(ctx,arg0, 488, 2) * Val(1024))) + (get(ctx,arg0, 489, 2) * Val(2048)));
 Val x463 = ((x462 + (get(ctx,arg0, 490, 2) * Val(4096))) + (get(ctx,arg0, 491, 2) * Val(8192)));
 Val x464 = ((x463 + (get(ctx,arg0, 492, 2) * Val(16384))) + (get(ctx,arg0, 493, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x465 = (get(ctx,arg0, 462, 1) + (get(ctx,arg0, 463, 1) * Val(2)));
 Val x466 = ((x465 + (get(ctx,arg0, 464, 1) * Val(4))) + (get(ctx,arg0, 465, 1) * Val(8)));
 Val x467 = ((x466 + (get(ctx,arg0, 466, 1) * Val(16))) + (get(ctx,arg0, 467, 1) * Val(32)));
@@ -563,7 +563,7 @@ Val x469 = ((x468 + (get(ctx,arg0, 470, 1) * Val(256))) + (get(ctx,arg0, 471, 1)
 Val x470 = ((x469 + (get(ctx,arg0, 472, 1) * Val(1024))) + (get(ctx,arg0, 473, 1) * Val(2048)));
 Val x471 = ((x470 + (get(ctx,arg0, 474, 1) * Val(4096))) + (get(ctx,arg0, 475, 1) * Val(8192)));
 Val x472 = ((x471 + (get(ctx,arg0, 476, 1) * Val(16384))) + (get(ctx,arg0, 477, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x473 = (get(ctx,arg0, 478, 1) + (get(ctx,arg0, 479, 1) * Val(2)));
 Val x474 = ((x473 + (get(ctx,arg0, 480, 1) * Val(4))) + (get(ctx,arg0, 481, 1) * Val(8)));
 Val x475 = ((x474 + (get(ctx,arg0, 482, 1) * Val(16))) + (get(ctx,arg0, 483, 1) * Val(32)));
@@ -572,7 +572,7 @@ Val x477 = ((x476 + (get(ctx,arg0, 486, 1) * Val(256))) + (get(ctx,arg0, 487, 1)
 Val x478 = ((x477 + (get(ctx,arg0, 488, 1) * Val(1024))) + (get(ctx,arg0, 489, 1) * Val(2048)));
 Val x479 = ((x478 + (get(ctx,arg0, 490, 1) * Val(4096))) + (get(ctx,arg0, 491, 1) * Val(8192)));
 Val x480 = ((x479 + (get(ctx,arg0, 492, 1) * Val(16384))) + (get(ctx,arg0, 493, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x481 = (get(ctx,arg0, 494, 2) + (get(ctx,arg0, 495, 2) * Val(2)));
 Val x482 = ((x481 + (get(ctx,arg0, 496, 2) * Val(4))) + (get(ctx,arg0, 497, 2) * Val(8)));
 Val x483 = ((x482 + (get(ctx,arg0, 498, 2) * Val(16))) + (get(ctx,arg0, 499, 2) * Val(32)));
@@ -581,7 +581,7 @@ Val x485 = ((x484 + (get(ctx,arg0, 502, 2) * Val(256))) + (get(ctx,arg0, 503, 2)
 Val x486 = ((x485 + (get(ctx,arg0, 504, 2) * Val(1024))) + (get(ctx,arg0, 505, 2) * Val(2048)));
 Val x487 = ((x486 + (get(ctx,arg0, 506, 2) * Val(4096))) + (get(ctx,arg0, 507, 2) * Val(8192)));
 Val x488 = ((x487 + (get(ctx,arg0, 508, 2) * Val(16384))) + (get(ctx,arg0, 509, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x489 = (get(ctx,arg0, 510, 2) + (get(ctx,arg0, 511, 2) * Val(2)));
 Val x490 = ((x489 + (get(ctx,arg0, 512, 2) * Val(4))) + (get(ctx,arg0, 513, 2) * Val(8)));
 Val x491 = ((x490 + (get(ctx,arg0, 514, 2) * Val(16))) + (get(ctx,arg0, 515, 2) * Val(32)));
@@ -590,7 +590,7 @@ Val x493 = ((x492 + (get(ctx,arg0, 518, 2) * Val(256))) + (get(ctx,arg0, 519, 2)
 Val x494 = ((x493 + (get(ctx,arg0, 520, 2) * Val(1024))) + (get(ctx,arg0, 521, 2) * Val(2048)));
 Val x495 = ((x494 + (get(ctx,arg0, 522, 2) * Val(4096))) + (get(ctx,arg0, 523, 2) * Val(8192)));
 Val x496 = ((x495 + (get(ctx,arg0, 524, 2) * Val(16384))) + (get(ctx,arg0, 525, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x497 = (get(ctx,arg0, 494, 1) + (get(ctx,arg0, 495, 1) * Val(2)));
 Val x498 = ((x497 + (get(ctx,arg0, 496, 1) * Val(4))) + (get(ctx,arg0, 497, 1) * Val(8)));
 Val x499 = ((x498 + (get(ctx,arg0, 498, 1) * Val(16))) + (get(ctx,arg0, 499, 1) * Val(32)));
@@ -599,7 +599,7 @@ Val x501 = ((x500 + (get(ctx,arg0, 502, 1) * Val(256))) + (get(ctx,arg0, 503, 1)
 Val x502 = ((x501 + (get(ctx,arg0, 504, 1) * Val(1024))) + (get(ctx,arg0, 505, 1) * Val(2048)));
 Val x503 = ((x502 + (get(ctx,arg0, 506, 1) * Val(4096))) + (get(ctx,arg0, 507, 1) * Val(8192)));
 Val x504 = ((x503 + (get(ctx,arg0, 508, 1) * Val(16384))) + (get(ctx,arg0, 509, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x505 = (get(ctx,arg0, 510, 1) + (get(ctx,arg0, 511, 1) * Val(2)));
 Val x506 = ((x505 + (get(ctx,arg0, 512, 1) * Val(4))) + (get(ctx,arg0, 513, 1) * Val(8)));
 Val x507 = ((x506 + (get(ctx,arg0, 514, 1) * Val(16))) + (get(ctx,arg0, 515, 1) * Val(32)));
@@ -608,7 +608,7 @@ Val x509 = ((x508 + (get(ctx,arg0, 518, 1) * Val(256))) + (get(ctx,arg0, 519, 1)
 Val x510 = ((x509 + (get(ctx,arg0, 520, 1) * Val(1024))) + (get(ctx,arg0, 521, 1) * Val(2048)));
 Val x511 = ((x510 + (get(ctx,arg0, 522, 1) * Val(4096))) + (get(ctx,arg0, 523, 1) * Val(8192)));
 Val x512 = ((x511 + (get(ctx,arg0, 524, 1) * Val(16384))) + (get(ctx,arg0, 525, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x513 = (get(ctx,arg0, 526, 2) + (get(ctx,arg0, 527, 2) * Val(2)));
 Val x514 = ((x513 + (get(ctx,arg0, 528, 2) * Val(4))) + (get(ctx,arg0, 529, 2) * Val(8)));
 Val x515 = ((x514 + (get(ctx,arg0, 530, 2) * Val(16))) + (get(ctx,arg0, 531, 2) * Val(32)));
@@ -617,7 +617,7 @@ Val x517 = ((x516 + (get(ctx,arg0, 534, 2) * Val(256))) + (get(ctx,arg0, 535, 2)
 Val x518 = ((x517 + (get(ctx,arg0, 536, 2) * Val(1024))) + (get(ctx,arg0, 537, 2) * Val(2048)));
 Val x519 = ((x518 + (get(ctx,arg0, 538, 2) * Val(4096))) + (get(ctx,arg0, 539, 2) * Val(8192)));
 Val x520 = ((x519 + (get(ctx,arg0, 540, 2) * Val(16384))) + (get(ctx,arg0, 541, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x521 = (get(ctx,arg0, 542, 2) + (get(ctx,arg0, 543, 2) * Val(2)));
 Val x522 = ((x521 + (get(ctx,arg0, 544, 2) * Val(4))) + (get(ctx,arg0, 545, 2) * Val(8)));
 Val x523 = ((x522 + (get(ctx,arg0, 546, 2) * Val(16))) + (get(ctx,arg0, 547, 2) * Val(32)));
@@ -626,7 +626,7 @@ Val x525 = ((x524 + (get(ctx,arg0, 550, 2) * Val(256))) + (get(ctx,arg0, 551, 2)
 Val x526 = ((x525 + (get(ctx,arg0, 552, 2) * Val(1024))) + (get(ctx,arg0, 553, 2) * Val(2048)));
 Val x527 = ((x526 + (get(ctx,arg0, 554, 2) * Val(4096))) + (get(ctx,arg0, 555, 2) * Val(8192)));
 Val x528 = ((x527 + (get(ctx,arg0, 556, 2) * Val(16384))) + (get(ctx,arg0, 557, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x529 = (get(ctx,arg0, 526, 1) + (get(ctx,arg0, 527, 1) * Val(2)));
 Val x530 = ((x529 + (get(ctx,arg0, 528, 1) * Val(4))) + (get(ctx,arg0, 529, 1) * Val(8)));
 Val x531 = ((x530 + (get(ctx,arg0, 530, 1) * Val(16))) + (get(ctx,arg0, 531, 1) * Val(32)));
@@ -635,7 +635,7 @@ Val x533 = ((x532 + (get(ctx,arg0, 534, 1) * Val(256))) + (get(ctx,arg0, 535, 1)
 Val x534 = ((x533 + (get(ctx,arg0, 536, 1) * Val(1024))) + (get(ctx,arg0, 537, 1) * Val(2048)));
 Val x535 = ((x534 + (get(ctx,arg0, 538, 1) * Val(4096))) + (get(ctx,arg0, 539, 1) * Val(8192)));
 Val x536 = ((x535 + (get(ctx,arg0, 540, 1) * Val(16384))) + (get(ctx,arg0, 541, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x537 = (get(ctx,arg0, 542, 1) + (get(ctx,arg0, 543, 1) * Val(2)));
 Val x538 = ((x537 + (get(ctx,arg0, 544, 1) * Val(4))) + (get(ctx,arg0, 545, 1) * Val(8)));
 Val x539 = ((x538 + (get(ctx,arg0, 546, 1) * Val(16))) + (get(ctx,arg0, 547, 1) * Val(32)));
@@ -644,7 +644,7 @@ Val x541 = ((x540 + (get(ctx,arg0, 550, 1) * Val(256))) + (get(ctx,arg0, 551, 1)
 Val x542 = ((x541 + (get(ctx,arg0, 552, 1) * Val(1024))) + (get(ctx,arg0, 553, 1) * Val(2048)));
 Val x543 = ((x542 + (get(ctx,arg0, 554, 1) * Val(4096))) + (get(ctx,arg0, 555, 1) * Val(8192)));
 Val x544 = ((x543 + (get(ctx,arg0, 556, 1) * Val(16384))) + (get(ctx,arg0, 557, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x545 = (get(ctx,arg0, 558, 2) + (get(ctx,arg0, 559, 2) * Val(2)));
 Val x546 = ((x545 + (get(ctx,arg0, 560, 2) * Val(4))) + (get(ctx,arg0, 561, 2) * Val(8)));
 Val x547 = ((x546 + (get(ctx,arg0, 562, 2) * Val(16))) + (get(ctx,arg0, 563, 2) * Val(32)));
@@ -653,7 +653,7 @@ Val x549 = ((x548 + (get(ctx,arg0, 566, 2) * Val(256))) + (get(ctx,arg0, 567, 2)
 Val x550 = ((x549 + (get(ctx,arg0, 568, 2) * Val(1024))) + (get(ctx,arg0, 569, 2) * Val(2048)));
 Val x551 = ((x550 + (get(ctx,arg0, 570, 2) * Val(4096))) + (get(ctx,arg0, 571, 2) * Val(8192)));
 Val x552 = ((x551 + (get(ctx,arg0, 572, 2) * Val(16384))) + (get(ctx,arg0, 573, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x553 = (get(ctx,arg0, 574, 2) + (get(ctx,arg0, 575, 2) * Val(2)));
 Val x554 = ((x553 + (get(ctx,arg0, 576, 2) * Val(4))) + (get(ctx,arg0, 577, 2) * Val(8)));
 Val x555 = ((x554 + (get(ctx,arg0, 578, 2) * Val(16))) + (get(ctx,arg0, 579, 2) * Val(32)));
@@ -662,7 +662,7 @@ Val x557 = ((x556 + (get(ctx,arg0, 582, 2) * Val(256))) + (get(ctx,arg0, 583, 2)
 Val x558 = ((x557 + (get(ctx,arg0, 584, 2) * Val(1024))) + (get(ctx,arg0, 585, 2) * Val(2048)));
 Val x559 = ((x558 + (get(ctx,arg0, 586, 2) * Val(4096))) + (get(ctx,arg0, 587, 2) * Val(8192)));
 Val x560 = ((x559 + (get(ctx,arg0, 588, 2) * Val(16384))) + (get(ctx,arg0, 589, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x561 = (get(ctx,arg0, 558, 1) + (get(ctx,arg0, 559, 1) * Val(2)));
 Val x562 = ((x561 + (get(ctx,arg0, 560, 1) * Val(4))) + (get(ctx,arg0, 561, 1) * Val(8)));
 Val x563 = ((x562 + (get(ctx,arg0, 562, 1) * Val(16))) + (get(ctx,arg0, 563, 1) * Val(32)));
@@ -671,7 +671,7 @@ Val x565 = ((x564 + (get(ctx,arg0, 566, 1) * Val(256))) + (get(ctx,arg0, 567, 1)
 Val x566 = ((x565 + (get(ctx,arg0, 568, 1) * Val(1024))) + (get(ctx,arg0, 569, 1) * Val(2048)));
 Val x567 = ((x566 + (get(ctx,arg0, 570, 1) * Val(4096))) + (get(ctx,arg0, 571, 1) * Val(8192)));
 Val x568 = ((x567 + (get(ctx,arg0, 572, 1) * Val(16384))) + (get(ctx,arg0, 573, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x569 = (get(ctx,arg0, 574, 1) + (get(ctx,arg0, 575, 1) * Val(2)));
 Val x570 = ((x569 + (get(ctx,arg0, 576, 1) * Val(4))) + (get(ctx,arg0, 577, 1) * Val(8)));
 Val x571 = ((x570 + (get(ctx,arg0, 578, 1) * Val(16))) + (get(ctx,arg0, 579, 1) * Val(32)));
@@ -680,7 +680,7 @@ Val x573 = ((x572 + (get(ctx,arg0, 582, 1) * Val(256))) + (get(ctx,arg0, 583, 1)
 Val x574 = ((x573 + (get(ctx,arg0, 584, 1) * Val(1024))) + (get(ctx,arg0, 585, 1) * Val(2048)));
 Val x575 = ((x574 + (get(ctx,arg0, 586, 1) * Val(4096))) + (get(ctx,arg0, 587, 1) * Val(8192)));
 Val x576 = ((x575 + (get(ctx,arg0, 588, 1) * Val(16384))) + (get(ctx,arg0, 589, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x577 = (get(ctx,arg0, 590, 2) + (get(ctx,arg0, 591, 2) * Val(2)));
 Val x578 = ((x577 + (get(ctx,arg0, 592, 2) * Val(4))) + (get(ctx,arg0, 593, 2) * Val(8)));
 Val x579 = ((x578 + (get(ctx,arg0, 594, 2) * Val(16))) + (get(ctx,arg0, 595, 2) * Val(32)));
@@ -689,7 +689,7 @@ Val x581 = ((x580 + (get(ctx,arg0, 598, 2) * Val(256))) + (get(ctx,arg0, 599, 2)
 Val x582 = ((x581 + (get(ctx,arg0, 600, 2) * Val(1024))) + (get(ctx,arg0, 601, 2) * Val(2048)));
 Val x583 = ((x582 + (get(ctx,arg0, 602, 2) * Val(4096))) + (get(ctx,arg0, 603, 2) * Val(8192)));
 Val x584 = ((x583 + (get(ctx,arg0, 604, 2) * Val(16384))) + (get(ctx,arg0, 605, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x585 = (get(ctx,arg0, 606, 2) + (get(ctx,arg0, 607, 2) * Val(2)));
 Val x586 = ((x585 + (get(ctx,arg0, 608, 2) * Val(4))) + (get(ctx,arg0, 609, 2) * Val(8)));
 Val x587 = ((x586 + (get(ctx,arg0, 610, 2) * Val(16))) + (get(ctx,arg0, 611, 2) * Val(32)));
@@ -698,7 +698,7 @@ Val x589 = ((x588 + (get(ctx,arg0, 614, 2) * Val(256))) + (get(ctx,arg0, 615, 2)
 Val x590 = ((x589 + (get(ctx,arg0, 616, 2) * Val(1024))) + (get(ctx,arg0, 617, 2) * Val(2048)));
 Val x591 = ((x590 + (get(ctx,arg0, 618, 2) * Val(4096))) + (get(ctx,arg0, 619, 2) * Val(8192)));
 Val x592 = ((x591 + (get(ctx,arg0, 620, 2) * Val(16384))) + (get(ctx,arg0, 621, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x593 = (get(ctx,arg0, 590, 1) + (get(ctx,arg0, 591, 1) * Val(2)));
 Val x594 = ((x593 + (get(ctx,arg0, 592, 1) * Val(4))) + (get(ctx,arg0, 593, 1) * Val(8)));
 Val x595 = ((x594 + (get(ctx,arg0, 594, 1) * Val(16))) + (get(ctx,arg0, 595, 1) * Val(32)));
@@ -707,7 +707,7 @@ Val x597 = ((x596 + (get(ctx,arg0, 598, 1) * Val(256))) + (get(ctx,arg0, 599, 1)
 Val x598 = ((x597 + (get(ctx,arg0, 600, 1) * Val(1024))) + (get(ctx,arg0, 601, 1) * Val(2048)));
 Val x599 = ((x598 + (get(ctx,arg0, 602, 1) * Val(4096))) + (get(ctx,arg0, 603, 1) * Val(8192)));
 Val x600 = ((x599 + (get(ctx,arg0, 604, 1) * Val(16384))) + (get(ctx,arg0, 605, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x601 = (get(ctx,arg0, 606, 1) + (get(ctx,arg0, 607, 1) * Val(2)));
 Val x602 = ((x601 + (get(ctx,arg0, 608, 1) * Val(4))) + (get(ctx,arg0, 609, 1) * Val(8)));
 Val x603 = ((x602 + (get(ctx,arg0, 610, 1) * Val(16))) + (get(ctx,arg0, 611, 1) * Val(32)));
@@ -716,7 +716,7 @@ Val x605 = ((x604 + (get(ctx,arg0, 614, 1) * Val(256))) + (get(ctx,arg0, 615, 1)
 Val x606 = ((x605 + (get(ctx,arg0, 616, 1) * Val(1024))) + (get(ctx,arg0, 617, 1) * Val(2048)));
 Val x607 = ((x606 + (get(ctx,arg0, 618, 1) * Val(4096))) + (get(ctx,arg0, 619, 1) * Val(8192)));
 Val x608 = ((x607 + (get(ctx,arg0, 620, 1) * Val(16384))) + (get(ctx,arg0, 621, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x609 = (get(ctx,arg0, 622, 2) + (get(ctx,arg0, 623, 2) * Val(2)));
 Val x610 = ((x609 + (get(ctx,arg0, 624, 2) * Val(4))) + (get(ctx,arg0, 625, 2) * Val(8)));
 Val x611 = ((x610 + (get(ctx,arg0, 626, 2) * Val(16))) + (get(ctx,arg0, 627, 2) * Val(32)));
@@ -725,7 +725,7 @@ Val x613 = ((x612 + (get(ctx,arg0, 630, 2) * Val(256))) + (get(ctx,arg0, 631, 2)
 Val x614 = ((x613 + (get(ctx,arg0, 632, 2) * Val(1024))) + (get(ctx,arg0, 633, 2) * Val(2048)));
 Val x615 = ((x614 + (get(ctx,arg0, 634, 2) * Val(4096))) + (get(ctx,arg0, 635, 2) * Val(8192)));
 Val x616 = ((x615 + (get(ctx,arg0, 636, 2) * Val(16384))) + (get(ctx,arg0, 637, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x617 = (get(ctx,arg0, 638, 2) + (get(ctx,arg0, 639, 2) * Val(2)));
 Val x618 = ((x617 + (get(ctx,arg0, 640, 2) * Val(4))) + (get(ctx,arg0, 641, 2) * Val(8)));
 Val x619 = ((x618 + (get(ctx,arg0, 642, 2) * Val(16))) + (get(ctx,arg0, 643, 2) * Val(32)));
@@ -734,7 +734,7 @@ Val x621 = ((x620 + (get(ctx,arg0, 646, 2) * Val(256))) + (get(ctx,arg0, 647, 2)
 Val x622 = ((x621 + (get(ctx,arg0, 648, 2) * Val(1024))) + (get(ctx,arg0, 649, 2) * Val(2048)));
 Val x623 = ((x622 + (get(ctx,arg0, 650, 2) * Val(4096))) + (get(ctx,arg0, 651, 2) * Val(8192)));
 Val x624 = ((x623 + (get(ctx,arg0, 652, 2) * Val(16384))) + (get(ctx,arg0, 653, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x625 = (get(ctx,arg0, 622, 1) + (get(ctx,arg0, 623, 1) * Val(2)));
 Val x626 = ((x625 + (get(ctx,arg0, 624, 1) * Val(4))) + (get(ctx,arg0, 625, 1) * Val(8)));
 Val x627 = ((x626 + (get(ctx,arg0, 626, 1) * Val(16))) + (get(ctx,arg0, 627, 1) * Val(32)));
@@ -743,7 +743,7 @@ Val x629 = ((x628 + (get(ctx,arg0, 630, 1) * Val(256))) + (get(ctx,arg0, 631, 1)
 Val x630 = ((x629 + (get(ctx,arg0, 632, 1) * Val(1024))) + (get(ctx,arg0, 633, 1) * Val(2048)));
 Val x631 = ((x630 + (get(ctx,arg0, 634, 1) * Val(4096))) + (get(ctx,arg0, 635, 1) * Val(8192)));
 Val x632 = ((x631 + (get(ctx,arg0, 636, 1) * Val(16384))) + (get(ctx,arg0, 637, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x633 = (get(ctx,arg0, 638, 1) + (get(ctx,arg0, 639, 1) * Val(2)));
 Val x634 = ((x633 + (get(ctx,arg0, 640, 1) * Val(4))) + (get(ctx,arg0, 641, 1) * Val(8)));
 Val x635 = ((x634 + (get(ctx,arg0, 642, 1) * Val(16))) + (get(ctx,arg0, 643, 1) * Val(32)));
@@ -752,7 +752,7 @@ Val x637 = ((x636 + (get(ctx,arg0, 646, 1) * Val(256))) + (get(ctx,arg0, 647, 1)
 Val x638 = ((x637 + (get(ctx,arg0, 648, 1) * Val(1024))) + (get(ctx,arg0, 649, 1) * Val(2048)));
 Val x639 = ((x638 + (get(ctx,arg0, 650, 1) * Val(4096))) + (get(ctx,arg0, 651, 1) * Val(8192)));
 Val x640 = ((x639 + (get(ctx,arg0, 652, 1) * Val(16384))) + (get(ctx,arg0, 653, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x641 = (get(ctx,arg0, 654, 2) + (get(ctx,arg0, 655, 2) * Val(2)));
 Val x642 = ((x641 + (get(ctx,arg0, 656, 2) * Val(4))) + (get(ctx,arg0, 657, 2) * Val(8)));
 Val x643 = ((x642 + (get(ctx,arg0, 658, 2) * Val(16))) + (get(ctx,arg0, 659, 2) * Val(32)));
@@ -761,7 +761,7 @@ Val x645 = ((x644 + (get(ctx,arg0, 662, 2) * Val(256))) + (get(ctx,arg0, 663, 2)
 Val x646 = ((x645 + (get(ctx,arg0, 664, 2) * Val(1024))) + (get(ctx,arg0, 665, 2) * Val(2048)));
 Val x647 = ((x646 + (get(ctx,arg0, 666, 2) * Val(4096))) + (get(ctx,arg0, 667, 2) * Val(8192)));
 Val x648 = ((x647 + (get(ctx,arg0, 668, 2) * Val(16384))) + (get(ctx,arg0, 669, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x649 = (get(ctx,arg0, 670, 2) + (get(ctx,arg0, 671, 2) * Val(2)));
 Val x650 = ((x649 + (get(ctx,arg0, 672, 2) * Val(4))) + (get(ctx,arg0, 673, 2) * Val(8)));
 Val x651 = ((x650 + (get(ctx,arg0, 674, 2) * Val(16))) + (get(ctx,arg0, 675, 2) * Val(32)));
@@ -770,7 +770,7 @@ Val x653 = ((x652 + (get(ctx,arg0, 678, 2) * Val(256))) + (get(ctx,arg0, 679, 2)
 Val x654 = ((x653 + (get(ctx,arg0, 680, 2) * Val(1024))) + (get(ctx,arg0, 681, 2) * Val(2048)));
 Val x655 = ((x654 + (get(ctx,arg0, 682, 2) * Val(4096))) + (get(ctx,arg0, 683, 2) * Val(8192)));
 Val x656 = ((x655 + (get(ctx,arg0, 684, 2) * Val(16384))) + (get(ctx,arg0, 685, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x657 = (get(ctx,arg0, 654, 1) + (get(ctx,arg0, 655, 1) * Val(2)));
 Val x658 = ((x657 + (get(ctx,arg0, 656, 1) * Val(4))) + (get(ctx,arg0, 657, 1) * Val(8)));
 Val x659 = ((x658 + (get(ctx,arg0, 658, 1) * Val(16))) + (get(ctx,arg0, 659, 1) * Val(32)));
@@ -779,7 +779,7 @@ Val x661 = ((x660 + (get(ctx,arg0, 662, 1) * Val(256))) + (get(ctx,arg0, 663, 1)
 Val x662 = ((x661 + (get(ctx,arg0, 664, 1) * Val(1024))) + (get(ctx,arg0, 665, 1) * Val(2048)));
 Val x663 = ((x662 + (get(ctx,arg0, 666, 1) * Val(4096))) + (get(ctx,arg0, 667, 1) * Val(8192)));
 Val x664 = ((x663 + (get(ctx,arg0, 668, 1) * Val(16384))) + (get(ctx,arg0, 669, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x665 = (get(ctx,arg0, 670, 1) + (get(ctx,arg0, 671, 1) * Val(2)));
 Val x666 = ((x665 + (get(ctx,arg0, 672, 1) * Val(4))) + (get(ctx,arg0, 673, 1) * Val(8)));
 Val x667 = ((x666 + (get(ctx,arg0, 674, 1) * Val(16))) + (get(ctx,arg0, 675, 1) * Val(32)));
@@ -788,7 +788,7 @@ Val x669 = ((x668 + (get(ctx,arg0, 678, 1) * Val(256))) + (get(ctx,arg0, 679, 1)
 Val x670 = ((x669 + (get(ctx,arg0, 680, 1) * Val(1024))) + (get(ctx,arg0, 681, 1) * Val(2048)));
 Val x671 = ((x670 + (get(ctx,arg0, 682, 1) * Val(4096))) + (get(ctx,arg0, 683, 1) * Val(8192)));
 Val x672 = ((x671 + (get(ctx,arg0, 684, 1) * Val(16384))) + (get(ctx,arg0, 685, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x673 = (get(ctx,arg0, 686, 2) + (get(ctx,arg0, 687, 2) * Val(2)));
 Val x674 = ((x673 + (get(ctx,arg0, 688, 2) * Val(4))) + (get(ctx,arg0, 689, 2) * Val(8)));
 Val x675 = ((x674 + (get(ctx,arg0, 690, 2) * Val(16))) + (get(ctx,arg0, 691, 2) * Val(32)));
@@ -797,7 +797,7 @@ Val x677 = ((x676 + (get(ctx,arg0, 694, 2) * Val(256))) + (get(ctx,arg0, 695, 2)
 Val x678 = ((x677 + (get(ctx,arg0, 696, 2) * Val(1024))) + (get(ctx,arg0, 697, 2) * Val(2048)));
 Val x679 = ((x678 + (get(ctx,arg0, 698, 2) * Val(4096))) + (get(ctx,arg0, 699, 2) * Val(8192)));
 Val x680 = ((x679 + (get(ctx,arg0, 700, 2) * Val(16384))) + (get(ctx,arg0, 701, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x681 = (get(ctx,arg0, 702, 2) + (get(ctx,arg0, 703, 2) * Val(2)));
 Val x682 = ((x681 + (get(ctx,arg0, 704, 2) * Val(4))) + (get(ctx,arg0, 705, 2) * Val(8)));
 Val x683 = ((x682 + (get(ctx,arg0, 706, 2) * Val(16))) + (get(ctx,arg0, 707, 2) * Val(32)));
@@ -806,7 +806,7 @@ Val x685 = ((x684 + (get(ctx,arg0, 710, 2) * Val(256))) + (get(ctx,arg0, 711, 2)
 Val x686 = ((x685 + (get(ctx,arg0, 712, 2) * Val(1024))) + (get(ctx,arg0, 713, 2) * Val(2048)));
 Val x687 = ((x686 + (get(ctx,arg0, 714, 2) * Val(4096))) + (get(ctx,arg0, 715, 2) * Val(8192)));
 Val x688 = ((x687 + (get(ctx,arg0, 716, 2) * Val(16384))) + (get(ctx,arg0, 717, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x689 = (get(ctx,arg0, 686, 1) + (get(ctx,arg0, 687, 1) * Val(2)));
 Val x690 = ((x689 + (get(ctx,arg0, 688, 1) * Val(4))) + (get(ctx,arg0, 689, 1) * Val(8)));
 Val x691 = ((x690 + (get(ctx,arg0, 690, 1) * Val(16))) + (get(ctx,arg0, 691, 1) * Val(32)));
@@ -815,7 +815,7 @@ Val x693 = ((x692 + (get(ctx,arg0, 694, 1) * Val(256))) + (get(ctx,arg0, 695, 1)
 Val x694 = ((x693 + (get(ctx,arg0, 696, 1) * Val(1024))) + (get(ctx,arg0, 697, 1) * Val(2048)));
 Val x695 = ((x694 + (get(ctx,arg0, 698, 1) * Val(4096))) + (get(ctx,arg0, 699, 1) * Val(8192)));
 Val x696 = ((x695 + (get(ctx,arg0, 700, 1) * Val(16384))) + (get(ctx,arg0, 701, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x697 = (get(ctx,arg0, 702, 1) + (get(ctx,arg0, 703, 1) * Val(2)));
 Val x698 = ((x697 + (get(ctx,arg0, 704, 1) * Val(4))) + (get(ctx,arg0, 705, 1) * Val(8)));
 Val x699 = ((x698 + (get(ctx,arg0, 706, 1) * Val(16))) + (get(ctx,arg0, 707, 1) * Val(32)));
@@ -824,7 +824,7 @@ Val x701 = ((x700 + (get(ctx,arg0, 710, 1) * Val(256))) + (get(ctx,arg0, 711, 1)
 Val x702 = ((x701 + (get(ctx,arg0, 712, 1) * Val(1024))) + (get(ctx,arg0, 713, 1) * Val(2048)));
 Val x703 = ((x702 + (get(ctx,arg0, 714, 1) * Val(4096))) + (get(ctx,arg0, 715, 1) * Val(8192)));
 Val x704 = ((x703 + (get(ctx,arg0, 716, 1) * Val(16384))) + (get(ctx,arg0, 717, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x705 = (get(ctx,arg0, 718, 2) + (get(ctx,arg0, 719, 2) * Val(2)));
 Val x706 = ((x705 + (get(ctx,arg0, 720, 2) * Val(4))) + (get(ctx,arg0, 721, 2) * Val(8)));
 Val x707 = ((x706 + (get(ctx,arg0, 722, 2) * Val(16))) + (get(ctx,arg0, 723, 2) * Val(32)));
@@ -833,7 +833,7 @@ Val x709 = ((x708 + (get(ctx,arg0, 726, 2) * Val(256))) + (get(ctx,arg0, 727, 2)
 Val x710 = ((x709 + (get(ctx,arg0, 728, 2) * Val(1024))) + (get(ctx,arg0, 729, 2) * Val(2048)));
 Val x711 = ((x710 + (get(ctx,arg0, 730, 2) * Val(4096))) + (get(ctx,arg0, 731, 2) * Val(8192)));
 Val x712 = ((x711 + (get(ctx,arg0, 732, 2) * Val(16384))) + (get(ctx,arg0, 733, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x713 = (get(ctx,arg0, 734, 2) + (get(ctx,arg0, 735, 2) * Val(2)));
 Val x714 = ((x713 + (get(ctx,arg0, 736, 2) * Val(4))) + (get(ctx,arg0, 737, 2) * Val(8)));
 Val x715 = ((x714 + (get(ctx,arg0, 738, 2) * Val(16))) + (get(ctx,arg0, 739, 2) * Val(32)));
@@ -842,7 +842,7 @@ Val x717 = ((x716 + (get(ctx,arg0, 742, 2) * Val(256))) + (get(ctx,arg0, 743, 2)
 Val x718 = ((x717 + (get(ctx,arg0, 744, 2) * Val(1024))) + (get(ctx,arg0, 745, 2) * Val(2048)));
 Val x719 = ((x718 + (get(ctx,arg0, 746, 2) * Val(4096))) + (get(ctx,arg0, 747, 2) * Val(8192)));
 Val x720 = ((x719 + (get(ctx,arg0, 748, 2) * Val(16384))) + (get(ctx,arg0, 749, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x721 = (get(ctx,arg0, 718, 1) + (get(ctx,arg0, 719, 1) * Val(2)));
 Val x722 = ((x721 + (get(ctx,arg0, 720, 1) * Val(4))) + (get(ctx,arg0, 721, 1) * Val(8)));
 Val x723 = ((x722 + (get(ctx,arg0, 722, 1) * Val(16))) + (get(ctx,arg0, 723, 1) * Val(32)));
@@ -851,7 +851,7 @@ Val x725 = ((x724 + (get(ctx,arg0, 726, 1) * Val(256))) + (get(ctx,arg0, 727, 1)
 Val x726 = ((x725 + (get(ctx,arg0, 728, 1) * Val(1024))) + (get(ctx,arg0, 729, 1) * Val(2048)));
 Val x727 = ((x726 + (get(ctx,arg0, 730, 1) * Val(4096))) + (get(ctx,arg0, 731, 1) * Val(8192)));
 Val x728 = ((x727 + (get(ctx,arg0, 732, 1) * Val(16384))) + (get(ctx,arg0, 733, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x729 = (get(ctx,arg0, 734, 1) + (get(ctx,arg0, 735, 1) * Val(2)));
 Val x730 = ((x729 + (get(ctx,arg0, 736, 1) * Val(4))) + (get(ctx,arg0, 737, 1) * Val(8)));
 Val x731 = ((x730 + (get(ctx,arg0, 738, 1) * Val(16))) + (get(ctx,arg0, 739, 1) * Val(32)));
@@ -860,7 +860,7 @@ Val x733 = ((x732 + (get(ctx,arg0, 742, 1) * Val(256))) + (get(ctx,arg0, 743, 1)
 Val x734 = ((x733 + (get(ctx,arg0, 744, 1) * Val(1024))) + (get(ctx,arg0, 745, 1) * Val(2048)));
 Val x735 = ((x734 + (get(ctx,arg0, 746, 1) * Val(4096))) + (get(ctx,arg0, 747, 1) * Val(8192)));
 Val x736 = ((x735 + (get(ctx,arg0, 748, 1) * Val(16384))) + (get(ctx,arg0, 749, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x737 = (get(ctx,arg0, 750, 2) + (get(ctx,arg0, 751, 2) * Val(2)));
 Val x738 = ((x737 + (get(ctx,arg0, 752, 2) * Val(4))) + (get(ctx,arg0, 753, 2) * Val(8)));
 Val x739 = ((x738 + (get(ctx,arg0, 754, 2) * Val(16))) + (get(ctx,arg0, 755, 2) * Val(32)));
@@ -869,7 +869,7 @@ Val x741 = ((x740 + (get(ctx,arg0, 758, 2) * Val(256))) + (get(ctx,arg0, 759, 2)
 Val x742 = ((x741 + (get(ctx,arg0, 760, 2) * Val(1024))) + (get(ctx,arg0, 761, 2) * Val(2048)));
 Val x743 = ((x742 + (get(ctx,arg0, 762, 2) * Val(4096))) + (get(ctx,arg0, 763, 2) * Val(8192)));
 Val x744 = ((x743 + (get(ctx,arg0, 764, 2) * Val(16384))) + (get(ctx,arg0, 765, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x745 = (get(ctx,arg0, 766, 2) + (get(ctx,arg0, 767, 2) * Val(2)));
 Val x746 = ((x745 + (get(ctx,arg0, 768, 2) * Val(4))) + (get(ctx,arg0, 769, 2) * Val(8)));
 Val x747 = ((x746 + (get(ctx,arg0, 770, 2) * Val(16))) + (get(ctx,arg0, 771, 2) * Val(32)));
@@ -878,7 +878,7 @@ Val x749 = ((x748 + (get(ctx,arg0, 774, 2) * Val(256))) + (get(ctx,arg0, 775, 2)
 Val x750 = ((x749 + (get(ctx,arg0, 776, 2) * Val(1024))) + (get(ctx,arg0, 777, 2) * Val(2048)));
 Val x751 = ((x750 + (get(ctx,arg0, 778, 2) * Val(4096))) + (get(ctx,arg0, 779, 2) * Val(8192)));
 Val x752 = ((x751 + (get(ctx,arg0, 780, 2) * Val(16384))) + (get(ctx,arg0, 781, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x753 = (get(ctx,arg0, 750, 1) + (get(ctx,arg0, 751, 1) * Val(2)));
 Val x754 = ((x753 + (get(ctx,arg0, 752, 1) * Val(4))) + (get(ctx,arg0, 753, 1) * Val(8)));
 Val x755 = ((x754 + (get(ctx,arg0, 754, 1) * Val(16))) + (get(ctx,arg0, 755, 1) * Val(32)));
@@ -887,7 +887,7 @@ Val x757 = ((x756 + (get(ctx,arg0, 758, 1) * Val(256))) + (get(ctx,arg0, 759, 1)
 Val x758 = ((x757 + (get(ctx,arg0, 760, 1) * Val(1024))) + (get(ctx,arg0, 761, 1) * Val(2048)));
 Val x759 = ((x758 + (get(ctx,arg0, 762, 1) * Val(4096))) + (get(ctx,arg0, 763, 1) * Val(8192)));
 Val x760 = ((x759 + (get(ctx,arg0, 764, 1) * Val(16384))) + (get(ctx,arg0, 765, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x761 = (get(ctx,arg0, 766, 1) + (get(ctx,arg0, 767, 1) * Val(2)));
 Val x762 = ((x761 + (get(ctx,arg0, 768, 1) * Val(4))) + (get(ctx,arg0, 769, 1) * Val(8)));
 Val x763 = ((x762 + (get(ctx,arg0, 770, 1) * Val(16))) + (get(ctx,arg0, 771, 1) * Val(32)));
@@ -896,7 +896,7 @@ Val x765 = ((x764 + (get(ctx,arg0, 774, 1) * Val(256))) + (get(ctx,arg0, 775, 1)
 Val x766 = ((x765 + (get(ctx,arg0, 776, 1) * Val(1024))) + (get(ctx,arg0, 777, 1) * Val(2048)));
 Val x767 = ((x766 + (get(ctx,arg0, 778, 1) * Val(4096))) + (get(ctx,arg0, 779, 1) * Val(8192)));
 Val x768 = ((x767 + (get(ctx,arg0, 780, 1) * Val(16384))) + (get(ctx,arg0, 781, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:272)
+// WriteCycle(zirgen/circuit/keccak/top.zir:271)
 Val x769 = (get(ctx,arg0, 782, 2) + (get(ctx,arg0, 783, 2) * Val(2)));
 Val x770 = ((x769 + (get(ctx,arg0, 784, 2) * Val(4))) + (get(ctx,arg0, 785, 2) * Val(8)));
 Val x771 = ((x770 + (get(ctx,arg0, 786, 2) * Val(16))) + (get(ctx,arg0, 787, 2) * Val(32)));
@@ -905,7 +905,7 @@ Val x773 = ((x772 + (get(ctx,arg0, 790, 2) * Val(256))) + (get(ctx,arg0, 791, 2)
 Val x774 = ((x773 + (get(ctx,arg0, 792, 2) * Val(1024))) + (get(ctx,arg0, 793, 2) * Val(2048)));
 Val x775 = ((x774 + (get(ctx,arg0, 794, 2) * Val(4096))) + (get(ctx,arg0, 795, 2) * Val(8192)));
 Val x776 = ((x775 + (get(ctx,arg0, 796, 2) * Val(16384))) + (get(ctx,arg0, 797, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:273)
+// WriteCycle(zirgen/circuit/keccak/top.zir:272)
 Val x777 = (get(ctx,arg0, 798, 2) + (get(ctx,arg0, 799, 2) * Val(2)));
 Val x778 = ((x777 + (get(ctx,arg0, 800, 2) * Val(4))) + (get(ctx,arg0, 801, 2) * Val(8)));
 Val x779 = ((x778 + (get(ctx,arg0, 802, 2) * Val(16))) + (get(ctx,arg0, 803, 2) * Val(32)));
@@ -914,7 +914,7 @@ Val x781 = ((x780 + (get(ctx,arg0, 806, 2) * Val(256))) + (get(ctx,arg0, 807, 2)
 Val x782 = ((x781 + (get(ctx,arg0, 808, 2) * Val(1024))) + (get(ctx,arg0, 809, 2) * Val(2048)));
 Val x783 = ((x782 + (get(ctx,arg0, 810, 2) * Val(4096))) + (get(ctx,arg0, 811, 2) * Val(8192)));
 Val x784 = ((x783 + (get(ctx,arg0, 812, 2) * Val(16384))) + (get(ctx,arg0, 813, 2) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:274)
+// WriteCycle(zirgen/circuit/keccak/top.zir:273)
 Val x785 = (get(ctx,arg0, 782, 1) + (get(ctx,arg0, 783, 1) * Val(2)));
 Val x786 = ((x785 + (get(ctx,arg0, 784, 1) * Val(4))) + (get(ctx,arg0, 785, 1) * Val(8)));
 Val x787 = ((x786 + (get(ctx,arg0, 786, 1) * Val(16))) + (get(ctx,arg0, 787, 1) * Val(32)));
@@ -923,7 +923,7 @@ Val x789 = ((x788 + (get(ctx,arg0, 790, 1) * Val(256))) + (get(ctx,arg0, 791, 1)
 Val x790 = ((x789 + (get(ctx,arg0, 792, 1) * Val(1024))) + (get(ctx,arg0, 793, 1) * Val(2048)));
 Val x791 = ((x790 + (get(ctx,arg0, 794, 1) * Val(4096))) + (get(ctx,arg0, 795, 1) * Val(8192)));
 Val x792 = ((x791 + (get(ctx,arg0, 796, 1) * Val(16384))) + (get(ctx,arg0, 797, 1) * Val(32768)));
-// WriteCycle(zirgen/circuit/keccak/top.zir:275)
+// WriteCycle(zirgen/circuit/keccak/top.zir:274)
 Val x793 = (get(ctx,arg0, 798, 1) + (get(ctx,arg0, 799, 1) * Val(2)));
 Val x794 = ((x793 + (get(ctx,arg0, 800, 1) * Val(4))) + (get(ctx,arg0, 801, 1) * Val(8)));
 Val x795 = ((x794 + (get(ctx,arg0, 802, 1) * Val(16))) + (get(ctx,arg0, 803, 1) * Val(32)));
@@ -935,7 +935,7 @@ Val x800 = ((x799 + (get(ctx,arg0, 812, 1) * Val(16384))) + (get(ctx,arg0, 813, 
 // builtin NondetReg
 // Reg(<preamble>:5)
 // TopState(zirgen/circuit/keccak/top.zir:33)
-// WriteCycle(zirgen/circuit/keccak/top.zir:279)
+// WriteCycle(zirgen/circuit/keccak/top.zir:278)
 set(ctx,arg0, 14, Val(0));
 set(ctx,arg0, 15, Val(0));
 set(ctx,arg0, 16, Val(0));
