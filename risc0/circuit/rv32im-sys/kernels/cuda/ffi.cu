@@ -434,6 +434,7 @@ const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
                                              PreflightTrace* preflight,
                                              uint32_t lastCycle) {
   try {
+    CUDA_OK(cudaDeviceSynchronize());
     HostExecContext ctx(buffers, preflight, lastCycle);
     CudaStream stream;
     size_t split = preflight->tableSplitCycle;
@@ -476,6 +477,7 @@ const char* risc0_circuit_rv32im_cuda_accum(AccumBuffers* buffers,
                                             PreflightTrace* preflight,
                                             uint32_t lastCycle) {
   try {
+    CUDA_OK(cudaDeviceSynchronize());
     HostAccumContext ctx(buffers, preflight, lastCycle);
     CudaStream stream;
     auto cfg = getSimpleConfig(lastCycle);

@@ -135,6 +135,7 @@ const char* risc0_zkp_cuda_combos_prepare(FpExt* combos,
                                           const FpExt* mix) {
 
   try {
+    CUDA_OK(cudaDeviceSynchronize());
     CudaStream stream;
     combos_prepare<<<1, 1, 0, stream>>>(
         combos, coeffU, regsCount, regSizes, regComboIds, cycles, mix, checkSize, comboCount);

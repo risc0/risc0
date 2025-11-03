@@ -81,6 +81,8 @@ const char* launchKernel(void (*kernel)(ExpTypes...),
                          uint32_t shared_size,
                          ActTypes&&... args) {
   try {
+    CUDA_OK(cudaDeviceSynchronize());
+
     CudaStream stream;
     LaunchConfig cfg = getSimpleConfig(count);
     cudaLaunchConfig_t config;

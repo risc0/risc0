@@ -49,6 +49,8 @@ sppark_poseidon254_fold(alt_bn128::fr_t* d_out, const alt_bn128::fr_t* d_in, siz
   compute_grid_block_size(num_hashes, block_size, num_blocks);
 
   try {
+    CUDA_OK(cudaDeviceSynchronize());
+
     _poseidon254_fold<<<num_blocks, block_size, 0, gpu>>>(d_out, d_in, num_hashes);
 
     CUDA_OK(cudaGetLastError());
@@ -72,6 +74,8 @@ sppark_poseidon254_rows(alt_bn128::fr_t* d_out, const fr_t* d_in, size_t count, 
   compute_grid_block_size(count, block_size, num_blocks);
 
   try {
+    CUDA_OK(cudaDeviceSynchronize());
+
     _poseidon254_rows<<<num_blocks, block_size, 0, gpu>>>(d_out, d_in, count, col_size);
 
     CUDA_OK(cudaGetLastError());
@@ -89,6 +93,8 @@ extern "C" RustError::by_value sppark_prefix_product(fr4_t d_inout[/*count*/], u
   const gpu_t& gpu = select_gpu();
 
   try {
+    CUDA_OK(cudaDeviceSynchronize());
+
     prefix_op<Multiply<fr4_t>>(d_inout, count, gpu);
     gpu.sync();
   } catch (const cuda_error& e) {
@@ -104,6 +110,8 @@ supra_poly_divide(fr4_t d_inout[/*len*/], size_t len, fr4_t* remainder, const fr
   const gpu_t& gpu = select_gpu();
 
   try {
+    CUDA_OK(cudaDeviceSynchronize());
+
     div_by_x_minus_z<true>(d_inout, len, pow, gpu);
     gpu.DtoH(remainder, &d_inout[len - 1], 1);
     gpu.sync();
