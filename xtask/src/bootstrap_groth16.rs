@@ -161,7 +161,7 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
     let image_id = receipt.claim().unwrap().as_value().unwrap().pre.digest();
     let verifier_parameters_digest = Groth16ReceiptVerifierParameters::default().digest();
     let selector = hex::encode(&verifier_parameters_digest.as_bytes()[..4]);
-    let seal = hex::encode(receipt.inner.groth16().unwrap().seal.clone());
+    let seal = hex::encode(receipt.inner.groth16().unwrap().seal.as_slice());
     let image_id = hex::encode(image_id.as_bytes());
     let journal = hex::encode(receipt.journal.bytes);
     let user_id = hex::encode(Digest::from(MULTI_TEST_ID).as_bytes());
