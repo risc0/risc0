@@ -1476,10 +1476,84 @@ pub fn sys_times(_tbuf: u32) -> Result<u32, Err> {
 //     Err(Err::NoSys)
 // }
 
-pub fn sys_uname(_buf: u32) -> Result<u32, Err> {
-    let msg = b"sys_uname not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+// Linux utsname structure - each field is 65 bytes (64 chars + null terminator)
+#[repr(C)]
+struct UtsName {
+    sysname: [u8; 65],
+    nodename: [u8; 65],
+    release: [u8; 65],
+    version: [u8; 65],
+    machine: [u8; 65],
+    domainname: [u8; 65],
+}
+
+impl UtsName {
+    fn new() -> Self {
+        let mut utsname = UtsName {
+            sysname: [0; 65],
+            nodename: [0; 65],
+            release: [0; 65],
+            version: [0; 65],
+            machine: [0; 65],
+            domainname: [0; 65],
+        };
+
+        // Set sysname to "Linux"
+        let sysname = b"Linux";
+        utsname.sysname[..sysname.len()].copy_from_slice(sysname);
+
+        // Set nodename to "risc0"
+        let nodename = b"risc0";
+        utsname.nodename[..nodename.len()].copy_from_slice(nodename);
+
+        // Set release to "6.7.0" (pretend we're Linux 6.7)
+        let release = b"6.7.0";
+        utsname.release[..release.len()].copy_from_slice(release);
+
+        // Set version to a build string
+        let version = b"#1 SMP PREEMPT_DYNAMIC";
+        utsname.version[..version.len()].copy_from_slice(version);
+
+        // Set machine to "riscv32"
+        let machine = b"riscv32";
+        utsname.machine[..machine.len()].copy_from_slice(machine);
+
+        // Set domainname (usually empty or "(none)")
+        let domainname = b"(none)";
+        utsname.domainname[..domainname.len()].copy_from_slice(domainname);
+
+        utsname
+    }
+}
+
+pub fn sys_uname(buf: u32) -> Result<u32, Err> {
+    // Check for NULL pointer
+    if buf == 0 {
+        return Err(Err::Fault);
+    }
+
+    // Check if address is in user memory range
+    if buf >= 0xC0000000 {
+        kprint!("sys_uname: invalid buffer address: 0x{:x}", buf);
+        return Err(Err::Fault);
+    }
+
+    kprint!("sys_uname: buf=0x{:x}", buf);
+
+    // Create utsname structure
+    let utsname = UtsName::new();
+
+    // Copy to user space
+    unsafe {
+        let dest = buf as *mut UtsName;
+        core::ptr::write(dest, utsname);
+    }
+
+    kprint!(
+        "sys_uname: returned Linux 6.7.0 riscv32"
+    );
+
+    Ok(0)
 }
 
 pub fn sys_unshare(_flags: u32) -> Result<u32, Err> {
