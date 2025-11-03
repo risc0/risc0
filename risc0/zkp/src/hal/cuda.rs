@@ -1018,9 +1018,12 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
 #[cfg(test)]
 mod tests {
+    use serde::{Deserialize, Serialize};
     use test_log::test;
 
-    use super::{CudaHalPoseidon2, CudaHalSha256};
+    use risc0_core::field::Elem as _;
+
+    use super::{BabyBearExtElem, Buffer as _, CudaHalPoseidon2, CudaHalSha256};
     use crate::hal::testutil;
 
     #[test]
@@ -1088,6 +1091,34 @@ mod tests {
     #[gpu_guard::gpu_guard]
     fn batch_interpolate_ntt() {
         testutil::batch_interpolate_ntt(CudaHalSha256::new());
+    }
+
+    #[derive(Serialize, Deserialize)]
+    struct PolyDivideTestInput {
+        pow: BabyBearExtElem,
+        polynomial: Vec<BabyBearExtElem>,
+        expected: Vec<BabyBearExtElem>,
+    }
+
+    #[test]
+    #[gpu_guard::gpu_guard]
+    fn supra_poly_divide() {
+        for i in 0..3 {
+            let test_data_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "src/hal/cuda/poly_divide_test_data/test_data{i}.bin"
+            ));
+            println!("opening test data at {}", test_data_path.display());
+            let input: PolyDivideTestInput =
+                bincode::deserialize_from(std::fs::File::open(test_data_path).unwrap()).unwrap();
+
+            let cuda_hal = CudaHalSha256::new();
+            let poly = super::BufferImpl::copy_from("combos", &input.polynomial);
+            let remainder = cuda_hal.poly_divide(&poly, input.pow);
+            assert_eq!(remainder, BabyBearExtElem::ZERO, "i: {i}");
+            poly.view(|slice| {
+                assert_eq!(slice, input.expected);
+            });
+        }
     }
 
     #[test]

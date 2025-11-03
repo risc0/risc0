@@ -26,6 +26,7 @@ use core::{
 };
 
 use bytemuck::{CheckedBitPattern, NoUninit, Zeroable};
+use serde::{Deserialize, Serialize};
 
 use crate::field::{self, Elem as FieldElem};
 
@@ -62,7 +63,7 @@ const R2: u32 = 1172168163;
 ///
 /// The Fp class wraps all the standard arithmetic operations to make the finite
 /// field elements look basically like ordinary numbers (which they mostly are).
-#[derive(Eq, Clone, Copy, NoUninit, Zeroable)]
+#[derive(Eq, Clone, Copy, NoUninit, Zeroable, Serialize, Deserialize)]
 #[repr(transparent)]
 pub struct Elem(u32);
 
@@ -371,7 +372,7 @@ const EXT_SIZE: usize = 4;
 /// The irreducible polynomial `x^4 + 11` was chosen because `11` is
 /// the simplest choice of `BETA` for `x^4 + BETA` that makes this polynomial
 /// irreducible.
-#[derive(Eq, Clone, Copy, Zeroable)]
+#[derive(Eq, Clone, Copy, Zeroable, Serialize, Deserialize)]
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);
 

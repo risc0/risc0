@@ -7381,6 +7381,7 @@ dependencies = [
  "puffin",
  "rand 0.9.2",
  "rand_core 0.9.3",
+ "serde",
 ]
 
 [[package]]
@@ -7552,6 +7553,7 @@ name = "risc0-zkp"
 version = "5.0.0"
 dependencies = [
  "anyhow",
+ "bincode",
  "blake2",
  "borsh",
  "bytemuck",
