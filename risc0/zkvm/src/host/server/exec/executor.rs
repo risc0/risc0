@@ -109,10 +109,6 @@ impl<'a> ExecutorImpl<'a> {
         let binary = ProgramBinary::decode(elf)?;
         check_program_version(&binary.header)?;
 
-        // TODO(victor/perf): This function immediatly computes the Merkle tree, although we do not
-        // actually need it on the execution thread. This could instead create a WorkingImage and
-        // pipe that through to the hashing thread that runs as a sidecar to execution. Doing so
-        // may save ~270ms of executi time based on my profiling.
         let image = binary.to_image()?;
 
         let profiler = if env.pprof_out.is_some() {
@@ -382,10 +378,6 @@ impl CircuitSyscall for ExecutorImpl<'_> {
 
         let mut ctx = ContextAdapter {
             ctx,
-            // TODO(victor/perf): Its possible this clone is showing up on the trace. It is part
-            // of the `ecall_read` implementation, which is taking ~5% of execution time, so this
-            // can be having an at-most 5% impact on performance though. Still may be worth chasing
-            // down.
             syscall_table: self.syscall_table.clone(),
         };
 

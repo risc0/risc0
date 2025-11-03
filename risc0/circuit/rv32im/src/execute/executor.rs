@@ -149,13 +149,6 @@ fn create_segments(
         let post_digest = existing_image.image_id();
 
         let segment = Segment {
-            // TODO(victor/perf): Can we get away with sending a WorkingImage (i.e. without the
-            // hashes) here instead? Without the uncles, it would not be possible to reconstruct
-            // the claim. But maybe it would be cheaper if we could compute _just_ the uncles, and
-            // avoid hashing pages that are included in the message. We'd also need to drop the
-            // claim field from Segment, as it includes the root digests. It would no longer be
-            // possible to compute the claim without re-executing the segment, to get the final
-            // memory state and hash it.
             partial_image,
             claim: Rv32imV2Claim {
                 pre_state: pre_digest,
