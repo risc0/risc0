@@ -20,18 +20,18 @@ namespace risc0::circuit::keccak::cpu {
 void step_Top_6(ExecContext& ctx,MutableBuf arg0)   {
 // builtin NondetReg
 // Reg(<preamble>:5)
-// ControlState(zirgen/circuit/keccak/top.zir:296)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:342)
+// ControlState(zirgen/circuit/keccak/top.zir:295)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:341)
 set(ctx,arg0, 11, Val(9));
-// ControlState(zirgen/circuit/keccak/top.zir:297)
+// ControlState(zirgen/circuit/keccak/top.zir:296)
 set(ctx,arg0, 12, Val(1));
-// ControlState(zirgen/circuit/keccak/top.zir:298)
+// ControlState(zirgen/circuit/keccak/top.zir:297)
 set(ctx,arg0, 13, Val(0));
 return ;
 }
 void step_Top_22(ExecContext& ctx,MutableBuf arg0, GlobalBuf arg1)   {
 // TopState(zirgen/circuit/keccak/top.zir:40)
-// Top(zirgen/circuit/keccak/top.zir:378)
+// Top(zirgen/circuit/keccak/top.zir:377)
 Val x2 = get(ctx,arg0, 930, 1);
 Val x3 = get(ctx,arg0, 931, 1);
 Val x4 = get(ctx,arg0, 932, 1);
@@ -40,8 +40,8 @@ Val x6 = get(ctx,arg0, 934, 1);
 Val x7 = get(ctx,arg0, 935, 1);
 Val x8 = get(ctx,arg0, 936, 1);
 Val x9 = get(ctx,arg0, 937, 1);
-// DigestReg(zirgen/circuit/keccak/top.zir:284)
-// ShutdownCycle(zirgen/circuit/keccak/top.zir:289)
+// DigestReg(zirgen/circuit/keccak/top.zir:283)
+// ShutdownCycle(zirgen/circuit/keccak/top.zir:288)
 setGlobal(ctx,arg1, 0, x2);
 setGlobal(ctx,arg1, 1, x3);
 setGlobal(ctx,arg1, 2, x4);
@@ -51,7 +51,7 @@ setGlobal(ctx,arg1, 5, x7);
 setGlobal(ctx,arg1, 6, x8);
 setGlobal(ctx,arg1, 7, x9);
 // TopState(zirgen/circuit/keccak/top.zir:33)
-// ShutdownCycle(zirgen/circuit/keccak/top.zir:292)
+// ShutdownCycle(zirgen/circuit/keccak/top.zir:291)
 set(ctx,arg0, 14, Val(0));
 set(ctx,arg0, 15, Val(0));
 set(ctx,arg0, 16, Val(0));
