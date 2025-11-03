@@ -3954,6 +3954,7 @@ dependencies = [
  "nvtx",
  "puffin",
  "rand_core 0.9.3",
+ "serde",
 ]
 
 [[package]]

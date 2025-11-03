@@ -1135,6 +1135,7 @@ version = "5.0.0"
 dependencies = [
  "bytemuck",
  "rand_core 0.9.3",
+ "serde",
 ]
 
 [[package]]
