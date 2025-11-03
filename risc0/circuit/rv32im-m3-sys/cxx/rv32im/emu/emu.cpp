@@ -29,6 +29,7 @@ namespace risc0::rv32im {
 
 namespace {
 
+//#define DLOG(...) if (debug && mode != MODE_MACHINE) LOG(0, __VA_ARGS__)
 #define DLOG(...) LOG(2, __VA_ARGS__)
 // #define DLOG(...) if (mode != MODE_MACHINE) LOG(2, __VA_ARGS__)
 // #define DLOG(...) /**/
@@ -119,33 +120,106 @@ struct Emulator {
     (*page)[wordNum].cycle = record.prevCycle;
   }
 
-  inline uint32_t peekVirtMemory(uint32_t wordAddr) {
-    return peekPhysMemory(wordAddr); // TODO
+  std::pair<bool, uint32_t> translatePage(uint32_t vPage, uint32_t aType) {
+    if (mode == MODE_MACHINE) { return { true, vPage }; } 
+    uint32_t vinfo = peekPhysMemory(CSR_WORD(MVINFO));
+    if ((vinfo & 0x80000000) == 0) { return { true, vPage }; }
+    uint32_t a = vinfo << 12;
+    uint32_t smode = mode == MODE_SUPERVISOR;
+    uint32_t sum = (vinfo >> 29) & 1;
+    uint32_t mxr = (vinfo >> 30) & 1;
+    uint32_t i, xwr, pte, pteAddr;
+    for (i = 2; i-- > 0;) {
+      pteAddr = a + ((vPage >> (10 * i)) & 0x3ff)*4;
+      if (pteAddr >= FIRMWARE_START_ADDR) { return { false, 0 }; }
+      pte = peekPhysMemory(pteAddr/4);
+      if ((pte & 1) == 0) { return { false, 0 }; }
+      xwr = (pte >> 1) & 7;
+      if (xwr == 2 || xwr == 6) { return { false, 0 }; }
+      a = (pte << 2) & 0xfffff000;
+      if (xwr != 0) break;
+    }
+    if (!xwr) { return { false, 0 }; }
+    if (i == 1) {
+      if (((pte >> 10) & 0x3ff) != 0) { return { false, 0 }; }
+      a |= ((vPage & 0x3ff) << 12);
+    }
+    uint32_t u = (pte >> 4) & 1;
+    uint32_t x = (pte >> 3) & 1;
+    uint32_t w = (pte >> 2) & 1;
+    uint32_t r = (pte >> 1) & 1;
+    if (mxr && x) { r = 1; }
+    if (!u && !smode) { return { false, 0 }; }
+    if (u && !sum && smode) { return { false, 0 }; }
+    if ((aType == ACCESS_FETCH && !x) ||
+        (aType == ACCESS_LOAD && !r) ||
+        (aType == ACCESS_STORE && !w)) {
+      return { false, 0 };
+    }
+    pte |= (1 << 6);  // Set A bit always
+    if (aType == ACCESS_STORE) { pte |= (1 << 7); } // Set D if write
+    //AT(pteAddr)[0] = pte;
+    //LOG(0, "vPage=" << HexWord{vPage} << ", pPage=" << HexWord{(a >> 12)} << ", key=" << key);
+    return { true, a >> 12 };
   }
 
-  inline uint32_t translateAddress(VirtAddrWitness& record, uint32_t vWordAddr) {
+  std::pair<bool, uint32_t> computePhysPage(uint32_t vPage, uint32_t aType) {
+    uint32_t key = vPage | (mode << 30) | aType << 28;
+    auto it = virtualMem.find(key);
+    if (it != virtualMem.end()) { return { true, it->second }; }
+    auto [ok, pPage] = translatePage(vPage, aType);
+    if (!ok) { return { false, 0 }; }
+    virtualMem[key] = pPage;
+    return { true, pPage };
+  }
+
+  inline std::pair<bool, uint32_t> translateAddress(VirtAddrWitness& record, uint32_t vWordAddr, uint32_t accessMode) {
     record.vpage = vWordAddr >> VPAGE_SIZE_WORDS_PO2;
-    record.ppage = record.vpage; // TODO: Translate
+    auto [ok, ppage] = computePhysPage(record.vpage, accessMode);
+    if (!ok) { return { false, 0 }; }
+    record.ppage = ppage;
     record.wordOffset = vWordAddr & VPAGE_MASK_WORDS;
-    return (record.ppage << VPAGE_SIZE_WORDS_PO2) | record.wordOffset;
+    uint32_t pWordAddr = (record.ppage << VPAGE_SIZE_WORDS_PO2) | record.wordOffset;
+    return { true, pWordAddr };
   }
 
-  inline uint32_t readVirtMemory(VirtMemReadWitness& record, uint32_t vWordAddr) {
-    uint32_t pWordAddr = translateAddress(record.addr, vWordAddr);
+  inline std::pair<bool, uint32_t> peekVirtMemory(uint32_t vWordAddr, uint32_t accessMode) {
+    uint32_t vpage = vWordAddr >> VPAGE_SIZE_WORDS_PO2;
+    auto [ok, ppage] = computePhysPage(vpage, accessMode);
+    if (!ok) { return { false, 0 }; }
+    uint32_t wordOffset = vWordAddr & VPAGE_MASK_WORDS;
+    uint32_t pWordAddr = (ppage << VPAGE_SIZE_WORDS_PO2) | wordOffset; 
+    return { true, peekPhysMemory(pWordAddr) };
+  }
+
+  inline std::pair<bool, uint32_t> fetchVirtMemory(VirtMemReadWitness& record, uint32_t vWordAddr) {
+    auto [ok, pWordAddr] = translateAddress(record.addr, vWordAddr, ACCESS_FETCH);
+    if (!ok) { return { false, 0 }; }
     PhysMemReadWitness phys;
     readPhysMemory(phys, pWordAddr);
     record.prevCycle = phys.prevCycle;
     record.value = phys.value;
-    return record.value;
+    return { true, record.value };
   }
 
-  inline void writeVirtMemory(VirtMemWriteWitness& record, uint32_t vWordAddr, uint32_t value) {
-    uint32_t pWordAddr = translateAddress(record.addr, vWordAddr);
+  inline std::pair<bool, uint32_t> readVirtMemory(VirtMemReadWitness& record, uint32_t vWordAddr) {
+    auto [ok, pWordAddr] = translateAddress(record.addr, vWordAddr, ACCESS_LOAD);
+    if (!ok) { return { false, 0 }; }
+    PhysMemReadWitness phys;
+    readPhysMemory(phys, pWordAddr);
+    record.prevCycle = phys.prevCycle;
+    record.value = phys.value;
+    return { true, record.value };
+  }
+
+  inline bool writeVirtMemory(VirtMemWriteWitness& record, uint32_t vWordAddr, uint32_t value) {
+    auto [ok, pWordAddr] = translateAddress(record.addr, vWordAddr, ACCESS_STORE);
     PhysMemWriteWitness phys;
     writePhysMemory(phys, pWordAddr, value);
     record.prevCycle = phys.prevCycle;
     record.prevValue = phys.prevValue;
     record.value = phys.value;
+    return true;
   }
 
   inline void undoVirtMemory(VirtMemReadWitness& record) {
@@ -297,32 +371,38 @@ struct Emulator {
   }
 
   void doResume() {
-    auto& resumeWit = trace.makeInstResume();
-    v2Compat = 1 - readPhysMemory(resumeWit.v2Compat, CSR_WORD(MNOV2COMPAT));
+    auto& wit = trace.makeInstResume();
+    v2Compat = 1 - readPhysMemory(wit.v2Compat, CSR_WORD(MNOV2COMPAT));
     trace.getGlobals().v2Compat = v2Compat;
     if (v2Compat) {
-      pc = readPhysMemory(resumeWit.pc, V2_COMPAT_SPC);
-      setMode(readPhysMemory(resumeWit.mode, V2_COMPAT_SMODE) ? MODE_MACHINE : MODE_USER);
-      writePhysMemory(resumeWit.version, V2_COMPAT_VERSION, RV32IM_CIRCUIT_VERSION);
+      pc = readPhysMemory(wit.pc, V2_COMPAT_SPC);
+      setMode(readPhysMemory(wit.mode, V2_COMPAT_SMODE) ? MODE_MACHINE : MODE_USER);
+      writePhysMemory(wit.version, V2_COMPAT_VERSION, RV32IM_CIRCUIT_VERSION);
     } else {
-      pc = readPhysMemory(resumeWit.pc, CSR_WORD(MSPC));
-      setMode(readPhysMemory(resumeWit.mode, CSR_WORD(MSMODE)));
-      writePhysMemory(resumeWit.version, CSR_WORD(MVERSION), RV32IM_CIRCUIT_VERSION);
+      pc = readPhysMemory(wit.pc, CSR_WORD(MSPC));
+      setMode(readPhysMemory(wit.mode, CSR_WORD(MSMODE)));
+      writePhysMemory(wit.version, CSR_WORD(MVERSION), RV32IM_CIRCUIT_VERSION);
     }
+    writePhysMemory(wit.writeCycle, CSR_WORD(MSCYCLE), curCycle);
     curCycle++;
   }
 
   void doSuspend() {
-    auto& suspendWit = trace.makeInstSuspend();
-    suspendWit.cycle = curCycle;
-    suspendWit.iCacheCycle = iCacheCycle;
+    auto& wit = trace.makeInstSuspend();
+    wit.cycle = curCycle;
+    wit.iCacheCycle = iCacheCycle;
     if (v2Compat) {
-      writePhysMemory(suspendWit.pc, V2_COMPAT_SPC, pc);
-      writePhysMemory(suspendWit.mode, V2_COMPAT_SMODE, mode == MODE_MACHINE);
+      writePhysMemory(wit.pc, V2_COMPAT_SPC, pc);
+      writePhysMemory(wit.mode, V2_COMPAT_SMODE, mode == MODE_MACHINE);
     } else {
-      writePhysMemory(suspendWit.pc, CSR_WORD(MSPC), pc);
-      writePhysMemory(suspendWit.mode, CSR_WORD(MSMODE), mode);
+      writePhysMemory(wit.pc, CSR_WORD(MSPC), pc);
+      writePhysMemory(wit.mode, CSR_WORD(MSMODE), mode);
     }
+    uint32_t oldCycle = readPhysMemory(wit.readCycle, CSR_WORD(MSCYCLE));
+    uint64_t time = peekPhysMemory(CSR_WORD(MTIME)) | (uint64_t(peekPhysMemory(CSR_WORD(MTIMEH))) << 32);
+    time += wit.cycle - oldCycle;
+    writePhysMemory(wit.updateTime, CSR_WORD(MTIME), time & 0xffffffff);
+    writePhysMemory(wit.updateTime, CSR_WORD(MTIMEH), time >> 32);
     curCycle++;
   }
 
@@ -346,6 +426,11 @@ struct Emulator {
     }
     newPc = readPhysMemory(wit.readDispatch, dispatchWord);
     setMode(MODE_MACHINE);
+    uint32_t oldCycle = readPhysMemory(wit.readCycle, CSR_WORD(MSCYCLE));
+    uint64_t time = peekPhysMemory(CSR_WORD(MTIME)) | (uint64_t(peekPhysMemory(CSR_WORD(MTIMEH))) << 32);
+    time += wit.cycle - oldCycle;
+    writePhysMemory(wit.updateTime, CSR_WORD(MTIME), time & 0xffffffff);
+    writePhysMemory(wit.updateTime, CSR_WORD(MTIMEH), time >> 32);
   }
 
   void fatal(const std::string& reason) { throw std::runtime_error("Fatal Error: " + reason); }
@@ -397,7 +482,7 @@ struct Emulator {
     constexpr Option optInner = Option(opt).popRet<InstKind>();
     auto kind = optInner.peek<LoadKind>();
     // Check alignment + trap if reqired
-    uint32_t peekAddr = peekReg(dinst->rs1) + dinst->imm;
+    uint32_t addr = peekReg(dinst->rs1) + dinst->imm;
     uint32_t alignmentReq = 1;
     switch (kind) {
     case LOAD_LH:
@@ -410,19 +495,25 @@ struct Emulator {
     default:
       break;
     }
-    if (peekAddr % alignmentReq != 0) {
+    if (addr % alignmentReq != 0) {
       trap("Alignement error on load");
       return;
     }
+    // Preattempt virtual read
+    VirtMemReadWitness readWit;
+    auto [ok, in] = readVirtMemory(readWit, addr / BYTES_PER_WORD);
+    if (!ok) {
+      trap("VM error on read");
+      return;
+    }
     auto& wit = trace.makeInstLoad();
+    wit.mem = readWit;
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
-    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    readReg(wit.rs1, dinst->rs1);
     wit.rs2 = dinst->rs2;
     wit.imm = dinst->imm;
-    uint32_t addr = rs1Val + wit.imm;
     uint32_t shift = BITS_PER_BYTE * (addr % BYTES_PER_WORD);
-    uint32_t in = readVirtMemory(wit.mem, addr / BYTES_PER_WORD);
     wit.options = opt;
     uint32_t out;
     switch (kind) {
@@ -443,7 +534,7 @@ struct Emulator {
       break;
     }
     writeReg(wit.rd, dinst->rd, out);
-    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{rs1Val});
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{wit.rs1.value});
     DLOG("  IMM = " << HexWord{dinst->imm});
     DLOG("  RD = " << uint32_t(dinst->rd) << ", val = " << HexWord{out});
   }
@@ -478,7 +569,8 @@ struct Emulator {
     wit.options = opt;
     uint32_t addr = rs1Val + wit.imm;
     uint32_t shift = BITS_PER_BYTE * (addr % BYTES_PER_WORD);
-    uint32_t in = peekVirtMemory(addr / BYTES_PER_WORD);
+    // TODO: Check ok
+    auto [ok, in] = peekVirtMemory(addr / BYTES_PER_WORD, ACCESS_STORE);
     uint32_t out;
     switch (optInner.peek<StoreKind>()) {
     case STORE_SB:
@@ -491,7 +583,10 @@ struct Emulator {
       out = data;
       break;
     }
-    writeVirtMemory(wit.mem, addr / BYTES_PER_WORD, out);
+    if (!writeVirtMemory(wit.mem, addr / BYTES_PER_WORD, out)) {
+      // TODO: fix this
+      fatal("Write failed");
+    }
     DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{rs1Val});
     DLOG("  RS1 = " << uint32_t(dinst->rs2) << ", val = " << HexWord{data});
     DLOG("  IMM = " << HexWord{dinst->imm});
@@ -610,9 +705,20 @@ struct Emulator {
     wit.fetch = dinst->fetch;
     uint32_t add = v2Compat ? 4 : 0;
     uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
-    newPc = readPhysMemory(wit.MEPC, mepcWord) + add;
-    uint32_t newMode = readPhysMemory(wit.MEMODE, CSR_WORD(MEMODE));
+    newPc = readPhysMemory(wit.readPc, mepcWord) + add;
+    uint32_t newMode = readPhysMemory(wit.readMode, CSR_WORD(MEMODE));
+    writePhysMemory(wit.updateClearCache, CSR_WORD(MCLEARCACHE), 0);
+    if (wit.updateClearCache.prevValue) {
+      //LOG(0, "Clearing caches");
+      instCache.clear();
+      virtualMem.clear();
+      iCacheCycle = curCycle;
+    }
+    writePhysMemory(wit.writeCycle, CSR_WORD(MSCYCLE), wit.cycle);
     DLOG("  NEW PC = " << HexWord{newPc});
+    if (peekPhysMemory(CSR_WORD(MDEBUG))) {
+      debug = true;
+    }
     setMode(newMode);
   }
 
@@ -823,28 +929,44 @@ struct Emulator {
     }
   }
 
-  void fetchAndDecode(DecodeWitness* wit) {
+  bool fetchAndDecode(DecodeWitness* wit) {
     // We always read the memory address at pc/4
-    uint32_t l0 = readVirtMemory(wit->load0, pc / 4);
+    auto [ok, l0] = fetchVirtMemory(wit->load0, pc / 4);
+    if (!ok) { return false; }
     // If pc == 2 (mod 4), shift to lower value
     uint32_t inst = (pc % 4 == 2) ? l0 >> 16 : l0;
     bool compressed = false;
+    uint32_t longInst;
     // Check if low bits are 11 (normal) or anything else (compressed)
     if ((inst & 3) == 3) {
       // if needed, add in second half to inst
       if (pc % 4 == 2) {
         // For unaligned addresses, always read next address
-        uint32_t l1 = readVirtMemory(wit->load1, pc / 4 + 1);
+        auto [ok2, l1] = fetchVirtMemory(wit->load1, pc / 4 + 1);
+        if (!ok2) {
+          undoVirtMemory(wit->load0);
+          return false;
+        }
         inst |= l1 << 16;
       } else {
         // For aligned addresses, read from a `null` word (and ignore the value)
+        uint32_t curMode = mode;
+        mode = MODE_MACHINE;
+        // Cannot fail
         readVirtMemory(wit->load1, COMPRESSED_INST_LOOKUP_WORD);
+        mode = curMode;
       }
+      longInst = inst;
     } else {
       // Remove any high bits, and then do a lookup to convert
       inst &= 0xffff;
       compressed = true;
-      inst = readVirtMemory(wit->load1, COMPRESSED_INST_LOOKUP_WORD + inst);
+      uint32_t curMode = mode;
+      mode = MODE_MACHINE;
+      // Cannot fail
+      auto [ok2, inst2] = readVirtMemory(wit->load1, COMPRESSED_INST_LOOKUP_WORD + inst);
+      mode = curMode;
+      longInst = inst2;
     }
     wit->fetch.iCacheCycle = iCacheCycle;
     wit->fetch.loadCycle = curCycle;
@@ -853,7 +975,7 @@ struct Emulator {
     wit->fetch.nextPc = pc + (compressed ? 2 : 4);
     wit->inst = inst;
     wit->count = 1;
-    auto decoded = DecodedInst(wit->inst);
+    auto decoded = DecodedInst(longInst);
     wit->opcode = uint32_t(getOpcode(decoded));
     wit->rd = decoded.rd;
     wit->rs1 = decoded.rs1;
@@ -868,6 +990,22 @@ struct Emulator {
     default:
       wit->imm = 0;
     }
+    return true;
+  }
+
+  void makeFetchFailedTrap() {
+    DecodeWitness*& decodeWit = instCache[{MACHINE_REGS_ADDR,  mode}];
+    if (!decodeWit) {
+      decodeWit = &trace.makeDecode();
+      uint32_t oldMode = mode;
+      mode = MODE_MACHINE;
+      fetchAndDecode(decodeWit);
+      mode = oldMode;
+    }
+    dinst = decodeWit;
+    trap("Fetch Failed");
+    curCycle++;
+    pc = newPc;
   }
 
   bool run(size_t rowCount) {
@@ -876,10 +1014,15 @@ struct Emulator {
                             ceilDiv(curCycle, 24) + // How many rows we need for cycle table
                             memory.getPagingCost() <
                         rowCount) {
-      DecodeWitness*& decodeWit = (mode == MODE_MACHINE) ? mInstCache[pc] : usInstCache[pc];
+      DecodeWitness*& decodeWit = instCache[{pc, mode}];
       if (!decodeWit) {
+        DecodeWitness maybeSave;
+        if (!fetchAndDecode(&maybeSave)) {
+          makeFetchFailedTrap();
+          continue;
+        }
         decodeWit = &trace.makeDecode();
-        fetchAndDecode(decodeWit);
+        *decodeWit = maybeSave;
       } else {
         decodeWit->count++;
       }
@@ -942,8 +1085,7 @@ struct Emulator {
   ankerl::unordered_dense::map<uint32_t, uint32_t> virtualMem;
   std::vector<PageDetails*> pages;
   PageDetails* regPage;
-  ankerl::unordered_dense::map<uint32_t, DecodeWitness*> mInstCache;
-  ankerl::unordered_dense::map<uint32_t, DecodeWitness*> usInstCache;
+  ankerl::unordered_dense::map<std::pair<uint32_t, uint32_t>, DecodeWitness*> instCache;
 
   // Machine state
   bool v2Compat = true;
@@ -955,6 +1097,7 @@ struct Emulator {
   uint32_t pc = 0;
   uint32_t newPc = 0;
   DecodeWitness* dinst;
+  bool debug = false;
 };
 
 } // namespace

@@ -101,18 +101,22 @@ template <typename C> struct InstMretBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  PhysMemReadBlock<C> readMEPC;
-  PhysMemReadBlock<C> readMEMODE;
+  PhysMemReadBlock<C> readPc;
+  PhysMemReadBlock<C> readMode;
   Reg<C> toAdd;
   AddU32<C> sumPc;
+  PhysMemWriteBlock<C> updateClearCache;
+  Reg<C> iCacheCycleOut;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, cycle);
     T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readMEPC, cycle.get());
-    T::apply(ctx, readMEMODE, cycle.get());
+    T::apply(ctx, readPc, cycle.get());
+    T::apply(ctx, readMode, cycle.get());
     T::apply(ctx, toAdd);
-    T::apply(ctx, sumPc, readMEPC.data.get(), ValU32<C>(toAdd.get(), 0));
+    T::apply(ctx, sumPc, readPc.data.get(), ValU32<C>(toAdd.get(), 0));
+    T::apply(ctx, updateClearCache, cycle.get());
+    T::apply(ctx, iCacheCycleOut);
   }
 
   FDEV void set(CTX, InstMretWitness wit) DEV;

@@ -22,6 +22,7 @@ struct InstResumeWitness {
   PhysMemReadWitness pc;
   PhysMemReadWitness mode;
   PhysMemWriteWitness version;
+  PhysMemWriteWitness writeCycle;
 };
 
 struct InstSuspendWitness {
@@ -29,6 +30,9 @@ struct InstSuspendWitness {
   uint32_t iCacheCycle;
   PhysMemWriteWitness pc;
   PhysMemWriteWitness mode;
+  PhysMemReadWitness readCycle;
+  PhysMemWriteWitness updateTime;
+  PhysMemWriteWitness updateTimeH;
 };
 
 struct InstTrapWitness {
@@ -39,11 +43,16 @@ struct InstTrapWitness {
   PhysMemWriteWitness writeMode;
   PhysMemWriteWitness writeVal;
   PhysMemReadWitness readDispatch;
+  PhysMemReadWitness readCycle;
+  PhysMemWriteWitness updateTime;
+  PhysMemWriteWitness updateTimeH;
 };
 
 struct InstMretWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  PhysMemReadWitness MEPC;
-  PhysMemReadWitness MEMODE;
+  PhysMemReadWitness readPc;
+  PhysMemReadWitness readMode;
+  PhysMemWriteWitness updateClearCache;
+  PhysMemWriteWitness writeCycle;
 };

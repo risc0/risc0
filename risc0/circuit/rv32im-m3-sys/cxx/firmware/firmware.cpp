@@ -98,14 +98,7 @@ struct LogHelper {
   die(); \
 } while(0)
 
-#if 0
-
-
-bool forwardInvalidInst(uint32_t inst) {
-  return supervisorTrap(MCAUSE_ILLEGAL_INSTRUCTION, inst);
-} 
-
-
+/*
 void vmTrap(uint32_t cause, uint32_t vaddr) {
   CSR(SCAUSE) = cause;
   CSR(STVAL) = vaddr;
@@ -125,30 +118,7 @@ void vmTrap(uint32_t cause, uint32_t vaddr) {
   CSR(MEPC) = CSR(STVEC);
   return;
 }
-
-
-uint32_t handleSystemReset() {
-  uint32_t func_id = UREG(A6);
-  if (func_id != 0) {
-    error("Invalid system reset function: ", func_id);
-  }
-  terminate(UREG(A0));
-  return 0;
-}
-
-uint32_t handleTimer() {
-  uint32_t func_id = UREG(A6);
-  if (func_id != 0) {
-    error("Invalid timer function: ", func_id);
-  }
-  //info("Setting timer to: ", UREG(A1), UREG(A0));
-  CSR(MTIMER) = UREG(A0);
-  CSR(MTIMERH) = UREG(A1);
-  return 0;
-}
-
-
-#endif 
+*/
 
 uint32_t causeAccessFault(uint32_t aType) {
   switch(aType) {
@@ -221,6 +191,8 @@ uint32_t translate(uint32_t& addr, uint32_t aType) {
 void supervisorTrap(uint32_t cause) {
   // Setup to return to supervisor mode
   CSR(SCAUSE) = cause;
+  //LOG(0, "Setting SCAUSE = " << CSR(SCAUSE));
+  //LOG(0, "STVAL = " << CSR(STVAL));
   uint32_t cur = CSR(SSTATUS);
   // Extract SIE bit
   uint32_t sie = (cur >> 1) & 1;
@@ -240,8 +212,8 @@ void supervisorTrap(uint32_t cause) {
 }
 
 // Helper to save some redundant work
-uint32_t forwardInvalid(uint32_t inst) {
-  CSR(STVAL) = inst;
+uint32_t forwardInvalid() {
+  CSR(STVAL) = CSR(MTVAL);
   return MCAUSE_ILLEGAL_INSTRUCTION;
 }
 
@@ -258,20 +230,58 @@ uint32_t expandCsrVal(uint32_t reg, uint32_t isImm) {
   }
 }
 
+void invalidateCache() {
+  CSR(MCLEARCACHE) = 1;
+}
+
+void recomputeVmInfo() {
+  uint32_t orig = CSR(MVINFO);
+  uint32_t cur = (CSR(SATP) & 0x803fffff) |
+    ((CSR(SSTATUS) & 0x000c0000) << 11);
+  if (orig != cur) {
+    LOG(0, "NEW VINFO: " << cur);
+    CSR(MVINFO) = cur;
+    invalidateCache();
+  }
+}
+
+uint32_t doSRET() {
+  // LOG(0, "Doing SRET");
+  uint32_t cur = CSR(SSTATUS);
+  // Extract SPIE bit
+  uint32_t spie = (cur >> 5) & 1;
+  // Extract SPP bit
+  uint32_t newMode = (cur >> 8) & 1;
+  // Clear SPIE, SIE, and SPP)
+  cur &= 0xfffffedd;
+  // Make SIE = SPIE
+  cur |= (spie << 1);
+  // Set SPIE
+  cur |= (1 << 5);
+  // Update SSTATUS
+  CSR(SSTATUS) = cur;
+  CSR(MEPC) = CSR(SEPC);
+  CSR(MEMODE) = newMode;
+  return MCAUSE_SRET;
+}
+
 // Handle system instructions
 uint32_t handleInstSystem(uint32_t inst) {
   if (inst == 0x10500073) {
     // TODO: this is wait for interrupt, maybe actual skip ahead?
     return MCAUSE_NONE;  // No-op
   }
+  if (inst == 0x10200073) {
+    return doSRET();
+  }
   uint32_t csrt = (inst >> 12) & 3;
   if (csrt == 0) {
     if ((inst & (~0x01ff8000)) == 0x12000073) {
       // SFENCE.VMA
-      // TODO: make this clear cache
+      invalidateCache();
       return MCAUSE_NONE;  // No-op
     }
-    return forwardInvalid(inst);
+    return forwardInvalid();
   }
   // Bascially, a CSR intruciton, deocde
   uint32_t rd = (inst >> 7) & 0x1f;
@@ -279,7 +289,30 @@ uint32_t handleInstSystem(uint32_t inst) {
   uint32_t rs1 = (inst >> 15) & 0x1f;
   uint32_t csr = (inst >> 20);
   uint32_t newVal = expandCsrVal(rs1, isImm);;
-  // TODO: check permissions
+  // Check permissions
+  if (csrt == 1 || rs1 != 0) {
+    // We are doing a write, if R0 induce trap
+    if ((inst & 0xc0000000) == 0xc0000000) {
+      return forwardInvalid();
+    }
+  }
+  uint32_t allowedMode = (inst >> 28) & 3;
+  if (allowedMode > CSR(MEMODE)) {
+    return forwardInvalid();
+  }
+  // Quickly fix time if needed
+  switch(csr) {
+    case CSR_CYCLE:
+    case CSR_TIME:
+    case CSR_INSTRET:
+      AT(CSR_BASE_ADDR)[csr] = CSR(MTIME);
+      break;
+    case CSR_CYCLEH:
+    case CSR_TIMEH:
+    case CSR_INSTRETH:
+      AT(CSR_BASE_ADDR)[csr] = CSR(MTIMEH);
+      break;
+  }
   // Load current value
   uint32_t curVal = AT(CSR_BASE_ADDR)[csr];
   if (rd != 0) {
@@ -293,7 +326,7 @@ uint32_t handleInstSystem(uint32_t inst) {
     case 2: curVal |= newVal; break;
     case 3: curVal &= newVal; break;
     default:
-      return forwardInvalid(inst);
+      return forwardInvalid();
   }
   // Store new value
   AT(CSR_BASE_ADDR)[csr] = curVal;
@@ -302,23 +335,25 @@ uint32_t handleInstSystem(uint32_t inst) {
   switch(csr) {
     // Special CSR handling goes here
     case CSR_SATP:
-      LOG(0, "NEW SATP: " << curVal);
+    case CSR_SSTATUS:
+      recomputeVmInfo();
     default:
       break;
   }
   return MCAUSE_NONE;
 }
+
 // Handle atomic instructions
 uint32_t handleInstAtomic(uint32_t inst) {
   // Extract parts of the instruction
   uint32_t rs1 = (inst >> 15) & 0x1f;
   uint32_t rs2 = (inst >> 20) & 0x1f;
   uint32_t rd = (inst >> 7) & 0x1f;
-  uint32_t func3 = (inst >> 12) & 0x7;
+  uint32_t func3 =  (inst >> 12) & 0x7;
   uint32_t op = (inst >> 27);
   // If 64-bit, fail
   if (func3 != 2) {
-    return forwardInvalid(inst);
+    return forwardInvalid();
   }
   // Get the address
   uint32_t addr = AT(USER_REGS_ADDR)[rs1];
@@ -344,7 +379,7 @@ uint32_t handleInstAtomic(uint32_t inst) {
   // Process instruction
   if (op == 0b00010) { // LR
     if (rs2 != 0) {
-      return forwardInvalid(inst);
+      return forwardInvalid();
     }
     active = true;
     lastAddr = addr;
@@ -389,9 +424,63 @@ uint32_t handleInstAtomic(uint32_t inst) {
       val = (val < in) ? in : val; break;
     default:
       // Invalid instruction!
-      return forwardInvalid(inst);
+      return forwardInvalid();
   }
   AT(addr)[0] = val;
+  return MCAUSE_NONE;
+}
+
+uint32_t handleMiscMemory(uint32_t inst) {
+  uint32_t func3 =  (inst >> 12) & 0x7;
+  switch(func3) {
+    case 0: // Normal fence
+      return MCAUSE_NONE;
+    case 1: // fence.i
+      invalidateCache();
+      return MCAUSE_NONE;
+  }
+  return forwardInvalid();
+}
+
+uint32_t handleLoad(uint32_t inst) {
+  uint32_t func3 =  (inst >> 12) & 0x7;
+  if (func3 == 3 || func3 > 5) {
+    // Not a valid load subtype
+    return forwardInvalid();
+  }
+  uint32_t rs1 = (inst >> 15) & 0x1f;
+  uint32_t immI = ((inst >> 31) * 0xfffff000) + (inst >> 20);
+  uint32_t addr = AT(USER_REGS_ADDR)[rs1] + immI;
+  // LOG(0, "func3 = " << func3 << ", addr = " << addr);
+  // If unaligned, forward as invalid alignment
+  switch(func3) {
+    case 1: // LH
+    case 5: // LHU
+      if (addr % 2 != 0) {
+        LOG(0, "MISALIGNED");
+        CSR(STVAL) = addr;
+        //CSR(MDEBUG) = true;
+        return MCAUSE_LOAD_ADDRESS_MISALIGNED;
+      }
+      break;
+    case 2:
+      if (addr % 4 != 0) {
+        LOG(0, "MISALIGNED");
+        CSR(STVAL) = addr;
+        //CSR(MDEBUG) = true;
+        return MCAUSE_LOAD_ADDRESS_MISALIGNED;
+      }
+      break;
+  }
+  // OK, data is aligned, try to translate VM address
+  uint32_t cause = translate(addr, ACCESS_LOAD);
+  if (cause != MCAUSE_NONE) {
+    CSR(STVAL) = addr;
+    return cause;
+  }
+  // Hmm, load seems to have been valid, prover is byzantine
+  // disallow proof
+  die();
   return MCAUSE_NONE;
 }
 
@@ -400,12 +489,14 @@ uint32_t handleInstAtomic(uint32_t inst) {
 // STVAL should be set directly
 uint32_t handleInst(uint32_t inst) {
   switch((inst >> 2) & 0x1f) {
-    case(0b11100):
-      return handleInstSystem(inst);
+    case(0b00000):
+      return handleLoad(inst);
+    case(0b00011):  // Fence, ignore
+      return handleMiscMemory(inst);
     case(0b01011):
       return handleInstAtomic(inst);
-    case(0b00011):  // Fence, ignore
-      return MCAUSE_NONE;
+    case(0b11100):
+      return handleInstSystem(inst);
     default:
       // TODO: Handle all the cases
       FATAL("Unimplemented: inst = " << inst);
@@ -462,15 +553,24 @@ extern "C" void onTrap() {
     instLen = 4;
   }
   */
-  uint32_t instLong = CSR(MTVAL);
-  uint32_t instLen = 4; // TODO
+  uint32_t inst = CSR(MTVAL);
+  uint32_t instLen;
+  uint32_t instLong;
+  if ((inst & 3) == 3) {
+    instLen = 4;
+    instLong = inst;
+  } else {
+    instLen = 2;
+    instLong = AT(COMPRESSED_INST_LOOKUP_ADDR)[inst];
+  }
   // Try to process instruction
-  // LOG(0, "Handling inst " << inst << " at " << CSR(MEPC));
+  // LOG(0, "Handling inst " << inst << ":" << instLong << " at " << CSR(MEPC));
   uint32_t mcause = handleInst(instLong);
+  // LOG(0, "mcause = " << mcause);
   if (mcause == MCAUSE_NONE) {
     // Success, bump PC + continue
     CSR(MEPC) += instLen;
-  } else {
+  } else if (mcause != MCAUSE_SRET) {
     // If it failed, forward to supervisor
     supervisorTrap(mcause);
   }
@@ -525,6 +625,28 @@ uint32_t handleSbiDebugConsole() {
   return 0;
 }
 
+uint32_t handleSystemReset() {
+  uint32_t func_id = UREG(A6);
+  if (func_id != 0) {
+    LOG(0, "Invalid system reset function: " << func_id);
+    die();
+  }
+  terminate(0, UREG(A0));
+  return 0;
+}
+
+uint32_t handleTimer() {
+  uint32_t func_id = UREG(A6);
+  if (func_id != 0) {
+    LOG(0, "Invalid timer function: " << func_id);
+    die();
+  }
+  //info("Setting timer to: ", UREG(A1), UREG(A0));
+  CSR(MTIMER) = UREG(A0);
+  CSR(MTIMERH) = UREG(A1);
+  return 0;
+}
+
 extern "C" void onEcall() {
   uint32_t ext_id = UREG(A7);
   uint32_t ret = 0;
@@ -538,14 +660,12 @@ extern "C" void onEcall() {
     case 0x4442434E:
       ret = handleSbiDebugConsole();
       break;
-    /*
     case 0x53525354:
       ret = handleSystemReset();
       break;
     case 0x54494D45:
       ret = handleTimer();
       break;
-    */
     default:
       LOG(0, "Request for invalid SBI extension: " << ext_id);
   }

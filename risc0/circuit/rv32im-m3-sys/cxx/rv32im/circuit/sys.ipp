@@ -117,7 +117,6 @@ template <typename C> FDEV void InstTrapBlock<C>::addArguments(CTX) DEV {
   arg.rd = rd.get();
   arg.immLow = writeVal.data.low.get();
   arg.immHigh = writeVal.data.high.get();
-  ;
   arg.options = cond<C>(isEcall.get(), Val<C>(uint32_t(INST_ECALL)), Val<C>(uint32_t(INST_ANY)));
   ctx.pull(arg);
 }
@@ -125,20 +124,33 @@ template <typename C> FDEV void InstTrapBlock<C>::addArguments(CTX) DEV {
 template <typename C> FDEV void InstMretBlock<C>::set(CTX, InstMretWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   fetch.set(ctx, wit.fetch, wit.cycle);
-  readMEPC.set(ctx, wit.MEPC, wit.cycle);
-  readMEMODE.set(ctx, wit.MEMODE, wit.cycle);
+  readPc.set(ctx, wit.readPc, wit.cycle);
+  readMode.set(ctx, wit.readMode, wit.cycle);
   toAdd.set(ctx, GLOBAL_GET(v2Compat).asUInt32() * 4);
-  sumPc.set(ctx, wit.MEPC.value, GLOBAL_GET(v2Compat).asUInt32() * 4);
+  sumPc.set(ctx, wit.readPc.value, GLOBAL_GET(v2Compat).asUInt32() * 4);
+  updateClearCache.set(ctx, wit.updateClearCache, wit.cycle);
+  iCacheCycleOut.set(ctx, wit.updateClearCache.prevValue ? wit.cycle : wit.fetch.iCacheCycle);
 }
 
 template <typename C> FDEV void InstMretBlock<C>::verify(CTX) DEV {
-  // Make sure address constants is right
+  // Verify addresses
   Val<C> mepcWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_MEPC, CSR_WORD(MEPC));
+  EQ(readPc.wordAddr.get(), mepcWord);
+  EQ(readMode.wordAddr.get(), CSR_WORD(MEMODE));
+  EQ(updateClearCache.wordAddr.get(), CSR_WORD(MCLEARCACHE));
+  // Add 4 only for compatibility
   EQ(toAdd.get(), GLOBAL_GET(v2Compat) * 4);
-  EQ(readMEPC.wordAddr.get(), mepcWord);
-  EQ(readMEMODE.wordAddr.get(), CSR_WORD(MEMODE));
-  EQZ(readMEMODE.data.high.get());
-  EQZ(GLOBAL_GET(v2Compat) * readMEMODE.data.low.get());
+  // Make is valid
+  EQZ(readMode.data.high.get());
+  EQZ(GLOBAL_GET(v2Compat) * readMode.data.low.get());
+  // Make sure we always zero 'clearCahce'
+  EQZ(updateClearCache.data.low.get());
+  EQZ(updateClearCache.data.high.get());
+  // Verify original clear cache is 0/1
+  AssertBit(ctx, updateClearCache.prevData.low.get());
+  EQZ(updateClearCache.prevData.high.get());
+  // set output iCacheCycle based on clearCache
+  EQ(iCacheCycleOut.get(), cond<C>(updateClearCache.prevData.low.get(), cycle.get(), fetch.iCacheCycle.get()));
 }
 
 template <typename C> FDEV void InstMretBlock<C>::addArguments(CTX) DEV {
@@ -146,7 +158,7 @@ template <typename C> FDEV void InstMretBlock<C>::addArguments(CTX) DEV {
   // Move from mode = MACHINE to mode = USER
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(
-      cycleVal + 1, sumPc.get(), readMEMODE.data.low.get(), fetch.iCacheCycle.get()));
+      cycleVal + 1, sumPc.get(), readMode.data.low.get(), iCacheCycleOut.get()));
   // Verify decoding
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();

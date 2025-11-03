@@ -66,6 +66,7 @@ CONSTANT uint32_t ACCESS_STORE = 2;
 
 // Trap cause constants
 CONSTANT uint32_t MCAUSE_NONE = 32;
+CONSTANT uint32_t MCAUSE_SRET = 33;
 CONSTANT uint32_t MCAUSE_INSTRUCTION_ACCESS_FAULT = 1;
 CONSTANT uint32_t MCAUSE_ILLEGAL_INSTRUCTION = 2;
 CONSTANT uint32_t MCAUSE_LOAD_ADDRESS_MISALIGNED = 4;
@@ -145,9 +146,16 @@ CONSTANT uint32_t CSR_MTVAL = 0x343;
 CONSTANT uint32_t CSR_MVERSION = 0x7C0; // Turn off V2 compat in global
 CONSTANT uint32_t CSR_MSPC = 0x7C1;     // Suspend/Resume PC
 CONSTANT uint32_t CSR_MSMODE = 0x7C2;   // Suspend/Resume Mode
-CONSTANT uint32_t CSR_MVINFO = 0x7C3;
+CONSTANT uint32_t CSR_MVINFO = 0x7C3;   // VM Info
 CONSTANT uint32_t CSR_MEMODE = 0x7C4;      // Saved mode when machine traps
 CONSTANT uint32_t CSR_MTRAP = 0x7C5;       // Nondet Trap
+CONSTANT uint32_t CSR_MCLEARCACHE = 0x7C6; // Clear inst + translations caches
+CONSTANT uint32_t CSR_MSCYCLE = 0x7C7;  // Saved cycle # on exit of machine mode
+CONSTANT uint32_t CSR_MTIME = 0x7C8;  // Time low 32 bits
+CONSTANT uint32_t CSR_MTIMEH = 0x7C9;  // Time high 32 bits
+CONSTANT uint32_t CSR_MTIMER = 0xD0;  // Time low 32 bits
+CONSTANT uint32_t CSR_MTIMERH = 0x7D1;  // Time high 32 bits
+CONSTANT uint32_t CSR_MDEBUG = 0x7E0;  // Time high 32 bits
 CONSTANT uint32_t CSR_MNOV2COMPAT = 0x7FF; // Turn off V2 compat in global
 
 // V2 Compatibility constants
