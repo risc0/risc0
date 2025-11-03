@@ -3719,36 +3719,92 @@ pub fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u
     }
 }
 
-pub fn sys_openat2(_dfd: u32, _filename: u32, _how: u32) -> Result<u32, Err> {
-    // Extract and print the filename
-    let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
-    let null_pos = filename
-        .iter()
-        .position(|&b| b == 0)
-        .unwrap_or(filename.len());
-    let filename = &filename[..null_pos];
+// openat2 structure - struct open_how
+#[repr(C)]
+struct OpenHow {
+    flags: u64,
+    mode: u64,
+    resolve: u64,
+}
 
-    // Convert the filename to a UTF-8 string
-    let filename_str = match str::from_utf8(filename) {
-        Ok(s) => s,
-        Err(_) => {
-            kprint!("sys_openat2: invalid UTF-8 filename");
-            return Err(Err::NoSys);
-        }
+// resolve flags for openat2
+const RESOLVE_NO_XDEV: u64 = 0x01; // Block mount-point crossings
+const RESOLVE_NO_MAGICLINKS: u64 = 0x02; // Block magic-link resolution
+const RESOLVE_NO_SYMLINKS: u64 = 0x04; // Block all symlink resolution
+const RESOLVE_BENEATH: u64 = 0x08; // Only allow resolution beneath dirfd
+const RESOLVE_IN_ROOT: u64 = 0x10; // Treat dirfd as root directory
+const RESOLVE_CACHED: u64 = 0x20; // Only use cached path resolution
+
+pub fn sys_openat2(dfd: u32, filename: u32, how_ptr: u32, how_size: u32) -> Result<u32, Err> {
+    // Validate how_ptr
+    if how_ptr == 0 {
+        kprint!("sys_openat2: NULL how pointer");
+        return Err(Err::Fault);
+    }
+
+    if how_ptr >= 0xC0000000 {
+        kprint!("sys_openat2: invalid how pointer: 0x{:x}", how_ptr);
+        return Err(Err::Fault);
+    }
+
+    // Validate how_size - must be at least size of OpenHow
+    if how_size < 24 {
+        kprint!("sys_openat2: invalid how_size: {}", how_size);
+        return Err(Err::Inval);
+    }
+
+    // Read the open_how structure from user space
+    let how = unsafe {
+        let ptr = how_ptr as *const OpenHow;
+        core::ptr::read(ptr)
     };
 
     kprint!(
-        "sys_openat2: dfd={}, filename='{}', how=0x{:x}",
-        _dfd,
-        filename_str,
-        _how
+        "sys_openat2: dfd={}, filename=0x{:x}, flags=0x{:x}, mode=0x{:x}, resolve=0x{:x}",
+        dfd,
+        filename,
+        how.flags,
+        how.mode,
+        how.resolve
     );
 
-    // TODO: Implement actual file opening with 9P operations
-    // For now, just return not implemented
-    let msg = b"sys_openat2 not fully implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
+    // Check for unsupported resolve flags
+    if how.resolve != 0 {
+        // We support basic resolution but log if special flags are used
+        if (how.resolve & RESOLVE_NO_SYMLINKS) != 0 {
+            kprint!("sys_openat2: RESOLVE_NO_SYMLINKS requested");
+            // We can handle this with O_NOFOLLOW logic
+        }
+        if (how.resolve & RESOLVE_NO_XDEV) != 0 {
+            kprint!("sys_openat2: RESOLVE_NO_XDEV requested (not fully supported)");
+        }
+        if (how.resolve & RESOLVE_NO_MAGICLINKS) != 0 {
+            kprint!("sys_openat2: RESOLVE_NO_MAGICLINKS requested");
+        }
+        if (how.resolve & RESOLVE_BENEATH) != 0 {
+            kprint!("sys_openat2: RESOLVE_BENEATH requested (not fully supported)");
+        }
+        if (how.resolve & RESOLVE_IN_ROOT) != 0 {
+            kprint!("sys_openat2: RESOLVE_IN_ROOT requested (not fully supported)");
+        }
+        if (how.resolve & RESOLVE_CACHED) != 0 {
+            kprint!("sys_openat2: RESOLVE_CACHED requested (ignored)");
+        }
+    }
+
+    // Convert flags and mode to 32-bit (openat uses 32-bit)
+    let flags = how.flags as u32;
+    let mode = how.mode as u32;
+
+    // If RESOLVE_NO_SYMLINKS is set, add O_NOFOLLOW
+    let flags = if (how.resolve & RESOLVE_NO_SYMLINKS) != 0 {
+        flags | O_NOFOLLOW
+    } else {
+        flags
+    };
+
+    // Delegate to sys_openat implementation
+    sys_openat(dfd, filename, flags, mode)
 }
 
 pub fn sys_preadv(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32, Err> {

@@ -843,7 +843,7 @@ pub fn handle_linux_syscall() -> ! {
         SYS_OPEN_TREE => syscall3(sys_open_tree),
         SYS_OPEN_TREE_ATTR => syscall4(sys_open_tree_attr),
         SYS_OPENAT => syscall4(sys_openat),
-        SYS_OPENAT2 => syscall3(sys_openat2),
+        SYS_OPENAT2 => syscall4(sys_openat2),
         SYS_PERF_EVENT_OPEN => syscall5(sys_perf_event_open),
         SYS_PERSONALITY => syscall1(sys_personality),
         SYS_PIDFD_GETFD => syscall3(sys_pidfd_getfd),
