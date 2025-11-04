@@ -31,18 +31,17 @@ template <typename C> struct UnitAddSubBlock {
   AddU32<C> out;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, count);
-    T::apply(ctx, doSub);
-    T::apply(ctx, a);
-    T::apply(ctx, b);
+    T::apply(ctx, "count", count);
+    T::apply(ctx, "doSub", doSub);
+    T::apply(ctx, "a", a);
+    T::apply(ctx, "b", b);
     ValU32<C> v = cond<C>(doSub.get(), negate(b.get()), b.get());
-    T::apply(ctx, out, a.get(), v);
+    T::apply(ctx, "out", out, a.get(), v);
   }
 
   FDEV void set(CTX, UnitAddSubWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
-
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 
@@ -58,13 +57,13 @@ template <typename C> struct UnitBitBlock {
   BitReg<C> bBits[32];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, count);
-    T::apply(ctx, op);
-    T::apply(ctx, a);
-    T::apply(ctx, b);
-    T::apply(ctx, out);
-    T::apply(ctx, aBits);
-    T::apply(ctx, bBits);
+    T::apply(ctx, "count", count);
+    T::apply(ctx, "op", op);
+    T::apply(ctx, "a", a);
+    T::apply(ctx, "b", b);
+    T::apply(ctx, "out", out);
+    T::apply(ctx, "aBits", aBits);
+    T::apply(ctx, "bBits", bBits);
   }
 
   FDEV void set(CTX, UnitBitWitness wit) DEV;
@@ -81,8 +80,8 @@ template <typename C> struct UnitMulBlock {
   Multiply<C> mul;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, count);
-    T::apply(ctx, mul);
+    T::apply(ctx, "count", count);
+    T::apply(ctx, "mul", mul);
   }
 
   FDEV void set(CTX, UnitMulWitness wit) DEV;
@@ -116,23 +115,24 @@ template <typename C> struct UnitDivBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     ValU32<C> absRem = ValU32<C>(absRemLow.get(), absRemHigh.get());
-    T::apply(ctx, count);
-    T::apply(ctx, isSigned);
-    T::apply(ctx, numer, isSigned.get());
-    T::apply(ctx, denom, isSigned.get());
-    T::apply(ctx, absQuot);
-    T::apply(ctx, total);
-    T::apply(ctx, absRemLow);
-    T::apply(ctx, absRemHigh);
-    T::apply(ctx, addTotRem, total.get(), absRem);
-    T::apply(ctx, denomZero, denom.in.low.get() + denom.in.high.get());
+    T::apply(ctx, "count", count);
+    T::apply(ctx, "isSigned", isSigned);
+    T::apply(ctx, "numer", numer, isSigned.get());
+    T::apply(ctx, "denom", denom, isSigned.get());
+    T::apply(ctx, "absQuot", absQuot);
+    T::apply(ctx, "total", total);
+    T::apply(ctx, "absRemLow", absRemLow);
+    T::apply(ctx, "absRemHigh", absRemHigh);
+    T::apply(ctx, "addTotRem", addTotRem, total.get(), absRem);
+    T::apply(ctx, "denomZero", denomZero, denom.in.low.get() + denom.in.high.get());
     T::apply(ctx,
+             "verifyRem",
              verifyRem,
-             ValU32<C>(denom.absLow.get(), denom.absHigh.get()),
+             denom.getAbs(),
              ValU32<C>(Val<C>(0xffff) - absRemLow.get(), Val<C>(0xffff) - absRemHigh.get()));
-    T::apply(ctx, negQuot);
-    T::apply(ctx, flipQuot, absQuot.get(), negQuot.get());
-    T::apply(ctx, flipRem, absRem, numer.neg.get());
+    T::apply(ctx, "negQuot", negQuot);
+    T::apply(ctx, "flipQuot", flipQuot, absQuot.get(), negQuot.get());
+    T::apply(ctx, "flipRem", flipRem, absRem, numer.neg.get());
   }
 
   FDEV void set(CTX, UnitDivWitness wit) DEV;
@@ -155,15 +155,15 @@ template <typename C> struct UnitLtBlock {
   BitReg<C> isLt;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, count);
-    T::apply(ctx, a);
-    T::apply(ctx, b);
-    T::apply(ctx, diff, a.get(), negate(b.get()));
-    T::apply(ctx, signA, a.get().high);
-    T::apply(ctx, signB, b.get().high);
-    T::apply(ctx, signDiff, diff.get().high);
-    T::apply(ctx, overflow);
-    T::apply(ctx, isLt);
+    T::apply(ctx, "count", count);
+    T::apply(ctx, "a", a);
+    T::apply(ctx, "b", b);
+    T::apply(ctx, "diff", diff, a.get(), negate(b.get()));
+    T::apply(ctx, "signA", signA, a.get().high);
+    T::apply(ctx, "signB", signB, b.get().high);
+    T::apply(ctx, "signDiff", signDiff, diff.get().high);
+    T::apply(ctx, "overflow", overflow);
+    T::apply(ctx, "isLt", isLt);
   }
 
   FDEV void set(CTX, UnitLtWitness wit) DEV;
@@ -194,19 +194,19 @@ template <typename C> struct UnitShiftBlock {
   RegU32<C> out2;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, count);
-    T::apply(ctx, a);
-    T::apply(ctx, b);
-    T::apply(ctx, opt);
-    T::apply(ctx, bits);
-    T::apply(ctx, byte1);
-    T::apply(ctx, po2First3);
-    T::apply(ctx, po2);
-    T::apply(ctx, signA, a.get().high);
-    T::apply(ctx, maybeNegA);
-    T::apply(ctx, maybeNegOut);
-    T::apply(ctx, out);
-    T::apply(ctx, out2);
+    T::apply(ctx, "count", count);
+    T::apply(ctx, "a", a);
+    T::apply(ctx, "b", b);
+    T::apply(ctx, "opt", opt);
+    T::apply(ctx, "bits", bits);
+    T::apply(ctx, "byte1", byte1);
+    T::apply(ctx, "po2First3", po2First3);
+    T::apply(ctx, "po2", po2);
+    T::apply(ctx, "signA", signA, a.get().high);
+    T::apply(ctx, "maybeNegA", maybeNegA);
+    T::apply(ctx, "maybeNegOut", maybeNegOut);
+    T::apply(ctx, "out", out);
+    T::apply(ctx, "out2", out2);
   }
 
   FDEV void set(CTX, UnitShiftWitness wit) DEV;

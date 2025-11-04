@@ -87,14 +87,22 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
 
   struct VerifyFwd {
     template <typename T, typename... Args>
-    FDEV static void apply(MTHR VerifyContext& ctx, MDEV T& obj, Args... args) {
+    FDEV static void
+    apply(MTHR VerifyContext& ctx, CONSTARG const char*, MDEV T& obj, Args... args) {
+      VerifyFwd::apply(ctx, obj, args...);
+    }
+
+    template <typename T, typename... Args>
+    FDEV static typename if_not_char<T, void>::type
+    apply(MTHR VerifyContext& ctx, MDEV T& obj, Args... args) {
       obj.template applyInner<VerifyFwd>(ctx, args...);
       obj.verify(ctx, args...);
       obj.addArguments(ctx, args...);
     }
 
     template <typename T, size_t N, typename... Args>
-    FDEV static void apply(MTHR VerifyContext& ctx, MDEV T (&t)[N], Args... args) {
+    FDEV static typename if_not_char<T, void>::type
+    apply(MTHR VerifyContext& ctx, MDEV T (&t)[N], Args... args) {
       for (size_t i = 0; i < N; i++) {
         VerifyFwd::apply(ctx, t[i], args...);
       }
