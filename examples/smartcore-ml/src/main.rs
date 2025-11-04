@@ -45,7 +45,7 @@ fn predict() -> Vec<u32> {
     let model: Model =
         rmp_serde::from_slice(MODEL_SERIALIZED).expect("model failed to deserialize byte array");
     let data: DenseMatrix<f64> =
-        rmp_serde::from_slice(DATA_SERIALIZED).expect("data filed to deserialize byte array");
+        rmp_serde::from_slice(DATA_SERIALIZED).expect("data failed to deserialize byte array");
 
     let env = ExecutorEnv::builder()
         .write(&is_svm)
