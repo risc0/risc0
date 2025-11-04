@@ -173,6 +173,9 @@ pub use self::{
     },
 };
 
+#[cfg(feature = "blake3")]
+pub use self::claim::blake3::Blake3ReceiptClaim;
+
 use semver::Version;
 
 /// Reports the current version of this crate.

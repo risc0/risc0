@@ -1,7 +1,9 @@
-use crate::VerifyingKey;
+use crate::{Seal, Verifier, VerifyingKey};
+use anyhow::{Error, Result};
 use ark_bn254::{Fq, Fq2, G1Affine, G2Affine};
+use ark_ff::PrimeField;
+use risc0_zkp::core::digest::Digest;
 use std::str::FromStr;
-
 // TODO(ec2): Bootstrap from solidity verifier
 
 /// Default verifying key for RISC Zero recursive verification.
@@ -119,5 +121,20 @@ pub fn get_ark_verifying_key() -> ark_groth16::VerifyingKey<ark_bn254::Bn254> {
         gamma_g2,
         delta_g2,
         gamma_abc_g1,
+    }
+}
+
+impl Verifier {
+    /// Creates a new Groth16 Blake3`Verifier` instance.
+    pub fn new_blake3(
+        seal: &[u8],
+        claim_digest: Digest,
+        verifying_key: &VerifyingKey,
+    ) -> Result<Self, Error> {
+        let seal = Seal::decode(seal)?;
+        let public_input_scalar = crate::Fr(ark_bn254::Fr::from_be_bytes_mod_order(
+            claim_digest.as_ref(),
+        ));
+        Self::new_inner(&seal, &[public_input_scalar], verifying_key)
     }
 }

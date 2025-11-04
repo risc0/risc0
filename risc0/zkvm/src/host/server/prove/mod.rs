@@ -30,6 +30,8 @@ use risc0_groth16::prove::shrink_wrap;
 use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
+#[cfg(feature = "blake3")]
+use crate::claim::blake3::Blake3ReceiptClaim;
 use crate::{
     ExecutorEnv, PreflightResults, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, Segment,
     Session, VerifierContext, WorkClaim,
@@ -211,9 +213,11 @@ pub trait ProverServer: private::Sealed {
         &self,
         receipt: &SuccinctReceipt<ReceiptClaim>,
         journal: [u8; 32],
-    ) -> Result<Groth16Receipt<ReceiptClaim>> {
+    ) -> Result<Groth16Receipt<Blake3ReceiptClaim>> {
+        use crate::MaybePruned;
+
         let ident_receipt = self.identity_p254(receipt).unwrap();
-        let control_root = ident_receipt.control_root()?;
+        let control_root = receipt.control_root()?;
         let receipt_claim = ident_receipt.claim.as_value()?;
         let seal_bytes = ident_receipt.get_seal_bytes();
 
@@ -225,11 +229,12 @@ pub trait ProverServer: private::Sealed {
             control_root,
             journal,
         )?;
+        let claim = Blake3ReceiptClaim::ok(receipt_claim.pre.digest(), journal);
         let seal = risc0_groth16::prove::blake3_shrink_wrap(&identity_seal_json)?.to_vec();
         Ok(Groth16Receipt {
             seal,
-            claim: receipt.claim.clone(),
-            verifier_parameters: Groth16ReceiptVerifierParameters::default().digest(),
+            claim: MaybePruned::Value(claim),
+            verifier_parameters: Groth16ReceiptVerifierParameters::blake3_default().digest(),
         })
     }
 
