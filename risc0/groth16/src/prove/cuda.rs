@@ -142,9 +142,9 @@ struct ProveInputs {
 }
 
 impl ProveInputs {
-    fn new(root_dir: &Path) -> Result<Self> {
+    fn new(root_dir: &Path, srs_file: &Path) -> Result<Self> {
         let pcoeffs_file = std::fs::File::open(root_dir.join("preprocessed_coeffs.bin"))?;
-        let srs_file = std::fs::File::open(root_dir.join("stark_verify_final.zkey"))?;
+        let srs_file = std::fs::File::open(srs_file)?;
         Ok(Self {
             pcoeffs: unsafe { Mmap::map(&pcoeffs_file)? },
             fres: std::fs::read(root_dir.join("fuzzed_msm_results.bin"))?,
@@ -172,11 +172,47 @@ pub(crate) fn shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
             To install it, ensure that your `rzup` version is >= 0.5.0, \
             and then run `rzup install risc0-groth16`.",
         )?;
-    let prove_inputs = ProveInputs::new(&root_dir).context("failed to open groth16 input files")?;
+    let prove_inputs = ProveInputs::new(&root_dir, &root_dir.join("stark_verify_final.zkey"))
+        .context("failed to open groth16 input files")?;
 
     let inputs = to_json(seal_bytes)?;
 
     let graph_path = root_dir.join("stark_verify_graph.bin");
+    let witness =
+        calc_witness(&graph_path, &inputs).context("failed to calculate groth16 witness")?;
+
+    let proof = risc0_groth16_sys::prove(witness.as_bytes(), &prove_inputs.prove_params())
+        .context("failed to run groth16 prove operation")?;
+
+    Ok(proof.into())
+}
+
+#[cfg(feature = "blake3")]
+pub(crate) fn blake3_shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
+    tracing::info!("blake3_shrink_wrap: {} seal bytes", seal_bytes.len());
+
+    // TODO(ec2): make rzup component
+    // let root_dir = Rzup::new()
+    //     .context("failed to initialize rzup")?
+    //     .get_version_dir(&Component::Risc0Groth16, &Version::new(0, 1, 0))
+    //     .context(
+    //         "Missing required `risc0-groth16` rzup component. \
+    //         To install it, ensure that your `rzup` version is >= 0.5.0, \
+    //         and then run `rzup install risc0-groth16`.",
+    //     )?;
+
+    let root_dir = std::env::var("BLAKE3_GROTH16_SETUP_DIR");
+    let root_dir = root_dir
+        .as_ref()
+        .map(Path::new)
+        .expect("must provide BLAKE3_GROTH16_SETUP_DIR");
+
+    let prove_inputs = ProveInputs::new(&root_dir, &root_dir.join("verify_for_guest_final.zkey"))
+        .context("failed to open blake3 groth16 input files")?;
+
+    let inputs = to_json(seal_bytes)?;
+
+    let graph_path = root_dir.join("verify_for_guest_graph.bin");
     let witness =
         calc_witness(&graph_path, &inputs).context("failed to calculate groth16 witness")?;
 

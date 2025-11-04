@@ -98,7 +98,7 @@ use ark_serialize::CanonicalDeserialize;
 use num_bigint::BigInt;
 
 pub use types::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
-pub use verifier::{Fr, Verifier, VerifyingKey, verifying_key};
+pub use verifier::{Fr, Verifier, VerifyingKey, risc0::verifying_key};
 
 /// Deserialize an element over the G1 group from bytes in big-endian format
 pub(crate) fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {

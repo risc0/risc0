@@ -38,3 +38,17 @@ pub fn shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         }
     }
 }
+
+#[cfg(feature = "blake3")]
+/// Produce a Groth16 proof from an `identity_p254` seal.
+pub fn blake3_shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "cuda")] {
+            self::cuda::blake3_shrink_wrap(identity_p254_seal_bytes)
+        } else {
+            let _ = identity_p254_seal_bytes;
+            unimplemented!("blake3 shrink wrap is only supported with cuda feature");
+            // self::docker::shrink_wrap(identity_p254_seal_bytes)
+        }
+    }
+}

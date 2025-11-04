@@ -52,7 +52,7 @@ cuda = [
   "risc0-groth16-sys/cuda",
   "risc0-zkp/cuda",
 ]
-default = ["std"]
+default = ["std", "blake3"]
 prove = [
   "dep:cfg-if",
   "dep:risc0-core",
@@ -75,3 +75,4 @@ std = [
   "serde/std",
 ]
 unstable = []
+blake3 = []
