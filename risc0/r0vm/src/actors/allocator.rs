@@ -532,7 +532,7 @@ impl AllocatorActor {
         Ok(self
             .workers
             .values()
-            .filter(|w| &w.machine == &worker.machine)
+            .filter(|w| w.machine == worker.machine)
             .map(|w| w.total_scheduled_cores())
             .sum())
     }
@@ -886,7 +886,7 @@ impl AllocatorActor {
         let chosen_worker = workers[0].id;
 
         // Count that this worker has a new task now.
-        let res = self.add_worker_task(&chosen_worker, &msg);
+        let res = self.add_worker_task(&chosen_worker, msg);
         if let Err(error) = res {
             return Some(Err(error));
         }
