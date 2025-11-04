@@ -24,7 +24,7 @@ template <typename C> struct Top {
 
   Reg<C> array[4];
 
-  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, array); }
+  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, "array", array); }
 
   FDEV void set(CTX, Fp val) DEV {}
   FDEV inline void finalize(CTX) DEV {}
@@ -39,13 +39,7 @@ int main() {
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
-  ctx.enterComponent("Top");
-  Top<C> component;
-  mlir::Type layoutType = getLayoutType(ctx, component);
-  llvm::outs() << "Layout type: " << layoutType << "\n";
-  component.verify(ctx);
-  ctx.materializeLayout(layoutType);
-  ctx.exitComponent();
+  extract<Top>(ctx);
 
   ctx.getModuleOp().print(llvm::outs());
   return failed(mlir::verify(ctx.getModuleOp()));

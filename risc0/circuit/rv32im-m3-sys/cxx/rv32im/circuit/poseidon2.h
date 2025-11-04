@@ -32,11 +32,11 @@ template <typename C> struct P2ExtRoundBlock {
   RegCells<C> outputs;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, id);
-    T::apply(ctx, round);
-    T::apply(ctx, inputs);
-    T::apply(ctx, sBoxTmp);
-    T::apply(ctx, outputs);
+    T::apply(ctx, "id", id);
+    T::apply(ctx, "round", round);
+    T::apply(ctx, "inputs", inputs);
+    T::apply(ctx, "sBoxTmp", sBoxTmp);
+    T::apply(ctx, "outputs", outputs);
   }
 
   FDEV void set(CTX, P2ExtRoundWitness wit) DEV;
@@ -56,11 +56,11 @@ template <typename C> struct P2IntRoundsBlock {
   RegCells<C> outputs;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, id);
-    T::apply(ctx, inputs);
-    T::apply(ctx, sBoxT1);
-    T::apply(ctx, sBoxT2);
-    T::apply(ctx, outputs);
+    T::apply(ctx, "id", id);
+    T::apply(ctx, "inputs", inputs);
+    T::apply(ctx, "sBoxT1", sBoxT1);
+    T::apply(ctx, "sBoxT2", sBoxT2);
+    T::apply(ctx, "outputs", outputs);
   }
 
   FDEV void set(CTX, P2IntRoundsWitness wit) DEV;
@@ -80,11 +80,11 @@ template <typename C> struct P2BlockBlock {
   RegCells<C> outputs;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, id);
-    T::apply(ctx, outUseCount);
-    T::apply(ctx, contUseCount);
-    T::apply(ctx, inputs);
-    T::apply(ctx, outputs);
+    T::apply(ctx, "id", id);
+    T::apply(ctx, "outUseCount", outUseCount);
+    T::apply(ctx, "contUseCount", contUseCount);
+    T::apply(ctx, "inputs", inputs);
+    T::apply(ctx, "outputs", outputs);
   }
 
   FDEV void set(CTX, P2BlockWitness wit) DEV;

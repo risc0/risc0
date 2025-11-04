@@ -30,12 +30,12 @@ template <typename C> struct ExpandU32 {
   RegU8<C> b3Low7times2;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, b0);
-    T::apply(ctx, b1);
-    T::apply(ctx, b2);
-    T::apply(ctx, b3);
-    T::apply(ctx, topBit);
-    T::apply(ctx, b3Low7times2);
+    T::apply(ctx, "b0", b0);
+    T::apply(ctx, "b1", b1);
+    T::apply(ctx, "b2", b2);
+    T::apply(ctx, "b3", b3);
+    T::apply(ctx, "topBit", topBit);
+    T::apply(ctx, "b3Low7times2", b3Low7times2);
   }
 
   FDEV void set(CTX, uint32_t val) DEV;
@@ -60,10 +60,10 @@ template <typename C> struct SplitTotal {
   BitReg<C> carryBit1;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> val) DEV {
-    T::apply(ctx, out);
-    T::apply(ctx, carryByte);
-    T::apply(ctx, carryBit0);
-    T::apply(ctx, carryBit1);
+    T::apply(ctx, "out", out);
+    T::apply(ctx, "carryByte", carryByte);
+    T::apply(ctx, "carryBit0", carryBit0);
+    T::apply(ctx, "carryBit1", carryBit1);
   }
 
   FDEV void set(CTX, uint32_t val) DEV;
@@ -93,15 +93,15 @@ template <typename C> struct Multiply {
   RegU8<C> s3Carry;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, signA);
-    T::apply(ctx, signB);
-    T::apply(ctx, ax);
-    T::apply(ctx, bx);
-    T::apply(ctx, s0, valS0());
-    T::apply(ctx, s1, valS1());
-    T::apply(ctx, s2, valS2());
-    T::apply(ctx, s3Out);
-    T::apply(ctx, s3Carry);
+    T::apply(ctx, "signA", signA);
+    T::apply(ctx, "signB", signB);
+    T::apply(ctx, "ax", ax);
+    T::apply(ctx, "bx", bx);
+    T::apply(ctx, "s0", s0, valS0());
+    T::apply(ctx, "s1", s1, valS1());
+    T::apply(ctx, "s2", s2, valS2());
+    T::apply(ctx, "s3Out", s3Out);
+    T::apply(ctx, "s3Carry", s3Carry);
   }
 
   FDEV void set(CTX, uint32_t a, uint32_t b, uint32_t signA, uint32_t signB) DEV;
