@@ -35,7 +35,7 @@ int main() {
   for (size_t i = 0; i < 3; i++) {
     LOG(0, "Preflight");
     uint32_t cycles;
-    prover.preflight(image, io, &cycles);
+    prover.preflight(image, io, 0, &cycles);
     using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
     LOG(0, "Proving " << cycles << " cycles");
     static time_point pre = std::chrono::high_resolution_clock::now();

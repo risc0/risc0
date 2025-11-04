@@ -239,6 +239,7 @@ fn sha_iter() {
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()
+        // .segment_limit_po2(21)
         .build()
         .unwrap();
     let receipt = prove_elf(env, MULTI_TEST_ELF).unwrap();

@@ -93,6 +93,7 @@ impl SegmentProver for SegmentProverImpl {
                 ptr: segment.write_record.as_ptr(),
                 len: segment.write_record.len(),
             },
+            suspend_cycle: segment.suspend_cycle,
         };
 
         ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_load_segment(self.ctx, &raw_segment) })

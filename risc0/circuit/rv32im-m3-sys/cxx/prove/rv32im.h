@@ -33,7 +33,10 @@ class Rv32imProver {
 public:
   Rv32imProver(IHalPtr hal, size_t po2, bool doValidate = false);
 
-  bool preflight(rv32im::MemoryImage& image, rv32im::HostIO& io, uint32_t* cyclesOut = nullptr);
+  bool preflight(rv32im::MemoryImage& image,
+                 rv32im::HostIO& io,
+                 uint32_t endCycle = 0,
+                 uint32_t* cyclesOut = nullptr);
   void prove(WriteIop& iop);
 
   size_t po2() const;

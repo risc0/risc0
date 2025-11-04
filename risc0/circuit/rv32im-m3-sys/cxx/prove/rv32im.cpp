@@ -90,16 +90,17 @@ Rv32imProver::Rv32imProver(IHalPtr hal, size_t po2, bool doValidate)
     , ci(hal, rowInfo, aux, tables, doValidate)
     , prover(hal, ci.ci, po2) {}
 
-bool Rv32imProver::preflight(rv32im::MemoryImage& image, HostIO& io, uint32_t* cyclesOut) {
+bool Rv32imProver::preflight(rv32im::MemoryImage& image,
+                             HostIO& io,
+                             uint32_t endCycle,
+                             uint32_t* cyclesOut) {
   LOG(1, "Pinning");
   PinnedArrayWO cpuRI(hal, rowInfo);
   PinnedArrayWO cpuAux(hal, aux);
   LOG(1, "Executing");
   Trace trace(rows, cpuRI.data(), cpuAux.data());
-  bool ret = emulate(trace, image, io, rows, 0);
-  if (cyclesOut) {
-    *cyclesOut = trace.getGlobals().finalCycle;
-  }
+  bool ret = emulate(trace, image, io, rows, endCycle);
+  *cyclesOut = endCycle;
   LOG(1, "Finalizing, trace row count = " << trace.getRowCount());
   trace.finalize();
   LOG(1, "Copying to GPU");

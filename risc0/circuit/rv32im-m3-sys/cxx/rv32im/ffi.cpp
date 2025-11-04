@@ -74,13 +74,7 @@ struct RustSegment {
   RustMemoryImage image;
   RustSliceReadRecord reads;
   RustSliceWord writes;
-  // pub claim: Rv32imV2Claim,
-  // pub suspend_cycle: u32,
-  // pub paging_cycles: u32,
-  // pub segment_threshold: u32,
-  // pub po2: u32,
-  // pub index: u64,
-  // pub povw_nonce: Option<PovwNonce>,
+  uint32_t suspendCycle;
 };
 
 } // extern "C"
@@ -137,6 +131,7 @@ struct ProverContext {
   MemoryImage image;
   ReplayHostIO io;
   std::vector<Fp> transcript;
+  uint32_t endCycle = 0;
 
   ProverContext(IHalPtr hal, size_t po2) : prover(hal, po2) {}
 };
@@ -176,6 +171,8 @@ const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustS
     }
     // ctx->image.dump();
     ctx->io.loadSegment(segment);
+    ctx->endCycle = segment->suspendCycle;
+    LOG(1, "endCycle: " << ctx->endCycle);
   } catch (const std::exception& err) {
     LOG(0, "ERROR: " << err.what());
     return strdup(err.what());
@@ -189,7 +186,15 @@ const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustS
 const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx, uint32_t* isDone) {
   nvtx3::scoped_range range("preflight");
   try {
-    *isDone = ctx->prover.preflight(ctx->image, ctx->io);
+    uint32_t retiredCycles;
+    *isDone = ctx->prover.preflight(ctx->image, ctx->io, ctx->endCycle, &retiredCycles);
+    ctx->endCycle -= retiredCycles;
+    LOG(1,
+        "retiredCycles: " << retiredCycles << ", endCycle: " << ctx->endCycle
+                          << ", isDone: " << *isDone);
+    if (ctx->endCycle == 0) {
+      *isDone = true;
+    }
   } catch (const std::exception& err) {
     LOG(0, "ERROR: " << err.what());
     return strdup(err.what());

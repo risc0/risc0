@@ -50,6 +50,7 @@ pub struct RawSegment {
     pub image: RawMemoryImage,
     pub reads: RawSlice<RawSlice<u8>>,
     pub writes: RawSlice<u32>,
+    pub suspend_cycle: u32,
 }
 
 type RawError = *const std::os::raw::c_char;
