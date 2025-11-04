@@ -98,6 +98,8 @@ use ark_serialize::CanonicalDeserialize;
 use num_bigint::BigInt;
 
 pub use types::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
+#[cfg(feature = "blake3")]
+pub use verifier::blake3::verifying_key as blake3_verifying_key;
 pub use verifier::{Fr, Verifier, VerifyingKey, risc0::verifying_key};
 
 /// Deserialize an element over the G1 group from bytes in big-endian format

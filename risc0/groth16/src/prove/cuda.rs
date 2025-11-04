@@ -188,8 +188,8 @@ pub(crate) fn shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
 }
 
 #[cfg(feature = "blake3")]
-pub(crate) fn blake3_shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
-    tracing::info!("blake3_shrink_wrap: {} seal bytes", seal_bytes.len());
+pub(crate) fn blake3_shrink_wrap(seal_json: &serde_json::Value) -> Result<Seal> {
+    tracing::info!("blake3_shrink_wrap");
 
     // TODO(ec2): make rzup component
     // let root_dir = Rzup::new()
@@ -210,7 +210,7 @@ pub(crate) fn blake3_shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
     let prove_inputs = ProveInputs::new(&root_dir, &root_dir.join("verify_for_guest_final.zkey"))
         .context("failed to open blake3 groth16 input files")?;
 
-    let inputs = to_json(seal_bytes)?;
+    let inputs = seal_json.to_string();
 
     let graph_path = root_dir.join("verify_for_guest_graph.bin");
     let witness =

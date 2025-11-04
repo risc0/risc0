@@ -154,6 +154,7 @@ client = [
   "dep:tempfile",
   "std",
 ]
+blake3 = ["risc0-groth16/blake3"]
 bonsai = ["dep:bonsai-sdk"]
 cuda = [
   "prove",
@@ -164,7 +165,7 @@ cuda = [
   "risc0-groth16/cuda",
   "risc0-zkp/cuda",
 ]
-default = ["client", "bonsai"]
+default = ["client", "bonsai", "blake3"]
 r0vm-ver-compat = []
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test

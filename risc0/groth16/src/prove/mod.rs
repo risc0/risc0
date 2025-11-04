@@ -28,6 +28,9 @@ use crate::Seal;
 
 pub use self::seal_to_json::to_json;
 
+#[cfg(feature = "blake3")]
+pub use self::seal_to_json::identity_seal_json_blake3;
+
 /// Produce a Groth16 proof from an `identity_p254` seal.
 pub fn shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
     cfg_if::cfg_if! {
@@ -41,12 +44,12 @@ pub fn shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
 
 #[cfg(feature = "blake3")]
 /// Produce a Groth16 proof from an `identity_p254` seal.
-pub fn blake3_shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
+pub fn blake3_shrink_wrap(identity_p254_seal_json: &serde_json::Value) -> Result<Seal> {
     cfg_if::cfg_if! {
         if #[cfg(feature = "cuda")] {
-            self::cuda::blake3_shrink_wrap(identity_p254_seal_bytes)
+            self::cuda::blake3_shrink_wrap(identity_p254_seal_json)
         } else {
-            let _ = identity_p254_seal_bytes;
+            let _ = identity_p254_seal_json;
             unimplemented!("blake3 shrink wrap is only supported with cuda feature");
             // self::docker::shrink_wrap(identity_p254_seal_bytes)
         }
