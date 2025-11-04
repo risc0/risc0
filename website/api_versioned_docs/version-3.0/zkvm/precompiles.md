@@ -29,7 +29,7 @@ each fork's repository on GitHub.
 | [`bls12_381`](https://github.com/risc0/zkcrypto-bls12_381/releases)           | 0.8.0                          | `bls12_381 = { git = "https://github.com/risc0/zkcrypto-bls12_381", tag = "v0.8.0-risczero.0" }`             | No                      |
 | [`blst`](https://github.com/risc0/blst/releases)                              | 0.3.14                         | `blst = { git = "https://github.com/risc0/blst", tag = "blst/v0.3.14-risczero.0" }`                          | No                      |
 | [`crypto-bigint`](https://github.com/risc0/RustCrypto-crypto-bigint/releases) | 0.5.5, 0.5.4, 0.5.3, 0.5.2     | `crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.5-risczero.0" }`   | No                      |
-| [`c-kzg`](https://github.com/risc0/c-kzg-4844/releases)[^2]                   | 1.0.3, 2.1.0, 2.1.1, 2.1.5     | `c-kzg = { git = "https://github.com/risc0/c-kzg-4844", tag = "c-kzg/v2.1.5-risczero.0" }`                   | No                      |
+| [`c-kzg`](https://github.com/risc0/c-kzg-4844/releases)[^2]                   | 1.0.3, 2.1.0, 2.1.1, 2.1.5     | `c-kzg = { git = "https://github.com/risc0/c-kzg-4844", tag = "v2.1.5-risczero.0" }`                   | No                      |
 
 Make sure that your dependency gives the same patch version of the crate as listed in
 the git tag of the patch. If you need other patch versions or crates than listed here, please reach
