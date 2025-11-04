@@ -133,6 +133,7 @@ private:
 extern "C" {
 
 struct ProverContext {
+  PreflightResults preflightData;
   Rv32imProver prover;
   MemoryImage image;
   ReplayHostIO io;
@@ -189,7 +190,7 @@ const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustS
 const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx) {
   nvtx3::scoped_range range("preflight");
   try {
-    ctx->prover.preflight(ctx->image, ctx->io);
+    ctx->preflightData = preflight(ctx->prover.po2(), ctx->image, ctx->io);
   } catch (const std::exception& err) {
     LOG(0, "ERROR: " << err.what());
     return strdup(err.what());
@@ -208,7 +209,7 @@ const char* risc0_circuit_rv32im_m3_prove(ProverContext* ctx) {
     uint32_t po2 = ctx->prover.po2();
     // LOG(0, "po2: " << po2);
     writeIop.write(po2);
-    ctx->prover.prove(writeIop);
+    ctx->prover.prove(writeIop, ctx->preflightData);
     ctx->transcript = writeIop.getTranscript();
 
     ReadIop readIop(ctx->transcript.data(), ctx->transcript.size());
