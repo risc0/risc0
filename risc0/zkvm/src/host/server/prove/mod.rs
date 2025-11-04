@@ -225,7 +225,7 @@ pub trait ProverServer: private::Sealed {
             &seal_bytes,
             receipt_claim.pre.digest(),
             receipt_claim.post.digest(),
-            receipt.control_id,
+            ident_receipt.control_id,
             control_root,
             journal,
         )?;

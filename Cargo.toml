@@ -99,7 +99,4 @@ lto = false
 incremental = true
 
 [workspace.lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = [
-  'cfg(ci)',
-  'cfg(ci_profile, values("fast", "medium", "slow"))',
-] }
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(ci)', 'cfg(ci_profile, values("fast", "medium", "slow"))'] }
