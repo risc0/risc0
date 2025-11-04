@@ -49,7 +49,7 @@ export function Benchmarks() {
     };
 
     // Prepare data points for charts
-    const dataset = Object.keys(data.entries).map((name) => ({
+    const dataset = names.map((name) => ({
       name,
       dataSet: collectBenchesPerTestCase(data.entries[name]),
     }));
