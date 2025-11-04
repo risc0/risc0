@@ -30,11 +30,11 @@ template <typename C> struct FetchBlock {
   RegU32<C> nextPc;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
-    T::apply(ctx, iCacheCycle);
-    T::apply(ctx, loadCycle);
-    T::apply(ctx, mode);
-    T::apply(ctx, pc);
-    T::apply(ctx, nextPc);
+    T::apply(ctx, "iCacheCycle", iCacheCycle);
+    T::apply(ctx, "loadCycle", loadCycle);
+    T::apply(ctx, "mode", mode);
+    T::apply(ctx, "pc", pc);
+    T::apply(ctx, "nextPc", nextPc);
   }
 
   FDEV void set(CTX, FetchWitness witness, Val<C> cycle) DEV;
@@ -71,20 +71,24 @@ template <typename C> struct DecodeBlock {
   }
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, count);
-    T::apply(ctx, fetch, fetch.loadCycle.get());
-    T::apply(ctx, pcDecomp, fetch.pc.get());
-    T::apply(ctx, verifyPc, fetch.pc.get(), fetch.isMM());
-    T::apply(ctx, load0, fetch.loadCycle.get());
-    T::apply(ctx, load1, fetch.loadCycle.get());
-    T::apply(ctx, low16Decomp, ValU32<C>{low16(), 0});
-    T::apply(ctx, computeNext, fetch.pc.get(), ValU32<C>(Val<C>(4) - isCompressed.get() * 2, 0));
-    T::apply(ctx, bits);
-    T::apply(ctx, opcode);
-    T::apply(ctx, idx1);
-    T::apply(ctx, idx2);
-    T::apply(ctx, imm);
-    T::apply(ctx, options);
+    T::apply(ctx, "count", count);
+    T::apply(ctx, "fetch", fetch, fetch.loadCycle.get());
+    T::apply(ctx, "pcDecomp", pcDecomp, fetch.pc.get());
+    T::apply(ctx, "verifyPc", verifyPc, fetch.pc.get(), fetch.isMM());
+    T::apply(ctx, "load0", load0, fetch.loadCycle.get());
+    T::apply(ctx, "load1", load1, fetch.loadCycle.get());
+    T::apply(ctx, "low16Decomp", low16Decomp, ValU32<C>{low16(), 0});
+    T::apply(ctx,
+             "computeNext",
+             computeNext,
+             fetch.pc.get(),
+             ValU32<C>(Val<C>(4) - isCompressed.get() * 2, 0));
+    T::apply(ctx, "bits", bits);
+    T::apply(ctx, "opcode", opcode);
+    T::apply(ctx, "idx1", idx1);
+    T::apply(ctx, "idx2", idx2);
+    T::apply(ctx, "imm", imm);
+    T::apply(ctx, "options", options);
   }
 
   FDEV void set(CTX, DecodeWitness witness) DEV;

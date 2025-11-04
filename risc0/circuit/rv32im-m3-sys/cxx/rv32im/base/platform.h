@@ -29,6 +29,7 @@ struct RowInfo {
 #define MDEV /**/
 #define MTHR /**/
 #define CONSTANT constexpr
+#define CONSTARG /**/
 
 #include <array>
 
@@ -61,6 +62,7 @@ struct RowInfo {
 #define MDEV device
 #define MTHR thread
 #define CONSTANT constexpr constant
+#define CONSTARG constant
 
 using namespace metal;
 
@@ -83,6 +85,7 @@ inline uint32_t ATOMIC_GET(atomic_uint device& data) {
 #define MDEV /**/
 #define MTHR /**/
 #define CONSTANT constexpr
+#define CONSTARG /**/
 
 #include "zkp/fp.h"
 #include "zkp/fpext.h"

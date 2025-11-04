@@ -31,8 +31,8 @@ template <typename C> struct RegU32 {
   Reg<C> high;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, low);
-    T::apply(ctx, high);
+    T::apply(ctx, "low", low);
+    T::apply(ctx, "high", high);
   }
 
   FDEV void set(CTX, uint32_t val) DEV;
@@ -55,10 +55,10 @@ template <typename C> struct AddU32 {
   BitReg<C> carryHigh;
 
   template <typename T> FDEV void applyInner(CTX, ValU32<C> a, ValU32<C> b) DEV {
-    T::apply(ctx, low);
-    T::apply(ctx, carryLow);
-    T::apply(ctx, high);
-    T::apply(ctx, carryHigh);
+    T::apply(ctx, "low", low);
+    T::apply(ctx, "carryLow", carryLow);
+    T::apply(ctx, "high", high);
+    T::apply(ctx, "carryHigh", carryHigh);
   }
 
   // Set based on the 32 bit inputs
@@ -88,9 +88,9 @@ template <typename C> struct AddressDecompose {
   BitReg<C> low1;
 
   template <typename T> FDEV void applyInner(CTX, ValU32<C> val) DEV {
-    T::apply(ctx, mid14);
-    T::apply(ctx, low0);
-    T::apply(ctx, low1);
+    T::apply(ctx, "mid14", mid14);
+    T::apply(ctx, "low0", low0);
+    T::apply(ctx, "low1", low1);
   }
 
   FDEV void set(CTX, uint32_t val) DEV;
@@ -110,7 +110,7 @@ template <typename C> struct AddressVerify {
   RegU16<C> highSub;
 
   template <typename T> FDEV void applyInner(CTX, ValU32<C> val, Val<C> mode) DEV {
-    T::apply(ctx, highSub);
+    T::apply(ctx, "highSub", highSub);
   }
 
   FDEV void set(CTX, uint32_t val, uint32_t mode) DEV;
@@ -126,8 +126,8 @@ template <typename C> struct GetSign {
   RegU16<C> signVerify;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> inHigh) DEV {
-    T::apply(ctx, sign);
-    T::apply(ctx, signVerify);
+    T::apply(ctx, "sign", sign);
+    T::apply(ctx, "signVerify", signVerify);
   }
 
   FDEV void set(CTX, uint32_t val) DEV;
@@ -147,10 +147,10 @@ template <typename C> struct NegU32 {
   RegU16<C> outHigh;
 
   template <typename T> FDEV void applyInner(CTX, ValU32<C> in, Val<C> neg) DEV {
-    T::apply(ctx, carryLow);
-    T::apply(ctx, carryHigh);
-    T::apply(ctx, outLow);
-    T::apply(ctx, outHigh);
+    T::apply(ctx, "carryLow", carryLow);
+    T::apply(ctx, "carryHigh", carryHigh);
+    T::apply(ctx, "outLow", outLow);
+    T::apply(ctx, "outHigh", outHigh);
   }
 
   FDEV void set(CTX, uint32_t in, uint32_t neg) DEV;
@@ -173,14 +173,14 @@ template <typename C> struct AbsU32 {
   RegU16<C> absHigh;
 
   template <typename T> FDEV void applyInner(CTX, Val<C> isSigned) DEV {
-    T::apply(ctx, in);
-    T::apply(ctx, neg);
-    T::apply(ctx, sign);
-    T::apply(ctx, signVerify);
-    T::apply(ctx, carryLow);
-    T::apply(ctx, carryHigh);
-    T::apply(ctx, absLow);
-    T::apply(ctx, absHigh);
+    T::apply(ctx, "in", in);
+    T::apply(ctx, "neg", neg);
+    T::apply(ctx, "sign", sign);
+    T::apply(ctx, "signVerify", signVerify);
+    T::apply(ctx, "carryLow", carryLow);
+    T::apply(ctx, "carryHigh", carryHigh);
+    T::apply(ctx, "absLow", absLow);
+    T::apply(ctx, "absHigh", absHigh);
   }
 
   FDEV void set(CTX, uint32_t in, uint32_t isSigned) DEV;

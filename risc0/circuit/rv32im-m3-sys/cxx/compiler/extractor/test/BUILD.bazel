@@ -25,5 +25,6 @@ cc_test(
     deps = [
         "//compiler/extractor",
         "//rv32im/circuit",
+        "@zirgen//zirgen/compiler/picus",
     ],
 )
