@@ -179,6 +179,7 @@ impl ProverOpts {
         }
     }
 
+    #[cfg(feature = "blake3")]
     /// Choose the prover that generates Blake3 Groth16 receipts which are constant size in the length of
     /// the execution and small enough to verify on blockchains, like Ethereum. Compatible only with
     /// guests that have journal size of 32 bytes.

@@ -251,6 +251,7 @@ impl DefaultProver {
         Ok(Arc::into_inner(result.receipt).unwrap())
     }
 
+    #[cfg(feature = "blake3")]
     fn shrink_wrap_blake3_groth16(&self, receipt: &Receipt, dev_mode: bool) -> Result<Receipt> {
         let shrink_wrap_request = ShrinkWrapRequest {
             kind: ShrinkWrapKind::Blake3Groth16,
