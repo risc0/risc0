@@ -1569,8 +1569,8 @@ pub fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32, _flags: u32) -> Res
         return Err(Err::Fault);
     }
 
-    // Check if address is in user memory range (below 0xC0000000)
-    if _filename >= 0xC0000000 {
+    // Check if address is in user memory range (below kernel space)
+    if _filename >= crate::constants::KERNEL_SPACE_START {
         kprint!(
             "sys_faccessat2: invalid filename address (out of user memory): 0x{:x}",
             _filename
@@ -2229,7 +2229,7 @@ pub fn sys_fchmodat(dfd: u32, filename: u32, mode: u32, flag: u32) -> Result<u32
     }
 
     // Check if address is in user memory range
-    if filename >= 0xC0000000 {
+    if filename >= crate::constants::KERNEL_SPACE_START {
         kprint!(
             "sys_fchmodat: invalid filename address (out of user memory): 0x{:x}",
             filename
@@ -3464,7 +3464,9 @@ pub fn sys_linkat(
     }
 
     // Check if addresses are in user memory range
-    if oldname >= 0xC0000000 || newname >= 0xC0000000 {
+    if oldname >= crate::constants::KERNEL_SPACE_START
+        || newname >= crate::constants::KERNEL_SPACE_START
+    {
         kprint!("sys_linkat: address out of user memory range");
         return Err(Err::Fault);
     }
@@ -3961,7 +3963,7 @@ pub fn sys_openat2(dfd: u32, filename: u32, how_ptr: u32, how_size: u32) -> Resu
         return Err(Err::Fault);
     }
 
-    if how_ptr >= 0xC0000000 {
+    if how_ptr >= crate::constants::KERNEL_SPACE_START {
         kprint!("sys_openat2: invalid how pointer: 0x{:x}", how_ptr);
         return Err(Err::Fault);
     }
