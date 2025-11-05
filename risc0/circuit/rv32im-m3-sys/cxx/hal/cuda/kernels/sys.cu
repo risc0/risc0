@@ -29,30 +29,50 @@ extern "C" void cuda_free(void* buf) {
   cudaFree(buf);
 }
 
-extern "C" bool cuda_sync() {
-  cudaError_t err = cudaDeviceSynchronize();
+extern "C" bool cuda_sync(cudaStream_t stream) {
+  cudaError_t err = cudaStreamSynchronize(stream);
   if (err != cudaSuccess) {
     fprintf(stderr, "Failed to sync: %s\n", cudaGetErrorString(err));
   }
   return err == cudaSuccess;
 }
 
-extern "C" bool cuda_copy_to_host_sync(void* host, const void* dev, size_t size) {
-  cudaError_t err = cudaMemcpy(host, dev, size, cudaMemcpyDeviceToHost);
+extern "C" bool
+cuda_copy_to_host_sync(cudaStream_t stream, void* host, const void* dev, size_t size) {
+  cudaError_t err = cudaMemcpyAsync(host, dev, size, cudaMemcpyDeviceToHost, stream);
+  if (!cuda_sync(stream))
+    return false;
   return err == cudaSuccess;
 }
 
-extern "C" bool cuda_copy_to_dev_sync(void* dev, const void* host, size_t size) {
-  cudaError_t err = cudaMemcpy(dev, host, size, cudaMemcpyHostToDevice);
+extern "C" bool
+cuda_copy_to_dev_sync(cudaStream_t stream, void* dev, const void* host, size_t size) {
+  cudaError_t err = cudaMemcpyAsync(dev, host, size, cudaMemcpyHostToDevice, stream);
+  if (!cuda_sync(stream))
+    return false;
   return err == cudaSuccess;
 }
 
-extern "C" bool cuda_copy_dev(void* dst, void* src, size_t size) {
-  cudaError_t err = cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice);
+extern "C" bool cuda_copy_dev(cudaStream_t stream, void* dst, void* src, size_t size) {
+  cudaError_t err = cudaMemcpyAsync(dst, src, size, cudaMemcpyDeviceToDevice, stream);
+  if (!cuda_sync(stream))
+    return false;
   return err == cudaSuccess;
 }
 
-extern "C" bool cuda_zero_dev(void* buf, size_t size) {
-  cudaError_t err = cudaMemset(buf, 0, size);
+extern "C" bool cuda_zero_dev(cudaStream_t stream, void* buf, size_t size) {
+  cudaError_t err = cudaMemsetAsync(buf, 0, size, stream);
+  if (!cuda_sync(stream))
+    return false;
+  return err == cudaSuccess;
+}
+
+extern "C" bool cuda_stream_create(cudaStream_t* stream) {
+  cudaError_t err = cudaStreamCreate(stream);
+  return err == cudaSuccess;
+}
+
+extern "C" bool cuda_stream_destroy(cudaStream_t stream) {
+  cudaError_t err = cudaStreamDestroy(stream);
   return err == cudaSuccess;
 }
