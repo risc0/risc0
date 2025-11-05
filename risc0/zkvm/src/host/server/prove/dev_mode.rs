@@ -408,7 +408,7 @@ where
     Ok(Duration::from_secs_f64(secs))
 }
 
-/// Utility macro to compress repeated checks that dev mode is not disabled.
+/// Utility function to compress repeated checks that dev mode is not disabled.
 fn ensure_dev_mode_allowed() -> Result<()> {
     ensure!(
         cfg!(not(feature = "disable-dev-mode")),
