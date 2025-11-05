@@ -279,57 +279,17 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
         opcode,
         funct7
     );
-    // Check for floating point operations (opcode 0x43) - R4-type instructions
-    if opcode == 0x43 {
-        /*let msg = str_format!(
-            str256,
-            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
-            instruction,
-            mepc
-        );
-        print(&msg); */
-        unsafe {
-            emulate_fp_instruction(instruction, mepc);
-        }
-    }
-
-    // Check for floating point operations (opcode 0x47) - R4-type instructions
-    if opcode == 0x47 {
-        /* let msg = str_format!(
-            str256,
-            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
-            instruction,
-            mepc
-        );
-        print(&msg); */
-        unsafe {
-            emulate_fp_instruction(instruction, mepc);
-        }
-    }
-
-    // Check for floating point operations (opcode 0x4b) - R4-type instructions
-    if opcode == 0x4b {
-        /* let msg = str_format!(
-            str256,
-            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
-            instruction,
-            mepc
-        );
-        print(&msg); */
-        unsafe {
-            emulate_fp_instruction(instruction, mepc);
-        }
-    }
-
-    // Check for floating point operations (opcode 0x4f) - R4-type instructions
-    if opcode == 0x4f {
-        debug_print!(
-            "Processing R4-type FP instruction: {:#08x} at PC: {:#010x}",
+    // Check for floating point operations (opcode 0x43/0x47/0x4b/0x4f) - R4-type instructions
+    // These should call emulate_fmadd directly, not go through funct7 dispatch
+    if opcode == 0x43 || opcode == 0x47 || opcode == 0x4b || opcode == 0x4f {
+        trace_print!(
+            "Processing R4-type FP instruction: opcode={:#02x}, insn={:#08x} at PC: {:#010x}",
+            opcode,
             instruction,
             mepc
         );
         unsafe {
-            emulate_fp_instruction(instruction, mepc);
+            crate::softfloat::emulate_fmadd(instruction);
         }
     }
 

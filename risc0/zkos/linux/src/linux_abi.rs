@@ -443,6 +443,7 @@ pub enum Err {
     Inval = -22,       // EINVAL
     MFile = -24,       // EMFILE - Too many open files
     FileTooBig = -27,  // EFBIG - File too large
+    NoSpc = -28,       // ENOSPC - No space left on device
     NameTooLong = -36, // ENAMETOOLONG - File name too long
     NoSys = -38,       // ENOSYS - Function not implemented
     Loop = -40,        // ELOOP - Too many symbolic links encountered
@@ -454,6 +455,170 @@ pub enum Err {
 impl Err {
     pub fn as_errno(&self) -> u32 {
         *self as u32
+    }
+}
+
+// Memory region tracking for EFAULT validation
+#[derive(Clone, Copy, Debug)]
+#[allow(dead_code)]
+pub struct MemoryRegion {
+    pub start: u32,
+    pub end: u32,    // Exclusive end address
+    pub readable: bool,
+    pub writable: bool,
+    pub executable: bool,
+    pub name: &'static str,
+}
+
+#[allow(dead_code)]
+impl MemoryRegion {
+    const fn new_empty() -> Self {
+        Self {
+            start: 0,
+            end: 0,
+            readable: false,
+            writable: false,
+            executable: false,
+            name: "",
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.start == 0 && self.end == 0
+    }
+
+    fn contains(&self, addr: u32) -> bool {
+        !self.is_empty() && addr >= self.start && addr < self.end
+    }
+
+    fn contains_range(&self, addr: u32, len: usize) -> bool {
+        if self.is_empty() || len == 0 {
+            return false;
+        }
+        let end_addr = addr.saturating_add(len as u32);
+        addr >= self.start && end_addr <= self.end && end_addr >= addr
+    }
+}
+
+// Global memory map (fixed-size array for no_std compatibility)
+const MAX_MEMORY_REGIONS: usize = 128;
+static mut MEMORY_REGIONS: [MemoryRegion; MAX_MEMORY_REGIONS] =
+    [MemoryRegion::new_empty(); MAX_MEMORY_REGIONS];
+static mut MEMORY_REGION_COUNT: usize = 0;
+
+// Memory map functions
+pub fn register_memory_region(
+    start: u32,
+    end: u32,
+    readable: bool,
+    writable: bool,
+    executable: bool,
+    name: &'static str,
+) {
+    unsafe {
+        if MEMORY_REGION_COUNT < MAX_MEMORY_REGIONS {
+            kprint!(
+                "register_memory_region: [{:08x}-{:08x}) {} r:{} w:{} x:{}",
+                start,
+                end,
+                name,
+                readable,
+                writable,
+                executable
+            );
+            MEMORY_REGIONS[MEMORY_REGION_COUNT] = MemoryRegion {
+                start,
+                end,
+                readable,
+                writable,
+                executable,
+                name,
+            };
+            MEMORY_REGION_COUNT += 1;
+        } else {
+            kprint!("register_memory_region: WARNING - MAX_MEMORY_REGIONS reached!");
+        }
+    }
+}
+
+pub fn unregister_memory_region(start: u32, end: u32) {
+    unsafe {
+        let mut found_idx = None;
+        for i in 0..MEMORY_REGION_COUNT {
+            if MEMORY_REGIONS[i].start == start && MEMORY_REGIONS[i].end == end {
+                found_idx = Some(i);
+                break;
+            }
+        }
+        
+        if let Some(idx) = found_idx {
+            kprint!("unregister_memory_region: [{:08x}-{:08x}) {}", start, end, MEMORY_REGIONS[idx].name);
+            // Shift remaining regions down
+            for i in idx..MEMORY_REGION_COUNT - 1 {
+                MEMORY_REGIONS[i] = MEMORY_REGIONS[i + 1];
+            }
+            MEMORY_REGIONS[MEMORY_REGION_COUNT - 1] = MemoryRegion::new_empty();
+            MEMORY_REGION_COUNT -= 1;
+        }
+    }
+}
+
+#[allow(dead_code)]
+pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> bool {
+    if addr == 0 || len == 0 {
+        return false;
+    }
+    
+    // Check for overflow
+    let end_addr = addr.checked_add(len as u32);
+    if end_addr.is_none() {
+        return false;
+    }
+    let end_addr = end_addr.unwrap();
+    
+    // Reject kernel space
+    if addr >= 0xC0000000 || end_addr > 0xC0000000 {
+        return false;
+    }
+    
+    unsafe {
+        for i in 0..MEMORY_REGION_COUNT {
+            let region = &MEMORY_REGIONS[i];
+            if region.contains_range(addr, len) {
+                // Found a containing region - check permissions
+                if require_write {
+                    return region.writable;
+                } else {
+                    return region.readable;
+                }
+            }
+        }
+    }
+    
+    // For now, allow any user space address (< 0xC0000000) that we haven't explicitly tracked
+    // This is permissive for ELF segments we don't track yet
+    // TODO: Track ELF segments from host to be more strict
+    true
+}
+
+#[allow(dead_code)]
+pub fn dump_memory_regions() {
+    kprint!("=== Memory Regions ({} total) ===", unsafe {
+        MEMORY_REGION_COUNT
+    });
+    unsafe {
+        for i in 0..MEMORY_REGION_COUNT {
+            let r = &MEMORY_REGIONS[i];
+            kprint!(
+                "  [{:08x}-{:08x}) {} r:{} w:{} x:{}",
+                r.start,
+                r.end,
+                r.name,
+                r.readable,
+                r.writable,
+                r.executable
+            );
+        }
     }
 }
 
@@ -1089,8 +1254,18 @@ fn sys_brk(addr: u32) -> Result<u32, Err> {
         }
 
         // Update the break
+        let old_brk = current_brk;
         core::ptr::addr_of_mut!(BRK).write_volatile(addr);
-        kprint!("sys_brk: updated BRK to {:08x}", addr);
+        kprint!("sys_brk: updated BRK from {:08x} to {:08x}", old_brk, addr);
+        
+        // Update memory region tracking
+        // Unregister old heap region if it exists
+        if old_brk != original_brk {
+            unregister_memory_region(original_brk, old_brk);
+        }
+        // Register new heap region
+        register_memory_region(original_brk, addr, true, true, false, "heap");
+        
         Ok(addr)
     }
 }
@@ -1278,6 +1453,20 @@ fn sys_mmap(
         }
         kprint!("sys_mmap: new mmap base = {:08x}", new_mmap_base);
         set_mmap_base(new_mmap_base);
+        
+        // Track the allocated region
+        let readable = (_prot & 0x1) != 0; // PROT_READ
+        let writable = (_prot & 0x2) != 0; // PROT_WRITE
+        let executable = (_prot & 0x4) != 0; // PROT_EXEC
+        register_memory_region(
+            new_mmap_base,
+            new_mmap_base + aligned_length as u32,
+            readable,
+            writable,
+            executable,
+            "mmap-anon",
+        );
+        
         Ok(ptr as u32)
     } else if !is_anonymous && _flags & MAP_FIXED != MAP_FIXED {
         let mmap_base = get_mmap_base();
@@ -1310,6 +1499,20 @@ fn sys_mmap(
                 zero_len
             );
         }
+        
+        // Track the allocated region
+        let readable = (_prot & 0x1) != 0; // PROT_READ
+        let writable = (_prot & 0x2) != 0; // PROT_WRITE
+        let executable = (_prot & 0x4) != 0; // PROT_EXEC
+        register_memory_region(
+            new_mmap_base,
+            new_mmap_base + aligned_length as u32,
+            readable,
+            writable,
+            executable,
+            "mmap-file",
+        );
+        
         Ok(ptr as u32)
     } else if !is_anonymous && _flags & MAP_FIXED == MAP_FIXED && _addr != 0 {
         kprint!(
@@ -1338,6 +1541,20 @@ fn sys_mmap(
         if _addr + len < get_mmap_base() {
             kpanic!("sys_mmap: mmap base + len < get_mmap_base()");
         }
+        
+        // Track the allocated region
+        let readable = (_prot & 0x1) != 0; // PROT_READ
+        let writable = (_prot & 0x2) != 0; // PROT_WRITE
+        let executable = (_prot & 0x4) != 0; // PROT_EXEC
+        register_memory_region(
+            _addr,
+            _addr + aligned_length as u32,
+            readable,
+            writable,
+            executable,
+            "mmap-file-fixed",
+        );
+        
         kprint!("sys_mmap: returning {:08x}", ptr as u32);
         Ok(ptr as u32)
     } else if is_anonymous && _flags & MAP_FIXED == MAP_FIXED && _addr != 0 {
@@ -1346,6 +1563,20 @@ fn sys_mmap(
         unsafe {
             ptr.write_bytes(0, aligned_length);
         }
+        
+        // Track the allocated region
+        let readable = (_prot & 0x1) != 0; // PROT_READ
+        let writable = (_prot & 0x2) != 0; // PROT_WRITE
+        let executable = (_prot & 0x4) != 0; // PROT_EXEC
+        register_memory_region(
+            _addr,
+            _addr + aligned_length as u32,
+            readable,
+            writable,
+            executable,
+            "mmap-anon-fixed",
+        );
+        
         kprint!("sys_mmap: returning {:08x}", ptr as u32);
         Ok(ptr as u32)
     } else {

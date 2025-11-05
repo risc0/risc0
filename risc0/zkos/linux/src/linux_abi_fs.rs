@@ -58,6 +58,18 @@ const TEMP_FID_9: u32 = 0xFFFF_FFF6; // Additional operations
 const TEMP_FID_10: u32 = 0xFFFF_FFF5; // Additional operations
 const TEMP_FID_11: u32 = 0xFFFF_FFF4; // Additional operations
 
+// Virtual device FID values (0xFFFF_FFE0 - 0xFFFF_FFEF range)
+// These are special FIDs that represent virtual devices that don't go through 9p
+const VIRTUAL_DEV_NULL: u32 = 0xFFFF_FFE0;
+const VIRTUAL_DEV_ZERO: u32 = 0xFFFF_FFE1;
+const VIRTUAL_DEV_RANDOM: u32 = 0xFFFF_FFE2;
+const VIRTUAL_DEV_URANDOM: u32 = 0xFFFF_FFE3;
+const VIRTUAL_DEV_FULL: u32 = 0xFFFF_FFE4;
+
+// Virtual file FID values (0xFFFF_FFD0 - 0xFFFF_FFDF range)
+// These represent virtual files like /proc entries that return content
+const VIRTUAL_FILE_PROC_CPUINFO: u32 = 0xFFFF_FFD0;
+
 // fcntl constants
 #[allow(dead_code)]
 pub const F_DUPFD: u32 = 0; // Duplicate file descriptor.
@@ -523,6 +535,37 @@ pub fn init_fs() {
     set_fd(2, TEMP_FID_1);
 }
 
+// Helper function to check if a FID is a virtual device or file
+fn is_virtual_device(fid: u32) -> bool {
+    matches!(
+        fid,
+        VIRTUAL_DEV_NULL
+            | VIRTUAL_DEV_ZERO
+            | VIRTUAL_DEV_RANDOM
+            | VIRTUAL_DEV_URANDOM
+            | VIRTUAL_DEV_FULL
+            | VIRTUAL_FILE_PROC_CPUINFO
+    )
+}
+
+// Helper function to check if a FID is specifically a virtual file (like /proc entries)
+fn is_virtual_file(fid: u32) -> bool {
+    matches!(fid, VIRTUAL_FILE_PROC_CPUINFO)
+}
+
+// Check if a path is a virtual device/file and return its FID if so
+fn get_virtual_device_fid(path: &str) -> Option<u32> {
+    match path {
+        "/dev/null" => Some(VIRTUAL_DEV_NULL),
+        "/dev/zero" => Some(VIRTUAL_DEV_ZERO),
+        "/dev/random" => Some(VIRTUAL_DEV_RANDOM),
+        "/dev/urandom" => Some(VIRTUAL_DEV_URANDOM),
+        "/dev/full" => Some(VIRTUAL_DEV_FULL),
+        "/proc/cpuinfo" => Some(VIRTUAL_FILE_PROC_CPUINFO),
+        _ => None,
+    }
+}
+
 pub fn sys_close(_fd: u32) -> Result<u32, Err> {
     if _fd >= 256 {
         return Err(Err::BadFd);
@@ -539,8 +582,12 @@ pub fn sys_close(_fd: u32) -> Result<u32, Err> {
     // Decrement reference count
     let should_clunk = dec_refcount(desc_id);
 
-    // Only clunk the fid when this is the last reference
-    if should_clunk && file_desc.fid != TEMP_FID_1 && file_desc.fid != 0 {
+    // Only clunk the fid when this is the last reference and it's not a virtual device
+    if should_clunk
+        && file_desc.fid != TEMP_FID_1
+        && file_desc.fid != 0
+        && !is_virtual_device(file_desc.fid)
+    {
         clunk(file_desc.fid, false);
         // Clear the file description
         update_file_desc(
@@ -637,6 +684,103 @@ pub fn read_file_to_user_memory(fd: u32, buf: u32, count: u32, offset: u64) -> R
     Err(Err::NoSys)
 }
 
+// Generate the content for /proc/cpuinfo
+fn get_proc_cpuinfo_content() -> &'static [u8] {
+    // RISC-V cpuinfo format
+    // For RISC0 zkVM, we present it as a single RISC-V processor
+    b"processor\t: 0\n\
+hart\t\t: 0\n\
+isa\t\t: rv32imac\n\
+mmu\t\t: sv32\n\
+uarch\t\t: risc0\n\
+\n"
+}
+
+// Handle read operations for virtual devices
+fn handle_virtual_device_read(fid: u32, buf: u32, count: u32, desc_id: u32) -> Result<u32, Err> {
+    match fid {
+        VIRTUAL_DEV_NULL => {
+            // Reading from /dev/null always returns 0 (EOF)
+            kprint!("handle_virtual_device_read: /dev/null returns EOF");
+            Ok(0)
+        }
+        VIRTUAL_DEV_ZERO | VIRTUAL_DEV_FULL => {
+            // Reading from /dev/zero or /dev/full returns zeros
+            kprint!(
+                "handle_virtual_device_read: /dev/zero or /dev/full, filling {} bytes with zeros",
+                count
+            );
+            let buf_slice =
+                unsafe { core::slice::from_raw_parts_mut(buf as *mut u8, count as usize) };
+            buf_slice.fill(0);
+            Ok(count)
+        }
+        VIRTUAL_DEV_RANDOM | VIRTUAL_DEV_URANDOM => {
+            // Return pseudo-random data using a simple XOR shift PRNG
+            kprint!(
+                "handle_virtual_device_read: /dev/random or /dev/urandom, generating {} bytes",
+                count
+            );
+            let buf_slice =
+                unsafe { core::slice::from_raw_parts_mut(buf as *mut u8, count as usize) };
+            // Simple pseudo-random using XOR shift
+            static mut RAND_STATE: u32 = 0x12345678;
+            unsafe {
+                for byte in buf_slice.iter_mut() {
+                    RAND_STATE ^= RAND_STATE << 13;
+                    RAND_STATE ^= RAND_STATE >> 17;
+                    RAND_STATE ^= RAND_STATE << 5;
+                    *byte = (RAND_STATE & 0xFF) as u8;
+                }
+            }
+            Ok(count)
+        }
+        VIRTUAL_FILE_PROC_CPUINFO => {
+            // Read from /proc/cpuinfo with cursor support
+            let mut file_desc = get_file_desc(desc_id);
+            let content = get_proc_cpuinfo_content();
+            let cursor = file_desc.cursor as usize;
+
+            kprint!(
+                "handle_virtual_device_read: /proc/cpuinfo at cursor={}, count={}",
+                cursor,
+                count
+            );
+
+            // Check if we're past the end of the content
+            if cursor >= content.len() {
+                kprint!("handle_virtual_device_read: /proc/cpuinfo EOF");
+                return Ok(0); // EOF
+            }
+
+            // Calculate how many bytes to copy
+            let remaining = content.len() - cursor;
+            let to_copy = (count as usize).min(remaining);
+
+            // Copy the content to user buffer
+            let buf_slice = unsafe { core::slice::from_raw_parts_mut(buf as *mut u8, to_copy) };
+            buf_slice.copy_from_slice(&content[cursor..cursor + to_copy]);
+
+            // Update cursor
+            file_desc.cursor += to_copy as u64;
+            update_file_desc(desc_id, file_desc);
+
+            kprint!(
+                "handle_virtual_device_read: /proc/cpuinfo read {} bytes",
+                to_copy
+            );
+            Ok(to_copy as u32)
+        }
+        _ => {
+            kprint!(
+                "handle_virtual_device_read: unknown virtual device fid={}",
+                fid
+            );
+            Err(Err::Inval)
+        }
+    }
+}
+
 pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
     // Check for NULL buffer
     if _buf == 0 {
@@ -679,6 +823,12 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
     if file_desc.is_dir {
         kprint!("sys_read: fd={} is a directory", _fd);
         return Err(Err::IsDir);
+    }
+
+    // Handle virtual devices
+    if is_virtual_device(file_desc.fid) {
+        kprint!("sys_read: fd={} is a virtual device", _fd);
+        return handle_virtual_device_read(file_desc.fid, _buf, _count, fd_entry.file_desc_id);
     }
 
     if file_desc.fid != 0 && file_desc.fid != TEMP_FID_1 {
@@ -826,6 +976,37 @@ pub fn sys_write(fd: u32, buf: u32, count: u32) -> Result<u32, Err> {
     do_write(fd as i32, buf as *const u8, count as usize).map(|x| x as u32)
 }
 
+// Handle write operations for virtual devices
+fn handle_virtual_device_write(fid: u32, _buf: *const u8, count: usize) -> Result<usize, Err> {
+    match fid {
+        VIRTUAL_DEV_NULL | VIRTUAL_DEV_ZERO | VIRTUAL_DEV_RANDOM | VIRTUAL_DEV_URANDOM => {
+            // Writing to these devices always succeeds and discards data
+            kprint!(
+                "handle_virtual_device_write: /dev/null or similar, discarding {} bytes",
+                count
+            );
+            Ok(count)
+        }
+        VIRTUAL_DEV_FULL => {
+            // Writing to /dev/full always returns ENOSPC (no space)
+            kprint!("handle_virtual_device_write: /dev/full, returning ENOSPC");
+            Err(Err::NoSpc)
+        }
+        VIRTUAL_FILE_PROC_CPUINFO => {
+            // Writing to /proc/cpuinfo is not allowed (read-only)
+            kprint!("handle_virtual_device_write: /proc/cpuinfo is read-only");
+            Err(Err::Inval)
+        }
+        _ => {
+            kprint!(
+                "handle_virtual_device_write: unknown virtual device fid={}",
+                fid
+            );
+            Err(Err::Inval)
+        }
+    }
+}
+
 pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
     // Special case: NULL buffer with count=0 is allowed (Linux behavior)
     // This allows write(fd, NULL, 0) to succeed and return 0
@@ -841,7 +1022,15 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
     }
 
     if fd == 1 || fd == 2 {
-        host_write(fd as u32, buf, count);
+        // Chunk stdout/stderr writes to respect MAX_IO_BYTES (1024) limit
+        const MAX_IO_BYTES: usize = 1024;
+        let mut offset = 0usize;
+        while offset < count {
+            let chunk_size = core::cmp::min(MAX_IO_BYTES, count - offset);
+            let chunk_ptr = unsafe { buf.add(offset) };
+            host_write(fd as u32, chunk_ptr, chunk_size);
+            offset += chunk_size;
+        }
     } else {
         if !(0..256).contains(&fd) {
             return Err(Err::Inval);
@@ -867,6 +1056,12 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
             // O_RDONLY - can't write
             kprint!("do_write: fd={} opened read-only", fd);
             return Err(Err::BadFd);
+        }
+
+        // Handle virtual devices
+        if is_virtual_device(file_desc.fid) {
+            kprint!("do_write: fd={} is a virtual device", fd);
+            return handle_virtual_device_write(file_desc.fid, buf, count);
         }
 
         if file_desc.fid != 0 && file_desc.fid != TEMP_FID_1 {
@@ -5489,6 +5684,45 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
         mode
     );
 
+    // Check if this is a virtual device file
+    if let Some(virtual_fid) = get_virtual_device_fid(filename_str) {
+        kprint!("sys_openat: opening virtual device: {}", filename_str);
+
+        let fd = find_free_fd()?;
+        let desc_id = find_free_file_desc()?;
+
+        let p9_flags = if (_flags & 0o3) == 0o0 {
+            0 // O_RDONLY
+        } else if (_flags & 0o3) == 0o1 {
+            1 // O_WRONLY
+        } else {
+            2 // O_RDWR
+        };
+
+        update_file_desc(
+            desc_id,
+            FileDescription {
+                fid: virtual_fid,
+                cursor: 0,
+                is_dir: false,
+                mode: p9_flags,
+                flags: _flags,
+                refcount: 1,
+            },
+        );
+
+        update_fd(
+            fd,
+            FileDescriptor {
+                file_desc_id: desc_id,
+                cloexec: false,
+            },
+        );
+
+        kprint!("sys_openat: virtual device opened with fd={}", fd);
+        return Ok(fd);
+    }
+
     // Use top-level O_* constants
 
     let p9_flags = if (_flags & 0o3) == 0o0 {
@@ -5967,6 +6201,33 @@ pub fn sys_statx(
     let filename = str::from_utf8(filename).unwrap();
     kprint!("sys_statx: filename = {}", filename);
 
+    // Check if this is a virtual device file and handle it directly
+    if let Some(virtual_fid) = get_virtual_device_fid(filename) {
+        kprint!("sys_statx: statting virtual device: {}", filename);
+
+        let statx = create_virtual_device_statx(virtual_fid);
+
+        // Write the statx structure to the user buffer using copy_to_user
+        let statx_bytes = unsafe {
+            core::slice::from_raw_parts(
+                &statx as *const Statx as *const u8,
+                core::mem::size_of::<Statx>(),
+            )
+        };
+        let bytes_copied = crate::kernel::copy_to_user(
+            _statxbuf as *mut u8,
+            statx_bytes.as_ptr(),
+            core::mem::size_of::<Statx>(),
+        );
+        if bytes_copied == 0 {
+            kprint!("sys_statx: failed to copy statx structure to user memory");
+            return Err(Err::Fault);
+        }
+
+        kprint!("sys_statx: successfully filled statx buffer for virtual device");
+        return Ok(0);
+    }
+
     // AT_EMPTY_PATH flag (0x1000) - if filename is empty, stat the fd itself
     const AT_EMPTY_PATH: u32 = 0x1000;
     const AT_SYMLINK_NOFOLLOW: u32 = 0x100;
@@ -5996,6 +6257,33 @@ pub fn sys_statx(
             return Err(Err::Inval);
         }
         let file_desc = get_file_desc(fd_entry.file_desc_id);
+
+        // Check if this fd is a virtual device
+        if is_virtual_device(file_desc.fid) {
+            kprint!("sys_statx: fd {} is a virtual device", _dfd);
+            let statx = create_virtual_device_statx(file_desc.fid);
+
+            // Write the statx structure to the user buffer
+            let statx_bytes = unsafe {
+                core::slice::from_raw_parts(
+                    &statx as *const Statx as *const u8,
+                    core::mem::size_of::<Statx>(),
+                )
+            };
+            let bytes_copied = crate::kernel::copy_to_user(
+                _statxbuf as *mut u8,
+                statx_bytes.as_ptr(),
+                core::mem::size_of::<Statx>(),
+            );
+            if bytes_copied == 0 {
+                kprint!("sys_statx: failed to copy statx structure to user memory");
+                return Err(Err::Fault);
+            }
+
+            kprint!("sys_statx: successfully filled statx buffer for virtual device fd");
+            return Ok(0);
+        }
+
         file_desc.fid
     } else if (_flags & AT_SYMLINK_NOFOLLOW) != 0 {
         // Don't follow symlinks - use Twalk directly on the final component
@@ -6107,6 +6395,88 @@ pub fn sys_statx(
             }
             Ok(-(rlerror.ecode as i32) as u32)
         }
+    }
+}
+
+/// Create a Statx structure for virtual devices and files
+fn create_virtual_device_statx(fid: u32) -> Statx {
+    use crate::constants::{Statx, StatxTimestamp};
+
+    // Check if this is a virtual file (like /proc entries) vs a virtual device
+    let (mode, size, rdev_major, rdev_minor) = if is_virtual_file(fid) {
+        // S_IFREG (0x8000) = regular file
+        // 0444 = r--r--r-- (read-only)
+        let mode: u16 = 0x8000 | 0o444;
+        let size = match fid {
+            VIRTUAL_FILE_PROC_CPUINFO => get_proc_cpuinfo_content().len() as u64,
+            _ => 0,
+        };
+        (mode, size, 0, 0) // Regular files don't have rdev
+    } else {
+        // S_IFCHR (0x2000) = character device
+        // 0666 = rw-rw-rw- permissions
+        let mode: u16 = 0x2000 | 0o666;
+        let rdev_minor = match fid {
+            VIRTUAL_DEV_NULL => 3,
+            VIRTUAL_DEV_ZERO => 5,
+            VIRTUAL_DEV_RANDOM => 8,
+            VIRTUAL_DEV_URANDOM => 9,
+            VIRTUAL_DEV_FULL => 7,
+            _ => 0,
+        };
+        (mode, 0, 1, rdev_minor) // Devices have size 0, major=1
+    };
+
+    // Use the virtual device/file FID as a pseudo inode number
+    let ino = fid as u64;
+
+    Statx {
+        stx_mask: STATX_TYPE
+            | STATX_MODE
+            | STATX_NLINK
+            | STATX_UID
+            | STATX_GID
+            | STATX_INO
+            | STATX_SIZE,
+        stx_blksize: 4096,
+        stx_attributes: 0,
+        stx_nlink: 1,
+        stx_uid: 0, // root
+        stx_gid: 0, // root
+        stx_mode: mode,
+        __spare0: [0],
+        stx_ino: ino,
+        stx_size: size,
+        stx_blocks: 0,
+        stx_attributes_mask: 0,
+        stx_atime: StatxTimestamp {
+            tv_sec: 0,
+            tv_nsec: 0,
+            __reserved: 0,
+        },
+        stx_btime: StatxTimestamp {
+            tv_sec: 0,
+            tv_nsec: 0,
+            __reserved: 0,
+        },
+        stx_ctime: StatxTimestamp {
+            tv_sec: 0,
+            tv_nsec: 0,
+            __reserved: 0,
+        },
+        stx_mtime: StatxTimestamp {
+            tv_sec: 0,
+            tv_nsec: 0,
+            __reserved: 0,
+        },
+        stx_rdev_major: rdev_major,
+        stx_rdev_minor: rdev_minor,
+        stx_dev_major: 0,
+        stx_dev_minor: 0,
+        stx_mnt_id: 0,
+        stx_dio_mem_align: 0,
+        stx_dio_offset_align: 0,
+        __spare3: [0; 12],
     }
 }
 
