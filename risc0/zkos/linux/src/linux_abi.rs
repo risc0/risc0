@@ -577,7 +577,8 @@ pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> bool
     let end_addr = end_addr.unwrap();
     
     // Reject kernel space
-    if addr >= 0xC0000000 || end_addr > 0xC0000000 {
+    use crate::constants::KERNEL_SPACE_START;
+    if addr >= KERNEL_SPACE_START || end_addr > KERNEL_SPACE_START {
         return false;
     }
     

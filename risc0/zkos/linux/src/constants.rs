@@ -24,6 +24,17 @@ pub const FP_REGS_PTR: *mut u64 = 0xffff_4000 as *mut u64;
 // Floating point control and status register (FCSR) storage
 #[allow(dead_code)]
 pub const FCSR_PTR: *mut u32 = 0xffff_4100 as *mut u32;
+// Memory layout constants for RISC-V RV32 in zkOS
+// The address space is divided into:
+// - User space: 0x00000000 - 0xBFFFFFFF (3GB)
+// - Kernel space: 0xC0000000 - 0xFFFFFFFF (1GB)
+
+/// Start of kernel memory space (3GB boundary)
+pub const KERNEL_SPACE_START: u32 = 0xC000_0000;
+
+/// End of user memory space (just before kernel space)
+pub const USER_SPACE_END: u32 = 0xC000_0000;
+
 pub const USER_MEMORY_START_PTR: *const u8 = 0x0001_1100 as *const u8;
 pub const USER_MEMORY_LENGTH: usize = 0x4000_0000;
 pub const USER_START_PTR: *const usize = 0x0001_0000 as *const usize;
