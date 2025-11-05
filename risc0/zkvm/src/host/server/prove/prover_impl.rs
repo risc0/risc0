@@ -40,13 +40,19 @@ use crate::{
 
 /// An implementation of a Prover that runs locally.
 pub struct ProverImpl {
+    #[cfg(feature = "rv32im-m3")]
+    prover: std::rc::Rc<risc0_circuit_rv32im_m3::prove::ProverContext>,
     opts: ProverOpts,
 }
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
-    pub fn new(opts: ProverOpts) -> Self {
-        Self { opts }
+    pub fn new(opts: ProverOpts) -> Result<Self> {
+        Ok(Self {
+            #[cfg(feature = "rv32im-m3")]
+            prover: risc0_circuit_rv32im_m3::prove::segment_prover(opts.max_prover_po2)?,
+            opts,
+        })
     }
 }
 
@@ -261,9 +267,10 @@ impl ProverServer for ProverImpl {
     #[cfg(feature = "rv32im-m3")]
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
         tracing::debug!("segment_preflight");
-        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(self.opts.max_prover_po2)?;
-        prover.load_segment(&segment.inner)?;
-        Ok(Box::new(rv32im_m3::PreflightIter::new(prover, segment)))
+        Ok(Box::new(rv32im_m3::PreflightIter::new(
+            segment,
+            self.opts.max_prover_po2,
+        )?))
     }
 
     #[cfg(not(feature = "rv32im-m3"))]
@@ -314,10 +321,7 @@ impl ProverServer for ProverImpl {
     ) -> Result<SegmentReceipt> {
         tracing::debug!("prove_preflight");
 
-        let seal = preflight_results
-            .prover
-            .ok_or_else(|| anyhow!("segment_prover required"))?
-            .prove()?;
+        let seal = self.prover.prove(&preflight_results.inner)?;
 
         let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output)
             .context("Decode ReceiptClaim from seal")?;
@@ -329,7 +333,7 @@ impl ProverServer for ProverImpl {
             .digest();
         let receipt = SegmentReceipt {
             seal,
-            index: preflight_results.segment_index,
+            index: 0,
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,
@@ -462,32 +466,28 @@ fn check_claims(
 
 #[cfg(feature = "rv32im-m3")]
 mod rv32im_m3 {
-    use std::sync::Arc;
-
     use risc0_circuit_rv32im::TerminateState;
 
     use super::*;
 
     pub(crate) struct PreflightIter {
-        prover: Arc<dyn risc0_circuit_rv32im_m3::prove::SegmentProver>,
+        max_prover_po2: usize,
+        ctx: risc0_circuit_rv32im_m3::prove::SegmentContext,
         output: Option<Output>,
-        segment_index: u32,
         terminate_state: Option<TerminateState>,
         is_done: bool,
     }
 
     impl PreflightIter {
-        pub(crate) fn new(
-            prover: Arc<dyn risc0_circuit_rv32im_m3::prove::SegmentProver>,
-            segment: &Segment,
-        ) -> Self {
-            Self {
-                prover,
+        pub(crate) fn new(segment: &Segment, max_prover_po2: usize) -> Result<Self> {
+            let ctx = risc0_circuit_rv32im_m3::prove::SegmentContext::new(&segment.inner)?;
+            Ok(Self {
+                max_prover_po2,
+                ctx,
                 output: segment.output.clone(),
-                segment_index: segment.index,
                 terminate_state: segment.inner.claim.terminate_state,
                 is_done: false,
-            }
+            })
         }
     }
 
@@ -499,14 +499,17 @@ mod rv32im_m3 {
                 return None;
             }
 
-            match self.prover.preflight() {
-                Ok(is_done) => {
-                    self.is_done = is_done;
+            match self.ctx.preflight(self.max_prover_po2) {
+                Ok(preflight) => {
+                    self.is_done = preflight.is_final();
                     let results = PreflightResults {
+                        inner: preflight,
                         terminate_state: self.terminate_state,
-                        segment_index: self.segment_index,
-                        output: if is_done { self.output.clone() } else { None },
-                        prover: Some(self.prover.clone()),
+                        output: if self.is_done {
+                            self.output.clone()
+                        } else {
+                            None
+                        },
                     };
                     Some(Ok(results))
                 }

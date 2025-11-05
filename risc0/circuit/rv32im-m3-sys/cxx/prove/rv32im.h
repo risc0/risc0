@@ -36,7 +36,10 @@ struct PreflightResults {
   std::vector<uint32_t> aux;
 };
 
-PreflightResults preflight(size_t po2, rv32im::MemoryImage& image, rv32im::HostIO& io);
+using PreflightResultsPtr = std::shared_ptr<PreflightResults>;
+
+PreflightResultsPtr
+preflight(size_t po2, rv32im::MemoryImage& image, rv32im::HostIO& io, uint32_t endCycle);
 
 class Rv32imProver {
 public:

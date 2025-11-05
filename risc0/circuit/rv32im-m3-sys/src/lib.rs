@@ -13,8 +13,23 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::ffi::CStr;
-use std::os::raw::{c_char, c_int};
+use std::{
+    ffi::CStr,
+    os::raw::{c_char, c_int},
+    ptr::NonNull,
+};
+
+use anyhow::{Result, anyhow};
+
+#[repr(C)]
+pub struct SegmentContext {
+    _private: (),
+}
+
+#[repr(C)]
+pub struct PreflightContext {
+    _private: (),
+}
 
 #[repr(C)]
 pub struct ProverContext {
@@ -50,32 +65,39 @@ pub struct RawSegment {
     pub image: RawMemoryImage,
     pub reads: RawSlice<RawSlice<u8>>,
     pub writes: RawSlice<u32>,
-    pub suspend_cycle: u32,
+    pub insn_counter: u32,
 }
 
 type RawError = *const std::os::raw::c_char;
 
 unsafe extern "C" {
-    pub fn risc0_circuit_rv32im_m3_prover_new_cpu(po2: usize) -> *const ProverContext;
+    pub fn risc0_circuit_rv32im_m3_last_error() -> RawError;
+    pub fn risc0_circuit_rv32im_m3_clear_last_error();
 
-    #[cfg(feature = "cuda")]
-    pub fn risc0_circuit_rv32im_m3_prover_new_cuda(po2: usize) -> *const ProverContext;
-
+    pub fn risc0_circuit_rv32im_m3_segment_free(ctx: *const SegmentContext);
+    pub fn risc0_circuit_rv32im_m3_preflight_free(ctx: *const PreflightContext);
     pub fn risc0_circuit_rv32im_m3_prover_free(ctx: *const ProverContext);
 
+    pub fn risc0_circuit_rv32im_m3_segment_new(segment: *const RawSegment) -> *mut SegmentContext;
+
+    pub fn risc0_circuit_rv32im_m3_segment_preflight(
+        sctx: *mut SegmentContext,
+        po2: usize,
+    ) -> *mut PreflightContext;
+
+    pub fn risc0_circuit_rv32im_m3_preflight_is_final(ctx: *const PreflightContext) -> usize;
+
+    pub fn risc0_circuit_rv32im_m3_prover_new_cpu(po2: usize) -> *mut ProverContext;
+
+    #[cfg(feature = "cuda")]
+    pub fn risc0_circuit_rv32im_m3_prover_new_cuda(po2: usize) -> *mut ProverContext;
+
+    pub fn risc0_circuit_rv32im_m3_prove(
+        ctx: *const ProverContext,
+        preflight: *const PreflightContext,
+    );
+
     pub fn risc0_circuit_rv32im_m3_prover_transcript(ctx: *const ProverContext) -> RawSlice<u32>;
-
-    pub fn risc0_circuit_rv32im_m3_load_segment(
-        ctx: *const ProverContext,
-        segment: *const RawSegment,
-    ) -> RawError;
-
-    pub fn risc0_circuit_rv32im_m3_preflight(
-        ctx: *const ProverContext,
-        is_done: *mut u32,
-    ) -> RawError;
-
-    pub fn risc0_circuit_rv32im_m3_prove(ctx: *const ProverContext) -> RawError;
 }
 
 #[repr(C)]
@@ -102,5 +124,77 @@ pub unsafe extern "C" fn risc0_log_callback(level: c_int, msg: *const c_char) {
         2 => tracing::debug!("{str}"),
         3 => tracing::trace!("{str}"),
         _ => (),
+    }
+}
+
+/// Wrap a pointer-returning FFI call:
+///   - Success: returns NonNull<T>
+///   - Error:   returns Err(anyhow!("...")) from TLS last error
+pub fn ffi_wrap_ptr<T, F>(mut inner: F) -> Result<*const T>
+where
+    F: FnMut() -> *const T,
+{
+    unsafe {
+        risc0_circuit_rv32im_m3_clear_last_error();
+        let ptr = inner();
+        if ptr.is_null() {
+            Err(take_last_error())
+        } else {
+            Ok(ptr)
+        }
+    }
+}
+
+/// Wrap a pointer-returning FFI call:
+///   - Success: returns NonNull<T>
+///   - Error:   returns Err(anyhow!("...")) from TLS last error
+pub fn ffi_wrap_ptr_mut<T, F>(mut inner: F) -> Result<NonNull<T>>
+where
+    F: FnMut() -> *mut T,
+{
+    unsafe {
+        risc0_circuit_rv32im_m3_clear_last_error();
+        match NonNull::new(inner()) {
+            Some(x) => Ok(x),
+            None => Err(take_last_error()),
+        }
+    }
+}
+
+/// Wrap a void-returning FFI call that signals failure only by setting the TLS error.
+///
+/// Convention: on success, the C++ function simply returns (no set_last_error call);
+/// on failure, it catches exceptions and sets the thread-local last error.
+pub fn ffi_wrap_void<F>(mut inner: F) -> Result<()>
+where
+    F: FnMut(),
+{
+    unsafe {
+        // Clear stale error before the call
+        risc0_circuit_rv32im_m3_clear_last_error();
+        inner();
+
+        // After the call, see if an error message was set
+        let ptr = risc0_circuit_rv32im_m3_last_error();
+        if ptr.is_null() {
+            Ok(())
+        } else {
+            let msg = CStr::from_ptr(ptr).to_string_lossy().into_owned();
+            Err(anyhow!(msg))
+        }
+    }
+}
+
+/// Read the TLS error string from the C++ side and convert to anyhow::Error.
+/// If there's nothing set, synthesize a generic message (optionally include an error code).
+fn take_last_error() -> anyhow::Error {
+    unsafe {
+        let ptr = risc0_circuit_rv32im_m3_last_error();
+        let msg = if ptr.is_null() {
+            "FFI call failed with no message".to_string()
+        } else {
+            CStr::from_ptr(ptr).to_string_lossy().into_owned()
+        };
+        anyhow!(msg)
     }
 }

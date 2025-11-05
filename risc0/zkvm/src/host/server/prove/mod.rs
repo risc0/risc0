@@ -432,5 +432,5 @@ pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         return Ok(Rc::new(DevModeProver::new()));
     }
 
-    Ok(Rc::new(ProverImpl::new(opts.clone())))
+    Ok(Rc::new(ProverImpl::new(opts.clone())?))
 }

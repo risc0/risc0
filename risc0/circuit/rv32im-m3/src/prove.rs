@@ -13,38 +13,40 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::ptr::addr_of_mut;
-use std::sync::Arc;
+use std::{ptr::NonNull, rc::Rc};
 
 use anyhow::Result;
 use cfg_if::cfg_if;
 use risc0_circuit_rv32im::execute::Segment;
 use risc0_circuit_rv32im_m3_sys::*;
-use risc0_sys::ffi_wrap;
 use risc0_zkp::{core::digest::DIGEST_WORDS, field::baby_bear::Elem};
 
 use crate::verify::verify;
 
 pub type Seal = Vec<u32>;
 
-pub trait SegmentProver: Send + Sync {
-    fn load_segment(&self, segment: &Segment) -> Result<()>;
-
-    fn preflight(&self) -> Result<bool>;
-
-    fn prove(&self) -> Result<Seal>;
+pub struct SegmentContext {
+    ctx: NonNull<risc0_circuit_rv32im_m3_sys::SegmentContext>,
 }
 
-struct SegmentProverImpl {
-    ctx: *const ProverContext,
+/// Safety: A [PreflightContext] is an immutable object that can be safely
+/// passed between threads.
+#[derive(Default)]
+pub struct PreflightContext {
+    ctx: *const risc0_circuit_rv32im_m3_sys::PreflightContext,
 }
 
-unsafe impl Send for SegmentProverImpl {}
-unsafe impl Sync for SegmentProverImpl {}
+unsafe impl Send for PreflightContext {}
+unsafe impl Sync for PreflightContext {}
 
-impl SegmentProver for SegmentProverImpl {
-    fn load_segment(&self, segment: &Segment) -> Result<()> {
+pub struct ProverContext {
+    ctx: NonNull<risc0_circuit_rv32im_m3_sys::ProverContext>,
+}
+
+impl SegmentContext {
+    pub fn new(segment: &Segment) -> Result<Self> {
         tracing::debug!("load_segment: {segment:#?}",);
+
         let mut pages: Vec<RawPage> = Vec::with_capacity(segment.partial_image.pages.len());
         for (&addr, page) in segment.partial_image.pages.iter() {
             let slice: &[u32] = bytemuck::cast_slice(page.data().as_slice());
@@ -93,69 +95,91 @@ impl SegmentProver for SegmentProverImpl {
                 ptr: segment.write_record.as_ptr(),
                 len: segment.write_record.len(),
             },
-            suspend_cycle: segment.suspend_cycle,
+            insn_counter: segment.insn_counter,
         };
 
-        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_load_segment(self.ctx, &raw_segment) })
+        let ctx =
+            ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_m3_segment_new(&raw_segment) })?;
+
+        Ok(Self { ctx })
     }
 
-    fn preflight(&self) -> Result<bool> {
+    pub fn preflight(&self, po2: usize) -> Result<PreflightContext> {
         tracing::debug!("preflight");
-        let mut is_done = 0u32;
-        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_preflight(self.ctx, addr_of_mut!(is_done)) })?;
-        Ok(is_done == 1)
+        let ctx = ffi_wrap_ptr(|| unsafe {
+            risc0_circuit_rv32im_m3_segment_preflight(self.ctx.as_ptr(), po2)
+        })?;
+        Ok(PreflightContext { ctx })
+    }
+}
+
+impl Drop for SegmentContext {
+    fn drop(&mut self) {
+        unsafe { risc0_circuit_rv32im_m3_segment_free(self.ctx.as_ptr()) };
+    }
+}
+
+impl PreflightContext {
+    pub fn is_final(&self) -> bool {
+        unsafe { risc0_circuit_rv32im_m3_preflight_is_final(self.ctx) == 1 }
+    }
+}
+
+impl Drop for PreflightContext {
+    fn drop(&mut self) {
+        unsafe { risc0_circuit_rv32im_m3_preflight_free(self.ctx) };
+    }
+}
+
+impl ProverContext {
+    #[allow(dead_code)]
+    pub fn new_cpu(po2: usize) -> Result<Self> {
+        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_m3_prover_new_cpu(po2) })?;
+        Ok(Self { ctx })
     }
 
-    fn prove(&self) -> Result<Seal> {
+    #[cfg(feature = "cuda")]
+    pub fn new_cuda(po2: usize) -> Result<Self> {
+        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_m3_prover_new_cuda(po2) })?;
+        Ok(Self { ctx })
+    }
+
+    pub fn prove(&self, preflight: &PreflightContext) -> Result<Seal> {
         tracing::debug!("prove");
-        ffi_wrap(|| unsafe { risc0_circuit_rv32im_m3_prove(self.ctx) })?;
+        ffi_wrap_void(|| unsafe {
+            risc0_circuit_rv32im_m3_prove(self.ctx.as_ptr(), preflight.ctx)
+        })?;
 
         let transcript = self.transcript()?;
         verify(&transcript)?;
 
         Ok(transcript)
     }
-}
-
-impl SegmentProverImpl {
-    #[allow(dead_code)]
-    fn new_cpu(po2: usize) -> Self {
-        Self {
-            ctx: unsafe { risc0_circuit_rv32im_m3_prover_new_cpu(po2) },
-        }
-    }
-
-    #[cfg(feature = "cuda")]
-    fn new_cuda(po2: usize) -> Self {
-        Self {
-            ctx: unsafe { risc0_circuit_rv32im_m3_prover_new_cuda(po2) },
-        }
-    }
 
     fn transcript(&self) -> Result<Seal> {
         let transcript = unsafe {
-            let transcript = risc0_circuit_rv32im_m3_prover_transcript(self.ctx);
+            let transcript = risc0_circuit_rv32im_m3_prover_transcript(self.ctx.as_ptr());
             std::slice::from_raw_parts(transcript.ptr, transcript.len)
         };
         Ok(transcript.to_vec())
     }
 }
 
-impl Drop for SegmentProverImpl {
+impl Drop for ProverContext {
     fn drop(&mut self) {
-        unsafe { risc0_circuit_rv32im_m3_prover_free(self.ctx) };
+        unsafe { risc0_circuit_rv32im_m3_prover_free(self.ctx.as_ptr()) };
     }
 }
 
-pub fn segment_prover(po2: usize) -> Result<Arc<dyn SegmentProver>> {
+pub fn segment_prover(po2: usize) -> Result<Rc<ProverContext>> {
     cfg_if! {
         if #[cfg(feature = "cuda")] {
-            let segment_prover = SegmentProverImpl::new_cuda(po2);
+            let segment_prover = ProverContext::new_cuda(po2)?;
         } else {
-            let segment_prover = SegmentProverImpl::new_cpu(po2);
+            let segment_prover = ProverContext::new_cpu(po2)?;
         }
     }
-    Ok(Arc::new(segment_prover))
+    Ok(Rc::new(segment_prover))
 }
 
 #[cfg(test)]
@@ -266,10 +290,11 @@ mod tests {
         let segment = segments.first().unwrap();
         // segment.partial_image.dump();
 
+        let segment_ctx = SegmentContext::new(segment).unwrap();
+        let preflight = segment_ctx.preflight(po2).unwrap();
+
         let prover = segment_prover(po2).unwrap();
-        prover.load_segment(segment).unwrap();
-        prover.preflight().unwrap();
-        prover.prove().unwrap();
+        prover.prove(&preflight).unwrap();
     }
 
     const DEFAULT_PO2: usize = 13;

@@ -849,7 +849,7 @@ struct Emulator {
     return done || rowCount < usedRows || userCycles == endCycle;
   }
 
-  bool run(size_t rowCount, uint32_t& endCycle) {
+  bool run(size_t rowCount, uint32_t endCycle) {
     doResume();
     while (!isDone(rowCount, endCycle)) {
       DecodeWitness*& decodeWit = (mode == MODE_MACHINE) ? mInstCache[pc] : usInstCache[pc];
@@ -892,7 +892,7 @@ struct Emulator {
       makeTable.start = i;
     }
 
-    endCycle = userCycles;
+    trace.setUserCycles(userCycles);
     return done;
   }
 
@@ -941,7 +941,7 @@ struct Emulator {
 
 } // namespace
 
-bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount, uint32_t& endCycle) {
+bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount, uint32_t endCycle) {
   Emulator emu(trace, image, io, rowCount);
   emu.addTables();
   bool done = emu.run(rowCount, endCycle);

@@ -36,6 +36,6 @@ public:
   uint32_t onRead(uint32_t fd, uint8_t* data, uint32_t size) override { return 0; }
 };
 
-bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount, uint32_t& endCycle);
+bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount, uint32_t endCycle);
 
 } // namespace risc0::rv32im

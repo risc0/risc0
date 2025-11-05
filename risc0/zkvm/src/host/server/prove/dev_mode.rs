@@ -176,12 +176,10 @@ impl ProverServer for DevModeProver {
         }
 
         let preflight_results = PreflightResults {
-            #[cfg(not(feature = "rv32im-m3"))]
             inner: Default::default(),
-            #[cfg(feature = "rv32im-m3")]
-            prover: None,
             terminate_state: segment.inner.claim.terminate_state,
             output: segment.output.clone(),
+            #[cfg(not(feature = "rv32im-m3"))]
             segment_index: segment.index,
         };
 
@@ -203,6 +201,9 @@ impl ProverServer for DevModeProver {
         let exit_code = exit_code_from_terminate_state(&preflight_results.terminate_state)?;
         Ok(SegmentReceipt {
             seal: Vec::new(),
+            #[cfg(feature = "rv32im-m3")]
+            index: 0,
+            #[cfg(not(feature = "rv32im-m3"))]
             index: preflight_results.segment_index,
             hashfn: "fake".into(),
             verifier_parameters: Digest::ZERO,
