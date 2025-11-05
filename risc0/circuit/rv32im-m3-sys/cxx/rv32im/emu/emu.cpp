@@ -651,6 +651,7 @@ struct Emulator {
   }
 
   void do_ECALL_WRITE() {
+    LOG(0, "Write on cycle: " << curCycle);
     auto& wit = trace.makeEcallWrite();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
@@ -703,8 +704,8 @@ struct Emulator {
         uint32_t i2 = CELLS_DIGEST + i;
         p2Wit.stateIn[i] = Fp::fromRaw(state.words[i]).asUInt32();
         if (p2.isElem) {
-          in[i] = readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i);
-          in[i2] = readPhysMemory(p2Wit.dataIn[i2], p2.inWordAddr + i2);
+          in[i] = Fp::fromRaw(readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i)).asUInt32();
+          in[i2] = Fp::fromRaw(readPhysMemory(p2Wit.dataIn[i2], p2.inWordAddr + i2)).asUInt32();
         } else {
           uint32_t word = readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i);
           readPhysMemory(p2Wit.dataIn[i2], P2_ZEROS_WORD + i);
@@ -717,7 +718,7 @@ struct Emulator {
       uint32_t outAddr = (p2.count != 1) ? P2_TRASH_WORD : p2.outWordAddr;
       for (size_t i = 0; i < CELLS_DIGEST; i++) {
         p2Wit.stateOut[i] = Fp::fromRaw(state.words[i]).asUInt32();
-        writePhysMemory(p2Wit.dataOut[i], outAddr + i, Fp::fromRaw(out.words[i]).asUInt32());
+        writePhysMemory(p2Wit.dataOut[i], outAddr + i, out.words[i]);
         if (p2.isCheck && p2.count == 1) {
           if (p2Wit.dataOut[i].prevValue != p2Wit.dataOut[i].value) {
             DLOG("Mismatch on check");
@@ -866,7 +867,9 @@ struct Emulator {
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
       case Opcode::INVALID:
-        trap("Invalid opcde");
+        LOG(0, "PC = " << HexWord{pc});
+        LOG(0, "Inst = " << HexWord{dinst->inst});
+        trap("Invalid opcode");
         break;
       }
       curCycle++;

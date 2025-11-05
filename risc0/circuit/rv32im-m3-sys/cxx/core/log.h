@@ -47,6 +47,9 @@ void setR0LogLevel(unsigned level);
 /// Usually used to optionally do extra computation required only for logging.
 unsigned getR0LogLevel();
 
+#ifdef __riscv
+#define LOG(...) /**/
+#else
 #define LOG(num, vals)                                                                             \
   do {                                                                                             \
     if (::risc0::getR0LogLevel() >= num) {                                                         \
@@ -55,6 +58,7 @@ unsigned getR0LogLevel();
       risc0_log_callback(num, oss.str().c_str());                                                  \
     }                                                                                              \
   } while (0)
+#endif
 
 template <typename Iterator>
 std::ostream& stringify_collection(std::ostream& os, Iterator it, Iterator itEnd) {

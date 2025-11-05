@@ -1,7 +1,23 @@
+load("//bazel/toolchain/rv32im-linux:defs.bzl", "risc0_cc_library")
+
 cc_library(
     name = "zkp",
     srcs = glob(["*.cpp"]),
     hdrs = glob(["*.h"]),
     visibility = ["//visibility:public"],
-    deps = ["//core"],
+    deps = [
+        "//core",
+        "@unordered_dense",
+    ],
+)
+
+risc0_cc_library(
+    name = "guest_zkp",
+    srcs = glob(["*.cpp"]),
+    hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core:guest_core",
+        "@unordered_dense",
+    ],
 )

@@ -1,4 +1,5 @@
 load("//bazel/helpers:po2.bzl", "make_po2")
+load("//bazel/toolchain/rv32im-linux:defs.bzl", "risc0_cc_library")
 
 make_po2(
     name = "verify_po2s",
@@ -25,3 +26,26 @@ cc_library(
         "@unordered_dense",
     ],
 )
+
+cc_library(
+    name = "guest_emu",
+    srcs = [
+      "blocks.cpp",
+      "decode.cpp",
+      "poly.cpp",
+    ],
+    hdrs = [
+      "blocks.h",
+      "decode.h",
+      "//rv32im/argument:files",
+      "//rv32im/base:files",
+      "//rv32im/circuit:files",
+      "//rv32im/witness:files",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core:guest_core",
+        "//zkp:guest_zkp",
+    ],
+)
+

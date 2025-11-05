@@ -16,8 +16,10 @@
 #include "zkp/taps.h"
 #include "zkp/params.h"
 
+#include <ankerl/unordered_dense.h>
 #include <algorithm>
 #include <assert.h>
+#include <unordered_map>
 
 namespace risc0 {
 
@@ -26,6 +28,17 @@ TapManager::TapManager() {}
 void TapManager::addTap(uint32_t group, uint32_t col, uint32_t back) {
   taps.emplace_back(group, col, back);
 }
+
+struct HashVec {
+  size_t operator()(const std::vector<uint32_t>& k) const {
+    size_t out = 0;
+    for (uint32_t val : k) {
+      out *= 53;
+      out ^= std::hash<int>()(val);
+    }
+    return out;
+  }
+};
 
 void TapManager::done() {
   // Order + dedup taps
@@ -68,7 +81,8 @@ void TapManager::done() {
   groups.push_back(curGroup);
   // Compute all the unique combos
   using ComboVec = std::vector<uint32_t>;
-  std::map<ComboVec, uint32_t> comboToId;
+  ankerl::unordered_dense::map<ComboVec, uint32_t, HashVec> comboToId;
+  //std::unordered_map<ComboVec, uint32_t, HashVec> comboToId;
   for (const Column& column : columns) {
     ComboVec curCombo;
     for (const Tap& tap : column.getTaps()) {

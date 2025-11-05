@@ -1,0 +1,41 @@
+load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
+load("//bazel/toolchain/rv32im-linux:defs.bzl", "risc0_cc_binary", "risc0_cc_kernel_binary")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+risc0_cc_kernel_binary(
+    name = "recursion_kernel",
+    srcs = [
+        "entry.s",
+        "recursion_kernel.cpp",
+    ],
+    hdrs = ["//rv32im/base:files"],
+)
+
+risc0_cc_binary(
+    name = "recursion_guest",
+    srcs = [
+        "recursion_guest.cpp",
+    ],
+    deps = [
+        "//verify:guest_verify",
+    ],
+)
+
+cc_binary(
+    name = "recursion",
+    srcs = [
+        "recursion.cpp",
+    ],
+    deps = [
+        "//prove",
+        "//hal/cpu",
+    ],
+    data = [
+        "//rv32im/test:smoke_kernel",
+        ":recursion_guest",
+        ":recursion_kernel",
+    ],
+)

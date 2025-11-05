@@ -16,6 +16,7 @@
 #pragma once
 
 #include "zkp/rng.h"
+#define PROOF_FAIL(x) exit(1)
 
 namespace risc0 {
 

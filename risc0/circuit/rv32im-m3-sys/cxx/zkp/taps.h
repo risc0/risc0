@@ -15,8 +15,6 @@
 
 #pragma once
 
-#include <map>
-#include <set>
 #include <vector>
 
 #include "zkp/fpext.h"

@@ -52,9 +52,10 @@ FpExt Rng::rngFpExt() {
 }
 
 size_t Rng::rngBits(size_t bits) {
-  if (bits < 1 || bits > 27) {
+  /* if (bits < 1 || bits > 27) {
     throw std::runtime_error("Invalid # of bits");
   }
+  */
   uint32_t val = rngFp().asUInt32();
   for (size_t i = 0; i < 3; i++) {
     uint32_t newVal = rngFp().asUInt32();

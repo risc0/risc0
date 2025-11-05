@@ -208,7 +208,7 @@ template <typename T> void parallelExpand(T* io, size_t sizeIn, size_t sizeOut, 
 void multiBitReverse(Fp* io, size_t size, size_t count) {
   size_t N = log2Ceil(size);
   if (size_t(1) << N != size) {
-    throw std::runtime_error("Invalid bit reversal");
+    //throw std::runtime_error("Invalid bit reversal");
   }
   // TODO: parallel
   for (size_t i = 0; i < count; i++) {
@@ -224,7 +224,7 @@ void multiBitReverse(Fp* io, size_t size, size_t count) {
 void multiBitReverse(FpExt* io, size_t size, size_t count) {
   size_t N = log2Ceil(size);
   if (size_t(1) << N != size) {
-    throw std::runtime_error("Invalid bit reversal");
+    //throw std::runtime_error("Invalid bit reversal");
   }
   // This is only used for FRI, so count == 16
   for (size_t i = 0; i < count; i++) {
@@ -255,7 +255,7 @@ void multiExpand(Fp* io, size_t sizeIn, size_t sizeOut, size_t count) {
 void multiShift(Fp* io, size_t size, size_t count) {
   size_t N = log2Ceil(size);
   if (size_t(1) << N != size) {
-    throw std::runtime_error("Invalid shift");
+    //throw std::runtime_error("Invalid shift");
   }
   for (size_t j = 0; j < size; j++) {
     size_t revIdx = bitReverse(j) >> (32 - N);

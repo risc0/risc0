@@ -1,3 +1,5 @@
+load("//bazel/toolchain/rv32im-linux:defs.bzl", "risc0_cc_library")
+
 cc_library(
     name = "core",
     defines = ["FROM_BAZEL"],
@@ -5,3 +7,15 @@ cc_library(
     hdrs = glob(["*.h"]),
     visibility = ["//visibility:public"],
 )
+
+cc_library(
+    name = "guest_core",
+    defines = ["FROM_BAZEL"],
+    srcs = [
+        "log.cpp",
+        "util.cpp",
+    ],
+    hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+)
+

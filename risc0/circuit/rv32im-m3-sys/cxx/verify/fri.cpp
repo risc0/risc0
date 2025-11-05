@@ -46,7 +46,7 @@ void FriRoundVerifier::query(ReadIop& iop, size_t& pos, FpExt& goal) {
   }
   // Check the existing goal
   if (dataExt[quot] != goal) {
-    throw std::runtime_error("Invalid fri state");
+    PROOF_FAIL("Invalid fri state");
   }
   // Compute the new goal + pos
   Fp root = ROU_REV[log2Ceil(kFriFold * domain)];
@@ -90,7 +90,7 @@ void FriVerifier::run(ReadIop& iop, VerifyPointFunction func) {
     }
     FpExt fx = polyEval(coeffs, pow(gen, pos));
     if (fx != goal) {
-      throw std::runtime_error("Mismatch final goal in FRI query");
+      PROOF_FAIL("Mismatch final goal in FRI query");
     }
   }
 }

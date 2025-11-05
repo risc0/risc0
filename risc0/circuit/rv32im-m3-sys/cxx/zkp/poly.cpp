@@ -43,7 +43,7 @@ std::vector<FpExt> polyInterpolate(const std::vector<FpExt>& xs, const std::vect
     return fxs;
   }
   if (xs.size() != 2) {
-    throw std::runtime_error("Unimplemented");
+    //throw std::runtime_error("Unimplemented");
   }
   FpExt c1 = (fxs[0] - fxs[1]) * inv(xs[0] - xs[1]);
   FpExt c0 = fxs[0] - c1 * xs[0];

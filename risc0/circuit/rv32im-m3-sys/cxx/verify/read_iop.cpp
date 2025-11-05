@@ -23,7 +23,7 @@ ReadIop::ReadIop(const Fp* buf, uint32_t size) : buf(buf), size(size), offset(0)
 
 void ReadIop::read(Fp* buf, size_t size) {
   if (offset + size > this->size) {
-    throw std::runtime_error("Invalid read");
+    PROOF_FAIL("Invalid read");
   }
   std::copy(this->buf + offset, this->buf + offset + size, buf);
   offset += size;
@@ -47,7 +47,7 @@ uint32_t ReadIop::readU32() {
 
 void ReadIop::done() {
   if (offset != size) {
-    throw std::runtime_error("Unread data");
+    PROOF_FAIL("Unread data");
   }
 }
 

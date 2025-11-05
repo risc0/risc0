@@ -15,16 +15,18 @@
 
 #include "verify/verify.h"
 
-#include "rv32im/emu/blocks.h"
+#include "core/log.h"
 #include "verify/fri.h"
 #include "verify/merkle.h"
 #include "zkp/params.h"
 #include "zkp/poly.h"
 #include "zkp/rou.h"
 
-namespace risc0 {
+#ifdef __riscv
+#include <unistd.h>
+#endif
 
-using namespace rv32im;
+namespace risc0 {
 
 void verify(VerifyCircuitInfo& ci, ReadIop& iop, size_t po2) {
   size_t rows = 1 << po2;
@@ -92,7 +94,13 @@ void verify(VerifyCircuitInfo& ci, ReadIop& iop, size_t po2) {
     eval[i] = coeffs[i];
   }
 
+#ifdef __riscv
+  write(0, "CP0", 3);
+#endif
   FpExt constraintPoly = ci.evalCheck(eval.data(), globals.data(), mix.data(), evalCheckMix, z);
+#ifdef __riscv
+  write(0, "CP1", 3);
+#endif
   LOG(1, "constraintPoly = " << constraintPoly);
   const FpExt* checkData = eval.data() + offset;
   FpExt check;
@@ -107,7 +115,7 @@ void verify(VerifyCircuitInfo& ci, ReadIop& iop, size_t po2) {
   check *= pow(Fp(3) * z, rows) - FpExt(1);
   LOG(1, "check = " << check);
   if (constraintPoly != check) {
-    throw std::runtime_error("Poly check failed");
+    PROOF_FAIL("Poly check failed");
   }
 
   // Compute comboU

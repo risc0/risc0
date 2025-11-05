@@ -32,7 +32,7 @@ MerkleVerifier::MerkleVerifier(ReadIop& iop, size_t _rows, size_t _cols, size_t 
 
 std::vector<Fp> MerkleVerifier::query(ReadIop& iop, size_t idx) {
   if (idx > _rows) {
-    throw std::runtime_error("MerkleVerifier: idx out of range");
+    PROOF_FAIL("MerkleVerifier: idx out of range");
   }
   idx += _rows;
   std::vector<Fp> out(_cols);
@@ -51,7 +51,7 @@ std::vector<Fp> MerkleVerifier::query(ReadIop& iop, size_t idx) {
     idx /= 2;
   }
   if (cur != top[idx]) {
-    throw std::runtime_error("MerkleVerifier: Invalid merkle proof");
+    PROOF_FAIL("MerkleVerifier: Invalid merkle proof");
   }
   return out;
 }

@@ -16,6 +16,10 @@
 #include <array>
 #include <iostream>
 
+#ifdef __riscv
+#include <unistd.h>
+#endif
+
 #include "zkp/poseidon2.h"
 #include "zkp/poseidon2_consts.h"
 
@@ -163,7 +167,52 @@ void poseidonSponge(cells_t& cells) {
 
 } // namespace p2impl
 
+#ifdef __riscv
+#include <string.h>
+
+uint32_t PFLAG_IS_ELEM = 0x80000000;
+uint32_t PFLAG_CHECK_OUT = 0x40000000;
+
+inline void doPoseidon2(uint32_t* state, const uint32_t* bufIn, uint32_t* bufOut, uint32_t countAndBits) {
+  register uintptr_t a0 asm("a0") = reinterpret_cast<uint32_t>(state);
+  register uintptr_t a1 asm("a1") = reinterpret_cast<uint32_t>(bufIn);
+  register uintptr_t a2 asm("a2") = reinterpret_cast<uint32_t>(bufOut);
+  register uintptr_t a3 asm("a3") = countAndBits;
+  register uintptr_t a7 asm("a7") = 3;
+  asm volatile("ecall\n"
+               : "+r"(a0)
+               : "r"(a1), "r"(a2), "r"(a3), "r"(a7) // inputs
+               : "memory"                                    // no clobbers
+  );
+}
+
+#endif
+
 Digest poseidon2Hash(const Fp* data, size_t size, size_t stride) {
+#if __riscv
+  if (stride != 1) {
+    exit(2);
+  }
+  Digest state = Digest::zero();
+  Digest out;
+  uint32_t fullBlocks = size / 16;
+  doPoseidon2(reinterpret_cast<uint32_t*>(&state),
+              reinterpret_cast<const uint32_t*>(data), 
+              reinterpret_cast<uint32_t*>(&out), 
+              fullBlocks | PFLAG_IS_ELEM);
+  uint32_t restSize = size - fullBlocks*16;
+  if (!restSize) { return out; }
+  Fp rest[16];
+  memset(&rest, 0, sizeof(Fp) * 16);
+  for (size_t i = 0; i < restSize; i++) {
+    rest[i] = data[fullBlocks*16 + i];
+  }
+  doPoseidon2(reinterpret_cast<uint32_t*>(&state),
+              reinterpret_cast<const uint32_t*>(&rest), 
+              reinterpret_cast<uint32_t*>(&out), 
+              1 | PFLAG_IS_ELEM);
+  return out;
+#else
   using namespace p2impl;
   cells_t cur = {0};
   size_t curUsed = 0;
@@ -186,9 +235,21 @@ Digest poseidon2Hash(const Fp* data, size_t size, size_t stride) {
     out.words[i] = cur[i].asRaw();
   }
   return out;
+#endif
 }
 
 Digest poseidon2HashPair(Digest x, Digest y) {
+#ifdef __riscv
+  Digest both[2];
+  Digest out;
+  both[0] = x;
+  both[1] = y;
+  doPoseidon2(0,
+              reinterpret_cast<uint32_t*>(&both[0]),
+              reinterpret_cast<uint32_t*>(&out), 
+              1 | PFLAG_IS_ELEM);
+  return out;
+#else
   using namespace p2impl;
   cells_t cur = {0};
   for (size_t i = 0; i < 8; i++) {
@@ -201,6 +262,7 @@ Digest poseidon2HashPair(Digest x, Digest y) {
     out.words[i] = cur[i].asRaw();
   }
   return out;
+#endif
 }
 
 } // namespace risc0
