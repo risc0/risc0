@@ -39,6 +39,15 @@ pub fn host_write(fd: u32, msg_ptr: *const u8, msg_len: usize) -> u32 {
     #[cfg(target_arch = "riscv32")]
     unsafe {
         const HOST_ECALL_READ: u32 = 1;
+        const MAX_IO_BYTES: u32 = 1024;
+
+        if msg_len > MAX_IO_BYTES as usize {
+            kpanic!(
+                "host_write: msg_len {} exceeds MAX_IO_BYTES ({})",
+                msg_len,
+                MAX_IO_BYTES
+            );
+        }
 
         let syscall_name = b"risc0_zkvm_platform::syscall::nr::SYS_WRITE\0";
         let syscall_name_ptr = syscall_name.as_ptr() as u32;
@@ -173,12 +182,19 @@ pub fn host_read(fd: u32, buf: *mut u8, buf_len: usize) -> u32 {
         const MAX_IO_BYTES: u32 = 1024;
         const WORD_SIZE: u32 = 4;
 
+        if buf_len > MAX_IO_BYTES as usize {
+            kpanic!(
+                "host_read: buf_len {} exceeds MAX_IO_BYTES ({})",
+                buf_len,
+                MAX_IO_BYTES
+            );
+        }
+
         // Create the syscall name string
         let syscall_name = b"risc0_zkvm_platform::syscall::nr::SYS_READ\0";
         let syscall_name_ptr = syscall_name.as_ptr() as u32;
 
-        // Truncate buffer size to MAX_IO_BYTES
-        let nbytes = core::cmp::min(buf_len as u32, MAX_IO_BYTES);
+        let nbytes = buf_len as u32;
         let nwords = nbytes / WORD_SIZE;
 
         // First do the syscall to get argv (like host_syscall)
@@ -241,12 +257,19 @@ pub fn host_argv(arg_index: u32, buf: *mut u8, buf_len: usize) -> u32 {
         const MAX_IO_BYTES: u32 = 1024;
         const WORD_SIZE: u32 = 4;
 
+        if buf_len > MAX_IO_BYTES as usize {
+            kpanic!(
+                "host_argv: buf_len {} exceeds MAX_IO_BYTES ({})",
+                buf_len,
+                MAX_IO_BYTES
+            );
+        }
+
         // Create the syscall name string
         let syscall_name = b"risc0_zkvm_platform::syscall::nr::SYS_ARGV\0";
         let syscall_name_ptr = syscall_name.as_ptr() as u32;
 
-        // Truncate buffer size to MAX_IO_BYTES
-        let nbytes = core::cmp::min(buf_len as u32, MAX_IO_BYTES);
+        let nbytes = buf_len as u32;
         let nwords = nbytes / WORD_SIZE;
 
         // First do the syscall to get argv (like host_syscall)
