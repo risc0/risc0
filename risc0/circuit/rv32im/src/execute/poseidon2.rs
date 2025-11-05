@@ -98,45 +98,20 @@ impl Poseidon2State {
         final_state: CycleState,
     ) -> Result<()> {
         let mut cur_state = self.next_state;
-        let state_addr = WordAddr(self.state_addr);
 
         // If we have state, load it
         if self.has_state == 1 {
-            // tracing::trace!("has_state");
-            self.step(ctx, &mut cur_state, CycleState::PoseidonLoadState, 0);
-            for i in 0..DIGEST_WORDS {
-                self.inner[DIGEST_WORDS * 2 + i] = ctx.load_u32(LoadOp::Record, state_addr + i)?;
-            }
+            self.load_p2_state(ctx, &mut cur_state)?;
         }
 
         // While we have data to process
-        let mut buf_in_addr = WordAddr(self.buf_in_addr);
         // tracing::debug!("buf_in_addr: {buf_in_addr:?}");
         while self.count > 0 {
-            // Do load
-            self.step(ctx, &mut cur_state, CycleState::PoseidonLoadIn, 0);
-
-            if self.is_elem != 0 {
-                for i in 0..DIGEST_WORDS {
-                    self.inner[i] = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
-                }
-                self.buf_in_addr = buf_in_addr.0;
-                self.step(ctx, &mut cur_state, CycleState::PoseidonLoadIn, 1);
-                for i in 0..DIGEST_WORDS {
-                    self.inner[DIGEST_WORDS + i] =
-                        ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
-                }
-                self.buf_in_addr = buf_in_addr.0;
-            } else {
-                for i in 0..DIGEST_WORDS {
-                    let word = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
-                    self.inner[2 * i] = word & 0xffff;
-                    self.inner[2 * i + 1] = word >> 16;
-                }
-                self.buf_in_addr = buf_in_addr.0;
-            }
+            self.load_buf_in(ctx, &mut cur_state)?;
 
             // Do the mix
+            // NOTE(victor/perf): This is where essentially all of the time in the profile for this
+            // evall lives. It should not have memory side effects and should be specialized.
             self.multiply_by_m_ext();
             for i in 0..ROUNDS_HALF_FULL {
                 self.step(ctx, &mut cur_state, CycleState::PoseidonExtRound, i as u32);
@@ -151,9 +126,92 @@ impl Poseidon2State {
             self.count -= 1;
         }
 
-        self.step(ctx, &mut cur_state, CycleState::PoseidonDoOut, 0);
+        self.store_buf_out(ctx, &mut cur_state)?;
 
+        self.buf_in_addr = 0;
+
+        if self.has_state == 1 {
+            self.store_p2_state(ctx, &mut cur_state)?;
+        }
+
+        self.step(ctx, &mut cur_state, final_state, 0);
+
+        Ok(())
+    }
+
+    fn load_p2_state(
+        &mut self,
+        ctx: &mut impl Risc0Context,
+        cur_state: &mut CycleState,
+    ) -> Result<()> {
+        let state_addr = WordAddr(self.state_addr);
+
+        self.step(ctx, cur_state, CycleState::PoseidonLoadState, 0);
+        for i in 0..DIGEST_WORDS {
+            self.inner[DIGEST_WORDS * 2 + i] = ctx.load_u32(LoadOp::Record, state_addr + i)?;
+        }
+        Ok(())
+    }
+
+    fn store_p2_state(
+        &mut self,
+        ctx: &mut impl Risc0Context,
+        cur_state: &mut CycleState,
+    ) -> Result<()> {
+        let state_addr = WordAddr(self.state_addr);
+
+        self.step(ctx, cur_state, CycleState::PoseidonStoreState, 0);
+        for i in 0..DIGEST_WORDS {
+            ctx.store_u32(state_addr + i, self.inner[DIGEST_WORDS * 2 + i])?;
+        }
+        Ok(())
+    }
+
+    fn load_buf_in(
+        &mut self,
+        ctx: &mut impl Risc0Context,
+        cur_state: &mut CycleState,
+    ) -> Result<()> {
+        let mut buf_in_addr = WordAddr(self.buf_in_addr);
+        self.step(ctx, cur_state, CycleState::PoseidonLoadIn, 0);
+
+        // NOTE(victor/perf): This loading logic is somewhat involved, can be shared, and does
+        // not really show up on the trace. It does not need to be specialized to the executor.
+        // If the data at buf_in_addr is already encoded as field elements, then load iteration can
+        // process 16 elements. Otherwise, each u32 needs to be split into two halves and each load
+        // iteration processes 8 u32s (roughly half the rate).
+        if self.is_elem != 0 {
+            for i in 0..DIGEST_WORDS {
+                self.inner[i] = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
+            }
+            self.buf_in_addr = buf_in_addr.0;
+            self.step(ctx, cur_state, CycleState::PoseidonLoadIn, 1);
+            for i in 0..DIGEST_WORDS {
+                self.inner[DIGEST_WORDS + i] =
+                    ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
+            }
+            self.buf_in_addr = buf_in_addr.0;
+        } else {
+            for i in 0..DIGEST_WORDS {
+                let word = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
+                self.inner[2 * i] = word & 0xffff;
+                self.inner[2 * i + 1] = word >> 16;
+            }
+            self.buf_in_addr = buf_in_addr.0;
+        }
+        Ok(())
+    }
+
+    fn store_buf_out(
+        &mut self,
+        ctx: &mut impl Risc0Context,
+        cur_state: &mut CycleState,
+    ) -> Result<()> {
+        self.step(ctx, cur_state, CycleState::PoseidonDoOut, 0);
         let buf_out_addr = WordAddr(self.buf_out_addr);
+
+        // If check_out is true, then the data at buf_out is asserted to be equal to the computed
+        // digest. If not, then the value at buf_out is has the computed digest written to it.
         if self.check_out != 0 {
             for i in 0..DIGEST_WORDS {
                 let addr = buf_out_addr + i;
@@ -172,18 +230,6 @@ impl Poseidon2State {
                 ctx.store_u32(buf_out_addr + i, self.inner[i])?;
             }
         }
-
-        self.buf_in_addr = 0;
-
-        if self.has_state == 1 {
-            self.step(ctx, &mut cur_state, CycleState::PoseidonStoreState, 0);
-            for i in 0..DIGEST_WORDS {
-                ctx.store_u32(state_addr + i, self.inner[DIGEST_WORDS * 2 + i])?;
-            }
-        }
-
-        self.step(ctx, &mut cur_state, final_state, 0);
-
         Ok(())
     }
 
