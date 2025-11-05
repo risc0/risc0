@@ -82,7 +82,7 @@ impl SetupBlake3Groth16 {
 
         if !sh.path_exists(srs_path.as_path()) {
             let zkey_path = srs_path.as_path().to_path_buf();
-            let url = "https://static.testnet.citrea.xyz/conf/verify_for_guest_final.zkey";
+            let url = "https://static.mainnet.citrea.xyz/verify_for_guest_final.zkey";
             cmd!(sh, "curl -o {zkey_path} {url}").run().unwrap();
         }
 
