@@ -30,12 +30,12 @@ template <typename C> struct EcallTerminateBlock {
   PhysMemReadBlock<C> readOutput[8];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readA7, cycle.get());
-    T::apply(ctx, readA0, cycle.get());
-    T::apply(ctx, readA1, cycle.get());
-    T::apply(ctx, readOutput, cycle.get());
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "fetch", fetch, cycle.get());
+    T::apply(ctx, "readA7", readA7, cycle.get());
+    T::apply(ctx, "readA0", readA0, cycle.get());
+    T::apply(ctx, "readA1", readA1, cycle.get());
+    T::apply(ctx, "readOutput", readOutput, cycle.get());
   }
 
   FDEV void set(CTX, EcallTerminateWitness wit) DEV;
@@ -60,17 +60,17 @@ template <typename C> struct EcallReadBlock {
   Reg<C> finalAddrBits;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, finalCycle);
-    T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readA7, cycle.get());
-    T::apply(ctx, readA1, cycle.get());
-    T::apply(ctx, readA2, cycle.get());
-    T::apply(ctx, writeA0, cycle.get());
-    T::apply(ctx, decomp, readA1.data.get());
-    T::apply(ctx, verifyRet);
-    T::apply(ctx, finalAddrWord);
-    T::apply(ctx, finalAddrBits);
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "finalCycle", finalCycle);
+    T::apply(ctx, "fetch", fetch, cycle.get());
+    T::apply(ctx, "readA7", readA7, cycle.get());
+    T::apply(ctx, "readA1", readA1, cycle.get());
+    T::apply(ctx, "readA2", readA2, cycle.get());
+    T::apply(ctx, "writeA0", writeA0, cycle.get());
+    T::apply(ctx, "decomp", decomp, readA1.data.get());
+    T::apply(ctx, "verifyRet", verifyRet);
+    T::apply(ctx, "finalAddrWord", finalAddrWord);
+    T::apply(ctx, "finalAddrBits", finalAddrBits);
   }
 
   FDEV void set(CTX, EcallReadWitness wit) DEV;
@@ -90,12 +90,12 @@ template <typename C> struct EcallWriteBlock {
   RegU16<C> verifyRet;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readA7, cycle.get());
-    T::apply(ctx, readA2, cycle.get());
-    T::apply(ctx, writeA0, cycle.get());
-    T::apply(ctx, verifyRet);
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "fetch", fetch, cycle.get());
+    T::apply(ctx, "readA7", readA7, cycle.get());
+    T::apply(ctx, "readA2", readA2, cycle.get());
+    T::apply(ctx, "writeA0", writeA0, cycle.get());
+    T::apply(ctx, "verifyRet", verifyRet);
   }
 
   FDEV void set(CTX, EcallWriteWitness wit) DEV;
@@ -121,18 +121,18 @@ template <typename C> struct P2StepBlock {
   Reg<C> stateOut[CELLS_DIGEST];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, isElem);
-    T::apply(ctx, isCheck);
-    T::apply(ctx, count);
-    T::apply(ctx, countOne, count.get() - 1);
-    T::apply(ctx, inWordAddr);
-    T::apply(ctx, outWordAddr);
-    T::apply(ctx, dataIn, cycle.get());
-    T::apply(ctx, dataOut, cycle.get());
-    T::apply(ctx, stateIn);
-    T::apply(ctx, inValues);
-    T::apply(ctx, stateOut);
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "isElem", isElem);
+    T::apply(ctx, "isCheck", isCheck);
+    T::apply(ctx, "count", count);
+    T::apply(ctx, "countOne", countOne, count.get() - 1);
+    T::apply(ctx, "inWordAddr", inWordAddr);
+    T::apply(ctx, "outWordAddr", outWordAddr);
+    T::apply(ctx, "dataIn", dataIn, cycle.get());
+    T::apply(ctx, "dataOut", dataOut, cycle.get());
+    T::apply(ctx, "stateIn", stateIn);
+    T::apply(ctx, "inValues", inValues);
+    T::apply(ctx, "stateOut", stateOut);
   }
 
   FDEV void set(CTX, P2StepWitness wit) DEV;
@@ -164,22 +164,22 @@ template <typename C> struct EcallP2Block {
   PhysMemWriteBlock<C> stateOut[CELLS_DIGEST];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readA0, cycle.get());
-    T::apply(ctx, readA1, cycle.get());
-    T::apply(ctx, readA2, cycle.get());
-    T::apply(ctx, readA3, cycle.get());
-    T::apply(ctx, readA7, cycle.get());
-    T::apply(ctx, decompState, readA0.data.get());
-    T::apply(ctx, decompIn, readA1.data.get());
-    T::apply(ctx, decompOut, readA2.data.get());
-    T::apply(ctx, iszState, decompState.wordAddr(readA0.data.get()));
-    T::apply(ctx, stateInWordAddr);
-    T::apply(ctx, stateOutWordAddr);
-    T::apply(ctx, inWordAddrFinal);
-    T::apply(ctx, stateIn, cycle.get());
-    T::apply(ctx, stateOut, cycle.get() + 1 + readA3.data.low.get());
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "fetch", fetch, cycle.get());
+    T::apply(ctx, "readA0", readA0, cycle.get());
+    T::apply(ctx, "readA1", readA1, cycle.get());
+    T::apply(ctx, "readA2", readA2, cycle.get());
+    T::apply(ctx, "readA3", readA3, cycle.get());
+    T::apply(ctx, "readA7", readA7, cycle.get());
+    T::apply(ctx, "decompState", decompState, readA0.data.get());
+    T::apply(ctx, "decompIn", decompIn, readA1.data.get());
+    T::apply(ctx, "decompOut", decompOut, readA2.data.get());
+    T::apply(ctx, "iszState", iszState, decompState.wordAddr(readA0.data.get()));
+    T::apply(ctx, "stateInWordAddr", stateInWordAddr);
+    T::apply(ctx, "stateOutWordAddr", stateOutWordAddr);
+    T::apply(ctx, "inWordAddrFinal", inWordAddrFinal);
+    T::apply(ctx, "stateIn", stateIn, cycle.get());
+    T::apply(ctx, "stateOut", stateOut, cycle.get() + 1 + readA3.data.low.get());
   }
 
   FDEV void set(CTX, EcallP2Witness wit) DEV;
@@ -202,14 +202,14 @@ template <typename C> struct EcallBigIntBlock {
   AddressVerify<C> pcVerify;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, fetch, cycle.get());
-    T::apply(ctx, readA7, cycle.get());
-    T::apply(ctx, readT0, cycle.get());
-    T::apply(ctx, readT2, cycle.get());
-    T::apply(ctx, cycleCount);
-    T::apply(ctx, pcDecomp, readT2.data.get());
-    T::apply(ctx, pcVerify, readT2.data.get(), mm.get() * Val<C>(MODE_MACHINE));
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "fetch", fetch, cycle.get());
+    T::apply(ctx, "readA7", readA7, cycle.get());
+    T::apply(ctx, "readT0", readT0, cycle.get());
+    T::apply(ctx, "readT2", readT2, cycle.get());
+    T::apply(ctx, "cycleCount", cycleCount);
+    T::apply(ctx, "pcDecomp", pcDecomp, readT2.data.get());
+    T::apply(ctx, "pcVerify", pcVerify, readT2.data.get(), mm.get() * Val<C>(MODE_MACHINE));
   }
 
   FDEV void set(CTX, EcallBigIntWitness wit) DEV;
