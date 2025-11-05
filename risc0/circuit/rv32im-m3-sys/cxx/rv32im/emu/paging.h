@@ -70,6 +70,7 @@ public:
   size_t getPagingCost() { return pagingCost; }
 
   void commit(const std::vector<PageDetails*>& pages);
+  Poseidon2Witgen& getP2() { return p2; }
 
 private:
   void addCostPage();

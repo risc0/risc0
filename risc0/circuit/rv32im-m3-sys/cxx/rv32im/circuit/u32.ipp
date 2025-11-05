@@ -21,6 +21,10 @@ template <typename C> FDEV ValU32<C> RegU32<C>::get() DEV {
   return ValU32<C>(low.get(), high.get());
 }
 
+template <typename C> FDEV Val<C> RegU32<C>::flat() DEV {
+  return high.get() * 0x10000 + low.get();
+}
+
 template <typename C> FDEV void AddU32<C>::set(CTX, uint32_t a, uint32_t b, bool carryIn) DEV {
   uint32_t low17 = (a & 0xffff) + (b & 0xffff) + carryIn;
   low.set(ctx, low17 & 0xffff);
@@ -96,6 +100,8 @@ template <typename C> FDEV ValU32<C> NegU32<C>::get() DEV {
 }
 
 template <typename C> FDEV void NegU32<C>::verify(CTX, ValU32<C> in, Val<C> neg) DEV {
+  EQZ((Val<C>(1) - neg) * carryLow.get());
+  EQZ((Val<C>(1) - neg) * carryHigh.get());
   EQZ(neg * (Val<C>(0xffff) - in.low + 1 - Val<C>(0x10000) * carryLow.get() - outLow.get()) +
       (Val<C>(1) - neg) * (outLow.get() - in.low));
   EQZ(neg * (Val<C>(0xffff) - in.high + carryLow.get() - Val<C>(0x10000) * carryHigh.get() -
@@ -133,11 +139,26 @@ template <typename C> FDEV ValU32<C> AbsU32<C>::getAbs() DEV {
 }
 
 template <typename C> FDEV void AbsU32<C>::verify(CTX, Val<C> isSigned) DEV {
+  // Assert sign and signVerify properly decompose the high half of the input
   EQ(signVerify.get() * inv(Fp(2)) + sign.get() * Val<C>(0x8000), in.high.get());
+
+  // The number is negative only if the sign bit is set and so is the isSigned flag
   EQ(neg.get(), sign.get() * isSigned);
+
+  // If `in` is positive, the carry is unused. Ensure it isn't underconstrained.
+  EQZ((Val<C>(1) - neg.get()) * carryLow.get());
+  EQZ((Val<C>(1) - neg.get()) * carryHigh.get());
+
+  // If negative, absLow is the low part of the 2's complement of in.low with a
+  // correction for carry. If not negative, absLow == in.low.
   EQZ(neg.get() *
           (Val<C>(0xffff) - in.low.get() + 1 - Val<C>(0x10000) * carryLow.get() - absLow.get()) +
       (Val<C>(1) - neg.get()) * (absLow.get() - in.low.get()));
+
+  // If negative, absHigh is the high part of the 2's complement of in.low with
+  // a correction for carry. Note that the +1 of the complement equation is
+  // included in the low part, but shouldn't be here. If not negative,
+  // absHigh == in.high.
   EQZ(neg.get() * (Val<C>(0xffff) - in.high.get() + carryLow.get() -
                    Val<C>(0x10000) * carryHigh.get() - absHigh.get()) +
       (Val<C>(1) - neg.get()) * (absHigh.get() - in.high.get()));

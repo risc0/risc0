@@ -30,13 +30,13 @@ template <typename C> struct GlobalsBlock {
   RegU8<C> checkRoundedLT;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, rootIn);
-    T::apply(ctx, rootOut);
-    T::apply(ctx, p2Count);
-    T::apply(ctx, finalCycle);
-    T::apply(ctx, finalCycleCeilDiv);
-    T::apply(ctx, checkRoundedGT);
-    T::apply(ctx, checkRoundedLT);
+    T::apply(ctx, "rootIn", rootIn);
+    T::apply(ctx, "rootOut", rootOut);
+    T::apply(ctx, "p2Count", p2Count);
+    T::apply(ctx, "finalCycle", finalCycle);
+    T::apply(ctx, "finalCycleCeilDiv", finalCycleCeilDiv);
+    T::apply(ctx, "checkRoundedGT", checkRoundedGT);
+    T::apply(ctx, "checkRoundedLT", checkRoundedLT);
   }
 
   FDEV void set(CTX, GlobalsWitness wit) DEV;

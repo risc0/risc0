@@ -42,12 +42,20 @@ struct ArgCountContext {
 
 struct AddArgsFwd {
   template <typename T, typename... Args>
+  static void apply(ArgCountContext& ctx, const char*, T& obj, Args... args) {
+    AddArgsFwd::apply(ctx, obj, args...);
+  }
+
+  template <typename T, typename... Args>
   static void apply(ArgCountContext& ctx, T& obj, Args... args) {
     obj.template applyInner<AddArgsFwd>(ctx, args...);
     obj.addArguments(ctx, args...);
   }
 
-  template <typename T, size_t N, typename... Args>
+  template <typename T,
+            size_t N,
+            typename... Args,
+            std::enable_if_t<!std::is_same<std::remove_cv_t<T>, char>::value, int> = 0>
   static void apply(ArgCountContext& ctx, T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; i++) {
       AddArgsFwd::apply(ctx, t[i], args...);

@@ -22,7 +22,8 @@ __device__ FpExt rv32im_v2_19(uint32_t idx,
                               const Fp* arg8,
                               const Fp* arg9,
                               const Fp* arg10,
-                              const Fp* arg11) {
+                              const Fp* arg11,
+                              const FpExt* poly_mix) {
   uint32_t mask = size - 1;
   Fp x0(115);
   Fp x1(23);
@@ -1234,7 +1235,8 @@ __device__ FpExt rv32im_v2_19(uint32_t idx,
   arg0[125] = x1158;
   Fp x1159 = x967 * x954;
   arg0[107] = x1159;
-  auto x1160 = rv32im_v2_18(idx, size, arg0, x1147, x1033, arg4, arg7, arg8, arg9, arg10, arg11);
+  auto x1160 =
+      rv32im_v2_18(idx, size, arg0, x1147, x1033, arg4, arg7, arg8, arg9, arg10, arg11, poly_mix);
 
   return x1160;
 }
@@ -1252,7 +1254,8 @@ __device__ FpExt rv32im_v2_15(uint32_t idx,
                               const Fp* arg9,
                               const Fp* arg10,
                               const Fp* arg11,
-                              const Fp* arg12) {
+                              const Fp* arg12,
+                              const FpExt* poly_mix) {
   uint32_t mask = size - 1;
   Fp x0(1073725568);
   Fp x1(1073726464);
@@ -2555,8 +2558,22 @@ __device__ FpExt rv32im_v2_15(uint32_t idx,
   FpExt x1221 = x1220 + poly_mix[68] * x85;
   FpExt x1222 = x1221 + poly_mix[69] * x78;
   FpExt x1223 = x1222 + poly_mix[70] * x189;
-  auto x1224 = rv32im_v2_14(
-      idx, size, x1223, x1108, arg0, arg1, x657, x910, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+  auto x1224 = rv32im_v2_14(idx,
+                            size,
+                            x1223,
+                            x1108,
+                            arg0,
+                            arg1,
+                            x657,
+                            x910,
+                            arg6,
+                            arg7,
+                            arg8,
+                            arg9,
+                            arg10,
+                            arg11,
+                            arg12,
+                            poly_mix);
 
   return x1224;
 }
@@ -2574,7 +2591,8 @@ __device__ FpExt rv32im_v2_11(uint32_t idx,
                               FpExt arg9,
                               const Fp* arg10,
                               const Fp* arg11,
-                              const Fp* arg12) {
+                              const Fp* arg12,
+                              const FpExt* poly_mix) {
   uint32_t mask = size - 1;
   Fp x0(1073741824);
   Fp x1(32);
@@ -3886,7 +3904,8 @@ __device__ FpExt rv32im_v2_11(uint32_t idx,
                             arg5,
                             arg10,
                             arg11,
-                            arg12);
+                            arg12,
+                            poly_mix);
 
   return x1234;
 }
@@ -3903,7 +3922,8 @@ __device__ FpExt rv32im_v2_7(uint32_t idx,
                              FpExt arg8,
                              const Fp* arg9,
                              const Fp* arg10,
-                             const Fp* arg11) {
+                             const Fp* arg11,
+                             const FpExt* poly_mix) {
   uint32_t mask = size - 1;
   Fp x0(15);
   Fp x1(256);
@@ -5289,8 +5309,22 @@ __device__ FpExt rv32im_v2_7(uint32_t idx,
   arg0[777] = x1293;
   Fp x1294 = x1139 * x1185;
   arg0[778] = x1294;
-  auto x1295 = rv32im_v2_6(
-      idx, size, arg0, x1113, x953, x555, x565, arg7, x420, arg6, arg8, arg2, arg9, arg10, arg11);
+  auto x1295 = rv32im_v2_6(idx,
+                           size,
+                           arg0,
+                           x1113,
+                           x953,
+                           x555,
+                           x565,
+                           arg7,
+                           x420,
+                           arg6,
+                           arg8,
+                           arg2,
+                           arg9,
+                           arg10,
+                           arg11,
+                           poly_mix);
 
   return x1295;
 }
@@ -5305,7 +5339,8 @@ __device__ FpExt rv32im_v2_3(uint32_t idx,
                              FpExt* arg6,
                              const Fp* arg7,
                              const Fp* arg8,
-                             const Fp* arg9) {
+                             const Fp* arg9,
+                             const FpExt* poly_mix) {
   uint32_t mask = size - 1;
   FpExt x0{128, 0, 0, 0};
   FpExt x1{1, 0, 0, 0};
@@ -6595,7 +6630,7 @@ __device__ FpExt rv32im_v2_3(uint32_t idx,
   FpExt x1260 = x1242 + x228 * x1259 * poly_mix[441];
   FpExt x1261 = x1148 * x0;
   arg6[19] = x1261;
-  auto x1262 = rv32im_v2_2(idx, size, arg6, arg2, x1260, arg7, arg8, arg9);
+  auto x1262 = rv32im_v2_2(idx, size, arg6, arg2, x1260, arg7, arg8, arg9, poly_mix);
 
   return x1262;
 }
@@ -6605,7 +6640,8 @@ __device__ FpExt poly_fp(uint32_t idx,
                          const Fp* out,
                          const Fp* data,
                          const Fp* mix,
-                         const Fp* accum) {
+                         const Fp* accum,
+                         const FpExt* poly_mix) {
   uint32_t mask = size - 1;
   Fp x0(51);
   Fp x1(1073725472);
@@ -7902,7 +7938,7 @@ __device__ FpExt poly_fp(uint32_t idx,
   FpExt x1099 = x1098 + poly_mix[9] * x706;
   FpExt x1100 = x1099 + poly_mix[10] * x709;
   auto x1101 = rv32im_v2_19(
-      idx, size, x33, x1100, x1089, x667, x203, x344, x665, x34, data, accum, mix, out);
+      idx, size, x33, x1100, x1089, x667, x203, x344, x665, x34, data, accum, mix, out, poly_mix);
 
   return x1101;
 }
