@@ -7613,6 +7613,8 @@ fn p9_send_message(buf: &[u8], bytes_written: usize) -> Result<u32, HostWriteErr
 pub fn p9_read_message(fd: u32, buf: &mut [u8]) -> Result<u32, HostReadError> {
     use crate::host_calls::host_read;
 
+    const MAX_IO_BYTES: usize = 1024;
+
     if buf.len() < 4 {
         return Err(HostReadError::BufferTooSmall);
     }
@@ -7634,18 +7636,15 @@ pub fn p9_read_message(fd: u32, buf: &mut [u8]) -> Result<u32, HostReadError> {
         });
     }
 
-    // Read the rest of the message in a loop until we have the full length
+    // Read the rest of the message in chunks, respecting MAX_IO_BYTES limit
     let remaining_len = (data_len - 4) as usize;
     let mut total_read = 0;
     let mut offset = 4; // Start reading after the 4-byte length prefix
 
     while total_read < remaining_len {
-        let bytes_to_read = remaining_len - total_read;
-        let len = host_read(
-            fd,
-            unsafe { buf.as_mut_ptr().offset(offset as isize) },
-            bytes_to_read,
-        );
+        let bytes_remaining = remaining_len - total_read;
+        let chunk_size = core::cmp::min(MAX_IO_BYTES, bytes_remaining);
+        let len = host_read(fd, unsafe { buf.as_mut_ptr().add(offset) }, chunk_size);
 
         if len == 0 {
             return Err(HostReadError::LengthMismatch {
@@ -7686,6 +7685,8 @@ pub fn p9_read_message(fd: u32, buf: &mut [u8]) -> Result<u32, HostReadError> {
 pub fn p9_write(fd: u32, buf: *const u8, buf_len: usize) -> Result<u32, HostWriteError> {
     use crate::host_calls::host_write;
 
+    const MAX_IO_BYTES: usize = 1024;
+
     if buf.is_null() {
         return Err(HostWriteError::NullBuffer);
     }
@@ -7694,10 +7695,20 @@ pub fn p9_write(fd: u32, buf: *const u8, buf_len: usize) -> Result<u32, HostWrit
         return Err(HostWriteError::ZeroLength);
     }
 
-    let _bytes_written = host_write(fd, buf, buf_len);
+    let mut offset = 0usize;
 
-    // XXX we currently ignore the bytes written, we get 0?
-    Ok(0)
+    // Write in chunks of MAX_IO_BYTES
+    while offset < buf_len {
+        let chunk_size = core::cmp::min(MAX_IO_BYTES, buf_len - offset);
+        let chunk_ptr = unsafe { buf.add(offset) };
+
+        // XXX: host_write doesn't return reliable length, so we assume success
+        let _bytes_written = host_write(fd, chunk_ptr, chunk_size);
+
+        offset += chunk_size;
+    }
+
+    Ok(buf_len as u32)
 }
 
 /// Error types for custom host read operations
