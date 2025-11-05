@@ -359,19 +359,6 @@ pub unsafe fn emulate_fp_instruction(insn: u32, mepc: usize) -> ! {
         0x61 => emulate_fcvt_if(insn), // FCVT (double to int)
         0x68 => emulate_fcvt_fi(insn), // FCVT (int to float)
         0x69 => emulate_fcvt_fi(insn), // FCVT (int to double)
-        0x30 => emulate_fmadd(insn),   // FMADD.S (R4-type)
-        0x31 => emulate_fmadd(insn),   // FMADD.D (R4-type)
-        0x35 => emulate_fmadd(insn),   // FNMADD.D (R4-type)
-        0x39 => emulate_fmadd(insn),   // FMSUB.D (R4-type)
-        0x3d => emulate_fmadd(insn),   // FNMSUB.D (R4-type)
-        0x43 => emulate_fmadd(insn),   // FMADD.S
-        0x44 => emulate_fmadd(insn),   // FMADD.D
-        0x47 => emulate_fmadd(insn),   // FMSUB.S
-        0x48 => emulate_fmadd(insn),   // FMSUB.D
-        0x4b => emulate_fmadd(insn),   // FNMSUB.S
-        0x4c => emulate_fmadd(insn),   // FNMSUB.D
-        0x4f => emulate_fmadd(insn),   // FNMADD.S
-        0x4e => emulate_fmadd(insn),   // FNMADD.D
         0x70 => emulate_fmv_if(insn),  // FMV (float to int)
         0x71 => emulate_fmv_if(insn),  // FCLASS.D
         0x78 => emulate_fmv_fi(insn),  // FMV (int to float)
@@ -956,8 +943,20 @@ fn emulate_fcvt_if(insn: u32) -> ! {
                 // Follow riscv-pk approach: use softfloat directly and let it handle special cases
                 unsafe { f32_to_ui32(f32_rs1, rounding_mode, true) as u32 }
             }
+            2 => {
+                // fcvt.l.s - signed 64-bit conversion (RV64, but might appear in RV32 code)
+                // For RV32, treat as 32-bit signed conversion
+                kprint!("fcvt_if: rs2=2 (L conversion), treating as 32-bit signed");
+                unsafe { f32_to_i32(f32_rs1, rounding_mode, true) as u32 }
+            }
+            3 => {
+                // fcvt.lu.s - unsigned 64-bit conversion (RV64)
+                // For RV32, treat as 32-bit unsigned conversion
+                kprint!("fcvt_if: rs2=3 (LU conversion), treating as 32-bit unsigned");
+                unsafe { f32_to_ui32(f32_rs1, rounding_mode, true) as u32 }
+            }
             _ => {
-                kpanic!("Unsupported fcvt rs2: {}", rs2);
+                kpanic!("Unsupported fcvt rs2: {} (insn={:#010x})", rs2, insn);
             }
         };
         set_ureg(rd as usize, result);
@@ -984,8 +983,20 @@ fn emulate_fcvt_if(insn: u32) -> ! {
                 // Follow riscv-pk approach: use softfloat directly and let it handle special cases
                 unsafe { f64_to_ui32(f64_rs1, rounding_mode, true) as u32 }
             }
+            2 => {
+                // fcvt.l.d - signed 64-bit conversion (RV64)
+                // For RV32, treat as 32-bit signed conversion
+                kprint!("fcvt_if: rs2=2 (L conversion), treating as 32-bit signed");
+                unsafe { f64_to_i32(f64_rs1, rounding_mode, true) as u32 }
+            }
+            3 => {
+                // fcvt.lu.d - unsigned 64-bit conversion (RV64)
+                // For RV32, treat as 32-bit unsigned conversion
+                kprint!("fcvt_if: rs2=3 (LU conversion), treating as 32-bit unsigned");
+                unsafe { f64_to_ui32(f64_rs1, rounding_mode, true) as u32 }
+            }
             _ => {
-                kpanic!("Unsupported fcvt rs2: {}", rs2);
+                kpanic!("Unsupported fcvt rs2: {} (insn={:#010x})", rs2, insn);
             }
         };
         set_ureg(rd as usize, result);
@@ -1277,7 +1288,7 @@ fn emulate_fcvt_ff(insn: u32) -> ! {
     mret()
 }
 
-fn emulate_fmadd(insn: u32) -> ! {
+pub fn emulate_fmadd(insn: u32) -> ! {
     // R4-type instruction format:
     // [31:27] rs3 (5 bits, 3rd source reg)
     // [26:25] funct2 (2 bits, must be 00 for FMA ops)
