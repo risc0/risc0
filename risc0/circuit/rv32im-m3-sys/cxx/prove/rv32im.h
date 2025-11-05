@@ -29,15 +29,19 @@ struct Rv32CircuitInfo {
   CircuitInfo ci;
 };
 
+struct PreflightResults {
+  bool isFinal;    // Did this preflight result in termination
+  uint32_t cycles; // How many cycles did this preflight do
+  std::vector<RowInfo> rowInfo;
+  std::vector<uint32_t> aux;
+};
+
+PreflightResults preflight(size_t po2, rv32im::MemoryImage& image, rv32im::HostIO& io);
+
 class Rv32imProver {
 public:
   Rv32imProver(IHalPtr hal, size_t po2, bool doValidate = false);
-
-  bool preflight(rv32im::MemoryImage& image,
-                 rv32im::HostIO& io,
-                 uint32_t endCycle = 0,
-                 uint32_t* cyclesOut = nullptr);
-  void prove(WriteIop& iop);
+  void prove(WriteIop& iop, const PreflightResults& preflight);
 
   size_t po2() const;
 
