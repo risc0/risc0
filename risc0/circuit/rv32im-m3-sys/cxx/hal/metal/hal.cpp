@@ -41,6 +41,9 @@ public:
   MetalBuffer(MTL::Buffer* buffer) : buffer(buffer) {}
   ~MetalBuffer() override { buffer->release(); }
   size_t size() override { return buffer->length(); }
+  void copyFromCpu(size_t offset, const void* data, size_t size) override {
+    memcpy(reinterpret_cast<uint8_t*>(buffer->contents()) + offset, data, size);
+  }
 
 private:
   MTL::Buffer* buffer;

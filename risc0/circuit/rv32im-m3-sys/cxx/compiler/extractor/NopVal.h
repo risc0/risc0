@@ -13,25 +13,25 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "core/log.h"
-#include "prove/rv32im.h"
-#include "verify/rv32im.h"
+#pragma once
 
-namespace risc0 {
+#include "zkp/fp.h"
 
-void runTest(rv32im::MemoryImage& image, rv32im::HostIO& io, size_t po2) {
-  IHalPtr hal = getCpuHal();
-  // IHalPtr hal = getGpuHal();
-  Rv32imProver prover(hal, po2, true);
-  auto preflightData = preflight(po2, image, io);
-  if (!preflightData.isFinal) {
-    std::cerr << "FAILED TO COMPLETE\n";
-    exit(1);
-  }
-  WriteIop wiop;
-  prover.prove(wiop, preflightData);
-  ReadIop riop(wiop.getTranscript().data(), wiop.getTranscript().size());
-  verifyRv32im(riop, po2);
-}
+struct NopVal {
+  NopVal() {}
+  NopVal(uint32_t) {}
+  NopVal(risc0::Fp) {}
 
-} // namespace risc0
+  NopVal operator+(const NopVal& rhs) const { return NopVal{}; }
+  NopVal operator+=(const NopVal& rhs) { return NopVal{}; }
+  NopVal operator-(const NopVal& rhs) const { return NopVal{}; }
+  NopVal operator-=(const NopVal& rhs) { return NopVal{}; }
+  NopVal operator-() const { return NopVal{}; }
+  NopVal operator*(const NopVal& rhs) const { return NopVal{}; }
+  NopVal operator*=(const NopVal& rhs) { return NopVal{}; }
+  operator risc0::Fp() const { return risc0::Fp(); }
+};
+
+struct NopReg {
+  NopVal get() { return NopVal{}; }
+};

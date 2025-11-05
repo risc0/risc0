@@ -32,10 +32,10 @@ void testProve(IHalPtr hal) {
   auto image = rv32im::MemoryImage::fromWords(words);
   LOG(0, "Running first segment");
   rv32im::NullHostIO io;
-  prover.preflight(image, io);
+  auto preflightData = preflight(po2, image, io);
   WriteIop writeIop;
   LOG(0, "Proving");
-  prover.prove(writeIop);
+  prover.prove(writeIop, preflightData);
   std::vector<Fp> transcript = writeIop.getTranscript();
   LOG(0, "Transcipt size = " << transcript.size());
   LOG(0, "Verifying");

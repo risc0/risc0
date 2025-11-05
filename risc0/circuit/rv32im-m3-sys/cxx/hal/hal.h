@@ -37,6 +37,7 @@ public:
   IBuffer() {}
   virtual ~IBuffer() {}
   virtual size_t size() = 0; // Size in bytes
+  virtual void copyFromCpu(size_t offset, const void* data, size_t size) = 0;
 };
 
 using IBufferPtr = std::shared_ptr<IBuffer>;
@@ -58,7 +59,14 @@ public:
   HalArray(IBufferPtr inner) : inner(inner), _offset(0), _size(inner->size()) {}
   HalArray(const HalArray<T>& rhs) = default;
 
-  void copyFromCpu(IHalPtr hal, const T* data);
+  void copyFromCpu(IHalPtr hal, const T* data, size_t size) {
+    if (_offset + size * sizeof(T) > _size) {
+      throw std::runtime_error("Invalid copyFromCpu");
+    }
+    inner->copyFromCpu(_offset, data, size * sizeof(T));
+  }
+
+  void copyFromCpu(IHalPtr hal, const T* data) { copyFromCpu(hal, data, size()); }
 
   // Size in elements
   size_t size() const { return _size / sizeof(T); }
@@ -297,11 +305,6 @@ template <typename T> class PinnedArrayRW : public PinnedArrayBase<T> {
 public:
   PinnedArrayRW(IHalPtr hal, HalArray<T> buf) : PinnedArrayBase<T>(hal, buf, true) {}
 };
-
-template <typename T> void HalArray<T>::copyFromCpu(IHalPtr hal, const T* data) {
-  PinnedArrayWO<T> pinned(hal, *this);
-  memcpy(pinned.data(), data, _size);
-}
 
 template <typename T> class PinnedMatrixRO {
 public:
