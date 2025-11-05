@@ -5,7 +5,7 @@ use alloc::vec;
 use anyhow::{Error, Result};
 use ark_bn254::Bn254;
 
-use crate::{VerifyingKey, from_u256, g1_from_bytes, g2_from_bytes};
+use crate::{from_u256, g1_from_bytes, g2_from_bytes, VerifyingKey};
 
 // Constants from: risc0-ethereum/contracts/src/groth16/Groth16Verifier.sol
 // When running a new ceremony, update them by running cargo xtask bootstrap-groth16

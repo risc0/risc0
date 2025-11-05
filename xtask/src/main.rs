@@ -17,6 +17,8 @@ mod bazel;
 #[cfg(feature = "zkvm")]
 mod bootstrap;
 #[cfg(feature = "zkvm")]
+mod bootstrap_blake3_groth16;
+#[cfg(feature = "zkvm")]
 mod bootstrap_groth16;
 mod bootstrap_poseidon;
 mod bootstrap_protos;
@@ -40,7 +42,10 @@ use self::{
     update_crate_version::UpdateCrateVersion, update_lock_files::UpdateLockFiles,
 };
 #[cfg(feature = "zkvm")]
-use self::{bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16, gen_receipt::GenReceipt};
+use self::{
+    bootstrap::Bootstrap, bootstrap_blake3_groth16::BootstrapBlake3Groth16,
+    bootstrap_groth16::BootstrapGroth16, gen_receipt::GenReceipt,
+};
 
 #[derive(Parser)]
 struct Cli {
@@ -55,6 +60,8 @@ enum Commands {
     Bootstrap(Bootstrap),
     #[cfg(feature = "zkvm")]
     BootstrapGroth16(BootstrapGroth16),
+    #[cfg(feature = "zkvm")]
+    BootstrapBlake3Groth16(BootstrapBlake3Groth16),
     BootstrapPoseidon(BootstrapPoseidon),
     BootstrapProtos(BootstrapProtos),
     #[cfg(feature = "zkvm")]
@@ -78,6 +85,8 @@ impl Commands {
             Commands::Bootstrap(cmd) => cmd.run(),
             #[cfg(feature = "zkvm")]
             Commands::BootstrapGroth16(cmd) => cmd.run(),
+            #[cfg(feature = "zkvm")]
+            Commands::BootstrapBlake3Groth16(cmd) => cmd.run(),
             Commands::BootstrapPoseidon(cmd) => cmd.run(),
             Commands::BootstrapProtos(cmd) => cmd.run(),
             Commands::Install(cmd) => cmd.run(),
