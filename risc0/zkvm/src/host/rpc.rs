@@ -50,6 +50,9 @@ pub struct ProofRequest {
 pub enum ShrinkWrapKind {
     /// TODO
     Groth16,
+
+    /// TODO
+    Blake3Groth16,
 }
 
 /// TODO
