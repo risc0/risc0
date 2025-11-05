@@ -112,7 +112,6 @@ impl Poseidon2State {
         // While we have data to process
         let mut buf_in_addr = WordAddr(self.buf_in_addr);
         // tracing::debug!("buf_in_addr: {buf_in_addr:?}");
-        // HERE!
         while self.count > 0 {
             // Do load
             self.step(ctx, &mut cur_state, CycleState::PoseidonLoadIn, 0);
@@ -296,6 +295,8 @@ impl Poseidon2 {
         let buf_in_addr = ctx.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A1)?;
         let buf_out_addr = ctx.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A2)?;
         let bits_count = ctx.load_machine_register(LoadOp::Record, REG_A3)?;
+        // TODO(victor/perf): The rest of this function needs to leverage Risc0Context more to
+        // avoid doing as much work in execution as we do in preflight.
         let mut p2 = Poseidon2State::new_ecall(state_addr, buf_in_addr, buf_out_addr, bits_count);
         p2.rest(ctx, CycleState::Decode)
     }
