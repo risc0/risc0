@@ -212,9 +212,9 @@ impl ProverServer for ProverImpl {
             });
         }
 
-        let groth16_receipt = self.succinct_to_groth16(&succinct_receipt)?;
-
         if self.opts.receipt_kind == ReceiptKind::Groth16 {
+            let groth16_receipt = self.succinct_to_groth16(&succinct_receipt)?;
+
             let receipt = Receipt::new(
                 InnerReceipt::Groth16(groth16_receipt),
                 session.journal.clone().unwrap_or_default().bytes,
@@ -224,6 +224,29 @@ impl ProverServer for ProverImpl {
                 work_receipt: work_receipt.map(Into::into),
                 stats: session.stats(),
             });
+        }
+
+        #[cfg(feature = "blake3")]
+        if self.opts.receipt_kind == ReceiptKind::Blake3Groth16 {
+            if let Some(journal) = session.journal.as_ref() {
+                let journal: [u8; 32] = journal.as_ref().try_into().map_err(|_| {
+                    anyhow!("Blake3Groth16 receipts require a journal of exactly 32 bytes")
+                })?;
+                let blake3_groth16_receipt =
+                    self.succinct_to_blake3_groth16(&succinct_receipt, journal)?;
+
+                let receipt = Receipt::new(
+                    InnerReceipt::Blake3Groth16(blake3_groth16_receipt),
+                    session.journal.clone().unwrap_or_default().bytes,
+                );
+                return Ok(ProveInfo {
+                    receipt,
+                    work_receipt: work_receipt.map(Into::into),
+                    stats: session.stats(),
+                });
+            } else {
+                bail!("Blake3Groth16 receipts require a non-empty 32 byte journal");
+            }
         }
 
         // As long as the checks above are exhaustive, this code is unreachable. If this statement
