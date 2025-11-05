@@ -51,6 +51,7 @@ pub enum ShrinkWrapKind {
     /// TODO
     Groth16,
 
+    #[cfg(feature = "blake3")]
     /// TODO
     Blake3Groth16,
 }

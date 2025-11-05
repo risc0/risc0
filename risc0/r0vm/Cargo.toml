@@ -41,13 +41,7 @@ serde = { version = "1.0.219", features = ["rc"] }
 serde_json = "1"
 tempfile = "3.20.0"
 thiserror = "2.0.12"
-tokio = { version = "1.44.2", features = [
-  "macros",
-  "io-util",
-  "process",
-  "rt-multi-thread",
-  "signal",
-] }
+tokio = { version = "1.44.2", features = ["macros", "io-util", "process", "rt-multi-thread", "signal"] }
 tokio-util = { version = "0.7.15", features = ["codec"] }
 toml = "0.8.22"
 tracing = "0.1.41"
@@ -71,6 +65,7 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
+blake3 = ["risc0-zkvm/blake3", "bonsai-sdk/blake3"]
 cuda = ["risc0-zkvm/cuda"]
 default = []
 disable-dev-mode = ["risc0-zkvm/disable-dev-mode"]
