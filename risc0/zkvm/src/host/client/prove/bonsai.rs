@@ -166,66 +166,116 @@ impl Prover for BonsaiProver {
         };
         match opts.receipt_kind {
             // If the caller requested a composite or succinct receipt, we are done.
-            ReceiptKind::Composite | ReceiptKind::Succinct => {
-                return Ok(succinct_prove_info);
-            }
+            ReceiptKind::Composite | ReceiptKind::Succinct => Ok(succinct_prove_info),
             // If they requested a groth16 receipts, we need to continue.
-            ReceiptKind::Groth16 => {}
-            #[cfg(feature = "blake3")]
-            // If they requested a blake3 receipt, we need to continue.
-            ReceiptKind::Blake3Groth16 => {}
-        }
-        // TODO(ec2): Use bonsai api to call blake3
-        // Request that Bonsai compress further, to Groth16.
-        let snark_session = client.create_snark(session.uuid)?;
-        let snark_receipt_url = loop {
-            let res = snark_session.status(&client)?;
-            match res.status.as_str() {
-                "RUNNING" => {
-                    std::thread::sleep(polling_interval);
-                    continue;
-                }
-                "SUCCEEDED" => {
-                    break res.output.with_context(|| {
+            ReceiptKind::Groth16 => {
+                // Request that Bonsai compress further, to Groth16.
+                let snark_session = client.create_snark(session.uuid)?;
+                let snark_receipt_url = loop {
+                    let res = snark_session.status(&client)?;
+                    match res.status.as_str() {
+                        "RUNNING" => {
+                            std::thread::sleep(polling_interval);
+                            continue;
+                        }
+                        "SUCCEEDED" => {
+                            break res.output.with_context(|| {
                         format!(
                             "Bonsai prover workflow [{}] reported success, but provided no receipt",
                             snark_session.uuid
                         )
                     })?;
-                }
-                _ => {
-                    bail!(
-                        "Bonsai prover workflow [{}] exited: {} err: {}",
-                        snark_session.uuid,
-                        res.status,
-                        res.error_msg
-                            .unwrap_or("Bonsai workflow missing error_msg".into()),
-                    );
-                }
+                        }
+                        _ => {
+                            bail!(
+                                "Bonsai prover workflow [{}] exited: {} err: {}",
+                                snark_session.uuid,
+                                res.status,
+                                res.error_msg
+                                    .unwrap_or("Bonsai workflow missing error_msg".into()),
+                            );
+                        }
+                    }
+                };
+
+                // Assemble the groth16 receipt, and verify it.
+                // TODO(bonsai-alpha#461): If the Groth16 parameters used by Bonsai do not match, this
+                // verification will fail. When Bonsai returned ReceiptMetadata, we'll be able to detect
+                // this error condition and report a better message. Constructing the receipt here will all
+                // the verifier parameters for this version of risc0-zkvm, which may be different than
+                // Bonsai. By verifying the receipt though, we at least know the proving key used on Bonsai
+                // matches the verifying key used here.
+                let receipt_buf = client.download(&snark_receipt_url)?;
+                let groth16_receipt: Receipt = bincode::deserialize(&receipt_buf)?;
+                groth16_receipt
+                    .verify_integrity_with_context(ctx)
+                    .context("failed to verify Groth16Receipt returned by Bonsai")?;
+
+                succinct_prove_info.stats.log_if_risc0_info_set();
+
+                // Return the groth16 receipt, with the stats collected earlier.
+                Ok(ProveInfo {
+                    receipt: groth16_receipt,
+                    work_receipt: None,
+                    stats: succinct_prove_info.stats,
+                })
             }
-        };
+            #[cfg(feature = "blake3")]
+            // If they requested a blake3 receipt, we need to continue.
+            ReceiptKind::Blake3Groth16 => {
+                // Request that Bonsai compress further, to Groth16.
+                let snark_session = client.shrink_blake3_groth16(session.uuid)?;
+                let snark_receipt_url = loop {
+                    let res = snark_session.status(&client)?;
+                    match res.status.as_str() {
+                        "RUNNING" => {
+                            std::thread::sleep(polling_interval);
+                            continue;
+                        }
+                        "SUCCEEDED" => {
+                            break res.output.with_context(|| {
+                        format!(
+                            "Bonsai prover workflow [{}] reported success, but provided no receipt",
+                            snark_session.uuid
+                        )
+                    })?;
+                        }
+                        _ => {
+                            bail!(
+                                "Bonsai prover workflow [{}] exited: {} err: {}",
+                                snark_session.uuid,
+                                res.status,
+                                res.error_msg
+                                    .unwrap_or("Bonsai workflow missing error_msg".into()),
+                            );
+                        }
+                    }
+                };
 
-        // Assemble the groth16 receipt, and verify it.
-        // TODO(bonsai-alpha#461): If the Groth16 parameters used by Bonsai do not match, this
-        // verification will fail. When Bonsai returned ReceiptMetadata, we'll be able to detect
-        // this error condition and report a better message. Constructing the receipt here will all
-        // the verifier parameters for this version of risc0-zkvm, which may be different than
-        // Bonsai. By verifying the receipt though, we at least know the proving key used on Bonsai
-        // matches the verifying key used here.
-        let receipt_buf = client.download(&snark_receipt_url)?;
-        let groth16_receipt: Receipt = bincode::deserialize(&receipt_buf)?;
-        groth16_receipt
-            .verify_integrity_with_context(ctx)
-            .context("failed to verify Groth16Receipt returned by Bonsai")?;
+                // Assemble the groth16 receipt, and verify it.
+                // TODO(bonsai-alpha#461): If the Groth16 parameters used by Bonsai do not match, this
+                // verification will fail. When Bonsai returned ReceiptMetadata, we'll be able to detect
+                // this error condition and report a better message. Constructing the receipt here will all
+                // the verifier parameters for this version of risc0-zkvm, which may be different than
+                // Bonsai. By verifying the receipt though, we at least know the proving key used on Bonsai
+                // matches the verifying key used here.
+                let receipt_buf = client.download(&snark_receipt_url)?;
+                let groth16_receipt: Receipt = bincode::deserialize(&receipt_buf)?;
+                groth16_receipt
+                    .verify_integrity_with_context(ctx)
+                    .context("failed to verify Groth16Receipt returned by Bonsai")?;
 
-        succinct_prove_info.stats.log_if_risc0_info_set();
+                succinct_prove_info.stats.log_if_risc0_info_set();
 
-        // Return the groth16 receipt, with the stats collected earlier.
-        Ok(ProveInfo {
-            receipt: groth16_receipt,
-            work_receipt: None,
-            stats: succinct_prove_info.stats,
-        })
+                // Return the groth16 receipt, with the stats collected earlier.
+                Ok(ProveInfo {
+                    receipt: groth16_receipt,
+                    work_receipt: None,
+                    stats: succinct_prove_info.stats,
+                })
+            }
+        }
+        // TODO(ec2): Use bonsai api to call blake3
     }
 
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {

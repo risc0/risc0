@@ -136,7 +136,7 @@ client = [
   "dep:tempfile",
   "std",
 ]
-blake3 = ["risc0-groth16/blake3", "dep:blake3"]
+blake3 = ["risc0-groth16/blake3", "dep:blake3", "bonsai-sdk/blake3"]
 bonsai = ["dep:bonsai-sdk"]
 cuda = [
   "prove",
