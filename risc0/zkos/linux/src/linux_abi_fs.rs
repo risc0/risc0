@@ -92,9 +92,12 @@ pub static mut CWD_STR: String = String::new();
 pub static mut UMASK: u32 = 0o022; // Default umask value
 
 // Max chunk size for 9P I/O operations
-// Must fit in the 1024-byte Twrite/Tread message buffer with ~23 bytes of overhead
-// Using 1000 to leave safe margin for message headers (1000 + 23 = 1023 < 1024)
-const MAX_9P_IO_CHUNK: u32 = 1000;
+// P9_DEFAULT_MSIZE is 8192. The diod server checks: count + IOHDRSZ <= msize
+// where IOHDRSZ = 24 (diod's conservative header size for Twrite/Rread messages)
+// Maximum data per operation: 8192 - 24 = 8168 bytes
+// The p9_write and p9_read_message functions automatically chunk the full message
+// into 1024-byte pieces for transmission to stay within the host I/O limits
+const MAX_9P_IO_CHUNK: u32 = 8192 - 24; // 8168 bytes
 
 // Sentinel value for invalid/uninitialized file mode
 const INVALID_MODE: u32 = 0xFFFF_FFFF;
@@ -579,8 +582,8 @@ pub fn read_file_to_user_memory(fd: u32, buf: u32, count: u32, offset: u64) -> R
         let mut cursor = offset;
         let mut total_bytes_read = 0u32;
         while cursor < offset + (count as u64) {
-            // read max 128 bytes at a time
-            let max_count = (offset + count as u64 - cursor).min(128) as u32;
+            // read max MAX_9P_IO_CHUNK bytes at a time
+            let max_count = (offset + count as u64 - cursor).min(MAX_9P_IO_CHUNK as u64) as u32;
             let tread = TreadMessage::new(0, file_desc.fid, cursor, max_count);
             match tread.send_tread() {
                 Ok(_bytes_written) => {
