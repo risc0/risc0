@@ -32,15 +32,15 @@ template <typename C> struct ReadByteBlock {
   RegU16<C> sizeMinus1;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, lowBit0);
-    T::apply(ctx, lowBit1);
-    T::apply(ctx, io, cycle.get());
-    T::apply(ctx, lowByte);
-    T::apply(ctx, highByte);
-    T::apply(ctx, newByte);
-    T::apply(ctx, is3);
-    T::apply(ctx, sizeMinus1);
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "lowBit0", lowBit0);
+    T::apply(ctx, "lowBit1", lowBit1);
+    T::apply(ctx, "io", io, cycle.get());
+    T::apply(ctx, "lowByte", lowByte);
+    T::apply(ctx, "highByte", highByte);
+    T::apply(ctx, "newByte", newByte);
+    T::apply(ctx, "is3", is3);
+    T::apply(ctx, "sizeMinus1", sizeMinus1);
   }
 
   FDEV void set(CTX, ReadByteWitness wit) DEV;
@@ -57,9 +57,9 @@ template <typename C> struct ReadWordBlock {
   PhysMemWriteBlock<C> io;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, sizeMinus4);
-    T::apply(ctx, io, cycle.get());
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "sizeMinus4", sizeMinus4);
+    T::apply(ctx, "io", io, cycle.get());
   }
 
   FDEV void set(CTX, ReadWordWitness wit) DEV;

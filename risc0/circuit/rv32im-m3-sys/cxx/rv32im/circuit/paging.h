@@ -32,10 +32,10 @@ template <typename C> struct PageInNodeBlock {
   RegDigest<C> right;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, index);
-    T::apply(ctx, node);
-    T::apply(ctx, left);
-    T::apply(ctx, right);
+    T::apply(ctx, "index", index);
+    T::apply(ctx, "node", node);
+    T::apply(ctx, "left", left);
+    T::apply(ctx, "right", right);
   }
 
   FDEV void set(CTX, PageInNodeWitness wit) DEV;
@@ -56,12 +56,12 @@ template <typename C> struct PageInPartBlock {
   IsZero<C> lastPart;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, addr);
-    T::apply(ctx, partNum);
-    T::apply(ctx, in);
-    T::apply(ctx, out);
-    T::apply(ctx, data);
-    T::apply(ctx, lastPart, Val<C>(NUM_PARTS - 1) - partNum.get());
+    T::apply(ctx, "addr", addr);
+    T::apply(ctx, "partNum", partNum);
+    T::apply(ctx, "in", in);
+    T::apply(ctx, "out", out);
+    T::apply(ctx, "data", data);
+    T::apply(ctx, "lastPart", lastPart, Val<C>(NUM_PARTS - 1) - partNum.get());
   }
 
   FDEV void set(CTX, PageInPartWitness wit) DEV;
@@ -78,8 +78,8 @@ template <typename C> struct PageInPageBlock {
   RegDigest<C> node;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, addr);
-    T::apply(ctx, node);
+    T::apply(ctx, "addr", addr);
+    T::apply(ctx, "node", node);
   }
 
   FDEV void set(CTX, PageInPageWitness wit) DEV;
@@ -98,10 +98,10 @@ template <typename C> struct PageOutNodeBlock {
   RegDigest<C> right;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, index);
-    T::apply(ctx, node);
-    T::apply(ctx, left);
-    T::apply(ctx, right);
+    T::apply(ctx, "index", index);
+    T::apply(ctx, "node", node);
+    T::apply(ctx, "left", left);
+    T::apply(ctx, "right", right);
   }
 
   FDEV void set(CTX, PageOutNodeWitness wit) DEV;
@@ -123,13 +123,13 @@ template <typename C> struct PageOutPartBlock {
   IsZero<C> lastPart;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, addr);
-    T::apply(ctx, partNum);
-    T::apply(ctx, in);
-    T::apply(ctx, out);
-    T::apply(ctx, data);
-    T::apply(ctx, cycle);
-    T::apply(ctx, lastPart, Val<C>(NUM_PARTS - 1) - partNum.get());
+    T::apply(ctx, "addr", addr);
+    T::apply(ctx, "partNum", partNum);
+    T::apply(ctx, "in", in);
+    T::apply(ctx, "out", out);
+    T::apply(ctx, "data", data);
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "lastPart", lastPart, Val<C>(NUM_PARTS - 1) - partNum.get());
   }
 
   FDEV void set(CTX, PageOutPartWitness wit) DEV;
@@ -146,8 +146,8 @@ template <typename C> struct PageOutPageBlock {
   RegDigest<C> node;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, addr);
-    T::apply(ctx, node);
+    T::apply(ctx, "addr", addr);
+    T::apply(ctx, "node", node);
   }
 
   FDEV void set(CTX, PageOutPageWitness wit) DEV;
@@ -164,8 +164,8 @@ template <typename C> struct PageUncleBlock {
   RegDigest<C> node;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, index);
-    T::apply(ctx, node);
+    T::apply(ctx, "index", index);
+    T::apply(ctx, "node", node);
   }
 
   FDEV void set(CTX, PageUncleWitness wit) DEV;
