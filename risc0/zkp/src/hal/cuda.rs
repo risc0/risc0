@@ -240,6 +240,15 @@ impl RawBuffer {
         Self { name, buf }
     }
 
+    pub fn new_zeroed(name: &'static str, size: usize) -> Self {
+        tracing::trace!("alloc: {size} bytes, {name}");
+        tracker().lock().unwrap().alloc(size);
+        let buf = DeviceBuffer::zeroed(size)
+            .context(format!("allocation failed on {name}: {size} bytes"))
+            .unwrap();
+        Self { name, buf }
+    }
+
     pub fn set_u32(&mut self, value: u32) {
         self.buf.set_32(value).unwrap();
     }
@@ -278,6 +287,17 @@ impl<T> BufferImpl<T> {
         assert!(bytes_len > 0);
         BufferImpl {
             buffer: Rc::new(RefCell::new(RawBuffer::new(name, bytes_len))),
+            size,
+            offset: 0,
+            marker: PhantomData,
+        }
+    }
+
+    fn new_zeroed(name: &'static str, size: usize) -> Self {
+        let bytes_len = std::mem::size_of::<T>() * size;
+        assert!(bytes_len > 0);
+        BufferImpl {
+            buffer: Rc::new(RefCell::new(RawBuffer::new_zeroed(name, bytes_len))),
             size,
             offset: 0,
             marker: PhantomData,
@@ -461,6 +481,10 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         BufferImpl::new(name, size)
     }
 
+    fn alloc_elem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        BufferImpl::new_zeroed(name, size)
+    }
+
     fn alloc_elem_init(
         &self,
         name: &'static str,
@@ -501,12 +525,20 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         BufferImpl::new(name, size)
     }
 
+    fn alloc_digest_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        BufferImpl::new_zeroed(name, size)
+    }
+
     fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
         BufferImpl::copy_from(name, slice)
     }
 
     fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
         BufferImpl::new(name, size)
+    }
+
+    fn alloc_u32_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        BufferImpl::new_zeroed(name, size)
     }
 
     fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
