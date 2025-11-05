@@ -44,9 +44,9 @@ int main() {
   auto image = rv32im::MemoryImage::fromWords(words);
   Rv32imProver prover(hal, po2);
   rv32im::NullHostIO io;
-  prover.preflight(image, io);
+  auto preflightData = preflight(po2, image, io);
   WriteIop wiop;
-  prover.prove(wiop);
+  prover.prove(wiop, preflightData);
   const std::vector<Fp>& transcript = wiop.getTranscript();
 
   // Do a plain verify as a sanity check

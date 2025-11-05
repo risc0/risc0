@@ -26,7 +26,7 @@ template <typename C> struct BitReg {
 
   Reg<C> inner;
 
-  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, inner); }
+  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, "inner", inner); }
 
   FDEV void set(CTX, Val<C> v) DEV;
   FDEV inline void finalize(CTX) DEV {}

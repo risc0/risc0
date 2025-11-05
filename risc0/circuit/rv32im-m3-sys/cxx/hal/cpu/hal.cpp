@@ -55,6 +55,9 @@ public:
   CpuBuffer(size_t size) : buffer(new char[size]), _size(size) { memset(buffer, 0, size); }
   ~CpuBuffer() override { delete[] reinterpret_cast<char*>(buffer); }
   size_t size() override { return _size; }
+  void copyFromCpu(size_t offset, const void* data, size_t size) override {
+    memcpy(reinterpret_cast<uint8_t*>(buffer) + offset, data, size);
+  }
 
 private:
   void* buffer;

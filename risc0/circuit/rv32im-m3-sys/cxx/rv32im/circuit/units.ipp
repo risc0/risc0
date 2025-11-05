@@ -12,6 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define PICUS_U32_INPUT(ctx, x)                                                                    \
+  PICUS_INPUT(ctx, x);                                                                             \
+  RANGE_PRECONDITION(ctx, 0, x.low.get(), 0x10000);                                                \
+  RANGE_PRECONDITION(ctx, 0, x.high.get(), 0x10000)
+
+#define UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx)                                                          \
+  PICUS_INPUT(ctx, count);                                                                         \
+  PICUS_U32_INPUT(ctx, a);                                                                         \
+  PICUS_U32_INPUT(ctx, b)
+
 template <typename C> FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness wit) DEV {
   count.set(ctx, wit.count);
   Option opts(wit.opts);
@@ -20,6 +30,11 @@ template <typename C> FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness w
   a.set(ctx, wit.a);
   b.set(ctx, wit.b);
   out.set(ctx, wit.a, (opts.val ? ~wit.b : wit.b), opts.val);
+}
+
+template <typename C> FDEV void UnitAddSubBlock<C>::verify(CTX) DEV {
+  UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx);
+  PICUS_INPUT(ctx, doSub);
 }
 
 template <typename C> FDEV void UnitAddSubBlock<C>::addArguments(CTX) DEV {
@@ -52,6 +67,12 @@ template <typename C> FDEV void UnitBitBlock<C>::set(CTX, UnitBitWitness wit) DE
 }
 
 template <typename C> FDEV void UnitBitBlock<C>::verify(CTX) DEV {
+  UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx);
+  PICUS_INPUT(ctx, op);
+
+  // Assert that aBits and bBits are bit decompositions of a and b. Also compute
+  // the "recomposition" of aBits, bBits, and their product into shorts for use
+  // in a moment.
   Val<C> aParts[2], bParts[2], andParts[2];
   for (size_t p = 0; p < 2; p++) {
     for (size_t i = 0; i < 16; i++) {
@@ -63,10 +84,25 @@ template <typename C> FDEV void UnitBitBlock<C>::verify(CTX) DEV {
       andParts[p] += aVal * bVal * po2;
     }
   }
+
+  // Assert that aBits and bBits recompose into a and b.
   EQ(aParts[0], a.low.get());
   EQ(aParts[1], a.high.get());
   EQ(bParts[0], b.low.get());
   EQ(bParts[1], b.high.get());
+
+  // Now we want to assert that out is computed correctly from a and b, and bits
+  // encodes whether we're computing XOR, OR, or AND. Noting that we've already
+  // computed AND(a, b), we can relate XOR(a, b) and OR(a, b) with ordinary
+  // addition (and therefore field addition without overflow) with some
+  // manipulation of the equations of a ripple-carry adder:
+  //
+  // XOR(a, b) = a + b - 2 * AND(a, b)
+  // OR(a, b) = a + b - AND(a, b)
+  // AND(a, b) = AND(a, b)
+  //
+  // Since these equations have common structure, we can write the result of
+  // each possible operation in the form c1 * (a + b) + c2 * AND(a, b).
   Val<C> c1 = op.bits[0].get() + op.bits[1].get();
   Val<C> c2 = op.bits[0].get() * (-Val<C>(2)) + op.bits[1].get() * (-Val<C>(1)) + op.bits[2].get();
   // LOG(0, "c1 = " << c1 << ", c2 = " << c2);
@@ -113,6 +149,22 @@ template <typename C> FDEV void UnitMulBlock<C>::set(CTX, UnitMulWitness wit) DE
 }
 
 template <typename C> FDEV void UnitMulBlock<C>::verify(CTX) DEV {
+  PICUS_INPUT(ctx, count);
+  PICUS_INPUT(ctx, mul.signA);
+  PICUS_INPUT(ctx, mul.signB);
+
+  // Only the fields used in the argument are guaranteed to be determinstic. In
+  // particular, ExpandU32::topBit and ExpandU32::b3Low7times2 cannot be assumed.
+  // TODO: is there a more robust way to flag the correct fields?
+  PICUS_INPUT(ctx, mul.ax.b0);
+  PICUS_INPUT(ctx, mul.ax.b1);
+  PICUS_INPUT(ctx, mul.ax.b2);
+  PICUS_INPUT(ctx, mul.ax.b3);
+  PICUS_INPUT(ctx, mul.bx.b0);
+  PICUS_INPUT(ctx, mul.bx.b1);
+  PICUS_INPUT(ctx, mul.bx.b2);
+  PICUS_INPUT(ctx, mul.bx.b3);
+
   // Disallow signA = 0, sign B = 1
   EQZ((Val<C>(1) - mul.signA.get()) * mul.signB.get());
 }
@@ -173,6 +225,11 @@ template <typename C> FDEV void UnitDivBlock<C>::set(CTX, UnitDivWitness wit) DE
 }
 
 template <typename C> FDEV void UnitDivBlock<C>::verify(CTX) DEV {
+  PICUS_INPUT(ctx, count);
+  PICUS_INPUT(ctx, isSigned);
+  PICUS_U32_INPUT(ctx, numer.in);
+  PICUS_U32_INPUT(ctx, denom.in);
+
   /*
   LOG(0, std::hex);
   LOG(0, "isSigned = " << isSigned.get());
@@ -360,3 +417,6 @@ template <typename C> FDEV void UnitShiftBlock<C>::addArguments(CTX) DEV {
   arg.out1High = out2.high.get();
   ctx.pull(arg);
 }
+
+#undef UNIT_BLOCK_PICUS_ASSUMPTIONS
+#undef PICUS_U32_INPUT

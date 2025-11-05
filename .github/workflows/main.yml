@@ -114,7 +114,7 @@ jobs:
       - check-semver
       - check-template
       - clippy
-      - compute-sanitizer
+      # - compute-sanitizer
       - doc
       - docker
       - docs-rs

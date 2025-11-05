@@ -38,8 +38,8 @@ struct SparkError {
 extern "C" void* cuda_malloc(size_t size);
 extern "C" void cuda_free(void* buf);
 extern "C" bool cuda_sync();
-extern "C" bool cuda_copy_to_host_sync(void* host, void* dev, size_t size);
-extern "C" bool cuda_copy_to_dev_sync(void* host, void* dev, size_t size);
+extern "C" bool cuda_copy_to_host_sync(void* host, const void* dev, size_t size);
+extern "C" bool cuda_copy_to_dev_sync(void* dev, const void* host, size_t size);
 extern "C" bool cuda_copy_dev(void* dst, void* src, size_t size);
 extern "C" bool cuda_zero_dev(void* buf, size_t size);
 
@@ -136,6 +136,9 @@ public:
   CudaBuffer(void* devPtr, size_t size) : devPtr(devPtr), bufSize(size) {}
   ~CudaBuffer() override { cuda_free(devPtr); }
   size_t size() override { return bufSize; }
+  void copyFromCpu(size_t offset, const void* data, size_t size) override {
+    cuda_copy_to_dev_sync(reinterpret_cast<uint8_t*>(devPtr) + offset, data, size);
+  }
 
 private:
   void* devPtr;
