@@ -79,13 +79,15 @@ impl Poseidon2State {
         }
     }
 
-    fn step(
+    fn step<C>(
         &mut self,
-        ctx: &mut impl Risc0Context,
+        ctx: &mut C,
         cur_state: &mut CycleState,
         next_state: CycleState,
         sub_state: u32,
-    ) {
+    ) where
+        C: Risc0Context + ?Sized,
+    {
         self.next_state = next_state;
         self.sub_state = sub_state;
         ctx.on_poseidon2_cycle(*cur_state, self);
@@ -108,21 +110,7 @@ impl Poseidon2State {
         // tracing::debug!("buf_in_addr: {buf_in_addr:?}");
         while self.count > 0 {
             self.load_buf_in(ctx, &mut cur_state)?;
-
-            // Do the mix
-            // NOTE(victor/perf): This is where essentially all of the time in the profile for this
-            // evall lives. It should not have memory side effects and should be specialized.
-            self.multiply_by_m_ext();
-            for i in 0..ROUNDS_HALF_FULL {
-                self.step(ctx, &mut cur_state, CycleState::PoseidonExtRound, i as u32);
-                self.do_ext_round(i);
-            }
-            self.step(ctx, &mut cur_state, CycleState::PoseidonIntRound, 0);
-            self.do_int_rounds();
-            for i in ROUNDS_HALF_FULL..ROUNDS_HALF_FULL * 2 {
-                self.step(ctx, &mut cur_state, CycleState::PoseidonExtRound, i as u32);
-                self.do_ext_round(i);
-            }
+            ctx.ecall_poseidon2_mix(&mut cur_state, self);
             self.count -= 1;
         }
 
@@ -231,6 +219,23 @@ impl Poseidon2State {
             }
         }
         Ok(())
+    }
+
+    pub(crate) fn mix<C>(&mut self, ctx: &mut C, cur_state: &mut CycleState)
+    where
+        C: Risc0Context + ?Sized,
+    {
+        self.multiply_by_m_ext();
+        for i in 0..ROUNDS_HALF_FULL {
+            self.step(ctx, cur_state, CycleState::PoseidonExtRound, i as u32);
+            self.do_ext_round(i);
+        }
+        self.step(ctx, cur_state, CycleState::PoseidonIntRound, 0);
+        self.do_int_rounds();
+        for i in ROUNDS_HALF_FULL..ROUNDS_HALF_FULL * 2 {
+            self.step(ctx, cur_state, CycleState::PoseidonExtRound, i as u32);
+            self.do_ext_round(i);
+        }
     }
 
     // Optimized method for multiplication by M_EXT.

@@ -182,6 +182,10 @@ pub(crate) trait Risc0Context {
     fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State);
 
     fn ecall_bigint(&mut self) -> Result<()>;
+
+    fn ecall_poseidon2_mix(&mut self, cur_state: &mut CycleState, p2: &mut Poseidon2State) {
+        p2.mix(self, cur_state)
+    }
 }
 
 #[cfg(test)]

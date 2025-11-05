@@ -28,6 +28,7 @@ use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
 use risc0_zkp::core::{
     digest::{DIGEST_BYTES, Digest},
+    hash::poseidon2::ROUNDS_HALF_FULL,
     log2_ceil,
 };
 
@@ -682,6 +683,14 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         let cycles = bigint::ecall_execute(self)?;
         self.inc_user_cycles(cycles, Some(EcallKind::BigInt));
         Ok(())
+    }
+
+    fn ecall_poseidon2_mix(&mut self, _cur_state: &mut CycleState, p2: &mut Poseidon2State) {
+        self.inc_user_cycles(ROUNDS_HALF_FULL * 2 + 1, Some(EcallKind::Poseidon2));
+        // Convert to Montgomery form, run the mix function, then convert back.
+        let mut state = p2.inner.map(Into::into);
+        risc0_zkp::core::hash::poseidon2::poseidon2_mix(&mut state);
+        p2.inner = state.map(Into::into);
     }
 }
 
