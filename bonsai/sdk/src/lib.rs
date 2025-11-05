@@ -491,16 +491,16 @@ pub mod module_type {
         }
     }
 
-    /// ShrinkBitvm2 Session representation
-    #[cfg(feature = "shrink_bitvm2")]
-    pub struct ShrinkBitvm2Id {
+    /// ShrinkBlake3Groth16 Session representation
+    #[cfg(feature = "blake3")]
+    pub struct ShrinkBlake3Groth16Id {
         /// Session UUID
         pub uuid: String,
     }
 
-    #[cfg(feature = "shrink_bitvm2")]
-    impl ShrinkBitvm2Id {
-        /// Construct a [ShrinkBitvm2Id] from a UUID [String]
+    #[cfg(feature = "blake3")]
+    impl ShrinkBlake3Groth16Id {
+        /// Construct a [ShrinkBlake3Groth16Id] from a UUID [String]
         pub fn new(uuid: String) -> Self {
             Self { uuid }
         }
@@ -508,7 +508,7 @@ pub mod module_type {
         /// Fetches the current status of the session
         #[maybe_async_attr]
         pub async fn status(&self, client: &Client) -> Result<SnarkStatusRes, SdkErr> {
-            let url = format!("{}/shrink_bitvm2/status/{}", client.url, self.uuid);
+            let url = format!("{}/shrink_blake3/status/{}", client.url, self.uuid);
             let res = client.client.get(url).send().await?;
 
             if !res.status().is_success() {
@@ -922,16 +922,19 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
             Ok(SnarkId::new(res.uuid))
         }
 
-        /// Requests a bitvm2-compatible groth16 proof to be created from an
+        /// Requests a blake3 groth16 proof to be created from an
         /// existing sessionId.
         ///
         /// Supply a completed sessionId to convert the risc0 STARK proof into a
-        /// bitvm2-compatible Groth16 proof that uses blake3 for its hashing
+        /// blake3 Groth16 proof that uses blake3 for its hashing
         /// function.
         #[maybe_async_attr]
-        #[cfg(feature = "shrink_bitvm2")]
-        pub async fn shrink_bitvm2(&self, session_id: String) -> Result<ShrinkBitvm2Id, SdkErr> {
-            let url = format!("{}/shrink_bitvm2/create", self.url);
+        #[cfg(feature = "blake3")]
+        pub async fn shrink_blake3_groth16(
+            &self,
+            session_id: String,
+        ) -> Result<ShrinkBlake3Groth16Id, SdkErr> {
+            let url = format!("{}/shrink_blake3/create", self.url);
 
             let snark_req = SnarkReq { session_id };
 
@@ -945,7 +948,7 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
             // Reuse the session response because its the same member format
             let res: CreateSessRes = res.json().await?;
 
-            Ok(ShrinkBitvm2Id::new(res.uuid))
+            Ok(ShrinkBlake3Groth16Id::new(res.uuid))
         }
 
         // - /version
@@ -1520,8 +1523,8 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "shrink_bitvm2")]
-    fn shrink_bitvm2_create() {
+    #[cfg(feature = "blake3")]
+    fn shrink_blake3_groth16_create() {
         let server = MockServer::start();
 
         let request = SnarkReq {
@@ -1533,7 +1536,7 @@ mod tests {
 
         let create_mock = server.mock(|when, then| {
             when.method(POST)
-                .path("/shrink_bitvm2/create")
+                .path("/shrink_blake3/create")
                 .header("content-type", "application/json")
                 .header(API_KEY_HEADER, TEST_KEY)
                 .header(VERSION_HEADER, TEST_VERSION)
@@ -1546,19 +1549,19 @@ mod tests {
         let server_url = format!("http://{}", server.address());
         let client = Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
 
-        let res = client.shrink_bitvm2(request.session_id).unwrap();
+        let res = client.shrink_blake3_groth16(request.session_id).unwrap();
         assert_eq!(res.uuid, response.uuid);
 
         create_mock.assert();
     }
 
     #[test]
-    #[cfg(feature = "shrink_bitvm2")]
-    fn shrink_bitvm2_status() {
+    #[cfg(feature = "blake3")]
+    fn shrink_blake3_groth16_status() {
         let server = MockServer::start();
 
         let uuid = Uuid::new_v4().to_string();
-        let snark_id = blocking::ShrinkBitvm2Id::new(uuid);
+        let snark_id = blocking::ShrinkBlake3Groth16Id::new(uuid);
         let response = SnarkStatusRes {
             status: "RUNNING".to_string(),
             output: None,
@@ -1567,7 +1570,7 @@ mod tests {
 
         let create_mock = server.mock(|when, then| {
             when.method(GET)
-                .path(format!("/shrink_bitvm2/status/{}", snark_id.uuid))
+                .path(format!("/shrink_blake3/status/{}", snark_id.uuid))
                 .header(API_KEY_HEADER, TEST_KEY)
                 .header(VERSION_HEADER, TEST_VERSION);
             then.status(200)
