@@ -555,10 +555,12 @@ unsafe extern "C" fn store_access_fault_dispatch() -> ! {
 
 /// Copy data from kernel memory to user memory
 /// Returns the number of bytes copied, or 0 if the copy failed
-/// This function checks that the destination is in user memory (below 0xC0000000)
+/// This function checks that the destination is in user memory (below kernel space)
 pub fn copy_to_user(dst: *mut u8, src: *const u8, len: usize) -> usize {
+    use crate::constants::KERNEL_SPACE_START;
+    
     // Check if the destination pointer is in user memory
-    if (dst as usize) >= 0xC0000000 {
+    if (dst as usize) >= KERNEL_SPACE_START as usize {
         kprint!(
             "copy_to_user: destination pointer 0x{:x} is in kernel memory",
             dst as usize
@@ -578,7 +580,7 @@ pub fn copy_to_user(dst: *mut u8, src: *const u8, len: usize) -> usize {
     }
 
     // Check if the destination range is in user memory
-    if (dst as usize) + len > 0xC0000000 {
+    if (dst as usize) + len > KERNEL_SPACE_START as usize {
         kprint!("copy_to_user: destination range extends into kernel memory");
         return 0;
     }
