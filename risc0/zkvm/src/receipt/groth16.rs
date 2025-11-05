@@ -15,8 +15,6 @@
 
 use alloc::vec::Vec;
 
-#[cfg(feature = "blake3")]
-use crate::claim::blake3::Blake3ReceiptClaim;
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
@@ -133,10 +131,13 @@ impl<Claim> Groth16Receipt<Claim> {
 }
 
 #[cfg(feature = "blake3")]
-impl Groth16Receipt<Blake3ReceiptClaim> {
+impl<Claim> Groth16Receipt<Claim> {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
-    pub fn verify_blake3_integrity(&self) -> Result<(), VerificationError> {
+    pub fn verify_blake3_integrity(&self) -> Result<(), VerificationError>
+    where
+        Claim: Digestible + core::fmt::Debug,
+    {
         let ctx = VerifierContext {
             groth16_verifier_parameters: Some(Groth16ReceiptVerifierParameters::blake3_default()),
             ..Default::default()
@@ -149,7 +150,10 @@ impl Groth16Receipt<Blake3ReceiptClaim> {
     pub fn verify_blake3_integrity_with_context(
         &self,
         ctx: &VerifierContext,
-    ) -> Result<(), VerificationError> {
+    ) -> Result<(), VerificationError>
+    where
+        Claim: Digestible + core::fmt::Debug,
+    {
         let params = ctx
             .groth16_verifier_parameters
             .as_ref()

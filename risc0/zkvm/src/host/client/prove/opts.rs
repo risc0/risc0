@@ -75,6 +75,15 @@ pub enum ReceiptKind {
     /// Groth16 receipts are proven using Groth16, are constant in size, and are the smallest
     /// available receipt format. A Groth16 receipt can be serialized to a few hundred bytes.
     Groth16,
+
+    #[cfg(feature = "blake3")]
+    /// Request that a Blake3 [Groth16Receipt][crate::Groth16Receipt] be generated.
+    ///
+    /// Groth16 receipts are proven using Groth16, are constant in size, and are the smallest
+    /// available receipt format. A Groth16 receipt can be serialized to a few hundred bytes.
+    /// This variant uses the BLAKE3 hash function and is only compatible with guests that
+    /// have journal size of 32 bytes.
+    Blake3Groth16,
 }
 
 impl Default for ProverOpts {
@@ -164,6 +173,22 @@ impl ProverOpts {
             hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Groth16,
+            control_ids: ALLOWED_CONTROL_IDS.to_vec(),
+            max_segment_po2: DEFAULT_MAX_PO2,
+            dev_mode: crate::is_dev_mode_enabled_via_environment(),
+        }
+    }
+
+    /// Choose the prover that generates Blake3 Groth16 receipts which are constant size in the length of
+    /// the execution and small enough to verify on blockchains, like Ethereum. Compatible only with
+    /// guests that have journal size of 32 bytes.
+    ///
+    /// Only supported with Docker installed.
+    pub fn blake3_groth16() -> Self {
+        Self {
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Blake3Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),

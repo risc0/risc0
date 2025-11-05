@@ -366,6 +366,10 @@ impl ProverServer for DevModeProver {
                 ReceiptKind::Groth16 => {
                     std::thread::sleep(delay.shrink_wrap_groth16);
                 }
+                #[cfg(feature = "blake3")]
+                ReceiptKind::Blake3Groth16 => {
+                    std::thread::sleep(delay.shrink_wrap_groth16);
+                }
             }
         }
 

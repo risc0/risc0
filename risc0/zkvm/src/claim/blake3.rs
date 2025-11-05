@@ -3,11 +3,12 @@ use crate::{
     sha::{self, DIGEST_BYTES, Digestible, Sha256},
 };
 use anyhow::Context;
+use borsh::{BorshDeserialize, BorshSerialize};
 use serde::{Deserialize, Serialize};
 
 /// A claim about the guest program execution, such as the journal.
 /// The digest of this is what the BLAKE3 Groth16 proof outputs.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct Blake3ReceiptClaim {
     /// The [SystemState] just before execution has begun.
     pub pre: MaybePruned<SystemState>,

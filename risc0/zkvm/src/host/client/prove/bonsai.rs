@@ -171,8 +171,11 @@ impl Prover for BonsaiProver {
             }
             // If they requested a groth16 receipts, we need to continue.
             ReceiptKind::Groth16 => {}
+            #[cfg(feature = "blake3")]
+            // If they requested a blake3 receipt, we need to continue.
+            ReceiptKind::Blake3Groth16 => {}
         }
-
+        // TODO(ec2): Use bonsai api to call blake3
         // Request that Bonsai compress further, to Groth16.
         let snark_session = client.create_snark(session.uuid)?;
         let snark_receipt_url = loop {
@@ -234,6 +237,14 @@ impl Prover for BonsaiProver {
                 InnerReceipt::Groth16(_),
                 ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Groth16,
             ) => Ok(receipt.clone()),
+            #[cfg(feature = "blake3")]
+            (
+                InnerReceipt::Blake3Groth16(_) | InnerReceipt::Groth16(_),
+                ReceiptKind::Composite
+                | ReceiptKind::Succinct
+                | ReceiptKind::Groth16
+                | ReceiptKind::Blake3Groth16,
+            ) => Ok(receipt.clone()),
             // Compression is always a no-op in dev mode
             (InnerReceipt::Fake { .. }, _) => {
                 ensure!(
@@ -252,6 +263,14 @@ impl Prover for BonsaiProver {
                 bail!([
                     "BonsaiProver does not support compression on existing receipts",
                     "Set receipt_kind on ProverOpts in initial prove request to get a Groth16Receipt."
+                ].join(""));
+            }
+            #[cfg(feature = "blake3")]
+            (_, ReceiptKind::Blake3Groth16) => {
+                // Caller is requesting a Groth16Receipt. Provide a hint on how to get one.
+                bail!([
+                    "BonsaiProver does not support compression on existing receipts",
+                    "Set receipt_kind on ProverOpts in initial prove request to get a blake3 Groth16Receipt."
                 ].join(""));
             }
         }
