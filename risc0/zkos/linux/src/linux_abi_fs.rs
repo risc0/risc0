@@ -314,10 +314,11 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
         return Err(Err::Fault);
     }
 
-    // Check if address is in user memory range (below kernel space)
-    if pathname >= 0xC0000000 {
+    // Validate the pathname pointer is in readable user memory (max path length = 256)
+    const MAX_PATH_LEN: usize = 256;
+    if !crate::linux_abi::is_valid_user_address(pathname, MAX_PATH_LEN, false) {
         kprint!(
-            "sys_unlinkat: invalid pathname address (out of user memory): 0x{:x}",
+            "sys_unlinkat: EFAULT - invalid pathname address {:#010x}",
             pathname
         );
         return Err(Err::Fault);
@@ -787,6 +788,16 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
         return Err(Err::Fault);
     }
 
+    // Validate the buffer is in writable user memory
+    if !crate::linux_abi::is_valid_user_address(_buf, _count as usize, true) {
+        kprint!(
+            "sys_read: EFAULT - invalid buffer address {:#010x} len {}",
+            _buf,
+            _count
+        );
+        return Err(Err::Fault);
+    }
+
     if !get_p9_enabled() {
         let msg = b"sys_read: p9 is not enabled";
         host_log(msg.as_ptr(), msg.len());
@@ -1018,6 +1029,16 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
 
     // NULL buffer with count > 0 is invalid (causes EFAULT)
     if buf.is_null() {
+        return Err(Err::Fault);
+    }
+
+    // Validate the buffer is in readable user memory
+    if !crate::linux_abi::is_valid_user_address(buf as u32, count, false) {
+        kprint!(
+            "do_write: EFAULT - invalid buffer address {:#010x} len {}",
+            buf as u32,
+            count
+        );
         return Err(Err::Fault);
     }
 
@@ -5082,10 +5103,13 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
             return Err(Err::Fault);
         }
 
-        // Validate the pointer is in user memory
-        const USER_MEMORY_START: u32 = 0x6800_0000;
-        const USER_MEMORY_END: u32 = 0xa000_0000;
-        if !(USER_MEMORY_START..USER_MEMORY_END).contains(&_arg) {
+        // Validate the pointer is in writable user memory (struct flock is ~24 bytes)
+        const FLOCK_SIZE: usize = 24;
+        if !crate::linux_abi::is_valid_user_address(_arg, FLOCK_SIZE, true) {
+            kprint!(
+                "sys_fcntl64: F_GETLK - invalid flock pointer {:#010x}",
+                _arg
+            );
             return Err(Err::Fault);
         }
 
@@ -5110,10 +5134,13 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
             return Err(Err::Fault);
         }
 
-        // Validate the pointer is in user memory
-        const USER_MEMORY_START: u32 = 0x6800_0000;
-        const USER_MEMORY_END: u32 = 0xa000_0000;
-        if !(USER_MEMORY_START..USER_MEMORY_END).contains(&_arg) {
+        // Validate the pointer is in readable user memory (struct flock is ~24 bytes)
+        const FLOCK_SIZE: usize = 24;
+        if !crate::linux_abi::is_valid_user_address(_arg, FLOCK_SIZE, false) {
+            kprint!(
+                "sys_fcntl64: F_SETLK/F_SETLKW - invalid flock pointer {:#010x}",
+                _arg
+            );
             return Err(Err::Fault);
         }
 

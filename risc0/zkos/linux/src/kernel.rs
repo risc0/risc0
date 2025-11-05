@@ -288,9 +288,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
             instruction,
             mepc
         );
-        unsafe {
-            crate::softfloat::emulate_fmadd(instruction);
-        }
+        crate::softfloat::emulate_fmadd(instruction);
     }
 
     // Check for floating point operations (opcode 0x53)
