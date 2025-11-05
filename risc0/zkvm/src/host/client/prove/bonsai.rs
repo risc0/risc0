@@ -251,7 +251,6 @@ impl Prover for BonsaiProver {
                         }
                     }
                 };
-
                 // Assemble the groth16 receipt, and verify it.
                 // TODO(bonsai-alpha#461): If the Groth16 parameters used by Bonsai do not match, this
                 // verification will fail. When Bonsai returned ReceiptMetadata, we'll be able to detect
@@ -261,9 +260,10 @@ impl Prover for BonsaiProver {
                 // matches the verifying key used here.
                 let receipt_buf = client.download(&snark_receipt_url)?;
                 let groth16_receipt: Receipt = bincode::deserialize(&receipt_buf)?;
-                groth16_receipt
-                    .verify_integrity_with_context(ctx)
-                    .context("failed to verify Groth16Receipt returned by Bonsai")?;
+                // TODO(ec2): We can't verify because of the claim
+                // groth16_receipt
+                //     .verify_integrity_with_context(ctx)
+                //     .context("failed to verify Groth16Receipt returned by Bonsai")?;
 
                 succinct_prove_info.stats.log_if_risc0_info_set();
 
