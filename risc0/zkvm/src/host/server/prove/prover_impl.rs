@@ -261,10 +261,7 @@ impl ProverServer for ProverImpl {
     #[cfg(feature = "rv32im-m3")]
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
         tracing::debug!("segment_preflight");
-        // TODO: get the po2 from someplace
-        // let po2 = 20;
-        let po2 = segment.po2();
-        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(po2)?;
+        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(self.opts.max_prover_po2)?;
         prover.load_segment(&segment.inner)?;
         Ok(Box::new(rv32im_m3::PreflightIter::new(prover, segment)))
     }

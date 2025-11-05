@@ -17,7 +17,6 @@ use std::sync::OnceLock;
 
 use anyhow::Result;
 use risc0_binfmt::MemoryImage;
-use risc0_circuit_rv32im::TerminateState;
 use risc0_zkp::{core::digest::Digest, digest, verify::VerificationError};
 use risc0_zkvm_methods::{
     HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec,
@@ -521,11 +520,11 @@ fn pause_exit_nonzero() {
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
-    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(6000);
     let image = MemoryImage::new_kernel(program);
 
     let env = ExecutorEnv::builder()
-        .segment_limit_po2(13) // 8k cycles
+        .segment_limit_po2(14)
         .build()
         .unwrap();
     let session = ExecutorImpl::new(env, image).unwrap().run().unwrap();
@@ -542,11 +541,17 @@ fn continuation() {
     }
     assert_eq!(
         final_segment.inner.claim.terminate_state,
-        Some(TerminateState::default())
+        Some(risc0_circuit_rv32im::TerminateState::default())
     );
 
-    let receipt = prove_session(&session).unwrap();
-    for (idx, receipt) in receipt
+    let opts = ProverOpts::fast().with_max_prover_po2(12);
+    let ctx = VerifierContext::default();
+    let prover = get_prover_server(&opts).unwrap();
+    let _receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
+
+    // The segment index is no longer used with rv32im-m3
+    #[cfg(not(feature = "rv32im-m3"))]
+    for (idx, receipt) in _receipt
         .inner
         .composite()
         .unwrap()
