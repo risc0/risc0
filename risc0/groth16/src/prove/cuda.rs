@@ -193,7 +193,7 @@ struct CalcWitness {
 impl CalcWitness {
     fn as_bytes(&self) -> &[u8] {
         let r: &[wtns_file::FieldElement<32>] = &self.witness[..];
-        unsafe { std::slice::from_raw_parts(r.as_ptr() as *const u8, r.len() * 4) }
+        unsafe { std::slice::from_raw_parts(r.as_ptr() as *const u8, std::mem::size_of_val(r)) }
     }
 }
 
