@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 /// A claim about the guest program execution, such as the journal.
 /// The digest of this is what the BLAKE3 Groth16 proof outputs.
 #[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct Blake3ReceiptClaim {
     /// The [SystemState] just before execution has begun.
     pub pre: MaybePruned<SystemState>,

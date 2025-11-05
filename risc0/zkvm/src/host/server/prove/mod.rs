@@ -290,7 +290,7 @@ pub trait ProverServer: private::Sealed {
                     let journal: [u8; 32] = receipt.journal.as_ref().try_into().map_err(|_| {
                         anyhow::anyhow!("journal must be 32 bytes to compress using blake3 groth16")
                     })?;
-                    let groth16_receipt = self.succinct_to_blake3_groth16(&inner, journal)?;
+                    let groth16_receipt = self.succinct_to_blake3_groth16(inner, journal)?;
                     Ok(Receipt::new(
                         InnerReceipt::Blake3Groth16(groth16_receipt),
                         receipt.journal.bytes.clone(),
