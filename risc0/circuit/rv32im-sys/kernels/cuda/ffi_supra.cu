@@ -51,7 +51,8 @@ using namespace risc0::circuit::rv32im_v2::cuda;
 
 extern "C" {
 
-const char* risc0_circuit_rv32im_cuda_eval_check(Fp* check,
+const char* risc0_circuit_rv32im_cuda_eval_check(cudaStream_t stream,
+                                                 Fp* check,
                                                  const Fp* ctrl,
                                                  const Fp* data,
                                                  const Fp* accum,
@@ -62,9 +63,6 @@ const char* risc0_circuit_rv32im_cuda_eval_check(Fp* check,
                                                  uint32_t domain,
                                                  const FpExt* poly_mix_pows) {
   try {
-    CUDA_OK(cudaDeviceSynchronize());
-
-    CudaStream stream;
     auto cfg = getSimpleConfig(domain);
     eval_check<<<cfg.grid, cfg.block, 0, stream>>>(
         check, ctrl, data, accum, mix, out, rou, po2, domain, poly_mix_pows);

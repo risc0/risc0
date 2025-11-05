@@ -40,22 +40,22 @@ static void compute_grid_block_size(size_t total_count, size_t& block_size, size
 }
 
 extern "C" RustError::by_value
-sppark_poseidon254_fold(alt_bn128::fr_t* d_out, const alt_bn128::fr_t* d_in, size_t num_hashes) {
-  const gpu_t& gpu = select_gpu();
+sppark_poseidon254_fold(cudaStream_t stream, alt_bn128::fr_t* d_out, const alt_bn128::fr_t* d_in, size_t num_hashes) {
+  stream_t sppark_stream(stream, 0);
 
   size_t block_size = 512;
-  size_t num_blocks = gpu.sm_count();
+  size_t num_blocks = sppark_stream.sm_count();
 
   compute_grid_block_size(num_hashes, block_size, num_blocks);
 
   try {
-    _poseidon254_fold<<<num_blocks, block_size, 0, gpu>>>(d_out, d_in, num_hashes);
+    _poseidon254_fold<<<num_blocks, block_size, 0, sppark_stream>>>(d_out, d_in, num_hashes);
 
     CUDA_OK(cudaGetLastError());
 
-    gpu.sync();
+    sppark_stream.sync();
   } catch (const cuda_error& e) {
-    gpu.sync();
+    sppark_stream.sync();
     return RustError{e.code(), e.what()};
   }
 
@@ -63,36 +63,36 @@ sppark_poseidon254_fold(alt_bn128::fr_t* d_out, const alt_bn128::fr_t* d_in, siz
 }
 
 extern "C" RustError::by_value
-sppark_poseidon254_rows(alt_bn128::fr_t* d_out, const fr_t* d_in, size_t count, uint32_t col_size) {
-  const gpu_t& gpu = select_gpu();
+sppark_poseidon254_rows(cudaStream_t stream, alt_bn128::fr_t* d_out, const fr_t* d_in, size_t count, uint32_t col_size) {
+  stream_t sppark_stream(stream, 0);
 
   size_t block_size = 512;
-  size_t num_blocks = gpu.sm_count();
+  size_t num_blocks = sppark_stream.sm_count();
 
   compute_grid_block_size(count, block_size, num_blocks);
 
   try {
-    _poseidon254_rows<<<num_blocks, block_size, 0, gpu>>>(d_out, d_in, count, col_size);
+    _poseidon254_rows<<<num_blocks, block_size, 0, sppark_stream>>>(d_out, d_in, count, col_size);
 
     CUDA_OK(cudaGetLastError());
 
-    gpu.sync();
+    sppark_stream.sync();
   } catch (const cuda_error& e) {
-    gpu.sync();
+    sppark_stream.sync();
     return RustError{e.code(), e.what()};
   }
 
   return RustError{cudaSuccess};
 }
 
-extern "C" RustError::by_value sppark_prefix_product(fr4_t d_inout[/*count*/], uint32_t count) {
-  const gpu_t& gpu = select_gpu();
+extern "C" RustError::by_value sppark_prefix_product(cudaStream_t stream, fr4_t d_inout[/*count*/], uint32_t count) {
+  stream_t sppark_stream(stream, 0);
 
   try {
-    prefix_op<Multiply<fr4_t>>(d_inout, count, gpu);
-    gpu.sync();
+    prefix_op<Multiply<fr4_t>>(d_inout, count, sppark_stream);
+    sppark_stream.sync();
   } catch (const cuda_error& e) {
-    gpu.sync();
+    sppark_stream.sync();
     return RustError{e.code(), e.what()};
   }
 
@@ -100,15 +100,16 @@ extern "C" RustError::by_value sppark_prefix_product(fr4_t d_inout[/*count*/], u
 }
 
 extern "C" RustError::by_value
-supra_poly_divide(fr4_t d_inout[/*len*/], size_t len, fr4_t* remainder, const fr4_t& pow) {
-  const gpu_t& gpu = select_gpu();
+supra_poly_divide(cudaStream_t stream, fr4_t d_inout[/*len*/], size_t len, fr4_t* remainder, const fr4_t& pow) {
+
+  stream_t sppark_stream(stream, 0);
 
   try {
-    div_by_x_minus_z<true>(d_inout, len, pow, gpu);
-    gpu.DtoH(remainder, &d_inout[len - 1], 1);
-    gpu.sync();
+    div_by_x_minus_z<true>(d_inout, len, pow, sppark_stream);
+    sppark_stream.DtoH(remainder, &d_inout[len - 1], 1);
+    sppark_stream.sync();
   } catch (const cuda_error& e) {
-    gpu.sync();
+    sppark_stream.sync();
     return RustError{e.code(), e.what()};
   }
 

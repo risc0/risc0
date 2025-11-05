@@ -4330,6 +4330,7 @@ dependencies = [
 name = "risc0-circuit-recursion-sys"
 version = "5.0.0"
 dependencies = [
+ "cust",
  "glob",
  "risc0-build-kernel",
  "risc0-core",

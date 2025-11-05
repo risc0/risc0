@@ -70,6 +70,7 @@ unsafe extern "C" {
 #[cfg(feature = "cuda")]
 unsafe extern "C" {
     pub fn risc0_circuit_keccak_cuda_scatter(
+        stream: cust::sys::CUstream,
         into: DevicePointer<u8>,
         infos: *const ScatterInfo,
         from: DevicePointer<u8>,
@@ -78,6 +79,7 @@ unsafe extern "C" {
     ) -> *const std::os::raw::c_char;
 
     pub fn risc0_circuit_keccak_cuda_witgen(
+        stream: cust::sys::CUstream,
         mode: u32,
         buffers: *const RawExecBuffers,
         preflight: *const RawPreflightTrace,
@@ -85,6 +87,7 @@ unsafe extern "C" {
     ) -> *const std::os::raw::c_char;
 
     pub fn risc0_circuit_keccak_cuda_eval_check(
+        stream: cust::sys::CUstream,
         check: DevicePointer<u8>,
         ctrl: DevicePointer<u8>,
         data: DevicePointer<u8>,

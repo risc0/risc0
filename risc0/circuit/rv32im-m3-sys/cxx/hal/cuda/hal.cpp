@@ -16,6 +16,7 @@
 #include "hal/hal.h"
 #include "hal/po2s.h"
 
+#include <cuda_runtime.h>
 #include <iostream>
 #include <map>
 
@@ -44,9 +45,9 @@ extern "C" bool cuda_copy_dev(void* dst, void* src, size_t size);
 extern "C" bool cuda_zero_dev(void* buf, size_t size);
 
 // api.cu
-extern "C" SparkError sppark_poseidon2_fold(void* d_out, const void* d_in, size_t num_hashes);
+extern "C" SparkError sppark_poseidon2_fold(cudaStream_t stream, void* d_out, const void* d_in, size_t num_hashes);
 extern "C" SparkError
-sppark_poseidon2_rows(void* d_out, const void* d_in, uint32_t count, uint32_t col_size);
+sppark_poseidon2_rows(cudaStream_t stream, void* d_out, const void* d_in, uint32_t count, uint32_t col_size);
 extern "C" void prefix_sum(Fp* d_inout, uint32_t count);
 extern "C" SparkError
 rv32im_m3_poly_divide(FpExt* d_inout, size_t len, FpExt* remainder, FpExt pow);
@@ -56,14 +57,13 @@ extern "C" bool cuda_query(
     void* out, void* data, void* tree, size_t querySize, size_t rows, size_t cols, size_t idx);
 
 // ntt.cu
-extern "C" SparkError sppark_init();
 extern "C" SparkError
-sppark_batch_expand(void* out, void* in, uint32_t inPo2, uint32_t expPo2, uint32_t cols);
-extern "C" SparkError sppark_batch_NTT(void* d_inout, uint32_t lg_domain_size, uint32_t poly_count);
+sppark_batch_expand(cudaStream_t stream, void* out, void* in, uint32_t inPo2, uint32_t expPo2, uint32_t cols);
+extern "C" SparkError sppark_batch_NTT(cudaStream_t stream, void* d_inout, uint32_t lg_domain_size, uint32_t poly_count);
 extern "C" SparkError
-sppark_batch_iNTT(void* d_inout, uint32_t lg_domain_size, uint32_t poly_count);
+sppark_batch_iNTT(cudaStream_t stream, void* d_inout, uint32_t lg_domain_size, uint32_t poly_count);
 extern "C" SparkError
-sppark_batch_zk_shift(void* d_inout, uint32_t lg_domain_size, uint32_t poly_count);
+sppark_batch_zk_shift(cudaStream_t stream, void* d_inout, uint32_t lg_domain_size, uint32_t poly_count);
 
 // kernels.cu
 extern "C" bool cuda_batch_bit_reverse(Fp* io, uint32_t po2, uint32_t cols);
@@ -169,7 +169,7 @@ public:
     if (in.rows() != out.size()) {
       throw std::runtime_error("Mismatched sizes in hashRows");
     }
-    auto err = sppark_poseidon2_rows(toDevPtr(out), toDevPtr(in), out.size(), in.cols());
+    auto err = sppark_poseidon2_rows(0, toDevPtr(out), toDevPtr(in), out.size(), in.cols());
     if (err.code != 0) {
       throw std::runtime_error(std::string("Error during hash fold: ") + err.message);
     }
@@ -179,7 +179,7 @@ public:
     if (in.size() != 2 * out.size()) {
       throw std::runtime_error("Mismatched sizes in hashFold");
     }
-    auto err = sppark_poseidon2_fold(toDevPtr(out), toDevPtr(in), out.size());
+    auto err = sppark_poseidon2_fold(0, toDevPtr(out), toDevPtr(in), out.size());
     if (err.code != 0) {
       throw std::runtime_error(std::string("Error during hash fold:") + err.message);
     }
@@ -223,11 +223,11 @@ public:
       LOG(0, "inPo2 = " << inPo2 << ", expPo2 = " << expPo2);
       throw std::runtime_error("Mismatched sizes batchExpandNtt");
     }
-    auto err = sppark_batch_expand(toDevPtr(out), toDevPtr(in), inPo2, expPo2, in.cols());
+    auto err = sppark_batch_expand(0, toDevPtr(out), toDevPtr(in), inPo2, expPo2, in.cols());
     if (err.code != 0) {
       throw std::runtime_error(std::string("Error during batch expand:") + err.message);
     }
-    err = sppark_batch_NTT(toDevPtr(out), inPo2 + expPo2, out.cols());
+    err = sppark_batch_NTT(0, toDevPtr(out), inPo2 + expPo2, out.cols());
     if (err.code != 0) {
       throw std::runtime_error(std::string("Error during batch interpolate:") + err.message);
     }
@@ -238,7 +238,7 @@ public:
     if (io.rows() != (size_t(1) << inPo2)) {
       throw std::runtime_error("invlaid size in batchInterpolateNtt");
     }
-    auto err = sppark_batch_iNTT(toDevPtr(io), inPo2, io.cols());
+    auto err = sppark_batch_iNTT(0, toDevPtr(io), inPo2, io.cols());
     if (err.code != 0) {
       throw std::runtime_error(std::string("Error during batch interpolate:") + err.message);
     }
@@ -249,7 +249,7 @@ public:
     if (io.rows() != (size_t(1) << inPo2)) {
       throw std::runtime_error("invlaid size in batchInterpolateNtt");
     }
-    auto err = sppark_batch_zk_shift(toDevPtr(io), inPo2, io.cols());
+    auto err = sppark_batch_zk_shift(0, toDevPtr(io), inPo2, io.cols());
     if (err.code != 0) {
       throw std::runtime_error(std::string("Error during batch interpolate:") + err.message);
     }

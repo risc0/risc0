@@ -52,7 +52,7 @@ use super::{CircuitWitnessGenerator, MetaBuffer, PreflightCycleOrder, PreflightT
 use crate::prove::preflight::ControlState;
 
 pub struct CudaCircuitHal<CH: CudaHash> {
-    hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
+    hal: Rc<CudaHal<CH>>,
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
@@ -96,6 +96,7 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
         let from = self.hal.copy_from_u32("from", from);
         ffi_wrap(|| unsafe {
             risc0_circuit_keccak_cuda_scatter(
+                self.hal.stream.as_inner(),
                 into.buf.as_device_ptr(),
                 infos.as_ptr(),
                 from.as_device_ptr(),
@@ -149,7 +150,13 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
             run_order: run_order.as_ptr(),
         };
         ffi_wrap(|| unsafe {
-            risc0_circuit_keccak_cuda_witgen(mode as u32, &buffers, &preflight, cycles as u32)
+            risc0_circuit_keccak_cuda_witgen(
+                self.hal.stream.as_inner(),
+                mode as u32,
+                &buffers,
+                &preflight,
+                cycles as u32,
+            )
         })
     }
 }
@@ -207,10 +214,12 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             BabyBearExtElem::as_u32_slice(poly_mix_pows.as_slice())
                 .try_into()
                 .unwrap();
-        let poly_mix_pows = CudaBuffer::copy_from("poly_mix", &poly_mix_pows_vec[..]);
+        let poly_mix_pows =
+            CudaBuffer::copy_from("poly_mix", &poly_mix_pows_vec[..], self.hal.stream.clone());
 
         ffi_wrap(|| unsafe {
             risc0_circuit_keccak_cuda_eval_check(
+                self.hal.stream.as_inner(),
                 check.as_device_ptr(),
                 ctrl.as_device_ptr(),
                 data.as_device_ptr(),
