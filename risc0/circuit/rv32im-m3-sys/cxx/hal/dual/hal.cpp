@@ -41,6 +41,10 @@ public:
     REQUIRE(a->size() == b->size());
     return a->size();
   }
+  void copyFromCpu(size_t offset, const void* data, size_t size) override {
+    a->copyFromCpu(offset, data, size);
+    b->copyFromCpu(offset, data, size);
+  }
 
 private:
   IBufferPtr a;

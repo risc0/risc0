@@ -37,12 +37,12 @@ extern "C" bool cuda_sync() {
   return err == cudaSuccess;
 }
 
-extern "C" bool cuda_copy_to_host_sync(void* host, void* dev, size_t size) {
+extern "C" bool cuda_copy_to_host_sync(void* host, const void* dev, size_t size) {
   cudaError_t err = cudaMemcpy(host, dev, size, cudaMemcpyDeviceToHost);
   return err == cudaSuccess;
 }
 
-extern "C" bool cuda_copy_to_dev_sync(void* dev, void* host, size_t size) {
+extern "C" bool cuda_copy_to_dev_sync(void* dev, const void* host, size_t size) {
   cudaError_t err = cudaMemcpy(dev, host, size, cudaMemcpyHostToDevice);
   return err == cudaSuccess;
 }
