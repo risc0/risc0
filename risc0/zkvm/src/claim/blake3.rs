@@ -1,5 +1,7 @@
+#[cfg(not(target_os = "zkvm"))]
+use crate::BN254_IDENTITY_CONTROL_ID;
 use crate::{
-    BN254_IDENTITY_CONTROL_ID, Digest, MaybePruned, SystemState, VerifierContext,
+    Digest, MaybePruned, SystemState, VerifierContext,
     sha::{self, DIGEST_BYTES, Digestible, Sha256},
 };
 use anyhow::Context;
@@ -22,7 +24,7 @@ pub struct Blake3ReceiptClaim {
     /// BN-254 identity control ID
     pub control_id: Digest,
 }
-
+#[cfg(not(target_os = "zkvm"))]
 impl Blake3ReceiptClaim {
     /// Construct a [Blake3ReceiptClaim] representing a zkVM execution that ended normally (i.e.
     /// Halted(0)) with the given image ID and journal.
@@ -54,7 +56,8 @@ impl Blake3ReceiptClaim {
             journal: journal.into(),
         })
     }
-
+}
+impl Blake3ReceiptClaim {
     /// The BLAKE3-based digest of this claim.
     pub fn claim_digest(&self) -> Digest {
         self.claim_digest_inner::<sha::Impl>()
