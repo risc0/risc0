@@ -32,7 +32,7 @@ use super::{
     error::{Error, Result as ActorResult},
     job::{self, JobActor},
     protocol::{
-        GlobalId, JobId, TaskKind, WorkerId,
+        GlobalId, JobId, Task, TaskKind, WorkerId,
         factory::{DropJob, GetTasks, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
         worker::TaskMsg,
     },
@@ -180,6 +180,20 @@ impl From<SendError> for ScheduleError {
     }
 }
 
+fn prove_segment_tokens(po2: usize) -> GpuTokens {
+    GpuTokens::from(match po2 {
+        0..=17 => 5,
+
+        // these values were measured
+        18 => 8,
+        19 => 10,
+        20 => 15,
+        21 => 24,
+
+        _ => 30,
+    })
+}
+
 struct TaskGotWorker {
     worker_id: ActorResult<WorkerId>,
     task_id: GlobalId,
@@ -281,7 +295,11 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
         }
 
         tracing::info!("Factory: scheduling job {:?}", &msg.header);
-        let (cores, gpu_tokens) = self.choose_tokens(msg.header.task_kind);
+        let po2 = match &msg.task {
+            Task::ProveSegment(task) => Some(task.segment.po2()),
+            _ => None,
+        };
+        let (cores, gpu_tokens) = self.choose_tokens(msg.header.task_kind, po2);
 
         let task = TaskMsg {
             header: msg.header.clone(),
@@ -395,10 +413,10 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
     }
 
     /// XXX remi: These token amounts are for po2=21. We should generalize to other po2 vaules.
-    fn choose_tokens(&self, task_kind: TaskKind) -> (CpuCores, GpuTokens) {
+    fn choose_tokens(&self, task_kind: TaskKind, po2: Option<usize>) -> (CpuCores, GpuTokens) {
         let (cores, mut gpu_tokens) = match task_kind {
             TaskKind::Execute => (CpuCores::from(1), GpuTokens::from(0)),
-            TaskKind::ProveSegment => (CpuCores::from(1), GpuTokens::from(15)),
+            TaskKind::ProveSegment => (CpuCores::from(1), prove_segment_tokens(po2.unwrap())),
             TaskKind::ProveKeccak => (CpuCores::ZERO, GpuTokens::from(27)),
             _ => (CpuCores::ZERO, GpuTokens::from(3)),
         };
