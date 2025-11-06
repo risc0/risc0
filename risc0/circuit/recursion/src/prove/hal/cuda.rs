@@ -46,11 +46,11 @@ use crate::{
 
 use super::{CircuitAccumulator, CircuitWitnessGenerator};
 
-type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
-type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
-type CudaCircuitHalPoseidon254 = CudaCircuitHal<CudaHashPoseidon254>;
+pub type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
+pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
+pub type CudaCircuitHalPoseidon254 = CudaCircuitHal<CudaHashPoseidon254>;
 
-struct CudaCircuitHal<CH: CudaHash> {
+pub struct CudaCircuitHal<CH: CudaHash> {
     _hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
 }
 
@@ -191,6 +191,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
     }
 }
 
+#[cfg_attr(feature = "dual", expect(dead_code))]
 pub(crate) fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>> {
     match hashfn {
         "poseidon2" => {

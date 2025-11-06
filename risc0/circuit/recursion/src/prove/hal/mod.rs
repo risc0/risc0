@@ -20,6 +20,9 @@ use risc0_zkp::hal::Hal;
 pub(crate) mod cpu;
 #[cfg(feature = "cuda")]
 pub(crate) mod cuda;
+#[cfg(feature = "cuda")]
+pub(crate) mod dual;
+
 // #[cfg(all(
 //     feature = "prove",
 //     any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios")

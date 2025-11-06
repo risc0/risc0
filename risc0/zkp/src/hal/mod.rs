@@ -66,9 +66,33 @@ pub trait Hal {
     fn get_hash_suite(&self) -> &HashSuite<Self::Field>;
 
     fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest>;
+
+    fn alloc_digest_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        let buffer = self.alloc_digest(name, size);
+        buffer.view_mut(|slice| slice.fill(Digest::default()));
+        buffer
+    }
+
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem>;
+    fn alloc_elem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        let buffer = self.alloc_elem(name, size);
+        buffer.view_mut(|slice| {
+            slice.fill(Self::Elem::ZERO);
+        });
+        buffer
+    }
+
     fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem>;
+
     fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32>;
+
+    fn alloc_u32_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        let buffer = self.alloc_u32(name, size);
+        buffer.view_mut(|slice| {
+            slice.fill(0u32);
+        });
+        buffer
+    }
 
     fn alloc_elem_init(
         &self,

@@ -31,7 +31,7 @@ pub(crate) struct VersionConfig {
     pub version: usize,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct AppConfig {
     pub version: usize,
@@ -59,12 +59,12 @@ pub(crate) struct ManagerConfig {
     pub allocator: Option<SocketAddr>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct AllocatorConfig {
     pub listen: Option<SocketAddr>,
     pub default_release_channel: Option<String>,
-    pub worker_task_limit: Option<usize>,
+    pub worker_queuing_factor: Option<f32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -111,7 +111,7 @@ impl Default for AppConfig {
             allocator: Some(AllocatorConfig {
                 listen: Some(default_allocator_listen_addr()),
                 default_release_channel: None,
-                worker_task_limit: None,
+                worker_queuing_factor: None,
             }),
             executor: Some(ExecutorConfig {
                 allocator: None,
@@ -203,7 +203,7 @@ mod tests {
                 allocator: Some(AllocatorConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap()),
                     default_release_channel: None,
-                    worker_task_limit: None
+                    worker_queuing_factor: None
                 }),
                 executor: Some(ExecutorConfig {
                     allocator: None,
