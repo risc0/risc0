@@ -99,6 +99,8 @@ fn get_gpus_from_nvml() -> anyhow::Result<Vec<GpuSpec>> {
     use nvml_wrapper::Nvml;
     use std::collections::HashSet;
 
+    const GIGABYTE: u64 = 1024 * 1024 * 1024;
+
     let visible_devices = std::env::var("CUDA_VISIBLE_DEVICES")
         .ok()
         .map(|v| {
@@ -119,14 +121,17 @@ fn get_gpus_from_nvml() -> anyhow::Result<Vec<GpuSpec>> {
         }
 
         let device = nvml.device_by_index(idx)?;
-        gpus.push(GpuSpec {
-            name: device.name()?,
-            uuid: device
-                .uuid()?
-                .parse()
-                .expect("nvml device should have valid UUID"),
-            tokens: GpuTokens::from(100),
-        });
+        let memory_info = device.memory_info()?;
+
+        let name = device.name()?;
+        let uuid = device
+            .uuid()?
+            .parse()
+            .expect("nvml device should have valid UUID");
+        let tokens = GpuTokens::from(memory_info.total / GIGABYTE);
+
+        tracing::info!("found GPU {name} {uuid} with memory {}", memory_info.total);
+        gpus.push(GpuSpec { name, uuid, tokens });
     }
     Ok(gpus)
 }
@@ -453,6 +458,7 @@ impl Drop for TaskTracer {
     }
 }
 
+#[derive(Clone)]
 struct GpuProcessor {
     factory: ActorRef<RemoteFactoryActor>,
     allocator: ActorRef<RemoteAllocatorActor>,
@@ -529,27 +535,43 @@ impl GpuProcessor {
             .await??;
         drop(msg.allocate_tracer);
 
-        let _tracer = TaskTracer::new(
+        let tracer = TaskTracer::new(
             &msg.tracing,
             format!("WorkerGPU({:?})", msg.header.task_kind),
         );
 
         msg.reserved.extend(std::mem::take(&mut msg.to_reserve));
 
-        let header = msg.header.clone();
+        let processor = self.clone();
 
-        let result = match msg.task {
-            GpuTask::ProveSegmentCore(task) => self.prove_segment_core(msg.header, task).await,
-            GpuTask::ProveKeccak(task) => self.prove_keccak(msg.header, task).await,
-            GpuTask::Lift(task) => self.lift(msg.header, task).await,
-            GpuTask::Join(task) => self.join(msg.header, task).await,
-            GpuTask::Union(task) => self.union(msg.header, task).await,
-            GpuTask::Resolve(task) => self.resolve(msg.header, task).await,
-            GpuTask::ShrinkWrap(task) => self.shrink_wrap(msg.header, task).await,
+        tokio::task::spawn(async move {
+            let res = processor.run_task(msg.header, msg.task, msg.reserved).await;
+            if let Err(error) = res {
+                tracing::error!("GPU task runner failed: {error}");
+            }
+
+            drop(tracer);
+        });
+
+        Ok(())
+    }
+
+    async fn run_task(
+        &self,
+        header: TaskHeader,
+        task: GpuTask,
+        reserved: Vec<HardwareReservation>,
+    ) -> Result<()> {
+        let result = match task {
+            GpuTask::ProveSegmentCore(task) => self.prove_segment_core(header.clone(), task).await,
+            GpuTask::ProveKeccak(task) => self.prove_keccak(header.clone(), task).await,
+            GpuTask::Lift(task) => self.lift(header.clone(), task).await,
+            GpuTask::Join(task) => self.join(header.clone(), task).await,
+            GpuTask::Union(task) => self.union(header.clone(), task).await,
+            GpuTask::Resolve(task) => self.resolve(header.clone(), task).await,
+            GpuTask::ShrinkWrap(task) => self.shrink_wrap(header.clone(), task).await,
         };
-
-        self.send_done(header, result, msg.reserved).await?;
-
+        self.send_done(header, result, reserved).await?;
         Ok(())
     }
 

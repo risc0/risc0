@@ -323,6 +323,10 @@ impl<ActorT: Actor> ActorRef<ActorT> {
     {
         let pending_reply = self.ask_enqueue(msg).await?;
         runner.handle_one().await;
+
+        if !pending_reply.has_reply() {
+            return Err(SendError::NoReply);
+        }
         pending_reply.recv().await
     }
 
