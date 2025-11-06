@@ -465,9 +465,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         if let Some(kind) = ecall {
             self.ecall_metrics[kind].cycles += count as u64;
         }
-        if count > 1 {
-            tracing::debug!("inc_user_cycles({count}, {ecall:?})");
-        }
     }
 
     fn povw_nonce(&self, segment_index: u32) -> Option<PovwNonce> {

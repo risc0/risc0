@@ -258,8 +258,8 @@ ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2) {
 }
 
 void risc0_circuit_rv32im_m3_prove(ProverContext* ctx, PreflightContext* preflight) {
-  nvtx3::scoped_range range("prove");
   return tryVoid([&] {
+    nvtx3::scoped_range range("prove");
     WriteIop writeIop;
     writeIop.write(RV32IM_SEAL_VERSION);
     uint32_t po2 = ctx->prover.po2();

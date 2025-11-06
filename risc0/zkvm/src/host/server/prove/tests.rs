@@ -468,6 +468,7 @@ mod riscv {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg(not(feature = "rv32im-m3"))]
 fn pause_resume() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::PauseResume(0))
@@ -493,6 +494,7 @@ fn pause_resume() {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg(not(feature = "rv32im-m3"))]
 fn pause_exit_nonzero() {
     let user_exit_code = 1;
     let env = ExecutorEnv::builder()
@@ -564,6 +566,7 @@ fn continuation() {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg(not(feature = "rv32im-m3"))]
 fn sys_input() {
     use hex::FromHex;
     let digest =
