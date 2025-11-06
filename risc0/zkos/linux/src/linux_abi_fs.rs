@@ -29,6 +29,81 @@ use alloc::vec::Vec;
 #[cfg(target_arch = "riscv32")]
 use core::str;
 
+// Helper functions for user pointer validation
+
+/// Validate and read a null-terminated pathname from user memory
+/// Returns the pathname as a String, or EFAULT/EINVAL on error
+fn validate_and_read_pathname(ptr: u32) -> Result<String, Err> {
+    validate_and_read_pathname_with_len(ptr, 256)
+}
+
+/// Validate and read a null-terminated pathname with custom max length
+/// Returns the pathname as a String, or EFAULT/EINVAL/ENAMETOOLONG on error
+fn validate_and_read_pathname_with_len(ptr: u32, max_len: usize) -> Result<String, Err> {
+    if ptr == 0 {
+        return Err(Err::Fault);
+    }
+
+    if !crate::linux_abi::is_valid_user_address(ptr, max_len, false) {
+        kprint!(
+            "validate_and_read_pathname: EFAULT - invalid pointer {:#010x}",
+            ptr
+        );
+        return Err(Err::Fault);
+    }
+
+    let buf = unsafe { core::slice::from_raw_parts(ptr as *const u8, max_len) };
+    let null_pos = buf.iter().position(|&b| b == 0).unwrap_or(buf.len());
+
+    // Check for path too long (before null terminator found)
+    if null_pos >= max_len - 1 {
+        return Err(Err::NameTooLong);
+    }
+
+    str::from_utf8(&buf[..null_pos])
+        .map(|s| s.to_string())
+        .map_err(|_| Err::Inval)
+}
+
+/// Validate a user buffer pointer for writing
+/// Returns Ok(()) if valid, Err(Err::Fault) otherwise
+fn validate_user_buffer_write(ptr: u32, len: usize) -> Result<(), Err> {
+    if ptr == 0 {
+        return Err(Err::Fault);
+    }
+
+    if !crate::linux_abi::is_valid_user_address(ptr, len, true) {
+        kprint!(
+            "validate_user_buffer_write: EFAULT - invalid pointer {:#010x} len {}",
+            ptr,
+            len
+        );
+        return Err(Err::Fault);
+    }
+
+    Ok(())
+}
+
+/// Validate a user buffer pointer for reading
+/// Returns Ok(()) if valid, Err(Err::Fault) otherwise
+#[allow(dead_code)]
+fn validate_user_buffer_read(ptr: u32, len: usize) -> Result<(), Err> {
+    if ptr == 0 {
+        return Err(Err::Fault);
+    }
+
+    if !crate::linux_abi::is_valid_user_address(ptr, len, false) {
+        kprint!(
+            "validate_user_buffer_read: EFAULT - invalid pointer {:#010x} len {}",
+            ptr,
+            len
+        );
+        return Err(Err::Fault);
+    }
+
+    Ok(())
+}
+
 // Filesystem-related syscalls
 
 // open() flags
@@ -374,7 +449,7 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
     // For unlink, we must NOT follow symlinks - we want to remove the symlink itself, not its target
     // Use direct Twalk instead of resolve_path
     let starting_fid = get_starting_fid(dfd, filename_str)?;
-    let (dir_path, file_name) = split_path(filename_str);
+    let (dir_path, file_name) = split_path(&filename_str);
 
     // Walk to the directory (following symlinks in the path)
     let dir_fid = if dir_path.is_empty() || dir_path == "." {
@@ -1208,22 +1283,7 @@ pub fn sys_chdir(filename: u32) -> Result<u32, Err> {
         return Err(Err::NoSys);
     }
 
-    let filename = unsafe { core::slice::from_raw_parts(filename as *const u8, 256) };
-    kprint!("sys_chdir: filename='{:?}'", filename);
-
-    let null_pos = filename
-        .iter()
-        .position(|&b| b == 0)
-        .unwrap_or(filename.len());
-    let filename = &filename[..null_pos];
-    let filename_str = match str::from_utf8(filename) {
-        Ok(s) => s,
-        Err(_) => {
-            kprint!("sys_chdir: invalid UTF-8 filename");
-            return Err(Err::NoSys);
-        }
-    };
-
+    let filename_str = validate_and_read_pathname(filename)?;
     kprint!("sys_chdir: filename='{}'", filename_str);
 
     // Check for pathname too long (limit is 255 for 9P)
@@ -1240,7 +1300,7 @@ pub fn sys_chdir(filename: u32) -> Result<u32, Err> {
     } else {
         get_cwd_fid()
     };
-    let wnames = normalize_path(filename_str);
+    let wnames = normalize_path(&filename_str);
     let walk_result = do_walk(starting_fid, TEMP_FID_3, wnames);
     match walk_result {
         Ok((ret_code, _)) => {
@@ -1269,7 +1329,7 @@ pub fn sys_chdir(filename: u32) -> Result<u32, Err> {
         normalize_path(cwd.trim_end_matches('/'))
     };
 
-    let components = normalize_path(filename_str);
+    let components = normalize_path(&filename_str);
 
     // Process each component, resolving symlinks as we go
     for component in components {
@@ -1647,7 +1707,7 @@ pub fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32, _flags: u32) -> Res
         kprint!("sys_faccessat2: AT_SYMLINK_NOFOLLOW set");
 
         let starting_fid = get_starting_fid(_dfd, filename_str)?;
-        let (dir_path, file_name) = split_path(filename_str);
+        let (dir_path, file_name) = split_path(&filename_str);
 
         // For relative paths, use the dfd directly as the directory
         let dir_fid = if dir_path.is_empty() || dir_path == "." {
@@ -1694,7 +1754,7 @@ pub fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32, _flags: u32) -> Res
 
     // Normal path-based access check (following symlinks)
     let starting_fid = get_starting_fid(_dfd, filename_str)?;
-    let (dir_path, file_name) = split_path(filename_str);
+    let (dir_path, file_name) = split_path(&filename_str);
     let dir_path = normalize_path(&dir_path);
     do_walk(starting_fid, TEMP_FID_4, dir_path)?;
 
@@ -2475,7 +2535,7 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
 
         // Walk to the file without following symlinks
         let starting_fid = get_starting_fid(dfd, filename_str)?;
-        let (dir_path, file_name) = split_path(filename_str);
+        let (dir_path, file_name) = split_path(&filename_str);
         kprint!(
             "sys_fchownat: dir_path='{}', file_name='{}'",
             dir_path,
@@ -3095,14 +3155,7 @@ pub fn sys_truncate64(pathname: u32, length: u32) -> Result<u32, Err> {
         return Err(Err::NoSys);
     }
 
-    // Parse pathname
-    let pathname_buf = unsafe { core::slice::from_raw_parts(pathname as *const u8, 256) };
-    let pathname_len = pathname_buf
-        .iter()
-        .position(|&b| b == 0)
-        .unwrap_or(pathname_buf.len());
-    let pathname_str = str::from_utf8(&pathname_buf[..pathname_len]).map_err(|_| Err::Inval)?;
-
+    let pathname_str = validate_and_read_pathname(pathname)?;
     kprint!(
         "sys_truncate64: pathname='{}', length={}",
         pathname_str,
@@ -3111,7 +3164,7 @@ pub fn sys_truncate64(pathname: u32, length: u32) -> Result<u32, Err> {
 
     // Walk to the file
     let file_fid = TEMP_FID_11;
-    resolve_path(AT_FDCWD as u32, pathname_str, file_fid)?;
+    resolve_path(AT_FDCWD as u32, &pathname_str, file_fid)?;
 
     // Create Tsetattr message for truncate operation
     let valid = P9SetattrMask::Size as u32;
@@ -3408,12 +3461,8 @@ pub fn sys_getcwd(_buf: u32, _size: u32) -> Result<u32, Err> {
         return Err(Err::Range); // ERANGE
     }
 
-    // Now check for NULL buffer (after size check)
-    // Note: glibc handles getcwd(NULL, size) by allocating memory before calling syscall
-    if _buf == 0 {
-        kprint!("sys_getcwd: _buf is null");
-        return Err(Err::Fault);
-    }
+    // Now validate buffer (after size check for correct error precedence)
+    validate_user_buffer_write(_buf, cwd_str_len)?;
 
     let buf = unsafe { core::slice::from_raw_parts_mut(_buf as *mut u8, cwd_str_len) };
     // copy the string into buffer, null-terminated utf-8
@@ -3569,55 +3618,11 @@ pub fn sys_symlinkat(target: u32, newdirfd: u32, linkpath: u32) -> Result<u32, E
         return Err(Err::NoSys);
     }
 
-    // Parse target (symlink contents) - read up to PATH_MAX to check for ENAMETOOLONG
-    // PATH_MAX is typically 4096, but we'll use 4097 to detect paths that are too long
-    const PATH_MAX_CHECK: usize = 4097;
-    let target_buf = unsafe { core::slice::from_raw_parts(target as *const u8, PATH_MAX_CHECK) };
-    let target_null_pos = target_buf
-        .iter()
-        .position(|&b| b == 0)
-        .unwrap_or(target_buf.len());
+    // PATH_MAX is 4096 for symlinks
+    const PATH_MAX: usize = 4097;
 
-    // Check if target path is too long (>= PATH_MAX = 4096)
-    if target_null_pos >= 4096 {
-        kprint!(
-            "sys_symlinkat: target path too long ({} bytes)",
-            target_null_pos
-        );
-        return Err(Err::NameTooLong);
-    }
-
-    let target_str = match str::from_utf8(&target_buf[..target_null_pos]) {
-        Ok(s) => s,
-        Err(_) => {
-            kprint!("sys_symlinkat: invalid UTF-8 target");
-            return Err(Err::NoSys);
-        }
-    };
-
-    let linkpath_buf =
-        unsafe { core::slice::from_raw_parts(linkpath as *const u8, PATH_MAX_CHECK) };
-    let linkpath_null_pos = linkpath_buf
-        .iter()
-        .position(|&b| b == 0)
-        .unwrap_or(linkpath_buf.len());
-
-    // Check if linkpath is too long
-    if linkpath_null_pos >= 4096 {
-        kprint!(
-            "sys_symlinkat: linkpath too long ({} bytes)",
-            linkpath_null_pos
-        );
-        return Err(Err::NameTooLong);
-    }
-
-    let linkpath_str = match str::from_utf8(&linkpath_buf[..linkpath_null_pos]) {
-        Ok(s) => s,
-        Err(_) => {
-            kprint!("sys_symlinkat: invalid UTF-8 linkpath");
-            return Err(Err::NoSys);
-        }
-    };
+    let target_str = validate_and_read_pathname_with_len(target, PATH_MAX)?;
+    let linkpath_str = validate_and_read_pathname_with_len(linkpath, PATH_MAX)?;
 
     kprint!(
         "sys_symlinkat: target='{}', newdirfd={}, linkpath='{}'",
@@ -3627,7 +3632,7 @@ pub fn sys_symlinkat(target: u32, newdirfd: u32, linkpath: u32) -> Result<u32, E
     );
 
     // Split linkpath into directory and filename
-    let (dir_path, file_name) = split_path(linkpath_str);
+    let (dir_path, file_name) = split_path(&linkpath_str);
     kprint!(
         "sys_symlinkat: dir_path='{}', file_name='{}'",
         dir_path,
@@ -3813,7 +3818,7 @@ pub fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
         _dfd as i32,
         filename_str
     );
-    let (dir_path, file_name) = split_path(filename_str);
+    let (dir_path, file_name) = split_path(&filename_str);
     kprint!(
         "sys_mkdirat: dir_path='{}', file_name='{}'",
         dir_path,
@@ -3864,20 +3869,8 @@ pub fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u
         host_log(msg.as_ptr(), msg.len());
         return Err(Err::NoSys);
     }
-    let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
-    let null_pos = filename
-        .iter()
-        .position(|&b| b == 0)
-        .unwrap_or(filename.len());
-    let filename = &filename[..null_pos];
-    let filename_str = match str::from_utf8(filename) {
-        Ok(s) => s,
-        Err(_) => {
-            kprint!("sys_mknodat: invalid UTF-8 filename");
-            return Err(Err::NoSys);
-        }
-    };
 
+    let filename_str = validate_and_read_pathname(_filename)?;
     kprint!(
         "sys_mknodat: dfd={}, filename='{}', mode=0x{:x}, dev=0x{:x}",
         _dfd,
@@ -3886,7 +3879,7 @@ pub fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u
         _dev
     );
 
-    let (dir_path, file_name) = split_path(filename_str);
+    let (dir_path, file_name) = split_path(&filename_str);
     resolve_path(_dfd, &dir_path, TEMP_FID_1)?;
 
     // Apply umask to the mode
@@ -4341,13 +4334,8 @@ pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<
         return Err(Err::Inval);
     }
 
-    // Parse pathname
-    let pathname_buf = unsafe { core::slice::from_raw_parts(pathname as *const u8, 256) };
-    let pathname_len = pathname_buf
-        .iter()
-        .position(|&b| b == 0)
-        .unwrap_or(pathname_buf.len());
-    let pathname_str = str::from_utf8(&pathname_buf[..pathname_len]).map_err(|_| Err::Inval)?;
+    let pathname_str = validate_and_read_pathname(pathname)?;
+    validate_user_buffer_write(buf, bufsiz as usize)?;
 
     kprint!(
         "sys_readlinkat: dfd={}, pathname='{}', buf=0x{:x}, bufsiz={}",
@@ -4395,8 +4383,8 @@ pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<
 
     // Walk to the symlink (without following it)
     let symlink_fid = TEMP_FID_11;
-    let starting_fid = get_starting_fid(dfd, pathname_str)?;
-    let (dir_path, file_name) = split_path(pathname_str);
+    let starting_fid = get_starting_fid(dfd, &pathname_str)?;
+    let (dir_path, file_name) = split_path(&pathname_str);
 
     // Walk to the directory
     let dir_fid = if dir_path.is_empty() || dir_path == "." {
@@ -5678,7 +5666,7 @@ fn get_starting_fid(_dfd: u32, filename_str: &str) -> Result<u32, Err> {
 #[allow(dead_code)]
 fn get_dir_fid_into_temp_fid(dfd: u32, filename_str: &str) -> Result<(u32, String), Err> {
     let starting_fid = get_starting_fid(dfd, filename_str)?;
-    let (dir_path, file_name) = split_path(filename_str);
+    let (dir_path, file_name) = split_path(&filename_str);
     let dir_path = normalize_path(&dir_path);
     // Use temp fid that doesn't conflict with CWD (TEMP_FID_2)
     do_walk(starting_fid, TEMP_FID_4, dir_path)?;
@@ -5693,7 +5681,7 @@ fn resolve_file_to_fid(dir_fid: u32, new_fid: u32, filename: &str) -> Result<u32
 fn resolve_path(dfd: u32, filename_str: &str, into_fid: u32) -> Result<u32, Err> {
     let starting_fid = get_starting_fid(dfd, filename_str)?;
 
-    let (dir_path, file_name) = split_path(filename_str);
+    let (dir_path, file_name) = split_path(&filename_str);
     let dir_path = normalize_path(&dir_path);
     let mut file_path = dir_path.clone();
     file_path.push(file_name.clone());
@@ -5773,7 +5761,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
         kprint!("sys_openat: O_NOFOLLOW flag set");
 
         let starting_fid = get_starting_fid(dfd, filename_str)?;
-        let (dir_path, file_name) = split_path(filename_str);
+        let (dir_path, file_name) = split_path(&filename_str);
 
         // Walk to the directory (following symlinks in the path)
         let dir_fid = if dir_path.is_empty() || dir_path == "." {
@@ -6045,7 +6033,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
         }
     } else if _flags & O_CREAT == O_CREAT {
         kprint!("sys_openat: O_CREAT flag detected, attempting file creation");
-        let (dir_path, file_name) = split_path(filename_str);
+        let (dir_path, file_name) = split_path(&filename_str);
         resolve_path(dfd, &dir_path, file_fid)?;
 
         // Apply umask to permission bits, but preserve special bits (setuid, setgid, sticky)
