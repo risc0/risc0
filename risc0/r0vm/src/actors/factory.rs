@@ -299,7 +299,8 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
             Task::ProveSegment(task) => Some(task.segment.po2()),
             _ => None,
         };
-        let (cores, gpu_tokens) = self.choose_tokens(msg.header.task_kind, po2);
+        let dev_mode = msg.task.dev_mode();
+        let (cores, gpu_tokens) = self.choose_tokens(msg.header.task_kind, po2, dev_mode);
 
         let task = TaskMsg {
             header: msg.header.clone(),
@@ -412,8 +413,12 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
         res.map(|_| ())
     }
 
-    /// XXX remi: These token amounts are for po2=21. We should generalize to other po2 vaules.
-    fn choose_tokens(&self, task_kind: TaskKind, po2: Option<usize>) -> (CpuCores, GpuTokens) {
+    fn choose_tokens(
+        &self,
+        task_kind: TaskKind,
+        po2: Option<usize>,
+        dev_mode: bool,
+    ) -> (CpuCores, GpuTokens) {
         let (cores, mut gpu_tokens) = match task_kind {
             TaskKind::Execute => (CpuCores::from(1), GpuTokens::from(0)),
             TaskKind::ProveSegment => (CpuCores::from(1), prove_segment_tokens(po2.unwrap())),
@@ -421,7 +426,7 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
             _ => (CpuCores::ZERO, GpuTokens::from(3)),
         };
 
-        if !self.require_gpu {
+        if !self.require_gpu || dev_mode {
             gpu_tokens = GpuTokens::ZERO;
         }
         (cores, gpu_tokens)
