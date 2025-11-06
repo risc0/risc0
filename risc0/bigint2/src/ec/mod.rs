@@ -258,7 +258,8 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
 /// Doubles a point on the curve.
 ///
 /// Note: this function assumes that identity point cases are handled before calling, otherwise
-/// this function will panic in the host.
+/// this function will panic in the host. It also assumes the given point is in the prime order
+/// subgroup (if there exists a nontrivial cofactor).
 fn double_raw<const WIDTH: usize>(
     point: &[[u32; WIDTH]; 2],
     curve: &[[u32; WIDTH]; 3],
@@ -295,7 +296,8 @@ fn double_raw<const WIDTH: usize>(
 /// Adds two points on the curve.
 ///
 /// Note: this function assumes that identity point cases are handled before calling, otherwise
-/// this function will panic in the host.
+/// this function will panic in the host. It also assumes the given point is in the prime order
+/// subgroup (if there exists a nontrivial cofactor).
 fn add_raw<const WIDTH: usize>(
     lhs: &[[u32; WIDTH]; 2],
     rhs: &[[u32; WIDTH]; 2],

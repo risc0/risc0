@@ -80,6 +80,8 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
             addr.inc();
         }
 
+        // NOTE(victor/perf): Why bother with unaligned reads when the only caller rounds the count
+        // to the nuxt multiple of 16? I don't think this actually hurts anything though.
         if let Some(last_limb) = limbs.last_mut() {
             match count % 4 {
                 1 => *last_limb &= 0x000000FF,
@@ -185,6 +187,7 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
         "nondet_program_ptr: {nondet_program_ptr:?}, nondet_program_size: {nondet_program_size}"
     );
 
+    // NOTE(victor/perf): Program load + decode is about 4% of the e2e profile
     let program_bytes = ctx.load_region(
         LoadOp::Load,
         nondet_program_ptr.baddr(),
@@ -194,6 +197,7 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
     let mut cursor = Cursor::new(program_bytes);
     let program = bibc::Program::decode(&mut cursor)?;
 
+    // NOTE(victor/perf): Eval is about 15% of the overall profile.
     let witness = {
         let mut io = BigIntIOImpl::new(ctx, mode);
         program.eval(&mut io)?;

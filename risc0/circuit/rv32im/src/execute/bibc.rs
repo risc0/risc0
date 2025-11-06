@@ -26,20 +26,31 @@ use num_traits::FromPrimitive;
 
 use super::exec_trace;
 
+// NOTE: Fields in Type and Input are currently unused, but are read to consume the associated
+// bytes from the stream when decoding the program.
+
 #[derive(Debug)]
 pub(crate) struct Type {
+    /// Number of byte-limbs (i.e. coefficients) in the number associated with this type.
     pub coeffs: u64,
-    _max_pos: u64,
-    _max_neg: u64,
-    _min_bits: u64,
+    #[expect(dead_code)]
+    max_pos: u64,
+    #[expect(dead_code)]
+    max_neg: u64,
+    #[expect(dead_code)]
+    min_bits: u64,
 }
 
 #[derive(Debug)]
 pub(crate) struct Input {
-    _label: u64,
-    _bit_width: u32,
-    _min_bits: u16,
-    _is_public: bool,
+    #[expect(dead_code)]
+    label: u64,
+    #[expect(dead_code)]
+    bit_width: u32,
+    #[expect(dead_code)]
+    min_bits: u16,
+    #[expect(dead_code)]
+    is_public: bool,
 }
 
 #[derive(Debug, FromPrimitive)]
@@ -57,9 +68,17 @@ pub(crate) enum OpCode {
 
 #[derive(Debug)]
 pub(crate) struct Op {
+    /// 4-bit opcode enum.
     pub code: OpCode,
+    /// 12-bit index into [Program::types]  to access the [Type] for the result.
     pub result_type: usize,
+    /// 24-bit field `a` of the op. Semantics are operation-specific.
+    ///
+    /// In the arithmatic ops, a is the index into the list of op results for the lhs.
     pub a: usize,
+    /// 24-bit field `b` of the op. Semantics are operation-specific.
+    ///
+    /// In the arithmatic ops, b is the index into the list of op results for the rhs.
     pub b: usize,
 }
 
@@ -100,10 +119,10 @@ impl Op {
 impl Input {
     pub fn decode<R: Read>(stream: &mut R) -> Result<Self> {
         Ok(Self {
-            _label: stream.read_u64::<LittleEndian>()?,
-            _bit_width: stream.read_u32::<LittleEndian>()?,
-            _min_bits: stream.read_u16::<LittleEndian>()?,
-            _is_public: stream.read_u16::<LittleEndian>()? != 0,
+            label: stream.read_u64::<LittleEndian>()?,
+            bit_width: stream.read_u32::<LittleEndian>()?,
+            min_bits: stream.read_u16::<LittleEndian>()?,
+            is_public: stream.read_u16::<LittleEndian>()? != 0,
         })
     }
 }
@@ -112,9 +131,9 @@ impl Type {
     pub fn decode<R: Read>(stream: &mut R) -> Result<Self> {
         Ok(Self {
             coeffs: stream.read_u64::<LittleEndian>()?,
-            _max_pos: stream.read_u64::<LittleEndian>()?,
-            _max_neg: stream.read_u64::<LittleEndian>()?,
-            _min_bits: stream.read_u64::<LittleEndian>()?,
+            max_pos: stream.read_u64::<LittleEndian>()?,
+            max_neg: stream.read_u64::<LittleEndian>()?,
+            min_bits: stream.read_u64::<LittleEndian>()?,
         })
     }
 }
