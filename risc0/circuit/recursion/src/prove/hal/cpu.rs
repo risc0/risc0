@@ -45,7 +45,7 @@ use crate::{
 
 use super::{CircuitAccumulator, CircuitWitnessGenerator};
 
-type CpuHal = risc0_zkp::hal::cpu::CpuHal<BabyBear>;
+pub(crate) type CpuHal = risc0_zkp::hal::cpu::CpuHal<BabyBear>;
 
 #[derive(Default)]
 pub(crate) struct CpuCircuitHal;
