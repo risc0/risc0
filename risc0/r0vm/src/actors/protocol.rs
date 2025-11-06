@@ -125,6 +125,21 @@ pub(crate) enum Task {
     ShrinkWrap(Arc<ShrinkWrapTask>),
 }
 
+impl Task {
+    pub(crate) fn dev_mode(&self) -> bool {
+        match self {
+            Self::Execute(_) => false,
+            Self::ProveSegment(task) => task.dev_mode,
+            Self::ProveKeccak(task) => task.dev_mode,
+            Self::Lift(task) => task.dev_mode,
+            Self::Join(task) => task.dev_mode,
+            Self::Union(task) => task.dev_mode,
+            Self::Resolve(task) => task.dev_mode,
+            Self::ShrinkWrap(task) => task.dev_mode,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ExecuteTask {
     pub request: ProofRequest,

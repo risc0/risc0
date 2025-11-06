@@ -67,7 +67,7 @@ use crate::init_logging;
 use self::{
     actor::{Actor, ActorRef, Message},
     allocator::{
-        AllocatorActor, DEFAULT_RELEASE_CHANNEL, DEFAULT_WORKER_TASK_LIMIT, DeploymentVersion,
+        AllocatorActor, DEFAULT_RELEASE_CHANNEL, DEFAULT_WORKER_QUEUING_FACTOR, DeploymentVersion,
         HardwareResource, RegisterManager, RegisterWorker, RemoteAllocatorActor,
     },
     config::{
@@ -222,7 +222,7 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
             allocator: Some(AllocatorConfig {
                 listen: None,
                 default_release_channel: None,
-                worker_task_limit: None,
+                worker_queuing_factor: None,
             }),
             executor: Some(ExecutorConfig {
                 allocator: None,
@@ -406,8 +406,8 @@ impl App {
                     .as_deref()
                     .unwrap_or(DEFAULT_RELEASE_CHANNEL),
                 cfg_allocator
-                    .worker_task_limit
-                    .unwrap_or(DEFAULT_WORKER_TASK_LIMIT),
+                    .worker_queuing_factor
+                    .unwrap_or(DEFAULT_WORKER_QUEUING_FACTOR),
             ));
             allocator = Some(alloc_ref.clone());
 
