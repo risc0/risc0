@@ -754,13 +754,18 @@ where
 }
 
 pub(crate) fn join(left: impl Into<[u8; 32]>, right: impl Into<[u8; 32]>) -> Digest {
-    *sha::Impl::hash_bytes(&[left.into(), right.into()].concat())
+    let mut buf = [0u8; 64];
+    buf[..32].copy_from_slice(&left.into());
+    buf[32..].copy_from_slice(&right.into());
+    *sha::Impl::hash_bytes(&buf)
 }
 
 pub(crate) fn hash_leaf(leaf: Bitmap) -> Digest {
     const LEAF_TAG: &[u8] = b"POVWLEAF";
-
-    *sha::Impl::hash_bytes(&[LEAF_TAG, <[u8; 32]>::from(leaf).as_slice()].concat())
+    let mut buf = [0u8; 40];
+    buf[..8].copy_from_slice(LEAF_TAG);
+    buf[8..].copy_from_slice(&<[u8; 32]>::from(leaf));
+    *sha::Impl::hash_bytes(&buf)
 }
 
 #[cfg(test)]
