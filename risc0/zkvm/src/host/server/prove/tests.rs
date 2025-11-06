@@ -38,6 +38,8 @@ fn prove_nothing(kind: ReceiptKind) -> ProveInfo {
         ReceiptKind::Composite => prove_nothing_composite(),
         ReceiptKind::Succinct => prove_nothing_succinct(),
         ReceiptKind::Groth16 => prove_nothing_groth16(),
+        #[cfg(feature = "blake3")]
+        ReceiptKind::Blake3Groth16 => prove_nothing_blake3_groth16(),
     }
 }
 
@@ -70,6 +72,14 @@ fn prove_nothing_succinct() -> ProveInfo {
 fn prove_nothing_groth16() -> ProveInfo {
     static ONCE: OnceLock<ProveInfo> = OnceLock::new();
     ONCE.get_or_init(|| prove_nothing_impl(ReceiptKind::Groth16))
+        .clone()
+}
+
+#[cfg(feature = "blake3")]
+#[allow(dead_code)]
+fn prove_nothing_blake3_groth16() -> ProveInfo {
+    static ONCE: OnceLock<ProveInfo> = OnceLock::new();
+    ONCE.get_or_init(|| prove_nothing_impl(ReceiptKind::Blake3Groth16))
         .clone()
 }
 

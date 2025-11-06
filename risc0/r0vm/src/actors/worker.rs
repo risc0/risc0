@@ -690,6 +690,9 @@ impl GpuProcessor {
             ShrinkWrapKind::Groth16 => {
                 ProverOpts::groth16().with_dev_mode(prover.delay.is_some() || prover.dev_mode)
             }
+            #[cfg(feature = "blake3")]
+            ShrinkWrapKind::Blake3Groth16 => ProverOpts::blake3_groth16()
+                .with_dev_mode(prover.delay.is_some() || prover.dev_mode),
         };
         let receipt =
             tokio::task::spawn_blocking(move || prover.get()?.compress(&opts, &task.receipt))

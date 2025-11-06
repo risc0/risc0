@@ -28,6 +28,9 @@ pub(crate) mod merge;
 pub(crate) mod receipt;
 pub(crate) mod work;
 
+#[cfg(feature = "blake3")]
+pub(crate) mod blake3;
+
 /// A receipt (e.g. [SuccinctReceipt][crate::SuccinctReceipt]) may have an unknown claim type when
 /// only the digest of the claim is needed, and the full claim value cannot be determined by the
 /// compiler. This allows for a collection of receipts to be created even when the underlying

@@ -30,6 +30,8 @@ use risc0_groth16::prove::shrink_wrap;
 use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
+#[cfg(feature = "blake3")]
+use crate::claim::blake3::Blake3ReceiptClaim;
 use crate::{
     ExecutorEnv, PreflightResults, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, Segment,
     Session, VerifierContext, WorkClaim,
@@ -205,6 +207,37 @@ pub trait ProverServer: private::Sealed {
         })
     }
 
+    #[cfg(feature = "blake3")]
+    /// Compress a [SuccinctReceipt] into a [Groth16Receipt].
+    fn succinct_to_blake3_groth16(
+        &self,
+        receipt: &SuccinctReceipt<ReceiptClaim>,
+        journal: [u8; 32],
+    ) -> Result<Groth16Receipt<Blake3ReceiptClaim>> {
+        use crate::MaybePruned;
+
+        let ident_receipt = self.identity_p254(receipt).unwrap();
+        let control_root = receipt.control_root()?;
+        let receipt_claim = ident_receipt.claim.as_value()?;
+        let seal_bytes = ident_receipt.get_seal_bytes();
+
+        let identity_seal_json = risc0_groth16::prove::identity_seal_json_blake3(
+            &seal_bytes,
+            receipt_claim.pre.digest(),
+            receipt_claim.post.digest(),
+            ident_receipt.control_id,
+            control_root,
+            journal,
+        )?;
+        let claim = Blake3ReceiptClaim::ok(receipt_claim.pre.digest(), journal);
+        let seal = risc0_groth16::prove::blake3_shrink_wrap(&identity_seal_json)?.to_vec();
+        Ok(Groth16Receipt {
+            seal,
+            claim: MaybePruned::Value(claim),
+            verifier_parameters: Groth16ReceiptVerifierParameters::blake3_default().digest(),
+        })
+    }
+
     /// Compress a receipt into one with a smaller representation.
     ///
     /// The requested target representation is determined by the [ReceiptKind] specified on the
@@ -229,6 +262,19 @@ pub trait ProverServer: private::Sealed {
                         receipt.journal.bytes.clone(),
                     ))
                 }
+                #[cfg(feature = "blake3")]
+                ReceiptKind::Blake3Groth16 => {
+                    let journal: [u8; 32] = receipt.journal.as_ref().try_into().map_err(|_| {
+                        anyhow::anyhow!("journal must be 32 bytes to compress using blake3 groth16")
+                    })?;
+                    let succinct_receipt = self.composite_to_succinct(inner)?;
+                    let groth16_receipt =
+                        self.succinct_to_blake3_groth16(&succinct_receipt, journal)?;
+                    Ok(Receipt::new(
+                        InnerReceipt::Blake3Groth16(groth16_receipt),
+                        receipt.journal.bytes.clone(),
+                    ))
+                }
             },
             InnerReceipt::Succinct(inner) => match opts.receipt_kind {
                 ReceiptKind::Composite | ReceiptKind::Succinct => Ok(receipt.clone()),
@@ -239,11 +285,31 @@ pub trait ProverServer: private::Sealed {
                         receipt.journal.bytes.clone(),
                     ))
                 }
+                #[cfg(feature = "blake3")]
+                ReceiptKind::Blake3Groth16 => {
+                    let journal: [u8; 32] = receipt.journal.as_ref().try_into().map_err(|_| {
+                        anyhow::anyhow!("journal must be 32 bytes to compress using blake3 groth16")
+                    })?;
+                    let groth16_receipt = self.succinct_to_blake3_groth16(inner, journal)?;
+                    Ok(Receipt::new(
+                        InnerReceipt::Blake3Groth16(groth16_receipt),
+                        receipt.journal.bytes.clone(),
+                    ))
+                }
             },
             InnerReceipt::Groth16(_) => match opts.receipt_kind {
                 ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Groth16 => {
                     Ok(receipt.clone())
                 }
+                #[cfg(feature = "blake3")]
+                ReceiptKind::Blake3Groth16 => Ok(receipt.clone()),
+            },
+            #[cfg(feature = "blake3")]
+            InnerReceipt::Blake3Groth16(_) => match opts.receipt_kind {
+                ReceiptKind::Composite
+                | ReceiptKind::Succinct
+                | ReceiptKind::Groth16
+                | ReceiptKind::Blake3Groth16 => Ok(receipt.clone()),
             },
             InnerReceipt::Fake(_) => {
                 ensure!(
@@ -385,7 +451,11 @@ where
                 ),
                 InnerAssumptionReceipt::Groth16(_) => bail!(
                     "compressing composite receipts with Groth16 receipt assumptions is not supported"
-                )
+                ),
+                #[cfg(feature = "blake3")]
+                InnerAssumptionReceipt::Blake3Groth16(_) => bail!(
+                    "compressing composite receipts with Blake3 Groth16 receipt assumptions is not supported"
+                ),
             },
         )
     }

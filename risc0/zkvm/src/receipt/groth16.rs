@@ -24,7 +24,6 @@ use risc0_groth16::{Verifier, VerifyingKey};
 use risc0_zkp::core::hash::sha::Sha256;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
-
 // Make succinct receipt available through this `receipt` module.
 use crate::{
     MaybePruned,
@@ -101,7 +100,10 @@ impl<Claim> Groth16Receipt<Claim> {
             params.bn254_control_id,
             &params.verifying_key,
         )
-        .map_err(|_| VerificationError::ReceiptFormatError)?
+        .map_err(|e| {
+            tracing::error!("Failed to verify receipt format: {}", e);
+            VerificationError::ReceiptFormatError
+        })?
         .verify()
         .map_err(|_| VerificationError::InvalidProof)?;
 
@@ -125,6 +127,59 @@ impl<Claim> Groth16Receipt<Claim> {
     /// Number of bytes used by the seal for this receipt.
     pub fn seal_size(&self) -> usize {
         core::mem::size_of_val(self.seal.as_slice())
+    }
+}
+
+#[cfg(feature = "blake3")]
+impl<Claim> Groth16Receipt<Claim> {
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
+    pub fn verify_blake3_integrity(&self) -> Result<(), VerificationError>
+    where
+        Claim: Digestible + core::fmt::Debug,
+    {
+        let ctx = VerifierContext {
+            groth16_verifier_parameters: Some(Groth16ReceiptVerifierParameters::blake3_default()),
+            ..Default::default()
+        };
+        self.verify_blake3_integrity_with_context(&ctx)
+    }
+
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
+    pub fn verify_blake3_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError>
+    where
+        Claim: Digestible + core::fmt::Debug,
+    {
+        let params = ctx
+            .groth16_verifier_parameters
+            .as_ref()
+            .ok_or(VerificationError::VerifierParametersMissing)?;
+
+        if params.digest::<sha::Impl>() != self.verifier_parameters {
+            return Err(VerificationError::VerifierParametersMismatch {
+                expected: params.digest::<sha::Impl>(),
+                received: self.verifier_parameters,
+            });
+        }
+
+        Verifier::new_blake3(
+            &self.seal,
+            self.claim.digest::<sha::Impl>(),
+            &params.verifying_key,
+        )
+        .map_err(|e| {
+            tracing::error!("Failed to verify receipt format: {}", e);
+            VerificationError::ReceiptFormatError
+        })?
+        .verify()
+        .map_err(|_| VerificationError::InvalidProof)?;
+
+        // Everything passed
+        Ok(())
     }
 }
 
@@ -158,6 +213,16 @@ impl Groth16ReceiptVerifierParameters {
     #[stability::unstable]
     pub fn all_po2s() -> Self {
         Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+    }
+
+    /// Default set of parameters used to verify a Blake3 [Groth16Receipt].
+    #[cfg(feature = "blake3")]
+    pub fn blake3_default() -> Self {
+        Self {
+            control_root: ALLOWED_CONTROL_ROOT,
+            bn254_control_id: BN254_IDENTITY_CONTROL_ID,
+            verifying_key: risc0_groth16::blake3_verifying_key(),
+        }
     }
 }
 

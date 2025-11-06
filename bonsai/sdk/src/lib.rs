@@ -491,6 +491,34 @@ pub mod module_type {
         }
     }
 
+    /// ShrinkBlake3Groth16 Session representation
+    #[cfg(feature = "blake3")]
+    pub struct ShrinkBlake3Groth16Id {
+        /// Session UUID
+        pub uuid: String,
+    }
+
+    #[cfg(feature = "blake3")]
+    impl ShrinkBlake3Groth16Id {
+        /// Construct a [ShrinkBlake3Groth16Id] from a UUID [String]
+        pub fn new(uuid: String) -> Self {
+            Self { uuid }
+        }
+
+        /// Fetches the current status of the session
+        #[maybe_async_attr]
+        pub async fn status(&self, client: &Client) -> Result<SnarkStatusRes, SdkErr> {
+            let url = format!("{}/shrink_blake3/status/{}", client.url, self.uuid);
+            let res = client.client.get(url).send().await?;
+
+            if !res.status().is_success() {
+                let body = res.text().await?;
+                return Err(SdkErr::InternalServerErr(body));
+            }
+            Ok(res.json::<SnarkStatusRes>().await?)
+        }
+    }
+
     /// Creates a [reqwest::Client] for internal connection pooling
     fn construct_req_client(
         api_key: &str,
@@ -892,6 +920,35 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
             let res: CreateSessRes = res.json().await?;
 
             Ok(SnarkId::new(res.uuid))
+        }
+
+        /// Requests a blake3 groth16 proof to be created from an
+        /// existing sessionId.
+        ///
+        /// Supply a completed sessionId to convert the risc0 STARK proof into a
+        /// blake3 Groth16 proof that uses blake3 for its hashing
+        /// function.
+        #[maybe_async_attr]
+        #[cfg(feature = "blake3")]
+        pub async fn shrink_blake3_groth16(
+            &self,
+            session_id: String,
+        ) -> Result<ShrinkBlake3Groth16Id, SdkErr> {
+            let url = format!("{}/shrink_blake3/create", self.url);
+
+            let snark_req = SnarkReq { session_id };
+
+            let res = self.client.post(url).json(&snark_req).send().await?;
+
+            if !res.status().is_success() {
+                let body = res.text().await?;
+                return Err(SdkErr::InternalServerErr(body));
+            }
+
+            // Reuse the session response because its the same member format
+            let res: CreateSessRes = res.json().await?;
+
+            Ok(ShrinkBlake3Groth16Id::new(res.uuid))
         }
 
         // - /version
@@ -1448,6 +1505,72 @@ mod tests {
         let create_mock = server.mock(|when, then| {
             when.method(GET)
                 .path(format!("/snark/status/{}", snark_id.uuid))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
+
+        let status = snark_id.status(&client).unwrap();
+        assert_eq!(status.status, response.status);
+        assert_eq!(status.output, None);
+
+        create_mock.assert();
+    }
+
+    #[test]
+    #[cfg(feature = "blake3")]
+    fn shrink_blake3_groth16_create() {
+        let server = MockServer::start();
+
+        let request = SnarkReq {
+            session_id: Uuid::new_v4().to_string(),
+        };
+        let response = CreateSessRes {
+            uuid: Uuid::new_v4().to_string(),
+        };
+
+        let create_mock = server.mock(|when, then| {
+            when.method(POST)
+                .path("/shrink_blake3/create")
+                .header("content-type", "application/json")
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION)
+                .json_body_obj(&request);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
+
+        let res = client.shrink_blake3_groth16(request.session_id).unwrap();
+        assert_eq!(res.uuid, response.uuid);
+
+        create_mock.assert();
+    }
+
+    #[test]
+    #[cfg(feature = "blake3")]
+    fn shrink_blake3_groth16_status() {
+        let server = MockServer::start();
+
+        let uuid = Uuid::new_v4().to_string();
+        let snark_id = blocking::ShrinkBlake3Groth16Id::new(uuid);
+        let response = SnarkStatusRes {
+            status: "RUNNING".to_string(),
+            output: None,
+            error_msg: None,
+        };
+
+        let create_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("/shrink_blake3/status/{}", snark_id.uuid))
                 .header(API_KEY_HEADER, TEST_KEY)
                 .header(VERSION_HEADER, TEST_VERSION);
             then.status(200)

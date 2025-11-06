@@ -133,15 +133,28 @@ impl Prover for DefaultProver {
                 ReceiptKind::Composite => Ok(receipt.clone()),
                 ReceiptKind::Succinct => unimplemented!("missing composite -> succinct conversion"),
                 ReceiptKind::Groth16 => self.shrink_wrap_groth16(receipt, dev_mode),
+                #[cfg(feature = "blake3")]
+                ReceiptKind::Blake3Groth16 => self.shrink_wrap_blake3_groth16(receipt, dev_mode),
             },
             InnerReceipt::Succinct(_) => match opts.receipt_kind {
                 ReceiptKind::Composite | ReceiptKind::Succinct => Ok(receipt.clone()),
                 ReceiptKind::Groth16 => self.shrink_wrap_groth16(receipt, dev_mode),
+                #[cfg(feature = "blake3")]
+                ReceiptKind::Blake3Groth16 => self.shrink_wrap_blake3_groth16(receipt, dev_mode),
             },
             InnerReceipt::Groth16(_) => match opts.receipt_kind {
                 ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Groth16 => {
                     Ok(receipt.clone())
                 }
+                #[cfg(feature = "blake3")]
+                ReceiptKind::Blake3Groth16 => Ok(receipt.clone()),
+            },
+            #[cfg(feature = "blake3")]
+            InnerReceipt::Blake3Groth16(_) => match opts.receipt_kind {
+                ReceiptKind::Composite
+                | ReceiptKind::Succinct
+                | ReceiptKind::Groth16
+                | ReceiptKind::Blake3Groth16 => Ok(receipt.clone()),
             },
             InnerReceipt::Fake(_) => {
                 ensure!(
@@ -231,6 +244,17 @@ impl DefaultProver {
     fn shrink_wrap_groth16(&self, receipt: &Receipt, dev_mode: bool) -> Result<Receipt> {
         let shrink_wrap_request = ShrinkWrapRequest {
             kind: ShrinkWrapKind::Groth16,
+            receipt: receipt.clone(),
+            dev_mode,
+        };
+        let result: ShrinkWrapResult = self.rpc_request(shrink_wrap_request)?;
+        Ok(Arc::into_inner(result.receipt).unwrap())
+    }
+
+    #[cfg(feature = "blake3")]
+    fn shrink_wrap_blake3_groth16(&self, receipt: &Receipt, dev_mode: bool) -> Result<Receipt> {
+        let shrink_wrap_request = ShrinkWrapRequest {
+            kind: ShrinkWrapKind::Blake3Groth16,
             receipt: receipt.clone(),
             dev_mode,
         };

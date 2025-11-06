@@ -25,10 +25,14 @@ use risc0_zkvm::{
 use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec};
 
 #[derive(Debug, Parser)]
-pub struct BootstrapGroth16 {
+pub struct BootstrapBlake3Groth16 {
     /// risc0-ethereum repository path
     #[arg(long, env)]
     risc0_ethereum_path: String,
+
+    /// blake3-groth16 setup directory
+    #[arg(long, env)]
+    blake3_groth16_setup_dir: String,
 
     /// bootstrap test receipt only (exclude rust verifier and control id)
     #[arg(long, action = clap::ArgAction::SetTrue, default_value_t = false)]
@@ -56,40 +60,41 @@ const SOL_HEADER: &str = r#"// Copyright 2025 RISC Zero, Inc.
 
 "#;
 
-const SOLIDITY_VERIFIER_SOURCE: &str = "groth16_proof/groth16/verifier.sol";
-const SOLIDITY_VERIFIER_TARGET: &str = "contracts/src/groth16/Groth16Verifier.sol";
-const SOLIDITY_CONTROL_ID_PATH: &str = "contracts/src/groth16/ControlID.sol";
-const SOLIDITY_TEST_RECEIPT_PATH: &str = "contracts/test/TestReceipt.sol";
-const RUST_VERIFIER_PATH: &str = "risc0/groth16/src/verifier/risc0.rs";
+const SOLIDITY_VERIFIER_TARGET: &str = "contracts/src/bitvm/Groth16Verifier.sol";
+const SOLIDITY_CONTROL_ID_PATH: &str = "contracts/src/bitvm/ControlID.sol";
+const SOLIDITY_TEST_RECEIPT_PATH: &str = "contracts/test/Blake3TestReceipt.sol";
+const RUST_VERIFIER_PATH: &str = "risc0/groth16/src/verifier/blake3.rs";
 
-impl BootstrapGroth16 {
+impl BootstrapBlake3Groth16 {
     pub fn run(&self) {
         let current_dir = std::env::current_dir().unwrap();
+        let blake3_setup_path = current_dir.join(&self.blake3_groth16_setup_dir);
         let risc0_ethereum_path = current_dir.join(&self.risc0_ethereum_path);
         if !self.test_receipt_only {
-            bootstrap_verifying_key(&risc0_ethereum_path);
+            bootstrap_verifying_key(&blake3_setup_path, &risc0_ethereum_path);
             bootstrap_control_id(&risc0_ethereum_path);
         }
         bootstrap_test_receipt(&risc0_ethereum_path);
     }
 }
 
-fn bootstrap_verifying_key(risc0_ethereum_path: &Path) {
+fn bootstrap_verifying_key(blake3_setup_path: &Path, risc0_ethereum_path: &Path) {
     let solidity_verifier_target = risc0_ethereum_path.join(SOLIDITY_VERIFIER_TARGET);
-    std::fs::copy(SOLIDITY_VERIFIER_SOURCE, solidity_verifier_target).unwrap();
-    let solidity_code = fs::read_to_string(SOLIDITY_VERIFIER_SOURCE).unwrap();
+    let solidity_verifier_source = blake3_setup_path.join("verifier.sol");
+    std::fs::copy(&solidity_verifier_source, solidity_verifier_target).unwrap();
+    let solidity_code = fs::read_to_string(solidity_verifier_source).unwrap();
     let mut rust_code = fs::read_to_string(RUST_VERIFIER_PATH).unwrap();
 
     let solidity_constants = [
         "alphax", "alphay", "betax1", "betax2", "betay1", "betay2", "gammax1", "gammax2",
         "gammay1", "gammay2", "deltax1", "deltax2", "deltay1", "deltay2", "IC0x", "IC0y", "IC1x",
-        "IC1y", "IC2x", "IC2y", "IC3x", "IC3y", "IC4x", "IC4y", "IC5x", "IC5y",
+        "IC1y",
     ];
 
     let rust_constants = [
         "ALPHA_X", "ALPHA_Y", "BETA_X1", "BETA_X2", "BETA_Y1", "BETA_Y2", "GAMMA_X1", "GAMMA_X2",
         "GAMMA_Y1", "GAMMA_Y2", "DELTA_X1", "DELTA_X2", "DELTA_Y1", "DELTA_Y2", "IC0_X", "IC0_Y",
-        "IC1_X", "IC1_Y", "IC2_X", "IC2_Y", "IC3_X", "IC3_Y", "IC4_X", "IC4_Y", "IC5_X", "IC5_Y",
+        "IC1_X", "IC1_Y",
     ];
 
     for (i, constant) in solidity_constants.into_iter().enumerate() {

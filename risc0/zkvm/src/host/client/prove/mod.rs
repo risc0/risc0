@@ -32,8 +32,8 @@ use self::bonsai::BonsaiProver;
 use self::{default::DefaultProver, opts::ProverOpts};
 
 use crate::{
-    ExecutorEnv, ExitCode, Journal, Receipt, ReceiptClaim, VerifierContext, get_version,
-    host::prove_info::ProveInfo,
+    ExecutorEnv, ExitCode, Groth16ReceiptVerifierParameters, Journal, Receipt, ReceiptClaim,
+    ReceiptKind, VerifierContext, get_version, host::prove_info::ProveInfo,
 };
 
 /// Provides information about a segment of execution.
@@ -114,7 +114,14 @@ pub trait Prover {
     /// Default [VerifierContext] and [ProverOpts] will be used.
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         let opts = ProverOpts::default();
-        let ctx = VerifierContext::default();
+        let groth16_params = match opts.receipt_kind {
+            ReceiptKind::Groth16 | ReceiptKind::Composite | ReceiptKind::Succinct => {
+                Groth16ReceiptVerifierParameters::default()
+            }
+            #[cfg(feature = "blake3")]
+            ReceiptKind::Blake3Groth16 => Groth16ReceiptVerifierParameters::blake3_default(),
+        };
+        let ctx = VerifierContext::default().with_groth16_verifier_parameters(groth16_params);
         self.prove_with_ctx(env, &ctx, elf, &opts)
     }
 
@@ -130,7 +137,16 @@ pub trait Prover {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<ProveInfo> {
-        let ctx = VerifierContext::default().with_dev_mode(opts.dev_mode());
+        let groth16_params = match opts.receipt_kind {
+            ReceiptKind::Groth16 | ReceiptKind::Composite | ReceiptKind::Succinct => {
+                Groth16ReceiptVerifierParameters::default()
+            }
+            #[cfg(feature = "blake3")]
+            ReceiptKind::Blake3Groth16 => Groth16ReceiptVerifierParameters::blake3_default(),
+        };
+        let ctx = VerifierContext::default()
+            .with_groth16_verifier_parameters(groth16_params)
+            .with_dev_mode(opts.dev_mode());
         self.prove_with_ctx(env, &ctx, elf, opts)
     }
 

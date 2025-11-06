@@ -39,6 +39,8 @@ use risc0_zkp::{
 };
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
+#[cfg(feature = "blake3")]
+use crate::Blake3ReceiptClaim;
 // Make succinct receipt available through this `receipt` module.
 use crate::{
     Assumption, Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim,
@@ -316,6 +318,10 @@ pub enum InnerReceipt {
     /// A [Groth16Receipt], proving arbitrarily long zkVM computations with a single Groth16 SNARK.
     Groth16(Groth16Receipt<ReceiptClaim>),
 
+    #[cfg(feature = "blake3")]
+    /// A Blake3 [Groth16Receipt], proving arbitrarily long zkVM computations with a single Groth16 SNARK.
+    Blake3Groth16(Groth16Receipt<Blake3ReceiptClaim>),
+
     /// A [FakeReceipt], with no cryptographic integrity, used only for development.
     Fake(FakeReceipt<ReceiptClaim>),
 }
@@ -336,6 +342,8 @@ impl InnerReceipt {
         match self {
             Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
             Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
+            #[cfg(feature = "blake3")]
+            Self::Blake3Groth16(inner) => inner.verify_blake3_integrity_with_context(ctx),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
             Self::Fake(inner) => inner.verify_integrity_with_context(ctx),
         }
@@ -359,6 +367,16 @@ impl InnerReceipt {
         }
     }
 
+    #[cfg(feature = "blake3")]
+    /// Returns the [InnerReceipt::Blake3Groth16] arm.
+    pub fn blake3_groth16(&self) -> Result<&Groth16Receipt<Blake3ReceiptClaim>, VerificationError> {
+        if let Self::Blake3Groth16(x) = self {
+            Ok(x)
+        } else {
+            Err(VerificationError::ReceiptFormatError)
+        }
+    }
+
     /// Returns the [InnerReceipt::Succinct] arm.
     pub fn succinct(&self) -> Result<&SuccinctReceipt<ReceiptClaim>, VerificationError> {
         if let Self::Succinct(x) = self {
@@ -373,6 +391,11 @@ impl InnerReceipt {
         match self {
             Self::Composite(inner) => Ok(inner.claim()?.into()),
             Self::Groth16(inner) => Ok(inner.claim.clone()),
+            #[cfg(feature = "blake3")]
+            Self::Blake3Groth16(_) => {
+                tracing::error!("No ReceiptClaim available for Blake3 Groth16 receipts");
+                Err(VerificationError::ReceiptFormatError)
+            }
             Self::Succinct(inner) => Ok(inner.claim.clone()),
             Self::Fake(inner) => Ok(inner.claim.clone()),
         }
@@ -383,6 +406,8 @@ impl InnerReceipt {
         match self {
             Self::Composite(inner) => inner.verifier_parameters,
             Self::Groth16(inner) => inner.verifier_parameters,
+            #[cfg(feature = "blake3")]
+            Self::Blake3Groth16(inner) => inner.verifier_parameters,
             Self::Succinct(inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
         }
@@ -394,6 +419,8 @@ impl InnerReceipt {
             Self::Composite(receipt) => receipt.seal_size(),
             Self::Succinct(receipt) => receipt.seal_size(),
             Self::Groth16(receipt) => receipt.seal_size(),
+            #[cfg(feature = "blake3")]
+            Self::Blake3Groth16(receipt) => receipt.seal_size(),
             Self::Fake(_) => 0,
         }
     }
@@ -414,6 +441,13 @@ impl From<SuccinctReceipt<ReceiptClaim>> for InnerReceipt {
 impl From<Groth16Receipt<ReceiptClaim>> for InnerReceipt {
     fn from(receipt: Groth16Receipt<ReceiptClaim>) -> Self {
         Self::Groth16(receipt)
+    }
+}
+
+#[cfg(feature = "blake3")]
+impl From<Groth16Receipt<Blake3ReceiptClaim>> for InnerReceipt {
+    fn from(receipt: Groth16Receipt<Blake3ReceiptClaim>) -> Self {
+        Self::Blake3Groth16(receipt)
     }
 }
 
@@ -775,6 +809,10 @@ pub enum InnerAssumptionReceipt {
     /// A [Groth16Receipt], proving arbitrarily the claim with a single Groth16 SNARK.
     Groth16(Groth16Receipt<Unknown>),
 
+    #[cfg(feature = "blake3")]
+    /// A Blake3 [Blake3Groth16Receipt], proving arbitrarily the claim with a single Blake3 Groth16 SNARK.
+    Blake3Groth16(Groth16Receipt<Unknown>),
+
     /// A [FakeReceipt], with no cryptographic integrity, used only for development.
     Fake(FakeReceipt<Unknown>),
 }
@@ -789,6 +827,8 @@ impl InnerAssumptionReceipt {
         match self {
             Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
             Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
+            #[cfg(feature = "blake3")]
+            Self::Blake3Groth16(inner) => inner.verify_blake3_integrity_with_context(ctx),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
             Self::Fake(inner) => inner.verify_integrity_with_context(ctx),
         }
@@ -829,6 +869,8 @@ impl InnerAssumptionReceipt {
             Self::Composite(inner) => Ok(inner.claim()?.digest()),
             Self::Groth16(inner) => Ok(inner.claim.digest()),
             Self::Succinct(inner) => Ok(inner.claim.digest()),
+            #[cfg(feature = "blake3")]
+            Self::Blake3Groth16(inner) => Ok(inner.claim.digest()),
             Self::Fake(inner) => Ok(inner.claim.digest()),
         }
     }
@@ -838,6 +880,8 @@ impl InnerAssumptionReceipt {
         match self {
             Self::Composite(inner) => inner.verifier_parameters,
             Self::Groth16(inner) => inner.verifier_parameters,
+            #[cfg(feature = "blake3")]
+            Self::Blake3Groth16(inner) => inner.verifier_parameters,
             Self::Succinct(inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
         }
@@ -849,6 +893,8 @@ impl InnerAssumptionReceipt {
             Self::Composite(receipt) => receipt.seal_size(),
             Self::Succinct(receipt) => receipt.seal_size(),
             Self::Groth16(receipt) => receipt.seal_size(),
+            #[cfg(feature = "blake3")]
+            Self::Blake3Groth16(receipt) => receipt.seal_size(),
             Self::Fake(_) => 0,
         }
     }
@@ -860,6 +906,10 @@ impl From<InnerReceipt> for InnerAssumptionReceipt {
             InnerReceipt::Composite(x) => InnerAssumptionReceipt::Composite(x),
             InnerReceipt::Succinct(x) => InnerAssumptionReceipt::Succinct(x.into_unknown()),
             InnerReceipt::Groth16(x) => InnerAssumptionReceipt::Groth16(x.into_unknown()),
+            #[cfg(feature = "blake3")]
+            InnerReceipt::Blake3Groth16(x) => {
+                InnerAssumptionReceipt::Blake3Groth16(x.into_unknown())
+            }
             InnerReceipt::Fake(x) => InnerAssumptionReceipt::Fake(x.into_unknown()),
         }
     }
