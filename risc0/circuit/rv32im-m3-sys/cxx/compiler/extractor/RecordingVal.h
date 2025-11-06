@@ -19,79 +19,54 @@
 #include "zkp/fp.h"
 #include "zkp/fpext.h"
 
-struct RecordingContext;
-
-struct RecordingVal {
-    mlir::Value value;
-
-    RecordingVal();
-    RecordingVal(mlir::Value v) : value(v) {}
-    RecordingVal(uint32_t c);
-    RecordingVal(risc0::Fp c);
-
-    RecordingVal operator+(const RecordingVal& other) const;
-    RecordingVal operator+=(const RecordingVal& other) {
-      return *this = *this + other;
-    }
-    RecordingVal operator-(const RecordingVal& other) const;
-    RecordingVal operator-=(const RecordingVal& other) {
-      return *this = *this - other;
-    }
-    RecordingVal operator-() const;
-    RecordingVal operator*(const RecordingVal& other) const;
-    RecordingVal operator*=(const RecordingVal& other) {
-      return *this = *this * other;
-    }
-    bool operator==(const RecordingVal& other) const;
-
-    static void setContext(RecordingContext* ctx) {
-        context = ctx;
-    }
-
-    static RecordingContext* getContext() {
-        return context;
-    }
-
-    operator risc0::Fp() const {
-      return risc0::Fp();
-    }
-    
-    uint32_t asUInt32() const {
-      // This should only happen in witgen
-      throw std::runtime_error("Call to asUInt32() in RecordingVal");
-    }
+struct BuilderSingleton {
+  static void set(mlir::OpBuilder* value) { builder = value; }
+  static mlir::OpBuilder* get() { return builder; }
 
 protected:
-    static RecordingContext* context;
+  static mlir::OpBuilder* builder;
 };
 
-// TODO
+struct RecordingVal {
+  mlir::Value value;
+
+  RecordingVal();
+  RecordingVal(mlir::Value v) : value(v) {}
+  RecordingVal(uint32_t c);
+  RecordingVal(risc0::Fp c);
+
+  RecordingVal operator+(const RecordingVal& rhs) const;
+  RecordingVal operator+=(const RecordingVal& rhs) { return *this = *this + rhs; }
+  RecordingVal operator-(const RecordingVal& rhs) const;
+  RecordingVal operator-=(const RecordingVal& rhs) { return *this = *this - rhs; }
+  RecordingVal operator-() const;
+  RecordingVal operator*(const RecordingVal& rhs) const;
+  RecordingVal operator*=(const RecordingVal& rhs) { return *this = *this * rhs; }
+
+  operator risc0::Fp() const { return risc0::Fp(); }
+
+  static void startRecording() { recording = true; }
+  static void stopRecording() { recording = false; }
+
+private:
+  static bool recording;
+};
+
 struct RecordingValExt {
-  RecordingValExt() {}
-  explicit RecordingValExt(risc0::FpExt v) {}
-  explicit RecordingValExt(RecordingVal v) {}
-  explicit RecordingValExt(RecordingVal v0, RecordingVal v1, RecordingVal v2, RecordingVal v3) {}
+  mlir::Value value;
 
-  // Never called in constraint code, only witgen
-  RecordingVal elem(size_t i) { throw std::runtime_error("Not implemented"); }
+  RecordingValExt();
+  RecordingValExt(uint32_t x);
+  RecordingValExt(mlir::Value v) : value(v) {}
+  explicit RecordingValExt(risc0::FpExt v);
+  explicit RecordingValExt(RecordingVal v);
+  explicit RecordingValExt(RecordingVal v0, RecordingVal v1, RecordingVal v2, RecordingVal v3);
 
-  RecordingValExt operator+(RecordingValExt rhs) const {
-    return RecordingValExt();
-  }
-  RecordingValExt operator-(RecordingValExt rhs) const {
-    return RecordingValExt();
-  }
-  RecordingValExt operator*(RecordingValExt rhs) const {
-    return RecordingValExt();
-  }
-  RecordingValExt operator*(RecordingVal rhs) const {
-    return RecordingValExt();
-  }
-  RecordingValExt& operator+=(RecordingValExt rhs) {
-    return *this;
-  }
-  RecordingValExt& operator*=(RecordingValExt rhs) {
-    return *this;
-  }
+  RecordingValExt operator+(RecordingValExt rhs) const;
+  RecordingValExt operator-(RecordingValExt rhs) const;
+  RecordingValExt operator*(RecordingValExt rhs) const;
+  RecordingValExt operator*(RecordingVal rhs) const;
+  RecordingValExt& operator+=(RecordingValExt rhs) { return *this = *this + rhs; }
+  RecordingValExt& operator*=(RecordingValExt rhs) { return *this = *this * rhs; }
+  RecordingValExt& operator*=(RecordingVal rhs) { return *this = *this * rhs; }
 };
-

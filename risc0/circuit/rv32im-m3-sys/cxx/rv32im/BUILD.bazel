@@ -4,7 +4,9 @@ cc_library(
     hdrs = glob(["*.h"]),
     visibility = ["//visibility:public"],
     deps = [
+        "//hal/pick",
         "//prove",
         "//verify",
+        "@risc0_sys",
     ],
 )

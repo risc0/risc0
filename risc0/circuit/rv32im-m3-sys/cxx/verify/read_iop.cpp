@@ -19,11 +19,7 @@
 
 namespace risc0 {
 
-ReadIop::ReadIop(const Fp* buf, uint32_t size)
-  : buf(buf)
-  , size(size)
-  , offset(0)
-{}
+ReadIop::ReadIop(const Fp* buf, uint32_t size) : buf(buf), size(size), offset(0) {}
 
 void ReadIop::read(Fp* buf, size_t size) {
   if (offset + size > this->size) {
@@ -41,6 +37,12 @@ void ReadIop::read(FpExt* buf, size_t size) {
 void ReadIop::read(Digest* buf, size_t size) {
   Fp* castBuf = reinterpret_cast<Fp*>(buf);
   read(castBuf, size * 8);
+}
+
+uint32_t ReadIop::readU32() {
+  Fp value;
+  read(&value, 1);
+  return value.asRaw();
 }
 
 void ReadIop::done() {
@@ -66,4 +68,3 @@ size_t ReadIop::rngBits(size_t bits) {
 }
 
 } // namespace risc0
-

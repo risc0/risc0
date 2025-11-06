@@ -18,7 +18,8 @@ use std::rc::Rc;
 use anyhow::Result;
 use risc0_circuit_rv32im_sys::{
     RawAccumBuffers, RawBuffer, RawExecBuffers, RawPreflightTrace, risc0_circuit_rv32im_cuda_accum,
-    risc0_circuit_rv32im_cuda_eval_check, risc0_circuit_rv32im_cuda_witgen,
+    risc0_circuit_rv32im_cuda_eval_check, risc0_circuit_rv32im_cuda_reset,
+    risc0_circuit_rv32im_cuda_witgen,
 };
 use risc0_core::{
     field::{Elem, ExtElem as _, RootsOfUnity, map_pow},
@@ -53,8 +54,21 @@ pub struct CudaCircuitHal<CH: CudaHash> {
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
     pub fn new(_hal: Rc<CudaHal<CH>>) -> Self {
+        #[cfg(test)]
+        gpu_guard::assert_gpu_semaphore_held();
+
         Self { _hal }
     }
+}
+
+impl<CH: CudaHash> Drop for CudaCircuitHal<CH> {
+    fn drop(&mut self) {
+        cuda_reset();
+    }
+}
+
+fn cuda_reset() {
+    ffi_wrap(|| unsafe { risc0_circuit_rv32im_cuda_reset() }).unwrap();
 }
 
 impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
@@ -205,10 +219,11 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 
         tracing::debug!("steps: {steps}, domain: {domain}, po2: {po2}, rou: {rou:?}");
         let poly_mix_pows = map_pow(poly_mix, POLY_MIX_POWERS);
-        let poly_mix_pows: &[u32; ExtVal::EXT_SIZE * NUM_POLY_MIX_POWERS] =
+        let poly_mix_pows_vec: &[u32; ExtVal::EXT_SIZE * NUM_POLY_MIX_POWERS] =
             ExtVal::as_u32_slice(poly_mix_pows.as_slice())
                 .try_into()
                 .unwrap();
+        let poly_mix_pows = CudaBuffer::copy_from("poly_mix", &poly_mix_pows_vec[..]);
 
         ffi_wrap(|| unsafe {
             risc0_circuit_rv32im_cuda_eval_check(
@@ -221,7 +236,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 &rou as *const Val,
                 po2 as u32,
                 domain as u32,
-                poly_mix_pows.as_ptr(),
+                poly_mix_pows.as_device_ptr().as_ptr() as *const ExtVal,
             )
         })
         .unwrap();
@@ -312,6 +327,7 @@ mod tests {
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eval_check() {
         const PO2: usize = 4;
         let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());

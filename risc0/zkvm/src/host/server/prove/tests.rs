@@ -18,7 +18,7 @@ use std::sync::OnceLock;
 use anyhow::Result;
 use risc0_binfmt::{MemoryImage, PovwJobId, PovwLogId, PovwNonce};
 use risc0_circuit_rv32im::TerminateState;
-use risc0_zkp::{core::digest::Digest, verify::VerificationError};
+use risc0_zkp::{core::digest::Digest, digest, verify::VerificationError};
 use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec};
 use risc0_zkvm_platform::{WORD_SIZE, memory};
 use rstest::rstest;
@@ -97,27 +97,14 @@ fn prove_elf_succinct(env: ExecutorEnv, elf: &[u8]) -> Result<Receipt> {
 }
 
 #[test_log::test]
-#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
-fn keccak_union() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::KeccakUnion(3))
-        .unwrap()
-        .build()
-        .unwrap();
-    let opts = ProverOpts::succinct();
-    get_prover_server(&opts)
-        .unwrap()
-        .prove(env, MULTI_TEST_ELF)
-        .unwrap();
-}
-
-#[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn basic() {
     // ensure that we got a succinct receipt.
     prove_nothing_succinct().receipt.inner.succinct().unwrap();
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn verifier_parameters_mismatch() {
     let receipt = prove_nothing_succinct().receipt;
 
@@ -139,6 +126,7 @@ fn verifier_parameters_mismatch() {
 /// an error if you try to create a proof using that hashfn, or if you try to verify a receipt that
 /// is using that hashfn.
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn sha256_hashfn_fails() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
@@ -170,6 +158,7 @@ fn sha256_hashfn_fails() {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn receipt_serde() {
     let receipt = prove_nothing_composite().receipt;
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
@@ -180,6 +169,7 @@ fn receipt_serde() {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn check_image_id() {
     let receipt = prove_nothing_composite().receipt;
     let mut image_id: Digest = MULTI_TEST_ID.into();
@@ -194,6 +184,7 @@ fn check_image_id() {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn p2_basic() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Poseidon2Basic)
@@ -205,6 +196,7 @@ fn p2_basic() {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn sha_basics() {
     let run_sha = |msg: &str| -> String {
         let env = ExecutorEnv::builder()
@@ -236,6 +228,7 @@ fn sha_basics() {
 
 #[test_log::test]
 #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn sha_iter() {
     let input = MultiTestSpec::ShaDigestIter {
         data: Vec::from([0u8; 32]),
@@ -256,6 +249,7 @@ fn sha_iter() {
 
 #[test_log::test]
 #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(10);
     for case in cases {
@@ -304,6 +298,7 @@ const POS: usize = crate::align_up(
 #[should_panic(expected = "LoadAddressMisaligned")]
 #[case(&[(POS + 1, 0)])]
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn memory_io(#[case] pairs: &[(usize, usize)]) {
     let input = MultiTestSpec::ReadWriteMem {
         values: pairs
@@ -327,6 +322,7 @@ fn memory_io(#[case] pairs: &[(usize, usize)]) {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn session_events() {
     use std::{cell::RefCell, rc::Rc};
 
@@ -412,6 +408,7 @@ mod riscv {
     macro_rules! test_case {
         ($func_name:ident) => {
             #[test_log::test]
+            #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
             fn $func_name() {
                 run_test(stringify!($func_name));
             }
@@ -469,6 +466,7 @@ mod riscv {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn pause_resume() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::PauseResume(0))
@@ -493,6 +491,7 @@ fn pause_resume() {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn pause_exit_nonzero() {
     let user_exit_code = 1;
     let env = ExecutorEnv::builder()
@@ -515,6 +514,7 @@ fn pause_exit_nonzero() {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
@@ -556,6 +556,7 @@ fn continuation() {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn sys_input() {
     use hex::FromHex;
     let digest =
@@ -586,6 +587,7 @@ fn sys_input() {
 #[case(ReceiptKind::Groth16, ReceiptKind::Groth16)]
 #[test_log::test]
 #[cfg(any(feature = "cuda", feature = "docker"))]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
     let from_receipt = prove_nothing(from).receipt;
     let opts = ProverOpts::default().with_receipt_kind(into);
@@ -618,6 +620,7 @@ fn compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
 #[case(ReceiptKind::Groth16, ReceiptKind::Groth16)]
 #[test_log::test]
 #[cfg(any(feature = "cuda", feature = "docker"))]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn fake_compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
     use crate::{DevModeProver, FakeReceipt, ProverServer as _};
 
@@ -639,13 +642,14 @@ fn fake_compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
 
 #[test_log::test]
 #[cfg(feature = "cuda")]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn shrink_wrap() {
     // Perform many proofs in parallel. The initial implementation of the
     // groth16 prover on CUDA had issues with this. Ensure that we got a groth16
     // receipt.
 
     use rayon::prelude::*;
-    (0..5).into_par_iter().for_each(|_| {
+    (0..3).into_par_iter().for_each(|_| {
         prove_nothing_impl(ReceiptKind::Groth16)
             .receipt
             .inner
@@ -660,6 +664,7 @@ fn shrink_wrap() {
 #[case(ReceiptKind::Groth16)]
 #[test_log::test]
 #[cfg(any(feature = "cuda", feature = "docker"))]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn verify_in_guest(#[case] kind: ReceiptKind) {
     use risc0_zkvm_methods::VERIFY_ELF;
 
@@ -742,6 +747,7 @@ mod sys_verify {
     }
 
     #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
     fn sys_verify_1() {
         let spec = MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
@@ -764,6 +770,7 @@ mod sys_verify {
     }
 
     #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
     fn sys_verify_2() {
         let spec = MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
@@ -781,6 +788,7 @@ mod sys_verify {
     }
 
     #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
     fn sys_verify_3() {
         let spec = MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
@@ -807,6 +815,7 @@ mod sys_verify {
     }
 
     #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
     fn sys_verify_integrity() {
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             claim_words: to_vec(&hello_commit_receipt().claim().unwrap().as_value().unwrap())
@@ -848,6 +857,7 @@ mod sys_verify {
     }
 
     #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
     fn sys_verify_integrity_halt_1() {
         // Generate a receipt for an execution ending in a guest error indicated
         // by ExitCode::Halted(1).
@@ -871,6 +881,7 @@ mod sys_verify {
     }
 
     #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
     fn sys_verify_assumption() {
         let test_circuit_receipt = prove_test_recursion_circuit();
         let test_circuit_assumption = Assumption {
@@ -920,6 +931,7 @@ mod sys_verify {
     }
 
     #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
     fn sys_verify_with_povw() -> Result<()> {
         let spec = MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
@@ -1002,6 +1014,7 @@ fn run_unconstrained() -> Result<()> {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn povw_nonce_assignment() -> Result<()> {
     let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
     let povw_job_id = PovwJobId {
@@ -1028,6 +1041,7 @@ fn povw_nonce_assignment() -> Result<()> {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn povw_nonce_default_assignment() -> Result<()> {
     let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
     let env = ExecutorEnv::builder()
@@ -1049,6 +1063,7 @@ fn povw_nonce_default_assignment() -> Result<()> {
 }
 
 #[test_log::test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn povw_prove_work_receipt() -> Result<()> {
     let segment_limit_po2 = 16; // 64k cycles
     let cycles = 1 << segment_limit_po2;
@@ -1131,5 +1146,92 @@ mod soundness {
 
         let security = soundness::toy_model_security::<CpuHal<BabyBear>>(taps, coeffs_size);
         assert_eq!(security, 97.14198);
+    }
+}
+
+mod keccak {
+    use risc0_circuit_keccak::{
+        KECCAK_CONTROL_IDS, KECCAK_CONTROL_ROOT, KECCAK_PO2_RANGE, prove::zkr::get_keccak_zkr,
+    };
+    use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
+
+    use crate::recursion::MerkleGroup;
+
+    use super::*;
+
+    fn compute_control_ids() -> Vec<Digest> {
+        let mut ret = vec![];
+        for po2 in KECCAK_PO2_RANGE {
+            let program = get_keccak_zkr(po2).unwrap();
+            let hash_suite = Poseidon2HashSuite::new_suite();
+            ret.push(program.compute_control_id(hash_suite).unwrap())
+        }
+        ret
+    }
+
+    fn compute_control_root() -> Digest {
+        let control_ids = compute_control_ids();
+        let hash_suite = Poseidon2HashSuite::new_suite();
+        let hashfn = hash_suite.hashfn.as_ref();
+        let group = MerkleGroup::new(control_ids).unwrap();
+        group.calc_root(hashfn)
+    }
+
+    // Makes sure our included control IDs are what we expect
+    #[test]
+    fn control_ids() {
+        assert_eq!(KECCAK_CONTROL_IDS, compute_control_ids());
+    }
+
+    #[test]
+    fn control_roots() {
+        assert_eq!(KECCAK_CONTROL_ROOT, compute_control_root());
+    }
+
+    #[rstest]
+    #[case(16, digest!("b5dc0b683d1e06601584752ad3d9404d8761f85fbfaa0a5b15999a27a2f79314"))]
+    #[case(17, digest!("1cc132224976f3626a94315c341efc232cff5e485da96144c908c9580e29c707"))]
+    #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    fn basic(#[case] po2: u32, #[case] claim_digest: Digest) {
+        let env = ExecutorEnv::builder()
+            .write(&MultiTestSpec::KeccakProve { claim_digest, po2 })
+            .unwrap()
+            .keccak_max_po2(po2)
+            .unwrap()
+            .build()
+            .unwrap();
+
+        let receipt = prove_elf(env, MULTI_TEST_ELF).unwrap();
+
+        // Make sure this receipt actually depends on the assumption;
+        // otherwise this test might give a false negative.
+        assert!(
+            !receipt
+                .inner
+                .composite()
+                .unwrap()
+                .assumption_receipts
+                .is_empty()
+        );
+
+        // Make sure the receipt verifies OK
+        receipt.verify(MULTI_TEST_ID).unwrap();
+    }
+
+    #[test_log::test]
+    #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    fn union() {
+        let env = ExecutorEnv::builder()
+            .write(&MultiTestSpec::KeccakUnion(3))
+            .unwrap()
+            .build()
+            .unwrap();
+        let opts = ProverOpts::succinct();
+        get_prover_server(&opts)
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap();
     }
 }

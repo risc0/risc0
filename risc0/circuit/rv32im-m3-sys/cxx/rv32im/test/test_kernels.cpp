@@ -16,8 +16,8 @@
 #include "core/log.h"
 #include "rv32im/test/test_prove.h"
 
-#include <string>
 #include <iostream>
+#include <string>
 
 using namespace risc0;
 
@@ -36,11 +36,16 @@ public:
   }
 };
 
+void runTestBinary(const std::string& kernel, rv32im::HostIO& io, size_t po2) {
+  std::map<uint32_t, uint32_t> words;
+  rv32im::loadKernelV2(words, kernel);
+  auto image = rv32im::MemoryImage::fromWords(words);
+  runTest(image, io, po2);
+}
+
 int main() {
-  if (const char* level = std::getenv("RISC0_LOG")) {
-    risc0::setLogLevel(std::atoi(level));
-  }
   TestIO io;
+  runTestBinary("rv32im/test/test_p2_kernel", io, 13);
   runTestBinary("rv32im/test/test_bigint_kernel", io, 13);
   runTestBinary("rv32im/test/test_io_kernel", io, 13);
   if (io.out != "Hello World") {

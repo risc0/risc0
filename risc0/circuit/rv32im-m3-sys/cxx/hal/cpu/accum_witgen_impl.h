@@ -29,5 +29,3 @@ void FUNCNAME(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix,
 }
 
 } // namespace risc0
-
-

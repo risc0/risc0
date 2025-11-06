@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc, sync::OnceLock};
+use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc};
 
 use anyhow::{Context as _, Result, bail};
 use cust::{
@@ -21,7 +21,6 @@ use cust::{
     memory::{DeviceCopy, DevicePointer, GpuBuffer},
     prelude::*,
 };
-use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use risc0_core::{
     field::{
         Elem, ExtElem, RootsOfUnity,
@@ -43,12 +42,6 @@ use crate::{
         log2_ceil,
     },
 };
-
-// The GPU becomes unstable as the number of concurrent provers grow.
-pub fn singleton() -> &'static ReentrantMutex<()> {
-    static ONCE: OnceLock<ReentrantMutex<()>> = OnceLock::new();
-    ONCE.get_or_init(|| ReentrantMutex::new(()))
-}
 
 #[derive(Clone, Copy)]
 #[repr(transparent)]
@@ -226,7 +219,6 @@ pub struct CudaHal<Hash: CudaHash + ?Sized> {
     pub max_threads: u32,
     hash: Option<Box<Hash>>,
     _context: Context,
-    _lock: ReentrantMutexGuard<'static, ()>,
 }
 
 pub type CudaHalSha256 = CudaHal<CudaHashSha256>;
@@ -243,6 +235,15 @@ impl RawBuffer {
         tracing::trace!("alloc: {size} bytes, {name}");
         tracker().lock().unwrap().alloc(size);
         let buf = unsafe { DeviceBuffer::uninitialized(size) }
+            .context(format!("allocation failed on {name}: {size} bytes"))
+            .unwrap();
+        Self { name, buf }
+    }
+
+    pub fn new_zeroed(name: &'static str, size: usize) -> Self {
+        tracing::trace!("alloc: {size} bytes, {name}");
+        tracker().lock().unwrap().alloc(size);
+        let buf = DeviceBuffer::zeroed(size)
             .context(format!("allocation failed on {name}: {size} bytes"))
             .unwrap();
         Self { name, buf }
@@ -286,6 +287,17 @@ impl<T> BufferImpl<T> {
         assert!(bytes_len > 0);
         BufferImpl {
             buffer: Rc::new(RefCell::new(RawBuffer::new(name, bytes_len))),
+            size,
+            offset: 0,
+            marker: PhantomData,
+        }
+    }
+
+    fn new_zeroed(name: &'static str, size: usize) -> Self {
+        let bytes_len = std::mem::size_of::<T>() * size;
+        assert!(bytes_len > 0);
+        BufferImpl {
+            buffer: Rc::new(RefCell::new(RawBuffer::new_zeroed(name, bytes_len))),
             size,
             offset: 0,
             marker: PhantomData,
@@ -396,7 +408,8 @@ impl<CH: CudaHash + ?Sized> CudaHal<CH> {
     }
 
     fn new_from_hash(hash: Box<CH>) -> Self {
-        let _lock = singleton().lock();
+        #[cfg(all(test, feature = "cuda"))]
+        gpu_guard::assert_gpu_semaphore_held();
 
         let err = unsafe { sppark_init() };
         if err.code != 0 {
@@ -415,7 +428,6 @@ impl<CH: CudaHash + ?Sized> CudaHal<CH> {
             max_threads: max_threads as u32,
             _context: context,
             hash: None,
-            _lock,
         };
         hal.hash = Some(hash);
         hal
@@ -469,6 +481,10 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         BufferImpl::new(name, size)
     }
 
+    fn alloc_elem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        BufferImpl::new_zeroed(name, size)
+    }
+
     fn alloc_elem_init(
         &self,
         name: &'static str,
@@ -509,12 +525,20 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         BufferImpl::new(name, size)
     }
 
+    fn alloc_digest_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        BufferImpl::new_zeroed(name, size)
+    }
+
     fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
         BufferImpl::copy_from(name, slice)
     }
 
     fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
         BufferImpl::new(name, size)
+    }
+
+    fn alloc_u32_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        BufferImpl::new_zeroed(name, size)
     }
 
     fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
@@ -720,28 +744,13 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         input_size: usize,
         count: usize,
     ) {
-        let mix_start = self.copy_from_extelem("mix_start", &[*mix_start]);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
-
-        unsafe extern "C" {
-            fn risc0_zkp_cuda_mix_poly_coeffs(
-                output: DevicePointer<u8>,
-                input: DevicePointer<u8>,
-                combos: DevicePointer<u8>,
-                mix_start: DevicePointer<u8>,
-                mix: DevicePointer<u8>,
-                input_size: u32,
-                count: u32,
-            ) -> *const std::os::raw::c_char;
-        }
-
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_mix_poly_coeffs(
                 output.as_device_ptr(),
                 input.as_device_ptr(),
                 combos.as_device_ptr(),
-                mix_start.as_device_ptr(),
-                mix.as_device_ptr(),
+                mix_start as *const _ as *const u32,
+                mix as *const _ as *const u32,
                 input_size as u32,
                 count as u32,
             )
@@ -941,22 +950,12 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         let count = output.size() / Self::ExtElem::EXT_SIZE;
         assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), output.size() * FRI_FOLD);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
-
-        unsafe extern "C" {
-            fn risc0_zkp_cuda_fri_fold(
-                output: DevicePointer<u8>,
-                input: DevicePointer<u8>,
-                mix: DevicePointer<u8>,
-                count: u32,
-            ) -> *const std::os::raw::c_char;
-        }
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_fri_fold(
                 output.as_device_ptr(),
                 input.as_device_ptr(),
-                mix.as_device_ptr(),
+                mix as *const _ as *const u32,
                 count as u32,
             )
         })
@@ -1057,82 +1056,98 @@ mod tests {
     use crate::hal::testutil;
 
     #[test]
+    #[gpu_guard::gpu_guard]
     #[should_panic]
     fn check_req() {
         testutil::check_req(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_add_elem() {
         testutil::eltwise_add_elem(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_copy_elem() {
         testutil::eltwise_copy_elem(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_sum_extelem() {
         testutil::eltwise_sum_extelem(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_rows_sha256() {
         testutil::hash_rows(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_fold_sha256() {
         testutil::hash_fold(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_rows_poseidon2() {
         testutil::hash_rows(CudaHalPoseidon2::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_fold_poseidon2() {
         testutil::hash_fold(CudaHalPoseidon2::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn fri_fold() {
         testutil::fri_fold(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_expand_into_evaluate_ntt() {
         testutil::batch_expand_into_evaluate_ntt(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_interpolate_ntt() {
         testutil::batch_interpolate_ntt(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_bit_reverse() {
         testutil::batch_bit_reverse(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_evaluate_any() {
         testutil::batch_evaluate_any(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn gather_sample() {
         testutil::gather_sample(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn zk_shift() {
         testutil::zk_shift(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn mix_poly_coeffs() {
         testutil::mix_poly_coeffs(CudaHalSha256::new());
     }

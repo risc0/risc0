@@ -26,8 +26,8 @@ where
     L: Buffer<T>,
     R: Buffer<T>,
 {
-    lhs: L,
-    rhs: R,
+    pub lhs: L,
+    pub rhs: R,
     phantom: PhantomData<T>,
 }
 
@@ -45,7 +45,7 @@ where
         }
     }
 
-    fn assert_eq(&self) {
+    pub fn assert_eq(&self) {
         self.lhs.view(|lhs| {
             self.rhs.view(|rhs| {
                 assert_eq!(lhs.len(), rhs.len());
@@ -133,26 +133,42 @@ where
     }
 
     fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        let lhs = self.lhs.alloc_digest(name, size);
-        let rhs = self.rhs.alloc_digest(name, size);
+        self.alloc_digest_zeroed(name, size)
+    }
+
+    fn alloc_digest_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        let lhs = self.lhs.alloc_digest_zeroed(name, size);
+        let rhs = self.rhs.alloc_digest_zeroed(name, size);
         BufferImpl::new(lhs, rhs)
     }
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
-        let lhs = self.lhs.alloc_elem(name, size);
-        let rhs = self.rhs.alloc_elem(name, size);
+        self.alloc_elem_zeroed(name, size)
+    }
+
+    fn alloc_elem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        let lhs = self.lhs.alloc_elem_zeroed(name, size);
+        let rhs = self.rhs.alloc_elem_zeroed(name, size);
         BufferImpl::new(lhs, rhs)
     }
 
     fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        let lhs = self.lhs.alloc_extelem(name, size);
-        let rhs = self.rhs.alloc_extelem(name, size);
+        self.alloc_extelem_zeroed(name, size)
+    }
+
+    fn alloc_extelem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        let lhs = self.lhs.alloc_extelem_zeroed(name, size);
+        let rhs = self.rhs.alloc_extelem_zeroed(name, size);
         BufferImpl::new(lhs, rhs)
     }
 
     fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
-        let lhs = self.lhs.alloc_u32(name, size);
-        let rhs = self.rhs.alloc_u32(name, size);
+        self.alloc_u32_zeroed(name, size)
+    }
+
+    fn alloc_u32_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        let lhs = self.lhs.alloc_u32_zeroed(name, size);
+        let rhs = self.rhs.alloc_u32_zeroed(name, size);
         BufferImpl::new(lhs, rhs)
     }
 

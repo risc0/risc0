@@ -19,18 +19,14 @@
 
 // A widget holds a value from [0..N-1] as N bits, exactly one
 // of which is set
-template<typename C, size_t N>
-struct OneHot {
-  #define _NAME(N) "OneHot<" #N ">"
+template <typename C, size_t N> struct OneHot {
+#define _NAME(N) "OneHot<" #N ">"
   CONSTANT static char NAME[] = _NAME(N);
-  #undef _NAME
+#undef _NAME
 
   BitReg<C> bits[N];
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, bits);
-  }
+  template <typename T> FDEV void applyInner(CTX) DEV { T::apply(ctx, "bits", bits); }
 
   FDEV void set(CTX, uint32_t val) DEV;
   FDEV inline void finalize(CTX) DEV {}
@@ -39,19 +35,17 @@ struct OneHot {
   FDEV void addArguments(CTX) DEV {}
 };
 
-template<typename C, size_t N, size_t M>
-struct TwoHot {
-  #define _NAME(N, M) "OneHot<" #N ", " #M ">"
+template <typename C, size_t N, size_t M> struct TwoHot {
+#define _NAME(N, M) "OneHot<" #N ", " #M ">"
   CONSTANT static char NAME[] = _NAME(N, M);
-  #undef _NAME
+#undef _NAME
 
   OneHot<C, N> major;
   OneHot<C, M> minor;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, major);
-    T::apply(ctx, minor);
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, "major", major);
+    T::apply(ctx, "minor", minor);
   }
 
   FDEV void set(CTX, uint32_t val) DEV;

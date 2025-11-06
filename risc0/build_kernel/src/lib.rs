@@ -196,7 +196,16 @@ impl KernelBuild {
 
         let cudart = env::var("RISC0_CUDART_LINKAGE").unwrap_or("static".to_string());
 
+        let warnings = [
+            "-Wno-missing-braces",
+            "-Wno-unused-function",
+            "-Wno-unknown-pragmas",
+            "-Wno-unused-parameter",
+        ]
+        .join(",");
+
         build
+            .cpp(true)
             .cuda(true)
             .cudart(&cudart)
             .debug(false)
@@ -206,10 +215,9 @@ impl KernelBuild {
             .flag("-diag-suppress=2922")
             .flag("-Xcudafe")
             .flag("--display_error_number")
+            .flag("-lineinfo")
             .flag("-Xcompiler")
-            .flag(
-                "-Wno-missing-braces,-Wno-unused-function,-Wno-unknown-pragmas,-Wno-unused-parameter",
-            )
+            .flag(warnings)
             .compile(output);
     }
 

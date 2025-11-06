@@ -14,7 +14,7 @@ INST_TESTS = {
         ("blt", 16),
         ("bltu", 16),
         ("bne", 16),
-        #"fence_i",
+        #("fence_i", 16),
         ("jal", 16),
         ("jalr", 16),
         ("lb", 32),
@@ -56,6 +56,18 @@ INST_TESTS = {
     ("rv32uc", "rv64uc"): [
         ("rvc", 16),
     ],
+    ("rv32ua", "rv64ua"): [
+        ("amoadd_w", 16),
+        ("amoand_w", 16),
+        ("amomax_w", 16),
+        ("amomaxu_w", 16),
+        ("amomin_w", 16),
+        ("amominu_w", 16),
+        ("amoor_w", 16),
+        ("amoswap_w", 16),
+        ("amoxor_w", 16),
+        ("lrsc", 16),
+    ],
 }
 
 def compile_riscv_tests():
@@ -73,6 +85,7 @@ def compile_riscv_tests():
                     Label("@riscv_tests//:isa/macros/scalar/test_macros.h"),
                 ],
                 copts = [
+                    "-march=rv32g",
                     "-Iexternal/riscv_tests",
                     "-Iexternal/riscv_tests/isa/macros/scalar",
                     "-Irv32im/rvtest",

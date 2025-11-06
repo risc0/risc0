@@ -48,15 +48,13 @@ public:
     }
     return out;
   }
-  template<typename T>
-  void addOutput(HalArray<T> out) {
+  template <typename T> void addOutput(HalArray<T> out) {
     PinnedArrayRO<T> pOut(hal, out);
     size_t start = data.size();
     data.resize(start + out.size() * sizeof(T));
     memcpy(data.data() + start, pOut.data(), out.size() * sizeof(T));
   }
-  template<typename T>
-  void addOutput(HalMatrix<T> out) {
+  template <typename T> void addOutput(HalMatrix<T> out) {
     PinnedMatrixRO<T> pOut(hal, out);
     size_t start = data.size();
     data.resize(start + out.size() * sizeof(T));
@@ -70,6 +68,7 @@ public:
     std::uniform_int_distribution<uint32_t> distX(0, size - 1);
     return distX(rng);
   }
+
 private:
   IHalPtr hal;
   std::default_random_engine rng;
@@ -77,8 +76,7 @@ private:
   std::vector<uint8_t> data;
 };
 
-template<typename F>
-void compareHals(IHalPtr h1, IHalPtr h2, F func) {
+template <typename F> void compareHals(IHalPtr h1, IHalPtr h2, F func) {
   TestIO t1(h1);
   TestIO t2(h2);
   LOG(1, "Running H1");
@@ -93,7 +91,9 @@ void compareHals(IHalPtr h1, IHalPtr h2, F func) {
   uint8_t* out2 = t2.outData();
   for (size_t i = 0; i < t1.outSize(); i++) {
     if (out1[i] != out2[i]) {
-      LOG(0, "Mismatch: byte " << i << ", h1 = " << uint32_t(out1[i]) << ", h2 = " << uint32_t(out2[i]));
+      LOG(0,
+          "Mismatch: byte " << i << ", h1 = " << uint32_t(out1[i])
+                            << ", h2 = " << uint32_t(out2[i]));
       throw std::runtime_error("Mismatch");
     }
   }
@@ -121,11 +121,11 @@ void testMerkle(IHalPtr hal, TestIO& io) {
   size_t cols = 200;
   size_t maxPo2 = (1 << levels);
   auto in = io.makeMatrix(maxPo2, cols);
-  auto out = hal->allocateArray<Digest>(2*maxPo2);
+  auto out = hal->allocateArray<Digest>(2 * maxPo2);
   hal->hashRows(out.slice(maxPo2, maxPo2), in);
-  for (size_t i = levels; i --> 0;) {
+  for (size_t i = levels; i-- > 0;) {
     uint32_t po2 = 1 << i;
-    hal->hashFold(out.slice(po2, po2), out.slice(2*po2, 2*po2));
+    hal->hashFold(out.slice(po2, po2), out.slice(2 * po2, 2 * po2));
   }
   io.addOutput(out.slice(maxPo2, maxPo2));
 }
@@ -216,4 +216,3 @@ TEST(hal, compareBatchPolyEval) {
   IHalPtr gpuHal = getGpuHal();
   compareHals(cpuHal, gpuHal, testBatchPolyEval);
 }
-

@@ -15,43 +15,46 @@
 
 #pragma once
 
-#include "rv32im/witness/decode.h"
 #include "rv32im/circuit/mem.h"
 #include "rv32im/circuit/one_hot.h"
 #include "rv32im/circuit/u32.h"
+#include "rv32im/witness/decode.h"
 
-template<typename C>
-struct FetchBlock {
+template <typename C> struct FetchBlock {
   CONSTANT static char NAME[] = "FetchBlock";
 
   Reg<C> iCacheCycle;
+  Reg<C> loadCycle;
+  Reg<C> mode;
   RegU32<C> pc;
   RegU32<C> nextPc;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, iCacheCycle);
-    T::apply(ctx, pc);
-    T::apply(ctx, nextPc);
+  template <typename T> FDEV void applyInner(CTX, Val<C> cycle) DEV {
+    T::apply(ctx, "iCacheCycle", iCacheCycle);
+    T::apply(ctx, "loadCycle", loadCycle);
+    T::apply(ctx, "mode", mode);
+    T::apply(ctx, "pc", pc);
+    T::apply(ctx, "nextPc", nextPc);
   }
 
-  FDEV void set(CTX, FetchWitness witness) DEV;
+  FDEV void set(CTX, FetchWitness witness, Val<C> cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
-  FDEV void addArguments(CTX) DEV {}
+  // Return 1 if in machine mode
+  FDEV Val<C> isMM() DEV { return mode.get(); }
+  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
 
-template<typename C>
-struct DecodeBlock {
+template <typename C> struct DecodeBlock {
   CONSTANT static char NAME[] = "DecodeBlock";
 
   ArgCountReg<C> count;
   FetchBlock<C> fetch;
-  Reg<C> loadCycle;
   AddressDecompose<C> pcDecomp;
-  MemReadBlock<C> load0;
-  MemReadBlock<C> load1;
+  AddressVerify<C> verifyPc;
+  VirtMemReadBlock<C> load0;
+  VirtMemReadBlock<C> load1;
   AddressDecompose<C> low16Decomp;
   BitReg<C> isCompressed;
   AddU32<C> computeNext;
@@ -67,22 +70,25 @@ struct DecodeBlock {
     return cond<C>(pcDecomp.low1.get(), load0.data.high.get(), load0.data.low.get());
   }
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, count);
-    T::apply(ctx, fetch);
-    T::apply(ctx, loadCycle);
-    T::apply(ctx, pcDecomp, fetch.pc.get());
-    T::apply(ctx, load0, loadCycle.get());
-    T::apply(ctx, load1, loadCycle.get());
-    T::apply(ctx, low16Decomp, ValU32<C>{low16(), 0});
-    T::apply(ctx, computeNext, fetch.pc.get(), ValU32<C>(Val<C>(4) - isCompressed.get() * 2, 0));
-    T::apply(ctx, bits);
-    T::apply(ctx, opcode);
-    T::apply(ctx, idx1);
-    T::apply(ctx, idx2);
-    T::apply(ctx, imm);
-    T::apply(ctx, options);
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, "count", count);
+    T::apply(ctx, "fetch", fetch, fetch.loadCycle.get());
+    T::apply(ctx, "pcDecomp", pcDecomp, fetch.pc.get());
+    T::apply(ctx, "verifyPc", verifyPc, fetch.pc.get(), fetch.isMM());
+    T::apply(ctx, "load0", load0, fetch.loadCycle.get());
+    T::apply(ctx, "load1", load1, fetch.loadCycle.get());
+    T::apply(ctx, "low16Decomp", low16Decomp, ValU32<C>{low16(), 0});
+    T::apply(ctx,
+             "computeNext",
+             computeNext,
+             fetch.pc.get(),
+             ValU32<C>(Val<C>(4) - isCompressed.get() * 2, 0));
+    T::apply(ctx, "bits", bits);
+    T::apply(ctx, "opcode", opcode);
+    T::apply(ctx, "idx1", idx1);
+    T::apply(ctx, "idx2", idx2);
+    T::apply(ctx, "imm", imm);
+    T::apply(ctx, "options", options);
   }
 
   FDEV void set(CTX, DecodeWitness witness) DEV;

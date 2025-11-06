@@ -85,7 +85,10 @@ pub mod sha;
 pub use ::serde::de::DeserializeOwned;
 pub use anyhow::Result;
 pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
-pub use risc0_zkp::core::digest::{Digest, digest};
+pub use risc0_zkp::{
+    core::digest::{Digest, digest},
+    verify::VerificationError,
+};
 pub use risc0_zkvm_platform::{PAGE_SIZE, align_up, declare_syscall, memory::GUEST_MAX_MEM};
 
 #[cfg(not(target_os = "zkvm"))]
@@ -95,7 +98,6 @@ pub use bytes::Bytes;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
 pub use self::host::{
-    api::server::Server as ApiServer,
     client::prove::{local::LocalProver, local_executor},
     recursion::{
         self, RECURSION_PO2,
@@ -122,20 +124,13 @@ pub use self::host::client::prove::bonsai::BonsaiProver;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 pub use {
-    self::host::{
-        api::{
-            Asset, AssetRequest, Connector, RedisParams, SegmentInfo, SessionInfo,
-            client::Client as ApiClient,
-        },
-        client::{
-            env::{ExecutorEnv, ExecutorEnvBuilder},
-            prove::{
-                Executor, Prover,
-                default::DefaultProver,
-                default_executor, default_prover,
-                external::ExternalProver,
-                opts::{ProverOpts, ReceiptKind},
-            },
+    self::host::client::{
+        env::{ExecutorEnv, ExecutorEnvBuilder},
+        prove::{
+            Executor, Prover, SegmentInfo, SessionInfo,
+            default::DefaultProver,
+            default_executor, default_prover,
+            opts::{ProverOpts, ReceiptKind},
         },
     },
     risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},

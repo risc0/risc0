@@ -19,8 +19,7 @@
 
 // Split a 32 bit value into 4 bytes, and also extract it's top bit
 // Used in the multiplier
-template<typename C>
-struct ExpandU32 {
+template <typename C> struct ExpandU32 {
   CONSTANT static char NAME[] = "ExpandU32";
 
   RegU8<C> b0;
@@ -30,14 +29,13 @@ struct ExpandU32 {
   BitReg<C> topBit;
   RegU8<C> b3Low7times2;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, b0);
-    T::apply(ctx, b1);
-    T::apply(ctx, b2);
-    T::apply(ctx, b3);
-    T::apply(ctx, topBit);
-    T::apply(ctx, b3Low7times2);
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, "b0", b0);
+    T::apply(ctx, "b1", b1);
+    T::apply(ctx, "b2", b2);
+    T::apply(ctx, "b3", b3);
+    T::apply(ctx, "topBit", topBit);
+    T::apply(ctx, "b3Low7times2", b3Low7times2);
   }
 
   FDEV void set(CTX, uint32_t val) DEV;
@@ -53,8 +51,7 @@ struct ExpandU32 {
 // carryByte - bits 16-23
 // carryBit0 - bit 24
 // carryBit1 - bit 25
-template<typename C>
-struct SplitTotal {
+template <typename C> struct SplitTotal {
   CONSTANT static char NAME[] = "SplitTotal";
 
   RegU16<C> out;
@@ -62,12 +59,11 @@ struct SplitTotal {
   BitReg<C> carryBit0;
   BitReg<C> carryBit1;
 
-  template<typename T>
-  FDEV void applyInner(CTX, Val<C> val) DEV {
-    T::apply(ctx, out);
-    T::apply(ctx, carryByte);
-    T::apply(ctx, carryBit0);
-    T::apply(ctx, carryBit1);
+  template <typename T> FDEV void applyInner(CTX, Val<C> val) DEV {
+    T::apply(ctx, "out", out);
+    T::apply(ctx, "carryByte", carryByte);
+    T::apply(ctx, "carryBit0", carryBit0);
+    T::apply(ctx, "carryBit1", carryBit1);
   }
 
   FDEV void set(CTX, uint32_t val) DEV;
@@ -80,8 +76,7 @@ struct SplitTotal {
 
 // Multiply 2 32-bit values, compute low / high of output
 // Supports
-template<typename C>
-struct Multiply {
+template <typename C> struct Multiply {
   CONSTANT static char NAME[] = "Multiply";
 
   BitReg<C> signA;
@@ -97,17 +92,16 @@ struct Multiply {
   RegU16<C> s3Out;
   RegU8<C> s3Carry;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, signA);
-    T::apply(ctx, signB);
-    T::apply(ctx, ax);
-    T::apply(ctx, bx);
-    T::apply(ctx, s0, valS0());
-    T::apply(ctx, s1, valS1());
-    T::apply(ctx, s2, valS2());
-    T::apply(ctx, s3Out);
-    T::apply(ctx, s3Carry);
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, "signA", signA);
+    T::apply(ctx, "signB", signB);
+    T::apply(ctx, "ax", ax);
+    T::apply(ctx, "bx", bx);
+    T::apply(ctx, "s0", s0, valS0());
+    T::apply(ctx, "s1", s1, valS1());
+    T::apply(ctx, "s2", s2, valS2());
+    T::apply(ctx, "s3Out", s3Out);
+    T::apply(ctx, "s3Carry", s3Carry);
   }
 
   FDEV void set(CTX, uint32_t a, uint32_t b, uint32_t signA, uint32_t signB) DEV;

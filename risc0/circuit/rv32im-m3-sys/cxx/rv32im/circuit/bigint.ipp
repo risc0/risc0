@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-template<typename C>
-FDEV void BigIntBlock<C>::set(CTX, BigIntWitness wit) DEV {
+template <typename C> FDEV void BigIntBlock<C>::set(CTX, BigIntWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   mm.set(ctx, wit.mm);
   readInst.set(ctx, wit.inst, wit.cycle);
@@ -33,10 +32,10 @@ FDEV void BigIntBlock<C>::set(CTX, BigIntWitness wit) DEV {
   computeAddr.set(ctx, wit.baseReg.value, offsetVal * 16);
   isLastPage.set(ctx, computeAddr.get().high - 0xbfff);
   wordBase.set(ctx, wit.baseReg.value + offsetVal * 16);
-  checkBase.set(ctx, wit.baseReg.value + offsetVal * 16, wit.mm);
+  checkBase.set(ctx, wit.baseReg.value + offsetVal * 16, wit.mm * MODE_MACHINE);
   for (size_t i = 0; i < 4; i++) {
     for (size_t j = 0; j < 4; j++) {
-      bytes[i*4 + j].set(ctx, (wit.data[i] >> (j * 8)) & 0xff);
+      bytes[i * 4 + j].set(ctx, (wit.data[i] >> (j * 8)) & 0xff);
     }
     prevCycle[i].set(ctx, wit.prevCycle[i]);
     prevValue[i].set(ctx, wit.prevValue[i]);
@@ -48,14 +47,10 @@ FDEV void BigIntBlock<C>::set(CTX, BigIntWitness wit) DEV {
   }
 }
 
-template<typename C>
-FDEV void BigIntBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void BigIntBlock<C>::verify(CTX) DEV {
   // Verify instruction decoding
-  EQ(readInst.data.high.get(), 
-      memOp.get() * (1 << 12) + 
-      polyOp.get() * (1 << 8) +
-      getCoeff() * (1 << 5) +
-      getReg());
+  EQ(readInst.data.high.get(),
+     memOp.get() * (1 << 12) + polyOp.get() * (1 << 8) + getCoeff() * (1 << 5) + getReg());
   EQ(readInst.data.low.get(), offset.get());
   // Verify we are reading the right base register
   EQ(readBaseReg.wordAddr.get(), cond<C>(mm.get(), MACHINE_REGS_WORD, USER_REGS_WORD) + getReg());
@@ -67,22 +62,25 @@ FDEV void BigIntBlock<C>::verify(CTX) DEV {
   EQZ(isLastPage.isZero.get() * (Val<C>(1) - mm.get()));
   // Verify reads are reads
   for (size_t i = 0; i < 4; i++) {
-    ValU32<C> word(bytes[i*4 + 0].get() + bytes[i*4 + 1].get() * 256, bytes[i*4 + 2].get() + bytes[i*4 + 3].get() * 256);
+    ValU32<C> word(bytes[i * 4 + 0].get() + bytes[i * 4 + 1].get() * 256,
+                   bytes[i * 4 + 2].get() + bytes[i * 4 + 3].get() * 256);
     EQZ(memOp.bits[0].get() * (word.low - prevValue[i].low.get()));
     EQZ(memOp.bits[0].get() * (word.high - prevValue[i].high.get()));
   }
-
 }
 
-template<typename C>
-FDEV void BigIntBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void BigIntBlock<C>::addArguments(CTX) DEV {
   Val<C> doMem = memOp.bits[0].get() + memOp.bits[1].get();
   Val<C> addr = wordBase.wordAddr(computeAddr.get());
   Val<C> cycleVal = cycle.get();
   Val<C> memCycleVal = cycleVal * 2 + memOp.bits[1].get();
   for (size_t i = 0; i < 4; i++) {
-    ValU32<C> word(bytes[i*4 + 0].get() + bytes[i*4 + 1].get() * 256, bytes[i*4 + 2].get() + bytes[i*4 + 3].get() * 256);
-    ctx.addArgument(-doMem, MemoryArgument<C>(addr + i, prevCycle[i].get(), prevValue[i].get().low, prevValue[i].get().high));
+    ValU32<C> word(bytes[i * 4 + 0].get() + bytes[i * 4 + 1].get() * 256,
+                   bytes[i * 4 + 2].get() + bytes[i * 4 + 3].get() * 256);
+    ctx.addArgument(
+        -doMem,
+        MemoryArgument<C>(
+            addr + i, prevCycle[i].get(), prevValue[i].get().low, prevValue[i].get().high));
     ctx.addArgument(doMem, MemoryArgument<C>(addr + i, memCycleVal, word.low, word.high));
     ctx.addArgument(-doMem, LookupArgument<C>(2, memCycleVal - prevCycle[i].get() - 1));
   }

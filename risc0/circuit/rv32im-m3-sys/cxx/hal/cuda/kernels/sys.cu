@@ -32,23 +32,23 @@ extern "C" void cuda_free(void* buf) {
 extern "C" bool cuda_sync() {
   cudaError_t err = cudaDeviceSynchronize();
   if (err != cudaSuccess) {
-    fprintf(stderr,"Failed to sync: %s\n", cudaGetErrorString(err));
+    fprintf(stderr, "Failed to sync: %s\n", cudaGetErrorString(err));
   }
   return err == cudaSuccess;
 }
 
-extern "C" bool cuda_copy_to_host_sync(void* host, void *dev, size_t size) {
-  cudaError_t err = cudaMemcpy(host, dev, size,  cudaMemcpyDeviceToHost);
+extern "C" bool cuda_copy_to_host_sync(void* host, const void* dev, size_t size) {
+  cudaError_t err = cudaMemcpy(host, dev, size, cudaMemcpyDeviceToHost);
   return err == cudaSuccess;
 }
 
-extern "C" bool cuda_copy_to_dev_sync(void* dev, void *host, size_t size) {
-  cudaError_t err = cudaMemcpy(dev, host, size,  cudaMemcpyHostToDevice);
+extern "C" bool cuda_copy_to_dev_sync(void* dev, const void* host, size_t size) {
+  cudaError_t err = cudaMemcpy(dev, host, size, cudaMemcpyHostToDevice);
   return err == cudaSuccess;
 }
 
-extern "C" bool cuda_copy_dev(void* dst, void *src, size_t size) {
-  cudaError_t err = cudaMemcpy(dst, src, size,  cudaMemcpyDeviceToDevice);
+extern "C" bool cuda_copy_dev(void* dst, void* src, size_t size) {
+  cudaError_t err = cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice);
   return err == cudaSuccess;
 }
 
@@ -56,5 +56,3 @@ extern "C" bool cuda_zero_dev(void* buf, size_t size) {
   cudaError_t err = cudaMemset(buf, 0, size);
   return err == cudaSuccess;
 }
-
-

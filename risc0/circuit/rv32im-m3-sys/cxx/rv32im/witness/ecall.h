@@ -15,37 +15,70 @@
 
 #pragma once
 
+#include "rv32im/base/poseidon2.h"
 #include "rv32im/witness/decode.h"
 
 struct EcallTerminateWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness a7;
+  RegMemReadWitness a7;
+  RegMemReadWitness a0;
+  RegMemReadWitness a1;
+  PhysMemReadWitness output[8];
 };
 
 struct EcallReadWitness {
   uint32_t cycle;
   uint32_t finalCycle;
   FetchWitness fetch;
-  MemReadWitness a7;
-  MemReadWitness a1;
-  MemReadWitness a2;
-  MemWriteWitness a0;
+  RegMemReadWitness a7;
+  RegMemReadWitness a1;
+  RegMemReadWitness a2;
+  RegMemWriteWitness a0;
 };
 
 struct EcallWriteWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness a7;
-  MemReadWitness a2;
-  MemWriteWitness a0;
+  RegMemReadWitness a7;
+  RegMemReadWitness a2;
+  RegMemWriteWitness a0;
+};
+
+struct P2State {
+  uint32_t cycle;
+  uint8_t isElem;
+  uint8_t isCheck;
+  uint16_t count;
+  uint32_t inWordAddr;
+  uint32_t outWordAddr;
+};
+
+struct P2StepWitness {
+  P2State state;
+  Fp stateIn[CELLS_DIGEST];
+  Fp stateOut[CELLS_DIGEST];
+  PhysMemReadWitness dataIn[CELLS_RATE];
+  PhysMemWriteWitness dataOut[CELLS_DIGEST];
+};
+
+struct EcallP2Witness {
+  uint32_t cycle;
+  FetchWitness fetch;
+  RegMemReadWitness a0;
+  RegMemReadWitness a1;
+  RegMemReadWitness a2;
+  RegMemReadWitness a3;
+  RegMemReadWitness a7;
+  PhysMemReadWitness stateIn[CELLS_DIGEST];
+  PhysMemWriteWitness stateOut[CELLS_DIGEST];
 };
 
 struct EcallBigIntWitness {
   uint32_t cycle;
   FetchWitness fetch;
-  MemReadWitness a7;
-  MemReadWitness t0;
-  MemReadWitness t2;
+  RegMemReadWitness a7;
+  RegMemReadWitness t0;
+  RegMemReadWitness t2;
   uint32_t count;
 };

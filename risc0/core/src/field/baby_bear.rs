@@ -62,7 +62,7 @@ const R2: u32 = 1172168163;
 ///
 /// The Fp class wraps all the standard arithmetic operations to make the finite
 /// field elements look basically like ordinary numbers (which they mostly are).
-#[derive(Eq, Clone, Copy, NoUninit, Zeroable)]
+#[derive(Eq, Clone, Copy, NoUninit, Zeroable, PartialEq)]
 #[repr(transparent)]
 pub struct Elem(u32);
 
@@ -276,12 +276,6 @@ impl ops::Neg for Elem {
 
     fn neg(self) -> Self {
         Elem(0) - *self.ensure_valid()
-    }
-}
-
-impl PartialEq<Elem> for Elem {
-    fn eq(&self, rhs: &Self) -> bool {
-        self.ensure_valid().0 == rhs.ensure_valid().0
     }
 }
 

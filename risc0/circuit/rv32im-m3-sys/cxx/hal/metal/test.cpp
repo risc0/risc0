@@ -41,4 +41,3 @@ int main() {
   }
   std::cerr << "Done\n";
 }
-

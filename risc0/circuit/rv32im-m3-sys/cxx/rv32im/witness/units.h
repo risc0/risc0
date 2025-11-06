@@ -17,15 +17,15 @@
 
 #include "rv32im/base/base.h"
 
-#define UNIT_WITNESS(x) \
-struct Unit ## x ## Witness { \
-  uint32_t count; \
-  uint32_t opts; \
-  uint32_t a; \
-  uint32_t b; \
-  uint32_t out0; \
-  uint32_t out1; \
-};
+#define UNIT_WITNESS(x)                                                                            \
+  struct Unit##x##Witness {                                                                        \
+    uint32_t count;                                                                                \
+    uint32_t opts;                                                                                 \
+    uint32_t a;                                                                                    \
+    uint32_t b;                                                                                    \
+    uint32_t out0;                                                                                 \
+    uint32_t out1;                                                                                 \
+  };
 
 // Not a real unit, used as a generic unit type in fast_emu
 UNIT_WITNESS(Base)
@@ -36,4 +36,3 @@ UNIT_WITNESS(Lt)
 UNIT_WITNESS(Mul)
 UNIT_WITNESS(Div)
 UNIT_WITNESS(Shift)
-

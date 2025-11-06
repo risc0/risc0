@@ -30,65 +30,23 @@ namespace risc0::rv32im {
 namespace {
 
 #define DLOG(...) LOG(2, __VA_ARGS__)
-//#define DLOG(...) /**/
+// #define DLOG(...) /**/
 
 struct Emulator {
   Emulator(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount)
       : trace(trace)
       , memory(trace, image)
       , io(io)
-      , pages(MEMORY_SIZE_PAGES)
-      , regPage(memory.pageIn(MACHINE_REGS_WORD >> 8))
-  {
-    pages[MACHINE_REGS_WORD >> 8] = regPage;
+      , pages(MEMORY_SIZE_MPAGES)
+      , regPage(memory.pageIn(MACHINE_REGS_WORD >> MPAGE_SIZE_WORDS_PO2)) {
+    pages[MACHINE_REGS_WORD >> MPAGE_SIZE_WORDS_PO2] = regPage;
   }
 
-  static constexpr uint32_t regPageAddr = MACHINE_REGS_WORD & 0xffffff00;
+  static constexpr uint32_t regPageAddr = MACHINE_REGS_WORD & ~MPAGE_MASK_WORDS;
 
-  inline uint32_t peekMemory(uint32_t wordAddr) {
-    PageDetails* page = pages[wordAddr >> 8];
-    if (!page) {
-      page = memory.pageIn(wordAddr >> 8);
-      pages[wordAddr >> 8] = page;
-    }
-    return (*page)[wordAddr & 0xff].value;
-  }
+  inline uint32_t peekReg(uint32_t reg) { return (*regPage)[regOffset + reg].value; }
 
-  inline uint8_t peekByte(uint32_t addr) {
-    uint32_t word = peekMemory(addr / 4);
-    return word >> ((addr % 4) * 8);
-  }
-
-  inline uint32_t readMemory(MemReadWitness& record, uint32_t wordAddr) {
-    PageDetails* page = pages[wordAddr>> 8];
-    if (!page) {
-      page = memory.pageIn(wordAddr >> 8);
-      pages[wordAddr >> 8] = page;
-    }
-    uint32_t wordNum = wordAddr & 0xff;
-    record.wordAddr = wordAddr;
-    record.prevCycle = (*page)[wordNum].cycle;
-    record.value = (*page)[wordNum].value;
-    (*page)[wordNum].cycle = curCycle * 2;
-    return record.value;
-  }
-
-  inline void writeMemory(MemWriteWitness& record, uint32_t wordAddr, uint32_t value) {
-    PageDetails* page = pages[wordAddr >> 8];
-    if (!page) {
-      page = memory.pageIn(wordAddr >> 8);
-      pages[wordAddr >> 8] = page;
-    }
-    uint32_t wordNum = wordAddr & 0xff;
-    record.wordAddr = wordAddr;
-    record.prevCycle = (*page)[wordNum].cycle;
-    record.prevValue = (*page)[wordNum].value;
-    (*page)[wordNum].value = value;
-    (*page)[wordNum].cycle = curCycle * 2 + 1;
-    record.value = value;
-  }
-
-  inline uint32_t readReg(MemReadWitness& record, uint32_t reg, bool sameReg = false) {
+  inline uint32_t readReg(RegMemReadWitness& record, uint32_t reg, bool sameReg = false) {
     uint32_t wordNum = regOffset + reg + (sameReg ? 64 : 0);
     record.wordAddr = regPageAddr + wordNum;
     record.prevCycle = (*regPage)[wordNum].cycle;
@@ -97,7 +55,7 @@ struct Emulator {
     return (sameReg ? (*regPage)[regOffset + reg].value : record.value);
   }
 
-  inline void writeReg(MemWriteWitness& record, uint32_t reg, uint32_t value) {
+  inline void writeReg(RegMemWriteWitness& record, uint32_t reg, uint32_t value) {
     uint32_t wordNum = regOffset + reg + (reg == 0 ? 64 : 0);
     record.wordAddr = regPageAddr + wordNum;
     record.prevCycle = (*regPage)[wordNum].cycle;
@@ -107,64 +65,151 @@ struct Emulator {
     record.value = value;
   }
 
-#define UNIT_COMMON(name) \
-    auto& unit = trace.makeUnit ## name(); \
-    unit.count = 1; \
-    unit.opts = opt; \
-    unit.a = a; \
-    unit.b = b; \
-    [[maybe_unused]] constexpr Option optInner = Option(opt).popRet<UnitKind>()
+  inline uint32_t peekPhysMemory(uint32_t wordAddr) {
+    uint32_t pageId = wordAddr >> MPAGE_SIZE_WORDS_PO2;
+    PageDetails* page = pages[pageId];
+    if (!page) {
+      page = memory.pageIn(pageId);
+      pages[pageId] = page;
+    }
+    return (*page)[wordAddr & MPAGE_MASK_WORDS].value;
+  }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitAddSub(uint32_t a, uint32_t b) {
+  inline uint8_t peekPhysByte(uint32_t addr) {
+    uint32_t word = peekPhysMemory(addr / BYTES_PER_WORD);
+    return word >> ((addr % BYTES_PER_WORD) * BITS_PER_BYTE);
+  }
+
+  inline uint32_t readPhysMemory(PhysMemReadWitness& record, uint32_t wordAddr) {
+    uint32_t pageId = wordAddr >> MPAGE_SIZE_WORDS_PO2;
+    PageDetails* page = pages[pageId];
+    if (!page) {
+      page = memory.pageIn(pageId);
+      pages[pageId] = page;
+    }
+    uint32_t wordNum = wordAddr & MPAGE_MASK_WORDS;
+    record.wordAddr = wordAddr;
+    record.prevCycle = (*page)[wordNum].cycle;
+    record.value = (*page)[wordNum].value;
+    (*page)[wordNum].cycle = curCycle * 2;
+    return record.value;
+  }
+
+  inline void writePhysMemory(PhysMemWriteWitness& record, uint32_t wordAddr, uint32_t value) {
+    uint32_t pageId = wordAddr >> MPAGE_SIZE_WORDS_PO2;
+    PageDetails* page = pages[pageId];
+    if (!page) {
+      page = memory.pageIn(pageId);
+      pages[pageId] = page;
+    }
+    uint32_t wordNum = wordAddr & MPAGE_MASK_WORDS;
+    record.wordAddr = wordAddr;
+    record.prevCycle = (*page)[wordNum].cycle;
+    record.prevValue = (*page)[wordNum].value;
+    (*page)[wordNum].value = value;
+    (*page)[wordNum].cycle = curCycle * 2 + 1;
+    record.value = value;
+  }
+
+  inline uint32_t peekVirtMemory(uint32_t wordAddr) {
+    return peekPhysMemory(wordAddr); // TODO
+  }
+
+  inline uint32_t translateAddress(VirtAddrWitness& record, uint32_t vWordAddr) {
+    record.vpage = vWordAddr >> VPAGE_SIZE_WORDS_PO2;
+    record.ppage = record.vpage; // TODO: Translate
+    record.wordOffset = vWordAddr & VPAGE_MASK_WORDS;
+    return (record.ppage << VPAGE_SIZE_WORDS_PO2) | record.wordOffset;
+  }
+
+  inline uint32_t readVirtMemory(VirtMemReadWitness& record, uint32_t vWordAddr) {
+    uint32_t pWordAddr = translateAddress(record.addr, vWordAddr);
+    PhysMemReadWitness phys;
+    readPhysMemory(phys, pWordAddr);
+    record.prevCycle = phys.prevCycle;
+    record.value = phys.value;
+    return record.value;
+  }
+
+  inline void writeVirtMemory(VirtMemWriteWitness& record, uint32_t vWordAddr, uint32_t value) {
+    uint32_t pWordAddr = translateAddress(record.addr, vWordAddr);
+    PhysMemWriteWitness phys;
+    writePhysMemory(phys, pWordAddr, value);
+    record.prevCycle = phys.prevCycle;
+    record.prevValue = phys.prevValue;
+    record.value = phys.value;
+  }
+
+#define UNIT_COMMON(name)                                                                          \
+  auto& unit = trace.makeUnit##name();                                                             \
+  unit.count = 1;                                                                                  \
+  unit.opts = opt;                                                                                 \
+  unit.a = a;                                                                                      \
+  unit.b = b;                                                                                      \
+  [[maybe_unused]] constexpr Option optInner = Option(opt).popRet<UnitKind>()
+
+  template <uint32_t opt> inline UnitBaseWitness* unitAddSub(uint32_t a, uint32_t b) {
     UNIT_COMMON(AddSub);
-    switch(optInner.peek<AsKind>()) {
-      case AS_ADD: unit.out0 = a + b; break;
-      case AS_SUB: unit.out0 = a - b; break;
+    switch (optInner.peek<AsKind>()) {
+    case AS_ADD:
+      unit.out0 = a + b;
+      break;
+    case AS_SUB:
+      unit.out0 = a - b;
+      break;
     }
     unit.out1 = 0;
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitBit(uint32_t a, uint32_t b) {
+  template <uint32_t opt> inline UnitBaseWitness* unitBit(uint32_t a, uint32_t b) {
     UNIT_COMMON(Bit);
-    switch(optInner.peek<BitKind>()) {
-      case BIT_XOR: unit.out0 = a ^ b; break;
-      case BIT_OR: unit.out0 = a | b; break;
-      case BIT_AND: unit.out0 = a & b; break;
+    switch (optInner.peek<BitKind>()) {
+    case BIT_XOR:
+      unit.out0 = a ^ b;
+      break;
+    case BIT_OR:
+      unit.out0 = a | b;
+      break;
+    case BIT_AND:
+      unit.out0 = a & b;
+      break;
     }
     unit.out1 = 0;
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitLt(uint32_t a, uint32_t b) {
+  template <uint32_t opt> inline UnitBaseWitness* unitLt(uint32_t a, uint32_t b) {
     UNIT_COMMON(Lt);
     unit.out0 = int32_t(a) < int32_t(b);
     unit.out1 = a < b;
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitMul(uint32_t a, uint32_t b) {
+  template <uint32_t opt> inline UnitBaseWitness* unitMul(uint32_t a, uint32_t b) {
     UNIT_COMMON(Mul);
     uint64_t out;
-    switch(optInner.peek<MulKind>()) {
-      case MUL_SS: out = int64_t(int32_t(a)) * int64_t(int32_t(b)); break;
-      case MUL_SU: out = int64_t(int32_t(a)) * uint64_t(b); break;
-      case MUL_UU: out = uint64_t(a) * uint64_t(b); break;
+    switch (optInner.peek<MulKind>()) {
+    case MUL_SS:
+      out = int64_t(int32_t(a)) * int64_t(int32_t(b));
+      break;
+    case MUL_SU:
+      out = int64_t(int32_t(a)) * uint64_t(b);
+      break;
+    case MUL_UU:
+      out = uint64_t(a) * uint64_t(b);
+      break;
     }
-    unit.out0 = uint32_t(out); \
-    unit.out1 = out >> 32; \
+    unit.out0 = uint32_t(out);
+    unit.out1 = out >> 32;
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitDiv(uint32_t a, uint32_t b) {
+  template <uint32_t opt> inline UnitBaseWitness* unitDiv(uint32_t a, uint32_t b) {
     UNIT_COMMON(Div);
     if (optInner.peek<DivKind>() == DIV_S) {
-      // Intel processors actually fault if you do a signed division on MIN_INT by 1/-1
+      // Intel processors actually fault if you do a signed division on MIN_INT
+      // by 1/-1
       if (a == 0x80000000 && std::abs(int32_t(b)) == 1) {
         unit.out0 = 0x80000000;
         unit.out1 = 0;
@@ -192,8 +237,7 @@ struct Emulator {
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* unitShift(uint32_t a, uint32_t b) {
+  template <uint32_t opt> inline UnitBaseWitness* unitShift(uint32_t a, uint32_t b) {
     UNIT_COMMON(Shift);
     uint32_t po2 = (1 << (b & 0x1f));
     if (optInner.peek<ShiftKind>() == SHIFT_LL) {
@@ -201,32 +245,55 @@ struct Emulator {
       unit.out0 = (a << (b & 0x1f));
     } else {
       bool neg = optInner.peek<ShiftKind>() == SHIFT_RA && (a & 0x80000000) != 0;
-      if (neg) { a = ~a; }
+      if (neg) {
+        a = ~a;
+      }
       unitDiv<EncodeOptions(UNIT_DIV, DIV_U).val>(a, po2);
       unit.out0 = a >> (b & 0x1f);
-      if (neg) { unit.out0 = ~unit.out0; }
+      if (neg) {
+        unit.out0 = ~unit.out0;
+      }
     }
     unit.out1 = 0;
     return reinterpret_cast<UnitBaseWitness*>(&unit);
   }
 
-  template<uint32_t opt>
-  inline UnitBaseWitness* doUnit(uint32_t a, uint32_t b) {
-    switch(Option(opt).peek<UnitKind>()) {
-      case UNIT_ADDSUB: return unitAddSub<opt>(a, b);
-      case UNIT_BIT: return unitBit<opt>(a, b);
-      case UNIT_LT: return unitLt<opt>(a, b);
-      case UNIT_MUL: return unitMul<opt>(a, b);
-      case UNIT_DIV: return unitDiv<opt>(a, b);
-      case UNIT_SHIFT: return unitShift<opt>(a, b);
+  template <uint32_t opt> inline UnitBaseWitness* doUnit(uint32_t a, uint32_t b) {
+    switch (Option(opt).peek<UnitKind>()) {
+    case UNIT_ADDSUB:
+      return unitAddSub<opt>(a, b);
+    case UNIT_BIT:
+      return unitBit<opt>(a, b);
+    case UNIT_LT:
+      return unitLt<opt>(a, b);
+    case UNIT_MUL:
+      return unitMul<opt>(a, b);
+    case UNIT_DIV:
+      return unitDiv<opt>(a, b);
+    case UNIT_SHIFT:
+      return unitShift<opt>(a, b);
     }
+  }
+
+  void setMode(uint32_t newMode) {
+    mode = newMode;
+    regOffset = (mode == MODE_MACHINE) ? (MACHINE_REGS_WORD & MPAGE_MASK_WORDS)
+                                       : (USER_REGS_WORD & MPAGE_MASK_WORDS);
   }
 
   void doResume() {
     auto& resumeWit = trace.makeInstResume();
-    pc = readMemory(resumeWit.pc, SUSPEND_PC_WORD);
-    mm = readMemory(resumeWit.mm, SUSPEND_MODE_WORD);
-    regOffset = (mm ? (MACHINE_REGS_WORD & 0xff) : (USER_REGS_WORD & 0xff));
+    v2Compat = 1 - readPhysMemory(resumeWit.v2Compat, CSR_WORD(MNOV2COMPAT));
+    trace.getGlobals().v2Compat = v2Compat;
+    if (v2Compat) {
+      pc = readPhysMemory(resumeWit.pc, V2_COMPAT_SPC);
+      setMode(readPhysMemory(resumeWit.mode, V2_COMPAT_SMODE) ? MODE_MACHINE : MODE_USER);
+      writePhysMemory(resumeWit.version, V2_COMPAT_VERSION, RV32IM_CIRCUIT_VERSION);
+    } else {
+      pc = readPhysMemory(resumeWit.pc, CSR_WORD(MSPC));
+      setMode(readPhysMemory(resumeWit.pc, CSR_WORD(MSMODE)));
+      writePhysMemory(resumeWit.version, CSR_WORD(MVERSION), RV32IM_CIRCUIT_VERSION);
+    }
     curCycle++;
   }
 
@@ -234,8 +301,13 @@ struct Emulator {
     auto& suspendWit = trace.makeInstSuspend();
     suspendWit.cycle = curCycle;
     suspendWit.iCacheCycle = iCacheCycle;
-    writeMemory(suspendWit.pc, SUSPEND_PC_WORD, pc);
-    writeMemory(suspendWit.mm, SUSPEND_MODE_WORD, mm);
+    if (v2Compat) {
+      writePhysMemory(suspendWit.pc, V2_COMPAT_SPC, pc);
+      writePhysMemory(suspendWit.mode, V2_COMPAT_SMODE, mode == MODE_MACHINE);
+    } else {
+      writePhysMemory(suspendWit.pc, CSR_WORD(MSPC), pc);
+      writePhysMemory(suspendWit.mode, CSR_WORD(MSMODE), mode);
+    }
     curCycle++;
   }
 
@@ -244,130 +316,142 @@ struct Emulator {
     throw std::runtime_error("Trap: " + reason);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_REG() {
+  template <uint32_t opt> inline void do_INST_REG() {
     constexpr Option opts(opt);
     constexpr Option opts2 = opts.popRet<InstKind>();
     auto ok = opts2.peek<OutKind>();
     constexpr Option opts3 = opts2.popRet<OutKind>();
     auto& wit = trace.makeInstReg();
     wit.cycle = curCycle;
-    wit.mm = mm;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
-    uint32_t rs2Val = readReg(wit.rs2, decoded.rs2, decoded.rs1 == decoded.rs2);
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    uint32_t rs2Val = readReg(wit.rs2, dinst->rs2, dinst->rs1 == dinst->rs2);
     wit.options = opt;
     UnitBaseWitness* unit = doUnit<opts3.val>(rs1Val, rs2Val);
     wit.out0 = unit->out0;
     wit.out1 = unit->out1;
     uint32_t rdVal = (ok == OUT_0 ? unit->out0 : unit->out1);
-    writeReg(wit.rd, decoded.rd, rdVal);
+    writeReg(wit.rd, dinst->rd, rdVal);
     DLOG("  rs1Val = " << rs1Val << ", rs2Val = " << rs2Val);
     DLOG("  rdVal = " << rdVal);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_IMM() {
+  template <uint32_t opt> inline void do_INST_IMM() {
     constexpr Option opts(opt);
     constexpr Option opts2 = opts.popRet<InstKind>();
     auto ok = opts2.peek<OutKind>();
     constexpr Option opts3 = opts2.popRet<OutKind>();
     auto& wit = trace.makeInstImm();
     wit.cycle = curCycle;
-    wit.mm = mm;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
-    wit.rs2 = decoded.rs2;
-    wit.imm = opts3.is(UNIT_SHIFT) ? decoded.immIL() : decoded.immI();
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    wit.rs2 = dinst->rs2;
+    wit.imm = dinst->imm;
     wit.options = opt;
     UnitBaseWitness* unit = doUnit<opts3.val>(rs1Val, wit.imm);
     wit.out0 = unit->out0;
     wit.out1 = unit->out1;
     uint32_t rdVal = (ok == OUT_0 ? unit->out0 : unit->out1);
-    writeReg(wit.rd, decoded.rd, rdVal);
+    writeReg(wit.rd, dinst->rd, rdVal);
     DLOG("  rs1Val = " << rs1Val << ", imm = " << wit.imm);
     DLOG("  rdVal = " << rdVal);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_LOAD() {
+  template <uint32_t opt> inline void do_INST_LOAD() {
     auto& wit = trace.makeInstLoad();
     wit.cycle = curCycle;
-    wit.mm = mm;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
-    wit.rs2 = decoded.rs2;
-    wit.imm = decoded.immI();
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    wit.rs2 = dinst->rs2;
+    wit.imm = dinst->imm;
     uint32_t addr = rs1Val + wit.imm;
-    uint32_t shift = 8 * (addr % 4);
-    uint32_t in = readMemory(wit.mem, addr/4);
+    uint32_t shift = BITS_PER_BYTE * (addr % BYTES_PER_WORD);
+    uint32_t in = readVirtMemory(wit.mem, addr / BYTES_PER_WORD);
     wit.options = opt;
     constexpr Option optInner = Option(opt).popRet<InstKind>();
     uint32_t out;
-    switch(optInner.peek<LoadKind>()) {
-      case LOAD_LB:
-        out = uint32_t(int32_t(int8_t((in >> shift) & 0xff)));
-        break;
-      case LOAD_LH:
-        if (shift % 16 != 0) { trap("Alignment error"); }
-        out = uint32_t(int32_t(int16_t((in >> shift) & 0xfffff)));
-        break;
-      case LOAD_LW:
-        if (shift != 0) { trap("Alignment error"); }
-        out = in;
-        break;
-      case LOAD_LBU:
-        out = (in >> shift) & 0xff;
-        break;
-      case LOAD_LHU:
-        if (shift % 16 != 0) { trap("Alignment error"); }
-        out = (in >> shift) & 0xffff;
-        break;
+    switch (optInner.peek<LoadKind>()) {
+    case LOAD_LB:
+      out = uint32_t(int32_t(int8_t((in >> shift) & 0xff)));
+      break;
+    case LOAD_LH:
+      if (shift % 16 != 0) {
+        LOG(0, "Alignment error is LH, addr = " << addr);
+        trap("Alignment error");
+      }
+      out = uint32_t(int32_t(int16_t((in >> shift) & 0xfffff)));
+      break;
+    case LOAD_LW:
+      if (shift != 0) {
+        LOG(0, "Alignment error in LW, addr = " << addr);
+        trap("Alignment error");
+      }
+      out = in;
+      break;
+    case LOAD_LBU:
+      out = (in >> shift) & 0xff;
+      break;
+    case LOAD_LHU:
+      if (shift % 16 != 0) {
+        LOG(0, "Alignment error in LHU, addr = " << addr);
+        trap("Alignment error");
+      }
+      out = (in >> shift) & 0xffff;
+      break;
     }
-    writeReg(wit.rd, decoded.rd, out);
-    DLOG("  RS1 = " << decoded.rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
+    writeReg(wit.rd, dinst->rd, out);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value
+                    << std::dec);
     DLOG("  IMM = " << std::hex << wit.imm << std::dec);
-    DLOG("  RD = " << decoded.rd << ", value = " << std::hex << wit.rd.value << std::dec);
+    DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_STORE() {
+  template <uint32_t opt> inline void do_INST_STORE() {
     auto& wit = trace.makeInstStore();
     wit.cycle = curCycle;
-    wit.mm = mm;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
-    uint32_t data = readReg(wit.rs2, decoded.rs2, decoded.rs1 == decoded.rs2);
-    wit.rd = decoded.rd;
-    wit.imm = decoded.immS();
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    uint32_t data = readReg(wit.rs2, dinst->rs2, dinst->rs1 == dinst->rs2);
+    wit.rd = dinst->rd;
+    wit.imm = dinst->imm;
     wit.options = opt;
     constexpr Option optInner = Option(opt).popRet<InstKind>();
     uint32_t addr = rs1Val + wit.imm;
-    uint32_t shift = 8 * (addr % 4);
-    uint32_t in = peekMemory(addr/4);
+    uint32_t shift = BITS_PER_BYTE * (addr % BYTES_PER_WORD);
+    uint32_t in = peekVirtMemory(addr / BYTES_PER_WORD);
     uint32_t out;
-    switch(optInner.peek<StoreKind>()) {
-      case STORE_SB:
-        out = (in & ~(0xff << shift)) | ((data & 0xff)  << shift);
-        break;
-      case STORE_SH:
-        if (shift % 16 != 0) { trap("Alignment error"); }
-        out = (in & ~(0xffff << shift)) | ((data & 0xffff)  << shift);
-        break;
-      case STORE_SW:
-        if (shift != 0) { trap("Alignment error"); }
-        out = data;
-        break;
+    switch (optInner.peek<StoreKind>()) {
+    case STORE_SB:
+      out = (in & ~(0xff << shift)) | ((data & 0xff) << shift);
+      break;
+    case STORE_SH:
+      if (shift % 16 != 0) {
+        LOG(0, "Alignment error in SH, addr = " << addr);
+        trap("Alignment error");
+      }
+      out = (in & ~(0xffff << shift)) | ((data & 0xffff) << shift);
+      break;
+    case STORE_SW:
+      if (shift != 0) {
+        LOG(0, "Alignment error in SW, addr = " << addr);
+        LOG(0, "  RS1 = " << dinst->rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
+        LOG(0, "  RS2 = " << dinst->rs2 << ", value = " << std::hex << wit.rs2.value << std::dec);
+        LOG(0, "  IMM = " << std::hex << wit.imm << std::dec);
+        trap("Alignment error");
+      }
+      out = data;
+      break;
     }
-    writeMemory(wit.mem, addr/4, out);
-    DLOG("  RS1 = " << decoded.rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
-    DLOG("  RS2 = " << decoded.rs2 << ", value = " << std::hex << wit.rs2.value << std::dec);
+    writeVirtMemory(wit.mem, addr / BYTES_PER_WORD, out);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value
+                    << std::dec);
+    DLOG("  RS2 = " << uint32_t(dinst->rs2) << ", value = " << std::hex << wit.rs2.value
+                    << std::dec);
     DLOG("  IMM = " << std::hex << wit.imm << std::dec);
     DLOG("  MEM addr = " << std::hex << addr << ", value = " << out << std::dec);
-}
+  }
 
-  template<uint32_t opt>
-  inline void do_INST_BRANCH() {
+  template <uint32_t opt> inline void do_INST_BRANCH() {
     constexpr Option opts(opt);
     constexpr Option opts2 = opts.popRet<InstKind>();
     auto br = opts2.peek<BrKind>();
@@ -376,12 +460,11 @@ struct Emulator {
     constexpr Option opts4 = opts3.popRet<OutKind>();
     auto& wit = trace.makeInstBranch();
     wit.cycle = curCycle;
-    wit.mm = mm;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val = readReg(wit.rs1, decoded.rs1);
-    uint32_t rs2Val = readReg(wit.rs2, decoded.rs2, decoded.rs1 == decoded.rs2);
-    wit.rd = decoded.rd;
-    wit.imm = decoded.immB();
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    uint32_t rs2Val = readReg(wit.rs2, dinst->rs2, dinst->rs1 == dinst->rs2);
+    wit.rd = dinst->rd;
+    wit.imm = dinst->imm;
     wit.options = opt;
     UnitBaseWitness* unit = doUnit<opts4.val>(rs1Val, rs2Val);
     wit.out0 = unit->out0;
@@ -389,112 +472,142 @@ struct Emulator {
     uint32_t ret = (ok == OUT_0 ? unit->out0 : unit->out1);
     bool doBr = (br == BR_Z ? ret == 0 : ret != 0);
     wit.didBranch = doBr;
-    if (doBr) { newPc = pc + wit.imm; }
+    if (doBr) {
+      newPc = pc + wit.imm;
+    }
     DLOG("  rs1Val = " << rs1Val << ", rs2Val = " << rs2Val);
     DLOG("  PC = " << std::hex << pc << std::dec);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_JAL() {
+  template <uint32_t opt> inline void do_INST_JAL() {
     auto& wit = trace.makeInstJal();
     wit.cycle = curCycle;
-    wit.mm = mm;
-    wit.fetch = *curFetch;
-    wit.rs1 = decoded.rs1;
-    wit.rs2 = decoded.rs2;
-    writeReg(wit.rd, decoded.rd, newPc);
-    wit.imm = decoded.immJ();
+    wit.fetch = dinst->fetch;
+    wit.rs1 = dinst->rs1;
+    wit.rs2 = dinst->rs2;
+    writeReg(wit.rd, dinst->rd, newPc);
+    wit.imm = dinst->imm;
     newPc = pc + wit.imm;
-    DLOG("  RD = " << decoded.rd << ", value = " << std::hex << wit.rd.value << std::dec);
+    DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);
     DLOG("  PC = " << std::hex << pc << std::dec);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_JALR() {
+  template <uint32_t opt> inline void do_INST_JALR() {
     auto& wit = trace.makeInstJalr();
     wit.cycle = curCycle;
-    wit.mm = mm;
-    wit.fetch = *curFetch;
-    uint32_t rs1Val= readReg(wit.rs1, decoded.rs1);
-    wit.rs2 = decoded.rs2;
-    writeReg(wit.rd, decoded.rd, newPc);
-    wit.imm = decoded.immI();
+    wit.fetch = dinst->fetch;
+    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    wit.rs2 = dinst->rs2;
+    writeReg(wit.rd, dinst->rd, newPc);
+    wit.imm = dinst->imm;
     newPc = rs1Val + wit.imm;
-    DLOG("  RS1 = " << decoded.rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
-    DLOG("  RD = " << decoded.rd << ", value = " << std::hex << wit.rd.value << std::dec);
+    DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value
+                    << std::dec);
+    DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);
     DLOG("  PC = " << std::hex << pc << std::dec);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_LUI() {
+  template <uint32_t opt> inline void do_INST_LUI() {
     auto& wit = trace.makeInstLui();
     wit.cycle = curCycle;
-    wit.mm = mm;
-    wit.fetch = *curFetch;
-    wit.rs1 = decoded.rs1;
-    wit.rs2 = decoded.rs2;
-    writeReg(wit.rd, decoded.rd, decoded.immU());
+    wit.fetch = dinst->fetch;
+    wit.rs1 = dinst->rs1;
+    wit.rs2 = dinst->rs2;
+    writeReg(wit.rd, dinst->rd, dinst->imm);
   }
 
-  template<uint32_t opt>
-  inline void do_INST_AUIPC() {
+  template <uint32_t opt> inline void do_INST_AUIPC() {
     auto& wit = trace.makeInstAuipc();
     wit.cycle = curCycle;
-    wit.mm = mm;
-    wit.fetch = *curFetch;
-    wit.rs1 = decoded.rs1;
-    wit.rs2 = decoded.rs2;
-    writeReg(wit.rd, decoded.rd, pc + decoded.immU());
-    wit.imm = decoded.immU();
+    wit.fetch = dinst->fetch;
+    wit.rs1 = dinst->rs1;
+    wit.rs2 = dinst->rs2;
+    writeReg(wit.rd, dinst->rd, pc + dinst->imm);
+    wit.imm = dinst->imm;
   }
 
-  template<uint32_t opt>
-  inline void do_INST_ECALL() {
-    if (!mm) {
+  template <uint32_t opt> inline void do_INST_ECALL() {
+    if (mode == MODE_USER) {
       // Save PC + jump to dispatch address
       auto& wit = trace.makeInstEcall();
       wit.cycle = curCycle;
-      wit.fetch = *curFetch;
-      writeMemory(wit.savePc, MEPC_WORD, newPc);
-      mm = 1;
-      pc = readMemory(wit.dispatch, ECALL_DISPATCH_WORD);
+      wit.fetch = dinst->fetch;
+      uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
+      writePhysMemory(wit.savePc, mepcWord, pc);
+      setMode(MODE_MACHINE);
+      uint32_t mtvecWord = v2Compat ? V2_COMPAT_ECALL_DISPATCH : CSR_WORD(MTVEC);
+      newPc = readPhysMemory(wit.dispatch, mtvecWord);
       return;
     }
-    uint32_t which = peekMemory(MACHINE_REGS_WORD + REG_A7);
-    switch(which) {
-      case HOST_ECALL_TERMINATE:
-        do_ECALL_TERMINATE();
-        break;
-      case HOST_ECALL_READ:
-        do_ECALL_READ();
-        break;
-      case HOST_ECALL_WRITE:
-        do_ECALL_WRITE();
-        break;
-      case HOST_ECALL_BIGINT:
-        do_ECALL_BIG_INT();
-        break;
-      default:
-        trap("Invalid ECALL in machine mode");
+    uint32_t which = peekReg(REG_A7);
+    switch (which) {
+    case HOST_ECALL_TERMINATE:
+      do_ECALL_TERMINATE();
+      break;
+    case HOST_ECALL_READ:
+      do_ECALL_READ();
+      break;
+    case HOST_ECALL_WRITE:
+      do_ECALL_WRITE();
+      break;
+    case HOST_ECALL_POSEIDON2:
+      do_ECALL_P2();
+      break;
+    case HOST_ECALL_BIGINT:
+      do_ECALL_BIG_INT();
+      break;
+    default:
+      LOG(0, "Invalid ECALL in machine mode: " << which);
+      trap("Invalid ECALL in machine mode");
     }
+  }
+
+  template <uint32_t opt> inline void do_INST_MRET() {
+    if (mode != MODE_MACHINE) {
+      trap("MRET not in machine mode");
+    }
+    auto& wit = trace.makeInstMret();
+    wit.cycle = curCycle;
+    wit.fetch = dinst->fetch;
+    setMode(MODE_USER);
+    uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
+    newPc = readPhysMemory(wit.readPc, mepcWord) + 4;
+  }
+
+  template <uint32_t opt> inline void do_INST_SRET() {
+    if (mode != MODE_SUPERVISOR) {
+      trap("MRET not in machine mode");
+    }
+    // Actually do MRET anyway for now
+    auto& wit = trace.makeInstMret();
+    wit.cycle = curCycle;
+    wit.fetch = dinst->fetch;
+    setMode(MODE_USER);
+    uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
+    newPc = readPhysMemory(wit.readPc, mepcWord) + 4;
   }
 
   void do_ECALL_TERMINATE() {
     auto& wit = trace.makeEcallTerminate();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    readMemory(wit.a7, MACHINE_REGS_WORD + REG_A7);
+    wit.fetch = dinst->fetch;
+    readReg(wit.a7, REG_A7);
+    readReg(wit.a0, REG_A0);
+    readReg(wit.a1, REG_A1);
+    for (size_t i = 0; i < 8; i++) {
+      readPhysMemory(wit.output[i], OUTPUT_WORD + i);
+    }
     done = true;
   }
 
   void do_ECALL_READ() {
     auto& wit = trace.makeEcallRead();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    readMemory(wit.a7, MACHINE_REGS_WORD + REG_A7);
-    uint32_t fd = peekMemory(MACHINE_REGS_WORD + REG_A0);
-    uint32_t buf = readMemory(wit.a1, MACHINE_REGS_WORD + REG_A1);
-    uint32_t len = readMemory(wit.a2, MACHINE_REGS_WORD + REG_A2);
+    wit.fetch = dinst->fetch;
+    readReg(wit.a7, REG_A7);
+    uint32_t fd = peekReg(REG_A0);
+    uint32_t buf = readReg(wit.a1, REG_A1);
+    uint32_t len = readReg(wit.a2, REG_A2);
     if (len > 0xffff) {
       trap("Invalid READ, too long");
     }
@@ -504,7 +617,7 @@ struct Emulator {
     if (ret > len) {
       throw std::runtime_error("Invalid host read");
     }
-    writeMemory(wit.a0, MACHINE_REGS_WORD + REG_A0, ret);
+    writeReg(wit.a0, REG_A0, ret);
     curCycle++;
     uint32_t offset = 0;
     while (ret) {
@@ -513,10 +626,10 @@ struct Emulator {
         bWit.cycle = curCycle;
         bWit.size = ret;
         bWit.lowBits = buf % 4;
-        uint32_t data = peekMemory(buf / 4);
-        data &= ~(0xff << (buf % 4)*8);
-        data |= hostData[offset++] << (buf%4)*8;
-        writeMemory(bWit.io, buf / 4, data);
+        uint32_t data = peekPhysMemory(buf / 4);
+        data &= ~(0xff << (buf % 4) * 8);
+        data |= hostData[offset++] << (buf % 4) * 8;
+        writePhysMemory(bWit.io, buf / 4, data);
         ret--;
         buf++;
         curCycle++;
@@ -525,12 +638,12 @@ struct Emulator {
         bWit.cycle = curCycle;
         bWit.size = ret;
         uint32_t data = 0;
-        for (size_t i=0; i < 4; i++) {
-          data |= hostData[offset++] << (i*8);
+        for (size_t i = 0; i < 4; i++) {
+          data |= hostData[offset++] << (i * 8);
         }
-        writeMemory(bWit.io, buf / 4, data);
-        ret-=4;
-        buf+=4;
+        writePhysMemory(bWit.io, buf / 4, data);
+        ret -= 4;
+        buf += 4;
         curCycle++;
       }
     }
@@ -540,59 +653,129 @@ struct Emulator {
   void do_ECALL_WRITE() {
     auto& wit = trace.makeEcallWrite();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
-    readMemory(wit.a7, MACHINE_REGS_WORD + REG_A7);
-    uint32_t fd = peekMemory(MACHINE_REGS_WORD + REG_A0);
-    uint32_t buf = peekMemory(MACHINE_REGS_WORD + REG_A1);
-    uint32_t len = readMemory(wit.a2, MACHINE_REGS_WORD + REG_A2);
+    wit.fetch = dinst->fetch;
+    readReg(wit.a7, REG_A7);
+    uint32_t fd = peekReg(REG_A0);
+    uint32_t buf = peekReg(REG_A1);
+    uint32_t len = readReg(wit.a2, REG_A2);
     if (len > 0xffff) {
       trap("Invalid WRITE, too long");
     }
     std::vector<uint8_t> hostData(len);
     for (size_t i = 0; i < len; i++) {
-      hostData[i] = peekByte(buf + i);
+      hostData[i] = peekPhysByte(buf + i);
     }
     uint32_t ret = io.onWrite(fd, hostData.data(), len);
     if (ret > len) {
       throw std::runtime_error("Invalid host write");
     }
-    writeMemory(wit.a0, MACHINE_REGS_WORD + REG_A0, ret);
+    writeReg(wit.a0, REG_A0, ret);
+  }
+
+  void do_ECALL_P2() {
+    auto& wit = trace.makeEcallP2();
+    wit.cycle = curCycle;
+    wit.fetch = dinst->fetch;
+    readReg(wit.a0, REG_A0);
+    readReg(wit.a1, REG_A1);
+    readReg(wit.a2, REG_A2);
+    readReg(wit.a3, REG_A3);
+    readReg(wit.a7, REG_A7);
+    uint32_t stateInWordAddr = wit.a0.value ? wit.a0.value / 4 : P2_ZEROS_WORD;
+    uint32_t stateOutWordAddr = wit.a0.value ? wit.a0.value / 4 : P2_TRASH_WORD;
+    Digest state;
+    for (size_t i = 0; i < CELLS_DIGEST; i++) {
+      state.words[i] = Fp(readPhysMemory(wit.stateIn[i], stateInWordAddr + i)).asRaw();
+    }
+    curCycle++;
+    P2State p2;
+    p2.cycle = curCycle;
+    p2.count = wit.a3.value & 0xffff;
+    p2.inWordAddr = wit.a1.value / 4;
+    p2.outWordAddr = wit.a2.value / 4;
+    p2.isElem = (wit.a3.value & PFLAG_IS_ELEM) != 0;
+    p2.isCheck = (wit.a3.value & PFLAG_CHECK_OUT) != 0;
+    while (p2.count > 0) {
+      auto& p2Wit = trace.makeP2Step();
+      p2Wit.state = p2;
+      std::array<Fp, CELLS_RATE> in;
+      for (size_t i = 0; i < CELLS_DIGEST; i++) {
+        uint32_t i2 = CELLS_DIGEST + i;
+        p2Wit.stateIn[i] = Fp::fromRaw(state.words[i]).asUInt32();
+        if (p2.isElem) {
+          in[i] = readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i);
+          in[i2] = readPhysMemory(p2Wit.dataIn[i2], p2.inWordAddr + i2);
+        } else {
+          uint32_t word = readPhysMemory(p2Wit.dataIn[i], p2.inWordAddr + i);
+          readPhysMemory(p2Wit.dataIn[i2], P2_ZEROS_WORD + i);
+          in[2 * i] = word & 0xffff;
+          in[2 * i + 1] = word >> 16;
+        }
+      }
+      Digest out = memory.getP2().doBlock(*reinterpret_cast<Digest*>(&state), in, true);
+      state = memory.getP2().doBlock(*reinterpret_cast<Digest*>(&state), in, false);
+      uint32_t outAddr = (p2.count != 1) ? P2_TRASH_WORD : p2.outWordAddr;
+      for (size_t i = 0; i < CELLS_DIGEST; i++) {
+        p2Wit.stateOut[i] = Fp::fromRaw(state.words[i]).asUInt32();
+        writePhysMemory(p2Wit.dataOut[i], outAddr + i, Fp::fromRaw(out.words[i]).asUInt32());
+        if (p2.isCheck && p2.count == 1) {
+          if (p2Wit.dataOut[i].prevValue != p2Wit.dataOut[i].value) {
+            DLOG("Mismatch on check");
+            throw std::runtime_error("BAD");
+          }
+        }
+      }
+      if (p2.isElem) {
+        p2.inWordAddr += 16;
+      } else {
+        p2.inWordAddr += 8;
+      }
+      curCycle++;
+      p2.cycle = curCycle;
+      p2.count--;
+    }
+    for (size_t i = 0; i < CELLS_DIGEST; i++) {
+      writePhysMemory(
+          wit.stateOut[i], stateOutWordAddr + i, Fp::fromRaw(state.words[i]).asUInt32());
+    }
   }
 
   void do_ECALL_BIG_INT() {
     std::map<uint32_t, uint32_t> polyWitness;
-    size_t count = witgenBigInt(polyWitness, [&](uint32_t addr) { return peekMemory(addr); });
+    size_t count = witgenBigInt(polyWitness, [&](uint32_t addr) { return peekPhysMemory(addr); });
+    LOG(1, "BIGINT ecall with count = " << count);
     // TODO: Based on count + polyWitness paging, decide if we need to abort
     auto& wit = trace.makeEcallBigInt();
     wit.cycle = curCycle;
-    wit.fetch = *curFetch;
+    wit.fetch = dinst->fetch;
     wit.count = count;
-    readMemory(wit.a7, MACHINE_REGS_WORD + REG_A7);
-    uint32_t biMm = readMemory(wit.t0, MACHINE_REGS_WORD + REG_T0);
-    uint32_t biPcWord = readMemory(wit.t2, MACHINE_REGS_WORD + REG_T2) / 4;
+    readReg(wit.a7, REG_A7);
+    uint32_t biMm = readReg(wit.t0, REG_T0);
+    uint32_t biPcWord = readReg(wit.t2, REG_T2) / 4;
     curCycle++;
     BigIntPreflight pf;
     for (size_t i = 0; i < count; i++) {
       auto& biWit = trace.makeBigInt();
       biWit.cycle = curCycle;
       biWit.mm = biMm;
-      uint32_t inst = readMemory(biWit.inst, biPcWord++);
+      uint32_t inst = readPhysMemory(biWit.inst, biPcWord++);
       auto decoded = BigIntInstruction::decode(inst);
-      uint32_t base = readMemory(biWit.baseReg, (biMm ? MACHINE_REGS_WORD : USER_REGS_WORD) + decoded.reg);
+      uint32_t base =
+          readPhysMemory(biWit.baseReg, (biMm ? MACHINE_REGS_WORD : USER_REGS_WORD) + decoded.reg);
       uint32_t addr = base / 4 + decoded.offset * 4;
       switch (decoded.memOp) {
       case 0: { // read
         for (size_t i = 0; i < 4; i++) {
-          MemReadWitness mw;
-          biWit.data[i] = readMemory(mw, addr + i);
+          PhysMemReadWitness mw;
+          biWit.data[i] = readPhysMemory(mw, addr + i);
           biWit.prevCycle[i] = mw.prevCycle;
           biWit.prevValue[i] = mw.value;
         }
       } break;
       case 1: { // write
         for (size_t i = 0; i < 4; i++) {
-          MemWriteWitness mw;
-          writeMemory(mw, addr + i, polyWitness[addr+i]);
+          PhysMemWriteWitness mw;
+          writePhysMemory(mw, addr + i, polyWitness[addr + i]);
           biWit.data[i] = mw.value;
           biWit.prevCycle[i] = mw.prevCycle;
           biWit.prevValue[i] = mw.prevValue;
@@ -613,58 +796,78 @@ struct Emulator {
 
   void fetchAndDecode(DecodeWitness* wit) {
     // We always read the memory address at pc/4
-    uint32_t l0 = readMemory(wit->load0, pc/4);
+    uint32_t l0 = readVirtMemory(wit->load0, pc / 4);
     // If pc == 2 (mod 4), shift to lower value
     uint32_t inst = (pc % 4 == 2) ? l0 >> 16 : l0;
     bool compressed = false;
-    // Check is low bits are 11 (normal) or anything else (compressed)
+    // Check if low bits are 11 (normal) or anything else (compressed)
     if ((inst & 3) == 3) {
-      // For normal instructions, always read next address
-      uint32_t l1 = readMemory(wit->load1, pc/4 + 1);
       // if needed, add in second half to inst
       if (pc % 4 == 2) {
+        // For unaligned addresses, always read next address
+        uint32_t l1 = readVirtMemory(wit->load1, pc / 4 + 1);
         inst |= l1 << 16;
+      } else {
+        // For aligned addresses, read from a `null` word (and ignore the value)
+        readVirtMemory(wit->load1, COMPRESSED_INST_LOOKUP_WORD);
       }
     } else {
       // Remove any high bits, and then do a lookup to convert
       inst &= 0xffff;
       compressed = true;
-      inst = readMemory(wit->load1, COMPRESSED_INST_LOOKUP_WORD + inst);
+      inst = readVirtMemory(wit->load1, COMPRESSED_INST_LOOKUP_WORD + inst);
     }
     wit->fetch.iCacheCycle = iCacheCycle;
+    wit->fetch.loadCycle = curCycle;
+    wit->fetch.mode = mode;
     wit->fetch.pc = pc;
     wit->fetch.nextPc = pc + (compressed ? 2 : 4);
-    wit->loadCycle = curCycle;
     wit->inst = inst;
     wit->count = 1;
+    auto decoded = DecodedInst(wit->inst);
+    wit->opcode = uint32_t(getOpcode(decoded));
+    wit->rd = decoded.rd;
+    wit->rs1 = decoded.rs1;
+    wit->rs2 = decoded.rs2;
+    switch (Opcode(wit->opcode)) {
+#define ENTRY(name, idx, opcode, immType, ...)                                                     \
+  case Opcode::name:                                                                               \
+    wit->imm = decoded.imm##immType();                                                             \
+    break;
+#include "rv32im/base/rv32im.inc"
+#undef ENTRY
+    default:
+      wit->imm = 0;
+    }
   }
 
   bool run(size_t rowCount) {
     doResume();
-    while(!done &&
-        trace.getRowCount() +
-        ceilDiv(curCycle, 24) + // How many rows we need for cycle table
-        memory.getPagingCost() < rowCount) {
-      DecodeWitness*& decodeWit = iCache[pc];
+    while (!done && trace.getRowCount() +
+                            ceilDiv(curCycle, 24) + // How many rows we need for cycle table
+                            memory.getPagingCost() <
+                        rowCount) {
+      DecodeWitness*& decodeWit = (mode == MODE_MACHINE) ? mInstCache[pc] : usInstCache[pc];
       if (!decodeWit) {
         decodeWit = &trace.makeDecode();
         fetchAndDecode(decodeWit);
       } else {
         decodeWit->count++;
       }
-      curFetch = &decodeWit->fetch;
-      newPc = curFetch->nextPc;
-      decoded = DecodedInst(decodeWit->inst);
-      Opcode opcode = getOpcode(decoded);
-      DLOG("cycle: " << curCycle << ", pc: " << std::hex << pc << std::dec << ", inst: " << getOpcodeName(opcode));
-      switch(opcode) {
-#define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...) \
-        case Opcode::name: do_ ## itype <EncodeOptions(itype, ## __VA_ARGS__).val>(); break;
+      dinst = decodeWit;
+      newPc = dinst->fetch.nextPc;
+      DLOG("cycle: " << curCycle << ", pc: " << std::hex << pc << std::dec
+                     << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
+      switch (Opcode(decodeWit->opcode)) {
+#define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...)                                \
+  case Opcode::name:                                                                               \
+    do_##itype<EncodeOptions(itype, ##__VA_ARGS__).val>();                                         \
+    break;
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
-        case Opcode::INVALID:
-          trap("Invalid opcde");
-          break;
+      case Opcode::INVALID:
+        trap("Invalid opcde");
+        break;
       }
       curCycle++;
       pc = newPc;
@@ -696,9 +899,7 @@ struct Emulator {
     }
   }
 
-  void commit() {
-    memory.commit(pages);
-  }
+  void commit() { memory.commit(pages); }
 
   // The trace
   Trace& trace;
@@ -709,23 +910,22 @@ struct Emulator {
   // IO with host
   HostIO& io;
 
+  ankerl::unordered_dense::map<uint32_t, uint32_t> virtualMem;
   std::vector<PageDetails*> pages;
   PageDetails* regPage;
+  ankerl::unordered_dense::map<uint32_t, DecodeWitness*> mInstCache;
+  ankerl::unordered_dense::map<uint32_t, DecodeWitness*> usInstCache;
 
   // Machine state
+  bool v2Compat = true;
   bool done = false;
   uint32_t regOffset = 0;
   uint32_t curCycle = 1;
   uint32_t iCacheCycle = 1;
-  uint32_t mm = 0;
+  uint32_t mode = 0;
   uint32_t pc = 0;
   uint32_t newPc = 0;
-  DecodedInst decoded;
-  FetchWitness* curFetch;
-
-  // Keep track of decoded instructions (and how many times each is used).
-  // 'FetchKey' is (iCacheCyce, PC)
-  ankerl::unordered_dense::map<uint32_t, DecodeWitness*> iCache;
+  DecodeWitness* dinst;
 };
 
 } // namespace
@@ -734,9 +934,9 @@ bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount) {
   Emulator emu(trace, image, io, rowCount);
   emu.addTables();
   bool done = emu.run(rowCount);
-  LOG(0, "Cycle = " << emu.curCycle);
+  LOG(1, "Cycle = " << emu.curCycle);
   emu.commit();
   return done;
 }
 
-} // namespace risc0;:rv32im
+} // namespace risc0::rv32im

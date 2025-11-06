@@ -46,4 +46,4 @@ private:
   size_t finalDegree;
 };
 
-}  // namespace risc0
+} // namespace risc0

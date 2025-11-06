@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, Rv32imV2Claim,
-    execute::{CycleLimit, Executor},
+    execute::{CycleLimit, Executor, RV32IM_V2_CIRCUIT_VERSION},
 };
 
 use super::{Syscall, SyscallContext};
@@ -79,7 +79,15 @@ impl Segment {
         } else {
             MAX_INSN_CYCLES_LOWER_PO2
         };
-        Executor::new(self.partial_image.clone(), &handler, None, vec![], None).run(
+        Executor::new(
+            self.partial_image.clone(),
+            &handler,
+            None,
+            vec![],
+            None,
+            RV32IM_V2_CIRCUIT_VERSION,
+        )
+        .run(
             self.po2 as usize,
             max_insn_cycles,
             CycleLimit::Soft(self.suspend_cycle.into()),

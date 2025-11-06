@@ -56,7 +56,8 @@ inline size_t constexpr leastGePo2(size_t in) {
   return r;
 }
 
-/// Compute `ceil(log_2(in))`, i.e. find the smallest value `out` such that `2^out >= in`.
+/// Compute `ceil(log_2(in))`, i.e. find the smallest value `out` such that
+/// `2^out >= in`.
 inline size_t constexpr log2Ceil(size_t in) {
   size_t r = 0;
   while ((size_t(1) << r) < in) {

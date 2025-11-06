@@ -1024,7 +1024,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1044,7 +1044,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1058,7 +1058,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1071,7 +1071,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -1087,8 +1087,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-rv32im-m3"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "risc0-binfmt",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
+ "serde",
+ "tracing",
+]
+
+[[package]]
 name = "risc0-core"
-version = "3.0.1"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "rand_core 0.9.3",
@@ -1096,7 +1109,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1121,11 +1134,12 @@ dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
  "risc0-zkvm-platform",
+ "sha2",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1133,6 +1147,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "digest",
+ "generic-array",
  "hex",
  "hex-literal",
  "metal",
@@ -1153,6 +1168,7 @@ dependencies = [
  "anyhow",
  "borsh",
  "bytemuck",
+ "cfg-if",
  "derive_more",
  "enum-map",
  "hex",
@@ -1160,6 +1176,7 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
+ "risc0-circuit-rv32im-m3",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
@@ -1278,9 +1295,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.8"
+version = "0.10.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793db75ad2bcafc3ffa7c68b215fee268f537982cd901d132f89c6343f3a3dc8"
+checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
 dependencies = [
  "cfg-if",
  "cpufeatures",

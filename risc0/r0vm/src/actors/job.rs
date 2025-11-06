@@ -16,7 +16,7 @@
 mod execute_only;
 mod proof;
 mod shrink_wrap;
-mod tracer;
+pub(crate) mod tracer;
 
 use derive_more::From;
 use tokio::task::JoinSet;
@@ -24,6 +24,7 @@ use tokio::task::JoinSet;
 use super::{
     TaskDoneMsg, TaskUpdateMsg,
     actor::{self, Actor, ActorRef, Context, Message, ReplySender, WeakActorRef},
+    error::{Error, Result},
     factory::FactoryActor,
     protocol::{JobId, JobStatusReply, JobStatusRequest, ProofRequest, ShrinkWrapRequest},
 };
@@ -66,7 +67,7 @@ impl JobActor {
         &mut self,
         request: RequestT,
         self_ref: ActorRef<Self>,
-        reply_sender: Option<ReplySender<JobStatusReply>>,
+        reply_sender: Option<ReplySender<Result<JobStatusReply>>>,
     ) where
         InnerJobActor: From<ActorRef<ActorT>>,
         ActorT: Message<RequestT, Reply = JobStatusReply> + JobActorNew,
@@ -80,18 +81,18 @@ impl JobActor {
         self.inner = Some(job.clone().into());
 
         self.join_set.spawn(async move {
-            let reply = job.ask(request).await.unwrap();
+            let reply = job.ask(request).await.map_err(Error::from);
             job.wait_for_stop().await;
             if let Some(reply_sender) = reply_sender {
-                reply_sender.send(reply);
+                reply_sender.send(reply).await;
             }
-            self_ref.stop_gracefully().await.unwrap();
+            let _ = self_ref.stop_gracefully("job shutdown");
         });
     }
 }
 
 impl Message<ProofRequest> for JobActor {
-    type Reply = JobStatusReply;
+    type Reply = Result<JobStatusReply>;
 
     async fn handle(&mut self, request: ProofRequest, ctx: &mut Context<Self, Self::Reply>) {
         let reply_sender = ctx.reply_sender();
@@ -104,7 +105,7 @@ impl Message<ProofRequest> for JobActor {
 }
 
 impl Message<ShrinkWrapRequest> for JobActor {
-    type Reply = JobStatusReply;
+    type Reply = Result<JobStatusReply>;
 
     async fn handle(&mut self, request: ShrinkWrapRequest, ctx: &mut Context<Self, Self::Reply>) {
         let reply_sender = ctx.reply_sender();
@@ -113,10 +114,16 @@ impl Message<ShrinkWrapRequest> for JobActor {
 }
 
 impl Message<JobStatusRequest> for JobActor {
-    type Reply = JobStatusReply;
+    type Reply = Result<JobStatusReply>;
 
     async fn handle(&mut self, msg: JobStatusRequest, ctx: &mut Context<Self, Self::Reply>) {
-        match self.inner.as_mut().unwrap() {
+        let Some(inner) = self.inner.as_mut() else {
+            ctx.reply(Err(Error::new("JobActor hasn't received job request yet")))
+                .await;
+            return;
+        };
+
+        match inner {
             InnerJobActor::Proof(job) => ctx.forward(job, msg).await,
             InnerJobActor::ShrinkWrap(job) => ctx.forward(job, msg).await,
             InnerJobActor::ExecuteOnly(job) => ctx.forward(job, msg).await,
@@ -128,7 +135,12 @@ impl Message<TaskUpdateMsg> for JobActor {
     type Reply = ();
 
     async fn handle(&mut self, msg: TaskUpdateMsg, ctx: &mut Context<Self, Self::Reply>) {
-        match self.inner.as_mut().unwrap() {
+        let Some(inner) = self.inner.as_mut() else {
+            tracing::error!("JobActor received TaskUpdateMsg before job request");
+            return;
+        };
+
+        match inner {
             InnerJobActor::Proof(job) => ctx.forward(job, msg).await,
             InnerJobActor::ShrinkWrap(job) => ctx.forward(job, msg).await,
             InnerJobActor::ExecuteOnly(job) => ctx.forward(job, msg).await,
@@ -140,7 +152,12 @@ impl Message<TaskDoneMsg> for JobActor {
     type Reply = ();
 
     async fn handle(&mut self, msg: TaskDoneMsg, ctx: &mut Context<Self, Self::Reply>) {
-        match self.inner.as_mut().unwrap() {
+        let Some(inner) = self.inner.as_mut() else {
+            tracing::error!("JobActor received TaskDoneMsg before job request");
+            return;
+        };
+
+        match inner {
             InnerJobActor::Proof(job) => ctx.forward(job, msg).await,
             InnerJobActor::ShrinkWrap(job) => ctx.forward(job, msg).await,
             InnerJobActor::ExecuteOnly(job) => ctx.forward(job, msg).await,

@@ -15,4 +15,4 @@
 
 #include "rv32im/base/base.h"
 
-CONSTANT uint32_t PAGE_PART_SIZE = 8;
+CONSTANT uint32_t MPAGE_PART_SIZE = 8;

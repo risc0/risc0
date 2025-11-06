@@ -13,6 +13,20 @@ build:dbg -c dbg
 build:dbg --strategy=ObjcLink=local
 build:dbg --strategy=CppLink=local
 
+build:linux --@bazel_clang_format//:binary=@clang-format-linux//:clang-format
+
 build:macos --@rules_cuda//cuda:enable=false
+build:macos --@bazel_clang_format//:binary=@clang-format-macos//:clang-format
+
+build:clang-format-base --@bazel_clang_format//:config=//:clang-format-config
+build:clang-format-base --output_groups=report
+build:clang-format-base --keep_going
+
+build:clang-format-check --config=clang-format-base
+build:clang-format-check --aspects=@bazel_clang_format//:defs.bzl%check_aspect
+
+build:clang-format --config=clang-format-base
+build:clang-format --aspects=@bazel_clang_format//:defs.bzl%fix_aspect
+build:clang-format --use_action_cache=false
 
 try-import %workspace%/.bazelrc.local

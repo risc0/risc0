@@ -44,6 +44,8 @@ use risc0_zkp::{
     taps::TapSet,
 };
 
+pub const LIFT_PO2_RANGE: core::ops::RangeInclusive<usize> = 12..=24;
+
 pub const REGISTER_GROUP_ACCUM: usize = 0;
 pub const REGISTER_GROUP_CODE: usize = 1;
 pub const REGISTER_GROUP_CTRL: usize = 1;

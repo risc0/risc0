@@ -15,10 +15,12 @@
 
 #pragma once
 
-template<typename T> struct OptSize {};
+template <typename T> struct OptSize {};
 
-#define IMPL_SIZE(T, L) \
-template<> struct OptSize<T> { static CONSTANT int32_t value = uint32_t(L) + 1; }
+#define IMPL_SIZE(T, L)                                                                            \
+  template <> struct OptSize<T> {                                                                  \
+    static CONSTANT int32_t value = uint32_t(L) + 1;                                               \
+  }
 
 enum InstKind {
   INST_REG,
@@ -31,9 +33,11 @@ enum InstKind {
   INST_LUI,
   INST_AUIPC,
   INST_ECALL,
+  INST_MRET,
+  INST_SRET,
 };
 
-IMPL_SIZE(InstKind, INST_ECALL);
+IMPL_SIZE(InstKind, INST_SRET);
 
 enum UnitKind {
   UNIT_ADDSUB,
@@ -122,30 +126,23 @@ struct Option {
   FDEV constexpr Option() : val(0) {}
   FDEV constexpr Option(uint32_t val) : val(val) {}
 
-  template<typename T>
-  FDEV constexpr bool is(T cmp) const {
+  template <typename T> FDEV constexpr bool is(T cmp) const {
     return (val % OptSize<T>::value) == uint32_t(cmp);
   }
 
-  template<typename T>
-  FDEV constexpr T peek() const {
-    return T(val % OptSize<T>::value);
-  }
+  template <typename T> FDEV constexpr T peek() const { return T(val % OptSize<T>::value); }
 
-  template<typename T>
-  FDEV constexpr T pop() {
+  template <typename T> FDEV constexpr T pop() {
     T ret = peek<T>();
     val /= OptSize<T>::value;
     return ret;
   }
 
-  template<typename T>
-  FDEV constexpr Option popRet() const {
+  template <typename T> FDEV constexpr Option popRet() const {
     return Option(val / OptSize<T>::value);
   }
 
-  template<typename T>
-  FDEV constexpr void push(T t) {
+  template <typename T> FDEV constexpr void push(T t) {
     val *= OptSize<T>::value;
     val += uint32_t(t);
   }
@@ -155,10 +152,9 @@ FDEV constexpr inline Option EncodeOptions() {
   return Option();
 }
 
-template<typename T, typename... Rest>
+template <typename T, typename... Rest>
 FDEV constexpr inline Option EncodeOptions(T a, Rest... args) {
   Option r = EncodeOptions(args...);
   r.push(a);
   return r;
 }
-

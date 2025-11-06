@@ -14,19 +14,19 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #include "core/util.h"
-#include "zkp/fp.h"
-#include "zkp/rou.h"
 #include "hal/hal.h"
 #include "hal/po2s.h"
+#include "zkp/fp.h"
+#include "zkp/rou.h"
 
 namespace risc0 {
 
-#define PO2(x) \
-  void verify_cpu_ ## x(const Fp* data, const Fp* globals, Fp rou);
+#define PO2(x) void verify_cpu_##x(const Fp* data, const Fp* globals, Fp rou);
 PO2S
 #undef PO2
 
-inline void verify(const Fp* data, const Fp* globals, size_t numRows) {
+    inline void
+    verify(const Fp* data, const Fp* globals, size_t numRows) {
   size_t po2 = log2Ceil(numRows);
   if (po2 < MIN_PO2 || po2 > MAX_PO2) {
     LOG(0, "PO2 = " << po2);
@@ -36,14 +36,15 @@ inline void verify(const Fp* data, const Fp* globals, size_t numRows) {
     throw std::runtime_error("numRows is not a power of 2");
   }
 
-  switch(po2) {
-#define PO2(x) \
-    case x: verify_cpu_ ## x(data, globals, ROU_FWD[po2]); break;
+  switch (po2) {
+#define PO2(x)                                                                                     \
+  case x:                                                                                          \
+    verify_cpu_##x(data, globals, ROU_FWD[po2]);                                                   \
+    break;
     PO2S
 #undef PO2
-    default: throw std::runtime_error("Unreachable");
+        default : throw std::runtime_error("Unreachable");
   }
 }
 
-}  // namespace risc0
-
+} // namespace risc0

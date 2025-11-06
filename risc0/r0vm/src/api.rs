@@ -46,6 +46,7 @@ use uuid::Uuid;
 use crate::actors::{
     actor::ActorRef,
     allocator::PROXY_URL_PATH,
+    error::Error as ActorError,
     manager::ManagerActor,
     protocol::{
         CreateJobRequest, JobInfo, JobStatus, JobStatusReply, JobStatusRequest, ProofRequest,
@@ -419,6 +420,7 @@ async fn prove_stark(
                 assumptions,
                 segment_limit_po2: state.po2,
                 execute_only: proof_req.execute_only,
+                dev_mode: false,
             }),
         })
         .await
@@ -448,6 +450,8 @@ where
         .manager
         .ask(JobStatusRequest { job_id: *job_id })
         .await
+        .map_err(ActorError::from)
+        .flatten()
         .context("Failed to get job status")?
         .try_into()
         .map_err(|_| AppError::InternalErr(anyhow!("Invalid job_id")))?;
@@ -596,6 +600,7 @@ async fn prove_groth16(
             request: JobRequest::ShrinkWrap(ShrinkWrapRequest {
                 kind: ShrinkWrapKind::Groth16,
                 receipt,
+                dev_mode: false,
             }),
         })
         .await

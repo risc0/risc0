@@ -12,12 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define GLOBAL_OFFSET(member) (reinterpret_cast<MDEV Fp*>(&reinterpret_cast<MDEV Globals*>(0x10000)->member) - reinterpret_cast<MDEV Fp*>(0x10000))
-#define GLOBAL_GET(member) ctx.globalGet(GLOBAL_OFFSET(member))
-#define GLOBAL_SET(member, val) ctx.globalSet(GLOBAL_OFFSET(member), (val))
-
-template<typename C>
-FDEV void GlobalsBlock<C>::set(CTX, GlobalsWitness wit) DEV {
+template <typename C> FDEV void GlobalsBlock<C>::set(CTX, GlobalsWitness wit) DEV {
   p2Count.set(ctx, wit.p2Count);
   finalCycle.set(ctx, wit.finalCycle);
   finalCycleCeilDiv.set(ctx, (wit.finalCycle + 7) / 8);
@@ -33,8 +28,7 @@ FDEV void GlobalsBlock<C>::set(CTX, GlobalsWitness wit) DEV {
   }
 }
 
-template<typename C>
-FDEV void GlobalsBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void GlobalsBlock<C>::verify(CTX) DEV {
   // Make sure we are on the first row
   EQ(ctx.getX(), 1);
   // Verify finalCycleCeilDiv
@@ -47,8 +41,7 @@ FDEV void GlobalsBlock<C>::verify(CTX) DEV {
   }
 }
 
-template<typename C>
-FDEV void GlobalsBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void GlobalsBlock<C>::addArguments(CTX) DEV {
   PageInArgument<C> piNode;
   piNode.index = 1;
   GET_ARR(piNode.node, rootIn, CELLS_DIGEST);

@@ -18,17 +18,15 @@
 #include "rv32im/circuit/bits.h"
 
 // Given a value, set a boolean to 0 if (val != 0), and 1 if (val == 0)
-template<typename C>
-struct IsZero {
+template <typename C> struct IsZero {
   CONSTANT static char NAME[] = "IsZero";
 
   BitReg<C> isZero;
   Reg<C> invReg;
 
-  template<typename T>
-  FDEV void applyInner(CTX, Val<C> val) DEV {
-    T::apply(ctx, isZero);
-    T::apply(ctx, invReg);
+  template <typename T> FDEV void applyInner(CTX, Val<C> val) DEV {
+    T::apply(ctx, "isZero", isZero);
+    T::apply(ctx, "invReg", invReg);
   }
 
   FDEV void set(CTX, Fp val) DEV;

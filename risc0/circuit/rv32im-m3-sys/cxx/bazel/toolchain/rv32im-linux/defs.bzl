@@ -125,6 +125,24 @@ def _risc0_cc_kernel_binary_impl(ctx):
 
     return _risc0_cc_binary_impl(ctx, copts, linkopts)
 
+def _risc0_cc_firmware_binary_impl(ctx):
+    copts = [
+        # A freestanding environment is one in which the standard library may not exist,
+        # and program startup may not necessarily be at main.
+        "-ffreestanding",
+    ]
+
+    linkopts = [
+        # Do not use the standard system startup files or libraries when linking.
+        "-nostdlib",
+
+        # Use a custom linker script for kernel code.
+        "-T",
+        ctx.file._linker_script_firmware.path,
+    ]
+
+    return _risc0_cc_binary_impl(ctx, copts, linkopts)
+
 def _risc0_cc_kernel_binary_v1_impl(ctx):
     copts = [
         # A freestanding environment is one in which the standard library may not exist,
@@ -161,6 +179,10 @@ attrs = {
         allow_single_file = True,
         default = Label("//bazel/toolchain/rv32im-linux:kernel.ld"),
     ),
+    "_linker_script_firmware": attr.label(
+        allow_single_file = True,
+        default = Label("//bazel/toolchain/rv32im-linux:firmware.ld"),
+    ),
     "_linker_script_v1": attr.label(
         allow_single_file = True,
         default = Label("//bazel/toolchain/rv32im-linux:kernel_v1.ld"),
@@ -190,6 +212,15 @@ risc0_cc_binary = rule(
 
 risc0_cc_kernel_binary = rule(
     implementation = _risc0_cc_kernel_binary_impl,
+    attrs = attrs,
+    toolchains = [CC_TOOLCHAIN_TYPE],
+    fragments = ["cpp"],
+    incompatible_use_toolchain_transition = True,
+    cfg = rv32im_linux_transition,
+)
+
+risc0_cc_firmware_binary = rule(
+    implementation = _risc0_cc_firmware_binary_impl,
     attrs = attrs,
     toolchains = [CC_TOOLCHAIN_TYPE],
     fragments = ["cpp"],

@@ -19,24 +19,19 @@
 
 namespace risc0 {
 
-void runTestBinary(const std::string& elf, rv32im::HostIO& io, size_t po2) {
+void runTest(rv32im::MemoryImage& image, rv32im::HostIO& io, size_t po2) {
   IHalPtr hal = getCpuHal();
-  LOG(2, "Loading ELF: '" << elf << "'");
-  auto image = rv32im::MemoryImage::fromRawElf(elf);
-  LOG(0, "Running test on " << elf);
+  // IHalPtr hal = getGpuHal();
   Rv32imProver prover(hal, po2, true);
-  bool complete = prover.preflight(image, io);
-  if (!complete) {
+  auto preflightData = preflight(po2, image, io);
+  if (!preflightData.isFinal) {
     std::cerr << "FAILED TO COMPLETE\n";
     exit(1);
   }
   WriteIop wiop;
-  prover.prove(wiop);
+  prover.prove(wiop, preflightData);
   ReadIop riop(wiop.getTranscript().data(), wiop.getTranscript().size());
-  LOG(0, "Running verify");
   verifyRv32im(riop, po2);
-  LOG(0, "Verify succeeded");
 }
 
-}
-
+} // namespace risc0

@@ -1,0 +1,37 @@
+[package]
+name = "sppark"
+version = "0.1.14"
+edition = "2021"
+description = "Zero-knowledge template library"
+repository = "https://github.com/supranational/sppark"
+categories = ["cryptography"]
+keywords = ["crypto", "zero-knowledge", "cuda"]
+license = "Apache-2.0"
+links = "sppark"
+include = [
+    "/Cargo.toml",
+    "/build.rs",
+    "/src/**",
+    "/sppark/ec/**",
+    "/sppark/ff/**",
+    "/sppark/msm/**",
+    "/sppark/ntt/**",
+    "/sppark/polynomial/**",
+    "/sppark/util/**",
+]
+
+[dependencies]
+cc = { version = "^1.0.70", optional = true }
+
+[build-dependencies]
+# cc 1.1.32 through 1.1.35 are problematic with clang++ as host compiler
+# for CUDA, but there is no way single them out...
+cc = "^1.0.70"
+which = "^4.0"
+
+[features]
+# coerse either as an alternative to auto-detection
+cuda = []
+rocm = []
+build = [ "cc" ]
+build-poc = [ "build" ]

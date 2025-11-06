@@ -29,7 +29,16 @@ public:
   }
 
   Opcode lookup(const DecodedInst inst) const {
-    if ((inst.opcode & 0x3) != 3) { return Opcode::INVALID; }
+    if ((inst.opcode & 0x3) != 3) {
+      return Opcode::INVALID;
+    }
+    // Annoyingly SRET + MRET don't fit in the 10 bit table
+    if (inst.inst == 0x10200073) {
+      return Opcode::SRET;
+    }
+    if (inst.inst == 0x30200073) {
+      return Opcode::MRET;
+    }
     return table[map10(inst.opcode, inst.func3, inst.func7)];
   }
 
@@ -45,6 +54,10 @@ private:
   }
 
   void addInst(uint32_t opcode, int32_t func3, int32_t func7, Opcode inst) {
+    // Annoyingly SRET + MRET don't fit in the 10 bit table
+    if (inst == Opcode::SRET || inst == Opcode::MRET) {
+      return;
+    }
     uint32_t opHigh = opcode >> 2;
     if (func3 < 0) {
       for (uint32_t f3 = 0; f3 < 8; f3++) {
@@ -66,7 +79,7 @@ private:
   void addRV32IM() {
 #define XF7 -1
 #define XF3 -1
-#define ENTRY(name, idx, opcode, immType, func3, func7, ...) \
+#define ENTRY(name, idx, opcode, immType, func3, func7, ...)                                       \
   addInst(opcode, func3, func7, Opcode::name);
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
@@ -77,7 +90,7 @@ private:
 
 FastDecodeTable gDecode;
 
-}  // namespace
+} // namespace
 
 Opcode getOpcode(const DecodedInst& inst) {
   return gDecode.lookup(inst);

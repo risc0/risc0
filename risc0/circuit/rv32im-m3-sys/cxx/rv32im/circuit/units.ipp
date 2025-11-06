@@ -12,8 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-template<typename C>
-FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness wit) DEV {
+#define PICUS_U32_INPUT(ctx, x)                                                                    \
+  PICUS_INPUT(ctx, x);                                                                             \
+  RANGE_PRECONDITION(ctx, 0, x.low.get(), 0x10000);                                                \
+  RANGE_PRECONDITION(ctx, 0, x.high.get(), 0x10000)
+
+#define UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx)                                                          \
+  PICUS_INPUT(ctx, count);                                                                         \
+  PICUS_U32_INPUT(ctx, a);                                                                         \
+  PICUS_U32_INPUT(ctx, b)
+
+template <typename C> FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness wit) DEV {
   count.set(ctx, wit.count);
   Option opts(wit.opts);
   opts.pop<UnitKind>();
@@ -23,8 +32,12 @@ FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness wit) DEV {
   out.set(ctx, wit.a, (opts.val ? ~wit.b : wit.b), opts.val);
 }
 
-template<typename C>
-FDEV void UnitAddSubBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void UnitAddSubBlock<C>::verify(CTX) DEV {
+  UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx);
+  PICUS_INPUT(ctx, doSub);
+}
+
+template <typename C> FDEV void UnitAddSubBlock<C>::addArguments(CTX) DEV {
   UnitArgument<C> arg;
   arg.opts = doSub.get() * Val<C>(OptSize<UnitKind>::value) + Val<C>(uint32_t(UNIT_ADDSUB));
   arg.aLow = a.low.get();
@@ -39,8 +52,7 @@ FDEV void UnitAddSubBlock<C>::addArguments(CTX) DEV {
   ctx.addArgument(count.get(), arg);
 }
 
-template<typename C>
-FDEV void UnitBitBlock<C>::set(CTX, UnitBitWitness wit) DEV {
+template <typename C> FDEV void UnitBitBlock<C>::set(CTX, UnitBitWitness wit) DEV {
   count.set(ctx, wit.count);
   Option opts(wit.opts);
   opts.pop<UnitKind>();
@@ -54,8 +66,13 @@ FDEV void UnitBitBlock<C>::set(CTX, UnitBitWitness wit) DEV {
   }
 }
 
-template<typename C>
-FDEV void UnitBitBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void UnitBitBlock<C>::verify(CTX) DEV {
+  UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx);
+  PICUS_INPUT(ctx, op);
+
+  // Assert that aBits and bBits are bit decompositions of a and b. Also compute
+  // the "recomposition" of aBits, bBits, and their product into shorts for use
+  // in a moment.
   Val<C> aParts[2], bParts[2], andParts[2];
   for (size_t p = 0; p < 2; p++) {
     for (size_t i = 0; i < 16; i++) {
@@ -67,20 +84,35 @@ FDEV void UnitBitBlock<C>::verify(CTX) DEV {
       andParts[p] += aVal * bVal * po2;
     }
   }
+
+  // Assert that aBits and bBits recompose into a and b.
   EQ(aParts[0], a.low.get());
   EQ(aParts[1], a.high.get());
   EQ(bParts[0], b.low.get());
   EQ(bParts[1], b.high.get());
+
+  // Now we want to assert that out is computed correctly from a and b, and bits
+  // encodes whether we're computing XOR, OR, or AND. Noting that we've already
+  // computed AND(a, b), we can relate XOR(a, b) and OR(a, b) with ordinary
+  // addition (and therefore field addition without overflow) with some
+  // manipulation of the equations of a ripple-carry adder:
+  //
+  // XOR(a, b) = a + b - 2 * AND(a, b)
+  // OR(a, b) = a + b - AND(a, b)
+  // AND(a, b) = AND(a, b)
+  //
+  // Since these equations have common structure, we can write the result of
+  // each possible operation in the form c1 * (a + b) + c2 * AND(a, b).
   Val<C> c1 = op.bits[0].get() + op.bits[1].get();
   Val<C> c2 = op.bits[0].get() * (-Val<C>(2)) + op.bits[1].get() * (-Val<C>(1)) + op.bits[2].get();
-  //LOG(0, "c1 = " << c1 << ", c2 = " << c2);
-  //LOG(0, "a = " << std::hex << aParts[0] << ", b = " << bParts[0] << ", out = " << out.low.get() << std::dec);
+  // LOG(0, "c1 = " << c1 << ", c2 = " << c2);
+  // LOG(0, "a = " << std::hex << aParts[0] << ", b = " << bParts[0] << ", out =
+  // " << out.low.get() << std::dec);
   EQ(c1 * (aParts[0] + bParts[0]) + c2 * andParts[0], out.low.get());
   EQ(c1 * (aParts[1] + bParts[1]) + c2 * andParts[1], out.high.get());
 }
 
-template<typename C>
-FDEV void UnitBitBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void UnitBitBlock<C>::addArguments(CTX) DEV {
   UnitArgument<C> arg;
   arg.opts = op.get() * Val<C>(OptSize<UnitKind>::value) + Val<C>(uint32_t(UNIT_BIT));
   arg.aLow = a.low.get();
@@ -94,33 +126,55 @@ FDEV void UnitBitBlock<C>::addArguments(CTX) DEV {
   ctx.addArgument(count.get(), arg);
 }
 
-template<typename C>
-FDEV void UnitMulBlock<C>::set(CTX, UnitMulWitness wit) DEV {
+template <typename C> FDEV void UnitMulBlock<C>::set(CTX, UnitMulWitness wit) DEV {
   Option opts(wit.opts);
   opts.pop<UnitKind>();
   uint32_t signA, signB;
-  switch(opts.peek<MulKind>()) {
-    case MUL_SS: signA = 1; signB = 1; break;
-    case MUL_SU: signA = 1; signB = 0; break;
-    case MUL_UU: signA = 0; signB = 0; break;
+  switch (opts.peek<MulKind>()) {
+  case MUL_SS:
+    signA = 1;
+    signB = 1;
+    break;
+  case MUL_SU:
+    signA = 1;
+    signB = 0;
+    break;
+  case MUL_UU:
+    signA = 0;
+    signB = 0;
+    break;
   }
   count.set(ctx, wit.count);
   mul.set(ctx, wit.a, wit.b, signA, signB);
 }
 
-template<typename C>
-FDEV void UnitMulBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void UnitMulBlock<C>::verify(CTX) DEV {
+  PICUS_INPUT(ctx, count);
+  PICUS_INPUT(ctx, mul.signA);
+  PICUS_INPUT(ctx, mul.signB);
+
+  // Only the fields used in the argument are guaranteed to be determinstic. In
+  // particular, ExpandU32::topBit and ExpandU32::b3Low7times2 cannot be assumed.
+  // TODO: is there a more robust way to flag the correct fields?
+  PICUS_INPUT(ctx, mul.ax.b0);
+  PICUS_INPUT(ctx, mul.ax.b1);
+  PICUS_INPUT(ctx, mul.ax.b2);
+  PICUS_INPUT(ctx, mul.ax.b3);
+  PICUS_INPUT(ctx, mul.bx.b0);
+  PICUS_INPUT(ctx, mul.bx.b1);
+  PICUS_INPUT(ctx, mul.bx.b2);
+  PICUS_INPUT(ctx, mul.bx.b3);
+
   // Disallow signA = 0, sign B = 1
   EQZ((Val<C>(1) - mul.signA.get()) * mul.signB.get());
 }
 
-template<typename C>
-FDEV void UnitMulBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void UnitMulBlock<C>::addArguments(CTX) DEV {
   UnitArgument<C> arg;
   Val<C> signOpt = Val<C>(2) - mul.signA.get() - mul.signB.get();
   arg.opts = signOpt * Val<C>(OptSize<UnitKind>::value) + Val<C>(uint32_t(UNIT_MUL));
   arg.aLow = mul.getA().low;
-  arg.aHigh= mul.getA().high;
+  arg.aHigh = mul.getA().high;
   arg.bLow = mul.getB().low;
   arg.bHigh = mul.getB().high;
   arg.out0Low = mul.getOutLow().low;
@@ -130,8 +184,7 @@ FDEV void UnitMulBlock<C>::addArguments(CTX) DEV {
   ctx.addArgument(count.get(), arg);
 }
 
-template<typename C>
-FDEV void UnitDivBlock<C>::set(CTX, UnitDivWitness wit) DEV {
+template <typename C> FDEV void UnitDivBlock<C>::set(CTX, UnitDivWitness wit) DEV {
   Option opts(wit.opts);
   opts.pop<UnitKind>();
   count.set(ctx, wit.count);
@@ -163,14 +216,20 @@ FDEV void UnitDivBlock<C>::set(CTX, UnitDivWitness wit) DEV {
   denomZero.set(ctx, (wit.b & 0xffff) + (wit.b >> 16));
   verifyRem.set(ctx, absDenom, ~absRemU32);
   bool negQuotVal = negDenom ^ negNumer;
-  if (absDenom == 0) { negQuotVal = false; }
+  if (absDenom == 0) {
+    negQuotVal = false;
+  }
   negQuot.set(ctx, negQuotVal);
   flipQuot.set(ctx, absQuotU32, negQuotVal);
   flipRem.set(ctx, absRemU32, negNumer);
 }
 
-template<typename C>
-FDEV void UnitDivBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void UnitDivBlock<C>::verify(CTX) DEV {
+  PICUS_INPUT(ctx, count);
+  PICUS_INPUT(ctx, isSigned);
+  PICUS_U32_INPUT(ctx, numer.in);
+  PICUS_U32_INPUT(ctx, denom.in);
+
   /*
   LOG(0, std::hex);
   LOG(0, "isSigned = " << isSigned.get());
@@ -184,9 +243,9 @@ FDEV void UnitDivBlock<C>::verify(CTX) DEV {
   LOG(0, "addTotRem = " << addTotRem.high.get() << ":" << addTotRem.low.get());
   LOG(0, "negQuot = " << negQuot.get());
   LOG(0, "negRem = " << numer.neg.get());
-  LOG(0, "flipQuot = " << flipQuot.outHigh.get() << ":" << flipQuot.outLow.get());
-  LOG(0, "flipRem = " << flipRem.outHigh.get() << ":" << flipRem.outLow.get());
-  LOG(0, std::dec);
+  LOG(0, "flipQuot = " << flipQuot.outHigh.get() << ":" <<
+  flipQuot.outLow.get()); LOG(0, "flipRem = " << flipRem.outHigh.get() << ":" <<
+  flipRem.outLow.get()); LOG(0, std::dec);
   */
   Val<C> negDenom = denom.neg.get();
   Val<C> negNumer = numer.neg.get();
@@ -198,8 +257,7 @@ FDEV void UnitDivBlock<C>::verify(CTX) DEV {
   EQZ(nz * (Val<C>(1) - verifyRem.carryHigh.get()));
 }
 
-template<typename C>
-FDEV void UnitDivBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void UnitDivBlock<C>::addArguments(CTX) DEV {
   // Produce division
   UnitArgument<C> arg;
   arg.opts = isSigned.get() * Val<C>(OptSize<UnitKind>::value) + Val<C>(uint32_t(UNIT_DIV));
@@ -225,23 +283,20 @@ FDEV void UnitDivBlock<C>::addArguments(CTX) DEV {
   ctx.pull(arg);
 }
 
-template<typename C>
-FDEV Val<C> UnitLtBlock<C>::computeOverflow() DEV {
+template <typename C> FDEV Val<C> UnitLtBlock<C>::computeOverflow() DEV {
   Val<C> s1 = signA.get();
   Val<C> s2 = signB.get();
   Val<C> s3 = signDiff.get();
   return s1 * (Val<C>(1) - s2) * (Val<C>(1) - s3) + (Val<C>(1) - s1) * s2 * s3;
 }
 
-template<typename C>
-FDEV Val<C> UnitLtBlock<C>::computeLt() DEV {
+template <typename C> FDEV Val<C> UnitLtBlock<C>::computeLt() DEV {
   Val<C> s3 = signDiff.get();
   Val<C> overflowVal = overflow.get();
   return overflowVal + s3 - Val<C>(2) * overflowVal * s3;
 }
 
-template<typename C>
-FDEV void UnitLtBlock<C>::set(CTX, UnitLtWitness wit) DEV {
+template <typename C> FDEV void UnitLtBlock<C>::set(CTX, UnitLtWitness wit) DEV {
   count.set(ctx, wit.count);
   a.set(ctx, wit.a);
   b.set(ctx, wit.b);
@@ -253,14 +308,12 @@ FDEV void UnitLtBlock<C>::set(CTX, UnitLtWitness wit) DEV {
   isLt.set(ctx, computeLt());
 }
 
-template<typename C>
-FDEV void UnitLtBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void UnitLtBlock<C>::verify(CTX) DEV {
   EQ(overflow.get(), computeOverflow());
   EQ(isLt.get(), computeLt());
 }
 
-template<typename C>
-FDEV void UnitLtBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void UnitLtBlock<C>::addArguments(CTX) DEV {
   UnitArgument<C> arg;
   arg.opts = Val<C>(uint32_t(UNIT_LT));
   arg.aLow = a.low.get();
@@ -274,8 +327,7 @@ FDEV void UnitLtBlock<C>::addArguments(CTX) DEV {
   ctx.addArgument(count.get(), arg);
 }
 
-template<typename C>
-FDEV void UnitShiftBlock<C>::set(CTX, UnitShiftWitness wit) DEV {
+template <typename C> FDEV void UnitShiftBlock<C>::set(CTX, UnitShiftWitness wit) DEV {
   count.set(ctx, wit.count);
   a.set(ctx, wit.a);
   b.set(ctx, wit.b);
@@ -307,8 +359,7 @@ FDEV void UnitShiftBlock<C>::set(CTX, UnitShiftWitness wit) DEV {
   }
 }
 
-template<typename C>
-FDEV void UnitShiftBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void UnitShiftBlock<C>::verify(CTX) DEV {
   /*
   LOG(0, std::hex);
   LOG(0, "opt = " << opt.get());
@@ -338,8 +389,7 @@ FDEV void UnitShiftBlock<C>::verify(CTX) DEV {
   EQ(maybeNegOut.high.get(), cond<C>(neg.get(), Val<C>(0xffff) - out.high.get(), out.high.get()));
 }
 
-template<typename C>
-FDEV void UnitShiftBlock<C>::addArguments(CTX) DEV {
+template <typename C> FDEV void UnitShiftBlock<C>::addArguments(CTX) DEV {
   // Produce division
   UnitArgument<C> arg;
   arg.opts = opt.get() * Val<C>(OptSize<UnitKind>::value) + Val<C>(uint32_t(UNIT_SHIFT));
@@ -354,9 +404,9 @@ FDEV void UnitShiftBlock<C>::addArguments(CTX) DEV {
   ctx.addArgument(count.get(), arg);
   // Require multiplication or division
   arg.opts =
-    opt.bits[0].get() * Val<C>(uint32_t(MUL_UU) * OptSize<UnitKind>::value + uint32_t(UNIT_MUL)) +
-    opt.bits[1].get() * Val<C>(uint32_t(DIV_U) * OptSize<UnitKind>::value + uint32_t(UNIT_DIV)) +
-    opt.bits[2].get() * Val<C>(uint32_t(DIV_U) * OptSize<UnitKind>::value + uint32_t(UNIT_DIV));
+      opt.bits[0].get() * Val<C>(uint32_t(MUL_UU) * OptSize<UnitKind>::value + uint32_t(UNIT_MUL)) +
+      opt.bits[1].get() * Val<C>(uint32_t(DIV_U) * OptSize<UnitKind>::value + uint32_t(UNIT_DIV)) +
+      opt.bits[2].get() * Val<C>(uint32_t(DIV_U) * OptSize<UnitKind>::value + uint32_t(UNIT_DIV));
   arg.aLow = maybeNegA.low.get();
   arg.aHigh = maybeNegA.high.get();
   arg.bLow = po2.low.get();
@@ -367,3 +417,6 @@ FDEV void UnitShiftBlock<C>::addArguments(CTX) DEV {
   arg.out1High = out2.high.get();
   ctx.pull(arg);
 }
+
+#undef UNIT_BLOCK_PICUS_ASSUMPTIONS
+#undef PICUS_U32_INPUT

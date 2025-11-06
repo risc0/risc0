@@ -53,6 +53,7 @@ mod tests {
     use password_checker_core::PasswordRequest;
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn main() {
         const TEST_SALT: [u8; 32] = [0u8; 32];
         const TEST_PASSWORD: &str = "S00perSecr1t!!!";

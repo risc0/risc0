@@ -16,18 +16,57 @@
 
 #include "rv32im/circuit/circuit.h"
 
-#include "rv32im/base/opt.h"
 #include "rv32im/argument/argument.h"
+#include "rv32im/base/opt.h"
 
+#ifdef IN_VERIFY
+#define EQ(a, b)                                                                                   \
+  do {                                                                                             \
+    Fp aVal = (a);                                                                                 \
+    Fp bVal = (b);                                                                                 \
+    if (aVal != bVal) {                                                                            \
+      LOG(0,                                                                                       \
+          "INVALID EQ: " << __FILE__ << ": " << __LINE__ << ", " << #a << " [ actual = " << aVal   \
+                         << "] != " << #b << " [ actual = " << bVal << "]");                       \
+    }                                                                                              \
+    ctx.eqz(aVal - bVal);                                                                          \
+  } while (0)
+#define EQZ(a)                                                                                     \
+  do {                                                                                             \
+    Fp aVal = (a);                                                                                 \
+    if (aVal != 0) {                                                                               \
+      LOG(0,                                                                                       \
+          "INVALID EQZ: " << __FILE__ << ": " << __LINE__ << ", " << #a << " [ actual = " << aVal  \
+                          << "]");                                                                 \
+    }                                                                                              \
+    ctx.eqz(aVal);                                                                                 \
+  } while (0)
+#else
 #define EQ(a, b) ctx.eqz((a) - (b))
 #define EQZ(a) ctx.eqz(a)
+#endif
 
-#define GET_ARR(out, in, n) \
-      for (size_t i = 0; i < n; i++) { out[i] = in[i].get(); }
+#define GET_ARR(out, in, n)                                                                        \
+  for (size_t i = 0; i < n; i++) {                                                                 \
+    out[i] = in[i].get();                                                                          \
+  }
 
-#define SET_ARR(out, in, n) \
-      for (size_t i = 0; i < n; i++) { out[i].set(ctx, in[i]); }
+#define SET_ARR(out, in, n)                                                                        \
+  for (size_t i = 0; i < n; i++) {                                                                 \
+    out[i].set(ctx, in[i]);                                                                        \
+  }
 
+#define GLOBAL_OFFSET(member)                                                                      \
+  (reinterpret_cast<MDEV Fp*>(&reinterpret_cast<MDEV Globals*>(0x10000)->member) -                 \
+   reinterpret_cast<MDEV Fp*>(0x10000))
+#define GLOBAL_GET(member) ctx.globalGet(GLOBAL_OFFSET(member))
+#define GLOBAL_SET(member, val) ctx.globalSet(GLOBAL_OFFSET(member), (val))
+
+template <typename T, typename U> struct if_not_char {
+  using type = U;
+};
+template <typename U> struct if_not_char<char, U> {};
+template <typename U> struct if_not_char<const char, U> {};
 
 #include "rv32im/circuit/bigint.ipp"
 #include "rv32im/circuit/bits.ipp"

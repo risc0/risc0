@@ -16,6 +16,8 @@
 #include <array>
 #include <map>
 
+#define IN_VERIFY 1
+
 #include "rv32im/circuit/circuit.ipp"
 
 namespace NAMESPACE {
@@ -23,11 +25,14 @@ namespace NAMESPACE {
 constexpr size_t NUM_ROWS = (1 << NUM_ROWS_PO2);
 
 inline const char* getArgumentTypeName(ArgumentType type) {
-  switch(type) {
-#define ARGUMENT_TYPE(name) case ArgumentType::name: return #name;
+  switch (type) {
+#define ARGUMENT_TYPE(name)                                                                        \
+  case ArgumentType::name:                                                                         \
+    return #name;
     ARGUMENT_TYPES
 #undef ARGUMENT_TYPE
-    default: return "***UNKNOWN***";
+  default:
+    return "***UNKNOWN***";
   };
 }
 
@@ -36,11 +41,8 @@ struct Context {
   using ValExtImpl = FpExt;
 
   struct RegImpl {
-    Fp get() {
-      return data[0];
-    }
-    template<typename T>
-    void applyInner(Context& ctx) {}
+    Fp get() { return data[0]; }
+    template <typename T> void applyInner(Context& ctx) {}
     void verify(Context& ctx) {}
     void addArguments(Context& ctx) {}
     Fp data[NUM_ROWS];
@@ -63,8 +65,7 @@ struct Context {
       throw std::runtime_error("Invalid eqz");
     }
   }
-  template<typename T>
-  inline void fpAddArgument(Fp count, const T& argument) {
+  template <typename T> inline void fpAddArgument(Fp count, const T& argument) {
     std::vector<Fp> all;
     all.push_back(Fp(uint32_t(GetArgumentType<T>::value)));
     for (size_t i = 0; i < sizeof(T) / sizeof(Fp); i++) {
@@ -73,16 +74,11 @@ struct Context {
     args[all] += count;
   }
 
-  template<typename T>
-  inline void push(const T& argument) {
-    fpAddArgument(isValid, argument);
-  }
-  template<typename T>
-  inline void pull(const T& argument) {
+  template <typename T> inline void push(const T& argument) { fpAddArgument(isValid, argument); }
+  template <typename T> inline void pull(const T& argument) {
     fpAddArgument(isValid * -Fp(1), argument);
   }
-  template<typename T>
-  inline void addArgument(Fp count, const T& argument) {
+  template <typename T> inline void addArgument(Fp count, const T& argument) {
     fpAddArgument(count, argument);
   }
   inline Fp globalGet(uint32_t offset) { return globals[offset]; }
@@ -91,11 +87,14 @@ struct Context {
   inline void checkArgs() {
     size_t count = 0;
     for (const auto& kvp : args) {
-      if (count == 10) break;
-      if (kvp.second == 0) continue;
-      LOG(0, "Unmatched argument, type = " <<
-          getArgumentTypeName(static_cast<ArgumentType>(kvp.first[0].asUInt32())) <<
-          ", error = " << kvp.second);
+      if (count == 10)
+        break;
+      if (kvp.second == 0)
+        continue;
+      LOG(0,
+          "Unmatched argument, type = "
+              << getArgumentTypeName(static_cast<ArgumentType>(kvp.first[0].asUInt32()))
+              << ", error = " << kvp.second);
       for (size_t i = 1; i < kvp.first.size(); i++) {
         LOG(0, "  " << kvp.first[i]);
       }
@@ -108,22 +107,29 @@ struct Context {
 };
 
 struct BothFwd {
-  template<typename T, typename... Args>
-  static void apply(Context& ctx, T& obj, Args... args) {
+  template <typename T, typename... Args>
+  static void apply(Context& ctx, const char*, T& obj, Args... args) {
+    BothFwd::apply(ctx, obj, args...);
+  }
+
+  template <typename T, typename... Args> static void apply(Context& ctx, T& obj, Args... args) {
     obj.template applyInner<BothFwd>(ctx, args...);
     obj.verify(ctx, args...);
     obj.addArguments(ctx, args...);
   }
 
-  template <typename T, size_t N>
-  static void apply(Context& ctx, T (&t)[N]) {
+  template <typename T,
+            size_t N,
+            typename... Args,
+            std::enable_if_t<!std::is_same<std::remove_cv_t<T>, char>::value, int> = 0>
+  static void apply(Context& ctx, T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; ++i) {
-      BothFwd::apply(ctx, t[i]);
+      BothFwd::apply(ctx, t[i], args...);
     }
   }
 };
 
-}  // namespace NAMESPACE
+} // namespace NAMESPACE
 
 namespace risc0 {
 
@@ -137,30 +143,30 @@ void FUNCNAME(const Fp* dataConst, const Fp* globals, Fp rou) {
     ctx.x = pow(rou, row);
     Fp* data = const_cast<Fp*>(dataConst) + row;
     size_t idxMajor = reinterpret_cast<OneHot<Context, MAJOR_SPLIT_SIZE>*>(data)->get().asUInt32();
-    data += MAJOR_SPLIT_SIZE * NUM_ROWS; \
-    size_t idxMinor= reinterpret_cast<OneHot<Context, MINOR_SPLIT_SIZE>*>(data)->get().asUInt32();
-    data += MINOR_SPLIT_SIZE * NUM_ROWS; \
+    data += MAJOR_SPLIT_SIZE * NUM_ROWS;
+    size_t idxMinor = reinterpret_cast<OneHot<Context, MINOR_SPLIT_SIZE>*>(data)->get().asUInt32();
+    data += MINOR_SPLIT_SIZE * NUM_ROWS;
     size_t idx = idxMajor * MINOR_SPLIT_SIZE + idxMinor;
     BlockType type = static_cast<BlockType>(idx);
-    switch(type) {
-#define BLOCK_TYPE(name, count) \
-      case BlockType::name: { \
-        RegImpl* isValidRegs = reinterpret_cast<RegImpl*>(data); \
-        data += count * NUM_ROWS; \
-        name ## Block<Context>* typedBlock = reinterpret_cast<name ## Block<Context>*>(data); \
-        LOG(2, "Block type: " << #name); \
-        for (size_t i = 0; i < count; i++) { \
-          ctx.isValid = isValidRegs[i].get(); \
-          BothFwd::apply(ctx, typedBlock[i]); \
-        }} \
-        break;
+    switch (type) {
+#define BLOCK_TYPE(name, count)                                                                    \
+  case BlockType::name: {                                                                          \
+    RegImpl* isValidRegs = reinterpret_cast<RegImpl*>(data);                                       \
+    data += count * NUM_ROWS;                                                                      \
+    name##Block<Context>* typedBlock = reinterpret_cast<name##Block<Context>*>(data);              \
+    LOG(2, "Block type: " << #name);                                                               \
+    for (size_t i = 0; i < count; i++) {                                                           \
+      ctx.isValid = isValidRegs[i].get();                                                          \
+      BothFwd::apply(ctx, typedBlock[i]);                                                          \
+    }                                                                                              \
+  } break;
       BLOCK_TYPES
 #undef BLOCK_TYPE
-      case BlockType::Empty:
+    case BlockType::Empty:
       break;
     }
   }
   ctx.checkArgs();
 }
 
-}  // namespace risc0
+} // namespace risc0

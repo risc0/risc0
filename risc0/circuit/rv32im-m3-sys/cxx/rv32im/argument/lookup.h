@@ -17,19 +17,16 @@
 
 #include "rv32im/base/base.h"
 
-template<typename C>
-struct LookupArgument {
+template <typename C> struct LookupArgument {
   FDEV LookupArgument() = default;
   FDEV LookupArgument(Val<C> table, Val<C> val) : table(table), val(val) {}
   Val<C> table;
   Val<C> val;
 };
 
-template<typename C>
-struct MakeTableArgument {
+template <typename C> struct MakeTableArgument {
   FDEV MakeTableArgument() = default;
   FDEV MakeTableArgument(Val<C> table, Val<C> start) : table(table), start(start) {}
   Val<C> table;
   Val<C> start;
 };
-

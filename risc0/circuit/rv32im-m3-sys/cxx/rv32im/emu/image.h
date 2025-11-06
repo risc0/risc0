@@ -29,12 +29,12 @@ namespace risc0::rv32im {
 
 constexpr size_t MERKLE_TREE_DEPTH = 22;
 
-using Page = std::array<uint32_t, PAGE_SIZE_WORDS>;
+using Page = std::array<uint32_t, MPAGE_SIZE_WORDS>;
 using PagePtr = std::shared_ptr<const Page>;
 
 // A class to hold 'memory images'.  A memory image may not know all page data
-// (for example partial transfer of image for proving).  Internally, the memory image
-// is an actual tree of pages, with null pointer to 'unknown' pages.
+// (for example partial transfer of image for proving).  Internally, the memory
+// image is an actual tree of pages, with null pointer to 'unknown' pages.
 class MemoryImage {
 public:
   // Construct an 'all-unknown' memory image
@@ -43,12 +43,6 @@ public:
   static MemoryImage zeros();
   // Construct an image for a 'word map'
   static MemoryImage fromWords(const std::map<uint32_t, uint32_t>& words);
-  // Construct an image from elf files
-  static MemoryImage fromElfs(const std::string& kernel, const std::string& user);
-  // Construct an image from a single MM elf file
-  static MemoryImage fromRawElf(const std::string& elf);
-  // Construct an image from a single elf span.
-  static MemoryImage fromRawElfBytes(const ArrayRef<uint8_t>& elf);
 
   // Returns a pointer to the page data, fails if unavailable
   PagePtr getPage(size_t page);
@@ -62,6 +56,12 @@ public:
   std::map<uint32_t, PagePtr> getKnownPages() const;
   // Return a map of all 'known' digests
   std::map<uint32_t, Digest> getKnownDigests() const;
+
+  void setPageRaw(size_t pidx, PagePtr page);
+  void setDigestRaw(size_t didx, const Digest& digest);
+
+  void dumpZeros();
+  void dump();
 
 private:
   PagePtr zeroPage;

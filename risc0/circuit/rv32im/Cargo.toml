@@ -1,7 +1,7 @@
 [package]
 name = "risc0-circuit-rv32im"
 description = "RISC Zero circuit for rv32im"
-version = "4.0.3"
+version = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -52,6 +52,9 @@ risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 smallvec = { version = "1.13", optional = true }
 wide = { version = "0.7", optional = true }
+
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+gpu-guard = { workspace = true }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }

@@ -17,27 +17,23 @@
 
 #include "rv32im/base/poseidon2.h"
 
-template<typename C>
-struct PageInArgument {
+template <typename C> struct PageInArgument {
   Val<C> index;
   ValDigest<C> node;
 };
 
-template<typename C>
-struct PageInPartArgument {
+template <typename C> struct PageInPartArgument {
   Val<C> addr;
   Val<C> partNum;
   ValDigest<C> node;
 };
 
-template<typename C>
-struct PageOutArgument {
+template <typename C> struct PageOutArgument {
   Val<C> index;
   ValDigest<C> node;
 };
 
-template<typename C>
-struct PageOutPartArgument {
+template <typename C> struct PageOutPartArgument {
   Val<C> addr;
   Val<C> partNum;
   ValDigest<C> node;

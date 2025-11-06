@@ -13,6 +13,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+//! Precomputation of prover parameters from the Circom-formatted stark_verify_final.zkey (created
+//! via trusted setup ceremony) and the stark_verify.circom circuit.
+
 use std::path::PathBuf;
 
 use clap::Parser;

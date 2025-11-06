@@ -32,6 +32,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      bazel: ${{ steps.filter.outputs.bazel }}
       browser: ${{ steps.filter.outputs.browser }}
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
@@ -55,6 +56,10 @@ jobs:
               - rust-toolchain.toml
               - Cargo.lock
               - rzup/**
+            bazel:
+              - .github/actions/**
+              - .github/workflows/main.yml
+              - risc0/circuit/rv32im-m3-sys/cxx/**
             browser:
               - *base
               - examples/browser-verify/**
@@ -102,17 +107,19 @@ jobs:
   main-status-check:
     if: always()
     needs:
+      - bazel
       - browser
       - check
       - check-external
       - check-semver
       - check-template
       - clippy
+      # - compute-sanitizer
       - doc
+      - docker
       - docs-rs
       - examples
       - extra
-      - docker
       # - test-crates
       - test
       - web
@@ -222,7 +229,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
             partition: 1
             ci_profile: slow
           - os: macOS
@@ -249,6 +256,9 @@ jobs:
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
@@ -278,7 +288,7 @@ jobs:
       - name: test workspace
         run: ${{ matrix.test_command }} --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --exclude doc-test
       - name: test risc0-r0vm (disable-dev-mode)
-        run: cargo test --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
+        run: cargo nextest run --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
       - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}-${{ matrix.partition }}
@@ -299,7 +309,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
             ci_profile: slow
           - os: macOS
             arch: ARM64
@@ -348,6 +358,55 @@ jobs:
       - run: cargo check -p bonsai-sdk --all-features
       - run: sccache --show-stats
 
+  compute-sanitizer:
+    if: needs.changes.outputs.test == 'true'
+    needs: changes
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            arch: X64
+            device: nvidia_rtx_4000_ada
+            nvcc_arch: sm_89
+    env:
+      FEATURE: cuda
+      NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
+      RISC0_DEFAULT_PROVER_NUM_GPUS: 1
+      RISC0_BUILD_LOCKED: 1
+      RUST_BACKTRACE: full
+      # SCCACHE_RECACHE: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cuda
+      - run: nvidia-smi
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install risc0-groth16 $RISC0_GROTH16_VERSION
+      - run: cargo build --package risc0-r0vm -F cuda
+      - run: cargo build --package risc0-zkvm-methods
+      - name: compute-sanitizer memcheck
+        run: |
+          /usr/local/cuda/bin/compute-sanitizer \
+              --tool memcheck \
+              target/debug/r0vm \
+              --elf target/riscv-guest/risc0-zkvm-methods/risc0-zkvm-methods-guest/riscv32im-risc0-zkvm-elf/release/hello_commit.bin \
+              --receipt-kind groth16
+        shell: bash
+      - name: compute-sanitizer racecheck
+        run: |
+          /usr/local/cuda/bin/compute-sanitizer \
+              --tool racecheck \
+              target/debug/r0vm \
+              --elf target/riscv-guest/risc0-zkvm-methods/risc0-zkvm-methods-guest/riscv32im-risc0-zkvm-elf/release/hello_commit.bin \
+              --receipt-kind groth16
+        shell: bash
+      - run: sccache --show-stats
+
   examples:
     if: needs.changes.outputs.examples == 'true'
     needs: changes
@@ -361,7 +420,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
           - os: macOS
             arch: ARM64
             feature: default
@@ -395,10 +454,7 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - name: test in dev mode
-        run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace --exclude prover-example
-        working-directory: examples
-      - name: test prover example
-        run: ${{ matrix.test_command }} --release --locked -F $FEATURE -p prover-example
+        run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:
@@ -454,8 +510,8 @@ jobs:
     env:
       RUSTDOCFLAGS: "--cfg docsrs -D warnings"
       # Building with docs.rs config requires the nightly toolchain.
-      # nightly-2025-05-09 corresponds to 1.88
-      NIGHTLY_RUST_TOOLCHAIN: nightly-2025-05-09
+      # nightly-2025-06-20 corresponds to 1.89
+      NIGHTLY_RUST_TOOLCHAIN: nightly-2025-06-20
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -656,3 +712,37 @@ jobs:
         working-directory: web
       - run: bun run test
         working-directory: web
+
+  bazel:
+    if: needs.changes.outputs.bazel == 'true'
+    needs: changes
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.device }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            arch: X64
+            feature: cuda
+            device: nvidia_rtx_4000_ada
+            nvcc_arch: sm_89
+          - os: macOS
+            arch: ARM64
+            feature: default
+            device: apple_m2_pro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/bazelisk
+      - name: clang-format check
+        run: bazelisk build //... --config=clang-format-check
+        working-directory: risc0/circuit/rv32im-m3-sys/cxx
+      - name: Build & test
+        env:
+          CONFIG: ${{ matrix.config }}
+        run: |
+          bazelisk test //... \
+              --spawn_strategy=local \
+              --test_output=errors \
+              --strategy=TestRunner=local \
+              --@rules_cuda//cuda:archs=${{ matrix.nvcc_arch }}
+        working-directory: risc0/circuit/rv32im-m3-sys/cxx

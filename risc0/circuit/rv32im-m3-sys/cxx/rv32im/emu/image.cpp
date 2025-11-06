@@ -22,16 +22,16 @@
 
 namespace risc0::rv32im {
 
-size_t MEMORY_SIZE_PAGES = (1 << MERKLE_TREE_DEPTH);
+size_t MEMORY_SIZE_MPAGES = (1 << MERKLE_TREE_DEPTH);
 
 Digest hashPage(const uint32_t* data) {
   std::array<Fp, 24> cells;
   cells.fill(0);
   // Load data into felts as 16 bit values
-  for (size_t i = 0; i < PAGE_SIZE_WORDS / 8; i++) {
+  for (size_t i = 0; i < MPAGE_SIZE_WORDS / 8; i++) {
     for (size_t j = 0; j < 8; j++) {
-      cells[2 * j] = Fp::fromRaw(data[i * 8 + j] & 0xffff);
-      cells[2 * j + 1] = Fp::fromRaw(data[i * 8 + j] >> 16);
+      cells[2 * j] = Fp(data[i * 8 + j] & 0xffff);
+      cells[2 * j + 1] = Fp(data[i * 8 + j] >> 16);
     }
     p2impl::poseidonSponge(cells);
   }
@@ -72,7 +72,7 @@ MemoryImage MemoryImage::fromWords(const std::map<uint32_t, uint32_t>& words) {
   uint32_t curPageID = 0xffffffff;
   std::shared_ptr<Page> curPage;
   for (const auto& kvp : words) {
-    uint32_t pageID = kvp.first / PAGE_SIZE_WORDS;
+    uint32_t pageID = kvp.first / MPAGE_SIZE_WORDS;
     if (pageID != curPageID) {
       if (curPage) {
         ret.setPage(curPageID, curPage);
@@ -81,7 +81,7 @@ MemoryImage MemoryImage::fromWords(const std::map<uint32_t, uint32_t>& words) {
       curPageID = pageID;
     }
     // printf("store(0x%08x, 0x%08x)\n", kvp.first, kvp.second);
-    (*curPage)[kvp.first % PAGE_SIZE_WORDS] = kvp.second;
+    (*curPage)[kvp.first % MPAGE_SIZE_WORDS] = kvp.second;
   }
   if (curPage) {
     ret.setPage(curPageID, curPage);
@@ -89,37 +89,21 @@ MemoryImage MemoryImage::fromWords(const std::map<uint32_t, uint32_t>& words) {
   return ret;
 }
 
-MemoryImage MemoryImage::fromElfs(const std::string& kernel, const std::string& user) {
-  std::map<uint32_t, uint32_t> words;
-  loadWithKernel(words, kernel, user);
-  return MemoryImage::fromWords(words);
-}
-
-MemoryImage MemoryImage::fromRawElf(const std::string& elf) {
-  std::map<uint32_t, uint32_t> words;
-  loadRaw(words, elf);
-  return MemoryImage::fromWords(words);
-}
-
-MemoryImage MemoryImage::fromRawElfBytes(const ArrayRef<uint8_t>& elf) {
-  std::map<uint32_t, uint32_t> words;
-  loadRawBytes(words, elf);
-  return MemoryImage::fromWords(words);
-}
-
 PagePtr MemoryImage::getPage(size_t page) {
+  // LOG(1, "getPage: " << HexWord{static_cast<uint32_t>(page)});
+
   // If page exists, return it
   auto it = pages.find(page);
   if (it != pages.end()) {
     return it->second;
   }
   // Otherwise try an expand
-  if (expandIfZero(MEMORY_SIZE_PAGES + page)) {
+  if (expandIfZero(MEMORY_SIZE_MPAGES + page)) {
     pages[page] = zeroPage;
     return zeroPage;
   }
   // Otherwise fail
-  std::cerr << "Unavailable page: " << page << "\n";
+  LOG(0, "Unavailable page: " << HexWord{static_cast<uint32_t>(page)});
   throw std::runtime_error("Attempting to read unavailable page");
 }
 
@@ -127,13 +111,13 @@ PagePtr MemoryImage::getPage(size_t page) {
 void MemoryImage::setPage(size_t page, PagePtr data) {
   // printf("setPage(0x%08zx)\n", page);
   // If page is zero, reify it so I have proper uncles
-  expandIfZero(MEMORY_SIZE_PAGES + page);
+  expandIfZero(MEMORY_SIZE_MPAGES + page);
   // Set page
   pages[page] = data;
   // Set the diest value
-  digests[MEMORY_SIZE_PAGES + page] = hashPage(data->data());
+  digests[MEMORY_SIZE_MPAGES + page] = hashPage(data->data());
   // Fixup digest values
-  fixupDigests(MEMORY_SIZE_PAGES + page);
+  fixupDigests(MEMORY_SIZE_MPAGES + page);
 }
 
 const Digest& MemoryImage::getDigest(size_t idx) const {
@@ -232,6 +216,28 @@ bool MemoryImage::expandIfZero(size_t idx) {
     return true;
   }
   return false;
+}
+
+void MemoryImage::setPageRaw(size_t pidx, PagePtr page) {
+  pages[pidx] = page;
+}
+
+void MemoryImage::setDigestRaw(size_t didx, const Digest& digest) {
+  digests[didx] = digest;
+}
+
+void MemoryImage::dumpZeros() {
+  LOG(0, "Zero Digests");
+  for (auto& digest : zeroDigests) {
+    LOG(0, "digest: " << digest);
+  }
+}
+
+void MemoryImage::dump() {
+  LOG(0, "MemoryImage Digests");
+  for (auto& digest : getKnownDigests()) {
+    LOG(0, "digest: " << HexWord{digest.first} << ": " << digest.second);
+  }
 }
 
 } // namespace risc0::rv32im

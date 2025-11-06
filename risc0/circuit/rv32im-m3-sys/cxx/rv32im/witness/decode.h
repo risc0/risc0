@@ -18,16 +18,22 @@
 #include "rv32im/witness/mem.h"
 
 struct FetchWitness {
+  uint32_t mode;
   uint32_t iCacheCycle;
+  uint32_t loadCycle;
   uint32_t pc;
   uint32_t nextPc;
 };
 
 struct DecodeWitness {
+  uint8_t opcode;
+  uint8_t rd;
+  uint8_t rs1;
+  uint8_t rs2;
+  uint32_t imm;
   FetchWitness fetch;
-  uint32_t loadCycle;
-  MemReadWitness load0;
-  MemReadWitness load1;
+  VirtMemReadWitness load0;
+  VirtMemReadWitness load1;
   uint32_t inst;
   uint32_t count;
 };

@@ -13,6 +13,7 @@ tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]

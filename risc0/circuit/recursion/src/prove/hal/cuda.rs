@@ -46,16 +46,19 @@ use crate::{
 
 use super::{CircuitAccumulator, CircuitWitnessGenerator};
 
-type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
-type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
-type CudaCircuitHalPoseidon254 = CudaCircuitHal<CudaHashPoseidon254>;
+pub type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
+pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
+pub type CudaCircuitHalPoseidon254 = CudaCircuitHal<CudaHashPoseidon254>;
 
-struct CudaCircuitHal<CH: CudaHash> {
+pub struct CudaCircuitHal<CH: CudaHash> {
     _hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
     pub fn new(_hal: Rc<CudaHal<CH>>) -> Self {
+        #[cfg(test)]
+        gpu_guard::assert_gpu_semaphore_held();
+
         Self { _hal }
     }
 }
@@ -145,7 +148,8 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         const EXP_PO2: usize = log2_ceil(INV_RATE);
         let domain = steps * INV_RATE;
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
-        let poly_mix_pows = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
+        let poly_mix_pows_vec = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
+        let poly_mix_pows = CudaBuffer::copy_from("poly_mix", &poly_mix_pows_vec[..]);
 
         let check = check.as_device_ptr();
         let ctrl = ctrl.as_device_ptr();
@@ -153,6 +157,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let accum = accum.as_device_ptr();
         let mix = mix.as_device_ptr();
         let out = out.as_device_ptr();
+        let poly_mix_pows = poly_mix_pows.as_device_ptr();
 
         ffi_wrap(|| unsafe {
             risc0_circuit_recursion_cuda_eval_check(
@@ -165,7 +170,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 &rou as *const BabyBearElem,
                 po2 as u32,
                 domain as u32,
-                poly_mix_pows.as_ptr(),
+                poly_mix_pows.as_ptr() as *const BabyBearExtElem,
             )
         })
         .unwrap();
@@ -186,6 +191,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
     }
 }
 
+#[cfg_attr(feature = "dual", expect(dead_code))]
 pub(crate) fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>> {
     match hashfn {
         "poseidon2" => {
@@ -221,6 +227,7 @@ mod tests {
     use crate::prove::hal::cpu::CpuCircuitHal;
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eval_check() {
         const PO2: usize = 4;
         let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());

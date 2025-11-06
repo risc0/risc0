@@ -730,6 +730,7 @@ version = "0.1.0"
 dependencies = [
  "bn254-core",
  "bn254-methods",
+ "gpu-guard",
  "hex",
  "risc0-zkvm",
  "substrate-bn",
@@ -984,6 +985,7 @@ dependencies = [
  "chess-core",
  "chess-methods",
  "clap",
+ "gpu-guard",
  "risc0-zkvm",
  "shakmaty",
 ]
@@ -1375,8 +1377,18 @@ version = "0.20.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6f63b86c8a8826a49b8c21f08a2d07338eec8d900540f8630dc76284be802989"
 dependencies = [
- "darling_core",
- "darling_macro",
+ "darling_core 0.20.10",
+ "darling_macro 0.20.10",
+]
+
+[[package]]
+name = "darling"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9cdf337090841a411e2a7f3deb9187445851f91b309c0c0a29e05f74a00a48c0"
+dependencies = [
+ "darling_core 0.21.3",
+ "darling_macro 0.21.3",
 ]
 
 [[package]]
@@ -1394,12 +1406,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "darling_core"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1247195ecd7e3c85f83c8d2a366e4210d588e802133e1e355180a9870b517ea4"
+dependencies = [
+ "fnv",
+ "ident_case",
+ "proc-macro2",
+ "quote",
+ "strsim",
+ "syn 2.0.99",
+]
+
+[[package]]
 name = "darling_macro"
 version = "0.20.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d336a2a514f6ccccaa3e09b02d41d35330c07ddf03a62165fcec10bb561c7806"
 dependencies = [
- "darling_core",
+ "darling_core 0.20.10",
+ "quote",
+ "syn 2.0.99",
+]
+
+[[package]]
+name = "darling_macro"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d38308df82d1080de0afee5d069fa14b0326a88c14f15c5ccda35b4a6c414c81"
+dependencies = [
+ "darling_core 0.21.3",
  "quote",
  "syn 2.0.99",
 ]
@@ -1462,7 +1499,7 @@ version = "0.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2d5bcf7b024d6835cfb3d473887cd966994907effbe9227e8c8219824d06c4e8"
 dependencies = [
- "darling",
+ "darling 0.20.10",
  "proc-macro2",
  "quote",
  "syn 2.0.99",
@@ -1527,6 +1564,7 @@ dependencies = [
  "clap",
  "digital-signature-core",
  "digital-signature-methods",
+ "gpu-guard",
  "risc0-zkvm",
  "sha2",
  "test-log",
@@ -1957,6 +1995,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "fs2"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9564fc758e15025b46aa6643b1b77d047d1a56a1aea6e01002ac0c7026876213"
+dependencies = [
+ "libc",
+ "winapi",
+]
+
+[[package]]
 name = "funty"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2138,6 +2186,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8d1add55171497b4705a648c6b583acafb01d58050a51727785f0b2c8e0a2b2"
 
 [[package]]
+name = "gpu-guard"
+version = "0.1.0"
+dependencies = [
+ "fs2",
+ "gpu-guard-macros",
+ "once_cell",
+]
+
+[[package]]
+name = "gpu-guard-macros"
+version = "0.1.0"
+dependencies = [
+ "darling 0.21.3",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.99",
+]
+
+[[package]]
 name = "groth16-verifier-methods"
 version = "0.1.0"
 dependencies = [
@@ -2235,6 +2302,7 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 name = "hello-world"
 version = "0.1.0"
 dependencies = [
+ "gpu-guard",
  "hello-world-methods",
  "risc0-zkvm",
  "tracing-subscriber 0.3.19",
@@ -2272,15 +2340,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c49c37c09c17a53d937dfbb742eb3a961d65a994e6bcdcf37e7399d0cc8ab5e"
 dependencies = [
  "digest 0.10.7",
-]
-
-[[package]]
-name = "home"
-version = "0.5.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "589533453244b0995c858700322199b2becb13b627df2851f64a2775d024abcf"
-dependencies = [
- "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -2702,6 +2761,7 @@ dependencies = [
 name = "json-example"
 version = "0.1.0"
 dependencies = [
+ "gpu-guard",
  "json-core",
  "json-methods",
  "risc0-zkvm",
@@ -2756,6 +2816,7 @@ dependencies = [
 name = "jwt-validator"
 version = "0.1.0"
 dependencies = [
+ "gpu-guard",
  "jwt-core",
  "jwt-methods",
  "risc0-zkvm",
@@ -2899,12 +2960,6 @@ dependencies = [
  "bitflags 2.9.0",
  "libc",
 ]
-
-[[package]]
-name = "linux-raw-sys"
-version = "0.4.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d26c52dbd32dccf2d10cac7725f8eae5296885fb5703b261f7d0a0739ec807ab"
 
 [[package]]
 name = "linux-raw-sys"
@@ -3220,7 +3275,6 @@ checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
 dependencies = [
  "num-integer",
  "num-traits",
- "serde",
 ]
 
 [[package]]
@@ -3476,6 +3530,7 @@ dependencies = [
 name = "password-checker"
 version = "0.12.0"
 dependencies = [
+ "gpu-guard",
  "password-checker-core",
  "password-checker-methods",
  "rand 0.9.1",
@@ -3714,6 +3769,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "clap",
+ "gpu-guard",
  "prorata-core",
  "prorata-methods",
  "risc0-zkvm",
@@ -3790,22 +3846,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "52c2c1bf36ddb1a1c396b3601a3cec27c2462e45f07c386894ec3ccf5332bd16"
 dependencies = [
  "prost",
-]
-
-[[package]]
-name = "prover-example"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bytemuck",
- "num-bigint 0.4.6",
- "risc0-circuit-keccak",
- "risc0-zkp",
- "risc0-zkvm",
- "risc0-zkvm-methods",
- "tracing",
- "tracing-subscriber 0.3.19",
- "workerpool",
 ]
 
 [[package]]
@@ -4174,7 +4214,7 @@ checksum = "3df6368f71f205ff9c33c076d170dd56ebf68e8161c733c0caa07a7a5509ed53"
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -4229,7 +4269,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -4249,7 +4289,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "4.0.2"
+version = "5.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -4257,13 +4297,13 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -4272,6 +4312,7 @@ dependencies = [
  "downloader",
  "hex",
  "lazy-regex",
+ "liblzma",
  "metal",
  "rand 0.9.1",
  "rayon",
@@ -4287,18 +4328,18 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "4.0.2"
+version = "5.0.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "4.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -4329,8 +4370,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-rv32im-m3"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "cfg-if",
+ "risc0-binfmt",
+ "risc0-circuit-rv32im",
+ "risc0-circuit-rv32im-m3-sys",
+ "risc0-sys",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
+ "serde",
+ "tracing",
+]
+
+[[package]]
+name = "risc0-circuit-rv32im-m3-sys"
+version = "0.0.0"
+dependencies = [
+ "cc",
+ "glob",
+ "risc0-build-kernel",
+ "risc0-sppark",
+ "risc0-sys",
+ "tracing",
+]
+
+[[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "4.0.2"
+version = "5.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -4338,13 +4408,13 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sppark",
  "risc0-sys",
- "sppark",
 ]
 
 [[package]]
 name = "risc0-core"
-version = "3.0.1"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "nvtx",
@@ -4354,7 +4424,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -4388,7 +4458,7 @@ dependencies = [
  "anyhow",
  "blst",
  "risc0-build-kernel",
- "sppark",
+ "risc0-sppark",
 ]
 
 [[package]]
@@ -4406,20 +4476,28 @@ name = "risc0-keccak-example"
 version = "0.12.0"
 dependencies = [
  "clap",
+ "gpu-guard",
  "hex",
  "keccak-methods",
  "risc0-zkvm",
 ]
 
 [[package]]
+name = "risc0-sppark"
+version = "0.1.14"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "risc0-sys"
-version = "1.5.1"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blst",
  "cust",
  "risc0-build-kernel",
- "sppark",
+ "risc0-sppark",
 ]
 
 [[package]]
@@ -4429,11 +4507,12 @@ dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
  "risc0-zkvm-platform",
+ "sha2",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "3.0.3"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -4443,6 +4522,7 @@ dependencies = [
  "cust",
  "digest 0.10.7",
  "ff",
+ "generic-array",
  "hex",
  "hex-literal",
  "metal",
@@ -4472,6 +4552,7 @@ dependencies = [
  "borsh",
  "bytemuck",
  "bytes",
+ "cfg-if",
  "derive_more",
  "elf",
  "enum-map",
@@ -4492,6 +4573,7 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
+ "risc0-circuit-rv32im-m3",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
@@ -4510,21 +4592,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-zkvm-methods"
-version = "3.0.0"
-dependencies = [
- "borsh",
- "ciborium",
- "postcard",
- "risc0-build",
- "risc0-zkvm",
- "risc0-zkvm-platform",
- "rmp-serde",
- "serde",
- "tracing-subscriber 0.3.19",
-]
-
-[[package]]
 name = "risc0-zkvm-platform"
 version = "2.3.0"
 dependencies = [
@@ -4540,7 +4607,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "3.0.0"
+version = "5.0.0"
 
 [[package]]
 name = "rkyv"
@@ -4731,19 +4798,6 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.38.44"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fdb5bc1ae2baa591800df16c9ca78619bf65c0488b41b96ccec5d11220d8c154"
-dependencies = [
- "bitflags 2.9.0",
- "errno",
- "libc",
- "linux-raw-sys 0.4.15",
- "windows-sys 0.59.0",
-]
-
-[[package]]
-name = "rustix"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17f8dcd64f141950290e45c99f7710ede1b600297c91818bb30b3667c0f45dc0"
@@ -4751,7 +4805,7 @@ dependencies = [
  "bitflags 2.9.0",
  "errno",
  "libc",
- "linux-raw-sys 0.9.2",
+ "linux-raw-sys",
  "windows-sys 0.59.0",
 ]
 
@@ -4855,15 +4909,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "scc"
-version = "2.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea091f6cac2595aa38993f04f4ee692ed43757035c36e67c180b6828356385b1"
-dependencies = [
- "sdd",
-]
-
-[[package]]
 name = "schemars"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4892,12 +4937,6 @@ name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
-
-[[package]]
-name = "sdd"
-version = "3.0.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b07779b9b918cc05650cb30f404d4d7835d26df37c235eded8a6832e2fb82cca"
 
 [[package]]
 name = "seahash"
@@ -5026,7 +5065,7 @@ version = "3.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "de90945e6565ce0d9a25098082ed4ee4002e047cb59892c318d66821e14bb30f"
 dependencies = [
- "darling",
+ "darling 0.20.10",
  "proc-macro2",
  "quote",
  "syn 2.0.99",
@@ -5043,35 +5082,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "serial_test"
-version = "3.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b258109f244e1d6891bf1053a55d63a5cd4f8f4c30cf9a1280989f80e7a1fa9"
-dependencies = [
- "futures",
- "log",
- "once_cell",
- "parking_lot",
- "scc",
- "serial_test_derive",
-]
-
-[[package]]
-name = "serial_test_derive"
-version = "3.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d69265a08751de7844521fd15003ae0a888e035773ba05695c5c759a6f89eef"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.99",
-]
-
-[[package]]
 name = "sha"
 version = "0.12.0"
 dependencies = [
  "clap",
+ "gpu-guard",
  "hex",
  "risc0-zkvm",
  "sha-methods",
@@ -5086,9 +5101,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.8"
+version = "0.10.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793db75ad2bcafc3ffa7c68b215fee268f537982cd901d132f89c6343f3a3dc8"
+checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -5177,6 +5192,7 @@ dependencies = [
 name = "smartcore-ml"
 version = "0.1.0"
 dependencies = [
+ "gpu-guard",
  "risc0-zkvm",
  "rmp-serde",
  "smartcore",
@@ -5217,16 +5233,6 @@ checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
 dependencies = [
  "base64ct",
  "der",
-]
-
-[[package]]
-name = "sppark"
-version = "0.1.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6bdc4f02f557e3037bbe2a379cac8be6e014a67beb7bf0996b536979392f6361"
-dependencies = [
- "cc",
- "which",
 ]
 
 [[package]]
@@ -5355,7 +5361,7 @@ dependencies = [
  "fastrand",
  "getrandom 0.3.1",
  "once_cell",
- "rustix 1.0.0",
+ "rustix",
  "windows-sys 0.59.0",
 ]
 
@@ -5840,6 +5846,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 name = "voting-machine"
 version = "0.12.0"
 dependencies = [
+ "gpu-guard",
  "hex",
  "risc0-zkvm",
  "test-log",
@@ -5902,6 +5909,7 @@ dependencies = [
 name = "wasm"
 version = "0.1.0"
 dependencies = [
+ "gpu-guard",
  "risc0-zkvm",
  "wasm-methods",
  "wat",
@@ -6079,18 +6087,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2210b291f7ea53617fbafcc4939f10914214ec15aace5ba62293a668f322c5c9"
 dependencies = [
  "rustls-pki-types",
-]
-
-[[package]]
-name = "which"
-version = "4.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87ba24419a2078cd2b0f2ede2691b6c66d8e47836da3b6db8265ebad47afbfc7"
-dependencies = [
- "either",
- "home",
- "once_cell",
- "rustix 0.38.44",
 ]
 
 [[package]]
@@ -6283,9 +6279,9 @@ dependencies = [
 name = "wordle"
 version = "0.1.0"
 dependencies = [
+ "gpu-guard",
  "rand 0.9.1",
  "risc0-zkvm",
- "serial_test",
  "wordle-core",
  "wordle-methods",
 ]
@@ -6303,16 +6299,6 @@ name = "wordle-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
-]
-
-[[package]]
-name = "workerpool"
-version = "1.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "27acc04c753780224f8f6c565db754da04d687b93150c258a4ddb3c4682543d3"
-dependencies = [
- "num_cpus",
- "parking_lot",
 ]
 
 [[package]]
@@ -6350,6 +6336,7 @@ name = "xgboost-example"
 version = "0.1.0"
 dependencies = [
  "forust-ml",
+ "gpu-guard",
  "risc0-zkvm",
  "rmp-serde",
  "serde_json",

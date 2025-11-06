@@ -21,20 +21,26 @@
 namespace risc0::rv32im {
 
 inline constexpr const char* getBlockTypeName(BlockType type) {
-  switch(type) {
-#define BLOCK_TYPE(name, count) case BlockType::name: return #name;
-BLOCK_TYPES
+  switch (type) {
+#define BLOCK_TYPE(name, count)                                                                    \
+  case BlockType::name:                                                                            \
+    return #name;
+    BLOCK_TYPES
 #undef BLOCK_TYPE
-    default: return "***UNKNOWN***";
+  default:
+    return "***UNKNOWN***";
   }
 }
 
 inline constexpr size_t getBlockCountPerRow(BlockType type) {
-  switch(type) {
-#define BLOCK_TYPE(name, count) case BlockType::name: return count;
-BLOCK_TYPES
+  switch (type) {
+#define BLOCK_TYPE(name, count)                                                                    \
+  case BlockType::name:                                                                            \
+    return count;
+    BLOCK_TYPES
 #undef BLOCK_TYPE
-    default: return 0;
+  default:
+    return 0;
   }
 }
 
@@ -42,9 +48,12 @@ size_t computeMaxWitPerRow(bool tune = false);
 size_t computeMaxDataPerRow(bool tune = false);
 size_t computeMaxAccumPerRow(bool tune = false);
 size_t computeAccumTopSize();
-inline size_t computeTotalAccum() { return computeMaxAccumPerRow() + computeAccumTopSize(); }
+inline size_t computeTotalAccum() {
+  return computeMaxAccumPerRow() + computeAccumTopSize();
+}
 size_t computeMaxDegree(bool tune = false);
 
-FpExt computeConstraintPoly(const FpExt* data, const Fp* globals, const FpExt* accMix, FpExt ecMix, FpExt z);
+FpExt computeConstraintPoly(
+    const FpExt* data, const Fp* globals, const FpExt* accMix, FpExt ecMix, FpExt z);
 
 } // namespace risc0::rv32im

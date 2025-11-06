@@ -19,12 +19,12 @@ use risc0_zkp::core::digest::Digest;
 use risc0_zkp::digest;
 
 pub const KECCAK_CONTROL_IDS: &[Digest] = &[
-    digest!("92631f2b8dc9431cb2abdc1e82ac2e30deaf086a36e51e4aa60ad0516bf5b748"), // keccak_lift po2=14
-    digest!("cacefc600b59de2dbb280764f448dc2b6c6fb557fb05800aedd66237b2838c60"), // keccak_lift po2=15
-    digest!("8120201571ad74095087207325b3251d97b3d3391e897922a6cf2f3f3693e850"), // keccak_lift po2=16
-    digest!("1211351795b7710d6b936e50a5ecc51ae556b07385dc854539b7da2732dba16f"), // keccak_lift po2=17
-    digest!("41db96728251e1740ee3471a400f2a3ce6108d0f889ecd5094005577f8502a34"), // keccak_lift po2=18
+    digest!("4de45d281348ee2a73935d1a23926b5c003d414d71a2ea170798331ea0621508"), // keccak_lift po2=14
+    digest!("4887d251c57a5722f3d2774591081b6b4c55c350bbd6b2428eb3d21bf6b86a12"), // keccak_lift po2=15
+    digest!("93cbdf680e9de31203a8381105c2014cd4b1dc2beda6861a33ace00260294607"), // keccak_lift po2=16
+    digest!("a527526231050c44d359d242b77e2c03fa5c46616321036ddfd4f43050f00a51"), // keccak_lift po2=17
+    digest!("f383c83b035a493c290611484e3dfc60302d2b5c36748a0d2545f5489d9b9655"), // keccak_lift po2=18
 ];
 
 pub const KECCAK_CONTROL_ROOT: Digest =
-    digest!("abd93866a6878528f29ffc6ea6d9e428cc9ad020a540dd11f1d45e5e9bb6db71");
+    digest!("de5b023a90a1121f26239e2530d12300ea03190c2401436f9f3121368a4f220a");

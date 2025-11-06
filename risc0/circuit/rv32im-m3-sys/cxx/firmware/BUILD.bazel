@@ -1,0 +1,13 @@
+load("//bazel/toolchain/rv32im-linux:defs.bzl", "risc0_cc_firmware_binary")
+
+risc0_cc_firmware_binary(
+    visibility = ["//visibility:public"],
+    name = "firmware",
+    srcs = [
+        "entry.s",
+        "firmware.cpp",
+    ],
+    deps = [
+        "//rv32im/base:platform",
+    ],
+)

@@ -27,11 +27,14 @@ enum class Opcode : uint8_t {
 };
 
 inline const char* getOpcodeName(Opcode opcode) {
-  switch(opcode) {
-#define ENTRY(name, ...) case Opcode::name: return #name;
+  switch (opcode) {
+#define ENTRY(name, ...)                                                                           \
+  case Opcode::name:                                                                               \
+    return #name;
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
-    default: return "***UNKNOWN***";
+  default:
+    return "***UNKNOWN***";
   }
 }
 
@@ -72,4 +75,4 @@ struct DecodedInst {
 
 Opcode getOpcode(const DecodedInst& inst);
 
-}  // namespace risc0::rv32im
+} // namespace risc0::rv32im

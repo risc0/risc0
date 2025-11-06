@@ -1,7 +1,7 @@
 [package]
 name = "risc0-circuit-keccak"
 description = "RISC Zero circuit for keccak"
-version = "4.0.3"
+version = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -31,10 +31,12 @@ risc0-sys = { workspace = true, optional = true }
 rayon = { version = "1.10", optional = true }
 liblzma = { version = "0.4", optional = true, features = ["static"] }
 
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+gpu-guard = { workspace = true }
+
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
 rand = "0.9.1"
-risc0-circuit-keccak-methods = { path = "methods" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 

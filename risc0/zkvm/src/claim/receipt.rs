@@ -152,18 +152,52 @@ impl ReceiptClaim {
         Ok(())
     }
 
+    #[cfg(feature = "rv32im-m3")]
+    pub(crate) fn decode_m3_with_output(
+        seal: &[u32],
+        output: Option<Output>,
+    ) -> anyhow::Result<ReceiptClaim> {
+        let claim = risc0_circuit_rv32im_m3::Claim::decode(seal)?;
+        tracing::debug!("claim: {claim:#?}");
+
+        let exit_code = claim.exit_code()?;
+        let post_state = match exit_code {
+            ExitCode::Halted(_) => Digest::ZERO,
+            _ => claim.post_state,
+        };
+
+        let output = if let Some(output) = output {
+            MaybePruned::Value(Some(output))
+        } else {
+            MaybePruned::Pruned(claim.output.unwrap_or_default())
+        };
+
+        Ok(ReceiptClaim {
+            pre: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: claim.pre_state,
+            }),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: post_state,
+            }),
+            exit_code,
+            input: MaybePruned::Pruned(Digest::ZERO),
+            output,
+        })
+    }
+
+    #[cfg(feature = "rv32im-m3")]
+    pub(crate) fn decode_from_seal_v3(seal: &[u32]) -> anyhow::Result<ReceiptClaim> {
+        Self::decode_m3_with_output(seal, None)
+    }
+
     pub(crate) fn decode_from_seal_v2(
         seal: &[u32],
         _po2: Option<u32>,
     ) -> anyhow::Result<ReceiptClaim> {
         let claim = Rv32imV2Claim::decode(seal)?;
         tracing::debug!("claim: {claim:#?}");
-
-        // TODO(flaub): implement this once shutdownCycle is supported in rv32im-v2 circuit
-        // if let Some(po2) = po2 {
-        //     let segment_threshold = (1 << po2) - MAX_INSN_CYCLES;
-        //     ensure!(claim.shutdown_cycle.unwrap() == segment_threshold as u32);
-        // }
 
         let exit_code = exit_code_from_terminate_state(&claim.terminate_state)?;
         let post_state = match exit_code {

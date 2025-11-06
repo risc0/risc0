@@ -17,22 +17,17 @@
 
 #include "rv32im/base/platform.h"
 
-template<typename C>
-using Val = typename C::ValImpl;
+template <typename C> using Val = typename C::ValImpl;
 
-template<typename C>
-using ValExt = typename C::ValExtImpl;
+template <typename C> using ValExt = typename C::ValExtImpl;
 
-template<typename C>
-using Reg = typename C::RegImpl;
+template <typename C> using Reg = typename C::RegImpl;
 
-template<typename C>
-using ArgCountReg = typename C::ArgCountRegImpl;
+template <typename C> using ArgCountReg = typename C::ArgCountRegImpl;
 
 // A 32 bit value represented by high/low parts
 // Declared early because it is used in some arguments
-template<typename C>
-struct ValU32 {
+template <typename C> struct ValU32 {
   FDEV ValU32() = default;
   FDEV ValU32(Val<C> low, Val<C> high) : low(low), high(high) {}
   Val<C> low;
@@ -41,3 +36,13 @@ struct ValU32 {
 
 // Reduce typing a bit
 #define CTX MTHR C& ctx
+
+// Picus directives are no-ops when not using the extractor
+#ifndef PICUS
+#define PICUS_INPUT(ctx, x)
+#define RANGE_PRECONDITION(ctx, low, x, high)
+#define RANGE_POSTCONDITION(ctx, low, x, high)
+#define PICUS_CALL(ctx, outputs, name, inputs)
+#define PICUS_BEGIN_OUTLINE(...)
+#define PICUS_END_OUTLINE
+#endif

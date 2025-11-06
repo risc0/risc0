@@ -14,7 +14,7 @@ risc0-build-kernel = { workspace = true }
 [dependencies]
 anyhow = "1.0.98"
 blst = { version = "0.3.15", optional = true }
-sppark = { workspace = true, optional = true }
+risc0-sppark = { workspace = true, optional = true }
 
 [dev-dependencies]
 test-log = { version = "0.2.17", default-features = false, features = [
@@ -24,6 +24,8 @@ tracing = "0.1.41"
 
 [features]
 default = []
-cuda = ["dep:blst", "dep:sppark"]
+cuda = ["dep:blst", "risc0-sppark/cuda"]
 metal = []
+# Build code used for preprocessing of prover parameters.
+# Used in the xtask setup-groth16 command for the development of this crate.
 setup = []

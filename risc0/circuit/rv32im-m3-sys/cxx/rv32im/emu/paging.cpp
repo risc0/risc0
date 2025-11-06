@@ -13,13 +13,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "core/log.h"
 #include "rv32im/emu/paging.h"
+#include "core/log.h"
 
 namespace risc0::rv32im {
 
 void PagedMemory::addCostPage() {
-  size_t NUM_PARTS = PAGE_SIZE_WORDS / PAGE_PART_SIZE;
+  size_t NUM_PARTS = MPAGE_SIZE_WORDS / MPAGE_PART_SIZE;
   counts[size_t(BlockType::P2Block)] += 2 * NUM_PARTS;
   counts[size_t(BlockType::P2ExtRound)] += 2 * 8 * NUM_PARTS;
   counts[size_t(BlockType::P2IntRounds)] += 2 * NUM_PARTS;
@@ -35,7 +35,7 @@ void PagedMemory::addCostNode() {
   counts[size_t(BlockType::P2IntRounds)] += 2;
   counts[size_t(BlockType::PageInNode)]++;
   counts[size_t(BlockType::PageOutNode)]++;
-  counts[size_t(BlockType::PageUncle)]++;  // Technically we don't always need this
+  counts[size_t(BlockType::PageUncle)]++; // Technically we don't always need this
 }
 
 void PagedMemory::recomputeCost() {
@@ -47,23 +47,22 @@ void PagedMemory::recomputeCost() {
   pagingCost = tot;
 }
 
-
 void PagedMemory::commit(const std::vector<PageDetails*>& pages) {
   // Set initial root
   toFpDigest(trace.getGlobals().rootIn, image.getDigest(1));
   // Page in all the pages that were read
-  auto itNodeEnd = loaded.lower_bound(MEMORY_SIZE_PAGES);
+  auto itNodeEnd = loaded.lower_bound(MEMORY_SIZE_MPAGES);
   for (auto it = itNodeEnd; it != loaded.end(); ++it) {
-    LOG(2, "Paging in: " << *it - MEMORY_SIZE_PAGES);
-    pageInPage(*it - MEMORY_SIZE_PAGES);
+    LOG(2, "Paging in: " << *it - MEMORY_SIZE_MPAGES);
+    pageInPage(*it - MEMORY_SIZE_MPAGES);
   }
   // Page in all nodes that were read
   for (auto it = loaded.begin(); it != itNodeEnd; ++it) {
     pageInNode(*it);
   }
   // Page out all the new pages, update image
-  for (auto it = loaded.lower_bound(MEMORY_SIZE_PAGES); it != loaded.end(); ++it) {
-    size_t page = *it - MEMORY_SIZE_PAGES;
+  for (auto it = loaded.lower_bound(MEMORY_SIZE_MPAGES); it != loaded.end(); ++it) {
+    size_t page = *it - MEMORY_SIZE_MPAGES;
     LOG(2, "Paging out: " << page);
     pageOutPage(page, pages[page]);
   }
@@ -86,24 +85,24 @@ void PagedMemory::commit(const std::vector<PageDetails*>& pages) {
 void PagedMemory::pageInPage(uint32_t page) {
   PagePtr pagePtr = image.getPage(page);
   Digest cur = Digest::zero();
-  size_t NUM_PARTS = PAGE_SIZE_WORDS / PAGE_PART_SIZE;
+  size_t NUM_PARTS = MPAGE_SIZE_WORDS / MPAGE_PART_SIZE;
   for (size_t i = 0; i < NUM_PARTS; i++) {
     std::array<Fp, p2impl::CELLS_RATE> data;
     auto& pip = trace.makePageInPart();
-    uint32_t addr = page * PAGE_SIZE_WORDS + i * PAGE_PART_SIZE;
+    uint32_t addr = page * MPAGE_SIZE_WORDS + i * MPAGE_PART_SIZE;
     pip.addr = addr;
     toFpDigest(pip.in, cur);
-    for (size_t j = 0; j < PAGE_PART_SIZE; j++) {
-      uint32_t word = (*pagePtr)[i * PAGE_PART_SIZE + j];
+    for (size_t j = 0; j < MPAGE_PART_SIZE; j++) {
+      uint32_t word = (*pagePtr)[i * MPAGE_PART_SIZE + j];
       pip.data[j] = word;
-      data[2*j] = Fp::fromRaw(word & 0xffff);
-      data[2*j + 1] = Fp::fromRaw(word >> 16);
+      data[2 * j] = word & 0xffff;
+      data[2 * j + 1] = word >> 16;
     }
     cur = p2.doBlock(cur, data, i == NUM_PARTS - 1);
     toFpDigest(pip.out, cur);
   }
   auto& pip = trace.makePageInPage();
-  pip.addr = page * PAGE_SIZE_WORDS;
+  pip.addr = page * MPAGE_SIZE_WORDS;
   toFpDigest(pip.node, cur);
 }
 
@@ -114,7 +113,7 @@ void PagedMemory::pageInNode(uint32_t idx) {
   toFpDigest(wit.left, image.getDigest(idx * 2));
   toFpDigest(wit.right, image.getDigest(idx * 2 + 1));
   std::array<Fp, p2impl::CELLS_RATE> data;
-  for(size_t i = 0; i < p2impl::CELLS_DIGEST; i++) {
+  for (size_t i = 0; i < p2impl::CELLS_DIGEST; i++) {
     data[i] = wit.right[i];
     data[CELLS_DIGEST + i] = wit.left[i];
   }
@@ -124,26 +123,26 @@ void PagedMemory::pageInNode(uint32_t idx) {
 void PagedMemory::pageOutPage(uint32_t page, const PageDetails* pageData) {
   auto newPage = std::make_shared<Page>();
   Digest cur = Digest::zero();
-  size_t NUM_PARTS = PAGE_SIZE_WORDS / PAGE_PART_SIZE;
+  size_t NUM_PARTS = MPAGE_SIZE_WORDS / MPAGE_PART_SIZE;
   for (size_t i = 0; i < NUM_PARTS; i++) {
     std::array<Fp, p2impl::CELLS_RATE> data;
     auto& pop = trace.makePageOutPart();
-    uint32_t addr = page * PAGE_SIZE_WORDS + i * PAGE_PART_SIZE;
+    uint32_t addr = page * MPAGE_SIZE_WORDS + i * MPAGE_PART_SIZE;
     pop.addr = addr;
     toFpDigest(pop.in, cur);
-    for (size_t j = 0; j < PAGE_PART_SIZE; j++) {
-      uint32_t word = (*pageData)[i * PAGE_PART_SIZE + j].value;
-      (*newPage)[i * PAGE_PART_SIZE + j] = word;
+    for (size_t j = 0; j < MPAGE_PART_SIZE; j++) {
+      uint32_t word = (*pageData)[i * MPAGE_PART_SIZE + j].value;
+      (*newPage)[i * MPAGE_PART_SIZE + j] = word;
       pop.data[j] = word;
-      pop.cycle[j] = (*pageData)[i * PAGE_PART_SIZE + j].cycle;
-      data[2*j] = Fp::fromRaw(word & 0xffff);
-      data[2*j + 1] = Fp::fromRaw(word >> 16);
+      pop.cycle[j] = (*pageData)[i * MPAGE_PART_SIZE + j].cycle;
+      data[2 * j] = word & 0xffff;
+      data[2 * j + 1] = word >> 16;
     }
     cur = p2.doBlock(cur, data, i == NUM_PARTS - 1);
     toFpDigest(pop.out, cur);
   }
   auto& pop = trace.makePageOutPage();
-  pop.addr = page * PAGE_SIZE_WORDS;
+  pop.addr = page * MPAGE_SIZE_WORDS;
   toFpDigest(pop.node, cur);
   image.setPage(page, newPage);
 }
@@ -155,7 +154,7 @@ void PagedMemory::pageOutNode(uint32_t idx) {
   toFpDigest(wit.left, image.getDigest(idx * 2));
   toFpDigest(wit.right, image.getDigest(idx * 2 + 1));
   std::array<Fp, p2impl::CELLS_RATE> data;
-  for(size_t i = 0; i < p2impl::CELLS_DIGEST; i++) {
+  for (size_t i = 0; i < p2impl::CELLS_DIGEST; i++) {
     data[i] = wit.right[i];
     data[CELLS_DIGEST + i] = wit.left[i];
   }

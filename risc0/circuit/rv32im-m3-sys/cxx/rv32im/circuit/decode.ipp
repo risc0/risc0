@@ -12,123 +12,112 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-template<typename C>
-FDEV void FetchBlock<C>::set(CTX, FetchWitness witness) DEV {
+template <typename C> FDEV void FetchBlock<C>::set(CTX, FetchWitness witness, Val<C> cycle) DEV {
   iCacheCycle.set(ctx, witness.iCacheCycle);
+  loadCycle.set(ctx, witness.loadCycle);
+  mode.set(ctx, witness.mode);
   pc.set(ctx, witness.pc);
   nextPc.set(ctx, witness.nextPc);
+  uint32_t cycleDiff = cycle.asUInt32() - witness.loadCycle;
+  ctx.tableAdd(256 + 65536 + cycleDiff * 2, 1);
 }
 
-template<typename C>
-FDEV Val<C> DecodeBlock<C>::recomposeRange(uint32_t start, uint32_t end) DEV {
-    Val<C> value(0);
-    for (uint32_t i = start; i < end; i++) {
-      uint32_t multiplier = 1 << (i - start);
-        value += bits[i].get() * multiplier;
-    }
-    return value;
+template <typename C> FDEV void FetchBlock<C>::addArguments(CTX, Val<C> cycle) DEV {
+  ctx.pull(LookupArgument<C>(2, (cycle - loadCycle.get()) * 2));
 }
 
-template<typename C>
-FDEV Val<C> DecodeBlock<C>::getOpcode() DEV {
+template <typename C> FDEV Val<C> DecodeBlock<C>::recomposeRange(uint32_t start, uint32_t end) DEV {
+  Val<C> value(0);
+  for (uint32_t i = start; i < end; i++) {
+    uint32_t multiplier = 1 << (i - start);
+    value += bits[i].get() * multiplier;
+  }
+  return value;
+}
+
+template <typename C> FDEV Val<C> DecodeBlock<C>::getOpcode() DEV {
   return recomposeRange(0, 7);
 }
 
-template<typename C>
-FDEV Val<C> DecodeBlock<C>::getRD() DEV {
+template <typename C> FDEV Val<C> DecodeBlock<C>::getRD() DEV {
   return recomposeRange(7, 12);
 }
 
-template<typename C>
-FDEV Val<C> DecodeBlock<C>::getFunct3() DEV {
+template <typename C> FDEV Val<C> DecodeBlock<C>::getFunct3() DEV {
   return recomposeRange(12, 15);
 }
 
-template<typename C>
-FDEV Val<C> DecodeBlock<C>::getRS1() DEV {
+template <typename C> FDEV Val<C> DecodeBlock<C>::getRS1() DEV {
   return recomposeRange(15, 20);
 }
 
-template<typename C>
-FDEV Val<C> DecodeBlock<C>::getRS2() DEV {
+template <typename C> FDEV Val<C> DecodeBlock<C>::getRS2() DEV {
   return recomposeRange(20, 25);
 }
 
-template<typename C>
-FDEV Val<C> DecodeBlock<C>::getFunct7Low() DEV {
+template <typename C> FDEV Val<C> DecodeBlock<C>::getFunct7Low() DEV {
   return recomposeRange(25, 31);
 }
 
-template<typename C>
-FDEV Val<C> DecodeBlock<C>::getFunct7() DEV {
+template <typename C> FDEV Val<C> DecodeBlock<C>::getFunct7() DEV {
   return recomposeRange(25, 32);
 }
 
 // Immediate variant helpers
-template<typename C>
-FDEV Val<C> DecodeBlock<C>::getImmSign() DEV {
+template <typename C> FDEV Val<C> DecodeBlock<C>::getImmSign() DEV {
   return bits[31].get();
 }
 
-template<typename C>
-FDEV ValU32<C> DecodeBlock<C>::getImmI() DEV {
+template <typename C> FDEV ValU32<C> DecodeBlock<C>::getImmI() DEV {
   Val<C> immSign = getImmSign();
   Val<C> funct7 = getFunct7();
   Val<C> rs2 = getRS2();
   return ValU32<C>(immSign * 0xf000 + funct7 * 32 + rs2, immSign * 0xffff);
 }
 
-template<typename C>
-FDEV ValU32<C> DecodeBlock<C>::getImmIL() DEV {
+template <typename C> FDEV ValU32<C> DecodeBlock<C>::getImmIL() DEV {
   return ValU32<C>(getRS2(), 0);
 }
 
-template<typename C>
-FDEV ValU32<C> DecodeBlock<C>::getImmS() DEV {
+template <typename C> FDEV ValU32<C> DecodeBlock<C>::getImmS() DEV {
   Val<C> immSign = getImmSign();
   Val<C> funct7 = getFunct7();
   Val<C> rd = getRD();
   return ValU32<C>(immSign * 0xf000 + funct7 * 32 + rd, immSign * 0xffff);
 }
 
-template<typename C>
-FDEV ValU32<C> DecodeBlock<C>::getImmB() DEV {
+template <typename C> FDEV ValU32<C> DecodeBlock<C>::getImmB() DEV {
   Val<C> immSign = getImmSign();
   Val<C> funct7Low = getFunct7Low();
   Val<C> rdHigh = recomposeRange(8, 12);
-  return ValU32<C>(
-    immSign * 0xf000 + bits[7].get() * 0x800 + funct7Low * 32 + rdHigh * 2,
-    immSign * 0xffff);
+  return ValU32<C>(immSign * 0xf000 + bits[7].get() * 0x800 + funct7Low * 32 + rdHigh * 2,
+                   immSign * 0xffff);
 }
 
-template<typename C>
-FDEV ValU32<C> DecodeBlock<C>::getImmJ() DEV {
+template <typename C> FDEV ValU32<C> DecodeBlock<C>::getImmJ() DEV {
   Val<C> immSign = getImmSign();
   Val<C> bits_1_10 = recomposeRange(21, 31);
   Val<C> bit_11 = bits[20].get();
   Val<C> bits_12_16 = recomposeRange(12, 16);
   Val<C> bits_17_19 = recomposeRange(16, 20);
-  return ValU32<C>(
-    bits_12_16 * 0x1000 + bit_11 * 0x800 + bits_1_10 * 0x2,
-    immSign * 0xfff0 + bits_17_19);
+  return ValU32<C>(bits_12_16 * 0x1000 + bit_11 * 0x800 + bits_1_10 * 0x2,
+                   immSign * 0xfff0 + bits_17_19);
 }
 
-template<typename C>
-FDEV ValU32<C> DecodeBlock<C>::getImmU() DEV {
+template <typename C> FDEV ValU32<C> DecodeBlock<C>::getImmU() DEV {
   Val<C> instHigh = recomposeRange(16, 32);
   return ValU32<C>(bits[15].get() * 0x8000 + getFunct3() * 0x1000, instHigh);
 }
 
-template<typename C>
-FDEV void DecodeBlock<C>::set(CTX, DecodeWitness witness) DEV {
+template <typename C> FDEV void DecodeBlock<C>::set(CTX, DecodeWitness witness) DEV {
   count.set(ctx, witness.count);
-  fetch.set(ctx, witness.fetch);
-  loadCycle.set(ctx, witness.loadCycle);
-  uint32_t cycleDiff = witness.loadCycle - witness.fetch.iCacheCycle;
+  fetch.set(ctx, witness.fetch, witness.fetch.loadCycle);
+  uint32_t cycleDiff = witness.fetch.loadCycle - witness.fetch.iCacheCycle;
   ctx.tableAdd(256 + 65536 + cycleDiff * 2, 1);
   pcDecomp.set(ctx, witness.fetch.pc);
-  load0.set(ctx, witness.load0, witness.loadCycle);
-  load1.set(ctx, witness.load1, witness.loadCycle);
+  verifyPc.set(ctx, witness.fetch.pc, witness.fetch.mode);
+  load0.set(ctx, witness.load0, witness.fetch.loadCycle);
+  load1.set(ctx, witness.load1, witness.fetch.loadCycle);
   uint32_t baseInst = witness.load0.value;
   uint32_t low16 = witness.fetch.pc % 4 == 2 ? baseInst >> 16 : baseInst & 0xffff;
   low16Decomp.set(ctx, low16);
@@ -163,42 +152,45 @@ FDEV void DecodeBlock<C>::set(CTX, DecodeWitness witness) DEV {
   uint32_t immIL = rs2;
   uint32_t immS = (topBit * 0xfffff000) | (f7 << 5) | rd;
   uint32_t immJ = (topBit * 0xfff00000) | (rs1 << 15) | (f3 << 12) | ((rs2 & 1) << 11) |
-         ((f7 & 0x3f) << 5) | (rs2 & 0x1e);
+                  ((f7 & 0x3f) << 5) | (rs2 & 0x1e);
   uint32_t immU = inst & 0xfffff000;
-  uint32_t idx = 48;  // Will fail to verify if we don't find a match
-  #define XF3 f3
-  #define XF7 f7
-  #define ENTRY(name, gidx, gopcode, gimmType, gf3, gf7, ...) \
-  if (gopcode == opcode && gf3 == f3 && gf7 == f7) { \
-    idx = gidx; \
-    imm.set(ctx, imm ## gimmType); \
-    options.set(ctx, EncodeOptions(__VA_ARGS__).val); \
+  uint32_t idx = 48; // Will fail to verify if we don't find a match
+#define XF3 f3
+#define XF7 f7
+#define ENTRY(name, gidx, gopcode, gimmType, gf3, gf7, ...)                                        \
+  if (gopcode == opcode && gf3 == f3 && gf7 == f7) {                                               \
+    idx = gidx;                                                                                    \
+    imm.set(ctx, imm##gimmType);                                                                   \
+    options.set(ctx, EncodeOptions(__VA_ARGS__).val);                                              \
   }
 #include "rv32im/base/rv32im.inc"
-  #undef ENTRY
-  #undef XF7
-  #undef XF3
+#undef ENTRY
+#undef XF7
+#undef XF3
   idx1.set(ctx, idx / 7);
   idx2.set(ctx, idx % 7);
 }
 
-template<typename C>
-FDEV void DecodeBlock<C>::verify(CTX) DEV {
+template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
   Val<C> instWordAddr = pcDecomp.wordAddr(fetch.pc.get());
   // Always load from the decomposed word initially
-  EQ(instWordAddr, load0.wordAddr.get());
+  EQ(instWordAddr, load0.getWordAddr());
   // Verify low 2 bits relate to isCompressed
   EQ(isCompressed.get(), Val<C>(1) - low16Decomp.low0.get() * low16Decomp.low1.get());
   // Compute address of second read + verify
-  Val<C> load1Addr = cond<C>(isCompressed.get(), Val<C>(COMPRESSED_INST_LOOKUP_WORD) + low16(), instWordAddr + 1);
-  EQ(load1Addr, load1.wordAddr.get());
+  Val<C> isUnaligned = pcDecomp.low1.get();
+  Val<C> load1Addr = cond<C>(isCompressed.get(),
+                             Val<C>(COMPRESSED_INST_LOOKUP_WORD) + low16(),
+                             cond<C>(isUnaligned, instWordAddr + 1, COMPRESSED_INST_LOOKUP_WORD));
+  EQ(load1Addr, load1.getWordAddr());
   // Verify next instruction is right
   EQ(computeNext.low.get(), fetch.nextPc.low.get());
   EQ(computeNext.high.get(), fetch.nextPc.high.get());
   // Get actual instruction data
   Val<C> instLow = cond<C>(isCompressed.get(), load1.data.low.get(), low16());
-  Val<C> instHigh = cond<C>(isCompressed.get(), load1.data.high.get(), 
-      cond<C>(pcDecomp.low1.get(), load1.data.low.get(), load0.data.high.get()));
+  Val<C> instHigh = cond<C>(isCompressed.get(),
+                            load1.data.high.get(),
+                            cond<C>(isUnaligned, load1.data.low.get(), load0.data.high.get()));
   // Make sure the instruction matches the bits
   EQ(instLow, recomposeRange(0, 16));
   EQ(instHigh, recomposeRange(16, 32));
@@ -225,23 +217,23 @@ FDEV void DecodeBlock<C>::verify(CTX) DEV {
   Val<C> reqF3 = 0;
   Val<C> reqF7 = 0;
   Val<C> validCount = 0;
-  #define XF3 f3
-  #define XF7 f7
-  #define ENTRY(name, gidx, gopcode, gt, gf3, gf7, ...) \
-  { \
-    Val<C> isValid = idx1.bits[gidx/7].get() * idx2.bits[gidx%7].get(); \
-    reqOpcode += isValid * gopcode; \
-    reqF3 += isValid * gf3; \
-    reqF7 += isValid * gf7; \
-    reqImm.low += isValid * imm ## gt.low; \
-    reqImm.high += isValid * imm ## gt.high; \
-    reqOptions += isValid * EncodeOptions(__VA_ARGS__).val; \
-    validCount += isValid; \
+#define XF3 f3
+#define XF7 f7
+#define ENTRY(name, gidx, gopcode, gt, gf3, gf7, ...)                                              \
+  {                                                                                                \
+    Val<C> isValid = idx1.bits[gidx / 7].get() * idx2.bits[gidx % 7].get();                        \
+    reqOpcode += isValid * gopcode;                                                                \
+    reqF3 += isValid * gf3;                                                                        \
+    reqF7 += isValid * gf7;                                                                        \
+    reqImm.low += isValid * imm##gt.low;                                                           \
+    reqImm.high += isValid * imm##gt.high;                                                         \
+    reqOptions += isValid * EncodeOptions(__VA_ARGS__).val;                                        \
+    validCount += isValid;                                                                         \
   }
 #include "rv32im/base/rv32im.inc"
-  #undef ENTRY
-  #undef XF7
-  #undef XF3
+#undef ENTRY
+#undef XF7
+#undef XF3
   // Do final validation
   EQ(validCount, 1);
   EQ(reqF3, f3);
@@ -252,9 +244,8 @@ FDEV void DecodeBlock<C>::verify(CTX) DEV {
   EQ(reqImm.high, imm.high.get());
 }
 
-template<typename C>
-FDEV void DecodeBlock<C>::addArguments(CTX) DEV {
-  ctx.pull(LookupArgument<C>(2, (loadCycle.get() - fetch.iCacheCycle.get()) * 2));
+template <typename C> FDEV void DecodeBlock<C>::addArguments(CTX) DEV {
+  ctx.pull(LookupArgument<C>(2, (fetch.loadCycle.get() - fetch.iCacheCycle.get()) * 2));
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();

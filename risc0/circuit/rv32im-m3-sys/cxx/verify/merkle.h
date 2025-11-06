@@ -41,4 +41,4 @@ private:
   std::vector<Digest> top;
 };
 
-}  // namespace risc0
+} // namespace risc0

@@ -18,22 +18,17 @@
 #include "rv32im/circuit/circuit.ipp"
 
 // During data witgen, we ignore eqz, and all arguments
-template<size_t po2>
-struct DataWitgenContext {
+template <size_t po2> struct DataWitgenContext {
   using C = DataWitgenContext<po2>;
   static CONSTANT size_t numRows = (1 << po2);
 
   using ValImpl = Fp;
   using ValExtImpl = FpExt;
   struct RegImpl {
-    FDEV void set(MTHR C& ctx, Fp val) DEV {
-      data[0] = val;
-    }
+    FDEV void set(MTHR C& ctx, Fp val) DEV { data[0] = val; }
     FDEV void finalize(MTHR C& ctx) DEV {}
-    FDEV Fp get() DEV {
-      return data[0];
-    }
-    template<typename T> FDEV void applyInner(MTHR C& ctx) DEV {}
+    FDEV Fp get() DEV { return data[0]; }
+    template <typename T> FDEV void applyInner(MTHR C& ctx) DEV {}
     Fp data[numRows];
   };
   struct ArgCountRegImpl {
@@ -45,10 +40,8 @@ struct DataWitgenContext {
       }
     }
     FDEV void finalize(MTHR C& ctx) DEV {}
-    FDEV Fp get() DEV {
-      return data[0];
-    }
-    template<typename T> FDEV void applyInner(MTHR C& ctx) DEV {}
+    FDEV Fp get() DEV { return data[0]; }
+    template <typename T> FDEV void applyInner(MTHR C& ctx) DEV {}
     Fp data[numRows];
   };
 
@@ -58,30 +51,23 @@ struct DataWitgenContext {
       ATOMIC_ADD(tables[offset], val);
     }
   }
-  FDEV inline uint32_t tableGet(uint32_t offset) {
-    return ATOMIC_GET(tables[offset]);
-  }
-  FDEV inline void globalSet(uint32_t offset, Fp val) {
-    globals[offset] = val;
-  }
-  FDEV inline Fp globalGet(uint32_t offset) {
-    return globals[offset];
-  }
+  FDEV inline uint32_t tableGet(uint32_t offset) { return ATOMIC_GET(tables[offset]); }
+  FDEV inline void globalSet(uint32_t offset, Fp val) { globals[offset] = val; }
+  FDEV inline Fp globalGet(uint32_t offset) { return globals[offset]; }
   FDEV inline Fp getX() { return x; }
   Fp x;
   MDEV ATOMIC_U32* tables;
   MDEV Fp* globals;
 };
 
-template<size_t po2>
-FDEV void computeRowSet(
-                MDEV Fp* data,
-                MDEV Fp* globals,
-                const MDEV RowInfo* info,
-                const MDEV uint32_t* aux,
-                MDEV uint32_t* tables,
-                Fp rou,
-                size_t row) {
+template <size_t po2>
+FDEV void computeRowSet(MDEV Fp* data,
+                        MDEV Fp* globals,
+                        const MDEV RowInfo* info,
+                        const MDEV uint32_t* aux,
+                        MDEV uint32_t* tables,
+                        Fp rou,
+                        size_t row) {
   using C = DataWitgenContext<po2>;
   C ctx;
   ctx.tables = reinterpret_cast<MDEV ATOMIC_U32*>(tables);
@@ -89,55 +75,60 @@ FDEV void computeRowSet(
   ctx.x = pow(rou, row);
   BlockType type = static_cast<BlockType>(info[row].rowType);
   MDEV Top<C>* top = reinterpret_cast<MDEV Top<C>*>(data + row);
-  switch(type) {
-#define BLOCK_TYPE(name, count) \
-    case BlockType::name: { \
-      const MDEV name ## Witness* typedWitness= reinterpret_cast<const MDEV name ## Witness*>(aux + info[row].auxOffset); \
-      top->select.set(ctx, static_cast<size_t>(type)); \
-      for (size_t i = 0; i < count; i++) { \
-        if (i < info[row].blockCount) { \
-          ctx.valid = true; \
-          top->mux.name.isValid[i].set(ctx, 1); \
-          top->mux.name.data[i].set(ctx, typedWitness[i]); \
-        } else { \
-          ctx.valid = false; \
-          top->mux.name.isValid[i].set(ctx, 0); \
-          top->mux.name.data[i].set(ctx, typedWitness[0]); \
-        } \
-      }} \
-      break;
-  BLOCK_TYPES
+  switch (type) {
+#define BLOCK_TYPE(name, count)                                                                    \
+  case BlockType::name: {                                                                          \
+    const MDEV name##Witness* typedWitness =                                                       \
+        reinterpret_cast<const MDEV name##Witness*>(aux + info[row].auxOffset);                    \
+    top->select.set(ctx, static_cast<size_t>(type));                                               \
+    for (size_t i = 0; i < count; i++) {                                                           \
+      if (i < info[row].blockCount) {                                                              \
+        ctx.valid = true;                                                                          \
+        top->mux.name.isValid[i].set(ctx, 1);                                                      \
+        top->mux.name.data[i].set(ctx, typedWitness[i]);                                           \
+      } else {                                                                                     \
+        ctx.valid = false;                                                                         \
+        top->mux.name.isValid[i].set(ctx, 0);                                                      \
+        top->mux.name.data[i].set(ctx, typedWitness[0]);                                           \
+      }                                                                                            \
+    }                                                                                              \
+  } break;
+    BLOCK_TYPES
 #undef BLOCK_TYPE
-    case BlockType::Empty:
-      top->select.set(ctx, static_cast<size_t>(BlockType::Empty));
-      break;
+  case BlockType::Empty:
+    top->select.set(ctx, static_cast<size_t>(BlockType::Empty));
+    break;
   }
 }
 
 struct FinalizeFwd {
-  template<typename T, typename C, typename... Args>
-  FDEV static void apply(MTHR C& ctx, MDEV T& obj, Args... args) {
+  template <typename T, typename C, typename... Args>
+  FDEV static void apply(MTHR C& ctx, CONSTARG const char*, MDEV T& obj, Args... args) {
+    FinalizeFwd::apply(ctx, obj, args...);
+  }
+
+  template <typename T, typename C, typename... Args>
+  FDEV static typename if_not_char<T, void>::type apply(MTHR C& ctx, MDEV T& obj, Args... args) {
     obj.template applyInner<FinalizeFwd>(ctx, args...);
     obj.finalize(ctx);
   }
 
-  template <typename T, typename C, size_t N>
-  FDEV static void apply(MTHR C& ctx, MDEV T (&t)[N]) {
+  template <typename T, typename C, size_t N, typename... Args>
+  FDEV static typename if_not_char<T, void>::type apply(MTHR C& ctx, MDEV T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; i++) {
-      FinalizeFwd::apply(ctx, t[i]);
+      FinalizeFwd::apply(ctx, t[i], args...);
     }
   }
 };
 
-template<size_t po2>
-FDEV void computeRowFinalize(
-                MDEV Fp* io,
-                MDEV Fp* globals,
-                const MDEV RowInfo* info,
-                const MDEV uint32_t* aux,
-                MDEV uint32_t* tables,
-                Fp rou,
-                size_t row) {
+template <size_t po2>
+FDEV void computeRowFinalize(MDEV Fp* io,
+                             MDEV Fp* globals,
+                             const MDEV RowInfo* info,
+                             const MDEV uint32_t* aux,
+                             MDEV uint32_t* tables,
+                             Fp rou,
+                             size_t row) {
   using C = DataWitgenContext<po2>;
   C ctx;
   ctx.tables = reinterpret_cast<MDEV ATOMIC_U32*>(tables);
@@ -145,18 +136,17 @@ FDEV void computeRowFinalize(
   ctx.x = pow(rou, row);
   BlockType type = static_cast<BlockType>(info[row].rowType);
   MDEV Top<C>* top = reinterpret_cast<MDEV Top<C>*>(io + row);
-  switch(type) {
-#define BLOCK_TYPE(name, count) \
-    case BlockType::name: { \
-      for (size_t i = 0; i < count; i++) { \
-        ctx.valid = i < info[row].blockCount; \
-        FinalizeFwd::apply(ctx, top->mux.name.data[i]); \
-      }} \
-      break;
-  BLOCK_TYPES
+  switch (type) {
+#define BLOCK_TYPE(name, count)                                                                    \
+  case BlockType::name: {                                                                          \
+    for (size_t i = 0; i < count; i++) {                                                           \
+      ctx.valid = i < info[row].blockCount;                                                        \
+      FinalizeFwd::apply(ctx, top->mux.name.data[i]);                                              \
+    }                                                                                              \
+  } break;
+    BLOCK_TYPES
 #undef BLOCK_TYPE
-    case BlockType::Empty:
-       break;
+  case BlockType::Empty:
+    break;
   }
 }
-

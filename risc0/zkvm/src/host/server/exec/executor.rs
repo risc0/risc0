@@ -79,6 +79,17 @@ fn check_program_version(header: &ProgramBinaryHeader) -> Result<()> {
     Ok(())
 }
 
+pub(crate) fn circuit_version() -> u32 {
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "rv32im-m3")] {
+            risc0_circuit_rv32im::execute::RV32IM_M3_CIRCUIT_VERSION
+        }
+        else {
+            risc0_circuit_rv32im::execute::RV32IM_V2_CIRCUIT_VERSION
+        }
+    }
+}
+
 impl<'a> ExecutorImpl<'a> {
     /// Construct a new [ExecutorImpl] from a [MemoryImage] and entry point.
     ///
@@ -194,6 +205,7 @@ impl<'a> ExecutorImpl<'a> {
             self.env.input_digest,
             self.env.trace.clone(),
             self.env.povw_job_id,
+            circuit_version(),
         );
 
         let max_insn_cycles = if segment_limit_po2 >= 15 {

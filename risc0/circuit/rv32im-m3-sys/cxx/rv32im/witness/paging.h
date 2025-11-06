@@ -28,7 +28,7 @@ struct PageInPartWitness {
   FpDigest in;
   FpDigest out;
   uint32_t addr;
-  uint32_t data[PAGE_PART_SIZE];
+  uint32_t data[MPAGE_PART_SIZE];
 };
 
 struct PageInPageWitness {
@@ -47,8 +47,8 @@ struct PageOutPartWitness {
   FpDigest in;
   FpDigest out;
   uint32_t addr;
-  uint32_t data[PAGE_PART_SIZE];
-  uint32_t cycle[PAGE_PART_SIZE];
+  uint32_t data[MPAGE_PART_SIZE];
+  uint32_t cycle[MPAGE_PART_SIZE];
 };
 
 struct PageOutPageWitness {

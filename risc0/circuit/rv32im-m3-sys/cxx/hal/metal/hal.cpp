@@ -26,9 +26,9 @@
 #include "core/log.h"
 #include "core/util.h"
 #include "zkp/params.h"
+#include "zkp/poly.h"
 #include "zkp/poseidon2_consts.h"
 #include "zkp/rou.h"
-#include "zkp/poly.h"
 
 using namespace risc0;
 
@@ -36,14 +36,15 @@ class MetalHal;
 
 class MetalBuffer : public IBuffer {
   friend class MetalHal;
+
 public:
-  MetalBuffer(MTL::Buffer* buffer) : buffer(buffer)  {}
-  ~MetalBuffer() override {
-    buffer->release();
+  MetalBuffer(MTL::Buffer* buffer) : buffer(buffer) {}
+  ~MetalBuffer() override { buffer->release(); }
+  size_t size() override { return buffer->length(); }
+  void copyFromCpu(size_t offset, const void* data, size_t size) override {
+    memcpy(reinterpret_cast<uint8_t*>(buffer->contents()) + offset, data, size);
   }
-  size_t size() override {
-    return buffer->length();
-  }
+
 private:
   MTL::Buffer* buffer;
 };
@@ -73,16 +74,19 @@ public:
     device = all->object<MTL::Device>(0);
     device->retain();
     all->release();
-    LOG(0, "Opening metal device: " << device->name()->utf8String());
+    LOG(1, "Opening metal device: " << device->name()->utf8String());
 
     // Create the command queue
     commandQueue = device->newCommandQueue();
-    if (!commandQueue) { throw std::runtime_error("Unable to make command queue"); }
+    if (!commandQueue) {
+      throw std::runtime_error("Unable to make command queue");
+    }
 
     // Load the library and get the functions
     NS::Error* error;
     // TODO: Loading from a file is annoying and dangerous
-    MTL::Library* library = device->newLibrary(MTLSTR("hal/metal/kernels/kernels.metallib"), &error);
+    MTL::Library* library =
+        device->newLibrary(MTLSTR("hal/metal/kernels/kernels.metallib"), &error);
     if (!library) {
       LOG(0, "Unable to load library: " << error->localizedDescription()->utf8String());
       throw std::runtime_error("Unable to load library");
@@ -95,7 +99,9 @@ public:
       MTL::ComputePipelineState* pls = device->newComputePipelineState(func, &error);
       func->release();
       if (!pls) {
-        LOG(0, "Unable to load kernel `" << cppName << "`: " << error->localizedDescription()->utf8String());
+        LOG(0,
+            "Unable to load kernel `" << cppName
+                                      << "`: " << error->localizedDescription()->utf8String());
         throw std::runtime_error("Unable to load kernel");
       }
       kernels[cppName] = pls;
@@ -130,7 +136,8 @@ public:
     }
   }
 
-  void copy(IBufferPtr dst, size_t dstOffset, IBufferPtr src, size_t srcOffset, size_t count) override {
+  void
+  copy(IBufferPtr dst, size_t dstOffset, IBufferPtr src, size_t srcOffset, size_t count) override {
     prepBuffer();
     auto* blitEncoder = commandBuffer->blitCommandEncoder();
     blitEncoder->copyFromBuffer(getBuffer(src), srcOffset, getBuffer(dst), dstOffset, count);
@@ -160,7 +167,7 @@ public:
   }
 
   void hashFold(HalArray<Digest> out, HalArray<Digest> in) override {
-    if (in.size() != 2*out.size()) {
+    if (in.size() != 2 * out.size()) {
       throw std::runtime_error("Mismatched sizes in hashFold");
     }
     size_t groupSize;
@@ -173,7 +180,11 @@ public:
     dispatchEasy(encoder, out.size(), groupSize);
   }
 
-  void query(HalArray<Fp> out, HalMatrix<Fp> data, HalArray<Digest> tree, size_t topSize, size_t idx) override {
+  void query(HalArray<Fp> out,
+             HalMatrix<Fp> data,
+             HalArray<Digest> tree,
+             size_t topSize,
+             size_t idx) override {
     size_t steps = log2Ceil(data.rows()) - log2Ceil(topSize);
     size_t querySize = steps * p2impl::CELLS_DIGEST + data.cols();
     if (querySize != out.size() || tree.size() != 2 * data.rows() || idx >= data.rows()) {
@@ -205,11 +216,8 @@ public:
   void batchExpandAndEvaluate(HalMatrix<Fp> out, HalMatrix<Fp> in) override {
     uint32_t inPo2 = log2Ceil(in.rows());
     uint32_t expPo2 = log2Ceil(out.rows() / in.rows());
-    if (
-      in.rows() != (size_t(1) << inPo2) ||
-      (size_t(1) << expPo2) * in.rows() != out.rows() ||
-      in.cols() != out.cols())
-    {
+    if (in.rows() != (size_t(1) << inPo2) || (size_t(1) << expPo2) * in.rows() != out.rows() ||
+        in.cols() != out.cols()) {
       throw std::runtime_error("Mismatched sizes batchExpandNtt");
     }
     size_t groupSize;
@@ -266,7 +274,10 @@ public:
     dispatchEasy(encoder, io.rows() * io.cols(), groupSize);
   }
 
-  void batchPolyEval(HalArray<FpExt> out, HalMatrix<Fp> coeffs, HalArray<uint32_t> cols, HalArray<FpExt> xs) override {
+  void batchPolyEval(HalArray<FpExt> out,
+                     HalMatrix<Fp> coeffs,
+                     HalArray<uint32_t> cols,
+                     HalArray<FpExt> xs) override {
     if (out.size() != cols.size() || cols.size() != xs.size()) {
       throw std::runtime_error("Invalid batchPolyEval");
     }
@@ -280,7 +291,11 @@ public:
     dispatchEasy(encoder, out.size() * groupSize, groupSize);
   }
 
-  void combosMix(HalMatrix<FpExt> combos, HalMatrix<Fp> coeffs, HalArray<uint32_t> whichCombo, FpExt cur, FpExt mix) override {
+  void combosMix(HalMatrix<FpExt> combos,
+                 HalMatrix<Fp> coeffs,
+                 HalArray<uint32_t> whichCombo,
+                 FpExt cur,
+                 FpExt mix) override {
     if (combos.rows() != coeffs.rows() || coeffs.cols() != whichCombo.size()) {
       throw std::runtime_error("Invalid combosMix");
     }
@@ -296,8 +311,12 @@ public:
     dispatchEasy(encoder, coeffs.rows(), groupSize);
   }
 
-  void combosPrep(HalMatrix<FpExt> combos, HalArray<FpExt> eval, HalArray<EvalInfo> info, FpExt mix) override {
-    // TODO: Maybe do this on the GPU?  Not really that relevant though since we current do poly division on CPU also
+  void combosPrep(HalMatrix<FpExt> combos,
+                  HalArray<FpExt> eval,
+                  HalArray<EvalInfo> info,
+                  FpExt mix) override {
+    // TODO: Maybe do this on the GPU?  Not really that relevant though since we current do poly
+    // division on CPU also
     if (eval.size() != info.size()) {
       throw std::runtime_error("Invalid combosMix");
     }
@@ -307,7 +326,8 @@ public:
     FpExt cur(1);
     for (size_t i = 0; i < eval.size(); i++) {
       pCombos(pInfo[i].coeffIndex, pInfo[i].comboId) -= cur * pEval[i];
-      if (i + 1 < eval.size() && (pInfo[i + 1].group != pInfo[i].group || pInfo[i + 1].column != pInfo[i].column)) {
+      if (i + 1 < eval.size() &&
+          (pInfo[i + 1].group != pInfo[i].group || pInfo[i + 1].column != pInfo[i].column)) {
         cur *= mix;
       }
     }
@@ -317,7 +337,8 @@ public:
     PinnedMatrixRW<FpExt> pCombos(shared_from_this(), combos);
     PinnedArrayRO<DivideInfo> pInfo(shared_from_this(), info);
     for (size_t i = 0; i < info.size(); i++) {
-      FpExt rem = polyDivide(pCombos.data() + combos.rows() * pInfo[i].comboId, combos.rows(), pInfo[i].z);
+      FpExt rem =
+          polyDivide(pCombos.data() + combos.rows() * pInfo[i].comboId, combos.rows(), pInfo[i].z);
       if (rem != FpExt(0)) {
         throw std::runtime_error("Invalid remainder");
       }
@@ -354,7 +375,11 @@ public:
     dispatchEasy(encoder, out.rows(), groupSize);
   }
 
-  void computeDataWitness(HalMatrix<Fp> data, HalArray<Fp> globals, HalArray<RowInfo> rows, HalArray<uint32_t> aux, HalArray<uint32_t> tables) override {
+  void computeDataWitness(HalMatrix<Fp> data,
+                          HalArray<Fp> globals,
+                          HalArray<RowInfo> rows,
+                          HalArray<uint32_t> aux,
+                          HalArray<uint32_t> tables) override {
     if (data.rows() != rows.size()) {
       throw std::runtime_error("Mismatched sizes in computeDataWitness");
     }
@@ -378,7 +403,10 @@ public:
     dispatchEasy(encoder, rows.size(), groupSize);
   }
 
-  void computeAccumWitness(HalMatrix<Fp> accum, HalMatrix<Fp> data, HalArray<Fp> globals, HalArray<FpExt> accMix) override {
+  void computeAccumWitness(HalMatrix<Fp> accum,
+                           HalMatrix<Fp> data,
+                           HalArray<Fp> globals,
+                           HalArray<FpExt> accMix) override {
     if (accum.rows() != data.rows()) {
       throw std::runtime_error("Mismatched sizes in computeDataWitness");
     }
@@ -397,7 +425,6 @@ public:
     setBufArg(encoder, 3, extract(accMix), getOffset(accMix));
     dispatchEasy(encoder, accum.rows(), groupSize);
     PinnedMatrixRW<Fp> pAccum(shared_from_this(), accum);
-    LOG(0, "Doing prefix sum");
     FpExt tot;
     for (size_t i = 0; i < pAccum.rows(); i++) {
       tot += FpExt(pAccum(i, 0), pAccum(i, 1), pAccum(i, 2), pAccum(i, 3));
@@ -406,17 +433,22 @@ public:
       pAccum(i, 2) = tot.elem(2);
       pAccum(i, 3) = tot.elem(3);
     }
-    LOG(0, "Accum tot = " << tot);
+    LOG(1, "Accum tot = " << tot);
   }
 
-  void evalCheck(HalMatrix<Fp> check, HalMatrix<Fp> data, HalMatrix<Fp> accum, HalArray<Fp> globals, HalArray<FpExt> accMix, FpExt ecMix) override {
+  void evalCheck(HalMatrix<Fp> check,
+                 HalMatrix<Fp> data,
+                 HalMatrix<Fp> accum,
+                 HalArray<Fp> globals,
+                 HalArray<FpExt> accMix,
+                 FpExt ecMix) override {
     if (check.rows() != accum.rows() || accum.rows() != data.rows()) {
       throw std::runtime_error("Mismatched sizes in evalCheck");
     }
     // -2 to undo to expansion factor
     size_t po2 = getPo2(check.rows()) - 2;
     size_t groupSize;
-    auto encoder = getEncoder("eval_check_metal_" +  std::to_string(po2), groupSize);
+    auto encoder = getEncoder("eval_check_metal_" + std::to_string(po2), groupSize);
     setBufArg(encoder, 0, extract(check));
     setBufArg(encoder, 1, extract(data));
     setBufArg(encoder, 2, extract(accum));
@@ -428,7 +460,9 @@ public:
   }
 
   void sync() override {
-    if (!commandBuffer) { return; }
+    if (!commandBuffer) {
+      return;
+    }
     commandBuffer->commit();
     commandBuffer->waitUntilCompleted();
     auto status = commandBuffer->status();
@@ -494,7 +528,9 @@ private:
     } else {
       return;
     }
-    if (!commandBuffer) { throw std::runtime_error("Unable to get command buffer"); }
+    if (!commandBuffer) {
+      throw std::runtime_error("Unable to get command buffer");
+    }
   }
 
   MTL::ComputeCommandEncoder* getEncoder(const std::string& name, size_t& groupSize) {
@@ -510,7 +546,8 @@ private:
     return encode;
   }
 
-  void setBufArg(MTL::ComputeCommandEncoder* encode, size_t arg, IBufferPtr buf, size_t offset = 0) {
+  void
+  setBufArg(MTL::ComputeCommandEncoder* encode, size_t arg, IBufferPtr buf, size_t offset = 0) {
     encode->setBuffer(getBuffer(buf), offset, arg);
   }
 
@@ -528,7 +565,9 @@ private:
   }
 
   void dispatchEasy(MTL::ComputeCommandEncoder* encode, size_t count, size_t groupSize) {
-    if (groupSize > count) { groupSize = count; }
+    if (groupSize > count) {
+      groupSize = count;
+    }
     encode->dispatchThreads(MTL::Size(count, 1, 1), MTL::Size(groupSize, 1, 1));
     encode->endEncoding();
     encode->release();
@@ -561,8 +600,7 @@ private:
     encode->dispatchThreadgroups(grid, block);
     encode->endEncoding();
     encode->release();
-}
-
+  }
 };
 
 namespace risc0 {

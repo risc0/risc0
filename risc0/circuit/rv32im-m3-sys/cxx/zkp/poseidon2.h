@@ -47,6 +47,6 @@ void poseidonDoExtRound(cells_t& cells, size_t idx);
 void poseidonDoIntRounds(cells_t& cells);
 void poseidonSponge(cells_t& cells);
 
-}  // end namespace p2impl
+} // end namespace p2impl
 
 } // namespace risc0

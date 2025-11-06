@@ -10,6 +10,9 @@ clap = { version = "4.0", features = ["derive"] }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 shakmaty = "0.27"
 
+[dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []

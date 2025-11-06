@@ -27,13 +27,15 @@ void testProve(IHalPtr hal) {
   size_t po2 = 12;
   Rv32imProver prover(hal, po2);
   LOG(0, "Loading elf");
-  auto image = rv32im::MemoryImage::fromRawElf("rv32im/test/benchmark_kernel");
+  std::map<uint32_t, uint32_t> words;
+  rv32im::loadKernelV2(words, "rv32im/test/benchmark_kernel");
+  auto image = rv32im::MemoryImage::fromWords(words);
   LOG(0, "Running first segment");
   rv32im::NullHostIO io;
-  prover.preflight(image, io);
+  auto preflightData = preflight(po2, image, io);
   WriteIop writeIop;
   LOG(0, "Proving");
-  prover.prove(writeIop);
+  prover.prove(writeIop, preflightData);
   std::vector<Fp> transcript = writeIop.getTranscript();
   LOG(0, "Transcipt size = " << transcript.size());
   LOG(0, "Verifying");

@@ -15,34 +15,32 @@
 
 #pragma once
 
-#include "rv32im/witness/io.h"
 #include "rv32im/circuit/mem.h"
+#include "rv32im/witness/io.h"
 
-template<typename C>
-struct ReadByteBlock {
+template <typename C> struct ReadByteBlock {
   CONSTANT static char NAME[] = "ReadByte";
 
   Reg<C> cycle;
   BitReg<C> lowBit0;
   BitReg<C> lowBit1;
-  MemWriteBlock<C> io;
+  PhysMemWriteBlock<C> io;
   RegU8<C> lowByte;
   RegU8<C> highByte;
   RegU8<C> newByte;
   Reg<C> is3;
   RegU16<C> sizeMinus1;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, lowBit0);
-    T::apply(ctx, lowBit1);
-    T::apply(ctx, io, cycle.get());
-    T::apply(ctx, lowByte);
-    T::apply(ctx, highByte);
-    T::apply(ctx, newByte);
-    T::apply(ctx, is3);
-    T::apply(ctx, sizeMinus1);
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "lowBit0", lowBit0);
+    T::apply(ctx, "lowBit1", lowBit1);
+    T::apply(ctx, "io", io, cycle.get());
+    T::apply(ctx, "lowByte", lowByte);
+    T::apply(ctx, "highByte", highByte);
+    T::apply(ctx, "newByte", newByte);
+    T::apply(ctx, "is3", is3);
+    T::apply(ctx, "sizeMinus1", sizeMinus1);
   }
 
   FDEV void set(CTX, ReadByteWitness wit) DEV;
@@ -51,19 +49,17 @@ struct ReadByteBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
-template<typename C>
-struct ReadWordBlock {
+template <typename C> struct ReadWordBlock {
   CONSTANT static char NAME[] = "ReadWord";
 
   Reg<C> cycle;
   RegU16<C> sizeMinus4;
-  MemWriteBlock<C> io;
+  PhysMemWriteBlock<C> io;
 
-  template<typename T>
-  FDEV void applyInner(CTX) DEV {
-    T::apply(ctx, cycle);
-    T::apply(ctx, sizeMinus4);
-    T::apply(ctx, io, cycle.get());
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "sizeMinus4", sizeMinus4);
+    T::apply(ctx, "io", io, cycle.get());
   }
 
   FDEV void set(CTX, ReadWordWitness wit) DEV;
@@ -71,4 +67,3 @@ struct ReadWordBlock {
   FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
-
