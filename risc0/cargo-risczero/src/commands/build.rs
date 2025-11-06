@@ -20,7 +20,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use clap::Parser;
 use risc0_build::{DockerOptionsBuilder, GuestOptionsBuilder};
 
@@ -50,6 +50,7 @@ pub struct BuildCommand {
     #[arg(long)]
     no_docker: bool,
 
+    // TODO: Rename as --bake
     /// Copy the built guest program artifacts from the `target` directory to `./elfs` relative to
     /// the package maifest.
     #[arg(long, group = "archive-opts")]
@@ -86,51 +87,89 @@ impl BuildCommand {
             .build()
             .context("failed to build guest options")?;
 
-        let mut guest_list = vec![];
+        // Determine which packages to include, first via flags, then filtering to packages
+        // with risc0 guest binary targets, including in workspaces referenced via the
+        // risc0.methods Cargo metadata field.
+        let mut guest_pkgs = vec![];
         let (included, excluded) = self.workspace.partition_packages(&meta);
-        tracing::debug!("Included packages: {included:?}");
-        tracing::trace!("Excluded packages: {excluded:?}");
+        if tracing::enabled!(tracing::Level::TRACE) {
+            let excluded_names = excluded.iter().map(|pkg| &pkg.name).collect::<Vec<_>>();
+            tracing::trace!("Excluding packages {:?}", excluded_names);
+        }
         for pkg in included {
-            // TODO: This filtering picks up all bin targets, including ones that cannot be built
-            // for RISC Zero. Implement a default set of filtering rules that includes:
-            // * Binary targets in packages marked with [package.metadata.risc0] within this workspace
-            // * Binary targets in packages in workspaces pointed to by [package.metadata.risc0.methods]
-            if pkg.targets.iter().any(|x| x.is_bin()) {
-                let guests = risc0_build::build_package(pkg, target_dir, guest_opts.clone())?;
-                guest_list.extend_from_slice(&guests);
+            tracing::debug!("Processing included package: {:?}", pkg.name);
 
-                // Compute the archive dir, which may be None if we should not archive.
-                let archive_dir = self.archive_dir.clone().or(self.archive.then(|| {
-                    pkg.manifest_path
-                        .parent()
-                        .expect("manifest_path empty")
-                        .join(DEFAULT_ARCHIVE_DIRNAME)
-                        .into()
-                }));
+            // If this package has bin targets, and a `risc0` metadata section, include it in the
+            // build. An example of this is the risc0-zkos-v1compat crate in risc0.
+            if let Some(_risc0) = pkg.metadata.get("risc0")
+                && pkg.targets.iter().any(|x| x.is_bin())
+            {
+                tracing::debug!("Adding pkg {:?} to list of guest packages", pkg.name);
+                guest_pkgs.push(pkg.clone())
+            }
 
-                if let Some(archive_dir) = archive_dir {
-                    tracing::info!("Archiving guest to {}", archive_dir.display());
-                    // Copy each guest bin into the archive directory, along with its image ID.
-                    for guest in guests {
-                        let guest_path = Path::new(guest.path.deref());
-                        let guest_ext = read_bin_type(guest_path)?.file_extension();
-                        let file_name = guest_path.file_name().expect("guest bin path empty");
-                        let tgt_path = archive_dir.join(file_name).with_extension(guest_ext);
-                        std::fs::create_dir_all(tgt_path.parent().unwrap())?;
-                        std::fs::copy(guest_path, tgt_path)?;
+            // Add any child guest packages specified via the risc0.methods package metadata field.
+            // This picks up packages specified using the standard convention of using a workspace
+            // nested in the methods directory to contains the guest bins. Note that the packages
+            // in the child workspace do not generally have any risc0 metadata themselves.
+            // TODO: This needs to filter packages based on required features.
+            let pkg_children = risc0_build::guest_packages(pkg)
+                .with_context(|| format!("Failed to determine guest packages for {}", pkg.name))?;
+            for guest_pkg in pkg_children {
+                tracing::debug!(
+                    "Adding pkg {:?} to list of guest packages as child of {:?}",
+                    guest_pkg.name,
+                    pkg.name
+                );
+                guest_pkgs.push(guest_pkg);
+            }
+        }
 
-                        let image_id_path = archive_dir.join(file_name).with_extension("iid");
-                        std::fs::write(image_id_path, guest.image_id.as_bytes())?;
-                    }
+        // Build all packages in the gathered list, creating a list of the built guest binaries.
+        let mut guest_list = Vec::<risc0_build::GuestListEntry>::new();
+        for pkg in guest_pkgs {
+            tracing::debug!("Building guest package: {:?}", pkg.name);
+            let guests = risc0_build::build_package(&pkg, target_dir, guest_opts.clone())?;
+            guest_list.extend_from_slice(&guests);
+
+            // Compute the archive dir, which may be None if we should not archive.
+            let archive_dir = self.archive_dir.clone().or(self.archive.then(|| {
+                pkg.manifest_path
+                    .parent()
+                    .expect("manifest_path empty")
+                    .join(DEFAULT_ARCHIVE_DIRNAME)
+                    .into()
+            }));
+
+            if let Some(archive_dir) = archive_dir {
+                tracing::info!("Archiving guest to {}", archive_dir.display());
+                // Copy each guest bin into the archive directory, along with its image ID.
+                for guest in guests {
+                    let guest_path = Path::new(guest.path.deref());
+                    let guest_ext = read_bin_type(guest_path)?.file_extension();
+                    let file_name = guest_path.file_name().expect("guest bin path empty");
+                    let tgt_path = archive_dir.join(file_name).with_extension(guest_ext);
+                    std::fs::create_dir_all(tgt_path.parent().unwrap())?;
+                    std::fs::copy(guest_path, tgt_path)?;
+
+                    let image_id_path = archive_dir.join(file_name).with_extension("iid");
+                    std::fs::write(image_id_path, guest.image_id.as_bytes())?;
                 }
             }
         }
 
         if guest_list.is_empty() {
             eprintln!("No guest bin targets were found in included packages");
+            eprintln!("Guest bin targets are identified either by:");
+            eprintln!("1. Adding a [package.metadata.risc0] section to the guest Cargo.toml");
+            eprintln!(
+                "2. Specifying the guest dir [package.metadata.risc0.methods] in the Cargo.toml of a parent directory"
+            );
             bail!("No guest bin targets were found in included packages")
         }
 
+        // TODO: List the archive path here when set.
+        // TODO: Kernel targets list of image ID of all zeroes.
         println!("Guest programs ready at:");
         for guest in &guest_list {
             println!("ImageID: {} - {}", guest.image_id, guest.path);
