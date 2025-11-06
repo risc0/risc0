@@ -268,6 +268,10 @@ impl<F: Field> Hal for CpuHal<F> {
     type Buffer<T: Clone + Debug + PartialEq> = CpuBuffer<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        self.alloc_elem_zeroed(name, size)
+    }
+
+    fn alloc_elem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         CpuBuffer::new(name, size)
     }
 
@@ -276,6 +280,10 @@ impl<F: Field> Hal for CpuHal<F> {
     }
 
     fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        self.alloc_extelem_zeroed(name, size)
+    }
+
+    fn alloc_extelem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
         CpuBuffer::new(name, size)
     }
 
@@ -288,6 +296,10 @@ impl<F: Field> Hal for CpuHal<F> {
     }
 
     fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        self.alloc_digest_zeroed(name, size)
+    }
+
+    fn alloc_digest_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
         CpuBuffer::new(name, size)
     }
 
@@ -296,6 +308,10 @@ impl<F: Field> Hal for CpuHal<F> {
     }
 
     fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        self.alloc_u32_zeroed(name, size)
+    }
+
+    fn alloc_u32_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
         CpuBuffer::new(name, size)
     }
 

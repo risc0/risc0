@@ -36,13 +36,13 @@ int main() {
   Digest initialDigest = image.getDigest(1);
   Rv32imProver prover(hal, po2, true);
   rv32im::NullHostIO io;
-  bool complete = prover.preflight(image, io);
-  if (!complete) {
+  auto preflightData = preflight(po2, image, io);
+  if (!preflightData.isFinal) {
     throw std::runtime_error("Failed to complete");
   }
   Digest finalDigest = image.getDigest(1);
   WriteIop wiop;
-  prover.prove(wiop);
+  prover.prove(wiop, preflightData);
   auto transcript = wiop.getTranscript();
   ReadIop riop(wiop.getTranscript().data(), wiop.getTranscript().size());
   LOG(0, "Running verify");

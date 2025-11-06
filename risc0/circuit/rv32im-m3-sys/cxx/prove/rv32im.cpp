@@ -79,6 +79,24 @@ Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal,
   ci.taps.done();
 }
 
+PreflightResults preflight(size_t po2, rv32im::MemoryImage& image, rv32im::HostIO& io) {
+  PreflightResults results;
+  LOG(1, "Executing");
+  size_t rows = size_t(1) << po2;
+  results.rowInfo.resize(rows);
+  results.aux.resize(rows * computeMaxWitPerRow());
+  Trace trace(rows, results.rowInfo.data(), results.aux.data());
+  results.isFinal = emulate(trace, image, io, rows);
+  results.cycles = trace.getGlobals().finalCycle;
+  LOG(1,
+      "Finalizing, trace row count = " << trace.getRowCount()
+                                       << ", aux size = " << trace.getAuxSize());
+  trace.finalize();
+  results.rowInfo.resize(trace.getRowCount());
+  results.aux.resize(trace.getAuxSize());
+  return results;
+}
+
 Rv32imProver::Rv32imProver(IHalPtr hal, size_t po2, bool doValidate)
     : hal(hal)
     , rows(size_t(1) << po2)
@@ -90,23 +108,11 @@ Rv32imProver::Rv32imProver(IHalPtr hal, size_t po2, bool doValidate)
     , ci(hal, rowInfo, aux, tables, doValidate)
     , prover(hal, ci.ci, po2) {}
 
-bool Rv32imProver::preflight(rv32im::MemoryImage& image, HostIO& io, uint32_t* cyclesOut) {
-  LOG(1, "Pinning");
-  PinnedArrayWO cpuRI(hal, rowInfo);
-  PinnedArrayWO cpuAux(hal, aux);
-  LOG(1, "Executing");
-  Trace trace(rows, cpuRI.data(), cpuAux.data());
-  bool ret = emulate(trace, image, io, rows);
-  if (cyclesOut) {
-    *cyclesOut = trace.getGlobals().finalCycle;
-  }
-  LOG(1, "Finalizing, trace row count = " << trace.getRowCount());
-  trace.finalize();
+void Rv32imProver::prove(WriteIop& iop, const PreflightResults& preflight) {
   LOG(1, "Copying to GPU");
-  return ret;
-}
-
-void Rv32imProver::prove(WriteIop& iop) {
+  rowInfo.copyFromCpu(hal, preflight.rowInfo.data(), preflight.rowInfo.size());
+  aux.copyFromCpu(hal, preflight.aux.data(), preflight.aux.size());
+  LOG(1, "Proving");
   prover.prove(iop);
 }
 

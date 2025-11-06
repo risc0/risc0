@@ -84,3 +84,4 @@ prove = [
 ]
 std = ["risc0-zkp/std"]
 test = []
+dual = ["cuda"]
