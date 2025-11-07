@@ -104,6 +104,55 @@ fn validate_user_buffer_read(ptr: u32, len: usize) -> Result<(), Err> {
     Ok(())
 }
 
+/// Map 9P error codes to Linux errno values
+///
+/// This function provides a centralized mapping from 9P protocol error codes
+/// to the appropriate Linux `Err` type. It covers all common error codes that
+/// can be returned by the 9P server.
+///
+/// # Arguments
+/// * `ecode` - The 9P error code (from RlerrorMessage.ecode)
+///
+/// # Returns
+/// * `Err` - The corresponding Linux error enum value
+///
+/// # Notes
+/// - Error codes match standard Linux errno values
+/// - Unmapped errors default to `Err::IO` as a safe fallback
+#[inline]
+fn map_p9_error(ecode: u32) -> Err {
+    match ecode {
+        1 => Err::Access,       // EPERM - Operation not permitted
+        2 => Err::FileNotFound, // ENOENT - No such file or directory
+        5 => Err::IO,           // EIO - I/O error
+        9 => Err::BadFd,        // EBADF - Bad file descriptor
+        12 => Err::NoMem,       // ENOMEM - Out of memory
+        13 => Err::Access,      // EACCES - Permission denied
+        14 => Err::Fault,       // EFAULT - Bad address
+        17 => Err::FileExists,  // EEXIST - File exists
+        20 => Err::NotDir,      // ENOTDIR - Not a directory
+        21 => Err::IsDir,       // EISDIR - Is a directory
+        22 => Err::Inval,       // EINVAL - Invalid argument
+        24 => Err::MFile,       // EMFILE - Too many open files
+        27 => Err::FileTooBig,  // EFBIG - File too large
+        28 => Err::NoSpc,       // ENOSPC - No space left on device
+        36 => Err::NameTooLong, // ENAMETOOLONG - File name too long
+        38 => Err::NoSys,       // ENOSYS - Function not implemented
+        40 => Err::Loop,        // ELOOP - Too many symbolic links
+        34 => Err::Range,       // ERANGE - Math result not representable
+        61 => Err::NoData,      // ENODATA - No data available
+        95 => Err::OpNotSupp,   // EOPNOTSUPP - Operation not supported
+        _ => {
+            // For unmapped errors, log and default to IO error
+            kprint!(
+                "map_p9_error: unmapped P9 error code {} (defaulting to EIO)",
+                ecode
+            );
+            Err::IO
+        }
+    }
+}
+
 // Filesystem-related syscalls
 
 // open() flags
@@ -483,12 +532,7 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
                     "sys_unlinkat: walk to file failed with ecode={}",
                     rlerror.ecode
                 );
-                // Map error codes properly
-                return match rlerror.ecode {
-                    2 => Err(Err::FileNotFound), // ENOENT
-                    20 => Err(Err::NotDir),      // ENOTDIR
-                    _ => Err(Err::FileNotFound),
-                };
+                return Err(map_p9_error(rlerror.ecode));
             }
         },
         Err(_) => {
@@ -523,7 +567,7 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
                 rlerror2.tag,
                 rlerror2.ecode
             );
-            Ok(-(rlerror2.ecode as i32) as u32)
+            Err(map_p9_error(rlerror2.ecode))
         }
     }
 }
@@ -748,13 +792,7 @@ pub fn read_file_to_user_memory(fd: u32, buf: u32, count: u32, offset: u64) -> R
                         "read_file_to_user_memory: Rread error: ecode={}",
                         rlerror.ecode
                     );
-                    // Map 9P error codes to appropriate errno
-                    return match rlerror.ecode {
-                        2 => Err(Err::FileNotFound), // ENOENT
-                        9 => Err(Err::BadFd),        // EBADF
-                        5 => Err(Err::IO),           // EIO
-                        _ => Err(Err::IO),           // Default to EIO for I/O errors
-                    };
+                    return Err(map_p9_error(rlerror.ecode));
                 }
             }
         }
@@ -1036,14 +1074,7 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
                     if total_read > 0 {
                         return Ok(total_read);
                     }
-                    // Map 9P error codes to appropriate errno
-                    // Common error codes: 2=ENOENT, 9=EBADF, 5=EIO
-                    return match rlerror.ecode {
-                        2 => Err(Err::FileNotFound), // ENOENT
-                        9 => Err(Err::BadFd),        // EBADF
-                        5 => Err(Err::IO),           // EIO
-                        _ => Err(Err::IO),           // Default to EIO for I/O errors
-                    };
+                    return Err(map_p9_error(rlerror.ecode));
                 }
             }
         }
@@ -1184,7 +1215,7 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
                                 "do_write: error getting file size for O_APPEND: ecode={}",
                                 rlerror.ecode
                             );
-                            return Err(Err::IO); // EIO for I/O errors
+                            return Err(map_p9_error(rlerror.ecode));
                         }
                     },
                     Err(e) => {
@@ -1242,13 +1273,7 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
                     }
                     P9Response::Error(rlerror) => {
                         kprint!("do_write: Rwrite error: ecode={}", rlerror.ecode);
-                        // Map 9P error codes to appropriate errno
-                        return match rlerror.ecode {
-                            2 => Err(Err::FileNotFound), // ENOENT
-                            9 => Err(Err::BadFd),        // EBADF
-                            5 => Err(Err::IO),           // EIO
-                            _ => Err(Err::IO),           // Default to EIO for I/O errors
-                        };
+                        return Err(map_p9_error(rlerror.ecode));
                     }
                 }
             }
@@ -1909,9 +1934,12 @@ pub fn sys_fallocate(
     let current_size = match tgetattr.send_tgetattr() {
         Ok(_) => match RgetattrMessage::read_response() {
             P9Response::Success(rgetattr) => rgetattr.size,
-            P9Response::Error(_) => {
-                kprint!("sys_fallocate: error getting current file size");
-                return Err(Err::NoSys);
+            P9Response::Error(rlerror) => {
+                kprint!(
+                    "sys_fallocate: error getting current file size: ecode={}",
+                    rlerror.ecode
+                );
+                return Err(map_p9_error(rlerror.ecode));
             }
         },
         Err(_) => {
@@ -1997,7 +2025,7 @@ pub fn sys_fallocate(
                                         "sys_fallocate: error restoring size: ecode={}",
                                         e.ecode
                                     );
-                                    Err(Err::NoSys)
+                                    Err(map_p9_error(e.ecode))
                                 }
                             },
                             Err(e) => {
@@ -2012,17 +2040,16 @@ pub fn sys_fallocate(
                             rlerror.ecode,
                             size_to_allocate
                         );
-                        // Map 9P error codes to Linux error codes
-                        if rlerror.ecode == 27 {
-                            Err(Err::FileTooBig)
-                        } else if rlerror.ecode == 22
+                        // Special handling for fallocate: treat large size EINVAL as EFBIG
+                        if rlerror.ecode == 22
                             && (size_to_allocate > 0x7FFF_FFFF_FFFF_FFFF
                                 || offset > 0x7FFF_FFFF_FFFF_FFFF)
                         {
-                            // If the file size or offset is very large, treat EINVAL as EFBIG
+                            // Very large file size or offset: treat EINVAL as EFBIG
                             Err(Err::FileTooBig)
                         } else {
-                            Err(Err::Inval)
+                            // Use standard error mapping
+                            Err(map_p9_error(rlerror.ecode))
                         }
                     }
                 },
@@ -2068,23 +2095,16 @@ pub fn sys_fallocate(
                     }
                     P9Response::Error(rlerror) => {
                         kprint!("sys_fallocate: error setting size: ecode={}", rlerror.ecode);
-                        // Map 9P error codes to Linux error codes
-                        // 27 = EFBIG (File too large)
-                        // 22 = EINVAL (Invalid argument)
-                        // For fallocate, if we're trying to allocate a very large file,
-                        // the server might return EINVAL, but we should check if it's actually EFBIG
-                        // MAX_FILESIZE is typically LLONG_MAX / 1024, and with 1024-byte blocks
-                        // the offset would be around 9 exabytes, which is > 0x7FFF_FFFF_FFFF_FFFF
+                        // Special handling for fallocate: treat large size EINVAL as EFBIG
                         const MAX_REASONABLE_SIZE: u64 = 0x7FFF_FFFF_FFFF_FFFF; // 2^63 - 1
-                        if rlerror.ecode == 27 {
-                            Err(Err::FileTooBig)
-                        } else if rlerror.ecode == 22
+                        if rlerror.ecode == 22
                             && (target_size > MAX_REASONABLE_SIZE || offset > MAX_REASONABLE_SIZE)
                         {
-                            // If the file size or offset is very large, treat EINVAL as EFBIG
+                            // Very large file size or offset: treat EINVAL as EFBIG
                             Err(Err::FileTooBig)
                         } else {
-                            Err(Err::Inval)
+                            // Use standard error mapping
+                            Err(map_p9_error(rlerror.ecode))
                         }
                     }
                 },
@@ -2200,7 +2220,7 @@ pub fn sys_fchmod(fd: u32, mode: u32) -> Result<u32, Err> {
             }
             P9Response::Error(rlerror) => {
                 kprint!("sys_fchmod: error setting mode: ecode={}", rlerror.ecode);
-                Err(Err::NoSys)
+                Err(map_p9_error(rlerror.ecode))
             }
         },
         Err(e) => {
@@ -2353,7 +2373,7 @@ pub fn sys_fchmodat(dfd: u32, filename: u32, mode: u32, flag: u32) -> Result<u32
                 rlerror.tag,
                 rlerror.ecode
             );
-            Ok(-(rlerror.ecode as i32) as u32)
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -2444,7 +2464,7 @@ pub fn sys_fchown(fd: u32, user: u32, group: u32) -> Result<u32, Err> {
                     "sys_fchown: error setting ownership: ecode={}",
                     rlerror.ecode
                 );
-                Err(Err::NoSys)
+                Err(map_p9_error(rlerror.ecode))
             }
         },
         Err(e) => {
@@ -2552,7 +2572,7 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
                     } else {
                         clunk(TEMP_FID_4, false);
                     }
-                    return Err(Err::FileNotFound);
+                    return Err(map_p9_error(rlerror.ecode));
                 }
             },
             Err(e) => {
@@ -2633,7 +2653,7 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
                 }
             }
 
-            Ok(-(rlerror.ecode as i32) as u32)
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -2703,7 +2723,7 @@ pub fn sys_utimensat_time64(dfd: u32, filename: u32, times: u32, flags: u32) -> 
         match tsetattr.send_tsetattr() {
             Ok(_) => match RsetattrMessage::read_response() {
                 P9Response::Success(_) => Ok(0),
-                P9Response::Error(_) => Err(Err::NoSys),
+                P9Response::Error(rlerror) => Err(map_p9_error(rlerror.ecode)),
             },
             Err(_) => Err(Err::NoSys),
         }
@@ -2744,7 +2764,7 @@ pub fn sys_utimensat_time64(dfd: u32, filename: u32, times: u32, flags: u32) -> 
                 P9Response::Error(rlerror) => {
                     clunk(TEMP_FID_1, false);
                     kprint!("sys_utimensat_time64: Rlerror: ecode={}", rlerror.ecode);
-                    Err(Err::NoSys)
+                    Err(map_p9_error(rlerror.ecode))
                 }
             },
             Err(e) => {
@@ -2928,7 +2948,7 @@ pub fn sys_fgetxattr(fd: u32, name: u32, value: u32, size: u32) -> Result<u32, E
         }
         crate::p9::P9Response::Error(rlerror) => {
             kprint!("sys_fgetxattr: xattrwalk failed: ecode={}", rlerror.ecode);
-            Err(Err::NoData) // ENODATA - no such attribute
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -3054,7 +3074,7 @@ pub fn sys_flistxattr(fd: u32, list: u32, size: u32) -> Result<u32, Err> {
         }
         crate::p9::P9Response::Error(rlerror) => {
             kprint!("sys_flistxattr: xattrwalk failed: ecode={}", rlerror.ecode);
-            Err(Err::NoData) // ENODATA - no xattrs available
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -3156,7 +3176,7 @@ pub fn sys_truncate64(pathname: u32, length: u32) -> Result<u32, Err> {
                 rlerror.ecode
             );
             clunk(file_fid, false);
-            Ok(-(rlerror.ecode as i32) as u32)
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -3226,7 +3246,7 @@ pub fn sys_ftruncate64(fd: u32, length: u32) -> Result<u32, Err> {
                 rlerror.tag,
                 rlerror.ecode
             );
-            Ok(-(rlerror.ecode as i32) as u32)
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -3286,7 +3306,7 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
         }
         crate::p9::P9Response::Error(rlerror) => {
             kprint!("sys_fsetxattr: walk failed: ecode={}", rlerror.ecode);
-            return Err(Err::NoSys);
+            return Err(map_p9_error(rlerror.ecode));
         }
     }
 
@@ -3382,7 +3402,7 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
         }
         crate::p9::P9Response::Error(rlerror) => {
             kprint!("sys_fsetxattr: xattrcreate failed: ecode={}", rlerror.ecode);
-            Err(Err::NoSys)
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -3523,7 +3543,7 @@ pub fn sys_linkat(
             clunk(new_dir_fid, false);
             // Map 9P error codes to Linux errno
             // Return the error code as a negative errno value
-            Ok(-(rlerror.ecode as i32) as u32)
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -3592,7 +3612,7 @@ pub fn sys_symlinkat(target: u32, newdirfd: u32, linkpath: u32) -> Result<u32, E
                 rlerror.ecode
             );
             clunk(TEMP_FID_1, false);
-            Ok(-(rlerror.ecode as i32) as u32)
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -3762,7 +3782,7 @@ pub fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
                 rlerror.tag,
                 rlerror.ecode
             );
-            Ok(-(rlerror.ecode as i32) as u32)
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -3832,7 +3852,7 @@ pub fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u
                 rlerror.tag,
                 rlerror.ecode
             );
-            Ok(-(rlerror.ecode as i32) as u32)
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -4333,11 +4353,7 @@ pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<
                 clunk(dir_fid, false);
             }
             // Preserve ENOTDIR vs ENOENT semantics
-            return match rlerror.ecode as i32 {
-                20 => Err(Err::NotDir),
-                2 => Err(Err::FileNotFound),
-                _ => Err(Err::NoSys),
-            };
+            return Err(map_p9_error(rlerror.ecode));
         }
     }
 
@@ -4601,7 +4617,7 @@ pub fn sys_renameat2(
                     clunk(new_file_fid2, false);
                     clunk(TEMP_FID_1, false);
                     clunk(TEMP_FID_4, false);
-                    return Ok(-(rlerror.ecode as i32) as u32);
+                    return Err(map_p9_error(rlerror.ecode));
                 }
             },
             Err(_) => {
@@ -4627,7 +4643,7 @@ pub fn sys_renameat2(
                     clunk(new_file_fid2, false);
                     clunk(TEMP_FID_1, false);
                     clunk(TEMP_FID_4, false);
-                    return Ok(-(rlerror.ecode as i32) as u32);
+                    return Err(map_p9_error(rlerror.ecode));
                 }
             },
             Err(_) => {
@@ -4683,7 +4699,7 @@ pub fn sys_renameat2(
                     clunk(temp_fid, false);
                     clunk(TEMP_FID_1, false);
                     clunk(TEMP_FID_4, false);
-                    return Ok(-(rlerror.ecode as i32) as u32);
+                    return Err(map_p9_error(rlerror.ecode));
                 }
             },
             Err(_) => {
@@ -4778,7 +4794,7 @@ pub fn sys_renameat2(
                             clunk(file_fid, false);
                             clunk(TEMP_FID_1, false);
                             clunk(TEMP_FID_4, false);
-                            return Ok(-(rlerror2.ecode as i32) as u32);
+                            return Err(map_p9_error(rlerror2.ecode));
                         }
                     },
                     Err(_) => {
@@ -4792,7 +4808,7 @@ pub fn sys_renameat2(
                 kprint!("sys_renameat2: received Rlerror: ecode={}", rlerror.ecode);
                 clunk(TEMP_FID_1, false);
                 clunk(TEMP_FID_4, false);
-                return Ok(-(rlerror.ecode as i32) as u32);
+                return Err(map_p9_error(rlerror.ecode));
             }
         }
     }
@@ -5246,7 +5262,7 @@ pub fn sys_getdents64(fd: u32, dirp: u32, count: u32) -> Result<u32, Err> {
 
             Ok(total_bytes as u32)
         }
-        P9Response::Error(_rlerror) => Err(Err::NoSys),
+        P9Response::Error(rlerror) => Err(map_p9_error(rlerror.ecode)),
     }
 }
 
@@ -5389,12 +5405,7 @@ fn do_walk(
                 rlerror.tag,
                 rlerror.ecode
             );
-            // Map common 9P error codes to proper Linux errno
-            match rlerror.ecode {
-                2 => Err(Err::FileNotFound), // ENOENT
-                20 => Err(Err::NotDir),      // ENOTDIR
-                _ => Err(Err::NoSys),
-            }
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -5424,7 +5435,7 @@ fn read_symlink(fid: u32) -> Result<String, Err> {
                 rlerror.tag,
                 rlerror.ecode
             );
-            Err(Err::NoSys)
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
@@ -5744,7 +5755,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                                 }
                                 P9Response::Error(rlerror) => {
                                     clunk(file_fid, false);
-                                    return Ok(-(rlerror.ecode as i32) as u32);
+                                    return Err(map_p9_error(rlerror.ecode));
                                 }
                             }
                         }
@@ -5883,7 +5894,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                                             rlerror.ecode
                                         );
                                         clunk(file_fid, false);
-                                        return Ok(-(rlerror.ecode as i32) as u32);
+                                        return Err(map_p9_error(rlerror.ecode));
                                     }
                                 },
                                 Err(e) => {
@@ -5903,7 +5914,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                             rlerror.tag,
                             rlerror.ecode
                         );
-                        Ok(-(rlerror.ecode as i32) as u32)
+                        Err(map_p9_error(rlerror.ecode))
                     }
                 }
             }
@@ -5959,7 +5970,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                             rlerror.tag,
                             rlerror.ecode
                         );
-                        Ok(-(rlerror.ecode as i32) as u32)
+                        Err(map_p9_error(rlerror.ecode))
                     }
                 }
             }
@@ -6291,7 +6302,7 @@ pub fn sys_statx(
             if target_fid == TEMP_FID_1 {
                 clunk(TEMP_FID_1, false);
             }
-            Ok(-(rlerror.ecode as i32) as u32)
+            Err(map_p9_error(rlerror.ecode))
         }
     }
 }
