@@ -70,6 +70,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     povw_job_id: Option<PovwJobId>,
     circuit_version: u32,
     segment_counter: u32,
+    insn_counter: u32,
 }
 
 #[non_exhaustive]
@@ -115,6 +116,7 @@ struct CreateSegmentRequest {
     write_record: Vec<u32>,
     user_cycles: u32,
     pager_cycles: u32,
+    insn_counter: u32,
     terminate_state: Option<TerminateState>,
     segment_threshold: u32,
     po2: u32,
@@ -166,6 +168,7 @@ fn create_segments(
             index: req.index,
             segment_threshold: req.segment_threshold,
             povw_nonce: req.povw_nonce,
+            insn_counter: req.insn_counter,
         };
 
         if let Some(dump_path) = req.dump_path {
@@ -197,6 +200,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             user_pc: ByteAddr(0),
             machine_mode: 0,
             user_cycles: 0,
+            insn_counter: 0,
             pager: PagedMemory::new(image.clone(), /*tracing_enabled=*/ !trace.is_empty()),
             initial_image: image,
             terminate_state: None,
@@ -274,6 +278,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 }
 
                 let result = Risc0Machine::step(&mut emu, self);
+                self.insn_counter += 1;
 
                 if let Err(err) = result {
                     self.dump();
@@ -362,6 +367,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             write_record: std::mem::take(&mut self.write_record),
             user_cycles: self.user_cycles,
             pager_cycles: self.pager.cycles,
+            insn_counter: self.insn_counter,
             terminate_state: self.terminate_state,
             segment_threshold,
             po2: segment_po2 as u32,
@@ -392,6 +398,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.cycles.paging += pager_cycles;
         self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
         self.user_cycles = 0;
+        self.insn_counter = 0;
         self.pager.reset();
 
         Ok(())
@@ -433,6 +440,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 write_record: std::mem::take(&mut self.write_record),
                 user_cycles: self.user_cycles,
                 pager_cycles: self.pager.cycles,
+                insn_counter: self.insn_counter,
                 terminate_state: self.terminate_state,
                 segment_threshold,
                 po2: po2 as u32,
@@ -458,10 +466,12 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.output_digest = None;
         self.machine_mode = 0;
         self.user_cycles = 0;
+        self.insn_counter = 0;
         self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
         self.ecall_metrics = Default::default();
         self.segment_counter = 0;
+        self.insn_counter = 0;
     }
 
     fn segment_cycles(&self) -> u32 {

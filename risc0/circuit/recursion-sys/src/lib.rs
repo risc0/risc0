@@ -83,6 +83,7 @@ unsafe extern "C" {
 #[cfg(feature = "cuda")]
 unsafe extern "C" {
     pub fn risc0_circuit_recursion_cuda_witgen(
+        stream: cust::sys::CUstream,
         mode: StepMode,
         buffers: *const RawExecBuffers,
         preflight: *const RawPreflightTrace,
@@ -90,12 +91,14 @@ unsafe extern "C" {
     ) -> *const std::os::raw::c_char;
 
     pub fn risc0_circuit_recursion_cuda_accum(
+        stream: cust::sys::CUstream,
         buffers: *const RawAccumBuffers,
         steps: u32,
         cycles: u32,
     ) -> *const std::os::raw::c_char;
 
     pub fn risc0_circuit_recursion_cuda_eval_check(
+        stream: cust::sys::CUstream,
         check: *const BabyBearElem,
         ctrl: *const BabyBearElem,
         data: *const BabyBearElem,

@@ -79,21 +79,22 @@ Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal,
   ci.taps.done();
 }
 
-PreflightResults preflight(size_t po2, rv32im::MemoryImage& image, rv32im::HostIO& io) {
-  PreflightResults results;
+PreflightResultsPtr
+preflight(size_t po2, rv32im::MemoryImage& image, rv32im::HostIO& io, uint32_t endCycle) {
   LOG(1, "Executing");
   size_t rows = size_t(1) << po2;
-  results.rowInfo.resize(rows);
-  results.aux.resize(rows * computeMaxWitPerRow());
-  Trace trace(rows, results.rowInfo.data(), results.aux.data());
-  results.isFinal = emulate(trace, image, io, rows);
-  results.cycles = trace.getGlobals().finalCycle;
+  auto results = std::make_shared<PreflightResults>();
+  results->rowInfo.resize(rows);
+  results->aux.resize(rows * computeMaxWitPerRow());
+  Trace trace(rows, results->rowInfo.data(), results->aux.data());
+  results->isFinal = emulate(trace, image, io, rows, endCycle);
+  results->cycles = trace.getUserCycles();
   LOG(1,
       "Finalizing, trace row count = " << trace.getRowCount()
                                        << ", aux size = " << trace.getAuxSize());
   trace.finalize();
-  results.rowInfo.resize(trace.getRowCount());
-  results.aux.resize(trace.getAuxSize());
+  results->rowInfo.resize(trace.getRowCount());
+  results->aux.resize(trace.getAuxSize());
   return results;
 }
 
