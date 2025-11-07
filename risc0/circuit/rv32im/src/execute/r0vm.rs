@@ -641,6 +641,10 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
 }
 
 impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
+    fn circuit_version(&self) -> u32 {
+        self.ctx.circuit_version()
+    }
+
     fn ecall(&mut self) -> Result<bool> {
         if self.is_machine_mode() {
             self.machine_ecall()

@@ -35,7 +35,7 @@ constexpr size_t kStepModeSeqForward = 1;
 constexpr size_t kStepModeSeqReverse = 2;
 
 namespace sppark {
-void calcPrefixProducts(void* d_inout, uint32_t count);
+void calcPrefixProducts(cudaStream_t stream, void* d_inout, uint32_t count);
 } // namespace sppark
 
 __device__ void nextStepExec(ExecContext* ctx, uint32_t cycle, uint32_t count) {
@@ -159,11 +159,11 @@ __global__ void parStepVerifyAccum(AccumContext* ctx) {
 
 struct HostExecContext {
   ExecContext* ctx;
-  CudaStream stream;
+  cudaStream_t stream;
   LaunchConfig cfg;
 
-  HostExecContext(ExecBuffers* buffers, PreflightTrace* trace, size_t totalCycles)
-      : cfg(getSimpleConfig(trace->numCycles)) {
+  HostExecContext(cudaStream_t stream, ExecBuffers* buffers, PreflightTrace* trace, size_t totalCycles)
+      : cfg(getSimpleConfig(trace->numCycles)), stream(stream) {
     CUDA_OK(cudaMallocManaged(&ctx, sizeof(ExecContext)));
     ctx->buffers.ctrl = buffers->ctrl;
     ctx->buffers.data = buffers->data;
@@ -231,13 +231,13 @@ struct HostExecContext {
 
     {
       nvtx3::scoped_range range("sortWom");
-      thrust::sort(thrust::device, ctx->womRows, ctx->womRows + numCycles * kMaxWomRowsPerCycle);
+      thrust::sort(thrust::cuda::par.on(stream), ctx->womRows, ctx->womRows + numCycles * kMaxWomRowsPerCycle);
     }
 
     {
       nvtx3::scoped_range range("scan");
       thrust::exclusive_scan(
-          thrust::device, ctx->womIndex, ctx->womIndex + numCycles, ctx->womIndex);
+          thrust::cuda::par.on(stream), ctx->womIndex, ctx->womIndex + numCycles, ctx->womIndex);
     }
 
     {
@@ -256,11 +256,11 @@ struct HostExecContext {
 
 struct HostAccumContext {
   AccumContext* ctx;
-  CudaStream stream;
+  cudaStream_t stream;
   LaunchConfig cfg;
 
-  HostAccumContext(AccumBuffers* buffers, size_t workCycles, size_t totalCycles)
-      : cfg(getSimpleConfig(workCycles)) {
+  HostAccumContext(cudaStream_t stream, AccumBuffers* buffers, size_t workCycles, size_t totalCycles)
+      : cfg(getSimpleConfig(workCycles)), stream(stream) {
     CUDA_OK(cudaMallocManaged(&ctx, sizeof(AccumContext)));
     ctx->buffers.ctrl = buffers->ctrl;
     ctx->buffers.global = buffers->global;
@@ -289,13 +289,12 @@ struct HostAccumContext {
 
   void calcPrefixProducts() {
     nvtx3::scoped_range range("calcPrefixProducts");
-    sppark::calcPrefixProducts(ctx->accum, ctx->workCycles);
+    sppark::calcPrefixProducts(stream, ctx->accum, ctx->workCycles);
     CUDA_OK(cudaStreamSynchronize(stream));
   }
 
   void verifyAccum() {
     nvtx3::scoped_range range("verifyAccum");
-    CUDA_OK(cudaDeviceSynchronize());
     parStepVerifyAccum<<<cfg.grid, cfg.block, 0, stream>>>(ctx);
     CUDA_OK(cudaStreamSynchronize(stream));
   }
@@ -303,13 +302,13 @@ struct HostAccumContext {
 
 extern "C" {
 
-const char* risc0_circuit_recursion_cuda_witgen(uint32_t mode,
+const char* risc0_circuit_recursion_cuda_witgen(cudaStream_t stream,
+                                                uint32_t mode,
                                                 ExecBuffers* buffers,
                                                 PreflightTrace* trace,
                                                 uint32_t totalCycles) {
   try {
-    CUDA_OK(cudaDeviceSynchronize());
-    HostExecContext ctx(buffers, trace, totalCycles);
+    HostExecContext ctx(stream, buffers, trace, totalCycles);
     ctx.doStepExec(mode);
     ctx.verifyWom(mode);
   } catch (const std::exception& err) {
@@ -318,12 +317,12 @@ const char* risc0_circuit_recursion_cuda_witgen(uint32_t mode,
   return nullptr;
 }
 
-const char* risc0_circuit_recursion_cuda_accum(AccumBuffers* buffers,
+const char* risc0_circuit_recursion_cuda_accum(cudaStream_t stream,
+                                               AccumBuffers* buffers,
                                                uint32_t workCycles,
                                                uint32_t totalCycles) {
   try {
-    CUDA_OK(cudaDeviceSynchronize());
-    HostAccumContext ctx(buffers, workCycles, totalCycles);
+    HostAccumContext ctx(stream, buffers, workCycles, totalCycles);
     ctx.computeAccum();
     ctx.calcPrefixProducts();
     ctx.verifyAccum();

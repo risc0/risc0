@@ -22,19 +22,19 @@
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 
-extern "C" void prefix_sum(fr_t* buf, uint32_t count) {
-  thrust::inclusive_scan(thrust::device, buf, buf + count, buf);
+extern "C" void prefix_sum(cudaStream_t stream, fr_t* buf, uint32_t count) {
+  thrust::inclusive_scan(thrust::cuda::par.on(stream), buf, buf + count, buf);
 }
 
-extern "C" RustError::by_value
-rv32im_m3_poly_divide(fr4_t d_inout[/*len*/], size_t len, fr4_t* remainder, fr4_t pow) {
-  const gpu_t& gpu = select_gpu();
+extern "C" RustError::by_value rv32im_m3_poly_divide(
+    cudaStream_t stream, fr4_t d_inout[/*len*/], size_t len, fr4_t* remainder, fr4_t pow) {
+  stream_t sppark_stream(stream, 0);
   try {
-    div_by_x_minus_z<true>(d_inout, len, pow, gpu);
-    gpu.DtoH(remainder, &d_inout[len - 1], 1);
-    gpu.sync();
+    div_by_x_minus_z<true>(d_inout, len, pow, sppark_stream);
+    sppark_stream.DtoH(remainder, &d_inout[len - 1], 1);
+    sppark_stream.sync();
   } catch (const cuda_error& e) {
-    gpu.sync();
+    sppark_stream.sync();
     return RustError{e.code(), e.what()};
   }
 

@@ -17,7 +17,7 @@ use std::collections::HashMap;
 
 use anyhow::{Context, Result, anyhow, bail, ensure};
 
-use super::{ProverServer, keccak::prove_keccak};
+use super::{PreflightIter, ProverServer, keccak::prove_keccak};
 use crate::{
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
     MaybePruned, Output, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
@@ -40,13 +40,19 @@ use crate::{
 
 /// An implementation of a Prover that runs locally.
 pub struct ProverImpl {
+    #[cfg(feature = "rv32im-m3")]
+    prover: risc0_circuit_rv32im_m3::prove::ProverContext,
     opts: ProverOpts,
 }
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
-    pub fn new(opts: ProverOpts) -> Self {
-        Self { opts }
+    pub fn new(opts: ProverOpts) -> Result<Self> {
+        Ok(Self {
+            #[cfg(feature = "rv32im-m3")]
+            prover: risc0_circuit_rv32im_m3::prove::segment_prover(opts.max_prover_po2)?,
+            opts,
+        })
     }
 }
 
@@ -90,7 +96,7 @@ impl ProverServer for ProverImpl {
             for hook in &session.hooks {
                 hook.on_pre_prove_segment(&segment);
             }
-            segments.push(self.prove_segment(ctx, &segment)?);
+            segments.extend(self.prove_segment(ctx, &segment)?);
             for hook in &session.hooks {
                 hook.on_post_prove_segment(&segment);
             }
@@ -234,34 +240,8 @@ impl ProverServer for ProverImpl {
         );
     }
 
-    #[cfg(feature = "rv32im-m3")]
-    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
-        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(segment.po2())?;
-        let seal = prover.prove(&segment.inner)?;
-
-        let claim = ReceiptClaim::decode_m3_with_output(&seal, segment.output.clone())
-            .context("Decode ReceiptClaim from seal")?;
-
-        let verifier_parameters = ctx
-            .segment_verifier_parameters
-            .as_ref()
-            .ok_or_else(|| anyhow!("segment receipt verifier parameters missing from context"))?
-            .digest();
-        let receipt = SegmentReceipt {
-            seal,
-            index: segment.index,
-            hashfn: self.opts.hashfn.clone(),
-            claim,
-            verifier_parameters,
-        };
-        receipt
-            .verify_integrity_with_context(ctx)
-            .context("verify segment")?;
-
-        Ok(receipt)
-    }
-
-    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
+    #[cfg(not(feature = "rv32im-m3"))]
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
         tracing::debug!("segment_preflight");
 
         ensure!(
@@ -270,22 +250,36 @@ impl ProverServer for ProverImpl {
             segment.po2(),
             self.opts.max_segment_po2
         );
-        let inner = risc0_circuit_rv32im::prove::segment_prover()?.preflight(&segment.inner)?;
 
-        Ok(PreflightResults {
+        let prover = risc0_circuit_rv32im::prove::segment_prover()?;
+
+        let inner = prover.preflight(&segment.inner)?;
+        let preflight_results = PreflightResults {
             inner,
             terminate_state: segment.inner.claim.terminate_state,
             output: segment.output.clone(),
             segment_index: segment.index,
-        })
+        };
+
+        Ok(Box::new(std::iter::once(Ok(preflight_results))))
     }
 
-    fn prove_segment_core(
+    #[cfg(feature = "rv32im-m3")]
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
+        tracing::debug!("segment_preflight");
+        Ok(Box::new(rv32im_m3::PreflightIter::new(
+            segment,
+            self.opts.max_prover_po2,
+        )?))
+    }
+
+    #[cfg(not(feature = "rv32im-m3"))]
+    fn prove_preflight(
         &self,
         ctx: &VerifierContext,
         preflight_results: PreflightResults,
     ) -> Result<SegmentReceipt> {
-        tracing::debug!("prove_segment_core");
+        tracing::debug!("prove_preflight");
 
         ensure!(
             self.opts.hashfn == "poseidon2",
@@ -295,8 +289,8 @@ impl ProverServer for ProverImpl {
         );
 
         let po2 = preflight_results.inner.po2();
-        let seal =
-            risc0_circuit_rv32im::prove::segment_prover()?.prove_core(preflight_results.inner)?;
+        let prover = risc0_circuit_rv32im::prove::segment_prover()?;
+        let seal = prover.prove_core(preflight_results.inner)?;
         let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(po2))?;
         claim.output = preflight_results.output.into();
 
@@ -308,6 +302,38 @@ impl ProverServer for ProverImpl {
         let receipt = SegmentReceipt {
             seal,
             index: preflight_results.segment_index,
+            hashfn: self.opts.hashfn.clone(),
+            claim,
+            verifier_parameters,
+        };
+        receipt
+            .verify_integrity_with_context(ctx)
+            .context("verify segment")?;
+
+        Ok(receipt)
+    }
+
+    #[cfg(feature = "rv32im-m3")]
+    fn prove_preflight(
+        &self,
+        ctx: &VerifierContext,
+        preflight_results: PreflightResults,
+    ) -> Result<SegmentReceipt> {
+        tracing::debug!("prove_preflight");
+
+        let seal = self.prover.prove(&preflight_results.inner)?;
+
+        let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output)
+            .context("Decode ReceiptClaim from seal")?;
+
+        let verifier_parameters = ctx
+            .segment_verifier_parameters
+            .as_ref()
+            .ok_or_else(|| anyhow!("segment receipt verifier parameters missing from context"))?
+            .digest();
+        let receipt = SegmentReceipt {
+            seal,
+            index: 0,
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,
@@ -436,4 +462,58 @@ fn check_claims(
         );
     }
     Ok(())
+}
+
+#[cfg(feature = "rv32im-m3")]
+mod rv32im_m3 {
+    use risc0_circuit_rv32im::TerminateState;
+
+    use super::*;
+
+    pub(crate) struct PreflightIter {
+        max_prover_po2: usize,
+        ctx: risc0_circuit_rv32im_m3::prove::SegmentContext,
+        output: Option<Output>,
+        terminate_state: Option<TerminateState>,
+        is_done: bool,
+    }
+
+    impl PreflightIter {
+        pub(crate) fn new(segment: &Segment, max_prover_po2: usize) -> Result<Self> {
+            let ctx = risc0_circuit_rv32im_m3::prove::SegmentContext::new(&segment.inner)?;
+            Ok(Self {
+                max_prover_po2,
+                ctx,
+                output: segment.output.clone(),
+                terminate_state: segment.inner.claim.terminate_state,
+                is_done: false,
+            })
+        }
+    }
+
+    impl Iterator for PreflightIter {
+        type Item = Result<PreflightResults>;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            if self.is_done {
+                return None;
+            }
+
+            match self.ctx.preflight(self.max_prover_po2) {
+                Ok(preflight) => {
+                    self.is_done = preflight.is_final();
+                    let results = PreflightResults {
+                        inner: preflight,
+                        terminate_state: self.terminate_state,
+                        output: self.is_done.then(|| self.output.clone()).flatten(),
+                    };
+                    Some(Ok(results))
+                }
+                Err(err) => {
+                    self.is_done = true;
+                    Some(Err(err))
+                }
+            }
+        }
+    }
 }
