@@ -429,13 +429,13 @@ extern "C" {
 
 using namespace risc0::circuit::rv32im_v2::cuda;
 
-const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
+const char* risc0_circuit_rv32im_cuda_witgen(cudaStream_t stream,
+                                             uint32_t mode,
                                              ExecBuffers* buffers,
                                              PreflightTrace* preflight,
                                              uint32_t lastCycle) {
   try {
     HostExecContext ctx(buffers, preflight, lastCycle);
-    CudaStream stream;
     size_t split = preflight->tableSplitCycle;
 
     switch (mode) {
@@ -472,12 +472,12 @@ const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
   return nullptr;
 }
 
-const char* risc0_circuit_rv32im_cuda_accum(AccumBuffers* buffers,
+const char* risc0_circuit_rv32im_cuda_accum(cudaStream_t stream,
+                                            AccumBuffers* buffers,
                                             PreflightTrace* preflight,
                                             uint32_t lastCycle) {
   try {
     HostAccumContext ctx(buffers, preflight, lastCycle);
-    CudaStream stream;
     auto cfg = getSimpleConfig(lastCycle);
 
     {
@@ -493,7 +493,7 @@ const char* risc0_circuit_rv32im_cuda_accum(AccumBuffers* buffers,
         size_t col = buffers->accum.cols - 4 + j;
         Fp* itBegin = buffers->accum.buf + col * rows;
         Fp* itEnd = buffers->accum.buf + col * rows + lastCycle;
-        thrust::inclusive_scan(thrust::device, itBegin, itEnd, itBegin);
+        thrust::inclusive_scan(thrust::cuda::par.on(stream), itBegin, itEnd, itBegin);
       }
       CUDA_OK(cudaStreamSynchronize(stream));
     }

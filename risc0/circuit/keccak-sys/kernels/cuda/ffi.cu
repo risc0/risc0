@@ -189,13 +189,13 @@ extern "C" {
 
 using namespace risc0::circuit::keccak::cuda;
 
-const char* risc0_circuit_keccak_cuda_witgen(uint32_t mode,
+const char* risc0_circuit_keccak_cuda_witgen(cudaStream_t stream,
+                                             uint32_t mode,
                                              ExecBuffers* buffers,
                                              PreflightTrace* preflight,
                                              uint32_t lastCycle) {
   try {
     HostContext ctx(buffers, preflight, lastCycle);
-    CudaStream stream;
 
     auto cfg = getSimpleConfig(lastCycle);
     switch (mode) {
@@ -218,14 +218,14 @@ const char* risc0_circuit_keccak_cuda_witgen(uint32_t mode,
   return nullptr;
 }
 
-const char* risc0_circuit_keccak_cuda_scatter(Fp* into,
+const char* risc0_circuit_keccak_cuda_scatter(cudaStream_t stream,
+                                              Fp* into,
                                               const ScatterInfo* infos,
                                               const uint32_t* from,
                                               const uint32_t rows,
                                               const uint32_t count) {
   try {
     ScatterContext ctx(infos, count);
-    CudaStream stream;
     auto cfg = getSimpleConfig(count);
     scatter_preflight<<<cfg.grid, cfg.block, 0, stream>>>(into, ctx.d_infos, from, rows, count);
     CUDA_OK(cudaStreamSynchronize(stream));
