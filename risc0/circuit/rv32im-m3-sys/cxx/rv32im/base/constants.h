@@ -148,14 +148,18 @@ CONSTANT uint32_t CSR_MSPC = 0x7C1;     // Suspend/Resume PC
 CONSTANT uint32_t CSR_MSMODE = 0x7C2;   // Suspend/Resume Mode
 CONSTANT uint32_t CSR_MVINFO = 0x7C3;   // VM Info
 CONSTANT uint32_t CSR_MEMODE = 0x7C4;      // Saved mode when machine traps
-CONSTANT uint32_t CSR_MTRAP = 0x7C5;       // Nondet Trap
-CONSTANT uint32_t CSR_MCLEARCACHE = 0x7C6; // Clear inst + translations caches
-CONSTANT uint32_t CSR_MSCYCLE = 0x7C7;  // Saved cycle # on exit of machine mode
+CONSTANT uint32_t CSR_MCLEARCACHE = 0x7C5; // Clear inst + translations caches
+CONSTANT uint32_t CSR_MSCYCLE = 0x7C6;  // Saved cycle # on exit of machine mode
+CONSTANT uint32_t CSR_MIE = 0x7C7;  // Is timer interrupt ready to fire
 CONSTANT uint32_t CSR_MTIME = 0x7C8;  // Time low 32 bits
 CONSTANT uint32_t CSR_MTIMEH = 0x7C9;  // Time high 32 bits
-CONSTANT uint32_t CSR_MTIMER = 0xD0;  // Time low 32 bits
-CONSTANT uint32_t CSR_MTIMERH = 0x7D1;  // Time high 32 bits
-CONSTANT uint32_t CSR_MDEBUG = 0x7E0;  // Time high 32 bits
+CONSTANT uint32_t CSR_MTIMER = 0x7CA;  // Time low 32 bits
+CONSTANT uint32_t CSR_MTIMERH = 0x7CB;  // Time high 32 bits
+CONSTANT uint32_t CSR_MTRAPECALL = 0x7D0;       // Nondet Trap
+CONSTANT uint32_t CSR_MTRAPINST = 0x7D1;       // Nondet Trap
+CONSTANT uint32_t CSR_MTRAPFETCH = 0x7D2;       // Nondet Trap
+CONSTANT uint32_t CSR_MTRAPINTER = 0x7D3;       // Nondet Trap
+CONSTANT uint32_t CSR_MDEBUG = 0x7FE;  // Time high 32 bits
 CONSTANT uint32_t CSR_MNOV2COMPAT = 0x7FF; // Turn off V2 compat in global
 
 // V2 Compatibility constants

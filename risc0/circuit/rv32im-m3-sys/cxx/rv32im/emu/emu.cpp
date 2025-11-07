@@ -27,6 +27,8 @@
 
 namespace risc0::rv32im {
 
+FILE* pcFile = nullptr;
+
 namespace {
 
 //#define DLOG(...) if (debug && mode != MODE_MACHINE) LOG(0, __VA_ARGS__)
@@ -158,7 +160,9 @@ struct Emulator {
     }
     pte |= (1 << 6);  // Set A bit always
     if (aType == ACCESS_STORE) { pte |= (1 << 7); } // Set D if write
-    //AT(pteAddr)[0] = pte;
+    // TODO: Actually write
+    PhysMemWriteWitness ignore;
+    writePhysMemory(ignore, pteAddr/4, pte);
     //LOG(0, "vPage=" << HexWord{vPage} << ", pPage=" << HexWord{(a >> 12)} << ", key=" << key);
     return { true, a >> 12 };
   }
@@ -219,7 +223,7 @@ struct Emulator {
     record.prevCycle = phys.prevCycle;
     record.prevValue = phys.prevValue;
     record.value = phys.value;
-    return true;
+    return ok;
   }
 
   inline void undoVirtMemory(VirtMemReadWitness& record) {
@@ -383,7 +387,18 @@ struct Emulator {
       setMode(readPhysMemory(wit.mode, CSR_WORD(MSMODE)));
       writePhysMemory(wit.version, CSR_WORD(MVERSION), RV32IM_CIRCUIT_VERSION);
     }
-    writePhysMemory(wit.writeCycle, CSR_WORD(MSCYCLE), curCycle);
+    writePhysMemory(wit.writeCycle, CSR_WORD(MSCYCLE), 2);
+    uint32_t ie = peekPhysMemory(CSR_WORD(MIE));
+    timer = 0x40000001;
+    if (ie) {
+      uint64_t timer64 = (uint64_t(peekPhysMemory(CSR_WORD(MTIMERH) & 0x4fffffff)) << 32) | peekPhysMemory(CSR_WORD(MTIMER));
+      uint64_t time64 = (uint64_t(peekPhysMemory(CSR_WORD(MTIMEH))) << 32) | peekPhysMemory(CSR_WORD(MTIME));
+      int64_t diff = int64_t(timer64) - int64_t(time64);
+      if (diff < 0) { diff = 0; }
+      if (diff > 0x40000000) { diff = 0x40000000; }
+      //LOG(0, "ie = " << ie << ", timer = " << std::hex << timer64 << ", time = " << time64 << std::dec << ", diff = " << diff);
+      timer = curCycle + diff + 1; 
+    }
     curCycle++;
   }
 
@@ -399,14 +414,15 @@ struct Emulator {
       writePhysMemory(wit.mode, CSR_WORD(MSMODE), mode);
     }
     uint32_t oldCycle = readPhysMemory(wit.readCycle, CSR_WORD(MSCYCLE));
+    if (mode == MODE_MACHINE) { oldCycle = curCycle; }
     uint64_t time = peekPhysMemory(CSR_WORD(MTIME)) | (uint64_t(peekPhysMemory(CSR_WORD(MTIMEH))) << 32);
-    time += wit.cycle - oldCycle;
+    time += curCycle - oldCycle;
     writePhysMemory(wit.updateTime, CSR_WORD(MTIME), time & 0xffffffff);
     writePhysMemory(wit.updateTime, CSR_WORD(MTIMEH), time >> 32);
     curCycle++;
   }
 
-  void trap(const std::string& reason) {
+  void trap(const std::string& reason, uint32_t trapType) {
     if (mode == MODE_MACHINE) {
       fatal("Double Trap: " + reason);
     }
@@ -414,15 +430,27 @@ struct Emulator {
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
     uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
-    bool isEcall = (dinst->inst == 0x00000073);
-    wit.isEcall = isEcall;
+    wit.trapType = trapType;
     writePhysMemory(wit.writePc, mepcWord, pc);
     writePhysMemory(wit.writeMode, CSR_WORD(MEMODE), mode);
-    uint32_t imm = isEcall ? 0 : dinst->inst;
+    uint32_t imm = trapType == TRAP_ECALL ? 0 : dinst->inst;
     writePhysMemory(wit.writeVal, CSR_WORD(MTVAL), imm);
-    uint32_t dispatchWord = CSR_WORD(MTRAP);
-    if (isEcall) {
-      dispatchWord = v2Compat ? V2_COMPAT_ECALL_DISPATCH : CSR_WORD(MTVEC);
+    uint32_t dispatchWord;
+    switch(trapType) {
+      case TRAP_ECALL:
+        dispatchWord = v2Compat ? V2_COMPAT_ECALL_DISPATCH : CSR_WORD(MTRAPECALL);
+        break;
+      case TRAP_INST:
+        dispatchWord = CSR_WORD(MTRAPINST);
+        break;
+      case TRAP_FETCH:
+        dispatchWord = CSR_WORD(MTRAPFETCH);
+        break;
+      case TRAP_INTER:
+        dispatchWord = CSR_WORD(MTRAPINTER);
+        break;
+      default:
+        throw std::runtime_error("Unknown trap call");
     }
     newPc = readPhysMemory(wit.readDispatch, dispatchWord);
     setMode(MODE_MACHINE);
@@ -496,14 +524,14 @@ struct Emulator {
       break;
     }
     if (addr % alignmentReq != 0) {
-      trap("Alignement error on load");
+      trap("Alignement error on load", TRAP_INST);
       return;
     }
     // Preattempt virtual read
     VirtMemReadWitness readWit;
     auto [ok, in] = readVirtMemory(readWit, addr / BYTES_PER_WORD);
     if (!ok) {
-      trap("VM error on read");
+      trap("VM error on read", TRAP_INST);
       return;
     }
     auto& wit = trace.makeInstLoad();
@@ -556,7 +584,13 @@ struct Emulator {
       break;
     }
     if (peekAddr % alignmentReq != 0) {
-      trap("Alignement error on store");
+      trap("Alignement error on store", TRAP_INST);
+      return;
+    }
+    // Peek VM in advance + fault if needed
+    auto [ok, in] = peekVirtMemory(peekAddr / BYTES_PER_WORD, ACCESS_STORE);
+    if (!ok) {
+      trap("VM error on read", TRAP_INST);
       return;
     }
     auto& wit = trace.makeInstStore();
@@ -569,8 +603,6 @@ struct Emulator {
     wit.options = opt;
     uint32_t addr = rs1Val + wit.imm;
     uint32_t shift = BITS_PER_BYTE * (addr % BYTES_PER_WORD);
-    // TODO: Check ok
-    auto [ok, in] = peekVirtMemory(addr / BYTES_PER_WORD, ACCESS_STORE);
     uint32_t out;
     switch (optInner.peek<StoreKind>()) {
     case STORE_SB:
@@ -584,7 +616,7 @@ struct Emulator {
       break;
     }
     if (!writeVirtMemory(wit.mem, addr / BYTES_PER_WORD, out)) {
-      // TODO: fix this
+      // THis should never occur
       fatal("Write failed");
     }
     DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{rs1Val});
@@ -669,7 +701,7 @@ struct Emulator {
 
   template <uint32_t opt> inline void do_INST_ECALL() {
     if (mode != MODE_MACHINE) {
-      trap("ECALL");
+      trap("ECALL", TRAP_ECALL);
       return;
     }
     uint32_t which = peekReg(REG_A7);
@@ -697,7 +729,7 @@ struct Emulator {
 
   template <uint32_t opt> inline void do_INST_MRET() {
     if (mode != MODE_MACHINE) {
-      trap("MRET not in machine mode");
+      trap("MRET not in machine mode", TRAP_INST);
       return;
     }
     auto& wit = trace.makeInstMret();
@@ -714,12 +746,23 @@ struct Emulator {
       virtualMem.clear();
       iCacheCycle = curCycle;
     }
-    writePhysMemory(wit.writeCycle, CSR_WORD(MSCYCLE), wit.cycle);
+    writePhysMemory(wit.writeCycle, CSR_WORD(MSCYCLE), wit.cycle + 1);
     DLOG("  NEW PC = " << HexWord{newPc});
     if (peekPhysMemory(CSR_WORD(MDEBUG))) {
       debug = true;
     }
     setMode(newMode);
+    uint32_t ie = peekPhysMemory(CSR_WORD(MIE));
+    timer = 0x40000001;
+    if (ie) {
+      uint64_t timer64 = (uint64_t(peekPhysMemory(CSR_WORD(MTIMERH) & 0x4fffffff)) << 32) | peekPhysMemory(CSR_WORD(MTIMER));
+      uint64_t time64 = (uint64_t(peekPhysMemory(CSR_WORD(MTIMEH))) << 32) | peekPhysMemory(CSR_WORD(MTIME));
+      int64_t diff = int64_t(timer64) - int64_t(time64);
+      //LOG(0, "ie = " << ie << ", timer = " << std::hex << timer64 << ", time = " << time64 << std::dec << ", diff = " << diff);
+      if (diff < 0) { diff = 0; }
+      if (diff > 0x40000000) { diff = 0x40000000; }
+      timer = curCycle + diff + 1; 
+    }
   }
 
   void do_ECALL_TERMINATE() {
@@ -993,7 +1036,7 @@ struct Emulator {
     return true;
   }
 
-  void makeFetchFailedTrap() {
+  void makeNoDecodeTrap(uint32_t trapType) {
     DecodeWitness*& decodeWit = instCache[{MACHINE_REGS_ADDR,  mode}];
     if (!decodeWit) {
       decodeWit = &trace.makeDecode();
@@ -1003,7 +1046,7 @@ struct Emulator {
       mode = oldMode;
     }
     dinst = decodeWit;
-    trap("Fetch Failed");
+    trap("No decode trap", trapType);
     curCycle++;
     pc = newPc;
   }
@@ -1014,11 +1057,35 @@ struct Emulator {
                             ceilDiv(curCycle, 24) + // How many rows we need for cycle table
                             memory.getPagingCost() <
                         rowCount) {
+      /*
+      if (mode != MODE_MACHINE) {
+        uint32_t goalPc;
+        uint32_t goalTime;
+        fread(&goalPc, 1, 4, pcFile);
+        fread(&goalTime, 1, 4, pcFile);
+        if (pc != goalPc) {
+          LOG(0, "MISMATCH: pc = " << HexWord{pc} << ", gaalPC = " << HexWord{goalPc});
+          throw std::runtime_error("SAD");
+        }
+        uint32_t oldCycle = peekPhysMemory(CSR_WORD(MSCYCLE));
+        uint32_t curTime = peekPhysMemory(CSR_WORD(MTIME)) + curCycle - oldCycle;
+        if (curTime != goalTime) {
+          LOG(0, "TIME ERROR: pc = " << HexWord{pc});
+          LOG(0, "Time = " << HexWord{curTime});
+          LOG(0, "Goal Time = " << HexWord{goalTime});
+          throw std::runtime_error("SADDER");
+        }
+      }
+      */
+      if (mode != MODE_MACHINE && timer == curCycle) {
+        makeNoDecodeTrap(TRAP_INTER);
+        continue;
+      }
       DecodeWitness*& decodeWit = instCache[{pc, mode}];
       if (!decodeWit) {
         DecodeWitness maybeSave;
         if (!fetchAndDecode(&maybeSave)) {
-          makeFetchFailedTrap();
+          makeNoDecodeTrap(TRAP_FETCH);
           continue;
         }
         decodeWit = &trace.makeDecode();
@@ -1039,7 +1106,7 @@ struct Emulator {
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
       case Opcode::ANY:
-        trap("INVALID INSTRUCTION");
+        trap("INVALID INSTRUCTION", TRAP_INST);
       }
       curCycle++;
       pc = newPc;
@@ -1096,6 +1163,7 @@ struct Emulator {
   uint32_t mode = 0;
   uint32_t pc = 0;
   uint32_t newPc = 0;
+  uint32_t timer = 0x40000000;
   DecodeWitness* dinst;
   bool debug = false;
 };
@@ -1103,6 +1171,9 @@ struct Emulator {
 } // namespace
 
 bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount) {
+  if (pcFile == nullptr) {
+    pcFile = fopen("/tmp/pcdata", "rb");
+  }
   Emulator emu(trace, image, io, rowCount);
   emu.addTables();
   bool done = emu.run(rowCount);

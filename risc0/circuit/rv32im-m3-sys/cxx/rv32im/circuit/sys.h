@@ -71,7 +71,7 @@ template <typename C> struct InstTrapBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
-  BitReg<C> isEcall;
+  OneHot<C, 4> trapType;
   Reg<C> rs1;
   Reg<C> rs2;
   Reg<C> rd;

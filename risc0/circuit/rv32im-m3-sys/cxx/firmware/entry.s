@@ -12,16 +12,28 @@ _start:
   /* Jump to kernel start at the C level */
   call start
 
-.extern onTrap
-.extern onEcall
+.extern onTrapEcall
+.extern onTrapInst
+.extern onTrapFetch
+.extern onTrapInter
 
-.global _trapEntry
-_trapEntry:
-  call onTrap 
+.global _trapEcall
+_trapEcall:
+  call onTrapEcall
   mret
 
-.global _ecallEntry
-_ecallEntry:
-  call onEcall
+.global _trapInst
+_trapInst:
+  call onTrapInst
+  mret
+
+.global _trapFetch
+_trapFetch:
+  call onTrapFetch
+  mret
+
+.global _trapInter
+_trapInter:
+  call onTrapInter
   mret
 

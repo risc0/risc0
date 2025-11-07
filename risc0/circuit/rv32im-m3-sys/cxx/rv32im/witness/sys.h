@@ -35,9 +35,14 @@ struct InstSuspendWitness {
   PhysMemWriteWitness updateTimeH;
 };
 
+#define TRAP_ECALL 0
+#define TRAP_INST 1
+#define TRAP_FETCH 2
+#define TRAP_INTER 3
+
 struct InstTrapWitness {
   uint32_t cycle;
-  uint32_t isEcall;
+  uint32_t trapType;
   FetchWitness fetch;
   PhysMemWriteWitness writePc;
   PhysMemWriteWitness writeMode;

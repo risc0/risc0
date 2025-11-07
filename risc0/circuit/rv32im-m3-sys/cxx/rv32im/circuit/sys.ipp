@@ -71,7 +71,7 @@ template <typename C> FDEV void InstTrapBlock<C>::set(CTX, InstTrapWitness wit) 
   cycle.set(ctx, wit.cycle);
   fetch.set(ctx, wit.fetch, wit.cycle);
   uint32_t inst = wit.writeVal.value;
-  isEcall.set(ctx, wit.isEcall);
+  trapType.set(ctx, wit.trapType);
   rd.set(ctx, (inst >> 7) & 0x1f);
   rs1.set(ctx, (inst >> 15) & 0x1f);
   rs2.set(ctx, (inst >> 20) & 0x1f);
@@ -83,8 +83,13 @@ template <typename C> FDEV void InstTrapBlock<C>::set(CTX, InstTrapWitness wit) 
 
 template <typename C> FDEV void InstTrapBlock<C>::verify(CTX) DEV {
   Val<C> mepcWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_MEPC, CSR_WORD(MEPC));
-  Val<C> mtvecWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_ECALL_DISPATCH, CSR_WORD(MTVEC));
-  Val<C> dispatchWord = cond<C>(isEcall.get(), mtvecWord, CSR_WORD(MTRAP));
+  Val<C> mtvecWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_ECALL_DISPATCH, CSR_WORD(MTRAPECALL));
+  //Val<C> dispatchWord = cond<C>(isEcall.get(), mtvecWord, CSR_WORD(MTRAP));
+  Val<C> dispatchWord = 
+    trapType.bits[0].get() * mtvecWord +
+    trapType.bits[1].get() * CSR_WORD(MTRAPINST) + 
+    trapType.bits[2].get() * CSR_WORD(MTRAPFETCH) + 
+    trapType.bits[3].get() * CSR_WORD(MTRAPINTER);
   // Verify addresses
   EQ(writePc.wordAddr.get(), mepcWord);
   EQ(writeMode.wordAddr.get(), CSR_WORD(MEMODE));
@@ -95,8 +100,9 @@ template <typename C> FDEV void InstTrapBlock<C>::verify(CTX) DEV {
   Val<C> oldMode = writeMode.data.low.get();
   EQZ((oldMode - MODE_USER) * (oldMode - MODE_SUPERVISOR));
   // Make sure that if ecall is set, we are on an ecall
-  EQZ(isEcall.get() * writeVal.data.high.get());
-  EQZ(isEcall.get() * writeVal.data.low.get());
+  // TODO:
+  //EQZ(isEcall.get() * writeVal.data.high.get());
+  //EQZ(isEcall.get() * writeVal.data.low.get());
 }
 
 template <typename C> FDEV void InstTrapBlock<C>::addArguments(CTX) DEV {
@@ -117,7 +123,7 @@ template <typename C> FDEV void InstTrapBlock<C>::addArguments(CTX) DEV {
   arg.rd = rd.get();
   arg.immLow = writeVal.data.low.get();
   arg.immHigh = writeVal.data.high.get();
-  arg.options = cond<C>(isEcall.get(), Val<C>(uint32_t(INST_ECALL)), Val<C>(uint32_t(INST_ANY)));
+  arg.options = cond<C>(trapType.bits[0].get(), Val<C>(uint32_t(INST_ECALL)), Val<C>(uint32_t(INST_ANY)));
   ctx.pull(arg);
 }
 
