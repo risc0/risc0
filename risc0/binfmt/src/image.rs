@@ -29,7 +29,7 @@ use std::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::boxed::Box;
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Result, anyhow, bail, ensure};
 use derive_more::Debug;
 use risc0_zkp::{
     core::{
@@ -183,9 +183,10 @@ impl MemoryImage {
 
     /// Sorted iterator over page digests (digest_idx -> Digest)
     pub fn digests(&self) -> impl Iterator<Item = (&'_ u32, &'_ Digest)> + '_ {
-        if !self.dirty.is_empty() {
-            panic!("attempted to get digests on a dirty memory image")
-        }
+        assert!(
+            self.dirty.is_empty(),
+            "attempted to get digests on a dirty memory image"
+        );
         self.digests.iter()
     }
 
@@ -237,9 +238,10 @@ impl MemoryImage {
     pub fn get_digest(&mut self, digest_idx: u32) -> Result<&Digest> {
         // Expand if needed
         self.expand_if_zero(digest_idx);
-        if self.dirty.contains(&digest_idx) {
-            bail!("digest marked as dirty: {digest_idx}");
-        }
+        ensure!(
+            !self.dirty.contains(&digest_idx),
+            "digest marked as dirty: {digest_idx}"
+        );
         self.digests
             .get(&digest_idx)
             .ok_or_else(|| anyhow!("Unavailable digest: {digest_idx}"))

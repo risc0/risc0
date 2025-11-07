@@ -307,9 +307,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
             segment_callback_thread
                 .take()
-                .expect("segment_callback_thread is None")
+                .expect("segment_callback_thread should always be Some(_)")
                 .join()
-                .expect("segment_callback_thread panicked")
+                .unwrap()
         })?;
 
         let session_claim = Rv32imV2Claim {
