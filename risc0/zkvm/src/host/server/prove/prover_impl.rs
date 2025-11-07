@@ -41,7 +41,7 @@ use crate::{
 /// An implementation of a Prover that runs locally.
 pub struct ProverImpl {
     #[cfg(feature = "rv32im-m3")]
-    prover: std::rc::Rc<risc0_circuit_rv32im_m3::prove::ProverContext>,
+    prover: risc0_circuit_rv32im_m3::prove::ProverContext,
     opts: ProverOpts,
 }
 
@@ -505,11 +505,7 @@ mod rv32im_m3 {
                     let results = PreflightResults {
                         inner: preflight,
                         terminate_state: self.terminate_state,
-                        output: if self.is_done {
-                            self.output.clone()
-                        } else {
-                            None
-                        },
+                        output: self.is_done.then(|| self.output.clone()).flatten(),
                     };
                     Some(Ok(results))
                 }

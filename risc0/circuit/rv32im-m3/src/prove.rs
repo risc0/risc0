@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{ptr::NonNull, rc::Rc};
+use std::ptr::NonNull;
 
 use anyhow::Result;
 use cfg_if::cfg_if;
@@ -170,7 +170,7 @@ impl Drop for ProverContext {
     }
 }
 
-pub fn segment_prover(po2: usize) -> Result<Rc<ProverContext>> {
+pub fn segment_prover(po2: usize) -> Result<ProverContext> {
     cfg_if! {
         if #[cfg(feature = "cuda")] {
             let segment_prover = ProverContext::new_cuda(po2)?;
@@ -178,7 +178,7 @@ pub fn segment_prover(po2: usize) -> Result<Rc<ProverContext>> {
             let segment_prover = ProverContext::new_cpu(po2)?;
         }
     }
-    Ok(Rc::new(segment_prover))
+    Ok(segment_prover)
 }
 
 #[cfg(test)]
