@@ -9,6 +9,7 @@ listen = "0.0.0.0:8000"
 listen = "0.0.0.0:9000"
 
 [manager]
+api-po2 = 21
 
 [executor]
 count = 4
