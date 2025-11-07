@@ -37,7 +37,6 @@ pub struct PreflightContext {
 }
 
 unsafe impl Send for PreflightContext {}
-unsafe impl Sync for PreflightContext {}
 
 pub struct ProverContext {
     ctx: NonNull<risc0_circuit_rv32im_m3_sys::ProverContext>,
