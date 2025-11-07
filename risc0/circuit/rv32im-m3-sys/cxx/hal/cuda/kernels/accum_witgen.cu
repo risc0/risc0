@@ -17,13 +17,18 @@
 #include "hal/po2s.h"
 
 #define PO2(x)                                                                                     \
-  extern "C" void accum_witgen_cuda_##x(                                                           \
-      Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou);
+  extern "C" void accum_witgen_cuda_##x(cudaStream_t stream,                                       \
+                                        Fp* accum,                                                 \
+                                        const Fp* data,                                            \
+                                        const Fp* globals,                                         \
+                                        const FpExt* accMix,                                       \
+                                        Fp rou);
 PO2S
 #undef PO2
 
     extern "C" void
-    accum_witgen_cuda(Fp* accum,
+    accum_witgen_cuda(cudaStream_t stream,
+                      Fp* accum,
                       const Fp* data,
                       const Fp* globals,
                       const FpExt* accMix,
@@ -33,7 +38,7 @@ PO2S
   switch (po2) {
 #define PO2(x)                                                                                     \
   case x:                                                                                          \
-    accum_witgen_cuda_##x(accum, data, globals, accMix, rou);                                      \
+    accum_witgen_cuda_##x(stream, accum, data, globals, accMix, rou);                              \
     break;
     PO2S
 #undef PO2
