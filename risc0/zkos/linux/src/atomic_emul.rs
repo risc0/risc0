@@ -75,8 +75,7 @@ pub fn emulate_atomic_instruction(
                 (addr as *mut u32).write_volatile(new_value);
             }
 
-            // Write original value to rd register
-            // XXX check for rd = 0?
+            // Write original value to rd register (set_ureg handles x0 case)
             set_ureg(rd as usize, current_value);
 
             mret()
@@ -110,8 +109,7 @@ pub fn emulate_atomic_instruction(
                 (addr as *mut u32).write_volatile(swap_value);
             }
 
-            // Write original value to rd register
-            // XXX check for rd = 0?
+            // Write original value to rd register (set_ureg handles x0 case)
             set_ureg(rd as usize, current_value);
 
             mret()
@@ -146,8 +144,7 @@ pub fn emulate_atomic_instruction(
                 (addr as *mut u32).write_volatile(new_value);
             }
 
-            // Write original value to rd register
-            // XXX check for rd = 0?
+            // Write original value to rd register (set_ureg handles x0 case)
             set_ureg(rd as usize, current_value);
 
             mret()
@@ -182,8 +179,7 @@ pub fn emulate_atomic_instruction(
                 (addr as *mut u32).write_volatile(new_value);
             }
 
-            // Write original value to rd register
-            // XXX check for rd = 0?
+            // Write original value to rd register (set_ureg handles x0 case)
             set_ureg(rd as usize, current_value);
 
             mret()
@@ -218,8 +214,7 @@ pub fn emulate_atomic_instruction(
                 (addr as *mut u32).write_volatile(new_value);
             }
 
-            // Write original value to rd register
-            // XXX check for rd = 0?
+            // Write original value to rd register (set_ureg handles x0 case)
             set_ureg(rd as usize, current_value);
 
             mret()
@@ -260,8 +255,7 @@ pub fn emulate_atomic_instruction(
                 (addr as *mut u32).write_volatile(new_value);
             }
 
-            // Write original value to rd register
-            // XXX check for rd = 0?
+            // Write original value to rd register (set_ureg handles x0 case)
             set_ureg(rd as usize, current_value);
 
             mret()
@@ -302,8 +296,7 @@ pub fn emulate_atomic_instruction(
                 (addr as *mut u32).write_volatile(new_value);
             }
 
-            // Write original value to rd register
-            // XXX check for rd = 0?
+            // Write original value to rd register (set_ureg handles x0 case)
             set_ureg(rd as usize, current_value);
 
             mret()
@@ -342,8 +335,7 @@ pub fn emulate_atomic_instruction(
                 (addr as *mut u32).write_volatile(new_value);
             }
 
-            // Write original value to rd register
-            // XXX check for rd = 0?
+            // Write original value to rd register (set_ureg handles x0 case)
             set_ureg(rd as usize, current_value);
 
             mret()
@@ -382,8 +374,7 @@ pub fn emulate_atomic_instruction(
                 (addr as *mut u32).write_volatile(new_value);
             }
 
-            // Write original value to rd register
-            // XXX check for rd = 0?
+            // Write original value to rd register (set_ureg handles x0 case)
             set_ureg(rd as usize, current_value);
 
             mret()
