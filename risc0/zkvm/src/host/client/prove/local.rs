@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
@@ -60,7 +60,7 @@ impl Executor for LocalProver {
     fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
         let mut segments = Vec::new();
         let session = ExecutorImpl::from_elf(env, elf)
-            .unwrap()
+            .context("Failed to create executor from provided program")?
             .run_with_callback(|segment| {
                 segments.push(segment.get_info());
                 Ok(Box::new(NullSegmentRef))
