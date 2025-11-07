@@ -32,7 +32,7 @@ use risc0_binfmt::{
     Digestible, ExitCode, InvalidExitCodeError, read_sha_halfs, tagged_list, tagged_list_cons,
     tagged_struct, write_sha_halfs,
 };
-use risc0_circuit_rv32im::{HighLowU16, Rv32imV2Claim, TerminateState};
+use risc0_circuit_rv32im::{HighLowU16, TerminateState};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
@@ -192,11 +192,12 @@ impl ReceiptClaim {
         Self::decode_m3_with_output(seal, None)
     }
 
+    #[cfg(not(feature = "rv32im-m3"))]
     pub(crate) fn decode_from_seal_v2(
         seal: &[u32],
         _po2: Option<u32>,
     ) -> anyhow::Result<ReceiptClaim> {
-        let claim = Rv32imV2Claim::decode(seal)?;
+        let claim = risc0_circuit_rv32im::Rv32imV2Claim::decode(seal)?;
         tracing::debug!("claim: {claim:#?}");
 
         let exit_code = exit_code_from_terminate_state(&claim.terminate_state)?;

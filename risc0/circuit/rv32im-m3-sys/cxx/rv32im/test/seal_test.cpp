@@ -37,12 +37,12 @@ int main() {
   Rv32imProver prover(hal, po2, true);
   rv32im::NullHostIO io;
   auto preflightData = preflight(po2, image, io);
-  if (!preflightData.isFinal) {
+  if (!preflightData->isFinal) {
     throw std::runtime_error("Failed to complete");
   }
   Digest finalDigest = image.getDigest(1);
   WriteIop wiop;
-  prover.prove(wiop, preflightData);
+  prover.prove(wiop, *preflightData);
   auto transcript = wiop.getTranscript();
   ReadIop riop(wiop.getTranscript().data(), wiop.getTranscript().size());
   LOG(0, "Running verify");

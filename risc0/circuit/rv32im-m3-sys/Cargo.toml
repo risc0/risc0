@@ -13,6 +13,7 @@ publish = false
 release = false
 
 [dependencies]
+anyhow = { version = "1.0", default-features = false }
 risc0-sppark = { workspace = true, optional = true }
 risc0-sys = { workspace = true }
 tracing = { version = "0.1", default-features = false, features = [

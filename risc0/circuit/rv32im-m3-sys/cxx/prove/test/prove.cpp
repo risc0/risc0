@@ -35,7 +35,7 @@ void testProve(IHalPtr hal) {
   auto preflightData = preflight(po2, image, io);
   WriteIop writeIop;
   LOG(0, "Proving");
-  prover.prove(writeIop, preflightData);
+  prover.prove(writeIop, *preflightData);
   std::vector<Fp> transcript = writeIop.getTranscript();
   LOG(0, "Transcipt size = " << transcript.size());
   LOG(0, "Verifying");

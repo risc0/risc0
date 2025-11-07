@@ -16,10 +16,11 @@
 use std::sync::OnceLock;
 
 use anyhow::Result;
-use risc0_binfmt::{MemoryImage, PovwJobId, PovwLogId, PovwNonce};
-use risc0_circuit_rv32im::TerminateState;
+use risc0_binfmt::MemoryImage;
 use risc0_zkp::{core::digest::Digest, digest, verify::VerificationError};
-use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec};
+use risc0_zkvm_methods::{
+    HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec,
+};
 use risc0_zkvm_platform::{WORD_SIZE, memory};
 use rstest::rstest;
 
@@ -467,6 +468,7 @@ mod riscv {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg(not(feature = "rv32im-m3"))]
 fn pause_resume() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::PauseResume(0))
@@ -492,6 +494,7 @@ fn pause_resume() {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg(not(feature = "rv32im-m3"))]
 fn pause_exit_nonzero() {
     let user_exit_code = 1;
     let env = ExecutorEnv::builder()
@@ -518,11 +521,11 @@ fn pause_exit_nonzero() {
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
-    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(6000);
     let image = MemoryImage::new_kernel(program);
 
     let env = ExecutorEnv::builder()
-        .segment_limit_po2(13) // 8k cycles
+        .segment_limit_po2(14)
         .build()
         .unwrap();
     let session = ExecutorImpl::new(env, image).unwrap().run().unwrap();
@@ -539,11 +542,17 @@ fn continuation() {
     }
     assert_eq!(
         final_segment.inner.claim.terminate_state,
-        Some(TerminateState::default())
+        Some(risc0_circuit_rv32im::TerminateState::default())
     );
 
-    let receipt = prove_session(&session).unwrap();
-    for (idx, receipt) in receipt
+    let opts = ProverOpts::fast().with_max_prover_po2(12);
+    let ctx = VerifierContext::default();
+    let prover = get_prover_server(&opts).unwrap();
+    let _receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
+
+    // The segment index is no longer used with rv32im-m3
+    #[cfg(not(feature = "rv32im-m3"))]
+    for (idx, receipt) in _receipt
         .inner
         .composite()
         .unwrap()
@@ -557,6 +566,7 @@ fn continuation() {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg(not(feature = "rv32im-m3"))]
 fn sys_input() {
     use hex::FromHex;
     let digest =
@@ -687,11 +697,13 @@ fn verify_in_guest(#[case] kind: ReceiptKind) {
     println!("{:?}", session.stats());
 }
 
-mod sys_verify {
-    use std::sync::OnceLock;
+fn hello_commit_receipt() -> &'static Receipt {
+    static ONCE: OnceLock<Receipt> = OnceLock::new();
+    ONCE.get_or_init(|| prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap())
+}
 
+mod sys_verify {
     use risc0_zkp::{core::hash::poseidon2::Poseidon2HashSuite, digest};
-    use risc0_zkvm_methods::{HELLO_COMMIT_ELF, HELLO_COMMIT_ID};
 
     use super::*;
     use crate::{
@@ -739,11 +751,6 @@ mod sys_verify {
 
         let digest2 = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
         test_zkr(&control_root, &digest2, RECURSION_PO2).unwrap()
-    }
-
-    fn hello_commit_receipt() -> &'static Receipt {
-        static ONCE: OnceLock<Receipt> = OnceLock::new();
-        ONCE.get_or_init(|| prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap())
     }
 
     #[test_log::test]
@@ -929,6 +936,135 @@ mod sys_verify {
             .unwrap();
         assert!(prove_elf(env, MULTI_TEST_ELF).is_err());
     }
+}
+
+#[ignore]
+#[test_log::test]
+fn run_unconstrained() -> Result<()> {
+    const RUN_UNCONSTRAINED_PO2: u32 = 17;
+    const RUN_UNCONSTRAINED_CYCLES: u64 = 1 << RUN_UNCONSTRAINED_PO2;
+
+    for unconstrained in [false, true] {
+        let spec = MultiTestSpec::RunUnconstrained {
+            unconstrained,
+            cycles: RUN_UNCONSTRAINED_CYCLES,
+        };
+        let env = ExecutorEnv::builder()
+            .segment_limit_po2(RUN_UNCONSTRAINED_PO2)
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
+        let receipt = prove_session(&session).unwrap();
+        let segments = &receipt.inner.composite().unwrap().segments;
+
+        if unconstrained {
+            // Test
+            assert_eq!(segments.len(), 1);
+        } else {
+            // Control
+            assert_eq!(
+                segments.len(),
+                2,
+                "Expecting 2 segments; adjust RUN_UNCONSTRAINED_CYCLES here, or CYCLES_PER_LOOP in multi_test?"
+            );
+        }
+    }
+    Ok(())
+}
+
+#[cfg(not(feature = "rv32im-m3"))]
+mod povw {
+    use risc0_binfmt::{PovwJobId, PovwLogId, PovwNonce};
+
+    use super::*;
+
+    #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    fn nonce_assignment() -> Result<()> {
+        let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
+        let povw_job_id = PovwJobId {
+            log: PovwLogId::from(0x202ce_u64),
+            job: 42,
+        };
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .segment_limit_po2(17)
+            .povw(povw_job_id)
+            .build()
+            .unwrap();
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
+        let receipt = prove_session(&session).unwrap();
+        let segments = &receipt.inner.composite().unwrap().segments;
+        for (i, segment) in segments.iter().enumerate() {
+            segment
+                .verify_integrity_with_context(&VerifierContext::default())
+                .unwrap();
+            assert_eq!(segment.povw_nonce().unwrap(), povw_job_id.nonce(i as u32));
+        }
+        Ok(())
+    }
+
+    #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    fn nonce_default_assignment() -> Result<()> {
+        let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .segment_limit_po2(17)
+            .build()
+            .unwrap();
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
+        let receipt = prove_session(&session).unwrap();
+        let segments = &receipt.inner.composite().unwrap().segments;
+        for segment in segments.iter() {
+            segment
+                .verify_integrity_with_context(&VerifierContext::default())
+                .unwrap();
+            assert_eq!(segment.povw_nonce().unwrap(), PovwNonce::default());
+        }
+        Ok(())
+    }
+
+    #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    fn prove_work_receipt() -> Result<()> {
+        let segment_limit_po2 = 16; // 64k cycles
+        let cycles = 1 << segment_limit_po2;
+        let povw_job_id: PovwJobId = rand::random();
+        let env = ExecutorEnv::builder()
+            .write(&MultiTestSpec::BusyLoop { cycles })
+            .unwrap()
+            .segment_limit_po2(segment_limit_po2)
+            .povw(povw_job_id)
+            .build()
+            .unwrap();
+
+        let opts = ProverOpts::succinct();
+        let prove_info = get_prover_server(&opts)?.prove(env, MULTI_TEST_ELF)?;
+
+        prove_info.receipt.verify(MULTI_TEST_ID)?;
+        let work_receipt = prove_info.work_receipt.unwrap();
+        work_receipt.verify_integrity()?;
+
+        let work_claim = work_receipt.claim().as_value()?.clone();
+        assert_eq!(
+            work_claim.claim.digest(),
+            prove_info.receipt.claim()?.digest()
+        );
+        let work = work_claim.work.value()?;
+        assert!(work.value >= 1 << 16);
+        assert_eq!(work.nonce_min.log, povw_job_id.log);
+        assert_eq!(work.nonce_min.job, povw_job_id.job);
+        assert_eq!(work.nonce_min.segment, 0);
+        assert_eq!(work.nonce_max.log, povw_job_id.log);
+        assert_eq!(work.nonce_max.job, povw_job_id.job);
+        assert!(work.nonce_max.segment > 0);
+        Ok(())
+    }
 
     #[test_log::test]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
@@ -975,128 +1111,6 @@ mod sys_verify {
         assert_eq!(work.nonce_max.segment, 0);
         Ok(())
     }
-}
-
-#[ignore]
-#[test_log::test]
-fn run_unconstrained() -> Result<()> {
-    const RUN_UNCONSTRAINED_PO2: u32 = 17;
-    const RUN_UNCONSTRAINED_CYCLES: u64 = 1 << RUN_UNCONSTRAINED_PO2;
-
-    for unconstrained in [false, true] {
-        let spec = MultiTestSpec::RunUnconstrained {
-            unconstrained,
-            cycles: RUN_UNCONSTRAINED_CYCLES,
-        };
-        let env = ExecutorEnv::builder()
-            .segment_limit_po2(RUN_UNCONSTRAINED_PO2)
-            .write(&spec)
-            .unwrap()
-            .build()
-            .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
-        let receipt = prove_session(&session).unwrap();
-        let segments = &receipt.inner.composite().unwrap().segments;
-
-        if unconstrained {
-            // Test
-            assert_eq!(segments.len(), 1);
-        } else {
-            // Control
-            assert_eq!(
-                segments.len(),
-                2,
-                "Expecting 2 segments; adjust RUN_UNCONSTRAINED_CYCLES here, or CYCLES_PER_LOOP in multi_test?"
-            );
-        }
-    }
-    Ok(())
-}
-
-#[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-fn povw_nonce_assignment() -> Result<()> {
-    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
-    let povw_job_id = PovwJobId {
-        log: PovwLogId::from(0x202ce_u64),
-        job: 42,
-    };
-    let env = ExecutorEnv::builder()
-        .write(&spec)
-        .unwrap()
-        .segment_limit_po2(17)
-        .povw(povw_job_id)
-        .build()
-        .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
-    let receipt = prove_session(&session).unwrap();
-    let segments = &receipt.inner.composite().unwrap().segments;
-    for (i, segment) in segments.iter().enumerate() {
-        segment
-            .verify_integrity_with_context(&VerifierContext::default())
-            .unwrap();
-        assert_eq!(segment.povw_nonce().unwrap(), povw_job_id.nonce(i as u32));
-    }
-    Ok(())
-}
-
-#[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-fn povw_nonce_default_assignment() -> Result<()> {
-    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
-    let env = ExecutorEnv::builder()
-        .write(&spec)
-        .unwrap()
-        .segment_limit_po2(17)
-        .build()
-        .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
-    let receipt = prove_session(&session).unwrap();
-    let segments = &receipt.inner.composite().unwrap().segments;
-    for segment in segments.iter() {
-        segment
-            .verify_integrity_with_context(&VerifierContext::default())
-            .unwrap();
-        assert_eq!(segment.povw_nonce().unwrap(), PovwNonce::default());
-    }
-    Ok(())
-}
-
-#[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-fn povw_prove_work_receipt() -> Result<()> {
-    let segment_limit_po2 = 16; // 64k cycles
-    let cycles = 1 << segment_limit_po2;
-    let povw_job_id: PovwJobId = rand::random();
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::BusyLoop { cycles })
-        .unwrap()
-        .segment_limit_po2(segment_limit_po2)
-        .povw(povw_job_id)
-        .build()
-        .unwrap();
-
-    let opts = ProverOpts::succinct();
-    let prove_info = get_prover_server(&opts)?.prove(env, MULTI_TEST_ELF)?;
-
-    prove_info.receipt.verify(MULTI_TEST_ID)?;
-    let work_receipt = prove_info.work_receipt.unwrap();
-    work_receipt.verify_integrity()?;
-
-    let work_claim = work_receipt.claim().as_value()?.clone();
-    assert_eq!(
-        work_claim.claim.digest(),
-        prove_info.receipt.claim()?.digest()
-    );
-    let work = work_claim.work.value()?;
-    assert!(work.value >= 1 << 16);
-    assert_eq!(work.nonce_min.log, povw_job_id.log);
-    assert_eq!(work.nonce_min.job, povw_job_id.job);
-    assert_eq!(work.nonce_min.segment, 0);
-    assert_eq!(work.nonce_max.log, povw_job_id.log);
-    assert_eq!(work.nonce_max.job, povw_job_id.job);
-    assert!(work.nonce_max.segment > 0);
-    Ok(())
 }
 
 mod soundness {

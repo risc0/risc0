@@ -20,6 +20,8 @@
 
 extern "C" {
 
+struct SegmentContext;
+struct PreflightContext;
 struct ProverContext;
 
 struct RustSegment;
@@ -29,18 +31,23 @@ struct RustSliceFp {
   size_t len;
 };
 
-ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2);
+const char* risc0_circuit_rv32im_m3_last_error() noexcept;
+void risc0_circuit_rv32im_m3_clear_last_error() noexcept;
 
-ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2);
-
+void risc0_circuit_rv32im_m3_segment_free(SegmentContext* ctx);
+void risc0_circuit_rv32im_m3_preflight_free(PreflightContext* ctx);
 void risc0_circuit_rv32im_m3_prover_free(ProverContext* ctx);
 
+SegmentContext* risc0_circuit_rv32im_m3_segment_new(const RustSegment* segment);
+PreflightContext* risc0_circuit_rv32im_m3_segment_preflight(SegmentContext* sctx, size_t po2);
+
+size_t risc0_circuit_rv32im_m3_preflight_is_final(PreflightContext* ctx);
+
+ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2);
+ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2);
+
+void risc0_circuit_rv32im_m3_prove(ProverContext* ctx, PreflightContext* preflight);
+
 RustSliceFp risc0_circuit_rv32im_m3_prover_transcript(ProverContext* ctx);
-
-const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustSegment* segment);
-
-const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx);
-
-const char* risc0_circuit_rv32im_m3_prove(ProverContext* ctx);
 
 } // extern "C"
