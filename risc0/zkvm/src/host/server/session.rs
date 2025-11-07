@@ -168,6 +168,11 @@ impl PreflightResults {
             }
         }
     }
+
+    /// The po2
+    pub fn po2(&self) -> u32 {
+        self.inner.po2()
+    }
 }
 
 /// A reference to a [Segment].
