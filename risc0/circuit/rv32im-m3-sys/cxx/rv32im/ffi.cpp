@@ -30,6 +30,8 @@ using namespace risc0::rv32im;
 
 extern "C" {
 
+static thread_local std::string gLastError;
+
 struct RustPage {
   uint32_t addr;
   const uint32_t* data;
@@ -74,14 +76,21 @@ struct RustSegment {
   RustMemoryImage image;
   RustSliceReadRecord reads;
   RustSliceWord writes;
-  // pub claim: Rv32imV2Claim,
-  // pub suspend_cycle: u32,
-  // pub paging_cycles: u32,
-  // pub segment_threshold: u32,
-  // pub po2: u32,
-  // pub index: u64,
-  // pub povw_nonce: Option<PovwNonce>,
+  uint32_t suspendCycle;
 };
+
+static void setLastError(const char* msg) {
+  LOG(0, "ERROR: " << msg);
+  gLastError = msg ? msg : "Unknown error";
+}
+
+const char* risc0_circuit_rv32im_m3_last_error() noexcept {
+  return gLastError.empty() ? nullptr : gLastError.c_str();
+}
+
+void risc0_circuit_rv32im_m3_clear_last_error() noexcept {
+  gLastError.clear();
+}
 
 } // extern "C"
 
@@ -128,41 +137,66 @@ private:
   size_t curWrite = 0;
 };
 
+template <class F> inline auto tryRet(F&& f) noexcept -> std::invoke_result_t<F> {
+  try {
+    return f();
+  } catch (const std::exception& err) {
+    setLastError(err.what());
+    return nullptr;
+  } catch (...) {
+    setLastError("unknown exception");
+    return nullptr;
+  }
+}
+
+template <class F> inline void tryVoid(F&& f) noexcept {
+  try {
+    f();
+  } catch (const std::exception& err) {
+    setLastError(err.what());
+  } catch (...) {
+    setLastError("unknown exception");
+  }
+}
+
 } // namespace
 
 extern "C" {
 
-struct ProverContext {
-  PreflightResults preflightData;
-  Rv32imProver prover;
+struct SegmentContext {
   MemoryImage image;
   ReplayHostIO io;
+  uint32_t endCycle;
+};
+
+struct PreflightContext {
+  PreflightResultsPtr results;
+  bool isFinal = false;
+};
+
+struct ProverContext {
+  Rv32imProver prover;
   std::vector<Fp> transcript;
 
   ProverContext(IHalPtr hal, size_t po2) : prover(hal, po2) {}
 };
 
-ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {
-  IHalPtr hal = getCpuHal();
-  return new ProverContext(hal, po2);
+void risc0_circuit_rv32im_m3_segment_free(SegmentContext* ctx) {
+  delete ctx;
 }
 
-ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2) {
-  IHalPtr hal = getGpuHal();
-  return new ProverContext(hal, po2);
+void risc0_circuit_rv32im_m3_preflight_free(PreflightContext* ctx) {
+  delete ctx;
 }
 
 void risc0_circuit_rv32im_m3_prover_free(ProverContext* ctx) {
   delete ctx;
 }
 
-RustSliceFp risc0_circuit_rv32im_m3_prover_transcript(ProverContext* ctx) {
-  return RustSliceFp{ctx->transcript.data(), ctx->transcript.size()};
-}
-
-const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustSegment* segment) {
-  nvtx3::scoped_range range("load_segment");
-  try {
+SegmentContext* risc0_circuit_rv32im_m3_segment_new(const RustSegment* segment) {
+  return tryRet([&] {
+    nvtx3::scoped_range range("load_segment");
+    SegmentContext* ctx = new SegmentContext{};
     ctx->image = MemoryImage::zeros();
     // ctx->image.dumpZeros();
     for (size_t i = 0; i < segment->image.pages.len; i++) {
@@ -177,39 +211,61 @@ const char* risc0_circuit_rv32im_m3_load_segment(ProverContext* ctx, const RustS
     }
     // ctx->image.dump();
     ctx->io.loadSegment(segment);
-  } catch (const std::exception& err) {
-    LOG(0, "ERROR: " << err.what());
-    return strdup(err.what());
-  } catch (...) {
-    LOG(0, "UNKNOWN ERROR");
-    return strdup("Generic exception");
-  }
-  return nullptr;
+    ctx->endCycle = segment->suspendCycle;
+    LOG(1, "endCycle: " << ctx->endCycle);
+    return ctx;
+  });
 }
 
-const char* risc0_circuit_rv32im_m3_preflight(ProverContext* ctx) {
-  nvtx3::scoped_range range("preflight");
-  try {
-    ctx->preflightData = preflight(ctx->prover.po2(), ctx->image, ctx->io);
-  } catch (const std::exception& err) {
-    LOG(0, "ERROR: " << err.what());
-    return strdup(err.what());
-  } catch (...) {
-    LOG(0, "UNKNOWN ERROR");
-    return strdup("Generic exception");
-  }
-  return nullptr;
+PreflightContext* risc0_circuit_rv32im_m3_segment_preflight(SegmentContext* ctx, size_t po2) {
+  return tryRet([&] {
+    nvtx3::scoped_range range("preflight");
+    PreflightContext* ret = new PreflightContext{};
+    ret->results = preflight(po2, ctx->image, ctx->io, ctx->endCycle);
+    if (ret->results->cycles > ctx->endCycle) {
+      throw std::runtime_error("Preflight cycles > requested end cycle");
+    }
+    LOG(1,
+        "endCycle: " << ctx->endCycle << ", retiredCycles: " << ret->results->cycles
+                     << ", isFinal: " << ret->results->isFinal);
+    ctx->endCycle -= ret->results->cycles;
+    if (ret->results->isFinal && ctx->endCycle) {
+      throw std::runtime_error("Termination before reaching requested end cycle");
+    }
+    if (ctx->endCycle == 0) {
+      ret->isFinal = true;
+    }
+    return ret;
+  });
 }
 
-const char* risc0_circuit_rv32im_m3_prove(ProverContext* ctx) {
-  nvtx3::scoped_range range("prove");
-  try {
+size_t risc0_circuit_rv32im_m3_preflight_is_final(PreflightContext* ctx) {
+  return ctx->isFinal;
+}
+
+ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {
+  return tryRet([&] {
+    IHalPtr hal = getCpuHal();
+    return new ProverContext(hal, po2);
+  });
+}
+
+ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2) {
+  return tryRet([&] {
+    IHalPtr hal = getGpuHal();
+    return new ProverContext(hal, po2);
+  });
+}
+
+void risc0_circuit_rv32im_m3_prove(ProverContext* ctx, PreflightContext* preflight) {
+  return tryVoid([&] {
+    nvtx3::scoped_range range("prove");
     WriteIop writeIop;
     writeIop.write(RV32IM_SEAL_VERSION);
     uint32_t po2 = ctx->prover.po2();
     // LOG(0, "po2: " << po2);
     writeIop.write(po2);
-    ctx->prover.prove(writeIop, ctx->preflightData);
+    ctx->prover.prove(writeIop, *preflight->results);
     ctx->transcript = writeIop.getTranscript();
 
     ReadIop readIop(ctx->transcript.data(), ctx->transcript.size());
@@ -218,15 +274,12 @@ const char* risc0_circuit_rv32im_m3_prove(ProverContext* ctx) {
     LOG(2, "version: " << readVersion << ", po2: " << readPo2);
     verifyRv32im(readIop, ctx->prover.po2());
     readIop.done();
-  } catch (const std::exception& err) {
-    LOG(0, "ERROR: " << err.what());
-    return strdup(err.what());
-  } catch (...) {
-    LOG(0, "UNKNOWN ERROR");
-    return strdup("Generic exception");
-  }
-  LOG(1, "Completed successfuly");
-  return nullptr;
+    LOG(1, "Completed successfuly");
+  });
+}
+
+RustSliceFp risc0_circuit_rv32im_m3_prover_transcript(ProverContext* ctx) {
+  return RustSliceFp{ctx->transcript.data(), ctx->transcript.size()};
 }
 
 } // extern "C"

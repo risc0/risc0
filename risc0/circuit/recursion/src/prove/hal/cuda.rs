@@ -51,15 +51,15 @@ pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
 pub type CudaCircuitHalPoseidon254 = CudaCircuitHal<CudaHashPoseidon254>;
 
 pub struct CudaCircuitHal<CH: CudaHash> {
-    _hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
+    hal: Rc<CudaHal<CH>>,
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
-    pub fn new(_hal: Rc<CudaHal<CH>>) -> Self {
+    pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
         #[cfg(test)]
         gpu_guard::assert_gpu_semaphore_held();
 
-        Self { _hal }
+        Self { hal }
     }
 }
 
@@ -82,7 +82,13 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
             global: global.as_ptr() as *const BabyBearElem,
         };
         ffi_wrap(|| unsafe {
-            risc0_circuit_recursion_cuda_witgen(mode, &buffers, preflight, total_cycles)
+            risc0_circuit_recursion_cuda_witgen(
+                self.hal.stream.as_inner(),
+                mode,
+                &buffers,
+                preflight,
+                total_cycles,
+            )
         })
     }
 }
@@ -111,7 +117,12 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
             accum: accum.as_ptr() as *const BabyBearElem,
         };
         ffi_wrap(|| unsafe {
-            risc0_circuit_recursion_cuda_accum(&buffers, work_cycles, total_cycles)
+            risc0_circuit_recursion_cuda_accum(
+                self.hal.stream.as_inner(),
+                &buffers,
+                work_cycles,
+                total_cycles,
+            )
         })
     }
 }
@@ -149,7 +160,8 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let domain = steps * INV_RATE;
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
         let poly_mix_pows_vec = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
-        let poly_mix_pows = CudaBuffer::copy_from("poly_mix", &poly_mix_pows_vec[..]);
+        let poly_mix_pows =
+            CudaBuffer::copy_from("poly_mix", &poly_mix_pows_vec[..], self.hal.stream.clone());
 
         let check = check.as_device_ptr();
         let ctrl = ctrl.as_device_ptr();
@@ -161,6 +173,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 
         ffi_wrap(|| unsafe {
             risc0_circuit_recursion_cuda_eval_check(
+                self.hal.stream.as_inner(),
                 check.as_ptr() as *const BabyBearElem,
                 ctrl.as_ptr() as *const BabyBearElem,
                 data.as_ptr() as *const BabyBearElem,

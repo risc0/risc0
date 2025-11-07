@@ -32,6 +32,8 @@ namespace {
 #define DLOG(...) LOG(2, __VA_ARGS__)
 // #define DLOG(...) /**/
 
+constexpr uint32_t CYCLE_TABLE_ROWS = 24;
+
 struct Emulator {
   Emulator(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount)
       : trace(trace)
@@ -841,12 +843,15 @@ struct Emulator {
     }
   }
 
-  bool run(size_t rowCount) {
+  bool isDone(size_t rowCount, uint32_t endCycle) {
+    size_t usedRows =
+        trace.getRowCount() + ceilDiv(curCycle, CYCLE_TABLE_ROWS) + memory.getPagingCost();
+    return done || rowCount < usedRows || userCycles == endCycle;
+  }
+
+  bool run(size_t rowCount, uint32_t endCycle) {
     doResume();
-    while (!done && trace.getRowCount() +
-                            ceilDiv(curCycle, 24) + // How many rows we need for cycle table
-                            memory.getPagingCost() <
-                        rowCount) {
+    while (!isDone(rowCount, endCycle)) {
       DecodeWitness*& decodeWit = (mode == MODE_MACHINE) ? mInstCache[pc] : usInstCache[pc];
       if (!decodeWit) {
         decodeWit = &trace.makeDecode();
@@ -856,8 +861,9 @@ struct Emulator {
       }
       dinst = decodeWit;
       newPc = dinst->fetch.nextPc;
-      DLOG("cycle: " << curCycle << ", pc: " << std::hex << pc << std::dec
-                     << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
+      // LOG(1,
+      //     "cycle: " << userCycles << ", pc: " << HexWord{pc}
+      //               << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
       switch (Opcode(decodeWit->opcode)) {
 #define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...)                                \
   case Opcode::name:                                                                               \
@@ -870,6 +876,7 @@ struct Emulator {
         break;
       }
       curCycle++;
+      userCycles++;
       pc = newPc;
     }
     if (!done) {
@@ -883,6 +890,7 @@ struct Emulator {
       makeTable.start = i;
     }
 
+    trace.setUserCycles(userCycles);
     return done;
   }
 
@@ -920,6 +928,7 @@ struct Emulator {
   bool v2Compat = true;
   bool done = false;
   uint32_t regOffset = 0;
+  uint32_t userCycles = 0;
   uint32_t curCycle = 1;
   uint32_t iCacheCycle = 1;
   uint32_t mode = 0;
@@ -930,10 +939,10 @@ struct Emulator {
 
 } // namespace
 
-bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount) {
+bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount, uint32_t endCycle) {
   Emulator emu(trace, image, io, rowCount);
   emu.addTables();
-  bool done = emu.run(rowCount);
+  bool done = emu.run(rowCount, endCycle);
   LOG(1, "Cycle = " << emu.curCycle);
   emu.commit();
   return done;
