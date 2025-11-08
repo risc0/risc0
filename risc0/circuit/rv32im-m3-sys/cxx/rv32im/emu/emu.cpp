@@ -31,8 +31,9 @@ FILE* pcFile = nullptr;
 
 namespace {
 
-//#define DLOG(...) if (debug && mode != MODE_MACHINE) LOG(0, __VA_ARGS__)
-#define DLOG(...) LOG(2, __VA_ARGS__)
+#define DLOG(...) if (debug) LOG(0, __VA_ARGS__)
+// #define DLOG(...) if (debug && mode != MODE_MACHINE) LOG(0, __VA_ARGS__)
+// #define DLOG(...) LOG(2, __VA_ARGS__)
 // #define DLOG(...) if (mode != MODE_MACHINE) LOG(2, __VA_ARGS__)
 // #define DLOG(...) /**/
 
@@ -414,7 +415,7 @@ struct Emulator {
     // Subtract delta from countdown, is < 0 fatal
     countdown = peekPhysMemory(CSR_WORD(MCOUNTDOWN));
     countdown -= delta;
-    if (countdown & 0x80000000) {
+    if (countdown < 0) {
       // Underflow, die
       fatal("Counter underflow");
     }
@@ -464,7 +465,7 @@ struct Emulator {
     // Subtract delta from countdown, is < 0 fatal
     countdown = peekPhysMemory(CSR_WORD(MCOUNTDOWN));
     countdown -= delta;
-    if (countdown & 0x80000000) {
+    if (countdown < 0) {
       // Underflow, die
       fatal("Counter underflow");
     }
@@ -1057,8 +1058,12 @@ struct Emulator {
                             ceilDiv(curCycle, 24) + // How many rows we need for cycle table
                             memory.getPagingCost() <
                         rowCount) {
+      if (countdown < 0) {
+        fatal("Yikes");
+      }
       if (mode != MODE_MACHINE) {
         if (countdown == 0) {
+          LOG(0, "Firing timer");
           makeNoDecodeTrap(TRAP_INTER);
           continue;
         }
@@ -1146,7 +1151,7 @@ struct Emulator {
   uint32_t mode = 0;
   uint32_t pc = 0;
   uint32_t newPc = 0;
-  uint32_t countdown = 0x7fffffff;;
+  int32_t countdown = 0x7fffffff;;
   DecodeWitness* dinst;
   bool debug = false;
 };

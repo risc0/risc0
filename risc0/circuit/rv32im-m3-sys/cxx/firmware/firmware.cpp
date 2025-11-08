@@ -210,11 +210,37 @@ void recomputeVmInfo() {
   }
 }
 
+void incTime() {
+  if (++CSR(MTIME) == 0) CSR(MTIMEH)++;
+}
+
+uint32_t recomputeTimer() {
+  uint64_t time = (uint64_t(CSR(MTIMEH)) << 32) | CSR(MTIME);
+  uint64_t timer = (uint64_t(CSR(MTIMERH)) << 32) | CSR(MTIMER);
+  uint32_t sie = (CSR(SSTATUS) >> 1) & 1;
+  uint32_t mode = CSR(MEMODE);
+  uint32_t ie = (mode == MODE_USER || sie) && (CSR(SIE) & 0x20);
+  uint32_t countdown = 0x7fffffff;
+  if (ie) {
+    if (time >= timer) {
+      countdown = 0;
+    } else {
+      uint64_t until = timer - time;
+      if (until < countdown) {
+        countdown = until;
+      }
+    }
+  }
+  // LOG(0, "sstatus sie = " << sie << ", mode = " << mode << ", sie = " << CSR(SIE) << ", ie = " << ie);
+  // LOG(0, "time = " << CSR(MTIMEH) << CSR(MTIME) << ", timer = " << CSR(MTIMERH) << CSR(MTIMER) << ", countdown = " << countdown);
+  return countdown;
+}
+
 void supervisorTrap(uint32_t cause) {
   // Setup to return to supervisor mode
   CSR(SCAUSE) = cause;
-  //LOG(0, "Setting SCAUSE = " << CSR(SCAUSE));
-  //LOG(0, "STVAL = " << CSR(STVAL));
+  // LOG(0, "Setting SCAUSE = " << CSR(SCAUSE));
+  // LOG(0, "STVAL = " << CSR(STVAL));
   uint32_t cur = CSR(SSTATUS);
   // Extract SIE bit
   uint32_t sie = (cur >> 1) & 1;
@@ -565,35 +591,19 @@ extern "C" void onTrapInst() {
     instLong = AT(COMPRESSED_INST_LOOKUP_ADDR)[inst];
   }
   uint32_t mcause = handleInst(instLong);
-  uint64_t& time = *reinterpret_cast<uint64_t*>(&CSR(MTIME));
   if (mcause == MCAUSE_NONE) {
     // Success, advance time, bump PC, and continue
-    time++;
+    incTime();
     CSR(MEPC) += instLen;
   } else if (mcause != MCAUSE_SRET) {
     // If it failed, forward to supervisor
     supervisorTrap(mcause);
   }
   // Update countdown
-  uint64_t& timer = *reinterpret_cast<uint64_t*>(&CSR(MTIMER));
-  uint32_t sie = (CSR(SSTATUS) >> 1) & 1;
-  uint32_t mode = CSR(MEMODE);
-  uint32_t ie = (mode == MODE_USER || sie) && (CSR(SIE) & 0x20);
-  uint32_t countdown = 0x7fffffff;
-  if (ie) {
-    if (time >= timer) {
-      CSR(MCOUNTDOWN) = 0;
-    } else {
-      uint64_t until = timer - time;
-      if (until < countdown) {
-        countdown = until;
-      }
-    }
-  }
-  CSR(MCOUNTDOWN) = countdown;
+  CSR(MCOUNTDOWN) = recomputeTimer();
 }
 
-extern "C" void onTrapFetch() {
+uint32_t handleFetchTrap() {
   // LOG(0, "Trap fetch: Mode = " << CSR(MEMODE) << ", SSTATUS = " << CSR(SSTATUS));
   // Get PC we trapped on
   uint32_t pc = CSR(MEPC);
@@ -603,8 +613,7 @@ extern "C" void onTrapFetch() {
     // LOG(0, "PC = " <<  pc << ", cause = " << mcause);
     // If it fails, trap to supervisor
     CSR(STVAL) = pc;
-    supervisorTrap(mcause);
-    return;
+    return mcause;
   }
   // Load low part of instructions
   uint32_t inst = *reinterpret_cast<uint16_t*>(pc);
@@ -616,12 +625,20 @@ extern "C" void onTrapFetch() {
       // LOG(0, "PC = " <<  pc << ", cause = " << mcause);
       // If it fails, trap to supervisor
       CSR(STVAL) = pc2;
+      return mcause;
       supervisorTrap(mcause);
-      return;
     }
   }
   LOG(0, "Fetch trap failed to trap, evil prover");
   die();
+  return 0;
+}
+
+
+extern "C" void onTrapFetch() {
+  uint32_t mcause = handleFetchTrap();
+  supervisorTrap(mcause);
+  CSR(MCOUNTDOWN) = recomputeTimer();
 }
 
 uint32_t handleSbiBaseExt() {
@@ -660,8 +677,7 @@ uint32_t handleSbiDebugConsole() {
     case 0: // sbi_debug_console_write
       return hostWrite(-1, reinterpret_cast<char*>(UREG(A1)), UREG(A0));
     case 1: // sbi_debug_console_read
-      // TODO: Check is there is data to read and read it
-      return 0;
+      return hostRead(-1, reinterpret_cast<char*>(UREG(A1)), UREG(A0));
     case 2: // sbi_debug_console_write_byte 
       c = UREG(A0);
       hostWrite(-1, &c, 1);
@@ -696,12 +712,12 @@ uint32_t handleTimer() {
 }
 
 extern "C" void onTrapEcall() {
-  uint64_t& time = *reinterpret_cast<uint64_t*>(&CSR(MTIME));
-  time++;
+  incTime();
   if (CSR(MEMODE) == MODE_USER) {
     // LOG(0, "User mode ECALL");
     CSR(STVAL) = 0;
     supervisorTrap(MCAUSE_ECALL_FROM_UMODE);
+    CSR(MCOUNTDOWN) = recomputeTimer();
     return;
   }
   uint32_t ext_id = UREG(A7);
@@ -728,12 +744,16 @@ extern "C" void onTrapEcall() {
   UREG(A0) = 0;
   UREG(A1) = ret;
   CSR(MEPC) += 4;
+  CSR(MCOUNTDOWN) = recomputeTimer();
 }
 
 extern "C" void onTrapInter() {
-  CSR(MCOUNTDOWN) = 0x7fffffff;
-  CSR(STVAL) = 0;
-  supervisorTrap(MCAUSE_TIMER_INTERRUPT);
+  uint32_t timer = recomputeTimer();
+  if (timer == 0) {
+    CSR(MCOUNTDOWN) = 0x7fffffff;
+    CSR(STVAL) = 0;
+    supervisorTrap(MCAUSE_TIMER_INTERRUPT);
+  }
 }
 
 extern "C" void _trapEcall();
@@ -744,6 +764,8 @@ extern "C" void _trapInter();
 void initializeCsrs() {
   // Only initialize ones that are explicitly non-zero
   CSR(MCOUNTDOWN) = 0x7fffffff;
+  CSR(MTIMER) = 0xffffffff;
+  CSR(MTIMERH) = 0xffffffff;
   CSR(MTRAPECALL) = reinterpret_cast<uint32_t>(_trapEcall);  // Set trap handler address, calls onTrap
   CSR(MTRAPINST) = reinterpret_cast<uint32_t>(_trapInst);  // Set trap handler address, calls onTrap
   CSR(MTRAPFETCH) = reinterpret_cast<uint32_t>(_trapFetch);  // Set trap handler address, calls onTrap

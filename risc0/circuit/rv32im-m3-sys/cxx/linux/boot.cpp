@@ -17,21 +17,37 @@
 using namespace risc0;
 using namespace risc0::rv32im;
 
+#include <fcntl.h>
+#include <unistd.h>
+#include <termios.h>
+
 struct DebugHostIO : public HostIO {
   std::string holdLinux;
   uint32_t onWrite(uint32_t fd, const uint8_t* data, uint32_t size) override {
     if (size == 0) {
       return 0;
     }
-    std::string str(reinterpret_cast<const char*>(data), size);
     if (fd == uint32_t(-1)) {
-      std::cout << str;
+      fwrite(data, 1, size, stdout);
     } else {
-      LOG(fd, std::string(reinterpret_cast<const char*>(data), size));
+      LOG(0, std::string(reinterpret_cast<const char*>(data), size));
     }
     return size;
   }
-  uint32_t onRead(uint32_t fd, uint8_t* data, uint32_t size) override { return 0; }
+
+  uint32_t onRead(uint32_t fd, uint8_t* data, uint32_t size) override {
+    if (size == 0) { return 0; }
+    char c;
+    ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
+
+    if (bytes_read > 0) {
+      data[0] = c;
+      return 1;
+    } else {
+      return 0;
+    }
+    return 0;
+  }
 };
 
 void loadFileIntoMemory(std::map<uint32_t, uint32_t>& words, const char* filename, uint32_t addr) {
@@ -77,6 +93,21 @@ int main() {
 
   // Make an image
   auto image = MemoryImage::fromWords(words);
+
+  // Setup keyboard input goo
+  int flags = fcntl(STDIN_FILENO, F_GETFL, 0); // Get current flags
+  fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK); // Add O_NONBLOCK
+  struct termios old_tio, new_tio;
+
+  // Get current terminal settings
+  tcgetattr(STDIN_FILENO, &old_tio);
+  new_tio = old_tio;
+
+  // Disable canonical mode (ICANON) and echo (ECHO)
+  new_tio.c_lflag &= ~(ICANON | ECHO);
+
+  // Set the new terminal settings
+  tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
 
   // Run
   DebugHostIO io;
