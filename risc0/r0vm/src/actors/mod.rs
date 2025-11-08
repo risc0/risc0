@@ -218,6 +218,7 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
             manager: Some(ManagerConfig {
                 allocator: None,
                 listen: None,
+                api_po2: None,
             }),
             allocator: Some(AllocatorConfig {
                 listen: None,
@@ -475,7 +476,7 @@ impl App {
                         manager_listen_addr(cfg_manager.listen),
                         storage_root,
                         manager_ref,
-                        cfg.api.and_then(|c| c.po2),
+                        cfg_manager.api_po2,
                     )
                     .await?,
                 );
