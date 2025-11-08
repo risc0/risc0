@@ -387,18 +387,8 @@ struct Emulator {
       setMode(readPhysMemory(wit.mode, CSR_WORD(MSMODE)));
       writePhysMemory(wit.version, CSR_WORD(MVERSION), RV32IM_CIRCUIT_VERSION);
     }
-    writePhysMemory(wit.writeCycle, CSR_WORD(MSCYCLE), 2);
-    uint32_t ie = peekPhysMemory(CSR_WORD(MIE));
-    timer = 0x40000001;
-    if (ie) {
-      uint64_t timer64 = (uint64_t(peekPhysMemory(CSR_WORD(MTIMERH) & 0x4fffffff)) << 32) | peekPhysMemory(CSR_WORD(MTIMER));
-      uint64_t time64 = (uint64_t(peekPhysMemory(CSR_WORD(MTIMEH))) << 32) | peekPhysMemory(CSR_WORD(MTIME));
-      int64_t diff = int64_t(timer64) - int64_t(time64);
-      if (diff < 0) { diff = 0; }
-      if (diff > 0x40000000) { diff = 0x40000000; }
-      //LOG(0, "ie = " << ie << ", timer = " << std::hex << timer64 << ", time = " << time64 << std::dec << ", diff = " << diff);
-      timer = curCycle + diff + 1; 
-    }
+    writePhysMemory(wit.writeCycle, CSR_WORD(MSCYCLE), curCycle + 1);
+    countdown = peekPhysMemory(CSR_WORD(MCOUNTDOWN));
     curCycle++;
   }
 
@@ -415,10 +405,20 @@ struct Emulator {
     }
     uint32_t oldCycle = readPhysMemory(wit.readCycle, CSR_WORD(MSCYCLE));
     if (mode == MODE_MACHINE) { oldCycle = curCycle; }
+    uint32_t delta = curCycle - oldCycle;
+    // Add delta to time
     uint64_t time = peekPhysMemory(CSR_WORD(MTIME)) | (uint64_t(peekPhysMemory(CSR_WORD(MTIMEH))) << 32);
-    time += curCycle - oldCycle;
+    time += delta;
     writePhysMemory(wit.updateTime, CSR_WORD(MTIME), time & 0xffffffff);
     writePhysMemory(wit.updateTime, CSR_WORD(MTIMEH), time >> 32);
+    // Subtract delta from countdown, is < 0 fatal
+    countdown = peekPhysMemory(CSR_WORD(MCOUNTDOWN));
+    countdown -= delta;
+    if (countdown & 0x80000000) {
+      // Underflow, die
+      fatal("Counter underflow");
+    }
+    writePhysMemory(wit.updateTime, CSR_WORD(MCOUNTDOWN), countdown);
     curCycle++;
   }
 
@@ -455,10 +455,20 @@ struct Emulator {
     newPc = readPhysMemory(wit.readDispatch, dispatchWord);
     setMode(MODE_MACHINE);
     uint32_t oldCycle = readPhysMemory(wit.readCycle, CSR_WORD(MSCYCLE));
+    uint32_t delta = curCycle - oldCycle;
+    // Add delta to time
     uint64_t time = peekPhysMemory(CSR_WORD(MTIME)) | (uint64_t(peekPhysMemory(CSR_WORD(MTIMEH))) << 32);
-    time += wit.cycle - oldCycle;
+    time += delta;
     writePhysMemory(wit.updateTime, CSR_WORD(MTIME), time & 0xffffffff);
     writePhysMemory(wit.updateTime, CSR_WORD(MTIMEH), time >> 32);
+    // Subtract delta from countdown, is < 0 fatal
+    countdown = peekPhysMemory(CSR_WORD(MCOUNTDOWN));
+    countdown -= delta;
+    if (countdown & 0x80000000) {
+      // Underflow, die
+      fatal("Counter underflow");
+    }
+    writePhysMemory(wit.updateTime, CSR_WORD(MCOUNTDOWN), countdown);
   }
 
   void fatal(const std::string& reason) { throw std::runtime_error("Fatal Error: " + reason); }
@@ -752,17 +762,7 @@ struct Emulator {
       debug = true;
     }
     setMode(newMode);
-    uint32_t ie = peekPhysMemory(CSR_WORD(MIE));
-    timer = 0x40000001;
-    if (ie) {
-      uint64_t timer64 = (uint64_t(peekPhysMemory(CSR_WORD(MTIMERH) & 0x4fffffff)) << 32) | peekPhysMemory(CSR_WORD(MTIMER));
-      uint64_t time64 = (uint64_t(peekPhysMemory(CSR_WORD(MTIMEH))) << 32) | peekPhysMemory(CSR_WORD(MTIME));
-      int64_t diff = int64_t(timer64) - int64_t(time64);
-      //LOG(0, "ie = " << ie << ", timer = " << std::hex << timer64 << ", time = " << time64 << std::dec << ", diff = " << diff);
-      if (diff < 0) { diff = 0; }
-      if (diff > 0x40000000) { diff = 0x40000000; }
-      timer = curCycle + diff + 1; 
-    }
+    countdown = peekPhysMemory(CSR_WORD(MCOUNTDOWN));
   }
 
   void do_ECALL_TERMINATE() {
@@ -1057,29 +1057,12 @@ struct Emulator {
                             ceilDiv(curCycle, 24) + // How many rows we need for cycle table
                             memory.getPagingCost() <
                         rowCount) {
-      /*
       if (mode != MODE_MACHINE) {
-        uint32_t goalPc;
-        uint32_t goalTime;
-        fread(&goalPc, 1, 4, pcFile);
-        fread(&goalTime, 1, 4, pcFile);
-        if (pc != goalPc) {
-          LOG(0, "MISMATCH: pc = " << HexWord{pc} << ", gaalPC = " << HexWord{goalPc});
-          throw std::runtime_error("SAD");
+        if (countdown == 0) {
+          makeNoDecodeTrap(TRAP_INTER);
+          continue;
         }
-        uint32_t oldCycle = peekPhysMemory(CSR_WORD(MSCYCLE));
-        uint32_t curTime = peekPhysMemory(CSR_WORD(MTIME)) + curCycle - oldCycle;
-        if (curTime != goalTime) {
-          LOG(0, "TIME ERROR: pc = " << HexWord{pc});
-          LOG(0, "Time = " << HexWord{curTime});
-          LOG(0, "Goal Time = " << HexWord{goalTime});
-          throw std::runtime_error("SADDER");
-        }
-      }
-      */
-      if (mode != MODE_MACHINE && timer == curCycle) {
-        makeNoDecodeTrap(TRAP_INTER);
-        continue;
+        countdown--;
       }
       DecodeWitness*& decodeWit = instCache[{pc, mode}];
       if (!decodeWit) {
@@ -1163,7 +1146,7 @@ struct Emulator {
   uint32_t mode = 0;
   uint32_t pc = 0;
   uint32_t newPc = 0;
-  uint32_t timer = 0x40000000;
+  uint32_t countdown = 0x7fffffff;;
   DecodeWitness* dinst;
   bool debug = false;
 };

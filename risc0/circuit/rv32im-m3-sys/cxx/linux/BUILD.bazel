@@ -1,0 +1,15 @@
+cc_binary(
+    name = "boot",
+    srcs = [
+        "boot.cpp",
+    ],
+    deps = [
+        "//rv32im/emu",
+    ],
+    data = [
+        "linux.elf",
+        "risc0.dtb",
+        "rootfs.cpio",
+        "//firmware",
+    ],
+)

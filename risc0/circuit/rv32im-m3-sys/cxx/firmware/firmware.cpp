@@ -133,24 +133,24 @@ uint32_t translate(uint32_t& addr, uint32_t aType) {
     if (pteAddr >= FIRMWARE_START_ADDR) { return causeAccessFault(aType); }
     pte = AT(pteAddr)[0];
     if ((pte & 1) == 0) {
-      LOG(0, "NOT VALID");
+      // LOG(0, "NOT VALID");
       return causePageFault(aType); 
     }
     xwr = (pte >> 1) & 7;
     if (xwr == 2 || xwr == 6) { 
-      LOG(0, "Reserved mode");
+      // LOG(0, "Reserved mode");
       return causePageFault(aType); 
     } 
     a = (pte << 2) & 0xfffff000;
     if (xwr != 0) break;
   }
   if (!xwr) { 
-    LOG(0, "NOT XWR mode");
+    // LOG(0, "NOT XWR mode");
     return causePageFault(aType); 
   }
   if (i == 1) {
     if (((pte >> 10) & 0x3ff) != 0) {
-      LOG(0, "Unaligned mega page");
+      // LOG(0, "Unaligned mega page");
       return causePageFault(aType);
     }
     a |= ((vPage & 0x3ff) << 12);
@@ -165,7 +165,7 @@ uint32_t translate(uint32_t& addr, uint32_t aType) {
   if ((aType == ACCESS_FETCH && !x) ||
       (aType == ACCESS_LOAD && !r) ||
       (aType == ACCESS_STORE && !w)) {
-    LOG(0, "Invalid access: u = " << u << ", smode = " << smode << ", mxr = " << mxr << ", u = " << u << ", xwr = " << xwr);
+    // LOG(0, "Invalid access: u = " << u << ", smode = " << smode << ", mxr = " << mxr << ", u = " << u << ", xwr = " << xwr);
     return causePageFault(aType); 
   }
   pte |= (1 << 6);  // Set A bit always
@@ -198,36 +198,13 @@ void invalidateCache() {
   CSR(MCLEARCACHE) = 1;
 }
 
-void recomputeInter() {
-  uint32_t orig = CSR(MIE);
-  uint32_t sie = (CSR(SSTATUS) >> 1) & 1;
-  uint32_t mode = CSR(MEMODE);
-  uint32_t ie = (mode == MODE_USER || sie) && (CSR(SIE) & 0x20);
-  if (ie == orig) { return; }
-  CSR(MIE) = ie;
-  uint64_t time = (uint64_t(CSR(MTIMEH)) << 32) | CSR(MTIME);
-  uint64_t timer = (uint64_t(CSR(MTIMERH)) << 32) | CSR(MTIMER);
-  if (ie) {
-    // Transitioning to interrupts enabled
-    if (time >= timer) {
-      LOG(0, "DOH");
-      die();
-    }
-  } else {
-    // Disabling interrupts
-    if (time >= timer) {
-      LOG(0, "Time should have fired but did not");
-      die();
-    }
-  }
-}
 
 void recomputeVmInfo() {
   uint32_t orig = CSR(MVINFO);
   uint32_t cur = (CSR(SATP) & 0x803fffff) |
     ((CSR(SSTATUS) & 0x000c0000) << 11);
   if (orig != cur) {
-    LOG(0, "NEW VINFO: " << cur);
+    // LOG(0, "NEW VINFO: " << cur);
     CSR(MVINFO) = cur;
     invalidateCache();
   }
@@ -256,12 +233,6 @@ void supervisorTrap(uint32_t cause) {
   CSR(MEPC) = CSR(STVEC);
   // LOG(0, "New mode = " << CSR(MEMODE));
   recomputeVmInfo();
-  if (++CSR(MTIME) == 0) {
-    ++CSR(MTIMEH);
-  }
-  if (cause != MCAUSE_TIMER_INTERRUPT) {
-    recomputeInter();
-  }
 }
 
 uint32_t doSRET() {
@@ -281,10 +252,6 @@ uint32_t doSRET() {
   CSR(SSTATUS) = cur;
   CSR(MEPC) = CSR(SEPC);
   CSR(MEMODE) = newMode;
-  recomputeInter();
-  if (++CSR(MTIME) == 0) {
-    ++CSR(MTIMEH);
-  }
   return MCAUSE_SRET;
 }
 
@@ -362,10 +329,6 @@ uint32_t handleInstSystem(uint32_t inst) {
       break;
     case CSR_SSTATUS:
       recomputeVmInfo();
-      recomputeInter();
-      break;
-    case CSR_SIE:
-      recomputeInter();
       break;
     default:
       break;
@@ -487,7 +450,7 @@ uint32_t handleLoad(uint32_t inst) {
     case 1: // LH
     case 5: // LHU
       if (addr % 2 != 0) {
-        LOG(0, "MISALIGNED");
+        // LOG(0, "MISALIGNED");
         CSR(STVAL) = addr;
         //CSR(MDEBUG) = true;
         return MCAUSE_LOAD_ADDRESS_MISALIGNED;
@@ -495,7 +458,7 @@ uint32_t handleLoad(uint32_t inst) {
       break;
     case 2:
       if (addr % 4 != 0) {
-        LOG(0, "MISALIGNED");
+        // LOG(0, "MISALIGNED");
         CSR(STVAL) = addr;
         //CSR(MDEBUG) = true;
         return MCAUSE_LOAD_ADDRESS_MISALIGNED;
@@ -503,13 +466,13 @@ uint32_t handleLoad(uint32_t inst) {
       break;
   }
   // OK, data is aligned, try to translate VM address
-  LOG(0, "MEPC = " << CSR(MEPC));
-  LOG(0, "Attempting to translate: " << addr);
-  LOG(0, "Mode = " << CSR(MEMODE) << ", SSTATUS = " << CSR(SSTATUS));
+  // LOG(0, "MEPC = " << CSR(MEPC));
+  // LOG(0, "Attempting to translate: " << addr);
+  // LOG(0, "Mode = " << CSR(MEMODE) << ", SSTATUS = " << CSR(SSTATUS));
   uint32_t cause = translate(addr, ACCESS_LOAD);
   if (cause != MCAUSE_NONE) {
     CSR(STVAL) = addr;
-    LOG(0, "Val = " << addr << ", cause = " << cause);
+    // LOG(0, "Val = " << addr << ", cause = " << cause);
     return cause;
   }
   // Hmm, load seems to have been valid, prover is byzantine
@@ -535,27 +498,27 @@ uint32_t handleStore(uint32_t inst) {
   switch(func3) {
     case 1: // SH
       if (addr % 2 != 0) {
-        LOG(0, "MISALIGNED");
+        // LOG(0, "MISALIGNED");
         CSR(STVAL) = addr;
         return MCAUSE_LOAD_ADDRESS_MISALIGNED;
       }
       break;
     case 2:  // SW
       if (addr % 4 != 0) {
-        LOG(0, "MISALIGNED");
+        // LOG(0, "MISALIGNED");
         CSR(STVAL) = addr;
         return MCAUSE_LOAD_ADDRESS_MISALIGNED;
       }
       break;
   }
   // OK, data is aligned, try to translate VM address
-  LOG(0, "MEPC = " << CSR(MEPC));
-  LOG(0, "Attempting to translate: " << addr);
-  LOG(0, "Mode = " << CSR(MEMODE) << ", SSTATUS = " << CSR(SSTATUS));
+  // LOG(0, "MEPC = " << CSR(MEPC));
+  // LOG(0, "Attempting to translate: " << addr);
+  // LOG(0, "Mode = " << CSR(MEMODE) << ", SSTATUS = " << CSR(SSTATUS));
   uint32_t cause = translate(addr, ACCESS_STORE);
   if (cause != MCAUSE_NONE) {
     CSR(STVAL) = addr;
-    LOG(0, "Val = " << addr << ", cause = " << cause);
+    // LOG(0, "Val = " << addr << ", cause = " << cause);
     return cause;
   }
   // Hmm, load seems to have been valid, prover is byzantine
@@ -601,27 +564,43 @@ extern "C" void onTrapInst() {
     instLen = 2;
     instLong = AT(COMPRESSED_INST_LOOKUP_ADDR)[inst];
   }
-  // Try to process instruction
-  // LOG(0, "Handling inst " << inst << ":" << instLong << " at " << CSR(MEPC));
   uint32_t mcause = handleInst(instLong);
-  // LOG(0, "mcause = " << mcause);
+  uint64_t& time = *reinterpret_cast<uint64_t*>(&CSR(MTIME));
   if (mcause == MCAUSE_NONE) {
-    // Success, bump PC + continue
+    // Success, advance time, bump PC, and continue
+    time++;
     CSR(MEPC) += instLen;
   } else if (mcause != MCAUSE_SRET) {
     // If it failed, forward to supervisor
     supervisorTrap(mcause);
   }
+  // Update countdown
+  uint64_t& timer = *reinterpret_cast<uint64_t*>(&CSR(MTIMER));
+  uint32_t sie = (CSR(SSTATUS) >> 1) & 1;
+  uint32_t mode = CSR(MEMODE);
+  uint32_t ie = (mode == MODE_USER || sie) && (CSR(SIE) & 0x20);
+  uint32_t countdown = 0x7fffffff;
+  if (ie) {
+    if (time >= timer) {
+      CSR(MCOUNTDOWN) = 0;
+    } else {
+      uint64_t until = timer - time;
+      if (until < countdown) {
+        countdown = until;
+      }
+    }
+  }
+  CSR(MCOUNTDOWN) = countdown;
 }
 
 extern "C" void onTrapFetch() {
-  LOG(0, "Trap fetch: Mode = " << CSR(MEMODE) << ", SSTATUS = " << CSR(SSTATUS));
+  // LOG(0, "Trap fetch: Mode = " << CSR(MEMODE) << ", SSTATUS = " << CSR(SSTATUS));
   // Get PC we trapped on
   uint32_t pc = CSR(MEPC);
   // Translate address
   uint32_t mcause = translate(pc, ACCESS_FETCH);
   if (mcause != MCAUSE_NONE) {
-    LOG(0, "PC = " <<  pc << ", cause = " << mcause);
+    // LOG(0, "PC = " <<  pc << ", cause = " << mcause);
     // If it fails, trap to supervisor
     CSR(STVAL) = pc;
     supervisorTrap(mcause);
@@ -634,7 +613,7 @@ extern "C" void onTrapFetch() {
     uint32_t pc2 = CSR(MEPC) + 2;
     mcause = translate(pc2, ACCESS_FETCH);
     if (mcause != MCAUSE_NONE) {
-      LOG(0, "PC = " <<  pc << ", cause = " << mcause);
+      // LOG(0, "PC = " <<  pc << ", cause = " << mcause);
       // If it fails, trap to supervisor
       CSR(STVAL) = pc2;
       supervisorTrap(mcause);
@@ -717,8 +696,10 @@ uint32_t handleTimer() {
 }
 
 extern "C" void onTrapEcall() {
+  uint64_t& time = *reinterpret_cast<uint64_t*>(&CSR(MTIME));
+  time++;
   if (CSR(MEMODE) == MODE_USER) {
-    LOG(0, "User mode ECALL");
+    // LOG(0, "User mode ECALL");
     CSR(STVAL) = 0;
     supervisorTrap(MCAUSE_ECALL_FROM_UMODE);
     return;
@@ -750,14 +731,8 @@ extern "C" void onTrapEcall() {
 }
 
 extern "C" void onTrapInter() {
-  /*
-  LOG(0, "Timer interrupt");
-  LOG(0, "MEPC = " << CSR(MEPC));
-  LOG(0, "time = " << CSR(MTIME));
-  LOG(0, "timer = " << CSR(MTIMER));
-  */
+  CSR(MCOUNTDOWN) = 0x7fffffff;
   CSR(STVAL) = 0;
-  CSR(MIE) = 0;
   supervisorTrap(MCAUSE_TIMER_INTERRUPT);
 }
 
@@ -768,6 +743,7 @@ extern "C" void _trapInter();
 
 void initializeCsrs() {
   // Only initialize ones that are explicitly non-zero
+  CSR(MCOUNTDOWN) = 0x7fffffff;
   CSR(MTRAPECALL) = reinterpret_cast<uint32_t>(_trapEcall);  // Set trap handler address, calls onTrap
   CSR(MTRAPINST) = reinterpret_cast<uint32_t>(_trapInst);  // Set trap handler address, calls onTrap
   CSR(MTRAPFETCH) = reinterpret_cast<uint32_t>(_trapFetch);  // Set trap handler address, calls onTrap
