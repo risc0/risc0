@@ -93,6 +93,8 @@ pub(crate) trait SyscallContext<'a> {
     /// Loads an individual word from memory.
     fn load_u32(&mut self, addr: ByteAddr) -> Result<u32>;
 
+    // DO NOT MERGE: Try changing this to an iterator pattern and examine all callsites to
+    // determine how this should be used.
     /// Loads bytes from the given region of memory. A region may span multiple pages.
     fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
         let mut region = Vec::new();

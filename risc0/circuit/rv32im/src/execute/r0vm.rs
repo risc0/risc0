@@ -88,6 +88,8 @@ pub(crate) trait Risc0Context {
         Ok(bytes[byte_offset])
     }
 
+    // DO NOT MERGE: Try changing this to an iterator pattern and examine all callsites to
+    // determine how this should be used.
     #[inline(always)]
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
         let mut region = Vec::with_capacity(size);
