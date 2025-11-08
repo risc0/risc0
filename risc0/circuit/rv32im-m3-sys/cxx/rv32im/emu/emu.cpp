@@ -1063,7 +1063,6 @@ struct Emulator {
       }
       if (mode != MODE_MACHINE) {
         if (countdown == 0) {
-          LOG(0, "Firing timer");
           makeNoDecodeTrap(TRAP_INTER);
           continue;
         }

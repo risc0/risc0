@@ -29,6 +29,7 @@ struct DebugHostIO : public HostIO {
     }
     if (fd == uint32_t(-1)) {
       fwrite(data, 1, size, stdout);
+      fflush(stdout);
     } else {
       LOG(0, std::string(reinterpret_cast<const char*>(data), size));
     }
