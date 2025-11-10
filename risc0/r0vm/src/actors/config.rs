@@ -45,21 +45,21 @@ pub(crate) struct AppConfig {
     pub telemetry: Option<TelemetryConfig>,
 }
 
-#[derive(Clone, Default, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct ApiConfig {
     pub listen: Option<SocketAddr>,
+    pub po2: Option<u32>,
 }
 
-#[derive(Clone, Default, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct ManagerConfig {
     pub listen: Option<IpAddr>,
     pub allocator: Option<SocketAddr>,
-    pub api_po2: Option<u32>,
 }
 
-#[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct AllocatorConfig {
     pub listen: Option<SocketAddr>,
@@ -67,14 +67,14 @@ pub(crate) struct AllocatorConfig {
     pub worker_queuing_factor: Option<f32>,
 }
 
-#[derive(Clone, Default, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct ExecutorConfig {
     pub allocator: Option<SocketAddr>,
     pub count: usize,
 }
 
-#[derive(Clone, Default, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct ProverConfig {
     pub allocator: Option<SocketAddr>,
@@ -102,11 +102,11 @@ impl Default for AppConfig {
             release_channel: None,
             api: Some(ApiConfig {
                 listen: Some(default_api_listen_addr()),
+                po2: None,
             }),
             manager: Some(ManagerConfig {
                 allocator: None,
                 listen: None,
-                api_po2: None,
             }),
             allocator: Some(AllocatorConfig {
                 listen: Some(default_allocator_listen_addr()),
@@ -170,6 +170,7 @@ mod tests {
                 release_channel: None,
                 api: Some(ApiConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
+                    po2: None,
                 }),
                 manager: None,
                 allocator: None,
@@ -193,11 +194,11 @@ mod tests {
                 release_channel: None,
                 api: Some(ApiConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:8000").unwrap()),
+                    po2: None,
                 }),
                 manager: Some(ManagerConfig {
                     allocator: None,
-                    listen: None,
-                    api_po2: Some(21),
+                    listen: None
                 }),
                 allocator: Some(AllocatorConfig {
                     listen: Some(SocketAddr::from_str("0.0.0.0:9000").unwrap()),
