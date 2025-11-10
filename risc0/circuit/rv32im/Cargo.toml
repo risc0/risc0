@@ -104,4 +104,3 @@ std = [
   "serde/std",
 ]
 witgen_debug = []
-exec_debug = []

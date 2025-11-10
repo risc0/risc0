@@ -24,8 +24,6 @@ use malachite::{
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
-use super::exec_trace;
-
 // NOTE: Fields in Type and Input are currently unused, but are read to consume the associated
 // bytes from the stream when decoding the program.
 
@@ -178,7 +176,7 @@ impl Program {
     pub fn eval<T: BigIntIO>(&self, io: &mut T) -> Result<()> {
         let mut regs = vec![Integer::ZERO; self.ops.len()];
         for (op_index, op) in self.ops.iter().enumerate() {
-            exec_trace!("[{op_index}]: {op:?}");
+            tracing::trace!("[{op_index}]: {op:?}");
             match op.code {
                 OpCode::Const => {
                     let offset = op.a;
