@@ -23,9 +23,9 @@ use risc0_zkp::core::{digest::Digest, hash::sha::Impl};
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
-use crate::{ByteAddr, Digestible as _, KERNEL_START_ADDR, MemoryImage, SystemState};
-
-const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
+use crate::{
+    ByteAddr, Digestible as _, KERNEL_START_ADDR, MemoryImage, SystemState, USER_START_ADDR,
+};
 
 const SUSPEND_PC_ADDR: ByteAddr = ByteAddr(0xffff_0210);
 const SUSPEND_MODE_ADDR: ByteAddr = ByteAddr(0xffff_0214);
