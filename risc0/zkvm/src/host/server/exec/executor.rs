@@ -348,6 +348,10 @@ impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
         self.ctx.peek_register(idx).unwrap()
     }
 
+    fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+        self.ctx.peek_page(page_idx)
+    }
+
     fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {
         self.ctx.peek_u8(addr)
     }

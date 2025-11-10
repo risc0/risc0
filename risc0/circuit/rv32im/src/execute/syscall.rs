@@ -42,6 +42,12 @@ pub trait SyscallContext {
     /// A region may span multiple pages.
     fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Vec<u8>>;
 
+    /// Load a page from memory at the specified page index.
+    ///
+    /// This is used by sys_fork in order to build a copy-on-write page cache to
+    /// inherit pages from the parent process.
+    fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
+
     /// Returns the current cycle count.
     fn get_cycle(&self) -> u64;
 

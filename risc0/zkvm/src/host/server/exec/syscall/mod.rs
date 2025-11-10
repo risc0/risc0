@@ -110,6 +110,9 @@ pub(crate) trait SyscallContext<'a> {
             .map_err(|vec| anyhow!("invalid digest: {vec:?}"))
     }
 
+    /// Load a page from memory at the specified page index.
+    fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
+
     /// Access the syscall table.
     fn syscall_table(&self) -> &SyscallTable<'a>;
 }
