@@ -52,6 +52,9 @@ const MERKLE_TREE_DEPTH: usize = MEMORY_PAGES.ilog2() as usize;
 /// Start address for kernel-mode memory.
 pub const KERNEL_START_ADDR: ByteAddr = ByteAddr(0xc000_0000);
 
+/// Start address for user programs
+pub const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
+
 /// Program header table address (stored in memory)
 pub const USER_PHDR_ADDR: ByteAddr = ByteAddr(0xffff_3000);
 
@@ -195,11 +198,11 @@ impl MemoryImage {
     pub fn new_kernel(mut program: Program) -> Self {
         program.prepare_kernel(None);
         // Store program header information in memory
-        image.insert(USER_PHDR_ADDR.0, program.phdr_addr);
-        image.insert(USER_PHDR_NUM_ADDR.0, program.phnum);
+        program.image.insert(USER_PHDR_ADDR.0, program.phdr_addr);
+        program.image.insert(USER_PHDR_NUM_ADDR.0, program.phnum);
 
-        image.insert(SUSPEND_PC_ADDR.0, program.entry);
-        image.insert(SUSPEND_MODE_ADDR.0, 1);
+        program.image.insert(SUSPEND_PC_ADDR.0, program.entry);
+        program.image.insert(SUSPEND_MODE_ADDR.0, 1);
         Self::new(program.image)
     }
 
