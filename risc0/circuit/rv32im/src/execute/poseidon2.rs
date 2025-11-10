@@ -112,7 +112,6 @@ impl Poseidon2State {
         // While we have data to process
         let mut buf_in_addr = WordAddr(self.buf_in_addr);
         // tracing::debug!("buf_in_addr: {buf_in_addr:?}");
-        // HERE!
         while self.count > 0 {
             // Do load
             self.step(ctx, &mut cur_state, CycleState::PoseidonLoadIn, 0);
