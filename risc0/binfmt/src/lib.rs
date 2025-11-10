@@ -31,7 +31,7 @@ mod sys_state;
 use anyhow::Result;
 use risc0_zkp::core::digest::Digest;
 
-pub use self::image::{KERNEL_START_ADDR, MemoryImage, Page};
+pub use self::image::{KERNEL_START_ADDR, MemoryImage, Page, USER_START_ADDR};
 
 pub use crate::{
     addr::{ByteAddr, WordAddr},
