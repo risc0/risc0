@@ -531,6 +531,25 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
+trait Region {
+    fn chunks(&mut self) -> impl FusedIterator<Item = Result<PageChunk>>;
+
+    fn bytes(&mut self) -> impl FusedIterator<Item = Result<u8>> {
+        self.chunks().flat_map(|chunk| {
+            let mut chunk = Some(chunk);
+            let mut pos = 0usize;
+            std::iter::from_fn(move || {
+                if let Some(Err(err)) = chunk.take_if(|x| x.is_err()) {
+                    return Some(Err(err));
+                }
+                pos += 1;
+                Some(Ok(*chunk?.unwrap().get(pos - 1)?))
+            })
+            .fuse()
+        })
+    }
+}
+
 pub struct LoadRegion<'a> {
     pager: &'a mut PagedMemory,
     op: LoadOp,
