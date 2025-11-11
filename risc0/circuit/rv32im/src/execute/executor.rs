@@ -35,7 +35,10 @@ use risc0_zkp::core::{
 
 use crate::{
     EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
-    execute::rv32im::disasm,
+    execute::{
+        r0vm::{PageChunk, Region},
+        rv32im::disasm,
+    },
     trace::{TraceCallback, TraceEvent},
 };
 
@@ -531,43 +534,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-trait Region {
-    fn chunks(&mut self) -> impl FusedIterator<Item = Result<PageChunk>>;
-
-    fn bytes(&mut self) -> impl FusedIterator<Item = Result<u8>> {
-        self.chunks().flat_map(|chunk| {
-            let mut chunk = Some(chunk);
-            let mut pos = 0usize;
-            std::iter::from_fn(move || {
-                if let Some(Err(err)) = chunk.take_if(|x| x.is_err()) {
-                    return Some(Err(err));
-                }
-                pos += 1;
-                Some(Ok(*chunk?.unwrap().get(pos - 1)?))
-            })
-            .fuse()
-        })
-    }
-}
-
-pub struct LoadRegion<'a> {
+struct LoadRegion<'a> {
     pager: &'a mut PagedMemory,
     op: LoadOp,
     start: ByteAddr,
     end: ByteAddr,
-}
-
-pub struct PageChunk {
-    page: Page,
-    range: Range<usize>,
-}
-
-impl Deref for PageChunk {
-    type Target = [u8];
-
-    fn deref(&self) -> &Self::Target {
-        &self.page.data()[self.range.clone()]
-    }
 }
 
 impl<'a> LoadRegion<'a> {
@@ -591,8 +562,14 @@ impl<'a> LoadRegion<'a> {
             end,
         })
     }
+}
 
-    pub fn chunks(&mut self) -> impl FusedIterator<Item = Result<PageChunk>> {
+impl Region for LoadRegion<'_> {
+    fn size(&self) -> usize {
+        (self.end.0 - self.start.0) as usize
+    }
+
+    fn chunks(&mut self) -> impl FusedIterator<Item = Result<PageChunk>> {
         let mut pos = self.start;
 
         std::iter::from_fn(move || {
@@ -631,15 +608,6 @@ impl<'a> LoadRegion<'a> {
             Some(Ok(chunk))
         })
         .fuse()
-    }
-
-    pub fn into_vec(mut self) -> Result<Vec<u8>> {
-        let capacity = (self.end - self.start).0 as usize;
-        self.chunks()
-            .try_fold(Vec::with_capacity(capacity), |mut buffer, chunk| {
-                buffer.extend_from_slice(&chunk?);
-                Ok(buffer)
-            })
     }
 }
 

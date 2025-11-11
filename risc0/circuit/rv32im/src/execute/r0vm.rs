@@ -13,10 +13,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{cmp::min, fmt::Write as _};
+use std::{
+    cmp::min,
+    fmt::Write as _,
+    iter::FusedIterator,
+    ops::{Deref, Range},
+};
 
 use anyhow::{Result, anyhow, bail};
-use risc0_binfmt::{ByteAddr, WordAddr};
+use risc0_binfmt::{ByteAddr, Page, WordAddr};
 
 use super::{
     platform::*,
@@ -31,6 +36,34 @@ pub(crate) enum LoadOp {
     Peek,
     Load,
     Record,
+}
+
+pub(crate) trait Region {
+    fn chunks(&mut self) -> impl FusedIterator<Item = Result<PageChunk>>;
+
+    fn size(&self) -> usize;
+
+    fn into_vec(&mut self) -> Result<Vec<u8>> {
+        let capacity = self.size();
+        self.chunks()
+            .try_fold(Vec::with_capacity(capacity), |mut buffer, chunk| {
+                buffer.extend_from_slice(&chunk?);
+                Ok(buffer)
+            })
+    }
+}
+
+pub struct PageChunk {
+    pub page: Page,
+    pub range: Range<usize>,
+}
+
+impl Deref for PageChunk {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        &self.page.data()[self.range.clone()]
+    }
 }
 
 pub(crate) trait Risc0Context {
@@ -96,7 +129,7 @@ pub(crate) trait Risc0Context {
     // give the right results if it was, if an unaligned address is given, as it would load_u32
     // each word 4 times, recording a memory transaction for every access.
     #[inline(always)]
-    fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
+    fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<impl Region> {
         let mut region = Vec::with_capacity(size);
         if addr.is_aligned() && size.is_multiple_of(WORD_SIZE) {
             let mut waddr = addr.waddr();
