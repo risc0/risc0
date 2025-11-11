@@ -531,6 +531,99 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
+pub struct LoadRegion<'a> {
+    pager: &'a mut PagedMemory,
+    op: LoadOp,
+    start: ByteAddr,
+    end: ByteAddr,
+}
+
+pub struct PageChunk {
+    page: Page,
+    range: Range<usize>,
+}
+
+impl Deref for PageChunk {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        &self.page.data()[self.range.clone()]
+    }
+}
+
+impl<'a> LoadRegion<'a> {
+    pub(crate) fn new(
+        pager: &'a mut PagedMemory,
+        op: LoadOp,
+        start: ByteAddr,
+        size: usize,
+    ) -> Result<Self> {
+        let end = ByteAddr(
+            (start.0 as usize)
+                .checked_add(size)
+                .filter(|end| *end < MEMORY_END_ADDR.baddr().0 as usize)
+                .context("Load region end is past the end of memory")? as u32,
+        );
+
+        Ok(Self {
+            pager,
+            op,
+            start,
+            end,
+        })
+    }
+
+    pub fn chunks(&mut self) -> impl FusedIterator<Item = Result<PageChunk>> {
+        let mut pos = self.start;
+
+        std::iter::from_fn(move || {
+            assert!(pos <= self.end);
+            if pos == self.end {
+                return None;
+            }
+
+            let load_result = match self.op {
+                LoadOp::Peek => self.pager.peek_page(pos.page_idx()),
+                LoadOp::Load => self.pager.load_page(pos.page_idx()),
+                LoadOp::Record => {
+                    unimplemented!("Load region is not implemented for LoadOp::Record")
+                }
+            };
+            let page = match load_result {
+                Ok(page) => page.clone(),
+                Err(e) => return Some(Err(e)),
+            };
+            let chunk = if self.end.page_idx() == pos.page_idx() {
+                let subpage_pos = pos.page_subaddr().0 as usize;
+                let subpage_end = self.end.page_subaddr().0 as usize;
+                PageChunk {
+                    page,
+                    range: subpage_pos..subpage_end,
+                }
+            } else {
+                let subpage_pos = pos.page_subaddr().0 as usize;
+                PageChunk {
+                    page,
+                    range: subpage_pos..PAGE_BYTES,
+                }
+            };
+
+            pos += chunk.len();
+            Some(Ok(chunk))
+        })
+        .fuse()
+    }
+
+    pub fn into_vec(mut self) -> Result<Vec<u8>> {
+        let capacity = (self.end - self.start).0 as usize;
+        self.chunks()
+            .try_fold(Vec::with_capacity(capacity), |mut buffer, chunk| {
+                buffer.extend_from_slice(&chunk?);
+                Ok(buffer)
+            })
+    }
+}
+
 impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     fn circuit_version(&self) -> u32 {
         self.circuit_version
@@ -617,82 +710,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
-        if let LoadOp::Record = op {
-            unimplemented!();
-        }
-
-        struct Region<'a> {
-            pager: &'a mut PagedMemory,
-            pos: ByteAddr,
-            end: ByteAddr,
-        }
-
-        struct PageChunk {
-            page: Page,
-            range: Range<usize>,
-        }
-
-        impl Deref for PageChunk {
-            type Target = [u8];
-
-            fn deref(&self) -> &Self::Target {
-                &self.page.data()[self.range.clone()]
-            }
-        }
-
-        impl Region<'_> {
-            fn next_chunk(&mut self) -> Option<Result<PageChunk>> {
-                assert!(self.pos <= self.end);
-                if self.pos == self.end {
-                    return None;
-                }
-
-                let page = match self.pager.load_page(self.pos.page_idx()) {
-                    Ok(page) => page.clone(),
-                    Err(e) => return Some(Err(e)),
-                };
-                let chunk = if self.end.page_idx() == self.pos.page_idx() {
-                    let subpage_pos = self.pos.page_subaddr().0 as usize;
-                    let subpage_end = self.end.page_subaddr().0 as usize;
-                    PageChunk {
-                        page,
-                        range: subpage_pos..subpage_end,
-                    }
-                } else {
-                    let subpage_pos = self.pos.page_subaddr().0 as usize;
-                    PageChunk {
-                        page,
-                        range: subpage_pos..PAGE_BYTES,
-                    }
-                };
-
-                self.pos += chunk.len();
-                Some(Ok(chunk))
-            }
-
-            fn chunks(&mut self) -> impl FusedIterator<Item = Result<PageChunk>> {
-                std::iter::from_fn(|| self.next_chunk()).fuse()
-            }
-        }
-
-        let pos = addr;
-        let end = ByteAddr(
-            (addr.0 as usize)
-                .checked_add(size)
-                .filter(|end| *end < MEMORY_END_ADDR.baddr().0 as usize)
-                .context("Load region end is past the end of memory")? as u32,
-        );
-
-        let mut region = Region {
-            pager: &mut self.pager,
-            pos,
-            end,
-        };
-
-        region.chunks().try_fold(vec![], |mut buffer, chunk| {
-            buffer.extend_from_slice(&chunk?);
-            Ok(buffer)
-        })
+        LoadRegion::new(&mut self.pager, op, addr, size)?.into_vec()
     }
 
     #[inline(always)]
@@ -793,9 +811,8 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
         self.load_u8(LoadOp::Peek, addr)
     }
 
-    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
-        // let addr = Self::check_guest_addr(addr)?;
-        self.load_region(LoadOp::Peek, addr, size)
+    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<LoadRegion<'_>> {
+        LoadRegion::new(&mut self.pager, LoadOp::Peek, addr, size)
     }
 
     fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {
