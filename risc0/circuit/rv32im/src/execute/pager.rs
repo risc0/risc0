@@ -236,15 +236,16 @@ pub(crate) struct WorkingImage {
 }
 
 impl WorkingImage {
+    /// Returns a reference to the page at the given index.
+    ///
+    /// If the page is not in the working image, it is assumed to be all zeroes. A page of zeroes
+    /// is inserted into the working image when this is called.
     #[inline(always)]
-    fn get_page(&mut self, page_idx: u32) -> Result<Page> {
-        // If page exists, return it
-        if let Some(page) = self.pages.get(&page_idx) {
-            return Ok(page.clone());
-        }
-        self.pages.insert(page_idx, zero_page().clone());
-
-        Ok(zero_page().clone())
+    fn get_page(&mut self, page_idx: u32) -> Result<&Page> {
+        Ok(self
+            .pages
+            .entry(page_idx)
+            .or_insert_with(|| zero_page().clone()))
     }
 
     fn set_page(&mut self, page_idx: u32, page: Page) {
@@ -356,6 +357,16 @@ impl PagedMemory {
         match self.try_load_register(addr) {
             Some(word) => Ok(word),
             None => self.peek_ram(addr),
+        }
+    }
+
+    pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {
+        if let Some(cache_idx) = self.page_table.get(page_idx) {
+            // Loaded, get from cache
+            Ok(self.page_cache[cache_idx].data())
+        } else {
+            // Unloaded, peek into image
+            Ok(self.image.get_page(page_idx)?.data())
         }
     }
 
@@ -499,7 +510,7 @@ impl PagedMemory {
         tracing::trace!("load_page: {page_idx:#08x}");
         let page = self.image.get_page(page_idx)?;
         self.page_table.set(page_idx, self.page_cache.len());
-        self.page_cache.push(page);
+        self.page_cache.push(page.clone());
         self.cycles += PAGE_CYCLES;
         self.trace_page_in(PAGE_CYCLES);
         self.fixup_costs(node_idx(page_idx), PageState::Loaded);
