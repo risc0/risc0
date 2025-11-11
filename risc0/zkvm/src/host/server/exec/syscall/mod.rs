@@ -38,6 +38,7 @@ use std::{
 use anyhow::{Result, anyhow};
 use enum_map::EnumMap;
 use risc0_binfmt::ByteAddr;
+use risc0_circuit_rv32im::execute::PAGE_BYTES;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{
     DIGEST_BYTES, SyscallName,
@@ -109,6 +110,9 @@ pub(crate) trait SyscallContext<'a> {
             .try_into()
             .map_err(|vec| anyhow!("invalid digest: {vec:?}"))
     }
+
+    /// Load a page from memory at the specified page index.
+    fn load_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]>;
 
     /// Access the syscall table.
     fn syscall_table(&self) -> &SyscallTable<'a>;

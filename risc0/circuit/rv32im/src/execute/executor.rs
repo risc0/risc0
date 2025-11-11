@@ -726,6 +726,10 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
         self.load_region(LoadOp::Peek, addr, size)
     }
 
+    fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {
+        self.pager.peek_page(page_idx)
+    }
+
     fn get_cycle(&self) -> u64 {
         self.cycles.user
     }
