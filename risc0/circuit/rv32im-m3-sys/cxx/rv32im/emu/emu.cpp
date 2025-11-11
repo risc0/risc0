@@ -29,7 +29,7 @@ namespace risc0::rv32im {
 
 namespace {
 
-#define DLOG(...) LOG(2, __VA_ARGS__)
+#define DLOG(...) LOG(3, __VA_ARGS__)
 // #define DLOG(...) /**/
 
 constexpr uint32_t CYCLE_TABLE_ROWS = 24;
@@ -745,7 +745,7 @@ struct Emulator {
   void do_ECALL_BIG_INT() {
     std::map<uint32_t, uint32_t> polyWitness;
     size_t count = witgenBigInt(polyWitness, [&](uint32_t addr) { return peekPhysMemory(addr); });
-    LOG(1, "BIGINT ecall with count = " << count);
+    LOG(2, "BIGINT ecall with count = " << count);
     // TODO: Based on count + polyWitness paging, decide if we need to abort
     auto& wit = trace.makeEcallBigInt();
     wit.cycle = curCycle;
@@ -757,6 +757,7 @@ struct Emulator {
     curCycle++;
     BigIntPreflight pf;
     for (size_t i = 0; i < count; i++) {
+      LOG(2, "BigIntPreflight: " << i);
       auto& biWit = trace.makeBigInt();
       biWit.cycle = curCycle;
       biWit.mm = biMm;
@@ -943,7 +944,7 @@ bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount, uint
   Emulator emu(trace, image, io, rowCount);
   emu.addTables();
   bool done = emu.run(rowCount, endCycle);
-  LOG(1, "Cycle = " << emu.curCycle);
+  LOG(2, "Cycle = " << emu.curCycle);
   emu.commit();
   return done;
 }

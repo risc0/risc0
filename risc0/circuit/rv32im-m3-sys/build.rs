@@ -69,6 +69,12 @@ fn main() {
         .debug(false)
         .warnings(false)
         .flag("-std=c++17")
+        // .flag("-Xcompiler")
+        // .flag("-fsanitize=address")
+        // .flag("-Xcompiler")
+        // .flag("-fno-omit-frame-pointer")
+        // .flag("-Xcompiler")
+        // .flag("-g")
         .include("cxx")
         .include("vendor")
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
@@ -80,6 +86,8 @@ fn main() {
         .files(glob_paths("cxx/verify/*.cpp"))
         .files(glob_paths("cxx/zkp/*.cpp"))
         .files(generated_files);
+
+    // println!("cargo:rustc-link-lib=asan");
 
     // if is_metal() {
     //     build
