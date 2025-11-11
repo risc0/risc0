@@ -61,6 +61,8 @@ pub(crate) trait Risc0Context {
 
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32>;
 
+    //fn load_page(&mut self, op: LoadOp, addr: WordAddr) -> Result<&[u8; PAGE_BYTES]>;
+
     #[inline(always)]
     fn load_register(&mut self, op: LoadOp, base: WordAddr, idx: usize) -> Result<u32> {
         self.load_u32(op, base + idx)
@@ -90,6 +92,9 @@ pub(crate) trait Risc0Context {
 
     // DO NOT MERGE: Try changing this to an iterator pattern and examine all callsites to
     // determine how this should be used.
+    // DO NOT MERGE: This function is never called with LoadOp::Record. Its not clear that it would
+    // give the right results if it was, if an unaligned address is given, as it would load_u32
+    // each word 4 times, recording a memory transaction for every access.
     #[inline(always)]
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
         let mut region = Vec::with_capacity(size);

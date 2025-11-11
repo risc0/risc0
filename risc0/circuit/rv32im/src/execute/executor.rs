@@ -13,10 +13,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use core::iter::FusedIterator;
 use std::{
     cell::RefCell,
     collections::BTreeSet,
     fmt::Debug,
+    ops::{Deref, Range},
     rc::Rc,
     sync::mpsc::{SyncSender, sync_channel},
     thread::{self, ScopedJoinHandle},
@@ -25,7 +27,7 @@ use std::{
 use anyhow::{Context, Result, bail};
 use enum_map::EnumMap;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
-use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
+use risc0_binfmt::{ByteAddr, MemoryImage, Page, PovwJobId, PovwNonce, WordAddr};
 use risc0_zkp::core::{
     digest::{DIGEST_BYTES, Digest},
     log2_ceil,
@@ -614,6 +616,85 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(word)
     }
 
+    fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
+        if let LoadOp::Record = op {
+            unimplemented!();
+        }
+
+        struct Region<'a> {
+            pager: &'a mut PagedMemory,
+            pos: ByteAddr,
+            end: ByteAddr,
+        }
+
+        struct PageChunk {
+            page: Page,
+            range: Range<usize>,
+        }
+
+        impl Deref for PageChunk {
+            type Target = [u8];
+
+            fn deref(&self) -> &Self::Target {
+                &self.page.data()[self.range.clone()]
+            }
+        }
+
+        impl Region<'_> {
+            fn next_chunk(&mut self) -> Option<Result<PageChunk>> {
+                assert!(self.pos <= self.end);
+                if self.pos == self.end {
+                    return None;
+                }
+
+                let page = match self.pager.load_page(self.pos.page_idx()) {
+                    Ok(page) => page.clone(),
+                    Err(e) => return Some(Err(e)),
+                };
+                let chunk = if self.end.page_idx() == self.pos.page_idx() {
+                    let subpage_pos = self.pos.page_subaddr().0 as usize;
+                    let subpage_end = self.end.page_subaddr().0 as usize;
+                    PageChunk {
+                        page,
+                        range: subpage_pos..subpage_end,
+                    }
+                } else {
+                    let subpage_pos = self.pos.page_subaddr().0 as usize;
+                    PageChunk {
+                        page,
+                        range: subpage_pos..PAGE_BYTES,
+                    }
+                };
+
+                self.pos += chunk.len();
+                Some(Ok(chunk))
+            }
+
+            fn chunks(&mut self) -> impl FusedIterator<Item = Result<PageChunk>> {
+                std::iter::from_fn(|| self.next_chunk()).fuse()
+            }
+        }
+
+        let pos = addr;
+        let end = ByteAddr(
+            (addr.0 as usize)
+                .checked_add(size)
+                .filter(|end| *end < MEMORY_END_ADDR.baddr().0 as usize)
+                .context("Load region end is past the end of memory")? as u32,
+        );
+
+        let mut region = Region {
+            pager: &mut self.pager,
+            pos,
+            end,
+        };
+
+        region.chunks().try_fold(vec![], |mut buffer, chunk| {
+            buffer.extend_from_slice(&chunk?);
+            Ok(buffer)
+        })
+    }
+
     #[inline(always)]
     fn load_register(&mut self, _op: LoadOp, base: WordAddr, idx: usize) -> Result<u32> {
         let word = self.pager.load_register(base, idx);
@@ -718,7 +799,7 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
     }
 
     fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {
-        self.pager.peek_page(page_idx)
+        Ok(self.pager.peek_page(page_idx)?.data())
     }
 
     fn get_cycle(&self) -> u64 {

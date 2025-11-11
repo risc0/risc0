@@ -360,29 +360,20 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {
+    pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<&Page> {
         if let Some(cache_idx) = self.page_table.get(page_idx) {
             // Loaded, get from cache
-            Ok(self.page_cache[cache_idx].data())
+            Ok(&self.page_cache[cache_idx])
         } else {
             // Unloaded, peek into image
-            Ok(self.image.get_page(page_idx)?.data())
+            Ok(self.image.get_page(page_idx)?)
         }
     }
 
     #[inline(always)]
     fn load_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
-        let node_idx = node_idx(page_idx);
-        // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}, node: {node_idx:#08x}");
-        let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
-            cache_idx
-        } else {
-            self.load_page(page_idx)?;
-            self.page_states.set(node_idx, PageState::Loaded);
-            self.page_table.get(page_idx).unwrap()
-        };
-        Ok(self.page_cache[cache_idx].load(addr))
+        Ok(self.load_page(page_idx)?.load(addr))
     }
 
     #[inline(always)]
@@ -406,6 +397,27 @@ impl PagedMemory {
         } else {
             unimplemented!("unknown register address {base:?}");
         }
+    }
+
+    #[inline(always)]
+    pub(crate) fn load_page(&mut self, page_idx: u32) -> Result<&Page> {
+        if unlikely(page_idx >= NUM_PAGES as u32) {
+            bail!("Invalid load page index: {page_idx}")
+        }
+        // Registers are not stored in the main RAM during execution. If the page containing the
+        // memory mapped registers is requested, then they must first be written to RAM.
+        // TODO(victor/perf): Does this conditional have any perf impact?
+        if page_idx == USER_REGS_ADDR.page_idx() || page_idx == MACHINE_REGS_ADDR.page_idx() {
+            self.write_registers()
+        }
+        let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
+            cache_idx
+        } else {
+            self.page_in(page_idx)?;
+            self.page_states.set(node_idx(page_idx), PageState::Loaded);
+            self.page_table.get(page_idx).unwrap()
+        };
+        Ok(&self.page_cache[cache_idx])
     }
 
     #[inline(always)]
@@ -446,7 +458,7 @@ impl PagedMemory {
         let node_idx = node_idx(page_idx);
         let mut state = self.page_states.get(node_idx);
         if state == PageState::Unloaded {
-            self.load_page(page_idx)?;
+            self.page_in(page_idx)?;
             state = PageState::Loaded;
         };
 
@@ -460,6 +472,8 @@ impl PagedMemory {
         Ok(self.page_cache.get_mut(cache_idx).unwrap())
     }
 
+    /// Write the registers, which are stored separate from the rest of RAM, to their memory mapped
+    /// location. This method is called when committing to the final memory state of a segment.
     fn write_registers(&mut self) {
         // Copy register values first to avoid borrow conflicts
         let user_registers = self.user_registers;
@@ -506,7 +520,7 @@ impl PagedMemory {
     }
 
     #[inline(always)]
-    fn load_page(&mut self, page_idx: u32) -> Result<()> {
+    fn page_in(&mut self, page_idx: u32) -> Result<()> {
         tracing::trace!("load_page: {page_idx:#08x}");
         let page = self.image.get_page(page_idx)?;
         self.page_table.set(page_idx, self.page_cache.len());
