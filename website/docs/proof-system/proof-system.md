@@ -64,7 +64,7 @@ In addition to the links in the sidebar, we recommend the following resources:
 
 [`env::commit_slice()`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit_slice.html
 [`env::commit()`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
-[about-zkvm]: /api/zkvm
+[about-zkvm]: /website/api/zkvm
 [Bonsai]: https://bonsai.xyz
 [composite receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.CompositeReceipt.html
 [dev-mode]: /api/generating-proofs/dev-mode
