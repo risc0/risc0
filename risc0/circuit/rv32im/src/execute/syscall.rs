@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use std::io::Read;
+
 use anyhow::Result;
 
 use risc0_binfmt::ByteAddr;
@@ -25,7 +27,7 @@ pub trait Syscall {
     fn host_read(&self, ctx: &mut dyn SyscallContext, fd: u32, buf: &mut [u8]) -> Result<u32>;
 
     /// Writes to the host.
-    fn host_write(&self, ctx: &mut dyn SyscallContext, fd: u32, buf: &[u8]) -> Result<u32>;
+    fn host_write(&self, ctx: &mut dyn SyscallContext, fd: u32, data: impl Read) -> Result<u32>;
 }
 
 /// Access to memory and machine state for syscalls.

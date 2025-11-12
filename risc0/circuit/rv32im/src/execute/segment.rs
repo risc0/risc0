@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::cell::Cell;
+use std::{cell::Cell, io::Read};
 
 use anyhow::Result;
 use derive_more::Debug;
@@ -113,7 +113,7 @@ impl Syscall for SegmentSyscallHandler<'_> {
         Ok(read_record.len() as u32)
     }
 
-    fn host_write(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
+    fn host_write(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _data: impl Read) -> Result<u32> {
         let pos = self.write_pos.replace(self.read_pos.get() + 1);
         Ok(self.segment.write_record[pos])
     }

@@ -15,6 +15,7 @@
 
 use std::{
     cell::{Cell, RefCell},
+    io::Read,
     rc::Rc,
     sync::Arc,
     time::Instant,
@@ -36,6 +37,7 @@ use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
+use tracing::Level;
 
 use crate::{
     Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
@@ -407,10 +409,21 @@ impl CircuitSyscall for ExecutorImpl<'_> {
         Ok(rlen as u32)
     }
 
-    fn host_write(&self, ctx: &mut dyn CircuitSyscallContext, _fd: u32, buf: &[u8]) -> Result<u32> {
-        let str = String::from_utf8(buf.to_vec())?;
-        tracing::debug!("R0VM[{}] {str}", ctx.get_cycle());
-        Ok(buf.len() as u32)
+    fn host_write(
+        &self,
+        ctx: &mut dyn CircuitSyscallContext,
+        _fd: u32,
+        mut data: impl Read,
+    ) -> Result<u32> {
+        let read_len = if tracing::enabled!(Level::DEBUG) {
+            let str = std::io::read_to_string(data)?;
+            tracing::debug!("R0VM[{}] {str}", ctx.get_cycle());
+            str.len()
+        } else {
+            // Drain the reader, recording only the number of bytes read.
+            std::io::copy(&mut data, &mut std::io::sink())? as usize
+        };
+        Ok(read_len as u32)
     }
 }
 
