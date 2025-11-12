@@ -3,6 +3,7 @@ use crate::{
         ASCII_TABLE_PTR, MEPC_PTR, PAGE_SIZE, REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5,
         REG_A7, REG_SP, USER_BRK_ADDR, USER_INTERP_ADDR, USER_INTERP_BASE_ADDR, USER_PHDR_ADDR_PTR,
         USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE, USER_STACK_PTR, USER_START_PTR,
+        FILESYSTEM_IMAGE_ADDR_PTR, KERNEL_HEAP_START_ADDR,
     },
     host_calls::{host_argv, host_terminate},
     kernel::{get_ureg, mret, print},
@@ -11,6 +12,7 @@ use crate::{
         set_p9_enabled, sys_statx,
     },
     p9::get_p9_traffic_hash,
+    p9_backend::init_zerocopy_backend,
 };
 
 use crate::kernel::set_ureg;
@@ -699,6 +701,63 @@ impl UserStack {
     }
 }
 
+/// Initialize zero-copy P9 backend from embedded filesystem image
+fn init_p9_zerocopy_backend() {
+    use crate::host_calls::host_terminate;
+    
+    unsafe {
+        // Read filesystem image address from memory
+        print(&str_format!(str256, "Reading FS address from ptr: 0x{:08x}", FILESYSTEM_IMAGE_ADDR_PTR as u32));
+        let fs_addr = *FILESYSTEM_IMAGE_ADDR_PTR;
+        print(&str_format!(str256, "Read FS address: 0x{:08x}", fs_addr));
+        
+        if fs_addr == 0 {
+            print("FATAL: opts=p9mem specified but no filesystem embedded!");
+            print("Use: elf-to-bin --root <dir> to embed a filesystem");
+            host_terminate(1, 0);
+        }
+        
+        print(&str_format!(str256, "Initializing zero-copy filesystem at 0x{:08x}", fs_addr));
+        
+        // Note: Large filesystems may be placed in user space, which is fine
+        // as they're read-only and won't conflict with user programs
+        if fs_addr < 0xC0000000 {
+            print("  Note: Large FS placed in upper user space (read-only, safe)");
+        }
+        
+        // Initialize the zero-copy backend
+        // Use very large max size - the header's total_size will be the actual limit
+        const MAX_FS_SIZE: usize = 1024 * 1024 * 1024; // 1GB max
+        print(&str_format!(str256, "  Max allowed FS size: {} MB", MAX_FS_SIZE / (1024 * 1024)));
+        
+        match init_zerocopy_backend(fs_addr as usize, MAX_FS_SIZE) {
+            Ok(fs_size) => {
+                print(&str_format!(str256, "Filesystem loaded: {} bytes ({:.2} MB)", fs_size, fs_size as f64 / (1024.0 * 1024.0)));
+                
+                // Verify filesystem fits below heap
+                let fs_end = fs_addr as usize + fs_size;
+                if fs_end > KERNEL_HEAP_START_ADDR {
+                    print("FATAL: Filesystem extends into kernel heap!");
+                    print(&str_format!(str256, "  FS end:    0x{:08x}", fs_end));
+                    print(&str_format!(str256, "  Heap start: 0x{:08x}", KERNEL_HEAP_START_ADDR));
+                    print("  Reduce filesystem size or increase heap start address");
+                    host_terminate(1, 0);
+                }
+                
+                print(&str_format!(str256, "  FS ends at: 0x{:08x}", fs_end));
+                print(&str_format!(str256, "  Heap starts: 0x{:08x} (fixed)", KERNEL_HEAP_START_ADDR));
+                print("Zero-copy P9 backend activated");
+            }
+            Err(errno) => {
+                print(&str_format!(str256, "FATAL: Failed to initialize filesystem: error {}", errno));
+                print(&str_format!(str256, "  Filesystem address: 0x{:08x}", fs_addr));
+                print("  Check that filesystem was properly embedded with elf-to-bin --root");
+                host_terminate(1, 0);
+            }
+        }
+    }
+}
+
 pub fn start_linux_binary(argc: u32) -> ! {
     init_fs();
 
@@ -727,7 +786,18 @@ pub fn start_linux_binary(argc: u32) -> ! {
 
     if !argv.is_empty() {
         if argv[0].starts_with("opts=p9") {
-            set_p9_enabled(true);
+            let opt = &argv[0];
+            
+            if opt == "opts=p9mem" || opt == "opts=p9zc" {
+                // Zero-copy in-memory filesystem
+                set_p9_enabled(true);
+                init_p9_zerocopy_backend();
+            } else if opt.starts_with("opts=p9") {
+                // Traditional P9 over host calls (zkVM backend)
+                set_p9_enabled(true);
+                // Backend defaults to Zkvm, no action needed
+            }
+            
             argv.remove(0);
         } else {
             set_p9_enabled(false);

@@ -34,9 +34,7 @@ pub use crate::p9_zkvm::{HostReadError, HostWriteError};
 use crate::p9_zkvm::p9_send_message;
 
 // Import backend system for message sending
-use crate::p9_backend::{
-    BackendType, P9Backend, get_backend_type, get_in_memory_backend, get_zkvm_backend,
-};
+use crate::p9_backend::get_backend;
 
 // Import for tests
 #[cfg(test)]
@@ -765,20 +763,9 @@ impl TversionMessage {
     }
 
     /// Send the Tversion message using the active backend
-    /// Returns the number of bytes written, or an error
-    pub fn send_tversion(&self) -> Result<u32, TversionError> {
-        match get_backend_type() {
-            BackendType::Zkvm => {
-                let mut backend = get_zkvm_backend();
-                backend.send_tversion(self)?;
-                Ok(0) // Success
-            }
-            BackendType::InMemory => {
-                let backend = get_in_memory_backend();
-                backend.send_tversion(self)?;
-                Ok(0) // Success
-            }
-        }
+    /// Returns the response from the backend
+    pub fn send_tversion(&self) -> Result<P9Response<RversionMessage>, TversionError> {
+        get_backend().send_tversion(self)
     }
 }
 
@@ -1150,20 +1137,9 @@ impl TreadMessage {
     }
 
     /// Send the Tread message using the active backend
-    /// Returns the number of bytes written, or an error
-    pub fn send_tread(&self) -> Result<u32, TreadError> {
-        match get_backend_type() {
-            BackendType::Zkvm => {
-                let mut backend = get_zkvm_backend();
-                backend.send_tread(self)?;
-                Ok(0)
-            }
-            BackendType::InMemory => {
-                let backend = get_in_memory_backend();
-                backend.send_tread(self)?;
-                Ok(0)
-            }
-        }
+    /// Returns the response from the backend
+    pub fn send_tread(&self) -> Result<P9Response<RreadMessage>, TreadError> {
+        get_backend().send_tread(self)
     }
 }
 
@@ -1380,20 +1356,8 @@ impl TwriteMessage {
 
     /// Send the Twrite message using host_write
     /// Returns the number of bytes written, or an error
-    pub fn send_twrite(&self) -> Result<u32, TwriteError> {
-        // Create a buffer for the serialized message
-        // Need to fit MAX_9P_IO_CHUNK (8000) + overhead (23 bytes) = 8023 bytes minimum
-        // Using 8192 to match P9_DEFAULT_MSIZE
-        let mut buf = [0u8; 8192];
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TwriteError::InternalError),
-        }
+    pub fn send_twrite(&self) -> Result<P9Response<RwriteMessage>, TwriteError> {
+        get_backend().send_twrite(self)
     }
 }
 
@@ -1611,20 +1575,9 @@ impl TwalkMessage {
     }
 
     /// Send the Twalk message using the active backend
-    /// Returns the number of bytes written, or an error
-    pub fn send_twalk(&self) -> Result<u32, TwalkError> {
-        match get_backend_type() {
-            BackendType::Zkvm => {
-                let mut backend = get_zkvm_backend();
-                backend.send_twalk(self)?;
-                Ok(0)
-            }
-            BackendType::InMemory => {
-                let backend = get_in_memory_backend();
-                backend.send_twalk(self)?;
-                Ok(0)
-            }
-        }
+    /// Returns the response from the backend
+    pub fn send_twalk(&self) -> Result<P9Response<RwalkMessage>, TwalkError> {
+        get_backend().send_twalk(self)
     }
 }
 
@@ -1834,20 +1787,10 @@ impl TclunkMessage {
         Ok(offset)
     }
 
-    /// Send the Tclunk message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tclunk(&self) -> Result<u32, TclunkError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 16]; // Large enough for Tclunk message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TclunkError::InternalError),
-        }
+    /// Send the Tclunk message using the active backend
+    /// Returns the response from the backend
+    pub fn send_tclunk(&self) -> Result<P9Response<RclunkMessage>, TclunkError> {
+        get_backend().send_tclunk(self)
     }
 }
 
@@ -2004,20 +1947,10 @@ impl TremoveMessage {
         Ok(offset)
     }
 
-    /// Send the Tremove message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tremove(&self) -> Result<u32, TremoveError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 16]; // Large enough for Tremove message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TremoveError::InternalError),
-        }
+    /// Send the Tremove message using the active backend
+    /// Returns the response from the backend
+    pub fn send_tremove(&self) -> Result<P9Response<RremoveMessage>, TremoveError> {
+        get_backend().send_tremove(self)
     }
 }
 
@@ -2443,20 +2376,10 @@ impl TattachMessage {
         Ok(offset)
     }
 
-    /// Send the Tattach message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tattach(&self) -> Result<u32, TattachError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 1024]; // Large enough for Tattach message with strings
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TattachError::InternalError),
-        }
+    /// Send the Tattach message using the active backend
+    /// Returns the response from the backend
+    pub fn send_tattach(&self) -> Result<P9Response<RattachMessage>, TattachError> {
+        get_backend().send_tattach(self)
     }
 }
 
@@ -3026,20 +2949,10 @@ impl TlopenMessage {
         Ok(offset)
     }
 
-    /// Send the Tlopen message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tlopen(&self) -> Result<u32, TlopenError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 16]; // Large enough for Tlopen message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TlopenError::InternalError),
-        }
+    /// Send the Tlopen message using the active backend
+    /// Returns the response from the backend
+    pub fn send_tlopen(&self) -> Result<P9Response<RlopenMessage>, TlopenError> {
+        get_backend().send_tlopen(self)
     }
 }
 
@@ -3277,20 +3190,10 @@ impl TlcreateMessage {
         Ok(offset)
     }
 
-    /// Send the Tlcreate message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tlcreate(&self) -> Result<u32, TlcreateError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 128]; // Large enough for Tlcreate message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TlcreateError::InternalError),
-        }
+    /// Send the Tlcreate message using the active backend
+    /// Returns the response from the backend
+    pub fn send_tlcreate(&self) -> Result<P9Response<RlcreateMessage>, TlcreateError> {
+        get_backend().send_tlcreate(self)
     }
 }
 
@@ -3512,14 +3415,9 @@ impl TsymlinkMessage {
         Ok(offset)
     }
 
-    /// Send the Tsymlink message using p9_write
-    pub fn send_tsymlink(&self) -> Result<u32, TsymlinkError> {
-        let mut buf = [0u8; 128];
-        let bytes_written = self.serialize(&mut buf)?;
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TsymlinkError::InternalError),
-        }
+    /// Send the Tsymlink message using the active backend
+    pub fn send_tsymlink(&self) -> Result<P9Response<RsymlinkMessage>, TsymlinkError> {
+        get_backend().send_tsymlink(self)
     }
 }
 
@@ -3710,14 +3608,9 @@ impl TmknodMessage {
         Ok(offset)
     }
 
-    /// Send the Tmknod message using p9_write
-    pub fn send_tmknod(&self) -> Result<u32, TmknodError> {
-        let mut buf = [0u8; 128];
-        let bytes_written = self.serialize(&mut buf)?;
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TmknodError::InternalError),
-        }
+    /// Send the Tmknod message using the active backend
+    pub fn send_tmknod(&self) -> Result<P9Response<RmknodMessage>, TmknodError> {
+        get_backend().send_tmknod(self)
     }
 }
 
@@ -3882,13 +3775,8 @@ impl TrenameMessage {
     }
 
     /// Send the Trename message using p9_write
-    pub fn send_trename(&self) -> Result<u32, TrenameError> {
-        let mut buf = [0u8; 128];
-        let bytes_written = self.serialize(&mut buf)?;
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TrenameError::InternalError),
-        }
+    pub fn send_trename(&self) -> Result<P9Response<RrenameMessage>, TrenameError> {
+        get_backend().send_trename(self)
     }
 }
 
@@ -3996,14 +3884,9 @@ impl TreadlinkMessage {
         Ok(offset)
     }
 
-    /// Send the Treadlink message using p9_write
-    pub fn send_treadlink(&self) -> Result<u32, TreadlinkError> {
-        let mut buf = [0u8; 16];
-        let bytes_written = self.serialize(&mut buf)?;
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TreadlinkError::InternalError),
-        }
+    /// Send the Treadlink message using the active backend
+    pub fn send_treadlink(&self) -> Result<P9Response<RreadlinkMessage>, TreadlinkError> {
+        get_backend().send_treadlink(self)
     }
 }
 
@@ -4272,20 +4155,9 @@ impl TgetattrMessage {
     }
 
     /// Send the Tgetattr message using the active backend
-    /// Returns the number of bytes written, or an error
-    pub fn send_tgetattr(&self) -> Result<u32, TgetattrError> {
-        match get_backend_type() {
-            BackendType::Zkvm => {
-                let mut backend = get_zkvm_backend();
-                backend.send_tgetattr(self)?;
-                Ok(0)
-            }
-            BackendType::InMemory => {
-                let backend = get_in_memory_backend();
-                backend.send_tgetattr(self)?;
-                Ok(0)
-            }
-        }
+    /// Returns the response from the backend
+    pub fn send_tgetattr(&self) -> Result<P9Response<RgetattrMessage>, TgetattrError> {
+        get_backend().send_tgetattr(self)
     }
 }
 
@@ -4806,20 +4678,10 @@ impl TsetattrMessage {
         Ok(offset)
     }
 
-    /// Send the Tsetattr message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tsetattr(&self) -> Result<u32, TsetattrError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 128]; // Large enough for Tsetattr message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TsetattrError::InternalError),
-        }
+    /// Send the Tsetattr message using the active backend
+    /// Returns the response from the backend
+    pub fn send_tsetattr(&self) -> Result<P9Response<RsetattrMessage>, TsetattrError> {
+        get_backend().send_tsetattr(self)
     }
 }
 
@@ -5026,20 +4888,9 @@ impl TxattrwalkMessage {
         Ok(offset)
     }
 
-    /// Send the Txattrwalk message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_txattrwalk(&self) -> Result<u32, TxattrwalkError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 128]; // Large enough for Txattrwalk message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TxattrwalkError::InternalError),
-        }
+    /// Send the Txattrwalk message using the active backend
+    pub fn send_txattrwalk(&self) -> Result<P9Response<RxattrwalkMessage>, TxattrwalkError> {
+        get_backend().send_txattrwalk(self)
     }
 }
 
@@ -5222,20 +5073,9 @@ impl TxattrcreateMessage {
         Ok(offset)
     }
 
-    /// Send the Txattrcreate message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_txattrcreate(&self) -> Result<u32, TxattrcreateError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 128]; // Large enough for Txattrcreate message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TxattrcreateError::InternalError),
-        }
+    /// Send the Txattrcreate message using the active backend
+    pub fn send_txattrcreate(&self) -> Result<P9Response<RxattrcreateMessage>, TxattrcreateError> {
+        get_backend().send_txattrcreate(self)
     }
 }
 
@@ -5397,20 +5237,10 @@ impl TreaddirMessage {
         Ok(offset)
     }
 
-    /// Send the Treaddir message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_treaddir(&self) -> Result<u32, TreaddirError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 32]; // Large enough for Treaddir message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TreaddirError::InternalError),
-        }
+    /// Send the Treaddir message using the active backend
+    /// Returns the response from the backend
+    pub fn send_treaddir(&self) -> Result<P9Response<RreaddirMessage>, TreaddirError> {
+        get_backend().send_treaddir(self)
     }
 }
 
@@ -6269,18 +6099,8 @@ impl TlinkMessage {
 
     /// Send the Tlink message using p9_write
     /// Returns the number of bytes written, or an error
-    pub fn send_tlink(&self) -> Result<u32, TlinkError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 128]; // Large enough for Tlink message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TlinkError::InternalError),
-        }
+    pub fn send_tlink(&self) -> Result<P9Response<RlinkMessage>, TlinkError> {
+        get_backend().send_tlink(self)
     }
 }
 
@@ -6524,20 +6344,10 @@ impl TmkdirMessage {
         Ok(offset)
     }
 
-    /// Send the Tmkdir message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tmkdir(&self) -> Result<u32, TmkdirError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 128]; // Large enough for Tmkdir message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TmkdirError::InternalError),
-        }
+    /// Send the Tmkdir message using the active backend
+    /// Returns the response from the backend
+    pub fn send_tmkdir(&self) -> Result<P9Response<RmkdirMessage>, TmkdirError> {
+        get_backend().send_tmkdir(self)
     }
 }
 
@@ -6729,20 +6539,9 @@ impl TrenameatMessage {
         Ok(offset)
     }
 
-    /// Send the Trenameat message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_trenameat(&self) -> Result<u32, TrenameatError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 128]; // Large enough for Trenameat message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TrenameatError::InternalError),
-        }
+    /// Send the Trenameat message using the active backend
+    pub fn send_trenameat(&self) -> Result<P9Response<RrenameatMessage>, TrenameatError> {
+        get_backend().send_trenameat(self)
     }
 }
 
@@ -6895,20 +6694,9 @@ impl TunlinkatMessage {
         Ok(offset)
     }
 
-    /// Send the Tunlinkat message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tunlinkat(&self) -> Result<u32, TunlinkatError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 128]; // Large enough for Tunlinkat message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TunlinkatError::InternalError),
-        }
+    /// Send the Tunlinkat message using the active backend
+    pub fn send_tunlinkat(&self) -> Result<P9Response<RunlinkatMessage>, TunlinkatError> {
+        get_backend().send_tunlinkat(self)
     }
 }
 

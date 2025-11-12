@@ -18,6 +18,7 @@ use crate::p9::{
     RfsyncMessage,
     RgetattrMessage,
     RlcreateMessage,
+    RlinkMessage,
     RlopenMessage,
     RmkdirMessage,
     RmknodMessage,
@@ -25,6 +26,7 @@ use crate::p9::{
     RreaddirMessage,
     RreadlinkMessage,
     RremoveMessage,
+    RrenameMessage,
     RrenameatMessage,
     RsetattrMessage,
     RsymlinkMessage,
@@ -32,6 +34,8 @@ use crate::p9::{
     RversionMessage,
     RwalkMessage,
     RwriteMessage,
+    RxattrcreateMessage,
+    RxattrwalkMessage,
     TattachError,
     TattachMessage,
     TclunkError,
@@ -42,6 +46,8 @@ use crate::p9::{
     TgetattrMessage,
     TlcreateError,
     TlcreateMessage,
+    TlinkError,
+    TlinkMessage,
     TlopenError,
     TlopenMessage,
     TmkdirError,
@@ -56,6 +62,8 @@ use crate::p9::{
     TreadlinkMessage,
     TremoveError,
     TremoveMessage,
+    TrenameError,
+    TrenameMessage,
     TrenameatError,
     TrenameatMessage,
     TsetattrError,
@@ -70,6 +78,10 @@ use crate::p9::{
     TwalkMessage,
     TwriteError,
     TwriteMessage,
+    TxattrcreateError,
+    TxattrcreateMessage,
+    TxattrwalkError,
+    TxattrwalkMessage,
 };
 
 /// Trait for P9 backend implementations
@@ -184,48 +196,126 @@ pub trait P9Backend {
         &mut self,
         msg: &TfsyncMessage,
     ) -> Result<P9Response<RfsyncMessage>, TfsyncError>;
+
+    /// Send Tlink and receive Rlink
+    fn send_tlink(&mut self, msg: &TlinkMessage) -> Result<P9Response<RlinkMessage>, TlinkError>;
+
+    /// Send Trename and receive Rrename
+    fn send_trename(
+        &mut self,
+        msg: &TrenameMessage,
+    ) -> Result<P9Response<RrenameMessage>, TrenameError>;
+
+    /// Send Txattrwalk and receive Rxattrwalk
+    fn send_txattrwalk(
+        &mut self,
+        msg: &TxattrwalkMessage,
+    ) -> Result<P9Response<RxattrwalkMessage>, TxattrwalkError>;
+
+    /// Send Txattrcreate and receive Rxattrcreate
+    fn send_txattrcreate(
+        &mut self,
+        msg: &TxattrcreateMessage,
+    ) -> Result<P9Response<RxattrcreateMessage>, TxattrcreateError>;
 }
 
-/// Global backend selector
-static mut BACKEND_TYPE: BackendType = BackendType::Zkvm;
+// Separate statics for each backend type
+static mut ZKVM_BACKEND: Option<crate::p9_zkvm::ZkvmBackend> = None;
+static mut INMEMORY_BACKEND: Option<crate::p9_in_memory::InMemoryBackend> = None;
+static mut ZEROCOPY_BACKEND: Option<crate::p9_in_memory::ZeroCopyBackend> = None;
 
+/// Get the active backend as a trait object
+///
+/// Priority: ZeroCopy > InMemory > Zkvm (default)
+/// Since we only initialize once, we just check which one is Some().
+#[allow(static_mut_refs)]
+pub fn get_backend() -> &'static mut dyn P9Backend {
+    unsafe {
+        // Check in priority order
+        if let Some(ref mut b) = ZEROCOPY_BACKEND {
+            return b as &mut dyn P9Backend;
+        }
+        if let Some(ref mut b) = INMEMORY_BACKEND {
+            return b as &mut dyn P9Backend;
+        }
+        // Default to zkVM backend (lazy init)
+        if ZKVM_BACKEND.is_none() {
+            ZKVM_BACKEND = Some(crate::p9_zkvm::ZkvmBackend::new());
+        }
+        ZKVM_BACKEND.as_mut().unwrap() as &mut dyn P9Backend
+    }
+}
+
+/// Initialize with in-memory backend
+pub fn init_in_memory_backend() {
+    unsafe {
+        INMEMORY_BACKEND = Some(crate::p9_in_memory::InMemoryBackend::new());
+    }
+}
+
+/// Initialize the zero-copy backend from an embedded filesystem image
+///
+/// # Safety
+/// Must be called before any P9 operations if using ZeroCopy backend.
+/// The address must point to a valid FilesystemImage.
+pub unsafe fn init_zerocopy_backend(addr: usize, max_size: usize) -> Result<usize, u32> {
+    unsafe {
+        let backend = crate::p9_in_memory::ZeroCopyBackend::from_address(addr, max_size)?;
+        let fs_size = backend.image_size();
+        ZEROCOPY_BACKEND = Some(backend);
+        Ok(fs_size)
+    }
+}
+
+// Deprecated compatibility functions
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BackendType {
     Zkvm,
     InMemory,
+    ZeroCopy,
 }
 
-/// Set the active backend type
-pub fn set_backend_type(backend: BackendType) {
+pub fn get_backend_type() -> BackendType {
     unsafe {
-        BACKEND_TYPE = backend;
+        match (&raw const ZEROCOPY_BACKEND as *const Option<_>)
+            .read()
+            .is_some()
+        {
+            true => BackendType::ZeroCopy,
+            false => match (&raw const INMEMORY_BACKEND as *const Option<_>)
+                .read()
+                .is_some()
+            {
+                true => BackendType::InMemory,
+                false => BackendType::Zkvm,
+            },
+        }
     }
 }
 
-/// Get the current backend type
-pub fn get_backend_type() -> BackendType {
-    unsafe { BACKEND_TYPE }
+pub fn set_backend_type(_backend: BackendType) {
+    // Deprecated - backends are set by calling init_*_backend()
 }
 
-/// Get a ZkvmBackend instance (always available)
 pub fn get_zkvm_backend() -> crate::p9_zkvm::ZkvmBackend {
     crate::p9_zkvm::ZkvmBackend::new()
 }
 
-/// Get InMemoryBackend instance if available
-///
-/// Note: For now this panics if called before initialization.
-/// In a real implementation, you'd initialize this at startup with a snapshot.
 #[allow(static_mut_refs)]
 pub fn get_in_memory_backend() -> &'static mut crate::p9_in_memory::InMemoryBackend {
-    static mut BACKEND: Option<crate::p9_in_memory::InMemoryBackend> = None;
-
     unsafe {
-        if let None = &BACKEND {
-            // Initialize with empty filesystem for now
-            // In production, load from snapshot here
-            BACKEND = Some(crate::p9_in_memory::InMemoryBackend::new());
+        if INMEMORY_BACKEND.is_none() {
+            INMEMORY_BACKEND = Some(crate::p9_in_memory::InMemoryBackend::new());
         }
-        BACKEND.as_mut().unwrap()
+        INMEMORY_BACKEND.as_mut().unwrap()
+    }
+}
+
+#[allow(static_mut_refs)]
+pub fn get_zerocopy_backend() -> &'static mut crate::p9_in_memory::ZeroCopyBackend {
+    unsafe {
+        ZEROCOPY_BACKEND
+            .as_mut()
+            .expect("ZeroCopy backend not initialized")
     }
 }
