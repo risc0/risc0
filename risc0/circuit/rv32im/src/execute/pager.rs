@@ -13,18 +13,22 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use core::{
+    iter::FusedIterator,
+    ops::{Deref, Range},
+};
 use std::{
     collections::{BTreeMap, BTreeSet},
     sync::OnceLock,
 };
 
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
 use bit_vec::BitVec;
 use derive_more::Debug;
-use risc0_binfmt::{MemoryImage, Page, WordAddr};
+use risc0_binfmt::{ByteAddr, MemoryImage, Page, WordAddr};
 
 use super::{node_idx, platform::*};
-use crate::execute::unlikely;
+use crate::execute::{r0vm::LoadOp, unlikely};
 
 pub const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
 
@@ -57,6 +61,106 @@ pub(crate) const RESERVED_PAGING_CYCLES: u32 = LOAD_ROOT_CYCLES
     + STORE_ROOT_CYCLES;
 
 const NUM_PAGES: usize = 4 * 1024 * 1024;
+
+pub struct Region<'a> {
+    pager: &'a mut PagedMemory,
+    op: LoadOp,
+    start: ByteAddr,
+    end: ByteAddr,
+}
+
+impl<'a> Region<'a> {
+    pub(crate) fn new(
+        pager: &'a mut PagedMemory,
+        op: LoadOp,
+        start: ByteAddr,
+        size: usize,
+    ) -> Result<Self> {
+        let end = ByteAddr(
+            (start.0 as usize)
+                .checked_add(size)
+                .filter(|end| *end < MEMORY_END_ADDR.baddr().0 as usize)
+                .context("Load region end is past the end of memory")? as u32,
+        );
+
+        Ok(Self {
+            pager,
+            op,
+            start,
+            end,
+        })
+    }
+}
+
+impl Region<'_> {
+    pub fn size(&self) -> usize {
+        (self.end.0 - self.start.0) as usize
+    }
+
+    pub fn chunks(&mut self) -> impl FusedIterator<Item = Result<impl Deref<Target = [u8]>>> {
+        let mut pos = self.start;
+
+        std::iter::from_fn(move || {
+            assert!(pos <= self.end);
+            if pos == self.end {
+                return None;
+            }
+
+            let load_result = match self.op {
+                LoadOp::Peek => self.pager.peek_page(pos.page_idx()),
+                LoadOp::Load => self.pager.load_page(pos.page_idx()),
+                LoadOp::Record => {
+                    unimplemented!("Load region is not implemented for LoadOp::Record")
+                }
+            };
+            let page = match load_result {
+                Ok(page) => page.clone(),
+                Err(e) => return Some(Err(e)),
+            };
+            let chunk = if self.end.page_idx() == pos.page_idx() {
+                let subpage_pos = pos.page_subaddr().0 as usize;
+                let subpage_end = self.end.page_subaddr().0 as usize;
+                PageChunk {
+                    page,
+                    range: subpage_pos..subpage_end,
+                }
+            } else {
+                let subpage_pos = pos.page_subaddr().0 as usize;
+                PageChunk {
+                    page,
+                    range: subpage_pos..PAGE_BYTES,
+                }
+            };
+
+            pos += chunk.len();
+            Some(Ok(chunk))
+        })
+        .fuse()
+    }
+
+    pub fn into_vec(mut self) -> Result<Vec<u8>> {
+        let capacity = self.size();
+        self.chunks()
+            .try_fold(Vec::with_capacity(capacity), |mut buffer, chunk| {
+                buffer.extend_from_slice(&chunk?);
+                Ok(buffer)
+            })
+    }
+}
+
+#[derive(Clone)]
+struct PageChunk {
+    pub page: Page,
+    pub range: Range<usize>,
+}
+
+impl Deref for PageChunk {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        &self.page.data()[self.range.clone()]
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub(crate) enum PageState {
@@ -361,6 +465,12 @@ impl PagedMemory {
     }
 
     pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<&Page> {
+        // Registers are not stored in the main RAM during execution. If the page containing the
+        // memory mapped registers is requested, then they must first be written to RAM.
+        // TODO(victor/perf): Does this conditional have any perf impact?
+        if page_idx == USER_REGS_ADDR.page_idx() || page_idx == MACHINE_REGS_ADDR.page_idx() {
+            self.write_registers()
+        }
         if let Some(cache_idx) = self.page_table.get(page_idx) {
             // Loaded, get from cache
             Ok(&self.page_cache[cache_idx])
@@ -401,9 +511,6 @@ impl PagedMemory {
 
     #[inline(always)]
     pub(crate) fn load_page(&mut self, page_idx: u32) -> Result<&Page> {
-        if unlikely(page_idx >= NUM_PAGES as u32) {
-            bail!("Invalid load page index: {page_idx}")
-        }
         // Registers are not stored in the main RAM during execution. If the page containing the
         // memory mapped registers is requested, then they must first be written to RAM.
         // TODO(victor/perf): Does this conditional have any perf impact?
@@ -413,6 +520,7 @@ impl PagedMemory {
         let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
             cache_idx
         } else {
+            // Page-in will set the Page in the table and cache or fail.
             self.page_in(page_idx)?;
             self.page_states.set(node_idx(page_idx), PageState::Loaded);
             self.page_table.get(page_idx).unwrap()

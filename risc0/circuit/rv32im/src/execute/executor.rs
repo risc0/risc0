@@ -13,12 +13,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use core::iter::FusedIterator;
 use std::{
     cell::RefCell,
     collections::BTreeSet,
     fmt::Debug,
-    ops::{Deref, Range},
     rc::Rc,
     sync::mpsc::{SyncSender, sync_channel},
     thread::{self, ScopedJoinHandle},
@@ -27,7 +25,7 @@ use std::{
 use anyhow::{Context, Result, bail};
 use enum_map::EnumMap;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
-use risc0_binfmt::{ByteAddr, MemoryImage, Page, PovwJobId, PovwNonce, WordAddr};
+use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
 use risc0_zkp::core::{
     digest::{DIGEST_BYTES, Digest},
     log2_ceil,
@@ -35,10 +33,7 @@ use risc0_zkp::core::{
 
 use crate::{
     EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
-    execute::{
-        r0vm::{PageChunk, Region},
-        rv32im::disasm,
-    },
+    execute::{pager::Region, rv32im::disasm},
     trace::{TraceCallback, TraceEvent},
 };
 
@@ -534,83 +529,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-struct LoadRegion<'a> {
-    pager: &'a mut PagedMemory,
-    op: LoadOp,
-    start: ByteAddr,
-    end: ByteAddr,
-}
-
-impl<'a> LoadRegion<'a> {
-    pub(crate) fn new(
-        pager: &'a mut PagedMemory,
-        op: LoadOp,
-        start: ByteAddr,
-        size: usize,
-    ) -> Result<Self> {
-        let end = ByteAddr(
-            (start.0 as usize)
-                .checked_add(size)
-                .filter(|end| *end < MEMORY_END_ADDR.baddr().0 as usize)
-                .context("Load region end is past the end of memory")? as u32,
-        );
-
-        Ok(Self {
-            pager,
-            op,
-            start,
-            end,
-        })
-    }
-}
-
-impl Region for LoadRegion<'_> {
-    fn size(&self) -> usize {
-        (self.end.0 - self.start.0) as usize
-    }
-
-    fn chunks(&mut self) -> impl FusedIterator<Item = Result<PageChunk>> {
-        let mut pos = self.start;
-
-        std::iter::from_fn(move || {
-            assert!(pos <= self.end);
-            if pos == self.end {
-                return None;
-            }
-
-            let load_result = match self.op {
-                LoadOp::Peek => self.pager.peek_page(pos.page_idx()),
-                LoadOp::Load => self.pager.load_page(pos.page_idx()),
-                LoadOp::Record => {
-                    unimplemented!("Load region is not implemented for LoadOp::Record")
-                }
-            };
-            let page = match load_result {
-                Ok(page) => page.clone(),
-                Err(e) => return Some(Err(e)),
-            };
-            let chunk = if self.end.page_idx() == pos.page_idx() {
-                let subpage_pos = pos.page_subaddr().0 as usize;
-                let subpage_end = self.end.page_subaddr().0 as usize;
-                PageChunk {
-                    page,
-                    range: subpage_pos..subpage_end,
-                }
-            } else {
-                let subpage_pos = pos.page_subaddr().0 as usize;
-                PageChunk {
-                    page,
-                    range: subpage_pos..PAGE_BYTES,
-                }
-            };
-
-            pos += chunk.len();
-            Some(Ok(chunk))
-        })
-        .fuse()
-    }
-}
-
 impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     fn circuit_version(&self) -> u32 {
         self.circuit_version
@@ -697,7 +615,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
-        LoadRegion::new(&mut self.pager, op, addr, size)?.into_vec()
+        Region::new(&mut self.pager, op, addr, size)?.into_vec()
     }
 
     #[inline(always)]
@@ -798,8 +716,8 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
         self.load_u8(LoadOp::Peek, addr)
     }
 
-    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<LoadRegion<'_>> {
-        LoadRegion::new(&mut self.pager, LoadOp::Peek, addr, size)
+    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Region<'_>> {
+        Region::new(&mut self.pager, LoadOp::Peek, addr, size)
     }
 
     fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {

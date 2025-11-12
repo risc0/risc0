@@ -17,7 +17,7 @@ use anyhow::Result;
 
 use risc0_binfmt::ByteAddr;
 
-use crate::execute::{PAGE_BYTES, executor::LoadRegion};
+use crate::execute::{PAGE_BYTES, pager::Region};
 
 /// A host-side implementation of a system call.
 pub trait Syscall {
@@ -42,7 +42,7 @@ pub trait SyscallContext {
     /// Loads bytes from the given region of memory.
     ///
     /// A region may span multiple pages.
-    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<LoadRegion<'_>>;
+    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Region<'_>>;
 
     /// Load a page from memory at the specified page index.
     ///
