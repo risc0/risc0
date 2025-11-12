@@ -34,6 +34,7 @@ pub struct SegmentContext {
 #[derive(Default)]
 pub struct PreflightContext {
     ctx: *const risc0_circuit_rv32im_m3_sys::PreflightContext,
+    po2: u32,
 }
 
 unsafe impl Send for PreflightContext {}
@@ -108,7 +109,10 @@ impl SegmentContext {
         let ctx = ffi_wrap_ptr(|| unsafe {
             risc0_circuit_rv32im_m3_segment_preflight(self.ctx.as_ptr(), po2)
         })?;
-        Ok(PreflightContext { ctx })
+        Ok(PreflightContext {
+            ctx,
+            po2: po2 as u32,
+        })
     }
 }
 
@@ -121,6 +125,10 @@ impl Drop for SegmentContext {
 impl PreflightContext {
     pub fn is_final(&self) -> bool {
         unsafe { risc0_circuit_rv32im_m3_preflight_is_final(self.ctx) == 1 }
+    }
+
+    pub fn po2(&self) -> u32 {
+        self.po2
     }
 }
 
