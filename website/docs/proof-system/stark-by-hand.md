@@ -429,6 +429,6 @@ Whew! Congratulations and thank you for making it this far!
 
 Got questions, feedback, or corrections? Find us on [Twitter](https://twitter.com/risczero) and [Discord](https://discord.gg/risczero).
 
-[cryptographic security model]: /api/security-model
+[cryptographic security model]: /website/api/security-model.md
 [RISC-V]: https://en.wikipedia.org/wiki/RISC-V
 [security calculator]: https://github.com/risc0/risc0/blob/release-1.0/risc0/zkp/src/prove/soundness.rs
