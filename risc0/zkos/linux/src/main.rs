@@ -35,7 +35,9 @@ mod linux_abi_misc;
 mod linux_abi_privileged;
 mod linux_abi_sockets;
 mod p9;
+mod p9_backend;
 mod p9_zkvm;
+mod p9_in_memory;
 mod softfloat;
 
 // Set up the global allocator

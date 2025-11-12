@@ -24,9 +24,7 @@ use alloc::vec::Vec;
 use alloc::vec;
 
 // Re-export zkVM-specific transport layer functions for external use
-pub use crate::p9_zkvm::{
-    p9_read_message, get_p9_traffic_hash,
-};
+pub use crate::p9_zkvm::{get_p9_traffic_hash, p9_read_message};
 
 // Re-export error types for external use (marked as potentially unused in this module)
 #[allow(unused_imports)]
@@ -35,9 +33,14 @@ pub use crate::p9_zkvm::{HostReadError, HostWriteError};
 // Import for internal use (sending messages)
 use crate::p9_zkvm::p9_send_message;
 
+// Import backend system for message sending
+use crate::p9_backend::{
+    BackendType, P9Backend, get_backend_type, get_in_memory_backend, get_zkvm_backend,
+};
+
 // Import for tests
 #[cfg(test)]
-use crate::p9_zkvm::{p9_write, p9_update_traffic_hash};
+use crate::p9_zkvm::{p9_update_traffic_hash, p9_write};
 
 /// 9P message types
 ///
@@ -761,19 +764,20 @@ impl TversionMessage {
         Ok(offset)
     }
 
-    /// Send the Tversion message using p9_write
+    /// Send the Tversion message using the active backend
     /// Returns the number of bytes written, or an error
     pub fn send_tversion(&self) -> Result<u32, TversionError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 64]; // Large enough for any reasonable version string
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TversionError::InternalError),
+        match get_backend_type() {
+            BackendType::Zkvm => {
+                let mut backend = get_zkvm_backend();
+                backend.send_tversion(self)?;
+                Ok(0) // Success
+            }
+            BackendType::InMemory => {
+                let backend = get_in_memory_backend();
+                backend.send_tversion(self)?;
+                Ok(0) // Success
+            }
         }
     }
 }
@@ -1145,19 +1149,20 @@ impl TreadMessage {
         Ok(offset)
     }
 
-    /// Send the Tread message using p9_write
+    /// Send the Tread message using the active backend
     /// Returns the number of bytes written, or an error
     pub fn send_tread(&self) -> Result<u32, TreadError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 32]; // Large enough for Tread message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TreadError::InternalError),
+        match get_backend_type() {
+            BackendType::Zkvm => {
+                let mut backend = get_zkvm_backend();
+                backend.send_tread(self)?;
+                Ok(0)
+            }
+            BackendType::InMemory => {
+                let backend = get_in_memory_backend();
+                backend.send_tread(self)?;
+                Ok(0)
+            }
         }
     }
 }
@@ -1605,19 +1610,20 @@ impl TwalkMessage {
         Ok(offset)
     }
 
-    /// Send the Twalk message using p9_write
+    /// Send the Twalk message using the active backend
     /// Returns the number of bytes written, or an error
     pub fn send_twalk(&self) -> Result<u32, TwalkError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 1024]; // Large enough for Twalk message with path elements
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TwalkError::InternalError),
+        match get_backend_type() {
+            BackendType::Zkvm => {
+                let mut backend = get_zkvm_backend();
+                backend.send_twalk(self)?;
+                Ok(0)
+            }
+            BackendType::InMemory => {
+                let backend = get_in_memory_backend();
+                backend.send_twalk(self)?;
+                Ok(0)
+            }
         }
     }
 }
@@ -4265,19 +4271,20 @@ impl TgetattrMessage {
         Ok(offset)
     }
 
-    /// Send the Tgetattr message using p9_write
+    /// Send the Tgetattr message using the active backend
     /// Returns the number of bytes written, or an error
     pub fn send_tgetattr(&self) -> Result<u32, TgetattrError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 32]; // Large enough for Tgetattr message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TgetattrError::InternalError),
+        match get_backend_type() {
+            BackendType::Zkvm => {
+                let mut backend = get_zkvm_backend();
+                backend.send_tgetattr(self)?;
+                Ok(0)
+            }
+            BackendType::InMemory => {
+                let backend = get_in_memory_backend();
+                backend.send_tgetattr(self)?;
+                Ok(0)
+            }
         }
     }
 }
