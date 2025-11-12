@@ -80,7 +80,7 @@ impl SysKeccak {
         }
 
         let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
-        let from_guest = &ctx.load_region(buf_ptr, 25 * 8)?;
+        let from_guest = &ctx.load_region(buf_ptr, 25 * 8)?.into_vec()?;
         let mut from_guest: KeccakState = bytemuck::cast_slice(from_guest).try_into()?;
         self.inputs.push(from_guest);
 

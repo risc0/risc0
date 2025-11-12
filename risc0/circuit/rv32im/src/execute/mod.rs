@@ -32,6 +32,7 @@ pub mod testutil;
 pub use self::{
     bigint::analyze::analyze as bigint_analyze,
     executor::{CycleLimit, Executor, ExecutorResult, SimpleSession},
+    pager::Region,
     platform::*,
     segment::Segment,
     syscall::{Syscall, SyscallContext},

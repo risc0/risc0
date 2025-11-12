@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{cmp::min, collections::HashMap};
+use std::{cmp::min, collections::HashMap, io::Read};
 
 use anyhow::{Result, bail};
 use risc0_binfmt::ByteAddr;
@@ -35,10 +35,16 @@ impl Syscall for SysGetenv {
     ) -> Result<(u32, u32)> {
         let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        let msg = std::str::from_utf8(&from_guest)?;
 
-        match self.0.get(msg) {
+        // Read the env var take from the guest. Read with MAX_IO_BYTES + 1 to detect when a too
+        // long env var is supplied.
+        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+        let msg = std::io::read_to_string(from_guest.reader().take(MAX_IO_BYTES as u64 + 1))?;
+        if msg.len() > MAX_IO_BYTES as usize {
+            bail!("sys_getenv failure: env var name is too large");
+        }
+
+        match self.0.get(&msg) {
             None => Ok((u32::MAX, 0)),
             Some(val) => {
                 let nbytes = min(to_guest.len() * WORD_SIZE, val.len());

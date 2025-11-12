@@ -29,8 +29,8 @@ use risc0_binfmt::{
 use risc0_circuit_rv32im::{
     MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2,
     execute::{
-        CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, Executor, PAGE_BYTES, Syscall as CircuitSyscall,
-        SyscallContext as CircuitSyscallContext, platform::WORD_SIZE,
+        CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, Executor, PAGE_BYTES, Region,
+        Syscall as CircuitSyscall, SyscallContext as CircuitSyscallContext, platform::WORD_SIZE,
     },
 };
 use risc0_core::scope;
@@ -352,6 +352,10 @@ impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
 
     fn load_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {
         self.ctx.peek_page(page_idx)
+    }
+
+    fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Region<'_>> {
+        self.ctx.peek_region(addr, size as usize)
     }
 
     fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {

@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use std::rc::Rc;
+
 use anyhow::{Result, bail};
 use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::{
@@ -100,15 +102,16 @@ impl Syscall for SysWrite {
             bail!("invalid sys_write call");
         }
 
+        let posix_io = Rc::clone(&ctx.syscall_table().posix_io);
         let fd = ctx.load_register(REG_A3);
         let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
         let buf_len = ctx.load_register(REG_A5);
-        let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
-        let writer = ctx.syscall_table().posix_io.borrow().get_writer(fd)?;
+        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+        let writer = posix_io.borrow().get_writer(fd)?;
 
         tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
 
-        writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
+        std::io::copy(&mut from_guest.reader(), &mut *writer.borrow_mut())?;
 
         let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::Write];
         metric.count += 1;

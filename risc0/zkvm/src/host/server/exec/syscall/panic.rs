@@ -13,11 +13,17 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use std::io::Read;
+
 use anyhow::{Result, bail};
 use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
 
 use super::{Syscall, SyscallContext};
+
+// Maximum size, in bytes, for the panic message provided by the guest. Messages above this size
+// are truncated.
+const MAX_PANIC_MSG_SIZE: u64 = 1 << 20; // 1 MB
 
 pub(crate) struct SysPanic;
 impl Syscall for SysPanic {
@@ -34,7 +40,7 @@ impl Syscall for SysPanic {
         let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        let msg = std::str::from_utf8(&from_guest)?;
+        let msg = std::io::read_to_string(from_guest.reader().take(MAX_PANIC_MSG_SIZE))?;
         bail!("Guest panicked: {msg}");
     }
 }

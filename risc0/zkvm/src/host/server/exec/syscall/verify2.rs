@@ -37,9 +37,16 @@ impl Syscall for SysVerify2 {
         if !to_guest.is_empty() {
             bail!("invalid sys_verify2 call");
         }
+
+        // NOTE: Length is read from the guest, but its actually required to be two digests.
         let from_guest_ptr = ByteAddr(ctx.load_register(REG_A3));
         let from_guest_len = ctx.load_register(REG_A4);
-        let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
+        if from_guest_len != DIGEST_BYTES as u32 * 2 {
+            bail!("sys_verify_integrity2: invalid from_guest_len supplied by guest");
+        }
+        let from_guest = ctx
+            .load_region(from_guest_ptr, from_guest_len)?
+            .into_vec()?;
 
         let claim_digest: Digest = from_guest[..DIGEST_BYTES]
             .try_into()

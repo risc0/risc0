@@ -170,6 +170,8 @@ pub(crate) trait Risc0Context {
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32>;
 
     /// For writes, just pass through, record rlen only
+    ///
+    /// The given `buf` should be at most [MAX_IO_BYTES][super::MAX_IO_BYTES].
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32>;
 
     fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()>;
