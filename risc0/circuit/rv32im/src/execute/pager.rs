@@ -19,6 +19,7 @@ use core::{
 };
 use std::{
     collections::{BTreeMap, BTreeSet},
+    io::{BufRead, Read},
     sync::OnceLock,
 };
 
@@ -82,6 +83,11 @@ impl<'a> Region<'a> {
                 .filter(|end| *end < MEMORY_END_ADDR.baddr().0 as usize)
                 .context("Load region end is past the end of memory")? as u32,
         );
+        // NOTE: Load region is never called with LoadOp::Record. This op is only used in for
+        // special memory (e.g. the page tree nodes and PoVW nonce).
+        if let LoadOp::Record = op {
+            unimplemented!("Region is not implemented for LoadOp::Record")
+        }
 
         Ok(Self {
             pager,
@@ -97,45 +103,75 @@ impl Region<'_> {
         (self.end.0 - self.start.0) as usize
     }
 
+    fn next_chunk(&mut self, pos: ByteAddr) -> Option<Result<PageChunk>> {
+        assert!(pos <= self.end);
+        if pos == self.end {
+            return None;
+        }
+
+        let load_result = match self.op {
+            LoadOp::Peek => self.pager.peek_page(pos.page_idx()),
+            LoadOp::Load => self.pager.load_page(pos.page_idx()),
+            LoadOp::Record => {
+                unimplemented!("Region is not implemented for LoadOp::Record")
+            }
+        };
+        let page = match load_result {
+            Ok(page) => page.clone(),
+            Err(e) => return Some(Err(e)),
+        };
+        let chunk = if self.end.page_idx() == pos.page_idx() {
+            let subpage_pos = pos.page_subaddr().0 as usize;
+            let subpage_end = self.end.page_subaddr().0 as usize;
+            PageChunk {
+                page,
+                range: subpage_pos..subpage_end,
+            }
+        } else {
+            let subpage_pos = pos.page_subaddr().0 as usize;
+            PageChunk {
+                page,
+                range: subpage_pos..PAGE_BYTES,
+            }
+        };
+        Some(Ok(chunk))
+    }
+
     pub fn chunks(&mut self) -> impl FusedIterator<Item = Result<impl Deref<Target = [u8]>>> {
         let mut pos = self.start;
 
-        std::iter::from_fn(move || {
-            assert!(pos <= self.end);
-            if pos == self.end {
-                return None;
+        std::iter::from_fn(move || match self.next_chunk(pos)? {
+            Ok(chunk) => {
+                pos += chunk.len();
+                Some(Ok(chunk))
             }
-
-            let load_result = match self.op {
-                LoadOp::Peek => self.pager.peek_page(pos.page_idx()),
-                LoadOp::Load => self.pager.load_page(pos.page_idx()),
-                LoadOp::Record => {
-                    unimplemented!("Load region is not implemented for LoadOp::Record")
-                }
-            };
-            let page = match load_result {
-                Ok(page) => page.clone(),
-                Err(e) => return Some(Err(e)),
-            };
-            let chunk = if self.end.page_idx() == pos.page_idx() {
-                let subpage_pos = pos.page_subaddr().0 as usize;
-                let subpage_end = self.end.page_subaddr().0 as usize;
-                PageChunk {
-                    page,
-                    range: subpage_pos..subpage_end,
-                }
-            } else {
-                let subpage_pos = pos.page_subaddr().0 as usize;
-                PageChunk {
-                    page,
-                    range: subpage_pos..PAGE_BYTES,
-                }
-            };
-
-            pos += chunk.len();
-            Some(Ok(chunk))
+            Err(err) => Some(Err(err)),
         })
         .fuse()
+    }
+
+    pub fn reader(self) -> impl Read {
+        struct Reader<'a> {
+            region: Region<'a>,
+            pos: ByteAddr,
+        }
+
+        impl Read for Reader<'_> {
+            fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+                let Some(result) = self.region.next_chunk(self.pos) else {
+                    return Ok(0);
+                };
+                let chunk = result.map_err(std::io::Error::other)?;
+                let read_len = usize::min(chunk.len(), buf.len());
+                buf[..read_len].copy_from_slice(&chunk);
+                Ok(read_len)
+            }
+        }
+
+        Reader {
+            pos: self.start,
+            region: self,
+        }
     }
 
     pub fn into_vec(mut self) -> Result<Vec<u8>> {
