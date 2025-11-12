@@ -70,6 +70,9 @@ pub const USER_INTERP_ADDR: *const usize = 0xffff_3018 as *const usize;
 /// Brk address (stored in memory)
 pub const USER_BRK_ADDR: *const usize = 0xffff_3020 as *const usize;
 
+/// Filesystem image address (set by elf-to-bin tool)
+pub const FILESYSTEM_IMAGE_ADDR_PTR: *const u32 = 0xffff_3030 as *const u32;
+
 // Shadow register storage area for supervisor CSRs (starting at 0xffff_5000)
 pub const SHADOW_REGS_PTR: *mut u32 = 0xffff_5000 as *mut u32;
 
@@ -94,9 +97,9 @@ pub const VM_MACHINE_MODE_EMULATED_S_MODE: u32 = 1;
 pub const VM_MACHINE_MODE_EMULATED_U_MODE: u32 = 2;
 
 // Kernel heap constants
-// Kernel stack is at 0xfff00000, heap is 16MB below it
-pub const KERNEL_HEAP_START_ADDR: usize = 0xfef00000; // 16MB below kernel stack
-pub const KERNEL_HEAP_SIZE: usize = 1024 * 1024; // 1MB heap
+// Memory layout: Stack (0xfff00000) → Heap (16MB fixed) → FS (variable) → User Space
+pub const KERNEL_HEAP_START_ADDR: usize = 0xfef00000; // Fixed: 16MB below kernel stack
+pub const KERNEL_HEAP_SIZE: usize = 16 * 1024 * 1024; // 16MB heap (fixed)
 pub const KERNEL_HEAP_END_ADDR: usize = KERNEL_HEAP_START_ADDR + KERNEL_HEAP_SIZE;
 
 /// Timestamp structure for the timestamps in struct statx

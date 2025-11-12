@@ -84,7 +84,7 @@ pub unsafe fn init_kernel_allocator() {
         return; // Already initialized
     }
 
-    // Initialize the heap memory region
+    // Initialize the heap memory region (fixed 16MB below stack)
     let heap_start = KERNEL_HEAP_START_ADDR as *mut u8;
     let heap_size = KERNEL_HEAP_SIZE;
 

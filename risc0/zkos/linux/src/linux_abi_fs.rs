@@ -6,13 +6,11 @@ use crate::{
     kernel::print,
     linux_abi::Err,
     p9::{
-        P9Response, P9SetattrMask, Qid, RattachMessage, RclunkMessage, ReadableMessage,
-        RgetattrMessage, RlcreateMessage, RlopenMessage, RmkdirMessage, RmknodMessage,
-        RreadMessage, RreaddirMessage, RreadlinkMessage, RremoveMessage, RsetattrMessage,
-        RsymlinkMessage, RversionMessage, RwalkMessage, RwriteMessage, TattachMessage,
-        TlcreateMessage, TlopenMessage, TmkdirMessage, TmknodMessage, TreadMessage,
-        TreaddirMessage, TreadlinkMessage, TremoveMessage, TsetattrMessage, TsymlinkMessage,
-        TversionMessage, TwriteMessage, constants::*,
+        P9Response, P9SetattrMask, Qid, RclunkMessage, ReadableMessage, RgetattrMessage,
+        RlopenMessage, RreaddirMessage, RreadlinkMessage, RsetattrMessage, RwalkMessage,
+        RwriteMessage, TattachMessage, TlcreateMessage, TlopenMessage, TmkdirMessage,
+        TmknodMessage, TreadMessage, TreaddirMessage, TreadlinkMessage, TremoveMessage,
+        TsetattrMessage, TsymlinkMessage, TversionMessage, TwriteMessage, constants::*,
     },
 };
 
@@ -513,28 +511,26 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
     let file_path = vec![file_name];
     let twalk = crate::p9::TwalkMessage::new(0, dir_fid, TEMP_FID_1, file_path);
     match twalk.send_twalk() {
-        Ok(_) => match crate::p9::RwalkMessage::read_response() {
-            crate::p9::P9Response::Success(rwalk) => {
-                if dir_fid != starting_fid {
-                    clunk(dir_fid, false);
-                }
+        Ok(crate::p9::P9Response::Success(rwalk)) => {
+            if dir_fid != starting_fid {
+                clunk(dir_fid, false);
+            }
 
-                if rwalk.wqids.is_empty() {
-                    clunk(TEMP_FID_1, false);
-                    return Err(Err::FileNotFound);
-                }
+            if rwalk.wqids.is_empty() {
+                clunk(TEMP_FID_1, false);
+                return Err(Err::FileNotFound);
             }
-            crate::p9::P9Response::Error(rlerror) => {
-                if dir_fid != starting_fid {
-                    clunk(dir_fid, false);
-                }
-                kprint!(
-                    "sys_unlinkat: walk to file failed with ecode={}",
-                    rlerror.ecode
-                );
-                return Err(map_p9_error(rlerror.ecode));
+        }
+        Ok(crate::p9::P9Response::Error(rlerror)) => {
+            if dir_fid != starting_fid {
+                clunk(dir_fid, false);
             }
-        },
+            kprint!(
+                "sys_unlinkat: walk to file failed with ecode={}",
+                rlerror.ecode
+            );
+            return Err(map_p9_error(rlerror.ecode));
+        }
         Err(_) => {
             if dir_fid != starting_fid {
                 clunk(dir_fid, false);
@@ -546,28 +542,22 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
     // Now TEMP_FID_1 points to the file/symlink itself (not its target)
     let tremove = TremoveMessage::new(0, TEMP_FID_1);
     match tremove.send_tremove() {
-        Ok(bytes_written) => {
-            kprint!("sys_unlinkat: sent {} bytes for Tremove", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_unlinkat: error sending Tremove: {:?}", e);
-            return Err(Err::IO); // EIO for I/O errors
-        }
-    }
-
-    match RremoveMessage::read_response() {
-        P9Response::Success(rremove) => {
+        Ok(P9Response::Success(rremove)) => {
             kprint!("sys_unlinkat: rremove = {:?}", rremove);
             clunk(TEMP_FID_1, false);
             Ok(0)
         }
-        P9Response::Error(rlerror2) => {
+        Ok(P9Response::Error(rlerror2)) => {
             kprint!(
                 "sys_unlinkat: received Rlerror for Rremove: tag={}, ecode={}",
                 rlerror2.tag,
                 rlerror2.ecode
             );
             Err(map_p9_error(rlerror2.ecode))
+        }
+        Err(e) => {
+            kprint!("sys_unlinkat: error sending Tremove: {:?}", e);
+            Err(Err::IO)
         }
     }
 }
@@ -756,16 +746,7 @@ pub fn read_file_to_user_memory(fd: u32, buf: u32, count: u32, offset: u64) -> R
             let max_count = (offset + count as u64 - cursor).min(MAX_9P_IO_CHUNK as u64) as u32;
             let tread = TreadMessage::new(0, file_desc.fid, cursor, max_count);
             match tread.send_tread() {
-                Ok(_bytes_written) => {
-                    // Success
-                }
-                Err(e) => {
-                    kprint!("read_file_to_user_memory: error sending tread: {:?}", e);
-                    return Err(Err::IO); // EIO for I/O errors
-                }
-            }
-            match RreadMessage::read_response() {
-                P9Response::Success(rread) => {
+                Ok(P9Response::Success(rread)) => {
                     if rread.count == 0 {
                         kprint!(
                             "read_file_to_user_memory: read 0 bytes, offset={} cursor={} count={}, max_count={}",
@@ -784,7 +765,7 @@ pub fn read_file_to_user_memory(fd: u32, buf: u32, count: u32, offset: u64) -> R
                     cursor += rread.count as u64;
                     total_bytes_read += rread.count;
                 }
-                P9Response::Error(rlerror) => {
+                Ok(P9Response::Error(rlerror)) => {
                     if rlerror.ecode == 0 {
                         return Ok(total_bytes_read);
                     }
@@ -793,6 +774,10 @@ pub fn read_file_to_user_memory(fd: u32, buf: u32, count: u32, offset: u64) -> R
                         rlerror.ecode
                     );
                     return Err(map_p9_error(rlerror.ecode));
+                }
+                Err(e) => {
+                    kprint!("read_file_to_user_memory: error sending tread: {:?}", e);
+                    return Err(Err::IO);
                 }
             }
         }
@@ -995,21 +980,7 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
 
             let tread = TreadMessage::new(0, current_desc.fid, current_desc.cursor, chunk_size);
             match tread.send_tread() {
-                Ok(_bytes_written) => {
-                    // Success
-                }
-                Err(e) => {
-                    kprint!("sys_read: error sending Tread: {:?}", e);
-                    // If we already read some data, return what we got
-                    if total_read > 0 {
-                        return Ok(total_read);
-                    }
-                    return Err(Err::IO); // I/O error
-                }
-            }
-
-            match RreadMessage::read_response() {
-                P9Response::Success(rread) => {
+                Ok(P9Response::Success(rread)) => {
                     kprint!("sys_read: received {} bytes from 9P", rread.count);
 
                     if rread.count == 0 {
@@ -1063,7 +1034,7 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
                         return Ok(total_read);
                     }
                 }
-                P9Response::Error(rlerror) => {
+                Ok(P9Response::Error(rlerror)) => {
                     kprint!(
                         "sys_read: Rread error: ecode={}, fid={}, cursor={}",
                         rlerror.ecode,
@@ -1075,6 +1046,13 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
                         return Ok(total_read);
                     }
                     return Err(map_p9_error(rlerror.ecode));
+                }
+                Err(e) => {
+                    kprint!("sys_read: error sending Tread: {:?}", e);
+                    if total_read > 0 {
+                        return Ok(total_read);
+                    }
+                    return Err(Err::IO);
                 }
             }
         }
@@ -1202,22 +1180,20 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
                 // Get file size using getattr
                 let tgetattr = crate::p9::TgetattrMessage::new(0, file_desc.fid, P9_GETATTR_SIZE);
                 match tgetattr.send_tgetattr() {
-                    Ok(_) => match RgetattrMessage::read_response() {
-                        P9Response::Success(rgetattr) => {
-                            current_cursor = rgetattr.size;
-                            kprint!(
-                                "do_write: O_APPEND - setting cursor to end of file: {}",
-                                current_cursor
-                            );
-                        }
-                        P9Response::Error(rlerror) => {
-                            kprint!(
-                                "do_write: error getting file size for O_APPEND: ecode={}",
-                                rlerror.ecode
-                            );
-                            return Err(map_p9_error(rlerror.ecode));
-                        }
-                    },
+                    Ok(P9Response::Success(rgetattr)) => {
+                        current_cursor = rgetattr.size;
+                        kprint!(
+                            "do_write: O_APPEND - setting cursor to end of file: {}",
+                            current_cursor
+                        );
+                    }
+                    Ok(P9Response::Error(rlerror)) => {
+                        kprint!(
+                            "do_write: error getting file size for O_APPEND: ecode={}",
+                            rlerror.ecode
+                        );
+                        return Err(map_p9_error(rlerror.ecode));
+                    }
                     Err(e) => {
                         kprint!("do_write: error sending getattr for O_APPEND: {:?}", e);
                         return Err(Err::IO); // EIO for I/O errors
@@ -2353,27 +2329,21 @@ pub fn sys_fchmodat(dfd: u32, filename: u32, mode: u32, flag: u32) -> Result<u32
     );
 
     match tsetattr.send_tsetattr() {
-        Ok(bytes_written) => {
-            kprint!("sys_fchmodat: sent {} bytes for Tsetattr", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_fchmodat: error sending Tsetattr: {:?}", e);
-            return Err(Err::NoSys);
-        }
-    }
-
-    match RsetattrMessage::read_response() {
-        P9Response::Success(rsetattr) => {
+        Ok(P9Response::Success(rsetattr)) => {
             kprint!("sys_fchmodat: rsetattr = {:?}", rsetattr);
             Ok(0)
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!(
                 "sys_fchmodat: received Rlerror for Rsetattr: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
             );
             Err(map_p9_error(rlerror.ecode))
+        }
+        Err(e) => {
+            kprint!("sys_fchmodat: error sending Tsetattr: {:?}", e);
+            Err(Err::NoSys)
         }
     }
 }
@@ -2615,17 +2585,7 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
     );
 
     match tsetattr.send_tsetattr() {
-        Ok(bytes_written) => {
-            kprint!("sys_fchownat: sent {} bytes for Tsetattr", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_fchownat: error sending Tsetattr: {:?}", e);
-            return Err(Err::NoSys);
-        }
-    }
-
-    match RsetattrMessage::read_response() {
-        P9Response::Success(rsetattr) => {
+        Ok(P9Response::Success(rsetattr)) => {
             kprint!("sys_fchownat: rsetattr = {:?}", rsetattr);
 
             // Clean up temporary FIDs if we used AT_SYMLINK_NOFOLLOW
@@ -2638,7 +2598,7 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
 
             Ok(0)
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!(
                 "sys_fchownat: received Rlerror for Rsetattr: tag={}, ecode={}",
                 rlerror.tag,
@@ -2654,6 +2614,10 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
             }
 
             Err(map_p9_error(rlerror.ecode))
+        }
+        Err(e) => {
+            kprint!("sys_fchownat: error sending Tsetattr: {:?}", e);
+            Err(Err::NoSys)
         }
     }
 }
@@ -3153,23 +3117,12 @@ pub fn sys_truncate64(pathname: u32, length: u32) -> Result<u32, Err> {
     );
 
     match tsetattr.send_tsetattr() {
-        Ok(bytes_written) => {
-            kprint!("sys_truncate64: sent {} bytes for Tsetattr", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_truncate64: error sending Tsetattr: {:?}", e);
-            clunk(file_fid, false);
-            return Err(Err::NoSys);
-        }
-    }
-
-    match RsetattrMessage::read_response() {
-        P9Response::Success(rsetattr) => {
+        Ok(P9Response::Success(rsetattr)) => {
             kprint!("sys_truncate64: rsetattr = {:?}", rsetattr);
             clunk(file_fid, false);
             Ok(0)
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!(
                 "sys_truncate64: received Rlerror for Rsetattr: tag={}, ecode={}",
                 rlerror.tag,
@@ -3177,6 +3130,11 @@ pub fn sys_truncate64(pathname: u32, length: u32) -> Result<u32, Err> {
             );
             clunk(file_fid, false);
             Err(map_p9_error(rlerror.ecode))
+        }
+        Err(e) => {
+            kprint!("sys_truncate64: error sending Tsetattr: {:?}", e);
+            clunk(file_fid, false);
+            Err(Err::NoSys)
         }
     }
 }
@@ -3226,27 +3184,21 @@ pub fn sys_ftruncate64(fd: u32, length: u32) -> Result<u32, Err> {
     );
 
     match tsetattr.send_tsetattr() {
-        Ok(bytes_written) => {
-            kprint!("sys_ftruncate64: sent {} bytes for Tsetattr", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_ftruncate64: error sending Tsetattr: {:?}", e);
-            return Err(Err::NoSys);
-        }
-    }
-
-    match RsetattrMessage::read_response() {
-        P9Response::Success(rsetattr) => {
+        Ok(P9Response::Success(rsetattr)) => {
             kprint!("sys_ftruncate64: rsetattr = {:?}", rsetattr);
             Ok(0)
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!(
                 "sys_ftruncate64: received Rlerror for Rsetattr: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
             );
             Err(map_p9_error(rlerror.ecode))
+        }
+        Err(e) => {
+            kprint!("sys_ftruncate64: error sending Tsetattr: {:?}", e);
+            Err(Err::NoSys)
         }
     }
 }
@@ -3589,23 +3541,12 @@ pub fn sys_symlinkat(target: u32, newdirfd: u32, linkpath: u32) -> Result<u32, E
     );
 
     match tsymlink.send_tsymlink() {
-        Ok(bytes_written) => {
-            kprint!("sys_symlinkat: sent {} bytes for Tsymlink", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_symlinkat: error sending Tsymlink: {:?}", e);
-            clunk(TEMP_FID_1, false);
-            return Err(Err::NoSys);
-        }
-    }
-
-    match RsymlinkMessage::read_response() {
-        P9Response::Success(rsymlink) => {
+        Ok(P9Response::Success(rsymlink)) => {
             kprint!("sys_symlinkat: rsymlink = {:?}", rsymlink);
             clunk(TEMP_FID_1, false);
             Ok(0)
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!(
                 "sys_symlinkat: received Rlerror: tag={}, ecode={}",
                 rlerror.tag,
@@ -3613,6 +3554,11 @@ pub fn sys_symlinkat(target: u32, newdirfd: u32, linkpath: u32) -> Result<u32, E
             );
             clunk(TEMP_FID_1, false);
             Err(map_p9_error(rlerror.ecode))
+        }
+        Err(e) => {
+            kprint!("sys_symlinkat: error sending Tsymlink: {:?}", e);
+            clunk(TEMP_FID_1, false);
+            Err(Err::NoSys)
         }
     }
 }
@@ -3762,27 +3708,22 @@ pub fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
 
     let tmkdir = TmkdirMessage::new(0, TEMP_FID_1, file_name.to_string(), final_mode, 0);
     match tmkdir.send_tmkdir() {
-        Ok(bytes_written) => {
-            kprint!("sys_mkdirat: sent {} bytes for Tmkdir", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_mkdirat: error sending Tmkdir: {:?}", e);
-            return Err(Err::NoSys);
-        }
-    }
-    match RmkdirMessage::read_response() {
-        P9Response::Success(rmkdir) => {
+        Ok(P9Response::Success(rmkdir)) => {
             kprint!("sys_mkdirat: rmkdir = {:?}", rmkdir);
             clunk(TEMP_FID_1, false);
             Ok(0)
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!(
                 "sys_mkdirat: received Rlerror for Rmkdir: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
             );
             Err(map_p9_error(rlerror.ecode))
+        }
+        Err(e) => {
+            kprint!("sys_mkdirat: error sending Tmkdir: {:?}", e);
+            Err(Err::NoSys)
         }
     }
 }
@@ -3832,27 +3773,22 @@ pub fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u
         0,
     );
     match tmknod.send_tmknod() {
-        Ok(bytes_written) => {
-            kprint!("sys_mknodat: sent {} bytes for Tmknod", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_mknodat: error sending Tmknod: {:?}", e);
-            return Err(Err::NoSys);
-        }
-    }
-    match RmknodMessage::read_response() {
-        P9Response::Success(rmknod) => {
+        Ok(P9Response::Success(rmknod)) => {
             kprint!("sys_mknodat: rmknod = {:?}", rmknod);
             clunk(TEMP_FID_1, false);
             Ok(0)
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!(
                 "sys_mknodat: received Rlerror for Rmknod: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
             );
             Err(map_p9_error(rlerror.ecode))
+        }
+        Err(e) => {
+            kprint!("sys_mknodat: error sending Tmknod: {:?}", e);
+            Err(Err::NoSys)
         }
     }
 }
@@ -5273,6 +5209,8 @@ fn do_walk(
     target_fid: u32,
     wnames: Vec<String>,
 ) -> Result<(u32, Vec<Qid>), Err> {
+    use crate::p9_backend::{BackendType, P9Backend, get_backend_type, get_zerocopy_backend};
+
     kprint!(
         "do_walk: starting_fid={}, target_fid={}, wnames={:?}",
         starting_fid,
@@ -5283,130 +5221,141 @@ fn do_walk(
     let wnames_len = wnames.len();
     let wnames_clone = wnames.clone();
     let twalk = crate::p9::TwalkMessage::new(0, starting_fid, target_fid, wnames);
-    match twalk.send_twalk() {
-        Ok(bytes_written) => {
-            kprint!("do_walk: bytes_written = {}", bytes_written);
-        }
-        Err(e) => {
-            kprint!("do_walk: error = {:?}", e);
-            return Err(Err::NoSys);
-        }
-    }
-    match RwalkMessage::read_response() {
-        P9Response::Success(rwalk) => {
-            kprint!(
-                "do_walk: rwalk.wqids.len()={}, wnames_len={}, wqids={:?}",
-                rwalk.wqids.len(),
-                wnames_len,
-                rwalk.wqids
-            );
-            if rwalk.wqids.len() != wnames_len {
-                kprint!(
-                    "do_walk: walk failed - expected {} components, got {}",
-                    wnames_len,
-                    rwalk.wqids.len()
-                );
 
-                // Check if we stopped at a symlink in the middle of the path
-                if rwalk.wqids.len() > 0 {
-                    if let Some(last_qid) = rwalk.wqids.last() {
-                        if last_qid.is_symlink() {
-                            kprint!(
-                                "do_walk: stopped at symlink at position {}/{}",
-                                rwalk.wqids.len(),
-                                wnames_len
-                            );
-
-                            // Read the symlink target
-                            let symlink_target = read_symlink(target_fid)?;
-                            kprint!(
-                                "do_walk: intermediate symlink target = '{}'",
-                                symlink_target
-                            );
-
-                            // Build the path up to the symlink
-                            let symlink_wnames: Vec<String> = wnames_clone
-                                .iter()
-                                .take(rwalk.wqids.len())
-                                .cloned()
-                                .collect();
-
-                            // Resolve the symlink target relative to its directory
-                            let resolved_symlink_path =
-                                resolve_symlink_target(&symlink_target, &symlink_wnames)?;
-                            kprint!(
-                                "do_walk: resolved intermediate symlink to '{}'",
-                                resolved_symlink_path
-                            );
-
-                            // Append the remaining path components
-                            let mut full_resolved_path = resolved_symlink_path;
-                            for i in rwalk.wqids.len()..wnames_len {
-                                full_resolved_path.push('/');
-                                full_resolved_path.push_str(&wnames_clone[i]);
-                            }
-                            kprint!("do_walk: full resolved path = '{}'", full_resolved_path);
-
-                            // Close the current target_fid
-                            clunk(target_fid, false);
-
-                            // Walk to the fully resolved path
-                            let resolved_wnames = normalize_path(&full_resolved_path);
-                            let walk_from_fid = if symlink_target.starts_with('/') {
-                                kprint!(
-                                    "do_walk: absolute intermediate symlink, walking from root"
-                                );
-                                get_root_fid()
-                            } else {
-                                starting_fid
-                            };
-                            return do_walk(walk_from_fid, target_fid, resolved_wnames);
-                        }
-                    }
+    let rwalk = match get_backend_type() {
+        BackendType::Zkvm => {
+            // zkVM backend: get response directly
+            match twalk.send_twalk() {
+                Ok(P9Response::Success(rwalk)) => rwalk,
+                Ok(P9Response::Error(rlerror)) => {
+                    kprint!("do_walk: error response - ecode={}", rlerror.ecode);
+                    return Err(Err::FileNotFound);
                 }
+                Err(e) => {
+                    kprint!("do_walk: error = {:?}", e);
+                    return Err(Err::NoSys);
+                }
+            }
+        }
+        BackendType::ZeroCopy | BackendType::InMemory => {
+            // Zero-copy backend: get response directly
+            let backend = get_zerocopy_backend();
+            match backend.send_twalk(&twalk) {
+                Ok(P9Response::Success(rwalk)) => rwalk,
+                Ok(P9Response::Error(rlerror)) => {
+                    kprint!("do_walk: error response - ecode={}", rlerror.ecode);
+                    return Err(Err::FileNotFound);
+                }
+                Err(e) => {
+                    kprint!("do_walk: backend error = {:?}", e);
+                    return Err(Err::NoSys);
+                }
+            }
+        }
+    };
 
-                clunk(target_fid, false);
-                Err(Err::FileNotFound)
-            } else {
-                // Check if the final component is a symlink
-                if let Some(last_qid) = rwalk.wqids.last()
-                    && last_qid.is_symlink()
-                {
-                    kprint!("do_walk: final component is a symlink, resolving...");
+    // Continue with rwalk processing
+    kprint!(
+        "do_walk: rwalk.wqids.len()={}, wnames_len={}, wqids={:?}",
+        rwalk.wqids.len(),
+        wnames_len,
+        rwalk.wqids
+    );
+    if rwalk.wqids.len() != wnames_len {
+        kprint!(
+            "do_walk: walk failed - expected {} components, got {}",
+            wnames_len,
+            rwalk.wqids.len()
+        );
 
-                    // Read the symlink contents
+        // Check if we stopped at a symlink in the middle of the path
+        if rwalk.wqids.len() > 0 {
+            if let Some(last_qid) = rwalk.wqids.last() {
+                if last_qid.is_symlink() {
+                    kprint!(
+                        "do_walk: stopped at symlink at position {}/{}",
+                        rwalk.wqids.len(),
+                        wnames_len
+                    );
+
+                    // Read the symlink target
                     let symlink_target = read_symlink(target_fid)?;
-                    kprint!("do_walk: symlink target = '{}'", symlink_target);
-                    let wnames = wnames_clone;
-                    // Resolve the target path relative to the symlink's directory
-                    let resolved_path = resolve_symlink_target(&symlink_target, &wnames)?;
-                    kprint!("do_walk: resolved path = '{}'", resolved_path);
+                    kprint!(
+                        "do_walk: intermediate symlink target = '{}'",
+                        symlink_target
+                    );
 
-                    // Close the current target_fid since we're going to walk to a new path
+                    // Build the path up to the symlink
+                    let symlink_wnames: Vec<String> = wnames_clone
+                        .iter()
+                        .take(rwalk.wqids.len())
+                        .cloned()
+                        .collect();
+
+                    // Resolve the symlink target relative to its directory
+                    let resolved_symlink_path =
+                        resolve_symlink_target(&symlink_target, &symlink_wnames)?;
+                    kprint!(
+                        "do_walk: resolved intermediate symlink to '{}'",
+                        resolved_symlink_path
+                    );
+
+                    // Append the remaining path components
+                    let mut full_resolved_path = resolved_symlink_path;
+                    for i in rwalk.wqids.len()..wnames_len {
+                        full_resolved_path.push('/');
+                        full_resolved_path.push_str(&wnames_clone[i]);
+                    }
+                    kprint!("do_walk: full resolved path = '{}'", full_resolved_path);
+
+                    // Close the current target_fid
                     clunk(target_fid, false);
 
-                    // Walk to the resolved path
-                    let resolved_wnames = normalize_path(&resolved_path);
-                    // For absolute paths, start from root; for relative paths, use starting_fid
+                    // Walk to the fully resolved path
+                    let resolved_wnames = normalize_path(&full_resolved_path);
                     let walk_from_fid = if symlink_target.starts_with('/') {
-                        kprint!("do_walk: absolute symlink, walking from root");
+                        kprint!("do_walk: absolute intermediate symlink, walking from root");
                         get_root_fid()
                     } else {
                         starting_fid
                     };
                     return do_walk(walk_from_fid, target_fid, resolved_wnames);
                 }
-                Ok((0, rwalk.wqids))
             }
         }
-        P9Response::Error(rlerror) => {
-            kprint!(
-                "do_walk: received Rlerror for walk operation: tag={}, ecode={}",
-                rlerror.tag,
-                rlerror.ecode
-            );
-            Err(map_p9_error(rlerror.ecode))
+
+        clunk(target_fid, false);
+        Err(Err::FileNotFound)
+    } else {
+        // Check if the final component is a symlink
+        if let Some(last_qid) = rwalk.wqids.last()
+            && last_qid.is_symlink()
+        {
+            kprint!("do_walk: final component is a symlink, resolving...");
+
+            // Read the symlink contents
+            let symlink_target = read_symlink(target_fid)?;
+            kprint!("do_walk: symlink target = '{}'", symlink_target);
+            let wnames = wnames_clone;
+            // Resolve the target path relative to the symlink's directory
+            let resolved_path = resolve_symlink_target(&symlink_target, &wnames)?;
+            kprint!("do_walk: resolved path = '{}'", resolved_path);
+
+            // Close the current target_fid since we're going to walk to a new path
+            clunk(target_fid, false);
+
+            // Walk to the resolved path
+            let resolved_wnames = normalize_path(&resolved_path);
+            // For absolute paths, start from root; for relative paths, use starting_fid
+            let walk_from_fid = if symlink_target.starts_with('/') {
+                kprint!("do_walk: absolute symlink, walking from root");
+                get_root_fid()
+            } else {
+                starting_fid
+            };
+            return do_walk(walk_from_fid, target_fid, resolved_wnames);
         }
+        Ok((0, rwalk.wqids))
     }
 }
 
@@ -5848,78 +5797,67 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
         let tlopen = TlopenMessage::new(0, file_fid, p9_flags);
 
         match tlopen.send_tlopen() {
-            Ok(bytes_written) => {
-                kprint!("sys_openat: sent {} bytes for Tlopen", bytes_written);
+            Ok(P9Response::Success(rlopen)) => {
+                kprint!("sys_openat: received Rlopen: {:?}", rlopen);
+                let is_directory = rlopen.qid.is_dir();
+                set_fd(file_fid, file_fid);
+                // Update the file description with the correct mode, is_dir, and flags
+                let fd_entry = get_fd(file_fid);
+                let mut file_desc = get_file_desc(fd_entry.file_desc_id);
+                file_desc.mode = p9_flags;
+                file_desc.is_dir = is_directory;
+                file_desc.flags = _flags;
+                update_file_desc(fd_entry.file_desc_id, file_desc);
 
-                // Read the response
-                match RlopenMessage::read_response() {
-                    P9Response::Success(rlopen) => {
-                        kprint!("sys_openat: received Rlopen: {:?}", rlopen);
-                        let is_directory = rlopen.qid.is_dir();
-                        set_fd(file_fid, file_fid);
-                        // Update the file description with the correct mode, is_dir, and flags
-                        let fd_entry = get_fd(file_fid);
-                        let mut file_desc = get_file_desc(fd_entry.file_desc_id);
-                        file_desc.mode = p9_flags;
-                        file_desc.is_dir = is_directory;
-                        file_desc.flags = _flags;
-                        update_file_desc(fd_entry.file_desc_id, file_desc);
+                // Handle O_TRUNC: truncate file to 0 bytes after opening
+                if (_flags & O_TRUNC) == O_TRUNC {
+                    kprint!("sys_openat: O_TRUNC detected, truncating file to 0 bytes");
+                    let valid = P9SetattrMask::Size as u32;
+                    let tsetattr = TsetattrMessage::new(
+                        0,        // tag
+                        file_fid, // fid
+                        valid,    // valid mask (only Size)
+                        0,        // mode (not changing)
+                        0,        // uid (not changing)
+                        0,        // gid (not changing)
+                        0,        // size (truncate to 0)
+                        0,        // atime_sec (not changing)
+                        0,        // atime_nsec (not changing)
+                        0,        // mtime_sec (not changing)
+                        0,        // mtime_nsec (not changing)
+                    );
 
-                        // Handle O_TRUNC: truncate file to 0 bytes after opening
-                        if (_flags & O_TRUNC) == O_TRUNC {
-                            kprint!("sys_openat: O_TRUNC detected, truncating file to 0 bytes");
-                            let valid = P9SetattrMask::Size as u32;
-                            let tsetattr = TsetattrMessage::new(
-                                0,        // tag
-                                file_fid, // fid
-                                valid,    // valid mask (only Size)
-                                0,        // mode (not changing)
-                                0,        // uid (not changing)
-                                0,        // gid (not changing)
-                                0,        // size (truncate to 0)
-                                0,        // atime_sec (not changing)
-                                0,        // atime_nsec (not changing)
-                                0,        // mtime_sec (not changing)
-                                0,        // mtime_nsec (not changing)
-                            );
-
-                            match tsetattr.send_tsetattr() {
-                                Ok(_) => match RsetattrMessage::read_response() {
-                                    P9Response::Success(_) => {
-                                        kprint!("sys_openat: file truncated successfully");
-                                    }
-                                    P9Response::Error(rlerror) => {
-                                        kprint!(
-                                            "sys_openat: error truncating file: ecode={}",
-                                            rlerror.ecode
-                                        );
-                                        clunk(file_fid, false);
-                                        return Err(map_p9_error(rlerror.ecode));
-                                    }
-                                },
-                                Err(e) => {
-                                    kprint!("sys_openat: error sending Tsetattr: {:?}", e);
-                                    clunk(file_fid, false);
-                                    return Err(Err::NoSys);
-                                }
-                            }
+                    match tsetattr.send_tsetattr() {
+                        Ok(P9Response::Success(_)) => {
+                            kprint!("sys_openat: file truncated successfully");
                         }
-
-                        Ok(file_fid)
-                    }
-                    P9Response::Error(rlerror) => {
-                        clunk(file_fid, false);
-                        kprint!(
-                            "sys_openat: received Rlerror for Rlopen: tag={}, ecode={}",
-                            rlerror.tag,
-                            rlerror.ecode
-                        );
-                        Err(map_p9_error(rlerror.ecode))
+                        Ok(P9Response::Error(rlerror)) => {
+                            kprint!("sys_openat: error truncating file: ecode={}", rlerror.ecode);
+                            clunk(file_fid, false);
+                            return Err(map_p9_error(rlerror.ecode));
+                        }
+                        Err(e) => {
+                            kprint!("sys_openat: error sending Tsetattr: {:?}", e);
+                            clunk(file_fid, false);
+                            return Err(Err::NoSys);
+                        }
                     }
                 }
+
+                Ok(file_fid)
+            }
+            Ok(P9Response::Error(rlerror)) => {
+                clunk(file_fid, false);
+                kprint!(
+                    "sys_openat: received Rlerror for Rlopen: tag={}, ecode={}",
+                    rlerror.tag,
+                    rlerror.ecode
+                );
+                Err(map_p9_error(rlerror.ecode))
             }
             Err(e) => {
                 kprint!("sys_openat: error sending Tlopen: {:?}", e);
+                clunk(file_fid, false);
                 Err(Err::NoSys)
             }
         }
@@ -5945,34 +5883,27 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
             TlcreateMessage::new(0, file_fid, file_name.to_string(), p9_flags, p9_mode, 0); // flags=p9_flags, mode=p9_mode, gid=0
         kprint!("sys_openat: tlcreate = {:?}", tlcreate);
         match tlcreate.send_tlcreate() {
-            Ok(bytes_written) => {
-                kprint!("sys_openat: sent {} bytes for Tlcreate", bytes_written);
-
-                // Read the response
-                match RlcreateMessage::read_response() {
-                    P9Response::Success(rlcreate) => {
-                        kprint!("sys_openat: received Rlcreate: {:?}", rlcreate);
-                        let is_directory = rlcreate.qid.is_dir();
-                        set_fd(file_fid, file_fid);
-                        // Update the file description with the correct mode, is_dir, and flags
-                        let fd_entry = get_fd(file_fid);
-                        let mut file_desc = get_file_desc(fd_entry.file_desc_id);
-                        file_desc.mode = p9_flags;
-                        file_desc.is_dir = is_directory;
-                        file_desc.flags = _flags;
-                        update_file_desc(fd_entry.file_desc_id, file_desc);
-                        Ok(file_fid)
-                    }
-                    P9Response::Error(rlerror) => {
-                        clunk(file_fid, false);
-                        kprint!(
-                            "sys_openat: received Rlerror for Rlcreate: tag={}, ecode={}",
-                            rlerror.tag,
-                            rlerror.ecode
-                        );
-                        Err(map_p9_error(rlerror.ecode))
-                    }
-                }
+            Ok(P9Response::Success(rlcreate)) => {
+                kprint!("sys_openat: received Rlcreate: {:?}", rlcreate);
+                let is_directory = rlcreate.qid.is_dir();
+                set_fd(file_fid, file_fid);
+                // Update the file description with the correct mode, is_dir, and flags
+                let fd_entry = get_fd(file_fid);
+                let mut file_desc = get_file_desc(fd_entry.file_desc_id);
+                file_desc.mode = p9_flags;
+                file_desc.is_dir = is_directory;
+                file_desc.flags = _flags;
+                update_file_desc(fd_entry.file_desc_id, file_desc);
+                Ok(file_fid)
+            }
+            Ok(P9Response::Error(rlerror)) => {
+                clunk(file_fid, false);
+                kprint!(
+                    "sys_openat: received Rlerror for Rlcreate: tag={}, ecode={}",
+                    rlerror.tag,
+                    rlerror.ecode
+                );
+                Err(map_p9_error(rlerror.ecode))
             }
             Err(e) => {
                 kprint!("sys_openat: error sending Tlcreate: {:?}", e);
@@ -6061,25 +5992,22 @@ fn get_file_size(starting_fid: u32, path: &str, depth: u32) -> Result<u64, Err> 
 
     let tgetattr = crate::p9::TgetattrMessage::new(0, TEMP_FID_1, P9_GETATTR_ALL);
     match tgetattr.send_tgetattr() {
-        Ok(bytes_written) => {
-            kprint!("sys_statx: bytes_written = {}", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_statx: error = {:?}", e);
-        }
-    }
-    match RgetattrMessage::read_response() {
-        P9Response::Success(rgetattr) => {
+        Ok(P9Response::Success(rgetattr)) => {
             kprint!("sys_statx: rgetattr = {:?}", rgetattr);
             clunk(TEMP_FID_1, false);
             Ok(rgetattr.size)
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!(
                 "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
             );
+            clunk(TEMP_FID_1, false);
+            Err(Err::NoSys)
+        }
+        Err(e) => {
+            kprint!("sys_statx: error = {:?}", e);
             clunk(TEMP_FID_1, false);
             Err(Err::NoSys)
         }
@@ -6256,15 +6184,7 @@ pub fn sys_statx(
 
     let tgetattr = crate::p9::TgetattrMessage::new(0, target_fid, P9_GETATTR_ALL);
     match tgetattr.send_tgetattr() {
-        Ok(bytes_written) => {
-            kprint!("sys_statx: bytes_written = {}", bytes_written);
-        }
-        Err(e) => {
-            kprint!("sys_statx: error = {:?}", e);
-        }
-    }
-    match RgetattrMessage::read_response() {
-        P9Response::Success(rgetattr) => {
+        Ok(P9Response::Success(rgetattr)) => {
             kprint!("sys_statx: rgetattr = {:?}", rgetattr);
 
             // Convert 9P RgetattrMessage to Linux statx structure
@@ -6293,7 +6213,7 @@ pub fn sys_statx(
             }
             Ok(0) // Success
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!(
                 "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
                 rlerror.tag,
@@ -6303,6 +6223,13 @@ pub fn sys_statx(
                 clunk(TEMP_FID_1, false);
             }
             Err(map_p9_error(rlerror.ecode))
+        }
+        Err(e) => {
+            kprint!("sys_statx: error = {:?}", e);
+            if target_fid == TEMP_FID_1 {
+                clunk(TEMP_FID_1, false);
+            }
+            Err(Err::NoSys)
         }
     }
 }
@@ -6550,60 +6477,107 @@ pub fn clunk(fid: u32, is_cwd_clunking_allowed: bool) {
 }
 
 pub fn attach_to_p9() {
-    let msg = TversionMessage::default_9p2000l(1);
+    use crate::p9_backend::{BackendType, P9Backend, get_backend_type, get_zerocopy_backend};
 
-    // Send the message via host_write to file descriptor 1
-    match msg.send_tversion() {
-        Ok(bytes_written) => {
-            kprint!("Sent {} bytes", bytes_written);
-        }
-        Err(_e) => {
-            kprint!("Failed to send Tversion");
-        }
-    }
-    match RversionMessage::read_response() {
-        P9Response::Success(rversion) => {
-            kprint!("Successfully read Rversion: {:?}", rversion);
-            // Process the message
-        }
-        P9Response::Error(rlerror) => {
-            kpanic!(
-                "Received Rlerror for Rversion: tag={}, ecode={}",
-                rlerror.tag,
-                rlerror.ecode
+    let backend_type = get_backend_type();
+    kprint!("Attaching to P9 using {:?} backend", backend_type);
+
+    // Handle version negotiation based on backend
+    match backend_type {
+        BackendType::Zkvm => {
+            // zkVM backend now uses unified pattern
+            let msg = TversionMessage::default_9p2000l(1);
+            match msg.send_tversion() {
+                Ok(P9Response::Success(rversion)) => {
+                    kprint!("Successfully negotiated version: {:?}", rversion);
+                }
+                Ok(P9Response::Error(rlerror)) => {
+                    kpanic!(
+                        "Received Rlerror for Rversion: tag={}, ecode={}",
+                        rlerror.tag,
+                        rlerror.ecode
+                    );
+                }
+                Err(e) => {
+                    kpanic!("Failed to send Tversion: {:?}", e);
+                }
+            }
+
+            // Attach
+            let tattach = TattachMessage::new(
+                0,
+                0,
+                crate::p9::constants::P9_NOFID,
+                "root".to_string(),
+                "/risc0-root".to_string(),
             );
+            match tattach.send_tattach() {
+                Ok(P9Response::Success(rattach)) => {
+                    kprint!("Received Rattach: {:?}", rattach);
+                    set_cwd_str("/".to_string());
+                    set_cwd_fid(0);
+                    set_root_fid(0);
+                }
+                Ok(P9Response::Error(rlerror)) => {
+                    kpanic!(
+                        "Received Rlerror for Rattach: tag={}, ecode={}",
+                        rlerror.tag,
+                        rlerror.ecode
+                    );
+                }
+                Err(e) => {
+                    kpanic!("Failed to send Tattach: {:?}", e);
+                }
+            }
         }
-    }
-    // now we attach with Tattach, P9_NOFID as afid, to /risc0-root
-    let tattach = TattachMessage::new(
-        0,
-        0,
-        crate::p9::constants::P9_NOFID,
-        "root".to_string(),
-        "/risc0-root".to_string(),
-    );
-    match tattach.send_tattach() {
-        Ok(bytes_written) => {
-            kprint!("Sent {} bytes", bytes_written);
-        }
-        Err(e) => {
-            kpanic!("Failed to send Tattach: {:?}", e);
-        }
-    }
-    // and wait for Rattach
-    match RattachMessage::read_response() {
-        P9Response::Success(rattach) => {
-            kprint!("Received Rattach: {:?}", rattach);
-            set_cwd_str("/".to_string());
-            set_cwd_fid(0);
-            set_root_fid(0);
-        }
-        P9Response::Error(rlerror) => {
-            kpanic!(
-                "Received Rlerror for Rattach: tag={}, ecode={}",
-                rlerror.tag,
-                rlerror.ecode
+        BackendType::ZeroCopy | BackendType::InMemory => {
+            // Zero-copy/in-memory path: backend handles everything directly
+            let msg = TversionMessage::default_9p2000l(1);
+            let backend = get_zerocopy_backend();
+
+            match backend.send_tversion(&msg) {
+                Ok(P9Response::Success(rversion)) => {
+                    kprint!("Successfully negotiated version: {:?}", rversion);
+                }
+                Ok(P9Response::Error(rlerror)) => {
+                    kpanic!(
+                        "Received Rlerror for Rversion: tag={}, ecode={}",
+                        rlerror.tag,
+                        rlerror.ecode
+                    );
+                }
+                Err(e) => {
+                    kpanic!("Failed to send Tversion: {:?}", e);
+                }
+            }
+
+            // Attach to root
+            let tattach = TattachMessage::new(
+                0,
+                0,
+                crate::p9::constants::P9_NOFID,
+                "root".to_string(),
+                "/".to_string(), // Zero-copy uses "/" not "/risc0-root"
             );
+
+            match backend.send_tattach(&tattach) {
+                Ok(P9Response::Success(rattach)) => {
+                    kprint!("Successfully attached to root: {:?}", rattach);
+                    set_cwd_str("/".to_string());
+                    set_cwd_fid(0);
+                    set_root_fid(0);
+                }
+                Ok(P9Response::Error(rlerror)) => {
+                    kpanic!(
+                        "Received Rlerror for Rattach: tag={}, ecode={}",
+                        rlerror.tag,
+                        rlerror.ecode
+                    );
+                }
+                Err(e) => {
+                    kpanic!("Failed to send Tattach: {:?}", e);
+                }
+            }
         }
     }
 }
