@@ -116,7 +116,7 @@ public:
 public:
   uint32_t onWrite(uint32_t fd, const uint8_t* data, uint32_t size) override {
     size_t bytes = writes[curWrite++];
-    LOG(2, "onWrite: " << bytes << " bytes");
+    LOG(3, "onWrite: " << bytes << " bytes");
     return bytes;
   }
 
@@ -125,7 +125,7 @@ public:
     if (size < record.size()) {
       throw std::runtime_error("Read record too big");
     }
-    LOG(2, "onRead: " << record.size() << " bytes");
+    LOG(3, "onRead: " << record.size() << " bytes");
     std::memcpy(data, record.data(), record.size());
     return record.size();
   }
