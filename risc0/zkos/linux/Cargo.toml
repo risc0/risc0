@@ -11,7 +11,7 @@ name = "vmlinuz"
 path = "src/main.rs"
 
 [dependencies]
-bytemuck = "1.23"
+bytemuck = { version = "1.23", features = ["derive"] }
 include_bytes_aligned = "0.1"
 no_std_strings = "0.1.3"
 rlsf = "0.2.1"
