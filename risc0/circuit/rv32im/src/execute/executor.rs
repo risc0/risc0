@@ -614,10 +614,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(word)
     }
 
-    fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
-        Region::new(&mut self.pager, op, addr, size)?.into_vec()
-    }
-
     #[inline(always)]
     fn load_register(&mut self, _op: LoadOp, base: WordAddr, idx: usize) -> Result<u32> {
         let word = self.pager.load_register(base, idx);

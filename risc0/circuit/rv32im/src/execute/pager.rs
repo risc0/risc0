@@ -19,7 +19,7 @@ use core::{
 };
 use std::{
     collections::{BTreeMap, BTreeSet},
-    io::{BufRead, Read},
+    io::Read,
     sync::OnceLock,
 };
 
