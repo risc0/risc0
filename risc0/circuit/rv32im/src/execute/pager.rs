@@ -13,10 +13,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use core::{
-    iter::FusedIterator,
-    ops::{Deref, Range},
-};
 use std::{
     collections::{BTreeMap, BTreeSet},
     io::Read,
@@ -103,51 +99,28 @@ impl Region<'_> {
         (self.end.0 - self.start.0) as usize
     }
 
-    fn next_chunk(&mut self, pos: ByteAddr) -> Option<Result<PageChunk>> {
+    fn next_chunk(&mut self, pos: ByteAddr) -> Result<Option<&[u8]>> {
         assert!(pos <= self.end);
         if pos == self.end {
-            return None;
+            return Ok(None);
         }
 
-        let load_result = match self.op {
-            LoadOp::Peek => self.pager.peek_page(pos.page_idx()),
-            LoadOp::Load => self.pager.load_page(pos.page_idx()),
+        let page = match self.op {
+            LoadOp::Peek => self.pager.peek_page(pos.page_idx())?,
+            LoadOp::Load => self.pager.load_page(pos.page_idx())?,
             LoadOp::Record => {
-                unimplemented!("Region is not implemented for LoadOp::Record")
+                bail!("Region is not implemented for LoadOp::Record")
             }
-        };
-        let page = match load_result {
-            Ok(page) => page.clone(),
-            Err(e) => return Some(Err(e)),
         };
         let chunk = if self.end.page_idx() == pos.page_idx() {
             let subpage_pos = pos.page_subaddr().0 as usize;
             let subpage_end = self.end.page_subaddr().0 as usize;
-            PageChunk {
-                page,
-                range: subpage_pos..subpage_end,
-            }
+            &page.data()[subpage_pos..subpage_end]
         } else {
             let subpage_pos = pos.page_subaddr().0 as usize;
-            PageChunk {
-                page,
-                range: subpage_pos..PAGE_BYTES,
-            }
+            &page.data()[subpage_pos..]
         };
-        Some(Ok(chunk))
-    }
-
-    pub fn chunks(&mut self) -> impl FusedIterator<Item = Result<impl Deref<Target = [u8]>>> {
-        let mut pos = self.start;
-
-        std::iter::from_fn(move || match self.next_chunk(pos)? {
-            Ok(chunk) => {
-                pos += chunk.len();
-                Some(Ok(chunk))
-            }
-            Err(err) => Some(Err(err)),
-        })
-        .fuse()
+        Ok(Some(chunk))
     }
 
     pub fn reader(self) -> impl Read {
@@ -158,12 +131,16 @@ impl Region<'_> {
 
         impl Read for Reader<'_> {
             fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-                let Some(result) = self.region.next_chunk(self.pos) else {
+                let chunk = self
+                    .region
+                    .next_chunk(self.pos)
+                    .map_err(std::io::Error::other)?;
+                let Some(chunk) = chunk else {
                     return Ok(0);
                 };
-                let chunk = result.map_err(std::io::Error::other)?;
                 let read_len = usize::min(chunk.len(), buf.len());
-                buf[..read_len].copy_from_slice(&chunk);
+                buf[..read_len].copy_from_slice(chunk);
+                self.pos += read_len;
                 Ok(read_len)
             }
         }
@@ -175,26 +152,13 @@ impl Region<'_> {
     }
 
     pub fn into_vec(mut self) -> Result<Vec<u8>> {
-        let capacity = self.size();
-        self.chunks()
-            .try_fold(Vec::with_capacity(capacity), |mut buffer, chunk| {
-                buffer.extend_from_slice(&chunk?);
-                Ok(buffer)
-            })
-    }
-}
-
-#[derive(Clone)]
-struct PageChunk {
-    pub page: Page,
-    pub range: Range<usize>,
-}
-
-impl Deref for PageChunk {
-    type Target = [u8];
-
-    fn deref(&self) -> &Self::Target {
-        &self.page.data()[self.range.clone()]
+        let mut pos = self.start;
+        let mut buf = Vec::with_capacity(self.size());
+        while let Some(chunk) = self.next_chunk(pos)? {
+            buf.extend_from_slice(chunk);
+            pos += chunk.len();
+        }
+        Ok(buf)
     }
 }
 
