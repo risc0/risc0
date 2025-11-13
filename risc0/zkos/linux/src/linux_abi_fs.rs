@@ -6,9 +6,8 @@ use crate::{
     kernel::print,
     linux_abi::Err,
     p9::{
-        P9Response, P9SetattrMask, Qid, RclunkMessage, ReadableMessage, RgetattrMessage,
-        RlopenMessage, RreaddirMessage, RreadlinkMessage, RsetattrMessage, RwalkMessage,
-        RwriteMessage, TattachMessage, TlcreateMessage, TlopenMessage, TmkdirMessage,
+        P9Response, P9SetattrMask, Qid, RgetattrMessage,
+        TattachMessage, TlcreateMessage, TlopenMessage, TmkdirMessage,
         TmknodMessage, TreadMessage, TreaddirMessage, TreadlinkMessage, TremoveMessage,
         TsetattrMessage, TsymlinkMessage, TversionMessage, TwriteMessage, constants::*,
     },
@@ -1221,17 +1220,7 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
                     TwriteMessage::new(0, file_desc.fid, current_cursor, chunk_data.to_vec());
 
                 match twrite.send_twrite() {
-                    Ok(_bytes_written) => {
-                        // Success
-                    }
-                    Err(e) => {
-                        kprint!("do_write: error sending Twrite: {:?}", e);
-                        return Err(Err::IO); // EIO for I/O errors
-                    }
-                }
-
-                match RwriteMessage::read_response() {
-                    P9Response::Success(rwrite) => {
+                    Ok(P9Response::Success(rwrite)) => {
                         let bytes_written = rwrite.count as usize;
                         total_written += bytes_written;
                         current_cursor += bytes_written as u64;
@@ -1247,9 +1236,13 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
                             break;
                         }
                     }
-                    P9Response::Error(rlerror) => {
+                    Ok(P9Response::Error(rlerror)) => {
                         kprint!("do_write: Rwrite error: ecode={}", rlerror.ecode);
                         return Err(map_p9_error(rlerror.ecode));
+                    }
+                    Err(e) => {
+                        kprint!("do_write: error sending Twrite: {:?}", e);
+                        return Err(Err::IO); // EIO for I/O errors
                     }
                 }
             }
@@ -1400,16 +1393,7 @@ pub fn sys_chdir(filename: u32) -> Result<u32, Err> {
             let twalk =
                 crate::p9::TwalkMessage::new(0, parent_fid, check_fid, vec![component.clone()]);
             match twalk.send_twalk() {
-                Ok(_) => {}
-                Err(_) => {
-                    clunk(parent_fid, false);
-                    resolved_components.push(component.clone());
-                    continue;
-                }
-            }
-
-            match crate::p9::RwalkMessage::read_response() {
-                crate::p9::P9Response::Success(rwalk) => {
+                Ok(crate::p9::P9Response::Success(rwalk)) => {
                     clunk(parent_fid, false);
 
                     if rwalk.wqids.len() != 1 {
@@ -1461,10 +1445,15 @@ pub fn sys_chdir(filename: u32) -> Result<u32, Err> {
                         }
                     }
                 }
-                crate::p9::P9Response::Error(_) => {
+                Ok(crate::p9::P9Response::Error(_)) => {
                     clunk(parent_fid, false);
                     // Can't walk to it, just add it
                     resolved_components.push(component);
+                }
+                Err(_) => {
+                    clunk(parent_fid, false);
+                    resolved_components.push(component.clone());
+                    continue;
                 }
             }
         }
@@ -1732,17 +1721,7 @@ pub fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32, _flags: u32) -> Res
         let file_path = vec![file_name];
         let twalk = crate::p9::TwalkMessage::new(0, dir_fid, TEMP_FID_5, file_path);
         match twalk.send_twalk() {
-            Ok(_) => {}
-            Err(_) => {
-                if dir_fid != starting_fid {
-                    clunk(dir_fid, false);
-                }
-                return Err(Err::FileNotFound);
-            }
-        }
-
-        match crate::p9::RwalkMessage::read_response() {
-            crate::p9::P9Response::Success(_) => {
+            Ok(crate::p9::P9Response::Success(_)) => {
                 // File/symlink exists and is accessible
                 clunk(TEMP_FID_5, false);
                 if dir_fid != starting_fid {
@@ -1750,7 +1729,13 @@ pub fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32, _flags: u32) -> Res
                 }
                 return Ok(0);
             }
-            crate::p9::P9Response::Error(_) => {
+            Ok(crate::p9::P9Response::Error(_)) => {
+                if dir_fid != starting_fid {
+                    clunk(dir_fid, false);
+                }
+                return Err(Err::FileNotFound);
+            }
+            Err(_) => {
                 if dir_fid != starting_fid {
                     clunk(dir_fid, false);
                 }
@@ -1908,16 +1893,14 @@ pub fn sys_fallocate(
     // Get current file size - we always need it
     let tgetattr = crate::p9::TgetattrMessage::new(0, file_desc.fid, P9_GETATTR_SIZE);
     let current_size = match tgetattr.send_tgetattr() {
-        Ok(_) => match RgetattrMessage::read_response() {
-            P9Response::Success(rgetattr) => rgetattr.size,
-            P9Response::Error(rlerror) => {
-                kprint!(
-                    "sys_fallocate: error getting current file size: ecode={}",
-                    rlerror.ecode
-                );
-                return Err(map_p9_error(rlerror.ecode));
-            }
-        },
+        Ok(P9Response::Success(rgetattr)) => rgetattr.size,
+        Ok(P9Response::Error(rlerror)) => {
+            kprint!(
+                "sys_fallocate: error getting current file size: ecode={}",
+                rlerror.ecode
+            );
+            return Err(map_p9_error(rlerror.ecode));
+        }
         Err(_) => {
             kprint!("sys_fallocate: error sending getattr");
             return Err(Err::NoSys);
@@ -1967,50 +1950,47 @@ pub fn sys_fallocate(
             );
 
             match tsetattr_extend.send_tsetattr() {
-                Ok(_) => match RsetattrMessage::read_response() {
-                    P9Response::Success(_) => {
-                        kprint!(
-                            "sys_fallocate: allocated space (extended to {}), now restoring size to {}",
-                            size_to_allocate,
-                            current_size
-                        );
+                Ok(P9Response::Success(_)) => {
+                    kprint!(
+                        "sys_fallocate: allocated space (extended to {}), now restoring size to {}",
+                        size_to_allocate,
+                        current_size
+                    );
 
-                        // Now restore the original size
-                        let tsetattr_restore = TsetattrMessage::new(
-                            0,
-                            file_desc.fid,
-                            valid,
-                            0,
-                            0,
-                            0,
-                            current_size,
-                            0,
-                            0,
-                            0,
-                            0,
-                        );
+                    // Now restore the original size
+                    let tsetattr_restore = TsetattrMessage::new(
+                        0,
+                        file_desc.fid,
+                        valid,
+                        0,
+                        0,
+                        0,
+                        current_size,
+                        0,
+                        0,
+                        0,
+                        0,
+                    );
 
-                        match tsetattr_restore.send_tsetattr() {
-                            Ok(_) => match RsetattrMessage::read_response() {
-                                P9Response::Success(_) => {
-                                    kprint!("sys_fallocate: restored size to {}", current_size);
-                                    Ok(0)
-                                }
-                                P9Response::Error(e) => {
-                                    kprint!(
-                                        "sys_fallocate: error restoring size: ecode={}",
-                                        e.ecode
-                                    );
-                                    Err(map_p9_error(e.ecode))
-                                }
-                            },
-                            Err(e) => {
-                                kprint!("sys_fallocate: error sending restore Tsetattr: {:?}", e);
-                                Err(Err::NoSys)
-                            }
+                    match tsetattr_restore.send_tsetattr() {
+                        Ok(P9Response::Success(_)) => {
+                            kprint!("sys_fallocate: restored size to {}", current_size);
+                            Ok(0)
+                        }
+                        Ok(P9Response::Error(e)) => {
+                            kprint!(
+                                "sys_fallocate: error restoring size: ecode={}",
+                                e.ecode
+                            );
+                            Err(map_p9_error(e.ecode))
+                        }
+                        Err(e) => {
+                            kprint!("sys_fallocate: error sending restore Tsetattr: {:?}", e);
+                            Err(Err::NoSys)
                         }
                     }
-                    P9Response::Error(rlerror) => {
+                }
+                Ok(P9Response::Error(rlerror)) => {
                         kprint!(
                             "sys_fallocate: error extending file: ecode={}, size_to_allocate={}",
                             rlerror.ecode,
@@ -2027,8 +2007,7 @@ pub fn sys_fallocate(
                             // Use standard error mapping
                             Err(map_p9_error(rlerror.ecode))
                         }
-                    }
-                },
+                }
                 Err(e) => {
                     kprint!("sys_fallocate: error sending extend Tsetattr: {:?}", e);
                     Err(Err::NoSys)
@@ -2061,29 +2040,27 @@ pub fn sys_fallocate(
                 TsetattrMessage::new(0, file_desc.fid, valid, 0, 0, 0, target_size, 0, 0, 0, 0);
 
             match tsetattr.send_tsetattr() {
-                Ok(_) => match RsetattrMessage::read_response() {
-                    P9Response::Success(_) => {
-                        kprint!(
-                            "sys_fallocate: successfully extended file to {}",
-                            target_size
-                        );
-                        Ok(0)
+                Ok(P9Response::Success(_)) => {
+                    kprint!(
+                        "sys_fallocate: successfully extended file to {}",
+                        target_size
+                    );
+                    Ok(0)
+                }
+                Ok(P9Response::Error(rlerror)) => {
+                    kprint!("sys_fallocate: error setting size: ecode={}", rlerror.ecode);
+                    // Special handling for fallocate: treat large size EINVAL as EFBIG
+                    const MAX_REASONABLE_SIZE: u64 = 0x7FFF_FFFF_FFFF_FFFF; // 2^63 - 1
+                    if rlerror.ecode == 22
+                        && (target_size > MAX_REASONABLE_SIZE || offset > MAX_REASONABLE_SIZE)
+                    {
+                        // Very large file size or offset: treat EINVAL as EFBIG
+                        Err(Err::FileTooBig)
+                    } else {
+                        // Use standard error mapping
+                        Err(map_p9_error(rlerror.ecode))
                     }
-                    P9Response::Error(rlerror) => {
-                        kprint!("sys_fallocate: error setting size: ecode={}", rlerror.ecode);
-                        // Special handling for fallocate: treat large size EINVAL as EFBIG
-                        const MAX_REASONABLE_SIZE: u64 = 0x7FFF_FFFF_FFFF_FFFF; // 2^63 - 1
-                        if rlerror.ecode == 22
-                            && (target_size > MAX_REASONABLE_SIZE || offset > MAX_REASONABLE_SIZE)
-                        {
-                            // Very large file size or offset: treat EINVAL as EFBIG
-                            Err(Err::FileTooBig)
-                        } else {
-                            // Use standard error mapping
-                            Err(map_p9_error(rlerror.ecode))
-                        }
-                    }
-                },
+                }
                 Err(e) => {
                     kprint!("sys_fallocate: error sending Tsetattr: {:?}", e);
                     Err(Err::NoSys)
@@ -2189,16 +2166,14 @@ pub fn sys_fchmod(fd: u32, mode: u32) -> Result<u32, Err> {
     );
 
     match tsetattr.send_tsetattr() {
-        Ok(_) => match RsetattrMessage::read_response() {
-            P9Response::Success(_) => {
-                kprint!("sys_fchmod: successfully changed mode to 0o{:o}", p9_mode);
-                Ok(0)
-            }
-            P9Response::Error(rlerror) => {
-                kprint!("sys_fchmod: error setting mode: ecode={}", rlerror.ecode);
-                Err(map_p9_error(rlerror.ecode))
-            }
-        },
+        Ok(P9Response::Success(_)) => {
+            kprint!("sys_fchmod: successfully changed mode to 0o{:o}", p9_mode);
+            Ok(0)
+        }
+        Ok(P9Response::Error(rlerror)) => {
+            kprint!("sys_fchmod: error setting mode: ecode={}", rlerror.ecode);
+            Err(map_p9_error(rlerror.ecode))
+        }
         Err(e) => {
             kprint!("sys_fchmod: error sending Tsetattr: {:?}", e);
             Err(Err::NoSys)
@@ -2420,23 +2395,21 @@ pub fn sys_fchown(fd: u32, user: u32, group: u32) -> Result<u32, Err> {
     );
 
     match tsetattr.send_tsetattr() {
-        Ok(_) => match RsetattrMessage::read_response() {
-            P9Response::Success(_) => {
-                kprint!(
-                    "sys_fchown: successfully changed ownership to uid={}, gid={}",
-                    user,
-                    group
-                );
-                Ok(0)
-            }
-            P9Response::Error(rlerror) => {
-                kprint!(
-                    "sys_fchown: error setting ownership: ecode={}",
-                    rlerror.ecode
-                );
-                Err(map_p9_error(rlerror.ecode))
-            }
-        },
+        Ok(P9Response::Success(_)) => {
+            kprint!(
+                "sys_fchown: successfully changed ownership to uid={}, gid={}",
+                user,
+                group
+            );
+            Ok(0)
+        }
+        Ok(P9Response::Error(rlerror)) => {
+            kprint!(
+                "sys_fchown: error setting ownership: ecode={}",
+                rlerror.ecode
+            );
+            Err(map_p9_error(rlerror.ecode))
+        }
         Err(e) => {
             kprint!("sys_fchown: error sending Tsetattr: {:?}", e);
             Err(Err::NoSys)
@@ -2511,40 +2484,38 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
         );
         let twalk = crate::p9::TwalkMessage::new(0, dir_fid, TEMP_FID_1, file_path.clone());
         match twalk.send_twalk() {
-            Ok(_) => match RwalkMessage::read_response() {
-                P9Response::Success(rwalk) => {
-                    if rwalk.wqids.len() != 1 {
-                        clunk(TEMP_FID_1, false);
-                        clunk(TEMP_FID_4, false);
-                        return Err(Err::FileNotFound);
-                    }
+            Ok(P9Response::Success(rwalk)) => {
+                if rwalk.wqids.len() != 1 {
+                    clunk(TEMP_FID_1, false);
+                    clunk(TEMP_FID_4, false);
+                    return Err(Err::FileNotFound);
+                }
 
-                    // Check if the final component is a symlink
-                    if let Some(last_qid) = rwalk.wqids.last() {
-                        if last_qid.is_symlink() {
-                            kprint!(
-                                "sys_fchownat: symlink detected with AT_SYMLINK_NOFOLLOW, operating on symlink directly"
-                            );
-                            // We have the symlink FID at TEMP_FID_1, don't follow it
-                        } else {
-                            kprint!("sys_fchownat: not a symlink, operating normally");
-                            // Not a symlink, continue normally
-                        }
-                    }
-                }
-                P9Response::Error(rlerror) => {
-                    kprint!(
-                        "sys_fchownat: error walking to file: ecode={}",
-                        rlerror.ecode
-                    );
-                    if dir_path.is_empty() || dir_path == "." {
-                        // No cleanup needed for relative paths
+                // Check if the final component is a symlink
+                if let Some(last_qid) = rwalk.wqids.last() {
+                    if last_qid.is_symlink() {
+                        kprint!(
+                            "sys_fchownat: symlink detected with AT_SYMLINK_NOFOLLOW, operating on symlink directly"
+                        );
+                        // We have the symlink FID at TEMP_FID_1, don't follow it
                     } else {
-                        clunk(TEMP_FID_4, false);
+                        kprint!("sys_fchownat: not a symlink, operating normally");
+                        // Not a symlink, continue normally
                     }
-                    return Err(map_p9_error(rlerror.ecode));
                 }
-            },
+            }
+            Ok(P9Response::Error(rlerror)) => {
+                kprint!(
+                    "sys_fchownat: error walking to file: ecode={}",
+                    rlerror.ecode
+                );
+                if dir_path.is_empty() || dir_path == "." {
+                    // No cleanup needed for relative paths
+                } else {
+                    clunk(TEMP_FID_4, false);
+                }
+                return Err(map_p9_error(rlerror.ecode));
+            }
             Err(e) => {
                 kprint!("sys_fchownat: error sending Twalk: {:?}", e);
                 if !dir_path.is_empty() && dir_path != "." {
@@ -2685,10 +2656,8 @@ pub fn sys_utimensat_time64(dfd: u32, filename: u32, times: u32, flags: u32) -> 
         );
 
         match tsetattr.send_tsetattr() {
-            Ok(_) => match RsetattrMessage::read_response() {
-                P9Response::Success(_) => Ok(0),
-                P9Response::Error(rlerror) => Err(map_p9_error(rlerror.ecode)),
-            },
+            Ok(P9Response::Success(_)) => Ok(0),
+            Ok(P9Response::Error(rlerror)) => Err(map_p9_error(rlerror.ecode)),
             Err(_) => Err(Err::NoSys),
         }
     } else {
@@ -2720,17 +2689,15 @@ pub fn sys_utimensat_time64(dfd: u32, filename: u32, times: u32, flags: u32) -> 
         );
 
         match tsetattr.send_tsetattr() {
-            Ok(_) => match RsetattrMessage::read_response() {
-                P9Response::Success(_) => {
-                    clunk(TEMP_FID_1, false);
-                    Ok(0)
-                }
-                P9Response::Error(rlerror) => {
-                    clunk(TEMP_FID_1, false);
-                    kprint!("sys_utimensat_time64: Rlerror: ecode={}", rlerror.ecode);
-                    Err(map_p9_error(rlerror.ecode))
-                }
-            },
+            Ok(P9Response::Success(_)) => {
+                clunk(TEMP_FID_1, false);
+                Ok(0)
+            }
+            Ok(P9Response::Error(rlerror)) => {
+                clunk(TEMP_FID_1, false);
+                kprint!("sys_utimensat_time64: Rlerror: ecode={}", rlerror.ecode);
+                Err(map_p9_error(rlerror.ecode))
+            }
             Err(e) => {
                 clunk(TEMP_FID_1, false);
                 kprint!("sys_utimensat_time64: error: {:?}", e);
@@ -2833,12 +2800,7 @@ pub fn sys_fgetxattr(fd: u32, name: u32, value: u32, size: u32) -> Result<u32, E
         crate::p9::TxattrwalkMessage::new(0, file_desc.fid, TEMP_FID_6, name_str.to_string());
 
     match txattrwalk.send_txattrwalk() {
-        Ok(_) => {}
-        Err(_) => return Err(Err::NoSys),
-    }
-
-    match crate::p9::RxattrwalkMessage::read_response() {
-        crate::p9::P9Response::Success(rxattrwalk) => {
+        Ok(crate::p9::P9Response::Success(rxattrwalk)) => {
             let xattr_size = rxattrwalk.size;
             kprint!("sys_fgetxattr: xattr size = {}", xattr_size);
 
@@ -2868,15 +2830,7 @@ pub fn sys_fgetxattr(fd: u32, name: u32, value: u32, size: u32) -> Result<u32, E
 
                 let tread = crate::p9::TreadMessage::new(0, TEMP_FID_6, total_read, chunk_size);
                 match tread.send_tread() {
-                    Ok(_) => {}
-                    Err(_) => {
-                        clunk(TEMP_FID_6, false);
-                        return Err(Err::IO);
-                    }
-                }
-
-                match crate::p9::RreadMessage::read_response() {
-                    crate::p9::P9Response::Success(rread) => {
+                    Ok(crate::p9::P9Response::Success(rread)) => {
                         if rread.count == 0 {
                             // EOF reached
                             break;
@@ -2900,7 +2854,11 @@ pub fn sys_fgetxattr(fd: u32, name: u32, value: u32, size: u32) -> Result<u32, E
                             break;
                         }
                     }
-                    crate::p9::P9Response::Error(_) => {
+                    Ok(crate::p9::P9Response::Error(_)) => {
+                        clunk(TEMP_FID_6, false);
+                        return Err(Err::IO);
+                    }
+                    Err(_) => {
                         clunk(TEMP_FID_6, false);
                         return Err(Err::IO);
                     }
@@ -2910,10 +2868,11 @@ pub fn sys_fgetxattr(fd: u32, name: u32, value: u32, size: u32) -> Result<u32, E
             clunk(TEMP_FID_6, false);
             Ok(total_read.min(size as u64) as u32)
         }
-        crate::p9::P9Response::Error(rlerror) => {
+        Ok(crate::p9::P9Response::Error(rlerror)) => {
             kprint!("sys_fgetxattr: xattrwalk failed: ecode={}", rlerror.ecode);
             Err(map_p9_error(rlerror.ecode))
         }
+        Err(_) => Err(Err::NoSys),
     }
 }
 
@@ -2959,12 +2918,7 @@ pub fn sys_flistxattr(fd: u32, list: u32, size: u32) -> Result<u32, Err> {
     );
 
     match txattrwalk.send_txattrwalk() {
-        Ok(_) => {}
-        Err(_) => return Err(Err::NoSys),
-    }
-
-    match crate::p9::RxattrwalkMessage::read_response() {
-        crate::p9::P9Response::Success(rxattrwalk) => {
+        Ok(crate::p9::P9Response::Success(rxattrwalk)) => {
             let xattr_list_size = rxattrwalk.size;
             kprint!("sys_flistxattr: xattr list size = {}", xattr_list_size);
 
@@ -2994,15 +2948,7 @@ pub fn sys_flistxattr(fd: u32, list: u32, size: u32) -> Result<u32, Err> {
 
                 let tread = crate::p9::TreadMessage::new(0, list_fid, total_read, chunk_size);
                 match tread.send_tread() {
-                    Ok(_) => {}
-                    Err(_) => {
-                        clunk(list_fid, false);
-                        return Err(Err::IO);
-                    }
-                }
-
-                match crate::p9::RreadMessage::read_response() {
-                    crate::p9::P9Response::Success(rread) => {
+                    Ok(crate::p9::P9Response::Success(rread)) => {
                         if rread.count == 0 {
                             // EOF reached
                             break;
@@ -3026,7 +2972,11 @@ pub fn sys_flistxattr(fd: u32, list: u32, size: u32) -> Result<u32, Err> {
                             break;
                         }
                     }
-                    crate::p9::P9Response::Error(_) => {
+                    Ok(crate::p9::P9Response::Error(_)) => {
+                        clunk(list_fid, false);
+                        return Err(Err::IO);
+                    }
+                    Err(_) => {
                         clunk(list_fid, false);
                         return Err(Err::IO);
                     }
@@ -3036,10 +2986,11 @@ pub fn sys_flistxattr(fd: u32, list: u32, size: u32) -> Result<u32, Err> {
             clunk(list_fid, false);
             Ok(total_read.min(size as u64) as u32)
         }
-        crate::p9::P9Response::Error(rlerror) => {
+        Ok(crate::p9::P9Response::Error(rlerror)) => {
             kprint!("sys_flistxattr: xattrwalk failed: ecode={}", rlerror.ecode);
             Err(map_p9_error(rlerror.ecode))
         }
+        Err(_) => Err(Err::NoSys),
     }
 }
 
@@ -3248,18 +3199,14 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
     // First, walk to duplicate the file's FID to the xattr FID
     let twalk = crate::p9::TwalkMessage::new(0, file_desc.fid, xattr_fid, vec![]);
     match twalk.send_twalk() {
-        Ok(_) => {}
-        Err(_) => return Err(Err::NoSys),
-    }
-
-    match crate::p9::RwalkMessage::read_response() {
-        crate::p9::P9Response::Success(_) => {
+        Ok(crate::p9::P9Response::Success(_)) => {
             kprint!("sys_fsetxattr: walked to duplicate fid={}", xattr_fid);
         }
-        crate::p9::P9Response::Error(rlerror) => {
+        Ok(crate::p9::P9Response::Error(rlerror)) => {
             kprint!("sys_fsetxattr: walk failed: ecode={}", rlerror.ecode);
             return Err(map_p9_error(rlerror.ecode));
         }
+        Err(_) => return Err(Err::NoSys),
     }
 
     // Now use Txattrcreate with the xattr FID
@@ -3272,15 +3219,7 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
     );
 
     match txattrcreate.send_txattrcreate() {
-        Ok(_) => {}
-        Err(_) => {
-            clunk(xattr_fid, false);
-            return Err(Err::NoSys);
-        }
-    }
-
-    match crate::p9::RxattrcreateMessage::read_response() {
-        crate::p9::P9Response::Success(_) => {
+        Ok(crate::p9::P9Response::Success(_)) => {
             kprint!(
                 "sys_fsetxattr: xattrcreate succeeded, using fid={}",
                 xattr_fid
@@ -3306,15 +3245,7 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
                         chunk_data.to_vec(),
                     );
                     match twrite.send_twrite() {
-                        Ok(_) => {}
-                        Err(_) => {
-                            clunk(xattr_fid, false);
-                            return Err(Err::IO);
-                        }
-                    }
-
-                    match crate::p9::RwriteMessage::read_response() {
-                        crate::p9::P9Response::Success(rwrite) => {
+                        Ok(crate::p9::P9Response::Success(rwrite)) => {
                             kprint!("sys_fsetxattr: wrote {} bytes", rwrite.count);
                             total_written += rwrite.count;
 
@@ -3329,7 +3260,11 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
                                 return Err(Err::IO);
                             }
                         }
-                        crate::p9::P9Response::Error(_) => {
+                        Ok(crate::p9::P9Response::Error(_)) => {
+                            clunk(xattr_fid, false);
+                            return Err(Err::IO);
+                        }
+                        Err(_) => {
                             clunk(xattr_fid, false);
                             return Err(Err::IO);
                         }
@@ -3352,9 +3287,14 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
             clunk(xattr_fid, false);
             Ok(0)
         }
-        crate::p9::P9Response::Error(rlerror) => {
+        Ok(crate::p9::P9Response::Error(rlerror)) => {
             kprint!("sys_fsetxattr: xattrcreate failed: ecode={}", rlerror.ecode);
+            clunk(xattr_fid, false);
             Err(map_p9_error(rlerror.ecode))
+        }
+        Err(_) => {
+            clunk(xattr_fid, false);
+            Err(Err::NoSys)
         }
     }
 }
@@ -3416,7 +3356,7 @@ pub fn sys_linkat(
     newname: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    use crate::p9::{P9Response, RlinkMessage, TlinkMessage};
+    use crate::p9::{P9Response, TlinkMessage};
 
     if !get_p9_enabled() {
         return Err(Err::NoSys);
@@ -3474,28 +3414,24 @@ pub fn sys_linkat(
     // Create the hard link using Tlink
     let tlink = TlinkMessage::new(0, new_dir_fid, old_fid, new_name.clone());
     match tlink.send_tlink() {
-        Ok(_) => {}
-        Err(_) => {
-            clunk(old_fid, false);
-            clunk(new_dir_fid, false);
-            return Err(Err::IO);
-        }
-    }
-
-    match RlinkMessage::read_response() {
-        P9Response::Success(_) => {
+        Ok(P9Response::Success(_)) => {
             kprint!("sys_linkat: successfully created hard link");
             clunk(old_fid, false);
             clunk(new_dir_fid, false);
             Ok(0)
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!("sys_linkat: error creating link: ecode={}", rlerror.ecode);
             clunk(old_fid, false);
             clunk(new_dir_fid, false);
             // Map 9P error codes to Linux errno
             // Return the error code as a negative errno value
             Err(map_p9_error(rlerror.ecode))
+        }
+        Err(_) => {
+            clunk(old_fid, false);
+            clunk(new_dir_fid, false);
+            Err(Err::IO)
         }
     }
 }
@@ -3623,13 +3559,11 @@ pub fn sys_llseek(
             if file_desc.fid != 0 && file_desc.fid != TEMP_FID_1 {
                 let tgetattr = crate::p9::TgetattrMessage::new(0, file_desc.fid, P9_GETATTR_SIZE);
                 match tgetattr.send_tgetattr() {
-                    Ok(_) => match RgetattrMessage::read_response() {
-                        P9Response::Success(rgetattr) => rgetattr.size + offset,
-                        P9Response::Error(_) => {
-                            // Fallback: use cursor if getattr fails
-                            file_desc.cursor + offset
-                        }
-                    },
+                    Ok(P9Response::Success(rgetattr)) => rgetattr.size + offset,
+                    Ok(P9Response::Error(_)) => {
+                        // Fallback: use cursor if getattr fails
+                        file_desc.cursor + offset
+                    }
                     Err(_) => {
                         // Fallback: use cursor if getattr fails
                         file_desc.cursor + offset
@@ -4247,17 +4181,7 @@ pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<
     let file_path = vec![file_name];
     let twalk = crate::p9::TwalkMessage::new(0, dir_fid, symlink_fid, file_path);
     match twalk.send_twalk() {
-        Ok(_) => {}
-        Err(_) => {
-            if dir_fid != starting_fid {
-                clunk(dir_fid, false);
-            }
-            return Err(Err::NoSys);
-        }
-    }
-
-    match crate::p9::RwalkMessage::read_response() {
-        crate::p9::P9Response::Success(rwalk) => {
+        Ok(crate::p9::P9Response::Success(rwalk)) => {
             if rwalk.wqids.len() != 1 {
                 clunk(symlink_fid, false);
                 if dir_fid != starting_fid {
@@ -4284,12 +4208,18 @@ pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<
                 clunk(dir_fid, false);
             }
         }
-        crate::p9::P9Response::Error(rlerror) => {
+        Ok(crate::p9::P9Response::Error(rlerror)) => {
             if dir_fid != starting_fid {
                 clunk(dir_fid, false);
             }
             // Preserve ENOTDIR vs ENOENT semantics
             return Err(map_p9_error(rlerror.ecode));
+        }
+        Err(_) => {
+            if dir_fid != starting_fid {
+                clunk(dir_fid, false);
+            }
+            return Err(Err::NoSys);
         }
     }
 
@@ -4342,7 +4272,7 @@ pub fn sys_renameat2(
     _newpath: u32,
     _flags: u32,
 ) -> Result<u32, Err> {
-    use crate::p9::{P9Response, RrenameatMessage, TrenameatMessage};
+    use crate::p9::{P9Response, TrenameatMessage};
 
     if !get_p9_enabled() {
         let msg = b"sys_renameat2: p9 is not enabled";
@@ -4426,23 +4356,19 @@ pub fn sys_renameat2(
         let new_file_path = vec![new_name.clone()];
         let twalk = crate::p9::TwalkMessage::new(0, TEMP_FID_4, new_file_fid, new_file_path);
         match twalk.send_twalk() {
-            Ok(_) => {
-                match crate::p9::RwalkMessage::read_response() {
-                    crate::p9::P9Response::Success(rwalk) => {
-                        if !rwalk.wqids.is_empty() {
-                            // File exists, fail with EEXIST
-                            kprint!("sys_renameat2: RENAME_NOREPLACE and newpath exists");
-                            clunk(new_file_fid, false);
-                            clunk(TEMP_FID_1, false);
-                            clunk(TEMP_FID_4, false);
-                            return Err(Err::FileExists);
-                        }
-                        clunk(new_file_fid, false);
-                    }
-                    crate::p9::P9Response::Error(_) => {
-                        // File doesn't exist, continue with rename
-                    }
+            Ok(crate::p9::P9Response::Success(rwalk)) => {
+                if !rwalk.wqids.is_empty() {
+                    // File exists, fail with EEXIST
+                    kprint!("sys_renameat2: RENAME_NOREPLACE and newpath exists");
+                    clunk(new_file_fid, false);
+                    clunk(TEMP_FID_1, false);
+                    clunk(TEMP_FID_4, false);
+                    return Err(Err::FileExists);
                 }
+                clunk(new_file_fid, false);
+            }
+            Ok(crate::p9::P9Response::Error(_)) => {
+                // File doesn't exist, continue with rename
             }
             Err(_) => {
                 // File doesn't exist, continue with rename
@@ -4458,27 +4384,23 @@ pub fn sys_renameat2(
         let new_file_path = vec![new_name.clone()];
         let twalk = crate::p9::TwalkMessage::new(0, TEMP_FID_4, new_file_fid, new_file_path);
         match twalk.send_twalk() {
-            Ok(_) => {
-                match crate::p9::RwalkMessage::read_response() {
-                    crate::p9::P9Response::Success(rwalk) => {
-                        if rwalk.wqids.is_empty() {
-                            // newpath doesn't exist, fail with ENOENT
-                            kprint!("sys_renameat2: RENAME_EXCHANGE but newpath doesn't exist");
-                            clunk(new_file_fid, false);
-                            clunk(TEMP_FID_1, false);
-                            clunk(TEMP_FID_4, false);
-                            return Err(Err::FileNotFound);
-                        }
-                        clunk(new_file_fid, false);
-                    }
-                    crate::p9::P9Response::Error(_) => {
-                        // newpath doesn't exist, fail with ENOENT
-                        kprint!("sys_renameat2: RENAME_EXCHANGE but newpath doesn't exist");
-                        clunk(TEMP_FID_1, false);
-                        clunk(TEMP_FID_4, false);
-                        return Err(Err::FileNotFound);
-                    }
+            Ok(crate::p9::P9Response::Success(rwalk)) => {
+                if rwalk.wqids.is_empty() {
+                    // newpath doesn't exist, fail with ENOENT
+                    kprint!("sys_renameat2: RENAME_EXCHANGE but newpath doesn't exist");
+                    clunk(new_file_fid, false);
+                    clunk(TEMP_FID_1, false);
+                    clunk(TEMP_FID_4, false);
+                    return Err(Err::FileNotFound);
                 }
+                clunk(new_file_fid, false);
+            }
+            Ok(crate::p9::P9Response::Error(_)) => {
+                // newpath doesn't exist, fail with ENOENT
+                kprint!("sys_renameat2: RENAME_EXCHANGE but newpath doesn't exist");
+                clunk(TEMP_FID_1, false);
+                clunk(TEMP_FID_4, false);
+                return Err(Err::FileNotFound);
             }
             Err(_) => {
                 // newpath doesn't exist, fail with ENOENT
@@ -4505,12 +4427,11 @@ pub fn sys_renameat2(
         let old_file_path = vec![old_name.clone()];
         let twalk_old = crate::p9::TwalkMessage::new(0, TEMP_FID_1, old_file_fid, old_file_path);
         match twalk_old.send_twalk() {
-            Ok(_) => {
-                if let crate::p9::P9Response::Error(_) = crate::p9::RwalkMessage::read_response() {
-                    clunk(TEMP_FID_1, false);
-                    clunk(TEMP_FID_4, false);
-                    return Err(Err::FileNotFound);
-                }
+            Ok(crate::p9::P9Response::Success(_)) => {}
+            Ok(crate::p9::P9Response::Error(_)) => {
+                clunk(TEMP_FID_1, false);
+                clunk(TEMP_FID_4, false);
+                return Err(Err::FileNotFound);
             }
             Err(_) => {
                 clunk(TEMP_FID_1, false);
@@ -4524,13 +4445,12 @@ pub fn sys_renameat2(
         let new_file_path2 = vec![new_name.clone()];
         let twalk_new = crate::p9::TwalkMessage::new(0, TEMP_FID_4, new_file_fid2, new_file_path2);
         match twalk_new.send_twalk() {
-            Ok(_) => {
-                if let crate::p9::P9Response::Error(_) = crate::p9::RwalkMessage::read_response() {
-                    clunk(old_file_fid, false);
-                    clunk(TEMP_FID_1, false);
-                    clunk(TEMP_FID_4, false);
-                    return Err(Err::FileNotFound);
-                }
+            Ok(crate::p9::P9Response::Success(_)) => {}
+            Ok(crate::p9::P9Response::Error(_)) => {
+                clunk(old_file_fid, false);
+                clunk(TEMP_FID_1, false);
+                clunk(TEMP_FID_4, false);
+                return Err(Err::FileNotFound);
             }
             Err(_) => {
                 clunk(old_file_fid, false);
@@ -4544,18 +4464,16 @@ pub fn sys_renameat2(
         let trename1 =
             crate::p9::TrenameMessage::new(0, old_file_fid, TEMP_FID_1, temp_name.clone());
         match trename1.send_trename() {
-            Ok(_) => match crate::p9::RrenameMessage::read_response() {
-                P9Response::Success(_) => {
-                    kprint!("sys_renameat2: step 1 complete (old->temp)");
-                }
-                P9Response::Error(rlerror) => {
-                    clunk(old_file_fid, false);
-                    clunk(new_file_fid2, false);
-                    clunk(TEMP_FID_1, false);
-                    clunk(TEMP_FID_4, false);
-                    return Err(map_p9_error(rlerror.ecode));
-                }
-            },
+            Ok(P9Response::Success(_)) => {
+                kprint!("sys_renameat2: step 1 complete (old->temp)");
+            }
+            Ok(P9Response::Error(rlerror)) => {
+                clunk(old_file_fid, false);
+                clunk(new_file_fid2, false);
+                clunk(TEMP_FID_1, false);
+                clunk(TEMP_FID_4, false);
+                return Err(map_p9_error(rlerror.ecode));
+            }
             Err(_) => {
                 clunk(old_file_fid, false);
                 clunk(new_file_fid2, false);
@@ -4569,19 +4487,17 @@ pub fn sys_renameat2(
         let trename2 =
             crate::p9::TrenameMessage::new(0, new_file_fid2, TEMP_FID_1, old_name.to_string());
         match trename2.send_trename() {
-            Ok(_) => match crate::p9::RrenameMessage::read_response() {
-                P9Response::Success(_) => {
-                    kprint!("sys_renameat2: step 2 complete (new->old)");
-                }
-                P9Response::Error(rlerror) => {
-                    // Rollback not implemented for simplicity
-                    clunk(old_file_fid, false);
-                    clunk(new_file_fid2, false);
-                    clunk(TEMP_FID_1, false);
-                    clunk(TEMP_FID_4, false);
-                    return Err(map_p9_error(rlerror.ecode));
-                }
-            },
+            Ok(P9Response::Success(_)) => {
+                kprint!("sys_renameat2: step 2 complete (new->old)");
+            }
+            Ok(P9Response::Error(rlerror)) => {
+                // Rollback not implemented for simplicity
+                clunk(old_file_fid, false);
+                clunk(new_file_fid2, false);
+                clunk(TEMP_FID_1, false);
+                clunk(TEMP_FID_4, false);
+                return Err(map_p9_error(rlerror.ecode));
+            }
             Err(_) => {
                 clunk(old_file_fid, false);
                 clunk(new_file_fid2, false);
@@ -4597,14 +4513,13 @@ pub fn sys_renameat2(
         let temp_path = vec![temp_name.clone()];
         let twalk_temp = crate::p9::TwalkMessage::new(0, TEMP_FID_1, temp_fid, temp_path);
         match twalk_temp.send_twalk() {
-            Ok(_) => {
-                if let crate::p9::P9Response::Error(_) = crate::p9::RwalkMessage::read_response() {
-                    clunk(old_file_fid, false);
-                    clunk(new_file_fid2, false);
-                    clunk(TEMP_FID_1, false);
-                    clunk(TEMP_FID_4, false);
-                    return Err(Err::FileNotFound);
-                }
+            Ok(crate::p9::P9Response::Success(_)) => {}
+            Ok(crate::p9::P9Response::Error(_)) => {
+                clunk(old_file_fid, false);
+                clunk(new_file_fid2, false);
+                clunk(TEMP_FID_1, false);
+                clunk(TEMP_FID_4, false);
+                return Err(Err::FileNotFound);
             }
             Err(_) => {
                 clunk(old_file_fid, false);
@@ -4618,26 +4533,24 @@ pub fn sys_renameat2(
         let trename3 =
             crate::p9::TrenameMessage::new(0, temp_fid, TEMP_FID_4, new_name.to_string());
         match trename3.send_trename() {
-            Ok(_) => match crate::p9::RrenameMessage::read_response() {
-                P9Response::Success(_) => {
-                    kprint!("sys_renameat2: RENAME_EXCHANGE complete");
-                    clunk(old_file_fid, false);
-                    clunk(new_file_fid2, false);
-                    clunk(temp_fid, false);
-                    clunk(TEMP_FID_1, false);
-                    clunk(TEMP_FID_4, false);
-                    return Ok(0);
-                }
-                P9Response::Error(rlerror) => {
-                    kprint!("sys_renameat2: RENAME_EXCHANGE failed at step 3");
-                    clunk(old_file_fid, false);
-                    clunk(new_file_fid2, false);
-                    clunk(temp_fid, false);
-                    clunk(TEMP_FID_1, false);
-                    clunk(TEMP_FID_4, false);
-                    return Err(map_p9_error(rlerror.ecode));
-                }
-            },
+            Ok(P9Response::Success(_)) => {
+                kprint!("sys_renameat2: RENAME_EXCHANGE complete");
+                clunk(old_file_fid, false);
+                clunk(new_file_fid2, false);
+                clunk(temp_fid, false);
+                clunk(TEMP_FID_1, false);
+                clunk(TEMP_FID_4, false);
+                return Ok(0);
+            }
+            Ok(P9Response::Error(rlerror)) => {
+                kprint!("sys_renameat2: RENAME_EXCHANGE failed at step 3");
+                clunk(old_file_fid, false);
+                clunk(new_file_fid2, false);
+                clunk(temp_fid, false);
+                clunk(TEMP_FID_1, false);
+                clunk(TEMP_FID_4, false);
+                return Err(map_p9_error(rlerror.ecode));
+            }
             Err(_) => {
                 kprint!("sys_renameat2: RENAME_EXCHANGE failed at step 3");
                 clunk(old_file_fid, false);
@@ -4661,26 +4574,13 @@ pub fn sys_renameat2(
     );
 
     match trenameat.send_trenameat() {
-        Ok(_) => {
-            kprint!("sys_renameat2: sent Trenameat");
-        }
-        Err(e) => {
-            kprint!("sys_renameat2: error sending Trenameat: {:?}", e);
-            clunk(TEMP_FID_1, false);
-            clunk(TEMP_FID_4, false);
-            return Err(Err::NoSys);
-        }
-    }
-
-    // Read response
-    match RrenameatMessage::read_response() {
-        P9Response::Success(_rrenameat) => {
+        Ok(P9Response::Success(_rrenameat)) => {
             kprint!("sys_renameat2: Trenameat successful");
             clunk(TEMP_FID_1, false);
             clunk(TEMP_FID_4, false);
             return Ok(0);
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             // If Trenameat is not supported, fall back to Trename
             if rlerror.ecode == 95 {
                 // EOPNOTSUPP
@@ -4691,21 +4591,19 @@ pub fn sys_renameat2(
                 let file_path = vec![old_name.clone()];
                 let twalk = crate::p9::TwalkMessage::new(0, TEMP_FID_1, file_fid, file_path);
                 match twalk.send_twalk() {
-                    Ok(_) => match crate::p9::RwalkMessage::read_response() {
-                        crate::p9::P9Response::Success(rwalk) => {
-                            if rwalk.wqids.is_empty() {
-                                clunk(file_fid, false);
-                                clunk(TEMP_FID_1, false);
-                                clunk(TEMP_FID_4, false);
-                                return Err(Err::FileNotFound);
-                            }
-                        }
-                        crate::p9::P9Response::Error(_) => {
+                    Ok(crate::p9::P9Response::Success(rwalk)) => {
+                        if rwalk.wqids.is_empty() {
+                            clunk(file_fid, false);
                             clunk(TEMP_FID_1, false);
                             clunk(TEMP_FID_4, false);
                             return Err(Err::FileNotFound);
                         }
-                    },
+                    }
+                    Ok(crate::p9::P9Response::Error(_)) => {
+                        clunk(TEMP_FID_1, false);
+                        clunk(TEMP_FID_4, false);
+                        return Err(Err::FileNotFound);
+                    }
                     Err(_) => {
                         clunk(TEMP_FID_1, false);
                         clunk(TEMP_FID_4, false);
@@ -4717,22 +4615,20 @@ pub fn sys_renameat2(
                 let trename =
                     crate::p9::TrenameMessage::new(0, file_fid, TEMP_FID_4, new_name.to_string());
                 match trename.send_trename() {
-                    Ok(_) => match crate::p9::RrenameMessage::read_response() {
-                        crate::p9::P9Response::Success(_) => {
-                            kprint!("sys_renameat2: Trename successful");
-                            clunk(file_fid, false);
-                            clunk(TEMP_FID_1, false);
-                            clunk(TEMP_FID_4, false);
-                            return Ok(0);
-                        }
-                        crate::p9::P9Response::Error(rlerror2) => {
-                            kprint!("sys_renameat2: Trename failed: ecode={}", rlerror2.ecode);
-                            clunk(file_fid, false);
-                            clunk(TEMP_FID_1, false);
-                            clunk(TEMP_FID_4, false);
-                            return Err(map_p9_error(rlerror2.ecode));
-                        }
-                    },
+                    Ok(crate::p9::P9Response::Success(_)) => {
+                        kprint!("sys_renameat2: Trename successful");
+                        clunk(file_fid, false);
+                        clunk(TEMP_FID_1, false);
+                        clunk(TEMP_FID_4, false);
+                        return Ok(0);
+                    }
+                    Ok(crate::p9::P9Response::Error(rlerror2)) => {
+                        kprint!("sys_renameat2: Trename failed: ecode={}", rlerror2.ecode);
+                        clunk(file_fid, false);
+                        clunk(TEMP_FID_1, false);
+                        clunk(TEMP_FID_4, false);
+                        return Err(map_p9_error(rlerror2.ecode));
+                    }
                     Err(_) => {
                         clunk(file_fid, false);
                         clunk(TEMP_FID_1, false);
@@ -4746,6 +4642,12 @@ pub fn sys_renameat2(
                 clunk(TEMP_FID_4, false);
                 return Err(map_p9_error(rlerror.ecode));
             }
+        }
+        Err(e) => {
+            kprint!("sys_renameat2: error sending Trenameat: {:?}", e);
+            clunk(TEMP_FID_1, false);
+            clunk(TEMP_FID_4, false);
+            Err(Err::NoSys)
         }
     }
 }
@@ -5047,17 +4949,7 @@ pub fn sys_getdents64(fd: u32, dirp: u32, count: u32) -> Result<u32, Err> {
     // XXX we will read one dir entry at a a time
     let treaddir = TreaddirMessage::new(0, fid, offset, count);
     match treaddir.send_treaddir() {
-        Ok(_bytes_written) => {
-            // Success
-        }
-        Err(_e) => {
-            return Err(Err::NoSys);
-        }
-    }
-
-    // Read the Rreaddir response
-    match RreaddirMessage::read_response() {
-        P9Response::Success(rreaddir) => {
+        Ok(P9Response::Success(rreaddir)) => {
             if rreaddir.count == 0 {
                 // No more entries
                 return Ok(0);
@@ -5198,7 +5090,8 @@ pub fn sys_getdents64(fd: u32, dirp: u32, count: u32) -> Result<u32, Err> {
 
             Ok(total_bytes as u32)
         }
-        P9Response::Error(rlerror) => Err(map_p9_error(rlerror.ecode)),
+        Ok(P9Response::Error(rlerror)) => Err(map_p9_error(rlerror.ecode)),
+        Err(_e) => Err(Err::NoSys),
     }
 }
 
@@ -5364,27 +5257,21 @@ fn read_symlink(fid: u32) -> Result<String, Err> {
     // Use Treadlink to read the symlink contents directly
     let treadlink = TreadlinkMessage::new(0, fid);
     match treadlink.send_treadlink() {
-        Ok(_bytes_written) => {
-            kprint!("read_symlink: sent treadlink request");
-        }
-        Err(e) => {
-            kprint!("read_symlink: error sending treadlink: {:?}", e);
-            return Err(Err::NoSys);
-        }
-    }
-
-    match RreadlinkMessage::read_response() {
-        P9Response::Success(rreadlink) => {
+        Ok(P9Response::Success(rreadlink)) => {
             kprint!("read_symlink: readlink target = '{}'", rreadlink.target);
             Ok(rreadlink.target)
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!(
                 "read_symlink: error reading symlink: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
             );
             Err(map_p9_error(rlerror.ecode))
+        }
+        Err(e) => {
+            kprint!("read_symlink: error sending treadlink: {:?}", e);
+            Err(Err::NoSys)
         }
     }
 }
@@ -5619,107 +5506,99 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
         let file_path = vec![file_name];
         let twalk = crate::p9::TwalkMessage::new(0, dir_fid, file_fid, file_path);
         match twalk.send_twalk() {
-            Ok(_) => {
-                match crate::p9::RwalkMessage::read_response() {
-                    crate::p9::P9Response::Success(rwalk) => {
-                        if dir_fid != starting_fid {
-                            clunk(dir_fid, false);
-                        }
+            Ok(crate::p9::P9Response::Success(rwalk)) => {
+                if dir_fid != starting_fid {
+                    clunk(dir_fid, false);
+                }
 
-                        if rwalk.wqids.len() != 1 {
-                            clunk(file_fid, false);
-                            // File doesn't exist - check if O_CREAT is set
-                            if (_flags & O_CREAT) == 0 {
-                                return Err(Err::FileNotFound);
-                            }
-                            // Will handle creation below
-                        } else {
-                            // Check if it's a symlink
-                            let qid = rwalk.wqids.first().unwrap();
-                            if qid.is_symlink() {
-                                // With O_PATH, we can open symlinks - just get an fd to the symlink itself
-                                if (_flags & O_PATH) != 0 {
-                                    kprint!(
-                                        "sys_openat: O_NOFOLLOW + O_PATH on symlink - creating fd-only descriptor"
-                                    );
-                                    set_fd(file_fid, file_fid);
-                                    let fd_entry = get_fd(file_fid);
-                                    let mut file_desc = get_file_desc(fd_entry.file_desc_id);
-                                    file_desc.mode = 0;
-                                    file_desc.is_dir = qid.is_dir();
-                                    file_desc.flags = _flags;
-                                    update_file_desc(fd_entry.file_desc_id, file_desc);
-                                    return Ok(file_fid);
-                                } else {
-                                    // O_NOFOLLOW without O_PATH on a symlink - fail with ELOOP
-                                    kprint!(
-                                        "sys_openat: O_NOFOLLOW - path is a symlink, returning ELOOP"
-                                    );
-                                    clunk(file_fid, false);
-                                    return Err(Err::Loop);
-                                }
-                            }
-                            // Not a symlink, file exists
-                            // Check if O_PATH is set - if so, don't actually open the file
-                            if (_flags & O_PATH) != 0 {
-                                kprint!(
-                                    "sys_openat: O_NOFOLLOW + O_PATH - creating fd-only descriptor"
-                                );
-                                // For O_PATH, we don't call Tlopen - just set up the fd
-                                set_fd(file_fid, file_fid);
-                                let fd_entry = get_fd(file_fid);
-                                let mut file_desc = get_file_desc(fd_entry.file_desc_id);
-                                file_desc.mode = 0;
-                                file_desc.is_dir = qid.is_dir();
-                                file_desc.flags = _flags;
-                                update_file_desc(fd_entry.file_desc_id, file_desc);
-                                return Ok(file_fid);
-                            }
-
-                            // Normal open
+                if rwalk.wqids.len() != 1 {
+                    clunk(file_fid, false);
+                    // File doesn't exist - check if O_CREAT is set
+                    if (_flags & O_CREAT) == 0 {
+                        return Err(Err::FileNotFound);
+                    }
+                    // Will handle creation below
+                } else {
+                    // Check if it's a symlink
+                    let qid = rwalk.wqids.first().unwrap();
+                    if qid.is_symlink() {
+                        // With O_PATH, we can open symlinks - just get an fd to the symlink itself
+                        if (_flags & O_PATH) != 0 {
                             kprint!(
-                                "sys_openat: O_NOFOLLOW - file exists and is not a symlink, opening"
+                                "sys_openat: O_NOFOLLOW + O_PATH on symlink - creating fd-only descriptor"
                             );
-
-                            let tlopen = TlopenMessage::new(0, file_fid, p9_flags);
-                            match tlopen.send_tlopen() {
-                                Ok(_) => {}
-                                Err(_) => {
-                                    clunk(file_fid, false);
-                                    return Err(Err::IO);
-                                }
-                            }
-
-                            match RlopenMessage::read_response() {
-                                P9Response::Success(rlopen) => {
-                                    let is_directory = rlopen.qid.is_dir();
-                                    set_fd(file_fid, file_fid);
-                                    let fd_entry = get_fd(file_fid);
-                                    let mut file_desc = get_file_desc(fd_entry.file_desc_id);
-                                    file_desc.mode = p9_flags;
-                                    file_desc.is_dir = is_directory;
-                                    file_desc.flags = _flags;
-                                    update_file_desc(fd_entry.file_desc_id, file_desc);
-                                    return Ok(file_fid);
-                                }
-                                P9Response::Error(rlerror) => {
-                                    clunk(file_fid, false);
-                                    return Err(map_p9_error(rlerror.ecode));
-                                }
-                            }
+                            set_fd(file_fid, file_fid);
+                            let fd_entry = get_fd(file_fid);
+                            let mut file_desc = get_file_desc(fd_entry.file_desc_id);
+                            file_desc.mode = 0;
+                            file_desc.is_dir = qid.is_dir();
+                            file_desc.flags = _flags;
+                            update_file_desc(fd_entry.file_desc_id, file_desc);
+                            return Ok(file_fid);
+                        } else {
+                            // O_NOFOLLOW without O_PATH on a symlink - fail with ELOOP
+                            kprint!(
+                                "sys_openat: O_NOFOLLOW - path is a symlink, returning ELOOP"
+                            );
+                            clunk(file_fid, false);
+                            return Err(Err::Loop);
                         }
                     }
-                    crate::p9::P9Response::Error(_) => {
-                        if dir_fid != starting_fid {
-                            clunk(dir_fid, false);
+                    // Not a symlink, file exists
+                    // Check if O_PATH is set - if so, don't actually open the file
+                    if (_flags & O_PATH) != 0 {
+                        kprint!(
+                            "sys_openat: O_NOFOLLOW + O_PATH - creating fd-only descriptor"
+                        );
+                        // For O_PATH, we don't call Tlopen - just set up the fd
+                        set_fd(file_fid, file_fid);
+                        let fd_entry = get_fd(file_fid);
+                        let mut file_desc = get_file_desc(fd_entry.file_desc_id);
+                        file_desc.mode = 0;
+                        file_desc.is_dir = qid.is_dir();
+                        file_desc.flags = _flags;
+                        update_file_desc(fd_entry.file_desc_id, file_desc);
+                        return Ok(file_fid);
+                    }
+
+                    // Normal open
+                    kprint!(
+                        "sys_openat: O_NOFOLLOW - file exists and is not a symlink, opening"
+                    );
+
+                    let tlopen = TlopenMessage::new(0, file_fid, p9_flags);
+                    match tlopen.send_tlopen() {
+                        Ok(P9Response::Success(rlopen)) => {
+                            let is_directory = rlopen.qid.is_dir();
+                            set_fd(file_fid, file_fid);
+                            let fd_entry = get_fd(file_fid);
+                            let mut file_desc = get_file_desc(fd_entry.file_desc_id);
+                            file_desc.mode = p9_flags;
+                            file_desc.is_dir = is_directory;
+                            file_desc.flags = _flags;
+                            update_file_desc(fd_entry.file_desc_id, file_desc);
+                            return Ok(file_fid);
                         }
-                        // File doesn't exist - check if O_CREAT is set
-                        if (_flags & O_CREAT) == 0 {
-                            return Err(Err::FileNotFound);
+                        Ok(P9Response::Error(rlerror)) => {
+                            clunk(file_fid, false);
+                            return Err(map_p9_error(rlerror.ecode));
                         }
-                        // Will handle creation below
+                        Err(_) => {
+                            clunk(file_fid, false);
+                            return Err(Err::IO);
+                        }
                     }
                 }
+            }
+            Ok(crate::p9::P9Response::Error(_)) => {
+                if dir_fid != starting_fid {
+                    clunk(dir_fid, false);
+                }
+                // File doesn't exist - check if O_CREAT is set
+                if (_flags & O_CREAT) == 0 {
+                    return Err(Err::FileNotFound);
+                }
+                // Will handle creation below
             }
             Err(_) => {
                 if dir_fid != starting_fid {
@@ -5753,24 +5632,20 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
             );
             let tgetattr = crate::p9::TgetattrMessage::new(0, file_fid, P9_GETATTR_MODE);
             let is_directory = match tgetattr.send_tgetattr() {
-                Ok(_) => {
+                Ok(P9Response::Success(rgetattr)) => {
                     kprint!("sys_openat: O_PATH Tgetattr sent successfully");
-                    match RgetattrMessage::read_response() {
-                        P9Response::Success(rgetattr) => {
-                            // Check if mode indicates directory (Unix S_IFDIR)
-                            let is_dir = (rgetattr.mode & S_IFDIR) != 0;
-                            kprint!(
-                                "sys_openat: O_PATH mode=0x{:x}, is_dir={}",
-                                rgetattr.mode,
-                                is_dir
-                            );
-                            is_dir
-                        }
-                        P9Response::Error(rlerror) => {
-                            kprint!("sys_openat: O_PATH Rgetattr error: ecode={}", rlerror.ecode);
-                            false
-                        }
-                    }
+                    // Check if mode indicates directory (Unix S_IFDIR)
+                    let is_dir = (rgetattr.mode & S_IFDIR) != 0;
+                    kprint!(
+                        "sys_openat: O_PATH mode=0x{:x}, is_dir={}",
+                        rgetattr.mode,
+                        is_dir
+                    );
+                    is_dir
+                }
+                Ok(P9Response::Error(rlerror)) => {
+                    kprint!("sys_openat: O_PATH Rgetattr error: ecode={}", rlerror.ecode);
+                    false
                 }
                 Err(e) => {
                     kprint!("sys_openat: O_PATH Tgetattr send failed: {:?}", e);
@@ -6141,27 +6016,25 @@ pub fn sys_statx(
         let file_path = vec![file_name];
         let twalk = crate::p9::TwalkMessage::new(0, dir_fid, TEMP_FID_1, file_path);
         match twalk.send_twalk() {
-            Ok(_) => match RwalkMessage::read_response() {
-                P9Response::Success(rwalk) => {
-                    if rwalk.wqids.len() != 1 {
-                        clunk(TEMP_FID_1, false);
-                        if dir_fid != starting_fid {
-                            clunk(dir_fid, false);
-                        }
-                        return Err(Err::FileNotFound);
-                    }
-                    // Clean up directory fid if we allocated one
-                    if dir_fid != starting_fid {
-                        clunk(dir_fid, false);
-                    }
-                }
-                P9Response::Error(_) => {
+            Ok(P9Response::Success(rwalk)) => {
+                if rwalk.wqids.len() != 1 {
+                    clunk(TEMP_FID_1, false);
                     if dir_fid != starting_fid {
                         clunk(dir_fid, false);
                     }
                     return Err(Err::FileNotFound);
                 }
-            },
+                // Clean up directory fid if we allocated one
+                if dir_fid != starting_fid {
+                    clunk(dir_fid, false);
+                }
+            }
+            Ok(P9Response::Error(_)) => {
+                if dir_fid != starting_fid {
+                    clunk(dir_fid, false);
+                }
+                return Err(Err::FileNotFound);
+            }
             Err(_) => {
                 if dir_fid != starting_fid {
                     clunk(dir_fid, false);
@@ -6460,9 +6333,7 @@ pub fn clunk(fid: u32, is_cwd_clunking_allowed: bool) {
 
     let tclunk = crate::p9::TclunkMessage::new(0, fid);
     kprint!("clunk: sending TclunkMessage for fid {}", fid);
-    tclunk.send_tclunk().unwrap();
-    let rclunk = RclunkMessage::read_response();
-    match rclunk {
+    match tclunk.send_tclunk().unwrap() {
         P9Response::Success(rclunk) => {
             kprint!("clunk {}: = {:?}", fid, rclunk);
         }

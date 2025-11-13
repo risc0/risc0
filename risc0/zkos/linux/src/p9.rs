@@ -30,15 +30,12 @@ pub use crate::p9_zkvm::{get_p9_traffic_hash, p9_read_message};
 #[allow(unused_imports)]
 pub use crate::p9_zkvm::{HostReadError, HostWriteError};
 
-// Import for internal use (sending messages)
-use crate::p9_zkvm::p9_send_message;
-
 // Import backend system for message sending
 use crate::p9_backend::get_backend;
 
 // Import for tests
 #[cfg(test)]
-use crate::p9_zkvm::{p9_update_traffic_hash, p9_write};
+use crate::p9_zkvm::{p9_send_message, p9_update_traffic_hash, p9_write};
 
 /// 9P message types
 ///
@@ -964,18 +961,8 @@ impl TflushMessage {
 
     /// Send the Tflush message using p9_write
     /// Returns the number of bytes written, or an error
-    pub fn send_tflush(&self) -> Result<u32, TflushError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 16]; // Large enough for Tflush message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TflushError::InternalError),
-        }
+    pub fn send_tflush(&self) -> Result<P9Response<RflushMessage>, TflushError> {
+        get_backend().send_tflush(self)
     }
 }
 
@@ -2146,20 +2133,9 @@ impl TauthMessage {
         Ok(offset)
     }
 
-    /// Send the Tauth message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tauth(&self) -> Result<u32, TauthError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 1024]; // Large enough for Tauth message with strings
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TauthError::InternalError),
-        }
+    /// Send the Tauth message using the active backend
+    pub fn send_tauth(&self) -> Result<P9Response<RauthMessage>, TauthError> {
+        get_backend().send_tauth(self)
     }
 }
 
@@ -2664,20 +2640,9 @@ impl TstatfsMessage {
         Ok(offset)
     }
 
-    /// Send the Tstatfs message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tstatfs(&self) -> Result<u32, TstatfsError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 16]; // Large enough for Tstatfs message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TstatfsError::InternalError),
-        }
+    /// Send the Tstatfs message using the active backend
+    pub fn send_tstatfs(&self) -> Result<P9Response<RstatfsMessage>, TstatfsError> {
+        get_backend().send_tstatfs(self)
     }
 }
 
@@ -5460,20 +5425,9 @@ impl TfsyncMessage {
         Ok(offset)
     }
 
-    /// Send the Tfsync message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tfsync(&self) -> Result<u32, TfsyncError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 32]; // Large enough for Tfsync message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TfsyncError::InternalError),
-        }
+    /// Send the Tfsync message using the active backend
+    pub fn send_tfsync(&self) -> Result<P9Response<RfsyncMessage>, TfsyncError> {
+        get_backend().send_tfsync(self)
     }
 }
 
@@ -5664,20 +5618,9 @@ impl TlockMessage {
         Ok(offset)
     }
 
-    /// Send the Tlock message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tlock(&self) -> Result<u32, TlockError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 128]; // Large enough for Tlock message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TlockError::InternalError),
-        }
+    /// Send the Tlock message using the active backend
+    pub fn send_tlock(&self) -> Result<P9Response<RlockMessage>, TlockError> {
+        get_backend().send_tlock(self)
     }
 }
 
@@ -5866,20 +5809,9 @@ impl TgetlockMessage {
         Ok(offset)
     }
 
-    /// Send the Tgetlock message using p9_write
-    /// Returns the number of bytes written, or an error
-    pub fn send_tgetlock(&self) -> Result<u32, TgetlockError> {
-        // Create a buffer for the serialized message
-        let mut buf = [0u8; 128]; // Large enough for Tgetlock message
-
-        // Serialize the message
-        let bytes_written = self.serialize(&mut buf)?;
-
-        // Send via p9_send_message
-        match p9_send_message(&buf, bytes_written) {
-            Ok(result) => Ok(result),
-            Err(_) => Err(TgetlockError::InternalError),
-        }
+    /// Send the Tgetlock message using the active backend
+    pub fn send_tgetlock(&self) -> Result<P9Response<RgetlockMessage>, TgetlockError> {
+        get_backend().send_tgetlock(self)
     }
 }
 
