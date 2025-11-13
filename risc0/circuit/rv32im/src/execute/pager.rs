@@ -136,7 +136,7 @@ impl Region<'_> {
                     return Ok(0);
                 };
                 let read_len = usize::min(chunk.len(), buf.len());
-                buf[..read_len].copy_from_slice(chunk);
+                buf[..read_len].copy_from_slice(&chunk[..read_len]);
                 self.pos += read_len;
                 Ok(read_len)
             }
