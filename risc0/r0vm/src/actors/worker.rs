@@ -15,6 +15,7 @@
 
 use std::{borrow::Cow, rc::Rc, sync::Arc};
 
+use anyhow::Context as _;
 use derive_more::From;
 use opentelemetry::{
     global::BoxedSpan,
@@ -636,7 +637,8 @@ impl GpuProcessor {
             prover.get()?.prove_preflight(&ctx, *task.preflight_results)
         })
         .await
-        .map_err(|e| Error::new(format!("JoinHandle error: prove_segment task: {e}")))??;
+        .map_err(|e| Error::new(format!("JoinHandle error: prove_segment task: {e}")))?
+        .context("prove_segment")?;
 
         let end = if last {
             SegmentIndex::new(task.segment_index.major + 1, 0)
@@ -669,7 +671,8 @@ impl GpuProcessor {
         let receipt =
             tokio::task::spawn_blocking(move || prover.get()?.prove_keccak(&task.request))
                 .await
-                .map_err(|e| Error::new(format!("JoinHandle error: prove_keccak task: {e}")))??;
+                .map_err(|e| Error::new(format!("JoinHandle error: prove_keccak task: {e}")))?
+                .context("prove_keccak")?;
         Ok(vec![
             TaskDone::ProveKeccak(Arc::new(ProveKeccakDone { index, receipt })).into(),
         ])
@@ -685,7 +688,8 @@ impl GpuProcessor {
         let range = task.segment_range;
         let receipt = tokio::task::spawn_blocking(move || prover.get()?.lift(&task.receipt))
             .await
-            .map_err(|e| Error::new(format!("JoinHandle error: lift task: {e}")))??;
+            .map_err(|e| Error::new(format!("JoinHandle error: lift task: {e}")))?
+            .context("lift")?;
         Ok(vec![
             TaskDone::Lift(Box::new(JoinNode { range, receipt })).into(),
         ])
@@ -703,7 +707,8 @@ impl GpuProcessor {
             prover.get()?.join(&task.receipts[0], &task.receipts[1])
         })
         .await
-        .map_err(|e| Error::new(format!("JoinHandle error: join task: {e}")))??;
+        .map_err(|e| Error::new(format!("JoinHandle error: join task: {e}")))?
+        .context("join")?;
         Ok(vec![
             TaskDone::Join(Box::new(JoinNode { range, receipt })).into(),
         ])
@@ -726,7 +731,8 @@ impl GpuProcessor {
             prover.get()?.union(&task.receipts[0], &task.receipts[1])
         })
         .await
-        .map_err(|e| Error::new(format!("JoinHandle error: union task: {e}")))??;
+        .map_err(|e| Error::new(format!("JoinHandle error: union task: {e}")))?
+        .context("union")?;
         Ok(vec![
             TaskDone::Union(Arc::new(UnionDone {
                 height,
@@ -752,7 +758,8 @@ impl GpuProcessor {
             prover.get()?.resolve(&task.conditional, &task.assumption)
         })
         .await
-        .map_err(|e| Error::new(format!("JoinHandle error: resolve task: {e}")))??;
+        .map_err(|e| Error::new(format!("JoinHandle error: resolve task: {e}")))?
+        .context("resolve")?;
         Ok(vec![TaskDone::Resolve(Arc::new(receipt)).into()])
     }
 
@@ -782,7 +789,8 @@ impl GpuProcessor {
                 .await
                 .map_err(|_| {
                     Error::new(format!("JoinHandle error: shrink_wrap({task_kind:?}) task"))
-                })??;
+                })?
+                .with_context(|| format!("shrink_wrap({task_kind:?})"))?;
         Ok(vec![TaskDone::ShrinkWrap(Arc::new(receipt)).into()])
     }
 }
@@ -1058,7 +1066,8 @@ impl CpuProcessor {
             Ok(())
         })
         .await
-        .map_err(|e| Error::new(format!("JoinHandle error: preflight task: {e}")))??;
+        .map_err(|e| Error::new(format!("JoinHandle error: preflight task: {e}")))?
+        .context("preflight")?;
 
         Ok(())
     }
@@ -1071,8 +1080,6 @@ struct Coprocessor {
 
 impl CoprocessorCallback for Coprocessor {
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> anyhow::Result<()> {
-        use anyhow::Context as _;
-
         self.factory
             .tell_blocking(TaskUpdateMsg {
                 header: self.header.clone(),
