@@ -31,7 +31,7 @@ use super::{
 /// Maximum size, in bytes, of the nondet program for bigint2. This limit is imposed to avoid a
 /// crafted binary from providing an oversized bigint2 program, beyond what is actually useful, to
 /// use up executor resources.
-const MAX_NONDET_PROGRAM_SIZE: usize = 10 << 20;
+const MAX_NONDET_PROGRAM_SIZE: usize = 10 << 20; // 10 MB
 
 /// BigInt width, in words, handled by the BigInt accelerator circuit.
 pub(crate) const BIGINT_WIDTH_WORDS: usize = 4;

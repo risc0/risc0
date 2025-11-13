@@ -62,6 +62,11 @@ pub struct ExecutorImpl<'a> {
     return_cache: Cell<(u32, u32)>,
 }
 
+/// Maximum journal size, imposed to limit the ability of the amount of allocation that a guest
+/// program can induce. Can be overridden by the execute caller by providing a custom
+/// [`Write`][std::io::Write] stream for the journal in the [`ExecutorEnv`].
+const MAX_JOURNAL_SIZE: usize = 100 << 20; // 100 MB
+
 /// Check to see if the executor is compatible with the given guest program.
 fn check_program_version(header: &ProgramBinaryHeader) -> Result<()> {
     let abi_kind = header.abi_kind;
@@ -187,7 +192,7 @@ impl<'a> ExecutorImpl<'a> {
         self.env
             .posix_io
             .borrow_mut()
-            .with_write_fd(fileno::JOURNAL, journal.clone());
+            .with_write_fd(fileno::JOURNAL, journal.limit_writer(MAX_JOURNAL_SIZE));
 
         let segment_limit_po2 = self
             .env
