@@ -15,7 +15,7 @@
 
 pub mod analyze;
 
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, io::BufReader};
 
 use anyhow::{Result, ensure};
 use malachite::Natural;
@@ -195,11 +195,11 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
         "bigint2 nondet program is too large"
     );
 
-    let mut program_bytes = ctx.read_region(
+    let mut program_bytes = BufReader::new(ctx.read_region(
         LoadOp::Load,
         nondet_program_ptr.baddr(),
         nondet_program_size_bytes,
-    )?;
+    )?);
     let program = bibc::Program::decode(&mut program_bytes)?;
     drop(program_bytes);
 
