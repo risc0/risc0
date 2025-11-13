@@ -569,7 +569,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          lfs: true
           fetch-depth: 0
+      - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
