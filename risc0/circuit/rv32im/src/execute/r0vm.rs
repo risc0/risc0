@@ -107,6 +107,7 @@ pub(crate) trait Risc0Context {
 
     /// Create an [`std::io`] reader over the given memory region for streaming reads.
     fn read_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<impl Read> {
+        /// A reader for guest memory reagion implemented using [Risc0Context::load_region].
         struct Reader<'a, C: ?Sized> {
             ctx: &'a mut C,
             op: LoadOp,
@@ -130,7 +131,6 @@ pub(crate) trait Risc0Context {
 
         let end = addr
             .checked_add(size as u32)
-            .filter(|end| *end < MEMORY_END_ADDR.baddr())
             .context("Region end is past the end of memory")?;
 
         Ok(Reader {
