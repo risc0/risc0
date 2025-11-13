@@ -622,11 +622,13 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(word)
     }
 
+    /// Implementation of [`Risc0Context::load_region`] using paged-memory [`Region`].
     #[inline(always)]
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
         Region::new(&mut self.pager, op, addr, size)?.into_vec()
     }
 
+    /// Implementation of [`Risc0Context::read_region`] using paged-memory [`Region`].
     fn read_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<impl Read> {
         Ok(Region::new(&mut self.pager, op, addr, size)?.reader())
     }
