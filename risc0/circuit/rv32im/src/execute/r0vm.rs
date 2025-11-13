@@ -13,7 +13,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{cmp::min, fmt::Write as _};
+use std::{
+    cmp::min,
+    fmt::Write as _,
+    io::{Cursor, Read},
+};
 
 use anyhow::{Result, anyhow, bail};
 use risc0_binfmt::{ByteAddr, WordAddr};
@@ -105,6 +109,11 @@ pub(crate) trait Risc0Context {
             }
         }
         Ok(region)
+    }
+
+    /// Create an [`std::io`] reader over the given memory region for streaming reads.
+    fn read_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<impl Read> {
+        Ok(Cursor::new(self.load_region(op, addr, size)?))
     }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;

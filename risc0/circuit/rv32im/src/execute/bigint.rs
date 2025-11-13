@@ -184,14 +184,13 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
         "nondet_program_ptr: {nondet_program_ptr:?}, nondet_program_size: {nondet_program_size}"
     );
 
-    let program_bytes = ctx.load_region(
+    let mut program_bytes = ctx.read_region(
         LoadOp::Load,
         nondet_program_ptr.baddr(),
         nondet_program_size as usize * WORD_SIZE,
     )?;
-    tracing::debug!("program_bytes: {}", program_bytes.len());
-    let mut cursor = Cursor::new(program_bytes);
-    let program = bibc::Program::decode(&mut cursor)?;
+    let program = bibc::Program::decode(&mut program_bytes)?;
+    drop(program_bytes);
 
     let witness = {
         let mut io = BigIntIOImpl::new(ctx, mode);
@@ -199,15 +198,23 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
         std::mem::take(&mut io.witness)
     };
 
-    ctx.load_region(
-        LoadOp::Load,
-        verify_program_ptr.baddr(),
-        verify_program_size * WORD_SIZE,
+    // Read the verify program and the witness so that they are paged-in, and the cycles for
+    // loading them are recorded.
+    std::io::copy(
+        &mut ctx.read_region(
+            LoadOp::Load,
+            verify_program_ptr.baddr(),
+            verify_program_size * WORD_SIZE,
+        )?,
+        &mut std::io::sink(),
     )?;
-    ctx.load_region(
-        LoadOp::Load,
-        consts_ptr.baddr(),
-        consts_size as usize * WORD_SIZE,
+    std::io::copy(
+        &mut ctx.read_region(
+            LoadOp::Load,
+            consts_ptr.baddr(),
+            consts_size as usize * WORD_SIZE,
+        )?,
+        &mut std::io::sink(),
     )?;
 
     Ok(BigIntExec {

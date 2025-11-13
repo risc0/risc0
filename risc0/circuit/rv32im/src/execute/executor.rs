@@ -17,6 +17,7 @@ use std::{
     cell::RefCell,
     collections::BTreeSet,
     fmt::Debug,
+    io::Read,
     rc::Rc,
     sync::mpsc::{SyncSender, sync_channel},
     thread::{self, ScopedJoinHandle},
@@ -624,6 +625,10 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     #[inline(always)]
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
         Region::new(&mut self.pager, op, addr, size)?.into_vec()
+    }
+
+    fn read_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<impl Read> {
+        Ok(Region::new(&mut self.pager, op, addr, size)?.reader())
     }
 
     #[inline(always)]
