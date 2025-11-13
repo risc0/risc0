@@ -307,9 +307,6 @@ impl Emulator {
         }
 
         let word = ctx.load_memory(pc.waddr())?;
-        // TODO(victor/perf): Why is this seperately checked here. It is implied by the
-        // decoded.opcode check above in exec_rv32im. One difference could be that the if let
-        // below will result in a call to ctx.on_normal_end, whereas a failure here will not.
         if word & 0x03 != 0x03 {
             ctx.trap(Exception::IllegalInstruction(word, 0))?;
             return Ok(());

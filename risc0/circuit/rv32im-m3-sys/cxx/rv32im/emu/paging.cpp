@@ -53,7 +53,7 @@ void PagedMemory::commit(const std::vector<PageDetails*>& pages) {
   // Page in all the pages that were read
   auto itNodeEnd = loaded.lower_bound(MEMORY_SIZE_MPAGES);
   for (auto it = itNodeEnd; it != loaded.end(); ++it) {
-    LOG(2, "Paging in: " << *it - MEMORY_SIZE_MPAGES);
+    LOG(3, "Paging in: " << *it - MEMORY_SIZE_MPAGES);
     pageInPage(*it - MEMORY_SIZE_MPAGES);
   }
   // Page in all nodes that were read
@@ -63,7 +63,7 @@ void PagedMemory::commit(const std::vector<PageDetails*>& pages) {
   // Page out all the new pages, update image
   for (auto it = loaded.lower_bound(MEMORY_SIZE_MPAGES); it != loaded.end(); ++it) {
     size_t page = *it - MEMORY_SIZE_MPAGES;
-    LOG(2, "Paging out: " << page);
+    LOG(3, "Paging out: " << page);
     pageOutPage(page, pages[page]);
   }
   // Page out all  nodes

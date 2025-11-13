@@ -21,7 +21,7 @@ cc_library(
         "//rv32im/base",
         "//rv32im/circuit",
         "//zkp",
-        "@num",
+        "@boost",
         "@unordered_dense",
     ],
 )
