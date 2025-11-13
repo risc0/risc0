@@ -15,7 +15,7 @@
 
 pub mod analyze;
 
-use std::{collections::BTreeMap, io::Cursor};
+use std::collections::BTreeMap;
 
 use anyhow::{Result, ensure};
 use malachite::Natural;
@@ -27,6 +27,11 @@ use super::{
     platform::*,
     r0vm::{LoadOp, Risc0Context},
 };
+
+/// Maximum size, in bytes, of the nondet program for bigint2. This limit is imposed to avoid a
+/// crafted binary from providing an oversized bigint2 program, beyond what is actually useful, to
+/// use up executor resources.
+const MAX_NONDET_PROGRAM_SIZE: usize = 10 << 20;
 
 /// BigInt width, in words, handled by the BigInt accelerator circuit.
 pub(crate) const BIGINT_WIDTH_WORDS: usize = 4;
@@ -184,10 +189,16 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
         "nondet_program_ptr: {nondet_program_ptr:?}, nondet_program_size: {nondet_program_size}"
     );
 
+    let nondet_program_size_bytes = nondet_program_size as usize * WORD_SIZE;
+    ensure!(
+        nondet_program_size_bytes <= MAX_NONDET_PROGRAM_SIZE,
+        "bigint2 nondet program is too large"
+    );
+
     let mut program_bytes = ctx.read_region(
         LoadOp::Load,
         nondet_program_ptr.baddr(),
-        nondet_program_size as usize * WORD_SIZE,
+        nondet_program_size_bytes,
     )?;
     let program = bibc::Program::decode(&mut program_bytes)?;
     drop(program_bytes);
