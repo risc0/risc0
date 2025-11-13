@@ -790,7 +790,7 @@ pub fn start_linux_binary(argc: u32) -> ! {
             
             if opt == "opts=p9mem" || opt == "opts=p9zc" {
                 // Zero-copy in-memory filesystem
-                set_p9_enabled(true);
+            set_p9_enabled(true);
                 init_p9_zerocopy_backend();
             } else if opt.starts_with("opts=p9") {
                 // Traditional P9 over host calls (zkVM backend)
