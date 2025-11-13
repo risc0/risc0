@@ -125,7 +125,7 @@ mod tests {
         assert_eq!(
             result,
             fibonacci(fib_iters),
-            "We expect the zkVM output to be the product of the inputs"
+            "We expect the zkVM output to equal fibonacci(fib_iters)"
         )
     }
 }
