@@ -24,8 +24,8 @@ use crate::{
     prove::write_iop::WriteIOP,
 };
 
-pub struct MerkleTreeProver<H: Hal> {
-    params: MerkleTreeParams,
+pub struct MerkleTreeProver<H: Hal + ?Sized> {
+    pub(crate) params: MerkleTreeParams,
 
     // The retained matrix of values
     matrix: H::Buffer<H::Elem>,
@@ -39,7 +39,7 @@ pub struct MerkleTreeProver<H: Hal> {
     root: Digest,
 }
 
-impl<H: Hal> MerkleTreeProver<H> {
+impl<H: Hal + ?Sized> MerkleTreeProver<H> {
     /// Generate a merkle tree from a matrix of values.
     ///
     /// The proofs will prove a single 'column' of values in the tree at a
@@ -97,6 +97,49 @@ impl<H: Hal> MerkleTreeProver<H> {
         &self.root
     }
 
+    /// Get a column
+    pub fn get_column(&self, idx: usize) -> Vec<H::Elem> {
+        assert!(idx < self.params.row_size);
+        let mut out = Vec::with_capacity(self.params.col_size);
+        self.matrix.view(|view| {
+            for i in 0..self.params.col_size {
+                out.push(view[idx + i * self.params.row_size]);
+            }
+        });
+        out
+    }
+
+    /// Get digests for a column
+    pub fn get_digests(&self, idx: usize) -> Vec<Digest> {
+        assert!(idx < self.params.row_size);
+        let mut digests_out = vec![];
+        let mut idx = idx + self.params.row_size;
+
+        while idx >= 2 * self.params.top_size {
+            let low_bit = idx % 2;
+            idx /= 2;
+            let other_idx = 2 * idx + (1 - low_bit);
+            let other = self.nodes.get_at(other_idx);
+            digests_out.push(other);
+        }
+
+        digests_out
+    }
+
+    /// Convert this tree prover to a different HAL
+    pub fn map_hal<OtherH: Hal>(
+        &self,
+        map_matrix: impl FnOnce(&H::Buffer<H::Elem>) -> OtherH::Buffer<OtherH::Elem>,
+        map_nodes: impl FnOnce(&H::Buffer<Digest>) -> OtherH::Buffer<Digest>,
+    ) -> MerkleTreeProver<OtherH> {
+        MerkleTreeProver {
+            params: self.params.clone(),
+            matrix: map_matrix(&self.matrix),
+            nodes: map_nodes(&self.nodes),
+            root: self.root.clone(),
+        }
+    }
+
     /// Generate a proof at a given index, and return the values at that column.
     ///
     /// The format of the proof is always:
@@ -106,38 +149,26 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// It is presumed the verifier is given the index of the row from other
     /// parts of the protocol, and verification will of course fail if the
     /// wrong row is specified.
-    pub fn prove(&self, hal: &H, iop: &mut WriteIOP<H::Field>, idx: usize) -> Vec<H::Elem> {
-        assert!(idx < self.params.row_size);
-        let mut out = Vec::with_capacity(self.params.col_size);
-        if hal.has_unified_memory() {
-            self.matrix.view(|view| {
-                for i in 0..self.params.col_size {
-                    out.push(view[idx + i * self.params.row_size]);
-                }
-            });
-        } else {
-            let sample = hal.alloc_elem("sample", self.params.col_size);
-            hal.gather_sample(
-                &sample,
-                &self.matrix,
-                idx,
-                self.params.col_size,
-                self.params.row_size,
-            );
-            sample.view(|view| {
-                out.extend_from_slice(view);
-            });
-        }
-        iop.write_field_elem_slice::<H::Elem>(out.as_slice());
-        let mut idx = idx + self.params.row_size;
-        while idx >= 2 * self.params.top_size {
-            let low_bit = idx % 2;
-            idx /= 2;
-            let other_idx = 2 * idx + (1 - low_bit);
-            let other = self.nodes.get_at(other_idx);
-            iop.write_pod_slice(&[other]);
-        }
+    #[cfg(test)]
+    fn prove(&self, iop: &mut WriteIOP<H::Field>, idx: usize) -> Vec<H::Elem> {
+        let out = self.get_column(idx);
+
+        iop.write_field_elem_slice(&out);
+        iop.write_pod_slice(&self.get_digests(idx)[..]);
         out
+    }
+}
+
+#[cfg(feature = "cuda")]
+impl<CH: crate::hal::cuda::CudaHash + ?Sized> MerkleTreeProver<crate::hal::cuda::CudaHal<CH>> {
+    pub fn to_cuda_prover(&self) -> crate::hal::cuda::CudaMerkleTreeProver {
+        crate::hal::cuda::CudaMerkleTreeProver {
+            row_size: self.params.row_size,
+            col_size: self.params.col_size,
+            top_size: self.params.top_size,
+            matrix: self.matrix.as_device_ptr(),
+            nodes: self.nodes.as_device_ptr(),
+        }
     }
 }
 
@@ -193,7 +224,7 @@ mod tests {
         let hal = CpuHal::new(suite);
         let prover = init_prover(&hal, rows, cols, queries);
         let mut iop = WriteIOP::new(hal.get_hash_suite().rng.as_ref());
-        prover.prove(&hal, &mut iop, rows);
+        prover.prove(&mut iop, rows);
     }
 
     fn bad_row_access_all(rows: usize, cols: usize, queries: usize) {
@@ -218,7 +249,7 @@ mod tests {
         prover.commit(&mut iop);
         for _query in 0..queries {
             let r_idx = iop.rng.random_bits(log2_ceil(rows)) as usize;
-            let col = prover.prove(&hal, &mut iop, r_idx);
+            let col = prover.prove(&mut iop, r_idx);
             for (c_idx, col) in col.iter().enumerate() {
                 assert_eq!(
                     *col,
