@@ -86,7 +86,7 @@ impl<'a> Region<'a> {
         // NOTE: Load region is never called with LoadOp::Record. This op is only used in for
         // special memory (e.g. the page tree nodes and PoVW nonce).
         if let LoadOp::Record = op {
-            unimplemented!("Region is not implemented for LoadOp::Record")
+            bail!("Region is not implemented for LoadOp::Record")
         }
 
         Ok(Self {
