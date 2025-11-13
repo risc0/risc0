@@ -77,6 +77,19 @@ impl ByteAddr {
         self.0 == 0
     }
 
+    /// Add an offset to an address, returning `None` on overflow.
+    pub const fn checked_add(self, rhs: u32) -> Option<Self> {
+        match self.0.checked_add(rhs) {
+            None => None,
+            Some(x) => Some(Self(x)),
+        }
+    }
+
+    /// Add an offset to an address, saturating on overflow.
+    pub const fn saturating_add(self, rhs: u32) -> Self {
+        Self(self.0.saturating_add(rhs))
+    }
+
     /// Add an offset to an address
     ///
     /// This will wrap on overflow, e.g. `0xFFFFFFFF + 0x00000001` is

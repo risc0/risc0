@@ -13,13 +13,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{
-    cmp::min,
-    fmt::Write as _,
-    io::{Cursor, Read},
-};
+use std::{cmp::min, fmt::Write as _, io::Read};
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Context, Result, anyhow, bail};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::{
@@ -111,7 +107,38 @@ pub(crate) trait Risc0Context {
 
     /// Create an [`std::io`] reader over the given memory region for streaming reads.
     fn read_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<impl Read> {
-        Ok(Cursor::new(self.load_region(op, addr, size)?))
+        struct Reader<'a, C: ?Sized> {
+            ctx: &'a mut C,
+            op: LoadOp,
+            pos: ByteAddr,
+            end: ByteAddr,
+        }
+
+        impl<C: Risc0Context + ?Sized> Read for Reader<'_, C> {
+            fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+                let end = ByteAddr::min(self.pos.saturating_add(buf.len() as u32), self.end);
+                let size = (end.0 - self.pos.0) as usize;
+                let region = self
+                    .ctx
+                    .load_region(self.op, self.pos, size)
+                    .map_err(std::io::Error::other)?;
+                buf[..size].copy_from_slice(&region);
+                self.pos += size;
+                Ok(size)
+            }
+        }
+
+        let end = addr
+            .checked_add(size as u32)
+            .filter(|end| *end < MEMORY_END_ADDR.baddr())
+            .context("Region end is past the end of memory")?;
+
+        Ok(Reader {
+            ctx: self,
+            op,
+            pos: addr,
+            end,
+        })
     }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;

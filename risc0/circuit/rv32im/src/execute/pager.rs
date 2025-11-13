@@ -73,12 +73,10 @@ impl<'a> Region<'a> {
         start: ByteAddr,
         size: usize,
     ) -> Result<Self> {
-        let end = ByteAddr(
-            (start.0 as usize)
-                .checked_add(size)
-                .filter(|end| *end < MEMORY_END_ADDR.baddr().0 as usize)
-                .context("Load region end is past the end of memory")? as u32,
-        );
+        let end = start
+            .checked_add(size as u32)
+            .filter(|end| *end < MEMORY_END_ADDR.baddr())
+            .context("Region end is past the end of memory")?;
         // NOTE: Load region is never called with LoadOp::Record. This op is only used in for
         // special memory (e.g. the page tree nodes and PoVW nonce).
         if let LoadOp::Record = op {
