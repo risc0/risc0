@@ -477,10 +477,23 @@ impl PagedMemory {
         }
     }
 
+    /// Load a word from the RAM.
+    ///
+    /// This method cannot be used to access register values. If the given address is a memory
+    /// mapped register address, the results may not match the current values of the registers.
     #[inline(always)]
     fn load_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
-        Ok(self.load_page(page_idx)?.load(addr))
+        let node_idx = node_idx(page_idx);
+        // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}, node: {node_idx:#08x}");
+        let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
+            cache_idx
+        } else {
+            self.load_page(page_idx)?;
+            self.page_states.set(node_idx, PageState::Loaded);
+            self.page_table.get(page_idx).unwrap()
+        };
+        Ok(self.page_cache[cache_idx].load(addr))
     }
 
     #[inline(always)]
