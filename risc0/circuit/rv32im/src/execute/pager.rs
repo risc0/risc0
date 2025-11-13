@@ -464,7 +464,6 @@ impl PagedMemory {
     pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<&Page> {
         // Registers are not stored in the main RAM during execution. If the page containing the
         // memory mapped registers is requested, then they must first be written to RAM.
-        // TODO(victor/perf): Does this conditional have any perf impact?
         if page_idx == USER_REGS_ADDR.page_idx() || page_idx == MACHINE_REGS_ADDR.page_idx() {
             self.write_registers()
         }
@@ -523,7 +522,6 @@ impl PagedMemory {
     pub(crate) fn load_page(&mut self, page_idx: u32) -> Result<&Page> {
         // Registers are not stored in the main RAM during execution. If the page containing the
         // memory mapped registers is requested, then they must first be written to RAM.
-        // TODO(victor/perf): Does this conditional have any perf impact?
         if page_idx == USER_REGS_ADDR.page_idx() || page_idx == MACHINE_REGS_ADDR.page_idx() {
             self.write_registers()
         }
