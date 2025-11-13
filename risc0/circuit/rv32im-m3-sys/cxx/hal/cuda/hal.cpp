@@ -172,6 +172,14 @@ private:
   cudaStream_t stream;
 };
 
+template <typename... Types> inline std::string fmt(const char* fmt, Types... args) {
+  size_t len = std::snprintf(nullptr, 0, fmt, args...);
+  std::string ret(++len, '\0');
+  std::snprintf(&ret.front(), len, fmt, args...);
+  ret.resize(--len);
+  return ret;
+}
+
 using CudaBufferPtr = std::shared_ptr<CudaBuffer>;
 
 class CudaHal : public IHal {
@@ -191,10 +199,15 @@ private:
 
 public:
   CudaHal() {
-    if (!cuda_stream_create(&stream)) {
-      throw std::runtime_error("error during cudaStreamCreate");
+    // cudaStreamCreate(&stream);
+    cudaError_t err = cudaStreamCreate(&stream);
+    if (err != cudaSuccess) {
+      auto msg = fmt(
+          "cudaStreamCreate failed: \"%s\"\n%s:%d", cudaGetErrorString(err), __FILE__, __LINE__);
+      throw std::runtime_error{msg};
     }
   }
+
   ~CudaHal() override { (void)cuda_stream_destroy(stream); }
 
   void hashRows(HalArray<Digest> out, HalMatrix<Fp> in) override {

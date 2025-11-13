@@ -24,6 +24,7 @@
 #endif
 
 // Very basic numbers
+CONSTANT uint32_t WORD_SIZE = 4;
 CONSTANT uint32_t BITS_PER_BYTE = 8;
 CONSTANT uint32_t BYTES_PER_WORD_PO2 = 2;
 CONSTANT uint32_t BYTES_PER_WORD = (1 << BYTES_PER_WORD_PO2);

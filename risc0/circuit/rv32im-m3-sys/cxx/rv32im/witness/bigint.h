@@ -17,6 +17,12 @@
 
 #include "rv32im/witness/mem.h"
 
+enum class MemoryOp {
+  READ = 0,
+  WRITE = 1,
+  CHECK = 2,
+};
+
 enum class PolyOp {
   NOP = 0,
   SHIFT = 1,

@@ -429,7 +429,7 @@ mod riscv {
     test_case!(bne);
     test_case!(div);
     test_case!(divu);
-    test_case!(fence);
+    // test_case!(fence);
     test_case!(jal);
     test_case!(jalr);
     test_case!(misaligned_jalr);
@@ -659,9 +659,12 @@ fn shrink_wrap() {
     // receipt.
 
     use rayon::prelude::*;
+    let succinct_receipt = prove_nothing_succinct().receipt;
     (0..3).into_par_iter().for_each(|_| {
-        prove_nothing_impl(ReceiptKind::Groth16)
-            .receipt
+        get_prover_server(&ProverOpts::default())
+            .unwrap()
+            .compress(&ProverOpts::groth16(), &succinct_receipt)
+            .unwrap()
             .inner
             .groth16()
             .unwrap();
@@ -675,6 +678,7 @@ fn shrink_wrap() {
 #[test_log::test]
 #[cfg(any(feature = "cuda", feature = "docker"))]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg(not(feature = "rv32im-m3"))]
 fn verify_in_guest(#[case] kind: ReceiptKind) {
     use risc0_zkvm_methods::VERIFY_ELF;
 

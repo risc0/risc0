@@ -48,16 +48,35 @@ struct BigIntInstruction {
 // of validate
 size_t witgenBigInt(std::map<uint32_t, uint32_t>& polyWitness, PeekFunc peek);
 
-struct BytePolynomial {
+class BytePolynomial {
+public:
   BytePolynomial();
   static BytePolynomial zero();
   static BytePolynomial one();
+  static BytePolynomial negPoly();
+  static BytePolynomial basisPoint();
+  static BytePolynomial fromData(uint32_t* data);
+
   BytePolynomial shift() const;
   BytePolynomial operator*(int x) const;
   BytePolynomial operator+(const BytePolynomial& rhs) const;
   BytePolynomial operator*(const BytePolynomial& rhs) const;
 
+  size_t size() const { return coeffs.size(); }
+
+  int32_t operator[](size_t x) const {
+    if (x < coeffs.size()) {
+      return coeffs[x];
+    }
+    return 0;
+  }
+
+  BytePolynomial propagateCarry() const;
+
+private:
   std::vector<int32_t> coeffs;
+
+  friend std::ostream& operator<<(std::ostream& os, const BytePolynomial& x);
 };
 
 std::ostream& operator<<(std::ostream& os, const BytePolynomial& x);
