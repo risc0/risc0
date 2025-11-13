@@ -622,6 +622,11 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     #[inline(always)]
+    fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
+        Region::new(&mut self.pager, op, addr, size)?.into_vec()
+    }
+
+    #[inline(always)]
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         // tracing::trace!(
         //     "store_u32({:?}, {word:#010x}), pc: {:?}",
