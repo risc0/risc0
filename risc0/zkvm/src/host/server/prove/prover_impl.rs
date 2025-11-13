@@ -40,19 +40,13 @@ use crate::{
 
 /// An implementation of a Prover that runs locally.
 pub struct ProverImpl {
-    #[cfg(feature = "rv32im-m3")]
-    prover: risc0_circuit_rv32im_m3::prove::ProverContext,
     opts: ProverOpts,
 }
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
     pub fn new(opts: ProverOpts) -> Result<Self> {
-        Ok(Self {
-            #[cfg(feature = "rv32im-m3")]
-            prover: risc0_circuit_rv32im_m3::prove::segment_prover(opts.max_prover_po2)?,
-            opts,
-        })
+        Ok(Self { opts })
     }
 }
 
@@ -321,7 +315,8 @@ impl ProverServer for ProverImpl {
     ) -> Result<SegmentReceipt> {
         tracing::debug!("prove_preflight");
 
-        let seal = self.prover.prove(&preflight_results.inner)?;
+        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(self.opts.max_prover_po2)?;
+        let seal = prover.prove(&preflight_results.inner)?;
 
         let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output)
             .context("Decode ReceiptClaim from seal")?;

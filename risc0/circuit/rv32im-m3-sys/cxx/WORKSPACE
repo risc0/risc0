@@ -89,11 +89,11 @@ new_local_repository(
     path = "../vendor/ankerl",
 )
 
-# https://github.com/983/Num
+# https://github.com/boostorg/multiprecision
 new_local_repository(
-    name = "num",
-    build_file = "//bazel/third_party:num.BUILD",
-    path = "../vendor/num",
+    name = "boost",
+    build_file = "//bazel/third_party:boost.BUILD",
+    path = "../vendor/boost",
 )
 
 #
