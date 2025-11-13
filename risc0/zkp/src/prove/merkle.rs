@@ -136,7 +136,7 @@ impl<H: Hal + ?Sized> MerkleTreeProver<H> {
             params: self.params.clone(),
             matrix: map_matrix(&self.matrix),
             nodes: map_nodes(&self.nodes),
-            root: self.root.clone(),
+            root: self.root,
         }
     }
 

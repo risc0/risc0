@@ -282,6 +282,7 @@ pub trait Hal {
         });
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn fri_prove(
         &self,
         out_values: &Self::Buffer<u32>,
@@ -667,7 +668,7 @@ mod testutil {
             16 * 16,
             <DualHal<_, CpuHal<_>, H> as Hal>::Elem::from_u64(13),
         );
-        let trees = vec![
+        let trees = [
             MerkleTreeProver::new(&hal, &matrix1, 16, 16, 10),
             MerkleTreeProver::new(&hal, &matrix2, 16, 16, 10),
         ];
@@ -675,7 +676,7 @@ mod testutil {
         let positions = hal.alloc_u32("fri_prove_pos", 10);
         positions.view_mut(|positions| positions.fill(8));
 
-        let groups_iter = std::iter::repeat(u32::MAX as usize).take(trees.len());
+        let groups_iter = std::iter::repeat_n(u32::MAX as usize, trees.len());
         let groups = hal.alloc_u32("fri_groups", trees.len());
         groups.view_mut(|groups_out| {
             for (dst, src) in groups_out.iter_mut().zip(groups_iter) {

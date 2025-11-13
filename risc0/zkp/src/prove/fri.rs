@@ -109,13 +109,12 @@ pub fn fri_prove<H: Hal>(
     positions.view_mut(|positions| positions.fill_with(|| iop.random_bits(log2_ceil(orig_domain))));
 
     let trees: Vec<_> = inner_merkles
-        .into_iter()
-        .map(|m| *m)
+        .iter()
+        .copied()
         .chain(rounds.iter().map(|r| &r.merkle))
         .collect();
 
-    let groups_iter = std::iter::repeat(u32::MAX as usize)
-        .take(inner_merkles.len())
+    let groups_iter = std::iter::repeat_n(u32::MAX as usize, inner_merkles.len())
         .chain(rounds.iter().map(|r| r.domain / FRI_FOLD));
     let groups = hal.alloc_u32("fri_groups", trees.len());
     groups.view_mut(|groups_out| {
