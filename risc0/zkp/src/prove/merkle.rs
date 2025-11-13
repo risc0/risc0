@@ -172,6 +172,19 @@ impl<CH: crate::hal::cuda::CudaHash + ?Sized> MerkleTreeProver<crate::hal::cuda:
     }
 }
 
+#[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))]
+impl<MH: crate::hal::metal::MetalHash> MerkleTreeProver<crate::hal::metal::MetalHal<MH>> {
+    pub fn to_metal_prover(&self) -> crate::hal::metal::MetalMerkleTreeProver {
+        crate::hal::metal::MetalMerkleTreeProver {
+            row_size: self.params.row_size,
+            col_size: self.params.col_size,
+            top_size: self.params.top_size,
+            matrix: self.matrix.as_device_ptr() as *const u32,
+            nodes: self.nodes.as_device_ptr() as *const u32,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use rand::Rng;
