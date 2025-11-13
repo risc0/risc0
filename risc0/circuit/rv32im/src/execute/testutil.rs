@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{collections::BTreeMap, io::Read};
+use std::collections::BTreeMap;
 
 use anyhow::{Result, bail};
 use risc0_binfmt::{MemoryImage, Program};
@@ -42,7 +42,7 @@ impl Syscall for NullSyscall {
         Ok(buf.len() as u32)
     }
 
-    fn host_write(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _data: impl Read) -> Result<u32> {
+    fn host_write(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
         unimplemented!()
     }
 }

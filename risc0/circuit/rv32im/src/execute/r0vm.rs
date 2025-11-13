@@ -65,8 +65,6 @@ pub(crate) trait Risc0Context {
 
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32>;
 
-    //fn load_page(&mut self, op: LoadOp, addr: WordAddr) -> Result<&[u8; PAGE_BYTES]>;
-
     #[inline(always)]
     fn load_register(&mut self, op: LoadOp, base: WordAddr, idx: usize) -> Result<u32> {
         self.load_u32(op, base + idx)

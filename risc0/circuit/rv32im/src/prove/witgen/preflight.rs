@@ -575,11 +575,12 @@ impl Risc0Context for Preflight<'_> {
     // Pass memory ops to pager + record
     #[inline(always)]
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
-        // tracing::trace!("load_u32: {addr:?}");
         if op == LoadOp::Peek {
             return self.pager.peek(addr);
         }
 
+        // tracing::trace!("load_u32: {addr:?}");
+        let cycle = (2 * self.trace.cycles.len()) as u32;
         // MERKLE_TREE_START_ADDR is the first address in a special region of memory that is
         // outside of the user-addressable range. This region also contains the PoVW nonce.
         let word = if addr >= MERKLE_TREE_START_ADDR {
@@ -596,9 +597,7 @@ impl Risc0Context for Preflight<'_> {
         } else {
             self.pager.load(addr)?
         };
-
         if op == LoadOp::Record {
-            let cycle = (2 * self.trace.cycles.len()) as u32;
             self.orig_words.get_mut(&addr).get_or_insert(word);
             let prev_cycle = self.prev_cycle.insert_default(&addr, cycle, u32::MAX);
             let txn = RawMemoryTransaction {
