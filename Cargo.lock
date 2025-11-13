@@ -7385,6 +7385,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-emu"
+version = "5.0.0"
+dependencies = [
+ "anyhow",
+ "derive_more",
+ "risc0-binfmt",
+ "tracing",
+]
+
+[[package]]
 name = "risc0-groth16"
 version = "5.0.0"
 dependencies = [
