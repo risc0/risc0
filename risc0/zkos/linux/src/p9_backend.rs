@@ -14,11 +14,15 @@
 use crate::p9::{
     P9Response, // Re-use the existing P9Response type from p9.rs (includes RlerrorMessage)
     RattachMessage,
+    RauthMessage,
     RclunkMessage,
+    RflushMessage,
     RfsyncMessage,
     RgetattrMessage,
+    RgetlockMessage,
     RlcreateMessage,
     RlinkMessage,
+    RlockMessage,
     RlopenMessage,
     RmkdirMessage,
     RmknodMessage,
@@ -29,6 +33,7 @@ use crate::p9::{
     RrenameMessage,
     RrenameatMessage,
     RsetattrMessage,
+    RstatfsMessage,
     RsymlinkMessage,
     RunlinkatMessage,
     RversionMessage,
@@ -38,16 +43,24 @@ use crate::p9::{
     RxattrwalkMessage,
     TattachError,
     TattachMessage,
+    TauthError,
+    TauthMessage,
     TclunkError,
     TclunkMessage,
+    TflushError,
+    TflushMessage,
     TfsyncError,
     TfsyncMessage,
     TgetattrError,
     TgetattrMessage,
+    TgetlockError,
+    TgetlockMessage,
     TlcreateError,
     TlcreateMessage,
     TlinkError,
     TlinkMessage,
+    TlockError,
+    TlockMessage,
     TlopenError,
     TlopenMessage,
     TmkdirError,
@@ -68,6 +81,8 @@ use crate::p9::{
     TrenameatMessage,
     TsetattrError,
     TsetattrMessage,
+    TstatfsError,
+    TstatfsMessage,
     TsymlinkError,
     TsymlinkMessage,
     TunlinkatError,
@@ -217,6 +232,30 @@ pub trait P9Backend {
         &mut self,
         msg: &TxattrcreateMessage,
     ) -> Result<P9Response<RxattrcreateMessage>, TxattrcreateError>;
+
+    /// Send Tflush and receive Rflush
+    fn send_tflush(
+        &mut self,
+        msg: &TflushMessage,
+    ) -> Result<P9Response<RflushMessage>, TflushError>;
+
+    /// Send Tauth and receive Rauth
+    fn send_tauth(&mut self, msg: &TauthMessage) -> Result<P9Response<RauthMessage>, TauthError>;
+
+    /// Send Tstatfs and receive Rstatfs
+    fn send_tstatfs(
+        &mut self,
+        msg: &TstatfsMessage,
+    ) -> Result<P9Response<RstatfsMessage>, TstatfsError>;
+
+    /// Send Tlock and receive Rlock
+    fn send_tlock(&mut self, msg: &TlockMessage) -> Result<P9Response<RlockMessage>, TlockError>;
+
+    /// Send Tgetlock and receive Rgetlock
+    fn send_tgetlock(
+        &mut self,
+        msg: &TgetlockMessage,
+    ) -> Result<P9Response<RgetlockMessage>, TgetlockError>;
 }
 
 // Separate statics for each backend type

@@ -11,9 +11,9 @@
 
 #![allow(dead_code)] // Functions are re-exported and used via p9 module
 
-use core::fmt;
-use crate::p9_backend::P9Backend;
 use crate::p9::*;
+use crate::p9_backend::P9Backend;
+use core::fmt;
 
 /// Static mutable global to store the traffic hash value
 static mut TRAFFIC_HASH: [u8; 32] = [0; 32];
@@ -273,137 +273,188 @@ impl ZkvmBackend {
 
 // Implement P9Backend for ZkvmBackend
 impl P9Backend for ZkvmBackend {
-    fn send_tversion(&mut self, msg: &TversionMessage) -> Result<P9Response<RversionMessage>, TversionError> {
+    fn send_tversion(
+        &mut self,
+        msg: &TversionMessage,
+    ) -> Result<P9Response<RversionMessage>, TversionError> {
         let mut buf = [0u8; 64];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TversionError::InternalError)?;
         Ok(RversionMessage::read_response())
     }
-    
-    fn send_tattach(&mut self, msg: &TattachMessage) -> Result<P9Response<RattachMessage>, TattachError> {
+
+    fn send_tattach(
+        &mut self,
+        msg: &TattachMessage,
+    ) -> Result<P9Response<RattachMessage>, TattachError> {
         let mut buf = [0u8; 256];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TattachError::InternalError)?;
         Ok(RattachMessage::read_response())
     }
-    
+
     fn send_twalk(&mut self, msg: &TwalkMessage) -> Result<P9Response<RwalkMessage>, TwalkError> {
         let mut buf = [0u8; 1024];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TwalkError::InternalError)?;
         Ok(RwalkMessage::read_response())
     }
-    
+
     fn send_tread(&mut self, msg: &TreadMessage) -> Result<P9Response<RreadMessage>, TreadError> {
         let mut buf = [0u8; 32];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TreadError::InternalError)?;
         Ok(RreadMessage::read_response())
     }
-    
-    fn send_twrite(&mut self, msg: &TwriteMessage) -> Result<P9Response<RwriteMessage>, TwriteError> {
+
+    fn send_twrite(
+        &mut self,
+        msg: &TwriteMessage,
+    ) -> Result<P9Response<RwriteMessage>, TwriteError> {
         let mut buf = [0u8; 8192];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TwriteError::InternalError)?;
         Ok(RwriteMessage::read_response())
     }
-    
-    fn send_tlopen(&mut self, msg: &TlopenMessage) -> Result<P9Response<RlopenMessage>, TlopenError> {
+
+    fn send_tlopen(
+        &mut self,
+        msg: &TlopenMessage,
+    ) -> Result<P9Response<RlopenMessage>, TlopenError> {
         let mut buf = [0u8; 32];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TlopenError::InternalError)?;
         Ok(RlopenMessage::read_response())
     }
-    
-    fn send_tlcreate(&mut self, msg: &TlcreateMessage) -> Result<P9Response<RlcreateMessage>, TlcreateError> {
+
+    fn send_tlcreate(
+        &mut self,
+        msg: &TlcreateMessage,
+    ) -> Result<P9Response<RlcreateMessage>, TlcreateError> {
         let mut buf = [0u8; 512];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TlcreateError::InternalError)?;
         Ok(RlcreateMessage::read_response())
     }
-    
-    fn send_tgetattr(&mut self, msg: &TgetattrMessage) -> Result<P9Response<RgetattrMessage>, TgetattrError> {
+
+    fn send_tgetattr(
+        &mut self,
+        msg: &TgetattrMessage,
+    ) -> Result<P9Response<RgetattrMessage>, TgetattrError> {
         let mut buf = [0u8; 32];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TgetattrError::InternalError)?;
         Ok(RgetattrMessage::read_response())
     }
-    
-    fn send_tsetattr(&mut self, msg: &TsetattrMessage) -> Result<P9Response<RsetattrMessage>, TsetattrError> {
+
+    fn send_tsetattr(
+        &mut self,
+        msg: &TsetattrMessage,
+    ) -> Result<P9Response<RsetattrMessage>, TsetattrError> {
         let mut buf = [0u8; 128];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TsetattrError::InternalError)?;
         Ok(RsetattrMessage::read_response())
     }
-    
-    fn send_treaddir(&mut self, msg: &TreaddirMessage) -> Result<P9Response<RreaddirMessage>, TreaddirError> {
+
+    fn send_treaddir(
+        &mut self,
+        msg: &TreaddirMessage,
+    ) -> Result<P9Response<RreaddirMessage>, TreaddirError> {
         let mut buf = [0u8; 32];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TreaddirError::InternalError)?;
         Ok(RreaddirMessage::read_response())
     }
-    
-    fn send_treadlink(&mut self, msg: &TreadlinkMessage) -> Result<P9Response<RreadlinkMessage>, TreadlinkError> {
+
+    fn send_treadlink(
+        &mut self,
+        msg: &TreadlinkMessage,
+    ) -> Result<P9Response<RreadlinkMessage>, TreadlinkError> {
         let mut buf = [0u8; 16];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TreadlinkError::InternalError)?;
         Ok(RreadlinkMessage::read_response())
     }
-    
-    fn send_tsymlink(&mut self, msg: &TsymlinkMessage) -> Result<P9Response<RsymlinkMessage>, TsymlinkError> {
+
+    fn send_tsymlink(
+        &mut self,
+        msg: &TsymlinkMessage,
+    ) -> Result<P9Response<RsymlinkMessage>, TsymlinkError> {
         let mut buf = [0u8; 512];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TsymlinkError::InternalError)?;
         Ok(RsymlinkMessage::read_response())
     }
-    
-    fn send_tmknod(&mut self, msg: &TmknodMessage) -> Result<P9Response<RmknodMessage>, TmknodError> {
+
+    fn send_tmknod(
+        &mut self,
+        msg: &TmknodMessage,
+    ) -> Result<P9Response<RmknodMessage>, TmknodError> {
         let mut buf = [0u8; 512];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TmknodError::InternalError)?;
         Ok(RmknodMessage::read_response())
     }
-    
-    fn send_tmkdir(&mut self, msg: &TmkdirMessage) -> Result<P9Response<RmkdirMessage>, TmkdirError> {
+
+    fn send_tmkdir(
+        &mut self,
+        msg: &TmkdirMessage,
+    ) -> Result<P9Response<RmkdirMessage>, TmkdirError> {
         let mut buf = [0u8; 512];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TmkdirError::InternalError)?;
         Ok(RmkdirMessage::read_response())
     }
-    
-    fn send_tunlinkat(&mut self, msg: &TunlinkatMessage) -> Result<P9Response<RunlinkatMessage>, TunlinkatError> {
+
+    fn send_tunlinkat(
+        &mut self,
+        msg: &TunlinkatMessage,
+    ) -> Result<P9Response<RunlinkatMessage>, TunlinkatError> {
         let mut buf = [0u8; 512];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TunlinkatError::InternalError)?;
         Ok(RunlinkatMessage::read_response())
     }
-    
-    fn send_trenameat(&mut self, msg: &TrenameatMessage) -> Result<P9Response<RrenameatMessage>, TrenameatError> {
+
+    fn send_trenameat(
+        &mut self,
+        msg: &TrenameatMessage,
+    ) -> Result<P9Response<RrenameatMessage>, TrenameatError> {
         let mut buf = [0u8; 512];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TrenameatError::InternalError)?;
         Ok(RrenameatMessage::read_response())
     }
-    
-    fn send_tclunk(&mut self, msg: &TclunkMessage) -> Result<P9Response<RclunkMessage>, TclunkError> {
+
+    fn send_tclunk(
+        &mut self,
+        msg: &TclunkMessage,
+    ) -> Result<P9Response<RclunkMessage>, TclunkError> {
         let mut buf = [0u8; 16];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TclunkError::InternalError)?;
         Ok(RclunkMessage::read_response())
     }
-    
-    fn send_tremove(&mut self, msg: &TremoveMessage) -> Result<P9Response<RremoveMessage>, TremoveError> {
+
+    fn send_tremove(
+        &mut self,
+        msg: &TremoveMessage,
+    ) -> Result<P9Response<RremoveMessage>, TremoveError> {
         let mut buf = [0u8; 16];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TremoveError::InternalError)?;
         Ok(RremoveMessage::read_response())
     }
-    
-    fn send_tfsync(&mut self, msg: &TfsyncMessage) -> Result<P9Response<RfsyncMessage>, TfsyncError> {
+
+    fn send_tfsync(
+        &mut self,
+        msg: &TfsyncMessage,
+    ) -> Result<P9Response<RfsyncMessage>, TfsyncError> {
         let mut buf = [0u8; 16];
         let bytes_written = msg.serialize(&mut buf)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TfsyncError::InternalError)?;
-        
+
         // Read response manually since RfsyncMessage doesn't implement ReadableMessage
         let mut rbuf = [0u8; 8192];
         match p9_read_message(3, &mut rbuf) {
@@ -427,9 +478,11 @@ impl P9Backend for ZkvmBackend {
 
     fn send_tlink(&mut self, msg: &TlinkMessage) -> Result<P9Response<RlinkMessage>, TlinkError> {
         let mut buf = [0u8; 128];
-        let bytes_written = msg.serialize(&mut buf).map_err(|_| TlinkError::InternalError)?;
+        let bytes_written = msg
+            .serialize(&mut buf)
+            .map_err(|_| TlinkError::InternalError)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TlinkError::InternalError)?;
-        
+
         let mut rbuf = [0u8; 1024];
         match p9_read_message(3, &mut rbuf) {
             Ok(data_len) => {
@@ -450,11 +503,16 @@ impl P9Backend for ZkvmBackend {
         }
     }
 
-    fn send_trename(&mut self, msg: &TrenameMessage) -> Result<P9Response<RrenameMessage>, TrenameError> {
+    fn send_trename(
+        &mut self,
+        msg: &TrenameMessage,
+    ) -> Result<P9Response<RrenameMessage>, TrenameError> {
         let mut buf = [0u8; 128];
-        let bytes_written = msg.serialize(&mut buf).map_err(|_| TrenameError::InternalError)?;
+        let bytes_written = msg
+            .serialize(&mut buf)
+            .map_err(|_| TrenameError::InternalError)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TrenameError::InternalError)?;
-        
+
         let mut rbuf = [0u8; 1024];
         match p9_read_message(3, &mut rbuf) {
             Ok(data_len) => {
@@ -475,11 +533,16 @@ impl P9Backend for ZkvmBackend {
         }
     }
 
-    fn send_txattrwalk(&mut self, msg: &TxattrwalkMessage) -> Result<P9Response<RxattrwalkMessage>, TxattrwalkError> {
+    fn send_txattrwalk(
+        &mut self,
+        msg: &TxattrwalkMessage,
+    ) -> Result<P9Response<RxattrwalkMessage>, TxattrwalkError> {
         let mut buf = [0u8; 128];
-        let bytes_written = msg.serialize(&mut buf).map_err(|_| TxattrwalkError::InternalError)?;
+        let bytes_written = msg
+            .serialize(&mut buf)
+            .map_err(|_| TxattrwalkError::InternalError)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TxattrwalkError::InternalError)?;
-        
+
         let mut rbuf = [0u8; 1024];
         match p9_read_message(3, &mut rbuf) {
             Ok(data_len) => {
@@ -500,11 +563,16 @@ impl P9Backend for ZkvmBackend {
         }
     }
 
-    fn send_txattrcreate(&mut self, msg: &TxattrcreateMessage) -> Result<P9Response<RxattrcreateMessage>, TxattrcreateError> {
+    fn send_txattrcreate(
+        &mut self,
+        msg: &TxattrcreateMessage,
+    ) -> Result<P9Response<RxattrcreateMessage>, TxattrcreateError> {
         let mut buf = [0u8; 128];
-        let bytes_written = msg.serialize(&mut buf).map_err(|_| TxattrcreateError::InternalError)?;
+        let bytes_written = msg
+            .serialize(&mut buf)
+            .map_err(|_| TxattrcreateError::InternalError)?;
         p9_send_message(&buf, bytes_written).map_err(|_| TxattrcreateError::InternalError)?;
-        
+
         let mut rbuf = [0u8; 1024];
         match p9_read_message(3, &mut rbuf) {
             Ok(data_len) => {
@@ -524,5 +592,143 @@ impl P9Backend for ZkvmBackend {
             Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
         }
     }
-}
 
+    fn send_tflush(
+        &mut self,
+        msg: &TflushMessage,
+    ) -> Result<P9Response<RflushMessage>, TflushError> {
+        let mut buf = [0u8; 16];
+        let bytes_written = msg
+            .serialize(&mut buf)
+            .map_err(|_| TflushError::InternalError)?;
+        p9_send_message(&buf, bytes_written).map_err(|_| TflushError::InternalError)?;
+        let mut rbuf = [0u8; 1024];
+        match p9_read_message(3, &mut rbuf) {
+            Ok(data_len) => {
+                let msg_type = rbuf[4];
+                if msg_type == P9MsgType::RLerror as u8 {
+                    match RlerrorMessage::deserialize(&rbuf[..data_len as usize]) {
+                        Ok((rlerror, _)) => Ok(P9Response::Error(rlerror)),
+                        Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+                    }
+                } else {
+                    match RflushMessage::deserialize(&rbuf[..data_len as usize]) {
+                        Ok((response, _)) => Ok(P9Response::Success(response)),
+                        Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+                    }
+                }
+            }
+            Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+        }
+    }
+
+    fn send_tauth(&mut self, msg: &TauthMessage) -> Result<P9Response<RauthMessage>, TauthError> {
+        let mut buf = [0u8; 128];
+        let bytes_written = msg
+            .serialize(&mut buf)
+            .map_err(|_| TauthError::InternalError)?;
+        p9_send_message(&buf, bytes_written).map_err(|_| TauthError::InternalError)?;
+        let mut rbuf = [0u8; 1024];
+        match p9_read_message(3, &mut rbuf) {
+            Ok(data_len) => {
+                let msg_type = rbuf[4];
+                if msg_type == P9MsgType::RLerror as u8 {
+                    match RlerrorMessage::deserialize(&rbuf[..data_len as usize]) {
+                        Ok((rlerror, _)) => Ok(P9Response::Error(rlerror)),
+                        Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+                    }
+                } else {
+                    match RauthMessage::deserialize(&rbuf[..data_len as usize]) {
+                        Ok((response, _)) => Ok(P9Response::Success(response)),
+                        Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+                    }
+                }
+            }
+            Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+        }
+    }
+
+    fn send_tstatfs(
+        &mut self,
+        msg: &TstatfsMessage,
+    ) -> Result<P9Response<RstatfsMessage>, TstatfsError> {
+        let mut buf = [0u8; 16];
+        let bytes_written = msg
+            .serialize(&mut buf)
+            .map_err(|_| TstatfsError::InternalError)?;
+        p9_send_message(&buf, bytes_written).map_err(|_| TstatfsError::InternalError)?;
+        let mut rbuf = [0u8; 1024];
+        match p9_read_message(3, &mut rbuf) {
+            Ok(data_len) => {
+                let msg_type = rbuf[4];
+                if msg_type == P9MsgType::RLerror as u8 {
+                    match RlerrorMessage::deserialize(&rbuf[..data_len as usize]) {
+                        Ok((rlerror, _)) => Ok(P9Response::Error(rlerror)),
+                        Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+                    }
+                } else {
+                    match RstatfsMessage::deserialize(&rbuf[..data_len as usize]) {
+                        Ok((response, _)) => Ok(P9Response::Success(response)),
+                        Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+                    }
+                }
+            }
+            Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+        }
+    }
+
+    fn send_tlock(&mut self, msg: &TlockMessage) -> Result<P9Response<RlockMessage>, TlockError> {
+        let mut buf = [0u8; 128];
+        let bytes_written = msg
+            .serialize(&mut buf)
+            .map_err(|_| TlockError::InternalError)?;
+        p9_send_message(&buf, bytes_written).map_err(|_| TlockError::InternalError)?;
+        let mut rbuf = [0u8; 1024];
+        match p9_read_message(3, &mut rbuf) {
+            Ok(data_len) => {
+                let msg_type = rbuf[4];
+                if msg_type == P9MsgType::RLerror as u8 {
+                    match RlerrorMessage::deserialize(&rbuf[..data_len as usize]) {
+                        Ok((rlerror, _)) => Ok(P9Response::Error(rlerror)),
+                        Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+                    }
+                } else {
+                    match RlockMessage::deserialize(&rbuf[..data_len as usize]) {
+                        Ok((response, _)) => Ok(P9Response::Success(response)),
+                        Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+                    }
+                }
+            }
+            Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+        }
+    }
+
+    fn send_tgetlock(
+        &mut self,
+        msg: &TgetlockMessage,
+    ) -> Result<P9Response<RgetlockMessage>, TgetlockError> {
+        let mut buf = [0u8; 128];
+        let bytes_written = msg
+            .serialize(&mut buf)
+            .map_err(|_| TgetlockError::InternalError)?;
+        p9_send_message(&buf, bytes_written).map_err(|_| TgetlockError::InternalError)?;
+        let mut rbuf = [0u8; 1024];
+        match p9_read_message(3, &mut rbuf) {
+            Ok(data_len) => {
+                let msg_type = rbuf[4];
+                if msg_type == P9MsgType::RLerror as u8 {
+                    match RlerrorMessage::deserialize(&rbuf[..data_len as usize]) {
+                        Ok((rlerror, _)) => Ok(P9Response::Error(rlerror)),
+                        Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+                    }
+                } else {
+                    match RgetlockMessage::deserialize(&rbuf[..data_len as usize]) {
+                        Ok((response, _)) => Ok(P9Response::Success(response)),
+                        Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+                    }
+                }
+            }
+            Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
+        }
+    }
+}

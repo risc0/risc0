@@ -1339,19 +1339,62 @@ impl P9Backend for InMemoryBackend {
         Ok(P9Response::Error(RlerrorMessage::new(_msg.tag, 38))) // ENOSYS
     }
 
-    fn send_trename(&mut self, _msg: &TrenameMessage) -> Result<P9Response<RrenameMessage>, TrenameError> {
+    fn send_trename(
+        &mut self,
+        _msg: &TrenameMessage,
+    ) -> Result<P9Response<RrenameMessage>, TrenameError> {
         // TODO: Implement rename
         Ok(P9Response::Error(RlerrorMessage::new(_msg.tag, 38))) // ENOSYS
     }
 
-    fn send_txattrwalk(&mut self, _msg: &TxattrwalkMessage) -> Result<P9Response<RxattrwalkMessage>, TxattrwalkError> {
+    fn send_txattrwalk(
+        &mut self,
+        _msg: &TxattrwalkMessage,
+    ) -> Result<P9Response<RxattrwalkMessage>, TxattrwalkError> {
         // TODO: Implement xattr walk
         Ok(P9Response::Error(RlerrorMessage::new(_msg.tag, 38))) // ENOSYS
     }
 
-    fn send_txattrcreate(&mut self, _msg: &TxattrcreateMessage) -> Result<P9Response<RxattrcreateMessage>, TxattrcreateError> {
+    fn send_txattrcreate(
+        &mut self,
+        _msg: &TxattrcreateMessage,
+    ) -> Result<P9Response<RxattrcreateMessage>, TxattrcreateError> {
         // TODO: Implement xattr create
         Ok(P9Response::Error(RlerrorMessage::new(_msg.tag, 38))) // ENOSYS
+    }
+
+    fn send_tflush(
+        &mut self,
+        msg: &TflushMessage,
+    ) -> Result<P9Response<RflushMessage>, TflushError> {
+        // No-op for in-memory (nothing to flush)
+        Ok(P9Response::Success(RflushMessage { tag: msg.tag }))
+    }
+
+    fn send_tauth(&mut self, msg: &TauthMessage) -> Result<P9Response<RauthMessage>, TauthError> {
+        // No authentication needed for in-memory
+        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
+    }
+
+    fn send_tstatfs(
+        &mut self,
+        msg: &TstatfsMessage,
+    ) -> Result<P9Response<RstatfsMessage>, TstatfsError> {
+        // TODO: Implement statfs
+        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
+    }
+
+    fn send_tlock(&mut self, msg: &TlockMessage) -> Result<P9Response<RlockMessage>, TlockError> {
+        // TODO: Implement file locking
+        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
+    }
+
+    fn send_tgetlock(
+        &mut self,
+        msg: &TgetlockMessage,
+    ) -> Result<P9Response<RgetlockMessage>, TgetlockError> {
+        // TODO: Implement file locking
+        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
     }
 }
 
@@ -1675,18 +1718,61 @@ impl P9Backend for ZeroCopyBackend {
         Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
     }
 
-    fn send_trename(&mut self, msg: &TrenameMessage) -> Result<P9Response<RrenameMessage>, TrenameError> {
+    fn send_trename(
+        &mut self,
+        msg: &TrenameMessage,
+    ) -> Result<P9Response<RrenameMessage>, TrenameError> {
         // Read-only filesystem
         Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
     }
 
-    fn send_txattrwalk(&mut self, msg: &TxattrwalkMessage) -> Result<P9Response<RxattrwalkMessage>, TxattrwalkError> {
+    fn send_txattrwalk(
+        &mut self,
+        msg: &TxattrwalkMessage,
+    ) -> Result<P9Response<RxattrwalkMessage>, TxattrwalkError> {
         // Extended attributes not supported
         Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 95))) // EOPNOTSUPP
     }
 
-    fn send_txattrcreate(&mut self, msg: &TxattrcreateMessage) -> Result<P9Response<RxattrcreateMessage>, TxattrcreateError> {
+    fn send_txattrcreate(
+        &mut self,
+        msg: &TxattrcreateMessage,
+    ) -> Result<P9Response<RxattrcreateMessage>, TxattrcreateError> {
         // Read-only filesystem
         Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+    }
+
+    fn send_tflush(
+        &mut self,
+        msg: &TflushMessage,
+    ) -> Result<P9Response<RflushMessage>, TflushError> {
+        // No-op for zero-copy (nothing to flush)
+        Ok(P9Response::Success(RflushMessage { tag: msg.tag }))
+    }
+
+    fn send_tauth(&mut self, msg: &TauthMessage) -> Result<P9Response<RauthMessage>, TauthError> {
+        // No authentication needed for zero-copy
+        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
+    }
+
+    fn send_tstatfs(
+        &mut self,
+        msg: &TstatfsMessage,
+    ) -> Result<P9Response<RstatfsMessage>, TstatfsError> {
+        // TODO: Implement statfs
+        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
+    }
+
+    fn send_tlock(&mut self, msg: &TlockMessage) -> Result<P9Response<RlockMessage>, TlockError> {
+        // Read-only filesystem doesn't support locks
+        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
+    }
+
+    fn send_tgetlock(
+        &mut self,
+        msg: &TgetlockMessage,
+    ) -> Result<P9Response<RgetlockMessage>, TgetlockError> {
+        // Read-only filesystem doesn't support locks
+        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
     }
 }
