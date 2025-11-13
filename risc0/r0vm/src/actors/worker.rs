@@ -15,6 +15,7 @@
 
 use std::{borrow::Cow, rc::Rc, sync::Arc};
 
+use derive_more::From;
 use opentelemetry::{
     global::BoxedSpan,
     trace::{Span as _, Tracer as _},
@@ -37,8 +38,9 @@ use super::{
     factory::RemoteFactoryActor,
     job,
     protocol::{
-        ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Session,
-        ShrinkWrapKind, ShrinkWrapTask, Task, TaskError, TaskHeader, TaskKind, UnionTask, WorkerId,
+        ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask,
+        SegmentIndex, Session, ShrinkWrapKind, ShrinkWrapTask, Task, TaskError, TaskHeader,
+        TaskKind, UnionTask, WorkerId,
         factory::{
             GetTasks, JoinNode, ProveKeccakDone, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg,
             UnionDone,
@@ -53,6 +55,7 @@ type TaskResult<T> = std::result::Result<T, TaskError>;
 struct ProveSegmentCoreTask {
     preflight_results: Box<PreflightResults>,
     dev_mode: bool,
+    segment_index: SegmentIndex,
 }
 
 enum GpuTask {
@@ -458,6 +461,13 @@ impl Drop for TaskTracer {
     }
 }
 
+#[allow(clippy::large_enum_variant)]
+#[derive(From)]
+enum DoneOrUpdate {
+    Done(TaskDone),
+    Update(TaskUpdate),
+}
+
 #[derive(Clone)]
 struct GpuProcessor {
     factory: ActorRef<RemoteFactoryActor>,
@@ -489,21 +499,10 @@ impl GpuProcessor {
         Ok(self.factory.tell(TaskUpdateMsg { header, payload }).await?)
     }
 
-    async fn send_done(
-        &self,
-        header: TaskHeader,
-        payload: TaskResult<TaskDone>,
-        hardware_reservations: Vec<HardwareReservation>,
-    ) -> Result<()> {
+    async fn send_done(&self, header: TaskHeader, payload: TaskResult<TaskDone>) -> Result<()> {
         let global_id = header.global_id;
+
         self.factory.tell(TaskDoneMsg { header, payload }).await?;
-        self.allocator
-            .tell(DeallocateHardware {
-                worker_id: self.worker_id,
-                task_id: global_id,
-                hardware_reservations,
-            })
-            .await?;
         self.allocator
             .tell(EndTask {
                 worker_id: self.worker_id,
@@ -576,7 +575,32 @@ impl GpuProcessor {
             GpuTask::Resolve(task) => self.resolve(header.clone(), task).await,
             GpuTask::ShrinkWrap(task) => self.shrink_wrap(header.clone(), task).await,
         };
-        self.send_done(header, result, reserved).await?;
+
+        let global_id = header.global_id;
+        self.allocator
+            .tell(DeallocateHardware {
+                worker_id: self.worker_id,
+                task_id: global_id,
+                hardware_reservations: reserved,
+            })
+            .await?;
+
+        match result {
+            Ok(msgs) => {
+                for msg in msgs {
+                    match msg {
+                        DoneOrUpdate::Done(done) => {
+                            self.send_done(header.clone(), Ok(done)).await?
+                        }
+                        DoneOrUpdate::Update(update) => {
+                            self.send_update(header.clone(), update).await?
+                        }
+                    }
+                }
+            }
+            Err(error) => self.send_done(header, Err(error)).await?,
+        }
+
         Ok(())
     }
 
@@ -585,7 +609,7 @@ impl GpuProcessor {
         header: TaskHeader,
         task: ProveSegmentCoreTask,
         tracer: &mut TaskTracer,
-    ) -> TaskResult<TaskDone> {
+    ) -> TaskResult<Vec<DoneOrUpdate>> {
         tracing::info!(
             "ProveSegmentCore: {}",
             task.preflight_results.segment_index()
@@ -595,7 +619,13 @@ impl GpuProcessor {
             i64::from(task.preflight_results.po2()),
         ));
 
-        self.task_start(header.clone()).await?;
+        let first = task.segment_index.minor == 0;
+        let last = task.preflight_results.is_final();
+
+        if first {
+            self.task_start(header.clone()).await?;
+        }
+
         let prover = Prover {
             delay: self.delay,
             dev_mode: task.dev_mode,
@@ -607,14 +637,28 @@ impl GpuProcessor {
         })
         .await
         .map_err(|e| Error::new(format!("JoinHandle error: prove_segment task: {e}")))??;
-        Ok(TaskDone::ProveSegment(Box::new(receipt)))
+
+        let end = if last {
+            SegmentIndex::new(task.segment_index.major + 1, 0)
+        } else {
+            SegmentIndex::new(task.segment_index.major, task.segment_index.minor + 1)
+        };
+        let segment_range = task.segment_index..end;
+
+        let mut results =
+            vec![TaskUpdate::SegmentReceipt(Box::new(receipt), segment_range.into()).into()];
+        if last {
+            results.push(TaskDone::ProveSegment.into());
+        }
+
+        Ok(results)
     }
 
     async fn prove_keccak(
         &self,
         header: TaskHeader,
         task: Arc<ProveKeccakTask>,
-    ) -> TaskResult<TaskDone> {
+    ) -> TaskResult<Vec<DoneOrUpdate>> {
         let index = task.index;
         tracing::info!("ProveKeccak: {index}");
         self.task_start(header.clone()).await?;
@@ -626,30 +670,28 @@ impl GpuProcessor {
             tokio::task::spawn_blocking(move || prover.get()?.prove_keccak(&task.request))
                 .await
                 .map_err(|e| Error::new(format!("JoinHandle error: prove_keccak task: {e}")))??;
-        Ok(TaskDone::ProveKeccak(Arc::new(ProveKeccakDone {
-            index,
-            receipt,
-        })))
+        Ok(vec![
+            TaskDone::ProveKeccak(Arc::new(ProveKeccakDone { index, receipt })).into(),
+        ])
     }
 
-    async fn lift(&self, header: TaskHeader, task: Arc<LiftTask>) -> TaskResult<TaskDone> {
+    async fn lift(&self, header: TaskHeader, task: Arc<LiftTask>) -> TaskResult<Vec<DoneOrUpdate>> {
         tracing::info!("Lift: {}", task.receipt.index);
         self.task_start(header.clone()).await?;
-        let segment_idx = task.receipt.index;
         let prover = Prover {
             delay: self.delay,
             dev_mode: task.dev_mode,
         };
+        let range = task.segment_range;
         let receipt = tokio::task::spawn_blocking(move || prover.get()?.lift(&task.receipt))
             .await
             .map_err(|e| Error::new(format!("JoinHandle error: lift task: {e}")))??;
-        Ok(TaskDone::Lift(Box::new(JoinNode {
-            range: (segment_idx..segment_idx + 1).into(),
-            receipt,
-        })))
+        Ok(vec![
+            TaskDone::Lift(Box::new(JoinNode { range, receipt })).into(),
+        ])
     }
 
-    async fn join(&self, header: TaskHeader, task: Arc<JoinTask>) -> TaskResult<TaskDone> {
+    async fn join(&self, header: TaskHeader, task: Arc<JoinTask>) -> TaskResult<Vec<DoneOrUpdate>> {
         let range = task.range;
         tracing::info!("Join: {range:?}");
         self.task_start(header.clone()).await?;
@@ -662,10 +704,16 @@ impl GpuProcessor {
         })
         .await
         .map_err(|e| Error::new(format!("JoinHandle error: join task: {e}")))??;
-        Ok(TaskDone::Join(Box::new(JoinNode { range, receipt })))
+        Ok(vec![
+            TaskDone::Join(Box::new(JoinNode { range, receipt })).into(),
+        ])
     }
 
-    async fn union(&self, header: TaskHeader, task: Arc<UnionTask>) -> TaskResult<TaskDone> {
+    async fn union(
+        &self,
+        header: TaskHeader,
+        task: Arc<UnionTask>,
+    ) -> TaskResult<Vec<DoneOrUpdate>> {
         let height = task.height;
         let pos = task.pos;
         tracing::info!("Union: {height}/{pos}");
@@ -679,14 +727,21 @@ impl GpuProcessor {
         })
         .await
         .map_err(|e| Error::new(format!("JoinHandle error: union task: {e}")))??;
-        Ok(TaskDone::Union(Arc::new(UnionDone {
-            height,
-            pos,
-            receipt,
-        })))
+        Ok(vec![
+            TaskDone::Union(Arc::new(UnionDone {
+                height,
+                pos,
+                receipt,
+            }))
+            .into(),
+        ])
     }
 
-    async fn resolve(&self, header: TaskHeader, task: Arc<ResolveTask>) -> TaskResult<TaskDone> {
+    async fn resolve(
+        &self,
+        header: TaskHeader,
+        task: Arc<ResolveTask>,
+    ) -> TaskResult<Vec<DoneOrUpdate>> {
         tracing::info!("Resolve: {:?}", header.global_id.task_id);
         self.task_start(header.clone()).await?;
         let prover = Prover {
@@ -698,14 +753,14 @@ impl GpuProcessor {
         })
         .await
         .map_err(|e| Error::new(format!("JoinHandle error: resolve task: {e}")))??;
-        Ok(TaskDone::Resolve(Arc::new(receipt)))
+        Ok(vec![TaskDone::Resolve(Arc::new(receipt)).into()])
     }
 
     async fn shrink_wrap(
         &self,
         header: TaskHeader,
         task: Arc<ShrinkWrapTask>,
-    ) -> TaskResult<TaskDone> {
+    ) -> TaskResult<Vec<DoneOrUpdate>> {
         tracing::info!(
             "ShrinkWrap({:?}): {:?}",
             task.kind,
@@ -728,7 +783,7 @@ impl GpuProcessor {
                 .map_err(|_| {
                     Error::new(format!("JoinHandle error: shrink_wrap({task_kind:?}) task"))
                 })??;
-        Ok(TaskDone::ShrinkWrap(Arc::new(receipt)))
+        Ok(vec![TaskDone::ShrinkWrap(Arc::new(receipt)).into()])
     }
 }
 
@@ -979,14 +1034,19 @@ impl CpuProcessor {
 
         let gpu_queue = self.gpu_queue.clone();
         tokio::task::spawn_blocking(move || -> Result<_> {
-            for preflight_results in prover.get()?.segment_preflight(&task.segment)? {
+            for (subsegment_index, preflight_results) in
+                prover.get()?.segment_preflight(&task.segment)?.enumerate()
+            {
                 let tracing = tracing.clone();
+                let segment_index =
+                    SegmentIndex::new(task.segment.index as usize, subsegment_index);
                 gpu_queue
                     .blocking_send(GpuTaskMsg {
                         header: header.clone(),
                         task: GpuTask::ProveSegmentCore(ProveSegmentCoreTask {
                             preflight_results: Box::new(preflight_results?),
                             dev_mode,
+                            segment_index,
                         }),
                         to_reserve: to_reserve.clone(),
                         reserved: reserved.clone(),

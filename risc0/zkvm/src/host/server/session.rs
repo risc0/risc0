@@ -173,6 +173,18 @@ impl PreflightResults {
     pub fn po2(&self) -> u32 {
         self.inner.po2()
     }
+
+    /// These results are the last ones for the segment.
+    #[cfg(feature = "rv32im-m3")]
+    pub fn is_final(&self) -> bool {
+        self.inner.is_final()
+    }
+
+    /// These results are the last ones for the segment.
+    #[cfg(not(feature = "rv32im-m3"))]
+    pub fn is_final(&self) -> bool {
+        true
+    }
 }
 
 /// A reference to a [Segment].
