@@ -21,16 +21,31 @@
 
 using namespace risc0;
 
+uint32_t totalShards = 1;
+uint32_t shardIndex = 0;
+uint32_t testNum = 0;
+
 void runTest(const std::string& name, size_t po2 = 12) {
+  if (testNum % totalShards != shardIndex) {
+    testNum++;
+    return;
+  }
   LOG(0, "Running test: " << name);
   rv32im::NullHostIO io;
   std::map<uint32_t, uint32_t> words;
   rv32im::loadKernelV2(words, "rv32im/rvtest/" + name);
   auto image = rv32im::MemoryImage::fromWords(words);
   runTest(image, io, po2);
+  testNum++;
 }
 
 int main() {
+  if (getenv("TEST_TOTAL_SHARDS")) {
+    totalShards = atoi(getenv("TEST_TOTAL_SHARDS"));
+  }
+  if (getenv("TEST_SHARD_INDEX")) {
+    shardIndex = atoi(getenv("TEST_SHARD_INDEX"));
+  }
   runTest("rvc", 14);
   runTest("add");
   runTest("sub");

@@ -8,6 +8,7 @@ cc_test(
     srcs = ["test.cpp"],
     data = [":riscv_test_bins"],
     deps = ["//rv32im/test:test_prove"],
+    shard_count = 16,
 )
 
 cc_test(
