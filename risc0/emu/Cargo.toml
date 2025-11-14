@@ -13,6 +13,7 @@ derive_more = { version = "2.0.1", default-features = false, features = [
   "add_assign",
   "debug",
 ] }
+dynasmrt = "4.0.1"
 risc0-binfmt = { workspace = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
