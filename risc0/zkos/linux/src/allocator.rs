@@ -88,9 +88,7 @@ pub unsafe fn init_kernel_allocator() {
     let heap_start = KERNEL_HEAP_START_ADDR as *mut u8;
     let heap_size = KERNEL_HEAP_SIZE;
 
-    /* Not needed?
-       Zero out the heap memory
-    unsafe {
+    /* unsafe {
         core::ptr::write_bytes(heap_start, 0, heap_size);
     } */
 

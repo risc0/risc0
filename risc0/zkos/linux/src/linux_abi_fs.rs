@@ -5102,8 +5102,6 @@ fn do_walk(
     target_fid: u32,
     wnames: Vec<String>,
 ) -> Result<(u32, Vec<Qid>), Err> {
-    use crate::p9_backend::{BackendType, P9Backend, get_backend_type, get_zerocopy_backend};
-
     kprint!(
         "do_walk: starting_fid={}, target_fid={}, wnames={:?}",
         starting_fid,
@@ -5115,35 +5113,15 @@ fn do_walk(
     let wnames_clone = wnames.clone();
     let twalk = crate::p9::TwalkMessage::new(0, starting_fid, target_fid, wnames);
 
-    let rwalk = match get_backend_type() {
-        BackendType::Zkvm => {
-            // zkVM backend: get response directly
-            match twalk.send_twalk() {
-                Ok(P9Response::Success(rwalk)) => rwalk,
-                Ok(P9Response::Error(rlerror)) => {
-                    kprint!("do_walk: error response - ecode={}", rlerror.ecode);
-                    return Err(Err::FileNotFound);
-                }
-                Err(e) => {
-                    kprint!("do_walk: error = {:?}", e);
-                    return Err(Err::NoSys);
-                }
-            }
+    let rwalk = match twalk.send_twalk() {
+        Ok(P9Response::Success(rwalk)) => rwalk,
+        Ok(P9Response::Error(rlerror)) => {
+            kprint!("do_walk: error response - ecode={}", rlerror.ecode);
+            return Err(Err::FileNotFound);
         }
-        BackendType::ZeroCopy | BackendType::InMemory => {
-            // Zero-copy backend: get response directly
-            let backend = get_zerocopy_backend();
-            match backend.send_twalk(&twalk) {
-                Ok(P9Response::Success(rwalk)) => rwalk,
-                Ok(P9Response::Error(rlerror)) => {
-                    kprint!("do_walk: error response - ecode={}", rlerror.ecode);
-                    return Err(Err::FileNotFound);
-                }
-                Err(e) => {
-                    kprint!("do_walk: backend error = {:?}", e);
-                    return Err(Err::NoSys);
-                }
-            }
+        Err(e) => {
+            kprint!("do_walk: error = {:?}", e);
+            return Err(Err::NoSys);
         }
     };
 
@@ -6333,122 +6311,71 @@ pub fn clunk(fid: u32, is_cwd_clunking_allowed: bool) {
 
     let tclunk = crate::p9::TclunkMessage::new(0, fid);
     kprint!("clunk: sending TclunkMessage for fid {}", fid);
-    match tclunk.send_tclunk().unwrap() {
-        P9Response::Success(rclunk) => {
+    match tclunk.send_tclunk() {
+        Ok(P9Response::Success(rclunk)) => {
             kprint!("clunk {}: = {:?}", fid, rclunk);
         }
-        P9Response::Error(rlerror) => {
+        Ok(P9Response::Error(rlerror)) => {
             kprint!(
                 "clunk: received Rlerror for clunk operation: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
             );
         }
+        Err(e) => {
+            kprint!("clunk: error sending Tclunk: {:?}", e);
+        }
     }
 }
 
 pub fn attach_to_p9() {
-    use crate::p9_backend::{BackendType, P9Backend, get_backend_type, get_zerocopy_backend};
+    use crate::p9_backend::{get_backend_type};
 
     let backend_type = get_backend_type();
     kprint!("Attaching to P9 using {:?} backend", backend_type);
 
-    // Handle version negotiation based on backend
-    match backend_type {
-        BackendType::Zkvm => {
-            // zkVM backend now uses unified pattern
-            let msg = TversionMessage::default_9p2000l(1);
-            match msg.send_tversion() {
-                Ok(P9Response::Success(rversion)) => {
-                    kprint!("Successfully negotiated version: {:?}", rversion);
-                }
-                Ok(P9Response::Error(rlerror)) => {
-                    kpanic!(
-                        "Received Rlerror for Rversion: tag={}, ecode={}",
-                        rlerror.tag,
-                        rlerror.ecode
-                    );
-                }
-                Err(e) => {
-                    kpanic!("Failed to send Tversion: {:?}", e);
-                }
-            }
-
-            // Attach
-            let tattach = TattachMessage::new(
-                0,
-                0,
-                crate::p9::constants::P9_NOFID,
-                "root".to_string(),
-                "/risc0-root".to_string(),
-            );
-            match tattach.send_tattach() {
-                Ok(P9Response::Success(rattach)) => {
-                    kprint!("Received Rattach: {:?}", rattach);
-                    set_cwd_str("/".to_string());
-                    set_cwd_fid(0);
-                    set_root_fid(0);
-                }
-                Ok(P9Response::Error(rlerror)) => {
-                    kpanic!(
-                        "Received Rlerror for Rattach: tag={}, ecode={}",
-                        rlerror.tag,
-                        rlerror.ecode
-                    );
-                }
-                Err(e) => {
-                    kpanic!("Failed to send Tattach: {:?}", e);
-                }
-            }
+    // Version negotiation
+    let msg = TversionMessage::default_9p2000l(1);
+    match msg.send_tversion() {
+        Ok(P9Response::Success(rversion)) => {
+            kprint!("Successfully negotiated version: {:?}", rversion);
         }
-        BackendType::ZeroCopy | BackendType::InMemory => {
-            // Zero-copy/in-memory path: backend handles everything directly
-            let msg = TversionMessage::default_9p2000l(1);
-            let backend = get_zerocopy_backend();
-
-            match backend.send_tversion(&msg) {
-                Ok(P9Response::Success(rversion)) => {
-                    kprint!("Successfully negotiated version: {:?}", rversion);
-                }
-                Ok(P9Response::Error(rlerror)) => {
-                    kpanic!(
-                        "Received Rlerror for Rversion: tag={}, ecode={}",
-                        rlerror.tag,
-                        rlerror.ecode
-                    );
-                }
-                Err(e) => {
-                    kpanic!("Failed to send Tversion: {:?}", e);
-                }
-            }
-
-            // Attach to root
-            let tattach = TattachMessage::new(
-                0,
-                0,
-                crate::p9::constants::P9_NOFID,
-                "root".to_string(),
-                "/".to_string(), // Zero-copy uses "/" not "/risc0-root"
+        Ok(P9Response::Error(rlerror)) => {
+            kpanic!(
+                "Received Rlerror for Rversion: tag={}, ecode={}",
+                rlerror.tag,
+                rlerror.ecode
             );
+        }
+        Err(e) => {
+            kpanic!("Failed to send Tversion: {:?}", e);
+        }
+    }
 
-            match backend.send_tattach(&tattach) {
-                Ok(P9Response::Success(rattach)) => {
-                    kprint!("Successfully attached to root: {:?}", rattach);
-                    set_cwd_str("/".to_string());
-                    set_cwd_fid(0);
-                    set_root_fid(0);
-                }
-                Ok(P9Response::Error(rlerror)) => {
-                    kpanic!(
-                        "Received Rlerror for Rattach: tag={}, ecode={}",
-                        rlerror.tag,
-                        rlerror.ecode
-                    );
-                }
-                Err(e) => {
-                    kpanic!("Failed to send Tattach: {:?}", e);
-                }
-            }
+    // Attach to root
+    let tattach = TattachMessage::new(
+        0,
+        0,
+        crate::p9::constants::P9_NOFID,
+        "root".to_string(),
+        "/".to_string(),
+    );
+    match tattach.send_tattach() {
+        Ok(P9Response::Success(rattach)) => {
+            kprint!("Received Rattach: {:?}", rattach);
+            set_cwd_str("/".to_string());
+            set_cwd_fid(0);
+            set_root_fid(0);
+        }
+        Ok(P9Response::Error(rlerror)) => {
+            kpanic!(
+                "Received Rlerror for Rattach: tag={}, ecode={}",
+                rlerror.tag,
+                rlerror.ecode
+            );
+        }
+        Err(e) => {
+            kpanic!("Failed to send Tattach: {:?}", e);
         }
     }
 }

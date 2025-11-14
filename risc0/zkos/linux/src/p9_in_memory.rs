@@ -14,13 +14,13 @@
 use crate::p9::*;
 use crate::p9::{P9QidType, P9Response, Qid};
 use crate::p9_backend::P9Backend;
+use bytemuck::{cast_slice, from_bytes};
 use core::mem::size_of;
+use risc0_zkos_fs::{
+    FS_MAGIC, FS_VERSION, FilesystemImageHeader, HEADER_SIZE, INODE_META_SIZE, INodeMeta,
+};
 
-#[cfg(target_arch = "riscv32")]
-use bytemuck::{Pod, Zeroable};
-
-#[cfg(not(target_arch = "riscv32"))]
-use bytemuck::{Pod, Zeroable};
+const ZERO_COPY_DEBUG: bool = true;
 
 #[cfg(target_arch = "riscv32")]
 use alloc::collections::BTreeMap;
@@ -34,6 +34,8 @@ use alloc::vec::Vec;
 #[cfg(not(target_arch = "riscv32"))]
 use std::collections::BTreeMap;
 #[cfg(not(target_arch = "riscv32"))]
+use std::format;
+#[cfg(not(target_arch = "riscv32"))]
 use std::string::String;
 #[cfg(not(target_arch = "riscv32"))]
 use std::vec::Vec;
@@ -45,98 +47,27 @@ const MAX_FIDS: usize = 1024;
 // ZERO-COPY FILESYSTEM IMAGE FORMAT
 //==============================================================================
 
-/// Filesystem image header (embedded in ELF, zero-copy access)
-#[repr(C, align(8))]
-#[derive(Copy, Clone, Pod, Zeroable, Debug)]
-pub struct FilesystemImageHeader {
-    /// Magic bytes: "P9FS"
-    pub magic: [u8; 4],
-    /// Format version (currently 1)
-    pub version: u32,
-    /// Total size of this filesystem image in bytes
-    pub total_size: u32,
-    /// Number of inodes in the inode table
-    pub num_inodes: u32,
-    /// Offset to inode metadata table
-    pub inode_table_offset: u32,
-    /// Offset to file data blob
-    pub data_blob_offset: u32,
-    /// Offset to path index
-    pub path_index_offset: u32,
-    pub _padding: u32,
-    /// Root inode number
-    pub root_inode: u64,
+trait INodeMetaExt {
+    fn qid(&self) -> Qid;
+    fn is_dir(&self) -> bool;
+    fn is_symlink(&self) -> bool;
+    fn is_regular(&self) -> bool;
 }
 
-impl FilesystemImageHeader {
-    pub fn new(total_size: u32, num_inodes: u32) -> Self {
-        Self {
-            magic: *b"P9FS",
-            version: 1,
-            total_size,
-            num_inodes,
-            inode_table_offset: size_of::<FilesystemImageHeader>() as u32,
-            data_blob_offset: 0,  // Set by builder
-            path_index_offset: 0, // Set by builder
-            _padding: 0,
-            root_inode: 1,
-        }
-    }
-}
-
-/// Fixed-size inode metadata (zero-copy via bytemuck)
-#[repr(C, align(8))]
-#[derive(Copy, Clone, Pod, Zeroable, Debug)]
-pub struct INodeMeta {
-    // QID (13 bytes in wire format, padded to 16 for alignment)
-    pub qid_type: u8,
-    pub _padding1: [u8; 3],
-    pub qid_version: u32,
-    pub qid_path: u64,
-
-    // Standard stat fields
-    pub mode: u32,
-    pub uid: u32,
-    pub gid: u32,
-    pub _padding2: u32,
-    pub nlink: u64,
-    pub rdev: u64,
-    pub size: u64,
-    pub blksize: u64,
-    pub blocks: u64,
-
-    // Timestamps (all u64)
-    pub atime_sec: u64,
-    pub atime_nsec: u64,
-    pub mtime_sec: u64,
-    pub mtime_nsec: u64,
-    pub ctime_sec: u64,
-    pub ctime_nsec: u64,
-    pub btime_sec: u64,
-    pub btime_nsec: u64,
-
-    // Content location in data blob (total 8 bytes for alignment)
-    pub content_type: u8, // 0=regular, 1=directory, 2=symlink, 3=special
-    pub _padding3: [u8; 3],
-    pub content_offset: u32, // Offset into data blob
-    pub content_length: u32, // Length of content in bytes
-    pub _padding4: u32,      // Ensure 8-byte alignment at end
-}
-
-impl INodeMeta {
-    pub fn qid(&self) -> Qid {
+impl INodeMetaExt for INodeMeta {
+    fn qid(&self) -> Qid {
         Qid::new(self.qid_type, self.qid_version, self.qid_path)
     }
 
-    pub fn is_dir(&self) -> bool {
+    fn is_dir(&self) -> bool {
         self.qid_type & P9QidType::Qtdir as u8 != 0
     }
 
-    pub fn is_symlink(&self) -> bool {
+    fn is_symlink(&self) -> bool {
         self.qid_type & P9QidType::Qtsymlink as u8 != 0
     }
 
-    pub fn is_regular(&self) -> bool {
+    fn is_regular(&self) -> bool {
         self.qid_type == P9QidType::Qtfile as u8
     }
 }
@@ -164,16 +95,27 @@ pub struct ZeroCopyFilesystem {
 }
 
 impl ZeroCopyFilesystem {
+    #[inline(always)]
+    fn debug_log(&self, msg: &str) {
+        if ZERO_COPY_DEBUG {
+            crate::kernel::print(msg);
+        }
+    }
+
+    fn sanity_check_layout() {
+        debug_assert_eq!(size_of::<FilesystemImageHeader>(), HEADER_SIZE);
+        debug_assert_eq!(size_of::<INodeMeta>(), INODE_META_SIZE);
+    }
+
     /// Initialize filesystem from embedded image at given address
     ///
     /// # Safety
     /// The address must point to a valid FilesystemImage with correct alignment.
     /// The memory must remain valid for the 'static lifetime.
     pub unsafe fn from_address(addr: usize, max_size: usize) -> Result<Self, u32> {
+        Self::sanity_check_layout();
         // First, read just the header to get the total size
-        let header_slice = unsafe {
-            core::slice::from_raw_parts(addr as *const u8, size_of::<FilesystemImageHeader>())
-        };
+        let header_slice = unsafe { core::slice::from_raw_parts(addr as *const u8, HEADER_SIZE) };
 
         // Debug: show raw header bytes
         crate::kernel::print(&format!("Reading header at 0x{:08x}", addr));
@@ -182,22 +124,36 @@ impl ZeroCopyFilesystem {
             &header_slice[..16.min(header_slice.len())]
         ));
 
-        let header: &'static FilesystemImageHeader = bytemuck::from_bytes(header_slice);
+        let header: &'static FilesystemImageHeader = from_bytes(header_slice);
 
         // Verify magic
-        if &header.magic != b"P9FS" {
+        if header.magic != FS_MAGIC {
             crate::kernel::print("ZeroCopyFilesystem: invalid magic");
-            crate::kernel::print(&format!("  Expected: {:?} (P9FS)", b"P9FS"));
+            crate::kernel::print(&format!("  Expected: {:?} (P9FS)", FS_MAGIC));
             crate::kernel::print(&format!("  Got: {:?}", &header.magic));
             crate::kernel::print("  This indicates the filesystem was not properly embedded");
             return Err(22); // EINVAL
         }
 
         // Verify version
-        if header.version != 1 {
+        if header.version != FS_VERSION {
             crate::kernel::print("ZeroCopyFilesystem: unsupported version");
             crate::kernel::print(&format!("  Got version: {}", header.version));
             return Err(22); // EINVAL
+        }
+
+        if header.inode_table_offset as usize != HEADER_SIZE {
+            crate::kernel::print("ZeroCopyFilesystem: unexpected inode table offset");
+            crate::kernel::print(&format!(
+                "  Expected offset {}, got {}",
+                HEADER_SIZE, header.inode_table_offset
+            ));
+            return Err(22);
+        }
+
+        if header.root_inode == 0 || header.num_inodes == 0 {
+            crate::kernel::print("ZeroCopyFilesystem: missing root inode metadata");
+            return Err(22);
         }
 
         // Check total size is reasonable
@@ -213,23 +169,38 @@ impl ZeroCopyFilesystem {
 
         // Zero-copy inode table access
         let inode_start = header.inode_table_offset as usize;
-        let inode_bytes = header.num_inodes as usize * size_of::<INodeMeta>();
+        let inode_bytes = header.num_inodes as usize * INODE_META_SIZE;
 
         if inode_start + inode_bytes > header.total_size as usize {
             crate::kernel::print("ZeroCopyFilesystem: inode table out of bounds");
             return Err(22); // EINVAL
         }
 
+        if (header.path_index_offset as usize) < inode_start + inode_bytes {
+            crate::kernel::print("ZeroCopyFilesystem: path index overlaps inode table");
+            return Err(22);
+        }
+
         let inode_table: &'static [INodeMeta] =
-            bytemuck::cast_slice(&data[inode_start..inode_start + inode_bytes]);
+            cast_slice(&data[inode_start..inode_start + inode_bytes]);
 
         // Zero-copy data blob access
         let blob_start = header.data_blob_offset as usize;
+
+        if blob_start < header.path_index_offset as usize {
+            crate::kernel::print("ZeroCopyFilesystem: data blob overlaps path index");
+            return Err(22);
+        }
+
         let data_blob = &data[blob_start..header.total_size as usize];
 
         // Deserialize path index (one-time, small)
         let path_start = header.path_index_offset as usize;
         let path_end = blob_start;
+        if path_start > path_end || path_end > data.len() {
+            crate::kernel::print("ZeroCopyFilesystem: invalid path index range");
+            return Err(22);
+        }
         let path_index = Self::parse_path_index(&data[path_start..path_end])?;
 
         crate::kernel::print("ZeroCopyFilesystem: initialized");
@@ -297,6 +268,37 @@ impl ZeroCopyFilesystem {
         Ok(index)
     }
 
+    /// Dump all known filesystem paths for debugging
+    pub fn dump_all_paths(&self) {
+        crate::kernel::print("ZeroCopyFilesystem: dumping embedded paths");
+        crate::kernel::print(&format!("  Total entries: {}", self.path_index.len()));
+        for (path, inode) in self.path_index.iter() {
+            if let Ok(meta) = self.get_inode_meta(*inode) {
+                let marker = if meta.is_symlink() && meta.content_length == 0 {
+                    " [symlink: EMPTY TARGET]"
+                } else if meta.is_symlink() {
+                    " [symlink]"
+                } else if meta.is_dir() {
+                    " [dir]"
+                } else {
+                    ""
+                };
+                crate::kernel::print(&format!(
+                    "  {} (inode {}, qtype=0x{:02x}, size={}, content_len={}){}",
+                    path, inode, meta.qid_type, meta.size, meta.content_length, marker
+                ));
+            } else {
+                crate::kernel::print(&format!("  {} (inode {}) [missing meta]", path, inode));
+            }
+        }
+        crate::kernel::print("ZeroCopyFilesystem: end of path dump");
+        if let Some(inode) = self.path_index.get("/this-is-not-here") {
+            crate::kernel::print(&format!("epoxyA: inode={}", inode));
+        } else {
+            crate::kernel::print("epoxyB: not found");
+        }
+    }
+
     /// Get inode metadata by number (zero-copy!)
     pub fn get_inode_meta(&self, inode_num: u64) -> Result<&'static INodeMeta, u32> {
         if inode_num == 0 || inode_num > self.header.num_inodes as u64 {
@@ -319,7 +321,22 @@ impl ZeroCopyFilesystem {
         let end = start + meta.content_length as usize;
 
         if end > self.data_blob.len() {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC read_file_data: out-of-bounds slice offset={} len={} blob_len={}",
+                    start,
+                    meta.content_length,
+                    self.data_blob.len()
+                ));
+            }
             return &[];
+        }
+
+        if ZERO_COPY_DEBUG {
+            self.debug_log(&format!(
+                "ZC read_file_data: slice offset={} len={} inode={} qtype=0x{:02x}",
+                start, meta.content_length, meta.qid_path, meta.qid_type
+            ));
         }
 
         &self.data_blob[start..end]
@@ -328,10 +345,25 @@ impl ZeroCopyFilesystem {
     /// Read directory entries from content blob
     pub fn read_dir_entries(&self, meta: &INodeMeta) -> Result<Vec<DirEntry>, u32> {
         if !meta.is_dir() {
+            if ZERO_COPY_DEBUG {
+                self.debug_log("ZC read_dir_entries: is not a dir");
+            }
             return Err(20); // ENOTDIR
         }
 
         let data = self.read_file_data(meta);
+        if ZERO_COPY_DEBUG {
+            self.debug_log(&format!(
+                "ZC read_dir_entries: inode={} entries_blob_len={} (path='{}')",
+                meta.qid_path,
+                data.len(),
+                self.fid_table
+                    .iter()
+                    .find(|(_, vnode)| vnode.inode == meta.qid_path)
+                    .map(|(_, vnode)| vnode.path.clone())
+                    .unwrap_or_else(|| "<unknown>".to_string())
+            ));
+        }
         Self::parse_dir_entries(data)
     }
 
@@ -464,46 +496,194 @@ impl ZeroCopyFilesystem {
     pub fn walk(&mut self, from_fid: u32, to_fid: u32, wnames: &[String]) -> Result<Vec<Qid>, u32> {
         // Get starting vnode
         let from_vnode = self.get_fid(from_fid)?.clone();
+        if ZERO_COPY_DEBUG {
+            self.debug_log(&format!(
+                "ZC walk: from_fid={} ({}) -> to_fid={} components={:?}",
+                from_fid, from_vnode.path, to_fid, wnames
+            ));
+        }
         let mut current_inode = from_vnode.inode;
         let mut current_path = from_vnode.path.clone();
         let mut qids = Vec::new();
 
         // If wnames is empty, just clone the FID
         if wnames.is_empty() {
+            if ZERO_COPY_DEBUG {
+                self.debug_log("ZC walk [p1]: empty wnames, cloning fid");
+            }
             let meta = self.get_inode_meta(current_inode)?;
             qids.push(meta.qid());
-            self.allocate_fid(to_fid, current_inode, current_path)?;
+            self.allocate_fid(to_fid, current_inode, current_path.clone())?;
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC walk [p1]: cloned fid {} -> inode {} path '{}'",
+                    to_fid, current_inode, current_path
+                ));
+            }
             return Ok(qids);
         }
 
         // Walk each component
-        for wname in wnames {
+        for (i, wname) in wnames.iter().enumerate() {
             let meta = self.get_inode_meta(current_inode)?;
 
             // Must be a directory to walk into
             if !meta.is_dir() {
+                if ZERO_COPY_DEBUG {
+                    self.debug_log(&format!(
+                        "ZC walk [p6]: current inode {} is not a dir (wnames={:?})",
+                        current_inode, wnames
+                    ));
+                }
                 return Err(20); // ENOTDIR
             }
 
             // Read directory entries
             let entries = self.read_dir_entries(meta)?;
-
-            // Find the named entry
-            let entry = entries.iter().find(|e| e.name == *wname).ok_or(2u32)?; // ENOENT
-
-            current_inode = entry.inode;
-            current_path = if current_path == "/" {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC walk: directory inode {} '{}' entries={}",
+                    current_inode,
+                    current_path,
+                    entries.len()
+                ));
+                for (idx, entry) in entries.iter().enumerate() {
+                    self.debug_log(&format!(
+                        "ZC walk:   entry[{}] name='{}' inode={} qtype=0x{:02x} entry_type={} qid_path={}",
+                        idx,
+                        entry.name,
+                        entry.inode,
+                        entry.qid.qtype,
+                        entry.entry_type,
+                        entry.qid.path
+                    ));
+                }
+            }
+            self.debug_log(&format!("ZC walk pxy1: {}", *wname));
+            // Compute the next absolute path for path-index fallback
+            let next_path = if current_path == "/" {
                 format!("/{}", wname)
             } else {
                 format!("{}/{}", current_path, wname)
             };
 
+            self.debug_log(&format!(
+                "ZC walk pxyA: next_path='{}' len={}",
+                next_path,
+                next_path.len()
+            ));
+            // Validate next_path is valid UTF-8 and not corrupted
+            if next_path.is_empty() {
+                self.debug_log("ZC walk pxyA: ERROR: next_path is empty!");
+                return Err(22); // EINVAL
+            }
+            // Check if path_index is accessible
+            let path_index_len = self.path_index.len();
+            self.debug_log(&format!(
+                "ZC walk pxyA2: path_index.len()={}",
+                path_index_len
+            ));
+
+            // Try a simple operation first - check if we can get any entry
+            let first_key_opt = self.path_index.keys().next();
+            if first_key_opt.is_none() && path_index_len > 0 {
+                self.debug_log("ZC walk pxyA: ERROR: path_index claims non-zero len but iter() returns nothing!");
+                return Err(22); // EINVAL - corrupted BTreeMap
+            }
+            self.debug_log("ZC walk pxyA3: path_index.iter() works");
+
+            // Now try the actual lookup - wrap in a way that catches panics
+            // Since we can't use catch_unwind in no_std, we'll just be very careful
+            let inode_opt = self.path_index.get(&next_path);
+            if let Some(inode) = inode_opt {
+                self.debug_log(&format!("ZC walk pxyB: found inode={}", inode));
+            } else {
+                self.debug_log("ZC walk pxyB: not found");
+            }
+            self.debug_log("ZC walk pxyB: after lookup");
+            // Find the named entry, falling back to the path index if needed
+            let next_inode = if let Some(entry) = entries.iter().find(|e| e.name == *wname) {
+                if ZERO_COPY_DEBUG {
+                    self.debug_log(&format!(
+                        "ZC walk: found '{}' in dir listing -> inode {} qtype=0x{:02x}",
+                        wname, entry.inode, entry.qid.qtype
+                    ));
+                }
+                entry.inode
+            } else if let Some(inode) = self.path_index.get(&next_path) {
+                if ZERO_COPY_DEBUG {
+                    self.debug_log(&format!(
+                        "ZC walk: '{}' missing from dir entries, using path index inode {}",
+                        next_path, inode
+                    ));
+                }
+                *inode
+            } else {
+                if ZERO_COPY_DEBUG {
+                    self.debug_log("ZC walk [p2]: not found");
+                }
+                return Err(2); // ENOENT
+            };
+
+            current_inode = next_inode;
+            current_path = next_path;
+
             let next_meta = self.get_inode_meta(current_inode)?;
-            qids.push(next_meta.qid());
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC walk: inode {} qtype=0x{:02x} size={} offset={} content_len={}",
+                    current_inode,
+                    next_meta.qid_type,
+                    next_meta.size,
+                    next_meta.content_offset,
+                    next_meta.content_length
+                ));
+            }
+            let next_qid = next_meta.qid();
+            qids.push(next_qid);
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC walk: pushed qid path={} type=0x{:02x} total_qids={}",
+                    next_qid.path,
+                    next_qid.qtype,
+                    qids.len()
+                ));
+            }
+
+            // Stop walking if we hit a symlink before the final component.
+            if next_meta.is_symlink() && (i + 1) < wnames.len() {
+                if ZERO_COPY_DEBUG {
+                    self.debug_log(&format!(
+                        "ZC walk [p3]: encountered symlink '{}' inode {}, stopping walk early",
+                        current_path, current_inode
+                    ));
+                }
+                break;
+            }
         }
 
         // Allocate the new FID
-        self.allocate_fid(to_fid, current_inode, current_path)?;
+        if let Err(errno) = self.allocate_fid(to_fid, current_inode, current_path.clone()) {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC walk [p4]: allocate_fid failed fid={} errno={}",
+                    to_fid, errno
+                ));
+            }
+            return Err(errno);
+        }
+        if ZERO_COPY_DEBUG {
+            match self.get_fid(to_fid) {
+                Ok(vnode) => self.debug_log(&format!(
+                    "ZC walk [p5]: completed walk -> fid {} inode {} path '{}'",
+                    to_fid, vnode.inode, vnode.path
+                )),
+                Err(errno) => self.debug_log(&format!(
+                    "ZC walk [p5]: completed walk but get_fid({}) failed with errno {}",
+                    to_fid, errno
+                )),
+            }
+        }
 
         Ok(qids)
     }
@@ -524,6 +704,17 @@ impl ZeroCopyFilesystem {
 
         // Get file data (zero-copy slice!)
         let file_data = self.read_file_data(meta);
+        if ZERO_COPY_DEBUG {
+            self.debug_log(&format!(
+                "ZC read: fid={} path='{}' inode={} offset={} count={} available={}",
+                fid,
+                vnode.path,
+                vnode.inode,
+                offset,
+                count,
+                file_data.len()
+            ));
+        }
 
         // Calculate read range
         let start = offset.min(file_data.len() as u64) as usize;
@@ -754,6 +945,7 @@ impl InMemoryFilesystem {
             rdev: 0,
             size: content.len() as u64,
             blksize: 4096,
+            #[allow(clippy::manual_div_ceil)]
             blocks: ((content.len() as u64 + 511) / 512),
             atime_sec: 0,
             atime_nsec: 0,
@@ -807,10 +999,8 @@ impl InMemoryFilesystem {
         self.path_to_inode.insert(path.to_string(), inode_num);
 
         // Add to parent directory
-        if path != "/" {
-            if let Some(parent_path) = Self::parent_path(path) {
-                self.add_dir_entry(parent_path, Self::basename(path), inode_num)?;
-            }
+        if let Some(parent_path) = Self::parent_path(path) {
+            self.add_dir_entry(parent_path, Self::basename(path), inode_num)?;
         }
 
         Ok(inode_num)
@@ -995,7 +1185,7 @@ impl InMemoryFilesystem {
         }
 
         // Walk each component
-        for wname in wnames {
+        for (i, wname) in wnames.iter().enumerate() {
             let inode = self.get_inode(current_inode)?;
 
             // Must be a directory to walk into
@@ -1012,6 +1202,10 @@ impl InMemoryFilesystem {
 
                 let next_inode = self.get_inode(current_inode)?;
                 qids.push(next_inode.qid);
+
+                if next_inode.qid.is_symlink() && (i + 1) < wnames.len() {
+                    break;
+                }
             } else {
                 return Err(20); // ENOTDIR
             }
@@ -1431,6 +1625,11 @@ impl ZeroCopyBackend {
     pub fn filesystem_mut(&mut self) -> &mut ZeroCopyFilesystem {
         &mut self.fs
     }
+
+    /// Dump all known paths for debugging purposes
+    pub fn dump_all_paths(&self) {
+        self.fs.dump_all_paths();
+    }
 }
 
 impl P9Backend for ZeroCopyBackend {
@@ -1475,12 +1674,28 @@ impl P9Backend for ZeroCopyBackend {
     fn send_twalk(&mut self, msg: &TwalkMessage) -> Result<P9Response<RwalkMessage>, TwalkError> {
         // Use zero-copy walk operation
         match self.fs.walk(msg.fid, msg.newfid, &msg.wnames) {
-            Ok(qids) => Ok(P9Response::Success(RwalkMessage {
-                tag: msg.tag,
-                nwqid: qids.len() as u16,
-                wqids: qids,
-            })),
-            Err(errno) => Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno))),
+            Ok(qids) => {
+                if ZERO_COPY_DEBUG {
+                    crate::kernel::print(&format!(
+                        "ZC send_twalk: success fid={} newfid={} qids={:?}",
+                        msg.fid, msg.newfid, qids
+                    ));
+                }
+                Ok(P9Response::Success(RwalkMessage {
+                    tag: msg.tag,
+                    nwqid: qids.len() as u16,
+                    wqids: qids,
+                }))
+            }
+            Err(errno) => {
+                if ZERO_COPY_DEBUG {
+                    crate::kernel::print(&format!(
+                        "ZC send_twalk: error fid={} newfid={} errno={}",
+                        msg.fid, msg.newfid, errno
+                    ));
+                }
+                Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno)))
+            }
         }
     }
 
@@ -1637,6 +1852,14 @@ impl P9Backend for ZeroCopyBackend {
 
         // Read symlink target (zero-copy slice, then convert to String)
         let target_bytes = self.fs.read_file_data(meta);
+        if ZERO_COPY_DEBUG {
+            self.fs.debug_log(&format!(
+                "ZC treadlink: fid={} inode={} target_len={}",
+                msg.fid,
+                vnode.inode,
+                target_bytes.len()
+            ));
+        }
         let target = core::str::from_utf8(target_bytes)
             .map_err(|_| TreadlinkError::InvalidUtf8)?
             .to_string();
