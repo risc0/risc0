@@ -1,0 +1,10 @@
+[package]
+name = "risc0-zkos-fs"
+version = "0.0.0"
+edition = "2024"
+license = "Apache-2.0 OR MIT"
+description = "Shared zero-copy filesystem image layout for LaneLayer core layer"
+
+[dependencies]
+bytemuck = { version = "1.23", features = ["derive"] }
+

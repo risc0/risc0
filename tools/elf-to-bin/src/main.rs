@@ -25,61 +25,20 @@ const KERNEL_HEAP_SIZE: u32 = 16 * 1024 * 1024; // 16MB fixed
 const KERNEL_HEAP_START: u32 = KERNEL_STACK_ADDR - KERNEL_HEAP_SIZE; // 0xfef00000
 const FS_IMAGE_ADDR_PTR: u32 = 0xffff_3030; // Where we store the FS address
 
-// Re-use the zero-copy structures from p9_in_memory.rs
+// Zero-copy filesystem image builder shared with the kernel
 mod filesystem_image {
     use super::*;
-    use bytemuck::{Pod, Zeroable};
+    use risc0_zkos_fs::{
+        FilesystemImageHeader, INodeMeta, FS_MAGIC, FS_VERSION, HEADER_SIZE, INODE_META_SIZE,
+    };
     use std::fs;
     use std::io;
-
-    #[repr(C, align(8))]
-    #[derive(Copy, Clone, Pod, Zeroable, Debug)]
-    pub struct FilesystemImageHeader {
-        pub magic: [u8; 4],
-        pub version: u32,
-        pub total_size: u32,
-        pub num_inodes: u32,
-        pub inode_table_offset: u32,
-        pub data_blob_offset: u32,
-        pub path_index_offset: u32,
-        pub _padding: u32,
-        pub root_inode: u64,
-    }
-
-    #[repr(C, align(8))]
-    #[derive(Copy, Clone, Pod, Zeroable, Debug)]
-    pub struct INodeMeta {
-        pub qid_type: u8,
-        pub _padding1: [u8; 3],
-        pub qid_version: u32,
-        pub qid_path: u64,
-        pub mode: u32,
-        pub uid: u32,
-        pub gid: u32,
-        pub _padding2: u32,
-        pub nlink: u64,
-        pub rdev: u64,
-        pub size: u64,
-        pub blksize: u64,
-        pub blocks: u64,
-        pub atime_sec: u64,
-        pub atime_nsec: u64,
-        pub mtime_sec: u64,
-        pub mtime_nsec: u64,
-        pub ctime_sec: u64,
-        pub ctime_nsec: u64,
-        pub btime_sec: u64,
-        pub btime_nsec: u64,
-        pub content_type: u8,
-        pub _padding3: [u8; 3],
-        pub content_offset: u32,
-        pub content_length: u32,
-        pub _padding4: u32,
-    }
 
     /// Build a zero-copy filesystem image from a directory
     pub fn build_from_directory(root_path: &PathBuf) -> io::Result<Vec<u8>> {
         println!("Building zero-copy filesystem from {:?}", root_path);
+        debug_assert_eq!(core::mem::size_of::<FilesystemImageHeader>(), HEADER_SIZE);
+        debug_assert_eq!(core::mem::size_of::<INodeMeta>(), INODE_META_SIZE);
 
         let mut inodes = BTreeMap::new();
         let mut paths = BTreeMap::new();
@@ -136,43 +95,20 @@ mod filesystem_image {
             let inode_num = *next_inode;
             *next_inode += 1;
 
-            let (content_type, qid_type) = if metadata.is_dir() {
+            let is_dir = metadata.is_dir();
+            let is_symlink = metadata.is_symlink();
+
+            let (content_type, qid_type) = if is_dir {
                 (1u8, 0x80u8) // Directory
-            } else if metadata.is_symlink() {
+            } else if is_symlink {
                 (2u8, 0x02u8) // Symlink
             } else {
                 (0u8, 0x00u8) // Regular file
             };
 
             let content_offset = data_blob.len() as u32;
-            let content_length;
+            let mut content_length = 0u32;
 
-            if metadata.is_dir() {
-                // For directories, we'll write entries later
-                content_length = 0;
-                // Recurse
-                walk_directory(
-                    &entry.path(),
-                    &child_path,
-                    inodes,
-                    paths,
-                    next_inode,
-                    data_blob,
-                )?;
-            } else if metadata.is_symlink() {
-                // Read symlink target
-                let target = fs::read_link(entry.path())?;
-                let target_str = target.to_string_lossy();
-                data_blob.extend_from_slice(target_str.as_bytes());
-                content_length = target_str.len() as u32;
-            } else {
-                // Regular file - read content
-                let file_data = fs::read(entry.path())?;
-                data_blob.extend_from_slice(&file_data);
-                content_length = file_data.len() as u32;
-            }
-
-            // Create inode metadata
             let mode = if metadata.is_dir() {
                 0o040755
             } else if metadata.is_symlink() {
@@ -181,7 +117,7 @@ mod filesystem_image {
                 0o100644
             };
 
-            let meta = INodeMeta {
+            let mut meta = INodeMeta {
                 qid_type,
                 _padding1: [0; 3],
                 qid_version: 0,
@@ -210,8 +146,38 @@ mod filesystem_image {
                 _padding4: 0,
             };
 
-            inodes.insert(inode_num, meta);
-            paths.insert(child_path.clone(), inode_num);
+            if is_dir {
+                // Insert the placeholder metadata before recursing so the child walk can
+                // update content_offset/content_length for this directory.
+                inodes.insert(inode_num, meta);
+                paths.insert(child_path.clone(), inode_num);
+
+                walk_directory(
+                    &entry.path(),
+                    &child_path,
+                    inodes,
+                    paths,
+                    next_inode,
+                    data_blob,
+                )?;
+            } else {
+                if is_symlink {
+                    // Read symlink target
+                    let target = fs::read_link(entry.path())?;
+                    let target_str = target.to_string_lossy();
+                    data_blob.extend_from_slice(target_str.as_bytes());
+                    content_length = target_str.len() as u32;
+                } else {
+                    // Regular file - read content
+                    let file_data = fs::read(entry.path())?;
+                    data_blob.extend_from_slice(&file_data);
+                    content_length = file_data.len() as u32;
+                }
+
+                meta.content_length = content_length;
+                inodes.insert(inode_num, meta);
+                paths.insert(child_path.clone(), inode_num);
+            }
 
             // Store for directory entry
             dir_entries.push((file_name, inode_num, qid_type));
@@ -301,17 +267,15 @@ mod filesystem_image {
         paths: BTreeMap<String, u64>,
         data_blob: Vec<u8>,
     ) -> Vec<u8> {
-        use std::mem::size_of;
-
         let mut image = Vec::new();
 
         // Create header
         let header = FilesystemImageHeader {
-            magic: *b"P9FS",
-            version: 1,
+            magic: FS_MAGIC,
+            version: FS_VERSION,
             total_size: 0, // Will update
             num_inodes: inodes.len() as u32,
-            inode_table_offset: size_of::<FilesystemImageHeader>() as u32,
+            inode_table_offset: HEADER_SIZE as u32,
             data_blob_offset: 0,  // Will update
             path_index_offset: 0, // Will update
             _padding: 0,
@@ -343,14 +307,13 @@ mod filesystem_image {
 
         // Update header
         let total_size = image.len() as u32;
-        let mut header = bytemuck::pod_read_unaligned::<FilesystemImageHeader>(
-            &image[..size_of::<FilesystemImageHeader>()],
-        );
+        let mut header =
+            bytemuck::pod_read_unaligned::<FilesystemImageHeader>(&image[..HEADER_SIZE]);
         header.total_size = total_size;
         header.path_index_offset = path_index_offset;
         header.data_blob_offset = data_blob_offset;
 
-        image[..size_of::<FilesystemImageHeader>()].copy_from_slice(bytemuck::bytes_of(&header));
+        image[..HEADER_SIZE].copy_from_slice(bytemuck::bytes_of(&header));
 
         image
     }
