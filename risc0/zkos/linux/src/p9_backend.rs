@@ -300,6 +300,7 @@ pub fn init_in_memory_backend() {
 pub unsafe fn init_zerocopy_backend(addr: usize, max_size: usize) -> Result<usize, u32> {
     unsafe {
         let backend = crate::p9_in_memory::ZeroCopyBackend::from_address(addr, max_size)?;
+        backend.dump_all_paths();
         let fs_size = backend.image_size();
         ZEROCOPY_BACKEND = Some(backend);
         Ok(fs_size)
