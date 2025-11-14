@@ -36,20 +36,37 @@ public:
   }
 };
 
-void runTestBinary(const std::string& kernel, rv32im::HostIO& io, size_t po2) {
+uint32_t totalShards = 1;
+uint32_t shardIndex = 0;
+uint32_t testNum = 0;
+
+void runTestBinary(const std::string& kernel, rv32im::HostIO& io, size_t po2, bool checkIO = false) {
+  TestIO io;
+  if (testNum % totalShards != shardIndex) {
+    testNum++;
+    return;
+  }
   std::map<uint32_t, uint32_t> words;
   rv32im::loadKernelV2(words, kernel);
   auto image = rv32im::MemoryImage::fromWords(words);
   runTest(image, io, po2);
+  if (checkIO) {
+    io.out != "Hello World") {
+      throw std::runtime_error("BAD");
+    }
+  }
+  testNum++;
 }
 
 int main() {
-  TestIO io;
+  if (getenv("TEST_TOTAL_SHARDS")) {
+    totalShards = atoi(getenv("TEST_TOTAL_SHARDS"));
+  }
+  if (getenv("TEST_SHARD_INDEX")) {
+    shardIndex = atoi(getenv("TEST_SHARD_INDEX"));
+  }
   runTestBinary("rv32im/test/test_p2_kernel", io, 13);
   runTestBinary("rv32im/test/test_bigint_kernel", io, 13);
-  runTestBinary("rv32im/test/test_io_kernel", io, 13);
-  if (io.out != "Hello World") {
-    throw std::runtime_error("BAD");
-  }
+  runTestBinary("rv32im/test/test_io_kernel", io, 13, true);
   return 0;
 }

@@ -99,6 +99,8 @@ cc_test(
         ":test_io_kernel",
     ],
     deps = ["//rv32im/test:test_prove"],
+    test_size = "large",
+    shard_count = 4,
 )
 
 cc_test(
