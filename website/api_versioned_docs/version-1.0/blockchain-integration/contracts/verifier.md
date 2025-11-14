@@ -63,5 +63,4 @@ Upgrading to v2 or higher is recommended.
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
 [term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm
-[TimelockController.sol]: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/TimelockController.sol
 [VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/version-management-design.md
