@@ -14,3 +14,16 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 pub mod rv32im;
+
+use dynasmrt::{AssemblyOffset, ExecutableBuffer, dynasm};
+
+struct Program {
+    code: ExecutableBuffer,
+    start: AssemblyOffset,
+}
+
+impl Program {
+    fn jit(&self) {}
+
+    fn run(&self) {}
+}
