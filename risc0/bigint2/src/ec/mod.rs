@@ -50,7 +50,12 @@ pub struct WeierstrassCurve<const WIDTH: usize> {
 }
 
 impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
-    // TODO this constructor is prone to misuse, ideal to have named fields
+    /// Creates a new Weierstrass curve with the given parameters.
+    ///
+    /// # Parameters
+    /// * `prime` - The prime modulus of the field
+    /// * `a` - The coefficient 'a' in the equation y² = x³ + ax + b
+    /// * `b` - The coefficient 'b' in the equation y² = x³ + ax + b
     pub const fn new(
         prime: [u32; WIDTH],
         a: [u32; WIDTH],
