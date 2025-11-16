@@ -42,8 +42,8 @@ pub struct MerkleTreeProver<H: Hal> {
 impl<H: Hal> MerkleTreeProver<H> {
     /// Generate a merkle tree from a matrix of values.
     ///
-    /// The proofs will prove a single 'column' of values in the tree at a
-    /// certain row. Layout is presumed to be packed row-major.
+    /// The proofs prove a single row (across all columns) at index `idx`.
+    /// Layout: column-major; address (row, col) = row + col * rows.
     /// The number of queries represents the expected # of queries and
     /// determines the size of the 'top' layer. It is important that the
     /// verifier is constructed with identical size parameters, including # of
@@ -63,7 +63,7 @@ impl<H: Hal> MerkleTreeProver<H> {
         let params = MerkleTreeParams::new(rows, cols, queries);
         // Allocate nodes
         let nodes = hal.alloc_digest("nodes", rows * 2);
-        // hash each column
+        // hash each row (hash of col_size elements across columns)
         hal.hash_rows(&nodes.slice(rows, rows), matrix);
         // For each layer, hash up the layer below
         scope!("hash_fold", {
@@ -100,7 +100,7 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// Generate a proof at a given index, and return the values at that column.
     ///
     /// The format of the proof is always:
-    /// 1) The column itself
+    /// 1) Row values (col_size elements across all columns)
     /// 2) The 'other' digests up to the top.
     ///
     /// It is presumed the verifier is given the index of the row from other
