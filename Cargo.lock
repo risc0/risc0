@@ -2807,8 +2807,10 @@ name = "elf-to-bin"
 version = "0.1.0"
 dependencies = [
  "bincode",
+ "bytemuck",
  "clap 4.5.51",
  "risc0-binfmt",
+ "risc0-zkos-fs",
 ]
 
 [[package]]
@@ -7506,6 +7508,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-fs"
+version = "0.0.0"
+dependencies = [
+ "bytemuck",
+]
+
+[[package]]
 name = "risc0-zkos-linux"
 version = "0.0.0"
 dependencies = [
@@ -7513,6 +7522,7 @@ dependencies = [
  "elf",
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkos-fs",
  "rlsf",
  "softfloat-sys",
 ]
