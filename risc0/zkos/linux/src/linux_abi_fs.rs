@@ -6,10 +6,10 @@ use crate::{
     kernel::print,
     linux_abi::Err,
     p9::{
-        P9Response, P9SetattrMask, Qid, RgetattrMessage,
-        TattachMessage, TlcreateMessage, TlopenMessage, TmkdirMessage,
-        TmknodMessage, TreadMessage, TreaddirMessage, TreadlinkMessage, TremoveMessage,
-        TsetattrMessage, TsymlinkMessage, TversionMessage, TwriteMessage, constants::*,
+        P9Response, P9SetattrMask, Qid, RgetattrMessage, TattachMessage, TlcreateMessage,
+        TlopenMessage, TmkdirMessage, TmknodMessage, TreadMessage, TreaddirMessage,
+        TreadlinkMessage, TremoveMessage, TsetattrMessage, TsymlinkMessage, TversionMessage,
+        TwriteMessage, constants::*,
     },
 };
 
@@ -598,9 +598,6 @@ pub fn sys_statfs64(path: u32, sz: u32, buf: u32) -> Result<u32, Err> {
         return Err(Err::NoSys);
     }
 
-    // Validate the buffer is writable
-    validate_user_buffer_write(buf, sz as usize)?;
-
     // Create statfs64 structure with the specified f_type
     let statfs = Statfs64 {
         f_type: 0x01021994,         // 9P filesystem type as requested
@@ -1113,6 +1110,9 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
         return Ok(0);
     }
 
+    if count == 0 {
+        return Ok(0);
+    }
     // NULL buffer with count > 0 is invalid (causes EFAULT)
     if buf.is_null() {
         return Err(Err::Fault);
@@ -1978,10 +1978,7 @@ pub fn sys_fallocate(
                             Ok(0)
                         }
                         Ok(P9Response::Error(e)) => {
-                            kprint!(
-                                "sys_fallocate: error restoring size: ecode={}",
-                                e.ecode
-                            );
+                            kprint!("sys_fallocate: error restoring size: ecode={}", e.ecode);
                             Err(map_p9_error(e.ecode))
                         }
                         Err(e) => {
@@ -1991,22 +1988,22 @@ pub fn sys_fallocate(
                     }
                 }
                 Ok(P9Response::Error(rlerror)) => {
-                        kprint!(
-                            "sys_fallocate: error extending file: ecode={}, size_to_allocate={}",
-                            rlerror.ecode,
-                            size_to_allocate
-                        );
-                        // Special handling for fallocate: treat large size EINVAL as EFBIG
-                        if rlerror.ecode == 22
-                            && (size_to_allocate > 0x7FFF_FFFF_FFFF_FFFF
-                                || offset > 0x7FFF_FFFF_FFFF_FFFF)
-                        {
-                            // Very large file size or offset: treat EINVAL as EFBIG
-                            Err(Err::FileTooBig)
-                        } else {
-                            // Use standard error mapping
-                            Err(map_p9_error(rlerror.ecode))
-                        }
+                    kprint!(
+                        "sys_fallocate: error extending file: ecode={}, size_to_allocate={}",
+                        rlerror.ecode,
+                        size_to_allocate
+                    );
+                    // Special handling for fallocate: treat large size EINVAL as EFBIG
+                    if rlerror.ecode == 22
+                        && (size_to_allocate > 0x7FFF_FFFF_FFFF_FFFF
+                            || offset > 0x7FFF_FFFF_FFFF_FFFF)
+                    {
+                        // Very large file size or offset: treat EINVAL as EFBIG
+                        Err(Err::FileTooBig)
+                    } else {
+                        // Use standard error mapping
+                        Err(map_p9_error(rlerror.ecode))
+                    }
                 }
                 Err(e) => {
                     kprint!("sys_fallocate: error sending extend Tsetattr: {:?}", e);
@@ -5515,9 +5512,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                             return Ok(file_fid);
                         } else {
                             // O_NOFOLLOW without O_PATH on a symlink - fail with ELOOP
-                            kprint!(
-                                "sys_openat: O_NOFOLLOW - path is a symlink, returning ELOOP"
-                            );
+                            kprint!("sys_openat: O_NOFOLLOW - path is a symlink, returning ELOOP");
                             clunk(file_fid, false);
                             return Err(Err::Loop);
                         }
@@ -5525,9 +5520,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                     // Not a symlink, file exists
                     // Check if O_PATH is set - if so, don't actually open the file
                     if (_flags & O_PATH) != 0 {
-                        kprint!(
-                            "sys_openat: O_NOFOLLOW + O_PATH - creating fd-only descriptor"
-                        );
+                        kprint!("sys_openat: O_NOFOLLOW + O_PATH - creating fd-only descriptor");
                         // For O_PATH, we don't call Tlopen - just set up the fd
                         set_fd(file_fid, file_fid);
                         let fd_entry = get_fd(file_fid);
@@ -5540,9 +5533,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                     }
 
                     // Normal open
-                    kprint!(
-                        "sys_openat: O_NOFOLLOW - file exists and is not a symlink, opening"
-                    );
+                    kprint!("sys_openat: O_NOFOLLOW - file exists and is not a symlink, opening");
 
                     let tlopen = TlopenMessage::new(0, file_fid, p9_flags);
                     match tlopen.send_tlopen() {
@@ -6329,7 +6320,7 @@ pub fn clunk(fid: u32, is_cwd_clunking_allowed: bool) {
 }
 
 pub fn attach_to_p9() {
-    use crate::p9_backend::{get_backend_type};
+    use crate::p9_backend::get_backend_type;
 
     let backend_type = get_backend_type();
     kprint!("Attaching to P9 using {:?} backend", backend_type);
@@ -6358,7 +6349,7 @@ pub fn attach_to_p9() {
         0,
         crate::p9::constants::P9_NOFID,
         "root".to_string(),
-        "/".to_string(),
+        "/risc0-root".to_string(),
     );
     match tattach.send_tattach() {
         Ok(P9Response::Success(rattach)) => {

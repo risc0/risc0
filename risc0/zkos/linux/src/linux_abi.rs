@@ -1,9 +1,9 @@
 use crate::{
     constants::{
-        ASCII_TABLE_PTR, MEPC_PTR, PAGE_SIZE, REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5,
-        REG_A7, REG_SP, USER_BRK_ADDR, USER_INTERP_ADDR, USER_INTERP_BASE_ADDR, USER_PHDR_ADDR_PTR,
-        USER_PHDR_NUM_ADDR_PTR, USER_PHENT_SIZE, USER_STACK_PTR, USER_START_PTR,
-        FILESYSTEM_IMAGE_ADDR_PTR, KERNEL_HEAP_START_ADDR,
+        ASCII_TABLE_PTR, FILESYSTEM_IMAGE_ADDR_PTR, KERNEL_HEAP_START_ADDR, MEPC_PTR, PAGE_SIZE,
+        REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5, REG_A7, REG_SP, USER_BRK_ADDR,
+        USER_INTERP_ADDR, USER_INTERP_BASE_ADDR, USER_PHDR_ADDR_PTR, USER_PHDR_NUM_ADDR_PTR,
+        USER_PHENT_SIZE, USER_STACK_ADDR, USER_STACK_PTR, USER_STACK_SIZE, USER_START_PTR,
     },
     host_calls::{host_argv, host_terminate},
     kernel::{get_ureg, mret, print},
@@ -102,7 +102,7 @@ use alloc::vec;
 #[cfg(target_arch = "riscv32")]
 use alloc::vec::Vec;
 
-static mut MMAP_BASE: u32 = 0x94800000;
+static mut MMAP_BASE: u32 = crate::constants::USER_MMAP_BASE_INIT;
 
 fn get_mmap_base() -> u32 {
     unsafe { MMAP_BASE }
@@ -465,7 +465,7 @@ impl Err {
 #[allow(dead_code)]
 pub struct MemoryRegion {
     pub start: u32,
-    pub end: u32,    // Exclusive end address
+    pub end: u32, // Exclusive end address
     pub readable: bool,
     pub writable: bool,
     pub executable: bool,
@@ -517,7 +517,64 @@ pub fn register_memory_region(
     executable: bool,
     name: &'static str,
 ) {
+    use crate::constants::{KERNEL_SPACE_START, USER_MEMORY_START_PTR};
+
+    if start == 0 || end == 0 || start >= end {
+        kprint!(
+            "register_memory_region: rejecting invalid range [{:08x}-{:08x}) {}",
+            start,
+            end,
+            name
+        );
+        return;
+    }
+
+    if start < USER_MEMORY_START_PTR as u32 {
+        kprint!(
+            "register_memory_region: rejecting range below user memory [{:08x}-{:08x}) {}",
+            start,
+            end,
+            name
+        );
+        return;
+    }
+
+    if end > KERNEL_SPACE_START {
+        kprint!(
+            "register_memory_region: rejecting range crossing kernel space [{:08x}-{:08x}) {}",
+            start,
+            end,
+            name
+        );
+        return;
+    }
+
+    let range_overlaps =
+        |a_start: u32, a_end: u32, b_start: u32, b_end: u32| a_start < b_end && b_start < a_end;
+
     unsafe {
+        let mut idx = 0;
+        while idx < MEMORY_REGION_COUNT {
+            let existing = &MEMORY_REGIONS[idx];
+            if existing.is_empty() {
+                idx += 1;
+                continue;
+            }
+            if range_overlaps(start, end, existing.start, existing.end) {
+                kprint!(
+                    "register_memory_region: rejecting [{:08x}-{:08x}) {} due to overlap with {} [{:08x}-{:08x})",
+                    start,
+                    end,
+                    name,
+                    existing.name,
+                    existing.start,
+                    existing.end
+                );
+                return;
+            }
+            idx += 1;
+        }
+
         if MEMORY_REGION_COUNT < MAX_MEMORY_REGIONS {
             kprint!(
                 "register_memory_region: [{:08x}-{:08x}) {} r:{} w:{} x:{}",
@@ -545,63 +602,73 @@ pub fn register_memory_region(
 
 pub fn unregister_memory_region(start: u32, end: u32) {
     unsafe {
-        let mut found_idx = None;
-        for i in 0..MEMORY_REGION_COUNT {
-            if MEMORY_REGIONS[i].start == start && MEMORY_REGIONS[i].end == end {
-                found_idx = Some(i);
+        let mut idx = 0;
+        while idx < MEMORY_REGION_COUNT {
+            if MEMORY_REGIONS[idx].start == start && MEMORY_REGIONS[idx].end == end {
+                kprint!(
+                    "unregister_memory_region: [{:08x}-{:08x}) {}",
+                    start,
+                    end,
+                    MEMORY_REGIONS[idx].name
+                );
+                let slice = &mut MEMORY_REGIONS[..MEMORY_REGION_COUNT];
+                if idx + 1 < slice.len() {
+                    slice.copy_within(idx + 1.., idx);
+                }
+                MEMORY_REGIONS[MEMORY_REGION_COUNT - 1] = MemoryRegion::new_empty();
+                MEMORY_REGION_COUNT -= 1;
                 break;
             }
-        }
-        
-        if let Some(idx) = found_idx {
-            kprint!("unregister_memory_region: [{:08x}-{:08x}) {}", start, end, MEMORY_REGIONS[idx].name);
-            // Shift remaining regions down
-            for i in idx..MEMORY_REGION_COUNT - 1 {
-                MEMORY_REGIONS[i] = MEMORY_REGIONS[i + 1];
-            }
-            MEMORY_REGIONS[MEMORY_REGION_COUNT - 1] = MemoryRegion::new_empty();
-            MEMORY_REGION_COUNT -= 1;
+            idx += 1;
         }
     }
 }
 
 #[allow(dead_code)]
 pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> bool {
-    if addr == 0 || len == 0 {
+    use crate::constants::{KERNEL_SPACE_START, USER_MEMORY_START_PTR, USER_SPACE_END};
+
+    if len == 0 {
+        return true;
+    }
+
+    if addr < USER_MEMORY_START_PTR as u32 {
         return false;
     }
-    
-    // Check for overflow
-    let end_addr = addr.checked_add(len as u32);
-    if end_addr.is_none() {
+
+    let end_addr = match addr.checked_add(len as u32) {
+        Some(val) => val,
+        None => return false,
+    };
+
+    if end_addr > USER_SPACE_END {
         return false;
     }
-    let end_addr = end_addr.unwrap();
-    
-    // Reject kernel space
-    use crate::constants::KERNEL_SPACE_START;
+
     if addr >= KERNEL_SPACE_START || end_addr > KERNEL_SPACE_START {
         return false;
     }
-    
+
     unsafe {
-        for i in 0..MEMORY_REGION_COUNT {
-            let region = &MEMORY_REGIONS[i];
+        let mut idx = 0;
+        while idx < MEMORY_REGION_COUNT {
+            let region = &MEMORY_REGIONS[idx];
             if region.contains_range(addr, len) {
-                // Found a containing region - check permissions
-                if require_write {
-                    return region.writable;
+                return if require_write {
+                    region.writable
                 } else {
-                    return region.readable;
-                }
+                    region.readable
+                };
             }
+            idx += 1;
+        }
+
+        if MEMORY_REGION_COUNT == 0 {
+            return true;
         }
     }
-    
-    // For now, allow any user space address (< 0xC0000000) that we haven't explicitly tracked
-    // This is permissive for ELF segments we don't track yet
-    // TODO: Track ELF segments from host to be more strict
-    true
+
+    false
 }
 
 #[allow(dead_code)]
@@ -610,8 +677,9 @@ pub fn dump_memory_regions() {
         MEMORY_REGION_COUNT
     });
     unsafe {
-        for i in 0..MEMORY_REGION_COUNT {
-            let r = &MEMORY_REGIONS[i];
+        let mut idx = 0;
+        while idx < MEMORY_REGION_COUNT {
+            let r = &MEMORY_REGIONS[idx];
             kprint!(
                 "  [{:08x}-{:08x}) {} r:{} w:{} x:{}",
                 r.start,
@@ -621,6 +689,7 @@ pub fn dump_memory_regions() {
                 r.writable,
                 r.executable
             );
+            idx += 1;
         }
     }
 }
@@ -704,53 +773,178 @@ impl UserStack {
 /// Initialize zero-copy P9 backend from embedded filesystem image
 fn init_p9_zerocopy_backend() {
     use crate::host_calls::host_terminate;
-    
+
     unsafe {
         // Read filesystem image address from memory
-        print(&str_format!(str256, "Reading FS address from ptr: 0x{:08x}", FILESYSTEM_IMAGE_ADDR_PTR as u32));
+        print(&str_format!(
+            str256,
+            "Reading FS address from ptr: 0x{:08x}",
+            FILESYSTEM_IMAGE_ADDR_PTR as u32
+        ));
         let fs_addr = *FILESYSTEM_IMAGE_ADDR_PTR;
         print(&str_format!(str256, "Read FS address: 0x{:08x}", fs_addr));
-        
+
         if fs_addr == 0 {
             print("FATAL: opts=p9mem specified but no filesystem embedded!");
             print("Use: elf-to-bin --root <dir> to embed a filesystem");
             host_terminate(1, 0);
         }
-        
-        print(&str_format!(str256, "Initializing zero-copy filesystem at 0x{:08x}", fs_addr));
-        
+
+        print(&str_format!(
+            str256,
+            "Initializing zero-copy filesystem at 0x{:08x}",
+            fs_addr
+        ));
+
         // Note: Large filesystems may be placed in user space, which is fine
         // as they're read-only and won't conflict with user programs
         if fs_addr < 0xC0000000 {
             print("  Note: Large FS placed in upper user space (read-only, safe)");
         }
-        
+
         // Initialize the zero-copy backend
         // Use very large max size - the header's total_size will be the actual limit
         const MAX_FS_SIZE: usize = 1024 * 1024 * 1024; // 1GB max
-        print(&str_format!(str256, "  Max allowed FS size: {} MB", MAX_FS_SIZE / (1024 * 1024)));
-        
+        print(&str_format!(
+            str256,
+            "  Max allowed FS size: {} MB",
+            MAX_FS_SIZE / (1024 * 1024)
+        ));
+
         match init_zerocopy_backend(fs_addr as usize, MAX_FS_SIZE) {
             Ok(fs_size) => {
-                print(&str_format!(str256, "Filesystem loaded: {} bytes ({:.2} MB)", fs_size, fs_size as f64 / (1024.0 * 1024.0)));
-                
+                print(&str_format!(
+                    str256,
+                    "Filesystem loaded: {} bytes ({:.2} MB)",
+                    fs_size,
+                    fs_size as f64 / (1024.0 * 1024.0)
+                ));
+
                 // Verify filesystem fits below heap
                 let fs_end = fs_addr as usize + fs_size;
                 if fs_end > KERNEL_HEAP_START_ADDR {
                     print("FATAL: Filesystem extends into kernel heap!");
                     print(&str_format!(str256, "  FS end:    0x{:08x}", fs_end));
-                    print(&str_format!(str256, "  Heap start: 0x{:08x}", KERNEL_HEAP_START_ADDR));
+                    print(&str_format!(
+                        str256,
+                        "  Heap start: 0x{:08x}",
+                        KERNEL_HEAP_START_ADDR
+                    ));
                     print("  Reduce filesystem size or increase heap start address");
                     host_terminate(1, 0);
                 }
-                
+
                 print(&str_format!(str256, "  FS ends at: 0x{:08x}", fs_end));
-                print(&str_format!(str256, "  Heap starts: 0x{:08x} (fixed)", KERNEL_HEAP_START_ADDR));
+                print(&str_format!(
+                    str256,
+                    "  Heap starts: 0x{:08x} (fixed)",
+                    KERNEL_HEAP_START_ADDR
+                ));
                 print("Zero-copy P9 backend activated");
             }
             Err(errno) => {
-                print(&str_format!(str256, "FATAL: Failed to initialize filesystem: error {}", errno));
-                print(&str_format!(str256, "  Filesystem address: 0x{:08x}", fs_addr));
+                print(&str_format!(
+                    str256,
+                    "FATAL: Failed to initialize filesystem: error {}",
+                    errno
+                ));
+                print(&str_format!(
+                    str256,
+                    "  Filesystem address: 0x{:08x}",
+                    fs_addr
+                ));
+                print("  Check that filesystem was properly embedded with elf-to-bin --root");
+                host_terminate(1, 0);
+            }
+        }
+    }
+}
+
+/// Initialize zero-copy backend without setting it as active
+/// This fully initializes the ZC filesystem and keeps it in memory, but still uses zkVM backend for operations
+fn validate_p9_zerocopy_backend() {
+    use crate::host_calls::host_terminate;
+    use crate::p9_backend::validate_zerocopy_backend;
+
+    unsafe {
+        // Read filesystem image address from memory
+        print(&str_format!(
+            str256,
+            "Reading FS address from ptr: 0x{:08x}",
+            FILESYSTEM_IMAGE_ADDR_PTR as u32
+        ));
+        let fs_addr = *FILESYSTEM_IMAGE_ADDR_PTR;
+        print(&str_format!(str256, "Read FS address: 0x{:08x}", fs_addr));
+
+        if fs_addr == 0 {
+            print("FATAL: opts=p9zc specified but no filesystem embedded!");
+            print("Use: elf-to-bin --root <dir> to embed a filesystem");
+            host_terminate(1, 0);
+        }
+
+        print(&str_format!(
+            str256,
+            "Initializing zero-copy filesystem at 0x{:08x} (not setting as backend)",
+            fs_addr
+        ));
+
+        // Note: Large filesystems may be placed in user space, which is fine
+        // as they're read-only and won't conflict with user programs
+        if fs_addr < 0xC0000000 {
+            print("  Note: Large FS placed in upper user space (read-only, safe)");
+        }
+
+        // Validate the zero-copy backend (but don't set it as active)
+        // Use very large max size - the header's total_size will be the actual limit
+        const MAX_FS_SIZE: usize = 1024 * 1024 * 1024; // 1GB max
+        print(&str_format!(
+            str256,
+            "  Max allowed FS size: {} MB",
+            MAX_FS_SIZE / (1024 * 1024)
+        ));
+
+        match validate_zerocopy_backend(fs_addr as usize, MAX_FS_SIZE) {
+            Ok(fs_size) => {
+                print(&str_format!(
+                    str256,
+                    "Filesystem initialized: {} bytes ({:.2} MB)",
+                    fs_size,
+                    fs_size as f64 / (1024.0 * 1024.0)
+                ));
+
+                // Verify filesystem fits below heap
+                let fs_end = fs_addr as usize + fs_size;
+                if fs_end > KERNEL_HEAP_START_ADDR {
+                    print("FATAL: Filesystem extends into kernel heap!");
+                    print(&str_format!(str256, "  FS end:    0x{:08x}", fs_end));
+                    print(&str_format!(
+                        str256,
+                        "  Heap start: 0x{:08x}",
+                        KERNEL_HEAP_START_ADDR
+                    ));
+                    print("  Reduce filesystem size or increase heap start address");
+                    host_terminate(1, 0);
+                }
+
+                print(&str_format!(str256, "  FS ends at: 0x{:08x}", fs_end));
+                print(&str_format!(
+                    str256,
+                    "  Heap starts: 0x{:08x} (fixed)",
+                    KERNEL_HEAP_START_ADDR
+                ));
+                print("Zero-copy P9 filesystem initialized (using zkVM backend for operations)");
+            }
+            Err(errno) => {
+                print(&str_format!(
+                    str256,
+                    "FATAL: Failed to initialize filesystem: error {}",
+                    errno
+                ));
+                print(&str_format!(
+                    str256,
+                    "  Filesystem address: 0x{:08x}",
+                    fs_addr
+                ));
                 print("  Check that filesystem was properly embedded with elf-to-bin --root");
                 host_terminate(1, 0);
             }
@@ -760,6 +954,11 @@ fn init_p9_zerocopy_backend() {
 
 pub fn start_linux_binary(argc: u32) -> ! {
     init_fs();
+
+    // Track the user stack region so pointer validation accepts stack addresses
+    let stack_top = USER_STACK_ADDR as u32;
+    let stack_start = stack_top - USER_STACK_SIZE as u32;
+    register_memory_region(stack_start, stack_top, true, true, false, "user-stack");
 
     // XXX we should review this code from a security perspective
     // Get each argument from host and add to stack
@@ -787,17 +986,21 @@ pub fn start_linux_binary(argc: u32) -> ! {
     if !argv.is_empty() {
         if argv[0].starts_with("opts=p9") {
             let opt = &argv[0];
-            
-            if opt == "opts=p9mem" || opt == "opts=p9zc" {
-                // Zero-copy in-memory filesystem
-            set_p9_enabled(true);
+
+            if opt == "opts=p9mem" {
+                // Zero-copy in-memory filesystem (set as active backend)
+                set_p9_enabled(true);
                 init_p9_zerocopy_backend();
+            } else if opt == "opts=p9zc" {
+                // Initialize zero-copy filesystem but use zkVM backend for operations
+                set_p9_enabled(true);
+                validate_p9_zerocopy_backend();
             } else if opt.starts_with("opts=p9") {
                 // Traditional P9 over host calls (zkVM backend)
                 set_p9_enabled(true);
                 // Backend defaults to Zkvm, no action needed
             }
-            
+
             argv.remove(0);
         } else {
             set_p9_enabled(false);
@@ -1328,7 +1531,7 @@ fn sys_brk(addr: u32) -> Result<u32, Err> {
         let old_brk = current_brk;
         core::ptr::addr_of_mut!(BRK).write_volatile(addr);
         kprint!("sys_brk: updated BRK from {:08x} to {:08x}", old_brk, addr);
-        
+
         // Update memory region tracking
         // Unregister old heap region if it exists
         if old_brk != original_brk {
@@ -1336,7 +1539,7 @@ fn sys_brk(addr: u32) -> Result<u32, Err> {
         }
         // Register new heap region
         register_memory_region(original_brk, addr, true, true, false, "heap");
-        
+
         Ok(addr)
     }
 }
@@ -1524,7 +1727,7 @@ fn sys_mmap(
         }
         kprint!("sys_mmap: new mmap base = {:08x}", new_mmap_base);
         set_mmap_base(new_mmap_base);
-        
+
         // Track the allocated region
         let readable = (_prot & 0x1) != 0; // PROT_READ
         let writable = (_prot & 0x2) != 0; // PROT_WRITE
@@ -1537,7 +1740,7 @@ fn sys_mmap(
             executable,
             "mmap-anon",
         );
-        
+
         Ok(ptr as u32)
     } else if !is_anonymous && _flags & MAP_FIXED != MAP_FIXED {
         let mmap_base = get_mmap_base();
@@ -1570,7 +1773,7 @@ fn sys_mmap(
                 zero_len
             );
         }
-        
+
         // Track the allocated region
         let readable = (_prot & 0x1) != 0; // PROT_READ
         let writable = (_prot & 0x2) != 0; // PROT_WRITE
@@ -1583,7 +1786,7 @@ fn sys_mmap(
             executable,
             "mmap-file",
         );
-        
+
         Ok(ptr as u32)
     } else if !is_anonymous && _flags & MAP_FIXED == MAP_FIXED && _addr != 0 {
         kprint!(
@@ -1612,7 +1815,7 @@ fn sys_mmap(
         if _addr + len < get_mmap_base() {
             kpanic!("sys_mmap: mmap base + len < get_mmap_base()");
         }
-        
+
         // Track the allocated region
         let readable = (_prot & 0x1) != 0; // PROT_READ
         let writable = (_prot & 0x2) != 0; // PROT_WRITE
@@ -1625,7 +1828,7 @@ fn sys_mmap(
             executable,
             "mmap-file-fixed",
         );
-        
+
         kprint!("sys_mmap: returning {:08x}", ptr as u32);
         Ok(ptr as u32)
     } else if is_anonymous && _flags & MAP_FIXED == MAP_FIXED && _addr != 0 {
@@ -1634,7 +1837,7 @@ fn sys_mmap(
         unsafe {
             ptr.write_bytes(0, aligned_length);
         }
-        
+
         // Track the allocated region
         let readable = (_prot & 0x1) != 0; // PROT_READ
         let writable = (_prot & 0x2) != 0; // PROT_WRITE
@@ -1647,7 +1850,7 @@ fn sys_mmap(
             executable,
             "mmap-anon-fixed",
         );
-        
+
         kprint!("sys_mmap: returning {:08x}", ptr as u32);
         Ok(ptr as u32)
     } else {
@@ -1670,7 +1873,7 @@ fn sys_munmap(addr: u32, _len: u32) -> Result<u32, Err> {
     }
 
     // Validate address is page-aligned
-    if addr % PAGE_SIZE as u32 != 0 {
+    if !addr.is_multiple_of(PAGE_SIZE as u32) {
         kprint!("sys_munmap: addr is not page-aligned");
         return Err(Err::Inval);
     }

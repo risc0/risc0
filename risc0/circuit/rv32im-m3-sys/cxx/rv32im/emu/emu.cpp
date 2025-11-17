@@ -862,9 +862,10 @@ struct Emulator {
       }
       dinst = decodeWit;
       newPc = dinst->fetch.nextPc;
-      // LOG(1,
-      //     "cycle: " << userCycles << ", pc: " << HexWord{pc}
-      //               << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
+      LOG(0,
+           "cycle: " << userCycles << ", pc: " << HexWord{pc}
+                     << ", instRaw" << HexWord{dinst->opcode}
+                     << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
       switch (Opcode(decodeWit->opcode)) {
 #define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...)                                \
   case Opcode::name:                                                                               \
