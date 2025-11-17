@@ -24,9 +24,9 @@
   DecodeArgument<C> arg;                                                                           \
   arg.iCacheCycle = fetch.iCacheCycle.get();                                                       \
   arg.pcLow = fetch.pc.low.get();                                                                  \
-  arg.pcLow = fetch.pc.high.get();                                                                 \
+  arg.pcHigh = fetch.pc.high.get();                                                                 \
   arg.newPcLow = fetch.nextPc.low.get();                                                           \
-  arg.newPcLow = fetch.nextPc.high.get();                                                          \
+  arg.newPcHigh = fetch.nextPc.high.get();                                                          \
   arg.rs1 = 0;                                                                                     \
   arg.rs2 = 0;                                                                                     \
   arg.rd = 0;                                                                                      \
