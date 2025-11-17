@@ -13,7 +13,24 @@
 
 extern crate alloc;
 
+use core::cell::UnsafeCell;
+
 use alloc::format;
+
+// Wrapper to make UnsafeCell Sync for single-threaded zkVM context
+struct SyncUnsafeCell<T>(UnsafeCell<T>);
+
+unsafe impl<T> Sync for SyncUnsafeCell<T> {}
+
+impl<T> SyncUnsafeCell<T> {
+    const fn new(value: T) -> Self {
+        Self(UnsafeCell::new(value))
+    }
+
+    fn get(&self) -> *mut T {
+        self.0.get()
+    }
+}
 
 use crate::p9::{
     P9Response, // Re-use the existing P9Response type from p9.rs (includes RlerrorMessage)
@@ -263,38 +280,46 @@ pub trait P9Backend {
 }
 
 // Separate statics for each backend type
-static mut ZKVM_BACKEND: Option<crate::p9_zkvm::ZkvmBackend> = None;
-static mut INMEMORY_BACKEND: Option<crate::p9_in_memory::InMemoryBackend> = None;
-static mut ZEROCOPY_BACKEND: Option<crate::p9_in_memory::ZeroCopyBackend> = None;
+// Use SyncUnsafeCell to avoid accidental moves/drops from static mut
+// SAFETY: zkVM is single-threaded, so this is safe
+static ZKVM_BACKEND: SyncUnsafeCell<Option<crate::p9_zkvm::ZkvmBackend>> =
+    SyncUnsafeCell::new(None);
+static INMEMORY_BACKEND: SyncUnsafeCell<Option<crate::p9_in_memory::InMemoryBackend>> =
+    SyncUnsafeCell::new(None);
+static ZEROCOPY_BACKEND: SyncUnsafeCell<Option<crate::p9_in_memory::ZeroCopyBackend>> =
+    SyncUnsafeCell::new(None);
 // Initialized but not used as active backend (for opts=p9zc)
-static mut ZEROCOPY_FILESYSTEM_INIT: Option<crate::p9_in_memory::ZeroCopyBackend> = None;
+static ZEROCOPY_FILESYSTEM_INIT: SyncUnsafeCell<Option<crate::p9_in_memory::ZeroCopyBackend>> =
+    SyncUnsafeCell::new(None);
 
 /// Get the active backend as a trait object
 ///
 /// Priority: ZeroCopy > InMemory > Zkvm (default)
 /// Since we only initialize once, we just check which one is Some().
-#[allow(static_mut_refs)]
 pub fn get_backend() -> &'static mut dyn P9Backend {
     unsafe {
-        // Check in priority order
-        if let Some(ref mut b) = ZEROCOPY_BACKEND {
+        // Check in priority order - use UnsafeCell::get() to avoid moves
+        let zerocopy_ptr = ZEROCOPY_BACKEND.get();
+        if let Some(ref mut b) = *zerocopy_ptr {
             return b as &mut dyn P9Backend;
         }
-        if let Some(ref mut b) = INMEMORY_BACKEND {
+        let inmemory_ptr = INMEMORY_BACKEND.get();
+        if let Some(ref mut b) = *inmemory_ptr {
             return b as &mut dyn P9Backend;
         }
         // Default to zkVM backend (lazy init)
-        if ZKVM_BACKEND.is_none() {
-            ZKVM_BACKEND = Some(crate::p9_zkvm::ZkvmBackend::new());
+        let zkvm_ptr = ZKVM_BACKEND.get();
+        if (*zkvm_ptr).is_none() {
+            *zkvm_ptr = Some(crate::p9_zkvm::ZkvmBackend::new());
         }
-        ZKVM_BACKEND.as_mut().unwrap() as &mut dyn P9Backend
+        (*zkvm_ptr).as_mut().unwrap() as &mut dyn P9Backend
     }
 }
 
 /// Initialize with in-memory backend
 pub fn init_in_memory_backend() {
     unsafe {
-        INMEMORY_BACKEND = Some(crate::p9_in_memory::InMemoryBackend::new());
+        *INMEMORY_BACKEND.get() = Some(crate::p9_in_memory::InMemoryBackend::new());
     }
 }
 
@@ -305,67 +330,57 @@ pub fn init_in_memory_backend() {
 /// The address must point to a valid FilesystemImage.
 pub unsafe fn init_zerocopy_backend(addr: usize, max_size: usize) -> Result<usize, u32> {
     unsafe {
-        let mut backend = crate::p9_in_memory::ZeroCopyBackend::from_address(addr, max_size)?;
-        backend.dump_all_paths();
-
-        // Sanity check: mimic the failing walk to detect inode-table corruption early.
-        let sanity_path = "/etc/ld-musl-riscv32.path";
-        crate::kernel::print(&format!(
-            "init_zerocopy_backend: sanity check {}",
-            sanity_path
-        ));
-        match backend.filesystem_mut().get_inode_by_path(sanity_path) {
-            Ok(meta) => crate::kernel::print(&format!(
-                "init_zerocopy_backend: sanity check success inode={} qtype=0x{:02x}",
-                meta.qid_path, meta.qid_type
-            )),
-            Err(errno) => crate::kernel::print(&format!(
-                "init_zerocopy_backend: sanity check failed errno={}",
-                errno
-            )),
+        // CRITICAL: If already initialized, don't re-assign! Re-assigning would drop the old backend.
+        // Check if ZEROCOPY_BACKEND is already Some (has a value)
+        // Use UnsafeCell::get() to avoid moves - just peek at the value
+        let zerocopy_ptr = ZEROCOPY_BACKEND.get();
+        let already_initialized = (*zerocopy_ptr).is_some();
+        if already_initialized {
+            crate::kernel::print(
+                "init_zerocopy_backend: Already initialized, returning existing backend size",
+            );
+            // Return the size of the existing backend without re-initializing
+            return Ok(get_zerocopy_backend().image_size());
         }
 
-        let fs_size = backend.image_size();
-        ZEROCOPY_BACKEND = Some(backend);
-        Ok(fs_size)
-    }
-}
+        // Only initialize if not already initialized
+        // Assign directly - since we checked it's None above, this won't drop anything
+        crate::kernel::print("init_zerocopy_backend: Creating backend...");
+        let backend = crate::p9_in_memory::ZeroCopyBackend::from_address(addr, max_size)?;
+        crate::kernel::print("init_zerocopy_backend: Backend created, assigning to static...");
+        // CRITICAL: Use UnsafeCell::get() and assign in-place to avoid moves/drops
+        // This writes directly into the static without creating temporaries
+        *zerocopy_ptr = Some(backend);
+        crate::kernel::print(
+            "init_zerocopy_backend: Assignment complete, backend should be in static now",
+        );
 
-/// Initialize and validate the zero-copy backend from an embedded filesystem image without setting it as active
-///
-/// This function fully initializes the zero-copy backend (including sanity checks) and keeps it
-/// in memory, but does NOT set it as the active backend. The initialized filesystem is stored
-/// in ZEROCOPY_FILESYSTEM_INIT but get_backend() will not use it. This is useful for testing/validation
-/// purposes where you want the filesystem initialized but still use zkVM backend for operations.
-///
-/// # Safety
-/// The address must point to a valid FilesystemImage.
-pub unsafe fn validate_zerocopy_backend(addr: usize, max_size: usize) -> Result<usize, u32> {
-    unsafe {
-        let mut backend = crate::p9_in_memory::ZeroCopyBackend::from_address(addr, max_size)?;
-        backend.dump_all_paths();
-
-        // Sanity check: mimic the failing walk to detect inode-table corruption early.
-        let sanity_path = "/etc/ld-musl-riscv32.path";
-        crate::kernel::print(&format!(
-            "validate_zerocopy_backend: sanity check {}",
-            sanity_path
-        ));
-        match backend.filesystem_mut().get_inode_by_path(sanity_path) {
-            Ok(meta) => crate::kernel::print(&format!(
-                "validate_zerocopy_backend: sanity check success inode={} qtype=0x{:02x}",
-                meta.qid_path, meta.qid_type
-            )),
-            Err(errno) => crate::kernel::print(&format!(
-                "validate_zerocopy_backend: sanity check failed errno={}",
-                errno
-            )),
+        // Verify it's actually in the static - check in-place without moving
+        if (*zerocopy_ptr).is_some() {
+            crate::kernel::print("init_zerocopy_backend: Verified - backend is in static");
+        } else {
+            crate::kernel::print(
+                "init_zerocopy_backend: ERROR - backend NOT in static after assignment!",
+            );
         }
 
-        let fs_size = backend.image_size();
-        // Store the initialized backend but don't set it as active
-        // get_backend() only checks ZEROCOPY_BACKEND, not ZEROCOPY_FILESYSTEM_INIT
-        ZEROCOPY_FILESYSTEM_INIT = Some(backend);
+        // Get the size BEFORE returning, to ensure the backend stays in the static
+        let fs_size = get_zerocopy_backend().image_size();
+        crate::kernel::print(&format!(
+            "init_zerocopy_backend: Got image_size={}, about to return",
+            fs_size
+        ));
+
+        // Double-check the backend is still in the static before returning
+        // Check in-place without moving
+        if (*zerocopy_ptr).is_some() {
+            crate::kernel::print("init_zerocopy_backend: Backend still in static before return");
+        } else {
+            crate::kernel::print(
+                "init_zerocopy_backend: CRITICAL - Backend NOT in static before return!",
+            );
+        }
+
         Ok(fs_size)
     }
 }
@@ -380,9 +395,10 @@ pub enum BackendType {
 
 pub fn get_backend_type() -> BackendType {
     unsafe {
-        if core::ptr::addr_of!(ZEROCOPY_BACKEND).read().is_some() {
+        // Use UnsafeCell::get() to check without moving
+        if (*ZEROCOPY_BACKEND.get()).is_some() {
             BackendType::ZeroCopy
-        } else if core::ptr::addr_of!(INMEMORY_BACKEND).read().is_some() {
+        } else if (*INMEMORY_BACKEND.get()).is_some() {
             BackendType::InMemory
         } else {
             BackendType::Zkvm
@@ -398,21 +414,20 @@ pub fn get_zkvm_backend() -> crate::p9_zkvm::ZkvmBackend {
     crate::p9_zkvm::ZkvmBackend::new()
 }
 
-#[allow(static_mut_refs)]
 pub fn get_in_memory_backend() -> &'static mut crate::p9_in_memory::InMemoryBackend {
     unsafe {
-        if INMEMORY_BACKEND.is_none() {
-            INMEMORY_BACKEND = Some(crate::p9_in_memory::InMemoryBackend::new());
+        let ptr = INMEMORY_BACKEND.get();
+        if (*ptr).is_none() {
+            *ptr = Some(crate::p9_in_memory::InMemoryBackend::new());
         }
-        INMEMORY_BACKEND.as_mut().unwrap()
+        (*ptr).as_mut().unwrap()
     }
 }
 
-#[allow(static_mut_refs)]
 pub fn get_zerocopy_backend() -> &'static mut crate::p9_in_memory::ZeroCopyBackend {
     unsafe {
-        ZEROCOPY_BACKEND
-            .as_mut()
-            .expect("ZeroCopy backend not initialized")
+        // Use UnsafeCell::get() and borrow in-place to avoid moves
+        let ptr = ZEROCOPY_BACKEND.get();
+        (*ptr).as_mut().expect("ZeroCopy backend not initialized")
     }
 }
