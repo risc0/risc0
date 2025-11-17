@@ -734,6 +734,12 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
             self.dump_registers(true)?;
             self.dump_registers(false)?;
         }
+        if self.is_machine_mode() {
+            tracing::debug!("cause: {cause:?}");
+            tracing::debug!("pc: {:?}", self.ctx.get_pc());
+            self.dump_registers(true)?;
+            self.dump_registers(false)?;
+        }
         let dispatch_addr =
             ByteAddr(self.load_memory(TRAP_DISPATCH_ADDR.waddr() + cause.as_u32())?);
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {

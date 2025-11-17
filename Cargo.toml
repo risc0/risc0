@@ -23,6 +23,7 @@ members = [
   "risc0/r0vm",
   "risc0/sys",
   "risc0/tools",
+  "risc0/zkos/fs_image",
   "risc0/zkos/linux",
   "risc0/zkos/linux/guests",
   "risc0/zkos/v1compat",
@@ -75,6 +76,7 @@ risc0-sppark = { version = "0.1.14", path = "vendor/sppark" }
 risc0-sys = { version = "5.0.0", default-features = false, path = "risc0/sys" }
 risc0-zkos-v1compat = { version = "2.2.2", path = "risc0/zkos/v1compat" }
 risc0-zkos-linux = { version = "0.0.0", path = "risc0/zkos/linux" }
+risc0-zkos-fs = { version = "0.0.0", path = "risc0/zkos/fs_image" }
 risc0-zkp = { version = "5.0.0", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "4.0.0", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-platform = { version = "2.3.0", default-features = false, path = "risc0/zkvm/platform" }

@@ -35,10 +35,20 @@ pub struct BakeCommand {
     ///  Run compilation using a Docker container for reproducible builds.
     #[arg(long, default_value_t = false)]
     pub docker: bool,
+
+    /// Build guests/kernels in debug mode (sets RISC0_BUILD_DEBUG=1).
+    #[arg(long, default_value_t = false)]
+    pub debug: bool,
 }
 
 impl BakeCommand {
     pub fn run(&self) -> Result<()> {
+        if self.debug {
+            unsafe {
+                std::env::set_var("RISC0_BUILD_DEBUG", "1");
+            }
+        }
+
         let mut meta_cmd = self.manifest.metadata();
         let meta_cmd = self.features.forward_metadata(&mut meta_cmd);
         let meta = meta_cmd.exec()?;
