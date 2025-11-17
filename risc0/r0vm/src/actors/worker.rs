@@ -535,7 +535,7 @@ impl GpuProcessor {
             .await??;
         drop(msg.allocate_tracer);
 
-        let tracer = TaskTracer::new(
+        let mut tracer = TaskTracer::new(
             &msg.tracing,
             format!("WorkerGPU({:?})", msg.header.task_kind),
         );
@@ -545,7 +545,9 @@ impl GpuProcessor {
         let processor = self.clone();
 
         tokio::task::spawn(async move {
-            let res = processor.run_task(msg.header, msg.task, msg.reserved).await;
+            let res = processor
+                .run_task(msg.header, msg.task, msg.reserved, &mut tracer)
+                .await;
             if let Err(error) = res {
                 tracing::error!("GPU task runner failed: {error}");
             }
@@ -561,9 +563,12 @@ impl GpuProcessor {
         header: TaskHeader,
         task: GpuTask,
         reserved: Vec<HardwareReservation>,
+        tracer: &mut TaskTracer,
     ) -> Result<()> {
         let result = match task {
-            GpuTask::ProveSegmentCore(task) => self.prove_segment_core(header.clone(), task).await,
+            GpuTask::ProveSegmentCore(task) => {
+                self.prove_segment_core(header.clone(), task, tracer).await
+            }
             GpuTask::ProveKeccak(task) => self.prove_keccak(header.clone(), task).await,
             GpuTask::Lift(task) => self.lift(header.clone(), task).await,
             GpuTask::Join(task) => self.join(header.clone(), task).await,
@@ -579,11 +584,17 @@ impl GpuProcessor {
         &self,
         header: TaskHeader,
         task: ProveSegmentCoreTask,
+        tracer: &mut TaskTracer,
     ) -> TaskResult<TaskDone> {
         tracing::info!(
             "ProveSegmentCore: {}",
             task.preflight_results.segment_index()
         );
+        tracer.span.set_attribute(opentelemetry::KeyValue::new(
+            "po2",
+            i64::from(task.preflight_results.po2()),
+        ));
+
         self.task_start(header.clone()).await?;
         let prover = Prover {
             delay: self.delay,
@@ -815,13 +826,20 @@ impl CpuProcessor {
 
         let processor = self.clone();
 
-        let tracer = TaskTracer::new(
+        let mut tracer = TaskTracer::new(
             &msg.tracing,
             format!("WorkerCPU({:?})", msg.header.task_kind),
         );
         tokio::task::spawn(async move {
             let res = processor
-                .run_task(header, msg.task, msg.to_reserve, msg.reserved, msg.tracing)
+                .run_task(
+                    header,
+                    msg.task,
+                    msg.to_reserve,
+                    msg.reserved,
+                    msg.tracing,
+                    &mut tracer,
+                )
                 .await;
             if let Err(error) = res {
                 tracing::error!("CPU task runner failed: {error}");
@@ -840,12 +858,20 @@ impl CpuProcessor {
         to_reserve: Vec<HardwareReservation>,
         reserved: Vec<HardwareReservation>,
         tracing: job::tracer::SavedContext,
+        tracer: &mut TaskTracer,
     ) -> Result<()> {
         let result = match task {
             CpuTask::Execute(task) => self.execute(header.clone(), task).await,
             CpuTask::Preflight(task) => {
                 if let Err(error) = self
-                    .preflight(header.clone(), task, to_reserve, reserved.clone(), tracing)
+                    .preflight(
+                        header.clone(),
+                        task,
+                        to_reserve,
+                        reserved.clone(),
+                        tracing,
+                        tracer,
+                    )
                     .await
                 {
                     self.send_done(header, Err(error), reserved).await?;
@@ -859,7 +885,11 @@ impl CpuProcessor {
     }
 
     async fn execute(&self, header: TaskHeader, task: Arc<ExecuteTask>) -> TaskResult<TaskDone> {
-        tracing::info!("ELF: {} bytes", task.request.binary.len());
+        tracing::info!(
+            "execute: ELF: {} bytes, po2={:?}",
+            task.request.binary.len(),
+            task.request.segment_limit_po2
+        );
         self.task_start(header.clone()).await?;
         let factory = self.factory.clone();
         let header_copy = header.clone();
@@ -931,8 +961,14 @@ impl CpuProcessor {
         to_reserve: Vec<HardwareReservation>,
         reserved: Vec<HardwareReservation>,
         tracing: job::tracer::SavedContext,
+        tracer: &mut TaskTracer,
     ) -> TaskResult<()> {
         tracing::info!("Preflight: {}", task.segment.index);
+        tracer.span.set_attribute(opentelemetry::KeyValue::new(
+            "po2",
+            i64::try_from(task.segment.po2()).expect("po2 value should fit in i64"),
+        ));
+
         self.task_start(header.clone()).await?;
 
         let dev_mode = task.dev_mode;
