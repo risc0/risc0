@@ -112,7 +112,7 @@ impl WordAddr {
     /// Increments this address to the next word and returns its previous value
     ///
     /// This is a postfixing increment, analogous to `addr++` in C; the value
-    /// this evaluates to is the value prior to the increment.
+    /// this evaluates to the value prior to the increment.
     pub fn postfix_inc(&mut self) -> Self {
         let cur = *self;
         self.0 += 1;
