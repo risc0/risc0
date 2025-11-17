@@ -142,12 +142,34 @@ impl ZeroCopyFilesystem {
             return Err(22); // EINVAL
         }
 
-        if header.inode_table_offset as usize != HEADER_SIZE {
-            crate::kernel::print("ZeroCopyFilesystem: unexpected inode table offset");
+        // Verify inode table offset is valid and aligned
+        // Note: After adding padding for alignment, offset may be > HEADER_SIZE
+        let inode_table_offset = header.inode_table_offset as usize;
+        if inode_table_offset < HEADER_SIZE {
+            crate::kernel::print("ZeroCopyFilesystem: invalid inode table offset");
             crate::kernel::print(&format!(
-                "  Expected offset {}, got {}",
-                HEADER_SIZE, header.inode_table_offset
+                "  Offset {} is before header end ({})",
+                inode_table_offset, HEADER_SIZE
             ));
+            return Err(22);
+        }
+
+        // CRITICAL: Verify 8-byte alignment for bytemuck::cast_slice
+        const INODE_ALIGNMENT: usize = 8; // INodeMeta requires 8-byte alignment
+        #[allow(clippy::manual_is_multiple_of)]
+        if inode_table_offset % INODE_ALIGNMENT != 0 {
+            crate::kernel::print("ZeroCopyFilesystem: inode table not 8-byte aligned!");
+            crate::kernel::print(&format!(
+                "  Offset: {}, alignment: {} bytes",
+                inode_table_offset,
+                inode_table_offset % INODE_ALIGNMENT
+            ));
+            return Err(22);
+        }
+
+        // Verify offset is reasonable (not beyond image)
+        if inode_table_offset > header.total_size as usize {
+            crate::kernel::print("ZeroCopyFilesystem: inode table offset beyond image");
             return Err(22);
         }
 
@@ -168,31 +190,57 @@ impl ZeroCopyFilesystem {
         let data = unsafe { core::slice::from_raw_parts(addr as *const u8, total_size) };
 
         // Zero-copy inode table access
-        let inode_start = header.inode_table_offset as usize;
-        let inode_bytes = header.num_inodes as usize * INODE_META_SIZE;
+        // Use the verified offset (already checked for alignment above)
+        let inode_start = inode_table_offset;
 
-        if inode_start + inode_bytes > header.total_size as usize {
+        // Check for integer overflow in inode_bytes calculation
+        let inode_bytes = match (header.num_inodes as usize).checked_mul(INODE_META_SIZE) {
+            Some(bytes) => bytes,
+            None => {
+                crate::kernel::print(
+                    "ZeroCopyFilesystem: integer overflow in inode_bytes calculation",
+                );
+                return Err(22); // EINVAL
+            }
+        };
+
+        // Check for integer overflow in bounds check
+        let inode_end = match inode_start.checked_add(inode_bytes) {
+            Some(end) => end,
+            None => {
+                crate::kernel::print("ZeroCopyFilesystem: integer overflow in inode table bounds");
+                return Err(22); // EINVAL
+            }
+        };
+
+        if inode_end > header.total_size as usize {
             crate::kernel::print("ZeroCopyFilesystem: inode table out of bounds");
             return Err(22); // EINVAL
         }
 
-        if (header.path_index_offset as usize) < inode_start + inode_bytes {
+        if (header.path_index_offset as usize) < inode_end {
             crate::kernel::print("ZeroCopyFilesystem: path index overlaps inode table");
             return Err(22);
         }
 
-        let inode_table: &'static [INodeMeta] =
-            cast_slice(&data[inode_start..inode_start + inode_bytes]);
+        let inode_table: &'static [INodeMeta] = cast_slice(&data[inode_start..inode_end]);
 
         // Zero-copy data blob access
         let blob_start = header.data_blob_offset as usize;
+        let total_size = header.total_size as usize;
 
         if blob_start < header.path_index_offset as usize {
             crate::kernel::print("ZeroCopyFilesystem: data blob overlaps path index");
             return Err(22);
         }
 
-        let data_blob = &data[blob_start..header.total_size as usize];
+        // Validate blob_start is within bounds
+        if blob_start > total_size {
+            crate::kernel::print("ZeroCopyFilesystem: data blob start beyond total size");
+            return Err(22);
+        }
+
+        let data_blob = &data[blob_start..total_size];
 
         // Deserialize path index (one-time, small)
         let path_start = header.path_index_offset as usize;
@@ -220,7 +268,7 @@ impl ZeroCopyFilesystem {
     /// Parse path index from bytes
     fn parse_path_index(data: &[u8]) -> Result<BTreeMap<String, u64>, u32> {
         let mut index = BTreeMap::new();
-        let mut pos = 0;
+        let mut pos: usize = 0;
 
         if data.len() < 4 {
             return Ok(index); // Empty index
@@ -231,23 +279,45 @@ impl ZeroCopyFilesystem {
         pos += 4;
 
         for _ in 0..num_entries {
-            if pos + 10 > data.len() {
-                return Err(22); // EINVAL
+            // Check for overflow when reading minimum required bytes (2 for path_len + 8 for inode)
+            match pos.checked_add(10) {
+                Some(sum) if sum > data.len() => return Err(22), // EINVAL
+                None => return Err(22),                          // EINVAL - overflow
+                _ => {}
             }
 
             // Read path length (u16)
             let path_len = u16::from_le_bytes([data[pos], data[pos + 1]]) as usize;
             pos += 2;
 
-            if pos + path_len + 8 > data.len() {
+            // Check for integer overflow: pos + path_len + 8
+            let required_bytes = match path_len.checked_add(8) {
+                Some(sum) => match pos.checked_add(sum) {
+                    Some(total) => total,
+                    None => return Err(22), // EINVAL - overflow
+                },
+                None => return Err(22), // EINVAL - overflow
+            };
+
+            if required_bytes > data.len() {
+                return Err(22); // EINVAL
+            }
+
+            // Check for overflow when accessing path string
+            let path_end = match pos.checked_add(path_len) {
+                Some(end) => end,
+                None => return Err(22), // EINVAL - overflow
+            };
+
+            if path_end > data.len() {
                 return Err(22); // EINVAL
             }
 
             // Read path string
-            let path = core::str::from_utf8(&data[pos..pos + path_len])
+            let path = core::str::from_utf8(&data[pos..path_end])
                 .map_err(|_| 22u32)? // EINVAL
                 .to_string();
-            pos += path_len;
+            pos = path_end;
 
             // Read inode number
             let inode = u64::from_le_bytes([
@@ -305,6 +375,8 @@ impl ZeroCopyFilesystem {
             return Err(2); // ENOENT
         }
 
+        // Safe: inode_num is > 0, so (inode_num - 1) cannot underflow
+        // inode_num is <= num_inodes, so idx will be < inode_table.len()
         let idx = (inode_num - 1) as usize;
         self.inode_table.get(idx).ok_or(2u32) // ENOENT
     }
@@ -318,14 +390,52 @@ impl ZeroCopyFilesystem {
     /// Read file content (zero-copy slice!)
     pub fn read_file_data(&self, meta: &INodeMeta) -> &'static [u8] {
         let start = meta.content_offset as usize;
-        let end = start + meta.content_length as usize;
+        let content_length = meta.content_length as usize;
+
+        // Validate that INodeMeta fields are reasonable (sanity check for corrupted metadata)
+        // If content_length is extremely large, it's likely corrupted
+        if content_length > self.data_blob.len() {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC read_file_data: suspicious content_length {} > blob_len {} (likely corrupted meta)",
+                    content_length, self.data_blob.len()
+                ));
+            }
+            return &[];
+        }
+
+        // Check for integer overflow before bounds check
+        let end = match start.checked_add(content_length) {
+            Some(e) => e,
+            None => {
+                if ZERO_COPY_DEBUG {
+                    self.debug_log(&format!(
+                        "ZC read_file_data: integer overflow offset={} len={}",
+                        start, content_length
+                    ));
+                }
+                return &[];
+            }
+        };
 
         if end > self.data_blob.len() {
             if ZERO_COPY_DEBUG {
                 self.debug_log(&format!(
                     "ZC read_file_data: out-of-bounds slice offset={} len={} blob_len={}",
                     start,
-                    meta.content_length,
+                    content_length,
+                    self.data_blob.len()
+                ));
+            }
+            return &[];
+        }
+
+        // Additional check: ensure start is within bounds
+        if start > self.data_blob.len() {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC read_file_data: start offset out of bounds offset={} blob_len={}",
+                    start,
                     self.data_blob.len()
                 ));
             }
@@ -335,7 +445,7 @@ impl ZeroCopyFilesystem {
         if ZERO_COPY_DEBUG {
             self.debug_log(&format!(
                 "ZC read_file_data: slice offset={} len={} inode={} qtype=0x{:02x}",
-                start, meta.content_length, meta.qid_path, meta.qid_type
+                start, content_length, meta.qid_path, meta.qid_type
             ));
         }
 
@@ -370,7 +480,7 @@ impl ZeroCopyFilesystem {
     /// Parse directory entries from serialized format
     fn parse_dir_entries(data: &[u8]) -> Result<Vec<DirEntry>, u32> {
         let mut entries = Vec::new();
-        let mut pos = 0;
+        let mut pos: usize = 0;
 
         if data.len() < 4 {
             return Ok(entries);
@@ -381,8 +491,11 @@ impl ZeroCopyFilesystem {
         pos += 4;
 
         for _ in 0..num_entries {
-            if pos + 22 > data.len() {
-                return Err(22); // EINVAL
+            // Check for overflow: minimum 22 bytes needed (13 QID + 1 type + 8 inode)
+            match pos.checked_add(22) {
+                Some(sum) if sum > data.len() => return Err(22), // EINVAL
+                None => return Err(22),                          // EINVAL - overflow
+                _ => {}
             }
 
             // Parse QID (13 bytes)
@@ -422,15 +535,21 @@ impl ZeroCopyFilesystem {
             let name_len = u16::from_le_bytes([data[pos], data[pos + 1]]) as usize;
             pos += 2;
 
-            if pos + name_len > data.len() {
+            // Check for integer overflow: pos + name_len
+            let name_end = match pos.checked_add(name_len) {
+                Some(end) => end,
+                None => return Err(22), // EINVAL - overflow
+            };
+
+            if name_end > data.len() {
                 return Err(22); // EINVAL
             }
 
             // Name string
-            let name = core::str::from_utf8(&data[pos..pos + name_len])
+            let name = core::str::from_utf8(&data[pos..name_end])
                 .map_err(|_| 22u32)? // EINVAL
                 .to_string();
-            pos += name_len;
+            pos = name_end;
 
             entries.push(DirEntry {
                 name,
@@ -494,6 +613,17 @@ impl ZeroCopyFilesystem {
 
     /// Walk from a FID following path components (zero-copy metadata access!)
     pub fn walk(&mut self, from_fid: u32, to_fid: u32, wnames: &[String]) -> Result<Vec<Qid>, u32> {
+        self.debug_log("ZC walk pxEEEE: starting walk");
+        let path_index_len = self.path_index.len();
+        let first_key_opt = self.path_index.keys().next();
+        if first_key_opt.is_none() && path_index_len > 0 {
+            self.debug_log(
+                "ZC walk pxyEEEEE: ERROR: path_index claims non-zero len but iter() returns nothing!",
+            );
+            return Err(22); // EINVAL - corrupted BTreeMap
+        }
+        self.debug_log("ZC walk pxyEEEEE: path_index.iter() works");
+
         // Get starting vnode
         let from_vnode = self.get_fid(from_fid)?.clone();
         if ZERO_COPY_DEBUG {
@@ -502,6 +632,17 @@ impl ZeroCopyFilesystem {
                 from_fid, from_vnode.path, to_fid, wnames
             ));
         }
+        // Validate initial inode number
+        if from_vnode.inode == 0 || from_vnode.inode > self.header.num_inodes as u64 {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC walk: corrupted initial inode {} (max={})",
+                    from_vnode.inode, self.header.num_inodes
+                ));
+            }
+            return Err(22); // EINVAL - corrupted inode
+        }
+
         let mut current_inode = from_vnode.inode;
         let mut current_path = from_vnode.path.clone();
         let mut qids = Vec::new();
@@ -540,6 +681,20 @@ impl ZeroCopyFilesystem {
 
             // Read directory entries
             let entries = self.read_dir_entries(meta)?;
+
+            // Validate all directory entry inode numbers to prevent using corrupted data
+            for entry in &entries {
+                if entry.inode == 0 || entry.inode > self.header.num_inodes as u64 {
+                    if ZERO_COPY_DEBUG {
+                        self.debug_log(&format!(
+                            "ZC walk: corrupted inode {} in dir entry '{}' (max={})",
+                            entry.inode, entry.name, self.header.num_inodes
+                        ));
+                    }
+                    return Err(22); // EINVAL - corrupted directory entry
+                }
+            }
+
             if ZERO_COPY_DEBUG {
                 self.debug_log(&format!(
                     "ZC walk: directory inode {} '{}' entries={}",
@@ -603,6 +758,16 @@ impl ZeroCopyFilesystem {
             self.debug_log("ZC walk pxyB: after lookup");
             // Find the named entry, falling back to the path index if needed
             let next_inode = if let Some(entry) = entries.iter().find(|e| e.name == *wname) {
+                // Validate inode number from directory entry before using
+                if entry.inode == 0 || entry.inode > self.header.num_inodes as u64 {
+                    if ZERO_COPY_DEBUG {
+                        self.debug_log(&format!(
+                            "ZC walk: corrupted inode {} from dir entry (max={})",
+                            entry.inode, self.header.num_inodes
+                        ));
+                    }
+                    return Err(22); // EINVAL - corrupted inode
+                }
                 if ZERO_COPY_DEBUG {
                     self.debug_log(&format!(
                         "ZC walk: found '{}' in dir listing -> inode {} qtype=0x{:02x}",
@@ -611,6 +776,16 @@ impl ZeroCopyFilesystem {
                 }
                 entry.inode
             } else if let Some(inode) = self.path_index.get(&next_path) {
+                // Validate inode number from path_index before using
+                if *inode == 0 || *inode > self.header.num_inodes as u64 {
+                    if ZERO_COPY_DEBUG {
+                        self.debug_log(&format!(
+                            "ZC walk: corrupted inode {} from path_index (max={})",
+                            inode, self.header.num_inodes
+                        ));
+                    }
+                    return Err(22); // EINVAL - corrupted inode
+                }
                 if ZERO_COPY_DEBUG {
                     self.debug_log(&format!(
                         "ZC walk: '{}' missing from dir entries, using path index inode {}",

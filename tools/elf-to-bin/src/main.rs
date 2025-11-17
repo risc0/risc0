@@ -20,9 +20,14 @@ use std::path::PathBuf;
 pub const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
 
 // Memory layout constants
+// Stack grows DOWN from top, so heap must end BEFORE stack top
 const KERNEL_STACK_ADDR: u32 = 0xfff00000;
+const KERNEL_STACK_MAX_SIZE: u32 = 1024 * 1024; // Max 1MB stack growth
+const KERNEL_HEAP_STACK_GAP: u32 = 1024 * 1024; // 1MB safety gap
 const KERNEL_HEAP_SIZE: u32 = 16 * 1024 * 1024; // 16MB fixed
-const KERNEL_HEAP_START: u32 = KERNEL_STACK_ADDR - KERNEL_HEAP_SIZE; // 0xfef00000
+                                                // Heap ends before stack bottom: stack_top - stack_size - gap
+const KERNEL_HEAP_END: u32 = KERNEL_STACK_ADDR - KERNEL_STACK_MAX_SIZE - KERNEL_HEAP_STACK_GAP;
+const KERNEL_HEAP_START: u32 = KERNEL_HEAP_END - KERNEL_HEAP_SIZE; // 0xfed00000
 const FS_IMAGE_ADDR_PTR: u32 = 0xffff_3030; // Where we store the FS address
 
 // Zero-copy filesystem image builder shared with the kernel
@@ -106,7 +111,13 @@ mod filesystem_image {
                 (0u8, 0x00u8) // Regular file
             };
 
-            let content_offset = data_blob.len() as u32;
+            // Check for overflow: data_blob.len() must fit in u32
+            let content_offset = data_blob.len().try_into().map_err(|_| {
+                io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("Data blob too large: {} bytes (max: {})", data_blob.len(), u32::MAX),
+                )
+            })?;
             let mut content_length = 0u32;
 
             let mode = if metadata.is_dir() {
@@ -130,7 +141,9 @@ mod filesystem_image {
                 rdev: 0,
                 size: metadata.len(),
                 blksize: 4096,
-                blocks: (metadata.len() + 511) / 512,
+                blocks: metadata.len().checked_add(511)
+                    .and_then(|n| n.checked_div(512))
+                    .unwrap_or(u64::MAX), // Safe fallback for huge files
                 atime_sec: 0,
                 atime_nsec: 0,
                 mtime_sec: 0,
@@ -165,11 +178,26 @@ mod filesystem_image {
                     // Read symlink target
                     let target = fs::read_link(entry.path())?;
                     let target_str = target.to_string_lossy();
-                    data_blob.extend_from_slice(target_str.as_bytes());
-                    content_length = target_str.len() as u32;
+                    let target_bytes = target_str.as_bytes();
+                    // Check for overflow: symlink target must fit in u32
+                    if target_bytes.len() > u32::MAX as usize {
+                        return Err(io::Error::new(
+                            io::ErrorKind::InvalidData,
+                            format!("Symlink target too large: {} bytes (max: {})", target_bytes.len(), u32::MAX),
+                        ));
+                    }
+                    data_blob.extend_from_slice(target_bytes);
+                    content_length = target_bytes.len() as u32;
                 } else {
                     // Regular file - read content
                     let file_data = fs::read(entry.path())?;
+                    // Check for overflow: file content must fit in u32
+                    if file_data.len() > u32::MAX as usize {
+                        return Err(io::Error::new(
+                            io::ErrorKind::InvalidData,
+                            format!("File too large: {} bytes (max: {})", file_data.len(), u32::MAX),
+                        ));
+                    }
                     data_blob.extend_from_slice(&file_data);
                     content_length = file_data.len() as u32;
                 }
@@ -185,8 +213,21 @@ mod filesystem_image {
 
         // Update directory content with entries
         if let Some(dir_inode_num) = paths.get(vfs_path) {
-            let content_offset = data_blob.len() as u32;
+            // Check for overflow: data_blob.len() must fit in u32
+            let content_offset = data_blob.len().try_into().map_err(|_| {
+                io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("Data blob too large: {} bytes (max: {})", data_blob.len(), u32::MAX),
+                )
+            })?;
             let dir_data = serialize_dir_entries(&dir_entries);
+            // Check for overflow: directory data must fit in u32
+            if dir_data.len() > u32::MAX as usize {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("Directory data too large: {} bytes (max: {})", dir_data.len(), u32::MAX),
+                ));
+            }
             data_blob.extend_from_slice(&dir_data);
 
             if let Some(meta) = inodes.get_mut(dir_inode_num) {
@@ -232,8 +273,9 @@ mod filesystem_image {
     fn serialize_dir_entries(entries: &[(String, u64, u8)]) -> Vec<u8> {
         let mut data = Vec::new();
 
-        // Number of entries
-        data.extend_from_slice(&(entries.len() as u32).to_le_bytes());
+        // Number of entries - check for overflow
+        let num_entries = entries.len().try_into().unwrap_or(u32::MAX);
+        data.extend_from_slice(&num_entries.to_le_bytes());
 
         for (name, inode, qtype) in entries {
             // QID (13 bytes)
@@ -254,9 +296,10 @@ mod filesystem_image {
             // Inode number
             data.extend_from_slice(&inode.to_le_bytes());
 
-            // Name
-            data.extend_from_slice(&(name.len() as u16).to_le_bytes());
-            data.extend_from_slice(name.as_bytes());
+            // Name - check for overflow: filename must fit in u16
+            let name_len = name.len().min(u16::MAX as usize);
+            data.extend_from_slice(&(name_len as u16).to_le_bytes());
+            data.extend_from_slice(&name.as_bytes()[..name_len]);
         }
 
         data
@@ -269,15 +312,22 @@ mod filesystem_image {
     ) -> Vec<u8> {
         let mut image = Vec::new();
 
-        // Create header
+        // Create header (inode_table_offset will be updated after padding)
+        // CRITICAL: num_inodes must match max_inode (not just inodes.len())
+        // because p9_in_memory.rs expects a dense table numbered 1..=num_inodes
+        let max_inode = inodes.keys().max().copied().unwrap_or(0);
+        let num_inodes = max_inode.try_into().unwrap_or_else(|_| {
+            panic!("Too many inodes: {} (max: {})", max_inode, u32::MAX);
+        });
+        
         let header = FilesystemImageHeader {
             magic: FS_MAGIC,
             version: FS_VERSION,
             total_size: 0, // Will update
-            num_inodes: inodes.len() as u32,
-            inode_table_offset: HEADER_SIZE as u32,
-            data_blob_offset: 0,  // Will update
-            path_index_offset: 0, // Will update
+            num_inodes,
+            inode_table_offset: 0, // Will update after padding
+            data_blob_offset: 0,   // Will update
+            path_index_offset: 0,  // Will update
             _padding: 0,
             root_inode: 1,
         };
@@ -285,31 +335,99 @@ mod filesystem_image {
         // Write header (placeholder)
         image.extend_from_slice(bytemuck::bytes_of(&header));
 
-        // Write inode table
-        for i in 1..=inodes.len() as u64 {
+        // CRITICAL: Ensure inode table is 8-byte aligned for bytemuck::cast_slice
+        // Header is 40 bytes (8-byte aligned), so inode table should already be aligned,
+        // but add explicit padding to be safe
+        const INODE_ALIGNMENT: usize = 8; // INodeMeta requires 8-byte alignment
+        let padding_needed = (INODE_ALIGNMENT - (image.len() % INODE_ALIGNMENT)) % INODE_ALIGNMENT;
+        if padding_needed > 0 {
+            image.extend_from_slice(&vec![0u8; padding_needed]);
+            eprintln!(
+                "Added {} bytes padding after header to align inode table",
+                padding_needed
+            );
+        }
+
+        // Verify alignment
+        debug_assert_eq!(
+            image.len() % INODE_ALIGNMENT,
+            0,
+            "Inode table must be 8-byte aligned for bytemuck::cast_slice"
+        );
+
+        // Record actual inode table offset (after padding)
+        // Check for overflow: image.len() must fit in u32
+        let inode_table_offset = image.len().try_into().unwrap_or_else(|_| {
+            panic!("Image too large: {} bytes (max: {})", image.len(), u32::MAX);
+        });
+
+        // Write inode table - CRITICAL: Write inodes in order 1..=max_inode
+        // This ensures the inode table is dense and matches what p9_in_memory.rs expects
+        // p9_in_memory.rs uses (inode_num - 1) as the index, so inodes must be numbered 1..=num_inodes
+        let inode_table_start = image.len();
+        let max_inode = inodes.keys().max().copied().unwrap_or(0);
+        
+        // Verify that inodes are dense (no gaps expected, but handle defensively)
+        if max_inode != inodes.len() as u64 {
+            eprintln!(
+                "WARNING: Inode numbers are not dense: max_inode={}, num_inodes={}",
+                max_inode, inodes.len()
+            );
+        }
+        
+        // Write inodes in order 1..=max_inode to ensure dense table
+        for i in 1..=max_inode {
             if let Some(meta) = inodes.get(&i) {
                 image.extend_from_slice(bytemuck::bytes_of(meta));
+            } else {
+                // This should never happen if inodes are allocated sequentially,
+                // but handle it defensively to prevent memory corruption in p9_in_memory.rs
+                eprintln!("ERROR: Missing inode {} in table! This will cause memory corruption!", i);
+                panic!("Inode table has gaps - inode {} is missing. This will cause out-of-bounds access in p9_in_memory.rs", i);
             }
         }
 
+        // Verify inode table alignment
+        debug_assert_eq!(
+            inode_table_start % INODE_ALIGNMENT,
+            0,
+            "Inode table start must be 8-byte aligned"
+        );
+
         // Write path index
-        let path_index_offset = image.len() as u32;
-        image.extend_from_slice(&(paths.len() as u32).to_le_bytes());
+        // Check for overflow: image.len() must fit in u32
+        let path_index_offset = image.len().try_into().unwrap_or_else(|_| {
+            panic!("Image too large for path index: {} bytes (max: {})", image.len(), u32::MAX);
+        });
+        
+        // Check for overflow: paths.len() must fit in u32
+        let num_paths = paths.len().try_into().unwrap_or(u32::MAX);
+        image.extend_from_slice(&num_paths.to_le_bytes());
+        
         for (path, inode_num) in &paths {
-            image.extend_from_slice(&(path.len() as u16).to_le_bytes());
-            image.extend_from_slice(path.as_bytes());
+            // Check for overflow: path.len() must fit in u16
+            let path_len = path.len().min(u16::MAX as usize);
+            image.extend_from_slice(&(path_len as u16).to_le_bytes());
+            image.extend_from_slice(&path.as_bytes()[..path_len]);
             image.extend_from_slice(&inode_num.to_le_bytes());
         }
 
         // Write data blob
-        let data_blob_offset = image.len() as u32;
+        // Check for overflow: image.len() must fit in u32
+        let data_blob_offset = image.len().try_into().unwrap_or_else(|_| {
+            panic!("Image too large for data blob: {} bytes (max: {})", image.len(), u32::MAX);
+        });
         image.extend_from_slice(&data_blob);
 
-        // Update header
-        let total_size = image.len() as u32;
+        // Update header with correct offsets
+        // Check for overflow: image.len() must fit in u32
+        let total_size = image.len().try_into().unwrap_or_else(|_| {
+            panic!("Image too large: {} bytes (max: {})", image.len(), u32::MAX);
+        });
         let mut header =
             bytemuck::pod_read_unaligned::<FilesystemImageHeader>(&image[..HEADER_SIZE]);
         header.total_size = total_size;
+        header.inode_table_offset = inode_table_offset; // Update with actual offset after padding
         header.path_index_offset = path_index_offset;
         header.data_blob_offset = data_blob_offset;
 
@@ -337,23 +455,47 @@ fn embed_filesystem(
         fs_size as f64 / (1024.0 * 1024.0)
     );
 
-    // Calculate where to place the filesystem (below fixed kernel heap, 4K aligned)
+    // Calculate where to place the filesystem (below fixed kernel heap, 4KB aligned)
     // Memory layout: Stack | Heap (16MB fixed) | FS (variable) | User Space
-    let fs_addr = ((KERNEL_HEAP_START - fs_size as u32) & !0xfff) as u32; // Aligned to 4K
+    // CRITICAL: Must be 4KB aligned for zero-copy access with bytemuck
+    const PAGE_SIZE: u32 = 4096; // 4KB
+    const PAGE_MASK: u32 = !(PAGE_SIZE - 1); // 0xfffff000 (clears bottom 12 bits)
+
+    // Calculate raw address (before alignment)
+    let fs_addr_raw = KERNEL_HEAP_START - fs_size as u32;
+
+    // Align DOWN to 4KB boundary (clears bottom 12 bits)
+    let fs_addr = (fs_addr_raw & PAGE_MASK) as u32;
+
+    // Verify alignment is correct
+    if (fs_addr & (PAGE_SIZE - 1)) != 0 {
+        return Err(format!(
+            "FATAL: Alignment calculation failed! FS addr: 0x{:08x}, offset: 0x{:03x}",
+            fs_addr,
+            fs_addr & (PAGE_SIZE - 1)
+        )
+        .into());
+    }
 
     println!("Memory layout:");
     println!("  Stack:        0x{:08x}", KERNEL_STACK_ADDR);
     println!("  Heap start:   0x{:08x} (16 MB fixed)", KERNEL_HEAP_START);
     println!(
-        "  FS start:     0x{:08x} ({:.2} MB)",
+        "  FS start:     0x{:08x} ({:.2} MB) [4KB aligned]",
         fs_addr,
         fs_size as f64 / (1024.0 * 1024.0)
     );
     println!("  FS end:       0x{:08x}", fs_addr + fs_size as u32);
 
-    // Ensure filesystem address is word-aligned
-    if fs_addr % 4 != 0 {
-        return Err("Filesystem address must be word-aligned".into());
+    // Log alignment info
+    if fs_addr != fs_addr_raw {
+        let alignment_adjustment = fs_addr_raw - fs_addr;
+        println!(
+            "  Alignment: Adjusted DOWN by {} bytes to 4KB boundary",
+            alignment_adjustment
+        );
+    } else {
+        println!("  Alignment: Already 4KB aligned (no adjustment needed)");
     }
 
     // Debug: show first 16 bytes of FS image
@@ -369,11 +511,98 @@ fn embed_filesystem(
         fs_image_padded.push(0);
     }
 
+    // CRITICAL: Use padded size for all calculations to avoid heap overlap!
+    let fs_size_padded = fs_image_padded.len() as u32;
+
+    // CRITICAL: Reserve minimum gap between FS and heap for safety
+    // This prevents accidental overlap and allows for alignment adjustments
+    const MIN_FS_HEAP_GAP: u32 = 4 * 1024; // 4KB minimum gap
+
+    // Recalculate placement with padded size AND minimum gap
+    // Must maintain 4KB alignment
+    let fs_addr_raw_final = KERNEL_HEAP_START - fs_size_padded - MIN_FS_HEAP_GAP;
+    let fs_addr_final = (fs_addr_raw_final & PAGE_MASK) as u32;
+
+    // Verify final alignment
+    if (fs_addr_final & (PAGE_SIZE - 1)) != 0 {
+        return Err(format!(
+            "FATAL: Final alignment calculation failed! FS addr: 0x{:08x}, offset: 0x{:03x}",
+            fs_addr_final,
+            fs_addr_final & (PAGE_SIZE - 1)
+        )
+        .into());
+    }
+
+    if fs_addr_final != fs_addr {
+        eprintln!("WARNING: FS placement recalculated due to padding!");
+        eprintln!("  Original addr: 0x{:08x} (size: {})", fs_addr, fs_size);
+        eprintln!(
+            "  Final addr:    0x{:08x} (padded size: {})",
+            fs_addr_final, fs_size_padded
+        );
+    }
+
+    let fs_addr = fs_addr_final;
+
     println!(
         "  Writing {} words starting at 0x{:08x}",
         fs_image_padded.len() / 4,
         fs_addr
     );
+
+    println!("  FS end (padded): 0x{:08x}", fs_addr + fs_size_padded);
+
+    // Verify FS placement doesn't overlap with heap
+    let fs_end = fs_addr + fs_size_padded;
+    if fs_end > KERNEL_HEAP_START {
+        return Err(format!(
+            "FATAL: Filesystem (padded) extends into kernel heap! FS end: 0x{:08x}, Heap start: 0x{:08x}",
+            fs_end, KERNEL_HEAP_START
+        ).into());
+    }
+
+    // Verify minimum gap (should always pass since we reserved it in calculation)
+    let gap = KERNEL_HEAP_START - fs_end;
+    if gap < MIN_FS_HEAP_GAP {
+        return Err(format!(
+            "FATAL: Filesystem too close to heap! Gap: {} bytes (minimum: {} bytes). FS end: 0x{:08x}, Heap start: 0x{:08x}",
+            gap, MIN_FS_HEAP_GAP, fs_end, KERNEL_HEAP_START
+        ).into());
+    }
+
+    println!(
+        "  ✓ Gap to heap: {} KB (minimum: {} KB)",
+        gap / 1024,
+        MIN_FS_HEAP_GAP / 1024
+    );
+
+    // Verify FS placement doesn't overlap with stack
+    // Stack grows DOWN from KERNEL_STACK_ADDR, worst case bottom is KERNEL_STACK_ADDR - KERNEL_STACK_MAX_SIZE
+    let stack_bottom = KERNEL_STACK_ADDR - KERNEL_STACK_MAX_SIZE;
+    if fs_end >= stack_bottom {
+        return Err(format!(
+            "FATAL: Filesystem overlaps with stack! FS end: 0x{:08x}, Stack bottom: 0x{:08x}",
+            fs_end, stack_bottom
+        )
+        .into());
+    }
+
+    // Log gap information
+    let gap_to_heap = KERNEL_HEAP_START - fs_end;
+    if gap_to_heap == 0 {
+        println!("  ✓ FS ends exactly at heap start (touching, OK)");
+    } else {
+        println!("  ✓ Gap between FS and heap: {} KB", gap_to_heap / 1024);
+    }
+
+    // Verify alignment
+    if (fs_addr & 0xfff) != 0 {
+        return Err(format!(
+            "FATAL: Filesystem address not 4KB aligned! FS start: 0x{:08x}",
+            fs_addr
+        )
+        .into());
+    }
 
     for (i, chunk) in fs_image_padded.chunks_exact(4).enumerate() {
         let word = u32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]);
@@ -392,7 +621,7 @@ fn embed_filesystem(
     );
     println!(
         "Heap will start at approximately: 0x{:08x}",
-        (fs_addr + fs_size as u32 + 0xfff) & !0xfff
+        (fs_addr + fs_size_padded + 0xfff) & !0xfff
     );
 
     // Debug: verify what we wrote
@@ -475,7 +704,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 format!("Failed to read guest ELF from {:?}: {}", guest_elf_path, e)
             })?;
 
-            let elf = Program::load_elf_dyn(&guest_elf, u32::MAX, &interp_elf).map_err(|e| {
+            const USER_MAX_MEM: u32 = 0x4000_0000;
+            let elf = Program::load_elf_dyn(&guest_elf, USER_MAX_MEM, &interp_elf).map_err(|e| {
                 format!("Failed to read guest ELF from {:?}: {}", guest_elf_path, e)
             })?;
             let memory_image = MemoryImage::new_dyn(elf, kernel_program);

@@ -11,6 +11,10 @@
 
 #![allow(dead_code)] // Trait will be used when we refactor message sending
 
+extern crate alloc;
+
+use alloc::format;
+
 use crate::p9::{
     P9Response, // Re-use the existing P9Response type from p9.rs (includes RlerrorMessage)
     RattachMessage,
@@ -262,6 +266,8 @@ pub trait P9Backend {
 static mut ZKVM_BACKEND: Option<crate::p9_zkvm::ZkvmBackend> = None;
 static mut INMEMORY_BACKEND: Option<crate::p9_in_memory::InMemoryBackend> = None;
 static mut ZEROCOPY_BACKEND: Option<crate::p9_in_memory::ZeroCopyBackend> = None;
+// Initialized but not used as active backend (for opts=p9zc)
+static mut ZEROCOPY_FILESYSTEM_INIT: Option<crate::p9_in_memory::ZeroCopyBackend> = None;
 
 /// Get the active backend as a trait object
 ///
@@ -299,10 +305,67 @@ pub fn init_in_memory_backend() {
 /// The address must point to a valid FilesystemImage.
 pub unsafe fn init_zerocopy_backend(addr: usize, max_size: usize) -> Result<usize, u32> {
     unsafe {
-        let backend = crate::p9_in_memory::ZeroCopyBackend::from_address(addr, max_size)?;
+        let mut backend = crate::p9_in_memory::ZeroCopyBackend::from_address(addr, max_size)?;
         backend.dump_all_paths();
+
+        // Sanity check: mimic the failing walk to detect inode-table corruption early.
+        let sanity_path = "/etc/ld-musl-riscv32.path";
+        crate::kernel::print(&format!(
+            "init_zerocopy_backend: sanity check {}",
+            sanity_path
+        ));
+        match backend.filesystem_mut().get_inode_by_path(sanity_path) {
+            Ok(meta) => crate::kernel::print(&format!(
+                "init_zerocopy_backend: sanity check success inode={} qtype=0x{:02x}",
+                meta.qid_path, meta.qid_type
+            )),
+            Err(errno) => crate::kernel::print(&format!(
+                "init_zerocopy_backend: sanity check failed errno={}",
+                errno
+            )),
+        }
+
         let fs_size = backend.image_size();
         ZEROCOPY_BACKEND = Some(backend);
+        Ok(fs_size)
+    }
+}
+
+/// Initialize and validate the zero-copy backend from an embedded filesystem image without setting it as active
+///
+/// This function fully initializes the zero-copy backend (including sanity checks) and keeps it
+/// in memory, but does NOT set it as the active backend. The initialized filesystem is stored
+/// in ZEROCOPY_FILESYSTEM_INIT but get_backend() will not use it. This is useful for testing/validation
+/// purposes where you want the filesystem initialized but still use zkVM backend for operations.
+///
+/// # Safety
+/// The address must point to a valid FilesystemImage.
+pub unsafe fn validate_zerocopy_backend(addr: usize, max_size: usize) -> Result<usize, u32> {
+    unsafe {
+        let mut backend = crate::p9_in_memory::ZeroCopyBackend::from_address(addr, max_size)?;
+        backend.dump_all_paths();
+
+        // Sanity check: mimic the failing walk to detect inode-table corruption early.
+        let sanity_path = "/etc/ld-musl-riscv32.path";
+        crate::kernel::print(&format!(
+            "validate_zerocopy_backend: sanity check {}",
+            sanity_path
+        ));
+        match backend.filesystem_mut().get_inode_by_path(sanity_path) {
+            Ok(meta) => crate::kernel::print(&format!(
+                "validate_zerocopy_backend: sanity check success inode={} qtype=0x{:02x}",
+                meta.qid_path, meta.qid_type
+            )),
+            Err(errno) => crate::kernel::print(&format!(
+                "validate_zerocopy_backend: sanity check failed errno={}",
+                errno
+            )),
+        }
+
+        let fs_size = backend.image_size();
+        // Store the initialized backend but don't set it as active
+        // get_backend() only checks ZEROCOPY_BACKEND, not ZEROCOPY_FILESYSTEM_INIT
+        ZEROCOPY_FILESYSTEM_INIT = Some(backend);
         Ok(fs_size)
     }
 }
@@ -317,18 +380,12 @@ pub enum BackendType {
 
 pub fn get_backend_type() -> BackendType {
     unsafe {
-        match (&raw const ZEROCOPY_BACKEND as *const Option<_>)
-            .read()
-            .is_some()
-        {
-            true => BackendType::ZeroCopy,
-            false => match (&raw const INMEMORY_BACKEND as *const Option<_>)
-                .read()
-                .is_some()
-            {
-                true => BackendType::InMemory,
-                false => BackendType::Zkvm,
-            },
+        if core::ptr::addr_of!(ZEROCOPY_BACKEND).read().is_some() {
+            BackendType::ZeroCopy
+        } else if core::ptr::addr_of!(INMEMORY_BACKEND).read().is_some() {
+            BackendType::InMemory
+        } else {
+            BackendType::Zkvm
         }
     }
 }

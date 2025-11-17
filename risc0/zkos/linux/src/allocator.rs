@@ -45,12 +45,17 @@ unsafe impl GlobalAlloc for KernelAllocator {
             }
         }
 
-        unsafe {
+        let ret = unsafe {
             (*get_tlsf_ptr())
                 .allocate(layout)
                 .map(|ptr| ptr.as_ptr())
                 .unwrap_or(core::ptr::null_mut())
+        };
+        if ret.is_null() {
+            crate::kernel::print("Out of memory");
+            loop {}
         }
+        ret
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
@@ -83,14 +88,19 @@ pub unsafe fn init_kernel_allocator() {
     if INITIALIZED.load(Ordering::Acquire) {
         return; // Already initialized
     }
-
     // Initialize the heap memory region (fixed 16MB below stack)
     let heap_start = KERNEL_HEAP_START_ADDR as *mut u8;
     let heap_size = KERNEL_HEAP_SIZE;
 
-    /* unsafe {
+    crate::kernel::print("Zeroing heap memory");
+
+    unsafe {
+        // This writes the byte value 0 to every address from `heap_start` up to `heap_start + heap_size`,
+        // that is, it zeroes out the entire kernel heap memory region from the starting pointer
+        // (`heap_start`) to (`heap_start + heap_size`).
         core::ptr::write_bytes(heap_start, 0, heap_size);
-    } */
+    }
+    crate::kernel::print("Done zeroing heap memory");
 
     // Add the heap memory to the allocator
     let heap_slice = unsafe { core::slice::from_raw_parts_mut(heap_start, heap_size) };

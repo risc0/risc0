@@ -70,12 +70,20 @@ impl Program {
         if elf.ehdr.e_type != elf::abi::ET_DYN {
             bail!("Invalid ELF type, must be dynamic");
         }
-        // ELF_ET_DYN_BASE = (2/3) * TASK_SIZE = (2/3) * 0x9c800000 ≈ 0x68555555
-        // → page-align → 0x68555000
-        let load_base = 0x68555000u32;
-
-        // Linux page size (4096 bytes), not zkVM PAGE_SIZE (1024 bytes)
+        // Mirror Linux's ELF_ET_DYN_BASE calculation: load the main executable
+        // 2/3 of the way up the user VA space and align it to the system page size.
         const LINUX_PAGE_SIZE: u32 = 0x1000;
+        if max_mem < (LINUX_PAGE_SIZE * 4 / 3) {
+            bail!(
+                "max_mem ({max_mem:#010x}) is too small to place ELF segments safely (needs >={:#010x})",
+                LINUX_PAGE_SIZE * 4 / 3
+            );
+        }
+        let mut load_base = ((max_mem as u64 * 2 / 3) as u32) & !(LINUX_PAGE_SIZE - 1);
+        if load_base == 0 {
+            load_base = LINUX_PAGE_SIZE;
+        }
+
         let entry: u32 = elf
             .ehdr
             .e_entry
@@ -83,6 +91,12 @@ impl Program {
             .map_err(|err| anyhow!("e_entry was larger than 32 bits. {err}"))?;
         if entry >= max_mem || entry % WORD_SIZE as u32 != 0 {
             bail!("Invalid entrypoint");
+        }
+        let entry_addr = load_base
+            .checked_add(entry)
+            .ok_or_else(|| anyhow!("Entry address overflows when applying load base"))?;
+        if entry_addr >= max_mem {
+            bail!("Entry address {entry_addr:#010x} exceeds user memory ceiling {max_mem:#010x}");
         }
         let segments = elf
             .segments()
@@ -233,15 +247,20 @@ impl Program {
             }
         }
 
-        let executable = (load_base + entry, phdr_addr, phnum);
+        let executable = (entry_addr, phdr_addr, phnum);
 
         // Compute top-down DSO arena base (matching Linux's memory layout)
-        const TASK_SIZE: u32 = 0x9C80_0000; // User VA ceiling (STACK_TOP / FIXADDR_START)
         const STACK_GAP: u32 = 0x0800_0000; // Stack gap (128 MiB)
         const BIG_ALIGN: u32 = 0x0080_0000; // 8 MiB alignment for mmap_base
         const PAGE: u32 = 0x1000;
 
-        let mmap_base: u32 = (TASK_SIZE - STACK_GAP) & !(BIG_ALIGN - 1); // → 0x94800000
+        if max_mem <= STACK_GAP {
+            bail!(
+                "max_mem ({max_mem:#010x}) is too small to reserve stack gap ({STACK_GAP:#010x})"
+            );
+        }
+        let task_size = max_mem;
+        let mmap_base: u32 = (task_size - STACK_GAP) & !(BIG_ALIGN - 1);
 
         let elf = ElfBytes::<LittleEndian>::minimal_parse(interp)
             .map_err(|err| anyhow!("Elf parse error: {err}"))?;
