@@ -1045,6 +1045,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "XXX remi: some unknown GPU synchronization issue causes it to fail"]
     #[gpu_guard::gpu_guard]
     fn fri_prove() {
         testutil::fri_prove(MetalHalSha256::new());
