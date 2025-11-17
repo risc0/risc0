@@ -88,10 +88,33 @@ pub struct ZeroCopyFilesystem {
     data_blob: &'static [u8],
 
     /// Path to inode mapping (deserialized once, small)
+    /// NOTE: Uses String keys (not &'static str) because we need to look up dynamically created paths
     path_index: BTreeMap<String, u64>,
 
     /// Active FID table (runtime state)
     fid_table: BTreeMap<u32, VNode>,
+}
+
+impl Drop for ZeroCopyFilesystem {
+    fn drop(&mut self) {
+        let path_index_len = self.path_index.len();
+        // Only log if path_index has entries (real instance, not temporary validation instance)
+        if path_index_len > 0 {
+            let (heap_used, _heap_free, _heap_total) = crate::allocator::get_heap_stats();
+            crate::kernel::print(&format!(
+                "ZeroCopyFilesystem::drop() called! path_index.len()={}, heap_used={} bytes ({} KB)",
+                path_index_len,
+                heap_used,
+                heap_used / 1024
+            ));
+            crate::kernel::print(&format!(
+                "ZeroCopyFilesystem::drop() - CRITICAL: Real backend being dropped! This will deallocate path_index (BTreeMap with {} entries, ~{} KB)",
+                path_index_len,
+                (path_index_len * 100) / 1024 // Rough estimate
+            ));
+        }
+        // Silently drop temporary validation instances (path_index_len == 0)
+    }
 }
 
 impl ZeroCopyFilesystem {
@@ -105,6 +128,177 @@ impl ZeroCopyFilesystem {
     fn sanity_check_layout() {
         debug_assert_eq!(size_of::<FilesystemImageHeader>(), HEADER_SIZE);
         debug_assert_eq!(size_of::<INodeMeta>(), INODE_META_SIZE);
+    }
+
+    /// Validate that an INodeMeta struct contains reasonable values
+    /// Returns true if valid, false if corrupted
+    fn validate_inode_meta(&self, meta: &INodeMeta, inode_num: u64, data_blob_len: usize) -> bool {
+        // Validate QID type - must be one of the known types
+        // Valid types: Qtfile (0x00), Qtdir (0x80), Qtsymlink (0x02), or combinations
+        // Invalid: anything with bits that don't correspond to known types
+        let qtype = meta.qid_type;
+        let valid_qtype_bits = P9QidType::Qtdir as u8
+            | P9QidType::Qtappend as u8
+            | P9QidType::Qtexcl as u8
+            | P9QidType::Qtmount as u8
+            | P9QidType::Qtauth as u8
+            | P9QidType::Qttmp as u8
+            | P9QidType::Qtsymlink as u8
+            | P9QidType::Qtlink as u8
+            | P9QidType::Qtfile as u8;
+
+        // Check if qtype has any invalid bits set
+        if (qtype & !valid_qtype_bits) != 0 {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC validate_inode_meta: invalid qid_type 0x{:02x} for inode {}",
+                    qtype, inode_num
+                ));
+            }
+            return false;
+        }
+
+        // Validate content_type (0=reg, 1=dir, 2=symlink, 3=special)
+        if meta.content_type > 3 {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC validate_inode_meta: invalid content_type {} for inode {}",
+                    meta.content_type, inode_num
+                ));
+            }
+            return false;
+        }
+
+        // Validate content_type matches qid_type
+        let is_dir = meta.is_dir();
+        let is_symlink = meta.is_symlink();
+        let is_regular = meta.is_regular();
+
+        if is_dir && meta.content_type != 1 {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC validate_inode_meta: qid_type indicates dir but content_type={} for inode {}",
+                    meta.content_type, inode_num
+                ));
+            }
+            return false;
+        }
+
+        if is_symlink && meta.content_type != 2 {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC validate_inode_meta: qid_type indicates symlink but content_type={} for inode {}",
+                    meta.content_type, inode_num
+                ));
+            }
+            return false;
+        }
+
+        if is_regular && meta.content_type != 0 {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC validate_inode_meta: qid_type indicates file but content_type={} for inode {}",
+                    meta.content_type, inode_num
+                ));
+            }
+            return false;
+        }
+
+        // Validate content_offset and content_length
+        let content_offset = meta.content_offset as usize;
+        let content_length = meta.content_length as usize;
+
+        // Check for integer overflow in offset + length
+        if let Some(end) = content_offset.checked_add(content_length) {
+            if end > data_blob_len {
+                if ZERO_COPY_DEBUG {
+                    self.debug_log(&format!(
+                        "ZC validate_inode_meta: content out of bounds for inode {}: offset={} len={} blob_len={}",
+                        inode_num, content_offset, content_length, data_blob_len
+                    ));
+                }
+                return false;
+            }
+        } else {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC validate_inode_meta: integer overflow in content offset+length for inode {}: offset={} len={}",
+                    inode_num, content_offset, content_length
+                ));
+            }
+            return false;
+        }
+
+        // Validate that content_offset is within bounds
+        if content_offset > data_blob_len {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC validate_inode_meta: content_offset out of bounds for inode {}: offset={} blob_len={}",
+                    inode_num, content_offset, data_blob_len
+                ));
+            }
+            return false;
+        }
+
+        // Sanity check: qid_path should match inode number (common pattern, but not always required)
+        // We'll warn but not fail on this, as it's not strictly required by the format
+        if meta.qid_path != inode_num && ZERO_COPY_DEBUG {
+            // This is just a warning, not an error - qid_path can be different
+            // But if it's wildly different, it might indicate corruption
+            if meta.qid_path > (inode_num * 2) || meta.qid_path < (inode_num / 2) {
+                self.debug_log(&format!(
+                    "ZC validate_inode_meta: suspicious qid_path mismatch for inode {}: qid_path={}",
+                    inode_num, meta.qid_path
+                ));
+            }
+        }
+
+        // Validate reasonable size values (prevent obviously corrupted data)
+        // Max reasonable file size: 1GB (prevent corrupted size values)
+        const MAX_REASONABLE_SIZE: u64 = 1024 * 1024 * 1024;
+        if meta.size > MAX_REASONABLE_SIZE {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC validate_inode_meta: suspiciously large size for inode {}: size={}",
+                    inode_num, meta.size
+                ));
+            }
+            // Don't fail on this - might be legitimate, but log it
+        }
+
+        // Validate timestamps are reasonable (not in the far future)
+        // Max reasonable timestamp: year 2100 (4102444800 seconds since epoch)
+        const MAX_REASONABLE_TIMESTAMP: u64 = 4102444800;
+        if meta.atime_sec > MAX_REASONABLE_TIMESTAMP
+            || meta.mtime_sec > MAX_REASONABLE_TIMESTAMP
+            || meta.ctime_sec > MAX_REASONABLE_TIMESTAMP
+            || meta.btime_sec > MAX_REASONABLE_TIMESTAMP
+        {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC validate_inode_meta: suspicious timestamp for inode {}: atime={} mtime={} ctime={} btime={}",
+                    inode_num, meta.atime_sec, meta.mtime_sec, meta.ctime_sec, meta.btime_sec
+                ));
+            }
+            // Don't fail on this - might be legitimate, but log it
+        }
+
+        // Validate nsec values are < 1 billion (nanoseconds in a second)
+        if meta.atime_nsec >= 1_000_000_000
+            || meta.mtime_nsec >= 1_000_000_000
+            || meta.ctime_nsec >= 1_000_000_000
+            || meta.btime_nsec >= 1_000_000_000
+        {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC validate_inode_meta: invalid nanosecond values for inode {}: atime_nsec={} mtime_nsec={} ctime_nsec={} btime_nsec={}",
+                    inode_num, meta.atime_nsec, meta.mtime_nsec, meta.ctime_nsec, meta.btime_nsec
+                ));
+            }
+            return false;
+        }
+
+        true
     }
 
     /// Initialize filesystem from embedded image at given address
@@ -249,13 +443,81 @@ impl ZeroCopyFilesystem {
             crate::kernel::print("ZeroCopyFilesystem: invalid path index range");
             return Err(22);
         }
+        // Track heap before parsing path_index
+        let (heap_before_used, _, _) = crate::allocator::get_heap_stats();
+        crate::kernel::print(&format!(
+            "ZeroCopyFilesystem: Heap before parse_path_index: {} bytes",
+            heap_before_used
+        ));
+
         let path_index = Self::parse_path_index(&data[path_start..path_end])?;
+
+        // Track heap after parsing path_index
+        let (heap_after_used, heap_after_free, heap_after_total) =
+            crate::allocator::get_heap_stats();
+        let heap_delta = heap_after_used.saturating_sub(heap_before_used);
+        let path_index_size = path_end.saturating_sub(path_start);
+        crate::kernel::print(&format!(
+            "ZeroCopyFilesystem: Heap after parse_path_index: {} bytes (delta: {} bytes, {:.2} KB), free: {} bytes, total: {} bytes",
+            heap_after_used,
+            heap_delta,
+            heap_delta as f64 / 1024.0,
+            heap_after_free,
+            heap_after_total
+        ));
+        crate::kernel::print(&format!(
+            "ZeroCopyFilesystem: path_index.len()={}, path_index data size: {} bytes ({:.2} KB)",
+            path_index.len(),
+            path_index_size,
+            path_index_size as f64 / 1024.0
+        ));
+
+        // Create temporary filesystem instance for validation (before final construction)
+        // This allows us to validate all inodes during initialization to catch corruption early
+        let temp_fs = Self {
+            header,
+            inode_table,
+            data_blob,
+            path_index: BTreeMap::new(), // Empty for validation, will use real one below
+            fid_table: BTreeMap::new(),
+        };
+
+        // Validate all inodes during initialization to catch corruption early
+        // This is optional but helps detect issues before they cause problems
+        let mut corrupted_inodes = 0;
+        for inode_num in 1..=header.num_inodes as u64 {
+            if let Some(meta) = temp_fs.inode_table.get((inode_num - 1) as usize) {
+                if !temp_fs.validate_inode_meta(meta, inode_num, data_blob.len()) {
+                    corrupted_inodes += 1;
+                    if corrupted_inodes <= 5 {
+                        // Only log first 5 to avoid spam
+                        crate::kernel::print(&format!(
+                            "ZeroCopyFilesystem: WARNING - corrupted inode {} detected during init",
+                            inode_num
+                        ));
+                    }
+                }
+            }
+        }
+
+        if corrupted_inodes > 0 {
+            crate::kernel::print(&format!(
+                "ZeroCopyFilesystem: WARNING - {} corrupted inodes detected (filesystem may be unreliable)",
+                corrupted_inodes
+            ));
+            // Don't fail initialization - allow degraded operation, but warn
+            // Individual accesses will still be validated and fail safely
+        }
 
         crate::kernel::print("ZeroCopyFilesystem: initialized");
         crate::kernel::print(&format!("  Inodes: {}", header.num_inodes));
         crate::kernel::print(&format!("  Paths: {}", path_index.len()));
         crate::kernel::print(&format!("  Data blob: {} bytes", data_blob.len()));
+        if corrupted_inodes == 0 {
+            crate::kernel::print("  Validation: All inodes passed integrity checks");
+        }
 
+        // Now create the final filesystem instance with the real path_index
         Ok(Self {
             header,
             inode_table,
@@ -314,6 +576,7 @@ impl ZeroCopyFilesystem {
             }
 
             // Read path string
+            // NOTE: We copy to String (not &'static str) because we need to look up dynamically created paths
             let path = core::str::from_utf8(&data[pos..path_end])
                 .map_err(|_| 22u32)? // EINVAL
                 .to_string();
@@ -339,37 +602,10 @@ impl ZeroCopyFilesystem {
     }
 
     /// Dump all known filesystem paths for debugging
-    pub fn dump_all_paths(&self) {
-        crate::kernel::print("ZeroCopyFilesystem: dumping embedded paths");
-        crate::kernel::print(&format!("  Total entries: {}", self.path_index.len()));
-        for (path, inode) in self.path_index.iter() {
-            if let Ok(meta) = self.get_inode_meta(*inode) {
-                let marker = if meta.is_symlink() && meta.content_length == 0 {
-                    " [symlink: EMPTY TARGET]"
-                } else if meta.is_symlink() {
-                    " [symlink]"
-                } else if meta.is_dir() {
-                    " [dir]"
-                } else {
-                    ""
-                };
-                crate::kernel::print(&format!(
-                    "  {} (inode {}, qtype=0x{:02x}, size={}, content_len={}){}",
-                    path, inode, meta.qid_type, meta.size, meta.content_length, marker
-                ));
-            } else {
-                crate::kernel::print(&format!("  {} (inode {}) [missing meta]", path, inode));
-            }
-        }
-        crate::kernel::print("ZeroCopyFilesystem: end of path dump");
-        if let Some(inode) = self.path_index.get("/this-is-not-here") {
-            crate::kernel::print(&format!("epoxyA: inode={}", inode));
-        } else {
-            crate::kernel::print("epoxyB: not found");
-        }
-    }
+    pub fn dump_all_paths(&self) {}
 
     /// Get inode metadata by number (zero-copy!)
+    /// Validates metadata integrity before returning
     pub fn get_inode_meta(&self, inode_num: u64) -> Result<&'static INodeMeta, u32> {
         if inode_num == 0 || inode_num > self.header.num_inodes as u64 {
             return Err(2); // ENOENT
@@ -378,7 +614,20 @@ impl ZeroCopyFilesystem {
         // Safe: inode_num is > 0, so (inode_num - 1) cannot underflow
         // inode_num is <= num_inodes, so idx will be < inode_table.len()
         let idx = (inode_num - 1) as usize;
-        self.inode_table.get(idx).ok_or(2u32) // ENOENT
+        let meta = self.inode_table.get(idx).ok_or(2u32)?; // ENOENT
+
+        // Validate metadata integrity to detect corruption
+        if !self.validate_inode_meta(meta, inode_num, self.data_blob.len()) {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC get_inode_meta: corrupted metadata detected for inode {}",
+                    inode_num
+                ));
+            }
+            return Err(22); // EINVAL - corrupted metadata
+        }
+
+        Ok(meta)
     }
 
     /// Get inode metadata by path (zero-copy metadata!)
@@ -388,7 +637,21 @@ impl ZeroCopyFilesystem {
     }
 
     /// Read file content (zero-copy slice!)
+    /// Validates metadata before accessing data to prevent corruption
     pub fn read_file_data(&self, meta: &INodeMeta) -> &'static [u8] {
+        // First, validate the metadata structure itself
+        // We need to determine the inode number from qid_path (best guess)
+        // If validation fails, return empty slice to prevent corruption
+        let inode_num = meta.qid_path; // Use qid_path as proxy for inode number
+        if !self.validate_inode_meta(meta, inode_num, self.data_blob.len()) {
+            if ZERO_COPY_DEBUG {
+                self.debug_log(&format!(
+                    "ZC read_file_data: corrupted metadata detected, refusing to read data"
+                ));
+            }
+            return &[];
+        }
+
         let start = meta.content_offset as usize;
         let content_length = meta.content_length as usize;
 
@@ -702,7 +965,7 @@ impl ZeroCopyFilesystem {
                     current_path,
                     entries.len()
                 ));
-                for (idx, entry) in entries.iter().enumerate() {
+                /* for (idx, entry) in entries.iter().enumerate() {
                     self.debug_log(&format!(
                         "ZC walk:   entry[{}] name='{}' inode={} qtype=0x{:02x} entry_type={} qid_path={}",
                         idx,
@@ -712,7 +975,7 @@ impl ZeroCopyFilesystem {
                         entry.entry_type,
                         entry.qid.path
                     ));
-                }
+                } */
             }
             self.debug_log(&format!("ZC walk pxy1: {}", *wname));
             // Compute the next absolute path for path-index fallback
@@ -738,6 +1001,52 @@ impl ZeroCopyFilesystem {
                 "ZC walk pxyA2: path_index.len()={}",
                 path_index_len
             ));
+
+            // Print heap stats before accessing path_index
+            let (heap_used, heap_free, heap_total) = crate::allocator::get_heap_stats();
+            self.debug_log(&format!(
+                "ZC walk pxyA2.5: HEAP STATS - used={} bytes ({:.2} MB), free={} bytes ({:.2} MB), total={} bytes ({:.2} MB)",
+                heap_used,
+                heap_used as f64 / (1024.0 * 1024.0),
+                heap_free,
+                heap_free as f64 / (1024.0 * 1024.0),
+                heap_total,
+                heap_total as f64 / (1024.0 * 1024.0)
+            ));
+
+            // CRITICAL: If heap is only 2KB but path_index should be ~717KB, something is very wrong!
+            if heap_used < 100_000 && path_index_len > 1000 {
+                self.debug_log(&format!(
+                    "ZC walk pxyA2.5.5: WARNING - Heap only {} bytes but path_index has {} entries! Expected ~717KB!",
+                    heap_used, path_index_len
+                ));
+                self.debug_log("ZC walk pxyA2.5.5: This suggests path_index may be corrupted or heap stats are wrong!");
+            }
+
+            // Additional diagnostics: check path_index state
+            self.debug_log(&format!(
+                "ZC walk pxyA2.6: path_index diagnostics - len={}, is_empty={}",
+                path_index_len,
+                self.path_index.is_empty()
+            ));
+
+            // Try to get a sample of path_index contents (first few keys) safely
+            let mut sample_count = 0;
+            for (key, val) in self.path_index.iter().take(3) {
+                self.debug_log(&format!(
+                    "ZC walk pxyA2.7: path_index sample[{}] - key='{}' (len={}), inode={}",
+                    sample_count,
+                    key,
+                    key.len(),
+                    val
+                ));
+                sample_count += 1;
+            }
+            if sample_count == 0 && path_index_len > 0 {
+                self.debug_log(
+                    "ZC walk pxyA2.7: WARNING - path_index.len() > 0 but iter() returns nothing!",
+                );
+            }
 
             // Try a simple operation first - check if we can get any entry
             let first_key_opt = self.path_index.keys().next();
@@ -1778,6 +2087,23 @@ impl P9Backend for InMemoryBackend {
 /// All file data is accessed as slices directly from the embedded image.
 pub struct ZeroCopyBackend {
     fs: ZeroCopyFilesystem,
+}
+
+impl Drop for ZeroCopyBackend {
+    fn drop(&mut self) {
+        let (heap_used, _heap_free, _heap_total) = crate::allocator::get_heap_stats();
+        let path_index_len = self.fs.path_index.len();
+        crate::kernel::print(&format!(
+            "ZeroCopyBackend::drop() called! path_index.len()={}, heap_used={} bytes ({} KB)",
+            path_index_len,
+            heap_used,
+            heap_used / 1024
+        ));
+        crate::kernel::print(&format!(
+            "ZeroCopyBackend::drop() - This will deallocate path_index (BTreeMap with {} entries)",
+            path_index_len
+        ));
+    }
 }
 
 impl ZeroCopyBackend {

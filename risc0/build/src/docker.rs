@@ -140,12 +140,20 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
     let fetch_cmd = [&["cargo", "+risc0", "fetch"], common_args.as_slice()]
         .concat()
         .join(" ");
-    let build_cmd = [
-        &["cargo", "+risc0", "build", "--release"],
-        build_args.as_slice(),
-    ]
-    .concat()
-    .join(" ");
+    
+    // Check if debug mode is enabled
+    let is_debug = std::env::var("RISC0_BUILD_DEBUG")
+        .map(|v| v == "1")
+        .unwrap_or(false);
+    
+    // Build command with optional --release flag
+    let mut build_cmd_parts = vec!["cargo", "+risc0", "build"];
+    if !is_debug {
+        build_cmd_parts.push("--release");
+    }
+    let build_cmd = [build_cmd_parts.as_slice(), build_args.as_slice()]
+        .concat()
+        .join(" ");
 
     let docker_opts = guest_info.options.use_docker.clone().unwrap_or_default();
     let docker_tag = format!(
@@ -153,19 +161,28 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
         docker_opts.docker_container_tag()
     );
 
+    // Pass RISC0_BUILD_DEBUG into Docker if set
+    let mut docker_env_vars = vec![
+        ("CARGO_TARGET_DIR", "target"),
+        ("RISC0_FEATURE_bigint2", ""),
+        (
+            "CC_riscv32im_risc0_zkvm_elf",
+            "/root/.risc0/cpp/bin/riscv32-unknown-elf-gcc",
+        ),
+        ("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib"),
+    ];
+    
+    if is_debug {
+        docker_env_vars.push(("RISC0_BUILD_DEBUG", "1"));
+    }
+    
     let mut build = DockerFile::new()
         .from_alias("build", &docker_tag)
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
         .env(rustflags_env)
-        .env(&[("CARGO_TARGET_DIR", "target")])
-        .env(&[("RISC0_FEATURE_bigint2", "")])
-        .env(&[(
-            "CC_riscv32im_risc0_zkvm_elf",
-            "/root/.risc0/cpp/bin/riscv32-unknown-elf-gcc",
-        )])
-        .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")]);
+        .env(&docker_env_vars);
 
     let docker_env = docker_opts.env();
     if !docker_env.is_empty() {
@@ -178,7 +195,12 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
         .run(&fetch_cmd)
         .run(&build_cmd);
 
-    let src_dir = format!("/src/target/{target}/release");
+    // Use debug or release directory based on build mode
+    let is_debug = std::env::var("RISC0_BUILD_DEBUG")
+        .map(|v| v == "1")
+        .unwrap_or(false);
+    let profile_dir = if is_debug { "debug" } else { "release" };
+    let src_dir = format!("/src/target/{target}/{profile_dir}");
     let binary = DockerFile::new()
         .comment("export stage")
         .from_alias("export", "scratch")
