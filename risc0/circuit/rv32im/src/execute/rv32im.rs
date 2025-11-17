@@ -68,7 +68,7 @@ pub trait EmuContext {
 }
 
 #[derive(Default)]
-pub struct Emulator;
+pub struct Emulator {}
 
 #[derive(Debug)]
 #[repr(u32)]
@@ -313,7 +313,7 @@ impl Emulator {
         }
 
         if let Some(kind) = self.exec_rv32im(ctx, word)? {
-            ctx.on_normal_end(kind)?
+            ctx.on_normal_end(kind)?;
         }
 
         Ok(())

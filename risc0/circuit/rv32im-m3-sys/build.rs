@@ -112,6 +112,47 @@ fn main() {
     }
 
     build.compile(output);
+
+    generate_rust(
+        "cxx/rv32im/witness/rust_bindings.rs.h",
+        &format!("{out_dir}/bindings.rs"),
+    );
+}
+
+fn generate_rust(input: &str, output: &str) {
+    let mut build = cc::Build::new();
+    build
+        .cpp(true)
+        .debug(false)
+        .warnings(false)
+        .flag("-std=c++17")
+        .include("cxx")
+        .include("vendor");
+
+    let mut command = build.get_compiler().to_command();
+
+    let status = command
+        .arg("-E")
+        .arg(input)
+        .arg("-o")
+        .arg(output)
+        .status()
+        .unwrap();
+    assert!(status.success(), "preprocessing {input} failed");
+
+    let contents = std::fs::read_to_string(output).unwrap();
+    let inc_directive = regex::Regex::new("^# \\d+ .*$").unwrap();
+    let contents = contents
+        .lines()
+        .filter(|l| !inc_directive.is_match(l))
+        .collect::<Vec<_>>();
+
+    std::fs::write(output, contents.join("\n")).unwrap();
+    let status = std::process::Command::new("rustfmt")
+        .arg(output)
+        .status()
+        .unwrap();
+    assert!(status.success(), "rustfmt {input} failed");
 }
 
 fn rerun_if_changed<P: AsRef<Path>>(path: P) {

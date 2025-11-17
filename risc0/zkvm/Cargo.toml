@@ -215,7 +215,7 @@ prove = [
   "std",
 ]
 redis = ["dep:redis"]
-rv32im-m3 = ["dep:risc0-circuit-rv32im-m3"]
+rv32im-m3 = ["dep:risc0-circuit-rv32im-m3", "risc0-circuit-rv32im/rv32im-m3"]
 std = [
   "anyhow/std",
   "derive_more/std",
