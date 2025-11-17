@@ -18,8 +18,8 @@ use derive_more::Debug;
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 // TODO: move these up a layer
-pub const RV32IM_V2_CIRCUIT_VERSION: u32 = 0;
-pub const RV32IM_M3_CIRCUIT_VERSION: u32 = 3;
+// pub const RV32IM_V2_CIRCUIT_VERSION: u32 = 0;
+// pub const RV32IM_M3_CIRCUIT_VERSION: u32 = 3;
 
 pub const WORD_SIZE: usize = 4;
 
@@ -59,7 +59,7 @@ pub const REG_T6: usize = 31; // temporary
 pub const REG_MAX: usize = 32; // maximum number of registers
 
 pub trait EmuContext {
-    fn circuit_version(&self) -> u32;
+    // fn circuit_version(&self) -> u32;
 
     // Handle environment call
     fn ecall(&mut self) -> Result<bool>;
@@ -71,10 +71,10 @@ pub trait EmuContext {
     fn trap(&mut self, cause: Exception) -> Result<bool>;
 
     // Callback when instructions are decoded
-    fn on_insn_decoded(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()>;
+    fn on_insn_decoded(&mut self, kind: RvOp, decoded: &DecodedInstruction) -> Result<()>;
 
     // Callback when instructions end normally
-    fn on_normal_end(&mut self, kind: InsnKind) -> Result<()>;
+    fn on_normal_end(&mut self, kind: RvOp) -> Result<()>;
 
     // Get the program counter
     fn get_pc(&self) -> ByteAddr;
@@ -95,13 +95,19 @@ pub trait EmuContext {
     fn store_memory(&mut self, addr: WordAddr, word: u32) -> Result<()>;
 
     // Check access for instruction load
-    fn check_insn_load(&self, addr: ByteAddr) -> bool;
+    fn check_insn_load(&self, addr: ByteAddr) -> bool {
+        true
+    }
 
     // Check access for data load
-    fn check_data_load(&self, addr: ByteAddr) -> bool;
+    fn check_data_load(&self, addr: ByteAddr) -> bool {
+        true
+    }
 
     // Check access for data store
-    fn check_data_store(&self, addr: ByteAddr) -> bool;
+    fn check_data_store(&self, addr: ByteAddr) -> bool {
+        true
+    }
 }
 
 #[derive(Default)]
@@ -147,7 +153,7 @@ pub struct DecodedInstruction {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum InsnKind {
+pub enum RvOp {
     Add = 0,  // major: 0, minor: 0
     Sub = 1,  // major: 0, minor: 1
     Xor = 2,  // major: 0, minor: 2
@@ -208,7 +214,7 @@ pub enum InsnKind {
 }
 
 impl DecodedInstruction {
-    fn new(insn: u32) -> Self {
+    pub fn new(insn: u32) -> Self {
         Self {
             insn,
             top_bit: (insn & 0x80000000) >> 31,
@@ -258,79 +264,79 @@ impl Emulator {
     fn trace_instruction<C: EmuContext>(
         &mut self,
         ctx: &mut C,
-        kind: InsnKind,
+        kind: RvOp,
         decoded: &DecodedInstruction,
     ) -> Result<()> {
         ctx.on_insn_decoded(kind, decoded)
     }
 
     #[inline(always)]
-    fn exec_rv32im<C: EmuContext>(&mut self, ctx: &mut C, word: u32) -> Result<Option<InsnKind>> {
+    fn dispatch<C: EmuContext>(&mut self, ctx: &mut C, word: u32) -> Result<Option<RvOp>> {
         let decoded = DecodedInstruction::new(word);
 
         match (decoded.opcode, decoded.func3, decoded.func7) {
             // R-format arithmetic ops
-            (0b0110011, 0b000, 0b0000000) => self.step_compute(ctx, InsnKind::Add, decoded),
-            (0b0110011, 0b000, 0b0100000) => self.step_compute(ctx, InsnKind::Sub, decoded),
-            (0b0110011, 0b001, 0b0000000) => self.step_compute(ctx, InsnKind::Sll, decoded),
-            (0b0110011, 0b010, 0b0000000) => self.step_compute(ctx, InsnKind::Slt, decoded),
-            (0b0110011, 0b011, 0b0000000) => self.step_compute(ctx, InsnKind::SltU, decoded),
-            (0b0110011, 0b101, 0b0000000) => self.step_compute(ctx, InsnKind::Srl, decoded),
-            (0b0110011, 0b100, 0b0000000) => self.step_compute(ctx, InsnKind::Xor, decoded),
-            (0b0110011, 0b101, 0b0100000) => self.step_compute(ctx, InsnKind::Sra, decoded),
-            (0b0110011, 0b110, 0b0000000) => self.step_compute(ctx, InsnKind::Or, decoded),
-            (0b0110011, 0b111, 0b0000000) => self.step_compute(ctx, InsnKind::And, decoded),
-            (0b0110011, 0b000, 0b0000001) => self.step_compute(ctx, InsnKind::Mul, decoded),
-            (0b0110011, 0b001, 0b0000001) => self.step_compute(ctx, InsnKind::MulH, decoded),
-            (0b0110011, 0b010, 0b0000001) => self.step_compute(ctx, InsnKind::MulHSU, decoded),
-            (0b0110011, 0b011, 0b0000001) => self.step_compute(ctx, InsnKind::MulHU, decoded),
-            (0b0110011, 0b100, 0b0000001) => self.step_compute(ctx, InsnKind::Div, decoded),
-            (0b0110011, 0b101, 0b0000001) => self.step_compute(ctx, InsnKind::DivU, decoded),
-            (0b0110011, 0b110, 0b0000001) => self.step_compute(ctx, InsnKind::Rem, decoded),
-            (0b0110011, 0b111, 0b0000001) => self.step_compute(ctx, InsnKind::RemU, decoded),
+            (0b0110011, 0b000, 0b0000000) => self.step_compute(ctx, RvOp::Add, decoded),
+            (0b0110011, 0b000, 0b0100000) => self.step_compute(ctx, RvOp::Sub, decoded),
+            (0b0110011, 0b001, 0b0000000) => self.step_compute(ctx, RvOp::Sll, decoded),
+            (0b0110011, 0b010, 0b0000000) => self.step_compute(ctx, RvOp::Slt, decoded),
+            (0b0110011, 0b011, 0b0000000) => self.step_compute(ctx, RvOp::SltU, decoded),
+            (0b0110011, 0b101, 0b0000000) => self.step_compute(ctx, RvOp::Srl, decoded),
+            (0b0110011, 0b100, 0b0000000) => self.step_compute(ctx, RvOp::Xor, decoded),
+            (0b0110011, 0b101, 0b0100000) => self.step_compute(ctx, RvOp::Sra, decoded),
+            (0b0110011, 0b110, 0b0000000) => self.step_compute(ctx, RvOp::Or, decoded),
+            (0b0110011, 0b111, 0b0000000) => self.step_compute(ctx, RvOp::And, decoded),
+            (0b0110011, 0b000, 0b0000001) => self.step_compute(ctx, RvOp::Mul, decoded),
+            (0b0110011, 0b001, 0b0000001) => self.step_compute(ctx, RvOp::MulH, decoded),
+            (0b0110011, 0b010, 0b0000001) => self.step_compute(ctx, RvOp::MulHSU, decoded),
+            (0b0110011, 0b011, 0b0000001) => self.step_compute(ctx, RvOp::MulHU, decoded),
+            (0b0110011, 0b100, 0b0000001) => self.step_compute(ctx, RvOp::Div, decoded),
+            (0b0110011, 0b101, 0b0000001) => self.step_compute(ctx, RvOp::DivU, decoded),
+            (0b0110011, 0b110, 0b0000001) => self.step_compute(ctx, RvOp::Rem, decoded),
+            (0b0110011, 0b111, 0b0000001) => self.step_compute(ctx, RvOp::RemU, decoded),
             // I-format arithmetic ops
-            (0b0010011, 0b000, _) => self.step_compute(ctx, InsnKind::AddI, decoded),
-            (0b0010011, 0b001, 0b0000000) => self.step_compute(ctx, InsnKind::SllI, decoded),
-            (0b0010011, 0b010, _) => self.step_compute(ctx, InsnKind::SltI, decoded),
-            (0b0010011, 0b011, _) => self.step_compute(ctx, InsnKind::SltIU, decoded),
-            (0b0010011, 0b100, _) => self.step_compute(ctx, InsnKind::XorI, decoded),
-            (0b0010011, 0b101, 0b0000000) => self.step_compute(ctx, InsnKind::SrlI, decoded),
-            (0b0010011, 0b101, 0b0100000) => self.step_compute(ctx, InsnKind::SraI, decoded),
-            (0b0010011, 0b110, _) => self.step_compute(ctx, InsnKind::OrI, decoded),
-            (0b0010011, 0b111, _) => self.step_compute(ctx, InsnKind::AndI, decoded),
+            (0b0010011, 0b000, _) => self.step_compute(ctx, RvOp::AddI, decoded),
+            (0b0010011, 0b001, 0b0000000) => self.step_compute(ctx, RvOp::SllI, decoded),
+            (0b0010011, 0b010, _) => self.step_compute(ctx, RvOp::SltI, decoded),
+            (0b0010011, 0b011, _) => self.step_compute(ctx, RvOp::SltIU, decoded),
+            (0b0010011, 0b100, _) => self.step_compute(ctx, RvOp::XorI, decoded),
+            (0b0010011, 0b101, 0b0000000) => self.step_compute(ctx, RvOp::SrlI, decoded),
+            (0b0010011, 0b101, 0b0100000) => self.step_compute(ctx, RvOp::SraI, decoded),
+            (0b0010011, 0b110, _) => self.step_compute(ctx, RvOp::OrI, decoded),
+            (0b0010011, 0b111, _) => self.step_compute(ctx, RvOp::AndI, decoded),
             // I-format memory loads
-            (0b0000011, 0b000, _) => self.step_load(ctx, InsnKind::Lb, decoded),
-            (0b0000011, 0b001, _) => self.step_load(ctx, InsnKind::Lh, decoded),
-            (0b0000011, 0b010, _) => self.step_load(ctx, InsnKind::Lw, decoded),
-            (0b0000011, 0b100, _) => self.step_load(ctx, InsnKind::LbU, decoded),
-            (0b0000011, 0b101, _) => self.step_load(ctx, InsnKind::LhU, decoded),
+            (0b0000011, 0b000, _) => self.step_load(ctx, RvOp::Lb, decoded),
+            (0b0000011, 0b001, _) => self.step_load(ctx, RvOp::Lh, decoded),
+            (0b0000011, 0b010, _) => self.step_load(ctx, RvOp::Lw, decoded),
+            (0b0000011, 0b100, _) => self.step_load(ctx, RvOp::LbU, decoded),
+            (0b0000011, 0b101, _) => self.step_load(ctx, RvOp::LhU, decoded),
             // S-format memory stores
-            (0b0100011, 0b000, _) => self.step_store(ctx, InsnKind::Sb, decoded),
-            (0b0100011, 0b001, _) => self.step_store(ctx, InsnKind::Sh, decoded),
-            (0b0100011, 0b010, _) => self.step_store(ctx, InsnKind::Sw, decoded),
+            (0b0100011, 0b000, _) => self.step_store(ctx, RvOp::Sb, decoded),
+            (0b0100011, 0b001, _) => self.step_store(ctx, RvOp::Sh, decoded),
+            (0b0100011, 0b010, _) => self.step_store(ctx, RvOp::Sw, decoded),
             // U-format lui
-            (0b0110111, _, _) => self.step_compute(ctx, InsnKind::Lui, decoded),
+            (0b0110111, _, _) => self.step_compute(ctx, RvOp::Lui, decoded),
             // U-format auipc
-            (0b0010111, _, _) => self.step_compute(ctx, InsnKind::Auipc, decoded),
+            (0b0010111, _, _) => self.step_compute(ctx, RvOp::Auipc, decoded),
             // B-format branch
-            (0b1100011, 0b000, _) => self.step_branch(ctx, InsnKind::Beq, decoded),
-            (0b1100011, 0b001, _) => self.step_branch(ctx, InsnKind::Bne, decoded),
-            (0b1100011, 0b100, _) => self.step_branch(ctx, InsnKind::Blt, decoded),
-            (0b1100011, 0b101, _) => self.step_branch(ctx, InsnKind::Bge, decoded),
-            (0b1100011, 0b110, _) => self.step_branch(ctx, InsnKind::BltU, decoded),
-            (0b1100011, 0b111, _) => self.step_branch(ctx, InsnKind::BgeU, decoded),
+            (0b1100011, 0b000, _) => self.step_branch(ctx, RvOp::Beq, decoded),
+            (0b1100011, 0b001, _) => self.step_branch(ctx, RvOp::Bne, decoded),
+            (0b1100011, 0b100, _) => self.step_branch(ctx, RvOp::Blt, decoded),
+            (0b1100011, 0b101, _) => self.step_branch(ctx, RvOp::Bge, decoded),
+            (0b1100011, 0b110, _) => self.step_branch(ctx, RvOp::BltU, decoded),
+            (0b1100011, 0b111, _) => self.step_branch(ctx, RvOp::BgeU, decoded),
             // J-format jal
-            (0b1101111, _, _) => self.step_compute(ctx, InsnKind::Jal, decoded),
+            (0b1101111, _, _) => self.step_compute(ctx, RvOp::Jal, decoded),
             // I-format jalr
-            (0b1100111, _, _) => self.step_compute(ctx, InsnKind::JalR, decoded),
+            (0b1100111, _, _) => self.step_compute(ctx, RvOp::JalR, decoded),
             // System instruction
-            (0b1110011, 0b000, 0b0011000) => self.step_system(ctx, InsnKind::Mret, decoded),
-            (0b1110011, 0b000, 0b0000000) => self.step_system(ctx, InsnKind::Eany, decoded),
+            (0b1110011, 0b000, 0b0011000) => self.step_system(ctx, RvOp::Mret, decoded),
+            (0b1110011, 0b000, 0b0000000) => self.step_system(ctx, RvOp::Eany, decoded),
             // Fence instruction
-            (0b0001111, 0b000, _) => self.step_system(ctx, InsnKind::Fence, decoded),
+            (0b0001111, 0b000, _) => self.step_system(ctx, RvOp::Fence, decoded),
             _ => Ok(ctx
                 .trap(Exception::IllegalInstruction(decoded.insn, line!()))?
-                .then_some(InsnKind::Invalid)),
+                .then_some(RvOp::Invalid)),
         }
     }
 
@@ -338,10 +344,10 @@ impl Emulator {
     pub fn step<C: EmuContext>(&mut self, ctx: &mut C) -> Result<()> {
         let pc = ctx.get_pc();
 
-        if !ctx.check_insn_load(pc) {
-            ctx.trap(Exception::InstructionFault)?;
-            return Ok(());
-        }
+        // if !ctx.check_insn_load(pc) {
+        //     ctx.trap(Exception::InstructionFault)?;
+        //     return Ok(());
+        // }
 
         let word = ctx.load_memory(pc.waddr())?;
         if word & 0x03 != 0x03 {
@@ -349,7 +355,7 @@ impl Emulator {
             return Ok(());
         }
 
-        if let Some(kind) = self.exec_rv32im(ctx, word)? {
+        if let Some(kind) = self.dispatch(ctx, word)? {
             ctx.on_normal_end(kind)?
         }
 
@@ -373,9 +379,9 @@ impl Emulator {
     fn step_compute<M: EmuContext>(
         &mut self,
         ctx: &mut M,
-        kind: InsnKind,
+        kind: RvOp,
         decoded: DecodedInstruction,
-    ) -> Result<Option<InsnKind>> {
+    ) -> Result<Option<RvOp>> {
         self.trace_instruction(ctx, kind, &decoded)?;
 
         let pc = ctx.get_pc();
@@ -384,87 +390,85 @@ impl Emulator {
         let rs2 = self.load_rs2(ctx, &decoded, rs1)?;
         let imm_i = decoded.imm_i();
         let out = match kind {
-            InsnKind::Add => rs1.wrapping_add(rs2),
-            InsnKind::Sub => rs1.wrapping_sub(rs2),
-            InsnKind::Xor => rs1 ^ rs2,
-            InsnKind::Or => rs1 | rs2,
-            InsnKind::And => rs1 & rs2,
-            InsnKind::Sll => rs1 << (rs2 & 0x1f),
-            InsnKind::Srl => rs1 >> (rs2 & 0x1f),
-            InsnKind::Sra => ((rs1 as i32) >> (rs2 & 0x1f)) as u32,
-            InsnKind::Slt => {
+            RvOp::Add => rs1.wrapping_add(rs2),
+            RvOp::Sub => rs1.wrapping_sub(rs2),
+            RvOp::Xor => rs1 ^ rs2,
+            RvOp::Or => rs1 | rs2,
+            RvOp::And => rs1 & rs2,
+            RvOp::Sll => rs1 << (rs2 & 0x1f),
+            RvOp::Srl => rs1 >> (rs2 & 0x1f),
+            RvOp::Sra => ((rs1 as i32) >> (rs2 & 0x1f)) as u32,
+            RvOp::Slt => {
                 if (rs1 as i32) < (rs2 as i32) {
                     1
                 } else {
                     0
                 }
             }
-            InsnKind::SltU => {
+            RvOp::SltU => {
                 if rs1 < rs2 {
                     1
                 } else {
                     0
                 }
             }
-            InsnKind::AddI => rs1.wrapping_add(imm_i),
-            InsnKind::XorI => rs1 ^ imm_i,
-            InsnKind::OrI => rs1 | imm_i,
-            InsnKind::AndI => rs1 & imm_i,
-            InsnKind::SllI => rs1 << (imm_i & 0x1f),
-            InsnKind::SrlI => rs1 >> (imm_i & 0x1f),
-            InsnKind::SraI => ((rs1 as i32) >> (imm_i & 0x1f)) as u32,
-            InsnKind::SltI => {
+            RvOp::AddI => rs1.wrapping_add(imm_i),
+            RvOp::XorI => rs1 ^ imm_i,
+            RvOp::OrI => rs1 | imm_i,
+            RvOp::AndI => rs1 & imm_i,
+            RvOp::SllI => rs1 << (imm_i & 0x1f),
+            RvOp::SrlI => rs1 >> (imm_i & 0x1f),
+            RvOp::SraI => ((rs1 as i32) >> (imm_i & 0x1f)) as u32,
+            RvOp::SltI => {
                 if (rs1 as i32) < (imm_i as i32) {
                     1
                 } else {
                     0
                 }
             }
-            InsnKind::SltIU => {
+            RvOp::SltIU => {
                 if rs1 < imm_i {
                     1
                 } else {
                     0
                 }
             }
-            InsnKind::Jal => {
+            RvOp::Jal => {
                 new_pc = pc.wrapping_add(decoded.imm_j());
                 (pc + WORD_SIZE).0
             }
-            InsnKind::JalR => {
+            RvOp::JalR => {
                 new_pc = ByteAddr(rs1.wrapping_add(imm_i) & 0xfffffffe);
                 (pc + WORD_SIZE).0
             }
-            InsnKind::Lui => decoded.imm_u(),
-            InsnKind::Auipc => (pc.wrapping_add(decoded.imm_u())).0,
-            InsnKind::Mul => rs1.wrapping_mul(rs2),
-            InsnKind::MulH => {
-                (sign_extend_u32(rs1).wrapping_mul(sign_extend_u32(rs2)) >> 32) as u32
-            }
-            InsnKind::MulHSU => (sign_extend_u32(rs1).wrapping_mul(rs2 as i64) >> 32) as u32,
-            InsnKind::MulHU => (((rs1 as u64).wrapping_mul(rs2 as u64)) >> 32) as u32,
-            InsnKind::Div => {
+            RvOp::Lui => decoded.imm_u(),
+            RvOp::Auipc => (pc.wrapping_add(decoded.imm_u())).0,
+            RvOp::Mul => rs1.wrapping_mul(rs2),
+            RvOp::MulH => (sign_extend_u32(rs1).wrapping_mul(sign_extend_u32(rs2)) >> 32) as u32,
+            RvOp::MulHSU => (sign_extend_u32(rs1).wrapping_mul(rs2 as i64) >> 32) as u32,
+            RvOp::MulHU => (((rs1 as u64).wrapping_mul(rs2 as u64)) >> 32) as u32,
+            RvOp::Div => {
                 if rs2 == 0 {
                     u32::MAX
                 } else {
                     ((rs1 as i32).wrapping_div(rs2 as i32)) as u32
                 }
             }
-            InsnKind::DivU => {
+            RvOp::DivU => {
                 if rs2 == 0 {
                     u32::MAX
                 } else {
                     rs1 / rs2
                 }
             }
-            InsnKind::Rem => {
+            RvOp::Rem => {
                 if rs2 == 0 {
                     rs1
                 } else {
                     ((rs1 as i32).wrapping_rem(rs2 as i32)) as u32
                 }
             }
-            InsnKind::RemU => {
+            RvOp::RemU => {
                 if rs2 == 0 {
                     rs1
                 } else {
@@ -485,21 +489,21 @@ impl Emulator {
     fn step_branch<M: EmuContext>(
         &mut self,
         ctx: &mut M,
-        kind: InsnKind,
+        kind: RvOp,
         decoded: DecodedInstruction,
-    ) -> Result<Option<InsnKind>> {
+    ) -> Result<Option<RvOp>> {
         self.trace_instruction(ctx, kind, &decoded)?;
 
         let pc = ctx.get_pc();
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
         let rs2 = self.load_rs2(ctx, &decoded, rs1)?;
         let br_cond = match kind {
-            InsnKind::Beq => rs1 == rs2,
-            InsnKind::Bne => rs1 != rs2,
-            InsnKind::Blt => (rs1 as i32) < (rs2 as i32),
-            InsnKind::Bge => (rs1 as i32) >= (rs2 as i32),
-            InsnKind::BltU => rs1 < rs2,
-            InsnKind::BgeU => rs1 >= rs2,
+            RvOp::Beq => rs1 == rs2,
+            RvOp::Bne => rs1 != rs2,
+            RvOp::Blt => (rs1 as i32) < (rs2 as i32),
+            RvOp::Bge => (rs1 as i32) >= (rs2 as i32),
+            RvOp::BltU => rs1 < rs2,
+            RvOp::BgeU => rs1 >= rs2,
             _ => unreachable!(),
         };
 
@@ -512,9 +516,9 @@ impl Emulator {
         if !new_pc.is_aligned() {
             return Ok(ctx.trap(Exception::InstructionMisaligned)?.then_some(kind));
         }
-        if ctx.circuit_version() == RV32IM_V2_CIRCUIT_VERSION {
-            ctx.store_register(0, 0)?;
-        }
+        // if ctx.circuit_version() == RV32IM_V2_CIRCUIT_VERSION {
+        //     ctx.store_register(0, 0)?;
+        // }
         ctx.set_pc(new_pc);
         Ok(Some(kind))
     }
@@ -523,9 +527,9 @@ impl Emulator {
     fn step_load<M: EmuContext>(
         &mut self,
         ctx: &mut M,
-        kind: InsnKind,
+        kind: RvOp,
         decoded: DecodedInstruction,
-    ) -> Result<Option<InsnKind>> {
+    ) -> Result<Option<RvOp>> {
         self.trace_instruction(ctx, kind, &decoded)?;
 
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
@@ -536,14 +540,14 @@ impl Emulator {
         let data = ctx.load_memory(addr.waddr())?;
         let shift = 8 * (addr.0 & 3);
         let out = match kind {
-            InsnKind::Lb => {
+            RvOp::Lb => {
                 let mut out = (data >> shift) & 0xff;
                 if out & 0x80 != 0 {
                     out |= 0xffffff00;
                 }
                 out
             }
-            InsnKind::Lh => {
+            RvOp::Lh => {
                 if addr.0 & 0x01 != 0 {
                     return Ok(ctx.trap(Exception::LoadAddressMisaligned)?.then_some(kind));
                 }
@@ -553,14 +557,14 @@ impl Emulator {
                 }
                 out
             }
-            InsnKind::Lw => {
+            RvOp::Lw => {
                 if addr.0 & 0x03 != 0 {
                     return Ok(ctx.trap(Exception::LoadAddressMisaligned)?.then_some(kind));
                 }
                 data
             }
-            InsnKind::LbU => (data >> shift) & 0xff,
-            InsnKind::LhU => {
+            RvOp::LbU => (data >> shift) & 0xff,
+            RvOp::LhU => {
                 if addr.0 & 0x01 != 0 {
                     return Ok(ctx.trap(Exception::LoadAddressMisaligned)?.then_some(kind));
                 }
@@ -577,9 +581,9 @@ impl Emulator {
     fn step_store<M: EmuContext>(
         &mut self,
         ctx: &mut M,
-        kind: InsnKind,
+        kind: RvOp,
         decoded: DecodedInstruction,
-    ) -> Result<Option<InsnKind>> {
+    ) -> Result<Option<RvOp>> {
         self.trace_instruction(ctx, kind, &decoded)?;
 
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
@@ -591,11 +595,11 @@ impl Emulator {
         }
         let mut data = ctx.load_memory(addr.waddr())?;
         match kind {
-            InsnKind::Sb => {
+            RvOp::Sb => {
                 data ^= data & (0xff << shift);
                 data |= (rs2 & 0xff) << shift;
             }
-            InsnKind::Sh => {
+            RvOp::Sh => {
                 if addr.0 & 0x01 != 0 {
                     tracing::debug!("Misaligned SH");
                     return Ok(ctx
@@ -605,7 +609,7 @@ impl Emulator {
                 data ^= data & (0xffff << shift);
                 data |= (rs2 & 0xffff) << shift;
             }
-            InsnKind::Sw => {
+            RvOp::Sw => {
                 if addr.0 & 0x03 != 0 {
                     tracing::debug!("Misaligned SW");
                     return Ok(ctx
@@ -625,19 +629,19 @@ impl Emulator {
     fn step_system<M: EmuContext>(
         &mut self,
         ctx: &mut M,
-        kind: InsnKind,
+        kind: RvOp,
         decoded: DecodedInstruction,
-    ) -> Result<Option<InsnKind>> {
+    ) -> Result<Option<RvOp>> {
         self.trace_instruction(ctx, kind, &decoded)?;
 
         Ok(match kind {
-            InsnKind::Eany => match decoded.rs2 {
+            RvOp::Eany => match decoded.rs2 {
                 0 => ctx.ecall(),
                 1 => ctx.trap(Exception::Breakpoint),
                 _ => ctx.trap(Exception::IllegalInstruction(decoded.insn, 2)),
             },
-            InsnKind::Mret => ctx.mret(),
-            InsnKind::Fence => {
+            RvOp::Mret => ctx.mret(),
+            RvOp::Fence => {
                 ctx.set_pc(ctx.get_pc() + WORD_SIZE);
                 Ok(true)
             }
@@ -665,71 +669,71 @@ impl std::fmt::Display for Register {
     }
 }
 
-pub fn disasm(kind: InsnKind, decoded: &DecodedInstruction) -> String {
+pub fn disasm(kind: RvOp, decoded: &DecodedInstruction) -> String {
     let (rd, rs1, rs2) = (
         Register(decoded.rd),
         Register(decoded.rs1),
         Register(decoded.rs2),
     );
     match kind {
-        InsnKind::Invalid => "illegal".to_string(),
-        InsnKind::Add => format!("add {rd}, {rs1}, {rs2}"),
-        InsnKind::Sub => format!("sub {rd}, {rs1}, {rs2}"),
-        InsnKind::Xor => format!("xor {rd}, {rs1}, {rs2}"),
-        InsnKind::Or => format!("or {rd}, {rs1}, {rs2}"),
-        InsnKind::And => format!("and {rd}, {rs1}, {rs2}"),
-        InsnKind::Sll => format!("sll {rd}, {rs1}, {rs2}"),
-        InsnKind::Srl => format!("srl {rd}, {rs1}, {rs2}"),
-        InsnKind::Sra => format!("sra {rd}, {rs1}, {rs2}"),
-        InsnKind::Slt => format!("slt {rd}, {rs1}, {rs2}"),
-        InsnKind::SltU => format!("sltu {rd}, {rs1}, {rs2}"),
-        InsnKind::AddI => {
+        RvOp::Invalid => "illegal".to_string(),
+        RvOp::Add => format!("add {rd}, {rs1}, {rs2}"),
+        RvOp::Sub => format!("sub {rd}, {rs1}, {rs2}"),
+        RvOp::Xor => format!("xor {rd}, {rs1}, {rs2}"),
+        RvOp::Or => format!("or {rd}, {rs1}, {rs2}"),
+        RvOp::And => format!("and {rd}, {rs1}, {rs2}"),
+        RvOp::Sll => format!("sll {rd}, {rs1}, {rs2}"),
+        RvOp::Srl => format!("srl {rd}, {rs1}, {rs2}"),
+        RvOp::Sra => format!("sra {rd}, {rs1}, {rs2}"),
+        RvOp::Slt => format!("slt {rd}, {rs1}, {rs2}"),
+        RvOp::SltU => format!("sltu {rd}, {rs1}, {rs2}"),
+        RvOp::AddI => {
             if rs1.0 == REG_ZERO as u32 {
                 format!("li {rd}, {}", decoded.imm_i() as i32)
             } else {
                 format!("addi {rd}, {rs1}, {}", decoded.imm_i() as i32)
             }
         }
-        InsnKind::XorI => format!("xori {rd}, {rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::OrI => format!("ori {rd}, {rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::AndI => format!("andi {rd}, {rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::SllI => format!("slli {rd}, {rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::SrlI => format!("srli {rd}, {rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::SraI => format!("srai {rd}, {rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::SltI => format!("slti {rd}, {rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::SltIU => format!("sltiu {rd}, {rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::Beq => format!("beq {rs1}, {rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::Bne => format!("bne {rs1}, {rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::Blt => format!("blt {rs1}, {rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::Bge => format!("bge {rs1}, {rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::BltU => format!("bltu {rs1}, {rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::BgeU => format!("bgeu {rs1}, {rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::Jal => format!("jal {rd}, {}", decoded.imm_j() as i32),
-        InsnKind::JalR => format!("jalr {rd}, {rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::Lui => format!("lui {rd}, {:#010x}", decoded.imm_u() >> 12),
-        InsnKind::Auipc => format!("auipc {rd}, {:#010x}", decoded.imm_u() >> 12),
-        InsnKind::Mul => format!("mul {rd}, {rs1}, {rs2}"),
-        InsnKind::MulH => format!("mulh {rd}, {rs1}, {rs2}"),
-        InsnKind::MulHSU => format!("mulhsu {rd}, {rs1}, {rs2}"),
-        InsnKind::MulHU => format!("mulhu {rd}, {rs1}, {rs2}"),
-        InsnKind::Div => format!("div {rd}, {rs1}, {rs2}"),
-        InsnKind::DivU => format!("divu {rd}, {rs1}, {rs2}"),
-        InsnKind::Rem => format!("rem {rd}, {rs1}, {rs2}"),
-        InsnKind::RemU => format!("remu {rd}, {rs1}, {rs2}"),
-        InsnKind::Lb => format!("lb {rd}, {}({rs1})", decoded.imm_i() as i32),
-        InsnKind::Lh => format!("lh {rd}, {}({rs1})", decoded.imm_i() as i32),
-        InsnKind::Lw => format!("lw {rd}, {}({rs1})", decoded.imm_i() as i32),
-        InsnKind::LbU => format!("lbu {rd}, {}({rs1})", decoded.imm_i() as i32),
-        InsnKind::LhU => format!("lhu {rd}, {}({rs1})", decoded.imm_i() as i32),
-        InsnKind::Sb => format!("sb {rs2}, {}({rs1})", decoded.imm_s() as i32),
-        InsnKind::Sh => format!("sh {rs2}, {}({rs1})", decoded.imm_s() as i32),
-        InsnKind::Sw => format!("sw {rs2}, {}({rs1})", decoded.imm_s() as i32),
-        InsnKind::Eany => match decoded.rs2 {
+        RvOp::XorI => format!("xori {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        RvOp::OrI => format!("ori {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        RvOp::AndI => format!("andi {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        RvOp::SllI => format!("slli {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        RvOp::SrlI => format!("srli {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        RvOp::SraI => format!("srai {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        RvOp::SltI => format!("slti {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        RvOp::SltIU => format!("sltiu {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        RvOp::Beq => format!("beq {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        RvOp::Bne => format!("bne {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        RvOp::Blt => format!("blt {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        RvOp::Bge => format!("bge {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        RvOp::BltU => format!("bltu {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        RvOp::BgeU => format!("bgeu {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        RvOp::Jal => format!("jal {rd}, {}", decoded.imm_j() as i32),
+        RvOp::JalR => format!("jalr {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        RvOp::Lui => format!("lui {rd}, {:#010x}", decoded.imm_u() >> 12),
+        RvOp::Auipc => format!("auipc {rd}, {:#010x}", decoded.imm_u() >> 12),
+        RvOp::Mul => format!("mul {rd}, {rs1}, {rs2}"),
+        RvOp::MulH => format!("mulh {rd}, {rs1}, {rs2}"),
+        RvOp::MulHSU => format!("mulhsu {rd}, {rs1}, {rs2}"),
+        RvOp::MulHU => format!("mulhu {rd}, {rs1}, {rs2}"),
+        RvOp::Div => format!("div {rd}, {rs1}, {rs2}"),
+        RvOp::DivU => format!("divu {rd}, {rs1}, {rs2}"),
+        RvOp::Rem => format!("rem {rd}, {rs1}, {rs2}"),
+        RvOp::RemU => format!("remu {rd}, {rs1}, {rs2}"),
+        RvOp::Lb => format!("lb {rd}, {}({rs1})", decoded.imm_i() as i32),
+        RvOp::Lh => format!("lh {rd}, {}({rs1})", decoded.imm_i() as i32),
+        RvOp::Lw => format!("lw {rd}, {}({rs1})", decoded.imm_i() as i32),
+        RvOp::LbU => format!("lbu {rd}, {}({rs1})", decoded.imm_i() as i32),
+        RvOp::LhU => format!("lhu {rd}, {}({rs1})", decoded.imm_i() as i32),
+        RvOp::Sb => format!("sb {rs2}, {}({rs1})", decoded.imm_s() as i32),
+        RvOp::Sh => format!("sh {rs2}, {}({rs1})", decoded.imm_s() as i32),
+        RvOp::Sw => format!("sw {rs2}, {}({rs1})", decoded.imm_s() as i32),
+        RvOp::Eany => match decoded.rs2 {
             0 => "ecall".to_string(),
             1 => "ebreak".to_string(),
             _ => "illegal eany".to_string(),
         },
-        InsnKind::Mret => "mret".to_string(),
-        InsnKind::Fence => "fence".to_string(),
+        RvOp::Mret => "mret".to_string(),
+        RvOp::Fence => "fence".to_string(),
     }
 }

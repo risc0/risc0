@@ -19,5 +19,8 @@ tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
 
+[dev-dependencies]
+iced-x86 = "1.21.0"
+
 [lints]
 workspace = true
