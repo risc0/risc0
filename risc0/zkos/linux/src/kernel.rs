@@ -1,3 +1,19 @@
+use crate::constants::KERNEL_SPACE_START;
+
+/// Validate a user pointer + length range. Returns Some((addr, end)) if valid.
+fn validate_user_range(ptr: usize, len: usize) -> Option<(usize, usize)> {
+    if len == 0 {
+        return None;
+    }
+    if ptr >= KERNEL_SPACE_START as usize {
+        return None;
+    }
+    let end = ptr.checked_add(len)?;
+    if end > KERNEL_SPACE_START as usize {
+        return None;
+    }
+    Some((ptr, end))
+}
 // Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +28,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use no_std_strings::{str256, str_format};
+use no_std_strings::{str_format, str256};
 
 use crate::atomic_emul::emulate_atomic_instruction;
 use crate::compressed_emul::{
@@ -541,11 +557,7 @@ unsafe extern "C" fn store_address_misaligned_dispatch() -> ! {
 unsafe extern "C" fn store_access_fault_dispatch() -> ! {
     let epc = unsafe { MEPC_PTR.read_volatile() };
     for i in 0..32 {
-        kprint!(
-            "store_access_fault_dispatch: x{} = {:?}",
-            i,
-            get_ureg(i)
-        );
+        kprint!("store_access_fault_dispatch: x{} = {:?}", i, get_ureg(i));
     }
     kpanic!(
         "Store access fault trap - not implemented, at PC: {:#010x}",
@@ -557,38 +569,44 @@ unsafe extern "C" fn store_access_fault_dispatch() -> ! {
 /// Returns the number of bytes copied, or 0 if the copy failed
 /// This function checks that the destination is in user memory (below kernel space)
 pub fn copy_to_user(dst: *mut u8, src: *const u8, len: usize) -> usize {
-    use crate::constants::KERNEL_SPACE_START;
-    
-    // Check if the destination pointer is in user memory
-    if (dst as usize) >= KERNEL_SPACE_START as usize {
-        kprint!(
-            "copy_to_user: destination pointer 0x{:x} is in kernel memory",
-            dst as usize
-        );
-        return 0;
-    }
-
-    // Check if the source pointer is valid
     if src.is_null() {
         kprint!("copy_to_user: source pointer is null");
         return 0;
     }
-
-    // Check if the length is reasonable
-    if len == 0 {
+    let dst_addr = dst as usize;
+    if validate_user_range(dst_addr, len).is_none() {
+        kprint!(
+            "copy_to_user: invalid destination range dst=0x{:08x} len={}",
+            dst_addr,
+            len
+        );
         return 0;
     }
-
-    // Check if the destination range is in user memory
-    if (dst as usize) + len > KERNEL_SPACE_START as usize {
-        kprint!("copy_to_user: destination range extends into kernel memory");
-        return 0;
-    }
-
-    // Perform the copy
     unsafe {
         core::ptr::copy_nonoverlapping(src, dst, len);
     }
+    len
+}
 
+/// Copy data from user memory into kernel memory.
+/// Returns number of bytes copied or 0 on failure.
+#[allow(dead_code)]
+pub fn copy_from_user(dst: *mut u8, src: *const u8, len: usize) -> usize {
+    if dst.is_null() {
+        kprint!("copy_from_user: destination pointer is null");
+        return 0;
+    }
+    let src_addr = src as usize;
+    if validate_user_range(src_addr, len).is_none() {
+        kprint!(
+            "copy_from_user: invalid source range src=0x{:08x} len={}",
+            src_addr,
+            len
+        );
+        return 0;
+    }
+    unsafe {
+        core::ptr::copy_nonoverlapping(src, dst, len);
+    }
     len
 }

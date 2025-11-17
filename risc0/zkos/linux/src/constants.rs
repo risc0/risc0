@@ -26,24 +26,28 @@ pub const FP_REGS_PTR: *mut u64 = 0xffff_4000 as *mut u64;
 pub const FCSR_PTR: *mut u32 = 0xffff_4100 as *mut u32;
 // Memory layout constants for RISC-V RV32 in zkOS
 // The address space is divided into:
-// - User space: 0x00000000 - 0xBFFFFFFF (3GB)
-// - Kernel space: 0xC0000000 - 0xFFFFFFFF (1GB)
+// - User space: 0x00000000 - 0x3FFFFFFF (1GB)
+// - Kernel space: 0x40000000 - 0xFFFFFFFF (3GB)
 
-/// Start of kernel memory space (3GB boundary)
-pub const KERNEL_SPACE_START: u32 = 0xC000_0000;
+/// Start of kernel memory space (1GB boundary)
+pub const KERNEL_SPACE_START: u32 = 0x4000_0000;
 
 /// End of user memory space (just before kernel space)
-pub const USER_SPACE_END: u32 = 0xC000_0000;
+pub const USER_SPACE_END: u32 = 0x4000_0000;
 
 pub const USER_MEMORY_START_PTR: *const u8 = 0x0001_1100 as *const u8;
-pub const USER_MEMORY_LENGTH: usize = 0x4000_0000;
+pub const USER_MEMORY_START: usize = 0x0001_1100;
+pub const USER_MEMORY_LENGTH: usize = (USER_SPACE_END as usize) - USER_MEMORY_START;
 pub const USER_START_PTR: *const usize = 0x0001_0000 as *const usize;
-pub const USER_STACK_ADDR: usize = 0x9c7ffe00;
+pub const USER_STACK_ADDR: usize = 0x3f00_0000;
 pub const USER_STACK_PTR: *const usize = USER_STACK_ADDR as *const usize;
-pub const USER_FIXUP_ADDR: usize = 0xbfff_0000;
+pub const USER_FIXUP_ADDR: usize = 0x3fff_0000;
 pub const USER_FIXUP_PTR: *mut u32 = USER_FIXUP_ADDR as *mut u32;
 #[allow(dead_code)]
 pub const USER_STACK_SIZE: usize = 2 * 1024 * 1024;
+pub const USER_STACK_MMAP_GAP: usize = 0x0800_0000; // 128MB gap between stack and mmap arena
+pub const USER_MMAP_ALIGN: usize = 0x0080_0000; // 8MB alignment for mmap base
+pub const USER_MMAP_BASE_INIT: u32 = (USER_STACK_ADDR as u32) - (USER_STACK_MMAP_GAP as u32); // 0x3780_0000
 
 #[allow(dead_code)]
 pub const USER_PHENT_SIZE: usize = 32; // ELF32_Phdr size in bytes
@@ -52,7 +56,7 @@ pub const PAGE_SIZE: usize = 4096;
 // pub const AT_VECTOR_SIZE_BASE: usize = 20;
 // pub const AT_VECTOR_SIZE_ARCH: usize = 7;
 // pub const AT_VECTOR_SIZE: usize = 2 * (AT_VECTOR_SIZE_ARCH + AT_VECTOR_SIZE_BASE + 1);
-pub const ASCII_TABLE_PTR: *const u8 = 0xbf00_0200 as *const u8;
+pub const ASCII_TABLE_PTR: *const u8 = 0x3ff0_0200 as *const u8;
 
 /// Program header table address (stored in memory)
 #[allow(dead_code)]
@@ -97,10 +101,16 @@ pub const VM_MACHINE_MODE_EMULATED_S_MODE: u32 = 1;
 pub const VM_MACHINE_MODE_EMULATED_U_MODE: u32 = 2;
 
 // Kernel heap constants
-// Memory layout: Stack (0xfff00000) → Heap (16MB fixed) → FS (variable) → User Space
-pub const KERNEL_HEAP_START_ADDR: usize = 0xfef00000; // Fixed: 16MB below kernel stack
+// Memory layout: Stack (0xfff00000, grows DOWN) → Gap → Heap (16MB fixed) → FS (variable) → User Space
+// Stack needs room to grow down, so heap must end BEFORE stack top
+pub const KERNEL_STACK_TOP: usize = 0xfff00000;
+pub const KERNEL_STACK_MAX_SIZE: usize = 1024 * 1024; // Assume max 1MB stack growth
+pub const KERNEL_HEAP_STACK_GAP: usize = 1024 * 1024; // 1MB safety gap between heap and stack
 pub const KERNEL_HEAP_SIZE: usize = 16 * 1024 * 1024; // 16MB heap (fixed)
-pub const KERNEL_HEAP_END_ADDR: usize = KERNEL_HEAP_START_ADDR + KERNEL_HEAP_SIZE;
+// Heap ends before stack bottom to leave room for stack growth
+pub const KERNEL_HEAP_END_ADDR: usize =
+    KERNEL_STACK_TOP - KERNEL_STACK_MAX_SIZE - KERNEL_HEAP_STACK_GAP;
+pub const KERNEL_HEAP_START_ADDR: usize = KERNEL_HEAP_END_ADDR - KERNEL_HEAP_SIZE; // 0xfed00000
 
 /// Timestamp structure for the timestamps in struct statx
 #[repr(C)]
