@@ -14,16 +14,10 @@ use crate::{
 };
 
 #[cfg(target_arch = "riscv32")]
-use alloc::format;
+use alloc::string::{String, ToString};
 #[cfg(target_arch = "riscv32")]
-use alloc::string::String;
-#[cfg(target_arch = "riscv32")]
-use alloc::string::ToString;
-#[cfg(target_arch = "riscv32")]
-use alloc::vec;
-#[cfg(target_arch = "riscv32")]
-use alloc::vec::Vec;
-#[cfg(target_arch = "riscv32")]
+use alloc::{format, vec, vec::Vec};
+
 use core::str;
 
 // Helper functions for user pointer validation
@@ -1302,19 +1296,15 @@ pub fn sys_writev(fd: u32, vec_ptr: u32, vlen: u32) -> Result<u32, Err> {
         return Ok(0);
     }
 
-    // Validate the iovec array pointer
-    let iovec_array_size = vlen as usize * core::mem::size_of::<IoVec>();
-    validate_user_buffer_read(vec_ptr, iovec_array_size)?;
-
     let fd = fd as i32;
-    let vec_ptr = vec_ptr as *const IoVec;
-    let vec = unsafe { core::slice::from_raw_parts(vec_ptr, vlen as usize) };
+    let vec = load_iovecs(vec_ptr, vlen)?;
 
     // Validate each iovec entry's buffer is readable
     for (i, iov) in vec.iter().enumerate() {
-        if iov.iov_len > 0 {
-            validate_user_buffer_read(iov.iov_base as u32, iov.iov_len)?;
+        if iov.iov_len == 0 {
+            continue;
         }
+        validate_user_buffer_read(iov.iov_base as u32, iov.iov_len)?;
         // Check for unreasonable lengths
         if iov.iov_len > (isize::MAX as usize) {
             kprint!(
@@ -1328,6 +1318,9 @@ pub fn sys_writev(fd: u32, vec_ptr: u32, vlen: u32) -> Result<u32, Err> {
 
     let mut total: usize = 0;
     for iov in vec {
+        if iov.iov_len == 0 {
+            continue;
+        }
         total += do_write(fd, iov.iov_base, iov.iov_len)?;
     }
     Ok(total as u32)
@@ -3923,6 +3916,15 @@ pub fn sys_preadv(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32,
     restored_desc.cursor = current_pos;
     update_file_desc(fd_entry.file_desc_id, restored_desc);
 
+    match &result {
+        Ok(n) => {
+            kprint!("sys_preadv: returning Ok({})", n);
+        }
+        Err(e) => {
+            kprint!("sys_preadv: returning Err({})", e.as_errno());
+        }
+    }
+
     result
 }
 
@@ -4053,16 +4055,27 @@ pub fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
         return Err(Err::BadFd);
     }
 
-    // Validate the iovec array pointer
-    let iovec_array_size = _vlen as usize * core::mem::size_of::<IoVec>();
-    validate_user_buffer_read(_vec, iovec_array_size)?;
-
-    // Read the iovec array from user space
-    let iovecs = unsafe { core::slice::from_raw_parts(_vec as *const IoVec, _vlen as usize) };
+    let iovecs = load_iovecs(_vec, _vlen)?;
+    kprint!(
+        "sys_readv: loaded {} iovecs from user (requested {})",
+        iovecs.len(),
+        _vlen
+    );
+    for (idx, iov) in iovecs.iter().enumerate() {
+        kprint!(
+            "sys_readv: iov[{}] base=0x{:08x} len={}",
+            idx,
+            iov.iov_base as u32,
+            iov.iov_len
+        );
+    }
 
     // Validate each iovec entry's buffer
     let mut total_len: usize = 0;
     for (i, iov) in iovecs.iter().enumerate() {
+        if iov.iov_len == 0 {
+            continue;
+        }
         // Validate each buffer is in writable user memory (for read operations)
         validate_user_buffer_write(iov.iov_base as u32, iov.iov_len)?;
         // Check for negative length (iov_len is usize, so check if it's suspiciously large)
@@ -4108,13 +4121,20 @@ pub fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
             Err(e) => {
                 // If we've already read some data, return that
                 if total_read > 0 {
+                    kprint!(
+                        "sys_readv: short read due to error {} returning partial {} bytes",
+                        e.as_errno(),
+                        total_read
+                    );
                     return Ok(total_read);
                 }
+                kprint!("sys_readv: returning error {}", e.as_errno());
                 return Err(e);
             }
         }
     }
 
+    kprint!("sys_readv: returning {} bytes", total_read);
     Ok(total_read)
 }
 
@@ -6369,9 +6389,53 @@ pub fn set_fd(fd: u32, fid: u32) {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct IoVec {
     pub iov_base: *mut u8,
     pub iov_len: usize,
+}
+
+fn copy_from_user(src: u32, dst: &mut [u8]) -> Result<(), Err> {
+    if dst.is_empty() {
+        return Ok(());
+    }
+
+    let mut copied = 0usize;
+    while copied < dst.len() {
+        let addr = src.checked_add(copied as u32).ok_or(Err::Fault)?;
+        let remaining = dst.len() - copied;
+        let safe =
+            crate::linux_abi::is_valid_user_address(addr, remaining, false).ok_or(Err::Fault)?;
+        let chunk = core::cmp::min(remaining, safe);
+        unsafe {
+            core::ptr::copy_nonoverlapping(addr as *const u8, dst[copied..].as_mut_ptr(), chunk);
+        }
+        copied += chunk;
+    }
+
+    Ok(())
+}
+
+fn load_iovecs(vec_ptr: u32, vlen: u32) -> Result<Vec<IoVec>, Err> {
+    let mut result = Vec::with_capacity(vlen as usize);
+    let entry_size = core::mem::size_of::<IoVec>();
+
+    if entry_size == 0 {
+        return Ok(result);
+    }
+
+    let base = vec_ptr as usize;
+    for i in 0..(vlen as usize) {
+        let offset = base
+            .checked_add(i.checked_mul(entry_size).ok_or(Err::Inval)?)
+            .ok_or(Err::Inval)?;
+        let mut raw = [0u8; core::mem::size_of::<IoVec>()];
+        copy_from_user(offset as u32, &mut raw)?;
+        let iov = unsafe { core::ptr::read_unaligned(raw.as_ptr() as *const IoVec) };
+        result.push(iov);
+    }
+
+    Ok(result)
 }
 
 pub fn clunk(fid: u32, is_cwd_clunking_allowed: bool) {
