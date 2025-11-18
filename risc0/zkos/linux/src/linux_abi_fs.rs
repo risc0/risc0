@@ -3583,65 +3583,56 @@ pub fn sys_llseek(
     }
 
     let file_desc = get_file_desc(fd_entry.file_desc_id);
-    let offset = ((_offset_high as u64) << 32) | (_offset_low as u64);
-    let new_cursor = match whence {
+
+    // Combine high/low parts into signed 64-bit offset
+    let offset = ((_offset_high as i64) << 32) | (_offset_low as i64 & 0xffff_ffff);
+
+    let cursor_i64 = i64::try_from(file_desc.cursor).map_err(|_| {
+        kprint!(
+            "sys_llseek: cursor value {} does not fit in i64",
+            file_desc.cursor
+        );
+        Err::Inval
+    })?;
+
+    let new_cursor_i64 = match whence {
         SEEK_SET => offset,
-        SEEK_CUR => file_desc.cursor.checked_add(offset).ok_or_else(|| {
+        SEEK_CUR => cursor_i64.checked_add(offset).ok_or_else(|| {
             kprint!(
                 "sys_llseek: SEEK_CUR overflow (cursor={}, offset={})",
-                file_desc.cursor,
+                cursor_i64,
                 offset
             );
             Err::Inval
         })?,
         SEEK_END => {
             // For SEEK_END, we need to get the file size
-            if file_desc.fid != 0 && file_desc.fid != TEMP_FID_1 {
+            let base = if file_desc.fid != 0 && file_desc.fid != TEMP_FID_1 {
                 let tgetattr = crate::p9::TgetattrMessage::new(0, file_desc.fid, P9_GETATTR_SIZE);
                 match tgetattr.send_tgetattr() {
                     Ok(P9Response::Success(rgetattr)) => {
-                        rgetattr.size.checked_add(offset).ok_or_else(|| {
+                        i64::try_from(rgetattr.size).map_err(|_| {
                             kprint!(
-                                "sys_llseek: SEEK_END overflow (size={}, offset={})",
-                                rgetattr.size,
-                                offset
+                                "sys_llseek: SEEK_END size {} does not fit in i64",
+                                rgetattr.size
                             );
                             Err::Inval
                         })?
                     }
-                    Ok(P9Response::Error(_)) => {
-                        // Fallback: use cursor if getattr fails
-                        file_desc.cursor.checked_add(offset).ok_or_else(|| {
-                            kprint!(
-                                "sys_llseek: SEEK_END fallback overflow (cursor={}, offset={})",
-                                file_desc.cursor,
-                                offset
-                            );
-                            Err::Inval
-                        })?
-                    }
-                    Err(_) => {
-                        // Fallback: use cursor if getattr fails
-                        file_desc.cursor.checked_add(offset).ok_or_else(|| {
-                            kprint!(
-                                "sys_llseek: SEEK_END fallback overflow (cursor={}, offset={})",
-                                file_desc.cursor,
-                                offset
-                            );
-                            Err::Inval
-                        })?
-                    }
+                    Ok(P9Response::Error(_)) | Err(_) => cursor_i64,
                 }
             } else {
-                file_desc.cursor.checked_add(offset).ok_or_else(|| {
-                    kprint!(
-                        "sys_llseek: SEEK_END else overflow (cursor={}, offset={})",
-                        file_desc.cursor,
-                        offset
-                    );
-                    Err::Inval
-                })?
-            }
+                cursor_i64
+            };
+
+            base.checked_add(offset).ok_or_else(|| {
+                kprint!(
+                    "sys_llseek: SEEK_END overflow (base={}, offset={})",
+                    base,
+                    offset
+                );
+                Err::Inval
+            })?
         }
         _ => {
             let msg = b"sys_llseek: invalid whence";
@@ -3649,6 +3640,16 @@ pub fn sys_llseek(
             return Err(Err::Inval);
         }
     };
+
+    if new_cursor_i64 < 0 {
+        kprint!(
+            "sys_llseek: resulting cursor negative ({}), returning EINVAL",
+            new_cursor_i64
+        );
+        return Err(Err::Inval);
+    }
+
+    let new_cursor = new_cursor_i64 as u64;
 
     // Update the shared cursor in the file description
     let mut updated_desc = file_desc;
