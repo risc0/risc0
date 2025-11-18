@@ -15,7 +15,7 @@
 
 use anyhow::{Result, anyhow, bail};
 use risc0_binfmt::ByteAddr;
-use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
+use risc0_zkvm_platform::syscall::reg_abi::REG_A3;
 
 use crate::sha::{DIGEST_BYTES, Digest};
 
@@ -41,13 +41,9 @@ impl Syscall for SysVerify {
             bail!("invalid sys_verify call");
         }
 
-        // NOTE: Length is read from the guest, but its actually required to be two digests.
         let from_guest_ptr = ByteAddr(ctx.load_register(REG_A3));
-        let from_guest_len = ctx.load_register(REG_A4);
-        if from_guest_len != DIGEST_BYTES as u32 * 2 {
-            bail!("sys_verify_integrity: invalid from_guest_len supplied by guest");
-        }
-        let from_guest: Vec<u8> = ctx
+        let from_guest_len = DIGEST_BYTES as u32 * 2;
+        let from_guest = ctx
             .load_region(from_guest_ptr, from_guest_len)?
             .into_vec()?;
 
