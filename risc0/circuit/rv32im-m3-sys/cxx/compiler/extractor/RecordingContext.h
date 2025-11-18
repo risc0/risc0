@@ -94,12 +94,15 @@ struct RecordingContext {
 
   void materializeLayout(mlir::Type layoutType);
 
+  template <typename Component> mlir::Value get(Component& component) {
+    return componentIRMap.get<Component>(&component);
+  }
+
   mlir::MLIRContext* mlirCtx;
   mlir::ModuleOp moduleOp;
   mlir::OpBuilder builder;
 
   const char* componentName;
-  ComponentIRMap componentIRMap;
 
   // private:
   void unifyRefsIntoLayout(mlir::Value layout, size_t& i);
@@ -114,6 +117,9 @@ struct RecordingContext {
 
   // The index 0 used for load ops
   mlir::Value zero;
+
+  // A map from component instances to their IR values
+  ComponentIRMap componentIRMap;
 
   friend struct RecordingVal;
 };

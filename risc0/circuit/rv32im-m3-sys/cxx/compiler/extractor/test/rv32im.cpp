@@ -20,7 +20,6 @@
 #include "mlir/IR/Verifier.h"
 
 int main() {
-  using C = RecordingContext;
   mlir::MLIRContext mlirCtx;
   RecordingContext ctx(&mlirCtx);
   RecordingReg::setContext(&ctx);
@@ -29,10 +28,10 @@ int main() {
   extract1<IsZero>(ctx);
 
   // EXTRACT(IsZero);
+  EXTRACT(InstRegBlock);
   // EXTRACT(UnitAddSubBlock);
   // EXTRACT(UnitBitBlock);
   // EXTRACT(UnitMulBlock);
-  EXTRACT(UnitDivBlock);
 
   // #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
   //   BLOCK_TYPES
