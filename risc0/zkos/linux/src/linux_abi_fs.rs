@@ -41,15 +41,20 @@ fn validate_and_read_pathname_with_len(ptr: u32, max_len: usize) -> Result<Strin
         return Err(Err::Fault);
     }
 
-    if !crate::linux_abi::is_valid_user_address(ptr, max_len, false) {
-        kprint!(
-            "validate_and_read_pathname: EFAULT - invalid pointer {:#010x}",
-            ptr
-        );
-        return Err(Err::Fault);
-    }
+    let valid_len = match crate::linux_abi::is_valid_user_address(ptr, max_len, false) {
+        Some(len) => len,
+        None => {
+            kprint!(
+                "validate_and_read_pathname: EFAULT - invalid pointer {:#010x}",
+                ptr
+            );
+            return Err(Err::Fault);
+        }
+    };
 
-    let buf = unsafe { core::slice::from_raw_parts(ptr as *const u8, max_len) };
+    // Use the maximum safe length
+    let safe_len = core::cmp::min(max_len, valid_len);
+    let buf = unsafe { core::slice::from_raw_parts(ptr as *const u8, safe_len) };
     let null_pos = buf.iter().position(|&b| b == 0).unwrap_or(buf.len());
 
     // Check for path too long (before null terminator found)
@@ -69,16 +74,27 @@ fn validate_user_buffer_write(ptr: u32, len: usize) -> Result<(), Err> {
         return Err(Err::Fault);
     }
 
-    if !crate::linux_abi::is_valid_user_address(ptr, len, true) {
-        kprint!(
-            "validate_user_buffer_write: EFAULT - invalid pointer {:#010x} len {}",
-            ptr,
-            len
-        );
-        return Err(Err::Fault);
+    match crate::linux_abi::is_valid_user_address(ptr, len, true) {
+        Some(valid_len) => {
+            if valid_len < len {
+                kprint!(
+                    "validate_user_buffer_write: EFAULT - buffer extends beyond valid region (requested={}, available={})",
+                    len,
+                    valid_len
+                );
+                return Err(Err::Fault);
+            }
+            Ok(())
+        }
+        None => {
+            kprint!(
+                "validate_user_buffer_write: EFAULT - invalid pointer {:#010x} len {}",
+                ptr,
+                len
+            );
+            Err(Err::Fault)
+        }
     }
-
-    Ok(())
 }
 
 /// Validate a user buffer pointer for reading
@@ -89,16 +105,27 @@ fn validate_user_buffer_read(ptr: u32, len: usize) -> Result<(), Err> {
         return Err(Err::Fault);
     }
 
-    if !crate::linux_abi::is_valid_user_address(ptr, len, false) {
-        kprint!(
-            "validate_user_buffer_read: EFAULT - invalid pointer {:#010x} len {}",
-            ptr,
-            len
-        );
-        return Err(Err::Fault);
+    match crate::linux_abi::is_valid_user_address(ptr, len, false) {
+        Some(valid_len) => {
+            if valid_len < len {
+                kprint!(
+                    "validate_user_buffer_read: EFAULT - buffer extends beyond valid region (requested={}, available={})",
+                    len,
+                    valid_len
+                );
+                return Err(Err::Fault);
+            }
+            Ok(())
+        }
+        None => {
+            kprint!(
+                "validate_user_buffer_read: EFAULT - invalid pointer {:#010x} len {}",
+                ptr,
+                len
+            );
+            Err(Err::Fault)
+        }
     }
-
-    Ok(())
 }
 
 /// Map 9P error codes to Linux errno values
@@ -437,16 +464,19 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
 
     // Validate the pathname pointer is in readable user memory (max path length = 256)
     const MAX_PATH_LEN: usize = 256;
-    if !crate::linux_abi::is_valid_user_address(pathname, MAX_PATH_LEN, false) {
-        kprint!(
-            "sys_unlinkat: EFAULT - invalid pathname address {:#010x}",
-            pathname
-        );
-        return Err(Err::Fault);
-    }
+    let safe_len = match crate::linux_abi::is_valid_user_address(pathname, MAX_PATH_LEN, false) {
+        Some(valid_len) => core::cmp::min(MAX_PATH_LEN, valid_len),
+        None => {
+            kprint!(
+                "sys_unlinkat: EFAULT - invalid pathname address {:#010x}",
+                pathname
+            );
+            return Err(Err::Fault);
+        }
+    };
 
-    // Read the pathname from user space
-    let filename = unsafe { core::slice::from_raw_parts(pathname as *const u8, 256) };
+    // Read the pathname from user space (up to the safe length)
+    let filename = unsafe { core::slice::from_raw_parts(pathname as *const u8, safe_len) };
     let null_pos = filename
         .iter()
         .position(|&b| b == 0)
@@ -886,13 +916,16 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
     }
 
     // Validate the buffer is in writable user memory
-    if !crate::linux_abi::is_valid_user_address(_buf, _count as usize, true) {
-        kprint!(
-            "sys_read: EFAULT - invalid buffer address {:#010x} len {}",
-            _buf,
-            _count
-        );
-        return Err(Err::Fault);
+    match crate::linux_abi::is_valid_user_address(_buf, _count as usize, true) {
+        Some(valid_len) if valid_len >= _count as usize => {}
+        _ => {
+            kprint!(
+                "sys_read: EFAULT - invalid buffer address {:#010x} len {}",
+                _buf,
+                _count
+            );
+            return Err(Err::Fault);
+        }
     }
 
     if !get_p9_enabled() {
@@ -1119,13 +1152,16 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
     }
 
     // Validate the buffer is in readable user memory
-    if !crate::linux_abi::is_valid_user_address(buf as u32, count, false) {
-        kprint!(
-            "do_write: EFAULT - invalid buffer address {:#010x} len {}",
-            buf as u32,
-            count
-        );
-        return Err(Err::Fault);
+    match crate::linux_abi::is_valid_user_address(buf as u32, count, false) {
+        Some(valid_len) if valid_len >= count => {}
+        _ => {
+            kprint!(
+                "do_write: EFAULT - invalid buffer address {:#010x} len {}",
+                buf as u32,
+                count
+            );
+            return Err(Err::Fault);
+        }
     }
 
     if fd == 1 || fd == 2 {
@@ -3550,24 +3586,61 @@ pub fn sys_llseek(
     let offset = ((_offset_high as u64) << 32) | (_offset_low as u64);
     let new_cursor = match whence {
         SEEK_SET => offset,
-        SEEK_CUR => file_desc.cursor + offset,
+        SEEK_CUR => file_desc.cursor.checked_add(offset).ok_or_else(|| {
+            kprint!(
+                "sys_llseek: SEEK_CUR overflow (cursor={}, offset={})",
+                file_desc.cursor,
+                offset
+            );
+            Err::Inval
+        })?,
         SEEK_END => {
             // For SEEK_END, we need to get the file size
             if file_desc.fid != 0 && file_desc.fid != TEMP_FID_1 {
                 let tgetattr = crate::p9::TgetattrMessage::new(0, file_desc.fid, P9_GETATTR_SIZE);
                 match tgetattr.send_tgetattr() {
-                    Ok(P9Response::Success(rgetattr)) => rgetattr.size + offset,
+                    Ok(P9Response::Success(rgetattr)) => {
+                        rgetattr.size.checked_add(offset).ok_or_else(|| {
+                            kprint!(
+                                "sys_llseek: SEEK_END overflow (size={}, offset={})",
+                                rgetattr.size,
+                                offset
+                            );
+                            Err::Inval
+                        })?
+                    }
                     Ok(P9Response::Error(_)) => {
                         // Fallback: use cursor if getattr fails
-                        file_desc.cursor + offset
+                        file_desc.cursor.checked_add(offset).ok_or_else(|| {
+                            kprint!(
+                                "sys_llseek: SEEK_END fallback overflow (cursor={}, offset={})",
+                                file_desc.cursor,
+                                offset
+                            );
+                            Err::Inval
+                        })?
                     }
                     Err(_) => {
                         // Fallback: use cursor if getattr fails
-                        file_desc.cursor + offset
+                        file_desc.cursor.checked_add(offset).ok_or_else(|| {
+                            kprint!(
+                                "sys_llseek: SEEK_END fallback overflow (cursor={}, offset={})",
+                                file_desc.cursor,
+                                offset
+                            );
+                            Err::Inval
+                        })?
                     }
                 }
             } else {
-                file_desc.cursor + offset
+                file_desc.cursor.checked_add(offset).ok_or_else(|| {
+                    kprint!(
+                        "sys_llseek: SEEK_END else overflow (cursor={}, offset={})",
+                        file_desc.cursor,
+                        offset
+                    );
+                    Err::Inval
+                })?
             }
         }
         _ => {
@@ -4838,12 +4911,15 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
 
         // Validate the pointer is in writable user memory (struct flock is ~24 bytes)
         const FLOCK_SIZE: usize = 24;
-        if !crate::linux_abi::is_valid_user_address(_arg, FLOCK_SIZE, true) {
-            kprint!(
-                "sys_fcntl64: F_GETLK - invalid flock pointer {:#010x}",
-                _arg
-            );
-            return Err(Err::Fault);
+        match crate::linux_abi::is_valid_user_address(_arg, FLOCK_SIZE, true) {
+            Some(valid_len) if valid_len >= FLOCK_SIZE => {}
+            _ => {
+                kprint!(
+                    "sys_fcntl64: F_GETLK - invalid flock pointer {:#010x}",
+                    _arg
+                );
+                return Err(Err::Fault);
+            }
         }
 
         // Write F_UNLCK (2) to l_type field (first 2 bytes)
@@ -4869,12 +4945,15 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
 
         // Validate the pointer is in readable user memory (struct flock is ~24 bytes)
         const FLOCK_SIZE: usize = 24;
-        if !crate::linux_abi::is_valid_user_address(_arg, FLOCK_SIZE, false) {
-            kprint!(
-                "sys_fcntl64: F_SETLK/F_SETLKW - invalid flock pointer {:#010x}",
-                _arg
-            );
-            return Err(Err::Fault);
+        match crate::linux_abi::is_valid_user_address(_arg, FLOCK_SIZE, false) {
+            Some(valid_len) if valid_len >= FLOCK_SIZE => {}
+            _ => {
+                kprint!(
+                    "sys_fcntl64: F_SETLK/F_SETLKW - invalid flock pointer {:#010x}",
+                    _arg
+                );
+                return Err(Err::Fault);
+            }
         }
 
         // Read and validate the flock structure
