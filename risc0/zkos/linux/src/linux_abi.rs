@@ -502,6 +502,93 @@ impl MemoryRegion {
     }
 }
 
+/// Register ELF program memory region
+/// This registers a large region from load_base to heap start, covering all ELF-loaded memory.
+/// Also registers the interpreter region if present.
+/// This is simpler and more robust than parsing individual segments.
+fn register_elf_segments() {
+    use crate::constants::{
+        USER_BRK_ADDR, USER_INTERP_BASE_ADDR, USER_MMAP_BASE_INIT, USER_SPACE_END,
+    };
+
+    // Calculate load_base the same way the ELF loader does
+    // Mirror Linux's ELF_ET_DYN_BASE calculation: load the main executable
+    // 2/3 of the way up the user VA space and align it to the system page size.
+    const LINUX_PAGE_SIZE: u32 = 0x1000;
+    let max_mem = USER_SPACE_END;
+    let mut load_base = ((max_mem as u64 * 2 / 3) as u32) & !(LINUX_PAGE_SIZE - 1);
+    if load_base == 0 {
+        load_base = LINUX_PAGE_SIZE;
+    }
+
+    // Get heap start (brk) from stored value
+    let heap_start = unsafe { USER_BRK_ADDR.read_volatile() as u32 };
+
+    if heap_start == 0 {
+        kprint!("register_elf_segments: No heap start (brk=0), skipping ELF region registration");
+        return;
+    }
+
+    if heap_start <= load_base {
+        kprint!(
+            "register_elf_segments: Invalid range (load_base=0x{:08x} >= heap_start=0x{:08x}), skipping",
+            load_base,
+            heap_start
+        );
+        return;
+    }
+
+    kprint!(
+        "register_elf_segments: Registering main ELF region [0x{:08x}-0x{:08x}) (load_base to heap start)",
+        load_base,
+        heap_start
+    );
+
+    // Register the entire region from load_base to heap_start as readable, writable, and executable
+    // This covers all ELF-loaded segments (code, data, BSS, etc.)
+    register_memory_region(
+        load_base,
+        heap_start,
+        true, // readable
+        true, // writable (data segments need this)
+        true, // executable (code segments need this)
+        "elf-loaded-memory",
+    );
+
+    // Register interpreter region if present
+    // The interpreter is loaded with load_bias (stored as interp_base_addr) and ends at the initial mmap_base
+    let interp_base_addr = unsafe { USER_INTERP_BASE_ADDR.read_volatile() };
+    if interp_base_addr != 0 {
+        // The interpreter is placed so its top ends at the initial mmap_base
+        // (which is USER_MMAP_BASE_INIT = 0x3780_0000)
+        let interp_end = USER_MMAP_BASE_INIT;
+
+        if interp_end <= interp_base_addr as u32 {
+            kprint!(
+                "register_elf_segments: Invalid interpreter range (base=0x{:08x} >= end=0x{:08x}), skipping",
+                interp_base_addr,
+                interp_end
+            );
+        } else {
+            kprint!(
+                "register_elf_segments: Registering interpreter region [0x{:08x}-0x{:08x})",
+                interp_base_addr,
+                interp_end
+            );
+
+            // Register interpreter region as readable, writable, and executable
+            register_memory_region(
+                interp_base_addr as u32,
+                interp_end,
+                true, // readable
+                true, // writable
+                true, // executable
+                "interpreter-memory",
+            );
+        }
+    }
+}
+
 // Global memory map (fixed-size array for no_std compatibility)
 const MAX_MEMORY_REGIONS: usize = 128;
 static mut MEMORY_REGIONS: [MemoryRegion; MAX_MEMORY_REGIONS] =
@@ -862,6 +949,9 @@ fn init_p9_zerocopy_backend() {
 
 pub fn start_linux_binary(argc: u32) -> ! {
     init_fs();
+
+    // Register ELF program segments first (before stack, so they take priority)
+    register_elf_segments();
 
     // Track the user stack region so pointer validation accepts stack addresses
     let stack_top = USER_STACK_ADDR as u32;
