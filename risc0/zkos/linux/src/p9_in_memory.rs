@@ -876,17 +876,6 @@ impl ZeroCopyFilesystem {
 
     /// Walk from a FID following path components (zero-copy metadata access!)
     pub fn walk(&mut self, from_fid: u32, to_fid: u32, wnames: &[String]) -> Result<Vec<Qid>, u32> {
-        self.debug_log("ZC walk pxEEEE: starting walk");
-        let path_index_len = self.path_index.len();
-        let first_key_opt = self.path_index.keys().next();
-        if first_key_opt.is_none() && path_index_len > 0 {
-            self.debug_log(
-                "ZC walk pxyEEEEE: ERROR: path_index claims non-zero len but iter() returns nothing!",
-            );
-            return Err(22); // EINVAL - corrupted BTreeMap
-        }
-        self.debug_log("ZC walk pxyEEEEE: path_index.iter() works");
-
         // Get starting vnode
         let from_vnode = self.get_fid(from_fid)?.clone();
         if ZERO_COPY_DEBUG {
@@ -977,7 +966,6 @@ impl ZeroCopyFilesystem {
                     ));
                 } */
             }
-            self.debug_log(&format!("ZC walk pxy1: {}", *wname));
             // Compute the next absolute path for path-index fallback
             let next_path = if current_path == "/" {
                 format!("/{}", wname)
@@ -985,11 +973,6 @@ impl ZeroCopyFilesystem {
                 format!("{}/{}", current_path, wname)
             };
 
-            self.debug_log(&format!(
-                "ZC walk pxyA: next_path='{}' len={}",
-                next_path,
-                next_path.len()
-            ));
             // Validate next_path is valid UTF-8 and not corrupted
             if next_path.is_empty() {
                 self.debug_log("ZC walk pxyA: ERROR: next_path is empty!");
@@ -1002,60 +985,6 @@ impl ZeroCopyFilesystem {
                 path_index_len
             ));
 
-            // Print heap stats before accessing path_index
-            let (heap_used, heap_free, heap_total) = crate::allocator::get_heap_stats();
-            self.debug_log(&format!(
-                "ZC walk pxyA2.5: HEAP STATS - used={} bytes ({:.2} MB), free={} bytes ({:.2} MB), total={} bytes ({:.2} MB)",
-                heap_used,
-                heap_used as f64 / (1024.0 * 1024.0),
-                heap_free,
-                heap_free as f64 / (1024.0 * 1024.0),
-                heap_total,
-                heap_total as f64 / (1024.0 * 1024.0)
-            ));
-
-            // CRITICAL: If heap is only 2KB but path_index should be ~717KB, something is very wrong!
-            if heap_used < 100_000 && path_index_len > 1000 {
-                self.debug_log(&format!(
-                    "ZC walk pxyA2.5.5: WARNING - Heap only {} bytes but path_index has {} entries! Expected ~717KB!",
-                    heap_used, path_index_len
-                ));
-                self.debug_log("ZC walk pxyA2.5.5: This suggests path_index may be corrupted or heap stats are wrong!");
-            }
-
-            // Additional diagnostics: check path_index state
-            self.debug_log(&format!(
-                "ZC walk pxyA2.6: path_index diagnostics - len={}, is_empty={}",
-                path_index_len,
-                self.path_index.is_empty()
-            ));
-
-            // Try to get a sample of path_index contents (first few keys) safely
-            let mut sample_count = 0;
-            for (key, val) in self.path_index.iter().take(3) {
-                self.debug_log(&format!(
-                    "ZC walk pxyA2.7: path_index sample[{}] - key='{}' (len={}), inode={}",
-                    sample_count,
-                    key,
-                    key.len(),
-                    val
-                ));
-                sample_count += 1;
-            }
-            if sample_count == 0 && path_index_len > 0 {
-                self.debug_log(
-                    "ZC walk pxyA2.7: WARNING - path_index.len() > 0 but iter() returns nothing!",
-                );
-            }
-
-            // Try a simple operation first - check if we can get any entry
-            let first_key_opt = self.path_index.keys().next();
-            if first_key_opt.is_none() && path_index_len > 0 {
-                self.debug_log("ZC walk pxyA: ERROR: path_index claims non-zero len but iter() returns nothing!");
-                return Err(22); // EINVAL - corrupted BTreeMap
-            }
-            self.debug_log("ZC walk pxyA3: path_index.iter() works");
-
             // Now try the actual lookup - wrap in a way that catches panics
             // Since we can't use catch_unwind in no_std, we'll just be very careful
             let inode_opt = self.path_index.get(&next_path);
@@ -1064,7 +993,6 @@ impl ZeroCopyFilesystem {
             } else {
                 self.debug_log("ZC walk pxyB: not found");
             }
-            self.debug_log("ZC walk pxyB: after lookup");
             // Find the named entry, falling back to the path index if needed
             let next_inode = if let Some(entry) = entries.iter().find(|e| e.name == *wname) {
                 // Validate inode number from directory entry before using
