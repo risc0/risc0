@@ -513,7 +513,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
     #[inline(always)]
     fn trace_instruction(&mut self, cycle: u64, kind: InsnKind, decoded: &DecodedInstruction) {
-        // TODO(victor/perf): This tracing enabled check is showing up in the trace.
         if unlikely(tracing::enabled!(tracing::Level::TRACE)) {
             tracing::trace!(
                 "[{}:{}:{cycle}] {:?}> {:#010x}  {}",

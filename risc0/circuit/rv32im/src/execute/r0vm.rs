@@ -515,6 +515,7 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             add_cycle!(ptr, rlen);
         }
 
+        // HERE!
         while rlen >= MAX_IO_WORDS {
             let words = min(rlen / MAX_IO_WORDS, MAX_IO_WORDS);
             // tracing::trace!("body: {words}");
