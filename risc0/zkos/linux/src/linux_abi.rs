@@ -507,9 +507,7 @@ impl MemoryRegion {
 /// Also registers the interpreter region if present.
 /// This is simpler and more robust than parsing individual segments.
 fn register_elf_segments() {
-    use crate::constants::{
-        USER_BRK_ADDR, USER_INTERP_BASE_ADDR, USER_MMAP_BASE_INIT, USER_SPACE_END,
-    };
+    use crate::constants::{USER_BRK_ADDR, USER_INTERP_BASE_ADDR, USER_SPACE_END};
 
     // Calculate load_base the same way the ELF loader does
     // Mirror Linux's ELF_ET_DYN_BASE calculation: load the main executable
@@ -560,8 +558,12 @@ fn register_elf_segments() {
     let interp_base_addr = unsafe { USER_INTERP_BASE_ADDR.read_volatile() };
     if interp_base_addr != 0 {
         // The interpreter is placed so its top ends at the initial mmap_base
-        // (which is USER_MMAP_BASE_INIT = 0x3780_0000)
-        let interp_end = USER_MMAP_BASE_INIT;
+        // Calculate it the same way the ELF loader does: (task_size - STACK_GAP) & !(BIG_ALIGN - 1)
+        const STACK_GAP: u32 = 0x0800_0000; // 128 MiB
+        const BIG_ALIGN: u32 = 0x0080_0000; // 8 MiB alignment
+        let task_size = USER_SPACE_END;
+        let initial_mmap_base = (task_size - STACK_GAP) & !(BIG_ALIGN - 1);
+        let interp_end = initial_mmap_base;
 
         if interp_end <= interp_base_addr as u32 {
             kprint!(
@@ -639,6 +641,11 @@ pub fn register_memory_region(
     let range_overlaps =
         |a_start: u32, a_end: u32, b_start: u32, b_end: u32| a_start < b_end && b_start < a_end;
 
+    // Check if the new region is completely contained within an existing region
+    let is_contained_in = |new_start: u32, new_end: u32, existing_start: u32, existing_end: u32| {
+        new_start >= existing_start && new_end <= existing_end
+    };
+
     unsafe {
         let mut idx = 0;
         while idx < MEMORY_REGION_COUNT {
@@ -647,6 +654,23 @@ pub fn register_memory_region(
                 idx += 1;
                 continue;
             }
+
+            // If the new region is completely contained within an existing region,
+            // it's already covered - allow it (no need to register again)
+            if is_contained_in(start, end, existing.start, existing.end) {
+                kprint!(
+                    "register_memory_region: [{:08x}-{:08x}) {} is already covered by {} [{:08x}-{:08x}), skipping registration",
+                    start,
+                    end,
+                    name,
+                    existing.name,
+                    existing.start,
+                    existing.end
+                );
+                return;
+            }
+
+            // If there's an overlap but the new region is not contained, reject it
             if range_overlaps(start, end, existing.start, existing.end) {
                 kprint!(
                     "register_memory_region: rejecting [{:08x}-{:08x}) {} due to overlap with {} [{:08x}-{:08x})",
@@ -711,51 +735,148 @@ pub fn unregister_memory_region(start: u32, end: u32) {
     }
 }
 
+/// Check if a user address range is valid and return the maximum safe length
+/// Returns Some(max_len) if valid, where max_len is the maximum number of bytes
+/// that can be safely accessed from addr. Returns None if invalid.
+/// If the range is fully contained, max_len will be the requested len.
+/// If the range extends beyond a region, max_len will be the available bytes in that region.
 #[allow(dead_code)]
-pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> bool {
+pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> Option<usize> {
     use crate::constants::{KERNEL_SPACE_START, USER_MEMORY_START_PTR, USER_SPACE_END};
 
     if len == 0 {
-        return true;
+        return Some(0);
     }
 
     if addr < USER_MEMORY_START_PTR as u32 {
-        return false;
+        kprint!(
+            "is_valid_user_address: addr={:08x} len={} below USER_MEMORY_START ({:08x})",
+            addr,
+            len,
+            USER_MEMORY_START_PTR as u32
+        );
+        return None;
     }
 
     let end_addr = match addr.checked_add(len as u32) {
         Some(val) => val,
-        None => return false,
+        None => {
+            kprint!(
+                "is_valid_user_address: addr={:08x} len={} overflow",
+                addr,
+                len
+            );
+            return None;
+        }
     };
 
     if end_addr > USER_SPACE_END {
-        return false;
+        kprint!(
+            "is_valid_user_address: addr={:08x} len={} end={:08x} exceeds USER_SPACE_END ({:08x})",
+            addr,
+            len,
+            end_addr,
+            USER_SPACE_END
+        );
+        return None;
     }
 
     if addr >= KERNEL_SPACE_START || end_addr > KERNEL_SPACE_START {
-        return false;
+        kprint!(
+            "is_valid_user_address: addr={:08x} len={} end={:08x} in kernel space (>= {:08x})",
+            addr,
+            len,
+            end_addr,
+            KERNEL_SPACE_START
+        );
+        return None;
     }
 
     unsafe {
+        // Dump all registered regions for debugging
+        let region_count = MEMORY_REGION_COUNT;
+        kprint!(
+            "is_valid_user_address: checking addr={:08x} len={} end={:08x} require_write={}, {} regions registered:",
+            addr,
+            len,
+            end_addr,
+            require_write,
+            region_count
+        );
         let mut idx = 0;
-        while idx < MEMORY_REGION_COUNT {
+        while idx < region_count {
             let region = &MEMORY_REGIONS[idx];
-            if region.contains_range(addr, len) {
-                return if require_write {
-                    region.writable
-                } else {
-                    region.readable
-                };
+            if !region.is_empty() {
+                let contains = region.contains_range(addr, len);
+                // Also check if the start address is in the region (for cases where range extends slightly beyond)
+                let start_in_region = region.contains(addr);
+                kprint!(
+                    "  [{:08x}-{:08x}) {} r:{} w:{} x:{} {}",
+                    region.start,
+                    region.end,
+                    region.name,
+                    region.readable,
+                    region.writable,
+                    region.executable,
+                    if contains {
+                        "<- FULLY CONTAINS"
+                    } else if start_in_region {
+                        "<- START IN REGION"
+                    } else {
+                        ""
+                    }
+                );
+                // Accept if fully contained, or if start is in region (allows slight overflow for stack/heap)
+                if contains || start_in_region {
+                    let valid = if require_write {
+                        region.writable
+                    } else {
+                        region.readable
+                    };
+                    if !valid {
+                        kprint!(
+                            "is_valid_user_address: INVALID (require_write={}, region.writable={}, region.readable={})",
+                            require_write,
+                            region.writable,
+                            region.readable
+                        );
+                        return None;
+                    }
+
+                    // Calculate maximum safe length
+                    let max_len = if contains {
+                        // Fully contained - can use full requested length
+                        len
+                    } else {
+                        // Start in region but extends beyond - calculate available bytes
+                        let available_bytes = (region.end - addr) as usize;
+                        core::cmp::min(len, available_bytes)
+                    };
+
+                    kprint!(
+                        "is_valid_user_address: VALID up to {} bytes (requested={}, fully_contained={})",
+                        max_len,
+                        len,
+                        contains
+                    );
+                    return Some(max_len);
+                }
             }
             idx += 1;
         }
 
         if MEMORY_REGION_COUNT == 0 {
-            return true;
+            kprint!("is_valid_user_address: no regions registered, allowing access");
+            return Some(len);
         }
     }
 
-    false
+    kprint!(
+        "is_valid_user_address: addr={:08x} len={} not found in any region",
+        addr,
+        len
+    );
+    None
 }
 
 #[allow(dead_code)]
