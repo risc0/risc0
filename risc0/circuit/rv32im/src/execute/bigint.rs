@@ -146,6 +146,10 @@ pub(crate) struct BigIntExec {
     pub(crate) witness: BigIntWitness,
 }
 
+// TODO(victor/perf): This function is taking ~218ms of trace time, which seems high. Most of that
+// is spent in `Arc::make_mut` which is probably copying pages. Some time (not a ton) in this
+// function is also claimed to be from deallocating btree nodes. What seems relevant from that is
+// that its possible this is contributing to churn on the heap.
 fn write_witness_to_memory(witness: BigIntWitness, ctx: &mut impl Risc0Context) -> Result<()> {
     for (addr, bytes) in witness {
         for (i, chunk) in bytes.chunks_exact(WORD_SIZE).enumerate() {
