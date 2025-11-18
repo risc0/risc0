@@ -5971,44 +5971,6 @@ pub fn sys_statx(
         return Err(Err::NoSys);
     }
 
-    // let's print the filename we're trying to stat, it's a u32 pointer
-    // we need to search for the null-terminator
-    // XXX this is ugly
-    kprint!("sys_statx: _statxbuf = {:08x}", _statxbuf);
-    let filename = unsafe { core::slice::from_raw_parts(_filename as *const u8, 256) };
-    let null_pos = filename.iter().position(|&b| b == 0).unwrap();
-    let filename = &filename[..null_pos];
-    // convert the filename, it's a 0-terminated utf-8 string
-    let filename = str::from_utf8(filename).unwrap();
-    kprint!("sys_statx: filename = {}", filename);
-
-    // Check if this is a virtual device file and handle it directly
-    if let Some(virtual_fid) = get_virtual_device_fid(filename) {
-        kprint!("sys_statx: statting virtual device: {}", filename);
-
-        let statx = create_virtual_device_statx(virtual_fid);
-
-        // Write the statx structure to the user buffer using copy_to_user
-        let statx_bytes = unsafe {
-            core::slice::from_raw_parts(
-                &statx as *const Statx as *const u8,
-                core::mem::size_of::<Statx>(),
-            )
-        };
-        let bytes_copied = crate::kernel::copy_to_user(
-            _statxbuf as *mut u8,
-            statx_bytes.as_ptr(),
-            core::mem::size_of::<Statx>(),
-        );
-        if bytes_copied == 0 {
-            kprint!("sys_statx: failed to copy statx structure to user memory");
-            return Err(Err::Fault);
-        }
-
-        kprint!("sys_statx: successfully filled statx buffer for virtual device");
-        return Ok(0);
-    }
-
     // AT_EMPTY_PATH flag (0x1000) - if filename is empty, stat the fd itself
     const AT_EMPTY_PATH: u32 = 0x1000;
     const AT_SYMLINK_NOFOLLOW: u32 = 0x100;
@@ -6025,17 +5987,53 @@ pub fn sys_statx(
         return Err(Err::Inval);
     }
 
-    if (_flags & AT_EMPTY_PATH) != 0 && _dfd < 3 {
-        // FIXME this doesn't return a statx buffer, it returns 0
-        return Ok(0);
+    // Validate mask - check for invalid bits
+    // Valid mask bits: STATX_BASIC_STATS (0x7ff) | STATX_BTIME (0x800) | STATX_MNT_ID (0x1000) | STATX_DIOALIGN (0x2000) | STATX_RESERVED (0x80000000)
+    const VALID_MASK_BITS: u32 = 0x80003fff;
+    if (_mask & !VALID_MASK_BITS) != 0 {
+        kprint!("sys_statx: invalid mask 0x{:x}", _mask);
+        return Err(Err::Inval);
     }
-    let target_fid = if (_flags & AT_EMPTY_PATH) != 0 && filename.is_empty() {
-        // Stat the file descriptor itself
+
+    // Validate statxbuf pointer early - must be writable
+    if _statxbuf == 0 {
+        kprint!("sys_statx: _statxbuf is NULL");
+        return Err(Err::Fault);
+    }
+    let statx_size = core::mem::size_of::<Statx>();
+    if crate::linux_abi::is_valid_user_address(_statxbuf, statx_size, true).is_none() {
+        kprint!("sys_statx: _statxbuf {:08x} is not writable", _statxbuf);
+        return Err(Err::Fault);
+    }
+
+    const MAX_PATH_LEN: usize = 256;
+
+    // Handle AT_EMPTY_PATH early - the pathname is ignored in this mode
+    if (_flags & AT_EMPTY_PATH) != 0 {
+        if _dfd >= 256 {
+            kprint!(
+                "sys_statx: AT_EMPTY_PATH set but dfd {} is out of range",
+                _dfd
+            );
+            return Err(Err::BadFd);
+        }
+
+        if _filename != 0 {
+            let filename_str = validate_and_read_pathname_with_len(_filename, MAX_PATH_LEN)?;
+            if !filename_str.is_empty() {
+                kprint!(
+                    "sys_statx: AT_EMPTY_PATH set but filename '{}' is not empty",
+                    filename_str
+                );
+                return Err(Err::Inval);
+            }
+        }
+
         kprint!("sys_statx: AT_EMPTY_PATH set, statting fd {}", _dfd);
         let fd_entry = get_fd(_dfd);
         if fd_entry.file_desc_id == 0xFF {
             kprint!("sys_statx: invalid fd {}", _dfd);
-            return Err(Err::Inval);
+            return Err(Err::BadFd);
         }
         let file_desc = get_file_desc(fd_entry.file_desc_id);
 
@@ -6065,72 +6063,74 @@ pub fn sys_statx(
             return Ok(0);
         }
 
-        file_desc.fid
-    } else if (_flags & AT_SYMLINK_NOFOLLOW) != 0 {
-        // Don't follow symlinks - use Twalk directly on the final component
-        kprint!("sys_statx: AT_SYMLINK_NOFOLLOW set, not following symlinks");
-        let starting_fid = get_starting_fid(_dfd, filename)?;
-        let (dir_path, file_name) = split_path(filename);
+        // Use the fd's FID for regular files
+        let target_fid = file_desc.fid;
+        let tgetattr = crate::p9::TgetattrMessage::new(0, target_fid, P9_GETATTR_ALL);
+        match tgetattr.send_tgetattr() {
+            Ok(P9Response::Success(rgetattr)) => {
+                kprint!("sys_statx: rgetattr = {:?}", rgetattr);
 
-        // For relative paths, use the dfd directly as the directory
-        let dir_fid = if dir_path.is_empty() || dir_path == "." {
-            starting_fid
-        } else {
-            let dir_path = normalize_path(&dir_path);
-            do_walk(starting_fid, TEMP_FID_4, dir_path)?;
-            TEMP_FID_4
-        };
+                // Convert 9P RgetattrMessage to Linux statx structure
+                let statx = convert_rgetattr_to_statx(&rgetattr);
 
-        // Walk to the final component without following symlinks
-        let file_path = vec![file_name];
-        let twalk = crate::p9::TwalkMessage::new(0, dir_fid, TEMP_FID_1, file_path);
-        match twalk.send_twalk() {
-            Ok(P9Response::Success(rwalk)) => {
-                if rwalk.wqids.len() != 1 {
-                    clunk(TEMP_FID_1, false);
-                    if dir_fid != starting_fid {
-                        clunk(dir_fid, false);
-                    }
-                    return Err(Err::FileNotFound);
+                // Write the statx structure to the user buffer using copy_to_user
+                let statx_bytes = unsafe {
+                    core::slice::from_raw_parts(
+                        &statx as *const Statx as *const u8,
+                        core::mem::size_of::<Statx>(),
+                    )
+                };
+                let bytes_copied = crate::kernel::copy_to_user(
+                    _statxbuf as *mut u8,
+                    statx_bytes.as_ptr(),
+                    core::mem::size_of::<Statx>(),
+                );
+                if bytes_copied == 0 {
+                    kprint!("sys_statx: failed to copy statx structure to user memory");
+                    return Err(Err::Fault);
                 }
-                // Clean up directory fid if we allocated one
-                if dir_fid != starting_fid {
-                    clunk(dir_fid, false);
-                }
+
+                kprint!("sys_statx: successfully filled statx buffer");
+                Ok(0) // Success
             }
-            Ok(P9Response::Error(_)) => {
-                if dir_fid != starting_fid {
-                    clunk(dir_fid, false);
-                }
-                return Err(Err::FileNotFound);
+            Ok(P9Response::Error(rlerror)) => {
+                kprint!(
+                    "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
+                    rlerror.tag,
+                    rlerror.ecode
+                );
+                Err(map_p9_error(rlerror.ecode))
             }
-            Err(_) => {
-                if dir_fid != starting_fid {
-                    clunk(dir_fid, false);
-                }
-                return Err(Err::NoSys);
+            Err(e) => {
+                kprint!("sys_statx: error = {:?}", e);
+                Err(Err::NoSys)
             }
         }
-        TEMP_FID_1
     } else {
-        // Normal path resolution (follows symlinks)
-        // Use temp fids that don't conflict with CWD (TEMP_FID_2)
-        let starting_fid = get_starting_fid(_dfd, filename)?;
-        let (dir_path, file_name) = split_path(filename);
-        let dir_path = normalize_path(&dir_path);
-        do_walk(starting_fid, TEMP_FID_4, dir_path)?;
-        resolve_file_to_fid(TEMP_FID_4, TEMP_FID_1, &file_name)?;
-        clunk(TEMP_FID_4, false); // Clean up directory fid
-        TEMP_FID_1
-    };
+        // Normal path - parse filename
+        kprint!(
+            "sys_statx: _dfd={}, _mask=0x{:x}, _statxbuf = {:08x}",
+            _dfd,
+            _mask,
+            _statxbuf
+        );
+        if _filename == 0 {
+            return Err(Err::Fault);
+        }
+        let filename = validate_and_read_pathname_with_len(_filename, MAX_PATH_LEN)?;
+        kprint!("sys_statx: filename = {}", filename);
 
-    let tgetattr = crate::p9::TgetattrMessage::new(0, target_fid, P9_GETATTR_ALL);
-    match tgetattr.send_tgetattr() {
-        Ok(P9Response::Success(rgetattr)) => {
-            kprint!("sys_statx: rgetattr = {:?}", rgetattr);
+        // Empty filename without AT_EMPTY_PATH is invalid
+        if filename.is_empty() {
+            kprint!("sys_statx: empty filename without AT_EMPTY_PATH");
+            return Err(Err::FileNotFound);
+        }
 
-            // Convert 9P RgetattrMessage to Linux statx structure
-            let statx = convert_rgetattr_to_statx(&rgetattr);
+        // Check if this is a virtual device file and handle it directly
+        if let Some(virtual_fid) = get_virtual_device_fid(&filename) {
+            kprint!("sys_statx: statting virtual device: {}", filename);
+
+            let statx = create_virtual_device_statx(virtual_fid);
 
             // Write the statx structure to the user buffer using copy_to_user
             let statx_bytes = unsafe {
@@ -6146,32 +6146,120 @@ pub fn sys_statx(
             );
             if bytes_copied == 0 {
                 kprint!("sys_statx: failed to copy statx structure to user memory");
-                return Err(Err::NoSys);
+                return Err(Err::Fault);
             }
 
-            kprint!("sys_statx: successfully filled statx buffer");
-            if target_fid == TEMP_FID_1 {
-                clunk(TEMP_FID_1, false);
-            }
-            Ok(0) // Success
+            kprint!("sys_statx: successfully filled statx buffer for virtual device");
+            return Ok(0);
         }
-        Ok(P9Response::Error(rlerror)) => {
-            kprint!(
-                "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
-                rlerror.tag,
-                rlerror.ecode
-            );
-            if target_fid == TEMP_FID_1 {
-                clunk(TEMP_FID_1, false);
+
+        let target_fid = if (_flags & AT_SYMLINK_NOFOLLOW) != 0 {
+            // Don't follow symlinks - use Twalk directly on the final component
+            kprint!("sys_statx: AT_SYMLINK_NOFOLLOW set, not following symlinks");
+            let starting_fid = get_starting_fid(_dfd, &filename)?;
+            let (dir_path, file_name) = split_path(&filename);
+
+            // For relative paths, use the dfd directly as the directory
+            let dir_fid = if dir_path.is_empty() || dir_path == "." {
+                starting_fid
+            } else {
+                let dir_path = normalize_path(&dir_path);
+                do_walk(starting_fid, TEMP_FID_4, dir_path)?;
+                TEMP_FID_4
+            };
+
+            // Walk to the final component without following symlinks
+            let file_path = vec![file_name];
+            let twalk = crate::p9::TwalkMessage::new(0, dir_fid, TEMP_FID_1, file_path);
+            match twalk.send_twalk() {
+                Ok(P9Response::Success(rwalk)) => {
+                    if rwalk.wqids.len() != 1 {
+                        clunk(TEMP_FID_1, false);
+                        if dir_fid != starting_fid {
+                            clunk(dir_fid, false);
+                        }
+                        return Err(Err::FileNotFound);
+                    }
+                    // Clean up directory fid if we allocated one
+                    if dir_fid != starting_fid {
+                        clunk(dir_fid, false);
+                    }
+                }
+                Ok(P9Response::Error(_)) => {
+                    if dir_fid != starting_fid {
+                        clunk(dir_fid, false);
+                    }
+                    return Err(Err::FileNotFound);
+                }
+                Err(_) => {
+                    if dir_fid != starting_fid {
+                        clunk(dir_fid, false);
+                    }
+                    return Err(Err::NoSys);
+                }
             }
-            Err(map_p9_error(rlerror.ecode))
-        }
-        Err(e) => {
-            kprint!("sys_statx: error = {:?}", e);
-            if target_fid == TEMP_FID_1 {
-                clunk(TEMP_FID_1, false);
+            TEMP_FID_1
+        } else {
+            // Normal path resolution (follows symlinks)
+            // Use temp fids that don't conflict with CWD (TEMP_FID_2)
+            let starting_fid = get_starting_fid(_dfd, &filename)?;
+            let (dir_path, file_name) = split_path(&filename);
+            let dir_path = normalize_path(&dir_path);
+            do_walk(starting_fid, TEMP_FID_4, dir_path)?;
+            resolve_file_to_fid(TEMP_FID_4, TEMP_FID_1, &file_name)?;
+            clunk(TEMP_FID_4, false); // Clean up directory fid
+            TEMP_FID_1
+        };
+
+        let tgetattr = crate::p9::TgetattrMessage::new(0, target_fid, P9_GETATTR_ALL);
+        match tgetattr.send_tgetattr() {
+            Ok(P9Response::Success(rgetattr)) => {
+                kprint!("sys_statx: rgetattr = {:?}", rgetattr);
+
+                // Convert 9P RgetattrMessage to Linux statx structure
+                let statx = convert_rgetattr_to_statx(&rgetattr);
+
+                // Write the statx structure to the user buffer using copy_to_user
+                let statx_bytes = unsafe {
+                    core::slice::from_raw_parts(
+                        &statx as *const Statx as *const u8,
+                        core::mem::size_of::<Statx>(),
+                    )
+                };
+                let bytes_copied = crate::kernel::copy_to_user(
+                    _statxbuf as *mut u8,
+                    statx_bytes.as_ptr(),
+                    core::mem::size_of::<Statx>(),
+                );
+                if bytes_copied == 0 {
+                    kprint!("sys_statx: failed to copy statx structure to user memory");
+                    return Err(Err::Fault);
+                }
+
+                kprint!("sys_statx: successfully filled statx buffer");
+                if target_fid == TEMP_FID_1 {
+                    clunk(TEMP_FID_1, false);
+                }
+                Ok(0) // Success
             }
-            Err(Err::NoSys)
+            Ok(P9Response::Error(rlerror)) => {
+                kprint!(
+                    "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
+                    rlerror.tag,
+                    rlerror.ecode
+                );
+                if target_fid == TEMP_FID_1 {
+                    clunk(TEMP_FID_1, false);
+                }
+                Err(map_p9_error(rlerror.ecode))
+            }
+            Err(e) => {
+                kprint!("sys_statx: error = {:?}", e);
+                if target_fid == TEMP_FID_1 {
+                    clunk(TEMP_FID_1, false);
+                }
+                Err(Err::NoSys)
+            }
         }
     }
 }
