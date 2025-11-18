@@ -1,7 +1,8 @@
 *.id binary
 *.iid binary
+*.xz filter=lfs diff=lfs merge=lfs -text
 *.zip -text
+*.zkr filter=lfs diff=lfs merge=lfs -text
 groth16_proof/groth16/stark_verify.circom filter=lfs diff=lfs merge=lfs -text
-risc0/circuit/hello-m3/src/testdata/hello_lift_12.zkr filter=lfs diff=lfs merge=lfs -text
 risc0/circuit/hello-m3/src/testdata/proof.bin filter=lfs diff=lfs merge=lfs -text
 risc0/circuit/recursion/src/recursion_zkr.zip filter=lfs diff=lfs merge=lfs -text

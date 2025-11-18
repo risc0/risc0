@@ -89,6 +89,9 @@ jobs:
     runs-on: [self-hosted, cluster, Linux, X64, cpu]
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
@@ -113,6 +116,9 @@ jobs:
     runs-on: [self-hosted, cluster, Linux, X64, cpu]
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
