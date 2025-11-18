@@ -51,6 +51,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
 
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
