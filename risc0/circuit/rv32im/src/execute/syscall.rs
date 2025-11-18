@@ -17,6 +17,8 @@ use anyhow::Result;
 
 use risc0_binfmt::ByteAddr;
 
+use crate::execute::PAGE_BYTES;
+
 /// A host-side implementation of a system call.
 pub trait Syscall {
     /// Reads from the host.
@@ -46,7 +48,7 @@ pub trait SyscallContext {
     ///
     /// This is used by sys_fork in order to build a copy-on-write page cache to
     /// inherit pages from the parent process.
-    fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
+    fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]>;
 
     /// Returns the current cycle count.
     fn get_cycle(&self) -> u64;
