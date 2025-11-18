@@ -462,11 +462,9 @@ impl PagedMemory {
     }
 
     pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<&Page> {
-        // Registers are not stored in the main RAM during execution. If the page containing the
-        // memory mapped registers is requested, then they must first be written to RAM.
-        if page_idx == USER_REGS_ADDR.page_idx() || page_idx == MACHINE_REGS_ADDR.page_idx() {
-            self.write_registers()
-        }
+        // TODO(victor): When the system page is requested, the register values returned will be
+        // incorrect. We cannot cannot call write_registers here, because it throughs off the
+        // current cycle counting logic.
         if let Some(cache_idx) = self.page_table.get(page_idx) {
             // Loaded, get from cache
             Ok(&self.page_cache[cache_idx])
@@ -520,11 +518,9 @@ impl PagedMemory {
 
     #[inline(always)]
     pub(crate) fn load_page(&mut self, page_idx: u32) -> Result<&Page> {
-        // Registers are not stored in the main RAM during execution. If the page containing the
-        // memory mapped registers is requested, then they must first be written to RAM.
-        if page_idx == USER_REGS_ADDR.page_idx() || page_idx == MACHINE_REGS_ADDR.page_idx() {
-            self.write_registers()
-        }
+        // TODO(victor): When the system page is requested, the register values returned will be
+        // incorrect. We cannot cannot call write_registers here, because it throughs off the
+        // current cycle counting logic.
         let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
             cache_idx
         } else {
