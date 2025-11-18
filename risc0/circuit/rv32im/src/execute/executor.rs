@@ -22,7 +22,7 @@ use std::{
     thread::{self, ScopedJoinHandle},
 };
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result, bail, ensure};
 use enum_map::EnumMap;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
@@ -349,6 +349,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         segment_po2: usize,
         segment_threshold: u32,
     ) -> Result<()> {
+        ensure!(
+            self.segment_cycles() <= 1 << segment_po2,
+            "Segment split cycles exceeds the chosen segment size"
+        );
         tracing::debug!(
             "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
             self.user_cycles,
@@ -394,6 +398,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let total_cycles = 1 << segment_po2;
         let pager_cycles = self.pager.cycles as u64;
         let user_cycles = self.user_cycles as u64;
+
         self.cycles.total += total_cycles;
         self.cycles.paging += pager_cycles;
         self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
