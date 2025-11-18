@@ -659,6 +659,7 @@ struct Emulator {
     if (doBr) {
       newPc = pc + wit.imm;
     }
+    bbhit[newPc]++;
     DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{rs1Val});
     DLOG("  RS2 = " << uint32_t(dinst->rs2) << ", val = " << HexWord{rs2Val});
     DLOG("  NEW PC = " << HexWord{newPc});
@@ -673,6 +674,7 @@ struct Emulator {
     writeReg(wit.rd, dinst->rd, newPc);
     wit.imm = dinst->imm;
     newPc = pc + wit.imm;
+    bbhit[newPc]++;
     DLOG("  RD = " << uint32_t(dinst->rd) << ", val = " << HexWord{wit.rd.value});
     DLOG("  PC = " << HexWord{pc});
   }
@@ -686,6 +688,7 @@ struct Emulator {
     writeReg(wit.rd, dinst->rd, newPc);
     wit.imm = dinst->imm;
     newPc = rs1Val + wit.imm;
+    bbhit[newPc]++;
     DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{wit.rs1.value});
     DLOG("  RD = " << uint32_t(dinst->rd) << ", val = " << HexWord{wit.rd.value});
     DLOG("  PC = " << HexWord{pc});
@@ -713,6 +716,7 @@ struct Emulator {
   template <uint32_t opt> inline void do_INST_ECALL() {
     if (mode != MODE_MACHINE) {
       trap("ECALL", TRAP_ECALL);
+      bbhit[newPc]++;
       return;
     }
     uint32_t which = peekReg(REG_A7);
@@ -749,6 +753,7 @@ struct Emulator {
     uint32_t add = v2Compat ? 4 : 0;
     uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
     newPc = readPhysMemory(wit.readPc, mepcWord) + add;
+    bbhit[newPc]++;
     uint32_t newMode = readPhysMemory(wit.readMode, CSR_WORD(MEMODE));
     writePhysMemory(wit.updateClearCache, CSR_WORD(MCLEARCACHE), 0);
     if (wit.updateClearCache.prevValue) {
@@ -1063,7 +1068,6 @@ struct Emulator {
       }
       if (mode != MODE_MACHINE) {
         if (countdown == 0) {
-          LOG(0, "Firing timer");
           makeNoDecodeTrap(TRAP_INTER);
           continue;
         }
@@ -1126,7 +1130,19 @@ struct Emulator {
     }
   }
 
-  void commit() { memory.commit(pages); }
+  void commit() { 
+    memory.commit(pages);
+    std::map<uint32_t, uint32_t> uniqCount;
+    std::map<uint32_t, uint32_t> totCount;
+    for(const auto& kvp : bbhit) {
+      uint32_t po2 = log2Ceil(kvp.second);
+      uniqCount[po2]++;
+      totCount[po2] += kvp.second;
+    }
+    for (size_t i = 0; i < 20; i++) {
+      LOG(0, "PO2 " << i << ", uniq = " << uniqCount[i] << ", tot = " << totCount[i]);
+    }
+  }
 
   // The trace
   Trace& trace;
@@ -1142,6 +1158,8 @@ struct Emulator {
   PageDetails* regPage;
   ankerl::unordered_dense::map<std::pair<uint32_t, uint32_t>, DecodeWitness*> instCache;
 
+  std::map<uint32_t, uint32_t> bbhit;
+
   // Machine state
   bool v2Compat = true;
   bool done = false;
@@ -1151,7 +1169,7 @@ struct Emulator {
   uint32_t mode = 0;
   uint32_t pc = 0;
   uint32_t newPc = 0;
-  int32_t countdown = 0x7fffffff;;
+  int32_t countdown = 0x7fffffff;
   DecodeWitness* dinst;
   bool debug = false;
 };

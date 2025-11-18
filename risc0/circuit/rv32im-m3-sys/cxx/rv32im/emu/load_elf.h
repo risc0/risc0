@@ -31,7 +31,7 @@ void fillExpandTable(std::map<uint32_t, uint32_t>& words);
 uint32_t loadRaw(std::map<uint32_t, uint32_t>& words, const std::string& elf);
 
 // Loads as only a machine mode kernel for machine mode test
-void loadKernelV2(std::map<uint32_t, uint32_t>& words, const std::string& elf);
+uint32_t loadKernelV2(std::map<uint32_t, uint32_t>& words, const std::string& elf);
 
 // Loads for UM kernel mode tests
 void loadUserMachineV2(std::map<uint32_t, uint32_t>& words,

@@ -36,12 +36,13 @@ uint32_t loadRaw(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
   return risc0::loadElf(ArrayRef(elfBytes.data(), elfBytes.size()), words);
 }
 
-void loadKernelV2(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
+uint32_t loadKernelV2(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
   auto elfBytes = risc0::loadFile(elf);
   uint32_t entry = risc0::loadElf(ArrayRef(elfBytes.data(), elfBytes.size()), words);
   words[V2_COMPAT_SPC] = entry;
   words[V2_COMPAT_SMODE] = 1;
   fillExpandTable(words);
+  return entry;
 }
 
 void loadUserMachineV2(std::map<uint32_t, uint32_t>& words,

@@ -1,0 +1,13 @@
+cc_binary(
+    name = "jit",
+    srcs = [
+        "jit.cpp",
+    ],
+    deps = [
+        "//rv32im/emu",
+    ],
+    data = [
+        "//rv32im/rvtest:riscv_test_bins",
+        "//rv32im/test:asm_loop_kernel",
+    ],
+)

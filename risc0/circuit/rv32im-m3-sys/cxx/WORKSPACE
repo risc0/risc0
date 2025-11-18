@@ -191,3 +191,10 @@ http_archive(
     strip_prefix = "bazel_clang_format-0.0.1",
     urls = ["https://github.com/oliverlee/bazel_clang_format/archive/refs/tags/0.0.1.tar.gz"],
 )
+
+git_repository(
+    name = "asmjit",
+    build_file = "//bazel/third_party:asmjit.BUILD",
+    commit = "b56f4176cb9b0c0501da659ac54d4c5877862c7b",
+    remote = "https://github.com/asmjit/asmjit.git",
+)
