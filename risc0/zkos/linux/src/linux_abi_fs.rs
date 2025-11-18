@@ -1301,11 +1301,7 @@ pub fn sys_writev(fd: u32, vec_ptr: u32, vlen: u32) -> Result<u32, Err> {
 
     // Validate each iovec entry's buffer is readable
     for (i, iov) in vec.iter().enumerate() {
-        if iov.iov_len == 0 {
-            continue;
-        }
-        validate_user_buffer_read(iov.iov_base as u32, iov.iov_len)?;
-        // Check for unreasonable lengths
+        // Check for unreasonable lengths first (captures negative lengths represented as large usize)
         if iov.iov_len > (isize::MAX as usize) {
             kprint!(
                 "sys_writev: iovec[{}] has invalid length {}",
@@ -1314,6 +1310,10 @@ pub fn sys_writev(fd: u32, vec_ptr: u32, vlen: u32) -> Result<u32, Err> {
             );
             return Err(Err::Inval);
         }
+        if iov.iov_len == 0 {
+            continue;
+        }
+        validate_user_buffer_read(iov.iov_base as u32, iov.iov_len)?;
     }
 
     let mut total: usize = 0;
@@ -4073,17 +4073,17 @@ pub fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
     // Validate each iovec entry's buffer
     let mut total_len: usize = 0;
     for (i, iov) in iovecs.iter().enumerate() {
-        if iov.iov_len == 0 {
-            continue;
-        }
-        // Validate each buffer is in writable user memory (for read operations)
-        validate_user_buffer_write(iov.iov_base as u32, iov.iov_len)?;
         // Check for negative length (iov_len is usize, so check if it's suspiciously large)
         // A negative isize (-1) would appear as usize::MAX
         if iov.iov_len > (isize::MAX as usize) {
             kprint!("sys_readv: iovec[{}] has invalid length {}", i, iov.iov_len);
             return Err(Err::Inval);
         }
+        if iov.iov_len == 0 {
+            continue;
+        }
+        // Validate each buffer is in writable user memory (for read operations)
+        validate_user_buffer_write(iov.iov_base as u32, iov.iov_len)?;
 
         // Buffer validation already done above in the loop
 
