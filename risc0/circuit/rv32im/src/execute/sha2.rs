@@ -99,6 +99,7 @@ pub fn ecall(ctx: &mut impl Risc0Context) -> Result<()> {
         ctx.store_u32(sha2.state_out_addr + 7u32 - i, e)?;
     }
 
+    // HERE!
     while sha2.count != 0 {
         for i in 0..SHA2_LOAD_DATA_CYCLES {
             sha2.round = i;
