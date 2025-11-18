@@ -595,7 +595,8 @@ impl PagedMemory {
         let user_registers = self.user_registers;
         let machine_registers = self.machine_registers;
         // This works because we can assume that user and machine register files
-        // live in the same page.
+        // live in the same page. This is a compile-time assertion that this is true.
+        const _: () = assert!(USER_REGS_ADDR.page_idx() == MACHINE_REGS_ADDR.page_idx());
         let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
         let page = self.page_for_writing(page_idx).unwrap();
         for idx in 0..REG_MAX {
