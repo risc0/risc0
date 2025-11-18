@@ -53,3 +53,16 @@ void picusCall(RecordingContext& ctx,
   builder.create<zirgen::Zhlt::ConstructOp>(
       builder.getUnknownLoc(), name, compType, arguments, layout);
 }
+
+void picusArgument(RecordingContext& ctx,
+                   llvm::ArrayRef<Value> inputs,
+                   llvm::ArrayRef<Value> outputs) {
+  OpBuilder& builder = *BuilderSingleton::get();
+  Location loc = builder.getUnknownLoc();
+
+  llvm::SmallVector<mlir::Value> operands;
+  operands.append(inputs.begin(), inputs.end());
+  operands.append(outputs.begin(), outputs.end());
+  auto dir = builder.create<zirgen::Zhlt::DirectiveOp>(loc, "PicusDeterministicIf", operands);
+  dir->setAttr("input_count", builder.getUI32IntegerAttr(inputs.size()));
+}
