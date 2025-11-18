@@ -22,6 +22,10 @@ template <typename C> FDEV void FetchBlock<C>::set(CTX, FetchWitness witness, Va
   ctx.tableAdd(256 + 65536 + cycleDiff * 2, 1);
 }
 
+template <typename C> FDEV void FetchBlock<C>::verify(CTX, Val<C> cycle) DEV {
+  PICUS_ARGUMENT(ctx, {cycle.value}, {ctx.get(loadCycle)});
+}
+
 template <typename C> FDEV void FetchBlock<C>::addArguments(CTX, Val<C> cycle) DEV {
   ctx.pull(LookupArgument<C>(2, (cycle - loadCycle.get()) * 2));
 }

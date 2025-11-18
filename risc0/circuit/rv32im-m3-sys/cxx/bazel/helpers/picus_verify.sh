@@ -22,6 +22,5 @@ ah start-picus-v2-task \
     --solver multi-solver \
     --solver-timeout 2000 \
     --assume-deterministic CycleCounter \
-    --enable-debug \
     --wait # > picus_output.log
 # grep -q "Verification result for module Top is: verified" picus_output.log

@@ -18,6 +18,21 @@
 #define GLOBAL_GET(member) ctx.globalGet(GLOBAL_OFFSET(member))
 #define GLOBAL_SET(member, val) ctx.globalSet(GLOBAL_OFFSET(member), (val))
 
+#define CPU_STATE_ARGUMENT(ctx, cycle, pc, mode, iCacheCycle) \
+    PICUS_ARGUMENT(ctx, \
+                  ({}), \
+                  ({ctx.get(cycle), ctx.get(pc), ctx.get(mode), ctx.get(iCacheCycle)}))
+
+#define DECODE_ARGUMENT(ctx, iCacheCycle, pc, nextPc, rs1, rs2, rd, optOut, outIdx) \
+    PICUS_ARGUMENT(ctx, \
+                  ({ctx.get(iCacheCycle), ctx.get(pc)}), \
+                  ({ctx.get(nextPc), ctx.get(rs1), ctx.get(rs2), ctx.get(rd), ctx.get(optOut), ctx.get(outIdx)}))
+
+#define UNIT_ARGUMENT(ctx, optOut, a, b, out0, out1) \
+    PICUS_ARGUMENT(ctx, \
+                   ({ctx.get(optOut), ctx.get(a), ctx.get(b)}), \
+                   ({ctx.get(out0), ctx.get(out1)}))
+
 template <typename C> FDEV void InstResumeBlock<C>::set(CTX, InstResumeWitness wit) DEV {
   readV2Compat.set(ctx, wit.v2Compat, 1);
   readPc.set(ctx, wit.pc, 1);
@@ -126,9 +141,22 @@ DualReg<C>::set(CTX, RegMemReadWitness rs1Wit, RegMemReadWitness rs2Wit, uint32_
 
 template <typename C> FDEV void DualReg<C>::verify(CTX, Val<C> cycle, Val<C> mode) DEV {
   Val<C> isMM = (mode - MODE_USER) * (mode - MODE_SUPERVISOR) * Val<C>(inv(Fp(6)));
+
+  // Compute the address of the registers in the current privilege level
   EQ(cond<C>(isMM, MACHINE_REGS_WORD, USER_REGS_WORD) + rs1Idx.get(), readRs1.wordAddr.get());
   EQ(cond<C>(isMM, MACHINE_REGS_WORD, USER_REGS_WORD) + sameReg.get() * 64 + rs2Idx.get(),
      readRs2.wordAddr.get());
+
+  // There can be only one read from a memory location per cycle, and so if rs1
+  // is the same as rs2, we need to coalesce the reads. Thus, we track this fact
+  // via the sameReg flag, and select the value of rs2 appropriately. To ensure
+  // that sameReg is constrained appropriately, we have 4 cases to consider:
+  //   rs1 = rs2, sameReg = 0: violates the memory argument
+  //   rs1 = rs2, sameReg = 1: valid
+  //   rs1 != rs2, sameReg = 0: valid
+  //   rs1 != rs2, sameReg = 1: violates the next constraint
+  // PICUS_ASSERT(ctx, (rs1Idx.get() != rs2Idx.get()) || sameReg.get() == 1); // TODO
+  PICUS_INPUT(ctx, sameReg);
   EQZ(sameReg.get() * (rs1Idx.get() - rs2Idx.get()));
   EQ(cond<C>(sameReg.get(), readRs1.data.low.get(), readRs2.data.low.get()), rs2Data.low.get());
   EQ(cond<C>(sameReg.get(), readRs1.data.high.get(), readRs2.data.high.get()), rs2Data.high.get());
@@ -166,6 +194,10 @@ template <typename C> FDEV void InstRegBlock<C>::set(CTX, InstRegWitness wit) DE
 }
 
 template <typename C> FDEV void InstRegBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, dr.rs1Idx, dr.rs2Idx, rd.idx, optOut, outIdx);
+  UNIT_ARGUMENT(ctx, optOut, dr.readRs1.data, dr.readRs2.data, out0, out1);
+
   ValU32<C> out = cond<C>(outIdx.get(), out1.get(), out0.get());
   EQ(out.low, writeRd.data.low.get());
   EQ(out.high, writeRd.data.high.get());
