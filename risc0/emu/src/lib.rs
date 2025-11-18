@@ -212,10 +212,25 @@ enum Loc {
     Zero,
 }
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub enum Size {
+    S8,
+    S16,
+    S32,
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub enum Extend {
+    None,
+    Sign,
+    Zero,
+}
+
+// SystemV C ABI calling conventions
 // callee: rbx, rsp, rbp, r12, r13, r14, r15
 // caller: rax, rdi, rsi, rdx, rcx, r8, r9, r10, r11
 
-// RV x0  (zero)  N/A    -> no storage, synthesize with XOR or load from const 0
+// RV x0  (zero)  N/A    -> always zero
 // RV x1  (ra)    caller -> r13 (callee)
 // RV x2  (sp)    callee -> rsp
 // RV x3  (gp)    N/A    -> memory
@@ -249,25 +264,26 @@ enum Loc {
 // RV x31 (t6)    caller -> memory
 fn map_reg_to_loc(idx: u32) -> Loc {
     // reserved:
-    //   eax: tmp scratch
+    //   eax: scratch/tmp
     //   ebx: ptr to registers mapped in memory
     //   r15: guest base address
+    use GPR::*;
     match idx {
         rv32im_reg::ZERO => Loc::Zero,
-        rv32im_reg::SP => Loc::GPR(GPR::RSP),
-        rv32im_reg::S0 => Loc::GPR(GPR::RBP),
-        rv32im_reg::A0 => Loc::GPR(GPR::RDI),
-        rv32im_reg::A1 => Loc::GPR(GPR::RSI),
-        rv32im_reg::A2 => Loc::GPR(GPR::RDX),
-        rv32im_reg::A3 => Loc::GPR(GPR::RCX),
-        rv32im_reg::A4 => Loc::GPR(GPR::R8),
-        rv32im_reg::A5 => Loc::GPR(GPR::R9),
-        rv32im_reg::A6 => Loc::GPR(GPR::R10),
-        rv32im_reg::A7 => Loc::GPR(GPR::R11),
-        rv32im_reg::S1 => Loc::GPR(GPR::R12),
-        rv32im_reg::RA => Loc::GPR(GPR::R13),
-        rv32im_reg::T0 => Loc::GPR(GPR::R14),
-        idx => Loc::Memory(GPR::RBX, idx as i32 * WORD_SIZE as i32),
+        rv32im_reg::SP => Loc::GPR(RSP),
+        rv32im_reg::S0 => Loc::GPR(RBP),
+        rv32im_reg::A0 => Loc::GPR(RDI),
+        rv32im_reg::A1 => Loc::GPR(RSI),
+        rv32im_reg::A2 => Loc::GPR(RDX),
+        rv32im_reg::A3 => Loc::GPR(RCX),
+        rv32im_reg::A4 => Loc::GPR(R8),
+        rv32im_reg::A5 => Loc::GPR(R9),
+        rv32im_reg::A6 => Loc::GPR(R10),
+        rv32im_reg::A7 => Loc::GPR(R11),
+        rv32im_reg::S1 => Loc::GPR(R12),
+        rv32im_reg::RA => Loc::GPR(R13),
+        rv32im_reg::T0 => Loc::GPR(R14),
+        idx => Loc::Memory(RBX, idx as i32 * WORD_SIZE as i32),
     }
 }
 
@@ -464,14 +480,6 @@ impl<A: DynasmApi> Translator<A> {
         }
     }
 
-    fn load_rs2(&self, insn: &Instruction, rs1: u32) -> Result<u32> {
-        if insn.rs1 == insn.rs2 {
-            Ok(rs1)
-        } else {
-            self.machine.load_register(insn.rs2 as usize)
-        }
-    }
-
     fn emit_binop(&mut self, bop: fn(&mut Self, Loc, Loc), rd: Loc, rs1: Loc, rs2: Loc) {
         // (GPR, GPR, GPR)
         // mov rd, rs1
@@ -608,15 +616,65 @@ impl<A: DynasmApi> Translator<A> {
         });
     }
 
+    fn emit_movzx(&mut self, dst: GPR, src: Loc) {
+        match src {
+            Loc::GPR(src) => emit!(self ; movzx Rd(dst), Rb(src)),
+            Loc::Memory(src, disp) => {
+                emit!(self ; mov Rd(dst), DWORD [Rq(src) + disp])
+            }
+            Loc::Imm8(imm) => emit!(self; mov Rb(dst), imm as i8),
+            Loc::Imm32(imm) => emit!(self; mov Rd(dst), imm as i32),
+            Loc::Zero => emit!(self; xor Rd(dst), Rd(dst)),
+        }
+    }
+
     fn emit_shift(&mut self, op: fn(&mut Self, Loc, Loc), rd: Loc, rs1: Loc, rs2: Loc) {
         // save ecx
+        self.save(GPR::RCX, 0);
+
         let ecx = Loc::GPR(GPR::RCX);
         self.emit_mov(ecx, rs2);
         if rd != rs1 {
             self.emit_mov(rd, rs1);
         }
         op(self, rd, ecx);
+
         // restore ecx
+        self.restore(GPR::RCX, 0);
+    }
+
+    fn emit_setl(&mut self, dst: GPR) {
+        emit!(self ; setl Rb(dst));
+    }
+
+    fn emit_setb(&mut self, dst: GPR) {
+        emit!(self ; setb Rb(dst));
+    }
+
+    fn emit_cmpset(&mut self, op: fn(&mut Self, GPR), rd: Loc, rs1: Loc, rs2: Loc) {
+        match (rs1, rs2) {
+            (Loc::Memory(_, _), Loc::Memory(_, _)) => {
+                let eax = Loc::GPR(GPR::RAX);
+                self.emit_mov(eax, rs1);
+                binop!(self, cmp, eax, rs2, {
+                    panic!("bad cmp");
+                });
+            }
+            _ => {
+                binop!(self, cmp, rs1, rs2, {
+                    panic!("bad cmp");
+                });
+            }
+        }
+        op(self, GPR::RAX);
+        match rd {
+            Loc::GPR(gpr) => emit!(self ; movzx Rd(gpr), al),
+            Loc::Memory(_, _) => {
+                emit!(self ; movzx eax, al);
+                self.emit_mov(rd, Loc::GPR(GPR::RAX));
+            }
+            _ => unreachable!(),
+        }
     }
 
     fn step_compute(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
@@ -659,13 +717,11 @@ impl<A: DynasmApi> Translator<A> {
             }
             RvOp::Slt => {
                 // rd = (rs1 < rs2) ? 1 : 0
-                // if (rs1 as i32) < (rs2 as i32) { 1 } else { 0 }
-                todo!()
+                self.emit_cmpset(Self::emit_setl, rd, rs1, rs2);
             }
             RvOp::SltU => {
                 // rd = (rs1 < rs2) ? 1 : 0 (zero-extends)
-                // if rs1 < rs2 { 1 } else { 0 }
-                todo!()
+                self.emit_cmpset(Self::emit_setb, rd, rs1, rs2);
             }
             RvOp::AddI => {
                 // rd = rs1 + imm
@@ -699,26 +755,21 @@ impl<A: DynasmApi> Translator<A> {
                 self.emit_shift(Self::emit_sar, rd, rs1, Loc::Imm8(imm as u8));
             }
             RvOp::SltI => {
-                // if (rs1 as i32) < (imm_i as i32) {
-                //     1
-                // } else {
-                //     0
-                // }
-                todo!()
+                // rd = (rs1 < imm) ? 1 : 0
+                let imm = insn.imm_i() as i32 as u32;
+                self.emit_cmpset(Self::emit_setl, rd, rs1, Loc::Imm32(imm));
             }
             RvOp::SltIU => {
-                // if rs1 < imm_i {
-                //     1
-                // } else {
-                //     0
-                // }
-                todo!()
+                // rd = (rs1 < imm) ? 1 : 0 (zero-extends)
+                self.emit_cmpset(Self::emit_setb, rd, rs1, Loc::Imm32(insn.imm_i()));
             }
             RvOp::Lui => {
+                // rd = imm << 12
                 // insn.imm_u()
                 todo!()
             }
             RvOp::Auipc => {
+                // rd = PC + (imm << 12)
                 // (pc.wrapping_add(insn.imm_u())),
                 todo!()
             }
@@ -776,19 +827,199 @@ impl<A: DynasmApi> Translator<A> {
         Ok(None)
     }
 
+    fn save(&mut self, reg: GPR, offset: i32) {
+        emit!(self ; mov DWORD [ebx + offset], Rd(reg));
+    }
+
+    fn restore(&mut self, reg: GPR, offset: i32) {
+        emit!(self ; mov Rd(reg), DWORD [ebx + offset]);
+    }
+
+    fn emit_lea(&mut self, dst: GPR, src: Loc, imm: u32) {
+        match src {
+            Loc::GPR(src) => {
+                emit!(self ; lea Rq(dst), [r15 + Rq(src) + imm as i32])
+            }
+            Loc::Memory(src, disp) => {
+                emit!(self ; mov Rd(dst), DWORD [Rq(src) + disp]);
+                emit!(self ; lea Rq(dst), [r15 + Rq(dst) + imm as i32])
+            }
+            Loc::Zero => {
+                emit!(self ; xor Rq(dst), Rq(dst));
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    fn emit_load(&mut self, size: Size, extend: Extend, rd: Loc, rs1: Loc, imm: u32) {
+        if rd == Loc::Zero {
+            return;
+        }
+
+        if let (Loc::GPR(rd), Loc::GPR(rs1)) = (rd, rs1) {
+            match (size, extend) {
+                (Size::S8, Extend::None) => {
+                    emit!(self ; mov Rb(rd), BYTE [r15 + Rq(rs1) + imm as i32])
+                }
+                (Size::S8, Extend::Sign) => {
+                    emit!(self ; movsx Rd(rd), BYTE [r15 + Rq(rs1) + imm as i32])
+                }
+                (Size::S8, Extend::Zero) => {
+                    emit!(self ; movzx Rd(rd), BYTE [r15 + Rq(rs1) + imm as i32])
+                }
+                (Size::S16, Extend::None) => {
+                    emit!(self ; mov Rw(rd), WORD [r15 + Rq(rs1) + imm as i32])
+                }
+                (Size::S16, Extend::Sign) => {
+                    emit!(self ; movsx Rd(rd), WORD [r15 + Rq(rs1) + imm as i32])
+                }
+                (Size::S16, Extend::Zero) => {
+                    emit!(self ; movzx Rd(rd), WORD [r15 + Rq(rs1) + imm as i32])
+                }
+                (Size::S32, _) => emit!(self ; mov Rd(rd), DWORD [r15 + Rq(rs1) + imm as i32]),
+            }
+            return;
+        }
+
+        // load rs1 into rax
+        self.emit_lea(GPR::RAX, rs1, imm);
+
+        // load byte/word/dword into eax
+        match (size, extend) {
+            (Size::S8, Extend::None) => emit!(self ; mov al, BYTE [rax]),
+            (Size::S8, Extend::Sign) => emit!(self ; movsx eax, BYTE [rax]),
+            (Size::S8, Extend::Zero) => emit!(self ; movzx eax, BYTE [rax]),
+            (Size::S16, Extend::None) => emit!(self ; mov ax, WORD [rax]),
+            (Size::S16, Extend::Sign) => emit!(self ; movsx eax, WORD [rax]),
+            (Size::S16, Extend::Zero) => emit!(self ; movzx eax, WORD [rax]),
+            (Size::S32, _) => emit!(self ; mov eax, DWORD [rax]),
+        }
+
+        // store result into rd
+        match rd {
+            Loc::GPR(rd) => emit!(self ; mov Rd(rd), eax),
+            Loc::Memory(rd, disp) => emit!(self ; mov [Rd(rd) + disp], eax),
+            _ => unreachable!(),
+        };
+    }
+
+    fn emit_store(&mut self, size: Size, rs1: Loc, rs2: Loc, imm: u32) {
+        if let (Loc::GPR(rs1), Loc::GPR(rs2)) = (rs1, rs2) {
+            match size {
+                Size::S8 => emit!(self ; mov BYTE [r15 + Rq(rs1) + imm as i32], Rb(rs2)),
+                Size::S16 => emit!(self ; mov WORD [r15 + Rq(rs1) + imm as i32], Rw(rs2)),
+                Size::S32 => emit!(self ; mov DWORD [r15 + Rq(rs1) + imm as i32], Rd(rs2)),
+            }
+            return;
+        }
+
+        // save ecx
+        self.save(GPR::RCX, 0);
+
+        // load [rs2] into rcx
+        match rs2 {
+            Loc::GPR(rs2) => emit!(self ; mov ecx, [Rd(rs2)]),
+            Loc::Memory(rs2, disp) => emit!(self ; mov ecx, [Rd(rs2) + disp]),
+            Loc::Zero => emit!(self ; xor ecx, ecx),
+            _ => unreachable!(),
+        }
+
+        // load rs1 into rax
+        self.emit_lea(GPR::RAX, rs1, imm);
+
+        match size {
+            Size::S8 => emit!(self ; mov BYTE [rax], cl),
+            Size::S16 => emit!(self ; mov WORD [rax], cx),
+            Size::S32 => emit!(self ; mov DWORD [rax], ecx),
+        }
+
+        // restore ecx
+        self.restore(GPR::RCX, 0);
+    }
+
     fn step_load(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+        let (rd, rs1, imm) = (insn.rd_loc(), insn.rs1_loc(), insn.imm_i());
+        match op {
+            RvOp::Lb => {
+                // rd = M[rs1+imm][0:7]
+                self.emit_load(Size::S8, Extend::Sign, rd, rs1, imm);
+            }
+            RvOp::Lh => {
+                // rd = M[rs1+imm][0:15]
+                self.emit_load(Size::S16, Extend::Sign, rd, rs1, imm);
+            }
+            RvOp::Lw => {
+                // rd = M[rs1+imm][0:31]
+                self.emit_load(Size::S32, Extend::None, rd, rs1, imm);
+            }
+            RvOp::LbU => {
+                // rd = M[rs1+imm][0:7] (zero-extends)
+                self.emit_load(Size::S8, Extend::Zero, rd, rs1, imm);
+            }
+            RvOp::LhU => {
+                // rd = M[rs1+imm][0:15] (zero-extends)
+                self.emit_load(Size::S16, Extend::Zero, rd, rs1, imm);
+            }
+            _ => unreachable!(),
+        }
         Ok(None)
     }
 
     fn step_store(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+        let (rs1, rs2, imm) = (insn.rs1_loc(), insn.rs2_loc(), insn.imm_s());
+        match op {
+            RvOp::Sb => {
+                // M[rs1+imm][0:7] = rs2[0:7]
+                self.emit_store(Size::S8, rs1, rs2, imm);
+            }
+            RvOp::Sh => {
+                // M[rs1+imm][0:15] = rs2[0:15]
+                self.emit_store(Size::S16, rs1, rs2, imm);
+            }
+            RvOp::Sw => {
+                // M[rs1+imm][0:31] = rs2[0:31]
+                self.emit_store(Size::S32, rs1, rs2, imm);
+            }
+            _ => unreachable!(),
+        }
         Ok(None)
     }
 
     fn step_branch(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+        match op {
+            RvOp::Beq => {
+                // if(rs1 == rs2) PC += imm
+            }
+            RvOp::Bne => {
+                // if(rs1 != rs2) PC += imm
+            }
+            RvOp::Blt => {
+                // if(rs1 < rs2) PC += imm
+            }
+            RvOp::Bge => {
+                // if(rs1 >= rs2) PC += imm
+            }
+            RvOp::BltU => {
+                // if(rs1 < rs2) PC += imm (zero-extends)
+            }
+            RvOp::BgeU => {
+                // if(rs1 >= rs2) PC += imm (zero-extends)
+            }
+            _ => unreachable!(),
+        }
         Ok(Some(Terminal::Branch))
     }
 
     fn step_jump(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+        match op {
+            RvOp::Jal => {
+                // rd = PC+4; PC += imm
+            }
+            RvOp::JalR => {
+                // rd = PC+4; PC += rs1 + imm
+            }
+            _ => unreachable!(),
+        }
         Ok(Some(Terminal::Jump))
     }
 
@@ -813,7 +1044,7 @@ mod tests {
 
     use crate::rv32im::*;
 
-    fn run_binop_test(inner: fn(&mut Translator<SimpleAssembler>), expected: &[&str]) {
+    fn run_asm_test(inner: fn(&mut Translator<SimpleAssembler>), expected: &[&str]) {
         let program = Program::default();
         let asm = SimpleAssembler::new();
         let mut xlate = Translator::new(asm, program).unwrap();
@@ -835,104 +1066,273 @@ mod tests {
 
     #[test]
     fn add() {
-        run_binop_test(
+        use GPR::*;
+        run_asm_test(
             |x| {
                 x.emit_binop(
                     Translator::emit_add,
-                    Loc::GPR(GPR::RDX),
-                    Loc::GPR(GPR::RDX),
-                    Loc::GPR(GPR::RDX),
+                    Loc::GPR(RDX),
+                    Loc::GPR(RDX),
+                    Loc::GPR(RDX),
                 )
             },
             &["add edx,edx"],
         );
-        run_binop_test(
+        run_asm_test(
             |x| {
                 x.emit_binop(
                     Translator::emit_add,
-                    Loc::GPR(GPR::RDX),
-                    Loc::GPR(GPR::RDX),
-                    Loc::GPR(GPR::RCX),
+                    Loc::GPR(RDX),
+                    Loc::GPR(RDX),
+                    Loc::GPR(RCX),
                 )
             },
             &["add edx,ecx"],
         );
-        run_binop_test(
+        run_asm_test(
             |x| {
                 x.emit_binop(
                     Translator::emit_add,
-                    Loc::GPR(GPR::RSI),
-                    Loc::GPR(GPR::RDX),
-                    Loc::GPR(GPR::RCX),
+                    Loc::GPR(RSI),
+                    Loc::GPR(RDX),
+                    Loc::GPR(RCX),
                 )
             },
-            &["mov esi,edx", "add esi,ecx"],
+            &[
+                "mov esi,edx", //
+                "add esi,ecx",
+            ],
         );
-        run_binop_test(
+        run_asm_test(
             |x| {
                 x.emit_binop(
                     Translator::emit_add,
-                    Loc::Memory(GPR::RBX, 4),
-                    Loc::GPR(GPR::RCX),
-                    Loc::GPR(GPR::RDX),
+                    Loc::Memory(RBX, 4),
+                    Loc::GPR(RCX),
+                    Loc::GPR(RDX),
                 )
             },
-            &["mov eax,ecx", "add eax,edx", "mov [rbx+4],eax"],
+            &[
+                "mov eax,ecx", //
+                "add eax,edx",
+                "mov [rbx+4],eax",
+            ],
         );
-        run_binop_test(
+        run_asm_test(
             |x| {
                 x.emit_binop(
                     Translator::emit_add,
-                    Loc::Memory(GPR::RBX, 4),
-                    Loc::Memory(GPR::RBX, 8),
-                    Loc::Memory(GPR::RBX, 12),
+                    Loc::Memory(RBX, 4),
+                    Loc::Memory(RBX, 8),
+                    Loc::Memory(RBX, 12),
                 )
             },
-            &["mov eax,[rbx+8]", "add eax,[rbx+0Ch]", "mov [rbx+4],eax"],
+            &[
+                "mov eax,[rbx+8]", //
+                "add eax,[rbx+0Ch]",
+                "mov [rbx+4],eax",
+            ],
         );
-        run_binop_test(
+        run_asm_test(
             |x| {
                 x.emit_binop(
                     Translator::emit_add,
-                    Loc::GPR(GPR::RDX),
-                    Loc::GPR(GPR::RDX),
+                    Loc::GPR(RDX),
+                    Loc::GPR(RDX),
                     Loc::Imm32(6),
                 )
             },
             &["add edx,6"],
         );
-        run_binop_test(
+        run_asm_test(
             |x| {
                 x.emit_binop(
                     Translator::emit_add,
-                    Loc::GPR(GPR::RDX),
-                    Loc::GPR(GPR::RCX),
+                    Loc::GPR(RDX),
+                    Loc::GPR(RCX),
                     Loc::Imm32(6),
                 )
             },
-            &["mov edx,ecx", "add edx,6"],
+            &[
+                "mov edx,ecx", //
+                "add edx,6",
+            ],
         );
-        run_binop_test(
+        run_asm_test(
             |x| {
                 x.emit_binop(
                     Translator::emit_add,
-                    Loc::GPR(GPR::RDX),
-                    Loc::GPR(GPR::RCX),
+                    Loc::GPR(RDX),
+                    Loc::GPR(RCX),
                     Loc::Imm32(-6_i32 as u32),
                 )
             },
-            &["mov edx,ecx", "add edx,0FFFFFFFAh"],
+            &[
+                "mov edx,ecx", //
+                "add edx,0FFFFFFFAh",
+            ],
         );
-        run_binop_test(
+        run_asm_test(
             |x| {
                 x.emit_binop(
                     Translator::emit_add,
-                    Loc::Memory(GPR::RBX, 4),
-                    Loc::GPR(GPR::RCX),
+                    Loc::Memory(RBX, 4),
+                    Loc::GPR(RCX),
                     Loc::Imm32(6),
                 )
             },
-            &["mov eax,ecx", "add eax,6", "mov [rbx+4],eax"],
+            &[
+                "mov eax,ecx", //
+                "add eax,6",
+                "mov [rbx+4],eax",
+            ],
+        );
+    }
+
+    #[test]
+    fn slt() {
+        use GPR::*;
+        run_asm_test(
+            |x| {
+                x.emit_cmpset(
+                    Translator::emit_setl,
+                    Loc::GPR(RDX),
+                    Loc::GPR(RSI),
+                    Loc::GPR(RDI),
+                );
+            },
+            &[
+                "cmp esi,edi", //
+                "setl al",
+                "movzx edx,al",
+            ],
+        );
+        run_asm_test(
+            |x| {
+                x.emit_cmpset(
+                    Translator::emit_setl,
+                    Loc::GPR(RDX),
+                    Loc::Memory(RBX, 4),
+                    Loc::GPR(RSI),
+                );
+            },
+            &[
+                "cmp [rbx+4],esi", //
+                "setl al",
+                "movzx edx,al",
+            ],
+        );
+        run_asm_test(
+            |x| {
+                x.emit_cmpset(
+                    Translator::emit_setl,
+                    Loc::GPR(RDX),
+                    Loc::GPR(RSI),
+                    Loc::Memory(RBX, 4),
+                );
+            },
+            &[
+                "cmp esi,[rbx+4]", //
+                "setl al",
+                "movzx edx,al",
+            ],
+        );
+        run_asm_test(
+            |x| {
+                x.emit_cmpset(
+                    Translator::emit_setl,
+                    Loc::GPR(RDX),
+                    Loc::Memory(RBX, 8),
+                    Loc::Memory(RBX, 12),
+                );
+            },
+            &[
+                "mov eax,[rbx+8]",
+                "cmp eax,[rbx+0Ch]",
+                "setl al",
+                "movzx edx,al",
+            ],
+        );
+        run_asm_test(
+            |x| {
+                x.emit_cmpset(
+                    Translator::emit_setl,
+                    Loc::Memory(RBX, 4),
+                    Loc::Memory(RBX, 8),
+                    Loc::Memory(RBX, 12),
+                );
+            },
+            &[
+                "mov eax,[rbx+8]",
+                "cmp eax,[rbx+0Ch]",
+                "setl al",
+                "movzx eax,al",
+                "mov [rbx+4],eax",
+            ],
+        );
+    }
+
+    #[test]
+    fn load() {
+        use GPR::*;
+        run_asm_test(
+            |x| {
+                x.emit_load(Size::S32, Extend::None, Loc::GPR(RDX), Loc::GPR(RSI), 8);
+            },
+            &["mov edx,[r15+rsi+8]"],
+        );
+        run_asm_test(
+            |x| {
+                x.emit_load(Size::S8, Extend::Sign, Loc::GPR(RDX), Loc::GPR(RSI), 8);
+            },
+            &["movsx edx,byte [r15+rsi+8]"],
+        );
+        run_asm_test(
+            |x| {
+                x.emit_load(
+                    Size::S8,
+                    Extend::Sign,
+                    Loc::Memory(RBX, 4),
+                    Loc::Memory(RBX, 8),
+                    8,
+                );
+            },
+            &[
+                "mov eax,[rbx+8]",
+                "lea rax,[r15+rax+8]",
+                "movsx eax,byte [rax]",
+                "mov [ebx+4],eax",
+            ],
+        );
+    }
+
+    #[test]
+    fn store() {
+        use GPR::*;
+        run_asm_test(
+            |x| {
+                x.emit_store(Size::S32, Loc::GPR(RSI), Loc::GPR(RDX), 8);
+            },
+            &["mov [r15+rsi+8],edx"],
+        );
+        run_asm_test(
+            |x| {
+                x.emit_store(Size::S8, Loc::GPR(RSI), Loc::GPR(RDX), 8);
+            },
+            &["mov [r15+rsi+8],dl"],
+        );
+        run_asm_test(
+            |x| {
+                x.emit_store(Size::S8, Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), 8);
+            },
+            &[
+                "mov [ebx],ecx",
+                "mov ecx,[ebx+8]",
+                "mov eax,[rbx+4]",
+                "lea rax,[r15+rax+8]",
+                "mov [rax],cl",
+                "mov ecx,[ebx]",
+            ],
         );
     }
 
