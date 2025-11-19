@@ -977,28 +977,33 @@ impl CpuProcessor {
             dev_mode,
         };
 
-        let gpu_queue = self.gpu_queue.clone();
-        tokio::task::spawn_blocking(move || -> Result<_> {
-            for preflight_results in prover.get()?.segment_preflight(&task.segment)? {
-                let tracing = tracing.clone();
-                gpu_queue
-                    .blocking_send(GpuTaskMsg {
-                        header: header.clone(),
-                        task: GpuTask::ProveSegmentCore(ProveSegmentCoreTask {
-                            preflight_results: Box::new(preflight_results?),
-                            dev_mode,
-                        }),
-                        to_reserve: to_reserve.clone(),
-                        reserved: reserved.clone(),
-                        allocate_tracer: TaskTracer::new(&tracing, "allocate GPU"),
-                        tracing,
-                    })
-                    .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
+        let preflight_results = tokio::task::spawn_blocking(move || -> Result<_> {
+            let mut segment_iter = prover.get()?.segment_preflight(&task.segment)?;
+            let preflight_results = segment_iter
+                .next()
+                .ok_or_else(|| Error::new("segment_preflight produced no segment results"))?;
+            if segment_iter.next().is_some() {
+                return Err(Error::new("segment_preflight produced multiple segments"));
             }
-            Ok(())
+            Ok(preflight_results)
         })
         .await
         .map_err(|e| Error::new(format!("JoinHandle error: preflight task: {e}")))??;
+
+        self.gpu_queue
+            .send(GpuTaskMsg {
+                header: header.clone(),
+                task: GpuTask::ProveSegmentCore(ProveSegmentCoreTask {
+                    preflight_results: Box::new(preflight_results?),
+                    dev_mode,
+                }),
+                to_reserve: to_reserve.clone(),
+                reserved: reserved.clone(),
+                allocate_tracer: TaskTracer::new(&tracing, "allocate GPU"),
+                tracing,
+            })
+            .await
+            .map_err(|e| Error::new(format!("GPU processor dead: {e}")))?;
 
         Ok(())
     }
