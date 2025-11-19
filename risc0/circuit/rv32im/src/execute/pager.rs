@@ -462,9 +462,11 @@ impl PagedMemory {
     }
 
     pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<&Page> {
-        // TODO(victor): When the system page is requested, the register values returned will be
-        // incorrect. We cannot cannot call write_registers here, because it throughs off the
-        // current cycle counting logic.
+        // Registers are not stored in the main RAM during execution. If the page containing the
+        // memory mapped registers is requested, then they must first be written to RAM.
+        if page_idx == USER_REGS_ADDR.page_idx() || page_idx == MACHINE_REGS_ADDR.page_idx() {
+            self.write_registers();
+        }
         if let Some(cache_idx) = self.page_table.get(page_idx) {
             // Loaded, get from cache
             Ok(&self.page_cache[cache_idx])
@@ -481,13 +483,10 @@ impl PagedMemory {
     #[inline(always)]
     fn load_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
-        let node_idx = node_idx(page_idx);
-        // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}, node: {node_idx:#08x}");
         let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
             cache_idx
         } else {
-            self.load_page(page_idx)?;
-            self.page_states.set(node_idx, PageState::Loaded);
+            self.page_in(page_idx)?;
             self.page_table.get(page_idx).unwrap()
         };
         Ok(self.page_cache[cache_idx].load(addr))
@@ -518,15 +517,16 @@ impl PagedMemory {
 
     #[inline(always)]
     pub(crate) fn load_page(&mut self, page_idx: u32) -> Result<&Page> {
-        // TODO(victor): When the system page is requested, the register values returned will be
-        // incorrect. We cannot cannot call write_registers here, because it throughs off the
-        // current cycle counting logic.
+        // Registers are not stored in the main RAM during execution. If the page containing the
+        // memory mapped registers is requested, then they must first be written to RAM.
+        if page_idx == USER_REGS_ADDR.page_idx() || page_idx == MACHINE_REGS_ADDR.page_idx() {
+            self.write_registers();
+        }
         let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
             cache_idx
         } else {
             // Page-in will set the Page in the table and cache or fail.
             self.page_in(page_idx)?;
-            self.page_states.set(node_idx(page_idx), PageState::Loaded);
             self.page_table.get(page_idx).unwrap()
         };
         Ok(&self.page_cache[cache_idx])
