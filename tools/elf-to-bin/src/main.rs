@@ -704,8 +704,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 format!("Failed to read guest ELF from {:?}: {}", guest_elf_path, e)
             })?;
 
-            const USER_MAX_MEM: u32 = 0x4000_0000;
-            let elf = Program::load_elf_dyn(&guest_elf, USER_MAX_MEM, &interp_elf).map_err(|e| {
+            let elf = Program::load_elf_dyn(&guest_elf, u32::MAX, &interp_elf).map_err(|e| {
                 format!("Failed to read guest ELF from {:?}: {}", guest_elf_path, e)
             })?;
             let memory_image = MemoryImage::new_dyn(elf, kernel_program);
