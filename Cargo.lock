@@ -7519,10 +7519,12 @@ name = "risc0-emu"
 version = "5.0.0"
 dependencies = [
  "anyhow",
+ "bytemuck",
  "derive_more",
  "dynasmrt",
  "iced-x86",
  "risc0-binfmt",
+ "test-log",
  "tracing",
 ]
 
