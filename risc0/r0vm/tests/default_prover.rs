@@ -26,7 +26,7 @@ fn basic_proof() {
     let r0vm_path = cargo_bin("r0vm");
     let prover = DefaultProver::new(r0vm_path).unwrap();
 
-    const ITERATIONS: u32 = 300_000;
+    const ITERATIONS: u32 = 800_000;
     let env = ExecutorEnv::builder()
         .write(&ITERATIONS)
         .unwrap()
@@ -53,7 +53,7 @@ fn basic_execute() {
     let r0vm_path = cargo_bin("r0vm");
     let prover = DefaultProver::new(r0vm_path).unwrap();
 
-    const ITERATIONS: u32 = 300_000;
+    const ITERATIONS: u32 = 800_000;
     let env = ExecutorEnv::builder()
         .write(&ITERATIONS)
         .unwrap()
