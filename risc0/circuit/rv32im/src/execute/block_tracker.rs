@@ -19,17 +19,17 @@ use super::pager::NUM_PAGES;
 use super::platform::{PAGE_BYTES, WORD_SIZE};
 use super::rv32im::InsnKind;
 
-const POINTS_PER_ROW: u32 = 5040;
+const POINTS_PER_ROW: u64 = 5040;
 
-const PART_SIZE: u32 = 8;
-const NUM_PARTS: u32 = (PAGE_BYTES as u32 / WORD_SIZE as u32) / PART_SIZE;
+const PART_SIZE: u64 = 8;
+const NUM_PARTS: u64 = (PAGE_BYTES as u64 / WORD_SIZE as u64) / PART_SIZE;
 
-const fn row_points(block: BlockType) -> u32 {
-    POINTS_PER_ROW / block.count_per_row() as u32
+const fn row_points(block: BlockType) -> u64 {
+    POINTS_PER_ROW / block.count_per_row() as u64
 }
 
 /// Which block types the given instruction ends up being implemented with.
-const fn row_points_for_insn(i: &InsnKind) -> u32 {
+const fn row_points_for_insn(i: &InsnKind) -> u64 {
     use BlockType::*;
 
     macro_rules! rp {
@@ -91,14 +91,14 @@ const fn row_points_for_insn(i: &InsnKind) -> u32 {
 
 pub struct BlockTracker {
     pc_cache: std::collections::BTreeSet<u32>,
-    row_points: u32,
+    row_points: u64,
 }
 
 impl Default for BlockTracker {
     fn default() -> Self {
         Self {
             pc_cache: Default::default(),
-            row_points: BlockType::COUNT as u32 * POINTS_PER_ROW,
+            row_points: BlockType::COUNT as u64 * POINTS_PER_ROW,
         }
     }
 }
@@ -122,43 +122,43 @@ impl BlockTracker {
         self.row_points += row_points(BlockType::EcallTerminate);
     }
 
-    pub fn track_ecall_read(&mut self, bytes: u32, words: u32) {
+    pub fn track_ecall_read(&mut self, bytes: u64, words: u64) {
         self.row_points += row_points(BlockType::EcallRead)
             + row_points(BlockType::ReadByte) * bytes
             + row_points(BlockType::ReadWord) * words;
     }
 
-    pub fn track_ecall_bigint(&mut self, verify_program_size: u32) {
+    pub fn track_ecall_bigint(&mut self, verify_program_size: u64) {
         self.row_points += row_points(BlockType::EcallBigInt)
             + row_points(BlockType::BigInt) * verify_program_size;
     }
 
-    const fn p2_points() -> u32 {
+    const fn p2_points() -> u64 {
         row_points(BlockType::P2Block)
             + row_points(BlockType::P2IntRounds)
             + 8 * row_points(BlockType::P2ExtRound)
     }
 
-    pub fn track_ecall_poseidon2(&mut self, block_count: u32) {
+    pub fn track_ecall_poseidon2(&mut self, block_count: u64) {
         self.row_points += row_points(BlockType::EcallP2)
             + block_count * (row_points(BlockType::P2Step) + Self::p2_points());
     }
 
-    const fn page_in_points() -> u32 {
-        let tree_height = NUM_PAGES.ilog2() as u32;
+    const fn page_in_points() -> u64 {
+        let tree_height = NUM_PAGES.ilog2() as u64;
         row_points(BlockType::PageInPage)
             + (row_points(BlockType::PageInPart) + Self::p2_points()) * NUM_PARTS
             + (row_points(BlockType::PageInNode) + Self::p2_points()) * (tree_height - 1)
     }
 
-    const fn page_out_points() -> u32 {
-        let tree_height = NUM_PAGES.ilog2() as u32;
+    const fn page_out_points() -> u64 {
+        let tree_height = NUM_PAGES.ilog2() as u64;
         row_points(BlockType::PageOutPage)
             + (row_points(BlockType::PageOutPart) + Self::p2_points()) * NUM_PARTS
             + (row_points(BlockType::PageOutNode) + Self::p2_points()) * (tree_height - 1)
     }
 
-    pub fn row_count(&self, page_touches: u32) -> u32 {
+    pub fn row_count(&self, page_touches: u64) -> u64 {
         let page_points = page_touches * (Self::page_in_points() + Self::page_out_points());
         (self.row_points + page_points).div_ceil(POINTS_PER_ROW)
     }

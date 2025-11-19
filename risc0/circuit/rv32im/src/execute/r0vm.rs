@@ -183,9 +183,9 @@ pub(crate) trait Risc0Context {
 
     fn ecall_bigint(&mut self) -> Result<()>;
 
-    fn on_ecall_read_end(&mut self, _read_bytes: u32, _read_words: u32) {}
+    fn on_ecall_read_end(&mut self, _read_bytes: u64, _read_words: u64) {}
 
-    fn on_ecall_poseidon2_end(&mut self, _block_count: u32) {}
+    fn on_ecall_poseidon2_end(&mut self, _block_count: u64) {}
 
     fn on_ecall_write_end(&mut self) {}
 }
@@ -582,7 +582,7 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             EcallKind::Poseidon2,
         )?;
         let block_count = Poseidon2::ecall(self.ctx)?;
-        self.ctx.on_ecall_poseidon2_end(block_count);
+        self.ctx.on_ecall_poseidon2_end(block_count as u64);
         Ok(false)
     }
 

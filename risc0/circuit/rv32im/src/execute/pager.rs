@@ -550,8 +550,8 @@ impl PagedMemory {
     }
 
     #[cfg(feature = "rv32im-m3")]
-    pub(crate) fn touched_pages(&self) -> u32 {
-        self.page_cache.len().try_into().unwrap()
+    pub(crate) fn touched_pages(&self) -> u64 {
+        self.page_cache.len() as u64
     }
 
     #[inline(always)]
