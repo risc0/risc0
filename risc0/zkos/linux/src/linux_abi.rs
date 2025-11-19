@@ -102,7 +102,7 @@ use alloc::vec;
 #[cfg(target_arch = "riscv32")]
 use alloc::vec::Vec;
 
-static mut MMAP_BASE: u32 = crate::constants::USER_MMAP_BASE_INIT;
+static mut MMAP_BASE: u32 = 0x94800000;
 
 fn get_mmap_base() -> u32 {
     unsafe { MMAP_BASE }
@@ -507,17 +507,12 @@ impl MemoryRegion {
 /// Also registers the interpreter region if present.
 /// This is simpler and more robust than parsing individual segments.
 fn register_elf_segments() {
-    use crate::constants::{USER_BRK_ADDR, USER_INTERP_BASE_ADDR, USER_SPACE_END};
+    use crate::constants::{USER_BRK_ADDR, USER_INTERP_BASE_ADDR};
 
-    // Calculate load_base the same way the ELF loader does
-    // Mirror Linux's ELF_ET_DYN_BASE calculation: load the main executable
-    // 2/3 of the way up the user VA space and align it to the system page size.
-    const LINUX_PAGE_SIZE: u32 = 0x1000;
-    let max_mem = USER_SPACE_END;
-    let mut load_base = ((max_mem as u64 * 2 / 3) as u32) & !(LINUX_PAGE_SIZE - 1);
-    if load_base == 0 {
-        load_base = LINUX_PAGE_SIZE;
-    }
+    // Use the same hardcoded load_base as the ELF loader
+    // ELF_ET_DYN_BASE = (2/3) * TASK_SIZE = (2/3) * 0x9c800000 ≈ 0x68555555
+    // → page-align → 0x68555000
+    let load_base = 0x68555000u32;
 
     // Get heap start (brk) from stored value
     let heap_start = unsafe { USER_BRK_ADDR.read_volatile() as u32 };
@@ -558,11 +553,11 @@ fn register_elf_segments() {
     let interp_base_addr = unsafe { USER_INTERP_BASE_ADDR.read_volatile() };
     if interp_base_addr != 0 {
         // The interpreter is placed so its top ends at the initial mmap_base
-        // Calculate it the same way the ELF loader does: (task_size - STACK_GAP) & !(BIG_ALIGN - 1)
+        // Use the same hardcoded mmap_base calculation as the ELF loader
+        const TASK_SIZE: u32 = 0x9C80_0000; // User VA ceiling (STACK_TOP / FIXADDR_START)
         const STACK_GAP: u32 = 0x0800_0000; // 128 MiB
-        const BIG_ALIGN: u32 = 0x0080_0000; // 8 MiB alignment
-        let task_size = USER_SPACE_END;
-        let initial_mmap_base = (task_size - STACK_GAP) & !(BIG_ALIGN - 1);
+        const BIG_ALIGN: u32 = 0x0080_0000; // 8 MiB alignment for mmap_base
+        let initial_mmap_base = (TASK_SIZE - STACK_GAP) & !(BIG_ALIGN - 1); // → 0x94800000
         let interp_end = initial_mmap_base;
 
         if interp_end <= interp_base_addr as u32 {
