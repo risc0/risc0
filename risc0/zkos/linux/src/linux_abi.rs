@@ -1074,6 +1074,18 @@ pub fn start_linux_binary(argc: u32) -> ! {
     let stack_start = stack_top - USER_STACK_SIZE as u32;
     register_memory_region(stack_start, stack_top, true, true, false, "user-stack");
 
+    // Track the ASCII table region (used for pathname helper data near the top of user VA space)
+    let ascii_table_start = ASCII_TABLE_PTR as u32;
+    let ascii_table_end = ascii_table_start.saturating_add(PAGE_SIZE as u32);
+    register_memory_region(
+        ascii_table_start,
+        ascii_table_end,
+        true,
+        false,
+        false,
+        "ascii-table",
+    );
+
     // XXX we should review this code from a security perspective
     // Get each argument from host and add to stack
     let mut argv = vec![];

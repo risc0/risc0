@@ -6030,6 +6030,94 @@ pub fn sys_statx(
         }
 
         kprint!("sys_statx: AT_EMPTY_PATH set, statting fd {}", _dfd);
+
+        // Special handling for stdin/stdout/stderr (fds 0, 1, 2)
+        // These are character devices and don't have valid P9 FIDs
+        if _dfd <= 2 {
+            use crate::constants::{
+                STATX_GID, STATX_INO, STATX_MODE, STATX_NLINK, STATX_SIZE, STATX_TYPE, STATX_UID,
+                Statx, StatxTimestamp,
+            };
+
+            kprint!(
+                "sys_statx: fd {} is stdin/stdout/stderr, treating as character device",
+                _dfd
+            );
+            // Create a statx structure for a character device (tty-like)
+            // S_IFCHR (0x2000) = character device, 0666 = rw-rw-rw-
+            let mode: u16 = 0x2000 | 0o666;
+            // Use fd number as pseudo inode, major=5 (tty), minor based on fd
+            let rdev_minor = _dfd + 64; // Common tty minor numbers start at 64
+            let statx = Statx {
+                stx_mask: STATX_TYPE
+                    | STATX_MODE
+                    | STATX_NLINK
+                    | STATX_UID
+                    | STATX_GID
+                    | STATX_INO
+                    | STATX_SIZE,
+                stx_blksize: 4096,
+                stx_attributes: 0,
+                stx_nlink: 1,
+                stx_uid: 0, // root
+                stx_gid: 0, // root
+                stx_mode: mode,
+                __spare0: [0],
+                stx_ino: _dfd as u64,
+                stx_size: 0, // Character devices have size 0
+                stx_blocks: 0,
+                stx_attributes_mask: 0,
+                stx_atime: StatxTimestamp {
+                    tv_sec: 0,
+                    tv_nsec: 0,
+                    __reserved: 0,
+                },
+                stx_btime: StatxTimestamp {
+                    tv_sec: 0,
+                    tv_nsec: 0,
+                    __reserved: 0,
+                },
+                stx_ctime: StatxTimestamp {
+                    tv_sec: 0,
+                    tv_nsec: 0,
+                    __reserved: 0,
+                },
+                stx_mtime: StatxTimestamp {
+                    tv_sec: 0,
+                    tv_nsec: 0,
+                    __reserved: 0,
+                },
+                stx_rdev_major: 5, // tty major number
+                stx_rdev_minor: rdev_minor,
+                stx_dev_major: 0,
+                stx_dev_minor: 0,
+                stx_mnt_id: 0,
+                stx_dio_mem_align: 0,
+                stx_dio_offset_align: 0,
+                __spare3: [0; 12],
+            };
+
+            // Write the statx structure to the user buffer
+            let statx_bytes = unsafe {
+                core::slice::from_raw_parts(
+                    &statx as *const Statx as *const u8,
+                    core::mem::size_of::<Statx>(),
+                )
+            };
+            let bytes_copied = crate::kernel::copy_to_user(
+                _statxbuf as *mut u8,
+                statx_bytes.as_ptr(),
+                core::mem::size_of::<Statx>(),
+            );
+            if bytes_copied == 0 {
+                kprint!("sys_statx: failed to copy statx structure to user memory");
+                return Err(Err::Fault);
+            }
+
+            kprint!("sys_statx: successfully filled statx buffer for stdin/stdout/stderr");
+            return Ok(0);
+        }
+
         let fd_entry = get_fd(_dfd);
         if fd_entry.file_desc_id == 0xFF {
             kprint!("sys_statx: invalid fd {}", _dfd);
