@@ -545,7 +545,7 @@ fn continuation() {
         Some(risc0_circuit_rv32im::TerminateState::default())
     );
 
-    let opts = ProverOpts::fast().with_max_prover_po2(12);
+    let opts = ProverOpts::fast().with_max_segment_po2(12);
     let ctx = VerifierContext::default();
     let prover = get_prover_server(&opts).unwrap();
     let _receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
