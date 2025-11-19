@@ -399,12 +399,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             .checked_add(1)
             .context("segment_counter overflow")?;
 
-        let total_cycles = 1 << segment_po2;
         let pager_cycles = self.pager.cycles as u64;
         let user_cycles = self.user_cycles as u64;
-        self.cycles.total += total_cycles;
+        self.cycles.total += pager_cycles + user_cycles + RESERVED_CYCLES as u64;
         self.cycles.paging += pager_cycles;
-        self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
+        self.cycles.reserved += RESERVED_CYCLES as u64;
         self.user_cycles = 0;
         self.insn_counter = 0;
         self.pager.reset();
