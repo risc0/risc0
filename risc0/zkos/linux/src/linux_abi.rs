@@ -559,23 +559,25 @@ fn register_elf_segments() {
         const BIG_ALIGN: u32 = 0x0080_0000; // 8 MiB alignment for mmap_base
         let initial_mmap_base = (TASK_SIZE - STACK_GAP) & !(BIG_ALIGN - 1); // → 0x94800000
         let interp_end = initial_mmap_base;
+        let interp_base = interp_base_addr as u32;
+        let interp_start = interp_base.checked_sub(0x1000).unwrap_or(interp_base);
 
-        if interp_end <= interp_base_addr as u32 {
+        if interp_end <= interp_start {
             kprint!(
                 "register_elf_segments: Invalid interpreter range (base=0x{:08x} >= end=0x{:08x}), skipping",
-                interp_base_addr,
+                interp_start,
                 interp_end
             );
         } else {
             kprint!(
                 "register_elf_segments: Registering interpreter region [0x{:08x}-0x{:08x})",
-                interp_base_addr,
+                interp_start,
                 interp_end
             );
 
             // Register interpreter region as readable, writable, and executable
             register_memory_region(
-                interp_base_addr as u32,
+                interp_start,
                 interp_end,
                 true, // readable
                 true, // writable
@@ -591,6 +593,44 @@ const MAX_MEMORY_REGIONS: usize = 128;
 static mut MEMORY_REGIONS: [MemoryRegion; MAX_MEMORY_REGIONS] =
     [MemoryRegion::new_empty(); MAX_MEMORY_REGIONS];
 static mut MEMORY_REGION_COUNT: usize = 0;
+
+fn push_memory_region(region: MemoryRegion) {
+    unsafe {
+        if MEMORY_REGION_COUNT >= MAX_MEMORY_REGIONS {
+            kprint!(
+                "register_memory_region: WARNING - MAX_MEMORY_REGIONS reached when adding {} [{:08x}-{:08x})",
+                region.name,
+                region.start,
+                region.end
+            );
+            return;
+        }
+        kprint!(
+            "register_memory_region: [{:08x}-{:08x}) {} r:{} w:{} x:{}",
+            region.start,
+            region.end,
+            region.name,
+            region.readable,
+            region.writable,
+            region.executable
+        );
+        MEMORY_REGIONS[MEMORY_REGION_COUNT] = region;
+        MEMORY_REGION_COUNT += 1;
+    }
+}
+
+fn remove_memory_region_at(idx: usize) -> MemoryRegion {
+    unsafe {
+        if idx >= MEMORY_REGION_COUNT {
+            return MemoryRegion::new_empty();
+        }
+        let removed = MEMORY_REGIONS[idx];
+        MEMORY_REGION_COUNT -= 1;
+        MEMORY_REGIONS[idx] = MEMORY_REGIONS[MEMORY_REGION_COUNT];
+        MEMORY_REGIONS[MEMORY_REGION_COUNT] = MemoryRegion::new_empty();
+        removed
+    }
+}
 
 // Memory map functions
 pub fn register_memory_region(
@@ -642,16 +682,14 @@ pub fn register_memory_region(
     };
 
     unsafe {
-        let mut idx = 0;
-        while idx < MEMORY_REGION_COUNT {
-            let existing = &MEMORY_REGIONS[idx];
+        let mut idx = MEMORY_REGION_COUNT;
+        while idx > 0 {
+            idx -= 1;
+            let existing = MEMORY_REGIONS[idx];
             if existing.is_empty() {
-                idx += 1;
                 continue;
             }
 
-            // If the new region is completely contained within an existing region,
-            // it's already covered - allow it (no need to register again)
             if is_contained_in(start, end, existing.start, existing.end) {
                 kprint!(
                     "register_memory_region: [{:08x}-{:08x}) {} is already covered by {} [{:08x}-{:08x}), skipping registration",
@@ -665,7 +703,6 @@ pub fn register_memory_region(
                 return;
             }
 
-            // If there's an overlap but the new region is not contained, reject it
             if range_overlaps(start, end, existing.start, existing.end) {
                 kprint!(
                     "register_memory_region: rejecting [{:08x}-{:08x}) {} due to overlap with {} [{:08x}-{:08x})",
@@ -678,32 +715,17 @@ pub fn register_memory_region(
                 );
                 return;
             }
-            idx += 1;
-        }
-
-        if MEMORY_REGION_COUNT < MAX_MEMORY_REGIONS {
-            kprint!(
-                "register_memory_region: [{:08x}-{:08x}) {} r:{} w:{} x:{}",
-                start,
-                end,
-                name,
-                readable,
-                writable,
-                executable
-            );
-            MEMORY_REGIONS[MEMORY_REGION_COUNT] = MemoryRegion {
-                start,
-                end,
-                readable,
-                writable,
-                executable,
-                name,
-            };
-            MEMORY_REGION_COUNT += 1;
-        } else {
-            kprint!("register_memory_region: WARNING - MAX_MEMORY_REGIONS reached!");
         }
     }
+
+    push_memory_region(MemoryRegion {
+        start,
+        end,
+        readable,
+        writable,
+        executable,
+        name,
+    });
 }
 
 pub fn unregister_memory_region(start: u32, end: u32) {
@@ -717,15 +739,56 @@ pub fn unregister_memory_region(start: u32, end: u32) {
                     end,
                     MEMORY_REGIONS[idx].name
                 );
-                let slice = &mut MEMORY_REGIONS[..MEMORY_REGION_COUNT];
-                if idx + 1 < slice.len() {
-                    slice.copy_within(idx + 1.., idx);
-                }
-                MEMORY_REGIONS[MEMORY_REGION_COUNT - 1] = MemoryRegion::new_empty();
-                MEMORY_REGION_COUNT -= 1;
+                remove_memory_region_at(idx);
                 break;
             }
             idx += 1;
+        }
+    }
+}
+
+fn carve_memory_region(start: u32, end: u32) {
+    if start == 0 || end == 0 || start >= end {
+        return;
+    }
+
+    unsafe {
+        let mut idx = 0;
+        while idx < MEMORY_REGION_COUNT {
+            let region = MEMORY_REGIONS[idx];
+            if region.is_empty() || region.end <= start || region.start >= end {
+                idx += 1;
+                continue;
+            }
+
+            let removed = remove_memory_region_at(idx);
+
+            let left_start = removed.start;
+            let left_end = start.min(removed.end);
+            if left_start < left_end {
+                push_memory_region(MemoryRegion {
+                    start: left_start,
+                    end: left_end,
+                    readable: removed.readable,
+                    writable: removed.writable,
+                    executable: removed.executable,
+                    name: removed.name,
+                });
+            }
+
+            let right_start = end.max(removed.start);
+            let right_end = removed.end;
+            if right_start < right_end {
+                push_memory_region(MemoryRegion {
+                    start: right_start,
+                    end: right_end,
+                    readable: removed.readable,
+                    writable: removed.writable,
+                    executable: removed.executable,
+                    name: removed.name,
+                });
+            }
+            // Do not increment idx; the last element was moved into this slot.
         }
     }
 }
@@ -1946,6 +2009,7 @@ fn sys_mmap(
         let readable = (_prot & 0x1) != 0; // PROT_READ
         let writable = (_prot & 0x2) != 0; // PROT_WRITE
         let executable = (_prot & 0x4) != 0; // PROT_EXEC
+        carve_memory_region(_addr, _addr + aligned_length as u32);
         register_memory_region(
             _addr,
             _addr + aligned_length as u32,
@@ -1968,6 +2032,7 @@ fn sys_mmap(
         let readable = (_prot & 0x1) != 0; // PROT_READ
         let writable = (_prot & 0x2) != 0; // PROT_WRITE
         let executable = (_prot & 0x4) != 0; // PROT_EXEC
+        carve_memory_region(_addr, _addr + aligned_length as u32);
         register_memory_region(
             _addr,
             _addr + aligned_length as u32,
