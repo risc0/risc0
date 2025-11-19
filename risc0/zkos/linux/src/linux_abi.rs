@@ -589,7 +589,7 @@ fn register_elf_segments() {
 }
 
 // Global memory map (fixed-size array for no_std compatibility)
-const MAX_MEMORY_REGIONS: usize = 128;
+const MAX_MEMORY_REGIONS: usize = 1024;
 static mut MEMORY_REGIONS: [MemoryRegion; MAX_MEMORY_REGIONS] =
     [MemoryRegion::new_empty(); MAX_MEMORY_REGIONS];
 static mut MEMORY_REGION_COUNT: usize = 0;
