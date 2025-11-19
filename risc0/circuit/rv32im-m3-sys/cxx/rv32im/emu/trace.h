@@ -31,6 +31,7 @@ private:
   uint32_t* auxBegin;
   uint32_t* auxNext;
   GlobalsWitness* globals;
+  uint32_t userCycles = 0;
 
 #define BLOCK_TYPE(name, count)                                                                    \
   RowInfo* row##name = nullptr;                                                                    \
@@ -70,6 +71,9 @@ public:
 
   const RowInfo* getRows() const { return rowBegin; }
   const uint32_t* getAux() const { return auxBegin; }
+
+  void setUserCycles(uint32_t cycles) { userCycles = cycles; }
+  inline uint32_t getUserCycles() const { return userCycles; }
 };
 
 } // namespace risc0::rv32im

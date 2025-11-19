@@ -30,13 +30,14 @@ RecordingContext::RecordingContext(MLIRContext* mlirCtx) : mlirCtx(mlirCtx), bui
   builder.setInsertionPointToEnd(moduleOp.getBody());
 }
 
-void RecordingContext::enterComponent(std::string name) {
+void RecordingContext::enterComponent(const char* name, mlir::Type layoutType) {
   assert(!componentBody && "starting a new component without ending the previous one");
 
   // Create a temporary region in the module where the component will be built
-  componentName = builder.getStringAttr(name);
+  componentName = name;
   componentBody = new Region(moduleOp);
   builder.setInsertionPointToStart(builder.createBlock(componentBody));
+  componentBody->addArgument(layoutType, builder.getUnknownLoc());
   zero = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), builder.getIndexAttr(0));
 }
 
@@ -52,8 +53,12 @@ void RecordingContext::exitComponent() {
   // Now move the temporary body into a function with the right signature
   builder.setInsertionPointToEnd(moduleOp.getBody());
   auto funcType = FunctionType::get(mlirCtx, componentBody->getArgumentTypes(), {compType});
-  auto component = builder.create<zirgen::Zhlt::ComponentOp>(
-      builder.getUnknownLoc(), componentName, funcType, nullptr, nullptr, nullptr);
+  auto component = builder.create<zirgen::Zhlt::ComponentOp>(builder.getUnknownLoc(),
+                                                             builder.getStringAttr(componentName),
+                                                             funcType,
+                                                             nullptr,
+                                                             nullptr,
+                                                             nullptr);
   component.getBody().takeBody(*componentBody);
   component->setAttr("picus_analyze", builder.getUnitAttr());
   componentBody = nullptr;
@@ -63,7 +68,8 @@ void RecordingContext::exitComponent() {
 RecordingVal RecordingContext::addValParameter() {
   assert(componentBody && "adding parameter without a component");
   mlir::Type val = zirgen::Zhlt::getValType(mlirCtx);
-  mlir::Value param = componentBody->addArgument(val, builder.getUnknownLoc());
+  auto pos = componentBody->getNumArguments() - 1;
+  mlir::Value param = componentBody->insertArgument(pos, val, builder.getUnknownLoc());
   return RecordingVal(param);
 }
 

@@ -4,15 +4,16 @@ compile_riscv_tests()
 
 cc_test(
     name = "test",
-    size = "enormous",
+    size = "large",
     srcs = ["test.cpp"],
     data = [":riscv_test_bins"],
     deps = ["//rv32im/test:test_prove"],
+    shard_count = 16,
 )
 
 cc_test(
     name = "test_atomics",
-    size = "enormous",
+    size = "large",
     srcs = ["test_atomics.cpp"],
     data = [
         "//firmware",

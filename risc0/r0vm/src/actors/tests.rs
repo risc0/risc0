@@ -63,24 +63,17 @@ async fn basic() {
             version: VERSION,
             release_channel: None,
             api: None,
-            manager: Some(ManagerConfig {
-                allocator: None,
-                listen: None,
-            }),
-            allocator: Some(AllocatorConfig {
-                listen: None,
-                default_release_channel: None,
-                worker_task_limit: None,
-            }),
+            manager: Some(ManagerConfig::default()),
+            allocator: Some(AllocatorConfig::default()),
             executor: Some(ExecutorConfig {
-                allocator: None,
                 count: 1,
+                ..Default::default()
             }),
             prover: Some(vec![crate::actors::config::ProverConfig {
-                allocator: None,
                 count: Some(100),
                 subscribe: task_kinds.clone(),
                 simulate: Some(PROFILE_RTX_5090),
+                ..Default::default()
             }]),
             storage: Some(StorageConfig {
                 path: storage_root.to_path_buf(),

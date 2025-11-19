@@ -147,17 +147,31 @@ impl Segment {
 
 /// The results of running preflight on a [Segment].
 pub struct PreflightResults {
+    #[cfg(not(feature = "rv32im-m3"))]
     pub(crate) inner: risc0_circuit_rv32im::prove::PreflightResults,
-
+    #[cfg(feature = "rv32im-m3")]
+    pub(crate) inner: risc0_circuit_rv32im_m3::prove::PreflightContext,
     pub(crate) terminate_state: Option<TerminateState>,
     pub(crate) output: Option<Output>,
+    #[cfg(not(feature = "rv32im-m3"))]
     pub(crate) segment_index: u32,
 }
 
 impl PreflightResults {
     /// The index of the [Segment] this [PreflightResults] came from.
     pub fn segment_index(&self) -> u32 {
-        self.segment_index
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "rv32im-m3")] {
+                0
+            } else {
+                self.segment_index
+            }
+        }
+    }
+
+    /// The po2
+    pub fn po2(&self) -> u32 {
+        self.inner.po2()
     }
 }
 

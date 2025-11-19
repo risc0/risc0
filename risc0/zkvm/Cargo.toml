@@ -164,6 +164,11 @@ cuda = [
   "risc0-groth16/cuda",
   "risc0-zkp/cuda",
 ]
+dual = [
+  "cuda",
+  # Only recursion supports dual right now
+  "risc0-circuit-recursion/dual"
+]
 default = ["client", "bonsai"]
 r0vm-ver-compat = []
 disable-dev-mode = []
@@ -174,7 +179,6 @@ disable-dev-mode = []
 # While this is acceptable for most tests, the tests counting cycles and
 # segments will fail intermittently. It does not effect non-test code.
 docker = []
-dual = []
 # The zkVM exposes a getrandom implementation that panics by default. This will
 # expose a getrandom implementation that uses the `sys_random` ecall.
 getrandom = ["risc0-zkvm-platform/getrandom"]

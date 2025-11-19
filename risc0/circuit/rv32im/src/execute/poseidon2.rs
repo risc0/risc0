@@ -149,6 +149,13 @@ impl Poseidon2State {
                 self.step(ctx, &mut cur_state, CycleState::PoseidonExtRound, i as u32);
                 self.do_ext_round(i);
             }
+
+            if ctx.circuit_version() == RV32IM_M3_CIRCUIT_VERSION && self.count != 1 {
+                for i in 0..DIGEST_WORDS {
+                    ctx.store_u32(RV32IM_M3_P2_TRASH_ADDR.waddr() + i, self.inner[i])?;
+                }
+            }
+
             self.count -= 1;
         }
 
@@ -180,6 +187,13 @@ impl Poseidon2State {
             self.step(ctx, &mut cur_state, CycleState::PoseidonStoreState, 0);
             for i in 0..DIGEST_WORDS {
                 ctx.store_u32(state_addr + i, self.inner[DIGEST_WORDS * 2 + i])?;
+            }
+        } else if ctx.circuit_version() == RV32IM_M3_CIRCUIT_VERSION {
+            for i in 0..DIGEST_WORDS {
+                ctx.store_u32(
+                    RV32IM_M3_P2_TRASH_ADDR.waddr() + i,
+                    self.inner[DIGEST_WORDS * 2 + i],
+                )?;
             }
         }
 

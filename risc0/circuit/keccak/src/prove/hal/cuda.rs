@@ -52,7 +52,7 @@ use super::{CircuitWitnessGenerator, MetaBuffer, PreflightCycleOrder, PreflightT
 use crate::prove::preflight::ControlState;
 
 pub struct CudaCircuitHal<CH: CudaHash> {
-    hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
+    hal: Rc<CudaHal<CH>>,
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
@@ -96,6 +96,7 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
         let from = self.hal.copy_from_u32("from", from);
         ffi_wrap(|| unsafe {
             risc0_circuit_keccak_cuda_scatter(
+                self.hal.stream.as_inner(),
                 into.buf.as_device_ptr(),
                 infos.as_ptr(),
                 from.as_device_ptr(),
@@ -149,7 +150,13 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
             run_order: run_order.as_ptr(),
         };
         ffi_wrap(|| unsafe {
-            risc0_circuit_keccak_cuda_witgen(mode as u32, &buffers, &preflight, cycles as u32)
+            risc0_circuit_keccak_cuda_witgen(
+                self.hal.stream.as_inner(),
+                mode as u32,
+                &buffers,
+                &preflight,
+                cycles as u32,
+            )
         })
     }
 }
@@ -203,13 +210,16 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 
         tracing::debug!("steps: {steps}, domain: {domain}, po2: {po2}, rou: {rou:?}");
         let poly_mix_pows = map_pow(poly_mix, POLY_MIX_POWERS);
-        let poly_mix_pows: &[u32; BabyBearExtElem::EXT_SIZE * NUM_POLY_MIX_POWERS] =
+        let poly_mix_pows_vec: &[u32; BabyBearExtElem::EXT_SIZE * NUM_POLY_MIX_POWERS] =
             BabyBearExtElem::as_u32_slice(poly_mix_pows.as_slice())
                 .try_into()
                 .unwrap();
+        let poly_mix_pows =
+            CudaBuffer::copy_from("poly_mix", &poly_mix_pows_vec[..], self.hal.stream.clone());
 
         ffi_wrap(|| unsafe {
             risc0_circuit_keccak_cuda_eval_check(
+                self.hal.stream.as_inner(),
                 check.as_device_ptr(),
                 ctrl.as_device_ptr(),
                 data.as_device_ptr(),
@@ -219,7 +229,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 &rou as *const BabyBearElem,
                 po2 as u32,
                 domain as u32,
-                poly_mix_pows.as_ptr(),
+                poly_mix_pows.as_device_ptr().as_ptr() as *const BabyBearExtElem,
             )
         })
         .unwrap();

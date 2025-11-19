@@ -56,6 +56,8 @@ pub struct Segment {
     pub index: u64,
 
     pub povw_nonce: Option<PovwNonce>,
+
+    pub insn_counter: u32,
 }
 
 impl Segment {

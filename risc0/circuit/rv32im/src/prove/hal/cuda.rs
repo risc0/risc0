@@ -49,15 +49,15 @@ use super::{
 };
 
 pub struct CudaCircuitHal<CH: CudaHash> {
-    _hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
+    hal: Rc<CudaHal<CH>>,
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
-    pub fn new(_hal: Rc<CudaHal<CH>>) -> Self {
+    pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
         #[cfg(test)]
         gpu_guard::assert_gpu_semaphore_held();
 
-        Self { _hal }
+        Self { hal }
     }
 }
 
@@ -111,7 +111,13 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {
-            risc0_circuit_rv32im_cuda_witgen(mode as u32, &buffers, &preflight, cycles as u32)
+            risc0_circuit_rv32im_cuda_witgen(
+                self.hal.stream.as_inner(),
+                mode as u32,
+                &buffers,
+                &preflight,
+                cycles as u32,
+            )
         })
     }
 }
@@ -166,7 +172,14 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
             bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
-        ffi_wrap(|| unsafe { risc0_circuit_rv32im_cuda_accum(&buffers, &preflight, cycles as u32) })
+        ffi_wrap(|| unsafe {
+            risc0_circuit_rv32im_cuda_accum(
+                self.hal.stream.as_inner(),
+                &buffers,
+                &preflight,
+                cycles as u32,
+            )
+        })
     }
 }
 
@@ -219,13 +232,16 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 
         tracing::debug!("steps: {steps}, domain: {domain}, po2: {po2}, rou: {rou:?}");
         let poly_mix_pows = map_pow(poly_mix, POLY_MIX_POWERS);
-        let poly_mix_pows: &[u32; ExtVal::EXT_SIZE * NUM_POLY_MIX_POWERS] =
+        let poly_mix_pows_vec: &[u32; ExtVal::EXT_SIZE * NUM_POLY_MIX_POWERS] =
             ExtVal::as_u32_slice(poly_mix_pows.as_slice())
                 .try_into()
                 .unwrap();
+        let poly_mix_pows =
+            CudaBuffer::copy_from("poly_mix", &poly_mix_pows_vec[..], self.hal.stream.clone());
 
         ffi_wrap(|| unsafe {
             risc0_circuit_rv32im_cuda_eval_check(
+                self.hal.stream.as_inner(),
                 check.as_device_ptr(),
                 ctrl.as_device_ptr(),
                 data.as_device_ptr(),
@@ -235,7 +251,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 &rou as *const Val,
                 po2 as u32,
                 domain as u32,
-                poly_mix_pows.as_ptr(),
+                poly_mix_pows.as_device_ptr().as_ptr() as *const ExtVal,
             )
         })
         .unwrap();

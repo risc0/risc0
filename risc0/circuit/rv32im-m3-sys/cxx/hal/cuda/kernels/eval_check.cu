@@ -16,7 +16,8 @@
 #include "hal/po2s.h"
 
 #define PO2(x)                                                                                     \
-  extern "C" void eval_check_cuda_##x(Fp* check,                                                   \
+  extern "C" void eval_check_cuda_##x(cudaStream_t stream,                                         \
+                                      Fp* check,                                                   \
                                       const Fp* data,                                              \
                                       const Fp* accum,                                             \
                                       const Fp* globals,                                           \
@@ -27,7 +28,8 @@ PO2S
 #undef PO2
 
     extern "C" void
-    eval_check_cuda(Fp* check,
+    eval_check_cuda(cudaStream_t stream,
+                    Fp* check,
                     const Fp* data,
                     const Fp* accum,
                     const Fp* globals,
@@ -39,7 +41,7 @@ PO2S
   switch (po2) {
 #define PO2(x)                                                                                     \
   case x:                                                                                          \
-    eval_check_cuda_##x(check, data, accum, globals, accMix, ecMix, rou);                          \
+    eval_check_cuda_##x(stream, check, data, accum, globals, accMix, ecMix, rou);                  \
     break;
     PO2S
 #undef PO2

@@ -37,10 +37,16 @@ __global__ void query_kernel(Fp* out,
   }
 }
 
-extern "C" bool
-cuda_query(Fp* out, Fp* data, Fp* tree, size_t querySize, size_t rows, size_t cols, size_t idx) {
+extern "C" bool cuda_query(cudaStream_t stream,
+                           Fp* out,
+                           Fp* data,
+                           Fp* tree,
+                           size_t querySize,
+                           size_t rows,
+                           size_t cols,
+                           size_t idx) {
   size_t block_size = querySize < 256 ? querySize : 256;
   size_t num_blocks = (querySize + block_size - 1) / block_size;
-  query_kernel<<<num_blocks, block_size, 0>>>(out, data, tree, querySize, rows, cols, idx);
+  query_kernel<<<num_blocks, block_size, 0, stream>>>(out, data, tree, querySize, rows, cols, idx);
   return true;
 }

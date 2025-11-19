@@ -566,13 +566,15 @@ fn main() {
             ];
             let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
 
-            unsafe {
-                sys_poseidon2(
-                    null_mut(),
-                    input.as_ptr() as *const u8,
-                    &mut actual,
-                    PFLAG_IS_ELEM | 1u32,
-                );
+            for _ in 0..100_000 {
+                unsafe {
+                    sys_poseidon2(
+                        null_mut(),
+                        input.as_ptr() as *const u8,
+                        &mut actual,
+                        PFLAG_IS_ELEM | 1u32,
+                    );
+                }
             }
             assert_eq!(expected, actual);
         }
