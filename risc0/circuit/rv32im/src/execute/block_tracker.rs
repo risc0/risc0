@@ -144,18 +144,25 @@ impl BlockTracker {
             + block_count * (row_points(BlockType::P2Step) + Self::p2_points());
     }
 
+    const fn page_tree_inner_levels() -> u64 {
+        // tree_levels = tree_height + 1
+        // tree_height = floor(log2(NUM_PAGES))
+        // inner_block_levels = tree_levels - 1 = tree_height = floor(log2(NUM_PAGES))
+        NUM_PAGES.ilog2() as u64
+    }
+
     const fn page_in_points() -> u64 {
-        let tree_height = NUM_PAGES.ilog2() as u64;
         row_points(BlockType::PageInPage)
             + (row_points(BlockType::PageInPart) + Self::p2_points()) * NUM_PARTS
-            + (row_points(BlockType::PageInNode) + Self::p2_points()) * (tree_height - 1)
+            + (row_points(BlockType::PageInNode) + Self::p2_points())
+                * Self::page_tree_inner_levels()
     }
 
     const fn page_out_points() -> u64 {
-        let tree_height = NUM_PAGES.ilog2() as u64;
         row_points(BlockType::PageOutPage)
             + (row_points(BlockType::PageOutPart) + Self::p2_points()) * NUM_PARTS
-            + (row_points(BlockType::PageOutNode) + Self::p2_points()) * (tree_height - 1)
+            + (row_points(BlockType::PageOutNode) + Self::p2_points())
+                * Self::page_tree_inner_levels()
     }
 
     pub fn row_count(&self, page_touches: u64) -> u64 {
