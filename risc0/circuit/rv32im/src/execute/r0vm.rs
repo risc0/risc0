@@ -90,19 +90,9 @@ pub(crate) trait Risc0Context {
 
     #[inline(always)]
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
-        let mut region = Vec::with_capacity(size);
-        if addr.is_aligned() && size.is_multiple_of(WORD_SIZE) {
-            let mut waddr = addr.waddr();
-            for _ in (0..size).step_by(WORD_SIZE) {
-                let word = self.load_u32(op, waddr.postfix_inc())?;
-                region.extend_from_slice(&word.to_le_bytes());
-            }
-        } else {
-            for i in 0..size {
-                region.push(self.load_u8(op, addr + i)?);
-            }
-        }
-        Ok(region)
+        let mut buf = vec![0u8; size];
+        self.read_region(op, addr, size)?.read_exact(&mut buf)?;
+        Ok(buf)
     }
 
     /// Create an [`std::io`] reader over the given memory region for streaming reads.
@@ -116,14 +106,29 @@ pub(crate) trait Risc0Context {
         }
 
         impl<C: Risc0Context + ?Sized> Read for Reader<'_, C> {
+            #[inline(always)]
             fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
                 let end = ByteAddr::min(self.pos.saturating_add(buf.len() as u32), self.end);
                 let size = (end.0 - self.pos.0) as usize;
-                let region = self
-                    .ctx
-                    .load_region(self.op, self.pos, size)
-                    .map_err(std::io::Error::other)?;
-                buf[..size].copy_from_slice(&region);
+                if self.pos.is_aligned()
+                    && let Ok(wbuf) = bytemuck::try_cast_slice_mut(&mut buf[..size])
+                {
+                    let waddr = self.pos.waddr();
+                    for (pos, word) in wbuf.iter_mut().enumerate() {
+                        *word = self
+                            .ctx
+                            .load_u32(self.op, waddr + pos)
+                            .map_err(std::io::Error::other)?
+                            .to_le();
+                    }
+                } else {
+                    for (pos, byte) in buf[..size].iter_mut().enumerate() {
+                        *byte = self
+                            .ctx
+                            .load_u8(self.op, self.pos + pos)
+                            .map_err(std::io::Error::other)?;
+                    }
+                }
                 self.pos += size;
                 Ok(size)
             }

@@ -15,7 +15,10 @@
 
 pub mod analyze;
 
-use std::{collections::BTreeMap, io::BufReader};
+use std::{
+    collections::BTreeMap,
+    io::{BufReader, Read},
+};
 
 use anyhow::{Result, ensure};
 use malachite::Natural;
@@ -167,6 +170,13 @@ pub fn ecall_execute(ctx: &mut impl Risc0Context) -> Result<usize> {
     Ok(cycles)
 }
 
+// A thin function to drain a reader. Optimizes well with inlining.
+fn drain(mut reader: impl Read) -> std::io::Result<()> {
+    let mut buf = [0u8; 8 << 10];
+    while reader.read(&mut buf)? > 0 {}
+    Ok(())
+}
+
 pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
     tracing::debug!("ecall");
 
@@ -211,22 +221,16 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
 
     // Read the verify program and the witness so that they are paged-in, and the cycles for
     // loading them are recorded.
-    std::io::copy(
-        &mut ctx.read_region(
-            LoadOp::Load,
-            verify_program_ptr.baddr(),
-            verify_program_size * WORD_SIZE,
-        )?,
-        &mut std::io::sink(),
-    )?;
-    std::io::copy(
-        &mut ctx.read_region(
-            LoadOp::Load,
-            consts_ptr.baddr(),
-            consts_size as usize * WORD_SIZE,
-        )?,
-        &mut std::io::sink(),
-    )?;
+    drain(ctx.read_region(
+        LoadOp::Load,
+        verify_program_ptr.baddr(),
+        verify_program_size * WORD_SIZE,
+    )?)?;
+    drain(ctx.read_region(
+        LoadOp::Load,
+        consts_ptr.baddr(),
+        consts_size as usize * WORD_SIZE,
+    )?)?;
 
     Ok(BigIntExec {
         #[cfg(feature = "prove")]
