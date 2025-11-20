@@ -27,6 +27,7 @@ pub enum BlockType {
 
 
 impl BlockType {
+    ATTR(allow, clippy::identity_op)
     pub const COUNT: usize = 0
 #define BLOCK_TYPE(name, count) + 1
       BLOCK_TYPES
