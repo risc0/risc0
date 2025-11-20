@@ -15,6 +15,8 @@
 
 #include "rv32im/witness/block_types.h"
 
+// clang-format off
+
 #define HASH #
 #define ATTR(key, ...) HASH [key(__VA_ARGS__)]
 
@@ -42,3 +44,5 @@ impl BlockType {
         }
     }
 }
+
+// clang-format on
