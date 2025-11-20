@@ -274,7 +274,8 @@ struct JitContext {
   // 0 point is here
   // 128 for user + system + 'junk' space
   std::array<uint64_t, 128> riscvRegs;
-  JitExec* callback;
+  FuncPtr2 pageMissFunc;
+  JitExec* callbackObj;
 };
 
 class JitExec {
@@ -289,8 +290,9 @@ private:
     PageDetails* data = pages[page];
     if (!data) {
       data = new PageDetails;
+      PagePtr ipage = image.getPage(page);
       for (size_t i = 0; i < MPAGE_SIZE_WORDS; i++) {
-        (*data)[i].value = (*image.getPage(page))[i];
+        (*data)[i].value = (*ipage)[i];
         (*data)[i].cycle = 0;
       }
       pages[page] = data;
@@ -308,13 +310,13 @@ private:
   }
 
   // Handle branch instruction
-  void doBranch(CmpOp op, const ExpandedInst& inst, uint32_t pc, uint32_t nextPc) {
+  bool endBranch(CmpOp op, const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
     // Make a branch
     uint32_t branchFixup = a.doBranch(op, 0);
     // This will be the 'fallthough case', intially just fall through
     uint32_t fallthoughFixup = a.doLocalJump();
     // Set return value for dispatch (what to patch, where to patch to)
-    uint64_t ret = (uint64_t(fallthoughFixup) << 32) | nextPc;
+    uint64_t ret = (uint64_t(fallthoughFixup) << 32) | newPc;
     a.doLoadImm64(Reg::RAX, ret);
     a.doRet();
     // Ok, now handle branch patch
@@ -324,34 +326,71 @@ private:
     ret = (uint64_t(branchFixup) << 32) | dest;
     a.doLoadImm64(Reg::RAX, ret);
     a.doRet();
+    return true;
   }
 
-#if 0
-  // Do AUIPC instruction
-  void doAUIPC(const ExpandedInst& inst, uint32_t pc) {
-    logRd(inst.rd);
-    a.doLoadImm32(Reg::EAX, pc + inst.imm);
-    doRegPost(inst);
+  bool endJal(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
+    throw std::runtime_error("Unimplemented");
   }
 
-  // Do LUI instruction
-  void doLUI(const ExpandedInst& inst) {
-    logRd(inst.rd);
-    a.doLoadImm32(Reg::EAX, inst.imm);
-    doRegPost(inst);
+  bool endJalr(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
+    throw std::runtime_error("Unimplemented");
   }
 
-  void doECALL(uint32_t nextPc) {
-    // Just call the exit block, but with null fixup
-    a.doLoadImm64(Reg::EAX, nextPc);
-    a.doLocalJump(exitOffset);
+  bool endEcall(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
+    uint64_t ret = pc;
+    a.doLoadImm64(Reg::RAX, ret);
+    a.doRet();
+    return true;
   }
-#endif
+
+  bool endMret(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
+    throw std::runtime_error("Unimplemented");
+  }
+
+  bool doUnhandled(uint32_t& cost, const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
+    throw std::runtime_error("Unimplemented");
+  }
+
+  bool doInst(uint32_t& cost, uint32_t offset, const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
+    a.doLoadImm32(Reg::R8, (inst.rd == 0 ? 64 : inst.rd));
+    a.doLoadImm32(Reg::R9, inst.rs1);
+    a.doLoadImm32(Reg::R10, (inst.rs1 == inst.rs2) ? inst.rs2 + 64 : inst.rs2);;
+    a.doLoadImm32(Reg::R11, inst.imm);
+    a.doLoadImm32(Reg::R12, pc);
+    a.doCall(offset);
+    cost++;  // TODO handle variable costs
+    switch (Opcode(inst.opcode)) {
+      case Opcode::BEQ: return endBranch(CmpOp::JE, inst, pc, newPc);
+      case Opcode::BNE: return endBranch(CmpOp::JNE, inst, pc, newPc);
+      case Opcode::BLT: return endBranch(CmpOp::JL, inst, pc, newPc);
+      case Opcode::BGE: return endBranch(CmpOp::JNL, inst, pc, newPc);
+      case Opcode::BLTU: return endBranch(CmpOp::JB, inst, pc, newPc);
+      case Opcode::BGEU: return endBranch(CmpOp::JNB, inst, pc, newPc);
+      case Opcode::JAL: return endJal(inst, pc, newPc);
+      case Opcode::JALR: return endJalr(inst, pc, newPc);
+      case Opcode::ECALL: return endEcall(inst, pc, newPc);
+      case Opcode::MRET: return endMret(inst, pc, newPc);
+      default: break;
+    }
+    return false;
+  }
+
+  uint64_t pageMiss(uint64_t page) {
+    PageDetails* pageDetails = getPage(page);
+    return reinterpret_cast<uint64_t>(pageDetails);
+  }
+
+  static uint64_t invokePageMiss(uint64_t ctxAddr, uint64_t val) {
+    ctxAddr -= offsetof(JitContext, riscvRegs);
+    JitContext* ctx = reinterpret_cast<JitContext*>(ctxAddr);
+    return ctx->callbackObj->pageMiss(val);
+  };
 
 public:
   JitExec(MemoryImage& image) 
     : image(image)
-    , a(1024)
+    , a(4096)
   {
     auto builtins = loadFile("jit/jit_asm.bin");
     a.addBuiltins(builtins);
@@ -362,7 +401,8 @@ public:
     ctx.quota = maxLog;
     ctx.log = log.data();
     ctx.pages = pages.data();
-    ctx.callback = this;
+    ctx.pageMissFunc = invokePageMiss;
+    ctx.callbackObj = this;
     // TODO: Copy from memory image
     for (size_t i = 0; i < 128; i++) {
       ctx.riscvRegs[i] = 0;
@@ -380,14 +420,6 @@ public:
     return a.call(gsym_enter, ctxAddr, a.getAddr(offset));
   }
 
-  void doInst(uint32_t offset, const ExpandedInst& inst) {
-    a.doLoadImm32(Reg::R8, (inst.rd == 0 ? 64 : inst.rd));
-    a.doLoadImm32(Reg::R9, inst.rs1);
-    a.doLoadImm32(Reg::R10, inst.rs2);
-    a.doLoadImm32(Reg::R11, inst.imm);
-    a.doCall(offset);
-  }
-
   uint32_t jitBlockAt(uint32_t pc) {
     bool done = false;
     uint32_t blockOffset = a.getOffset();
@@ -398,31 +430,25 @@ public:
       ExpandedInst exInst = expand(inst);
       uint64_t exFlat;
       memcpy(&exFlat, &exInst, sizeof(ExpandedInst));
-      LOG(0, "PC: " << HexWord{pc} << " - " << getOpcodeName(Opcode(exInst.opcode)));
-      LOG(0, "  rd = " << uint32_t(exInst.rd) << ", rs1 = " << uint32_t(exInst.rs1) << 
+      LOG(2, "PC: " << HexWord{pc} << " - " << getOpcodeName(Opcode(exInst.opcode)) << 
+          "  rd = " << uint32_t(exInst.rd) << ", rs1 = " << uint32_t(exInst.rs1) << 
           ", rs2 = " << uint32_t(exInst.rs2) << ", imm = " << std::hex << exInst.imm << std::dec);
+      uint32_t newPc = pc + 4;  // This will change when we do compressed mode
       switch(Opcode(exInst.opcode)) {
-        case Opcode::ADDI:
-          doInst(gsym_do_ADDI, exInst);
-          cost += 1;
+#define ENTRY(name, ...)  \
+        case Opcode::name:  \
+          done = doInst(cost, gsym_do_ ## name, exInst, pc, newPc); \
           break;
-        case Opcode::BNE:
-          doInst(gsym_do_BNE, exInst);
-          doBranch(CmpOp::JNE, exInst, pc, pc + 4); 
-          cost += 1;
-          done = true;
-          break;
-        case Opcode::LUI:
-          doInst(gsym_do_LUI, exInst);
-          cost += 1;
-          break;
+#include "rv32im/base/rv32im.inc"
+#undef ENTRY
         default:
-          throw std::runtime_error("Unhandled instruction");
+          done = doUnhandled(cost, exInst, pc, newPc);
+          break;
       }
-      pc += 4;
+      pc = newPc;
     }
-    LOG(0, "Block offset = " << blockOffset);
-    //a.fixupImm(quotaDec, cost);
+    // TODO: apply quota check
+    // a.fixupImm(quotaDec, cost);
     return blockOffset; 
   }
 
@@ -433,7 +459,7 @@ public:
       auto it = blockCache.find(pc);
       uint32_t bstart;
       if (it == blockCache.end()) {
-        LOG(0, "Jitting BB = " << HexWord{pc});
+        LOG(1, "Jitting BB = " << HexWord{pc});
         bstart = jitBlockAt(pc);
         if (bstart == 0) { return; }
         blockCache[pc] = bstart;
@@ -443,14 +469,11 @@ public:
       if (fixAddr) {
         a.fixup(fixAddr, bstart);
       }
-      LOG(0, "Entering block, PC = " << HexWord{pc} << ", cycle = " << (ctx.cycle >> 32) << ", quota = " << ctx.quota);
-      LOG(0, "  log offset = " << ctx.log - log.data());
+      LOG(1, "Entering block, PC = " << HexWord{pc} << ", cycle = " << (ctx.cycle >> 32) << ", quota = " << ctx.quota);
       uint64_t ret = enterBlock(bstart);
-      LOG(0, "  ret = " << std::hex << ret << std::hex);
-      LOG(0, "  new cycle = " << (ctx.cycle >> 32) << ", new quota = " << ctx.quota);
-      LOG(0, "  new log offset = " << ctx.log - log.data());
       fixAddr = ret >> 32;
       pc = ret & 0xffffffff;
+      LOG(1, "  new PC = " << HexWord{pc} << ", new cycle = " << (ctx.cycle >> 32) << ", new quota = " << ctx.quota);
       if (ctx.quota < 0) { break; }
       if (fixAddr == 0) {
         LOG(0, "ECALL HIT");
@@ -458,33 +481,58 @@ public:
       }
     }
   }
-
-  void dump() {
-    for (size_t i = 0; i < 10; i++) {
-      LOG(0, "  " << 
-          getOpcodeName(Opcode(log[i].inst.opcode)) << 
-          ", rd = " << uint32_t(log[i].inst.rd) << 
-          ", rs1 = " << uint32_t(log[i].inst.rs1) << 
-          ", rs2 = " << uint32_t(log[i].inst.rs2) << 
-          ", imm = " << log[i].inst.imm);
-    }
-    /*
-    for (size_t i = 0; i < 32; i++) {
-      LOG(0, "Reg[" << i << "] = " << std::hex << riscvRegs[i] << std::dec);
-    }
-    LOG(0, "Cycle = " << std::hex << cycle << std::dec);
-    */
-  }
 };
 
-int main() {
+void runTest(const std::string& testName) {
+  std::string path = "rv32im/rvtest/" + testName;
   std::map<uint32_t, uint32_t> words;
-  //uint32_t entry = loadKernelV2(words, "rv32im/rvtest/add");
-  uint32_t entry = loadKernelV2(words, "rv32im/test/asm_loop_kernel");
+  LOG(0, "Loading " << path);
+  uint32_t entry = loadKernelV2(words, path);
   auto image = MemoryImage::fromWords(words);
-
+  LOG(0, "Making JIT engine");
   JitExec jit(image);
+  LOG(0, "Doing JIT");
   jit.jitLoop(entry);
-  LOG(0, "********* DONE ************");
-  jit.dump();
+}
+
+void runBench() {
+  std::string path = "rv32im/test/asm_loop_kernel";
+  std::map<uint32_t, uint32_t> words;
+  LOG(0, "Loading " << path);
+  uint32_t entry = loadKernelV2(words, path);
+  auto image = MemoryImage::fromWords(words);
+  LOG(0, "Making JIT engine");
+  JitExec jit(image);
+  LOG(0, "Doing JIT");
+  jit.jitLoop(entry);
+}
+
+
+int main() {
+  runBench();
+  runTest("add");
+  runTest("sub");
+  runTest("xor");
+  runTest("or");
+  runTest("and");
+  runTest("slt");
+  runTest("sltu");
+  runTest("addi");
+  runTest("xori");
+  runTest("ori");
+  runTest("andi");
+  runTest("slti");
+  runTest("sltiu");
+  runTest("beq");
+  runTest("bne");
+  runTest("blt");
+  runTest("bge");
+  runTest("bltu");
+  runTest("bgeu");
+  runTest("jal");
+  runTest("jalr");
+  runTest("lui");
+  runTest("auipc");
+  runTest("sll");
+  runTest("slli");
 }
