@@ -51,6 +51,9 @@ pub(crate) struct Poseidon2State {
     pub inner: [u32; CELLS],
     #[cfg(feature = "prove")]
     pub zcheck: crate::zirgen::circuit::ExtVal,
+
+    // NOTE: cur_state is not written to the trace.
+    pub cur_state: CycleState,
 }
 
 impl Poseidon2State {
@@ -79,89 +82,86 @@ impl Poseidon2State {
         }
     }
 
-    fn step<C>(
-        &mut self,
-        ctx: &mut C,
-        cur_state: &mut CycleState,
-        next_state: CycleState,
-        sub_state: u32,
-    ) where
+    fn step<C>(&mut self, ctx: &mut C, next_state: CycleState, sub_state: u32)
+    where
         C: Risc0Context + ?Sized,
     {
         self.next_state = next_state;
         self.sub_state = sub_state;
-        ctx.on_poseidon2_cycle(*cur_state, self);
-        *cur_state = next_state;
+        ctx.on_poseidon2_cycle(self.cur_state, self);
+        self.cur_state = next_state;
     }
 
-    pub(crate) fn rest(
+    pub(crate) fn run(
         &mut self,
-        ctx: &mut impl Risc0Context,
+        ctx: &mut (impl Risc0Context + ?Sized),
         final_state: CycleState,
     ) -> Result<()> {
-        let mut cur_state = self.next_state;
+        self.run_with_mix(ctx, final_state, |p2, ctx| {
+            p2.mix(ctx);
+            Ok(())
+        })
+    }
 
+    pub(crate) fn run_with_mix<F, C>(
+        &mut self,
+        ctx: &mut C,
+        final_state: CycleState,
+        mut mix: F,
+    ) -> Result<()>
+    where
+        F: FnMut(&mut Self, &mut C) -> Result<()>,
+        C: Risc0Context + ?Sized,
+    {
         // If we have state, load it
         if self.has_state == 1 {
-            self.load_p2_state(ctx, &mut cur_state)?;
+            self.load_p2_state(ctx)?;
         }
 
         // While we have data to process
         // tracing::debug!("buf_in_addr: {buf_in_addr:?}");
         while self.count > 0 {
-            self.load_buf_in(ctx, &mut cur_state)?;
-            ctx.ecall_poseidon2_mix(&mut cur_state, self);
+            self.load_buf_in(ctx)?;
+            mix(self, ctx)?;
             self.count -= 1;
         }
 
-        self.store_buf_out(ctx, &mut cur_state)?;
+        self.store_buf_out(ctx)?;
 
         self.buf_in_addr = 0;
 
         if self.has_state == 1 {
-            self.store_p2_state(ctx, &mut cur_state)?;
+            self.store_p2_state(ctx)?;
         }
 
-        self.step(ctx, &mut cur_state, final_state, 0);
+        self.step(ctx, final_state, 0);
 
         Ok(())
     }
 
-    fn load_p2_state(
-        &mut self,
-        ctx: &mut impl Risc0Context,
-        cur_state: &mut CycleState,
-    ) -> Result<()> {
+    fn load_p2_state(&mut self, ctx: &mut (impl Risc0Context + ?Sized)) -> Result<()> {
         let state_addr = WordAddr(self.state_addr);
 
-        self.step(ctx, cur_state, CycleState::PoseidonLoadState, 0);
+        self.step(ctx, CycleState::PoseidonLoadState, 0);
         for i in 0..DIGEST_WORDS {
             self.inner[DIGEST_WORDS * 2 + i] = ctx.load_u32(LoadOp::Record, state_addr + i)?;
         }
         Ok(())
     }
 
-    fn store_p2_state(
-        &mut self,
-        ctx: &mut impl Risc0Context,
-        cur_state: &mut CycleState,
-    ) -> Result<()> {
+    fn store_p2_state(&mut self, ctx: &mut (impl Risc0Context + ?Sized)) -> Result<()> {
         let state_addr = WordAddr(self.state_addr);
 
-        self.step(ctx, cur_state, CycleState::PoseidonStoreState, 0);
+        self.step(ctx, CycleState::PoseidonStoreState, 0);
         for i in 0..DIGEST_WORDS {
             ctx.store_u32(state_addr + i, self.inner[DIGEST_WORDS * 2 + i])?;
         }
         Ok(())
     }
 
-    fn load_buf_in(
-        &mut self,
-        ctx: &mut impl Risc0Context,
-        cur_state: &mut CycleState,
-    ) -> Result<()> {
+    fn load_buf_in(&mut self, ctx: &mut (impl Risc0Context + ?Sized)) -> Result<()> {
         let mut buf_in_addr = WordAddr(self.buf_in_addr);
-        self.step(ctx, cur_state, CycleState::PoseidonLoadIn, 0);
+        self.step(ctx, CycleState::PoseidonLoadIn, 0);
 
         // NOTE(victor/perf): This loading logic is somewhat involved, can be shared, and does
         // not really show up on the trace. It does not need to be specialized to the executor.
@@ -173,7 +173,7 @@ impl Poseidon2State {
                 self.inner[i] = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
             }
             self.buf_in_addr = buf_in_addr.0;
-            self.step(ctx, cur_state, CycleState::PoseidonLoadIn, 1);
+            self.step(ctx, CycleState::PoseidonLoadIn, 1);
             for i in 0..DIGEST_WORDS {
                 self.inner[DIGEST_WORDS + i] =
                     ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
@@ -190,12 +190,8 @@ impl Poseidon2State {
         Ok(())
     }
 
-    fn store_buf_out(
-        &mut self,
-        ctx: &mut impl Risc0Context,
-        cur_state: &mut CycleState,
-    ) -> Result<()> {
-        self.step(ctx, cur_state, CycleState::PoseidonDoOut, 0);
+    fn store_buf_out(&mut self, ctx: &mut (impl Risc0Context + ?Sized)) -> Result<()> {
+        self.step(ctx, CycleState::PoseidonDoOut, 0);
         let buf_out_addr = WordAddr(self.buf_out_addr);
 
         // If check_out is true, then the data at buf_out is asserted to be equal to the computed
@@ -221,19 +217,19 @@ impl Poseidon2State {
         Ok(())
     }
 
-    pub(crate) fn mix<C>(&mut self, ctx: &mut C, cur_state: &mut CycleState)
+    pub(crate) fn mix<C>(&mut self, ctx: &mut C)
     where
         C: Risc0Context + ?Sized,
     {
         self.multiply_by_m_ext();
         for i in 0..ROUNDS_HALF_FULL {
-            self.step(ctx, cur_state, CycleState::PoseidonExtRound, i as u32);
+            self.step(ctx, CycleState::PoseidonExtRound, i as u32);
             self.do_ext_round(i);
         }
-        self.step(ctx, cur_state, CycleState::PoseidonIntRound, 0);
+        self.step(ctx, CycleState::PoseidonIntRound, 0);
         self.do_int_rounds();
         for i in ROUNDS_HALF_FULL..ROUNDS_HALF_FULL * 2 {
-            self.step(ctx, cur_state, CycleState::PoseidonExtRound, i as u32);
+            self.step(ctx, CycleState::PoseidonExtRound, i as u32);
             self.do_ext_round(i);
         }
     }
@@ -340,13 +336,17 @@ fn sbox2(x: u32) -> u32 {
 pub(crate) struct Poseidon2;
 
 impl Poseidon2 {
-    pub fn ecall(ctx: &mut impl Risc0Context) -> Result<()> {
-        tracing::trace!("ecall");
+    pub fn load_ecall(ctx: &mut (impl Risc0Context + ?Sized)) -> Result<Poseidon2State> {
+        tracing::trace!("load_ecall");
         let state_addr = ctx.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A0)?;
         let buf_in_addr = ctx.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A1)?;
         let buf_out_addr = ctx.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A2)?;
         let bits_count = ctx.load_machine_register(LoadOp::Record, REG_A3)?;
-        let mut p2 = Poseidon2State::new_ecall(state_addr, buf_in_addr, buf_out_addr, bits_count);
-        p2.rest(ctx, CycleState::Decode)
+        Ok(Poseidon2State::new_ecall(
+            state_addr,
+            buf_in_addr,
+            buf_out_addr,
+            bits_count,
+        ))
     }
 }
