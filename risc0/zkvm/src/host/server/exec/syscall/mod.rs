@@ -31,6 +31,7 @@ mod verify2;
 use std::{
     cell::RefCell,
     collections::HashMap,
+    io::Read,
     rc::Rc,
     sync::{Arc, Mutex},
 };
@@ -38,7 +39,7 @@ use std::{
 use anyhow::{Result, anyhow};
 use enum_map::EnumMap;
 use risc0_binfmt::ByteAddr;
-use risc0_circuit_rv32im::execute::{PAGE_BYTES, Region};
+use risc0_circuit_rv32im::execute::PAGE_BYTES;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{
     DIGEST_BYTES, SyscallName,
@@ -94,14 +95,26 @@ pub(crate) trait SyscallContext<'a> {
     /// Loads an individual word from memory.
     fn load_u32(&mut self, addr: ByteAddr) -> Result<u32>;
 
-    /// Loads bytes from the given region of memory. A region may span multiple pages.
-    fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Region<'_>>;
+    /// Loads bytes from the given region of memory.
+    ///
+    /// A region may span multiple pages.
+    fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
+        let mut region = Vec::new();
+        for i in 0..size {
+            region.push(self.load_u8(addr + i)?);
+        }
+        Ok(region)
+    }
+
+    /// Provides a reader for the given region of memory.
+    ///
+    /// A region may span multiple pages.
+    fn read_region<'b>(&'b mut self, addr: ByteAddr, size: u32) -> Result<Box<dyn Read + 'b>>;
 
     /// Loads a digest from the address in the specified register.
     fn load_digest_from_register(&mut self, idx: usize) -> Result<Digest> {
         let addr = ByteAddr(self.load_register(idx));
         self.load_region(addr, DIGEST_BYTES as u32)?
-            .into_vec()?
             .try_into()
             .map_err(|vec| anyhow!("invalid digest: {vec:?}"))
     }

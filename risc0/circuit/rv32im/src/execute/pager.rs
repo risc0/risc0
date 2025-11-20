@@ -15,17 +15,16 @@
 
 use std::{
     collections::{BTreeMap, BTreeSet},
-    io::Read,
     sync::OnceLock,
 };
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Result, bail, ensure};
 use bit_vec::BitVec;
 use derive_more::Debug;
-use risc0_binfmt::{ByteAddr, MemoryImage, Page, WordAddr};
+use risc0_binfmt::{MemoryImage, Page, WordAddr};
 
 use super::{node_idx, platform::*};
-use crate::execute::{r0vm::LoadOp, unlikely};
+use crate::execute::unlikely;
 
 pub const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
 
@@ -58,106 +57,6 @@ pub(crate) const RESERVED_PAGING_CYCLES: u32 = LOAD_ROOT_CYCLES
     + STORE_ROOT_CYCLES;
 
 const NUM_PAGES: usize = 4 * 1024 * 1024;
-
-pub struct Region<'a> {
-    pager: &'a mut PagedMemory,
-    op: LoadOp,
-    start: ByteAddr,
-    end: ByteAddr,
-}
-
-impl<'a> Region<'a> {
-    pub(crate) fn new(
-        pager: &'a mut PagedMemory,
-        op: LoadOp,
-        start: ByteAddr,
-        size: usize,
-    ) -> Result<Self> {
-        let end = start
-            .checked_add(size as u32)
-            .context("Region end is past the end of memory")?;
-        // NOTE: Load region is never called with LoadOp::Record. This op is only used in for
-        // special memory (e.g. the page tree nodes and PoVW nonce).
-        if let LoadOp::Record = op {
-            bail!("Region is not implemented for LoadOp::Record")
-        }
-
-        Ok(Self {
-            pager,
-            op,
-            start,
-            end,
-        })
-    }
-}
-
-impl Region<'_> {
-    pub fn size(&self) -> usize {
-        (self.end.0 - self.start.0) as usize
-    }
-
-    fn next_chunk(&mut self, pos: ByteAddr) -> Result<Option<&[u8]>> {
-        assert!(pos <= self.end);
-        if pos == self.end {
-            return Ok(None);
-        }
-
-        let page = match self.op {
-            LoadOp::Peek => self.pager.peek_page(pos.page_idx())?,
-            LoadOp::Load => self.pager.load_page(pos.page_idx())?,
-            LoadOp::Record => {
-                bail!("Region is not implemented for LoadOp::Record")
-            }
-        };
-        let chunk = if self.end.page_idx() == pos.page_idx() {
-            let subpage_pos = pos.page_subaddr().0 as usize;
-            let subpage_end = self.end.page_subaddr().0 as usize;
-            &page.data()[subpage_pos..subpage_end]
-        } else {
-            let subpage_pos = pos.page_subaddr().0 as usize;
-            &page.data()[subpage_pos..]
-        };
-        Ok(Some(chunk))
-    }
-
-    pub fn reader(self) -> impl Read {
-        struct Reader<'a> {
-            region: Region<'a>,
-            pos: ByteAddr,
-        }
-
-        impl Read for Reader<'_> {
-            fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-                let chunk = self
-                    .region
-                    .next_chunk(self.pos)
-                    .map_err(std::io::Error::other)?;
-                let Some(chunk) = chunk else {
-                    return Ok(0);
-                };
-                let read_len = usize::min(chunk.len(), buf.len());
-                buf[..read_len].copy_from_slice(&chunk[..read_len]);
-                self.pos += read_len;
-                Ok(read_len)
-            }
-        }
-
-        Reader {
-            pos: self.start,
-            region: self,
-        }
-    }
-
-    pub fn into_vec(mut self) -> Result<Vec<u8>> {
-        let mut pos = self.start;
-        let mut buf = Vec::with_capacity(self.size());
-        while let Some(chunk) = self.next_chunk(pos)? {
-            buf.extend_from_slice(chunk);
-            pos += chunk.len();
-        }
-        Ok(buf)
-    }
-}
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub(crate) enum PageState {
@@ -462,11 +361,9 @@ impl PagedMemory {
     }
 
     pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<&Page> {
-        // Registers are not stored in the main RAM during execution. If the page containing the
-        // memory mapped registers is requested, then they must first be written to RAM.
-        if page_idx == USER_REGS_ADDR.page_idx() || page_idx == MACHINE_REGS_ADDR.page_idx() {
-            self.write_registers();
-        }
+        // Registers are not stored in the main RAM during execution. As a result, the system page
+        // cannot be accessed with this method, as it would not be correct.
+        ensure!(page_idx != USER_REGS_ADDR.page_idx() && page_idx != MACHINE_REGS_ADDR.page_idx());
         if let Some(cache_idx) = self.page_table.get(page_idx) {
             // Loaded, get from cache
             Ok(&self.page_cache[cache_idx])
@@ -483,6 +380,7 @@ impl PagedMemory {
     #[inline(always)]
     fn load_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
+        // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}");
         let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
             cache_idx
         } else {
@@ -513,23 +411,6 @@ impl PagedMemory {
         } else {
             unimplemented!("unknown register address {base:?}");
         }
-    }
-
-    #[inline(always)]
-    pub(crate) fn load_page(&mut self, page_idx: u32) -> Result<&Page> {
-        // Registers are not stored in the main RAM during execution. If the page containing the
-        // memory mapped registers is requested, then they must first be written to RAM.
-        if page_idx == USER_REGS_ADDR.page_idx() || page_idx == MACHINE_REGS_ADDR.page_idx() {
-            self.write_registers();
-        }
-        let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
-            cache_idx
-        } else {
-            // Page-in will set the Page in the table and cache or fail.
-            self.page_in(page_idx)?;
-            self.page_table.get(page_idx).unwrap()
-        };
-        Ok(&self.page_cache[cache_idx])
     }
 
     #[inline(always)]

@@ -40,9 +40,7 @@ impl Syscall for SysVerify2 {
 
         let from_guest_ptr = ByteAddr(ctx.load_register(REG_A3));
         let from_guest_len = DIGEST_BYTES as u32 * 2;
-        let from_guest = ctx
-            .load_region(from_guest_ptr, from_guest_len)?
-            .into_vec()?;
+        let from_guest = ctx.load_region(from_guest_ptr, from_guest_len)?;
 
         let claim_digest: Digest = from_guest[..DIGEST_BYTES]
             .try_into()

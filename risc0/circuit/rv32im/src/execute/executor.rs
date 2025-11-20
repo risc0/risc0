@@ -34,7 +34,7 @@ use risc0_zkp::core::{
 
 use crate::{
     EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
-    execute::{pager::Region, rv32im::disasm},
+    execute::rv32im::disasm,
     trace::{TraceCallback, TraceEvent},
 };
 
@@ -621,17 +621,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(word)
     }
 
-    /// Implementation of [`Risc0Context::load_region`] using paged-memory [`Region`].
-    #[inline(always)]
-    fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
-        Region::new(&mut self.pager, op, addr, size)?.into_vec()
-    }
-
-    /// Implementation of [`Risc0Context::read_region`] using paged-memory [`Region`].
-    fn read_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<impl Read> {
-        Ok(Region::new(&mut self.pager, op, addr, size)?.reader())
-    }
-
     #[inline(always)]
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         // tracing::trace!(
@@ -723,8 +712,14 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
         self.load_u8(LoadOp::Peek, addr)
     }
 
-    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Region<'_>> {
-        Region::new(&mut self.pager, LoadOp::Peek, addr, size)
+    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
+        // let addr = Self::check_guest_addr(addr)?;
+        self.load_region(LoadOp::Peek, addr, size)
+    }
+
+    fn read_region(&mut self, addr: ByteAddr, size: usize) -> Result<impl Read> {
+        // let addr = Self::check_guest_addr(addr)?;
+        <Self as Risc0Context>::read_region(self, LoadOp::Peek, addr, size)
     }
 
     fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {

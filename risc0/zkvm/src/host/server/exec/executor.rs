@@ -15,6 +15,7 @@
 
 use std::{
     cell::{Cell, RefCell},
+    io::Read,
     rc::Rc,
     sync::Arc,
     time::Instant,
@@ -28,8 +29,8 @@ use risc0_binfmt::{
 use risc0_circuit_rv32im::{
     MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2,
     execute::{
-        CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, Executor, PAGE_BYTES, Region,
-        Syscall as CircuitSyscall, SyscallContext as CircuitSyscallContext, platform::WORD_SIZE,
+        CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, Executor, PAGE_BYTES, Syscall as CircuitSyscall,
+        SyscallContext as CircuitSyscallContext, platform::WORD_SIZE,
     },
 };
 use risc0_core::scope;
@@ -336,12 +337,15 @@ impl<'a> ExecutorImpl<'a> {
     }
 }
 
-struct ContextAdapter<'a, 'b> {
-    ctx: &'b mut dyn CircuitSyscallContext,
+struct ContextAdapter<'a, 'b, C> {
+    ctx: &'b mut C,
     syscall_table: SyscallTable<'a>,
 }
 
-impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
+impl<'a, C> SyscallContext<'a> for ContextAdapter<'a, '_, C>
+where
+    C: CircuitSyscallContext,
+{
     fn get_pc(&self) -> u32 {
         self.ctx.get_pc()
     }
@@ -358,8 +362,12 @@ impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
         self.ctx.peek_page(page_idx)
     }
 
-    fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Region<'_>> {
+    fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
         self.ctx.peek_region(addr, size as usize)
+    }
+
+    fn read_region<'b>(&'b mut self, addr: ByteAddr, size: u32) -> Result<Box<dyn Read + 'b>> {
+        Ok(Box::new(self.ctx.read_region(addr, size as usize)?))
     }
 
     fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {
@@ -378,7 +386,7 @@ impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
 impl CircuitSyscall for ExecutorImpl<'_> {
     fn host_read(
         &self,
-        ctx: &mut dyn CircuitSyscallContext,
+        ctx: &mut impl CircuitSyscallContext,
         fd: u32,
         buf: &mut [u8],
     ) -> Result<u32> {
@@ -417,7 +425,12 @@ impl CircuitSyscall for ExecutorImpl<'_> {
         Ok(rlen as u32)
     }
 
-    fn host_write(&self, ctx: &mut dyn CircuitSyscallContext, _fd: u32, buf: &[u8]) -> Result<u32> {
+    fn host_write(
+        &self,
+        ctx: &mut impl CircuitSyscallContext,
+        _fd: u32,
+        buf: &[u8],
+    ) -> Result<u32> {
         if tracing::enabled!(Level::DEBUG) {
             let str = String::from_utf8(buf.to_vec())?;
             tracing::debug!("R0VM[{}] {str}", ctx.get_cycle());
@@ -426,7 +439,10 @@ impl CircuitSyscall for ExecutorImpl<'_> {
     }
 }
 
-impl ContextAdapter<'_, '_> {
+impl<C> ContextAdapter<'_, '_, C>
+where
+    C: CircuitSyscallContext,
+{
     fn peek_string(&mut self, mut addr: ByteAddr) -> Result<String> {
         tracing::trace!("peek_string: {addr:?}");
         let mut buf = Vec::new();

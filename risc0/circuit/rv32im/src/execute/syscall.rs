@@ -13,19 +13,21 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use std::io::Read;
+
 use anyhow::Result;
 
 use risc0_binfmt::ByteAddr;
 
-use crate::execute::{PAGE_BYTES, pager::Region};
+use crate::execute::PAGE_BYTES;
 
 /// A host-side implementation of a system call.
 pub trait Syscall {
     /// Reads from the host.
-    fn host_read(&self, ctx: &mut dyn SyscallContext, fd: u32, buf: &mut [u8]) -> Result<u32>;
+    fn host_read(&self, ctx: &mut impl SyscallContext, fd: u32, buf: &mut [u8]) -> Result<u32>;
 
     /// Writes to the host.
-    fn host_write(&self, ctx: &mut dyn SyscallContext, fd: u32, buf: &[u8]) -> Result<u32>;
+    fn host_write(&self, ctx: &mut impl SyscallContext, fd: u32, buf: &[u8]) -> Result<u32>;
 }
 
 /// Access to memory and machine state for syscalls.
@@ -42,7 +44,12 @@ pub trait SyscallContext {
     /// Loads bytes from the given region of memory.
     ///
     /// A region may span multiple pages.
-    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Region<'_>>;
+    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Vec<u8>>;
+
+    /// Provides a reader for the given region of memory.
+    ///
+    /// A region may span multiple pages.
+    fn read_region(&mut self, addr: ByteAddr, size: usize) -> Result<impl Read>;
 
     /// Load a page from memory at the specified page index.
     ///

@@ -42,11 +42,11 @@ impl Syscall for SysLog {
         let msg = format!("R0VM[{}] ", ctx.get_cycle());
 
         let posix_io = ctx.syscall_table().posix_io.clone();
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+        let mut from_guest = ctx.read_region(buf_ptr, buf_len)?;
         let writer = posix_io.borrow().get_writer(fileno::STDOUT)?;
 
         writer.borrow_mut().write_all(msg.as_bytes())?;
-        std::io::copy(&mut from_guest.reader(), &mut *writer.borrow_mut())?;
+        std::io::copy(&mut from_guest, &mut *writer.borrow_mut())?;
         writer.borrow_mut().write_all(b"\n".as_slice())?;
         Ok((0, 0))
     }

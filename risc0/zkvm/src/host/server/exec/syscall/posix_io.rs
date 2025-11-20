@@ -106,12 +106,13 @@ impl Syscall for SysWrite {
         let fd = ctx.load_register(REG_A3);
         let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
         let buf_len = ctx.load_register(REG_A5);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+        let mut from_guest = ctx.read_region(buf_ptr, buf_len)?;
         let writer = posix_io.borrow().get_writer(fd)?;
 
         tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
 
-        std::io::copy(&mut from_guest.reader(), &mut *writer.borrow_mut())?;
+        std::io::copy(&mut from_guest, &mut *writer.borrow_mut())?;
+        drop(from_guest);
 
         let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::Write];
         metric.count += 1;
