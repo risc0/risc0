@@ -79,11 +79,19 @@ pub trait ProverServer: private::Sealed {
     ) -> Result<Vec<SegmentReceipt>> {
         tracing::debug!("prove_segment");
         let mut receipts = vec![];
-        for chunk in self.segment_preflight(segment)? {
-            tracing::debug!("chunk");
-            let receipt = self.prove_preflight(ctx, chunk?)?;
-            receipts.push(receipt);
+        let mut iter = self.segment_preflight(segment)?;
+        let chunk = iter
+            .next()
+            .ok_or_else(|| anyhow!("segment_preflight produced no segment results"))?;
+
+        if iter.next().is_some() {
+            bail!("segment_preflight produced multiple segments");
         }
+
+        tracing::debug!("chunk");
+        let receipt = self.prove_preflight(ctx, chunk?)?;
+        receipts.push(receipt);
+
         Ok(receipts)
     }
 
