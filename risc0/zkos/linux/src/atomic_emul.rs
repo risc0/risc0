@@ -1,6 +1,6 @@
 use crate::constants::*;
 use crate::host_calls::host_terminate;
-use crate::kernel::{TRACE_ENABLED, print};
+use crate::kernel::{DEBUG_ENABLED, TRACE_ENABLED, print};
 use crate::kernel::{get_ureg, mret, set_ureg};
 use no_std_strings::{str_format, str256};
 
