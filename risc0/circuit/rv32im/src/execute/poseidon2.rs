@@ -163,8 +163,6 @@ impl Poseidon2State {
         let mut buf_in_addr = WordAddr(self.buf_in_addr);
         self.step(ctx, CycleState::PoseidonLoadIn, 0);
 
-        // NOTE(victor/perf): This loading logic is somewhat involved, can be shared, and does
-        // not really show up on the trace. It does not need to be specialized to the executor.
         // If the data at buf_in_addr is already encoded as field elements, then load iteration can
         // process 16 elements. Otherwise, each u32 needs to be split into two halves and each load
         // iteration processes 8 u32s (roughly half the rate).
