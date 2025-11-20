@@ -697,6 +697,9 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Poseidon2::load_ecall(self)?.run_with_mix(self, CycleState::Decode, |p2, ctx| {
             ctx.inc_user_cycles(ROUNDS_HALF_FULL * 2 + 1, Some(EcallKind::Poseidon2));
             // Convert to Montgomery form, run the mix function, then convert back.
+            // NOTE: It's possible this could be optimized to not convert the back and forth on
+            // every mix, and instead only convert the input, initial state and final state.
+            // However, it does not seem that this conversion has a significant impact.
             let mut state = p2.inner.map(Into::into);
             risc0_zkp::core::hash::poseidon2::poseidon2_mix(&mut state);
             p2.inner = state.map(Into::into);
