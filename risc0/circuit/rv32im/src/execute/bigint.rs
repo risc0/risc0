@@ -191,6 +191,10 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
     );
 
     // NOTE(victor/perf): Program load + decode is about 4% of the e2e profile
+    //eprintln!(
+    //    "bigint::ecall decoding program at: {:#08x}",
+    //    nondet_program_ptr.baddr().0
+    //);
     let program_bytes = ctx.load_region(
         LoadOp::Load,
         nondet_program_ptr.baddr(),

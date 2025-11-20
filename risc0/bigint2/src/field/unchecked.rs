@@ -36,23 +36,31 @@ use crate::{
 
 use include_bytes_aligned::include_bytes_aligned;
 
-const MODADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "modadd_256.blob");
-const MODADD_384_BLOB: &[u8] = include_bytes_aligned!(4, "modadd_384.blob");
-const MODINV_256_BLOB: &[u8] = include_bytes_aligned!(4, "modinv_256.blob");
-const MODINV_384_BLOB: &[u8] = include_bytes_aligned!(4, "modinv_384.blob");
-const MODMUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_256.blob");
-const MODMUL_384_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_384.blob");
-const MODMUL_4096_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_4096.blob");
-const MODSUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "modsub_256.blob");
-const MODSUB_384_BLOB: &[u8] = include_bytes_aligned!(4, "modsub_384.blob");
-const EXTFIELD_DEG2_ADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg2_add_256.blob");
-const EXTFIELD_DEG2_ADD_384_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg2_add_384.blob");
-const EXTFIELD_DEG2_MUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg2_mul_256.blob");
-const EXTFIELD_DEG4_MUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg4_mul_256.blob");
-const EXTFIELD_DEG2_SUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg2_sub_256.blob");
-const EXTFIELD_DEG2_SUB_384_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg2_sub_384.blob");
-const EXTFIELD_XXONE_MUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_xxone_mul_256.blob");
-const EXTFIELD_XXONE_MUL_384_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_xxone_mul_384.blob");
+pub(crate) const MODADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "modadd_256.blob");
+pub(crate) const MODADD_384_BLOB: &[u8] = include_bytes_aligned!(4, "modadd_384.blob");
+pub(crate) const MODINV_256_BLOB: &[u8] = include_bytes_aligned!(4, "modinv_256.blob");
+pub(crate) const MODINV_384_BLOB: &[u8] = include_bytes_aligned!(4, "modinv_384.blob");
+pub(crate) const MODMUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_256.blob");
+pub(crate) const MODMUL_384_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_384.blob");
+pub(crate) const MODMUL_4096_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_4096.blob");
+pub(crate) const MODSUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "modsub_256.blob");
+pub(crate) const MODSUB_384_BLOB: &[u8] = include_bytes_aligned!(4, "modsub_384.blob");
+pub(crate) const EXTFIELD_DEG2_ADD_256_BLOB: &[u8] =
+    include_bytes_aligned!(4, "extfield_deg2_add_256.blob");
+pub(crate) const EXTFIELD_DEG2_ADD_384_BLOB: &[u8] =
+    include_bytes_aligned!(4, "extfield_deg2_add_384.blob");
+pub(crate) const EXTFIELD_DEG2_MUL_256_BLOB: &[u8] =
+    include_bytes_aligned!(4, "extfield_deg2_mul_256.blob");
+pub(crate) const EXTFIELD_DEG4_MUL_256_BLOB: &[u8] =
+    include_bytes_aligned!(4, "extfield_deg4_mul_256.blob");
+pub(crate) const EXTFIELD_DEG2_SUB_256_BLOB: &[u8] =
+    include_bytes_aligned!(4, "extfield_deg2_sub_256.blob");
+pub(crate) const EXTFIELD_DEG2_SUB_384_BLOB: &[u8] =
+    include_bytes_aligned!(4, "extfield_deg2_sub_384.blob");
+pub(crate) const EXTFIELD_XXONE_MUL_256_BLOB: &[u8] =
+    include_bytes_aligned!(4, "extfield_xxone_mul_256.blob");
+pub(crate) const EXTFIELD_XXONE_MUL_384_BLOB: &[u8] =
+    include_bytes_aligned!(4, "extfield_xxone_mul_384.blob");
 
 pub fn modadd_256(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],

@@ -28,10 +28,10 @@ pub use secp384r1::Secp384r1Curve;
 pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
 pub const EC_384_WIDTH_WORDS: usize = 384 / 32;
 
-const ADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "ec_add_256.blob");
-const DOUBLE_256_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_256.blob");
-const ADD_384_BLOB: &[u8] = include_bytes_aligned!(4, "ec_add_384.blob");
-const DOUBLE_384_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_384.blob");
+pub(crate) const ADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "ec_add_256.blob");
+pub(crate) const DOUBLE_256_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_256.blob");
+pub(crate) const ADD_384_BLOB: &[u8] = include_bytes_aligned!(4, "ec_add_384.blob");
+pub(crate) const DOUBLE_384_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_384.blob");
 
 /// Generic static curve configuration.
 pub trait Curve<const WIDTH: usize> {

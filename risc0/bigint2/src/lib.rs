@@ -47,6 +47,125 @@ fn is_less<const N: usize>(lhs: &[u32; N], rhs: &[u32; N]) -> bool {
     false
 }
 
+// DO NOT MERGE
+pub fn print_blob_addr_table() {
+    use crate::ec::{ADD_256_BLOB, ADD_384_BLOB, DOUBLE_256_BLOB, DOUBLE_384_BLOB};
+    use crate::field::unchecked::{
+        EXTFIELD_DEG2_ADD_256_BLOB, EXTFIELD_DEG2_ADD_384_BLOB, EXTFIELD_DEG2_MUL_256_BLOB,
+        EXTFIELD_DEG2_SUB_256_BLOB, EXTFIELD_DEG2_SUB_384_BLOB, EXTFIELD_DEG4_MUL_256_BLOB,
+        EXTFIELD_XXONE_MUL_256_BLOB, EXTFIELD_XXONE_MUL_384_BLOB, MODADD_256_BLOB, MODADD_384_BLOB,
+        MODINV_256_BLOB, MODINV_384_BLOB, MODMUL_256_BLOB, MODMUL_384_BLOB, MODMUL_4096_BLOB,
+        MODSUB_256_BLOB, MODSUB_384_BLOB,
+    };
+
+    println!("bigint2 blob addrs");
+    println!(
+        "ec_add_256_blob: addr {:p} size {}",
+        ADD_256_BLOB.as_ptr(),
+        ADD_256_BLOB.len()
+    );
+    println!(
+        "ec_double_256_blob: addr {:p} size {}",
+        DOUBLE_256_BLOB.as_ptr(),
+        DOUBLE_256_BLOB.len()
+    );
+    println!(
+        "ec_add_384_blob: addr {:p} size {}",
+        ADD_384_BLOB.as_ptr(),
+        ADD_384_BLOB.len()
+    );
+    println!(
+        "ec_double_384_blob: addr {:p} size {}",
+        DOUBLE_384_BLOB.as_ptr(),
+        DOUBLE_384_BLOB.len()
+    );
+    println!(
+        "ec_modadd_256_blob: addr {:p} size {}",
+        MODADD_256_BLOB.as_ptr(),
+        MODADD_256_BLOB.len()
+    );
+    println!(
+        "ec_modadd_384_blob: addr {:p} size {}",
+        MODADD_384_BLOB.as_ptr(),
+        MODADD_384_BLOB.len()
+    );
+    println!(
+        "ec_modinv_256_blob: addr {:p} size {}",
+        MODINV_256_BLOB.as_ptr(),
+        MODINV_256_BLOB.len()
+    );
+    println!(
+        "ec_modinv_384_blob: addr {:p} size {}",
+        MODINV_384_BLOB.as_ptr(),
+        MODINV_384_BLOB.len()
+    );
+    println!(
+        "ec_modmul_256_blob: addr {:p} size {}",
+        MODMUL_256_BLOB.as_ptr(),
+        MODMUL_256_BLOB.len()
+    );
+    println!(
+        "ec_modmul_384_blob: addr {:p} size {}",
+        MODMUL_384_BLOB.as_ptr(),
+        MODMUL_384_BLOB.len()
+    );
+    println!(
+        "ec_modmul_4096_blob: addr {:p} size {}",
+        MODMUL_4096_BLOB.as_ptr(),
+        MODMUL_4096_BLOB.len()
+    );
+    println!(
+        "ec_modsub_256_blob: addr {:p} size {}",
+        MODSUB_256_BLOB.as_ptr(),
+        MODSUB_256_BLOB.len()
+    );
+    println!(
+        "ec_modsub_384_blob: addr {:p} size {}",
+        MODSUB_384_BLOB.as_ptr(),
+        MODSUB_384_BLOB.len()
+    );
+    println!(
+        "ec_extfield_deg2_add_256_blob: addr {:p} size {}",
+        EXTFIELD_DEG2_ADD_256_BLOB.as_ptr(),
+        EXTFIELD_DEG2_ADD_256_BLOB.len()
+    );
+    println!(
+        "ec_extfield_deg2_add_384_blob: addr {:p} size {}",
+        EXTFIELD_DEG2_ADD_384_BLOB.as_ptr(),
+        EXTFIELD_DEG2_ADD_384_BLOB.len()
+    );
+    println!(
+        "ec_extfield_deg2_mul_256_blob: addr {:p} size {}",
+        EXTFIELD_DEG2_MUL_256_BLOB.as_ptr(),
+        EXTFIELD_DEG2_MUL_256_BLOB.len()
+    );
+    println!(
+        "ec_extfield_deg4_mul_256_blob: addr {:p} size {}",
+        EXTFIELD_DEG4_MUL_256_BLOB.as_ptr(),
+        EXTFIELD_DEG4_MUL_256_BLOB.len()
+    );
+    println!(
+        "ec_extfield_deg2_sub_256_blob: addr {:p} size {}",
+        EXTFIELD_DEG2_SUB_256_BLOB.as_ptr(),
+        EXTFIELD_DEG2_SUB_256_BLOB.len()
+    );
+    println!(
+        "ec_extfield_deg2_sub_384_blob: addr {:p} size {}",
+        EXTFIELD_DEG2_SUB_384_BLOB.as_ptr(),
+        EXTFIELD_DEG2_SUB_384_BLOB.len()
+    );
+    println!(
+        "ec_extfield_xxone_mul_256_blob: addr {:p} size {}",
+        EXTFIELD_XXONE_MUL_256_BLOB.as_ptr(),
+        EXTFIELD_XXONE_MUL_256_BLOB.len()
+    );
+    println!(
+        "ec_extfield_xxone_mul_384_blob: addr {:p} size {}",
+        EXTFIELD_XXONE_MUL_384_BLOB.as_ptr(),
+        EXTFIELD_XXONE_MUL_384_BLOB.len()
+    );
+}
+
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 const _: () = {
     assert!(

@@ -19,7 +19,10 @@ use anyhow::{Result, anyhow};
 use byteorder::{LittleEndian, ReadBytesExt};
 use malachite::{
     Integer, Natural,
-    num::{arithmetic::traits::ModInverse, basic::traits::Zero},
+    base::num::{
+        arithmetic::traits::{DivRem, ModInverse},
+        basic::traits::Zero,
+    },
 };
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
@@ -63,6 +66,7 @@ pub(crate) enum OpCode {
     Rem = 0xB,   // binary: bigint, bigint
     Quo = 0xC,   // binary: bigint, bigint
     Inv = 0xE,   // binary: bigint, bigint
+    Div = 0xF,   // binary: bigint, bigint
 }
 
 #[derive(Debug)]
@@ -175,11 +179,21 @@ impl Program {
     }
 
     pub fn eval<T: BigIntIO>(&self, io: &mut T) -> Result<()> {
+        // DO NOT MERGE
+        #[inline(always)]
+        fn print_op(name: &str) {
+            if option_env!("BIGINT2_DEBUG").is_some() {
+                eprintln!("bigint2::eval {name}");
+            }
+        }
+
         let mut regs = vec![Integer::ZERO; self.ops.len()];
-        for (op_index, op) in self.ops.iter().enumerate() {
+        let mut op_index = 0;
+        for op in self.ops.iter() {
             tracing::trace!("[{op_index}]: {op:?}");
             match op.code {
                 OpCode::Const => {
+                    print_op("const");
                     let offset = op.a;
                     let words = op.b;
                     let mut value = Natural::from(0_u64);
@@ -190,42 +204,57 @@ impl Program {
                     regs[op_index] = Integer::from(value);
                 }
                 OpCode::Load => {
+                    print_op("load");
                     let typ = &self.types[op.result_type];
                     let count = typ.coeffs.next_multiple_of(16) as u32;
                     let value = io.load(op.arena(), op.offset(), count)?;
                     regs[op_index] = value.into();
                 }
                 OpCode::Store => {
+                    print_op("store");
                     let typ = &self.types[op.result_type];
                     let count = typ.coeffs.next_multiple_of(16) as u32;
                     let value = &regs[op.b];
                     io.store(op.arena(), op.offset(), count, value.unsigned_abs_ref())?;
                 }
                 OpCode::Add => {
+                    print_op("add");
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
                     *dst = lhs + rhs;
                 }
                 OpCode::Norm => {
+                    print_op("norm");
                     let (val, _, dst) = operands_mut(op, op_index, &mut regs);
                     *dst = val.clone();
                 }
                 OpCode::Sub => {
+                    print_op("sub");
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
                     *dst = lhs - rhs;
                 }
                 OpCode::Mul => {
+                    print_op("mul");
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
                     *dst = lhs * rhs;
                 }
                 OpCode::Rem => {
+                    print_op("rem");
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
                     *dst = lhs % rhs;
                 }
                 OpCode::Quo => {
+                    print_op("quo");
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
                     *dst = lhs / rhs;
                 }
+                OpCode::Div => {
+                    print_op("div");
+                    let (lhs, rhs, quo, rem) = operands_mut_div(op, op_index, &mut regs);
+                    (*quo, *rem) = lhs.div_rem(rhs);
+                    op_index += 1;
+                }
                 OpCode::Inv => {
+                    print_op("inv");
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
                     let lhs = lhs.unsigned_abs_ref();
                     let rhs = rhs.unsigned_abs_ref();
@@ -237,6 +266,8 @@ impl Program {
                         .into();
                 }
             }
+
+            op_index += 1;
         }
         Ok(())
     }
@@ -257,4 +288,23 @@ fn operands_mut<'a>(
     let dst = &mut suffix[0];
 
     (lhs, rhs, dst)
+}
+
+fn operands_mut_div<'a>(
+    op: &Op,
+    op_index: usize,
+    regs: &'a mut [Integer],
+) -> (&'a Integer, &'a Integer, &'a mut Integer, &'a mut Integer) {
+    assert!(op.a < op_index);
+    assert!(op.b < op_index);
+    let (prefix, suffix) = regs.split_at_mut(op_index);
+
+    let lhs = &prefix[op.a];
+    let rhs = &prefix[op.b];
+
+    let (a, b) = suffix.split_at_mut(1);
+    let quo = &mut a[0];
+    let rem = &mut b[0];
+
+    (lhs, rhs, quo, rem)
 }
