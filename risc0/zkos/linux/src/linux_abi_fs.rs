@@ -3,7 +3,7 @@ use no_std_strings::{str_format, str256};
 use crate::{
     constants::*,
     host_calls::{host_log, host_terminate, host_write},
-    kernel::print,
+    kernel::{DEBUG_ENABLED, print},
     linux_abi::Err,
     p9::{
         P9Response, P9SetattrMask, Qid, RgetattrMessage, TattachMessage, TlcreateMessage,
@@ -38,7 +38,7 @@ fn validate_and_read_pathname_with_len(ptr: u32, max_len: usize) -> Result<Strin
     let valid_len = match crate::linux_abi::is_valid_user_address(ptr, max_len, false) {
         Some(len) => len,
         None => {
-            kprint!(
+            debug_print!(
                 "validate_and_read_pathname: EFAULT - invalid pointer {:#010x}",
                 ptr
             );
@@ -71,7 +71,7 @@ fn validate_user_buffer_write(ptr: u32, len: usize) -> Result<(), Err> {
     match crate::linux_abi::is_valid_user_address(ptr, len, true) {
         Some(valid_len) => {
             if valid_len < len {
-                kprint!(
+                debug_print!(
                     "validate_user_buffer_write: EFAULT - buffer extends beyond valid region (requested={}, available={})",
                     len,
                     valid_len
@@ -81,7 +81,7 @@ fn validate_user_buffer_write(ptr: u32, len: usize) -> Result<(), Err> {
             Ok(())
         }
         None => {
-            kprint!(
+            debug_print!(
                 "validate_user_buffer_write: EFAULT - invalid pointer {:#010x} len {}",
                 ptr,
                 len
@@ -102,7 +102,7 @@ fn validate_user_buffer_read(ptr: u32, len: usize) -> Result<(), Err> {
     match crate::linux_abi::is_valid_user_address(ptr, len, false) {
         Some(valid_len) => {
             if valid_len < len {
-                kprint!(
+                debug_print!(
                     "validate_user_buffer_read: EFAULT - buffer extends beyond valid region (requested={}, available={})",
                     len,
                     valid_len
@@ -112,7 +112,7 @@ fn validate_user_buffer_read(ptr: u32, len: usize) -> Result<(), Err> {
             Ok(())
         }
         None => {
-            kprint!(
+            debug_print!(
                 "validate_user_buffer_read: EFAULT - invalid pointer {:#010x} len {}",
                 ptr,
                 len
@@ -162,7 +162,7 @@ fn map_p9_error(ecode: u32) -> Err {
         95 => Err::OpNotSupp,   // EOPNOTSUPP - Operation not supported
         _ => {
             // For unmapped errors, log and default to IO error
-            kprint!(
+            debug_print!(
                 "map_p9_error: unmapped P9 error code {} (defaulting to EIO)",
                 ecode
             );
@@ -380,7 +380,7 @@ pub fn find_free_file_desc() -> Result<u32, Err> {
             return Ok(i);
         }
     }
-    kprint!("find_free_file_desc: no free file descriptions available");
+    debug_print!("find_free_file_desc: no free file descriptions available");
     Err(Err::MFile)
 }
 
@@ -452,7 +452,7 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
 
     // Check for invalid address - NULL pointer
     if pathname == 0 {
-        kprint!("sys_unlinkat: invalid pathname address (NULL)");
+        debug_print!("sys_unlinkat: invalid pathname address (NULL)");
         return Err(Err::Fault);
     }
 
@@ -461,7 +461,7 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
     let safe_len = match crate::linux_abi::is_valid_user_address(pathname, MAX_PATH_LEN, false) {
         Some(valid_len) => core::cmp::min(MAX_PATH_LEN, valid_len),
         None => {
-            kprint!(
+            debug_print!(
                 "sys_unlinkat: EFAULT - invalid pathname address {:#010x}",
                 pathname
             );
@@ -479,20 +479,20 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
     let filename_str = match str::from_utf8(filename) {
         Ok(s) => s,
         Err(_) => {
-            kprint!("sys_unlinkat: invalid UTF-8 filename");
+            debug_print!("sys_unlinkat: invalid UTF-8 filename");
             return Err(Err::Inval); // EINVAL for invalid UTF-8
         }
     };
 
     // Check for empty pathname
     if filename_str.is_empty() {
-        kprint!("sys_unlinkat: empty pathname, returning ENOENT");
+        debug_print!("sys_unlinkat: empty pathname, returning ENOENT");
         return Err(Err::FileNotFound);
     }
 
     // Check for pathname too long (limit is 255 for 9P)
     if filename_str.len() > 255 {
-        kprint!(
+        debug_print!(
             "sys_unlinkat: pathname too long ({} bytes), returning ENAMETOOLONG",
             filename_str.len()
         );
@@ -502,14 +502,14 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
     // Validate flags - only AT_REMOVEDIR is valid
     const AT_REMOVEDIR: u32 = 0x200;
     if (flag & !AT_REMOVEDIR) != 0 {
-        kprint!(
+        debug_print!(
             "sys_unlinkat: invalid flag value 0x{:x}, returning EINVAL",
             flag
         );
         return Err(Err::Inval);
     }
 
-    kprint!(
+    debug_print!(
         "sys_unlinkat: dfd={}, filename='{}', flag={}",
         dfd,
         filename_str,
@@ -548,7 +548,7 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
             if dir_fid != starting_fid {
                 clunk(dir_fid, false);
             }
-            kprint!(
+            debug_print!(
                 "sys_unlinkat: walk to file failed with ecode={}",
                 rlerror.ecode
             );
@@ -566,12 +566,12 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
     let tremove = TremoveMessage::new(0, TEMP_FID_1);
     match tremove.send_tremove() {
         Ok(P9Response::Success(rremove)) => {
-            kprint!("sys_unlinkat: rremove = {:?}", rremove);
+            debug_print!("sys_unlinkat: rremove = {:?}", rremove);
             clunk(TEMP_FID_1, false);
             Ok(0)
         }
         Ok(P9Response::Error(rlerror2)) => {
-            kprint!(
+            debug_print!(
                 "sys_unlinkat: received Rlerror for Rremove: tag={}, ecode={}",
                 rlerror2.tag,
                 rlerror2.ecode
@@ -579,7 +579,7 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
             Err(map_p9_error(rlerror2.ecode))
         }
         Err(e) => {
-            kprint!("sys_unlinkat: error sending Tremove: {:?}", e);
+            debug_print!("sys_unlinkat: error sending Tremove: {:?}", e);
             Err(Err::IO)
         }
     }
@@ -610,11 +610,11 @@ pub fn sys_statfs64(path: u32, sz: u32, buf: u32) -> Result<u32, Err> {
         return Err(Err::NoSys);
     }
 
-    kprint!("sys_statfs64: path={}, sz={}, buf={}", path, sz, buf);
+    debug_print!("sys_statfs64: path={}, sz={}, buf={}", path, sz, buf);
 
     // Validate the size parameter
     if sz != core::mem::size_of::<Statfs64>() as u32 {
-        kprint!(
+        debug_print!(
             "sys_statfs64: invalid size parameter: expected {}, got {}",
             core::mem::size_of::<Statfs64>(),
             sz
@@ -651,11 +651,11 @@ pub fn sys_statfs64(path: u32, sz: u32, buf: u32) -> Result<u32, Err> {
         core::mem::size_of::<Statfs64>(),
     );
     if bytes_copied == 0 {
-        kprint!("sys_statfs64: failed to copy statfs64 structure to user memory");
+        debug_print!("sys_statfs64: failed to copy statfs64 structure to user memory");
         return Err(Err::Fault); // EFAULT for memory copy failure
     }
 
-    kprint!(
+    debug_print!(
         "sys_statfs64: wrote statfs64 structure with f_type=0x{:x}",
         statfs.f_type
     );
@@ -768,7 +768,7 @@ pub fn read_file_to_user_memory(fd: u32, buf: u32, count: u32, offset: u64) -> R
             match tread.send_tread() {
                 Ok(P9Response::Success(rread)) => {
                     if rread.count == 0 {
-                        kprint!(
+                        debug_print!(
                             "read_file_to_user_memory: read 0 bytes, offset={} cursor={} count={}, max_count={}",
                             offset,
                             cursor,
@@ -789,14 +789,14 @@ pub fn read_file_to_user_memory(fd: u32, buf: u32, count: u32, offset: u64) -> R
                     if rlerror.ecode == 0 {
                         return Ok(total_bytes_read);
                     }
-                    kprint!(
+                    debug_print!(
                         "read_file_to_user_memory: Rread error: ecode={}",
                         rlerror.ecode
                     );
                     return Err(map_p9_error(rlerror.ecode));
                 }
                 Err(e) => {
-                    kprint!("read_file_to_user_memory: error sending tread: {:?}", e);
+                    debug_print!("read_file_to_user_memory: error sending tread: {:?}", e);
                     return Err(Err::IO);
                 }
             }
@@ -823,12 +823,12 @@ fn handle_virtual_device_read(fid: u32, buf: u32, count: u32, desc_id: u32) -> R
     match fid {
         VIRTUAL_DEV_NULL => {
             // Reading from /dev/null always returns 0 (EOF)
-            kprint!("handle_virtual_device_read: /dev/null returns EOF");
+            debug_print!("handle_virtual_device_read: /dev/null returns EOF");
             Ok(0)
         }
         VIRTUAL_DEV_ZERO | VIRTUAL_DEV_FULL => {
             // Reading from /dev/zero or /dev/full returns zeros
-            kprint!(
+            debug_print!(
                 "handle_virtual_device_read: /dev/zero or /dev/full, filling {} bytes with zeros",
                 count
             );
@@ -839,7 +839,7 @@ fn handle_virtual_device_read(fid: u32, buf: u32, count: u32, desc_id: u32) -> R
         }
         VIRTUAL_DEV_RANDOM | VIRTUAL_DEV_URANDOM => {
             // Return pseudo-random data using a simple XOR shift PRNG
-            kprint!(
+            debug_print!(
                 "handle_virtual_device_read: /dev/random or /dev/urandom, generating {} bytes",
                 count
             );
@@ -863,7 +863,7 @@ fn handle_virtual_device_read(fid: u32, buf: u32, count: u32, desc_id: u32) -> R
             let content = get_proc_cpuinfo_content();
             let cursor = file_desc.cursor as usize;
 
-            kprint!(
+            debug_print!(
                 "handle_virtual_device_read: /proc/cpuinfo at cursor={}, count={}",
                 cursor,
                 count
@@ -871,7 +871,7 @@ fn handle_virtual_device_read(fid: u32, buf: u32, count: u32, desc_id: u32) -> R
 
             // Check if we're past the end of the content
             if cursor >= content.len() {
-                kprint!("handle_virtual_device_read: /proc/cpuinfo EOF");
+                debug_print!("handle_virtual_device_read: /proc/cpuinfo EOF");
                 return Ok(0); // EOF
             }
 
@@ -887,14 +887,14 @@ fn handle_virtual_device_read(fid: u32, buf: u32, count: u32, desc_id: u32) -> R
             file_desc.cursor += to_copy as u64;
             update_file_desc(desc_id, file_desc);
 
-            kprint!(
+            debug_print!(
                 "handle_virtual_device_read: /proc/cpuinfo read {} bytes",
                 to_copy
             );
             Ok(to_copy as u32)
         }
         _ => {
-            kprint!(
+            debug_print!(
                 "handle_virtual_device_read: unknown virtual device fid={}",
                 fid
             );
@@ -913,7 +913,7 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
     match crate::linux_abi::is_valid_user_address(_buf, _count as usize, true) {
         Some(valid_len) if valid_len >= _count as usize => {}
         _ => {
-            kprint!(
+            debug_print!(
                 "sys_read: EFAULT - invalid buffer address {:#010x} len {}",
                 _buf,
                 _count
@@ -930,16 +930,16 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
 
     // Validate file descriptor is within range
     if _fd >= 256 {
-        kprint!("sys_read: invalid fd={}", _fd);
+        debug_print!("sys_read: invalid fd={}", _fd);
         return Err(Err::BadFd);
     }
 
-    kprint!("sys_read: _fd={} _buf={} _count={}", _fd, _buf, _count);
+    debug_print!("sys_read: _fd={} _buf={} _count={}", _fd, _buf, _count);
     let fd_entry = get_fd(_fd);
 
     // Check if fd is closed/invalid
     if fd_entry.file_desc_id == 0xFF {
-        kprint!("sys_read: fd={} is not open", _fd);
+        debug_print!("sys_read: fd={} is not open", _fd);
         return Err(Err::BadFd);
     }
 
@@ -950,19 +950,19 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
     let access_mode = file_desc.mode & 0x3;
     if access_mode == 1 {
         // O_WRONLY - can't read
-        kprint!("sys_read: fd={} opened write-only", _fd);
+        debug_print!("sys_read: fd={} opened write-only", _fd);
         return Err(Err::BadFd);
     }
 
     // Check if fd is a directory
     if file_desc.is_dir {
-        kprint!("sys_read: fd={} is a directory", _fd);
+        debug_print!("sys_read: fd={} is a directory", _fd);
         return Err(Err::IsDir);
     }
 
     // Handle virtual devices
     if is_virtual_device(file_desc.fid) {
-        kprint!("sys_read: fd={} is a virtual device", _fd);
+        debug_print!("sys_read: fd={} is a virtual device", _fd);
         return handle_virtual_device_read(file_desc.fid, _buf, _count, fd_entry.file_desc_id);
     }
 
@@ -974,7 +974,7 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
         let mut total_read = 0u32;
         let user_ptr = _buf as *mut u8;
 
-        kprint!(
+        debug_print!(
             "sys_read: reading from fid={}, cursor={}, count={}, access_mode={}",
             file_desc.fid,
             file_desc.cursor,
@@ -995,7 +995,7 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
             let fd_entry = get_fd(_fd);
             let current_desc = get_file_desc(fd_entry.file_desc_id);
 
-            kprint!(
+            debug_print!(
                 "sys_read: chunk read - requesting {} bytes at cursor {}",
                 chunk_size,
                 current_desc.cursor
@@ -1004,15 +1004,15 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
             let tread = TreadMessage::new(0, current_desc.fid, current_desc.cursor, chunk_size);
             match tread.send_tread() {
                 Ok(P9Response::Success(rread)) => {
-                    kprint!("sys_read: received {} bytes from 9P", rread.count);
+                    debug_print!("sys_read: received {} bytes from 9P", rread.count);
 
                     if rread.count == 0 {
-                        kprint!("sys_read: read 0 bytes (EOF)");
+                        debug_print!("sys_read: read 0 bytes (EOF)");
                         // EOF - return what we've read so far
                         return Ok(total_read);
                     }
 
-                    kprint!(
+                    debug_print!(
                         "sys_read: copying {} bytes to user buffer 0x{:08x}",
                         rread.count,
                         _buf as u32 + total_read
@@ -1026,7 +1026,7 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
                     );
 
                     if bytes_copied == 0 {
-                        kprint!(
+                        debug_print!(
                             "sys_read: copy_to_user failed! dst=0x{:08x}, len={}",
                             dest_ptr as u32,
                             rread.count
@@ -1049,7 +1049,7 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
 
                     // If we got less than requested, we hit EOF
                     if rread.count < chunk_size {
-                        kprint!(
+                        debug_print!(
                             "sys_read: short read ({} < {}), EOF reached",
                             rread.count,
                             chunk_size
@@ -1058,7 +1058,7 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
                     }
                 }
                 Ok(P9Response::Error(rlerror)) => {
-                    kprint!(
+                    debug_print!(
                         "sys_read: Rread error: ecode={}, fid={}, cursor={}",
                         rlerror.ecode,
                         current_desc.fid,
@@ -1071,7 +1071,7 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
                     return Err(map_p9_error(rlerror.ecode));
                 }
                 Err(e) => {
-                    kprint!("sys_read: error sending Tread: {:?}", e);
+                    debug_print!("sys_read: error sending Tread: {:?}", e);
                     if total_read > 0 {
                         return Ok(total_read);
                     }
@@ -1080,10 +1080,10 @@ pub fn sys_read(_fd: u32, _buf: u32, _count: u32) -> Result<u32, Err> {
             }
         }
 
-        kprint!("sys_read: successfully read {} bytes total", total_read);
+        debug_print!("sys_read: successfully read {} bytes total", total_read);
         return Ok(total_read);
     } else {
-        kprint!(
+        debug_print!(
             "sys_read: invalid fid={} (skipping read, fid is 0 or TEMP_FID_1)",
             file_desc.fid
         );
@@ -1102,7 +1102,7 @@ fn handle_virtual_device_write(fid: u32, _buf: *const u8, count: usize) -> Resul
     match fid {
         VIRTUAL_DEV_NULL | VIRTUAL_DEV_ZERO | VIRTUAL_DEV_RANDOM | VIRTUAL_DEV_URANDOM => {
             // Writing to these devices always succeeds and discards data
-            kprint!(
+            debug_print!(
                 "handle_virtual_device_write: /dev/null or similar, discarding {} bytes",
                 count
             );
@@ -1110,16 +1110,16 @@ fn handle_virtual_device_write(fid: u32, _buf: *const u8, count: usize) -> Resul
         }
         VIRTUAL_DEV_FULL => {
             // Writing to /dev/full always returns ENOSPC (no space)
-            kprint!("handle_virtual_device_write: /dev/full, returning ENOSPC");
+            debug_print!("handle_virtual_device_write: /dev/full, returning ENOSPC");
             Err(Err::NoSpc)
         }
         VIRTUAL_FILE_PROC_CPUINFO => {
             // Writing to /proc/cpuinfo is not allowed (read-only)
-            kprint!("handle_virtual_device_write: /proc/cpuinfo is read-only");
+            debug_print!("handle_virtual_device_write: /proc/cpuinfo is read-only");
             Err(Err::Inval)
         }
         _ => {
-            kprint!(
+            debug_print!(
                 "handle_virtual_device_write: unknown virtual device fid={}",
                 fid
             );
@@ -1149,7 +1149,7 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
     match crate::linux_abi::is_valid_user_address(buf as u32, count, false) {
         Some(valid_len) if valid_len >= count => {}
         _ => {
-            kprint!(
+            debug_print!(
                 "do_write: EFAULT - invalid buffer address {:#010x} len {}",
                 buf as u32,
                 count
@@ -1191,13 +1191,13 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
         let access_mode = file_desc.mode & 0x3;
         if access_mode == 0 {
             // O_RDONLY - can't write
-            kprint!("do_write: fd={} opened read-only", fd);
+            debug_print!("do_write: fd={} opened read-only", fd);
             return Err(Err::BadFd);
         }
 
         // Handle virtual devices
         if is_virtual_device(file_desc.fid) {
-            kprint!("do_write: fd={} is a virtual device", fd);
+            debug_print!("do_write: fd={} is a virtual device", fd);
             return handle_virtual_device_write(file_desc.fid, buf, count);
         }
 
@@ -1211,20 +1211,20 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
                 match tgetattr.send_tgetattr() {
                     Ok(P9Response::Success(rgetattr)) => {
                         current_cursor = rgetattr.size;
-                        kprint!(
+                        debug_print!(
                             "do_write: O_APPEND - setting cursor to end of file: {}",
                             current_cursor
                         );
                     }
                     Ok(P9Response::Error(rlerror)) => {
-                        kprint!(
+                        debug_print!(
                             "do_write: error getting file size for O_APPEND: ecode={}",
                             rlerror.ecode
                         );
                         return Err(map_p9_error(rlerror.ecode));
                     }
                     Err(e) => {
-                        kprint!("do_write: error sending getattr for O_APPEND: {:?}", e);
+                        debug_print!("do_write: error sending getattr for O_APPEND: {:?}", e);
                         return Err(Err::IO); // EIO for I/O errors
                     }
                 }
@@ -1240,7 +1240,7 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
                 let chunk_end = (chunk_start + chunk_size).min(count);
                 let chunk_data = &data[chunk_start..chunk_end];
 
-                kprint!(
+                debug_print!(
                     "do_write: writing chunk {} bytes at cursor {}",
                     chunk_data.len(),
                     current_cursor
@@ -1255,7 +1255,7 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
                         total_written += bytes_written;
                         current_cursor += bytes_written as u64;
 
-                        kprint!(
+                        debug_print!(
                             "do_write: wrote {} bytes, total: {}",
                             bytes_written,
                             total_written
@@ -1267,11 +1267,11 @@ pub fn do_write(fd: i32, buf: *const u8, count: usize) -> Result<usize, Err> {
                         }
                     }
                     Ok(P9Response::Error(rlerror)) => {
-                        kprint!("do_write: Rwrite error: ecode={}", rlerror.ecode);
+                        debug_print!("do_write: Rwrite error: ecode={}", rlerror.ecode);
                         return Err(map_p9_error(rlerror.ecode));
                     }
                     Err(e) => {
-                        kprint!("do_write: error sending Twrite: {:?}", e);
+                        debug_print!("do_write: error sending Twrite: {:?}", e);
                         return Err(Err::IO); // EIO for I/O errors
                     }
                 }
@@ -1303,7 +1303,7 @@ pub fn sys_writev(fd: u32, vec_ptr: u32, vlen: u32) -> Result<u32, Err> {
     for (i, iov) in vec.iter().enumerate() {
         // Check for unreasonable lengths first (captures negative lengths represented as large usize)
         if iov.iov_len > (isize::MAX as usize) {
-            kprint!(
+            debug_print!(
                 "sys_writev: iovec[{}] has invalid length {}",
                 i,
                 iov.iov_len
@@ -1334,11 +1334,11 @@ pub fn sys_chdir(filename: u32) -> Result<u32, Err> {
     }
 
     let filename_str = validate_and_read_pathname(filename)?;
-    kprint!("sys_chdir: filename='{}'", filename_str);
+    debug_print!("sys_chdir: filename='{}'", filename_str);
 
     // Check for pathname too long (limit is 255 for 9P)
     if filename_str.len() > 255 {
-        kprint!(
+        debug_print!(
             "sys_chdir: pathname too long ({} bytes), returning ENAMETOOLONG",
             filename_str.len()
         );
@@ -1359,7 +1359,7 @@ pub fn sys_chdir(filename: u32) -> Result<u32, Err> {
             }
         }
         Err(e) => {
-            kprint!(
+            debug_print!(
                 "sys_chdir: error walking to directory: errno={}",
                 e.as_errno()
             );
@@ -1437,7 +1437,7 @@ pub fn sys_chdir(filename: u32) -> Result<u32, Err> {
                             // Read and resolve the symlink
                             match read_symlink(check_fid) {
                                 Ok(target) => {
-                                    kprint!(
+                                    debug_print!(
                                         "sys_chdir: '{}' is symlink to '{}'",
                                         component,
                                         target
@@ -1499,7 +1499,7 @@ pub fn sys_chdir(filename: u32) -> Result<u32, Err> {
         final_path.push('/');
     }
 
-    kprint!("sys_chdir: canonical path='{}'", final_path);
+    debug_print!("sys_chdir: canonical path='{}'", final_path);
     set_cwd_str(final_path);
     dup_fid_to(TEMP_FID_3, TEMP_FID_2)?;
     clunk(TEMP_FID_3, true); // allow CWD clunking in sys_chdir
@@ -1515,7 +1515,7 @@ fn dup_fid_to(fid: u32, fid_to: u32) -> Result<u32, Err> {
             Ok(fid_to)
         }
         Err(e) => {
-            kprint!("dup_fid_to: error dupping: {:?}", e.as_errno());
+            debug_print!("dup_fid_to: error dupping: {:?}", e.as_errno());
             clunk(fid_to, false);
             Err(e)
         }
@@ -1530,13 +1530,13 @@ pub fn sys_dup(fd: u32) -> Result<u32, Err> {
     }
     // Check if fd is out of range (including negative values cast to u32)
     if fd >= 256 {
-        kprint!("sys_dup: fd {} is out of range", fd);
+        debug_print!("sys_dup: fd {} is out of range", fd);
         return Err(Err::BadFd);
     }
     // diod/p9 protocol "fid can be cloned to newfid by calling walk with nwname set to zero."
     let fd_entry = get_fd(fd);
     if fd_entry.file_desc_id == 0xFF {
-        kprint!("sys_dup: fd {} is not open", fd);
+        debug_print!("sys_dup: fd {} is not open", fd);
         return Err(Err::BadFd);
     }
 
@@ -1558,7 +1558,7 @@ pub fn sys_dup(fd: u32) -> Result<u32, Err> {
     // Increment the reference count for the shared file description
     inc_refcount(fd_entry.file_desc_id);
 
-    kprint!(
+    debug_print!(
         "sys_dup: duplicated fd {} to fd {}, both pointing to desc_id {} (fid={}, refcount now {})",
         fd,
         new_fd,
@@ -1577,7 +1577,7 @@ pub fn sys_dup3(oldfd: u32, newfd: u32, flags: u32) -> Result<u32, Err> {
         return Err(Err::NoSys);
     }
 
-    kprint!(
+    debug_print!(
         "sys_dup3: oldfd={}, newfd={}, flags={}",
         oldfd,
         newfd,
@@ -1588,37 +1588,37 @@ pub fn sys_dup3(oldfd: u32, newfd: u32, flags: u32) -> Result<u32, Err> {
     // Invalid flags should return EINVAL even if fds are invalid
     const O_CLOEXEC: u32 = 0o2000000;
     if (flags & !O_CLOEXEC) != 0 {
-        kprint!("sys_dup3: invalid flags 0x{:x}", flags);
+        debug_print!("sys_dup3: invalid flags 0x{:x}", flags);
         return Err(Err::Inval);
     }
 
     // Validate file descriptors are in range
     if oldfd >= 256 {
-        kprint!("sys_dup3: oldfd {} is out of range", oldfd);
+        debug_print!("sys_dup3: oldfd {} is out of range", oldfd);
         return Err(Err::BadFd);
     }
     if newfd >= 256 {
-        kprint!("sys_dup3: newfd {} is out of range", newfd);
+        debug_print!("sys_dup3: newfd {} is out of range", newfd);
         return Err(Err::BadFd);
     }
 
     // Check if oldfd is the same as newfd (not allowed in dup3, unlike dup2)
     if oldfd == newfd {
-        kprint!("sys_dup3: oldfd == newfd (not allowed in dup3)");
+        debug_print!("sys_dup3: oldfd == newfd (not allowed in dup3)");
         return Err(Err::Inval);
     }
 
     // Check if oldfd is open
     let old_fd_entry = get_fd(oldfd);
     if old_fd_entry.file_desc_id == 0xFF {
-        kprint!("sys_dup3: oldfd {} is not open", oldfd);
+        debug_print!("sys_dup3: oldfd {} is not open", oldfd);
         return Err(Err::BadFd);
     }
 
     // Close newfd if it's currently open
     let new_fd_entry = get_fd(newfd);
     if new_fd_entry.file_desc_id != 0xFF {
-        kprint!(
+        debug_print!(
             "sys_dup3: closing existing fd {} (desc_id={})",
             newfd,
             new_fd_entry.file_desc_id
@@ -1641,7 +1641,7 @@ pub fn sys_dup3(oldfd: u32, newfd: u32, flags: u32) -> Result<u32, Err> {
     inc_refcount(old_fd_entry.file_desc_id);
 
     let file_desc = get_file_desc(old_fd_entry.file_desc_id);
-    kprint!(
+    debug_print!(
         "sys_dup3: duplicated fd {} to fd {}, both pointing to desc_id {} (fid={}, refcount now {})",
         oldfd,
         newfd,
@@ -1679,7 +1679,7 @@ pub fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32, _flags: u32) -> Res
     // -1 (0xFFFFFFFF when cast from i32) sets all bits, which is invalid
     let flags_i32 = _flags as i32;
     if flags_i32 < 0 || (_flags & !AT_FLAGS_MASK) != 0 {
-        kprint!("sys_faccessat2: invalid flags 0x{:x}", _flags);
+        debug_print!("sys_faccessat2: invalid flags 0x{:x}", _flags);
         return Err(Err::Inval);
     }
 
@@ -1689,13 +1689,13 @@ pub fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32, _flags: u32) -> Res
     let mode_i32 = _mode as i32;
     const MODE_MASK: u32 = 0x7; // Only lowest 3 bits valid
     if mode_i32 < 0 || (_mode & !MODE_MASK) != 0 {
-        kprint!("sys_faccessat2: invalid mode 0x{:x}", _mode);
+        debug_print!("sys_faccessat2: invalid mode 0x{:x}", _mode);
         return Err(Err::Inval);
     }
 
     let filename_str = validate_and_read_pathname(_filename)?;
 
-    kprint!(
+    debug_print!(
         "sys_faccessat2: dfd={}, filename='{}', mode=0x{:x}, flags=0x{:x}",
         _dfd,
         filename_str,
@@ -1704,13 +1704,13 @@ pub fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32, _flags: u32) -> Res
     );
 
     if (_flags & AT_EACCESS) != 0 {
-        kprint!("sys_faccessat2: AT_EACCESS set (using effective uid/gid)");
+        debug_print!("sys_faccessat2: AT_EACCESS set (using effective uid/gid)");
         // In zkVM context, we don't distinguish between real and effective uid/gid
     }
 
     // Handle AT_EMPTY_PATH - check access on the fd itself
     if (_flags & AT_EMPTY_PATH) != 0 && filename_str.is_empty() {
-        kprint!("sys_faccessat2: AT_EMPTY_PATH set, checking fd {}", _dfd);
+        debug_print!("sys_faccessat2: AT_EMPTY_PATH set, checking fd {}", _dfd);
 
         // Validate dfd is in range
         if _dfd >= 256 {
@@ -1729,7 +1729,7 @@ pub fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32, _flags: u32) -> Res
 
     // Handle AT_SYMLINK_NOFOLLOW: don't follow symlinks, check access on the symlink itself
     if (_flags & AT_SYMLINK_NOFOLLOW) != 0 {
-        kprint!("sys_faccessat2: AT_SYMLINK_NOFOLLOW set");
+        debug_print!("sys_faccessat2: AT_SYMLINK_NOFOLLOW set");
 
         let starting_fid = get_starting_fid(_dfd, &filename_str)?;
         let (dir_path, file_name) = split_path(&filename_str);
@@ -1816,7 +1816,7 @@ pub fn sys_fallocate(
 
     // Validate parameters before proceeding
     if offset_i64 < 0 {
-        kprint!(
+        debug_print!(
             "sys_fallocate: negative offset {}, returning EINVAL",
             offset_i64
         );
@@ -1824,7 +1824,7 @@ pub fn sys_fallocate(
     }
 
     if len_i64 <= 0 {
-        kprint!(
+        debug_print!(
             "sys_fallocate: invalid len {} (must be > 0), returning EINVAL",
             len_i64
         );
@@ -1838,7 +1838,7 @@ pub fn sys_fallocate(
 
     // Check for overflow
     if end_pos < offset || end_pos < len {
-        kprint!("sys_fallocate: overflow in offset+len calculation");
+        debug_print!("sys_fallocate: overflow in offset+len calculation");
         return Err(Err::Inval);
     }
 
@@ -1869,7 +1869,7 @@ pub fn sys_fallocate(
 
     let accmode = file_desc.flags & O_ACCMODE;
     if accmode == O_RDONLY {
-        kprint!("sys_fallocate: fd opened read-only, returning EBADF");
+        debug_print!("sys_fallocate: fd opened read-only, returning EBADF");
         return Err(Err::BadFd);
     }
 
@@ -1879,7 +1879,7 @@ pub fn sys_fallocate(
     let len_i64 = len as i64;
 
     if offset_i64 < 0 {
-        kprint!(
+        debug_print!(
             "sys_fallocate: negative offset {}, returning EINVAL",
             offset
         );
@@ -1887,13 +1887,13 @@ pub fn sys_fallocate(
     }
 
     if len_i64 <= 0 {
-        kprint!("sys_fallocate: invalid len {}, returning EINVAL", len);
+        debug_print!("sys_fallocate: invalid len {}, returning EINVAL", len);
         return Err(Err::Inval);
     }
 
     // Check for overflow
     if end_pos < offset || end_pos < len {
-        kprint!("sys_fallocate: overflow in offset+len calculation");
+        debug_print!("sys_fallocate: overflow in offset+len calculation");
         return Err(Err::Inval);
     }
 
@@ -1905,12 +1905,12 @@ pub fn sys_fallocate(
 
     // For now, we only support the default mode (0) and FALLOC_FL_KEEP_SIZE
     if (mode & !FALLOC_FL_KEEP_SIZE) != 0 {
-        kprint!("sys_fallocate: unsupported mode flags 0x{:x}", mode);
+        debug_print!("sys_fallocate: unsupported mode flags 0x{:x}", mode);
         // Return success for unsupported flags (some filesystems don't support all flags)
         // but we'll still try to allocate space
     }
 
-    kprint!(
+    debug_print!(
         "sys_fallocate: fd={}, mode=0x{:x}, offset={}, len={}, end_pos={}",
         fd,
         mode,
@@ -1924,19 +1924,19 @@ pub fn sys_fallocate(
     let current_size = match tgetattr.send_tgetattr() {
         Ok(P9Response::Success(rgetattr)) => rgetattr.size,
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "sys_fallocate: error getting current file size: ecode={}",
                 rlerror.ecode
             );
             return Err(map_p9_error(rlerror.ecode));
         }
         Err(_) => {
-            kprint!("sys_fallocate: error sending getattr");
+            debug_print!("sys_fallocate: error sending getattr");
             return Err(Err::NoSys);
         }
     };
 
-    kprint!(
+    debug_print!(
         "sys_fallocate: current_size={}, end_pos={}, mode=0x{:x}",
         current_size,
         end_pos,
@@ -1953,7 +1953,7 @@ pub fn sys_fallocate(
         // Check if the requested size is too large before attempting allocation
         const MAX_REASONABLE_SIZE: u64 = 0x7FFF_FFFF_FFFF_FFFF; // 2^63 - 1
         if size_to_allocate > MAX_REASONABLE_SIZE || offset > MAX_REASONABLE_SIZE {
-            kprint!(
+            debug_print!(
                 "sys_fallocate: file size too large: size_to_allocate={}, offset={}",
                 size_to_allocate,
                 offset
@@ -1980,7 +1980,7 @@ pub fn sys_fallocate(
 
             match tsetattr_extend.send_tsetattr() {
                 Ok(P9Response::Success(_)) => {
-                    kprint!(
+                    debug_print!(
                         "sys_fallocate: allocated space (extended to {}), now restoring size to {}",
                         size_to_allocate,
                         current_size
@@ -2003,21 +2003,21 @@ pub fn sys_fallocate(
 
                     match tsetattr_restore.send_tsetattr() {
                         Ok(P9Response::Success(_)) => {
-                            kprint!("sys_fallocate: restored size to {}", current_size);
+                            debug_print!("sys_fallocate: restored size to {}", current_size);
                             Ok(0)
                         }
                         Ok(P9Response::Error(e)) => {
-                            kprint!("sys_fallocate: error restoring size: ecode={}", e.ecode);
+                            debug_print!("sys_fallocate: error restoring size: ecode={}", e.ecode);
                             Err(map_p9_error(e.ecode))
                         }
                         Err(e) => {
-                            kprint!("sys_fallocate: error sending restore Tsetattr: {:?}", e);
+                            debug_print!("sys_fallocate: error sending restore Tsetattr: {:?}", e);
                             Err(Err::NoSys)
                         }
                     }
                 }
                 Ok(P9Response::Error(rlerror)) => {
-                    kprint!(
+                    debug_print!(
                         "sys_fallocate: error extending file: ecode={}, size_to_allocate={}",
                         rlerror.ecode,
                         size_to_allocate
@@ -2035,13 +2035,13 @@ pub fn sys_fallocate(
                     }
                 }
                 Err(e) => {
-                    kprint!("sys_fallocate: error sending extend Tsetattr: {:?}", e);
+                    debug_print!("sys_fallocate: error sending extend Tsetattr: {:?}", e);
                     Err(Err::NoSys)
                 }
             }
         } else {
             // Already large enough, nothing to do
-            kprint!(
+            debug_print!(
                 "sys_fallocate: file already large enough (size={})",
                 current_size
             );
@@ -2053,7 +2053,7 @@ pub fn sys_fallocate(
         // even if the file is already larger
         let target_size = end_pos.max(current_size);
 
-        kprint!(
+        debug_print!(
             "sys_fallocate: default mode - current_size={}, end_pos={}, target_size={}",
             current_size,
             end_pos,
@@ -2067,14 +2067,14 @@ pub fn sys_fallocate(
 
             match tsetattr.send_tsetattr() {
                 Ok(P9Response::Success(_)) => {
-                    kprint!(
+                    debug_print!(
                         "sys_fallocate: successfully extended file to {}",
                         target_size
                     );
                     Ok(0)
                 }
                 Ok(P9Response::Error(rlerror)) => {
-                    kprint!("sys_fallocate: error setting size: ecode={}", rlerror.ecode);
+                    debug_print!("sys_fallocate: error setting size: ecode={}", rlerror.ecode);
                     // Special handling for fallocate: treat large size EINVAL as EFBIG
                     const MAX_REASONABLE_SIZE: u64 = 0x7FFF_FFFF_FFFF_FFFF; // 2^63 - 1
                     if rlerror.ecode == 22
@@ -2088,13 +2088,13 @@ pub fn sys_fallocate(
                     }
                 }
                 Err(e) => {
-                    kprint!("sys_fallocate: error sending Tsetattr: {:?}", e);
+                    debug_print!("sys_fallocate: error sending Tsetattr: {:?}", e);
                     Err(Err::NoSys)
                 }
             }
         } else {
             // Already large enough, nothing to do
-            kprint!(
+            debug_print!(
                 "sys_fallocate: file already large enough (size={} >= target={})",
                 current_size,
                 target_size
@@ -2168,7 +2168,7 @@ pub fn sys_fchmod(fd: u32, mode: u32) -> Result<u32, Err> {
 
     let file_desc = get_file_desc(fd_entry.file_desc_id);
 
-    kprint!("sys_fchmod: fd={}, mode=0o{:o}", fd, mode);
+    debug_print!("sys_fchmod: fd={}, mode=0o{:o}", fd, mode);
 
     // Use Tsetattr to change file mode (permissions)
     // We only want to set the mode, so we use the Mode valid flag
@@ -2193,15 +2193,15 @@ pub fn sys_fchmod(fd: u32, mode: u32) -> Result<u32, Err> {
 
     match tsetattr.send_tsetattr() {
         Ok(P9Response::Success(_)) => {
-            kprint!("sys_fchmod: successfully changed mode to 0o{:o}", p9_mode);
+            debug_print!("sys_fchmod: successfully changed mode to 0o{:o}", p9_mode);
             Ok(0)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!("sys_fchmod: error setting mode: ecode={}", rlerror.ecode);
+            debug_print!("sys_fchmod: error setting mode: ecode={}", rlerror.ecode);
             Err(map_p9_error(rlerror.ecode))
         }
         Err(e) => {
-            kprint!("sys_fchmod: error sending Tsetattr: {:?}", e);
+            debug_print!("sys_fchmod: error sending Tsetattr: {:?}", e);
             Err(Err::NoSys)
         }
     }
@@ -2272,7 +2272,7 @@ pub fn sys_fchmodat(dfd: u32, filename: u32, mode: u32, flag: u32) -> Result<u32
     // Check if this is the explicit invalid flag test case: -1 (all bits set)
     // When passed as i32 and cast to u32, -1 becomes 0xFFFFFFFF
     if flag as i32 == -1 {
-        kprint!("sys_fchmodat: invalid flag -1 (0x{:x})", flag);
+        debug_print!("sys_fchmodat: invalid flag -1 (0x{:x})", flag);
         return Err(Err::Inval);
     }
 
@@ -2282,7 +2282,7 @@ pub fn sys_fchmodat(dfd: u32, filename: u32, mode: u32, flag: u32) -> Result<u32
 
     // Log if AT_SYMLINK_NOFOLLOW is set
     if (flag & AT_SYMLINK_NOFOLLOW) != 0 {
-        kprint!("sys_fchmodat: AT_SYMLINK_NOFOLLOW flag set (not yet implemented)");
+        debug_print!("sys_fchmodat: AT_SYMLINK_NOFOLLOW flag set (not yet implemented)");
     }
 
     let filename_str = validate_and_read_pathname(filename)?;
@@ -2292,11 +2292,11 @@ pub fn sys_fchmodat(dfd: u32, filename: u32, mode: u32, flag: u32) -> Result<u32
     if filename_str.is_empty() {
         // For fchmodat, empty pathname should return ENOENT
         // (unlike fchmod which works on a file descriptor)
-        kprint!("sys_fchmodat: empty pathname, returning ENOENT");
+        debug_print!("sys_fchmodat: empty pathname, returning ENOENT");
         return Err(Err::FileNotFound);
     }
 
-    kprint!(
+    debug_print!(
         "sys_fchmodat: dfd={}, filename='{}', mode={}, flag={}",
         dfd,
         filename_str,
@@ -2331,11 +2331,11 @@ pub fn sys_fchmodat(dfd: u32, filename: u32, mode: u32, flag: u32) -> Result<u32
 
     match tsetattr.send_tsetattr() {
         Ok(P9Response::Success(rsetattr)) => {
-            kprint!("sys_fchmodat: rsetattr = {:?}", rsetattr);
+            debug_print!("sys_fchmodat: rsetattr = {:?}", rsetattr);
             Ok(0)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "sys_fchmodat: received Rlerror for Rsetattr: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
@@ -2343,7 +2343,7 @@ pub fn sys_fchmodat(dfd: u32, filename: u32, mode: u32, flag: u32) -> Result<u32
             Err(map_p9_error(rlerror.ecode))
         }
         Err(e) => {
-            kprint!("sys_fchmodat: error sending Tsetattr: {:?}", e);
+            debug_print!("sys_fchmodat: error sending Tsetattr: {:?}", e);
             Err(Err::NoSys)
         }
     }
@@ -2366,7 +2366,7 @@ pub fn sys_umask(mask: u32) -> Result<u32, Err> {
         UMASK = new_mask;
     }
 
-    kprint!(
+    debug_print!(
         "sys_umask: old_mask=0o{:o}, new_mask=0o{:o}",
         old_mask,
         new_mask
@@ -2400,7 +2400,7 @@ pub fn sys_fchown(fd: u32, user: u32, group: u32) -> Result<u32, Err> {
 
     let file_desc = get_file_desc(fd_entry.file_desc_id);
 
-    kprint!("sys_fchown: fd={}, uid={}, gid={}", fd, user, group);
+    debug_print!("sys_fchown: fd={}, uid={}, gid={}", fd, user, group);
 
     // Use Tsetattr to change file ownership
     // We want to set both uid and gid, so we use both User and Group valid flags
@@ -2422,7 +2422,7 @@ pub fn sys_fchown(fd: u32, user: u32, group: u32) -> Result<u32, Err> {
 
     match tsetattr.send_tsetattr() {
         Ok(P9Response::Success(_)) => {
-            kprint!(
+            debug_print!(
                 "sys_fchown: successfully changed ownership to uid={}, gid={}",
                 user,
                 group
@@ -2430,14 +2430,14 @@ pub fn sys_fchown(fd: u32, user: u32, group: u32) -> Result<u32, Err> {
             Ok(0)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "sys_fchown: error setting ownership: ecode={}",
                 rlerror.ecode
             );
             Err(map_p9_error(rlerror.ecode))
         }
         Err(e) => {
-            kprint!("sys_fchown: error sending Tsetattr: {:?}", e);
+            debug_print!("sys_fchown: error sending Tsetattr: {:?}", e);
             Err(Err::NoSys)
         }
     }
@@ -2458,13 +2458,13 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
     // Only reject negative flags (like -1 = 0xFFFFFFFF)
     let flag_i32 = flag as i32;
     if flag_i32 < 0 || (flag & !AT_FLAGS_MASK) != 0 {
-        kprint!("sys_fchownat: invalid flag 0x{:x}", flag);
+        debug_print!("sys_fchownat: invalid flag 0x{:x}", flag);
         return Err(Err::Inval);
     }
 
     let filename_str = validate_and_read_pathname(filename)?;
 
-    kprint!(
+    debug_print!(
         "sys_fchownat: dfd={}, filename='{}', user={}, group={}, flag={}",
         dfd,
         filename_str,
@@ -2475,12 +2475,12 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
 
     // Handle AT_SYMLINK_NOFOLLOW: don't follow symlinks, operate on the symlink itself
     if (flag & AT_SYMLINK_NOFOLLOW) != 0 {
-        kprint!("sys_fchownat: AT_SYMLINK_NOFOLLOW flag set, operating on symlink directly");
+        debug_print!("sys_fchownat: AT_SYMLINK_NOFOLLOW flag set, operating on symlink directly");
 
         // Walk to the file without following symlinks
         let starting_fid = get_starting_fid(dfd, &filename_str)?;
         let (dir_path, file_name) = split_path(&filename_str);
-        kprint!(
+        debug_print!(
             "sys_fchownat: dir_path='{}', file_name='{}'",
             dir_path,
             file_name
@@ -2503,7 +2503,7 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
         // Now walk to the final component (the symlink itself) without following
         // We use Twalk directly on just the final component to avoid symlink resolution
         let file_path = vec![file_name.clone()];
-        kprint!(
+        debug_print!(
             "sys_fchownat: walking to symlink: dir_fid={}, file_name='{}', target_fid=TEMP_FID_1",
             dir_fid,
             file_name
@@ -2520,18 +2520,18 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
                 // Check if the final component is a symlink
                 if let Some(last_qid) = rwalk.wqids.last() {
                     if last_qid.is_symlink() {
-                        kprint!(
+                        debug_print!(
                             "sys_fchownat: symlink detected with AT_SYMLINK_NOFOLLOW, operating on symlink directly"
                         );
                         // We have the symlink FID at TEMP_FID_1, don't follow it
                     } else {
-                        kprint!("sys_fchownat: not a symlink, operating normally");
+                        debug_print!("sys_fchownat: not a symlink, operating normally");
                         // Not a symlink, continue normally
                     }
                 }
             }
             Ok(P9Response::Error(rlerror)) => {
-                kprint!(
+                debug_print!(
                     "sys_fchownat: error walking to file: ecode={}",
                     rlerror.ecode
                 );
@@ -2543,7 +2543,7 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
                 return Err(map_p9_error(rlerror.ecode));
             }
             Err(e) => {
-                kprint!("sys_fchownat: error sending Twalk: {:?}", e);
+                debug_print!("sys_fchownat: error sending Twalk: {:?}", e);
                 if !dir_path.is_empty() && dir_path != "." {
                     clunk(TEMP_FID_4, false);
                 }
@@ -2559,7 +2559,7 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
     // We only want to set UID and GID, so we use the appropriate valid flags
     let valid = P9SetattrMask::Uid as u32 | P9SetattrMask::Gid as u32;
 
-    kprint!(
+    debug_print!(
         "sys_fchownat: calling Tsetattr on FID TEMP_FID_1 with user={}, group={}",
         user,
         group
@@ -2583,7 +2583,7 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
 
     match tsetattr.send_tsetattr() {
         Ok(P9Response::Success(rsetattr)) => {
-            kprint!("sys_fchownat: rsetattr = {:?}", rsetattr);
+            debug_print!("sys_fchownat: rsetattr = {:?}", rsetattr);
 
             // Clean up temporary FIDs if we used AT_SYMLINK_NOFOLLOW
             if (flag & AT_SYMLINK_NOFOLLOW) != 0 {
@@ -2596,7 +2596,7 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
             Ok(0)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "sys_fchownat: received Rlerror for Rsetattr: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
@@ -2613,7 +2613,7 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
             Err(map_p9_error(rlerror.ecode))
         }
         Err(e) => {
-            kprint!("sys_fchownat: error sending Tsetattr: {:?}", e);
+            debug_print!("sys_fchownat: error sending Tsetattr: {:?}", e);
             Err(Err::NoSys)
         }
     }
@@ -2634,7 +2634,7 @@ pub fn sys_utimensat_time64(dfd: u32, filename: u32, times: u32, flags: u32) -> 
         validate_user_buffer_read(times, TIMESPEC_ARRAY_SIZE)?;
     }
 
-    kprint!(
+    debug_print!(
         "sys_utimensat_time64: dfd={}, filename='{}', times={}, flags={}",
         dfd,
         filename_str,
@@ -2721,12 +2721,12 @@ pub fn sys_utimensat_time64(dfd: u32, filename: u32, times: u32, flags: u32) -> 
             }
             Ok(P9Response::Error(rlerror)) => {
                 clunk(TEMP_FID_1, false);
-                kprint!("sys_utimensat_time64: Rlerror: ecode={}", rlerror.ecode);
+                debug_print!("sys_utimensat_time64: Rlerror: ecode={}", rlerror.ecode);
                 Err(map_p9_error(rlerror.ecode))
             }
             Err(e) => {
                 clunk(TEMP_FID_1, false);
-                kprint!("sys_utimensat_time64: error: {:?}", e);
+                debug_print!("sys_utimensat_time64: error: {:?}", e);
                 Err(Err::NoSys)
             }
         }
@@ -2813,7 +2813,7 @@ pub fn sys_fgetxattr(fd: u32, name: u32, value: u32, size: u32) -> Result<u32, E
         Err(_) => return Err(Err::Inval),
     };
 
-    kprint!(
+    debug_print!(
         "sys_fgetxattr: fd={} name='{}' value=0x{:x} size={}",
         fd,
         name_str,
@@ -2828,7 +2828,7 @@ pub fn sys_fgetxattr(fd: u32, name: u32, value: u32, size: u32) -> Result<u32, E
     match txattrwalk.send_txattrwalk() {
         Ok(crate::p9::P9Response::Success(rxattrwalk)) => {
             let xattr_size = rxattrwalk.size;
-            kprint!("sys_fgetxattr: xattr size = {}", xattr_size);
+            debug_print!("sys_fgetxattr: xattr size = {}", xattr_size);
 
             // If size is 0, just return the size
             if size == 0 {
@@ -2895,7 +2895,7 @@ pub fn sys_fgetxattr(fd: u32, name: u32, value: u32, size: u32) -> Result<u32, E
             Ok(total_read.min(size as u64) as u32)
         }
         Ok(crate::p9::P9Response::Error(rlerror)) => {
-            kprint!("sys_fgetxattr: xattrwalk failed: ecode={}", rlerror.ecode);
+            debug_print!("sys_fgetxattr: xattrwalk failed: ecode={}", rlerror.ecode);
             Err(map_p9_error(rlerror.ecode))
         }
         Err(_) => Err(Err::NoSys),
@@ -2931,7 +2931,7 @@ pub fn sys_flistxattr(fd: u32, list: u32, size: u32) -> Result<u32, Err> {
 
     let file_desc = get_file_desc(fd_entry.file_desc_id);
 
-    kprint!("sys_flistxattr: fd={} list=0x{:x} size={}", fd, list, size);
+    debug_print!("sys_flistxattr: fd={} list=0x{:x} size={}", fd, list, size);
 
     // Use Txattrwalk with empty name to list xattrs
     // When name is empty, the newfid can be used to list all xattrs
@@ -2946,7 +2946,7 @@ pub fn sys_flistxattr(fd: u32, list: u32, size: u32) -> Result<u32, Err> {
     match txattrwalk.send_txattrwalk() {
         Ok(crate::p9::P9Response::Success(rxattrwalk)) => {
             let xattr_list_size = rxattrwalk.size;
-            kprint!("sys_flistxattr: xattr list size = {}", xattr_list_size);
+            debug_print!("sys_flistxattr: xattr list size = {}", xattr_list_size);
 
             // If size is 0, just return the size
             if size == 0 {
@@ -3013,7 +3013,7 @@ pub fn sys_flistxattr(fd: u32, list: u32, size: u32) -> Result<u32, Err> {
             Ok(total_read.min(size as u64) as u32)
         }
         Ok(crate::p9::P9Response::Error(rlerror)) => {
-            kprint!("sys_flistxattr: xattrwalk failed: ecode={}", rlerror.ecode);
+            debug_print!("sys_flistxattr: xattrwalk failed: ecode={}", rlerror.ecode);
             Err(map_p9_error(rlerror.ecode))
         }
         Err(_) => Err(Err::NoSys),
@@ -3037,13 +3037,13 @@ pub fn sys_flock(fd: u32, operation: u32) -> Result<u32, Err> {
     // LOCK_UN = 8  (unlock)
     // LOCK_NB = 4  (non-blocking)
 
-    kprint!("sys_flock: fd={} operation={}", fd, operation);
+    debug_print!("sys_flock: fd={} operation={}", fd, operation);
 
     // In zkVM, there's no concurrent access, so file locking is a no-op
     // Just validate the operation and succeed
     let op = operation & !4; // Remove LOCK_NB flag for validation
     if op != 1 && op != 2 && op != 8 {
-        kprint!("sys_flock: invalid operation {}", operation);
+        debug_print!("sys_flock: invalid operation {}", operation);
         return Err(Err::Inval);
     }
 
@@ -3065,7 +3065,7 @@ pub fn sys_truncate64(pathname: u32, length: u32) -> Result<u32, Err> {
     }
 
     let pathname_str = validate_and_read_pathname(pathname)?;
-    kprint!(
+    debug_print!(
         "sys_truncate64: pathname='{}', length={}",
         pathname_str,
         length
@@ -3095,12 +3095,12 @@ pub fn sys_truncate64(pathname: u32, length: u32) -> Result<u32, Err> {
 
     match tsetattr.send_tsetattr() {
         Ok(P9Response::Success(rsetattr)) => {
-            kprint!("sys_truncate64: rsetattr = {:?}", rsetattr);
+            debug_print!("sys_truncate64: rsetattr = {:?}", rsetattr);
             clunk(file_fid, false);
             Ok(0)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "sys_truncate64: received Rlerror for Rsetattr: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
@@ -3109,7 +3109,7 @@ pub fn sys_truncate64(pathname: u32, length: u32) -> Result<u32, Err> {
             Err(map_p9_error(rlerror.ecode))
         }
         Err(e) => {
-            kprint!("sys_truncate64: error sending Tsetattr: {:?}", e);
+            debug_print!("sys_truncate64: error sending Tsetattr: {:?}", e);
             clunk(file_fid, false);
             Err(Err::NoSys)
         }
@@ -3124,16 +3124,16 @@ pub fn sys_ftruncate64(fd: u32, length: u32) -> Result<u32, Err> {
     }
 
     if fd >= 256 {
-        kprint!("sys_ftruncate64: invalid file descriptor {}", fd);
+        debug_print!("sys_ftruncate64: invalid file descriptor {}", fd);
         return Err(Err::Inval);
     }
 
-    kprint!("sys_ftruncate64: fd={}, length={}", fd, length);
+    debug_print!("sys_ftruncate64: fd={}, length={}", fd, length);
 
     // Get the file descriptor entry
     let fd_entry = get_fd(fd);
     if fd_entry.file_desc_id == 0xFF {
-        kprint!("sys_ftruncate64: invalid file descriptor {}", fd);
+        debug_print!("sys_ftruncate64: invalid file descriptor {}", fd);
         return Err(Err::BadFd);
     }
 
@@ -3162,11 +3162,11 @@ pub fn sys_ftruncate64(fd: u32, length: u32) -> Result<u32, Err> {
 
     match tsetattr.send_tsetattr() {
         Ok(P9Response::Success(rsetattr)) => {
-            kprint!("sys_ftruncate64: rsetattr = {:?}", rsetattr);
+            debug_print!("sys_ftruncate64: rsetattr = {:?}", rsetattr);
             Ok(0)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "sys_ftruncate64: received Rlerror for Rsetattr: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
@@ -3174,7 +3174,7 @@ pub fn sys_ftruncate64(fd: u32, length: u32) -> Result<u32, Err> {
             Err(map_p9_error(rlerror.ecode))
         }
         Err(e) => {
-            kprint!("sys_ftruncate64: error sending Tsetattr: {:?}", e);
+            debug_print!("sys_ftruncate64: error sending Tsetattr: {:?}", e);
             Err(Err::NoSys)
         }
     }
@@ -3208,7 +3208,7 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
         Err(_) => return Err(Err::Inval),
     };
 
-    kprint!(
+    debug_print!(
         "sys_fsetxattr: fd={} name='{}' value=0x{:x} size={} flags={}",
         fd,
         name_str,
@@ -3226,10 +3226,10 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
     let twalk = crate::p9::TwalkMessage::new(0, file_desc.fid, xattr_fid, vec![]);
     match twalk.send_twalk() {
         Ok(crate::p9::P9Response::Success(_)) => {
-            kprint!("sys_fsetxattr: walked to duplicate fid={}", xattr_fid);
+            debug_print!("sys_fsetxattr: walked to duplicate fid={}", xattr_fid);
         }
         Ok(crate::p9::P9Response::Error(rlerror)) => {
-            kprint!("sys_fsetxattr: walk failed: ecode={}", rlerror.ecode);
+            debug_print!("sys_fsetxattr: walk failed: ecode={}", rlerror.ecode);
             return Err(map_p9_error(rlerror.ecode));
         }
         Err(_) => return Err(Err::NoSys),
@@ -3246,7 +3246,7 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
 
     match txattrcreate.send_txattrcreate() {
         Ok(crate::p9::P9Response::Success(_)) => {
-            kprint!(
+            debug_print!(
                 "sys_fsetxattr: xattrcreate succeeded, using fid={}",
                 xattr_fid
             );
@@ -3272,12 +3272,12 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
                     );
                     match twrite.send_twrite() {
                         Ok(crate::p9::P9Response::Success(rwrite)) => {
-                            kprint!("sys_fsetxattr: wrote {} bytes", rwrite.count);
+                            debug_print!("sys_fsetxattr: wrote {} bytes", rwrite.count);
                             total_written += rwrite.count;
 
                             // If we wrote fewer bytes than requested, it's an error
                             if rwrite.count != chunk_data.len() as u32 {
-                                kprint!(
+                                debug_print!(
                                     "sys_fsetxattr: write size mismatch: expected {}, got {}",
                                     chunk_data.len(),
                                     rwrite.count
@@ -3299,7 +3299,7 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
 
                 // Verify total written matches expected size
                 if total_written != size {
-                    kprint!(
+                    debug_print!(
                         "sys_fsetxattr: total write mismatch: expected {}, got {}",
                         size,
                         total_written
@@ -3314,7 +3314,7 @@ pub fn sys_fsetxattr(fd: u32, name: u32, value: u32, size: u32, flags: u32) -> R
             Ok(0)
         }
         Ok(crate::p9::P9Response::Error(rlerror)) => {
-            kprint!("sys_fsetxattr: xattrcreate failed: ecode={}", rlerror.ecode);
+            debug_print!("sys_fsetxattr: xattrcreate failed: ecode={}", rlerror.ecode);
             clunk(xattr_fid, false);
             Err(map_p9_error(rlerror.ecode))
         }
@@ -3339,7 +3339,7 @@ pub fn sys_getcwd(_buf: u32, _size: u32) -> Result<u32, Err> {
     // Check size FIRST - ERANGE takes precedence over EFAULT
     // This includes size==0 and buffer too small cases
     if _size == 0 || cwd_str_len > _size as usize {
-        kprint!(
+        debug_print!(
             "sys_getcwd: buffer too small (need {}, have {})",
             cwd_str_len,
             _size
@@ -3353,7 +3353,7 @@ pub fn sys_getcwd(_buf: u32, _size: u32) -> Result<u32, Err> {
     let buf = unsafe { core::slice::from_raw_parts_mut(_buf as *mut u8, cwd_str_len) };
     // copy the string into buffer, null-terminated utf-8
     buf.copy_from_slice(cwd_str.as_bytes());
-    kprint!(
+    debug_print!(
         "sys_getcwd: cwd_str='{}' cwd_str_len={}",
         cwd_str.trim_end_matches('\0'),
         cwd_str_len
@@ -3393,25 +3393,25 @@ pub fn sys_linkat(
 
     // Check for empty paths
     if oldpath_str.is_empty() {
-        kprint!("sys_linkat: oldpath is empty");
+        debug_print!("sys_linkat: oldpath is empty");
         return Err(Err::FileNotFound);
     }
     if newpath_str.is_empty() {
-        kprint!("sys_linkat: newpath is empty");
+        debug_print!("sys_linkat: newpath is empty");
         return Err(Err::FileNotFound);
     }
 
     // Check for pathname too long
     if oldpath_str.len() > 255 {
-        kprint!("sys_linkat: oldpath too long ({})", oldpath_str.len());
+        debug_print!("sys_linkat: oldpath too long ({})", oldpath_str.len());
         return Err(Err::NameTooLong);
     }
     if newpath_str.len() > 255 {
-        kprint!("sys_linkat: newpath too long ({})", newpath_str.len());
+        debug_print!("sys_linkat: newpath too long ({})", newpath_str.len());
         return Err(Err::NameTooLong);
     }
 
-    kprint!(
+    debug_print!(
         "sys_linkat: old='{}' new='{}', flags=0x{:x}",
         oldpath_str,
         newpath_str,
@@ -3441,13 +3441,13 @@ pub fn sys_linkat(
     let tlink = TlinkMessage::new(0, new_dir_fid, old_fid, new_name.clone());
     match tlink.send_tlink() {
         Ok(P9Response::Success(_)) => {
-            kprint!("sys_linkat: successfully created hard link");
+            debug_print!("sys_linkat: successfully created hard link");
             clunk(old_fid, false);
             clunk(new_dir_fid, false);
             Ok(0)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!("sys_linkat: error creating link: ecode={}", rlerror.ecode);
+            debug_print!("sys_linkat: error creating link: ecode={}", rlerror.ecode);
             clunk(old_fid, false);
             clunk(new_dir_fid, false);
             // Map 9P error codes to Linux errno
@@ -3475,7 +3475,7 @@ pub fn sys_symlinkat(target: u32, newdirfd: u32, linkpath: u32) -> Result<u32, E
     let target_str = validate_and_read_pathname_with_len(target, PATH_MAX)?;
     let linkpath_str = validate_and_read_pathname_with_len(linkpath, PATH_MAX)?;
 
-    kprint!(
+    debug_print!(
         "sys_symlinkat: target='{}', newdirfd={}, linkpath='{}'",
         target_str,
         newdirfd,
@@ -3484,7 +3484,7 @@ pub fn sys_symlinkat(target: u32, newdirfd: u32, linkpath: u32) -> Result<u32, E
 
     // Split linkpath into directory and filename
     let (dir_path, file_name) = split_path(&linkpath_str);
-    kprint!(
+    debug_print!(
         "sys_symlinkat: dir_path='{}', file_name='{}'",
         dir_path,
         file_name
@@ -3504,12 +3504,12 @@ pub fn sys_symlinkat(target: u32, newdirfd: u32, linkpath: u32) -> Result<u32, E
 
     match tsymlink.send_tsymlink() {
         Ok(P9Response::Success(rsymlink)) => {
-            kprint!("sys_symlinkat: rsymlink = {:?}", rsymlink);
+            debug_print!("sys_symlinkat: rsymlink = {:?}", rsymlink);
             clunk(TEMP_FID_1, false);
             Ok(0)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "sys_symlinkat: received Rlerror: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
@@ -3518,7 +3518,7 @@ pub fn sys_symlinkat(target: u32, newdirfd: u32, linkpath: u32) -> Result<u32, E
             Err(map_p9_error(rlerror.ecode))
         }
         Err(e) => {
-            kprint!("sys_symlinkat: error sending Tsymlink: {:?}", e);
+            debug_print!("sys_symlinkat: error sending Tsymlink: {:?}", e);
             clunk(TEMP_FID_1, false);
             Err(Err::NoSys)
         }
@@ -3562,7 +3562,7 @@ pub fn sys_llseek(
 
     // Validate whence first (before checking fd for proper error priority)
     if whence != SEEK_SET && whence != SEEK_CUR && whence != SEEK_END {
-        kprint!("sys_llseek: invalid whence={}", whence);
+        debug_print!("sys_llseek: invalid whence={}", whence);
         return Err(Err::Inval);
     }
 
@@ -3581,7 +3581,7 @@ pub fn sys_llseek(
     let offset = ((_offset_high as i64) << 32) | (_offset_low as i64 & 0xffff_ffff);
 
     let cursor_i64 = i64::try_from(file_desc.cursor).map_err(|_| {
-        kprint!(
+        debug_print!(
             "sys_llseek: cursor value {} does not fit in i64",
             file_desc.cursor
         );
@@ -3591,7 +3591,7 @@ pub fn sys_llseek(
     let new_cursor_i64 = match whence {
         SEEK_SET => offset,
         SEEK_CUR => cursor_i64.checked_add(offset).ok_or_else(|| {
-            kprint!(
+            debug_print!(
                 "sys_llseek: SEEK_CUR overflow (cursor={}, offset={})",
                 cursor_i64,
                 offset
@@ -3605,7 +3605,7 @@ pub fn sys_llseek(
                 match tgetattr.send_tgetattr() {
                     Ok(P9Response::Success(rgetattr)) => {
                         i64::try_from(rgetattr.size).map_err(|_| {
-                            kprint!(
+                            debug_print!(
                                 "sys_llseek: SEEK_END size {} does not fit in i64",
                                 rgetattr.size
                             );
@@ -3619,7 +3619,7 @@ pub fn sys_llseek(
             };
 
             base.checked_add(offset).ok_or_else(|| {
-                kprint!(
+                debug_print!(
                     "sys_llseek: SEEK_END overflow (base={}, offset={})",
                     base,
                     offset
@@ -3635,7 +3635,7 @@ pub fn sys_llseek(
     };
 
     if new_cursor_i64 < 0 {
-        kprint!(
+        debug_print!(
             "sys_llseek: resulting cursor negative ({}), returning EINVAL",
             new_cursor_i64
         );
@@ -3681,13 +3681,13 @@ pub fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
         return Err(Err::NoSys);
     }
     let filename_str = validate_and_read_pathname(_pathname)?;
-    kprint!(
+    debug_print!(
         "sys_mkdirat: dfd={}, filename='{}'",
         _dfd as i32,
         filename_str
     );
     let (dir_path, file_name) = split_path(&filename_str);
-    kprint!(
+    debug_print!(
         "sys_mkdirat: dir_path='{}', file_name='{}'",
         dir_path,
         file_name
@@ -3697,7 +3697,7 @@ pub fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
     // Apply umask to the mode
     let umask_value = get_umask();
     let final_mode = _mode & !umask_value;
-    kprint!(
+    debug_print!(
         "sys_mkdirat: requested_mode=0o{:o}, umask=0o{:o}, final_mode=0o{:o}",
         _mode,
         umask_value,
@@ -3707,12 +3707,12 @@ pub fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
     let tmkdir = TmkdirMessage::new(0, TEMP_FID_1, file_name.to_string(), final_mode, 0);
     match tmkdir.send_tmkdir() {
         Ok(P9Response::Success(rmkdir)) => {
-            kprint!("sys_mkdirat: rmkdir = {:?}", rmkdir);
+            debug_print!("sys_mkdirat: rmkdir = {:?}", rmkdir);
             clunk(TEMP_FID_1, false);
             Ok(0)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "sys_mkdirat: received Rlerror for Rmkdir: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
@@ -3720,7 +3720,7 @@ pub fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
             Err(map_p9_error(rlerror.ecode))
         }
         Err(e) => {
-            kprint!("sys_mkdirat: error sending Tmkdir: {:?}", e);
+            debug_print!("sys_mkdirat: error sending Tmkdir: {:?}", e);
             Err(Err::NoSys)
         }
     }
@@ -3734,7 +3734,7 @@ pub fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u
     }
 
     let filename_str = validate_and_read_pathname(_filename)?;
-    kprint!(
+    debug_print!(
         "sys_mknodat: dfd={}, filename='{}', mode=0x{:x}, dev=0x{:x}",
         _dfd,
         filename_str,
@@ -3748,7 +3748,7 @@ pub fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u
     // Apply umask to the mode
     let umask_value = get_umask();
     let final_mode = _mode & !umask_value;
-    kprint!(
+    debug_print!(
         "sys_mknodat: requested_mode=0o{:o}, umask=0o{:o}, final_mode=0o{:o}",
         _mode,
         umask_value,
@@ -3772,12 +3772,12 @@ pub fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u
     );
     match tmknod.send_tmknod() {
         Ok(P9Response::Success(rmknod)) => {
-            kprint!("sys_mknodat: rmknod = {:?}", rmknod);
+            debug_print!("sys_mknodat: rmknod = {:?}", rmknod);
             clunk(TEMP_FID_1, false);
             Ok(0)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "sys_mknodat: received Rlerror for Rmknod: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
@@ -3785,7 +3785,7 @@ pub fn sys_mknodat(_dfd: u32, _filename: u32, _mode: u32, _dev: u32) -> Result<u
             Err(map_p9_error(rlerror.ecode))
         }
         Err(e) => {
-            kprint!("sys_mknodat: error sending Tmknod: {:?}", e);
+            debug_print!("sys_mknodat: error sending Tmknod: {:?}", e);
             Err(Err::NoSys)
         }
     }
@@ -3810,18 +3810,18 @@ const RESOLVE_CACHED: u64 = 0x20; // Only use cached path resolution
 pub fn sys_openat2(dfd: u32, filename: u32, how_ptr: u32, how_size: u32) -> Result<u32, Err> {
     // Validate how_ptr
     if how_ptr == 0 {
-        kprint!("sys_openat2: NULL how pointer");
+        debug_print!("sys_openat2: NULL how pointer");
         return Err(Err::Fault);
     }
 
     if how_ptr >= crate::constants::KERNEL_SPACE_START {
-        kprint!("sys_openat2: invalid how pointer: 0x{:x}", how_ptr);
+        debug_print!("sys_openat2: invalid how pointer: 0x{:x}", how_ptr);
         return Err(Err::Fault);
     }
 
     // Validate how_size - must be at least size of OpenHow
     if how_size < 24 {
-        kprint!("sys_openat2: invalid how_size: {}", how_size);
+        debug_print!("sys_openat2: invalid how_size: {}", how_size);
         return Err(Err::Inval);
     }
 
@@ -3831,7 +3831,7 @@ pub fn sys_openat2(dfd: u32, filename: u32, how_ptr: u32, how_size: u32) -> Resu
         core::ptr::read(ptr)
     };
 
-    kprint!(
+    debug_print!(
         "sys_openat2: dfd={}, filename=0x{:x}, flags=0x{:x}, mode=0x{:x}, resolve=0x{:x}",
         dfd,
         filename,
@@ -3844,23 +3844,23 @@ pub fn sys_openat2(dfd: u32, filename: u32, how_ptr: u32, how_size: u32) -> Resu
     if how.resolve != 0 {
         // We support basic resolution but log if special flags are used
         if (how.resolve & RESOLVE_NO_SYMLINKS) != 0 {
-            kprint!("sys_openat2: RESOLVE_NO_SYMLINKS requested");
+            debug_print!("sys_openat2: RESOLVE_NO_SYMLINKS requested");
             // We can handle this with O_NOFOLLOW logic
         }
         if (how.resolve & RESOLVE_NO_XDEV) != 0 {
-            kprint!("sys_openat2: RESOLVE_NO_XDEV requested (not fully supported)");
+            debug_print!("sys_openat2: RESOLVE_NO_XDEV requested (not fully supported)");
         }
         if (how.resolve & RESOLVE_NO_MAGICLINKS) != 0 {
-            kprint!("sys_openat2: RESOLVE_NO_MAGICLINKS requested");
+            debug_print!("sys_openat2: RESOLVE_NO_MAGICLINKS requested");
         }
         if (how.resolve & RESOLVE_BENEATH) != 0 {
-            kprint!("sys_openat2: RESOLVE_BENEATH requested (not fully supported)");
+            debug_print!("sys_openat2: RESOLVE_BENEATH requested (not fully supported)");
         }
         if (how.resolve & RESOLVE_IN_ROOT) != 0 {
-            kprint!("sys_openat2: RESOLVE_IN_ROOT requested (not fully supported)");
+            debug_print!("sys_openat2: RESOLVE_IN_ROOT requested (not fully supported)");
         }
         if (how.resolve & RESOLVE_CACHED) != 0 {
-            kprint!("sys_openat2: RESOLVE_CACHED requested (ignored)");
+            debug_print!("sys_openat2: RESOLVE_CACHED requested (ignored)");
         }
     }
 
@@ -3884,7 +3884,7 @@ pub fn sys_preadv(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32,
         return Err(Err::Inval);
     }
 
-    kprint!(
+    debug_print!(
         "sys_preadv: fd={}, vec=0x{:08x}, vlen={}, pos={}",
         _fd,
         _vec,
@@ -3918,10 +3918,10 @@ pub fn sys_preadv(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32,
 
     match &result {
         Ok(n) => {
-            kprint!("sys_preadv: returning Ok({})", n);
+            debug_print!("sys_preadv: returning Ok({})", n);
         }
         Err(e) => {
-            kprint!("sys_preadv: returning Err({})", e.as_errno());
+            debug_print!("sys_preadv: returning Err({})", e.as_errno());
         }
     }
 
@@ -3945,7 +3945,7 @@ pub fn sys_pwrite64(_fd: u32, _buf: u32, _count: u32, _pos: u32) -> Result<u32, 
         return Err(Err::Inval);
     }
 
-    kprint!(
+    debug_print!(
         "sys_pwrite64: fd={}, buf=0x{:08x}, count={}, pos={}",
         _fd,
         _buf,
@@ -3985,7 +3985,7 @@ pub fn sys_pwritev(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32
         return Err(Err::Inval);
     }
 
-    kprint!(
+    debug_print!(
         "sys_pwritev: fd={}, vec=0x{:08x}, vlen={}, pos={}",
         _fd,
         _vec,
@@ -4048,7 +4048,7 @@ pub fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
         return Ok(0);
     }
 
-    kprint!("sys_readv: fd={}, vec=0x{:08x}, vlen={}", _fd, _vec, _vlen);
+    debug_print!("sys_readv: fd={}, vec=0x{:08x}, vlen={}", _fd, _vec, _vlen);
 
     let fd_entry = get_fd(_fd);
     if fd_entry.file_desc_id == 0xFF {
@@ -4056,13 +4056,13 @@ pub fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
     }
 
     let iovecs = load_iovecs(_vec, _vlen)?;
-    kprint!(
+    debug_print!(
         "sys_readv: loaded {} iovecs from user (requested {})",
         iovecs.len(),
         _vlen
     );
     for (idx, iov) in iovecs.iter().enumerate() {
-        kprint!(
+        debug_print!(
             "sys_readv: iov[{}] base=0x{:08x} len={}",
             idx,
             iov.iov_base as u32,
@@ -4076,7 +4076,7 @@ pub fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
         // Check for negative length (iov_len is usize, so check if it's suspiciously large)
         // A negative isize (-1) would appear as usize::MAX
         if iov.iov_len > (isize::MAX as usize) {
-            kprint!("sys_readv: iovec[{}] has invalid length {}", i, iov.iov_len);
+            debug_print!("sys_readv: iovec[{}] has invalid length {}", i, iov.iov_len);
             return Err(Err::Inval);
         }
         if iov.iov_len == 0 {
@@ -4090,7 +4090,7 @@ pub fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
         // Check for overflow in total length
         total_len = total_len.saturating_add(iov.iov_len);
         if total_len > (isize::MAX as usize) {
-            kprint!("sys_readv: total iov_len overflows ssize_t");
+            debug_print!("sys_readv: total iov_len overflows ssize_t");
             return Err(Err::Inval);
         }
     }
@@ -4103,7 +4103,7 @@ pub fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
             continue;
         }
 
-        kprint!(
+        debug_print!(
             "sys_readv: reading into iovec[{}] - base=0x{:08x}, len={}",
             i,
             iov.iov_base as u32,
@@ -4121,20 +4121,20 @@ pub fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
             Err(e) => {
                 // If we've already read some data, return that
                 if total_read > 0 {
-                    kprint!(
+                    debug_print!(
                         "sys_readv: short read due to error {} returning partial {} bytes",
                         e.as_errno(),
                         total_read
                     );
                     return Ok(total_read);
                 }
-                kprint!("sys_readv: returning error {}", e.as_errno());
+                debug_print!("sys_readv: returning error {}", e.as_errno());
                 return Err(e);
             }
         }
     }
 
-    kprint!("sys_readv: returning {} bytes", total_read);
+    debug_print!("sys_readv: returning {} bytes", total_read);
     Ok(total_read)
 }
 
@@ -4154,7 +4154,7 @@ pub fn sys_pread64(_fd: u32, _buf: u32, _count: u32, _pos: u32) -> Result<u32, E
         return Err(Err::Inval);
     }
 
-    kprint!(
+    debug_print!(
         "sys_pread64: fd={}, buf=0x{:08x}, count={}, pos={}",
         _fd,
         _buf,
@@ -4203,14 +4203,14 @@ pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<
     // POSIX: readlink/readlinkat must fail with EINVAL if bufsiz < 1
     // Treat bufsiz < 2 as invalid to handle C library quirks
     if bufsiz < 2 {
-        kprint!("sys_readlinkat: bufsiz={} < 2, returning EINVAL", bufsiz);
+        debug_print!("sys_readlinkat: bufsiz={} < 2, returning EINVAL", bufsiz);
         return Err(Err::Inval);
     }
 
     let pathname_str = validate_and_read_pathname(pathname)?;
     validate_user_buffer_write(buf, bufsiz as usize)?;
 
-    kprint!(
+    debug_print!(
         "sys_readlinkat: dfd={}, pathname='{}', buf=0x{:x}, bufsiz={}",
         dfd,
         pathname_str,
@@ -4220,7 +4220,7 @@ pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<
 
     // Handle empty pathname - operate on the fd itself
     if pathname_str.is_empty() {
-        kprint!(
+        debug_print!(
             "sys_readlinkat: empty pathname, reading symlink from fd {}",
             dfd
         );
@@ -4240,7 +4240,7 @@ pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<
         // Read the symlink contents directly from the fd's FID
         let symlink_target = read_symlink(symlink_fid)?;
 
-        kprint!("sys_readlinkat: symlink target = '{}'", symlink_target);
+        debug_print!("sys_readlinkat: symlink target = '{}'", symlink_target);
 
         // Copy to user buffer (not null-terminated!)
         let copy_len = symlink_target.len().min(bufsiz as usize);
@@ -4284,7 +4284,7 @@ pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<
             // Check if the file is actually a symlink
             let qid = rwalk.wqids.first().unwrap();
             if !qid.is_symlink() {
-                kprint!(
+                debug_print!(
                     "sys_readlinkat: path is not a symlink (qtype={})",
                     qid.qtype
                 );
@@ -4318,7 +4318,7 @@ pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<
     let symlink_target = read_symlink(symlink_fid)?;
     clunk(symlink_fid, false);
 
-    kprint!("sys_readlinkat: symlink target = '{}'", symlink_target);
+    debug_print!("sys_readlinkat: symlink target = '{}'", symlink_target);
 
     // Copy to user buffer (not null-terminated!)
     let copy_len = symlink_target.len().min(bufsiz as usize);
@@ -4387,7 +4387,7 @@ pub fn sys_renameat2(
         .unwrap_or(newpath.len());
     let newpath_str = str::from_utf8(&newpath[..newpath_len]).map_err(|_| Err::Inval)?;
 
-    kprint!(
+    debug_print!(
         "sys_renameat2: '{}' -> '{}', flags=0x{:x}",
         oldpath_str,
         newpath_str,
@@ -4402,26 +4402,26 @@ pub fn sys_renameat2(
     // Validate flag combinations
     // RENAME_NOREPLACE and RENAME_EXCHANGE are mutually exclusive
     if (_flags & RENAME_NOREPLACE) != 0 && (_flags & RENAME_EXCHANGE) != 0 {
-        kprint!("sys_renameat2: RENAME_NOREPLACE and RENAME_EXCHANGE both set");
+        debug_print!("sys_renameat2: RENAME_NOREPLACE and RENAME_EXCHANGE both set");
         return Err(Err::Inval);
     }
 
     // RENAME_WHITEOUT and RENAME_EXCHANGE are mutually exclusive
     if (_flags & RENAME_WHITEOUT) != 0 && (_flags & RENAME_EXCHANGE) != 0 {
-        kprint!("sys_renameat2: RENAME_WHITEOUT and RENAME_EXCHANGE both set");
+        debug_print!("sys_renameat2: RENAME_WHITEOUT and RENAME_EXCHANGE both set");
         return Err(Err::Inval);
     }
 
     // We don't support RENAME_WHITEOUT (it's for overlay filesystems)
     if (_flags & RENAME_WHITEOUT) != 0 {
-        kprint!("sys_renameat2: RENAME_WHITEOUT not supported");
+        debug_print!("sys_renameat2: RENAME_WHITEOUT not supported");
         return Err(Err::OpNotSupp);
     }
 
     // Validate no unknown flags
     const KNOWN_FLAGS: u32 = RENAME_NOREPLACE | RENAME_EXCHANGE | RENAME_WHITEOUT;
     if (_flags & !KNOWN_FLAGS) != 0 {
-        kprint!(
+        debug_print!(
             "sys_renameat2: unknown flags: 0x{:x}",
             _flags & !KNOWN_FLAGS
         );
@@ -4450,7 +4450,7 @@ pub fn sys_renameat2(
             Ok(crate::p9::P9Response::Success(rwalk)) => {
                 if !rwalk.wqids.is_empty() {
                     // File exists, fail with EEXIST
-                    kprint!("sys_renameat2: RENAME_NOREPLACE and newpath exists");
+                    debug_print!("sys_renameat2: RENAME_NOREPLACE and newpath exists");
                     clunk(new_file_fid, false);
                     clunk(TEMP_FID_1, false);
                     clunk(TEMP_FID_4, false);
@@ -4478,7 +4478,7 @@ pub fn sys_renameat2(
             Ok(crate::p9::P9Response::Success(rwalk)) => {
                 if rwalk.wqids.is_empty() {
                     // newpath doesn't exist, fail with ENOENT
-                    kprint!("sys_renameat2: RENAME_EXCHANGE but newpath doesn't exist");
+                    debug_print!("sys_renameat2: RENAME_EXCHANGE but newpath doesn't exist");
                     clunk(new_file_fid, false);
                     clunk(TEMP_FID_1, false);
                     clunk(TEMP_FID_4, false);
@@ -4488,14 +4488,14 @@ pub fn sys_renameat2(
             }
             Ok(crate::p9::P9Response::Error(_)) => {
                 // newpath doesn't exist, fail with ENOENT
-                kprint!("sys_renameat2: RENAME_EXCHANGE but newpath doesn't exist");
+                debug_print!("sys_renameat2: RENAME_EXCHANGE but newpath doesn't exist");
                 clunk(TEMP_FID_1, false);
                 clunk(TEMP_FID_4, false);
                 return Err(Err::FileNotFound);
             }
             Err(_) => {
                 // newpath doesn't exist, fail with ENOENT
-                kprint!("sys_renameat2: RENAME_EXCHANGE but newpath doesn't exist");
+                debug_print!("sys_renameat2: RENAME_EXCHANGE but newpath doesn't exist");
                 clunk(TEMP_FID_1, false);
                 clunk(TEMP_FID_4, false);
                 return Err(Err::FileNotFound);
@@ -4508,7 +4508,7 @@ pub fn sys_renameat2(
         // 3. Rename temp to newpath
         // This is complex and not atomic in 9P, so we'll return EOPNOTSUPP for now
         // unless the 9P server supports it natively
-        kprint!("sys_renameat2: RENAME_EXCHANGE - attempting via temp file swap");
+        debug_print!("sys_renameat2: RENAME_EXCHANGE - attempting via temp file swap");
 
         // Create a temporary name
         let temp_name = format!(".tmp_rename_{}", old_name);
@@ -4556,7 +4556,7 @@ pub fn sys_renameat2(
             crate::p9::TrenameMessage::new(0, old_file_fid, TEMP_FID_1, temp_name.clone());
         match trename1.send_trename() {
             Ok(P9Response::Success(_)) => {
-                kprint!("sys_renameat2: step 1 complete (old->temp)");
+                debug_print!("sys_renameat2: step 1 complete (old->temp)");
             }
             Ok(P9Response::Error(rlerror)) => {
                 clunk(old_file_fid, false);
@@ -4579,7 +4579,7 @@ pub fn sys_renameat2(
             crate::p9::TrenameMessage::new(0, new_file_fid2, TEMP_FID_1, old_name.to_string());
         match trename2.send_trename() {
             Ok(P9Response::Success(_)) => {
-                kprint!("sys_renameat2: step 2 complete (new->old)");
+                debug_print!("sys_renameat2: step 2 complete (new->old)");
             }
             Ok(P9Response::Error(rlerror)) => {
                 // Rollback not implemented for simplicity
@@ -4625,7 +4625,7 @@ pub fn sys_renameat2(
             crate::p9::TrenameMessage::new(0, temp_fid, TEMP_FID_4, new_name.to_string());
         match trename3.send_trename() {
             Ok(P9Response::Success(_)) => {
-                kprint!("sys_renameat2: RENAME_EXCHANGE complete");
+                debug_print!("sys_renameat2: RENAME_EXCHANGE complete");
                 clunk(old_file_fid, false);
                 clunk(new_file_fid2, false);
                 clunk(temp_fid, false);
@@ -4634,7 +4634,7 @@ pub fn sys_renameat2(
                 return Ok(0);
             }
             Ok(P9Response::Error(rlerror)) => {
-                kprint!("sys_renameat2: RENAME_EXCHANGE failed at step 3");
+                debug_print!("sys_renameat2: RENAME_EXCHANGE failed at step 3");
                 clunk(old_file_fid, false);
                 clunk(new_file_fid2, false);
                 clunk(temp_fid, false);
@@ -4643,7 +4643,7 @@ pub fn sys_renameat2(
                 return Err(map_p9_error(rlerror.ecode));
             }
             Err(_) => {
-                kprint!("sys_renameat2: RENAME_EXCHANGE failed at step 3");
+                debug_print!("sys_renameat2: RENAME_EXCHANGE failed at step 3");
                 clunk(old_file_fid, false);
                 clunk(new_file_fid2, false);
                 clunk(temp_fid, false);
@@ -4666,7 +4666,7 @@ pub fn sys_renameat2(
 
     match trenameat.send_trenameat() {
         Ok(P9Response::Success(_rrenameat)) => {
-            kprint!("sys_renameat2: Trenameat successful");
+            debug_print!("sys_renameat2: Trenameat successful");
             clunk(TEMP_FID_1, false);
             clunk(TEMP_FID_4, false);
             return Ok(0);
@@ -4675,7 +4675,7 @@ pub fn sys_renameat2(
             // If Trenameat is not supported, fall back to Trename
             if rlerror.ecode == 95 {
                 // EOPNOTSUPP
-                kprint!("sys_renameat2: Trenameat not supported, trying Trename");
+                debug_print!("sys_renameat2: Trenameat not supported, trying Trename");
 
                 // For Trename, we need to walk to the file being renamed
                 let file_fid = TEMP_FID_7;
@@ -4707,14 +4707,14 @@ pub fn sys_renameat2(
                     crate::p9::TrenameMessage::new(0, file_fid, TEMP_FID_4, new_name.to_string());
                 match trename.send_trename() {
                     Ok(crate::p9::P9Response::Success(_)) => {
-                        kprint!("sys_renameat2: Trename successful");
+                        debug_print!("sys_renameat2: Trename successful");
                         clunk(file_fid, false);
                         clunk(TEMP_FID_1, false);
                         clunk(TEMP_FID_4, false);
                         return Ok(0);
                     }
                     Ok(crate::p9::P9Response::Error(rlerror2)) => {
-                        kprint!("sys_renameat2: Trename failed: ecode={}", rlerror2.ecode);
+                        debug_print!("sys_renameat2: Trename failed: ecode={}", rlerror2.ecode);
                         clunk(file_fid, false);
                         clunk(TEMP_FID_1, false);
                         clunk(TEMP_FID_4, false);
@@ -4728,14 +4728,14 @@ pub fn sys_renameat2(
                     }
                 }
             } else {
-                kprint!("sys_renameat2: received Rlerror: ecode={}", rlerror.ecode);
+                debug_print!("sys_renameat2: received Rlerror: ecode={}", rlerror.ecode);
                 clunk(TEMP_FID_1, false);
                 clunk(TEMP_FID_4, false);
                 return Err(map_p9_error(rlerror.ecode));
             }
         }
         Err(e) => {
-            kprint!("sys_renameat2: error sending Trenameat: {:?}", e);
+            debug_print!("sys_renameat2: error sending Trenameat: {:?}", e);
             clunk(TEMP_FID_1, false);
             clunk(TEMP_FID_4, false);
             Err(Err::NoSys)
@@ -4776,7 +4776,7 @@ pub fn sys_setxattrat(
 const F_DUPFD_CLOEXEC: u32 = 1030;
 
 pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
-    kprint!("sys_fcntl64: _fd={} _cmd={} _arg={}", _fd, _cmd, _arg);
+    debug_print!("sys_fcntl64: _fd={} _cmd={} _arg={}", _fd, _cmd, _arg);
 
     // Check fd validity first (for EBADF vs EINVAL priority)
     // Check for out-of-range file descriptors
@@ -4805,13 +4805,13 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
     ];
 
     if !VALID_CMDS.contains(&_cmd) {
-        kprint!("sys_fcntl64: invalid command {}", _cmd);
+        debug_print!("sys_fcntl64: invalid command {}", _cmd);
         return Err(Err::Inval);
     }
 
     if _cmd == F_DUPFD {
         // Duplicate file descriptor with lowest available fd >= _arg
-        kprint!("sys_fcntl64: F_DUPFD fd={} arg={}", _fd, _arg);
+        debug_print!("sys_fcntl64: F_DUPFD fd={} arg={}", _fd, _arg);
 
         // Find the lowest available fd >= _arg
         let start_fd = _arg.max(3); // Start from at least 3 (after stdin/stdout/stderr)
@@ -4835,18 +4835,18 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
                     },
                 );
                 inc_refcount(fd_entry.file_desc_id);
-                kprint!("sys_fcntl64: F_DUPFD allocated fd {}", fd);
+                debug_print!("sys_fcntl64: F_DUPFD allocated fd {}", fd);
                 return Ok(fd);
             }
             None => {
-                kprint!("sys_fcntl64: F_DUPFD no available fd");
+                debug_print!("sys_fcntl64: F_DUPFD no available fd");
                 return Err(Err::MFile);
             }
         }
     } else if _cmd == F_GETFD {
         // Get file descriptor flags (only FD_CLOEXEC is relevant)
         let flags = if fd_entry.cloexec { FD_CLOEXEC } else { 0 };
-        kprint!(
+        debug_print!(
             "sys_fcntl64: F_GETFD returning {} (cloexec={})",
             flags,
             fd_entry.cloexec
@@ -4858,13 +4858,13 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
         let mut updated_entry = fd_entry;
         updated_entry.cloexec = new_cloexec;
         update_fd(_fd, updated_entry);
-        kprint!("sys_fcntl64: F_SETFD setting FD_CLOEXEC to {}", new_cloexec);
+        debug_print!("sys_fcntl64: F_SETFD setting FD_CLOEXEC to {}", new_cloexec);
         return Ok(0);
     } else if _cmd == F_GETFL {
         // Get file status flags (O_RDONLY, O_WRONLY, O_RDWR, O_APPEND, O_NONBLOCK, etc.)
         let file_desc = get_file_desc(fd_entry.file_desc_id);
         let flags = file_desc.flags;
-        kprint!("sys_fcntl64: F_GETFL returning 0x{:x}", flags);
+        debug_print!("sys_fcntl64: F_GETFL returning 0x{:x}", flags);
         return Ok(flags);
     } else if _cmd == F_SETFL {
         // Set file status flags (only certain flags can be set: O_APPEND, O_NONBLOCK, O_ASYNC, O_DIRECT)
@@ -4886,7 +4886,7 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
         updated_desc.flags = new_flags;
         update_file_desc(fd_entry.file_desc_id, updated_desc);
 
-        kprint!(
+        debug_print!(
             "sys_fcntl64: F_SETFL old_flags=0x{:x} new_flags=0x{:x}",
             file_desc.flags,
             new_flags
@@ -4909,12 +4909,12 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
             },
         );
         inc_refcount(fd_entry.file_desc_id);
-        kprint!("sys_fcntl64: F_DUPFD_CLOEXEC: _fd={} _arg={}", _fd, _arg);
+        debug_print!("sys_fcntl64: F_DUPFD_CLOEXEC: _fd={} _arg={}", _fd, _arg);
         return Ok(_arg);
     } else if _cmd == F_GETLK {
         // Get file lock status
         // In zkVM, we don't have real file locking, so we always report F_UNLCK (no lock)
-        kprint!("sys_fcntl64: F_GETLK fd={} flock_ptr=0x{:x}", _fd, _arg);
+        debug_print!("sys_fcntl64: F_GETLK fd={} flock_ptr=0x{:x}", _fd, _arg);
 
         // The _arg is a pointer to struct flock
         // struct flock {
@@ -4935,7 +4935,7 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
         match crate::linux_abi::is_valid_user_address(_arg, FLOCK_SIZE, true) {
             Some(valid_len) if valid_len >= FLOCK_SIZE => {}
             _ => {
-                kprint!(
+                debug_print!(
                     "sys_fcntl64: F_GETLK - invalid flock pointer {:#010x}",
                     _arg
                 );
@@ -4949,11 +4949,11 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
             *l_type_ptr = F_UNLCK as u16;
         }
 
-        kprint!("sys_fcntl64: F_GETLK set l_type to F_UNLCK");
+        debug_print!("sys_fcntl64: F_GETLK set l_type to F_UNLCK");
         return Ok(0);
     } else if _cmd == F_SETLK || _cmd == F_SETLKW {
         // Set file lock (non-blocking or blocking)
-        kprint!(
+        debug_print!(
             "sys_fcntl64: F_SETLK/F_SETLKW fd={} flock_ptr=0x{:x}",
             _fd,
             _arg
@@ -4969,7 +4969,7 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
         match crate::linux_abi::is_valid_user_address(_arg, FLOCK_SIZE, false) {
             Some(valid_len) if valid_len >= FLOCK_SIZE => {}
             _ => {
-                kprint!(
+                debug_print!(
                     "sys_fcntl64: F_SETLK/F_SETLKW - invalid flock pointer {:#010x}",
                     _arg
                 );
@@ -4998,18 +4998,18 @@ pub fn sys_fcntl64(_fd: u32, _cmd: u32, _arg: u32) -> Result<u32, Err> {
                 && l_whence != SEEK_CUR as i16
                 && l_whence != SEEK_END as i16
             {
-                kprint!("sys_fcntl64: F_SETLK invalid l_whence={}", l_whence);
+                debug_print!("sys_fcntl64: F_SETLK invalid l_whence={}", l_whence);
                 return Err(Err::Inval);
             }
         }
 
         // In zkVM, we don't have real file locking, so we just succeed
-        kprint!("sys_fcntl64: F_SETLK/F_SETLKW success (no-op in zkVM)");
+        debug_print!("sys_fcntl64: F_SETLK/F_SETLKW success (no-op in zkVM)");
         return Ok(0);
     }
 
     // Unsupported command
-    kprint!("sys_fcntl64: unsupported command {}", _cmd);
+    debug_print!("sys_fcntl64: unsupported command {}", _cmd);
     let msg = b"sys_fcntl64 not implemented for this cmd/arg";
     host_log(msg.as_ptr(), msg.len());
     Err(Err::NoSys)
@@ -5199,7 +5199,7 @@ fn do_walk(
     target_fid: u32,
     wnames: Vec<String>,
 ) -> Result<(u32, Vec<Qid>), Err> {
-    kprint!(
+    debug_print!(
         "do_walk: starting_fid={}, target_fid={}, wnames={:?}",
         starting_fid,
         target_fid,
@@ -5213,24 +5213,24 @@ fn do_walk(
     let rwalk = match twalk.send_twalk() {
         Ok(P9Response::Success(rwalk)) => rwalk,
         Ok(P9Response::Error(rlerror)) => {
-            kprint!("do_walk: error response - ecode={}", rlerror.ecode);
+            debug_print!("do_walk: error response - ecode={}", rlerror.ecode);
             return Err(Err::FileNotFound);
         }
         Err(e) => {
-            kprint!("do_walk: error = {:?}", e);
+            debug_print!("do_walk: error = {:?}", e);
             return Err(Err::NoSys);
         }
     };
 
     // Continue with rwalk processing
-    kprint!(
+    debug_print!(
         "do_walk: rwalk.wqids.len()={}, wnames_len={}, wqids={:?}",
         rwalk.wqids.len(),
         wnames_len,
         rwalk.wqids
     );
     if rwalk.wqids.len() != wnames_len {
-        kprint!(
+        debug_print!(
             "do_walk: walk failed - expected {} components, got {}",
             wnames_len,
             rwalk.wqids.len()
@@ -5240,7 +5240,7 @@ fn do_walk(
         if rwalk.wqids.len() > 0 {
             if let Some(last_qid) = rwalk.wqids.last() {
                 if last_qid.is_symlink() {
-                    kprint!(
+                    debug_print!(
                         "do_walk: stopped at symlink at position {}/{}",
                         rwalk.wqids.len(),
                         wnames_len
@@ -5248,7 +5248,7 @@ fn do_walk(
 
                     // Read the symlink target
                     let symlink_target = read_symlink(target_fid)?;
-                    kprint!(
+                    debug_print!(
                         "do_walk: intermediate symlink target = '{}'",
                         symlink_target
                     );
@@ -5263,7 +5263,7 @@ fn do_walk(
                     // Resolve the symlink target relative to its directory
                     let resolved_symlink_path =
                         resolve_symlink_target(&symlink_target, &symlink_wnames)?;
-                    kprint!(
+                    debug_print!(
                         "do_walk: resolved intermediate symlink to '{}'",
                         resolved_symlink_path
                     );
@@ -5274,7 +5274,7 @@ fn do_walk(
                         full_resolved_path.push('/');
                         full_resolved_path.push_str(&wnames_clone[i]);
                     }
-                    kprint!("do_walk: full resolved path = '{}'", full_resolved_path);
+                    debug_print!("do_walk: full resolved path = '{}'", full_resolved_path);
 
                     // Close the current target_fid
                     clunk(target_fid, false);
@@ -5282,7 +5282,7 @@ fn do_walk(
                     // Walk to the fully resolved path
                     let resolved_wnames = normalize_path(&full_resolved_path);
                     let walk_from_fid = if symlink_target.starts_with('/') {
-                        kprint!("do_walk: absolute intermediate symlink, walking from root");
+                        debug_print!("do_walk: absolute intermediate symlink, walking from root");
                         get_root_fid()
                     } else {
                         starting_fid
@@ -5299,15 +5299,15 @@ fn do_walk(
         if let Some(last_qid) = rwalk.wqids.last()
             && last_qid.is_symlink()
         {
-            kprint!("do_walk: final component is a symlink, resolving...");
+            debug_print!("do_walk: final component is a symlink, resolving...");
 
             // Read the symlink contents
             let symlink_target = read_symlink(target_fid)?;
-            kprint!("do_walk: symlink target = '{}'", symlink_target);
+            debug_print!("do_walk: symlink target = '{}'", symlink_target);
             let wnames = wnames_clone;
             // Resolve the target path relative to the symlink's directory
             let resolved_path = resolve_symlink_target(&symlink_target, &wnames)?;
-            kprint!("do_walk: resolved path = '{}'", resolved_path);
+            debug_print!("do_walk: resolved path = '{}'", resolved_path);
 
             // Close the current target_fid since we're going to walk to a new path
             clunk(target_fid, false);
@@ -5316,7 +5316,7 @@ fn do_walk(
             let resolved_wnames = normalize_path(&resolved_path);
             // For absolute paths, start from root; for relative paths, use starting_fid
             let walk_from_fid = if symlink_target.starts_with('/') {
-                kprint!("do_walk: absolute symlink, walking from root");
+                debug_print!("do_walk: absolute symlink, walking from root");
                 get_root_fid()
             } else {
                 starting_fid
@@ -5333,11 +5333,11 @@ fn read_symlink(fid: u32) -> Result<String, Err> {
     let treadlink = TreadlinkMessage::new(0, fid);
     match treadlink.send_treadlink() {
         Ok(P9Response::Success(rreadlink)) => {
-            kprint!("read_symlink: readlink target = '{}'", rreadlink.target);
+            debug_print!("read_symlink: readlink target = '{}'", rreadlink.target);
             Ok(rreadlink.target)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "read_symlink: error reading symlink: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
@@ -5345,7 +5345,7 @@ fn read_symlink(fid: u32) -> Result<String, Err> {
             Err(map_p9_error(rlerror.ecode))
         }
         Err(e) => {
-            kprint!("read_symlink: error sending treadlink: {:?}", e);
+            debug_print!("read_symlink: error sending treadlink: {:?}", e);
             Err(Err::NoSys)
         }
     }
@@ -5382,7 +5382,7 @@ fn resolve_symlink_target(target: &str, original_wnames: &[String]) -> Result<St
             format!("{}/{}", dir_path, target)
         };
 
-        kprint!(
+        debug_print!(
             "resolve_symlink_target: dir_path='{}', target='{}', resolved='{}'",
             dir_path,
             target,
@@ -5438,7 +5438,7 @@ fn get_starting_fid(_dfd: u32, filename_str: &str) -> Result<u32, Err> {
         // For relative paths, dirfd must be valid
         // Check if dfd is in range (including negative values cast to u32)
         if _dfd_i32 < 0 || _dfd >= 256 {
-            kprint!(
+            debug_print!(
                 "get_starting_fid: invalid dfd={} (as i32={})",
                 _dfd,
                 _dfd_i32
@@ -5448,14 +5448,14 @@ fn get_starting_fid(_dfd: u32, filename_str: &str) -> Result<u32, Err> {
 
         let fd_entry = get_fd(_dfd);
         if fd_entry.file_desc_id == 0xFF {
-            kprint!("get_starting_fid: dfd={} is not open", _dfd);
+            debug_print!("get_starting_fid: dfd={} is not open", _dfd);
             return Err(Err::BadFd);
         }
 
         // Check if dfd is a directory (required for relative paths)
         let file_desc = get_file_desc(fd_entry.file_desc_id);
         if !file_desc.is_dir {
-            kprint!(
+            debug_print!(
                 "get_starting_fid: dfd={} is not a directory (is_dir=false)",
                 _dfd
             );
@@ -5496,7 +5496,7 @@ fn resolve_path(dfd: u32, filename_str: &str, into_fid: u32) -> Result<u32, Err>
 
 fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32, Err> {
     // Convert the filename to a UTF-8 s
-    kprint!(
+    debug_print!(
         "sys_openat: filename='{}' dfd={} flags=0x{:x} mode=0x{:x}",
         filename_str,
         dfd,
@@ -5506,7 +5506,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
 
     // Check if this is a virtual device file
     if let Some(virtual_fid) = get_virtual_device_fid(filename_str) {
-        kprint!("sys_openat: opening virtual device: {}", filename_str);
+        debug_print!("sys_openat: opening virtual device: {}", filename_str);
 
         let fd = find_free_fd()?;
         let desc_id = find_free_file_desc()?;
@@ -5539,7 +5539,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
             },
         );
 
-        kprint!("sys_openat: virtual device opened with fd={}", fd);
+        debug_print!("sys_openat: virtual device opened with fd={}", fd);
         return Ok(fd);
     }
 
@@ -5561,7 +5561,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
 
     // Handle O_NOFOLLOW: check if target is a symlink and fail if it is
     if (_flags & O_NOFOLLOW) != 0 {
-        kprint!("sys_openat: O_NOFOLLOW flag set");
+        debug_print!("sys_openat: O_NOFOLLOW flag set");
 
         let starting_fid = get_starting_fid(dfd, &filename_str)?;
         let (dir_path, file_name) = split_path(&filename_str);
@@ -5599,7 +5599,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                     if qid.is_symlink() {
                         // With O_PATH, we can open symlinks - just get an fd to the symlink itself
                         if (_flags & O_PATH) != 0 {
-                            kprint!(
+                            debug_print!(
                                 "sys_openat: O_NOFOLLOW + O_PATH on symlink - creating fd-only descriptor"
                             );
                             set_fd(file_fid, file_fid);
@@ -5612,7 +5612,9 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                             return Ok(file_fid);
                         } else {
                             // O_NOFOLLOW without O_PATH on a symlink - fail with ELOOP
-                            kprint!("sys_openat: O_NOFOLLOW - path is a symlink, returning ELOOP");
+                            debug_print!(
+                                "sys_openat: O_NOFOLLOW - path is a symlink, returning ELOOP"
+                            );
                             clunk(file_fid, false);
                             return Err(Err::Loop);
                         }
@@ -5620,7 +5622,9 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                     // Not a symlink, file exists
                     // Check if O_PATH is set - if so, don't actually open the file
                     if (_flags & O_PATH) != 0 {
-                        kprint!("sys_openat: O_NOFOLLOW + O_PATH - creating fd-only descriptor");
+                        debug_print!(
+                            "sys_openat: O_NOFOLLOW + O_PATH - creating fd-only descriptor"
+                        );
                         // For O_PATH, we don't call Tlopen - just set up the fd
                         set_fd(file_fid, file_fid);
                         let fd_entry = get_fd(file_fid);
@@ -5633,7 +5637,9 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                     }
 
                     // Normal open
-                    kprint!("sys_openat: O_NOFOLLOW - file exists and is not a symlink, opening");
+                    debug_print!(
+                        "sys_openat: O_NOFOLLOW - file exists and is not a symlink, opening"
+                    );
 
                     let tlopen = TlopenMessage::new(0, file_fid, p9_flags);
                     match tlopen.send_tlopen() {
@@ -5685,27 +5691,27 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
     let path_result = resolve_path(dfd, filename_str, file_fid);
     if path_result.is_ok() {
         if (_flags & O_CREAT) == O_CREAT && (_flags & O_EXCL) == O_EXCL {
-            kprint!("sys_openat: O_CREAT and O_EXCL flags detected, file already exists");
+            debug_print!("sys_openat: O_CREAT and O_EXCL flags detected, file already exists");
             return Err(Err::FileExists);
         }
-        kprint!("sys_openat: file exists, flags=0x{:x}", _flags);
+        debug_print!("sys_openat: file exists, flags=0x{:x}", _flags);
 
         // Check if O_PATH is set - if so, don't actually open the file
         if (_flags & O_PATH) != 0 {
-            kprint!("sys_openat: O_PATH - creating fd-only descriptor");
+            debug_print!("sys_openat: O_PATH - creating fd-only descriptor");
 
             // Get file attributes to determine if it's a directory
-            kprint!(
+            debug_print!(
                 "sys_openat: O_PATH querying file attributes for fid {}",
                 file_fid
             );
             let tgetattr = crate::p9::TgetattrMessage::new(0, file_fid, P9_GETATTR_MODE);
             let is_directory = match tgetattr.send_tgetattr() {
                 Ok(P9Response::Success(rgetattr)) => {
-                    kprint!("sys_openat: O_PATH Tgetattr sent successfully");
+                    debug_print!("sys_openat: O_PATH Tgetattr sent successfully");
                     // Check if mode indicates directory (Unix S_IFDIR)
                     let is_dir = (rgetattr.mode & S_IFDIR) != 0;
-                    kprint!(
+                    debug_print!(
                         "sys_openat: O_PATH mode=0x{:x}, is_dir={}",
                         rgetattr.mode,
                         is_dir
@@ -5713,16 +5719,16 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                     is_dir
                 }
                 Ok(P9Response::Error(rlerror)) => {
-                    kprint!("sys_openat: O_PATH Rgetattr error: ecode={}", rlerror.ecode);
+                    debug_print!("sys_openat: O_PATH Rgetattr error: ecode={}", rlerror.ecode);
                     false
                 }
                 Err(e) => {
-                    kprint!("sys_openat: O_PATH Tgetattr send failed: {:?}", e);
+                    debug_print!("sys_openat: O_PATH Tgetattr send failed: {:?}", e);
                     false
                 }
             };
 
-            kprint!(
+            debug_print!(
                 "sys_openat: O_PATH setting is_dir={} for fd {}",
                 is_directory,
                 file_fid
@@ -5742,7 +5748,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
 
         match tlopen.send_tlopen() {
             Ok(P9Response::Success(rlopen)) => {
-                kprint!("sys_openat: received Rlopen: {:?}", rlopen);
+                debug_print!("sys_openat: received Rlopen: {:?}", rlopen);
                 let is_directory = rlopen.qid.is_dir();
                 set_fd(file_fid, file_fid);
                 // Update the file description with the correct mode, is_dir, and flags
@@ -5755,7 +5761,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
 
                 // Handle O_TRUNC: truncate file to 0 bytes after opening
                 if (_flags & O_TRUNC) == O_TRUNC {
-                    kprint!("sys_openat: O_TRUNC detected, truncating file to 0 bytes");
+                    debug_print!("sys_openat: O_TRUNC detected, truncating file to 0 bytes");
                     let valid = P9SetattrMask::Size as u32;
                     let tsetattr = TsetattrMessage::new(
                         0,        // tag
@@ -5773,15 +5779,18 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
 
                     match tsetattr.send_tsetattr() {
                         Ok(P9Response::Success(_)) => {
-                            kprint!("sys_openat: file truncated successfully");
+                            debug_print!("sys_openat: file truncated successfully");
                         }
                         Ok(P9Response::Error(rlerror)) => {
-                            kprint!("sys_openat: error truncating file: ecode={}", rlerror.ecode);
+                            debug_print!(
+                                "sys_openat: error truncating file: ecode={}",
+                                rlerror.ecode
+                            );
                             clunk(file_fid, false);
                             return Err(map_p9_error(rlerror.ecode));
                         }
                         Err(e) => {
-                            kprint!("sys_openat: error sending Tsetattr: {:?}", e);
+                            debug_print!("sys_openat: error sending Tsetattr: {:?}", e);
                             clunk(file_fid, false);
                             return Err(Err::NoSys);
                         }
@@ -5792,7 +5801,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
             }
             Ok(P9Response::Error(rlerror)) => {
                 clunk(file_fid, false);
-                kprint!(
+                debug_print!(
                     "sys_openat: received Rlerror for Rlopen: tag={}, ecode={}",
                     rlerror.tag,
                     rlerror.ecode
@@ -5800,13 +5809,13 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                 Err(map_p9_error(rlerror.ecode))
             }
             Err(e) => {
-                kprint!("sys_openat: error sending Tlopen: {:?}", e);
+                debug_print!("sys_openat: error sending Tlopen: {:?}", e);
                 clunk(file_fid, false);
                 Err(Err::NoSys)
             }
         }
     } else if _flags & O_CREAT == O_CREAT {
-        kprint!("sys_openat: O_CREAT flag detected, attempting file creation");
+        debug_print!("sys_openat: O_CREAT flag detected, attempting file creation");
         let (dir_path, file_name) = split_path(&filename_str);
         resolve_path(dfd, &dir_path, file_fid)?;
 
@@ -5816,7 +5825,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
         let masked_permissions = permission_bits & !umask_value; // Apply umask
         let special_bits = mode & 0o7000; // Get special bits (setuid, setgid, sticky)
         let p9_mode = special_bits | masked_permissions; // Combine them
-        kprint!(
+        debug_print!(
             "sys_openat: requested_mode=0o{:o}, umask=0o{:o}, final_mode=0o{:o}",
             mode,
             umask_value,
@@ -5825,10 +5834,10 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
         // Create the file using Tlcreate
         let tlcreate =
             TlcreateMessage::new(0, file_fid, file_name.to_string(), p9_flags, p9_mode, 0); // flags=p9_flags, mode=p9_mode, gid=0
-        kprint!("sys_openat: tlcreate = {:?}", tlcreate);
+        debug_print!("sys_openat: tlcreate = {:?}", tlcreate);
         match tlcreate.send_tlcreate() {
             Ok(P9Response::Success(rlcreate)) => {
-                kprint!("sys_openat: received Rlcreate: {:?}", rlcreate);
+                debug_print!("sys_openat: received Rlcreate: {:?}", rlcreate);
                 let is_directory = rlcreate.qid.is_dir();
                 set_fd(file_fid, file_fid);
                 // Update the file description with the correct mode, is_dir, and flags
@@ -5842,7 +5851,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
             }
             Ok(P9Response::Error(rlerror)) => {
                 clunk(file_fid, false);
-                kprint!(
+                debug_print!(
                     "sys_openat: received Rlerror for Rlcreate: tag={}, ecode={}",
                     rlerror.tag,
                     rlerror.ecode
@@ -5850,7 +5859,7 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
                 Err(map_p9_error(rlerror.ecode))
             }
             Err(e) => {
-                kprint!("sys_openat: error sending Tlcreate: {:?}", e);
+                debug_print!("sys_openat: error sending Tlcreate: {:?}", e);
                 clunk(file_fid, false);
                 Err(Err::NoSys)
             }
@@ -5861,11 +5870,11 @@ fn do_openat(dfd: u32, filename_str: &str, _flags: u32, mode: u32) -> Result<u32
         match path_result {
             Ok(_) => {
                 // This shouldn't happen as we already handled the Ok case above
-                kprint!("sys_openat: unexpected state - path_result was Ok");
+                debug_print!("sys_openat: unexpected state - path_result was Ok");
                 Err(Err::FileNotFound)
             }
             Err(e) => {
-                kprint!(
+                debug_print!(
                     "sys_openat: path resolution failed with error {:?}",
                     e as i32
                 );
@@ -5928,7 +5937,7 @@ fn normalize_path(path: &str) -> Vec<String> {
 fn get_file_size(starting_fid: u32, path: &str, depth: u32) -> Result<u64, Err> {
     if depth > 40 {
         // don't let it recurse too much
-        kprint!("get_file_size: depth too deep, returning error");
+        debug_print!("get_file_size: depth too deep, returning error");
         return Err(Err::NoSys);
     }
     let wnames = normalize_path(path);
@@ -5937,12 +5946,12 @@ fn get_file_size(starting_fid: u32, path: &str, depth: u32) -> Result<u64, Err> 
     let tgetattr = crate::p9::TgetattrMessage::new(0, TEMP_FID_1, P9_GETATTR_ALL);
     match tgetattr.send_tgetattr() {
         Ok(P9Response::Success(rgetattr)) => {
-            kprint!("sys_statx: rgetattr = {:?}", rgetattr);
+            debug_print!("sys_statx: rgetattr = {:?}", rgetattr);
             clunk(TEMP_FID_1, false);
             Ok(rgetattr.size)
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
@@ -5951,7 +5960,7 @@ fn get_file_size(starting_fid: u32, path: &str, depth: u32) -> Result<u64, Err> 
             Err(Err::NoSys)
         }
         Err(e) => {
-            kprint!("sys_statx: error = {:?}", e);
+            debug_print!("sys_statx: error = {:?}", e);
             clunk(TEMP_FID_1, false);
             Err(Err::NoSys)
         }
@@ -5983,7 +5992,7 @@ pub fn sys_statx(
 
     // Check for invalid flags
     if (_flags & !VALID_FLAGS_MASK) != 0 {
-        kprint!("sys_statx: invalid flags 0x{:x}", _flags);
+        debug_print!("sys_statx: invalid flags 0x{:x}", _flags);
         return Err(Err::Inval);
     }
 
@@ -5991,18 +6000,18 @@ pub fn sys_statx(
     // Valid mask bits: STATX_BASIC_STATS (0x7ff) | STATX_BTIME (0x800) | STATX_MNT_ID (0x1000) | STATX_DIOALIGN (0x2000) | STATX_RESERVED (0x80000000)
     const VALID_MASK_BITS: u32 = 0x80003fff;
     if (_mask & !VALID_MASK_BITS) != 0 {
-        kprint!("sys_statx: invalid mask 0x{:x}", _mask);
+        debug_print!("sys_statx: invalid mask 0x{:x}", _mask);
         return Err(Err::Inval);
     }
 
     // Validate statxbuf pointer early - must be writable
     if _statxbuf == 0 {
-        kprint!("sys_statx: _statxbuf is NULL");
+        debug_print!("sys_statx: _statxbuf is NULL");
         return Err(Err::Fault);
     }
     let statx_size = core::mem::size_of::<Statx>();
     if crate::linux_abi::is_valid_user_address(_statxbuf, statx_size, true).is_none() {
-        kprint!("sys_statx: _statxbuf {:08x} is not writable", _statxbuf);
+        debug_print!("sys_statx: _statxbuf {:08x} is not writable", _statxbuf);
         return Err(Err::Fault);
     }
 
@@ -6011,7 +6020,7 @@ pub fn sys_statx(
     // Handle AT_EMPTY_PATH early - the pathname is ignored in this mode
     if (_flags & AT_EMPTY_PATH) != 0 {
         if _dfd >= 256 {
-            kprint!(
+            debug_print!(
                 "sys_statx: AT_EMPTY_PATH set but dfd {} is out of range",
                 _dfd
             );
@@ -6021,7 +6030,7 @@ pub fn sys_statx(
         if _filename != 0 {
             let filename_str = validate_and_read_pathname_with_len(_filename, MAX_PATH_LEN)?;
             if !filename_str.is_empty() {
-                kprint!(
+                debug_print!(
                     "sys_statx: AT_EMPTY_PATH set but filename '{}' is not empty",
                     filename_str
                 );
@@ -6029,7 +6038,7 @@ pub fn sys_statx(
             }
         }
 
-        kprint!("sys_statx: AT_EMPTY_PATH set, statting fd {}", _dfd);
+        debug_print!("sys_statx: AT_EMPTY_PATH set, statting fd {}", _dfd);
 
         // Special handling for stdin/stdout/stderr (fds 0, 1, 2)
         // These are character devices and don't have valid P9 FIDs
@@ -6039,7 +6048,7 @@ pub fn sys_statx(
                 Statx, StatxTimestamp,
             };
 
-            kprint!(
+            debug_print!(
                 "sys_statx: fd {} is stdin/stdout/stderr, treating as character device",
                 _dfd
             );
@@ -6110,24 +6119,24 @@ pub fn sys_statx(
                 core::mem::size_of::<Statx>(),
             );
             if bytes_copied == 0 {
-                kprint!("sys_statx: failed to copy statx structure to user memory");
+                debug_print!("sys_statx: failed to copy statx structure to user memory");
                 return Err(Err::Fault);
             }
 
-            kprint!("sys_statx: successfully filled statx buffer for stdin/stdout/stderr");
+            debug_print!("sys_statx: successfully filled statx buffer for stdin/stdout/stderr");
             return Ok(0);
         }
 
         let fd_entry = get_fd(_dfd);
         if fd_entry.file_desc_id == 0xFF {
-            kprint!("sys_statx: invalid fd {}", _dfd);
+            debug_print!("sys_statx: invalid fd {}", _dfd);
             return Err(Err::BadFd);
         }
         let file_desc = get_file_desc(fd_entry.file_desc_id);
 
         // Check if this fd is a virtual device
         if is_virtual_device(file_desc.fid) {
-            kprint!("sys_statx: fd {} is a virtual device", _dfd);
+            debug_print!("sys_statx: fd {} is a virtual device", _dfd);
             let statx = create_virtual_device_statx(file_desc.fid);
 
             // Write the statx structure to the user buffer
@@ -6143,11 +6152,11 @@ pub fn sys_statx(
                 core::mem::size_of::<Statx>(),
             );
             if bytes_copied == 0 {
-                kprint!("sys_statx: failed to copy statx structure to user memory");
+                debug_print!("sys_statx: failed to copy statx structure to user memory");
                 return Err(Err::Fault);
             }
 
-            kprint!("sys_statx: successfully filled statx buffer for virtual device fd");
+            debug_print!("sys_statx: successfully filled statx buffer for virtual device fd");
             return Ok(0);
         }
 
@@ -6156,7 +6165,7 @@ pub fn sys_statx(
         let tgetattr = crate::p9::TgetattrMessage::new(0, target_fid, P9_GETATTR_ALL);
         match tgetattr.send_tgetattr() {
             Ok(P9Response::Success(rgetattr)) => {
-                kprint!("sys_statx: rgetattr = {:?}", rgetattr);
+                debug_print!("sys_statx: rgetattr = {:?}", rgetattr);
 
                 // Convert 9P RgetattrMessage to Linux statx structure
                 let statx = convert_rgetattr_to_statx(&rgetattr);
@@ -6174,15 +6183,15 @@ pub fn sys_statx(
                     core::mem::size_of::<Statx>(),
                 );
                 if bytes_copied == 0 {
-                    kprint!("sys_statx: failed to copy statx structure to user memory");
+                    debug_print!("sys_statx: failed to copy statx structure to user memory");
                     return Err(Err::Fault);
                 }
 
-                kprint!("sys_statx: successfully filled statx buffer");
+                debug_print!("sys_statx: successfully filled statx buffer");
                 Ok(0) // Success
             }
             Ok(P9Response::Error(rlerror)) => {
-                kprint!(
+                debug_print!(
                     "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
                     rlerror.tag,
                     rlerror.ecode
@@ -6190,13 +6199,13 @@ pub fn sys_statx(
                 Err(map_p9_error(rlerror.ecode))
             }
             Err(e) => {
-                kprint!("sys_statx: error = {:?}", e);
+                debug_print!("sys_statx: error = {:?}", e);
                 Err(Err::NoSys)
             }
         }
     } else {
         // Normal path - parse filename
-        kprint!(
+        debug_print!(
             "sys_statx: _dfd={}, _mask=0x{:x}, _statxbuf = {:08x}",
             _dfd,
             _mask,
@@ -6206,17 +6215,17 @@ pub fn sys_statx(
             return Err(Err::Fault);
         }
         let filename = validate_and_read_pathname_with_len(_filename, MAX_PATH_LEN)?;
-        kprint!("sys_statx: filename = {}", filename);
+        debug_print!("sys_statx: filename = {}", filename);
 
         // Empty filename without AT_EMPTY_PATH is invalid
         if filename.is_empty() {
-            kprint!("sys_statx: empty filename without AT_EMPTY_PATH");
+            debug_print!("sys_statx: empty filename without AT_EMPTY_PATH");
             return Err(Err::FileNotFound);
         }
 
         // Check if this is a virtual device file and handle it directly
         if let Some(virtual_fid) = get_virtual_device_fid(&filename) {
-            kprint!("sys_statx: statting virtual device: {}", filename);
+            debug_print!("sys_statx: statting virtual device: {}", filename);
 
             let statx = create_virtual_device_statx(virtual_fid);
 
@@ -6233,17 +6242,17 @@ pub fn sys_statx(
                 core::mem::size_of::<Statx>(),
             );
             if bytes_copied == 0 {
-                kprint!("sys_statx: failed to copy statx structure to user memory");
+                debug_print!("sys_statx: failed to copy statx structure to user memory");
                 return Err(Err::Fault);
             }
 
-            kprint!("sys_statx: successfully filled statx buffer for virtual device");
+            debug_print!("sys_statx: successfully filled statx buffer for virtual device");
             return Ok(0);
         }
 
         let target_fid = if (_flags & AT_SYMLINK_NOFOLLOW) != 0 {
             // Don't follow symlinks - use Twalk directly on the final component
-            kprint!("sys_statx: AT_SYMLINK_NOFOLLOW set, not following symlinks");
+            debug_print!("sys_statx: AT_SYMLINK_NOFOLLOW set, not following symlinks");
             let starting_fid = get_starting_fid(_dfd, &filename)?;
             let (dir_path, file_name) = split_path(&filename);
 
@@ -6302,7 +6311,7 @@ pub fn sys_statx(
         let tgetattr = crate::p9::TgetattrMessage::new(0, target_fid, P9_GETATTR_ALL);
         match tgetattr.send_tgetattr() {
             Ok(P9Response::Success(rgetattr)) => {
-                kprint!("sys_statx: rgetattr = {:?}", rgetattr);
+                debug_print!("sys_statx: rgetattr = {:?}", rgetattr);
 
                 // Convert 9P RgetattrMessage to Linux statx structure
                 let statx = convert_rgetattr_to_statx(&rgetattr);
@@ -6320,18 +6329,18 @@ pub fn sys_statx(
                     core::mem::size_of::<Statx>(),
                 );
                 if bytes_copied == 0 {
-                    kprint!("sys_statx: failed to copy statx structure to user memory");
+                    debug_print!("sys_statx: failed to copy statx structure to user memory");
                     return Err(Err::Fault);
                 }
 
-                kprint!("sys_statx: successfully filled statx buffer");
+                debug_print!("sys_statx: successfully filled statx buffer");
                 if target_fid == TEMP_FID_1 {
                     clunk(TEMP_FID_1, false);
                 }
                 Ok(0) // Success
             }
             Ok(P9Response::Error(rlerror)) => {
-                kprint!(
+                debug_print!(
                     "sys_statx: received Rlerror for getattr operation: tag={}, ecode={}",
                     rlerror.tag,
                     rlerror.ecode
@@ -6342,7 +6351,7 @@ pub fn sys_statx(
                 Err(map_p9_error(rlerror.ecode))
             }
             Err(e) => {
-                kprint!("sys_statx: error = {:?}", e);
+                debug_print!("sys_statx: error = {:?}", e);
                 if target_fid == TEMP_FID_1 {
                     clunk(TEMP_FID_1, false);
                 }
@@ -6532,7 +6541,7 @@ pub fn find_free_fd() -> Result<u32, Err> {
         fd += 1;
     }
     if fd >= 256 {
-        kprint!("find_free_fd: no free file descriptors available");
+        debug_print!("find_free_fd: no free file descriptors available");
         return Err(Err::MFile);
     }
     Ok(fd)
@@ -6621,20 +6630,20 @@ pub fn clunk(fid: u32, is_cwd_clunking_allowed: bool) {
     }
 
     let tclunk = crate::p9::TclunkMessage::new(0, fid);
-    kprint!("clunk: sending TclunkMessage for fid {}", fid);
+    debug_print!("clunk: sending TclunkMessage for fid {}", fid);
     match tclunk.send_tclunk() {
         Ok(P9Response::Success(rclunk)) => {
-            kprint!("clunk {}: = {:?}", fid, rclunk);
+            debug_print!("clunk {}: = {:?}", fid, rclunk);
         }
         Ok(P9Response::Error(rlerror)) => {
-            kprint!(
+            debug_print!(
                 "clunk: received Rlerror for clunk operation: tag={}, ecode={}",
                 rlerror.tag,
                 rlerror.ecode
             );
         }
         Err(e) => {
-            kprint!("clunk: error sending Tclunk: {:?}", e);
+            debug_print!("clunk: error sending Tclunk: {:?}", e);
         }
     }
 }
@@ -6643,13 +6652,13 @@ pub fn attach_to_p9() {
     use crate::p9_backend::get_backend_type;
 
     let backend_type = get_backend_type();
-    kprint!("Attaching to P9 using {:?} backend", backend_type);
+    debug_print!("Attaching to P9 using {:?} backend", backend_type);
 
     // Version negotiation
     let msg = TversionMessage::default_9p2000l(1);
     match msg.send_tversion() {
         Ok(P9Response::Success(rversion)) => {
-            kprint!("Successfully negotiated version: {:?}", rversion);
+            debug_print!("Successfully negotiated version: {:?}", rversion);
         }
         Ok(P9Response::Error(rlerror)) => {
             kpanic!(
@@ -6673,7 +6682,7 @@ pub fn attach_to_p9() {
     );
     match tattach.send_tattach() {
         Ok(P9Response::Success(rattach)) => {
-            kprint!("Received Rattach: {:?}", rattach);
+            debug_print!("Received Rattach: {:?}", rattach);
             set_cwd_str("/".to_string());
             set_cwd_fid(0);
             set_root_fid(0);

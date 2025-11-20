@@ -6,7 +6,7 @@ use crate::{
         USER_PHENT_SIZE, USER_STACK_ADDR, USER_STACK_PTR, USER_STACK_SIZE, USER_START_PTR,
     },
     host_calls::{host_argv, host_terminate},
-    kernel::{get_ureg, mret, print},
+    kernel::{DEBUG_ENABLED, get_ureg, mret, print},
     linux_abi_fs::{
         attach_to_p9, get_fd, get_file_desc, get_p9_enabled, init_fs, read_file_to_user_memory,
         set_p9_enabled, sys_statx,
@@ -518,12 +518,14 @@ fn register_elf_segments() {
     let heap_start = unsafe { USER_BRK_ADDR.read_volatile() as u32 };
 
     if heap_start == 0 {
-        kprint!("register_elf_segments: No heap start (brk=0), skipping ELF region registration");
+        debug_print!(
+            "register_elf_segments: No heap start (brk=0), skipping ELF region registration"
+        );
         return;
     }
 
     if heap_start <= load_base {
-        kprint!(
+        debug_print!(
             "register_elf_segments: Invalid range (load_base=0x{:08x} >= heap_start=0x{:08x}), skipping",
             load_base,
             heap_start
@@ -531,7 +533,7 @@ fn register_elf_segments() {
         return;
     }
 
-    kprint!(
+    debug_print!(
         "register_elf_segments: Registering main ELF region [0x{:08x}-0x{:08x}) (load_base to heap start)",
         load_base,
         heap_start
@@ -563,13 +565,13 @@ fn register_elf_segments() {
         let interp_start = interp_base.checked_sub(0x1000).unwrap_or(interp_base);
 
         if interp_end <= interp_start {
-            kprint!(
+            debug_print!(
                 "register_elf_segments: Invalid interpreter range (base=0x{:08x} >= end=0x{:08x}), skipping",
                 interp_start,
                 interp_end
             );
         } else {
-            kprint!(
+            debug_print!(
                 "register_elf_segments: Registering interpreter region [0x{:08x}-0x{:08x})",
                 interp_start,
                 interp_end
@@ -597,7 +599,7 @@ static mut MEMORY_REGION_COUNT: usize = 0;
 fn push_memory_region(region: MemoryRegion) {
     unsafe {
         if MEMORY_REGION_COUNT >= MAX_MEMORY_REGIONS {
-            kprint!(
+            debug_print!(
                 "register_memory_region: WARNING - MAX_MEMORY_REGIONS reached when adding {} [{:08x}-{:08x})",
                 region.name,
                 region.start,
@@ -605,7 +607,7 @@ fn push_memory_region(region: MemoryRegion) {
             );
             return;
         }
-        kprint!(
+        debug_print!(
             "register_memory_region: [{:08x}-{:08x}) {} r:{} w:{} x:{}",
             region.start,
             region.end,
@@ -644,7 +646,7 @@ pub fn register_memory_region(
     use crate::constants::{KERNEL_SPACE_START, USER_MEMORY_START_PTR};
 
     if start == 0 || end == 0 || start >= end {
-        kprint!(
+        debug_print!(
             "register_memory_region: rejecting invalid range [{:08x}-{:08x}) {}",
             start,
             end,
@@ -654,7 +656,7 @@ pub fn register_memory_region(
     }
 
     if start < USER_MEMORY_START_PTR as u32 {
-        kprint!(
+        debug_print!(
             "register_memory_region: rejecting range below user memory [{:08x}-{:08x}) {}",
             start,
             end,
@@ -664,7 +666,7 @@ pub fn register_memory_region(
     }
 
     if end > KERNEL_SPACE_START {
-        kprint!(
+        debug_print!(
             "register_memory_region: rejecting range crossing kernel space [{:08x}-{:08x}) {}",
             start,
             end,
@@ -691,7 +693,7 @@ pub fn register_memory_region(
             }
 
             if is_contained_in(start, end, existing.start, existing.end) {
-                kprint!(
+                debug_print!(
                     "register_memory_region: [{:08x}-{:08x}) {} is already covered by {} [{:08x}-{:08x}), skipping registration",
                     start,
                     end,
@@ -704,7 +706,7 @@ pub fn register_memory_region(
             }
 
             if range_overlaps(start, end, existing.start, existing.end) {
-                kprint!(
+                debug_print!(
                     "register_memory_region: rejecting [{:08x}-{:08x}) {} due to overlap with {} [{:08x}-{:08x})",
                     start,
                     end,
@@ -733,7 +735,7 @@ pub fn unregister_memory_region(start: u32, end: u32) {
         let mut idx = 0;
         while idx < MEMORY_REGION_COUNT {
             if MEMORY_REGIONS[idx].start == start && MEMORY_REGIONS[idx].end == end {
-                kprint!(
+                debug_print!(
                     "unregister_memory_region: [{:08x}-{:08x}) {}",
                     start,
                     end,
@@ -807,7 +809,7 @@ pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> Opti
     }
 
     if addr < USER_MEMORY_START_PTR as u32 {
-        kprint!(
+        debug_print!(
             "is_valid_user_address: addr={:08x} len={} below USER_MEMORY_START ({:08x})",
             addr,
             len,
@@ -819,7 +821,7 @@ pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> Opti
     let end_addr = match addr.checked_add(len as u32) {
         Some(val) => val,
         None => {
-            kprint!(
+            debug_print!(
                 "is_valid_user_address: addr={:08x} len={} overflow",
                 addr,
                 len
@@ -829,7 +831,7 @@ pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> Opti
     };
 
     if end_addr > USER_SPACE_END {
-        kprint!(
+        debug_print!(
             "is_valid_user_address: addr={:08x} len={} end={:08x} exceeds USER_SPACE_END ({:08x})",
             addr,
             len,
@@ -840,7 +842,7 @@ pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> Opti
     }
 
     if addr >= KERNEL_SPACE_START || end_addr > KERNEL_SPACE_START {
-        kprint!(
+        debug_print!(
             "is_valid_user_address: addr={:08x} len={} end={:08x} in kernel space (>= {:08x})",
             addr,
             len,
@@ -853,7 +855,7 @@ pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> Opti
     unsafe {
         // Dump all registered regions for debugging
         let region_count = MEMORY_REGION_COUNT;
-        kprint!(
+        debug_print!(
             "is_valid_user_address: checking addr={:08x} len={} end={:08x} require_write={}, {} regions registered:",
             addr,
             len,
@@ -868,7 +870,7 @@ pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> Opti
                 let contains = region.contains_range(addr, len);
                 // Also check if the start address is in the region (for cases where range extends slightly beyond)
                 let start_in_region = region.contains(addr);
-                kprint!(
+                debug_print!(
                     "  [{:08x}-{:08x}) {} r:{} w:{} x:{} {}",
                     region.start,
                     region.end,
@@ -892,7 +894,7 @@ pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> Opti
                         region.readable
                     };
                     if !valid {
-                        kprint!(
+                        debug_print!(
                             "is_valid_user_address: INVALID (require_write={}, region.writable={}, region.readable={})",
                             require_write,
                             region.writable,
@@ -911,7 +913,7 @@ pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> Opti
                         core::cmp::min(len, available_bytes)
                     };
 
-                    kprint!(
+                    debug_print!(
                         "is_valid_user_address: VALID up to {} bytes (requested={}, fully_contained={})",
                         max_len,
                         len,
@@ -924,12 +926,12 @@ pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> Opti
         }
 
         if MEMORY_REGION_COUNT == 0 {
-            kprint!("is_valid_user_address: no regions registered, allowing access");
+            debug_print!("is_valid_user_address: no regions registered, allowing access");
             return Some(len);
         }
     }
 
-    kprint!(
+    debug_print!(
         "is_valid_user_address: addr={:08x} len={} not found in any region",
         addr,
         len
@@ -939,14 +941,14 @@ pub fn is_valid_user_address(addr: u32, len: usize, require_write: bool) -> Opti
 
 #[allow(dead_code)]
 pub fn dump_memory_regions() {
-    kprint!("=== Memory Regions ({} total) ===", unsafe {
+    debug_print!("=== Memory Regions ({} total) ===", unsafe {
         MEMORY_REGION_COUNT
     });
     unsafe {
         let mut idx = 0;
         while idx < MEMORY_REGION_COUNT {
             let r = &MEMORY_REGIONS[idx];
-            kprint!(
+            debug_print!(
                 "  [{:08x}-{:08x}) {} r:{} w:{} x:{}",
                 r.start,
                 r.end,
@@ -1017,7 +1019,7 @@ impl UserStack {
 
     #[allow(dead_code)]
     fn add_aux_word(&mut self, atype: AuxType, word: usize) {
-        kprint!(
+        debug_print!(
             "UserStack::add_aux_word: atype={:?}, word={:08x}",
             atype as usize,
             word
@@ -1265,13 +1267,13 @@ pub fn start_linux_binary(argc: u32) -> ! {
     set_ureg(REG_SP, USER_STACK_PTR as u32);
 
     if interp_addr != 0 {
-        kprint!(
+        debug_print!(
             "starting linux binary with interpreter at 0x{:08x}",
             interp_addr,
         );
-        kprint!("AT_BASE (interp load addr) = 0x{:08x}", interp_base_addr);
-        kprint!("AT_ENTRY (main entry) = 0x{:08x}", user_start_addr);
-        kprint!("AT_PHDR (main phdr) = 0x{:08x}", unsafe {
+        debug_print!("AT_BASE (interp load addr) = 0x{:08x}", interp_base_addr);
+        debug_print!("AT_ENTRY (main entry) = 0x{:08x}", user_start_addr);
+        debug_print!("AT_PHDR (main phdr) = 0x{:08x}", unsafe {
             USER_PHDR_ADDR_PTR.read_volatile()
         });
         unsafe {
@@ -1289,7 +1291,7 @@ pub fn start_linux_binary(argc: u32) -> ! {
 
 pub fn handle_linux_syscall() -> ! {
     let nr = get_ureg(REG_A7);
-    kprint!("handle_linux_syscall: nr={}", nr);
+    debug_print!("handle_linux_syscall: nr={}", nr);
     match nr {
         SYS_IOCTL => syscall3(sys_ioctl),
         SYS_READ => syscall3(sys_read),
@@ -1671,7 +1673,7 @@ fn syscall6<F: Fn(u32, u32, u32, u32, u32, u32) -> Result<u32, Err>>(inner: F) {
 /// https://elixir.bootlin.com/linux/v5.15.5/source/mm/mmap.c#L194
 /// https://elixir.bootlin.com/linux/v5.15.5/source/mm/nommu.c#L381
 fn sys_brk(addr: u32) -> Result<u32, Err> {
-    kprint!("sys_brk: addr = {:08x}", addr);
+    debug_print!("sys_brk: addr = {:08x}", addr);
 
     unsafe {
         // Get current BRK value
@@ -1681,7 +1683,7 @@ fn sys_brk(addr: u32) -> Result<u32, Err> {
         if current_brk == 0 {
             let original_brk = USER_BRK_ADDR.read_volatile() as u32;
             core::ptr::addr_of_mut!(BRK).write_volatile(original_brk);
-            kprint!("sys_brk: initialized BRK to {:08x}", original_brk);
+            debug_print!("sys_brk: initialized BRK to {:08x}", original_brk);
 
             // If addr is 0, return the initialized break
             if addr == 0 {
@@ -1690,7 +1692,7 @@ fn sys_brk(addr: u32) -> Result<u32, Err> {
         } else {
             // If addr is 0, return the current break
             if addr == 0 {
-                kprint!("sys_brk: returning current BRK = {:08x}", current_brk);
+                debug_print!("sys_brk: returning current BRK = {:08x}", current_brk);
                 return Ok(current_brk);
             }
         }
@@ -1701,7 +1703,7 @@ fn sys_brk(addr: u32) -> Result<u32, Err> {
         // Validate the new address
         // Don't allow setting it below the original break
         if addr < original_brk {
-            kprint!(
+            debug_print!(
                 "sys_brk: addr {:08x} < original_brk {:08x}, returning current BRK",
                 addr,
                 original_brk
@@ -1712,14 +1714,14 @@ fn sys_brk(addr: u32) -> Result<u32, Err> {
         // Don't allow setting it too high (arbitrary limit to prevent abuse)
         const MAX_BRK_SIZE: u32 = 64 * 1024 * 1024; // 64 MB
         if addr > original_brk + MAX_BRK_SIZE {
-            kprint!("sys_brk: addr {:08x} too high, returning current BRK", addr);
+            debug_print!("sys_brk: addr {:08x} too high, returning current BRK", addr);
             return Ok(current_brk);
         }
 
         // Update the break
         let old_brk = current_brk;
         core::ptr::addr_of_mut!(BRK).write_volatile(addr);
-        kprint!("sys_brk: updated BRK from {:08x} to {:08x}", old_brk, addr);
+        debug_print!("sys_brk: updated BRK from {:08x} to {:08x}", old_brk, addr);
 
         // Update memory region tracking
         // Unregister old heap region if it exists
@@ -1752,7 +1754,7 @@ fn sys_mmap(
     pgoffset: u32,
 ) -> Result<u32, Err> {
     let _fd = fd as i32;
-    kprint!("sys_mmap(0x{_addr:08x}, {len}, {_prot}, 0x{_flags:08x}, {_fd}, {pgoffset})");
+    debug_print!("sys_mmap(0x{_addr:08x}, {len}, {_prot}, 0x{_flags:08x}, {_fd}, {pgoffset})");
 
     // Check file descriptor validity for file-backed mappings first
     // (EBADF has priority over EINVAL for length/flags)
@@ -1764,7 +1766,7 @@ fn sys_mmap(
         // For file-backed mappings, validate fd first (before length/flags)
         // fd=-1 without MAP_ANONYMOUS is invalid
         if _fd == -1 || fd >= 256 {
-            kprint!(
+            debug_print!(
                 "sys_mmap: EBADF - invalid fd {} for file-backed mapping",
                 _fd
             );
@@ -1772,7 +1774,7 @@ fn sys_mmap(
         }
         let fd_entry = get_fd(fd);
         if fd_entry.file_desc_id == 0xFF {
-            kprint!("sys_mmap: EBADF - fd {} is not open", fd);
+            debug_print!("sys_mmap: EBADF - fd {} is not open", fd);
             return Err(Err::BadFd);
         }
     }
@@ -1792,7 +1794,7 @@ fn sys_mmap(
         || (_flags & MAP_SHARED_VALIDATE) != 0;
 
     if !has_valid_sharing {
-        kprint!("sys_mmap: invalid flags - missing MAP_PRIVATE/MAP_SHARED");
+        debug_print!("sys_mmap: invalid flags - missing MAP_PRIVATE/MAP_SHARED");
         return Err(Err::Inval);
     }
 
@@ -1806,7 +1808,7 @@ fn sys_mmap(
                 let file_desc = get_file_desc(fd_entry.file_desc_id);
                 let open_mode = file_desc.flags & 0x3; // O_RDONLY=0, O_WRONLY=1, O_RDWR=2
 
-                kprint!(
+                debug_print!(
                     "sys_mmap: checking permissions - open_mode={}, prot=0x{:x}, flags=0x{:x}",
                     open_mode,
                     _prot,
@@ -1817,7 +1819,7 @@ fn sys_mmap(
                 // (even PROT_WRITE requires read permission for private mappings)
                 if ((_prot & 0x1) != 0 || (_prot & 0x2) != 0) && open_mode == 1 {
                     // File opened write-only but read/write access requested
-                    kprint!(
+                    debug_print!(
                         "sys_mmap: EACCES - fd opened write-only but PROT_READ/WRITE requested"
                     );
                     return Err(Err::Access);
@@ -1827,7 +1829,7 @@ fn sys_mmap(
                 if (_prot & 0x2) != 0 && (_flags & MAP_SHARED) != 0 && open_mode == 0 {
                     // PROT_WRITE=0x2
                     // File opened read-only but write with MAP_SHARED is requested
-                    kprint!(
+                    debug_print!(
                         "sys_mmap: EACCES - fd opened read-only but PROT_WRITE+MAP_SHARED requested"
                     );
                     return Err(Err::Access);
@@ -1836,17 +1838,17 @@ fn sys_mmap(
         }
     }
 
-    kprint!("user_brk_start = {:08x}", unsafe {
+    debug_print!("user_brk_start = {:08x}", unsafe {
         USER_BRK_ADDR.read_volatile() as u32
     });
-    kprint!("brk = {:08x}", unsafe { BRK });
+    debug_print!("brk = {:08x}", unsafe { BRK });
     if _addr >= unsafe { USER_BRK_ADDR.read_volatile() as u32 }
         && _addr + len <= unsafe { BRK }
         && _flags & MAP_FIXED == MAP_FIXED
         && _prot == 0
     {
         // musl wants to make this unavailable, we just happily comply
-        kprint!(
+        debug_print!(
             "sys_mmap: musl wants to make {:08x}-{:08x} unavailable with PROT_NONE, we just OK(0)",
             _addr,
             _addr + len
@@ -1858,7 +1860,7 @@ fn sys_mmap(
     const MAP_FIXED: u32 = 0x10;
     // MAP_ANONYMOUS already defined above
     if _flags & MAP_FIXED == MAP_FIXED {
-        kprint!("sys_mmap: MAP_FIXED is set");
+        debug_print!("sys_mmap: MAP_FIXED is set");
     }
 
     // Check for address overflow and invalid high memory regions
@@ -1866,7 +1868,7 @@ fn sys_mmap(
     if _addr != 0 {
         // Check if starting address is in kernel space
         if _addr >= 0xc000_0000 {
-            kprint!(
+            debug_print!(
                 "sys_mmap: address in kernel space - addr=0x{:08x}, returning EINVAL",
                 _addr
             );
@@ -1876,7 +1878,7 @@ fn sys_mmap(
         let end_addr = _addr.wrapping_add(len);
         if end_addr < _addr {
             // Overflow occurred - address wraps around
-            kprint!(
+            debug_print!(
                 "sys_mmap: address overflow - addr=0x{:08x} len={}, returning EINVAL",
                 _addr,
                 len
@@ -1885,7 +1887,7 @@ fn sys_mmap(
         }
         // Check if address range extends into kernel space
         if end_addr > 0xc000_0000 {
-            kprint!(
+            debug_print!(
                 "sys_mmap: addr outside mmap space - end=0x{:08x}, returning EINVAL",
                 end_addr
             );
@@ -1914,7 +1916,7 @@ fn sys_mmap(
         unsafe {
             ptr.write_bytes(0, aligned_length);
         }
-        kprint!("sys_mmap: new mmap base = {:08x}", new_mmap_base);
+        debug_print!("sys_mmap: new mmap base = {:08x}", new_mmap_base);
         set_mmap_base(new_mmap_base);
 
         // Track the allocated region
@@ -1944,7 +1946,7 @@ fn sys_mmap(
         {
             kpanic!("sys_mmap: mmap base is not aligned to page size anymore");
         }
-        kprint!("sys_mmap: new mmap base = {:08x}", new_mmap_base);
+        debug_print!("sys_mmap: new mmap base = {:08x}", new_mmap_base);
         set_mmap_base(new_mmap_base);
         let ptr: *mut u8 = new_mmap_base as *mut u8;
         let bytes_read = read_file_to_user_memory(fd, ptr as u32, len, offset)?;
@@ -1955,7 +1957,7 @@ fn sys_mmap(
                 let zero_start = ptr.add(bytes_read as usize);
                 zero_start.write_bytes(0, zero_len);
             }
-            kprint!(
+            debug_print!(
                 "sys_mmap: zero-filled from {:08x} to {:08x} ({} bytes beyond EOF)",
                 ptr as u32 + bytes_read,
                 ptr as u32 + aligned_length as u32,
@@ -1978,7 +1980,7 @@ fn sys_mmap(
 
         Ok(ptr as u32)
     } else if !is_anonymous && _flags & MAP_FIXED == MAP_FIXED && _addr != 0 {
-        kprint!(
+        debug_print!(
             "sys_mmap: wishing {:08x}-{:08x} to be mapped, and our mmap base is {:08x}",
             _addr,
             _addr + len,
@@ -1994,7 +1996,7 @@ fn sys_mmap(
                 let zero_start = ptr.add(bytes_read as usize);
                 zero_start.write_bytes(0, zero_len);
             }
-            kprint!(
+            debug_print!(
                 "sys_mmap: zero-filled from {:08x} to {:08x} ({} bytes beyond EOF)",
                 _addr + bytes_read,
                 _addr + aligned_length as u32,
@@ -2019,7 +2021,7 @@ fn sys_mmap(
             "mmap-file-fixed",
         );
 
-        kprint!("sys_mmap: returning {:08x}", ptr as u32);
+        debug_print!("sys_mmap: returning {:08x}", ptr as u32);
         Ok(ptr as u32)
     } else if is_anonymous && _flags & MAP_FIXED == MAP_FIXED && _addr != 0 {
         let ptr: *mut u8 = _addr as *mut u8;
@@ -2042,7 +2044,7 @@ fn sys_mmap(
             "mmap-anon-fixed",
         );
 
-        kprint!("sys_mmap: returning {:08x}", ptr as u32);
+        debug_print!("sys_mmap: returning {:08x}", ptr as u32);
         Ok(ptr as u32)
     } else {
         kpanic!("sys_mmap: unsupported scenario");
@@ -2055,17 +2057,17 @@ fn sys_munmap(addr: u32, _len: u32) -> Result<u32, Err> {
     // In a zkVM environment without real virtual memory management,
     // we implement this as a validated no-op
 
-    kprint!("sys_munmap: addr=0x{:08x}, len={}", addr, _len);
+    debug_print!("sys_munmap: addr=0x{:08x}, len={}", addr, _len);
 
     // Validate address is not NULL
     if addr == 0 {
-        kprint!("sys_munmap: addr is NULL");
+        debug_print!("sys_munmap: addr is NULL");
         return Err(Err::Inval);
     }
 
     // Validate address is page-aligned
     if !addr.is_multiple_of(PAGE_SIZE as u32) {
-        kprint!("sys_munmap: addr is not page-aligned");
+        debug_print!("sys_munmap: addr is not page-aligned");
         return Err(Err::Inval);
     }
 
@@ -2079,7 +2081,7 @@ fn sys_exit(error_code: u32) -> Result<u32, Err> {
     if get_p9_enabled() {
         let traffic_hash = get_p9_traffic_hash();
         // Commit to journal in future
-        kprint!("sys_exit: p9_traffic_hash = {:?}", traffic_hash);
+        debug_print!("sys_exit: p9_traffic_hash = {:?}", traffic_hash);
     }
     let msg = str_format!(str256, "sys_exit({error_code})");
     print(&msg);
@@ -2160,6 +2162,6 @@ fn sys_getuid() -> Result<u32, Err> {
 }
 
 fn sys_getpid() -> Result<u32, Err> {
-    kprint!("sys_getpid: returning 1");
+    debug_print!("sys_getpid: returning 1");
     Ok(1)
 }

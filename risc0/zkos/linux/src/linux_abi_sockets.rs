@@ -1,4 +1,4 @@
-use crate::{host_calls::host_log, kernel::print, linux_abi::Err};
+use crate::{host_calls::host_log, kernel::DEBUG_ENABLED, kernel::print, linux_abi::Err};
 use no_std_strings::{str_format, str256};
 
 // Socket-related syscalls
@@ -132,7 +132,7 @@ pub fn sys_shutdown(_sockfd: u32, _how: u32) -> Result<u32, Err> {
 }
 
 pub fn sys_socket(domain: u32, socket_type: u32, protocol: u32) -> Result<u32, Err> {
-    kprint!(
+    debug_print!(
         "sys_socket: domain={}, type={}, protocol={}",
         domain,
         socket_type,

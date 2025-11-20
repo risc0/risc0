@@ -10,7 +10,7 @@ use softfloat_sys::{
 
 use crate::constants::*;
 use crate::host_calls::host_terminate;
-use crate::kernel::{TRACE_ENABLED, get_ureg, mret, print, set_ureg};
+use crate::kernel::{DEBUG_ENABLED, TRACE_ENABLED, get_ureg, mret, print, set_ureg};
 
 pub fn init_softfloat() {
     init_fp_regs();
