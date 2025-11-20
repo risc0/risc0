@@ -7,7 +7,7 @@
 //! For a general introduction to 9P see the Plan 9 intro(5) manual page.
 
 #![allow(dead_code)]
-use crate::kernel::print;
+use crate::kernel::{DEBUG_ENABLED, print};
 use core::fmt;
 use no_std_strings::{str_format, str256};
 
@@ -648,7 +648,7 @@ pub trait ReadableMessage: Sized {
                     match RlerrorMessage::deserialize(&buf[..data_len as usize]) {
                         Ok((rlerror, _)) => P9Response::Error(rlerror),
                         Err(_) => {
-                            kprint!(
+                            debug_print!(
                                 "ReadableMessage::read_response: error deserializing Rlerror message"
                             );
                             P9Response::Error(RlerrorMessage::new(0, 0)) // Generic error
@@ -659,7 +659,7 @@ pub trait ReadableMessage: Sized {
                     match Self::deserialize(&buf[..data_len as usize]) {
                         Ok((response, _)) => P9Response::Success(response),
                         Err(err) => {
-                            kprint!(
+                            debug_print!(
                                 "ReadableMessage::read_response: error deserializing message: {:?}",
                                 err
                             );
@@ -669,7 +669,7 @@ pub trait ReadableMessage: Sized {
                 }
             }
             Err(err) => {
-                kprint!(
+                debug_print!(
                     "ReadableMessage::read_response: p9_read_message error: {:?}",
                     err
                 );
@@ -849,7 +849,7 @@ impl RversionMessage {
         // Note: We can't return a &str from a buffer because it would have the wrong lifetime
         // In a real implementation, you'd need to copy the string to a static buffer
         // For now, we'll return an error if the version is not a known static string
-        kprint!("Version: {}", version);
+        debug_print!("Version: {}", version);
         let static_version = match version {
             "9P2000.L" => constants::P9_VERSION,
             _ => return Err(RversionError::UnknownVersion),

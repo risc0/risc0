@@ -1,19 +1,3 @@
-use crate::constants::KERNEL_SPACE_START;
-
-/// Validate a user pointer + length range. Returns Some((addr, end)) if valid.
-fn validate_user_range(ptr: usize, len: usize) -> Option<(usize, usize)> {
-    if len == 0 {
-        return None;
-    }
-    if ptr >= KERNEL_SPACE_START as usize {
-        return None;
-    }
-    let end = ptr.checked_add(len)?;
-    if end > KERNEL_SPACE_START as usize {
-        return None;
-    }
-    Some((ptr, end))
-}
 // Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +18,7 @@ use crate::atomic_emul::emulate_atomic_instruction;
 use crate::compressed_emul::{
     emulate_compressed_instruction, handle_mpec_fixup, unaligned_instruction_execution,
 };
+use crate::constants::KERNEL_SPACE_START;
 use crate::constants::*;
 use crate::host_calls::{host_argc, host_log, host_terminate};
 use crate::linux_abi::{handle_linux_syscall, start_linux_binary};
@@ -41,6 +26,7 @@ use crate::softfloat::{
     emulate_fp_instruction, emulate_fp_load_store, handle_float_csr_exception,
     handle_float_csr_fcsr, handle_float_csr_frm, init_softfloat,
 };
+
 // Debug configuration - set to true to enable debug prints, false to disable
 pub const DEBUG_ENABLED: bool = false;
 pub const TRACE_ENABLED: bool = false;
@@ -83,7 +69,7 @@ macro_rules! debug_print_simple {
 #[macro_export]
 macro_rules! kpanic {
     ($($arg:tt)*) => {
-        kprint!($($arg)*);
+        debug_print!($($arg)*);
         host_terminate(1, 0);
         #[allow(unreachable_code)]
         loop {}
@@ -98,6 +84,21 @@ core::arch::global_asm!(include_str!("kernel.s"));
 fn panic(_info: &core::panic::PanicInfo) -> ! {
     kpanic!("Panic: {}", _info);
     unsafe { core::arch::asm!("unimp", options(noreturn)) }
+}
+
+/// Validate a user pointer + length range. Returns Some((addr, end)) if valid.
+fn validate_user_range(ptr: usize, len: usize) -> Option<(usize, usize)> {
+    if len == 0 {
+        return None;
+    }
+    if ptr >= KERNEL_SPACE_START as usize {
+        return None;
+    }
+    let end = ptr.checked_add(len)?;
+    if end > KERNEL_SPACE_START as usize {
+        return None;
+    }
+    Some((ptr, end))
 }
 
 pub fn get_ureg(idx: usize) -> u32 {
@@ -525,7 +526,7 @@ unsafe extern "C" fn breakpoint_dispatch() -> ! {
 #[unsafe(no_mangle)]
 unsafe extern "C" fn load_address_misaligned_dispatch() -> ! {
     for i in 0..32 {
-        kprint!(
+        debug_print!(
             "load_address_misaligned_dispatch: x{} = {:?}",
             i,
             get_ureg(i)
@@ -557,7 +558,7 @@ unsafe extern "C" fn store_address_misaligned_dispatch() -> ! {
 unsafe extern "C" fn store_access_fault_dispatch() -> ! {
     let epc = unsafe { MEPC_PTR.read_volatile() };
     for i in 0..32 {
-        kprint!("store_access_fault_dispatch: x{} = {:?}", i, get_ureg(i));
+        debug_print!("store_access_fault_dispatch: x{} = {:?}", i, get_ureg(i));
     }
     kpanic!(
         "Store access fault trap - not implemented, at PC: {:#010x}",
@@ -570,12 +571,12 @@ unsafe extern "C" fn store_access_fault_dispatch() -> ! {
 /// This function checks that the destination is in user memory (below kernel space)
 pub fn copy_to_user(dst: *mut u8, src: *const u8, len: usize) -> usize {
     if src.is_null() {
-        kprint!("copy_to_user: source pointer is null");
+        debug_print!("copy_to_user: source pointer is null");
         return 0;
     }
     let dst_addr = dst as usize;
     if validate_user_range(dst_addr, len).is_none() {
-        kprint!(
+        debug_print!(
             "copy_to_user: invalid destination range dst=0x{:08x} len={}",
             dst_addr,
             len
@@ -593,12 +594,12 @@ pub fn copy_to_user(dst: *mut u8, src: *const u8, len: usize) -> usize {
 #[allow(dead_code)]
 pub fn copy_from_user(dst: *mut u8, src: *const u8, len: usize) -> usize {
     if dst.is_null() {
-        kprint!("copy_from_user: destination pointer is null");
+        debug_print!("copy_from_user: destination pointer is null");
         return 0;
     }
     let src_addr = src as usize;
     if validate_user_range(src_addr, len).is_none() {
-        kprint!(
+        debug_print!(
             "copy_from_user: invalid source range src=0x{:08x} len={}",
             src_addr,
             len
