@@ -38,7 +38,7 @@ bit-vec = "0.8"
 byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
 enum-map = { version = "2.7.3" }
-malachite = { version = "0.4.22", optional = true, default-features = false, features = [
+malachite = { version = "0.7.1", optional = true, default-features = false, features = [
   "naturals_and_integers",
   "32_bit_limbs",
 ] }
