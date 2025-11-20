@@ -35,6 +35,7 @@ use risc0_core::{
 use crate::{
     INV_RATE,
     core::{digest::Digest, hash::HashSuite, poly::poly_divide},
+    prove::MerkleTreeProver,
 };
 
 pub trait Buffer<T>: Clone {
@@ -280,6 +281,18 @@ pub trait Hal {
                 });
         });
     }
+
+    #[allow(clippy::too_many_arguments)]
+    fn fri_prove(
+        &self,
+        out_values: &Self::Buffer<u32>,
+        values_column_width: usize,
+        out_digests: &Self::Buffer<u32>,
+        digests_column_width: usize,
+        positions: &Self::Buffer<u32>,
+        trees: &[&MerkleTreeProver<Self>],
+        groups: &Self::Buffer<u32>,
+    );
 }
 
 #[derive(Clone, Default)]
@@ -355,8 +368,9 @@ mod testutil {
     use super::{Hal, dual::DualHal};
     use crate::{
         FRI_FOLD, INV_RATE,
-        core::digest::Digest,
+        core::digest::{DIGEST_WORDS, Digest},
         hal::{Buffer, cpu::CpuHal},
+        prove::MerkleTreeProver,
     };
 
     const COUNTS: [usize; 7] = [1, 9, 12, 1001, 1024, 1025, 1024 * 1024];
@@ -637,5 +651,64 @@ mod testutil {
             let io = generate_elem(&hal, &mut rng, count);
             hal.zk_shift(&io, poly_count);
         }
+    }
+
+    pub(crate) fn fri_prove<H: Hal>(hal_gpu: H) {
+        let mut rng = rand::rng();
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+
+        let matrix1 = hal.alloc_elem_init(
+            "fri_prove_matrix1",
+            16 * 16,
+            <DualHal<_, CpuHal<_>, H> as Hal>::Elem::from_u64(12),
+        );
+        let matrix2 = hal.alloc_elem_init(
+            "fri_prove_matrix2",
+            16 * 16,
+            <DualHal<_, CpuHal<_>, H> as Hal>::Elem::from_u64(13),
+        );
+        let trees = [
+            MerkleTreeProver::new(&hal, &matrix1, 16, 16, 10),
+            MerkleTreeProver::new(&hal, &matrix2, 16, 16, 10),
+        ];
+
+        let positions = hal.alloc_u32("fri_prove_pos", 10);
+        positions.view_mut(|positions| positions.fill(8));
+
+        let groups_iter = std::iter::repeat_n(u32::MAX as usize, trees.len());
+        let groups = hal.alloc_u32("fri_groups", trees.len());
+        groups.view_mut(|groups_out| {
+            for (dst, src) in groups_out.iter_mut().zip(groups_iter) {
+                *dst = src.try_into().unwrap();
+            }
+        });
+
+        let values_column_width = trees.iter().map(|m| m.params.col_size + 1).max().unwrap();
+
+        let digests_column_width = trees
+            .iter()
+            .map(|m| m.params.layers * DIGEST_WORDS + 1)
+            .max()
+            .unwrap();
+
+        let out_values = hal.alloc_u32(
+            "fri_prove_out_values",
+            values_column_width * 10 * trees.len(),
+        );
+        let out_digests = hal.alloc_u32(
+            "fri_prove_out_digests",
+            digests_column_width * 10 * trees.len(),
+        );
+
+        hal.fri_prove(
+            &out_values,
+            values_column_width,
+            &out_digests,
+            digests_column_width,
+            &positions,
+            &trees.iter().collect::<Vec<_>>(),
+            &groups,
+        );
     }
 }

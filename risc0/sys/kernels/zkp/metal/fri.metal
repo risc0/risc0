@@ -49,3 +49,83 @@ kernel void fri_fold(device Fp* out,
     out[count * i + gid] = tot.elems[i];
   }
 }
+
+struct MetalMerkleTreeProver {
+    size_t row_size;
+    size_t col_size;
+    size_t top_size;
+    const device uint32_t *matrix;
+    const device uint32_t *nodes;
+};
+
+kernel void fri_prove_values(device uint32_t* out_values,
+                             const device size_t& values_column_width,
+                             device uint32_t* positions,
+                             const device size_t& positions_len,
+                             device struct MetalMerkleTreeProver* trees,
+                             const device size_t& trees_len,
+                             device uint32_t* groups,
+                             uint3 blockDim [[threads_per_threadgroup]],
+                             uint3 blockIdx [[threadgroup_position_in_grid]],
+                             uint3 threadIdx [[thread_position_in_threadgroup]]) {
+    size_t values_len = values_column_width * positions_len * trees_len;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (idx < values_len) {
+        size_t pos_idx = (idx / values_column_width / trees_len) % positions_len;
+        size_t tree_idx = (idx / values_column_width) % trees_len;
+
+        device struct MetalMerkleTreeProver *tree = &trees[tree_idx];
+        uint32_t pos = positions[pos_idx] % groups[tree_idx];
+        assert(pos < tree->row_size);
+
+        size_t c = idx % values_column_width;
+        if (c < tree->col_size + 1) {
+            if (c == 0) {
+                out_values[idx] = tree->col_size;
+            } else {
+                out_values[idx] = tree->matrix[pos + (c - 1) * tree->row_size];
+            }
+        }
+    }
+}
+
+kernel void fri_prove_digests(device uint32_t* out_digests,
+                              const device size_t& digests_column_width,
+                              device uint32_t* positions,
+                              const device size_t& positions_len,
+                              device struct MetalMerkleTreeProver* trees,
+                              const device size_t& trees_len,
+                              device uint32_t* groups,
+                              uint3 blockDim [[threads_per_threadgroup]],
+                              uint3 blockIdx [[threadgroup_position_in_grid]],
+                              uint3 threadIdx [[thread_position_in_threadgroup]]) {
+    size_t digests_len = digests_column_width * positions_len * trees_len;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (idx < digests_len) {
+        size_t pos_idx = (idx / digests_column_width / trees_len) % positions_len;
+        size_t tree_idx = (idx / digests_column_width) % trees_len;
+
+        device struct MetalMerkleTreeProver *tree = &trees[tree_idx];
+        uint32_t pos = positions[pos_idx] % groups[tree_idx];
+        assert(pos < tree->row_size);
+
+        pos += tree->row_size;
+
+        size_t digest_chunk_idx = idx % digests_column_width;
+
+        if (digest_chunk_idx == 0) {
+            out_digests[idx] = log2Ceil(pos / tree->top_size) * 8;
+        } else {
+            size_t digest_chunk = (digest_chunk_idx - 1) % 8;
+            size_t digest_idx = (digest_chunk_idx - 1) / 8;
+            size_t i = pos / (1 << digest_idx);
+            if (i >= 2 * tree->top_size) {
+                size_t low_bit = i % 2;
+                size_t other_digest_idx = 2 * (i / 2) + (1 - low_bit);
+                out_digests[idx] = tree->nodes[other_digest_idx * 8 + digest_chunk];
+            }
+        }
+    }
+}
