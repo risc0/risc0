@@ -1,7 +1,23 @@
+sh_binary(
+  name = "make_asm",
+  srcs = ["make_asm.sh"],
+)
+
+genrule(
+    name = "jit_blob",
+    srcs = ["jit_asm.s"],
+    tools = [":make_asm"],
+    outs = [
+        "jit_asm.bin",  # raw machine code
+        "jit_asm.h",    # symbol_name<TAB>offset_hex
+    ],
+    cmd = "$(location :make_asm) $(location jit_asm.s) $(OUTS)",
+)
 cc_binary(
     name = "jit",
     srcs = [
         "jit.cpp",
+        "jit_asm.h",
     ],
     deps = [
         "//rv32im/emu",
@@ -9,5 +25,6 @@ cc_binary(
     data = [
         "//rv32im/rvtest:riscv_test_bins",
         "//rv32im/test:asm_loop_kernel",
+        "jit_asm.bin",
     ],
 )
