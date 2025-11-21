@@ -318,8 +318,12 @@ do_BGEU:
   DO_BRANCH $32
 
 do_JAL:
-  
-  ud2
+  WRITE_INST $35  # Write opcode data to log
+  LOG_OLD_RD  # Log the current RD value before it is overwritten
+  movl PC, %eax  # Write PC to eax
+  # TODO: Need to fix for compressed instructions
+  addl $4, %eax  # Inc PC by 4
+  DO_IMM_POST  # Tail half of LUI looks like IMM
 
 do_JALR:
   ud2

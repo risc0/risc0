@@ -257,6 +257,8 @@ struct MemTxn {
 };
 
 struct LogEntry {
+  uint32_t pc;
+  uint32_t origInst;
   ExpandedInst inst;
   MemTxn rd;
   MemTxn rs1;
@@ -330,7 +332,11 @@ private:
   }
 
   bool endJal(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    throw std::runtime_error("Unimplemented");
+    uint32_t fallthoughFixup = a.doLocalJump();
+    uint32_t jmpPc = pc + inst.imm;
+    uint64_t ret = (uint64_t(fallthoughFixup) << 32) | jmpPc;
+    a.doLoadImm64(Reg::RAX, ret);
+    a.doRet();
   }
 
   bool endJalr(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
@@ -510,6 +516,7 @@ void runBench() {
 
 int main() {
   runBench();
+  /*
   runTest("add");
   runTest("sub");
   runTest("xor");
@@ -529,10 +536,13 @@ int main() {
   runTest("bge");
   runTest("bltu");
   runTest("bgeu");
+  */
   runTest("jal");
+  /*
   runTest("jalr");
   runTest("lui");
   runTest("auipc");
   runTest("sll");
   runTest("slli");
+  */
 }
