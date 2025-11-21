@@ -126,17 +126,33 @@ where
         let mut segment_callback = self.inner;
         let mut image = initial_image.clone();
         let (update_send, update_recv) =
-            mpsc::sync_channel::<SegmentUpdate>(MAX_OUTSTANDING_SEGMENTS);
+            mpsc::sync_channel::<(SegmentUpdate, bool)>(MAX_OUTSTANDING_SEGMENTS);
 
         // Spawn the thread that will receive segment updates and construct segments.
         self.scope.spawn(move || -> Result<()> {
-            for update in update_recv {
+            for (update, is_error) in update_recv {
                 // Update the current memory image and produce a risc0_circuit_rv32im::Segment.
                 let circuit_segment = update
                     .apply_into_segment(&mut image)
                     .context("Failed to apply segment update to memory image")?;
 
-                // TODO(victor/perf): Support dumping the Segment here.
+                // If an error is indicated by the executor, and RISC0_DUMP_PATH is set serialize
+                // the final segment and write it to the given path.
+                if is_error {
+                    if let Some(dump_path) = std::env::var_os("RISC0_DUMP_PATH") {
+                        tracing::error!(
+                            "Execution failure, saving segment to {}:",
+                            dump_path.to_string_lossy()
+                        );
+                        tracing::error!("{circuit_segment:?}");
+
+                        let bytes = circuit_segment.encode()?;
+                        tracing::error!("Serialized segment into {} bytes", bytes.len());
+
+                        std::fs::write(dump_path, bytes)?;
+                    }
+                    break;
+                }
 
                 let segment = Segment {
                     index: circuit_segment.index.try_into().unwrap(),
@@ -166,14 +182,20 @@ where
 }
 
 struct ExecutorImplCallback {
-    update_channel: SyncSender<SegmentUpdate>,
+    update_channel: SyncSender<(SegmentUpdate, bool)>,
 }
 
 impl SegmentUpdateCallback for ExecutorImplCallback {
     fn on_segment_update(&mut self, update: SegmentUpdate) -> Result<()> {
         self.update_channel
-            .send(update)
+            .send((update, false))
             .context("Failed to send segment update to hasher thread")
+    }
+
+    fn on_execution_error(&mut self, update: SegmentUpdate) -> Result<()> {
+        self.update_channel
+            .send((update, true))
+            .context("Failed to send segment error update to hasher thread")
     }
 }
 
