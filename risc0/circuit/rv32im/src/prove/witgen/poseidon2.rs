@@ -34,7 +34,6 @@ use crate::{
 use super::node_idx_to_addr;
 
 const P2_STATE_LAYOUT: &PoseidonStateLayout = LAYOUT_TOP.inst_result.arm9.state;
-// DO NOT MERGE: This is slightly wrong
 const P2_STATE_SIZE: usize = std::mem::size_of::<Poseidon2State>() / WORD_SIZE;
 
 impl Poseidon2State {
