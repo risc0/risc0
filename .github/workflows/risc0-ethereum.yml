@@ -17,7 +17,7 @@ concurrency:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.91.1+alpha3
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
   RISC0_PATH: ${{ github.workspace }}/risc0
   RISC0_ETHEREUM_PATH: ${{ github.workspace }}/risc0-ethereum
