@@ -305,6 +305,7 @@ private:
   // Read a word from the page table
   uint32_t readWord(uint32_t wordAddr) {
     uint32_t page = wordAddr >> MPAGE_SIZE_WORDS_PO2;
+    uint32_t idx = wordAddr & MPAGE_MASK_WORDS;
     PageDetails* data = getPage(page);
     // TODO: This is only called on fetch, update cycle #
     // basically make Decode info
@@ -386,6 +387,7 @@ private:
 
   uint64_t pageMiss(uint64_t page) {
     PageDetails* pageDetails = getPage(page);
+    LOG(1, "Did page miss, page " << page << " -> " << pageDetails);
     return reinterpret_cast<uint64_t>(pageDetails);
   }
 
@@ -482,12 +484,20 @@ public:
       fixAddr = ret >> 32;
       pc = ret & 0xffffffff;
       LOG(1, "  new PC = " << HexWord{pc} << ", new cycle = " << (ctx.cycle >> 32) << ", new quota = " << ctx.quota);
+      //dump();
       if (ctx.quota < 0) { break; }
       if (fixAddr == 0xffffffff) {
         LOG(0, "ECALL HIT");
         return;
       }
     }
+  }
+
+  void dump() {
+    LOG(0, "REG[1] = " << HexWord{ctx.riscvRegs[1]});
+    LOG(0, "REG[2] = " << HexWord{ctx.riscvRegs[2]});
+    LOG(0, "REG[14] = " << HexWord{ctx.riscvRegs[14]});
+    LOG(0, "MEM[REG[2]] = " << HexWord{readWord(uint32_t(ctx.riscvRegs[2])/4)});
   }
 };
 

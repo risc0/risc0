@@ -122,6 +122,92 @@ LOG_RS2_OFF = 24
   INST_END
 .endm
 
+# Helper macros for memory ops
+
+# Check aligment and fail if wrong
+# Address in EAX
+.macro CHECK_ALIGNMENT mask
+  test \mask, %eax  # Check for alignment
+  jnz .Lalignment_trap  # Fail not aligned
+.endm
+
+.Lresolve_page:
+  # Get function pointer to jump to
+  movq CTX_PAGE_MISS_OFF(CTX), %rdx
+  # Save critival data back to context
+  movq LOG, CTX_LOG_OFF(CTX)
+  movq CYCLE, CTX_CYCLE_OFF(CTX)
+  push RDN  # Save RDN since I still need to write RD
+  push %rax  # Save rax since it holds the full address
+  push CTX  # Save CTX
+  movq %rbx, %rsi  # Pass page up to c++
+  call *%rdx
+  movq %rax, %rdx  # Move return value to ecx
+  pop CTX # Restore things
+  pop %rax
+  pop RDN
+  # Reload things I need
+  movq CTX_LOG_OFF(CTX), LOG
+  movq CTX_CYCLE_OFF(CTX), CYCLE
+  movq $0x100000000, CYCLE_INC_VAL
+  movq CTX_PAGES_OFF(CTX), PAGES
+  ret
+
+# Given an address in %eax, puts the page ptr in %edx
+# Makes sure to not mess with %ecx since we need it
+# for SW (which reads RS2 there).  Trash rbx
+.macro RESOLVE_PAGE label_prefix
+  mov %eax, %ebx  # Copy address to ebx
+  shr $10, %ebx  # Shift, now we have the page #
+  mov (PAGES, %rbx, 8), %rdx  # Load page pointer
+  cmp $0, %rdx  # Check if it's NULL
+  jne .L\label_prefix\()_skip  # if not, we are good to go
+  call .Lresolve_page  # Otherwise, resolve page
+.L\label_prefix\()_skip:
+.endm
+
+# Given address in %eax, page in %rdx, compute offset into %ebx
+# and load word data and cycle into %rax
+.macro LOAD_WORD
+  mov %eax, %ebx  # Copy address
+  and $0x3fc, %ebx  # Clear high bits + aligne, EBX is now offset
+  mov (%rdx, %rbx, 2), %rax  # Load the page data + cycle
+.endm
+
+.macro DO_LOAD_PRE opcode label_prefix align_mask
+  DO_IMM_PRE \opcode  # LOG rd, load RS1
+  add IMM, %eax  # EAX is now the address to load from
+  CHECK_ALIGNMENT \align_mask  # Jump to error if misaligned
+  RESOLVE_PAGE \label_prefix  # Load page ptr into %rdx
+  mov %eax, %ecx  # Save address to ecx
+  LOAD_WORD  # Load word into %eax
+  mov %rax, LOG_RS2_OFF(LOG)  # Log memory transaction into RS2
+  mov %eax, %eax  # Clear top bits
+  orq CYCLE, %rax  # Update cycle #
+  mov %rax, (%rdx, %rbx, 2)  # Write back to memory
+.endm
+
+.macro DO_STORE_PRE opcode label_prefix align_mask
+  WRITE_INST \opcode  # Write opcode data to log
+  LOAD_RS1_EAX  # Load RS1 into EAX (and log)
+  LOAD_RS2_ECX  # Load RS2 into ECX (and log)
+  mov %ecx, %r12d  # Squirel away in r12d (which is caller saved)
+  add IMM, %eax  # EAX is now the address to load from
+  CHECK_ALIGNMENT \align_mask  # Jump to error if misaligned
+  RESOLVE_PAGE \label_prefix  # Load page ptr into %rdx
+  mov %eax, %ecx  # Save address to ecx
+  LOAD_WORD  # Load word into %eax
+  mov %rax, LOG_RD_OFF(LOG)  # Log memory transaction into RD
+.endm
+
+.macro DO_STORE_POST
+  INC_CYCLE  # Move to the 'write' cycle
+  #mov %eax, %eax  # Clear top bits
+  #orq CYCLE, %rax  # Update cycle #
+  movq %rax, (%rdx, %rbx, 2)  # Write back to memory
+  INST_END  # Finish instruction
+.endm
+
 # Actual instructions
 
 do_ADD:
@@ -230,73 +316,72 @@ do_SLTIU:
   setb %al  # set AL = 1 if (eax < ecx) unsigned
   DO_IMM_POST
 
-resolve_page:
-  # Get function pointer to jump to
-  movq CTX_PAGE_MISS_OFF(CTX), %rcx
-  # Save critival data back to context
-  movq LOG, CTX_LOG_OFF(CTX)
-  movq CYCLE, CTX_CYCLE_OFF(CTX)
-  push RDN  # Save RDN since I still need to write RD
-  push %rax  # Save rax since it holds the full address
-  push CTX  # Save CTX
-  movq %rbx, %rsi  # Pass page up to c++
-  call *%rcx
-  movq %rax, %rcx  # Move return value to ecx
-  pop CTX # Restore things
-  pop %rax
-  pop RDN
-  # Reload things I need
-  movq CTX_LOG_OFF(CTX), LOG
-  movq CTX_CYCLE_OFF(CTX), CYCLE
-  movq $0x100000000, CYCLE_INC_VAL
-  movq CTX_PAGES_OFF(CTX), PAGES
-  ret
-  
 do_LB:
-  ud2
-
-do_LH:
-  ud2
-
-do_LW:
-  DO_IMM_PRE $21
-  add IMM, %eax  # EAX is now the address to load from
-  test $3, %eax  # Check for alignment
-  jnz alignment_trap  # Fail not aligned
-  mov %eax, %ebx  # Copy address to ebx
-  shr $10, %ebx  # Shift, now we have the page #
-  mov (PAGES, %rbx, 8), %rcx  # Load page pointer
-  cmp $0, %rcx  # Check if it's NULL
-  jne do_LW_skip  # if not, we are good to go
-  call resolve_page  # Otherwise, resolve page
-do_LW_skip:
-  # Now, eax is the address, %rcx is the page pointer
-  mov %eax, %ebx
-  and $0x3ff, %ebx  # Clear low bit
-  mov (%rcx, %rbx, 2), %rax  # Load the page data + cycle
-  mov %rax, LOG_RS2_OFF(LOG)  # Log memory transaction
-  mov %eax, %eax  # Clear top bits
-  orq CYCLE, %rax  # Update cycle #
-  mov %rax, (%rcx, %rbx, 2)  # Write back to memory
+  DO_LOAD_PRE $19 do_LB $0  # Put addr in %eax, page in %rdx
+  andl $3, %ecx  # Get lower bits from address
+  shll $3, %ecx  # Multiply by 8
+  shrl %cl, %eax  # Shift right byte into lower byte
+  movsbl %al, %eax
   DO_IMM_POST
 
+do_LH:
+  DO_LOAD_PRE $20 do_LH $1  # Put addr in %eax, page in %rdx
+  andl $3, %ecx  # Get lower bits from address
+  shll $3, %ecx  # Multiply by 8
+  shrl %cl, %eax  # Shift right byte into lower short
+  movswl %ax, %eax
+  DO_IMM_POST
+
+do_LW:
+  DO_LOAD_PRE $21 do_LW $3  # Put addr in %eax, page in %rdx
+  DO_IMM_POST  # Data now in EAX, just write back
+
 do_LBU:
-  ud2
+  DO_LOAD_PRE $22 do_LBU $0  # Put addr in %eax, page in %rdx
+  andl $3, %ecx  # Get lower bits from address
+  shll $3, %ecx  # Multiply by 8
+  shrl %cl, %eax  # Shift right byte into lower byte
+  andl $0x000000ff, %eax
+  DO_IMM_POST
 
 do_LHU:
-  ud2
+  DO_LOAD_PRE $23 do_LHU $1  # Put addr in %eax, page in %rdx
+  andl $3, %ecx  # Get lower bits from address
+  shll $3, %ecx  # Multiply by 8
+  shrl %cl, %eax  # Shift right byte into lower short
+  andl $0x0000ffff, %eax
+  DO_IMM_POST
 
 do_SB:
-  ud2
+  DO_STORE_PRE $24 do_SB $0 # eax = old value, r9d = new
+  andl $3, %ecx  # Get lower bits from address
+  shll $3, %ecx  # Multiply by 8
+  mov $0xff, %r10d  # Load mask into r10d
+  shll %cl, %r10d  # Move mask to right position
+  notl %r10d  # Invert
+  andl %r10d, %eax  # Mask out EAX bits
+  andl $0xff, %r12d  # Make sure we are only writing a byte
+  shll %cl, %r12d  # Shift byte into place
+  orl %r12d, %eax  # Or it in
+  DO_STORE_POST
 
 do_SH:
-  ud2
+  DO_STORE_PRE $25 do_SH $0 # eax = old value, r9d = new
+  andl $3, %ecx  # Get lower bits from address
+  shll $3, %ecx  # Multiply by 8
+  mov $0xffff, %r10d  # Load mask into r10d
+  shll %cl, %r10d  # Move mask to right position
+  notl %r10d  # Invert
+  andl %r10d, %eax  # Mask out EAX bits
+  andl $0xffff, %r12d  # Make sure we are only writing a byte
+  shll %cl, %r12d  # Shift byte into place
+  orl %r12d, %eax  # Or it in
+  DO_STORE_POST
 
 do_SW:
-  ud2
-
-handle_alignment_trap:
-  ud2
+  DO_STORE_PRE $26 do_SW $3 # eax = old value, r9d = new
+  mov %r12d, %eax
+  DO_STORE_POST
 
 do_BEQ:
   DO_BRANCH $27
@@ -442,6 +527,10 @@ do_ECALL:
   ret 
 
 do_MRET:
+  ud2
+
+# Handle misalignment
+.Lalignment_trap:
   ud2
 
 enter:
