@@ -118,6 +118,48 @@ pub(crate) trait SyscallContext<'a> {
     fn syscall_table(&self) -> &SyscallTable<'a>;
 }
 
+/// Parameters for verification syscalls
+pub(crate) struct VerifyParams {
+    pub claim_digest: Digest,
+    pub control_root: Digest,
+    pub data_len: u32,
+}
+
+/// Helper function to read verification parameters from guest memory.
+pub(crate) fn read_verify_params(ctx: &mut dyn SyscallContext) -> Result<VerifyParams> {
+    use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
+    
+    let from_guest_ptr = ByteAddr(ctx.load_register(REG_A3));
+    let from_guest_len = ctx.load_register(REG_A4);
+    let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
+
+    let claim_digest: Digest = from_guest[..DIGEST_BYTES]
+        .try_into()
+        .map_err(|vec| anyhow!("invalid digest: {vec:?}"))?;
+    let control_root: Digest = from_guest[DIGEST_BYTES..]
+        .try_into()
+        .map_err(|vec| anyhow!("invalid digest: {vec:?}"))?;
+
+    Ok(VerifyParams {
+        claim_digest,
+        control_root,
+        data_len: from_guest_len,
+    })
+}
+
+/// Helper function to update syscall metrics.
+/// 
+/// Increments the count and adds to the size for the specified syscall kind.
+pub(crate) fn update_syscall_metric(
+    ctx: &dyn SyscallContext,
+    kind: SyscallKind,
+    size: u64,
+) {
+    let metric = &mut ctx.syscall_table().metrics.borrow_mut()[kind];
+    metric.count += 1;
+    metric.size += size;
+}
+
 pub(crate) type AssumptionUsage = Vec<(Assumption, AssumptionReceipt)>;
 
 #[derive(Clone)]
