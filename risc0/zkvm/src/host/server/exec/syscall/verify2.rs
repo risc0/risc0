@@ -13,16 +13,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use anyhow::{Result, anyhow, bail};
-use risc0_binfmt::ByteAddr;
-use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
+use anyhow::{Result, bail};
 
 use crate::{
     Assumption, AssumptionReceipt,
-    sha::{DIGEST_BYTES, Digest},
+    sha::Digest,
 };
 
-use super::{Syscall, SyscallContext, SyscallKind};
+use super::{Syscall, SyscallContext, SyscallKind, read_verify_params, update_syscall_metric};
 
 #[derive(Clone)]
 pub(crate) struct SysVerify2;
@@ -37,26 +35,17 @@ impl Syscall for SysVerify2 {
         if !to_guest.is_empty() {
             bail!("invalid sys_verify2 call");
         }
-        let from_guest_ptr = ByteAddr(ctx.load_register(REG_A3));
-        let from_guest_len = ctx.load_register(REG_A4);
-        let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
-
-        let claim_digest: Digest = from_guest[..DIGEST_BYTES]
-            .try_into()
-            .map_err(|vec| anyhow!("invalid digest: {vec:?}"))?;
-        let control_root: Digest = from_guest[DIGEST_BYTES..]
-            .try_into()
-            .map_err(|vec| anyhow!("invalid digest: {vec:?}"))?;
+        let params = read_verify_params(ctx)?;
 
         tracing::debug!(
             "SYS_VERIFY_INTEGRITY2: ({}, {})",
-            claim_digest,
-            control_root
+            params.claim_digest,
+            params.control_root
         );
 
         let assumption = Assumption {
-            claim: claim_digest,
-            control_root,
+            claim: params.claim_digest,
+            control_root: params.control_root,
         };
 
         let assumption_receipt = AssumptionReceipt::Unresolved(assumption.clone());
@@ -74,9 +63,7 @@ impl Syscall for SysVerify2 {
             .unwrap()
             .insert(0, (assumption, assumption_receipt));
 
-        let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::VerifyIntegrity2];
-        metric.count += 1;
-        metric.size += from_guest_len as u64;
+        update_syscall_metric(ctx, SyscallKind::VerifyIntegrity2, params.data_len as u64);
 
         Ok((0, 0))
     }
