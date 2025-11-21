@@ -225,6 +225,10 @@ pub(crate) trait Risc0Context {
     fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State);
 
     fn ecall_bigint(&mut self) -> Result<()>;
+
+    fn ecall_poseidon2(&mut self) -> Result<()> {
+        Poseidon2::load_ecall(self)?.run(self, CycleState::Decode)
+    }
 }
 
 #[cfg(test)]
@@ -606,7 +610,7 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             0,
             EcallKind::Poseidon2,
         )?;
-        Poseidon2::ecall(self.ctx)?;
+        self.ctx.ecall_poseidon2()?;
         Ok(false)
     }
 
