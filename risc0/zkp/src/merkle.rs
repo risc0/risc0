@@ -22,6 +22,7 @@ use crate::core::to_po2;
 /// layers - the number of levels on the merkle tree
 /// top_layer - the index of the layer above which we check hashes only once
 /// top_size - the number of hashes in the top layer
+#[derive(Clone)]
 pub struct MerkleTreeParams {
     pub row_size: usize,
     pub col_size: usize,
