@@ -34,6 +34,7 @@ use crate::{
 use super::node_idx_to_addr;
 
 const P2_STATE_LAYOUT: &PoseidonStateLayout = LAYOUT_TOP.inst_result.arm9.state;
+// DO NOT MERGE: This is slightly wrong
 const P2_STATE_SIZE: usize = std::mem::size_of::<Poseidon2State>() / WORD_SIZE;
 
 impl Poseidon2State {
@@ -191,13 +192,13 @@ impl Poseidon2 {
     pub fn read_node(ctx: &mut impl Risc0Context, node_idx: u32) -> Result<()> {
         // tracing::trace!("read_node: {node_idx:#010x}");
         let mut p2 = Poseidon2State::new_node(node_idx, true);
-        p2.rest(ctx, CycleState::PoseidonPaging)
+        p2.run(ctx, CycleState::PoseidonPaging)
     }
 
     pub fn read_page(ctx: &mut impl Risc0Context, page_idx: u32) -> Result<()> {
         // tracing::trace!("read_page: {page_idx:#010x}");
         let mut p2 = Poseidon2State::new_page(page_idx, true);
-        p2.rest(ctx, CycleState::PoseidonPaging)
+        p2.run(ctx, CycleState::PoseidonPaging)
     }
 
     pub fn read_done(ctx: &mut impl Risc0Context) -> Result<()> {
@@ -217,13 +218,13 @@ impl Poseidon2 {
     pub fn write_node(ctx: &mut impl Risc0Context, node_idx: u32) -> Result<()> {
         // tracing::trace!("write_node: {node_idx:#010x}");
         let mut p2 = Poseidon2State::new_node(node_idx, false);
-        p2.rest(ctx, CycleState::PoseidonPaging)
+        p2.run(ctx, CycleState::PoseidonPaging)
     }
 
     pub fn write_page(ctx: &mut impl Risc0Context, page_idx: u32) -> Result<()> {
         // tracing::trace!("write_page: {page_idx:#010x}");
         let mut p2 = Poseidon2State::new_page(page_idx, false);
-        p2.rest(ctx, CycleState::PoseidonPaging)
+        p2.run(ctx, CycleState::PoseidonPaging)
     }
 
     pub fn write_done(ctx: &mut impl Risc0Context) -> Result<()> {

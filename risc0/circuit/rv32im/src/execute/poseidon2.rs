@@ -94,11 +94,27 @@ impl Poseidon2State {
         *cur_state = next_state;
     }
 
-    pub(crate) fn rest(
+    pub(crate) fn run(
         &mut self,
-        ctx: &mut impl Risc0Context,
+        ctx: &mut (impl Risc0Context + ?Sized),
         final_state: CycleState,
     ) -> Result<()> {
+        self.run_with_mix(ctx, final_state, |p2, cur_state, ctx| {
+            p2.mix(ctx, cur_state);
+            Ok(())
+        })
+    }
+
+    pub(crate) fn run_with_mix<F, C>(
+        &mut self,
+        ctx: &mut C,
+        final_state: CycleState,
+        mut mix: F,
+    ) -> Result<()>
+    where
+        F: FnMut(&mut Self, &mut CycleState, &mut C) -> Result<()>,
+        C: Risc0Context + ?Sized,
+    {
         let mut cur_state = self.next_state;
 
         // If we have state, load it
@@ -110,7 +126,7 @@ impl Poseidon2State {
         // tracing::debug!("buf_in_addr: {buf_in_addr:?}");
         while self.count > 0 {
             self.load_buf_in(ctx, &mut cur_state)?;
-            ctx.ecall_poseidon2_mix(&mut cur_state, self);
+            mix(self, &mut cur_state, ctx)?;
             self.count -= 1;
         }
 
@@ -129,7 +145,7 @@ impl Poseidon2State {
 
     fn load_p2_state(
         &mut self,
-        ctx: &mut impl Risc0Context,
+        ctx: &mut (impl Risc0Context + ?Sized),
         cur_state: &mut CycleState,
     ) -> Result<()> {
         let state_addr = WordAddr(self.state_addr);
@@ -143,7 +159,7 @@ impl Poseidon2State {
 
     fn store_p2_state(
         &mut self,
-        ctx: &mut impl Risc0Context,
+        ctx: &mut (impl Risc0Context + ?Sized),
         cur_state: &mut CycleState,
     ) -> Result<()> {
         let state_addr = WordAddr(self.state_addr);
@@ -157,14 +173,12 @@ impl Poseidon2State {
 
     fn load_buf_in(
         &mut self,
-        ctx: &mut impl Risc0Context,
+        ctx: &mut (impl Risc0Context + ?Sized),
         cur_state: &mut CycleState,
     ) -> Result<()> {
         let mut buf_in_addr = WordAddr(self.buf_in_addr);
         self.step(ctx, cur_state, CycleState::PoseidonLoadIn, 0);
 
-        // NOTE(victor/perf): This loading logic is somewhat involved, can be shared, and does
-        // not really show up on the trace. It does not need to be specialized to the executor.
         // If the data at buf_in_addr is already encoded as field elements, then load iteration can
         // process 16 elements. Otherwise, each u32 needs to be split into two halves and each load
         // iteration processes 8 u32s (roughly half the rate).
@@ -192,7 +206,7 @@ impl Poseidon2State {
 
     fn store_buf_out(
         &mut self,
-        ctx: &mut impl Risc0Context,
+        ctx: &mut (impl Risc0Context + ?Sized),
         cur_state: &mut CycleState,
     ) -> Result<()> {
         self.step(ctx, cur_state, CycleState::PoseidonDoOut, 0);
@@ -340,13 +354,17 @@ fn sbox2(x: u32) -> u32 {
 pub(crate) struct Poseidon2;
 
 impl Poseidon2 {
-    pub fn ecall(ctx: &mut impl Risc0Context) -> Result<()> {
-        tracing::trace!("ecall");
+    pub fn load_ecall(ctx: &mut (impl Risc0Context + ?Sized)) -> Result<Poseidon2State> {
+        tracing::trace!("load_ecall");
         let state_addr = ctx.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A0)?;
         let buf_in_addr = ctx.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A1)?;
         let buf_out_addr = ctx.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A2)?;
         let bits_count = ctx.load_machine_register(LoadOp::Record, REG_A3)?;
-        let mut p2 = Poseidon2State::new_ecall(state_addr, buf_in_addr, buf_out_addr, bits_count);
-        p2.rest(ctx, CycleState::Decode)
+        Ok(Poseidon2State::new_ecall(
+            state_addr,
+            buf_in_addr,
+            buf_out_addr,
+            bits_count,
+        ))
     }
 }
