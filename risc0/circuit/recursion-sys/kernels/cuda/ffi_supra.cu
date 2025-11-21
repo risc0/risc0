@@ -52,7 +52,8 @@ __global__ void eval_check(Fp* check,
 
 } // namespace risc0::circuit::recursion::cuda
 
-extern "C" const char* risc0_circuit_recursion_cuda_eval_check(Fp* check,
+extern "C" const char* risc0_circuit_recursion_cuda_eval_check(cudaStream_t stream,
+                                                               Fp* check,
                                                                const Fp* ctrl,
                                                                const Fp* data,
                                                                const Fp* accum,
@@ -64,8 +65,6 @@ extern "C" const char* risc0_circuit_recursion_cuda_eval_check(Fp* check,
                                                                const FpExt* poly_mix_pows) {
 
   try {
-    CUDA_OK(cudaDeviceSynchronize());
-    CudaStream stream;
     LaunchConfig cfg = getSimpleConfig(domain);
     risc0::circuit::recursion::cuda::eval_check<<<cfg.grid, cfg.block, 0, stream>>>(
         check, ctrl, data, accum, mix, out, rou, po2, domain, poly_mix_pows);

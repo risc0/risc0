@@ -24,12 +24,12 @@ void runTest(rv32im::MemoryImage& image, rv32im::HostIO& io, size_t po2) {
   // IHalPtr hal = getGpuHal();
   Rv32imProver prover(hal, po2, true);
   auto preflightData = preflight(po2, image, io);
-  if (!preflightData.isFinal) {
+  if (!preflightData->isFinal) {
     std::cerr << "FAILED TO COMPLETE\n";
     exit(1);
   }
   WriteIop wiop;
-  prover.prove(wiop, preflightData);
+  prover.prove(wiop, *preflightData);
   ReadIop riop(wiop.getTranscript().data(), wiop.getTranscript().size());
   verifyRv32im(riop, po2);
 }

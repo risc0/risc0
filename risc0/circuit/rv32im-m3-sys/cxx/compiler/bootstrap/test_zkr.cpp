@@ -46,7 +46,7 @@ int main() {
   rv32im::NullHostIO io;
   auto preflightData = preflight(po2, image, io);
   WriteIop wiop;
-  prover.prove(wiop, preflightData);
+  prover.prove(wiop, *preflightData);
   const std::vector<Fp>& transcript = wiop.getTranscript();
 
   // Do a plain verify as a sanity check

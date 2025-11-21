@@ -26,15 +26,16 @@ __device__ inline constexpr size_t log2Ceil(size_t in) {
   return r;
 }
 
-extern "C" bool cuda_batch_bit_reverse(Fp* io, uint32_t po2, uint32_t cols) {
+extern "C" bool cuda_batch_bit_reverse(cudaStream_t stream, Fp* io, uint32_t po2, uint32_t cols) {
   uint32_t count = (uint32_t(1) << po2) * cols;
   size_t block_size = count < 256 ? count : 256;
   size_t num_blocks = (count + block_size - 1) / block_size;
-  batch_bit_reverse<<<num_blocks, block_size, 0>>>(io, po2, count);
+  batch_bit_reverse<<<num_blocks, block_size, 0, stream>>>(io, po2, count);
   return true;
 }
 
-extern "C" bool cuda_batch_evaluate_any(FpExt* out,
+extern "C" bool cuda_batch_evaluate_any(cudaStream_t stream,
+                                        FpExt* out,
                                         const Fp* coeffs,
                                         const uint32_t* which,
                                         const FpExt* xs,
@@ -42,19 +43,21 @@ extern "C" bool cuda_batch_evaluate_any(FpExt* out,
                                         uint32_t deg) {
   size_t block_size = (deg < 256 ? deg : 256);
   size_t num_blocks = outSize;
-  batch_evaluate_any<<<num_blocks, block_size, block_size * sizeof(FpExt)>>>(
+  batch_evaluate_any<<<num_blocks, block_size, block_size * sizeof(FpExt), stream>>>(
       out, coeffs, which, xs, deg);
   return true;
 }
 
-extern "C" bool cuda_fri_fold(Fp* out, const Fp* in, FpExt mix, uint32_t count) {
+extern "C" bool
+cuda_fri_fold(cudaStream_t stream, Fp* out, const Fp* in, FpExt mix, uint32_t count) {
   size_t block_size = count < 256 ? count : 256;
   size_t num_blocks = (count + block_size - 1) / block_size;
-  fri_fold<<<num_blocks, block_size, 0>>>(out, in, mix, count);
+  fri_fold<<<num_blocks, block_size, 0, stream>>>(out, in, mix, count);
   return true;
 }
 
-extern "C" bool cuda_mix_poly_coeffs(FpExt* out,
+extern "C" bool cuda_mix_poly_coeffs(cudaStream_t stream,
+                                     FpExt* out,
                                      const Fp* in,
                                      const uint32_t* combos,
                                      FpExt mixStart,
@@ -63,7 +66,8 @@ extern "C" bool cuda_mix_poly_coeffs(FpExt* out,
                                      uint32_t count) {
   size_t block_size = count < 256 ? count : 256;
   size_t num_blocks = (count + block_size - 1) / block_size;
-  mix_poly_coeffs<<<num_blocks, block_size, 0>>>(out, in, combos, mixStart, mix, inputSize, count);
+  mix_poly_coeffs<<<num_blocks, block_size, 0, stream>>>(
+      out, in, combos, mixStart, mix, inputSize, count);
   return true;
 }
 
@@ -90,13 +94,14 @@ __global__ void rv32im_m3_combos_prepare(FpExt* combos,
   }
 }
 
-extern "C" bool cuda_combos_prepare(FpExt* combos,
+extern "C" bool cuda_combos_prepare(cudaStream_t stream,
+                                    FpExt* combos,
                                     const FpExt* eval,
                                     const EvalInfo* info,
                                     FpExt mix,
                                     uint32_t rows,
                                     uint32_t evalSize) {
-  rv32im_m3_combos_prepare<<<1, 1, 0>>>(combos, eval, info, mix, rows, evalSize);
+  rv32im_m3_combos_prepare<<<1, 1, 0, stream>>>(combos, eval, info, mix, rows, evalSize);
   return true;
 }
 
@@ -113,10 +118,10 @@ __global__ void combos_finalize(Fp* out, const FpExt* combos, uint32_t numCombos
   }
 }
 
-extern "C" bool
-cuda_combos_finalize(Fp* out, const FpExt* combos, uint32_t numCombos, uint32_t count) {
+extern "C" bool cuda_combos_finalize(
+    cudaStream_t stream, Fp* out, const FpExt* combos, uint32_t numCombos, uint32_t count) {
   size_t block_size = count < 256 ? count : 256;
   size_t num_blocks = (count + block_size - 1) / block_size;
-  combos_finalize<<<num_blocks, block_size, 0>>>(out, combos, numCombos, count);
+  combos_finalize<<<num_blocks, block_size, 0, stream>>>(out, combos, numCombos, count);
   return true;
 }

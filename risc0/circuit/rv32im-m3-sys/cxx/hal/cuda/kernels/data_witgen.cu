@@ -17,13 +17,19 @@
 #include "hal/po2s.h"
 
 #define PO2(x)                                                                                     \
-  extern "C" void data_witgen_cuda_##x(                                                            \
-      Fp* data, Fp* globals, const RowInfo* info, const uint32_t* aux, uint32_t* tables, Fp rou);
+  extern "C" void data_witgen_cuda_##x(cudaStream_t stream,                                        \
+                                       Fp* data,                                                   \
+                                       Fp* globals,                                                \
+                                       const RowInfo* info,                                        \
+                                       const uint32_t* aux,                                        \
+                                       uint32_t* tables,                                           \
+                                       Fp rou);
 PO2S
 #undef PO2
 
     extern "C" void
-    data_witgen_cuda(Fp* data,
+    data_witgen_cuda(cudaStream_t stream,
+                     Fp* data,
                      Fp* globals,
                      const RowInfo* info,
                      const uint32_t* aux,
@@ -34,7 +40,7 @@ PO2S
   switch (po2) {
 #define PO2(x)                                                                                     \
   case x:                                                                                          \
-    data_witgen_cuda_##x(data, globals, info, aux, tables, rou);                                   \
+    data_witgen_cuda_##x(stream, data, globals, info, aux, tables, rou);                           \
     break;
     PO2S
 #undef PO2

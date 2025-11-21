@@ -26,7 +26,10 @@ use lazy_static::lazy_static;
 #[cfg(feature = "std")]
 use std::sync::Arc;
 
-use anyhow::{Result, anyhow, bail};
+#[cfg(not(feature = "std"))]
+use alloc::boxed::Box;
+
+use anyhow::{Result, anyhow, bail, ensure};
 use derive_more::Debug;
 use risc0_zkp::{
     core::{
@@ -82,7 +85,7 @@ impl ZeroCache {
 /// segment, at which point it is paged out.
 #[cfg(feature = "std")]
 #[derive(Clone)]
-pub struct Page(Arc<Vec<u8>>);
+pub struct Page(Arc<[u8; PAGE_BYTES]>);
 
 /// A page of memory
 ///
@@ -91,7 +94,7 @@ pub struct Page(Arc<Vec<u8>>);
 /// segment, at which point it is paged out.
 #[cfg(not(feature = "std"))]
 #[derive(Clone)]
-pub struct Page(Vec<u8>);
+pub struct Page(Box<[u8; PAGE_BYTES]>);
 
 /// A memory image
 ///
@@ -101,16 +104,16 @@ pub struct Page(Vec<u8>);
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MemoryImage {
     /// The pages of the memory image, by address.
-    #[debug("{}", pages.len())]
+    #[debug("{} entries", pages.len())]
     // #[debug("{:#010x?}", pages.keys())]
     pub pages: BTreeMap<u32, Page>,
 
     /// The digests of the memory image, representing a merkle tree.
-    #[debug("{}", digests.len())]
+    #[debug("{} entries", digests.len())]
     // #[debug("{:#010x?}", digests.keys())]
     pub digests: BTreeMap<u32, Digest>,
 
-    #[debug("{}", dirty.len())]
+    #[debug("{} entries", dirty.len())]
     dirty: BTreeSet<u32>,
 }
 
@@ -178,8 +181,12 @@ impl MemoryImage {
         self.pages.keys().copied().collect()
     }
 
-    /// Sorted iterator over page digests (page_idx -> Digest)
+    /// Sorted iterator over page digests (digest_idx -> Digest)
     pub fn digests(&self) -> impl Iterator<Item = (&'_ u32, &'_ Digest)> + '_ {
+        assert!(
+            self.dirty.is_empty(),
+            "attempted to get digests on a dirty memory image"
+        );
         self.digests.iter()
     }
 
@@ -202,7 +209,10 @@ impl MemoryImage {
         bail!("Unavailable page: {page_idx}")
     }
 
-    /// Set the data for a page
+    /// Set the data for a page.
+    ///
+    /// Inner nodes which are ancestors of this page will be marked as dirty. The caller must call
+    /// [MemoryImage::update_digests] to recompute these nodes after calling this function.
     pub fn set_page(&mut self, page_idx: u32, page: Page) {
         // tracing::trace!("set_page({page_idx:#08x})");
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
@@ -213,6 +223,9 @@ impl MemoryImage {
     }
 
     /// Set the data for a page and with the given digest
+    ///
+    /// Inner nodes which are ancestors of this page will be marked as dirty. The caller must call
+    /// [MemoryImage::update_digests] to recompute these nodes after calling this function.
     pub fn set_page_with_digest(&mut self, page_idx: u32, page: Page, digest: Digest) {
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
         self.expand_if_zero(digest_idx);
@@ -225,12 +238,19 @@ impl MemoryImage {
     pub fn get_digest(&mut self, digest_idx: u32) -> Result<&Digest> {
         // Expand if needed
         self.expand_if_zero(digest_idx);
+        ensure!(
+            !self.dirty.contains(&digest_idx),
+            "digest marked as dirty: {digest_idx}"
+        );
         self.digests
             .get(&digest_idx)
             .ok_or_else(|| anyhow!("Unavailable digest: {digest_idx}"))
     }
 
-    /// Set a digest
+    /// Set a digest.
+    ///
+    /// Inner nodes which are ancestors of this page will be marked as dirty. The caller must call
+    /// [MemoryImage::update_digests] to recompute these nodes after calling this function.
     pub fn set_digest(&mut self, digest_idx: u32, digest: Digest) {
         // If digest is in a zero region, reify for proper uncles
         self.expand_if_zero(digest_idx);
@@ -244,12 +264,12 @@ impl MemoryImage {
         *self.get_digest(1).unwrap()
     }
 
-    /// Return the user portion of the MT
+    /// Return the user portion of the Merkle tree.
     pub fn user_id(&mut self) -> Digest {
         *self.get_digest(2).unwrap()
     }
 
-    /// Return the kernel portion of the MT
+    /// Return the kernel portion of the Merkle tree.
     pub fn kernel_id(&mut self) -> Digest {
         *self.get_digest(3).unwrap()
     }
@@ -263,7 +283,7 @@ impl MemoryImage {
             .is_some()
     }
 
-    /// Check if given MT node is a zero
+    /// Check if given Merkle tree node is a zero
     fn is_zero(&self, mut digest_idx: u32) -> bool {
         // Compute the depth in the tree of this node
         let mut depth = digest_idx.ilog2() as usize;
@@ -279,9 +299,10 @@ impl MemoryImage {
         }
     }
 
-    /// Expand zero MT node.
+    /// Expand zero Merkle tree node.
     ///
-    /// Presumes `is_zero(digest_idx)` returned true.
+    /// Presumes `is_zero(digest_idx)` returned true. Populates the digests BTreeMap at the given
+    /// digest_idx, its sibling and all empty parents and uncles with zero-subtree digests.
     fn expand_zero(&mut self, mut digest_idx: u32) {
         // Compute the depth in the tree of this node
         let mut depth = digest_idx.ilog2() as usize;
@@ -306,10 +327,13 @@ impl MemoryImage {
             let lhs = self.digests.get(&lhs_idx);
             let rhs = self.digests.get(&rhs_idx);
             if let (Some(_), Some(_)) = (lhs, rhs) {
-                self.dirty.insert(parent_idx);
+                if !self.dirty.insert(parent_idx) {
+                    // Node already marked dirty. All parents will also be marked dirty already.
+                    break;
+                }
                 digest_idx = parent_idx;
             } else {
-                break;
+                unreachable!("corrupted MemoryImage");
             };
         }
     }
@@ -317,7 +341,7 @@ impl MemoryImage {
     /// After making changes to the image, call this to update all the digests
     /// that need to be updated.
     pub fn update_digests(&mut self) {
-        let dirty: Vec<_> = mem::take(&mut self.dirty).into_iter().collect();
+        let dirty = mem::take(&mut self.dirty);
         for idx in dirty.into_iter().rev() {
             let lhs_idx = idx * 2;
             let rhs_idx = idx * 2 + 1;
@@ -345,17 +369,16 @@ impl MemoryImage {
 
 impl Default for Page {
     fn default() -> Self {
-        Self::from_vec(vec![0; PAGE_BYTES])
+        Self::from_arr([0; PAGE_BYTES])
     }
 }
 
 impl Page {
-    /// Caller must ensure given Vec is of length `PAGE_BYTES`
-    fn from_vec(v: Vec<u8>) -> Self {
+    fn from_arr(arr: [u8; PAGE_BYTES]) -> Self {
         #[cfg(not(feature = "std"))]
-        return Self(v);
+        return Self(Box::new(arr));
         #[cfg(feature = "std")]
-        return Self(Arc::new(v));
+        return Self(Arc::new(arr));
     }
 
     /// Produce the digest of this page
@@ -396,14 +419,14 @@ impl Page {
 
     #[cfg(feature = "std")]
     #[inline(always)]
-    fn ensure_writable(&mut self) -> &mut [u8] {
-        &mut Arc::make_mut(&mut self.0)[..]
+    fn ensure_writable(&mut self) -> &mut [u8; PAGE_BYTES] {
+        &mut *Arc::make_mut(&mut self.0)
     }
 
     #[cfg(not(feature = "std"))]
     #[inline(always)]
-    fn ensure_writable(&mut self) -> &mut [u8] {
-        &mut self.0
+    fn ensure_writable(&mut self) -> &mut [u8; PAGE_BYTES] {
+        &mut *self.0
     }
 
     /// Store a word to this page
@@ -424,7 +447,7 @@ impl Page {
 
     /// Get a shared reference to the underlying data in the page
     #[inline(always)]
-    pub fn data(&self) -> &Vec<u8> {
+    pub fn data(&self) -> &[u8; PAGE_BYTES] {
         &self.0
     }
 }
@@ -446,14 +469,14 @@ impl<'de> Deserialize<'de> for Page {
         use serde::de::Error as _;
 
         let vec = <Vec<u8> as Deserialize>::deserialize(deserializer)?;
-        if vec.len() != PAGE_BYTES {
-            return Err(D::Error::custom(format!(
+        let arr = vec.try_into().map_err(|vec: Vec<u8>| {
+            D::Error::custom(format!(
                 "serialized page has wrong length {} != {}",
                 vec.len(),
                 PAGE_BYTES
-            )));
-        }
-        Ok(Self::from_vec(vec))
+            ))
+        })?;
+        Ok(Self::from_arr(arr))
     }
 }
 

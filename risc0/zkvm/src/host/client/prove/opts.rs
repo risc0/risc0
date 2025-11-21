@@ -23,6 +23,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::receipt::DEFAULT_MAX_PO2;
 
+/// The default maximum po2 size used for proving.
+pub const DEFAULT_MAX_PROVER_PO2: usize = 20;
+
 /// Options to configure a [Prover][super::Prover].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -52,6 +55,10 @@ pub struct ProverOpts {
     /// Whether or not dev-mode is enabled. If enabled, fake receipts may be generated, and fake
     /// receipts will verify successfully.
     pub(crate) dev_mode: bool,
+
+    /// The max po2 size for the prover. The prover may select a smaller po2 if
+    /// it will fit, but it will never use a larger po2 than this value.
+    pub(crate) max_prover_po2: usize,
 }
 
 /// An enumeration of receipt kinds that can be requested to be generated.
@@ -90,6 +97,7 @@ impl Default for ProverOpts {
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
+            max_prover_po2: DEFAULT_MAX_PROVER_PO2,
         }
     }
 }
@@ -112,6 +120,7 @@ impl ProverOpts {
                 .collect(),
             max_segment_po2: po2_max,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
+            max_prover_po2: DEFAULT_MAX_PROVER_PO2,
         }
     }
 
@@ -139,6 +148,7 @@ impl ProverOpts {
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
+            max_prover_po2: DEFAULT_MAX_PROVER_PO2,
         }
     }
 
@@ -152,6 +162,7 @@ impl ProverOpts {
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
+            max_prover_po2: DEFAULT_MAX_PROVER_PO2,
         }
     }
 
@@ -167,10 +178,11 @@ impl ProverOpts {
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
+            max_prover_po2: DEFAULT_MAX_PROVER_PO2,
         }
     }
 
-    /// Return [ProverOpts] with the hashfn set to the given value.
+    /// Return [ProverOpts] with the `hashfn` set to the given value.
     pub fn with_hashfn(self, hashfn: String) -> Self {
         Self {
             hashfn: hashfn.to_owned(),
@@ -178,7 +190,7 @@ impl ProverOpts {
         }
     }
 
-    /// Return [ProverOpts] with prove_guest_errors set to the given value.
+    /// Return [ProverOpts] with `prove_guest_errors` set to the given value.
     pub fn with_prove_guest_errors(self, prove_guest_errors: bool) -> Self {
         Self {
             prove_guest_errors,
@@ -186,7 +198,7 @@ impl ProverOpts {
         }
     }
 
-    /// Return [ProverOpts] with the receipt_kind set to the given value.
+    /// Return [ProverOpts] with the `receipt_kind` set to the given value.
     pub fn with_receipt_kind(self, receipt_kind: ReceiptKind) -> Self {
         Self {
             receipt_kind,
@@ -194,7 +206,7 @@ impl ProverOpts {
         }
     }
 
-    /// Return [ProverOpts] with the control_ids set to the given value.
+    /// Return [ProverOpts] with the `control_ids` set to the given value.
     pub fn with_control_ids(self, control_ids: Vec<Digest>) -> Self {
         Self {
             control_ids,
@@ -202,9 +214,9 @@ impl ProverOpts {
         }
     }
 
-    /// Return [ProverOpts] with the max_segment_po2 set to the given value.
+    /// Return [ProverOpts] with the `max_segment_po2` set to the given value.
     #[stability::unstable]
-    pub fn with_segment_po2_max(self, max_segment_po2: usize) -> Self {
+    pub fn with_max_segment_po2(self, max_segment_po2: usize) -> Self {
         Self {
             max_segment_po2,
             ..self
@@ -225,6 +237,14 @@ impl ProverOpts {
     /// Returns `true` if dev-mode is enabled.
     pub fn dev_mode(&self) -> bool {
         self.dev_mode
+    }
+
+    /// Return [ProverOpts] with the `max_prover_po2` set to the given value.
+    pub fn with_max_prover_po2(self, max_prover_po2: usize) -> Self {
+        Self {
+            max_prover_po2,
+            ..self
+        }
     }
 
     #[cfg(feature = "prove")]

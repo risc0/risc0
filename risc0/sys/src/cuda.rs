@@ -18,9 +18,8 @@ use cust::memory::DevicePointer;
 pub use risc0_sppark::Error as SpparkError;
 
 unsafe extern "C" {
-    pub fn sppark_init() -> risc0_sppark::Error;
-
     pub fn sppark_batch_expand(
+        stream: cust::sys::CUstream,
         d_out: DevicePointer<u8>,
         d_in: DevicePointer<u8>,
         lg_domain_size: u32,
@@ -29,30 +28,35 @@ unsafe extern "C" {
     ) -> risc0_sppark::Error;
 
     pub fn sppark_batch_NTT(
+        stream: cust::sys::CUstream,
         d_inout: DevicePointer<u8>,
         lg_domain_size: u32,
         poly_count: u32,
     ) -> risc0_sppark::Error;
 
     pub fn sppark_batch_iNTT(
+        stream: cust::sys::CUstream,
         d_inout: DevicePointer<u8>,
         lg_domain_size: u32,
         poly_count: u32,
     ) -> risc0_sppark::Error;
 
     pub fn sppark_batch_zk_shift(
+        stream: cust::sys::CUstream,
         d_inout: DevicePointer<u8>,
         lg_domain_size: u32,
         poly_count: u32,
     ) -> risc0_sppark::Error;
 
     pub fn sppark_poseidon2_fold(
+        stream: cust::sys::CUstream,
         d_out: DevicePointer<u8>,
         d_in: DevicePointer<u8>,
         num_hashes: usize,
     ) -> risc0_sppark::Error;
 
     pub fn sppark_poseidon2_rows(
+        stream: cust::sys::CUstream,
         d_out: DevicePointer<u8>,
         d_in: DevicePointer<u8>,
         count: u32,
@@ -60,12 +64,14 @@ unsafe extern "C" {
     ) -> risc0_sppark::Error;
 
     pub fn sppark_poseidon254_fold(
+        stream: cust::sys::CUstream,
         d_out: DevicePointer<u8>,
         d_in: DevicePointer<u8>,
         num_hashes: usize,
     ) -> risc0_sppark::Error;
 
     pub fn sppark_poseidon254_rows(
+        stream: cust::sys::CUstream,
         d_out: DevicePointer<u8>,
         d_in: DevicePointer<u8>,
         count: usize,
@@ -73,6 +79,7 @@ unsafe extern "C" {
     ) -> risc0_sppark::Error;
 
     pub fn supra_poly_divide(
+        stream: cust::sys::CUstream,
         polynomial: DevicePointer<u8>,
         poly_size: usize,
         remainder: *mut u32,
@@ -80,6 +87,7 @@ unsafe extern "C" {
     ) -> risc0_sppark::Error;
 
     pub fn risc0_zkp_cuda_fri_fold(
+        stream: cust::sys::CUstream,
         output: DevicePointer<u8>,
         input: DevicePointer<u8>,
         mix: *const u32, // FpExt*
@@ -87,6 +95,7 @@ unsafe extern "C" {
     ) -> *const std::os::raw::c_char;
 
     pub fn risc0_zkp_cuda_mix_poly_coeffs(
+        stream: cust::sys::CUstream,
         output: DevicePointer<u8>,
         input: DevicePointer<u8>,
         combos: DevicePointer<u8>,

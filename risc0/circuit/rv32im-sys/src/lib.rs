@@ -107,6 +107,7 @@ unsafe extern "C" {
 #[cfg(feature = "cuda")]
 unsafe extern "C" {
     pub fn risc0_circuit_rv32im_cuda_witgen(
+        stream: cust::sys::CUstream,
         mode: u32,
         buffers: *const RawExecBuffers,
         preflight: *const RawPreflightTrace,
@@ -114,12 +115,14 @@ unsafe extern "C" {
     ) -> *const std::os::raw::c_char;
 
     pub fn risc0_circuit_rv32im_cuda_accum(
+        stream: cust::sys::CUstream,
         buffers: *const RawAccumBuffers,
         preflight: *const RawPreflightTrace,
         cycles: u32,
     ) -> *const std::os::raw::c_char;
 
     pub fn risc0_circuit_rv32im_cuda_eval_check(
+        stream: cust::sys::CUstream,
         check: DevicePointer<u8>,
         ctrl: DevicePointer<u8>,
         data: DevicePointer<u8>,

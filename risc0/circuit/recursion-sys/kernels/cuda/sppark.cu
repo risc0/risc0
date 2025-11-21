@@ -19,10 +19,10 @@
 
 namespace sppark {
 
-void calcPrefixProducts(void* d_inout, uint32_t count) {
-  const gpu_t& gpu = select_gpu();
-  prefix_op<Multiply<fr4_t>>(static_cast<fr4_t*>(d_inout), count, gpu);
-  gpu.sync();
+void calcPrefixProducts(cudaStream_t stream, void* d_inout, uint32_t count) {
+  stream_t sppark_stream(stream, 0);
+  prefix_op<Multiply<fr4_t>>(static_cast<fr4_t*>(d_inout), count, sppark_stream);
+  sppark_stream.sync();
 }
 
 } // namespace sppark

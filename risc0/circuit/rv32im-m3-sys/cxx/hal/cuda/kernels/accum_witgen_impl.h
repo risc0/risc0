@@ -32,11 +32,17 @@ kernel_phase2(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix,
 
 } // namespace NAMESPACE
 
-extern "C" void
-FUNCNAME(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou) {
+extern "C" void FUNCNAME(cudaStream_t stream,
+                         Fp* accum,
+                         const Fp* data,
+                         const Fp* globals,
+                         const FpExt* accMix,
+                         Fp rou) {
   constexpr size_t NUM_ROWS = size_t(1) << NUM_ROWS_PO2;
   constexpr size_t block_size = NUM_ROWS < 256 ? NUM_ROWS : 256;
   constexpr size_t num_blocks = (NUM_ROWS + block_size - 1) / block_size;
-  NAMESPACE::kernel_phase1<<<num_blocks, block_size, 0>>>(accum, data, globals, accMix, rou);
-  NAMESPACE::kernel_phase2<<<num_blocks, block_size, 0>>>(accum, data, globals, accMix, rou);
+  NAMESPACE::kernel_phase1<<<num_blocks, block_size, 0, stream>>>(
+      accum, data, globals, accMix, rou);
+  NAMESPACE::kernel_phase2<<<num_blocks, block_size, 0, stream>>>(
+      accum, data, globals, accMix, rou);
 }
