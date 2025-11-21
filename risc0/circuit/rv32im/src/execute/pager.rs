@@ -261,8 +261,6 @@ fn zero_page() -> &'static Page {
     ZERO_PAGE.get_or_init(Page::default)
 }
 
-// TODO(victor/perf): If I were to use MemoryImage instead of WorkingImage everywhere, would this
-// actually slow anything down at this point?
 #[derive(Clone, Default, Debug)]
 pub(crate) struct WorkingImage {
     #[debug(skip)]

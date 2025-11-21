@@ -121,6 +121,7 @@ where
     F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send + 'scope,
 {
     type Callback = ExecutorImplCallback;
+    type Error = anyhow::Error;
 
     fn with_initial_image(self, initial_image: &MemoryImage) -> Result<Self::Callback> {
         let mut segment_callback = self.inner;
@@ -136,7 +137,7 @@ where
                     .apply_into_segment(&mut image)
                     .context("Failed to apply segment update to memory image")?;
 
-                // TODO(victor/perf): Support dumping the Segment here?
+                // TODO(victor/perf): Support dumping the Segment here.
 
                 let segment = Segment {
                     index: circuit_segment.index.try_into().unwrap(),
@@ -170,6 +171,8 @@ struct ExecutorImplCallback {
 }
 
 impl SegmentUpdateCallback for ExecutorImplCallback {
+    type Error = anyhow::Error;
+
     fn on_segment_update(&mut self, update: SegmentUpdate) -> Result<()> {
         self.update_channel
             .send(update)
@@ -364,7 +367,9 @@ impl<'a> ExecutorImpl<'a> {
         };
 
         let session = Session {
-            // TODO(victor/perf): Is there a better way to solve the issue of filling this field?
+            // NOTE: Session requires this field to be filled with something. Using NullSegmentRef
+            // gives an indication of the number of segments. In ExecutorImpl::run, this is filled
+            // in when returning, collecting the refs from the sidecar thread.
             segments: (0..exec_result.segments)
                 .map(|_| -> Box<dyn SegmentRef> { Box::new(NullSegmentRef) })
                 .collect(),
