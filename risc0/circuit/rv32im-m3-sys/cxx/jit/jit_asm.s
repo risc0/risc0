@@ -426,7 +426,7 @@ do_REM:
   DO_REG_POST
 
 do_REMU:
-  DO_REG_PRE $43
+  DO_REG_PRE $44
   cmpl $0, %ecx
   je .Lremu_done  # divisor == 0 → result = dividend
   xorl %edx, %edx  # zero-extend dividend into EDX:EAX
