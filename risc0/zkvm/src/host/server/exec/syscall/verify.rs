@@ -14,12 +14,10 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use anyhow::{Result, anyhow, bail};
-use risc0_binfmt::ByteAddr;
-use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
 
-use crate::sha::{DIGEST_BYTES, Digest};
+use crate::sha::Digest;
 
-use super::{Syscall, SyscallContext, SyscallKind};
+use super::{Syscall, SyscallContext, SyscallKind, read_verify_params, update_syscall_metric};
 
 #[derive(Clone)]
 pub(crate) struct SysVerify;
@@ -41,25 +39,20 @@ impl Syscall for SysVerify {
             bail!("invalid sys_verify call");
         }
 
-        let from_guest_ptr = ByteAddr(ctx.load_register(REG_A3));
-        let from_guest_len = ctx.load_register(REG_A4);
-        let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
-
-        let claim_digest: Digest = from_guest[..DIGEST_BYTES]
-            .try_into()
-            .map_err(|vec| anyhow!("invalid digest: {vec:?}"))?;
-        let control_root: Digest = from_guest[DIGEST_BYTES..]
-            .try_into()
-            .map_err(|vec| anyhow!("invalid digest: {vec:?}"))?;
-
-        tracing::debug!("SYS_VERIFY_INTEGRITY: ({}, {})", claim_digest, control_root);
+        let params = read_verify_params(ctx)?;
+        
+        tracing::debug!(
+            "SYS_VERIFY_INTEGRITY: ({}, {})",
+            params.claim_digest,
+            params.control_root
+        );
 
         let assumption = ctx
             .syscall_table()
             .assumptions
             .borrow()
-            .find_assumption(&claim_digest, &control_root)?
-            .ok_or_else(|| not_found_err(&claim_digest, &control_root))?;
+            .find_assumption(&params.claim_digest, &params.control_root)?
+            .ok_or_else(|| not_found_err(&params.claim_digest, &params.control_root))?;
 
         // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
         ctx.syscall_table()
@@ -68,9 +61,7 @@ impl Syscall for SysVerify {
             .unwrap()
             .insert(0, assumption);
 
-        let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::VerifyIntegrity];
-        metric.count += 1;
-        metric.size += from_guest_len as u64;
+        update_syscall_metric(ctx, SyscallKind::VerifyIntegrity, params.data_len as u64);
 
         Ok((0, 0))
     }
