@@ -16,17 +16,79 @@
 #![allow(unused)]
 #![allow(clippy::useless_conversion)]
 
-pub mod rv32im;
-
-use std::collections::{BTreeMap, BTreeSet};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    ffi::CStr,
+    io::Write,
+    ops::Deref,
+    str::FromStr,
+};
 
 use anyhow::Result;
 use dynasmrt::{
-    AssemblyOffset, DynasmApi as _, DynasmLabelApi as _, components::StaticLabel, dynasm,
-    x64::Assembler,
+    AssemblyOffset, DynamicLabel, DynasmApi as _, DynasmError, DynasmLabelApi,
+    components::StaticLabel,
+    dynasm,
+    relocations::{Relocation, RelocationSize},
+    x64::{Assembler, X64Relocation},
+    x86::X86Relocation,
 };
 
-use crate::rv32im::{REG_MAX, RvOp, WORD_SIZE};
+const WORD_SIZE: usize = 4;
+const REG_MAX: usize = 32; // maximum number of registers
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum RvOp {
+    Add,
+    Sub,
+    Xor,
+    Or,
+    And,
+    Slt,
+    SltU,
+    AddI,
+    XorI,
+    OrI,
+    AndI,
+    SltI,
+    SltIU,
+    Beq,
+    Bne,
+    Blt,
+    Bge,
+    BltU,
+    BgeU,
+    Jal,
+    JalR,
+    Lui,
+    Auipc,
+    Sll,
+    SllI,
+    Mul,
+    MulH,
+    MulHSU,
+    MulHU,
+    Srl,
+    Sra,
+    SrlI,
+    SraI,
+    Div,
+    DivU,
+    Rem,
+    RemU,
+    Lb,
+    Lh,
+    Lw,
+    LbU,
+    LhU,
+    Sb,
+    Sh,
+    Sw,
+    Eany,
+    Mret,
+    Fence,
+    Invalid,
+}
 
 #[derive(Default)]
 struct Program {
@@ -61,6 +123,12 @@ impl Machine {
     fn store_register(&mut self, idx: usize, word: u32) -> Result<()> {
         self.registers[idx] = word;
         Ok(())
+    }
+
+    fn dump_registers(&self) {
+        for (i, reg) in self.registers.iter().enumerate() {
+            tracing::debug!("x{i}: {reg:#010x}");
+        }
     }
 }
 
@@ -235,24 +303,24 @@ fn map_reg_to_loc(idx: u32) -> Loc {
 // RV x30 (t5)    caller -> memory
 // RV x31 (t6)    caller -> memory
 const REGISTER_MAPPING: [Loc; REG_MAX] = [
-    Loc::Zero,
-    Loc::GPR(GPR::R13),
-    Loc::Memory(GPR::RBX, 2 * WORD_SIZE as i32),
-    Loc::Memory(GPR::RBX, 3 * WORD_SIZE as i32),
-    Loc::Memory(GPR::RBX, 4 * WORD_SIZE as i32),
-    Loc::GPR(GPR::R14),
-    Loc::Memory(GPR::RBX, 6 * WORD_SIZE as i32),
-    Loc::Memory(GPR::RBX, 7 * WORD_SIZE as i32),
-    Loc::GPR(GPR::RBP),
-    Loc::GPR(GPR::R12),
-    Loc::GPR(GPR::RDI),
-    Loc::GPR(GPR::RSI),
-    Loc::GPR(GPR::RDX),
-    Loc::GPR(GPR::RCX),
-    Loc::GPR(GPR::R8),
-    Loc::GPR(GPR::R9),
-    Loc::GPR(GPR::R10),
-    Loc::GPR(GPR::R11),
+    Loc::Zero,                                   // x0  (zero)
+    Loc::GPR(GPR::R13),                          // x1  (ra)
+    Loc::Memory(GPR::RBX, 2 * WORD_SIZE as i32), // x2  (sp)
+    Loc::Memory(GPR::RBX, 3 * WORD_SIZE as i32), // x3  (gp)
+    Loc::Memory(GPR::RBX, 4 * WORD_SIZE as i32), // x4  (tp)
+    Loc::GPR(GPR::R14),                          // x5  (t0)
+    Loc::Memory(GPR::RBX, 6 * WORD_SIZE as i32), // x6  (t1)
+    Loc::Memory(GPR::RBX, 7 * WORD_SIZE as i32), // x7  (t2)
+    Loc::GPR(GPR::RBP),                          // x8  (s0)
+    Loc::GPR(GPR::R12),                          // x9  (s1)
+    Loc::GPR(GPR::RDI),                          // x10 (a0)
+    Loc::GPR(GPR::RSI),                          // x11 (a1)
+    Loc::GPR(GPR::RDX),                          // x12 (a2)
+    Loc::GPR(GPR::RCX),                          // x13 (a3)
+    Loc::GPR(GPR::R8),                           // x14 (a4)
+    Loc::GPR(GPR::R9),                           // x15 (a5)
+    Loc::GPR(GPR::R10),                          // x16 (a6)
+    Loc::GPR(GPR::R11),                          // x17 (a7)
     Loc::Memory(GPR::RBX, 18 * WORD_SIZE as i32),
     Loc::Memory(GPR::RBX, 19 * WORD_SIZE as i32),
     Loc::Memory(GPR::RBX, 20 * WORD_SIZE as i32),
@@ -278,13 +346,31 @@ macro_rules! emit {
     };
 }
 
+macro_rules! unop {
+    ($self:tt, $op:ident, $dst:expr) => {
+        match $dst {
+            Loc::GPR(dst) => {
+                emit!($self ; $op Rd(dst));
+            },
+            (Loc::Memory(dst, disp)) => {
+                emit!($self ; $op DWORD [Rq(dst) + disp]);
+            },
+            _ => {
+                panic!("bad {}", stringify!($op));
+            }
+        }
+    };
+}
+
 macro_rules! binop {
-    ($self:tt, $op:ident, $dst:expr, $src:expr, $else:block) => {
+    ($self:tt, $op:ident, $dst:expr, $src:expr) => {
         binop_imm_gpr!($self, $op, $dst, $src, {
             binop_imm_mem!($self, $op, $dst, $src, {
                 binop_gpr_gpr!($self, $op, $dst, $src, {
                     binop_gpr_mem!($self, $op, $dst, $src, {
-                        binop_mem_gpr!($self, $op, $dst, $src, $else)
+                        binop_mem_gpr!($self, $op, $dst, $src, {
+                            panic!("bad {}", stringify!($op));
+                        })
                     })
                 })
             })
@@ -348,7 +434,7 @@ macro_rules! binop_mem_gpr {
 }
 
 macro_rules! binop_shift {
-    ($self:tt, $op:ident, $dst:expr, $src:expr, $else:block) => {
+    ($self:tt, $op:ident, $dst:expr, $src:expr) => {
         match ($src, $dst) {
             (Loc::GPR(GPR::RCX), Loc::GPR(dst)) => {
                 emit!($self ; $op Rd(dst), cl);
@@ -362,15 +448,53 @@ macro_rules! binop_shift {
             (Loc::Imm8(imm), Loc::Memory(dst, disp)) => {
                 emit!($self ; $op DWORD [Rq(dst) + disp], imm as i8);
             },
-            _ => $else,
+            _ => {
+                panic!("bad {}", stringify!($op));
+            }
         }
     };
+}
+
+macro_rules! call_print {
+    ($asm:expr, $str:expr) => {
+        dynasm!($asm
+            // align for call
+            ; sub rsp, 8
+
+            // save scratch registers
+            ; push rdx
+            ; push rdi
+            ; push rsi
+            ; push rax
+
+            // call print
+            ; mov rdi, QWORD $str.as_ptr() as i64
+            ; mov rsi, QWORD $str.len() as i64
+            ; mov rax, QWORD print as usize as i64
+            ; call rax
+
+            // restore scratch registers
+            ; pop rax
+            ; pop rsi
+            ; pop rdi
+            ; pop rdx
+
+            // undo alignment shim
+            ; add rsp, 8
+        );
+    };
+}
+extern "C" fn print(ptr: *const u8, len: u64) {
+    let bytes = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
+    let str = str::from_utf8(bytes).unwrap();
+    tracing::debug!("jit: {str}");
 }
 
 struct Translator {
     asm: Assembler,
     machine: Machine,
     labels: BTreeMap<u32, AssemblyOffset>,
+    fixups: BTreeMap<u32, Vec<(DynamicLabel, AssemblyOffset)>>,
 }
 
 impl Translator {
@@ -393,12 +517,13 @@ impl Translator {
         dynasm!(asm
             ; .arch x64
             ; ->enter:
-            ; sub rsp, BYTE stack_space
+            // ; int3
+            // ;; call_print!(asm, "enter")
         );
 
         // save callee registers
         for (i, &reg) in callee_registers.iter().enumerate() {
-            dynasm!(asm ; mov QWORD [rsp + i as i32 * HOST_WORD_SIZE as i32], Rq(reg));
+            dynasm!(asm ; push Rq(reg));
         }
 
         dynasm!(asm
@@ -421,7 +546,10 @@ impl Translator {
         dynasm!(asm ; jmp rax);
 
         // prepare exit
-        dynasm!(asm ; ->exit:);
+        dynasm!(asm
+            ; ->exit:
+            // ;; call_print!(asm, "exit")
+        );
 
         // save RISC-V registers
         for (i, &loc) in REGISTER_MAPPING.iter().enumerate() {
@@ -431,15 +559,12 @@ impl Translator {
         }
 
         // restore callee registers
-        for (i, &reg) in callee_registers.iter().enumerate() {
-            dynasm!(asm ; mov Rq(reg), QWORD [rsp + i as i32 * HOST_WORD_SIZE as i32]);
+        for (i, &reg) in callee_registers.iter().rev().enumerate() {
+            dynasm!(asm ; pop Rq(reg));
         }
 
         // return control back to the host
-        dynasm!(asm
-            ; add rsp, BYTE stack_space
-            ; ret
-        );
+        dynasm!(asm ; ret);
 
         asm.commit()?;
 
@@ -451,6 +576,7 @@ impl Translator {
                 ram: program.image,
             },
             labels: Default::default(),
+            fixups: Default::default(),
         })
     }
 
@@ -459,7 +585,19 @@ impl Translator {
         let start = self.asm.offset();
 
         loop {
-            self.labels.insert(self.machine.pc, self.asm.offset());
+            let offset = self.asm.offset();
+            self.labels.insert(self.machine.pc, offset);
+            if let Some(fixups) = self.fixups.remove(&self.machine.pc) {
+                let kind = X64Relocation::from_size(RelocationSize::DWord);
+                for (label, jmp_offset) in fixups {
+                    tracing::debug!("fixup: {label:?}: {jmp_offset:x?} -> {offset:x?}");
+                    self.asm.alter(|modifier| {
+                        modifier.goto(AssemblyOffset(jmp_offset.0 + 1));
+                        let offset = offset.0 as isize - 4;
+                        modifier.bare_relocation(offset as usize, 0, 0, kind.clone());
+                    })?;
+                }
+            }
             let insn = self.machine.fetch();
             if let Some(_terminal) = self.dispatch(insn)? {
                 // create new basic block
@@ -471,14 +609,21 @@ impl Translator {
             self.machine.next();
         }
 
+        tracing::debug!("commit");
         self.asm.commit()?;
         self.dump(start);
 
         Ok(start)
     }
 
+    fn enter_offset(&self) -> Result<AssemblyOffset, DynasmError> {
+        self.asm
+            .labels()
+            .resolve_static(&StaticLabel::global("enter"))
+    }
+
     fn jit_loop(&mut self) -> Result<()> {
-        self.dump(AssemblyOffset(0));
+        self.dump(self.enter_offset()?);
         loop {
             let pc = if let Some(&offset) = self.labels.get(&self.machine.pc) {
                 tracing::debug!("existing label: {:#10x}", self.machine.pc);
@@ -487,29 +632,26 @@ impl Translator {
                 let offset = self.jit_block()?;
                 self.enter_block(offset)?
             };
+            // self.machine.dump_registers();
             if pc == 0 {
                 break;
             }
-            tracing::debug!("next pc: {pc:#10x}");
+            tracing::trace!("next pc: {pc:#10x}");
             self.machine.pc = pc;
         }
 
         Ok(())
     }
 
-    // b risc0_emu::Translator::enter_block
     fn enter_block(&mut self, offset: AssemblyOffset) -> Result<u32> {
-        tracing::debug!("enter_block: {offset:#x?}");
-        let enter = self
-            .asm
-            .labels()
-            .resolve_static(&StaticLabel::global("enter"))?;
+        tracing::debug!("enter_block: {offset:x?}");
+        let enter = self.enter_offset()?;
         let reader = self.asm.reader();
         let exe = reader.lock();
         let enter_ptr = exe.ptr(enter);
         let block_ptr = exe.ptr(offset);
         let registers_ptr = self.machine.registers.as_mut_ptr();
-        tracing::debug!(
+        tracing::trace!(
             "enter_ptr: {enter_ptr:?}, block_ptr: {block_ptr:?}, registers_ptr: {registers_ptr:?}"
         );
         let enter: extern "C" fn(*const u8, *mut u32) -> u32 =
@@ -667,57 +809,39 @@ impl Translator {
             emit!(self ; xor Rd(dst), Rd(dst));
             return;
         }
-        binop!(self, mov, dst, src, {
-            panic!("bad mov");
-        });
+        binop!(self, mov, dst, src);
     }
 
     fn emit_add(&mut self, dst: Loc, src: Loc) {
-        binop!(self, add, dst, src, {
-            panic!("bad add");
-        });
+        binop!(self, add, dst, src);
     }
 
     fn emit_sub(&mut self, dst: Loc, src: Loc) {
-        binop!(self, sub, dst, src, {
-            panic!("bad sub");
-        });
+        binop!(self, sub, dst, src);
     }
 
     fn emit_xor(&mut self, dst: Loc, src: Loc) {
-        binop!(self, xor, dst, src, {
-            panic!("bad xor");
-        });
+        binop!(self, xor, dst, src);
     }
 
     fn emit_or(&mut self, dst: Loc, src: Loc) {
-        binop!(self, or, dst, src, {
-            panic!("bad or");
-        });
+        binop!(self, or, dst, src);
     }
 
     fn emit_and(&mut self, dst: Loc, src: Loc) {
-        binop!(self, and, dst, src, {
-            panic!("bad and");
-        });
+        binop!(self, and, dst, src);
     }
 
     fn emit_shl(&mut self, dst: Loc, src: Loc) {
-        binop_shift!(self, shl, dst, src, {
-            panic!("bad shl");
-        });
+        binop_shift!(self, shl, dst, src);
     }
 
     fn emit_shr(&mut self, dst: Loc, src: Loc) {
-        binop_shift!(self, shr, dst, src, {
-            panic!("bad shr");
-        });
+        binop_shift!(self, shr, dst, src);
     }
 
     fn emit_sar(&mut self, dst: Loc, src: Loc) {
-        binop_shift!(self, sar, dst, src, {
-            panic!("bad sar");
-        });
+        binop_shift!(self, sar, dst, src);
     }
 
     fn emit_movzx(&mut self, dst: GPR, src: Loc) {
@@ -760,14 +884,10 @@ impl Translator {
             (Loc::Memory(_, _), Loc::Memory(_, _)) => {
                 let tmp = Loc::GPR(tmp);
                 self.emit_mov(tmp, rs1);
-                binop!(self, cmp, tmp, rs2, {
-                    panic!("bad cmp");
-                });
+                binop!(self, cmp, tmp, rs2);
             }
             _ => {
-                binop!(self, cmp, rs1, rs2, {
-                    panic!("bad cmp");
-                });
+                binop!(self, cmp, rs1, rs2);
             }
         }
     }
@@ -786,12 +906,12 @@ impl Translator {
     }
 
     fn step_compute(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
-        tracing::debug!("step_compute");
+        tracing::trace!("step_compute");
         let (rd, rs1, rs2) = (insn.rd_loc(), insn.rs1_loc(), insn.rs2_loc());
         match op {
             RvOp::Add => {
                 // rd = rs1 + rs2
-                tracing::debug!("add {rd:?}, {rs1:?}, {rs2:?}");
+                tracing::trace!("add {rd:?}, {rs1:?}, {rs2:?}");
                 self.emit_binop(Self::emit_add, rd, rs1, rs2);
             }
             RvOp::Sub => {
@@ -833,8 +953,12 @@ impl Translator {
             RvOp::AddI => {
                 // rd = rs1 + imm
                 let imm = insn.imm_i();
-                tracing::debug!("add {rd:?}, {rs1:?}, {imm:?}");
-                self.emit_binop(Self::emit_add, rd, rs1, Loc::Imm32(imm));
+                tracing::trace!("addi {rd:?}, {rs1:?}, {imm:?}");
+                if rd == rs1 && imm == 1 {
+                    unop!(self, inc, rd);
+                } else {
+                    self.emit_binop(Self::emit_add, rd, rs1, Loc::Imm32(imm));
+                }
             }
             RvOp::XorI => {
                 // rd = rs1 ^ imm
@@ -875,7 +999,7 @@ impl Translator {
             RvOp::Lui => {
                 // rd = imm << 12
                 let imm = insn.imm_u();
-                tracing::debug!("lui {:#10x}", imm);
+                tracing::trace!("lui {:#10x}", imm);
                 self.emit_mov(rd, Loc::Imm32(imm));
             }
             RvOp::Auipc => {
@@ -992,11 +1116,9 @@ impl Translator {
 
     fn push(&mut self, reg: GPR) {
         emit!(self ; push Rq(reg));
-        // emit!(self ; mov DWORD [ebx + offset], Rd(reg));
     }
 
     fn pop(&mut self, reg: GPR) {
-        // emit!(self ; mov Rd(reg), DWORD [ebx + offset]);
         emit!(self ; pop Rq(reg));
     }
 
@@ -1190,17 +1312,48 @@ impl Translator {
         }
 
         let next_pc = self.machine.pc as i32 + WORD_SIZE as i32;
+        let next_label = self.asm.new_dynamic_label();
         let taken_pc = self.machine.pc as i32 + imm as i32;
+        let taken_label = self.asm.new_dynamic_label();
 
+        emit!(self ; mov eax, next_pc);
+        let jmp_next_offset = self.asm.offset();
         emit!(self
-            ; mov eax, next_pc
-            ; jmp ->exit
+            ; jmp =>next_label
             ;taken:
             ; mov eax, taken_pc
-            ; jmp ->exit
         );
+        let jmp_taken_offset = self.asm.offset();
+        emit!(self ; jmp =>taken_label);
+
+        self.add_fixup(next_pc as u32, next_label, jmp_next_offset)?;
+        self.add_fixup(taken_pc as u32, taken_label, jmp_taken_offset)?;
 
         Ok(Some(Terminal::Branch))
+    }
+
+    fn add_fixup(
+        &mut self,
+        target_pc: u32,
+        target_label: DynamicLabel,
+        jmp_offset: AssemblyOffset,
+    ) -> Result<()> {
+        if let Some(&offset) = self.labels.get(&target_pc) {
+            tracing::debug!("direct target: {target_pc:#10x?} -> {:#04x?}", offset.0);
+            self.asm.labels_mut().define_dynamic(target_label, offset);
+        } else {
+            tracing::debug!("indirect target: {target_pc:#10x?} -> exit");
+            let exit = self
+                .asm
+                .labels()
+                .resolve_static(&StaticLabel::global("exit"))?;
+            self.asm.labels_mut().define_dynamic(target_label, exit);
+            self.fixups
+                .entry(target_pc)
+                .or_default()
+                .push((target_label, jmp_offset));
+        }
+        Ok(())
     }
 
     fn step_jump(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
@@ -1231,7 +1384,7 @@ impl Translator {
     }
 
     fn step_system(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
-        tracing::debug!("step_system");
+        tracing::trace!("step_system");
         let next_pc = self.machine.pc + WORD_SIZE as u32;
         emit!(self
             // ; mov eax, next_pc as i32
@@ -1641,7 +1794,8 @@ mod tests {
 
     #[test_log::test]
     fn simple_loop() {
-        let count = 3;
+        // this only takes 0.19s on a modern machine :)
+        let count = 1_000_000_000;
 
         let mut asm = dynasmrt::riscv::Assembler::new().unwrap();
         dynasm!(asm
@@ -1649,11 +1803,16 @@ mod tests {
             ; .feature IM
             ; li a0, 0
             ; li a1, count
+            ; li a2, 3
             ;Loop:
-            ; addi a0, a0, 1
-            ; blt a0, a1, <Loop
-            ; lui a1, 0x1000
+            ; addi a0, a0, 1    // 0xc0000018
+            ; beq a0, a2, >Skip
+            ; blt a0, a1, <Loop // 0xc0000020
+            ; lui a1, 0x1000    // 0xc0000024
             ; ecall
+            ;Skip:              // 0xc000002c
+            ; li a3, 0xeeee
+            ; j <Loop
         );
 
         let buf = asm.finalize().unwrap();
@@ -1701,11 +1860,5 @@ mod tests {
         let exe = reader.lock();
         let func: extern "C" fn() -> bool = unsafe { std::mem::transmute(exe.ptr(entry)) };
         assert!(func());
-    }
-
-    pub extern "C" fn print(ptr: *const u8, len: u64) -> bool {
-        use std::io::Write as _;
-        let str = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
-        std::io::stdout().write_all(str).is_ok()
     }
 }
