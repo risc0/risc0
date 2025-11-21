@@ -14,7 +14,10 @@
 
 pub mod analyze;
 
-use std::{collections::BTreeMap, io::Cursor};
+use std::{
+    collections::BTreeMap,
+    io::{Cursor, Read},
+};
 
 use anyhow::{ensure, Result};
 use malachite::Natural;
@@ -26,6 +29,11 @@ use super::{
     platform::*,
     r0vm::{LoadOp, Risc0Context},
 };
+
+/// Maximum size, in bytes, of the nondet program for bigint2. This limit is imposed to avoid a
+/// crafted binary from providing an oversized bigint2 program, beyond what is actually useful, to
+/// use up executor resources.
+const MAX_NONDET_PROGRAM_SIZE: usize = 10 << 20; // 10 MB
 
 /// BigInt width, in words, handled by the BigInt accelerator circuit.
 pub(crate) const BIGINT_WIDTH_WORDS: usize = 4;
@@ -157,6 +165,13 @@ pub fn ecall_execute(ctx: &mut impl Risc0Context) -> Result<usize> {
     Ok(cycles)
 }
 
+// A thin function to drain a reader. Optimizes well with inlining.
+fn drain(mut reader: impl Read) -> std::io::Result<()> {
+    let mut buf = [0u8; 8 << 10];
+    while reader.read(&mut buf)? > 0 {}
+    Ok(())
+}
+
 pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
     tracing::debug!("ecall");
 
@@ -179,12 +194,17 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
         "nondet_program_ptr: {nondet_program_ptr:?}, nondet_program_size: {nondet_program_size}"
     );
 
+    let nondet_program_size_bytes = nondet_program_size as usize * WORD_SIZE;
+    ensure!(
+        nondet_program_size_bytes <= MAX_NONDET_PROGRAM_SIZE,
+        "bigint2 nondet program is too large"
+    );
+
     let program_bytes = ctx.load_region(
         LoadOp::Load,
         nondet_program_ptr.baddr(),
-        nondet_program_size as usize * WORD_SIZE,
+        nondet_program_size_bytes,
     )?;
-    tracing::debug!("program_bytes: {}", program_bytes.len());
     let mut cursor = Cursor::new(program_bytes);
     let program = bibc::Program::decode(&mut cursor)?;
 
@@ -194,16 +214,18 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
         std::mem::take(&mut io.witness)
     };
 
-    ctx.load_region(
+    // Read the verify program and the witness so that they are paged-in, and the cycles for
+    // loading them are recorded.
+    drain(ctx.read_region(
         LoadOp::Load,
         verify_program_ptr.baddr(),
         verify_program_size * WORD_SIZE,
-    )?;
-    ctx.load_region(
+    )?)?;
+    drain(ctx.read_region(
         LoadOp::Load,
         consts_ptr.baddr(),
         consts_size as usize * WORD_SIZE,
-    )?;
+    )?)?;
 
     Ok(BigIntExec {
         mode,

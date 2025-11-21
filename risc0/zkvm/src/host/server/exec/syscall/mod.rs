@@ -31,6 +31,7 @@ mod verify2;
 use std::{
     cell::RefCell,
     collections::HashMap,
+    io::Read,
     rc::Rc,
     sync::{Arc, Mutex},
 };
@@ -90,7 +91,9 @@ pub(crate) trait SyscallContext<'a> {
     /// Loads an individual word from memory.
     fn load_u32(&mut self, addr: ByteAddr) -> Result<u32>;
 
-    /// Loads bytes from the given region of memory. A region may span multiple pages.
+    /// Loads bytes from the given region of memory.
+    ///
+    /// A region may span multiple pages.
     fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
         let mut region = Vec::new();
         for i in 0..size {
@@ -98,6 +101,11 @@ pub(crate) trait SyscallContext<'a> {
         }
         Ok(region)
     }
+
+    /// Provides a reader for the given region of memory.
+    ///
+    /// A region may span multiple pages.
+    fn read_region<'b>(&'b mut self, addr: ByteAddr, size: u32) -> Result<Box<dyn Read + 'b>>;
 
     /// Loads a digest from the address in the specified register.
     fn load_digest_from_register(&mut self, idx: usize) -> Result<Digest> {
