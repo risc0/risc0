@@ -169,7 +169,10 @@ fn page_states() {
 const NUM_PAGE_STATES: usize = NUM_PAGES * 2;
 
 struct PageTable {
-    table: Vec<u32>,
+    // Epoch number is incremented on each call to clear. Entries in the table with a previous
+    // epoch number are invalid. This allows us to avoid actually clearing the table.
+    epoch: usize,
+    table: Box<[u32; NUM_PAGES]>,
 }
 
 impl Default for PageTable {
@@ -179,30 +182,59 @@ impl Default for PageTable {
 }
 
 impl PageTable {
-    const INVALID_IDX: u32 = 0;
+    const CACHE_INDEX_BITS: usize = NUM_PAGES.ilog2() as usize;
+    const CACHE_INDEX_MAX: usize = (1 << Self::CACHE_INDEX_BITS) - 1;
+    const CACHE_INDEX_MASK: u32 = Self::CACHE_INDEX_MAX as u32;
+    const EPOCH_BITS: usize = u32::BITS as usize - Self::CACHE_INDEX_BITS;
+    const EPOCH_MAX: usize = (1 << Self::EPOCH_BITS) - 1;
+    const EPOCH_MASK: u32 = (Self::EPOCH_MAX << Self::CACHE_INDEX_BITS) as u32;
 
     fn new() -> Self {
         Self {
-            table: vec![Self::INVALID_IDX; NUM_PAGES],
+            // Epoch starts from 1 such that all entries are invalid.
+            epoch: 1,
+            table: Box::new([0; NUM_PAGES]),
         }
+    }
+
+    // Takes a u32 table entry and decomposes it into (epoch, cache_idx)
+    fn unpack_value(value: u32) -> (usize, usize) {
+        let epoch = (value & Self::EPOCH_MASK) >> Self::CACHE_INDEX_BITS;
+        let cache_idx = value & Self::CACHE_INDEX_MASK;
+        (epoch as usize, cache_idx as usize)
+    }
+
+    // Takes a u32 cache index and an epoch number and packes it into a u32;
+    fn pack_value(epoch: usize, cache_idx: u32) -> u32 {
+        ((epoch as u32) << Self::CACHE_INDEX_BITS) | cache_idx
     }
 
     #[inline(always)]
     fn get(&self, index: u32) -> Option<usize> {
-        let value = self.table[index as usize] as usize;
-        value.checked_sub(1)
+        let value = self.table[index as usize];
+        let (epoch, cache_idx) = Self::unpack_value(value);
+        (epoch == self.epoch).then_some(cache_idx)
     }
 
+    // Panics if the given cache index is larger than the number of pages.
     #[inline(always)]
-    fn set(&mut self, index: u32, value: usize) {
-        self.table[index as usize] = (value + 1) as u32
+    fn set(&mut self, index: u32, cache_idx: usize) {
+        assert!(cache_idx <= Self::CACHE_INDEX_MAX);
+        self.table[index as usize] = Self::pack_value(self.epoch, cache_idx as u32);
     }
 
     fn clear(&mut self) {
-        // You would think its faster to reuse the memory, but filling it with zeros is
-        // slower
-        // than just allocating a new piece of zeroed memory.
-        self.table = vec![Self::INVALID_IDX; NUM_PAGES];
+        // If the epoch number is less than the max, then simply increment the epoch number. This
+        // serves to effective clear the table since gets will return None for past epochs. If we
+        // would need to exceed the max clear the table itself as we cannot repeat an epoch number.
+        if self.epoch < Self::EPOCH_MAX {
+            self.epoch += 1;
+        } else {
+            // You would think its faster to reuse the memory, but filling it with zeros is slower
+            // than just allocating a new piece of zeroed memory.
+            self.epoch = 1;
+            self.table = Box::new([0; NUM_PAGES]);
+        }
     }
 }
 
@@ -229,7 +261,9 @@ fn zero_page() -> &'static Page {
     ZERO_PAGE.get_or_init(Page::default)
 }
 
-#[derive(Default, Debug)]
+// TODO(victor/perf): If I were to use MemoryImage instead of WorkingImage everywhere, would this
+// actually slow anything down at this point?
+#[derive(Clone, Default, Debug)]
 pub(crate) struct WorkingImage {
     #[debug(skip)]
     pub(crate) pages: BTreeMap<u32, Page>,
@@ -255,6 +289,17 @@ impl WorkingImage {
     #[cfg(feature = "prove")]
     pub(crate) fn get_page_indexes(&self) -> BTreeSet<u32> {
         self.pages.keys().copied().collect()
+    }
+}
+
+impl From<WorkingImage> for MemoryImage {
+    /// Convert the given WorkingImage into a [MemoryImage]. Does not compute any digests.
+    fn from(val: WorkingImage) -> Self {
+        let mut memory_image = MemoryImage::default();
+        for (idx, page) in val.pages {
+            memory_image.set_page(idx, page);
+        }
+        memory_image
     }
 }
 
@@ -570,17 +615,16 @@ pub(crate) fn page_idx(node_idx: u32) -> u32 {
 
 pub(crate) fn compute_partial_image(
     input_image: &mut MemoryImage,
-    indexes: BTreeSet<u32>,
+    indexes: &BTreeSet<u32>,
 ) -> MemoryImage {
-    let mut image = MemoryImage::default();
+    let mut partial_image = MemoryImage::default();
 
     for &node_idx in indexes.range((MEMORY_PAGES as u32)..) {
         let page_idx = page_idx(node_idx);
 
         // Copy original state of all pages accessed in this segment.
         let page = input_image.get_page(page_idx).unwrap();
-        let page_digest = *input_image.get_digest(node_idx).unwrap();
-        image.set_page_with_digest(page_idx, page, page_digest);
+        partial_image.set_page(page_idx, page);
     }
 
     // Add minimal needed 'uncles'
@@ -590,14 +634,12 @@ pub(crate) fn compute_partial_image(
 
         // Otherwise, add whichever child digest (if any) is not loaded
         if !indexes.contains(&lhs_idx) {
-            image.set_digest(lhs_idx, *input_image.get_digest(lhs_idx).unwrap());
+            partial_image.set_digest(lhs_idx, *input_image.get_or_update_digest(lhs_idx).unwrap());
         }
         if !indexes.contains(&rhs_idx) {
-            image.set_digest(rhs_idx, *input_image.get_digest(rhs_idx).unwrap());
+            partial_image.set_digest(rhs_idx, *input_image.get_or_update_digest(rhs_idx).unwrap());
         }
     }
 
-    image.update_digests();
-
-    image
+    partial_image
 }

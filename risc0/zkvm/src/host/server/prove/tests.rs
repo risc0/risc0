@@ -538,10 +538,10 @@ fn continuation() {
 
     let (final_segment, segments) = segments.split_last().unwrap();
     for segment in segments {
-        assert_eq!(segment.inner.claim.terminate_state, None);
+        assert_eq!(segment.inner.terminate_state, None);
     }
     assert_eq!(
-        final_segment.inner.claim.terminate_state,
+        final_segment.inner.terminate_state,
         Some(risc0_circuit_rv32im::TerminateState::default())
     );
 

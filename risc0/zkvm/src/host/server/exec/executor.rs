@@ -16,11 +16,15 @@
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
-    sync::Arc,
+    sync::{
+        Arc,
+        mpsc::{self, Receiver, Sender, SyncSender},
+    },
+    thread::{self, Scope},
     time::Instant,
 };
 
-use anyhow::{Context as _, Result, bail};
+use anyhow::{Context as _, Result, anyhow, bail};
 use risc0_binfmt::{
     AbiKind, ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, ProgramBinaryHeader,
     SystemState,
@@ -28,7 +32,8 @@ use risc0_binfmt::{
 use risc0_circuit_rv32im::{
     MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2,
     execute::{
-        CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, Executor, PAGE_BYTES, Syscall as CircuitSyscall,
+        CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, Executor, PAGE_BYTES, SegmentUpdate,
+        SegmentUpdateCallback, SegmentUpdateCallbackFactory, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, platform::WORD_SIZE,
     },
 };
@@ -38,7 +43,7 @@ use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
 
 use crate::{
-    Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
+    ExecutorEnv, FileSegmentRef, MaybePruned, NullSegmentRef, Segment, SegmentRef,
     claim::receipt::exit_code_from_terminate_state,
     host::{client::env::SegmentPath, server::session::Session},
 };
@@ -87,6 +92,88 @@ pub(crate) fn circuit_version() -> u32 {
         else {
             risc0_circuit_rv32im::execute::RV32IM_V2_CIRCUIT_VERSION
         }
+    }
+}
+
+/// Maximum number of segments we can queue up before we block execution
+const MAX_OUTSTANDING_SEGMENTS: usize = 5;
+
+struct ExecutorImplCallbackFactory<'scope, 'env, F> {
+    inner: F,
+    segment_ref_channel: Sender<Box<dyn SegmentRef>>,
+    scope: &'scope Scope<'scope, 'env>,
+}
+
+impl<'scope, 'env, F> ExecutorImplCallbackFactory<'scope, 'env, F> {
+    fn new(scope: &'scope Scope<'scope, 'env>, inner: F) -> (Self, Receiver<Box<dyn SegmentRef>>) {
+        let (send, recv) = mpsc::channel();
+        let factory = Self {
+            inner,
+            scope,
+            segment_ref_channel: send,
+        };
+        (factory, recv)
+    }
+}
+
+impl<'scope, F> SegmentUpdateCallbackFactory for ExecutorImplCallbackFactory<'scope, '_, F>
+where
+    F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send + 'scope,
+{
+    type Callback = ExecutorImplCallback;
+
+    fn with_initial_image(self, initial_image: &MemoryImage) -> Result<Self::Callback> {
+        let mut segment_callback = self.inner;
+        let mut image = initial_image.clone();
+        let (update_send, update_recv) =
+            mpsc::sync_channel::<SegmentUpdate>(MAX_OUTSTANDING_SEGMENTS);
+
+        // Spawn the thread that will receive segment updates and construct segments.
+        self.scope.spawn(move || -> Result<()> {
+            for update in update_recv {
+                // Update the current memory image and produce a risc0_circuit_rv32im::Segment.
+                let circuit_segment = update
+                    .apply_into_segment(&mut image)
+                    .context("Failed to apply segment update to memory image")?;
+
+                // TODO(victor/perf): Support dumping the Segment here?
+
+                let segment = Segment {
+                    index: circuit_segment.index.try_into().unwrap(),
+                    output: MaybePruned::Pruned(
+                        circuit_segment.output_digest.unwrap_or(Digest::ZERO),
+                    ),
+                    inner: circuit_segment,
+                };
+                let segment_ref =
+                    segment_callback(segment).context("Segment callback returned an error")?;
+
+                self.segment_ref_channel
+                    .send(segment_ref)
+                    .map_err(|err| anyhow!("Failed to send segment ref: {err:?}"))?;
+
+                // Update the digests in the working image. This ensures that all digests are
+                // populated in the produced Segment and the receiver does not need to hash.
+                image.update_digests();
+            }
+            Ok(())
+        });
+
+        Ok(ExecutorImplCallback {
+            update_channel: update_send,
+        })
+    }
+}
+
+struct ExecutorImplCallback {
+    update_channel: SyncSender<SegmentUpdate>,
+}
+
+impl SegmentUpdateCallback for ExecutorImplCallback {
+    fn on_segment_update(&mut self, update: SegmentUpdate) -> Result<()> {
+        self.update_channel
+            .send(update)
+            .context("Failed to send segment update to hasher thread")
     }
 }
 
@@ -176,10 +263,25 @@ impl<'a> ExecutorImpl<'a> {
 
     /// Run the executor until [crate::ExitCode::Halted] or
     /// [crate::ExitCode::Paused] is reached, producing a [Session] as a result.
-    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
+    pub fn run_with_callback<F>(&mut self, callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send,
     {
+        let (session, recv) = thread::scope(|scope| {
+            let (segment_update_callback, recv) = ExecutorImplCallbackFactory::new(scope, callback);
+            let session = self.run_with_segment_update_callback(segment_update_callback)?;
+            anyhow::Ok((session, recv))
+        })?;
+        Ok(Session {
+            segments: recv.iter().collect(),
+            ..session
+        })
+    }
+
+    pub(crate) fn run_with_segment_update_callback(
+        &mut self,
+        callback: impl SegmentUpdateCallbackFactory,
+    ) -> Result<Session> {
         scope!("execute");
 
         let journal = Journal::default();
@@ -198,7 +300,10 @@ impl<'a> ExecutorImpl<'a> {
             None => CycleLimit::None,
         };
 
-        let mut refs = Vec::new();
+        // Update digests in the image before cloning and for the executor. Such that the initial
+        // ipage hashes only ever need to be computed once.
+        self.image.update_digests();
+
         let mut exec = Executor::new(
             self.image.clone(),
             self,
@@ -215,54 +320,15 @@ impl<'a> ExecutorImpl<'a> {
         };
 
         let start_time = Instant::now();
-        let result = exec.run(segment_limit_po2, max_insn_cycles, session_limit, |inner| {
-            let output = inner
-                .claim
-                .terminate_state
-                .is_some()
-                .then(|| -> Option<Result<_>> {
-                    inner
-                        .claim
-                        .output
-                        .and_then(|digest| {
-                            (digest != Digest::ZERO).then(|| journal.buf.lock().unwrap().clone())
-                        })
-                        .map(|journal| {
-                            Ok(Output {
-                                journal: journal.into(),
-                                assumptions: Assumptions(
-                                    self.syscall_table
-                                        .assumptions_used
-                                        .lock()
-                                        .unwrap()
-                                        .iter()
-                                        .map(|(a, _)| a.clone().into())
-                                        .collect::<Vec<_>>(),
-                                )
-                                .into(),
-                            })
-                        })
-                })
-                .flatten()
-                .transpose()?;
-
-            let segment = Segment {
-                index: inner.index as u32,
-                inner,
-                output,
-            };
-            let segment_ref = callback(segment)?;
-            refs.push(segment_ref);
-            Ok(())
-        })?;
+        let exec_result = exec.run(segment_limit_po2, max_insn_cycles, session_limit, callback)?;
         let elapsed = start_time.elapsed();
 
-        tracing::debug!("output_digest: {:?}", result.claim.output);
+        tracing::debug!("output_digest: {:?}", exec_result.output);
 
-        let exit_code = exit_code_from_terminate_state(&result.claim.terminate_state)?;
+        let exit_code = exit_code_from_terminate_state(&exec_result.terminate_state)?;
 
         // Set the session_journal to the committed data iff the guest set a non-zero output.
-        let session_journal = result.claim.output.and_then(|digest| {
+        let session_journal = exec_result.output.and_then(|digest| {
             (digest != Digest::ZERO).then(|| std::mem::take(&mut *journal.buf.lock().unwrap()))
         });
         if !exit_code.expects_output() && session_journal.is_some() {
@@ -285,29 +351,35 @@ impl<'a> ExecutorImpl<'a> {
             std::fs::write(self.env.pprof_out.as_ref().unwrap(), report)?;
         }
 
-        self.image = result.post_image.clone();
+        let pre_image_digest = self.image.image_id();
+        self.image = exec_result.post_image.clone();
         let syscall_metrics = self.syscall_table.metrics.borrow().clone();
 
         // NOTE: When a segment ends in a Halted(_) state, the post_digest will be null.
         let post_digest = match exit_code {
             ExitCode::Halted(_) => Digest::ZERO,
-            _ => result.claim.post_state,
+            // NOTE: Computing the memory image digest here might take ~200 ms. It is not done
+            // earlier, because this is not common for an execution to end with non-zero exit code.
+            _ => self.image.image_id(),
         };
 
         let session = Session {
-            segments: refs,
+            // TODO(victor/perf): Is there a better way to solve the issue of filling this field?
+            segments: (0..exec_result.segments)
+                .map(|_| -> Box<dyn SegmentRef> { Box::new(NullSegmentRef) })
+                .collect(),
             input: self.env.input_digest.unwrap_or_default(),
             journal: session_journal.map(crate::Journal::new),
             exit_code,
             assumptions,
             mmr_assumptions,
-            user_cycles: result.user_cycles,
-            paging_cycles: result.paging_cycles,
-            reserved_cycles: result.reserved_cycles,
-            total_cycles: result.total_cycles,
+            user_cycles: exec_result.user_cycles,
+            paging_cycles: exec_result.paging_cycles,
+            reserved_cycles: exec_result.reserved_cycles,
+            total_cycles: exec_result.total_cycles,
             pre_state: SystemState {
                 pc: 0,
-                merkle_root: result.claim.pre_state,
+                merkle_root: pre_image_digest,
             },
             post_state: SystemState {
                 pc: 0,
