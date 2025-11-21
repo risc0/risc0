@@ -18,11 +18,12 @@ use std::cell::Cell;
 use anyhow::Result;
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, PovwNonce};
+use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, Rv32imV2Claim,
-    execute::{CycleLimit, Executor, RV32IM_V2_CIRCUIT_VERSION},
+    MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, TerminateState,
+    execute::{CycleLimit, Executor, ExecutorResult, RV32IM_V2_CIRCUIT_VERSION},
 };
 
 use super::{Syscall, SyscallContext};
@@ -31,30 +32,39 @@ use super::{Syscall, SyscallContext};
 #[non_exhaustive]
 pub struct Segment {
     /// Initial sparse memory state for the segment
+    ///
+    /// It is not mandated that this have all digests up to date, as long as the dirty digests are
+    /// marked. A process that receives a Segment must call [MemoryImage::update_digests] before
+    /// any operation that accesses the digest values.
     pub partial_image: MemoryImage,
-
-    pub claim: Rv32imV2Claim,
 
     /// Recorded host->guest IO, one entry per read
     #[debug("{}", read_record.len())]
     pub read_record: Vec<Vec<u8>>,
-
     /// Recorded rlen of guest->host IO, one entry per write
     #[debug("{}", write_record.len())]
     pub write_record: Vec<u32>,
 
-    /// Cycle at which we suspend
+    /// Digest written to the input slot of the globals and claim.
+    pub input_digest: Digest,
+    /// Digest written to the output slot of the globals and claim.
+    pub output_digest: Option<Digest>,
+    /// Value set upon termination of execution, indicating the termination type.
+    pub terminate_state: Option<TerminateState>,
+
+    // NOTE: This is the same as SegmentUpdate::user_cycles.
+    /// Count of "user cycles", the cycles directly associated with instructions executed by the
+    /// user guest program, before suspend in this segment. Does not include paging costs.
     pub suspend_cycle: u32,
-
-    /// Total paging cycles
+    /// Count of cycles associated with memory paging (i.e. page-in and page-out operations).
     pub paging_cycles: u32,
-
     pub segment_threshold: u32,
 
+    /// Power-of-two for the segment size required to prove this segment.
     pub po2: u32,
-
+    /// Index of the segment in the session.
     pub index: u64,
-
+    /// Gloablly unique nonce used within the proof of verifiable work system.
     pub povw_nonce: Option<PovwNonce>,
 
     pub insn_counter: u32,
@@ -69,7 +79,10 @@ impl Segment {
         Ok(postcard::from_bytes(bytes)?)
     }
 
-    pub fn execute(&self) -> Result<()> {
+    /// Execute the [Segment], returning the execution result.
+    ///
+    /// This method can be used to compute the [crate::Rv32imV2Claim] from this segment.
+    pub fn execute(&self) -> Result<ExecutorResult> {
         let handler = SegmentSyscallHandler {
             segment: self,
             read_pos: Cell::new(0),
@@ -94,8 +107,7 @@ impl Segment {
             max_insn_cycles,
             CycleLimit::Soft(self.suspend_cycle.into()),
             |_| Ok(()),
-        )?;
-        Ok(())
+        )
     }
 }
 

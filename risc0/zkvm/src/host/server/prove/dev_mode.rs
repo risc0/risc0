@@ -28,10 +28,7 @@ use crate::{
         Unknown,
         receipt::{UnionClaim, exit_code_from_terminate_state},
     },
-    host::{
-        prove_info::ProveInfo,
-        server::{exec::executor::ExecutorImpl, session::null_callback},
-    },
+    host::{prove_info::ProveInfo, server::exec::executor::ExecutorImpl},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     recursion::MerkleProof,
     sha::Digestible as _,
@@ -164,7 +161,7 @@ impl ProverServer for DevModeProver {
     ) -> Result<ProveInfo> {
         let session = ExecutorImpl::from_elf(env, elf)
             .unwrap()
-            .run_with_callback(null_callback)?;
+            .run_with_segment_update_callback(|_| Ok(()))?;
         self.prove_session(ctx, &session)
     }
 
@@ -177,7 +174,7 @@ impl ProverServer for DevModeProver {
 
         let preflight_results = PreflightResults {
             inner: Default::default(),
-            terminate_state: segment.inner.claim.terminate_state,
+            terminate_state: segment.inner.terminate_state,
             output: segment.output.clone(),
             #[cfg(not(feature = "rv32im-m3"))]
             segment_index: segment.index,

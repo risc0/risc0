@@ -14,11 +14,12 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use anyhow::{Context, Result};
+use risc0_circuit_rv32im::execute::SegmentUpdate;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    ExecutorEnv, ProveInfo, Receipt, SessionInfo, VerifierContext, get_prover_server,
-    host::server::{exec::executor::ExecutorImpl, session::NullSegmentRef},
+    ExecutorEnv, ProveInfo, Receipt, SegmentInfo, SessionInfo, VerifierContext, get_prover_server,
+    host::server::exec::executor::ExecutorImpl,
 };
 
 /// A [Prover] implementation that selects a [ProverServer][crate::ProverServer] by calling
@@ -61,9 +62,12 @@ impl Executor for LocalProver {
         let mut segments = Vec::new();
         let session = ExecutorImpl::from_elf(env, elf)
             .context("Failed to create executor from provided program")?
-            .run_with_callback(|segment| {
-                segments.push(segment.get_info());
-                Ok(Box::new(NullSegmentRef))
+            .run_with_segment_update_callback(|update: SegmentUpdate| {
+                segments.push(SegmentInfo {
+                    po2: update.po2,
+                    cycles: update.user_cycles,
+                });
+                Ok(())
             })?;
 
         let receipt_claim = session.claim()?;
