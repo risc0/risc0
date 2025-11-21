@@ -55,7 +55,7 @@ impl<'a, Risc0ContextT> BigIntIOImpl<'a, Risc0ContextT> {
 
 fn check_bigint_addr(addr: WordAddr, mode: u32) -> Result<()> {
     ensure!(
-        addr >= ZERO_PAGE_END_ADDR.waddr() && mode == 1 || addr < USER_BIGINT_END_ADDR.waddr(),
+        addr >= ZERO_PAGE_END_ADDR.waddr() && (mode == 1 || addr < USER_BIGINT_END_ADDR.waddr()),
         "Invalid bigint address"
     );
     Ok(())
