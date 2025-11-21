@@ -34,11 +34,15 @@ LOG_RD_OFF =16
 LOG_RS1_OFF = 24
 LOG_RS2_OFF = 32 
 
+# We can safely skip a lot of work if we are not in prelight
+.set PREFLIGHT, 1
+
 # Next we have common 'parts' of instructions (getting RS1 + RS2, logging
 # RD's original state, etc).  When then use these to build instruction
 # categories (3-reg, imm, etc), and finally instructions
 
 .macro WRITE_INST, INST  # Write instruction info to the loga
+.if PREFLIGHT 
   movb \INST, (LOG)  # Write opcode
   movb %r8b, 1(LOG)  # Write RD
   movb %r9b, 2(LOG)  # Write RS1
@@ -46,43 +50,56 @@ LOG_RS2_OFF = 32
   movl IMM, 4(LOG)  # Write IMM
   movl PC, LOG_PC_OFF(LOG) # Write PC
   movl OINST, LOG_OINST_OFF(LOG) # Write PC
+.endif
 .endm
 
 .macro INC_CYCLE  # Incement cycle #
+.if PREFLIGHT
   addq CYCLE_INC_VAL, CYCLE  # Inc cycle
+.endif
 .endm
 
 .macro LOG_OLD_RD  # Log orignal RD value (for things that write to RD)
+.if PREFLIGHT
   movq (CTX, RDN, 8), %rax  # Load RD
   movq %rax, LOG_RD_OFF(LOG)  # Save to log
+.endif
 .endm
 
 .macro LOAD_RS1_EAX  # Log original RS1 value, and load RS1 into EAX
   movq (CTX, RS1N, 8), %rax  # Load RS1 into %rax
+.if PREFLIGHT
   movq %rax, LOG_RS1_OFF(LOG)  # Save to log
   movl %eax, %eax  # Clear high 32 bits
   orq CYCLE, %rax  # Add cycle
   movq %rax, (CTX, RS1N, 8)  # Write back
+.endif
 .endm
 
 .macro LOAD_RS2_ECX  # Log original RS2 value, and load RS2 into ECX
   movq (CTX, RS2N, 8), %rcx  # Load RS2 into %rcx
+.if PREFLIGHT
   movq %rcx, LOG_RS2_OFF(LOG)  # Save to log
   movl %ecx, %ecx  # Clear high 32 bits
   orq CYCLE, %rcx  # Add cycle
   movq %rcx, (CTX, RS2N, 8)  # Write back
   test $0x40, RS2N  # Check if RS2 is a 'trash address'
   cmovnz %eax, %ecx  # If so, copy over eax
+.endif
 .endm
 
 .macro WRITE_EAX_RD
+.if PREFLIGHT
   orq CYCLE, %rax  # Add cycle
+.endif
   movq %rax, (CTX, RDN, 8)  # Write to RD
 .endm
 
 .macro INST_END
+.if PREFLIGHT
   INC_CYCLE  # Add final cycle
   add $40, LOG  # Move log forward
+.endif
   ret  # Return from instruction
 .endm
 
@@ -140,8 +157,10 @@ LOG_RS2_OFF = 32
   # Get function pointer to jump to
   movq CTX_PAGE_MISS_OFF(CTX), %rdx
   # Save critival data back to context
+.if PREFLIGHT
   movq LOG, CTX_LOG_OFF(CTX)
   movq CYCLE, CTX_CYCLE_OFF(CTX)
+.endif
   push RDN  # Save RDN since I still need to write RD
   push %rax  # Save rax since it holds the full address
   push CTX  # Save CTX
@@ -152,9 +171,11 @@ LOG_RS2_OFF = 32
   pop %rax
   pop RDN
   # Reload things I need
+.if PREFLIGHT
   movq CTX_LOG_OFF(CTX), LOG
   movq CTX_CYCLE_OFF(CTX), CYCLE
   movq $0x100000000, CYCLE_INC_VAL
+.endif
   movq CTX_PAGES_OFF(CTX), PAGES
   ret
 
@@ -186,10 +207,12 @@ LOG_RS2_OFF = 32
   RESOLVE_PAGE \label_prefix  # Load page ptr into %rdx
   mov %eax, %ecx  # Save address to ecx
   LOAD_WORD  # Load word into %eax
+.if PREFLIGHT
   mov %rax, LOG_RS2_OFF(LOG)  # Log memory transaction into RS2
   mov %eax, %eax  # Clear top bits
   orq CYCLE, %rax  # Update cycle #
   mov %rax, (%rdx, %rbx, 2)  # Write back to memory
+.endif
 .endm
 
 .macro DO_STORE_PRE opcode label_prefix align_mask
@@ -202,13 +225,17 @@ LOG_RS2_OFF = 32
   RESOLVE_PAGE \label_prefix  # Load page ptr into %rdx
   mov %eax, %ecx  # Save address to ecx
   LOAD_WORD  # Load word into %eax
+.if PREFLIGHT
   mov %rax, LOG_RD_OFF(LOG)  # Log memory transaction into RD
+.endif
 .endm
 
 .macro DO_STORE_POST
+.if PREFLIGHT
   INC_CYCLE  # Move to the 'write' cycle
-  #mov %eax, %eax  # Clear top bits
-  #orq CYCLE, %rax  # Update cycle #
+  mov %eax, %eax  # Clear top bits
+  orq CYCLE, %rax  # Update cycle #
+.endif
   movq %rax, (%rdx, %rbx, 2)  # Write back to memory
   INST_END  # Finish instruction
 .endm
@@ -555,15 +582,19 @@ enter:
   # Save address to jump do (entry block)
   movq %rsi, %rax
   # Initialize local registers I care about
+.if PREFLIGHT
   movq CTX_LOG_OFF(CTX), LOG
   movq CTX_CYCLE_OFF(CTX), CYCLE
   movq $0x100000000, CYCLE_INC_VAL
+.endif
   movq CTX_PAGES_OFF(CTX), PAGES
   # Call into basic block, which will jump around + return
   call %rax 
   # Save data back to context
+.if PREFLIGHT
   movq LOG, CTX_LOG_OFF(CTX)
   movq CYCLE, CTX_CYCLE_OFF(CTX)
+.endif
   # Undo stack manipulations
   pop %r15
   pop %r14

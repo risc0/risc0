@@ -8,6 +8,8 @@
 
 #include "jit/jit_asm.h"
 
+#define PREFLIGHT
+
 using namespace risc0;
 using namespace risc0::rv32im;
 
@@ -369,7 +371,11 @@ private:
     uint32_t newPc = pc + (((oinst & 3) == 3) ? 4 : 2);
     a.doLoadImm32(Reg::R8, (inst.rd == 0 ? 64 : inst.rd));
     a.doLoadImm32(Reg::R9, inst.rs1);
+#ifdef PREFLIGHT
     a.doLoadImm32(Reg::R10, (inst.rs1 == inst.rs2) ? inst.rs2 + 64 : inst.rs2);;
+#else
+    a.doLoadImm32(Reg::R10, inst.rs2);
+#endif
     a.doLoadImm32(Reg::R11, inst.imm);
     a.doLoadImm32(Reg::R12, pc);
     a.doLoadImm32(Reg::RDX, oinst);
