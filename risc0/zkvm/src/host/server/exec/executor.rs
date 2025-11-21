@@ -121,7 +121,6 @@ where
     F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send + 'scope,
 {
     type Callback = ExecutorImplCallback;
-    type Error = anyhow::Error;
 
     fn with_initial_image(self, initial_image: &MemoryImage) -> Result<Self::Callback> {
         let mut segment_callback = self.inner;
@@ -171,8 +170,6 @@ struct ExecutorImplCallback {
 }
 
 impl SegmentUpdateCallback for ExecutorImplCallback {
-    type Error = anyhow::Error;
-
     fn on_segment_update(&mut self, update: SegmentUpdate) -> Result<()> {
         self.update_channel
             .send(update)

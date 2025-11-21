@@ -81,7 +81,7 @@ pub fn execute<S: Syscall>(
             let segment = segment_update.apply_into_segment(&mut image)?;
             tracing::trace!("{segment:#?}");
             segments.push(segment);
-            Ok(())
+            anyhow::Ok(())
         },
     )?;
 
