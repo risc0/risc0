@@ -152,4 +152,31 @@ const char* risc0_zkp_cuda_combos_prepare(cudaStream_t stream,
   return nullptr;
 }
 
+const char* risc0_zkp_cuda_fri_prove(cudaStream_t stream,
+                                     uint32_t* out_values,
+                                     const size_t values_column_width,
+                                     uint32_t* out_digests,
+                                     const size_t digests_column_width,
+                                     uint32_t* positions,
+                                     const size_t positions_len,
+                                     CudaMerkleTreeProver* trees,
+                                     const size_t trees_len,
+                                     uint32_t* groups) {
+  try {
+    LaunchConfig cfg1 = getSimpleConfig(trees_len * positions_len * values_column_width);
+    fri_prove_values<<<cfg1.grid, cfg1.block, 0, stream>>>(
+        out_values, values_column_width, positions, positions_len, trees, trees_len, groups);
+
+    LaunchConfig cfg2 = getSimpleConfig(trees_len * positions_len * digests_column_width);
+    fri_prove_digests<<<cfg2.grid, cfg2.block, 0, stream>>>(
+        out_digests, digests_column_width, positions, positions_len, trees, trees_len, groups);
+
+    CUDA_OK(cudaStreamSynchronize(stream));
+  } catch (const std::exception& err) {
+    CUDA_OK(cudaStreamSynchronize(stream));
+    return strdup(err.what());
+  }
+  return nullptr;
+}
+
 } // extern "C"
