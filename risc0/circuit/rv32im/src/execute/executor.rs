@@ -672,10 +672,8 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(rlen)
     }
 
-    fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32> {
-        let rlen = self.syscall_handler.host_write(self, fd, buf)?;
-        self.write_record.push(rlen);
-        Ok(rlen)
+    fn host_write(&mut self, _fd: u32, _buf: &[u8]) -> Result<u32> {
+        unimplemented!()
     }
 
     fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {

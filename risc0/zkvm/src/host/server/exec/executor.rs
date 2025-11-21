@@ -407,10 +407,13 @@ impl CircuitSyscall for ExecutorImpl<'_> {
         Ok(rlen as u32)
     }
 
-    fn host_write(&self, ctx: &mut dyn CircuitSyscallContext, _fd: u32, buf: &[u8]) -> Result<u32> {
-        let str = String::from_utf8(buf.to_vec())?;
-        tracing::debug!("R0VM[{}] {str}", ctx.get_cycle());
-        Ok(buf.len() as u32)
+    fn host_write(
+        &self,
+        _ctx: &mut dyn CircuitSyscallContext,
+        _fd: u32,
+        _buf: &[u8],
+    ) -> Result<u32> {
+        unimplemented!()
     }
 }
 

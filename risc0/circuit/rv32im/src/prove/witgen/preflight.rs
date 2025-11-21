@@ -77,6 +77,7 @@ pub(crate) struct Preflight<'a> {
     pager: PagedMemory,
     pc: ByteAddr,
     machine_mode: u32,
+    #[expect(dead_code)]
     cur_write: usize,
     cur_read: usize,
     user_cycle: u32,
@@ -672,11 +673,7 @@ impl Risc0Context for Preflight<'_> {
     }
 
     fn host_write(&mut self, _fd: u32, _buf: &[u8]) -> Result<u32> {
-        if self.cur_write >= self.segment.write_record.len() {
-            bail!("Invalid segment: unexpected write record");
-        }
-        self.cur_write += 1;
-        Ok(self.segment.write_record[self.cur_write])
+        unimplemented!();
     }
 
     fn on_sha2_cycle(&mut self, cur_state: CycleState, sha2: &Sha2State) {
