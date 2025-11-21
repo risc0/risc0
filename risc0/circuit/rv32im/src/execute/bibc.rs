@@ -19,7 +19,7 @@ use anyhow::{Result, anyhow};
 use byteorder::{LittleEndian, ReadBytesExt};
 use malachite::{
     Integer, Natural,
-    base::num::{arithmetic::traits::ModInverse, basic::traits::Zero},
+    num::{arithmetic::traits::ModInverse, basic::traits::Zero},
 };
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
