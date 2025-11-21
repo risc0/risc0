@@ -50,11 +50,12 @@ fn build_cuda_kernels(cxx_root: &Path) {
             "kernels/zkp/cuda/combos.cu",
             "kernels/zkp/cuda/eltwise.cu",
             "kernels/zkp/cuda/ffi.cu",
+            "kernels/zkp/cuda/fri_prove.cu",
             "kernels/zkp/cuda/kernels.cu",
             "kernels/zkp/cuda/sha.cu",
             "kernels/zkp/cuda/supra/api.cu",
-            "kernels/zkp/cuda/supra/poseidon2.cu",
             "kernels/zkp/cuda/supra/ntt.cu",
+            "kernels/zkp/cuda/supra/poseidon2.cu",
         ])
         .deps(["kernels/zkp/cuda", "kernels/zkp/cuda/supra"])
         .flag("-DFEATURE_BABY_BEAR")

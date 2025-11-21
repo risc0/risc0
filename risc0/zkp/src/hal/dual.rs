@@ -19,6 +19,7 @@ use risc0_core::field::Field;
 
 use super::{AccumPreflight, Buffer, CircuitHal, Hal};
 use crate::core::{digest::Digest, hash::HashSuite};
+use crate::prove::MerkleTreeProver;
 
 #[derive(Clone)]
 pub struct BufferImpl<T, L, R>
@@ -429,6 +430,46 @@ where
             into_stride,
         );
         into.assert_eq();
+    }
+
+    fn fri_prove(
+        &self,
+        out_values: &Self::Buffer<u32>,
+        values_column_width: usize,
+        out_digests: &Self::Buffer<u32>,
+        digests_column_width: usize,
+        positions: &Self::Buffer<u32>,
+        trees: &[&MerkleTreeProver<Self>],
+        groups: &Self::Buffer<u32>,
+    ) {
+        let left_trees = trees
+            .iter()
+            .map(|tree| tree.map_hal(|b| b.lhs.clone(), |b| b.lhs.clone()))
+            .collect::<Vec<_>>();
+        self.lhs.fri_prove(
+            &out_values.lhs,
+            values_column_width,
+            &out_digests.lhs,
+            digests_column_width,
+            &positions.lhs,
+            &left_trees.iter().collect::<Vec<_>>(),
+            &groups.lhs,
+        );
+        let right_trees = trees
+            .iter()
+            .map(|tree| tree.map_hal(|b| b.rhs.clone(), |b| b.rhs.clone()))
+            .collect::<Vec<_>>();
+        self.rhs.fri_prove(
+            &out_values.rhs,
+            values_column_width,
+            &out_digests.rhs,
+            digests_column_width,
+            &positions.rhs,
+            &right_trees.iter().collect::<Vec<_>>(),
+            &groups.rhs,
+        );
+        out_values.assert_eq();
+        out_digests.assert_eq();
     }
 }
 

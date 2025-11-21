@@ -41,6 +41,7 @@ use crate::{
         },
         log2_ceil,
     },
+    prove::MerkleTreeProver,
 };
 
 #[derive(Clone, Copy)]
@@ -1115,6 +1116,74 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
             }
         }
     }
+
+    fn fri_prove(
+        &self,
+        out_values: &Self::Buffer<u32>,
+        values_column_width: usize,
+        out_digests: &Self::Buffer<u32>,
+        digests_column_width: usize,
+        positions: &Self::Buffer<u32>,
+        trees: &[&MerkleTreeProver<Self>],
+        groups: &Self::Buffer<u32>,
+    ) {
+        assert_eq!(trees.len(), groups.size());
+
+        assert_eq!(
+            out_values.size() / values_column_width,
+            positions.size() * trees.len()
+        );
+        assert_eq!(
+            out_digests.size() / digests_column_width,
+            positions.size() * trees.len()
+        );
+
+        let trees_buffer = BufferImpl::<CudaMerkleTreeProver>::copy_from(
+            "fri_prove_trees",
+            &trees.iter().map(|t| t.to_cuda_prover()).collect::<Vec<_>>(),
+            self.stream.clone(),
+        );
+
+        unsafe extern "C" {
+            fn risc0_zkp_cuda_fri_prove(
+                stream: cust::sys::CUstream,
+                out_values: DevicePointer<u8>,
+                values_column_width: usize,
+                out_digests: DevicePointer<u8>,
+                digests_column_width: usize,
+                positions: DevicePointer<u8>,
+                positions_len: usize,
+                trees: DevicePointer<u8>,
+                trees_len: usize,
+                groups: DevicePointer<u8>,
+            ) -> *const std::os::raw::c_char;
+        }
+
+        ffi_wrap(|| unsafe {
+            risc0_zkp_cuda_fri_prove(
+                self.stream.as_inner(),
+                out_values.as_device_ptr(),
+                values_column_width,
+                out_digests.as_device_ptr(),
+                digests_column_width,
+                positions.as_device_ptr(),
+                positions.size(),
+                trees_buffer.as_device_ptr(),
+                trees.len(),
+                groups.as_device_ptr(),
+            )
+        })
+        .unwrap();
+    }
+}
+
+#[repr(C)]
+pub struct CudaMerkleTreeProver {
+    pub row_size: usize,
+    pub col_size: usize,
+    pub top_size: usize,
+    pub matrix: DevicePointer<u8>,
+    pub nodes: DevicePointer<u8>,
 }
 
 #[cfg(test)]
@@ -1177,6 +1246,12 @@ mod tests {
     #[gpu_guard::gpu_guard]
     fn fri_fold() {
         testutil::fri_fold(CudaHalSha256::new());
+    }
+
+    #[test]
+    #[gpu_guard::gpu_guard]
+    fn fri_prove() {
+        testutil::fri_prove(CudaHalSha256::new());
     }
 
     #[test]
