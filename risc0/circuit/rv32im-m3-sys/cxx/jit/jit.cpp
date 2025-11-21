@@ -1,5 +1,6 @@
 #include "core/log.h"
 #include "rv32im/emu/decode.h"
+#include "rv32im/emu/expand.h"
 #include "rv32im/emu/image.h"
 
 #include <sys/mman.h>
@@ -27,6 +28,10 @@ using PageDetails = std::array<MemoryInfo, MPAGE_SIZE_WORDS>;
 
 // TODO: Make this super minimal and self contained (i.e. don't use DecodedInst + getOpcode)
 ExpandedInst expand(uint32_t inst) {
+  if ((inst & 3) != 3) {
+    static auto expandTable = generateExpandTable();
+    inst = expandTable[inst];
+  }
   DecodedInst decoded(inst);
   ExpandedInst ret;
   ret.rs1 = decoded.rs1;
@@ -257,9 +262,9 @@ struct MemTxn {
 };
 
 struct LogEntry {
+  ExpandedInst inst;
   uint32_t pc;
   uint32_t origInst;
-  ExpandedInst inst;
   MemTxn rd;
   MemTxn rs1;
   MemTxn rs2;
@@ -305,7 +310,6 @@ private:
   // Read a word from the page table
   uint32_t readWord(uint32_t wordAddr) {
     uint32_t page = wordAddr >> MPAGE_SIZE_WORDS_PO2;
-    uint32_t idx = wordAddr & MPAGE_MASK_WORDS;
     PageDetails* data = getPage(page);
     // TODO: This is only called on fetch, update cycle #
     // basically make Decode info
@@ -361,12 +365,14 @@ private:
     throw std::runtime_error("Unhandled Unimplemented");
   }
 
-  bool doInst(uint32_t& cost, uint32_t offset, const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
+  bool doInst(uint32_t& cost, uint32_t offset, const ExpandedInst& inst, uint32_t pc, uint32_t oinst) {
+    uint32_t newPc = pc + (((oinst & 3) == 3) ? 4 : 2);
     a.doLoadImm32(Reg::R8, (inst.rd == 0 ? 64 : inst.rd));
     a.doLoadImm32(Reg::R9, inst.rs1);
     a.doLoadImm32(Reg::R10, (inst.rs1 == inst.rs2) ? inst.rs2 + 64 : inst.rs2);;
     a.doLoadImm32(Reg::R11, inst.imm);
     a.doLoadImm32(Reg::R12, pc);
+    a.doLoadImm32(Reg::RDX, oinst);
     a.doCall(offset);
     cost++;  // TODO handle variable costs
     switch (Opcode(inst.opcode)) {
@@ -430,24 +436,39 @@ public:
     return a.call(gsym_enter, ctxAddr, a.getAddr(offset));
   }
 
+  uint32_t readHalf(uint32_t pc) {
+    return (readWord(pc/4) >> (8 * (pc % 4))) & 0xffff;
+  }
+
+
+  uint32_t fetch(uint32_t pc) {
+    // Read low 16 of instruction
+    uint32_t inst = readHalf(pc);
+    if ((inst & 3) == 3) {
+      inst |= (readHalf(pc + 2)) << 16;
+    }
+    return inst;
+  }
+
   uint32_t jitBlockAt(uint32_t pc) {
     bool done = false;
     uint32_t blockOffset = a.getOffset();
     // TODO: Setup quota check
     uint32_t cost = 0;
     while (!done) {
-      uint32_t inst = readWord(pc/4);
+      uint32_t inst = fetch(pc);
       ExpandedInst exInst = expand(inst);
       uint64_t exFlat;
       memcpy(&exFlat, &exInst, sizeof(ExpandedInst));
       LOG(2, "PC: " << HexWord{pc} << " - " << getOpcodeName(Opcode(exInst.opcode)) << 
           "  rd = " << uint32_t(exInst.rd) << ", rs1 = " << uint32_t(exInst.rs1) << 
-          ", rs2 = " << uint32_t(exInst.rs2) << ", imm = " << std::hex << exInst.imm << std::dec);
-      uint32_t newPc = pc + 4;  // This will change when we do compressed mode
+          ", rs2 = " << uint32_t(exInst.rs2) << ", imm = " << HexWord{exInst.imm});
+      uint32_t newPc = pc + (((inst & 3) == 3) ? 4 : 2);
+      LOG(2, "inst = " << HexWord{inst} << ", newPc = " << HexWord{newPc});
       switch(Opcode(exInst.opcode)) {
 #define ENTRY(name, ...)  \
         case Opcode::name:  \
-          done = doInst(cost, gsym_do_ ## name, exInst, pc, newPc); \
+          done = doInst(cost, gsym_do_ ## name, exInst, pc, inst); \
           break;
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
@@ -492,13 +513,6 @@ public:
       }
     }
   }
-
-  void dump() {
-    LOG(0, "REG[1] = " << HexWord{ctx.riscvRegs[1]});
-    LOG(0, "REG[2] = " << HexWord{ctx.riscvRegs[2]});
-    LOG(0, "REG[14] = " << HexWord{ctx.riscvRegs[14]});
-    LOG(0, "MEM[REG[2]] = " << HexWord{readWord(uint32_t(ctx.riscvRegs[2])/4)});
-  }
 };
 
 void runTest(const std::string& testName) {
@@ -528,6 +542,7 @@ void runBench() {
 
 int main() {
   runBench();
+  runTest("rvc");
   runTest("add");
   runTest("sub");
   runTest("xor");

@@ -13,6 +13,7 @@ RS1N = %r9  # Which register is RS1
 RS2N = %r10  # Which register is RS2
 IMM = %r11d  # What was the 32 bit version of the immediate in the instruction
 PC = %r12d  # What PC was this instruction original on
+OINST = %edx  # Reuse eax as instruction
 CYCLE = %r13  # The current cycle is in the high 32 bits of this number
 CYCLE_INC_VAL = %r14  # The value 2^32 used to 'increment' the cycle
 PAGES = %r15
@@ -27,9 +28,11 @@ CTX_PAGES_OFF = -32
 CTX_PAGE_MISS_OFF = 1024;
 
 # Offsets in the log
-LOG_RD_OFF = 8
-LOG_RS1_OFF = 16
-LOG_RS2_OFF = 24 
+LOG_PC_OFF = 8
+LOG_OINST_OFF = 12
+LOG_RD_OFF =16 
+LOG_RS1_OFF = 24
+LOG_RS2_OFF = 32 
 
 # Next we have common 'parts' of instructions (getting RS1 + RS2, logging
 # RD's original state, etc).  When then use these to build instruction
@@ -41,6 +44,8 @@ LOG_RS2_OFF = 24
   movb %r9b, 2(LOG)  # Write RS1
   movb %r10b, 3(LOG)  # Write RS2
   movl IMM, 4(LOG)  # Write IMM
+  movl PC, LOG_PC_OFF(LOG) # Write PC
+  movl OINST, LOG_OINST_OFF(LOG) # Write PC
 .endm
 
 .macro INC_CYCLE  # Incement cycle #
@@ -77,7 +82,7 @@ LOG_RS2_OFF = 24
 
 .macro INST_END
   INC_CYCLE  # Add final cycle
-  add $32, LOG  # Move log forward
+  add $40, LOG  # Move log forward
   ret  # Return from instruction
 .endm
 
@@ -401,12 +406,20 @@ do_BLTU:
 do_BGEU:
   DO_BRANCH $32
 
+# Given that EDX still holds original instruction
+# If low two bits 11, add 4, else add 2
+.macro ADD_INST_LEN
+  and $3, %edx  # Get low two bits
+  cmp $3, %edx  # See if they are 11
+  sete %dl  # If so set dl + 1, i.e. 11 -> 1, anything else to 0
+  lea 2(%rax, %rdx, 2), %rax
+.endm
+
 do_JAL:
   WRITE_INST $33  # Write opcode data to log
   LOG_OLD_RD  # Log the current RD value before it is overwritten
   movl PC, %eax  # Write PC to eax
-  # TODO: Need to fix for compressed instructions
-  addl $4, %eax  # Inc PC by 4
+  ADD_INST_LEN  # Add 2 or 4 to PC
   DO_IMM_POST  # Tail half of LUI looks like IMM
 
 do_JALR:
@@ -416,8 +429,7 @@ do_JALR:
   movl %eax, %ecx
   addl IMM, %ecx
   movl PC, %eax  # Write PC to eax
-  # TODO: Need to fix for compressed instructions
-  addl $4, %eax  # Inc PC by 4
+  ADD_INST_LEN  # Add 2 or 4 to PC
   INC_CYCLE  # Move to the 'write' cycle
   WRITE_EAX_RD  # Write EAX to RD
   mov %ecx, %eax
