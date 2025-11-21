@@ -81,7 +81,6 @@ LOG_RS2_OFF = 24
   ret  # Return from instruction
 .endm
 
-
 # Three register instructions
 # We divide this into pre/post work, to allow special handling for
 # multiply/div, shift, etc, which are all slightly irregular
@@ -318,7 +317,7 @@ do_BGEU:
   DO_BRANCH $32
 
 do_JAL:
-  WRITE_INST $35  # Write opcode data to log
+  WRITE_INST $33  # Write opcode data to log
   LOG_OLD_RD  # Log the current RD value before it is overwritten
   movl PC, %eax  # Write PC to eax
   # TODO: Need to fix for compressed instructions
@@ -326,7 +325,18 @@ do_JAL:
   DO_IMM_POST  # Tail half of LUI looks like IMM
 
 do_JALR:
-  ud2
+  WRITE_INST $34  # Write opcode data to log
+  LOG_OLD_RD  # Log the current RD value before it is overwritten
+  LOAD_RS1_EAX  # Load RS1 into EAX (and log)
+  movl %eax, %ecx
+  addl IMM, %ecx
+  movl PC, %eax  # Write PC to eax
+  # TODO: Need to fix for compressed instructions
+  addl $4, %eax  # Inc PC by 4
+  INC_CYCLE  # Move to the 'write' cycle
+  WRITE_EAX_RD  # Write EAX to RD
+  mov %ecx, %eax
+  INST_END  # Finish instruction
 
 do_LUI:
   WRITE_INST $35  # Write opcode data to log
@@ -342,35 +352,94 @@ do_AUIPC:
   DO_IMM_POST  # Tail half of LUI looks like IMM
 
 do_MUL:
-  ud2
+  DO_REG_PRE $37
+  imull %ecx, %eax
+  DO_REG_POST
 
 do_MULH:
-  ud2
+  DO_REG_PRE $38
+  imull %ecx
+  movl %edx, %eax
+  DO_REG_POST
 
 do_MULHSU:
-  ud2
+  DO_REG_PRE $39
+  movl %eax, %ebx # EBX = a
+  sarl $31, %ebx  # EBX = 0xffffffff if a < 0, else 0
+  mull %ecx  # unsigned mul: edx:eax = (uint32)a * (uint32)b
+  andl %ecx, %ebx  # EBX = (a < 0 ? ECX : 0)
+  subl %ebx, %edx  # adjust high word for signed×unsigned
+  movl %edx, %eax  # result → eax
+  DO_REG_POST
 
 do_MULHU:
-  ud2
+  DO_REG_PRE $40
+  mull %ecx
+  movl %edx, %eax
+  DO_REG_POST
 
 do_DIV:
-  ud2
+  DO_REG_PRE $41
+  cmpl $0, %ecx  # divisor == 0 ?
+  je .Ldiv_zero  # yes -> result = -1
+  cmpl $0x80000000, %eax  # dividend == INT_MIN ?
+  jne .Ldiv_do
+  cmpl $-1, %ecx  # divisor == -1 ?
+  je .Ldiv_done  # In overflow case, we already have the right answer (0x80000000) 
+.Ldiv_do:
+  cdq  # sign-extend EAX into EDX:EAX
+  idivl %ecx  # signed divide: EDX:EAX / ECX, quotient -> EAX, remainder -> EDX
+  jmp .Ldiv_done
+.Ldiv_zero:
+  movl $-1, %eax  # 0xffffffff
+.Ldiv_done:
+  DO_REG_POST
 
 do_DIVU:
-  ud2
+  DO_REG_PRE $42
+  cmpl $0, %ecx
+  je .Ldivu_zero  # divisor == 0 → 0xffffffff
+  xorl %edx, %edx  # zero-extend dividend into EDX:EAX
+  divl %ecx  # unsigned divide, quotient -> EAX, remainder -> EDX
+  jmp .Ldivu_done
+.Ldivu_zero:
+  movl $-1, %eax  # 0xffffffff
+.Ldivu_done:
+  DO_REG_POST
 
 do_REM:
-  ud2
+  DO_REG_PRE $43
+  cmpl $0, %ecx
+  je .Lrem_done  # divisor == 0 → result = dividend (already in eax)
+  cmpl $0x80000000, %eax  # dividend == INT_MIN ?
+  jne .Lrem_do
+  cmpl $-1, %ecx  # divisor == -1 ?
+  jne .Lrem_do
+  # Special overflow case: INT_MIN / -1 -> quotient INT_MIN, remainder 0
+  xorl %eax, %eax  # remainder = 0
+  jmp .Lrem_done
+.Lrem_do:
+  cdq  # sign-extend EAX → EDX:EAX
+  idivl %ecx  # signed divide, quotient -> EAX, remainder -> EDX
+  movl %edx, %eax  # return remainder in EAX
+.Lrem_done:
+  DO_REG_POST
 
 do_REMU:
-  ud2
+  DO_REG_PRE $43
+  cmpl $0, %ecx
+  je .Lremu_done  # divisor == 0 → result = dividend
+  xorl %edx, %edx  # zero-extend dividend into EDX:EAX
+  divl %ecx  # unsigned divide, quotient -> EAX, remainder -> EDX
+  movl %edx, %eax  # result = remainder
+.Lremu_done:
+  DO_REG_POST
 
 do_ECALL:
   # We don't do anything, and the BB actually terminates with PC @ ECALL
   # No cycles pass, no logging happens, so we can do trap handling or
   # whatever we want
   ret 
-
 
 do_MRET:
   ud2

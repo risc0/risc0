@@ -337,25 +337,27 @@ private:
     uint64_t ret = (uint64_t(fallthoughFixup) << 32) | jmpPc;
     a.doLoadImm64(Reg::RAX, ret);
     a.doRet();
+    return true;
   }
 
   bool endJalr(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    throw std::runtime_error("Unimplemented");
+    a.doRet();
+    return true;
   }
 
   bool endEcall(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    uint64_t ret = pc;
+    uint64_t ret = uint64_t(0xffffffff00000000ull) | pc;
     a.doLoadImm64(Reg::RAX, ret);
     a.doRet();
     return true;
   }
 
   bool endMret(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    throw std::runtime_error("Unimplemented");
+    throw std::runtime_error("Mret Unimplemented");
   }
 
   bool doUnhandled(uint32_t& cost, const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    throw std::runtime_error("Unimplemented");
+    throw std::runtime_error("Unhandled Unimplemented");
   }
 
   bool doInst(uint32_t& cost, uint32_t offset, const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
@@ -481,7 +483,7 @@ public:
       pc = ret & 0xffffffff;
       LOG(1, "  new PC = " << HexWord{pc} << ", new cycle = " << (ctx.cycle >> 32) << ", new quota = " << ctx.quota);
       if (ctx.quota < 0) { break; }
-      if (fixAddr == 0) {
+      if (fixAddr == 0xffffffff) {
         LOG(0, "ECALL HIT");
         return;
       }
@@ -516,7 +518,6 @@ void runBench() {
 
 int main() {
   runBench();
-  /*
   runTest("add");
   runTest("sub");
   runTest("xor");
@@ -536,13 +537,30 @@ int main() {
   runTest("bge");
   runTest("bltu");
   runTest("bgeu");
-  */
   runTest("jal");
-  /*
   runTest("jalr");
   runTest("lui");
   runTest("auipc");
   runTest("sll");
   runTest("slli");
-  */
+  runTest("mul");
+  runTest("mulh");
+  runTest("mulhsu");
+  runTest("mulhu");
+  runTest("srl");
+  runTest("sra");
+  runTest("srli");
+  runTest("srai");
+  runTest("div");
+  runTest("divu");
+  runTest("rem");
+  runTest("remu");
+  runTest("lb");
+  runTest("lh");
+  runTest("lw");
+  runTest("lbu");
+  runTest("lhu");
+  runTest("sb");
+  runTest("sh");
+  runTest("sw");
 }
