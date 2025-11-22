@@ -882,7 +882,7 @@ where
 ///
 /// A default of 21 was selected to reach a target of 97 bits of security under our analysis. Using
 /// a po2 higher than 21 shows a degradation of 1 bit of security per po2, to 94 bits at po2 24.
-pub const DEFAULT_MAX_PO2: usize = 22;
+pub const DEFAULT_MAX_PO2: usize = 20;
 
 /// Context available to the verification process.
 #[non_exhaustive]

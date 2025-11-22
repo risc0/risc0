@@ -520,8 +520,14 @@ fn pause_exit_nonzero() {
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
+    //
+    #[cfg(feature = "rv32im-m3")]
+    const ITERATIONS: u32 = 40_000;
 
-    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(6000);
+    #[cfg(not(feature = "rv32im-m3"))]
+    const ITERATIONS: u32 = 6000;
+
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(ITERATIONS);
     let image = MemoryImage::new_kernel(program);
 
     let env = ExecutorEnv::builder()
@@ -545,7 +551,7 @@ fn continuation() {
         Some(risc0_circuit_rv32im::TerminateState::default())
     );
 
-    let opts = ProverOpts::fast().with_max_prover_po2(12);
+    let opts = ProverOpts::fast().with_max_segment_po2(12);
     let ctx = VerifierContext::default();
     let prover = get_prover_server(&opts).unwrap();
     let _receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
