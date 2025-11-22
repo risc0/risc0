@@ -32,7 +32,7 @@ use crate::actors::{
     protocol::{
         ExecuteTask, GlobalId, JobId, JobInfo, JobStatus, JobStatusReply, JobStatusRequest,
         JoinTask, LiftTask, ProofRequest, ProofResult, ProveKeccakTask, ProveSegmentTask,
-        ResolveTask, SegmentRange, Session, Task, TaskError, TaskHeader, UnionTask,
+        ResolveTask, SegmentIndex, SegmentRange, Session, Task, TaskError, TaskHeader, UnionTask,
         factory::{
             DropJob, JoinNode, ProveKeccakDone, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate,
             TaskUpdateMsg, UnionDone,
@@ -290,10 +290,15 @@ impl JobActor {
         Ok(())
     }
 
-    async fn prove_segment_done(&mut self, receipt: Box<SegmentReceipt>) -> Result<()> {
-        tracing::info!("ProveSegmentDone: {}", receipt.index);
+    async fn prove_segment_done(
+        &mut self,
+        receipt: Box<SegmentReceipt>,
+        segment_range: SegmentRange,
+    ) -> Result<()> {
+        tracing::info!("ProveSegmentDone: {segment_range:?}");
         self.submit_task(Task::Lift(Arc::new(LiftTask {
             receipt: *receipt,
+            segment_range,
             dev_mode: self.dev_mode()?,
         })))
         .await?;
@@ -494,8 +499,8 @@ impl JobActor {
         session: &Arc<Session>,
     ) -> Result<Option<Arc<SuccinctReceipt<ReceiptClaim>>>> {
         if let Some((range, join_root)) = self.joins.first_key_value()
-            && range.start == 0
-            && range.end == session.stats.segments
+            && range.start == SegmentIndex::ZERO
+            && range.end == SegmentIndex::new(session.stats.segments, 0)
         {
             if self.dev_mode()? {
                 let mut join_root = SuccinctReceipt::clone(join_root);
@@ -648,6 +653,9 @@ impl JobActor {
             TaskUpdate::Start => {}
             TaskUpdate::Segment(segment) => self.prove_segment(msg.header, segment).await?,
             TaskUpdate::Keccak(request) => self.prove_keccak(request).await?,
+            TaskUpdate::SegmentReceipt(receipt, segment_range) => {
+                self.prove_segment_done(receipt, segment_range).await?
+            }
         };
         Ok(())
     }
@@ -675,7 +683,7 @@ impl JobActor {
         self.tracer.span_end(msg.header.global_id.task_id);
         match msg.payload? {
             TaskDone::Session(session) => self.session_done(session, self_ref).await?,
-            TaskDone::ProveSegment(receipt) => self.prove_segment_done(receipt).await?,
+            TaskDone::ProveSegment => {}
             TaskDone::ProveKeccak(done) => self.prove_keccak_done(done, self_ref).await?,
             TaskDone::Lift(node) => self.lift_done(node, self_ref).await?,
             TaskDone::Join(node) => self.join_done(node, self_ref).await?,

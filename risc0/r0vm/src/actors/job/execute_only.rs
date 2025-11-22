@@ -174,6 +174,7 @@ impl Message<TaskUpdateMsg> for JobActor {
                 )
                 .await;
             }
+            TaskUpdate::SegmentReceipt(..) => {}
         }
     }
 }

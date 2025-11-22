@@ -159,15 +159,30 @@ pub(crate) struct ProveKeccakTask {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub(crate) struct SegmentIndex {
+    pub major: usize,
+    pub minor: usize,
+}
+
+impl SegmentIndex {
+    pub const ZERO: Self = Self { major: 0, minor: 0 };
+
+    pub fn new(major: usize, minor: usize) -> Self {
+        Self { major, minor }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub(crate) struct SegmentRange {
-    pub start: usize,
-    pub end: usize,
+    pub start: SegmentIndex,
+    pub end: SegmentIndex,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct LiftTask {
     pub receipt: SegmentReceipt,
     pub dev_mode: bool,
+    pub segment_range: SegmentRange,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -256,12 +271,13 @@ pub mod factory {
         Start,
         Segment(Segment),
         Keccak(ProveKeccakRequest),
+        SegmentReceipt(Box<SegmentReceipt>, SegmentRange),
     }
 
     #[derive(Serialize, Deserialize)]
     pub(crate) enum TaskDone {
         Session(Arc<Session>),
-        ProveSegment(Box<SegmentReceipt>),
+        ProveSegment,
         ProveKeccak(Arc<ProveKeccakDone>),
         Lift(Box<JoinNode>),
         Join(Box<JoinNode>),
@@ -294,7 +310,7 @@ pub mod factory {
         pub fn kind(&self) -> TaskKind {
             match self {
                 Self::Session(_) => TaskKind::Execute,
-                Self::ProveSegment(_) => TaskKind::ProveSegment,
+                Self::ProveSegment => TaskKind::ProveSegment,
                 Self::ProveKeccak(_) => TaskKind::ProveKeccak,
                 Self::Lift(_) => TaskKind::Lift,
                 Self::Join(_) => TaskKind::Join,
@@ -324,20 +340,11 @@ pub mod worker {
     }
 }
 
-impl From<Range<usize>> for SegmentRange {
-    fn from(value: Range<usize>) -> Self {
+impl From<Range<SegmentIndex>> for SegmentRange {
+    fn from(value: Range<SegmentIndex>) -> Self {
         Self {
             start: value.start,
             end: value.end,
-        }
-    }
-}
-
-impl From<Range<u32>> for SegmentRange {
-    fn from(value: Range<u32>) -> Self {
-        Self {
-            start: value.start as usize,
-            end: value.end as usize,
         }
     }
 }

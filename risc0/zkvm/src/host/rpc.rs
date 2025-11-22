@@ -177,6 +177,6 @@ impl<JobResultT> JobStatus<JobResultT> {
 
 impl From<anyhow::Error> for TaskError {
     fn from(value: anyhow::Error) -> Self {
-        Self::Generic(value.to_string())
+        Self::Generic(format!("{value:?}"))
     }
 }
