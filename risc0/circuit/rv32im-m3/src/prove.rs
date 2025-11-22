@@ -56,9 +56,12 @@ impl SegmentContext {
             });
         }
 
+        // Ensure the digests on this partial image are up to date.
+        segment.partial_image.update_digests();
+
         let mut digests: Vec<RawDigestEntry> =
-            Vec::with_capacity(segment.partial_image.digests.len());
-        for (&idx, &digest) in segment.partial_image.digests.iter() {
+            Vec::with_capacity(segment.partial_image.digests().len());
+        for (&idx, &digest) in segment.partial_image.digests().iter() {
             let mut words = [0; DIGEST_WORDS];
             for (i, word) in words.iter_mut().enumerate() {
                 *word = Elem::new(digest.as_words()[i]).as_u32_montgomery();
@@ -194,7 +197,7 @@ pub fn segment_prover(po2: usize) -> Result<ProverContext> {
 mod tests {
     use risc0_binfmt::{MemoryImage, Program};
     use risc0_circuit_rv32im::execute::{
-        CycleLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, Syscall, SyscallContext,
+        CycleLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, SegmentUpdate, Syscall, SyscallContext,
     };
 
     use super::*;
@@ -276,21 +279,21 @@ mod tests {
 
     fn run_program(elf: &[u8], po2: usize) {
         let program = Program::load_elf(elf, u32::MAX).unwrap();
-        let image = MemoryImage::new_kernel(program);
+        let mut image = MemoryImage::new_kernel(program);
 
         let mut segments = Vec::new();
         let trace = Vec::new();
         let session_limit = CycleLimit::Hard(1 << 24);
         Executor::new(
-            image,
+            image.clone(),
             &NullSyscall,
             None,
             trace,
             None,
             RV32IM_M3_CIRCUIT_VERSION,
         )
-        .run(po2, 0, session_limit, |segment| {
-            segments.push(segment);
+        .run(po2, 0, session_limit, |update: SegmentUpdate| {
+            segments.push(update.apply_into_segment(&mut image)?);
             Ok(())
         })
         .unwrap();

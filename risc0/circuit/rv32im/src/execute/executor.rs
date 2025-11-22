@@ -239,6 +239,8 @@ pub trait SegmentUpdateCallback {
     fn on_segment_update(&mut self, update: SegmentUpdate) -> Result<()>;
 
     /// Method called with a final update if the executor encounters an error.
+    ///
+    /// Default implementation is a no-op.
     #[expect(unused_variables)]
     fn on_execution_error(&mut self, final_update: SegmentUpdate) -> Result<()> {
         Ok(())
