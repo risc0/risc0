@@ -266,6 +266,7 @@ pub fn read_slice<T: Pod>(slice: &mut [T]) {
 ///
 /// [example page]: https://dev.risczero.com/api/zkvm/examples
 /// [I/O documentation]: https://dev.risczero.com/api/zkvm/tutorials/io
+/// [risc0-r0vm]: https://crates.io/crates/risc0-r0vm
 pub fn write<T: Serialize>(data: &T) {
     stdout().write(data)
 }
@@ -297,6 +298,7 @@ pub fn write<T: Serialize>(data: &T) {
 /// [example page]: https://dev.risczero.com/api/zkvm/examples
 /// [I/O documentation]: https://dev.risczero.com/api/zkvm/tutorials/io
 /// [instructions on guest optimization]: https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
+/// [risc0-r0vm]: https://crates.io/crates/risc0-r0vm
 pub fn write_slice<T: Pod>(slice: &[T]) {
     stdout().write_slice(slice);
 }
