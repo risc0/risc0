@@ -27,4 +27,5 @@ pub mod prover;
 pub mod soundness;
 pub mod write_iop;
 
+pub(crate) use merkle::MerkleTreeProver;
 pub use prover::Prover;

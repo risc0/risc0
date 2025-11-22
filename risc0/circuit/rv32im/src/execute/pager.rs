@@ -18,7 +18,7 @@ use std::{
     sync::OnceLock,
 };
 
-use anyhow::{Result, bail};
+use anyhow::{Result, bail, ensure};
 use bit_vec::BitVec;
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
@@ -236,15 +236,16 @@ pub(crate) struct WorkingImage {
 }
 
 impl WorkingImage {
+    /// Returns a reference to the page at the given index.
+    ///
+    /// If the page is not in the working image, it is assumed to be all zeroes. A page of zeroes
+    /// is inserted into the working image when this is called.
     #[inline(always)]
-    fn get_page(&mut self, page_idx: u32) -> Result<Page> {
-        // If page exists, return it
-        if let Some(page) = self.pages.get(&page_idx) {
-            return Ok(page.clone());
-        }
-        self.pages.insert(page_idx, zero_page().clone());
-
-        Ok(zero_page().clone())
+    fn get_page(&mut self, page_idx: u32) -> Result<&Page> {
+        Ok(self
+            .pages
+            .entry(page_idx)
+            .or_insert_with(|| zero_page().clone()))
     }
 
     fn set_page(&mut self, page_idx: u32, page: Page) {
@@ -359,26 +360,31 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+    pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<&Page> {
+        // Registers are not stored in the main RAM during execution. As a result, the system page
+        // cannot be accessed with this method, as it would not be correct.
+        ensure!(page_idx != USER_REGS_ADDR.page_idx() && page_idx != MACHINE_REGS_ADDR.page_idx());
         if let Some(cache_idx) = self.page_table.get(page_idx) {
             // Loaded, get from cache
-            Ok(self.page_cache[cache_idx].data().clone())
+            Ok(&self.page_cache[cache_idx])
         } else {
             // Unloaded, peek into image
-            Ok(self.image.get_page(page_idx)?.data().clone())
+            Ok(self.image.get_page(page_idx)?)
         }
     }
 
+    /// Load a word from the RAM.
+    ///
+    /// This method cannot be used to access register values. If the given address is a memory
+    /// mapped register address, the results may not match the current values of the registers.
     #[inline(always)]
     fn load_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
-        let node_idx = node_idx(page_idx);
-        // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}, node: {node_idx:#08x}");
+        // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}");
         let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
             cache_idx
         } else {
-            self.load_page(page_idx)?;
-            self.page_states.set(node_idx, PageState::Loaded);
+            self.page_in(page_idx)?;
             self.page_table.get(page_idx).unwrap()
         };
         Ok(self.page_cache[cache_idx].load(addr))
@@ -445,7 +451,7 @@ impl PagedMemory {
         let node_idx = node_idx(page_idx);
         let mut state = self.page_states.get(node_idx);
         if state == PageState::Unloaded {
-            self.load_page(page_idx)?;
+            self.page_in(page_idx)?;
             state = PageState::Loaded;
         };
 
@@ -459,12 +465,15 @@ impl PagedMemory {
         Ok(self.page_cache.get_mut(cache_idx).unwrap())
     }
 
+    /// Write the registers, which are stored separate from the rest of RAM, to their memory mapped
+    /// location. This method is called when committing to the final memory state of a segment.
     fn write_registers(&mut self) {
         // Copy register values first to avoid borrow conflicts
         let user_registers = self.user_registers;
         let machine_registers = self.machine_registers;
         // This works because we can assume that user and machine register files
-        // live in the same page.
+        // live in the same page. This is a compile-time assertion that this is true.
+        const _: () = assert!(USER_REGS_ADDR.page_idx() == MACHINE_REGS_ADDR.page_idx());
         let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
         let page = self.page_for_writing(page_idx).unwrap();
         for idx in 0..REG_MAX {
@@ -505,11 +514,11 @@ impl PagedMemory {
     }
 
     #[inline(always)]
-    fn load_page(&mut self, page_idx: u32) -> Result<()> {
+    fn page_in(&mut self, page_idx: u32) -> Result<()> {
         tracing::trace!("load_page: {page_idx:#08x}");
         let page = self.image.get_page(page_idx)?;
         self.page_table.set(page_idx, self.page_cache.len());
-        self.page_cache.push(page);
+        self.page_cache.push(page.clone());
         self.cycles += PAGE_CYCLES;
         self.trace_page_in(PAGE_CYCLES);
         self.fixup_costs(node_idx(page_idx), PageState::Loaded);

@@ -31,6 +31,7 @@ mod verify2;
 use std::{
     cell::RefCell,
     collections::HashMap,
+    io::Read,
     rc::Rc,
     sync::{Arc, Mutex},
 };
@@ -38,6 +39,7 @@ use std::{
 use anyhow::{Result, anyhow};
 use enum_map::EnumMap;
 use risc0_binfmt::ByteAddr;
+use risc0_circuit_rv32im::execute::PAGE_BYTES;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{
     DIGEST_BYTES, SyscallName,
@@ -93,7 +95,9 @@ pub(crate) trait SyscallContext<'a> {
     /// Loads an individual word from memory.
     fn load_u32(&mut self, addr: ByteAddr) -> Result<u32>;
 
-    /// Loads bytes from the given region of memory. A region may span multiple pages.
+    /// Loads bytes from the given region of memory.
+    ///
+    /// A region may span multiple pages.
     fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
         let mut region = Vec::new();
         for i in 0..size {
@@ -101,6 +105,11 @@ pub(crate) trait SyscallContext<'a> {
         }
         Ok(region)
     }
+
+    /// Provides a reader for the given region of memory.
+    ///
+    /// A region may span multiple pages.
+    fn read_region<'b>(&'b mut self, addr: ByteAddr, size: u32) -> Result<Box<dyn Read + 'b>>;
 
     /// Loads a digest from the address in the specified register.
     fn load_digest_from_register(&mut self, idx: usize) -> Result<Digest> {
@@ -111,7 +120,7 @@ pub(crate) trait SyscallContext<'a> {
     }
 
     /// Load a page from memory at the specified page index.
-    fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
+    fn load_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]>;
 
     /// Access the syscall table.
     fn syscall_table(&self) -> &SyscallTable<'a>;

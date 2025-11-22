@@ -16,6 +16,8 @@
 use std::{
     cell::RefCell,
     collections::BTreeSet,
+    fmt::Debug,
+    io::Read,
     rc::Rc,
     sync::mpsc::{SyncSender, sync_channel},
     thread::{self, ScopedJoinHandle},
@@ -68,6 +70,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
     povw_job_id: Option<PovwJobId>,
     circuit_version: u32,
+    segment_counter: u32,
     insn_counter: u32,
 }
 
@@ -103,8 +106,10 @@ pub enum CycleLimit {
 }
 
 struct CreateSegmentRequest {
-    partial_image: WorkingImage,
-    page_indexes: BTreeSet<u32>,
+    // Partial image containing pages that were written to in the segment.
+    update_partial_image: WorkingImage,
+    // Indices of all pages that were accessed in the segment.
+    access_page_indexes: BTreeSet<u32>,
 
     input_digest: Digest,
     output_digest: Option<Digest>,
@@ -134,10 +139,13 @@ fn create_segments(
     let initial_digest = existing_image.image_id();
 
     while let Ok(req) = recv.recv() {
+        // Compute the partial image that from the initial memory state that will be sent to
+        // preflight for re-execution of the segment.
         let pre_digest = existing_image.image_id();
-        let partial_image = compute_partial_image(&mut existing_image, req.page_indexes);
+        let partial_image = compute_partial_image(&mut existing_image, req.access_page_indexes);
 
-        for (idx, page) in req.partial_image.pages {
+        // Update the image held locally to the state after segment execution.
+        for (idx, page) in req.update_partial_image.pages {
             existing_image.set_page(idx, page);
         }
         existing_image.update_digests();
@@ -208,6 +216,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             ring: AllocRingBuffer::new(10),
             povw_job_id,
             circuit_version,
+            segment_counter: 0,
         }
     }
 
@@ -221,7 +230,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let segment_limit: u32 = 1 << segment_po2;
         assert!(max_insn_cycles < segment_limit as usize);
         let segment_threshold = segment_limit - max_insn_cycles as u32;
-        let mut segment_counter = 0u32;
 
         self.reset();
 
@@ -232,8 +240,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         let initial_image = self.initial_image.clone();
         let (initial_digest, post_digest, post_image) = thread::scope(|scope| {
-            let segment_callback_thread =
-                scope.spawn(move || create_segments(initial_image, commit_recv, callback));
+            let mut segment_callback_thread =
+                Some(scope.spawn(move || create_segments(initial_image, commit_recv, callback)));
 
             while self.terminate_state.is_none() {
                 match max_cycles {
@@ -254,58 +262,19 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 }
 
                 if self.segment_cycles() > segment_threshold {
-                    tracing::debug!(
-                        "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
-                        self.user_cycles,
-                        self.pager.cycles,
-                        self.segment_cycles()
-                    );
-
                     assert!(
                         self.segment_cycles() < segment_limit,
                         "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
                         self.pc
                     );
+
                     Risc0Machine::suspend(self)?;
-
-                    let partial_image = self.pager.commit();
-
-                    let req = CreateSegmentRequest {
-                        partial_image,
-                        page_indexes: self.pager.page_indexes(),
-                        input_digest: self.input_digest,
-                        output_digest: self.output_digest,
-                        read_record: std::mem::take(&mut self.read_record),
-                        write_record: std::mem::take(&mut self.write_record),
-                        user_cycles: self.user_cycles,
-                        pager_cycles: self.pager.cycles,
-                        insn_counter: self.insn_counter,
-                        terminate_state: self.terminate_state,
+                    self.split_segment(
+                        &commit_sender,
+                        &mut segment_callback_thread,
+                        segment_po2,
                         segment_threshold,
-                        po2: segment_po2 as u32,
-                        index: segment_counter as u64,
-                        dump_path: None,
-                        povw_nonce: self.povw_nonce(segment_counter),
-                    };
-                    if commit_sender.send(req).is_err() {
-                        return Err(segment_callback_thread.join().unwrap().unwrap_err());
-                    }
-
-                    // NOTE: There is no reasonable scenario where a session will have more than 4B
-                    // segments, but its possible.
-                    segment_counter = segment_counter
-                        .checked_add(1)
-                        .context("segment_counter overflow")?;
-                    let total_cycles = 1 << segment_po2;
-                    let pager_cycles = self.pager.cycles as u64;
-                    let user_cycles = self.user_cycles as u64;
-                    self.cycles.total += total_cycles;
-                    self.cycles.paging += pager_cycles;
-                    self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
-                    self.user_cycles = 0;
-                    self.insn_counter = 0;
-                    self.pager.reset();
-
+                    )?;
                     Risc0Machine::resume(self)?;
                 }
 
@@ -316,10 +285,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     self.dump();
                     let result = self.dump_segment(
                         commit_sender,
-                        segment_callback_thread,
+                        segment_callback_thread.unwrap(),
                         segment_po2,
                         segment_threshold,
-                        segment_counter,
+                        self.segment_counter,
                     );
                     return Err(if let Err(inner) = result {
                         err.context(inner)
@@ -333,38 +302,20 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
             let final_cycles = self.segment_cycles().next_power_of_two();
             let final_po2 = log2_ceil(final_cycles as usize);
-            let partial_image = self.pager.commit();
-            let req = CreateSegmentRequest {
-                partial_image,
-                page_indexes: self.pager.page_indexes(),
-                input_digest: self.input_digest,
-                output_digest: self.output_digest,
-                read_record: std::mem::take(&mut self.read_record),
-                write_record: std::mem::take(&mut self.write_record),
-                user_cycles: self.user_cycles,
-                pager_cycles: self.pager.cycles,
-                insn_counter: self.insn_counter,
-                terminate_state: self.terminate_state,
-                segment_threshold: 0, // meaningless for final segment
-                po2: final_po2 as u32,
-                index: segment_counter as u64,
-                dump_path: None,
-                povw_nonce: self.povw_nonce(segment_counter),
-            };
-            if commit_sender.send(req).is_err() {
-                return Err(segment_callback_thread.join().unwrap().unwrap_err());
-            }
-
-            let final_cycles = final_cycles as u64;
-            let user_cycles = self.user_cycles as u64;
-            let pager_cycles = self.pager.cycles as u64;
-            self.cycles.total += final_cycles;
-            self.cycles.paging += pager_cycles;
-            self.cycles.reserved += final_cycles - pager_cycles - user_cycles;
+            self.split_segment(
+                &commit_sender,
+                &mut segment_callback_thread,
+                final_po2,
+                0, // theshold is meaningless for final segment
+            )?;
 
             drop(commit_sender);
 
-            segment_callback_thread.join().unwrap()
+            segment_callback_thread
+                .take()
+                .expect("segment_callback_thread should always be Some(_)")
+                .join()
+                .unwrap()
         })?;
 
         let session_claim = Rv32imV2Claim {
@@ -377,7 +328,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         };
 
         Ok(ExecutorResult {
-            segments: segment_counter as u64 + 1,
+            segments: self.segment_counter as u64 + 1,
             post_image,
             user_cycles: self.cycles.user,
             total_cycles: self.cycles.total,
@@ -385,6 +336,73 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             reserved_cycles: self.cycles.reserved,
             claim: session_claim,
         })
+    }
+
+    /// Execute a segment split, committing the current pager state, sending the segment to the
+    /// segment callback thread thread, and resetting the pager and segment stats.
+    ///
+    /// Takes a handle to the segment callback thread so that it can get the error if the thread
+    /// fails to receive the segment request (e.g. the thread has died).
+    fn split_segment(
+        &mut self,
+        commit_sender: &SyncSender<CreateSegmentRequest>,
+        segment_callback_thread: &mut Option<ScopedJoinHandle<'_, Result<impl Debug>>>,
+        segment_po2: usize,
+        segment_threshold: u32,
+    ) -> Result<()> {
+        tracing::debug!(
+            "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
+            self.user_cycles,
+            self.pager.cycles,
+            self.segment_cycles()
+        );
+
+        let partial_image = self.pager.commit();
+
+        let req = CreateSegmentRequest {
+            update_partial_image: partial_image,
+            access_page_indexes: self.pager.page_indexes(),
+            input_digest: self.input_digest,
+            output_digest: self.output_digest,
+            read_record: std::mem::take(&mut self.read_record),
+            write_record: std::mem::take(&mut self.write_record),
+            user_cycles: self.user_cycles,
+            pager_cycles: self.pager.cycles,
+            insn_counter: self.insn_counter,
+            terminate_state: self.terminate_state,
+            segment_threshold,
+            po2: segment_po2 as u32,
+            index: self.segment_counter as u64,
+            dump_path: None,
+            povw_nonce: self.povw_nonce(self.segment_counter),
+        };
+        if commit_sender.send(req).is_err() {
+            return Err(segment_callback_thread
+                .take()
+                .expect("segment_callback_thread is None")
+                .join()
+                .expect("segment_callback_thread panicked")
+                .expect_err("send to segment_callback_thread failed, but thread returned Ok"));
+        }
+
+        // NOTE: There is no reasonable scenario where a session will have more than 4B
+        // segments, but its possible.
+        self.segment_counter = self
+            .segment_counter
+            .checked_add(1)
+            .context("segment_counter overflow")?;
+
+        let total_cycles = 1 << segment_po2;
+        let pager_cycles = self.pager.cycles as u64;
+        let user_cycles = self.user_cycles as u64;
+        self.cycles.total += total_cycles;
+        self.cycles.paging += pager_cycles;
+        self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
+        self.user_cycles = 0;
+        self.insn_counter = 0;
+        self.pager.reset();
+
+        Ok(())
     }
 
     pub(crate) fn terminate_state(&self) -> Option<&TerminateState> {
@@ -415,8 +433,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             let partial_image = self.pager.commit();
 
             let req = CreateSegmentRequest {
-                partial_image,
-                page_indexes: self.pager.page_indexes(),
+                update_partial_image: partial_image,
+                access_page_indexes: self.pager.page_indexes(),
                 input_digest: self.input_digest,
                 output_digest: self.output_digest,
                 read_record: std::mem::take(&mut self.read_record),
@@ -449,9 +467,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.output_digest = None;
         self.machine_mode = 0;
         self.user_cycles = 0;
+        self.insn_counter = 0;
         self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
         self.ecall_metrics = Default::default();
+        self.segment_counter = 0;
         self.insn_counter = 0;
     }
 
@@ -697,8 +717,13 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
         self.load_region(LoadOp::Peek, addr, size)
     }
 
-    fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
-        self.pager.peek_page(page_idx)
+    fn read_region(&mut self, addr: ByteAddr, size: usize) -> Result<impl Read> {
+        // let addr = Self::check_guest_addr(addr)?;
+        <Self as Risc0Context>::read_region(self, LoadOp::Peek, addr, size)
+    }
+
+    fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {
+        Ok(self.pager.peek_page(page_idx)?.data())
     }
 
     fn get_cycle(&self) -> u64 {
