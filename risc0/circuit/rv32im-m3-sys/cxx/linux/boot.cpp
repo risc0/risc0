@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifdef USE_JIT
+#else
 #include "rv32im/emu/emu.h"
+#endif
+
 
 using namespace risc0;
 using namespace risc0::rv32im;

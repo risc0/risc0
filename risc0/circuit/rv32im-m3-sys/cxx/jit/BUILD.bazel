@@ -4,20 +4,28 @@ sh_binary(
 )
 
 genrule(
-    name = "jit_blob",
-    srcs = ["jit_asm.s"],
+    name = "jit_prelight_h",
+    srcs = ["jit_asm.S"],
     tools = [":make_asm"],
-    outs = [
-        "jit_asm.bin",  # raw machine code
-        "jit_asm.h",    # symbol_name<TAB>offset_hex
-    ],
-    cmd = "$(location :make_asm) $(location jit_asm.s) $(OUTS)",
+    outs = ["jit_asm_preflight.h"],
+    cmd = "$(location :make_asm) 1 $(location jit_asm.S) $(OUTS)",
 )
+
+genrule(
+    name = "jit_exec_h",
+    srcs = ["jit_asm.S"],
+    tools = [":make_asm"],
+    outs = ["jit_asm_exec.h"],
+    cmd = "$(location :make_asm) 0 $(location jit_asm.S) $(OUTS)",
+)
+
 cc_binary(
     name = "jit",
     srcs = [
         "jit.cpp",
-        "jit_asm.h",
+        "config.h",
+        ":jit_exec_h",
+        ":jit_prelight_h",
     ],
     deps = [
         "//rv32im/emu",
@@ -25,6 +33,5 @@ cc_binary(
     data = [
         "//rv32im/rvtest:riscv_test_bins",
         "//rv32im/test:asm_loop_kernel",
-        "jit_asm.bin",
     ],
 )

@@ -6,9 +6,10 @@
 #include <sys/mman.h>
 #include <cstring>
 
-#include "jit/jit_asm.h"
-
-#define PREFLIGHT
+// TODO: Make work for both
+namespace exec_details {
+#include "jit/jit_asm_exec.h"
+};
 
 using namespace risc0;
 using namespace risc0::rv32im;
@@ -139,9 +140,9 @@ public:
     end = cur + size;
   }
 
-  void addBuiltins(const std::vector<uint8_t>& data) {
-    memcpy(cur, data.data(), data.size());
-    cur += data.size();
+  void addBuiltins(const uint8_t* data, size_t size) {
+    memcpy(cur, data, size);
+    cur += size;
   }
 
   ~Assembler() {
@@ -414,8 +415,7 @@ public:
     : image(image)
     , a(4096)
   {
-    auto builtins = loadFile("jit/jit_asm.bin");
-    a.addBuiltins(builtins);
+    a.addBuiltins(exec_details::bytes, exec_details::bytes_len);
     size_t maxLog = 2 * 1024 * 1024;
     pages.resize(MEMORY_SIZE_MPAGES);
     log.resize(maxLog);
@@ -439,7 +439,7 @@ public:
 
   uint64_t enterBlock(uint32_t offset) {
     uint64_t ctxAddr = reinterpret_cast<uint64_t>(&ctx.riscvRegs[0]);
-    return a.call(gsym_enter, ctxAddr, a.getAddr(offset));
+    return a.call(exec_details::gsym_enter, ctxAddr, a.getAddr(offset));
   }
 
   uint32_t readHalf(uint32_t pc) {
@@ -474,7 +474,7 @@ public:
       switch(Opcode(exInst.opcode)) {
 #define ENTRY(name, ...)  \
         case Opcode::name:  \
-          done = doInst(cost, gsym_do_ ## name, exInst, pc, inst); \
+          done = doInst(cost, exec_details::gsym_do_ ## name, exInst, pc, inst); \
           break;
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
