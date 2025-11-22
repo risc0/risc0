@@ -18,6 +18,7 @@ members = [
   "risc0/circuit/rv32im-m3-sys",
   "risc0/circuit/rv32im-sys",
   "risc0/core",
+  "risc0/emu",
   "risc0/groth16",
   "risc0/groth16-sys",
   "risc0/povw",
@@ -67,6 +68,7 @@ risc0-circuit-rv32im-sys = { version = "5.0.0", default-features = false, path =
 risc0-circuit-rv32im-m3 = { version = "0.0.0", default-features = false, path = "risc0/circuit/rv32im-m3" }
 risc0-circuit-rv32im-m3-sys = { version = "0.0.0", default-features = false, path = "risc0/circuit/rv32im-m3-sys" }
 risc0-core = { version = "5.0.0", default-features = false, path = "risc0/core" }
+risc0-emu = { version = "5.0.0", path = "risc0/emu" }
 risc0-groth16 = { version = "5.0.0", default-features = false, path = "risc0/groth16" }
 risc0-groth16-sys = { version = "0.2.0", default-features = false, path = "risc0/groth16-sys" }
 risc0-povw = { default-features = false, path = "risc0/povw" }
