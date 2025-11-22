@@ -892,110 +892,227 @@ impl Translator {
             }
             RvOp::Mul => {
                 // rd = (rs1 * rs2)[31:0]
-                let eax = Loc::GPR(GPR::RAX);
-                let ecx = Loc::GPR(GPR::RCX);
-
-                self.push(GPR::RCX);
-
-                self.emit_mov(eax, rs1);
-                self.emit_mov(ecx, rs2);
-                emit!(self ; imul eax, ecx);
-                self.emit_mov(rd, eax);
-
-                self.pop(GPR::RCX);
+                self.emit_mul(rd, rs1, rs2);
             }
             RvOp::MulH => {
                 // rd = (rs1 * rs2)[63:32]
-                let eax = Loc::GPR(GPR::RAX);
-                let ecx = Loc::GPR(GPR::RCX);
-                let edx = Loc::GPR(GPR::RDX);
-
-                self.push(GPR::RDX);
-                self.push(GPR::RCX);
-
-                self.emit_mov(eax, rs1);
-                self.emit_mov(ecx, rs2);
-                emit!(self ; imul ecx);
-                self.emit_mov(rd, edx);
-
-                self.pop(GPR::RCX);
-                self.pop(GPR::RDX);
+                self.emit_mulh(rd, rs1, rs2);
             }
             RvOp::MulHU => {
                 // rd = (rs1 * rs2)[63:32]
-                let eax = Loc::GPR(GPR::RAX);
-                let ecx = Loc::GPR(GPR::RCX);
-                let edx = Loc::GPR(GPR::RDX);
-
-                self.push(GPR::RDX);
-                self.push(GPR::RCX);
-
-                self.emit_mov(eax, rs1);
-                self.emit_mov(ecx, rs2);
-                emit!(self ; mul ecx);
-                self.emit_mov(rd, edx);
-
-                self.pop(GPR::RCX);
-                self.pop(GPR::RDX);
+                self.emit_mulhu(rd, rs1, rs2);
             }
             RvOp::MulHSU => {
                 // rd = (rs1 * rs2)[63:32]
-                let eax = Loc::GPR(GPR::RAX);
-                let ecx = Loc::GPR(GPR::RCX);
-                let edx = Loc::GPR(GPR::RDX);
-
-                self.push(GPR::RDX);
-                self.push(GPR::RCX);
-
-                self.emit_mov(eax, rs1);
-                emit!(self ; cdqe);
-                self.emit_mov(ecx, rs2);
-                emit!(self ; mov ecx, ecx);
-                emit!(self ; imul rcx);
-                self.emit_mov(rd, edx);
-
-                self.pop(GPR::RCX);
-                self.pop(GPR::RDX);
+                self.emit_mulhsu(rd, rs1, rs2);
             }
             RvOp::Div => {
                 // rd = rs1 / rs2
-                // if rs2 == 0 {
-                //     u32::MAX
-                // } else {
-                //     ((rs1 as i32).wrapping_div(rs2 as i32)) as u32
-                // }
-                todo!()
+                self.emit_div(rd, rs1, rs2);
             }
             RvOp::DivU => {
                 // rd = rs1 / rs2
-                // if rs2 == 0 {
-                //     u32::MAX
-                // } else {
-                //     rs1 / rs2
-                // }
-                todo!()
+                self.emit_divu(rd, rs1, rs2);
             }
             RvOp::Rem => {
                 // rd = rs1 % rs2
-                // if rs2 == 0 {
-                //     rs1
-                // } else {
-                //     ((rs1 as i32).wrapping_rem(rs2 as i32)) as u32
-                // }
-                todo!()
+                self.emit_rem(rd, rs1, rs2);
             }
             RvOp::RemU => {
                 // rd = rs1 % rs2
-                // if rs2 == 0 {
-                //     rs1
-                // } else {
-                //     rs1 % rs2
-                // }
-                todo!()
+                self.emit_remu(rd, rs1, rs2);
             }
             _ => unreachable!(),
         };
         Ok(None)
+    }
+
+    fn emit_mul(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
+        let eax = Loc::GPR(GPR::RAX);
+        let ecx = Loc::GPR(GPR::RCX);
+
+        self.push(GPR::RCX);
+
+        self.emit_mov(eax, rs1);
+        self.emit_mov(ecx, rs2);
+        emit!(self ; imul eax, ecx);
+        self.emit_mov(rd, eax);
+
+        self.pop(GPR::RCX);
+    }
+
+    fn emit_mulh(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
+        let eax = Loc::GPR(GPR::RAX);
+        let ecx = Loc::GPR(GPR::RCX);
+        let edx = Loc::GPR(GPR::RDX);
+
+        self.push(GPR::RDX);
+        self.push(GPR::RCX);
+
+        self.emit_mov(eax, rs1);
+        self.emit_mov(ecx, rs2);
+        emit!(self ; imul ecx);
+        self.emit_mov(rd, edx);
+
+        self.pop(GPR::RCX);
+        self.pop(GPR::RDX);
+    }
+
+    fn emit_mulhu(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
+        let eax = Loc::GPR(GPR::RAX);
+        let ecx = Loc::GPR(GPR::RCX);
+        let edx = Loc::GPR(GPR::RDX);
+
+        self.push(GPR::RDX);
+        self.push(GPR::RCX);
+
+        self.emit_mov(eax, rs1);
+        self.emit_mov(ecx, rs2);
+        emit!(self ; mul ecx);
+        self.emit_mov(rd, edx);
+
+        self.pop(GPR::RCX);
+        self.pop(GPR::RDX);
+    }
+
+    fn emit_mulhsu(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
+        let eax = Loc::GPR(GPR::RAX);
+        let ecx = Loc::GPR(GPR::RCX);
+        let edx = Loc::GPR(GPR::RDX);
+
+        self.push(GPR::RDX);
+        self.push(GPR::RCX);
+
+        self.emit_mov(eax, rs1);
+        emit!(self ; cdqe);
+        self.emit_mov(ecx, rs2);
+        emit!(self ; mov ecx, ecx);
+        emit!(self ; imul rcx);
+        self.emit_mov(rd, edx);
+
+        self.pop(GPR::RCX);
+        self.pop(GPR::RDX);
+    }
+
+    fn emit_div(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
+        self.push(GPR::RDX);
+        self.push(GPR::RCX);
+
+        let eax = Loc::GPR(GPR::RAX);
+        let ecx = Loc::GPR(GPR::RCX);
+        let edx = Loc::GPR(GPR::RDX);
+
+        self.emit_mov(eax, rs1);
+        self.emit_mov(ecx, rs2);
+
+        emit!(self
+            ; cmp ecx, 0
+            ; je >div_by_zero
+            ; cmp eax, i32::MIN
+            ; jne >body
+            ; cmp ecx, -1
+            ; je >done
+            ;body:
+            ; cdq
+            ; idiv ecx
+            ; jmp >done
+            ;div_by_zero:
+            ; mov eax, -1
+            ;done:
+        );
+
+        self.emit_mov(rd, eax);
+
+        self.pop(GPR::RCX);
+        self.pop(GPR::RDX);
+    }
+
+    fn emit_divu(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
+        self.push(GPR::RDX);
+        self.push(GPR::RCX);
+
+        let eax = Loc::GPR(GPR::RAX);
+        let ecx = Loc::GPR(GPR::RCX);
+        let edx = Loc::GPR(GPR::RDX);
+
+        self.emit_mov(eax, rs1);
+        self.emit_mov(ecx, rs2);
+
+        emit!(self
+            ; cmp ecx, 0
+            ; je >div_by_zero
+            ; xor edx, edx
+            ; div ecx
+            ; jmp >done
+            ;div_by_zero:
+            ; mov eax, -1
+            ;done:
+        );
+
+        self.emit_mov(rd, eax);
+
+        self.pop(GPR::RCX);
+        self.pop(GPR::RDX);
+    }
+
+    fn emit_rem(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
+        self.push(GPR::RDX);
+        self.push(GPR::RCX);
+
+        let eax = Loc::GPR(GPR::RAX);
+        let ecx = Loc::GPR(GPR::RCX);
+        let edx = Loc::GPR(GPR::RDX);
+
+        self.emit_mov(eax, rs1);
+        self.emit_mov(ecx, rs2);
+
+        emit!(self
+            ; cmp ecx, 0
+            ; je >done
+            ; cmp eax, i32::MIN
+            ; jne >body
+            ; cmp ecx, -1
+            ; jne >body
+            ; xor eax, eax
+            ; jmp >done
+            ;body:
+            ; cdq
+            ; idiv ecx
+            ; mov eax, edx
+            ; jmp >done
+            ;done:
+        );
+
+        self.emit_mov(rd, eax);
+
+        self.pop(GPR::RCX);
+        self.pop(GPR::RDX);
+    }
+
+    fn emit_remu(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
+        self.push(GPR::RDX);
+        self.push(GPR::RCX);
+
+        let eax = Loc::GPR(GPR::RAX);
+        let ecx = Loc::GPR(GPR::RCX);
+        let edx = Loc::GPR(GPR::RDX);
+
+        self.emit_mov(eax, rs1);
+        self.emit_mov(ecx, rs2);
+
+        emit!(self
+            ; cmp ecx, 0
+            ; je >done
+            ; xor edx, edx
+            ; div ecx
+            ; mov eax, edx
+            ;done:
+        );
+
+        self.emit_mov(rd, eax);
+
+        self.pop(GPR::RCX);
+        self.pop(GPR::RDX);
     }
 
     fn push(&mut self, reg: GPR) {
@@ -1252,6 +1369,7 @@ impl Translator {
         self.emit_lea(GPR::RAX, None, rs1, imm);
     }
 
+    // TODO
     fn step_system(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
         tracing::trace!("step_system");
         let next_pc = self.machine.pc + WORD_SIZE as u32;
