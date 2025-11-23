@@ -14,7 +14,7 @@ void runTest(const std::string& testName) {
   LOG(0, "Doing JIT");
   JitTrace trace;
   NullHostIO io;
-  doJit(trace, image, io, 2*1024*1024, true);
+  doJit(trace, image, io, 64*1024);
   LOG(0, "Done");
 }
 
@@ -27,7 +27,7 @@ void runBench() {
   LOG(0, "Doing JIT");
   JitTrace trace;
   NullHostIO io;
-  doJit(trace, image, io, 64*1024);
+  doJit(trace, image, io, 2*1024*1024, true);
   LOG(0, "Done");
 }
 

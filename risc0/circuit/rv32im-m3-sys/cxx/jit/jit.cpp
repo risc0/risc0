@@ -63,6 +63,7 @@ private:
   MemoryImage& image;
   Assembler a;
   std::vector<PageDetails*> pages;
+  bool execOnly;
 
   PageDetails* getPage(uint32_t page) {
     PageDetails* data = pages[page];
@@ -179,11 +180,16 @@ private:
   };
 
 public:
-  JitExec(MemoryImage& image) 
+  JitExec(MemoryImage& image, bool execOnly) 
     : image(image)
     , a(4096)
+    , execOnly(execOnly)
   {
-    a.addBuiltins(exec_details::bytes, exec_details::bytes_len);
+    if (execOnly) {
+      a.addBuiltins(exec_details::bytes, exec_details::bytes_len);
+    } else {
+      a.addBuiltins(preflight_details::bytes, preflight_details::bytes_len);
+    }
     size_t maxLog = 2 * 1024 * 1024;
     pages.resize(MEMORY_SIZE_MPAGES);
     log.resize(maxLog);
@@ -207,7 +213,8 @@ public:
 
   uint64_t enterBlock(uint32_t offset) {
     uint64_t ctxAddr = reinterpret_cast<uint64_t>(&ctx.riscvRegs[0]);
-    return a.call(exec_details::gsym_enter, ctxAddr, a.getAddr(offset));
+    uint32_t eoffset = (execOnly ? exec_details::gsym_enter : preflight_details::gsym_enter);
+    return a.call(eoffset, ctxAddr, a.getAddr(offset));
   }
 
   uint32_t readHalf(uint32_t pc) {
@@ -239,10 +246,12 @@ public:
           ", rs2 = " << uint32_t(exInst.rs2) << ", imm = " << HexWord{exInst.imm});
       uint32_t newPc = pc + (((inst & 3) == 3) ? 4 : 2);
       LOG(2, "inst = " << HexWord{inst} << ", newPc = " << HexWord{newPc});
+      uint32_t offset;
       switch(Opcode(exInst.opcode)) {
 #define ENTRY(name, ...)  \
         case Opcode::name:  \
-          done = doInst(cost, exec_details::gsym_do_ ## name, exInst, pc, inst); \
+          offset = (execOnly ? exec_details::gsym_do_ ## name : preflight_details::gsym_do_ ## name); \
+          done = doInst(cost, offset, exInst, pc, inst); \
           break;
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
@@ -295,7 +304,7 @@ public:
 };
 
 bool doJit(JitTrace& trace, MemoryImage& image, HostIO& io, size_t quota, bool execOnly) {
-  JitExec jit(image);
+  JitExec jit(image, execOnly);
   jit.run();
   return true;
 }
