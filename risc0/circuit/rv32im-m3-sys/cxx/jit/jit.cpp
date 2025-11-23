@@ -45,13 +45,11 @@ struct JitExec;
 
 // State passed to JIT code
 struct JitContext {
+  uint64_t* regs;
   PageDetails** pages;
   InstEntry* log; 
   int64_t quota;
   uint64_t cycle;
-  // 0 point is here
-  // 128 for user + system + 'junk' space
-  std::array<uint64_t, 128> riscvRegs;
   FuncPtr2 pageMissFunc;
   JitExec* callbackObj;
 };
@@ -63,6 +61,7 @@ private:
   MemoryImage& image;
   Assembler a;
   std::vector<PageDetails*> pages;
+  std::array<uint64_t, 128> riscvRegs;
   bool execOnly;
 
   PageDetails* getPage(uint32_t page) {
@@ -174,45 +173,12 @@ private:
   }
 
   static uint64_t invokePageMiss(uint64_t ctxAddr, uint64_t val) {
-    ctxAddr -= offsetof(JitContext, riscvRegs);
     JitContext* ctx = reinterpret_cast<JitContext*>(ctxAddr);
     return ctx->callbackObj->pageMiss(val);
   };
 
-public:
-  JitExec(MemoryImage& image, bool execOnly) 
-    : image(image)
-    , a(4096)
-    , execOnly(execOnly)
-  {
-    if (execOnly) {
-      a.addBuiltins(exec_details::bytes, exec_details::bytes_len);
-    } else {
-      a.addBuiltins(preflight_details::bytes, preflight_details::bytes_len);
-    }
-    size_t maxLog = 2 * 1024 * 1024;
-    pages.resize(MEMORY_SIZE_MPAGES);
-    log.resize(maxLog);
-    ctx.cycle = 0;
-    ctx.quota = maxLog;
-    ctx.log = log.data();
-    ctx.pages = pages.data();
-    ctx.pageMissFunc = invokePageMiss;
-    ctx.callbackObj = this;
-    // TODO: Copy from memory image
-    for (size_t i = 0; i < 128; i++) {
-      ctx.riscvRegs[i] = 0;
-    }
-  }
-
-  ~JitExec() {
-    for (PageDetails* page : pages) {
-      delete page;
-    }
-  }
-
   uint64_t enterBlock(uint32_t offset) {
-    uint64_t ctxAddr = reinterpret_cast<uint64_t>(&ctx.riscvRegs[0]);
+    uint64_t ctxAddr = reinterpret_cast<uint64_t>(&ctx);
     uint32_t eoffset = (execOnly ? exec_details::gsym_enter : preflight_details::gsym_enter);
     return a.call(eoffset, ctxAddr, a.getAddr(offset));
   }
@@ -220,7 +186,6 @@ public:
   uint32_t readHalf(uint32_t pc) {
     return (readWord(pc/4) >> (8 * (pc % 4))) & 0xffff;
   }
-
 
   uint32_t fetch(uint32_t pc) {
     // Read low 16 of instruction
@@ -265,8 +230,47 @@ public:
     // a.fixupImm(quotaDec, cost);
     return blockOffset; 
   }
+public:
+  JitExec(MemoryImage& image, bool execOnly) 
+    : image(image)
+    , a(4096)
+    , execOnly(execOnly)
+  {
+    if (execOnly) {
+      a.addBuiltins(exec_details::bytes, exec_details::bytes_len);
+    } else {
+      a.addBuiltins(preflight_details::bytes, preflight_details::bytes_len);
+    }
+    pages.resize(MEMORY_SIZE_MPAGES);
+    ctx.cycle = 0;
+    ctx.pages = pages.data();
+    ctx.pageMissFunc = invokePageMiss;
+    ctx.callbackObj = this;
+  }
 
-  void jitLoop(uint32_t pc) {
+  ~JitExec() {
+    for (PageDetails* page : pages) {
+      delete page;
+    }
+  }
+
+  bool run(size_t quotaIn) {
+    ctx.quota = quotaIn;
+    // TODO: Compute max instructions from quota
+    size_t maxInst = quotaIn;
+    // Resize log as needed
+    if (execOnly) {
+      ctx.log = nullptr;
+    } else {
+      log.resize(maxInst);
+      ctx.log = log.data();
+    }
+    // Load 'registers' page
+    uint32_t regPage = MACHINE_REGS_WORD >> MPAGE_SIZE_WORDS_PO2;
+    ctx.regs = reinterpret_cast<uint64_t*>(&((*getPage(regPage))[0]));
+    // Read entry point
+    uint32_t pc = readWord(V2_COMPAT_SPC);
+    // Go into main loop
     uint32_t fixAddr = 0;
     std::map<uint32_t, uint32_t> blockCache;
     while(true) {
@@ -275,7 +279,6 @@ public:
       if (it == blockCache.end()) {
         LOG(1, "Jitting BB = " << HexWord{pc});
         bstart = jitBlockAt(pc);
-        if (bstart == 0) { return; }
         blockCache[pc] = bstart;
       } else {
         bstart = it->second;
@@ -292,21 +295,16 @@ public:
       if (ctx.quota < 0) { break; }
       if (fixAddr == 0xffffffff) {
         LOG(0, "ECALL HIT");
-        return;
+        return true;
       }
     }
-  }
-  void run() {
-    uint32_t entry = readWord(V2_COMPAT_SPC);
-    LOG(0, "MSPC = " << HexWord{entry});
-    jitLoop(entry);
+    return false;  // Out of quota
   }
 };
 
 bool doJit(JitTrace& trace, MemoryImage& image, HostIO& io, size_t quota, bool execOnly) {
   JitExec jit(image, execOnly);
-  jit.run();
-  return true;
+  return jit.run(quota);
 }
 
 }  // namespace risc0::rv32im::jit

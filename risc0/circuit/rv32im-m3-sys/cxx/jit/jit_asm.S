@@ -8,6 +8,7 @@
 
 CTX = %rdi  # Context pointer back to c++ code
 LOG = %rsi  # Head of instruction log
+REGS = %rbp  # Pointer to registers
 RDN = %r8  # Which register is RD (i.e. RD number)
 RS1N = %r9  # Which register is RS1
 RS2N = %r10  # Which register is RS2
@@ -21,11 +22,12 @@ PAGES = %r15
 # Information about where various variables live in the C+++ code
 
 # Offsets for the JitContext structure, when given a pointer to start of registers
-CTX_CYCLE_OFF = -8
-CTX_QUOTA_OFF = -16
-CTX_LOG_OFF = -24
-CTX_PAGES_OFF = -32
-CTX_PAGE_MISS_OFF = 1024;
+CTX_REGS_OFF = 0
+CTX_PAGES_OFF = 8
+CTX_LOG_OFF = 16
+CTX_QUOTA_OFF = 24
+CTX_CYCLE_OFF = 32
+CTX_PAGE_MISS_OFF = 40;
 
 # Offsets in the log
 LOG_PC_OFF = 8
@@ -58,28 +60,28 @@ LOG_RS2_OFF = 32
 
 .macro LOG_OLD_RD  # Log orignal RD value (for things that write to RD)
 #if PREFLIGHT
-  movq (CTX, RDN, 8), %rax  # Load RD
+  movq (REGS, RDN, 8), %rax  # Load RD
   movq %rax, LOG_RD_OFF(LOG)  # Save to log
 #endif
 .endm
 
 .macro LOAD_RS1_EAX  # Log original RS1 value, and load RS1 into EAX
-  movq (CTX, RS1N, 8), %rax  # Load RS1 into %rax
+  movq (REGS, RS1N, 8), %rax  # Load RS1 into %rax
 #if PREFLIGHT
   movq %rax, LOG_RS1_OFF(LOG)  # Save to log
   movl %eax, %eax  # Clear high 32 bits
   orq CYCLE, %rax  # Add cycle
-  movq %rax, (CTX, RS1N, 8)  # Write back
+  movq %rax, (REGS, RS1N, 8)  # Write back
 #endif
 .endm
 
 .macro LOAD_RS2_ECX  # Log original RS2 value, and load RS2 into ECX
-  movq (CTX, RS2N, 8), %rcx  # Load RS2 into %rcx
+  movq (REGS, RS2N, 8), %rcx  # Load RS2 into %rcx
 #if PREFLIGHT
   movq %rcx, LOG_RS2_OFF(LOG)  # Save to log
   movl %ecx, %ecx  # Clear high 32 bits
   orq CYCLE, %rcx  # Add cycle
-  movq %rcx, (CTX, RS2N, 8)  # Write back
+  movq %rcx, (REGS, RS2N, 8)  # Write back
   test $0x40, RS2N  # Check if RS2 is a 'trash address'
   cmovnz %eax, %ecx  # If so, copy over eax
 #endif
@@ -89,7 +91,7 @@ LOG_RS2_OFF = 32
 #if PREFLIGHT
   orq CYCLE, %rax  # Add cycle
 #endif
-  movq %rax, (CTX, RDN, 8)  # Write to RD
+  movq %rax, (REGS, RDN, 8)  # Write to RD
 .endm
 
 .macro INST_END
@@ -168,6 +170,7 @@ LOG_RS2_OFF = 32
   pop %rax
   pop RDN
   # Reload things I need
+  movq CTX_REGS_OFF(CTX), REGS
 #if PREFLIGHT
   movq CTX_LOG_OFF(CTX), LOG
   movq CTX_CYCLE_OFF(CTX), CYCLE
@@ -572,13 +575,16 @@ do_MRET:
 enter:
   # Save caller save registers
   push %rbx
+  push %rbp
   push %r12
   push %r13
   push %r14
   push %r15
+  sub $8, %rsp  # Alignment
   # Save address to jump do (entry block)
   movq %rsi, %rax
   # Initialize local registers I care about
+  movq CTX_REGS_OFF(CTX), REGS
 #if PREFLIGHT
   movq CTX_LOG_OFF(CTX), LOG
   movq CTX_CYCLE_OFF(CTX), CYCLE
@@ -593,9 +599,11 @@ enter:
   movq CYCLE, CTX_CYCLE_OFF(CTX)
 #endif
   # Undo stack manipulations
+  add $8, %rsp
   pop %r15
   pop %r14
   pop %r13
   pop %r12
+  pop %rbp
   pop %rbx
   ret
