@@ -19,11 +19,16 @@ genrule(
     cmd = "$(location :make_asm) 0 $(location jit_asm.S) $(OUTS)",
 )
 
-cc_binary(
+cc_library(
+    visibility = ["//visibility:public"],
     name = "jit",
+    hdrs = [
+        "jit.h",
+    ],
     srcs = [
         "jit.cpp",
-        "config.h",
+        "intel_asm.h",
+        "intel_asm.cpp",
         ":jit_exec_h",
         ":jit_prelight_h",
     ],

@@ -1,33 +1,21 @@
+#include "jit/jit.h"
+
 #include "core/log.h"
 #include "rv32im/emu/decode.h"
 #include "rv32im/emu/expand.h"
-#include "rv32im/emu/image.h"
+#include "jit/intel_asm.h"
 
-#include <sys/mman.h>
-#include <cstring>
+namespace risc0::rv32im::jit {
 
-// TODO: Make work for both
 namespace exec_details {
 #include "jit/jit_asm_exec.h"
 };
 
-using namespace risc0;
-using namespace risc0::rv32im;
-
-struct ExpandedInst {
-  uint8_t opcode;
-  uint8_t rs1;
-  uint8_t rs2;
-  uint8_t rd;
-  uint32_t imm;
+namespace preflight_details {
+#include "jit/jit_asm_preflight.h"
 };
 
-struct MemoryInfo {
-  uint32_t value;
-  uint32_t cycle;
-};
-
-using PageDetails = std::array<MemoryInfo, MPAGE_SIZE_WORDS>;
+using PageDetails = std::array<MemTxn, MPAGE_SIZE_WORDS>;
 
 // TODO: Make this super minimal and self contained (i.e. don't use DecodedInst + getOpcode)
 ExpandedInst expand(uint32_t inst) {
@@ -53,232 +41,12 @@ ExpandedInst expand(uint32_t inst) {
   return ret;
 }
 
-// Define intel registers
-enum class Reg : uint8_t {
-  RAX = 0,
-  RCX = 1,
-  RDX = 2,
-  RBX = 3,
-  RSP = 4,
-  RBP = 5,
-  RSI = 6,
-  RDI = 7,
-  R8 = 8,
-  R9 = 9,
-  R10 = 10,
-  R11 = 11,
-  R12 = 12,
-  R13 = 13,
-  R14 = 14,
-  R15 = 15,
-};
-
-enum class CmpOp : uint8_t {
-  JO   = 0x80,  // Jump if overflow
-  JNO  = 0x81,  // Jump if not overflow
-  JB   = 0x82,  // Jump if below (unsigned) / carry
-  JNB  = 0x83,  // Jump if not below
-  JE   = 0x84,  // Jump if equal / zero
-  JNE  = 0x85,  // Jump if not equal
-  JBE  = 0x86,  // Jump if below or equal (unsigned)
-  JNBE = 0x87,  // Jump if not below or equal
-  JS   = 0x88,  // Jump if sign
-  JNS  = 0x89,  // Jump if not sign
-  JP   = 0x8A,  // Jump if parity
-  JNP  = 0x8B,  // Jump if not parity
-  JL   = 0x8C,  // Jump if less (signed)
-  JNL  = 0x8D,  // Jump if not less (signed)
-  JLE  = 0x8E,  // Jump if less or equal (signed)
-  JNLE = 0x8F,  // Jump if not less or equal (signed)
-};
-
-typedef uint64_t (*FuncPtr1)(uint64_t);
-typedef uint64_t (*FuncPtr2)(uint64_t, uint64_t);
-typedef uint64_t (*FuncPtr3)(uint64_t, uint64_t, uint64_t);
-typedef uint64_t (*FuncPtr4)(uint64_t, uint64_t, uint64_t, uint64_t);
-
-class Assembler {
-private:
-  // Memory region to JIT to
-  uint8_t* begin;
-  uint8_t* cur;
-  uint8_t* end;
-
-  // Some code to write to the current buffer
-  inline void writeByte(uint8_t val) {
-    *cur = val;
-    cur++;
-  }
-
-  inline void writeU32(uint32_t val) {
-    writeByte(val);
-    writeByte(val >> 8);
-    writeByte(val >> 16);
-    writeByte(val >> 24);
-  }
-
-  inline void writeU64(uint64_t val) {
-    writeU32(val);
-    writeU32(val >> 32);
-  }
-
-
-  inline constexpr bool isExtended(Reg reg) {
-    return uint8_t(reg) >= 8;
-  }
-
-
-public:
-  Assembler(size_t pages) {
-    size_t size = pages * 4096;
-    begin = (uint8_t*) mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC,
-                      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (begin == MAP_FAILED) {
-      throw std::runtime_error("Allocation of Jit region failed");
-    }
-    cur = begin;
-    end = cur + size;
-  }
-
-  void addBuiltins(const uint8_t* data, size_t size) {
-    memcpy(cur, data, size);
-    cur += size;
-  }
-
-  ~Assembler() {
-    if (begin != MAP_FAILED) {
-      munmap(begin, end - begin);
-    }
-  }
-
-  void doLoadImm32(Reg reg, uint32_t imm) {
-    if (isExtended(reg)) {
-      writeByte(0x41);
-    }
-    // Move RAX, imm
-    writeByte(0xb8 + (uint8_t(reg) & 7));
-    writeU32(imm);
-  }
-
-  void doLoadImm64(Reg reg, uint64_t imm) {
-    if (isExtended(reg)) {
-      writeByte(0x49);
-    } else {
-      writeByte(0x48);
-    }
-    // Rex prefix for 64 bit mode
-    writeByte(0xb8 + (uint8_t(reg) & 7));
-    writeU64(imm);
-  }
-
-
-  // Jump to a given offset: -1 means jump to end of this instruction which
-  // is used to put a NO-op that can later be retargeted.  Returns the offset
-  // of the immediate to allow later adjustment
-  uint32_t doLocalJump(uint32_t offset = 0xffffffff) {
-    uint32_t curOffset = (cur - begin);
-    uint32_t diff = offset - (curOffset + 5);
-    if (offset == 0xffffffff) {
-      diff = 0;
-    }
-    // Write PC local jump
-    writeByte(0xe9);
-    writeU32(diff);
-    return curOffset + 1;
-  }
-
-  // Branch to a location, returns an offset to allow rewriting of the destination
-  // Presume we need to cmp %eax, %ecx first
-  uint32_t doBranch(CmpOp cmp, uint32_t offset) {
-    // cmp %eax, %ecx
-    writeByte(0x39);  // Opcode
-    writeByte(0xC8);  // ModRM
-    uint32_t curOffset = (cur - begin);
-    uint32_t diff = offset - (curOffset + 6);
-    writeByte(0x0f);
-    writeByte(uint8_t(cmp));
-    writeU32(diff);
-    return curOffset + 2;
-  }
-
-  void fixup(uint32_t fixupOffset, uint32_t newDest) {
-    uint8_t* code = begin + fixupOffset;
-    uint32_t diff = newDest - (fixupOffset + 4);
-    code[0] = diff & 0xff;
-    code[1] = (diff >> 8) & 0xff;
-    code[2] = (diff >> 16) & 0xff;
-    code[3] = (diff >> 24) & 0xff;
-  }
-
-  void doPush(Reg reg) {
-    if (isExtended(reg)) {
-      writeByte(0x41);
-    }
-    writeByte(0x50 + (uint8_t(reg) & 7));
-  }
-
-  void doPop(Reg reg) {
-    if (isExtended(reg)) {
-      writeByte(0x41);
-    }
-    writeByte(0x58 + (uint8_t(reg) & 7));
-  }
-
-  void doCall(uint32_t offset) {
-    uint32_t self = (cur - begin) + 5;
-    writeByte(0xe8);
-    int32_t diff = offset - self;
-    writeU32(diff);
-  }
-
-  void doRet() {
-    writeByte(0xc3);
-  }
-
-  // Get the offset of the next instruction
-  uint32_t getOffset() {
-    return (cur - begin);
-  }
-
-  uint64_t getAddr(uint64_t offset) {
-    return reinterpret_cast<uint64_t>(begin + offset);
-  }
-
-  // Call into generated code at a given offset
-  uint64_t call(uint32_t offset, uint64_t arg) {
-    FuncPtr1 fptr = reinterpret_cast<FuncPtr1>(begin + offset);
-    return fptr(arg); 
-  }
-  uint64_t call(uint32_t offset, uint64_t arg1, uint64_t arg2) {
-    FuncPtr2 fptr = reinterpret_cast<FuncPtr2>(begin + offset);
-    return fptr(arg1, arg2); 
-  }
-  uint64_t call(uint32_t offset, uint64_t arg1, uint64_t arg2, uint64_t arg3) {
-    FuncPtr3 fptr = reinterpret_cast<FuncPtr3>(begin + offset);
-    return fptr(arg1, arg2, arg3); 
-  }
-};
-
-struct MemTxn {
-  uint32_t prevValue;
-  uint32_t prevCycle;
-};
-
-struct LogEntry {
-  ExpandedInst inst;
-  uint32_t pc;
-  uint32_t origInst;
-  MemTxn rd;
-  MemTxn rs1;
-  MemTxn rs2;
-};
-
 struct JitExec;
 
 // State passed to JIT code
 struct JitContext {
   PageDetails** pages;
-  LogEntry* log; 
+  InstEntry* log; 
   int64_t quota;
   uint64_t cycle;
   // 0 point is here
@@ -291,7 +59,7 @@ struct JitContext {
 class JitExec {
 private:
   JitContext ctx;
-  std::vector<LogEntry> log;
+  std::vector<InstEntry> log;
   MemoryImage& image;
   Assembler a;
   std::vector<PageDetails*> pages;
@@ -519,79 +287,17 @@ public:
       }
     }
   }
+  void run() {
+    uint32_t entry = readWord(V2_COMPAT_SPC);
+    LOG(0, "MSPC = " << HexWord{entry});
+    jitLoop(entry);
+  }
 };
 
-void runTest(const std::string& testName) {
-  std::string path = "rv32im/rvtest/" + testName;
-  std::map<uint32_t, uint32_t> words;
-  LOG(0, "Loading " << path);
-  uint32_t entry = loadKernelV2(words, path);
-  auto image = MemoryImage::fromWords(words);
-  LOG(0, "Making JIT engine");
+bool doJit(JitTrace& trace, MemoryImage& image, HostIO& io, size_t quota, bool execOnly) {
   JitExec jit(image);
-  LOG(0, "Doing JIT");
-  jit.jitLoop(entry);
+  jit.run();
+  return true;
 }
 
-void runBench() {
-  std::string path = "rv32im/test/asm_loop_kernel";
-  std::map<uint32_t, uint32_t> words;
-  LOG(0, "Loading " << path);
-  uint32_t entry = loadKernelV2(words, path);
-  auto image = MemoryImage::fromWords(words);
-  LOG(0, "Making JIT engine");
-  JitExec jit(image);
-  LOG(0, "Doing JIT");
-  jit.jitLoop(entry);
-}
-
-
-int main() {
-  runBench();
-  runTest("rvc");
-  runTest("add");
-  runTest("sub");
-  runTest("xor");
-  runTest("or");
-  runTest("and");
-  runTest("slt");
-  runTest("sltu");
-  runTest("addi");
-  runTest("xori");
-  runTest("ori");
-  runTest("andi");
-  runTest("slti");
-  runTest("sltiu");
-  runTest("beq");
-  runTest("bne");
-  runTest("blt");
-  runTest("bge");
-  runTest("bltu");
-  runTest("bgeu");
-  runTest("jal");
-  runTest("jalr");
-  runTest("lui");
-  runTest("auipc");
-  runTest("sll");
-  runTest("slli");
-  runTest("mul");
-  runTest("mulh");
-  runTest("mulhsu");
-  runTest("mulhu");
-  runTest("srl");
-  runTest("sra");
-  runTest("srli");
-  runTest("srai");
-  runTest("div");
-  runTest("divu");
-  runTest("rem");
-  runTest("remu");
-  runTest("lb");
-  runTest("lh");
-  runTest("lw");
-  runTest("lbu");
-  runTest("lhu");
-  runTest("sb");
-  runTest("sh");
-  runTest("sw");
-}
+}  // namespace risc0::rv32im::jit
