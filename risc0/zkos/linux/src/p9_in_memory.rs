@@ -129,21 +129,23 @@ pub struct ZeroCopyFilesystem {
 
 impl Drop for ZeroCopyFilesystem {
     fn drop(&mut self) {
-        let path_index_len = self.path_index.len();
-        // Only log if path_index has entries (real instance, not temporary validation instance)
-        if path_index_len > 0 {
-            let (heap_used, _heap_free, _heap_total) = crate::allocator::get_heap_stats();
-            crate::kernel::print(&format!(
-                "ZeroCopyFilesystem::drop() called! path_index.len()={}, heap_used={} bytes ({} KB)",
-                path_index_len,
-                heap_used,
-                heap_used / 1024
-            ));
-            crate::kernel::print(&format!(
-                "ZeroCopyFilesystem::drop() - CRITICAL: Real backend being dropped! This will deallocate path_index (BTreeMap with {} entries, ~{} KB)",
-                path_index_len,
-                (path_index_len * 100) / 1024 // Rough estimate
-            ));
+        if ZERO_COPY_DEBUG {
+            let path_index_len = self.path_index.len();
+            // Only log if path_index has entries (real instance, not temporary validation instance)
+            if path_index_len > 0 {
+                let (heap_used, _heap_free, _heap_total) = crate::allocator::get_heap_stats();
+                crate::kernel::print(&format!(
+                    "ZeroCopyFilesystem::drop() called! path_index.len()={}, heap_used={} bytes ({} KB)",
+                    path_index_len,
+                    heap_used,
+                    heap_used / 1024
+                ));
+                crate::kernel::print(&format!(
+                    "ZeroCopyFilesystem::drop() - CRITICAL: Real backend being dropped! This will deallocate path_index (BTreeMap with {} entries, ~{} KB)",
+                    path_index_len,
+                    (path_index_len * 100) / 1024 // Rough estimate
+                ));
+            }
         }
         // Silently drop temporary validation instances (path_index_len == 0)
     }
@@ -341,11 +343,13 @@ impl ZeroCopyFilesystem {
         let header_slice = unsafe { core::slice::from_raw_parts(addr as *const u8, HEADER_SIZE) };
 
         // Debug: show raw header bytes
-        crate::kernel::print(&format!("Reading header at 0x{:08x}", addr));
-        crate::kernel::print(&format!(
-            "  First 16 bytes: {:02x?}",
-            &header_slice[..16.min(header_slice.len())]
-        ));
+        if ZERO_COPY_DEBUG {
+            crate::kernel::print(&format!("Reading header at 0x{:08x}", addr));
+            crate::kernel::print(&format!(
+                "  First 16 bytes: {:02x?}",
+                &header_slice[..16.min(header_slice.len())]
+            ));
+        }
 
         let header: &'static FilesystemImageHeader = from_bytes(header_slice);
 
@@ -473,33 +477,41 @@ impl ZeroCopyFilesystem {
             return Err(P9Error::Einval as u32);
         }
         // Track heap before parsing path_index
-        let (heap_before_used, _, _) = crate::allocator::get_heap_stats();
-        crate::kernel::print(&format!(
-            "ZeroCopyFilesystem: Heap before parse_path_index: {} bytes",
-            heap_before_used
-        ));
+        let (heap_before_used, _, _) = if ZERO_COPY_DEBUG {
+            crate::allocator::get_heap_stats()
+        } else {
+            (0, 0, 0)
+        };
+        if ZERO_COPY_DEBUG {
+            crate::kernel::print(&format!(
+                "ZeroCopyFilesystem: Heap before parse_path_index: {} bytes",
+                heap_before_used
+            ));
+        }
 
         let path_index = Self::parse_path_index(&data[path_start..path_end])?;
 
         // Track heap after parsing path_index
-        let (heap_after_used, heap_after_free, heap_after_total) =
-            crate::allocator::get_heap_stats();
-        let heap_delta = heap_after_used.saturating_sub(heap_before_used);
-        let path_index_size = path_end.saturating_sub(path_start);
-        crate::kernel::print(&format!(
-            "ZeroCopyFilesystem: Heap after parse_path_index: {} bytes (delta: {} bytes, {:.2} KB), free: {} bytes, total: {} bytes",
-            heap_after_used,
-            heap_delta,
-            heap_delta as f64 / 1024.0,
-            heap_after_free,
-            heap_after_total
-        ));
-        crate::kernel::print(&format!(
-            "ZeroCopyFilesystem: path_index.len()={}, path_index data size: {} bytes ({:.2} KB)",
-            path_index.len(),
-            path_index_size,
-            path_index_size as f64 / 1024.0
-        ));
+        if ZERO_COPY_DEBUG {
+            let (heap_after_used, heap_after_free, heap_after_total) =
+                crate::allocator::get_heap_stats();
+            let heap_delta = heap_after_used.saturating_sub(heap_before_used);
+            let path_index_size = path_end.saturating_sub(path_start);
+            crate::kernel::print(&format!(
+                "ZeroCopyFilesystem: Heap after parse_path_index: {} bytes (delta: {} bytes, {:.2} KB), free: {} bytes, total: {} bytes",
+                heap_after_used,
+                heap_delta,
+                heap_delta as f64 / 1024.0,
+                heap_after_free,
+                heap_after_total
+            ));
+            crate::kernel::print(&format!(
+                "ZeroCopyFilesystem: path_index.len()={}, path_index data size: {} bytes ({:.2} KB)",
+                path_index.len(),
+                path_index_size,
+                path_index_size as f64 / 1024.0
+            ));
+        }
 
         // Create temporary filesystem instance for validation (before final construction)
         // This allows us to validate all inodes during initialization to catch corruption early
@@ -519,7 +531,7 @@ impl ZeroCopyFilesystem {
                 && !temp_fs.validate_inode_meta(meta, inode_num, data_blob.len())
             {
                 corrupted_inodes += 1;
-                if corrupted_inodes <= 5 {
+                if corrupted_inodes <= 5 && ZERO_COPY_DEBUG {
                     // Only log first 5 to avoid spam
                     crate::kernel::print(&format!(
                         "ZeroCopyFilesystem: WARNING - corrupted inode {} detected during init",
@@ -529,7 +541,7 @@ impl ZeroCopyFilesystem {
             }
         }
 
-        if corrupted_inodes > 0 {
+        if corrupted_inodes > 0 && ZERO_COPY_DEBUG {
             crate::kernel::print(&format!(
                 "ZeroCopyFilesystem: WARNING - {} corrupted inodes detected (filesystem may be unreliable)",
                 corrupted_inodes
@@ -538,12 +550,14 @@ impl ZeroCopyFilesystem {
             // Individual accesses will still be validated and fail safely
         }
 
-        crate::kernel::print("ZeroCopyFilesystem: initialized");
-        crate::kernel::print(&format!("  Inodes: {}", header.num_inodes));
-        crate::kernel::print(&format!("  Paths: {}", path_index.len()));
-        crate::kernel::print(&format!("  Data blob: {} bytes", data_blob.len()));
-        if corrupted_inodes == 0 {
-            crate::kernel::print("  Validation: All inodes passed integrity checks");
+        if ZERO_COPY_DEBUG {
+            crate::kernel::print("ZeroCopyFilesystem: initialized");
+            crate::kernel::print(&format!("  Inodes: {}", header.num_inodes));
+            crate::kernel::print(&format!("  Paths: {}", path_index.len()));
+            crate::kernel::print(&format!("  Data blob: {} bytes", data_blob.len()));
+            if corrupted_inodes == 0 {
+                crate::kernel::print("  Validation: All inodes passed integrity checks");
+            }
         }
 
         // Now create the final filesystem instance with the real path_index
@@ -632,12 +646,14 @@ impl ZeroCopyFilesystem {
 
     /// Dump all known filesystem paths for debugging
     pub fn dump_all_paths(&self) {
-        crate::kernel::print(&format!(
-            "ZeroCopyFilesystem: dumping {} paths from path_index",
-            self.path_index.len()
-        ));
-        for (path, inode) in &self.path_index {
-            crate::kernel::print(&format!("  {} -> inode {}", path, inode));
+        if ZERO_COPY_DEBUG {
+            crate::kernel::print(&format!(
+                "ZeroCopyFilesystem: dumping {} paths from path_index",
+                self.path_index.len()
+            ));
+            for (path, inode) in &self.path_index {
+                crate::kernel::print(&format!("  {} -> inode {}", path, inode));
+            }
         }
     }
 
@@ -1175,18 +1191,20 @@ pub struct ZeroCopyBackend {
 
 impl Drop for ZeroCopyBackend {
     fn drop(&mut self) {
-        let (heap_used, _heap_free, _heap_total) = crate::allocator::get_heap_stats();
-        let path_index_len = self.fs.path_index.len();
-        crate::kernel::print(&format!(
-            "ZeroCopyBackend::drop() called! path_index.len()={}, heap_used={} bytes ({} KB)",
-            path_index_len,
-            heap_used,
-            heap_used / 1024
-        ));
-        crate::kernel::print(&format!(
-            "ZeroCopyBackend::drop() - This will deallocate path_index (BTreeMap with {} entries)",
-            path_index_len
-        ));
+        if ZERO_COPY_DEBUG {
+            let (heap_used, _heap_free, _heap_total) = crate::allocator::get_heap_stats();
+            let path_index_len = self.fs.path_index.len();
+            crate::kernel::print(&format!(
+                "ZeroCopyBackend::drop() called! path_index.len()={}, heap_used={} bytes ({} KB)",
+                path_index_len,
+                heap_used,
+                heap_used / 1024
+            ));
+            crate::kernel::print(&format!(
+                "ZeroCopyBackend::drop() - This will deallocate path_index (BTreeMap with {} entries)",
+                path_index_len
+            ));
+        }
     }
 }
 
