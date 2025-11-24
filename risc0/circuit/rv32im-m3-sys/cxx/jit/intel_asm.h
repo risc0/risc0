@@ -84,8 +84,8 @@ public:
   // Add any pre-compiled code
   void addBuiltins(const uint8_t* data, size_t size);
 
-  // Emit code to load immediates into registre
-  void doLoadImm32(Reg reg, uint32_t imm);
+  // Emit code to load immediates into registre, returns offset of constant
+  uint32_t doLoadImm32(Reg reg, uint32_t imm);
   void doLoadImm64(Reg reg, uint64_t imm);
 
   // Jump to a given offset: -1 means jump to end of this instruction which
@@ -99,6 +99,7 @@ public:
 
   // Modify existing local jump to point to a new destination
   void fixup(uint32_t fixupOffset, uint32_t newDest);
+  void fixupImm32(uint32_t fixupOffset, uint32_t newVal);
 
   // Emit a call to a given offset
   void doCall(uint32_t offset);

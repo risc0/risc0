@@ -27,7 +27,9 @@ CTX_PAGES_OFF = 8
 CTX_LOG_OFF = 16
 CTX_QUOTA_OFF = 24
 CTX_CYCLE_OFF = 32
-CTX_PAGE_MISS_OFF = 40;
+CTX_STOP_CYCLE_OFF = 40
+CTX_EXIT_CAUSE_OFF = 48
+CTX_PAGE_MISS_OFF = 56
 
 # Offsets in the log
 LOG_PC_OFF = 8
@@ -36,11 +38,20 @@ LOG_RD_OFF =16
 LOG_RS1_OFF = 24
 LOG_RS2_OFF = 32 
 
+EXIT_CAUSE_QUOTA_OUT = 0
+EXIT_CAUSE_CYCLES_OUT = 1
+EXIT_CAUSE_ECALL = 2
+EXIT_CAUSE_ALIGNMENT = 3
+EXIT_CAUSE_MRET = 4
+EXIT_CAUSE_JALR = 5
+
 # Next we have common 'parts' of instructions (getting RS1 + RS2, logging
 # RD's original state, etc).  When then use these to build instruction
 # categories (3-reg, imm, etc), and finally instructions
 
 .macro WRITE_INST, INST  # Write instruction info to the loga
+  cmpq CTX_STOP_CYCLE_OFF(CTX), CYCLE
+  jae .Lcycles_empty
 #if PREFLIGHT 
   movb \INST, (LOG)  # Write opcode
   movb %r8b, 1(LOG)  # Write RD
@@ -98,6 +109,8 @@ LOG_RS2_OFF = 32
 #if PREFLIGHT
   INC_CYCLE  # Add final cycle
   add $40, LOG  # Move log forward
+#else
+  addq CYCLE_INC_VAL, CYCLE  # Inc cycle
 #endif
   ret  # Return from instruction
 .endm
@@ -175,6 +188,8 @@ LOG_RS2_OFF = 32
   movq CTX_LOG_OFF(CTX), LOG
   movq CTX_CYCLE_OFF(CTX), CYCLE
   movq $0x100000000, CYCLE_INC_VAL
+#else
+  movq $0x200000000, CYCLE_INC_VAL
 #endif
   movq CTX_PAGES_OFF(CTX), PAGES
   ret
@@ -460,6 +475,7 @@ do_JALR:
   INC_CYCLE  # Move to the 'write' cycle
   WRITE_EAX_RD  # Write EAX to RD
   mov %ecx, %eax
+  movq $EXIT_CAUSE_JALR, CTX_EXIT_CAUSE_OFF(CTX)
   INST_END  # Finish instruction
 
 do_LUI:
@@ -563,14 +579,50 @@ do_ECALL:
   # We don't do anything, and the BB actually terminates with PC @ ECALL
   # No cycles pass, no logging happens, so we can do trap handling or
   # whatever we want
+  movl PC, %eax
+  movq $EXIT_CAUSE_ECALL, CTX_EXIT_CAUSE_OFF(CTX)
   ret 
 
 do_MRET:
-  ud2
+  # Also handle MRET in emulator
+  movl PC, %eax
+  movq $EXIT_CAUSE_MRET, CTX_EXIT_CAUSE_OFF(CTX)
+  ret 
+
+block_header:
+  subq %r8, CTX_QUOTA_OFF(CTX)
+  js .Lquota_empty
+  ret
 
 # Handle misalignment
 .Lalignment_trap:
-  ud2
+  movq $EXIT_CAUSE_ALIGNMENT, CTX_EXIT_CAUSE_OFF(CTX)
+  jmp .Lexit_exception
+
+.Lcycles_empty:
+  movq $EXIT_CAUSE_CYCLES_OUT, CTX_EXIT_CAUSE_OFF(CTX)  # Set cause
+  jmp .Lexit_exception  # Exit with exception
+
+.Lquota_empty:
+  addq %r8, CTX_QUOTA_OFF(CTX)  # Undo effect
+  movq $EXIT_CAUSE_QUOTA_OUT, CTX_EXIT_CAUSE_OFF(CTX)
+  jmp .Lexit_exception
+
+.Lexit_exception:
+#if PREFLIGHT
+  movq LOG, CTX_LOG_OFF(CTX)
+  movq CYCLE, CTX_CYCLE_OFF(CTX)
+#endif
+  add $24, %rsp  # Drop two stack frames + padding
+  movq %r12, %rax  # Specify which IP we failed at
+  # Restore callee save registers
+  pop %r15
+  pop %r14
+  pop %r13
+  pop %r12
+  pop %rbp
+  pop %rbx
+  ret  # Exit back to c+++
 
 enter:
   # Save caller save registers
@@ -589,6 +641,8 @@ enter:
   movq CTX_LOG_OFF(CTX), LOG
   movq CTX_CYCLE_OFF(CTX), CYCLE
   movq $0x100000000, CYCLE_INC_VAL
+#else
+  movq $0x200000000, CYCLE_INC_VAL
 #endif
   movq CTX_PAGES_OFF(CTX), PAGES
   # Call into basic block, which will jump around + return

@@ -17,6 +17,15 @@ namespace preflight_details {
 
 using PageDetails = std::array<MemTxn, MPAGE_SIZE_WORDS>;
 
+enum ExitCause {
+  QUOTA_OUT = 0,
+  CYCLES_OUT = 1,
+  ECALL = 2,
+  ALIGNMENT = 3, 
+  MRET = 4,
+  JALR = 5,
+};
+
 // TODO: Make this super minimal and self contained (i.e. don't use DecodedInst + getOpcode)
 ExpandedInst expand(uint32_t inst) {
   if ((inst & 3) != 3) {
@@ -49,7 +58,9 @@ struct JitContext {
   PageDetails** pages;
   InstEntry* log; 
   int64_t quota;
-  uint64_t cycle;
+  uint64_t curCycle;
+  uint64_t stopCycle;
+  uint64_t exitCause;
   FuncPtr2 pageMissFunc;
   JitExec* callbackObj;
 };
@@ -122,14 +133,13 @@ private:
   }
 
   bool endEcall(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    uint64_t ret = uint64_t(0xffffffff00000000ull) | pc;
-    a.doLoadImm64(Reg::RAX, ret);
     a.doRet();
     return true;
   }
 
   bool endMret(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    throw std::runtime_error("Mret Unimplemented");
+    a.doRet();
+    return true;
   }
 
   bool doUnhandled(uint32_t& cost, const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
@@ -199,7 +209,10 @@ private:
   uint32_t jitBlockAt(uint32_t pc) {
     bool done = false;
     uint32_t blockOffset = a.getOffset();
-    // TODO: Setup quota check
+    // Do pre-block cost analysis
+    uint32_t quotaOff = a.doLoadImm32(Reg::R8, 0);
+    a.doLoadImm32(Reg::R12, pc);  // Write PC so early exit know where we are
+    a.doCall(execOnly ? exec_details::gsym_block_header : preflight_details::gsym_block_header);
     uint32_t cost = 0;
     while (!done) {
       uint32_t inst = fetch(pc);
@@ -226,10 +239,15 @@ private:
       }
       pc = newPc;
     }
-    // TODO: apply quota check
-    // a.fixupImm(quotaDec, cost);
+    a.fixupImm32(quotaOff, cost);
     return blockOffset; 
   }
+
+  bool onEcall() {
+    LOG(0, "ECALL");
+    return false;
+  }
+
 public:
   JitExec(MemoryImage& image, bool execOnly) 
     : image(image)
@@ -242,7 +260,7 @@ public:
       a.addBuiltins(preflight_details::bytes, preflight_details::bytes_len);
     }
     pages.resize(MEMORY_SIZE_MPAGES);
-    ctx.cycle = 0;
+    ctx.curCycle = 0;
     ctx.pages = pages.data();
     ctx.pageMissFunc = invokePageMiss;
     ctx.callbackObj = this;
@@ -256,6 +274,7 @@ public:
 
   bool run(size_t quotaIn) {
     ctx.quota = quotaIn;
+    ctx.stopCycle = uint64_t(0x7fffffff) << 33;
     // TODO: Compute max instructions from quota
     size_t maxInst = quotaIn;
     // Resize log as needed
@@ -273,7 +292,9 @@ public:
     // Go into main loop
     uint32_t fixAddr = 0;
     std::map<uint32_t, uint32_t> blockCache;
-    while(true) {
+    LOG(0, "Entering main loop");
+    bool keepLooping = true;
+    while(keepLooping) {
       auto it = blockCache.find(pc);
       uint32_t bstart;
       if (it == blockCache.end()) {
@@ -286,16 +307,34 @@ public:
       if (fixAddr) {
         a.fixup(fixAddr, bstart);
       }
-      LOG(1, "Entering block, PC = " << HexWord{pc} << ", cycle = " << (ctx.cycle >> 32) << ", quota = " << ctx.quota);
+      LOG(1, "Entering block, PC = " << HexWord{pc} << ", cycle = " << (ctx.curCycle >> 32) << ", quota = " << ctx.quota);
       uint64_t ret = enterBlock(bstart);
       fixAddr = ret >> 32;
       pc = ret & 0xffffffff;
-      LOG(1, "  new PC = " << HexWord{pc} << ", new cycle = " << (ctx.cycle >> 32) << ", new quota = " << ctx.quota);
-      //dump();
-      if (ctx.quota < 0) { break; }
-      if (fixAddr == 0xffffffff) {
-        LOG(0, "ECALL HIT");
-        return true;
+      LOG(1, "  new PC = " << HexWord{pc} << ", new cycle = " << (ctx.curCycle >> 32) << ", new quota = " << ctx.quota);
+      if (fixAddr == 0) {
+        switch(ctx.exitCause) {
+          case ExitCause::JALR:
+            // Just keep looping
+            break;
+          case ExitCause::QUOTA_OUT:
+            LOG(0, "Quota out");
+            keepLooping = false;
+            break;
+          case ExitCause::CYCLES_OUT:
+            // TODO: This will be used for timer interrupt
+            LOG(0, "cycle = " << ctx.curCycle);
+            LOG(0, "stopCycle = " << ctx.stopCycle);
+            throw std::runtime_error("Cycles out");
+          case ExitCause::ECALL:
+            keepLooping = onEcall();
+            break;
+          case ExitCause::ALIGNMENT:
+            throw std::runtime_error("Alignment");
+          default:
+            LOG(0, "Exit cause: " << ctx.exitCause);
+            throw std::runtime_error("Unknown exit cause");
+        }
       }
     }
     return false;  // Out of quota

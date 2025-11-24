@@ -32,13 +32,15 @@ void Assembler::addBuiltins(const uint8_t* data, size_t size) {
 }
 
 
-void Assembler::doLoadImm32(Reg reg, uint32_t imm) {
+uint32_t Assembler::doLoadImm32(Reg reg, uint32_t imm) {
   if (isExtended(reg)) {
     writeByte(0x41);
   }
   // Move RAX, imm
   writeByte(0xb8 + (uint8_t(reg) & 7));
+  uint32_t ret = getOffset();
   writeU32(imm);
+  return ret;
 }
 
 void Assembler::doLoadImm64(Reg reg, uint64_t imm) {
@@ -83,6 +85,14 @@ void Assembler::fixup(uint32_t fixupOffset, uint32_t newDest) {
   code[1] = (diff >> 8) & 0xff;
   code[2] = (diff >> 16) & 0xff;
   code[3] = (diff >> 24) & 0xff;
+}
+
+void Assembler::fixupImm32(uint32_t fixupOffset, uint32_t val) {
+  uint8_t* code = begin + fixupOffset;
+  code[0] = val & 0xff;
+  code[1] = (val >> 8) & 0xff;
+  code[2] = (val >> 16) & 0xff;
+  code[3] = (val >> 24) & 0xff;
 }
 
 void Assembler::doCall(uint32_t offset) {
