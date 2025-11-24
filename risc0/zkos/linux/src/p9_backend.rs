@@ -5,7 +5,7 @@
 //!
 //! Backends can be:
 //! - zkVM host calls (p9_zkvm.rs)
-//! - In-memory filesystem (p9_in_memory.rs)
+//! - Zero-copy filesystem (p9_in_memory.rs)
 //! - Mock/test implementations
 //! - Network sockets, etc.
 
@@ -284,8 +284,6 @@ pub trait P9Backend {
 // SAFETY: zkVM is single-threaded, so this is safe
 static ZKVM_BACKEND: SyncUnsafeCell<Option<crate::p9_zkvm::ZkvmBackend>> =
     SyncUnsafeCell::new(None);
-static INMEMORY_BACKEND: SyncUnsafeCell<Option<crate::p9_in_memory::InMemoryBackend>> =
-    SyncUnsafeCell::new(None);
 static ZEROCOPY_BACKEND: SyncUnsafeCell<Option<crate::p9_in_memory::ZeroCopyBackend>> =
     SyncUnsafeCell::new(None);
 // Initialized but not used as active backend (for opts=p9zc)
@@ -294,7 +292,7 @@ static ZEROCOPY_FILESYSTEM_INIT: SyncUnsafeCell<Option<crate::p9_in_memory::Zero
 
 /// Get the active backend as a trait object
 ///
-/// Priority: ZeroCopy > InMemory > Zkvm (default)
+/// Priority: ZeroCopy > Zkvm (default)
 /// Since we only initialize once, we just check which one is Some().
 pub fn get_backend() -> &'static mut dyn P9Backend {
     unsafe {
@@ -303,23 +301,12 @@ pub fn get_backend() -> &'static mut dyn P9Backend {
         if let Some(ref mut b) = *zerocopy_ptr {
             return b as &mut dyn P9Backend;
         }
-        let inmemory_ptr = INMEMORY_BACKEND.get();
-        if let Some(ref mut b) = *inmemory_ptr {
-            return b as &mut dyn P9Backend;
-        }
         // Default to zkVM backend (lazy init)
         let zkvm_ptr = ZKVM_BACKEND.get();
         if (*zkvm_ptr).is_none() {
             *zkvm_ptr = Some(crate::p9_zkvm::ZkvmBackend::new());
         }
         (*zkvm_ptr).as_mut().unwrap() as &mut dyn P9Backend
-    }
-}
-
-/// Initialize with in-memory backend
-pub fn init_in_memory_backend() {
-    unsafe {
-        *INMEMORY_BACKEND.get() = Some(crate::p9_in_memory::InMemoryBackend::new());
     }
 }
 
@@ -389,7 +376,6 @@ pub unsafe fn init_zerocopy_backend(addr: usize, max_size: usize) -> Result<usiz
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BackendType {
     Zkvm,
-    InMemory,
     ZeroCopy,
 }
 
@@ -398,8 +384,6 @@ pub fn get_backend_type() -> BackendType {
         // Use UnsafeCell::get() to check without moving
         if (*ZEROCOPY_BACKEND.get()).is_some() {
             BackendType::ZeroCopy
-        } else if (*INMEMORY_BACKEND.get()).is_some() {
-            BackendType::InMemory
         } else {
             BackendType::Zkvm
         }
@@ -412,16 +396,6 @@ pub fn set_backend_type(_backend: BackendType) {
 
 pub fn get_zkvm_backend() -> crate::p9_zkvm::ZkvmBackend {
     crate::p9_zkvm::ZkvmBackend::new()
-}
-
-pub fn get_in_memory_backend() -> &'static mut crate::p9_in_memory::InMemoryBackend {
-    unsafe {
-        let ptr = INMEMORY_BACKEND.get();
-        if (*ptr).is_none() {
-            *ptr = Some(crate::p9_in_memory::InMemoryBackend::new());
-        }
-        (*ptr).as_mut().unwrap()
-    }
 }
 
 pub fn get_zerocopy_backend() -> &'static mut crate::p9_in_memory::ZeroCopyBackend {
