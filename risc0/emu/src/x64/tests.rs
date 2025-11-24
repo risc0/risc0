@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use dynasmrt::dynasm;
+
 use super::*;
 
 fn run_asm_test(inner: fn(&mut Translator), expected: &[&str]) {

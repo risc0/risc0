@@ -24,7 +24,6 @@ use anyhow::Result;
 use dynasmrt::{
     AssemblyOffset, DynasmApi as _, DynasmError, DynasmLabelApi,
     components::StaticLabel,
-    dynasm,
     relocations::{Relocation as _, RelocationSize},
     x64::{Assembler, X64Relocation},
 };
@@ -221,12 +220,18 @@ const REGISTER_MAPPING: [Loc; REG_MAX] = [
     Loc::Memory(GPR::RBX, 31 * WORD_SIZE as i32),
 ];
 
-macro_rules! emit {
+macro_rules! dynasm {
     ($asm:expr ; $($tt:tt)*) => {
-        dynasm!($asm.asm
+        dynasmrt::dynasm!($asm
             ; .arch x64
             ; $($tt)*
         )
+    };
+}
+
+macro_rules! emit {
+    ($asm:expr ; $($tt:tt)*) => {
+        dynasm!($asm.asm ; $($tt)*)
     };
 }
 
@@ -399,7 +404,6 @@ impl Translator {
 
         // prepare enter
         dynasm!(asm
-            ; .arch x64
             ; ->enter:
             // ; int3
             // ;; call_print!(asm, "enter")
