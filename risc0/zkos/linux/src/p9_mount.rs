@@ -6,6 +6,7 @@
 
 #![allow(dead_code)]
 
+use crate::linux_abi_fs::{DT_DIR, DT_LNK, DT_REG};
 use crate::p9::*;
 use crate::p9_backend::P9Backend;
 
@@ -150,7 +151,7 @@ impl RamFilesystem {
     }
 
     fn walk(&mut self, from_fid: u32, to_fid: u32, wnames: &[String]) -> Result<Vec<Qid>, u32> {
-        let (from_inode, from_path) = self.get_fid(from_fid).map_err(|e| e)?;
+        let (from_inode, from_path) = self.get_fid(from_fid)?;
         let mut current_inode = from_inode;
         let mut current_path = from_path.clone();
         let mut qids = Vec::new();
@@ -263,11 +264,11 @@ impl RamFilesystem {
                 for (name, &entry_inode) in entries {
                     let qid = self.get_qid(entry_inode);
                     let entry_type = if self.is_dir(entry_inode) {
-                        4 // DT_DIR
+                        DT_DIR
                     } else if self.is_symlink(entry_inode) {
-                        10 // DT_LNK
+                        DT_LNK
                     } else {
-                        8 // DT_REG
+                        DT_REG
                     };
                     result.push((name.clone(), qid, entry_type));
                 }
@@ -421,7 +422,7 @@ impl P9Backend for RamFilesystem {
             rdev: 0,
             size,
             blksize: 4096,
-            blocks: (size + 4095) / 4096,
+            blocks: size.div_ceil(4096),
             atime_sec: 0,
             atime_nsec: 0,
             mtime_sec: 0,
@@ -839,9 +840,10 @@ impl P9Backend for MountBackend {
 
     fn send_twalk(&mut self, msg: &TwalkMessage) -> Result<P9Response<RwalkMessage>, TwalkError> {
         // Get the from_fid's backend and path
-        let from_fid_info = self.fid_map.get(&msg.fid).ok_or_else(|| {
-            TwalkError::InternalError // FID not found
-        })?;
+        let from_fid_info = self
+            .fid_map
+            .get(&msg.fid)
+            .ok_or(TwalkError::InternalError)?; // FID not found
 
         let from_path = from_fid_info.path.clone();
         let from_backend_idx = from_fid_info.backend_index;
@@ -850,39 +852,141 @@ impl P9Backend for MountBackend {
         let to_path = Self::build_path(&from_path, &msg.wnames);
 
         // Check if we're crossing a mount point
-        if let Some((_mount_idx, _remaining_path)) = self.check_mount_crossing(&from_path, &to_path)
-        {
+        if let Some((mount_idx, remaining_path)) = self.check_mount_crossing(&from_path, &to_path) {
             // We're crossing into a mount point
-            // This requires special handling:
-            // 1. Walk to mount point in root backend (if not already there)
-            // 2. Attach to mounted backend
+            // Strategy:
+            // 1. If we're not already at the mount point, walk to it in root backend
+            // 2. Attach to the mounted backend (using target FID)
             // 3. Walk remaining path in mounted backend
 
-            // For now, return an error - mount crossing needs more complex logic
-            // TODO: Implement proper mount crossing
-            return Ok(P9Response::Error(RlerrorMessage::new(
-                msg.tag,
-                P9Error::Eopnotsupp as u32, // Operation not supported for mount crossing
-            )));
-        }
+            let mount_path = &self.mounts[mount_idx].path;
+            let mount_components: Vec<String> = mount_path
+                .trim_start_matches('/')
+                .split('/')
+                .filter(|s| !s.is_empty())
+                .map(|s| s.to_string())
+                .collect();
 
-        // No mount crossing - walk in the current backend
-        let backend = self
-            .get_backend_for_fid(msg.fid)
-            .map_err(|_| TwalkError::InternalError)?;
-        match backend.send_twalk(msg) {
-            Ok(P9Response::Success(resp)) => {
-                // Update FID tracking
+            // Step 1: Walk to mount point if not already there
+            if from_path != mount_path.as_str() {
+                // Use a temporary FID to walk to mount point
+                const TEMP_MOUNT_FID: u32 = 0xFFFF_FFF0; // Use a temp FID
+                let walk_to_mount = TwalkMessage {
+                    tag: msg.tag,
+                    fid: msg.fid,
+                    newfid: TEMP_MOUNT_FID,
+                    nwname: mount_components.len() as u16,
+                    wnames: mount_components,
+                };
+
+                let root_backend = self.root.as_mut();
+                match root_backend.send_twalk(&walk_to_mount) {
+                    Ok(P9Response::Success(_)) => {
+                        // Successfully walked to mount point
+                        // Clean up temp FID
+                        let _ = root_backend.send_tclunk(&TclunkMessage {
+                            tag: msg.tag,
+                            fid: TEMP_MOUNT_FID,
+                        });
+                    }
+                    Ok(P9Response::Error(err)) => {
+                        return Ok(P9Response::Error(err));
+                    }
+                    Err(e) => {
+                        return Err(e);
+                    }
+                }
+            }
+
+            // Step 2: Attach to the mounted backend
+            let mounted_backend = self.mounts[mount_idx].backend.as_mut();
+            let attach_msg = TattachMessage {
+                tag: msg.tag,
+                fid: msg.newfid,  // Use target FID for attach
+                afid: 0xFFFFFFFF, // No authentication
+                uname: "".to_string(),
+                aname: "".to_string(),
+                n_uname: 0,
+            };
+
+            let attach_resp = match mounted_backend.send_tattach(&attach_msg) {
+                Ok(P9Response::Success(resp)) => resp,
+                Ok(P9Response::Error(err)) => {
+                    return Ok(P9Response::Error(err));
+                }
+                Err(_) => {
+                    return Err(TwalkError::InternalError);
+                }
+            };
+
+            // Step 3: Walk remaining path in mounted backend
+            let remaining_components: Vec<String> = remaining_path
+                .trim_start_matches('/')
+                .split('/')
+                .filter(|s| !s.is_empty())
+                .map(|s| s.to_string())
+                .collect();
+
+            if remaining_components.is_empty() {
+                // Already at mount point root, just return the attach QID
                 self.fid_map.insert(
                     msg.newfid,
                     FidInfo {
-                        backend_index: from_backend_idx,
-                        path: to_path,
+                        backend_index: Some(mount_idx),
+                        path: "/".to_string(),
                     },
                 );
-                Ok(P9Response::Success(resp))
+                let mut wqids = Vec::new();
+                wqids.push(attach_resp.qid);
+                return Ok(P9Response::Success(RwalkMessage {
+                    tag: msg.tag,
+                    nwqid: 1,
+                    wqids,
+                }));
             }
-            other => other,
+
+            // Walk remaining path
+            let walk_in_mount = TwalkMessage {
+                tag: msg.tag,
+                fid: msg.newfid,
+                newfid: msg.newfid, // Walk in place
+                nwname: remaining_components.len() as u16,
+                wnames: remaining_components,
+            };
+
+            match mounted_backend.send_twalk(&walk_in_mount) {
+                Ok(P9Response::Success(resp)) => {
+                    // Update FID tracking
+                    self.fid_map.insert(
+                        msg.newfid,
+                        FidInfo {
+                            backend_index: Some(mount_idx),
+                            path: remaining_path,
+                        },
+                    );
+                    Ok(P9Response::Success(resp))
+                }
+                other => other,
+            }
+        } else {
+            // No mount crossing - walk in the current backend
+            let backend = self
+                .get_backend_for_fid(msg.fid)
+                .map_err(|_| TwalkError::InternalError)?;
+            match backend.send_twalk(msg) {
+                Ok(P9Response::Success(resp)) => {
+                    // Update FID tracking
+                    self.fid_map.insert(
+                        msg.newfid,
+                        FidInfo {
+                            backend_index: from_backend_idx,
+                            path: to_path,
+                        },
+                    );
+                    Ok(P9Response::Success(resp))
+                }
+                other => other,
+            }
         }
     }
 
