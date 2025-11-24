@@ -13,7 +13,6 @@
 #![allow(dead_code)]
 
 use crate::p9::*;
-use crate::p9::{P9QidType, P9Response, Qid};
 use crate::p9_backend::P9Backend;
 use bytemuck::{cast_slice, from_bytes};
 use core::mem::size_of;
@@ -289,30 +288,27 @@ impl ZeroCopyFilesystem {
         // Validate reasonable size values (prevent obviously corrupted data)
         // Max reasonable file size: 1GB (prevent corrupted size values)
         const MAX_REASONABLE_SIZE: u64 = 1024 * 1024 * 1024;
-        if meta.size > MAX_REASONABLE_SIZE {
-            if ZERO_COPY_DEBUG {
-                self.debug_log(&format!(
-                    "ZC validate_inode_meta: suspiciously large size for inode {}: size={}",
-                    inode_num, meta.size
-                ));
-            }
+        if meta.size > MAX_REASONABLE_SIZE && ZERO_COPY_DEBUG {
+            self.debug_log(&format!(
+                "ZC validate_inode_meta: suspiciously large size for inode {}: size={}",
+                inode_num, meta.size
+            ));
             // Don't fail on this - might be legitimate, but log it
         }
 
         // Validate timestamps are reasonable (not in the far future)
         // Max reasonable timestamp: year 2100 (4102444800 seconds since epoch)
         const MAX_REASONABLE_TIMESTAMP: u64 = 4102444800;
-        if meta.atime_sec > MAX_REASONABLE_TIMESTAMP
+        if (meta.atime_sec > MAX_REASONABLE_TIMESTAMP
             || meta.mtime_sec > MAX_REASONABLE_TIMESTAMP
             || meta.ctime_sec > MAX_REASONABLE_TIMESTAMP
-            || meta.btime_sec > MAX_REASONABLE_TIMESTAMP
+            || meta.btime_sec > MAX_REASONABLE_TIMESTAMP)
+            && ZERO_COPY_DEBUG
         {
-            if ZERO_COPY_DEBUG {
-                self.debug_log(&format!(
-                    "ZC validate_inode_meta: suspicious timestamp for inode {}: atime={} mtime={} ctime={} btime={}",
-                    inode_num, meta.atime_sec, meta.mtime_sec, meta.ctime_sec, meta.btime_sec
-                ));
-            }
+            self.debug_log(&format!(
+                "ZC validate_inode_meta: suspicious timestamp for inode {}: atime={} mtime={} ctime={} btime={}",
+                inode_num, meta.atime_sec, meta.mtime_sec, meta.ctime_sec, meta.btime_sec
+            ));
             // Don't fail on this - might be legitimate, but log it
         }
 
@@ -678,9 +674,9 @@ impl ZeroCopyFilesystem {
         let inode_num = meta.qid_path; // Use qid_path as proxy for inode number
         if !self.validate_inode_meta(meta, inode_num, self.data_blob.len()) {
             if ZERO_COPY_DEBUG {
-                self.debug_log(&format!(
-                    "ZC read_file_data: corrupted metadata detected, refusing to read data"
-                ));
+                self.debug_log(
+                    "ZC read_file_data: corrupted metadata detected, refusing to read data",
+                );
             }
             return &[];
         }
@@ -1008,23 +1004,29 @@ impl ZeroCopyFilesystem {
 
             // Validate next_path is valid UTF-8 and not corrupted
             if next_path.is_empty() {
-                self.debug_log("ZC walk pxyA: ERROR: next_path is empty!");
+                if ZERO_COPY_DEBUG {
+                    self.debug_log("ZC walk pxyA: ERROR: next_path is empty!");
+                }
                 return Err(22); // EINVAL
             }
             // Check if path_index is accessible
-            let path_index_len = self.path_index.len();
-            self.debug_log(&format!(
-                "ZC walk pxyA2: path_index.len()={}",
-                path_index_len
-            ));
+            if ZERO_COPY_DEBUG {
+                let path_index_len = self.path_index.len();
+                self.debug_log(&format!(
+                    "ZC walk pxyA2: path_index.len()={}",
+                    path_index_len
+                ));
+            }
 
             // Now try the actual lookup - wrap in a way that catches panics
             // Since we can't use catch_unwind in no_std, we'll just be very careful
             let inode_opt = self.path_index.get(&next_path);
-            if let Some(inode) = inode_opt {
-                self.debug_log(&format!("ZC walk pxyB: found inode={}", inode));
-            } else {
-                self.debug_log("ZC walk pxyB: not found");
+            if ZERO_COPY_DEBUG {
+                if let Some(inode) = inode_opt {
+                    self.debug_log(&format!("ZC walk pxyB: found inode={}", inode));
+                } else {
+                    self.debug_log("ZC walk pxyB: not found");
+                }
             }
             // Find the named entry, falling back to the path index if needed
             let next_inode = if let Some(entry) = entries.iter().find(|e| e.name == *wname) {
