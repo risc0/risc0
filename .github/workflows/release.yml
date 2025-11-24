@@ -16,8 +16,8 @@ permissions:
 env:
   RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
-  TAG: v3.0.3
-  VERSION: 3.0.3
+  TAG: v3.0.4
+  VERSION: 3.0.4
 
 jobs:
   release:
