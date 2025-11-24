@@ -515,16 +515,16 @@ impl ZeroCopyFilesystem {
         // This is optional but helps detect issues before they cause problems
         let mut corrupted_inodes = 0;
         for inode_num in 1..=header.num_inodes as u64 {
-            if let Some(meta) = temp_fs.inode_table.get((inode_num - 1) as usize) {
-                if !temp_fs.validate_inode_meta(meta, inode_num, data_blob.len()) {
-                    corrupted_inodes += 1;
-                    if corrupted_inodes <= 5 {
-                        // Only log first 5 to avoid spam
-                        crate::kernel::print(&format!(
-                            "ZeroCopyFilesystem: WARNING - corrupted inode {} detected during init",
-                            inode_num
-                        ));
-                    }
+            if let Some(meta) = temp_fs.inode_table.get((inode_num - 1) as usize)
+                && !temp_fs.validate_inode_meta(meta, inode_num, data_blob.len())
+            {
+                corrupted_inodes += 1;
+                if corrupted_inodes <= 5 {
+                    // Only log first 5 to avoid spam
+                    crate::kernel::print(&format!(
+                        "ZeroCopyFilesystem: WARNING - corrupted inode {} detected during init",
+                        inode_num
+                    ));
                 }
             }
         }
@@ -1404,6 +1404,8 @@ impl P9Backend for ZeroCopyBackend {
         &mut self,
         msg: &TreaddirMessage,
     ) -> Result<P9Response<RreaddirMessage>, TreaddirError> {
+        use crate::p9::wire::{write_string, write_u64};
+
         let vnode = match self.fs.get_fid(msg.fid) {
             Ok(v) => v,
             Err(errno) => return Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno))),
@@ -1415,20 +1417,98 @@ impl P9Backend for ZeroCopyBackend {
         };
 
         // Read directory entries
-        let _entries = match self.fs.read_dir_entries(meta) {
+        let entries = match self.fs.read_dir_entries(meta) {
             Ok(e) => e,
             Err(errno) => return Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno))),
         };
 
-        // Serialize entries starting from offset
-        // TODO: Implement proper directory entry serialization with offset/count
-        // This requires parsing msg.offset and msg.count, then serializing the appropriate
-        // subset of directory entries into the P9 directory entry format.
-        // For now, return ENOSYS to indicate the feature is not yet implemented.
-        Ok(P9Response::Error(RlerrorMessage::new(
-            msg.tag,
-            P9Error::Enosys as u32,
-        )))
+        // Calculate cumulative offsets for each entry
+        // P9 directory entry format: qid[13] offset[8] type[1] name[s]
+        // where name[s] = length[2] + name[length]
+        let mut entry_offsets = Vec::new();
+        let mut current_offset: u64 = 0;
+
+        for entry in &entries {
+            // Calculate entry size: 13 (qid) + 8 (offset) + 1 (type) + 2 (name_len) + name_len
+            let name_len = entry.name.len();
+            if name_len > u16::MAX as usize {
+                // Skip entries with names too long (shouldn't happen, but be safe)
+                // Still track offset to maintain alignment with entries vector
+                entry_offsets.push(current_offset);
+                continue;
+            }
+            let entry_size = 13 + 8 + 1 + 2 + name_len;
+            entry_offsets.push(current_offset);
+            current_offset += entry_size as u64;
+        }
+
+        // Find starting entry based on msg.offset
+        // If offset is beyond all entries, return empty response
+        let start_idx = if entry_offsets.is_empty() || msg.offset >= current_offset {
+            entries.len() // Will skip all entries
+        } else {
+            entry_offsets
+                .binary_search(&msg.offset)
+                .unwrap_or_else(|idx| idx.saturating_sub(1))
+        };
+
+        // Allocate buffer for serialized entries (up to msg.count bytes)
+        let mut data = Vec::with_capacity(msg.count as usize);
+
+        // Serialize entries starting from start_idx
+        let mut bytes_written = 0u32;
+        for (idx, entry) in entries.iter().enumerate().skip(start_idx) {
+            // Calculate how many bytes this entry will take
+            let name_len = entry.name.len();
+            if name_len > u16::MAX as usize {
+                break;
+            }
+            let entry_size = 13 + 8 + 1 + 2 + name_len;
+
+            // Check if we have room for this entry
+            if bytes_written + entry_size as u32 > msg.count {
+                break;
+            }
+
+            // Ensure we have enough space in the buffer
+            let current_len = data.len();
+            data.resize(current_len + entry_size, 0);
+            let mut pos = current_len;
+
+            // Write QID (13 bytes: 1 byte type + 4 bytes version + 8 bytes path)
+            data[pos] = entry.qid.qtype;
+            pos += 1;
+            let version_bytes = entry.qid.version.to_le_bytes();
+            data[pos..pos + 4].copy_from_slice(&version_bytes);
+            pos += 4;
+            let path_bytes = entry.qid.path.to_le_bytes();
+            data[pos..pos + 8].copy_from_slice(&path_bytes);
+            pos += 8;
+
+            // Write offset (8 bytes) - this is the offset for the NEXT entry
+            let next_offset = if idx + 1 < entry_offsets.len() {
+                entry_offsets[idx + 1]
+            } else {
+                current_offset // Last entry points to end
+            };
+            pos =
+                write_u64(&mut data, pos, next_offset).map_err(|_| TreaddirError::InternalError)?;
+
+            // Write entry type (1 byte)
+            data[pos] = entry.entry_type;
+            pos += 1;
+
+            // Write name[s] (length[2] + name[length])
+            write_string(&mut data, pos, &entry.name).map_err(|_| TreaddirError::InternalError)?;
+
+            bytes_written += entry_size as u32;
+        }
+
+        Ok(P9Response::Success(RreaddirMessage {
+            tag: msg.tag,
+            count: bytes_written,
+            data,
+        }))
     }
 
     fn send_treadlink(
