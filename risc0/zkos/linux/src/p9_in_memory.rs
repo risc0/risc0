@@ -355,14 +355,14 @@ impl ZeroCopyFilesystem {
             crate::kernel::print(&format!("  Expected: {:?} (P9FS)", FS_MAGIC));
             crate::kernel::print(&format!("  Got: {:?}", &header.magic));
             crate::kernel::print("  This indicates the filesystem was not properly embedded");
-            return Err(22); // EINVAL
+            return Err(P9Error::Einval as u32);
         }
 
         // Verify version
         if header.version != FS_VERSION {
             crate::kernel::print("ZeroCopyFilesystem: unsupported version");
             crate::kernel::print(&format!("  Got version: {}", header.version));
-            return Err(22); // EINVAL
+            return Err(P9Error::Einval as u32);
         }
 
         // Verify inode table offset is valid and aligned
@@ -374,7 +374,7 @@ impl ZeroCopyFilesystem {
                 "  Offset {} is before header end ({})",
                 inode_table_offset, HEADER_SIZE
             ));
-            return Err(22);
+            return Err(P9Error::Einval as u32);
         }
 
         // CRITICAL: Verify 8-byte alignment for bytemuck::cast_slice
@@ -387,18 +387,18 @@ impl ZeroCopyFilesystem {
                 inode_table_offset,
                 inode_table_offset % INODE_ALIGNMENT
             ));
-            return Err(22);
+            return Err(P9Error::Einval as u32);
         }
 
         // Verify offset is reasonable (not beyond image)
         if inode_table_offset > header.total_size as usize {
             crate::kernel::print("ZeroCopyFilesystem: inode table offset beyond image");
-            return Err(22);
+            return Err(P9Error::Einval as u32);
         }
 
         if header.root_inode == 0 || header.num_inodes == 0 {
             crate::kernel::print("ZeroCopyFilesystem: missing root inode metadata");
-            return Err(22);
+            return Err(P9Error::Einval as u32);
         }
 
         // Check total size is reasonable
@@ -406,7 +406,7 @@ impl ZeroCopyFilesystem {
         if total_size > max_size {
             crate::kernel::print("ZeroCopyFilesystem: image too large");
             crate::kernel::print(&format!("  Image size: {}, max: {}", total_size, max_size));
-            return Err(22); // EINVAL
+            return Err(P9Error::Einval as u32);
         }
 
         // Now get slice of the actual size needed
@@ -423,7 +423,7 @@ impl ZeroCopyFilesystem {
                 crate::kernel::print(
                     "ZeroCopyFilesystem: integer overflow in inode_bytes calculation",
                 );
-                return Err(22); // EINVAL
+                return Err(P9Error::Einval as u32);
             }
         };
 
@@ -432,18 +432,18 @@ impl ZeroCopyFilesystem {
             Some(end) => end,
             None => {
                 crate::kernel::print("ZeroCopyFilesystem: integer overflow in inode table bounds");
-                return Err(22); // EINVAL
+                return Err(P9Error::Einval as u32);
             }
         };
 
         if inode_end > header.total_size as usize {
             crate::kernel::print("ZeroCopyFilesystem: inode table out of bounds");
-            return Err(22); // EINVAL
+            return Err(P9Error::Einval as u32);
         }
 
         if (header.path_index_offset as usize) < inode_end {
             crate::kernel::print("ZeroCopyFilesystem: path index overlaps inode table");
-            return Err(22);
+            return Err(P9Error::Einval as u32);
         }
 
         let inode_table: &'static [INodeMeta] = cast_slice(&data[inode_start..inode_end]);
@@ -454,13 +454,13 @@ impl ZeroCopyFilesystem {
 
         if blob_start < header.path_index_offset as usize {
             crate::kernel::print("ZeroCopyFilesystem: data blob overlaps path index");
-            return Err(22);
+            return Err(P9Error::Einval as u32);
         }
 
         // Validate blob_start is within bounds
         if blob_start > total_size {
             crate::kernel::print("ZeroCopyFilesystem: data blob start beyond total size");
-            return Err(22);
+            return Err(P9Error::Einval as u32);
         }
 
         let data_blob = &data[blob_start..total_size];
@@ -470,7 +470,7 @@ impl ZeroCopyFilesystem {
         let path_end = blob_start;
         if path_start > path_end || path_end > data.len() {
             crate::kernel::print("ZeroCopyFilesystem: invalid path index range");
-            return Err(22);
+            return Err(P9Error::Einval as u32);
         }
         // Track heap before parsing path_index
         let (heap_before_used, _, _) = crate::allocator::get_heap_stats();
@@ -572,8 +572,8 @@ impl ZeroCopyFilesystem {
         for _ in 0..num_entries {
             // Check for overflow when reading minimum required bytes (2 for path_len + 8 for inode)
             match pos.checked_add(10) {
-                Some(sum) if sum > data.len() => return Err(22), // EINVAL
-                None => return Err(22),                          // EINVAL - overflow
+                Some(sum) if sum > data.len() => return Err(P9Error::Einval as u32), // EINVAL
+                None => return Err(P9Error::Einval as u32), // EINVAL - overflow
                 _ => {}
             }
 
@@ -585,29 +585,29 @@ impl ZeroCopyFilesystem {
             let required_bytes = match path_len.checked_add(8) {
                 Some(sum) => match pos.checked_add(sum) {
                     Some(total) => total,
-                    None => return Err(22), // EINVAL - overflow
+                    None => return Err(P9Error::Einval as u32), // EINVAL - overflow
                 },
-                None => return Err(22), // EINVAL - overflow
+                None => return Err(P9Error::Einval as u32), // EINVAL - overflow
             };
 
             if required_bytes > data.len() {
-                return Err(22); // EINVAL
+                return Err(P9Error::Einval as u32);
             }
 
             // Check for overflow when accessing path string
             let path_end = match pos.checked_add(path_len) {
                 Some(end) => end,
-                None => return Err(22), // EINVAL - overflow
+                None => return Err(P9Error::Einval as u32), // EINVAL - overflow
             };
 
             if path_end > data.len() {
-                return Err(22); // EINVAL
+                return Err(P9Error::Einval as u32);
             }
 
             // Read path string
             // NOTE: We copy to String (not &'static str) because we need to look up dynamically created paths
             let path = core::str::from_utf8(&data[pos..path_end])
-                .map_err(|_| 22u32)? // EINVAL
+                .map_err(|_| P9Error::Einval as u32)? // EINVAL
                 .to_string();
             pos = path_end;
 
@@ -631,19 +631,27 @@ impl ZeroCopyFilesystem {
     }
 
     /// Dump all known filesystem paths for debugging
-    pub fn dump_all_paths(&self) {}
+    pub fn dump_all_paths(&self) {
+        crate::kernel::print(&format!(
+            "ZeroCopyFilesystem: dumping {} paths from path_index",
+            self.path_index.len()
+        ));
+        for (path, inode) in &self.path_index {
+            crate::kernel::print(&format!("  {} -> inode {}", path, inode));
+        }
+    }
 
     /// Get inode metadata by number (zero-copy!)
     /// Validates metadata integrity before returning
     pub fn get_inode_meta(&self, inode_num: u64) -> Result<&'static INodeMeta, u32> {
         if inode_num == 0 || inode_num > self.header.num_inodes as u64 {
-            return Err(2); // ENOENT
+            return Err(P9Error::Enoent as u32);
         }
 
         // Safe: inode_num is > 0, so (inode_num - 1) cannot underflow
         // inode_num is <= num_inodes, so idx will be < inode_table.len()
         let idx = (inode_num - 1) as usize;
-        let meta = self.inode_table.get(idx).ok_or(2u32)?; // ENOENT
+        let meta = self.inode_table.get(idx).ok_or(P9Error::Enoent as u32)?;
 
         // Validate metadata integrity to detect corruption
         if !self.validate_inode_meta(meta, inode_num, self.data_blob.len()) {
@@ -653,7 +661,7 @@ impl ZeroCopyFilesystem {
                     inode_num
                 ));
             }
-            return Err(22); // EINVAL - corrupted metadata
+            return Err(P9Error::Einval as u32); // EINVAL - corrupted metadata
         }
 
         Ok(meta)
@@ -661,7 +669,7 @@ impl ZeroCopyFilesystem {
 
     /// Get inode metadata by path (zero-copy metadata!)
     pub fn get_inode_by_path(&self, path: &str) -> Result<&'static INodeMeta, u32> {
-        let inode_num = self.path_index.get(path).ok_or(2u32)?; // ENOENT
+        let inode_num = self.path_index.get(path).ok_or(P9Error::Enoent as u32)?;
         self.get_inode_meta(*inode_num)
     }
 
@@ -750,7 +758,7 @@ impl ZeroCopyFilesystem {
             if ZERO_COPY_DEBUG {
                 self.debug_log("ZC read_dir_entries: is not a dir");
             }
-            return Err(20); // ENOTDIR
+            return Err(P9Error::Enotdir as u32);
         }
 
         let data = self.read_file_data(meta);
@@ -785,8 +793,8 @@ impl ZeroCopyFilesystem {
         for _ in 0..num_entries {
             // Check for overflow: minimum 22 bytes needed (13 QID + 1 type + 8 inode)
             match pos.checked_add(22) {
-                Some(sum) if sum > data.len() => return Err(22), // EINVAL
-                None => return Err(22),                          // EINVAL - overflow
+                Some(sum) if sum > data.len() => return Err(P9Error::Einval as u32), // EINVAL
+                None => return Err(P9Error::Einval as u32), // EINVAL - overflow
                 _ => {}
             }
 
@@ -830,16 +838,16 @@ impl ZeroCopyFilesystem {
             // Check for integer overflow: pos + name_len
             let name_end = match pos.checked_add(name_len) {
                 Some(end) => end,
-                None => return Err(22), // EINVAL - overflow
+                None => return Err(P9Error::Einval as u32), // EINVAL - overflow
             };
 
             if name_end > data.len() {
-                return Err(22); // EINVAL
+                return Err(P9Error::Einval as u32);
             }
 
             // Name string
             let name = core::str::from_utf8(&data[pos..name_end])
-                .map_err(|_| 22u32)? // EINVAL
+                .map_err(|_| P9Error::Einval as u32)? // EINVAL
                 .to_string();
             pos = name_end;
 
@@ -867,11 +875,11 @@ impl ZeroCopyFilesystem {
     /// Allocate a FID
     pub fn allocate_fid(&mut self, fid: u32, inode: u64, path: String) -> Result<(), u32> {
         if self.fid_table.len() >= MAX_FIDS {
-            return Err(24); // EMFILE
+            return Err(P9Error::Emfile as u32);
         }
 
         if self.fid_table.contains_key(&fid) {
-            return Err(17); // EEXIST
+            return Err(P9Error::Eexist as u32);
         }
 
         self.fid_table.insert(
@@ -889,17 +897,17 @@ impl ZeroCopyFilesystem {
 
     /// Get FID
     pub fn get_fid(&self, fid: u32) -> Result<&VNode, u32> {
-        self.fid_table.get(&fid).ok_or(9u32) // EBADF
+        self.fid_table.get(&fid).ok_or(P9Error::Ebadf as u32)
     }
 
     /// Get FID (mutable)
     pub fn get_fid_mut(&mut self, fid: u32) -> Result<&mut VNode, u32> {
-        self.fid_table.get_mut(&fid).ok_or(9u32) // EBADF
+        self.fid_table.get_mut(&fid).ok_or(P9Error::Ebadf as u32)
     }
 
     /// Release a FID
     pub fn clunk_fid(&mut self, fid: u32) -> Result<(), u32> {
-        self.fid_table.remove(&fid).ok_or(9u32)?; // EBADF
+        self.fid_table.remove(&fid).ok_or(P9Error::Ebadf as u32)?;
         Ok(())
     }
 
@@ -921,7 +929,7 @@ impl ZeroCopyFilesystem {
                     from_vnode.inode, self.header.num_inodes
                 ));
             }
-            return Err(22); // EINVAL - corrupted inode
+            return Err(P9Error::Einval as u32); // EINVAL - corrupted inode
         }
 
         let mut current_inode = from_vnode.inode;
@@ -957,7 +965,7 @@ impl ZeroCopyFilesystem {
                         current_inode, wnames
                     ));
                 }
-                return Err(20); // ENOTDIR
+                return Err(P9Error::Enotdir as u32);
             }
 
             // Read directory entries
@@ -972,7 +980,7 @@ impl ZeroCopyFilesystem {
                             entry.inode, entry.name, self.header.num_inodes
                         ));
                     }
-                    return Err(22); // EINVAL - corrupted directory entry
+                    return Err(P9Error::Einval as u32); // EINVAL - corrupted directory entry
                 }
             }
 
@@ -983,17 +991,6 @@ impl ZeroCopyFilesystem {
                     current_path,
                     entries.len()
                 ));
-                /* for (idx, entry) in entries.iter().enumerate() {
-                    self.debug_log(&format!(
-                        "ZC walk:   entry[{}] name='{}' inode={} qtype=0x{:02x} entry_type={} qid_path={}",
-                        idx,
-                        entry.name,
-                        entry.inode,
-                        entry.qid.qtype,
-                        entry.entry_type,
-                        entry.qid.path
-                    ));
-                } */
             }
             // Compute the next absolute path for path-index fallback
             let next_path = if current_path == "/" {
@@ -1007,7 +1004,7 @@ impl ZeroCopyFilesystem {
                 if ZERO_COPY_DEBUG {
                     self.debug_log("ZC walk pxyA: ERROR: next_path is empty!");
                 }
-                return Err(22); // EINVAL
+                return Err(P9Error::Einval as u32);
             }
             // Check if path_index is accessible
             if ZERO_COPY_DEBUG {
@@ -1029,17 +1026,8 @@ impl ZeroCopyFilesystem {
                 }
             }
             // Find the named entry, falling back to the path index if needed
+            // Note: Entry inode validation already done in the loop above (lines 971-976)
             let next_inode = if let Some(entry) = entries.iter().find(|e| e.name == *wname) {
-                // Validate inode number from directory entry before using
-                if entry.inode == 0 || entry.inode > self.header.num_inodes as u64 {
-                    if ZERO_COPY_DEBUG {
-                        self.debug_log(&format!(
-                            "ZC walk: corrupted inode {} from dir entry (max={})",
-                            entry.inode, self.header.num_inodes
-                        ));
-                    }
-                    return Err(22); // EINVAL - corrupted inode
-                }
                 if ZERO_COPY_DEBUG {
                     self.debug_log(&format!(
                         "ZC walk: found '{}' in dir listing -> inode {} qtype=0x{:02x}",
@@ -1056,7 +1044,7 @@ impl ZeroCopyFilesystem {
                             inode, self.header.num_inodes
                         ));
                     }
-                    return Err(22); // EINVAL - corrupted inode
+                    return Err(P9Error::Einval as u32); // EINVAL - corrupted inode
                 }
                 if ZERO_COPY_DEBUG {
                     self.debug_log(&format!(
@@ -1069,7 +1057,7 @@ impl ZeroCopyFilesystem {
                 if ZERO_COPY_DEBUG {
                     self.debug_log("ZC walk [p2]: not found");
                 }
-                return Err(2); // ENOENT
+                return Err(P9Error::Enoent as u32);
             };
 
             current_inode = next_inode;
@@ -1140,13 +1128,13 @@ impl ZeroCopyFilesystem {
         let vnode = self.get_fid(fid)?;
 
         if !vnode.is_open {
-            return Err(9); // EBADF
+            return Err(P9Error::Ebadf as u32);
         }
 
         let meta = self.get_inode_meta(vnode.inode)?;
 
         if !meta.is_regular() {
-            return Err(21); // EISDIR
+            return Err(P9Error::Eisdir as u32);
         }
 
         // Get file data (zero-copy slice!)
@@ -1257,13 +1245,13 @@ impl P9Backend for ZeroCopyBackend {
             .fs
             .allocate_fid(msg.fid, self.fs.root_inode(), "/".to_string())
         {
-            Ok(_) => {
-                let root = self.fs.get_inode_meta(self.fs.root_inode()).unwrap();
-                Ok(P9Response::Success(RattachMessage {
+            Ok(_) => match self.fs.get_inode_meta(self.fs.root_inode()) {
+                Ok(root) => Ok(P9Response::Success(RattachMessage {
                     tag: msg.tag,
                     qid: root.qid(),
-                }))
-            }
+                })),
+                Err(errno) => Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno))),
+            },
             Err(errno) => Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno))),
         }
     }
@@ -1313,7 +1301,10 @@ impl P9Backend for ZeroCopyBackend {
         _msg: &TwriteMessage,
     ) -> Result<P9Response<RwriteMessage>, TwriteError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(_msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            _msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_tlopen(
@@ -1352,7 +1343,10 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TlcreateMessage,
     ) -> Result<P9Response<RlcreateMessage>, TlcreateError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_tgetattr(
@@ -1400,7 +1394,10 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TsetattrMessage,
     ) -> Result<P9Response<RsetattrMessage>, TsetattrError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_treaddir(
@@ -1425,8 +1422,13 @@ impl P9Backend for ZeroCopyBackend {
 
         // Serialize entries starting from offset
         // TODO: Implement proper directory entry serialization with offset/count
-        // For now, return error
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
+        // This requires parsing msg.offset and msg.count, then serializing the appropriate
+        // subset of directory entries into the P9 directory entry format.
+        // For now, return ENOSYS to indicate the feature is not yet implemented.
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Enosys as u32,
+        )))
     }
 
     fn send_treadlink(
@@ -1444,7 +1446,10 @@ impl P9Backend for ZeroCopyBackend {
         };
 
         if !meta.is_symlink() {
-            return Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 22))); // EINVAL
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Einval as u32,
+            )));
         }
 
         // Read symlink target (zero-copy slice, then convert to String)
@@ -1472,7 +1477,10 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TsymlinkMessage,
     ) -> Result<P9Response<RsymlinkMessage>, TsymlinkError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_tmknod(
@@ -1480,7 +1488,10 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TmknodMessage,
     ) -> Result<P9Response<RmknodMessage>, TmknodError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_tmkdir(
@@ -1488,7 +1499,10 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TmkdirMessage,
     ) -> Result<P9Response<RmkdirMessage>, TmkdirError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_tunlinkat(
@@ -1496,7 +1510,10 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TunlinkatMessage,
     ) -> Result<P9Response<RunlinkatMessage>, TunlinkatError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_trenameat(
@@ -1504,7 +1521,10 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TrenameatMessage,
     ) -> Result<P9Response<RrenameatMessage>, TrenameatError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_tclunk(
@@ -1522,7 +1542,10 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TremoveMessage,
     ) -> Result<P9Response<RremoveMessage>, TremoveError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_tfsync(
@@ -1535,7 +1558,10 @@ impl P9Backend for ZeroCopyBackend {
 
     fn send_tlink(&mut self, msg: &TlinkMessage) -> Result<P9Response<RlinkMessage>, TlinkError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_trename(
@@ -1543,7 +1569,10 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TrenameMessage,
     ) -> Result<P9Response<RrenameMessage>, TrenameError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_txattrwalk(
@@ -1551,7 +1580,10 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TxattrwalkMessage,
     ) -> Result<P9Response<RxattrwalkMessage>, TxattrwalkError> {
         // Extended attributes not supported
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 95))) // EOPNOTSUPP
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Eopnotsupp as u32,
+        )))
     }
 
     fn send_txattrcreate(
@@ -1559,7 +1591,10 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TxattrcreateMessage,
     ) -> Result<P9Response<RxattrcreateMessage>, TxattrcreateError> {
         // Read-only filesystem
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 30))) // EROFS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Erofs as u32,
+        )))
     }
 
     fn send_tflush(
@@ -1572,7 +1607,10 @@ impl P9Backend for ZeroCopyBackend {
 
     fn send_tauth(&mut self, msg: &TauthMessage) -> Result<P9Response<RauthMessage>, TauthError> {
         // No authentication needed for zero-copy
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Enosys as u32,
+        )))
     }
 
     fn send_tstatfs(
@@ -1580,12 +1618,21 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TstatfsMessage,
     ) -> Result<P9Response<RstatfsMessage>, TstatfsError> {
         // TODO: Implement statfs
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
+        // This should return filesystem statistics (block size, total blocks, free blocks, etc.)
+        // For a read-only embedded filesystem, we could return fixed values or calculate
+        // from the filesystem image size. For now, return ENOSYS.
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Enosys as u32,
+        )))
     }
 
     fn send_tlock(&mut self, msg: &TlockMessage) -> Result<P9Response<RlockMessage>, TlockError> {
         // Read-only filesystem doesn't support locks
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Enosys as u32,
+        )))
     }
 
     fn send_tgetlock(
@@ -1593,6 +1640,9 @@ impl P9Backend for ZeroCopyBackend {
         msg: &TgetlockMessage,
     ) -> Result<P9Response<RgetlockMessage>, TgetlockError> {
         // Read-only filesystem doesn't support locks
-        Ok(P9Response::Error(RlerrorMessage::new(msg.tag, 38))) // ENOSYS
+        Ok(P9Response::Error(RlerrorMessage::new(
+            msg.tag,
+            P9Error::Enosys as u32,
+        )))
     }
 }
