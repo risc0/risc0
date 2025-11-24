@@ -6,7 +6,7 @@ edition = "2021"
 [workspace]
 
 [dependencies]
-risc0-zkvm = "3.0.3"
+risc0-zkvm = "3.0.4"
 # Use this only for testing locally before a release.
 # risc0-zkvm = { path = "../../risc0/zkvm" }
 methods = { path = "methods" }
