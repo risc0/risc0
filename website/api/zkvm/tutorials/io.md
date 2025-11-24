@@ -280,7 +280,6 @@ Happy coding!
 [Boundless]: http://boundless.network
 [docs-guest-code-optimization]: ../optimization.md#when-reading-data-as-raw-bytes-use-envread_slice
 [docs-hello-world]: ./hello-world.md
-[docs-remote-proving]: ../../generating-proofs/remote-proving.md
 [example-chess]: https://github.com/risc0/risc0/tree/main/examples/chess
 [example-chess-core]: https://github.com/risc0/risc0/blob/main/examples/chess/core/src/lib.rs
 [example-chess-guest]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs

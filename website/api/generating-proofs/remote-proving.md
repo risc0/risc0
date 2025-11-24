@@ -4,9 +4,6 @@ Boundless is a decentralized proving marketplace which lets users generate proof
 
 Boundless is highly decentralized, offering high reliability and reducing the impact of any single entity on proof generation and delivery. To get a taste of what you can do with Boundless, check out the [Boundless Docs][external-boundless-docs], specifically the [Quick Start][external-boundless-quick-start] and the [Request a Proof Tutorial][external-boundless-request-tutorial].
 
-[docs-executor-statistics]: ../zkvm/quickstart.md#executor-statistics
-[docs-host-code]: ../zkvm/host-code-101.md#a-very-simple-host
-[docs-local-proving]: ../generating-proofs/local-proving.md
 [docs-zkVM]: ../zkvm/zkvm-overview.md
 [external-boundless-docs]: https://docs.beboundless.xyz
 [external-boundless-quick-start]: https://docs.beboundless.xyz/developers/quick-start

@@ -28,5 +28,4 @@ Check out our [Getting Started][docs-getting-started] page.
 
 [docs-getting-started]: ./getting-started.md
 [external-risc-zero]: https://risczero.com
-[docs-verifiable-computation]: https://risczero.com
 [from-rust-to-receipt]: /img/comic-bob-meets-r0vm-01.png
