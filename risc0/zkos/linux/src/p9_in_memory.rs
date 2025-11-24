@@ -20,7 +20,7 @@ use risc0_zkos_fs::{
     FS_MAGIC, FS_VERSION, FilesystemImageHeader, HEADER_SIZE, INODE_META_SIZE, INodeMeta,
 };
 
-const ZERO_COPY_DEBUG: bool = false;
+const ZERO_COPY_DEBUG: bool = true;
 
 #[cfg(target_arch = "riscv32")]
 use alloc::collections::BTreeMap;

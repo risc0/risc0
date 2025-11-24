@@ -28,7 +28,7 @@ use crate::softfloat::{
 };
 
 // Debug configuration - set to true to enable debug prints, false to disable
-pub const DEBUG_ENABLED: bool = false;
+pub const DEBUG_ENABLED: bool = true;
 pub const TRACE_ENABLED: bool = false;
 // Debug print macro that avoids str_format evaluation when debug is disabled
 #[macro_export]

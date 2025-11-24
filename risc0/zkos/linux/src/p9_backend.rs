@@ -15,6 +15,16 @@ extern crate alloc;
 
 use core::cell::UnsafeCell;
 
+#[cfg(target_arch = "riscv32")]
+use alloc::boxed::Box;
+#[cfg(target_arch = "riscv32")]
+use alloc::string::String;
+
+#[cfg(not(target_arch = "riscv32"))]
+use std::boxed::Box;
+#[cfg(not(target_arch = "riscv32"))]
+use std::string::String;
+
 use alloc::format;
 
 // Wrapper to make UnsafeCell Sync for single-threaded zkVM context
@@ -289,14 +299,23 @@ static ZEROCOPY_BACKEND: SyncUnsafeCell<Option<crate::p9_in_memory::ZeroCopyBack
 // Initialized but not used as active backend (for opts=p9zc)
 static ZEROCOPY_FILESYSTEM_INIT: SyncUnsafeCell<Option<crate::p9_in_memory::ZeroCopyBackend>> =
     SyncUnsafeCell::new(None);
+// Mount backend (wraps zero-copy with tmpfs mounts, e.g., for opts=p9zctmpfs)
+static MOUNT_BACKEND: SyncUnsafeCell<Option<crate::p9_mount::MountBackend>> =
+    SyncUnsafeCell::new(None);
 
 /// Get the active backend as a trait object
 ///
-/// Priority: ZeroCopy > Zkvm (default)
+/// Priority: MountBackend > ZeroCopy > Zkvm (default)
 /// Since we only initialize once, we just check which one is Some().
 pub fn get_backend() -> &'static mut dyn P9Backend {
     unsafe {
         // Check in priority order - use UnsafeCell::get() to avoid moves
+        // First check for MountBackend (highest priority)
+        let mount_ptr = MOUNT_BACKEND.get();
+        if let Some(ref mut b) = *mount_ptr {
+            return b as &mut dyn P9Backend;
+        }
+        // Then check for ZeroCopy backend
         let zerocopy_ptr = ZEROCOPY_BACKEND.get();
         if let Some(ref mut b) = *zerocopy_ptr {
             return b as &mut dyn P9Backend;
@@ -372,6 +391,63 @@ pub unsafe fn init_zerocopy_backend(addr: usize, max_size: usize) -> Result<usiz
     }
 }
 
+/// Initialize the zero-copy backend with a tmpfs mounted at /tmp
+///
+/// This creates a MountBackend that wraps the zero-copy filesystem as root
+/// and mounts a RAM filesystem at /tmp for writable temporary files.
+///
+/// # Safety
+/// Must be called before any P9 operations if using this backend.
+/// The address must point to a valid FilesystemImage.
+pub unsafe fn init_zerocopy_backend_with_tmpfs(
+    addr: usize,
+    max_size: usize,
+) -> Result<usize, u32> {
+    unsafe {
+        // Check if already initialized
+        let mount_ptr = MOUNT_BACKEND.get();
+        let already_initialized = (*mount_ptr).is_some();
+        if already_initialized {
+            crate::kernel::print(
+                "init_zerocopy_backend_with_tmpfs: Already initialized, returning existing size",
+            );
+            // For now, return 0 - we'd need to expose image_size() from MountBackend
+            return Ok(0);
+        }
+
+        // Create the zero-copy backend directly (don't store in ZEROCOPY_BACKEND)
+        crate::kernel::print("init_zerocopy_backend_with_tmpfs: Creating zero-copy backend...");
+        let zerocopy_backend = crate::p9_in_memory::ZeroCopyBackend::from_address(addr, max_size)?;
+        let fs_size = zerocopy_backend.image_size();
+        
+        // Wrap it in a Box and create MountBackend
+        let root_backend: Box<dyn P9Backend> = Box::new(zerocopy_backend);
+        let mut mount_backend = crate::p9_mount::MountBackend::new(root_backend);
+
+        // Create and mount tmpfs at /tmp
+        crate::kernel::print("init_zerocopy_backend_with_tmpfs: Creating tmpfs...");
+        let tmpfs = crate::p9_mount::RamFilesystem::new();
+        match mount_backend.mount(String::from("/tmp"), Box::new(tmpfs)) {
+            Ok(_) => {
+                crate::kernel::print("init_zerocopy_backend_with_tmpfs: Mounted tmpfs at /tmp");
+            }
+            Err(errno) => {
+                crate::kernel::print(&format!(
+                    "init_zerocopy_backend_with_tmpfs: Failed to mount tmpfs: errno={}",
+                    errno
+                ));
+                return Err(errno);
+            }
+        }
+
+        // Store the mount backend
+        *mount_ptr = Some(mount_backend);
+        crate::kernel::print("init_zerocopy_backend_with_tmpfs: MountBackend initialized");
+
+        Ok(fs_size)
+    }
+}
+
 // Deprecated compatibility functions
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BackendType {
@@ -382,7 +458,10 @@ pub enum BackendType {
 pub fn get_backend_type() -> BackendType {
     unsafe {
         // Use UnsafeCell::get() to check without moving
-        if (*ZEROCOPY_BACKEND.get()).is_some() {
+        // Check MountBackend first (it wraps ZeroCopy)
+        if (*MOUNT_BACKEND.get()).is_some() {
+            BackendType::ZeroCopy // MountBackend uses ZeroCopy as root
+        } else if (*ZEROCOPY_BACKEND.get()).is_some() {
             BackendType::ZeroCopy
         } else {
             BackendType::Zkvm
