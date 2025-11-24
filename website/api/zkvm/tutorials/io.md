@@ -118,7 +118,7 @@ A good practice to handle sensitive data is to use [proof
 composition][article-composition];
 Essentially splitting the proving process into smaller parts, proving the
 sensitive data locally and combining the larger program later through
-composition in a capable proving service like [Bonsai][docs-remote-proving] to
+composition in a capable proving service like [Boundless] to
 speed up the proof generation.
 :::
 
@@ -277,6 +277,7 @@ reference if you wish.
 Happy coding!
 
 [article-composition]: https://www.risczero.com/blog/proof-composition
+[Boundless]: http://boundless.network
 [docs-guest-code-optimization]: ../optimization.md#when-reading-data-as-raw-bytes-use-envread_slice
 [docs-hello-world]: ./hello-world.md
 [docs-remote-proving]: ../../generating-proofs/remote-proving.md
