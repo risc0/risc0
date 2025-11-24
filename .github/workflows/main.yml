@@ -524,6 +524,8 @@ jobs:
     if: needs.changes.outputs.check-template == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    env:
+      RUST_TOOLCHAIN_VERSION: 1.88.0
     strategy:
       fail-fast: false
       matrix:
