@@ -38,6 +38,7 @@ mod p9;
 mod p9_backend;
 mod p9_zkvm;
 mod p9_in_memory;
+mod p9_mount;
 mod softfloat;
 
 // Set up the global allocator
