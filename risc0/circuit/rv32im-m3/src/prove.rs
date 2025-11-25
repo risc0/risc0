@@ -262,14 +262,14 @@ mod tests {
     impl Syscall for NullSyscall {
         fn host_read(
             &self,
-            _ctx: &mut dyn SyscallContext,
+            _ctx: &mut impl SyscallContext,
             _fd: u32,
             _buf: &mut [u8],
         ) -> Result<u32> {
             unimplemented!()
         }
 
-        fn host_write(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
+        fn host_write(&self, _ctx: &mut impl SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
             unimplemented!()
         }
     }
