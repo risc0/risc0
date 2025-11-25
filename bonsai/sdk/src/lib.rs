@@ -166,6 +166,10 @@ pub const TIMEOUT_ENVVAR: &str = "BONSAI_TIMEOUT_MS";
 pub const RELEASE_CHANNEL_ENVVAR: &str = "RISC0_RELEASE_CHANNEL";
 /// Default timeout in ms if env var is not set
 const DEFAULT_TIMEOUT: u64 = 30000;
+/// Environment variable name for the timeout, either a number in ms or "none" for no timeout
+pub const MAX_NUMBER_OF_IDLE_CLIENTS_ENVVAR: &str = "BONSAI_MAX_NUMBER_OF_IDLE_CLIENTS";
+/// Default max number of idle clients if env var is not set
+const DEFAULT_MAX_NUMBER_OF_IDLE_CLIENTS: usize = 5;
 
 /// Bonsai Alpha SDK error classes
 #[derive(Debug, Error)]
@@ -514,11 +518,16 @@ pub mod module_type {
             )),
             Err(_) => Some(Duration::from_millis(DEFAULT_TIMEOUT)),
         };
+        let max_idle_per_host = match std::env::var(MAX_NUMBER_OF_IDLE_CLIENTS_ENVVAR).as_deref() {
+            Ok(val) => val.parse().unwrap_or(DEFAULT_MAX_NUMBER_OF_IDLE_CLIENTS),
+            Err(_) => DEFAULT_MAX_NUMBER_OF_IDLE_CLIENTS,
+        };
+
         #[cfg(feature = "non_blocking")]
         {
             Ok(HttpClient::builder()
                 .default_headers(headers)
-                .pool_max_idle_per_host(0)
+                .pool_max_idle_per_host(max_idle_per_host)
                 .timeout(timeout.unwrap_or(Duration::from_millis(DEFAULT_TIMEOUT)))
                 .build()?)
         }
@@ -526,7 +535,7 @@ pub mod module_type {
         {
             Ok(HttpClient::builder()
                 .default_headers(headers)
-                .pool_max_idle_per_host(0)
+                .pool_max_idle_per_host(max_idle_per_host)
                 .timeout(timeout)
                 .build()?)
         }
