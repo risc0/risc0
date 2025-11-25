@@ -391,18 +391,15 @@ pub unsafe fn init_zerocopy_backend(addr: usize, max_size: usize) -> Result<usiz
     }
 }
 
-/// Initialize the zero-copy backend with a tmpfs mounted at /tmp
+/// Initialize the zero-copy backend with tmpfs mounted at /tmp and /dev/shm
 ///
 /// This creates a MountBackend that wraps the zero-copy filesystem as root
-/// and mounts a RAM filesystem at /tmp for writable temporary files.
+/// and mounts separate RAM filesystems at /tmp and /dev/shm for writable temporary files.
 ///
 /// # Safety
 /// Must be called before any P9 operations if using this backend.
 /// The address must point to a valid FilesystemImage.
-pub unsafe fn init_zerocopy_backend_with_tmpfs(
-    addr: usize,
-    max_size: usize,
-) -> Result<usize, u32> {
+pub unsafe fn init_zerocopy_backend_with_tmpfs(addr: usize, max_size: usize) -> Result<usize, u32> {
     unsafe {
         // Check if already initialized
         let mount_ptr = MOUNT_BACKEND.get();
@@ -419,26 +416,43 @@ pub unsafe fn init_zerocopy_backend_with_tmpfs(
         crate::kernel::print("init_zerocopy_backend_with_tmpfs: Creating zero-copy backend...");
         let zerocopy_backend = crate::p9_in_memory::ZeroCopyBackend::from_address(addr, max_size)?;
         let fs_size = zerocopy_backend.image_size();
-        
+
         // Wrap it in a Box and create MountBackend
         let root_backend: Box<dyn P9Backend> = Box::new(zerocopy_backend);
         let mut mount_backend = crate::p9_mount::MountBackend::new(root_backend);
 
-        // Create and mount tmpfs at /tmp
-        crate::kernel::print("init_zerocopy_backend_with_tmpfs: Creating tmpfs...");
-        let tmpfs = crate::p9_mount::RamFilesystem::new();
-        match mount_backend.mount(String::from("/tmp"), Box::new(tmpfs)) {
-            Ok(_) => {
-                crate::kernel::print("init_zerocopy_backend_with_tmpfs: Mounted tmpfs at /tmp");
+        // Helper to mount a tmpfs at a given path
+        let mount_tmpfs = |mount_backend: &mut crate::p9_mount::MountBackend,
+                          path: &str|
+         -> Result<(), u32> {
+            crate::kernel::print(&format!(
+                "init_zerocopy_backend_with_tmpfs: Creating tmpfs at {}...",
+                path
+            ));
+            let fs = crate::p9_mount::RamFilesystem::new();
+            match mount_backend.mount(String::from(path), Box::new(fs)) {
+                Ok(_) => {
+                    crate::kernel::print(&format!(
+                        "init_zerocopy_backend_with_tmpfs: Mounted tmpfs at {}",
+                        path
+                    ));
+                    Ok(())
+                }
+                Err(errno) => {
+                    crate::kernel::print(&format!(
+                        "init_zerocopy_backend_with_tmpfs: Failed to mount tmpfs at {}: errno={}",
+                        path, errno
+                    ));
+                    Err(errno)
+                }
             }
-            Err(errno) => {
-                crate::kernel::print(&format!(
-                    "init_zerocopy_backend_with_tmpfs: Failed to mount tmpfs: errno={}",
-                    errno
-                ));
-                return Err(errno);
-            }
-        }
+        };
+
+        // Mount tmpfs at /tmp
+        mount_tmpfs(&mut mount_backend, "/tmp")?;
+
+        // Mount a separate tmpfs at /dev/shm
+        mount_tmpfs(&mut mount_backend, "/dev/shm")?;
 
         // Store the mount backend
         *mount_ptr = Some(mount_backend);
