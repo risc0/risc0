@@ -20,31 +20,46 @@ mod tests;
 
 use std::collections::BTreeMap;
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use dynasmrt::{
     AssemblyOffset, DynasmApi as _, DynasmError, DynasmLabelApi,
     components::StaticLabel,
     relocations::{Relocation as _, RelocationSize},
     x64::{Assembler, X64Relocation},
 };
+use risc0_binfmt::Program;
 
 use crate::rv32im::{Instruction, REG_MAX, RvOp, WORD_SIZE};
 
-#[derive(Default)]
-struct Program {
-    entry: u32,
-    image: BTreeMap<u32, u32>,
+#[repr(u32)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+enum Terminal {
+    Jump,
+    Branch,
+    Break,
+    Trap,
 }
 
-struct Machine {
+impl Terminal {
+    fn from_u32(word: u32) -> Option<Self> {
+        match word {
+            0 => Some(Self::Jump),
+            1 => Some(Self::Branch),
+            2 => Some(Self::Break),
+            3 => Some(Self::Trap),
+            _ => None,
+        }
+    }
+}
+
+struct JitContext {
     pc: u32,
-    registers: [u32; REG_MAX],
+    pub(crate) registers: [u32; REG_MAX],
     ram: BTreeMap<u32, u32>,
 }
 
-impl Machine {
+impl JitContext {
     fn fetch(&mut self) -> Instruction {
-        tracing::debug!("fetch: {:#10x}", self.pc);
         Instruction::new(self.ram[&self.pc])
     }
 
@@ -66,13 +81,6 @@ impl Machine {
             tracing::debug!("x{i}: {reg:#010x}");
         }
     }
-}
-
-enum Terminal {
-    Branch,
-    Jump,
-    Break,
-    Trap,
 }
 
 /// General-purpose registers.
@@ -153,57 +161,25 @@ impl Instruction {
     }
 }
 
-// RV x0  (zero)  N/A    -> always zero
-// RV x1  (ra)    caller -> r13 (callee)
-// RV x2  (sp)    callee -> rsp
-// RV x3  (gp)    N/A    -> memory
-// RV x4  (tp)    N/A    -> memory
-// RV x5  (t0)    caller -> r14 (callee)
-// RV x6  (t1)    caller -> memory
-// RV x7  (t2)    caller -> memory
-// RV x8  (s0/fp) callee -> rbp
-// RV x9  (s1)    callee -> r12
-// RV x10 (a0)    caller -> rdi
-// RV x11 (a1)    caller -> rsi
-// RV x12 (a2)    caller -> rdx
-// RV x13 (a3)    caller -> rcx
-// RV x14 (a4)    caller -> r8
-// RV x15 (a5)    caller -> r9
-// RV x16 (a6)    caller -> r10
-// RV x17 (a7)    caller -> r11
-// RV x18 (s2)    callee -> memory
-// RV x19 (s3)    callee -> memory
-// RV x20 (t3)    callee -> memory
-// RV x21 (t3)    callee -> memory
-// RV x22 (t3)    callee -> memory
-// RV x23 (t3)    callee -> memory
-// RV x24 (t3)    callee -> memory
-// RV x25 (t3)    callee -> memory
-// RV x26 (t3)    callee -> memory
-// RV x27 (t3)    callee -> memory
-// RV x28 (t3)    caller -> memory
-// RV x29 (t4)    caller -> memory
-// RV x30 (t5)    caller -> memory
-// RV x31 (t6)    caller -> memory
 const REGISTER_MAPPING: [Loc; REG_MAX] = [
-    Loc::Zero,                                   // x0  (zero)
-    Loc::GPR(GPR::R13),                          // x1  (ra)
-    Loc::Memory(GPR::RBX, 2 * WORD_SIZE as i32), // x2  (sp)
-    Loc::Memory(GPR::RBX, 3 * WORD_SIZE as i32), // x3  (gp)
-    Loc::Memory(GPR::RBX, 4 * WORD_SIZE as i32), // x4  (tp)
-    Loc::GPR(GPR::R14),                          // x5  (t0)
-    Loc::Memory(GPR::RBX, 6 * WORD_SIZE as i32), // x6  (t1)
-    Loc::Memory(GPR::RBX, 7 * WORD_SIZE as i32), // x7  (t2)
-    Loc::GPR(GPR::RBP),                          // x8  (s0)
-    Loc::GPR(GPR::R12),                          // x9  (s1)
-    Loc::GPR(GPR::RDI),                          // x10 (a0)
-    Loc::GPR(GPR::RSI),                          // x11 (a1)
-    Loc::GPR(GPR::RDX),                          // x12 (a2)
-    Loc::GPR(GPR::RCX),                          // x13 (a3)
-    Loc::GPR(GPR::R8),                           // x14 (a4)
-    Loc::GPR(GPR::R9),                           // x15 (a5)
-    Loc::GPR(GPR::R10),                          // x16 (a6)
-    Loc::GPR(GPR::R11),                          // x17 (a7)
+    Loc::Zero,                                    // x0  (zero)
+    Loc::GPR(GPR::R13),                           // x1  (ra)
+    Loc::Memory(GPR::RBX, 2 * WORD_SIZE as i32),  // x2  (sp)
+    Loc::Memory(GPR::RBX, 3 * WORD_SIZE as i32),  // x3  (gp)
+    Loc::Memory(GPR::RBX, 4 * WORD_SIZE as i32),  // x4  (tp)
+    Loc::GPR(GPR::R14),                           // x5  (t0)
+    Loc::Memory(GPR::RBX, 6 * WORD_SIZE as i32),  // x6  (t1)
+    Loc::Memory(GPR::RBX, 7 * WORD_SIZE as i32),  // x7  (t2)
+    Loc::GPR(GPR::RBP),                           // x8  (s0)
+    Loc::Memory(GPR::RBX, 9 * WORD_SIZE as i32),  // x9  (s1)
+    Loc::GPR(GPR::RDI),                           // x10 (a0)
+    Loc::GPR(GPR::RSI),                           // x11 (a1)
+    Loc::GPR(GPR::R8),                            // x12 (a2)
+    Loc::GPR(GPR::R9),                            // x13 (a3)
+    Loc::GPR(GPR::R10),                           // x14 (a4)
+    Loc::GPR(GPR::R11),                           // x15 (a5)
+    Loc::GPR(GPR::R12),                           // x16 (a6)
+    Loc::Memory(GPR::RBX, 17 * WORD_SIZE as i32), // x17 (a7)
     Loc::Memory(GPR::RBX, 18 * WORD_SIZE as i32),
     Loc::Memory(GPR::RBX, 19 * WORD_SIZE as i32),
     Loc::Memory(GPR::RBX, 20 * WORD_SIZE as i32),
@@ -245,7 +221,7 @@ macro_rules! unop {
                 emit!($self ; $op DWORD [Rq(dst) + disp]);
             },
             _ => {
-                panic!("bad {}", stringify!($op));
+                panic!("bad {}, {:?}", stringify!($op), $dst);
             }
         }
     };
@@ -258,7 +234,7 @@ macro_rules! binop {
                 binop_gpr_gpr!($self, $op, $dst, $src, {
                     binop_gpr_mem!($self, $op, $dst, $src, {
                         binop_mem_gpr!($self, $op, $dst, $src, {
-                            panic!("bad {}", stringify!($op));
+                            panic!("bad {}, {:?}, {:?}", stringify!($op), $dst, $src);
                         })
                     })
                 })
@@ -270,8 +246,12 @@ macro_rules! binop {
 macro_rules! binop_imm_gpr {
     ($self:tt, $op:ident, $dst:expr, $src:expr, $else:block) => {
         match ($src, $dst) {
+            (_, Loc::Zero) => {},
             (Loc::Imm32(imm), Loc::GPR(dst)) => {
                 emit!($self ; $op Rd(dst), imm as i32);
+            },
+            (Loc::Zero, Loc::GPR(dst)) => {
+                emit!($self ; $op Rd(dst), 0);
             },
             _ => $else
         }
@@ -283,6 +263,9 @@ macro_rules! binop_imm_mem {
         match ($src, $dst) {
             (Loc::Imm32(imm), Loc::Memory(dst, disp)) => {
                 emit!($self ; $op DWORD [Rq(dst) + disp], imm as i32);
+            },
+            (Loc::Zero, Loc::Memory(dst, disp)) => {
+                emit!($self ; $op DWORD [Rq(dst) + disp], 0);
             },
             _ => $else
         }
@@ -325,6 +308,7 @@ macro_rules! binop_mem_gpr {
 macro_rules! binop_shift {
     ($self:tt, $op:ident, $dst:expr, $src:expr) => {
         match ($src, $dst) {
+            (_, Loc::Zero) => {}
             (Loc::GPR(GPR::RCX), Loc::GPR(dst)) => {
                 emit!($self ; $op Rd(dst), cl);
             },
@@ -338,7 +322,7 @@ macro_rules! binop_shift {
                 emit!($self ; $op DWORD [Rq(dst) + disp], imm as i8);
             },
             _ => {
-                panic!("bad {}", stringify!($op));
+                panic!("bad {}, {:?}, {:?}", stringify!($op), $dst, $src);
             }
         }
     };
@@ -381,7 +365,7 @@ extern "C" fn print(ptr: *const u8, len: u64) {
 
 struct Translator {
     asm: Assembler,
-    machine: Machine,
+    pub(crate) ctx: JitContext,
     labels: BTreeMap<u32, AssemblyOffset>,
     fixups: BTreeMap<u32, Vec<AssemblyOffset>>,
 }
@@ -458,7 +442,7 @@ impl Translator {
 
         Ok(Self {
             asm,
-            machine: Machine {
+            ctx: JitContext {
                 pc: program.entry,
                 registers: [0; REG_MAX],
                 ram: program.image,
@@ -469,32 +453,31 @@ impl Translator {
     }
 
     fn jit_block(&mut self) -> Result<AssemblyOffset> {
-        tracing::debug!("jit_block: {:#10x}", self.machine.pc);
+        tracing::debug!("jit_block: {:#10x}", self.ctx.pc);
         let start = self.asm.offset();
 
         loop {
             let offset = self.asm.offset();
-            self.labels.insert(self.machine.pc, offset);
-            if let Some(fixups) = self.fixups.remove(&self.machine.pc) {
+            self.labels.insert(self.ctx.pc, offset);
+            if let Some(fixups) = self.fixups.remove(&self.ctx.pc) {
                 let kind = X64Relocation::from_size(RelocationSize::DWord);
                 for jmp_offset in fixups {
                     tracing::debug!("fixup: {jmp_offset:x?} -> {offset:x?}");
                     self.asm.alter(|modifier| {
+                        // goto the rel32 operand of the source jump instruction
                         modifier.goto(AssemblyOffset(jmp_offset.0 + 1));
+                        // compute the rel32 offset from the end of the jump instruction
                         let offset = offset.0 as isize - 4;
+                        // perform the actual patch
                         modifier.bare_relocation(offset as usize, 0, 0, kind.clone());
                     })?;
                 }
             }
-            let insn = self.machine.fetch();
-            if let Some(_terminal) = self.dispatch(insn)? {
-                // create new basic block
-                // have we seen the basic block before?
-                // if so, jump to function that has been JIT
-                // if not, continue, create a new basic block
+            let insn = self.ctx.fetch();
+            if let Some(terminal) = self.dispatch(insn)? {
                 break;
             }
-            self.machine.next();
+            self.ctx.next();
         }
 
         tracing::debug!("commit");
@@ -510,45 +493,47 @@ impl Translator {
             .resolve_static(&StaticLabel::global("enter"))
     }
 
-    fn jit_loop(&mut self) -> Result<()> {
+    fn jit_loop(&mut self) -> Result<Terminal> {
         self.dump(self.enter_offset()?);
         loop {
-            let pc = if let Some(&offset) = self.labels.get(&self.machine.pc) {
-                tracing::debug!("existing label: {:#10x}", self.machine.pc);
+            let retval = if let Some(&offset) = self.labels.get(&self.ctx.pc) {
+                tracing::debug!("existing label: {:#10x}", self.ctx.pc);
                 self.enter_block(offset)?
             } else {
                 let offset = self.jit_block()?;
                 self.enter_block(offset)?
             };
-            // self.machine.dump_registers();
-            if pc == 0 {
-                break;
-            }
-            tracing::trace!("next pc: {pc:#10x}");
-            self.machine.pc = pc;
-        }
 
-        Ok(())
+            let terminal = Terminal::from_u32((retval >> 32) as u32)
+                .ok_or_else(|| anyhow!("Invalid terminal"))?;
+            let pc = (retval & 0xffffffff) as u32;
+            match terminal {
+                Terminal::Jump | Terminal::Branch => (),
+                Terminal::Break | Terminal::Trap => return Ok(terminal),
+            }
+            // self.machine.dump_registers();
+            tracing::trace!("next pc: {pc:#10x}");
+            self.ctx.pc = pc;
+        }
     }
 
-    fn enter_block(&mut self, offset: AssemblyOffset) -> Result<u32> {
+    fn enter_block(&mut self, offset: AssemblyOffset) -> Result<u64> {
         tracing::debug!("enter_block: {offset:x?}");
         let enter = self.enter_offset()?;
         let reader = self.asm.reader();
         let exe = reader.lock();
         let enter_ptr = exe.ptr(enter);
         let block_ptr = exe.ptr(offset);
-        let registers_ptr = self.machine.registers.as_mut_ptr();
+        let registers_ptr = self.ctx.registers.as_mut_ptr();
         tracing::trace!(
             "enter_ptr: {enter_ptr:?}, block_ptr: {block_ptr:?}, registers_ptr: {registers_ptr:?}"
         );
-        let enter: extern "C" fn(*const u8, *mut u32) -> u32 =
+        let enter: extern "C" fn(*const u8, *mut u32) -> u64 =
             unsafe { std::mem::transmute(enter_ptr) };
         Ok(enter(block_ptr, registers_ptr))
     }
 
     fn dispatch(&mut self, insn: Instruction) -> Result<Option<Terminal>> {
-        // tracing::debug!("dispatch: {insn:?}");
         match (insn.opcode, insn.func3, insn.func7) {
             // I-format memory loads
             (0b0000011, 0b000, _) => self.step_load(RvOp::Lb, insn),
@@ -557,7 +542,7 @@ impl Translator {
             (0b0000011, 0b100, _) => self.step_load(RvOp::LbU, insn),
             (0b0000011, 0b101, _) => self.step_load(RvOp::LhU, insn),
             // Fence instruction
-            (0b0001111, 0b000, _) => self.step_system(RvOp::Fence, insn),
+            // (0b0001111, 0b000, _) => self.step_system(RvOp::Fence, insn),
             // I-format arithmetic ops
             (0b0010011, 0b000, _) => self.step_compute(RvOp::AddI, insn),
             (0b0010011, 0b001, 0b0000000) => self.step_compute(RvOp::SllI, insn),
@@ -610,80 +595,40 @@ impl Translator {
             (0b1110011, 0b000, 0b0011000) => self.step_system(RvOp::Mret, insn),
             (0b1110011, 0b000, 0b0000000) => self.step_system(RvOp::Eany, insn),
             // illegal instruction
-            _ => Ok(Some(Terminal::Trap)),
+            _ => self.step_trap(),
         }
     }
 
+    fn step_trap(&mut self) -> Result<Option<Terminal>> {
+        self.emit_retval(Terminal::Trap, self.ctx.pc);
+        emit!(self ; jmp ->exit);
+        Ok(Some(Terminal::Trap))
+    }
+
     fn emit_binop(&mut self, bop: fn(&mut Self, Loc, Loc), rd: Loc, rs1: Loc, rs2: Loc) {
-        // (GPR, GPR, GPR)
-        // mov rd, rs1
-        // bop rd, rs2
-
-        // (GPR, MEM, GPR)
-        // mov rd, [rs1_gpr + rs1_offset]
-        // bop rd, rs2
-
-        // (GPR, GPR, MEM)
-        // mov rd, rs1
-        // bop rd, [rs2_gpr + rs2_offset]
-
-        // (GPR, MEM, MEM)
-        // mov rd, [rs1_gpr + rs1_offset]
-        // bop rd, [rs2_gpr + rs2_offset]
-
-        // (MEM, GPR, GPR)
-        // mov tmp, rs1
-        // bop tmp, rs2
-        // mov [rd_gpr + rd_offset], tmp
-
-        // (MEM, MEM, GPR)
-        // mov tmp, [rs1_gpr + rs1_offset]
-        // bop tmp, rs2
-        // mov [rd_gpr + rd_offset], tmp
-
-        // (MEM, GPR, MEM)
-        // mov tmp, rs1
-        // bop tmp, [rs2_gpr + rs2_offset]
-        // mov [rd_gpr + rd_offset], tmp
-
-        // (MEM, MEM, MEM)
-        // mov tmp, [rs1_gpr + rs1_offset]
-        // bop tmp, [rs2_gpr + rs2_offset]
-        // mov [rd_gpr + rd_offset], tmp
-
-        match rd {
-            Loc::GPR(rd) => {
-                // mov rd, (rs1)
-                match rs1 {
-                    Loc::GPR(rs1) => {
-                        if rd != rs1 {
-                            self.emit_mov(Loc::GPR(rd), Loc::GPR(rs1));
-                        }
-                    }
-                    Loc::Memory(_, _) => {
-                        self.emit_mov(Loc::GPR(rd), rs1);
-                    }
-                    Loc::Imm8(_) => unreachable!(),
-                    Loc::Imm32(_) => unreachable!(),
-                    Loc::Zero => {
-                        // self.emit_xor();
-                    }
-                }
-                // bop rd, (rs2)
-                bop(self, Loc::GPR(rd), rs2);
-            }
-            Loc::Memory(rd, offset) => {
+        if rd == rs1 {
+            // bop rd, rs2
+            bop(self, rd, rs2);
+        } else if rd != rs2 {
+            // mov rd, rs1
+            // bop rd, rs2
+            if let (Loc::Memory(_, _), Loc::Memory(_, _)) = (rd, rs1) {
                 let tmp = Loc::GPR(GPR::RAX);
-                // mov tmp, (rs1)
                 self.emit_mov(tmp, rs1);
-                // bop tmp, (rs2)
                 bop(self, tmp, rs2);
-                // mov [rd], tmp
-                self.emit_mov(Loc::Memory(rd, offset), tmp);
+                self.emit_mov(rd, tmp);
+            } else {
+                self.emit_mov(rd, rs1);
+                bop(self, rd, rs2);
             }
-            Loc::Imm8(_) => unreachable!(),
-            Loc::Imm32(_) => unreachable!(),
-            Loc::Zero => {}
+        } else {
+            // mov eax, rs1
+            // bop eax, rs2
+            // mv rd, eax
+            let tmp = Loc::GPR(GPR::RAX);
+            self.emit_mov(tmp, rs1);
+            bop(self, tmp, rs2);
+            self.emit_mov(rd, tmp);
         }
     }
 
@@ -745,18 +690,12 @@ impl Translator {
     }
 
     fn emit_shift(&mut self, op: fn(&mut Self, Loc, Loc), rd: Loc, rs1: Loc, rs2: Loc) {
-        // save ecx
-        self.push(GPR::RCX);
-
         let ecx = Loc::GPR(GPR::RCX);
         self.emit_mov(ecx, rs2);
         if rd != rs1 {
             self.emit_mov(rd, rs1);
         }
         op(self, rd, ecx);
-
-        // restore ecx
-        self.pop(GPR::RCX);
     }
 
     fn emit_setl(&mut self, dst: GPR) {
@@ -774,6 +713,10 @@ impl Translator {
                 self.emit_mov(tmp, rs1);
                 binop!(self, cmp, tmp, rs2);
             }
+            (Loc::Zero, _) => {
+                emit!(self; xor Rd(tmp), Rd(tmp));
+                binop!(self, cmp, Loc::GPR(tmp), rs2);
+            }
             _ => {
                 binop!(self, cmp, rs1, rs2);
             }
@@ -781,6 +724,10 @@ impl Translator {
     }
 
     fn emit_cmpset(&mut self, op: fn(&mut Self, GPR), rd: Loc, rs1: Loc, rs2: Loc) {
+        if rd == Loc::Zero {
+            return;
+        }
+
         self.emit_cmp(GPR::RAX, rs1, rs2);
         op(self, GPR::RAX);
         match rd {
@@ -789,17 +736,17 @@ impl Translator {
                 emit!(self ; movzx eax, al);
                 self.emit_mov(rd, Loc::GPR(GPR::RAX));
             }
+            Loc::Zero => {}
             _ => unreachable!(),
         }
     }
 
     fn step_compute(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
-        tracing::trace!("step_compute");
+        self.trace(op, &insn);
         let (rd, rs1, rs2) = (insn.rd_loc(), insn.rs1_loc(), insn.rs2_loc());
         match op {
             RvOp::Add => {
                 // rd = rs1 + rs2
-                tracing::trace!("add {rd:?}, {rs1:?}, {rs2:?}");
                 self.emit_binop(Self::emit_add, rd, rs1, rs2);
             }
             RvOp::Sub => {
@@ -841,7 +788,6 @@ impl Translator {
             RvOp::AddI => {
                 // rd = rs1 + imm
                 let imm = insn.imm_i();
-                tracing::trace!("addi {rd:?}, {rs1:?}, {imm:?}");
                 if rd == rs1 && imm == 1 {
                     unop!(self, inc, rd);
                 } else {
@@ -863,17 +809,17 @@ impl Translator {
             RvOp::SllI => {
                 // rd = rs1 << imm[0:4]
                 let imm = insn.imm_i() & 0x1f;
-                self.emit_shift(Self::emit_shl, rd, rs1, Loc::Imm8(imm as u8));
+                self.emit_binop(Self::emit_shl, rd, rs1, Loc::Imm8(imm as u8));
             }
             RvOp::SrlI => {
                 // rd = rs1 >> imm[0:4]
                 let imm = insn.imm_i() & 0x1f;
-                self.emit_shift(Self::emit_shr, rd, rs1, Loc::Imm8(imm as u8));
+                self.emit_binop(Self::emit_shr, rd, rs1, Loc::Imm8(imm as u8));
             }
             RvOp::SraI => {
                 // rd = rs1 >> imm[0:4] (msb-extends)
                 let imm = insn.imm_i() & 0x1f;
-                self.emit_shift(Self::emit_sar, rd, rs1, Loc::Imm8(imm as u8));
+                self.emit_binop(Self::emit_sar, rd, rs1, Loc::Imm8(imm as u8));
             }
             RvOp::SltI => {
                 // rd = (rs1 < imm) ? 1 : 0
@@ -887,12 +833,11 @@ impl Translator {
             RvOp::Lui => {
                 // rd = imm << 12
                 let imm = insn.imm_u();
-                tracing::trace!("lui {:#10x}", imm);
                 self.emit_mov(rd, Loc::Imm32(imm));
             }
             RvOp::Auipc => {
                 // rd = PC + (imm << 12)
-                self.emit_mov(rd, Loc::Imm32(self.machine.pc + insn.imm_u()));
+                self.emit_mov(rd, Loc::Imm32(self.ctx.pc.wrapping_add(insn.imm_u())));
             }
             RvOp::Mul => {
                 // rd = (rs1 * rs2)[31:0]
@@ -935,14 +880,10 @@ impl Translator {
         let eax = Loc::GPR(GPR::RAX);
         let ecx = Loc::GPR(GPR::RCX);
 
-        self.push(GPR::RCX);
-
         self.emit_mov(eax, rs1);
         self.emit_mov(ecx, rs2);
-        emit!(self ; imul eax, ecx);
+        emit!(self ; imul ecx);
         self.emit_mov(rd, eax);
-
-        self.pop(GPR::RCX);
     }
 
     fn emit_mulh(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
@@ -950,16 +891,10 @@ impl Translator {
         let ecx = Loc::GPR(GPR::RCX);
         let edx = Loc::GPR(GPR::RDX);
 
-        self.push(GPR::RDX);
-        self.push(GPR::RCX);
-
         self.emit_mov(eax, rs1);
         self.emit_mov(ecx, rs2);
         emit!(self ; imul ecx);
         self.emit_mov(rd, edx);
-
-        self.pop(GPR::RCX);
-        self.pop(GPR::RDX);
     }
 
     fn emit_mulhu(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
@@ -967,16 +902,10 @@ impl Translator {
         let ecx = Loc::GPR(GPR::RCX);
         let edx = Loc::GPR(GPR::RDX);
 
-        self.push(GPR::RDX);
-        self.push(GPR::RCX);
-
         self.emit_mov(eax, rs1);
         self.emit_mov(ecx, rs2);
         emit!(self ; mul ecx);
         self.emit_mov(rd, edx);
-
-        self.pop(GPR::RCX);
-        self.pop(GPR::RDX);
     }
 
     fn emit_mulhsu(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
@@ -984,24 +913,19 @@ impl Translator {
         let ecx = Loc::GPR(GPR::RCX);
         let edx = Loc::GPR(GPR::RDX);
 
-        self.push(GPR::RDX);
-        self.push(GPR::RCX);
-
-        self.emit_mov(eax, rs1);
-        emit!(self ; cdqe);
-        self.emit_mov(ecx, rs2);
-        emit!(self ; mov ecx, ecx);
-        emit!(self ; imul rcx);
+        self.emit_mov(eax, rs1); // eax = rs1
+        self.emit_mov(ecx, rs2); // ecx = rs2
+        emit!(self ; mul ecx); // unsigned mul: edx:eax = eax * ecx = (u32)rs1 * (u32)rs2
+        self.emit_mov(eax, rs1); // eax = rs1
+        emit!(self
+            ; sar eax, 31  // eax = 0xffffffff if rs1 < 0, else 0
+            ; and eax, ecx // eax = (rs1 < 0 ? ecx : 0)
+            ; sub edx, eax // adjust high word for signed * unsigned
+        );
         self.emit_mov(rd, edx);
-
-        self.pop(GPR::RCX);
-        self.pop(GPR::RDX);
     }
 
     fn emit_div(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
-        self.push(GPR::RDX);
-        self.push(GPR::RCX);
-
         let eax = Loc::GPR(GPR::RAX);
         let ecx = Loc::GPR(GPR::RCX);
         let edx = Loc::GPR(GPR::RDX);
@@ -1026,15 +950,9 @@ impl Translator {
         );
 
         self.emit_mov(rd, eax);
-
-        self.pop(GPR::RCX);
-        self.pop(GPR::RDX);
     }
 
     fn emit_divu(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
-        self.push(GPR::RDX);
-        self.push(GPR::RCX);
-
         let eax = Loc::GPR(GPR::RAX);
         let ecx = Loc::GPR(GPR::RCX);
         let edx = Loc::GPR(GPR::RDX);
@@ -1054,15 +972,9 @@ impl Translator {
         );
 
         self.emit_mov(rd, eax);
-
-        self.pop(GPR::RCX);
-        self.pop(GPR::RDX);
     }
 
     fn emit_rem(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
-        self.push(GPR::RDX);
-        self.push(GPR::RCX);
-
         let eax = Loc::GPR(GPR::RAX);
         let ecx = Loc::GPR(GPR::RCX);
         let edx = Loc::GPR(GPR::RDX);
@@ -1088,15 +1000,9 @@ impl Translator {
         );
 
         self.emit_mov(rd, eax);
-
-        self.pop(GPR::RCX);
-        self.pop(GPR::RDX);
     }
 
     fn emit_remu(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
-        self.push(GPR::RDX);
-        self.push(GPR::RCX);
-
         let eax = Loc::GPR(GPR::RAX);
         let ecx = Loc::GPR(GPR::RCX);
         let edx = Loc::GPR(GPR::RDX);
@@ -1114,17 +1020,6 @@ impl Translator {
         );
 
         self.emit_mov(rd, eax);
-
-        self.pop(GPR::RCX);
-        self.pop(GPR::RDX);
-    }
-
-    fn push(&mut self, reg: GPR) {
-        emit!(self ; push Rq(reg));
-    }
-
-    fn pop(&mut self, reg: GPR) {
-        emit!(self ; pop Rq(reg));
     }
 
     fn emit_lea(&mut self, dst: GPR, base: Option<GPR>, src: Loc, imm: u32) {
@@ -1213,9 +1108,6 @@ impl Translator {
             return;
         }
 
-        // save ecx
-        self.push(GPR::RCX);
-
         // load [rs2] into rcx
         match rs2 {
             Loc::GPR(rs2) => emit!(self ; mov ecx, [Rd(rs2)]),
@@ -1232,12 +1124,21 @@ impl Translator {
             Size::S16 => emit!(self ; mov WORD [rax], cx),
             Size::S32 => emit!(self ; mov DWORD [rax], ecx),
         }
+    }
 
-        // restore ecx
-        self.pop(GPR::RCX);
+    fn trace(&self, op: RvOp, insn: &Instruction) {
+        if tracing::enabled!(tracing::Level::TRACE) {
+            tracing::trace!(
+                "{:#010x}> {:#010x}  {}",
+                self.ctx.pc,
+                insn.word,
+                crate::rv32im::disasm(op, insn)
+            );
+        }
     }
 
     fn step_load(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+        self.trace(op, &insn);
         let (rd, rs1, imm) = (insn.rd_loc(), insn.rs1_loc(), insn.imm_i());
         match op {
             RvOp::Lb => {
@@ -1266,6 +1167,8 @@ impl Translator {
     }
 
     fn step_store(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+        todo!();
+        self.trace(op, &insn);
         let (rs1, rs2, imm) = (insn.rs1_loc(), insn.rs2_loc(), insn.imm_s());
         match op {
             RvOp::Sb => {
@@ -1286,6 +1189,7 @@ impl Translator {
     }
 
     fn step_branch(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+        self.trace(op, &insn);
         let (rs1, rs2, imm) = (insn.rs1_loc(), insn.rs2_loc(), insn.imm_b());
         self.emit_cmp(GPR::RAX, rs1, rs2);
         match op {
@@ -1316,18 +1220,23 @@ impl Translator {
             _ => unreachable!(),
         }
 
-        let next_pc = self.machine.pc as i32 + WORD_SIZE as i32;
-        let taken_pc = self.machine.pc as i32 + imm as i32;
+        let next_pc = self.ctx.pc as i32 + WORD_SIZE as i32;
+        let taken_pc = self.ctx.pc as i32 + imm as i32;
 
-        self.emit_exit(next_pc as u32, true);
+        self.emit_exit(Terminal::Branch, next_pc as u32, true);
         emit!(self ;taken:);
-        self.emit_exit(taken_pc as u32, true);
+        self.emit_exit(Terminal::Branch, taken_pc as u32, true);
 
         Ok(Some(Terminal::Branch))
     }
 
-    fn emit_exit(&mut self, target_pc: u32, emit_jmp: bool) -> Result<()> {
-        emit!(self ; mov eax, target_pc as i32);
+    fn emit_retval(&mut self, terminal: Terminal, pc: u32) {
+        let retval = (terminal as u64) << 32 | (pc as u64);
+        emit!(self ; mov rax, QWORD retval as i64);
+    }
+
+    fn emit_exit(&mut self, terminal: Terminal, target_pc: u32, emit_jmp: bool) -> Result<()> {
+        self.emit_retval(terminal, target_pc);
         if let Some(&offset) = self.labels.get(&target_pc) {
             tracing::debug!("direct target: {target_pc:#10x?} -> {:#04x?}", offset.0);
             let label = self.asm.new_dynamic_label();
@@ -1347,6 +1256,7 @@ impl Translator {
     }
 
     fn step_jump(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+        self.trace(op, &insn);
         match op {
             RvOp::Jal => {
                 // rd = PC+4; PC += imm
@@ -1363,25 +1273,21 @@ impl Translator {
     }
 
     fn emit_jal(&mut self, rd: Loc, imm: u32, emit_jmp: bool) {
-        self.emit_mov(rd, Loc::Imm32(self.machine.pc + WORD_SIZE as u32));
-        let target_pc = self.machine.pc as i32 + imm as i32;
-        self.emit_exit(target_pc as u32, emit_jmp);
+        self.emit_mov(rd, Loc::Imm32(self.ctx.pc + WORD_SIZE as u32));
+        let target_pc = self.ctx.pc as i32 + imm as i32;
+        self.emit_exit(Terminal::Jump, target_pc as u32, emit_jmp);
     }
 
     fn emit_jalr(&mut self, rd: Loc, rs1: Loc, imm: u32) {
-        self.emit_mov(rd, Loc::Imm32(self.machine.pc + WORD_SIZE as u32));
         self.emit_lea(GPR::RAX, None, rs1, imm);
+        self.emit_mov(rd, Loc::Imm32(self.ctx.pc + WORD_SIZE as u32));
     }
 
     // TODO
     fn step_system(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
-        tracing::trace!("step_system");
-        let next_pc = self.machine.pc + WORD_SIZE as u32;
-        emit!(self
-            // ; mov eax, next_pc as i32
-            ; xor eax, eax
-            ; jmp ->exit
-        );
+        self.trace(op, &insn);
+        self.emit_retval(Terminal::Break, self.ctx.pc);
+        emit!(self ; jmp ->exit);
         Ok(Some(Terminal::Break))
     }
 
@@ -1401,10 +1307,11 @@ impl Translator {
             let mut line = String::new();
             fmt.format(&insn, &mut line);
             if print_pos {
-                lines.push(format!(
-                    "{pos:#04x}: {line} {:02x?}",
-                    &data[pos..pos + insn.len()]
-                ));
+                // lines.push(format!(
+                //     "{pos:#04x}: {line} {:02x?}",
+                //     &data[pos..pos + insn.len()]
+                // ));
+                lines.push(format!("{pos:#04x}: {line}"));
             } else {
                 lines.push(line);
             }

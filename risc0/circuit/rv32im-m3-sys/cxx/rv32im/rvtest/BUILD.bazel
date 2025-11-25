@@ -7,8 +7,8 @@ cc_test(
     size = "large",
     srcs = ["test.cpp"],
     data = [":riscv_test_bins"],
-    deps = ["//rv32im/test:test_prove"],
     shard_count = 16,
+    deps = ["//rv32im/test:test_prove"],
 )
 
 cc_test(
@@ -16,9 +16,8 @@ cc_test(
     size = "large",
     srcs = ["test_atomics.cpp"],
     data = [
+        ":riscv_test_bins",
         "//firmware",
-        ":riscv_test_bins"
     ],
     deps = ["//rv32im/test:test_prove"],
 )
-

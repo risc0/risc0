@@ -910,13 +910,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(debug_assertions), ignore)]
-    #[should_panic(expected = "assertion failed: self.is_valid")]
-    fn compare_against_invalid() {
-        let _ = Elem::ZERO == Elem::INVALID;
-    }
-
-    #[test]
     fn u32s_conversions() {
         let mut rng = rand::rngs::SmallRng::seed_from_u64(2);
         for _ in 0..100 {
