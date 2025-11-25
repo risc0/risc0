@@ -3,7 +3,7 @@
 #include <sys/mman.h>
 #include <cstring>
 
-namespace risc0::rv32im::jit {
+namespace risc0::jit {
 
 Assembler::Assembler(size_t pages) {
   size_t size = pages * 4096;
@@ -115,4 +115,4 @@ uint64_t Assembler::call(uint32_t offset, uint64_t arg1, uint64_t arg2) {
   return fptr(arg1, arg2); 
 }
 
-}  // namespace risc0::rv32im::jit
+}  // namespace risc0::jit

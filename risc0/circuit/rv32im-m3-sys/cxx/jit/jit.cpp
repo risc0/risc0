@@ -5,7 +5,9 @@
 #include "rv32im/emu/expand.h"
 #include "jit/intel_asm.h"
 
-namespace risc0::rv32im::jit {
+using namespace risc0::rv32im;
+
+namespace risc0::jit {
 
 namespace exec_details {
 #include "jit/jit_asm_exec.h"
@@ -16,6 +18,8 @@ namespace preflight_details {
 };
 
 using PageDetails = std::array<MemTxn, MPAGE_SIZE_WORDS>;
+
+constexpr size_t CYCLE_SHIFT = 33;
 
 enum ExitCause {
   QUOTA_OUT = 0,
@@ -274,7 +278,7 @@ public:
 
   bool run(size_t quotaIn) {
     ctx.quota = quotaIn;
-    ctx.stopCycle = uint64_t(0x7fffffff) << 33;
+    ctx.stopCycle = uint64_t(0x7fffffff) << CYCLE_SHIFT;
     // TODO: Compute max instructions from quota
     size_t maxInst = quotaIn;
     // Resize log as needed
@@ -307,11 +311,11 @@ public:
       if (fixAddr) {
         a.fixup(fixAddr, bstart);
       }
-      LOG(1, "Entering block, PC = " << HexWord{pc} << ", cycle = " << (ctx.curCycle >> 32) << ", quota = " << ctx.quota);
+      LOG(1, "Entering block, PC = " << HexWord{pc} << ", cycle = " << (ctx.curCycle >> CYCLE_SHIFT) << ", quota = " << ctx.quota);
       uint64_t ret = enterBlock(bstart);
       fixAddr = ret >> 32;
       pc = ret & 0xffffffff;
-      LOG(1, "  new PC = " << HexWord{pc} << ", new cycle = " << (ctx.curCycle >> 32) << ", new quota = " << ctx.quota);
+      LOG(1, "  new PC = " << HexWord{pc} << ", new cycle = " << (ctx.curCycle >> CYCLE_SHIFT) << ", new quota = " << ctx.quota);
       if (fixAddr == 0) {
         switch(ctx.exitCause) {
           case ExitCause::JALR:
@@ -323,8 +327,8 @@ public:
             break;
           case ExitCause::CYCLES_OUT:
             // TODO: This will be used for timer interrupt
-            LOG(0, "cycle = " << ctx.curCycle);
-            LOG(0, "stopCycle = " << ctx.stopCycle);
+            LOG(0, "cycle = " << (ctx.curCycle >> CYCLE_SHIFT));
+            LOG(0, "stopCycle = " << (ctx.stopCycle >> CYCLE_SHIFT));
             throw std::runtime_error("Cycles out");
           case ExitCause::ECALL:
             keepLooping = onEcall();
@@ -346,4 +350,4 @@ bool doJit(JitTrace& trace, MemoryImage& image, HostIO& io, size_t quota, bool e
   return jit.run(quota);
 }
 
-}  // namespace risc0::rv32im::jit
+}  // namespace risc0::jit

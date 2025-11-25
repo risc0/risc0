@@ -1,6 +1,6 @@
 #include "rv32im/emu/emu.h"
 
-namespace risc0::rv32im::jit {
+namespace risc0::jit {
 
 struct ExpandedInst {
   uint8_t opcode;
@@ -45,8 +45,8 @@ struct AddrTranslateEntry {
 
 struct PageEntry {
   uint32_t page;
-  PagePtr origPage;
-  PagePtr finalPage;
+  rv32im::PagePtr origPage;
+  rv32im::PagePtr finalPage;
 };
 
 struct JitTrace {
@@ -61,6 +61,6 @@ struct JitTrace {
   std::vector<PageEntry> pages;
 };
 
-bool doJit(JitTrace& trace, MemoryImage& image, HostIO& io, size_t quota, bool execOnly = false);
+bool doJit(JitTrace& trace, rv32im::MemoryImage& image, rv32im::HostIO& io, size_t quota, bool execOnly = false);
 
-}  // namespace risc0::rv32im::jit
+}  // namespace risc0::jit

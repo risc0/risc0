@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdexcept>
 
-namespace risc0::rv32im::jit {
+namespace risc0::jit {
 
 // Define intel registers
 enum class Reg : uint8_t {
@@ -114,4 +114,4 @@ public:
   uint64_t call(uint32_t offset, uint64_t arg1, uint64_t arg2);
 };
 
-}  // namespace risc0::rv32im::jit
+}  // namespace risc0::jit

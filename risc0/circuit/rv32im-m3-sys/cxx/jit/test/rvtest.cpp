@@ -3,7 +3,7 @@
 #include "core/log.h"
 
 using namespace risc0::rv32im;
-using namespace risc0::rv32im::jit;
+using namespace risc0::jit;
 
 void runTest(const std::string& testName) {
   std::string path = "rv32im/rvtest/" + testName;
