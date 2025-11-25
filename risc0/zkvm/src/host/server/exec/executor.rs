@@ -15,6 +15,7 @@
 
 use std::{
     cell::{Cell, RefCell},
+    io::Read,
     rc::Rc,
     sync::Arc,
     time::Instant,
@@ -36,6 +37,7 @@ use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
+use tracing::Level;
 
 use crate::{
     Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
@@ -60,6 +62,11 @@ pub struct ExecutorImpl<'a> {
     profiler: Option<Rc<RefCell<Profiler>>>,
     return_cache: Cell<(u32, u32)>,
 }
+
+/// Maximum journal size, imposed to limit the ability of the amount of allocation that a guest
+/// program can induce. Can be overridden by the execute caller by providing a custom
+/// [`Write`][std::io::Write] stream for the journal in the [`ExecutorEnv`].
+const MAX_JOURNAL_SIZE: usize = 100 << 20; // 100 MB
 
 /// Check to see if the executor is compatible with the given guest program.
 fn check_program_version(header: &ProgramBinaryHeader) -> Result<()> {
@@ -186,7 +193,7 @@ impl<'a> ExecutorImpl<'a> {
         self.env
             .posix_io
             .borrow_mut()
-            .with_write_fd(fileno::JOURNAL, journal.clone());
+            .with_write_fd(fileno::JOURNAL, journal.limit_writer(MAX_JOURNAL_SIZE));
 
         let segment_limit_po2 = self
             .env
@@ -330,12 +337,15 @@ impl<'a> ExecutorImpl<'a> {
     }
 }
 
-struct ContextAdapter<'a, 'b> {
-    ctx: &'b mut dyn CircuitSyscallContext,
+struct ContextAdapter<'a, 'b, C> {
+    ctx: &'b mut C,
     syscall_table: SyscallTable<'a>,
 }
 
-impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
+impl<'a, C> SyscallContext<'a> for ContextAdapter<'a, '_, C>
+where
+    C: CircuitSyscallContext,
+{
     fn get_pc(&self) -> u32 {
         self.ctx.get_pc()
     }
@@ -350,6 +360,14 @@ impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
 
     fn load_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {
         self.ctx.peek_page(page_idx)
+    }
+
+    fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
+        self.ctx.peek_region(addr, size as usize)
+    }
+
+    fn read_region<'b>(&'b mut self, addr: ByteAddr, size: u32) -> Result<Box<dyn Read + 'b>> {
+        Ok(Box::new(self.ctx.read_region(addr, size as usize)?))
     }
 
     fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {
@@ -368,7 +386,7 @@ impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
 impl CircuitSyscall for ExecutorImpl<'_> {
     fn host_read(
         &self,
-        ctx: &mut dyn CircuitSyscallContext,
+        ctx: &mut impl CircuitSyscallContext,
         fd: u32,
         buf: &mut [u8],
     ) -> Result<u32> {
@@ -407,14 +425,24 @@ impl CircuitSyscall for ExecutorImpl<'_> {
         Ok(rlen as u32)
     }
 
-    fn host_write(&self, ctx: &mut dyn CircuitSyscallContext, _fd: u32, buf: &[u8]) -> Result<u32> {
-        let str = String::from_utf8(buf.to_vec())?;
-        tracing::debug!("R0VM[{}] {str}", ctx.get_cycle());
+    fn host_write(
+        &self,
+        ctx: &mut impl CircuitSyscallContext,
+        _fd: u32,
+        buf: &[u8],
+    ) -> Result<u32> {
+        if tracing::enabled!(Level::DEBUG) {
+            let str = String::from_utf8(buf.to_vec())?;
+            tracing::debug!("R0VM[{}] {str}", ctx.get_cycle());
+        }
         Ok(buf.len() as u32)
     }
 }
 
-impl ContextAdapter<'_, '_> {
+impl<C> ContextAdapter<'_, '_, C>
+where
+    C: CircuitSyscallContext,
+{
     fn peek_string(&mut self, mut addr: ByteAddr) -> Result<String> {
         tracing::trace!("peek_string: {addr:?}");
         let mut buf = Vec::new();
