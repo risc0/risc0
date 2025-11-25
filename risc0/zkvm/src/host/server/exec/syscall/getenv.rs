@@ -35,8 +35,14 @@ impl Syscall for SysGetenv {
     ) -> Result<(u32, u32)> {
         let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+        // Read the env var take from the guest. Read with MAX_IO_BYTES + 1 to detect when a too
+        // long env var is supplied.
+        let from_guest = ctx.load_region(buf_ptr, u32::min(buf_len, MAX_IO_BYTES + 1))?;
         let msg = std::str::from_utf8(&from_guest)?;
+        if msg.len() > MAX_IO_BYTES as usize {
+            bail!("sys_getenv failure: env var name is too large");
+        }
 
         match self.0.get(msg) {
             None => Ok((u32::MAX, 0)),

@@ -17,6 +17,7 @@ use std::{
     cell::RefCell,
     collections::BTreeSet,
     fmt::Debug,
+    io::Read,
     rc::Rc,
     sync::mpsc::{SyncSender, sync_channel},
     thread::{self, ScopedJoinHandle},
@@ -731,8 +732,13 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
         self.load_region(LoadOp::Peek, addr, size)
     }
 
+    fn read_region(&mut self, addr: ByteAddr, size: usize) -> Result<impl Read> {
+        // let addr = Self::check_guest_addr(addr)?;
+        <Self as Risc0Context>::read_region(self, LoadOp::Peek, addr, size)
+    }
+
     fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {
-        self.pager.peek_page(page_idx)
+        Ok(self.pager.peek_page(page_idx)?.data())
     }
 
     fn get_cycle(&self) -> u64 {
