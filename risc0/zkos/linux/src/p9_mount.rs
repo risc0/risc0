@@ -32,6 +32,9 @@ use std::string::String;
 #[cfg(not(target_arch = "riscv32"))]
 use std::vec::Vec;
 
+// Debug flag for mount backend
+const MOUNT_DEBUG: bool = true;
+
 //==============================================================================
 // RAM FILESYSTEM
 //==============================================================================
@@ -159,6 +162,11 @@ impl RamFilesystem {
         if wnames.is_empty() {
             // Clone FID
             qids.push(self.get_qid(current_inode));
+            if from_fid == to_fid {
+                // Same FID - just update the path (though it should be the same)
+                // Actually, if same FID and empty wnames, nothing to do
+                return Ok(qids);
+            }
             self.allocate_fid(to_fid, current_inode, current_path)?;
             return Ok(qids);
         }
@@ -168,22 +176,77 @@ impl RamFilesystem {
                 return Err(P9Error::Enotdir as u32);
             }
 
-            let dir = match self.nodes.get(&current_inode) {
-                Some(RamNode::Directory { entries, .. }) => entries,
-                _ => return Err(P9Error::Enotdir as u32),
+            // Handle special path components
+            let next_inode = if wname == "." {
+                // "." refers to the current directory
+                current_inode
+            } else if wname == ".." {
+                // ".." refers to the parent directory
+                // Find the parent of current_inode
+                let mut parent_inode = None;
+                for (node_inode, node) in &self.nodes {
+                    if let RamNode::Directory { entries, .. } = node {
+                        for (_name, &entry_inode) in entries {
+                            if entry_inode == current_inode {
+                                parent_inode = Some(*node_inode);
+                                break;
+                            }
+                        }
+                        if parent_inode.is_some() {
+                            break;
+                        }
+                    }
+                }
+                // If no parent found, we're at root, so ".." is root itself
+                parent_inode.unwrap_or(self.root_inode)
+            } else {
+                // Normal path component - look it up in the directory
+                let dir = match self.nodes.get(&current_inode) {
+                    Some(RamNode::Directory { entries, .. }) => entries,
+                    _ => return Err(P9Error::Enotdir as u32),
+                };
+                dir.get(wname).copied().ok_or(P9Error::Enoent as u32)?
             };
 
-            let next_inode = dir.get(wname).copied().ok_or(P9Error::Enoent as u32)?;
             current_inode = next_inode;
-            current_path = if current_path == "/" {
-                format!("/{}", wname)
-            } else {
-                format!("{}/{}", current_path, wname)
-            };
+            // Only update path for non-special components
+            if wname != "." && wname != ".." {
+                current_path = if current_path == "/" {
+                    format!("/{}", wname)
+                } else {
+                    format!("{}/{}", current_path, wname)
+                };
+            } else if wname == ".." {
+                // Update path to parent
+                if current_path == "/" {
+                    // Already at root, stay at root
+                } else {
+                    // Remove last component
+                    if let Some(last_slash) = current_path.rfind('/') {
+                        if last_slash == 0 {
+                            current_path = "/".to_string();
+                        } else {
+                            current_path = current_path[..last_slash].to_string();
+                        }
+                    }
+                }
+            }
             qids.push(self.get_qid(current_inode));
         }
 
-        self.allocate_fid(to_fid, current_inode, current_path)?;
+        // If walking to the same FID, update it instead of allocating
+        if from_fid == to_fid {
+            // Update existing FID entry
+            let fid_entry = self.get_fid_mut(to_fid)?;
+            *fid_entry = (current_inode, current_path);
+        } else {
+            // Allocate new FID - if it already exists, clunk it first
+            if self.fid_table.contains_key(&to_fid) {
+                // FID already exists, clunk it first
+                let _ = self.clunk_fid(to_fid);
+            }
+            self.allocate_fid(to_fid, current_inode, current_path)?;
+        }
         Ok(qids)
     }
 
@@ -212,6 +275,43 @@ impl RamFilesystem {
                 mode,
                 uid: 0,
                 gid: 0,
+            },
+        );
+        self.qid_versions.insert(inode, 0);
+
+        // Increment parent version
+        if let Some(version) = self.qid_versions.get_mut(&parent_inode) {
+            *version = version.wrapping_add(1);
+        }
+
+        Ok(inode)
+    }
+
+    fn create_directory(&mut self, parent_inode: u64, name: String, mode: u32, gid: u32) -> Result<u64, u32> {
+        if !self.is_dir(parent_inode) {
+            return Err(P9Error::Enotdir as u32);
+        }
+
+        let dir = match self.nodes.get_mut(&parent_inode) {
+            Some(RamNode::Directory { entries, .. }) => entries,
+            _ => return Err(P9Error::Enotdir as u32),
+        };
+
+        if dir.contains_key(&name) {
+            return Err(P9Error::Eexist as u32);
+        }
+
+        let inode = self.next_inode;
+        self.next_inode += 1;
+
+        dir.insert(name, inode);
+        self.nodes.insert(
+            inode,
+            RamNode::Directory {
+                entries: BTreeMap::new(),
+                mode,
+                uid: 0,
+                gid,
             },
         );
         self.qid_versions.insert(inode, 0);
@@ -309,13 +409,35 @@ impl P9Backend for RamFilesystem {
     }
 
     fn send_twalk(&mut self, msg: &TwalkMessage) -> Result<P9Response<RwalkMessage>, TwalkError> {
+        if MOUNT_DEBUG {
+            crate::kernel::print(&format!(
+                "[RamFilesystem] send_twalk: fid={} newfid={} wnames={:?}",
+                msg.fid, msg.newfid, msg.wnames
+            ));
+        }
         match self.walk(msg.fid, msg.newfid, &msg.wnames) {
-            Ok(qids) => Ok(P9Response::Success(RwalkMessage {
-                tag: msg.tag,
-                nwqid: qids.len() as u16,
-                wqids: qids,
-            })),
-            Err(errno) => Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno))),
+            Ok(qids) => {
+                if MOUNT_DEBUG {
+                    crate::kernel::print(&format!(
+                        "[RamFilesystem] send_twalk: success, nwqid={}",
+                        qids.len()
+                    ));
+                }
+                Ok(P9Response::Success(RwalkMessage {
+                    tag: msg.tag,
+                    nwqid: qids.len() as u16,
+                    wqids: qids,
+                }))
+            }
+            Err(errno) => {
+                if MOUNT_DEBUG {
+                    crate::kernel::print(&format!(
+                        "[RamFilesystem] send_twalk: error, errno={}",
+                        errno
+                    ));
+                }
+                Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno)))
+            }
         }
     }
 
@@ -526,13 +648,34 @@ impl P9Backend for RamFilesystem {
 
     fn send_tmkdir(
         &mut self,
-        _msg: &TmkdirMessage,
+        msg: &TmkdirMessage,
     ) -> Result<P9Response<RmkdirMessage>, TmkdirError> {
-        // TODO: Implement directory creation
-        Ok(P9Response::Error(RlerrorMessage::new(
-            _msg.tag,
-            P9Error::Enosys as u32,
-        )))
+        let (parent_inode, _) = self
+            .get_fid(msg.dfid)
+            .map_err(|_| TmkdirError::InternalError)?;
+        match self.create_directory(parent_inode, msg.name.clone(), msg.mode, msg.gid) {
+            Ok(inode) => {
+                if MOUNT_DEBUG {
+                    crate::kernel::print(&format!(
+                        "[RamFilesystem] send_tmkdir: created directory '{}' inode={}",
+                        msg.name, inode
+                    ));
+                }
+                Ok(P9Response::Success(RmkdirMessage {
+                    tag: msg.tag,
+                    qid: self.get_qid(inode),
+                }))
+            }
+            Err(errno) => {
+                if MOUNT_DEBUG {
+                    crate::kernel::print(&format!(
+                        "[RamFilesystem] send_tmkdir: error creating '{}', errno={}",
+                        msg.name, errno
+                    ));
+                }
+                Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno)))
+            }
+        }
     }
 
     fn send_tunlinkat(
@@ -568,12 +711,96 @@ impl P9Backend for RamFilesystem {
 
     fn send_tremove(
         &mut self,
-        _msg: &TremoveMessage,
+        msg: &TremoveMessage,
     ) -> Result<P9Response<RremoveMessage>, TremoveError> {
-        Ok(P9Response::Error(RlerrorMessage::new(
-            _msg.tag,
-            P9Error::Enosys as u32,
-        )))
+        let (inode, _path) = self
+            .get_fid(msg.fid)
+            .map_err(|_| TremoveError::InternalError)?;
+
+        if inode == self.root_inode {
+            // Cannot remove root directory
+            if MOUNT_DEBUG {
+                crate::kernel::print("[RamFilesystem] send_tremove: cannot remove root directory");
+            }
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Eperm as u32,
+            )));
+        }
+
+        // Find the parent directory that contains this inode
+        let mut parent_inode = None;
+        let mut entry_name = None;
+
+        for (node_inode, node) in &self.nodes {
+            if let RamNode::Directory { entries, .. } = node {
+                for (name, &entry_inode) in entries {
+                    if entry_inode == inode {
+                        parent_inode = Some(*node_inode);
+                        entry_name = Some(name.clone());
+                        break;
+                    }
+                }
+                if parent_inode.is_some() {
+                    break;
+                }
+            }
+        }
+
+        let parent_inode = parent_inode.ok_or_else(|| {
+            if MOUNT_DEBUG {
+                crate::kernel::print(&format!(
+                    "[RamFilesystem] send_tremove: inode {} not found in any directory",
+                    inode
+                ));
+            }
+            TremoveError::InternalError
+        })?;
+
+        let entry_name = entry_name.unwrap();
+
+        // Check if it's a directory and if it's empty
+        if self.is_dir(inode) {
+            if let Some(RamNode::Directory { entries, .. }) = self.nodes.get(&inode) {
+                if !entries.is_empty() {
+                    if MOUNT_DEBUG {
+                        crate::kernel::print(&format!(
+                            "[RamFilesystem] send_tremove: directory '{}' is not empty",
+                            entry_name
+                        ));
+                    }
+                    return Ok(P9Response::Error(RlerrorMessage::new(
+                        msg.tag,
+                        P9Error::Enotempty as u32,
+                    )));
+                }
+            }
+        }
+
+        // Remove the entry from parent directory
+        if let Some(RamNode::Directory { entries, .. }) = self.nodes.get_mut(&parent_inode) {
+            entries.remove(&entry_name);
+            // Increment parent version
+            if let Some(version) = self.qid_versions.get_mut(&parent_inode) {
+                *version = version.wrapping_add(1);
+            }
+        }
+
+        // Remove the node itself
+        self.nodes.remove(&inode);
+        self.qid_versions.remove(&inode);
+
+        // Remove the FID (it's being removed)
+        self.fid_table.remove(&msg.fid);
+
+        if MOUNT_DEBUG {
+            crate::kernel::print(&format!(
+                "[RamFilesystem] send_tremove: removed '{}' (inode={})",
+                entry_name, inode
+            ));
+        }
+
+        Ok(P9Response::Success(RremoveMessage { tag: msg.tag }))
     }
 
     fn send_tfsync(
@@ -692,8 +919,18 @@ pub struct MountBackend {
 }
 
 impl MountBackend {
+    /// Debug logging helper
+    fn debug_log(&self, msg: &str) {
+        if MOUNT_DEBUG {
+            crate::kernel::print(&format!("[MountBackend] {}", msg));
+        }
+    }
+
     /// Create a new mount backend with a root backend
     pub fn new(root: Box<dyn P9Backend>) -> Self {
+        if MOUNT_DEBUG {
+            crate::kernel::print("[MountBackend] Creating new MountBackend");
+        }
         Self {
             root,
             mounts: Vec::new(),
@@ -703,8 +940,11 @@ impl MountBackend {
 
     /// Mount a backend at a given path
     pub fn mount(&mut self, path: String, backend: Box<dyn P9Backend>) -> Result<(), u32> {
+        self.debug_log(&format!("mount: attempting to mount at '{}'", path));
+
         // Normalize path: ensure it starts with / and ends with / (except root)
         let normalized = if path == "/" {
+            self.debug_log("mount: ERROR - cannot mount over root");
             return Err(P9Error::Einval as u32); // Can't mount over root
         } else if !path.starts_with('/') {
             format!("/{}", path)
@@ -712,20 +952,32 @@ impl MountBackend {
             path.clone()
         };
 
+        self.debug_log(&format!("mount: normalized path to '{}'", normalized));
+
         // Check for conflicts
         for mount in &self.mounts {
             if mount.path == normalized || normalized.starts_with(&mount.path) {
+                self.debug_log(&format!(
+                    "mount: ERROR - conflict with existing mount at '{}'",
+                    mount.path
+                ));
                 return Err(P9Error::Ebusy as u32); // Mount point conflict
             }
         }
 
         self.mounts.push(MountPoint {
-            path: normalized,
+            path: normalized.clone(),
             backend,
         });
 
         // Sort by path length (longest first) for proper prefix matching
         self.mounts.sort_by(|a, b| b.path.len().cmp(&a.path.len()));
+
+        self.debug_log(&format!(
+            "mount: successfully mounted at '{}' (total mounts: {})",
+            normalized,
+            self.mounts.len()
+        ));
 
         Ok(())
     }
@@ -788,6 +1040,13 @@ impl MountBackend {
 
     /// Check if a path crosses a mount point boundary
     fn check_mount_crossing(&self, from_path: &str, to_path: &str) -> Option<(usize, String)> {
+        if MOUNT_DEBUG {
+            self.debug_log(&format!(
+                "check_mount_crossing: from='{}' to='{}'",
+                from_path, to_path
+            ));
+        }
+
         // Check if we're crossing into a mount point
         for (idx, mount) in self.mounts.iter().enumerate() {
             // Check if from_path is not under mount, but to_path is
@@ -801,8 +1060,18 @@ impl MountBackend {
                 } else {
                     to_path[mount.path.len()..].to_string()
                 };
+                if MOUNT_DEBUG {
+                    self.debug_log(&format!(
+                        "check_mount_crossing: CROSSING into mount '{}' (idx={}), remaining='{}'",
+                        mount.path, idx, remaining
+                    ));
+                }
                 return Some((idx, remaining));
             }
+        }
+
+        if MOUNT_DEBUG {
+            self.debug_log("check_mount_crossing: no mount crossing detected");
         }
         None
     }
@@ -821,9 +1090,12 @@ impl P9Backend for MountBackend {
         &mut self,
         msg: &TattachMessage,
     ) -> Result<P9Response<RattachMessage>, TattachError> {
+        self.debug_log(&format!("send_tattach: fid={}", msg.fid));
+
         // Attach always uses root backend and starts at "/"
         match self.root.send_tattach(msg) {
             Ok(P9Response::Success(resp)) => {
+                self.debug_log(&format!("send_tattach: attached, qid={:?}", resp.qid));
                 // Track the FID as being in root backend at "/"
                 self.fid_map.insert(
                     msg.fid,
@@ -832,27 +1104,50 @@ impl P9Backend for MountBackend {
                         path: "/".to_string(),
                     },
                 );
+                self.debug_log(&format!(
+                    "send_tattach: FID {} tracked at root '/'",
+                    msg.fid
+                ));
                 Ok(P9Response::Success(resp))
             }
-            other => other,
+            other => {
+                self.debug_log(&format!("send_tattach: failed: {:?}", other));
+                other
+            }
         }
     }
 
     fn send_twalk(&mut self, msg: &TwalkMessage) -> Result<P9Response<RwalkMessage>, TwalkError> {
+        self.debug_log(&format!(
+            "send_twalk: fid={} newfid={} wnames={:?}",
+            msg.fid, msg.newfid, msg.wnames
+        ));
+
         // Get the from_fid's backend and path
-        let from_fid_info = self
-            .fid_map
-            .get(&msg.fid)
-            .ok_or(TwalkError::InternalError)?; // FID not found
+        let from_fid_info = self.fid_map.get(&msg.fid).ok_or_else(|| {
+            self.debug_log(&format!("send_twalk: ERROR - FID {} not found", msg.fid));
+            TwalkError::InternalError
+        })?; // FID not found
 
         let from_path = from_fid_info.path.clone();
         let from_backend_idx = from_fid_info.backend_index;
 
+        self.debug_log(&format!(
+            "send_twalk: from_fid={} path='{}' backend_idx={:?}",
+            msg.fid, from_path, from_backend_idx
+        ));
+
         // Build the target path
         let to_path = Self::build_path(&from_path, &msg.wnames);
+        self.debug_log(&format!("send_twalk: target path='{}'", to_path));
 
         // Check if we're crossing a mount point
         if let Some((mount_idx, remaining_path)) = self.check_mount_crossing(&from_path, &to_path) {
+            self.debug_log(&format!(
+                "send_twalk: MOUNT CROSSING detected! mount_idx={} remaining='{}'",
+                mount_idx, remaining_path
+            ));
+
             // We're crossing into a mount point
             // Strategy:
             // 1. If we're not already at the mount point, walk to it in root backend
@@ -860,6 +1155,7 @@ impl P9Backend for MountBackend {
             // 3. Walk remaining path in mounted backend
 
             let mount_path = &self.mounts[mount_idx].path;
+            self.debug_log(&format!("send_twalk: mount_path='{}'", mount_path));
             let mount_components: Vec<String> = mount_path
                 .trim_start_matches('/')
                 .split('/')
@@ -868,7 +1164,14 @@ impl P9Backend for MountBackend {
                 .collect();
 
             // Step 1: Walk to mount point if not already there
+            // Collect QIDs from walking to the mount point
+            let mut mount_qids = Vec::new();
             if from_path != mount_path.as_str() {
+                self.debug_log(&format!(
+                    "send_twalk: walking to mount point (from='{}' mount='{}')",
+                    from_path, mount_path
+                ));
+
                 // Use a temporary FID to walk to mount point
                 const TEMP_MOUNT_FID: u32 = 0xFFFF_FFF0; // Use a temp FID
                 let walk_to_mount = TwalkMessage {
@@ -876,13 +1179,25 @@ impl P9Backend for MountBackend {
                     fid: msg.fid,
                     newfid: TEMP_MOUNT_FID,
                     nwname: mount_components.len() as u16,
-                    wnames: mount_components,
+                    wnames: mount_components.clone(),
                 };
+
+                self.debug_log(&format!(
+                    "send_twalk: walking to mount with components={:?}",
+                    mount_components
+                ));
 
                 let root_backend = self.root.as_mut();
                 match root_backend.send_twalk(&walk_to_mount) {
-                    Ok(P9Response::Success(_)) => {
-                        // Successfully walked to mount point
+                    Ok(P9Response::Success(walk_resp)) => {
+                        if MOUNT_DEBUG {
+                            crate::kernel::print(&format!(
+                                "[MountBackend] send_twalk: successfully walked to mount point, got {} QIDs",
+                                walk_resp.nwqid
+                            ));
+                        }
+                        // Collect QIDs from walking to mount point
+                        mount_qids.extend_from_slice(&walk_resp.wqids);
                         // Clean up temp FID
                         let _ = root_backend.send_tclunk(&TclunkMessage {
                             tag: msg.tag,
@@ -890,16 +1205,49 @@ impl P9Backend for MountBackend {
                         });
                     }
                     Ok(P9Response::Error(err)) => {
+                        if MOUNT_DEBUG {
+                            crate::kernel::print(&format!(
+                                "[MountBackend] send_twalk: error walking to mount: errno={}",
+                                err.ecode
+                            ));
+                        }
                         return Ok(P9Response::Error(err));
                     }
                     Err(e) => {
+                        if MOUNT_DEBUG {
+                            crate::kernel::print(&format!(
+                                "[MountBackend] send_twalk: error walking to mount: {:?}",
+                                e
+                            ));
+                        }
                         return Err(e);
                     }
                 }
+            } else {
+                self.debug_log("send_twalk: already at mount point, skipping walk");
             }
 
             // Step 2: Attach to the mounted backend
+            // First, ensure the FID is not already in use
+            if MOUNT_DEBUG {
+                crate::kernel::print(&format!(
+                    "[MountBackend] send_twalk: attaching to mounted backend (fid={})",
+                    msg.newfid
+                ));
+            }
+
+            // Remove FID from our tracking if it exists (might be from a previous operation)
+            self.fid_map.remove(&msg.newfid);
+
             let mounted_backend = self.mounts[mount_idx].backend.as_mut();
+
+            // Try to clunk the FID in the mounted backend if it exists
+            // This handles the case where the FID was previously used in the RamFilesystem
+            let _ = mounted_backend.send_tclunk(&TclunkMessage {
+                tag: msg.tag,
+                fid: msg.newfid,
+            });
+
             let attach_msg = TattachMessage {
                 tag: msg.tag,
                 fid: msg.newfid,  // Use target FID for attach
@@ -909,15 +1257,34 @@ impl P9Backend for MountBackend {
                 n_uname: 0,
             };
 
-            let attach_resp = match mounted_backend.send_tattach(&attach_msg) {
-                Ok(P9Response::Success(resp)) => resp,
+            // Attach to mounted backend (needed to establish FID, even if we don't use the QID)
+            match mounted_backend.send_tattach(&attach_msg) {
+                Ok(P9Response::Success(_resp)) => {
+                    if MOUNT_DEBUG {
+                        crate::kernel::print(&format!(
+                            "[MountBackend] send_twalk: attached to mounted backend, qid={:?}",
+                            _resp.qid
+                        ));
+                    }
+                }
                 Ok(P9Response::Error(err)) => {
+                    if MOUNT_DEBUG {
+                        crate::kernel::print(&format!(
+                            "[MountBackend] send_twalk: attach error: errno={}",
+                            err.ecode
+                        ));
+                    }
                     return Ok(P9Response::Error(err));
                 }
                 Err(_) => {
+                    if MOUNT_DEBUG {
+                        crate::kernel::print(
+                            "[MountBackend] send_twalk: attach failed with internal error",
+                        );
+                    }
                     return Err(TwalkError::InternalError);
                 }
-            };
+            }
 
             // Step 3: Walk remaining path in mounted backend
             let remaining_components: Vec<String> = remaining_path
@@ -928,7 +1295,19 @@ impl P9Backend for MountBackend {
                 .collect();
 
             if remaining_components.is_empty() {
-                // Already at mount point root, just return the attach QID
+                if MOUNT_DEBUG {
+                    crate::kernel::print(
+                        "[MountBackend] send_twalk: at mount root, returning only mount QIDs (attach QID is internal)",
+                    );
+                }
+                // Already at mount point root, return only the QIDs from walking to the mount point
+                // The attach QID is internal and shouldn't be included in the walk response
+                if MOUNT_DEBUG {
+                    crate::kernel::print(&format!(
+                        "[MountBackend] send_twalk: returning {} mount QIDs",
+                        mount_qids.len()
+                    ));
+                }
                 self.fid_map.insert(
                     msg.newfid,
                     FidInfo {
@@ -936,16 +1315,27 @@ impl P9Backend for MountBackend {
                         path: "/".to_string(),
                     },
                 );
-                let mut wqids = Vec::new();
-                wqids.push(attach_resp.qid);
+                if MOUNT_DEBUG {
+                    crate::kernel::print(&format!(
+                        "[MountBackend] send_twalk: FID {} now in mounted backend at '/'",
+                        msg.newfid
+                    ));
+                }
                 return Ok(P9Response::Success(RwalkMessage {
                     tag: msg.tag,
-                    nwqid: 1,
-                    wqids,
+                    nwqid: mount_qids.len() as u16,
+                    wqids: mount_qids,
                 }));
             }
 
             // Walk remaining path
+            if MOUNT_DEBUG {
+                crate::kernel::print(&format!(
+                    "[MountBackend] send_twalk: walking remaining path in mount: components={:?}",
+                    remaining_components
+                ));
+            }
+
             let walk_in_mount = TwalkMessage {
                 tag: msg.tag,
                 fid: msg.newfid,
@@ -956,7 +1346,24 @@ impl P9Backend for MountBackend {
 
             match mounted_backend.send_twalk(&walk_in_mount) {
                 Ok(P9Response::Success(resp)) => {
+                    if MOUNT_DEBUG {
+                        crate::kernel::print(&format!(
+                            "[MountBackend] send_twalk: walk in mount succeeded, nwqid={}",
+                            resp.nwqid
+                        ));
+                    }
+                    // Combine QIDs: mount point QIDs + mounted backend QIDs
+                    let mount_qids_len = mount_qids.len();
+                    let mut all_qids = mount_qids;
+                    all_qids.extend_from_slice(&resp.wqids);
+                    if MOUNT_DEBUG {
+                        crate::kernel::print(&format!(
+                            "[MountBackend] send_twalk: combined {} mount QIDs + {} mount-backend QIDs = {} total",
+                            mount_qids_len, resp.wqids.len(), all_qids.len()
+                        ));
+                    }
                     // Update FID tracking
+                    let remaining_path_clone = remaining_path.clone();
                     self.fid_map.insert(
                         msg.newfid,
                         FidInfo {
@@ -964,28 +1371,64 @@ impl P9Backend for MountBackend {
                             path: remaining_path,
                         },
                     );
-                    Ok(P9Response::Success(resp))
+                    if MOUNT_DEBUG {
+                        crate::kernel::print(&format!(
+                            "[MountBackend] send_twalk: FID {} now in mounted backend at '{}'",
+                            msg.newfid, remaining_path_clone
+                        ));
+                    }
+                    Ok(P9Response::Success(RwalkMessage {
+                        tag: msg.tag,
+                        nwqid: all_qids.len() as u16,
+                        wqids: all_qids,
+                    }))
                 }
-                other => other,
+                other => {
+                    if MOUNT_DEBUG {
+                        crate::kernel::print(&format!(
+                            "[MountBackend] send_twalk: walk in mount failed: {:?}",
+                            other
+                        ));
+                    }
+                    other
+                }
             }
         } else {
             // No mount crossing - walk in the current backend
-            let backend = self
-                .get_backend_for_fid(msg.fid)
-                .map_err(|_| TwalkError::InternalError)?;
+            self.debug_log("send_twalk: no mount crossing, walking in current backend");
+
+            let fid = msg.fid;
+            let backend = self.get_backend_for_fid(fid).map_err(|_| {
+                if MOUNT_DEBUG {
+                    crate::kernel::print(&format!(
+                        "[MountBackend] send_twalk: ERROR - cannot get backend for FID {}",
+                        fid
+                    ));
+                }
+                TwalkError::InternalError
+            })?;
+
             match backend.send_twalk(msg) {
                 Ok(P9Response::Success(resp)) => {
+                    self.debug_log(&format!("send_twalk: walk succeeded, nwqid={}", resp.nwqid));
                     // Update FID tracking
                     self.fid_map.insert(
                         msg.newfid,
                         FidInfo {
                             backend_index: from_backend_idx,
-                            path: to_path,
+                            path: to_path.clone(),
                         },
                     );
+                    self.debug_log(&format!(
+                        "send_twalk: FID {} now at path '{}'",
+                        msg.newfid, to_path
+                    ));
                     Ok(P9Response::Success(resp))
                 }
-                other => other,
+                other => {
+                    self.debug_log(&format!("send_twalk: walk failed: {:?}", other));
+                    other
+                }
             }
         }
     }
@@ -1122,13 +1565,29 @@ impl P9Backend for MountBackend {
         &mut self,
         msg: &TclunkMessage,
     ) -> Result<P9Response<RclunkMessage>, TclunkError> {
-        let backend = self
-            .get_backend_for_fid(msg.fid)
-            .map_err(|_| TclunkError::InternalError)?;
+        self.debug_log(&format!("send_tclunk: fid={}", msg.fid));
+
+        let fid = msg.fid;
+        let backend = self.get_backend_for_fid(fid).map_err(|_| {
+            if MOUNT_DEBUG {
+                crate::kernel::print(&format!(
+                    "[MountBackend] send_tclunk: ERROR - cannot get backend for FID {}",
+                    fid
+                ));
+            }
+            TclunkError::InternalError
+        })?;
+
         let result = backend.send_tclunk(msg);
         // Remove FID tracking on successful clunk
         if matches!(result, Ok(P9Response::Success(_))) {
             self.fid_map.remove(&msg.fid);
+            self.debug_log(&format!(
+                "send_tclunk: FID {} removed from tracking",
+                msg.fid
+            ));
+        } else {
+            self.debug_log(&format!("send_tclunk: clunk failed: {:?}", result));
         }
         result
     }

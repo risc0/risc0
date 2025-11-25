@@ -5229,10 +5229,13 @@ fn do_walk(
         wnames_len,
         rwalk.wqids
     );
-    if rwalk.wqids.len() != wnames_len {
+    // For a clone operation (wnames_len == 0), we should get 1 QID (the QID of the FID being cloned)
+    // For a walk operation (wnames_len > 0), we should get wnames_len QIDs
+    let expected_qids = if wnames_len == 0 { 1 } else { wnames_len };
+    if rwalk.wqids.len() != expected_qids {
         debug_print!(
-            "do_walk: walk failed - expected {} components, got {}",
-            wnames_len,
+            "do_walk: walk failed - expected {} QIDs, got {}",
+            expected_qids,
             rwalk.wqids.len()
         );
 
