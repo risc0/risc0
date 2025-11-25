@@ -227,7 +227,7 @@ pub(crate) trait Risc0Context {
     fn ecall_bigint(&mut self) -> Result<()>;
 
     fn ecall_poseidon2(&mut self) -> Result<()> {
-        Poseidon2::load_ecall(self)?.run(self, CycleState::Decode)
+        Poseidon2::load_ecall(self)?.rest(self, CycleState::Decode)
     }
 }
 

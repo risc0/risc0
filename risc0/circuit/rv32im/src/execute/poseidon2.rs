@@ -94,18 +94,18 @@ impl Poseidon2State {
         *cur_state = next_state;
     }
 
-    pub(crate) fn run(
+    pub(crate) fn rest(
         &mut self,
         ctx: &mut (impl Risc0Context + ?Sized),
         final_state: CycleState,
     ) -> Result<()> {
-        self.run_with_mix(ctx, final_state, |p2, cur_state, ctx| {
+        self.rest_with_mix(ctx, final_state, |p2, cur_state, ctx| {
             p2.mix(ctx, cur_state);
             Ok(())
         })
     }
 
-    pub(crate) fn run_with_mix<F, C>(
+    pub(crate) fn rest_with_mix<F, C>(
         &mut self,
         ctx: &mut C,
         final_state: CycleState,

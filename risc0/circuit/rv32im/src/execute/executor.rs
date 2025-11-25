@@ -695,7 +695,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn ecall_poseidon2(&mut self) -> Result<()> {
-        Poseidon2::load_ecall(self)?.run_with_mix(self, CycleState::Decode, |p2, _, ctx| {
+        Poseidon2::load_ecall(self)?.rest_with_mix(self, CycleState::Decode, |p2, _, ctx| {
             ctx.inc_user_cycles(ROUNDS_HALF_FULL * 2 + 1, Some(EcallKind::Poseidon2));
             // Convert to Montgomery form, run the mix function, then convert back.
             // NOTE: It's possible this could be optimized to not convert the back and forth on
