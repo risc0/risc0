@@ -5,3 +5,4 @@
 *.zkr filter=lfs diff=lfs merge=lfs -text
 groth16_proof/groth16/stark_verify.circom filter=lfs diff=lfs merge=lfs -text
 risc0/circuit/hello-m3/src/testdata/proof.bin filter=lfs diff=lfs merge=lfs -text
+risc0/emu/src/testdata/riscv-tests.zip filter=lfs diff=lfs merge=lfs -text

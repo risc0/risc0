@@ -22,7 +22,9 @@ tracing = { version = "0.1", default-features = false, features = [
 ] }
 
 [dev-dependencies]
+rstest = "0.26.1"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
+zip = { version = "6.0.0", default-features = false, features = ["deflate"] }
 
 [lints]
 workspace = true
