@@ -27,18 +27,15 @@ use anyhow::{Context, Result, bail};
 use enum_map::EnumMap;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
-use risc0_zkp::{
-    core::{
-        digest::{DIGEST_BYTES, DIGEST_WORDS, Digest},
-        hash::poseidon2,
-        log2_ceil,
-    },
-    field::{Elem, baby_bear::BabyBearElem},
+use risc0_zkp::core::{
+    digest::{DIGEST_BYTES, Digest},
+    hash::poseidon2::ROUNDS_HALF_FULL,
+    log2_ceil,
 };
 
 use crate::{
     EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
-    execute::rv32im::disasm,
+    execute::{poseidon2::Poseidon2, rv32im::disasm},
     trace::{TraceCallback, TraceEvent},
 };
 
@@ -698,88 +695,17 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn ecall_poseidon2(&mut self) -> Result<()> {
-        let state_addr = self.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A0)?;
-        let mut buf_in_addr =
-            self.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A1)?;
-        let mut buf_out_addr =
-            self.load_aligned_addr_from_machine_register(LoadOp::Record, REG_A2)?;
-        let bits_count = self.load_machine_register(LoadOp::Record, REG_A3)?;
-        let is_elem = (bits_count & PFLAG_IS_ELEM) != 0;
-        let check_out = (bits_count & PFLAG_CHECK_OUT) != 0;
-        let count = bits_count & 0xffff;
-
-        let mut state_buf = [BabyBearElem::ZERO; poseidon2::CELLS];
-
-        if !state_addr.is_null() {
-            self.inc_user_cycles(1, Some(EcallKind::Poseidon2));
-            for i in 0..DIGEST_WORDS {
-                state_buf[DIGEST_WORDS * 2 + i] =
-                    self.load_u32(LoadOp::Record, state_addr + i)?.into();
-            }
-        }
-
-        for _ in 0..count {
-            self.inc_user_cycles(1, Some(EcallKind::Poseidon2));
-
-            // If the data at buf_in_addr is already encoded as field elements, then load iteration can
-            // process 16 elements. Otherwise, each u32 needs to be split into two halves and each load
-            // iteration processes 8 u32s (roughly half the rate).
-            if is_elem {
-                self.inc_user_cycles(1, Some(EcallKind::Poseidon2));
-                #[expect(clippy::needless_range_loop)]
-                for i in 0..DIGEST_WORDS {
-                    state_buf[i] = self
-                        .load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?
-                        .into();
-                }
-                for i in 0..DIGEST_WORDS {
-                    state_buf[DIGEST_WORDS + i] = self
-                        .load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?
-                        .into();
-                }
-            } else {
-                for i in 0..DIGEST_WORDS {
-                    let word = self.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
-                    state_buf[2 * i] = (word & 0xffff).into();
-                    state_buf[2 * i + 1] = (word >> 16).into();
-                }
-            }
-
-            self.inc_user_cycles(
-                poseidon2::ROUNDS_HALF_FULL * 2 + 1,
-                Some(EcallKind::Poseidon2),
-            );
-            poseidon2::poseidon2_mix(&mut state_buf);
-        }
-
-        // If check_out is true, then the data at buf_out is asserted to be equal to the computed
-        // digest. If not, then the value at buf_out is has the computed digest written to it.
-        self.inc_user_cycles(1, Some(EcallKind::Poseidon2));
-        if check_out {
-            #[expect(clippy::needless_range_loop)]
-            for i in 0..DIGEST_WORDS {
-                let word = self.load_u32(LoadOp::Record, buf_out_addr.postfix_inc())?;
-                let cell: u32 = state_buf[i].into();
-                if word != cell {
-                    bail!("poseidon2 check failed: {word:#010x} != {cell:#010x}");
-                }
-            }
-        } else {
-            #[expect(clippy::needless_range_loop)]
-            for i in 0..DIGEST_WORDS {
-                self.store_u32(buf_out_addr.postfix_inc(), state_buf[i].into())?;
-            }
-        }
-
-        if !state_addr.is_null() {
-            self.inc_user_cycles(1, Some(EcallKind::Poseidon2));
-            for i in 0..DIGEST_WORDS {
-                self.store_u32(state_addr + i, state_buf[DIGEST_WORDS * 2 + i].into())?;
-            }
-        }
-
-        self.inc_user_cycles(1, Some(EcallKind::Poseidon2));
-        Ok(())
+        Poseidon2::load_ecall(self)?.rest_with_mix(self, CycleState::Decode, |p2, _, ctx| {
+            ctx.inc_user_cycles(ROUNDS_HALF_FULL * 2 + 1, Some(EcallKind::Poseidon2));
+            // Convert to Montgomery form, run the mix function, then convert back.
+            // NOTE: It's possible this could be optimized to not convert the back and forth on
+            // every mix, and instead only convert the input, initial state and final state.
+            // However, it does not seem that this conversion has a significant impact.
+            let mut state = p2.inner.map(Into::into);
+            risc0_zkp::core::hash::poseidon2::poseidon2_mix(&mut state);
+            p2.inner = state.map(Into::into);
+            Ok(())
+        })
     }
 }
 
