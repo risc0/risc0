@@ -118,14 +118,14 @@ struct SegmentSyscallHandler<'a> {
 }
 
 impl Syscall for SegmentSyscallHandler<'_> {
-    fn host_read(&self, _ctx: &mut dyn SyscallContext, _fd: u32, buf: &mut [u8]) -> Result<u32> {
+    fn host_read(&self, _ctx: &mut impl SyscallContext, _fd: u32, buf: &mut [u8]) -> Result<u32> {
         let pos = self.read_pos.replace(self.read_pos.get() + 1);
         let read_record = &self.segment.read_record[pos];
         buf.copy_from_slice(read_record);
         Ok(read_record.len() as u32)
     }
 
-    fn host_write(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
+    fn host_write(&self, _ctx: &mut impl SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
         let pos = self.write_pos.replace(self.read_pos.get() + 1);
         Ok(self.segment.write_record[pos])
     }

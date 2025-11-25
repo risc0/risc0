@@ -19,6 +19,10 @@ use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
 
 use super::{Syscall, SyscallContext};
 
+// Maximum size, in bytes, for the panic message provided by the guest. Messages above this size
+// are truncated.
+const MAX_PANIC_MSG_SIZE: u32 = 1 << 20; // 1 MB
+
 pub(crate) struct SysPanic;
 impl Syscall for SysPanic {
     fn syscall(
@@ -33,7 +37,7 @@ impl Syscall for SysPanic {
 
         let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+        let from_guest = ctx.load_region(buf_ptr, u32::min(buf_len, MAX_PANIC_MSG_SIZE))?;
         let msg = std::str::from_utf8(&from_guest)?;
         bail!("Guest panicked: {msg}");
     }
