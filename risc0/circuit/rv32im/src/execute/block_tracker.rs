@@ -19,6 +19,7 @@ use super::pager::NUM_PAGES;
 use super::platform::{PAGE_BYTES, WORD_SIZE};
 use super::rv32im::InsnKind;
 
+/// This value can be almost anything, but I chose lcm(count_per_row..) to mitigate rounding errors.
 pub const POINTS_PER_ROW: u64 = 5040;
 
 const PART_SIZE: u64 = 8;
