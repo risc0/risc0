@@ -45,6 +45,55 @@ EXIT_CAUSE_ALIGNMENT = 3
 EXIT_CAUSE_MRET = 4
 EXIT_CAUSE_JALR = 5
 
+# A friendly macro to lookup map entries
+.macro MAP_LOOKUP_64 PO2
+  # Input:
+  #   %rbx = key (uint64, non-zero)
+  #   PAGES = table base (array of { u64 key; u64 value; }, 16B each)
+  # Output:
+  #   %rdx = value, or 0 if key not found
+  # Clobbers:
+  #  %r9, %r10, flags
+
+  .set MAP_SHIFT\@, 64 - \PO2 
+  .set MAP_MASK\@, ((1 << \PO2) - 1)
+
+  # r10 = key * HASH_CONST 
+  movabs  $0x9e3779b97f4a7c15, %r9
+  mov %rbx, %r10
+  imul %r9, %r10
+  # index = high bits of hash
+  shr $MAP_SHIFT\@, %r10
+
+.L_map_lookup_loop\@:
+  # load key at slot: slot_key = table[index].key
+  lea (PAGES, %r10, 8), %r9
+  mov (%r9, %r10, 8), %rdx
+
+  # first check for match (hot path)
+  cmp %rbx, %rdx
+  je .L_map_found\@
+
+  # is slot_key == 0? => not found
+  test %rdx, %rdx
+  je .L_map_not_found\@
+
+  # linear probe: index = (index + 1) & ((1<<PO2)-1)
+  inc %r10
+  and $MAP_MASK\@, %r10
+  jmp .L_map_lookup_loop\@
+
+.L_map_found\@:
+  # load value: table[index].value
+  mov 8(%r9, %r10, 8), %rdx
+  jmp .L_map_done\@
+
+.L_map_not_found\@:
+  xor %rdx, %rdx # return 0 
+
+.L_map_done\@:
+.endm
+
 # Next we have common 'parts' of instructions (getting RS1 + RS2, logging
 # RD's original state, etc).  When then use these to build instruction
 # categories (3-reg, imm, etc), and finally instructions
@@ -200,10 +249,12 @@ EXIT_CAUSE_JALR = 5
 .macro RESOLVE_PAGE label_prefix
   mov %eax, %ebx  # Copy address to ebx
   shr $10, %ebx  # Shift, now we have the page #
-  mov (PAGES, %rbx, 8), %rdx  # Load page pointer
+  orl $0xf0000000, %ebx  # Make into 'key' 
+  # Do map lookup
+  MAP_LOOKUP_64 18
   cmp $0, %rdx  # Check if it's NULL
   jne .L\label_prefix\()_skip  # if not, we are good to go
-  call .Lresolve_page  # Otherwise, resolve page
+  call .Lresolve_page  # Otherwise, resolve page via c++
 .L\label_prefix\()_skip:
 .endm
 

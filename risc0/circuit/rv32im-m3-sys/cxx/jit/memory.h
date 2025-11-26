@@ -29,6 +29,9 @@ public:
   // Commit memory at end of segment
   void commit();
 
+  // Let asm code peek into details
+  void* getPhysTable() { return phys.getTable(); } 
+
 private:
   // Do a page lookup, here pages are at 4k granularity
   uint32_t virtToPhys(uint32_t vpage, uint32_t mode, uint32_t access);

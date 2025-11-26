@@ -64,6 +64,8 @@ public:
     }
   }
 
+  void* getTable() { return entries.data(); }
+
 private:
   static constexpr uint64_t kHashConst = 0x9e3779b97f4a7c15ull;
 

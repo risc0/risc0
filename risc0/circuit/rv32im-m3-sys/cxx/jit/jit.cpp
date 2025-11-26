@@ -60,7 +60,7 @@ struct JitExec;
 // State passed to JIT code
 struct JitContext {
   uint64_t* regs;
-  PageDetails** pages;
+  void* pageTable;
   InstEntry* log; 
   int64_t quota;
   uint64_t curCycle;
@@ -76,7 +76,6 @@ private:
   std::vector<InstEntry> log;
   Memory memory;
   Assembler a;
-  std::vector<PageDetails*> pages;
   std::array<uint64_t, 128> riscvRegs;
   bool execOnly;
 
@@ -159,6 +158,7 @@ private:
   }
 
   uint64_t pageMiss(uint64_t page) {
+    page &= 0x00ffffff;
     PageDetails* pageDetails = memory.lookup(page, MODE_MACHINE, 0);
     LOG(1, "Did page miss, page " << page << " -> " << pageDetails);
     return reinterpret_cast<uint64_t>(pageDetails);
@@ -246,17 +246,10 @@ public:
     } else {
       a.addBuiltins(preflight_details::bytes, preflight_details::bytes_len);
     }
-    pages.resize(MEMORY_SIZE_MPAGES);
     ctx.curCycle = 0;
-    ctx.pages = pages.data();
+    ctx.pageTable = memory.getPhysTable();
     ctx.pageMissFunc = invokePageMiss;
     ctx.callbackObj = this;
-  }
-
-  ~JitExec() {
-    for (PageDetails* page : pages) {
-      delete page;
-    }
   }
 
   bool run(size_t quotaIn) {
