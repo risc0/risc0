@@ -23,12 +23,14 @@ cc_library(
     visibility = ["//visibility:public"],
     name = "jit",
     hdrs = [
+        "block_cache.h",
         "fast_map.h",
         "jit.h",
         "memory.h",
         "trace.h",
     ],
     srcs = [
+        "block_cache.cpp",
         "jit.cpp",
         "intel_asm.h",
         "intel_asm.cpp",

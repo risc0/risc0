@@ -1,330 +1,35 @@
 #include "jit/jit.h"
 
 #include "core/log.h"
-#include "rv32im/emu/decode.h"
-#include "rv32im/emu/expand.h"
-#include "jit/intel_asm.h"
+#include "jit/block_cache.h"
 #include "jit/memory.h"
 
 using namespace risc0::rv32im;
 
 namespace risc0::jit {
 
-namespace exec_details {
-#include "jit/jit_asm_exec.h"
-};
-
-namespace preflight_details {
-#include "jit/jit_asm_preflight.h"
-};
-
-using PageDetails = std::array<MemTxn, MPAGE_SIZE_WORDS>;
-
-constexpr size_t CYCLE_SHIFT = 33;
-
-enum ExitCause {
-  QUOTA_OUT = 0,
-  CYCLES_OUT = 1,
-  ECALL = 2,
-  ALIGNMENT = 3, 
-  MRET = 4,
-  JALR = 5,
-};
-
-// TODO: Make this super minimal and self contained (i.e. don't use DecodedInst + getOpcode)
-ExpandedInst expand(uint32_t inst) {
-  if ((inst & 3) != 3) {
-    static auto expandTable = generateExpandTable();
-    inst = expandTable[inst];
-  }
-  DecodedInst decoded(inst);
-  ExpandedInst ret;
-  ret.rs1 = decoded.rs1;
-  ret.rs2 = decoded.rs2;
-  ret.rd = decoded.rd;
-  Opcode opcode = getOpcode(inst);
-  ret.opcode = uint8_t(opcode);
-  switch(opcode) {
-#define ENTRY(name, idx, op, immType, ...) \
-    case Opcode::name: ret.imm = decoded.imm ## immType(); break;
-#include "rv32im/base/rv32im.inc"
-#undef ENTRY
-    case Opcode::ANY:
-      throw std::runtime_error("Trying to expand an illegal instruction");
-  }
-  return ret;
-}
-
-struct JitExec;
-
-// State passed to JIT code
-struct JitContext {
-  uint64_t* regs;
-  void* pageTable;
-  InstEntry* log; 
-  int64_t quota;
-  uint64_t curCycle;
-  uint64_t stopCycle;
-  uint64_t exitCause;
-  FuncPtr2 pageMissFunc;
-  JitExec* callbackObj;
-};
-
-class JitExec {
-private:
-  JitContext ctx;
-  std::vector<InstEntry> log;
-  Memory memory;
-  Assembler a;
-  std::array<uint64_t, 128> riscvRegs;
-  bool execOnly;
-
-  // Handle branch instruction
-  bool endBranch(CmpOp op, const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    // Make a branch
-    uint32_t branchFixup = a.doBranch(op, 0);
-    // This will be the 'fallthough case', intially just fall through
-    uint32_t fallthoughFixup = a.doLocalJump();
-    // Set return value for dispatch (what to patch, where to patch to)
-    uint64_t ret = (uint64_t(fallthoughFixup) << 32) | newPc;
-    a.doLoadImm64(Reg::RAX, ret);
-    a.doRet();
-    // Ok, now handle branch patch
-    uint32_t dest = pc + inst.imm;
-    uint32_t branchOffset = a.getOffset();
-    a.fixup(branchFixup, branchOffset);
-    ret = (uint64_t(branchFixup) << 32) | dest;
-    a.doLoadImm64(Reg::RAX, ret);
-    a.doRet();
-    return true;
-  }
-
-  bool endJal(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    uint32_t fallthoughFixup = a.doLocalJump();
-    uint32_t jmpPc = pc + inst.imm;
-    uint64_t ret = (uint64_t(fallthoughFixup) << 32) | jmpPc;
-    a.doLoadImm64(Reg::RAX, ret);
-    a.doRet();
-    return true;
-  }
-
-  bool endJalr(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    a.doRet();
-    return true;
-  }
-
-  bool endEcall(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    a.doRet();
-    return true;
-  }
-
-  bool endMret(const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    a.doRet();
-    return true;
-  }
-
-  bool doUnhandled(uint32_t& cost, const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
-    throw std::runtime_error("Unhandled Unimplemented");
-  }
-
-  bool doInst(uint32_t& cost, uint32_t offset, const ExpandedInst& inst, uint32_t pc, uint32_t oinst) {
-    uint32_t newPc = pc + (((oinst & 3) == 3) ? 4 : 2);
-    a.doLoadImm32(Reg::R8, (inst.rd == 0 ? 64 : inst.rd));
-    a.doLoadImm32(Reg::R9, inst.rs1);
-#ifdef PREFLIGHT
-    a.doLoadImm32(Reg::R10, (inst.rs1 == inst.rs2) ? inst.rs2 + 64 : inst.rs2);;
-#else
-    a.doLoadImm32(Reg::R10, inst.rs2);
-#endif
-    a.doLoadImm32(Reg::R11, inst.imm);
-    a.doLoadImm32(Reg::R12, pc);
-    a.doLoadImm32(Reg::RDX, oinst);
-    a.doCall(offset);
-    cost++;  // TODO handle variable costs
-    switch (Opcode(inst.opcode)) {
-      case Opcode::BEQ: return endBranch(CmpOp::JE, inst, pc, newPc);
-      case Opcode::BNE: return endBranch(CmpOp::JNE, inst, pc, newPc);
-      case Opcode::BLT: return endBranch(CmpOp::JL, inst, pc, newPc);
-      case Opcode::BGE: return endBranch(CmpOp::JNL, inst, pc, newPc);
-      case Opcode::BLTU: return endBranch(CmpOp::JB, inst, pc, newPc);
-      case Opcode::BGEU: return endBranch(CmpOp::JNB, inst, pc, newPc);
-      case Opcode::JAL: return endJal(inst, pc, newPc);
-      case Opcode::JALR: return endJalr(inst, pc, newPc);
-      case Opcode::ECALL: return endEcall(inst, pc, newPc);
-      case Opcode::MRET: return endMret(inst, pc, newPc);
-      default: break;
-    }
-    return false;
-  }
-
-  uint64_t pageMiss(uint64_t page) {
-    page &= 0x00ffffff;
-    PageDetails* pageDetails = memory.lookup(page, MODE_MACHINE, 0);
-    LOG(1, "Did page miss, page " << page << " -> " << pageDetails);
-    return reinterpret_cast<uint64_t>(pageDetails);
-  }
-
-  static uint64_t invokePageMiss(uint64_t ctxAddr, uint64_t val) {
-    JitContext* ctx = reinterpret_cast<JitContext*>(ctxAddr);
-    return ctx->callbackObj->pageMiss(val);
-  };
-
-  uint64_t enterBlock(uint32_t offset) {
-    uint64_t ctxAddr = reinterpret_cast<uint64_t>(&ctx);
-    uint32_t eoffset = (execOnly ? exec_details::gsym_enter : preflight_details::gsym_enter);
-    return a.call(eoffset, ctxAddr, a.getAddr(offset));
-  }
-
-  uint32_t fetchWord(uint32_t wordAddr) {
-    MemTxn save;
-    return memory.readPhysical((ctx.curCycle >> CYCLE_SHIFT), save, wordAddr);
-  }
-
-  uint32_t fetchHalf(uint32_t pc) {
-    return (fetchWord(pc/4) >> (8 * (pc % 4))) & 0xffff;
-  }
-
-  uint32_t fetch(uint32_t pc) {
-    // Read low 16 of instruction
-    uint32_t inst = fetchHalf(pc);
-    if ((inst & 3) == 3) {
-      inst |= (fetchHalf(pc + 2)) << 16;
-    }
-    return inst;
-  }
-
-  uint32_t jitBlockAt(uint32_t pc) {
-    bool done = false;
-    uint32_t blockOffset = a.getOffset();
-    // Do pre-block cost analysis
-    uint32_t quotaOff = a.doLoadImm32(Reg::R8, 0);
-    a.doLoadImm32(Reg::R12, pc);  // Write PC so early exit know where we are
-    a.doCall(execOnly ? exec_details::gsym_block_header : preflight_details::gsym_block_header);
-    uint32_t cost = 0;
-    while (!done) {
-      uint32_t inst = fetch(pc);
-      ExpandedInst exInst = expand(inst);
-      uint64_t exFlat;
-      memcpy(&exFlat, &exInst, sizeof(ExpandedInst));
-      LOG(2, "PC: " << HexWord{pc} << " - " << getOpcodeName(Opcode(exInst.opcode)) << 
-          "  rd = " << uint32_t(exInst.rd) << ", rs1 = " << uint32_t(exInst.rs1) << 
-          ", rs2 = " << uint32_t(exInst.rs2) << ", imm = " << HexWord{exInst.imm});
-      uint32_t newPc = pc + (((inst & 3) == 3) ? 4 : 2);
-      LOG(2, "inst = " << HexWord{inst} << ", newPc = " << HexWord{newPc});
-      uint32_t offset;
-      switch(Opcode(exInst.opcode)) {
-#define ENTRY(name, ...)  \
-        case Opcode::name:  \
-          offset = (execOnly ? exec_details::gsym_do_ ## name : preflight_details::gsym_do_ ## name); \
-          done = doInst(cost, offset, exInst, pc, inst); \
-          break;
-#include "rv32im/base/rv32im.inc"
-#undef ENTRY
-        default:
-          done = doUnhandled(cost, exInst, pc, newPc);
-          break;
-      }
-      pc = newPc;
-    }
-    a.fixupImm32(quotaOff, cost);
-    return blockOffset; 
-  }
-
-  bool onEcall() {
-    LOG(0, "ECALL");
-    return false;
-  }
-
-public:
-  JitExec(JitTrace& trace, MemoryImage& image, bool execOnly) 
-    : memory(image, trace)
-    , a(4096)
-    , execOnly(execOnly)
-  {
-    if (execOnly) {
-      a.addBuiltins(exec_details::bytes, exec_details::bytes_len);
-    } else {
-      a.addBuiltins(preflight_details::bytes, preflight_details::bytes_len);
-    }
-    ctx.curCycle = 0;
-    ctx.pageTable = memory.getPhysTable();
-    ctx.pageMissFunc = invokePageMiss;
-    ctx.callbackObj = this;
-  }
-
-  bool run(size_t quotaIn) {
-    ctx.quota = quotaIn;
-    ctx.stopCycle = uint64_t(0x7fffffff) << CYCLE_SHIFT;
-    // TODO: Compute max instructions from quota
-    size_t maxInst = quotaIn;
-    // Resize log as needed
-    if (execOnly) {
-      ctx.log = nullptr;
-    } else {
-      log.resize(maxInst);
-      ctx.log = log.data();
-    }
-    // Load 'registers' page
-    uint32_t regPage = MACHINE_REGS_WORD >> MPAGE_SIZE_WORDS_PO2;
-    PageDetails* regPagePtr = memory.lookup(regPage, MODE_MACHINE, 0);
-    ctx.regs = reinterpret_cast<uint64_t*>(&((*regPagePtr)[0]));
-    // Read entry point
-    uint32_t pc = fetchWord(V2_COMPAT_SPC);
-    // Go into main loop
-    uint32_t fixAddr = 0;
-    std::map<uint32_t, uint32_t> blockCache;
-    LOG(0, "Entering main loop");
-    bool keepLooping = true;
-    while(keepLooping) {
-      auto it = blockCache.find(pc);
-      uint32_t bstart;
-      if (it == blockCache.end()) {
-        LOG(1, "Jitting BB = " << HexWord{pc});
-        bstart = jitBlockAt(pc);
-        blockCache[pc] = bstart;
-      } else {
-        bstart = it->second;
-      }
-      if (fixAddr) {
-        a.fixup(fixAddr, bstart);
-      }
-      LOG(1, "Entering block, PC = " << HexWord{pc} << ", cycle = " << (ctx.curCycle >> CYCLE_SHIFT) << ", quota = " << ctx.quota);
-      uint64_t ret = enterBlock(bstart);
-      fixAddr = ret >> 32;
-      pc = ret & 0xffffffff;
-      LOG(1, "  new PC = " << HexWord{pc} << ", new cycle = " << (ctx.curCycle >> CYCLE_SHIFT) << ", new quota = " << ctx.quota);
-      if (fixAddr == 0) {
-        switch(ctx.exitCause) {
-          case ExitCause::JALR:
-            // Just keep looping
-            break;
-          case ExitCause::QUOTA_OUT:
-            LOG(0, "Quota out");
-            keepLooping = false;
-            break;
-          case ExitCause::CYCLES_OUT:
-            // TODO: This will be used for timer interrupt
-            LOG(0, "cycle = " << (ctx.curCycle >> CYCLE_SHIFT));
-            LOG(0, "stopCycle = " << (ctx.stopCycle >> CYCLE_SHIFT));
-            throw std::runtime_error("Cycles out");
-          case ExitCause::ECALL:
-            keepLooping = onEcall();
-            break;
-          case ExitCause::ALIGNMENT:
-            throw std::runtime_error("Alignment");
-          default:
-            LOG(0, "Exit cause: " << ctx.exitCause);
-            throw std::runtime_error("Unknown exit cause");
-        }
-      }
-    }
-    return false;  // Out of quota
-  }
-};
-
 bool doJit(JitTrace& trace, MemoryImage& image, HostIO& io, size_t quota, bool execOnly) {
-  JitExec jit(trace, image, execOnly);
-  return jit.run(quota);
+  JitContext ctx(quota);
+  Memory memory(image, trace);
+  BlockCache machine(ctx, trace, memory, MODE_MACHINE, execOnly);
+  // Do 'restore' cycle
+  MemTxn txn;
+  machine.fetchWord(txn, V2_COMPAT_SPC);
+  uint32_t pc = txn.value;
+  ctx.incCycle();
+  // Do main loop
+  while(true) {
+    auto ec = machine.run(pc);
+    if (ec == ExitCause::QUOTA_OUT) {
+      return false;
+    }
+    if (ec == ExitCause::ECALL) {
+      LOG(0, "ECALL HIT");
+      break;
+    }
+    throw std::runtime_error("Unhandled case");
+  }
+  return true;
 }
 
 }  // namespace risc0::jit

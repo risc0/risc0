@@ -36,6 +36,7 @@ struct DecodeEntry {
   MemTxn load0;
   MemTxn load1;
   ExpandedInst inst;
+  uint32_t oinst;
 };
 
 struct AddrTranslateEntry {

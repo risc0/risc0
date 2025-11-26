@@ -1,9 +1,12 @@
+#pragma once
 
 #include "jit/fast_map.h"
 #include "jit/trace.h"
 #include "rv32im/base/constants.h"
 
 namespace risc0::jit {
+
+class JitContext;
 
 using PageDetails = std::array<MemTxn, MPAGE_SIZE_WORDS>;
 
@@ -12,16 +15,18 @@ class Memory {
   constexpr static size_t MAP_PO2 = 18;
 
 public:
+  static uint64_t makeKey(uint32_t page, uint32_t mode, uint32_t access);
+  static uint32_t getPage(uint64_t key);
+  static uint32_t getMode(uint64_t key);
+  static uint32_t getAccess(uint64_t key);
+
   // Construct
   Memory(risc0::rv32im::MemoryImage& image, JitTrace& trace);
 
-  // Read or write physical memory, page in merkle pages as required
-  uint32_t readPhysical(uint32_t cycle, MemTxn& savePrev, uint32_t wordAddr);
-  void writePhysical(uint32_t cycle, MemTxn& savePrev, uint32_t wordAddr, uint32_t value);
-  void undoPhysical(const MemTxn& prev, uint32_t wordAddr);
-
   // Do a page lookup, here pages are at 1k granularity
-  PageDetails* lookup(uint32_t vpage, uint32_t mode, uint32_t access);
+  // If VM resolution fails (page fault, etc), return nullptr
+  PageDetails* lookup(JitContext* ctx, uint32_t vpage, uint32_t mode, uint32_t access);
+  PageDetails* pageMiss(JitContext* ctx, uint64_t key);
 
   // Reset virtual memory state (i.e. bump iCacheCycle)
   void clearVM(uint32_t cycle);
@@ -31,6 +36,7 @@ public:
 
   // Let asm code peek into details
   void* getPhysTable() { return phys.getTable(); } 
+  void* getVirtTable() { return virt.getTable(); } 
 
 private:
   // Do a page lookup, here pages are at 4k granularity

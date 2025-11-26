@@ -26,6 +26,10 @@ uint32_t Assembler::getOffset() {
   return (cur - begin);
 }
 
+void Assembler::reset(uint32_t offset) {
+  cur = begin + offset;
+}
+
 void Assembler::addBuiltins(const uint8_t* data, size_t size) {
   memcpy(cur, data, size);
   cur += size;

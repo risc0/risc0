@@ -81,6 +81,9 @@ public:
   // Get the offset at which the next instruction will be written
   uint32_t getOffset();
 
+  // Reset cur back to offset
+  void reset(uint32_t offset);
+
   // Add any pre-compiled code
   void addBuiltins(const uint8_t* data, size_t size);
 
