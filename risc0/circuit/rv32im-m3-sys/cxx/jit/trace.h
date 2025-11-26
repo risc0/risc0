@@ -1,3 +1,5 @@
+#pragma once
+
 #include "rv32im/emu/emu.h"
 
 namespace risc0::jit {

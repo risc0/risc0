@@ -4,6 +4,7 @@
 #include "rv32im/emu/decode.h"
 #include "rv32im/emu/expand.h"
 #include "jit/intel_asm.h"
+#include "jit/memory.h"
 
 using namespace risc0::rv32im;
 
@@ -73,34 +74,11 @@ class JitExec {
 private:
   JitContext ctx;
   std::vector<InstEntry> log;
-  MemoryImage& image;
+  Memory memory;
   Assembler a;
   std::vector<PageDetails*> pages;
   std::array<uint64_t, 128> riscvRegs;
   bool execOnly;
-
-  PageDetails* getPage(uint32_t page) {
-    PageDetails* data = pages[page];
-    if (!data) {
-      data = new PageDetails;
-      PagePtr ipage = image.getPage(page);
-      for (size_t i = 0; i < MPAGE_SIZE_WORDS; i++) {
-        (*data)[i].value = (*ipage)[i];
-        (*data)[i].cycle = 0;
-      }
-      pages[page] = data;
-    }
-    return data;
-  }
-
-  // Read a word from the page table
-  uint32_t readWord(uint32_t wordAddr) {
-    uint32_t page = wordAddr >> MPAGE_SIZE_WORDS_PO2;
-    PageDetails* data = getPage(page);
-    // TODO: This is only called on fetch, update cycle #
-    // basically make Decode info
-    return (*data)[wordAddr & MPAGE_MASK_WORDS].value;
-  }
 
   // Handle branch instruction
   bool endBranch(CmpOp op, const ExpandedInst& inst, uint32_t pc, uint32_t newPc) {
@@ -181,7 +159,7 @@ private:
   }
 
   uint64_t pageMiss(uint64_t page) {
-    PageDetails* pageDetails = getPage(page);
+    PageDetails* pageDetails = memory.lookup(page, MODE_MACHINE, 0);
     LOG(1, "Did page miss, page " << page << " -> " << pageDetails);
     return reinterpret_cast<uint64_t>(pageDetails);
   }
@@ -197,15 +175,20 @@ private:
     return a.call(eoffset, ctxAddr, a.getAddr(offset));
   }
 
-  uint32_t readHalf(uint32_t pc) {
-    return (readWord(pc/4) >> (8 * (pc % 4))) & 0xffff;
+  uint32_t fetchWord(uint32_t wordAddr) {
+    MemTxn save;
+    return memory.readPhysical((ctx.curCycle >> CYCLE_SHIFT), save, wordAddr);
+  }
+
+  uint32_t fetchHalf(uint32_t pc) {
+    return (fetchWord(pc/4) >> (8 * (pc % 4))) & 0xffff;
   }
 
   uint32_t fetch(uint32_t pc) {
     // Read low 16 of instruction
-    uint32_t inst = readHalf(pc);
+    uint32_t inst = fetchHalf(pc);
     if ((inst & 3) == 3) {
-      inst |= (readHalf(pc + 2)) << 16;
+      inst |= (fetchHalf(pc + 2)) << 16;
     }
     return inst;
   }
@@ -253,8 +236,8 @@ private:
   }
 
 public:
-  JitExec(MemoryImage& image, bool execOnly) 
-    : image(image)
+  JitExec(JitTrace& trace, MemoryImage& image, bool execOnly) 
+    : memory(image, trace)
     , a(4096)
     , execOnly(execOnly)
   {
@@ -290,9 +273,10 @@ public:
     }
     // Load 'registers' page
     uint32_t regPage = MACHINE_REGS_WORD >> MPAGE_SIZE_WORDS_PO2;
-    ctx.regs = reinterpret_cast<uint64_t*>(&((*getPage(regPage))[0]));
+    PageDetails* regPagePtr = memory.lookup(regPage, MODE_MACHINE, 0);
+    ctx.regs = reinterpret_cast<uint64_t*>(&((*regPagePtr)[0]));
     // Read entry point
-    uint32_t pc = readWord(V2_COMPAT_SPC);
+    uint32_t pc = fetchWord(V2_COMPAT_SPC);
     // Go into main loop
     uint32_t fixAddr = 0;
     std::map<uint32_t, uint32_t> blockCache;
@@ -346,7 +330,7 @@ public:
 };
 
 bool doJit(JitTrace& trace, MemoryImage& image, HostIO& io, size_t quota, bool execOnly) {
-  JitExec jit(image, execOnly);
+  JitExec jit(trace, image, execOnly);
   return jit.run(quota);
 }
 
