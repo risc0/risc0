@@ -186,13 +186,11 @@ impl RamFilesystem {
                 let mut parent_inode = None;
                 for (node_inode, node) in &self.nodes {
                     if let RamNode::Directory { entries, .. } = node {
-                        for (_name, &entry_inode) in entries {
-                            if entry_inode == current_inode {
-                                parent_inode = Some(*node_inode);
-                                break;
-                            }
-                        }
-                        if parent_inode.is_some() {
+                        if entries
+                            .values()
+                            .any(|&entry_inode| entry_inode == current_inode)
+                        {
+                            parent_inode = Some(*node_inode);
                             break;
                         }
                     }
@@ -287,7 +285,13 @@ impl RamFilesystem {
         Ok(inode)
     }
 
-    fn create_directory(&mut self, parent_inode: u64, name: String, mode: u32, gid: u32) -> Result<u64, u32> {
+    fn create_directory(
+        &mut self,
+        parent_inode: u64,
+        name: String,
+        mode: u32,
+        gid: u32,
+    ) -> Result<u64, u32> {
         if !self.is_dir(parent_inode) {
             return Err(P9Error::Enotdir as u32);
         }
@@ -560,10 +564,103 @@ impl P9Backend for RamFilesystem {
 
     fn send_tsetattr(
         &mut self,
-        _msg: &TsetattrMessage,
+        msg: &TsetattrMessage,
     ) -> Result<P9Response<RsetattrMessage>, TsetattrError> {
-        // TODO: Implement attribute setting
-        Ok(P9Response::Success(RsetattrMessage { tag: _msg.tag }))
+        if MOUNT_DEBUG {
+            crate::kernel::print(&format!(
+                "[RamFilesystem] send_tsetattr: fid={}, valid=0x{:x}, size={}",
+                msg.fid, msg.valid, msg.size
+            ));
+        }
+
+        let (inode, _) = self
+            .get_fid(msg.fid)
+            .map_err(|_| TsetattrError::InternalError)?;
+
+        let node = self
+            .nodes
+            .get_mut(&inode)
+            .ok_or(TsetattrError::InternalError)?;
+
+        // Check which attributes to set based on valid mask
+        if (msg.valid & P9SetattrMask::Size as u32) != 0 {
+            // Truncate or extend file size
+            match node {
+                RamNode::File { data, .. } => {
+                    if msg.size < data.len() as u64 {
+                        // Truncate
+                        data.truncate(msg.size as usize);
+                        if MOUNT_DEBUG {
+                            crate::kernel::print(&format!(
+                                "[RamFilesystem] send_tsetattr: truncated file inode {} to {} bytes",
+                                inode, msg.size
+                            ));
+                        }
+                    } else if msg.size > data.len() as u64 {
+                        // Extend with zeros
+                        data.resize(msg.size as usize, 0);
+                        if MOUNT_DEBUG {
+                            crate::kernel::print(&format!(
+                                "[RamFilesystem] send_tsetattr: extended file inode {} to {} bytes",
+                                inode, msg.size
+                            ));
+                        }
+                    }
+                    // Update QID version when file is modified
+                    if let Some(version) = self.qid_versions.get_mut(&inode) {
+                        *version = version.wrapping_add(1);
+                    }
+                }
+                RamNode::Directory { .. } | RamNode::Symlink { .. } => {
+                    // For directories and symlinks, ignore size setting if size is 0
+                    // (this can happen when chmod sets the valid mask but size=0)
+                    // Only return error if trying to set a non-zero size
+                    if msg.size != 0 {
+                        if MOUNT_DEBUG {
+                            crate::kernel::print(&format!(
+                                "[RamFilesystem] send_tsetattr: ERROR - cannot set non-zero size on non-file inode {}",
+                                inode
+                            ));
+                        }
+                        return Ok(P9Response::Error(RlerrorMessage::new(
+                            msg.tag,
+                            P9Error::Eisdir as u32,
+                        )));
+                    }
+                    // Otherwise, silently ignore size=0 for directories/symlinks
+                }
+            }
+        }
+
+        if (msg.valid & P9SetattrMask::Mode as u32) != 0 {
+            match node {
+                RamNode::File { mode, .. } => *mode = msg.mode,
+                RamNode::Directory { mode, .. } => *mode = msg.mode,
+                RamNode::Symlink { mode, .. } => *mode = msg.mode,
+            }
+        }
+
+        if (msg.valid & P9SetattrMask::Uid as u32) != 0 {
+            match node {
+                RamNode::File { uid, .. } => *uid = msg.uid,
+                RamNode::Directory { uid, .. } => *uid = msg.uid,
+                RamNode::Symlink { uid, .. } => *uid = msg.uid,
+            }
+        }
+
+        if (msg.valid & P9SetattrMask::Gid as u32) != 0 {
+            match node {
+                RamNode::File { gid, .. } => *gid = msg.gid,
+                RamNode::Directory { gid, .. } => *gid = msg.gid,
+                RamNode::Symlink { gid, .. } => *gid = msg.gid,
+            }
+        }
+
+        // Note: We don't handle atime/mtime here as they're not stored in RamNode
+        // P9SetattrMask::Atime = 0x00000010
+        // P9SetattrMask::Mtime = 0x00000020
+
+        Ok(P9Response::Success(RsetattrMessage { tag: msg.tag }))
     }
 
     fn send_treaddir(
@@ -760,21 +857,20 @@ impl P9Backend for RamFilesystem {
         let entry_name = entry_name.unwrap();
 
         // Check if it's a directory and if it's empty
-        if self.is_dir(inode) {
-            if let Some(RamNode::Directory { entries, .. }) = self.nodes.get(&inode) {
-                if !entries.is_empty() {
-                    if MOUNT_DEBUG {
-                        crate::kernel::print(&format!(
-                            "[RamFilesystem] send_tremove: directory '{}' is not empty",
-                            entry_name
-                        ));
-                    }
-                    return Ok(P9Response::Error(RlerrorMessage::new(
-                        msg.tag,
-                        P9Error::Enotempty as u32,
-                    )));
-                }
+        if self.is_dir(inode)
+            && let Some(RamNode::Directory { entries, .. }) = self.nodes.get(&inode)
+            && !entries.is_empty()
+        {
+            if MOUNT_DEBUG {
+                crate::kernel::print(&format!(
+                    "[RamFilesystem] send_tremove: directory '{}' is not empty",
+                    entry_name
+                ));
             }
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Enotempty as u32,
+            )));
         }
 
         // Remove the entry from parent directory
@@ -1359,7 +1455,9 @@ impl P9Backend for MountBackend {
                     if MOUNT_DEBUG {
                         crate::kernel::print(&format!(
                             "[MountBackend] send_twalk: combined {} mount QIDs + {} mount-backend QIDs = {} total",
-                            mount_qids_len, resp.wqids.len(), all_qids.len()
+                            mount_qids_len,
+                            resp.wqids.len(),
+                            all_qids.len()
                         ));
                     }
                     // Update FID tracking
