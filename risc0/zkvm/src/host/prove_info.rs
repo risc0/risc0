@@ -57,7 +57,7 @@ pub struct ProveInfo {
     /// This receipt will be produced by provers that support Proof of Verifiable Work when a
     /// [`PovwJobId`][risc0_binfmt::PovwJobId] is provided in the [`ExecutorEnv`][crate::ExecutorEnv].
     /// This receipt provides a proof of work completed for this job, and can be combined into a
-    /// work log using the [Log Builder guest][risc0-povw].
+    /// work log using the Log Builder guest from `risc0-povw`.
     ///
     /// Note that this receipt will not be provided if the [`ProverOpts`][crate::ProverOpts] has a
     /// compression level of [`ReceiptKind::Composite`][crate::ReceiptKind]. A
