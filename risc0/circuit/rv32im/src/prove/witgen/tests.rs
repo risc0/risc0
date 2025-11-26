@@ -34,7 +34,7 @@ fn run_preflight(program: Program) {
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
-        &NullSyscall,
+        NullSyscall,
         None,
     )
     .unwrap();
@@ -64,7 +64,7 @@ fn fwd_rev_ab_test(program: Program) {
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
         testutil::DEFAULT_SESSION_LIMIT,
-        &testutil::NullSyscall,
+        testutil::NullSyscall,
         None,
     )
     .unwrap();

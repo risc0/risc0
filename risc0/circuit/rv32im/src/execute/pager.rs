@@ -238,23 +238,14 @@ pub(crate) struct WorkingImage {
 impl WorkingImage {
     /// Returns a reference to the page at the given index.
     ///
-    /// If the page is not in the working image, it is assumed to be all zeroes. A page of zeroes
-    /// is inserted into the working image when this is called.
+    /// If the page is not in the working image, it is assumed to be all zeroes.
     #[inline(always)]
-    fn get_page(&mut self, page_idx: u32) -> Result<&Page> {
-        Ok(self
-            .pages
-            .entry(page_idx)
-            .or_insert_with(|| zero_page().clone()))
+    fn get_page(&self, page_idx: u32) -> Result<&Page> {
+        Ok(self.pages.get(&page_idx).unwrap_or_else(|| zero_page()))
     }
 
     fn set_page(&mut self, page_idx: u32, page: Page) {
         self.pages.insert(page_idx, page);
-    }
-
-    #[cfg(feature = "prove")]
-    pub(crate) fn get_page_indexes(&self) -> BTreeSet<u32> {
-        self.pages.keys().copied().collect()
     }
 }
 
@@ -349,7 +340,7 @@ impl PagedMemory {
         }
     }
 
-    fn peek_ram(&mut self, addr: WordAddr) -> Result<u32> {
+    fn peek_ram(&self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
         if let Some(cache_idx) = self.page_table.get(page_idx) {
             // Loaded, get from cache
@@ -360,7 +351,7 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn peek(&mut self, addr: WordAddr) -> Result<u32> {
+    pub(crate) fn peek(&self, addr: WordAddr) -> Result<u32> {
         if unlikely(addr >= MEMORY_END_ADDR) {
             bail!("Invalid peek address: {addr:?}");
         }
@@ -371,7 +362,7 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<&Page> {
+    pub(crate) fn peek_page(&self, page_idx: u32) -> Result<&Page> {
         // Registers are not stored in the main RAM during execution. As a result, the system page
         // cannot be accessed with this method, as it would not be correct.
         ensure!(page_idx != USER_REGS_ADDR.page_idx() && page_idx != MACHINE_REGS_ADDR.page_idx());
@@ -414,7 +405,7 @@ impl PagedMemory {
     }
 
     #[inline(always)]
-    pub(crate) fn load_register(&mut self, base: WordAddr, idx: usize) -> u32 {
+    pub(crate) fn load_register(&self, base: WordAddr, idx: usize) -> u32 {
         if base == USER_REGS_ADDR.waddr() {
             self.user_registers[idx]
         } else if base == MACHINE_REGS_ADDR.waddr() {

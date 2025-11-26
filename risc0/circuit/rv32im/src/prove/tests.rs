@@ -25,7 +25,7 @@ fn run_program(program: Program) {
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
         testutil::DEFAULT_SESSION_LIMIT,
-        &testutil::NullSyscall,
+        testutil::NullSyscall,
         None,
     )
     .unwrap();

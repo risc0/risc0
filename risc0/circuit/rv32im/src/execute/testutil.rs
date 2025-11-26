@@ -51,7 +51,7 @@ pub fn execute<S: Syscall>(
     mut image: MemoryImage,
     segment_limit_po2: usize,
     max_cycles: CycleLimit,
-    syscall_handler: &S,
+    syscall_handler: S,
     input_digest: Option<Digest>,
 ) -> Result<SimpleSession> {
     scope!("execute");

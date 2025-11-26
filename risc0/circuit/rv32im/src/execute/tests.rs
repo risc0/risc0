@@ -34,7 +34,7 @@ fn basic() {
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
         testutil::DEFAULT_SESSION_LIMIT,
-        &testutil::NullSyscall,
+        testutil::NullSyscall,
         None,
     )
     .unwrap();
@@ -63,7 +63,7 @@ fn system_split() {
         image,
         testutil::MIN_CYCLES_PO2,
         testutil::DEFAULT_SESSION_LIMIT,
-        &testutil::NullSyscall,
+        testutil::NullSyscall,
         None,
     )
     .unwrap();

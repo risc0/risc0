@@ -67,7 +67,7 @@ fn main() {
         image.clone(),
         args.po2,
         testutil::DEFAULT_SESSION_LIMIT,
-        &testutil::NullSyscall,
+        testutil::NullSyscall,
         None,
     )
     .unwrap();
@@ -86,7 +86,7 @@ fn main() {
             image,
             args.po2,
             testutil::DEFAULT_SESSION_LIMIT,
-            &testutil::NullSyscall,
+            testutil::NullSyscall,
             None,
         )
         .unwrap();

@@ -44,7 +44,7 @@ use super::{
     unlikely,
 };
 
-pub struct Executor<'a, 'b, S: Syscall> {
+pub struct Executor<'a, S: Syscall> {
     pc: ByteAddr,
     user_pc: ByteAddr,
     machine_mode: u32,
@@ -54,10 +54,10 @@ pub struct Executor<'a, 'b, S: Syscall> {
     terminate_state: Option<TerminateState>,
     read_record: Vec<Vec<u8>>,
     write_record: Vec<u32>,
-    syscall_handler: &'a S,
+    syscall_handler: Rc<S>,
     input_digest: Digest,
     output_digest: Option<Digest>,
-    trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
+    trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
     cycles: SessionCycles,
     ecall_metrics: EnumMap<EcallKind, EcallMetric>,
     /// Ring buffer storing the most recent instructions executed. When the exec_debug feature is
@@ -270,12 +270,12 @@ impl<T: SegmentUpdateCallback> SegmentUpdateCallbackFactory for T {
     }
 }
 
-impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
+impl<'a, S: Syscall> Executor<'a, S> {
     pub fn new(
         image: MemoryImage,
-        syscall_handler: &'a S,
+        syscall_handler: S,
         input_digest: Option<Digest>,
-        trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
+        trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
         povw_job_id: Option<PovwJobId>,
         circuit_version: u32,
     ) -> Self {
@@ -290,7 +290,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             terminate_state: None,
             read_record: Vec::new(),
             write_record: Vec::new(),
-            syscall_handler,
+            syscall_handler: Rc::new(syscall_handler),
             input_digest: input_digest.unwrap_or_default(),
             output_digest: None,
             trace,
@@ -595,7 +595,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
+impl<S: Syscall> Risc0Context for Executor<'_, S> {
     fn circuit_version(&self) -> u32 {
         self.circuit_version
     }
@@ -733,14 +733,14 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32> {
-        let rlen = self.syscall_handler.host_read(self, fd, buf)?;
+        let rlen = self.syscall_handler.clone().host_read(self, fd, buf)?;
         let slice = &buf[..rlen as usize];
         self.read_record.push(slice.to_vec());
         Ok(rlen)
     }
 
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32> {
-        let rlen = self.syscall_handler.host_write(self, fd, buf)?;
+        let rlen = self.syscall_handler.clone().host_write(self, fd, buf)?;
         self.write_record.push(rlen);
         Ok(rlen)
     }
@@ -760,7 +760,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 }
 
-impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
+impl<S: Syscall> SyscallContext for Executor<'_, S> {
     fn peek_register(&mut self, idx: usize) -> Result<u32> {
         if idx >= REG_MAX {
             bail!("invalid register: x{idx}");

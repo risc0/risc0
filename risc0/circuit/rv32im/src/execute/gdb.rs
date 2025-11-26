@@ -46,15 +46,15 @@ pub enum ExecState {
     Continue,
 }
 
-pub struct Debugger<'a, 'b, S: Syscall> {
-    exec: Executor<'a, 'b, S>,
+pub struct Debugger<'a, S: Syscall> {
+    exec: Executor<'a, S>,
     emu: Emulator,
     exec_state: ExecState,
     breakpoints: Vec<u32>,
 }
 
-impl<'a, 'b, S: Syscall> Debugger<'a, 'b, S> {
-    pub fn new(exec: Executor<'a, 'b, S>) -> Self {
+impl<'a, S: Syscall> Debugger<'a, S> {
+    pub fn new(exec: Executor<'a, S>) -> Self {
         let mut s = Self {
             exec,
             emu: Emulator::new(),
@@ -119,7 +119,7 @@ impl<'a, 'b, S: Syscall> Debugger<'a, 'b, S> {
     }
 }
 
-impl<S: Syscall> Target for Debugger<'_, '_, S> {
+impl<S: Syscall> Target for Debugger<'_, S> {
     type Error = anyhow::Error;
     type Arch = gdbstub_arch::riscv::Riscv32;
 
@@ -134,7 +134,7 @@ impl<S: Syscall> Target for Debugger<'_, '_, S> {
     }
 }
 
-impl<S: Syscall> Breakpoints for Debugger<'_, '_, S> {
+impl<S: Syscall> Breakpoints for Debugger<'_, S> {
     fn support_sw_breakpoint(
         &mut self,
     ) -> Option<gdbstub::target::ext::breakpoints::SwBreakpointOps<'_, Self>> {
@@ -142,7 +142,7 @@ impl<S: Syscall> Breakpoints for Debugger<'_, '_, S> {
     }
 }
 
-impl<S: Syscall> SwBreakpoint for Debugger<'_, '_, S> {
+impl<S: Syscall> SwBreakpoint for Debugger<'_, S> {
     fn add_sw_breakpoint(
         &mut self,
         addr: <Self::Arch as gdbstub::arch::Arch>::Usize,
@@ -167,7 +167,7 @@ impl<S: Syscall> SwBreakpoint for Debugger<'_, '_, S> {
     }
 }
 
-impl<S: Syscall> SingleThreadBase for Debugger<'_, '_, S> {
+impl<S: Syscall> SingleThreadBase for Debugger<'_, S> {
     fn read_registers(
         &mut self,
         regs: &mut <Self::Arch as gdbstub::arch::Arch>::Registers,
@@ -231,7 +231,7 @@ impl<S: Syscall> SingleThreadBase for Debugger<'_, '_, S> {
     }
 }
 
-impl<S: Syscall> SingleThreadResume for Debugger<'_, '_, S> {
+impl<S: Syscall> SingleThreadResume for Debugger<'_, S> {
     fn resume(&mut self, _signal: Option<gdbstub::common::Signal>) -> Result<(), Self::Error> {
         Ok(())
     }
@@ -249,7 +249,7 @@ pub enum GdbEvent {
     BreakpointHit,
 }
 
-impl<S: Syscall> run_blocking::BlockingEventLoop for Debugger<'_, '_, S> {
+impl<S: Syscall> run_blocking::BlockingEventLoop for Debugger<'_, S> {
     type Target = Self;
     type Connection = Box<dyn ConnectionExt<Error = std::io::Error>>;
     type StopReason = SingleThreadStopReason<u32>;

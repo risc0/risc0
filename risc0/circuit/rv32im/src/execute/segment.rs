@@ -91,7 +91,7 @@ impl Segment {
 
         Executor::new(
             self.partial_image.clone(),
-            &handler,
+            handler,
             None,
             vec![],
             None,

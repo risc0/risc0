@@ -285,7 +285,7 @@ mod tests {
         let session_limit = CycleLimit::Hard(1 << 24);
         Executor::new(
             image.clone(),
-            &NullSyscall,
+            NullSyscall,
             None,
             trace,
             None,
