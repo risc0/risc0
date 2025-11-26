@@ -25,7 +25,8 @@ use risc0_zkp::core::{
 };
 
 use crate::{
-    EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
+    EcallKind, EcallMetric, MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, Rv32imV2Claim,
+    TerminateState,
     execute::rv32im::disasm,
     trace::{TraceCallback, TraceEvent},
 };
@@ -68,6 +69,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     insn_counter: u32,
 }
 
+#[derive(Clone, Debug)]
 #[non_exhaustive]
 pub struct ExecutorResult {
     pub segments: u64,
@@ -77,6 +79,7 @@ pub struct ExecutorResult {
     pub total_cycles: u64,
     pub paging_cycles: u64,
     pub reserved_cycles: u64,
+    pub ecall_metrics: EnumMap<EcallKind, EcallMetric>,
 
     // Fields used to populate the [Rv32imV2Claim].
     pub input: Digest,
@@ -115,9 +118,11 @@ pub struct SimpleSession {
     pub result: ExecutorResult,
 }
 
+#[derive(Copy, Clone, Debug, Default)]
 pub enum CycleLimit {
     Hard(u64), // it is an error to exceed this limit
     Soft(u64), // stop execution after this cycle count
+    #[default]
     None,
 }
 
@@ -298,25 +303,31 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
     }
 
-    pub fn run(
+    pub fn run_segment(
         &mut self,
         segment_po2: usize,
-        max_insn_cycles: usize,
         max_cycles: CycleLimit,
-        callback_factory: impl SegmentUpdateCallbackFactory,
-    ) -> Result<ExecutorResult> {
+    ) -> Result<Option<SegmentUpdate>> {
         let segment_limit: u32 = 1 << segment_po2;
-        assert!(max_insn_cycles < segment_limit as usize);
-        let segment_threshold = segment_limit - max_insn_cycles as u32;
+        assert!(Self::max_insn_cycles(segment_po2) < segment_limit as usize);
+        let segment_threshold = segment_limit - Self::max_insn_cycles(segment_po2) as u32;
 
-        self.reset();
-        let mut callback = callback_factory.with_initial_image(&self.initial_image)?;
+        // If the executor is in a normal termination state, return Ok(None).
+        if self.terminate_state.is_some() {
+            return Ok(None);
+        }
+        if let CycleLimit::Soft(soft_limit) = max_cycles
+            && self.cycles.user >= soft_limit
+        {
+            return Ok(None);
+        }
 
-        let mut emu = Emulator::new();
         Risc0Machine::resume(self)?;
 
         while self.terminate_state.is_none() {
+            // Check the session-level cycle limit.
             match max_cycles {
+                // DO NOT MERGE: Return a SegmentUpdate with the error.
                 CycleLimit::Hard(max_cycles) => {
                     if self.cycles.user >= max_cycles {
                         bail!(
@@ -333,6 +344,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 CycleLimit::None => {}
             }
 
+            // Check the segment-level cycle limit.
             if self.segment_cycles() > segment_threshold {
                 assert!(
                     self.segment_cycles() < segment_limit,
@@ -341,13 +353,14 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 );
 
                 Risc0Machine::suspend(self)?;
-                self.split_segment(&mut callback, segment_po2, segment_threshold)?;
-                Risc0Machine::resume(self)?;
+                let update = self.split_segment(segment_po2, segment_threshold)?;
+                return Ok(Some(update));
             }
 
-            let result = Risc0Machine::step(&mut emu, self);
+            Risc0Machine::step(&mut Emulator, self)?;
             self.insn_counter += 1;
 
+            /* DO NOT MERGE: Return a SegmentUpdate with the error.
             if let Err(err) = result {
                 self.dump();
                 let result = self.dump_segment(
@@ -362,31 +375,24 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     err
                 });
             }
+            */
         }
 
         Risc0Machine::suspend(self)?;
 
         let final_cycles = self.segment_cycles().next_power_of_two();
         let final_po2 = log2_ceil(final_cycles as usize);
-        self.split_segment(
-            &mut callback,
-            final_po2,
-            0, // theshold is meaningless for final segment
+        let update = self.split_segment(
+            final_po2, 0, // theshold is meaningless for final segment
         )?;
+        Ok(Some(update))
+    }
 
-        Ok(ExecutorResult {
-            segments: self.segment_counter as u64 + 1,
-            pre_image: self.initial_image.clone(),
-            post_image: self.pager.image.clone().into(),
-            user_cycles: self.cycles.user,
-            total_cycles: self.cycles.total,
-            paging_cycles: self.cycles.paging,
-            reserved_cycles: self.cycles.reserved,
-            input: self.input_digest,
-            output: self.output_digest,
-            terminate_state: self.terminate_state,
-            shutdown_cycle: None,
-        })
+    pub fn run(&mut self, segment_po2: usize, max_cycles: CycleLimit) -> Result<ExecutorResult> {
+        self.reset();
+
+        while self.run_segment(segment_po2, max_cycles)?.is_some() {}
+        Ok(self.state())
     }
 
     /// Execute a segment split, committing the current pager state, sending the segment to the
@@ -396,10 +402,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     /// fails to receive the segment request (e.g. the thread has died).
     fn split_segment(
         &mut self,
-        callback: &mut impl SegmentUpdateCallback,
         segment_po2: usize,
         segment_threshold: u32,
-    ) -> Result<()> {
+    ) -> Result<SegmentUpdate> {
         tracing::debug!(
             "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
             self.user_cycles,
@@ -426,10 +431,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             povw_nonce: self.povw_nonce(self.segment_counter),
         };
 
-        callback
-            .on_segment_update(update)
-            .context("Segment update callback returned error")?;
-
         // NOTE: There is no reasonable scenario where a session will have more than 4B
         // segments, but its possible.
         self.segment_counter = self
@@ -447,13 +448,45 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.insn_counter = 0;
         self.pager.reset();
 
-        Ok(())
+        Ok(update)
     }
 
     pub(crate) fn terminate_state(&self) -> Option<&TerminateState> {
         self.terminate_state.as_ref()
     }
 
+    pub fn state(&self) -> ExecutorResult {
+        ExecutorResult {
+            segments: self.segment_counter as u64 + 1,
+            pre_image: self.initial_image.clone(),
+            post_image: self.pager.image.clone().into(),
+            user_cycles: self.cycles.user,
+            total_cycles: self.cycles.total,
+            paging_cycles: self.cycles.paging,
+            reserved_cycles: self.cycles.reserved,
+            ecall_metrics: self.ecall_metrics.clone(),
+            input: self.input_digest,
+            output: self.output_digest,
+            terminate_state: self.terminate_state,
+            shutdown_cycle: None,
+        }
+    }
+
+    /// Maximum number of cycles a single instruction is allowed to consume.
+    ///
+    /// Ecall instructions and paging can result in a single worst-case instruction taking
+    /// thousands of cycles. This is the limit on a number of cycles a single instruction can take.
+    /// If an instruction exceeds this limit, and falls at the end of segment, it may result in an
+    /// execution failure.
+    fn max_insn_cycles(segment_po2: usize) -> usize {
+        if segment_po2 >= 15 {
+            MAX_INSN_CYCLES
+        } else {
+            MAX_INSN_CYCLES_LOWER_PO2
+        }
+    }
+
+    #[expect(unused)]
     fn dump(&self) {
         tracing::debug!("Dumping last {} instructions:", self.ring.len());
         for (pc, kind, decoded) in self.ring.iter() {
@@ -461,6 +494,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
     }
 
+    #[expect(unused)]
     fn dump_segment(
         &mut self,
         callback: &mut impl SegmentUpdateCallback,
@@ -489,10 +523,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         callback
             .on_execution_error(update)
             .context("Segment update callback returned error")
-    }
-
-    pub fn take_ecall_metrics(&mut self) -> EnumMap<EcallKind, EcallMetric> {
-        std::mem::take(&mut self.ecall_metrics)
     }
 
     fn reset(&mut self) {

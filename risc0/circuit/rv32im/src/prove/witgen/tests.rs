@@ -20,7 +20,6 @@ use risc0_zkp::field::Elem;
 use test_log::test;
 
 use crate::{
-    MAX_INSN_CYCLES,
     execute::{
         DEFAULT_SEGMENT_LIMIT_PO2,
         testutil::{self, DEFAULT_SESSION_LIMIT, NullSyscall},
@@ -34,7 +33,6 @@ fn run_preflight(program: Program) {
     let result = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
-        MAX_INSN_CYCLES,
         DEFAULT_SESSION_LIMIT,
         &NullSyscall,
         None,
@@ -65,7 +63,6 @@ fn fwd_rev_ab_test(program: Program) {
     let session = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
-        MAX_INSN_CYCLES,
         testutil::DEFAULT_SESSION_LIMIT,
         &testutil::NullSyscall,
         None,

@@ -23,8 +23,6 @@ use risc0_zkp::{
     core::{digest::Digest, log2_ceil},
 };
 
-use crate::execute::executor::SegmentUpdate;
-
 use super::{
     Executor, SimpleSession, SyscallContext, executor::CycleLimit, pager::RESERVED_PAGING_CYCLES,
     platform::*, syscall::Syscall,
@@ -52,7 +50,6 @@ impl Syscall for NullSyscall {
 pub fn execute<S: Syscall>(
     mut image: MemoryImage,
     segment_limit_po2: usize,
-    max_insn_cycles: usize,
     max_cycles: CycleLimit,
     syscall_handler: &S,
     input_digest: Option<Digest>,
@@ -65,27 +62,25 @@ pub fn execute<S: Syscall>(
 
     let mut segments = Vec::new();
     let trace = Vec::new();
-    let result = Executor::new(
+    let mut executor = Executor::new(
         image.clone(),
         syscall_handler,
         input_digest,
         trace,
         None,
         RV32IM_V2_CIRCUIT_VERSION,
-    )
-    .run(
-        segment_limit_po2,
-        max_insn_cycles,
-        max_cycles,
-        |segment_update: SegmentUpdate| {
-            let segment = segment_update.apply_into_segment(&mut image)?;
-            tracing::trace!("{segment:#?}");
-            segments.push(segment);
-            anyhow::Ok(())
-        },
-    )?;
+    );
 
-    Ok(SimpleSession { segments, result })
+    while let Some(segment_update) = executor.run_segment(segment_limit_po2, max_cycles)? {
+        let segment = segment_update.apply_into_segment(&mut image)?;
+        tracing::trace!("{segment:#?}");
+        segments.push(segment);
+    }
+
+    Ok(SimpleSession {
+        segments,
+        result: executor.state(),
+    })
 }
 
 pub mod user {

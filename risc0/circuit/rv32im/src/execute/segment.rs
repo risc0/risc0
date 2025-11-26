@@ -22,7 +22,7 @@ use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, TerminateState,
+    TerminateState,
     execute::{CycleLimit, Executor, ExecutorResult, RV32IM_V2_CIRCUIT_VERSION},
 };
 
@@ -89,11 +89,6 @@ impl Segment {
             write_pos: Cell::new(0),
         };
 
-        let max_insn_cycles = if self.po2 >= 15 {
-            MAX_INSN_CYCLES
-        } else {
-            MAX_INSN_CYCLES_LOWER_PO2
-        };
         Executor::new(
             self.partial_image.clone(),
             &handler,
@@ -104,9 +99,7 @@ impl Segment {
         )
         .run(
             self.po2 as usize,
-            max_insn_cycles,
             CycleLimit::Soft(self.suspend_cycle.into()),
-            |_| Ok(()),
         )
     }
 }

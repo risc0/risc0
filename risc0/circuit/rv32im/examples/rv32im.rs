@@ -53,6 +53,7 @@ fn main() {
 
     let args = Cli::parse();
 
+    // DO NOT MERGE: Is NON_LOOP_CYCLES correct with the moving of max_insn_cycles into Executor.
     let po2 = args.po2;
     let segment_cycles = 1 << po2;
     assert!(segment_cycles > NON_LOOP_CYCLES);
@@ -65,7 +66,6 @@ fn main() {
     let result = testutil::execute(
         image.clone(),
         args.po2,
-        MAX_INSN_CYCLES,
         testutil::DEFAULT_SESSION_LIMIT,
         &testutil::NullSyscall,
         None,
@@ -85,7 +85,6 @@ fn main() {
         let result = testutil::execute(
             image,
             args.po2,
-            MAX_INSN_CYCLES,
             testutil::DEFAULT_SESSION_LIMIT,
             &testutil::NullSyscall,
             None,

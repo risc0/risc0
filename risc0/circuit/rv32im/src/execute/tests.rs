@@ -17,7 +17,7 @@ use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::digest::Digest;
 use test_log::test;
 
-use crate::{MAX_INSN_CYCLES, TerminateState};
+use crate::TerminateState;
 
 use super::{DEFAULT_SEGMENT_LIMIT_PO2, testutil};
 
@@ -33,7 +33,6 @@ fn basic() {
     let session = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
-        MAX_INSN_CYCLES,
         testutil::DEFAULT_SESSION_LIMIT,
         &testutil::NullSyscall,
         None,
@@ -63,7 +62,6 @@ fn system_split() {
     let session = testutil::execute(
         image,
         testutil::MIN_CYCLES_PO2,
-        100,
         testutil::DEFAULT_SESSION_LIMIT,
         &testutil::NullSyscall,
         None,
