@@ -388,10 +388,15 @@ impl<'a, S: Syscall> Executor<'a, S> {
         Ok(Some(update))
     }
 
-    pub fn run(&mut self, segment_po2: usize, max_cycles: CycleLimit) -> Result<ExecutorResult> {
-        self.reset();
-
-        while self.run_segment(segment_po2, max_cycles)?.is_some() {}
+    pub fn run(
+        mut self,
+        segment_po2: usize,
+        max_cycles: CycleLimit,
+        mut callback: impl FnMut(SegmentUpdate) -> Result<()>,
+    ) -> Result<ExecutorResult> {
+        while let Some(update) = self.run_segment(segment_po2, max_cycles)? {
+            callback(update)?;
+        }
         Ok(self.state())
     }
 
@@ -449,6 +454,10 @@ impl<'a, S: Syscall> Executor<'a, S> {
         self.pager.reset();
 
         Ok(update)
+    }
+
+    pub fn syscall_handler(&self) -> &S {
+        &self.syscall_handler
     }
 
     pub(crate) fn terminate_state(&self) -> Option<&TerminateState> {
@@ -523,22 +532,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
         callback
             .on_execution_error(update)
             .context("Segment update callback returned error")
-    }
-
-    fn reset(&mut self) {
-        self.pager.reset();
-        self.terminate_state = None;
-        self.read_record.clear();
-        self.write_record.clear();
-        self.output_digest = None;
-        self.machine_mode = 0;
-        self.user_cycles = 0;
-        self.insn_counter = 0;
-        self.cycles = SessionCycles::default();
-        self.pc = ByteAddr(0);
-        self.ecall_metrics = Default::default();
-        self.segment_counter = 0;
-        self.insn_counter = 0;
     }
 
     fn segment_cycles(&self) -> u32 {

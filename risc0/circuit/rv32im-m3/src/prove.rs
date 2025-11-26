@@ -291,7 +291,7 @@ mod tests {
             None,
             RV32IM_M3_CIRCUIT_VERSION,
         )
-        .run(po2, 0, session_limit, |update: SegmentUpdate| {
+        .run(po2, session_limit, |update: SegmentUpdate| {
             segments.push(update.apply_into_segment(&mut image)?);
             Ok(())
         })

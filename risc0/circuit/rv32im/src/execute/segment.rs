@@ -100,6 +100,7 @@ impl Segment {
         .run(
             self.po2 as usize,
             CycleLimit::Soft(self.suspend_cycle.into()),
+            |_| Ok(()),
         )
     }
 }
