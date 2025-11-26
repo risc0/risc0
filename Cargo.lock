@@ -7344,6 +7344,7 @@ dependencies = [
  "rayon",
  "ringbuffer",
  "risc0-binfmt",
+ "risc0-circuit-rv32im-m3-sys",
  "risc0-circuit-rv32im-sys",
  "risc0-core",
  "risc0-sys",
@@ -7384,7 +7385,9 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "cc",
+ "enum-map",
  "glob",
+ "regex",
  "risc0-build-kernel",
  "risc0-sppark",
  "risc0-sys",
