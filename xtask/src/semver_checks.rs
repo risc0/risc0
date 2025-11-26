@@ -920,13 +920,6 @@ mod tests {
                 .success()
         );
 
-        // Locally published crates have this directory, but not ones on `crates.io`
-        let published_crate = tempdir
-            .path()
-            .join(baseline_name)
-            .join(format!("target/package/{crate_name}-{baseline_version}"));
-        std::fs::remove_dir_all(published_crate.join("target")).unwrap();
-
         let published_baseline = tempdir
             .path()
             .join(format!("published_{baseline_name}_{crate_name}"));
