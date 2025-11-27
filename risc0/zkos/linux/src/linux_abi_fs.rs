@@ -2403,16 +2403,23 @@ pub fn sys_fchown(fd: u32, user: u32, group: u32) -> Result<u32, Err> {
     debug_print!("sys_fchown: fd={}, uid={}, gid={}", fd, user, group);
 
     // Use Tsetattr to change file ownership
-    // We want to set both uid and gid, so we use both User and Group valid flags
-    let valid = P9SetattrMask::Uid as u32 | P9SetattrMask::Gid as u32;
+    // In Linux, -1 means "don't change this value", so we only set valid flags for non--1 values
+    // -1 as signed int becomes 0xFFFFFFFF (u32::MAX) as unsigned
+    let mut valid = 0u32;
+    if user != u32::MAX {
+        valid |= P9SetattrMask::Uid as u32;
+    }
+    if group != u32::MAX {
+        valid |= P9SetattrMask::Gid as u32;
+    }
 
     let tsetattr = TsetattrMessage::new(
         0,             // tag
         file_desc.fid, // fid
-        valid,         // valid mask (Uid and Gid)
+        valid,         // valid mask (only Uid and/or Gid if not -1)
         0,             // mode (not changing)
-        user,          // uid (the new user ID)
-        group,         // gid (the new group ID)
+        user,          // uid (the new user ID, or -1 to not change)
+        group,         // gid (the new group ID, or -1 to not change)
         0,             // size (not changing)
         0,             // atime_sec (not changing)
         0,             // atime_nsec (not changing)
@@ -2556,8 +2563,15 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
     }
 
     // Create Tsetattr message for chown operation
-    // We only want to set UID and GID, so we use the appropriate valid flags
-    let valid = P9SetattrMask::Uid as u32 | P9SetattrMask::Gid as u32;
+    // In Linux, -1 means "don't change this value", so we only set valid flags for non--1 values
+    // -1 as signed int becomes 0xFFFFFFFF (u32::MAX) as unsigned
+    let mut valid = 0u32;
+    if user != u32::MAX {
+        valid |= P9SetattrMask::Uid as u32;
+    }
+    if group != u32::MAX {
+        valid |= P9SetattrMask::Gid as u32;
+    }
 
     debug_print!(
         "sys_fchownat: calling Tsetattr on FID TEMP_FID_1 with user={}, group={}",
@@ -2566,14 +2580,14 @@ pub fn sys_fchownat(dfd: u32, filename: u32, user: u32, group: u32, flag: u32) -
     );
 
     // For chown, we don't want to change other attributes, so we use default values
-    // and only set the UID and GID
+    // and only set the UID and/or GID if not -1
     let tsetattr = TsetattrMessage::new(
         0,          // tag
         TEMP_FID_1, // fid (the file we walked to)
-        valid,      // valid mask (only UID and GID)
+        valid,      // valid mask (only UID and/or GID if not -1)
         0,          // mode (not changing)
-        user,       // uid
-        group,      // gid
+        user,       // uid (or -1 to not change)
+        group,      // gid (or -1 to not change)
         0,          // size (not changing)
         0,          // atime_sec (not changing)
         0,          // atime_nsec (not changing)
