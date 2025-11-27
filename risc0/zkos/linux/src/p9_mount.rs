@@ -357,17 +357,15 @@ impl RamFilesystem {
         self.next_inode += 1;
 
         dir.insert(name, inode);
-        self
-            .nodes
-            .insert(
-                inode,
-                RamNode::Symlink {
-                    target,
-                    mode: S_IFLNK | Self::DEFAULT_SYMLINK_PERMS,
-                    uid: 0,
-                    gid,
-                },
-            );
+        self.nodes.insert(
+            inode,
+            RamNode::Symlink {
+                target,
+                mode: S_IFLNK | Self::DEFAULT_SYMLINK_PERMS,
+                uid: 0,
+                gid,
+            },
+        );
         self.qid_versions.insert(inode, 0);
 
         if let Some(version) = self.qid_versions.get_mut(&parent_inode) {
@@ -778,12 +776,7 @@ impl P9Backend for RamFilesystem {
         let (parent_inode, _) = self
             .get_fid(msg.fid)
             .map_err(|_| TsymlinkError::InternalError)?;
-        match self.create_symlink(
-            parent_inode,
-            msg.name.clone(),
-            msg.symtgt.clone(),
-            msg.gid,
-        ) {
+        match self.create_symlink(parent_inode, msg.name.clone(), msg.symtgt.clone(), msg.gid) {
             Ok(inode) => Ok(P9Response::Success(RsymlinkMessage {
                 tag: msg.tag,
                 qid: self.get_qid(inode),
