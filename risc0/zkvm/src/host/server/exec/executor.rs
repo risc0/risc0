@@ -349,10 +349,6 @@ impl<'a> ExecutorImpl<'a> {
         self.inner.run_segment(segment_limit_po2, session_limit)
     }
 
-    pub(crate) fn run_segments(&mut self) -> impl FusedIterator<Item = Result<SegmentUpdate>> {
-        std::iter::from_fn(|| self.run_segment().transpose()).fuse()
-    }
-
     fn session(mut self) -> Result<Session> {
         let exec_result = self.inner.state();
 
