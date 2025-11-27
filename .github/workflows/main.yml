@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.91.1
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
   RISC0_GROTH16_VERSION: 0.1.0
 
@@ -589,7 +589,7 @@ jobs:
     needs: changes
     runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     env:
-      RUST_TOOLCHAIN_VERSION: 1.88.0
+      RUST_TOOLCHAIN_VERSION: 1.91.1
     strategy:
       fail-fast: false
       matrix:
