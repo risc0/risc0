@@ -56,7 +56,7 @@ pub(crate) const RESERVED_PAGING_CYCLES: u32 = LOAD_ROOT_CYCLES
     + POSEIDON_PAGING
     + STORE_ROOT_CYCLES;
 
-const NUM_PAGES: usize = 4 * 1024 * 1024;
+pub(crate) const NUM_PAGES: usize = 4 * 1024 * 1024;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub(crate) enum PageState {
@@ -587,6 +587,11 @@ impl PagedMemory {
 
     pub(crate) fn clear_trace_events(&mut self) {
         self.trace_events.clear();
+    }
+
+    #[cfg(feature = "rv32im-m3")]
+    pub(crate) fn touched_pages(&self) -> u64 {
+        self.page_cache.len() as u64
     }
 
     #[inline(always)]
