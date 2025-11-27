@@ -6,6 +6,7 @@
 
 #![allow(dead_code)]
 
+use crate::constants::S_IFLNK;
 use crate::linux_abi_fs::{DT_DIR, DT_LNK, DT_REG};
 use crate::p9::*;
 use crate::p9_backend::P9Backend;
@@ -77,6 +78,8 @@ pub struct RamFilesystem {
 }
 
 impl RamFilesystem {
+    const DEFAULT_SYMLINK_PERMS: u32 = 0o777;
+
     /// Create a new empty RAM filesystem
     pub fn new() -> Self {
         let mut fs = Self {
@@ -185,14 +188,16 @@ impl RamFilesystem {
                 // Find the parent of current_inode
                 let mut parent_inode = None;
                 for (node_inode, node) in &self.nodes {
-                    if let RamNode::Directory { entries, .. } = node {
-                        if entries
+                    let found_parent = if let RamNode::Directory { entries, .. } = node {
+                        entries
                             .values()
                             .any(|&entry_inode| entry_inode == current_inode)
-                        {
-                            parent_inode = Some(*node_inode);
-                            break;
-                        }
+                    } else {
+                        false
+                    };
+                    if found_parent {
+                        parent_inode = Some(*node_inode);
+                        break;
                     }
                 }
                 // If no parent found, we're at root, so ".." is root itself
@@ -321,6 +326,50 @@ impl RamFilesystem {
         self.qid_versions.insert(inode, 0);
 
         // Increment parent version
+        if let Some(version) = self.qid_versions.get_mut(&parent_inode) {
+            *version = version.wrapping_add(1);
+        }
+
+        Ok(inode)
+    }
+
+    fn create_symlink(
+        &mut self,
+        parent_inode: u64,
+        name: String,
+        target: String,
+        gid: u32,
+    ) -> Result<u64, u32> {
+        if !self.is_dir(parent_inode) {
+            return Err(P9Error::Enotdir as u32);
+        }
+
+        let dir = match self.nodes.get_mut(&parent_inode) {
+            Some(RamNode::Directory { entries, .. }) => entries,
+            _ => return Err(P9Error::Enotdir as u32),
+        };
+
+        if dir.contains_key(&name) {
+            return Err(P9Error::Eexist as u32);
+        }
+
+        let inode = self.next_inode;
+        self.next_inode += 1;
+
+        dir.insert(name, inode);
+        self
+            .nodes
+            .insert(
+                inode,
+                RamNode::Symlink {
+                    target,
+                    mode: S_IFLNK | Self::DEFAULT_SYMLINK_PERMS,
+                    uid: 0,
+                    gid,
+                },
+            );
+        self.qid_versions.insert(inode, 0);
+
         if let Some(version) = self.qid_versions.get_mut(&parent_inode) {
             *version = version.wrapping_add(1);
         }
@@ -724,13 +773,23 @@ impl P9Backend for RamFilesystem {
 
     fn send_tsymlink(
         &mut self,
-        _msg: &TsymlinkMessage,
+        msg: &TsymlinkMessage,
     ) -> Result<P9Response<RsymlinkMessage>, TsymlinkError> {
-        // TODO: Implement symlink creation
-        Ok(P9Response::Error(RlerrorMessage::new(
-            _msg.tag,
-            P9Error::Enosys as u32,
-        )))
+        let (parent_inode, _) = self
+            .get_fid(msg.fid)
+            .map_err(|_| TsymlinkError::InternalError)?;
+        match self.create_symlink(
+            parent_inode,
+            msg.name.clone(),
+            msg.symtgt.clone(),
+            msg.gid,
+        ) {
+            Ok(inode) => Ok(P9Response::Success(RsymlinkMessage {
+                tag: msg.tag,
+                qid: self.get_qid(inode),
+            })),
+            Err(errno) => Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno))),
+        }
     }
 
     fn send_tmknod(
