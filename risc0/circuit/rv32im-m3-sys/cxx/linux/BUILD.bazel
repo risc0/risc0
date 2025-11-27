@@ -5,6 +5,7 @@ cc_binary(
     ],
     deps = [
         "//rv32im/emu",
+        "//jit",
     ],
     data = [
         "linux.elf",

@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define USE_JIT YES
+
 #ifdef USE_JIT
+#include "jit/jit.h"
 #else
 #include "rv32im/emu/emu.h"
 #endif
@@ -121,8 +124,15 @@ int main() {
     size_t rows = 1024 * 1024;
     std::vector<RowInfo> ri(rows);
     std::vector<uint32_t> aux(rows * computeMaxWitPerRow());
+#ifdef USE_JIT
+    using namespace risc0::jit;
+    JitTrace trace;
+    bool done = doJit(trace, image, io, rows, true);
+    throw std::runtime_error("Can't loop");
+#else
     Trace trace(rows, ri.data(), aux.data());
     bool done = emulate(trace, image, io, rows);
+#endif
     if (done)
       break;
   }

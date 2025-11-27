@@ -23,6 +23,10 @@ public:
   // Construct
   Memory(risc0::rv32im::MemoryImage& image, JitTrace& trace);
 
+  // Peek at physical memory, might induce page in, but otherwise
+  // free of side effects
+  uint32_t peekPhysical(JitContext* ctx, uint32_t wordAddr);
+
   // Do a page lookup, here pages are at 1k granularity
   // If VM resolution fails (page fault, etc), return nullptr
   PageDetails* lookup(JitContext* ctx, uint32_t vpage, uint32_t mode, uint32_t access);

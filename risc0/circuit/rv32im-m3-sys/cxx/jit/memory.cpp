@@ -16,6 +16,13 @@ Memory::Memory(risc0::rv32im::MemoryImage& image, JitTrace& trace)
   , iCacheCycle(1)
 {}
 
+uint32_t Memory::peekPhysical(JitContext* ctx, uint32_t wordAddr) {
+  uint32_t page = wordAddr >> MPAGE_SIZE_WORDS_PO2;
+  uint32_t offset = wordAddr & MPAGE_MASK_WORDS;
+  PageDetails* data = lookup(ctx, page, MODE_MACHINE, ACCESS_LOAD);
+  return (*data)[offset].value;
+}
+
 PageDetails* Memory::lookup(JitContext* ctx, uint32_t vpage, uint32_t mode, uint32_t access) {
   // TODO: Compute and reduce quota
   uint64_t key = makeKey(vpage, mode, access);

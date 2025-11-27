@@ -44,10 +44,6 @@ void JitContext::setStopCycle(uint32_t cycle) {
 
 // TODO: Make this super minimal and self contained (i.e. don't use DecodedInst + getOpcode)
 ExpandedInst expand(uint32_t inst) {
-  if ((inst & 3) != 3) {
-    static auto expandTable = rv32im::generateExpandTable();
-    inst = expandTable[inst];
-  }
   rv32im::DecodedInst decoded(inst);
   ExpandedInst ret;
   ret.rs1 = decoded.rs1;
@@ -61,7 +57,8 @@ ExpandedInst expand(uint32_t inst) {
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
     case rv32im::Opcode::ANY:
-      throw std::runtime_error("Trying to expand an illegal instruction");
+      ret.imm = inst;
+      break;
   }
   return ret;
 }
@@ -90,6 +87,7 @@ BlockCache::BlockCache(JitContext& ctx, JitTrace& trace, Memory& memory, uint32_
   instOffsets.push_back(execOnly ? exec_details::gsym_do_ ## name : preflight_details::gsym_do_ ## name);
 #include "rv32im/base/rv32im.inc"
 #undef ENTRY
+  instOffsets.push_back(execOnly ? exec_details::gsym_do_ANY : preflight_details::gsym_do_ANY);
 }
 
 void BlockCache::clear(uint32_t cycle) {
@@ -173,10 +171,6 @@ uint32_t BlockCache::jitBlockAt(uint32_t pc) {
       throw std::runtime_error("Unimplemented");
     }
     const auto& inst = decode->inst;
-    if (rv32im::Opcode(inst.opcode) == rv32im::Opcode::ANY) {
-      // Handle invalid instruction case
-      throw std::runtime_error("Unimplemented");
-    }
     LOG(2, "PC: " << HexWord{pc} << " - " << getOpcodeName(rv32im::Opcode(inst.opcode)) <<
            "  rd = " << uint32_t(inst.rd) << ", rs1 = " << uint32_t(inst.rs1) <<
            ", rs2 = " << uint32_t(inst.rs2) << ", imm = " << HexWord{inst.imm});
@@ -277,6 +271,7 @@ bool BlockCache::handleEnd(rv32im::Opcode opcode, uint32_t imm, uint32_t pc, uin
     case rv32im::Opcode::JALR:
     case rv32im::Opcode::ECALL:
     case rv32im::Opcode::MRET:
+    case rv32im::Opcode::ANY:
       return endRet();
     default: break;
   }

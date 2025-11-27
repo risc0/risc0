@@ -47,6 +47,7 @@ enum class ExitCause {
   ALIGNMENT = 3,
   MRET = 4,
   JALR = 5,
+  ANY = 6,
 };
 
 class BlockCache {
@@ -59,7 +60,6 @@ public:
   // Clear
   void clear(uint32_t cycle);
 
-  std::pair<bool, uint32_t> fetchWord(MemTxn& save, uint32_t wordAddr, bool asMachine = false);
 private:
   JitContext& ctx;
   JitTrace& trace;
@@ -76,6 +76,7 @@ private:
 
   uint32_t jitBlockAt(uint32_t pc);
   DecodeEntry* fetchInst(uint32_t pc);
+  std::pair<bool, uint32_t> fetchWord(MemTxn& save, uint32_t wordAddr, bool asMachine = false);
   void undoTxn(MemTxn& save, uint32_t wordAddr);
 
   static uint64_t invokePageMiss(uint64_t ctxAddr, uint64_t key);

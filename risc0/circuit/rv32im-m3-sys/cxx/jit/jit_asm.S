@@ -44,6 +44,7 @@ EXIT_CAUSE_ECALL = 2
 EXIT_CAUSE_ALIGNMENT = 3
 EXIT_CAUSE_MRET = 4
 EXIT_CAUSE_JALR = 5
+EXIT_CAUSE_ANY = 6
 
 # A friendly macro to lookup map entries
 .macro MAP_LOOKUP_64 PO2
@@ -638,6 +639,12 @@ do_MRET:
   # Also handle MRET in emulator
   movl PC, %eax
   movq $EXIT_CAUSE_MRET, CTX_EXIT_CAUSE_OFF(CTX)
+  ret 
+
+do_ANY:
+  # Also handle ANY in emulator
+  movl PC, %eax
+  movq $EXIT_CAUSE_ANY, CTX_EXIT_CAUSE_OFF(CTX)
   ret 
 
 block_header:

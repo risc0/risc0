@@ -22,7 +22,7 @@ struct InstEntry {
   uint32_t pc;
   uint32_t origInst;
   uint32_t iCacheCycle;
-  uint32_t unitId;
+  uint32_t extra;
   MemTxn rd;
   MemTxn rs1;
   MemTxn rs2;
@@ -54,15 +54,31 @@ struct PageEntry {
   rv32im::PagePtr finalPage;
 };
 
+struct ResumeEntry {
+  MemTxn readCompat;
+  MemTxn readPc;
+  MemTxn readMode;
+};
+
+struct MretEntry {
+  MemTxn readPc;
+  MemTxn readMode;
+  MemTxn updateClearCache;
+  MemTxn writeCycle;
+};
+
 struct JitTrace {
   size_t totCycles;
+  ResumeEntry resume;
   // List of all instructions executed, preflight only
   std::vector<InstEntry> inst;
-  // List of all instructions decoded, preflight only
+  // Mrets
+  std::vector<MretEntry> mrets;
+  // List of all instructions decoded
   std::vector<DecodeEntry> decode; 
-  // List of all VM translations, preflight only
+  // List of all VM translations
   std::vector<AddrTranslateEntry> translate;
-  // Page pre + and post state, always valid
+  // Page pre + and post state
   std::vector<PageEntry> pages;
 };
 
