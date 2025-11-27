@@ -6,7 +6,7 @@
 
 #![allow(dead_code)]
 
-use crate::constants::S_IFLNK;
+use crate::constants::{S_IFDIR, S_IFLNK, S_IFMT, S_IFREG};
 use crate::linux_abi_fs::{DT_DIR, DT_LNK, DT_REG};
 use crate::p9::*;
 use crate::p9_backend::P9Backend;
@@ -95,7 +95,7 @@ impl RamFilesystem {
             1,
             RamNode::Directory {
                 entries: BTreeMap::new(),
-                mode: 0o755,
+                mode: S_IFDIR | 0o755,
                 uid: 0,
                 gid: 0,
             },
@@ -275,7 +275,9 @@ impl RamFilesystem {
             inode,
             RamNode::File {
                 data: Vec::new(),
-                mode,
+                // Preserve special bits (setuid/setgid/sticky, 0o7000) and permission bits (0o777)
+                // Mask out file type bits and add S_IFREG
+                mode: S_IFREG | (mode & 0o7777),
                 uid: 0,
                 gid: 0,
             },
@@ -318,7 +320,9 @@ impl RamFilesystem {
             inode,
             RamNode::Directory {
                 entries: BTreeMap::new(),
-                mode,
+                // Preserve special bits (setuid/setgid/sticky, 0o7000) and permission bits (0o777)
+                // Mask out file type bits and add S_IFDIR
+                mode: S_IFDIR | (mode & 0o7777),
                 uid: 0,
                 gid,
             },
@@ -681,11 +685,29 @@ impl P9Backend for RamFilesystem {
 
         if (msg.valid & P9SetattrMask::Mode as u32) != 0 {
             match node {
-                RamNode::File { mode, .. } => *mode = msg.mode,
-                RamNode::Directory { mode, .. } => *mode = msg.mode,
-                RamNode::Symlink { mode, .. } => *mode = msg.mode,
+                RamNode::File { mode, .. } => {
+                    // Preserve file type bits, update special bits (0o7000) and permission bits (0o777)
+                    *mode = (*mode & S_IFMT) | (msg.mode & 0o7777);
+                }
+                RamNode::Directory { mode, .. } => {
+                    // Preserve file type bits, update special bits (0o7000) and permission bits (0o777)
+                    *mode = (*mode & S_IFMT) | (msg.mode & 0o7777);
+                }
+                RamNode::Symlink { mode, .. } => {
+                    // Preserve file type bits, update special bits (0o7000) and permission bits (0o777)
+                    *mode = (*mode & S_IFMT) | (msg.mode & 0o7777);
+                }
             }
         }
+
+        // When only uid/gid are being changed (not mode), Linux clears setuid/setgid bits
+        // on regular files according to specific rules:
+        // - Always clear setuid (0o4000) on regular files
+        // - Clear setgid (0o2000) on regular files only if group-executable (0o0010)
+        // - For directories, preserve setgid
+        let should_clear_special_bits = (msg.valid & P9SetattrMask::Uid as u32) != 0
+            || (msg.valid & P9SetattrMask::Gid as u32) != 0;
+        let mode_not_changing = (msg.valid & P9SetattrMask::Mode as u32) == 0;
 
         if (msg.valid & P9SetattrMask::Uid as u32) != 0 {
             match node {
@@ -700,6 +722,28 @@ impl P9Backend for RamFilesystem {
                 RamNode::File { gid, .. } => *gid = msg.gid,
                 RamNode::Directory { gid, .. } => *gid = msg.gid,
                 RamNode::Symlink { gid, .. } => *gid = msg.gid,
+            }
+        }
+
+        // Clear setuid/setgid bits on regular files when only uid/gid changed (fchown behavior)
+        if should_clear_special_bits && mode_not_changing {
+            match node {
+                RamNode::File { mode, .. } => {
+                    // Always clear setuid (0o4000)
+                    *mode &= !0o4000;
+                    // Clear setgid (0o2000) only if group-executable (0o0010)
+                    if (*mode & 0o0010) != 0 {
+                        *mode &= !0o2000;
+                    }
+                    // Update QID version when mode is modified
+                    if let Some(version) = self.qid_versions.get_mut(&inode) {
+                        *version = version.wrapping_add(1);
+                    }
+                }
+                RamNode::Directory { .. } | RamNode::Symlink { .. } => {
+                    // For directories and symlinks, preserve setgid (Linux behavior)
+                    // Do nothing
+                }
             }
         }
 
