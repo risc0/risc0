@@ -6640,7 +6640,6 @@ dependencies = [
  "flate2",
  "indexmap 2.7.1",
  "memchr",
- "thiserror 2.0.17",
  "zopfli",
 ]
 
