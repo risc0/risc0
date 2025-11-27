@@ -54,7 +54,6 @@ bonsai-sdk = { version = "1.4.2", default-features = false, path = "bonsai/sdk" 
 gpu-guard = { path = "tools/gpu-guard" }
 hotbench = { path = "tools/hotbench" }
 metal = "0.29"
-risc0-bigint2 = { version = "1.4.11", default-features = false, path = "risc0/bigint2" }
 risc0-bigint2-methods = { path = "risc0/bigint2/methods" }
 risc0-binfmt = { version = "5.0.0", default-features = false, path = "risc0/binfmt" }
 risc0-build = { version = "4.0.0", default-features = false, path = "risc0/build" }
@@ -68,7 +67,6 @@ risc0-circuit-rv32im-sys = { version = "5.0.0", default-features = false, path =
 risc0-circuit-rv32im-m3 = { version = "0.0.0", default-features = false, path = "risc0/circuit/rv32im-m3" }
 risc0-circuit-rv32im-m3-sys = { version = "0.0.0", default-features = false, path = "risc0/circuit/rv32im-m3-sys" }
 risc0-core = { version = "5.0.0", default-features = false, path = "risc0/core" }
-risc0-emu = { version = "5.0.0", path = "risc0/emu" }
 risc0-groth16 = { version = "5.0.0", default-features = false, path = "risc0/groth16" }
 risc0-groth16-sys = { version = "0.2.0", default-features = false, path = "risc0/groth16-sys" }
 risc0-povw = { default-features = false, path = "risc0/povw" }

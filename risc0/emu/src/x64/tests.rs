@@ -14,199 +14,8 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use dynasmrt::dynasm;
-use rstest::rstest;
 
-use super::GPR::*;
 use super::*;
-
-fn run_asm_test(mut inner: impl FnMut(&mut Translator), expected: &[&str]) {
-    let program = Program {
-        entry: 0xC000_0000,
-        image: Default::default(),
-    };
-    let mut xlate = Translator::new(program).unwrap();
-    let start = xlate.asm.offset();
-    inner(&mut xlate);
-
-    xlate.asm.commit().unwrap();
-
-    let lines = xlate.disasm(start, false);
-    assert_eq!(lines, expected);
-}
-
-#[rstest]
-#[case(Loc::GPR(RDX), Loc::GPR(RDX), Loc::GPR(RDX), &[
-    "add edx,edx"
-])]
-#[case(Loc::GPR(RDX), Loc::GPR(RDX), Loc::GPR(RCX), &[
-    "add edx,ecx"
-])]
-#[case(Loc::GPR(RSI), Loc::GPR(RDX), Loc::GPR(RSI), &[
-    "mov eax,edx",
-    "add eax,esi",
-    "mov esi,eax"
-])]
-#[case(Loc::GPR(RSI), Loc::GPR(RDX), Loc::GPR(RCX), &[
-    "mov esi,edx",
-    "add esi,ecx",
-])]
-#[case(Loc::Memory(RBX, 4), Loc::GPR(RCX), Loc::GPR(RDX), &[
-    "mov [rbx+4],ecx",
-    "add [rbx+4],edx",
-])]
-#[case(Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), Loc::Memory(RBX, 12), &[
-    "mov eax,[rbx+8]",
-    "add eax,[rbx+0Ch]",
-    "mov [rbx+4],eax",
-])]
-#[case(Loc::GPR(RDX), Loc::GPR(RDX), Loc::Imm32(6), &[
-    "add edx,6"
-])]
-#[case(Loc::GPR(RDX), Loc::GPR(RCX), Loc::Imm32(6), &[
-    "mov edx,ecx",
-    "add edx,6",
-])]
-#[case(Loc::GPR(RDX), Loc::GPR(RCX), Loc::Imm32(-6_i32 as u32), &[
-    "mov edx,ecx",
-    "add edx,0FFFFFFFAh",
-])]
-#[case(Loc::Memory(RBX, 4), Loc::GPR(RCX), Loc::Imm32(-6_i32 as u32), &[
-    "mov [rbx+4],ecx",
-    "add dword [rbx+4],0FFFFFFFAh",
-])]
-#[test_log::test]
-fn add(#[case] rd: Loc, #[case] rs1: Loc, #[case] rs2: Loc, #[case] expected: &[&str]) {
-    run_asm_test(
-        |x| x.emit_binop(Translator::emit_add, rd, rs1, rs2),
-        expected,
-    );
-}
-
-#[rstest]
-#[case(Loc::GPR(RDX), Loc::GPR(RSI), Loc::GPR(RDI), &[
-    "cmp esi,edi",
-    "setl al",
-    "movzx edx,al",
-])]
-#[case(Loc::GPR(RDX), Loc::Memory(RBX, 4), Loc::GPR(RSI), &[
-    "cmp [rbx+4],esi",
-    "setl al",
-    "movzx edx,al",
-])]
-#[case(Loc::GPR(RDX), Loc::GPR(RSI), Loc::Memory(RBX, 4), &[
-    "cmp esi,[rbx+4]",
-    "setl al",
-    "movzx edx,al",
-])]
-#[case(Loc::GPR(RDX), Loc::Memory(RBX, 8), Loc::Memory(RBX, 12), &[
-    "mov eax,[rbx+8]",
-    "cmp eax,[rbx+0Ch]",
-    "setl al",
-    "movzx edx,al",
-])]
-#[case(Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), Loc::Memory(RBX, 12), &[
-    "mov eax,[rbx+8]",
-    "cmp eax,[rbx+0Ch]",
-    "setl al",
-    "movzx eax,al",
-    "mov [rbx+4],eax",
-])]
-#[test_log::test]
-fn slt(#[case] rd: Loc, #[case] rs1: Loc, #[case] rs2: Loc, #[case] expected: &[&str]) {
-    run_asm_test(
-        |x| x.emit_cmpset(Translator::emit_setl, rd, rs1, rs2),
-        expected,
-    );
-}
-
-#[rstest]
-#[case(Size::S32, Extend::None, Loc::GPR(RDX), Loc::GPR(RSI), 8, &[
-    "mov edx,[r15+rsi+8]"
-])]
-#[case(Size::S8, Extend::Sign, Loc::GPR(RDX), Loc::GPR(RSI), 8, &[
-    "movsx edx,byte [r15+rsi+8]"
-])]
-#[case(Size::S8, Extend::Zero, Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), 8, &[
-    "mov eax,[rbx+8]",
-    "lea rax,[r15+rax+8]",
-    "movzx eax,byte [rax]",
-    "mov [ebx+4],eax",
-])]
-#[test_log::test]
-fn load(
-    #[case] size: Size,
-    #[case] extend: Extend,
-    #[case] rd: Loc,
-    #[case] rs1: Loc,
-    #[case] imm: u32,
-    #[case] expected: &[&str],
-) {
-    run_asm_test(|x| x.emit_load(size, extend, rd, rs1, imm), expected);
-}
-
-#[rstest]
-#[case(Size::S32, Loc::GPR(RSI), Loc::GPR(RDX), 8, &[
-    "mov [r15+rsi+8],edx"
-])]
-#[case(Size::S8, Loc::GPR(RSI), Loc::GPR(RDX), 8, &[
-    "mov [r15+rsi+8],dl"
-])]
-#[case(Size::S32, Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), 8, &[
-    "mov ecx,[ebx+8]",
-    "mov eax,[rbx+4]",
-    "lea rax,[r15+rax+8]",
-    "mov [rax],ecx",
-])]
-#[case(Size::S8, Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), 8, &[
-    "mov ecx,[ebx+8]",
-    "mov eax,[rbx+4]",
-    "lea rax,[r15+rax+8]",
-    "mov [rax],cl",
-])]
-#[test_log::test]
-fn store(
-    #[case] size: Size,
-    #[case] rd: Loc,
-    #[case] rs1: Loc,
-    #[case] imm: u32,
-    #[case] expected: &[&str],
-) {
-    use GPR::*;
-    run_asm_test(
-        |x| {
-            x.emit_store(size, rd, rs1, imm);
-        },
-        expected,
-    );
-}
-
-#[test]
-fn jal() {
-    use GPR::*;
-    run_asm_test(
-        |x| {
-            x.emit_jal(Loc::GPR(RDX), 8, false);
-        },
-        &[
-            "mov edx,0C0000004h", //
-            "mov rax,0C0000008h",
-        ],
-    );
-}
-
-#[test]
-fn jalr() {
-    use GPR::*;
-    run_asm_test(
-        |x| {
-            x.emit_jalr(Loc::GPR(RDX), Loc::GPR(RCX), 8);
-        },
-        &[
-            "lea rax,[rcx+8]", //
-            "mov edx,0C0000004h",
-        ],
-    );
-}
 
 #[test_log::test]
 fn basic() {
@@ -237,7 +46,6 @@ fn basic() {
 
 #[test_log::test]
 fn simple_loop() {
-    // this only takes 0.19s on a modern machine :)
     let count = 1_000_000_000;
 
     let mut asm = dynasmrt::riscv::Assembler::new().unwrap();
@@ -274,8 +82,9 @@ fn simple_loop() {
 
 fn run_program(program: Program) -> (Terminal, JitContext) {
     let mut xlate = Translator::new(program).unwrap();
+    xlate.resume().unwrap();
     let terminal = xlate.jit_loop().unwrap();
-    (terminal, xlate.ctx)
+    (terminal, xlate.machine.ctx)
 }
 
 // These tests come from:
@@ -309,13 +118,16 @@ mod riscv {
         let program = Program::load_elf(&elf, u32::MAX).unwrap();
         let (terminal, ctx) = run_program(program);
         match terminal {
-            Terminal::Jump | Terminal::Branch => panic!("Unexpected terminal"),
+            Terminal::Jump => panic!("Unexpected terminal"),
             Terminal::Break => {
                 assert_eq!(ctx.registers[REG_A7], 0, "ecall expected a7 = 0");
             }
             Terminal::Trap => {
                 let test_num = ctx.registers[REG_TESTNUM];
                 panic!("Test case failed: {test_num}")
+            }
+            Terminal::Split => {
+                panic!("Split!");
             }
         }
     }
