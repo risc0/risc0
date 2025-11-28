@@ -67,6 +67,16 @@ struct MretEntry {
   MemTxn writeCycle;
 };
 
+struct TrapEntry {
+  MemTxn writePc;
+  MemTxn writeMode;
+  MemTxn writeVal;
+  MemTxn readDispatch;
+  MemTxn readCycle;
+  MemTxn updateTime;
+  MemTxn updateTimeh;
+};
+
 struct JitTrace {
   size_t totCycles;
   ResumeEntry resume;
@@ -74,6 +84,8 @@ struct JitTrace {
   std::vector<InstEntry> inst;
   // Mrets
   std::vector<MretEntry> mrets;
+  // Traps 
+  std::vector<TrapEntry> traps;
   // List of all instructions decoded
   std::vector<DecodeEntry> decode; 
   // List of all VM translations

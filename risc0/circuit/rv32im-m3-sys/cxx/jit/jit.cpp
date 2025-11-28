@@ -56,12 +56,43 @@ struct Jit {
     (*data)[offset].value = value;
   }
 
-  void trapInst() {
-    throw std::runtime_error("Trap Inst");
-  }
-
-  void trapFetch() {
-    throw std::runtime_error("Trap Fetch");
+  void trap(uint32_t type, uint32_t val) {
+    LOG(1, "Doing TRAP, type = " << type << ", val = " << HexWord{val});
+    if (val == 0) {
+      LOG(1, "Current cycle = " << ctx.getCycle());
+      for (size_t i = 0; i <= ctx.getCycle(); i++) {
+        LOG(1, i << ": " << getOpcodeName(rv32im::Opcode(trace.inst[i].inst.opcode)));
+      }
+      throw std::runtime_error("LAME");
+    }
+    if (mode == MODE_MACHINE) {
+      throw std::runtime_error("Double trap");
+    }
+    InstEntry& ie = trace.inst[ctx.getCycle()];
+    ie.inst.opcode = uint8_t(Opcode::ANY);  // Use 'any' for traps
+    ie.extra = trace.traps.size();
+    trace.traps.emplace_back();
+    TrapEntry& te = trace.traps.back();
+    write(te.writePc, CSR_WORD(MEPC), pc);
+    write(te.writeMode, CSR_WORD(MEMODE), mode);
+    write(te.writeVal, CSR_WORD(MTVAL), val);
+    uint32_t dispatch;
+    switch (type) {
+      case TRAP_ECALL: dispatch = CSR_WORD(MTRAPECALL); break;
+      case TRAP_INST: dispatch = CSR_WORD(MTRAPINST); break;
+      case TRAP_FETCH: dispatch = CSR_WORD(MTRAPFETCH); break;
+      case TRAP_INTER: dispatch = CSR_WORD(MTRAPINTER); break;
+      default:
+        throw std::runtime_error("Invalid trap type");
+    }
+    pc = read(te.readDispatch, dispatch);
+    mode = MODE_MACHINE;
+    uint32_t oldCycle = read(te.readCycle, CSR_WORD(MSCYCLE));
+    uint32_t delta = ctx.getCycle() - oldCycle;
+    uint64_t time = peek(CSR_WORD(MTIME)) | (uint64_t(peek(CSR_WORD(MTIMEH))) << 32);
+    time += delta;
+    write(te.updateTime, CSR_WORD(MTIME), time & 0xffffffff);
+    write(te.updateTimeh, CSR_WORD(MTIMEH), time >> 32);
   }
 
   void resume() {
@@ -85,10 +116,10 @@ struct Jit {
 
   void mret() {
     if (mode != MODE_MACHINE) {
-     trapInst();
+      trap(TRAP_INST, 0x30200073);
     }
     InstEntry& ie = trace.inst[ctx.getCycle()];
-    ie.inst.opcode = uint8_t(Opcode::MRET);
+    // Add extra to the entry
     ie.extra = trace.mrets.size();
     trace.mrets.emplace_back();
     MretEntry& me = trace.mrets.back();
@@ -99,6 +130,7 @@ struct Jit {
       throw std::runtime_error("TIME TO CLEAR THE CACHE");
     }
     write(me.writeCycle, CSR_WORD(MSCYCLE), ctx.getCycle() + 1);
+    ctx.incCycle();
     ctx.setStopCycle(ctx.getCycle() + peek(CSR_WORD(MCOUNTDOWN)));
   }
 
@@ -136,7 +168,7 @@ struct Jit {
           mret();
           break;
         case ExitCause::ANY:
-          trapInst();
+          trap(TRAP_INST, trace.inst[ctx.getCycle()].origInst);
           break;
         default:
           LOG(0, "Mystery exit cause: " << uint32_t(ec));

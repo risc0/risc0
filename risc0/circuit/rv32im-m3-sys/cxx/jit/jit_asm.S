@@ -34,9 +34,11 @@ CTX_PAGE_MISS_OFF = 56
 # Offsets in the log
 LOG_PC_OFF = 8
 LOG_OINST_OFF = 12
-LOG_RD_OFF =16 
-LOG_RS1_OFF = 24
-LOG_RS2_OFF = 32 
+LOG_RD_OFF = 24 
+LOG_RS1_OFF = 32
+LOG_RS2_OFF = 40 
+
+LOG_SIZE = 48
 
 EXIT_CAUSE_QUOTA_OUT = 0
 EXIT_CAUSE_CYCLES_OUT = 1
@@ -109,7 +111,7 @@ EXIT_CAUSE_ANY = 6
   movb %r10b, 3(LOG)  # Write RS2
   movl IMM, 4(LOG)  # Write IMM
   movl PC, LOG_PC_OFF(LOG) # Write PC
-  movl OINST, LOG_OINST_OFF(LOG) # Write PC
+  movl OINST, LOG_OINST_OFF(LOG) # Write original inst
 #endif
 .endm
 
@@ -158,7 +160,7 @@ EXIT_CAUSE_ANY = 6
 .macro INST_END
 #if PREFLIGHT
   INC_CYCLE  # Add final cycle
-  add $40, LOG  # Move log forward
+  add $LOG_SIZE, LOG  # Move log forward
 #else
   addq CYCLE_INC_VAL, CYCLE  # Inc cycle
 #endif
@@ -628,21 +630,23 @@ do_REMU:
   DO_REG_POST
 
 do_ECALL:
-  # We don't do anything, and the BB actually terminates with PC @ ECALL
-  # No cycles pass, no logging happens, so we can do trap handling or
-  # whatever we want
+  # Log the instruction, but don't actually increment the cycle #
+  # Do all the real work in the emulator
+  WRITE_INST $45
   movl PC, %eax
   movq $EXIT_CAUSE_ECALL, CTX_EXIT_CAUSE_OFF(CTX)
   ret 
 
 do_MRET:
   # Also handle MRET in emulator
+  WRITE_INST $46
   movl PC, %eax
   movq $EXIT_CAUSE_MRET, CTX_EXIT_CAUSE_OFF(CTX)
   ret 
 
 do_ANY:
   # Also handle ANY in emulator
+  WRITE_INST $47
   movl PC, %eax
   movq $EXIT_CAUSE_ANY, CTX_EXIT_CAUSE_OFF(CTX)
   ret 

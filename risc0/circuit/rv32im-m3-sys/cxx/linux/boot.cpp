@@ -102,6 +102,7 @@ int main() {
   // Make an image
   auto image = MemoryImage::fromWords(words);
 
+  /*
   // Setup keyboard input goo
   int flags = fcntl(STDIN_FILENO, F_GETFL, 0); // Get current flags
   fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK); // Add O_NONBLOCK
@@ -116,6 +117,7 @@ int main() {
 
   // Set the new terminal settings
   tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
+  */
 
   // Run
   DebugHostIO io;
@@ -127,8 +129,9 @@ int main() {
 #ifdef USE_JIT
     using namespace risc0::jit;
     JitTrace trace;
-    bool done = doJit(trace, image, io, rows, true);
-    throw std::runtime_error("Can't loop");
+    bool done = doJit(trace, image, io, rows, false);
+    LOG(0, "HEY, done = " << done);
+    break;
 #else
     Trace trace(rows, ri.data(), aux.data());
     bool done = emulate(trace, image, io, rows);
