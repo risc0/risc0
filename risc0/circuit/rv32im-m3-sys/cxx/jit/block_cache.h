@@ -48,6 +48,7 @@ enum class ExitCause {
   MRET = 4,
   JALR = 5,
   ANY = 6,
+  FETCH = 7,
 };
 
 class BlockCache {

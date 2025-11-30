@@ -21,16 +21,17 @@ public:
   static uint32_t getAccess(uint64_t key);
 
   // Construct
-  Memory(risc0::rv32im::MemoryImage& image, JitTrace& trace);
+  Memory(risc0::rv32im::MemoryImage& image, JitTrace& trace, JitContext& ctx);
 
-  // Peek at physical memory, might induce page in, but otherwise
-  // free of side effects
-  uint32_t peekPhysical(JitContext* ctx, uint32_t wordAddr);
+  uint32_t peekPhysical(uint32_t wordAddr);
+  uint32_t readPhysical(MemTxn& txn, uint32_t wordAddr);
+  void writePhysical(MemTxn& txn, uint32_t wordAddr, uint32_t value);
+  void undoTxn(MemTxn& old, uint32_t wordAddr);
 
   // Do a page lookup, here pages are at 1k granularity
   // If VM resolution fails (page fault, etc), return nullptr
-  PageDetails* lookup(JitContext* ctx, uint32_t vpage, uint32_t mode, uint32_t access);
-  PageDetails* pageMiss(JitContext* ctx, uint64_t key);
+  PageDetails* lookup(uint32_t vpage, uint32_t mode, uint32_t access);
+  PageDetails* pageMiss(uint64_t key);
 
   // Reset virtual memory state (i.e. bump iCacheCycle)
   void clearVM(uint32_t cycle);
@@ -48,6 +49,7 @@ private:
 
   risc0::rv32im::MemoryImage& image;
   JitTrace& trace;
+  JitContext& ctx;
   uint32_t iCacheCycle;
   // Map key:
   //   uint64_t key = vpage | (mode << 30) | (access < 28);

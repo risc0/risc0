@@ -79,7 +79,7 @@ BlockCache::BlockCache(JitContext& ctx, JitTrace& trace, Memory& memory, uint32_
   }
   resetPoint = a.getOffset();
   uint32_t regPage = MACHINE_REGS_WORD >> MPAGE_SIZE_WORDS_PO2;
-  PageDetails* regPagePtr = memory.lookup(nullptr, regPage, MODE_MACHINE, 0);
+  PageDetails* regPagePtr = memory.lookup(regPage, MODE_MACHINE, 0);
   uint32_t regOffset = (mode == MODE_MACHINE) ? (MACHINE_REGS_WORD & MPAGE_MASK_WORDS)
                                        : (USER_REGS_WORD & MPAGE_MASK_WORDS);
   regs = &((*regPagePtr)[regOffset]);
@@ -99,25 +99,33 @@ void BlockCache::clear(uint32_t cycle) {
 
 uint64_t BlockCache::invokePageMiss(uint64_t ctxAddr, uint64_t key) {
   JitContext* ctx = reinterpret_cast<JitContext*>(ctxAddr);
-  return reinterpret_cast<uint64_t>(ctx->callbackObj->pageMiss(ctx, key));
+  return reinterpret_cast<uint64_t>(ctx->callbackObj->pageMiss(key));
 };
 
 ExitCause BlockCache::run(uint32_t& pc) {
   // Check for immediate exits
   if (ctx.getQuota() < 0) { return ExitCause::QUOTA_OUT; }
   if (ctx.getStopCycle() <= ctx.getCycle()) { return ExitCause::STOP_CYCLE; }
-  // Compute worst case cycle use
-  uint32_t maxCycles = std::min(
-      uint32_t(ctx.getQuota() / minQuotaPerCycle),
-      ctx.getStopCycle() - ctx.getCycle());
-  // Make sure we have enough room to log them all
-  if (ctx.getCycle() + maxCycles >= trace.inst.size()) {
-    trace.inst.resize(ctx.getCycle() + maxCycles);
+  if (execOnly) {
+    trace.inst.resize(1);
+  } else {
+    // Compute worst case cycle use
+    uint32_t maxCycles = std::min(
+        uint32_t(ctx.getQuota() / minQuotaPerCycle),
+        ctx.getStopCycle() - ctx.getCycle());
+    // Make sure we have enough room to log them all
+    if (ctx.getCycle() + maxCycles >= trace.inst.size()) {
+      trace.inst.resize(ctx.getCycle() + maxCycles);
+    }
   }
   // Set up context
   ctx.regs = regs;
   ctx.pageTable = (mode == MODE_MACHINE) ? memory.getPhysTable() : memory.getVirtTable();
-  ctx.log = trace.inst.data() + ctx.getCycle();
+  if (execOnly) {
+    ctx.log = trace.inst.data();
+  } else {
+    ctx.log = trace.inst.data() + ctx.getCycle();
+  }
   ctx.pageMissFunc = invokePageMiss;
   ctx.callbackObj = &memory;
   ctx.loadKeyBase = Memory::makeKey(0, mode, ACCESS_LOAD);
@@ -148,6 +156,7 @@ ExitCause BlockCache::run(uint32_t& pc) {
     fixAddr = ret >> 32;
     pc = ret & 0xffffffff;
     LOG(1, "  new PC = " << HexWord{pc} << ", new cycle = " << ctx.getCycle() << ", new quota = " << ctx.getQuota());
+    LOG(1, "  new log offset = " << (ctx.log - trace.inst.data()));
     // Maybe exit loop
     if (fixAddr == 0 && ExitCause(ctx.exitCause) != ExitCause::JALR) {
       return ExitCause(ctx.exitCause);
@@ -168,7 +177,11 @@ uint32_t BlockCache::jitBlockAt(uint32_t pc) {
     DecodeEntry* decode = fetchInst(pc);
     if (!decode) {
       // Handle page fault case
-      throw std::runtime_error("Unimplemented");
+      a.doCall(execOnly ? exec_details::gsym_fetch_fault: preflight_details::gsym_fetch_fault);
+      a.doLoadImm64(Reg::RAX, pc);
+      a.doRet();
+      // TODO: Cost?
+      break;
     }
     const auto& inst = decode->inst;
     LOG(2, "PC: " << HexWord{pc} << " - " << getOpcodeName(rv32im::Opcode(inst.opcode)) <<
@@ -244,7 +257,7 @@ DecodeEntry* BlockCache::fetchInst(uint32_t pc) {
 void BlockCache::undoTxn(MemTxn& save, uint32_t wordAddr) {
   uint32_t page = wordAddr >> MPAGE_SIZE_WORDS_PO2;
   uint32_t offset = wordAddr & MPAGE_MASK_WORDS;
-  PageDetails* data = memory.lookup(&ctx, page, mode, ACCESS_FETCH);
+  PageDetails* data = memory.lookup(page, mode, ACCESS_FETCH);
   (*data)[offset] = save;
 }
 
@@ -252,7 +265,7 @@ std::pair<bool, uint32_t> BlockCache::fetchWord(MemTxn& save, uint32_t wordAddr,
   uint32_t mmode = asMachine ? MODE_MACHINE : mode;
   uint32_t page = wordAddr >> MPAGE_SIZE_WORDS_PO2;
   uint32_t offset = wordAddr & MPAGE_MASK_WORDS;
-  PageDetails* data = memory.lookup(&ctx, page, mmode, ACCESS_FETCH);
+  PageDetails* data = memory.lookup(page, mmode, ACCESS_FETCH);
   if (!data) { return { false, 0 }; }
   save = (*data)[offset];
   (*data)[offset].cycle = 2*ctx.getCycle();

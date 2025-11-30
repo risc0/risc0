@@ -74,6 +74,8 @@ void loadFileIntoMemory(std::map<uint32_t, uint32_t>& words, const char* filenam
   }
 }
 
+extern FILE* pcFile;
+
 int main() {
   // Make an empty memory state
   std::map<uint32_t, uint32_t> words;
@@ -119,9 +121,12 @@ int main() {
   tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
   */
 
+  //pcFile = fopen("/tmp/pcs", "rb");
+
   // Run
   DebugHostIO io;
   LOG(0, "Executing");
+  size_t i = 0;
   while (true) {
     size_t rows = 1024 * 1024;
     std::vector<RowInfo> ri(rows);
@@ -129,7 +134,7 @@ int main() {
 #ifdef USE_JIT
     using namespace risc0::jit;
     JitTrace trace;
-    bool done = doJit(trace, image, io, rows, false);
+    bool done = doJit(trace, image, io, 500 * rows, false);
     LOG(0, "HEY, done = " << done);
     break;
 #else
@@ -138,5 +143,8 @@ int main() {
 #endif
     if (done)
       break;
+    i++;
+    if (i > 0) break;
   }
+  fclose(pcFile);
 }

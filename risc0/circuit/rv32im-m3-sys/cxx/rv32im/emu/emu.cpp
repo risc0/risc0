@@ -25,9 +25,9 @@
 
 #include "rv32im/base/opt.h"
 
-namespace risc0::rv32im {
-
 FILE* pcFile = nullptr;
+
+namespace risc0::rv32im {
 
 namespace {
 
@@ -164,7 +164,7 @@ struct Emulator {
     // TODO: Actually write
     PhysMemWriteWitness ignore;
     writePhysMemory(ignore, pteAddr/4, pte);
-    //LOG(0, "vPage=" << HexWord{vPage} << ", pPage=" << HexWord{(a >> 12)} << ", key=" << key);
+    LOG(0, "vPage=" << HexWord{vPage} << ", pPage=" << HexWord{(a >> 12)});
     return { true, a >> 12 };
   }
 
@@ -376,6 +376,9 @@ struct Emulator {
   }
 
   void doResume() {
+    if (pcFile) {
+      fwrite(&pc, sizeof(uint32_t), 1, pcFile);
+    }
     auto& wit = trace.makeInstResume();
     v2Compat = 1 - readPhysMemory(wit.v2Compat, CSR_WORD(MNOV2COMPAT));
     trace.getGlobals().v2Compat = v2Compat;
@@ -394,6 +397,9 @@ struct Emulator {
   }
 
   void doSuspend() {
+    if (pcFile) {
+      fwrite(&pc, sizeof(uint32_t), 1, pcFile);
+    }
     auto& wit = trace.makeInstSuspend();
     wit.cycle = curCycle;
     wit.iCacheCycle = iCacheCycle;
@@ -659,7 +665,7 @@ struct Emulator {
     if (doBr) {
       newPc = pc + wit.imm;
     }
-    bbhit[newPc]++;
+    //bbhit[newPc]++;
     DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{rs1Val});
     DLOG("  RS2 = " << uint32_t(dinst->rs2) << ", val = " << HexWord{rs2Val});
     DLOG("  NEW PC = " << HexWord{newPc});
@@ -674,7 +680,7 @@ struct Emulator {
     writeReg(wit.rd, dinst->rd, newPc);
     wit.imm = dinst->imm;
     newPc = pc + wit.imm;
-    bbhit[newPc]++;
+    //bbhit[newPc]++;
     DLOG("  RD = " << uint32_t(dinst->rd) << ", val = " << HexWord{wit.rd.value});
     DLOG("  PC = " << HexWord{pc});
   }
@@ -688,7 +694,7 @@ struct Emulator {
     writeReg(wit.rd, dinst->rd, newPc);
     wit.imm = dinst->imm;
     newPc = rs1Val + wit.imm;
-    bbhit[newPc]++;
+    //bbhit[newPc]++;
     DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", val = " << HexWord{wit.rs1.value});
     DLOG("  RD = " << uint32_t(dinst->rd) << ", val = " << HexWord{wit.rd.value});
     DLOG("  PC = " << HexWord{pc});
@@ -716,7 +722,7 @@ struct Emulator {
   template <uint32_t opt> inline void do_INST_ECALL() {
     if (mode != MODE_MACHINE) {
       trap("ECALL", TRAP_ECALL);
-      bbhit[newPc]++;
+      //bbhit[newPc]++;
       return;
     }
     uint32_t which = peekReg(REG_A7);
@@ -753,7 +759,7 @@ struct Emulator {
     uint32_t add = v2Compat ? 4 : 0;
     uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
     newPc = readPhysMemory(wit.readPc, mepcWord) + add;
-    bbhit[newPc]++;
+    //bbhit[newPc]++;
     uint32_t newMode = readPhysMemory(wit.readMode, CSR_WORD(MEMODE));
     writePhysMemory(wit.updateClearCache, CSR_WORD(MCLEARCACHE), 0);
     if (wit.updateClearCache.prevValue) {
@@ -1053,6 +1059,9 @@ struct Emulator {
     }
     dinst = decodeWit;
     trap("No decode trap", trapType);
+    if (pcFile) {
+      fwrite(&pc, sizeof(uint32_t), 1, pcFile);
+    }
     curCycle++;
     pc = newPc;
   }
@@ -1100,6 +1109,9 @@ struct Emulator {
       case Opcode::ANY:
         trap("INVALID INSTRUCTION", TRAP_INST);
       }
+      if (pcFile) {
+        fwrite(&pc, sizeof(uint32_t), 1, pcFile);
+      }
       curCycle++;
       pc = newPc;
     }
@@ -1132,6 +1144,7 @@ struct Emulator {
 
   void commit() { 
     memory.commit(pages);
+    /*
     std::map<uint32_t, uint32_t> uniqCount;
     std::map<uint32_t, uint32_t> totCount;
     for(const auto& kvp : bbhit) {
@@ -1142,6 +1155,7 @@ struct Emulator {
     for (size_t i = 0; i < 20; i++) {
       LOG(0, "PO2 " << i << ", uniq = " << uniqCount[i] << ", tot = " << totCount[i]);
     }
+    */
   }
 
   // The trace
@@ -1177,9 +1191,6 @@ struct Emulator {
 } // namespace
 
 bool emulate(Trace& trace, MemoryImage& image, HostIO& io, size_t rowCount) {
-  if (pcFile == nullptr) {
-    pcFile = fopen("/tmp/pcdata", "rb");
-  }
   Emulator emu(trace, image, io, rowCount);
   emu.addTables();
   bool done = emu.run(rowCount);

@@ -40,12 +40,12 @@ struct DecodeEntry {
 };
 
 struct AddrTranslateEntry {
-  uint32_t mode;
+  uint32_t key;
+  uint32_t loadCycle;
   uint32_t iCacheCycle;
-  uint32_t vpage;
-  uint32_t ppgae;
-  MemTxn load0;
-  MemTxn load1;
+  uint32_t ppage;
+  MemTxn loadInfo;
+  MemTxn loadPTE[2];
 };
 
 struct PageEntry {

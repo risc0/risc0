@@ -30,6 +30,8 @@ CTX_CYCLE_OFF = 32
 CTX_STOP_CYCLE_OFF = 40
 CTX_EXIT_CAUSE_OFF = 48
 CTX_PAGE_MISS_OFF = 56
+CTX_LOAD_KEY_OFF = 72
+CTX_STORE_KEY_OFF = 80
 
 # Offsets in the log
 LOG_PC_OFF = 8
@@ -47,6 +49,7 @@ EXIT_CAUSE_ALIGNMENT = 3
 EXIT_CAUSE_MRET = 4
 EXIT_CAUSE_JALR = 5
 EXIT_CAUSE_ANY = 6
+EXIT_CAUSE_FETCH = 7
 
 # A friendly macro to lookup map entries
 .macro MAP_LOOKUP_64 PO2
@@ -223,22 +226,22 @@ EXIT_CAUSE_ANY = 6
   # Save critival data back to context
 #if PREFLIGHT
   movq LOG, CTX_LOG_OFF(CTX)
-  movq CYCLE, CTX_CYCLE_OFF(CTX)
 #endif
+  movq CYCLE, CTX_CYCLE_OFF(CTX)
   push RDN  # Save RDN since I still need to write RD
   push %rax  # Save rax since it holds the full address
   push CTX  # Save CTX
   movq %rbx, %rsi  # Pass page up to c++
   call *%rdx
-  movq %rax, %rdx  # Move return value to ecx
+  movq %rax, %rdx  # Move return value to rdx
   pop CTX # Restore things
   pop %rax
   pop RDN
   # Reload things I need
   movq CTX_REGS_OFF(CTX), REGS
-#if PREFLIGHT
   movq CTX_LOG_OFF(CTX), LOG
   movq CTX_CYCLE_OFF(CTX), CYCLE
+#if PREFLIGHT
   movq $0x100000000, CYCLE_INC_VAL
 #else
   movq $0x200000000, CYCLE_INC_VAL
@@ -249,15 +252,17 @@ EXIT_CAUSE_ANY = 6
 # Given an address in %eax, puts the page ptr in %edx
 # Makes sure to not mess with %ecx since we need it
 # for SW (which reads RS2 there).  Trash rbx
-.macro RESOLVE_PAGE label_prefix
+.macro RESOLVE_PAGE label_prefix off
   mov %eax, %ebx  # Copy address to ebx
   shr $10, %ebx  # Shift, now we have the page #
-  orl $0xf0000000, %ebx  # Make into 'key' 
+  orl \off(CTX), %ebx # Make into key
   # Do map lookup
   MAP_LOOKUP_64 18
   cmp $0, %rdx  # Check if it's NULL
   jne .L\label_prefix\()_skip  # if not, we are good to go
   call .Lresolve_page  # Otherwise, resolve page via c++
+  cmp $0, %edx  # Check if still null and trap
+  je .Lpage_fault_trap
 .L\label_prefix\()_skip:
 .endm
 
@@ -273,7 +278,7 @@ EXIT_CAUSE_ANY = 6
   DO_IMM_PRE \opcode  # LOG rd, load RS1
   add IMM, %eax  # EAX is now the address to load from
   CHECK_ALIGNMENT \align_mask  # Jump to error if misaligned
-  RESOLVE_PAGE \label_prefix  # Load page ptr into %rdx
+  RESOLVE_PAGE \label_prefix CTX_LOAD_KEY_OFF # Load page ptr into %rdx
   mov %eax, %ecx  # Save address to ecx
   LOAD_WORD  # Load word into %eax
 #if PREFLIGHT
@@ -291,7 +296,7 @@ EXIT_CAUSE_ANY = 6
   mov %ecx, %r12d  # Squirel away in r12d (which is caller saved)
   add IMM, %eax  # EAX is now the address to load from
   CHECK_ALIGNMENT \align_mask  # Jump to error if misaligned
-  RESOLVE_PAGE \label_prefix  # Load page ptr into %rdx
+  RESOLVE_PAGE \label_prefix CTX_STORE_KEY_OFF # Load page ptr into %rdx
   mov %eax, %ecx  # Save address to ecx
   LOAD_WORD  # Load word into %eax
 #if PREFLIGHT
@@ -647,8 +652,15 @@ do_MRET:
 do_ANY:
   # Also handle ANY in emulator
   WRITE_INST $47
+#if !PREFLIGHT 
+  movl OINST, LOG_OINST_OFF(LOG) # Write original inst
+#endif
   movl PC, %eax
   movq $EXIT_CAUSE_ANY, CTX_EXIT_CAUSE_OFF(CTX)
+  ret 
+
+fetch_fault:
+  movq $EXIT_CAUSE_FETCH, CTX_EXIT_CAUSE_OFF(CTX)
   ret 
 
 block_header:
@@ -658,6 +670,12 @@ block_header:
 
 # Handle misalignment
 .Lalignment_trap:
+  movq $EXIT_CAUSE_ALIGNMENT, CTX_EXIT_CAUSE_OFF(CTX)
+  jmp .Lexit_exception
+
+.Lpage_fault_trap:
+  # Technically, we should maybe use a different code
+  # but the efect is the same
   movq $EXIT_CAUSE_ALIGNMENT, CTX_EXIT_CAUSE_OFF(CTX)
   jmp .Lexit_exception
 
@@ -673,8 +691,8 @@ block_header:
 .Lexit_exception:
 #if PREFLIGHT
   movq LOG, CTX_LOG_OFF(CTX)
-  movq CYCLE, CTX_CYCLE_OFF(CTX)
 #endif
+  movq CYCLE, CTX_CYCLE_OFF(CTX)
   add $24, %rsp  # Drop two stack frames + padding
   movq %r12, %rax  # Specify which IP we failed at
   # Restore callee save registers
@@ -699,9 +717,9 @@ enter:
   movq %rsi, %rax
   # Initialize local registers I care about
   movq CTX_REGS_OFF(CTX), REGS
-#if PREFLIGHT
   movq CTX_LOG_OFF(CTX), LOG
   movq CTX_CYCLE_OFF(CTX), CYCLE
+#if PREFLIGHT
   movq $0x100000000, CYCLE_INC_VAL
 #else
   movq $0x200000000, CYCLE_INC_VAL
@@ -712,8 +730,8 @@ enter:
   # Save data back to context
 #if PREFLIGHT
   movq LOG, CTX_LOG_OFF(CTX)
-  movq CYCLE, CTX_CYCLE_OFF(CTX)
 #endif
+  movq CYCLE, CTX_CYCLE_OFF(CTX)
   # Undo stack manipulations
   add $8, %rsp
   pop %r15
