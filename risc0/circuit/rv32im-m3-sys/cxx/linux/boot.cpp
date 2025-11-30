@@ -134,7 +134,7 @@ int main() {
 #ifdef USE_JIT
     using namespace risc0::jit;
     JitTrace trace;
-    bool done = doJit(trace, image, io, 500 * rows, false);
+    bool done = doJit(trace, image, io, 1024 * rows, false);
     LOG(0, "HEY, done = " << done);
     break;
 #else

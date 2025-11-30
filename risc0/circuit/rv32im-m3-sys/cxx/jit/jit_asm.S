@@ -677,6 +677,7 @@ block_header:
   # Technically, we should maybe use a different code
   # but the efect is the same
   movq $EXIT_CAUSE_ALIGNMENT, CTX_EXIT_CAUSE_OFF(CTX)
+  movl LOG_PC_OFF(LOG), %r12d
   jmp .Lexit_exception
 
 .Lcycles_empty:

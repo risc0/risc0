@@ -115,8 +115,10 @@ struct Jit {
     uint32_t fd = peek(MACHINE_REGS_WORD + REG_A0);
     uint32_t addr = peek(MACHINE_REGS_WORD + REG_A1);
     uint32_t len = peek(MACHINE_REGS_WORD + REG_A2);
-    LOG(0, "Ecall Read: " << fd << ", " << addr << ", " << len);
-    throw std::runtime_error("Unimplemented");
+    MemTxn ignore;
+    write(ignore, MACHINE_REGS_WORD + REG_A0, 0);
+    ctx.incCycle();
+    pc += 4;
   }
 
   void ecallWrite() {

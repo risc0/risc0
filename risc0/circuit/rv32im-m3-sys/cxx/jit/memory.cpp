@@ -161,15 +161,10 @@ uint32_t Memory::virtToPhys(uint32_t vpage, uint32_t mode, uint32_t access) {
   writePhysical(ignore, pteAddr/4, pte);
   if (err) {
     static uint32_t count = 0;
-    LOG(0, "Page translation error: vpage = " << HexWord{vpage} << ", mode = " << mode << ", access = " << access);
+    LOG(1, "Page translation error: vpage = " << HexWord{vpage} << ", mode = " << mode << ", access = " << access);
     undoTxn(entry.loadInfo, CSR_WORD(MVINFO));
     undoTxn(entry.loadPTE[0], saveAddr[0]);
     undoTxn(entry.loadPTE[1], saveAddr[1]);
-    setR0LogLevel(2);
-    count++;
-    if (count == 2) {
-      throw std::runtime_error("FAILED");
-    }
     return 0xffffffff;
   }
   entry.ppage = a >> 12;
