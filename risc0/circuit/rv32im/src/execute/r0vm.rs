@@ -20,7 +20,7 @@ use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::{
     platform::*,
-    poseidon2::{Poseidon2, Poseidon2State},
+    poseidon2::Poseidon2State,
     rv32im::{EmuContext, Emulator, Exception, InsnKind},
     sha2::{self, Sha2State},
 };
@@ -225,6 +225,12 @@ pub(crate) trait Risc0Context {
     fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State);
 
     fn ecall_bigint(&mut self) -> Result<()>;
+
+    fn ecall_poseidon2(&mut self) -> Result<()>;
+
+    fn on_ecall_read_end(&mut self, _read_bytes: u64, _read_words: u64) {}
+
+    fn on_ecall_write_end(&mut self) {}
 }
 
 #[cfg(test)]
@@ -348,6 +354,10 @@ impl Risc0Context for TestRisc0Context {
         _cur_state: CycleState,
         _p2: &super::poseidon2::Poseidon2State,
     ) {
+    }
+
+    fn ecall_poseidon2(&mut self) -> Result<()> {
+        unimplemented!()
     }
 
     fn ecall_bigint(&mut self) -> Result<()> {
@@ -488,8 +498,16 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             }
         }
 
+        let mut read_bytes = 0;
+        let mut read_words = 0;
+
         macro_rules! add_cycle {
             ($ptr:expr, $rlen:expr) => {{
+                if cur_state == CycleState::HostReadBytes {
+                    read_bytes += 1;
+                } else if cur_state == CycleState::HostReadWords {
+                    read_words += 1;
+                }
                 let next_state = next_io_state($ptr, $rlen);
                 self.ctx.on_ecall_cycle(
                     cur_state,
@@ -559,6 +577,8 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             add_cycle!(ptr, rlen);
         }
 
+        self.ctx.on_ecall_read_end(read_bytes, read_words);
+
         Ok(false)
     }
 
@@ -593,6 +613,8 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             0,
             EcallKind::Write,
         )?;
+        self.ctx.on_ecall_write_end();
+
         Ok(false)
     }
 
@@ -606,7 +628,7 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             0,
             EcallKind::Poseidon2,
         )?;
-        Poseidon2::ecall(self.ctx)?;
+        self.ctx.ecall_poseidon2()?;
         Ok(false)
     }
 

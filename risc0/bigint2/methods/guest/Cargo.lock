@@ -1132,7 +1132,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.11"
+version = "1.4.12"
 dependencies = [
  "include_bytes_aligned",
  "num-bigint",
@@ -1148,7 +1148,7 @@ dependencies = [
  "k256",
  "num-bigint",
  "num-bigint-dig",
- "risc0-bigint2 1.4.11",
+ "risc0-bigint2 1.4.12",
  "risc0-zkvm",
 ]
 
@@ -1259,7 +1259,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.2.1"
+version = "2.2.2"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
