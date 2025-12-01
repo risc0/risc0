@@ -160,13 +160,7 @@ pub struct PreflightResults {
 impl PreflightResults {
     /// The index of the [Segment] this [PreflightResults] came from.
     pub fn segment_index(&self) -> u32 {
-        cfg_if::cfg_if! {
-            if #[cfg(feature = "rv32im-m3")] {
-                0
-            } else {
-                self.segment_index
-            }
-        }
+        self.segment_index
     }
 
     /// The po2

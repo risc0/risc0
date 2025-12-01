@@ -427,6 +427,8 @@ impl<'a> ExecutorImpl<'a> {
             execution_time: Duration::from_secs(0), // DO NOT MERGE
         };
 
+        // XXX remi: For m3, these cycle counts no longer add up to the po2
+        #[cfg(not(feature = "rv32im-m3"))]
         assert_eq!(
             session.total_cycles,
             session.user_cycles + session.paging_cycles + session.reserved_cycles

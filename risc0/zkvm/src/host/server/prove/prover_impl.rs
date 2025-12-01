@@ -244,7 +244,8 @@ impl ProverServer for ProverImpl {
         tracing::debug!("segment_preflight");
         Ok(Box::new(rv32im_m3::PreflightIter::new(
             segment,
-            self.opts.max_prover_po2,
+            self.opts.max_segment_po2,
+            segment.index,
         )?))
     }
 
@@ -296,7 +297,7 @@ impl ProverServer for ProverImpl {
     ) -> Result<SegmentReceipt> {
         tracing::debug!("prove_preflight");
 
-        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(self.opts.max_prover_po2)?;
+        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(self.opts.max_segment_po2)?;
         let seal = prover.prove(&preflight_results.inner)?;
 
         let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output)
@@ -309,7 +310,7 @@ impl ProverServer for ProverImpl {
             .digest();
         let receipt = SegmentReceipt {
             seal,
-            index: 0,
+            index: preflight_results.segment_index,
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,
@@ -452,10 +453,15 @@ mod rv32im_m3 {
         output: Option<Output>,
         terminate_state: Option<TerminateState>,
         is_done: bool,
+        segment_index: u32,
     }
 
     impl PreflightIter {
-        pub(crate) fn new(segment: &Segment, max_prover_po2: usize) -> Result<Self> {
+        pub(crate) fn new(
+            segment: &Segment,
+            max_prover_po2: usize,
+            segment_index: u32,
+        ) -> Result<Self> {
             let ctx = risc0_circuit_rv32im_m3::prove::SegmentContext::new(&segment.inner)?;
             Ok(Self {
                 max_prover_po2,
@@ -463,6 +469,7 @@ mod rv32im_m3 {
                 output: segment.output.clone(),
                 terminate_state: segment.inner.claim.terminate_state,
                 is_done: false,
+                segment_index,
             })
         }
     }
@@ -482,6 +489,7 @@ mod rv32im_m3 {
                         inner: preflight,
                         terminate_state: self.terminate_state,
                         output: self.is_done.then(|| self.output.clone()).flatten(),
+                        segment_index: self.segment_index,
                     };
                     Some(Ok(results))
                 }

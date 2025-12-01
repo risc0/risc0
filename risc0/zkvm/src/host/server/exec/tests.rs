@@ -118,7 +118,13 @@ fn basic() {
 
 #[test_log::test]
 fn system_split_v2() {
-    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
+    #[cfg(feature = "rv32im-m3")]
+    const ITERATIONS: u32 = 10_000;
+
+    #[cfg(not(feature = "rv32im-m3"))]
+    const ITERATIONS: u32 = 200;
+
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(ITERATIONS);
     let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 

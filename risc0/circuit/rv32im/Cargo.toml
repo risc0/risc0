@@ -52,6 +52,7 @@ risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 smallvec = { version = "1.13", optional = true }
 wide = { version = "0.7", optional = true }
+risc0-circuit-rv32im-m3-sys = { workspace = true, optional = true }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 gpu-guard = { workspace = true }
@@ -96,6 +97,7 @@ prove = [
   "execute",
   "risc0-zkp/prove",
 ]
+rv32im-m3 = ["dep:risc0-circuit-rv32im-m3-sys"]
 std = [
   "anyhow/std",
   "derive_more/std",
@@ -104,3 +106,4 @@ std = [
   "serde/std",
 ]
 witgen_debug = []
+block_tracker_debug = []

@@ -29,6 +29,9 @@ mod syscall;
 mod tests;
 pub mod testutil;
 
+#[cfg(feature = "rv32im-m3")]
+mod block_tracker;
+
 pub use self::{
     bigint::analyze::analyze as bigint_analyze,
     executor::{

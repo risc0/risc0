@@ -708,6 +708,10 @@ impl Risc0Context for Preflight<'_> {
         self.user_cycles += 1;
     }
 
+    fn ecall_poseidon2(&mut self) -> Result<()> {
+        Poseidon2::load_ecall(self)?.rest(self, CycleState::Decode)
+    }
+
     fn ecall_bigint(&mut self) -> Result<()> {
         super::bigint::ecall_preflight(self)
     }
