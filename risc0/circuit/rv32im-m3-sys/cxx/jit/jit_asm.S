@@ -107,21 +107,19 @@ EXIT_CAUSE_FETCH = 7
 .macro WRITE_INST, INST  # Write instruction info to the loga
   cmpq CTX_STOP_CYCLE_OFF(CTX), CYCLE
   jae .Lcycles_empty
-#if PREFLIGHT 
+#if PREFLIGHT
   movb \INST, (LOG)  # Write opcode
   movb %r8b, 1(LOG)  # Write RD
   movb %r9b, 2(LOG)  # Write RS1
   movb %r10b, 3(LOG)  # Write RS2
   movl IMM, 4(LOG)  # Write IMM
+#endif
   movl PC, LOG_PC_OFF(LOG) # Write PC
   movl OINST, LOG_OINST_OFF(LOG) # Write original inst
-#endif
 .endm
 
 .macro INC_CYCLE  # Incement cycle #
-#if PREFLIGHT
   addq CYCLE_INC_VAL, CYCLE  # Inc cycle
-#endif
 .endm
 
 .macro LOG_OLD_RD  # Log orignal RD value (for things that write to RD)
@@ -161,11 +159,9 @@ EXIT_CAUSE_FETCH = 7
 .endm
 
 .macro INST_END
-#if PREFLIGHT
   INC_CYCLE  # Add final cycle
+#if PREFLIGHT
   add $LOG_SIZE, LOG  # Move log forward
-#else
-  addq CYCLE_INC_VAL, CYCLE  # Inc cycle
 #endif
   ret  # Return from instruction
 .endm
@@ -241,11 +237,7 @@ EXIT_CAUSE_FETCH = 7
   movq CTX_REGS_OFF(CTX), REGS
   movq CTX_LOG_OFF(CTX), LOG
   movq CTX_CYCLE_OFF(CTX), CYCLE
-#if PREFLIGHT
   movq $0x100000000, CYCLE_INC_VAL
-#else
-  movq $0x200000000, CYCLE_INC_VAL
-#endif
   movq CTX_PAGES_OFF(CTX), PAGES
   ret
 
@@ -305,8 +297,8 @@ EXIT_CAUSE_FETCH = 7
 .endm
 
 .macro DO_STORE_POST
-#if PREFLIGHT
   INC_CYCLE  # Move to the 'write' cycle
+#if PREFLIGHT
   mov %eax, %eax  # Clear top bits
   orq CYCLE, %rax  # Update cycle #
 #endif
@@ -652,9 +644,6 @@ do_MRET:
 do_ANY:
   # Also handle ANY in emulator
   WRITE_INST $47
-#if !PREFLIGHT 
-  movl OINST, LOG_OINST_OFF(LOG) # Write original inst
-#endif
   movl PC, %eax
   movq $EXIT_CAUSE_ANY, CTX_EXIT_CAUSE_OFF(CTX)
   ret 
@@ -720,11 +709,7 @@ enter:
   movq CTX_REGS_OFF(CTX), REGS
   movq CTX_LOG_OFF(CTX), LOG
   movq CTX_CYCLE_OFF(CTX), CYCLE
-#if PREFLIGHT
   movq $0x100000000, CYCLE_INC_VAL
-#else
-  movq $0x200000000, CYCLE_INC_VAL
-#endif
   movq CTX_PAGES_OFF(CTX), PAGES
   # Call into basic block, which will jump around + return
   call *%rax 

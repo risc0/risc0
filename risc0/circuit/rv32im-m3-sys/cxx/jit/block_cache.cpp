@@ -191,7 +191,11 @@ uint32_t BlockCache::jitBlockAt(uint32_t pc) {
     LOG(2, "inst = " << HexWord{decode->oinst} << ", newPc = " << HexWord{newPc});
     a.doLoadImm32(Reg::R8, (inst.rd == 0 ? 64 : inst.rd));
     a.doLoadImm32(Reg::R9, inst.rs1);
-    a.doLoadImm32(Reg::R10, (inst.rs1 == inst.rs2) ? inst.rs2 + 64 : inst.rs2);;
+    if (execOnly) {
+      a.doLoadImm32(Reg::R10, inst.rs2);
+    } else {
+      a.doLoadImm32(Reg::R10, (inst.rs1 == inst.rs2) ? inst.rs2 + 64 : inst.rs2);
+    }
     a.doLoadImm32(Reg::R11, inst.imm);
     a.doLoadImm32(Reg::R12, pc);
     a.doLoadImm32(Reg::RDX, decode->oinst);
