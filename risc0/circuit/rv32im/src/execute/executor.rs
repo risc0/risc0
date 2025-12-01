@@ -29,6 +29,7 @@ use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
 use risc0_zkp::core::{
     digest::{DIGEST_BYTES, Digest},
+    hash::poseidon2::ROUNDS_HALF_FULL,
     log2_ceil,
 };
 
@@ -37,7 +38,7 @@ use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
 use crate::{
     EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
-    execute::rv32im::disasm,
+    execute::{poseidon2::Poseidon2, rv32im::disasm},
     trace::{TraceCallback, TraceEvent},
 };
 
@@ -755,14 +756,28 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(())
     }
 
-    #[cfg(feature = "rv32im-m3")]
-    fn on_ecall_read_end(&mut self, read_bytes: u64, read_words: u64) {
-        self.block_tracker.track_ecall_read(read_bytes, read_words);
+    fn ecall_poseidon2(&mut self) -> Result<()> {
+        let mut p2 = Poseidon2::load_ecall(self)?;
+
+        #[cfg(feature = "rv32im-m3")]
+        self.block_tracker.track_ecall_poseidon2(p2.count);
+
+        p2.rest_with_mix(self, CycleState::Decode, |p2, _, ctx| {
+            ctx.inc_user_cycles(ROUNDS_HALF_FULL * 2 + 1, Some(EcallKind::Poseidon2));
+            // Convert to Montgomery form, run the mix function, then convert back.
+            // NOTE: It's possible this could be optimized to not convert the back and forth on
+            // every mix, and instead only convert the input, initial state and final state.
+            // However, it does not seem that this conversion has a significant impact.
+            let mut state = p2.inner.map(Into::into);
+            risc0_zkp::core::hash::poseidon2::poseidon2_mix(&mut state);
+            p2.inner = state.map(Into::into);
+            Ok(())
+        })
     }
 
     #[cfg(feature = "rv32im-m3")]
-    fn on_ecall_poseidon2_end(&mut self, block_count: u64) {
-        self.block_tracker.track_ecall_poseidon2(block_count);
+    fn on_ecall_read_end(&mut self, read_bytes: u64, read_words: u64) {
+        self.block_tracker.track_ecall_read(read_bytes, read_words);
     }
 
     #[cfg(feature = "rv32im-m3")]
