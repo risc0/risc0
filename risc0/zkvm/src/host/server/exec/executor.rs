@@ -13,7 +13,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use core::iter::FusedIterator;
 use std::{
     cell::{Cell, RefCell},
     io::Read,
