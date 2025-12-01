@@ -181,7 +181,7 @@ This project is dual-licensed under either:
 [actions-badge]: https://img.shields.io/github/actions/workflow/status/risc0/risc0/main.yml?branch=main
 [actions-url]: https://github.com/risc0/risc0/actions?query=workflow%3ACI+branch%3Amain
 [cargo-risczero-readme]: https://github.com/risc0/risc0/blob/main/risc0/cargo-risczero/README.md
-[crates-badge]: https://img.shields.io/badge/crates.io-v2.0-orange
+[crates-badge]: https://img.shields.io/crates/v/risc0-zkvm.svg
 [crates-url]: https://crates.io/crates/risc0-zkvm
 [crates.io]: https://crates.io
 [discord-badge]: https://img.shields.io/discord/953703904086994974.svg?logo=discord&style=flat-square
