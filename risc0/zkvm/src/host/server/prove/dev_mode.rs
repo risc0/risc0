@@ -179,7 +179,6 @@ impl ProverServer for DevModeProver {
             inner: Default::default(),
             terminate_state: segment.inner.claim.terminate_state,
             output: segment.output.clone(),
-            #[cfg(not(feature = "rv32im-m3"))]
             segment_index: segment.index,
         };
 
