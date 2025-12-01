@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "RecordingVal.h"
 #include "compiler/extractor/RecordingContext.h"
 
 class PicusDeclareInputVisitor {
@@ -35,7 +36,7 @@ public:
     }
   }
 
-  static void apply(RecordingContext& ctx, RecordingReg& x);
+  static void apply(RecordingContext& ctx, RecordingVal& x);
 };
 
 template <typename Component> void picusInput(RecordingContext& ctx, Component component) {

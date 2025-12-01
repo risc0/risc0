@@ -110,6 +110,7 @@ template <typename C> struct AddressVerify {
   RegU16<C> highSub;
 
   template <typename T> FDEV void applyInner(CTX, ValU32<C> val, Val<C> mode) DEV {
+    T::apply(ctx, "isMM", isMM);
     T::apply(ctx, "highSub", highSub);
   }
 
