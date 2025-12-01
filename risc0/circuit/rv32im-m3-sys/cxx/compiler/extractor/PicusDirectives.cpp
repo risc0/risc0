@@ -14,13 +14,14 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #include "compiler/extractor/PicusDirectives.h"
+#include "RecordingVal.h"
 #include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
 
 using namespace mlir;
 
-void PicusDeclareInputVisitor::apply(RecordingContext& ctx, RecordingReg& x) {
+void PicusDeclareInputVisitor::apply(RecordingContext& ctx, RecordingVal& x) {
   OpBuilder& builder = *BuilderSingleton::get();
-  SmallVector<Value> args = {x.val.value};
+  SmallVector<Value> args = {x.value};
   builder.create<zirgen::Zhlt::DirectiveOp>(builder.getUnknownLoc(), "PicusInput", args);
 }
 

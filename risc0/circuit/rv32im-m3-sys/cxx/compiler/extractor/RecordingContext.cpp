@@ -14,6 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #include "compiler/extractor/RecordingContext.h"
+#include "RecordingContext.h"
 #include "compiler/extractor/RecordingVal.h"
 #include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
 #include <mlir/Dialect/Arith/IR/Arith.h>
@@ -28,6 +29,16 @@ RecordingContext::RecordingContext(MLIRContext* mlirCtx) : mlirCtx(mlirCtx), bui
   mlirCtx->getOrLoadDialect<zirgen::Zll::ZllDialect>();
   moduleOp = mlir::ModuleOp::create(builder.getUnknownLoc());
   builder.setInsertionPointToEnd(moduleOp.getBody());
+}
+
+RecordingVal RecordingContext::globalGet(uint32_t entry) {
+  // TODO: multiple gets of the same global should return the same value, but
+  // we never actually do this in practice.
+  auto loc = builder.getUnknownLoc();
+  auto ref = zirgen::ZStruct::getRefType(builder.getContext());
+  auto global = builder.create<zirgen::Zhlt::GetGlobalLayoutOp>(loc, ref, std::to_string(entry));
+  auto val = builder.create<zirgen::ZStruct::LoadOp>(loc, global.getResult(), zero);
+  return RecordingVal(val.getResult());
 }
 
 void RecordingContext::enterComponent(const char* name, mlir::Type layoutType) {
@@ -71,53 +82,4 @@ RecordingVal RecordingContext::addValParameter() {
   auto pos = componentBody->getNumArguments() - 1;
   mlir::Value param = componentBody->insertArgument(pos, val, builder.getUnknownLoc());
   return RecordingVal(param);
-}
-
-RecordingVal RecordingContext::getNextRef() {
-  assert(componentBody && "adding parameter without a component");
-  mlir::Value ref =
-      builder
-          .create<mlir::UnrealizedConversionCastOp>(
-              builder.getUnknownLoc(), zirgen::Zll::ValType::get(mlirCtx), ValueRange{})
-          .getResult(0);
-  refs.push_back(ref);
-  return ref;
-}
-
-void RecordingContext::unifyRefsIntoLayout(mlir::Value layout, size_t& i) {
-  assert(i < refs.size() && "there should be the same number of refs in the context and layout");
-
-  if (isa<zirgen::ZStruct::RefType>(layout.getType())) {
-    mlir::Value val =
-        builder.create<zirgen::ZStruct::LoadOp>(builder.getUnknownLoc(), layout, zero);
-    refs[i].replaceAllUsesWith(val);
-    refs[i].getDefiningOp()->erase();
-    i++;
-  } else if (auto str = dyn_cast<zirgen::ZStruct::LayoutType>(layout.getType())) {
-    for (auto field : str.getFields()) {
-      mlir::Value sublayout =
-          builder.create<zirgen::ZStruct::LookupOp>(builder.getUnknownLoc(), layout, field.name);
-      unifyRefsIntoLayout(sublayout, i);
-    }
-  } else if (auto arr = dyn_cast<zirgen::ZStruct::LayoutArrayType>(layout.getType())) {
-    for (size_t j = 0; j < arr.getSize(); j++) {
-      auto index = builder.create<arith::ConstantIndexOp>(builder.getUnknownLoc(), j);
-      mlir::Value sublayout =
-          builder.create<zirgen::ZStruct::SubscriptOp>(builder.getUnknownLoc(), layout, index);
-      unifyRefsIntoLayout(sublayout, i);
-    }
-  } else {
-    assert(false && "unrecognized layout type");
-  }
-}
-
-void RecordingContext::materializeLayout(mlir::Type layoutType) {
-  assert(componentBody && "materializing layout of a component that doesn't exist");
-
-  mlir::Value layout = componentBody->addArgument(layoutType, builder.getUnknownLoc());
-  builder.setInsertionPointAfter(refs.back().getDefiningOp());
-  size_t i = 0;
-  unifyRefsIntoLayout(layout, i);
-  builder.setInsertionPointToEnd(&componentBody->back());
-  refs.clear();
 }

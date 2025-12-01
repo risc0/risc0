@@ -249,6 +249,7 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
 }
 
 template <typename C> FDEV void DecodeBlock<C>::addArguments(CTX) DEV {
+  // PC, iCacheCycle, cycle are inputs assumed to be deterministic.
   ctx.pull(LookupArgument<C>(2, (fetch.loadCycle.get() - fetch.iCacheCycle.get()) * 2));
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();

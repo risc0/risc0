@@ -18,6 +18,7 @@
 #include "compiler/extractor/RecordingVal.h"
 #include "zirgen/Dialect/ZHLT/IR/ZHLT.h"
 #include <mlir/IR/MLIRContext.h>
+#include <string>
 // #include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
 
 #define ZIRGEN
@@ -72,13 +73,8 @@ struct RecordingContext {
   inline void tableAdd(uint32_t entry, uint32_t val) {}
   inline uint32_t tableGet(uint32_t offset) { return 0; }
 
-  void globalSet(uint32_t entry, RecordingVal val) {
-    // TODO: Actual do a global set here
-  }
-  RecordingVal globalGet(uint32_t entry) {
-    // TODO: Actually do a global get
-    return RecordingVal(uint64_t(0));
-  }
+  void globalSet(uint32_t entry, RecordingVal val) {}
+  RecordingVal globalGet(uint32_t entry);
   RecordingVal getX() {
     // TODO: Add support for 'x' in zirgen + existing proof system
     return RecordingVal(uint64_t(0));
@@ -90,12 +86,13 @@ struct RecordingContext {
   void exitComponent();
 
   RecordingVal addValParameter();
-  RecordingVal getNextRef();
-
-  void materializeLayout(mlir::Type layoutType);
 
   template <typename Component> mlir::Value get(Component& component) {
     return componentIRMap.get<Component>(&component);
+  }
+
+  template <> mlir::Value get<RecordingVal>(RecordingVal& component) {
+    return component.value;
   }
 
   mlir::MLIRContext* mlirCtx;
@@ -105,15 +102,9 @@ struct RecordingContext {
   const char* componentName;
 
   // private:
-  void unifyRefsIntoLayout(mlir::Value layout, size_t& i);
-
   // A temporary region on `moduleOp` that holds the body of a component being
   // built until `exitComponent` is called
   mlir::Region* componentBody;
-
-  // A flattened list of all `ref`s that will ultimately be contained in the
-  // component's layout
-  std::vector<mlir::Value> refs;
 
   // The index 0 used for load ops
   mlir::Value zero;
