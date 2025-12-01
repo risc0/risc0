@@ -1,4 +1,5 @@
 .text
+.intel_syntax noprefix
 
 .equ REG_R8, 0
 .equ REG_R9, 1
@@ -35,32 +36,32 @@ jit_fault_handler:
   # making RSP % 16 == 0 in the callee).
   #
   # This ensures (rsp % 16) == 8 before the call.
-  sub $8, %rsp
+  sub rsp, 8
 
   call jit_fault_slow
 
   # need to restore:
   # rax, rdi, rsi, r8, r9, r10, r11, r12, r13, r14, r15
-  mov  REG_R8*8(%rax), %r8
-  mov  REG_R9*8(%rax), %r9
-  mov REG_R10*8(%rax), %r10
-  mov REG_R11*8(%rax), %r11
-  mov REG_R12*8(%rax), %r12
-  mov REG_R13*8(%rax), %r13
-  mov REG_R14*8(%rax), %r14
-  mov REG_R15*8(%rax), %r15
-  mov REG_RDI*8(%rax), %rdi
-  mov REG_RSI*8(%rax), %rsi
+  mov r8, QWORD [rax + REG_R8 * 8]
+  mov r9, QWORD [rax + REG_R9 * 8]
+  mov r10, [rax + REG_R10 * 8]
+  mov r11, [rax + REG_R11 * 8]
+  mov r12, [rax + REG_R12 * 8]
+  mov r13, [rax + REG_R13 * 8]
+  mov r14, [rax + REG_R14 * 8]
+  mov r15, [rax + REG_R15 * 8]
+  mov rdi, [rax + REG_RDI * 8]
+  mov rsi, [rax + REG_RSI * 8]
 
   # Restore the stack pointer
-  mov REG_RSP*8(%rax), %rsp
+  mov rsp, [rax + REG_RSP * 8]
 
   # Load RIP into RDX so we can jump into it
-  mov REG_RIP*8(%rax), %rdx
+  mov rdx, [rax + REG_RIP * 8]
 
   # Restore RAX last since it's used as the base pointer
-  mov REG_RAX*8(%rax), %rax
+  mov rax, [rax + REG_RAX * 8]
 
   # It's safe to trash RDX because this should only happen in the context of a
   # load/store and RDX is unused.
-  jmp %rdx
+  jmp rdx

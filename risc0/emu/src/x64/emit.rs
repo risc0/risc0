@@ -57,17 +57,17 @@ macro_rules! binop {
     ($self:tt, $op:ident, $dst:expr, $src:expr) => {
         match ($src, $dst) {
             (_, Loc::Zero) => {},
-            (Loc::Imm32(imm), Loc::GPR(dst)) => {
-                emit!($self ; $op Rd(dst), imm as i32);
-            },
             (Loc::Zero, Loc::GPR(dst)) => {
                 emit!($self ; $op Rd(dst), 0);
             },
-            (Loc::Imm32(imm), Loc::Memory(dst, disp)) => {
-                emit!($self ; $op DWORD [Rq(dst) + disp], imm as i32);
-            },
             (Loc::Zero, Loc::Memory(dst, disp)) => {
                 emit!($self ; $op DWORD [Rq(dst) + disp], 0);
+            },
+            (Loc::Imm32(imm), Loc::GPR(dst)) => {
+                emit!($self ; $op Rd(dst), imm as i32);
+            },
+            (Loc::Imm32(imm), Loc::Memory(dst, disp)) => {
+                emit!($self ; $op DWORD [Rq(dst) + disp], imm as i32);
             },
             (Loc::GPR(src), Loc::GPR(dst)) => {
                 emit!($self ; $op Rd(dst), Rd(src));
@@ -828,21 +828,29 @@ impl Translator {
             return;
         }
 
-        // load [rs2] into rcx
-        match rs2 {
-            Loc::GPR(rs2) => emit!(self ; mov ecx, [Rd(rs2)]),
-            Loc::Memory(rs2, disp) => emit!(self ; mov ecx, [Rd(rs2) + disp]),
-            Loc::Zero => emit!(self ; xor ecx, ecx),
-            _ => unreachable!(),
-        }
-
         // load rs1 into rax
         self.emit_lea(GPR::RAX, Some(GPR::R15), rs1, imm);
 
-        match size {
-            Size::S8 => emit!(self ; mov BYTE [rax], cl),
-            Size::S16 => emit!(self ; mov WORD [rax], cx),
-            Size::S32 => emit!(self ; mov DWORD [rax], ecx),
+        match rs2 {
+            Loc::GPR(rs2) => match size {
+                Size::S8 => emit!(self ; mov BYTE [rax], Rb(rs2)),
+                Size::S16 => emit!(self ; mov WORD [rax], Rw(rs2)),
+                Size::S32 => emit!(self ; mov DWORD [rax], Rd(rs2)),
+            },
+            Loc::Memory(rs2, disp) => {
+                emit!(self ; mov ecx, DWORD [Rq(rs2) + disp]);
+                match size {
+                    Size::S8 => emit!(self ; mov BYTE [rax], cl),
+                    Size::S16 => emit!(self ; mov WORD [rax], cx),
+                    Size::S32 => emit!(self ; mov DWORD [rax], ecx),
+                }
+            }
+            Loc::Zero => match size {
+                Size::S8 => emit!(self ; mov BYTE [rax], 0),
+                Size::S16 => emit!(self ; mov WORD [rax], 0),
+                Size::S32 => emit!(self ; mov DWORD [rax], 0),
+            },
+            _ => unreachable!(),
         }
     }
 
@@ -887,7 +895,6 @@ impl Translator {
     }
 
     fn step_store(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
-        todo!();
         self.trace(op, &insn);
         let (rs1, rs2, imm) = (insn.rs1_loc(), insn.rs2_loc(), insn.imm_s());
         match op {
@@ -1151,15 +1158,15 @@ mod tests {
         "mov [r15+rsi+8],dl"
     ])]
     #[case(Size::S32, Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), 8, &[
-        "mov ecx,[ebx+8]",
         "mov eax,[rbx+4]",
         "lea rax,[r15+rax+8]",
+        "mov ecx,[rbx+8]",
         "mov [rax],ecx",
     ])]
     #[case(Size::S8, Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), 8, &[
-        "mov ecx,[ebx+8]",
         "mov eax,[rbx+4]",
         "lea rax,[r15+rax+8]",
+        "mov ecx,[rbx+8]",
         "mov [rax],cl",
     ])]
     #[test_log::test]
