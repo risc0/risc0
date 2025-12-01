@@ -54,6 +54,7 @@ bonsai-sdk = { version = "1.4.2", default-features = false, path = "bonsai/sdk" 
 gpu-guard = { path = "tools/gpu-guard" }
 hotbench = { path = "tools/hotbench" }
 metal = "0.29"
+risc0-bigint2 = { version = "1.4.12", default-features = false, path = "risc0/bigint2" }
 risc0-bigint2-methods = { path = "risc0/bigint2/methods" }
 risc0-binfmt = { version = "5.0.0", default-features = false, path = "risc0/binfmt" }
 risc0-build = { version = "4.0.0", default-features = false, path = "risc0/build" }
@@ -73,7 +74,7 @@ risc0-povw = { default-features = false, path = "risc0/povw" }
 risc0-r0vm = { version = "4.0.0", default-features = false, path = "risc0/r0vm" }
 risc0-sppark = { version = "0.1.14", path = "vendor/sppark" }
 risc0-sys = { version = "5.0.0", default-features = false, path = "risc0/sys" }
-risc0-zkos-v1compat = { version = "2.2.1", path = "risc0/zkos/v1compat" }
+risc0-zkos-v1compat = { version = "2.2.2", path = "risc0/zkos/v1compat" }
 risc0-zkp = { version = "5.0.0", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "4.0.0", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-platform = { version = "2.3.0", default-features = false, path = "risc0/zkvm/platform" }
