@@ -21,6 +21,8 @@ use std::{
 
 use anyhow::{Result, anyhow};
 
+include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+
 #[repr(C)]
 pub struct SegmentContext {
     _private: (),
