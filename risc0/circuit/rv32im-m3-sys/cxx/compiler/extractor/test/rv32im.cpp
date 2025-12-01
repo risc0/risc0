@@ -27,8 +27,11 @@ int main() {
 
   extract1<IsZero>(ctx);
 
-  // EXTRACT(IsZero);
-  EXTRACT(InstRegBlock);
+  // EXTRACT(InstRegBlock); // TODO
+  // EXTRACT(InstImmBlock);
+  EXTRACT(InstLoadBlock); // TODO
+  // EXTRACT(InstJalBlock);
+  // EXTRACT(InstJalrBlock);
   // EXTRACT(UnitAddSubBlock);
   // EXTRACT(UnitBitBlock);
   // EXTRACT(UnitMulBlock);
@@ -42,7 +45,7 @@ int main() {
     return 1;
   }
 
-  llvm::outs() << ctx.getModuleOp() << "\n\n";
+  // llvm::outs() << ctx.getModuleOp() << "\n\n";
   printPicus(ctx.getModuleOp(), llvm::outs());
 
   // llvm::outs() << "(begin-module UnitArgument)\n"
