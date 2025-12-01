@@ -385,7 +385,6 @@ impl Translator {
             guest_size: GUEST_RAM_SIZE,
             fault_addr: ptr::null_mut(),
             gregs: [0; 23],
-            have_pending_fault: false,
         };
         VM_STATE.with(|tls| {
             *tls.borrow_mut() = Some(state);
@@ -494,7 +493,6 @@ struct VmState {
     guest_size: usize,
     fault_addr: *mut u8,
     gregs: [i64; 23],
-    have_pending_fault: bool,
 }
 
 // Thread-local pointer to VmState for the current thread.
@@ -506,9 +504,6 @@ thread_local! {
 // Install-once guard for SIGSEGV handler.
 static INSTALL_SEGV_ONCE: Once = Once::new();
 
-// Store old handler to chain for non-guest faults, if you want to be fancy later.
-// static mut OLD_SEGV: sigaction = unsafe { std::mem::zeroed() };
-
 /// Ensure SIGSEGV handler is installed once.
 fn ensure_segv_handler_installed() {
     INSTALL_SEGV_ONCE.call_once(install_segv_handler);
@@ -516,25 +511,15 @@ fn ensure_segv_handler_installed() {
 
 /// Install a SA_SIGINFO SIGSEGV handler using libc::sigaction.
 fn install_segv_handler() {
-    extern "C" fn handler(sig: c_int, info: *mut siginfo_t, uctx: *mut c_void) {
-        unsafe { segv_trampoline(sig, info, uctx) };
-    }
-
     let mut sa: sigaction = unsafe { std::mem::zeroed() };
-    sa.sa_sigaction = handler as usize;
+    sa.sa_sigaction = segv_trampoline as usize;
     sa.sa_flags = SA_SIGINFO;
 
     unsafe { sigemptyset(&mut sa.sa_mask) };
 
-    // let mut old: sigaction = unsafe { std::mem::zeroed() };
-    let res = unsafe { sigaction(libc::SIGSEGV, &sa, ptr::null_mut()) };
-    if res != 0 {
+    if unsafe { sigaction(libc::SIGSEGV, &sa, ptr::null_mut()) } != 0 {
         panic!("sigaction(SIGSEGV) failed");
     }
-
-    // unsafe {
-    //     OLD_SEGV = old;
-    // }
 
     tracing::info!("SIGSEGV handler installed");
 }
@@ -567,6 +552,10 @@ fn debug_hex(label: &str, value: usize) {
 /// - stash fault info in per-thread VmState
 /// - patch RIP to jit_fault_handler
 unsafe fn segv_trampoline(sig: c_int, info: *mut siginfo_t, uctx: *mut c_void) {
+    unsafe extern "C" {
+        fn jit_fault_handler();
+    }
+
     VM_STATE.with_borrow_mut(|vm_state| {
         if let Some(vm_state) = vm_state {
             let fault_addr = unsafe { (&*info).si_addr() } as *mut u8;
@@ -586,22 +575,10 @@ unsafe fn segv_trampoline(sig: c_int, info: *mut siginfo_t, uctx: *mut c_void) {
             }
 
             let uctx = unsafe { &mut *(uctx as *mut ucontext_t) };
-            vm_state.have_pending_fault = true;
             vm_state.fault_addr = fault_addr;
             vm_state.gregs = uctx.uc_mcontext.gregs;
 
-            unsafe extern "C" {
-                fn jit_fault_handler();
-            }
-
-            uctx.uc_mcontext.gregs[libc::REG_RIP as usize] =
-                jit_fault_handler as usize as libc::greg_t;
-
-            // let page_base = (fault_addr as usize & !(HOST_PAGE_SIZE - 1)) as *mut c_void;
-            // if unsafe { mprotect(page_base, HOST_PAGE_SIZE, PROT_READ | PROT_WRITE) } != 0 {
-            //     tracing::error!("mprotect failed");
-            //     default_handler(sig);
-            // }
+            uctx.uc_mcontext.gregs[libc::REG_RIP as usize] = jit_fault_handler as usize as _;
         } else {
             default_handler(sig);
         }
