@@ -221,12 +221,10 @@ const MAX_QUOTA: u32 = 1_000_000;
 const QUOTA_OFFSET: usize = offset_of!(JitContext, quota);
 const RAM_OFFSET: usize = offset_of!(JitContext, ram);
 const REGISTERS_OFFSET: usize = offset_of!(JitContext, registers);
-// const PGTBL_OFFSET: usize = offset_of!(JitContext, page_table);
 const GUEST_RAM_SIZE: usize = 1 << 32; // 4GB
 
 const QUOTA_REL_OFFSET: i32 = QUOTA_OFFSET as i32 - REGISTERS_OFFSET as i32;
 const RAM_REL_OFFSET: i32 = RAM_OFFSET as i32 - REGISTERS_OFFSET as i32;
-// const PGTBL_REL_OFFSET: i32 = PGTBL_OFFSET as i32 - REGISTERS_OFFSET as i32;
 
 const NUM_PAGES: usize = 4 * 1024 * 1024;
 const INVALID_IDX: u32 = 0;
@@ -269,7 +267,6 @@ impl Machine {
             word_slice[addr as usize / 4] = word;
         }
 
-        let page_table = vec![INVALID_IDX; NUM_PAGES];
         Ok(Self {
             ctx: JitContext {
                 pc: program.entry,
@@ -316,6 +313,7 @@ struct Translator {
 
 const HOST_WORD_SIZE: usize = usize::BITS as usize / 8;
 const HOST_PAGE_SIZE: usize = 4096;
+const GUEST_PAGE_SIZE: usize = 1024;
 
 const CALLEE_REGISTERS: &[GPR] = &[GPR::RBX, GPR::RBP, GPR::R12, GPR::R13, GPR::R14, GPR::R15];
 const STACK_SPACE: usize = CALLEE_REGISTERS.len() * HOST_WORD_SIZE;
@@ -579,6 +577,7 @@ unsafe fn segv_trampoline(sig: c_int, info: *mut siginfo_t, uctx: *mut c_void) {
             vm_state.gregs = uctx.uc_mcontext.gregs;
 
             uctx.uc_mcontext.gregs[libc::REG_RIP as usize] = jit_fault_handler as usize as _;
+            uctx.uc_mcontext.gregs[libc::REG_RDI as usize] = vm_state as *const VmState as i64;
         } else {
             default_handler(sig);
         }
@@ -593,21 +592,18 @@ fn default_handler(sig: c_int) {
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn jit_fault_slow() -> *const i64 {
+extern "C" fn jit_fault_slow(vm_state: &VmState) -> *const i64 {
     tracing::info!("page fault!");
 
-    VM_STATE.with_borrow(|vm_state| {
-        let vm_state = vm_state.as_ref().unwrap();
-        tracing::debug!("vm_state: {vm_state:#x?}");
+    tracing::debug!("vm_state: {vm_state:#018x?}");
 
-        let page_base = (vm_state.fault_addr as usize & !(HOST_PAGE_SIZE - 1)) as *mut c_void;
-        let page_idx = (page_base as usize - vm_state.guest_base as usize) / 1024;
-        tracing::info!("page_idx: {page_idx:#08x}");
+    let page_base = (vm_state.fault_addr as usize & !(HOST_PAGE_SIZE - 1)) as *mut c_void;
+    let page_idx = (page_base as usize - vm_state.guest_base as usize) / GUEST_PAGE_SIZE;
+    tracing::info!("page_idx: {page_idx:#08x}");
 
-        if unsafe { mprotect(page_base, HOST_PAGE_SIZE, PROT_READ | PROT_WRITE) } != 0 {
-            tracing::error!("mprotect failed");
-        }
+    if unsafe { mprotect(page_base, HOST_PAGE_SIZE, PROT_READ | PROT_WRITE) } != 0 {
+        tracing::error!("mprotect failed");
+    }
 
-        vm_state.gregs.as_ptr()
-    })
+    vm_state.gregs.as_ptr()
 }
