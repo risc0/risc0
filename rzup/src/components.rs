@@ -121,7 +121,7 @@ impl Component {
         match self {
             // rust toolchain uses date-based versions with r0. prefix
             Component::RustToolchain => {
-                format!("r0.{}.{}.{}", version.major, version.minor, version.patch)
+                format!("r0.{version}")
             }
             // cpp toolchain uses date-based versions
             Component::CppToolchain | Component::Gdb => format!(

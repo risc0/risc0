@@ -79,33 +79,31 @@ impl Poseidon2State {
         }
     }
 
-    fn step<C>(
+    fn step(
         &mut self,
-        ctx: &mut C,
+        ctx: &mut (impl Risc0Context + ?Sized),
         cur_state: &mut CycleState,
         next_state: CycleState,
         sub_state: u32,
-    ) where
-        C: Risc0Context + ?Sized,
-    {
+    ) {
         self.next_state = next_state;
         self.sub_state = sub_state;
         ctx.on_poseidon2_cycle(*cur_state, self);
         *cur_state = next_state;
     }
 
-    pub(crate) fn run(
+    pub(crate) fn rest(
         &mut self,
         ctx: &mut (impl Risc0Context + ?Sized),
         final_state: CycleState,
     ) -> Result<()> {
-        self.run_with_mix(ctx, final_state, |p2, cur_state, ctx| {
+        self.rest_with_mix(ctx, final_state, |p2, cur_state, ctx| {
             p2.mix(ctx, cur_state);
             Ok(())
         })
     }
 
-    pub(crate) fn run_with_mix<F, C>(
+    pub(crate) fn rest_with_mix<F, C>(
         &mut self,
         ctx: &mut C,
         final_state: CycleState,
@@ -235,10 +233,11 @@ impl Poseidon2State {
         Ok(())
     }
 
-    pub(crate) fn mix<C>(&mut self, ctx: &mut C, cur_state: &mut CycleState)
-    where
-        C: Risc0Context + ?Sized,
-    {
+    pub(crate) fn mix(
+        &mut self,
+        ctx: &mut (impl Risc0Context + ?Sized),
+        cur_state: &mut CycleState,
+    ) {
         self.multiply_by_m_ext();
         for i in 0..ROUNDS_HALF_FULL {
             self.step(ctx, cur_state, CycleState::PoseidonExtRound, i as u32);

@@ -170,10 +170,10 @@ fn write_witness_to_memory(witness: BigIntWitness, ctx: &mut impl Risc0Context) 
 
 pub fn ecall_execute(ctx: &mut impl Risc0Context) -> Result<usize> {
     let exec = ecall(ctx)?;
-    let cycles = exec.verify_program_size + 1;
+    let verify_program_size = exec.verify_program_size;
     write_witness_to_memory(exec.witness, ctx)?;
 
-    Ok(cycles)
+    Ok(verify_program_size)
 }
 
 // A thin function to drain a reader. Optimizes well with inlining.
