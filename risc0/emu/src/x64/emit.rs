@@ -55,22 +55,6 @@ macro_rules! unop {
 
 macro_rules! binop {
     ($self:tt, $op:ident, $dst:expr, $src:expr) => {
-        binop_imm_gpr!($self, $op, $dst, $src, {
-            binop_imm_mem!($self, $op, $dst, $src, {
-                binop_gpr_gpr!($self, $op, $dst, $src, {
-                    binop_gpr_mem!($self, $op, $dst, $src, {
-                        binop_mem_gpr!($self, $op, $dst, $src, {
-                            panic!("bad {}, {:?}, {:?}", stringify!($op), $dst, $src);
-                        })
-                    })
-                })
-            })
-        })
-    };
-}
-
-macro_rules! binop_imm_gpr {
-    ($self:tt, $op:ident, $dst:expr, $src:expr, $else:block) => {
         match ($src, $dst) {
             (_, Loc::Zero) => {},
             (Loc::Imm32(imm), Loc::GPR(dst)) => {
@@ -79,54 +63,24 @@ macro_rules! binop_imm_gpr {
             (Loc::Zero, Loc::GPR(dst)) => {
                 emit!($self ; $op Rd(dst), 0);
             },
-            _ => $else
-        }
-    };
-}
-
-macro_rules! binop_imm_mem {
-    ($self:tt, $op:ident, $dst:expr, $src:expr, $else:block) => {
-        match ($src, $dst) {
             (Loc::Imm32(imm), Loc::Memory(dst, disp)) => {
                 emit!($self ; $op DWORD [Rq(dst) + disp], imm as i32);
             },
             (Loc::Zero, Loc::Memory(dst, disp)) => {
                 emit!($self ; $op DWORD [Rq(dst) + disp], 0);
             },
-            _ => $else
-        }
-    };
-}
-
-macro_rules! binop_gpr_gpr {
-    ($self:tt, $op:ident, $dst:expr, $src:expr, $else:block) => {
-        match ($src, $dst) {
             (Loc::GPR(src), Loc::GPR(dst)) => {
                 emit!($self ; $op Rd(dst), Rd(src));
             },
-            _ => $else
-        }
-    };
-}
-
-macro_rules! binop_gpr_mem {
-    ($self:tt, $op:ident, $dst:expr, $src:expr, $else:block) => {
-        match ($src, $dst) {
             (Loc::GPR(src), Loc::Memory(dst, disp)) => {
                 emit!($self ; $op DWORD [Rq(dst) + disp], Rd(src));
             },
-            _ => $else
-        }
-    };
-}
-
-macro_rules! binop_mem_gpr {
-    ($self:tt, $op:ident, $dst:expr, $src:expr, $else:block) => {
-        match ($src, $dst) {
             (Loc::Memory(src, disp), Loc::GPR(dst)) => {
                 emit!($self ; $op Rd(dst), [Rq(src) + disp]);
             },
-            _ => $else
+            _ => {
+                panic!("bad {}, {:?}, {:?}", stringify!($op), $dst, $src);
+            }
         }
     };
 }
@@ -252,8 +206,6 @@ fn make_exit(asm: &mut Assembler) {
     // return control back to the host
     dynasm_x64!(asm ; ret);
 }
-
-fn make_call(asm: &mut Assembler) {}
 
 extern "C" fn print(ptr: *const u8, len: u64) {
     let bytes = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
