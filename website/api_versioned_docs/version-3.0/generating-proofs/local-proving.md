@@ -1,10 +1,12 @@
 # Local Proving
 
-RISC Zero offers a fully \[open-source] prover.
-Users can run the \[zkVM] locally, generating proofs using their own hardware.
-The \[feature flags] include options to toggle between CPU and GPU proving.
+RISC Zero offers a fully [open-source] prover.
+Users can run the [zkVM] locally, generating proofs using their own hardware.
+The [feature flags] include options to toggle between CPU and GPU proving.
 
 ## Local vs. Remote Proving
+
+For most use cases, we recommend remote proving using [Boundless].
 
 Proving with **private data** is a key reason to consider using local proof generation, as whoever is generating the proofs can see all private information involved.
 With local proof generation your private data never leaves your machine.
@@ -19,8 +21,8 @@ The Groth16 prover currently _only_ works on x86 architecture, and so Apple Sili
 You can find out more info in the relevant issues [#1520] and [#1749].
 :::
 
-> TIP: In cases where memory is constrained (i.e. less than 10 GB is available), it may be necessary to change the \[segment size limit]\[segment-limit-docs].
-> You can find information about expected memory consumption on our \[benchmarks page]\[datasheet].
+> TIP: In cases where memory is constrained (i.e. less than 10 GB is available), it may be necessary to change the [segment size limit][segment-limit-docs].
+> You can find information about expected memory consumption on our [benchmarks page][datasheet].
 
 > NOTE: When run for the first time, the GPU (e.g. Metal or CUDA) kernels may need to be JIT compiled.
 > This can take a few minutes, but should only happen once.
@@ -71,10 +73,9 @@ No options need to be configured to take advantage of acceleration through the u
 [#1520]: https://github.com/risc0/risc0/issues/1520
 [#1749]: https://github.com/risc0/risc0/issues/1749
 [apple-metal]: https://developer.apple.com/metal
-
-\[Boundless] [https://boundless.network](https://boundless.network)
-\[datasheet]: [https://benchmarks.risczero.com/main/datasheet](https://benchmarks.risczero.com/main/datasheet)
-\[feature flags]: [https://github.com/risc0/risc0#feature-flags](https://github.com/risc0/risc0#feature-flags)
-\[open-source]: [https://risczero.com/news/open-source](https://risczero.com/news/open-source)
-\[segment-limit-docs]: [https://docs.rs/risc0-zkvm/3.0/risc0\_zkvm/struct.ExecutorEnvBuilder.html#method.segment\_limit\_po2](https://docs.rs/risc0-zkvm/3.0/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.segment_limit_po2)
-\[zkVM]: ../zkvm/zkvm-overview\.md
+[Boundless]: https://boundless.network
+[datasheet]: https://benchmarks.risczero.com/main/datasheet
+[feature flags]: https://github.com/risc0/risc0#feature-flags
+[open-source]: https://risczero.com/news/open-source
+[segment-limit-docs]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.segment_limit_po2
+[zkVM]: ../zkvm/zkvm-overview.md

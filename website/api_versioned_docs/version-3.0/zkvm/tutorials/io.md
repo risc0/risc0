@@ -118,7 +118,7 @@ A good practice to handle sensitive data is to use [proof
 composition][article-composition];
 Essentially splitting the proving process into smaller parts, proving the
 sensitive data locally and combining the larger program later through
-composition in a capable proving service like \[Boundless] to
+composition in a capable proving service like [Boundless] to
 speed up the proof generation.
 :::
 
