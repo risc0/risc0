@@ -317,8 +317,7 @@ mod tests {
 
         test_context.store_region(base_addr, &input)?;
 
-        let mode = if machine_mode { 1 } else { 0 };
-        let mut io = BigIntIOImpl::new(&mut test_context, mode);
+        let mut io = BigIntIOImpl::new(&mut test_context, machine_mode as u32);
         let natural_out = io.load(ARENA_REG as u32, 0, count).unwrap();
         assert_eq!(natural_out.to_limbs_asc(), expected);
         Ok(())
@@ -332,8 +331,7 @@ mod tests {
         let mut test_context = TestRisc0Context::default();
         test_context.store_register(MACHINE_REGS_ADDR.waddr(), ARENA_REG, base_addr.0)?;
 
-        let mode = if machine_mode { 1 } else { 0 };
-        let mut io = BigIntIOImpl::new(&mut test_context, mode);
+        let mut io = BigIntIOImpl::new(&mut test_context, machine_mode as u32);
         let error = io
             .load(ARENA_REG as u32, 0, count)
             .err()
