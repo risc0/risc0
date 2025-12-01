@@ -15,11 +15,18 @@
 
 #![allow(unused)]
 
-pub(crate) mod emit;
+mod emit;
 #[cfg(test)]
 mod tests;
 
-use std::{collections::BTreeMap, ffi::c_void, mem::offset_of, ptr};
+use std::{
+    arch::asm,
+    cell::{Cell, RefCell},
+    collections::BTreeMap,
+    mem::offset_of,
+    ptr,
+    sync::Once,
+};
 
 use anyhow::{Result, anyhow, bail};
 use dynasmrt::{
@@ -28,7 +35,10 @@ use dynasmrt::{
     relocations::{Relocation as _, RelocationSize},
     x64::{Assembler, X64Relocation},
 };
-use libc::{MAP_ANON, MAP_FAILED, MAP_PRIVATE, PROT_NONE, PROT_READ, PROT_WRITE, mmap, mprotect};
+use libc::{
+    MAP_ANON, MAP_FAILED, MAP_PRIVATE, PROT_NONE, PROT_READ, PROT_WRITE, SA_SIGINFO, c_int, c_void,
+    mmap, mprotect, sigaction, sigemptyset, siginfo_t, ucontext_t,
+};
 use risc0_binfmt::Program;
 
 use crate::rv32im::{Instruction, REG_MAX, RvOp, WORD_SIZE};
@@ -132,6 +142,10 @@ impl Instruction {
     }
 }
 
+// reserved: rax, rbx, rcx, rdx, r15
+// used:     rdi, rsi, rbp, r8, r9, r10, r11, r12, r13, r14
+// not used: rsp
+
 const REGISTER_MAPPING: [Loc; REG_MAX] = [
     Loc::Zero,                                    // x0  (zero)
     Loc::GPR(GPR::R13),                           // x1  (ra)
@@ -222,15 +236,13 @@ const INVALID_IDX: u32 = 0;
 struct JitContext {
     pc: u32,
     quota: u32,
-    // page_table: *const u32,
-    ram: *const u8,
+    ram: *mut u8,
     pub(crate) registers: [u32; REG_MAX],
 }
 
 struct Machine {
     ctx: JitContext,
     text: BTreeMap<u32, u32>,
-    // page_table: Vec<u32>,
 }
 
 impl Machine {
@@ -249,7 +261,13 @@ impl Machine {
             }
             addr as *mut u8
         };
+
         tracing::debug!("ram: {ram:?}");
+        let ram_slice = unsafe { std::slice::from_raw_parts_mut(ram, GUEST_RAM_SIZE) };
+        let word_slice: &mut [u32] = bytemuck::cast_slice_mut(ram_slice);
+        for (&addr, &word) in program.image.iter() {
+            word_slice[addr as usize / 4] = word;
+        }
 
         let page_table = vec![INVALID_IDX; NUM_PAGES];
         Ok(Self {
@@ -257,11 +275,9 @@ impl Machine {
                 pc: program.entry,
                 quota: MAX_QUOTA,
                 ram,
-                // page_table: page_table.as_ptr(),
                 registers: [0; REG_MAX],
             },
             text: program.image,
-            // page_table,
         })
     }
 
@@ -299,6 +315,8 @@ struct Translator {
 }
 
 const HOST_WORD_SIZE: usize = usize::BITS as usize / 8;
+const HOST_PAGE_SIZE: usize = 4096;
+
 const CALLEE_REGISTERS: &[GPR] = &[GPR::RBX, GPR::RBP, GPR::R12, GPR::R13, GPR::R14, GPR::R15];
 const STACK_SPACE: usize = CALLEE_REGISTERS.len() * HOST_WORD_SIZE;
 
@@ -322,11 +340,11 @@ impl Translator {
             self.process_fixups(offset)?;
 
             let insn = self.machine.fetch();
-            self.step_prologue();
+            // self.step_prologue();
             if let Some(terminal) = self.dispatch(insn)? {
                 break;
             }
-            self.step_epilogue();
+            // self.step_epilogue();
             self.machine.next();
         }
 
@@ -362,20 +380,34 @@ impl Translator {
     }
 
     fn resume(&mut self) -> Result<()> {
-        unsafe {
-            if mprotect(
+        let mut state = VmState {
+            guest_base: self.machine.ctx.ram,
+            guest_size: GUEST_RAM_SIZE,
+            fault_addr: ptr::null_mut(),
+            gregs: [0; 23],
+            have_pending_fault: false,
+        };
+        VM_STATE.with(|tls| {
+            *tls.borrow_mut() = Some(state);
+        });
+
+        if unsafe {
+            mprotect(
                 self.machine.ctx.ram as *mut c_void,
                 GUEST_RAM_SIZE,
                 PROT_NONE,
-            ) != 0
-            {
-                bail!("mprotect(PROT_NONE) failed");
-            }
-        };
+            )
+        } != 0
+        {
+            bail!("mprotect(PROT_NONE) failed");
+        }
+
         Ok(())
     }
 
     fn jit_loop(&mut self) -> Result<Terminal> {
+        ensure_segv_handler_installed();
+
         self.dump(self.enter_offset()?);
         loop {
             let retval = if let Some(&offset) = self.labels.get(&self.machine.ctx.pc) {
@@ -453,4 +485,152 @@ impl Translator {
             tracing::debug!("{line}");
         }
     }
+}
+
+// Per-thread VM state. In your real code you'll add instr metadata, cycles, etc.
+#[derive(Debug)]
+struct VmState {
+    guest_base: *mut u8,
+    guest_size: usize,
+    fault_addr: *mut u8,
+    gregs: [i64; 23],
+    have_pending_fault: bool,
+}
+
+// Thread-local pointer to VmState for the current thread.
+// Only threads running guest code set this.
+thread_local! {
+    pub static VM_STATE: RefCell<Option<VmState>> = const { RefCell::new(None) };
+}
+
+// Install-once guard for SIGSEGV handler.
+static INSTALL_SEGV_ONCE: Once = Once::new();
+
+// Store old handler to chain for non-guest faults, if you want to be fancy later.
+// static mut OLD_SEGV: sigaction = unsafe { std::mem::zeroed() };
+
+/// Ensure SIGSEGV handler is installed once.
+fn ensure_segv_handler_installed() {
+    INSTALL_SEGV_ONCE.call_once(install_segv_handler);
+}
+
+/// Install a SA_SIGINFO SIGSEGV handler using libc::sigaction.
+fn install_segv_handler() {
+    extern "C" fn handler(sig: c_int, info: *mut siginfo_t, uctx: *mut c_void) {
+        unsafe { segv_trampoline(sig, info, uctx) };
+    }
+
+    let mut sa: sigaction = unsafe { std::mem::zeroed() };
+    sa.sa_sigaction = handler as usize;
+    sa.sa_flags = SA_SIGINFO;
+
+    unsafe { sigemptyset(&mut sa.sa_mask) };
+
+    // let mut old: sigaction = unsafe { std::mem::zeroed() };
+    let res = unsafe { sigaction(libc::SIGSEGV, &sa, ptr::null_mut()) };
+    if res != 0 {
+        panic!("sigaction(SIGSEGV) failed");
+    }
+
+    // unsafe {
+    //     OLD_SEGV = old;
+    // }
+
+    tracing::info!("SIGSEGV handler installed");
+}
+
+#[allow(unused)]
+#[inline(always)]
+fn debug_str(s: &str) {
+    // Best effort; ignore errors.
+    let _ = unsafe { libc::write(2, s.as_ptr() as *const c_void, s.len()) };
+}
+
+#[allow(unused)]
+#[inline(always)]
+fn debug_hex(label: &str, value: usize) {
+    debug_str(label);
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut buf = [0u8; 18]; // "0x" + 16 hex digits
+    buf[0] = b'0';
+    buf[1] = b'x';
+    for i in 0..16 {
+        let shift = (15 - i) * 4;
+        buf[2 + i] = HEX[((value >> shift) & 0xf) as usize];
+    }
+    let _ = unsafe { libc::write(2, buf.as_ptr() as *const c_void, buf.len()) };
+    debug_str("\n");
+}
+
+/// The raw SIGSEGV handler. Very tiny and async-signal-safe:
+/// - identify if it's our guest
+/// - stash fault info in per-thread VmState
+/// - patch RIP to jit_fault_handler
+unsafe fn segv_trampoline(sig: c_int, info: *mut siginfo_t, uctx: *mut c_void) {
+    VM_STATE.with_borrow_mut(|vm_state| {
+        if let Some(vm_state) = vm_state {
+            let fault_addr = unsafe { (&*info).si_addr() } as *mut u8;
+
+            let base = vm_state.guest_base as usize;
+            let end = base + vm_state.guest_size;
+            let fault = fault_addr as usize;
+
+            if fault < base || fault >= end {
+                // Fault outside guest memory: not ours.
+                // debug_str("out of range\n");
+                // debug_hex("fault: ", fault);
+                // debug_hex("base: ", base);
+                // debug_hex("end: ", end);
+                default_handler(sig);
+                return;
+            }
+
+            let uctx = unsafe { &mut *(uctx as *mut ucontext_t) };
+            vm_state.have_pending_fault = true;
+            vm_state.fault_addr = fault_addr;
+            vm_state.gregs = uctx.uc_mcontext.gregs;
+
+            unsafe extern "C" {
+                fn jit_fault_handler();
+            }
+
+            uctx.uc_mcontext.gregs[libc::REG_RIP as usize] =
+                jit_fault_handler as usize as libc::greg_t;
+
+            // let page_base = (fault_addr as usize & !(HOST_PAGE_SIZE - 1)) as *mut c_void;
+            // if unsafe { mprotect(page_base, HOST_PAGE_SIZE, PROT_READ | PROT_WRITE) } != 0 {
+            //     tracing::error!("mprotect failed");
+            //     default_handler(sig);
+            // }
+        } else {
+            default_handler(sig);
+        }
+    });
+}
+
+fn default_handler(sig: c_int) {
+    unsafe {
+        libc::signal(sig, libc::SIG_DFL);
+        libc::raise(sig);
+    }
+}
+
+#[unsafe(no_mangle)]
+extern "C" fn jit_fault_slow() -> *const i64 {
+    tracing::info!("page fault!");
+
+    VM_STATE.with_borrow(|vm_state| {
+        let vm_state = vm_state.as_ref().unwrap();
+        tracing::debug!("vm_state: {vm_state:#x?}");
+
+        let page_base = (vm_state.fault_addr as usize & !(HOST_PAGE_SIZE - 1)) as *mut c_void;
+        let page_idx = (page_base as usize - vm_state.guest_base as usize) / 1024;
+        tracing::info!("page_idx: {page_idx:#08x}");
+
+        if unsafe { mprotect(page_base, HOST_PAGE_SIZE, PROT_READ | PROT_WRITE) } != 0 {
+            tracing::error!("mprotect failed");
+        }
+
+        vm_state.gregs.as_ptr()
+    })
 }

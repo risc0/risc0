@@ -14,4 +14,5 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 mod rv32im;
+#[cfg(target_arch = "x86_64")]
 mod x64;
