@@ -27,5 +27,8 @@ rstest = "0.26.1"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 zip = { version = "6.0.0", default-features = false, features = ["deflate"] }
 
+[build-dependencies]
+cc = "1.2.47"
+
 [lints]
 workspace = true

@@ -211,7 +211,7 @@ fn make_enter(asm: &mut Assembler) {
     }
 
     dynasm_x64!(asm
-        // remember the 1st argment
+        // remember the 1st argument
         ; mov rax, rdi
         // set base regfile address from 2nd argument
         ; mov rbx, rsi
@@ -252,6 +252,8 @@ fn make_exit(asm: &mut Assembler) {
     // return control back to the host
     dynasm_x64!(asm ; ret);
 }
+
+fn make_call(asm: &mut Assembler) {}
 
 extern "C" fn print(ptr: *const u8, len: u64) {
     let bytes = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
@@ -789,6 +791,12 @@ impl Translator {
     }
 
     fn emit_load(&mut self, size: Size, extend: Extend, rd: Loc, rs1: Loc, imm: u32) {
+        // available registers:
+        // eax, ecx, edx
+        // reserved:
+        // rbx: shadow register file address
+        // r15: base guest address
+
         if rd == Loc::Zero {
             return;
         }
@@ -853,7 +861,7 @@ impl Translator {
         // store result into rd
         match rd {
             Loc::GPR(rd) => emit!(self ; mov Rd(rd), eax),
-            Loc::Memory(rd, disp) => emit!(self ; mov [Rd(rd) + disp], eax),
+            Loc::Memory(rd, disp) => emit!(self ; mov DWORD [Rq(rd) + disp], eax),
             _ => unreachable!(),
         };
     }
@@ -1075,44 +1083,44 @@ mod tests {
 
     #[rstest]
     #[case(Loc::GPR(RDX), Loc::GPR(RDX), Loc::GPR(RDX), &[
-    "add edx,edx"
-])]
+        "add edx,edx"
+    ])]
     #[case(Loc::GPR(RDX), Loc::GPR(RDX), Loc::GPR(RCX), &[
-    "add edx,ecx"
-])]
+        "add edx,ecx"
+    ])]
     #[case(Loc::GPR(RSI), Loc::GPR(RDX), Loc::GPR(RSI), &[
-    "mov eax,edx",
-    "add eax,esi",
-    "mov esi,eax"
-])]
+        "mov eax,edx",
+        "add eax,esi",
+        "mov esi,eax"
+    ])]
     #[case(Loc::GPR(RSI), Loc::GPR(RDX), Loc::GPR(RCX), &[
-    "mov esi,edx",
-    "add esi,ecx",
-])]
+        "mov esi,edx",
+        "add esi,ecx",
+    ])]
     #[case(Loc::Memory(RBX, 4), Loc::GPR(RCX), Loc::GPR(RDX), &[
-    "mov [rbx+4],ecx",
-    "add [rbx+4],edx",
-])]
+        "mov [rbx+4],ecx",
+        "add [rbx+4],edx",
+    ])]
     #[case(Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), Loc::Memory(RBX, 12), &[
-    "mov eax,[rbx+8]",
-    "add eax,[rbx+0Ch]",
-    "mov [rbx+4],eax",
-])]
+        "mov eax,[rbx+8]",
+        "add eax,[rbx+0Ch]",
+        "mov [rbx+4],eax",
+    ])]
     #[case(Loc::GPR(RDX), Loc::GPR(RDX), Loc::Imm32(6), &[
-    "add edx,6"
-])]
+        "add edx,6"
+    ])]
     #[case(Loc::GPR(RDX), Loc::GPR(RCX), Loc::Imm32(6), &[
-    "mov edx,ecx",
-    "add edx,6",
-])]
+        "mov edx,ecx",
+        "add edx,6",
+    ])]
     #[case(Loc::GPR(RDX), Loc::GPR(RCX), Loc::Imm32(-6_i32 as u32), &[
-    "mov edx,ecx",
-    "add edx,0FFFFFFFAh",
-])]
+        "mov edx,ecx",
+        "add edx,0FFFFFFFAh",
+    ])]
     #[case(Loc::Memory(RBX, 4), Loc::GPR(RCX), Loc::Imm32(-6_i32 as u32), &[
-    "mov [rbx+4],ecx",
-    "add dword [rbx+4],0FFFFFFFAh",
-])]
+        "mov [rbx+4],ecx",
+        "add dword [rbx+4],0FFFFFFFAh",
+    ])]
     #[test_log::test]
     fn add(#[case] rd: Loc, #[case] rs1: Loc, #[case] rs2: Loc, #[case] expected: &[&str]) {
         run_asm_test(
@@ -1123,33 +1131,33 @@ mod tests {
 
     #[rstest]
     #[case(Loc::GPR(RDX), Loc::GPR(RSI), Loc::GPR(RDI), &[
-    "cmp esi,edi",
-    "setl al",
-    "movzx edx,al",
-])]
+        "cmp esi,edi",
+        "setl al",
+        "movzx edx,al",
+    ])]
     #[case(Loc::GPR(RDX), Loc::Memory(RBX, 4), Loc::GPR(RSI), &[
-    "cmp [rbx+4],esi",
-    "setl al",
-    "movzx edx,al",
-])]
+        "cmp [rbx+4],esi",
+        "setl al",
+        "movzx edx,al",
+    ])]
     #[case(Loc::GPR(RDX), Loc::GPR(RSI), Loc::Memory(RBX, 4), &[
-    "cmp esi,[rbx+4]",
-    "setl al",
-    "movzx edx,al",
-])]
+        "cmp esi,[rbx+4]",
+        "setl al",
+        "movzx edx,al",
+    ])]
     #[case(Loc::GPR(RDX), Loc::Memory(RBX, 8), Loc::Memory(RBX, 12), &[
-    "mov eax,[rbx+8]",
-    "cmp eax,[rbx+0Ch]",
-    "setl al",
-    "movzx edx,al",
-])]
+        "mov eax,[rbx+8]",
+        "cmp eax,[rbx+0Ch]",
+        "setl al",
+        "movzx edx,al",
+    ])]
     #[case(Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), Loc::Memory(RBX, 12), &[
-    "mov eax,[rbx+8]",
-    "cmp eax,[rbx+0Ch]",
-    "setl al",
-    "movzx eax,al",
-    "mov [rbx+4],eax",
-])]
+        "mov eax,[rbx+8]",
+        "cmp eax,[rbx+0Ch]",
+        "setl al",
+        "movzx eax,al",
+        "mov [rbx+4],eax",
+    ])]
     #[test_log::test]
     fn slt(#[case] rd: Loc, #[case] rs1: Loc, #[case] rs2: Loc, #[case] expected: &[&str]) {
         run_asm_test(
@@ -1160,17 +1168,17 @@ mod tests {
 
     #[rstest]
     #[case(Size::S32, Extend::None, Loc::GPR(RDX), Loc::GPR(RSI), 8, &[
-    "mov edx,[r15+rsi+8]"
-])]
+        "mov edx,[r15+rsi+8]"
+    ])]
     #[case(Size::S8, Extend::Sign, Loc::GPR(RDX), Loc::GPR(RSI), 8, &[
-    "movsx edx,byte [r15+rsi+8]"
-])]
+        "movsx edx,byte [r15+rsi+8]"
+    ])]
     #[case(Size::S8, Extend::Zero, Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), 8, &[
-    "mov eax,[rbx+8]",
-    "lea rax,[r15+rax+8]",
-    "movzx eax,byte [rax]",
-    "mov [ebx+4],eax",
-])]
+        "mov eax,[rbx+8]",
+        "lea rax,[r15+rax+8]",
+        "movzx eax,byte [rax]",
+        "mov [rbx+4],eax",
+    ])]
     #[test_log::test]
     fn load(
         #[case] size: Size,
@@ -1185,23 +1193,23 @@ mod tests {
 
     #[rstest]
     #[case(Size::S32, Loc::GPR(RSI), Loc::GPR(RDX), 8, &[
-    "mov [r15+rsi+8],edx"
-])]
+        "mov [r15+rsi+8],edx"
+    ])]
     #[case(Size::S8, Loc::GPR(RSI), Loc::GPR(RDX), 8, &[
-    "mov [r15+rsi+8],dl"
-])]
+        "mov [r15+rsi+8],dl"
+    ])]
     #[case(Size::S32, Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), 8, &[
-    "mov ecx,[ebx+8]",
-    "mov eax,[rbx+4]",
-    "lea rax,[r15+rax+8]",
-    "mov [rax],ecx",
-])]
+        "mov ecx,[ebx+8]",
+        "mov eax,[rbx+4]",
+        "lea rax,[r15+rax+8]",
+        "mov [rax],ecx",
+    ])]
     #[case(Size::S8, Loc::Memory(RBX, 4), Loc::Memory(RBX, 8), 8, &[
-    "mov ecx,[ebx+8]",
-    "mov eax,[rbx+4]",
-    "lea rax,[r15+rax+8]",
-    "mov [rax],cl",
-])]
+        "mov ecx,[ebx+8]",
+        "mov eax,[rbx+4]",
+        "lea rax,[r15+rax+8]",
+        "mov [rax],cl",
+    ])]
     #[test_log::test]
     fn store(
         #[case] size: Size,
