@@ -7468,6 +7468,7 @@ dependencies = [
  "iced-x86",
  "libc",
  "risc0-binfmt",
+ "risc0-circuit-rv32im-m3-sys",
  "rstest",
  "test-log",
  "tracing",
