@@ -36,6 +36,10 @@ public:
     }
   }
 
+  static void apply(RecordingContext& ctx, RecordingReg& x) {
+    PicusDeclareInputVisitor::apply(ctx, x.val);
+  }
+
   static void apply(RecordingContext& ctx, RecordingVal& x);
 };
 
