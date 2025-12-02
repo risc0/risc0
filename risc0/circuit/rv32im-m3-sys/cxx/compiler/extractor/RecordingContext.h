@@ -91,7 +91,7 @@ struct RecordingContext {
     return componentIRMap.get<Component>(&component);
   }
 
-  template <> mlir::Value get<RecordingVal>(RecordingVal& component) {
+  mlir::Value get(RecordingVal component) {
     return component.value;
   }
 

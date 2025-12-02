@@ -27,9 +27,10 @@ int main() {
 
   extract1<IsZero>(ctx);
 
-  // EXTRACT(InstRegBlock); // TODO
+  // EXTRACT(InstRegBlock);
   // EXTRACT(InstImmBlock);
-  EXTRACT(InstLoadBlock); // TODO
+  // EXTRACT(InstLoadBlock);
+  // EXTRACT(InstStoreBlock);
   // EXTRACT(InstJalBlock);
   // EXTRACT(InstJalrBlock);
   // EXTRACT(UnitAddSubBlock);
