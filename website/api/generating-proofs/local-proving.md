@@ -6,7 +6,7 @@ The [feature flags] include options to toggle between CPU and GPU proving.
 
 ## Local vs. Remote Proving
 
-For most use cases, we recommend remote proving using [Bonsai], our scalable and highly parallel proving service.
+For most use cases, we recommend remote proving using [Boundless].
 
 Proving with **private data** is a key reason to consider using local proof generation, as whoever is generating the proofs can see all private information involved.
 With local proof generation your private data never leaves your machine.
@@ -73,7 +73,7 @@ No options need to be configured to take advantage of acceleration through the u
 [#1520]: https://github.com/risc0/risc0/issues/1520
 [#1749]: https://github.com/risc0/risc0/issues/1749
 [apple-metal]: https://developer.apple.com/metal
-[Bonsai]: ./remote-proving.md
+[Boundless]: https://boundless.network
 [datasheet]: https://benchmarks.risczero.com/main/datasheet
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [open-source]: https://risczero.com/news/open-source
