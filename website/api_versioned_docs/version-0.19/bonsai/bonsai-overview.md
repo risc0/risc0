@@ -61,7 +61,7 @@ Under the hood, Bonsai uses the RISC Zero zkVM to prove your programs. With the 
 
 _Status: Pre-Alpha_
 
-The Bonsai proving service can be used standalone or directly integrated with smart contracts and blockchains. If you're interested in Bonsai, learn more in our [litepaper] and [talks](https://youtu.be/nVAs2i-_Iyo?t=3044).
+The Bonsai proving service can be used standalone or directly integrated with smart contracts and blockchains. If you're interested in Bonsai, learn more in our [talks](https://youtu.be/nVAs2i-_Iyo?t=3044).
 
 ### 3. Bonsai Relayer and Relay Contract: Connecting off-chain proofs and on-chain applications
 
@@ -71,7 +71,7 @@ The `Bonsai Relayer` and the `Bonsay Relay Contract` let your Ethereum dApps con
 
 ## Where we're headed
 
-We're building technology that allows anyone to generate highly performant zero-knowledge proofs for a variety of applications. We want to make zero-knowledge proof integration into Ethereum, L1 blockchains, Cosmos app chains, L2 rollups, and dApps possible with minimal development effort. To learn more, read our [litepaper].
+We're building technology that allows anyone to generate highly performant zero-knowledge proofs for a variety of applications. We want to make zero-knowledge proof integration into Ethereum, L1 blockchains, Cosmos app chains, L2 rollups, and dApps possible with minimal development effort.
 
 [`cargo risczero`]: https://crates.io/crates/cargo-risczero
 [Bonsai as a zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
@@ -82,7 +82,6 @@ We're building technology that allows anyone to generate highly performant zero-
 [Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.19/bonsai/examples/governance#readme
 [guest program]: /terminology#guest-program
 [journal]: /terminology#journal
-[litepaper]: /litepaper
 [receipt]: /terminology#receipt
 [Request access here]: https://bonsai.xyz/apply
 [Zeth]: https://www.risczero.com/news/zeth-release
