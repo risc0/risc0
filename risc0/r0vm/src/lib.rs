@@ -217,7 +217,7 @@ pub fn main() {
 
     // TODO(povw): Add PoVW here.
     let session = {
-        let mut exec = if let Some(ref elf_path) = args.mode.elf {
+        let exec = if let Some(ref elf_path) = args.mode.elf {
             let elf_contents = std::fs::read(elf_path).unwrap();
             ExecutorImpl::from_elf(env, &elf_contents).unwrap()
         } else if let Some(ref image_path) = args.mode.image {

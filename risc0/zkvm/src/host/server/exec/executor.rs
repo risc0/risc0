@@ -19,7 +19,7 @@ use std::{
     rc::Rc,
     sync::{
         Arc,
-        mpsc::{self, Receiver, Sender, SyncSender},
+        mpsc::{self, Receiver, SyncSender},
     },
     thread::{self, Scope},
     time::Duration,
@@ -32,8 +32,7 @@ use risc0_binfmt::{
 };
 use risc0_circuit_rv32im::execute::{
     CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, Executor, PAGE_BYTES, SegmentUpdate,
-    SegmentUpdateCallback, SegmentUpdateCallbackFactory, Syscall as CircuitSyscall,
-    SyscallContext as CircuitSyscallContext, platform::WORD_SIZE,
+    Syscall as CircuitSyscall, SyscallContext as CircuitSyscallContext, platform::WORD_SIZE,
 };
 use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
@@ -102,38 +101,27 @@ pub(crate) fn circuit_version() -> u32 {
 /// Maximum number of segments we can queue up before we block execution
 const MAX_OUTSTANDING_SEGMENTS: usize = 5;
 
-struct ExecutorImplCallbackFactory<'scope, 'env, F> {
-    inner: F,
-    segment_ref_channel: Sender<Box<dyn SegmentRef>>,
-    scope: &'scope Scope<'scope, 'env>,
+struct SegmentUpdateProcessor {
+    segment_ref_channel: Receiver<Box<dyn SegmentRef>>,
+    update_channel: SyncSender<(SegmentUpdate, bool)>,
 }
 
-impl<'scope, 'env, F> ExecutorImplCallbackFactory<'scope, 'env, F> {
-    fn new(scope: &'scope Scope<'scope, 'env>, inner: F) -> (Self, Receiver<Box<dyn SegmentRef>>) {
-        let (send, recv) = mpsc::channel();
-        let factory = Self {
-            inner,
-            scope,
-            segment_ref_channel: send,
-        };
-        (factory, recv)
-    }
-}
-
-impl<'scope, F> SegmentUpdateCallbackFactory for ExecutorImplCallbackFactory<'scope, '_, F>
-where
-    F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send + 'scope,
-{
-    type Callback = ExecutorImplCallback;
-
-    fn with_initial_image(self, initial_image: &MemoryImage) -> Result<Self::Callback> {
-        let mut segment_callback = self.inner;
+impl SegmentUpdateProcessor {
+    fn spawn<'scope, F>(
+        scope: &'scope Scope<'scope, '_>,
+        initial_image: &MemoryImage,
+        mut segment_callback: F,
+    ) -> Self
+    where
+        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send + 'scope,
+    {
         let mut image = initial_image.clone();
         let (update_send, update_recv) =
             mpsc::sync_channel::<(SegmentUpdate, bool)>(MAX_OUTSTANDING_SEGMENTS);
+        let (segment_ref_send, segment_ref_recv) = mpsc::channel();
 
         // Spawn the thread that will receive segment updates and construct segments.
-        self.scope.spawn(move || -> Result<()> {
+        scope.spawn(move || -> Result<()> {
             for (update, is_error) in update_recv {
                 // Update the current memory image and produce a risc0_circuit_rv32im::Segment.
                 let circuit_segment = update
@@ -168,7 +156,7 @@ where
                 let segment_ref =
                     segment_callback(segment).context("Segment callback returned an error")?;
 
-                self.segment_ref_channel
+                segment_ref_send
                     .send(segment_ref)
                     .map_err(|err| anyhow!("Failed to send segment ref: {err:?}"))?;
 
@@ -179,24 +167,20 @@ where
             Ok(())
         });
 
-        Ok(ExecutorImplCallback {
+        SegmentUpdateProcessor {
             update_channel: update_send,
-        })
+            segment_ref_channel: segment_ref_recv,
+        }
     }
-}
 
-struct ExecutorImplCallback {
-    update_channel: SyncSender<(SegmentUpdate, bool)>,
-}
-
-impl SegmentUpdateCallback for ExecutorImplCallback {
-    fn on_segment_update(&mut self, update: SegmentUpdate) -> Result<()> {
+    fn on_segment_update(&self, update: SegmentUpdate) -> Result<()> {
         self.update_channel
             .send((update, false))
             .context("Failed to send segment update to hasher thread")
     }
 
-    fn on_execution_error(&mut self, update: SegmentUpdate) -> Result<()> {
+    #[expect(unused)] // DO NOT MERGE
+    fn on_execution_error(&self, update: SegmentUpdate) -> Result<()> {
         self.update_channel
             .send((update, true))
             .context("Failed to send segment error update to hasher thread")
@@ -314,21 +298,18 @@ impl<'a> ExecutorImpl<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send,
     {
-        let (session, recv) = thread::scope(|scope| {
-            // DO NOT MERGE: Factor away the whole factory thing.
-            let (segment_update_callback_factory, recv) =
-                ExecutorImplCallbackFactory::new(scope, callback);
-            let mut segment_update_callback =
-                segment_update_callback_factory.with_initial_image(&self.image)?;
+        thread::scope(|scope| {
+            let update_processor = SegmentUpdateProcessor::spawn(scope, &self.image, callback);
+            // DO NOT MERGE: Handle errors with dumping the segment.
             while let Some(update) = self.run_segment()? {
-                segment_update_callback.on_segment_update(update)?;
+                update_processor.on_segment_update(update)?;
             }
+
             let session = self.session()?;
-            anyhow::Ok((session, recv))
-        })?;
-        Ok(Session {
-            segments: recv.iter().collect(),
-            ..session
+            Ok(Session {
+                segments: update_processor.segment_ref_channel.iter().collect(),
+                ..session
+            })
         })
     }
 
@@ -348,7 +329,7 @@ impl<'a> ExecutorImpl<'a> {
         self.inner.run_segment(segment_limit_po2, session_limit)
     }
 
-    fn session(mut self) -> Result<Session> {
+    pub(crate) fn session(mut self) -> Result<Session> {
         let exec_result = self.inner.state();
 
         tracing::debug!("output_digest: {:?}", exec_result.output);

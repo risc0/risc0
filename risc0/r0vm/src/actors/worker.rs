@@ -924,7 +924,7 @@ impl CpuProcessor {
                     .build()?;
 
                 // TODO(povw): Add PoVW here
-                let mut exec = ExecutorImpl::from_elf(env, &task.request.binary)?;
+                let exec = ExecutorImpl::from_elf(env, &task.request.binary)?;
                 exec.run_with_callback(|segment| {
                     segments.push(segment.get_info());
                     let msg = TaskUpdateMsg {

@@ -14,7 +14,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use anyhow::{Context, Result};
-use risc0_circuit_rv32im::execute::SegmentUpdate;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
@@ -60,15 +59,15 @@ impl Prover for LocalProver {
 impl Executor for LocalProver {
     fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
         let mut segments = Vec::new();
-        let session = ExecutorImpl::from_elf(env, elf)
-            .context("Failed to create executor from provided program")?
-            .run_with_segment_update_callback(|update: SegmentUpdate| {
-                segments.push(SegmentInfo {
-                    po2: update.po2,
-                    cycles: update.user_cycles,
-                });
-                Ok(())
-            })?;
+        let mut exec = ExecutorImpl::from_elf(env, elf)
+            .context("Failed to create executor from provided program")?;
+        while let Some(update) = exec.run_segment()? {
+            segments.push(SegmentInfo {
+                po2: update.po2,
+                cycles: update.user_cycles,
+            });
+        }
+        let session = exec.session()?;
 
         let receipt_claim = session.claim()?;
         Ok(SessionInfo {

@@ -159,9 +159,9 @@ impl ProverServer for DevModeProver {
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<ProveInfo> {
-        let session = ExecutorImpl::from_elf(env, elf)
-            .unwrap()
-            .run_with_segment_update_callback(|_| Ok(()))?;
+        let mut exec = ExecutorImpl::from_elf(env, elf).unwrap();
+        while exec.run_segment()?.is_some() {}
+        let session = exec.session()?;
         self.prove_session(ctx, &session)
     }
 
