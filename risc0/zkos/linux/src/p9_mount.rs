@@ -873,13 +873,107 @@ impl P9Backend for RamFilesystem {
 
     fn send_tunlinkat(
         &mut self,
-        _msg: &TunlinkatMessage,
+        msg: &TunlinkatMessage,
     ) -> Result<P9Response<RunlinkatMessage>, TunlinkatError> {
-        // TODO: Implement unlink
-        Ok(P9Response::Error(RlerrorMessage::new(
-            _msg.tag,
-            P9Error::Enosys as u32,
-        )))
+        if MOUNT_DEBUG {
+            crate::kernel::print(&format!(
+                "[RamFilesystem] send_tunlinkat: dirfd={}, name='{}', flags=0x{:x}",
+                msg.dirfd, msg.name, msg.flags
+            ));
+        }
+
+        // Get the parent directory FID
+        let (parent_inode, _) = self
+            .get_fid(msg.dirfd)
+            .map_err(|_| TunlinkatError::InternalError)?;
+
+        if !self.is_dir(parent_inode) {
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Enotdir as u32,
+            )));
+        }
+
+        // Look up the entry in the parent directory
+        let entry_inode = match self.nodes.get(&parent_inode) {
+            Some(RamNode::Directory { entries, .. }) => entries.get(&msg.name).copied(),
+            _ => {
+                return Ok(P9Response::Error(RlerrorMessage::new(
+                    msg.tag,
+                    P9Error::Enotdir as u32,
+                )));
+            }
+        };
+
+        let entry_inode = entry_inode.ok_or_else(|| {
+            if MOUNT_DEBUG {
+                crate::kernel::print(&format!(
+                    "[RamFilesystem] send_tunlinkat: entry '{}' not found in directory",
+                    msg.name
+                ));
+            }
+            TunlinkatError::InternalError
+        })?;
+
+        // Check if it's a directory
+        const AT_REMOVEDIR: u32 = 0x200;
+        let is_dir = self.is_dir(entry_inode);
+        let is_removedir = (msg.flags & AT_REMOVEDIR) != 0;
+
+        if is_dir && !is_removedir {
+            // Trying to remove directory without AT_REMOVEDIR flag
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Eisdir as u32,
+            )));
+        }
+
+        if !is_dir && is_removedir {
+            // Trying to remove non-directory with AT_REMOVEDIR flag
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Enotdir as u32,
+            )));
+        }
+
+        // If it's a directory, check if it's empty
+        if is_dir
+            && let Some(RamNode::Directory { entries, .. }) = self.nodes.get(&entry_inode)
+            && !entries.is_empty()
+        {
+            if MOUNT_DEBUG {
+                crate::kernel::print(&format!(
+                    "[RamFilesystem] send_tunlinkat: directory '{}' is not empty",
+                    msg.name
+                ));
+            }
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Enotempty as u32,
+            )));
+        }
+
+        // Remove the entry from parent directory
+        if let Some(RamNode::Directory { entries, .. }) = self.nodes.get_mut(&parent_inode) {
+            entries.remove(&msg.name);
+            // Increment parent version
+            if let Some(version) = self.qid_versions.get_mut(&parent_inode) {
+                *version = version.wrapping_add(1);
+            }
+        }
+
+        // Remove the node itself
+        self.nodes.remove(&entry_inode);
+        self.qid_versions.remove(&entry_inode);
+
+        if MOUNT_DEBUG {
+            crate::kernel::print(&format!(
+                "[RamFilesystem] send_tunlinkat: removed '{}' (inode={})",
+                msg.name, entry_inode
+            ));
+        }
+
+        Ok(P9Response::Success(RunlinkatMessage { tag: msg.tag }))
     }
 
     fn send_trenameat(

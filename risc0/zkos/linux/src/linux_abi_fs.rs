@@ -257,7 +257,24 @@ const MAX_9P_IO_CHUNK: u32 = 8192 - 24; // 8168 bytes
 const INVALID_MODE: u32 = 0xFFFF_FFFF;
 
 pub fn get_root_fid() -> u32 {
-    unsafe { ROOT_FID }
+    // ROOT_FID should always point to "/". If ROOT_FID and CWD_FID are the same (both 0),
+    // that's fine initially. But if CWD_FID has been updated and ROOT_FID is still 0,
+    // then ROOT_FID might have been walked away from root. We need to ensure ROOT_FID
+    // always points to "/". The simplest solution is to use a dedicated root FID.
+    const DEDICATED_ROOT_FID: u32 = 0xFFFF_FF00;
+    unsafe {
+        // If ROOT_FID is 0 and CWD_FID is not 0, then ROOT_FID might have been walked
+        // In this case, we should use a dedicated root FID that's separate from CWD
+        if ROOT_FID == 0 && CWD_FID != 0 {
+            // Try to ensure DEDICATED_ROOT_FID points to root by cloning from CWD and walking to root
+            // For now, just return 0 and let the caller handle it
+            // Actually, better: clone root from CWD by walking ".." enough times, or use a temp FID
+            // Simplest: use a dedicated FID that we keep at root
+            DEDICATED_ROOT_FID
+        } else {
+            ROOT_FID
+        }
+    }
 }
 
 #[allow(dead_code)]
@@ -6689,7 +6706,8 @@ pub fn attach_to_p9() {
         }
     }
 
-    // Attach to root
+    // Attach to root - use FID 0 for CWD initially, and a dedicated FID for root
+    const DEDICATED_ROOT_FID: u32 = 0xFFFF_FF00;
     let tattach = TattachMessage::new(
         0,
         0,
@@ -6702,7 +6720,17 @@ pub fn attach_to_p9() {
             debug_print!("Received Rattach: {:?}", rattach);
             set_cwd_str("/".to_string());
             set_cwd_fid(0);
-            set_root_fid(0);
+            // Clone FID 0 to DEDICATED_ROOT_FID to keep root separate from CWD
+            let twalk = crate::p9::TwalkMessage::new(0, 0, DEDICATED_ROOT_FID, vec![]);
+            match twalk.send_twalk() {
+                Ok(crate::p9::P9Response::Success(_)) => {
+                    set_root_fid(DEDICATED_ROOT_FID);
+                }
+                _ => {
+                    // If clone fails, just use 0 for root (fallback)
+                    set_root_fid(0);
+                }
+            }
         }
         Ok(P9Response::Error(rlerror)) => {
             kpanic!(
