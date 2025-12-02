@@ -63,7 +63,7 @@ impl<'a, Risc0ContextT> BigIntIOImpl<'a, Risc0ContextT> {
 
 fn check_bigint_addr(addr: WordAddr, mode: u32) -> Result<()> {
     ensure!(
-        addr >= ZERO_PAGE_END_ADDR.waddr() && mode == 1 || addr < USER_BIGINT_END_ADDR.waddr(),
+        addr >= ZERO_PAGE_END_ADDR.waddr() && (mode == 1 || addr < USER_BIGINT_END_ADDR.waddr()),
         "Invalid bigint address"
     );
     Ok(())
@@ -246,19 +246,30 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
 mod tests {
     use super::*;
     use crate::execute::r0vm::TestRisc0Context;
+    use anyhow::Context;
+    use malachite::num::basic::traits::One;
     use risc0_binfmt::ByteAddr;
 
-    fn bigint_write(value: Vec<u32>, count: u32, expected: Vec<u8>) -> Result<()> {
+    /// Register used to store the arena base address for test functions.
+    const ARENA_REG: usize = REG_A0;
+    /// Default arena base address used in the tests below.
+    const DEFAULT_BASE_ADDR: ByteAddr = ByteAddr(ZERO_PAGE_END_ADDR.0 + 0x1234);
+
+    fn bigint_write_to(
+        base_addr: ByteAddr,
+        machine_mode: bool,
+        value: Vec<u32>,
+        count: u32,
+        expected: Vec<u8>,
+    ) -> Result<()> {
         let mut test_context = TestRisc0Context::default();
-        let arena = REG_A0;
-        let base_addr = ByteAddr(0x1234);
-        test_context
-            .store_register(MACHINE_REGS_ADDR.waddr(), arena, base_addr.0)
-            .unwrap();
-        let mut io = BigIntIOImpl::new(&mut test_context, /*mod=*/ 0);
+        test_context.store_register(MACHINE_REGS_ADDR.waddr(), ARENA_REG, base_addr.0)?;
+
+        let mode = if machine_mode { 1 } else { 0 };
+        let mut io = BigIntIOImpl::new(&mut test_context, mode);
 
         let natural_in = Natural::from_limbs_asc(&value);
-        io.store(arena as u32, 0, count, &natural_in)?;
+        io.store(ARENA_REG as u32, 0, count, &natural_in)?;
 
         write_witness_to_memory(io.witness, &mut test_context).unwrap();
 
@@ -273,19 +284,60 @@ mod tests {
         Ok(())
     }
 
-    fn bigint_read(input: Vec<u8>, count: u32, expected: Vec<u32>) -> Result<()> {
+    fn bigint_write(value: Vec<u32>, count: u32, expected: Vec<u8>) -> Result<()> {
+        bigint_write_to(DEFAULT_BASE_ADDR, false, value, count, expected)
+    }
+
+    fn bigint_write_oob(base_addr: ByteAddr, count: u32, machine_mode: bool) -> Result<()> {
         let mut test_context = TestRisc0Context::default();
-        let arena = REG_A0;
-        let base_addr = ByteAddr(0x1234);
-        test_context
-            .store_register(MACHINE_REGS_ADDR.waddr(), arena, base_addr.0)
-            .unwrap();
+        test_context.store_register(MACHINE_REGS_ADDR.waddr(), ARENA_REG, base_addr.0)?;
+
+        let mode = if machine_mode { 1 } else { 0 };
+        let mut io = BigIntIOImpl::new(&mut test_context, mode);
+
+        let natural_in = Natural::ONE;
+        let error = io
+            .store(ARENA_REG as u32, 0, count, &natural_in)
+            .err()
+            .context("Expected store to result in an error")?;
+
+        assert!(error.to_string().contains("Invalid bigint address"));
+        Ok(())
+    }
+
+    fn bigint_read_from(
+        base_addr: ByteAddr,
+        machine_mode: bool,
+        input: Vec<u8>,
+        count: u32,
+        expected: Vec<u32>,
+    ) -> Result<()> {
+        let mut test_context = TestRisc0Context::default();
+        test_context.store_register(MACHINE_REGS_ADDR.waddr(), ARENA_REG, base_addr.0)?;
 
         test_context.store_region(base_addr, &input)?;
 
-        let mut io = BigIntIOImpl::new(&mut test_context, /*mod=*/ 0);
-        let natural_out = io.load(arena as u32, 0, count).unwrap();
+        let mut io = BigIntIOImpl::new(&mut test_context, machine_mode as u32);
+        let natural_out = io.load(ARENA_REG as u32, 0, count).unwrap();
         assert_eq!(natural_out.to_limbs_asc(), expected);
+        Ok(())
+    }
+
+    fn bigint_read(input: Vec<u8>, count: u32, expected: Vec<u32>) -> Result<()> {
+        bigint_read_from(DEFAULT_BASE_ADDR, false, input, count, expected)
+    }
+
+    fn bigint_read_oob(base_addr: ByteAddr, count: u32, machine_mode: bool) -> Result<()> {
+        let mut test_context = TestRisc0Context::default();
+        test_context.store_register(MACHINE_REGS_ADDR.waddr(), ARENA_REG, base_addr.0)?;
+
+        let mut io = BigIntIOImpl::new(&mut test_context, machine_mode as u32);
+        let error = io
+            .load(ARENA_REG as u32, 0, count)
+            .err()
+            .context("Expected load to result in an error")?;
+
+        assert!(error.to_string().contains("Invalid bigint address"));
         Ok(())
     }
 
@@ -420,5 +472,91 @@ mod tests {
             )
             .unwrap();
         }
+    }
+
+    #[test]
+    fn bigint_read_kernel_memory() {
+        bigint_read_oob(KERNEL_START_ADDR, 1, false).unwrap();
+        bigint_read_oob(
+            KERNEL_START_ADDR - ByteAddr(BIGINT_WIDTH_BYTES as u32),
+            2,
+            false,
+        )
+        .unwrap();
+
+        bigint_read_from(
+            KERNEL_START_ADDR,
+            true,
+            vec![
+                0x1, 0x0, 0x0, 0x1, // u32
+                0x2, 0x0, 0x0, 0x1, // u32
+                0x3, 0x0, 0x0, 0x1, // u32
+                0x4, 0x0, 0x0, 0x1, // u32
+            ],
+            16,
+            vec![0x1000001, 0x1000002, 0x1000003, 0x1000004],
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_read_zero_page() {
+        bigint_read_oob(ZERO_PAGE_START_ADDR, 1, false).unwrap();
+        bigint_read_oob(ZERO_PAGE_START_ADDR, 1, true).unwrap();
+        bigint_read_oob(
+            ZERO_PAGE_END_ADDR - ByteAddr(BIGINT_WIDTH_BYTES as u32),
+            1,
+            false,
+        )
+        .unwrap();
+        bigint_read_oob(
+            ZERO_PAGE_END_ADDR - ByteAddr(BIGINT_WIDTH_BYTES as u32),
+            1,
+            true,
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_write_kernel_memory() {
+        bigint_write_oob(KERNEL_START_ADDR, 1, false).unwrap();
+        bigint_write_oob(
+            KERNEL_START_ADDR - ByteAddr(BIGINT_WIDTH_BYTES as u32),
+            2,
+            false,
+        )
+        .unwrap();
+
+        bigint_write_to(
+            KERNEL_START_ADDR,
+            true,
+            vec![0x1000001, 0x1000002, 0x1000003, 0x1000004],
+            16,
+            vec![
+                0x1, 0x0, 0x0, 0x1, // u32
+                0x2, 0x0, 0x0, 0x1, // u32
+                0x3, 0x0, 0x0, 0x1, // u32
+                0x4, 0x0, 0x0, 0x1, // u32
+            ],
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_write_zero_page() {
+        bigint_write_oob(ZERO_PAGE_START_ADDR, 1, false).unwrap();
+        bigint_write_oob(ZERO_PAGE_START_ADDR, 1, true).unwrap();
+        bigint_write_oob(
+            ZERO_PAGE_END_ADDR - ByteAddr(BIGINT_WIDTH_BYTES as u32),
+            1,
+            false,
+        )
+        .unwrap();
+        bigint_write_oob(
+            ZERO_PAGE_END_ADDR - ByteAddr(BIGINT_WIDTH_BYTES as u32),
+            1,
+            true,
+        )
+        .unwrap();
     }
 }
