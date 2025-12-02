@@ -200,11 +200,9 @@ template <typename C> FDEV void InstRegBlock<C>::set(CTX, InstRegWitness wit) DE
 }
 
 template <typename C> FDEV void InstRegBlock<C>::verify(CTX) DEV {
-  auto options = Val<C>(OptSize<InstKind>::value) * (Val<C>(2) * optOut.get() + outIdx.get()) +
-                 Val<C>(uint32_t(INST_REG));
-  Val<C> imm(0);
   CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
-  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, dr.rs1Idx, dr.rs2Idx, rd.idx, imm, options);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, dr.rs1Idx, dr.rs2Idx, rd.idx, Val<C>(0),
+                  Val<C>(OptSize<InstKind>::value) * (Val<C>(2) * optOut.get() + outIdx.get()) + Val<C>(uint32_t(INST_REG)));
   UNIT_ARGUMENT(ctx, optOut, dr.readRs1.data, dr.readRs2.data, out0, out1);
   // TODO: this extra hint is necessary to verify this unit. I've requested a
   // fix in Picus, which should be confirmed once its available.
@@ -255,10 +253,9 @@ template <typename C> FDEV void InstImmBlock<C>::set(CTX, InstImmWitness wit) DE
 }
 
 template <typename C> FDEV void InstImmBlock<C>::verify(CTX) DEV {
-  auto options = Val<C>(OptSize<InstKind>::value) * (Val<C>(2) * optOut.get() + outIdx.get()) +
-                 Val<C>(uint32_t(INST_IMM));
   CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
-  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1.idx, rs2, rd.idx, imm, options);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1.idx, rs2, rd.idx, imm,
+                  Val<C>(OptSize<InstKind>::value) * (Val<C>(2) * optOut.get() + outIdx.get()) + Val<C>(uint32_t(INST_IMM)));
   UNIT_ARGUMENT(ctx, optOut, readRs1.data, imm, out0, out1);
 
   ValU32<C> out = cond<C>(outIdx.get(), out1.get(), out0.get());
@@ -328,14 +325,15 @@ template <typename C> FDEV Val<C> InstLoadBlock<C>::getSignBitInput() DEV {
 }
 
 template <typename C> FDEV void InstLoadBlock<C>::verify(CTX) DEV {
-  Val<C> options = Val<C>(OptSize<InstKind>::value) * (opt.get()) + Val<C>(uint32_t(INST_LOAD));
   CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
-  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1.idx, rs2, rd.idx, imm, options);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1.idx, rs2, rd.idx, imm,
+                  Val<C>(OptSize<InstKind>::value) * (opt.get()) + Val<C>(uint32_t(INST_LOAD)));
   PICUS_INPUT(ctx, opt);
-  PICUS_INPUT(ctx, )
 
   // Since load instructions read at an offset, the base + offset is computed by
-  // readAddr. Here, make sure that the memory read corresponds to that address.
+  // readAddr. We require word loads to be 4-byte aligned, and for short and
+  // byte loads we load the aligned word containing those bytes. Here, make sure
+  // that the memory read corresponds to that address.
   EQ(readAddr.wordAddr(computeAddr.get()), readMem.getWordAddr());
 
   // Regardless of whether we load a byte, short, or word, we always compute all
@@ -521,9 +519,8 @@ template <typename C> FDEV void InstJalBlock<C>::set(CTX, InstJalWitness wit) DE
 }
 
 template <typename C> FDEV void InstJalBlock<C>::verify(CTX) DEV {
-  auto options = Val<C>(uint32_t(INST_JAL));
   CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
-  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1, rs2, rd.idx, imm, options);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1, rs2, rd.idx, imm, Val<C>(uint32_t(INST_JAL)));
 
   EQ(fetch.nextPc.low.get(), writeRd.data.low.get());
   EQ(fetch.nextPc.high.get(), writeRd.data.high.get());
@@ -562,9 +559,8 @@ template <typename C> FDEV void InstJalrBlock<C>::set(CTX, InstJalrWitness wit) 
 }
 
 template <typename C> FDEV void InstJalrBlock<C>::verify(CTX) DEV {
-  auto options = Val<C>(uint32_t(INST_JALR));
   CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
-  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1, rs2, rd.idx, imm, options);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1, rs2, rd.idx, imm, Val<C>(uint32_t(INST_JALR)));
 
   EQ(fetch.nextPc.low.get(), writeRd.data.low.get());
   EQ(fetch.nextPc.high.get(), writeRd.data.high.get());
