@@ -20,6 +20,8 @@ use alloc::format;
 #[cfg(target_arch = "riscv32")]
 use alloc::string::{String, ToString};
 #[cfg(target_arch = "riscv32")]
+use alloc::vec;
+#[cfg(target_arch = "riscv32")]
 use alloc::vec::Vec;
 
 #[cfg(not(target_arch = "riscv32"))]
@@ -48,19 +50,33 @@ enum RamNode {
         mode: u32,
         uid: u32,
         gid: u32,
+        xattrs: BTreeMap<String, Vec<u8>>, // extended attributes
     },
     Directory {
         entries: BTreeMap<String, u64>, // name -> inode
         mode: u32,
         uid: u32,
         gid: u32,
+        xattrs: BTreeMap<String, Vec<u8>>, // extended attributes
     },
     Symlink {
         target: String,
         mode: u32,
         uid: u32,
         gid: u32,
+        xattrs: BTreeMap<String, Vec<u8>>, // extended attributes
     },
+}
+
+/// FID type for tracking what a FID refers to
+#[derive(Clone, Debug)]
+enum FidType {
+    /// Regular file/directory FID
+    Regular { inode: u64, path: String },
+    /// Extended attribute FID (for reading)
+    XattrRead { inode: u64, name: String },
+    /// Extended attribute FID (for writing)
+    XattrWrite { inode: u64, name: String, size: u64 },
 }
 
 /// RAM filesystem - simple in-memory writable filesystem
@@ -71,8 +87,8 @@ pub struct RamFilesystem {
     next_inode: u64,
     /// Root inode (always 1)
     root_inode: u64,
-    /// FID table: fid -> (inode, path)
-    fid_table: BTreeMap<u32, (u64, String)>,
+    /// FID table: fid -> FID type
+    fid_table: BTreeMap<u32, FidType>,
     /// QID version counter (increments on modification)
     qid_versions: BTreeMap<u64, u32>,
 }
@@ -98,6 +114,7 @@ impl RamFilesystem {
                 mode: S_IFDIR | 0o755,
                 uid: 0,
                 gid: 0,
+                xattrs: BTreeMap::new(),
             },
         );
         fs.qid_versions.insert(1, 0);
@@ -136,18 +153,19 @@ impl RamFilesystem {
         if self.fid_table.contains_key(&fid) {
             return Err(P9Error::Eexist as u32);
         }
-        self.fid_table.insert(fid, (inode, path));
+        self.fid_table.insert(fid, FidType::Regular { inode, path });
         Ok(())
     }
 
     fn get_fid(&self, fid: u32) -> Result<(u64, String), u32> {
-        self.fid_table
-            .get(&fid)
-            .cloned()
-            .ok_or(P9Error::Ebadf as u32)
+        match self.fid_table.get(&fid) {
+            Some(FidType::Regular { inode, path }) => Ok((*inode, path.clone())),
+            Some(_) => Err(P9Error::Ebadf as u32), // Not a regular FID
+            None => Err(P9Error::Ebadf as u32),
+        }
     }
 
-    fn get_fid_mut(&mut self, fid: u32) -> Result<&mut (u64, String), u32> {
+    fn get_fid_mut(&mut self, fid: u32) -> Result<&mut FidType, u32> {
         self.fid_table.get_mut(&fid).ok_or(P9Error::Ebadf as u32)
     }
 
@@ -241,7 +259,10 @@ impl RamFilesystem {
         if from_fid == to_fid {
             // Update existing FID entry
             let fid_entry = self.get_fid_mut(to_fid)?;
-            *fid_entry = (current_inode, current_path);
+            *fid_entry = FidType::Regular {
+                inode: current_inode,
+                path: current_path,
+            };
         } else {
             // Allocate new FID - if it already exists, clunk it first
             if self.fid_table.contains_key(&to_fid) {
@@ -280,6 +301,7 @@ impl RamFilesystem {
                 mode: S_IFREG | (mode & 0o7777),
                 uid: 0,
                 gid: 0,
+                xattrs: BTreeMap::new(),
             },
         );
         self.qid_versions.insert(inode, 0);
@@ -325,6 +347,7 @@ impl RamFilesystem {
                 mode: S_IFDIR | (mode & 0o7777),
                 uid: 0,
                 gid,
+                xattrs: BTreeMap::new(),
             },
         );
         self.qid_versions.insert(inode, 0);
@@ -368,6 +391,7 @@ impl RamFilesystem {
                 mode: S_IFLNK | Self::DEFAULT_SYMLINK_PERMS,
                 uid: 0,
                 gid,
+                xattrs: BTreeMap::new(),
             },
         );
         self.qid_versions.insert(inode, 0);
@@ -497,16 +521,57 @@ impl P9Backend for RamFilesystem {
     }
 
     fn send_tread(&mut self, msg: &TreadMessage) -> Result<P9Response<RreadMessage>, TreadError> {
-        let (inode, _) = self
-            .get_fid(msg.fid)
-            .map_err(|_| TreadError::InternalError)?;
-        match self.read_file(inode, msg.offset, msg.count) {
-            Ok(data) => Ok(P9Response::Success(RreadMessage {
-                tag: msg.tag,
-                count: data.len() as u32,
-                data,
-            })),
-            Err(errno) => Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno))),
+        // Check if this is an xattr FID
+        let fid_type = self
+            .fid_table
+            .get(&msg.fid)
+            .ok_or(TreadError::InternalError)?
+            .clone();
+
+        match fid_type {
+            FidType::Regular { inode, .. } => {
+                // Regular file read
+                match self.read_file(inode, msg.offset, msg.count) {
+                    Ok(data) => Ok(P9Response::Success(RreadMessage {
+                        tag: msg.tag,
+                        count: data.len() as u32,
+                        data,
+                    })),
+                    Err(errno) => Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno))),
+                }
+            }
+            FidType::XattrRead { inode, name } => {
+                // Read extended attribute
+                let node = self.nodes.get(&inode).ok_or(TreadError::InternalError)?;
+                let xattrs = match node {
+                    RamNode::File { xattrs, .. }
+                    | RamNode::Directory { xattrs, .. }
+                    | RamNode::Symlink { xattrs, .. } => xattrs,
+                };
+
+                match xattrs.get(&name) {
+                    Some(value) => {
+                        let start = msg.offset.min(value.len() as u64) as usize;
+                        let end = (msg.offset + msg.count as u64).min(value.len() as u64) as usize;
+                        Ok(P9Response::Success(RreadMessage {
+                            tag: msg.tag,
+                            count: (end - start) as u32,
+                            data: value[start..end].to_vec(),
+                        }))
+                    }
+                    None => Ok(P9Response::Error(RlerrorMessage::new(
+                        msg.tag,
+                        P9Error::Enodata as u32,
+                    ))),
+                }
+            }
+            FidType::XattrWrite { .. } => {
+                // Cannot read from a write-only xattr FID
+                Ok(P9Response::Error(RlerrorMessage::new(
+                    msg.tag,
+                    P9Error::Ebadf as u32,
+                )))
+            }
         }
     }
 
@@ -514,15 +579,71 @@ impl P9Backend for RamFilesystem {
         &mut self,
         msg: &TwriteMessage,
     ) -> Result<P9Response<RwriteMessage>, TwriteError> {
-        let (inode, _) = self
-            .get_fid(msg.fid)
-            .map_err(|_| TwriteError::InternalError)?;
-        match self.write_file(inode, msg.offset, &msg.data) {
-            Ok(count) => Ok(P9Response::Success(RwriteMessage {
-                tag: msg.tag,
-                count,
-            })),
-            Err(errno) => Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno))),
+        // Check if this is an xattr FID
+        let fid_type = self
+            .fid_table
+            .get(&msg.fid)
+            .ok_or(TwriteError::InternalError)?
+            .clone();
+
+        match fid_type {
+            FidType::Regular { inode, .. } => {
+                // Regular file write
+                match self.write_file(inode, msg.offset, &msg.data) {
+                    Ok(count) => Ok(P9Response::Success(RwriteMessage {
+                        tag: msg.tag,
+                        count,
+                    })),
+                    Err(errno) => Ok(P9Response::Error(RlerrorMessage::new(msg.tag, errno))),
+                }
+            }
+            FidType::XattrWrite { inode, name, size } => {
+                // Write extended attribute
+                // Get the node and prepare the xattr buffer
+                let node = self
+                    .nodes
+                    .get_mut(&inode)
+                    .ok_or(TwriteError::InternalError)?;
+                let xattrs = match node {
+                    RamNode::File { xattrs, .. }
+                    | RamNode::Directory { xattrs, .. }
+                    | RamNode::Symlink { xattrs, .. } => xattrs,
+                };
+
+                // Ensure xattr exists and is sized correctly
+                let xattr_value = xattrs
+                    .entry(name.clone())
+                    .or_insert_with(|| vec![0u8; size as usize]);
+
+                // Resize if needed
+                if xattr_value.len() < size as usize {
+                    xattr_value.resize(size as usize, 0);
+                }
+
+                // Write the data at the given offset
+                let offset = msg.offset as usize;
+                if offset + msg.data.len() > size as usize {
+                    // Writing beyond allocated size
+                    return Ok(P9Response::Error(RlerrorMessage::new(
+                        msg.tag,
+                        P9Error::Einval as u32,
+                    )));
+                }
+
+                xattr_value[offset..offset + msg.data.len()].copy_from_slice(&msg.data);
+
+                Ok(P9Response::Success(RwriteMessage {
+                    tag: msg.tag,
+                    count: msg.data.len() as u32,
+                }))
+            }
+            FidType::XattrRead { .. } => {
+                // Cannot write to a read-only xattr FID
+                Ok(P9Response::Error(RlerrorMessage::new(
+                    msg.tag,
+                    P9Error::Ebadf as u32,
+                )))
+            }
         }
     }
 
@@ -550,8 +671,13 @@ impl P9Backend for RamFilesystem {
         match self.create_file(parent_inode, msg.name.clone(), msg.mode) {
             Ok(inode) => {
                 // Update FID to point to new file
-                if let Ok((fid_inode, _)) = self.get_fid_mut(msg.fid) {
-                    *fid_inode = inode;
+                if let Ok(fid_type) = self.get_fid_mut(msg.fid) {
+                    if let FidType::Regular {
+                        inode: fid_inode, ..
+                    } = fid_type
+                    {
+                        *fid_inode = inode;
+                    }
                 }
                 Ok(P9Response::Success(RlcreateMessage {
                     tag: msg.tag,
@@ -1115,22 +1241,118 @@ impl P9Backend for RamFilesystem {
 
     fn send_txattrwalk(
         &mut self,
-        _msg: &TxattrwalkMessage,
+        msg: &TxattrwalkMessage,
     ) -> Result<P9Response<RxattrwalkMessage>, TxattrwalkError> {
-        Ok(P9Response::Error(RlerrorMessage::new(
-            _msg.tag,
-            P9Error::Eopnotsupp as u32,
-        )))
+        // Get the file FID
+        let (inode, _) = self
+            .get_fid(msg.fid)
+            .map_err(|_| TxattrwalkError::InternalError)?;
+
+        // Get the node
+        let node = self
+            .nodes
+            .get(&inode)
+            .ok_or(TxattrwalkError::InternalError)?;
+
+        // Get xattrs from the node
+        let xattrs = match node {
+            RamNode::File { xattrs, .. }
+            | RamNode::Directory { xattrs, .. }
+            | RamNode::Symlink { xattrs, .. } => xattrs,
+        };
+
+        // Check if the xattr exists
+        let size = match xattrs.get(&msg.name) {
+            Some(value) => value.len() as u64,
+            None => {
+                // Xattr doesn't exist
+                return Ok(P9Response::Error(RlerrorMessage::new(
+                    msg.tag,
+                    P9Error::Enodata as u32,
+                )));
+            }
+        };
+
+        // Allocate the new FID for reading the xattr
+        if self.fid_table.contains_key(&msg.newfid) {
+            // FID already exists, return error
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Eexist as u32,
+            )));
+        }
+
+        self.fid_table.insert(
+            msg.newfid,
+            FidType::XattrRead {
+                inode,
+                name: msg.name.clone(),
+            },
+        );
+
+        Ok(P9Response::Success(RxattrwalkMessage {
+            tag: msg.tag,
+            size,
+        }))
     }
 
     fn send_txattrcreate(
         &mut self,
-        _msg: &TxattrcreateMessage,
+        msg: &TxattrcreateMessage,
     ) -> Result<P9Response<RxattrcreateMessage>, TxattrcreateError> {
-        Ok(P9Response::Error(RlerrorMessage::new(
-            _msg.tag,
-            P9Error::Enosys as u32,
-        )))
+        // Get the file FID
+        let (inode, _) = self
+            .get_fid(msg.fid)
+            .map_err(|_| TxattrcreateError::InternalError)?;
+
+        // Check that the node exists
+        if !self.nodes.contains_key(&inode) {
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Enoent as u32,
+            )));
+        }
+
+        // Check flags
+        const XATTR_CREATE: u32 = 0x1; // Create only - fail if exists
+        const XATTR_REPLACE: u32 = 0x2; // Replace only - fail if doesn't exist
+
+        let node = self.nodes.get(&inode).unwrap();
+        let xattrs = match node {
+            RamNode::File { xattrs, .. }
+            | RamNode::Directory { xattrs, .. }
+            | RamNode::Symlink { xattrs, .. } => xattrs,
+        };
+
+        let exists = xattrs.contains_key(&msg.name);
+
+        if (msg.flags & XATTR_CREATE) != 0 && exists {
+            // XATTR_CREATE flag set, but xattr already exists
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Eexist as u32,
+            )));
+        }
+
+        if (msg.flags & XATTR_REPLACE) != 0 && !exists {
+            // XATTR_REPLACE flag set, but xattr doesn't exist
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Enodata as u32,
+            )));
+        }
+
+        // Convert the FID to an xattr write FID
+        self.fid_table.insert(
+            msg.fid,
+            FidType::XattrWrite {
+                inode,
+                name: msg.name.clone(),
+                size: msg.attr_size,
+            },
+        );
+
+        Ok(P9Response::Success(RxattrcreateMessage { tag: msg.tag }))
     }
 
     fn send_tflush(
