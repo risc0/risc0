@@ -23,7 +23,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     TerminateState,
-    execute::{CycleLimit, Executor, ExecutorResult, RV32IM_V2_CIRCUIT_VERSION},
+    execute::{
+        CycleLimit, Executor, ExecutorResult, RV32IM_V2_CIRCUIT_VERSION, executor::ExecutionError,
+    },
 };
 
 use super::{Syscall, SyscallContext};
@@ -82,7 +84,7 @@ impl Segment {
     /// Execute the [Segment], returning the execution result.
     ///
     /// This method can be used to compute the [crate::Rv32imV2Claim] from this segment.
-    pub fn execute(&self) -> Result<ExecutorResult> {
+    pub fn execute(&self) -> Result<ExecutorResult, ExecutionError> {
         let handler = SegmentSyscallHandler {
             segment: self,
             read_pos: Cell::new(0),

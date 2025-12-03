@@ -15,7 +15,7 @@
 
 use std::{cell::RefCell, collections::BTreeSet, io::Read, rc::Rc};
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result, anyhow, bail};
 use enum_map::EnumMap;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
@@ -131,6 +131,21 @@ pub enum CycleLimit {
     Soft(u64), // stop execution after this cycle count
     #[default]
     None,
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum ExecutionError {
+    #[error("Execution cycle limit exceeded: {cycle} >= {limit}")]
+    CycleLimitExceeded { limit: u64, cycle: u64 },
+    #[error("Execution failed at program counter {pc:?}: {error}")]
+    ExecutionFailed {
+        #[source]
+        error: anyhow::Error,
+        pc: ByteAddr,
+        update: Option<Box<SegmentUpdate>>,
+    },
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
 }
 
 /// Update message sent to the segment callback on each split.
@@ -297,7 +312,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         &mut self,
         segment_po2: usize,
         max_cycles: CycleLimit,
-    ) -> Result<Option<SegmentUpdate>> {
+    ) -> Result<Option<SegmentUpdate>, ExecutionError> {
         let segment_limit: u32 = 1 << segment_po2;
         assert!(Self::max_insn_cycles(segment_po2) < segment_limit as usize);
         let segment_threshold = segment_limit - Self::max_insn_cycles(segment_po2) as u32;
@@ -314,16 +329,20 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         Risc0Machine::resume(self)?;
 
-        while self.terminate_state.is_none() {
+        loop {
+            // Check if the machine has reached termination.
+            let None = self.terminate_state else {
+                break;
+            };
+
             // Check the session-level cycle limit.
             match max_cycles {
-                // DO NOT MERGE: Return a SegmentUpdate with the error.
                 CycleLimit::Hard(max_cycles) => {
                     if self.cycles.user >= max_cycles {
-                        bail!(
-                            "Session limit exceeded: {} >= {max_cycles}",
-                            self.cycles.user
-                        );
+                        return Err(ExecutionError::CycleLimitExceeded {
+                            limit: max_cycles,
+                            cycle: self.cycles.user,
+                        });
                     }
                 }
                 CycleLimit::Soft(max_cycles) => {
@@ -336,45 +355,40 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
             // Check the segment-level cycle limit.
             if self.should_split(segment_threshold) {
-                assert!(
-                    self.segment_cycles() < segment_limit,
-                    "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
-                    self.pc
-                );
+                if self.segment_cycles() > segment_limit {
+                    return Err(anyhow!(
+                        "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
+                        self.pc
+                    )
+                    .into());
+                };
 
-                Risc0Machine::suspend(self)?;
-                let update = self.split_segment(segment_po2, segment_threshold)?;
-                return Ok(Some(update));
+                break;
             }
 
-            Risc0Machine::step(&mut Emulator {}, self)?;
-            self.insn_counter += 1;
-
-            /* DO NOT MERGE: Return a SegmentUpdate with the error.
-            if let Err(err) = result {
-                self.dump();
-                let result = self.dump_segment(
-                    &mut callback,
-                    segment_po2,
-                    segment_threshold,
-                    self.segment_counter,
-                );
-                return Err(if let Err(inner) = result {
-                    err.context(inner)
-                } else {
-                    err
+            // Execute a step of the virtual machine.
+            if let Err(error) = Risc0Machine::step(&mut Emulator {}, self) {
+                self.dump_recent_instructions();
+                return Err(ExecutionError::ExecutionFailed {
+                    error,
+                    pc: self.pc,
+                    update: Some(Box::new(self.dump_segment(
+                        segment_po2,
+                        0,
+                        self.segment_counter,
+                    ))),
                 });
             }
-            */
+            self.insn_counter += 1;
         }
 
         Risc0Machine::suspend(self)?;
 
-        let final_cycles = self.segment_cycles().next_power_of_two();
-        let final_po2 = log2_ceil(final_cycles as usize);
-        let update = self.split_segment(
-            final_po2, 0, // theshold is meaningless for final segment
-        )?;
+        let cycles = self.segment_cycles().next_power_of_two();
+        let po2 = log2_ceil(cycles as usize);
+        let segment_threshold_min = u32::min(self.segment_cycles(), segment_threshold);
+        let update = self.split_segment(po2, segment_threshold_min)?;
+
         Ok(Some(update))
     }
 
@@ -383,7 +397,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         segment_po2: usize,
         max_cycles: CycleLimit,
         mut callback: impl FnMut(SegmentUpdate) -> Result<()>,
-    ) -> Result<ExecutorResult> {
+    ) -> Result<ExecutorResult, ExecutionError> {
         while let Some(update) = self.run_segment(segment_po2, max_cycles)? {
             callback(update)?;
         }
@@ -399,7 +413,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         &mut self,
         segment_po2: usize,
         segment_threshold: u32,
-    ) -> Result<SegmentUpdate> {
+    ) -> Result<SegmentUpdate, ExecutionError> {
         tracing::debug!(
             "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
             self.user_cycles,
@@ -501,32 +515,24 @@ impl<'a, S: Syscall> Executor<'a, S> {
         }
     }
 
-    #[expect(unused)]
-    fn dump(&self) {
+    fn dump_recent_instructions(&self) {
         tracing::debug!("Dumping last {} instructions:", self.ring.len());
         for (pc, kind, decoded) in self.ring.iter() {
             tracing::debug!("{pc:?}> {:#010x}  {}", decoded.insn, disasm(*kind, decoded));
         }
     }
 
-    /*
-    #[expect(unused)]
-    fn dump_segment(
-        &mut self,
-        callback: &mut impl SegmentUpdateCallback,
-        po2: usize,
-        segment_threshold: u32,
-        index: u32,
-    ) -> anyhow::Result<()> {
+    /// Produce a [SegmentUpdate] from the current state of the executor. Unlike
+    /// [Executor::split_segment], this does not reset the state of the executor.
+    fn dump_segment(&mut self, po2: usize, segment_threshold: u32, index: u32) -> SegmentUpdate {
         let partial_image = self.pager.commit();
-
-        let update = SegmentUpdate {
+        SegmentUpdate {
             update_partial_image: partial_image,
             access_page_indexes: self.pager.page_indexes(),
             input_digest: self.input_digest,
             output_digest: self.output_digest,
-            read_record: std::mem::take(&mut self.read_record),
-            write_record: std::mem::take(&mut self.write_record),
+            read_record: self.read_record.clone(),
+            write_record: self.write_record.clone(),
             user_cycles: self.user_cycles,
             pager_cycles: self.pager.cycles,
             insn_counter: self.insn_counter,
@@ -535,12 +541,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
             po2: po2 as u32,
             index: index as u64,
             povw_nonce: self.povw_nonce(index),
-        };
-        callback
-            .on_execution_error(update)
-            .context("Segment update callback returned error")
+        }
     }
-    */
 
     pub fn reset(&mut self) {
         let image: MemoryImage = std::mem::take(&mut self.pager.image).into();
@@ -598,7 +600,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     #[cold]
-    fn trace(&mut self, event: TraceEvent) -> Result<()> {
+    fn trace(&mut self, event: TraceEvent) -> Result<(), ExecutionError> {
         for trace in self.trace.iter() {
             trace.borrow_mut().trace_callback(event.clone())?;
         }
@@ -606,7 +608,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     #[cold]
-    fn trace_pager(&mut self) -> Result<()> {
+    fn trace_pager(&mut self) -> Result<(), ExecutionError> {
         for &event in self.pager.trace_events() {
             let event = TraceEvent::from(event);
             for trace in self.trace.iter() {
