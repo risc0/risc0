@@ -8,8 +8,8 @@ use crate::{
     p9::{
         P9Response, P9SetattrMask, Qid, RgetattrMessage, TattachMessage, TlcreateMessage,
         TlopenMessage, TmkdirMessage, TmknodMessage, TreadMessage, TreaddirMessage,
-        TreadlinkMessage, TremoveMessage, TsetattrMessage, TsymlinkMessage, TversionMessage,
-        TwriteMessage, constants::*,
+        TreadlinkMessage, TsetattrMessage, TsymlinkMessage, TversionMessage, TwriteMessage,
+        constants::*,
     },
 };
 
@@ -547,56 +547,31 @@ pub fn sys_unlinkat(dfd: u32, pathname: u32, flag: u32) -> Result<u32, Err> {
         TEMP_FID_4
     };
 
-    // Walk to the file itself WITHOUT following symlinks
-    let file_path = vec![file_name];
-    let twalk = crate::p9::TwalkMessage::new(0, dir_fid, TEMP_FID_1, file_path);
-    match twalk.send_twalk() {
-        Ok(crate::p9::P9Response::Success(rwalk)) => {
+    // Use Tunlinkat which takes directory FID and filename
+    // This properly handles hard links by removing the specific directory entry
+    let tunlinkat = crate::p9::TunlinkatMessage::new(0, dir_fid, file_name, flag);
+    match tunlinkat.send_tunlinkat() {
+        Ok(P9Response::Success(_)) => {
             if dir_fid != starting_fid {
                 clunk(dir_fid, false);
             }
-
-            if rwalk.wqids.is_empty() {
-                clunk(TEMP_FID_1, false);
-                return Err(Err::FileNotFound);
-            }
-        }
-        Ok(crate::p9::P9Response::Error(rlerror)) => {
-            if dir_fid != starting_fid {
-                clunk(dir_fid, false);
-            }
-            debug_print!(
-                "sys_unlinkat: walk to file failed with ecode={}",
-                rlerror.ecode
-            );
-            return Err(map_p9_error(rlerror.ecode));
-        }
-        Err(_) => {
-            if dir_fid != starting_fid {
-                clunk(dir_fid, false);
-            }
-            return Err(Err::FileNotFound);
-        }
-    }
-
-    // Now TEMP_FID_1 points to the file/symlink itself (not its target)
-    let tremove = TremoveMessage::new(0, TEMP_FID_1);
-    match tremove.send_tremove() {
-        Ok(P9Response::Success(rremove)) => {
-            debug_print!("sys_unlinkat: rremove = {:?}", rremove);
-            clunk(TEMP_FID_1, false);
             Ok(0)
         }
-        Ok(P9Response::Error(rlerror2)) => {
+        Ok(P9Response::Error(rlerror)) => {
+            if dir_fid != starting_fid {
+                clunk(dir_fid, false);
+            }
             debug_print!(
-                "sys_unlinkat: received Rlerror for Rremove: tag={}, ecode={}",
-                rlerror2.tag,
-                rlerror2.ecode
+                "sys_unlinkat: tunlinkat failed with ecode={}",
+                rlerror.ecode
             );
-            Err(map_p9_error(rlerror2.ecode))
+            Err(map_p9_error(rlerror.ecode))
         }
         Err(e) => {
-            debug_print!("sys_unlinkat: error sending Tremove: {:?}", e);
+            if dir_fid != starting_fid {
+                clunk(dir_fid, false);
+            }
+            debug_print!("sys_unlinkat: error sending Tunlinkat: {:?}", e);
             Err(Err::IO)
         }
     }
