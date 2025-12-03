@@ -60,7 +60,7 @@ Under the hood, Bonsai uses the RISC Zero zkVM to prove your programs. With the 
 
 _Status: Pre-Alpha_
 
-The Bonsai proving service can be used standalone or directly integrated with smart contracts and blockchains. If you're interested in Bonsai, learn more in our [litepaper] and [talks](https://youtu.be/nVAs2i-_Iyo?t=3044).
+The Bonsai proving service can be used standalone or directly integrated with smart contracts and blockchains. If you're interested in Bonsai, learn more in our [talks](https://youtu.be/nVAs2i-_Iyo?t=3044).
 
 ### 3. Bonsai ETH Relay: Connecting off-chain proofs and on-chain applications
 
@@ -70,7 +70,7 @@ The Bonsai ETH Relay connects your Ethereum dApps to Bonsai. Smart contract deve
 
 ## Where we're headed
 
-We're building technology that allows anyone to generate highly performant zero-knowledge proofs for a variety of applications. We want to make zero-knowledge proof integration into Ethereum, L1 blockchains, Cosmos app chains, L2 rollups, and dApps possible with minimal development effort. To learn more, read our [litepaper].
+We're building technology that allows anyone to generate highly performant zero-knowledge proofs for a variety of applications. We want to make zero-knowledge proof integration into Ethereum, L1 blockchains, Cosmos app chains, L2 rollups, and dApps possible with minimal development effort.
 
 [`cargo risczero`]: https://crates.io/crates/cargo-risczero
 [Bonfire Wallet]: https://ethglobal.com/showcase/bonfire-wallet-n1dzp
@@ -79,5 +79,4 @@ We're building technology that allows anyone to generate highly performant zero-
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.18/bonsai/examples/governance#readme
-[litepaper]: /litepaper
 [Request access here]: https://bonsai.xyz/apply
