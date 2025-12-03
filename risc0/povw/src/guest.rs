@@ -68,10 +68,12 @@ impl From<Journal> for State {
 #[derive(Clone, Builder, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[non_exhaustive]
 pub struct Input {
-    /// Optional journal from the previous execution of this guest.
+    /// Execution state for the Log Builder guest.
     ///
-    /// If provided, the updated root of the journal will be used as the initial root for this
-    /// update. If not provided, an empty work log root constant is used.
+    /// Use `State::Initial { work_log_id }` to start from an empty work log
+    /// (the empty work log root is used as the initial commit).
+    /// Use `State::Continuation { journal }` to resume from a prior execution
+    /// (the journal's `updated_commit` is used as the initial commit for this update).
     #[builder(setter(into))]
     pub state: State,
     /// Series of work log updates to apply.
@@ -137,7 +139,7 @@ pub struct Journal {
     /// Work log ID that this journal corresponds to.
     #[builder(setter(into))]
     pub work_log_id: PovwLogId,
-    /// Optional initial work log commitment.
+    /// Initial work log commitment.
     ///
     /// If the log is initially empty, the empty work log root constant is used.
     #[builder(setter(into))]
