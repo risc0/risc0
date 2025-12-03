@@ -32,7 +32,7 @@ use risc0_binfmt::{
     SystemState,
 };
 use risc0_circuit_rv32im::execute::{
-    CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, Executor, PAGE_BYTES, SegmentUpdate,
+    CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, ExecutionError, Executor, PAGE_BYTES, SegmentUpdate,
     Syscall as CircuitSyscall, SyscallContext as CircuitSyscallContext, platform::WORD_SIZE,
 };
 use risc0_core::scope;
@@ -181,11 +181,16 @@ impl SegmentUpdateProcessor {
             .context("Failed to send segment update to hasher thread")
     }
 
-    #[expect(unused)] // DO NOT MERGE
-    fn on_execution_error(&self, update: SegmentUpdate) -> Result<()> {
-        self.update_channel
-            .send((update, true))
-            .context("Failed to send segment error update to hasher thread")
+    fn on_execution_error(&self, error: &ExecutionError) {
+        // If the error is carrying a segment update, send it to the hasher thread to construct a
+        // Segment and dump it to a file when RISC0_DUMP_PATH env var is set.
+        if let ExecutionError::ExecutionFailed { update, .. } = error
+            && let Some(update) = update
+        {
+            self.update_channel.send((*update.clone(), true)).unwrap_or_else(
+                    |err| tracing::error!(%err, "Failed to send segment error update to hasher thread"),
+                );
+        }
     }
 }
 
@@ -303,10 +308,13 @@ impl<'a> ExecutorImpl<'a> {
     {
         thread::scope(|scope| {
             let update_processor = SegmentUpdateProcessor::spawn(scope, &self.image, callback);
-            // DO NOT MERGE: Handle errors with dumping the segment.
-            while let Some(update) = self.run_segment()? {
+            while let Some(update) = self
+                .run_segment()
+                .inspect_err(|err| update_processor.on_execution_error(err))?
+            {
                 update_processor.on_segment_update(update)?;
             }
+            // Close the update channel to indicate to the sidecar thread execution has finished.
             drop(update_processor.update_channel);
 
             let session = self.session()?;
@@ -317,7 +325,7 @@ impl<'a> ExecutorImpl<'a> {
         })
     }
 
-    pub(crate) fn run_segment(&mut self) -> Result<Option<SegmentUpdate>> {
+    pub(crate) fn run_segment(&mut self) -> Result<Option<SegmentUpdate>, ExecutionError> {
         scope!("execute");
 
         let segment_limit_po2 = self

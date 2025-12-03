@@ -134,6 +134,7 @@ pub enum CycleLimit {
 }
 
 #[derive(thiserror::Error, Debug)]
+#[non_exhaustive]
 pub enum ExecutionError {
     #[error("Session limit exceeded: {cycle} >= {limit}")]
     CycleLimitExceeded { limit: u64, cycle: u64 },
@@ -369,6 +370,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
             // Execute a step of the virtual machine.
             if let Err(error) = Risc0Machine::step(&mut Emulator {}, self) {
+                // On error, log information about the most recent instructions (at `debug` level),
+                // and include a SegmentUpdate for the segment up to the point of the error.
                 self.dump_recent_instructions();
                 return Err(ExecutionError::ExecutionFailed {
                     error,
@@ -400,7 +403,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         mut callback: impl FnMut(SegmentUpdate) -> Result<()>,
     ) -> Result<ExecutorResult, ExecutionError> {
         while let Some(update) = self.run_segment(segment_po2, max_cycles)? {
-            callback(update)?;
+            callback(update).context("Segment update callback returned error")?;
         }
         Ok(self.state())
     }
