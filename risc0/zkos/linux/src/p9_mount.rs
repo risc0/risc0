@@ -730,7 +730,13 @@ impl P9Backend for RamFilesystem {
                 ..
             }) => (*mode, *uid, *gid, data.len() as u64),
             Some(RamNode::Directory { mode, uid, gid, .. }) => (*mode, *uid, *gid, 0),
-            Some(RamNode::Symlink { mode, uid, gid, .. }) => (*mode, *uid, *gid, 0),
+            Some(RamNode::Symlink {
+                target,
+                mode,
+                uid,
+                gid,
+                ..
+            }) => (*mode, *uid, *gid, target.len() as u64), // Size = length of target string
             None => {
                 return Ok(P9Response::Error(RlerrorMessage::new(
                     msg.tag,
