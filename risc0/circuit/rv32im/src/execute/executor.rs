@@ -135,7 +135,7 @@ pub enum CycleLimit {
 
 #[derive(thiserror::Error, Debug)]
 pub enum ExecutionError {
-    #[error("Execution cycle limit exceeded: {cycle} >= {limit}")]
+    #[error("Session limit exceeded: {cycle} >= {limit}")]
     CycleLimitExceeded { limit: u64, cycle: u64 },
     #[error("Execution failed at program counter {pc:?}: {error}")]
     ExecutionFailed {
