@@ -307,6 +307,7 @@ impl<'a> ExecutorImpl<'a> {
             while let Some(update) = self.run_segment()? {
                 update_processor.on_segment_update(update)?;
             }
+            drop(update_processor.update_channel);
 
             let session = self.session()?;
             Ok(Session {
