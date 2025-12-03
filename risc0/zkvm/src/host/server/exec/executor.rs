@@ -23,7 +23,7 @@ use std::{
         mpsc::{self, Receiver, SyncSender},
     },
     thread::{self, Scope},
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 use anyhow::{Context as _, Result, anyhow, bail};
@@ -63,6 +63,7 @@ pub struct ExecutorImpl<'a> {
     pub(crate) image: MemoryImage,
     pub(crate) elf: Option<Vec<u8>>,
     profiler: Option<Rc<RefCell<Profiler>>>,
+    execution_time: Duration,
 }
 
 /// Maximum journal size, imposed to limit the ability of the amount of allocation that a guest
@@ -267,6 +268,7 @@ impl<'a> ExecutorImpl<'a> {
             elf: elf.map(|e| e.to_owned()),
             image,
             profiler,
+            execution_time: Duration::from_secs(0),
         })
     }
 
@@ -327,7 +329,18 @@ impl<'a> ExecutorImpl<'a> {
             None => CycleLimit::None,
         };
 
-        self.inner.run_segment(segment_limit_po2, session_limit)
+        // Run the segment.
+        let start = Instant::now();
+        let update = self.inner.run_segment(segment_limit_po2, session_limit)?;
+
+        // If an update was produced, increment the running total of the execution time.
+        self.execution_time += if update.is_some() {
+            start.elapsed()
+        } else {
+            Default::default()
+        };
+
+        Ok(update)
     }
 
     /// Takes the results from the [ExecutorImpl] and creates a [Session], resetting the executor
@@ -408,7 +421,7 @@ impl<'a> ExecutorImpl<'a> {
             hooks: vec![],
             ecall_metrics: exec_result.ecall_metrics,
             povw_job_id: self.env.povw_job_id,
-            execution_time: Duration::from_secs(0), // DO NOT MERGE
+            execution_time: self.execution_time,
         };
 
         // XXX remi: For m3, these cycle counts no longer add up to the po2

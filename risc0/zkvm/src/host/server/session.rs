@@ -104,6 +104,9 @@ pub struct Session {
     pub(crate) povw_job_id: Option<PovwJobId>,
 
     /// The elapsed execution time.
+    ///
+    /// This duration captures the amount of time spent execution the virtual machine. It does not,
+    /// for instance, include the time spent hashing the memory image to produce a [Segment].
     pub(crate) execution_time: Duration,
 }
 
