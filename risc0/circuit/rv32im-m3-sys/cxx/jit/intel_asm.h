@@ -90,6 +90,15 @@ public:
   // Emit code to load immediates into registre, returns offset of constant
   uint32_t doLoadImm32(Reg reg, uint32_t imm);
   void doLoadImm64(Reg reg, uint64_t imm);
+  template<Reg R>
+  inline void fastLoadImm32(uint32_t imm) {
+    if (isExtended(R)) {
+      writeByte(0x41);
+    }
+    // Move RAX, imm
+    writeByte(0xb8 + (uint8_t(R) & 7));
+    writeU32(imm);
+  }
 
   // Jump to a given offset: -1 means jump to end of this instruction which
   // is used to put a NO-op that can later be retargeted.  Returns the offset

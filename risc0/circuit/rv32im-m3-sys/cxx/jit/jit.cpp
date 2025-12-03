@@ -32,7 +32,9 @@ struct Jit {
     , supervisor(ctx, trace, memory, MODE_SUPERVISOR, execOnly)
     , machine(ctx, trace, memory, MODE_MACHINE, execOnly)
     , execOnly(execOnly)
-  {}
+  {
+    trace.decode.reserve(100 * 1000 * 1000);
+  }
 
   uint8_t peekByte(uint32_t addr) {
     return uint8_t(peek(addr / 4) >> ((addr % 4) * 8));
@@ -181,7 +183,7 @@ struct Jit {
     if (me.updateClearCache.value) {
       //LOG(0, "Clearing cache");
       user.clear(ctx.getCycle());
-      supervisor.clear(ctx.getCycle());
+      //supervisor.clear(ctx.getCycle());
       memory.clearVM(ctx.getCycle());
     }
     ctx.incCycle();
@@ -258,7 +260,8 @@ struct Jit {
 
 bool doJit(JitTrace& trace, MemoryImage& image, HostIO& io, size_t quota, bool execOnly) {
   Jit jit(trace, image, io, quota, execOnly);
-  return jit.run();
+  bool ret = jit.run();
+  return ret;
 }
 
 }  // namespace risc0::jit

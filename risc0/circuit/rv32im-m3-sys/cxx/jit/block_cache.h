@@ -71,8 +71,8 @@ private:
   MemTxn* regs;
   uint32_t iCacheCycle;
   uint32_t resetPoint;
-  std::map<uint32_t, uint32_t> blocks;  // TODO: Make accessable from ASM
-  std::map<uint32_t, uint32_t> decodeIdx;
+  FastMap<20> blocks;
+  FastMap<20> decodeIdx;;
   std::vector<uint32_t> instOffsets;
 
   uint32_t jitBlockAt(uint32_t pc);

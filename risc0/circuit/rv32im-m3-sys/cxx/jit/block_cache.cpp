@@ -136,14 +136,11 @@ ExitCause BlockCache::run(uint32_t& pc) {
   uint32_t fixAddr = 0;
   while(true) {
     // Find or create block
-    auto it = blocks.find(pc);
-    uint32_t bstart;
-    if (it == blocks.end()) {
+    uint32_t bstart = blocks.lookup(pc);
+    if (bstart == 0) {
       LOG(1, "Jitting BB = " << HexWord{pc});
       bstart = jitBlockAt(pc);
-      blocks[pc] = bstart;
-    } else {
-      bstart = it->second;
+      blocks.set(pc, bstart);
     }
     // If we had a fixup request in prior block, do that
     if (fixAddr) {
@@ -189,16 +186,16 @@ uint32_t BlockCache::jitBlockAt(uint32_t pc) {
            ", rs2 = " << uint32_t(inst.rs2) << ", imm = " << HexWord{inst.imm});
     uint32_t newPc = pc + (((decode->oinst & 3) == 3) ? 4 : 2);
     LOG(2, "inst = " << HexWord{decode->oinst} << ", newPc = " << HexWord{newPc});
-    a.doLoadImm32(Reg::R8, (inst.rd == 0 ? 64 : inst.rd));
-    a.doLoadImm32(Reg::R9, inst.rs1);
+    a.fastLoadImm32<Reg::R8>(inst.rd == 0 ? 64 : inst.rd);
+    a.fastLoadImm32<Reg::R9>(inst.rs1);
     if (execOnly) {
-      a.doLoadImm32(Reg::R10, inst.rs2);
+      a.fastLoadImm32<Reg::R10>(inst.rs2);
     } else {
-      a.doLoadImm32(Reg::R10, (inst.rs1 == inst.rs2) ? inst.rs2 + 64 : inst.rs2);
+      a.fastLoadImm32<Reg::R10>((inst.rs1 == inst.rs2) ? inst.rs2 + 64 : inst.rs2);
     }
-    a.doLoadImm32(Reg::R11, inst.imm);
-    a.doLoadImm32(Reg::R12, pc);
-    a.doLoadImm32(Reg::RDX, decode->oinst);
+    a.fastLoadImm32<Reg::R11>(inst.imm);
+    a.fastLoadImm32<Reg::R12>(pc);
+    a.fastLoadImm32<Reg::RDX>(decode->oinst);
     a.doCall(instOffsets[inst.opcode]);
     done = handleEnd(rv32im::Opcode(inst.opcode), inst.imm, pc, newPc);
     cost++;  // TODO handle variable costs
@@ -210,9 +207,9 @@ uint32_t BlockCache::jitBlockAt(uint32_t pc) {
 
 // Decode a single PC
 DecodeEntry* BlockCache::fetchInst(uint32_t pc) {
-  auto it = decodeIdx.find(pc);
-  if (it != decodeIdx.end()) {
-    return &trace.decode[it->second];
+  auto idx = decodeIdx.lookup(pc);
+  if (idx != 0) {
+    return &trace.decode[idx];
   }
   // Start by fetching the word at PC
   DecodeEntry* entry = &trace.decode.emplace_back();
@@ -253,7 +250,7 @@ DecodeEntry* BlockCache::fetchInst(uint32_t pc) {
   entry->iCacheCycle = iCacheCycle;
   entry->inst = expand(longInst);
   entry->oinst = inst;
-  decodeIdx[pc] = trace.decode.size() - 1;
+  decodeIdx.set(pc, trace.decode.size() - 1);
   // TODO: Reduce quota by cost of 1 decode
   return entry;
 }
