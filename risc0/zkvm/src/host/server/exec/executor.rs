@@ -367,14 +367,14 @@ impl<'a> ExecutorImpl<'a> {
 
         // Compute the pre and post state image IDs.
         let pre_image_digest = self.image.image_id();
-        self.image = exec_result.post_image.clone();
+        let mut post_image = exec_result.post_image;
 
         // NOTE: When a segment ends in a Halted(_) state, the post_digest will be null.
         let post_digest = match exit_code {
             ExitCode::Halted(_) => Digest::ZERO,
             // NOTE: Computing the memory image digest here might take ~200 ms. It is not done
             // earlier, because this is not common for an execution to end with non-zero exit code.
-            _ => self.image.image_id(),
+            _ => post_image.image_id(),
         };
 
         let syscall_metrics = syscall_table.inner.metrics.borrow().clone();
@@ -418,7 +418,16 @@ impl<'a> ExecutorImpl<'a> {
             session.user_cycles + session.paging_cycles + session.reserved_cycles
         );
 
-        self.inner.reset();
+        // Reset the executor, into a state where calling `run` will resume execution from the
+        // final state of this execution (i.e. resuming from a pause).
+        *self = Self::with_details(
+            std::mem::take(&mut self.env),
+            self.elf.take().as_deref(),
+            post_image,
+            self.profiler.take(),
+        )
+        .context("Failed to reset executor")?;
+
         Ok(session)
     }
 }
