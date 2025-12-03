@@ -91,6 +91,8 @@ pub struct RamFilesystem {
     fid_table: BTreeMap<u32, FidType>,
     /// QID version counter (increments on modification)
     qid_versions: BTreeMap<u64, u32>,
+    /// Link count for each inode (number of directory entries pointing to it)
+    nlinks: BTreeMap<u64, u64>,
 }
 
 impl RamFilesystem {
@@ -104,6 +106,7 @@ impl RamFilesystem {
             root_inode: 1,
             fid_table: BTreeMap::new(),
             qid_versions: BTreeMap::new(),
+            nlinks: BTreeMap::new(),
         };
 
         // Create root directory
@@ -118,6 +121,7 @@ impl RamFilesystem {
             },
         );
         fs.qid_versions.insert(1, 0);
+        fs.nlinks.insert(1, 1); // Root has 1 link
 
         fs
     }
@@ -305,6 +309,7 @@ impl RamFilesystem {
             },
         );
         self.qid_versions.insert(inode, 0);
+        self.nlinks.insert(inode, 1); // New file has 1 link
 
         // Increment parent version
         if let Some(version) = self.qid_versions.get_mut(&parent_inode) {
@@ -351,6 +356,7 @@ impl RamFilesystem {
             },
         );
         self.qid_versions.insert(inode, 0);
+        self.nlinks.insert(inode, 1); // New directory has 1 link
 
         // Increment parent version
         if let Some(version) = self.qid_versions.get_mut(&parent_inode) {
@@ -395,6 +401,7 @@ impl RamFilesystem {
             },
         );
         self.qid_versions.insert(inode, 0);
+        self.nlinks.insert(inode, 1); // New symlink has 1 link
 
         if let Some(version) = self.qid_versions.get_mut(&parent_inode) {
             *version = version.wrapping_add(1);
@@ -549,20 +556,40 @@ impl P9Backend for RamFilesystem {
                     | RamNode::Symlink { xattrs, .. } => xattrs,
                 };
 
-                match xattrs.get(&name) {
-                    Some(value) => {
-                        let start = msg.offset.min(value.len() as u64) as usize;
-                        let end = (msg.offset + msg.count as u64).min(value.len() as u64) as usize;
-                        Ok(P9Response::Success(RreadMessage {
-                            tag: msg.tag,
-                            count: (end - start) as u32,
-                            data: value[start..end].to_vec(),
-                        }))
+                if name.is_empty() {
+                    // List all xattr names as null-terminated strings
+                    let mut list_data = Vec::new();
+                    for xattr_name in xattrs.keys() {
+                        list_data.extend_from_slice(xattr_name.as_bytes());
+                        list_data.push(0); // null terminator
                     }
-                    None => Ok(P9Response::Error(RlerrorMessage::new(
-                        msg.tag,
-                        P9Error::Enodata as u32,
-                    ))),
+
+                    // Apply offset and count
+                    let start = msg.offset.min(list_data.len() as u64) as usize;
+                    let end = (msg.offset + msg.count as u64).min(list_data.len() as u64) as usize;
+                    Ok(P9Response::Success(RreadMessage {
+                        tag: msg.tag,
+                        count: (end - start) as u32,
+                        data: list_data[start..end].to_vec(),
+                    }))
+                } else {
+                    // Read specific xattr value
+                    match xattrs.get(&name) {
+                        Some(value) => {
+                            let start = msg.offset.min(value.len() as u64) as usize;
+                            let end =
+                                (msg.offset + msg.count as u64).min(value.len() as u64) as usize;
+                            Ok(P9Response::Success(RreadMessage {
+                                tag: msg.tag,
+                                count: (end - start) as u32,
+                                data: value[start..end].to_vec(),
+                            }))
+                        }
+                        None => Ok(P9Response::Error(RlerrorMessage::new(
+                            msg.tag,
+                            P9Error::Enodata as u32,
+                        ))),
+                    }
                 }
             }
             FidType::XattrWrite { .. } => {
@@ -671,13 +698,11 @@ impl P9Backend for RamFilesystem {
         match self.create_file(parent_inode, msg.name.clone(), msg.mode) {
             Ok(inode) => {
                 // Update FID to point to new file
-                if let Ok(fid_type) = self.get_fid_mut(msg.fid) {
-                    if let FidType::Regular {
-                        inode: fid_inode, ..
-                    } = fid_type
-                    {
-                        *fid_inode = inode;
-                    }
+                if let Ok(FidType::Regular {
+                    inode: fid_inode, ..
+                }) = self.get_fid_mut(msg.fid)
+                {
+                    *fid_inode = inode;
                 }
                 Ok(P9Response::Success(RlcreateMessage {
                     tag: msg.tag,
@@ -714,6 +739,8 @@ impl P9Backend for RamFilesystem {
             }
         };
 
+        let nlink = self.nlinks.get(&inode).copied().unwrap_or(1);
+
         Ok(P9Response::Success(RgetattrMessage {
             tag: msg.tag,
             valid: msg.request_mask,
@@ -721,7 +748,7 @@ impl P9Backend for RamFilesystem {
             mode,
             uid,
             gid,
-            nlink: 1,
+            nlink,
             rdev: 0,
             size,
             blksize: 4096,
@@ -1088,14 +1115,32 @@ impl P9Backend for RamFilesystem {
             }
         }
 
-        // Remove the node itself
-        self.nodes.remove(&entry_inode);
-        self.qid_versions.remove(&entry_inode);
+        // Decrement link count
+        let should_delete = if let Some(nlink) = self.nlinks.get_mut(&entry_inode) {
+            *nlink -= 1;
+            *nlink == 0
+        } else {
+            true // No nlink entry means delete
+        };
 
-        if MOUNT_DEBUG {
+        // Only remove the node data if link count reaches 0
+        if should_delete {
+            self.nodes.remove(&entry_inode);
+            self.qid_versions.remove(&entry_inode);
+            self.nlinks.remove(&entry_inode);
+
+            if MOUNT_DEBUG {
+                crate::kernel::print(&format!(
+                    "[RamFilesystem] send_tunlinkat: removed '{}' (inode={}) - last link",
+                    msg.name, entry_inode
+                ));
+            }
+        } else if MOUNT_DEBUG {
             crate::kernel::print(&format!(
-                "[RamFilesystem] send_tunlinkat: removed '{}' (inode={})",
-                msg.name, entry_inode
+                "[RamFilesystem] send_tunlinkat: unlinked '{}' (inode={}) - {} links remain",
+                msg.name,
+                entry_inode,
+                self.nlinks.get(&entry_inode).unwrap_or(&0)
             ));
         }
 
@@ -1198,19 +1243,37 @@ impl P9Backend for RamFilesystem {
             }
         }
 
-        // Remove the node itself
-        self.nodes.remove(&inode);
-        self.qid_versions.remove(&inode);
+        // Decrement link count
+        let should_delete = if let Some(nlink) = self.nlinks.get_mut(&inode) {
+            *nlink -= 1;
+            *nlink == 0
+        } else {
+            true // No nlink entry means delete
+        };
+
+        // Only remove the node data if link count reaches 0
+        if should_delete {
+            self.nodes.remove(&inode);
+            self.qid_versions.remove(&inode);
+            self.nlinks.remove(&inode);
+
+            if MOUNT_DEBUG {
+                crate::kernel::print(&format!(
+                    "[RamFilesystem] send_tremove: removed '{}' (inode={}) - last link",
+                    entry_name, inode
+                ));
+            }
+        } else if MOUNT_DEBUG {
+            crate::kernel::print(&format!(
+                "[RamFilesystem] send_tremove: unlinked '{}' (inode={}) - {} links remain",
+                entry_name,
+                inode,
+                self.nlinks.get(&inode).unwrap_or(&0)
+            ));
+        }
 
         // Remove the FID (it's being removed)
         self.fid_table.remove(&msg.fid);
-
-        if MOUNT_DEBUG {
-            crate::kernel::print(&format!(
-                "[RamFilesystem] send_tremove: removed '{}' (inode={})",
-                entry_name, inode
-            ));
-        }
 
         Ok(P9Response::Success(RremoveMessage { tag: msg.tag }))
     }
@@ -1222,11 +1285,70 @@ impl P9Backend for RamFilesystem {
         Ok(P9Response::Success(RfsyncMessage { tag: msg.tag }))
     }
 
-    fn send_tlink(&mut self, _msg: &TlinkMessage) -> Result<P9Response<RlinkMessage>, TlinkError> {
-        Ok(P9Response::Error(RlerrorMessage::new(
-            _msg.tag,
-            P9Error::Enosys as u32,
-        )))
+    fn send_tlink(&mut self, msg: &TlinkMessage) -> Result<P9Response<RlinkMessage>, TlinkError> {
+        // msg.dfid = directory where the link will be created
+        // msg.fid = file to link to
+        // msg.name = name of the new link
+
+        // Get the target file's inode
+        let (target_inode, _) = self
+            .get_fid(msg.fid)
+            .map_err(|_| TlinkError::InternalError)?;
+
+        // Check if target is a directory (can't hard link directories)
+        if self.is_dir(target_inode) {
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Eperm as u32, // Operation not permitted
+            )));
+        }
+
+        // Get the directory FID
+        let (dir_inode, _) = self
+            .get_fid(msg.dfid)
+            .map_err(|_| TlinkError::InternalError)?;
+
+        // Check if it's a directory
+        if !self.is_dir(dir_inode) {
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Enotdir as u32,
+            )));
+        }
+
+        // Get the directory entries
+        let dir = match self.nodes.get_mut(&dir_inode) {
+            Some(RamNode::Directory { entries, .. }) => entries,
+            _ => {
+                return Ok(P9Response::Error(RlerrorMessage::new(
+                    msg.tag,
+                    P9Error::Enotdir as u32,
+                )));
+            }
+        };
+
+        // Check if name already exists
+        if dir.contains_key(&msg.name) {
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Eexist as u32,
+            )));
+        }
+
+        // Add the new directory entry pointing to the same inode
+        dir.insert(msg.name.clone(), target_inode);
+
+        // Increment the link count
+        if let Some(nlink) = self.nlinks.get_mut(&target_inode) {
+            *nlink += 1;
+        }
+
+        // Increment parent directory version
+        if let Some(version) = self.qid_versions.get_mut(&dir_inode) {
+            *version = version.wrapping_add(1);
+        }
+
+        Ok(P9Response::Success(RlinkMessage { tag: msg.tag }))
     }
 
     fn send_trename(
@@ -1261,15 +1383,25 @@ impl P9Backend for RamFilesystem {
             | RamNode::Symlink { xattrs, .. } => xattrs,
         };
 
-        // Check if the xattr exists
-        let size = match xattrs.get(&msg.name) {
-            Some(value) => value.len() as u64,
-            None => {
-                // Xattr doesn't exist
-                return Ok(P9Response::Error(RlerrorMessage::new(
-                    msg.tag,
-                    P9Error::Enodata as u32,
-                )));
+        // Check if this is a list operation (empty name) or a specific xattr
+        let size = if msg.name.is_empty() {
+            // List all xattrs - return the size of all xattr names as null-terminated strings
+            let mut total_size = 0u64;
+            for name in xattrs.keys() {
+                total_size += name.len() as u64 + 1; // +1 for null terminator
+            }
+            total_size
+        } else {
+            // Get a specific xattr
+            match xattrs.get(&msg.name) {
+                Some(value) => value.len() as u64,
+                None => {
+                    // Xattr doesn't exist
+                    return Ok(P9Response::Error(RlerrorMessage::new(
+                        msg.tag,
+                        P9Error::Enodata as u32,
+                    )));
+                }
             }
         };
 
@@ -2143,10 +2275,31 @@ impl P9Backend for MountBackend {
         &mut self,
         msg: &TxattrwalkMessage,
     ) -> Result<P9Response<RxattrwalkMessage>, TxattrwalkError> {
+        // Get the backend index for the source FID
+        let fid_info = self
+            .fid_map
+            .get(&msg.fid)
+            .ok_or(TxattrwalkError::InternalError)?;
+        let backend_index = fid_info.backend_index;
+
         let backend = self
             .get_backend_for_fid(msg.fid)
             .map_err(|_| TxattrwalkError::InternalError)?;
-        backend.send_txattrwalk(msg)
+
+        match backend.send_txattrwalk(msg) {
+            Ok(P9Response::Success(resp)) => {
+                // Track the new xattr FID in the same backend as the source FID
+                self.fid_map.insert(
+                    msg.newfid,
+                    FidInfo {
+                        backend_index,
+                        path: format!("xattr:{}", msg.name), // Special path to indicate xattr FID
+                    },
+                );
+                Ok(P9Response::Success(resp))
+            }
+            other => other,
+        }
     }
 
     fn send_txattrcreate(
