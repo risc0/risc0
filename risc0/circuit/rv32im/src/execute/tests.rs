@@ -68,6 +68,7 @@ fn system_split() {
     )
     .unwrap();
 
+    // DO NOT MERGE: This is broken by the change I made to max_insn_cycles
     let segments = session.segments;
     assert_eq!(segments.len(), 2);
     let segment0_claim = segments[0].execute().unwrap().claim();

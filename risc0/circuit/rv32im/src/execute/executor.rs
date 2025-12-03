@@ -355,6 +355,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
             // Check the segment-level cycle limit.
             if self.should_split(segment_threshold) {
+                // NOTE: If the max_insn_cycles is set accurately, this should never happen.
                 if self.segment_cycles() > segment_limit {
                     return Err(anyhow!(
                         "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
