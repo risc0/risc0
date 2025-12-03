@@ -248,6 +248,25 @@ impl<'a, S: Syscall> Executor<'a, S> {
         povw_job_id: Option<PovwJobId>,
         circuit_version: u32,
     ) -> Self {
+        Self::new_inner(
+            image,
+            Rc::new(syscall_handler),
+            input_digest,
+            trace,
+            povw_job_id,
+            circuit_version,
+        )
+    }
+
+    /// An internal version of new that takes an Rc for syscall_handler to avoid ownership issues.
+    fn new_inner(
+        image: MemoryImage,
+        syscall_handler: Rc<S>,
+        input_digest: Option<Digest>,
+        trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
+        povw_job_id: Option<PovwJobId>,
+        circuit_version: u32,
+    ) -> Self {
         Self {
             pc: ByteAddr(0),
             user_pc: ByteAddr(0),
@@ -259,7 +278,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             terminate_state: None,
             read_record: Vec::new(),
             write_record: Vec::new(),
-            syscall_handler: Rc::new(syscall_handler),
+            syscall_handler,
             input_digest: input_digest.unwrap_or_default(),
             output_digest: None,
             trace,
@@ -442,6 +461,11 @@ impl<'a, S: Syscall> Executor<'a, S> {
         &self.syscall_handler
     }
 
+    pub fn syscall_handler_mut(&mut self) -> &mut S {
+        // unwrap will not fail because the only clones of this Rc are short-lived.
+        Rc::get_mut(&mut self.syscall_handler).unwrap()
+    }
+
     pub(crate) fn terminate_state(&self) -> Option<&TerminateState> {
         self.terminate_state.as_ref()
     }
@@ -517,6 +541,18 @@ impl<'a, S: Syscall> Executor<'a, S> {
             .context("Segment update callback returned error")
     }
     */
+
+    pub fn reset(&mut self) {
+        let image: MemoryImage = std::mem::take(&mut self.pager.image).into();
+        *self = Self::new_inner(
+            image,
+            self.syscall_handler.clone(),
+            Some(self.input_digest),
+            std::mem::take(&mut self.trace),
+            self.povw_job_id,
+            self.circuit_version,
+        )
+    }
 
     #[cfg(not(feature = "rv32im-m3"))]
     fn segment_cycles(&self) -> u32 {

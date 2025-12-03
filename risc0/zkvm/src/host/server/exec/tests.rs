@@ -1194,7 +1194,9 @@ fn post_state_digest_randomization() {
             let mut exec =
                 ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
             // Override the default randomness syscall using crate-internal API.
-            exec.syscall_table.with_syscall(SYS_RANDOM, RiggedRandom);
+            exec.inner
+                .syscall_handler_mut()
+                .with_syscall(SYS_RANDOM, RiggedRandom);
             let session = exec.run().unwrap();
             let segment = session.segments.last().unwrap().resolve().unwrap();
             segment.inner.execute().unwrap().claim().post_state

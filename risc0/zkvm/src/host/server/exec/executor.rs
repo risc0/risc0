@@ -16,6 +16,7 @@
 use std::{
     cell::{Cell, RefCell},
     io::Read,
+    ops::{Deref, DerefMut},
     rc::Rc,
     sync::{
         Arc,
@@ -271,7 +272,7 @@ impl<'a> ExecutorImpl<'a> {
 
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
-    pub fn run(mut self) -> Result<Session> {
+    pub fn run(&mut self) -> Result<Session> {
         if self.env.segment_path.is_none() {
             self.env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));
         }
@@ -281,8 +282,8 @@ impl<'a> ExecutorImpl<'a> {
     }
 
     /// This will run the executor with a gdb server so gdb can be attached.
-    pub fn run_with_debugger(mut self) -> Result<()> {
-        let debugger = super::gdb::GdbExecutor::new(&mut self)?;
+    pub fn run_with_debugger(&mut self) -> Result<()> {
+        let debugger = super::gdb::GdbExecutor::new(self)?;
         eprintln!(
             "connect gdb by running `riscv32im-gdb -ex \"target remote {}\" {}`",
             debugger.local_addr()?,
@@ -294,7 +295,7 @@ impl<'a> ExecutorImpl<'a> {
 
     /// Run the executor until [crate::ExitCode::Halted] or
     /// [crate::ExitCode::Paused] is reached, producing a [Session] as a result.
-    pub fn run_with_callback<F>(mut self, callback: F) -> Result<Session>
+    pub fn run_with_callback<F>(&mut self, callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send,
     {
@@ -329,7 +330,9 @@ impl<'a> ExecutorImpl<'a> {
         self.inner.run_segment(segment_limit_po2, session_limit)
     }
 
-    pub(crate) fn session(mut self) -> Result<Session> {
+    /// Takes the results from the [ExecutorImpl] and creates a [Session], resetting the executor
+    /// such that running it will resume execution from the final state.
+    pub(crate) fn session(&mut self) -> Result<Session> {
         let exec_result = self.inner.state();
 
         tracing::debug!("output_digest: {:?}", exec_result.output);
@@ -362,10 +365,9 @@ impl<'a> ExecutorImpl<'a> {
             std::fs::write(self.env.pprof_out.as_ref().unwrap(), report)?;
         }
 
+        // Compute the pre and post state image IDs.
         let pre_image_digest = self.image.image_id();
-        // DO NOT MERGE: If the receiver for this fn is owned, then this line should be deleted.
         self.image = exec_result.post_image.clone();
-        let syscall_metrics = syscall_table.inner.metrics.borrow().clone();
 
         // NOTE: When a segment ends in a Halted(_) state, the post_digest will be null.
         let post_digest = match exit_code {
@@ -374,6 +376,8 @@ impl<'a> ExecutorImpl<'a> {
             // earlier, because this is not common for an execution to end with non-zero exit code.
             _ => self.image.image_id(),
         };
+
+        let syscall_metrics = syscall_table.inner.metrics.borrow().clone();
 
         let session = Session {
             // NOTE: Session requires this field to be filled with something. Using NullSegmentRef
@@ -414,6 +418,7 @@ impl<'a> ExecutorImpl<'a> {
             session.user_cycles + session.paging_cycles + session.reserved_cycles
         );
 
+        self.inner.reset();
         Ok(session)
     }
 }
@@ -487,6 +492,20 @@ where
 pub(crate) struct CircuitSyscallTable<'a> {
     inner: SyscallTable<'a>,
     return_cache: Cell<(u32, u32)>,
+}
+
+impl<'a> Deref for CircuitSyscallTable<'a> {
+    type Target = SyscallTable<'a>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl<'a> DerefMut for CircuitSyscallTable<'a> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
 }
 
 impl CircuitSyscall for CircuitSyscallTable<'_> {
