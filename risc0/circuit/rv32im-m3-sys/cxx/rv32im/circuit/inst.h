@@ -430,7 +430,7 @@ template <typename C> struct InstLuiBlock {
   FDEV void set(CTX, InstLuiWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 

@@ -91,10 +91,17 @@ template <typename C> struct VirtAddrBlock {
     return ppage.get() * 0x400 + bit9.get() * 0x200 + bit8.get() * 0x100 + lowByte.get();
   }
 
-  // TODO: Actual verification of address mapping
   FDEV void set(CTX, VirtAddrWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
-  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV {
+    // TODO: Actual verification of address mapping. For now, just assume all
+    // registers are deterministic.
+    PICUS_INPUT(ctx, vpage);
+    PICUS_INPUT(ctx, ppage);
+    PICUS_INPUT(ctx, lowByte);
+    PICUS_INPUT(ctx, bit8);
+    PICUS_INPUT(ctx, bit9);
+  }
   FDEV void addArguments(CTX, Val<C> cycle) DEV {}
 };
 

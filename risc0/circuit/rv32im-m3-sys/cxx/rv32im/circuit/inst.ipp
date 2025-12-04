@@ -206,7 +206,7 @@ template <typename C> FDEV void InstRegBlock<C>::verify(CTX) DEV {
   UNIT_ARGUMENT(ctx, optOut, dr.readRs1.data, dr.readRs2.data, out0, out1);
   // TODO: this extra hint is necessary to verify this unit. I've requested a
   // fix in Picus, which should be confirmed once its available.
-  // PICUS_INPUT(ctx, optOut);
+  PICUS_INPUT(ctx, optOut);
 
   ValU32<C> out = cond<C>(outIdx.get(), out1.get(), out0.get());
   EQ(out.low, writeRd.data.low.get());
@@ -328,7 +328,6 @@ template <typename C> FDEV void InstLoadBlock<C>::verify(CTX) DEV {
   CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
   DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1.idx, rs2, rd.idx, imm,
                   Val<C>(OptSize<InstKind>::value) * (opt.get()) + Val<C>(uint32_t(INST_LOAD)));
-  PICUS_INPUT(ctx, opt);
 
   // Since load instructions read at an offset, the base + offset is computed by
   // readAddr. We require word loads to be 4-byte aligned, and for short and
@@ -412,6 +411,10 @@ template <typename C> FDEV void InstStoreBlock<C>::set(CTX, InstStoreWitness wit
 }
 
 template <typename C> FDEV void InstStoreBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, dr.rs1Idx, dr.rs2Idx, rd, imm,
+                  Val<C>(OptSize<InstKind>::value) * (opt.get()) + Val<C>(uint32_t(INST_STORE)));
+
   EQ(writeAddr.wordAddr(computeAddr.get()), writeMem.getWordAddr());
   EQ(pickShort.get(),
      cond<C>(writeAddr.low1.get(), writeMem.prevData.high.get(), writeMem.prevData.low.get()));
@@ -474,6 +477,19 @@ template <typename C> FDEV void InstBranchBlock<C>::set(CTX, InstBranchWitness w
 }
 
 template <typename C> FDEV void InstBranchBlock<C>::verify(CTX) DEV {
+  #ifdef PICUS
+  Val<C> opt = optOut.get();
+  opt = Val<C>(2) * opt + outIdx.get();
+  opt = Val<C>(2) * opt + brnz.get();
+  opt = Val<C>(OptSize<InstKind>::value) * opt + Val<C>(uint32_t(INST_BRANCH));
+  #endif
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, dr.rs1Idx, dr.rs2Idx, rd, imm, opt);
+  UNIT_ARGUMENT(ctx, optOut, dr.readRs1, dr.rs2Data, out0, out1);
+  // TODO: this extra hint is necessary to verify this unit. I've requested a
+  // fix in Picus, which should be confirmed once its available.
+  PICUS_INPUT(ctx, optOut);
+
   Val<C> brnzVal = brnz.get();
   Val<C> isZeroVal = isOutZero.isZero.get();
   Val<C> doBranch = brnzVal * (Val<C>(1) - isZeroVal) + (Val<C>(1) - brnzVal) * isZeroVal;
@@ -595,6 +611,12 @@ template <typename C> FDEV void InstLuiBlock<C>::set(CTX, InstLuiWitness wit) DE
   rd.set(ctx, wit.rd.wordAddr);
 }
 
+template <typename C> FDEV void InstLuiBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1, rs2, rd.idx, writeRd.data,
+                  Val<C>(uint32_t(INST_LUI)));
+}
+
 template <typename C> FDEV void InstLuiBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
   Val<C> mode = fetch.mode.get();
@@ -627,6 +649,9 @@ template <typename C> FDEV void InstAuipcBlock<C>::set(CTX, InstAuipcWitness wit
 }
 
 template <typename C> FDEV void InstAuipcBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1, rs2, rd.idx, imm, Val<C>(uint32_t(INST_AUIPC)));
+
   EQ(sumPc.low.get(), writeRd.data.low.get());
   EQ(sumPc.high.get(), writeRd.data.high.get());
 }
@@ -659,6 +684,15 @@ template <typename C> FDEV void InstEcallBlock<C>::set(CTX, InstEcallWitness wit
 }
 
 template <typename C> FDEV void InstEcallBlock<C>::verify(CTX) DEV {
+  #ifdef PICUS
+  Val<C> zero(0);
+  #endif
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, Val<C>(MODE_USER), fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, zero, zero, zero, zero, Val<C>(uint32_t(INST_ECALL)));
+
+  // Must be in user mode
+  EQ(fetch.mode.get(), Val<C>(MODE_USER));
+
   // Make sure next PC is being saved
   EQ(fetch.pc.low.get(), writeSavePc.data.low.get());
   EQ(fetch.pc.high.get(), writeSavePc.data.high.get());
@@ -723,7 +757,14 @@ template <typename C> FDEV void InstMretBlock<C>::set(CTX, InstMretWitness wit) 
 }
 
 template <typename C> FDEV void InstMretBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, Val<C>(MODE_MACHINE), fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, Val<C>(0), Val<C>(2), Val<C>(0), Val<C>(770), Val<C>(uint32_t(INST_MRET)));
+
+  // Must be in user mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   EQ(toAdd.get(), GLOBAL_GET(v2Compat) * 4);
+
   // Make sure address constants is right
   Val<C> mepcWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_MEPC, CSR_WORD(MEPC));
   EQ(readPc.wordAddr.get(), mepcWord);
