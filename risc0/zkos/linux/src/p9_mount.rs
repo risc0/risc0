@@ -1064,15 +1064,21 @@ impl P9Backend for RamFilesystem {
             }
         };
 
-        let entry_inode = entry_inode.ok_or_else(|| {
-            if MOUNT_DEBUG {
-                crate::kernel::print(&format!(
-                    "[RamFilesystem] send_tunlinkat: entry '{}' not found in directory",
-                    msg.name
-                ));
+        let entry_inode = match entry_inode {
+            Some(inode) => inode,
+            None => {
+                if MOUNT_DEBUG {
+                    crate::kernel::print(&format!(
+                        "[RamFilesystem] send_tunlinkat: entry '{}' not found in directory",
+                        msg.name
+                    ));
+                }
+                return Ok(P9Response::Error(RlerrorMessage::new(
+                    msg.tag,
+                    P9Error::Enoent as u32,
+                )));
             }
-            TunlinkatError::InternalError
-        })?;
+        };
 
         // Check if it's a directory
         const AT_REMOVEDIR: u32 = 0x200;
