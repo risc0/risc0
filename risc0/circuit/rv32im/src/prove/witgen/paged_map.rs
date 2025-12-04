@@ -42,6 +42,7 @@ impl Default for PagedMapTable {
     }
 }
 
+/// An associative map of [WordAddr] => `u32`, optimized for the rv32im preflight workload.
 pub(crate) struct PagedMap {
     high: PagedMapTable,
     mid: Vec<PagedMapTable>,

@@ -87,6 +87,7 @@ pub(crate) struct Preflight<'a> {
     user_cycles: u32,
     orig_words: PagedMap,
     prev_cycle: PagedMap,
+    /// An addr to u32 mapping used for memory outside the RISC-V addressable region.
     page_memory: PagedMap,
 }
 
