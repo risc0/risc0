@@ -54,7 +54,9 @@ template <typename C> FDEV Val<C> AddressDecompose<C>::wordAddr(ValU32<C> val) D
 }
 
 template <typename C> FDEV void AddressDecompose<C>::verify(CTX, ValU32<C> val) DEV {
+  PICUS_BEGIN_OUTLINE(val.low, val.high)
   EQ(mid14.get() * 4 + low1.get() * 2 + low0.get(), val.low);
+  PICUS_END_OUTLINE
 }
 
 template <typename C> FDEV void AddressVerify<C>::set(CTX, uint32_t val, uint32_t mode) DEV {

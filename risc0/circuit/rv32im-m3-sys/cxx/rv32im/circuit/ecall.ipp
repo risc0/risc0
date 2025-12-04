@@ -12,6 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define CPU_STATE_ARGUMENT(ctx, cycle, pc, mode, iCacheCycle) \
+    PICUS_ARGUMENT(ctx, \
+                  ({}), \
+                  ({ctx.get(cycle), ctx.get(pc), ctx.get(mode), ctx.get(iCacheCycle)}))
+
+// The actual "reading" happens via ReadByteBlock and ReadWordBlock. If the read
+// state argument is balanced, then the pulled values are determined by the
+// pushes from those blocks.
+#define READ_STATE_ARGUMENT(ctx, cycle, addrWord, addrLowBits, size) \
+    PICUS_ARGUMENT(ctx, {}, \
+                  ({ctx.get(cycle), ctx.get(addrWord), ctx.get(addrLowBits), ctx.get(size)}))
+
+#define DECODE_ARGUMENT(ctx, iCacheCycle, pc, nextPc) \
+    PICUS_ARGUMENT(ctx, \
+                  ({ctx.get(iCacheCycle), ctx.get(pc)}), \
+                  ({ctx.get(nextPc)}))
+
 #define GLOBAL_SET_U32(member, val)                                                                \
   GLOBAL_SET(member.low, val.low);                                                                 \
   GLOBAL_SET(member.high, val.high)
@@ -51,6 +68,12 @@ template <typename C> FDEV void EcallTerminateBlock<C>::set(CTX, EcallTerminateW
 }
 
 template <typename C> FDEV void EcallTerminateBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, Val<C>(MODE_MACHINE), fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc);
+
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure A7 = HOST_ECALL_TERMINATE
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_TERMINATE);
@@ -89,6 +112,18 @@ template <typename C> FDEV void EcallReadBlock<C>::set(CTX, EcallReadWitness wit
 }
 
 template <typename C> FDEV void EcallReadBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, Val<C>(MODE_MACHINE), fetch.iCacheCycle);
+  READ_STATE_ARGUMENT(ctx, finalCycle, finalAddrWord, finalAddrBits, Val<C>(0));
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc);
+
+  // A1 holds the address to read data into, A2 holds the requested length to
+  // read, and the actual length read is written to A0. The data read (and
+  // therefore its length as well) is input from the host.
+  PICUS_INPUT(ctx, writeA0.data.low);
+
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure A7 = HOST_ECALL_READ
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_READ);
@@ -97,7 +132,7 @@ template <typename C> FDEV void EcallReadBlock<C>::verify(CTX) DEV {
   EQ(readA1.wordAddr.get(), MACHINE_REGS_WORD + REG_A1);
   EQ(readA2.wordAddr.get(), MACHINE_REGS_WORD + REG_A2);
   EQ(writeA0.wordAddr.get(), MACHINE_REGS_WORD + REG_A0);
-  // Make sure len + ret < 64k
+  // Make sure len and ret < 64k
   EQ(readA2.data.high.get(), 0);
   EQ(writeA0.data.high.get(), 0);
   // Make sure ret <= len
@@ -127,6 +162,17 @@ template <typename C> FDEV void EcallWriteBlock<C>::set(CTX, EcallWriteWitness w
 }
 
 template <typename C> FDEV void EcallWriteBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, Val<C>(MODE_MACHINE), fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc);
+
+  // A1 holds the address to write data into, A2 holds the requested length to
+  // write, and the actual length written is returned to A0. The amount written
+  // is intentionally nondeterministic.
+  PICUS_INPUT(ctx, writeA0.data.low);
+
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure A7 = HOST_ECALL_READ
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_WRITE);
@@ -342,3 +388,6 @@ template <typename C> FDEV void EcallBigIntBlock<C>::addArguments(CTX) DEV {
       cycleVal + countVal + 2, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   VERIFY_DECODE
 }
+
+#undef CPU_STATE_ARGUMENT
+#undef DECODE_ARGUMENT

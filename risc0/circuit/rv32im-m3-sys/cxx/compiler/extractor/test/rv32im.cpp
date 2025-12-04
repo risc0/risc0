@@ -19,13 +19,16 @@
 
 #include "mlir/IR/Verifier.h"
 
+#include "compiler/extractor/extract.h"
+
 int main() {
   mlir::MLIRContext mlirCtx;
   RecordingContext ctx(&mlirCtx);
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
-  extract1<IsZero>(ctx);
+  extractWithValArg<IsZero>(ctx);
+  extractWithU32Arg<AddressDecompose>(ctx);
 
   // EXTRACT(InstRegBlock);
   // EXTRACT(InstImmBlock);
@@ -38,6 +41,9 @@ int main() {
   // EXTRACT(InstAuipcBlock);
   // EXTRACT(InstEcallBlock);
   // EXTRACT(InstMretBlock);
+  // EXTRACT(EcallTerminateBlock);
+  // EXTRACT(EcallReadBlock);
+  // EXTRACT(EcallWriteBlock);
   // EXTRACT(UnitAddSubBlock);
   // EXTRACT(UnitBitBlock);
   // EXTRACT(UnitMulBlock);
