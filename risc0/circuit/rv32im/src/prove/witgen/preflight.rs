@@ -750,9 +750,8 @@ impl PagingActivity {
 
 impl PagedMemory {
     pub(crate) fn loaded_pages(&self) -> PagingActivity {
-        let loaded_pages = self.page_states.keys().collect();
-        tracing::trace!("loaded_pages: {loaded_pages:#010x?}");
-        PagingActivity::new(loaded_pages)
+        tracing::trace!("loaded_pages: {:#010x?}", self.image.get_page_indexes());
+        PagingActivity::new(self.image.get_page_indexes())
     }
 
     pub(crate) fn dirty_pages(&self) -> PagingActivity {
