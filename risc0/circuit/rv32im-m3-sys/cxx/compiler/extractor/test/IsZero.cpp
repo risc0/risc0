@@ -26,7 +26,7 @@ int main() {
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
-  extract1<IsZero>(ctx);
+  extractWithValArg<IsZero>(ctx);
 
   ctx.getModuleOp().print(llvm::outs());
   return failed(mlir::verify(ctx.getModuleOp()));

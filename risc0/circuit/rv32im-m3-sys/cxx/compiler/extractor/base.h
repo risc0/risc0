@@ -29,52 +29,6 @@
 
 using namespace risc0;
 
-struct VerifyFwd {
-  template <typename T, typename... Args>
-  static void apply(RecordingContext& ctx, const char*, T& obj, Args... args) {
-    VerifyFwd::apply(ctx, obj, args...);
-  }
-
-  template <typename T,
-            typename... Args,
-            std::enable_if_t<!std::is_same<std::remove_cv_t<T>, char>::value, int> = 0>
-  static void apply(RecordingContext& ctx, T& obj, Args... args) {
-    obj.template applyInner<VerifyFwd>(ctx, args...);
-    obj.verify(ctx, args...);
-  }
-
-  template <typename T,
-            size_t N,
-            typename... Args,
-            std::enable_if_t<!std::is_same<std::remove_cv_t<T>, char>::value, int> = 0>
-  static void apply(RecordingContext& ctx, T (&t)[N], Args... args) {
-    for (size_t i = 0; i < N; i++) {
-      VerifyFwd::apply(ctx, t[i], args...);
-    }
-  }
-};
-
-template <template <typename Ctx> typename Component> void extract(RecordingContext& ctx) {
-  mlir::Type layoutType = getLayoutType<Component>(ctx.mlirCtx);
-  ctx.enterComponent(Component<RecordingContext>::NAME, layoutType);
-  Component<RecordingContext> component;
-  ctx.componentIRMap = populateComponent<Component>(ctx, component);
-  VerifyFwd::apply(ctx, component);
-  ctx.exitComponent();
-}
-
-template <template <typename Ctx> typename Component> void extract1(RecordingContext& ctx) {
-  mlir::Type layoutType = getLayoutType<Component, NopVal>(ctx.mlirCtx);
-  ctx.enterComponent(Component<RecordingContext>::NAME, layoutType);
-  auto arg1 = ctx.addValParameter();
-  Component<RecordingContext> component;
-  ctx.componentIRMap = populateComponent<Component, RecordingVal>(ctx, component);
-  VerifyFwd::apply(ctx, component, arg1);
-  ctx.exitComponent();
-}
-
-#define EXTRACT(Comp) extract<Comp>(ctx)
-
 #define PICUS
 #define PICUS_INPUT(ctx, x) picusInput(ctx, x)
 #define RANGE_PRECONDITION(ctx, low, x, high) rangePrecondition(ctx, low, x, high)
@@ -87,6 +41,6 @@ template <template <typename Ctx> typename Component> void extract1(RecordingCon
 
 #define PICUS_BEGIN_OUTLINE(...)                                                                   \
   if (NAME != ctx.componentName) {                                                                 \
-    PICUS_CALL(ctx, NAME, {__VA_ARGS__}, ctx.get(*this));                            \
+    PICUS_CALL(ctx, NAME, ({__VA_ARGS__}), ctx.get(*this));                            \
   } else {
 #define PICUS_END_OUTLINE }
