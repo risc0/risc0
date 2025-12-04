@@ -732,7 +732,11 @@ pub type MultiplyByMInt_Super_SuperStruct24Array = [MultiplyByMInt_Super_SuperSt
 pub struct MultiplyByMIntStruct {
     pub _super: MultiplyByMInt_Super_SuperStruct24Array,
 }
-pub type Val21Array = [Val; 21];
+#[derive(Copy, Clone, Debug)]
+pub struct DoIntRounds__0_SuperStruct {
+    pub _super: Val,
+}
+pub type DoIntRounds__0_SuperStruct21Array = [DoIntRounds__0_SuperStruct; 21];
 #[derive(Copy, Clone, Debug)]
 pub struct DoIntRoundsStruct {
     pub _super: Val24Array,

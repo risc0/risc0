@@ -250,7 +250,10 @@ using MultiplyByMInt_Super_SuperStruct24Array = std::array<MultiplyByMInt_Super_
 struct MultiplyByMIntStruct {
   MultiplyByMInt_Super_SuperStruct24Array _super;
 };
-using Val21Array = std::array<Val, 21>;
+struct DoIntRounds__0_SuperStruct {
+  Val _super;
+};
+using DoIntRounds__0_SuperStruct21Array = std::array<DoIntRounds__0_SuperStruct, 21>;
 struct DoIntRoundsStruct {
   Val24Array _super;
 };

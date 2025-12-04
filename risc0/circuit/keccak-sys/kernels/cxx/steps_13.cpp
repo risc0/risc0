@@ -18,20 +18,20 @@
 
 namespace risc0::circuit::keccak::cpu {
 void step_Top_12(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak/top.zir:295)
-// KeccackNextRound(zirgen/circuit/keccak/top.zir:305)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:346)
-// Top(zirgen/circuit/keccak/top.zir:368)
-set(ctx,arg0, 11, Val(4));
 // ControlState(zirgen/circuit/keccak/top.zir:296)
-set(ctx,arg0, 12, Val(0));
+// KeccackNextRound(zirgen/circuit/keccak/top.zir:306)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:347)
+// Top(zirgen/circuit/keccak/top.zir:369)
+set(ctx,arg0, 11, Val(4));
 // ControlState(zirgen/circuit/keccak/top.zir:297)
+set(ctx,arg0, 12, Val(0));
+// ControlState(zirgen/circuit/keccak/top.zir:298)
 set(ctx,arg0, 13, (get(ctx,arg0, 13, 1) + Val(1)));
 return ;
 }
 void step_Top_28(ExecContext& ctx,MutableBuf arg0)   {
 // TopState(zirgen/circuit/keccak/top.zir:33)
-// Top(zirgen/circuit/keccak/top.zir:383)
+// Top(zirgen/circuit/keccak/top.zir:384)
 Val x1 = get(ctx,arg0, 14, 2);
 Val x2 = get(ctx,arg0, 15, 2);
 Val x3 = get(ctx,arg0, 16, 2);

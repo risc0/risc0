@@ -18,10 +18,10 @@
 
 namespace risc0::circuit::keccak::cpu {
 void step_Top_5(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak/top.zir:296)
+// ControlState(zirgen/circuit/keccak/top.zir:297)
 Val x1 = get(ctx,arg0, 12, 1);
 if (to_size_t(x1)) {
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:336)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:337)
 step_Top_3(ctx,arg0);
 }
 if (to_size_t((Val(1) - x1))) {
@@ -31,7 +31,7 @@ return ;
 }
 void step_Top_21(ExecContext& ctx,MutableBuf arg0)   {
 if (to_size_t(get(ctx,arg0, 0, 1))) {
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:333)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:334)
 step_Top_1(ctx,arg0);
 }
 if (to_size_t(get(ctx,arg0, 1, 1))) {

@@ -18,25 +18,25 @@
 
 namespace risc0::circuit::keccak::cpu {
 void step_Top_1(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak/top.zir:295)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:334)
-// Top(zirgen/circuit/keccak/top.zir:368)
-set(ctx,arg0, 11, Val(0));
 // ControlState(zirgen/circuit/keccak/top.zir:296)
-set(ctx,arg0, 12, Val(0));
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:335)
+// Top(zirgen/circuit/keccak/top.zir:369)
+set(ctx,arg0, 11, Val(0));
 // ControlState(zirgen/circuit/keccak/top.zir:297)
+set(ctx,arg0, 12, Val(0));
+// ControlState(zirgen/circuit/keccak/top.zir:298)
 set(ctx,arg0, 13, Val(0));
 return ;
 }
 void step_Top_17(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak/top.zir:295)
-// CheckNextPreimage(zirgen/circuit/keccak/top.zir:327)
-// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:316)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:347)
-set(ctx,arg0, 11, Val(0));
 // ControlState(zirgen/circuit/keccak/top.zir:296)
-set(ctx,arg0, 12, Val(0));
+// CheckNextPreimage(zirgen/circuit/keccak/top.zir:328)
+// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:317)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:348)
+set(ctx,arg0, 11, Val(0));
 // ControlState(zirgen/circuit/keccak/top.zir:297)
+set(ctx,arg0, 12, Val(0));
+// ControlState(zirgen/circuit/keccak/top.zir:298)
 set(ctx,arg0, 13, Val(0));
 return ;
 }

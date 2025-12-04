@@ -18,20 +18,20 @@
 
 namespace risc0::circuit::keccak::cpu {
 void step_Top_14(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak/top.zir:295)
-// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:314)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:347)
-// Top(zirgen/circuit/keccak/top.zir:368)
-set(ctx,arg0, 11, Val(9));
 // ControlState(zirgen/circuit/keccak/top.zir:296)
-set(ctx,arg0, 12, get(ctx,arg0, 12, 1));
+// Poseidon2NextRound(zirgen/circuit/keccak/top.zir:315)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:348)
+// Top(zirgen/circuit/keccak/top.zir:369)
+set(ctx,arg0, 11, Val(9));
 // ControlState(zirgen/circuit/keccak/top.zir:297)
+set(ctx,arg0, 12, get(ctx,arg0, 12, 1));
+// ControlState(zirgen/circuit/keccak/top.zir:298)
 set(ctx,arg0, 13, (get(ctx,arg0, 13, 1) + Val(1)));
 return ;
 }
 void step_Top_30(ExecContext& ctx,MutableBuf arg0)   {
 // TopState(zirgen/circuit/keccak/top.zir:33)
-// Top(zirgen/circuit/keccak/top.zir:385)
+// Top(zirgen/circuit/keccak/top.zir:386)
 Val x1 = get(ctx,arg0, 14, 2);
 Val x2 = get(ctx,arg0, 15, 2);
 Val x3 = get(ctx,arg0, 16, 2);
@@ -832,13 +832,13 @@ Val x797 = get(ctx,arg0, 810, 2);
 Val x798 = get(ctx,arg0, 811, 2);
 Val x799 = get(ctx,arg0, 812, 2);
 Val x800 = get(ctx,arg0, 813, 2);
-// ControlState(zirgen/circuit/keccak/top.zir:297)
-// Top(zirgen/circuit/keccak/top.zir:364)
+// ControlState(zirgen/circuit/keccak/top.zir:298)
+// Top(zirgen/circuit/keccak/top.zir:365)
 Val x801 = get(ctx,arg0, 13, 0);
 // builtin Mul
 // Chi(zirgen/circuit/keccak/keccak.zir:75)
 // KeccakRound34(zirgen/circuit/keccak/top.zir:114)
-// Top(zirgen/circuit/keccak/top.zir:385)
+// Top(zirgen/circuit/keccak/top.zir:386)
 Val x802 = ((Val(1) - x33) * x65);
 // builtin Sub
 // BitXor(zirgen/circuit/keccak/bits.zir:34)

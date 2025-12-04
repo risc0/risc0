@@ -1,4 +1,3 @@
-
 // This code is automatically generated
 
 #include "supra/fp.h"
@@ -15,8 +14,7 @@ __device__ FpExt poly_fp(uint32_t idx,
                          const Fp* out,
                          const Fp* data,
                          const Fp* mix,
-                         const Fp* accum,
-                         const FpExt* poly_mix) {
+                         const Fp* accum) {
   uint32_t mask = size - 1;
   Fp x0(0);
   Fp x1(1);

@@ -250,7 +250,10 @@ using MultiplyByMInt_Super_SuperStruct24Array = ::cuda::std::array<MultiplyByMIn
 struct MultiplyByMIntStruct {
   MultiplyByMInt_Super_SuperStruct24Array _super;
 };
-using Val21Array = ::cuda::std::array<Val,21>;
+struct DoIntRounds__0_SuperStruct {
+  Val _super;
+};
+using DoIntRounds__0_SuperStruct21Array = ::cuda::std::array<DoIntRounds__0_SuperStruct,21>;
 struct DoIntRoundsStruct {
   Val24Array _super;
 };

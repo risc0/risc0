@@ -1,4 +1,3 @@
-
 // This code is automatically generated
 
 #include <metal_stdlib>

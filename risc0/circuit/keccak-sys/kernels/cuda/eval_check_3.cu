@@ -9,16 +9,11 @@
 
 namespace risc0::circuit::keccak::cuda {
 
+
+
 __device__ FpExt keccak_44(uint32_t idx,
-                           uint32_t size,
-                           Fp* arg0,
-                           FpExt arg1,
-                           FpExt arg2,
-                           FpExt arg3,
-                           FpExt arg4,
-                           FpExt arg5,
-                           const Fp* arg6,
-                           const FpExt* poly_mix) {
+                        uint32_t size
+                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, FpExt arg5, const Fp* arg6) {
   uint32_t mask = size - 1;
   Fp x0(1);
   Fp x1 = arg6[157 * size + ((idx - INV_RATE * 0) & mask)];
@@ -1390,20 +1385,13 @@ __device__ FpExt keccak_44(uint32_t idx,
   Fp x1190 = x0 - x298;
   Fp x1191 = x298 * x1190;
   arg0[825] = x1191;
-  auto x1192 = keccak_43(idx, size, arg0, x1189, arg2, arg3, arg4, arg5, arg6, poly_mix);
+  auto x1192 = keccak_43(idx, size, arg0, x1189, arg2, arg3, arg4, arg5, arg6);
 
   return x1192;
 }
 __device__ FpExt keccak_39(uint32_t idx,
-                           uint32_t size,
-                           Fp* arg0,
-                           FpExt arg1,
-                           FpExt arg2,
-                           FpExt arg3,
-                           FpExt arg4,
-                           FpExt arg5,
-                           const Fp* arg6,
-                           const FpExt* poly_mix) {
+                        uint32_t size
+                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, FpExt arg5, const Fp* arg6) {
   uint32_t mask = size - 1;
   Fp x0(32768);
   Fp x1(16384);
@@ -2975,19 +2963,13 @@ __device__ FpExt keccak_39(uint32_t idx,
   arg0[925] = x1451;
   Fp x1452 = x534 * x0;
   arg0[926] = x1452;
-  auto x1453 = keccak_38(idx, size, arg0, arg3, x687, arg4, arg5, arg6, poly_mix);
+  auto x1453 = keccak_38(idx, size, arg0, arg3, x687, arg4, arg5, arg6);
 
   return x1453;
 }
 __device__ FpExt keccak_34(uint32_t idx,
-                           uint32_t size,
-                           Fp* arg0,
-                           FpExt arg1,
-                           FpExt arg2,
-                           FpExt arg3,
-                           FpExt arg4,
-                           const Fp* arg5,
-                           const FpExt* poly_mix) {
+                        uint32_t size
+                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
   uint32_t mask = size - 1;
   Fp x0(4);
   Fp x1(2);
@@ -4455,18 +4437,13 @@ __device__ FpExt keccak_34(uint32_t idx,
   FpExt x1463 = x1457 + poly_mix[364] * x1462;
   Fp x1464 = x1461 - x488;
   arg0[1206] = x1464;
-  auto x1465 = keccak_33(idx, size, arg0, x1463, arg2, arg3, arg4, arg5, poly_mix);
+  auto x1465 = keccak_33(idx, size, arg0, x1463, arg2, arg3, arg4, arg5);
 
   return x1465;
 }
 __device__ FpExt keccak_29(uint32_t idx,
-                           uint32_t size,
-                           Fp* arg0,
-                           FpExt arg1,
-                           FpExt arg2,
-                           FpExt arg3,
-                           const Fp* arg4,
-                           const FpExt* poly_mix) {
+                        uint32_t size
+                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, const Fp* arg4) {
   uint32_t mask = size - 1;
   Fp x0(2);
   Fp x1 = arg4[242 * size + ((idx - INV_RATE * 1) & mask)];
@@ -6200,19 +6177,13 @@ __device__ FpExt keccak_29(uint32_t idx,
   Fp x1313 = x1312 * x646;
   Fp x1314 = x1311 - x1313;
   arg0[1845] = x1314;
-  auto x1315 = keccak_28(idx, size, arg0, arg1, arg2, arg3, arg4, poly_mix);
+  auto x1315 = keccak_28(idx, size, arg0, arg1, arg2, arg3, arg4);
 
   return x1315;
 }
 __device__ FpExt keccak_24(uint32_t idx,
-                           uint32_t size,
-                           Fp* arg0,
-                           FpExt arg1,
-                           FpExt arg2,
-                           FpExt arg3,
-                           FpExt arg4,
-                           const Fp* arg5,
-                           const FpExt* poly_mix) {
+                        uint32_t size
+                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
   uint32_t mask = size - 1;
   Fp x0(2);
   Fp x1 = arg5[604 * size + ((idx - INV_RATE * 0) & mask)];
@@ -8036,19 +8007,13 @@ __device__ FpExt keccak_24(uint32_t idx,
   arg0[2803] = x1662;
   Fp x1663 = x402 + x403;
   arg0[2626] = x1663;
-  auto x1664 = keccak_23(idx, size, arg0, arg3, x1282, arg4, arg5, poly_mix);
+  auto x1664 = keccak_23(idx, size, arg0, arg3, x1282, arg4, arg5);
 
   return x1664;
 }
 __device__ FpExt keccak_19(uint32_t idx,
-                           uint32_t size,
-                           Fp* arg0,
-                           FpExt arg1,
-                           FpExt arg2,
-                           FpExt arg3,
-                           FpExt arg4,
-                           const Fp* arg5,
-                           const FpExt* poly_mix) {
+                        uint32_t size
+                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
   uint32_t mask = size - 1;
   Fp x0 = arg5[39 * size + ((idx - INV_RATE * 0) & mask)];
   Fp x1 = arg5[40 * size + ((idx - INV_RATE * 0) & mask)];
@@ -9838,18 +9803,13 @@ __device__ FpExt keccak_19(uint32_t idx,
   Fp x1785 = arg0[3975];
   Fp x1786 = x1785 - x446;
   FpExt x1787 = x1784 + poly_mix[471] * x1786;
-  auto x1788 = keccak_18(idx, size, arg0, x1787, arg2, arg3, arg4, arg5, poly_mix);
+  auto x1788 = keccak_18(idx, size, arg0, x1787, arg2, arg3, arg4, arg5);
 
   return x1788;
 }
 __device__ FpExt keccak_14(uint32_t idx,
-                           uint32_t size,
-                           Fp* arg0,
-                           FpExt arg1,
-                           FpExt arg2,
-                           FpExt arg3,
-                           const Fp* arg4,
-                           const FpExt* poly_mix) {
+                        uint32_t size
+                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, const Fp* arg4) {
   uint32_t mask = size - 1;
   Fp x0(1);
   Fp x1(2);
@@ -11263,18 +11223,13 @@ __device__ FpExt keccak_14(uint32_t idx,
   arg0[4661] = x1248;
   Fp x1249 = x246 + x1248;
   arg0[4662] = x1249;
-  auto x1250 = keccak_13(idx, size, arg0, arg1, arg2, arg3, arg4, poly_mix);
+  auto x1250 = keccak_13(idx, size, arg0, arg1, arg2, arg3, arg4);
 
   return x1250;
 }
 __device__ FpExt keccak_9(uint32_t idx,
-                          uint32_t size,
-                          Fp* arg0,
-                          FpExt arg1,
-                          FpExt arg2,
-                          FpExt arg3,
-                          const Fp* arg4,
-                          const FpExt* poly_mix) {
+                        uint32_t size
+                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, const Fp* arg4) {
   uint32_t mask = size - 1;
   Fp x0(1380248020);
   Fp x1(1608891156);
@@ -12528,18 +12483,13 @@ __device__ FpExt keccak_9(uint32_t idx,
   arg0[6307] = x1241;
   Fp x1242 = x305 + x307;
   arg0[6301] = x1242;
-  auto x1243 = keccak_8(idx, size, arg0, x1217, arg2, arg3, arg4, poly_mix);
+  auto x1243 = keccak_8(idx, size, arg0, x1217, arg2, arg3, arg4);
 
   return x1243;
 }
 __device__ FpExt keccak_4(uint32_t idx,
-                          uint32_t size,
-                          Fp* arg0,
-                          FpExt arg1,
-                          FpExt arg2,
-                          FpExt arg3,
-                          const Fp* arg4,
-                          const FpExt* poly_mix) {
+                        uint32_t size
+                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, const Fp* arg4) {
   uint32_t mask = size - 1;
   Fp x0(1380248020);
   Fp x1(1608891156);
@@ -13753,18 +13703,13 @@ __device__ FpExt keccak_4(uint32_t idx,
   Fp x1177 = x1176 * x1171;
   Fp x1178 = x1177 - x261;
   FpExt x1179 = x1175 + poly_mix[332] * x1178;
-  auto x1180 = keccak_3(idx, size, arg0, x1179, arg2, arg3, arg4, poly_mix);
+  auto x1180 = keccak_3(idx, size, arg0, x1179, arg2, arg3, arg4);
 
   return x1180;
 }
 __device__ FpExt poly_fp(uint32_t idx,
-                         uint32_t size,
-                         const Fp* ctrl,
-                         const Fp* out,
-                         const Fp* data,
-                         const Fp* mix,
-                         const Fp* accum,
-                         const FpExt* poly_mix) {
+                        uint32_t size
+                        , const Fp* ctrl, const Fp* out, const Fp* data, const Fp* mix, const Fp* accum) {
   uint32_t mask = size - 1;
   Fp x0(23);
   Fp x1(2);
@@ -15400,9 +15345,9 @@ __device__ FpExt poly_fp(uint32_t idx,
   Fp x1294 = x11 - x402;
   x12[335] = x1294;
   FpExt x1295 = x1293 + poly_mix[343] * x1294;
-  auto x1296 = keccak_47(idx, size, x12, x1295, x607, x403, data, poly_mix);
+  auto x1296 = keccak_47(idx, size, x12, x1295, x607, x403, data);
 
   return x1296;
 }
 
-} // namespace risc0::circuit::keccak::cuda
+}  // namespace risc0::circuit::keccak::cuda

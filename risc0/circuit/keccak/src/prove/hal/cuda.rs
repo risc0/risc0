@@ -210,12 +210,10 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 
         tracing::debug!("steps: {steps}, domain: {domain}, po2: {po2}, rou: {rou:?}");
         let poly_mix_pows = map_pow(poly_mix, POLY_MIX_POWERS);
-        let poly_mix_pows_vec: &[u32; BabyBearExtElem::EXT_SIZE * NUM_POLY_MIX_POWERS] =
+        let poly_mix_pows: &[u32; BabyBearExtElem::EXT_SIZE * NUM_POLY_MIX_POWERS] =
             BabyBearExtElem::as_u32_slice(poly_mix_pows.as_slice())
                 .try_into()
                 .unwrap();
-        let poly_mix_pows =
-            CudaBuffer::copy_from("poly_mix", &poly_mix_pows_vec[..], self.hal.stream.clone());
 
         ffi_wrap(|| unsafe {
             risc0_circuit_keccak_cuda_eval_check(
@@ -229,7 +227,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 &rou as *const BabyBearElem,
                 po2 as u32,
                 domain as u32,
-                poly_mix_pows.as_device_ptr().as_ptr() as *const BabyBearExtElem,
+                poly_mix_pows.as_ptr(),
             )
         })
         .unwrap();

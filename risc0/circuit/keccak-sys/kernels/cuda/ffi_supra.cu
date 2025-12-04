@@ -22,6 +22,8 @@
 
 namespace risc0::circuit::keccak::cuda {
 
+__constant__ FpExt poly_mix[kNumPolyMixPows];
+
 __global__ void eval_check(Fp* check,
                            const Fp* ctrl,
                            const Fp* data,
@@ -30,11 +32,10 @@ __global__ void eval_check(Fp* check,
                            const Fp* out,
                            const Fp rou,
                            uint32_t po2,
-                           uint32_t domain,
-                           const FpExt* poly_mix) {
+                           uint32_t domain) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle < domain) {
-    FpExt tot = poly_fp(cycle, domain, ctrl, out, data, mix, accum, poly_mix);
+    FpExt tot = poly_fp(cycle, domain, ctrl, out, data, mix, accum);
     Fp x = pow(rou, cycle);
     Fp y = pow(Fp(3) * x, 1 << po2);
     FpExt ret = tot * inv(y - Fp(1));
@@ -64,8 +65,9 @@ const char* risc0_circuit_keccak_cuda_eval_check(cudaStream_t stream,
                                                  const FpExt* poly_mix_pows) {
   try {
     auto cfg = getSimpleConfig(domain);
+    cudaMemcpyToSymbol(poly_mix, poly_mix_pows, sizeof(poly_mix));
     eval_check<<<cfg.grid, cfg.block, 0, stream>>>(
-        check, ctrl, data, accum, mix, out, rou, po2, domain, poly_mix_pows);
+        check, ctrl, data, accum, mix, out, rou, po2, domain);
     CUDA_OK(cudaStreamSynchronize(stream));
   } catch (const std::exception& err) {
     return strdup(err.what());
