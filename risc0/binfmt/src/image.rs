@@ -194,15 +194,9 @@ impl MemoryImage {
 
     /// Sorted iterator over page digests (digest_idx -> Digest)
     ///
-    /// # Panic
-    ///
-    /// Panics if any digests are marked as dirty. Call [MemoryImage::update_digests] to ensure all
-    /// digests are up to date.
-    pub fn digests(&self) -> impl Iterator<Item = (&'_ u32, &'_ Digest)> + '_ {
-        assert!(
-            self.dirty.is_empty(),
-            "attempted to get digests on a dirty memory image"
-        );
+    /// Updates digests if they are not already up to date.
+    pub fn digests(&mut self) -> impl Iterator<Item = (&'_ u32, &'_ Digest)> + '_ {
+        self.update_digests();
         self.digests.iter()
     }
 

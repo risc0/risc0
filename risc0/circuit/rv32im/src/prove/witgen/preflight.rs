@@ -121,12 +121,10 @@ impl<'a> Preflight<'a> {
         let total_cycles = 1 << segment.po2;
 
         // NOTE: The executor may not have updated the digests in this memory_image, instead
-        // leaving them marked as dirty. If the memory_image is fully updated, this will be a nop.
-        // If it is not, this will hash all the required nodes.
-        let mut memory_image = segment.partial_image.clone();
-        memory_image.update_digests();
-
+        // leaving them marked as dirty. If the memory_image is fully updated, no hashing will be
+        // done. If it is not, MemoryImage::digests will hash all the required nodes.
         let mut page_memory = PagedMap::default();
+        let mut memory_image = segment.partial_image.clone();
         for (&node_idx, digest) in memory_image.digests() {
             let node_addr = node_idx_to_addr(node_idx);
             for i in 0..DIGEST_WORDS {

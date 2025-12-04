@@ -56,9 +56,6 @@ impl SegmentContext {
             });
         }
 
-        // Ensure the digests on this partial image are up to date.
-        segment.partial_image.update_digests();
-
         let mut digests: Vec<RawDigestEntry> = Vec::new();
         for (&idx, &digest) in segment.partial_image.digests() {
             let mut words = [0; DIGEST_WORDS];
