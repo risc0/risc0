@@ -74,6 +74,7 @@ pub(crate) enum PageTraceEvent {
 #[derive(Debug)]
 pub(crate) struct PageStates {
     states: BitVec,
+    /// Node indices in the bit vector that have been set (i.e. are not PageStates::Unloaded).
     indexes: Vec<u32>,
 }
 
@@ -318,6 +319,7 @@ pub(crate) struct PagedMemory {
 
 impl PagedMemory {
     pub(crate) fn new(mut image: MemoryImage, tracing_enabled: bool) -> Self {
+        // Populate the register cache from the initial state of memory.
         let mut machine_registers = [0; REG_MAX];
         let mut user_registers = [0; REG_MAX];
         let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
@@ -349,6 +351,7 @@ impl PagedMemory {
         self.cycles = RESERVED_PAGING_CYCLES;
     }
 
+    /// Set of node indices in the paged memory (including inner nodes) that have been loaded.
     pub(crate) fn page_indexes(&self) -> BTreeSet<u32> {
         self.page_states.keys().collect()
     }

@@ -750,6 +750,11 @@ impl PagingActivity {
 
 impl PagedMemory {
     pub(crate) fn loaded_pages(&self) -> PagingActivity {
+        // NOTE: This function currently reports all pages in the working image as loaded. This can
+        // result in wasted work, where cycles are spent doing page-in for memory that is included
+        // in the memory image sent to Preflight, but is never loaded during exec. However, this
+        // function is called by preflight before execution is run and so the pages that will
+        // actually be loaded is not yet known. As a result, the page_states cannot be used.
         tracing::trace!("loaded_pages: {:#010x?}", self.image.get_page_indexes());
         PagingActivity::new(self.image.get_page_indexes())
     }
