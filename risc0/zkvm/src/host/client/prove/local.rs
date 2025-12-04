@@ -67,7 +67,7 @@ impl Executor for LocalProver {
                 cycles: update.user_cycles,
             });
         }
-        let session = exec.session()?;
+        let session = exec.finalize_session()?;
 
         let receipt_claim = session.claim()?;
         Ok(SessionInfo {

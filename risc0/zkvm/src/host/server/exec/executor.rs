@@ -61,8 +61,8 @@ pub struct ExecutorImpl<'a> {
     journal: Journal,
     pub(crate) inner: Executor<'a, CircuitSyscallTable<'a>>,
     pub(crate) env: ExecutorEnv<'a>,
-    pub(crate) image: MemoryImage,
     pub(crate) elf: Option<Vec<u8>>,
+    image: MemoryImage,
     profiler: Option<Rc<RefCell<Profiler>>>,
     execution_time: Duration,
 }
@@ -105,8 +105,9 @@ pub(crate) fn circuit_version() -> u32 {
 const MAX_OUTSTANDING_SEGMENTS: usize = 5;
 
 struct SegmentUpdateProcessor {
-    segment_ref_channel: Receiver<Box<dyn SegmentRef>>,
     update_channel: SyncSender<(SegmentUpdate, bool)>,
+    segment_ref_channel: Receiver<Box<dyn SegmentRef>>,
+    pre_image_digest_channel: Receiver<Digest>,
 }
 
 impl SegmentUpdateProcessor {
@@ -122,9 +123,13 @@ impl SegmentUpdateProcessor {
         let (update_send, update_recv) =
             mpsc::sync_channel::<(SegmentUpdate, bool)>(MAX_OUTSTANDING_SEGMENTS);
         let (segment_ref_send, segment_ref_recv) = mpsc::channel();
+        let (pre_image_digest_send, pre_image_digest_recv) = mpsc::channel();
 
         // Spawn the thread that will receive segment updates and construct segments.
         scope.spawn(move || -> Result<()> {
+            // Send the pre image digest. If the receiver has already hung up, continue.
+            pre_image_digest_send.send(image.image_id()).ok();
+
             for (update, is_error) in update_recv {
                 // Update the current memory image and produce a risc0_circuit_rv32im::Segment.
                 let circuit_segment = update
@@ -172,6 +177,7 @@ impl SegmentUpdateProcessor {
 
         SegmentUpdateProcessor {
             update_channel: update_send,
+            pre_image_digest_channel: pre_image_digest_recv,
             segment_ref_channel: segment_ref_recv,
         }
     }
@@ -242,7 +248,7 @@ impl<'a> ExecutorImpl<'a> {
     fn with_details(
         env: ExecutorEnv<'a>,
         elf: Option<&[u8]>,
-        mut image: MemoryImage,
+        image: MemoryImage,
         profiler: Option<Rc<RefCell<Profiler>>>,
     ) -> Result<Self> {
         // Create a journal and insert it into the env. As the executor runs, the journal data will
@@ -252,11 +258,6 @@ impl<'a> ExecutorImpl<'a> {
         env.posix_io
             .borrow_mut()
             .with_write_fd(fileno::JOURNAL, journal.limit_writer(MAX_JOURNAL_SIZE));
-
-        // Update digests in the image before cloning and for the executor. Such that the initial
-        // page hashes only ever need to be computed once.
-        // TODO(victor/perf): Is this actually beneficial now?
-        image.update_digests();
 
         let syscall_table = SyscallTable::from_env(&env).into();
         let exec = Executor::new(
@@ -318,11 +319,11 @@ impl<'a> ExecutorImpl<'a> {
             // Close the update channel to indicate to the sidecar thread execution has finished.
             drop(update_processor.update_channel);
 
-            let session = self.session()?;
-            Ok(Session {
-                segments: update_processor.segment_ref_channel.iter().collect(),
-                ..session
-            })
+            // Get the pre_image_digest and the segments from the update_processor.
+            // pre_image_digest is only received to avoid recomputation.
+            let pre_image_digest = update_processor.pre_image_digest_channel.recv().ok();
+            let segments = Some(update_processor.segment_ref_channel.iter().collect());
+            self.finalize_session_with(pre_image_digest, segments)
         })
     }
 
@@ -345,7 +346,15 @@ impl<'a> ExecutorImpl<'a> {
 
     /// Takes the results from the [ExecutorImpl] and creates a [Session], resetting the executor
     /// such that running it will resume execution from the final state.
-    pub(crate) fn session(&mut self) -> Result<Session> {
+    pub(crate) fn finalize_session(&mut self) -> Result<Session> {
+        self.finalize_session_with(None, None)
+    }
+
+    fn finalize_session_with(
+        &mut self,
+        pre_image_digest: Option<Digest>,
+        segments: Option<Vec<Box<dyn SegmentRef>>>,
+    ) -> Result<Session> {
         let exec_result = self.inner.state();
 
         tracing::debug!("output_digest: {:?}", exec_result.output);
@@ -378,9 +387,11 @@ impl<'a> ExecutorImpl<'a> {
             std::fs::write(self.env.pprof_out.as_ref().unwrap(), report)?;
         }
 
-        // Compute the pre and post state image IDs.
-        let pre_image_digest = self.image.image_id();
+        // Compute the pre and post state image IDs. When a pre_image_digest is given as an
+        // argument, use that value. Otherwise compute it.
+        let mut pre_image = exec_result.pre_image;
         let mut post_image = exec_result.post_image;
+        let pre_image_digest = pre_image_digest.unwrap_or_else(|| pre_image.image_id());
 
         // NOTE: When a segment ends in a Halted(_) state, the post_digest will be null.
         let post_digest = match exit_code {
@@ -392,13 +403,17 @@ impl<'a> ExecutorImpl<'a> {
 
         let syscall_metrics = syscall_table.inner.metrics.borrow().clone();
 
-        let session = Session {
-            // NOTE: Session requires this field to be filled with something. Using NullSegmentRef
-            // gives an indication of the number of segments. In ExecutorImpl::run, this is filled
-            // in when returning, collecting the refs from the sidecar thread.
-            segments: (0..exec_result.segments)
+        // NOTE: Session requires this field to be filled with something. Using NullSegmentRef
+        // gives an indication of the number of segments. In ExecutorImpl::run, this is filled
+        // in when returning, collecting the refs from the sidecar thread.
+        let segments = segments.unwrap_or_else(|| {
+            (0..exec_result.segments)
                 .map(|_| -> Box<dyn SegmentRef> { Box::new(NullSegmentRef) })
-                .collect(),
+                .collect()
+        });
+
+        let session = Session {
+            segments,
             input: self.env.input_digest.unwrap_or_default(),
             journal: session_journal.map(crate::Journal::new),
             exit_code,

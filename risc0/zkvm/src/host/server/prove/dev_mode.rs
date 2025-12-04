@@ -161,7 +161,7 @@ impl ProverServer for DevModeProver {
     ) -> Result<ProveInfo> {
         let mut exec = ExecutorImpl::from_elf(env, elf).unwrap();
         while exec.run_segment()?.is_some() {}
-        let session = exec.session()?;
+        let session = exec.finalize_session()?;
         self.prove_session(ctx, &session)
     }
 
