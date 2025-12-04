@@ -51,6 +51,12 @@ enum RamNode {
         uid: u32,
         gid: u32,
         xattrs: BTreeMap<String, Vec<u8>>, // extended attributes
+        atime_sec: u64,
+        atime_nsec: u64,
+        mtime_sec: u64,
+        mtime_nsec: u64,
+        ctime_sec: u64,
+        ctime_nsec: u64,
     },
     Directory {
         entries: BTreeMap<String, u64>, // name -> inode
@@ -58,6 +64,12 @@ enum RamNode {
         uid: u32,
         gid: u32,
         xattrs: BTreeMap<String, Vec<u8>>, // extended attributes
+        atime_sec: u64,
+        atime_nsec: u64,
+        mtime_sec: u64,
+        mtime_nsec: u64,
+        ctime_sec: u64,
+        ctime_nsec: u64,
     },
     Symlink {
         target: String,
@@ -65,6 +77,12 @@ enum RamNode {
         uid: u32,
         gid: u32,
         xattrs: BTreeMap<String, Vec<u8>>, // extended attributes
+        atime_sec: u64,
+        atime_nsec: u64,
+        mtime_sec: u64,
+        mtime_nsec: u64,
+        ctime_sec: u64,
+        ctime_nsec: u64,
     },
 }
 
@@ -118,6 +136,12 @@ impl RamFilesystem {
                 uid: 0,
                 gid: 0,
                 xattrs: BTreeMap::new(),
+                atime_sec: 0,
+                atime_nsec: 0,
+                mtime_sec: 0,
+                mtime_nsec: 0,
+                ctime_sec: 0,
+                ctime_nsec: 0,
             },
         );
         fs.qid_versions.insert(1, 0);
@@ -306,6 +330,12 @@ impl RamFilesystem {
                 uid: 0,
                 gid: 0,
                 xattrs: BTreeMap::new(),
+                atime_sec: 0,
+                atime_nsec: 0,
+                mtime_sec: 0,
+                mtime_nsec: 0,
+                ctime_sec: 0,
+                ctime_nsec: 0,
             },
         );
         self.qid_versions.insert(inode, 0);
@@ -353,6 +383,12 @@ impl RamFilesystem {
                 uid: 0,
                 gid,
                 xattrs: BTreeMap::new(),
+                atime_sec: 0,
+                atime_nsec: 0,
+                mtime_sec: 0,
+                mtime_nsec: 0,
+                ctime_sec: 0,
+                ctime_nsec: 0,
             },
         );
         self.qid_versions.insert(inode, 0);
@@ -398,6 +434,12 @@ impl RamFilesystem {
                 uid: 0,
                 gid,
                 xattrs: BTreeMap::new(),
+                atime_sec: 0,
+                atime_nsec: 0,
+                mtime_sec: 0,
+                mtime_nsec: 0,
+                ctime_sec: 0,
+                ctime_nsec: 0,
             },
         );
         self.qid_versions.insert(inode, 0);
@@ -721,29 +763,86 @@ impl P9Backend for RamFilesystem {
         let (inode, _) = self
             .get_fid(msg.fid)
             .map_err(|_| TgetattrError::InternalError)?;
-        let (mode, uid, gid, size) = match self.nodes.get(&inode) {
-            Some(RamNode::File {
-                data,
-                mode,
-                uid,
-                gid,
-                ..
-            }) => (*mode, *uid, *gid, data.len() as u64),
-            Some(RamNode::Directory { mode, uid, gid, .. }) => (*mode, *uid, *gid, 0),
-            Some(RamNode::Symlink {
-                target,
-                mode,
-                uid,
-                gid,
-                ..
-            }) => (*mode, *uid, *gid, target.len() as u64), // Size = length of target string
-            None => {
-                return Ok(P9Response::Error(RlerrorMessage::new(
-                    msg.tag,
-                    P9Error::Enoent as u32,
-                )));
-            }
-        };
+        let (mode, uid, gid, size, atime_sec, atime_nsec, mtime_sec, mtime_nsec, ctime_sec, ctime_nsec) =
+            match self.nodes.get(&inode) {
+                Some(RamNode::File {
+                    data,
+                    mode,
+                    uid,
+                    gid,
+                    atime_sec,
+                    atime_nsec,
+                    mtime_sec,
+                    mtime_nsec,
+                    ctime_sec,
+                    ctime_nsec,
+                    ..
+                }) => (
+                    *mode,
+                    *uid,
+                    *gid,
+                    data.len() as u64,
+                    *atime_sec,
+                    *atime_nsec,
+                    *mtime_sec,
+                    *mtime_nsec,
+                    *ctime_sec,
+                    *ctime_nsec,
+                ),
+                Some(RamNode::Directory {
+                    mode,
+                    uid,
+                    gid,
+                    atime_sec,
+                    atime_nsec,
+                    mtime_sec,
+                    mtime_nsec,
+                    ctime_sec,
+                    ctime_nsec,
+                    ..
+                }) => (
+                    *mode,
+                    *uid,
+                    *gid,
+                    0,
+                    *atime_sec,
+                    *atime_nsec,
+                    *mtime_sec,
+                    *mtime_nsec,
+                    *ctime_sec,
+                    *ctime_nsec,
+                ),
+                Some(RamNode::Symlink {
+                    target,
+                    mode,
+                    uid,
+                    gid,
+                    atime_sec,
+                    atime_nsec,
+                    mtime_sec,
+                    mtime_nsec,
+                    ctime_sec,
+                    ctime_nsec,
+                    ..
+                }) => (
+                    *mode,
+                    *uid,
+                    *gid,
+                    target.len() as u64,
+                    *atime_sec,
+                    *atime_nsec,
+                    *mtime_sec,
+                    *mtime_nsec,
+                    *ctime_sec,
+                    *ctime_nsec,
+                ),
+                None => {
+                    return Ok(P9Response::Error(RlerrorMessage::new(
+                        msg.tag,
+                        P9Error::Enoent as u32,
+                    )));
+                }
+            };
 
         let nlink = self.nlinks.get(&inode).copied().unwrap_or(1);
 
@@ -759,12 +858,12 @@ impl P9Backend for RamFilesystem {
             size,
             blksize: 4096,
             blocks: size.div_ceil(4096),
-            atime_sec: 0,
-            atime_nsec: 0,
-            mtime_sec: 0,
-            mtime_nsec: 0,
-            ctime_sec: 0,
-            ctime_nsec: 0,
+            atime_sec,
+            atime_nsec,
+            mtime_sec,
+            mtime_nsec,
+            ctime_sec,
+            ctime_nsec,
             btime_sec: 0,
             btime_nsec: 0,
             gen_: 0,
@@ -906,9 +1005,54 @@ impl P9Backend for RamFilesystem {
             }
         }
 
-        // Note: We don't handle atime/mtime here as they're not stored in RamNode
-        // P9SetattrMask::Atime = 0x00000010
-        // P9SetattrMask::Mtime = 0x00000020
+        // Handle atime/mtime updates
+        if (msg.valid & P9SetattrMask::Atime as u32) != 0 {
+            let node = self.nodes.get_mut(&inode).ok_or(TsetattrError::InternalError)?;
+            match node {
+                RamNode::File {
+                    atime_sec,
+                    atime_nsec,
+                    ..
+                }
+                | RamNode::Directory {
+                    atime_sec,
+                    atime_nsec,
+                    ..
+                }
+                | RamNode::Symlink {
+                    atime_sec,
+                    atime_nsec,
+                    ..
+                } => {
+                    *atime_sec = msg.atime_sec;
+                    *atime_nsec = msg.atime_nsec;
+                }
+            }
+        }
+
+        if (msg.valid & P9SetattrMask::Mtime as u32) != 0 {
+            let node = self.nodes.get_mut(&inode).ok_or(TsetattrError::InternalError)?;
+            match node {
+                RamNode::File {
+                    mtime_sec,
+                    mtime_nsec,
+                    ..
+                }
+                | RamNode::Directory {
+                    mtime_sec,
+                    mtime_nsec,
+                    ..
+                }
+                | RamNode::Symlink {
+                    mtime_sec,
+                    mtime_nsec,
+                    ..
+                } => {
+                    *mtime_sec = msg.mtime_sec;
+                    *mtime_nsec = msg.mtime_nsec;
+                }
+            }
+        }
 
         Ok(P9Response::Success(RsetattrMessage { tag: msg.tag }))
     }
