@@ -202,9 +202,6 @@ jobs:
       RISC0_SKIP_BUILD_KERNELS: 1
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
@@ -330,9 +327,6 @@ jobs:
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
@@ -385,9 +379,6 @@ jobs:
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/actions/cuda
       - run: nvidia-smi
       - uses: ./.github/actions/rustup
@@ -448,9 +439,6 @@ jobs:
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
@@ -506,9 +494,6 @@ jobs:
     runs-on: [self-hosted, cluster, macOS, cpu]
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
@@ -529,9 +514,6 @@ jobs:
       NIGHTLY_RUST_TOOLCHAIN: nightly-2025-06-20
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/actions/rustup
         with:
           toolchain: ${{ env.NIGHTLY_RUST_TOOLCHAIN }}
@@ -569,9 +551,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          lfs: true
           fetch-depth: 0
-      - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
@@ -602,9 +582,6 @@ jobs:
             sed_bin: gsed
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - name: Install gsed
@@ -645,9 +622,6 @@ jobs:
       RISC0_BUILD_LOCKED: 1
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: browser-actions/setup-firefox@v1
       - run: firefox --version
       - uses: ./.github/actions/rustup
