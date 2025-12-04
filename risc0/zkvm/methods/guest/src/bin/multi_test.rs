@@ -15,7 +15,6 @@
 
 //! Runs different tests based on the supplied MultiTestSpec.
 
-#![cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #![no_main]
 #![no_std]
 
