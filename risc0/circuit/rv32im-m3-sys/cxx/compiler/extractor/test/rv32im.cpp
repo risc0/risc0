@@ -44,6 +44,7 @@ int main() {
   // EXTRACT(EcallTerminateBlock);
   // EXTRACT(EcallReadBlock);
   // EXTRACT(EcallWriteBlock);
+  // EXTRACT(EcallBigIntBlock);
   // EXTRACT(UnitAddSubBlock);
   // EXTRACT(UnitBitBlock);
   // EXTRACT(UnitMulBlock);
