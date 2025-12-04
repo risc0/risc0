@@ -76,8 +76,7 @@ impl PovwJobId {
     pub fn to_bytes(self) -> [u8; U160::BYTES + U64::BYTES] {
         let mut out = [0u8; U160::BYTES + U64::BYTES];
         out[..U64::BYTES].copy_from_slice(&self.job.to_le_bytes());
-        out[U64::BYTES..]
-            .copy_from_slice(&self.log.to_le_bytes::<{ U160::BYTES }>());
+        out[U64::BYTES..].copy_from_slice(&self.log.to_le_bytes::<{ U160::BYTES }>());
         out
     }
 
