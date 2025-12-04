@@ -1155,12 +1155,91 @@ impl P9Backend for RamFilesystem {
 
     fn send_trenameat(
         &mut self,
-        _msg: &TrenameatMessage,
+        msg: &TrenameatMessage,
     ) -> Result<P9Response<RrenameatMessage>, TrenameatError> {
-        Ok(P9Response::Error(RlerrorMessage::new(
-            _msg.tag,
-            P9Error::Enosys as u32,
-        )))
+        // Get old directory inode
+        let (old_dir_inode, _) = self
+            .get_fid(msg.olddirfid)
+            .map_err(|_| TrenameatError::InternalError)?;
+
+        // Get new directory inode
+        let (new_dir_inode, _) = self
+            .get_fid(msg.newdirfid)
+            .map_err(|_| TrenameatError::InternalError)?;
+
+        // Check both are directories
+        if !self.is_dir(old_dir_inode) || !self.is_dir(new_dir_inode) {
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Enotdir as u32,
+            )));
+        }
+
+        // Get the entry from old directory
+        let old_dir = match self.nodes.get(&old_dir_inode) {
+            Some(RamNode::Directory { entries, .. }) => entries,
+            _ => {
+                return Ok(P9Response::Error(RlerrorMessage::new(
+                    msg.tag,
+                    P9Error::Enotdir as u32,
+                )))
+            }
+        };
+
+        let entry_inode = match old_dir.get(&msg.oldname) {
+            Some(&inode) => inode,
+            None => {
+                return Ok(P9Response::Error(RlerrorMessage::new(
+                    msg.tag,
+                    P9Error::Enoent as u32,
+                )))
+            }
+        };
+
+        // Remove from old directory
+        if let Some(RamNode::Directory { entries, .. }) = self.nodes.get_mut(&old_dir_inode) {
+            entries.remove(&msg.oldname);
+            if let Some(version) = self.qid_versions.get_mut(&old_dir_inode) {
+                *version = version.wrapping_add(1);
+            }
+        }
+
+        // Check if newname already exists and collect inode to delete
+        let inode_to_delete = if let Some(RamNode::Directory { entries, .. }) =
+            self.nodes.get(&new_dir_inode)
+        {
+            entries.get(&msg.newname).copied()
+        } else {
+            None
+        };
+
+        // Decrement link count and mark for deletion if needed
+        let mut should_delete = false;
+        if let Some(old_inode) = inode_to_delete {
+            if let Some(nlink) = self.nlinks.get_mut(&old_inode) {
+                *nlink -= 1;
+                should_delete = *nlink == 0;
+            }
+        }
+
+        // Delete the old file if needed
+        if should_delete {
+            if let Some(old_inode) = inode_to_delete {
+                self.nodes.remove(&old_inode);
+                self.qid_versions.remove(&old_inode);
+                self.nlinks.remove(&old_inode);
+            }
+        }
+
+        // Add to new directory
+        if let Some(RamNode::Directory { entries, .. }) = self.nodes.get_mut(&new_dir_inode) {
+            entries.insert(msg.newname.clone(), entry_inode);
+            if let Some(version) = self.qid_versions.get_mut(&new_dir_inode) {
+                *version = version.wrapping_add(1);
+            }
+        }
+
+        Ok(P9Response::Success(RrenameatMessage { tag: msg.tag }))
     }
 
     fn send_tclunk(
@@ -1359,12 +1438,91 @@ impl P9Backend for RamFilesystem {
 
     fn send_trename(
         &mut self,
-        _msg: &TrenameMessage,
+        msg: &TrenameMessage,
     ) -> Result<P9Response<RrenameMessage>, TrenameError> {
-        Ok(P9Response::Error(RlerrorMessage::new(
-            _msg.tag,
-            P9Error::Enosys as u32,
-        )))
+        // Get the file's inode
+        let (file_inode, _) = self
+            .get_fid(msg.fid)
+            .map_err(|_| TrenameError::InternalError)?;
+
+        // Get the new directory inode
+        let (new_dir_inode, _) = self
+            .get_fid(msg.dfid)
+            .map_err(|_| TrenameError::InternalError)?;
+
+        // Check new directory is a directory
+        if !self.is_dir(new_dir_inode) {
+            return Ok(P9Response::Error(RlerrorMessage::new(
+                msg.tag,
+                P9Error::Enotdir as u32,
+            )));
+        }
+
+        // Find which directory currently contains this file
+        let mut old_dir_inode = None;
+        let mut old_name = None;
+
+        for (node_inode, node) in &self.nodes {
+            if let RamNode::Directory { entries, .. } = node {
+                for (name, &entry_inode) in entries {
+                    if entry_inode == file_inode {
+                        old_dir_inode = Some(*node_inode);
+                        old_name = Some(name.clone());
+                        break;
+                    }
+                }
+                if old_dir_inode.is_some() {
+                    break;
+                }
+            }
+        }
+
+        let old_dir_inode = old_dir_inode.ok_or(TrenameError::InternalError)?;
+        let old_name = old_name.ok_or(TrenameError::InternalError)?;
+
+        // Remove from old directory
+        if let Some(RamNode::Directory { entries, .. }) = self.nodes.get_mut(&old_dir_inode) {
+            entries.remove(&old_name);
+            if let Some(version) = self.qid_versions.get_mut(&old_dir_inode) {
+                *version = version.wrapping_add(1);
+            }
+        }
+
+        // Check if newname already exists and collect inode to delete
+        let inode_to_delete =
+            if let Some(RamNode::Directory { entries, .. }) = self.nodes.get(&new_dir_inode) {
+                entries.get(&msg.name).copied()
+            } else {
+                None
+            };
+
+        // Decrement link count and mark for deletion if needed
+        let mut should_delete = false;
+        if let Some(old_inode) = inode_to_delete {
+            if let Some(nlink) = self.nlinks.get_mut(&old_inode) {
+                *nlink -= 1;
+                should_delete = *nlink == 0;
+            }
+        }
+
+        // Delete the old file if needed
+        if should_delete {
+            if let Some(old_inode) = inode_to_delete {
+                self.nodes.remove(&old_inode);
+                self.qid_versions.remove(&old_inode);
+                self.nlinks.remove(&old_inode);
+            }
+        }
+
+        // Add to new directory
+        if let Some(RamNode::Directory { entries, .. }) = self.nodes.get_mut(&new_dir_inode) {
+            entries.insert(msg.name.clone(), file_inode);
+            if let Some(version) = self.qid_versions.get_mut(&new_dir_inode) {
+                *version = version.wrapping_add(1);
+            }
+        }
+
+        Ok(P9Response::Success(RrenameMessage { tag: msg.tag }))
     }
 
     fn send_txattrwalk(
