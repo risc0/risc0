@@ -35,7 +35,8 @@ mod block_tracker;
 pub use self::{
     bigint::analyze::analyze as bigint_analyze,
     executor::{
-        CycleLimit, ExecutionError, Executor, ExecutorResult, SegmentUpdate, SimpleSession,
+        CycleLimit, ExecutionError, ExecutionLimit, Executor, ExecutorResult, SegmentUpdate,
+        SimpleSession,
     },
     platform::*,
     segment::Segment,

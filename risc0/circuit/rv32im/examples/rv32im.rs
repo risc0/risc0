@@ -65,8 +65,7 @@ fn main() {
 
     let result = testutil::execute(
         image.clone(),
-        args.po2,
-        testutil::DEFAULT_SESSION_LIMIT,
+        testutil::DEFAULT_EXECUTION_LIMIT.with_segment_po2(args.po2),
         testutil::NullSyscall,
         None,
     )
@@ -84,8 +83,7 @@ fn main() {
         let start_time = Instant::now();
         let result = testutil::execute(
             image,
-            args.po2,
-            testutil::DEFAULT_SESSION_LIMIT,
+            testutil::DEFAULT_EXECUTION_LIMIT.with_segment_po2(args.po2),
             testutil::NullSyscall,
             None,
         )

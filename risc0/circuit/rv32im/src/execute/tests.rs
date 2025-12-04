@@ -17,9 +17,10 @@ use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::digest::Digest;
 use test_log::test;
 
-use crate::TerminateState;
-
-use super::{DEFAULT_SEGMENT_LIMIT_PO2, testutil};
+use crate::{
+    TerminateState,
+    execute::{ExecutionLimit, testutil},
+};
 
 #[test]
 fn basic() {
@@ -32,8 +33,7 @@ fn basic() {
 
     let session = testutil::execute(
         image,
-        DEFAULT_SEGMENT_LIMIT_PO2,
-        testutil::DEFAULT_SESSION_LIMIT,
+        testutil::DEFAULT_EXECUTION_LIMIT,
         testutil::NullSyscall,
         None,
     )
@@ -61,14 +61,15 @@ fn system_split() {
 
     let session = testutil::execute(
         image,
-        testutil::MIN_CYCLES_PO2,
-        testutil::DEFAULT_SESSION_LIMIT,
+        ExecutionLimit::default()
+            .with_segment_po2(testutil::MIN_CYCLES_PO2)
+            .with_session_limit(testutil::DEFAULT_SESSION_LIMIT)
+            .with_max_insn_cycles(100),
         testutil::NullSyscall,
         None,
     )
     .unwrap();
 
-    // DO NOT MERGE: This is broken by the change I made to max_insn_cycles
     let segments = session.segments;
     assert_eq!(segments.len(), 2);
     let segment0_claim = segments[0].execute().unwrap().claim();

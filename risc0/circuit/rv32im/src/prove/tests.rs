@@ -17,14 +17,13 @@ use risc0_binfmt::{MemoryImage, Program};
 use test_log::test;
 
 use super::segment_prover;
-use crate::execute::{DEFAULT_SEGMENT_LIMIT_PO2, testutil};
+use crate::execute::testutil;
 
 fn run_program(program: Program) {
     let image = MemoryImage::new_kernel(program);
     let result = testutil::execute(
         image,
-        DEFAULT_SEGMENT_LIMIT_PO2,
-        testutil::DEFAULT_SESSION_LIMIT,
+        testutil::DEFAULT_EXECUTION_LIMIT,
         testutil::NullSyscall,
         None,
     )

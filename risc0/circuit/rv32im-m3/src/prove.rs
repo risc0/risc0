@@ -196,7 +196,7 @@ pub fn segment_prover(po2: usize) -> Result<ProverContext> {
 mod tests {
     use risc0_binfmt::{MemoryImage, Program};
     use risc0_circuit_rv32im::execute::{
-        CycleLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, SegmentUpdate, Syscall, SyscallContext,
+        ExecutionLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, SegmentUpdate, Syscall, SyscallContext,
     };
 
     use super::*;
@@ -282,7 +282,9 @@ mod tests {
 
         let mut segments = Vec::new();
         let trace = Vec::new();
-        let session_limit = CycleLimit::Hard(1 << 24);
+        let execution_limit = ExecutionLimit::default()
+            .with_segment_po2(po2)
+            .with_hard_session_limit(1 << 24);
         Executor::new(
             image.clone(),
             NullSyscall,
@@ -291,7 +293,7 @@ mod tests {
             None,
             RV32IM_M3_CIRCUIT_VERSION,
         )
-        .run(po2, session_limit, |update: SegmentUpdate| {
+        .run(execution_limit, |update: SegmentUpdate| {
             segments.push(update.apply_into_segment(&mut image)?);
             Ok(())
         })

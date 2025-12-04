@@ -32,8 +32,9 @@ use risc0_binfmt::{
     SystemState,
 };
 use risc0_circuit_rv32im::execute::{
-    CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, ExecutionError, Executor, PAGE_BYTES, SegmentUpdate,
-    Syscall as CircuitSyscall, SyscallContext as CircuitSyscallContext, platform::WORD_SIZE,
+    CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, ExecutionError, ExecutionLimit, Executor, PAGE_BYTES,
+    SegmentUpdate, Syscall as CircuitSyscall, SyscallContext as CircuitSyscallContext,
+    platform::WORD_SIZE,
 };
 use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
@@ -328,19 +329,9 @@ impl<'a> ExecutorImpl<'a> {
     pub(crate) fn run_segment(&mut self) -> Result<Option<SegmentUpdate>, ExecutionError> {
         scope!("execute");
 
-        let segment_limit_po2 = self
-            .env
-            .segment_limit_po2
-            .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32) as usize;
-
-        let session_limit = match self.env.session_limit {
-            Some(limit) => CycleLimit::Hard(limit),
-            None => CycleLimit::None,
-        };
-
         // Run the segment.
         let start = Instant::now();
-        let update = self.inner.run_segment(segment_limit_po2, session_limit)?;
+        let update = self.inner.run_segment(self.execution_limit())?;
 
         // If an update was produced, increment the running total of the execution time.
         self.execution_time += if update.is_some() {
@@ -451,6 +442,22 @@ impl<'a> ExecutorImpl<'a> {
         .context("Failed to reset executor")?;
 
         Ok(session)
+    }
+
+    fn execution_limit(&self) -> ExecutionLimit {
+        let segment_limit_po2 = self
+            .env
+            .segment_limit_po2
+            .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32) as usize;
+
+        let session_limit = match self.env.session_limit {
+            Some(limit) => CycleLimit::Hard(limit),
+            None => CycleLimit::None,
+        };
+
+        ExecutionLimit::default()
+            .with_segment_po2(segment_limit_po2)
+            .with_session_limit(session_limit)
     }
 }
 

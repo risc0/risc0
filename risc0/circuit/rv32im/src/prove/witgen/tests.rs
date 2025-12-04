@@ -20,24 +20,14 @@ use risc0_zkp::field::Elem;
 use test_log::test;
 
 use crate::{
-    execute::{
-        DEFAULT_SEGMENT_LIMIT_PO2,
-        testutil::{self, DEFAULT_SESSION_LIMIT, NullSyscall},
-    },
+    execute::testutil::{self, DEFAULT_EXECUTION_LIMIT, NullSyscall},
     prove::{PreflightResults, hal::StepMode, witgen::WitnessGenerator},
     zirgen::circuit::{ExtVal, REGCOUNT_DATA},
 };
 
 fn run_preflight(program: Program) {
     let image = MemoryImage::new_kernel(program);
-    let result = testutil::execute(
-        image,
-        DEFAULT_SEGMENT_LIMIT_PO2,
-        DEFAULT_SESSION_LIMIT,
-        NullSyscall,
-        None,
-    )
-    .unwrap();
+    let result = testutil::execute(image, DEFAULT_EXECUTION_LIMIT, NullSyscall, None).unwrap();
     let segments = result.segments;
     let segment = segments.first().unwrap();
 
@@ -60,14 +50,8 @@ fn simple_loop() {
 fn fwd_rev_ab_test(program: Program) {
     let image = MemoryImage::new_kernel(program);
 
-    let session = testutil::execute(
-        image,
-        DEFAULT_SEGMENT_LIMIT_PO2,
-        testutil::DEFAULT_SESSION_LIMIT,
-        testutil::NullSyscall,
-        None,
-    )
-    .unwrap();
+    let session =
+        testutil::execute(image, DEFAULT_EXECUTION_LIMIT, testutil::NullSyscall, None).unwrap();
 
     cfg_if::cfg_if! {
         if #[cfg(feature = "cuda")] {

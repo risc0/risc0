@@ -24,7 +24,8 @@ use serde::{Deserialize, Serialize};
 use crate::{
     TerminateState,
     execute::{
-        CycleLimit, Executor, ExecutorResult, RV32IM_V2_CIRCUIT_VERSION, executor::ExecutionError,
+        ExecutionLimit, Executor, ExecutorResult, RV32IM_V2_CIRCUIT_VERSION,
+        executor::ExecutionError,
     },
 };
 
@@ -100,8 +101,9 @@ impl Segment {
             RV32IM_V2_CIRCUIT_VERSION,
         )
         .run(
-            self.po2 as usize,
-            CycleLimit::Soft(self.suspend_cycle.into()),
+            ExecutionLimit::default()
+                .with_segment_po2(self.po2 as usize)
+                .with_soft_session_limit(self.suspend_cycle.into()),
             |_| Ok(()),
         )
     }

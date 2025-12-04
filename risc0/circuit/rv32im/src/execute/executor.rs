@@ -31,7 +31,7 @@ use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 use crate::{
     EcallKind, EcallMetric, MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, Rv32imV2Claim,
     TerminateState,
-    execute::{poseidon2::Poseidon2, rv32im::disasm},
+    execute::{DEFAULT_SEGMENT_LIMIT_PO2, poseidon2::Poseidon2, rv32im::disasm},
     trace::{TraceCallback, TraceEvent},
 };
 
@@ -123,6 +123,81 @@ struct SessionCycles {
 pub struct SimpleSession {
     pub segments: Vec<Segment>,
     pub result: ExecutorResult,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct ExecutionLimit {
+    pub segment_po2: usize,
+    /// Maximum number of cycles a single instruction is allowed to consume.
+    ///
+    /// Ecall instructions and paging can result in a single worst-case instruction taking
+    /// thousands of cycles. This is the limit on a number of cycles a single instruction can take.
+    /// If an instruction exceeds this limit, and falls at the end of segment, it may result in an
+    /// execution failure.
+    pub max_insn_cycles: Option<usize>,
+    pub session: CycleLimit,
+}
+
+impl Default for ExecutionLimit {
+    fn default() -> Self {
+        Self::DEFAULT
+    }
+}
+
+impl ExecutionLimit {
+    pub const DEFAULT: Self = Self {
+        segment_po2: DEFAULT_SEGMENT_LIMIT_PO2,
+        max_insn_cycles: None,
+        session: CycleLimit::None,
+    };
+
+    pub const fn with_segment_po2(self, segment_po2: usize) -> Self {
+        Self {
+            segment_po2,
+            ..self
+        }
+    }
+
+    pub const fn with_max_insn_cycles(self, max_insn_cycles: usize) -> Self {
+        Self {
+            max_insn_cycles: Some(max_insn_cycles),
+            ..self
+        }
+    }
+
+    pub const fn with_session_limit(self, session: CycleLimit) -> Self {
+        Self { session, ..self }
+    }
+
+    pub const fn with_soft_session_limit(self, cycles: u64) -> Self {
+        Self {
+            session: CycleLimit::Soft(cycles),
+            ..self
+        }
+    }
+
+    pub const fn with_hard_session_limit(self, cycles: u64) -> Self {
+        Self {
+            session: CycleLimit::Hard(cycles),
+            ..self
+        }
+    }
+
+    pub fn segment_limit(&self) -> u32 {
+        1 << self.segment_po2 as u32
+    }
+
+    fn segment_threshold(&self) -> u32 {
+        self.segment_limit() - self.max_insn_cycles() as u32
+    }
+
+    pub fn max_insn_cycles(&self) -> usize {
+        self.max_insn_cycles.unwrap_or(if self.segment_po2 >= 15 {
+            MAX_INSN_CYCLES
+        } else {
+            MAX_INSN_CYCLES_LOWER_PO2
+        })
+    }
 }
 
 #[derive(Copy, Clone, Debug, Default)]
@@ -311,18 +386,13 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
     pub fn run_segment(
         &mut self,
-        segment_po2: usize,
-        max_cycles: CycleLimit,
+        limit: ExecutionLimit,
     ) -> Result<Option<SegmentUpdate>, ExecutionError> {
-        let segment_limit: u32 = 1 << segment_po2;
-        assert!(Self::max_insn_cycles(segment_po2) < segment_limit as usize);
-        let segment_threshold = segment_limit - Self::max_insn_cycles(segment_po2) as u32;
-
         // If the executor is in a normal termination state, return Ok(None).
         if self.terminate_state.is_some() {
             return Ok(None);
         }
-        if let CycleLimit::Soft(soft_limit) = max_cycles
+        if let CycleLimit::Soft(soft_limit) = limit.session
             && self.cycles.user >= soft_limit
         {
             return Ok(None);
@@ -337,7 +407,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             };
 
             // Check the session-level cycle limit.
-            match max_cycles {
+            match limit.session {
                 CycleLimit::Hard(max_cycles) => {
                     if self.cycles.user >= max_cycles {
                         return Err(ExecutionError::CycleLimitExceeded {
@@ -355,11 +425,12 @@ impl<'a, S: Syscall> Executor<'a, S> {
             }
 
             // Check the segment-level cycle limit.
-            if self.should_split(segment_threshold) {
+            if self.should_split(limit.segment_threshold()) {
                 // NOTE: If the max_insn_cycles is set accurately, this should never happen.
-                if self.segment_cycles() > segment_limit {
+                if self.segment_cycles() > limit.segment_limit() {
                     return Err(anyhow!(
-                        "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
+                        "segment limit ({}) too small for instruction at pc: {:?}",
+                        limit.segment_limit(),
                         self.pc
                     )
                     .into());
@@ -377,7 +448,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
                     error,
                     pc: self.pc,
                     update: Some(Box::new(self.dump_segment(
-                        segment_po2,
+                        limit.segment_po2,
                         0,
                         self.segment_counter,
                     ))),
@@ -390,7 +461,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         let cycles = self.segment_cycles().next_power_of_two();
         let po2 = log2_ceil(cycles as usize);
-        let segment_threshold_min = u32::min(self.segment_cycles(), segment_threshold);
+        let segment_threshold_min = u32::min(self.segment_cycles(), limit.segment_threshold());
         let update = self.split_segment(po2, segment_threshold_min)?;
 
         Ok(Some(update))
@@ -398,11 +469,10 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
     pub fn run(
         mut self,
-        segment_po2: usize,
-        max_cycles: CycleLimit,
+        limit: ExecutionLimit,
         mut callback: impl FnMut(SegmentUpdate) -> Result<()>,
     ) -> Result<ExecutorResult, ExecutionError> {
-        while let Some(update) = self.run_segment(segment_po2, max_cycles)? {
+        while let Some(update) = self.run_segment(limit)? {
             callback(update).context("Segment update callback returned error")?;
         }
         Ok(self.state())
@@ -502,20 +572,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
             output: self.output_digest,
             terminate_state: self.terminate_state,
             shutdown_cycle: None,
-        }
-    }
-
-    /// Maximum number of cycles a single instruction is allowed to consume.
-    ///
-    /// Ecall instructions and paging can result in a single worst-case instruction taking
-    /// thousands of cycles. This is the limit on a number of cycles a single instruction can take.
-    /// If an instruction exceeds this limit, and falls at the end of segment, it may result in an
-    /// execution failure.
-    fn max_insn_cycles(segment_po2: usize) -> usize {
-        if segment_po2 >= 15 {
-            MAX_INSN_CYCLES
-        } else {
-            MAX_INSN_CYCLES_LOWER_PO2
         }
     }
 
