@@ -29,10 +29,15 @@ int main() {
 
   // EXTRACT(InstRegBlock);
   // EXTRACT(InstImmBlock);
-  // EXTRACT(InstLoadBlock);
+  // EXTRACT(InstLoadBlock); // slow!
   // EXTRACT(InstStoreBlock);
+  // EXTRACT(InstBranchBlock);
   // EXTRACT(InstJalBlock);
   // EXTRACT(InstJalrBlock);
+  // EXTRACT(InstLuiBlock);
+  // EXTRACT(InstAuipcBlock);
+  // EXTRACT(InstEcallBlock);
+  // EXTRACT(InstMretBlock);
   // EXTRACT(UnitAddSubBlock);
   // EXTRACT(UnitBitBlock);
   // EXTRACT(UnitMulBlock);

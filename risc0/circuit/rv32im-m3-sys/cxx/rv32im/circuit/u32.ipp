@@ -64,9 +64,30 @@ template <typename C> FDEV void AddressVerify<C>::set(CTX, uint32_t val, uint32_
 }
 
 template <typename C> FDEV void AddressVerify<C>::verify(CTX, ValU32<C> val, Val<C> mode) DEV {
-  Val<C> topAddr =
-      cond<C>(isMM.get(), 0xffff, cond<C>(GLOBAL_GET(v2Compat), Val<C>(0xbfff), Val<C>(0xefff)));
+  Val<C> isV2Compat = GLOBAL_GET(v2Compat);
+  RANGE_PRECONDITION(ctx, 0, isV2Compat, 2);
+
+  // High addresses are reserved for machine mode. We check this by comparing
+  // the top half of the address against the highest usable address in the
+  // current mode.
+  Val<C> topAddr = cond<C>(isMM.get(), 0xffff, cond<C>(isV2Compat, Val<C>(0xbfff), Val<C>(0xefff)));
+
+  // Verify that `isMM` is set only if we are actually in machine mode. This
+  // doesn't fully constrain `isMM`, but that's okay; there are four cases:
+  //   - mode  = MACHINE, isMM = 1: valid
+  //   - mode  = MACHINE, isMM = 0: !!!
+  //   - mode != MACHINE, isMM = 1: invalid
+  //   - mode != MACHINE, isMM = 0: valid
+  // Note that the second case satisfies all of the constraints, but violates
+  // the intended semantics of `isMM`. This is totally fine though, because it
+  // simply restricts the address to a smaller space. This doesn't affect
+  // soundness.
+  // TODO: add directives so that Picus checks `isMM` properly.
+  PICUS_INPUT(ctx, isMM);
   EQZ(isMM.get() * (mode - Val<C>(MODE_MACHINE)));
+
+  // highSub stores a 16 bit value, so topAddr - val.high must not underflow. In
+  // other words, val.high <= topAddr.
   EQ(topAddr - val.high, highSub.get());
 }
 
