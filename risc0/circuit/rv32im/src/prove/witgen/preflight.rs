@@ -73,7 +73,6 @@ pub(crate) struct PreflightTrace {
     pub pre_state: Digest,
 }
 
-// TODO(victor): Add the pre-state and post-state here?
 pub(crate) struct Preflight<'a> {
     pub trace: PreflightTrace,
     segment: &'a Segment,
