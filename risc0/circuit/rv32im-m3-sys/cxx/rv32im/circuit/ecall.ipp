@@ -24,6 +24,10 @@
     PICUS_ARGUMENT(ctx, {}, \
                   ({ctx.get(cycle), ctx.get(addrWord), ctx.get(addrLowBits), ctx.get(size)}))
 
+#define BIGINT_STATE_ARGUMENT(ctx, cycle, pcWord, mm) \
+    PICUS_ARGUMENT(ctx, {}, \
+                  ({ctx.get(cycle), ctx.get(pcWord), ctx.get(mm)}))
+
 #define DECODE_ARGUMENT(ctx, iCacheCycle, pc, nextPc) \
     PICUS_ARGUMENT(ctx, \
                   ({ctx.get(iCacheCycle), ctx.get(pc)}), \
@@ -363,6 +367,18 @@ template <typename C> FDEV void EcallBigIntBlock<C>::set(CTX, EcallBigIntWitness
 }
 
 template <typename C> FDEV void EcallBigIntBlock<C>::verify(CTX) DEV {
+  #ifdef PICUS
+  Val<C> cycleVal = cycle.get();
+  Val<C> countVal = cycleCount.get();
+  Val<C> biPc = pcDecomp.wordAddr(readT2.data.get());
+  #endif
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, Val<C>(MODE_MACHINE), fetch.iCacheCycle);
+  BIGINT_STATE_ARGUMENT(ctx, cycleVal + countVal + 1, biPc + countVal, mm);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc);
+
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure A7 = HOST_ECALL_BIGINT
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_BIGINT);
