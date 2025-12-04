@@ -74,13 +74,11 @@ impl PovwJobId {
 
     /// Serializes the job ID to a byte array in little-endian format.
     pub fn to_bytes(self) -> [u8; U160::BYTES + U64::BYTES] {
-        [
-            self.job.to_le_bytes().as_slice(),
-            self.log.to_le_bytes::<{ U160::BYTES }>().as_slice(),
-        ]
-        .concat()
-        .try_into()
-        .unwrap()
+        let mut out = [0u8; U160::BYTES + U64::BYTES];
+        out[..U64::BYTES].copy_from_slice(&self.job.to_le_bytes());
+        out[U64::BYTES..U64::BYTES + U160::BYTES]
+            .copy_from_slice(&self.log.to_le_bytes::<{ U160::BYTES }>());
+        out
     }
 
     /// Deserializes a job ID from a byte array in little-endian format.
