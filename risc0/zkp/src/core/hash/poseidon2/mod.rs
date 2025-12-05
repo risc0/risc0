@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#![allow(dead_code)] // DO NOT MERGE
+
 //! An implementation of Poseidon2 targeting the Baby Bear.
 
 // Thank you to https://github.com/nhukc for the initial implementation of this code
@@ -22,6 +24,7 @@ mod rng;
 
 use alloc::{boxed::Box, rc::Rc, vec::Vec};
 
+use p3_symmetric::Permutation;
 use risc0_core::field::{
     Elem, ExtElem,
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
@@ -192,28 +195,14 @@ fn partial_round(cells: &mut [BabyBearElem; CELLS], round: usize) {
 
 /// The raw sponge mixing function
 pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
-    let mut round = 0;
-
-    // First linear layer.
-    multiply_by_m_ext(cells);
-    // tracing::trace!("After initial mExt: {cells:?}");
-
-    // Do initial full rounds
-    for _i in 0..ROUNDS_HALF_FULL {
-        full_round(cells, round);
-        round += 1;
-    }
-    // Do partial rounds
-    for _i in 0..ROUNDS_PARTIAL {
-        partial_round(cells, round);
-        round += 1;
-    }
-    // tracing::trace!("After partial rounds: {cells:?}");
-    // Do remaining full rounds
-    for _i in 0..ROUNDS_HALF_FULL {
-        full_round(cells, round);
-        round += 1;
-    }
+    // TODO(victor/perf): This makes a Vec out of some const arrays. If it optimizes in a good way,
+    // this should not be a problem, but I need to check this.
+    // DO NOT MERGE
+    p3_baby_bear::default_babybear_poseidon2_24().permute_mut(unsafe {
+        core::mem::transmute::<&mut [BabyBearElem; CELLS], &mut [p3_baby_bear::BabyBear; CELLS]>(
+            cells,
+        )
+    })
 }
 
 /// Perform an unpadded hash of a vector of elements.  Because this is unpadded
