@@ -210,8 +210,6 @@ fn poseidon2_permutation() -> Poseidon2BabyBear<24> {
 
 /// The raw sponge mixing function
 pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
-    // TODO(victor/perf): This makes a Vec out of some const arrays. If it optimizes in a good way,
-    // this should not be a problem, but I need to check this.
     // DO NOT MERGE
     poseidon2_permutation().permute_mut(unsafe {
         core::mem::transmute::<&mut [BabyBearElem; CELLS], &mut [p3_baby_bear::BabyBear; CELLS]>(
