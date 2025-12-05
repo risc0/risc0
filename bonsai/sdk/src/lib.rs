@@ -622,7 +622,7 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
                 .send()
                 .await?;
 
-            if res.status() == 204 {
+            if res.status() == reqwest::StatusCode::NO_CONTENT {
                 return Ok(ImageExistsOpt::Exists);
             }
 
