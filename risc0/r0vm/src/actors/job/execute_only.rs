@@ -84,7 +84,7 @@ impl JobActorNew for JobActor {
 }
 
 impl JobActor {
-    fn task_start(&mut self, header: TaskHeader) {
+    fn task_start(&mut self, header: &TaskHeader) {
         let name = format!("{:?}", header.task_kind);
         self.tracer.span_start(header.global_id.task_id, name);
     }
@@ -106,7 +106,7 @@ impl JobActor {
             },
             task_kind: task.kind(),
         };
-        self.task_start(header.clone());
+        self.task_start(&header);
 
         let msg = SubmitTaskMsg {
             job: self
