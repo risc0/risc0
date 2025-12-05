@@ -24,6 +24,7 @@ mod rng;
 
 use alloc::{boxed::Box, rc::Rc, vec::Vec};
 
+use p3_baby_bear::Poseidon2BabyBear;
 use p3_symmetric::Permutation;
 use risc0_core::field::{
     Elem, ExtElem,
@@ -193,12 +194,26 @@ fn partial_round(cells: &mut [BabyBearElem; CELLS], round: usize) {
     multiply_by_m_int(cells);
 }
 
+#[cfg(feature = "std")]
+fn poseidon2_permutation() -> &'static Poseidon2BabyBear<24> {
+    use std::sync::OnceLock;
+
+    static PERMUTATION: OnceLock<Poseidon2BabyBear<24>> = OnceLock::new();
+
+    PERMUTATION.get_or_init(p3_baby_bear::default_babybear_poseidon2_24)
+}
+
+#[cfg(not(feature = "std"))]
+fn poseidon2_permutation() -> Poseidon2BabyBear<24> {
+    p3_baby_bear::default_babybear_poseidon2_24()
+}
+
 /// The raw sponge mixing function
 pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
     // TODO(victor/perf): This makes a Vec out of some const arrays. If it optimizes in a good way,
     // this should not be a problem, but I need to check this.
     // DO NOT MERGE
-    p3_baby_bear::default_babybear_poseidon2_24().permute_mut(unsafe {
+    poseidon2_permutation().permute_mut(unsafe {
         core::mem::transmute::<&mut [BabyBearElem; CELLS], &mut [p3_baby_bear::BabyBear; CELLS]>(
             cells,
         )
