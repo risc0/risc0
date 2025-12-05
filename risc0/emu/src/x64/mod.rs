@@ -25,7 +25,7 @@ use std::{
     collections::BTreeMap,
     mem::offset_of,
     ptr,
-    sync::Once,
+    sync::{Arc, Once},
 };
 
 use anyhow::{Result, anyhow, bail};
@@ -218,98 +218,15 @@ const REGISTER_MAPPING: [Loc; REG_MAX] = [
 // ];
 
 const MAX_QUOTA: u32 = 1_000_000;
-const QUOTA_OFFSET: usize = offset_of!(JitContext, quota);
-const RAM_OFFSET: usize = offset_of!(JitContext, ram);
-const REGISTERS_OFFSET: usize = offset_of!(JitContext, registers);
 const GUEST_RAM_SIZE: usize = 1 << 32; // 4GB
 
-const QUOTA_REL_OFFSET: i32 = QUOTA_OFFSET as i32 - REGISTERS_OFFSET as i32;
-const RAM_REL_OFFSET: i32 = RAM_OFFSET as i32 - REGISTERS_OFFSET as i32;
+const QUOTA_OFFSET: usize = offset_of!(JitContext, quota);
+const REGISTERS_OFFSET: usize = offset_of!(JitContext, registers);
+const TLB_OFFSET: usize = offset_of!(JitContext, tlb);
+const TLB_MISS_OFFSET: usize = offset_of!(JitContext, tlb_miss);
 
 const NUM_PAGES: usize = 4 * 1024 * 1024;
 const INVALID_IDX: u32 = 0;
-
-// This is visible to the generated x64 code.
-#[repr(C)]
-struct JitContext {
-    pc: u32,
-    quota: u32,
-    ram: *mut u8,
-    pub(crate) registers: [u32; REG_MAX],
-}
-
-struct Machine {
-    ctx: JitContext,
-    text: BTreeMap<u32, u32>,
-}
-
-impl Machine {
-    fn new(program: Program) -> Result<Self> {
-        let ram = unsafe {
-            let addr = mmap(
-                ptr::null_mut(),
-                GUEST_RAM_SIZE,
-                PROT_READ | PROT_WRITE,
-                MAP_PRIVATE | MAP_ANON,
-                -1,
-                0,
-            );
-            if addr == MAP_FAILED {
-                bail!("mmap failed");
-            }
-            addr as *mut u8
-        };
-
-        tracing::debug!("ram: {ram:?}");
-        let ram_slice = unsafe { std::slice::from_raw_parts_mut(ram, GUEST_RAM_SIZE) };
-        let word_slice: &mut [u32] = bytemuck::cast_slice_mut(ram_slice);
-        for (&addr, &word) in program.image.iter() {
-            word_slice[addr as usize / 4] = word;
-        }
-
-        Ok(Self {
-            ctx: JitContext {
-                pc: program.entry,
-                quota: MAX_QUOTA,
-                ram,
-                registers: [0; REG_MAX],
-            },
-            text: program.image,
-        })
-    }
-
-    fn fetch(&mut self) -> Instruction {
-        Instruction::new(self.text[&self.ctx.pc])
-    }
-
-    fn next(&mut self) {
-        self.ctx.pc += WORD_SIZE as u32;
-    }
-}
-
-impl JitContext {
-    fn load_register(&self, idx: usize) -> Result<u32> {
-        Ok(self.registers[idx])
-    }
-
-    fn store_register(&mut self, idx: usize, word: u32) -> Result<()> {
-        self.registers[idx] = word;
-        Ok(())
-    }
-
-    fn dump_registers(&self) {
-        for (i, reg) in self.registers.iter().enumerate() {
-            tracing::debug!("x{i}: {reg:#010x}");
-        }
-    }
-}
-
-struct Translator {
-    asm: Assembler,
-    pub(crate) machine: Machine,
-    labels: BTreeMap<u32, AssemblyOffset>,
-    fixups: BTreeMap<u32, Vec<AssemblyOffset>>,
-}
 
 const HOST_WORD_SIZE: usize = usize::BITS as usize / 8;
 const HOST_PAGE_SIZE: usize = 4096;
@@ -318,32 +235,97 @@ const GUEST_PAGE_SIZE: usize = 1024;
 const CALLEE_REGISTERS: &[GPR] = &[GPR::RBX, GPR::RBP, GPR::R12, GPR::R13, GPR::R14, GPR::R15];
 const STACK_SPACE: usize = CALLEE_REGISTERS.len() * HOST_WORD_SIZE;
 
+const PAGE_SHIFT: u32 = 10;
+const PAGE_SIZE: usize = 1 << PAGE_SHIFT;
+const PAGE_OFFSET_MASK: u32 = PAGE_SIZE as u32 - 1;
+const TLB_SIZE: usize = 1024;
+const TLB_MASK: u32 = TLB_SIZE as u32 - 1;
+const TLB_ENTRY_SHIFT: u32 = std::mem::size_of::<TlbEntry>().ilog2();
+const TLB_TAG_OFFSET: usize = offset_of!(TlbEntry, tag);
+const TLB_HOST_PAGE_OFFSET: usize = offset_of!(TlbEntry, host_page);
+const TLB_VALID_TAG_MASK: u32 = 1 << (32 - 1);
+
+type Page = [u8; PAGE_SIZE];
+
+// This is visible to the generated x64 code.
+#[repr(C)]
+struct JitContext {
+    pc: u32,
+    quota: u32,
+    satp: u32,
+    registers: [u32; REG_MAX],
+    tlb_miss: extern "C" fn(ctx: *mut JitContext, vaddr: u32) -> *const u8,
+    tlb: Tlb,
+    phys_pages: Vec<Option<Arc<Page>>>,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+struct TlbEntry {
+    pub tag: u32,
+    pub host_page: *const u8,
+}
+
+#[repr(C)]
+struct Tlb {
+    pub entries: [TlbEntry; TLB_SIZE],
+}
+
+struct Translator {
+    asm: Assembler,
+    ctx: JitContext,
+    labels: BTreeMap<u32, AssemblyOffset>,
+    fixups: BTreeMap<u32, Vec<AssemblyOffset>>,
+}
+
 impl Translator {
     fn new(program: Program) -> Result<Self> {
+        let mut ctx = JitContext {
+            pc: program.entry,
+            satp: 0,
+            quota: MAX_QUOTA,
+            registers: [0; REG_MAX],
+            tlb: Tlb::default(),
+            tlb_miss: JitContext::tlb_miss_trampoline,
+            phys_pages: vec![None; NUM_PAGES],
+        };
+
+        for (addr, word) in program.image {
+            ctx.store_u32(addr, word)?;
+        }
+
         Ok(Self {
             asm: emit::make_assembler()?,
-            machine: Machine::new(program)?,
+            ctx,
             labels: Default::default(),
             fixups: Default::default(),
         })
     }
 
+    fn fetch(&mut self) -> Instruction {
+        Instruction::new(self.ctx.load_u32(self.ctx.pc).unwrap())
+    }
+
+    fn next(&mut self) {
+        self.ctx.pc += WORD_SIZE as u32;
+    }
+
     fn jit_block(&mut self) -> Result<AssemblyOffset> {
-        tracing::debug!("jit_block: {:#10x}", self.machine.ctx.pc);
+        tracing::debug!("jit_block: {:#10x}", self.ctx.pc);
         let start = self.asm.offset();
 
         loop {
             let offset = self.asm.offset();
-            self.labels.insert(self.machine.ctx.pc, offset);
+            self.labels.insert(self.ctx.pc, offset);
             self.process_fixups(offset)?;
 
-            let insn = self.machine.fetch();
+            let insn = self.fetch();
             // self.step_prologue();
             if let Some(terminal) = self.dispatch(insn)? {
                 break;
             }
             // self.step_epilogue();
-            self.machine.next();
+            self.next();
         }
 
         tracing::debug!("commit");
@@ -354,7 +336,7 @@ impl Translator {
     }
 
     fn process_fixups(&mut self, offset: AssemblyOffset) -> Result<()> {
-        if let Some(fixups) = self.fixups.remove(&self.machine.ctx.pc) {
+        if let Some(fixups) = self.fixups.remove(&self.ctx.pc) {
             let kind = X64Relocation::from_size(RelocationSize::DWord);
             for jmp_offset in fixups {
                 tracing::debug!("fixup: {jmp_offset:x?} -> {offset:x?}");
@@ -378,37 +360,17 @@ impl Translator {
     }
 
     fn resume(&mut self) -> Result<()> {
-        let mut state = VmState {
-            guest_base: self.machine.ctx.ram,
-            guest_size: GUEST_RAM_SIZE,
-            fault_addr: ptr::null_mut(),
-            gregs: [0; 23],
-        };
-        VM_STATE.with(|tls| {
-            *tls.borrow_mut() = Some(state);
-        });
-
-        if unsafe {
-            mprotect(
-                self.machine.ctx.ram as *mut c_void,
-                GUEST_RAM_SIZE,
-                PROT_NONE,
-            )
-        } != 0
-        {
-            bail!("mprotect(PROT_NONE) failed");
-        }
-
+        // TODO: clear state
         Ok(())
     }
 
     fn jit_loop(&mut self) -> Result<Terminal> {
-        ensure_segv_handler_installed();
+        // ensure_segv_handler_installed();
 
         self.dump(self.enter_offset()?);
         loop {
-            let retval = if let Some(&offset) = self.labels.get(&self.machine.ctx.pc) {
-                tracing::debug!("existing label: {:#10x}", self.machine.ctx.pc);
+            let retval = if let Some(&offset) = self.labels.get(&self.ctx.pc) {
+                tracing::debug!("existing label: {:#10x}", self.ctx.pc);
                 self.enter_block(offset)?
             } else {
                 let offset = self.jit_block()?;
@@ -423,12 +385,12 @@ impl Translator {
                 Terminal::Break | Terminal::Trap => return Ok(terminal),
                 Terminal::Split => {
                     tracing::debug!("split");
-                    self.machine.ctx.quota = MAX_QUOTA;
+                    self.ctx.quota = MAX_QUOTA;
                 }
             }
-            // self.machine.dump_registers();
+            // self.dump_registers();
             tracing::trace!("next pc: {pc:#10x}");
-            self.machine.ctx.pc = pc;
+            self.ctx.pc = pc;
         }
     }
 
@@ -439,13 +401,11 @@ impl Translator {
         let exe = reader.lock();
         let enter_ptr = exe.ptr(enter);
         let block_ptr = exe.ptr(offset);
-        let registers_ptr = self.machine.ctx.registers.as_mut_ptr();
-        tracing::trace!(
-            "enter_ptr: {enter_ptr:?}, block_ptr: {block_ptr:?}, registers_ptr: {registers_ptr:?}"
-        );
-        let enter: extern "C" fn(*const u8, *mut u32) -> u64 =
+        let ctx_ptr = &mut self.ctx as *mut JitContext;
+        tracing::trace!("enter: {enter_ptr:?}, block: {block_ptr:?}, ctx: {ctx_ptr:?}");
+        let enter: extern "C" fn(*const u8, *mut JitContext) -> u64 =
             unsafe { std::mem::transmute(enter_ptr) };
-        Ok(enter(block_ptr, registers_ptr))
+        Ok(enter(block_ptr, ctx_ptr))
     }
 
     fn disasm(&self, start: AssemblyOffset, print_pos: bool) -> Vec<String> {
@@ -484,44 +444,6 @@ impl Translator {
     }
 }
 
-// Per-thread VM state. In your real code you'll add instr metadata, cycles, etc.
-#[derive(Debug)]
-struct VmState {
-    guest_base: *mut u8,
-    guest_size: usize,
-    fault_addr: *mut u8,
-    gregs: [i64; 23],
-}
-
-// Thread-local pointer to VmState for the current thread.
-// Only threads running guest code set this.
-thread_local! {
-    pub static VM_STATE: RefCell<Option<VmState>> = const { RefCell::new(None) };
-}
-
-// Install-once guard for SIGSEGV handler.
-static INSTALL_SEGV_ONCE: Once = Once::new();
-
-/// Ensure SIGSEGV handler is installed once.
-fn ensure_segv_handler_installed() {
-    INSTALL_SEGV_ONCE.call_once(install_segv_handler);
-}
-
-/// Install a SA_SIGINFO SIGSEGV handler using libc::sigaction.
-fn install_segv_handler() {
-    let mut sa: sigaction = unsafe { std::mem::zeroed() };
-    sa.sa_sigaction = segv_trampoline as usize;
-    sa.sa_flags = SA_SIGINFO;
-
-    unsafe { sigemptyset(&mut sa.sa_mask) };
-
-    if unsafe { sigaction(libc::SIGSEGV, &sa, ptr::null_mut()) } != 0 {
-        panic!("sigaction(SIGSEGV) failed");
-    }
-
-    tracing::info!("SIGSEGV handler installed");
-}
-
 #[allow(unused)]
 #[inline(always)]
 fn debug_str(s: &str) {
@@ -539,71 +461,160 @@ fn debug_hex(label: &str, value: usize) {
     buf[1] = b'x';
     for i in 0..16 {
         let shift = (15 - i) * 4;
-        buf[2 + i] = HEX[((value >> shift) & 0xf) as usize];
+        buf[2 + i] = HEX[((value >> shift) & 0xf)];
     }
     let _ = unsafe { libc::write(2, buf.as_ptr() as *const c_void, buf.len()) };
     debug_str("\n");
 }
 
-/// The raw SIGSEGV handler. Very tiny and async-signal-safe:
-/// - identify if it's our guest
-/// - stash fault info in per-thread VmState
-/// - patch RIP to jit_fault_handler
-unsafe fn segv_trampoline(sig: c_int, info: *mut siginfo_t, uctx: *mut c_void) {
-    unsafe extern "C" {
-        fn jit_fault_handler();
+impl Default for Tlb {
+    fn default() -> Self {
+        Self {
+            entries: [TlbEntry::default(); TLB_SIZE],
+        }
+    }
+}
+
+impl JitContext {
+    extern "C" fn tlb_miss_trampoline(ctx: *mut JitContext, vaddr: u32) -> *const u8 {
+        unsafe { &mut *ctx }.tlb_miss(vaddr)
     }
 
-    VM_STATE.with_borrow_mut(|vm_state| {
-        if let Some(vm_state) = vm_state {
-            let fault_addr = unsafe { (&*info).si_addr() } as *mut u8;
+    #[inline]
+    fn tlb_miss(&mut self, vaddr: u32) -> *const u8 {
+        tracing::info!("tlb_miss: {vaddr:#010x}");
 
-            let base = vm_state.guest_base as usize;
-            let end = base + vm_state.guest_size;
-            let fault = fault_addr as usize;
+        let vpn = vaddr >> PAGE_SHIFT;
+        let index = vpn & TLB_MASK;
+        tracing::debug!("vpn: {vpn:#08x}, index: {index:#08x}");
+        let host_page_ptr = self.ensure_phys_page(vpn as usize);
 
-            if fault < base || fault >= end {
-                // Fault outside guest memory: not ours.
-                // debug_str("out of range\n");
-                // debug_hex("fault: ", fault);
-                // debug_hex("base: ", base);
-                // debug_hex("end: ", end);
-                default_handler(sig);
-                return;
+        let entry = &mut self.tlb.entries[index as usize];
+        entry.tag = vpn | TLB_VALID_TAG_MASK;
+        entry.host_page = host_page_ptr;
+
+        host_page_ptr
+
+        // let paddr = match self.translate_vaddr_sv32(vaddr) {
+        //     Ok(paddr) => paddr,
+        //     Err(_) => panic!("page fault in tlb_lookup"),
+        // };
+
+        // let page_idx = paddr >> PAGE_SHIFT;
+        // let host_page_ptr = self.ensure_phys_page(page_idx as usize);
+
+        // let entry = &mut self.tlb.entries[index as usize];
+        // let tag = vpn & TLB_VALID_MASK;
+        // entry.tag = tag;
+        // entry.host_page = host_page_ptr;
+
+        // host_page_ptr
+    }
+
+    fn translate_vaddr_sv32(&self, vaddr: u32) -> Result<u32> {
+        let root_ppn = self.satp & 0x003f_ffff;
+        let vpn0 = (vaddr >> 12) & 0x3ff;
+        let vpn1 = (vaddr >> 22) & 0x3ff;
+
+        let mut ppn = root_ppn;
+        let mut level = 1;
+        for vpn in [vpn1, vpn0] {
+            let pte_addr = (ppn << 12) + (vpn * 4);
+            let pte = self.load_u32(pte_addr)?;
+
+            let valid = (pte & 0x1) != 0;
+            let readable = (pte & 0x2) != 0;
+            let writable = (pte & 0x4) != 0;
+            let executable = (pte & 0x8) != 0;
+
+            if !valid || (!readable && writable) {
+                bail!("Invalid PTE");
             }
 
-            let uctx = unsafe { &mut *(uctx as *mut ucontext_t) };
-            vm_state.fault_addr = fault_addr;
-            vm_state.gregs = uctx.uc_mcontext.gregs;
+            let is_leaf = readable || writable;
+            if is_leaf {
+                if level != 0 {
+                    bail!("Unsupported superpage");
+                }
 
-            uctx.uc_mcontext.gregs[libc::REG_RIP as usize] = jit_fault_handler as usize as _;
-            uctx.uc_mcontext.gregs[libc::REG_RDI as usize] = vm_state as *const VmState as i64;
-        } else {
-            default_handler(sig);
+                let ppn = (pte >> 10) & 0x003f_ffff;
+                let page_offset = vaddr & PAGE_OFFSET_MASK;
+                let paddr = (ppn << 12) | page_offset;
+                return Ok(paddr);
+            } else {
+                ppn = (pte >> 10) & 0x003f_ffff;
+                level -= 1;
+            }
         }
-    });
-}
 
-fn default_handler(sig: c_int) {
-    unsafe {
-        libc::signal(sig, libc::SIG_DFL);
-        libc::raise(sig);
-    }
-}
-
-#[unsafe(no_mangle)]
-extern "C" fn jit_fault_slow(vm_state: &VmState) -> *const i64 {
-    tracing::info!("page fault!");
-
-    tracing::debug!("vm_state: {vm_state:#018x?}");
-
-    let page_base = (vm_state.fault_addr as usize & !(HOST_PAGE_SIZE - 1)) as *mut c_void;
-    let page_idx = (page_base as usize - vm_state.guest_base as usize) / GUEST_PAGE_SIZE;
-    tracing::info!("page_idx: {page_idx:#08x}");
-
-    if unsafe { mprotect(page_base, HOST_PAGE_SIZE, PROT_READ | PROT_WRITE) } != 0 {
-        tracing::error!("mprotect failed");
+        Err(anyhow!("Invalid vaddr"))
     }
 
-    vm_state.gregs.as_ptr()
+    fn ensure_phys_page(&mut self, page_idx: usize) -> *const u8 {
+        tracing::debug!("ensure_phys_page: {page_idx:#08x}");
+
+        if page_idx >= self.phys_pages.len() {
+            panic!("phys_pages too small");
+        }
+
+        let page = &mut self.phys_pages[page_idx];
+        if page.is_none() {
+            *page = Some(Arc::new([0; PAGE_SIZE]));
+        }
+
+        page.as_ref().unwrap().as_ptr()
+    }
+
+    fn load_u32(&self, paddr: u32) -> Result<u32> {
+        let page_idx = (paddr >> PAGE_SHIFT) as usize;
+        let offset = (paddr & PAGE_OFFSET_MASK) as usize;
+        if page_idx >= self.phys_pages.len() {
+            return Err(anyhow!("Invalid page_idx"));
+        }
+
+        let Some(ref page) = self.phys_pages[page_idx] else {
+            return Err(anyhow!("Empty page"));
+        };
+
+        let end = offset + WORD_SIZE;
+        if end > page.len() {
+            bail!("load_u32 crosses page boundary");
+        }
+
+        let bytes: [u8; WORD_SIZE] = page[offset..end]
+            .try_into()
+            .expect("slice is exactly 4 bytes");
+        Ok(u32::from_le_bytes(bytes))
+    }
+
+    fn store_u32(&mut self, paddr: u32, word: u32) -> Result<()> {
+        let page_idx = (paddr >> PAGE_SHIFT) as usize;
+        let offset = (paddr & PAGE_OFFSET_MASK) as usize;
+        if page_idx >= self.phys_pages.len() {
+            return Err(anyhow!("Invalid page_idx"));
+        }
+
+        let page = &mut self.phys_pages[page_idx];
+        if page.is_none() {
+            *page = Some(Arc::new([0; PAGE_SIZE]));
+        }
+
+        let page = page.as_mut().unwrap();
+        let page = Arc::get_mut(page).ok_or_else(|| anyhow!("Page isn't unique"))?;
+        let end = offset + WORD_SIZE;
+        if end > page.len() {
+            bail!("store_u32 crosses page boundary");
+        }
+
+        let bytes = word.to_le_bytes();
+        page[offset..end].copy_from_slice(&bytes);
+
+        Ok(())
+    }
+
+    fn dump_registers(&self) {
+        for (i, reg) in self.registers.iter().enumerate() {
+            tracing::debug!("x{i}: {reg:#010x}");
+        }
+    }
 }
