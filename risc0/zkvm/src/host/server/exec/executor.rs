@@ -346,10 +346,14 @@ impl<'a> ExecutorImpl<'a> {
 
     /// Takes the results from the [ExecutorImpl] and creates a [Session], resetting the executor
     /// such that running it will resume execution from the final state.
+    ///
+    /// The [Session] returned by this function will have only [NullSegmentRef] for segments.
     pub(crate) fn finalize_session(&mut self) -> Result<Session> {
         self.finalize_session_with(None, None)
     }
 
+    /// Internal version of `finalize_session` used with run_with_callback`, which provides the
+    /// pre_image_digest and segment refs, constructed by the sidecar thread, as arguments.
     fn finalize_session_with(
         &mut self,
         pre_image_digest: Option<Digest>,
@@ -403,9 +407,8 @@ impl<'a> ExecutorImpl<'a> {
 
         let syscall_metrics = syscall_table.inner.metrics.borrow().clone();
 
-        // NOTE: Session requires this field to be filled with something. Using NullSegmentRef
-        // gives an indication of the number of segments. In ExecutorImpl::run, this is filled
-        // in when returning, collecting the refs from the sidecar thread.
+        // NOTE: Session requires this field to be filled with something. If not provided as an
+        // argument, fill it in with NullSegmentRef.
         let segments = segments.unwrap_or_else(|| {
             (0..exec_result.segments)
                 .map(|_| -> Box<dyn SegmentRef> { Box::new(NullSegmentRef) })

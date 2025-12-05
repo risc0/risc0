@@ -48,6 +48,7 @@ use super::{
     unlikely,
 };
 
+/// Executor implementing the RISC Zero virtual machine for the `rv32im` circuit.
 pub struct Executor<'a, S: Syscall> {
     pc: ByteAddr,
     user_pc: ByteAddr,
@@ -76,6 +77,10 @@ pub struct Executor<'a, S: Syscall> {
     block_tracker: BlockTracker,
 }
 
+/// Results from running the [Executor], including information about the initial and final memory
+/// states as well metrics for the number of segments and cycles used.
+///
+/// This struct has the information required to compute the [Rv32imV2Claim] for the execution.
 #[derive(Clone, Debug)]
 #[non_exhaustive]
 pub struct ExecutorResult {
@@ -98,7 +103,7 @@ pub struct ExecutorResult {
 impl ExecutorResult {
     /// Construct the [Rv32imV2Claim] for this execution.
     ///
-    /// Calling this function will update the digests on the pre and post image, if needed.
+    /// Calling this function will compute the digests of the pre and post image, if needed.
     pub fn claim(&mut self) -> Rv32imV2Claim {
         Rv32imV2Claim {
             pre_state: self.pre_image.image_id(),
@@ -125,8 +130,11 @@ pub struct SimpleSession {
     pub result: ExecutorResult,
 }
 
+/// Limits on the execution, ensuring each segment can be proven and the session terminates.
 #[derive(Copy, Clone, Debug)]
+#[non_exhaustive]
 pub struct ExecutionLimit {
+    /// Maximum size of a segment, expressed as a power-of-two.
     pub segment_po2: usize,
     /// Maximum number of cycles a single instruction is allowed to consume.
     ///
@@ -135,6 +143,7 @@ pub struct ExecutionLimit {
     /// If an instruction exceeds this limit, and falls at the end of segment, it may result in an
     /// execution failure.
     pub max_insn_cycles: Option<usize>,
+    /// Limit on the number of cycles to execute in the session.
     pub session: CycleLimit,
 }
 
@@ -202,8 +211,11 @@ impl ExecutionLimit {
 
 #[derive(Copy, Clone, Debug, Default)]
 pub enum CycleLimit {
-    Hard(u64), // it is an error to exceed this limit
-    Soft(u64), // stop execution after this cycle count
+    /// Hard limit on the number of cycles, it is an error to exceed this limit.
+    Hard(u64),
+    /// Soft limit on the number of cycles. Terminate, without error, if this limit is reached.
+    Soft(u64),
+    /// No limit on the number of cycles.
     #[default]
     None,
 }
@@ -211,8 +223,11 @@ pub enum CycleLimit {
 #[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum ExecutionError {
+    /// Error when when a hard [CycleLimit] is exceeded.
     #[error("Session limit exceeded: {cycle} >= {limit}")]
     CycleLimitExceeded { limit: u64, cycle: u64 },
+    /// Error when the execution encounters an error. Optionally includes a [SegmentUpdate] with
+    /// the results of execution up to the point of error in the final segment.
     #[error("Execution failed at program counter {pc:?}: {error}")]
     ExecutionFailed {
         #[source]
@@ -384,6 +399,10 @@ impl<'a, S: Syscall> Executor<'a, S> {
         }
     }
 
+    /// Execute up to the next segment split.
+    ///
+    /// If the machine is in a terminal state, no segment is returned. This function can be used to
+    /// incrementally execute the program in an iterator-like fashion.
     pub fn run_segment(
         &mut self,
         limit: ExecutionLimit,
@@ -467,6 +486,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
         Ok(Some(update))
     }
 
+    /// Execute until the program reaches a terminal state. Either due to the machine exiting, or
+    /// an session limit being reached.
     pub fn run(
         mut self,
         limit: ExecutionLimit,
@@ -545,10 +566,12 @@ impl<'a, S: Syscall> Executor<'a, S> {
         Ok(update)
     }
 
+    /// Access the syscall handler used by this executor.
     pub fn syscall_handler(&self) -> &S {
         &self.syscall_handler
     }
 
+    /// Access the syscall handler used by this executor, allowing mutation.
     pub fn syscall_handler_mut(&mut self) -> &mut S {
         // unwrap will not fail because the only clones of this Rc are short-lived.
         Rc::get_mut(&mut self.syscall_handler).unwrap()
@@ -558,6 +581,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         self.terminate_state.as_ref()
     }
 
+    /// Compute the [ExecutorResult] from the initial to the current state of the executor.
     pub fn state(&self) -> ExecutorResult {
         ExecutorResult {
             segments: self.segment_counter as u64 + 1,
@@ -604,6 +628,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
         }
     }
 
+    /// Reset the state of the executor, such that a new session can be stated from the current
+    /// memory state and with the same syscall handler and tracer (if any).
     pub fn reset(&mut self) {
         let image: MemoryImage = std::mem::take(&mut self.pager.image).into();
         *self = Self::new_inner(
@@ -845,6 +871,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     }
 
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32> {
+        // NOTE: This clone is required to allow host_read to have mutable access to self.
         let rlen = self.syscall_handler.clone().host_read(self, fd, buf)?;
         let slice = &buf[..rlen as usize];
         self.read_record.push(slice.to_vec());
@@ -852,6 +879,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     }
 
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32> {
+        // NOTE: This clone is required to allow host_read to have mutable access to self.
         let rlen = self.syscall_handler.clone().host_write(self, fd, buf)?;
         self.write_record.push(rlen);
         Ok(rlen)
