@@ -9,13 +9,14 @@ struct CycleCounterLayout {
   NondetRegLayout _super;
   IsZeroLayout isFirstCycle;
 };
-using NondetRegLayout11LayoutArray = std::array<NondetRegLayout, 11>;
+using NondetRegLayout12LayoutArray = std::array<NondetRegLayout, 12>;
 struct WrapOneHotLayout {
-  NondetRegLayout11LayoutArray _super;
+  NondetRegLayout12LayoutArray _super;
 };
 struct ControlStateLayout {
   NondetRegLayout cycleType;
   NondetRegLayout subType;
+  NondetRegLayout block;
   NondetRegLayout round;
 };
 struct ComputeCurrentStep_SuperArm2_SuperLayout {
@@ -32,26 +33,34 @@ struct KeccackNextRoundLayout {
   KeccackNextRound_SuperLayout _super;
   IsZeroLayout isLast;
 };
-struct CheckNextPreimage_SuperLayout {
+struct ShaNextRound_SuperLayout {
   ControlStateLayout _super;
   ControlStateLayout arm0;
   ControlStateLayout arm1;
 };
-struct CheckNextPreimageLayout {
-  CheckNextPreimage_SuperLayout _super;
+struct ShaNextRoundLayout {
+  ShaNextRound_SuperLayout _super;
+  IsZeroLayout isLast;
+};
+struct ShaNextBlock_SuperArm2_Super_SuperLayout {
+  ControlStateLayout _super;
+  ControlStateLayout arm0;
+  ControlStateLayout arm1;
+};
+struct ShaNextBlock_SuperArm2_SuperLayout {
+  ShaNextBlock_SuperArm2_Super_SuperLayout _super;
   NondetRegLayout more;
 };
-struct Poseidon2NextRound_SuperLayout {
+struct ShaNextBlock_SuperLayout {
   ControlStateLayout _super;
   ControlStateLayout arm0;
   ControlStateLayout arm1;
-  CheckNextPreimageLayout arm2;
+  ShaNextBlock_SuperArm2_SuperLayout arm2;
 };
-struct Poseidon2NextRoundLayout {
-  Poseidon2NextRound_SuperLayout _super;
+struct ShaNextBlockLayout {
+  ShaNextBlock_SuperLayout _super;
   IsZeroLayout isLast;
-  NondetRegLayout isLastRead;
-  NondetRegLayout isLastWrite;
+  NondetRegLayout isSub0;
 };
 struct ComputeCurrentStep_SuperLayout {
   ControlStateLayout _super;
@@ -64,33 +73,39 @@ struct ComputeCurrentStep_SuperLayout {
   ControlStateLayout arm6;
   ControlStateLayout arm7;
   KeccackNextRoundLayout arm8;
-  Poseidon2NextRoundLayout arm9;
-  ControlStateLayout arm10;
+  ShaNextRoundLayout arm9;
+  ShaNextBlockLayout arm10;
+  ControlStateLayout arm11;
 };
 struct TopControlStateLayout {
   ControlStateLayout _super;
   ControlStateLayout arm0;
   ComputeCurrentStep_SuperLayout arm1;
 };
-struct OneHot_11_Layout {
-  NondetRegLayout11LayoutArray _super;
+struct OneHot_12_Layout {
+  NondetRegLayout12LayoutArray _super;
 };
 using NondetRegLayout800LayoutArray = std::array<NondetRegLayout, 800>;
 using NondetRegLayout100LayoutArray = std::array<NondetRegLayout, 100>;
-using NondetRegLayout24LayoutArray = std::array<NondetRegLayout, 24>;
+using NondetRegLayout16LayoutArray = std::array<NondetRegLayout, 16>;
 struct TopStateLayout {
   NondetRegLayout800LayoutArray bits;
   NondetRegLayout100LayoutArray kflat;
-  NondetRegLayout24LayoutArray pflat;
-};
-struct ReadCycleLayout {
-  TopStateLayout _super;
-  NondetRegLayout100LayoutArray load;
+  NondetRegLayout16LayoutArray sflat;
 };
 struct UnpackReg_800__16_Layout {
   NondetRegLayout800LayoutArray _super;
 };
+struct ReadCycleLayout {
+  TopStateLayout _super;
+  NondetRegLayout100LayoutArray load;
+  UnpackReg_800__16_Layout bits;
+};
 struct ExpandCycleLayout {
+  TopStateLayout _super;
+  UnpackReg_800__16_Layout bits;
+};
+struct WriteCycleLayout {
   TopStateLayout _super;
   UnpackReg_800__16_Layout bits;
 };
@@ -106,6 +121,7 @@ struct KeccakRound0Layout {
   TopStateLayout _super;
   ThetaP1Layout b;
 };
+using NondetRegLayout24LayoutArray = std::array<NondetRegLayout, 24>;
 struct OneHot_24_Layout {
   NondetRegLayout24LayoutArray _super;
 };
@@ -123,73 +139,90 @@ struct KeccakRound34_1_Layout {
   TopStateLayout _super;
   IotaLayout _0;
 };
-using NondetRegLayout7LayoutArray = std::array<NondetRegLayout, 7>;
-struct OneHot_7_Layout {
-  NondetRegLayout7LayoutArray _super;
-};
-struct SBoxLayout {
-  NondetRegLayout _super;
-  NondetRegLayout cubed;
-};
-using SBoxLayout24LayoutArray = std::array<SBoxLayout, 24>;
-struct DoExtRoundLayout {
-  SBoxLayout24LayoutArray _1;
-};
 using NondetRegLayout8LayoutArray = std::array<NondetRegLayout, 8>;
 struct OneHot_8_Layout {
   NondetRegLayout8LayoutArray _super;
 };
-struct DoExtRoundByIdxLayout {
-  DoExtRoundLayout _super;
-  OneHot_8_Layout idxHot;
+using NondetRegLayout4LayoutArray = std::array<NondetRegLayout, 4>;
+struct OneHot_4_Layout {
+  NondetRegLayout4LayoutArray _super;
 };
-struct DoIntRoundLayout {
-  SBoxLayout sbox;
+struct LoadWinLayout {
+  OneHot_4_Layout blockSelect;
 };
-using DoIntRoundLayout21LayoutArray = std::array<DoIntRoundLayout, 21>;
-struct DoIntRoundsLayout {
-  DoIntRoundLayout21LayoutArray _super;
+using NondetRegLayout32LayoutArray = std::array<NondetRegLayout, 32>;
+struct ExpandBELayout {
+  NondetRegLayout32LayoutArray _super;
 };
-struct DoSpongeLayout {
-  DoExtRoundByIdxLayout _super;
-  NondetRegLayout24LayoutArray stage0x;
-  DoExtRoundByIdxLayout stage1;
-  DoExtRoundByIdxLayout stage2;
-  DoExtRoundByIdxLayout stage3;
-  DoExtRoundByIdxLayout stage4;
-  DoIntRoundsLayout stage5;
-  DoExtRoundByIdxLayout stage6;
-  DoExtRoundByIdxLayout stage7;
-  DoExtRoundByIdxLayout stage8;
+struct UnpackReg_32__16_Layout {
+  NondetRegLayout32LayoutArray _super;
 };
-struct Poseidon2CycleLayout {
+struct CarryExtractLayout {
+  NondetRegLayout bit0;
+  NondetRegLayout bit1;
+  NondetRegLayout bit2;
+};
+struct CarryAndExpandLayout {
+  UnpackReg_32__16_Layout _super;
+  CarryExtractLayout lowCarry;
+  CarryExtractLayout highCarry;
+};
+struct DoShaStepWLayout {
+  NondetRegLayout32LayoutArray _super;
+  ExpandBELayout arm0;
+  CarryAndExpandLayout arm1;
+};
+struct DoShaStepLayout {
+  DoShaStepWLayout w;
+  CarryAndExpandLayout a;
+  CarryAndExpandLayout e;
+};
+using DoShaStepLayout8LayoutArray = std::array<DoShaStepLayout, 8>;
+struct ShaCycleLayout {
   TopStateLayout _super;
-  OneHot_7_Layout roundOH;
-  DoSpongeLayout stateOut;
+  OneHot_8_Layout oneHot;
+  NondetRegLayout isLoad;
+  LoadWinLayout win;
+  DoShaStepLayout step0;
+  DoShaStepLayout step1;
+  DoShaStepLayout step2;
+  DoShaStepLayout step3;
+  DoShaStepLayout step4;
+  DoShaStepLayout step5;
+  DoShaStepLayout step6;
+  DoShaStepLayout step7;
+  DoShaStepLayout8LayoutArray steps;
+};
+using CarryAndExpandLayout4LayoutArray = std::array<CarryAndExpandLayout, 4>;
+struct ShaNextBlockCycleLayout {
+  TopStateLayout _super;
+  CarryAndExpandLayout4LayoutArray totA;
+  CarryAndExpandLayout4LayoutArray totE;
 };
 struct TopCurStateLayout {
   TopStateLayout _super;
   TopStateLayout arm0;
   ReadCycleLayout arm1;
   ExpandCycleLayout arm2;
-  TopStateLayout arm3;
+  WriteCycleLayout arm3;
   KeccakRound0Layout arm4;
   TopStateLayout arm5;
   TopStateLayout arm6;
   KeccakRound34_0_Layout arm7;
   KeccakRound34_1_Layout arm8;
-  Poseidon2CycleLayout arm9;
-  TopStateLayout arm10;
+  ShaCycleLayout arm9;
+  ShaNextBlockCycleLayout arm10;
+  TopStateLayout arm11;
 };
 struct DigestRegLayout {
-  NondetRegLayout8LayoutArray values;
+  NondetRegLayout16LayoutArray values;
 };
 struct TopLayout {
   CycleCounterLayout cycle;
   WrapOneHotLayout cycleMux;
   ControlStateLayout controlState;
   TopControlStateLayout controlStateRedef;
-  OneHot_11_Layout oneHot;
+  OneHot_12_Layout oneHot;
   TopStateLayout curState;
   TopCurStateLayout curStateRedef;
 };
@@ -199,6 +232,9 @@ struct _globalLayout {
 };
 struct NondetRegStruct {
   Val _super;
+};
+struct NondetBitRegStruct {
+  NondetRegStruct _super;
 };
 struct ComponentStruct {
 };
@@ -210,7 +246,7 @@ using Val64Array = std::array<Val, 64>;
 using Val64Array5Array = std::array<Val64Array, 5>;
 using Val64Array5Array5Array = std::array<Val64Array5Array, 5>;
 struct ThetaP1_Super_Super_SuperStruct {
-  NondetRegStruct _super;
+  NondetBitRegStruct _super;
 };
 using ThetaP1_Super_Super_SuperStruct64Array = std::array<ThetaP1_Super_Super_SuperStruct, 64>;
 struct ThetaP1_Super_SuperStruct {
@@ -221,9 +257,9 @@ struct ThetaP1Struct {
   ThetaP1_Super_SuperStruct5Array _super;
 };
 using Val24Array = std::array<Val, 24>;
-using NondetRegStruct24Array = std::array<NondetRegStruct, 24>;
+using NondetBitRegStruct24Array = std::array<NondetBitRegStruct, 24>;
 struct OneHot_24_Struct {
-  NondetRegStruct24Array _super;
+  NondetBitRegStruct24Array _super;
 };
 struct RoundToArray_Super_SuperStruct {
   Val _super;
@@ -243,31 +279,26 @@ using Iota_Super_SuperStruct5Array = std::array<Iota_Super_SuperStruct, 5>;
 struct IotaStruct {
   Iota_Super_SuperStruct5Array _super;
 };
-struct MultiplyByMInt_Super_SuperStruct {
+struct CarryExtractStruct {
+  Val carry;
+  Val out;
+};
+using Val2Array = std::array<Val, 2>;
+struct DivStruct {
   Val _super;
 };
-using MultiplyByMInt_Super_SuperStruct24Array = std::array<MultiplyByMInt_Super_SuperStruct, 24>;
-struct MultiplyByMIntStruct {
-  MultiplyByMInt_Super_SuperStruct24Array _super;
+using DivStruct32Array = std::array<DivStruct, 32>;
+using Val32Array = std::array<Val, 32>;
+struct UnpackReg_32__16__SuperStruct {
+  NondetBitRegStruct _super;
 };
-struct DoIntRounds__0_SuperStruct {
-  Val _super;
+using UnpackReg_32__16__SuperStruct32Array = std::array<UnpackReg_32__16__SuperStruct, 32>;
+struct UnpackReg_32__16_Struct {
+  UnpackReg_32__16__SuperStruct32Array _super;
 };
-using DoIntRounds__0_SuperStruct21Array = std::array<DoIntRounds__0_SuperStruct, 21>;
-struct DoIntRoundsStruct {
-  Val24Array _super;
-};
-struct MultiplyByMExt_Super_SuperStruct {
-  Val _super;
-};
-using MultiplyByMExt_Super_SuperStruct24Array = std::array<MultiplyByMExt_Super_SuperStruct, 24>;
-struct MultiplyByMExtStruct {
-  MultiplyByMExt_Super_SuperStruct24Array _super;
-};
-using Val8Array = std::array<Val, 8>;
-using NondetRegStruct8Array = std::array<NondetRegStruct, 8>;
-struct OneHot_8_Struct {
-  NondetRegStruct8Array _super;
+using NondetBitRegStruct32Array = std::array<NondetBitRegStruct, 32>;
+struct ExpandBEStruct {
+  NondetBitRegStruct32Array _super;
 };
 using Val800Array = std::array<Val, 800>;
 struct TopStateBitsStruct {
@@ -279,24 +310,63 @@ struct TopStateKflatStruct {
   NondetRegStruct _super;
 };
 using TopStateKflatStruct100Array = std::array<TopStateKflatStruct, 100>;
+using Val16Array = std::array<Val, 16>;
+using NondetRegStruct16Array = std::array<NondetRegStruct, 16>;
 struct TopStateStruct {
   TopStateBitsStruct800Array bits;
   TopStateKflatStruct100Array kflat;
-  NondetRegStruct24Array pflat;
+  NondetRegStruct16Array sflat;
 };
-using Val7Array = std::array<Val, 7>;
-using NondetRegStruct7Array = std::array<NondetRegStruct, 7>;
-struct OneHot_7_Struct {
-  NondetRegStruct7Array _super;
+using Val8Array = std::array<Val, 8>;
+using NondetBitRegStruct8Array = std::array<NondetBitRegStruct, 8>;
+struct OneHot_8_Struct {
+  NondetBitRegStruct8Array _super;
 };
-using Val16Array = std::array<Val, 16>;
-using Val50Array = std::array<Val, 50>;
-struct DivStruct {
+using Val32Array4Array = std::array<Val32Array, 4>;
+using Val32Array16Array = std::array<Val32Array, 16>;
+struct ShaStateStruct {
+  Val32Array4Array a;
+  Val32Array4Array e;
+  Val32Array16Array w;
+};
+using ComponentStruct32Array = std::array<ComponentStruct, 32>;
+struct DoShaStepStruct {
+  NondetBitRegStruct32Array w;
+  UnpackReg_32__16_Struct a;
+  UnpackReg_32__16_Struct e;
+  ShaStateStruct newState;
+};
+using Val4Array = std::array<Val, 4>;
+using NondetBitRegStruct4Array = std::array<NondetBitRegStruct, 4>;
+struct OneHot_4_Struct {
+  NondetBitRegStruct4Array _super;
+};
+using Val2Array8Array = std::array<Val2Array, 8>;
+struct LoadWinStruct {
+  Val2Array8Array _super;
+};
+struct Pack_32__16__Super_SuperStruct {
   Val _super;
 };
+using Pack_32__16__Super_SuperStruct2Array = std::array<Pack_32__16__Super_SuperStruct, 2>;
+struct Pack_32__16_Struct {
+  Pack_32__16__Super_SuperStruct2Array _super;
+};
+using Pack_32__16_Struct4Array = std::array<Pack_32__16_Struct, 4>;
+using NondetRegStruct2Array = std::array<NondetRegStruct, 2>;
+struct ShaNextBlockCyclePrevA_SuperStruct {
+  NondetRegStruct2Array _super;
+};
+using ShaNextBlockCyclePrevA_SuperStruct4Array = std::array<ShaNextBlockCyclePrevA_SuperStruct, 4>;
+struct ShaNextBlockCyclePrevE_SuperStruct {
+  NondetRegStruct2Array _super;
+};
+using ShaNextBlockCyclePrevE_SuperStruct4Array = std::array<ShaNextBlockCyclePrevE_SuperStruct, 4>;
+using UnpackReg_32__16_Struct4Array = std::array<UnpackReg_32__16_Struct, 4>;
+using Val50Array = std::array<Val, 50>;
 using DivStruct800Array = std::array<DivStruct, 800>;
 struct UnpackReg_800__16__SuperStruct {
-  NondetRegStruct _super;
+  NondetBitRegStruct _super;
 };
 using UnpackReg_800__16__SuperStruct800Array = std::array<UnpackReg_800__16__SuperStruct, 800>;
 struct UnpackReg_800__16_Struct {
@@ -309,28 +379,29 @@ using ReadCycleLoadStruct100Array = std::array<ReadCycleLoadStruct, 100>;
 using TopStateKflatStruct50Array = std::array<TopStateKflatStruct, 50>;
 struct DigestRegValuesStruct {
 };
-using DigestRegValuesStruct8Array = std::array<DigestRegValuesStruct, 8>;
+using DigestRegValuesStruct16Array = std::array<DigestRegValuesStruct, 16>;
 struct DigestRegStruct {
 };
 struct ControlStateStruct {
   NondetRegStruct cycleType;
   NondetRegStruct subType;
+  NondetRegStruct block;
   NondetRegStruct round;
 };
-using Val11Array = std::array<Val, 11>;
-struct OneHot_11__SuperStruct {
-  NondetRegStruct _super;
+using Val12Array = std::array<Val, 12>;
+struct OneHot_12__SuperStruct {
+  NondetBitRegStruct _super;
 };
-using OneHot_11__SuperStruct11Array = std::array<OneHot_11__SuperStruct, 11>;
-struct OneHot_11_Struct {
-  OneHot_11__SuperStruct11Array _super;
+using OneHot_12__SuperStruct12Array = std::array<OneHot_12__SuperStruct, 12>;
+struct OneHot_12_Struct {
+  OneHot_12__SuperStruct12Array bits;
 };
 struct WrapOneHot_SuperStruct {
   NondetRegStruct _super;
 };
-using WrapOneHot_SuperStruct11Array = std::array<WrapOneHot_SuperStruct, 11>;
+using WrapOneHot_SuperStruct12Array = std::array<WrapOneHot_SuperStruct, 12>;
 struct WrapOneHotStruct {
-  WrapOneHot_SuperStruct11Array _super;
+  WrapOneHot_SuperStruct12Array _super;
 };
 struct TopStruct {
 };

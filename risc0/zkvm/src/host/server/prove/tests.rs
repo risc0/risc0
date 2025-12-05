@@ -17,7 +17,7 @@ use std::sync::OnceLock;
 
 use anyhow::Result;
 use risc0_binfmt::MemoryImage;
-use risc0_zkp::{core::digest::Digest, digest, verify::VerificationError};
+use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{
     HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec,
 };
@@ -95,6 +95,22 @@ fn prove_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Receipt> {
 fn prove_elf_succinct(env: ExecutorEnv, elf: &[u8]) -> Result<Receipt> {
     let opts = ProverOpts::succinct();
     Ok(get_prover_server(&opts)?.prove(env, elf)?.receipt)
+}
+
+#[test_log::test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+fn keccak_union() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::KeccakUnion(3))
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    get_prover_server(&opts)
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap();
 }
 
 #[test_log::test]
@@ -1167,92 +1183,5 @@ mod soundness {
 
         let security = soundness::toy_model_security::<CpuHal<BabyBear>>(taps, coeffs_size);
         assert_eq!(security, 97.14198);
-    }
-}
-
-mod keccak {
-    use risc0_circuit_keccak::{
-        KECCAK_CONTROL_IDS, KECCAK_CONTROL_ROOT, KECCAK_PO2_RANGE, prove::zkr::get_keccak_zkr,
-    };
-    use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
-
-    use crate::recursion::MerkleGroup;
-
-    use super::*;
-
-    fn compute_control_ids() -> Vec<Digest> {
-        let mut ret = vec![];
-        for po2 in KECCAK_PO2_RANGE {
-            let program = get_keccak_zkr(po2).unwrap();
-            let hash_suite = Poseidon2HashSuite::new_suite();
-            ret.push(program.compute_control_id(hash_suite).unwrap())
-        }
-        ret
-    }
-
-    fn compute_control_root() -> Digest {
-        let control_ids = compute_control_ids();
-        let hash_suite = Poseidon2HashSuite::new_suite();
-        let hashfn = hash_suite.hashfn.as_ref();
-        let group = MerkleGroup::new(control_ids).unwrap();
-        group.calc_root(hashfn)
-    }
-
-    // Makes sure our included control IDs are what we expect
-    #[test]
-    fn control_ids() {
-        assert_eq!(KECCAK_CONTROL_IDS, compute_control_ids());
-    }
-
-    #[test]
-    fn control_roots() {
-        assert_eq!(KECCAK_CONTROL_ROOT, compute_control_root());
-    }
-
-    #[rstest]
-    #[case(16, digest!("b5dc0b683d1e06601584752ad3d9404d8761f85fbfaa0a5b15999a27a2f79314"))]
-    #[case(17, digest!("1cc132224976f3626a94315c341efc232cff5e485da96144c908c9580e29c707"))]
-    #[test_log::test]
-    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    fn basic(#[case] po2: u32, #[case] claim_digest: Digest) {
-        let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::KeccakProve { claim_digest, po2 })
-            .unwrap()
-            .keccak_max_po2(po2)
-            .unwrap()
-            .build()
-            .unwrap();
-
-        let receipt = prove_elf(env, MULTI_TEST_ELF).unwrap();
-
-        // Make sure this receipt actually depends on the assumption;
-        // otherwise this test might give a false negative.
-        assert!(
-            !receipt
-                .inner
-                .composite()
-                .unwrap()
-                .assumption_receipts
-                .is_empty()
-        );
-
-        // Make sure the receipt verifies OK
-        receipt.verify(MULTI_TEST_ID).unwrap();
-    }
-
-    #[test_log::test]
-    #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
-    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    fn union() {
-        let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::KeccakUnion(3))
-            .unwrap()
-            .build()
-            .unwrap();
-        let opts = ProverOpts::succinct();
-        get_prover_server(&opts)
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap();
     }
 }

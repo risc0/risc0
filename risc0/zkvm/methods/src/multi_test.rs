@@ -42,7 +42,6 @@ pub enum MultiTestSpec {
         /// Busy loop until the guest has run for at least this number of cycles
         cycles: u64,
     },
-    CommitSingleKeccak,
     DoNothing,
     DoRandom,
     Echo {
@@ -59,13 +58,9 @@ pub enum MultiTestSpec {
     EventTrace,
     Fault,
     Halt(u8),
-    KeccakProve {
-        claim_digest: Digest,
-        po2: u32,
-    },
-    KeccakUnion(usize),
     KeccakUpdate,
     KeccakUpdate2,
+    KeccakUnion(usize),
     LibM,
     Oom,
     OutOfBounds,
@@ -98,6 +93,7 @@ pub enum MultiTestSpec {
         data: Vec<u8>,
         num_iter: u32,
     },
+    ShaSingleKeccak,
     SysFork,
     SysForkFork,
     SysForkJournalPanic,

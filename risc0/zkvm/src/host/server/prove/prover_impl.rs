@@ -20,8 +20,8 @@ use anyhow::{Context, Result, anyhow, bail, ensure};
 use super::{PreflightIter, ProverServer, keccak::prove_keccak};
 use crate::{
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
-    MaybePruned, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
-    SuccinctReceiptVerifierParameters, UnionClaim, Unknown, VerifierContext, WorkClaim,
+    MaybePruned, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session, UnionClaim,
+    Unknown, VerifierContext, WorkClaim,
     host::{
         client::prove::opts::ReceiptKind,
         prove_info::ProveInfo,
@@ -103,14 +103,8 @@ impl ProverServer for ProverImpl {
         let mut zkr_receipts = HashMap::new();
         let mut keccak_receipts: MerkleMountainAccumulator<UnionPeak> =
             MerkleMountainAccumulator::new();
-
-        let keccak_ctx = VerifierContext::default()
-            .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters::for_keccak());
-
         for proof_request in session.pending_keccaks.iter() {
-            let receipt = prove_keccak(proof_request).context("prove keccak")?;
-            receipt.verify_integrity_with_context(&keccak_ctx)?;
-
+            let receipt = prove_keccak(proof_request)?;
             tracing::debug!("adding keccak assumption: {}", receipt.claim.digest());
             keccak_receipts.insert(receipt)?;
         }

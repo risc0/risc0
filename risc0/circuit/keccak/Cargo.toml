@@ -37,6 +37,7 @@ gpu-guard = { workspace = true }
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
 rand = "0.9.1"
+risc0-circuit-keccak-methods = { path = "methods" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 

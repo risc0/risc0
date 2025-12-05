@@ -13,17 +13,19 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use std::collections::VecDeque;
+
 use anyhow::{Result, ensure};
+use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_keccak::{
     KECCAK_CONTROL_IDS, get_control_id,
     prove::{keccak_prover, zkr::get_keccak_zkr},
 };
 use risc0_core::field::baby_bear::BabyBearElem;
-use risc0_zkp::core::digest::{DIGEST_WORDS, Digest};
+use risc0_zkp::core::digest::{DIGEST_SHORTS, Digest};
 
 use crate::{
-    Unknown,
-    host::{client::env::ProveKeccakRequest, recursion::prove::prove_zkr},
+    Unknown, host::client::env::ProveKeccakRequest, host::recursion::prove::prove_zkr,
     receipt::SuccinctReceipt,
 };
 
@@ -33,7 +35,13 @@ pub(crate) fn prove_keccak(request: &ProveKeccakRequest) -> Result<SuccinctRecei
         let prover = keccak_prover()?;
         let seal = prover.prove(&request.input, request.po2)?;
 
-        let claim_digest = read_digest_from_words(&seal[..DIGEST_WORDS])?;
+        let claim_digest: Digest = read_sha_halfs(&mut VecDeque::from_iter(
+            bytemuck::checked::cast_slice::<_, BabyBearElem>(&seal[0..DIGEST_SHORTS])
+                .iter()
+                .copied()
+                .map(u32::from),
+        ))?;
+
         ensure!(
             request.claim_digest == claim_digest,
             "keccak claim digest mismatch, expected: {:?}, actual: {claim_digest:?}",
@@ -66,12 +74,4 @@ pub(crate) fn prove_keccak(request: &ProveKeccakRequest) -> Result<SuccinctRecei
         KECCAK_CONTROL_IDS.to_vec(),
         bytemuck::cast_slice(zkr_input.as_slice()),
     )
-}
-
-fn read_digest_from_words(slice: &[u32]) -> Result<Digest> {
-    let mut buf = slice.to_vec();
-    for word in buf.iter_mut() {
-        *word = BabyBearElem::new_raw(*word).as_u32();
-    }
-    Ok(Digest::try_from(buf.as_slice())?)
 }

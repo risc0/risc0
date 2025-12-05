@@ -147,7 +147,9 @@ where
         global.buf.view(|slice| {
             let mut digest = Digest::ZERO;
             for (i, word) in digest.as_mut_words().iter_mut().enumerate() {
-                *word = slice[i].into();
+                let low: u32 = slice[i * 2].into();
+                let high: u32 = slice[i * 2 + 1].into();
+                *word = low | (high << 16);
             }
             tracing::debug!("final digest: {digest}");
 

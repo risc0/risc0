@@ -167,9 +167,6 @@ __global__ void scatter_preflight(Fp* into,
   const ScatterInfo& info = infos[gid];
   uint32_t innerCount = 32 / info.bits;
   uint32_t mask = (1 << (info.bits)) - 1;
-  if (info.bits == 32) {
-    mask = 0xffffffff;
-  }
   for (size_t i = 0; i < info.count; i++) {
     uint32_t word = from[info.offset + (i / innerCount)];
     size_t j = i % innerCount;

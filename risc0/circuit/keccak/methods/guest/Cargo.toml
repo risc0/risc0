@@ -1,0 +1,16 @@
+[package]
+name = "risc0-circuit-keccak-test-guest"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+bytemuck = "1.20.0"
+risc0-circuit-keccak = { path = "../..", default-features = false }
+risc0-zkvm = { path = "../../../../zkvm", default-features = false, features = [
+  "std", "unstable"
+] }
+risc0-zkvm-platform = { path = "../../../../zkvm/platform", default-features = false, features = [
+  "unstable",
+] }

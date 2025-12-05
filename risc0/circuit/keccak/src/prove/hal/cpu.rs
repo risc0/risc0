@@ -62,11 +62,7 @@ impl CircuitWitnessGenerator<CpuHal<CircuitField>> for CpuCircuitHal {
         let mut into_slice = into.buf.as_slice_mut();
         for info in infos {
             let inner_count = 32 / info.bits;
-            let mask: u32 = if info.bits == 32 {
-                0xffffffff
-            } else {
-                (1 << info.bits) - 1
-            };
+            let mask: u32 = (1 << info.bits) - 1;
             for i in 0..info.count as u32 {
                 let from_idx = info.offset + (i / inner_count);
                 let word = data[from_idx as usize];

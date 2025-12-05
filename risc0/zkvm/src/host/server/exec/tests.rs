@@ -1279,14 +1279,14 @@ fn keccak_update2() {
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     assert_eq!(
         session.pending_keccaks[0].claim_digest,
-        digest!("50a60d378f06fa45a3315f3b2769970352d103504329e001be1a9419e9130c22")
+        digest!("4be4abacf05e312a566673392786c5ae69b8c7ed2b77bb2d63119e035420866c")
     );
     assert_eq!(session.pending_keccaks[0].po2, 15,);
 }
 
 #[test_log::test]
-fn commit_single_keccak() {
-    multi_test(MultiTestSpec::CommitSingleKeccak);
+fn sha_single_keccak() {
+    multi_test(MultiTestSpec::ShaSingleKeccak);
 }
 
 #[test_log::test]

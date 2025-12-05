@@ -13,12 +13,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use core::ptr::{addr_of, addr_of_mut};
+use core::ptr::addr_of;
 
 use risc0_circuit_keccak::{KECCAK_CONTROL_ROOT, KeccakState};
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
-use risc0_zkp::core::digest::Digest;
-use risc0_zkvm_platform::syscall::{DIGEST_WORDS, sys_keccak, sys_poseidon2, sys_prove_keccak};
+use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
+use risc0_zkvm_platform::syscall::{DIGEST_WORDS, sys_keccak, sys_prove_keccak, sys_sha_compress};
 
 use crate::{
     Assumption,
@@ -35,12 +35,12 @@ pub(crate) struct KeccakBatcher {
 
 impl KeccakBatcher {
     fn input_exists(&self) -> bool {
-        self.claim_state != Digest::ZERO
+        self.claim_state != SHA256_INIT
     }
 
     pub fn new() -> Self {
         Self {
-            claim_state: Digest::ZERO,
+            claim_state: SHA256_INIT,
             mmr: MerkleMountainAccumulator::<GuestPeak>::new(),
             proof_count: 0,
         }
@@ -48,10 +48,10 @@ impl KeccakBatcher {
 
     #[allow(dead_code)]
     pub(crate) fn update(&mut self, keccak_state: &mut KeccakState) {
-        commit_single_keccak(&mut self.claim_state, keccak_state);
+        sha_single_keccak(&mut self.claim_state, keccak_state);
         let status = unsafe { sys_keccak(keccak_state, keccak_state) };
         // at this point the keccak_state is output state resulting from keccak permutation.
-        commit_single_keccak(&mut self.claim_state, keccak_state);
+        sha_single_keccak(&mut self.claim_state, keccak_state);
         if status == 1 {
             // we've reached the limit. Create a proof request.
             self.flush();
@@ -92,40 +92,46 @@ impl KeccakBatcher {
     }
 
     fn claim_digest(&self) -> Digest {
-        self.claim_state
+        let mut claim_digest = self.claim_state;
+        for word in claim_digest.as_mut_words().iter_mut() {
+            *word = word.to_be();
+        }
+        claim_digest
     }
 
     fn reset(&mut self) {
-        self.claim_state = Digest::ZERO;
+        self.claim_state = SHA256_INIT;
     }
 }
 
-pub(crate) fn commit_single_keccak(claim_state: &mut Digest, keccak_state: &KeccakState) {
-    static mut DONT_CARE: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
+pub(crate) fn sha_single_keccak(claim_state: &mut Digest, keccak_state: &KeccakState) {
+    const ZEROES: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
 
     let keccak_state_u32 = keccak_state.as_ptr() as *const u32;
-    unsafe {
-        sys_poseidon2(
-            claim_state.as_mut(),
-            keccak_state_u32 as *const u8,
-            addr_of_mut!(DONT_CARE),
-            6, // Process 6 * 8 = 48 words
-        )
+    for i in 0..3 {
+        unsafe {
+            sys_sha_compress(
+                claim_state.as_mut(),
+                claim_state.as_ref(),
+                keccak_state_u32.add(i * 16) as *const [u32; DIGEST_WORDS],
+                keccak_state_u32.add(i * 16 + 8) as *const [u32; DIGEST_WORDS],
+            )
+        };
     }
 
     // any last words?
-    static mut LAST_WORDS: [u32; 8] = [0u32; 8];
+    static mut LAST_WORDS: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
     unsafe {
         LAST_WORDS[0] = *keccak_state_u32.add(48);
         LAST_WORDS[1] = *keccak_state_u32.add(49);
     }
 
     unsafe {
-        sys_poseidon2(
+        sys_sha_compress(
             claim_state.as_mut(),
-            addr_of!(LAST_WORDS) as *const u8,
-            addr_of_mut!(DONT_CARE),
-            1,
+            claim_state.as_ref(),
+            addr_of!(LAST_WORDS),
+            &ZEROES,
         )
     };
 }
