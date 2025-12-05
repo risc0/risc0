@@ -123,7 +123,7 @@ macro_rules! call_print {
             // call print
             ; mov rdi, QWORD $str.as_ptr() as i64
             ; mov rsi, QWORD $str.len() as i64
-            ; mov rax, QWORD print as usize as i64
+            ; mov rax, QWORD print as i64
             ; call rax
 
             // restore scratch registers
@@ -164,13 +164,11 @@ fn make_enter(asm: &mut Assembler) {
         dynasm_x64!(asm ; push Rq(reg));
     }
 
+    // extern "C" fn(block: *const u8, ctx: *mut JitContext) -> u64
     dynasm_x64!(asm
-        // remember the 1st argument
-        ; mov rax, rdi
-        // set base regfile address from 2nd argument
-        ; mov rbx, rsi
-        // set base RAM pointer
-        ; mov r15, [rbx + RAM_REL_OFFSET]
+        ; mov rax, rdi // block
+        ; mov r15, rsi // ctx
+        ; lea rbx, [r15 + REGISTERS_OFFSET as i32] // ctx.registers
     );
 
     // restore RISC-V registers
@@ -215,15 +213,15 @@ extern "C" fn print(ptr: *const u8, len: u64) {
 
 impl Translator {
     pub(crate) fn step_prologue(&mut self) {
-        self.emit_retval(Terminal::Split, self.machine.ctx.pc);
+        self.emit_retval(Terminal::Split, self.ctx.pc);
         emit!(self
-            ; cmp DWORD [rbx + QUOTA_REL_OFFSET], 0
+            ; cmp DWORD [r15 + QUOTA_OFFSET as i32], 0
             ; je ->exit
         );
     }
 
     pub(crate) fn step_epilogue(&mut self) {
-        emit!(self ; dec DWORD [rbx + QUOTA_REL_OFFSET]);
+        emit!(self ; dec DWORD [r15 + QUOTA_OFFSET as i32]);
     }
 
     pub(crate) fn dispatch(&mut self, insn: Instruction) -> Result<Option<Terminal>> {
@@ -338,7 +336,7 @@ impl Translator {
     }
 
     fn step_trap(&mut self) -> Result<Option<Terminal>> {
-        self.emit_retval(Terminal::Trap, self.machine.ctx.pc);
+        self.emit_retval(Terminal::Trap, self.ctx.pc);
         emit!(self ; jmp ->exit);
         Ok(Some(Terminal::Trap))
     }
@@ -530,10 +528,7 @@ impl Translator {
             }
             RvOp::Auipc => {
                 // rd = PC + (imm << 12)
-                self.emit_mov(
-                    rd,
-                    Loc::Imm32(self.machine.ctx.pc.wrapping_add(insn.imm_u())),
-                );
+                self.emit_mov(rd, Loc::Imm32(self.ctx.pc.wrapping_add(insn.imm_u())));
             }
             RvOp::Mul => {
                 // rd = (rs1 * rs2)[31:0]
@@ -747,68 +742,71 @@ impl Translator {
         // eax, ecx, edx
         // reserved:
         // rbx: shadow register file address
-        // r15: base guest address
+        // r15: JitContext pointer
 
         if rd == Loc::Zero {
             return;
         }
 
-        // // load guest memory address into eax
-        // self.emit_lea(GPR::RAX, None, rs1, imm);
+        // 1. load guest virtual address into rax
+        self.emit_lea(GPR::RAX, None, rs1, imm);
 
-        // emit!(self
-        //     ; mov edx, eax                      // copy address to edx
-        //     ; shr edx, 10                       // compute the page index
-        //     // ; lea rcx, [rbx + PGTBL_REL_OFFSET] // load base page_table address into rcx
-        //     ; mov rcx, [r15 + rdx]              // lookup page address from page_table into rcx
-        //     ; cmp rcx, 0                        // determine if page is active
-        //     ; je >page_miss
-        //     // ; mov rax, [rcx + rdx + rax]
-        // );
+        emit!(self
+            // save temp registers
+            ; push rbx
 
-        // // lookup the page index to resolve the actual page address
-        // emit!(self
-        //     ; mov rax, QWORD [rbx + PGTBL_REL_OFFSET + rax]
-        // );
+            // (ebx): sub-page offset = vaddr & PAGE_OFFSET_MASK
+            ; mov ebx, eax
+            ; and ebx, PAGE_OFFSET_MASK as i32
 
-        if let (Loc::GPR(rd), Loc::GPR(rs1)) = (rd, rs1) {
-            match (size, extend) {
-                (Size::S8, Extend::None) => {
-                    emit!(self ; mov Rb(rd), BYTE [r15 + Rq(rs1) + imm as i32])
-                }
-                (Size::S8, Extend::Sign) => {
-                    emit!(self ; movsx Rd(rd), BYTE [r15 + Rq(rs1) + imm as i32])
-                }
-                (Size::S8, Extend::Zero) => {
-                    emit!(self ; movzx Rd(rd), BYTE [r15 + Rq(rs1) + imm as i32])
-                }
-                (Size::S16, Extend::None) => {
-                    emit!(self ; mov Rw(rd), WORD [r15 + Rq(rs1) + imm as i32])
-                }
-                (Size::S16, Extend::Sign) => {
-                    emit!(self ; movsx Rd(rd), WORD [r15 + Rq(rs1) + imm as i32])
-                }
-                (Size::S16, Extend::Zero) => {
-                    emit!(self ; movzx Rd(rd), WORD [r15 + Rq(rs1) + imm as i32])
-                }
-                (Size::S32, _) => emit!(self ; mov Rd(rd), DWORD [r15 + Rq(rs1) + imm as i32]),
-            }
-            return;
-        }
+            // (ecx): vpn = vaddr >> PAGE_SHIFT
+            ; mov ecx, eax
+            ; shr ecx, PAGE_SHIFT as i8
 
-        // load rs1 into rax
-        self.emit_lea(GPR::RAX, Some(GPR::R15), rs1, imm);
+            // (edx): index = vpn & TLB_MASK
+            ; mov edx, ecx
+            ; and edx, TLB_MASK as i32
 
-        // load byte/word/dword into eax
-        match (size, extend) {
-            (Size::S8, Extend::None) => emit!(self ; mov al, BYTE [rax]),
-            (Size::S8, Extend::Sign) => emit!(self ; movsx eax, BYTE [rax]),
-            (Size::S8, Extend::Zero) => emit!(self ; movzx eax, BYTE [rax]),
-            (Size::S16, Extend::None) => emit!(self ; mov ax, WORD [rax]),
-            (Size::S16, Extend::Sign) => emit!(self ; movsx eax, WORD [rax]),
-            (Size::S16, Extend::Zero) => emit!(self ; movzx eax, WORD [rax]),
-            (Size::S32, _) => emit!(self ; mov eax, DWORD [rax]),
-        }
+            // (rcx): entry_ptr = r15 + TLB_OFFSET + index * sizeof(TlbEntry)
+            ; shl rdx, TLB_ENTRY_SHIFT as i8
+            ; add rdx, r15
+            ; add rdx, TLB_OFFSET as i32
+
+            // set the VALID bit
+            ; or ecx, TLB_VALID_TAG_MASK as i32
+
+            // compare tag
+            ; cmp DWORD [rdx + TLB_TAG_OFFSET as i32], ecx
+            ; jne >tlb_miss
+
+            // load host_page address
+            ; mov rax, QWORD [rdx + TLB_HOST_PAGE_OFFSET as i32]
+            ; jmp >done
+
+            ;tlb_miss:
+
+            ; push rdi
+            ; push rsi
+            // ; sub rsp, 8
+
+            // extern "C" fn tlb_miss_slow(ctx: *mut JitContext, vaddr: u32) -> *mut u8
+            ; mov rdi, r15 // arg0 = ctx
+            ; mov esi, eax // arg1 = vaddr
+            ; call QWORD [r15 + TLB_MISS_OFFSET as i32]
+            // on return:
+            //   rax = host_page_ptr
+
+            // ; add rsp, 8
+            ; pop rsi
+            ; pop rdi
+
+            ;done:
+            // perform actual load: host_page[offset]
+            ; mov eax, DWORD [rax + rbx]
+
+            // restore temp registers
+            ; pop rbx
+        );
 
         // store result into rd
         match rd {
@@ -858,7 +856,7 @@ impl Translator {
         if tracing::enabled!(tracing::Level::TRACE) {
             tracing::trace!(
                 "{:#010x}> {:#010x}  {}",
-                self.machine.ctx.pc,
+                self.ctx.pc,
                 insn.word,
                 crate::rv32im::disasm(op, insn)
             );
@@ -947,8 +945,8 @@ impl Translator {
             _ => unreachable!(),
         }
 
-        let next_pc = self.machine.ctx.pc as i32 + WORD_SIZE as i32;
-        let taken_pc = self.machine.ctx.pc as i32 + imm as i32;
+        let next_pc = self.ctx.pc as i32 + WORD_SIZE as i32;
+        let taken_pc = self.ctx.pc as i32 + imm as i32;
 
         self.emit_exit(Terminal::Jump, next_pc as u32, true);
         emit!(self ;taken:);
@@ -1000,20 +998,20 @@ impl Translator {
     }
 
     fn emit_jal(&mut self, rd: Loc, imm: u32, emit_jmp: bool) {
-        self.emit_mov(rd, Loc::Imm32(self.machine.ctx.pc + WORD_SIZE as u32));
-        let target_pc = self.machine.ctx.pc as i32 + imm as i32;
+        self.emit_mov(rd, Loc::Imm32(self.ctx.pc + WORD_SIZE as u32));
+        let target_pc = self.ctx.pc as i32 + imm as i32;
         self.emit_exit(Terminal::Jump, target_pc as u32, emit_jmp);
     }
 
     fn emit_jalr(&mut self, rd: Loc, rs1: Loc, imm: u32) {
         self.emit_lea(GPR::RAX, None, rs1, imm);
-        self.emit_mov(rd, Loc::Imm32(self.machine.ctx.pc + WORD_SIZE as u32));
+        self.emit_mov(rd, Loc::Imm32(self.ctx.pc + WORD_SIZE as u32));
     }
 
     // TODO
     fn step_system(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
         self.trace(op, &insn);
-        self.emit_retval(Terminal::Break, self.machine.ctx.pc);
+        self.emit_retval(Terminal::Break, self.ctx.pc);
         emit!(self ; jmp ->exit);
         Ok(Some(Terminal::Break))
     }
