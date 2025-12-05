@@ -43,7 +43,7 @@ This involves running a service binary provided by RISC Zero, and deploying the 
 The Bonsai Relay accepts requests off-chain using its [REST] API.
 
 Using the off-chain API allows for including data not available to smart contracts in the EVM, and avoids needing to pay transaction fees on Ethereum to initiate a request.
-When inputs to your [guest program] and large (e.g. more than a few kilobytes) sending requests on-chain can be cost-prohibitive, while sending large inputs (e.g. up to tens of megabytes) via the REST API has no additional cost.
+When inputs to your [guest program] are large (e.g. more than a few kilobytes) sending requests on-chain can be cost-prohibitive, while sending large inputs (e.g. up to tens of megabytes) via the REST API has no additional cost.
 
 The [Bonsai Relay SDK] provides a Rust interface for interacting with the Bonsai Relay.
 
