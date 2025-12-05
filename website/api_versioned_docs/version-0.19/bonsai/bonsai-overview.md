@@ -67,7 +67,7 @@ The Bonsai proving service can be used standalone or directly integrated with sm
 
 _Status: Pre-Alpha, [documentation](./bonsai-on-eth.md) and [Bonsai Foundry template](https://github.com/risc0/bonsai-foundry-template) available_
 
-The `Bonsai Relayer` and the `Bonsay Relay Contract` let your Ethereum dApps connect to Bonsai. Smart contract developers can call our proving service off-chain via a REST API or through an on-chain relay contract connected to the Bonsai proving service.
+The `Bonsai Relayer` and the `Bonsai Relay Contract` let your Ethereum dApps connect to Bonsai. Smart contract developers can call our proving service off-chain via a REST API or through an on-chain relay contract connected to the Bonsai proving service.
 
 ## Where we're headed
 
