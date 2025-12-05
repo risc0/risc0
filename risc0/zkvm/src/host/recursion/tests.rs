@@ -138,10 +138,8 @@ fn prove_segments(session: &Session) -> Result<Vec<SegmentReceipt>> {
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
     let segment_receipts = session
-        .segments
-        .iter()
-        .map(|x| x.resolve().unwrap())
-        .flat_map(|x| prover.prove_segment(&ctx, &x).unwrap())
+        .segments()
+        .flat_map(|x| prover.prove_segment(&ctx, &x.unwrap()).unwrap())
         .collect::<Vec<_>>();
 
     tracing::info!("Done proving rv32im: {} segments", segment_receipts.len());

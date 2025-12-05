@@ -28,12 +28,13 @@ use serde::{Deserialize, Serialize};
 use crate::{
     Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
     ReceiptClaim, SegmentInfo, Work,
+    claim::merge::Merge,
     host::{
         client::env::{ProveKeccakRequest, SegmentPath},
         prove_info::{SessionStats, SyscallKind, SyscallMetric},
     },
     mmr::{GuestPeak, MerkleMountainAccumulator},
-    sha::Digest,
+    sha::{Digest, Digestible},
 };
 
 /// The execution trace of a program.
@@ -103,6 +104,9 @@ pub struct Session {
     pub(crate) povw_job_id: Option<PovwJobId>,
 
     /// The elapsed execution time.
+    ///
+    /// This duration captures the amount of time spent execution the virtual machine. It does not,
+    /// for instance, include the time spent hashing the memory image to produce a [Segment].
     pub(crate) execution_time: Duration,
 }
 
@@ -120,8 +124,7 @@ pub struct Segment {
     pub index: u32,
 
     pub(crate) inner: risc0_circuit_rv32im::execute::Segment,
-
-    pub(crate) output: Option<Output>,
+    pub(crate) output: MaybePruned<Option<Output>>,
 }
 
 impl Segment {
@@ -152,7 +155,8 @@ pub struct PreflightResults {
     #[cfg(feature = "rv32im-m3")]
     pub(crate) inner: risc0_circuit_rv32im_m3::prove::PreflightContext,
     pub(crate) terminate_state: Option<TerminateState>,
-    pub(crate) output: Option<Output>,
+    pub(crate) output: MaybePruned<Option<Output>>,
+    #[cfg(not(feature = "rv32im-m3"))]
     pub(crate) segment_index: u32,
 }
 
@@ -324,22 +328,52 @@ impl Session {
             execution_time: Some(self.execution_time),
         }
     }
+
+    /// Iterate over the [SegmentRef] held in this session, resolve them, and yield the [Segment].
+    /// The populated [Output] is merged into the last segment, including journal and assumptions.
+    pub fn segments(&self) -> impl Iterator<Item = Result<Segment>> {
+        // Construct the populated Output from the session's journal and assumptions.
+        let (assumptions, _): (Vec<_>, Vec<_>) = self.assumptions.iter().cloned().unzip();
+        let output: MaybePruned<Option<Output>> = self
+            .journal
+            .as_ref()
+            .map(|journal| Output {
+                journal: MaybePruned::Pruned(journal.digest()),
+                assumptions: assumptions.into(),
+            })
+            .into();
+
+        let (last_segment_ref, segment_refs) = match self.segments.split_last() {
+            Some((last, rest)) => (Some(last), rest),
+            None => (None, [].as_slice()),
+        };
+
+        segment_refs
+            .iter()
+            .map(|segment_ref| segment_ref.resolve())
+            .chain(last_segment_ref.into_iter().map(move |last_segment_ref| {
+                let mut last_segment = last_segment_ref.resolve()?;
+
+                last_segment
+                    .output
+                    .merge_with(&output)
+                    .context("failed to merge output into final segment claim")?;
+
+                Ok(last_segment)
+            }))
+    }
 }
 
 /// Implementation of a [SegmentRef] that does not save the segment.
 ///
 /// This is useful for DevMode where the segments aren't needed.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Copy, Serialize, Deserialize)]
 pub struct NullSegmentRef;
 
 impl SegmentRef for NullSegmentRef {
     fn resolve(&self) -> anyhow::Result<Segment> {
         unimplemented!()
     }
-}
-
-pub fn null_callback(_: Segment) -> Result<Box<dyn SegmentRef>> {
-    Ok(Box::new(NullSegmentRef))
 }
 
 /// A very basic implementation of a [SegmentRef].

@@ -23,12 +23,16 @@ use risc0_zkp::{
     core::{digest::Digest, log2_ceil},
 };
 
+use crate::execute::ExecutionLimit;
+
 use super::{
     Executor, SimpleSession, SyscallContext, executor::CycleLimit, pager::RESERVED_PAGING_CYCLES,
     platform::*, syscall::Syscall,
 };
 
 pub const DEFAULT_SESSION_LIMIT: CycleLimit = CycleLimit::Hard(1 << 24);
+pub const DEFAULT_EXECUTION_LIMIT: ExecutionLimit =
+    ExecutionLimit::DEFAULT.with_session_limit(DEFAULT_SESSION_LIMIT);
 pub const MIN_CYCLES_PO2: usize = log2_ceil(RESERVED_CYCLES + RESERVED_PAGING_CYCLES as usize);
 
 #[derive(Default)]
@@ -48,36 +52,38 @@ impl Syscall for NullSyscall {
 }
 
 pub fn execute<S: Syscall>(
-    image: MemoryImage,
-    segment_limit_po2: usize,
-    max_insn_cycles: usize,
-    max_cycles: CycleLimit,
-    syscall_handler: &S,
+    mut image: MemoryImage,
+    limit: ExecutionLimit,
+    syscall_handler: S,
     input_digest: Option<Digest>,
 ) -> Result<SimpleSession> {
     scope!("execute");
 
-    if !(MIN_CYCLES_PO2..=MAX_CYCLES_PO2).contains(&segment_limit_po2) {
-        bail!("Invalid segment_limit_po2: {segment_limit_po2}");
+    if !(MIN_CYCLES_PO2..=MAX_CYCLES_PO2).contains(&limit.segment_po2) {
+        bail!("Invalid segment_limit_po2: {}", limit.segment_po2);
     }
 
     let mut segments = Vec::new();
     let trace = Vec::new();
-    let result = Executor::new(
-        image,
+    let mut executor = Executor::new(
+        image.clone(),
         syscall_handler,
         input_digest,
         trace,
         None,
         RV32IM_V2_CIRCUIT_VERSION,
-    )
-    .run(segment_limit_po2, max_insn_cycles, max_cycles, |segment| {
+    );
+
+    while let Some(segment_update) = executor.run_segment(limit)? {
+        let segment = segment_update.apply_into_segment(&mut image)?;
         tracing::trace!("{segment:#?}");
         segments.push(segment);
-        Ok(())
-    })?;
+    }
 
-    Ok(SimpleSession { segments, result })
+    Ok(SimpleSession {
+        segments,
+        result: executor.state(),
+    })
 }
 
 pub mod user {

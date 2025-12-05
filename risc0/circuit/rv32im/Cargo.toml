@@ -29,6 +29,7 @@ serde = { version = "1.0", default-features = false, features = [
   "derive",
   "alloc",
 ] }
+thiserror = { version = "2.0.17", default-features = false }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
@@ -104,6 +105,7 @@ std = [
   "risc0-binfmt/std",
   "risc0-zkp/std",
   "serde/std",
+  "thiserror/std",
 ]
 witgen_debug = []
 block_tracker_debug = []

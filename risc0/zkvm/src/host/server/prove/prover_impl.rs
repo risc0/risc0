@@ -20,9 +20,8 @@ use anyhow::{Context, Result, anyhow, bail, ensure};
 use super::{PreflightIter, ProverServer, keccak::prove_keccak};
 use crate::{
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
-    MaybePruned, Output, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
+    MaybePruned, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
     SuccinctReceiptVerifierParameters, UnionClaim, Unknown, VerifierContext, WorkClaim,
-    claim::merge::Merge,
     host::{
         client::prove::opts::ReceiptKind,
         prove_info::ProveInfo,
@@ -85,8 +84,8 @@ impl ProverServer for ProverImpl {
         gpu_guard::assert_gpu_semaphore_held();
 
         let mut segments = Vec::new();
-        for segment_ref in session.segments.iter() {
-            let segment = segment_ref.resolve()?;
+        for segment in session.segments() {
+            let segment = segment?;
             for hook in &session.hooks {
                 hook.on_pre_prove_segment(&segment);
             }
@@ -95,27 +94,6 @@ impl ProverServer for ProverImpl {
                 hook.on_post_prove_segment(&segment);
             }
         }
-
-        let (assumptions, session_assumption_receipts): (Vec<_>, Vec<_>) =
-            session.assumptions.iter().cloned().unzip();
-
-        // Merge the output, including journal digest and assumptions, into the last segment.
-        segments
-            .last_mut()
-            .ok_or_else(|| anyhow!("session is empty"))?
-            .claim
-            .output
-            .merge_with(
-                &session
-                    .journal
-                    .as_ref()
-                    .map(|journal| Output {
-                        journal: MaybePruned::Pruned(journal.digest()),
-                        assumptions: assumptions.into(),
-                    })
-                    .into(),
-            )
-            .context("failed to merge output into final segment claim")?;
 
         let verifier_parameters = ctx
             .composite_verifier_parameters()
@@ -147,6 +125,9 @@ impl ProverServer for ProverImpl {
             tracing::debug!("keccak root assumption: {:?}", assumption);
             zkr_receipts.insert(assumption, root_receipt.clone());
         }
+
+        let (_, session_assumption_receipts): (Vec<_>, Vec<_>) =
+            session.assumptions.iter().cloned().unzip();
 
         // TODO: add test case for when a single session refers to the same assumption multiple times
         let inner_assumption_receipts: Vec<_> = session_assumption_receipts
@@ -250,7 +231,7 @@ impl ProverServer for ProverImpl {
         let inner = prover.preflight(&segment.inner)?;
         let preflight_results = PreflightResults {
             inner,
-            terminate_state: segment.inner.claim.terminate_state,
+            terminate_state: segment.inner.terminate_state,
             output: segment.output.clone(),
             segment_index: segment.index,
         };
@@ -287,7 +268,7 @@ impl ProverServer for ProverImpl {
         let prover = risc0_circuit_rv32im::prove::segment_prover()?;
         let seal = prover.prove_core(preflight_results.inner)?;
         let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(po2))?;
-        claim.output = preflight_results.output.into();
+        claim.output = preflight_results.output;
 
         let verifier_parameters = ctx
             .segment_verifier_parameters

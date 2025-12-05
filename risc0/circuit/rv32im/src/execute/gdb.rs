@@ -47,22 +47,22 @@ pub enum ExecState {
 }
 
 pub struct Debugger<'a, 'b, S: Syscall> {
-    exec: Executor<'a, 'b, S>,
+    exec: &'b mut Executor<'a, S>,
     emu: Emulator,
     exec_state: ExecState,
     breakpoints: Vec<u32>,
 }
 
 impl<'a, 'b, S: Syscall> Debugger<'a, 'b, S> {
-    pub fn new(exec: Executor<'a, 'b, S>) -> Self {
-        let mut s = Self {
+    pub fn new(exec: &'b mut Executor<'a, S>) -> Self {
+        let s = Self {
             exec,
             emu: Emulator::new(),
             breakpoints: vec![],
             exec_state: ExecState::Continue,
         };
 
-        Risc0Machine::resume(&mut s.exec).unwrap();
+        Risc0Machine::resume(s.exec).unwrap();
         s
     }
 
@@ -89,7 +89,7 @@ impl<'a, 'b, S: Syscall> Debugger<'a, 'b, S> {
         use GdbEvent::*;
         use GdbStatus::*;
 
-        Risc0Machine::step(&mut self.emu, &mut self.exec).unwrap();
+        Risc0Machine::step(&mut self.emu, self.exec).unwrap();
 
         if let Some(TerminateState { a0, .. }) = self.exec.terminate_state() {
             return Ok(Event(ExecHalted(u32::from(*a0))));
