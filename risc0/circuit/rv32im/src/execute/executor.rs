@@ -315,7 +315,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 &commit_sender,
                 &mut segment_callback_thread,
                 final_po2,
-                0, // theshold is meaningless for final segment
+                0, // threshold is meaningless for final segment
             )?;
 
             drop(commit_sender);
