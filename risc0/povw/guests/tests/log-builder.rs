@@ -49,7 +49,6 @@ fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     assert_eq!(session_info.exit_code, ExitCode::Halted(0));
 
     let decoded_journal = Journal::decode(&session_info.journal.bytes)?;
-    println!("decoded_journal: {decoded_journal:#?}");
 
     Ok(decoded_journal)
 }
