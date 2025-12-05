@@ -33,10 +33,10 @@ const SUSPEND_MODE_ADDR: ByteAddr = ByteAddr(0xffff_0214);
 /// A RISC Zero program
 pub struct Program {
     /// The entrypoint of the program
-    pub(crate) entry: u32,
+    pub entry: u32,
 
     /// The initial memory image
-    pub(crate) image: BTreeMap<u32, u32>,
+    pub image: BTreeMap<u32, u32>,
 }
 
 impl Program {
