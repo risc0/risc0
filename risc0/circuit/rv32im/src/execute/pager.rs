@@ -205,7 +205,7 @@ impl PageTable {
         (epoch as usize, cache_idx as usize)
     }
 
-    // Takes a u32 cache index and an epoch number and packes it into a u32;
+    // Takes a u32 cache index and an epoch number and packs it into a u32;
     fn pack_value(epoch: usize, cache_idx: u32) -> u32 {
         ((epoch as u32) << Self::CACHE_INDEX_BITS) | cache_idx
     }
@@ -226,12 +226,12 @@ impl PageTable {
 
     fn clear(&mut self) {
         // If the epoch number is less than the max, then simply increment the epoch number. This
-        // serves to effective clear the table since gets will return None for past epochs. If we
+        // serves to effectively clear the table since gets will return None for past epochs. If we
         // would need to exceed the max clear the table itself as we cannot repeat an epoch number.
         if self.epoch < Self::EPOCH_MAX {
             self.epoch += 1;
         } else {
-            // You would think its faster to reuse the memory, but filling it with zeros is slower
+            // You would think it's faster to reuse the memory, but filling it with zeros is slower
             // than just allocating a new piece of zeroed memory.
             self.epoch = 1;
             self.table = Box::new([0; NUM_PAGES]);
