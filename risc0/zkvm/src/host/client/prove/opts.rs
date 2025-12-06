@@ -26,7 +26,7 @@ const DEFAULT_MAX_SEGMENT_PO2: usize = crate::receipt::DEFAULT_MAX_PO2;
 
 // Setting this higher on m3 causes unexplained issues at the moment.
 #[cfg(feature = "rv32im-m3")]
-const DEFAULT_MAX_SEGMENT_PO2: usize = 20;
+const DEFAULT_MAX_SEGMENT_PO2: usize = 21;
 
 /// Options to configure a [Prover][super::Prover].
 #[derive(Clone, Debug, Serialize, Deserialize)]

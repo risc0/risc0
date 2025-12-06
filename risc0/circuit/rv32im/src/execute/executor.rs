@@ -909,7 +909,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
         let mut p2 = Poseidon2::load_ecall(self)?;
 
         #[cfg(feature = "rv32im-m3")]
-        self.block_tracker.track_ecall_poseidon2(p2.count);
+        self.block_tracker.track_ecall_poseidon2(p2.count as u64);
 
         p2.rest_with_mix(self, CycleState::Decode, |p2, _, ctx| {
             ctx.inc_user_cycles(ROUNDS_HALF_FULL * 2 + 1, Some(EcallKind::Poseidon2));
