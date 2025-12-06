@@ -304,7 +304,7 @@ mod tests {
         prover.prove(&preflight).unwrap();
     }
 
-    const DEFAULT_PO2: usize = 13;
+    const DEFAULT_PO2: usize = 21;
 
     macro_rules! test_case {
         ($func_name:ident) => {

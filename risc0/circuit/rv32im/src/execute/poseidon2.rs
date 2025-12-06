@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#![allow(dead_code)]
+
 use anyhow::{Result, bail};
 use risc0_binfmt::WordAddr;
 use risc0_zkp::{
