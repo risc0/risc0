@@ -18,6 +18,27 @@
 #define GLOBAL_GET(member) ctx.globalGet(GLOBAL_OFFSET(member))
 #define GLOBAL_SET(member, val) ctx.globalSet(GLOBAL_OFFSET(member), (val))
 
+#define CPU_STATE_ARGUMENT(ctx, cycle, pc, mode, iCacheCycle) \
+    PICUS_ARGUMENT(ctx, \
+                  ({}), \
+                  ({ctx.get(cycle), ctx.get(pc), ctx.get(mode), ctx.get(iCacheCycle)}))
+
+#define DECODE_ARGUMENT(ctx, iCacheCycle, pc, nextPc, rs1, rs2, rd, imm, options) \
+    PICUS_ARGUMENT(ctx, \
+                  ({ctx.get(iCacheCycle), ctx.get(pc)}), \
+                  ({ctx.get(nextPc), ctx.get(rs1), ctx.get(rs2), ctx.get(rd), ctx.get(imm), ctx.get(options)}))
+
+// Note: because the units never push an `option` value greater than 12, we know
+// that the value pulled by an instruction block fits in that range. When there
+// are additional values packed into the `options` field from the decoder, we
+// need bounds on their values to prove that their values are fully determined
+// from their composition.
+#define UNIT_ARGUMENT(ctx, optOut, a, b, out0, out1) \
+    RANGE_POSTCONDITION(ctx, 0, optOut.get(), 12); \
+    PICUS_ARGUMENT(ctx, \
+                   ({ctx.get(optOut), ctx.get(a), ctx.get(b)}), \
+                   ({ctx.get(out0), ctx.get(out1)}))
+
 template <typename C> FDEV void InstResumeBlock<C>::set(CTX, InstResumeWitness wit) DEV {
   readV2Compat.set(ctx, wit.v2Compat, 1);
   readPc.set(ctx, wit.pc, 1);
@@ -126,9 +147,22 @@ DualReg<C>::set(CTX, RegMemReadWitness rs1Wit, RegMemReadWitness rs2Wit, uint32_
 
 template <typename C> FDEV void DualReg<C>::verify(CTX, Val<C> cycle, Val<C> mode) DEV {
   Val<C> isMM = (mode - MODE_USER) * (mode - MODE_SUPERVISOR) * Val<C>(inv(Fp(6)));
+
+  // Compute the address of the registers in the current privilege level
   EQ(cond<C>(isMM, MACHINE_REGS_WORD, USER_REGS_WORD) + rs1Idx.get(), readRs1.wordAddr.get());
   EQ(cond<C>(isMM, MACHINE_REGS_WORD, USER_REGS_WORD) + sameReg.get() * 64 + rs2Idx.get(),
      readRs2.wordAddr.get());
+
+  // There can be only one read from a memory location per cycle, and so if rs1
+  // is the same as rs2, we need to coalesce the reads. Thus, we track this fact
+  // via the sameReg flag, and select the value of rs2 appropriately. To ensure
+  // that sameReg is constrained appropriately, we have 4 cases to consider:
+  //   rs1 = rs2, sameReg = 0: violates the memory argument
+  //   rs1 = rs2, sameReg = 1: valid
+  //   rs1 != rs2, sameReg = 0: valid
+  //   rs1 != rs2, sameReg = 1: violates the next constraint
+  // PICUS_ASSERT(ctx, (rs1Idx.get() != rs2Idx.get()) || sameReg.get() == 1); // TODO
+  PICUS_INPUT(ctx, sameReg);
   EQZ(sameReg.get() * (rs1Idx.get() - rs2Idx.get()));
   EQ(cond<C>(sameReg.get(), readRs1.data.low.get(), readRs2.data.low.get()), rs2Data.low.get());
   EQ(cond<C>(sameReg.get(), readRs1.data.high.get(), readRs2.data.high.get()), rs2Data.high.get());
@@ -166,6 +200,14 @@ template <typename C> FDEV void InstRegBlock<C>::set(CTX, InstRegWitness wit) DE
 }
 
 template <typename C> FDEV void InstRegBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, dr.rs1Idx, dr.rs2Idx, rd.idx, Val<C>(0),
+                  Val<C>(OptSize<InstKind>::value) * (Val<C>(2) * optOut.get() + outIdx.get()) + Val<C>(uint32_t(INST_REG)));
+  UNIT_ARGUMENT(ctx, optOut, dr.readRs1.data, dr.readRs2.data, out0, out1);
+  // TODO: this extra hint is necessary to verify this unit. I've requested a
+  // fix in Picus, which should be confirmed once its available.
+  PICUS_INPUT(ctx, optOut);
+
   ValU32<C> out = cond<C>(outIdx.get(), out1.get(), out0.get());
   EQ(out.low, writeRd.data.low.get());
   EQ(out.high, writeRd.data.high.get());
@@ -180,9 +222,9 @@ template <typename C> FDEV void InstRegBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = dr.rs1Idx.get();
   arg.rs2 = dr.rs2Idx.get();
   arg.rd = rd.idx.get();
@@ -211,6 +253,11 @@ template <typename C> FDEV void InstImmBlock<C>::set(CTX, InstImmWitness wit) DE
 }
 
 template <typename C> FDEV void InstImmBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1.idx, rs2, rd.idx, imm,
+                  Val<C>(OptSize<InstKind>::value) * (Val<C>(2) * optOut.get() + outIdx.get()) + Val<C>(uint32_t(INST_IMM)));
+  UNIT_ARGUMENT(ctx, optOut, readRs1.data, imm, out0, out1);
+
   ValU32<C> out = cond<C>(outIdx.get(), out1.get(), out0.get());
   EQ(out.low, writeRd.data.low.get());
   EQ(out.high, writeRd.data.high.get());
@@ -225,9 +272,9 @@ template <typename C> FDEV void InstImmBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = rs1.idx.get();
   arg.rs2 = rs2.get();
   arg.rd = rd.idx.get();
@@ -278,11 +325,26 @@ template <typename C> FDEV Val<C> InstLoadBlock<C>::getSignBitInput() DEV {
 }
 
 template <typename C> FDEV void InstLoadBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1.idx, rs2, rd.idx, imm,
+                  Val<C>(OptSize<InstKind>::value) * (opt.get()) + Val<C>(uint32_t(INST_LOAD)));
+
+  // Since load instructions read at an offset, the base + offset is computed by
+  // readAddr. We require word loads to be 4-byte aligned, and for short and
+  // byte loads we load the aligned word containing those bytes. Here, make sure
+  // that the memory read corresponds to that address.
   EQ(readAddr.wordAddr(computeAddr.get()), readMem.getWordAddr());
+
+  // Regardless of whether we load a byte, short, or word, we always compute all
+  // three. We need to select different parts of the word depending on the
+  // alignment of readAddress for byte and short loads, so verify that here.
   EQ(pickShort.get(),
      cond<C>(readAddr.low1.get(), readMem.data.high.get(), readMem.data.low.get()));
   EQ(pickShort.get(), b1.get() * 256 + b0.get());
   EQ(pickByte.get(), cond<C>(readAddr.low0.get(), b1.get(), b0.get()));
+
+  // Now compute the final value written to the destination register based on the
+  // kind of load that was actually done.
   EQ(writeRd.data.low.get(),
      opt.bits[0].get() * (signBit.get() * 255 * 256 + pickByte.get()) + // LB
          opt.bits[1].get() * pickShort.get() +                          // LH
@@ -304,9 +366,9 @@ template <typename C> FDEV void InstLoadBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = rs1.idx.get();
   arg.rs2 = rs2.get();
   arg.rd = rd.idx.get();
@@ -349,6 +411,10 @@ template <typename C> FDEV void InstStoreBlock<C>::set(CTX, InstStoreWitness wit
 }
 
 template <typename C> FDEV void InstStoreBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, dr.rs1Idx, dr.rs2Idx, rd, imm,
+                  Val<C>(OptSize<InstKind>::value) * (opt.get()) + Val<C>(uint32_t(INST_STORE)));
+
   EQ(writeAddr.wordAddr(computeAddr.get()), writeMem.getWordAddr());
   EQ(pickShort.get(),
      cond<C>(writeAddr.low1.get(), writeMem.prevData.high.get(), writeMem.prevData.low.get()));
@@ -378,9 +444,9 @@ template <typename C> FDEV void InstStoreBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = dr.rs1Idx.get();
   arg.rs2 = dr.rs2Idx.get();
   arg.rd = rd.get();
@@ -411,6 +477,19 @@ template <typename C> FDEV void InstBranchBlock<C>::set(CTX, InstBranchWitness w
 }
 
 template <typename C> FDEV void InstBranchBlock<C>::verify(CTX) DEV {
+  #ifdef PICUS
+  Val<C> opt = optOut.get();
+  opt = Val<C>(2) * opt + outIdx.get();
+  opt = Val<C>(2) * opt + brnz.get();
+  opt = Val<C>(OptSize<InstKind>::value) * opt + Val<C>(uint32_t(INST_BRANCH));
+  #endif
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, dr.rs1Idx, dr.rs2Idx, rd, imm, opt);
+  UNIT_ARGUMENT(ctx, optOut, dr.readRs1, dr.rs2Data, out0, out1);
+  // TODO: this extra hint is necessary to verify this unit. I've requested a
+  // fix in Picus, which should be confirmed once its available.
+  PICUS_INPUT(ctx, optOut);
+
   Val<C> brnzVal = brnz.get();
   Val<C> isZeroVal = isOutZero.isZero.get();
   Val<C> doBranch = brnzVal * (Val<C>(1) - isZeroVal) + (Val<C>(1) - brnzVal) * isZeroVal;
@@ -428,9 +507,9 @@ template <typename C> FDEV void InstBranchBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = dr.rs1Idx.get();
   arg.rs2 = dr.rs2Idx.get();
   arg.rd = rd.get();
@@ -456,6 +535,9 @@ template <typename C> FDEV void InstJalBlock<C>::set(CTX, InstJalWitness wit) DE
 }
 
 template <typename C> FDEV void InstJalBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1, rs2, rd.idx, imm, Val<C>(uint32_t(INST_JAL)));
+
   EQ(fetch.nextPc.low.get(), writeRd.data.low.get());
   EQ(fetch.nextPc.high.get(), writeRd.data.high.get());
 }
@@ -468,9 +550,9 @@ template <typename C> FDEV void InstJalBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = rs1.get();
   arg.rs2 = rs2.get();
   arg.rd = rd.idx.get();
@@ -493,6 +575,9 @@ template <typename C> FDEV void InstJalrBlock<C>::set(CTX, InstJalrWitness wit) 
 }
 
 template <typename C> FDEV void InstJalrBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1, rs2, rd.idx, imm, Val<C>(uint32_t(INST_JALR)));
+
   EQ(fetch.nextPc.low.get(), writeRd.data.low.get());
   EQ(fetch.nextPc.high.get(), writeRd.data.high.get());
 }
@@ -505,9 +590,9 @@ template <typename C> FDEV void InstJalrBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = rs1.idx.get();
   arg.rs2 = rs2.get();
   arg.rd = rd.idx.get();
@@ -526,6 +611,12 @@ template <typename C> FDEV void InstLuiBlock<C>::set(CTX, InstLuiWitness wit) DE
   rd.set(ctx, wit.rd.wordAddr);
 }
 
+template <typename C> FDEV void InstLuiBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1, rs2, rd.idx, writeRd.data,
+                  Val<C>(uint32_t(INST_LUI)));
+}
+
 template <typename C> FDEV void InstLuiBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
   Val<C> mode = fetch.mode.get();
@@ -534,9 +625,9 @@ template <typename C> FDEV void InstLuiBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = rs1.get();
   arg.rs2 = rs2.get();
   arg.rd = rd.idx.get();
@@ -558,6 +649,9 @@ template <typename C> FDEV void InstAuipcBlock<C>::set(CTX, InstAuipcWitness wit
 }
 
 template <typename C> FDEV void InstAuipcBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, fetch.mode, fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, rs1, rs2, rd.idx, imm, Val<C>(uint32_t(INST_AUIPC)));
+
   EQ(sumPc.low.get(), writeRd.data.low.get());
   EQ(sumPc.high.get(), writeRd.data.high.get());
 }
@@ -570,9 +664,9 @@ template <typename C> FDEV void InstAuipcBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = rs1.get();
   arg.rs2 = rs2.get();
   arg.rd = rd.idx.get();
@@ -590,6 +684,15 @@ template <typename C> FDEV void InstEcallBlock<C>::set(CTX, InstEcallWitness wit
 }
 
 template <typename C> FDEV void InstEcallBlock<C>::verify(CTX) DEV {
+  #ifdef PICUS
+  Val<C> zero(0);
+  #endif
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, Val<C>(MODE_USER), fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, zero, zero, zero, zero, Val<C>(uint32_t(INST_ECALL)));
+
+  // Must be in user mode
+  EQ(fetch.mode.get(), Val<C>(MODE_USER));
+
   // Make sure next PC is being saved
   EQ(fetch.pc.low.get(), writeSavePc.data.low.get());
   EQ(fetch.pc.high.get(), writeSavePc.data.high.get());
@@ -610,9 +713,9 @@ template <typename C> FDEV void InstEcallBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = 0;
   arg.rs2 = 0;
   arg.rd = 0;
@@ -630,6 +733,12 @@ template <typename C> FDEV void InstMretBlock<C>::set(CTX, InstMretWitness wit) 
 }
 
 template <typename C> FDEV void InstMretBlock<C>::verify(CTX) DEV {
+  CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, Val<C>(MODE_MACHINE), fetch.iCacheCycle);
+  DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc, Val<C>(0), Val<C>(2), Val<C>(0), Val<C>(770), Val<C>(uint32_t(INST_MRET)));
+
+  // Must be in user mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure address constants is right
   Val<C> mepcWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_MEPC, CSR_WORD(MEPC));
   EQ(readPc.wordAddr.get(), mepcWord);
@@ -644,9 +753,9 @@ template <typename C> FDEV void InstMretBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = 0;
   arg.rs2 = 2;
   arg.rd = 0;
