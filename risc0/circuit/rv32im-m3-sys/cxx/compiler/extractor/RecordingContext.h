@@ -91,9 +91,7 @@ struct RecordingContext {
     return componentIRMap.get<Component>(&component);
   }
 
-  mlir::Value get(RecordingVal component) {
-    return component.value;
-  }
+  mlir::Value get(RecordingVal component) { return component.value; }
 
   mlir::MLIRContext* mlirCtx;
   mlir::ModuleOp moduleOp;

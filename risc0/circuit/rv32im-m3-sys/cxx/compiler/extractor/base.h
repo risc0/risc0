@@ -34,13 +34,13 @@ using namespace risc0;
 #define RANGE_PRECONDITION(ctx, low, x, high) rangePrecondition(ctx, low, x, high)
 #define RANGE_POSTCONDITION(ctx, low, x, high) rangePostcondition(ctx, low, x, high)
 #define PICUS_ASSERT(ctx, cond)
-#define PICUS_ARGUMENT(ctx, inputs, outputs)                                                 \
+#define PICUS_ARGUMENT(ctx, inputs, outputs)                                                       \
   picusArgument(ctx, llvm::SmallVector<mlir::Value> inputs, llvm::SmallVector<mlir::Value> outputs)
 #define PICUS_CALL(ctx, name, inputs, layout)                                                      \
   picusCall(ctx, name, llvm::SmallVector<Val<C>> inputs, layout)
 
 #define PICUS_BEGIN_OUTLINE(...)                                                                   \
   if (NAME != ctx.componentName) {                                                                 \
-    PICUS_CALL(ctx, NAME, ({__VA_ARGS__}), ctx.get(*this));                            \
+    PICUS_CALL(ctx, NAME, ({__VA_ARGS__}), ctx.get(*this));                                        \
   } else {
 #define PICUS_END_OUTLINE }

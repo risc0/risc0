@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define READ_STATE_ARGUMENT(ctx, cycle, addrWord, addrLowBits, size) \
-    PICUS_ARGUMENT(ctx, {}, \
-                  ({ctx.get(cycle), ctx.get(addrWord), ctx.get(addrLowBits), ctx.get(size)}))
+#define READ_STATE_ARGUMENT(ctx, cycle, addrWord, addrLowBits, size)                               \
+  PICUS_ARGUMENT(                                                                                  \
+      ctx, {}, ({ctx.get(cycle), ctx.get(addrWord), ctx.get(addrLowBits), ctx.get(size)}))
 
 template <typename C> FDEV void ReadByteBlock<C>::set(CTX, ReadByteWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
@@ -30,9 +30,9 @@ template <typename C> FDEV void ReadByteBlock<C>::set(CTX, ReadByteWitness wit) 
 }
 
 template <typename C> FDEV void ReadByteBlock<C>::verify(CTX) DEV {
-  #ifdef PICUS
+#ifdef PICUS
   Val<C> low3 = lowBit0.get() + lowBit1.get() * 2;
-  #endif
+#endif
   // The new byte is host input to the running program
   PICUS_INPUT(ctx, newByte);
   READ_STATE_ARGUMENT(ctx, cycle, io.wordAddr, low3, sizeMinus1.get() + 1);
