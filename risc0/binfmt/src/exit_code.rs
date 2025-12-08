@@ -78,7 +78,11 @@ impl ExitCode {
         match sys_exit {
             0 => Ok(ExitCode::Halted(user_exit)),
             1 => Ok(ExitCode::Paused(user_exit)),
-            2 => Ok(ExitCode::SystemSplit),
+            2 => match user_exit {
+                0 => Ok(ExitCode::SystemSplit),
+                2 => Ok(ExitCode::SessionLimit),
+                _ => Err(InvalidExitCodeError(sys_exit, user_exit)),
+            },
             _ => Err(InvalidExitCodeError(sys_exit, user_exit)),
         }
     }
