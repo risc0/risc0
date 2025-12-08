@@ -34,6 +34,7 @@ template <typename C> struct PhysMemReadBlock {
   FDEV void set(CTX, PhysMemReadWitness wit, uint32_t cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
   FDEV void verify(CTX, Val<C> cycle) DEV {
+    PICUS_INPUT(ctx, prevCycle);
     RANGE_PRECONDITION(ctx, 0, data.get().low, 0xffff);
     RANGE_PRECONDITION(ctx, 0, data.get().high, 0xffff);
     PICUS_INPUT(ctx, data);
@@ -59,6 +60,8 @@ template <typename C> struct PhysMemWriteBlock {
   FDEV void set(CTX, PhysMemWriteWitness wit, uint32_t cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
   FDEV void verify(CTX, Val<C> cycle) DEV {
+    PICUS_INPUT(ctx, prevCycle);
+    PICUS_INPUT(ctx, prevData);
     RANGE_PRECONDITION(ctx, 0, prevData.get().low, 0xffff);
     RANGE_PRECONDITION(ctx, 0, prevData.get().high, 0xffff);
     RANGE_POSTCONDITION(ctx, 0, data.get().low, 0xffff);
@@ -88,10 +91,17 @@ template <typename C> struct VirtAddrBlock {
     return ppage.get() * 0x400 + bit9.get() * 0x200 + bit8.get() * 0x100 + lowByte.get();
   }
 
-  // TODO: Actual verification of address mapping
   FDEV void set(CTX, VirtAddrWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
-  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV {
+    // TODO: Actual verification of address mapping. For now, just assume all
+    // registers are deterministic.
+    PICUS_INPUT(ctx, vpage);
+    PICUS_INPUT(ctx, ppage);
+    PICUS_INPUT(ctx, lowByte);
+    PICUS_INPUT(ctx, bit8);
+    PICUS_INPUT(ctx, bit9);
+  }
   FDEV void addArguments(CTX, Val<C> cycle) DEV {}
 };
 
@@ -112,7 +122,12 @@ template <typename C> struct VirtMemReadBlock {
 
   FDEV void set(CTX, VirtMemReadWitness wit, uint32_t cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
-  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV {
+    PICUS_INPUT(ctx, prevCycle);
+    RANGE_PRECONDITION(ctx, 0, data.get().low, 0xffff);
+    RANGE_PRECONDITION(ctx, 0, data.get().high, 0xffff);
+    PICUS_INPUT(ctx, data);
+  }
   FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
 
@@ -135,7 +150,14 @@ template <typename C> struct VirtMemWriteBlock {
 
   FDEV void set(CTX, VirtMemWriteWitness wit, uint32_t cycle) DEV;
   FDEV inline void finalize(CTX) DEV {}
-  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV {
+    PICUS_INPUT(ctx, prevCycle);
+    PICUS_INPUT(ctx, prevData);
+    RANGE_PRECONDITION(ctx, 0, prevData.get().low, 0xffff);
+    RANGE_PRECONDITION(ctx, 0, prevData.get().high, 0xffff);
+    RANGE_POSTCONDITION(ctx, 0, data.get().low, 0xffff);
+    RANGE_POSTCONDITION(ctx, 0, data.get().high, 0xffff);
+  }
   FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
 

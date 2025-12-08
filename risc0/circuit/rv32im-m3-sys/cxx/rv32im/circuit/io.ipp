@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define READ_STATE_ARGUMENT(ctx, cycle, addrWord, addrLowBits, size)                               \
+  PICUS_ARGUMENT(                                                                                  \
+      ctx, {}, ({ctx.get(cycle), ctx.get(addrWord), ctx.get(addrLowBits), ctx.get(size)}))
+
 template <typename C> FDEV void ReadByteBlock<C>::set(CTX, ReadByteWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   lowBit0.set(ctx, wit.lowBits % 2);
@@ -26,6 +30,13 @@ template <typename C> FDEV void ReadByteBlock<C>::set(CTX, ReadByteWitness wit) 
 }
 
 template <typename C> FDEV void ReadByteBlock<C>::verify(CTX) DEV {
+#ifdef PICUS
+  Val<C> low3 = lowBit0.get() + lowBit1.get() * 2;
+#endif
+  // The new byte is host input to the running program
+  PICUS_INPUT(ctx, newByte);
+  READ_STATE_ARGUMENT(ctx, cycle, io.wordAddr, low3, sizeMinus1.get() + 1);
+
   Val<C> lb1 = lowBit1.get();
   // Verify we don't change non-selected short
   EQ(lb1 * io.prevData.low.get() + (Val<C>(1) - lb1) * io.prevData.high.get(),
@@ -60,7 +71,9 @@ template <typename C> FDEV void ReadWordBlock<C>::set(CTX, ReadWordWitness wit) 
 }
 
 template <typename C> FDEV void ReadWordBlock<C>::verify(CTX) DEV {
-  // NOTHING TO DO
+  READ_STATE_ARGUMENT(ctx, cycle, io.wordAddr, 0, sizeMinus4.get() + 4);
+  // The new data is host input to the running program
+  PICUS_INPUT(ctx, io.data);
 }
 
 template <typename C> FDEV void ReadWordBlock<C>::addArguments(CTX) DEV {

@@ -19,20 +19,37 @@
 
 #include "mlir/IR/Verifier.h"
 
+#include "compiler/extractor/extract.h"
+
 int main() {
-  using C = RecordingContext;
   mlir::MLIRContext mlirCtx;
   RecordingContext ctx(&mlirCtx);
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
-  extract1<IsZero>(ctx);
+  extractWithValArg<IsZero>(ctx);
+  extractWithU32Arg<AddressDecompose>(ctx);
 
-  // EXTRACT(IsZero);
+  // EXTRACT(InstRegBlock);
+  // EXTRACT(InstImmBlock);
+  // EXTRACT(InstLoadBlock); // slow!
+  // EXTRACT(InstStoreBlock);
+  // EXTRACT(InstBranchBlock);
+  // EXTRACT(InstJalBlock);
+  // EXTRACT(InstJalrBlock);
+  // EXTRACT(InstLuiBlock);
+  // EXTRACT(InstAuipcBlock);
+  // EXTRACT(InstEcallBlock);
+  // EXTRACT(InstMretBlock);
+  // EXTRACT(EcallTerminateBlock);
+  // EXTRACT(EcallReadBlock);
+  // EXTRACT(EcallWriteBlock);
+  // EXTRACT(EcallBigIntBlock);
+  // EXTRACT(ReadByteBlock);
+  // EXTRACT(ReadWordBlock);
   // EXTRACT(UnitAddSubBlock);
   // EXTRACT(UnitBitBlock);
   // EXTRACT(UnitMulBlock);
-  EXTRACT(UnitDivBlock);
 
   // #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
   //   BLOCK_TYPES
@@ -43,7 +60,7 @@ int main() {
     return 1;
   }
 
-  llvm::outs() << ctx.getModuleOp() << "\n\n";
+  // llvm::outs() << ctx.getModuleOp() << "\n\n";
   printPicus(ctx.getModuleOp(), llvm::outs());
 
   // llvm::outs() << "(begin-module UnitArgument)\n"
