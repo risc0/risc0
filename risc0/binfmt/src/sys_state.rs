@@ -76,32 +76,28 @@ impl Digestible for SystemState {
 
 /// Read a SHA-256 digest as a series of half-words (i.e. 16-bit values).
 pub fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Result<Digest, DecodeError> {
-    let mut bytes = Vec::<u8>::new();
     if flat.len() < 16 {
         return Err(DecodeError::EndOfStream);
     }
-    for half in flat.drain(0..16) {
-        bytes.push((half & 0xff).try_into().unwrap());
-        bytes.push(
-            (half >> 8)
-                .try_into()
-                .map_err(|_| DecodeError::OutOfRange)?,
-        );
+    let mut bytes = [0u8; 32];
+    for (i, half) in flat.drain(0..16).enumerate() {
+        bytes[2 * i] = (half & 0xff).try_into().unwrap();
+        bytes[2 * i + 1] = (half >> 8)
+            .try_into()
+            .map_err(|_| DecodeError::OutOfRange)?;
     }
-    Ok(bytes.try_into().unwrap())
+    Ok(bytes.into())
 }
 
 fn read_u32_bytes(flat: &mut VecDeque<u32>) -> Result<u32, DecodeError> {
     if flat.len() < 4 {
         return Err(DecodeError::EndOfStream);
     }
-    Ok(u32::from_le_bytes(
-        flat.drain(0..4)
-            .map(|x| x as u8)
-            .collect::<Vec<u8>>()
-            .try_into()
-            .unwrap(),
-    ))
+    let mut bytes = [0u8; 4];
+    for (i, x) in flat.drain(0..4).enumerate() {
+        bytes[i] = x as u8;
+    }
+    Ok(u32::from_le_bytes(bytes))
 }
 
 /// Write a SHA-256 digest as a series of half-words (i.e. 16-bit values).
