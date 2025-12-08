@@ -959,6 +959,8 @@ impl ZeroCopyFilesystem {
             }
             let meta = self.get_inode_meta(current_inode)?;
             qids.push(meta.qid());
+            // Remove the FID if it already exists (allows reusing FIDs for cloning)
+            self.fid_table.remove(&to_fid);
             self.allocate_fid(to_fid, current_inode, current_path.clone())?;
             if ZERO_COPY_DEBUG {
                 self.debug_log(&format!(
@@ -1113,7 +1115,8 @@ impl ZeroCopyFilesystem {
             }
         }
 
-        // Allocate the new FID
+        // Allocate the new FID - if it already exists, remove it first (allows reusing FIDs)
+        self.fid_table.remove(&to_fid);
         if let Err(errno) = self.allocate_fid(to_fid, current_inode, current_path.clone()) {
             if ZERO_COPY_DEBUG {
                 self.debug_log(&format!(

@@ -216,6 +216,8 @@ impl RamFilesystem {
                 // Actually, if same FID and empty wnames, nothing to do
                 return Ok(qids);
             }
+            // Remove the FID if it already exists (allows reusing FIDs for cloning)
+            self.fid_table.remove(&to_fid);
             self.allocate_fid(to_fid, current_inode, current_path)?;
             return Ok(qids);
         }
@@ -292,11 +294,8 @@ impl RamFilesystem {
                 path: current_path,
             };
         } else {
-            // Allocate new FID - if it already exists, clunk it first
-            if self.fid_table.contains_key(&to_fid) {
-                // FID already exists, clunk it first
-                let _ = self.clunk_fid(to_fid);
-            }
+            // Allocate new FID - if it already exists, remove it first (allows reusing FIDs)
+            self.fid_table.remove(&to_fid);
             self.allocate_fid(to_fid, current_inode, current_path)?;
         }
         Ok(qids)
