@@ -97,6 +97,13 @@ struct Emulator {
     return record.value;
   }
 
+  void undoReadPhysMemory(PhysMemReadWitness& record) {
+    uint32_t pageId = record.wordAddr >> MPAGE_SIZE_WORDS_PO2;
+    PageDetails* page = pages[pageId];
+    uint32_t wordNum = record.wordAddr & MPAGE_MASK_WORDS;
+    (*page)[wordNum].cycle = record.prevCycle;
+  }
+
   inline void writePhysMemory(PhysMemWriteWitness& record, uint32_t wordAddr, uint32_t value) {
     uint32_t pageId = wordAddr >> MPAGE_SIZE_WORDS_PO2;
     PageDetails* page = pages[pageId];
@@ -131,6 +138,13 @@ struct Emulator {
     record.prevCycle = phys.prevCycle;
     record.value = phys.value;
     return record.value;
+  }
+
+  inline void undoReadVirtMemory(VirtMemReadWitness& record) {
+    PhysMemReadWitness phys;
+    phys.wordAddr = record.addr.vpage << VPAGE_SIZE_WORDS_PO2 | record.addr.wordOffset;
+    phys.prevCycle = record.prevCycle;
+    undoReadPhysMemory(phys);
   }
 
   inline void writeVirtMemory(VirtMemWriteWitness& record, uint32_t vWordAddr, uint32_t value) {
@@ -313,7 +327,14 @@ struct Emulator {
     curCycle++;
   }
 
+  void fatal(const std::string& reason) {
+    throw std::runtime_error("Trap: " + reason);
+  }
+
   void trap(const std::string& reason) {
+    if (mode == MODE_MACHINE) {
+      fatal("Double trap: " + reason);
+    }
     // TODO: Properly implement trap handling
     throw std::runtime_error("Trap: " + reason);
   }
@@ -360,44 +381,55 @@ struct Emulator {
   }
 
   template <uint32_t opt> inline void do_INST_LOAD() {
+    constexpr Option optInner = Option(opt).popRet<InstKind>();
+    auto kind = optInner.peek<LoadKind>();
+    // Check alignement + access
+    uint32_t addr = peekReg(dinst->rs1) + dinst->imm;
+    uint32_t alignmentReq = 1;
+    switch (kind) {
+    case LOAD_LH:
+    case LOAD_LHU:
+      alignmentReq = 2;
+      break;
+    case LOAD_LW:
+      alignmentReq = 4;
+      break;
+    default:
+      break;
+    }
+    if (addr % alignmentReq != 0) {
+      trap("Alignement error on load");
+      return;
+    }
+    if (mode != MODE_MACHINE && ((addr/4) >= KERNEL_START_WORD)) {
+      trap("Out of bounds error on load");
+      return;
+    }
+
     auto& wit = trace.makeInstLoad();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
-    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    readReg(wit.rs1, dinst->rs1);
     wit.rs2 = dinst->rs2;
     wit.imm = dinst->imm;
-    uint32_t addr = rs1Val + wit.imm;
     uint32_t shift = BITS_PER_BYTE * (addr % BYTES_PER_WORD);
     uint32_t in = readVirtMemory(wit.mem, addr / BYTES_PER_WORD);
     wit.options = opt;
-    constexpr Option optInner = Option(opt).popRet<InstKind>();
     uint32_t out;
-    switch (optInner.peek<LoadKind>()) {
+    switch (kind) {
     case LOAD_LB:
       out = uint32_t(int32_t(int8_t((in >> shift) & 0xff)));
       break;
     case LOAD_LH:
-      if (shift % 16 != 0) {
-        LOG(0, "Alignment error is LH, addr = " << addr);
-        trap("Alignment error");
-      }
       out = uint32_t(int32_t(int16_t((in >> shift) & 0xfffff)));
       break;
     case LOAD_LW:
-      if (shift != 0) {
-        LOG(0, "Alignment error in LW, addr = " << addr);
-        trap("Alignment error");
-      }
       out = in;
       break;
     case LOAD_LBU:
       out = (in >> shift) & 0xff;
       break;
     case LOAD_LHU:
-      if (shift % 16 != 0) {
-        LOG(0, "Alignment error in LHU, addr = " << addr);
-        trap("Alignment error");
-      }
       out = (in >> shift) & 0xffff;
       break;
     }
@@ -409,16 +441,38 @@ struct Emulator {
   }
 
   template <uint32_t opt> inline void do_INST_STORE() {
+    constexpr Option optInner = Option(opt).popRet<InstKind>();
+    auto kind = optInner.peek<StoreKind>();
+    // Check alignement + access
+    uint32_t addr = peekReg(dinst->rs1) + dinst->imm;
+    uint32_t alignmentReq = 1;
+    switch (kind) {
+    case STORE_SH:
+      alignmentReq = 2;
+      break;
+    case STORE_SW:
+      alignmentReq = 4;
+      break;
+    default:
+      break;
+    }
+    if (addr % alignmentReq != 0) {
+      trap("Alignement error on store");
+      return;
+    }
+    if (mode != MODE_MACHINE && ((addr/4) >= KERNEL_START_WORD)) {
+      trap("Out of bounds error on load");
+      return;
+    }
+
     auto& wit = trace.makeInstStore();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
-    uint32_t rs1Val = readReg(wit.rs1, dinst->rs1);
+    readReg(wit.rs1, dinst->rs1);
     uint32_t data = readReg(wit.rs2, dinst->rs2, dinst->rs1 == dinst->rs2);
     wit.rd = dinst->rd;
     wit.imm = dinst->imm;
     wit.options = opt;
-    constexpr Option optInner = Option(opt).popRet<InstKind>();
-    uint32_t addr = rs1Val + wit.imm;
     uint32_t shift = BITS_PER_BYTE * (addr % BYTES_PER_WORD);
     uint32_t in = peekVirtMemory(addr / BYTES_PER_WORD);
     uint32_t out;
@@ -427,20 +481,9 @@ struct Emulator {
       out = (in & ~(0xff << shift)) | ((data & 0xff) << shift);
       break;
     case STORE_SH:
-      if (shift % 16 != 0) {
-        LOG(0, "Alignment error in SH, addr = " << addr);
-        trap("Alignment error");
-      }
       out = (in & ~(0xffff << shift)) | ((data & 0xffff) << shift);
       break;
     case STORE_SW:
-      if (shift != 0) {
-        LOG(0, "Alignment error in SW, addr = " << addr);
-        LOG(0, "  RS1 = " << dinst->rs1 << ", value = " << std::hex << wit.rs1.value << std::dec);
-        LOG(0, "  RS2 = " << dinst->rs2 << ", value = " << std::hex << wit.rs2.value << std::dec);
-        LOG(0, "  IMM = " << std::hex << wit.imm << std::dec);
-        trap("Alignment error");
-      }
       out = data;
       break;
     }
@@ -560,7 +603,7 @@ struct Emulator {
       break;
     default:
       LOG(0, "Invalid ECALL in machine mode: " << which);
-      trap("Invalid ECALL in machine mode");
+      fatal("Invalid ECALL in machine mode");
     }
   }
 
@@ -568,19 +611,6 @@ struct Emulator {
     if (mode != MODE_MACHINE) {
       trap("MRET not in machine mode");
     }
-    auto& wit = trace.makeInstMret();
-    wit.cycle = curCycle;
-    wit.fetch = dinst->fetch;
-    setMode(MODE_USER);
-    uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
-    newPc = readPhysMemory(wit.readPc, mepcWord) + 4;
-  }
-
-  template <uint32_t opt> inline void do_INST_SRET() {
-    if (mode != MODE_SUPERVISOR) {
-      trap("MRET not in machine mode");
-    }
-    // Actually do MRET anyway for now
     auto& wit = trace.makeInstMret();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
@@ -611,7 +641,7 @@ struct Emulator {
     uint32_t buf = readReg(wit.a1, REG_A1);
     uint32_t len = readReg(wit.a2, REG_A2);
     if (len > 0xffff) {
-      trap("Invalid READ, too long");
+      fatal("Invalid READ, too long");
     }
     // TODO: Based on read length, decide if we have enough room for read
     std::vector<uint8_t> hostData(len);
@@ -661,7 +691,7 @@ struct Emulator {
     uint32_t buf = peekReg(REG_A1);
     uint32_t len = readReg(wit.a2, REG_A2);
     if (len > 0xffff) {
-      trap("Invalid WRITE, too long");
+      fatal("Invalid WRITE, too long");
     }
     std::vector<uint8_t> hostData(len);
     for (size_t i = 0; i < len; i++) {
@@ -797,7 +827,10 @@ struct Emulator {
     }
   }
 
-  void fetchAndDecode(DecodeWitness* wit) {
+  bool fetchAndDecode(DecodeWitness* wit) {
+    if (mode != MODE_MACHINE && pc / 4 >= KERNEL_START_WORD) {
+      return false;
+    }
     // We always read the memory address at pc/4
     uint32_t l0 = readVirtMemory(wit->load0, pc / 4);
     // If pc == 2 (mod 4), shift to lower value
@@ -829,6 +862,11 @@ struct Emulator {
     wit->count = 1;
     auto decoded = DecodedInst(wit->inst);
     wit->opcode = uint32_t(getOpcode(decoded));
+    if (wit->opcode == uint32_t(Opcode::INVALID)) {
+      undoReadVirtMemory(wit->load1);
+      undoReadVirtMemory(wit->load0);
+      return false;
+    }
     wit->rd = decoded.rd;
     wit->rs1 = decoded.rs1;
     wit->rs2 = decoded.rs2;
@@ -842,6 +880,7 @@ struct Emulator {
     default:
       wit->imm = 0;
     }
+    return true;
   }
 
   bool isDone(size_t rowCount, uint32_t endCycle) {
@@ -855,8 +894,16 @@ struct Emulator {
     while (!isDone(rowCount, endCycle)) {
       DecodeWitness*& decodeWit = (mode == MODE_MACHINE) ? mInstCache[pc] : usInstCache[pc];
       if (!decodeWit) {
+        DecodeWitness tmpWit;
+        if (!fetchAndDecode(&tmpWit)) {
+          trap("Invalid PC or instruction in user mode");
+          curCycle++;
+          userCycles++;
+          pc = newPc;
+          continue;
+        }
         decodeWit = &trace.makeDecode();
-        fetchAndDecode(decodeWit);
+        *decodeWit = tmpWit;
       } else {
         decodeWit->count++;
       }
