@@ -197,9 +197,6 @@ impl ProverServer for DevModeProver {
         let exit_code = exit_code_from_terminate_state(&preflight_results.terminate_state)?;
         Ok(SegmentReceipt {
             seal: Vec::new(),
-            #[cfg(feature = "rv32im-m3")]
-            index: 0,
-            #[cfg(not(feature = "rv32im-m3"))]
             index: preflight_results.segment_index,
             hashfn: "fake".into(),
             verifier_parameters: Digest::ZERO,
