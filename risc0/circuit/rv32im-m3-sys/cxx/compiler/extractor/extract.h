@@ -51,7 +51,8 @@ template <template <typename Ctx> typename Component> void extract(RecordingCont
   ctx.exitComponent();
 }
 
-template <template <typename Ctx> typename Component> void extractWithValArg(RecordingContext& ctx) {
+template <template <typename Ctx> typename Component>
+void extractWithValArg(RecordingContext& ctx) {
   mlir::Type layoutType = getLayoutType<Component, NopVal>(ctx.mlirCtx);
   ctx.enterComponent(Component<RecordingContext>::NAME, layoutType);
   auto arg1 = ctx.addValParameter();
@@ -61,7 +62,8 @@ template <template <typename Ctx> typename Component> void extractWithValArg(Rec
   ctx.exitComponent();
 }
 
-template <template <typename Ctx> typename Component> void extractWithU32Arg(RecordingContext& ctx) {
+template <template <typename Ctx> typename Component>
+void extractWithU32Arg(RecordingContext& ctx) {
   mlir::Type layoutType = getLayoutType<Component, ValU32<layoutbuilder::Context>>(ctx.mlirCtx);
   ctx.enterComponent(Component<RecordingContext>::NAME, layoutType);
   auto low = ctx.addValParameter();

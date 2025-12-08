@@ -12,26 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define CPU_STATE_ARGUMENT(ctx, cycle, pc, mode, iCacheCycle) \
-    PICUS_ARGUMENT(ctx, \
-                  ({}), \
-                  ({ctx.get(cycle), ctx.get(pc), ctx.get(mode), ctx.get(iCacheCycle)}))
+#define CPU_STATE_ARGUMENT(ctx, cycle, pc, mode, iCacheCycle)                                      \
+  PICUS_ARGUMENT(ctx, ({}), ({ctx.get(cycle), ctx.get(pc), ctx.get(mode), ctx.get(iCacheCycle)}))
 
 // The actual "reading" happens via ReadByteBlock and ReadWordBlock. If the read
 // state argument is balanced, then the pulled values are determined by the
 // pushes from those blocks.
-#define READ_STATE_ARGUMENT(ctx, cycle, addrWord, addrLowBits, size) \
-    PICUS_ARGUMENT(ctx, {}, \
-                  ({ctx.get(cycle), ctx.get(addrWord), ctx.get(addrLowBits), ctx.get(size)}))
+#define READ_STATE_ARGUMENT(ctx, cycle, addrWord, addrLowBits, size)                               \
+  PICUS_ARGUMENT(                                                                                  \
+      ctx, {}, ({ctx.get(cycle), ctx.get(addrWord), ctx.get(addrLowBits), ctx.get(size)}))
 
-#define BIGINT_STATE_ARGUMENT(ctx, cycle, pcWord, mm) \
-    PICUS_ARGUMENT(ctx, {}, \
-                  ({ctx.get(cycle), ctx.get(pcWord), ctx.get(mm)}))
+#define BIGINT_STATE_ARGUMENT(ctx, cycle, pcWord, mm)                                              \
+  PICUS_ARGUMENT(ctx, {}, ({ctx.get(cycle), ctx.get(pcWord), ctx.get(mm)}))
 
-#define DECODE_ARGUMENT(ctx, iCacheCycle, pc, nextPc) \
-    PICUS_ARGUMENT(ctx, \
-                  ({ctx.get(iCacheCycle), ctx.get(pc)}), \
-                  ({ctx.get(nextPc)}))
+#define DECODE_ARGUMENT(ctx, iCacheCycle, pc, nextPc)                                              \
+  PICUS_ARGUMENT(ctx, ({ctx.get(iCacheCycle), ctx.get(pc)}), ({ctx.get(nextPc)}))
 
 #define GLOBAL_SET_U32(member, val)                                                                \
   GLOBAL_SET(member.low, val.low);                                                                 \
@@ -45,9 +40,9 @@
   DecodeArgument<C> arg;                                                                           \
   arg.iCacheCycle = fetch.iCacheCycle.get();                                                       \
   arg.pcLow = fetch.pc.low.get();                                                                  \
-  arg.pcHigh = fetch.pc.high.get();                                                                 \
+  arg.pcHigh = fetch.pc.high.get();                                                                \
   arg.newPcLow = fetch.nextPc.low.get();                                                           \
-  arg.newPcHigh = fetch.nextPc.high.get();                                                          \
+  arg.newPcHigh = fetch.nextPc.high.get();                                                         \
   arg.rs1 = 0;                                                                                     \
   arg.rs2 = 0;                                                                                     \
   arg.rd = 0;                                                                                      \
@@ -367,11 +362,11 @@ template <typename C> FDEV void EcallBigIntBlock<C>::set(CTX, EcallBigIntWitness
 }
 
 template <typename C> FDEV void EcallBigIntBlock<C>::verify(CTX) DEV {
-  #ifdef PICUS
+#ifdef PICUS
   Val<C> cycleVal = cycle.get();
   Val<C> countVal = cycleCount.get();
   Val<C> biPc = pcDecomp.wordAddr(readT2.data.get());
-  #endif
+#endif
   CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, Val<C>(MODE_MACHINE), fetch.iCacheCycle);
   BIGINT_STATE_ARGUMENT(ctx, cycleVal + countVal + 1, biPc + countVal, mm);
   DECODE_ARGUMENT(ctx, fetch.iCacheCycle, fetch.pc, fetch.nextPc);
