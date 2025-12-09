@@ -2175,6 +2175,9 @@ fn sys_exit(error_code: u32) -> Result<u32, Err> {
         let traffic_hash = get_p9_traffic_hash();
         // Commit to journal in future
         debug_print!("sys_exit: p9_traffic_hash = {:?}", traffic_hash);
+        
+        // List all files in /tmp using P9 protocols
+        crate::linux_abi_fs::list_tmp_files_p9();
     }
     let msg = str_format!(str256, "sys_exit({error_code})");
     print(&msg);
