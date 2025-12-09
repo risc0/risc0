@@ -542,11 +542,18 @@ fn large_io_words() {
         fd: FD,
         nwords: buf.len() as u32,
     };
+
+    #[cfg(feature = "rv32im-m3")]
+    const SESSION_LIMIT: u64 = 20_000_000 * 8;
+
+    #[cfg(not(feature = "rv32im-m3"))]
+    const SESSION_LIMIT: u64 = 20_000_000;
+
     let env = ExecutorEnv::builder()
         .read_fd(FD, bytemuck::cast_slice(&buf))
         .write(&input)
         .unwrap()
-        .session_limit(Some(20_000_000))
+        .session_limit(Some(SESSION_LIMIT))
         .build()
         .unwrap();
     let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
