@@ -595,7 +595,7 @@ template <typename C> FDEV void InstEcallBlock<C>::verify(CTX) DEV {
   EQ(fetch.pc.high.get(), writeSavePc.data.high.get());
   // Make sure address constants are right
   Val<C> mepcWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_MEPC, CSR_WORD(MEPC));
-  Val<C> mtvecWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_ECALL_DISPATCH, CSR_WORD(MTVEC));
+  Val<C> mtvecWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_ECALL_DISPATCH, CSR_WORD(MTECALL));
   EQ(writeSavePc.wordAddr.get(), mepcWord);
   EQ(readDispatch.wordAddr.get(), mtvecWord);
 }
@@ -622,14 +622,39 @@ template <typename C> FDEV void InstEcallBlock<C>::addArguments(CTX) DEV {
   ctx.pull(arg);
 }
 
+template <typename C> FDEV void InstTrapBlock<C>::set(CTX, InstTrapWitness wit) DEV {
+  cycle.set(ctx, wit.cycle);
+  iCacheCycle.set(ctx, wit.iCacheCycle);
+  writeSavePc.set(ctx, wit.savePc, wit.cycle);
+  readDispatch.set(ctx, wit.dispatch, wit.cycle);
+}
+
+template <typename C> FDEV void InstTrapBlock<C>::verify(CTX) DEV {
+  // Make sure address constants are right
+  Val<C> mepcWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_MEPC, CSR_WORD(MEPC));
+  Val<C> mtvecWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_TRAP_DISPATCH, CSR_WORD(MTEXCEPT));
+  EQ(writeSavePc.wordAddr.get(), mepcWord);
+  EQ(readDispatch.wordAddr.get(), mtvecWord);
+}
+
+template <typename C> FDEV void InstTrapBlock<C>::addArguments(CTX) DEV {
+  Val<C> cycleVal = cycle.get();
+  // Move from mode = USER to mode = MACHINE
+  ctx.pull(CpuStateArgument<C>(cycleVal, writeSavePc.data.get(), MODE_USER, iCacheCycle.get()));
+  ctx.push(CpuStateArgument<C>(
+      cycleVal + 1, readDispatch.data.get(), MODE_MACHINE, iCacheCycle.get()));
+}
+
 template <typename C> FDEV void InstMretBlock<C>::set(CTX, InstMretWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   fetch.set(ctx, wit.fetch, wit.cycle);
   readPc.set(ctx, wit.readPc, wit.cycle);
-  sumPc.set(ctx, wit.readPc.value, 4);
+  toAdd.set(ctx, GLOBAL_GET(v2Compat) * 4);
+  sumPc.set(ctx, wit.readPc.value, GLOBAL_GET(v2Compat).asUInt32() * 4);
 }
 
 template <typename C> FDEV void InstMretBlock<C>::verify(CTX) DEV {
+  EQ(toAdd.get(), GLOBAL_GET(v2Compat) * 4);
   // Make sure address constants is right
   Val<C> mepcWord = cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_MEPC, CSR_WORD(MEPC));
   EQ(readPc.wordAddr.get(), mepcWord);

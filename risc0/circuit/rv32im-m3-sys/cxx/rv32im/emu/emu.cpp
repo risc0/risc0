@@ -307,7 +307,7 @@ struct Emulator {
       writePhysMemory(resumeWit.version, V2_COMPAT_VERSION, RV32IM_CIRCUIT_VERSION);
     } else {
       pc = readPhysMemory(resumeWit.pc, CSR_WORD(MSPC));
-      setMode(readPhysMemory(resumeWit.pc, CSR_WORD(MSMODE)));
+      setMode(readPhysMemory(resumeWit.mode, CSR_WORD(MSMODE)));
       writePhysMemory(resumeWit.version, CSR_WORD(MVERSION), RV32IM_CIRCUIT_VERSION);
     }
     curCycle++;
@@ -335,8 +335,17 @@ struct Emulator {
     if (mode == MODE_MACHINE) {
       fatal("Double trap: " + reason);
     }
-    // TODO: Properly implement trap handling
-    throw std::runtime_error("Trap: " + reason);
+    LOG(2, "Trap: " << reason);
+    // Save PC + jump to dispatch address
+    auto& wit = trace.makeInstTrap();
+    wit.cycle = curCycle;
+    wit.iCacheCycle = iCacheCycle;
+    uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
+    writePhysMemory(wit.savePc, mepcWord, pc);
+    setMode(MODE_MACHINE);
+    uint32_t mtvecWord = v2Compat ? V2_COMPAT_TRAP_DISPATCH : CSR_WORD(MTEXCEPT);
+    newPc = readPhysMemory(wit.dispatch, mtvecWord);
+    return;
   }
 
   template <uint32_t opt> inline void do_INST_REG() {
@@ -399,10 +408,12 @@ struct Emulator {
     }
     if (addr % alignmentReq != 0) {
       trap("Alignement error on load");
+      dinst->count--;
       return;
     }
     if (mode != MODE_MACHINE && ((addr/4) >= KERNEL_START_WORD)) {
       trap("Out of bounds error on load");
+      dinst->count--;
       return;
     }
 
@@ -458,10 +469,12 @@ struct Emulator {
     }
     if (addr % alignmentReq != 0) {
       trap("Alignement error on store");
+      dinst->count--;
       return;
     }
     if (mode != MODE_MACHINE && ((addr/4) >= KERNEL_START_WORD)) {
-      trap("Out of bounds error on load");
+      trap("Out of bounds error on store");
+      dinst->count--;
       return;
     }
 
@@ -580,7 +593,7 @@ struct Emulator {
       uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
       writePhysMemory(wit.savePc, mepcWord, pc);
       setMode(MODE_MACHINE);
-      uint32_t mtvecWord = v2Compat ? V2_COMPAT_ECALL_DISPATCH : CSR_WORD(MTVEC);
+      uint32_t mtvecWord = v2Compat ? V2_COMPAT_ECALL_DISPATCH : CSR_WORD(MTECALL);
       newPc = readPhysMemory(wit.dispatch, mtvecWord);
       return;
     }
@@ -610,13 +623,15 @@ struct Emulator {
   template <uint32_t opt> inline void do_INST_MRET() {
     if (mode != MODE_MACHINE) {
       trap("MRET not in machine mode");
+      dinst->count--;
+      return;
     }
     auto& wit = trace.makeInstMret();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
     setMode(MODE_USER);
     uint32_t mepcWord = v2Compat ? V2_COMPAT_MEPC : CSR_WORD(MEPC);
-    newPc = readPhysMemory(wit.readPc, mepcWord) + 4;
+    newPc = readPhysMemory(wit.readPc, mepcWord) + (v2Compat ? 4 : 0);
   }
 
   void do_ECALL_TERMINATE() {
@@ -909,9 +924,9 @@ struct Emulator {
       }
       dinst = decodeWit;
       newPc = dinst->fetch.nextPc;
-      // LOG(1,
-      //     "cycle: " << userCycles << ", pc: " << HexWord{pc}
-      //               << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
+      LOG(2,
+           "cycle: " << userCycles << ", pc: " << HexWord{pc}
+                     << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
       switch (Opcode(decodeWit->opcode)) {
 #define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...)                                \
   case Opcode::name:                                                                               \

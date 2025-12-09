@@ -136,23 +136,20 @@ CONSTANT uint32_t CSR_SIP = 0x144;
 CONSTANT uint32_t CSR_SATP = 0x180;
 
 // Standard machine CSRs we actually use
-CONSTANT uint32_t CSR_MTVEC = 0x305;
 CONSTANT uint32_t CSR_MEPC = 0x341;
-CONSTANT uint32_t CSR_MCAUSE = 0x342;
-CONSTANT uint32_t CSR_MTVAL = 0x343;
 
 // Custom machine CSRs
-CONSTANT uint32_t CSR_MVERSION = 0x7C0; // Turn off V2 compat in global
-CONSTANT uint32_t CSR_MSPC = 0x7C1;     // Suspend/Resume PC
-CONSTANT uint32_t CSR_MSMODE = 0x7C2;   // Suspend/Resume Mode
-CONSTANT uint32_t CSR_MVINFO = 0x7C3;
-CONSTANT uint32_t CSR_MNOPTE1 = 0x7C4;
-CONSTANT uint32_t CSR_MNOPTE2 = 0x7C5;
+CONSTANT uint32_t CSR_MVERSION = 0x7c0; // Set in V3 (but not V2)
+CONSTANT uint32_t CSR_MSPC = 0x7c1;     // Suspend/Resume PC
+CONSTANT uint32_t CSR_MSMODE = 0x7c2;   // Suspend/Resume Mode
+CONSTANT uint32_t CSR_MTECALL = 0x7d0;  // Trap vector for ecall
+CONSTANT uint32_t CSR_MTEXCEPT = 0x7d1;  // Trap vector for other expections
 CONSTANT uint32_t CSR_MNOV2COMPAT = 0x7FF; // Turn off V2 compat in global
 
 // V2 Compatibility constants
 CONSTANT uint32_t V2_COMPAT_MEPC = 0xffff0200 / 4;
 CONSTANT uint32_t V2_COMPAT_ECALL_DISPATCH = 0xffff1000 / 4;
+CONSTANT uint32_t V2_COMPAT_TRAP_DISPATCH = 0xffff2000 / 4;
 CONSTANT uint32_t V2_COMPAT_SPC = 0xffff0210 / 4;
 CONSTANT uint32_t V2_COMPAT_SMODE = 0xffff0214 / 4;
 CONSTANT uint32_t V2_COMPAT_VERSION = 0xffff0300 / 4;

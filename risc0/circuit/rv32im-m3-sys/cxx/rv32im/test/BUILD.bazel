@@ -80,6 +80,20 @@ risc0_cc_binary(
     srcs = ["linux_guest.cpp"],
 )
 
+risc0_cc_kernel_binary(
+    name = "trap_kernel",
+    srcs = [
+        "entry.s",
+        "trap_kernel.cpp",
+    ],
+    hdrs = ["//rv32im/base:files"],
+)
+
+risc0_cc_binary(
+    name = "trap_user",
+    srcs = ["trap_user.cpp"],
+)
+
 cc_test(
     name = "tune",
     srcs = [
@@ -109,6 +123,16 @@ cc_test(
     data = [
         ":linux_guest",
         ":linux_kernel",
+    ],
+    deps = ["//rv32im/test:test_prove"],
+)
+
+cc_test(
+    name = "test_trap",
+    srcs = ["trap_test.cpp"],
+    data = [
+        ":trap_user",
+        ":trap_kernel",
     ],
     deps = ["//rv32im/test:test_prove"],
 )

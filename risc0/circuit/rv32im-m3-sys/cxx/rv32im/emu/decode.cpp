@@ -36,6 +36,10 @@ public:
     if (inst.inst == 0x30200073) {
       return Opcode::MRET;
     }
+    // ECALL technically fits, but f7 being 0 isn't sufficient
+    if (inst.inst == 0x00000073) {
+      return Opcode::ECALL;
+    }
     return table[map10(inst.opcode, inst.func3, inst.func7)];
   }
 
@@ -53,6 +57,10 @@ private:
   void addInst(uint32_t opcode, int32_t func3, int32_t func7, Opcode inst) {
     // Annoyingly MRET doesn't fit in the 10 bit table
     if (inst == Opcode::MRET) {
+      return;
+    }
+    // ECall is also special cased
+    if (inst == Opcode::ECALL) {
       return;
     }
     uint32_t opHigh = opcode >> 2;
