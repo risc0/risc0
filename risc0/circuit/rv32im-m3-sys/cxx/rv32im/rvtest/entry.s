@@ -1,3 +1,4 @@
+
 .section .text
 .global _start
 _start:
@@ -7,15 +8,8 @@ _start:
   .option norelax
   la gp, __global_pointer$
   .option pop
-  /* Set the kernel stack pointer near the top of firmware memory */
-  li sp, 0xff000000
+  /* Set the kernel stack pointer near the top of kernel memory */
+  li sp, 0xfff00000
   /* Jump to kernel start at the C level */
   call start
-
-.extern onTrap
-
-.global _trapEntry
-_trapEntry:
-  call onTrap 
-  mret
 

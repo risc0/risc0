@@ -485,19 +485,43 @@ template <typename C> struct InstEcallBlock {
   FDEV void addArguments(CTX) DEV;
 };
 
+template <typename C> struct InstTrapBlock {
+  CONSTANT static char NAME[] = "InstTrapBlock";
+
+  Reg<C> cycle;
+  Reg<C> iCacheCycle;
+  PhysMemWriteBlock<C> writeSavePc;
+  PhysMemReadBlock<C> readDispatch;
+
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "iCacheCycle", iCacheCycle);
+    T::apply(ctx, "writeSavePc", writeSavePc, cycle.get());
+    T::apply(ctx, "readDispatch", readDispatch, cycle.get());
+  }
+
+  FDEV void set(CTX, InstTrapWitness wit) DEV;
+  FDEV inline void finalize(CTX) DEV {}
+
+  FDEV void verify(CTX) DEV;
+  FDEV void addArguments(CTX) DEV;
+};
+
 template <typename C> struct InstMretBlock {
   CONSTANT static char NAME[] = "InstMretBlock";
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
   PhysMemReadBlock<C> readPc;
+  Reg<C> toAdd;
   AddU32<C> sumPc;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, "cycle", cycle);
     T::apply(ctx, "fetch", fetch, cycle.get());
     T::apply(ctx, "readPc", readPc, cycle.get());
-    T::apply(ctx, "sumPc", sumPc, readPc.data.get(), ValU32<C>(4, 0));
+    T::apply(ctx, "toAdd", toAdd);
+    T::apply(ctx, "sumPc", sumPc, readPc.data.get(), ValU32<C>(toAdd.get(), 0));
   }
 
   FDEV void set(CTX, InstMretWitness wit) DEV;
