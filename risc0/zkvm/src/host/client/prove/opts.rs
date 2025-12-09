@@ -21,13 +21,6 @@ use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
-#[cfg(not(feature = "rv32im-m3"))]
-const DEFAULT_MAX_SEGMENT_PO2: usize = crate::receipt::DEFAULT_MAX_PO2;
-
-// Setting this higher on m3 causes unexplained issues at the moment.
-#[cfg(feature = "rv32im-m3")]
-const DEFAULT_MAX_SEGMENT_PO2: usize = 21;
-
 /// Options to configure a [Prover][super::Prover].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -93,7 +86,7 @@ impl Default for ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            max_segment_po2: DEFAULT_MAX_SEGMENT_PO2,
+            max_segment_po2: crate::receipt::DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
@@ -124,14 +117,7 @@ impl ProverOpts {
     /// control ID associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
     pub fn all_po2s() -> Self {
-        #[cfg(not(feature = "rv32im-m3"))]
-        {
-            Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
-        }
-        #[cfg(feature = "rv32im-m3")]
-        {
-            Self::from_max_po2(DEFAULT_MAX_SEGMENT_PO2)
-        }
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
     }
 
     /// Choose the fastest prover options. Receipt will be linear in length of the execution,
@@ -149,7 +135,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            max_segment_po2: DEFAULT_MAX_SEGMENT_PO2,
+            max_segment_po2: crate::receipt::DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
@@ -162,7 +148,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Succinct,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            max_segment_po2: DEFAULT_MAX_SEGMENT_PO2,
+            max_segment_po2: crate::receipt::DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
@@ -177,7 +163,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            max_segment_po2: DEFAULT_MAX_SEGMENT_PO2,
+            max_segment_po2: crate::receipt::DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }

@@ -244,7 +244,7 @@ impl ProverServer for ProverImpl {
         tracing::debug!("segment_preflight");
         Ok(Box::new(rv32im_m3::PreflightIter::new(
             segment,
-            self.opts.max_segment_po2,
+            segment.po2(),
             segment.index,
         )?))
     }
@@ -297,7 +297,8 @@ impl ProverServer for ProverImpl {
     ) -> Result<SegmentReceipt> {
         tracing::debug!("prove_preflight");
 
-        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(self.opts.max_segment_po2)?;
+        let po2 = preflight_results.inner.po2();
+        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(po2 as usize)?;
         let seal = prover.prove(&preflight_results.inner)?;
 
         let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output.clone())
