@@ -327,9 +327,7 @@ struct Emulator {
     curCycle++;
   }
 
-  void fatal(const std::string& reason) {
-    throw std::runtime_error("Trap: " + reason);
-  }
+  void fatal(const std::string& reason) { throw std::runtime_error("Trap: " + reason); }
 
   void trap(const std::string& reason) {
     if (mode == MODE_MACHINE) {
@@ -411,7 +409,7 @@ struct Emulator {
       dinst->count--;
       return;
     }
-    if (mode != MODE_MACHINE && ((addr/4) >= KERNEL_START_WORD)) {
+    if (mode != MODE_MACHINE && ((addr / 4) >= KERNEL_START_WORD)) {
       trap("Out of bounds error on load");
       dinst->count--;
       return;
@@ -472,7 +470,7 @@ struct Emulator {
       dinst->count--;
       return;
     }
-    if (mode != MODE_MACHINE && ((addr/4) >= KERNEL_START_WORD)) {
+    if (mode != MODE_MACHINE && ((addr / 4) >= KERNEL_START_WORD)) {
       trap("Out of bounds error on store");
       dinst->count--;
       return;
@@ -925,8 +923,8 @@ struct Emulator {
       dinst = decodeWit;
       newPc = dinst->fetch.nextPc;
       LOG(2,
-           "cycle: " << userCycles << ", pc: " << HexWord{pc}
-                     << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
+          "cycle: " << userCycles << ", pc: " << HexWord{pc}
+                    << ", inst: " << getOpcodeName(Opcode(dinst->opcode)));
       switch (Opcode(decodeWit->opcode)) {
 #define ENTRY(name, idx, opcode, immType, func3, func7, itype, ...)                                \
   case Opcode::name:                                                                               \

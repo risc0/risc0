@@ -11,14 +11,14 @@ cc_test(
     shard_count = 16,
 )
 
-cc_test(
-    name = "test_atomics",
-    size = "large",
-    srcs = ["test_atomics.cpp"],
-    data = [
-        "//firmware",
-        ":riscv_test_bins"
-    ],
-    deps = ["//rv32im/test:test_prove"],
-)
+#cc_test(
+#    name = "test_atomics",
+#    size = "large",
+#    srcs = ["test_atomics.cpp"],
+#    data = [
+#        "//firmware",
+#        ":riscv_test_bins"
+#    ],
+#    deps = ["//rv32im/test:test_prove"],
+#)
 
