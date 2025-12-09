@@ -88,7 +88,7 @@ impl<'a> Decoder<'a> {
 
     fn read_u32_from_shorts(&mut self) -> u32 {
         let slice = self.read(2);
-        let (high, low) = (Elem::new(slice[0]), Elem::new(slice[1]));
+        let (high, low) = (Elem::new_raw(slice[1]), Elem::new_raw(slice[0]));
         (high.as_u32() & 0xffff) << 16 | (low.as_u32() & 0xffff)
     }
 
