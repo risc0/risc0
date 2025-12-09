@@ -243,7 +243,7 @@ impl ProverServer for ProverImpl {
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
         tracing::debug!("segment_preflight");
         Ok(Box::new(rv32im_m3::PreflightIter::new(
-            segment.clone(),
+            segment,
             self.opts.max_segment_po2,
             segment.index,
         )?))
@@ -459,12 +459,12 @@ mod rv32im_m3 {
 
     impl PreflightIter {
         pub(crate) fn new(
-            segment: Segment,
+            segment: &Segment,
             max_prover_po2: usize,
             segment_index: u32,
         ) -> Result<Self> {
             let terminate_state = segment.inner.terminate_state;
-            let ctx = risc0_circuit_rv32im_m3::prove::SegmentContext::new(segment.inner)?;
+            let ctx = risc0_circuit_rv32im_m3::prove::SegmentContext::new(&segment.inner)?;
             Ok(Self {
                 max_prover_po2,
                 ctx,
