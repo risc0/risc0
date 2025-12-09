@@ -124,7 +124,14 @@ impl ProverOpts {
     /// control ID associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
     pub fn all_po2s() -> Self {
-        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+        #[cfg(not(feature = "rv32im-m3"))]
+        {
+            Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+        }
+        #[cfg(feature = "rv32im-m3")]
+        {
+            Self::from_max_po2(DEFAULT_MAX_SEGMENT_PO2)
+        }
     }
 
     /// Choose the fastest prover options. Receipt will be linear in length of the execution,
