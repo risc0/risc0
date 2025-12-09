@@ -20,6 +20,10 @@ use dynasmrt::{
     x64::{Assembler, X64Relocation},
 };
 
+use super::memory::{
+    PAGE_SLOT_PTR_OFFSET, PAGE_SLOT_SHIFT, PAGE_SLOT_SIZE, PAGE_SLOT_TAG_OFFSET,
+    PAGE_SLOT_TAG_SHIFT,
+};
 use super::*;
 
 macro_rules! dynasm_x64 {
@@ -168,7 +172,7 @@ fn make_enter(asm: &mut Assembler) {
     dynasm_x64!(asm
         ; mov rax, rdi // block
         ; mov r15, rsi // ctx
-        ; lea rbx, [r15 + REGISTERS_OFFSET as i32] // ctx.registers
+        ; lea rbx, [r15 + JITCTX_REGISTERS_OFFSET] // ctx.registers
     );
 
     // restore RISC-V registers
@@ -215,13 +219,13 @@ impl Translator {
     pub(crate) fn step_prologue(&mut self) {
         self.emit_retval(Terminal::Split, self.ctx.pc);
         emit!(self
-            ; cmp DWORD [r15 + QUOTA_OFFSET as i32], 0
+            ; cmp DWORD [r15 + JITCTX_QUOTA_OFFSET], 0
             ; je ->exit
         );
     }
 
     pub(crate) fn step_epilogue(&mut self) {
-        emit!(self ; dec DWORD [r15 + QUOTA_OFFSET as i32]);
+        emit!(self ; dec DWORD [r15 + JITCTX_QUOTA_OFFSET]);
     }
 
     pub(crate) fn dispatch(&mut self, insn: Instruction) -> Result<Option<Terminal>> {
@@ -748,64 +752,66 @@ impl Translator {
             return;
         }
 
-        // 1. load guest virtual address into rax
+        // 1. load guest address into rax
         self.emit_lea(GPR::RAX, None, rs1, imm);
 
         emit!(self
-            // save temp registers
-            ; push rbx
-
-            // (ebx): sub-page offset = vaddr & PAGE_OFFSET_MASK
-            ; mov ebx, eax
-            ; and ebx, PAGE_OFFSET_MASK as i32
-
-            // (ecx): vpn = vaddr >> PAGE_SHIFT
+            // (ecx): page_idx = addr >> PAGE_SHIFT
             ; mov ecx, eax
             ; shr ecx, PAGE_SHIFT as i8
 
-            // (edx): index = vpn & TLB_MASK
-            ; mov edx, ecx
-            ; and edx, TLB_MASK as i32
+            // (edx): offset = addr & PAGE_OFFSET_MASK
+            ; mov edx, eax
+            ; and edx, PAGE_OFFSET_MASK as i32
 
-            // (rcx): entry_ptr = r15 + TLB_OFFSET + index * sizeof(TlbEntry)
-            ; shl rdx, TLB_ENTRY_SHIFT as i8
-            ; add rdx, r15
-            ; add rdx, TLB_OFFSET as i32
+            // save page_idx on stack to reuse rcx
+            ; push rcx
 
-            // set the VALID bit
-            ; or ecx, TLB_VALID_TAG_MASK as i32
+            // (rax): ctx.page_table
+            ; mov rax, QWORD [r15 + JITCTX_PAGE_TABLE_OFFSET]
 
-            // compare tag
-            ; cmp DWORD [rdx + TLB_TAG_OFFSET as i32], ecx
-            ; jne >tlb_miss
+            // (rcx): page_idx * PAGE_SLOT_SIZE
+            ; shl rcx, PAGE_SLOT_SHIFT as i8
 
-            // load host_page address
-            ; mov rax, QWORD [rdx + TLB_HOST_PAGE_OFFSET as i32]
-            ; jmp >done
+            // (rax): ctx.page_table[page_idx]
+            ; add rax, rcx
 
-            ;tlb_miss:
+            // (ecx): last_tag = slot.tag
+            ; movzx ecx, WORD [rax + PAGE_SLOT_TAG_OFFSET]
 
+            // check if last_tag == current_tag
+            ; cmp cx, WORD [r15 + JITCTX_CURRENT_TAG_OFFSET]
+            ; jne >page_miss
+
+            // (rax): check if ptr is null
+            ; mov rax, QWORD [rax + PAGE_SLOT_PTR_OFFSET]
+            ; test rax, rax
+            ; jnz >done
+
+            ;page_miss:
+
+            // (ecx): grab page_idx off the stack
+            ; mov ecx, [rsp]
             ; push rdi
             ; push rsi
-            // ; sub rsp, 8
 
-            // extern "C" fn tlb_miss_slow(ctx: *mut JitContext, vaddr: u32) -> *mut u8
+            // extern "C" fn jit_load_page_miss(ctx: *mut JitContext, page_idx: u32) -> *mut u8
             ; mov rdi, r15 // arg0 = ctx
-            ; mov esi, eax // arg1 = vaddr
-            ; call QWORD [r15 + TLB_MISS_OFFSET as i32]
+            ; mov esi, ecx // arg1 = page_idx
+            ; call QWORD [r15 + JITCTX_LOAD_PAGE_MISS_OFFSET]
             // on return:
             //   rax = host_page_ptr
 
-            // ; add rsp, 8
             ; pop rsi
             ; pop rdi
 
             ;done:
-            // perform actual load: host_page[offset]
-            ; mov eax, DWORD [rax + rbx]
 
-            // restore temp registers
-            ; pop rbx
+            // pop saved page_idx
+            ; add rsp, 8
+
+            // perform actual load: host_page[offset]
+            ; mov eax, DWORD [rax + rdx]
         );
 
         // store result into rd

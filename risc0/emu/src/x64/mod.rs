@@ -16,16 +16,19 @@
 #![allow(unused)]
 
 mod emit;
+mod memory;
+mod page;
+mod segment;
 #[cfg(test)]
 mod tests;
 
 use std::{
     arch::asm,
     cell::{Cell, RefCell},
-    collections::BTreeMap,
+    collections::{BTreeMap, HashMap},
     mem::offset_of,
     ptr,
-    sync::{Arc, Once},
+    sync::{Arc, Once, OnceLock},
 };
 
 use anyhow::{Result, anyhow, bail};
@@ -40,8 +43,20 @@ use libc::{
     mmap, mprotect, sigaction, sigemptyset, siginfo_t, ucontext_t,
 };
 use risc0_binfmt::Program;
+use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
+use self::memory::HostMemory;
+use self::memory::PageSlot;
+use self::page::PAGE_OFFSET_MASK;
+use self::page::PAGE_SHIFT;
+use self::page::PAGE_SIZE;
+use self::segment::SegmentTracker;
 use crate::rv32im::{Instruction, REG_MAX, RvOp, WORD_SIZE};
+
+enum AccessKind {
+    Load,
+    Store,
+}
 
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -220,55 +235,31 @@ const REGISTER_MAPPING: [Loc; REG_MAX] = [
 const MAX_QUOTA: u32 = 1_000_000;
 const GUEST_RAM_SIZE: usize = 1 << 32; // 4GB
 
-const QUOTA_OFFSET: usize = offset_of!(JitContext, quota);
-const REGISTERS_OFFSET: usize = offset_of!(JitContext, registers);
-const TLB_OFFSET: usize = offset_of!(JitContext, tlb);
-const TLB_MISS_OFFSET: usize = offset_of!(JitContext, tlb_miss);
-
-const NUM_PAGES: usize = 4 * 1024 * 1024;
-const INVALID_IDX: u32 = 0;
+const JITCTX_QUOTA_OFFSET: i32 = offset_of!(JitContext, quota) as i32;
+const JITCTX_REGISTERS_OFFSET: i32 = offset_of!(JitContext, registers) as i32;
+const JITCTX_CURRENT_TAG_OFFSET: i32 = offset_of!(JitContext, current_tag) as i32;
+const JITCTX_PAGE_TABLE_OFFSET: i32 = offset_of!(JitContext, page_table) as i32;
+const JITCTX_LOAD_PAGE_MISS_OFFSET: i32 = offset_of!(JitContext, jit_load_page_miss) as i32;
+const JITCTX_STORE_PAGE_MISS_OFFSET: i32 = offset_of!(JitContext, jit_store_page_miss) as i32;
 
 const HOST_WORD_SIZE: usize = usize::BITS as usize / 8;
 const HOST_PAGE_SIZE: usize = 4096;
-const GUEST_PAGE_SIZE: usize = 1024;
 
 const CALLEE_REGISTERS: &[GPR] = &[GPR::RBX, GPR::RBP, GPR::R12, GPR::R13, GPR::R14, GPR::R15];
 const STACK_SPACE: usize = CALLEE_REGISTERS.len() * HOST_WORD_SIZE;
-
-const PAGE_SHIFT: u32 = 10;
-const PAGE_SIZE: usize = 1 << PAGE_SHIFT;
-const PAGE_OFFSET_MASK: u32 = PAGE_SIZE as u32 - 1;
-const TLB_SIZE: usize = 1024;
-const TLB_MASK: u32 = TLB_SIZE as u32 - 1;
-const TLB_ENTRY_SHIFT: u32 = std::mem::size_of::<TlbEntry>().ilog2();
-const TLB_TAG_OFFSET: usize = offset_of!(TlbEntry, tag);
-const TLB_HOST_PAGE_OFFSET: usize = offset_of!(TlbEntry, host_page);
-const TLB_VALID_TAG_MASK: u32 = 1 << (32 - 1);
-
-type Page = [u8; PAGE_SIZE];
 
 // This is visible to the generated x64 code.
 #[repr(C)]
 struct JitContext {
     pc: u32,
     quota: u32,
-    satp: u32,
     registers: [u32; REG_MAX],
-    tlb_miss: extern "C" fn(ctx: *mut JitContext, vaddr: u32) -> *const u8,
-    tlb: Tlb,
-    phys_pages: Vec<Option<Arc<Page>>>,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Default)]
-struct TlbEntry {
-    pub tag: u32,
-    pub host_page: *const u8,
-}
-
-#[repr(C)]
-struct Tlb {
-    pub entries: [TlbEntry; TLB_SIZE],
+    current_tag: u16,
+    page_table: *mut PageSlot,
+    jit_load_page_miss: extern "C" fn(ctx: *mut JitContext, vaddr: u32) -> *const u8,
+    jit_store_page_miss: extern "C" fn(ctx: *mut JitContext, vaddr: u32) -> *const u8,
+    ram: HostMemory,
+    tracker: SegmentTracker,
 }
 
 struct Translator {
@@ -280,18 +271,10 @@ struct Translator {
 
 impl Translator {
     fn new(program: Program) -> Result<Self> {
-        let mut ctx = JitContext {
-            pc: program.entry,
-            satp: 0,
-            quota: MAX_QUOTA,
-            registers: [0; REG_MAX],
-            tlb: Tlb::default(),
-            tlb_miss: JitContext::tlb_miss_trampoline,
-            phys_pages: vec![None; NUM_PAGES],
-        };
+        let mut ctx = JitContext::new(program.entry);
 
         for (addr, word) in program.image {
-            ctx.store_u32(addr, word)?;
+            ctx.ram.store_u32_untracked(addr, word);
         }
 
         Ok(Self {
@@ -365,8 +348,6 @@ impl Translator {
     }
 
     fn jit_loop(&mut self) -> Result<Terminal> {
-        // ensure_segv_handler_installed();
-
         self.dump(self.enter_offset()?);
         loop {
             let retval = if let Some(&offset) = self.labels.get(&self.ctx.pc) {
@@ -444,6 +425,76 @@ impl Translator {
     }
 }
 
+impl JitContext {
+    fn new(pc: u32) -> Self {
+        let mut ram = HostMemory::new();
+        Self {
+            pc,
+            quota: MAX_QUOTA,
+            registers: [0; REG_MAX],
+            current_tag: 0,
+            page_table: ram.slots.as_mut_ptr(),
+            jit_load_page_miss: JitContext::jit_load_page_miss_trampoline,
+            jit_store_page_miss: JitContext::jit_store_page_miss_trampoline,
+            ram,
+            tracker: SegmentTracker::new(),
+        }
+    }
+
+    extern "C" fn jit_load_page_miss_trampoline(ctx: *mut JitContext, page_idx: u32) -> *const u8 {
+        unsafe { &mut *ctx }.jit_load_page_miss(page_idx)
+    }
+
+    extern "C" fn jit_store_page_miss_trampoline(ctx: *mut JitContext, addr: u32) -> *const u8 {
+        unsafe { &mut *ctx }.jit_store_page_miss(addr, AccessKind::Store)
+    }
+
+    #[inline]
+    fn jit_load_page_miss(&mut self, page_idx: u32) -> *const u8 {
+        tracing::info!("jit_load_page_miss: {page_idx:#08x}");
+        let page =
+            self.ram
+                .ensure_page_read_for_segment(&mut self.tracker, self.current_tag, page_idx);
+        Arc::as_ptr(&page) as *const u8
+    }
+
+    #[inline]
+    fn jit_store_page_miss(&mut self, addr: u32, kind: AccessKind) -> *const u8 {
+        tracing::info!("jit_store_page_miss: {addr:#010x}");
+
+        let page_idx = addr >> PAGE_SHIFT;
+        let offset = (addr & PAGE_OFFSET_MASK) as usize;
+
+        let (_pre, post) =
+            self.ram
+                .ensure_page_write_for_segment(&mut self.tracker, self.current_tag, page_idx);
+
+        Arc::as_ptr(&post) as *const u8
+    }
+
+    fn load_u32(&mut self, addr: u32) -> Result<u32> {
+        let page_idx = addr >> PAGE_SHIFT;
+        let offset = (addr & PAGE_OFFSET_MASK) as usize;
+
+        let page =
+            self.ram
+                .ensure_page_read_for_segment(&mut self.tracker, self.current_tag, page_idx);
+
+        debug_assert!(offset + WORD_SIZE <= PAGE_SIZE);
+        let word = unsafe {
+            let ptr = page.bytes.as_ptr().add(offset) as *const u32;
+            u32::from_le(ptr.read_unaligned())
+        };
+        Ok(word)
+    }
+
+    fn dump_registers(&self) {
+        for (i, reg) in self.registers.iter().enumerate() {
+            tracing::debug!("x{i}: {reg:#010x}");
+        }
+    }
+}
+
 #[allow(unused)]
 #[inline(always)]
 fn debug_str(s: &str) {
@@ -465,156 +516,4 @@ fn debug_hex(label: &str, value: usize) {
     }
     let _ = unsafe { libc::write(2, buf.as_ptr() as *const c_void, buf.len()) };
     debug_str("\n");
-}
-
-impl Default for Tlb {
-    fn default() -> Self {
-        Self {
-            entries: [TlbEntry::default(); TLB_SIZE],
-        }
-    }
-}
-
-impl JitContext {
-    extern "C" fn tlb_miss_trampoline(ctx: *mut JitContext, vaddr: u32) -> *const u8 {
-        unsafe { &mut *ctx }.tlb_miss(vaddr)
-    }
-
-    #[inline]
-    fn tlb_miss(&mut self, vaddr: u32) -> *const u8 {
-        tracing::info!("tlb_miss: {vaddr:#010x}");
-
-        let vpn = vaddr >> PAGE_SHIFT;
-        let index = vpn & TLB_MASK;
-        tracing::debug!("vpn: {vpn:#08x}, index: {index:#08x}");
-        let host_page_ptr = self.ensure_phys_page(vpn as usize);
-
-        let entry = &mut self.tlb.entries[index as usize];
-        entry.tag = vpn | TLB_VALID_TAG_MASK;
-        entry.host_page = host_page_ptr;
-
-        host_page_ptr
-
-        // let paddr = match self.translate_vaddr_sv32(vaddr) {
-        //     Ok(paddr) => paddr,
-        //     Err(_) => panic!("page fault in tlb_lookup"),
-        // };
-
-        // let page_idx = paddr >> PAGE_SHIFT;
-        // let host_page_ptr = self.ensure_phys_page(page_idx as usize);
-
-        // let entry = &mut self.tlb.entries[index as usize];
-        // let tag = vpn & TLB_VALID_MASK;
-        // entry.tag = tag;
-        // entry.host_page = host_page_ptr;
-
-        // host_page_ptr
-    }
-
-    fn translate_vaddr_sv32(&self, vaddr: u32) -> Result<u32> {
-        let root_ppn = self.satp & 0x003f_ffff;
-        let vpn0 = (vaddr >> 12) & 0x3ff;
-        let vpn1 = (vaddr >> 22) & 0x3ff;
-
-        let mut ppn = root_ppn;
-        let mut level = 1;
-        for vpn in [vpn1, vpn0] {
-            let pte_addr = (ppn << 12) + (vpn * 4);
-            let pte = self.load_u32(pte_addr)?;
-
-            let valid = (pte & 0x1) != 0;
-            let readable = (pte & 0x2) != 0;
-            let writable = (pte & 0x4) != 0;
-            let executable = (pte & 0x8) != 0;
-
-            if !valid || (!readable && writable) {
-                bail!("Invalid PTE");
-            }
-
-            let is_leaf = readable || writable;
-            if is_leaf {
-                if level != 0 {
-                    bail!("Unsupported superpage");
-                }
-
-                let ppn = (pte >> 10) & 0x003f_ffff;
-                let page_offset = vaddr & PAGE_OFFSET_MASK;
-                let paddr = (ppn << 12) | page_offset;
-                return Ok(paddr);
-            } else {
-                ppn = (pte >> 10) & 0x003f_ffff;
-                level -= 1;
-            }
-        }
-
-        Err(anyhow!("Invalid vaddr"))
-    }
-
-    fn ensure_phys_page(&mut self, page_idx: usize) -> *const u8 {
-        tracing::debug!("ensure_phys_page: {page_idx:#08x}");
-
-        if page_idx >= self.phys_pages.len() {
-            panic!("phys_pages too small");
-        }
-
-        let page = &mut self.phys_pages[page_idx];
-        if page.is_none() {
-            *page = Some(Arc::new([0; PAGE_SIZE]));
-        }
-
-        page.as_ref().unwrap().as_ptr()
-    }
-
-    fn load_u32(&self, paddr: u32) -> Result<u32> {
-        let page_idx = (paddr >> PAGE_SHIFT) as usize;
-        let offset = (paddr & PAGE_OFFSET_MASK) as usize;
-        if page_idx >= self.phys_pages.len() {
-            return Err(anyhow!("Invalid page_idx"));
-        }
-
-        let Some(ref page) = self.phys_pages[page_idx] else {
-            return Err(anyhow!("Empty page"));
-        };
-
-        let end = offset + WORD_SIZE;
-        if end > page.len() {
-            bail!("load_u32 crosses page boundary");
-        }
-
-        let bytes: [u8; WORD_SIZE] = page[offset..end]
-            .try_into()
-            .expect("slice is exactly 4 bytes");
-        Ok(u32::from_le_bytes(bytes))
-    }
-
-    fn store_u32(&mut self, paddr: u32, word: u32) -> Result<()> {
-        let page_idx = (paddr >> PAGE_SHIFT) as usize;
-        let offset = (paddr & PAGE_OFFSET_MASK) as usize;
-        if page_idx >= self.phys_pages.len() {
-            return Err(anyhow!("Invalid page_idx"));
-        }
-
-        let page = &mut self.phys_pages[page_idx];
-        if page.is_none() {
-            *page = Some(Arc::new([0; PAGE_SIZE]));
-        }
-
-        let page = page.as_mut().unwrap();
-        let page = Arc::get_mut(page).ok_or_else(|| anyhow!("Page isn't unique"))?;
-        let end = offset + WORD_SIZE;
-        if end > page.len() {
-            bail!("store_u32 crosses page boundary");
-        }
-
-        let bytes = word.to_le_bytes();
-        page[offset..end].copy_from_slice(&bytes);
-
-        Ok(())
-    }
-
-    fn dump_registers(&self) {
-        for (i, reg) in self.registers.iter().enumerate() {
-            tracing::debug!("x{i}: {reg:#010x}");
-        }
-    }
 }
