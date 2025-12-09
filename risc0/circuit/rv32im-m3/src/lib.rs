@@ -63,51 +63,49 @@ pub struct Claim {
 }
 
 struct Decoder<'a> {
-    seal: &'a [Elem],
+    seal: &'a [u32],
 }
 
 impl<'a> Decoder<'a> {
     fn new(seal: &'a [u32]) -> Self {
-        Self {
-            seal: bytemuck::checked::cast_slice(seal),
-        }
+        Self { seal }
     }
 
-    fn read(&mut self, len: usize) -> Result<&'a [Elem]> {
+    fn read(&mut self, len: usize) -> Result<&'a [u32]> {
         ensure!(len <= self.seal.len(), "Unexpected end of seal");
         let (slice, remain) = self.seal.split_at(len);
         self.seal = remain;
         Ok(slice)
     }
 
-    /// Read a u32 from the seal, decoding from Montgomery form.
     fn read_u32(&mut self) -> Result<u32> {
-        Ok(self.read(1)?[0].as_u32())
+        let slice = self.read(1)?;
+        Ok(slice[0])
     }
 
-    /// Read a u32 from the seal, without decoding from Montgomery form.
-    fn read_u32_raw(&mut self) -> Result<u32> {
-        Ok(self.read(1)?[0].as_u32_montgomery())
+    fn read_u32_from_elem(&mut self) -> Result<u32> {
+        Ok(bytemuck::checked::cast::<_, Elem>(self.read_u32()?).as_u32())
     }
 
     fn read_u32_from_shorts(&mut self) -> Result<u32> {
-        let slice = self.read(2)?;
+        let slice = bytemuck::checked::cast_slice::<_, Elem>(self.read(2)?);
         let (high, low) = (slice[1], slice[0]);
         let val = (high.as_u32() & 0xffff) << 16 | (low.as_u32() & 0xffff);
         Ok(val)
     }
 
     fn read_digest_from_words(&mut self) -> Result<Digest> {
-        let slice = self.read(DIGEST_WORDS)?;
+        let slice = bytemuck::checked::cast_slice::<_, Elem>(self.read(DIGEST_WORDS)?);
         let buf = slice.iter().map(|x| x.as_u32()).collect::<Vec<u32>>();
         Ok(Digest::try_from(buf).unwrap())
     }
 
     fn read_digest_from_shorts(&mut self) -> Result<Digest> {
-        let elems = self.read(DIGEST_SHORTS)?;
+        let slice = self.read(DIGEST_SHORTS)?;
         let mut digest_bytes = [0; DIGEST_BYTES];
         for i in 0..DIGEST_SHORTS {
-            let word = elems[i].as_u32();
+            let elem: Elem = bytemuck::checked::cast(slice[i]);
+            let word = elem.as_u32();
             let short = u16::try_from(word)?;
             let short_bytes = short.to_le_bytes();
             digest_bytes[i * 2..i * 2 + 2].copy_from_slice(&short_bytes);
@@ -120,14 +118,14 @@ impl Claim {
     pub fn decode(seal: &[u32]) -> Result<Self> {
         let mut decoder = Decoder::new(seal);
 
-        let version = decoder.read_u32_raw()?;
+        let version = decoder.read_u32()?;
         ensure!(version == RV32IM_SEAL_VERSION, "seal version mismatch");
 
-        let po2 = decoder.read_u32_raw()?;
+        let po2 = decoder.read_u32()?;
 
         let pre_state = decoder.read_digest_from_words()?;
         let post_state = decoder.read_digest_from_words()?;
-        let is_terminate = decoder.read_u32()?;
+        let is_terminate = decoder.read_u32_from_elem()?;
         let term_a0 = decoder.read_u32_from_shorts()?;
         let term_a1 = decoder.read_u32_from_shorts()?;
         let output = decoder.read_digest_from_shorts()?;
