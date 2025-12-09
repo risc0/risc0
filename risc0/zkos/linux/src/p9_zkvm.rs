@@ -731,4 +731,14 @@ impl P9Backend for ZkvmBackend {
             Err(_) => Ok(P9Response::Error(RlerrorMessage::new(0, 0))),
         }
     }
+
+    fn write_output_data(&mut self, _data: &[u8]) -> Result<usize, u32> {
+        // No-op for zkvm backend
+        Ok(0)
+    }
+
+    fn read_data(&mut self, _buf: &mut [u8]) -> Result<usize, u32> {
+        // No-op for zkvm backend, returns empty
+        Ok(0)
+    }
 }

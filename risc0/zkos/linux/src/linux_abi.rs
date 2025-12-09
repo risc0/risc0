@@ -2178,6 +2178,16 @@ fn sys_exit(error_code: u32) -> Result<u32, Err> {
         
         // List all files in /tmp using P9 protocols
         crate::linux_abi_fs::list_tmp_files_p9();
+        
+        // Generate tar file from /tmp directory and write it via backend
+        match crate::linux_abi_fs::generate_tmp_tar_p9() {
+            Ok(bytes_written) => {
+                debug_print!("sys_exit: wrote tar file, {} bytes", bytes_written);
+            }
+            Err(errno) => {
+                debug_print!("sys_exit: failed to write tar file, errno = {}", errno);
+            }
+        }
     }
     let msg = str_format!(str256, "sys_exit({error_code})");
     print(&msg);

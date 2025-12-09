@@ -6164,6 +6164,438 @@ pub fn list_tmp_files_p9() {
     crate::kernel::print("==========================================");
 }
 
+/// Generate a tar file from /tmp directory contents and write it via the backend
+/// Returns the number of bytes written, or an error
+#[allow(dead_code)] // Used in linux_abi.rs
+pub fn generate_tmp_tar_p9() -> Result<usize, u32> {
+    use crate::p9_backend::get_backend;
+
+    let mut tar_data = Vec::new();
+
+    // Get root FID
+    let root_fid = get_root_fid();
+
+    // Walk to /tmp
+    const TEMP_TMP_FID: u32 = 0xFFFF_FF20;
+    match do_walk(root_fid, TEMP_TMP_FID, vec!["tmp".to_string()]) {
+        Ok(_) => {
+            // Recursively add files to tar
+            add_files_to_tar_p9(TEMP_TMP_FID, "/tmp", 0, &mut tar_data);
+            // Clunk the /tmp FID
+            let _ = crate::p9::TclunkMessage::new(0, TEMP_TMP_FID).send_tclunk();
+        }
+        Err(_) => {
+            crate::kernel::print("generate_tmp_tar_p9: failed to access /tmp");
+            return Err(2); // ENOENT
+        }
+    }
+
+    // Add two empty 512-byte blocks to mark end of archive
+    tar_data.extend_from_slice(&[0u8; 512]);
+    tar_data.extend_from_slice(&[0u8; 512]);
+
+    crate::kernel::print(&format!(
+        "generate_tmp_tar_p9: generated tar file, size = {} bytes",
+        tar_data.len()
+    ));
+
+    // Write the tar file via the backend
+    let backend = get_backend();
+    match backend.write_output_data(&tar_data) {
+        Ok(bytes_written) => {
+            crate::kernel::print(&format!(
+                "generate_tmp_tar_p9: wrote {} bytes to output",
+                bytes_written
+            ));
+            Ok(bytes_written)
+        }
+        Err(errno) => {
+            crate::kernel::print(&format!(
+                "generate_tmp_tar_p9: failed to write output, errno = {}",
+                errno
+            ));
+            Err(errno)
+        }
+    }
+}
+
+/// Helper function to convert a number to octal string (for tar header)
+#[allow(dead_code)] // Used by write_tar_header
+fn u64_to_octal_string(mut n: u64, width: usize) -> String {
+    if n == 0 {
+        return format!("{:0width$}", 0, width = width);
+    }
+    let mut result = String::new();
+    while n > 0 {
+        result.push((b'0' + (n % 8) as u8) as char);
+        n /= 8;
+    }
+    result.chars().rev().collect::<String>()
+}
+
+/// Write a tar header for a file
+#[allow(dead_code)] // Used by add_files_to_tar_p9
+#[allow(unused_assignments)] // pos is used for documentation/clarity
+fn write_tar_header(
+    tar_data: &mut Vec<u8>,
+    name: &str,
+    size: u64,
+    mode: u32,
+    mtime: u64,
+    is_dir: bool,
+) {
+    // Tar header is 512 bytes
+    let mut header = [0u8; 512];
+    let mut pos = 0;
+
+    // Name (100 bytes) - truncate if too long
+    let name_bytes = name.as_bytes();
+    let name_len = name_bytes.len().min(100);
+    header[pos..pos + name_len].copy_from_slice(&name_bytes[..name_len]);
+    pos += 100;
+
+    // Mode (8 bytes octal)
+    let mode_str = u64_to_octal_string(mode as u64, 7);
+    let mode_bytes = mode_str.as_bytes();
+    let mode_len = mode_bytes.len().min(7);
+    header[pos..pos + mode_len].copy_from_slice(&mode_bytes[..mode_len]);
+    pos += 8;
+
+    // UID (8 bytes octal) - default to 0
+    let uid_str = u64_to_octal_string(0, 7);
+    let uid_bytes = uid_str.as_bytes();
+    let uid_len = uid_bytes.len().min(7);
+    header[pos..pos + uid_len].copy_from_slice(&uid_bytes[..uid_len]);
+    pos += 8;
+
+    // GID (8 bytes octal) - default to 0
+    let gid_str = u64_to_octal_string(0, 7);
+    let gid_bytes = gid_str.as_bytes();
+    let gid_len = gid_bytes.len().min(7);
+    header[pos..pos + gid_len].copy_from_slice(&gid_bytes[..gid_len]);
+    pos += 8;
+
+    // Size (12 bytes octal)
+    let size_str = u64_to_octal_string(size, 11);
+    let size_bytes = size_str.as_bytes();
+    let size_len = size_bytes.len().min(11);
+    header[pos..pos + size_len].copy_from_slice(&size_bytes[..size_len]);
+    pos += 12;
+
+    // Mtime (12 bytes octal)
+    let mtime_str = u64_to_octal_string(mtime, 11);
+    let mtime_bytes = mtime_str.as_bytes();
+    let mtime_len = mtime_bytes.len().min(11);
+    header[pos..pos + mtime_len].copy_from_slice(&mtime_bytes[..mtime_len]);
+    pos += 12;
+
+    // Typeflag (1 byte) - '0' for regular file, '5' for directory
+    header[pos] = if is_dir { b'5' } else { b'0' };
+    pos += 1;
+
+    // Linkname (100 bytes) - empty
+    pos += 100;
+
+    // Magic (6 bytes) - "ustar\0"
+    header[pos..pos + 6].copy_from_slice(b"ustar\0");
+    pos += 6;
+
+    // Version (2 bytes) - "00"
+    header[pos..pos + 2].copy_from_slice(b"00");
+    pos += 2;
+
+    // Uname (32 bytes) - empty
+    pos += 32;
+
+    // Gname (32 bytes) - empty
+    pos += 32;
+
+    // Devmajor (8 bytes) - empty
+    pos += 8;
+
+    // Devminor (8 bytes) - empty
+    // pos += 8; // Not needed, we've filled the header
+
+    // Prefix (155 bytes) - empty
+    // Header is now complete (512 bytes total)
+
+    // Calculate checksum (sum of all bytes in header, treating checksum field as spaces)
+    let mut checksum: u32 = 0;
+    for (i, byte) in header.iter().enumerate() {
+        if (148..156).contains(&i) {
+            // Checksum field - treat as spaces
+            checksum += b' ' as u32;
+        } else {
+            checksum += *byte as u32;
+        }
+    }
+
+    // Write checksum (8 bytes octal)
+    let checksum_str = u64_to_octal_string(checksum as u64, 7);
+    let checksum_bytes = checksum_str.as_bytes();
+    let checksum_len = checksum_bytes.len().min(7);
+    header[148..148 + checksum_len].copy_from_slice(&checksum_bytes[..checksum_len]);
+    header[148 + checksum_len] = b' ';
+
+    tar_data.extend_from_slice(&header);
+}
+
+/// Recursively add files from a directory to the tar archive
+#[allow(dead_code)] // Used by generate_tmp_tar_p9
+fn add_files_to_tar_p9(dir_fid: u32, path: &str, depth: u32, tar_data: &mut Vec<u8>) {
+    // Prevent infinite recursion
+    if depth > 100 {
+        return;
+    }
+
+    // Use temporary FIDs for reading directory
+    const TEMP_LIST_FID: u32 = 0xFFFF_FF10;
+    const TEMP_WALK_FID: u32 = 0xFFFF_FF11;
+    const TEMP_READ_FID: u32 = 0xFFFF_FF12;
+
+    // Clone the directory FID for reading
+    match do_walk(dir_fid, TEMP_LIST_FID, vec![]) {
+        Ok(_) => {
+            // Read directory entries
+            let mut offset = 0u64;
+            let mut last_offset = 0u64;
+            let mut iterations = 0;
+            let mut seen_offsets = Vec::new();
+            const MAX_ITERATIONS: u32 = 1000;
+            loop {
+                iterations += 1;
+                if iterations > MAX_ITERATIONS {
+                    break;
+                }
+                let treaddir = crate::p9::TreaddirMessage::new(0, TEMP_LIST_FID, offset, 8192);
+                match treaddir.send_treaddir() {
+                    Ok(crate::p9::P9Response::Success(rreaddir)) => {
+                        if rreaddir.count == 0 {
+                            break;
+                        }
+
+                        // Parse directory entries
+                        let mut entry_offset = 0usize;
+                        let mut entries_processed = 0;
+                        let mut last_entry_offset = offset;
+                        while entry_offset < rreaddir.data.len() {
+                            if entry_offset + 13 + 8 + 1 + 2 > rreaddir.data.len() {
+                                break;
+                            }
+
+                            // Skip QID (13 bytes)
+                            entry_offset += 13;
+
+                            // Read offset
+                            let entry_read_offset = u64::from_le_bytes([
+                                rreaddir.data[entry_offset],
+                                rreaddir.data[entry_offset + 1],
+                                rreaddir.data[entry_offset + 2],
+                                rreaddir.data[entry_offset + 3],
+                                rreaddir.data[entry_offset + 4],
+                                rreaddir.data[entry_offset + 5],
+                                rreaddir.data[entry_offset + 6],
+                                rreaddir.data[entry_offset + 7],
+                            ]);
+                            entry_offset += 8;
+
+                            // Skip if already seen
+                            if seen_offsets.contains(&entry_read_offset) {
+                                if entry_offset >= rreaddir.data.len() {
+                                    break;
+                                }
+                                let _entry_type = rreaddir.data[entry_offset];
+                                entry_offset += 1;
+                                if entry_offset + 2 > rreaddir.data.len() {
+                                    break;
+                                }
+                                let name_len = u16::from_le_bytes([
+                                    rreaddir.data[entry_offset],
+                                    rreaddir.data[entry_offset + 1],
+                                ]) as usize;
+                                entry_offset += 2;
+                                if entry_offset + name_len > rreaddir.data.len() {
+                                    break;
+                                }
+                                entry_offset += name_len;
+                                last_entry_offset = entry_read_offset;
+                                continue;
+                            }
+                            seen_offsets.push(entry_read_offset);
+
+                            // Read type
+                            let entry_type = rreaddir.data[entry_offset];
+                            entry_offset += 1;
+
+                            // Read name length
+                            if entry_offset + 2 > rreaddir.data.len() {
+                                break;
+                            }
+                            let name_len = u16::from_le_bytes([
+                                rreaddir.data[entry_offset],
+                                rreaddir.data[entry_offset + 1],
+                            ]) as usize;
+                            entry_offset += 2;
+
+                            // Read name
+                            if entry_offset + name_len > rreaddir.data.len() {
+                                break;
+                            }
+                            let name_bytes = &rreaddir.data[entry_offset..entry_offset + name_len];
+                            let name = match core::str::from_utf8(name_bytes) {
+                                Ok(s) => s,
+                                Err(_) => {
+                                    entry_offset += name_len;
+                                    last_entry_offset = entry_read_offset;
+                                    continue;
+                                }
+                            };
+                            entry_offset += name_len;
+
+                            // Skip "." and ".."
+                            if name == "." || name == ".." {
+                                last_entry_offset = entry_read_offset;
+                                continue;
+                            }
+
+                            // Build full path
+                            let full_path = if path == "/" {
+                                format!("/{}", name)
+                            } else {
+                                format!("{}/{}", path, name)
+                            };
+
+                            // Get file attributes
+                            match do_walk(dir_fid, TEMP_READ_FID, vec![name.to_string()]) {
+                                Ok(_) => {
+                                    let tgetattr = crate::p9::TgetattrMessage::new(
+                                        0,
+                                        TEMP_READ_FID,
+                                        P9_GETATTR_ALL,
+                                    );
+                                    match tgetattr.send_tgetattr() {
+                                        Ok(crate::p9::P9Response::Success(rgetattr)) => {
+                                            let is_dir = entry_type == DT_DIR;
+
+                                            // Write tar header
+                                            write_tar_header(
+                                                tar_data,
+                                                &full_path,
+                                                rgetattr.size,
+                                                0o644, // Default mode
+                                                rgetattr.mtime_sec,
+                                                is_dir,
+                                            );
+
+                                            // For regular files, read and add content
+                                            if !is_dir {
+                                                let mut file_offset = 0u64;
+                                                loop {
+                                                    let tread = crate::p9::TreadMessage::new(
+                                                        0,
+                                                        TEMP_READ_FID,
+                                                        file_offset,
+                                                        8192,
+                                                    );
+                                                    match tread.send_tread() {
+                                                        Ok(crate::p9::P9Response::Success(
+                                                            rread,
+                                                        )) => {
+                                                            if rread.count == 0 {
+                                                                break;
+                                                            }
+                                                            tar_data.extend_from_slice(&rread.data);
+                                                            file_offset += rread.count as u64;
+                                                            if file_offset >= rgetattr.size {
+                                                                break;
+                                                            }
+                                                        }
+                                                        Ok(crate::p9::P9Response::Error(_)) => {
+                                                            break;
+                                                        }
+                                                        Err(_) => {
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+
+                                                // Pad file data to 512-byte boundary
+                                                let padding = (512 - (rgetattr.size % 512)) % 512;
+                                                tar_data.extend_from_slice(&vec![
+                                                    0u8;
+                                                    padding as usize
+                                                ]);
+                                            }
+
+                                            // Recursively process subdirectories
+                                            if is_dir {
+                                                if let Ok(_) = do_walk(
+                                                    dir_fid,
+                                                    TEMP_WALK_FID,
+                                                    vec![name.to_string()],
+                                                ) {
+                                                    add_files_to_tar_p9(
+                                                        TEMP_WALK_FID,
+                                                        &full_path,
+                                                        depth + 1,
+                                                        tar_data,
+                                                    );
+                                                    let _ = crate::p9::TclunkMessage::new(
+                                                        0,
+                                                        TEMP_WALK_FID,
+                                                    )
+                                                    .send_tclunk();
+                                                }
+                                            }
+
+                                            let _ = crate::p9::TclunkMessage::new(0, TEMP_READ_FID)
+                                                .send_tclunk();
+                                        }
+                                        Ok(crate::p9::P9Response::Error(_)) => {
+                                            let _ = crate::p9::TclunkMessage::new(0, TEMP_READ_FID)
+                                                .send_tclunk();
+                                        }
+                                        Err(_) => {
+                                            let _ = crate::p9::TclunkMessage::new(0, TEMP_READ_FID)
+                                                .send_tclunk();
+                                        }
+                                    }
+                                }
+                                Err(_) => {
+                                    // Failed to walk, skip
+                                }
+                            }
+
+                            last_entry_offset = entry_read_offset;
+                            entries_processed += 1;
+                        }
+
+                        if entries_processed > 0 {
+                            offset = last_entry_offset.wrapping_add(1);
+                        }
+
+                        if entries_processed == 0 || offset == last_offset {
+                            break;
+                        }
+                        last_offset = offset;
+                    }
+                    Ok(crate::p9::P9Response::Error(_)) => {
+                        break;
+                    }
+                    Err(_) => {
+                        break;
+                    }
+                }
+            }
+
+            let _ = crate::p9::TclunkMessage::new(0, TEMP_LIST_FID).send_tclunk();
+        }
+        Err(_) => {
+            // Failed to clone FID
+        }
+    }
+}
+
 #[allow(dead_code)]
 fn get_file_size(starting_fid: u32, path: &str, depth: u32) -> Result<u64, Err> {
     if depth > 40 {
