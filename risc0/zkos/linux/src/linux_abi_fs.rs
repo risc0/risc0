@@ -5942,6 +5942,228 @@ fn normalize_path(path: &str) -> Vec<String> {
     new_path
 }
 
+/// List all files in a directory recursively using P9 protocols
+fn list_files_p9_recursive(dir_fid: u32, path: &str, depth: u32) {
+    // Prevent infinite recursion
+    if depth > 100 {
+        return;
+    }
+
+    // Use temporary FIDs for reading directory
+    const TEMP_LIST_FID: u32 = 0xFFFF_FF10;
+    const TEMP_WALK_FID: u32 = 0xFFFF_FF11;
+
+    // Clone the directory FID for reading
+    match do_walk(dir_fid, TEMP_LIST_FID, vec![]) {
+        Ok(_) => {
+            // Read directory entries
+            let mut offset = 0u64;
+            let mut last_offset = 0u64;
+            let mut iterations = 0;
+            let mut seen_offsets = Vec::new(); // Track seen entry offsets
+            const MAX_ITERATIONS: u32 = 1000; // Safety limit
+            loop {
+                iterations += 1;
+                if iterations > MAX_ITERATIONS {
+                    crate::kernel::print(&format!(
+                        "  (stopped after {} iterations to prevent infinite loop)",
+                        MAX_ITERATIONS
+                    ));
+                    break;
+                }
+                let treaddir = crate::p9::TreaddirMessage::new(0, TEMP_LIST_FID, offset, 8192);
+                match treaddir.send_treaddir() {
+                    Ok(crate::p9::P9Response::Success(rreaddir)) => {
+                        if rreaddir.count == 0 {
+                            break; // No more entries
+                        }
+
+                        // Parse directory entries
+                        let mut entry_offset = 0usize;
+                        let mut entries_processed = 0;
+                        let mut last_entry_offset = offset; // Track the last entry's offset
+                        while entry_offset < rreaddir.data.len() {
+                            if entry_offset + 13 + 8 + 1 + 2 > rreaddir.data.len() {
+                                break;
+                            }
+
+                            // Skip QID (13 bytes)
+                            entry_offset += 13;
+
+                            // Read offset (8 bytes) - this is the offset to use to read this entry again
+                            let entry_read_offset = u64::from_le_bytes([
+                                rreaddir.data[entry_offset],
+                                rreaddir.data[entry_offset + 1],
+                                rreaddir.data[entry_offset + 2],
+                                rreaddir.data[entry_offset + 3],
+                                rreaddir.data[entry_offset + 4],
+                                rreaddir.data[entry_offset + 5],
+                                rreaddir.data[entry_offset + 6],
+                                rreaddir.data[entry_offset + 7],
+                            ]);
+                            entry_offset += 8;
+
+                            // Skip if we've already seen this entry
+                            if seen_offsets.contains(&entry_read_offset) {
+                                // We've already processed this entry, skip it
+                                // But we still need to parse the rest to advance entry_offset
+                                // Read type (1 byte)
+                                if entry_offset >= rreaddir.data.len() {
+                                    break;
+                                }
+                                let _entry_type = rreaddir.data[entry_offset];
+                                entry_offset += 1;
+
+                                // Read name length (2 bytes)
+                                if entry_offset + 2 > rreaddir.data.len() {
+                                    break;
+                                }
+                                let name_len = u16::from_le_bytes([
+                                    rreaddir.data[entry_offset],
+                                    rreaddir.data[entry_offset + 1],
+                                ]) as usize;
+                                entry_offset += 2;
+
+                                // Skip name
+                                if entry_offset + name_len > rreaddir.data.len() {
+                                    break;
+                                }
+                                entry_offset += name_len;
+                                last_entry_offset = entry_read_offset;
+                                continue;
+                            }
+                            seen_offsets.push(entry_read_offset);
+
+                            // Read type (1 byte)
+                            let entry_type = rreaddir.data[entry_offset];
+                            entry_offset += 1;
+
+                            // Read name length (2 bytes)
+                            if entry_offset + 2 > rreaddir.data.len() {
+                                break;
+                            }
+                            let name_len = u16::from_le_bytes([
+                                rreaddir.data[entry_offset],
+                                rreaddir.data[entry_offset + 1],
+                            ]) as usize;
+                            entry_offset += 2;
+
+                            // Read name
+                            if entry_offset + name_len > rreaddir.data.len() {
+                                break;
+                            }
+                            let name_bytes = &rreaddir.data[entry_offset..entry_offset + name_len];
+                            let name = match core::str::from_utf8(name_bytes) {
+                                Ok(s) => s,
+                                Err(_) => {
+                                    entry_offset += name_len;
+                                    last_entry_offset = entry_read_offset;
+                                    continue;
+                                }
+                            };
+                            entry_offset += name_len;
+
+                            // Skip "." and ".."
+                            if name == "." || name == ".." {
+                                last_entry_offset = entry_read_offset;
+                                continue;
+                            }
+
+                            // Build full path
+                            let full_path = if path == "/" {
+                                format!("/{}", name)
+                            } else {
+                                format!("{}/{}", path, name)
+                            };
+
+                            // Print the entry
+                            if entry_type == DT_DIR {
+                                crate::kernel::print(&format!("  {}/", full_path));
+                            } else if entry_type == DT_LNK {
+                                crate::kernel::print(&format!("  {} -> (symlink)", full_path));
+                            } else {
+                                crate::kernel::print(&format!("  {}", full_path));
+                            }
+
+                            // Recursively list subdirectories
+                            if entry_type == DT_DIR {
+                                // Walk to the subdirectory
+                                match do_walk(dir_fid, TEMP_WALK_FID, vec![name.to_string()]) {
+                                    Ok(_) => {
+                                        list_files_p9_recursive(
+                                            TEMP_WALK_FID,
+                                            &full_path,
+                                            depth + 1,
+                                        );
+                                        // Clunk the walk FID
+                                        let _ = crate::p9::TclunkMessage::new(0, TEMP_WALK_FID)
+                                            .send_tclunk();
+                                    }
+                                    Err(_) => {
+                                        // Failed to walk, skip
+                                    }
+                                }
+                            }
+
+                            last_entry_offset = entry_read_offset;
+                            entries_processed += 1;
+                        }
+
+                        // Update offset to the last entry's offset + 1 for the next batch read
+                        // In 9P, we need to use an offset that's greater than the last entry
+                        // to avoid reading the same entry again. The server returns entries
+                        // with offset >= the requested offset.
+                        if entries_processed > 0 {
+                            offset = last_entry_offset.wrapping_add(1);
+                        }
+
+                        // If we didn't process any entries or offset didn't advance, we're done
+                        if entries_processed == 0 || offset == last_offset {
+                            break;
+                        }
+                        last_offset = offset;
+                    }
+                    Ok(crate::p9::P9Response::Error(_)) => {
+                        break; // Error reading directory
+                    }
+                    Err(_) => {
+                        break; // Error
+                    }
+                }
+            }
+
+            // Clunk the temporary FID
+            let _ = crate::p9::TclunkMessage::new(0, TEMP_LIST_FID).send_tclunk();
+        }
+        Err(_) => {
+            // Failed to clone FID
+        }
+    }
+}
+
+/// List all files in /tmp using P9 protocols
+pub fn list_tmp_files_p9() {
+    crate::kernel::print("=== /tmp filesystem contents (via P9) ===");
+
+    // Get root FID
+    let root_fid = get_root_fid();
+
+    // Walk to /tmp
+    const TEMP_TMP_FID: u32 = 0xFFFF_FF20;
+    match do_walk(root_fid, TEMP_TMP_FID, vec!["tmp".to_string()]) {
+        Ok(_) => {
+            list_files_p9_recursive(TEMP_TMP_FID, "/tmp", 0);
+            // Clunk the /tmp FID
+            let _ = crate::p9::TclunkMessage::new(0, TEMP_TMP_FID).send_tclunk();
+        }
+        Err(_) => {
+            crate::kernel::print("  (failed to access /tmp)");
+        }
+    }
+
+    crate::kernel::print("==========================================");
+}
+
 #[allow(dead_code)]
 fn get_file_size(starting_fid: u32, path: &str, depth: u32) -> Result<u64, Err> {
     if depth > 40 {
