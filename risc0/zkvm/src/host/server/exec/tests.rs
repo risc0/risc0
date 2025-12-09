@@ -76,19 +76,6 @@ fn cpp_test() {
     assert_eq!(message.as_str(), "blst is such a blast");
 }
 
-#[rstest]
-#[ignore = "in m3 this way of testing this no longer works"]
-#[should_panic(expected = "too small")]
-fn insufficient_segment_limit() {
-    let env = ExecutorEnv::builder()
-        .segment_limit_po2(13) // 8K cycles
-        .write(&MultiTestSpec::DoNothing)
-        .unwrap()
-        .build()
-        .unwrap();
-    execute_elf(env, MULTI_TEST_ELF).unwrap();
-}
-
 #[test_log::test]
 fn basic() {
     let program = risc0_circuit_rv32im::execute::testutil::user::basic();

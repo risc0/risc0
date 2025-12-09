@@ -95,3 +95,26 @@ fn system_split() {
     assert!(segments[0].read_record.is_empty());
     assert!(segments[0].write_record.is_empty());
 }
+
+#[test]
+fn insufficient_segment_limit() {
+    const ITERATIONS: u32 = 10_000;
+
+    let program = testutil::kernel::simple_loop(ITERATIONS);
+    let image = MemoryImage::new_kernel(program);
+
+    let error = testutil::execute(
+        image,
+        ExecutionLimit::default()
+            .with_segment_po2(13)
+            .with_max_insn_cycles(0),
+        testutil::NullSyscall,
+        None,
+    )
+    .map(|_| ())
+    .unwrap_err();
+    assert!(
+        error.to_string().contains("too small"),
+        "too small not found in {error}"
+    );
+}
