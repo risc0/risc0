@@ -56,6 +56,6 @@ int main() {
   runTest("amoor_w");
   runTest("amoswap_w");
   runTest("amoxor_w");
-  //runTest("lrsc", 17);  Runs, but very slow
+  // runTest("lrsc", 17);  Runs, but very slow
   return 0;
 }
