@@ -287,6 +287,16 @@ pub trait P9Backend {
         &mut self,
         msg: &TgetlockMessage,
     ) -> Result<P9Response<RgetlockMessage>, TgetlockError>;
+
+    /// Write output data (e.g., tar file) to the backend
+    /// For zkvm backend: no-op
+    /// For in_memory backend: writes to fd 9 using host_write
+    fn write_output_data(&mut self, data: &[u8]) -> Result<usize, u32>;
+
+    /// Read data from the backend
+    /// For zkvm backend: no-op, returns empty
+    /// For in_memory backend: reads from fd 9 using host_read
+    fn read_data(&mut self, buf: &mut [u8]) -> Result<usize, u32>;
 }
 
 // Separate statics for each backend type
@@ -423,7 +433,7 @@ pub unsafe fn init_zerocopy_backend_with_tmpfs(addr: usize, max_size: usize) -> 
 
         // Helper to mount a tmpfs at a given path
         let mount_tmpfs = |mount_backend: &mut crate::p9_mount::MountBackend,
-                          path: &str|
+                           path: &str|
          -> Result<(), u32> {
             crate::kernel::print(&format!(
                 "init_zerocopy_backend_with_tmpfs: Creating tmpfs at {}...",

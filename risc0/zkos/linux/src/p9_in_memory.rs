@@ -1746,4 +1746,46 @@ impl P9Backend for ZeroCopyBackend {
             P9Error::Enosys as u32,
         )))
     }
+
+    fn write_output_data(&mut self, data: &[u8]) -> Result<usize, u32> {
+        use crate::host_calls::host_write;
+
+        const MAX_IO_BYTES: usize = 1024;
+        const OUTPUT_FD: u32 = 4;
+
+        if data.is_empty() {
+            return Ok(0);
+        }
+
+        let mut offset = 0usize;
+
+        // Write in chunks of MAX_IO_BYTES
+        while offset < data.len() {
+            let chunk_size = core::cmp::min(MAX_IO_BYTES, data.len() - offset);
+            let chunk_ptr = unsafe { data.as_ptr().add(offset) };
+
+            // Write chunk to fd 4
+            let _bytes_written = host_write(OUTPUT_FD, chunk_ptr, chunk_size);
+
+            offset += chunk_size;
+        }
+
+        Ok(data.len())
+    }
+
+    fn read_data(&mut self, buf: &mut [u8]) -> Result<usize, u32> {
+        use crate::host_calls::host_read;
+
+        const MAX_IO_BYTES: usize = 1024;
+        const INPUT_FD: u32 = 4;
+
+        if buf.is_empty() {
+            return Ok(0);
+        }
+
+        let read_size = core::cmp::min(MAX_IO_BYTES, buf.len());
+        let bytes_read = host_read(INPUT_FD, buf.as_mut_ptr(), read_size);
+
+        Ok(bytes_read as usize)
+    }
 }
