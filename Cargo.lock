@@ -7527,6 +7527,7 @@ dependencies = [
  "libc",
  "risc0-binfmt",
  "risc0-circuit-rv32im-sys",
+ "risc0-zkp",
  "rstest 0.26.1",
  "test-log",
  "tracing",
