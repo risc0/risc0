@@ -180,7 +180,7 @@ impl ReceiptClaim {
         })
     }
 
-    #[cfg(feature = "rv32im-m3")]
+    #[cfg(all(feature = "prove", feature = "rv32im-m3"))]
     pub(crate) fn decode_m3_with_output(
         seal: &[u32],
         output: MaybePruned<Option<Output>>,
