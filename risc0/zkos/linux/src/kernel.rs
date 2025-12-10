@@ -224,6 +224,7 @@ unsafe extern "C" fn ecall_dispatch() -> ! {
 
 #[unsafe(no_mangle)]
 unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
+    trace_print!("illegal_instruction_dispatch");
     // Get the saved PC from MEPC (where the illegal instruction occurred)
     let mepc = unsafe { MEPC_PTR.read_volatile() };
     // Read the instruction as a u16 first

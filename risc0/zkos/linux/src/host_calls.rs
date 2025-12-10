@@ -22,17 +22,11 @@ pub fn host_terminate(_a0: u32, _a1: u32) -> ! {
 }
 
 pub fn host_log(_msg_ptr: *const u8, _msg_len: usize) {
-    #[cfg(target_arch = "riscv32")]
-    unsafe {
-        const HOST_ECALL_WRITE: u32 = 2;
-        core::arch::asm!("ecall",
-            in("a7") HOST_ECALL_WRITE,
-            in("a0") 0,
-            in("a1") _msg_ptr,
-            in("a2") _msg_len,
-        )
-    };
+    const NEWLINE: &[u8] = b"\n";
+    host_write(1, _msg_ptr, _msg_len);
+    host_write(1, NEWLINE.as_ptr(), NEWLINE.len());
 }
+
 #[allow(dead_code)]
 #[allow(unused_variables)]
 pub fn host_write(fd: u32, msg_ptr: *const u8, msg_len: usize) -> u32 {
