@@ -72,7 +72,7 @@ cuda = [
   "risc0-sys/cuda",
   "risc0-zkp/cuda",
 ]
-default = []
+default = ["rv32im-m3"]
 # entropy_finder = []
 execute = [
   "anyhow/backtrace",
