@@ -131,6 +131,13 @@ struct InstEcallWitness {
   PhysMemReadWitness dispatch;
 };
 
+struct InstTrapWitness {
+  uint32_t cycle;
+  uint32_t iCacheCycle;
+  PhysMemWriteWitness savePc;
+  PhysMemReadWitness dispatch;
+};
+
 struct InstMretWitness {
   uint32_t cycle;
   FetchWitness fetch;

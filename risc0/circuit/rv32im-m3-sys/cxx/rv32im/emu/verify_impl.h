@@ -154,7 +154,7 @@ void FUNCNAME(const Fp* dataConst, const Fp* globals, Fp rou) {
     RegImpl* isValidRegs = reinterpret_cast<RegImpl*>(data);                                       \
     data += count * NUM_ROWS;                                                                      \
     name##Block<Context>* typedBlock = reinterpret_cast<name##Block<Context>*>(data);              \
-    LOG(2, "Block type: " << #name);                                                               \
+    LOG(3, "Block type: " << #name);                                                               \
     for (size_t i = 0; i < count; i++) {                                                           \
       ctx.isValid = isValidRegs[i].get();                                                          \
       BothFwd::apply(ctx, typedBlock[i]);                                                          \
