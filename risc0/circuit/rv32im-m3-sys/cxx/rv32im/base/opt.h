@@ -34,10 +34,9 @@ enum InstKind {
   INST_AUIPC,
   INST_ECALL,
   INST_MRET,
-  INST_SRET,
 };
 
-IMPL_SIZE(InstKind, INST_SRET);
+IMPL_SIZE(InstKind, INST_MRET);
 
 enum UnitKind {
   UNIT_ADDSUB,

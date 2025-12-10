@@ -38,7 +38,9 @@ void loadUserMachineV2(std::map<uint32_t, uint32_t>& words,
                        const std::string& kernelElf,
                        const std::string& userElf);
 
-// Loads raw elf + firmware combo
-void loadV3(std::map<uint32_t, uint32_t>& words, const std::string& elf);
+// Loads for V3 UM kernel mode tests
+void loadUserMachineV3(std::map<uint32_t, uint32_t>& words,
+                       const std::string& kernelElf,
+                       const std::string& userElf);
 
 } // namespace risc0::rv32im
