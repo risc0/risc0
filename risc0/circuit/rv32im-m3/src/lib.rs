@@ -24,8 +24,9 @@ pub mod prove;
 pub mod verify;
 mod zirgen;
 
-use anyhow::{Result, bail, ensure};
+use anyhow::{Result, anyhow, bail, ensure};
 use risc0_binfmt::ExitCode;
+use risc0_binfmt::PovwNonce;
 use risc0_zkp::{
     core::digest::{DIGEST_BYTES, DIGEST_SHORTS, DIGEST_WORDS, Digest},
     field::baby_bear::Elem,
@@ -171,4 +172,16 @@ impl Claim {
         };
         Ok(exit_code)
     }
+}
+
+/// Decodes a PoVW nonce from a segment seal.
+pub fn decode_povw_nonce(segment_seal: &[u32]) -> Result<PovwNonce> {
+    let seal_version = segment_seal[0];
+    ensure!(
+        seal_version == RV32IM_SEAL_VERSION,
+        "seal version mismatch: actual={seal_version} expected={RV32IM_SEAL_VERSION}"
+    );
+    let _segment_seal = &segment_seal[1..];
+
+    Err(anyhow!("povw not implemented for m3"))
 }

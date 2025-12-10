@@ -18,7 +18,7 @@ gpu-guard = { workspace = true }
 rand = "0.8"
 risc0-binfmt = { workspace = true }
 risc0-povw = { workspace = true, features = ["prover"] }
-risc0-zkvm = { workspace = true, features = ["client", "unstable"] }
+risc0-zkvm = { workspace = true, features = ["client", "unstable", "rv32im-m3"] }
 risc0-zkvm-methods = { path = "../../zkvm/methods" }
 ruint = { version = "1.15" }
 
