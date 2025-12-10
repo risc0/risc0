@@ -297,6 +297,11 @@ pub trait P9Backend {
     /// For zkvm backend: no-op, returns empty
     /// For in_memory backend: reads from fd 9 using host_read
     fn read_data(&mut self, buf: &mut [u8]) -> Result<usize, u32>;
+
+    /// Load a tar file from the backend and unpack it into /tmp
+    /// For zkvm backend: no-op
+    /// For in_memory backend: reads tar from backend and extracts to /tmp
+    fn load_and_unpack_tar_to_tmp(&mut self) -> Result<usize, u32>;
 }
 
 // Separate statics for each backend type

@@ -1777,7 +1777,7 @@ impl P9Backend for ZeroCopyBackend {
         use crate::host_calls::host_read;
 
         const MAX_IO_BYTES: usize = 1024;
-        const INPUT_FD: u32 = 4;
+        const INPUT_FD: u32 = 3;
 
         if buf.is_empty() {
             return Ok(0);
@@ -1787,5 +1787,9 @@ impl P9Backend for ZeroCopyBackend {
         let bytes_read = host_read(INPUT_FD, buf.as_mut_ptr(), read_size);
 
         Ok(bytes_read as usize)
+    }
+
+    fn load_and_unpack_tar_to_tmp(&mut self) -> Result<usize, u32> {
+        crate::linux_abi_fs::load_and_unpack_tar_to_tmp()
     }
 }

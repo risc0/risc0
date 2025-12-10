@@ -6219,6 +6219,422 @@ pub fn generate_tmp_tar_p9() -> Result<usize, u32> {
     }
 }
 
+/// Load and unpack a tar file into /tmp
+/// Reads tar data from the backend and extracts files to /tmp
+pub fn load_and_unpack_tar_to_tmp() -> Result<usize, u32> {
+    use crate::p9_backend::get_backend;
+
+    // Read tar data from backend
+    let backend = get_backend();
+    let mut tar_data = Vec::new();
+    let mut read_buf = [0u8; 8192];
+    let mut total_read = 0usize;
+
+    // Read tar file in chunks
+    loop {
+        match backend.read_data(&mut read_buf) {
+            Ok(bytes_read) => {
+                if bytes_read == 0 {
+                    break; // EOF
+                }
+                tar_data.extend_from_slice(&read_buf[..bytes_read]);
+                total_read += bytes_read;
+            }
+            Err(_errno) => {
+                if total_read == 0 {
+                    // No data available, that's okay
+                    crate::kernel::print("load_and_unpack_tar_to_tmp: no tar data available");
+                    return Ok(0);
+                }
+                // Some data read, continue with what we have
+                break;
+            }
+        }
+    }
+
+    if tar_data.is_empty() {
+        crate::kernel::print("load_and_unpack_tar_to_tmp: no tar data to unpack");
+        return Ok(0);
+    }
+
+    crate::kernel::print(&format!(
+        "load_and_unpack_tar_to_tmp: read {} bytes of tar data",
+        tar_data.len()
+    ));
+    crate::kernel::print("load_and_unpack_tar_to_tmp: starting extraction...");
+
+    // Parse and extract tar file
+    match unpack_tar_to_tmp(&tar_data) {
+        Ok(files_extracted) => {
+            crate::kernel::print(&format!(
+                "load_and_unpack_tar_to_tmp: extracted {} files to /tmp",
+                files_extracted
+            ));
+            Ok(files_extracted)
+        }
+        Err(errno) => {
+            crate::kernel::print(&format!(
+                "load_and_unpack_tar_to_tmp: failed to unpack, errno = {}",
+                errno
+            ));
+            Err(errno)
+        }
+    }
+}
+
+/// Parse tar data and extract files to /tmp
+fn unpack_tar_to_tmp(tar_data: &[u8]) -> Result<usize, u32> {
+    let mut offset = 0usize;
+    let mut files_extracted = 0usize;
+
+    // Get root FID
+    let root_fid = get_root_fid();
+
+    // Walk to /tmp
+    const TEMP_TMP_FID: u32 = 0xFFFF_FF30;
+    match do_walk(root_fid, TEMP_TMP_FID, vec!["tmp".to_string()]) {
+        Ok(_) => {
+            // Parse tar entries
+            while offset + 512 <= tar_data.len() {
+                // Check for EOF marker (two consecutive zero blocks)
+                let mut all_zeros = true;
+                for i in 0..512 {
+                    if tar_data[offset + i] != 0 {
+                        all_zeros = false;
+                        break;
+                    }
+                }
+                if all_zeros {
+                    // Check if next block is also zero (EOF marker)
+                    if offset + 1024 <= tar_data.len() {
+                        let mut next_all_zeros = true;
+                        for i in 0..512 {
+                            if tar_data[offset + 512 + i] != 0 {
+                                next_all_zeros = false;
+                                break;
+                            }
+                        }
+                        if next_all_zeros {
+                            break; // EOF marker found
+                        }
+                    }
+                }
+
+                // Parse tar header
+                let header = &tar_data[offset..offset + 512];
+
+                // Read name (100 bytes)
+                let name_end = header[..100].iter().position(|&b| b == 0).unwrap_or(100);
+                let name_bytes = &header[..name_end];
+                let name = match core::str::from_utf8(name_bytes) {
+                    Ok(s) => s,
+                    Err(_) => {
+                        offset += 512;
+                        continue;
+                    }
+                };
+
+                // Skip empty names
+                if name.is_empty() {
+                    offset += 512;
+                    continue;
+                }
+
+                // Read size (12 bytes octal, offset 124)
+                let size_str = match core::str::from_utf8(&header[124..136]) {
+                    Ok(s) => s.trim_end_matches('\0'),
+                    Err(_) => {
+                        offset += 512;
+                        continue;
+                    }
+                };
+                let size = match parse_octal_u64(size_str) {
+                    Ok(s) => s,
+                    Err(_) => {
+                        offset += 512;
+                        continue;
+                    }
+                };
+
+                // Read typeflag (1 byte, offset 156)
+                let typeflag = header[156];
+
+                // Skip if not a regular file or directory
+                if typeflag != b'0' && typeflag != b'5' {
+                    // Skip file data
+                    let data_size = ((size + 511) / 512) * 512; // Round up to 512-byte boundary
+                    offset += 512 + data_size as usize;
+                    continue;
+                }
+
+                // Build path in /tmp
+                let path = if name.starts_with('/') {
+                    format!("/tmp{}", name)
+                } else {
+                    format!("/tmp/{}", name)
+                };
+
+                // Skip if path is /tmp or /tmp/
+                if path == "/tmp" || path == "/tmp/" {
+                    let data_size = ((size + 511) / 512) * 512;
+                    offset += 512 + data_size as usize;
+                    continue;
+                }
+
+                // Extract relative path from /tmp
+                let rel_path = if path.starts_with("/tmp/") {
+                    &path[5..]
+                } else {
+                    &path[4..]
+                };
+
+                offset += 512;
+
+                if typeflag == b'5' {
+                    // Directory
+                    crate::kernel::print(&format!("  Extracting directory: /tmp/{}", rel_path));
+                    match create_directory_recursive(TEMP_TMP_FID, rel_path) {
+                        Ok(_) => {
+                            files_extracted += 1;
+                        }
+                        Err(_) => {
+                            crate::kernel::print(&format!(
+                                "    Failed to create directory: /tmp/{}",
+                                rel_path
+                            ));
+                            // Failed to create directory, continue
+                        }
+                    }
+                } else {
+                    // Regular file
+                    if offset + size as usize > tar_data.len() {
+                        break; // Not enough data
+                    }
+
+                    let file_data = &tar_data[offset..offset + size as usize];
+                    crate::kernel::print(&format!(
+                        "  Extracting file: /tmp/{} ({} bytes)",
+                        rel_path, size
+                    ));
+
+                    match create_file_in_tmp(TEMP_TMP_FID, rel_path, file_data) {
+                        Ok(_) => {
+                            files_extracted += 1;
+                        }
+                        Err(_) => {
+                            crate::kernel::print(&format!(
+                                "    Failed to create file: /tmp/{}",
+                                rel_path
+                            ));
+                            // Failed to create file, continue
+                        }
+                    }
+
+                    // Skip file data (round up to 512-byte boundary)
+                    let data_size = ((size + 511) / 512) * 512;
+                    offset += data_size as usize;
+                }
+            }
+
+            // Clunk the /tmp FID
+            let _ = crate::p9::TclunkMessage::new(0, TEMP_TMP_FID).send_tclunk();
+
+            Ok(files_extracted)
+        }
+        Err(_) => {
+            crate::kernel::print("load_and_unpack_tar_to_tmp: failed to access /tmp");
+            Err(2) // ENOENT
+        }
+    }
+}
+
+/// Parse octal string to u64
+fn parse_octal_u64(s: &str) -> Result<u64, ()> {
+    let s = s.trim();
+    if s.is_empty() {
+        return Ok(0);
+    }
+    let mut result = 0u64;
+    for ch in s.chars() {
+        if ch < '0' || ch > '7' {
+            return Err(());
+        }
+        result = result
+            .checked_mul(8)
+            .and_then(|r| r.checked_add((ch as u8 - b'0') as u64))
+            .ok_or(())?;
+    }
+    Ok(result)
+}
+
+/// Create a directory recursively in /tmp
+fn create_directory_recursive(tmp_fid: u32, path: &str) -> Result<(), u32> {
+    if path.is_empty() || path == "/" {
+        return Ok(());
+    }
+
+    let components: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+    if components.is_empty() {
+        return Ok(());
+    }
+
+    let mut current_fid = tmp_fid;
+    const TEMP_DIR_FID: u32 = 0xFFFF_FF31;
+
+    for component in components {
+        // Try to walk to the component
+        match do_walk(current_fid, TEMP_DIR_FID, vec![component.to_string()]) {
+            Ok(_) => {
+                // Directory exists, use it
+                current_fid = TEMP_DIR_FID;
+            }
+            Err(_) => {
+                // Directory doesn't exist, create it
+                let tmkdir =
+                    crate::p9::TmkdirMessage::new(0, current_fid, component.to_string(), 0o755, 0);
+                match tmkdir.send_tmkdir() {
+                    Ok(crate::p9::P9Response::Success(_)) => {
+                        // Walk to the newly created directory
+                        match do_walk(current_fid, TEMP_DIR_FID, vec![component.to_string()]) {
+                            Ok(_) => {
+                                current_fid = TEMP_DIR_FID;
+                            }
+                            Err(errno) => {
+                                let _ =
+                                    crate::p9::TclunkMessage::new(0, TEMP_DIR_FID).send_tclunk();
+                                return Err(errno as u32);
+                            }
+                        }
+                    }
+                    Ok(crate::p9::P9Response::Error(rlerror)) => {
+                        let _ = crate::p9::TclunkMessage::new(0, TEMP_DIR_FID).send_tclunk();
+                        return Err(rlerror.ecode);
+                    }
+                    Err(_) => {
+                        let _ = crate::p9::TclunkMessage::new(0, TEMP_DIR_FID).send_tclunk();
+                        return Err(5); // EIO
+                    }
+                }
+            }
+        }
+    }
+
+    let _ = crate::p9::TclunkMessage::new(0, TEMP_DIR_FID).send_tclunk();
+    Ok(())
+}
+
+/// Create a file in /tmp with the given data
+fn create_file_in_tmp(tmp_fid: u32, path: &str, data: &[u8]) -> Result<(), u32> {
+    // Split path into directory and filename
+    let path_components: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+    if path_components.is_empty() {
+        return Err(22); // EINVAL
+    }
+
+    let (dir_components, filename) = if path_components.len() == 1 {
+        (vec![], path_components[0])
+    } else {
+        (
+            path_components[..path_components.len() - 1].to_vec(),
+            path_components[path_components.len() - 1],
+        )
+    };
+
+    // Walk to parent directory
+    let mut current_fid = tmp_fid;
+    const TEMP_FILE_FID: u32 = 0xFFFF_FF32;
+    const TEMP_PARENT_FID: u32 = 0xFFFF_FF33;
+
+    for component in dir_components {
+        match do_walk(current_fid, TEMP_PARENT_FID, vec![component.to_string()]) {
+            Ok(_) => {
+                current_fid = TEMP_PARENT_FID;
+            }
+            Err(errno) => {
+                let _ = crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
+                return Err(errno as u32);
+            }
+        }
+    }
+
+    // Create the file - use TEMP_FILE_FID for the new file
+    // P9 flags: 1 = O_WRONLY, and we need O_CREAT and O_TRUNC
+    // For P9, O_CREAT is 0x00000040 and O_TRUNC is 0x00000200
+    const P9_O_CREAT: u32 = 0x00000040;
+    const P9_O_TRUNC: u32 = 0x00000200;
+    const P9_O_WRONLY: u32 = 1;
+    let p9_flags = P9_O_CREAT | P9_O_WRONLY | P9_O_TRUNC;
+
+    let tlcreate =
+        crate::p9::TlcreateMessage::new(0, current_fid, filename.to_string(), p9_flags, 0o644, 0);
+
+    match tlcreate.send_tlcreate() {
+        Ok(crate::p9::P9Response::Success(_rlcreate)) => {
+            // After Tlcreate, the current_fid becomes the file fid
+            // But we need to walk to the file to get a new fid for writing
+            // Actually, in P9, after Tlcreate succeeds, we can use the same fid for writing
+            // But let's walk to be safe
+            let file_fid = TEMP_FILE_FID;
+            match do_walk(current_fid, file_fid, vec![filename.to_string()]) {
+                Ok(_) => {
+                    // Write file data in chunks
+                    let mut write_offset = 0u64;
+                    const MAX_WRITE_SIZE: u32 = 8192;
+
+                    while write_offset < data.len() as u64 {
+                        let chunk_size = core::cmp::min(
+                            MAX_WRITE_SIZE,
+                            (data.len() as u64 - write_offset) as u32,
+                        );
+                        let chunk = &data
+                            [write_offset as usize..(write_offset + chunk_size as u64) as usize];
+
+                        let twrite = crate::p9::TwriteMessage::new(
+                            0,
+                            file_fid,
+                            write_offset,
+                            chunk.to_vec(),
+                        );
+                        match twrite.send_twrite() {
+                            Ok(crate::p9::P9Response::Success(_)) => {
+                                write_offset += chunk_size as u64;
+                            }
+                            Ok(crate::p9::P9Response::Error(rlerror)) => {
+                                let _ = crate::p9::TclunkMessage::new(0, file_fid).send_tclunk();
+                                let _ =
+                                    crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
+                                return Err(rlerror.ecode);
+                            }
+                            Err(_) => {
+                                let _ = crate::p9::TclunkMessage::new(0, file_fid).send_tclunk();
+                                let _ =
+                                    crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
+                                return Err(5); // EIO
+                            }
+                        }
+                    }
+
+                    let _ = crate::p9::TclunkMessage::new(0, file_fid).send_tclunk();
+                    let _ = crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
+                    Ok(())
+                }
+                Err(errno) => {
+                    let _ = crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
+                    Err(errno as u32)
+                }
+            }
+        }
+        Ok(crate::p9::P9Response::Error(rlerror)) => {
+            let _ = crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
+            Err(rlerror.ecode)
+        }
+        Err(_) => {
+            let _ = crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
+            Err(5) // EIO
+        }
+    }
+}
+
 /// Helper function to convert a number to octal string (for tar header)
 #[allow(dead_code)] // Used by write_tar_header
 fn u64_to_octal_string(mut n: u64, width: usize) -> String {
@@ -7358,6 +7774,24 @@ pub fn attach_to_p9() {
                 _ => {
                     // If clone fails, just use 0 for root (fallback)
                     set_root_fid(0);
+                }
+            }
+
+            // After attach succeeds, attempt to load and unpack tar file into /tmp
+            use crate::p9_backend::get_backend;
+            let backend = get_backend();
+            match backend.load_and_unpack_tar_to_tmp() {
+                Ok(files_extracted) => {
+                    if files_extracted > 0 {
+                        crate::kernel::print(&format!(
+                            "attach_to_p9: loaded and unpacked {} files from tar into /tmp",
+                            files_extracted
+                        ));
+                    }
+                }
+                Err(_errno) => {
+                    // No tar file available or error unpacking - that's okay
+                    debug_print!("attach_to_p9: no tar data available or unpacking failed");
                 }
             }
         }
