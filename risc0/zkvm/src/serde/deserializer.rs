@@ -343,7 +343,7 @@ impl<'de, R: WordRead + 'de> serde::Deserializer<'de> for &'_ mut Deserializer<'
         // safe; is there another way to not do double writes here?
         let mut bytes = vec![0u8; len_bytes];
         self.reader.read_padded_bytes(&mut bytes)?;
-        visitor.visit_string(String::from_utf8(bytes).map_err(|_| Error::DeserializeBadChar)?)
+        visitor.visit_string(String::from_utf8(bytes).map_err(|_| Error::DeserializeBadUtf8)?)
     }
 
     fn deserialize_string<V>(self, visitor: V) -> Result<V::Value>
