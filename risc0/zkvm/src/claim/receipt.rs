@@ -346,6 +346,7 @@ impl MaybePruned<WorkClaim<ReceiptClaim>> {
     }
 }
 
+#[cfg_attr(feature = "rv32im-m3", allow(dead_code))]
 pub(crate) fn exit_code_from_terminate_state(
     terminate_state: &Option<TerminateState>,
 ) -> anyhow::Result<ExitCode> {
