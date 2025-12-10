@@ -457,7 +457,7 @@ private:
   IBufferPtr allocate(size_t size) override {
     void* devPtr = cuda_malloc(size);
     if (devPtr == nullptr)
-        throw std::runtime_error("Out of CUDA memory");
+      throw std::runtime_error("Out of CUDA memory");
     return std::make_shared<CudaBuffer>(stream, devPtr, size);
   }
 

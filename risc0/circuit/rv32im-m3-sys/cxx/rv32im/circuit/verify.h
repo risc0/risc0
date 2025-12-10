@@ -144,7 +144,6 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
       , outerMix(eqzCtx.getTrue())
       , innerMix(eqzCtx.getTrue()) {}
 
-
 #define BLOCK_TYPE(name, count)                                                                    \
   FDEV void verify##name() {                                                                       \
     reset();                                                                                       \
@@ -166,8 +165,7 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
     outerMix = innerMix;
 
 // Verify inner data
-#define BLOCK_TYPE(name, _count)                                                                    \
-    this->verify##name();
+#define BLOCK_TYPE(name, _count) this->verify##name();
     BLOCK_TYPES
 #undef BLOCK_TYPE
     // Verify accumTop
