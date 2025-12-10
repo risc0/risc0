@@ -122,8 +122,11 @@ impl Claim {
     pub fn decode(seal: &[u32]) -> Result<Self> {
         let mut decoder = Decoder::new(seal);
 
-        let version = decoder.read_u32()?;
-        ensure!(version == RV32IM_SEAL_VERSION, "seal version mismatch");
+        let seal_version = decoder.read_u32()?;
+        ensure!(
+            seal_version == RV32IM_SEAL_VERSION,
+            "seal version mismatch: actual={seal_version} expected={RV32IM_SEAL_VERSION}"
+        );
 
         let po2 = decoder.read_u32()?;
 
