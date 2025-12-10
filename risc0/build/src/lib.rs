@@ -54,7 +54,6 @@ pub use self::{
     docker::{docker_build, BuildStatus, TARGET_DIR},
 };
 
-const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
 const DEFAULT_DOCKER_TAG: &str = "r0.1.91.1";
 
 #[derive(Debug, Deserialize)]
