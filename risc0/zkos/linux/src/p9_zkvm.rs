@@ -741,4 +741,9 @@ impl P9Backend for ZkvmBackend {
         // No-op for zkvm backend, returns empty
         Ok(0)
     }
+
+    fn load_and_unpack_tar_to_tmp(&mut self) -> Result<usize, u32> {
+        // No-op for zkvm backend
+        Ok(0)
+    }
 }
