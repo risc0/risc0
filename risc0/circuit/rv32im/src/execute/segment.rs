@@ -24,7 +24,8 @@ use serde::{Deserialize, Serialize};
 use crate::{
     TerminateState,
     execute::{
-        ExecutionLimit, Executor, ExecutorResult, RV32IM_V2_CIRCUIT_VERSION,
+        ExecutionLimit, Executor, ExecutorResult, RV32IM_M3_CIRCUIT_VERSION,
+        RV32IM_V2_CIRCUIT_VERSION,
         executor::ExecutionError,
     },
 };
@@ -91,6 +92,11 @@ impl Segment {
             read_pos: Cell::new(0),
             write_pos: Cell::new(0),
         };
+        let circuit_version = if cfg!(feature = "rv32im-m3") {
+            RV32IM_M3_CIRCUIT_VERSION
+        } else {
+            RV32IM_V2_CIRCUIT_VERSION
+        };
 
         Executor::new(
             self.partial_image.clone(),
@@ -98,7 +104,7 @@ impl Segment {
             None,
             vec![],
             None,
-            RV32IM_V2_CIRCUIT_VERSION,
+            circuit_version,
         )
         .run(
             ExecutionLimit::default()
