@@ -28,7 +28,7 @@ use crate::softfloat::{
 };
 
 // Debug configuration - set to true to enable debug prints, false to disable
-pub const DEBUG_ENABLED: bool = true;
+pub const DEBUG_ENABLED: bool = false;
 pub const TRACE_ENABLED: bool = false;
 // Debug print macro that avoids str_format evaluation when debug is disabled
 #[macro_export]
@@ -372,7 +372,7 @@ unsafe extern "C" fn illegal_instruction_dispatch() -> ! {
 
     // Log the illegal instruction event and terminate
     kpanic!(
-        "Illegal instruction at PC: {:#010x}, instr: {:#010x}",
+        "Illegal instruction or attempt to read/write kernel memory at PC: {:#010x}, instr: {:#010x}",
         mepc,
         instruction
     );
@@ -384,10 +384,28 @@ pub fn print(msg: &str) {
 }
 
 #[unsafe(no_mangle)]
-unsafe extern "C" fn instruction_misaligned_dispatch() -> ! {
+unsafe extern "C" fn trap_dispatch() -> ! {
+    trace_print!("trap_dispatch");
+    // Get the saved PC from MEPC (where the trap occurred)
+    let mepc = unsafe { MEPC_PTR.read_volatile() };
+    let instruction_h = unsafe { (mepc as *const u16).read_volatile() };
+    // we need to check if this is a trap due to a
+    if instruction_h & 0x3 == 0x3
+        && mepc % 4 == 0
+        && unsafe { instruction_misaligned_dispatch_check() }
+    {
+        mret()
+    }
+
+    unsafe { illegal_instruction_dispatch() }
+}
+
+unsafe fn instruction_misaligned_dispatch_check() -> bool {
+    debug_print!("instruction_misaligned_dispatch_check");
     // Get the saved PC from MEPC (where the misaligned instruction occurred)
     let mepc = unsafe { MEPC_PTR.read_volatile() };
 
+    debug_print!("mepc: {:#010x}", mepc);
     // Read the instruction that caused the misaligned jump
     let instruction = unsafe { (mepc as *const u32).read_volatile() };
 
@@ -399,8 +417,10 @@ unsafe extern "C" fn instruction_misaligned_dispatch() -> ! {
     let funct3 = (instruction & 0x00007000) >> 12;
     let _funct7 = (instruction & 0xfe000000) >> 25;
 
+    debug_print!("decoded instruction");
+
     debug_print!(
-        "Instruction misaligned dispatch: PC={:#010x}, instr={:#010x}, opcode={:#02x}",
+        "Checking for instruction misaligned dispatch: PC={:#010x}, instr={:#010x}, opcode={:#02x}",
         mepc,
         instruction,
         opcode
@@ -448,7 +468,7 @@ unsafe extern "C" fn instruction_misaligned_dispatch() -> ! {
                 // Set MEPC to next instruction
                 unsafe { MEPC_PTR.write_volatile(mepc) };
             }
-            mret()
+            true
         }
         0x6f => {
             // JAL (Jump and Link)
@@ -479,7 +499,7 @@ unsafe extern "C" fn instruction_misaligned_dispatch() -> ! {
             set_ureg(rd as usize, return_addr as u32);
             // Set MEPC to the target address (circuit bug: subtract 4)
             unsafe { MEPC_PTR.write_volatile(target_pc.wrapping_sub(4)) };
-            mret()
+            true
         }
         0x67 => {
             // JALR (Jump and Link Register)
@@ -502,15 +522,9 @@ unsafe extern "C" fn instruction_misaligned_dispatch() -> ! {
             set_ureg(rd as usize, return_addr as u32);
             // Set MEPC to the target address (circuit bug: subtract 4)
             unsafe { MEPC_PTR.write_volatile(target_pc.wrapping_sub(4)) };
-            mret()
+            true
         }
-        _ => {
-            kpanic!(
-                "Instruction address misaligned trap: unsupported opcode {:#02x} at PC {:#010x}",
-                opcode,
-                mepc
-            );
-        }
+        _ => false,
     }
 }
 

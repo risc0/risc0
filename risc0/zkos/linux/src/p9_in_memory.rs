@@ -127,30 +127,6 @@ pub struct ZeroCopyFilesystem {
     fid_table: BTreeMap<u32, VNode>,
 }
 
-impl Drop for ZeroCopyFilesystem {
-    fn drop(&mut self) {
-        if ZERO_COPY_DEBUG {
-            let path_index_len = self.path_index.len();
-            // Only log if path_index has entries (real instance, not temporary validation instance)
-            if path_index_len > 0 {
-                let (heap_used, _heap_free, _heap_total) = crate::allocator::get_heap_stats();
-                crate::kernel::print(&format!(
-                    "ZeroCopyFilesystem::drop() called! path_index.len()={}, heap_used={} bytes ({} KB)",
-                    path_index_len,
-                    heap_used,
-                    heap_used / 1024
-                ));
-                crate::kernel::print(&format!(
-                    "ZeroCopyFilesystem::drop() - CRITICAL: Real backend being dropped! This will deallocate path_index (BTreeMap with {} entries, ~{} KB)",
-                    path_index_len,
-                    (path_index_len * 100) / 1024 // Rough estimate
-                ));
-            }
-        }
-        // Silently drop temporary validation instances (path_index_len == 0)
-    }
-}
-
 impl ZeroCopyFilesystem {
     #[inline(always)]
     fn debug_log(&self, msg: &str) {
@@ -476,42 +452,8 @@ impl ZeroCopyFilesystem {
             crate::kernel::print("ZeroCopyFilesystem: invalid path index range");
             return Err(P9Error::Einval as u32);
         }
-        // Track heap before parsing path_index
-        let (heap_before_used, _, _) = if ZERO_COPY_DEBUG {
-            crate::allocator::get_heap_stats()
-        } else {
-            (0, 0, 0)
-        };
-        if ZERO_COPY_DEBUG {
-            crate::kernel::print(&format!(
-                "ZeroCopyFilesystem: Heap before parse_path_index: {} bytes",
-                heap_before_used
-            ));
-        }
 
         let path_index = Self::parse_path_index(&data[path_start..path_end])?;
-
-        // Track heap after parsing path_index
-        if ZERO_COPY_DEBUG {
-            let (heap_after_used, heap_after_free, heap_after_total) =
-                crate::allocator::get_heap_stats();
-            let heap_delta = heap_after_used.saturating_sub(heap_before_used);
-            let path_index_size = path_end.saturating_sub(path_start);
-            crate::kernel::print(&format!(
-                "ZeroCopyFilesystem: Heap after parse_path_index: {} bytes (delta: {} bytes, {:.2} KB), free: {} bytes, total: {} bytes",
-                heap_after_used,
-                heap_delta,
-                heap_delta as f64 / 1024.0,
-                heap_after_free,
-                heap_after_total
-            ));
-            crate::kernel::print(&format!(
-                "ZeroCopyFilesystem: path_index.len()={}, path_index data size: {} bytes ({:.2} KB)",
-                path_index.len(),
-                path_index_size,
-                path_index_size as f64 / 1024.0
-            ));
-        }
 
         // Create temporary filesystem instance for validation (before final construction)
         // This allows us to validate all inodes during initialization to catch corruption early
@@ -1190,25 +1132,6 @@ impl ZeroCopyFilesystem {
 /// All file data is accessed as slices directly from the embedded image.
 pub struct ZeroCopyBackend {
     fs: ZeroCopyFilesystem,
-}
-
-impl Drop for ZeroCopyBackend {
-    fn drop(&mut self) {
-        if ZERO_COPY_DEBUG {
-            let (heap_used, _heap_free, _heap_total) = crate::allocator::get_heap_stats();
-            let path_index_len = self.fs.path_index.len();
-            crate::kernel::print(&format!(
-                "ZeroCopyBackend::drop() called! path_index.len()={}, heap_used={} bytes ({} KB)",
-                path_index_len,
-                heap_used,
-                heap_used / 1024
-            ));
-            crate::kernel::print(&format!(
-                "ZeroCopyBackend::drop() - This will deallocate path_index (BTreeMap with {} entries)",
-                path_index_len
-            ));
-        }
-    }
 }
 
 impl ZeroCopyBackend {
