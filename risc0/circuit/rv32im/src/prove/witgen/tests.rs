@@ -38,11 +38,13 @@ fn run_preflight(program: Program) {
 }
 
 #[test]
+#[cfg_attr(feature = "rv32im-m3", ignore)]
 fn basic() {
     run_preflight(testutil::kernel::basic());
 }
 
 #[test]
+#[cfg_attr(feature = "rv32im-m3", ignore)]
 fn simple_loop() {
     run_preflight(testutil::kernel::simple_loop(500000));
 }
@@ -107,12 +109,14 @@ fn fwd_rev_ab_test(program: Program) {
 }
 
 #[test]
+#[cfg_attr(feature = "rv32im-m3", ignore)]
 #[gpu_guard::gpu_guard]
 fn fwd_rev_ab_basic() {
     fwd_rev_ab_test(testutil::kernel::basic());
 }
 
 #[test]
+#[cfg_attr(feature = "rv32im-m3", ignore)]
 #[gpu_guard::gpu_guard]
 fn fwd_rev_ab_split() {
     fwd_rev_ab_test(testutil::kernel::simple_loop(2000));

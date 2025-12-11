@@ -180,7 +180,7 @@ impl ReceiptClaim {
         })
     }
 
-    #[cfg(feature = "rv32im-m3")]
+    #[cfg(all(feature = "prove", feature = "rv32im-m3"))]
     pub(crate) fn decode_m3_with_output(
         seal: &[u32],
         output: MaybePruned<Option<Output>>,
@@ -346,6 +346,7 @@ impl MaybePruned<WorkClaim<ReceiptClaim>> {
     }
 }
 
+#[cfg_attr(feature = "rv32im-m3", allow(dead_code))]
 pub(crate) fn exit_code_from_terminate_state(
     terminate_state: &Option<TerminateState>,
 ) -> anyhow::Result<ExitCode> {

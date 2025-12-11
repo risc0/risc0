@@ -146,7 +146,14 @@ impl SegmentReceipt {
 
     /// Extracts the PoVW nonce from this segment receipt's seal.
     pub fn povw_nonce(&self) -> anyhow::Result<PovwNonce> {
-        risc0_circuit_rv32im::decode_povw_nonce(&self.seal)
+        #[cfg(not(feature = "rv32im-m3"))]
+        {
+            risc0_circuit_rv32im::decode_povw_nonce(&self.seal)
+        }
+        #[cfg(feature = "rv32im-m3")]
+        {
+            risc0_circuit_rv32im_m3::decode_povw_nonce(&self.seal)
+        }
     }
 }
 
