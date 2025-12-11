@@ -255,7 +255,7 @@ pub struct SegmentUpdate {
     /// Record of what is read by the guest across all syscalls.
     #[debug("{}", read_record.len())]
     read_record: Vec<Vec<u8>>,
-    /// Record of writen to the host across all syscalls.
+    /// Record of written to the host across all syscalls.
     #[debug("{}", write_record.len())]
     write_record: Vec<u32>,
 
