@@ -44,7 +44,7 @@ pub struct ProverContext {
 }
 
 impl SegmentContext {
-    pub fn new(mut segment: Segment) -> Result<Self> {
+    pub fn new(segment: &Segment) -> Result<Self> {
         tracing::debug!("load_segment: {segment:#?}",);
 
         let mut pages: Vec<RawPage> = Vec::with_capacity(segment.partial_image.pages.len());
@@ -56,8 +56,10 @@ impl SegmentContext {
             });
         }
 
+        // NOTE: If the memory image digests are not computed by this point, they will be here.
         let mut digests: Vec<RawDigestEntry> = Vec::new();
-        for (&idx, &digest) in segment.partial_image.digests() {
+        let mut memory_image = segment.partial_image.clone();
+        for (&idx, &digest) in memory_image.digests() {
             let mut words = [0; DIGEST_WORDS];
             for (i, word) in words.iter_mut().enumerate() {
                 *word = Elem::new(digest.as_words()[i]).as_u32_montgomery();
@@ -298,7 +300,7 @@ mod tests {
         let segment = segments.first().unwrap().clone();
         // segment.partial_image.dump();
 
-        let segment_ctx = SegmentContext::new(segment).unwrap();
+        let segment_ctx = SegmentContext::new(&segment).unwrap();
         let preflight = segment_ctx.preflight(po2).unwrap();
 
         let prover = segment_prover(po2).unwrap();

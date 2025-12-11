@@ -604,7 +604,7 @@ impl Prover {
     pub fn new_lift(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
         cfg_if! {
             if #[cfg(feature="rv32im-m3")] {
-                Self::new_lift_m3(segment, opts)
+                Self::new_lift_m3(segment, opts, false)
             } else {
                 Self::new_lift_inner(segment, opts, false)
             }
@@ -616,11 +616,21 @@ impl Prover {
     /// Similar to [`Self::new_lift`], but produces a work claim receipt that tracks
     /// verifiable work by computing the work value from the segment proof.
     pub fn new_lift_povw(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
-        Self::new_lift_inner(segment, opts, true)
+        cfg_if! {
+            if #[cfg(feature="rv32im-m3")] {
+                Self::new_lift_m3(segment, opts, true)
+            } else {
+                Self::new_lift_inner(segment, opts, true)
+            }
+        }
     }
 
     #[cfg(feature = "rv32im-m3")]
-    fn new_lift_m3(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
+    fn new_lift_m3(segment: &SegmentReceipt, opts: ProverOpts, povw: bool) -> Result<Self> {
+        if povw {
+            bail!("m3 doesn't support povw");
+        }
+
         ensure_poseidon2!(segment);
 
         let inner_hash_suite = hash_suite_from_name(&segment.hashfn)
@@ -642,6 +652,7 @@ impl Prover {
 
     /// Instantiate a lift program, with the option of PoVW or not. Note that these programs
     /// produce different output but have the same inputs and so share the same logic here.
+    #[cfg_attr(feature = "rv32im-m3", allow(dead_code))]
     fn new_lift_inner(segment: &SegmentReceipt, opts: ProverOpts, povw: bool) -> Result<Self> {
         ensure_poseidon2!(segment);
 
@@ -652,9 +663,10 @@ impl Prover {
 
         let out_size = risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE;
 
+        let seal_version = segment.seal[0];
         ensure!(
-            segment.seal[0] == RV32IM_SEAL_VERSION,
-            "seal version mismatch"
+            seal_version == RV32IM_SEAL_VERSION,
+            "seal version mismatch: actual={seal_version} expected={RV32IM_SEAL_VERSION}"
         );
 
         let seal = &segment.seal[1..];

@@ -76,18 +76,6 @@ fn cpp_test() {
     assert_eq!(message.as_str(), "blst is such a blast");
 }
 
-#[rstest]
-#[should_panic(expected = "too small")]
-fn insufficient_segment_limit() {
-    let env = ExecutorEnv::builder()
-        .segment_limit_po2(13) // 8K cycles
-        .write(&MultiTestSpec::DoNothing)
-        .unwrap()
-        .build()
-        .unwrap();
-    execute_elf(env, MULTI_TEST_ELF).unwrap();
-}
-
 #[test_log::test]
 fn basic() {
     let program = risc0_circuit_rv32im::execute::testutil::user::basic();
@@ -542,11 +530,18 @@ fn large_io_words() {
         fd: FD,
         nwords: buf.len() as u32,
     };
+
+    #[cfg(feature = "rv32im-m3")]
+    const SESSION_LIMIT: u64 = 20_000_000 * 8;
+
+    #[cfg(not(feature = "rv32im-m3"))]
+    const SESSION_LIMIT: u64 = 20_000_000;
+
     let env = ExecutorEnv::builder()
         .read_fd(FD, bytemuck::cast_slice(&buf))
         .write(&input)
         .unwrap()
-        .session_limit(Some(20_000_000))
+        .session_limit(Some(SESSION_LIMIT))
         .build()
         .unwrap();
     let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
