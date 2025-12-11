@@ -769,7 +769,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     #[inline(always)]
     fn on_insn_start(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()> {
         #[cfg(feature = "rv32im-m3")]
-        self.block_tracker.track_pc(self.user_pc.0);
+        self.block_tracker.track_pc(self.pc.0);
 
         let cycle = self.cycles.user;
         self.trace_instruction(cycle, kind, decoded);
