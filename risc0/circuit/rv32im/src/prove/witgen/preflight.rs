@@ -21,7 +21,7 @@ use num_traits::FromPrimitive as _;
 use risc0_binfmt::{ByteAddr, WordAddr};
 use risc0_circuit_rv32im_sys::{RawMemoryTransaction, RawPreflightCycle};
 use risc0_core::scope;
-use risc0_zkp::core::digest::DIGEST_WORDS;
+use risc0_zkp::core::digest::{DIGEST_WORDS, Digest};
 
 use crate::{
     EcallKind,
@@ -58,6 +58,7 @@ pub(crate) enum Back {
 }
 
 #[derive(Clone, Debug, Default)]
+#[non_exhaustive]
 pub(crate) struct PreflightTrace {
     #[debug("{}", cycles.len())]
     pub cycles: Vec<RawPreflightCycle>,
@@ -69,6 +70,7 @@ pub(crate) struct PreflightTrace {
     pub backs: Vec<Back>,
     pub table_split_cycle: u32,
     pub rand_z: ExtVal,
+    pub pre_state: Digest,
 }
 
 pub(crate) struct Preflight<'a> {
@@ -85,6 +87,7 @@ pub(crate) struct Preflight<'a> {
     user_cycles: u32,
     orig_words: PagedMap,
     prev_cycle: PagedMap,
+    /// An addr to u32 mapping used for memory outside the RISC-V addressable region.
     page_memory: PagedMap,
 }
 
@@ -117,8 +120,12 @@ impl<'a> Preflight<'a> {
         tracing::debug!("po2: {}", segment.po2);
         let total_cycles = 1 << segment.po2;
 
+        // NOTE: The executor may not have updated the digests in this memory_image, instead
+        // leaving them marked as dirty. If the memory_image is fully updated, no hashing will be
+        // done. If it is not, MemoryImage::digests will hash all the required nodes.
         let mut page_memory = PagedMap::default();
-        for (&node_idx, digest) in segment.partial_image.digests() {
+        let mut memory_image = segment.partial_image.clone();
+        for (&node_idx, digest) in memory_image.digests() {
             let node_addr = node_idx_to_addr(node_idx);
             for i in 0..DIGEST_WORDS {
                 page_memory.insert(&(node_addr + i), digest.as_words()[i]);
@@ -128,14 +135,12 @@ impl<'a> Preflight<'a> {
             trace: PreflightTrace {
                 cycles: Vec::with_capacity(total_cycles),
                 backs: Vec::with_capacity(total_cycles),
+                pre_state: memory_image.image_id(),
                 rand_z,
                 ..Default::default()
             },
             segment,
-            pager: PagedMemory::new(
-                segment.partial_image.clone(),
-                false, /* tracing_enabled */
-            ),
+            pager: PagedMemory::new(memory_image, false /* tracing_enabled */),
             pc: ByteAddr(0),
             machine_mode: 0,
             cur_write: 0,
@@ -294,7 +299,7 @@ impl<'a> Preflight<'a> {
             Back::None,
         );
 
-        if self.segment.claim.terminate_state.is_none() {
+        if self.segment.terminate_state.is_none() {
             let segment_threshold = self.segment.segment_threshold as usize;
             if self.trace.cycles.len() < segment_threshold {
                 bail!("Stopping segment too early");
@@ -516,7 +521,7 @@ impl Risc0Context for Preflight<'_> {
             0,
             Back::None,
         );
-        let input_words = self.segment.claim.input.as_words();
+        let input_words = self.segment.input_digest.as_words();
         for (i, word) in input_words.iter().enumerate() {
             self.store_u32(GLOBAL_INPUT_ADDR.waddr() + i, *word)?;
         }
@@ -746,6 +751,11 @@ impl PagingActivity {
 
 impl PagedMemory {
     pub(crate) fn loaded_pages(&self) -> PagingActivity {
+        // NOTE: This function currently reports all pages in the working image as loaded. This can
+        // result in wasted work, where cycles are spent doing page-in for memory that is included
+        // in the memory image sent to Preflight, but is never loaded during exec. However, this
+        // function is called by preflight before execution is run and so the pages that will
+        // actually be loaded is not yet known. As a result, the page_states cannot be used.
         tracing::trace!("loaded_pages: {:#010x?}", self.image.get_page_indexes());
         PagingActivity::new(self.image.get_page_indexes())
     }

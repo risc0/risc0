@@ -18,6 +18,7 @@ risc0-circuit-keccak = { path = "../../../circuit/keccak", default-features = fa
 risc0-zkp = { path = "../../../zkp", default-features = false }
 risc0-zkvm = { path = "../..", default-features = false, features = [
   "getrandom",
+  "rv32im-m3",
   "std",
   "unstable",
 ] }

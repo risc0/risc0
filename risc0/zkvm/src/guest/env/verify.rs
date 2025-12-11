@@ -182,7 +182,17 @@ pub fn verify_assumption(claim: Digest, control_root: Digest) -> Result<(), Infa
     Ok(())
 }
 
-/// TODO
+/// Add an unresolved assumption identified by the given claim digest and control root.
+///
+/// This is a lower-level variant of [`verify_assumption`] that uses
+/// [`sys_verify_integrity2`] to create an [Assumption][crate::Assumption] on the host side,
+/// rather than resolving an assumption that was pre-registered by the host.
+///
+/// It is intended for advanced composition flows, such as when aggregating accelerator
+/// proofs (e.g. Keccak) via union, where the guest needs to materialize a new assumption
+/// that will be resolved by a later proof. Do not use this function when you only need to
+/// verify a zkVM receipt; in that case prefer [`verify`], [`verify_integrity`], or
+/// [`verify_assumption`].
 pub fn verify_assumption2(claim: Digest, control_root: Digest) -> Result<(), Infallible> {
     unsafe {
         sys_verify_integrity2(claim.as_ref(), control_root.as_ref());

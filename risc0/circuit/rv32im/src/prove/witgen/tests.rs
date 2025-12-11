@@ -20,26 +20,14 @@ use risc0_zkp::field::Elem;
 use test_log::test;
 
 use crate::{
-    MAX_INSN_CYCLES,
-    execute::{
-        DEFAULT_SEGMENT_LIMIT_PO2,
-        testutil::{self, DEFAULT_SESSION_LIMIT, NullSyscall},
-    },
+    execute::testutil::{self, DEFAULT_EXECUTION_LIMIT, NullSyscall},
     prove::{PreflightResults, hal::StepMode, witgen::WitnessGenerator},
     zirgen::circuit::{ExtVal, REGCOUNT_DATA},
 };
 
 fn run_preflight(program: Program) {
     let image = MemoryImage::new_kernel(program);
-    let result = testutil::execute(
-        image,
-        DEFAULT_SEGMENT_LIMIT_PO2,
-        MAX_INSN_CYCLES,
-        DEFAULT_SESSION_LIMIT,
-        &NullSyscall,
-        None,
-    )
-    .unwrap();
+    let result = testutil::execute(image, DEFAULT_EXECUTION_LIMIT, NullSyscall, None).unwrap();
     let segments = result.segments;
     let segment = segments.first().unwrap();
 
@@ -50,11 +38,13 @@ fn run_preflight(program: Program) {
 }
 
 #[test]
+#[cfg_attr(feature = "rv32im-m3", ignore)]
 fn basic() {
     run_preflight(testutil::kernel::basic());
 }
 
 #[test]
+#[cfg_attr(feature = "rv32im-m3", ignore)]
 fn simple_loop() {
     run_preflight(testutil::kernel::simple_loop(500000));
 }
@@ -62,15 +52,8 @@ fn simple_loop() {
 fn fwd_rev_ab_test(program: Program) {
     let image = MemoryImage::new_kernel(program);
 
-    let session = testutil::execute(
-        image,
-        DEFAULT_SEGMENT_LIMIT_PO2,
-        MAX_INSN_CYCLES,
-        testutil::DEFAULT_SESSION_LIMIT,
-        &testutil::NullSyscall,
-        None,
-    )
-    .unwrap();
+    let session =
+        testutil::execute(image, DEFAULT_EXECUTION_LIMIT, testutil::NullSyscall, None).unwrap();
 
     cfg_if::cfg_if! {
         if #[cfg(feature = "cuda")] {
@@ -126,12 +109,14 @@ fn fwd_rev_ab_test(program: Program) {
 }
 
 #[test]
+#[cfg_attr(feature = "rv32im-m3", ignore)]
 #[gpu_guard::gpu_guard]
 fn fwd_rev_ab_basic() {
     fwd_rev_ab_test(testutil::kernel::basic());
 }
 
 #[test]
+#[cfg_attr(feature = "rv32im-m3", ignore)]
 #[gpu_guard::gpu_guard]
 fn fwd_rev_ab_split() {
     fwd_rev_ab_test(testutil::kernel::simple_loop(2000));

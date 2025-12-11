@@ -17,30 +17,25 @@ use std::io::Write as _;
 use std::net::{SocketAddr, TcpListener};
 use std::path::Path;
 
-use super::executor::{ExecutorImpl, circuit_version};
+use crate::host::server::exec::executor::CircuitSyscallTable;
+
+use super::executor::ExecutorImpl;
 use anyhow::Result;
 use anyhow::anyhow;
 use gdbstub::{conn::ConnectionExt, stub::GdbStub};
-use risc0_circuit_rv32im::execute::{
-    Executor as CircuitExecutor, gdb::Debugger as CircuitDebugger,
-};
+use risc0_circuit_rv32im::execute::gdb::Debugger as CircuitDebugger;
 use tempfile::NamedTempFile;
 
 type GdbConnection = Box<dyn ConnectionExt<Error = std::io::Error>>;
 
-pub struct GdbExecutor<'a, 'b, 'c> {
+pub struct GdbExecutor<'a, 'b> {
     pub(crate) elf: NamedTempFile,
-    debugger: CircuitDebugger<'a, 'b, ExecutorImpl<'c>>,
+    debugger: CircuitDebugger<'a, 'b, CircuitSyscallTable<'a>>,
     pub(crate) listener: TcpListener,
 }
 
-impl<'a, 'b, 'c> GdbExecutor<'a, 'b, 'c> {
-    pub fn new(exec: &'a mut ExecutorImpl<'c>) -> Result<Self>
-    where
-        'b: 'a,
-        'b: 'c,
-        'c: 'b,
-    {
+impl<'a, 'b> GdbExecutor<'a, 'b> {
+    pub fn new(exec: &'b mut ExecutorImpl<'a>) -> Result<Self> {
         let mut elf = NamedTempFile::with_suffix(".elf")?;
         elf.write_all(
             exec.elf
@@ -51,18 +46,9 @@ impl<'a, 'b, 'c> GdbExecutor<'a, 'b, 'c> {
 
         let listener = TcpListener::bind("127.0.0.1:0")?;
 
-        let exec = CircuitExecutor::new(
-            exec.image.clone(),
-            exec,
-            exec.env.input_digest,
-            exec.env.trace.clone(),
-            // NOTE: PoVW nonce has no effect on execution.
-            None,
-            circuit_version(),
-        );
         Ok(Self {
             elf,
-            debugger: CircuitDebugger::new(exec),
+            debugger: CircuitDebugger::new(&mut exec.inner),
             listener,
         })
     }
@@ -82,7 +68,8 @@ impl<'a, 'b, 'c> GdbExecutor<'a, 'b, 'c> {
         let connection: GdbConnection = Box::new(stream);
         let gdb_stub = GdbStub::new(connection);
 
-        match gdb_stub.run_blocking::<CircuitDebugger<'a, 'b, ExecutorImpl<'c>>>(&mut self.debugger)
+        match gdb_stub
+            .run_blocking::<CircuitDebugger<'a, 'b, CircuitSyscallTable<'a>>>(&mut self.debugger)
         {
             Ok(_) => eprintln!("target terminated!"),
             Err(e) => {

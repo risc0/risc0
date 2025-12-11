@@ -29,6 +29,7 @@ serde = { version = "1.0", default-features = false, features = [
   "derive",
   "alloc",
 ] }
+thiserror = { version = "2.0.17", default-features = false }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
@@ -71,7 +72,7 @@ cuda = [
   "risc0-sys/cuda",
   "risc0-zkp/cuda",
 ]
-default = []
+default = ["rv32im-m3"]
 # entropy_finder = []
 execute = [
   "anyhow/backtrace",
@@ -91,19 +92,21 @@ prove = [
   "dep:cfg-if",
   "dep:rand",
   "dep:rayon",
+  "dep:risc0-circuit-rv32im-m3-sys",
   "dep:risc0-circuit-rv32im-sys",
   "dep:risc0-sys",
   "dep:wide",
   "execute",
   "risc0-zkp/prove",
 ]
-rv32im-m3 = ["dep:risc0-circuit-rv32im-m3-sys"]
+rv32im-m3 = []
 std = [
   "anyhow/std",
   "derive_more/std",
   "risc0-binfmt/std",
   "risc0-zkp/std",
   "serde/std",
+  "thiserror/std",
 ]
 witgen_debug = []
 block_tracker_debug = []

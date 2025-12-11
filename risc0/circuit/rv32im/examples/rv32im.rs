@@ -64,10 +64,10 @@ fn main() {
 
     let result = testutil::execute(
         image.clone(),
-        args.po2,
-        MAX_INSN_CYCLES,
-        testutil::DEFAULT_SESSION_LIMIT,
-        &testutil::NullSyscall,
+        testutil::DEFAULT_EXECUTION_LIMIT
+            .with_max_insn_cycles(MAX_INSN_CYCLES)
+            .with_segment_po2(args.po2),
+        testutil::NullSyscall,
         None,
     )
     .unwrap();
@@ -84,10 +84,10 @@ fn main() {
         let start_time = Instant::now();
         let result = testutil::execute(
             image,
-            args.po2,
-            MAX_INSN_CYCLES,
-            testutil::DEFAULT_SESSION_LIMIT,
-            &testutil::NullSyscall,
+            testutil::DEFAULT_EXECUTION_LIMIT
+                .with_max_insn_cycles(MAX_INSN_CYCLES)
+                .with_segment_po2(args.po2),
+            testutil::NullSyscall,
             None,
         )
         .unwrap();
