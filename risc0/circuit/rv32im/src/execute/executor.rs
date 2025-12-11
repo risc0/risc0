@@ -480,6 +480,14 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         Risc0Machine::suspend(self)?;
 
+        #[cfg(feature = "rv32im-m3")]
+        {
+            let blocks = self
+                .block_tracker
+                .get_blocks(self.user_cycles, self.pager.touched_pages());
+            tracing::debug!("block_tracker blocks = {blocks:?}");
+        }
+
         let cycles = self.segment_cycles().next_power_of_two();
         let po2 = std::cmp::max(log2_ceil(cycles as usize), MIN_EXECUTOR_SEGMENT_PO2);
         let segment_threshold_min = u32::min(self.segment_cycles(), limit.segment_threshold());
