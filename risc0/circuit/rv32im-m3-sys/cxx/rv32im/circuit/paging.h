@@ -41,7 +41,7 @@ template <typename C> struct PageInNodeBlock {
   FDEV void set(CTX, PageInNodeWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 
@@ -67,7 +67,7 @@ template <typename C> struct PageInPartBlock {
   FDEV void set(CTX, PageInPartWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 
@@ -85,7 +85,7 @@ template <typename C> struct PageInPageBlock {
   FDEV void set(CTX, PageInPageWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 
@@ -107,7 +107,7 @@ template <typename C> struct PageOutNodeBlock {
   FDEV void set(CTX, PageOutNodeWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 
@@ -135,7 +135,7 @@ template <typename C> struct PageOutPartBlock {
   FDEV void set(CTX, PageOutPartWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 
@@ -153,7 +153,7 @@ template <typename C> struct PageOutPageBlock {
   FDEV void set(CTX, PageOutPageWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 
@@ -171,6 +171,6 @@ template <typename C> struct PageUncleBlock {
   FDEV void set(CTX, PageUncleWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };

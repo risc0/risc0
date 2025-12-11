@@ -50,6 +50,13 @@ int main() {
   // EXTRACT(UnitAddSubBlock);
   // EXTRACT(UnitBitBlock);
   // EXTRACT(UnitMulBlock);
+  // EXTRACT(PageInNodeBlock);
+  // EXTRACT(PageInPartBlock);
+  // EXTRACT(PageInPageBlock);
+  // EXTRACT(PageOutNodeBlock);
+  // EXTRACT(PageOutPartBlock);
+  // EXTRACT(PageOutPageBlock);
+  // EXTRACT(PageUncleBlock);
 
   // #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
   //   BLOCK_TYPES
