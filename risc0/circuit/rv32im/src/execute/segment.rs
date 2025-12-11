@@ -103,7 +103,10 @@ impl Segment {
         .run(
             ExecutionLimit::default()
                 .with_segment_po2(self.po2 as usize)
-                .with_soft_session_limit(self.suspend_cycle.into()),
+                .with_soft_session_limit(self.suspend_cycle.into())
+                // Set the max_insn_cycles to 0 to prevent splits based on this. We know we need to
+                // split on suspend_cycle.
+                .with_max_insn_cycles(0),
             |_| Ok(()),
         )
     }
