@@ -25,8 +25,7 @@ use crate::{
     TerminateState,
     execute::{
         ExecutionLimit, Executor, ExecutorResult, RV32IM_M3_CIRCUIT_VERSION,
-        RV32IM_V2_CIRCUIT_VERSION,
-        executor::ExecutionError,
+        RV32IM_V2_CIRCUIT_VERSION, executor::ExecutionError,
     },
 };
 
