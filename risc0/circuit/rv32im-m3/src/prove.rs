@@ -56,9 +56,10 @@ impl SegmentContext {
             });
         }
 
-        let mut digests: Vec<RawDigestEntry> =
-            Vec::with_capacity(segment.partial_image.digests.len());
-        for (&idx, &digest) in segment.partial_image.digests.iter() {
+        // NOTE: If the memory image digests are not computed by this point, they will be here.
+        let mut digests: Vec<RawDigestEntry> = Vec::new();
+        let mut memory_image = segment.partial_image.clone();
+        for (&idx, &digest) in memory_image.digests() {
             let mut words = [0; DIGEST_WORDS];
             for (i, word) in words.iter_mut().enumerate() {
                 *word = Elem::new(digest.as_words()[i]).as_u32_montgomery();
@@ -194,7 +195,7 @@ pub fn segment_prover(po2: usize) -> Result<ProverContext> {
 mod tests {
     use risc0_binfmt::{MemoryImage, Program};
     use risc0_circuit_rv32im::execute::{
-        CycleLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, Syscall, SyscallContext,
+        ExecutionLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, SegmentUpdate, Syscall, SyscallContext,
     };
 
     use super::*;
@@ -276,28 +277,30 @@ mod tests {
 
     fn run_program(elf: &[u8], po2: usize) {
         let program = Program::load_elf(elf, u32::MAX).unwrap();
-        let image = MemoryImage::new_kernel(program);
+        let mut image = MemoryImage::new_kernel(program);
 
         let mut segments = Vec::new();
         let trace = Vec::new();
-        let session_limit = CycleLimit::Hard(1 << 24);
+        let execution_limit = ExecutionLimit::default()
+            .with_segment_po2(po2)
+            .with_hard_session_limit(1 << 24);
         Executor::new(
-            image,
-            &NullSyscall,
+            image.clone(),
+            NullSyscall,
             None,
             trace,
             None,
             RV32IM_M3_CIRCUIT_VERSION,
         )
-        .run(po2, 0, session_limit, |segment| {
-            segments.push(segment);
+        .run(execution_limit, |update: SegmentUpdate| {
+            segments.push(update.apply_into_segment(&mut image)?);
             Ok(())
         })
         .unwrap();
-        let segment = segments.first().unwrap();
+        let segment = segments.first().unwrap().clone();
         // segment.partial_image.dump();
 
-        let segment_ctx = SegmentContext::new(segment).unwrap();
+        let segment_ctx = SegmentContext::new(&segment).unwrap();
         let preflight = segment_ctx.preflight(po2).unwrap();
 
         let prover = segment_prover(po2).unwrap();

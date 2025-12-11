@@ -16,46 +16,16 @@
 #include "core/log.h"
 #include "rv32im/test/test_prove.h"
 
-#include <assert.h>
 #include <iostream>
+#include <string>
 
 using namespace risc0;
 
-uint32_t totalShards = 1;
-uint32_t shardIndex = 0;
-uint32_t testNum = 0;
-
-void runTest(const std::string& name, size_t po2 = 13) {
-  LOG(0, "Running test: " << name);
-  if (testNum % totalShards != shardIndex) {
-    testNum++;
-    return;
-  }
+int main() {
   rv32im::NullHostIO io;
   std::map<uint32_t, uint32_t> words;
-  std::string testName = "rv32im/rvtest/" + name;
-  rv32im::loadUserMachineV3(words, "rv32im/rvtest/emu_kernel", testName);
+  rv32im::loadUserMachineV3(words, "rv32im/test/trap_kernel", "rv32im/test/trap_user");
   auto image = rv32im::MemoryImage::fromWords(words);
-  runTest(image, io, po2);
-  testNum++;
-}
-
-int main() {
-  if (getenv("TEST_TOTAL_SHARDS")) {
-    totalShards = atoi(getenv("TEST_TOTAL_SHARDS"));
-  }
-  if (getenv("TEST_SHARD_INDEX")) {
-    shardIndex = atoi(getenv("TEST_SHARD_INDEX"));
-  }
-  runTest("amoadd_w");
-  runTest("amoand_w");
-  runTest("amomax_w");
-  runTest("amomaxu_w");
-  runTest("amomin_w");
-  runTest("amominu_w");
-  runTest("amoor_w");
-  runTest("amoswap_w");
-  runTest("amoxor_w");
-  // runTest("lrsc", 17);  Runs, but very slow
+  runTest(image, io, 13);
   return 0;
 }

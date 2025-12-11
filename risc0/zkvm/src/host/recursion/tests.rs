@@ -138,10 +138,8 @@ fn prove_segments(session: &Session) -> Result<Vec<SegmentReceipt>> {
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
     let segment_receipts = session
-        .segments
-        .iter()
-        .map(|x| x.resolve().unwrap())
-        .flat_map(|x| prover.prove_segment(&ctx, &x).unwrap())
+        .segments()
+        .flat_map(|x| prover.prove_segment(&ctx, &x.unwrap()).unwrap())
         .collect::<Vec<_>>();
 
     tracing::info!("Done proving rv32im: {} segments", segment_receipts.len());
@@ -588,7 +586,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("eaa9781258978a50eedc56067be88673133e41277ab2fa3ed477e7598886413b")
+        digest!("ab0e9172f4306b6a3b2250055036565c2421683b39ee6c20366d17350756ad19")
     );
 }
 

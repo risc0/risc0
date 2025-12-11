@@ -1408,6 +1408,13 @@ pub const TAPSET: &TapSet = &TapSet::<'static> {
             skip: 1,
         },
         TapData {
+            offset: 198,
+            back: 0,
+            group: 0,
+            combo: 0,
+            skip: 1,
+        },
+        TapData {
             offset: 0,
             back: 0,
             group: 1,
@@ -2852,9 +2859,9 @@ pub const TAPSET: &TapSet = &TapSet::<'static> {
     ],
     combo_taps: &[0, 0, 1],
     combo_begin: &[0, 1, 3],
-    group_begin: &[0, 198, 404],
+    group_begin: &[0, 199, 405],
     combos_count: 2,
-    reg_count: 377,
+    reg_count: 378,
     tot_combo_backs: 3,
     group_names: &["data", "accum"],
 };

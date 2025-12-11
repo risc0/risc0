@@ -17,19 +17,14 @@ use risc0_binfmt::{MemoryImage, Program};
 use test_log::test;
 
 use super::segment_prover;
-use crate::{
-    MAX_INSN_CYCLES,
-    execute::{DEFAULT_SEGMENT_LIMIT_PO2, testutil},
-};
+use crate::execute::testutil;
 
 fn run_program(program: Program) {
     let image = MemoryImage::new_kernel(program);
     let result = testutil::execute(
         image,
-        DEFAULT_SEGMENT_LIMIT_PO2,
-        MAX_INSN_CYCLES,
-        testutil::DEFAULT_SESSION_LIMIT,
-        &testutil::NullSyscall,
+        testutil::DEFAULT_EXECUTION_LIMIT,
+        testutil::NullSyscall,
         None,
     )
     .unwrap();
@@ -42,12 +37,14 @@ fn run_program(program: Program) {
 }
 
 #[test]
+#[cfg_attr(feature = "rv32im-m3", ignore)]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn basic() {
     run_program(testutil::kernel::basic());
 }
 
 #[test]
+#[cfg_attr(feature = "rv32im-m3", ignore)]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn multi_read() {
     run_program(testutil::kernel::multi_read());
@@ -96,6 +93,7 @@ mod riscv {
     macro_rules! test_case {
         ($func_name:ident) => {
             #[test_log::test]
+            #[cfg_attr(feature = "rv32im-m3", ignore)]
             #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
             fn $func_name() {
                 run_test(stringify!($func_name));
