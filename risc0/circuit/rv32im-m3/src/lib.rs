@@ -15,6 +15,10 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 #[cfg(feature = "prove")]
 pub mod prove;
 pub mod verify;
@@ -71,41 +75,40 @@ impl<'a> Decoder<'a> {
         Self { seal }
     }
 
-    fn read(&mut self, len: usize) -> &'a [u32] {
+    fn read(&mut self, len: usize) -> Result<&'a [u32]> {
+        ensure!(len <= self.seal.len(), "Unexpected end of seal");
         let (slice, remain) = self.seal.split_at(len);
         self.seal = remain;
-        slice
+        Ok(slice)
     }
 
-    fn read_u32(&mut self) -> u32 {
-        let slice = self.read(1);
-        slice[0]
+    fn read_u32(&mut self) -> Result<u32> {
+        let slice = self.read(1)?;
+        Ok(slice[0])
     }
 
-    fn read_u32_from_elem(&mut self) -> u32 {
-        Elem::new_raw(self.read_u32()).as_u32()
+    fn read_u32_from_elem(&mut self) -> Result<u32> {
+        Ok(bytemuck::checked::cast::<_, Elem>(self.read_u32()?).as_u32())
     }
 
-    fn read_u32_from_shorts(&mut self) -> u32 {
-        let slice = self.read(2);
-        let (high, low) = (Elem::new(slice[0]), Elem::new(slice[1]));
-        (high.as_u32() & 0xffff) << 16 | (low.as_u32() & 0xffff)
+    fn read_u32_from_shorts(&mut self) -> Result<u32> {
+        let slice = bytemuck::checked::cast_slice::<_, Elem>(self.read(2)?);
+        let (high, low) = (slice[1], slice[0]);
+        let val = (high.as_u32() & 0xffff) << 16 | (low.as_u32() & 0xffff);
+        Ok(val)
     }
 
     fn read_digest_from_words(&mut self) -> Result<Digest> {
-        let slice = self.read(DIGEST_WORDS);
-        let mut buf = slice.to_vec();
-        for word in buf.iter_mut() {
-            *word = Elem::new_raw(*word).as_u32();
-        }
-        Ok(Digest::try_from(buf.as_slice())?)
+        let slice = bytemuck::checked::cast_slice::<_, Elem>(self.read(DIGEST_WORDS)?);
+        let buf = slice.iter().map(|x| x.as_u32()).collect::<Vec<u32>>();
+        Ok(Digest::try_from(buf).unwrap())
     }
 
     fn read_digest_from_shorts(&mut self) -> Result<Digest> {
-        let slice = self.read(DIGEST_SHORTS);
+        let slice = self.read(DIGEST_SHORTS)?;
         let mut digest_bytes = [0; DIGEST_BYTES];
         for i in 0..DIGEST_SHORTS {
-            let elem = Elem::new_raw(slice[i]);
+            let elem: Elem = bytemuck::checked::cast(slice[i]);
             let word = elem.as_u32();
             let short = u16::try_from(word)?;
             let short_bytes = short.to_le_bytes();
@@ -119,16 +122,16 @@ impl Claim {
     pub fn decode(seal: &[u32]) -> Result<Self> {
         let mut decoder = Decoder::new(seal);
 
-        let version = decoder.read_u32();
+        let version = decoder.read_u32()?;
         ensure!(version == RV32IM_SEAL_VERSION, "seal version mismatch");
 
-        let po2 = decoder.read_u32();
+        let po2 = decoder.read_u32()?;
 
         let pre_state = decoder.read_digest_from_words()?;
         let post_state = decoder.read_digest_from_words()?;
-        let is_terminate = decoder.read_u32_from_elem();
-        let term_a0 = decoder.read_u32_from_shorts();
-        let term_a1 = decoder.read_u32_from_shorts();
+        let is_terminate = decoder.read_u32_from_elem()?;
+        let term_a0 = decoder.read_u32_from_shorts()?;
+        let term_a1 = decoder.read_u32_from_shorts()?;
         let output = decoder.read_digest_from_shorts()?;
 
         let (terminate_state, output) = if is_terminate == 1 {
