@@ -345,6 +345,8 @@ impl SegmentUpdate {
     }
 }
 
+const MIN_EXECUTOR_SEGMENT_PO2: usize = 14;
+
 impl<'a, S: Syscall> Executor<'a, S> {
     pub fn new(
         image: MemoryImage,
@@ -479,7 +481,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         Risc0Machine::suspend(self)?;
 
         let cycles = self.segment_cycles().next_power_of_two();
-        let po2 = log2_ceil(cycles as usize);
+        let po2 = std::cmp::max(log2_ceil(cycles as usize), MIN_EXECUTOR_SEGMENT_PO2);
         let segment_threshold_min = u32::min(self.segment_cycles(), limit.segment_threshold());
         let update = self.split_segment(po2, segment_threshold_min)?;
 
