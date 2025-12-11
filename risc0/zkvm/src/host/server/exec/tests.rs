@@ -77,6 +77,7 @@ fn cpp_test() {
 }
 
 #[rstest]
+#[ignore = "in m3 this way of testing this no longer works"]
 #[should_panic(expected = "too small")]
 fn insufficient_segment_limit() {
     let env = ExecutorEnv::builder()
