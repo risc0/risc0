@@ -740,8 +740,8 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
             self.dump_registers(true)?;
             self.dump_registers(false)?;
         }
-        let dispatch_addr =
-            ByteAddr(self.load_memory(TRAP_DISPATCH_ADDR.waddr() + cause.as_u32())?);
+        tracing::debug!("cause: {cause:?}");
+        let dispatch_addr = ByteAddr(self.load_memory(TRAP_DISPATCH_ADDR.waddr())?);
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
             bail!("Invalid trap address: {dispatch_addr:?}, cause: {cause:?}");
         }

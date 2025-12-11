@@ -92,6 +92,7 @@ pub enum Exception {
 }
 
 impl Exception {
+    #[allow(dead_code)]
     pub fn as_u32(&self) -> u32 {
         unsafe { *(self as *const Self as *const u32) }
     }
