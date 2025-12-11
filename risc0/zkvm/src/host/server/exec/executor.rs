@@ -26,7 +26,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use anyhow::{Context as _, Result, anyhow, bail};
+use anyhow::{Context as _, Result, anyhow, bail, ensure};
 use risc0_binfmt::{
     AbiKind, ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, ProgramBinaryHeader,
     SystemState,
@@ -43,8 +43,9 @@ use tempfile::tempdir;
 use tracing::Level;
 
 use crate::{
-    ExecutorEnv, FileSegmentRef, MaybePruned, NullSegmentRef, Segment, SegmentRef,
-    claim::receipt::exit_code_from_terminate_state,
+    Assumptions, ExecutorEnv, FileSegmentRef, MaybePruned, NullSegmentRef, Output, Segment,
+    SegmentRef,
+    claim::{merge::Merge, receipt::exit_code_from_terminate_state},
     host::{client::env::SegmentPath, server::session::Session},
 };
 
@@ -105,8 +106,13 @@ pub(crate) fn circuit_version() -> u32 {
 const MAX_OUTSTANDING_SEGMENTS: usize = 5;
 
 struct SegmentUpdateProcessor {
+    /// Channel used to send SegmentUpdates from the execution thread.
     update_channel: SyncSender<(SegmentUpdate, bool)>,
+    /// Channel used to send the final segment output from the execution thread.
+    output_channel: SyncSender<MaybePruned<Option<Output>>>,
+    /// Channel used to send the segment refs, from the callback, to the execution thread.
     segment_ref_channel: Receiver<Box<dyn SegmentRef>>,
+    /// Channel used to send the pre-image digest to the execution thread.
     pre_image_digest_channel: Receiver<Digest>,
 }
 
@@ -122,6 +128,7 @@ impl SegmentUpdateProcessor {
         let mut image = initial_image.clone();
         let (update_send, update_recv) =
             mpsc::sync_channel::<(SegmentUpdate, bool)>(MAX_OUTSTANDING_SEGMENTS);
+        let (output_send, output_recv) = mpsc::sync_channel(1);
         let (segment_ref_send, segment_ref_recv) = mpsc::channel();
         let (pre_image_digest_send, pre_image_digest_recv) = mpsc::channel();
 
@@ -154,11 +161,24 @@ impl SegmentUpdateProcessor {
                     break;
                 }
 
+                // Add the Output to the Segment. If the output is not none (only true for the
+                // final segment), wait to receive the Output constructed by the execution thread
+                // and merge it into this segment.
+                let mut output =
+                    MaybePruned::Pruned(circuit_segment.output_digest.unwrap_or(Digest::ZERO));
+                if output.is_some() {
+                    output
+                        .merge_with(
+                            &output_recv.recv().context(
+                                "Failed to receipt session output from execution thread",
+                            )?,
+                        )
+                        .context("Failed to merge received session output into segment")?;
+                }
+
                 let segment = Segment {
                     index: circuit_segment.index.try_into().unwrap(),
-                    output: MaybePruned::Pruned(
-                        circuit_segment.output_digest.unwrap_or(Digest::ZERO),
-                    ),
+                    output,
                     inner: circuit_segment,
                 };
                 let segment_ref =
@@ -177,6 +197,7 @@ impl SegmentUpdateProcessor {
 
         SegmentUpdateProcessor {
             update_channel: update_send,
+            output_channel: output_send,
             pre_image_digest_channel: pre_image_digest_recv,
             segment_ref_channel: segment_ref_recv,
         }
@@ -316,6 +337,13 @@ impl<'a> ExecutorImpl<'a> {
             {
                 update_processor.on_segment_update(update)?;
             }
+            // Send the constructed Output to merge into the final segment.
+            update_processor
+                .output_channel
+                .send(self.final_segment_output()?)
+                .context("Failed to send output to segment update processor")?;
+            drop(update_processor.output_channel);
+
             // Close the update channel to indicate to the sidecar thread execution has finished.
             drop(update_processor.update_channel);
 
@@ -460,6 +488,36 @@ impl<'a> ExecutorImpl<'a> {
         .context("Failed to reset executor")?;
 
         Ok(session)
+    }
+
+    /// Constructs the expetced value for the final segment output. This includes the full journal
+    /// and assumptions.
+    fn final_segment_output(&self) -> Result<MaybePruned<Option<Output>>> {
+        let state = self.inner.state();
+        ensure!(
+            state.terminate_state.is_some(),
+            "Cannot compute final segment output for executor that has not terminated"
+        );
+        let output_digest = state.output.unwrap_or(Digest::ZERO);
+        if output_digest == Digest::ZERO {
+            return Ok(None.into());
+        }
+        let journal = self.journal.buf.lock().unwrap().clone();
+        Ok(Some(Output {
+            journal: journal.into(),
+            assumptions: Assumptions(
+                self.inner
+                    .syscall_handler()
+                    .assumptions_used
+                    .lock()
+                    .unwrap()
+                    .iter()
+                    .map(|(a, _)| a.clone().into())
+                    .collect::<Vec<_>>(),
+            )
+            .into(),
+        })
+        .into())
     }
 
     fn execution_limit(&self) -> ExecutionLimit {

@@ -24,8 +24,8 @@ use serde::{Deserialize, Serialize};
 use crate::{
     TerminateState,
     execute::{
-        ExecutionLimit, Executor, ExecutorResult, RV32IM_V2_CIRCUIT_VERSION,
-        executor::ExecutionError,
+        ExecutionLimit, Executor, ExecutorResult, RV32IM_M3_CIRCUIT_VERSION,
+        RV32IM_V2_CIRCUIT_VERSION, executor::ExecutionError,
     },
 };
 
@@ -91,6 +91,11 @@ impl Segment {
             read_pos: Cell::new(0),
             write_pos: Cell::new(0),
         };
+        let circuit_version = if cfg!(feature = "rv32im-m3") {
+            RV32IM_M3_CIRCUIT_VERSION
+        } else {
+            RV32IM_V2_CIRCUIT_VERSION
+        };
 
         Executor::new(
             self.partial_image.clone(),
@@ -98,12 +103,15 @@ impl Segment {
             None,
             vec![],
             None,
-            RV32IM_V2_CIRCUIT_VERSION,
+            circuit_version,
         )
         .run(
             ExecutionLimit::default()
                 .with_segment_po2(self.po2 as usize)
-                .with_soft_session_limit(self.suspend_cycle.into()),
+                .with_soft_session_limit(self.suspend_cycle.into())
+                // Set the max_insn_cycles to 0 to prevent splits based on this. We know we need to
+                // split on suspend_cycle.
+                .with_max_insn_cycles(0),
             |_| Ok(()),
         )
     }

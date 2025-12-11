@@ -65,17 +65,25 @@ void loadUserMachineV2(std::map<uint32_t, uint32_t>& words,
   fillExpandTable(words);
 }
 
-void loadV3(std::map<uint32_t, uint32_t>& words, const std::string& elf) {
-  auto firmwareBytes = risc0::loadFile("firmware/firmware");
-  uint32_t firmwareEntry =
-      risc0::loadElf(ArrayRef(firmwareBytes.data(), firmwareBytes.size()), words);
-  auto elfBytes = risc0::loadFile(elf);
-  uint32_t entry = risc0::loadElf(ArrayRef(elfBytes.data(), elfBytes.size()), words);
-  words[CSR_WORD(MNOV2COMPAT)] = 1;
-  words[CSR_WORD(MEPC)] = entry;
-  words[CSR_WORD(MSPC)] = firmwareEntry;
+void loadUserMachineV3(std::map<uint32_t, uint32_t>& words,
+                       const std::string& kernelElf,
+                       const std::string& userElf) {
+  auto kernelElfBytes = risc0::loadFile(kernelElf);
+  auto userElfBytes = risc0::loadFile(userElf);
+  // Set MEPC so MRET jumpts to start of user mode code
+  uint32_t userEntry = risc0::loadElf(
+      ArrayRef(userElfBytes.data(), userElfBytes.size()), words, USER_START_WORD, USER_END_WORD);
+  words[CSR_WORD(MEPC)] = userEntry;
+  // Put start info into the memory image
+  uint32_t kernelEntry = risc0::loadElf(ArrayRef(kernelElfBytes.data(), kernelElfBytes.size()),
+                                        words,
+                                        KERNEL_START_WORD,
+                                        KERNEL_END_WORD);
+  words[CSR_WORD(MSPC)] = kernelEntry;
   words[CSR_WORD(MSMODE)] = MODE_MACHINE;
+  // Load expansion table
   fillExpandTable(words);
+  words[CSR_WORD(MNOV2COMPAT)] = 1;
 }
 
 } // namespace risc0::rv32im
