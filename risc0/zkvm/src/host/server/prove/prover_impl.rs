@@ -300,7 +300,7 @@ impl ProverServer for ProverImpl {
         let prover = risc0_circuit_rv32im_m3::prove::segment_prover(self.opts.max_segment_po2)?;
         let seal = prover.prove(&preflight_results.inner)?;
 
-        let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output)
+        let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output.clone())
             .context("Decode ReceiptClaim from seal")?;
 
         let verifier_parameters = ctx
@@ -310,7 +310,7 @@ impl ProverServer for ProverImpl {
             .digest();
         let receipt = SegmentReceipt {
             seal,
-            index: preflight_results.segment_index,
+            index: preflight_results.segment_index(),
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,
@@ -446,11 +446,12 @@ mod rv32im_m3 {
     use risc0_circuit_rv32im::TerminateState;
 
     use super::*;
+    use crate::{MaybePruned, Output};
 
     pub(crate) struct PreflightIter {
         max_prover_po2: usize,
         ctx: risc0_circuit_rv32im_m3::prove::SegmentContext,
-        output: Option<Output>,
+        output: MaybePruned<Option<Output>>,
         terminate_state: Option<TerminateState>,
         is_done: bool,
         segment_index: u32,
@@ -462,12 +463,13 @@ mod rv32im_m3 {
             max_prover_po2: usize,
             segment_index: u32,
         ) -> Result<Self> {
+            let terminate_state = segment.inner.terminate_state;
             let ctx = risc0_circuit_rv32im_m3::prove::SegmentContext::new(&segment.inner)?;
             Ok(Self {
                 max_prover_po2,
                 ctx,
                 output: segment.output.clone(),
-                terminate_state: segment.inner.claim.terminate_state,
+                terminate_state,
                 is_done: false,
                 segment_index,
             })
@@ -488,7 +490,11 @@ mod rv32im_m3 {
                     let results = PreflightResults {
                         inner: preflight,
                         terminate_state: self.terminate_state,
-                        output: self.is_done.then(|| self.output.clone()).flatten(),
+                        output: if self.is_done {
+                            self.output.clone()
+                        } else {
+                            Default::default()
+                        },
                         segment_index: self.segment_index,
                     };
                     Some(Ok(results))
