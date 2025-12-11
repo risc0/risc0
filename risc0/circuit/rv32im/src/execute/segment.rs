@@ -71,6 +71,9 @@ pub struct Segment {
     pub povw_nonce: Option<PovwNonce>,
 
     pub insn_counter: u32,
+
+    /// Used to help debug the block tracking
+    pub blocks: crate::execute::BlockCollection,
 }
 
 impl Segment {

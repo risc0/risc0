@@ -276,6 +276,9 @@ pub struct SegmentUpdate {
     index: u64,
     /// Gloablly unique nonce used within the proof of verifiable work system.
     povw_nonce: Option<PovwNonce>,
+
+    /// Used to help debug the block tracking
+    blocks: super::block_tracker::BlockCollection,
 }
 
 impl SegmentUpdate {
@@ -325,6 +328,7 @@ impl SegmentUpdate {
             index: self.index,
             segment_threshold: self.segment_threshold,
             povw_nonce: self.povw_nonce,
+            blocks: self.blocks,
         }
     }
 
@@ -529,6 +533,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             po2: segment_po2 as u32,
             index: self.segment_counter as u64,
             povw_nonce: self.povw_nonce(self.segment_counter),
+            blocks: self.get_blocks(),
         };
 
         // NOTE: There is no reasonable scenario where a session will have more than 4B
@@ -613,6 +618,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             po2: po2 as u32,
             index: index as u64,
             povw_nonce: self.povw_nonce(index),
+            blocks: self.get_blocks(),
         }
     }
 
@@ -633,7 +639,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     fn segment_cycles(&self) -> u32 {
         let blocks = self
             .block_tracker
-            .get_blocks(self.user_cycles, self.pager.touched_pages());
+            .get_blocks(self.insn_counter, self.pager.touched_pages());
         blocks.row_points().div_ceil(POINTS_PER_ROW) as u32
     }
 
@@ -647,6 +653,14 @@ impl<'a, S: Syscall> Executor<'a, S> {
         } else {
             false
         }
+    }
+
+    fn get_blocks(&self) -> super::block_tracker::BlockCollection {
+        let blocks = self
+            .block_tracker
+            .get_blocks(self.user_cycles, self.pager.touched_pages());
+        tracing::debug!("block_tracker blocks = {blocks:?}");
+        blocks
     }
 
     fn inc_user_cycles(&mut self, count: usize, ecall: Option<EcallKind>) {
@@ -734,7 +748,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     #[inline(always)]
     fn on_insn_start(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()> {
-        self.block_tracker.track_pc(self.user_pc.0);
+        self.block_tracker.track_pc(self.pc.0);
 
         let cycle = self.cycles.user;
         self.trace_instruction(cycle, kind, decoded);
@@ -901,6 +915,10 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     fn on_ecall_write_end(&mut self) {
         self.block_tracker.track_ecall_write();
+    }
+
+    fn on_user_ecall(&mut self) {
+        self.block_tracker.track_user_ecall();
     }
 }
 
