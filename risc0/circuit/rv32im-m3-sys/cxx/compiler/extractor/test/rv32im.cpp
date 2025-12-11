@@ -57,6 +57,7 @@ int main() {
   // EXTRACT(PageOutPartBlock);
   // EXTRACT(PageOutPageBlock);
   // EXTRACT(PageUncleBlock);
+  EXTRACT(MakeTableBlock);
 
   // #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
   //   BLOCK_TYPES
