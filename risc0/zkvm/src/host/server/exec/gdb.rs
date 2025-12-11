@@ -13,12 +13,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use std::io::Write;
 use std::net::{SocketAddr, TcpListener};
 
 use crate::host::server::exec::executor::CircuitSyscallTable;
 
 use super::executor::ExecutorImpl;
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use gdbstub::{conn::ConnectionExt, stub::GdbStub};
 use risc0_circuit_rv32im::execute::gdb::Debugger as CircuitDebugger;
 use tempfile::NamedTempFile;
@@ -26,6 +27,7 @@ use tempfile::NamedTempFile;
 type GdbConnection = Box<dyn ConnectionExt<Error = std::io::Error>>;
 
 pub struct GdbExecutor<'a, 'b> {
+    #[allow(dead_code)] // Keeps the temp file alive while debugger runs
     pub(crate) elf: NamedTempFile,
     debugger: CircuitDebugger<'a, 'b, CircuitSyscallTable<'a>>,
     pub(crate) listener: TcpListener,
