@@ -7,7 +7,7 @@ edition = { workspace = true }
 crate-type = ["cdylib"]
 
 [dependencies]
-risc0-zkvm = { path = "../../risc0/zkvm", default-features = false, features = ["rv32im-m3"] }
+risc0-zkvm = { path = "../../risc0/zkvm", default-features = false }
 risc0-zkvm-receipts = { path = "../../risc0/zkvm/receipts" }
 
 # These crates are used for running unit tests.

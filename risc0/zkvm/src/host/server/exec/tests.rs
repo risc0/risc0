@@ -106,11 +106,7 @@ fn basic() {
 
 #[test_log::test]
 fn system_split_v2() {
-    #[cfg(feature = "rv32im-m3")]
     const ITERATIONS: u32 = 10_000;
-
-    #[cfg(not(feature = "rv32im-m3"))]
-    const ITERATIONS: u32 = 200;
 
     let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(ITERATIONS);
     let mut image = MemoryImage::new_kernel(program);
@@ -531,11 +527,7 @@ fn large_io_words() {
         nwords: buf.len() as u32,
     };
 
-    #[cfg(feature = "rv32im-m3")]
     const SESSION_LIMIT: u64 = 20_000_000 * 8;
-
-    #[cfg(not(feature = "rv32im-m3"))]
-    const SESSION_LIMIT: u64 = 20_000_000;
 
     let env = ExecutorEnv::builder()
         .read_fd(FD, bytemuck::cast_slice(&buf))

@@ -25,7 +25,6 @@ use risc0_zkp::core::{
     log2_ceil,
 };
 
-#[cfg(feature = "rv32im-m3")]
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
 use crate::{
@@ -73,7 +72,6 @@ pub struct Executor<'a, S: Syscall> {
     segment_counter: u32,
     insn_counter: u32,
 
-    #[cfg(feature = "rv32im-m3")]
     block_tracker: BlockTracker,
 }
 
@@ -396,7 +394,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
             povw_job_id,
             circuit_version,
             segment_counter: 0,
-            #[cfg(feature = "rv32im-m3")]
             block_tracker: Default::default(),
         }
     }
@@ -549,21 +546,14 @@ impl<'a, S: Syscall> Executor<'a, S> {
         self.cycles.total += total_cycles;
         self.cycles.paging += pager_cycles;
 
-        // XXX remi: For m3, these cycle counts no longer add up to the po2
-        #[cfg(not(feature = "rv32im-m3"))]
-        {
-            let user_cycles = self.user_cycles as u64;
-            self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
-        }
+        // XXX M3: For m3, these cycle counts no longer add up to the po2
+        // let user_cycles = self.user_cycles as u64;
+        // self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
 
         self.user_cycles = 0;
         self.insn_counter = 0;
         self.pager.reset();
-
-        #[cfg(feature = "rv32im-m3")]
-        {
-            self.block_tracker = Default::default();
-        }
+        self.block_tracker = Default::default();
 
         Ok(update)
     }
@@ -644,12 +634,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
         )
     }
 
-    #[cfg(not(feature = "rv32im-m3"))]
-    fn segment_cycles(&self) -> u32 {
-        self.user_cycles + self.pager.cycles + RESERVED_CYCLES as u32
-    }
-
-    #[cfg(feature = "rv32im-m3")]
     fn segment_cycles(&self) -> u32 {
         let blocks = self
             .block_tracker
@@ -657,12 +641,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
         blocks.row_points().div_ceil(POINTS_PER_ROW) as u32
     }
 
-    #[cfg(not(feature = "rv32im-m3"))]
-    fn should_split(&self, segment_threshold: u32) -> bool {
-        self.segment_cycles() > segment_threshold
-    }
-
-    #[cfg(feature = "rv32im-m3")]
     fn should_split(&self, segment_threshold: u32) -> bool {
         let blocks = self
             .block_tracker
@@ -760,7 +738,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     #[inline(always)]
     fn on_insn_start(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()> {
-        #[cfg(feature = "rv32im-m3")]
         self.block_tracker.track_pc(self.user_pc.0);
 
         let cycle = self.cycles.user;
@@ -777,7 +754,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     #[inline(always)]
     fn on_insn_end(&mut self, #[allow(unused_variables)] kind: InsnKind) -> Result<()> {
-        #[cfg(feature = "rv32im-m3")]
         self.block_tracker.track_instr(kind);
 
         self.inc_user_cycles(1, None);
@@ -866,7 +842,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
             .try_into()?;
         self.output_digest = Some(output);
 
-        #[cfg(feature = "rv32im-m3")]
         self.block_tracker.track_ecall_terminate();
 
         Ok(())
@@ -898,7 +873,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     fn ecall_bigint(&mut self) -> Result<()> {
         let verify_program_size = bigint::ecall_execute(self)?;
 
-        #[cfg(feature = "rv32im-m3")]
         self.block_tracker
             .track_ecall_bigint(verify_program_size as u64);
 
@@ -910,7 +884,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     fn ecall_poseidon2(&mut self) -> Result<()> {
         let mut p2 = Poseidon2::load_ecall(self)?;
 
-        #[cfg(feature = "rv32im-m3")]
         self.block_tracker.track_ecall_poseidon2(p2.count as u64);
 
         p2.rest_with_mix(self, CycleState::Decode, |p2, _, ctx| {
@@ -926,12 +899,10 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
         })
     }
 
-    #[cfg(feature = "rv32im-m3")]
     fn on_ecall_read_end(&mut self, read_bytes: u64, read_words: u64) {
         self.block_tracker.track_ecall_read(read_bytes, read_words);
     }
 
-    #[cfg(feature = "rv32im-m3")]
     fn on_ecall_write_end(&mut self) {
         self.block_tracker.track_ecall_write();
     }
