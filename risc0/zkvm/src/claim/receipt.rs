@@ -153,10 +153,7 @@ impl ReceiptClaim {
     }
 
     #[cfg(feature = "rv32im-m3")]
-    pub(crate) fn decode_m3_with_output(
-        seal: &[u32],
-        output: Option<Output>,
-    ) -> anyhow::Result<ReceiptClaim> {
+    pub(crate) fn decode_from_seal_m3(seal: &[u32]) -> anyhow::Result<ReceiptClaim> {
         let claim = risc0_circuit_rv32im_m3::Claim::decode(seal)?;
         tracing::debug!("claim: {claim:#?}");
 
@@ -166,11 +163,7 @@ impl ReceiptClaim {
             _ => claim.post_state,
         };
 
-        let output = if let Some(output) = output {
-            MaybePruned::Value(Some(output))
-        } else {
-            MaybePruned::Pruned(claim.output.unwrap_or_default())
-        };
+        let output = claim.output.map(MaybePruned::Pruned).unwrap_or_default();
 
         Ok(ReceiptClaim {
             pre: MaybePruned::Value(SystemState {
@@ -188,8 +181,18 @@ impl ReceiptClaim {
     }
 
     #[cfg(feature = "rv32im-m3")]
-    pub(crate) fn decode_from_seal_v3(seal: &[u32]) -> anyhow::Result<ReceiptClaim> {
-        Self::decode_m3_with_output(seal, None)
+    pub(crate) fn decode_m3_with_output(
+        seal: &[u32],
+        output: MaybePruned<Option<Output>>,
+    ) -> anyhow::Result<ReceiptClaim> {
+        use crate::claim::merge::Merge;
+
+        let mut claim = Self::decode_from_seal_m3(seal)?;
+        claim
+            .output
+            .merge_with(&output)
+            .context("Provided output does not match decoded output")?;
+        Ok(claim)
     }
 
     #[cfg(not(feature = "rv32im-m3"))]

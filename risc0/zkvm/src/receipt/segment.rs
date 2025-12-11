@@ -109,7 +109,7 @@ impl SegmentReceipt {
         cfg_if::cfg_if! {
             if #[cfg(feature = "rv32im-m3")] {
                 risc0_circuit_rv32im_m3::verify::verify(&self.seal)?;
-                let decoded_claim = ReceiptClaim::decode_from_seal_v3(&self.seal)
+                let decoded_claim = ReceiptClaim::decode_from_seal_m3(&self.seal)
                     .or(Err(VerificationError::ReceiptFormatError))?;
             } else {
                 risc0_circuit_rv32im::verify(&self.seal)?;

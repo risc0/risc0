@@ -126,6 +126,10 @@ impl Poseidon2State {
             self.load_buf_in(ctx, &mut cur_state)?;
             mix(self, &mut cur_state, ctx)?;
             self.count -= 1;
+
+            if self.count != 0 {
+                self.trash_digest(ctx)?;
+            }
         }
 
         self.store_buf_out(ctx, &mut cur_state)?;
@@ -134,6 +138,8 @@ impl Poseidon2State {
 
         if self.has_state == 1 {
             self.store_p2_state(ctx, &mut cur_state)?;
+        } else {
+            self.trash_state(ctx)?;
         }
 
         self.step(ctx, &mut cur_state, final_state, 0);
@@ -198,6 +204,29 @@ impl Poseidon2State {
                 self.inner[2 * i + 1] = word >> 16;
             }
             self.buf_in_addr = buf_in_addr.0;
+        }
+        Ok(())
+    }
+
+    /// In M3, store the digest part of the sponge to the trash address.
+    fn trash_digest(&mut self, ctx: &mut (impl Risc0Context + ?Sized)) -> Result<()> {
+        if ctx.circuit_version() == RV32IM_M3_CIRCUIT_VERSION {
+            for i in 0..DIGEST_WORDS {
+                ctx.store_u32(RV32IM_M3_P2_TRASH_ADDR.waddr() + i, self.inner[i])?;
+            }
+        }
+        Ok(())
+    }
+
+    /// In M3, store the preserved state part of the sponge to the trash address.
+    fn trash_state(&mut self, ctx: &mut (impl Risc0Context + ?Sized)) -> Result<()> {
+        if ctx.circuit_version() == RV32IM_M3_CIRCUIT_VERSION {
+            for i in 0..DIGEST_WORDS {
+                ctx.store_u32(
+                    RV32IM_M3_P2_TRASH_ADDR.waddr() + i,
+                    self.inner[DIGEST_WORDS * 2 + i],
+                )?;
+            }
         }
         Ok(())
     }
