@@ -21,21 +21,21 @@ Assumptions will be automatically resolved when you call [`Prover::prove_with_op
 
 Under the hood, proof composition works by _adding assumptions_ to the [ReceiptClaim] struct, and then _resolving_ those assumptions.
 
-![ReceiptClaim with no assumptions][composition-no-assumptions]
+![ReceiptClaim with no assumptions](https://github.com/risc0/risc0/blob/main/website/static/diagrams/composition-no-assumptions.png)
 
 ### Adding Assumptions
 
 When [`env::verify()`] is called inside the guest program, an [assumption][assumptions] is added to the [ReceiptClaim].
 This results in a "conditional receipt."
 
-![Adding an assumption][composition-add-assumption]
+![Adding an assumption](https://github.com/risc0/risc0/blob/main/website/static/diagrams/composition-add-assumption.png)
 
 ### Resolve an Assumption
 
 In order to finish the process of proof composition, assumptions must be resolved.
 This is accomplished via `resolve`, which is called automatically when users call [`Prover::prove_with_opts`] using `ReceiptKind::Succinct` or `ReceiptKind::Groth16`.
 
-![Resolving an assumption][composition-resolve]
+![Resolving an assumption](https://github.com/risc0/risc0/blob/main/website/static/diagrams/composition-resolve.png)
 
 For a more detailed dive into proof composition and RISC Zero's approach to recursive proving, check out the [Study Club recording].
 
