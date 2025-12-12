@@ -174,7 +174,7 @@ template <typename C> FDEV void DecodeBlock<C>::set(CTX, DecodeWitness witness) 
 template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
   Val<C> instWordAddr = pcDecomp.wordAddr(fetch.pc.get());
   // Always load from the decomposed word initially
-  EQ(instWordAddr, load0.getWordAddr());
+  EQ(instWordAddr, load0.wordAddr.get());
   // Verify low 2 bits relate to isCompressed
   EQ(isCompressed.get(), Val<C>(1) - low16Decomp.low0.get() * low16Decomp.low1.get());
   // Compute address of second read + verify
@@ -182,7 +182,7 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
   Val<C> load1Addr = cond<C>(isCompressed.get(),
                              Val<C>(COMPRESSED_INST_LOOKUP_WORD) + low16(),
                              cond<C>(isUnaligned, instWordAddr + 1, COMPRESSED_INST_LOOKUP_WORD));
-  EQ(load1Addr, load1.getWordAddr());
+  EQ(load1Addr, load1.wordAddr.get());
   // Verify next instruction is right
   EQ(computeNext.low.get(), fetch.nextPc.low.get());
   EQ(computeNext.high.get(), fetch.nextPc.high.get());

@@ -278,7 +278,7 @@ template <typename C> FDEV Val<C> InstLoadBlock<C>::getSignBitInput() DEV {
 }
 
 template <typename C> FDEV void InstLoadBlock<C>::verify(CTX) DEV {
-  EQ(readAddr.wordAddr(computeAddr.get()), readMem.getWordAddr());
+  EQ(readAddr.wordAddr(computeAddr.get()), readMem.wordAddr.get());
   EQ(pickShort.get(),
      cond<C>(readAddr.low1.get(), readMem.data.high.get(), readMem.data.low.get()));
   EQ(pickShort.get(), b1.get() * 256 + b0.get());
@@ -349,7 +349,7 @@ template <typename C> FDEV void InstStoreBlock<C>::set(CTX, InstStoreWitness wit
 }
 
 template <typename C> FDEV void InstStoreBlock<C>::verify(CTX) DEV {
-  EQ(writeAddr.wordAddr(computeAddr.get()), writeMem.getWordAddr());
+  EQ(writeAddr.wordAddr(computeAddr.get()), writeMem.wordAddr.get());
   EQ(pickShort.get(),
      cond<C>(writeAddr.low1.get(), writeMem.prevData.high.get(), writeMem.prevData.low.get()));
   EQ(pickShort.get(), psB1.get() * 256 + psB0.get());
