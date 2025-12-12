@@ -15,7 +15,7 @@
 
 use std::collections::HashMap;
 
-use super::page::PageRef;
+use super::page::{PageRef, PageVersion};
 
 /// One page’s contribution to a segment:
 /// - pre: bytes at segment start
@@ -61,5 +61,13 @@ impl SegmentTracker {
             segment_id: self.id,
             pages: std::mem::take(&mut self.pages),
         }
+    }
+}
+
+impl SegmentPage {
+    pub fn copy_on_write(&mut self) -> PageRef {
+        self.wrote = true;
+        self.post = PageVersion::new(&self.pre.bytes);
+        self.post.clone()
     }
 }

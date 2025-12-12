@@ -89,7 +89,7 @@ impl HostMemory {
             .clone()
     }
 
-    /// Returns (pre, post) versions and raw pointer for writing.
+    /// Returns raw pointer for writing.
     ///
     /// - pre: the version that was visible at segment start.
     /// - post: the version to be used *after* this write (may be new).
@@ -102,21 +102,20 @@ impl HostMemory {
         tracker: &mut SegmentTracker,
         current_tag: u16,
         page_idx: u32,
-    ) -> (PageRef, PageRef) {
+    ) -> PageRef {
         // Ensure a current version exists.
-        let curr = self.ensure_page_ref(page_idx);
+        let page = self.ensure_page_ref(page_idx);
         let slot = &mut self.slots[page_idx as usize];
 
         // Find or create SegmentPage record.
         let entry_idx = if let Some(&i) = tracker.page_index_map.get(&page_idx) {
             i
         } else {
-            let pre = curr.clone();
             let idx = tracker.pages.len();
             tracker.pages.push(SegmentPage {
                 page_idx,
-                pre,
-                post: curr.clone(),
+                pre: page.clone(),
+                post: page.clone(),
                 wrote: false,
             });
             tracker.page_index_map.insert(page_idx, idx);
@@ -124,19 +123,15 @@ impl HostMemory {
         };
 
         let seg_page = &mut tracker.pages[entry_idx];
-        seg_page.wrote = true;
-
-        // Create a new post version (CoW for this segment).
-        let post = PageVersion::new(&seg_page.pre.bytes);
+        let post = seg_page.copy_on_write();
 
         // Update canonical version map and segment record.
         self.versions.insert(page_idx, post.clone());
-        seg_page.post = post.clone();
 
         // Update slot pointer + generation for JIT fast path.
         slot.set(post.bytes.as_ptr(), current_tag);
 
-        (seg_page.pre.clone(), post)
+        post
     }
 
     /// Ensure page exists for read, update generation and segment tracker
@@ -147,35 +142,30 @@ impl HostMemory {
         current_tag: u16,
         page_idx: u32,
     ) -> PageRef {
-        let curr = self.ensure_page_ref(page_idx);
+        let page = self.ensure_page_ref(page_idx);
+        let ptr = page.bytes.as_ptr();
         let slot = &mut self.slots[page_idx as usize];
 
         // First access this segment?
         if slot.tag() != current_tag || slot.ptr.is_null() {
-            tracing::info!("new page");
-            let pre = curr.clone();
             let idx = tracker.pages.len();
             tracker.pages.push(SegmentPage {
                 page_idx,
-                pre: pre.clone(),
-                post: pre.clone(),
+                pre: page.clone(),
+                post: page.clone(),
                 wrote: false,
             });
             tracker.page_index_map.insert(page_idx, idx);
-            let ptr = pre.bytes.as_ptr();
             slot.set(ptr, current_tag);
-            tracing::info!("new slot: {slot:?}");
-
-            pre
         } else {
             // Already active this segment; just return current pointer.
             if slot.ptr().is_null() {
                 // Shouldn't happen: tag matches but no ptr. Fix by re-pointing.
-                let ptr = curr.bytes.as_ptr();
                 slot.set(ptr, current_tag);
             }
-            curr
         }
+
+        page
     }
 
     pub fn load_u32_untracked(&mut self, addr: u32) -> u32 {

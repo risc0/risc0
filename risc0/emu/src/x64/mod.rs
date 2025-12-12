@@ -53,11 +53,6 @@ use self::page::PAGE_SIZE;
 use self::segment::SegmentTracker;
 use crate::rv32im::{Instruction, REG_MAX, RvOp, WORD_SIZE};
 
-enum AccessKind {
-    Load,
-    Store,
-}
-
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 enum Terminal {
@@ -347,6 +342,30 @@ impl Translator {
         Ok(())
     }
 
+    fn check(&self) {
+        let slots = &self.ctx.ram.slots;
+        tracing::info!("slots: {}", slots.len());
+        for (i, slot) in slots.iter().enumerate() {
+            if !slot.is_empty() {
+                tracing::info!("[{i:#010x}]: {:?}", slot.ptr());
+            }
+        }
+        for (&k, v) in self.ctx.ram.versions.iter() {
+            let strong = Arc::strong_count(v);
+            tracing::info!("[{k:#010x}]: ptr={:?}, strong={strong}", v.bytes.as_ptr());
+        }
+
+        tracing::info!("page_index_map: {:#010x?}", self.ctx.tracker.page_index_map);
+        for page in self.ctx.tracker.pages.iter() {
+            tracing::info!(
+                "page: {:#010x}, pre: {:?}, post: {:?}",
+                page.page_idx,
+                page.pre.bytes.as_ptr(),
+                page.post.bytes.as_ptr()
+            );
+        }
+    }
+
     fn jit_loop(&mut self) -> Result<Terminal> {
         self.dump(self.enter_offset()?);
         loop {
@@ -445,8 +464,8 @@ impl JitContext {
         unsafe { &mut *ctx }.jit_load_page_miss(page_idx)
     }
 
-    extern "C" fn jit_store_page_miss_trampoline(ctx: *mut JitContext, addr: u32) -> *const u8 {
-        unsafe { &mut *ctx }.jit_store_page_miss(addr, AccessKind::Store)
+    extern "C" fn jit_store_page_miss_trampoline(ctx: *mut JitContext, page_idx: u32) -> *const u8 {
+        unsafe { &mut *ctx }.jit_store_page_miss(page_idx)
     }
 
     #[inline]
@@ -455,21 +474,16 @@ impl JitContext {
         let page =
             self.ram
                 .ensure_page_read_for_segment(&mut self.tracker, self.current_tag, page_idx);
-        Arc::as_ptr(&page) as *const u8
+        page.bytes.as_ptr()
     }
 
     #[inline]
-    fn jit_store_page_miss(&mut self, addr: u32, kind: AccessKind) -> *const u8 {
-        tracing::info!("jit_store_page_miss: {addr:#010x}");
-
-        let page_idx = addr >> PAGE_SHIFT;
-        let offset = (addr & PAGE_OFFSET_MASK) as usize;
-
-        let (_pre, post) =
+    fn jit_store_page_miss(&mut self, page_idx: u32) -> *const u8 {
+        tracing::info!("jit_store_page_miss: {page_idx:#010x}");
+        let page =
             self.ram
                 .ensure_page_write_for_segment(&mut self.tracker, self.current_tag, page_idx);
-
-        Arc::as_ptr(&post) as *const u8
+        page.bytes.as_ptr()
     }
 
     fn load_u32(&mut self, addr: u32) -> Result<u32> {
