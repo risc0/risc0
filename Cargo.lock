@@ -6100,8 +6100,6 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 [[package]]
 name = "p3-baby-bear"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e45ba447243fce7a5d8788d3e9f8fe808d93f74ac4aab777ffddf3d27893b1e7"
 dependencies = [
  "p3-field",
  "p3-mds",
@@ -6114,8 +6112,6 @@ dependencies = [
 [[package]]
 name = "p3-dft"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3b2764a3982d22d62aa933c8de6f9d71d8a474c9110b69e675dea1887bdeffc"
 dependencies = [
  "itertools 0.14.0",
  "p3-field",
@@ -6128,8 +6124,6 @@ dependencies = [
 [[package]]
 name = "p3-field"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc13a73509fe09c67b339951ca8d4cc6e61c9bf08c130dbc90dda52452918cc2"
 dependencies = [
  "itertools 0.14.0",
  "num-bigint 0.4.6",
@@ -6144,8 +6138,6 @@ dependencies = [
 [[package]]
 name = "p3-matrix"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8e1e9f69c2fe15768b3ceb2915edb88c47398aa22c485d8163deab2a47fe194"
 dependencies = [
  "itertools 0.14.0",
  "p3-field",
@@ -6160,14 +6152,10 @@ dependencies = [
 [[package]]
 name = "p3-maybe-rayon"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33f765046b763d046728b3246b690f81dfa7ccd7523b7a1582c74f616fbce6a0"
 
 [[package]]
 name = "p3-mds"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c90541c6056712daf2ee69ec328db8b5605ae8dbafe60226c8eb75eaac0e1f9"
 dependencies = [
  "p3-dft",
  "p3-field",
@@ -6179,8 +6167,6 @@ dependencies = [
 [[package]]
 name = "p3-monty-31"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c3b66dd563b9458bf38c5885d5c55b1c2be9f9a199deafdb06f0201504f7b13"
 dependencies = [
  "itertools 0.14.0",
  "num-bigint 0.4.6",
@@ -6202,8 +6188,6 @@ dependencies = [
 [[package]]
 name = "p3-poseidon2"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88e9f053f120a78ad27e9c1991a0ea547777328ca24025c42364d6ee2667d59a"
 dependencies = [
  "p3-field",
  "p3-mds",
@@ -6215,8 +6199,6 @@ dependencies = [
 [[package]]
 name = "p3-symmetric"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72d5db8f05a26d706dfd8aaf7aa4272ca4f3e7a075db897ec7108f24fad78759"
 dependencies = [
  "itertools 0.14.0",
  "p3-field",
@@ -6226,8 +6208,6 @@ dependencies = [
 [[package]]
 name = "p3-util"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6dfee67245d9ce78a15176728da2280032f0a84b5819a39a953e7ec03cfd9bd7"
 dependencies = [
  "serde",
 ]
@@ -6774,7 +6754,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be769465445e8c1474e9c5dac2018218498557af32d9ed057325ec9a41ae81bf"
 dependencies = [
  "heck 0.5.0",
- "itertools 0.14.0",
+ "itertools 0.10.5",
  "log",
  "multimap",
  "once_cell",
@@ -6794,7 +6774,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac6c3320f9abac597dcbc668774ef006702672474aad53c6d596b62e487b40b1"
 dependencies = [
  "heck 0.5.0",
- "itertools 0.14.0",
+ "itertools 0.10.5",
  "log",
  "multimap",
  "once_cell",
@@ -6814,7 +6794,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a56d757972c98b346a9b766e3f02746cde6dd1cd1d1d563472929fdd74bec4d"
 dependencies = [
  "anyhow",
- "itertools 0.14.0",
+ "itertools 0.10.5",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -6827,7 +6807,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9120690fafc389a67ba3803df527d0ec9cbbc9cc45e4cc20b332996dfb672425"
 dependencies = [
  "anyhow",
- "itertools 0.14.0",
+ "itertools 0.10.5",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -7739,6 +7719,7 @@ dependencies = [
  "metal",
  "ndarray",
  "p3-baby-bear",
+ "p3-field",
  "p3-symmetric",
  "parking_lot",
  "paste",

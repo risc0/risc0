@@ -1297,6 +1297,7 @@ dependencies = [
  "hex-literal",
  "metal",
  "p3-baby-bear",
+ "p3-field",
  "p3-symmetric",
  "paste",
  "rand_core 0.9.3",

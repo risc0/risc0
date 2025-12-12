@@ -103,3 +103,9 @@ unexpected_cfgs = { level = "warn", check-cfg = [
   'cfg(ci)',
   'cfg(ci_profile, values("fast", "medium", "slow"))',
 ] }
+
+[patch.crates-io]
+p3-monty-31 = { path = "../../src/plonky3/monty-31" }
+p3-baby-bear = { path = "../../src/plonky3/baby-bear" }
+p3-symmetric = { path = "../../src/plonky3/symmetric" }
+p3-field = { path = "../../src/plonky3/field" }
