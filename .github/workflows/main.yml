@@ -120,7 +120,7 @@ jobs:
       - docs-rs
       - examples
       - extra
-      # - test-crates
+      - test-crates
       - test
       - web
     runs-on: ubuntu-latest
@@ -475,7 +475,7 @@ jobs:
       - run: sccache --show-stats
 
   test-crates:
-    if: false # needs.changes.outputs.test-crates == 'true'
+    if: needs.changes.outputs.test-crates == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, Linux, cpu]
     strategy:
@@ -484,20 +484,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: 'risc0'
-      - uses: actions/checkout@v4
-        with:
-          repository: risc0/RustCrypto-crypto-bigint
-          path: 'RustCrypto-crypto-bigint'
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
-      - name: Install risczero toolchain
-        run: |
-          cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-          cargo install --force --path risc0/cargo-risczero -F experimental
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
         working-directory: risc0
-      - name: run cargo risczero test
-        working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
-        run: cargo risczero test
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+        working-directory: risc0
+      - run: cargo install --force --path risc0/cargo-risczero -F experimental
+        working-directory: risc0
+      - run: cargo new --lib simple_lib
+      - run: cargo risczero guest test
+        working-directory: simple_lib
       - run: sccache --show-stats
 
   doc:
