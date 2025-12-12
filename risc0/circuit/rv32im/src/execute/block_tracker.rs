@@ -86,7 +86,7 @@ fn add_blocks_for_insn(blocks: &mut BlockCollection, i: &InsnKind) {
         InsnKind::Rem => blocks!(InstReg, UnitDiv, UnitMul),
         InsnKind::RemU => blocks!(InstReg, UnitDiv, UnitMul),
         InsnKind::Mret => blocks!(InstMret),
-        InsnKind::Eany | InsnKind::Fence | InsnKind::Invalid => {}
+        InsnKind::Eany | InsnKind::Invalid => {}
     }
 }
 
