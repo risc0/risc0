@@ -56,10 +56,14 @@ template <typename C> FDEV void InstResumeBlock<C>::verify(CTX) DEV {
   EQZ(readMode.data.high.get());
   Val<C> mode = readMode.data.low.get() * cond<C>(GLOBAL_GET(v2Compat), MODE_MACHINE, 1);
   EQZ((mode - MODE_USER) * (mode - MODE_SUPERVISOR) * (mode - MODE_MACHINE));
+  // Verify circuit version is set to the current version of the circuit
+  EQZ(writeVersion.data.high.get());
+  EQ(writeVersion.data.low.get(), Val<C>(RV32IM_CIRCUIT_VERSION));
   // Verify we loaded from the right addresses
   EQ(readV2Compat.wordAddr.get(), CSR_WORD(MNOV2COMPAT));
   EQ(readPc.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SPC, CSR_WORD(MSPC)));
   EQ(readMode.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SMODE, CSR_WORD(MSMODE)));
+  EQ(writeVersion.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_VERSION, CSR_WORD(MVERSION)));
 }
 
 template <typename C> FDEV void InstResumeBlock<C>::addArguments(CTX) DEV {
@@ -78,6 +82,12 @@ template <typename C> FDEV void InstSuspendBlock<C>::set(CTX, InstSuspendWitness
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::verify(CTX) DEV {
+  #ifdef PICUS
+  RANGE_POSTCONDITION(ctx, 0, GLOBAL_GET(v2Compat), 2);
+  Val<C> mode = writeMode.data.low.get() * cond<C>(GLOBAL_GET(v2Compat), MODE_MACHINE, 1);
+  CPU_STATE_ARGUMENT(ctx, cycle, writePc.data, mode, iCacheCycle.get());
+  #endif
+
   // Verify terminate
   EQ(GLOBAL_GET(isTerminate), 0);
   // Verify we stored to the right values

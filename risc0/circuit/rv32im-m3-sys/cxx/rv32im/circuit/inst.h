@@ -55,6 +55,7 @@ template <typename C> struct InstSuspendBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "iCacheCycle", iCacheCycle);
     T::apply(ctx, "writePc", writePc, cycle.get());
     T::apply(ctx, "writeMode", writeMode, cycle.get());
   }
