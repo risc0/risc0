@@ -75,10 +75,7 @@ struct RecordingContext {
 
   void globalSet(uint32_t entry, RecordingVal val) {}
   RecordingVal globalGet(uint32_t entry);
-  RecordingVal getX() {
-    // TODO: Add support for 'x' in zirgen + existing proof system
-    return RecordingVal(uint64_t(0));
-  }
+  RecordingVal getX();
 
   mlir::ModuleOp getModuleOp() { return moduleOp; }
 
@@ -109,6 +106,12 @@ struct RecordingContext {
 
   // A map from component instances to their IR values
   ComponentIRMap componentIRMap;
+
+  // A cache of values representing global variables
+  std::map<uint32_t, RecordingVal> globalsCache;
+
+  // A cached value representing global variable 'x'
+  RecordingVal x = RecordingVal(nullptr);
 
   friend struct RecordingVal;
 };

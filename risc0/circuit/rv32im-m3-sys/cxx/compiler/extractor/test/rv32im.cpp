@@ -30,6 +30,7 @@ int main() {
   extractWithValArg<IsZero>(ctx);
   extractWithU32Arg<AddressDecompose>(ctx);
 
+  // EXTRACT(GlobalsBlock);
   // EXTRACT(InstRegBlock);
   // EXTRACT(InstImmBlock);
   // EXTRACT(InstLoadBlock); // slow!
@@ -57,7 +58,7 @@ int main() {
   // EXTRACT(PageOutPartBlock);
   // EXTRACT(PageOutPageBlock);
   // EXTRACT(PageUncleBlock);
-  EXTRACT(MakeTableBlock);
+  // EXTRACT(MakeTableBlock);
 
   // #define BLOCK_TYPE(name, count) EXTRACT(name##Block)
   //   BLOCK_TYPES

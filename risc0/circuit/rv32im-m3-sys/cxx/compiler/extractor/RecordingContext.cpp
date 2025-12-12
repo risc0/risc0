@@ -32,13 +32,28 @@ RecordingContext::RecordingContext(MLIRContext* mlirCtx) : mlirCtx(mlirCtx), bui
 }
 
 RecordingVal RecordingContext::globalGet(uint32_t entry) {
-  // TODO: multiple gets of the same global should return the same value, but
-  // we never actually do this in practice.
-  auto loc = builder.getUnknownLoc();
-  auto ref = zirgen::ZStruct::getRefType(builder.getContext());
-  auto global = builder.create<zirgen::Zhlt::GetGlobalLayoutOp>(loc, ref, std::to_string(entry));
-  auto val = builder.create<zirgen::ZStruct::LoadOp>(loc, global.getResult(), zero);
-  return RecordingVal(val.getResult());
+  if (globalsCache.find(entry) != globalsCache.end()) {
+    // Cache values of globals within a component so that accesses of the same
+    // global are the same MLIR value.
+    return globalsCache.at(entry);
+  } else {
+    auto loc = builder.getUnknownLoc();
+    auto ref = zirgen::ZStruct::getRefType(builder.getContext());
+    auto global = builder.create<zirgen::Zhlt::GetGlobalLayoutOp>(loc, ref, std::to_string(entry));
+    auto val = builder.create<zirgen::ZStruct::LoadOp>(loc, global.getResult(), zero);
+    RecordingVal result(val.getResult());
+    globalsCache.insert({entry, result});
+    return result;
+  }
+}
+
+RecordingVal RecordingContext::getX() {
+  // Cache the value of `x` within a component so that different accesses give
+  // the same MLIR value.
+  if (!x.value) {
+    x = addValParameter();
+  }
+  return x;
 }
 
 void RecordingContext::enterComponent(const char* name, mlir::Type layoutType) {
@@ -74,6 +89,8 @@ void RecordingContext::exitComponent() {
   component->setAttr("picus_analyze", builder.getUnitAttr());
   componentBody = nullptr;
   zero = nullptr;
+  globalsCache.clear();
+  x.value = nullptr;
 }
 
 RecordingVal RecordingContext::addValParameter() {
