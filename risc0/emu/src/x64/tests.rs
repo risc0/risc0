@@ -84,6 +84,7 @@ fn run_program(program: Program) -> (Terminal, JitContext) {
     let mut xlate = Translator::new(program).unwrap();
     xlate.resume().unwrap();
     let terminal = xlate.jit_loop().unwrap();
+    // xlate.check();
     (terminal, xlate.ctx)
 }
 
