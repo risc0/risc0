@@ -289,7 +289,7 @@ jobs:
         run: brew install zstd gettext lz4 mpfr gmp
         if: matrix.os == 'macOS'
       - name: test workspace
-        run: ${{ matrix.test_command }} --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --exclude doc-test
+        run: ${{ matrix.test_command }} --release -F $FEATURE -F block_tracker_debug -F prove -F redis -F unstable --workspace --timings --exclude doc-test
       - name: test risc0-r0vm (disable-dev-mode)
         run: cargo nextest run --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
       - uses: actions/upload-artifact@v4
