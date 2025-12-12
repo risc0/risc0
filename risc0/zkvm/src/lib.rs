@@ -161,6 +161,7 @@ pub use self::{
     claim::{
         Unknown,
         maybe_pruned::{MaybePruned, PrunedValueError},
+        merge::{Merge, MergeInequalityError},
         receipt::{Assumption, Assumptions, Input, Output, ReceiptClaim, UnionClaim},
         work::{Work, WorkClaim},
     },
