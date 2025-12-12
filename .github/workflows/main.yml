@@ -484,6 +484,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: 'risc0'
+          lfs: true
+      - run: git lfs pull
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
