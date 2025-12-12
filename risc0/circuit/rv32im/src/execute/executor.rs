@@ -952,6 +952,11 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     fn on_ecall_write_end(&mut self) {
         self.block_tracker.track_ecall_write();
     }
+
+    #[cfg(feature = "rv32im-m3")]
+    fn on_user_ecall(&mut self) {
+        self.block_tracker.track_user_ecall();
+    }
 }
 
 impl<S: Syscall> SyscallContext for Executor<'_, S> {

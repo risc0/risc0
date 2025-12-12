@@ -165,7 +165,7 @@ impl Default for BlockTracker {
     fn default() -> Self {
         let mut blocks = BlockCollection::default();
 
-        blocks.add_blocks(BlockType::MakeTable, (256 + 65536) / 16);
+        blocks.add_blocks(BlockType::MakeTable, (256u64 + 65536u64) / 16 + 500);
 
         Self {
             pc_cache: Default::default(),
@@ -187,22 +187,30 @@ impl BlockTracker {
 
     pub fn track_ecall_write(&mut self) {
         self.blocks.add_block(BlockType::EcallWrite);
+        self.blocks.add_block(BlockType::InstEcall);
     }
 
     pub fn track_ecall_terminate(&mut self) {
         self.blocks.add_block(BlockType::EcallTerminate);
+        self.blocks.add_block(BlockType::InstEcall);
     }
 
     pub fn track_ecall_read(&mut self, bytes: u64, words: u64) {
         self.blocks.add_block(BlockType::EcallRead);
+        self.blocks.add_block(BlockType::InstEcall);
         self.blocks.add_blocks(BlockType::ReadByte, bytes);
-        self.blocks.add_blocks(BlockType::ReadWord, words);
+        self.blocks.add_blocks(BlockType::ReadWord, words * 4);
     }
 
     pub fn track_ecall_bigint(&mut self, verify_program_size: u64) {
         self.blocks.add_block(BlockType::EcallBigInt);
+        self.blocks.add_block(BlockType::InstEcall);
         self.blocks
             .add_blocks(BlockType::BigInt, verify_program_size);
+    }
+
+    pub fn track_user_ecall(&mut self) {
+        self.blocks.add_block(BlockType::InstEcall);
     }
 
     fn add_p2_blocks(blocks: &mut BlockCollection, num: u64) {
@@ -213,6 +221,7 @@ impl BlockTracker {
 
     pub fn track_ecall_poseidon2(&mut self, block_count: u64) {
         self.blocks.add_block(BlockType::EcallP2);
+        self.blocks.add_block(BlockType::InstEcall);
         self.blocks.add_blocks(BlockType::P2Step, block_count);
         Self::add_p2_blocks(&mut self.blocks, block_count);
     }
@@ -247,7 +256,7 @@ impl BlockTracker {
     }
 
     fn add_table_blocks(blocks: &mut BlockCollection, cycles: u32) {
-        blocks.add_blocks(BlockType::MakeTable, (cycles / 8) as u64);
+        blocks.add_blocks(BlockType::MakeTable, cycles.div_ceil(8) as u64);
     }
 
     pub fn get_blocks(&self, cycles: u32, page_touches: u64) -> BlockCollection {
