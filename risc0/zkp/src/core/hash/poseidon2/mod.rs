@@ -24,7 +24,6 @@ mod rng;
 
 use alloc::{boxed::Box, rc::Rc, vec::Vec};
 
-use p3_baby_bear::Poseidon2BabyBear;
 use p3_symmetric::Permutation;
 use risc0_core::field::{
     Elem, ExtElem,
@@ -194,18 +193,34 @@ fn partial_round(cells: &mut [BabyBearElem; CELLS], round: usize) {
     multiply_by_m_int(cells);
 }
 
+type P3P2 = p3_poseidon2::Poseidon2<
+    p3_baby_bear::BabyBear,
+    p3_baby_bear::Poseidon2ExternalLayerBabyBear<24>,
+    p3_baby_bear::RiscZeroInternalLayer,
+    24,
+    7,
+>;
+
 #[cfg(feature = "std")]
-fn poseidon2_permutation() -> &'static Poseidon2BabyBear<24> {
+fn poseidon2_permutation() -> &'static P3P2 {
     use std::sync::OnceLock;
 
-    static PERMUTATION: OnceLock<Poseidon2BabyBear<24>> = OnceLock::new();
+    static PERMUTATION: OnceLock<P3P2> = OnceLock::new();
 
-    PERMUTATION.get_or_init(p3_baby_bear::default_babybear_poseidon2_24)
+    PERMUTATION.get_or_init(|| {
+        p3_poseidon2::Poseidon2::new(
+            p3_poseidon2::ExternalLayerConstants::new(
+                p3_baby_bear::BABYBEAR_RC24_EXTERNAL_INITIAL.to_vec(),
+                p3_baby_bear::BABYBEAR_RC24_EXTERNAL_FINAL.to_vec(),
+            ),
+            Vec::new(),
+        )
+    })
 }
 
 #[cfg(not(feature = "std"))]
-fn poseidon2_permutation() -> Poseidon2BabyBear<24> {
-    p3_baby_bear::default_babybear_poseidon2_24()
+fn poseidon2_permutation() -> P3P2 {
+    todo!()
 }
 
 /// The raw sponge mixing function
@@ -345,9 +360,7 @@ mod tests {
             0x279d47ec, 0x55014e81, 0x5953a67f, 0x2f403111, 0x6b8828ff, 0x1801301f, 0x2749207a,
             0x3dc9cf21, 0x3c985ba2, 0x57a99864,
         ];
-        for i in 0..CELLS {
-            assert_eq!(buf[i].as_u32(), goal[i]);
-        }
+        assert_eq!(buf.map(|x| x.as_u32()), goal);
 
         tracing::debug!("output: {:?}", buf);
     }
@@ -374,9 +387,7 @@ mod tests {
             (BabyBearElem::from(0x1a496f45_u32)).as_u32_montgomery(),
             (BabyBearElem::from(0x203ca999_u32)).as_u32_montgomery(),
         ];
-        for (i, word) in goal.iter().enumerate() {
-            assert_eq!(result.as_words()[i], *word, "At entry {i}");
-        }
+        assert_eq!(AsRef::<[u32; DIGEST_WORDS]>::as_ref(&*result), &goal);
     }
 
     #[test]
