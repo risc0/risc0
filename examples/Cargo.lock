@@ -4406,6 +4406,7 @@ dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
+ "enum-map",
  "risc0-binfmt",
  "risc0-circuit-rv32im",
  "risc0-circuit-rv32im-m3-sys",
@@ -4427,6 +4428,8 @@ dependencies = [
  "risc0-build-kernel",
  "risc0-sppark",
  "risc0-sys",
+ "serde",
+ "strum",
  "tracing",
 ]
 

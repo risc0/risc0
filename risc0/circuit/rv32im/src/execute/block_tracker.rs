@@ -12,6 +12,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+use serde::{Deserialize, Serialize};
 
 use risc0_circuit_rv32im_m3_sys::BlockType;
 
@@ -90,18 +91,24 @@ fn add_blocks_for_insn(blocks: &mut BlockCollection, i: &InsnKind) {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BlockCollection {
-    #[cfg(feature = "block_tracker_debug")]
-    blocks: enum_map::EnumMap<BlockType, u64>,
+    #[cfg(any(test, feature = "block_tracker_debug"))]
+    blocks: enum_map::EnumMap<BlockType, u32>,
     row_points: u64,
 }
 
 impl Default for BlockCollection {
     fn default() -> Self {
         Self {
-            #[cfg(feature = "block_tracker_debug")]
-            blocks: Default::default(),
+            #[cfg(any(test, feature = "block_tracker_debug"))]
+            blocks: {
+                let mut blocks = enum_map::EnumMap::default();
+                blocks[BlockType::Globals] += 1;
+                blocks[BlockType::InstResume] += 1;
+                blocks[BlockType::InstSuspend] += 1;
+                blocks
+            },
             row_points: BlockType::COUNT as u64 * POINTS_PER_ROW,
         }
     }
@@ -111,7 +118,7 @@ impl BlockCollection {
     fn add_block(&mut self, block: BlockType) {
         self.row_points += row_points(block);
 
-        #[cfg(feature = "block_tracker_debug")]
+        #[cfg(any(test, feature = "block_tracker_debug"))]
         {
             self.blocks[block] += 1;
         }
@@ -120,14 +127,32 @@ impl BlockCollection {
     fn add_blocks(&mut self, block: BlockType, amount: u64) {
         self.row_points += row_points(block) * amount;
 
-        #[cfg(feature = "block_tracker_debug")]
+        #[cfg(any(test, feature = "block_tracker_debug"))]
         {
-            self.blocks[block] += amount;
+            self.blocks[block] += u32::try_from(amount).unwrap();
         }
     }
 
     pub fn row_points(&self) -> u64 {
         self.row_points
+    }
+
+    pub fn assert_preflight_counts(&self, _preflight: enum_map::EnumMap<BlockType, u32>) {
+        #[cfg(any(test, feature = "block_tracker_debug"))]
+        {
+            for b in BlockType::iter() {
+                assert!(
+                    _preflight[b] <= self.blocks[b],
+                    "block_tracker count was too low: {b:?} {} > {}\n\
+                     executor = {:#?}\n\
+                     preflight = {:#?}",
+                    _preflight[b],
+                    self.blocks[b],
+                    &self.blocks,
+                    &_preflight,
+                );
+            }
+        }
     }
 }
 

@@ -281,6 +281,10 @@ pub struct SegmentUpdate {
     index: u64,
     /// Gloablly unique nonce used within the proof of verifiable work system.
     povw_nonce: Option<PovwNonce>,
+
+    /// Used to help debug the block tracking
+    #[cfg(feature = "rv32im-m3")]
+    blocks: super::block_tracker::BlockCollection,
 }
 
 impl SegmentUpdate {
@@ -330,6 +334,8 @@ impl SegmentUpdate {
             index: self.index,
             segment_threshold: self.segment_threshold,
             povw_nonce: self.povw_nonce,
+            #[cfg(feature = "rv32im-m3")]
+            blocks: self.blocks,
         }
     }
 
@@ -478,14 +484,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         Risc0Machine::suspend(self)?;
 
-        #[cfg(feature = "rv32im-m3")]
-        {
-            let blocks = self
-                .block_tracker
-                .get_blocks(self.user_cycles, self.pager.touched_pages());
-            tracing::debug!("block_tracker blocks = {blocks:?}");
-        }
-
         let cycles = self.segment_cycles().next_power_of_two();
         let po2 = log2_ceil(cycles as usize);
         let segment_threshold_min = u32::min(self.segment_cycles(), limit.segment_threshold());
@@ -541,6 +539,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
             po2: segment_po2 as u32,
             index: self.segment_counter as u64,
             povw_nonce: self.povw_nonce(self.segment_counter),
+            #[cfg(feature = "rv32im-m3")]
+            blocks: self.get_blocks(),
         };
 
         // NOTE: There is no reasonable scenario where a session will have more than 4B
@@ -633,6 +633,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
             po2: po2 as u32,
             index: index as u64,
             povw_nonce: self.povw_nonce(index),
+            #[cfg(feature = "rv32im-m3")]
+            blocks: self.get_blocks(),
         }
     }
 
@@ -679,6 +681,15 @@ impl<'a, S: Syscall> Executor<'a, S> {
         } else {
             false
         }
+    }
+
+    #[cfg(feature = "rv32im-m3")]
+    fn get_blocks(&self) -> super::block_tracker::BlockCollection {
+        let blocks = self
+            .block_tracker
+            .get_blocks(self.user_cycles, self.pager.touched_pages());
+        tracing::debug!("block_tracker blocks = {blocks:?}");
+        blocks
     }
 
     fn inc_user_cycles(&mut self, count: usize, ecall: Option<EcallKind>) {

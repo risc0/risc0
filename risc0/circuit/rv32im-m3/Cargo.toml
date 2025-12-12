@@ -15,6 +15,7 @@ release = false
 anyhow = { version = "1.0", default-features = false }
 bytemuck = "1.13"
 cfg-if = { version = "1.0", optional = true }
+enum-map = "2.7.3"
 risc0-binfmt = { workspace = true }
 risc0-circuit-rv32im = { workspace = true, optional = true }
 risc0-circuit-rv32im-m3-sys = { workspace = true, optional = true }

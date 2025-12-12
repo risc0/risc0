@@ -1457,6 +1457,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "enum-map",
  "risc0-binfmt",
  "risc0-zkp",
  "risc0-zkvm-platform",
