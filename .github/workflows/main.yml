@@ -488,6 +488,7 @@ jobs:
       - run: git lfs pull
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
+      - uses: ./risc0/.github/actions/protoc
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
         working-directory: risc0
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
