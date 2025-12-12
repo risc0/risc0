@@ -1428,6 +1428,7 @@ dependencies = [
  "metal",
  "p3-baby-bear",
  "p3-field",
+ "p3-poseidon2",
  "p3-symmetric",
  "paste",
  "rand_core 0.9.3",

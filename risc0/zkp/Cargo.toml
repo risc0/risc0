@@ -24,6 +24,8 @@ generic-array = "=0.14.7"
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 hex-literal = "0.4.1"
 p3-baby-bear = "0.3.0"
+p3-field = "0.3.0"
+p3-poseidon2 = "0.3.0"
 p3-symmetric = "0.3.0"
 paste = "1.0"
 rand_core = "0.9.3"

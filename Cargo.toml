@@ -108,4 +108,5 @@ unexpected_cfgs = { level = "warn", check-cfg = [
 p3-monty-31 = { path = "../../src/plonky3/monty-31" }
 p3-baby-bear = { path = "../../src/plonky3/baby-bear" }
 p3-symmetric = { path = "../../src/plonky3/symmetric" }
+p3-poseidon2 = { path = "../../src/plonky3/poseidon2" }
 p3-field = { path = "../../src/plonky3/field" }
