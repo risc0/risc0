@@ -20,10 +20,10 @@ pub const FP_REGS_SIZE: usize = NUM_FP_REGS * FP_REG_SIZE; // 256 bytes total
 pub const USER_REGS_PTR: *mut u32 = 0xffff_0080 as *mut u32;
 pub const MEPC_PTR: *mut usize = 0xffff_0200 as *mut usize;
 // Floating point register storage area (32 x 64-bit registers = 256 bytes)
-pub const FP_REGS_PTR: *mut u64 = 0xffff_4000 as *mut u64;
+pub const FP_REGS_PTR: *mut u64 = 0xffff_a000 as *mut u64;
 // Floating point control and status register (FCSR) storage
 #[allow(dead_code)]
-pub const FCSR_PTR: *mut u32 = 0xffff_4100 as *mut u32;
+pub const FCSR_PTR: *mut u32 = 0xffff_a100 as *mut u32;
 // Memory layout constants for RISC-V RV32 in zkOS
 // The address space is divided into:
 // - User space: 0x00000000 - 0xBFFFFFFF (3GB)
@@ -73,8 +73,8 @@ pub const USER_BRK_ADDR: *const usize = 0xffff_3020 as *const usize;
 /// Filesystem image address (set by elf-to-bin tool)
 pub const FILESYSTEM_IMAGE_ADDR_PTR: *const u32 = 0xffff_3030 as *const u32;
 
-// Shadow register storage area for supervisor CSRs (starting at 0xffff_5000)
-pub const SHADOW_REGS_PTR: *mut u32 = 0xffff_5000 as *mut u32;
+// Shadow register storage area for supervisor CSRs (starting at 0xffff_b000)
+pub const SHADOW_REGS_PTR: *mut u32 = 0xffff_b000 as *mut u32;
 
 // Supervisor CSR offsets within shadow register area
 pub const STVEC_OFFSET: usize = 0; // Supervisor trap vector base address
