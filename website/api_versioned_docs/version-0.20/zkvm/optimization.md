@@ -376,7 +376,7 @@ proving times, to reduce compute costs, or both. RISC Zero can leverage hardware
 accelerators, the ones made of real silicon this time, to accomplish both of
 these objectives.
 
-With an NVIDIA graphics card, proving can be accelerated through the [CUDA]
+With a NVIDIA graphics card, proving can be accelerated through the [CUDA]
 implementation. When running a zkVM application, a compatible version of the
 CUDA runtime needs to be installed. When building the zkVM from source, a
 compatible version of the CUDA toolkit needs to be installed on the build
