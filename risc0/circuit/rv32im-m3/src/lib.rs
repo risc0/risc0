@@ -34,6 +34,9 @@ use risc0_zkp::{
 use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "prove")]
+pub use risc0_circuit_rv32im_m3_sys::BlockType;
+
 /// Version of the seal for the m3-variant of the rv32im circuit.
 pub const RV32IM_SEAL_VERSION: u32 = 3;
 

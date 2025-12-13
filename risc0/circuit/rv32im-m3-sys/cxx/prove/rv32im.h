@@ -34,6 +34,7 @@ struct PreflightResults {
   uint32_t cycles; // How many cycles did this preflight do
   std::vector<RowInfo> rowInfo;
   std::vector<uint32_t> aux;
+  uint32_t block_counts[NUM_BLOCK_TYPES];
 };
 
 using PreflightResultsPtr = std::shared_ptr<PreflightResults>;

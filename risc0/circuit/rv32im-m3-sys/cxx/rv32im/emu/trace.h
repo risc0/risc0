@@ -32,6 +32,7 @@ private:
   uint32_t* auxNext;
   GlobalsWitness* globals;
   uint32_t userCycles = 0;
+  uint32_t* block_counts;
 
 #define BLOCK_TYPE(name, count)                                                                    \
   RowInfo* row##name = nullptr;                                                                    \
@@ -41,7 +42,7 @@ private:
 #undef BLOCK_TYPE
 
 public:
-  Trace(size_t maxRows, RowInfo* rows, uint32_t* aux);
+  Trace(size_t maxRows, RowInfo* rows, uint32_t* aux, uint32_t* block_counts);
   ~Trace();
 
   inline GlobalsWitness& getGlobals() { return *globals; }
@@ -61,6 +62,7 @@ public:
       auxNext = reinterpret_cast<uint32_t*>(wit##name##End);                                       \
     }                                                                                              \
     row##name->blockCount++;                                                                       \
+    block_counts[static_cast<int>(BlockType::name)]++;                                             \
     return *wit##name##Begin++;                                                                    \
   }
   BLOCK_TYPES

@@ -86,7 +86,7 @@ preflight(size_t po2, rv32im::MemoryImage& image, rv32im::HostIO& io, uint32_t e
   auto results = std::make_shared<PreflightResults>();
   results->rowInfo.resize(rows);
   results->aux.resize(rows * computeMaxWitPerRow());
-  Trace trace(rows, results->rowInfo.data(), results->aux.data());
+  Trace trace(rows, results->rowInfo.data(), results->aux.data(), &results->block_counts[0]);
   results->isFinal = emulate(trace, image, io, rows, endCycle);
   results->cycles = trace.getUserCycles();
   LOG(1,

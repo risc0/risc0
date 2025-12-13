@@ -7366,6 +7366,7 @@ dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
+ "enum-map",
  "flate2",
  "gpu-guard",
  "risc0-binfmt",
@@ -7392,6 +7393,8 @@ dependencies = [
  "risc0-build-kernel",
  "risc0-sppark",
  "risc0-sys",
+ "serde",
+ "strum",
  "tracing",
 ]
 

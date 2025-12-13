@@ -169,6 +169,12 @@ impl PreflightResults {
     pub fn po2(&self) -> u32 {
         self.inner.po2()
     }
+
+    /// The counts of the different blocks used during preflight
+    #[cfg(feature = "rv32im-m3")]
+    pub fn block_counts(&self) -> enum_map::EnumMap<risc0_circuit_rv32im_m3::BlockType, u32> {
+        self.inner.block_counts()
+    }
 }
 
 /// A reference to a [Segment].

@@ -231,6 +231,8 @@ pub(crate) trait Risc0Context {
     fn on_ecall_read_end(&mut self, _read_bytes: u64, _read_words: u64) {}
 
     fn on_ecall_write_end(&mut self) {}
+
+    fn on_user_ecall(&mut self) {}
 }
 
 #[cfg(test)]
@@ -427,6 +429,8 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
             return self.trap(Exception::UserEnvCall(dispatch_addr));
         }
+
+        self.ctx.on_user_ecall();
 
         self.enter_trap(dispatch_addr)?;
         Ok(true)
