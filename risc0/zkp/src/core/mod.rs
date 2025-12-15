@@ -31,8 +31,8 @@ use rand_core::RngCore;
 /// ```rust
 /// # use risc0_zkp::core::to_po2;
 /// #
-/// assert_eq!(to_po2(7), 2);
-/// assert_eq!(to_po2(10), 3);
+/// assert_eq!(to_po2(4), 2); // 4 = 1 << 2
+/// assert_eq!(to_po2(8), 3); // 8 = 1 << 3
 /// ```
 pub fn to_po2(x: usize) -> usize {
     (31 - (x as u32).leading_zeros()) as usize
