@@ -39,13 +39,17 @@ Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal,
   dataInfo.witgen = [hal, rowInfo, aux, tables, doValidate](std::vector<GroupState>& state) {
     LOG(1, "Computing data witness");
     {
-      // Copy across any input globals
+      // Clear initial global values
+      PinnedArrayWO<Fp> globalFp(hal, state[0].global);
+      for (size_t i = 0; i < globalFp.size(); i++) {
+        globalFp[i] = 0;
+      }
+      // Copy across the one special global that is needed during 'set'
+      // TODO: Remove when we get rid of v2Compat
       PinnedArrayRO<uint32_t> globalAux(hal,
                                         aux.slice(0, sizeof(GlobalsWitness) / sizeof(uint32_t)));
-      PinnedArrayWO<Fp> globalFp(hal, state[0].global);
       const GlobalsWitness* wit = reinterpret_cast<const GlobalsWitness*>(globalAux.data());
       Globals* globals = reinterpret_cast<Globals*>(globalFp.data());
-      memset(globals, 0, sizeof(Globals));
       globals->v2Compat = wit->v2Compat;
     }
     hal->zero(tables);
