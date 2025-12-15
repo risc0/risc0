@@ -7344,7 +7344,6 @@ dependencies = [
  "rayon",
  "ringbuffer",
  "risc0-binfmt",
- "risc0-circuit-rv32im-m3-sys",
  "risc0-circuit-rv32im-sys",
  "risc0-core",
  "risc0-sys",
@@ -7370,7 +7369,7 @@ dependencies = [
  "gpu-guard",
  "risc0-binfmt",
  "risc0-circuit-rv32im",
- "risc0-circuit-rv32im-m3-sys",
+ "risc0-circuit-rv32im-sys",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
@@ -7381,8 +7380,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-circuit-rv32im-m3-sys"
-version = "0.0.0"
+name = "risc0-circuit-rv32im-sys"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "cc",
@@ -7393,20 +7392,6 @@ dependencies = [
  "risc0-sppark",
  "risc0-sys",
  "tracing",
-]
-
-[[package]]
-name = "risc0-circuit-rv32im-sys"
-version = "5.0.0"
-dependencies = [
- "cc",
- "cust",
- "derive_more",
- "glob",
- "risc0-build-kernel",
- "risc0-core",
- "risc0-sppark",
- "risc0-sys",
 ]
 
 [[package]]

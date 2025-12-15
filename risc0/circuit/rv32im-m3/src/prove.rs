@@ -18,7 +18,7 @@ use std::ptr::NonNull;
 use anyhow::Result;
 use cfg_if::cfg_if;
 use risc0_circuit_rv32im::execute::Segment;
-use risc0_circuit_rv32im_m3_sys::*;
+use risc0_circuit_rv32im_sys::*;
 use risc0_zkp::{core::digest::DIGEST_WORDS, field::baby_bear::Elem};
 
 use crate::verify::verify;
@@ -26,21 +26,21 @@ use crate::verify::verify;
 pub type Seal = Vec<u32>;
 
 pub struct SegmentContext {
-    ctx: NonNull<risc0_circuit_rv32im_m3_sys::SegmentContext>,
+    ctx: NonNull<risc0_circuit_rv32im_sys::SegmentContext>,
 }
 
 /// Safety: A [PreflightContext] is an immutable object that can be safely
 /// passed between threads.
 #[derive(Default)]
 pub struct PreflightContext {
-    ctx: *const risc0_circuit_rv32im_m3_sys::PreflightContext,
+    ctx: *const risc0_circuit_rv32im_sys::PreflightContext,
     po2: u32,
 }
 
 unsafe impl Send for PreflightContext {}
 
 pub struct ProverContext {
-    ctx: NonNull<risc0_circuit_rv32im_m3_sys::ProverContext>,
+    ctx: NonNull<risc0_circuit_rv32im_sys::ProverContext>,
 }
 
 impl SegmentContext {
