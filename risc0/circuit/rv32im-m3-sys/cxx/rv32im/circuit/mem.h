@@ -74,4 +74,3 @@ template <typename C> using RegMemWriteBlock = PhysMemWriteBlock<C>;
 // but for now, they are just typedefs
 template <typename C> using VirtMemReadBlock = PhysMemReadBlock<C>;
 template <typename C> using VirtMemWriteBlock = PhysMemWriteBlock<C>;
-
