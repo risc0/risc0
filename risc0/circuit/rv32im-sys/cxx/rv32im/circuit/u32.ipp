@@ -58,7 +58,7 @@ template <typename C> FDEV void AddressDecompose<C>::verify(CTX, ValU32<C> val) 
 }
 
 template <typename C> FDEV void AddressVerify<C>::set(CTX, uint32_t val, uint32_t mode) DEV {
-  uint32_t max = (mode == MODE_MACHINE ? 0xffff :  0xbfff);
+  uint32_t max = (mode == MODE_MACHINE ? 0xffff : 0xbfff);
   highSub.set(ctx, max - (val >> 16));
 }
 

@@ -47,7 +47,8 @@ template <typename C> FDEV void InstResumeBlock<C>::addArguments(CTX) DEV {
   ctx.push(CpuStateArgument<C>(2, pc, mode, 1));
   uint32_t maxAddr = 0x40000000;
   for (size_t i = 0; i < 8; i++) {
-    ctx.push(MemoryArgument<C>(maxAddr + i, 0, GLOBAL_GET(povwNonce[i].low), GLOBAL_GET(povwNonce[i].high)));
+    ctx.push(MemoryArgument<C>(
+        maxAddr + i, 0, GLOBAL_GET(povwNonce[i].low), GLOBAL_GET(povwNonce[i].high)));
   }
 }
 
@@ -77,7 +78,8 @@ template <typename C> FDEV void InstSuspendBlock<C>::addArguments(CTX) DEV {
   ctx.push(CpuStateArgument<C>(cycleVal + 1, 0, 0, 0, 0));
   uint32_t maxAddr = 0x40000000;
   for (size_t i = 0; i < 8; i++) {
-    ctx.pull(MemoryArgument<C>(maxAddr + i, 0, GLOBAL_GET(povwNonce[i].low), GLOBAL_GET(povwNonce[i].high)));
+    ctx.pull(MemoryArgument<C>(
+        maxAddr + i, 0, GLOBAL_GET(povwNonce[i].low), GLOBAL_GET(povwNonce[i].high)));
   }
 }
 
