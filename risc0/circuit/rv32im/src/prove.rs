@@ -15,9 +15,9 @@
 
 use std::ptr::NonNull;
 
+use crate::execute::Segment;
 use anyhow::Result;
 use cfg_if::cfg_if;
-use risc0_circuit_rv32im::execute::Segment;
 use risc0_circuit_rv32im_sys::*;
 use risc0_zkp::{core::digest::DIGEST_WORDS, field::baby_bear::Elem};
 
@@ -193,10 +193,10 @@ pub fn segment_prover(po2: usize) -> Result<ProverContext> {
 #[cfg(test)]
 #[cfg(feature = "cuda")]
 mod tests {
-    use risc0_binfmt::{MemoryImage, Program};
-    use risc0_circuit_rv32im::execute::{
+    use crate::execute::{
         ExecutionLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, SegmentUpdate, Syscall, SyscallContext,
     };
+    use risc0_binfmt::{MemoryImage, Program};
 
     use super::*;
 

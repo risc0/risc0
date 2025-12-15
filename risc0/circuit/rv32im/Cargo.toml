@@ -25,6 +25,7 @@ paste = "1.0"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true, default-features = false }
+risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = [
   "derive",
   "alloc",
@@ -60,6 +61,7 @@ gpu-guard = { workspace = true }
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
 flate2 = "1.0"
+gpu-guard = { workspace = true }
 tar = "0.4"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
