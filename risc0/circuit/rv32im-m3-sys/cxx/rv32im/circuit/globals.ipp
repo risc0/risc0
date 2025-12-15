@@ -26,6 +26,10 @@ template <typename C> FDEV void GlobalsBlock<C>::set(CTX, GlobalsWitness wit) DE
     rootOut[i].set(ctx, wit.rootOut[i]);
     GLOBAL_SET(rootOut[i], wit.rootOut[i]);
   }
+  for (size_t i = 0; i < 8; i++) {
+    GLOBAL_SET(povwNonce[i].low, wit.povwNonce[i] & 0xffff);
+    GLOBAL_SET(povwNonce[i].high, wit.povwNonce[i] >> 16);
+  }
 }
 
 template <typename C> FDEV void GlobalsBlock<C>::verify(CTX) DEV {
