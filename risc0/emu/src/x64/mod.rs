@@ -237,11 +237,8 @@ const JITCTX_PAGE_TABLE_OFFSET: i32 = offset_of!(JitContext, page_table) as i32;
 const JITCTX_LOAD_PAGE_MISS_OFFSET: i32 = offset_of!(JitContext, jit_load_page_miss) as i32;
 const JITCTX_STORE_PAGE_MISS_OFFSET: i32 = offset_of!(JitContext, jit_store_page_miss) as i32;
 
-const HOST_WORD_SIZE: usize = usize::BITS as usize / 8;
+const HOST_WORD_SIZE: usize = (usize::BITS / u8::BITS) as usize;
 const HOST_PAGE_SIZE: usize = 4096;
-
-const CALLEE_REGISTERS: &[GPR] = &[GPR::RBX, GPR::RBP, GPR::R12, GPR::R13, GPR::R14, GPR::R15];
-const STACK_SPACE: usize = CALLEE_REGISTERS.len() * HOST_WORD_SIZE;
 
 // This is visible to the generated x64 code.
 #[repr(C)]
