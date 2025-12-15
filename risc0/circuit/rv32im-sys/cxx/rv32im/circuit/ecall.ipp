@@ -71,6 +71,11 @@ template <typename C> FDEV void EcallTerminateBlock<C>::addArguments(CTX) DEV {
   ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, 0, 0, 0, 0));
   VERIFY_DECODE
+  uint32_t maxAddr = 0x40000000;
+  for (size_t i = 0; i < 8; i++) {
+    ctx.pull(MemoryArgument<C>(
+        maxAddr + i, 0, GLOBAL_GET(povwNonce[i].low), GLOBAL_GET(povwNonce[i].high)));
+  }
 }
 
 template <typename C> FDEV void EcallReadBlock<C>::set(CTX, EcallReadWitness wit) DEV {

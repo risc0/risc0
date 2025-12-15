@@ -121,17 +121,13 @@ struct Emulator {
   }
 
   // Foward all the virtual memory calls for now until we add smode support
-  inline uint32_t peekVirtMemory(uint32_t wordAddr) {
-    return peekPhysMemory(wordAddr); 
-  }
+  inline uint32_t peekVirtMemory(uint32_t wordAddr) { return peekPhysMemory(wordAddr); }
 
   inline uint32_t readVirtMemory(VirtMemReadWitness& record, uint32_t vWordAddr) {
     return readPhysMemory(record, vWordAddr);
   }
 
-  inline void undoReadVirtMemory(VirtMemReadWitness& record) {
-    undoReadPhysMemory(record);
-  }
+  inline void undoReadVirtMemory(VirtMemReadWitness& record) { undoReadPhysMemory(record); }
 
   inline void writeVirtMemory(VirtMemWriteWitness& record, uint32_t vWordAddr, uint32_t value) {
     writePhysMemory(record, vWordAddr, value);
