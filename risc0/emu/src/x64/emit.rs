@@ -26,6 +26,8 @@ use super::memory::{
 };
 use super::*;
 
+const CALLEE_REGISTERS: &[GPR] = &[GPR::RBX, GPR::RBP, GPR::R12, GPR::R13, GPR::R14, GPR::R15];
+
 macro_rules! dynasm_x64 {
     ($asm:expr ; $($tt:tt)*) => {
         dynasmrt::dynasm!($asm
