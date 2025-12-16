@@ -467,11 +467,11 @@ impl JobActor {
             return Ok(());
         }
 
-        let Some(session) = self.session.clone() else {
+        let Some(session) = self.session.as_ref() else {
             return Ok(());
         };
 
-        let Some(join_root) = self.join_root(&session)? else {
+        let Some(join_root) = self.join_root(session)? else {
             return Ok(());
         };
 
@@ -480,11 +480,11 @@ impl JobActor {
             .get_or_insert_with(|| join_root.clone())
             .clone();
 
-        if !self.resolve_assumptions(&session, &final_receipt).await? {
+        if !self.resolve_assumptions(session, &final_receipt).await? {
             return Ok(());
         }
 
-        self.finish(&session, final_receipt, self_ref).await?;
+        self.finish(session, final_receipt, self_ref).await?;
 
         Ok(())
     }
