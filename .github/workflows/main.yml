@@ -496,9 +496,10 @@ jobs:
         working-directory: risc0
       - run: cargo install --force --path ./risc0/cargo-risczero -F experimental
         working-directory: risc0
-      - run: cargo new --lib simple_lib
+      - run: cargo new --lib simple_lib --vcs none
+        working-directory: "${{ runner.temp }}"
       - run: cargo risczero guest test
-        working-directory: simple_lib
+        working-directory: "${{ runner.temp }}/simple_lib"
       - run: sccache --show-stats
 
   doc:
