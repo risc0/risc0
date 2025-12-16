@@ -486,6 +486,7 @@ jobs:
           path: 'risc0'
           lfs: true
       - run: git lfs pull
+        working-directory: risc0
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
       - uses: ./risc0/.github/actions/protoc
@@ -493,7 +494,7 @@ jobs:
         working-directory: risc0
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
         working-directory: risc0
-      - run: cargo install --force --path risc0/cargo-risczero -F experimental
+      - run: cargo install --force --path ./risc0/cargo-risczero -F experimental
         working-directory: risc0
       - run: cargo new --lib simple_lib
       - run: cargo risczero guest test
