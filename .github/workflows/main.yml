@@ -489,7 +489,7 @@ jobs:
         working-directory: risc0
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
-      - uses: ./risc0/.github/actions/protoc
+      # - uses: ./risc0/.github/actions/protoc DO NOT MERGE
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
         working-directory: risc0
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
