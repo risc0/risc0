@@ -150,9 +150,6 @@ impl Segment {
 
 /// The results of running preflight on a [Segment].
 pub struct PreflightResults {
-    #[cfg(not(feature = "rv32im-m3"))]
-    pub(crate) inner: risc0_circuit_rv32im::prove::PreflightResults,
-    #[cfg(feature = "rv32im-m3")]
     pub(crate) inner: risc0_circuit_rv32im_m3::prove::PreflightContext,
     pub(crate) terminate_state: Option<TerminateState>,
     pub(crate) output: MaybePruned<Option<Output>>,

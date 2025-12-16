@@ -37,14 +37,14 @@ fn run_program(program: Program) {
 }
 
 #[test]
-#[cfg_attr(feature = "rv32im-m3", ignore)]
+#[ignore = "XXX M3: delete"]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn basic() {
     run_program(testutil::kernel::basic());
 }
 
 #[test]
-#[cfg_attr(feature = "rv32im-m3", ignore)]
+#[ignore = "XXX M3: delete"]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn multi_read() {
     run_program(testutil::kernel::multi_read());
@@ -93,7 +93,7 @@ mod riscv {
     macro_rules! test_case {
         ($func_name:ident) => {
             #[test_log::test]
-            #[cfg_attr(feature = "rv32im-m3", ignore)]
+            #[ignore = "XXX M3: delete"]
             #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
             fn $func_name() {
                 run_test(stringify!($func_name));

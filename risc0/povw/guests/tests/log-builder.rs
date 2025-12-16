@@ -383,6 +383,7 @@ fn prove_three_sequential_updates_inner() -> anyhow::Result<()> {
     Ok(())
 }
 
+// XXX M3
 #[test]
 #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
 #[gpu_guard::gpu_guard]

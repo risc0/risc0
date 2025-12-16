@@ -595,12 +595,9 @@ impl GpuProcessor {
             i64::from(task.preflight_results.po2()),
         ));
 
-        #[cfg(feature = "rv32im-m3")]
-        {
-            tracer
-                .span
-                .set_attribute(opentelemetry::KeyValue::new("rv32im-m3", true));
-        }
+        tracer
+            .span
+            .set_attribute(opentelemetry::KeyValue::new("rv32im-m3", true));
 
         self.task_start(header.clone()).await?;
         let prover = Prover {
@@ -976,12 +973,9 @@ impl CpuProcessor {
             i64::try_from(task.segment.po2()).expect("po2 value should fit in i64"),
         ));
 
-        #[cfg(feature = "rv32im-m3")]
-        {
-            tracer
-                .span
-                .set_attribute(opentelemetry::KeyValue::new("rv32im-m3", true));
-        }
+        tracer
+            .span
+            .set_attribute(opentelemetry::KeyValue::new("rv32im-m3", true));
 
         self.task_start(header.clone()).await?;
 

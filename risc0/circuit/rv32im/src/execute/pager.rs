@@ -603,7 +603,6 @@ impl PagedMemory {
         self.trace_events.clear();
     }
 
-    #[cfg(feature = "rv32im-m3")]
     pub(crate) fn touched_pages(&self) -> u64 {
         self.page_cache.len() as u64
     }
