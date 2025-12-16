@@ -49,11 +49,11 @@ The zkVM is open source, and you can explore and contribute at [github.com/risc0
 
 ### 2. The Bonsai proving service, powered by the zkVM
 
-The Bonsai proving service can be used standalone or directly integrated with smart contracts and blockchains. If you're interested in Bonsai, learn more in our [litepaper] and [talks](https://youtu.be/nVAs2i-_Iyo?t=3044).
+The Bonsai proving service can be used standalone or directly integrated with smart contracts and blockchains. If you're interested in Bonsai, learn more in our [talks](https://youtu.be/nVAs2i-_Iyo?t=3044).
 
 ## Where we're headed
 
-We're building technology that allows anyone to generate highly performant zero-knowledge proofs for a variety of applications. We want to make zero-knowledge proof integration into Ethereum, L1 blockchains, Cosmos app chains, L2 rollups, and dApps possible with minimal development effort. To learn more, read our [litepaper].
+We're building technology that allows anyone to generate highly performant zero-knowledge proofs for a variety of applications. We want to make zero-knowledge proof integration into Ethereum, L1 blockchains, Cosmos app chains, L2 rollups, and dApps possible with minimal development effort.
 
 [`cargo risczero`]: https://crates.io/crates/cargo-risczero
 [Bonsai as a zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
@@ -64,7 +64,6 @@ We're building technology that allows anyone to generate highly performant zero-
 [Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.20/bonsai/examples/governance#readme
 [guest program]: /terminology#guest-program
 [journal]: /terminology#journal
-[litepaper]: /litepaper
 [receipt]: /terminology#receipt
 [Request access here]: https://bonsai.xyz/apply
 [Zeth]: https://www.risczero.com/news/zeth-release

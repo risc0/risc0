@@ -144,14 +144,8 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
       , outerMix(eqzCtx.getTrue())
       , innerMix(eqzCtx.getTrue()) {}
 
-  // Main entry point
-  FDEV typename EqzCtx::MixStateT verify() {
-    // Verify the selector
-    VerifyFwd::apply(*this, top->select);
-    outerMix = innerMix;
-// Verify inner data
 #define BLOCK_TYPE(name, count)                                                                    \
-  {                                                                                                \
+  FDEV void verify##name() {                                                                       \
     reset();                                                                                       \
     for (size_t i = 0; i < count; i++) {                                                           \
       isValid = top->mux.name.isValid[i].get();                                                    \
@@ -161,6 +155,17 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
     ValT cond = top->select.at(uint32_t(BlockType::name));                                         \
     outerMix = eqzCtx.andCond(outerMix, cond, innerMix);                                           \
   }
+  BLOCK_TYPES
+#undef BLOCK_TYPE
+
+  // Main entry point
+  FDEV typename EqzCtx::MixStateT verify() {
+    // Verify the selector
+    VerifyFwd::apply(*this, top->select);
+    outerMix = innerMix;
+
+// Verify inner data
+#define BLOCK_TYPE(name, _count) this->verify##name();
     BLOCK_TYPES
 #undef BLOCK_TYPE
     // Verify accumTop

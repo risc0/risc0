@@ -169,7 +169,7 @@ dual = [
   # Only recursion supports dual right now
   "risc0-circuit-recursion/dual",
 ]
-default = ["client", "bonsai"]
+default = ["client", "bonsai", "rv32im-m3"]
 r0vm-ver-compat = []
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test

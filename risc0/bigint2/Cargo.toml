@@ -35,7 +35,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 witgen_debug = ["risc0-zkvm/witgen_debug"]
 circuit_debug = ["risc0-zkvm/circuit_debug"]
 cuda = ["risc0-zkvm/cuda"]
-default = []
+default = ["rv32im-m3"]
 num-bigint-dig = ["dep:num-bigint-dig"]
 num-bigint = ["dep:num-bigint"]
 rv32im-m3 = ["risc0-zkvm/rv32im-m3"]

@@ -125,9 +125,10 @@ pub struct Rv32imV2Claim {
 
 impl Rv32imV2Claim {
     pub fn decode(segment_seal: &[u32]) -> Result<Rv32imV2Claim> {
+        let seal_version = segment_seal[0];
         ensure!(
-            segment_seal[0] == RV32IM_SEAL_VERSION,
-            "seal version mismatch"
+            seal_version == RV32IM_SEAL_VERSION,
+            "seal version mismatch: actual={seal_version} expected={RV32IM_SEAL_VERSION}"
         );
         let segment_seal = &segment_seal[1..];
 
@@ -180,9 +181,10 @@ impl Rv32imV2Claim {
 
 /// Decodes a PoVW nonce from a segment seal.
 pub fn decode_povw_nonce(segment_seal: &[u32]) -> Result<PovwNonce> {
+    let seal_version = segment_seal[0];
     ensure!(
-        segment_seal[0] == RV32IM_SEAL_VERSION,
-        "seal version mismatch"
+        seal_version == RV32IM_SEAL_VERSION,
+        "seal version mismatch: actual={seal_version} expected={RV32IM_SEAL_VERSION}"
     );
     let segment_seal = &segment_seal[1..];
 

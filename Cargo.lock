@@ -7390,6 +7390,7 @@ dependencies = [
  "smallvec",
  "tar",
  "test-log",
+ "thiserror 2.0.17",
  "tracing",
  "tracing-subscriber 0.3.19",
  "wide",

@@ -72,7 +72,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
-default = []
+default = ["rv32im-m3"]
 disable-dev-mode = ["risc0-zkvm/disable-dev-mode"]
 dual = ["risc0-zkvm/dual"]
 metal = ["risc0-zkvm/metal"]

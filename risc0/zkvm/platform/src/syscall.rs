@@ -882,7 +882,13 @@ pub unsafe extern "C" fn sys_verify_integrity(
     }
 }
 
-/// TODO: Send a ReceiptClaim digest to the host to request verification. Meant for proofs that use union.
+/// Send a claim digest and control root to the host to register an unresolved assumption.
+///
+/// This is a lower-level companion to [`sys_verify_integrity`] used for advanced
+/// composition flows (for example, when aggregating accelerator proofs via union).
+/// Instead of resolving a pre-registered assumption, this syscall asks the host to
+/// create a new assumption identified by the given `(claim_digest, control_root)`,
+/// which will be resolved by a later proof.
 ///
 /// # Safety
 ///

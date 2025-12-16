@@ -13,17 +13,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{
-    cell::RefCell,
-    collections::BTreeSet,
-    fmt::Debug,
-    io::Read,
-    rc::Rc,
-    sync::mpsc::{SyncSender, sync_channel},
-    thread::{self, ScopedJoinHandle},
-};
+use std::{cell::RefCell, collections::BTreeSet, io::Read, rc::Rc};
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result, anyhow, bail};
 use enum_map::EnumMap;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
@@ -37,8 +29,9 @@ use risc0_zkp::core::{
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
 use crate::{
-    EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
-    execute::{poseidon2::Poseidon2, rv32im::disasm},
+    EcallKind, EcallMetric, MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, Rv32imV2Claim,
+    TerminateState,
+    execute::{DEFAULT_SEGMENT_LIMIT_PO2, poseidon2::Poseidon2, rv32im::disasm},
     trace::{TraceCallback, TraceEvent},
 };
 
@@ -55,7 +48,8 @@ use super::{
     unlikely,
 };
 
-pub struct Executor<'a, 'b, S: Syscall> {
+/// Executor implementing the RISC Zero virtual machine for the `rv32im` circuit.
+pub struct Executor<'a, S: Syscall> {
     pc: ByteAddr,
     user_pc: ByteAddr,
     machine_mode: u32,
@@ -65,12 +59,14 @@ pub struct Executor<'a, 'b, S: Syscall> {
     terminate_state: Option<TerminateState>,
     read_record: Vec<Vec<u8>>,
     write_record: Vec<u32>,
-    syscall_handler: &'a S,
+    syscall_handler: Rc<S>,
     input_digest: Digest,
     output_digest: Option<Digest>,
-    trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
+    trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
     cycles: SessionCycles,
     ecall_metrics: EnumMap<EcallKind, EcallMetric>,
+    /// Ring buffer storing the most recent instructions executed. When the exec_debug feature is
+    /// enabled, if the executor encounter an error, it dumps these recent instructions.
     ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
     povw_job_id: Option<PovwJobId>,
     circuit_version: u32,
@@ -81,15 +77,43 @@ pub struct Executor<'a, 'b, S: Syscall> {
     block_tracker: BlockTracker,
 }
 
+/// Results from running the [Executor], including information about the initial and final memory
+/// states as well metrics for the number of segments and cycles used.
+///
+/// This struct has the information required to compute the [Rv32imV2Claim] for the execution.
+#[derive(Clone, Debug)]
 #[non_exhaustive]
 pub struct ExecutorResult {
     pub segments: u64,
+    pub pre_image: MemoryImage,
     pub post_image: MemoryImage,
     pub user_cycles: u64,
     pub total_cycles: u64,
     pub paging_cycles: u64,
     pub reserved_cycles: u64,
-    pub claim: Rv32imV2Claim,
+    pub ecall_metrics: EnumMap<EcallKind, EcallMetric>,
+
+    // Fields used to populate the [Rv32imV2Claim].
+    pub input: Digest,
+    pub output: Option<Digest>,
+    pub terminate_state: Option<TerminateState>,
+    pub shutdown_cycle: Option<u32>,
+}
+
+impl ExecutorResult {
+    /// Construct the [Rv32imV2Claim] for this execution.
+    ///
+    /// Calling this function will compute the digests of the pre and post image, if needed.
+    pub fn claim(&mut self) -> Rv32imV2Claim {
+        Rv32imV2Claim {
+            pre_state: self.pre_image.image_id(),
+            post_state: self.post_image.image_id(),
+            input: self.input,
+            output: self.output,
+            terminate_state: self.terminate_state,
+            shutdown_cycle: self.shutdown_cycle,
+        }
+    }
 }
 
 #[derive(Default)]
@@ -106,100 +130,248 @@ pub struct SimpleSession {
     pub result: ExecutorResult,
 }
 
+/// Limits on the execution, ensuring each segment can be proven and the session terminates.
+#[derive(Copy, Clone, Debug)]
+#[non_exhaustive]
+pub struct ExecutionLimit {
+    /// Maximum size of a segment, expressed as a power-of-two.
+    pub segment_po2: usize,
+    /// Maximum number of cycles a single instruction is allowed to consume.
+    ///
+    /// Ecall instructions and paging can result in a single worst-case instruction taking
+    /// thousands of cycles. This is the limit on a number of cycles a single instruction can take.
+    /// If an instruction exceeds this limit, and falls at the end of segment, it may result in an
+    /// execution failure.
+    pub max_insn_cycles: Option<usize>,
+    /// Limit on the number of cycles to execute in the session.
+    pub session: CycleLimit,
+}
+
+impl Default for ExecutionLimit {
+    fn default() -> Self {
+        Self::DEFAULT
+    }
+}
+
+impl ExecutionLimit {
+    pub const DEFAULT: Self = Self {
+        segment_po2: DEFAULT_SEGMENT_LIMIT_PO2,
+        max_insn_cycles: None,
+        session: CycleLimit::None,
+    };
+
+    pub const fn with_segment_po2(self, segment_po2: usize) -> Self {
+        Self {
+            segment_po2,
+            ..self
+        }
+    }
+
+    pub const fn with_max_insn_cycles(self, max_insn_cycles: usize) -> Self {
+        Self {
+            max_insn_cycles: Some(max_insn_cycles),
+            ..self
+        }
+    }
+
+    pub const fn with_session_limit(self, session: CycleLimit) -> Self {
+        Self { session, ..self }
+    }
+
+    pub const fn with_soft_session_limit(self, cycles: u64) -> Self {
+        Self {
+            session: CycleLimit::Soft(cycles),
+            ..self
+        }
+    }
+
+    pub const fn with_hard_session_limit(self, cycles: u64) -> Self {
+        Self {
+            session: CycleLimit::Hard(cycles),
+            ..self
+        }
+    }
+
+    pub fn segment_limit(&self) -> u32 {
+        1 << self.segment_po2 as u32
+    }
+
+    fn segment_threshold(&self) -> u32 {
+        self.segment_limit() - self.max_insn_cycles() as u32
+    }
+
+    pub fn max_insn_cycles(&self) -> usize {
+        self.max_insn_cycles.unwrap_or(if self.segment_po2 >= 15 {
+            MAX_INSN_CYCLES
+        } else {
+            MAX_INSN_CYCLES_LOWER_PO2
+        })
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default)]
 pub enum CycleLimit {
-    Hard(u64), // it is an error to exceed this limit
-    Soft(u64), // stop execution after this cycle count
+    /// Hard limit on the number of cycles, it is an error to exceed this limit.
+    Hard(u64),
+    /// Soft limit on the number of cycles. Terminate, without error, if this limit is reached.
+    Soft(u64),
+    /// No limit on the number of cycles.
+    #[default]
     None,
 }
 
-struct CreateSegmentRequest {
-    // Partial image containing pages that were written to in the segment.
+#[derive(thiserror::Error, Debug)]
+#[non_exhaustive]
+pub enum ExecutionError {
+    /// Error when when a hard [CycleLimit] is exceeded.
+    #[error("Session limit exceeded: {cycle} >= {limit}")]
+    CycleLimitExceeded { limit: u64, cycle: u64 },
+    /// Error when the execution encounters an error. Optionally includes a [SegmentUpdate] with
+    /// the results of execution up to the point of error in the final segment.
+    #[error("Execution failed at program counter {pc:?}: {error}")]
+    ExecutionFailed {
+        #[source]
+        error: anyhow::Error,
+        pc: ByteAddr,
+        update: Option<Box<SegmentUpdate>>,
+    },
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+}
+
+/// Update message sent to the segment callback on each split.
+///
+/// Contains the updated memory pages as well as the pages accessed during the associated segment.
+/// Can be used to construct a [Segment] starting from an an initial memory state and processing
+/// each segment update.
+#[non_exhaustive]
+#[derive(Clone, derive_more::Debug)]
+pub struct SegmentUpdate {
+    /// Partial image containing pages that were written to in the segment.
     update_partial_image: WorkingImage,
-    // Indices of all pages that were accessed in the segment.
+    /// Indices of all pages that were accessed in the segment.
     access_page_indexes: BTreeSet<u32>,
 
-    input_digest: Digest,
-    output_digest: Option<Digest>,
+    /// Record of what is read by the guest across all syscalls.
+    #[debug("{}", read_record.len())]
     read_record: Vec<Vec<u8>>,
+    /// Record of writen to the host across all syscalls.
+    #[debug("{}", write_record.len())]
     write_record: Vec<u32>,
-    user_cycles: u32,
+
+    /// Input digest available to the guest via the input ecall.
+    input_digest: Digest,
+    /// Output digest set by the guest upon termination.
+    ///
+    /// Will only be `Some` if `terminate_state` is `Some`.
+    output_digest: Option<Digest>,
+    /// Value set upon termination of execution, indicating the termination type.
+    terminate_state: Option<TerminateState>,
+
+    /// Count of "user cycles", the cycles directly associated with instructions executed by the
+    /// user guest program, before suspend in this segment. Does not include paging costs.
+    pub user_cycles: u32,
+    /// Count of cycles associated with memory paging (i.e. page-in and page-out operations).
     pager_cycles: u32,
     insn_counter: u32,
-    terminate_state: Option<TerminateState>,
     segment_threshold: u32,
-    po2: u32,
+    /// Power-of-two for the segment size required to prove this segment.
+    pub po2: u32,
+    /// Index of the segment in the session.
     index: u64,
+    /// Gloablly unique nonce used within the proof of verifiable work system.
     povw_nonce: Option<PovwNonce>,
-
-    dump_path: Option<std::ffi::OsString>,
 }
 
-/// Maximum number of segments we can queue up before we block execution
-const MAX_OUTSTANDING_SEGMENTS: usize = 5;
-
-fn create_segments(
-    initial_image: MemoryImage,
-    recv: std::sync::mpsc::Receiver<CreateSegmentRequest>,
-    mut callback: impl FnMut(Segment) -> Result<()>,
-) -> Result<(Digest, Digest, MemoryImage)> {
-    let mut existing_image = initial_image;
-    let initial_digest = existing_image.image_id();
-
-    while let Ok(req) = recv.recv() {
-        // Compute the partial image that from the initial memory state that will be sent to
-        // preflight for re-execution of the segment.
-        let pre_digest = existing_image.image_id();
-        let partial_image = compute_partial_image(&mut existing_image, req.access_page_indexes);
-
-        // Update the image held locally to the state after segment execution.
-        for (idx, page) in req.update_partial_image.pages {
-            existing_image.set_page(idx, page);
+impl SegmentUpdate {
+    /// Applies the update to the given [MemoryImage].
+    ///
+    /// Provided that the given memory image represents that state at the start of the segment, the
+    /// memory image will be updated to the state after the segment.
+    ///
+    /// This function does not guarantee an update the node digests in the [MemoryImage] Merkle
+    /// tree. To ensure that the digests are up to date, call [MemoryImage::update_digests].
+    pub fn apply_to(&self, memory_image: &mut MemoryImage) -> Result<()> {
+        for (idx, page) in self.update_partial_image.pages.iter() {
+            memory_image.set_page(*idx, page.clone());
         }
-        existing_image.update_digests();
-        let post_digest = existing_image.image_id();
-
-        let segment = Segment {
-            partial_image,
-            claim: Rv32imV2Claim {
-                pre_state: pre_digest,
-                post_state: post_digest,
-                input: req.input_digest,
-                output: req.output_digest,
-                terminate_state: req.terminate_state,
-                shutdown_cycle: None,
-            },
-            read_record: req.read_record,
-            write_record: req.write_record,
-            suspend_cycle: req.user_cycles,
-            paging_cycles: req.pager_cycles,
-            po2: req.po2,
-            index: req.index,
-            segment_threshold: req.segment_threshold,
-            povw_nonce: req.povw_nonce,
-            insn_counter: req.insn_counter,
-        };
-
-        if let Some(dump_path) = req.dump_path {
-            tracing::error!("{segment:?}");
-
-            let bytes = segment.encode()?;
-            tracing::error!("serialized {} bytes", bytes.len());
-
-            std::fs::write(dump_path, bytes)?;
-            break;
-        }
-
-        callback(segment)?;
+        Ok(())
     }
-    Ok((initial_digest, existing_image.image_id(), existing_image))
+
+    /// Compute a partially populated [MemoryImage] containing all pages from the given memory
+    /// image that were accessed during this segment along with the Merkle tree uncles. The given
+    /// memory image is updated to cache any hashes computed in the process.
+    ///
+    /// This function does not guarantee the digests are up to date on the returned [MemoryImage].
+    /// Call [MemoryImage::update_digests] if needed to ensure the digests are up to date.
+    pub fn compute_partial_image(&self, memory_image: &mut MemoryImage) -> Result<MemoryImage> {
+        Ok(compute_partial_image(
+            memory_image,
+            &self.access_page_indexes,
+        ))
+    }
+
+    /// Construct a [Segment] from this struct and the given initial memory image.
+    ///
+    /// The initial partial memory image can be calculated with [Self::compute_partial_image], as
+    /// only accessed pages are required.
+    pub fn into_segment(self, partial_image: MemoryImage) -> Segment {
+        Segment {
+            partial_image,
+            input_digest: self.input_digest,
+            output_digest: self.output_digest,
+            terminate_state: self.terminate_state,
+            read_record: self.read_record,
+            write_record: self.write_record,
+            suspend_cycle: self.user_cycles,
+            paging_cycles: self.pager_cycles,
+            insn_counter: self.insn_counter,
+            po2: self.po2,
+            index: self.index,
+            segment_threshold: self.segment_threshold,
+            povw_nonce: self.povw_nonce,
+        }
+    }
+
+    /// Produces a [Segment] with the partial memory image fore all accessed pages, then applies
+    /// the update to the given [MemoryImage].
+    pub fn apply_into_segment(self, memory_image: &mut MemoryImage) -> Result<Segment> {
+        let partial_image = self
+            .compute_partial_image(memory_image)
+            .context("Failed to compute partial memory image")?;
+        self.apply_to(memory_image)
+            .context("Failed to apply update to memory image")?;
+        Ok(self.into_segment(partial_image))
+    }
 }
 
-impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
+const MIN_EXECUTOR_SEGMENT_PO2: usize = 14;
+
+impl<'a, S: Syscall> Executor<'a, S> {
     pub fn new(
         image: MemoryImage,
-        syscall_handler: &'a S,
+        syscall_handler: S,
         input_digest: Option<Digest>,
-        trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
+        trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
+        povw_job_id: Option<PovwJobId>,
+        circuit_version: u32,
+    ) -> Self {
+        Self::new_inner(
+            image,
+            Rc::new(syscall_handler),
+            input_digest,
+            trace,
+            povw_job_id,
+            circuit_version,
+        )
+    }
+
+    /// An internal version of new that takes an Rc for syscall_handler to avoid ownership issues.
+    fn new_inner(
+        image: MemoryImage,
+        syscall_handler: Rc<S>,
+        input_digest: Option<Digest>,
+        trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
         povw_job_id: Option<PovwJobId>,
         circuit_version: u32,
     ) -> Self {
@@ -229,122 +401,104 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
     }
 
-    pub fn run(
+    /// Execute up to the next segment split.
+    ///
+    /// If the machine is in a terminal state, no segment is returned. This function can be used to
+    /// incrementally execute the program in an iterator-like fashion.
+    pub fn run_segment(
         &mut self,
-        segment_po2: usize,
-        max_insn_cycles: usize,
-        max_cycles: CycleLimit,
-        callback: impl FnMut(Segment) -> Result<()> + Send,
-    ) -> Result<ExecutorResult> {
-        let segment_limit: u32 = 1 << segment_po2;
-        assert!(max_insn_cycles < segment_limit as usize);
-        let segment_threshold = segment_limit - max_insn_cycles as u32;
+        limit: ExecutionLimit,
+    ) -> Result<Option<SegmentUpdate>, ExecutionError> {
+        // If the executor is in a normal termination state, return Ok(None).
+        if self.terminate_state.is_some() {
+            return Ok(None);
+        }
+        if let CycleLimit::Soft(soft_limit) = limit.session
+            && self.cycles.user >= soft_limit
+        {
+            return Ok(None);
+        }
 
-        self.reset();
-
-        let mut emu = Emulator::new();
         Risc0Machine::resume(self)?;
 
-        let (commit_sender, commit_recv) = sync_channel(MAX_OUTSTANDING_SEGMENTS - 1);
+        loop {
+            // Check if the machine has reached termination.
+            let None = self.terminate_state else {
+                break;
+            };
 
-        let initial_image = self.initial_image.clone();
-        let (initial_digest, post_digest, post_image) = thread::scope(|scope| {
-            let mut segment_callback_thread =
-                Some(scope.spawn(move || create_segments(initial_image, commit_recv, callback)));
-
-            while self.terminate_state.is_none() {
-                match max_cycles {
-                    CycleLimit::Hard(max_cycles) => {
-                        if self.cycles.user >= max_cycles {
-                            bail!(
-                                "Session limit exceeded: {} >= {max_cycles}",
-                                self.cycles.user
-                            );
-                        }
+            // Check the session-level cycle limit.
+            match limit.session {
+                CycleLimit::Hard(max_cycles) => {
+                    if self.cycles.user >= max_cycles {
+                        return Err(ExecutionError::CycleLimitExceeded {
+                            limit: max_cycles,
+                            cycle: self.cycles.user,
+                        });
                     }
-                    CycleLimit::Soft(max_cycles) => {
-                        if self.cycles.user >= max_cycles {
-                            break;
-                        }
+                }
+                CycleLimit::Soft(max_cycles) => {
+                    if self.cycles.user >= max_cycles {
+                        break;
                     }
-                    CycleLimit::None => {}
                 }
-
-                if self.should_split(segment_threshold) {
-                    assert!(
-                        self.segment_cycles() < segment_limit,
-                        "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
-                        self.pc
-                    );
-
-                    Risc0Machine::suspend(self)?;
-                    self.split_segment(
-                        &commit_sender,
-                        &mut segment_callback_thread,
-                        segment_po2,
-                        segment_threshold,
-                    )?;
-                    Risc0Machine::resume(self)?;
-                }
-
-                let result = Risc0Machine::step(&mut emu, self);
-                self.insn_counter += 1;
-
-                if let Err(err) = result {
-                    self.dump();
-                    let result = self.dump_segment(
-                        commit_sender,
-                        segment_callback_thread.unwrap(),
-                        segment_po2,
-                        segment_threshold,
-                        self.segment_counter,
-                    );
-                    return Err(if let Err(inner) = result {
-                        err.context(inner)
-                    } else {
-                        err
-                    });
-                }
+                CycleLimit::None => {}
             }
 
-            Risc0Machine::suspend(self)?;
+            // Check the segment-level cycle limit.
+            if self.should_split(limit.segment_threshold()) {
+                // NOTE: If the max_insn_cycles is set accurately, this should never happen.
+                if self.segment_cycles() > limit.segment_limit() {
+                    return Err(anyhow!(
+                        "segment limit ({}) too small for instruction at pc: {:?}",
+                        limit.segment_limit(),
+                        self.pc
+                    )
+                    .into());
+                };
 
-            let final_cycles = self.segment_cycles().next_power_of_two();
-            let final_po2 = log2_ceil(final_cycles as usize);
-            self.split_segment(
-                &commit_sender,
-                &mut segment_callback_thread,
-                final_po2,
-                0, // theshold is meaningless for final segment
-            )?;
+                break;
+            }
 
-            drop(commit_sender);
+            // Execute a step of the virtual machine.
+            if let Err(error) = Risc0Machine::step(&mut Emulator {}, self) {
+                // On error, log information about the most recent instructions (at `debug` level),
+                // and include a SegmentUpdate for the segment up to the point of the error.
+                self.dump_recent_instructions();
+                return Err(ExecutionError::ExecutionFailed {
+                    error,
+                    pc: self.pc,
+                    update: Some(Box::new(self.dump_segment(
+                        limit.segment_po2,
+                        0,
+                        self.segment_counter,
+                    ))),
+                });
+            }
+            self.insn_counter += 1;
+        }
 
-            segment_callback_thread
-                .take()
-                .expect("segment_callback_thread should always be Some(_)")
-                .join()
-                .unwrap()
-        })?;
+        Risc0Machine::suspend(self)?;
 
-        let session_claim = Rv32imV2Claim {
-            pre_state: initial_digest,
-            post_state: post_digest,
-            input: self.input_digest,
-            output: self.output_digest,
-            terminate_state: self.terminate_state,
-            shutdown_cycle: None,
-        };
+        let cycles = self.segment_cycles().next_power_of_two();
+        let po2 = std::cmp::max(log2_ceil(cycles as usize), MIN_EXECUTOR_SEGMENT_PO2);
+        let segment_threshold_min = u32::min(self.segment_cycles(), limit.segment_threshold());
+        let update = self.split_segment(po2, segment_threshold_min)?;
 
-        Ok(ExecutorResult {
-            segments: self.segment_counter as u64 + 1,
-            post_image,
-            user_cycles: self.cycles.user,
-            total_cycles: self.cycles.total,
-            paging_cycles: self.cycles.paging,
-            reserved_cycles: self.cycles.reserved,
-            claim: session_claim,
-        })
+        Ok(Some(update))
+    }
+
+    /// Execute until the program reaches a terminal state. Either due to the machine exiting, or
+    /// an session limit being reached.
+    pub fn run(
+        mut self,
+        limit: ExecutionLimit,
+        mut callback: impl FnMut(SegmentUpdate) -> Result<()>,
+    ) -> Result<ExecutorResult, ExecutionError> {
+        while let Some(update) = self.run_segment(limit)? {
+            callback(update).context("Segment update callback returned error")?;
+        }
+        Ok(self.state())
     }
 
     /// Execute a segment split, committing the current pager state, sending the segment to the
@@ -354,11 +508,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     /// fails to receive the segment request (e.g. the thread has died).
     fn split_segment(
         &mut self,
-        commit_sender: &SyncSender<CreateSegmentRequest>,
-        segment_callback_thread: &mut Option<ScopedJoinHandle<'_, Result<impl Debug>>>,
         segment_po2: usize,
         segment_threshold: u32,
-    ) -> Result<()> {
+    ) -> Result<SegmentUpdate, ExecutionError> {
         tracing::debug!(
             "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
             self.user_cycles,
@@ -368,7 +520,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         let partial_image = self.pager.commit();
 
-        let req = CreateSegmentRequest {
+        let update = SegmentUpdate {
             update_partial_image: partial_image,
             access_page_indexes: self.pager.page_indexes(),
             input_digest: self.input_digest,
@@ -382,17 +534,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             segment_threshold,
             po2: segment_po2 as u32,
             index: self.segment_counter as u64,
-            dump_path: None,
             povw_nonce: self.povw_nonce(self.segment_counter),
         };
-        if commit_sender.send(req).is_err() {
-            return Err(segment_callback_thread
-                .take()
-                .expect("segment_callback_thread is None")
-                .join()
-                .expect("segment_callback_thread panicked")
-                .expect_err("send to segment_callback_thread failed, but thread returned Ok"));
-        }
 
         // NOTE: There is no reasonable scenario where a session will have more than 4B
         // segments, but its possible.
@@ -422,77 +565,83 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             self.block_tracker = Default::default();
         }
 
-        Ok(())
+        Ok(update)
+    }
+
+    /// Access the syscall handler used by this executor.
+    pub fn syscall_handler(&self) -> &S {
+        &self.syscall_handler
+    }
+
+    /// Access the syscall handler used by this executor, allowing mutation.
+    pub fn syscall_handler_mut(&mut self) -> &mut S {
+        // unwrap will not fail because the only clones of this Rc are short-lived.
+        Rc::get_mut(&mut self.syscall_handler).unwrap()
     }
 
     pub(crate) fn terminate_state(&self) -> Option<&TerminateState> {
         self.terminate_state.as_ref()
     }
 
-    fn dump(&self) {
+    /// Compute the [ExecutorResult] from the initial to the current state of the executor.
+    pub fn state(&self) -> ExecutorResult {
+        ExecutorResult {
+            segments: self.segment_counter as u64 + 1,
+            pre_image: self.initial_image.clone(),
+            post_image: self.pager.image.clone().into(),
+            user_cycles: self.cycles.user,
+            total_cycles: self.cycles.total,
+            paging_cycles: self.cycles.paging,
+            reserved_cycles: self.cycles.reserved,
+            ecall_metrics: self.ecall_metrics.clone(),
+            input: self.input_digest,
+            output: self.output_digest,
+            terminate_state: self.terminate_state,
+            shutdown_cycle: None,
+        }
+    }
+
+    fn dump_recent_instructions(&self) {
         tracing::debug!("Dumping last {} instructions:", self.ring.len());
         for (pc, kind, decoded) in self.ring.iter() {
             tracing::debug!("{pc:?}> {:#010x}  {}", decoded.insn, disasm(*kind, decoded));
         }
     }
 
-    fn dump_segment<RetT>(
-        &mut self,
-        commit_sender: SyncSender<CreateSegmentRequest>,
-        segment_callback_thread: ScopedJoinHandle<'_, Result<RetT>>,
-        po2: usize,
-        segment_threshold: u32,
-        index: u32,
-    ) -> anyhow::Result<()> {
-        if let Some(dump_path) = std::env::var_os("RISC0_DUMP_PATH") {
-            tracing::error!(
-                "Execution failure, saving segment to {}:",
-                dump_path.to_string_lossy()
-            );
-
-            let partial_image = self.pager.commit();
-
-            let req = CreateSegmentRequest {
-                update_partial_image: partial_image,
-                access_page_indexes: self.pager.page_indexes(),
-                input_digest: self.input_digest,
-                output_digest: self.output_digest,
-                read_record: std::mem::take(&mut self.read_record),
-                write_record: std::mem::take(&mut self.write_record),
-                user_cycles: self.user_cycles,
-                pager_cycles: self.pager.cycles,
-                insn_counter: self.insn_counter,
-                terminate_state: self.terminate_state,
-                segment_threshold,
-                po2: po2 as u32,
-                index: index as u64,
-                dump_path: Some(dump_path),
-                povw_nonce: self.povw_nonce(index),
-            };
-            let _ = commit_sender.send(req);
-            let _ = segment_callback_thread.join().unwrap()?;
+    /// Produce a [SegmentUpdate] from the current state of the executor. Unlike
+    /// [Executor::split_segment], this does not reset the state of the executor.
+    fn dump_segment(&mut self, po2: usize, segment_threshold: u32, index: u32) -> SegmentUpdate {
+        let partial_image = self.pager.commit();
+        SegmentUpdate {
+            update_partial_image: partial_image,
+            access_page_indexes: self.pager.page_indexes(),
+            input_digest: self.input_digest,
+            output_digest: self.output_digest,
+            read_record: self.read_record.clone(),
+            write_record: self.write_record.clone(),
+            user_cycles: self.user_cycles,
+            pager_cycles: self.pager.cycles,
+            insn_counter: self.insn_counter,
+            terminate_state: self.terminate_state,
+            segment_threshold,
+            po2: po2 as u32,
+            index: index as u64,
+            povw_nonce: self.povw_nonce(index),
         }
-        Ok(())
     }
 
-    pub fn take_ecall_metrics(&mut self) -> EnumMap<EcallKind, EcallMetric> {
-        std::mem::take(&mut self.ecall_metrics)
-    }
-
-    fn reset(&mut self) {
-        self.pager.reset();
-        self.terminate_state = None;
-        self.read_record.clear();
-        self.write_record.clear();
-        self.output_digest = None;
-        self.machine_mode = 0;
-        self.user_cycles = 0;
-        self.insn_counter = 0;
-        self.cycles = SessionCycles::default();
-        self.pc = ByteAddr(0);
-        self.ecall_metrics = Default::default();
-        self.segment_counter = 0;
-        self.insn_counter = 0;
+    /// Reset the state of the executor, such that a new session can be stated from the current
+    /// memory state and with the same syscall handler and tracer (if any).
+    pub fn reset(&mut self) {
+        let image: MemoryImage = std::mem::take(&mut self.pager.image).into();
+        *self = Self::new_inner(
+            image,
+            self.syscall_handler.clone(),
+            Some(self.input_digest),
+            std::mem::take(&mut self.trace),
+            self.povw_job_id,
+            self.circuit_version,
+        )
     }
 
     #[cfg(not(feature = "rv32im-m3"))]
@@ -539,7 +688,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     #[cold]
-    fn trace(&mut self, event: TraceEvent) -> Result<()> {
+    fn trace(&mut self, event: TraceEvent) -> Result<(), ExecutionError> {
         for trace in self.trace.iter() {
             trace.borrow_mut().trace_callback(event.clone())?;
         }
@@ -547,7 +696,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     #[cold]
-    fn trace_pager(&mut self) -> Result<()> {
+    fn trace_pager(&mut self) -> Result<(), ExecutionError> {
         for &event in self.pager.trace_events() {
             let event = TraceEvent::from(event);
             for trace in self.trace.iter() {
@@ -576,7 +725,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
+impl<S: Syscall> Risc0Context for Executor<'_, S> {
     fn circuit_version(&self) -> u32 {
         self.circuit_version
     }
@@ -724,14 +873,16 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32> {
-        let rlen = self.syscall_handler.host_read(self, fd, buf)?;
+        // NOTE: This clone is required to allow host_read to have mutable access to self.
+        let rlen = self.syscall_handler.clone().host_read(self, fd, buf)?;
         let slice = &buf[..rlen as usize];
         self.read_record.push(slice.to_vec());
         Ok(rlen)
     }
 
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32> {
-        let rlen = self.syscall_handler.host_write(self, fd, buf)?;
+        // NOTE: This clone is required to allow host_read to have mutable access to self.
+        let rlen = self.syscall_handler.clone().host_write(self, fd, buf)?;
         self.write_record.push(rlen);
         Ok(rlen)
     }
@@ -760,7 +911,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         let mut p2 = Poseidon2::load_ecall(self)?;
 
         #[cfg(feature = "rv32im-m3")]
-        self.block_tracker.track_ecall_poseidon2(p2.count);
+        self.block_tracker.track_ecall_poseidon2(p2.count as u64);
 
         p2.rest_with_mix(self, CycleState::Decode, |p2, _, ctx| {
             ctx.inc_user_cycles(ROUNDS_HALF_FULL * 2 + 1, Some(EcallKind::Poseidon2));
@@ -786,7 +937,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 }
 
-impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
+impl<S: Syscall> SyscallContext for Executor<'_, S> {
     fn peek_register(&mut self, idx: usize) -> Result<u32> {
         if idx >= REG_MAX {
             bail!("invalid register: x{idx}");
