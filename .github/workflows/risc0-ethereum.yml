@@ -66,6 +66,7 @@ jobs:
     runs-on: [self-hosted, cluster, Linux, X64, cpu, docker]
     env:
       RUST_BACKTRACE: full
+      PR_BASE: "${{ github.event.pull_request.base.ref }}"
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -76,11 +77,11 @@ jobs:
       # Determine the branch for risc0-ethereum
       - name: Set risc0-ethereum branch
         run: |
-          if [[ "${{ github.event.pull_request.base.ref }}" == release-* ]]; then
-            echo "RISC0_ETHEREUM_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
-          else
-            echo "RISC0_ETHEREUM_BRANCH=main" >> $GITHUB_ENV
+          branch="main"
+          if [[ "$PR_BASE" =~ ^release-[A-Za-z0-9._/-]+$ ]]; then
+            branch="$PR_BASE"
           fi
+          printf 'RISC0_ETHEREUM_BRANCH=%s\n' "$branch" >> "$GITHUB_ENV"
       # Checkout risc0-ethereum
       - name: Checkout risc0-ethereum
         uses: actions/checkout@v4
