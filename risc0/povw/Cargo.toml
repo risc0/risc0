@@ -17,7 +17,7 @@ bytemuck = "1.22"
 derive_builder = { version = "0.20.2", optional = true }
 hybrid-array = { version = "0.3.0", features = ["serde"] }
 risc0-binfmt = { workspace = true }
-risc0-zkvm = { workspace = true, features = ["rv32im-m3"] }
+risc0-zkvm = { workspace = true }
 ruint = { version = "1.15", features = ["serde"] }
 serde = "1"
 thiserror = "1.0"

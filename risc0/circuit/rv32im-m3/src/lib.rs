@@ -111,7 +111,8 @@ impl<'a> Decoder<'a> {
         for i in 0..DIGEST_SHORTS {
             let elem: Elem = bytemuck::checked::cast(slice[i]);
             let word = elem.as_u32();
-            let short = u16::try_from(word)?;
+            let short =
+                u16::try_from(word).map_err(|e| anyhow!("failed to convert u32 to u16: {e}"))?;
             let short_bytes = short.to_le_bytes();
             digest_bytes[i * 2..i * 2 + 2].copy_from_slice(&short_bytes);
         }
@@ -183,5 +184,5 @@ pub fn decode_povw_nonce(segment_seal: &[u32]) -> Result<PovwNonce> {
     );
     let _segment_seal = &segment_seal[1..];
 
-    Err(anyhow!("povw not implemented for m3"))
+    Err(anyhow!("m3 doesn't support povw"))
 }
