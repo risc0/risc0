@@ -299,7 +299,7 @@ pub fn install(
     Ok(())
 }
 
-#[cfg(feature = "install")]
+#[cfg(all(feature = "install", unix))]
 fn symlink(original: &Path, link: &Path) -> Result<()> {
     if let Ok(metadata) = std::fs::symlink_metadata(link) {
         if metadata.is_dir() {
@@ -321,6 +321,13 @@ fn symlink(original: &Path, link: &Path) -> Result<()> {
     }
     std::os::unix::fs::symlink(original, link)
         .map_err(|e| RzupError::Other(format!("Failed to create symlink: {e}")))
+}
+
+#[cfg(all(feature = "install", windows))]
+fn symlink(_original: &Path, _link: &Path) -> Result<()> {
+    Err(RzupError::UnsupportedPlatform(
+        "Windows platform is not supported".into(),
+    ))
 }
 
 #[cfg(not(feature = "install"))]
