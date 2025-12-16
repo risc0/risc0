@@ -13,19 +13,21 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#include "core/util.h"
 #include "rv32im/circuit/accum_witgen.h"
 
 namespace risc0 {
 
 void FUNCNAME(Fp* accum, const Fp* data, const Fp* globals, const FpExt* accMix, Fp rou) {
   size_t NUM_ROWS = size_t(1) << NUM_ROWS_PO2;
-  // TODO: Parallel for?
-  for (size_t i = 0; i < NUM_ROWS; i++) {
+
+  parallel_map(NUM_ROWS, [&accum, data, globals, accMix, rou](size_t i) {
     computeRowPhase1<NUM_ROWS_PO2>(accum, data, globals, accMix, rou, i);
-  }
-  for (size_t i = 0; i < NUM_ROWS; i++) {
+  });
+
+  parallel_map(NUM_ROWS, [&accum, data, globals, accMix, rou](size_t i) {
     computeRowPhase2<NUM_ROWS_PO2>(accum, data, globals, accMix, rou, i);
-  }
+  });
 }
 
 } // namespace risc0
