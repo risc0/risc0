@@ -13,6 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#include "core/util.h"
 #include "rv32im/circuit/eval_check.h"
 
 namespace risc0 {
@@ -25,10 +26,10 @@ void FUNCNAME(Fp* check,
               FpExt ecMix,
               Fp rou) {
   size_t NUM_ROWS = size_t(1) << (NUM_ROWS_PO2 + 2);
-  // TODO: Parallel for?
-  for (size_t i = 0; i < NUM_ROWS; i++) {
+
+  parallel_map(NUM_ROWS, [&check, data, accum, globals, accMix, ecMix, rou](size_t i) {
     computeRow<NUM_ROWS_PO2>(check, data, accum, globals, accMix, ecMix, rou, i);
-  }
+  });
 }
 
 } // namespace risc0

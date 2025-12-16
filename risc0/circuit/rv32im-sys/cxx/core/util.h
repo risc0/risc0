@@ -21,6 +21,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <stdexcept>
 #include <vector>
 
@@ -73,5 +74,8 @@ inline bool constexpr isPo2(size_t in) {
 
 // Reads an entire file into a buffer.
 std::vector<uint8_t> loadFile(const std::string& path);
+
+// Runs function on different threads passing i = 0..count
+void parallel_map(size_t count, std::function<void(size_t)> body);
 
 } // namespace risc0

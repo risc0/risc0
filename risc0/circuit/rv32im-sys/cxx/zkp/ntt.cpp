@@ -180,10 +180,9 @@ template <typename T, bool Rev>
 void parallelNTT(T* io, size_t size, size_t count, bool doBitRev = true) {
   size_t N = log2Ceil(size);
   assert((size_t(1) << N) == size);
-  // TODO: parallel
-  for (size_t i = 0; i < count; i++) {
+  parallel_map(count, [&io, size, N, doBitRev](size_t i) {
     runtimeN<T, Rev>(io + size * i, N, 0, doBitRev);
-  }
+  });
 }
 
 template <typename T> void parallelExpand(T* io, size_t sizeIn, size_t sizeOut, size_t count) {
@@ -191,8 +190,7 @@ template <typename T> void parallelExpand(T* io, size_t sizeIn, size_t sizeOut, 
   assert((size_t(1) << N) == sizeOut);
   size_t L = log2Ceil(sizeOut / sizeIn);
   assert((size_t(1) << (N - L)) == sizeIn);
-  // TODO: parallel
-  for (size_t i = 0; i < count; i++) {
+  parallel_map(count, [&io, sizeIn, sizeOut, N, L](size_t i) {
     runtimeN<T, true>(io + sizeOut * i, N - L, 0, false);
     for (size_t j = sizeIn; j-- > 0;) {
       for (size_t k = 0; k < (size_t(1) << L); k++) {
@@ -200,7 +198,7 @@ template <typename T> void parallelExpand(T* io, size_t sizeIn, size_t sizeOut, 
       }
     }
     runtimeN<T, false>(io + sizeOut * i, N, L, false);
-  }
+  });
 }
 
 } // namespace
@@ -210,15 +208,14 @@ void multiBitReverse(Fp* io, size_t size, size_t count) {
   if (size_t(1) << N != size) {
     throw std::runtime_error("Invalid bit reversal");
   }
-  // TODO: parallel
-  for (size_t i = 0; i < count; i++) {
+  parallel_map(count, [&io, size, N](size_t i) {
     for (size_t j = 0; j < size; j++) {
       size_t revIdx = bitReverse(j) >> (32 - N);
       if (j < revIdx) {
         std::swap(io[i * size + j], io[i * size + revIdx]);
       }
     }
-  }
+  });
 }
 
 void multiBitReverse(FpExt* io, size_t size, size_t count) {
