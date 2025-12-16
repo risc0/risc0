@@ -63,11 +63,7 @@ pub fn execute<S: Syscall>(
         bail!("Invalid segment_limit_po2: {}", limit.segment_po2);
     }
 
-    let circuit_version = if cfg!(feature = "rv32im-m3") {
-        RV32IM_M3_CIRCUIT_VERSION
-    } else {
-        RV32IM_V2_CIRCUIT_VERSION
-    };
+    let circuit_version = RV32IM_M3_CIRCUIT_VERSION;
 
     let mut segments = Vec::new();
     let trace = Vec::new();

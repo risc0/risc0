@@ -22,14 +22,12 @@ use std::{
 };
 
 use anyhow::{Context, Result, anyhow, bail, ensure};
-use cfg_if::cfg_if;
 use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_recursion::{
     CircuitImpl,
     control_id::BN254_IDENTITY_CONTROL_ID,
     prove::{DigestKind, RecursionReceipt},
 };
-use risc0_circuit_rv32im::RV32IM_SEAL_VERSION;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::{
@@ -37,7 +35,6 @@ use risc0_zkp::{
         hash::{hash_suite_from_name, poseidon2::Poseidon2HashSuite},
     },
     field::baby_bear::BabyBearElem,
-    verify::ReadIOP,
 };
 
 use crate::{
@@ -602,13 +599,7 @@ impl Prover {
     /// then used as the input to all other recursion programs (e.g. join, resolve, and
     /// identity_p254).
     pub fn new_lift(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
-        cfg_if! {
-            if #[cfg(feature="rv32im-m3")] {
-                Self::new_lift_m3(segment, opts, false)
-            } else {
-                Self::new_lift_inner(segment, opts, false)
-            }
-        }
+        Self::new_lift_m3(segment, opts, false)
     }
 
     /// Create a prover job for the lift program that produces a work claim receipt.
@@ -616,16 +607,11 @@ impl Prover {
     /// Similar to [`Self::new_lift`], but produces a work claim receipt that tracks
     /// verifiable work by computing the work value from the segment proof.
     pub fn new_lift_povw(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
-        cfg_if! {
-            if #[cfg(feature="rv32im-m3")] {
-                Self::new_lift_m3(segment, opts, true)
-            } else {
-                Self::new_lift_inner(segment, opts, true)
-            }
-        }
+        Self::new_lift_m3(segment, opts, true)
     }
 
-    #[cfg(feature = "rv32im-m3")]
+    /// Instantiate a lift program, with the option of PoVW or not. Note that these programs
+    /// produce different output but have the same inputs and so share the same logic here.
     fn new_lift_m3(segment: &SegmentReceipt, opts: ProverOpts, povw: bool) -> Result<Self> {
         if povw {
             bail!("m3 doesn't support povw");
@@ -646,46 +632,6 @@ impl Prover {
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_input(&segment.seal[2..]);
-
-        Ok(prover)
-    }
-
-    /// Instantiate a lift program, with the option of PoVW or not. Note that these programs
-    /// produce different output but have the same inputs and so share the same logic here.
-    #[cfg_attr(feature = "rv32im-m3", allow(dead_code))]
-    fn new_lift_inner(segment: &SegmentReceipt, opts: ProverOpts, povw: bool) -> Result<Self> {
-        ensure_poseidon2!(segment);
-
-        let inner_hash_suite = hash_suite_from_name(&segment.hashfn)
-            .ok_or_else(|| anyhow!("unsupported hash function: {}", segment.hashfn))?;
-        let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
-        let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
-
-        let out_size = risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE;
-
-        let seal_version = segment.seal[0];
-        ensure!(
-            seal_version == RV32IM_SEAL_VERSION,
-            "seal version mismatch: actual={seal_version} expected={RV32IM_SEAL_VERSION}"
-        );
-
-        let seal = &segment.seal[1..];
-
-        // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
-        // which lift program we are going to run.
-        let mut iop = ReadIOP::new(seal, inner_hash_suite.rng.as_ref());
-        iop.read_field_elem_slice::<BabyBearElem>(out_size);
-        let po2 = *iop.read_u32s(1).first().unwrap() as usize;
-
-        // Instantiate the prover with the lift recursion program and its control ID.
-        let (program, control_id) = match povw {
-            false => zkr::lift(po2, &opts.hashfn)?,
-            true => zkr::lift_povw(po2, &opts.hashfn)?,
-        };
-        let mut prover = Prover::new(program, control_id, opts);
-
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_input(seal);
 
         Ok(prover)
     }

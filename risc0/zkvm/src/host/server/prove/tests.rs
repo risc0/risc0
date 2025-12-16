@@ -468,7 +468,7 @@ mod riscv {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-#[cfg(not(feature = "rv32im-m3"))]
+#[ignore = "XXX m3"]
 fn pause_resume() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::PauseResume(0))
@@ -494,7 +494,7 @@ fn pause_resume() {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-#[cfg(not(feature = "rv32im-m3"))]
+#[ignore = "XXX m3"]
 fn pause_exit_nonzero() {
     let user_exit_code = 1;
     let env = ExecutorEnv::builder()
@@ -521,11 +521,7 @@ fn pause_exit_nonzero() {
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
-    #[cfg(feature = "rv32im-m3")]
     const ITERATIONS: u32 = 30_000;
-
-    #[cfg(not(feature = "rv32im-m3"))]
-    const ITERATIONS: u32 = 6000;
 
     let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(ITERATIONS);
     let image = MemoryImage::new_kernel(program);
@@ -554,7 +550,6 @@ fn continuation() {
     let _receipt = prove_session(&session).unwrap();
 
     // The segment index is no longer used with rv32im-m3
-    #[cfg(not(feature = "rv32im-m3"))]
     for (idx, receipt) in _receipt
         .inner
         .composite()
@@ -569,7 +564,7 @@ fn continuation() {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-#[cfg(not(feature = "rv32im-m3"))]
+#[ignore = "XXX m3"]
 fn sys_input() {
     use hex::FromHex;
     let digest =
@@ -681,7 +676,6 @@ fn shrink_wrap() {
 #[test_log::test]
 #[cfg(any(feature = "cuda", feature = "docker"))]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-#[cfg(not(feature = "rv32im-m3"))]
 fn verify_in_guest(#[case] kind: ReceiptKind) {
     use risc0_zkvm_methods::VERIFY_ELF;
 
@@ -981,15 +975,12 @@ fn run_unconstrained() -> Result<()> {
     Ok(())
 }
 
-#[cfg(not(feature = "rv32im-m3"))]
 mod povw {
     use risc0_binfmt::{PovwJobId, PovwLogId, PovwNonce};
 
     use super::*;
 
-    #[test_log::test]
-    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    fn nonce_assignment() -> Result<()> {
+    fn nonce_assignment_inner() -> Result<()> {
         let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
         let povw_job_id = PovwJobId {
             log: PovwLogId::from(0x202ce_u64),
@@ -1014,9 +1005,15 @@ mod povw {
         Ok(())
     }
 
+    // XXX M3
     #[test_log::test]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    fn nonce_default_assignment() -> Result<()> {
+    #[should_panic(expected = "m3 doesn't support povw")]
+    fn nonce_assignment() {
+        nonce_assignment_inner().unwrap();
+    }
+
+    fn nonce_default_assignment_inner() -> Result<()> {
         let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
         let env = ExecutorEnv::builder()
             .write(&spec)
@@ -1036,9 +1033,15 @@ mod povw {
         Ok(())
     }
 
+    // XXX M3
     #[test_log::test]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    fn prove_work_receipt() -> Result<()> {
+    #[should_panic(expected = "m3 doesn't support povw")]
+    fn nonce_default_assignment() {
+        nonce_default_assignment_inner().unwrap();
+    }
+
+    fn prove_work_receipt_inner() -> Result<()> {
         let segment_limit_po2 = 16; // 64k cycles
         let cycles = 1 << segment_limit_po2;
         let povw_job_id: PovwJobId = rand::random();
@@ -1073,9 +1076,15 @@ mod povw {
         Ok(())
     }
 
+    // XXX M3
     #[test_log::test]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    fn sys_verify_with_povw() -> Result<()> {
+    #[should_panic(expected = "m3 doesn't support povw")]
+    fn prove_work_receipt() {
+        prove_work_receipt_inner().unwrap();
+    }
+
+    fn sys_verify_with_povw_inner() -> Result<()> {
         let spec = MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
             hello_commit_receipt().journal.bytes.clone(),
@@ -1117,6 +1126,14 @@ mod povw {
         // We expect that the verify action only takes one segment.
         assert_eq!(work.nonce_max.segment, 0);
         Ok(())
+    }
+
+    // XXX M3
+    #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    #[should_panic(expected = "m3 doesn't support povw")]
+    fn sys_verify_with_povw() {
+        sys_verify_with_povw_inner().unwrap();
     }
 }
 
