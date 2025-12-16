@@ -41,7 +41,7 @@ jobs:
       examples: ${{ steps.filter.outputs.examples }}
       risc0: ${{ steps.filter.outputs.risc0 }}
       test: ${{ steps.filter.outputs.test }}
-      test-crates: ${{ steps.filter.outputs.test-crates }}
+      cargo-risczero-test: ${{ steps.filter.outputs.cargo-risczero-test }}
       web: ${{ steps.filter.outputs.web }}
     steps:
       - uses: actions/checkout@v4
@@ -97,7 +97,7 @@ jobs:
               - external/**
               - risc0/**
               - xtask/**
-            test-crates:
+            cargo-risczero-test:
               - *base
               - risc0/**
             web:
@@ -120,7 +120,7 @@ jobs:
       - docs-rs
       - examples
       - extra
-      - test-crates
+      - cargo-risczero-test
       - test
       - web
     runs-on: ubuntu-latest
@@ -474,8 +474,8 @@ jobs:
         working-directory: examples/profiling
       - run: sccache --show-stats
 
-  test-crates:
-    if: needs.changes.outputs.test-crates == 'true'
+  cargo-risczero-test:
+    if: needs.changes.outputs.cargo-risczero-test == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, Linux, cpu]
     strategy:
