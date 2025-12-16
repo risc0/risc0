@@ -1,4 +1,4 @@
-# rv32im M3
+# risc0-circuit-rv32im-m3
 
 The `rv32im-m3` circuit is the third generation of the RISC Zero virtul machine.
 It provides massive improvements in proving performance, while also extending the set supported of RISC-V features (e.g. compressed instructions).
