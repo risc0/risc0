@@ -29,14 +29,22 @@ That is, for each argument with a particular type and values pushed by a block, 
 This global balance condition is basically the way in which relations between blocks are modeled.
 In the case of a single push with multiplicity N, this requires that N different blocks pull to maintain the balance.
 
+### System-level constraints
+
+A singleton block called `Globals` implements system-level constraints.
+It pushes and pulls critical arguments, such as the initial memory root and the 16-bit lookup tables.
+In doing so, it creates in initial argument state which the rest of the trace must balance.
+
 ### Memory argument and paging
 
-The memory bus is 32 bits wide and addressed via 30-bit addresses, with the top quarter protected for machine mode.
+The memory bus is 32 bits wide and addressed via 30-bit addresses (`u32` word-aligned), with the top quarter protected for machine mode.
 All memory transactions flow through the `Memory` argument, which tracks `(cycle, addr, data)`.
-`PageInPart` pushes the initial `(addr, 0, data)` at cycle 0, instruction blocks pull and push updated memory to advance the cycle (and optionally data), and a `PageOutPart` pulls the final state so it can be rehashed into the new memory root.
-Reads pull `(addr, cycle_in, data)` and push `(addr, cycle_out, data)` with `cycle_in < cycle_out` and `cycle_out` equal to the instruction’s current cycle; writes add the analogous data in/out constraints.
+
+Reads pull `(addr, cycle_in, data)` and push `(addr, cycle_out, data)` with `cycle_in < cycle_out` and `cycle_out` equal to the instruction’s current cycle.
+Writes add roughly the same constraints, with the data in the pushed argument being the updated value.
 
 Paging proves that cycle-0 memory matches a Merkleized address space and that execution produces a new Merkle root.
+`PageInPart` pushes the initial `(addr, 0, data)` at cycle 0, instruction blocks pull and push updated memory to advance the cycle (and optionally data), and a `PageOutPart` pulls the final state so it can be rehashed into the new memory root.
 `PageIn`/`PageOut` arguments carry `(index, digest)` for nodes in a binary Merkle tree (1 = root, 2/3 = children, etc.).
 `Globals` pushes `(1, <initial_root_hash>)` into `PageIn`, `PageInNode` expands nodes by hashing children, `PageInPage` pages in leaf data with `PageInPart`, and `PageOutPage` rehashes updated leaves into `PageOut`.
 Unexpanded nodes are transferred via `PageUncle` and rejoined by `PageOutNode`, and `Globals` pulls the final root.
@@ -44,32 +52,40 @@ Unexpanded nodes are transferred via `PageUncle` and rejoined by `PageOutNode`, 
 ### Instructions
 
 The circuit implements the RV32IM ISA with general-purpose registers memory mapped in machine-only high memory, maintaining separate user and machine sets for easy context switching.
-Instruction ordering uses the `CpuState` argument `(cycle, PC, mode)` where mode is user, machine, or suspended.
-`Globals` pushes `(0, 0, suspended)`, `InstResume` reads persisted PC/mode from memory, normal instruction blocks pull `CpuState`, perform work (usually touching `Memory`), and push the advanced state.
-`InstSuspend` writes back PC/mode and pushes `(final_cycle, 0, suspended)` for `Globals` to pull.
 
-Instruction block types group related opcodes rather than mapping 1:1.
+Instruction ordering uses the `CpuState` argument `(cycle, PC, mode)` where mode is user or machine.
+`Globals` pushes `(0, 0, MODE_USER)`, which is pulled by `InstResume`.
+`InstResume` reads persisted PC/mode from memory and pushes the `CpuState` for the first normal instruction.
+Normal instruction blocks pull `CpuState`, perform work (usually touching `Memory`), and push the advanced state.
+`InstSuspend` writes back PC/mode to memory and pushes `(final_cycle, 0, MODE_USER)` for `Globals` to pull.
+
+Instruction block types group related opcodes rather than mapping 1:1 with RISC-V instructions.
 For example, `InstReg` covers three-register ALU operations, performing register reads/writes and pulling the appropriate unit block for the computation.
-All instruction blocks read the encoded instruction from `PC` and delegate decoding to a `Decode` block; `Decode` pushes to `Decode` with multiplicity so repeated instructions need only be decoded once.
+All instruction blocks read the encoded instruction from `PC` and delegate decoding to a `Decode` block.
+`Decode` pushes to `Decode` with multiplicity so repeated instructions need only be decoded once.
 
 ### Units
 
-Units perform the actual arithmetic/logic, communicating via the `Unit` argument `(options, a, b, out0, out1)`.
+Units perform the actual arithmetic/logic.
+
+Units communicate via the `Unit` argument `(options, a, b, out0, out1)`.
 `options` selects the operation; `out0`/`out1` hold results (e.g. low/high 32 bits for multiply).
-Units push their enforced relation and can push with multiplicity to memoize repeated computations (though current preflight does not lean on it).
+Units push their enforced relation and can push with multiplicity to memoize repeated computations.
 Units may call other units (e.g. division guesses a quotient/remainder and verifies via multiplication).
 Details vary between BabyBear and Binius (e.g. multiplication strategy), but the interface remains the same.
 
 ### Decoding
 
+Instruction decoding is handled in the `Decode` block, which pushes to the `Decode` argument.
+
 The decoder packs everything needed to distinguish an instruction into the `options` field of `Decode`.
-In BabyBear this is arithmetic encoding; in Binius it’s bitfields.
 Instruction classes unpack portions of `options` to pick the class, select unit outputs, choose unit type and sub-operation, and then feed the unit’s `options`.
 Because `Decode` pushes with multiplicity, frequently executed instructions amortize decoding across uses.
 
 ### Tables
 
 Lookup tables provide U8 and U16 range checks and a cycle table.
+
 The `Table` argument is `(table, value)` where table `0` = U8, `1` = U16, `2` = cycle numbers.
 To show a value is in range, blocks pull the corresponding entry; `MakeTable` produces sequential entries with multiplicity equal to usage, advancing via `MakeTable` arguments.
 `Globals` seeds and bounds each table (e.g. U8 from 0 to 256).
@@ -78,13 +94,14 @@ Cycle ordering reduces `old_cycle < new_cycle` to showing `(new_cycle - 1 - old_
 ### Hashing
 
 `P2CallArgument` verifies Poseidon2 hashing steps using `P2Block`, `P2ExtRound`, and `P2IntRounds`.
-`P2Call` is memoized, so repeated hashes of the same data are cheap—crucial for paging since read-only pages pay the hash cost once.
-Poseidon2 is BabyBear-specific and will be swapped for a Binius-friendly hash (e.g. Grostl for speed or SHA2 for compatibility).
+`P2Call` is memoized, so repeated hashes of the same data are cheap.
+This is crucial for paging, since read-only pages pay the hash cost once.
 
 ### Instantiation in the RISC Zero proof system
 
-The current RISC Zero system lacks first-class support for multiple logical tables, so multiple block types are packed into one physical table.
-Selector columns choose the block type per row, smaller blocks may share rows, and arguments use a LogUp-style mechanism.
+All block types are packed into a single into a single proof-system table, as opposed to the multiple tables used by many proof systems.
+Selector columns choose the block type per row, smaller blocks may share rows.
+Arguments use a LogUp-style multi-set equivalence check.
 
 ## Development
 
