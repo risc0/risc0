@@ -40,23 +40,6 @@ use tabled::{Table, Tabled, settings::Style};
 
 /// Powers-of-two for cycles, paired with the number of loop iterations used to
 /// achieve that many cycles.
-#[cfg(not(feature = "rv32im-m3"))]
-const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
-    (15, 1024 * 8),        // 15, 32K
-    (16, 1024 * 16),       // 16, 64K
-    (17, 1024 * 32),       // 17, 128K
-    (18, 1024 * 96),       // 18, 256K
-    (19, 1024 * 128),      // 19, 512K
-    (20, 1024 * 256),      // 20, 1M
-    (21, 1024 * 256 * 3),  // 21, 2M
-    (22, 1024 * 256 * 7),  // 22, 4M
-    (23, 1024 * 256 * 15), // 23, 8M
-    (24, 1024 * 256 * 31), // 24, 16M
-];
-
-/// Powers-of-two for cycles, paired with the number of loop iterations used to
-/// achieve that many cycles.
-#[cfg(feature = "rv32im-m3")]
 const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
     (15, 1024 * 16),
     (16, 1024 * 64),

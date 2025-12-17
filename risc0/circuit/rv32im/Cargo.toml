@@ -72,7 +72,7 @@ cuda = [
   "risc0-sys/cuda",
   "risc0-zkp/cuda",
 ]
-default = ["rv32im-m3"]
+default = []
 # entropy_finder = []
 execute = [
   "anyhow/backtrace",
@@ -84,6 +84,7 @@ execute = [
   "dep:num-traits",
   "dep:postcard",
   "dep:ringbuffer",
+  "dep:risc0-circuit-rv32im-m3-sys",
   "dep:smallvec",
   "risc0-core/perf",
   "std",
@@ -92,14 +93,12 @@ prove = [
   "dep:cfg-if",
   "dep:rand",
   "dep:rayon",
-  "dep:risc0-circuit-rv32im-m3-sys",
   "dep:risc0-circuit-rv32im-sys",
   "dep:risc0-sys",
   "dep:wide",
   "execute",
   "risc0-zkp/prove",
 ]
-rv32im-m3 = []
 std = [
   "anyhow/std",
   "derive_more/std",

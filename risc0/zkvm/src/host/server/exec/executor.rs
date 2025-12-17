@@ -92,14 +92,7 @@ fn check_program_version(header: &ProgramBinaryHeader) -> Result<()> {
 }
 
 pub(crate) fn circuit_version() -> u32 {
-    cfg_if::cfg_if! {
-        if #[cfg(feature = "rv32im-m3")] {
-            risc0_circuit_rv32im::execute::RV32IM_M3_CIRCUIT_VERSION
-        }
-        else {
-            risc0_circuit_rv32im::execute::RV32IM_V2_CIRCUIT_VERSION
-        }
-    }
+    risc0_circuit_rv32im::execute::RV32IM_M3_CIRCUIT_VERSION
 }
 
 /// Maximum number of segments we can queue up before we block execution
@@ -470,12 +463,11 @@ impl<'a> ExecutorImpl<'a> {
             execution_time: self.execution_time,
         };
 
-        // XXX remi: For m3, these cycle counts no longer add up to the po2
-        #[cfg(not(feature = "rv32im-m3"))]
-        assert_eq!(
-            session.total_cycles,
-            session.user_cycles + session.paging_cycles + session.reserved_cycles
-        );
+        // XXX M3: For m3, these cycle counts no longer add up to the po2
+        // assert_eq!(
+        //     session.total_cycles,
+        //     session.user_cycles + session.paging_cycles + session.reserved_cycles
+        // );
 
         // Reset the executor, into a state where calling `run` will resume execution from the
         // final state of this execution (i.e. resuming from a pause).
