@@ -346,15 +346,16 @@ template <typename C> FDEV void InstStoreBlock<C>::set(CTX, InstStoreWitness wit
   psB1.set(ctx, valU16 >> 8);
   uint32_t valU8 = (writeAddr.low0.get() == Val<C>(1)) ? (valU16 >> 8) : (valU16 & 0xff);
   pickByte.set(ctx, valU8);
-  lowB0.set(ctx, wit.rs2.value & 0xff);
-  lowB1.set(ctx, ((wit.rs2.value) >> 8) & 0xff);
-  uint32_t rs2Byte = wit.rs2.value & 0xff;
+  uint32_t rs2Low = dr.getRS2().low.asUInt32();
+  lowB0.set(ctx, rs2Low & 0xff);
+  lowB1.set(ctx, rs2Low >> 8);
+  uint32_t rs2Byte = rs2Low & 0xff;
   if (opts.val == 0 && writeAddr.low0.get() == Val<C>(1)) {
     newShort.set(ctx, (rs2Byte << 8) | (valU16 & 0x00ff));
   } else if (opts.val == 0 && writeAddr.low0.get() == Val<C>(0)) {
     newShort.set(ctx, (valU16 & 0xff00) | (rs2Byte));
   } else {
-    newShort.set(ctx, wit.rs2.value & 0xffff);
+    newShort.set(ctx, rs2Low);
   }
 }
 
