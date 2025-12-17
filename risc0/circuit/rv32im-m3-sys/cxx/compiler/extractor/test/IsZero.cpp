@@ -13,14 +13,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#include "mlir/IR/Verifier.h"
+
 #include "compiler/extractor/PopulateComponentVisitor.h"
 #include "compiler/extractor/base.h"
 #include "rv32im/circuit/circuit.ipp"
 
-#include "mlir/IR/Verifier.h"
+#include "compiler/extractor/extract.h"
 
 int main() {
-  using C = RecordingContext;
   mlir::MLIRContext mlirCtx;
   RecordingContext ctx(&mlirCtx);
   RecordingReg::setContext(&ctx);

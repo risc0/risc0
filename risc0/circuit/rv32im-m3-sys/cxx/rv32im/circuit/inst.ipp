@@ -63,7 +63,8 @@ template <typename C> FDEV void InstResumeBlock<C>::verify(CTX) DEV {
   EQ(readV2Compat.wordAddr.get(), CSR_WORD(MNOV2COMPAT));
   EQ(readPc.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SPC, CSR_WORD(MSPC)));
   EQ(readMode.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_SMODE, CSR_WORD(MSMODE)));
-  EQ(writeVersion.wordAddr.get(), cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_VERSION, CSR_WORD(MVERSION)));
+  EQ(writeVersion.wordAddr.get(),
+     cond<C>(GLOBAL_GET(v2Compat), V2_COMPAT_VERSION, CSR_WORD(MVERSION)));
 }
 
 template <typename C> FDEV void InstResumeBlock<C>::addArguments(CTX) DEV {
@@ -82,11 +83,11 @@ template <typename C> FDEV void InstSuspendBlock<C>::set(CTX, InstSuspendWitness
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::verify(CTX) DEV {
-  #ifdef PICUS
+#ifdef PICUS
   RANGE_POSTCONDITION(ctx, 0, GLOBAL_GET(v2Compat), 2);
   Val<C> mode = writeMode.data.low.get() * cond<C>(GLOBAL_GET(v2Compat), MODE_MACHINE, 1);
   CPU_STATE_ARGUMENT(ctx, cycle, writePc.data, mode, iCacheCycle.get());
-  #endif
+#endif
 
   // Verify terminate
   EQ(GLOBAL_GET(isTerminate), 0);
@@ -838,6 +839,7 @@ template <typename C> FDEV void InstMretBlock<C>::set(CTX, InstMretWitness wit) 
 }
 
 template <typename C> FDEV void InstMretBlock<C>::verify(CTX) DEV {
+#ifdef PICUS
   CPU_STATE_ARGUMENT(ctx, cycle, fetch.pc, Val<C>(MODE_MACHINE), fetch.iCacheCycle);
   DECODE_ARGUMENT(ctx,
                   fetch.iCacheCycle,
@@ -848,6 +850,7 @@ template <typename C> FDEV void InstMretBlock<C>::verify(CTX) DEV {
                   Val<C>(0),
                   Val<C>(770),
                   Val<C>(uint32_t(INST_MRET)));
+#endif
 
   // Must be in user mode
   EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));

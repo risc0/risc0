@@ -69,18 +69,18 @@ template <typename C> FDEV void MakeTableBlock<C>::finalize(CTX) DEV {
   }
 }
 
-#define TABLE_ARGUMENT(ctx, table, start) \
+#define TABLE_ARGUMENT(ctx, table, start)                                                          \
   PICUS_ARGUMENT(ctx, {}, ({ctx.get(table), ctx.get(start)}))
 
 template <typename C> FDEV void MakeTableBlock<C>::verify(CTX) DEV {
-  #ifdef PICUS
+#ifdef PICUS
   TABLE_ARGUMENT(ctx, table.get(), start.get());
   // The use counts are chosen nondeterministically to balance all other uses of
   // the lookup table. There is precisely one such value for each counter.
   for (auto& use : useCount) {
     PICUS_INPUT(ctx, use);
   }
-  #endif
+#endif
 }
 
 template <typename C> FDEV void MakeTableBlock<C>::addArguments(CTX) DEV {

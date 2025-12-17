@@ -34,13 +34,13 @@ template <typename C> FDEV void GlobalsBlock<C>::set(CTX, GlobalsWitness wit) DE
 }
 
 template <typename C> FDEV void GlobalsBlock<C>::verify(CTX) DEV {
-  #ifdef PICUS
+#ifdef PICUS
   // The 2-adicity of BabyBear is 27, and since we use a 4x RS expansion the
   // longest possible trace is 2^25 cycles.
   RANGE_PRECONDITION(ctx, 0, finalCycle.get(), (1 << 25));
   PICUS_INPUT(ctx, finalCycle); // from CPU state argument
   PICUS_INPUT(ctx, p2Count);    // from P2 ID argument
-  #endif
+#endif
 
   // Make sure we are on the first row
   EQ(ctx.getX(), 1);

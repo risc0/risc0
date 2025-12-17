@@ -13,11 +13,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "compiler/extractor/base.h"
+#include "mlir/IR/Verifier.h"
 
+#include "compiler/extractor/base.h"
 #include "rv32im/base/base.h"
 
-#include "mlir/IR/Verifier.h"
+#include "compiler/extractor/extract.h"
 
 template <typename C> struct Top {
   CONSTANT static char NAME[] = "TestTop";
@@ -33,7 +34,6 @@ template <typename C> struct Top {
 };
 
 int main() {
-  using C = RecordingContext;
   mlir::MLIRContext mlirCtx;
   RecordingContext ctx(&mlirCtx);
   RecordingReg::setContext(&ctx);

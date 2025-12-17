@@ -50,7 +50,7 @@ int main() {
   // EXTRACT(EcallBigIntBlock);
   // EXTRACT(ReadByteBlock);
   // EXTRACT(ReadWordBlock);
-  // EXTRACT(UnitAddSubBlock);
+  EXTRACT(UnitAddSubBlock);
   // EXTRACT(UnitBitBlock);
   // EXTRACT(UnitMulBlock);
   // EXTRACT(PageInNodeBlock);
