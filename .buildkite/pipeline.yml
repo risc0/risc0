@@ -19,7 +19,4 @@ steps:
       RISC0_SKIP_BUILD_KERNELS: 1
     plugins:
       - .buildkite/plugins/rustup:
-    commands:
-      - cargo clippy -F $FEATURE -F unstable --all-targets
-      - cd benchmarks && cargo clippy -F $FEATURE --all-targets
-      - cd examples && cargo clippy -F $FEATURE --all-targets
+    command: .buildkite/scripts/lint.sh
