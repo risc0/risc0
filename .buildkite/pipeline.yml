@@ -1,4 +1,11 @@
 steps:
+  - label: "check"
+    agents:
+      queue: hosted-linux-small
+    plugins:
+      - .buildkite/plugins/rustup:
+    command: .buildkite/scripts/check.sh
+
   - label: ":rust: Clippy {{matrix.os}}/{{matrix.arch}}/{{matrix.feature}}"
     agents:
       arch: "{{matrix.arch}}"
@@ -29,4 +36,4 @@ steps:
       - Cargo.toml
       - Cargo.lock
       - rust-toolchain.toml
-    command: .buildkite/scripts/lint.sh
+    command: .buildkite/scripts/clippy.sh
