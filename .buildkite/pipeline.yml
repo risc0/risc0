@@ -5,11 +5,10 @@ steps:
       os: "{{matrix.os}}"
     matrix:
       setup:
+        arch: x64
+        os: linux
+        feature: default
       adjustments:
-        - with:
-          arch: "x64"
-          os: "linux"
-          feature: "default"
         - with:
           arch: "x64"
           os: "linux"
