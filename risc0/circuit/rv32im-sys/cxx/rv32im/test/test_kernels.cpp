@@ -68,5 +68,6 @@ int main() {
   runTestBinary("rv32im/test/test_p2_kernel", 13);
   runTestBinary("rv32im/test/test_bigint_kernel", 13);
   runTestBinary("rv32im/test/test_io_kernel", 13, true);
+  runTestBinary("rv32im/test/store_bug_kernel", 13);
   return 0;
 }
