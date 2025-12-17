@@ -1,0 +1,25 @@
+steps:
+  - label: ":rust: Lint"
+    agents:
+      arch: "{{matrix.arch}}"
+      os: "{{matrix.os}}"
+    matrix:
+      adjustments:
+        - with:
+          arch: "x64"
+          os: "linux"
+          feature: "default"
+        - with:
+          arch: "x64"
+          os: "linux"
+          feature: "cuda"
+    env:
+      FEATURE: "{{matrix.feature}}"
+      RISC0_SKIP_BUILD: 1
+      RISC0_SKIP_BUILD_KERNELS: 1
+    plugins:
+      - .buildkite/plugins/rustup:
+    commands:
+      - cargo clippy -F $FEATURE -F unstable --all-targets
+      - cd benchmarks && cargo clippy -F $FEATURE --all-targets
+      - cd examples && cargo clippy -F $FEATURE --all-targets
