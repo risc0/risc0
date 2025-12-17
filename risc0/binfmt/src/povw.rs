@@ -204,13 +204,11 @@ impl PovwNonce {
         fn u16_from_u32(x: u32) -> Result<u16, DecodeError> {
             x.try_into().map_err(|_| DecodeError::OutOfRange)
         }
-        Ok(Self::from_u16s(
-            buf.drain(..16)
-                .map(u16_from_u32)
-                .collect::<Result<Vec<_>, _>>()?
-                .try_into()
-                .unwrap(),
-        ))
+        let mut u16s = [0u16; 16];
+        for (dst, src) in u16s.iter_mut().zip(buf.drain(..16)) {
+            *dst = u16_from_u32(src)?;
+        }
+        Ok(Self::from_u16s(u16s))
     }
 }
 

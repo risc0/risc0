@@ -220,13 +220,11 @@ fn decode_work_value_from_seal(buf: &mut VecDeque<u32>) -> Result<u64, risc0_bin
         x.try_into()
             .map_err(|_| risc0_binfmt::DecodeError::OutOfRange)
     }
-    Ok(u64_from_u16s(
-        buf.drain(..4)
-            .map(u16_from_u32)
-            .collect::<Result<Vec<_>, _>>()?
-            .try_into()
-            .unwrap(),
-    ))
+    let mut u16s = [0u16; 4];
+    for (dst, src) in u16s.iter_mut().zip(buf.drain(..4)) {
+        *dst = u16_from_u32(src)?;
+    }
+    Ok(u64_from_u16s(u16s))
 }
 
 impl Digestible for Work {
