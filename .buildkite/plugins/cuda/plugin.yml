@@ -1,0 +1,6 @@
+name: cuda
+description: Configure environment for CUDA toolkit
+author: https://github.com/risc0
+requirements: []
+configuration:
+  additionalProperties: false

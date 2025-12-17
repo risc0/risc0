@@ -18,5 +18,14 @@ steps:
       RISC0_SKIP_BUILD: 1
       RISC0_SKIP_BUILD_KERNELS: 1
     plugins:
+      - .buildkite/plugins/cuda:
       - .buildkite/plugins/rustup:
+      - .buildkite/plugins/sccache:
+    if_changed:
+      - .buildkite/**
+      - rzup/**
+      - risc0/**
+      - Cargo.toml
+      - Cargo.lock
+      - rust-toolchain.toml
     command: .buildkite/scripts/lint.sh

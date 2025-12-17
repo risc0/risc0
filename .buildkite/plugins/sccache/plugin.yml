@@ -1,0 +1,6 @@
+name: sccache
+description: Install sccache
+author: https://github.com/risc0
+requirements: []
+configuration:
+  additionalProperties: false

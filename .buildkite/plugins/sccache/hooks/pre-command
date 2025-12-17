@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCCACHE_VERSION=v0.10.0
+SCCACHE_URL=https://github.com/mozilla/sccache/releases/download
+SCCACHE_INSTALL_DIR=$HOME/.local/bin
+
+log() { echo "sccache-install: $*" >&2; }
+die() { echo "sccache-install: ERROR: $*" >&2; exit 1; }
+
+# --- detect target triple ---
+uname_s="$(uname -s)"
+uname_m="$(uname -m)"
+
+case "${uname_s}" in
+  Linux)
+    case "${uname_m}" in
+      x86_64|amd64) SCCACHE_ARCH="x86_64-unknown-linux-musl" ;;
+      aarch64|arm64) SCCACHE_ARCH="aarch64-unknown-linux-musl" ;;
+      *) die "Unsupported Linux arch: ${uname_m}" ;;
+    esac
+    ;;
+  Darwin)
+    case "${uname_m}" in
+      x86_64|amd64) SCCACHE_ARCH="x86_64-apple-darwin" ;;
+      arm64)        SCCACHE_ARCH="aarch64-apple-darwin" ;;
+      *) die "Unsupported macOS arch: ${uname_m}" ;;
+    esac
+    ;;
+  *)
+    die "Unsupported OS: ${uname_s}"
+    ;;
+esac
+
+SCCACHE_FILE="sccache-${SCCACHE_VERSION}-${SCCACHE_ARCH}"
+SCCACHE_TGZ="${SCCACHE_FILE}.tar.gz"
+SCCACHE_BIN="${SCCACHE_INSTALL_DIR}/sccache"
+
+log "Detected OS=${uname_s} ARCH=${uname_m} -> ${SCCACHE_ARCH}"
+log "Desired version: ${SCCACHE_VERSION}"
+
+# --- idempotent install (skip if already correct version) ---
+if [[ -x "${SCCACHE_BIN}" ]]; then
+  if "${SCCACHE_BIN}" --version 2>/dev/null | grep -q "${SCCACHE_VERSION#v}"; then
+    log "sccache already installed at ${SCCACHE_BIN} with version ${SCCACHE_VERSION}, skipping download"
+  else
+    log "sccache exists but version differs; reinstalling"
+    rm -f "${SCCACHE_BIN}"
+  fi
+fi
+
+if [[ ! -x "${SCCACHE_BIN}" ]]; then
+  tmpdir="$(mktemp -d)"
+  trap 'rm -rf "${tmpdir}"' EXIT
+
+  log "Downloading ${SCCACHE_URL}/${SCCACHE_VERSION}/${SCCACHE_TGZ}"
+  curl -fsSL "${SCCACHE_URL}/${SCCACHE_VERSION}/${SCCACHE_TGZ}" -o "${tmpdir}/${SCCACHE_TGZ}"
+
+  log "Extracting"
+  tar -xzf "${tmpdir}/${SCCACHE_TGZ}" -C "${tmpdir}"
+
+  mkdir -p "${SCCACHE_INSTALL_DIR}"
+  mv -f "${tmpdir}/${SCCACHE_FILE}/sccache" "${SCCACHE_BIN}"
+  chmod +x "${SCCACHE_BIN}"
+
+  log "Installed ${SCCACHE_BIN}"
+fi
+
+export SCCACHE_IDLE_TIMEOUT=0
+export PATH="${SCCACHE_INSTALL_DIR}:$PATH"
+
+export CARGO_INCREMENTAL=0
+export CARGO_PROFILE_DEV_DEBUG=0
+export CC="sccache clang"
+export CXX="sccache clang++"
+export CMAKE_C_COMPILER_LAUNCHER=sccache
+export CMAKE_CXX_COMPILER_LAUNCHER=sccache
+export RUSTC_WRAPPER=sccache
+
+log "Done. sccache: $("${SCCACHE_BIN}" --version || true)"
