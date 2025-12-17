@@ -6,8 +6,8 @@ SCCACHE_VERSION=v0.10.0
 SCCACHE_URL=https://github.com/mozilla/sccache/releases/download
 SCCACHE_INSTALL_DIR=$HOME/.local/bin
 
-log() { echo "sccache-install: $*" >&2; }
-die() { echo "sccache-install: ERROR: $*" >&2; exit 1; }
+log() { echo "$*" >&2; }
+die() { echo "ERROR: $*" >&2; exit 1; }
 
 # --- detect target triple ---
 uname_s="$(uname -s)"

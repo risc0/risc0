@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+PROTOC_VERSION=31.1
+PROTOC_BASE_URL=https://github.com/protocolbuffers/protobuf/releases/download
+PROTOC_INSTALL_DIR=$HOME/.local/bin
+
+log() { echo "$*" >&2; }
+die() { echo "ERROR: $*" >&2; exit 1; }
+
+# --- detect target triple ---
+uname_s="$(uname -s)"
+uname_m="$(uname -m)"
+
+case "${uname_s}" in
+  Linux)
+    case "${uname_m}" in
+      x86_64|amd64) PROTOC_ARCH="linux-x86_64" ;;
+      aarch64|arm64) PROTOC_ARCH="linux-aarch_64" ;;
+      *) die "Unsupported Linux arch: ${uname_m}" ;;
+    esac
+    ;;
+  Darwin)
+    case "${uname_m}" in
+      x86_64|amd64) PROTOC_ARCH="osx-x86_64" ;;
+      arm64)        PROTOC_ARCH="osx-aarch_64" ;;
+      *) die "Unsupported macOS arch: ${uname_m}" ;;
+    esac
+    ;;
+  *)
+    die "Unsupported OS: ${uname_s}"
+    ;;
+esac
+
+PROTOC_FILE="protoc-${PROTOC_VERSION}-${PROTOC_ARCH}"
+PROTOC_ZIP="${PROTOC_FILE}.zip"
+PROTOC_BIN="${PROTOC_INSTALL_DIR}/protoc"
+PROTOC_URL="${PROTOC_URL}/v${PROTOC_VERSION}/${PROTOC_ZIP}"
+
+log "Detected OS=${uname_s} ARCH=${uname_m} -> ${PROTOC_ARCH}"
+log "Desired version: ${PROTOC_VERSION}"
+
+# --- idempotent install (skip if already correct version) ---
+if [[ -x "${PROTOC_BIN}" ]]; then
+  if "${PROTOC_BIN}" --version 2>/dev/null | grep -q "${PROTOC_VERSION#v}"; then
+    log "protoc already installed at ${PROTOC_BIN} with version ${PROTOC_VERSION}, skipping download"
+  else
+    log "protoc exists but version differs; reinstalling"
+    rm -f "${PROTOC_BIN}"
+  fi
+fi
+
+if [[ ! -x "${PROTOC_BIN}" ]]; then
+  tmpdir="$(mktemp -d)"
+  trap 'rm -rf "${tmpdir}"' EXIT
+
+  log "Downloading ${PROTOC_URL}"
+  curl -fsSL "${PROTOC_URL}" -o "${tmpdir}/${PROTOC_ZIP}"
+
+  log "Extracting"
+  unzip "${tmpdir}/${PROTOC_ZIP}" -d ${tmpdir}
+
+  mkdir -p "${PROTOC_INSTALL_DIR}"
+  mv -f "${tmpdir}/bin/protoc" "${PROTOC_BIN}"
+  chmod +x "${PROTOC_BIN}"
+
+  log "Installed ${PROTOC_BIN}"
+fi
+
+export PROTOC="${PROTOC_BIN}"
+
+log "Done. protoc: $("${PROTOC_BIN}" --version || true)"

@@ -1,5 +1,5 @@
 steps:
-  - label: ":rust: Lint"
+  - label: ":rust: Clippy {{matrix.os}}/{{matrix.arch}}/{{matrix.feature}}"
     agents:
       arch: "{{matrix.arch}}"
       os: "{{matrix.os}}"
@@ -21,6 +21,7 @@ steps:
       - .buildkite/plugins/cuda:
       - .buildkite/plugins/rustup:
       - .buildkite/plugins/sccache:
+      - .buildkite/plugins/protoc:
     if_changed:
       - .buildkite/**
       - rzup/**
