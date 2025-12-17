@@ -18,7 +18,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <thread>
 #include <vector>
 
 namespace risc0 {
@@ -33,28 +32,6 @@ std::vector<uint8_t> loadFile(const std::string& path) {
   is.read(reinterpret_cast<char*>(elfContents.data()), nbytes);
   is.close();
   return elfContents;
-}
-
-void parallel_map(size_t count, std::function<void(size_t)> body) {
-  unsigned int num_logical_processors = std::thread::hardware_concurrency();
-  std::vector<std::thread> threads;
-
-  auto count_per_thread = count / num_logical_processors;
-  for (size_t thread_id = 0; thread_id < num_logical_processors; thread_id++) {
-    auto start = thread_id * count_per_thread;
-    if (thread_id == num_logical_processors - 1) {
-      count_per_thread += count % num_logical_processors;
-    }
-    threads.emplace_back([start, count_per_thread, body] {
-      for (size_t i = 0; i < count_per_thread; i++) {
-        body(start + i);
-      }
-    });
-  }
-
-  for (std::thread& t : threads) {
-    t.join();
-  }
 }
 
 } // namespace risc0
