@@ -4,6 +4,7 @@ steps:
       arch: "{{matrix.arch}}"
       os: "{{matrix.os}}"
     matrix:
+      setup:
       adjustments:
         - with:
           arch: "x64"
