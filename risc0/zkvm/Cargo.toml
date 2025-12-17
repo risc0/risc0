@@ -47,7 +47,6 @@ risc0-binfmt = { workspace = true }
 risc0-circuit-keccak = { workspace = true }
 risc0-circuit-recursion = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
-risc0-circuit-rv32im-m3 = { workspace = true }
 risc0-core = { workspace = true }
 risc0-groth16 = { workspace = true }
 risc0-zkos-v1compat = { workspace = true }
@@ -160,7 +159,6 @@ cuda = [
   "risc0-circuit-keccak/cuda",
   "risc0-circuit-recursion/cuda",
   "risc0-circuit-rv32im/cuda",
-  "risc0-circuit-rv32im-m3/cuda",
   "risc0-groth16/cuda",
   "risc0-zkp/cuda",
 ]
@@ -208,7 +206,6 @@ prove = [
   "risc0-circuit-keccak/prove",
   "risc0-circuit-recursion/prove",
   "risc0-circuit-rv32im/prove",
-  "risc0-circuit-rv32im-m3/prove",
   "risc0-core/perf",
   "risc0-groth16/prove",
   "risc0-zkp/prove",
@@ -220,7 +217,6 @@ std = [
   "derive_more/std",
   "hex/std",
   "risc0-binfmt/std",
-  "risc0-circuit-rv32im-m3/std",
   "risc0-groth16/std",
   "risc0-zkp/std",
   "serde/std",

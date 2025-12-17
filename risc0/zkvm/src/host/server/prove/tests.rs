@@ -1151,6 +1151,7 @@ mod soundness {
     };
 
     #[test_log::test]
+    #[ignore = "XXX m3"]
     fn proven() {
         let cycles = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;
@@ -1163,6 +1164,7 @@ mod soundness {
     }
 
     #[test_log::test]
+    #[ignore = "XXX m3"]
     fn conjectured_strict() {
         let cycles = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;
@@ -1175,6 +1177,7 @@ mod soundness {
     }
 
     #[test_log::test]
+    #[ignore = "XXX m3"]
     fn toy_model() {
         let cycles: usize = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;

@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use risc0_circuit_rv32im_m3_sys::BlockType;
+use risc0_circuit_rv32im_sys::BlockType;
 
 use super::pager::NUM_PAGES;
 use super::platform::{PAGE_BYTES, WORD_SIZE};
