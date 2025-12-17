@@ -55,6 +55,7 @@ template <typename C> struct InstSuspendBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "iCacheCycle", iCacheCycle);
     T::apply(ctx, "writePc", writePc, cycle.get());
     T::apply(ctx, "writeMode", writeMode, cycle.get());
   }
@@ -120,6 +121,7 @@ template <typename C> struct DualReg {
     T::apply(ctx, "readRs2", readRs2, cycle);
     T::apply(ctx, "rs1Idx", rs1Idx);
     T::apply(ctx, "rs2Idx", rs2Idx);
+    T::apply(ctx, "rs2Data", rs2Data);
   }
 
   FDEV ValU32<C> getRS1() DEV;
@@ -429,7 +431,7 @@ template <typename C> struct InstLuiBlock {
   FDEV void set(CTX, InstLuiWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
 
-  FDEV void verify(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
 };
 

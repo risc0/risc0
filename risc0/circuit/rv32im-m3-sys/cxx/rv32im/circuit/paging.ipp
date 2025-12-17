@@ -12,11 +12,68 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define UNPACK_DIGEST(ctx, digest)                                                                 \
+  ctx.get((digest)[0]), ctx.get((digest)[1]), ctx.get((digest)[2]), ctx.get((digest)[3]),          \
+      ctx.get((digest)[4]), ctx.get((digest)[5]), ctx.get((digest)[6]), ctx.get((digest)[7])
+
+#define PAGE_IN_PART_ARGUMENT(ctx, addr, partNum, node)                                            \
+  PICUS_ARGUMENT(ctx, {}, ({ctx.get(addr), ctx.get(partNum), UNPACK_DIGEST(ctx, node)}))
+
+#define PAGE_OUT_PART_ARGUMENT(ctx, addr, partNum, node)                                           \
+  PICUS_ARGUMENT(ctx, {}, ({ctx.get(addr), ctx.get(partNum), UNPACK_DIGEST(ctx, node)}))
+
+#define MEM_READ(ctx, addr, cycle, data)                                                           \
+  PICUS_ARGUMENT(ctx, {ctx.get(addr)}, ({ctx.get(cycle), ctx.get(data.low), ctx.get(data.high)}))
+
+#define PAGE_IN_ARGUMENT(ctx, index, node)                                                         \
+  PICUS_ARGUMENT(ctx, {}, ({ctx.get(index), UNPACK_DIGEST(ctx, node)}))
+
+// Poseidon2 is a deterministic function of its inputs, so if `isFinal`, `in`,
+// and `data` are deterministic then `out` is also deterministic. This mode of
+// reasoning is used for paging out, since there we know the state of memory and
+// use it to derive the final memory image root hash.
+#define P2_CALL_ARGUMENT(call)                                                                     \
+  PICUS_ARGUMENT(ctx,                                                                              \
+                 ({ctx.get(call.isFinal),                                                          \
+                   UNPACK_DIGEST(ctx, call.in),                                                    \
+                   UNPACK_DIGEST(ctx, &(call.data[0])),                                            \
+                   UNPACK_DIGEST(ctx, &(call.data[8]))}),                                          \
+                 ({UNPACK_DIGEST(ctx, call.out)}))
+
+// Also, since we assume it is a secure hash function, we can also infer that
+// the inputs are deterministic if the output is deterministic — a
+// counterexample is equivalent to finding a hash collision. This mode of
+// reasoning is used for paging in, since there we know the memory image root
+// and prove paged-in memory contents are correct by merkle inclusion.
+#define P2_CALL_ARGUMENT_REV(call)                                                                 \
+  PICUS_ARGUMENT(ctx,                                                                              \
+                 ({UNPACK_DIGEST(ctx, call.out)}),                                                 \
+                 ({ctx.get(call.isFinal),                                                          \
+                   UNPACK_DIGEST(ctx, call.in),                                                    \
+                   UNPACK_DIGEST(ctx, &(call.data[0])),                                            \
+                   UNPACK_DIGEST(ctx, &(call.data[8]))}))
+
 template <typename C> FDEV void PageInNodeBlock<C>::set(CTX, PageInNodeWitness wit) DEV {
   index.set(ctx, wit.index);
   SET_ARR(node, wit.node, CELLS_DIGEST);
   SET_ARR(left, wit.left, CELLS_DIGEST);
   SET_ARR(right, wit.right, CELLS_DIGEST);
+}
+
+template <typename C> FDEV void PageInNodeBlock<C>::verify(CTX) DEV {
+#ifdef PICUS
+  PAGE_IN_ARGUMENT(ctx, index, node);
+
+  P2CallArgument<C> call;
+  call.isFinal = 1;
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    call.in[i] = 0;
+    call.data[i] = right[i].get();
+    call.data[CELLS_DIGEST + i] = left[i].get();
+    call.out[i] = node[i].get();
+  }
+  P2_CALL_ARGUMENT_REV(call);
+#endif
 }
 
 template <typename C> FDEV void PageInNodeBlock<C>::addArguments(CTX) DEV {
@@ -53,6 +110,22 @@ template <typename C> FDEV void PageInPartBlock<C>::set(CTX, PageInPartWitness w
   lastPart.set(ctx, NUM_PARTS - 1 - part);
 }
 
+template <typename C> FDEV void PageInPartBlock<C>::verify(CTX) DEV {
+#ifdef PICUS
+  PAGE_IN_PART_ARGUMENT(ctx, addr.get() + MPAGE_PART_SIZE, partNum.get() + 1, out);
+
+  P2CallArgument<C> call;
+  call.isFinal = lastPart.isZero.get();
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    call.in[i] = in[i].get();
+    call.data[2 * i] = data[i].low.get();
+    call.data[2 * i + 1] = data[i].high.get();
+    call.out[i] = out[i].get();
+  }
+  P2_CALL_ARGUMENT_REV(call);
+#endif
+}
+
 template <typename C> FDEV void PageInPartBlock<C>::addArguments(CTX) DEV {
   Val<C> addrVal = addr.get();
   for (size_t i = 0; i < MPAGE_PART_SIZE; i++) {
@@ -62,11 +135,11 @@ template <typename C> FDEV void PageInPartBlock<C>::addArguments(CTX) DEV {
   pip.addr = addrVal;
   pip.partNum = partNum.get();
   GET_ARR(pip.node, in, CELLS_DIGEST);
-  ctx.pull(pip);
+  ctx.push(pip);
   pip.addr = addrVal + MPAGE_PART_SIZE;
   pip.partNum = partNum.get() + 1;
   GET_ARR(pip.node, out, CELLS_DIGEST);
-  ctx.push(pip);
+  ctx.pull(pip);
   P2CallArgument<C> call;
   call.isFinal = lastPart.isZero.get();
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
@@ -83,6 +156,16 @@ template <typename C> FDEV void PageInPageBlock<C>::set(CTX, PageInPageWitness w
   SET_ARR(node, wit.node, CELLS_DIGEST);
 }
 
+template <typename C> FDEV void PageInPageBlock<C>::verify(CTX) DEV {
+#ifdef PICUS
+  PAGE_IN_ARGUMENT(
+      ctx, addr.get() * inv(Fp(uint32_t(MPAGE_SIZE_WORDS))) + MEMORY_SIZE_MPAGES, node);
+
+  ValDigest<C> zeroDigest;
+  PAGE_IN_PART_ARGUMENT(ctx, addr, 0, zeroDigest);
+#endif
+}
+
 template <typename C> FDEV void PageInPageBlock<C>::addArguments(CTX) DEV {
   PageInArgument<C> pi;
   pi.index = addr.get() * inv(Fp(uint32_t(MPAGE_SIZE_WORDS))) + MEMORY_SIZE_MPAGES;
@@ -91,11 +174,11 @@ template <typename C> FDEV void PageInPageBlock<C>::addArguments(CTX) DEV {
   PageInPartArgument<C> pip;
   pip.addr = addr.get();
   pip.partNum = 0;
-  ctx.push(pip);
+  ctx.pull(pip);
   pip.addr = addr.get() + MPAGE_SIZE_WORDS;
   pip.partNum = NUM_PARTS;
   GET_ARR(pip.node, node, CELLS_DIGEST);
-  ctx.pull(pip);
+  ctx.push(pip);
 }
 
 template <typename C> FDEV void PageOutNodeBlock<C>::set(CTX, PageOutNodeWitness wit) DEV {
@@ -103,6 +186,23 @@ template <typename C> FDEV void PageOutNodeBlock<C>::set(CTX, PageOutNodeWitness
   SET_ARR(node, wit.node, CELLS_DIGEST);
   SET_ARR(left, wit.left, CELLS_DIGEST);
   SET_ARR(right, wit.right, CELLS_DIGEST);
+}
+
+template <typename C> FDEV void PageOutNodeBlock<C>::verify(CTX) DEV {
+#ifdef PICUS
+  PAGE_IN_ARGUMENT(ctx, Val<C>(2) * index.get(), left);
+  PAGE_IN_ARGUMENT(ctx, Val<C>(2) * index.get() + 1, right);
+
+  P2CallArgument<C> call;
+  call.isFinal = 1;
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    call.in[i] = 0;
+    call.data[i] = right[i].get();
+    call.data[CELLS_DIGEST + i] = left[i].get();
+    call.out[i] = node[i].get();
+  }
+  P2_CALL_ARGUMENT(call);
+#endif
 }
 
 template <typename C> FDEV void PageOutNodeBlock<C>::addArguments(CTX) DEV {
@@ -140,6 +240,26 @@ template <typename C> FDEV void PageOutPartBlock<C>::set(CTX, PageOutPartWitness
   lastPart.set(ctx, NUM_PARTS - 1 - part);
 }
 
+template <typename C> FDEV void PageOutPartBlock<C>::verify(CTX) DEV {
+#ifdef PICUS
+  for (size_t i = 0; i < MPAGE_PART_SIZE; i++) {
+    MEM_READ(ctx, addr.get() + i, cycle[i].get(), data[i]);
+  }
+
+  PAGE_OUT_PART_ARGUMENT(ctx, addr, partNum, in);
+
+  P2CallArgument<C> call;
+  call.isFinal = lastPart.isZero.get();
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    call.in[i] = in[i].get();
+    call.data[2 * i] = data[i].low.get();
+    call.data[2 * i + 1] = data[i].high.get();
+    call.out[i] = out[i].get();
+  }
+  P2_CALL_ARGUMENT(call);
+#endif
+}
+
 template <typename C> FDEV void PageOutPartBlock<C>::addArguments(CTX) DEV {
   Val<C> addrVal = addr.get();
   for (size_t i = 0; i < MPAGE_PART_SIZE; i++) {
@@ -170,6 +290,12 @@ template <typename C> FDEV void PageOutPageBlock<C>::set(CTX, PageOutPageWitness
   SET_ARR(node, wit.node, CELLS_DIGEST);
 }
 
+template <typename C> FDEV void PageOutPageBlock<C>::verify(CTX) DEV {
+#ifdef PICUS
+  PAGE_OUT_PART_ARGUMENT(ctx, addr.get() + MPAGE_SIZE_WORDS, Val<C>(NUM_PARTS), node);
+#endif
+}
+
 template <typename C> FDEV void PageOutPageBlock<C>::addArguments(CTX) DEV {
   PageOutArgument<C> po;
   po.index = addr.get() * inv(Fp(uint32_t(MPAGE_SIZE_WORDS))) + MEMORY_SIZE_MPAGES;
@@ -188,6 +314,12 @@ template <typename C> FDEV void PageOutPageBlock<C>::addArguments(CTX) DEV {
 template <typename C> FDEV void PageUncleBlock<C>::set(CTX, PageUncleWitness wit) DEV {
   index.set(ctx, wit.index);
   SET_ARR(node, wit.node, CELLS_DIGEST);
+}
+
+template <typename C> FDEV void PageUncleBlock<C>::verify(CTX) DEV {
+#ifdef PICUS
+  PAGE_IN_ARGUMENT(ctx, index, node);
+#endif
 }
 
 template <typename C> FDEV void PageUncleBlock<C>::addArguments(CTX) DEV {
