@@ -10,9 +10,9 @@ steps:
         feature: default
       adjustments:
         - with:
-          arch: "x64"
-          os: "linux"
-          feature: "cuda"
+            arch: "x64"
+            os: "linux"
+            feature: "cuda"
     env:
       FEATURE: "{{matrix.feature}}"
       RISC0_SKIP_BUILD: 1
