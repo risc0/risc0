@@ -1,7 +1,7 @@
 steps:
   - label: "check"
     agents:
-      queue: hosted-linux-small
+      os: linux
     plugins:
       - .buildkite/plugins/rustup:
     command: .buildkite/scripts/check.sh
