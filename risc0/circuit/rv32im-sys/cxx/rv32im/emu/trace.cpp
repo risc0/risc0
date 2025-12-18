@@ -18,6 +18,7 @@
 #include "core/log.h"
 #include "core/util.h"
 #include "rv32im/emu/blocks.h"
+#include "rv32im/emu/povw.h"
 
 #include <algorithm>
 #include <execution>
@@ -26,12 +27,13 @@
 
 namespace risc0::rv32im {
 
-Trace::Trace(size_t maxRows, RowInfo* rows, uint32_t* aux)
+Trace::Trace(size_t maxRows, RowInfo* rows, uint32_t* aux, PovwNonce povwNonce)
     : rowBegin(rows), rowNext(rows), rowEnd(rows + maxRows), auxBegin(aux), auxNext(aux) {
   globals = &makeGlobals();
   globals->p2Count = 0;
   globals->finalCycle = 0;
   globals->v2Compat = 0;
+  memcpy(&globals->povwNonce, povwNonce.data(), sizeof(globals->povwNonce));
 }
 
 Trace::~Trace() {}

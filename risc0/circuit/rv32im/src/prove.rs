@@ -97,6 +97,7 @@ impl SegmentContext {
                 len: segment.write_record.len(),
             },
             insn_counter: segment.insn_counter,
+            povw_nonce: segment.povw_nonce.map(|n| n.to_u32s()).unwrap_or_default(),
         };
 
         let ctx =
