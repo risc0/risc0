@@ -17,6 +17,7 @@
 
 #include "prove/prove.h"
 #include "rv32im/emu/emu.h"
+#include "rv32im/emu/povw.h"
 
 namespace risc0 {
 
@@ -41,7 +42,8 @@ using PreflightResultsPtr = std::shared_ptr<PreflightResults>;
 PreflightResultsPtr preflight(size_t po2,
                               rv32im::MemoryImage& image,
                               rv32im::HostIO& io,
-                              uint32_t endCycle = UINT32_MAX);
+                              uint32_t endCycle = UINT32_MAX,
+                              rv32im::PovwNonce povwNonce = rv32im::PovwNonce::zero());
 
 class Rv32imProver {
 public:

@@ -17,6 +17,7 @@
 
 #include "core/log.h"
 #include "rv32im/emu/emu.h"
+#include "rv32im/emu/povw.h"
 #include "rv32im/emu/verify.h"
 
 namespace risc0 {
@@ -83,14 +84,17 @@ Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal,
   ci.taps.done();
 }
 
-PreflightResultsPtr
-preflight(size_t po2, rv32im::MemoryImage& image, rv32im::HostIO& io, uint32_t endCycle) {
+PreflightResultsPtr preflight(size_t po2,
+                              rv32im::MemoryImage& image,
+                              rv32im::HostIO& io,
+                              uint32_t endCycle,
+                              rv32im::PovwNonce povwNonce) {
   LOG(1, "Executing");
   size_t rows = size_t(1) << po2;
   auto results = std::make_shared<PreflightResults>();
   results->rowInfo.resize(rows);
   results->aux.resize(rows * computeMaxWitPerRow());
-  Trace trace(rows, results->rowInfo.data(), results->aux.data());
+  Trace trace(rows, results->rowInfo.data(), results->aux.data(), povwNonce);
   results->isFinal = emulate(trace, image, io, rows, endCycle);
   results->cycles = trace.getUserCycles();
   LOG(1,

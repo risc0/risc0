@@ -17,6 +17,7 @@
 
 #include "hal/hal.h"
 #include "rv32im/emu/blocks.h"
+#include "rv32im/emu/povw.h"
 #include "zkp/fp.h"
 
 #include <deque>
@@ -41,7 +42,7 @@ private:
 #undef BLOCK_TYPE
 
 public:
-  Trace(size_t maxRows, RowInfo* rows, uint32_t* aux);
+  Trace(size_t maxRows, RowInfo* rows, uint32_t* aux, PovwNonce povwNonce);
   ~Trace();
 
   inline GlobalsWitness& getGlobals() { return *globals; }

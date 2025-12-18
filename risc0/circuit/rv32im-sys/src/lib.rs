@@ -68,6 +68,7 @@ pub struct RawSegment {
     pub reads: RawSlice<RawSlice<u8>>,
     pub writes: RawSlice<u32>,
     pub insn_counter: u32,
+    pub povw_nonce: [u32; 8],
 }
 
 type RawError = *const std::os::raw::c_char;
