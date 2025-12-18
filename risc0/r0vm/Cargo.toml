@@ -7,6 +7,15 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+disable-dev-mode = ["risc0-zkvm/disable-dev-mode"]
+dual = ["risc0-zkvm/dual"]
+metal = ["risc0-zkvm/metal"]
+redis = ["risc0-zkvm/redis"]
+r0vm-ver-compat = ["risc0-zkvm/r0vm-ver-compat"]
+
 [dependencies]
 anyhow = "1.0.98"
 axum = { version = "0.8.4", features = ["macros"] }
@@ -16,11 +25,11 @@ bonsai-sdk = { workspace = true }
 bytemuck = "1.12"
 clap = { version = "4.5", features = ["derive", "env"] }
 derive_more = { version = "2.0.1", default-features = false, features = [
-  "add",
-  "add_assign",
-  "debug",
-  "from",
-  "try_into",
+    "add",
+    "add_assign",
+    "debug",
+    "from",
+    "try_into",
 ] }
 dirs = "6.0.0"
 futures = "0.3.31"
@@ -42,11 +51,11 @@ serde_json = "1"
 tempfile = "3.20.0"
 thiserror = "2.0.12"
 tokio = { version = "1.44.2", features = [
-  "macros",
-  "io-util",
-  "process",
-  "rt-multi-thread",
-  "signal",
+    "macros",
+    "io-util",
+    "process",
+    "rt-multi-thread",
+    "signal",
 ] }
 tokio-util = { version = "0.7.15", features = ["codec"] }
 toml = "0.8.22"
@@ -69,15 +78,6 @@ rstest = "0.25.0"
 temp-env = "0.3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-
-[features]
-cuda = ["risc0-zkvm/cuda"]
-default = []
-disable-dev-mode = ["risc0-zkvm/disable-dev-mode"]
-dual = ["risc0-zkvm/dual"]
-metal = ["risc0-zkvm/metal"]
-redis = ["risc0-zkvm/redis"]
-r0vm-ver-compat = ["risc0-zkvm/r0vm-ver-compat"]
 
 [lints]
 workspace = true

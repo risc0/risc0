@@ -8,6 +8,9 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 end_of_line = lf
 
+[*.toml]
+indent_size = 4
+
 [*.rs]
 indent_size = 4
 

@@ -3,13 +3,13 @@ name = "risc0-groth16-verifier-example"
 version = "0.1.0"
 edition = { workspace = true }
 
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+prove = ["risc0-zkvm/prove"]
+
 [dependencies]
 groth16-verifier-methods = { path = "methods" }
 risc0-groth16 = { path = "../../risc0/groth16" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde_json = "1.0"
-
-[features]
-cuda = ["risc0-zkvm/cuda"]
-default = []
-prove = ["risc0-zkvm/prove"]
