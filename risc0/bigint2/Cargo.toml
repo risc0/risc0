@@ -26,7 +26,7 @@ puffin = "0.19"
 puffin_http = "0.16"
 risc0-bigint2-methods = { path = "methods" }
 risc0-zkvm = { workspace = true, features = ["prove"] }
-rstest = "0.25.0"
+rstest = "0.26.1"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

@@ -30,6 +30,7 @@ pub struct Bazel;
 
 impl Bazel {
     pub fn run(&self) {
+        Self::bootstrap_riscv_tests();
         Self::bootstrap_rust_verifier();
         Self::bootstrap_zkr();
     }
@@ -46,10 +47,46 @@ impl Bazel {
     }
 
     fn bootstrap_zkr() {
+        let srcs = Self::bazel("//compiler/bootstrap:zkr");
+
+        // copy
+        // bazel-bin/compiler/bootstrap/lift_rv32im_m3_12.zkr
+        // into
+        // risc0/circuit/recursion/src
+        let pwd = std::env::current_dir().unwrap();
+        let dst_dir = pwd.join("risc0/circuit/recursion/src/prove");
+        for src_path in srcs {
+            let file_name = src_path.file_name().unwrap().to_owned();
+            let src_data = File::open(&src_path).unwrap();
+            let mut src_xz = XzEncoder::new(src_data, XZ_COMPRESS_LEVEL);
+
+            // Avoid using `std::fs::copy` because bazel creates files with r/o permissions.
+            // We create a new file with r/w permissions and .copy the contents instead.
+            let mut dst_path = dst_dir.join(file_name);
+            dst_path.set_extension("zkr.xz");
+            let mut dst_file = File::create(&dst_path).unwrap();
+            std::io::copy(&mut src_xz, &mut dst_file).unwrap();
+        }
+    }
+
+    fn bootstrap_riscv_tests() {
+        let srcs = Self::bazel("//rv32im/rvtest:riscv-tests");
+        let pwd = std::env::current_dir().unwrap();
+        let dst_dir = pwd.join("risc0/emu/src/testdata");
+        for src_path in srcs {
+            let file_name = src_path.file_name().unwrap();
+            let mut src_data = File::open(&src_path).unwrap();
+            let dst_path = dst_dir.join(file_name);
+            let mut dst_file = File::create(&dst_path).unwrap();
+            std::io::copy(&mut src_data, &mut dst_file).unwrap();
+        }
+    }
+
+    fn bazel(target: &str) -> Vec<PathBuf> {
         let bazel_root = Path::new("risc0/circuit/rv32im-sys/cxx");
         let mut command = Command::new("bazelisk");
         command
-            .args(["build", "//compiler/bootstrap:zkr"])
+            .args(["build", target])
             .current_dir(bazel_root)
             .stdout(Stdio::inherit())
             .stderr(Stdio::piped());
@@ -73,24 +110,6 @@ impl Bazel {
             eprintln!("Bazel did not return success.");
             exit(status.code().unwrap());
         }
-
-        // copy
-        // bazel-bin/compiler/bootstrap/lift_rv32im_m3_12.zkr
-        // into
-        // risc0/circuit/recursion/src
-        let pwd = std::env::current_dir().unwrap();
-        let dst_dir = pwd.join("risc0/circuit/recursion/src/prove");
-        for src_path in srcs {
-            let file_name = src_path.file_name().unwrap().to_owned();
-            let src_data = File::open(&src_path).unwrap();
-            let mut src_xz = XzEncoder::new(src_data, XZ_COMPRESS_LEVEL);
-
-            // Avoid using `std::fs::copy` because bazel creates files with r/o permissions.
-            // We create a new file with r/w permissions and .copy the contents instead.
-            let mut dst_path = dst_dir.join(file_name);
-            dst_path.set_extension("zkr.xz");
-            let mut dst_file = File::create(&dst_path).unwrap();
-            std::io::copy(&mut src_xz, &mut dst_file).unwrap();
-        }
+        srcs
     }
 }
