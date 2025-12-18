@@ -28,8 +28,7 @@ use risc0_zkp::core::{
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
 use crate::{
-    EcallKind, EcallMetric, MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, Rv32imV2Claim,
-    TerminateState,
+    Claim, EcallKind, EcallMetric, MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, TerminateState,
     execute::{DEFAULT_SEGMENT_LIMIT_PO2, poseidon2::Poseidon2, rv32im::disasm},
     trace::{TraceCallback, TraceEvent},
 };
@@ -78,7 +77,7 @@ pub struct Executor<'a, S: Syscall> {
 /// Results from running the [Executor], including information about the initial and final memory
 /// states as well metrics for the number of segments and cycles used.
 ///
-/// This struct has the information required to compute the [Rv32imV2Claim] for the execution.
+/// This struct has the information required to compute the [Claim] for the execution.
 #[derive(Clone, Debug)]
 #[non_exhaustive]
 pub struct ExecutorResult {
@@ -91,25 +90,23 @@ pub struct ExecutorResult {
     pub reserved_cycles: u64,
     pub ecall_metrics: EnumMap<EcallKind, EcallMetric>,
 
-    // Fields used to populate the [Rv32imV2Claim].
-    pub input: Digest,
+    // Fields used to populate the [Claim].
     pub output: Option<Digest>,
     pub terminate_state: Option<TerminateState>,
-    pub shutdown_cycle: Option<u32>,
+    pub po2: u32,
 }
 
 impl ExecutorResult {
-    /// Construct the [Rv32imV2Claim] for this execution.
+    /// Construct the [Claim] for this execution.
     ///
     /// Calling this function will compute the digests of the pre and post image, if needed.
-    pub fn claim(&mut self) -> Rv32imV2Claim {
-        Rv32imV2Claim {
+    pub fn claim(&mut self) -> Claim {
+        Claim {
+            po2: self.po2,
             pre_state: self.pre_image.image_id(),
             post_state: self.post_image.image_id(),
-            input: self.input,
             output: self.output,
             terminate_state: self.terminate_state,
-            shutdown_cycle: self.shutdown_cycle,
         }
     }
 }
@@ -495,7 +492,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         while let Some(update) = self.run_segment(limit)? {
             callback(update).context("Segment update callback returned error")?;
         }
-        Ok(self.state())
+        Ok(self.state(limit.segment_po2.try_into().unwrap()))
     }
 
     /// Execute a segment split, committing the current pager state, sending the segment to the
@@ -574,7 +571,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     /// Compute the [ExecutorResult] from the initial to the current state of the executor.
-    pub fn state(&self) -> ExecutorResult {
+    pub fn state(&self, po2: u32) -> ExecutorResult {
         ExecutorResult {
             segments: self.segment_counter as u64 + 1,
             pre_image: self.initial_image.clone(),
@@ -584,10 +581,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
             paging_cycles: self.cycles.paging,
             reserved_cycles: self.cycles.reserved,
             ecall_metrics: self.ecall_metrics.clone(),
-            input: self.input_digest,
             output: self.output_digest,
             terminate_state: self.terminate_state,
-            shutdown_cycle: None,
+            po2,
         }
     }
 

@@ -37,8 +37,8 @@ impl Bazel {
 
     fn bootstrap_rust_verifier() {
         let pwd = std::env::current_dir().unwrap();
-        let dst_dir = pwd.join("risc0/circuit/rv32im-m3/src/zirgen");
-        let bazel_root = Path::new("risc0/circuit/rv32im-m3-sys/cxx");
+        let dst_dir = pwd.join("risc0/circuit/rv32im/src/zirgen");
+        let bazel_root = Path::new("risc0/circuit/rv32im-sys/cxx");
         let mut command = Command::new("bazelisk");
         command
             .args(["run", "//compiler/bootstrap", "--"])
@@ -83,7 +83,7 @@ impl Bazel {
     }
 
     fn bazel(target: &str) -> Vec<PathBuf> {
-        let bazel_root = Path::new("risc0/circuit/rv32im-m3-sys/cxx");
+        let bazel_root = Path::new("risc0/circuit/rv32im-sys/cxx");
         let mut command = Command::new("bazelisk");
         command
             .args(["build", target])

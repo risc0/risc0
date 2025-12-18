@@ -59,7 +59,7 @@ jobs:
             bazel:
               - .github/actions/**
               - .github/workflows/main.yml
-              - risc0/circuit/rv32im-m3-sys/cxx/**
+              - risc0/circuit/rv32im-sys/cxx/**
             browser:
               - *base
               - examples/browser-verify/**
@@ -735,7 +735,7 @@ jobs:
       - uses: ./.github/actions/bazelisk
       - name: clang-format check
         run: bazelisk build //... --config=clang-format-check
-        working-directory: risc0/circuit/rv32im-m3-sys/cxx
+        working-directory: risc0/circuit/rv32im-sys/cxx
       - name: Build & test
         env:
           CONFIG: ${{ matrix.config }}
@@ -745,4 +745,4 @@ jobs:
               --test_output=errors \
               --strategy=TestRunner=local \
               --@rules_cuda//cuda:archs=${{ matrix.nvcc_arch }}
-        working-directory: risc0/circuit/rv32im-m3-sys/cxx
+        working-directory: risc0/circuit/rv32im-sys/cxx

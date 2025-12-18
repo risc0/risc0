@@ -84,7 +84,7 @@ pub fn execute<S: Syscall>(
 
     Ok(SimpleSession {
         segments,
-        result: executor.state(),
+        result: executor.state(limit.segment_po2.try_into().unwrap()),
     })
 }
 

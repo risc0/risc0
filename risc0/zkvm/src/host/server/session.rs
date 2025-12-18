@@ -150,7 +150,7 @@ impl Segment {
 
 /// The results of running preflight on a [Segment].
 pub struct PreflightResults {
-    pub(crate) inner: risc0_circuit_rv32im_m3::prove::PreflightContext,
+    pub(crate) inner: risc0_circuit_rv32im::prove::PreflightContext,
     pub(crate) terminate_state: Option<TerminateState>,
     pub(crate) output: MaybePruned<Option<Output>>,
     pub(crate) segment_index: u32,
