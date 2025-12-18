@@ -2857,8 +2857,10 @@ name = "elf-to-bin"
 version = "0.1.0"
 dependencies = [
  "bincode",
- "clap 4.5.46",
+ "bytemuck",
+ "clap 4.5.53",
  "risc0-binfmt",
+ "risc0-zkos-fs",
 ]
 
 [[package]]
@@ -2868,15 +2870,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e079f19b08ca6239f47f8ba8509c11cf3ea30095831f7fed61441475edd8c449"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "elf-to-bin"
-version = "0.1.0"
-dependencies = [
- "bincode",
- "clap 4.5.46",
- "risc0-binfmt",
 ]
 
 [[package]]
@@ -7568,6 +7561,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-fs"
+version = "0.0.0"
+dependencies = [
+ "bytemuck",
+]
+
+[[package]]
 name = "risc0-zkos-linux"
 version = "0.0.0"
 dependencies = [
@@ -7575,13 +7575,14 @@ dependencies = [
  "elf",
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkos-fs",
  "rlsf",
  "softfloat-sys",
 ]
 
 [[package]]
 name = "risc0-zkos-linux-guests"
-version = "3.0.0"
+version = "5.0.0"
 dependencies = [
  "risc0-build",
 ]

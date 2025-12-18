@@ -29,6 +29,7 @@ use tempfile::NamedTempFile;
 type GdbConnection = Box<dyn ConnectionExt<Error = std::io::Error>>;
 
 pub struct GdbExecutor<'a, 'b> {
+    #[allow(dead_code)]
     pub(crate) elf: NamedTempFile,
     debugger: CircuitDebugger<'a, 'b, CircuitSyscallTable<'a>>,
     pub(crate) listener: TcpListener,
@@ -57,6 +58,7 @@ impl<'a, 'b> GdbExecutor<'a, 'b> {
         Ok(self.listener.local_addr()?)
     }
 
+    #[allow(dead_code)]
     pub fn elf_path(&self) -> &Path {
         self.elf.path()
     }

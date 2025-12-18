@@ -64,5 +64,4 @@ metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]
 redis = ["risc0-zkvm/redis"]
 r0vm-ver-compat = ["risc0-r0vm/r0vm-ver-compat"]
-rv32im-m3 = ["risc0-r0vm/rv32im-m3", "risc0-zkvm/rv32im-m3"]
 
