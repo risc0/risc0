@@ -7,6 +7,198 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+# NOTE: cuda and metal are excluded because their build scripts require external tools.
+features = ["client", "prove", "getrandom", "std", "unstable"]
+
+[features]
+circuit_debug = ["risc0-zkp/circuit_debug"]
+client = [
+    "dep:bincode",
+    "dep:bytes",
+    "dep:lazy-regex",
+    "dep:risc0-build",
+    "dep:rzup",
+    "dep:prost",
+    "dep:tempfile",
+    "std",
+]
+bonsai = ["dep:bonsai-sdk"]
+cuda = [
+    "prove",
+    "risc0-circuit-keccak/cuda",
+    "risc0-circuit-recursion/cuda",
+    "risc0-circuit-rv32im/cuda",
+    "risc0-groth16/cuda",
+    "risc0-zkp/cuda",
+]
+dual = [
+    "cuda",
+    # Only recursion supports dual right now
+    "risc0-circuit-recursion/dual",
+]
+default = ["client", "bonsai"]
+r0vm-ver-compat = []
+disable-dev-mode = []
+# This flag uses the docker environment to build test guests such as multi-test
+# to ensure accurate cycle and segment counts. Tests that have been gated on
+# this flag measure cycles and segments. Without this flag, the rust build
+# system will generate binaries that not identical across all architectures.
+# While this is acceptable for most tests, the tests counting cycles and
+# segments will fail intermittently. It does not effect non-test code.
+docker = []
+# The zkVM exposes a getrandom implementation that panics by default. This will
+# expose a getrandom implementation that uses the `sys_random` ecall.
+getrandom = ["risc0-zkvm-platform/getrandom"]
+# The zkVM uses a bump-pointer heap allocator by default which does not free
+# memory. This will use a slower linked-list heap allocator to reclaim memory.
+heap-embedded-alloc = ["risc0-zkvm-platform/heap-embedded-alloc"]
+metal = ["prove"]
+prove = [
+    "client",
+    "dep:addr2line",
+    "dep:bincode",
+    "dep:elf",
+    "dep:gdbstub",
+    "dep:gdbstub_arch",
+    "dep:gimli",
+    "dep:keccak",
+    "dep:lazy-regex",
+    "dep:num-bigint",
+    "dep:num-traits",
+    "dep:object",
+    "dep:prost",
+    "dep:rand",
+    "dep:rayon",
+    "dep:rustc-demangle",
+    "dep:tempfile",
+    "dep:typetag",
+    "risc0-circuit-keccak/prove",
+    "risc0-circuit-recursion/prove",
+    "risc0-circuit-rv32im/prove",
+    "risc0-core/perf",
+    "risc0-groth16/prove",
+    "risc0-zkp/prove",
+    "std",
+]
+redis = ["dep:redis"]
+std = [
+    "anyhow/std",
+    "derive_more/std",
+    "hex/std",
+    "risc0-binfmt/std",
+    "risc0-groth16/std",
+    "risc0-zkp/std",
+    "serde/std",
+    "sha2/std",
+]
+unstable = ["risc0-zkvm-platform/unstable"]
+witgen_debug = ["risc0-circuit-rv32im/witgen_debug"]
+
+[dependencies]
+anyhow = { version = "1.0", default-features = false }
+borsh = { version = "1.5", default-features = false, features = ["derive"] }
+bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
+cfg-if = "1.0"
+derive_more = { version = "2.0.1", default-features = false, features = [
+    "debug",
+    "from",
+] }
+hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
+risc0-binfmt = { workspace = true }
+risc0-circuit-keccak = { workspace = true }
+risc0-circuit-recursion = { workspace = true }
+risc0-circuit-rv32im = { workspace = true }
+risc0-core = { workspace = true }
+risc0-groth16 = { workspace = true }
+risc0-zkos-v1compat = { workspace = true }
+risc0-zkp = { workspace = true }
+risc0-zkvm-platform = { workspace = true, features = [
+    "rust-runtime",
+    "export-getrandom",
+] }
+rrs-lib = "0.1"
+semver = { version = "1.0", default-features = false }
+serde = { version = "1.0", default-features = false, features = [
+    "alloc",
+    "derive",
+    "rc",
+] }
+sha2 = { version = "0.10", default-features = false }
+stability = "0.2"
+tracing = { version = "0.1", default-features = false, features = [
+    "attributes",
+] }
+
+# Host dependencies
+[target.'cfg(not(target_os = "zkvm"))'.dependencies]
+addr2line = { version = "0.24.2", optional = true, features = [
+    "rustc-demangle",
+    "std",
+] }
+bincode = { version = "1.3", optional = true }
+bonsai-sdk = { workspace = true, optional = true }
+bytes = { version = "1.10", optional = true, features = ["serde"] }
+elf = { version = "0.7", optional = true, default-features = false }
+enum-map = { version = "2.7.3", features = ["serde"] }
+gdbstub = { version = "0.7", optional = true }
+gdbstub_arch = { version = "0.3", optional = true }
+gimli = { version = "0.31.1", optional = true }
+keccak = { version = "0.1.5", optional = true }
+lazy-regex = { version = "3.3", optional = true }
+num-bigint = { version = "0.4", optional = true, default-features = false }
+num-traits = { version = "0.2", optional = true, default-features = false }
+object = { version = "0.36.7", optional = true }
+prost = { version = "0.13", optional = true }
+rand = { version = "0.9.1", optional = true }
+rayon = { version = "1.5", optional = true }
+redis = { version = "0.30.0", optional = true, default-features = false, features = [
+    "tls-native-tls",
+] }
+risc0-binfmt = { workspace = true, features = ["rand"] }
+risc0-build = { workspace = true, optional = true }
+rustc-demangle = { version = "0.1", optional = true }
+rzup = { workspace = true, optional = true }
+tempfile = { version = "3", optional = true }
+typetag = { version = "0.2", optional = true }
+
+[dev-dependencies]
+bincode = "1.3"
+chrono = { version = "0.4", default-features = false, features = ["serde"] }
+ciborium = "0.2"
+clap = { version = "4.5", features = ["derive"] }
+mini-redis = { version = "0.4.1", default-features = false }
+postcard = { version = "1.1", features = ["alloc"] }
+rand = "0.9.1"
+regex = "1"
+rmp-serde = "1.3"
+rstest = "0.25.0"
+ruint = "1.15"
+tokio = { version = "1.43.0", default-features = false, features = ["macros"] }
+tracing-forest = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+crypto-bigint = { version = "0.5", default-features = false, features = [
+    "rand",
+] }
+enum-iterator = "2.1"
+flate2 = "1.0"
+gpu-guard = { workspace = true }
+hotbench = { workspace = true }
+human-repr = { version = "1.0", features = ["1024"] }
+puffin = "0.19"
+puffin_http = "0.16"
+risc0-bigint2-methods = { workspace = true }
+risc0-zkvm-methods = { path = "methods", features = ["std"] }
+serde_json = "1.0"
+serde_with = "3.12"
+tabled = "0.19.0"
+tar = "0.4"
+tempfile = "3"
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
+
 [[bench]]
 name = "fib"
 harness = false
@@ -32,198 +224,6 @@ test = true
 [[example]]
 name = "recursion"
 required-features = ["prove"]
-
-[dependencies]
-anyhow = { version = "1.0", default-features = false }
-borsh = { version = "1.5", default-features = false, features = ["derive"] }
-bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
-cfg-if = "1.0"
-derive_more = { version = "2.0.1", default-features = false, features = [
-  "debug",
-  "from",
-] }
-hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
-risc0-binfmt = { workspace = true }
-risc0-circuit-keccak = { workspace = true }
-risc0-circuit-recursion = { workspace = true }
-risc0-circuit-rv32im = { workspace = true }
-risc0-core = { workspace = true }
-risc0-groth16 = { workspace = true }
-risc0-zkos-v1compat = { workspace = true }
-risc0-zkp = { workspace = true }
-risc0-zkvm-platform = { workspace = true, features = [
-  "rust-runtime",
-  "export-getrandom",
-] }
-rrs-lib = "0.1"
-semver = { version = "1.0", default-features = false }
-serde = { version = "1.0", default-features = false, features = [
-  "alloc",
-  "derive",
-  "rc",
-] }
-sha2 = { version = "0.10", default-features = false }
-stability = "0.2"
-tracing = { version = "0.1", default-features = false, features = [
-  "attributes",
-] }
-
-# Host dependencies
-[target.'cfg(not(target_os = "zkvm"))'.dependencies]
-addr2line = { version = "0.24.2", optional = true, features = [
-  "rustc-demangle",
-  "std",
-] }
-risc0-binfmt = { workspace = true, features = ["rand"] }
-bincode = { version = "1.3", optional = true }
-bonsai-sdk = { workspace = true, optional = true }
-bytes = { version = "1.10", optional = true, features = ["serde"] }
-elf = { version = "0.7", optional = true, default-features = false }
-enum-map = { version = "2.7.3", features = ["serde"] }
-gdbstub = { version = "0.7", optional = true }
-gdbstub_arch = { version = "0.3", optional = true }
-gimli = { version = "0.31.1", optional = true }
-keccak = { version = "0.1.5", optional = true }
-lazy-regex = { version = "3.3", optional = true }
-num-bigint = { version = "0.4", optional = true, default-features = false }
-num-traits = { version = "0.2", optional = true, default-features = false }
-object = { version = "0.36.7", optional = true }
-prost = { version = "0.13", optional = true }
-rand = { version = "0.9.1", optional = true }
-rayon = { version = "1.5", optional = true }
-redis = { version = "0.30.0", optional = true, default-features = false, features = [
-  "tls-native-tls",
-] }
-risc0-build = { workspace = true, optional = true }
-rustc-demangle = { version = "0.1", optional = true }
-rzup = { workspace = true, optional = true }
-tempfile = { version = "3", optional = true }
-typetag = { version = "0.2", optional = true }
-
-[dev-dependencies]
-bincode = "1.3"
-chrono = { version = "0.4", default-features = false, features = ["serde"] }
-ciborium = "0.2"
-clap = { version = "4.5", features = ["derive"] }
-mini-redis = { version = "0.4.1", default-features = false }
-postcard = { version = "1.1", features = ["alloc"] }
-rand = "0.9.1"
-regex = "1"
-rmp-serde = "1.3"
-rstest = "0.25.0"
-ruint = "1.15"
-tokio = { version = "1.43.0", default-features = false, features = ["macros"] }
-tracing-forest = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-
-[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
-crypto-bigint = { version = "0.5", default-features = false, features = [
-  "rand",
-] }
-enum-iterator = "2.1"
-flate2 = "1.0"
-gpu-guard = { workspace = true }
-hotbench = { workspace = true }
-human-repr = { version = "1.0", features = ["1024"] }
-puffin = "0.19"
-puffin_http = "0.16"
-risc0-bigint2-methods = { workspace = true }
-risc0-zkvm-methods = { path = "methods", features = ["std"] }
-serde_json = "1.0"
-serde_with = "3.12"
-tabled = "0.19.0"
-tar = "0.4"
-tempfile = "3"
-test-log = { version = "0.2", default-features = false, features = ["trace"] }
-
-[package.metadata.docs.rs]
-rustdoc-args = ["--cfg", "docsrs"]
-# NOTE: cuda and metal are excluded because their build scripts require external tools.
-features = ["client", "prove", "getrandom", "std", "unstable"]
-
-[features]
-circuit_debug = ["risc0-zkp/circuit_debug"]
-client = [
-  "dep:bincode",
-  "dep:bytes",
-  "dep:lazy-regex",
-  "dep:risc0-build",
-  "dep:rzup",
-  "dep:prost",
-  "dep:tempfile",
-  "std",
-]
-bonsai = ["dep:bonsai-sdk"]
-cuda = [
-  "prove",
-  "risc0-circuit-keccak/cuda",
-  "risc0-circuit-recursion/cuda",
-  "risc0-circuit-rv32im/cuda",
-  "risc0-groth16/cuda",
-  "risc0-zkp/cuda",
-]
-dual = [
-  "cuda",
-  # Only recursion supports dual right now
-  "risc0-circuit-recursion/dual"
-]
-default = ["client", "bonsai"]
-r0vm-ver-compat = []
-disable-dev-mode = []
-# This flag uses the docker environment to build test guests such as multi-test
-# to ensure accurate cycle and segment counts. Tests that have been gated on
-# this flag measure cycles and segments. Without this flag, the rust build
-# system will generate binaries that not identical across all architectures.
-# While this is acceptable for most tests, the tests counting cycles and
-# segments will fail intermittently. It does not effect non-test code.
-docker = []
-# The zkVM exposes a getrandom implementation that panics by default. This will
-# expose a getrandom implementation that uses the `sys_random` ecall.
-getrandom = ["risc0-zkvm-platform/getrandom"]
-# The zkVM uses a bump-pointer heap allocator by default which does not free
-# memory. This will use a slower linked-list heap allocator to reclaim memory.
-heap-embedded-alloc = ["risc0-zkvm-platform/heap-embedded-alloc"]
-metal = ["prove"]
-prove = [
-  "client",
-  "dep:addr2line",
-  "dep:bincode",
-  "dep:elf",
-  "dep:gdbstub",
-  "dep:gdbstub_arch",
-  "dep:gimli",
-  "dep:keccak",
-  "dep:lazy-regex",
-  "dep:num-bigint",
-  "dep:num-traits",
-  "dep:object",
-  "dep:prost",
-  "dep:rand",
-  "dep:rayon",
-  "dep:rustc-demangle",
-  "dep:tempfile",
-  "dep:typetag",
-  "risc0-circuit-keccak/prove",
-  "risc0-circuit-recursion/prove",
-  "risc0-circuit-rv32im/prove",
-  "risc0-core/perf",
-  "risc0-groth16/prove",
-  "risc0-zkp/prove",
-  "std",
-]
-redis = ["dep:redis"]
-std = [
-  "anyhow/std",
-  "derive_more/std",
-  "hex/std",
-  "risc0-binfmt/std",
-  "risc0-groth16/std",
-  "risc0-zkp/std",
-  "serde/std",
-  "sha2/std",
-]
-unstable = ["risc0-zkvm-platform/unstable"]
-witgen_debug = ["risc0-circuit-rv32im/witgen_debug"]
 
 [lints]
 workspace = true

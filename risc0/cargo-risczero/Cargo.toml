@@ -9,9 +9,30 @@ description = "RISC Zero CLI tools"
 readme = "README.md"
 keywords = ["risc0", "risczero", "tool", "cli", "generate"]
 
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+# NOTE: cuda and metal are excluded because their build scripts require external tools.
+features = ["docker", "r0vm"]
+
 [[bin]]
 name = "r0vm"
 doc = false
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = ["r0vm"]
+docker = []
+experimental = [
+    "dep:tracing-subscriber",
+    "dep:risc0-build",
+    "dep:zip",
+    "risc0-zkvm/prove",
+    "risc0-build/unstable",
+]
+metal = ["risc0-zkvm/metal"]
+r0vm = ["dep:risc0-r0vm"]
+redis = ["risc0-zkvm/redis"]
+r0vm-ver-compat = ["risc0-r0vm/r0vm-ver-compat"]
 
 [dependencies]
 anyhow = { version = "1.0", features = ["backtrace"] }
@@ -40,27 +61,6 @@ cargo_metadata = "0.19.1"
 risc0-build = { workspace = true, optional = true }
 serde_json = "1"
 tracing-subscriber = { version = "0.3", features = [
-  "env-filter",
+    "env-filter",
 ], optional = true }
 zip = { version = "2.1", optional = true, default-features = false }
-
-[package.metadata.docs.rs]
-rustdoc-args = ["--cfg", "docsrs"]
-# NOTE: cuda and metal are excluded because their build scripts require external tools.
-features = ["docker", "r0vm"]
-
-[features]
-cuda = ["risc0-zkvm/cuda"]
-default = ["r0vm"]
-docker = []
-experimental = [
-  "dep:tracing-subscriber",
-  "dep:risc0-build",
-  "dep:zip",
-  "risc0-zkvm/prove",
-  "risc0-build/unstable",
-]
-metal = ["risc0-zkvm/metal"]
-r0vm = ["dep:risc0-r0vm"]
-redis = ["risc0-zkvm/redis"]
-r0vm-ver-compat = ["risc0-r0vm/r0vm-ver-compat"]

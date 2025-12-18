@@ -11,6 +11,9 @@ publish = false
 [package.metadata.release]
 release = false
 
+[features]
+cuda = ["risc0-zkp/cuda", "risc0-circuit-recursion/cuda"]
+
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 bytemuck = "1.20"
@@ -21,6 +24,3 @@ risc0-zkp = { workspace = true, features = ["default"] }
 risc0-circuit-recursion = { workspace = true, default-features = false }
 risc0-zkvm = { workspace = true, features = ["prove"] }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
-
-[features]
-cuda = ["risc0-zkp/cuda", "risc0-circuit-recursion/cuda"]

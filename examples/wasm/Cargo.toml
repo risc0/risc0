@@ -3,6 +3,11 @@ name = "wasm"
 version = "0.1.0"
 edition = { workspace = true }
 
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+prove = ["risc0-zkvm/prove"]
+
 [dependencies]
 risc0-zkvm = { path = "../../risc0/zkvm" }
 wasm-methods = { path = "methods" }
@@ -10,8 +15,3 @@ wat = "<1.0.72"
 
 [dev-dependencies]
 gpu-guard = { path = "../../tools/gpu-guard" }
-
-[features]
-cuda = ["risc0-zkvm/cuda"]
-default = []
-prove = ["risc0-zkvm/prove"]
