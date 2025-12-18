@@ -21,7 +21,9 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <stdexcept>
+#include <thread>
 #include <vector>
 
 namespace risc0 {
@@ -73,5 +75,41 @@ inline bool constexpr isPo2(size_t in) {
 
 // Reads an entire file into a buffer.
 std::vector<uint8_t> loadFile(const std::string& path);
+
+// Runs function on different threads passing i = 0..count
+inline void parallel_map(size_t count, std::function<void(size_t)> body) {
+  size_t num_logical_processors =
+      std::max(static_cast<size_t>(std::thread::hardware_concurrency()), 1UL);
+  size_t num_threads = std::min(num_logical_processors, count);
+
+  std::vector<std::thread> threads;
+
+  auto count_per_thread = count / num_threads;
+  for (size_t thread_id = 0; thread_id < num_threads; thread_id++) {
+    auto start = thread_id * count_per_thread;
+    if (thread_id == num_threads - 1) {
+      count_per_thread += count % num_threads;
+    }
+    threads.emplace_back([start, count_per_thread, body] {
+      for (size_t i = 0; i < count_per_thread; i++) {
+        body(start + i);
+      }
+    });
+  }
+
+  std::exception_ptr exception_ptr = nullptr;
+  for (std::thread& t : threads) {
+    try {
+      t.join();
+    } catch (...) {
+      if (!exception_ptr) {
+        exception_ptr = std::current_exception();
+      }
+    }
+  }
+  if (exception_ptr) {
+    std::rethrow_exception(exception_ptr);
+  }
+}
 
 } // namespace risc0

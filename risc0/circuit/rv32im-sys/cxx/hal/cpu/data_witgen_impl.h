@@ -13,6 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#include "core/util.h"
 #include "hal/hal.h"
 
 using risc0::RowInfo;
@@ -24,13 +25,12 @@ namespace risc0 {
 void FUNCNAME(
     Fp* data, Fp* globals, const RowInfo* info, const uint32_t* aux, uint32_t* tables, Fp rou) {
   size_t NUM_ROWS = size_t(1) << NUM_ROWS_PO2;
-  // TODO: Parallel for?
-  for (size_t i = 0; i < NUM_ROWS; i++) {
+  parallel_map(NUM_ROWS, [&data, &globals, info, aux, tables, rou](size_t i) {
     computeRowSet<NUM_ROWS_PO2>(data, globals, info, aux, tables, rou, i);
-  }
-  for (size_t i = 0; i < NUM_ROWS; i++) {
+  });
+  parallel_map(NUM_ROWS, [&data, &globals, info, aux, tables, rou](size_t i) {
     computeRowFinalize<NUM_ROWS_PO2>(data, globals, info, aux, tables, rou, i);
-  }
+  });
 }
 
 } // namespace risc0

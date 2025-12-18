@@ -87,10 +87,10 @@ public:
     if (in.rows() != out.size()) {
       throw std::runtime_error("Mismatched sizes in hashRows");
     }
-    // TODO: Parallel
-    for (size_t i = 0; i < out.size(); i++) {
+
+    parallel_map(out.size(), [&pOut, pIn, in](size_t i) {
       pOut[i] = poseidon2Hash(pIn.data() + i, in.cols(), in.rows());
-    }
+    });
   }
   void hashFold(HalArray<Digest> out, HalArray<Digest> in) override {
     PinnedArrayWO<Digest> pOut(shared_from_this(), out);
@@ -98,10 +98,9 @@ public:
     if (in.size() != 2 * out.size()) {
       throw std::runtime_error("Mismatched sizes in hashRows");
     }
-    // TODO: Parallel
-    for (size_t i = 0; i < out.size(); i++) {
+    parallel_map(out.size(), [&pOut, pIn, in](size_t i) {
       pOut[i] = poseidon2HashPair(pIn[2 * i], pIn[2 * i + 1]);
-    }
+    });
   }
   void query(HalArray<Fp> out,
              HalMatrix<Fp> data,
