@@ -19,4 +19,6 @@ namespace risc0 {
 
 void addLift(zirgen::Module& module, size_t po2);
 
+void addLiftPovw(zirgen::Module& module, size_t po2);
+
 } // namespace risc0

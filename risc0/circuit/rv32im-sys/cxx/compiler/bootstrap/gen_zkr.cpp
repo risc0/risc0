@@ -29,6 +29,7 @@ int main(int argc, char* argv[]) {
   zirgen::Module module;
   for (size_t po2 = 12; po2 < 25; ++po2) {
     risc0::addLift(module, po2);
+    risc0::addLiftPovw(module, po2);
   }
   module.optimize();
   // module.dump(true);
