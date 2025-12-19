@@ -66,6 +66,10 @@ impl Bootstrap {
         .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
         .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_povw_{i}.zkr")))
         .chain((risc0_circuit_recursion::LIFT_PO2_RANGE).map(|i| format!("lift_rv32im_m3_{i}.zkr")))
+        .chain(
+            (risc0_circuit_recursion::LIFT_PO2_RANGE)
+                .map(|i| format!("lift_rv32im_m3_povw_{i}.zkr")),
+        )
         .collect();
 
         tracing::info!("Using allowed_zkr_names {allowed_zkr_names:#?}");
