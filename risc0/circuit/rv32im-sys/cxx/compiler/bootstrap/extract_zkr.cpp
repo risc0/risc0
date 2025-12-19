@@ -185,8 +185,10 @@ void addLiftPovw(zirgen::Module& module, size_t po2) {
                       zirgen::DigestVal root = rootIop.readDigests(1)[0];
                       auto globals = zirgen::verify::verifyV3(seal, po2, circuit);
                       llvm::ArrayRef inStream(globals);
-                      auto claimAndNonce = zirgen::predicates::readReceiptClaimV3AndPovwNonce(inStream, po2);
-                      auto workClaim = zirgen::predicates::wrap_povw(po2, claimAndNonce.second, claimAndNonce.first);
+                      auto claimAndNonce =
+                          zirgen::predicates::readReceiptClaimV3AndPovwNonce(inStream, po2);
+                      auto workClaim = zirgen::predicates::wrap_povw(
+                          po2, claimAndNonce.second, claimAndNonce.first);
                       std::vector<zirgen::Val> outStream;
                       workClaim.write(outStream);
                       doExtern("write", "", 0, outStream);

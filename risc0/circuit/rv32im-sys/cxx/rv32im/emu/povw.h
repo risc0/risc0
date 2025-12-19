@@ -24,16 +24,13 @@ private:
   uint32_t inner_data[8];
 
 public:
-  PovwNonce(uint32_t povwNonce[8]) {
-      memcpy(&inner_data, povwNonce, sizeof(uint32_t) * 8);
-  }
+  PovwNonce(uint32_t povwNonce[8]) { memcpy(&inner_data, povwNonce, sizeof(uint32_t) * 8); }
   static PovwNonce zero() {
-      uint32_t d[8];
-      memset(d, 0, sizeof(d));
-      return PovwNonce(d);
+    uint32_t d[8];
+    memset(d, 0, sizeof(d));
+    return PovwNonce(d);
   }
   inline const uint32_t* data() const { return inner_data; }
-
 };
 
 } // namespace risc0::rv32im
