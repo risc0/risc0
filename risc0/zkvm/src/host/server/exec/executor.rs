@@ -92,14 +92,7 @@ fn check_program_version(header: &ProgramBinaryHeader) -> Result<()> {
 }
 
 pub(crate) fn circuit_version() -> u32 {
-    cfg_if::cfg_if! {
-        if #[cfg(feature = "rv32im-m3")] {
-            risc0_circuit_rv32im::execute::RV32IM_M3_CIRCUIT_VERSION
-        }
-        else {
-            risc0_circuit_rv32im::execute::RV32IM_V2_CIRCUIT_VERSION
-        }
-    }
+    risc0_circuit_rv32im::execute::RV32IM_M3_CIRCUIT_VERSION
 }
 
 /// Maximum number of segments we can queue up before we block execution
@@ -340,7 +333,7 @@ impl<'a> ExecutorImpl<'a> {
             // Send the constructed Output to merge into the final segment.
             update_processor
                 .output_channel
-                .send(self.final_segment_output()?)
+                .send(self.final_segment_output(self.segment_limit_po2())?)
                 .context("Failed to send output to segment update processor")?;
             drop(update_processor.output_channel);
 
@@ -387,7 +380,7 @@ impl<'a> ExecutorImpl<'a> {
         pre_image_digest: Option<Digest>,
         segments: Option<Vec<Box<dyn SegmentRef>>>,
     ) -> Result<Session> {
-        let exec_result = self.inner.state();
+        let exec_result = self.inner.state(self.segment_limit_po2());
 
         tracing::debug!("output_digest: {:?}", exec_result.output);
 
@@ -470,12 +463,11 @@ impl<'a> ExecutorImpl<'a> {
             execution_time: self.execution_time,
         };
 
-        // XXX remi: For m3, these cycle counts no longer add up to the po2
-        #[cfg(not(feature = "rv32im-m3"))]
-        assert_eq!(
-            session.total_cycles,
-            session.user_cycles + session.paging_cycles + session.reserved_cycles
-        );
+        // XXX M3: For m3, these cycle counts no longer add up to the po2
+        // assert_eq!(
+        //     session.total_cycles,
+        //     session.user_cycles + session.paging_cycles + session.reserved_cycles
+        // );
 
         // Reset the executor, into a state where calling `run` will resume execution from the
         // final state of this execution (i.e. resuming from a pause).
@@ -490,10 +482,10 @@ impl<'a> ExecutorImpl<'a> {
         Ok(session)
     }
 
-    /// Constructs the expetced value for the final segment output. This includes the full journal
+    /// Constructs the expected value for the final segment output. This includes the full journal
     /// and assumptions.
-    fn final_segment_output(&self) -> Result<MaybePruned<Option<Output>>> {
-        let state = self.inner.state();
+    fn final_segment_output(&self, po2: u32) -> Result<MaybePruned<Option<Output>>> {
+        let state = self.inner.state(po2);
         ensure!(
             state.terminate_state.is_some(),
             "Cannot compute final segment output for executor that has not terminated"
@@ -520,11 +512,14 @@ impl<'a> ExecutorImpl<'a> {
         .into())
     }
 
-    fn execution_limit(&self) -> ExecutionLimit {
-        let segment_limit_po2 = self
-            .env
+    fn segment_limit_po2(&self) -> u32 {
+        self.env
             .segment_limit_po2
-            .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32) as usize;
+            .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32)
+    }
+
+    fn execution_limit(&self) -> ExecutionLimit {
+        let segment_limit_po2 = self.segment_limit_po2() as usize;
 
         let session_limit = match self.env.session_limit {
             Some(limit) => CycleLimit::Hard(limit),

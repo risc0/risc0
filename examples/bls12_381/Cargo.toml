@@ -5,11 +5,11 @@ edition = { workspace = true }
 
 default-run = "bls12_381-example"
 
-[dependencies]
-bls12_381-methods = { path = "methods" }
-risc0-zkvm = { path = "../../risc0/zkvm" }
-
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
 prove = ["risc0-zkvm/prove"]
+
+[dependencies]
+bls12_381-methods = { path = "methods" }
+risc0-zkvm = { path = "../../risc0/zkvm" }
