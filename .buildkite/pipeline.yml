@@ -1,10 +1,11 @@
 common:
   filters:
     base: &filters-base
-      - .buildkite/**
-      - Cargo.toml
-      - Cargo.lock
-      - rust-toolchain.toml
+      include:
+        - .buildkite/**
+        - Cargo.toml
+        - Cargo.lock
+        - rust-toolchain.toml
 
 env:
   RISC0_RUST_TOOLCHAIN_VERSION: 1.91.1
@@ -21,9 +22,10 @@ steps:
 
   - label: ":rust: Clippy {{matrix.os}}/{{matrix.arch}}/{{matrix.feature}}"
     if_changed:
-      - *filters-base
-      - rzup/**
-      - risc0/**
+      <<: *filters-base
+      include:
+        - rzup/**
+        - risc0/**
     agents:
       arch: "{{matrix.arch}}"
       os: "{{matrix.os}}"
@@ -50,13 +52,14 @@ steps:
 
   - label: "Test {{matrix.os}}/{{matrix.arch}}/{{matrix.device}}"
     if_changed:
-      - *filters-base
-      - bonsai/sdk/**
-      - external/**
-      - groth16_proof/**
-      - risc0/**
-      - rzup/**
-      - xtask/**
+      <<: *filters-base
+      include:
+        - bonsai/sdk/**
+        - external/**
+        - groth16_proof/**
+        - risc0/**
+        - rzup/**
+        - xtask/**
     agents:
       arch: "{{matrix.arch}}"
       os: "{{matrix.os}}"
