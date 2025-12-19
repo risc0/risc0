@@ -23,13 +23,13 @@ cuda = ["risc0-zkvm/cuda"]
 default = ["r0vm"]
 docker = []
 experimental = [
-  "dep:risc0-binfmt",
-  "dep:risc0-build",
-  "dep:risc0-zkos-v1compat",
-  "dep:tracing-subscriber",
-  "dep:zip",
-  "risc0-build/unstable",
-  "risc0-zkvm/prove",
+    "dep:risc0-binfmt",
+    "dep:risc0-build",
+    "dep:risc0-zkos-v1compat",
+    "dep:tracing-subscriber",
+    "dep:zip",
+    "risc0-build/unstable",
+    "risc0-zkvm/prove",
 ]
 metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]
