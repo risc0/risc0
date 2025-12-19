@@ -38,7 +38,7 @@ EXTENSIONS = [
 ]
 
 SKIP_DIRS = [
-    str(Path.cwd()) + "/risc0/circuit/rv32im-m3-sys/vendor",
+    str(Path.cwd()) + "/risc0/circuit/rv32im-sys/vendor",
     str(Path.cwd()) + "/risc0/sys/cxx/vendor",
     str(Path.cwd()) + "/vendor",
 ]

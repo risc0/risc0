@@ -7,6 +7,14 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+all-features = true
+
+[features]
+perf = ["dep:nvtx", "dep:puffin"]
+std = []
+
 [dependencies]
 bytemuck = { version = "1.12", features = ["derive"] }
 rand_core = "0.9.3"
@@ -17,11 +25,3 @@ puffin = { version = "0.19", optional = true }
 
 [dev-dependencies]
 rand = { version = "0.9.1", features = ["small_rng"] }
-
-[package.metadata.docs.rs]
-rustdoc-args = ["--cfg", "docsrs"]
-all-features = true
-
-[features]
-perf = ["dep:nvtx", "dep:puffin"]
-std = []

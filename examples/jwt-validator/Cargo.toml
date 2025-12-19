@@ -3,6 +3,11 @@ name = "jwt-validator"
 version = "0.1.0"
 edition = { workspace = true }
 
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+prove = ["risc0-zkvm/prove"]
+
 [dependencies]
 jwt-core = { path = "core" }
 jwt-methods = { path = "methods" }
@@ -11,8 +16,3 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dev-dependencies]
 gpu-guard = { path = "../../tools/gpu-guard" }
-
-[features]
-cuda = ["risc0-zkvm/cuda"]
-default = []
-prove = ["risc0-zkvm/prove"]

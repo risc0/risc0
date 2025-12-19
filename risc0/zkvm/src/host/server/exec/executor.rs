@@ -333,7 +333,7 @@ impl<'a> ExecutorImpl<'a> {
             // Send the constructed Output to merge into the final segment.
             update_processor
                 .output_channel
-                .send(self.final_segment_output()?)
+                .send(self.final_segment_output(self.segment_limit_po2())?)
                 .context("Failed to send output to segment update processor")?;
             drop(update_processor.output_channel);
 
@@ -380,7 +380,7 @@ impl<'a> ExecutorImpl<'a> {
         pre_image_digest: Option<Digest>,
         segments: Option<Vec<Box<dyn SegmentRef>>>,
     ) -> Result<Session> {
-        let exec_result = self.inner.state();
+        let exec_result = self.inner.state(self.segment_limit_po2());
 
         tracing::debug!("output_digest: {:?}", exec_result.output);
 
@@ -482,10 +482,10 @@ impl<'a> ExecutorImpl<'a> {
         Ok(session)
     }
 
-    /// Constructs the expetced value for the final segment output. This includes the full journal
+    /// Constructs the expected value for the final segment output. This includes the full journal
     /// and assumptions.
-    fn final_segment_output(&self) -> Result<MaybePruned<Option<Output>>> {
-        let state = self.inner.state();
+    fn final_segment_output(&self, po2: u32) -> Result<MaybePruned<Option<Output>>> {
+        let state = self.inner.state(po2);
         ensure!(
             state.terminate_state.is_some(),
             "Cannot compute final segment output for executor that has not terminated"
@@ -512,11 +512,14 @@ impl<'a> ExecutorImpl<'a> {
         .into())
     }
 
-    fn execution_limit(&self) -> ExecutionLimit {
-        let segment_limit_po2 = self
-            .env
+    fn segment_limit_po2(&self) -> u32 {
+        self.env
             .segment_limit_po2
-            .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32) as usize;
+            .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32)
+    }
+
+    fn execution_limit(&self) -> ExecutionLimit {
+        let segment_limit_po2 = self.segment_limit_po2() as usize;
 
         let session_limit = match self.env.session_limit {
             Some(limit) => CycleLimit::Hard(limit),

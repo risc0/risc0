@@ -13,8 +13,8 @@ publish = false
 [package.metadata.release]
 release = false
 
-[build-dependencies]
-cc = { version = "1.2.16", features = ["parallel"] }
-
 [features]
 cuda = []
+
+[build-dependencies]
+cc = { version = "1.2.16", features = ["parallel"] }

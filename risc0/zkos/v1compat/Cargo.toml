@@ -7,6 +7,9 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[package.metadata.risc0]
+kernel = true
+
 [[bin]]
 name = "v1compat"
 path = "src/main.rs"
@@ -16,9 +19,6 @@ include_bytes_aligned = "0.1"
 no_std_strings = "0.1.3"
 risc0-zkvm-platform = { workspace = true }
 sha2 = { version = "0.10.9", default-features = false, features = ["compress"] }
-
-[package.metadata.risc0]
-kernel = true
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(rust_analyzer)'] }
