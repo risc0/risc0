@@ -90,11 +90,11 @@ steps:
           skip: true
     env:
       FEATURE: "{{matrix.feature}}"
-      NVCC_APPEND_FLAGS: -arch={{ matrix.nvcc_arch }}
+      NVCC_APPEND_FLAGS: "-arch={{matrix.nvcc_arch}}"
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
-      RUSTFLAGS: --cfg ci --cfg ci_profile="${{ matrix.ci_profile }}"
+      RUSTFLAGS: "--cfg ci --cfg ci_profile=\"{{matrix.ci_profile}}\""
       # SCCACHE_RECACHE: 1
       TEST_COMMAND: "{{matrix.test_command}}"
     plugins:
