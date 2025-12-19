@@ -1,6 +1,6 @@
 common:
   filters:
-    base: &filters/base
+    base: &filters-base
       - .buildkite/**
       - Cargo.toml
       - Cargo.lock
@@ -21,7 +21,7 @@ steps:
 
   - label: ":rust: Clippy {{matrix.os}}/{{matrix.arch}}/{{matrix.feature}}"
     if_changed:
-      - *filters/base
+      - *filters-base
       - rzup/**
       - risc0/**
     agents:
@@ -50,7 +50,7 @@ steps:
 
   - label: "Test {{matrix.os}}/{{matrix.arch}}/{{matrix.device}}"
     if_changed:
-      - *filters/base
+      - *filters-base
       - bonsai/sdk/**
       - external/**
       - groth16_proof/**
