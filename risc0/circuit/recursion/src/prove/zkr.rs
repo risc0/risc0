@@ -84,7 +84,9 @@ fn extract_zkr_m3(section: ZkrSection, po2: usize, expected_name: &str) -> Resul
     let (xz_bytes, uncompressed_size, name) = ZKRS[idx];
 
     // Make sure we got the right one
-    assert_eq!(name, expected_name);
+    if name != expected_name {
+        bail!("failed to find .zkr: {expected_name}");
+    }
 
     if uncompressed_size % std::mem::size_of::<u32>() != 0 {
         bail!(".zkr is incorrect size");
