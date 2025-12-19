@@ -106,7 +106,7 @@ impl SegmentReceipt {
         }
 
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
-        risc0_circuit_rv32im_m3::verify::verify(&self.seal)?;
+        risc0_circuit_rv32im::verify(&self.seal)?;
         let decoded_claim = ReceiptClaim::decode_from_seal_m3(&self.seal)
             .or(Err(VerificationError::ReceiptFormatError))?;
 
@@ -138,7 +138,7 @@ impl SegmentReceipt {
 
     /// Extracts the PoVW nonce from this segment receipt's seal.
     pub fn povw_nonce(&self) -> anyhow::Result<PovwNonce> {
-        risc0_circuit_rv32im_m3::decode_povw_nonce(&self.seal)
+        risc0_circuit_rv32im::decode_povw_nonce(&self.seal)
     }
 }
 

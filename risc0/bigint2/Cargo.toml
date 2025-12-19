@@ -7,6 +7,15 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[features]
+witgen_debug = ["risc0-zkvm/witgen_debug"]
+circuit_debug = ["risc0-zkvm/circuit_debug"]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+num-bigint-dig = ["dep:num-bigint-dig"]
+num-bigint = ["dep:num-bigint"]
+unstable = []
+
 [dependencies]
 include_bytes_aligned = "0.1"
 num-bigint = { version = "0.4", default-features = false, optional = true }
@@ -19,7 +28,7 @@ clap = { version = "4.5", features = ["derive"] }
 gpu-guard = { workspace = true }
 num-bigint = { version = "0.4", default-features = false, features = ["serde"] }
 num-bigint-dig = { version = "0.8", default-features = false, features = [
-  "serde",
+    "serde",
 ] }
 num-traits = "0.2.18"
 puffin = "0.19"
@@ -30,12 +39,3 @@ rstest = "0.25.0"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-
-[features]
-witgen_debug = ["risc0-zkvm/witgen_debug"]
-circuit_debug = ["risc0-zkvm/circuit_debug"]
-cuda = ["risc0-zkvm/cuda"]
-default = []
-num-bigint-dig = ["dep:num-bigint-dig"]
-num-bigint = ["dep:num-bigint"]
-unstable = []

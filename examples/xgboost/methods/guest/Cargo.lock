@@ -1112,21 +1112,9 @@ dependencies = [
  "risc0-binfmt",
  "risc0-core",
  "risc0-zkp",
- "serde",
- "thiserror 2.0.17",
- "tracing",
-]
-
-[[package]]
-name = "risc0-circuit-rv32im-m3"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "bytemuck",
- "risc0-binfmt",
- "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "thiserror 2.0.17",
  "tracing",
 ]
 
@@ -1207,7 +1195,6 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
- "risc0-circuit-rv32im-m3",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",

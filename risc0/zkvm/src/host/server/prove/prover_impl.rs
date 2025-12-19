@@ -232,7 +232,7 @@ impl ProverServer for ProverImpl {
         tracing::debug!("prove_preflight");
 
         let po2 = preflight_results.inner.po2();
-        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(po2 as usize)?;
+        let prover = risc0_circuit_rv32im::prove::segment_prover(po2 as usize)?;
         let seal = prover.prove(&preflight_results.inner)?;
 
         let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output.clone())
@@ -384,7 +384,7 @@ mod rv32im_m3 {
 
     pub(crate) struct PreflightIter {
         max_prover_po2: usize,
-        ctx: risc0_circuit_rv32im_m3::prove::SegmentContext,
+        ctx: risc0_circuit_rv32im::prove::SegmentContext,
         output: MaybePruned<Option<Output>>,
         terminate_state: Option<TerminateState>,
         is_done: bool,
@@ -398,7 +398,7 @@ mod rv32im_m3 {
             segment_index: u32,
         ) -> Result<Self> {
             let terminate_state = segment.inner.terminate_state;
-            let ctx = risc0_circuit_rv32im_m3::prove::SegmentContext::new(&segment.inner)?;
+            let ctx = risc0_circuit_rv32im::prove::SegmentContext::new(&segment.inner)?;
             Ok(Self {
                 max_prover_po2,
                 ctx,
