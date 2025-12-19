@@ -363,10 +363,8 @@ mod povw {
 
     use super::*;
 
-    // XXX M3
     #[test_log::test]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    #[should_panic(expected = "m3 doesn't support povw")]
     fn test_recursion_lift_then_unwrap() {
         // Prove the base case
         let (journal, segment) = ECHO_SEGMENT.clone();
@@ -457,11 +455,9 @@ mod povw {
         Ok(())
     }
 
-    // XXX M3
     #[test_log::test]
     #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    #[should_panic(expected = "m3 doesn't support povw")]
     fn test_recursion_lift_join_unwrap() {
         test_recursion_lift_join_unwrap_inner().unwrap();
     }
@@ -551,10 +547,8 @@ mod povw {
         Ok(())
     }
 
-    // XXX M3
     #[test_log::test]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    #[should_panic(expected = "m3 doesn't support povw")]
     fn test_recursion_lift_resolve_unwrap() {
         test_recursion_lift_resolve_unwrap_inner().unwrap();
     }
