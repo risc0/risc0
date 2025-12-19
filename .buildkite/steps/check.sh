@@ -3,10 +3,10 @@
 set -euo pipefail
 
 echo "--- cargo install cargo-sort"
-cargo install cargo-sort
+cargo install cargo-sort@2.0
 
 echo "--- cargo install cargo-rdme"
-cargo install cargo-rdme
+cargo install cargo-rdme@1.4.3
 
 echo "--- cargo fmt"
 cargo fmt --all --check
