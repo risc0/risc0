@@ -144,10 +144,6 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
 }
 
 pub(crate) struct BigIntExec {
-    #[cfg(feature = "prove")]
-    pub(crate) mode: u32,
-    #[cfg(feature = "prove")]
-    pub(crate) verify_program_ptr: WordAddr,
     pub(crate) verify_program_size: usize,
     pub(crate) witness: BigIntWitness,
 }
@@ -233,10 +229,6 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
     )?)?;
 
     Ok(BigIntExec {
-        #[cfg(feature = "prove")]
-        mode,
-        #[cfg(feature = "prove")]
-        verify_program_ptr,
         verify_program_size,
         witness,
     })

@@ -9,11 +9,16 @@ members = ["methods", "shared"]
 [workspace.dependencies]
 risc0-build = { path = "../risc0/build" }
 
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+prove = ["risc0-zkvm/prove"]
+
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
 csv = "1.1"
 ed25519-dalek = { version = "2.0.0-rc.3", default-features = false, features = [
-  "rand_core",
+    "rand_core",
 ] }
 enum-iterator = "2.0"
 gpu-guard = { path = "../tools/gpu-guard" }
@@ -29,11 +34,6 @@ serde_with = "3.8"
 tabled = "0.15"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-
-[features]
-cuda = ["risc0-zkvm/cuda"]
-default = []
-prove = ["risc0-zkvm/prove"]
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]

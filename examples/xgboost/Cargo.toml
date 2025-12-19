@@ -3,6 +3,11 @@ name = "xgboost-example"
 version = "0.1.0"
 edition = { workspace = true }
 
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+prove = ["risc0-zkvm/prove"]
+
 [dependencies]
 forust-ml = "0.4.2"
 risc0-zkvm = { path = "../../risc0/zkvm" }
@@ -12,8 +17,3 @@ xgboost-methods = { path = "methods" }
 
 [dev-dependencies]
 gpu-guard = { path = "../../tools/gpu-guard" }
-
-[features]
-cuda = ["risc0-zkvm/cuda"]
-default = []
-prove = ["risc0-zkvm/prove"]
