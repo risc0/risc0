@@ -282,6 +282,9 @@ pub(crate) fn allowed_control_ids(
     .chain(po2_range.clone().map(|i| format!("lift_rv32im_v2_{i}.zkr")))
     .chain(po2_range.map(|i| format!("lift_rv32im_v2_povw_{i}.zkr")))
     .chain((risc0_circuit_recursion::LIFT_PO2_RANGE).map(|i| format!("lift_rv32im_m3_{i}.zkr")))
+    .chain(
+        (risc0_circuit_recursion::LIFT_PO2_RANGE).map(|i| format!("lift_rv32im_m3_povw_{i}.zkr")),
+    )
     .collect();
 
     let zkr_control_ids = match hash_name.as_ref() {
