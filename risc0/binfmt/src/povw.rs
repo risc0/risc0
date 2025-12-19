@@ -172,6 +172,11 @@ impl PovwNonce {
         u32s
     }
 
+    /// Creates a nonce from an array of 8 u32 values.
+    pub fn from_u32s(b: [u32; 8]) -> Self {
+        Self::from_bytes(bytemuck::cast(b))
+    }
+
     /// Converts the nonce to an array of 16 u16 values.
     pub fn to_u16s(self) -> [u16; 16] {
         let mut u16s = bytemuck::cast::<_, [u16; 16]>(self.to_bytes());

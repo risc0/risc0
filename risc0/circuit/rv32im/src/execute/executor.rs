@@ -107,6 +107,7 @@ impl ExecutorResult {
             post_state: self.post_image.image_id(),
             output: self.output,
             terminate_state: self.terminate_state,
+            povw_nonce: PovwNonce::default(),
         }
     }
 }
