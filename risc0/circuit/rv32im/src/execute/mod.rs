@@ -15,6 +15,7 @@
 
 pub(crate) mod bibc;
 pub(crate) mod bigint;
+mod block_tracker;
 mod executor;
 pub mod gdb;
 pub(crate) mod pager;
@@ -28,9 +29,6 @@ mod syscall;
 #[cfg(test)]
 mod tests;
 pub mod testutil;
-
-#[cfg(feature = "rv32im-m3")]
-mod block_tracker;
 
 pub use self::{
     bigint::analyze::analyze as bigint_analyze,

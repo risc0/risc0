@@ -44,15 +44,6 @@ pub fn test_recursion_circuit(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("test_recursion_circuit.zkr", hashfn)
 }
 
-pub fn lift(po2: usize, hashfn: &str) -> Result<(Program, Digest)> {
-    if (MIN_CYCLES_PO2..MAX_CYCLES_PO2).contains(&po2) {
-        get_zkr(&format!("lift_rv32im_v2_{po2}.zkr"), hashfn)
-    } else {
-        bail!("No rv32im verifier available for po2={po2}")
-    }
-}
-
-#[cfg(feature = "rv32im-m3")]
 pub(crate) fn lift_m3(po2: usize) -> Result<(Program, Digest)> {
     if risc0_circuit_recursion::LIFT_PO2_RANGE.contains(&po2) {
         let name = format!("lift_rv32im_m3_{po2}.zkr");
@@ -84,6 +75,7 @@ pub fn union(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("union.zkr", hashfn)
 }
 
+#[expect(dead_code)]
 pub fn lift_povw(po2: usize, hashfn: &str) -> Result<(Program, Digest)> {
     if (MIN_CYCLES_PO2..MAX_CYCLES_PO2).contains(&po2) {
         get_zkr(&format!("lift_rv32im_v2_povw_{po2}.zkr"), hashfn)

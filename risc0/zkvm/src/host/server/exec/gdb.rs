@@ -125,6 +125,7 @@ mod tests {
         gdb_script.flush().unwrap();
 
         let gdb_output = std::process::Command::new(gdb_bin)
+            .arg("--nx") // Do not read any .gdbinit files
             .arg("-x")
             .arg(gdb_script.path())
             .arg(elf_path)
