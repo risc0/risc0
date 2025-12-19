@@ -5,13 +5,13 @@ edition = "2024"
 
 default-run = "k256-example"
 
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+prove = ["risc0-zkvm/prove"]
+
 [dependencies]
 k256 = { version = "0.13", features = ["serde"] }
 k256-methods = { path = "methods" }
 rand_core = "0.6.4"
 risc0-zkvm = { path = "../../../risc0/zkvm" }
-
-[features]
-cuda = ["risc0-zkvm/cuda"]
-default = []
-prove = ["risc0-zkvm/prove"]

@@ -3,12 +3,12 @@ name = "composition-example"
 version = "0.1.0"
 edition = { workspace = true }
 
-[dependencies]
-composition-example-methods = { path = "methods" }
-hello-world = { path = "../hello-world" }
-risc0-zkvm = { path = "../../risc0/zkvm" }
-
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
 prove = ["risc0-zkvm/prove"]
+
+[dependencies]
+composition-example-methods = { path = "methods" }
+hello-world = { path = "../hello-world" }
+risc0-zkvm = { path = "../../risc0/zkvm" }

@@ -624,7 +624,7 @@ impl Prover {
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
 
-        let claim = risc0_circuit_rv32im_m3::Claim::decode(&segment.seal)?;
+        let claim = risc0_circuit_rv32im::Claim::decode(&segment.seal)?;
 
         // Instantiate the prover with the lift recursion program and its control ID.
         let (program, control_id) = zkr::lift_m3(claim.po2 as usize)?;
