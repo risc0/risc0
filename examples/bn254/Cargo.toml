@@ -5,6 +5,11 @@ edition = { workspace = true }
 
 default-run = "bn254-example"
 
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+prove = ["risc0-zkvm/prove"]
+
 [dependencies]
 bn254-core = { path = "core" }
 bn254-methods = { path = "methods" }
@@ -14,8 +19,3 @@ substrate-bn = "=0.6.0"
 
 [dev-dependencies]
 gpu-guard = { path = "../../tools/gpu-guard" }
-
-[features]
-cuda = ["risc0-zkvm/cuda"]
-default = []
-prove = ["risc0-zkvm/prove"]

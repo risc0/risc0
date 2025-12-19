@@ -121,11 +121,6 @@ impl PageStates {
         }
     }
 
-    #[cfg(feature = "prove")]
-    pub(crate) fn iter(&self) -> impl Iterator<Item = (u32, PageState)> + '_ {
-        self.indexes.iter().map(|index| (*index, self.get(*index)))
-    }
-
     pub(crate) fn keys(&self) -> impl Iterator<Item = u32> + '_ {
         self.indexes.iter().copied()
     }
@@ -159,7 +154,10 @@ fn page_states() {
         }
 
         assert_eq!(
-            s.iter().collect::<Vec<_>>(),
+            s.indexes
+                .iter()
+                .map(|index| (*index, s.get(*index)))
+                .collect::<Vec<_>>(),
             vec![(0, a), (1, a), (2, a), (3, a), (4, a)]
         );
 
@@ -283,11 +281,6 @@ impl WorkingImage {
 
     fn set_page(&mut self, page_idx: u32, page: Page) {
         self.pages.insert(page_idx, page);
-    }
-
-    #[cfg(feature = "prove")]
-    pub(crate) fn get_page_indexes(&self) -> BTreeSet<u32> {
-        self.pages.keys().copied().collect()
     }
 }
 
