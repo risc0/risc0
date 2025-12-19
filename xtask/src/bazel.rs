@@ -39,10 +39,13 @@ impl Bazel {
         let dst_dir = pwd.join("risc0/circuit/rv32im/src/zirgen");
         let bazel_root = Path::new("risc0/circuit/rv32im-sys/cxx");
         let mut command = Command::new("bazelisk");
-        command
+        let status = command
             .args(["run", "//compiler/bootstrap", "--"])
             .arg(dst_dir)
-            .current_dir(bazel_root);
+            .current_dir(bazel_root)
+            .status()
+            .unwrap();
+        assert!(status.success(), "bazelisk run //compiler/bootstrap failed");
     }
 
     fn bootstrap_zkr() {
