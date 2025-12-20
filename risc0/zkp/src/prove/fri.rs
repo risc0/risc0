@@ -92,11 +92,9 @@ pub fn fri_prove<H: Hal>(
         rounds.push(round);
     }
     // Put the final coefficients into natural order
-    let final_coeffs = hal.alloc_elem("final_coeffs", coeffs.size());
-    hal.eltwise_copy_elem(&final_coeffs, &coeffs);
-    hal.batch_bit_reverse(&final_coeffs, ext_size);
+    hal.batch_bit_reverse(&coeffs, ext_size);
     // Dump final polynomial + commit
-    final_coeffs.view(|view| {
+    coeffs.view(|view| {
         iop.write_field_elem_slice::<H::Elem>(view);
         let digest = hal.get_hash_suite().hashfn.hash_elem_slice(view);
         iop.commit(&digest);
