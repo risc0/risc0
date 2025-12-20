@@ -95,13 +95,11 @@ fn read_u32_bytes(flat: &mut VecDeque<u32>) -> Result<u32, DecodeError> {
     if flat.len() < 4 {
         return Err(DecodeError::EndOfStream);
     }
-    Ok(u32::from_le_bytes(
-        flat.drain(0..4)
-            .map(|x| x as u8)
-            .collect::<Vec<u8>>()
-            .try_into()
-            .unwrap(),
-    ))
+    let mut bytes = [0u8; 4];
+    for (dst, src) in bytes.iter_mut().zip(flat.drain(0..4)) {
+        *dst = src as u8;
+    }
+    Ok(u32::from_le_bytes(bytes))
 }
 
 /// Write a SHA-256 digest as a series of half-words (i.e. 16-bit values).
