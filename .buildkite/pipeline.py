@@ -82,7 +82,6 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="clippy",
-                label=":rust: Clippy",
                 steps=group_steps,
             )
         )
@@ -121,7 +120,7 @@ class Pipeline:
 
         group_steps = [
             bk.CommandStep(
-                label=f":rust: Test {var.os}/{var.arch}/{var.device}",
+                label=f":rust: test {var.os}/{var.arch}/{var.device}",
                 skip=var.skip,
                 if_changed=FILTERS["base"]
                 + [
@@ -153,7 +152,6 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="test",
-                label="Test",
                 steps=group_steps,
             )
         )
