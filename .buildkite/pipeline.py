@@ -46,7 +46,7 @@ class Pipeline:
     def step_check(self):
         self.pipeline.add_step(
             bk.CommandStep(
-                label=":check:",
+                label=":white_check_mark:",
                 agents=dict(os="linux"),
                 plugins=[".buildkite/plugins/rustup"],
                 command=".buildkite/steps/check.sh",
@@ -61,7 +61,7 @@ class Pipeline:
 
         group_steps = [
             bk.CommandStep(
-                label=f":rust: Clippy {os}/{arch}/{feature}",
+                label=f":rust: :clippy: {os}/{arch}/{feature}",
                 if_changed=FILTERS["base"]
                 + [
                     "risc0/**",
