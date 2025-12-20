@@ -1,0 +1,6 @@
+name: protoc
+description: Install protobuf compiler
+author: https://github.com/risc0
+requirements: []
+configuration:
+  additionalProperties: false
