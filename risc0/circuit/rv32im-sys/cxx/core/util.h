@@ -33,7 +33,7 @@ inline size_t constexpr ceilDiv(size_t a, size_t b) {
   return (a + (b - 1)) / b;
 }
 
-/// Round `a` up to the nearest multipe of `b`.
+/// Round `a` up to the nearest multiple of `b`.
 inline size_t constexpr roundUp(size_t a, size_t b) {
   return ceilDiv(a, b) * b;
 }
