@@ -179,7 +179,12 @@ impl FromStr for Component {
 }
 
 #[cfg(feature = "install")]
-fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) -> Result<()> {
+fn extract_archive(
+    env: &Environment,
+    archive_path: &Path,
+    target_dir: &Path,
+    extension: &str,
+) -> Result<()> {
     use flate2::bufread::GzDecoder;
     use liblzma::bufread::XzDecoder;
     use std::fs::File;
@@ -196,18 +201,17 @@ fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) ->
 
     let file = File::open(archive_path)?;
     let reader = BufReader::new(file);
-    let filename = archive_path.to_string_lossy();
 
-    match filename.as_ref() {
-        f if f.ends_with(".tgz") || f.ends_with(".tar.gz") => {
+    match extension {
+        "tgz" | "tar.gz" => {
             Archive::new(GzDecoder::new(reader)).unpack(target_dir)?;
         }
-        f if f.ends_with(".tar.xz") => {
+        "tar.xz" => {
             Archive::new(XzDecoder::new_parallel(reader)).unpack(target_dir)?;
         }
         _ => {
             return Err(crate::RzupError::InstallationFailed(format!(
-                "Unsupported archive format: {filename}",
+                "Unsupported archive format: {extension}",
             )));
         }
     }
@@ -215,7 +219,12 @@ fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) ->
 }
 
 #[cfg(not(feature = "install"))]
-fn extract_archive(_env: &Environment, _archive_path: &Path, _target_dir: &Path) -> Result<()> {
+fn extract_archive(
+    _env: &Environment,
+    _archive_path: &Path,
+    _target_dir: &Path,
+    _extension: &str,
+) -> Result<()> {
     Err(RzupError::Other("not built with install support".into()))
 }
 
@@ -258,6 +267,7 @@ pub fn install(
         Paths::cleanup_version(env, &component_to_install, version)?;
     }
 
+    let (_, extension) = component_to_install.asset_name(env.platform())?;
     let archive_name = component_to_install.archive_name(env.platform())?;
 
     // Download and extract
@@ -270,7 +280,7 @@ pub fn install(
     )?;
 
     let downloaded_file = env.tmp_dir().join(archive_name);
-    extract_archive(env, &downloaded_file, extraction_dir.path())?;
+    extract_archive(env, &downloaded_file, extraction_dir.path(), extension)?;
 
     if let Some(parent) = version_dir.parent() {
         std::fs::create_dir_all(parent)?;
