@@ -38,7 +38,7 @@ popd
 echo "--- license check"
 python3 license-check.py
 
-echo "-- check for "D0 NOT MERGE" comments"
+echo "-- check for \"D0 NOT MERGE\" comments"
 [ "$(grep -re 'DO[_ ]\?NOT[_ ]\?MERGE' $(git ls-tree --full-tree --name-only -r HEAD) | tee /dev/fd/2 | wc -l)" -eq "0" ]
 
 echo "--- Compare circom hashes to golden values"

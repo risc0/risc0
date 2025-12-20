@@ -156,6 +156,110 @@ class Pipeline:
             )
         )
 
+    def step_extra(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="extra",
+                steps=[],
+            )
+        )
+
+    def step_compute_sanitizer(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="compute-sanitizer",
+                steps=[],
+            )
+        )
+
+    def step_examples(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="examples",
+                steps=[],
+            )
+        )
+
+    def step_test_crates(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="test-crates",
+                steps=[],
+            )
+        )
+
+    def step_doc(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="doc",
+                steps=[],
+            )
+        )
+
+    def step_docs_rs(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="docs-rs",
+                steps=[],
+            )
+        )
+
+    def step_check_external(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="check-external",
+                steps=[],
+            )
+        )
+
+    def step_check_semver(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="check-semver",
+                steps=[],
+            )
+        )
+
+    def step_check_template(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="check-template",
+                steps=[],
+            )
+        )
+
+    def step_browser(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="browser",
+                steps=[],
+            )
+        )
+
+    def step_docker(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="docker",
+                steps=[],
+            )
+        )
+
+    def step_web(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="web",
+                steps=[],
+            )
+        )
+
+    def step_bazel(self):
+        self.pipeline.add_step(
+            bk.GroupStep(
+                group="bazel",
+                steps=[],
+            )
+        )
+
     def to_yaml(self):
         return self.pipeline.to_yaml()
 
@@ -166,6 +270,19 @@ def main():
     pipeline.step_check()
     pipeline.step_clippy()
     pipeline.step_test()
+    pipeline.step_extra()
+    pipeline.step_compute_sanitizer()
+    pipeline.step_examples()
+    pipeline.step_test_crates()
+    pipeline.step_doc()
+    pipeline.step_docs_rs()
+    pipeline.step_check_external()
+    pipeline.step_check_semver()
+    pipeline.step_check_template()
+    pipeline.step_browser()
+    pipeline.step_docker()
+    pipeline.step_web()
+    pipeline.step_bazel()
 
     print(pipeline.to_yaml())
 
