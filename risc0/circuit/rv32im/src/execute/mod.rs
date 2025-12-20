@@ -32,6 +32,7 @@ pub mod testutil;
 
 pub use self::{
     bigint::analyze::analyze as bigint_analyze,
+    block_tracker::BlockCollection,
     executor::{
         CycleLimit, ExecutionError, ExecutionLimit, Executor, ExecutorResult, SegmentUpdate,
         SimpleSession,
