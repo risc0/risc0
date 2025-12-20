@@ -29,15 +29,20 @@ fi
 echo "--- cargo install cargo-nextest"
 cargo install cargo-nextest@0.9.96
 
-echo "--- install rzup components"
+echo "--- install rust toolchain: $RISC0_RUST_TOOLCHAIN_VERSION"
 cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+
+echo "--- install cpp toolchain: $RISC0_CPP_TOOLCHAIN_VERSION"
 cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+
+echo "--- install gdb component: $RISC0_CPP_TOOLCHAIN_VERSION"
 cargo run --bin rzup -- --verbose install gdb $RISC0_CPP_TOOLCHAIN_VERSION
+
+echo "--- install groth16 component: $RISC0_GROTH16_VERSION"
 cargo run --bin rzup -- --verbose install risc0-groth16 $RISC0_GROTH16_VERSION
 
-
 echo "--- test workspace"
-$TEST_COMMAND \
+$TEST_CMD \
   -F $FEATURE \
   -F prove \
   -F redis \
