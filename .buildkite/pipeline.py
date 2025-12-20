@@ -160,7 +160,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="extra",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -168,7 +168,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="compute-sanitizer",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -176,7 +176,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="examples",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -184,7 +184,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="test-crates",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -192,7 +192,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="doc",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -200,7 +200,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="docs-rs",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -208,7 +208,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="check-external",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -216,7 +216,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="check-semver",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -224,7 +224,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="check-template",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -232,7 +232,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="browser",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -240,7 +240,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="docker",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -248,7 +248,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="web",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
@@ -256,7 +256,7 @@ class Pipeline:
         self.pipeline.add_step(
             bk.GroupStep(
                 group="bazel",
-                steps=[],
+                steps=[bk.CommandStep(skip=True)],
             )
         )
 
