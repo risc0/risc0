@@ -263,7 +263,10 @@ fn two_batched_updates() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn prove_three_sequential_updates_inner() -> anyhow::Result<()> {
+#[test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
+#[gpu_guard::gpu_guard]
+fn prove_three_sequential_updates() -> anyhow::Result<()> {
     let work_log_id = uint!(0xdeafbee7_U160);
 
     let work_info = prove_busy_loop(
@@ -381,15 +384,6 @@ fn prove_three_sequential_updates_inner() -> anyhow::Result<()> {
 
     assert_eq!(journal, expected_journal);
     Ok(())
-}
-
-// XXX M3
-#[test]
-#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
-#[gpu_guard::gpu_guard]
-#[should_panic(expected = "m3 doesn't support povw")]
-fn prove_three_sequential_updates() {
-    prove_three_sequential_updates_inner().unwrap();
 }
 
 #[test]

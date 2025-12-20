@@ -60,6 +60,7 @@ struct Globals {
   OutU32 termA0;
   OutU32 termA1;
   OutU32 out[8];
+  OutU32 povwNonce[8];
   Fp v2Compat;
 };
 

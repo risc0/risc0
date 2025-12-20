@@ -13,12 +13,24 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "zirgen/compiler/edsl/edsl.h"
+#pragma once
 
-namespace risc0 {
+#include <cstring>
 
-void addLift(zirgen::Module& module, size_t po2);
+namespace risc0::rv32im {
 
-void addLiftPovw(zirgen::Module& module, size_t po2);
+struct PovwNonce {
+private:
+  uint32_t inner_data[8];
 
-} // namespace risc0
+public:
+  PovwNonce(uint32_t povwNonce[8]) { memcpy(&inner_data, povwNonce, sizeof(uint32_t) * 8); }
+  static PovwNonce zero() {
+    uint32_t d[8];
+    memset(d, 0, sizeof(d));
+    return PovwNonce(d);
+  }
+  inline const uint32_t* data() const { return inner_data; }
+};
+
+} // namespace risc0::rv32im
