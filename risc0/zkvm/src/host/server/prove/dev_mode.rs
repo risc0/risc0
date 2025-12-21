@@ -28,10 +28,7 @@ use crate::{
         Unknown,
         receipt::{UnionClaim, exit_code_from_terminate_state},
     },
-    host::{
-        prove_info::ProveInfo,
-        server::{exec::executor::ExecutorImpl, session::null_callback},
-    },
+    host::{prove_info::ProveInfo, server::exec::executor::ExecutorImpl},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     recursion::MerkleProof,
     sha::Digestible as _,
@@ -162,9 +159,9 @@ impl ProverServer for DevModeProver {
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<ProveInfo> {
-        let session = ExecutorImpl::from_elf(env, elf)
-            .unwrap()
-            .run_with_callback(null_callback)?;
+        let mut exec = ExecutorImpl::from_elf(env, elf).unwrap();
+        while exec.run_segment()?.is_some() {}
+        let session = exec.finalize_session()?;
         self.prove_session(ctx, &session)
     }
 
@@ -177,9 +174,8 @@ impl ProverServer for DevModeProver {
 
         let preflight_results = PreflightResults {
             inner: Default::default(),
-            terminate_state: segment.inner.claim.terminate_state,
+            terminate_state: segment.inner.terminate_state,
             output: segment.output.clone(),
-            #[cfg(not(feature = "rv32im-m3"))]
             segment_index: segment.index,
         };
 
@@ -201,9 +197,6 @@ impl ProverServer for DevModeProver {
         let exit_code = exit_code_from_terminate_state(&preflight_results.terminate_state)?;
         Ok(SegmentReceipt {
             seal: Vec::new(),
-            #[cfg(feature = "rv32im-m3")]
-            index: 0,
-            #[cfg(not(feature = "rv32im-m3"))]
             index: preflight_results.segment_index,
             hashfn: "fake".into(),
             verifier_parameters: Digest::ZERO,

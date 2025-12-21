@@ -1,0 +1,172 @@
+load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
+load("//bazel/toolchain/rv32im-linux:defs.bzl", "risc0_cc_binary", "risc0_cc_kernel_binary")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "test_prove",
+    srcs = [
+        "test_prove.cpp",
+    ],
+    hdrs = [
+        "test_prove.h",
+    ],
+    deps = [
+        "//hal/cpu",
+        "//prove",
+        "//verify",
+    ],
+)
+
+risc0_cc_binary(
+    name = "guest",
+    srcs = ["guest.cpp"],
+)
+
+risc0_cc_kernel_binary(
+    name = "benchmark_kernel",
+    srcs = [
+        "benchmark_kernel.cpp",
+        "entry.s",
+    ],
+)
+
+risc0_cc_kernel_binary(
+    name = "test_p2_kernel",
+    srcs = [
+        "entry.s",
+        "test_p2_kernel.cpp",
+    ],
+    deps = [
+        "//rv32im/base:platform",
+    ],
+)
+
+risc0_cc_kernel_binary(
+    name = "test_bigint_kernel",
+    srcs = [
+        "entry.s",
+        "test_bigint_kernel.cpp",
+    ],
+    deps = [
+        "//rv32im/base:platform",
+    ],
+)
+
+risc0_cc_kernel_binary(
+    name = "test_io_kernel",
+    srcs = [
+        "entry.s",
+        "test_io_kernel.cpp",
+    ],
+    deps = [
+        "//rv32im/base:platform",
+    ],
+)
+
+risc0_cc_kernel_binary(
+    name = "linux_kernel",
+    srcs = [
+        "entry.s",
+        "linux_kernel.cpp",
+    ],
+    hdrs = ["//rv32im/base:files"],
+)
+
+risc0_cc_binary(
+    name = "linux_guest",
+    srcs = ["linux_guest.cpp"],
+)
+
+risc0_cc_kernel_binary(
+    name = "trap_kernel",
+    srcs = [
+        "entry.s",
+        "trap_kernel.cpp",
+    ],
+    hdrs = ["//rv32im/base:files"],
+)
+
+risc0_cc_binary(
+    name = "trap_user",
+    srcs = ["trap_user.cpp"],
+)
+
+cc_test(
+    name = "tune",
+    srcs = [
+        "tune.cpp",
+    ],
+    deps = [
+        "//rv32im/emu",
+    ],
+)
+
+cc_test(
+    name = "test_kernels",
+    srcs = ["test_kernels.cpp"],
+    data = [
+        ":test_p2_kernel",
+        ":test_bigint_kernel",
+        ":test_io_kernel",
+    ],
+    deps = ["//rv32im/test:test_prove"],
+    size = "large",
+    shard_count = 4,
+)
+
+cc_test(
+    name = "test_linux",
+    srcs = ["linux_test.cpp"],
+    data = [
+        ":linux_guest",
+        ":linux_kernel",
+    ],
+    deps = ["//rv32im/test:test_prove"],
+)
+
+cc_test(
+    name = "test_trap",
+    srcs = ["trap_test.cpp"],
+    data = [
+        ":trap_user",
+        ":trap_kernel",
+    ],
+    deps = ["//rv32im/test:test_prove"],
+)
+
+risc0_cc_kernel_binary(
+    name = "smoke_kernel",
+    srcs = [
+        "smoke_kernel.s",
+    ],
+)
+cc_test(
+    name = "smoke",
+    srcs = ["smoke.cpp"],
+    data = [
+        ":smoke_kernel",
+    ],
+    deps = ["//rv32im/test:test_prove"],
+)
+
+risc0_cc_kernel_binary(
+    name = "seal_test_kernel",
+    srcs = [
+        "seal_test_kernel.cpp",
+        "entry.s",
+    ],
+    hdrs = ["//rv32im/base:files"],
+)
+
+cc_test(
+    name = "seal_test",
+    srcs = ["seal_test.cpp"],
+    data = [
+        ":seal_test_kernel",
+    ],
+    deps = ["//rv32im/test:test_prove"],
+)
+

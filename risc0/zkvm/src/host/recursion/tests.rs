@@ -138,10 +138,8 @@ fn prove_segments(session: &Session) -> Result<Vec<SegmentReceipt>> {
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
     let segment_receipts = session
-        .segments
-        .iter()
-        .map(|x| x.resolve().unwrap())
-        .flat_map(|x| prover.prove_segment(&ctx, &x).unwrap())
+        .segments()
+        .flat_map(|x| prover.prove_segment(&ctx, &x.unwrap()).unwrap())
         .collect::<Vec<_>>();
 
     tracing::info!("Done proving rv32im: {} segments", segment_receipts.len());
@@ -355,7 +353,6 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap();
 }
 
-#[cfg(not(feature = "rv32im-m3"))]
 mod povw {
     use crate::{
         WorkClaim,
@@ -366,8 +363,10 @@ mod povw {
 
     use super::*;
 
+    // XXX M3
     #[test_log::test]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    #[should_panic(expected = "m3 doesn't support povw")]
     fn test_recursion_lift_then_unwrap() {
         // Prove the base case
         let (journal, segment) = ECHO_SEGMENT.clone();
@@ -387,10 +386,7 @@ mod povw {
         receipt.verify(MULTI_TEST_ID).unwrap();
     }
 
-    #[test_log::test]
-    #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
-    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    fn test_recursion_lift_join_unwrap() -> anyhow::Result<()> {
+    fn test_recursion_lift_join_unwrap_inner() -> anyhow::Result<()> {
         // Prove the base case
         let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();
         let ctx = VerifierContext::default();
@@ -461,9 +457,16 @@ mod povw {
         Ok(())
     }
 
+    // XXX M3
     #[test_log::test]
+    #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    fn test_recursion_lift_resolve_unwrap() -> Result<()> {
+    #[should_panic(expected = "m3 doesn't support povw")]
+    fn test_recursion_lift_join_unwrap() {
+        test_recursion_lift_join_unwrap_inner().unwrap();
+    }
+
+    fn test_recursion_lift_resolve_unwrap_inner() -> Result<()> {
         let (assumption_journal, assumption_receipt) = ECHO_SUCCINCT.clone();
 
         let povw_job_id: PovwJobId = rand::random();
@@ -547,6 +550,14 @@ mod povw {
 
         Ok(())
     }
+
+    // XXX M3
+    #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    #[should_panic(expected = "m3 doesn't support povw")]
+    fn test_recursion_lift_resolve_unwrap() {
+        test_recursion_lift_resolve_unwrap_inner().unwrap();
+    }
 }
 
 #[test_log::test]
@@ -588,7 +599,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("eaa9781258978a50eedc56067be88673133e41277ab2fa3ed477e7598886413b")
+        digest!("ab0e9172f4306b6a3b2250055036565c2421683b39ee6c20366d17350756ad19")
     );
 }
 

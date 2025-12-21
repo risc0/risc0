@@ -7,9 +7,11 @@ slug: ./
 Welcome to the [RISC Zero][external-risc-zero] documentation!
 
 RISC Zero is creating the infrastructure & tooling necessary for
-developers around the globe to build software that leverages ZK technology.
+developers around the globe to build software that leverages **verifiable computation**. With verifiable computation, you can be cryptographically confident that a specific blob of data was produced by a specific algorithm.
 
-ZK technology is staged to re-shape the way we interact digitally. Historically,
+This technology is poised to enable the finance and healthcare sectors to prove compliance while maintaining privacy, and enables the tech sector to address decades-long trust gaps in software supply chains.
+
+Historically,
 the only method for confirming the correct execution of a software application
 was through redundant computation. ZK introduces a new option: **verifiable
 computation**.

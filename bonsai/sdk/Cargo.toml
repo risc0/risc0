@@ -7,14 +7,23 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+all-features = true
+
+[features]
+default = []
+non_blocking = ["dep:tokio"]
+
 [dependencies]
 duplicate = "2.0.0"
 maybe-async = "0.2"
 reqwest = { version = "0.12", default-features = false, features = [
-  "blocking",
-  "json",
-  "rustls-tls",
-  "stream",
+    "blocking",
+    "json",
+    "stream",
+    "http2",
+    "rustls-tls",
 ] }
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "2.0.12"
@@ -31,11 +40,3 @@ temp-env = "0.3"
 tokio = { version = "1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "1.16", features = ["v4"] }
-
-[features]
-default = []
-non_blocking = ["dep:tokio"]
-
-[package.metadata.docs.rs]
-rustdoc-args = ["--cfg", "docsrs"]
-all-features = true

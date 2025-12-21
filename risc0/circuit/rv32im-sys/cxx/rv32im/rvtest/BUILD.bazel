@@ -1,0 +1,35 @@
+load(":defs.bzl", "compile_riscv_tests")
+load("//bazel/toolchain/rv32im-linux:defs.bzl", "risc0_cc_kernel_binary")
+
+compile_riscv_tests()
+
+risc0_cc_kernel_binary(
+    name = "emu_kernel",
+    srcs = [
+        "entry.s",
+        "emu_kernel.cpp",
+    ],
+    hdrs = ["//rv32im/base:files"],
+)
+
+cc_test(
+    name = "test",
+    size = "large",
+    srcs = ["test.cpp"],
+    data = [":riscv_test_bins"],
+    deps = ["//rv32im/test:test_prove"],
+    shard_count = 16,
+)
+
+cc_test(
+    name = "test_atomics",
+    size = "large",
+    srcs = ["test_atomics.cpp"],
+    data = [
+        ":emu_kernel",
+        ":riscv_test_bins",
+    ],
+    deps = ["//rv32im/test:test_prove"],
+    shard_count = 16,
+)
+

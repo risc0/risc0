@@ -60,14 +60,14 @@ fn main() {
 
     let program = testutil::kernel::simple_loop(iterations as u32);
     let image = MemoryImage::new_kernel(program);
-    let prover = segment_prover().unwrap();
+    let prover = segment_prover(po2).unwrap();
 
     let result = testutil::execute(
         image.clone(),
-        args.po2,
-        MAX_INSN_CYCLES,
-        testutil::DEFAULT_SESSION_LIMIT,
-        &testutil::NullSyscall,
+        testutil::DEFAULT_EXECUTION_LIMIT
+            .with_max_insn_cycles(MAX_INSN_CYCLES)
+            .with_segment_po2(args.po2),
+        testutil::NullSyscall,
         None,
     )
     .unwrap();
@@ -84,10 +84,10 @@ fn main() {
         let start_time = Instant::now();
         let result = testutil::execute(
             image,
-            args.po2,
-            MAX_INSN_CYCLES,
-            testutil::DEFAULT_SESSION_LIMIT,
-            &testutil::NullSyscall,
+            testutil::DEFAULT_EXECUTION_LIMIT
+                .with_max_insn_cycles(MAX_INSN_CYCLES)
+                .with_segment_po2(args.po2),
+            testutil::NullSyscall,
             None,
         )
         .unwrap();
@@ -96,9 +96,10 @@ fn main() {
         let segments = result.segments;
         let segment = segments.first().unwrap();
         assert_eq!(args.po2, segment.po2 as usize);
+        let segment_ctx = risc0_circuit_rv32im::prove::SegmentContext::new(segment).unwrap();
 
         let start_time = Instant::now();
-        let seal = prover.prove(segment).unwrap();
+        let seal = prover.prove(&segment_ctx.preflight(po2).unwrap()).unwrap();
         if !args.skip_verification {
             risc0_circuit_rv32im::verify(&seal).expect("Verification failed");
         }
