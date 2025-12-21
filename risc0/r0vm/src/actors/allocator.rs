@@ -30,7 +30,7 @@
 //! To accomplish this, the allocator must communicate with managers and workers.
 //!
 //! Workers advertise to the allocator what hardware resources they are using. Workers also
-//! allocate and decallocate hardware time from the allocator. Managers receive proof requests from
+//! allocate and deallocate hardware time from the allocator. Managers receive proof requests from
 //! the allocator, and they also talk to the allocator to make scheduling decisions.
 //!
 
