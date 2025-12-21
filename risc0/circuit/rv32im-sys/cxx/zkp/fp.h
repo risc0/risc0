@@ -42,9 +42,9 @@ namespace risc0 {
 /// - Otherwise have as large a power of 2 in the factors of P-1 as possible.
 ///
 /// This last property is useful for number theoretical transforms (the fast
-/// fourier transform equivelant on finite fields).  See NTT.h for details.
+/// fourier transform equivalent on finite fields).  See NTT.h for details.
 ///
-/// The Fp class wraps all the standard arithmatic operations to make the finite
+/// The Fp class wraps all the standard arithmetic operations to make the finite
 /// field elements look basically like ordinary numbers (which they mostly are).
 class Fp {
 public:
