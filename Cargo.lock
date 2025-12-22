@@ -1945,6 +1945,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "cc-version"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e142b8a521e1a062f6cccb17827e45b06bc11cb65792535be5f8dec6c89e05c"
+dependencies = [
+ "cc",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "cexpr"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2726,7 +2736,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users 0.5.2",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -7544,6 +7554,7 @@ name = "risc0-zkos-common"
 version = "2.2.1"
 dependencies = [
  "risc0-zkvm-platform",
+ "softfloat-sys",
 ]
 
 [[package]]
@@ -7990,7 +8001,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.11.0",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -8566,6 +8577,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "softfloat-sys"
+version = "0.1.4"
+dependencies = [
+ "cc",
+ "cc-version",
+]
+
+[[package]]
 name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8857,7 +8876,7 @@ dependencies = [
  "getrandom 0.3.3",
  "once_cell",
  "rustix 1.1.2",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
