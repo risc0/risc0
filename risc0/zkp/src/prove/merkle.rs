@@ -43,7 +43,9 @@ impl<H: Hal + ?Sized> MerkleTreeProver<H> {
     /// Generate a merkle tree from a matrix of values.
     ///
     /// The proofs will prove a single 'column' of values in the tree at a
-    /// certain row. Layout is presumed to be packed row-major.
+    /// certain row. The matrix buffer has length `rows * cols` and is indexed
+    /// as `matrix[row + col * rows]`, so for a fixed `row` the `cols` values
+    /// are stored at stride `rows`.
     /// The number of queries represents the expected # of queries and
     /// determines the size of the 'top' layer. It is important that the
     /// verifier is constructed with identical size parameters, including # of
