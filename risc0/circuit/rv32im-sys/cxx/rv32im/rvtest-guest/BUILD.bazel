@@ -1,0 +1,4 @@
+load(":defs.bzl", "compile_riscv_tests")
+
+compile_riscv_tests()
+

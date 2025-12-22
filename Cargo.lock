@@ -7540,13 +7540,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-common"
+version = "2.2.1"
+dependencies = [
+ "risc0-zkvm-platform",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
 version = "2.2.2"
 dependencies = [
+ "anyhow",
+ "flate2",
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-binfmt",
+ "risc0-zkos-common",
+ "risc0-zkvm",
  "risc0-zkvm-platform",
  "sha2",
+ "tar",
+ "test-log",
 ]
 
 [[package]]
@@ -10367,6 +10381,7 @@ dependencies = [
  "cargo-semver-checks",
  "cargo_metadata 0.21.0",
  "clap 4.5.53",
+ "flate2",
  "hex",
  "liblzma",
  "log",
@@ -10386,6 +10401,7 @@ dependencies = [
  "semver 1.0.26",
  "serde",
  "serde_with",
+ "tar",
  "tempfile",
  "toml 0.9.5",
  "toml_edit 0.23.4",

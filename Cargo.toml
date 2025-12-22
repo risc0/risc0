@@ -23,6 +23,7 @@ members = [
     "risc0/r0vm",
     "risc0/sys",
     "risc0/tools",
+    "risc0/zkos/common",
     "risc0/zkos/v1compat",
     "risc0/zkp",
     "risc0/zkvm",
@@ -69,6 +70,7 @@ risc0-povw = { default-features = false, path = "risc0/povw" }
 risc0-r0vm = { version = "4.0.0", default-features = false, path = "risc0/r0vm" }
 risc0-sppark = { version = "0.1.14", path = "vendor/sppark" }
 risc0-sys = { version = "5.0.0", default-features = false, path = "risc0/sys" }
+risc0-zkos-common = { version = "2.2.1", default-features = false, path = "risc0/zkos/common" }
 risc0-zkos-v1compat = { version = "2.2.2", path = "risc0/zkos/v1compat" }
 risc0-zkp = { version = "5.0.0", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "4.0.0", default-features = false, path = "risc0/zkvm" }
