@@ -68,6 +68,31 @@ INST_TESTS = {
         "amoxor_w",
         "lrsc",
     ],
+    ("rv32uf", "rv64uf"): [
+        "fadd",
+        "fclass",
+        "fcmp",
+        "fcvt",
+        "fcvt_w",
+        "fdiv",
+        "fmadd",
+        "fmin",
+        "ldst",
+        "move",
+        "recoding",
+    ],
+    ("rv32ud", "rv64ud"): [
+        "fadd",
+        "fclass",
+        "fcmp",
+        "fcvt",
+        "fcvt_w",
+        "fdiv",
+        "fmadd",
+        "fmin",
+        "ldst",
+        "recoding",
+   ],
 }
 
 def compile_riscv_tests():
@@ -76,8 +101,16 @@ def compile_riscv_tests():
         for test in tests:
             src = Label("@riscv_tests//:isa/{}/{}.S".format(first, test))
             aux = Label("@riscv_tests//:isa/{}/{}.S".format(second, test))
+
+            # Add prefix for floating-point tests to avoid name conflicts
+            # rv32uf and rv32ud both have tests with the same names (fadd, fdiv, etc.)
+            if first in ["rv32uf", "rv32ud"]:
+                target_name = "{}_{}".format(first, test)
+            else:
+                target_name = test
+            
             risc0_cc_binary(
-                name = test,
+                name = target_name,
                 srcs = [src],
                 hdrs = ["riscv_test.h"],
                 aux_srcs = [
@@ -93,7 +126,7 @@ def compile_riscv_tests():
                     "-Iexternal/rv32im/rvtest",
                 ],
             )
-            all_bins = all_bins + [test]
+            all_bins = all_bins + [target_name]
     native.filegroup(
         name = "riscv_test_bins",
         srcs = all_bins,
