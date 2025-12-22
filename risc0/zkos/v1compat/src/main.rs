@@ -29,7 +29,8 @@ mod zkvm {
         mem::MaybeUninit,
     };
     use include_bytes_aligned::include_bytes_aligned;
-    use risc0_zkos_common::{get_ureg, set_ureg};
+    use risc0_zkos_common::softfloat::init_softfloat;
+    use risc0_zkos_common::{get_ureg, mret, set_ureg};
     use risc0_zkvm_platform::syscall::{DIGEST_WORDS, Syscall};
     use sha2::digest::generic_array::GenericArray;
 
@@ -695,5 +696,13 @@ mod zkvm {
         // a5: buf_nbytes
 
         host_syscall(fd);
+    }
+
+    #[unsafe(no_mangle)]
+    unsafe extern "C" fn kstart() -> ! {
+        // Initialize floating point registers to zero at startup
+        init_softfloat();
+
+        mret()
     }
 }

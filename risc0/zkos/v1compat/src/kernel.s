@@ -79,8 +79,7 @@ _start:
     addi a2, a2, -WORD_SIZE
     sw a2, 0(a1)
 
-    # Jump into userspace
-    mret
+    tail kstart
 
 _ecall_table:
     j _ecall_halt
@@ -93,6 +92,11 @@ _ecall_table:
     j _ecall_poseidon2
 
 _ecall_dispatch:
+    # re-set up expectations cos they got crashed during other execution
+    li tp, USER_REGS_ADDR
+    la s1, _ecall_table
+    li s2, ECALL_TABLE_SIZE
+
     # load t0 from userspace
     lw a0, REG_T0 * WORD_SIZE (tp)
     # check that ecall request is within range
@@ -250,3 +254,4 @@ _trap_handler:
     li sp, STACK_TOP
 
     tail trap_handler
+
