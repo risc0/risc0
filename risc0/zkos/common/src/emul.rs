@@ -44,6 +44,36 @@ pub unsafe extern "C" fn trap_handler() -> ! {
         emulate_atomic_instruction(rd, rs1, rs2, funct3, funct7);
     }
 
+    // Check for floating point operations (opcode 0x43/0x47/0x4b/0x4f) - R4-type instructions
+    // These should call emulate_fmadd directly, not go through funct7 dispatch
+    if opcode == 0x43 || opcode == 0x47 || opcode == 0x4b || opcode == 0x4f {
+        crate::softfloat::emulate_fmadd(instruction);
+    }
+
+    // Check for floating point operations (opcode 0x53)
+    if opcode == 0x53 {
+        unsafe {
+            crate::softfloat::emulate_fp_instruction(instruction, mepc);
+        }
+    }
+
+    // Check for floating point load/store operations (opcode 0x07 = Load-FP, 0x27 = Store-FP)
+    if opcode == 0x07 || opcode == 0x27 {
+        unsafe {
+            crate::softfloat::emulate_fp_load_store(instruction, mepc);
+        }
+    }
+
+    // Check for SYSTEM operations (opcode 0x73)
+    if opcode == 0x73 {
+        // This is a CSR instruction (funct3 != 000)
+        if funct3 != 0x0 {
+            unsafe {
+                emulate_csr_instruction(instruction, mepc);
+            }
+        }
+    }
+
     // Emulate fence, fence.i, fence rw,rw and fence ow,ow - null-op
     if instruction == 0x0ff0000f
         || instruction == 0x0000100f
@@ -57,4 +87,30 @@ pub unsafe extern "C" fn trap_handler() -> ! {
         "Illegal instruction or trap at PC: {:#010x}, instr: {:#010x}",
         mepc, instruction
     );
+}
+
+// CSR (Control and Status Register) emulation
+unsafe fn emulate_csr_instruction(insn: u32, _mepc: usize) -> ! {
+    let funct3 = (insn >> 12) & 0x7;
+    let rd = (insn >> 7) & 0x1f;
+    let rs1 = (insn >> 15) & 0x1f;
+    let csr_addr = (insn >> 20) & 0xfff;
+
+    // Handle floating point CSR operations
+    match csr_addr {
+        0x001 => {
+            crate::softfloat::handle_float_csr_exception(funct3, rs1, rd);
+        }
+        0x002 => {
+            crate::softfloat::handle_float_csr_frm(funct3, rs1, rd);
+        }
+        0x003 => {
+            crate::softfloat::handle_float_csr_fcsr(funct3, rs1, rd);
+        }
+        _ => {
+            panic!("Unsupported CSR address: {:#03x}", csr_addr);
+        }
+    }
+
+    mret()
 }
