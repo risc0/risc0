@@ -199,7 +199,7 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
   Val<C> f7 = getFunct7();
   Val<C> f3 = getFunct3();
 
-  // Compute the multiple verisons of the immediate
+  // Compute the multiple versions of the immediate
   ValU32<C> immR(0, 0);
   ValU32<C> immI = getImmI();
   ValU32<C> immIL = getImmIL();
