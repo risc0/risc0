@@ -145,11 +145,8 @@ impl ShowCommand {
                 let default_version = rzup.get_default_version(&component)?;
                 let current_version = rzup.settings().get_default_version(&component);
 
-                let mut sorted_versions = versions.clone();
-                sorted_versions.sort_by(|a, b| b.cmp(a)); // sort newest to oldest
-
-                for version in sorted_versions {
-                    let is_default = default_version.as_ref().is_some_and(|(v, _)| v == &version);
+                for version in &versions {
+                    let is_default = default_version.as_ref().is_some_and(|(v, _)| v == version);
                     let marker = if is_default { "* " } else { "  " };
                     rzup.print(format!("{}{version}", marker.bold()));
                 }
