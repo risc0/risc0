@@ -26,13 +26,16 @@ pub mod poly;
 
 use rand_core::RngCore;
 
-/// For x = (1 << po2), given x, find po2.
+/// Compute `floor(log_2(x))`.
+///
+/// Returns the position of the highest set bit (0-indexed).
+/// Equivalent to finding the largest `po2` such that `(1 << po2) <= x`.
 /// # Example
 /// ```rust
 /// # use risc0_zkp::core::to_po2;
 /// #
-/// assert_eq!(to_po2(7), 2);
-/// assert_eq!(to_po2(10), 3);
+/// assert_eq!(to_po2(7), 2);  // floor(log2(7)) = 2
+/// assert_eq!(to_po2(10), 3); // floor(log2(10)) = 3
 /// ```
 pub fn to_po2(x: usize) -> usize {
     (31 - (x as u32).leading_zeros()) as usize
