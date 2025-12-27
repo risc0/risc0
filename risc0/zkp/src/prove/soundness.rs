@@ -179,7 +179,7 @@ fn parameters<H: Hal>(taps: &TapSet, coeffs_size: usize) -> Params {
     // where deg(P) = deg(Z) = trace_domain_size and deg(C) = max_degree
     let num_segment_polynomials = max_degree - 1.0;
 
-    let biggest_combo = taps.combos().map(|combo| combo.size()).max().unwrap() as f32;
+    let biggest_combo = taps.combos().map(|combo| combo.size()).max().unwrap_or(0) as f32;   
 
     let ext_size = H::ExtElem::EXT_SIZE;
     let field_size = baby_bear::P as f32;
