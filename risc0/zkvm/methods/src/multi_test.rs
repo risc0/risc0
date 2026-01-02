@@ -48,7 +48,12 @@ pub enum MultiTestSpec {
     Echo {
         bytes: Vec<u8>,
     },
+    /// Read from the given file descriptor in a loop until EOF, writing to stdout.
+    /// Uses a buffer of `nbytes` size for each read operation. This tests POSIX-style
+    /// reading with a fixed-size buffer, where the total amount of data read may
+    /// exceed the buffer size.
     EchoStdout {
+        /// Buffer size for each read operation (not the total amount to read).
         nbytes: u32,
         fd: u32,
     },
