@@ -32,7 +32,7 @@ mkdir -p ./tmp
 nvcc --version
 nvcc ./tools/cuda-smoke/cuda_smoke.cu -o ./tmp/cuda_smoke
 
-ldd ./tmp/cuda_smoke | egrep 'libcuda|cudart|nvidia'
+ldd ./tmp/cuda_smoke
 
 # Show which libcuda would be resolved
 ldconfig -p | grep -E '^(\s*)libcuda\.so\.1' || true
