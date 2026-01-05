@@ -1033,11 +1033,16 @@ impl Default for VerifierContext {
 #[cfg(test)]
 mod tests {
     use super::{FakeReceipt, InnerReceipt, Receipt};
+
     use crate::{
-        MaybePruned,
+        Assumption, Assumptions, ExitCode, MaybePruned, Output, ReceiptClaim, SystemState,
+        VerifierContext,
         sha::{DIGEST_BYTES, Digest},
     };
     use risc0_zkp::verify::VerificationError;
+
+    const TEST_JOURNAL_A: &[u8] = &[1, 2, 3];
+    const TEST_JOURNAL_B: &[u8] = &[4, 5, 6];
 
     #[test]
     fn mangled_version_info_should_error() {
@@ -1085,5 +1090,96 @@ mod tests {
         let encoded = borsh::to_vec(&receipt).unwrap();
         let decoded: Receipt = borsh::from_slice(&encoded).unwrap();
         assert_eq!(receipt, decoded);
+    }
+
+    #[test]
+    fn non_empty_journal_without_expected_output_should_error() {
+        let claim = ReceiptClaim {
+            pre: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: Digest::ZERO,
+            }),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: Digest::ZERO,
+            }),
+            exit_code: ExitCode::SystemSplit,
+            input: None.into(),
+            output: None.into(),
+        };
+        let receipt = Receipt::new(
+            InnerReceipt::Fake(FakeReceipt {
+                claim: MaybePruned::Value(claim),
+            }),
+            TEST_JOURNAL_A.to_vec(),
+        );
+
+        let err = receipt
+            .verify_integrity_with_context(&VerifierContext::default().with_dev_mode(true))
+            .err()
+            .unwrap();
+        assert_eq!(err, VerificationError::ReceiptFormatError);
+    }
+
+    #[test]
+    fn output_digest_mismatch_should_error() {
+        let claim = ReceiptClaim {
+            pre: MaybePruned::Pruned(Digest::ZERO),
+            post: MaybePruned::Pruned(Digest::ZERO),
+            exit_code: ExitCode::Halted(0),
+            input: None.into(),
+            output: Some(Output {
+                journal: MaybePruned::Value(TEST_JOURNAL_B.to_vec()),
+                assumptions: MaybePruned::Value(Assumptions(vec![])),
+            })
+            .into(),
+        };
+        let receipt = Receipt::new(
+            InnerReceipt::Fake(FakeReceipt {
+                claim: MaybePruned::Value(claim),
+            }),
+            TEST_JOURNAL_A.to_vec(),
+        );
+
+        let err = receipt
+            .verify_integrity_with_context(&VerifierContext::default().with_dev_mode(true))
+            .err()
+            .unwrap();
+        assert_eq!(err, VerificationError::JournalDigestMismatch);
+    }
+
+    #[test]
+    fn non_empty_assumptions_should_error() {
+        let claim = ReceiptClaim {
+            pre: MaybePruned::Pruned(Digest::ZERO),
+            post: MaybePruned::Pruned(Digest::ZERO),
+            exit_code: ExitCode::Halted(0),
+            input: None.into(),
+            output: Some(Output {
+                journal: MaybePruned::Value(TEST_JOURNAL_A.to_vec()),
+                assumptions: MaybePruned::Value(Assumptions(vec![MaybePruned::Value(
+                    Assumption {
+                        claim: Digest::ZERO,
+                        control_root: Digest::ZERO,
+                    },
+                )])),
+            })
+            .into(),
+        };
+        let receipt = Receipt::new(
+            InnerReceipt::Fake(FakeReceipt {
+                claim: MaybePruned::Value(claim),
+            }),
+            TEST_JOURNAL_A.to_vec(),
+        );
+
+        // NOTE: Because the assumptions are in the output, which may be pruned, we cannot always
+        // distinguish between journal digest mismatch and an invalid assumption. Journal digest
+        // mismatch is the more common, when the issue is accidental.
+        let err = receipt
+            .verify_integrity_with_context(&VerifierContext::default().with_dev_mode(true))
+            .err()
+            .unwrap();
+        assert_eq!(err, VerificationError::JournalDigestMismatch);
     }
 }
