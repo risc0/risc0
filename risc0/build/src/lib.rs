@@ -435,6 +435,8 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
 
         // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
         // feature is available.
+        // NOTE: This is no longer required when using an up to date version of risc0-bigint2.
+        // It is kept to avoid breaking code that links older versions of that crate without cause.
         cmd.env("RISC0_FEATURE_bigint2", "");
     }
 
