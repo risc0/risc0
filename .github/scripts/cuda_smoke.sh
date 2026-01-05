@@ -32,7 +32,6 @@ mkdir -p ./tmp
 nvcc --version
 nvcc ./tools/cuda-smoke/cuda_smoke.cu -o ./tmp/cuda_smoke
 
-echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 ldd ./tmp/cuda_smoke | egrep 'libcuda|cudart|nvidia'
 
 # Show which libcuda would be resolved
@@ -42,4 +41,4 @@ ldconfig -p | grep -E '^(\s*)libcuda\.so\.1' || true
 ls -l /usr/local/cuda*/lib64/stubs/libcuda.so 2>/dev/null || true
 ls -l /usr/lib/x86_64-linux-gnu/libcuda.so.1 2>/dev/null || true
 
-./tmp/cuda_smoke
+strace -f -e openat ./tmp/cuda_smoke 2>&1 | egrep 'libcuda|libcudart|stubs' | head -n 50
