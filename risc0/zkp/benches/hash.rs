@@ -14,6 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use criterion::{Criterion, criterion_group, criterion_main};
+use p3_field::PackedValue;
 use p3_symmetric::Permutation;
 use rand::Rng;
 use risc0_core::field::{Elem, baby_bear::BabyBearElem};
@@ -25,14 +26,22 @@ fn benchmark_poseidon2_mix(c: &mut Criterion) {
     c.bench_function("poseidon2_mix", |b| b.iter(|| poseidon2_mix(&mut cells)));
 }
 
-fn benchmark_poseidon2_p3_mix(c: &mut Criterion) {
+fn benchmark_poseidon2_p3_mix_x8(c: &mut Criterion) {
     let hasher = p3_baby_bear::default_babybear_poseidon2_24();
     let mut rng = rand::rng();
-    let mut cells = p3_baby_bear::BabyBear::new_array(rng.random());
+    let mut cells: [<p3_baby_bear::BabyBear as p3_field::Field>::Packing; 24] = rng.random();
     c.bench_function("poseidon2_p3_mix", |b| {
         b.iter(|| hasher.permute_mut(&mut cells))
     });
+    assert_eq!(
+        <p3_baby_bear::BabyBear as p3_field::Field>::Packing::unpack_slice(cells.as_slice()).len(),
+        24 * 8
+    );
 }
 
-criterion_group!(benches, benchmark_poseidon2_mix, benchmark_poseidon2_p3_mix);
+criterion_group!(
+    benches,
+    benchmark_poseidon2_mix,
+    benchmark_poseidon2_p3_mix_x8
+);
 criterion_main!(benches);
