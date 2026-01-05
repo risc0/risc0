@@ -109,10 +109,14 @@ Rv32imProver::Rv32imProver(IHalPtr hal, size_t po2, bool doValidate)
     , ci(hal, rowInfo, aux, tables, doValidate)
     , prover(hal, ci.ci, po2) {}
 
-void Rv32imProver::prove(WriteIop& iop, const PreflightResults& preflight) {
+void Rv32imProver::prove(WriteIop& iop,
+                         const RowInfo* rowInfoIn,
+                         size_t rowInfoSize,
+                         const uint32_t* auxIn,
+                         size_t aux_size) {
   LOG(1, "Copying to GPU");
-  rowInfo.copyFromCpu(hal, preflight.rowInfo.data(), preflight.rowInfo.size());
-  aux.copyFromCpu(hal, preflight.aux.data(), preflight.aux.size());
+  rowInfo.copyFromCpu(hal, rowInfoIn, rowInfoSize);
+  aux.copyFromCpu(hal, auxIn, aux_size);
   LOG(1, "Proving");
   prover.prove(iop);
 }

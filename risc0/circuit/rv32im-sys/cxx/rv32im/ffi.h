@@ -20,16 +20,19 @@
 
 extern "C" {
 
-struct SegmentContext;
 struct PreflightContext;
 struct ProverContext;
-
 struct RustSegment;
+struct SegmentContext;
 
 struct RustSliceFp {
   const risc0::Fp* ptr;
   size_t len;
 };
+
+namespace risc0 {
+struct RowInfo;
+}
 
 const char* risc0_circuit_rv32im_m3_last_error() noexcept;
 void risc0_circuit_rv32im_m3_clear_last_error() noexcept;
@@ -43,10 +46,20 @@ PreflightContext* risc0_circuit_rv32im_m3_segment_preflight(SegmentContext* sctx
 
 size_t risc0_circuit_rv32im_m3_preflight_is_final(PreflightContext* ctx);
 
+const risc0::RowInfo* risc0_circuit_rv32im_m3_preflight_row_info(PreflightContext* ctx);
+size_t risc0_circuit_rv32im_m3_preflight_row_info_size(PreflightContext* ctx);
+
+const uint32_t* risc0_circuit_rv32im_m3_preflight_aux(PreflightContext* ctx);
+size_t risc0_circuit_rv32im_m3_preflight_aux_size(PreflightContext* ctx);
+
 ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2);
 ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2);
 
-void risc0_circuit_rv32im_m3_prove(ProverContext* ctx, PreflightContext* preflight);
+void risc0_circuit_rv32im_m3_prove(ProverContext* ctx,
+                                   const risc0::RowInfo* rowInfo,
+                                   size_t rowInfoSize,
+                                   const uint32_t* aux,
+                                   size_t auxSize);
 
 RustSliceFp risc0_circuit_rv32im_m3_prover_transcript(ProverContext* ctx);
 

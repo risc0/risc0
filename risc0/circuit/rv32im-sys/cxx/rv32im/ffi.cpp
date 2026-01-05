@@ -243,6 +243,22 @@ size_t risc0_circuit_rv32im_m3_preflight_is_final(PreflightContext* ctx) {
   return ctx->isFinal;
 }
 
+const RowInfo* risc0_circuit_rv32im_m3_preflight_row_info(PreflightContext* ctx) {
+  return ctx->results->rowInfo.data();
+}
+
+size_t risc0_circuit_rv32im_m3_preflight_row_info_size(PreflightContext* ctx) {
+  return ctx->results->rowInfo.size();
+}
+
+const uint32_t* risc0_circuit_rv32im_m3_preflight_aux(PreflightContext* ctx) {
+  return ctx->results->aux.data();
+}
+
+size_t risc0_circuit_rv32im_m3_preflight_aux_size(PreflightContext* ctx) {
+  return ctx->results->aux.size();
+}
+
 ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {
   return tryRet([&] {
     IHalPtr hal = getCpuHal();
@@ -257,7 +273,11 @@ ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2) {
   });
 }
 
-void risc0_circuit_rv32im_m3_prove(ProverContext* ctx, PreflightContext* preflight) {
+void risc0_circuit_rv32im_m3_prove(ProverContext* ctx,
+                                   const RowInfo* rowInfo,
+                                   size_t rowInfoSize,
+                                   const uint32_t* aux,
+                                   size_t auxSize) {
   return tryVoid([&] {
     nvtx3::scoped_range range("prove");
     WriteIop writeIop;
@@ -265,7 +285,7 @@ void risc0_circuit_rv32im_m3_prove(ProverContext* ctx, PreflightContext* preflig
     uint32_t po2 = ctx->prover.po2();
     // LOG(0, "po2: " << po2);
     writeIop.write(po2);
-    ctx->prover.prove(writeIop, *preflight->results);
+    ctx->prover.prove(writeIop, rowInfo, rowInfoSize, aux, auxSize);
     ctx->transcript = writeIop.getTranscript();
 
     ReadIop readIop(ctx->transcript.data(), ctx->transcript.size());

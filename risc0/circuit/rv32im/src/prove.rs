@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,11 +13,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+mod preflight;
+
 use std::ptr::NonNull;
 
 use crate::execute::Segment;
 use anyhow::Result;
 use cfg_if::cfg_if;
+use preflight::PreflightContext2;
 use risc0_circuit_rv32im_sys::*;
 use risc0_zkp::{core::digest::DIGEST_WORDS, field::baby_bear::Elem};
 
@@ -131,6 +134,22 @@ impl PreflightContext {
     pub fn po2(&self) -> u32 {
         self.po2
     }
+
+    pub fn row_info_ptr(&self) -> *const RowInfo {
+        unsafe { risc0_circuit_rv32im_m3_preflight_row_info(self.ctx) }
+    }
+
+    pub fn row_info_size(&self) -> usize {
+        unsafe { risc0_circuit_rv32im_m3_preflight_row_info_size(self.ctx) }
+    }
+
+    pub fn aux_ptr(&self) -> *const u32 {
+        unsafe { risc0_circuit_rv32im_m3_preflight_aux(self.ctx) }
+    }
+
+    pub fn aux_size(&self) -> usize {
+        unsafe { risc0_circuit_rv32im_m3_preflight_aux_size(self.ctx) }
+    }
 }
 
 impl Drop for PreflightContext {
@@ -155,7 +174,31 @@ impl ProverContext {
     pub fn prove(&self, preflight: &PreflightContext) -> Result<Seal> {
         tracing::debug!("prove");
         ffi_wrap_void(|| unsafe {
-            risc0_circuit_rv32im_m3_prove(self.ctx.as_ptr(), preflight.ctx)
+            risc0_circuit_rv32im_m3_prove(
+                self.ctx.as_ptr(),
+                preflight.row_info_ptr(),
+                preflight.row_info_size(),
+                preflight.aux_ptr(),
+                preflight.aux_size(),
+            )
+        })?;
+
+        let transcript = self.transcript()?;
+        verify(&transcript)?;
+
+        Ok(transcript)
+    }
+
+    pub fn prove2(&self, preflight: &PreflightContext2) -> Result<Seal> {
+        tracing::debug!("prove");
+        ffi_wrap_void(|| unsafe {
+            risc0_circuit_rv32im_m3_prove(
+                self.ctx.as_ptr(),
+                preflight.row_info.as_ptr(),
+                preflight.row_info.len(),
+                preflight.aux.as_ptr(),
+                preflight.aux.len(),
+            )
         })?;
 
         let transcript = self.transcript()?;
@@ -196,6 +239,7 @@ mod tests {
     use crate::execute::{
         ExecutionLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, SegmentUpdate, Syscall, SyscallContext,
     };
+    use paste::paste;
     use risc0_binfmt::{MemoryImage, Program};
 
     use super::*;
@@ -207,7 +251,7 @@ mod tests {
     // The exception is the test of fence, which was built with
     // https://archlinux.org/packages/extra/x86_64/riscv64-elf-gcc/ v14.0.1-1
 
-    fn run_test(test_name: &str, po2: usize) {
+    fn run_test_inner(test_name: &str, po2: usize, func: impl Fn(&[u8], usize)) {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
@@ -229,10 +273,18 @@ mod tests {
             let mut elf = Vec::new();
             entry.read_to_end(&mut elf).unwrap();
 
-            run_program(&elf, po2);
+            func(&elf, po2);
             return;
         }
         panic!("No filename matching '{test_name}'");
+    }
+
+    fn run_test(test_name: &str, po2: usize) {
+        run_test_inner(test_name, po2, run_program);
+    }
+
+    fn run_test2(test_name: &str, po2: usize) {
+        run_test_inner(test_name, po2, run_program2);
     }
 
     /*  This test code was used to verify that recursion lift works (and fails if
@@ -307,14 +359,54 @@ mod tests {
         prover.prove(&preflight).unwrap();
     }
 
+    fn run_program2(elf: &[u8], po2: usize) {
+        let program = Program::load_elf(elf, u32::MAX).unwrap();
+        let mut image = MemoryImage::new_kernel(program);
+
+        let mut segments = Vec::new();
+        let trace = Vec::new();
+        let execution_limit = ExecutionLimit::default()
+            .with_segment_po2(po2)
+            .with_hard_session_limit(1 << 24);
+        Executor::new(
+            image.clone(),
+            NullSyscall,
+            None,
+            trace,
+            None,
+            RV32IM_M3_CIRCUIT_VERSION,
+        )
+        .run(execution_limit, |update: SegmentUpdate| {
+            segments.push(update.apply_into_segment(&mut image)?);
+            Ok(())
+        })
+        .unwrap();
+        let segment = segments.first().unwrap().clone();
+        // segment.partial_image.dump();
+
+        let segment_ctx = preflight::SegmentContext2::new(&segment).unwrap();
+        let preflight = segment_ctx.preflight(po2).unwrap();
+
+        let prover = segment_prover(po2).unwrap();
+        prover.prove2(&preflight).unwrap();
+    }
+
     const DEFAULT_PO2: usize = 13;
 
     macro_rules! test_case {
         ($func_name:ident) => {
-            #[test_log::test]
-            #[gpu_guard::gpu_guard]
-            fn $func_name() {
-                run_test(stringify!($func_name), DEFAULT_PO2);
+            paste! {
+                #[test_log::test]
+                #[gpu_guard::gpu_guard]
+                fn $func_name() {
+                    run_test(stringify!($func_name), DEFAULT_PO2);
+                }
+
+                #[test_log::test]
+                #[gpu_guard::gpu_guard]
+                fn [<$func_name _preflight2>]() {
+                    run_test2(stringify!($func_name), DEFAULT_PO2);
+                }
             }
         };
     }
