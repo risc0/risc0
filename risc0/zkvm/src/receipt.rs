@@ -234,6 +234,12 @@ impl Receipt {
             assumptions: Assumptions(vec![]).into(),
         });
 
+        // When the exit code does not expect an output, the journal is undefined. If a non-empty
+        // journal is provided, then the receipt is malformed.
+        if expected_output.is_none() && !self.journal.bytes.is_empty() {
+            return Err(VerificationError::ReceiptFormatError);
+        }
+
         if claim.output.digest() != expected_output.digest() {
             let empty_output = claim.output.is_none() && self.journal.bytes.is_empty();
             if !empty_output {
