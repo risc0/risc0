@@ -329,16 +329,14 @@ impl ProverServer for DevModeProver {
         &self,
         _a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        // TODO: Apply a delay here. Should be a little smaller than a join.
-        fake_recursion(None)
+        fake_recursion(self.delay.map(|d| d.join))
     }
 
     fn identity_p254(
         &self,
         _a: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        // TODO: Apply a delay here.
-        fake_recursion(None)
+        fake_recursion(self.delay.map(|d| d.join))
     }
 
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
@@ -348,10 +346,10 @@ impl ProverServer for DevModeProver {
         if let Some(delay) = &self.delay {
             match opts.receipt_kind {
                 ReceiptKind::Composite => {
-                    // TODO: Apply a delay here.
+                    std::thread::sleep(delay.lift);
                 }
                 ReceiptKind::Succinct => {
-                    // TODO: Apply a delay here.
+                    std::thread::sleep(delay.join);
                 }
                 ReceiptKind::Groth16 => {
                     std::thread::sleep(delay.shrink_wrap_groth16);
