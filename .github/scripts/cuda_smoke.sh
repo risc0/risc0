@@ -36,13 +36,4 @@ mkdir -p ./tmp
 nvcc --version
 nvcc ./tools/cuda-smoke/cuda_smoke.cu -o ./tmp/cuda_smoke
 
-ldd ./tmp/cuda_smoke
-
-# Show which libcuda would be resolved
-ldconfig -p | grep -E '^(\s*)libcuda\.so\.1' || true
-
-# Find obvious stub locations
-ls -l /usr/local/cuda*/lib64/stubs/libcuda.so 2>/dev/null || true
-ls -l /usr/lib/x86_64-linux-gnu/libcuda.so.1 2>/dev/null || true
-
-strace -f -e openat ./tmp/cuda_smoke 2>&1 | egrep 'libcuda|libcudart|stubs' | head -n 50
+./tmp/cuda_smoke
