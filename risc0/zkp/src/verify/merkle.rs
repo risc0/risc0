@@ -100,6 +100,7 @@ impl<'a> MerkleTreeVerifier<'a> {
 
         if !fill_rest.is_empty() {
             for i in (params.top_size / 2..params.top_size).rev() {
+                // DO NOT MERGE: This can panic when the digest from the seal is not valid BB elems.
                 let top_idx = params.idx_to_top(2 * i);
                 fill_rest[params.idx_to_rest(i)]
                     .write(hashfn.hash_pair(&top[top_idx], &top[top_idx + 1]));
@@ -165,6 +166,7 @@ impl<'a> MerkleTreeVerifier<'a> {
                 _ => unreachable!(),
             };
             // Now ascend to the parent index, and compute the hash there.
+            // DO NOT MERGE: This can panic when the digest read from the IOP is not BB elems
             idx /= 2;
             if low_bit == 1 {
                 cur = hashfn.hash_pair(other, &cur);
