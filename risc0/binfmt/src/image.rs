@@ -52,6 +52,27 @@ const MERKLE_TREE_DEPTH: usize = MEMORY_PAGES.ilog2() as usize;
 /// Start address for kernel-mode memory.
 pub const KERNEL_START_ADDR: ByteAddr = ByteAddr(0xc000_0000);
 
+/// Start address for user programs
+pub const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
+
+/// Program header table address (stored in memory)
+pub const USER_PHDR_ADDR: ByteAddr = ByteAddr(0xffff_3000);
+
+/// Program header count address (stored in memory)
+pub const USER_PHDR_NUM_ADDR: ByteAddr = ByteAddr(0xffff_3008);
+
+/// Interpreter base address (stored in memory)
+pub const USER_INTERP_BASE_ADDR: ByteAddr = ByteAddr(0xffff_3010);
+
+/// Interpreter address (stored in memory)
+pub const USER_INTERP_ADDR: ByteAddr = ByteAddr(0xffff_3018);
+
+/// Brk address (stored in memory)
+pub const USER_BRK_ADDR: ByteAddr = ByteAddr(0xffff_3020);
+
+const SUSPEND_PC_ADDR: ByteAddr = ByteAddr(0xffff_0210);
+const SUSPEND_MODE_ADDR: ByteAddr = ByteAddr(0xffff_0214);
+
 lazy_static! {
     static ref ZERO_CACHE: ZeroCache = ZeroCache::new();
 }
@@ -176,7 +197,29 @@ impl MemoryImage {
     /// Creates the initial memory state for a kernel-mode `program`.
     pub fn new_kernel(mut program: Program) -> Self {
         program.prepare_kernel(None);
+        // Store program header information in memory
+        program.image.insert(USER_PHDR_ADDR.0, program.phdr_addr);
+        program.image.insert(USER_PHDR_NUM_ADDR.0, program.phnum);
+
+        program.image.insert(SUSPEND_PC_ADDR.0, program.entry);
+        program.image.insert(SUSPEND_MODE_ADDR.0, 1);
         Self::new(program.image)
+    }
+
+    /// Creates the initial memory state for a dynamic `program`.
+    pub fn new_dyn(mut user: Program, mut kernel: Program) -> Self {
+        user.image.insert(USER_START_ADDR.0, user.entry);
+        user.image.insert(USER_PHDR_ADDR.0, user.phdr_addr);
+        user.image.insert(USER_PHDR_NUM_ADDR.0, user.phnum);
+        user.image
+            .insert(USER_INTERP_BASE_ADDR.0, user.interp_base_addr);
+        user.image.insert(USER_INTERP_ADDR.0, user.interp_addr);
+        user.image.insert(USER_BRK_ADDR.0, user.brk);
+        kernel.image.append(&mut user.image);
+        kernel.image.insert(SUSPEND_PC_ADDR.0, kernel.entry);
+        kernel.image.insert(SUSPEND_MODE_ADDR.0, 1);
+
+        Self::new(kernel.image)
     }
 
     /// Creates the initial memory state for a user-mode `user` [Program] with a
@@ -184,6 +227,16 @@ impl MemoryImage {
     pub fn with_kernel(mut user: Program, mut kernel: Program) -> Self {
         user.prepare_user();
         kernel.prepare_kernel(Some(&mut user));
+
+        user.image.insert(USER_START_ADDR.0, user.entry);
+
+        // Store program header information in memory
+        user.image.insert(USER_PHDR_ADDR.0, user.phdr_addr);
+        user.image.insert(USER_PHDR_NUM_ADDR.0, user.phnum);
+
+        kernel.image.append(&mut user.image);
+        kernel.image.insert(SUSPEND_PC_ADDR.0, kernel.entry);
+        kernel.image.insert(SUSPEND_MODE_ADDR.0, 1);
         Self::new(kernel.image)
     }
 
@@ -587,6 +640,11 @@ mod tests {
         let program = Program {
             entry,
             image: BTreeMap::from([(entry, 0x1234b337)]),
+            phdr_addr: 0,
+            phnum: 0,
+            interp_base_addr: 0,
+            interp_addr: 0,
+            brk: 0,
         };
         let mut image = MemoryImage::new_kernel(program);
         assert_eq!(
