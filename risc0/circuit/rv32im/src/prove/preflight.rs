@@ -15,6 +15,8 @@
 
 #![allow(dead_code)]
 
+mod opt;
+
 use crate::execute::Segment;
 use crate::prove::RowInfo;
 use anyhow::Result;
