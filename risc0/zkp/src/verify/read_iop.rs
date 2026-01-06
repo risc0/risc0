@@ -56,7 +56,10 @@ impl<'a, F: Field> ReadIOP<'a, F> {
         n: usize,
     ) -> Result<&'a [T], VerificationError> {
         let u32s = self.read_u32s(n * T::WORDS)?;
-        Ok(T::from_u32_slice(u32s))
+        T::try_from_u32_slice(u32s).map_err(|e| {
+            tracing::debug!("casting seal elems to field slice failed: {e}");
+            VerificationError::ReceiptFormatError
+        })
     }
 
     /// Read some plain old data from this IOP without doing any
