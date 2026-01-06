@@ -13,6 +13,23 @@ use crate::{
     },
 };
 
+macro_rules! syscall_not_implemented {
+    ($name:ident($($param:ident: $type:ty),*)) => {
+        pub fn $name($($param: $type),*) -> Result<u32, Err> {
+            let msg = concat!(stringify!($name), " not implemented");
+            host_log(msg.as_bytes().as_ptr(), msg.as_bytes().len());
+            Err(Err::NoSys)
+        }
+    };
+    ($name:ident()) => {
+        pub fn $name() -> Result<u32, Err> {
+            let msg = concat!(stringify!($name), " not implemented");
+            host_log(msg.as_bytes().as_ptr(), msg.as_bytes().len());
+            Err(Err::NoSys)
+        }
+    };
+}
+
 #[cfg(target_arch = "riscv32")]
 use alloc::string::{String, ToString};
 #[cfg(target_arch = "riscv32")]
@@ -1786,11 +1803,7 @@ pub fn sys_faccessat2(_dfd: u32, _filename: u32, _mode: u32, _flags: u32) -> Res
     }
 }
 
-pub fn sys_fadvise64_64(_fd: u32, _offset: u32, _len: u32, _advice: u32) -> Result<u32, Err> {
-    let msg = b"sys_fadvise64_64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+syscall_not_implemented!(sys_fadvise64_64(_fd: u32, _offset: u32, _len: u32, _advice: u32));
 
 pub fn sys_fallocate(
     fd: u32,
@@ -2096,23 +2109,15 @@ pub fn sys_fallocate(
     }
 }
 
-pub fn sys_fanotify_init(_flags: u32, _event_f_flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_fanotify_init not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+syscall_not_implemented!(sys_fanotify_init(_flags: u32, _event_f_flags: u32));
 
-pub fn sys_fanotify_mark(
+syscall_not_implemented!(sys_fanotify_mark(
     _fanotify_fd: u32,
     _flags: u32,
     _mask: u32,
     _dirfd: u32,
-    _pathname: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_fanotify_mark not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+    _pathname: u32
+));
 
 pub fn sys_fchdir(fd: u32) -> Result<u32, Err> {
     if !get_p9_enabled() {
@@ -2908,17 +2913,8 @@ pub fn sys_fgetxattr(fd: u32, name: u32, value: u32, size: u32) -> Result<u32, E
     }
 }
 
-pub fn sys_file_getattr(_dfd: u32, _filename: u32, _mask: u32) -> Result<u32, Err> {
-    let msg = b"sys_file_getattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_file_setattr(_dfd: u32, _filename: u32, _mask: u32) -> Result<u32, Err> {
-    let msg = b"sys_file_setattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+syscall_not_implemented!(sys_file_getattr(_dfd: u32, _filename: u32, _mask: u32));
+syscall_not_implemented!(sys_file_setattr(_dfd: u32, _filename: u32, _mask: u32));
 
 pub fn sys_flistxattr(fd: u32, list: u32, size: u32) -> Result<u32, Err> {
     if !get_p9_enabled() {
@@ -3056,11 +3052,7 @@ pub fn sys_flock(fd: u32, operation: u32) -> Result<u32, Err> {
     Ok(0)
 }
 
-pub fn sys_fremovexattr(_fd: u32, _name: u32) -> Result<u32, Err> {
-    let msg = b"sys_fremovexattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+syscall_not_implemented!(sys_fremovexattr(_fd: u32, _name: u32));
 
 #[allow(dead_code)]
 pub fn sys_truncate64(pathname: u32, length: u32) -> Result<u32, Err> {
@@ -3369,17 +3361,8 @@ pub fn sys_getcwd(_buf: u32, _size: u32) -> Result<u32, Err> {
     Ok(cwd_str_len as u32)
 }
 
-pub fn sys_getxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
-    let msg = b"sys_getxattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_getxattrat(_dfd: u32, _filename: u32, _name: u32, _value: u32) -> Result<u32, Err> {
-    let msg = b"sys_getxattrat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+syscall_not_implemented!(sys_getxattr(_pathname: u32, _name: u32, _value: u32, _size: u32));
+syscall_not_implemented!(sys_getxattrat(_dfd: u32, _filename: u32, _name: u32, _value: u32));
 
 pub fn sys_linkat(
     olddfd: u32,
@@ -3531,23 +3514,9 @@ pub fn sys_symlinkat(target: u32, newdirfd: u32, linkpath: u32) -> Result<u32, E
     }
 }
 
-pub fn sys_listxattr(_pathname: u32, _list: u32, _size: u32) -> Result<u32, Err> {
-    let msg = b"sys_listxattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_listxattrat(_dfd: u32, _filename: u32, _list: u32, _size: u32) -> Result<u32, Err> {
-    let msg = b"sys_listxattrat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_llistxattr(_pathname: u32, _list: u32, _size: u32) -> Result<u32, Err> {
-    let msg = b"sys_llistxattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+syscall_not_implemented!(sys_listxattr(_pathname: u32, _list: u32, _size: u32));
+syscall_not_implemented!(sys_listxattrat(_dfd: u32, _filename: u32, _list: u32, _size: u32));
+syscall_not_implemented!(sys_llistxattr(_pathname: u32, _list: u32, _size: u32));
 
 pub fn sys_llseek(
     _fd: u32,
@@ -3662,23 +3631,15 @@ pub fn sys_llseek(
     Ok(0)
 }
 
-pub fn sys_lremovexattr(_pathname: u32, _name: u32) -> Result<u32, Err> {
-    let msg = b"sys_lremovexattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+syscall_not_implemented!(sys_lremovexattr(_pathname: u32, _name: u32));
 
-pub fn sys_lsetxattr(
+syscall_not_implemented!(sys_lsetxattr(
     _pathname: u32,
     _name: u32,
     _value: u32,
     _size: u32,
-    _flags: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_lsetxattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+    _flags: u32
+));
 
 pub fn sys_mkdirat(_dfd: u32, _pathname: u32, _mode: u32) -> Result<u32, Err> {
     if !get_p9_enabled() {
@@ -3934,17 +3895,13 @@ pub fn sys_preadv(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32,
     result
 }
 
-pub fn sys_preadv2(
+syscall_not_implemented!(sys_preadv2(
     _fd: u32,
     _vec: u32,
     _vlen: u32,
     _pos_low: u32,
-    _pos_high: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_preadv2 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+    _pos_high: u32
+));
 
 pub fn sys_pwrite64(_fd: u32, _buf: u32, _count: u32, _pos: u32) -> Result<u32, Err> {
     if _fd >= 256 {
@@ -4026,17 +3983,13 @@ pub fn sys_pwritev(_fd: u32, _vec: u32, _vlen: u32, _pos_low: u32) -> Result<u32
     result
 }
 
-pub fn sys_pwritev2(
+syscall_not_implemented!(sys_pwritev2(
     _fd: u32,
     _vec: u32,
     _vlen: u32,
     _pos_low: u32,
-    _pos_high: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_pwritev2 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+    _pos_high: u32
+));
 
 pub fn sys_readv(_fd: u32, _vec: u32, _vlen: u32) -> Result<u32, Err> {
     // readv() reads data into multiple buffers (scatter-gather I/O)
@@ -4195,11 +4148,7 @@ pub fn sys_pread64(_fd: u32, _buf: u32, _count: u32, _pos: u32) -> Result<u32, E
     result
 }
 
-pub fn sys_readahead(_fd: u32, _offset: u32, _count: u32) -> Result<u32, Err> {
-    let msg = b"sys_readahead not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+syscall_not_implemented!(sys_readahead(_fd: u32, _offset: u32, _count: u32));
 
 pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<u32, Err> {
     if !get_p9_enabled() {
@@ -4338,29 +4287,10 @@ pub fn sys_readlinkat(dfd: u32, pathname: u32, buf: u32, bufsiz: u32) -> Result<
     Ok(copy_len as u32)
 }
 
-pub fn sys_removexattr(_pathname: u32, _name: u32) -> Result<u32, Err> {
-    let msg = b"sys_removexattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_removexattrat(_dfd: u32, _filename: u32, _name: u32) -> Result<u32, Err> {
-    let msg = b"sys_removexattrat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_lgetxattr(_pathname: u32, _name: u32, _value: u32, _size: u32) -> Result<u32, Err> {
-    let msg = b"sys_lgetxattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_cachestat(_fd: u32, _cstat: u32, _cstat_size: u32, _flags: u32) -> Result<u32, Err> {
-    let msg = b"sys_cachestat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+syscall_not_implemented!(sys_removexattr(_pathname: u32, _name: u32));
+syscall_not_implemented!(sys_removexattrat(_dfd: u32, _filename: u32, _name: u32));
+syscall_not_implemented!(sys_lgetxattr(_pathname: u32, _name: u32, _value: u32, _size: u32));
+syscall_not_implemented!(sys_cachestat(_fd: u32, _cstat: u32, _cstat_size: u32, _flags: u32));
 
 pub fn sys_renameat2(
     _olddirfd: u32,
@@ -4749,35 +4679,22 @@ pub fn sys_renameat2(
     }
 }
 
-pub fn sys_sendfile64(_out_fd: u32, _in_fd: u32, _offset: u32, _count: u32) -> Result<u32, Err> {
-    let msg = b"sys_sendfile64 not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+syscall_not_implemented!(sys_sendfile64(_out_fd: u32, _in_fd: u32, _offset: u32, _count: u32));
 
-pub fn sys_setxattr(
+syscall_not_implemented!(sys_setxattr(
     _pathname: u32,
     _name: u32,
     _value: u32,
     _size: u32,
-    _flags: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_setxattr not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
-
-pub fn sys_setxattrat(
+    _flags: u32
+));
+syscall_not_implemented!(sys_setxattrat(
     _dfd: u32,
     _filename: u32,
     _name: u32,
     _value: u32,
-    _size: u32,
-) -> Result<u32, Err> {
-    let msg = b"sys_setxattrat not implemented";
-    host_log(msg.as_ptr(), msg.len());
-    Err(Err::NoSys)
-}
+    _size: u32
+));
 
 const F_DUPFD_CLOEXEC: u32 = 1030;
 
