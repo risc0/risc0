@@ -13,8 +13,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use quote::{format_ident, quote};
 use std::{
+    collections::HashMap,
     env, fs,
+    io::Write as _,
     path::{Path, PathBuf},
 };
 
@@ -113,13 +116,11 @@ fn main() {
 
     build.compile(output);
 
-    generate_rust(
-        "cxx/rv32im/witness/rust_bindings.rs.h",
-        &format!("{out_dir}/bindings.rs"),
-    );
+    generate_rust(&format!("{out_dir}/bindings.rs"));
 }
 
-fn generate_rust(input: &str, output: &str) {
+/// Uses the C pre-processor to parse the block type table from "cxx/rv32im/witness/block_types.h"
+fn parse_block_types() -> HashMap<String, u8> {
     let mut build = cc::Build::new();
     build
         .cpp(true)
@@ -131,28 +132,91 @@ fn generate_rust(input: &str, output: &str) {
 
     let mut command = build.get_compiler().to_command();
 
-    let status = command
+    let mut proc = command
+        .arg("-x")
+        .arg("c++")
         .arg("-E")
-        .arg(input)
+        .arg("-") // read from stdin
         .arg("-o")
-        .arg(output)
-        .status()
+        .arg("-") // write to stdout
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .spawn()
         .unwrap();
-    assert!(status.success(), "preprocessing {input} failed");
 
-    let contents = std::fs::read_to_string(output).unwrap();
+    // Use the pre-processor to parse the table
+    write!(
+        proc.stdin.as_mut().unwrap(),
+        "\
+            #include \"rv32im/witness/block_types.h\"\n\
+            #define BLOCK_TYPE(name, count) name,count;\n\
+            BLOCK_TYPES
+        "
+    )
+    .unwrap();
+    let _ = proc.stdin.take();
+
+    let output = proc.wait_with_output().unwrap();
+
+    assert!(output.status.success(), "preprocessing failed");
+
+    let contents = String::from_utf8(output.stdout).unwrap();
+
+    // Skip include directive output
     let inc_directive = regex::Regex::new("^# \\d+ .*$").unwrap();
     let contents = contents
         .lines()
         .filter(|l| !inc_directive.is_match(l))
         .collect::<Vec<_>>();
+    let contents = contents.join("");
 
-    std::fs::write(output, contents.join("\n")).unwrap();
+    contents
+        .trim()
+        .split(";")
+        .filter(|entry| !entry.trim().is_empty())
+        .map(|entry| {
+            let mut entries = entry.trim().split(",");
+            (
+                entries.next().unwrap().to_string(),
+                entries.next().unwrap().parse().unwrap(),
+            )
+        })
+        .collect()
+}
+
+fn generate_rust(output: &str) {
+    let block_types = parse_block_types();
+
+    let block_names = block_types
+        .keys()
+        .map(|n| format_ident!("{n}"))
+        .collect::<Vec<_>>();
+    let block_counts = block_types.values();
+    let num_blocks = block_types.len();
+
+    let contents = quote! {
+        #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, enum_map::Enum)]
+        pub enum BlockType {
+            #(#block_names),*
+        }
+
+        impl BlockType {
+            pub const COUNT: usize = #num_blocks;
+
+            pub const fn count_per_row(&self) -> u8 {
+                match self {
+                    #(Self::#block_names => #block_counts),*
+                }
+            }
+        }
+    };
+
+    std::fs::write(output, contents.to_string()).unwrap();
     let status = std::process::Command::new("rustfmt")
         .arg(output)
         .status()
         .unwrap();
-    assert!(status.success(), "rustfmt {input} failed");
+    assert!(status.success(), "rustfmt {output} failed");
 }
 
 fn rerun_if_changed<P: AsRef<Path>>(path: P) {

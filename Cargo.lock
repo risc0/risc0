@@ -7367,6 +7367,7 @@ dependencies = [
  "cc",
  "enum-map",
  "glob",
+ "quote",
  "regex",
  "risc0-build-kernel",
  "risc0-sppark",

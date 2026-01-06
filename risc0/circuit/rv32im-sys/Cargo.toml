@@ -24,5 +24,6 @@ tracing = { version = "0.1", default-features = false, features = [
 [build-dependencies]
 cc = { version = "1.2.2", features = ["parallel"] }
 glob = "0.3"
+quote = "1"
 regex = "1"
 risc0-build-kernel = { workspace = true }
