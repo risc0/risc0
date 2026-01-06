@@ -7579,6 +7579,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-linux"
+version = "0.0.0"
+dependencies = [
+ "bytemuck",
+ "elf",
+ "include_bytes_aligned",
+ "no_std_strings",
+ "risc0-zkos-common",
+ "risc0-zkos-fs",
+ "rlsf",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
 version = "2.2.2"
 dependencies = [

@@ -1,0 +1,27 @@
+[package]
+name = "risc0-zkos-linux"
+version = "0.0.0"
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+
+[[bin]]
+name = "vmlinuz"
+path = "src/main.rs"
+
+[dependencies]
+risc0-zkos-fs = { workspace = true }
+risc0-zkos-common = { workspace = true }
+
+bytemuck = { version = "1.23", features = ["derive"] }
+include_bytes_aligned = "0.1"
+no_std_strings = "0.1.3"
+rlsf = "0.2.1"
+elf = { version = "0.7", default-features = false }
+
+[package.metadata.release]
+release = false
+
+[package.metadata.risc0]
+kernel = true
