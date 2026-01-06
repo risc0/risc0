@@ -17,9 +17,12 @@ use alloc::boxed::Box;
 
 use risc0_core::field::{Elem, Field};
 
-use crate::core::{
-    digest::Digest,
-    hash::{Rng, RngFactory},
+use crate::{
+    core::{
+        digest::Digest,
+        hash::{Rng, RngFactory},
+    },
+    verify::VerificationError,
 };
 
 pub struct ReadIOP<'a, F: Field> {
@@ -35,28 +38,40 @@ impl<'a, F: Field> ReadIOP<'a, F> {
         }
     }
 
-    pub fn read_u32s(&mut self, n: usize) -> &'a [u32] {
-        let u32s;
-        (u32s, self.proof) = self.proof.split_at(n);
-        u32s
+    pub fn read_u32s(&mut self, n: usize) -> Result<&'a [u32], VerificationError> {
+        let Some(u32s) = self.proof.split_off(..n) else {
+            tracing::debug!(
+                "Tried to read {n} u32s from seal; seal length remaining {}",
+                self.proof.len()
+            );
+            return Err(VerificationError::ReceiptFormatError);
+        };
+        Ok(u32s)
     }
 
     /// Read some field elements from this IOP, and check to make sure
     /// they're not INVALID.
-    pub fn read_field_elem_slice<T: Elem>(&mut self, n: usize) -> &'a [T] {
-        let u32s = self.read_u32s(n * T::WORDS);
-        T::from_u32_slice(u32s)
+    pub fn read_field_elem_slice<T: Elem>(
+        &mut self,
+        n: usize,
+    ) -> Result<&'a [T], VerificationError> {
+        let u32s = self.read_u32s(n * T::WORDS)?;
+        Ok(T::from_u32_slice(u32s))
     }
 
     /// Read some plain old data from this IOP without doing any
     /// validation.  Prefer to use read_field_elem_slice if reading
     /// field elements.
-    pub fn read_pod_slice<T: bytemuck::Pod>(&mut self, n: usize) -> &'a [T] {
-        let u32s;
-        (u32s, self.proof) = self
-            .proof
-            .split_at(n * core::mem::size_of::<T>() / core::mem::size_of::<u32>());
-        bytemuck::cast_slice(u32s)
+    pub fn read_pod_slice<T: bytemuck::Pod>(
+        &mut self,
+        n: usize,
+    ) -> Result<&'a [T], VerificationError> {
+        let read_size = n * core::mem::size_of::<T>() / core::mem::size_of::<u32>();
+        let u32s = self.read_u32s(read_size)?;
+        bytemuck::try_cast_slice(u32s).map_err(|e| {
+            tracing::debug!("casting seal elems to slice failed: {e}");
+            VerificationError::ReceiptFormatError
+        })
     }
 
     pub fn commit(&mut self, digest: &Digest) {
@@ -64,8 +79,15 @@ impl<'a, F: Field> ReadIOP<'a, F> {
     }
 
     /// Checks that the entire data of the IOP has been read.
-    pub fn verify_complete(&self) {
-        assert_eq!(self.proof.len(), 0);
+    pub fn verify_complete(&self) -> Result<(), VerificationError> {
+        if !self.proof.is_empty() {
+            tracing::debug!(
+                "verify_complete called with {} words remaining in seal",
+                self.proof.len()
+            );
+            return Err(VerificationError::ReceiptFormatError);
+        }
+        Ok(())
     }
 
     /// Get a cryptographically uniform u32

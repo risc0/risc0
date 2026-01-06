@@ -88,11 +88,11 @@ impl<'a> MerkleTreeVerifier<'a> {
         row_size: usize,
         col_size: usize,
         queries: usize,
-    ) -> Self {
+    ) -> Result<Self, VerificationError> {
         let params = MerkleTreeParams::new(row_size, col_size, queries);
 
         // Fill top vector with digests from IOP.
-        let top = iop.read_pod_slice(params.top_size);
+        let top = iop.read_pod_slice(params.top_size)?;
         // Populate hashes up to the root of the tree.
         let mut rest = Vec::with_capacity(params.top_size - 1);
 
@@ -124,7 +124,7 @@ impl<'a> MerkleTreeVerifier<'a> {
         // Commit to root (index 1).
         let verifier = MerkleTreeVerifier { params, top, rest };
         iop.commit(verifier.root());
-        verifier
+        Ok(verifier)
     }
 
     /// Returns the root hash of the tree.
@@ -150,7 +150,7 @@ impl<'a> MerkleTreeVerifier<'a> {
             });
         }
         // Initialize a vector to hold field elements.
-        let out: &[F::Elem] = iop.read_field_elem_slice(self.params.col_size);
+        let out: &[F::Elem] = iop.read_field_elem_slice(self.params.col_size)?;
         // Get the hash at the leaf of the tree by hashing these field elements.
         let mut cur = hashfn.hash_elem_slice(out);
         // Shift idx to start of the row
@@ -160,7 +160,7 @@ impl<'a> MerkleTreeVerifier<'a> {
             // child.
             let low_bit = idx % 2;
             // Retrieve the other parent from the IOP.
-            let other: &Digest = match iop.read_pod_slice(1) {
+            let other: &Digest = match iop.read_pod_slice(1)? {
                 [other] => other,
                 _ => unreachable!(),
             };
