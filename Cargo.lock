@@ -7364,6 +7364,7 @@ name = "risc0-circuit-rv32im-sys"
 version = "5.0.0"
 dependencies = [
  "anyhow",
+ "bindgen 0.72.0",
  "cc",
  "enum-map",
  "glob",

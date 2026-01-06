@@ -21,7 +21,14 @@ use std::{
 
 use anyhow::{Result, anyhow};
 
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+include!(concat!(env!("OUT_DIR"), "/block_types.rs"));
+
+#[allow(non_snake_case, dead_code, non_upper_case_globals)]
+mod bindings {
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+}
+
+pub use bindings::*;
 
 #[repr(C)]
 pub struct SegmentContext {

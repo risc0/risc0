@@ -116,7 +116,9 @@ fn main() {
 
     build.compile(output);
 
-    generate_rust(&format!("{out_dir}/bindings.rs"));
+    let block_types = parse_block_types();
+    generate_rust_block_types(&format!("{out_dir}/block_types.rs"), &block_types);
+    generate_rust_bindings(&format!("{out_dir}/bindings.rs"), &block_types);
 }
 
 /// Uses the C pre-processor to parse the block type table from "cxx/rv32im/witness/block_types.h"
@@ -184,9 +186,7 @@ fn parse_block_types() -> HashMap<String, u8> {
         .collect()
 }
 
-fn generate_rust(output: &str) {
-    let block_types = parse_block_types();
-
+fn generate_rust_block_types(output: &str, block_types: &HashMap<String, u8>) {
     let block_names = block_types
         .keys()
         .map(|n| format_ident!("{n}"))
@@ -217,6 +217,23 @@ fn generate_rust(output: &str) {
         .status()
         .unwrap();
     assert!(status.success(), "rustfmt {output} failed");
+}
+
+fn generate_rust_bindings(output: &str, block_types: &HashMap<String, u8>) {
+    let mut builder = bindgen::Builder::default()
+        .header("cxx/rv32im/witness/witness.h")
+        .clang_arg("-x")
+        .clang_arg("c++")
+        .clang_arg("-std=c++17")
+        .clang_arg("-Icxx")
+        .clang_arg("-Ivendor");
+
+    for name in block_types.keys() {
+        builder = builder.allowlist_type(&format!("{name}Witness"));
+    }
+
+    let bindings = builder.generate().unwrap();
+    bindings.write_to_file(output).unwrap();
 }
 
 fn rerun_if_changed<P: AsRef<Path>>(path: P) {
