@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use risc0_zkp::{
-    MAX_CYCLES_PO2,
+    MAX_CYCLES_PO2, MIN_CYCLES_PO2,
     adapter::{CircuitCoreDefV3, CircuitInfoV3, GroupInfo, MixState, PolyExt},
     core::hash::poseidon2::Poseidon2HashSuite,
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
@@ -70,8 +70,10 @@ pub fn verify(mut seal: &[u32]) -> Result<(), VerificationError> {
     let po2 = *seal
         .split_off_first()
         .ok_or(VerificationError::ReceiptFormatError)? as usize;
-    if po2 > MAX_CYCLES_PO2 {
-        tracing::debug!("po2 decoded from seal is greater than max po2: {po2} > {MAX_CYCLES_PO2}");
+    if !(MIN_CYCLES_PO2..=MAX_CYCLES_PO2).contains(&po2) {
+        tracing::debug!(
+            "po2 decoded from seal is out of range: {po2} not in [{MIN_CYCLES_PO2}, {MAX_CYCLES_PO2}]"
+        );
         return Err(VerificationError::ReceiptFormatError);
     }
 
