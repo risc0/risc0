@@ -7,19 +7,23 @@ date -Is
 id
 uname -a
 
-# echo "--- FS sanity ---"
-# echo "HOME=$HOME"
-# ls -ld "$HOME" /tmp || true
-# mount | egrep ' /tmp | noexec' || true
-
-# mkdir -p "$HOME/.nv/ComputeCache" || true
-# touch "$HOME/.nv/ComputeCache/_write_test" || true
-
-# export CUDA_CACHE_PATH=/tmp/cuda_cache
-# mkdir -p "$CUDA_CACHE_PATH"
-
 echo "--- /dev nodes ---"
 ls -l /dev/nvidia* || true
+
+required=(/dev/nvidiactl /dev/nvidia0 /dev/nvidia-uvm)
+missing=0
+for n in "${required[@]}"; do
+  if [[ ! -e "$n" ]]; then
+    echo "ERROR: missing required NVIDIA node: $n"
+    missing=1
+  fi
+done
+
+if [[ "$missing" -ne 0 ]]; then
+  echo "ERROR: GPU device nodes incomplete inside container; likely created before host UVM was ready."
+  echo "Hint: restart container or fix host boot ordering (load nvidia_uvm earlier)."
+  exit 1
+fi
 
 echo "--- nvidia-smi ---"
 nvidia-smi || true
