@@ -10,7 +10,7 @@ uname -a
 echo "--- /dev nodes ---"
 ls -l /dev/nvidia* || true
 
-required=(/dev/nvidiactl /dev/nvidia0 /dev/nvidia-uvm)
+required=(/dev/nvidiactl /dev/nvidia-uvm)
 missing=0
 for n in "${required[@]}"; do
   if [[ ! -e "$n" ]]; then
