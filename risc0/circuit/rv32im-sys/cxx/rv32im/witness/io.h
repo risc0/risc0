@@ -17,6 +17,8 @@
 
 #include "rv32im/witness/mem.h"
 
+/// <div rustbindgen derive="::bytemuck::Pod"></div>
+/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
 struct ReadByteWitness {
   uint32_t cycle;
   uint32_t size;
@@ -24,6 +26,8 @@ struct ReadByteWitness {
   PhysMemWriteWitness io;
 };
 
+/// <div rustbindgen derive="::bytemuck::Pod"></div>
+/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
 struct ReadWordWitness {
   uint32_t cycle;
   uint32_t size;

@@ -46,6 +46,10 @@ namespace risc0 {
 ///
 /// The Fp class wraps all the standard arithmatic operations to make the finite
 /// field elements look basically like ordinary numbers (which they mostly are).
+///
+/// <div rustbindgen derive="::bytemuck::Pod"></div>
+/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Default"></div>
 class Fp {
 public:
   /// The value of P, the modulus of Fp.

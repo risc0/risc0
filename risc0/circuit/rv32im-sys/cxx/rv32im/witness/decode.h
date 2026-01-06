@@ -17,6 +17,8 @@
 
 #include "rv32im/witness/mem.h"
 
+/// <div rustbindgen derive="::bytemuck::Pod"></div>
+/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
 struct FetchWitness {
   uint32_t mode;
   uint32_t iCacheCycle;
@@ -25,6 +27,8 @@ struct FetchWitness {
   uint32_t nextPc;
 };
 
+/// <div rustbindgen derive="::bytemuck::Pod"></div>
+/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
 struct DecodeWitness {
   uint8_t opcode;
   uint8_t rd;

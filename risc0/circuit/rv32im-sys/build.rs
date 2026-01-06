@@ -116,7 +116,9 @@ fn main() {
 
     build.compile(output);
 
-    let block_types = parse_block_types();
+    let mut block_types = parse_block_types();
+    block_types.insert("Empty".into(), 0);
+
     generate_rust_block_types(&format!("{out_dir}/block_types.rs"), &block_types);
     generate_rust_bindings(&format!("{out_dir}/bindings.rs"), &block_types);
 }
@@ -191,6 +193,12 @@ fn generate_rust_block_types(output: &str, block_types: &HashMap<String, u8>) {
         .keys()
         .map(|n| format_ident!("{n}"))
         .collect::<Vec<_>>();
+
+    let block_witnesses = block_types
+        .keys()
+        .map(|n| format_ident!("{n}Witness"))
+        .collect::<Vec<_>>();
+    let block_values = 0u8..u8::try_from(block_names.len()).expect("too many blocks");
     let block_counts = block_types.values();
     let num_blocks = block_types.len();
 
@@ -209,6 +217,34 @@ fn generate_rust_block_types(output: &str, block_types: &HashMap<String, u8>) {
                 }
             }
         }
+
+        impl TryFrom<u8> for BlockType {
+            type Error = anyhow::Error;
+
+            fn try_from(v: u8) -> anyhow::Result<Self> {
+                match v {
+                    #(#block_values => Ok(Self::#block_names),)*
+                    unknown => Err(anyhow::anyhow!("bad value {unknown} for BlockType"))
+                }
+            }
+        }
+
+        #(impl HasBlockType for #block_witnesses {
+            const BLOCK_TYPE: BlockType = BlockType::#block_names;
+        })*
+
+        #[derive(derive_more::From, PartialEq, Debug)]
+        pub enum BlockWitness {
+            #(#block_names(#block_witnesses),)*
+        }
+
+        impl BlockWitness {
+            pub const fn block_type(&self) -> BlockType {
+                match self {
+                    #(Self::#block_names(_) => BlockType::#block_names),*
+                }
+            }
+        }
     };
 
     std::fs::write(output, contents.to_string()).unwrap();
@@ -222,6 +258,7 @@ fn generate_rust_block_types(output: &str, block_types: &HashMap<String, u8>) {
 fn generate_rust_bindings(output: &str, block_types: &HashMap<String, u8>) {
     let mut builder = bindgen::Builder::default()
         .header("cxx/rv32im/witness/witness.h")
+        .derive_partialeq(true)
         .clang_arg("-x")
         .clang_arg("c++")
         .clang_arg("-std=c++17")

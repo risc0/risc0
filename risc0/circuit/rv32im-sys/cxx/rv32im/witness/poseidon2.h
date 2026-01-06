@@ -17,6 +17,8 @@
 
 #include "rv32im/base/poseidon2.h"
 
+/// <div rustbindgen derive="::bytemuck::Pod"></div>
+/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
 struct P2BlockWitness {
   uint32_t id;
   uint32_t outUseCount;
@@ -25,12 +27,16 @@ struct P2BlockWitness {
   FpCells out;
 };
 
+/// <div rustbindgen derive="::bytemuck::Pod"></div>
+/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
 struct P2ExtRoundWitness {
   uint32_t id;
   uint32_t round;
   FpCells cells;
 };
 
+/// <div rustbindgen derive="::bytemuck::Pod"></div>
+/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
 struct P2IntRoundsWitness {
   uint32_t id;
   FpCells cells;

@@ -20,6 +20,7 @@ use std::{
 };
 
 use anyhow::{Result, anyhow};
+use bytemuck::{Pod, Zeroable};
 
 include!(concat!(env!("OUT_DIR"), "/block_types.rs"));
 
@@ -29,6 +30,16 @@ mod bindings {
 }
 
 pub use bindings::*;
+
+pub trait HasBlockType {
+    const BLOCK_TYPE: BlockType;
+}
+
+impl From<u32> for risc0_Fp {
+    fn from(val: u32) -> Self {
+        Self { val }
+    }
+}
 
 #[repr(C)]
 pub struct SegmentContext {
@@ -78,6 +89,7 @@ pub struct RawSegment {
 }
 
 #[repr(C)]
+#[derive(Zeroable, Pod, Copy, Clone)]
 pub struct RowInfo {
     pub row_type: u8,
     pub block_count: u8,

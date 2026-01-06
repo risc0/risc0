@@ -7368,7 +7368,9 @@ version = "5.0.0"
 dependencies = [
  "anyhow",
  "bindgen 0.72.0",
+ "bytemuck",
  "cc",
+ "derive_more",
  "enum-map",
  "glob",
  "quote",
