@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -262,7 +262,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "135d44e6735eec96c457bfa0f706f2b2b9dc81a8b43af5f37eecd1fe568e0159",
+            "22c8e8d34512b667fd0ca3d6ab4d5c7b2449b22e859332f3e1ab27f912ec4938",
         );
     }
 }
