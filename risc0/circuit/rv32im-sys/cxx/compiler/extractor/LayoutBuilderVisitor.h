@@ -69,14 +69,10 @@ public:
   static void apply(Context& ctx, const char* memberName, T (&t)[N], Args... args) {
     LayoutBuilder* builder = ctx.builder;
 
-    // Get the layout type of an element. Note that we still need to visit every
-    // element to ensure there are the right number of refs in the context.
+    // Get the layout type of an element.
     LayoutBuilder container("$tmp");
     ctx.builder = &container;
-    for (size_t i = 0; i < N; i++) {
-      std::string name = "elem" + std::to_string(i);
-      Visitor::apply(ctx, name.c_str(), t[i], args...);
-    }
+    Visitor::apply(ctx, "elem", t[0], args...);
     mlir::Type elementType = container.members.front().type;
     ctx.builder = builder;
 

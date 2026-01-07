@@ -23,6 +23,8 @@
 
 #include "rv32im/circuit/circuit.ipp"
 
+#include "compiler/extractor/extract.h"
+
 using namespace zirgen;
 namespace cl = llvm::cl;
 
@@ -47,7 +49,6 @@ int main(int argc, char** argv) {
 
   // Build a module with the circuit
   Module module;
-  using C = RecordingContext;
   RecordingContext ctx(module.getCtx());
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);

@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "RecordingVal.h"
 #include "compiler/extractor/RecordingContext.h"
 
 class PicusDeclareInputVisitor {
@@ -35,7 +36,11 @@ public:
     }
   }
 
-  static void apply(RecordingContext& ctx, RecordingReg& x);
+  static void apply(RecordingContext& ctx, RecordingReg& x) {
+    PicusDeclareInputVisitor::apply(ctx, x.val);
+  }
+
+  static void apply(RecordingContext& ctx, RecordingVal& x);
 };
 
 template <typename Component> void picusInput(RecordingContext& ctx, Component component) {
@@ -71,3 +76,12 @@ void picusCall(RecordingContext& ctx,
                const char* name,
                llvm::ArrayRef<RecordingVal> inputs,
                mlir::Value layout);
+
+// Emit a `DeterministicIf` directive into the IR. This indicates to Picus that
+// if all of the input signals are deterministic, then all of the output signals
+// are also deterministic. This is primarily used for arguments where some other
+// block force the outputs to be determined by the inputs, but that fact is
+// otherwise unclear from only considering the current block.
+void picusArgument(RecordingContext& ctx,
+                   llvm::ArrayRef<mlir::Value> inputs,
+                   llvm::ArrayRef<mlir::Value> outputs);
