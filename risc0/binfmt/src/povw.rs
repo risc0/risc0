@@ -173,7 +173,10 @@ impl PovwNonce {
     }
 
     /// Creates a nonce from an array of 8 u32 values.
-    pub fn from_u32s(b: [u32; 8]) -> Self {
+    pub fn from_u32s(mut b: [u32; 8]) -> Self {
+        for x in &mut b {
+            *x = u32::to_le(*x);
+        }
         Self::from_bytes(bytemuck::cast(b))
     }
 
