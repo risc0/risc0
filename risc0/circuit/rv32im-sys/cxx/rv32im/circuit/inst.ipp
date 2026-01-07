@@ -89,11 +89,6 @@ template <typename C> FDEV void InstResumeBlock<C>::addArguments(CTX) DEV {
   ValU32<C> pc = readPc.data.get();
   Val<C> mode = readMode.data.low.get() * cond<C>(GLOBAL_GET(v2Compat), MODE_MACHINE, 1);
   ctx.push(CpuStateArgument<C>(2, pc, mode, 1));
-  uint32_t maxAddr = 0x40000000;
-  for (size_t i = 0; i < 8; i++) {
-    ctx.push(MemoryArgument<C>(
-        maxAddr + i, 0, GLOBAL_GET(povwNonce[i].low), GLOBAL_GET(povwNonce[i].high)));
-  }
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::set(CTX, InstSuspendWitness wit) DEV {
@@ -124,12 +119,6 @@ template <typename C> FDEV void InstSuspendBlock<C>::addArguments(CTX) DEV {
   ctx.pull(cpuState);
   ctx.push(CpuStateArgument<C>(cycleVal + 1, 0, 0, 0, 0));
   CPU_STATE_ARGUMENT(ctx, cpuState);
-
-  uint32_t maxAddr = 0x40000000;
-  for (size_t i = 0; i < 8; i++) {
-    ctx.pull(MemoryArgument<C>(
-        maxAddr + i, 0, GLOBAL_GET(povwNonce[i].low), GLOBAL_GET(povwNonce[i].high)));
-  }
 }
 
 template <typename C> FDEV void SourceReg<C>::set(CTX, Val<C> wordAddr) DEV {
