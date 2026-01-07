@@ -189,7 +189,7 @@ template <typename C> FDEV void EcallWriteBlock<C>::verify(CTX) DEV {
   // Must be in machine mode
   EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
 
-  // Make sure A7 = HOST_ECALL_READ
+  // Make sure A7 = HOST_ECALL_WRITE
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_WRITE);
   EQ(readA7.data.high.get(), 0);
@@ -417,6 +417,7 @@ template <typename C> FDEV void EcallBigIntBlock<C>::addArguments(CTX) DEV {
   VERIFY_DECODE
 }
 
+#undef BIGINT_STATE_ARGUMENT
 #undef CPU_STATE_ARGUMENT
 #undef DECODE_ARGUMENT
 #undef READ_STATE_ARGUMENT

@@ -306,9 +306,9 @@ template <typename C> FDEV void InstImmBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
   Val<C> mode = fetch.mode.get();
   CpuStateArgument<C> cpuState(cycleVal, fetch.pc.get(), mode, fetch.iCacheCycle.get());
-  CPU_STATE_ARGUMENT(ctx, cpuState);
   ctx.pull(cpuState);
   ctx.push(CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), mode, fetch.iCacheCycle.get()));
+  CPU_STATE_ARGUMENT(ctx, cpuState);
 
   auto unit = makeUnit(optOut.get(), readRs1.data.get(), imm.get(), out0.get(), out1.get());
   ctx.pull(unit);

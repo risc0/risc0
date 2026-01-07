@@ -22,7 +22,7 @@ template <typename C> FDEV void GlobalsBlock<C>::set(CTX, GlobalsWitness wit) DE
   finalCycleCeilDiv.set(ctx, ceilDiv);
   ceilDivLow.set(ctx, ceilDiv & 0xffff);
   ceilDivHigh.set(ctx, (ceilDiv >> 16) & 0xff);
-  delta.set(ctx, finalCycleCeilDiv.get() * 8 - wit.finalCycle);
+  delta.set(ctx, ceilDiv * 8 - wit.finalCycle);
   deltaTimes32.set(ctx, delta.get() * 32);
 
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
