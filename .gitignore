@@ -19,6 +19,3 @@ compile_commands.json
 .vercel
 node_modules
 *.code-workspace
-
-risc0/fuzz/artifacts/
-risc0/fuzz/corpus/
