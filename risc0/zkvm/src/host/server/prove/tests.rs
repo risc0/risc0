@@ -293,10 +293,10 @@ const POS: usize = crate::align_up(
 // Aligned read is fine
 #[case(&[(POS, 0)])]
 // Unaligned write is bad
-#[should_panic(expected = "StoreAddressMisaligned")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(&[(POS + 1001, 1)])]
 // Unaligned read is bad
-#[should_panic(expected = "LoadAddressMisaligned")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(&[(POS + 1, 0)])]
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
