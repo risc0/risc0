@@ -89,6 +89,10 @@ template <typename C> FDEV void InstResumeBlock<C>::addArguments(CTX) DEV {
   ValU32<C> pc = readPc.data.get();
   Val<C> mode = readMode.data.low.get() * cond<C>(GLOBAL_GET(v2Compat), MODE_MACHINE, 1);
   ctx.push(CpuStateArgument<C>(2, pc, mode, 1));
+
+  ctx.addArgument(Val<C>(0),
+                  MemoryArgument<C>(
+                      0x40000000, 0, GLOBAL_GET(povwNonce[0].low), GLOBAL_GET(povwNonce[0].high)));
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::set(CTX, InstSuspendWitness wit) DEV {
