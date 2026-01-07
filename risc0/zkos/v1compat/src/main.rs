@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -29,6 +29,7 @@ mod zkvm {
         mem::MaybeUninit,
     };
     use include_bytes_aligned::include_bytes_aligned;
+    use risc0_zkos_common::{get_ureg, set_ureg};
     use risc0_zkvm_platform::syscall::{DIGEST_WORDS, Syscall};
     use sha2::digest::generic_array::GenericArray;
 
@@ -41,7 +42,6 @@ mod zkvm {
     const BLOCK_WORDS: usize = 2 * DIGEST_WORDS;
     const MAX_IO_BYTES: u32 = 1024;
     const MAX_SHA_COUNT: u32 = 10;
-    const USER_REGS_ADDR: u32 = 0xffff_0080;
     const USER_END_ADDR: usize = 0xc000_0000;
     const RV32IM_VERSION_ADDR: usize = 0xffff_0300;
     const REG_A0: usize = 10;
@@ -213,17 +213,6 @@ mod zkvm {
                 in("a4") a4,
             )
         };
-    }
-
-    fn set_ureg(idx: usize, word: u32) {
-        let base = USER_REGS_ADDR as *mut u32;
-        unsafe { base.add(idx).write_volatile(word) };
-    }
-
-    #[allow(dead_code)]
-    fn get_ureg(idx: usize) -> u32 {
-        let base = USER_REGS_ADDR as *mut u32;
-        unsafe { base.add(idx).read_volatile() }
     }
 
     #[allow(dead_code)]
