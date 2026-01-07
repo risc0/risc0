@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -18,6 +18,7 @@
 #include "core/log.h"
 #include "core/util.h"
 #include "rv32im/emu/blocks.h"
+#include "rv32im/emu/povw.h"
 
 #include <algorithm>
 #include <execution>
@@ -26,10 +27,13 @@
 
 namespace risc0::rv32im {
 
-Trace::Trace(size_t maxRows, RowInfo* rows, uint32_t* aux)
+Trace::Trace(size_t maxRows, RowInfo* rows, uint32_t* aux, PovwNonce povwNonce)
     : rowBegin(rows), rowNext(rows), rowEnd(rows + maxRows), auxBegin(aux), auxNext(aux) {
   globals = &makeGlobals();
-  memset(globals, 0, sizeof(GlobalsWitness));
+  globals->p2Count = 0;
+  globals->finalCycle = 0;
+  globals->v2Compat = 0;
+  memcpy(&globals->povwNonce, povwNonce.data(), sizeof(globals->povwNonce));
 }
 
 Trace::~Trace() {}

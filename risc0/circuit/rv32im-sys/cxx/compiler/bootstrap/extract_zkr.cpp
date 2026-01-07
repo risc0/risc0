@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -173,6 +173,27 @@ void addLift(zirgen::Module& module, size_t po2) {
                       doExtern("write", "", 0, outStream);
                       out.setDigest(0, root, "root");
                       out.setDigest(1, claim.digest(), "outDigest");
+                    });
+}
+
+void addLiftPovw(zirgen::Module& module, size_t po2) {
+  RV32IMM3CircuitInterface circuit;
+  module.addFunc<3>("lift_rv32im_m3_povw_" + std::to_string(po2),
+                    {zirgen::gbuf(recursion::kOutSize), zirgen::ioparg(), zirgen::ioparg()},
+                    [&](zirgen::Buffer out, zirgen::ReadIopVal rootIop, zirgen::ReadIopVal seal) {
+                      // TODO: Consider what I need to actually commit to
+                      zirgen::DigestVal root = rootIop.readDigests(1)[0];
+                      auto globals = zirgen::verify::verifyV3(seal, po2, circuit);
+                      llvm::ArrayRef inStream(globals);
+                      auto claimAndNonce =
+                          zirgen::predicates::readReceiptClaimV3AndPovwNonce(inStream, po2);
+                      auto workClaim = zirgen::predicates::wrap_povw(
+                          po2, claimAndNonce.second, claimAndNonce.first);
+                      std::vector<zirgen::Val> outStream;
+                      workClaim.write(outStream);
+                      doExtern("write", "", 0, outStream);
+                      out.setDigest(0, root, "root");
+                      out.setDigest(1, workClaim.digest(), "outDigest");
                     });
 }
 

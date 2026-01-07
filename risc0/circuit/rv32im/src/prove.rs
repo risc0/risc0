@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -97,6 +97,7 @@ impl SegmentContext {
                 len: segment.write_record.len(),
             },
             insn_counter: segment.insn_counter,
+            povw_nonce: segment.povw_nonce.map(|n| n.to_u32s()).unwrap_or_default(),
         };
 
         let ctx =
