@@ -82,14 +82,19 @@ pub trait ProverServer: private::Sealed {
         let mut iter = self.segment_preflight(segment)?;
         let chunk = iter
             .next()
-            .ok_or_else(|| anyhow!("segment_preflight produced no segment results"))?;
+            .ok_or_else(|| anyhow!("segment_preflight produced no segment results"))??;
+
+        segment
+            .inner
+            .blocks
+            .assert_preflight_counts(chunk.block_counts());
 
         if iter.next().is_some() {
             bail!("segment_preflight produced multiple segments");
         }
 
         tracing::debug!("chunk");
-        let receipt = self.prove_preflight(ctx, chunk?)?;
+        let receipt = self.prove_preflight(ctx, chunk)?;
         receipts.push(receipt);
 
         Ok(receipts)

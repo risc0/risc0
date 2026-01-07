@@ -132,6 +132,15 @@ impl PreflightContext {
     pub fn po2(&self) -> u32 {
         self.po2
     }
+
+    pub fn block_counts(&self) -> enum_map::EnumMap<BlockType, u32> {
+        let counts_ptr = unsafe { risc0_circuit_rv32im_m3_preflight_block_counts(self.ctx) };
+        let counts_slice = unsafe { std::slice::from_raw_parts(counts_ptr, BlockType::COUNT) };
+
+        BlockType::iter()
+            .zip(counts_slice.iter().copied())
+            .collect()
+    }
 }
 
 impl Drop for PreflightContext {

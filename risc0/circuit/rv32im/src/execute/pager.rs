@@ -597,7 +597,8 @@ impl PagedMemory {
     }
 
     pub(crate) fn touched_pages(&self) -> u64 {
-        self.page_cache.len() as u64
+        // add one for registers page and one for ??
+        self.page_cache.len() as u64 + 2
     }
 
     #[inline(always)]
