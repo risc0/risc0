@@ -21,8 +21,6 @@
 
 #include "compiler/extractor/extract.h"
 
-#include "compiler/extractor/extract.h"
-
 int main() {
   mlir::MLIRContext mlirCtx;
   RecordingContext ctx(&mlirCtx);
