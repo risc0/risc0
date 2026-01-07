@@ -17,7 +17,7 @@
 #![no_std]
 #![allow(unused_variables)]
 #![deny(rustdoc::broken_intra_doc_links)]
-#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 pub mod memory;
 #[macro_use]
