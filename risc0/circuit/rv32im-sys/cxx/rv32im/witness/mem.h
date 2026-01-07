@@ -17,16 +17,14 @@
 
 #include "rv32im/base/base.h"
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PhysMemReadWitness {
   uint32_t wordAddr;
   uint32_t prevCycle;
   uint32_t value;
 };
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PhysMemWriteWitness {
   uint32_t wordAddr;
   uint32_t prevCycle;
@@ -38,8 +36,7 @@ struct PhysMemWriteWitness {
 using RegMemReadWitness = PhysMemReadWitness;
 using RegMemWriteWitness = PhysMemWriteWitness;
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct VirtAddrWitness {
   uint32_t readCycle;
   uint32_t vpage;
@@ -47,16 +44,14 @@ struct VirtAddrWitness {
   uint32_t wordOffset;
 };
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct VirtMemReadWitness {
   VirtAddrWitness addr;
   uint32_t prevCycle;
   uint32_t value;
 };
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct VirtMemWriteWitness {
   VirtAddrWitness addr;
   uint32_t prevCycle;

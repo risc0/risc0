@@ -66,7 +66,11 @@ impl<'a> Trace<'a> {
         }
     }
 
-    pub fn globals(&mut self) -> &mut GlobalsWitness {
+    pub fn globals(&self) -> &GlobalsWitness {
+        &self.globals
+    }
+
+    pub fn globals_mut(&mut self) -> &mut GlobalsWitness {
         &mut self.globals
     }
 
@@ -170,12 +174,14 @@ impl<'a> Trace<'a> {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
 
     use bytemuck::Zeroable as _;
 
-    use risc0_circuit_rv32im_sys::{BlockWitness, MakeTableWitness, PageInPageWitness};
+    use risc0_circuit_rv32im_sys::{
+        BlockWitness, MakeTableWitness, PageInPageWitness, visit_blocks,
+    };
 
     fn decode_witness<WitnessT: Pod>(aux: &[u32], offset: usize, i: usize) -> BlockWitness
     where
@@ -187,8 +193,22 @@ mod tests {
         wit[0].into()
     }
 
-    fn decode_trace(rows: &[RowInfo], aux: &[u32]) -> Vec<BlockWitness> {
+    pub fn decode_trace(rows: &[RowInfo], aux: &[u32]) -> Vec<BlockWitness> {
         let mut out = vec![];
+
+        macro_rules! decode_witness {
+            ($block_type:expr, $aux:expr, $offset:expr, $i: expr, $($block_name:ident),*) => {
+                paste::paste! {
+                    match $block_type {
+                        $(BlockType::$block_name => {
+                            decode_witness::<risc0_circuit_rv32im_sys::[<$block_name Witness>]>(
+                                $aux, $offset, $i
+                            )
+                        }),*
+                    }
+                }
+            }
+        }
 
         for row in rows.iter() {
             let block_type = BlockType::try_from(row.row_type).unwrap();
@@ -196,15 +216,7 @@ mod tests {
 
             for i in 0..row.block_count {
                 let i = i as usize;
-                match block_type {
-                    BlockType::MakeTable => {
-                        out.push(decode_witness::<MakeTableWitness>(aux, offset, i));
-                    }
-                    BlockType::PageInPage => {
-                        out.push(decode_witness::<PageInPageWitness>(aux, offset, i));
-                    }
-                    _ => panic!("unexpected block type"),
-                }
+                out.push(visit_blocks!(decode_witness, block_type, aux, offset, i));
             }
         }
 
@@ -219,20 +231,22 @@ mod tests {
         let mut aux = vec![0u32; aux_bytes / size_of::<u32>()];
         let mut trace = Trace::new(&mut rows, &mut aux);
 
-        for w in wits {
-            match w {
-                BlockWitness::MakeTable(w) => {
-                    let idx = trace.add_block(w.clone());
-                    assert_eq!(trace.get_block(idx), w);
-                    assert_eq!(trace.get_block_mut(idx), w);
+        macro_rules! add_witness {
+            ($w:expr, $trace:expr, $($block_name:ident),*) => {
+                paste::paste! {
+                    match $w {
+                        $(BlockWitness::$block_name(w) => {
+                            let idx = trace.add_block(w.clone());
+                            assert_eq!(trace.get_block(idx), w);
+                            assert_eq!(trace.get_block_mut(idx), w);
+                        }),*
+                    }
                 }
-                BlockWitness::PageInPage(w) => {
-                    let idx = trace.add_block(w.clone());
-                    assert_eq!(trace.get_block(idx), w);
-                    assert_eq!(trace.get_block_mut(idx), w);
-                }
-                _ => panic!("unexpected block type"),
             }
+        }
+
+        for w in wits {
+            visit_blocks!(add_witness, w, trace);
         }
         trace.finalize();
 
@@ -249,16 +263,6 @@ mod tests {
             + size_of::<PageInPageWitness>() * 2;
 
         let wits = vec![
-            MakeTableWitness {
-                table: 12,
-                start: 30,
-            }
-            .into(),
-            MakeTableWitness {
-                table: 13,
-                start: 30,
-            }
-            .into(),
             PageInPageWitness {
                 addr: 0xFFF1,
                 node: Default::default(),
@@ -267,6 +271,16 @@ mod tests {
             PageInPageWitness {
                 addr: 0xFFF2,
                 node: Default::default(),
+            }
+            .into(),
+            MakeTableWitness {
+                table: 12,
+                start: 30,
+            }
+            .into(),
+            MakeTableWitness {
+                table: 13,
+                start: 30,
             }
             .into(),
         ];
@@ -281,16 +295,6 @@ mod tests {
             + size_of::<PageInPageWitness>() * 2;
 
         let wits = vec![
-            MakeTableWitness {
-                table: 12,
-                start: 30,
-            }
-            .into(),
-            MakeTableWitness {
-                table: 13,
-                start: 30,
-            }
-            .into(),
             PageInPageWitness {
                 addr: 0xFFF1,
                 node: Default::default(),
@@ -299,6 +303,16 @@ mod tests {
             PageInPageWitness {
                 addr: 0xFFF2,
                 node: Default::default(),
+            }
+            .into(),
+            MakeTableWitness {
+                table: 12,
+                start: 30,
+            }
+            .into(),
+            MakeTableWitness {
+                table: 13,
+                start: 30,
             }
             .into(),
         ];

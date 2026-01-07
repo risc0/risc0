@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+pub mod fp;
+
 use std::{
     ffi::CStr,
     os::raw::{c_char, c_int},
@@ -24,8 +26,16 @@ use bytemuck::{Pod, Zeroable};
 
 include!(concat!(env!("OUT_DIR"), "/block_types.rs"));
 
-#[allow(non_snake_case, dead_code, non_upper_case_globals)]
+#[allow(
+    dead_code,
+    non_camel_case_types,
+    non_snake_case,
+    non_upper_case_globals
+)]
 mod bindings {
+    type risc0_Fp = crate::fp::Fp;
+    use bytemuck::{Pod, Zeroable};
+
     include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 }
 
@@ -33,12 +43,6 @@ pub use bindings::*;
 
 pub trait HasBlockType {
     const BLOCK_TYPE: BlockType;
-}
-
-impl From<u32> for risc0_Fp {
-    fn from(val: u32) -> Self {
-        Self { val }
-    }
 }
 
 #[repr(C)]

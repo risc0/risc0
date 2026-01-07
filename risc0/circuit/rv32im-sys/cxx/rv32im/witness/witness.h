@@ -27,6 +27,7 @@
 #include "rv32im/witness/poseidon2.h"
 #include "rv32im/witness/units.h"
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct EmptyWitness {
   // Empty
 };

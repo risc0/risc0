@@ -17,8 +17,7 @@
 
 #include "rv32im/base/paging.h"
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PageInNodeWitness {
   uint32_t index;
   FpDigest node;
@@ -26,8 +25,7 @@ struct PageInNodeWitness {
   FpDigest right;
 };
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PageInPartWitness {
   FpDigest in;
   FpDigest out;
@@ -35,15 +33,13 @@ struct PageInPartWitness {
   uint32_t data[MPAGE_PART_SIZE];
 };
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PageInPageWitness {
   uint32_t addr;
   FpDigest node;
 };
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PageOutNodeWitness {
   uint32_t index;
   FpDigest node;
@@ -51,8 +47,7 @@ struct PageOutNodeWitness {
   FpDigest right;
 };
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PageOutPartWitness {
   FpDigest in;
   FpDigest out;
@@ -61,15 +56,13 @@ struct PageOutPartWitness {
   uint32_t cycle[MPAGE_PART_SIZE];
 };
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PageOutPageWitness {
   uint32_t addr;
   FpDigest node;
 };
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PageUncleWitness {
   uint32_t index;
   FpDigest node;

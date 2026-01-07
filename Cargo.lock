@@ -7378,6 +7378,7 @@ dependencies = [
  "risc0-build-kernel",
  "risc0-sppark",
  "risc0-sys",
+ "risc0-zkp",
  "tracing",
 ]
 

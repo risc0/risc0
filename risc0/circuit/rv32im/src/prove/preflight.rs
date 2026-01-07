@@ -16,6 +16,7 @@
 #![allow(dead_code)]
 
 mod opt;
+mod poseidon2;
 mod trace;
 
 use crate::execute::Segment;

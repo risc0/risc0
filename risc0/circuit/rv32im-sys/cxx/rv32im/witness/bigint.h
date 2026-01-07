@@ -35,8 +35,7 @@ enum class PolyOp {
 
 CONSTANT uint32_t POLY_OP_SIZE = 7;
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct BigIntWitness {
   uint32_t cycle;
   uint32_t mm;

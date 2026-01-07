@@ -245,6 +245,13 @@ fn generate_rust_block_types(output: &str, block_types: &HashMap<String, u8>) {
                 }
             }
         }
+
+        #[macro_export]
+        macro_rules! visit_blocks {
+            ($visitor:ident, $($arg:expr),*) => {
+                $visitor!($($arg,)* #(#block_names),*)
+            }
+        }
     };
 
     std::fs::write(output, contents.to_string()).unwrap();
@@ -258,7 +265,8 @@ fn generate_rust_block_types(output: &str, block_types: &HashMap<String, u8>) {
 fn generate_rust_bindings(output: &str, block_types: &HashMap<String, u8>) {
     let mut builder = bindgen::Builder::default()
         .header("cxx/rv32im/witness/witness.h")
-        .derive_partialeq(true)
+        .derive_copy(false)
+        .derive_debug(false)
         .clang_arg("-x")
         .clang_arg("c++")
         .clang_arg("-std=c++17")

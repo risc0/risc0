@@ -14,11 +14,12 @@ default = []
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-bytemuck = "1.13"
+bytemuck = { version = "1.13", features = ["min_const_generics"] }
 derive_more = { version = "2.0.1", default-features = false, features = ["from"] }
 enum-map = "2.7.3"
 risc0-sppark = { workspace = true, optional = true }
 risc0-sys = { workspace = true }
+risc0-zkp = { workspace = true, default-features = false }
 tracing = { version = "0.1", default-features = false, features = [
     "attributes",
 ] }

@@ -18,8 +18,7 @@
 #include "rv32im/base/base.h"
 #include "rv32im/base/poseidon2.h"
 
-/// <div rustbindgen derive="::bytemuck::Pod"></div>
-/// <div rustbindgen derive="::bytemuck::Zeroable"></div>
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct GlobalsWitness {
   FpDigest rootIn;
   FpDigest rootOut;
