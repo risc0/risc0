@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -12,6 +12,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+use serde::{Deserialize, Serialize};
 
 use risc0_circuit_rv32im_sys::BlockType;
 
@@ -90,18 +91,24 @@ fn add_blocks_for_insn(blocks: &mut BlockCollection, i: &InsnKind) {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BlockCollection {
-    #[cfg(feature = "block_tracker_debug")]
-    blocks: enum_map::EnumMap<BlockType, u64>,
+    #[cfg(any(test, feature = "block_tracker_debug"))]
+    blocks: enum_map::EnumMap<BlockType, u32>,
     row_points: u64,
 }
 
 impl Default for BlockCollection {
     fn default() -> Self {
         Self {
-            #[cfg(feature = "block_tracker_debug")]
-            blocks: Default::default(),
+            #[cfg(any(test, feature = "block_tracker_debug"))]
+            blocks: {
+                let mut blocks = enum_map::EnumMap::default();
+                blocks[BlockType::Globals] += 1;
+                blocks[BlockType::InstResume] += 1;
+                blocks[BlockType::InstSuspend] += 1;
+                blocks
+            },
             row_points: BlockType::COUNT as u64 * POINTS_PER_ROW,
         }
     }
@@ -111,7 +118,7 @@ impl BlockCollection {
     fn add_block(&mut self, block: BlockType) {
         self.row_points += row_points(block);
 
-        #[cfg(feature = "block_tracker_debug")]
+        #[cfg(any(test, feature = "block_tracker_debug"))]
         {
             self.blocks[block] += 1;
         }
@@ -120,14 +127,57 @@ impl BlockCollection {
     fn add_blocks(&mut self, block: BlockType, amount: u64) {
         self.row_points += row_points(block) * amount;
 
-        #[cfg(feature = "block_tracker_debug")]
+        #[cfg(any(test, feature = "block_tracker_debug"))]
         {
-            self.blocks[block] += amount;
+            self.blocks[block] += u32::try_from(amount).unwrap();
         }
     }
 
     pub fn row_points(&self) -> u64 {
         self.row_points
+    }
+
+    pub fn assert_preflight_counts(&self, _preflight: enum_map::EnumMap<BlockType, u32>) {
+        #[cfg(any(test, feature = "block_tracker_debug"))]
+        {
+            // These blocks are estimates only, assert they are over-estimates.
+            let estimate_blocks = [
+                BlockType::InstSuspend,
+                BlockType::MakeTable,
+                BlockType::P2Block,
+                BlockType::P2ExtRound,
+                BlockType::P2IntRounds,
+                BlockType::PageInNode,
+                BlockType::PageOutNode,
+                BlockType::PageUncle,
+            ];
+
+            for &b in estimate_blocks.iter() {
+                assert!(
+                    _preflight[b] <= self.blocks[b],
+                    "block_tracker count was too low: {b:?} {} > {}\n\
+                     executor = {:#?}\n\
+                     preflight = {:#?}",
+                    _preflight[b],
+                    self.blocks[b],
+                    &self.blocks,
+                    &_preflight,
+                );
+            }
+
+            for b in BlockType::iter().filter(|b| !estimate_blocks.contains(b)) {
+                assert!(
+                    _preflight[b] == self.blocks[b],
+                    "block_tracker count was off: {b:?} {} != {}\n\
+                     executor = {:#?}\n\
+                     preflight = {:#?}",
+                    _preflight[b],
+                    self.blocks[b],
+                    &self.blocks,
+                    &_preflight,
+                );
+            }
+        }
     }
 }
 
@@ -140,7 +190,7 @@ impl Default for BlockTracker {
     fn default() -> Self {
         let mut blocks = BlockCollection::default();
 
-        blocks.add_blocks(BlockType::MakeTable, (256 + 65536) / 16);
+        blocks.add_blocks(BlockType::MakeTable, (256u64 + 65536u64) / 16);
 
         Self {
             pc_cache: Default::default(),
@@ -170,14 +220,24 @@ impl BlockTracker {
 
     pub fn track_ecall_read(&mut self, bytes: u64, words: u64) {
         self.blocks.add_block(BlockType::EcallRead);
+
         self.blocks.add_blocks(BlockType::ReadByte, bytes);
         self.blocks.add_blocks(BlockType::ReadWord, words);
+
+        self.blocks
+            .add_blocks(BlockType::MakeTable, (bytes + words + 1).div_ceil(8));
     }
 
     pub fn track_ecall_bigint(&mut self, verify_program_size: u64) {
         self.blocks.add_block(BlockType::EcallBigInt);
         self.blocks
             .add_blocks(BlockType::BigInt, verify_program_size);
+        self.blocks
+            .add_blocks(BlockType::MakeTable, (verify_program_size + 1).div_ceil(8));
+    }
+
+    pub fn track_user_ecall(&mut self) {
+        self.blocks.add_block(BlockType::InstEcall);
     }
 
     fn add_p2_blocks(blocks: &mut BlockCollection, num: u64) {
@@ -190,6 +250,9 @@ impl BlockTracker {
         self.blocks.add_block(BlockType::EcallP2);
         self.blocks.add_blocks(BlockType::P2Step, block_count);
         Self::add_p2_blocks(&mut self.blocks, block_count);
+
+        self.blocks
+            .add_blocks(BlockType::MakeTable, (block_count + 1).div_ceil(8));
     }
 
     const fn page_tree_inner_levels() -> u64 {
@@ -222,7 +285,7 @@ impl BlockTracker {
     }
 
     fn add_table_blocks(blocks: &mut BlockCollection, cycles: u32) {
-        blocks.add_blocks(BlockType::MakeTable, (cycles / 8) as u64);
+        blocks.add_blocks(BlockType::MakeTable, cycles.div_ceil(8) as u64);
     }
 
     pub fn get_blocks(&self, cycles: u32, page_touches: u64) -> BlockCollection {
@@ -231,7 +294,8 @@ impl BlockTracker {
         Self::add_page_out_blocks(&mut blocks, page_touches);
         Self::add_page_uncle_blocks(&mut blocks, page_touches);
 
-        Self::add_table_blocks(&mut blocks, cycles);
+        // add 2 cycles for suspend / resume, 1 cycle is starting value
+        Self::add_table_blocks(&mut blocks, cycles + 2 + 1);
 
         blocks
     }

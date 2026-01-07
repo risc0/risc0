@@ -90,6 +90,10 @@ unsafe extern "C" {
 
     pub fn risc0_circuit_rv32im_m3_preflight_is_final(ctx: *const PreflightContext) -> usize;
 
+    pub fn risc0_circuit_rv32im_m3_preflight_block_counts(
+        ctx: *const PreflightContext,
+    ) -> *const u32;
+
     pub fn risc0_circuit_rv32im_m3_prover_new_cpu(po2: usize) -> *mut ProverContext;
 
     #[cfg(feature = "cuda")]
