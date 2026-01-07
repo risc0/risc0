@@ -18,6 +18,7 @@
 #include "compiler/extractor/RecordingVal.h"
 #include "zirgen/Dialect/ZHLT/IR/ZHLT.h"
 #include <mlir/IR/MLIRContext.h>
+#include <string>
 // #include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
 
 #define ZIRGEN
@@ -52,37 +53,27 @@ struct RecordingContext {
   void eqz(RecordingVal val) {
     builder.create<zirgen::Zll::EqualZeroOp>(builder.getUnknownLoc(), val.value);
   }
-  void eqz(RecordingValExt val) {
-    // TODO
-  }
+  void eqz(RecordingValExt val) { throw std::runtime_error("Not implemented"); }
 
   template <typename T> void push(const T& arg) {
-    // TODO: implement this
+    // no-op
   }
 
   template <typename T> void pull(const T& arg) {
-    // TODO: implement this
+    // no-op
   }
 
   template <typename T> void addArgument(RecordingVal count, const T& arg) {
-    // TODO: implement this
+    // no-op
   }
 
   // Since tables are only used in witgen, we have dummy implementations
   inline void tableAdd(uint32_t entry, uint32_t val) {}
   inline uint32_t tableGet(uint32_t offset) { return 0; }
 
-  void globalSet(uint32_t entry, RecordingVal val) {
-    // TODO: Actual do a global set here
-  }
-  RecordingVal globalGet(uint32_t entry) {
-    // TODO: Actually do a global get
-    return RecordingVal(uint64_t(0));
-  }
-  RecordingVal getX() {
-    // TODO: Add support for 'x' in zirgen + existing proof system
-    return RecordingVal(uint64_t(0));
-  }
+  void globalSet(uint32_t entry, RecordingVal val) {}
+  RecordingVal globalGet(uint32_t entry);
+  RecordingVal getX();
 
   mlir::ModuleOp getModuleOp() { return moduleOp; }
 
@@ -90,30 +81,35 @@ struct RecordingContext {
   void exitComponent();
 
   RecordingVal addValParameter();
-  RecordingVal getNextRef();
 
-  void materializeLayout(mlir::Type layoutType);
+  template <typename Component> mlir::Value get(Component& component) {
+    return componentIRMap.get<Component>(&component);
+  }
+
+  mlir::Value get(RecordingVal component) { return component.value; }
 
   mlir::MLIRContext* mlirCtx;
   mlir::ModuleOp moduleOp;
   mlir::OpBuilder builder;
 
   const char* componentName;
-  ComponentIRMap componentIRMap;
 
   // private:
-  void unifyRefsIntoLayout(mlir::Value layout, size_t& i);
-
   // A temporary region on `moduleOp` that holds the body of a component being
   // built until `exitComponent` is called
   mlir::Region* componentBody;
 
-  // A flattened list of all `ref`s that will ultimately be contained in the
-  // component's layout
-  std::vector<mlir::Value> refs;
-
   // The index 0 used for load ops
   mlir::Value zero;
+
+  // A map from component instances to their IR values
+  ComponentIRMap componentIRMap;
+
+  // A cache of values representing global variables
+  std::map<uint32_t, RecordingVal> globalsCache;
+
+  // A cached value representing global variable 'x'
+  RecordingVal x = RecordingVal(nullptr);
 
   friend struct RecordingVal;
 };
