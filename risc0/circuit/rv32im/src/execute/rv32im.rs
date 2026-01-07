@@ -164,9 +164,8 @@ pub enum InsnKind {
     Sh = 49, // major: 6, minor: 1
     Sw = 50, // major: 6, minor: 2
 
-    Eany = 56,  // major: 7, minor: 0
-    Mret = 57,  // major: 7, minor: 1
-    Fence = 58, // major: 7, minor: 2
+    Eany = 56, // major: 7, minor: 0
+    Mret = 57, // major: 7, minor: 1
 
     Invalid = 255,
 }
@@ -290,8 +289,6 @@ impl Emulator {
             // System instruction
             (0b1110011, 0b000, 0b0011000) => self.step_system(ctx, InsnKind::Mret, decoded),
             (0b1110011, 0b000, 0b0000000) => self.step_system(ctx, InsnKind::Eany, decoded),
-            // Fence instruction
-            (0b0001111, 0b000, _) => self.step_system(ctx, InsnKind::Fence, decoded),
             _ => Ok(ctx
                 .trap(Exception::IllegalInstruction(decoded.insn, line!()))?
                 .then_some(InsnKind::Invalid)),
@@ -601,10 +598,6 @@ impl Emulator {
                 _ => ctx.trap(Exception::IllegalInstruction(decoded.insn, 2)),
             },
             InsnKind::Mret => ctx.mret(),
-            InsnKind::Fence => {
-                ctx.set_pc(ctx.get_pc() + WORD_SIZE);
-                Ok(true)
-            }
             _ => unreachable!(),
         }?
         .then_some(kind))
@@ -694,6 +687,5 @@ pub fn disasm(kind: InsnKind, decoded: &DecodedInstruction) -> String {
             _ => "illegal eany".to_string(),
         },
         InsnKind::Mret => "mret".to_string(),
-        InsnKind::Fence => "fence".to_string(),
     }
 }
