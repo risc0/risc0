@@ -6338,12 +6338,12 @@ fn unpack_tar_to_tmp(tar_data: &[u8]) -> Result<usize, u32> {
                         Ok(_) => {
                             files_extracted += 1;
                         }
-                        Err(_) => {
+                        Err(errno) => {
                             crate::kernel::print(&format!(
-                                "    Failed to create file: /tmp/{}",
-                                rel_path
+                                "    Failed to create file: /tmp/{} (errno = {})",
+                                rel_path, errno
                             ));
-                            // Failed to create file, continue
+                            // Failed to fully create/write file, continue with next entry
                         }
                     }
 
@@ -6459,7 +6459,6 @@ fn create_file_in_tmp(tmp_fid: u32, path: &str, data: &[u8]) -> Result<(), u32> 
 
     // Walk to parent directory
     let mut current_fid = tmp_fid;
-    const TEMP_FILE_FID: u32 = 0xFFFF_FF32;
     const TEMP_PARENT_FID: u32 = 0xFFFF_FF33;
 
     for component in dir_components {
@@ -6487,59 +6486,39 @@ fn create_file_in_tmp(tmp_fid: u32, path: &str, data: &[u8]) -> Result<(), u32> 
 
     match tlcreate.send_tlcreate() {
         Ok(crate::p9::P9Response::Success(_rlcreate)) => {
-            // After Tlcreate, the current_fid becomes the file fid
-            // But we need to walk to the file to get a new fid for writing
-            // Actually, in P9, after Tlcreate succeeds, we can use the same fid for writing
-            // But let's walk to be safe
-            let file_fid = TEMP_FILE_FID;
-            match do_walk(current_fid, file_fid, vec![filename.to_string()]) {
-                Ok(_) => {
-                    // Write file data in chunks
-                    let mut write_offset = 0u64;
-                    const MAX_WRITE_SIZE: u32 = 8192;
+            // After Tlcreate, the fid we used (current_fid) now refers to the created file.
+            // Use that same fid for writing the file contents.
+            let file_fid = current_fid;
 
-                    while write_offset < data.len() as u64 {
-                        let chunk_size = core::cmp::min(
-                            MAX_WRITE_SIZE,
-                            (data.len() as u64 - write_offset) as u32,
-                        );
-                        let chunk = &data
-                            [write_offset as usize..(write_offset + chunk_size as u64) as usize];
+            // Write file data in chunks
+            let mut write_offset = 0u64;
+            const MAX_WRITE_SIZE: u32 = 8192;
 
-                        let twrite = crate::p9::TwriteMessage::new(
-                            0,
-                            file_fid,
-                            write_offset,
-                            chunk.to_vec(),
-                        );
-                        match twrite.send_twrite() {
-                            Ok(crate::p9::P9Response::Success(_)) => {
-                                write_offset += chunk_size as u64;
-                            }
-                            Ok(crate::p9::P9Response::Error(rlerror)) => {
-                                let _ = crate::p9::TclunkMessage::new(0, file_fid).send_tclunk();
-                                let _ =
-                                    crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
-                                return Err(rlerror.ecode);
-                            }
-                            Err(_) => {
-                                let _ = crate::p9::TclunkMessage::new(0, file_fid).send_tclunk();
-                                let _ =
-                                    crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
-                                return Err(5); // EIO
-                            }
-                        }
+            while write_offset < data.len() as u64 {
+                let chunk_size =
+                    core::cmp::min(MAX_WRITE_SIZE, (data.len() as u64 - write_offset) as u32);
+                let chunk =
+                    &data[write_offset as usize..(write_offset + chunk_size as u64) as usize];
+
+                let twrite =
+                    crate::p9::TwriteMessage::new(0, file_fid, write_offset, chunk.to_vec());
+                match twrite.send_twrite() {
+                    Ok(crate::p9::P9Response::Success(_)) => {
+                        write_offset += chunk_size as u64;
                     }
-
-                    let _ = crate::p9::TclunkMessage::new(0, file_fid).send_tclunk();
-                    let _ = crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
-                    Ok(())
-                }
-                Err(errno) => {
-                    let _ = crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
-                    Err(errno as u32)
+                    Ok(crate::p9::P9Response::Error(rlerror)) => {
+                        let _ = crate::p9::TclunkMessage::new(0, file_fid).send_tclunk();
+                        return Err(rlerror.ecode);
+                    }
+                    Err(_) => {
+                        let _ = crate::p9::TclunkMessage::new(0, file_fid).send_tclunk();
+                        return Err(5); // EIO
+                    }
                 }
             }
+
+            let _ = crate::p9::TclunkMessage::new(0, file_fid).send_tclunk();
+            Ok(())
         }
         Ok(crate::p9::P9Response::Error(rlerror)) => {
             let _ = crate::p9::TclunkMessage::new(0, TEMP_PARENT_FID).send_tclunk();
