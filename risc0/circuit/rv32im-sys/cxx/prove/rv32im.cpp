@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,6 +17,7 @@
 
 #include "core/log.h"
 #include "rv32im/emu/emu.h"
+#include "rv32im/emu/povw.h"
 #include "rv32im/emu/verify.h"
 
 namespace risc0 {
@@ -39,13 +40,17 @@ Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal,
   dataInfo.witgen = [hal, rowInfo, aux, tables, doValidate](std::vector<GroupState>& state) {
     LOG(1, "Computing data witness");
     {
-      // Copy across any input globals
+      // Clear initial global values
+      PinnedArrayWO<Fp> globalFp(hal, state[0].global);
+      for (size_t i = 0; i < globalFp.size(); i++) {
+        globalFp[i] = 0;
+      }
+      // Copy across the one special global that is needed during 'set'
+      // TODO: Remove when we get rid of v2Compat
       PinnedArrayRO<uint32_t> globalAux(hal,
                                         aux.slice(0, sizeof(GlobalsWitness) / sizeof(uint32_t)));
-      PinnedArrayWO<Fp> globalFp(hal, state[0].global);
       const GlobalsWitness* wit = reinterpret_cast<const GlobalsWitness*>(globalAux.data());
       Globals* globals = reinterpret_cast<Globals*>(globalFp.data());
-      memset(globals, 0, sizeof(Globals));
       globals->v2Compat = wit->v2Compat;
     }
     hal->zero(tables);
@@ -79,14 +84,17 @@ Rv32CircuitInfo::Rv32CircuitInfo(IHalPtr hal,
   ci.taps.done();
 }
 
-PreflightResultsPtr
-preflight(size_t po2, rv32im::MemoryImage& image, rv32im::HostIO& io, uint32_t endCycle) {
+PreflightResultsPtr preflight(size_t po2,
+                              rv32im::MemoryImage& image,
+                              rv32im::HostIO& io,
+                              uint32_t endCycle,
+                              rv32im::PovwNonce povwNonce) {
   LOG(1, "Executing");
   size_t rows = size_t(1) << po2;
   auto results = std::make_shared<PreflightResults>();
   results->rowInfo.resize(rows);
   results->aux.resize(rows * computeMaxWitPerRow());
-  Trace trace(rows, results->rowInfo.data(), results->aux.data());
+  Trace trace(rows, results->rowInfo.data(), results->aux.data(), povwNonce);
   results->isFinal = emulate(trace, image, io, rows, endCycle);
   results->cycles = trace.getUserCycles();
   LOG(1,

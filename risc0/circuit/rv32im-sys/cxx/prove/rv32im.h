@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,6 +17,7 @@
 
 #include "prove/prove.h"
 #include "rv32im/emu/emu.h"
+#include "rv32im/emu/povw.h"
 
 namespace risc0 {
 
@@ -41,7 +42,8 @@ using PreflightResultsPtr = std::shared_ptr<PreflightResults>;
 PreflightResultsPtr preflight(size_t po2,
                               rv32im::MemoryImage& image,
                               rv32im::HostIO& io,
-                              uint32_t endCycle = UINT32_MAX);
+                              uint32_t endCycle = UINT32_MAX,
+                              rv32im::PovwNonce povwNonce = rv32im::PovwNonce::zero());
 
 class Rv32imProver {
 public:
