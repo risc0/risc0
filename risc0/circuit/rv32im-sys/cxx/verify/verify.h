@@ -16,8 +16,8 @@
 #include <functional>
 #include <vector>
 
-#include "verify/read_iop.h"
 #include "verify/info/info.h"
+#include "verify/read_iop.h"
 
 namespace risc0 {
 
