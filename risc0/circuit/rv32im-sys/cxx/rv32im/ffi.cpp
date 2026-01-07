@@ -247,6 +247,10 @@ size_t risc0_circuit_rv32im_m3_preflight_is_final(PreflightContext* ctx) {
   return ctx->isFinal;
 }
 
+uint32_t* risc0_circuit_rv32im_m3_preflight_block_counts(PreflightContext* ctx) {
+  return ctx->results->block_counts;
+}
+
 ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {
   return tryRet([&] {
     IHalPtr hal = getCpuHal();

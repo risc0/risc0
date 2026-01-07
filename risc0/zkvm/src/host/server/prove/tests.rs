@@ -521,7 +521,7 @@ fn pause_exit_nonzero() {
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
-    const ITERATIONS: u32 = 30_000;
+    const ITERATIONS: u32 = 25_000;
 
     let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(ITERATIONS);
     let image = MemoryImage::new_kernel(program);

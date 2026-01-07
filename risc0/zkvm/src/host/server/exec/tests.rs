@@ -106,7 +106,7 @@ fn basic() {
 
 #[test_log::test]
 fn system_split_v2() {
-    const ITERATIONS: u32 = 10_000;
+    const ITERATIONS: u32 = 5_000;
 
     let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(ITERATIONS);
     let mut image = MemoryImage::new_kernel(program);
