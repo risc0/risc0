@@ -53,3 +53,4 @@ pub const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;
 
 /// FRI continues until the degree of the FRI polynomial reaches FRI_MIN_DEGREE
 const FRI_MIN_DEGREE: usize = 256;
+const FRI_MIN_DEGREE_PO2: usize = FRI_MIN_DEGREE.ilog2() as usize;
