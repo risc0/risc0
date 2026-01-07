@@ -27,8 +27,14 @@
 
 namespace risc0::rv32im {
 
-Trace::Trace(size_t maxRows, RowInfo* rows, uint32_t* aux, PovwNonce povwNonce)
-    : rowBegin(rows), rowNext(rows), rowEnd(rows + maxRows), auxBegin(aux), auxNext(aux) {
+Trace::Trace(
+    size_t maxRows, RowInfo* rows, uint32_t* aux, PovwNonce povwNonce, uint32_t* block_counts)
+    : rowBegin(rows)
+    , rowNext(rows)
+    , rowEnd(rows + maxRows)
+    , auxBegin(aux)
+    , auxNext(aux)
+    , block_counts(block_counts) {
   globals = &makeGlobals();
   globals->p2Count = 0;
   globals->finalCycle = 0;

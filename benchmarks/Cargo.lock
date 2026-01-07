@@ -3945,6 +3945,8 @@ dependencies = [
  "risc0-build-kernel",
  "risc0-sppark",
  "risc0-sys",
+ "serde",
+ "strum",
  "tracing",
 ]
 

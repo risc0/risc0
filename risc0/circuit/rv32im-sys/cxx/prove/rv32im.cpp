@@ -94,7 +94,8 @@ PreflightResultsPtr preflight(size_t po2,
   auto results = std::make_shared<PreflightResults>();
   results->rowInfo.resize(rows);
   results->aux.resize(rows * computeMaxWitPerRow());
-  Trace trace(rows, results->rowInfo.data(), results->aux.data(), povwNonce);
+  Trace trace(
+      rows, results->rowInfo.data(), results->aux.data(), povwNonce, &results->block_counts[0]);
   results->isFinal = emulate(trace, image, io, rows, endCycle);
   results->cycles = trace.getUserCycles();
   LOG(1,
