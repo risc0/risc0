@@ -22,6 +22,7 @@ mod rng;
 
 use alloc::{boxed::Box, rc::Rc, vec::Vec};
 
+use bytemuck::CheckedBitPattern;
 use risc0_core::field::{
     Elem, ExtElem,
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
@@ -67,6 +68,14 @@ impl HashFn<BabyBear> for Poseidon2HashFn {
         to_digest(unpadded_hash(
             slice.iter().flat_map(|ee| ee.subelems().iter()),
         ))
+    }
+
+    /// Checks is all words in the digest are less than the Baby Bear modulus.
+    fn is_digest_valid(&self, digest: &Digest) -> bool {
+        digest
+            .as_words()
+            .iter()
+            .all(<BabyBearElem as CheckedBitPattern>::is_valid_bit_pattern)
     }
 }
 

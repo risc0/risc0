@@ -100,10 +100,13 @@ impl<'a> MerkleTreeVerifier<'a> {
 
         if !fill_rest.is_empty() {
             for i in (params.top_size / 2..params.top_size).rev() {
-                // DO NOT MERGE: This can panic when the digest from the seal is not valid BB elems.
                 let top_idx = params.idx_to_top(2 * i);
-                fill_rest[params.idx_to_rest(i)]
-                    .write(hashfn.hash_pair(&top[top_idx], &top[top_idx + 1]));
+                let (left, right) = (&top[top_idx], &top[top_idx + 1]);
+                if !hashfn.is_digest_valid(left) || !hashfn.is_digest_valid(right) {
+                    tracing::debug!("top digests read from iop are invalid");
+                    return Err(VerificationError::ReceiptFormatError);
+                }
+                fill_rest[params.idx_to_rest(i)].write(hashfn.hash_pair(left, right));
             }
         }
         for i in (1..params.top_size / 2).rev() {
@@ -165,8 +168,11 @@ impl<'a> MerkleTreeVerifier<'a> {
                 [other] => other,
                 _ => unreachable!(),
             };
+            if !hashfn.is_digest_valid(other) {
+                tracing::debug!("merkle proof node read from iop is invalid");
+                return Err(VerificationError::ReceiptFormatError);
+            }
             // Now ascend to the parent index, and compute the hash there.
-            // DO NOT MERGE: This can panic when the digest read from the IOP is not BB elems
             idx /= 2;
             if low_bit == 1 {
                 cur = hashfn.hash_pair(other, &cur);
