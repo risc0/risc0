@@ -17,7 +17,7 @@
 #include "core/log.h"
 #include "rv32im/circuit/verify.h"
 #include "rv32im/emu/blocks.h"
-#include "verify/rv32im.h"
+#include "verify/info/rv32im.h"
 #include "zkp/taps.h"
 
 #include "mlir/Pass/PassManager.h"

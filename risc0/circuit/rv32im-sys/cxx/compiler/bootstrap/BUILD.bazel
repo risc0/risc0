@@ -6,7 +6,7 @@ cc_library(
     hdrs = ["extract_zkr.h"],
     deps = [
         "//rv32im/circuit",
-        "//verify",
+        "//verify/info",
         "@zirgen//zirgen/circuit/predicates:lib",
         "@zirgen//zirgen/compiler/codegen",
     ],
@@ -23,6 +23,7 @@ cc_test(
         ":extract_zkr",
         "//hal/pick",
         "//prove",
+        "//verify",
     ],
 )
 
@@ -53,6 +54,6 @@ cc_binary(
         "//compiler/extractor",
         "//rv32im/circuit",
         "//rv32im/emu",
-        "//verify",
+        "//verify/info",
     ],
 )

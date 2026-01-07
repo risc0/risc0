@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #include "core/log.h"
-#include "verify/rv32im.h"
+#include "verify/info/rv32im.h"
 
 #include <fstream>
 #include <string>

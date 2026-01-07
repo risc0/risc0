@@ -16,7 +16,7 @@
 #include "compiler/bootstrap/extract_zkr.h"
 
 #include "rv32im/circuit/verify.h"
-#include "verify/rv32im.h"
+#include "verify/info/rv32im.h"
 #include "zirgen/circuit/predicates/predicates.h"
 #include "zirgen/circuit/recursion/code.h"
 #include "zirgen/circuit/verify/verify.h"

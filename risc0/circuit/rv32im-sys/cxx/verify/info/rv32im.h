@@ -13,23 +13,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "verify/verify.h"
-
-#include "rv32im/base/constants.h"
-#include "rv32im/emu/blocks.h"
-#include "verify/fri.h"
-#include "verify/info/rv32im.h"
-#include "verify/merkle.h"
-#include "zkp/params.h"
-#include "zkp/rou.h"
+#include "verify/info/info.h"
 
 namespace risc0 {
 
-using namespace rv32im;
-void verifyRv32im(ReadIop& iop, size_t po2) {
-  VerifyCircuitInfo ci;
-  setupVerifyInfo(ci);
-  verify(ci, iop, po2);
-};
+void setupVerifyInfo(VerifyCircuitInfo& info);
 
 } // namespace risc0

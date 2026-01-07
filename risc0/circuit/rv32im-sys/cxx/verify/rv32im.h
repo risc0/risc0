@@ -13,11 +13,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#include "verify/read_iop.h"
 #include "verify/verify.h"
 
 namespace risc0 {
-
-void setupVerifyInfo(VerifyCircuitInfo& info);
 
 void verifyRv32im(ReadIop& iop, size_t po2);
 
