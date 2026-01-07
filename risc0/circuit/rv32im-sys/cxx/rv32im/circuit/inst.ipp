@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,6 +45,11 @@ template <typename C> FDEV void InstResumeBlock<C>::addArguments(CTX) DEV {
   ValU32<C> pc = readPc.data.get();
   Val<C> mode = readMode.data.low.get() * cond<C>(GLOBAL_GET(v2Compat), MODE_MACHINE, 1);
   ctx.push(CpuStateArgument<C>(2, pc, mode, 1));
+  uint32_t maxAddr = 0x40000000;
+  for (size_t i = 0; i < 8; i++) {
+    ctx.push(MemoryArgument<C>(
+        maxAddr + i, 0, GLOBAL_GET(povwNonce[i].low), GLOBAL_GET(povwNonce[i].high)));
+  }
 }
 
 template <typename C> FDEV void InstSuspendBlock<C>::set(CTX, InstSuspendWitness wit) DEV {
@@ -71,6 +76,11 @@ template <typename C> FDEV void InstSuspendBlock<C>::addArguments(CTX) DEV {
   Val<C> mode = writeMode.data.low.get() * cond<C>(GLOBAL_GET(v2Compat), MODE_MACHINE, 1);
   ctx.pull(CpuStateArgument<C>(cycleVal, pc, mode, iCacheCycle.get()));
   ctx.push(CpuStateArgument<C>(cycleVal + 1, 0, 0, 0, 0));
+  uint32_t maxAddr = 0x40000000;
+  for (size_t i = 0; i < 8; i++) {
+    ctx.pull(MemoryArgument<C>(
+        maxAddr + i, 0, GLOBAL_GET(povwNonce[i].low), GLOBAL_GET(povwNonce[i].high)));
+  }
 }
 
 template <typename C> FDEV void SourceReg<C>::set(CTX, Val<C> wordAddr) DEV {
@@ -278,7 +288,7 @@ template <typename C> FDEV Val<C> InstLoadBlock<C>::getSignBitInput() DEV {
 }
 
 template <typename C> FDEV void InstLoadBlock<C>::verify(CTX) DEV {
-  EQ(readAddr.wordAddr(computeAddr.get()), readMem.getWordAddr());
+  EQ(readAddr.wordAddr(computeAddr.get()), readMem.wordAddr.get());
   EQ(pickShort.get(),
      cond<C>(readAddr.low1.get(), readMem.data.high.get(), readMem.data.low.get()));
   EQ(pickShort.get(), b1.get() * 256 + b0.get());
@@ -336,20 +346,21 @@ template <typename C> FDEV void InstStoreBlock<C>::set(CTX, InstStoreWitness wit
   psB1.set(ctx, valU16 >> 8);
   uint32_t valU8 = (writeAddr.low0.get() == Val<C>(1)) ? (valU16 >> 8) : (valU16 & 0xff);
   pickByte.set(ctx, valU8);
-  lowB0.set(ctx, wit.rs2.value & 0xff);
-  lowB1.set(ctx, ((wit.rs2.value) >> 8) & 0xff);
-  uint32_t rs2Byte = wit.rs2.value & 0xff;
+  uint32_t rs2Low = dr.getRS2().low.asUInt32();
+  lowB0.set(ctx, rs2Low & 0xff);
+  lowB1.set(ctx, rs2Low >> 8);
+  uint32_t rs2Byte = rs2Low & 0xff;
   if (opts.val == 0 && writeAddr.low0.get() == Val<C>(1)) {
     newShort.set(ctx, (rs2Byte << 8) | (valU16 & 0x00ff));
   } else if (opts.val == 0 && writeAddr.low0.get() == Val<C>(0)) {
     newShort.set(ctx, (valU16 & 0xff00) | (rs2Byte));
   } else {
-    newShort.set(ctx, wit.rs2.value & 0xffff);
+    newShort.set(ctx, rs2Low);
   }
 }
 
 template <typename C> FDEV void InstStoreBlock<C>::verify(CTX) DEV {
-  EQ(writeAddr.wordAddr(computeAddr.get()), writeMem.getWordAddr());
+  EQ(writeAddr.wordAddr(computeAddr.get()), writeMem.wordAddr.get());
   EQ(pickShort.get(),
      cond<C>(writeAddr.low1.get(), writeMem.prevData.high.get(), writeMem.prevData.low.get()));
   EQ(pickShort.get(), psB1.get() * 256 + psB0.get());

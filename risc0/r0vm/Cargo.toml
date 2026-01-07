@@ -61,7 +61,7 @@ tokio-util = { version = "0.7.15", features = ["codec"] }
 toml = "0.8.22"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-url = "2"
+url = { version = "2", features = ["serde"] }
 uuid = { version = "1.16.0", features = ["serde", "v4"] }
 
 [dev-dependencies]

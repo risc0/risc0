@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -39,10 +39,13 @@ impl Bazel {
         let dst_dir = pwd.join("risc0/circuit/rv32im/src/zirgen");
         let bazel_root = Path::new("risc0/circuit/rv32im-sys/cxx");
         let mut command = Command::new("bazelisk");
-        command
+        let status = command
             .args(["run", "//compiler/bootstrap", "--"])
             .arg(dst_dir)
-            .current_dir(bazel_root);
+            .current_dir(bazel_root)
+            .status()
+            .unwrap();
+        assert!(status.success(), "bazelisk run //compiler/bootstrap failed");
     }
 
     fn bootstrap_zkr() {

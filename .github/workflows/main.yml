@@ -265,7 +265,7 @@ jobs:
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
-        run: nvidia-smi
+        run: bash ./.github/scripts/cuda_smoke.sh
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - uses: ./.github/actions/protoc
@@ -336,7 +336,7 @@ jobs:
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
-        run: nvidia-smi
+        run: bash ./.github/scripts/cuda_smoke.sh
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - uses: ./.github/actions/protoc
@@ -389,7 +389,7 @@ jobs:
           lfs: true
       - run: git lfs pull
       - uses: ./.github/actions/cuda
-      - run: nvidia-smi
+      - run: bash ./.github/scripts/cuda_smoke.sh
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - uses: ./.github/actions/protoc
@@ -454,7 +454,7 @@ jobs:
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
-        run: nvidia-smi
+        run: bash ./.github/scripts/cuda_smoke.sh
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - uses: ./.github/actions/protoc

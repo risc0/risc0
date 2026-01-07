@@ -30,6 +30,10 @@ ZKRS = [
     ("lift_rv32im_m3_" + str(po2))
     for po2 in range(12, 25)
 ]
+ZKRS += [
+    ("lift_rv32im_m3_povw_" + str(po2))
+    for po2 in range(12, 25)
+]
 
 build_circuit(
     name = "zkr",
