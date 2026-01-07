@@ -8,14 +8,14 @@ edition = "2024"
 [dependencies]
 risc0-zkvm = { path = "../../../../../risc0/zkvm", default-features = false, features = ["std"] }
 hex-literal = "0.4"
-k256 = { version = "=0.13.3", features = ["arithmetic", "serde", "expose-field", "std", "ecdsa"], default-features = false }
+k256 = { version = "=0.13.4", features = ["arithmetic", "serde", "expose-field", "std", "ecdsa"], default-features = false }
 
 [patch.crates-io]
 # Placing these patch statement in the workspace Cargo.toml will add RISC Zero SHA-256 and bigint
 # multiplication accelerator support for all downstream usages of the following crates.
-sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.6-risczero.0" }
-k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.3-risczero.1" }
-crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.2-risczero.0" }
+sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.9-risczero.0" }
+k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.4-risczero.1" }
+crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.5-risczero.0" }
 
 [profile.release]
 # Empirically observed to result in the best performance for this binary (in particular, better than

@@ -47,20 +47,6 @@ fn is_less<const N: usize>(lhs: &[u32; N], rhs: &[u32; N]) -> bool {
     false
 }
 
-#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
-const _: () = {
-    assert!(
-        core::option_env!("RISC0_FEATURE_bigint2").is_some(),
-        r#"
-RISC Zero zkVM feature bigint2 is not available, and is required by this crate.
-
-If you'd like to use bigint2, please upgrade to risc0-zkvm and risc0-build and ensure the required
-feature flags are enabled. See the RISC Zero dev docs for more information.
-https://dev.risczero.com/api/zkvm/acceleration
-"#
-    );
-};
-
 #[cfg(feature = "num-bigint")]
 impl<const WIDTH: usize> ToBigInt2Buffer<WIDTH> for num_bigint::BigUint {
     fn to_u32_array(&self) -> [u32; WIDTH] {

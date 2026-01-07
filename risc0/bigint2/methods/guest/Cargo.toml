@@ -15,14 +15,14 @@ num-bigint-dig = { version = "0.8", default-features = false, features = [
 ], optional = true }
 risc0-bigint2 = { path = "../..", default-features = false }
 risc0-zkvm = { path = "../../../zkvm", default-features = false, features = ["std"] }
-k256 = { version = "=0.13.3" }
+k256 = { version = "=0.13.4" }
 
 [build-dependencies]
-k256 = "=0.13.3"
+k256 = "=0.13.4"
 
 [patch.crates-io]
 crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.5-risczero.0" }
-k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.3-risczero.1" }
+k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.4-risczero.1" }
 
 [features]
 num-bigint = ["dep:num-bigint", "risc0-bigint2/num-bigint"]

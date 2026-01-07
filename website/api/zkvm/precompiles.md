@@ -17,30 +17,30 @@ We have patched several popular cryptographic Rust crates to create
 For the most up to date tags to use for the following crates, see the `/releases` in
 each fork's repository on GitHub.
 
-| Crate                                                                         | Versions supported             | Patch Statement Example                                                                                      | Requires Unstable Flag? |
-| ----------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------ | ----------------------- |
-| [`sha2`](https://github.com/risc0/RustCrypto-hashes/releases)                 | 0.10.8, 0.10.7, 0.10.6, 0.9.9  | `sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.8-risczero.0" }`             | No                      |
-| [`tiny-keccak`](https://github.com/risc0/tiny-keccak/releases)                | 2.0.2                          | `tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", tag = "tiny-keccak/v2.0.2-risczero.0" }`      | [Yes]                   |
-| [`k256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases)        | 0.13.4, 0.13.3, 0.13.2, 0.13.1 | `k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.3-risczero.1" }`    | No                      |
-| [`p256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases)        | 0.13.2                         | `p256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "p256/v0.13.2-risczero.1" }`    | No                      |
-| [`curve25519-dalek`](https://github.com/risc0/curve25519-dalek/releases)      | 4.1.3, 4.1.2, 4.1.1, 4.1.0     | `ed25519-dalek = { git = "https://github.com/risc0/curve25519-dalek", tag = "curve25519-4.1.3-risczero.0" }` | No                      |
-| [`rsa`](https://github.com/risc0/RustCrypto-RSA/releases)                     | 0.9.6                          | `rsa = { git = "https://github.com/risc0/RustCrypto-RSA", tag = "v0.9.6-risczero.0" }`                       | No                      |
-| [`substrate-bn`](https://github.com/risc0/paritytech-bn/releases)             | 0.6.0                          | `substrate-bn = { git = "https://github.com/risc0/paritytech-bn", tag = "v0.6.0-risczero.0" }`               | No                      |
-| [`bls12_381`](https://github.com/risc0/zkcrypto-bls12_381/releases)           | 0.8.0                          | `bls12_381 = { git = "https://github.com/risc0/zkcrypto-bls12_381", tag = "bls12_381/v0.8.0-risczero.1" }`   | No                      |
-| [`blst`](https://github.com/risc0/blst/releases)                              | 0.3.14                         | `blst = { git = "https://github.com/risc0/blst", tag = "blst/v0.3.14-risczero.0" }`                          | No                      |
-| [`crypto-bigint`](https://github.com/risc0/RustCrypto-crypto-bigint/releases) | 0.5.5, 0.5.4, 0.5.3, 0.5.2     | `crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.5-risczero.0" }`   | No                      |
-| [`c-kzg`](https://github.com/risc0/c-kzg-4844/releases)[^2]                   | 1.0.3, 2.1.0, 2.1.1, 2.1.5     | `c-kzg = { git = "https://github.com/risc0/c-kzg-4844", tag = "v2.1.5-risczero.0" }`                         | No                      |
+| Crate                                                                         | Versions supported                    | Patch Statement Example                                                                                      |
+| ----------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [`sha2`](https://github.com/risc0/RustCrypto-hashes/releases)                 | 0.10.9 0.10.8, 0.10.7, 0.10.6, 0.9.9  | `sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.9-risczero.0" }`             |
+| [`tiny-keccak`](https://github.com/risc0/tiny-keccak/releases)                | 2.0.2                                 | `tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", tag = "tiny-keccak/v2.0.2-risczero.0" }`      |
+| [`k256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases)        | 0.13.4, 0.13.3, 0.13.2, 0.13.1        | `k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.4-risczero.1" }`    |
+| [`p256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases)        | 0.13.2                                | `p256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "p256/v0.13.2-risczero.1" }`    |
+| [`curve25519-dalek`](https://github.com/risc0/curve25519-dalek/releases)      | 4.1.3, 4.1.2, 4.1.1, 4.1.0            | `ed25519-dalek = { git = "https://github.com/risc0/curve25519-dalek", tag = "curve25519-4.1.3-risczero.0" }` |
+| [`rsa`](https://github.com/risc0/RustCrypto-RSA/releases)                     | 0.9.9                                 | `rsa = { git = "https://github.com/risc0/RustCrypto-RSA", tag = "v0.9.9-risczero.0" }`                       |
+| [`substrate-bn`](https://github.com/risc0/paritytech-bn/releases)             | 0.6.0                                 | `substrate-bn = { git = "https://github.com/risc0/paritytech-bn", tag = "v0.6.0-risczero.0" }`               |
+| [`bls12_381`](https://github.com/risc0/zkcrypto-bls12_381/releases)           | 0.8.0                                 | `bls12_381 = { git = "https://github.com/risc0/zkcrypto-bls12_381", tag = "bls12_381/v0.8.0-risczero.1" }`   |
+| [`blst`](https://github.com/risc0/blst/releases)                              | 0.3.16 0.3.15 0.3.14                  | `blst = { git = "https://github.com/risc0/blst", tag = "blst/v0.3.16-risczero.0" }`                          |
+| [`crypto-bigint`](https://github.com/risc0/RustCrypto-crypto-bigint/releases) | 0.5.5, 0.5.4, 0.5.3, 0.5.2            | `crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.5-risczero.0" }`   |
+| [`c-kzg`](https://github.com/risc0/c-kzg-4844/releases)[^2]                   | 1.0.3, 2.1.0, 2.1.1, 2.1.5            | `c-kzg = { git = "https://github.com/risc0/c-kzg-4844", tag = "v2.1.5-risczero.0" }`                         |
 
 Make sure that your dependency gives the same patch version of the crate as listed in
 the git tag of the patch. If you need other patch versions or crates than listed here, please reach
 out to us on [Discord][discord-url] or otherwise!
 
-If using `tag = "sha2-v0.10.8-risczero.0"`, the dependency should be defined as a
+If using `tag = "sha2-v0.10.9-risczero.0"`, the dependency should be defined as a
 [git dependency][git-dep]:
 
 ```toml
 [dependencies]
-sha2 = "=0.10.8"
+sha2 = "=0.10.9"
 
 [patch.crates-io]
 sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.8-risczero.0" }
@@ -51,7 +51,7 @@ need to update the version specifically to update your lockfile for your guest.
 For example:
 
 ```sh
-cargo update -p sha2 --precise 0.10.8
+cargo update -p sha2 --precise 0.10.9
 ```
 
 > Note: To ensure that the patch is being applied, search for the crate in the `Cargo.lock` file
@@ -87,16 +87,6 @@ RustCrypto's secp256k1 ECDSA library. This fork starts from the base
 implementation, and changes the core operations to use the precompiled 256-bit
 elliptic curve instructions. E.g. [`lincomb`][lincomb].
 
-## Stability
-
-Certain versions of patches for some crates (e.g. `k256`, `rsa`) depend on more optimized
-precompiles that are still undergoing revision and review, and so users must opt-in to these
-features by setting the `"unstable"` [feature flag][feature-flag] on the `risc0-zkvm` crate used by
-the zkVM guest and by the `risc0-build` crate used to build the guest. These also require using
-versions `>=1.2.0` of `risc0` crates. For users who need a stable, production-ready version we are
-working on stabilizing these precompiles as soon as possible, and the `"unstable"` feature flag will
-no longer be required.
-
 ## Timing Attacks
 
 These precompiles do not currently provide strict guarantees about constant-time execution and
@@ -107,7 +97,7 @@ a message within the zkvm where an observer can measure the proving time or view
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 
-[^2]: The `c-kzg` crate depends on the `blst` crate (version 0.3.14) and also
+[^2]: The `c-kzg` crate depends on the `blst` crate (version 0.3.16) and also
     requires a patched version of `blst` to enable full acceleration.
 
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors

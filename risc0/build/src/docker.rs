@@ -160,6 +160,8 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
         .env(manifest_env)
         .env(rustflags_env)
         .env(&[("CARGO_TARGET_DIR", "target")])
+        // NOTE: This is no longer required when using an up to date version of risc0-bigint2.
+        // It is kept to avoid breaking code that links older versions of that crate without cause.
         .env(&[("RISC0_FEATURE_bigint2", "")])
         .env(&[(
             "CC_riscv32im_risc0_zkvm_elf",
