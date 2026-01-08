@@ -17,7 +17,7 @@ use std::{
     fs::File,
     io::{BufRead as _, BufReader},
     path::{Path, PathBuf},
-    process::{Command, Stdio, exit},
+    process::{Command, Stdio},
 };
 
 use clap::Parser;
@@ -75,7 +75,7 @@ impl Bazel {
     fn bootstrap_riscv_tests() {
         let srcs = Self::bazel("//rv32im/rvtest:riscv-tests");
         let pwd = std::env::current_dir().unwrap();
-        let dst_dir = pwd.join("risc0/zkos/v1compat/testdata");
+        let dst_dir = pwd.join("risc0/zkvm/src/host/server/testdata");
         for src_path in srcs {
             let file_name = src_path.file_name().unwrap();
             let mut src_data = File::open(&src_path).unwrap();
@@ -109,10 +109,13 @@ impl Bazel {
             srcs.push(bazel_root.join(path));
         }
         let status = child.wait().expect("Unable to wait for bazel");
-        if !status.success() {
-            eprintln!("Bazel did not return success.");
-            exit(status.code().unwrap());
-        }
+        assert!(status.success(), "`bazelisk build {target}` failed");
+
+        assert!(
+            !srcs.is_empty(),
+            "No artifacts found from Bazel target: {target}"
+        );
+
         srcs
     }
 }

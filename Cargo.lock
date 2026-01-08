@@ -7553,16 +7553,11 @@ dependencies = [
 name = "risc0-zkos-v1compat"
 version = "2.2.2"
 dependencies = [
- "anyhow",
  "include_bytes_aligned",
  "no_std_strings",
- "risc0-binfmt",
  "risc0-zkos-common",
- "risc0-zkvm",
  "risc0-zkvm-platform",
  "sha2",
- "test-log",
- "zip 6.0.0",
 ]
 
 [[package]]
@@ -7675,6 +7670,7 @@ dependencies = [
  "tracing-forest",
  "tracing-subscriber 0.3.19",
  "typetag",
+ "zip 6.0.0",
 ]
 
 [[package]]
