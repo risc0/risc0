@@ -1,0 +1,19 @@
+[package]
+name = "risc0-fuzz"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[[bin]]
+name = "receipt_seal"
+path = "fuzz_targets/receipt_seal.rs"
+test = false
+doc = false
+
+[dependencies]
+bytemuck = "1.24.0"
+libfuzzer-sys = "0.4"
+risc0-circuit-rv32im = { workspace = true }
