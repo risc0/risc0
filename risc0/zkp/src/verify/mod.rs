@@ -32,7 +32,7 @@ pub use read_iop::ReadIOP;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
-    FRI_MIN_DEGREE_PO2, INV_RATE, MAX_CYCLES_PO2, QUERIES,
+    INV_RATE, MAX_CYCLES_PO2, QUERIES,
     adapter::{
         CircuitCoreDef, CircuitCoreDefV3, PROOF_SYSTEM_INFO, ProtocolInfo, REGISTER_GROUP_ACCUM,
         REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
@@ -487,10 +487,8 @@ impl<'a, F: Field> Verifier<'a, F> {
         let (&[po2], &[]) = po2_elem.to_u32_words().split_at(1) else {
             unreachable!("po2 elem is larger than u32");
         };
-        if !(FRI_MIN_DEGREE_PO2..=MAX_CYCLES_PO2).contains(&(po2 as usize)) {
-            tracing::debug!(
-                "po2 in seal is out of range: {po2} not in [{FRI_MIN_DEGREE_PO2}, {MAX_CYCLES_PO2}]"
-            );
+        if po2 as usize > MAX_CYCLES_PO2 {
+            tracing::debug!("po2 in seal is larger than the max po2: {po2} > {MAX_CYCLES_PO2}");
             return Err(VerificationError::ReceiptFormatError);
         }
         self.po2 = po2 as usize;

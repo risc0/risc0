@@ -70,10 +70,8 @@ pub fn verify(mut seal: &[u32]) -> Result<(), VerificationError> {
     let po2 = *seal
         .split_off_first()
         .ok_or(VerificationError::ReceiptFormatError)? as usize;
-    if !(MIN_CYCLES_PO2..=MAX_CYCLES_PO2).contains(&po2) {
-        tracing::debug!(
-            "po2 decoded from seal is out of range: {po2} not in [{MIN_CYCLES_PO2}, {MAX_CYCLES_PO2}]"
-        );
+    if po2 > MAX_CYCLES_PO2 {
+        tracing::debug!("po2 in seal is larger than the max po2: {po2} > {MAX_CYCLES_PO2}");
         return Err(VerificationError::ReceiptFormatError);
     }
 
