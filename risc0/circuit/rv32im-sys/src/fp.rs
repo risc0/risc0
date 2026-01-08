@@ -33,6 +33,10 @@ impl Fp {
         self.0
     }
 
+    pub fn new_raw(v: u32) -> Self {
+        Self(v)
+    }
+
     pub fn from_elem_array<const N: usize>(elems: [BabyBearElem; N]) -> [Self; N] {
         let mut self_ = [Self(0); N];
         for (self_cell, &elem) in self_.iter_mut().zip(elems.iter()) {
@@ -46,5 +50,10 @@ impl Fp {
             assert!(elem.0 < baby_bear::P, "invalid baby bear element");
         }
         unsafe { std::mem::transmute(elems) }
+    }
+
+    pub fn to_elem(&self) -> BabyBearElem {
+        assert!(self.0 < baby_bear::P, "invalid baby bear element");
+        BabyBearElem::new_raw(self.0)
     }
 }
