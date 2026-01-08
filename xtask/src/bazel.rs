@@ -13,8 +13,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(unused)]
-
 use std::{
     fs::File,
     io::{BufRead as _, BufReader},
