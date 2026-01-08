@@ -919,6 +919,10 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     fn on_user_ecall(&mut self) {
         self.block_tracker.track_user_ecall();
     }
+
+    fn on_trap(&mut self) {
+        self.block_tracker.track_trap();
+    }
 }
 
 impl<S: Syscall> SyscallContext for Executor<'_, S> {

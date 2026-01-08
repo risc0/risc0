@@ -240,6 +240,10 @@ impl BlockTracker {
         self.blocks.add_block(BlockType::InstEcall);
     }
 
+    pub fn track_trap(&mut self) {
+        self.blocks.add_block(BlockType::InstTrap);
+    }
+
     fn add_p2_blocks(blocks: &mut BlockCollection, num: u64) {
         blocks.add_blocks(BlockType::P2Block, num);
         blocks.add_blocks(BlockType::P2IntRounds, num);
