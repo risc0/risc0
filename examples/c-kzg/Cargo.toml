@@ -3,12 +3,12 @@ name = "c-kzg"
 version = "0.1.0"
 edition = { workspace = true }
 
+[features]
+default = []
+prove = ["risc0-zkvm/prove"]
+
 [dependencies]
 c-kzg-core = { path = "core" }
 c-kzg-methods = { path = "methods" }
 hex-literal = "0.4.1"
 risc0-zkvm = { path = "../../risc0/zkvm" }
-
-[features]
-default = []
-prove = ["risc0-zkvm/prove"]

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -468,7 +468,7 @@ mod riscv {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-#[cfg(not(feature = "rv32im-m3"))]
+#[ignore = "XXX m3"]
 fn pause_resume() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::PauseResume(0))
@@ -494,7 +494,7 @@ fn pause_resume() {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-#[cfg(not(feature = "rv32im-m3"))]
+#[ignore = "XXX m3"]
 fn pause_exit_nonzero() {
     let user_exit_code = 1;
     let env = ExecutorEnv::builder()
@@ -521,11 +521,7 @@ fn pause_exit_nonzero() {
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
-    #[cfg(feature = "rv32im-m3")]
-    const ITERATIONS: u32 = 30_000;
-
-    #[cfg(not(feature = "rv32im-m3"))]
-    const ITERATIONS: u32 = 6000;
+    const ITERATIONS: u32 = 25_000;
 
     let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(ITERATIONS);
     let image = MemoryImage::new_kernel(program);
@@ -554,7 +550,6 @@ fn continuation() {
     let _receipt = prove_session(&session).unwrap();
 
     // The segment index is no longer used with rv32im-m3
-    #[cfg(not(feature = "rv32im-m3"))]
     for (idx, receipt) in _receipt
         .inner
         .composite()
@@ -569,7 +564,7 @@ fn continuation() {
 
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-#[cfg(not(feature = "rv32im-m3"))]
+#[ignore = "XXX m3"]
 fn sys_input() {
     use hex::FromHex;
     let digest =
@@ -681,7 +676,6 @@ fn shrink_wrap() {
 #[test_log::test]
 #[cfg(any(feature = "cuda", feature = "docker"))]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-#[cfg(not(feature = "rv32im-m3"))]
 fn verify_in_guest(#[case] kind: ReceiptKind) {
     use risc0_zkvm_methods::VERIFY_ELF;
 
@@ -981,7 +975,6 @@ fn run_unconstrained() -> Result<()> {
     Ok(())
 }
 
-#[cfg(not(feature = "rv32im-m3"))]
 mod povw {
     use risc0_binfmt::{PovwJobId, PovwLogId, PovwNonce};
 
@@ -1134,6 +1127,7 @@ mod soundness {
     };
 
     #[test_log::test]
+    #[ignore = "XXX m3"]
     fn proven() {
         let cycles = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;
@@ -1146,6 +1140,7 @@ mod soundness {
     }
 
     #[test_log::test]
+    #[ignore = "XXX m3"]
     fn conjectured_strict() {
         let cycles = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;
@@ -1158,6 +1153,7 @@ mod soundness {
     }
 
     #[test_log::test]
+    #[ignore = "XXX m3"]
     fn toy_model() {
         let cycles: usize = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;

@@ -7,9 +7,29 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
-[[bench]]
-name = "hash"
-harness = false
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+# NOTE: cuda and metal are excluded because their build scripts require external tools.
+features = ["prove", "std"]
+
+[features]
+circuit_debug = []
+cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
+default = []
+metal = ["prove"]
+metal_prefix_products = []
+prove = [
+    "dep:ff",
+    "dep:ndarray",
+    "dep:parking_lot",
+    "dep:rand",
+    "dep:rayon",
+    "dep:risc0-sys",
+    "risc0-core/perf",
+    "std",
+]
+std = ["anyhow/std"]
+unstable = []
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
@@ -35,7 +55,7 @@ serde = { version = "1.0", default-features = false, features = ["derive"] }
 sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 stability = "0.2"
 tracing = { version = "0.1", default-features = false, features = [
-  "attributes",
+    "attributes",
 ] }
 
 [target.'cfg(any(target_os="macos", target_os="ios"))'.dependencies]
@@ -57,26 +77,6 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 gpu-guard = { workspace = true }
 
-[package.metadata.docs.rs]
-rustdoc-args = ["--cfg", "docsrs"]
-# NOTE: cuda and metal are excluded because their build scripts require external tools.
-features = ["prove", "std"]
-
-[features]
-circuit_debug = []
-cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
-default = []
-metal = ["prove"]
-metal_prefix_products = []
-prove = [
-  "dep:ff",
-  "dep:ndarray",
-  "dep:parking_lot",
-  "dep:rand",
-  "dep:rayon",
-  "dep:risc0-sys",
-  "risc0-core/perf",
-  "std",
-]
-std = ["anyhow/std"]
-unstable = []
+[[bench]]
+name = "hash"
+harness = false

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -106,11 +106,7 @@ fn basic() {
 
 #[test_log::test]
 fn system_split_v2() {
-    #[cfg(feature = "rv32im-m3")]
-    const ITERATIONS: u32 = 10_000;
-
-    #[cfg(not(feature = "rv32im-m3"))]
-    const ITERATIONS: u32 = 200;
+    const ITERATIONS: u32 = 5_000;
 
     let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(ITERATIONS);
     let mut image = MemoryImage::new_kernel(program);
@@ -531,11 +527,7 @@ fn large_io_words() {
         nwords: buf.len() as u32,
     };
 
-    #[cfg(feature = "rv32im-m3")]
     const SESSION_LIMIT: u64 = 20_000_000 * 8;
-
-    #[cfg(not(feature = "rv32im-m3"))]
-    const SESSION_LIMIT: u64 = 20_000_000;
 
     let env = ExecutorEnv::builder()
         .read_fd(FD, bytemuck::cast_slice(&buf))

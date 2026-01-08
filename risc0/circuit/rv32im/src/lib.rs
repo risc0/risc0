@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -15,32 +15,32 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 #[cfg(feature = "execute")]
 pub mod execute;
 #[cfg(feature = "prove")]
 pub mod prove;
 pub mod trace;
+mod verify;
 mod zirgen;
 
-use core::num::TryFromIntError;
-
-use anyhow::{Result, anyhow, ensure};
+use anyhow::{Result, anyhow, bail, ensure};
 use derive_more::Debug;
+use risc0_binfmt::ExitCode;
 use risc0_binfmt::PovwNonce;
-use risc0_zkp::{
-    adapter::CircuitInfo as _,
-    core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite},
-    layout::Tree,
-    verify::VerificationError,
-};
+use risc0_zkp::core::digest::{DIGEST_BYTES, DIGEST_SHORTS, DIGEST_WORDS, Digest};
+use risc0_zkp::field::baby_bear::Elem;
+use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
 
-use self::zirgen::circuit::{LAYOUT_GLOBAL, Val};
+#[cfg(feature = "execute")]
+pub use risc0_circuit_rv32im_sys::BlockType;
 
 pub use self::zirgen::CircuitImpl;
-
-// NOTE: Seal version two introduced with PoVW, changing the output size from 74 to 90.
-pub const RV32IM_SEAL_VERSION: u32 = 2;
+pub use verify::verify;
 
 /// This number was picked by running `bigint2-analyze` on all the current bigint programs
 pub const MAX_INSN_CYCLES: usize = 25_000;
@@ -76,21 +76,8 @@ impl EcallMetric {
     }
 }
 
-pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
-    tracing::debug!("verify");
-
-    // We don't have a `code' buffer to verify.
-    let check_code_fn = |_: u32, _: &Digest| Ok(());
-
-    if seal[0] != RV32IM_SEAL_VERSION {
-        return Err(VerificationError::ReceiptFormatError);
-    }
-
-    let seal = &seal[1..];
-
-    let hash_suite = Poseidon2HashSuite::new_suite();
-    risc0_zkp::verify::verify(&CircuitImpl, &hash_suite, seal, check_code_fn)
-}
+/// Version of the seal for the m3-variant of the rv32im circuit.
+pub const RV32IM_SEAL_VERSION: u32 = 3;
 
 #[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct HighLowU16(pub u16, pub u16);
@@ -114,86 +101,130 @@ pub struct TerminateState {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct Rv32imV2Claim {
+pub struct Claim {
+    pub po2: u32,
     pub pre_state: Digest,
     pub post_state: Digest,
-    pub input: Digest,
     pub output: Option<Digest>,
     pub terminate_state: Option<TerminateState>,
-    pub shutdown_cycle: Option<u32>,
+    pub povw_nonce: PovwNonce,
 }
 
-impl Rv32imV2Claim {
-    pub fn decode(segment_seal: &[u32]) -> Result<Rv32imV2Claim> {
-        let seal_version = segment_seal[0];
+struct Decoder<'a> {
+    seal: &'a [u32],
+}
+
+impl<'a> Decoder<'a> {
+    fn new(seal: &'a [u32]) -> Self {
+        Self { seal }
+    }
+
+    fn read(&mut self, len: usize) -> Result<&'a [u32]> {
+        ensure!(len <= self.seal.len(), "Unexpected end of seal");
+        let (slice, remain) = self.seal.split_at(len);
+        self.seal = remain;
+        Ok(slice)
+    }
+
+    fn read_u32(&mut self) -> Result<u32> {
+        let slice = self.read(1)?;
+        Ok(slice[0])
+    }
+
+    fn read_u32_from_elem(&mut self) -> Result<u32> {
+        Ok(bytemuck::checked::cast::<_, Elem>(self.read_u32()?).as_u32())
+    }
+
+    fn read_u32_from_shorts(&mut self) -> Result<u32> {
+        let slice = bytemuck::checked::cast_slice::<_, Elem>(self.read(2)?);
+        let (high, low) = (slice[1], slice[0]);
+        let val = (high.as_u32() & 0xffff) << 16 | (low.as_u32() & 0xffff);
+        Ok(val)
+    }
+
+    fn read_digest_from_words(&mut self) -> Result<Digest> {
+        let slice = bytemuck::checked::cast_slice::<_, Elem>(self.read(DIGEST_WORDS)?);
+        let buf = slice.iter().map(|x| x.as_u32()).collect::<Vec<u32>>();
+        Ok(Digest::try_from(buf).unwrap())
+    }
+
+    fn read_digest_from_shorts(&mut self) -> Result<Digest> {
+        let slice = self.read(DIGEST_SHORTS)?;
+        let mut digest_bytes = [0; DIGEST_BYTES];
+        for i in 0..DIGEST_SHORTS {
+            let elem: Elem = bytemuck::checked::cast(slice[i]);
+            let word = elem.as_u32();
+            let short =
+                u16::try_from(word).map_err(|e| anyhow!("failed to convert u32 to u16: {e}"))?;
+            let short_bytes = short.to_le_bytes();
+            digest_bytes[i * 2..i * 2 + 2].copy_from_slice(&short_bytes);
+        }
+        Ok(Digest::from_bytes(digest_bytes))
+    }
+}
+
+impl Claim {
+    pub fn decode(seal: &[u32]) -> Result<Self> {
+        let mut decoder = Decoder::new(seal);
+
+        let seal_version = decoder.read_u32()?;
         ensure!(
             seal_version == RV32IM_SEAL_VERSION,
             "seal version mismatch: actual={seal_version} expected={RV32IM_SEAL_VERSION}"
         );
-        let segment_seal = &segment_seal[1..];
 
-        let io: &[Val] = bytemuck::checked::cast_slice(&segment_seal[..CircuitImpl::OUTPUT_SIZE]);
-        let global = Tree::new(io, LAYOUT_GLOBAL);
+        let po2 = decoder.read_u32()?;
 
-        // NOTE: rng and povw are not read from the globals here. Neither need to be checked to
-        // establish the integrity of the Rv32imV2Claim.
-        let pre_state = global.map(|c| c.state_in).get_digest_from_shorts()?;
-        let post_state = global.map(|c| c.state_out).get_digest_from_shorts()?;
-        let input = global.map(|c| c.input).get_digest_from_shorts()?;
-        let output = global.map(|c| c.output).get_digest_from_shorts()?;
-        let is_terminate = global.map(|c| c.is_terminate).get_u32_from_elem()?;
-        let term_a0_high = global.map(|c| c.term_a0high).get_u32_from_elem()?;
-        let term_a0_low = global.map(|c| c.term_a0low).get_u32_from_elem()?;
-        let term_a1_high = global.map(|c| c.term_a1high).get_u32_from_elem()?;
-        let term_a1_low = global.map(|c| c.term_a1low).get_u32_from_elem()?;
-        let shutdown_cycle = global.map(|c| c.shutdown_cycle).get_u32_from_elem()?;
-
-        fn try_as_u16(x: u32) -> Result<u16> {
-            x.try_into()
-                .map_err(|err: TryFromIntError| anyhow!("{err}"))
+        let pre_state = decoder.read_digest_from_words()?;
+        let post_state = decoder.read_digest_from_words()?;
+        let is_terminate = decoder.read_u32_from_elem()?;
+        let term_a0 = decoder.read_u32_from_shorts()?;
+        let term_a1 = decoder.read_u32_from_shorts()?;
+        let output = decoder.read_digest_from_shorts()?;
+        let mut povw_nonce = [0u32; 8];
+        for v in &mut povw_nonce {
+            *v = decoder.read_u32_from_shorts()?;
         }
 
-        let terminate_state = if is_terminate == 1 {
-            Some(TerminateState {
-                a0: HighLowU16(try_as_u16(term_a0_high)?, try_as_u16(term_a0_low)?),
-                a1: HighLowU16(try_as_u16(term_a1_high)?, try_as_u16(term_a1_low)?),
-            })
+        let (terminate_state, output) = if is_terminate == 1 {
+            (
+                Some(TerminateState {
+                    a0: term_a0.into(),
+                    a1: term_a1.into(),
+                }),
+                Some(output),
+            )
         } else {
-            None
+            (None, None)
         };
 
-        let output = if is_terminate == 1 {
-            Some(output)
-        } else {
-            None
-        };
-
-        Ok(Rv32imV2Claim {
+        Ok(Self {
+            po2,
             pre_state,
             post_state,
-            input,
             output,
             terminate_state,
-            shutdown_cycle: Some(shutdown_cycle),
+            povw_nonce: PovwNonce::from_u32s(povw_nonce),
         })
+    }
+
+    pub fn exit_code(&self) -> Result<ExitCode> {
+        let exit_code = if let Some(term) = self.terminate_state {
+            let HighLowU16(user_exit, halt_type) = term.a0;
+            match halt_type as u32 {
+                halt::TERMINATE => ExitCode::Halted(user_exit as u32),
+                halt::PAUSE => ExitCode::Paused(user_exit as u32),
+                _ => bail!("Illegal halt type: {halt_type}"),
+            }
+        } else {
+            ExitCode::SystemSplit
+        };
+        Ok(exit_code)
     }
 }
 
 /// Decodes a PoVW nonce from a segment seal.
 pub fn decode_povw_nonce(segment_seal: &[u32]) -> Result<PovwNonce> {
-    let seal_version = segment_seal[0];
-    ensure!(
-        seal_version == RV32IM_SEAL_VERSION,
-        "seal version mismatch: actual={seal_version} expected={RV32IM_SEAL_VERSION}"
-    );
-    let segment_seal = &segment_seal[1..];
-
-    let io: &[Val] = bytemuck::checked::cast_slice(&segment_seal[..CircuitImpl::OUTPUT_SIZE]);
-    let global = Tree::new(io, LAYOUT_GLOBAL);
-
-    let povw_nonce_shorts_vec = global.map(|c| c.povw_nonce).get_shorts()?;
-    let povw_nonce_shorts_arr = povw_nonce_shorts_vec
-        .try_into()
-        .map_err(|_| anyhow!("povw nonce global has unexpected length"))?;
-    Ok(PovwNonce::from_u16s(povw_nonce_shorts_arr))
+    let claim = Claim::decode(segment_seal)?;
+    Ok(claim.povw_nonce)
 }

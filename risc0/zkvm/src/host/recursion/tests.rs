@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -353,7 +353,6 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap();
 }
 
-#[cfg(not(feature = "rv32im-m3"))]
 mod povw {
     use crate::{
         WorkClaim,
@@ -385,10 +384,7 @@ mod povw {
         receipt.verify(MULTI_TEST_ID).unwrap();
     }
 
-    #[test_log::test]
-    #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
-    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    fn test_recursion_lift_join_unwrap() -> anyhow::Result<()> {
+    fn test_recursion_lift_join_unwrap_inner() -> anyhow::Result<()> {
         // Prove the base case
         let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();
         let ctx = VerifierContext::default();
@@ -460,8 +456,13 @@ mod povw {
     }
 
     #[test_log::test]
+    #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    fn test_recursion_lift_resolve_unwrap() -> Result<()> {
+    fn test_recursion_lift_join_unwrap() {
+        test_recursion_lift_join_unwrap_inner().unwrap();
+    }
+
+    fn test_recursion_lift_resolve_unwrap_inner() -> Result<()> {
         let (assumption_journal, assumption_receipt) = ECHO_SUCCINCT.clone();
 
         let povw_job_id: PovwJobId = rand::random();
@@ -545,6 +546,12 @@ mod povw {
 
         Ok(())
     }
+
+    #[test_log::test]
+    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    fn test_recursion_lift_resolve_unwrap() {
+        test_recursion_lift_resolve_unwrap_inner().unwrap();
+    }
 }
 
 #[test_log::test]
@@ -586,7 +593,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("ab0e9172f4306b6a3b2250055036565c2421683b39ee6c20366d17350756ad19")
+        digest!("4ec911509d6e5607f3bc083c61a2274824c71536ecffa208d02a472ffbde5b04")
     );
 }
 

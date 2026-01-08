@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -25,7 +25,7 @@ use crate::{
     TerminateState,
     execute::{
         ExecutionLimit, Executor, ExecutorResult, RV32IM_M3_CIRCUIT_VERSION,
-        RV32IM_V2_CIRCUIT_VERSION, executor::ExecutionError,
+        executor::ExecutionError,
     },
 };
 
@@ -71,6 +71,9 @@ pub struct Segment {
     pub povw_nonce: Option<PovwNonce>,
 
     pub insn_counter: u32,
+
+    /// Used to help debug the block tracking
+    pub blocks: crate::execute::BlockCollection,
 }
 
 impl Segment {
@@ -91,11 +94,7 @@ impl Segment {
             read_pos: Cell::new(0),
             write_pos: Cell::new(0),
         };
-        let circuit_version = if cfg!(feature = "rv32im-m3") {
-            RV32IM_M3_CIRCUIT_VERSION
-        } else {
-            RV32IM_V2_CIRCUIT_VERSION
-        };
+        let circuit_version = RV32IM_M3_CIRCUIT_VERSION;
 
         Executor::new(
             self.partial_image.clone(),

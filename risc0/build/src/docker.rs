@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -267,7 +267,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "18b59093c307f61cdb50222b02405b08d9a6be3bd1a298f0a1e2259c99115659",
+            "f6780923e8224cba854c16394322170dccc370854e5b1bd885ec7af3f3f030e0",
         );
     }
 }

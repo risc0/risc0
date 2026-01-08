@@ -215,31 +215,6 @@ impl ProverServer for ProverImpl {
         );
     }
 
-    #[cfg(not(feature = "rv32im-m3"))]
-    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
-        tracing::debug!("segment_preflight");
-
-        ensure!(
-            segment.po2() <= self.opts.max_segment_po2,
-            "segment po2 exceeds max on ProverOpts: {} > {}",
-            segment.po2(),
-            self.opts.max_segment_po2
-        );
-
-        let prover = risc0_circuit_rv32im::prove::segment_prover()?;
-
-        let inner = prover.preflight(&segment.inner)?;
-        let preflight_results = PreflightResults {
-            inner,
-            terminate_state: segment.inner.terminate_state,
-            output: segment.output.clone(),
-            segment_index: segment.index,
-        };
-
-        Ok(Box::new(std::iter::once(Ok(preflight_results))))
-    }
-
-    #[cfg(feature = "rv32im-m3")]
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
         tracing::debug!("segment_preflight");
         Ok(Box::new(rv32im_m3::PreflightIter::new(
@@ -249,47 +224,6 @@ impl ProverServer for ProverImpl {
         )?))
     }
 
-    #[cfg(not(feature = "rv32im-m3"))]
-    fn prove_preflight(
-        &self,
-        ctx: &VerifierContext,
-        preflight_results: PreflightResults,
-    ) -> Result<SegmentReceipt> {
-        tracing::debug!("prove_preflight");
-
-        ensure!(
-            self.opts.hashfn == "poseidon2",
-            "provided `ProverOpts` has unsupported `hashfn` value of \"{}\"; \
-            supported `hashfn` values are: \"poseidon2\".",
-            &self.opts.hashfn
-        );
-
-        let po2 = preflight_results.inner.po2();
-        let prover = risc0_circuit_rv32im::prove::segment_prover()?;
-        let seal = prover.prove_core(preflight_results.inner)?;
-        let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(po2))?;
-        claim.output = preflight_results.output;
-
-        let verifier_parameters = ctx
-            .segment_verifier_parameters
-            .as_ref()
-            .ok_or_else(|| anyhow!("segment receipt verifier parameters missing from context"))?
-            .digest();
-        let receipt = SegmentReceipt {
-            seal,
-            index: preflight_results.segment_index,
-            hashfn: self.opts.hashfn.clone(),
-            claim,
-            verifier_parameters,
-        };
-        receipt
-            .verify_integrity_with_context(ctx)
-            .context("verify segment")?;
-
-        Ok(receipt)
-    }
-
-    #[cfg(feature = "rv32im-m3")]
     fn prove_preflight(
         &self,
         ctx: &VerifierContext,
@@ -298,7 +232,7 @@ impl ProverServer for ProverImpl {
         tracing::debug!("prove_preflight");
 
         let po2 = preflight_results.inner.po2();
-        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(po2 as usize)?;
+        let prover = risc0_circuit_rv32im::prove::segment_prover(po2 as usize)?;
         let seal = prover.prove(&preflight_results.inner)?;
 
         let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output.clone())
@@ -442,7 +376,6 @@ fn check_claims(
     Ok(())
 }
 
-#[cfg(feature = "rv32im-m3")]
 mod rv32im_m3 {
     use risc0_circuit_rv32im::TerminateState;
 
@@ -451,7 +384,7 @@ mod rv32im_m3 {
 
     pub(crate) struct PreflightIter {
         max_prover_po2: usize,
-        ctx: risc0_circuit_rv32im_m3::prove::SegmentContext,
+        ctx: risc0_circuit_rv32im::prove::SegmentContext,
         output: MaybePruned<Option<Output>>,
         terminate_state: Option<TerminateState>,
         is_done: bool,
@@ -465,7 +398,7 @@ mod rv32im_m3 {
             segment_index: u32,
         ) -> Result<Self> {
             let terminate_state = segment.inner.terminate_state;
-            let ctx = risc0_circuit_rv32im_m3::prove::SegmentContext::new(&segment.inner)?;
+            let ctx = risc0_circuit_rv32im::prove::SegmentContext::new(&segment.inner)?;
             Ok(Self {
                 max_prover_po2,
                 ctx,

@@ -55,11 +55,7 @@ fn basic() {
 
 #[test]
 fn system_split() {
-    #[cfg(feature = "rv32im-m3")]
     const ITERATIONS: u32 = 10_000;
-
-    #[cfg(not(feature = "rv32im-m3"))]
-    const ITERATIONS: u32 = 2000;
 
     let program = testutil::kernel::simple_loop(ITERATIONS);
     let mut image = MemoryImage::new_kernel(program);
