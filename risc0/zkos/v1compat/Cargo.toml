@@ -30,3 +30,6 @@ zip = { version = "6.0.0", default-features = false, features = ["deflate"] }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(rust_analyzer)'] }
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
