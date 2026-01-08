@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use risc0_zkp::{
-    MAX_CYCLES_PO2, MIN_CYCLES_PO2,
+    MAX_CYCLES_PO2,
     adapter::{CircuitCoreDefV3, CircuitInfoV3, GroupInfo, MixState, PolyExt},
     core::hash::poseidon2::Poseidon2HashSuite,
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
