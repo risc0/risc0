@@ -87,7 +87,7 @@ impl<'a> Trace<'a> {
         wit: WitnessT,
     ) -> TraceIndex<WitnessT> {
         let wit_size = size_of::<WitnessT>();
-        assert!(wit_size % size_of::<u32>() == 0);
+        assert!(wit_size.is_multiple_of(size_of::<u32>()));
 
         let block_type = WitnessT::BLOCK_TYPE;
         let cursor = &mut self.cursors[block_type];
@@ -125,7 +125,7 @@ impl<'a> Trace<'a> {
         index: TraceIndex<WitnessT>,
     ) -> &WitnessT {
         let wit_size = size_of::<WitnessT>();
-        assert!(wit_size % size_of::<u32>() == 0);
+        assert!(wit_size.is_multiple_of(size_of::<u32>()));
 
         let idx = index.aux_idx;
         let end = idx + wit_size / size_of::<u32>();
@@ -138,7 +138,7 @@ impl<'a> Trace<'a> {
         index: TraceIndex<WitnessT>,
     ) -> &mut WitnessT {
         let wit_size = size_of::<WitnessT>();
-        assert!(wit_size % size_of::<u32>() == 0);
+        assert!(wit_size.is_multiple_of(size_of::<u32>()));
 
         let idx = index.aux_idx;
         let end = idx + wit_size / size_of::<u32>();

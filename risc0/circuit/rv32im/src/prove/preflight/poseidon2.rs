@@ -31,13 +31,13 @@ use crate::prove::preflight::trace::{Trace, TraceIndex};
 type Cells = [Elem; CELLS];
 
 fn add_round_constants_partial(input: &Cells, round: usize) -> Cells {
-    let mut out = input.clone();
+    let mut out = *input;
     out[0] += ROUND_CONSTANTS[round * CELLS];
     out
 }
 
 fn add_round_constants_full(input: &Cells, round: usize) -> Cells {
-    let mut out = input.clone();
+    let mut out = *input;
     for (out_cell, &constant) in out.iter_mut().zip(ROUND_CONSTANTS[round * CELLS..].iter()) {
         *out_cell += constant;
     }
@@ -107,8 +107,7 @@ fn sbox2(input: Elem) -> Elem {
     let in2 = input * input;
     let in4 = in2 * in2;
     let in6 = in4 * in2;
-    let in7 = in6 * input;
-    in7
+    in6 * input
 }
 
 fn full_poseidon2_round(input: &Cells, idx: usize) -> Cells {
@@ -207,7 +206,7 @@ impl Poseidon2Witgen {
             id,
             outUseCount: is_final as u32,
             contUseCount: !is_final as u32,
-            in_: Fp::from_elem_array(cells.clone()),
+            in_: Fp::from_elem_array(cells),
             out: Default::default(),
         };
         let block_idx = trace.add_block(witness);
@@ -217,7 +216,7 @@ impl Poseidon2Witgen {
             let witness = P2ExtRoundWitness {
                 id,
                 round: i as u32,
-                cells: Fp::from_elem_array(cells.clone()),
+                cells: Fp::from_elem_array(cells),
             };
             trace.add_block(witness);
 
@@ -226,7 +225,7 @@ impl Poseidon2Witgen {
 
         let witness = P2IntRoundsWitness {
             id,
-            cells: Fp::from_elem_array(cells.clone()),
+            cells: Fp::from_elem_array(cells),
         };
         trace.add_block(witness);
 
@@ -236,13 +235,13 @@ impl Poseidon2Witgen {
             let witness = P2ExtRoundWitness {
                 id,
                 round: (ROUNDS_HALF_FULL + i) as u32,
-                cells: Fp::from_elem_array(cells.clone()),
+                cells: Fp::from_elem_array(cells),
             };
             trace.add_block(witness);
             poseidon_do_ext_round(&mut cells, ROUNDS_HALF_FULL + i);
         }
 
-        trace.get_block_mut(block_idx).out = Fp::from_elem_array(cells.clone());
+        trace.get_block_mut(block_idx).out = Fp::from_elem_array(cells);
 
         digest_from_cells(&cells, is_final)
     }

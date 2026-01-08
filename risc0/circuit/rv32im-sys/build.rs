@@ -274,7 +274,7 @@ fn generate_rust_bindings(output: &str, block_types: &HashMap<String, u8>) {
         .clang_arg("-Ivendor");
 
     for name in block_types.keys() {
-        builder = builder.allowlist_type(&format!("{name}Witness"));
+        builder = builder.allowlist_type(format!("{name}Witness"));
     }
 
     let bindings = builder.generate().unwrap();
