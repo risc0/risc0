@@ -14,17 +14,16 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 mod riscv {
-    use std::io::Read;
+    use std::io::{Cursor, Read};
 
     use anyhow::Result;
-    use flate2::read::GzDecoder;
     use risc0_binfmt::ProgramBinary;
     use risc0_zkos_v1compat::V1COMPAT_ELF;
     use risc0_zkvm::{
         ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, Receipt, Session, SimpleSegmentRef,
         VerifierContext, get_prover_server,
     };
-    use tar::Archive;
+    use zip::ZipArchive;
 
     fn prove_session(session: &Session) -> Result<Receipt> {
         let opts = ProverOpts::fast();
@@ -35,28 +34,13 @@ mod riscv {
 
     fn run_test(test_name: &str) {
         // Load guest ELF from testdata archive
-        let bytes = include_bytes!("../testdata/riscv-tests.tgz");
-        let gz = GzDecoder::new(&bytes[..]);
-        let mut tar = Archive::new(gz);
+        let bytes = include_bytes!("../testdata/riscv-tests.zip");
+        let reader = Cursor::new(bytes);
+        let mut archive = ZipArchive::new(reader).unwrap();
 
+        let mut entry = archive.by_name(test_name).unwrap();
         let mut guest_elf = Vec::new();
-        for entry in tar.entries().unwrap() {
-            let mut entry = entry.unwrap();
-            if !entry.header().entry_type().is_file() {
-                continue;
-            }
-            let path = entry.path().unwrap();
-            let filename = path.file_name().unwrap().to_str().unwrap();
-            if filename != test_name {
-                continue;
-            }
-            entry.read_to_end(&mut guest_elf).unwrap();
-            break;
-        }
-
-        if guest_elf.is_empty() {
-            panic!("No filename matching '{}'", test_name);
-        }
+        entry.read_to_end(&mut guest_elf).unwrap();
 
         // Create combined binary with guest ELF and v1compat kernel
         let combined_binary = ProgramBinary::new(&guest_elf, V1COMPAT_ELF).encode();
@@ -78,7 +62,7 @@ mod riscv {
         );
 
         // Prove the execution
-        let _receipt = prove_session(&session).unwrap();
+        prove_session(&session).unwrap();
     }
 
     macro_rules! test_case {

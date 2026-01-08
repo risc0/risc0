@@ -401,7 +401,9 @@ mod zkvm {
             Syscall::VerifyIntegrity => sys_verify_integrity(fd),
             Syscall::VerifyIntegrity2 => sys_verify_integrity2(fd),
             Syscall::Write => sys_write(fd),
-            Syscall::Unknown(_) => unimplemented!(),
+            Syscall::Unknown(_) => {
+                unimplemented!("unknown ecall> nr: {nr}, fd: {fd}, buf: {buf:?}, len: {len}")
+            }
             Syscall::ProveZkr => todo!(),
         }
     }

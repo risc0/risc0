@@ -1815,7 +1815,7 @@ dependencies = [
  "text_io",
  "tokio",
  "tracing-subscriber 0.3.19",
- "zip",
+ "zip 2.4.2",
 ]
 
 [[package]]
@@ -2726,7 +2726,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users 0.5.2",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3177,6 +3177,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4a3d7db9596fecd151c5f638c0ee5d5bd487b6e0ea232e5dc96d5250f6f94b1d"
 dependencies = [
  "crc32fast",
+ "libz-rs-sys",
  "miniz_oxide",
 ]
 
@@ -7304,7 +7305,7 @@ dependencies = [
  "tracing",
  "tracing-forest",
  "tracing-subscriber 0.3.19",
- "zip",
+ "zip 2.4.2",
 ]
 
 [[package]]
@@ -7553,7 +7554,6 @@ name = "risc0-zkos-v1compat"
 version = "2.2.2"
 dependencies = [
  "anyhow",
- "flate2",
  "include_bytes_aligned",
  "no_std_strings",
  "risc0-binfmt",
@@ -7561,8 +7561,8 @@ dependencies = [
  "risc0-zkvm",
  "risc0-zkvm-platform",
  "sha2",
- "tar",
  "test-log",
+ "zip 6.0.0",
 ]
 
 [[package]]
@@ -7992,7 +7992,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.11.0",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -8859,7 +8859,7 @@ dependencies = [
  "getrandom 0.3.3",
  "once_cell",
  "rustix 1.1.2",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -10383,7 +10383,6 @@ dependencies = [
  "cargo-semver-checks",
  "cargo_metadata 0.21.0",
  "clap 4.5.53",
- "flate2",
  "hex",
  "liblzma",
  "log",
@@ -10403,7 +10402,6 @@ dependencies = [
  "semver 1.0.26",
  "serde",
  "serde_with",
- "tar",
  "tempfile",
  "toml 0.9.5",
  "toml_edit 0.23.4",
@@ -10563,6 +10561,20 @@ dependencies = [
  "indexmap 2.11.0",
  "memchr",
  "thiserror 2.0.17",
+ "zopfli",
+]
+
+[[package]]
+name = "zip"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb2a05c7c36fde6c09b08576c9f7fb4cda705990f73b58fe011abf7dfb24168b"
+dependencies = [
+ "arbitrary",
+ "crc32fast",
+ "flate2",
+ "indexmap 2.11.0",
+ "memchr",
  "zopfli",
 ]
 
