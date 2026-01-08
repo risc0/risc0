@@ -15,7 +15,7 @@
 
 use quote::{format_ident, quote};
 use std::{
-    collections::HashMap,
+    collections::BTreeMap,
     env, fs,
     io::Write as _,
     path::{Path, PathBuf},
@@ -117,14 +117,25 @@ fn main() {
     build.compile(output);
 
     let mut block_types = parse_block_types();
-    block_types.insert("Empty".into(), 0);
+    block_types.insert(
+        "Empty".into(),
+        BlockTypeInfo {
+            index: block_types.len(),
+            count_per_row: 0,
+        },
+    );
 
     generate_rust_block_types(&format!("{out_dir}/block_types.rs"), &block_types);
     generate_rust_bindings(&format!("{out_dir}/bindings.rs"), &block_types);
 }
 
+struct BlockTypeInfo {
+    index: usize,
+    count_per_row: u8,
+}
+
 /// Uses the C pre-processor to parse the block type table from "cxx/rv32im/witness/block_types.h"
-fn parse_block_types() -> HashMap<String, u8> {
+fn parse_block_types() -> BTreeMap<String, BlockTypeInfo> {
     let mut build = cc::Build::new();
     build
         .cpp(true)
@@ -178,17 +189,21 @@ fn parse_block_types() -> HashMap<String, u8> {
         .trim()
         .split(";")
         .filter(|entry| !entry.trim().is_empty())
-        .map(|entry| {
+        .enumerate()
+        .map(|(index, entry)| {
             let mut entries = entry.trim().split(",");
             (
                 entries.next().unwrap().to_string(),
-                entries.next().unwrap().parse().unwrap(),
+                BlockTypeInfo {
+                    index,
+                    count_per_row: entries.next().unwrap().parse().unwrap(),
+                },
             )
         })
         .collect()
 }
 
-fn generate_rust_block_types(output: &str, block_types: &HashMap<String, u8>) {
+fn generate_rust_block_types(output: &str, block_types: &BTreeMap<String, BlockTypeInfo>) {
     let block_names = block_types
         .keys()
         .map(|n| format_ident!("{n}"))
@@ -198,14 +213,18 @@ fn generate_rust_block_types(output: &str, block_types: &HashMap<String, u8>) {
         .keys()
         .map(|n| format_ident!("{n}Witness"))
         .collect::<Vec<_>>();
-    let block_values = 0u8..u8::try_from(block_names.len()).expect("too many blocks");
-    let block_counts = block_types.values();
+    let block_values = block_types
+        .values()
+        .map(|i| u8::try_from(i.index).expect("should be <= 255 block types"))
+        .collect::<Vec<_>>();
+    let block_counts = block_types.values().map(|i| i.count_per_row);
     let num_blocks = block_types.len();
 
     let contents = quote! {
-        #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, enum_map::Enum)]
+        #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, enum_map::Enum, strum::EnumIter)]
+        #[repr(u8)]
         pub enum BlockType {
-            #(#block_names),*
+            #(#block_names = #block_values),*
         }
 
         impl BlockType {
@@ -215,6 +234,10 @@ fn generate_rust_block_types(output: &str, block_types: &HashMap<String, u8>) {
                 match self {
                     #(Self::#block_names => #block_counts),*
                 }
+            }
+
+            pub fn iter() -> impl Iterator<Item = Self> {
+                <Self as strum::IntoEnumIterator>::iter()
             }
         }
 
@@ -262,7 +285,7 @@ fn generate_rust_block_types(output: &str, block_types: &HashMap<String, u8>) {
     assert!(status.success(), "rustfmt {output} failed");
 }
 
-fn generate_rust_bindings(output: &str, block_types: &HashMap<String, u8>) {
+fn generate_rust_bindings(output: &str, block_types: &BTreeMap<String, BlockTypeInfo>) {
     let mut builder = bindgen::Builder::default()
         .header("cxx/rv32im/witness/witness.h")
         .derive_copy(false)
