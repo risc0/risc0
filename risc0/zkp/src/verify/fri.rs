@@ -122,7 +122,7 @@ where
         // We want to minimize reallocation in verify, so make sure we
         // didn't have to reallocate.
         assert!(
-            rounds.len() < rounds_capacity,
+            rounds.len() <= rounds_capacity,
             "Did not allocate enough rounds; needed {} for degree {} but only allocated {}",
             rounds.len(),
             degree,
