@@ -1815,7 +1815,7 @@ dependencies = [
  "text_io",
  "tokio",
  "tracing-subscriber 0.3.19",
- "zip",
+ "zip 2.4.2",
 ]
 
 [[package]]
@@ -3177,6 +3177,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4a3d7db9596fecd151c5f638c0ee5d5bd487b6e0ea232e5dc96d5250f6f94b1d"
 dependencies = [
  "crc32fast",
+ "libz-rs-sys",
  "miniz_oxide",
 ]
 
@@ -7304,7 +7305,7 @@ dependencies = [
  "tracing",
  "tracing-forest",
  "tracing-subscriber 0.3.19",
- "zip",
+ "zip 2.4.2",
 ]
 
 [[package]]
@@ -7542,11 +7543,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-common"
+version = "2.2.1"
+dependencies = [
+ "risc0-zkvm-platform",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
 version = "2.2.2"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkos-common",
  "risc0-zkvm-platform",
  "sha2",
 ]
@@ -7661,6 +7670,7 @@ dependencies = [
  "tracing-forest",
  "tracing-subscriber 0.3.19",
  "typetag",
+ "zip 6.0.0",
 ]
 
 [[package]]
@@ -10547,6 +10557,20 @@ dependencies = [
  "indexmap 2.11.0",
  "memchr",
  "thiserror 2.0.17",
+ "zopfli",
+]
+
+[[package]]
+name = "zip"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb2a05c7c36fde6c09b08576c9f7fb4cda705990f73b58fe011abf7dfb24168b"
+dependencies = [
+ "arbitrary",
+ "crc32fast",
+ "flate2",
+ "indexmap 2.11.0",
+ "memchr",
  "zopfli",
 ]
 

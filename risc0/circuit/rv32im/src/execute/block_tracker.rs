@@ -87,7 +87,7 @@ fn add_blocks_for_insn(blocks: &mut BlockCollection, i: &InsnKind) {
         InsnKind::Rem => blocks!(InstReg, UnitDiv, UnitMul),
         InsnKind::RemU => blocks!(InstReg, UnitDiv, UnitMul),
         InsnKind::Mret => blocks!(InstMret),
-        InsnKind::Eany | InsnKind::Fence | InsnKind::Invalid => {}
+        InsnKind::Eany | InsnKind::Invalid => {}
     }
 }
 
@@ -238,6 +238,10 @@ impl BlockTracker {
 
     pub fn track_user_ecall(&mut self) {
         self.blocks.add_block(BlockType::InstEcall);
+    }
+
+    pub fn track_trap(&mut self) {
+        self.blocks.add_block(BlockType::InstTrap);
     }
 
     fn add_p2_blocks(blocks: &mut BlockCollection, num: u64) {
