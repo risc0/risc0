@@ -921,6 +921,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     }
 
     fn on_trap(&mut self) {
+        self.inc_user_cycles(1, None);
         self.block_tracker.track_trap();
     }
 }
