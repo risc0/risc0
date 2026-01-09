@@ -249,9 +249,9 @@ template <typename C> FDEV void DecodeBlock<C>::addArguments(CTX) DEV {
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = getRS1();
   arg.rs2 = getRS2();
   arg.rd = getRD();
