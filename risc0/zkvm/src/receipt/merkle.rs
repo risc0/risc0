@@ -205,8 +205,8 @@ mod tests {
         tracing::trace!("Proof3: {proof3:?}");
 
         proof1.verify(&digest1, &root, hashfn).unwrap();
-        proof1.verify(&digest1, &root, hashfn).unwrap();
-        proof1.verify(&digest1, &root, hashfn).unwrap();
+        proof2.verify(&digest2, &root, hashfn).unwrap();
+        proof3.verify(&digest3, &root, hashfn).unwrap();
 
         // Digest1 and digest2 should share 3 levels of proof, whereas proof2 and proof3
         // should only share 2
