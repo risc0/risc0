@@ -70,7 +70,7 @@ impl HashFn<BabyBear> for Poseidon2HashFn {
         ))
     }
 
-    /// Checks is all words in the digest are less than the Baby Bear modulus.
+    /// Checks if all words in the digest are less than the Baby Bear modulus.
     fn is_digest_valid(&self, digest: &Digest) -> bool {
         digest
             .as_words()
