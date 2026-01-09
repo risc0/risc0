@@ -427,6 +427,31 @@ mod riscv {
     test_case!(amoxor_w);
     test_case!(lrsc);
 
+    // Floating-point tests (RV32F)
+    test_case!(rv32uf_fadd);
+    test_case!(rv32uf_fclass);
+    test_case!(rv32uf_fcmp);
+    test_case!(rv32uf_fcvt);
+    test_case!(rv32uf_fcvt_w);
+    test_case!(rv32uf_fdiv);
+    test_case!(rv32uf_fmadd);
+    test_case!(rv32uf_fmin);
+    test_case!(rv32uf_ldst);
+    test_case!(rv32uf_move);
+    test_case!(rv32uf_recoding);
+
+    // Double-precision floating-point tests (RV32D)
+    test_case!(rv32ud_fadd);
+    test_case!(rv32ud_fclass);
+    test_case!(rv32ud_fcmp);
+    test_case!(rv32ud_fcvt);
+    test_case!(rv32ud_fcvt_w);
+    test_case!(rv32ud_fdiv);
+    test_case!(rv32ud_fmadd);
+    test_case!(rv32ud_fmin);
+    test_case!(rv32ud_ldst);
+    test_case!(rv32ud_recoding);
+
     // Standard instruction tests (RV32I, RV32M)
     test_case!(add);
     test_case!(addi);

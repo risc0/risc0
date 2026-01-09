@@ -20,6 +20,10 @@
   .macro init;                                                                                     \
   .endm
 
+#define RVTEST_RV32UF                                                                              \
+  .macro init;                                                                                     \
+  .endm
+
 #define RVTEST_FAIL unimp;
 
 // Invoke the terminate/halt ecall. This works for both user-mode and machine-mode ABIs.

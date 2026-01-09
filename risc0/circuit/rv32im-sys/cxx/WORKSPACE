@@ -96,6 +96,20 @@ new_local_repository(
     path = "../vendor/boost",
 )
 
+# Berkeley SoftFloat 3
+git_repository(
+    name = "berkeley_softfloat_3",
+    build_file = "//bazel/third_party:berkeley_softfloat_3.BUILD",
+    commit = "b51ef8f3201669b2288104c28546fc72532a1ea4",
+    remote = "https://github.com/ucb-bar/berkeley-softfloat-3.git",
+)
+
+new_local_repository(
+    name = "softfloat_sys",
+    build_file = "//bazel/third_party:softfloat.BUILD",
+    path = "../../../zkos/common/softfloat-sys",
+)
+
 #
 # Zirgen + MLIR
 #

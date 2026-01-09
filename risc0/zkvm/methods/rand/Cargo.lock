@@ -1063,6 +1063,7 @@ name = "risc0-zkos-common"
 version = "2.2.1"
 dependencies = [
  "risc0-zkvm-platform",
+ "softfloat-sys",
 ]
 
 [[package]]
@@ -1227,6 +1228,10 @@ dependencies = [
  "cpufeatures",
  "digest",
 ]
+
+[[package]]
+name = "softfloat-sys"
+version = "0.1.4"
 
 [[package]]
 name = "spin"
