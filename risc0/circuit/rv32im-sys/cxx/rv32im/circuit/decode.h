@@ -42,7 +42,7 @@ template <typename C> struct FetchBlock {
 
   // Return 1 if in machine mode
   FDEV Val<C> isMM() DEV { return mode.get(); }
-  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV;
   FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
 

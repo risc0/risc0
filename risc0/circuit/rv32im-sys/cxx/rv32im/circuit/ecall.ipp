@@ -12,6 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define CPU_STATE_ARGUMENT(ctx, arg)                                                               \
+  PICUS_ARGUMENT(ctx,                                                                              \
+                 ({}),                                                                             \
+                 ({ctx.get(arg.cycle),                                                             \
+                   ctx.get(arg.pcLow),                                                             \
+                   ctx.get(arg.pcHigh),                                                            \
+                   ctx.get(arg.mm),                                                                \
+                   ctx.get(arg.iCache)}))
+
+// The actual "reading" happens via ReadByteBlock and ReadWordBlock. If the read
+// state argument is balanced, then the pulled values are determined by the
+// pushes from those blocks.
+#define READ_STATE_ARGUMENT(ctx, arg)                                                              \
+  PICUS_ARGUMENT(                                                                                  \
+      ctx,                                                                                         \
+      {},                                                                                          \
+      ({ctx.get(arg.cycle), ctx.get(arg.addrWord), ctx.get(arg.addrLowBits), ctx.get(arg.size)}))
+
+#define BIGINT_STATE_ARGUMENT(ctx, init, fini)                                                     \
+  PICUS_ARGUMENT(ctx,                                                                              \
+                 ({ctx.get(init.cycle), ctx.get(init.pcWord), ctx.get(init.mm)}),                  \
+                 ({ctx.get(fini.cycle), ctx.get(fini.pcWord), ctx.get(fini.mm)}))
+
+#define DECODE_ARGUMENT(ctx, arg)                                                                  \
+  PICUS_ARGUMENT(ctx,                                                                              \
+                 ({ctx.get(arg.iCacheCycle), ctx.get(arg.pcLow), ctx.get(arg.pcHigh)}),            \
+                 ({ctx.get(arg.newPcLow), ctx.get(arg.newPcHigh)}))
+
 #define GLOBAL_SET_U32(member, val)                                                                \
   GLOBAL_SET(member.low, val.low);                                                                 \
   GLOBAL_SET(member.high, val.high)
@@ -24,16 +52,17 @@
   DecodeArgument<C> arg;                                                                           \
   arg.iCacheCycle = fetch.iCacheCycle.get();                                                       \
   arg.pcLow = fetch.pc.low.get();                                                                  \
-  arg.pcLow = fetch.pc.high.get();                                                                 \
+  arg.pcHigh = fetch.pc.high.get();                                                                \
   arg.newPcLow = fetch.nextPc.low.get();                                                           \
-  arg.newPcLow = fetch.nextPc.high.get();                                                          \
+  arg.newPcHigh = fetch.nextPc.high.get();                                                         \
   arg.rs1 = 0;                                                                                     \
   arg.rs2 = 0;                                                                                     \
   arg.rd = 0;                                                                                      \
   arg.immLow = 0;                                                                                  \
   arg.immHigh = 0;                                                                                 \
   arg.options = Val<C>(uint32_t(INST_ECALL));                                                      \
-  ctx.pull(arg);
+  ctx.pull(arg);                                                                                   \
+  DECODE_ARGUMENT(ctx, arg);
 
 template <typename C> FDEV void EcallTerminateBlock<C>::set(CTX, EcallTerminateWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
@@ -51,6 +80,9 @@ template <typename C> FDEV void EcallTerminateBlock<C>::set(CTX, EcallTerminateW
 }
 
 template <typename C> FDEV void EcallTerminateBlock<C>::verify(CTX) DEV {
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure A7 = HOST_ECALL_TERMINATE
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_TERMINATE);
@@ -68,14 +100,12 @@ template <typename C> FDEV void EcallTerminateBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void EcallTerminateBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  CpuStateArgument<C> cpuState(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get());
+  ctx.pull(cpuState);
   ctx.push(CpuStateArgument<C>(cycleVal + 1, 0, 0, 0, 0));
+  CPU_STATE_ARGUMENT(ctx, cpuState);
+
   VERIFY_DECODE
-  uint32_t maxAddr = 0x40000000;
-  for (size_t i = 0; i < 8; i++) {
-    ctx.pull(MemoryArgument<C>(
-        maxAddr + i, 0, GLOBAL_GET(povwNonce[i].low), GLOBAL_GET(povwNonce[i].high)));
-  }
 }
 
 template <typename C> FDEV void EcallReadBlock<C>::set(CTX, EcallReadWitness wit) DEV {
@@ -94,6 +124,14 @@ template <typename C> FDEV void EcallReadBlock<C>::set(CTX, EcallReadWitness wit
 }
 
 template <typename C> FDEV void EcallReadBlock<C>::verify(CTX) DEV {
+  // A1 holds the address to read data into, A2 holds the requested length to
+  // read, and the actual length read is written to A0. The data read (and
+  // therefore its length as well) is input from the host.
+  PICUS_INPUT(ctx, writeA0.data.low);
+
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure A7 = HOST_ECALL_READ
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_READ);
@@ -102,7 +140,7 @@ template <typename C> FDEV void EcallReadBlock<C>::verify(CTX) DEV {
   EQ(readA1.wordAddr.get(), MACHINE_REGS_WORD + REG_A1);
   EQ(readA2.wordAddr.get(), MACHINE_REGS_WORD + REG_A2);
   EQ(writeA0.wordAddr.get(), MACHINE_REGS_WORD + REG_A0);
-  // Make sure len + ret < 64k
+  // Make sure len and ret < 64k
   EQ(readA2.data.high.get(), 0);
   EQ(writeA0.data.high.get(), 0);
   // Make sure ret <= len
@@ -114,9 +152,15 @@ template <typename C> FDEV void EcallReadBlock<C>::addArguments(CTX) DEV {
   Val<C> finalCycleVal = finalCycle.get();
   Val<C> addrWord = decomp.wordAddr(readA1.data.get());
   Val<C> lowBits = decomp.low0.get() + decomp.low1.get() * 2;
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  CpuStateArgument<C> cpuState(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get());
+  ctx.pull(cpuState);
+  CPU_STATE_ARGUMENT(ctx, cpuState);
+
+  ReadStateArgument<C> readState(finalCycleVal, finalAddrWord.get(), finalAddrBits.get(), 0);
   ctx.push(ReadStateArgument<C>(cycleVal + 1, addrWord, lowBits, writeA0.data.low.get()));
-  ctx.pull(ReadStateArgument<C>(finalCycleVal, finalAddrWord.get(), finalAddrBits.get(), 0));
+  ctx.pull(readState);
+  READ_STATE_ARGUMENT(ctx, readState);
+
   ctx.push(CpuStateArgument<C>(
       finalCycleVal + 1, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   VERIFY_DECODE
@@ -132,7 +176,15 @@ template <typename C> FDEV void EcallWriteBlock<C>::set(CTX, EcallWriteWitness w
 }
 
 template <typename C> FDEV void EcallWriteBlock<C>::verify(CTX) DEV {
-  // Make sure A7 = HOST_ECALL_READ
+  // A1 holds the address to write data into, A2 holds the requested length to
+  // write, and the actual length written is returned to A0. The amount written
+  // is intentionally nondeterministic.
+  PICUS_INPUT(ctx, writeA0.data.low);
+
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
+  // Make sure A7 = HOST_ECALL_WRITE
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_WRITE);
   EQ(readA7.data.high.get(), 0);
@@ -148,9 +200,11 @@ template <typename C> FDEV void EcallWriteBlock<C>::verify(CTX) DEV {
 
 template <typename C> FDEV void EcallWriteBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  CpuStateArgument<C> cpuState(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get());
+  ctx.pull(cpuState);
   ctx.push(
       CpuStateArgument<C>(cycleVal + 1, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  CPU_STATE_ARGUMENT(ctx, cpuState);
   VERIFY_DECODE
 }
 
@@ -322,6 +376,9 @@ template <typename C> FDEV void EcallBigIntBlock<C>::set(CTX, EcallBigIntWitness
 }
 
 template <typename C> FDEV void EcallBigIntBlock<C>::verify(CTX) DEV {
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure A7 = HOST_ECALL_BIGINT
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_BIGINT);
@@ -340,10 +397,22 @@ template <typename C> FDEV void EcallBigIntBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
   Val<C> countVal = cycleCount.get();
   Val<C> biPc = pcDecomp.wordAddr(readT2.data.get());
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
-  ctx.push(BigIntCpuStateArgument<C>(cycleVal + 1, biPc, mm.get()));
-  ctx.pull(BigIntCpuStateArgument<C>(cycleVal + countVal + 1, biPc + countVal, mm.get()));
+  CpuStateArgument<C> cpuState(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get());
+  ctx.pull(cpuState);
+  CPU_STATE_ARGUMENT(ctx, cpuState);
+
+  BigIntCpuStateArgument<C> initialBigIntState(cycleVal + 1, biPc, mm.get());
+  BigIntCpuStateArgument<C> finalBigIntState(cycleVal + countVal + 1, biPc + countVal, mm.get());
+  ctx.push(initialBigIntState);
+  ctx.pull(finalBigIntState);
+  BIGINT_STATE_ARGUMENT(ctx, initialBigIntState, finalBigIntState);
+
   ctx.push(CpuStateArgument<C>(
       cycleVal + countVal + 2, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
   VERIFY_DECODE
 }
+
+#undef BIGINT_STATE_ARGUMENT
+#undef CPU_STATE_ARGUMENT
+#undef DECODE_ARGUMENT
+#undef READ_STATE_ARGUMENT

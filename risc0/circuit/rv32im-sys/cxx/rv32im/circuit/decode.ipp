@@ -22,6 +22,10 @@ template <typename C> FDEV void FetchBlock<C>::set(CTX, FetchWitness witness, Va
   ctx.tableAdd(256 + 65536 + cycleDiff * 2, 1);
 }
 
+template <typename C> FDEV void FetchBlock<C>::verify(CTX, Val<C> cycle) DEV {
+  PICUS_ARGUMENT(ctx, {cycle.value}, {ctx.get(loadCycle)});
+}
+
 template <typename C> FDEV void FetchBlock<C>::addArguments(CTX, Val<C> cycle) DEV {
   ctx.pull(LookupArgument<C>(2, (cycle - loadCycle.get()) * 2));
 }
@@ -245,13 +249,14 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
 }
 
 template <typename C> FDEV void DecodeBlock<C>::addArguments(CTX) DEV {
+  // PC, iCacheCycle, cycle are inputs assumed to be deterministic.
   ctx.pull(LookupArgument<C>(2, (fetch.loadCycle.get() - fetch.iCacheCycle.get()) * 2));
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = getRS1();
   arg.rs2 = getRS2();
   arg.rd = getRD();
