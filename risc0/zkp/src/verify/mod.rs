@@ -488,7 +488,7 @@ impl<'a, F: Field> Verifier<'a, F> {
             unreachable!("po2 elem is larger than u32");
         };
         if po2 as usize > MAX_CYCLES_PO2 {
-            tracing::debug!("po2 in seal is larger than the max po2: {po2} > {MAX_CYCLES_PO2}");
+            tracing::error!("po2 in seal is larger than the max po2: {po2} > {MAX_CYCLES_PO2}");
             return Err(VerificationError::ReceiptFormatError);
         }
         self.po2 = po2 as usize;
