@@ -26,9 +26,13 @@ tracing = { version = "0.1", default-features = false, features = [
 ] }
 
 [build-dependencies]
+anyhow = { version = "1.0", default-features = false }
 bindgen = "0.72"
 cc = { version = "1.2.2", features = ["parallel"] }
 glob = "0.3"
+heck = "0.5"
+proc-macro2 = "1"
 quote = "1"
 regex = "1"
+syn = { version = "2", features = ["parsing"] }
 risc0-build-kernel = { workspace = true }

@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use anyhow::{Result, anyhow};
+use heck::ToPascalCase as _;
 use quote::{format_ident, quote};
 use std::{
     collections::BTreeMap,
@@ -116,7 +118,7 @@ fn main() {
 
     build.compile(output);
 
-    let mut block_types = parse_block_types();
+    let mut block_types = parse_block_types().unwrap();
     block_types.insert(
         "Empty".into(),
         BlockTypeInfo {
@@ -127,6 +129,9 @@ fn main() {
 
     generate_rust_block_types(&format!("{out_dir}/block_types.rs"), &block_types);
     generate_rust_bindings(&format!("{out_dir}/bindings.rs"), &block_types);
+
+    let rv32im_table = parse_rv32im_inc().unwrap();
+    generate_rv32im_table(&format!("{out_dir}/rv32im_table.rs"), &rv32im_table);
 }
 
 struct BlockTypeInfo {
@@ -134,8 +139,7 @@ struct BlockTypeInfo {
     count_per_row: u8,
 }
 
-/// Uses the C pre-processor to parse the block type table from "cxx/rv32im/witness/block_types.h"
-fn parse_block_types() -> BTreeMap<String, BlockTypeInfo> {
+fn preprocess_file(file_contents: &str) -> String {
     let mut build = cc::Build::new();
     build
         .cpp(true)
@@ -160,15 +164,7 @@ fn parse_block_types() -> BTreeMap<String, BlockTypeInfo> {
         .unwrap();
 
     // Use the pre-processor to parse the table
-    write!(
-        proc.stdin.as_mut().unwrap(),
-        "\
-            #include \"rv32im/witness/block_types.h\"\n\
-            #define BLOCK_TYPE(name, count) name,count;\n\
-            BLOCK_TYPES
-        "
-    )
-    .unwrap();
+    write!(proc.stdin.as_mut().unwrap(), "{file_contents}").unwrap();
     let _ = proc.stdin.take();
 
     let output = proc.wait_with_output().unwrap();
@@ -183,7 +179,18 @@ fn parse_block_types() -> BTreeMap<String, BlockTypeInfo> {
         .lines()
         .filter(|l| !inc_directive.is_match(l))
         .collect::<Vec<_>>();
-    let contents = contents.join("");
+    contents.join("")
+}
+
+/// Uses the C pre-processor to parse the block type table from "cxx/rv32im/witness/block_types.h"
+fn parse_block_types() -> Result<BTreeMap<String, BlockTypeInfo>> {
+    let contents = preprocess_file(
+        "\
+            #include \"rv32im/witness/block_types.h\"\n\
+            #define BLOCK_TYPE(name, count) name,count;\n\
+            BLOCK_TYPES
+        ",
+    );
 
     contents
         .trim()
@@ -192,13 +199,93 @@ fn parse_block_types() -> BTreeMap<String, BlockTypeInfo> {
         .enumerate()
         .map(|(index, entry)| {
             let mut entries = entry.trim().split(",");
-            (
+            Ok((
                 entries.next().unwrap().to_string(),
                 BlockTypeInfo {
                     index,
-                    count_per_row: entries.next().unwrap().parse().unwrap(),
+                    count_per_row: entries
+                        .next()
+                        .ok_or_else(|| anyhow!("block_type.h table entry missing count"))?
+                        .parse()
+                        .map_err(|e| anyhow!("block_type.h table entry count invalid: {e}"))?,
                 },
+            ))
+        })
+        .collect()
+}
+
+#[derive(Debug)]
+#[allow(dead_code)]
+struct Rv32imInstrInfo {
+    name: String,
+    idx: u64,
+    opcode: u8,
+    imm_type: String,
+    func3: String,
+    func7: String,
+    params: Vec<String>,
+}
+
+impl Rv32imInstrInfo {
+    fn parse_from_parts(mut parts: Vec<String>) -> Result<Self> {
+        assert!(parts.len() >= 6, "rv32im.inc table entry is to small");
+        let params = parts.split_off(6);
+        let mut parts_iter = parts.into_iter();
+        let mut next = move || parts_iter.next().unwrap();
+
+        Ok(Self {
+            name: next(),
+            idx: next()
+                .parse()
+                .map_err(|e| anyhow!("rv32im.inc table entry invalid idx: {e}"))?,
+            opcode: u8::from_str_radix(
+                next()
+                    .strip_prefix("0b")
+                    .ok_or_else(|| anyhow!("rv32im.inc table entry invalid opcode"))?,
+                2,
             )
+            .map_err(|e| anyhow!("rv32im.inc table entry invalid opcode: {e}"))?,
+            imm_type: next(),
+            func3: next(),
+            func7: next(),
+            params,
+        })
+    }
+
+    fn to_tokens(&self) -> proc_macro2::TokenStream {
+        let name = format_ident!("{}", self.name.to_pascal_case());
+        let idx = self.idx;
+        let opcode = self.opcode;
+        let imm_type = format_ident!("{}", self.imm_type);
+        let func3: syn::Expr = syn::parse_str(&self.func3).unwrap();
+        let func7: syn::Expr = syn::parse_str(&self.func7).unwrap();
+        let params = self.params.iter().map(|p| format_ident!("{p}"));
+
+        quote! {
+            (#name, #idx, #opcode, #imm_type, #func3, #func7, #(#params),*)
+        }
+    }
+}
+
+/// Uses the C pre-processor to parse the block type table from "cxx/rv32im/base/rv32im.inc"
+fn parse_rv32im_inc() -> Result<Vec<Rv32imInstrInfo>> {
+    let contents = preprocess_file(
+        "\
+            #define ENTRY(...) __VA_ARGS__;\n\
+            #include \"rv32im/base/rv32im.inc\"\n\
+        ",
+    );
+
+    contents
+        .split(";")
+        .filter(|entry| !entry.trim().is_empty())
+        .map(|entry| {
+            let entries = entry
+                .trim()
+                .split(",")
+                .map(|e| e.trim().to_string())
+                .collect();
+            Rv32imInstrInfo::parse_from_parts(entries)
         })
         .collect()
 }
@@ -273,6 +360,47 @@ fn generate_rust_block_types(output: &str, block_types: &BTreeMap<String, BlockT
         macro_rules! visit_blocks {
             ($visitor:ident, $($arg:expr),*) => {
                 $visitor!($($arg,)* #(#block_names),*)
+            }
+        }
+    };
+
+    std::fs::write(output, contents.to_string()).unwrap();
+    let status = std::process::Command::new("rustfmt")
+        .arg(output)
+        .status()
+        .unwrap();
+    assert!(status.success(), "rustfmt {output} failed");
+}
+
+fn generate_rv32im_table(output: &str, rv32im_table: &[Rv32imInstrInfo]) {
+    let names = rv32im_table
+        .iter()
+        .map(|e| format_ident!("{}", e.name.to_pascal_case()))
+        .collect::<Vec<_>>();
+    let upper_names = rv32im_table.iter().map(|e| &e.name);
+    let entries = rv32im_table.iter().map(|entry| entry.to_tokens());
+
+    let contents = quote! {
+        #[repr(u8)]
+        #[derive(Copy, Clone, PartialEq, Eq)]
+        pub enum Opcode {
+            #(#names,)*
+            Invalid
+        }
+
+        impl Opcode {
+            pub fn name(&self) -> &'static str {
+                match self {
+                    #(Self::#names => #upper_names,)*
+                    _ => "***UNKNOWN***"
+                }
+            }
+        }
+
+        #[macro_export]
+        macro_rules! visit_rv32im_instr {
+            ($visitor:ident $(, $arg:expr)*) => {
+                $visitor!($($arg,)* #(#entries),*);
             }
         }
     };

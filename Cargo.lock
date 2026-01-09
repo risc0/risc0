@@ -7373,6 +7373,8 @@ dependencies = [
  "derive_more",
  "enum-map",
  "glob",
+ "heck 0.5.0",
+ "proc-macro2",
  "quote",
  "regex",
  "risc0-build-kernel",
@@ -7380,6 +7382,7 @@ dependencies = [
  "risc0-sys",
  "risc0-zkp",
  "strum",
+ "syn 2.0.106",
  "tracing",
 ]
 

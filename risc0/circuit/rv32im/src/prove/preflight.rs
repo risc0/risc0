@@ -16,6 +16,7 @@
 #![allow(dead_code)]
 
 mod constants;
+mod decode;
 mod opt;
 mod paging;
 mod poseidon2;

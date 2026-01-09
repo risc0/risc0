@@ -25,6 +25,7 @@ use anyhow::{Result, anyhow};
 use bytemuck::{Pod, Zeroable};
 
 include!(concat!(env!("OUT_DIR"), "/block_types.rs"));
+include!(concat!(env!("OUT_DIR"), "/rv32im_table.rs"));
 
 #[allow(
     dead_code,
