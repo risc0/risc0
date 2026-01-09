@@ -7547,6 +7547,7 @@ name = "risc0-zkos-common"
 version = "2.2.1"
 dependencies = [
  "risc0-zkvm-platform",
+ "softfloat-sys",
 ]
 
 [[package]]
@@ -8562,6 +8563,10 @@ dependencies = [
  "libc",
  "windows-sys 0.59.0",
 ]
+
+[[package]]
+name = "softfloat-sys"
+version = "0.1.4"
 
 [[package]]
 name = "spin"

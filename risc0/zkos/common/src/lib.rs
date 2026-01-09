@@ -20,6 +20,7 @@ use crate::constants::USER_REGS_PTR;
 pub mod atomics;
 pub mod constants;
 pub mod emul;
+pub mod softfloat;
 
 pub fn get_ureg(idx: usize) -> u32 {
     // x0 (register 0) should always return 0

@@ -9,6 +9,8 @@ repository = { workspace = true }
 
 [dependencies]
 risc0-zkvm-platform = { workspace = true }
+softfloat-sys = { path = "softfloat-sys", features = ["riscv"] }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(rust_analyzer)'] }
+
