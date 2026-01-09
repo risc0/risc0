@@ -30,9 +30,9 @@ template <typename C> FDEV void GlobalsBlock<C>::set(CTX, GlobalsWitness wit) DE
     GLOBAL_SET(rootIn[i], wit.rootIn[i]);
     rootOut[i].set(ctx, wit.rootOut[i]);
     GLOBAL_SET(rootOut[i], wit.rootOut[i]);
-  }
-  for (size_t i = 0; i < 8; i++) {
+    povwNonce[i].low.set(ctx, wit.povwNonce[i] & 0xffff);
     GLOBAL_SET(povwNonce[i].low, wit.povwNonce[i] & 0xffff);
+    povwNonce[i].high.set(ctx, wit.povwNonce[i] >> 16);
     GLOBAL_SET(povwNonce[i].high, wit.povwNonce[i] >> 16);
   }
 }
