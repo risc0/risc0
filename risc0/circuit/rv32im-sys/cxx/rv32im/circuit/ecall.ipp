@@ -51,6 +51,9 @@ template <typename C> FDEV void EcallTerminateBlock<C>::set(CTX, EcallTerminateW
 }
 
 template <typename C> FDEV void EcallTerminateBlock<C>::verify(CTX) DEV {
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure A7 = HOST_ECALL_TERMINATE
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_TERMINATE);
@@ -94,6 +97,9 @@ template <typename C> FDEV void EcallReadBlock<C>::set(CTX, EcallReadWitness wit
 }
 
 template <typename C> FDEV void EcallReadBlock<C>::verify(CTX) DEV {
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure A7 = HOST_ECALL_READ
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_READ);
@@ -132,7 +138,10 @@ template <typename C> FDEV void EcallWriteBlock<C>::set(CTX, EcallWriteWitness w
 }
 
 template <typename C> FDEV void EcallWriteBlock<C>::verify(CTX) DEV {
-  // Make sure A7 = HOST_ECALL_READ
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
+  // Make sure A7 = HOST_ECALL_WRITE
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_WRITE);
   EQ(readA7.data.high.get(), 0);
@@ -322,6 +331,9 @@ template <typename C> FDEV void EcallBigIntBlock<C>::set(CTX, EcallBigIntWitness
 }
 
 template <typename C> FDEV void EcallBigIntBlock<C>::verify(CTX) DEV {
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure A7 = HOST_ECALL_BIGINT
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_BIGINT);
