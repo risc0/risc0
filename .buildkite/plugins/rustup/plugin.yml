@@ -1,0 +1,21 @@
+name: rustup
+description: Install the Rust toolchain
+author: https://github.com/risc0
+requirements: ["rustup"]
+configuration:
+  properties:
+    toolchain:
+      type: string
+      description: Identifier of the rust toolchain to install
+      default: stable
+    targets:
+      type: array
+      description: An array of Rust compiler targets to install
+      default: []
+    components:
+      type: array
+      description: An array of components to install
+      default: []
+  required:
+    - toolchain
+  additionalProperties: false
