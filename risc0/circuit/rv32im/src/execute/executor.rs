@@ -238,7 +238,7 @@ pub enum ExecutionError {
 /// Update message sent to the segment callback on each split.
 ///
 /// Contains the updated memory pages as well as the pages accessed during the associated segment.
-/// Can be used to construct a [Segment] starting from an an initial memory state and processing
+/// Can be used to construct a [Segment] starting from an initial memory state and processing
 /// each segment update.
 #[non_exhaustive]
 #[derive(Clone, derive_more::Debug)]
