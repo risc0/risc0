@@ -318,7 +318,7 @@ At this point, $f_{2,even}=31$ and $f_{2,odd}=35$.
 Using randomness of $r_3=64$, we find:
 
 $$
-f_3(x)=f_{2,even}+r_2f_{2,odd}
+f_3(x)=f_{2,even}+r_3f_{2,odd}
 $$
 
 $$
