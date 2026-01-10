@@ -14,6 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 pub mod fp;
+pub mod opt;
 
 use std::{
     ffi::CStr,
@@ -23,6 +24,8 @@ use std::{
 
 use anyhow::{Result, anyhow};
 use bytemuck::{Pod, Zeroable};
+
+use opt::UnitOptions;
 
 include!(concat!(env!("OUT_DIR"), "/block_types.rs"));
 include!(concat!(env!("OUT_DIR"), "/rv32im_table.rs"));
