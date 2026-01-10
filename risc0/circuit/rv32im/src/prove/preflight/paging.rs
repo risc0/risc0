@@ -37,9 +37,9 @@ use crate::prove::preflight::{
 };
 
 #[derive(Default, Copy, Clone)]
-struct MemoryInfo {
-    cycle: u32,
-    value: u32,
+pub struct MemoryInfo {
+    pub cycle: u32,
+    pub value: u32,
 }
 
 fn to_fp_digest(digest: &Digest) -> FpDigest {
@@ -53,6 +53,16 @@ fn to_fp_digest(digest: &Digest) -> FpDigest {
 
 #[derive(Clone)]
 pub struct PageDetails(Box<[MemoryInfo; MPAGE_SIZE_WORDS as usize]>);
+
+impl PageDetails {
+    pub fn info(&self) -> &[MemoryInfo; MPAGE_SIZE_WORDS as usize] {
+        &*self.0
+    }
+
+    pub fn info_mut(&mut self) -> &mut [MemoryInfo; MPAGE_SIZE_WORDS as usize] {
+        &mut *self.0
+    }
+}
 
 impl Default for PageDetails {
     fn default() -> Self {
@@ -87,7 +97,7 @@ impl PagedMemory {
     pub fn page_in(&mut self, page_id: u32) -> Result<PageDetails> {
         let page_src = self.image.get_page(page_id)?;
         let mut page = PageDetails::default();
-        for (i, entry) in page.0.iter_mut().enumerate() {
+        for (i, entry) in page.info_mut().iter_mut().enumerate() {
             entry.value = page_src.load(WordAddr(i as u32));
         }
         self.add_cost_page();
@@ -278,7 +288,7 @@ impl PagedMemory {
             let addr = page_idx * MPAGE_SIZE_WORDS as u32 + i * MPAGE_PART_SIZE;
 
             for j in 0..MPAGE_PART_SIZE {
-                let page_data_j = page_data.0[(i * MPAGE_PART_SIZE + j) as usize];
+                let page_data_j = page_data.info()[(i * MPAGE_PART_SIZE + j) as usize];
                 let word = page_data_j.value;
                 new_page.store(WordAddr(i * MPAGE_PART_SIZE + j), word);
                 pop_data[j as usize] = word;

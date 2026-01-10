@@ -38,7 +38,7 @@ pub enum InstKind {
 #[derive(Copy, Clone, PartialEq, Eq, Debug, EnumCount, IntoPrimitive, TryFromPrimitive)]
 #[repr(u32)]
 pub enum UnitKind {
-    AddSub,
+    Addsub,
     Bit,
     Lt,
     Mul,
@@ -63,8 +63,8 @@ pub enum AsKind {
 #[derive(Copy, Clone, PartialEq, Eq, Debug, EnumCount, IntoPrimitive, TryFromPrimitive)]
 #[repr(u32)]
 pub enum BrKind {
-    BrZ,
-    BrNz,
+    Z,
+    Nz,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, EnumCount, IntoPrimitive, TryFromPrimitive)]
@@ -116,6 +116,33 @@ pub enum ShiftKind {
     Ra,
 }
 
+pub trait UnitOptions {
+    const UNIT_KIND: Option<UnitKind> = None;
+    const AS_KIND: Option<AsKind> = None;
+    const BIT_KIND: Option<BitKind> = None;
+    const MUL_KIND: Option<MulKind> = None;
+    const DIV_KIND: Option<DivKind> = None;
+    const SHIFT_KIND: Option<ShiftKind> = None;
+
+    const OPT_VALUE: u32;
+}
+
+pub struct MulUuOptions;
+
+impl UnitOptions for MulUuOptions {
+    const UNIT_KIND: Option<UnitKind> = Some(UnitKind::Mul);
+    const MUL_KIND: Option<MulKind> = Some(MulKind::Uu);
+    const OPT_VALUE: u32 = opt![UnitKind::Mul, MulKind::Uu].val();
+}
+
+pub struct DivUOptions;
+
+impl UnitOptions for DivUOptions {
+    const UNIT_KIND: Option<UnitKind> = Some(UnitKind::Div);
+    const DIV_KIND: Option<DivKind> = Some(DivKind::U);
+    const OPT_VALUE: u32 = opt![UnitKind::Div, DivKind::U].val();
+}
+
 pub trait OptValue: Copy + Into<u32> + TryFrom<u32> + EnumCount {
     const VALUE: u32 = <Self as EnumCount>::COUNT as u32;
 
@@ -136,6 +163,10 @@ pub struct Opt(u32);
 impl Opt {
     pub const fn from_u32(v: u32) -> Self {
         Self(v)
+    }
+
+    pub const fn val(&self) -> u32 {
+        self.0
     }
 
     pub fn peek<T: OptValue>(&self) -> T {
@@ -166,20 +197,22 @@ impl Opt {
 #[macro_export]
 macro_rules! opt {
     [] => {
-        Opt::from_u32(0)
+        $crate::opt::Opt::from_u32(0)
     };
 
     [$e:expr] => {
-        Opt::from_u32($e as u32)
+        $crate::opt::Opt::from_u32($e as u32)
     };
 
     [$e:expr, $($es:expr),+] => {{
-        let mut o = opt![$($es),+];
+        let mut o = $crate::opt::opt![$($es),+];
         let e = $e;
         o._push_const(e, e as u32);
         o
     }};
 }
+
+pub use opt;
 
 #[cfg(test)]
 mod tests {
@@ -189,20 +222,20 @@ mod tests {
     fn push_peek_and_pop() {
         let mut opt = Opt::default();
         opt.push(InstKind::Reg);
-        opt.push(UnitKind::AddSub);
+        opt.push(UnitKind::Addsub);
 
-        assert_eq!(opt.peek::<UnitKind>(), UnitKind::AddSub);
-        assert_eq!(opt.pop::<UnitKind>(), UnitKind::AddSub);
+        assert_eq!(opt.peek::<UnitKind>(), UnitKind::Addsub);
+        assert_eq!(opt.pop::<UnitKind>(), UnitKind::Addsub);
 
         assert_eq!(opt.peek::<InstKind>(), InstKind::Reg);
     }
 
     #[test]
     fn const_create_and_pop_ret() {
-        const O: Opt = opt![InstKind::Reg, UnitKind::AddSub];
+        const O: Opt = opt![InstKind::Reg, UnitKind::Addsub];
         const O1: Opt = O.pop_ret::<UnitKind>();
 
-        assert_eq!(O.peek::<UnitKind>(), UnitKind::AddSub);
+        assert_eq!(O.peek::<UnitKind>(), UnitKind::Addsub);
         assert_eq!(O1.peek::<InstKind>(), InstKind::Reg);
     }
 }

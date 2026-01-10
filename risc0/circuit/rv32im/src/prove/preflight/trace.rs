@@ -34,6 +34,15 @@ pub struct TraceIndex<WitnessT> {
     _witness: PhantomData<WitnessT>,
 }
 
+impl<WitnessT> TraceIndex<WitnessT> {
+    pub fn cast<OtherWitnessT>(self) -> TraceIndex<OtherWitnessT> {
+        TraceIndex {
+            aux_idx: self.aux_idx,
+            _witness: PhantomData,
+        }
+    }
+}
+
 pub struct Trace<'a> {
     rows: &'a mut [RowInfo],
     row_next: usize,
@@ -120,10 +129,7 @@ impl<'a> Trace<'a> {
         idx
     }
 
-    pub fn get_block<WitnessT: HasBlockType + Pod>(
-        &self,
-        index: TraceIndex<WitnessT>,
-    ) -> &WitnessT {
+    pub fn get_block<WitnessT: Pod>(&self, index: TraceIndex<WitnessT>) -> &WitnessT {
         let wit_size = size_of::<WitnessT>();
         assert!(wit_size.is_multiple_of(size_of::<u32>()));
 

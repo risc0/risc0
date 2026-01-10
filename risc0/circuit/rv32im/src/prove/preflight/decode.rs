@@ -152,7 +152,7 @@ impl FastDecodeTable {
 
         macro_rules! inst_visitor {
             ($(($name:ident, $idx:expr, $opcode:expr, $imm_type:expr, $func3:expr, $func7:expr,
-                $($rest:tt),*)),+) => {
+                $($rest:expr),*)),+) => {
                 $(self.add_inst($opcode as u32, $func3, $func7, Opcode::$name);)*
             };
         }
