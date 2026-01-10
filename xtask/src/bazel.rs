@@ -14,8 +14,9 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{
-    fs::File,
+    fs::{File, Permissions},
     io::{BufRead as _, BufReader},
+    os::unix::fs::PermissionsExt,
     path::{Path, PathBuf},
     process::{Command, Stdio},
 };
@@ -33,6 +34,7 @@ impl Bazel {
         Self::bootstrap_rust_verifier();
         Self::bootstrap_zkr();
         Self::bootstrap_riscv_tests();
+        Self::bootstrap_softfloat();
     }
 
     fn bootstrap_rust_verifier() {
@@ -83,6 +85,39 @@ impl Bazel {
             let mut dst_file = File::create(&dst_path).unwrap();
             std::io::copy(&mut src_data, &mut dst_file).unwrap();
         }
+    }
+
+    fn bootstrap_softfloat() {
+        // Build the softfloat library directly to get the archive output
+        let srcs = Self::bazel("//rv32im/softfloat:softfloat");
+        let pwd = std::env::current_dir().unwrap();
+        let dst_dir = pwd.join("risc0/zkos/common/softfloat-sys");
+        std::fs::create_dir_all(&dst_dir).expect("Failed to create softfloat-sys directory");
+
+        // Find the libsoftfloat.a file in the build outputs
+        for src_path in srcs {
+            let file_name = src_path.file_name().unwrap();
+            if file_name == "libsoftfloat.a"
+                || file_name.to_string_lossy().ends_with("libsoftfloat.a")
+            {
+                let dst_path = dst_dir.join("libsoftfloat.a");
+                // Use std::fs::copy which handles read-only source files better
+                std::fs::copy(&src_path, &dst_path).unwrap_or_else(|e| {
+                    panic!(
+                        "Failed to copy {} to {}: {}",
+                        src_path.display(),
+                        dst_path.display(),
+                        e
+                    )
+                });
+                // Make the file user-writable (rw-rw-r--)
+                std::fs::set_permissions(&dst_path, Permissions::from_mode(0o664)).unwrap_or_else(
+                    |e| panic!("Failed to set permissions on {}: {}", dst_path.display(), e),
+                );
+                return;
+            }
+        }
+        panic!("Could not find libsoftfloat.a in Bazel build outputs");
     }
 
     fn bazel(target: &str) -> Vec<PathBuf> {
