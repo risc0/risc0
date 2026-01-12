@@ -1388,7 +1388,7 @@ checksum = "caf4aa5b0f434c91fe5c7f1ecb6a5ece2130b02ad2a590589dda5146df959001"
 
 [[package]]
 name = "risc0-binfmt"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1408,7 +1408,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1422,7 +1422,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1435,7 +1435,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -1454,7 +1454,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "bytemuck",
  "rand_core 0.9.3",
@@ -1462,7 +1462,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1482,7 +1482,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-povw"
-version = "0.5.0"
+version = "0.5.0-rc.1"
 dependencies = [
  "borsh",
  "bytemuck",
@@ -1507,14 +1507,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-common"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "risc0-zkvm-platform",
 ]
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -1525,7 +1525,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1549,7 +1549,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1577,7 +1577,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "bytemuck",
  "cfg-if",
