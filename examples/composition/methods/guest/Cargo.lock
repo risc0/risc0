@@ -1495,7 +1495,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1515,7 +1515,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1538,7 +1538,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1552,7 +1552,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1565,7 +1565,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -1584,7 +1584,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "bytemuck",
  "rand_core 0.9.3",
@@ -1592,7 +1592,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1612,14 +1612,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-common"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "risc0-zkvm-platform",
 ]
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -1630,7 +1630,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1654,7 +1654,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1682,7 +1682,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -1773,7 +1773,7 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "rzup"
-version = "0.6.0"
+version = "0.6.0-rc.1"
 dependencies = [
  "hex",
  "rsa",
