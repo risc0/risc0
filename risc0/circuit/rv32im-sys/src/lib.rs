@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -68,6 +68,7 @@ pub struct RawSegment {
     pub reads: RawSlice<RawSlice<u8>>,
     pub writes: RawSlice<u32>,
     pub insn_counter: u32,
+    pub povw_nonce: [u32; 8],
 }
 
 type RawError = *const std::os::raw::c_char;
@@ -88,6 +89,10 @@ unsafe extern "C" {
     ) -> *mut PreflightContext;
 
     pub fn risc0_circuit_rv32im_m3_preflight_is_final(ctx: *const PreflightContext) -> usize;
+
+    pub fn risc0_circuit_rv32im_m3_preflight_block_counts(
+        ctx: *const PreflightContext,
+    ) -> *const u32;
 
     pub fn risc0_circuit_rv32im_m3_prover_new_cpu(po2: usize) -> *mut ProverContext;
 

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -231,6 +231,10 @@ pub(crate) trait Risc0Context {
     fn on_ecall_read_end(&mut self, _read_bytes: u64, _read_words: u64) {}
 
     fn on_ecall_write_end(&mut self) {}
+
+    fn on_user_ecall(&mut self) {}
+
+    fn on_trap(&mut self) {}
 }
 
 #[cfg(test)]
@@ -428,6 +432,8 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             return self.trap(Exception::UserEnvCall(dispatch_addr));
         }
 
+        self.ctx.on_user_ecall();
+
         self.enter_trap(dispatch_addr)?;
         Ok(true)
     }
@@ -479,6 +485,9 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
         if len > 0 {
             guest_addr(ptr.0)?;
         }
+
+        let (read_words, read_bytes) = calculate_bytes_and_words(ptr.0 as u64, len as u64);
+
         // tracing::trace!("ecall_read({fd}, {ptr:?}, {len})");
         let mut bytes = vec![0u8; len as usize];
         let mut rlen = self.ctx.host_read(fd, &mut bytes)?;
@@ -498,16 +507,8 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             }
         }
 
-        let mut read_bytes = 0;
-        let mut read_words = 0;
-
         macro_rules! add_cycle {
             ($ptr:expr, $rlen:expr) => {{
-                if cur_state == CycleState::HostReadBytes {
-                    read_bytes += 1;
-                } else if cur_state == CycleState::HostReadWords {
-                    read_words += 1;
-                }
                 let next_state = next_io_state($ptr, $rlen);
                 self.ctx.on_ecall_cycle(
                     cur_state,
@@ -701,6 +702,32 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
     }
 }
 
+fn calculate_bytes_and_words(offset: u64, len: u64) -> (u64, u64) {
+    let word_size = WORD_SIZE as u64;
+    let initial_bytes = if !offset.is_multiple_of(word_size) {
+        std::cmp::min(word_size - (offset % word_size), len)
+    } else {
+        0
+    };
+    let final_bytes = (len - initial_bytes) % word_size;
+
+    let read_bytes = initial_bytes + final_bytes;
+    let read_words = (len - initial_bytes - final_bytes) / word_size;
+
+    (read_words, read_bytes)
+}
+
+#[test]
+fn calculate_bytes_and_words_test() {
+    assert_eq!(calculate_bytes_and_words(0, 4), (1, 0));
+    assert_eq!(calculate_bytes_and_words(0, 5), (1, 1));
+    assert_eq!(calculate_bytes_and_words(1, 1), (0, 1));
+    assert_eq!(calculate_bytes_and_words(1, 2), (0, 2));
+    assert_eq!(calculate_bytes_and_words(1, 10), (1, 3 + 3));
+    assert_eq!(calculate_bytes_and_words(1, 12), (2, 3 + 1));
+    assert_eq!(calculate_bytes_and_words(7, 12), (2, 1 + 3));
+}
+
 impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
     fn circuit_version(&self) -> u32 {
         self.ctx.circuit_version()
@@ -734,12 +761,12 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
             self.dump_registers(true)?;
             self.dump_registers(false)?;
         }
-        let dispatch_addr =
-            ByteAddr(self.load_memory(TRAP_DISPATCH_ADDR.waddr() + cause.as_u32())?);
+        let dispatch_addr = ByteAddr(self.load_memory(TRAP_DISPATCH_ADDR.waddr())?);
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
             bail!("Invalid trap address: {dispatch_addr:?}, cause: {cause:?}");
         }
         self.enter_trap(dispatch_addr)?;
+        self.ctx.on_trap();
         self.ctx.trap(cause);
         Ok(false)
     }

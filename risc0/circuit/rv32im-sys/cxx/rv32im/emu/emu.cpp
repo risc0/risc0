@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -120,40 +120,17 @@ struct Emulator {
     record.value = value;
   }
 
-  inline uint32_t peekVirtMemory(uint32_t wordAddr) {
-    return peekPhysMemory(wordAddr); // TODO
-  }
-
-  inline uint32_t translateAddress(VirtAddrWitness& record, uint32_t vWordAddr) {
-    record.vpage = vWordAddr >> VPAGE_SIZE_WORDS_PO2;
-    record.ppage = record.vpage; // TODO: Translate
-    record.wordOffset = vWordAddr & VPAGE_MASK_WORDS;
-    return (record.ppage << VPAGE_SIZE_WORDS_PO2) | record.wordOffset;
-  }
+  // Foward all the virtual memory calls for now until we add smode support
+  inline uint32_t peekVirtMemory(uint32_t wordAddr) { return peekPhysMemory(wordAddr); }
 
   inline uint32_t readVirtMemory(VirtMemReadWitness& record, uint32_t vWordAddr) {
-    uint32_t pWordAddr = translateAddress(record.addr, vWordAddr);
-    PhysMemReadWitness phys;
-    readPhysMemory(phys, pWordAddr);
-    record.prevCycle = phys.prevCycle;
-    record.value = phys.value;
-    return record.value;
+    return readPhysMemory(record, vWordAddr);
   }
 
-  inline void undoReadVirtMemory(VirtMemReadWitness& record) {
-    PhysMemReadWitness phys;
-    phys.wordAddr = record.addr.vpage << VPAGE_SIZE_WORDS_PO2 | record.addr.wordOffset;
-    phys.prevCycle = record.prevCycle;
-    undoReadPhysMemory(phys);
-  }
+  inline void undoReadVirtMemory(VirtMemReadWitness& record) { undoReadPhysMemory(record); }
 
   inline void writeVirtMemory(VirtMemWriteWitness& record, uint32_t vWordAddr, uint32_t value) {
-    uint32_t pWordAddr = translateAddress(record.addr, vWordAddr);
-    PhysMemWriteWitness phys;
-    writePhysMemory(phys, pWordAddr, value);
-    record.prevCycle = phys.prevCycle;
-    record.prevValue = phys.prevValue;
-    record.value = phys.value;
+    writePhysMemory(record, vWordAddr, value);
   }
 
 #define UNIT_COMMON(name)                                                                          \
