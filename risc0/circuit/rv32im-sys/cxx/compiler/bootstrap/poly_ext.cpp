@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,14 +17,14 @@
 #include "core/log.h"
 #include "rv32im/circuit/verify.h"
 #include "rv32im/emu/blocks.h"
-#include "verify/rv32im.h"
+#include "verify/info/rv32im.h"
 #include "zkp/taps.h"
 
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Transforms/Passes.h"
 #include "llvm/ADT/TypeSwitch.h"
 
-static std::string prefix = R"***(// Copyright 2025 RISC Zero, Inc.
+static std::string prefix = R"***(// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or

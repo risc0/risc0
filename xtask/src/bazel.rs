@@ -17,7 +17,7 @@ use std::{
     fs::File,
     io::{BufRead as _, BufReader},
     path::{Path, PathBuf},
-    process::{Command, Stdio, exit},
+    process::{Command, Stdio},
 };
 
 use clap::Parser;
@@ -32,6 +32,7 @@ impl Bazel {
     pub fn run(&self) {
         Self::bootstrap_rust_verifier();
         Self::bootstrap_zkr();
+        Self::bootstrap_riscv_tests();
     }
 
     fn bootstrap_rust_verifier() {
@@ -49,33 +50,7 @@ impl Bazel {
     }
 
     fn bootstrap_zkr() {
-        let bazel_root = Path::new("risc0/circuit/rv32im-sys/cxx");
-        let mut command = Command::new("bazelisk");
-        command
-            .args(["build", "//compiler/bootstrap:zkr"])
-            .current_dir(bazel_root)
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::piped());
-        let mut child = command.spawn().expect("Unable to run bazelisk");
-        let child_out = BufReader::new(child.stderr.take().unwrap());
-
-        let mut srcs = vec![];
-        for line in child_out.lines() {
-            let line = line.unwrap();
-            eprintln!("{line}");
-            if !line.starts_with("  bazel-bin/") {
-                continue;
-            }
-
-            let path = PathBuf::from(&line[2..]);
-            println!("path: {}", path.display());
-            srcs.push(bazel_root.join(path));
-        }
-        let status = child.wait().expect("Unable to wait for bazel");
-        if !status.success() {
-            eprintln!("Bazel did not return success.");
-            exit(status.code().unwrap());
-        }
+        let srcs = Self::bazel("//compiler/bootstrap:zkr");
 
         // copy
         // bazel-bin/compiler/bootstrap/lift_rv32im_m3_12.zkr
@@ -95,5 +70,52 @@ impl Bazel {
             let mut dst_file = File::create(&dst_path).unwrap();
             std::io::copy(&mut src_xz, &mut dst_file).unwrap();
         }
+    }
+
+    fn bootstrap_riscv_tests() {
+        let srcs = Self::bazel("//rv32im/rvtest:riscv-tests");
+        let pwd = std::env::current_dir().unwrap();
+        let dst_dir = pwd.join("risc0/zkvm/src/host/server/testdata");
+        for src_path in srcs {
+            let file_name = src_path.file_name().unwrap();
+            let mut src_data = File::open(&src_path).unwrap();
+            let dst_path = dst_dir.join(file_name);
+            let mut dst_file = File::create(&dst_path).unwrap();
+            std::io::copy(&mut src_data, &mut dst_file).unwrap();
+        }
+    }
+
+    fn bazel(target: &str) -> Vec<PathBuf> {
+        let bazel_root = Path::new("risc0/circuit/rv32im-sys/cxx");
+        let mut command = Command::new("bazelisk");
+        command
+            .args(["build", target])
+            .current_dir(bazel_root)
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::piped());
+        let mut child = command.spawn().expect("Unable to run bazelisk");
+        let child_out = BufReader::new(child.stderr.take().unwrap());
+
+        let mut srcs = vec![];
+        for line in child_out.lines() {
+            let line = line.unwrap();
+            eprintln!("{line}");
+            if !line.starts_with("  bazel-bin/") {
+                continue;
+            }
+
+            let path = PathBuf::from(&line[2..]);
+            println!("path: {}", path.display());
+            srcs.push(bazel_root.join(path));
+        }
+        let status = child.wait().expect("Unable to wait for bazel");
+        assert!(status.success(), "`bazelisk build {target}` failed");
+
+        assert!(
+            !srcs.is_empty(),
+            "No artifacts found from Bazel target: {target}"
+        );
+
+        srcs
     }
 }
