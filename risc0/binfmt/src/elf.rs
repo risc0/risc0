@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -25,6 +25,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{ByteAddr, Digestible as _, KERNEL_START_ADDR, MemoryImage, SystemState};
 
+/// The starting address for user programs in the RISC Zero zkVM.
 const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
 
 const SUSPEND_PC_ADDR: ByteAddr = ByteAddr(0xffff_0210);
