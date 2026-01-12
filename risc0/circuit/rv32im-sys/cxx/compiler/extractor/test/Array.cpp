@@ -20,8 +20,6 @@
 
 #include "compiler/extractor/extract.h"
 
-#include "compiler/extractor/extract.h"
-
 template <typename C> struct Top {
   CONSTANT static char NAME[] = "TestTop";
 
