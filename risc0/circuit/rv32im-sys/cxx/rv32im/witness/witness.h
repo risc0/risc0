@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -60,6 +60,7 @@ struct Globals {
   OutU32 termA0;
   OutU32 termA1;
   OutU32 out[8];
+  OutU32 povwNonce[8];
   Fp v2Compat;
 };
 
