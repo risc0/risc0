@@ -685,15 +685,10 @@ fn missing_baseline_error(package: &str) -> anyhow::Error {
     )
 }
 
-fn catch_missing_baseline_error(package: &str, error: anyhow::Error) -> anyhow::Error {
+fn is_missing_baseline_error(package: &str, error: &anyhow::Error) -> bool {
     let error_str = format!("{error:?}");
-    if error_str.contains(&format!("{package} not found in"))
+    error_str.contains(&format!("{package} not found in"))
         || error_str.contains(&format!("`{package}` not found in"))
-    {
-        missing_baseline_error(package)
-    } else {
-        error
-    }
 }
 
 /// Entrypoint for the tests. See the module doc-comment about what it does.
@@ -728,20 +723,33 @@ fn run_inner(
             continue;
         }
         let baseline = semver_baseline_factory(version.and_then(|v| v.as_option()));
-        let output = run_semver_checks(workspace_root, baseline, vec![package.into()])
-            .map_err(|error| catch_missing_baseline_error(package, error))?;
-        semver_output.extend(output);
+        match run_semver_checks(workspace_root, baseline, vec![package.into()]) {
+            Ok(output) => semver_output.extend(output),
+            Err(error) => {
+                if is_missing_baseline_error(package, &error) {
+                    skipped_packages.insert(package.clone());
+                } else {
+                    return Err(error);
+                }
+            }
+        }
     }
 
     let mut output_baselines: SemverBaselines = semver_output.clone().into();
-    if !args.update {
-        output_baselines.versions.extend(
-            skipped_packages
-                .into_iter()
-                .map(|p| (p, VersionOrNone::None)),
-        );
-    }
+    output_baselines.versions.extend(
+        skipped_packages
+            .into_iter()
+            .map(|p| (p, VersionOrNone::None)),
+    );
     if args.locked && output_baselines != semver_lock_file {
+        // If we pass --locked and a package is not listed in the semver_lock_file return a special
+        // error since this is probably a new package.
+        for package in packages.keys() {
+            if semver_lock_file.get(package).is_none() {
+                return Err(missing_baseline_error(package));
+            }
+        }
+
         bail!(
             "`--locked` provided and baselines don't match: \
                 output != input: {output_baselines} != {semver_lock_file}"
@@ -1388,16 +1396,17 @@ mod tests {
             )][..],
         );
 
-        assert_eq!(
-            run_with_temp_dir(
-                &tempdir,
-                &baseline1_name,
-                false, /* update */
-                true,  /* locked */
-            )
-            .unwrap_err()
-            .to_string(),
-            "`--locked` provided and baselines don't match: output != input: {foobar: 1.0.0} != {}"
+        let err = run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            false, /* update */
+            true,  /* locked */
+        )
+        .unwrap_err();
+        assert!(
+            err.to_string()
+                .starts_with("No SemVer baseline found for foo"),
+            "{err:?}"
         );
     }
 
@@ -1542,6 +1551,81 @@ mod tests {
                 .starts_with("No SemVer baseline found for baz"),
             "{err:?}"
         );
+    }
+
+    #[test]
+    fn crate_no_baseline_update() {
+        let tempdir = tempdir().unwrap();
+
+        create_current(
+            &tempdir,
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo() {}",
+                Version::new(2, 0, 0),
+            )][..],
+        );
+
+        let baseline1_version = Version::new(1, 0, 0);
+        let baseline1_name = format!("baseline_{baseline1_version}");
+        create_baseline(
+            &tempdir,
+            &baseline1_name,
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo(_a: u32) {}",
+                baseline1_version,
+            )][..],
+        );
+
+        // Run once to populate the lock-file
+        run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            false, /* update */
+            false, /* locked */
+        )
+        .unwrap();
+
+        // Add a new crate
+        std::fs::write(
+            tempdir.path().join("current").join("Cargo.toml"),
+            "
+            [workspace]
+            members = [\"foobar\", \"baz\"]
+            resolve = \"2\"
+            ",
+        )
+        .unwrap();
+
+        let current_baz = tempdir.path().join("current/baz");
+        std::fs::create_dir_all(current_baz.join("src")).unwrap();
+        write_cargo_toml(
+            &current_baz,
+            "baz",
+            &Version::new(1, 0, 0),
+            &HashMap::new(),
+            &HashMap::new(),
+        );
+        std::fs::write(current_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
+
+        // Update should add "none" baseline for baz
+        run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            true,  /* update */
+            false, /* locked */
+        )
+        .unwrap();
+
+        // Running with locked, should be okay
+        run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            false, /* update */
+            true,  /* locked */
+        )
+        .unwrap();
     }
 
     #[test]
