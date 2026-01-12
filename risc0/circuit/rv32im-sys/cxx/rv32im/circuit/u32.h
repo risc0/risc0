@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -106,7 +106,6 @@ template <typename C> struct AddressVerify {
   CONSTANT static char NAME[] = "AddressVerify";
 
   // Holds the 'maxHigh16 - high16', verifies the mode legality
-  Reg<C> isMM;
   RegU16<C> highSub;
 
   template <typename T> FDEV void applyInner(CTX, ValU32<C> val, Val<C> mode) DEV {

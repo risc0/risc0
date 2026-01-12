@@ -1123,11 +1123,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-common"
+version = "5.0.0"
+dependencies = [
+ "risc0-zkvm-platform",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
-version = "2.2.2"
+version = "5.0.0"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkos-common",
  "risc0-zkvm-platform",
  "sha2",
 ]
@@ -1158,7 +1166,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1195,7 +1203,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.3.0"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "cfg-if",

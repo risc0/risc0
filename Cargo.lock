@@ -1794,7 +1794,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "bincode",
@@ -1815,7 +1815,7 @@ dependencies = [
  "text_io",
  "tokio",
  "tracing-subscriber 0.3.19",
- "zip",
+ "zip 2.4.2",
 ]
 
 [[package]]
@@ -2726,7 +2726,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users 0.5.2",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3177,6 +3177,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4a3d7db9596fecd151c5f638c0ee5d5bd487b6e0ea232e5dc96d5250f6f94b1d"
 dependencies = [
  "crc32fast",
+ "libz-rs-sys",
  "miniz_oxide",
 ]
 
@@ -7193,7 +7194,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "cargo_metadata 0.19.2",
@@ -7216,7 +7217,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "2.0.2"
+version = "5.0.0"
 dependencies = [
  "cc",
  "directories",
@@ -7304,7 +7305,7 @@ dependencies = [
  "tracing",
  "tracing-forest",
  "tracing-subscriber 0.3.19",
- "zip",
+ "zip 2.4.2",
 ]
 
 [[package]]
@@ -7371,6 +7372,8 @@ dependencies = [
  "risc0-build-kernel",
  "risc0-sppark",
  "risc0-sys",
+ "serde",
+ "strum",
  "tracing",
 ]
 
@@ -7417,7 +7420,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16-sys"
-version = "0.2.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blst",
@@ -7462,7 +7465,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -7512,7 +7515,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sppark"
-version = "0.1.14"
+version = "5.0.0"
 dependencies = [
  "cc",
 ]
@@ -7540,11 +7543,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-common"
+version = "5.0.0"
+dependencies = [
+ "risc0-zkvm-platform",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
-version = "2.2.2"
+version = "5.0.0"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkos-common",
  "risc0-zkvm-platform",
  "sha2",
 ]
@@ -7586,7 +7597,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -7659,6 +7670,7 @@ dependencies = [
  "tracing-forest",
  "tracing-subscriber 0.3.19",
  "typetag",
+ "zip 6.0.0",
 ]
 
 [[package]]
@@ -7679,7 +7691,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.3.0"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -7976,7 +7988,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.11.0",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -8843,7 +8855,7 @@ dependencies = [
  "getrandom 0.3.3",
  "once_cell",
  "rustix 1.1.2",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -10545,6 +10557,20 @@ dependencies = [
  "indexmap 2.11.0",
  "memchr",
  "thiserror 2.0.17",
+ "zopfli",
+]
+
+[[package]]
+name = "zip"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb2a05c7c36fde6c09b08576c9f7fb4cda705990f73b58fe011abf7dfb24168b"
+dependencies = [
+ "arbitrary",
+ "crc32fast",
+ "flate2",
+ "indexmap 2.11.0",
+ "memchr",
  "zopfli",
 ]
 

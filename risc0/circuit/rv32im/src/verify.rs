@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -28,7 +28,7 @@ impl CircuitInfoV3 for CircuitInfo {
     fn get_groups(&self) -> &'static [GroupInfo] {
         &[
             GroupInfo {
-                global_count: 38,
+                global_count: 54,
                 mix_count: 0,
             },
             GroupInfo {

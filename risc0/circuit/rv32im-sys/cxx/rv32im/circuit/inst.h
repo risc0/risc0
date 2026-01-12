@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -55,6 +55,7 @@ template <typename C> struct InstSuspendBlock {
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "iCacheCycle", iCacheCycle);
     T::apply(ctx, "writePc", writePc, cycle.get());
     T::apply(ctx, "writeMode", writeMode, cycle.get());
   }
