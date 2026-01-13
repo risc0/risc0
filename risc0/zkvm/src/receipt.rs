@@ -552,10 +552,11 @@ impl<Claim> From<FakeReceipt<Claim>> for GenericReceipt<Claim> {
 
 /// A fake receipt for testing and development.
 ///
-/// This receipt is not valid and will fail verification unless the
-/// environment variable `RISC0_DEV_MODE` is set to `true`, in which case a
-/// pass-through 'verification' will be performed, but it *does not*
-/// represent any meaningful attestation of receipt's integrity.
+/// This receipt is not valid and will fail verification unless dev mode is
+/// enabled in the [`VerifierContext`]. By default on host/std builds this is
+/// controlled by the `RISC0_DEV_MODE` environment variable. When dev mode is
+/// enabled, a pass-through 'verification' will be performed, but it *does not*
+/// represent any meaningful attestation of the receipt's integrity.
 ///
 /// This type solely exists to improve development experience, for further
 /// information about development-only mode see our [dev-mode
