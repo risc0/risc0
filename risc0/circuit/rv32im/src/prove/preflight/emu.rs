@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, btree_map::Entry as BTreeMapEntry};
 
 use anyhow::{Result, bail};
 use bytemuck::Zeroable as _;
@@ -57,12 +57,14 @@ use crate::prove::preflight::{
 
 const CYCLE_TABLE_ROWS: u32 = 24;
 
+type InstCache = BTreeMap<u32, TraceIndex<DecodeWitness>>;
+
 pub struct Emulator {
     memory: PagedMemory,
     pages: Vec<Option<PageDetails>>,
 
-    m_inst_cache: BTreeMap<u32, TraceIndex<DecodeWitness>>,
-    us_inst_cache: BTreeMap<u32, TraceIndex<DecodeWitness>>,
+    m_inst_cache: InstCache,
+    us_inst_cache: InstCache,
 
     // Machine state
     v2_compat: bool,
@@ -356,7 +358,7 @@ impl Emulator {
             load0,
             load1,
             inst,
-            count: 1,
+            count: 0,
         }))
     }
 
@@ -647,7 +649,7 @@ impl Emulator {
         let ok = Opt::OUT_KIND.unwrap();
         let dinst = trace.get_block(self.dinst.unwrap());
         let (rs1_val, rs1) = self.read_reg(dinst.rs1 as u32, false);
-        let (rs2_val, rs2) = self.read_reg(dinst.rs2 as u32, false);
+        let (rs2_val, rs2) = self.read_reg(dinst.rs2 as u32, dinst.rs1 == dinst.rs2);
         let fetch = dinst.fetch;
         let rd = dinst.rd as u32;
 
@@ -1045,24 +1047,53 @@ impl Emulator {
     }
 
     pub fn run(&mut self, trace: &mut Trace, row_count: usize, end_cycle: u32) -> Result<bool> {
+        let mut m_inst_cache = std::mem::take(&mut self.m_inst_cache);
+        let mut us_inst_cache = std::mem::take(&mut self.m_inst_cache);
+
+        let res = self.run_inner(
+            trace,
+            &mut m_inst_cache,
+            &mut us_inst_cache,
+            row_count,
+            end_cycle,
+        );
+
+        self.m_inst_cache = m_inst_cache;
+        self.us_inst_cache = us_inst_cache;
+
+        res
+    }
+
+    fn run_inner(
+        &mut self,
+        trace: &mut Trace,
+        m_inst_cache: &mut InstCache,
+        us_inst_cache: &mut InstCache,
+        row_count: usize,
+        end_cycle: u32,
+    ) -> Result<bool> {
         self.do_resume(trace)?;
 
         while !self.is_done(trace, row_count, end_cycle) {
-            let mut decode_wit_index = if self.mode == MODE_MACHINE {
-                self.m_inst_cache.get(&self.pc).cloned()
+            let decode_wit_index_entry = if self.mode == MODE_MACHINE {
+                m_inst_cache.entry(self.pc)
             } else {
-                self.us_inst_cache.get(&self.pc).cloned()
+                us_inst_cache.entry(self.pc)
             };
-            if decode_wit_index.is_none() {
-                decode_wit_index = self.fetch_and_decode()?.map(|b| trace.add_block(b));
-            }
 
-            let Some(decode_wit_index) = decode_wit_index else {
-                self.trap(trace, "Invalid PC or instruction in user mode")?;
-                self.cur_cycle += 1;
-                self.user_cycles += 1;
-                self.pc = self.new_pc;
-                continue;
+            let decode_wit_index = match decode_wit_index_entry {
+                BTreeMapEntry::Occupied(entry) => entry.get().clone(),
+                BTreeMapEntry::Vacant(entry) => {
+                    if let Some(b) = self.fetch_and_decode()? {
+                        *entry.insert(trace.add_block(b))
+                    } else {
+                        self.trap(trace, "Invalid PC or instruction in user mode")?;
+                        self.cur_cycle += 1;
+                        self.user_cycles += 1;
+                        self.pc = self.new_pc;
+                        continue;
+                    }
+                }
             };
 
             let decode_wit = trace.get_block_mut(decode_wit_index);
@@ -1107,8 +1138,8 @@ impl Emulator {
 
         trace.globals_mut().finalCycle = self.cur_cycle;
         let cycle_count = (self.cur_cycle * 2).div_ceil(16) * 16;
-        for _ in (0..cycle_count).step_by(16) {
-            trace.add_block(MakeTableWitness { table: 2, start: 1 });
+        for i in (0..cycle_count).step_by(16) {
+            trace.add_block(MakeTableWitness { table: 2, start: i });
         }
 
         trace.set_user_cycles(self.user_cycles);
@@ -1117,12 +1148,12 @@ impl Emulator {
     }
 
     fn add_tables(&self, trace: &mut Trace) {
-        for _ in (0..256).step_by(16) {
-            trace.add_block(MakeTableWitness { table: 0, start: 1 });
+        for i in (0..256).step_by(16) {
+            trace.add_block(MakeTableWitness { table: 0, start: i });
         }
 
-        for _ in (0..65536).step_by(16) {
-            trace.add_block(MakeTableWitness { table: 1, start: 1 });
+        for i in (0..65536).step_by(16) {
+            trace.add_block(MakeTableWitness { table: 1, start: i });
         }
     }
 

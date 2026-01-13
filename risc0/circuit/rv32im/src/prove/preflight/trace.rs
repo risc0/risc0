@@ -49,7 +49,7 @@ pub struct Trace<'a> {
     aux: &'a mut [u32],
     aux_next: usize,
 
-    globals: GlobalsWitness,
+    globals: TraceIndex<GlobalsWitness>,
     user_cycles: u32,
 
     cursors: EnumMap<BlockType, BlockCursor>,
@@ -57,30 +57,36 @@ pub struct Trace<'a> {
 
 impl<'a> Trace<'a> {
     pub fn new(rows: &'a mut [RowInfo], aux: &'a mut [u32]) -> Self {
-        Self {
+        let mut s_ = Self {
             rows,
             row_next: 0,
             aux,
             aux_next: 0,
 
-            globals: GlobalsWitness {
-                rootIn: FpDigest::default(),
-                rootOut: FpDigest::default(),
-                p2Count: 0,
-                finalCycle: 0,
-                v2Compat: 0,
+            globals: TraceIndex {
+                aux_idx: 0,
+                _witness: PhantomData,
             },
             user_cycles: 0,
             cursors: EnumMap::default(),
-        }
+        };
+        let idx = s_.add_block(GlobalsWitness {
+            rootIn: FpDigest::default(),
+            rootOut: FpDigest::default(),
+            p2Count: 0,
+            finalCycle: 0,
+            v2Compat: 0,
+        });
+        s_.globals = idx;
+        s_
     }
 
     pub fn globals(&self) -> &GlobalsWitness {
-        &self.globals
+        self.get_block(self.globals)
     }
 
     pub fn globals_mut(&mut self) -> &mut GlobalsWitness {
-        &mut self.globals
+        self.get_block_mut(self.globals)
     }
 
     pub fn get_row_count(&self) -> usize {
