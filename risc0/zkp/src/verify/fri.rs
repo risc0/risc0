@@ -38,9 +38,13 @@ struct VerifyRoundInfo<'a, F: Field> {
 }
 
 impl<'a, F: Field> VerifyRoundInfo<'a, F> {
-    pub fn new(iop: &mut ReadIOP<'a, F>, hashfn: &dyn HashFn<F>, in_domain: usize) -> Self {
+    pub fn new(
+        iop: &mut ReadIOP<'a, F>,
+        hashfn: &dyn HashFn<F>,
+        in_domain: usize,
+    ) -> Result<Self, VerificationError> {
         let domain = in_domain / FRI_FOLD;
-        VerifyRoundInfo {
+        Ok(VerifyRoundInfo {
             domain,
             merkle: MerkleTreeVerifier::new(
                 iop,
@@ -48,9 +52,9 @@ impl<'a, F: Field> VerifyRoundInfo<'a, F> {
                 domain,
                 FRI_FOLD * F::ExtElem::EXT_SIZE,
                 QUERIES,
-            ),
+            )?,
             mix: iop.random_ext_elem(),
-        }
+        })
     }
 }
 
@@ -106,14 +110,18 @@ where
         let rounds_capacity = log2_ceil(degree.div_ceil(FRI_FOLD).div_ceil(FRI_FOLD_PO2));
         let mut rounds = Vec::with_capacity(rounds_capacity);
         while degree > FRI_MIN_DEGREE {
-            rounds.push(VerifyRoundInfo::new(self.iop().deref_mut(), hashfn, domain));
+            rounds.push(VerifyRoundInfo::new(
+                self.iop().deref_mut(),
+                hashfn,
+                domain,
+            )?);
             domain /= FRI_FOLD;
             degree /= FRI_FOLD;
         }
         // We want to minimize reallocation in verify, so make sure we
         // didn't have to reallocate.
         assert!(
-            rounds.len() < rounds_capacity,
+            rounds.len() <= rounds_capacity,
             "Did not allocate enough rounds; needed {} for degree {} but only allocated {}",
             rounds.len(),
             degree,
@@ -122,7 +130,7 @@ where
         // Grab the final coeffs + commit
         let final_coeffs = self
             .iop()
-            .read_field_elem_slice(F::ExtElem::EXT_SIZE * degree);
+            .read_field_elem_slice(F::ExtElem::EXT_SIZE * degree)?;
         let final_digest = hashfn.hash_elem_slice(final_coeffs);
         self.iop().commit(&final_digest);
         // Get the generator for the final polynomial evaluations

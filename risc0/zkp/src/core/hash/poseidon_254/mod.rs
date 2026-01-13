@@ -98,7 +98,7 @@ struct Poseidon254HashFn;
 pub fn digest_to_fr(digest: &Digest) -> Fr {
     let mut repr: FrRepr = FrRepr::default();
     repr.as_mut().clone_from_slice(digest.as_bytes());
-    Fr::from_repr(repr).unwrap()
+    Fr::from_repr_vartime(repr).unwrap()
 }
 
 fn fr_to_digest(fr: &Fr) -> Digest {
@@ -154,6 +154,12 @@ impl HashFn<BabyBear> for Poseidon254HashFn {
         Box::new(unpadded_hash(
             slice.iter().flat_map(|ee| ee.subelems().iter()),
         ))
+    }
+
+    fn is_digest_valid(&self, digest: &Digest) -> bool {
+        let mut repr: FrRepr = FrRepr::default();
+        repr.as_mut().clone_from_slice(digest.as_bytes());
+        Fr::from_repr_vartime(repr).is_some()
     }
 }
 

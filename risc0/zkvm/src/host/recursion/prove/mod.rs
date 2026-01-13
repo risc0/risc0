@@ -636,8 +636,8 @@ impl Prover {
         // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
         // which lift program we are going to run.
         let mut iop = ReadIOP::new(seal, inner_hash_suite.rng.as_ref());
-        iop.read_field_elem_slice::<BabyBearElem>(out_size);
-        let po2 = *iop.read_u32s(1).first().unwrap() as usize;
+        iop.read_field_elem_slice::<BabyBearElem>(out_size)?;
+        let po2 = *iop.read_u32s(1)?.first().unwrap() as usize;
 
         // Instantiate the prover with the lift recursion program and its control ID.
         let (program, control_id) = match povw {
