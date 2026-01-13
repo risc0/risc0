@@ -27,7 +27,7 @@ use super::log2_ceil;
 /// ```rust
 /// # use risc0_zkp::core::ntt::bit_rev_32;
 /// #
-/// let a: u32 = 2^8 + 2^4 + 1;
+/// let a: u32 = 8 + 4 + 1;
 ///
 /// assert_eq!(format!("{:b}", a), "1101");
 /// assert_eq!(format!("{:b}", bit_rev_32(a)), "10110000000000000000000000000000");

@@ -23,7 +23,6 @@ Populator::Populator(RecordingContext& ctx) : builder(ctx.mlirCtx), zero(ctx.zer
 }
 
 mlir::Value Populator::lookup(const char* memberName) {
-  llvm::outs() << "lookup " << memberName << "\n";
   mlir::Value layout = path.back();
   mlir::StringAttr name = builder.getStringAttr(memberName);
   mlir::Value sublayout =

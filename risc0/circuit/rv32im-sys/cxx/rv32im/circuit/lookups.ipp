@@ -69,12 +69,18 @@ template <typename C> FDEV void MakeTableBlock<C>::finalize(CTX) DEV {
   }
 }
 
+#define TABLE_ARGUMENT(ctx, ta) PICUS_ARGUMENT(ctx, {}, ({ctx.get(ta.table), ctx.get(ta.start)}))
+
 template <typename C> FDEV void MakeTableBlock<C>::verify(CTX) DEV {}
 
 template <typename C> FDEV void MakeTableBlock<C>::addArguments(CTX) DEV {
-  ctx.pull(MakeTableArgument<C>(table.get(), start.get()));
+  MakeTableArgument<C> ta(table.get(), start.get());
+  ctx.pull(ta);
+  TABLE_ARGUMENT(ctx, ta);
   ctx.push(MakeTableArgument<C>(table.get(), start.get() + 16));
+
   for (size_t i = 0; i < 16; i++) {
+    PICUS_INPUT(ctx, useCount[i]);
     ctx.addArgument(useCount[i].get(), LookupArgument<C>(table.get(), start.get() + i));
   }
 }

@@ -43,7 +43,9 @@ impl<H: Hal + ?Sized> MerkleTreeProver<H> {
     /// Generate a merkle tree from a matrix of values.
     ///
     /// The proofs will prove a single 'column' of values in the tree at a
-    /// certain row. Layout is presumed to be packed row-major.
+    /// certain row. The matrix buffer has length `rows * cols` and is indexed
+    /// as `matrix[row + col * rows]`, so for a fixed `row` the `cols` values
+    /// are stored at stride `rows`.
     /// The number of queries represents the expected # of queries and
     /// determines the size of the 'top' layer. It is important that the
     /// verifier is constructed with identical size parameters, including # of
@@ -276,7 +278,7 @@ mod tests {
             iop.proof[manip_idx] ^= 1;
         }
         let mut r_iop = ReadIOP::new(&iop.proof, rng);
-        let verifier = MerkleTreeVerifier::new(&mut r_iop, hashfn, rows, cols, queries);
+        let verifier = MerkleTreeVerifier::new(&mut r_iop, hashfn, rows, cols, queries).unwrap();
         assert_eq!(verifier.root(), prover.root());
         let mut err = false;
         for query in 0..queries {
@@ -307,7 +309,7 @@ mod tests {
             }
         }
         if !err {
-            r_iop.verify_complete();
+            r_iop.verify_complete().unwrap();
         }
     }
 
@@ -474,10 +476,10 @@ mod tests {
         let rng = hal.get_hash_suite().rng.as_ref();
 
         let mut iop = ReadIOP::new(&transcript, rng);
-        let verifier = MerkleTreeVerifier::new(&mut iop, hashfn, rows, cols, queries);
+        let verifier = MerkleTreeVerifier::new(&mut iop, hashfn, rows, cols, queries).unwrap();
 
         let q = iop.random_bits(log2_ceil(rows)) as usize;
         verifier.verify(&mut iop, hashfn, q).unwrap();
-        iop.verify_complete();
+        iop.verify_complete().unwrap();
     }
 }

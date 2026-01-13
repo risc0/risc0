@@ -13,9 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "RecordingVal.h"
-#include "compiler/extractor/RecordingContext.h"
 #include "compiler/extractor/RecordingVal.h"
+#include "compiler/extractor/RecordingContext.h"
 #include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
 
 using namespace mlir;
