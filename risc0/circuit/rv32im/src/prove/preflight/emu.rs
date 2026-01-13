@@ -59,6 +59,12 @@ const CYCLE_TABLE_ROWS: u32 = 24;
 
 type InstCache = BTreeMap<u32, TraceIndex<DecodeWitness>>;
 
+/// Interpret given u32 as signed as do abs. If its i32::MIN, it is left alone.
+fn u32_abs(u: u32) -> u32 {
+    let s = u as i32;
+    if s == i32::MIN { u } else { s.abs() as u32 }
+}
+
 pub struct Emulator {
     memory: PagedMemory,
     pages: Vec<Option<PageDetails>>,
@@ -553,7 +559,7 @@ impl Emulator {
         if matches!(Opt::DIV_KIND.unwrap(), DivKind::S) {
             // Intel processors actually fault if you do a signed division on MIN_INT
             // by 1/-1
-            if a == 0x80000000 && (b as i32).abs() == 1 {
+            if a == 0x80000000 && u32_abs(b) == 1 {
                 unit.out0 = 0x80000000;
                 unit.out1 = 0;
             } else {
@@ -567,12 +573,10 @@ impl Emulator {
             }
             let abs_quot: u32 = if b == 0 {
                 0xffffffff
-            } else if unit.out0 as i32 != i32::MIN {
-                (unit.out0 as i32).abs() as u32
             } else {
-                unit.out0
+                u32_abs(unit.out0)
             };
-            self.unit_mul::<MulUuOptions>(trace, abs_quot, (b as i32).abs() as u32);
+            self.unit_mul::<MulUuOptions>(trace, abs_quot, u32_abs(b));
         } else {
             if b == 0 {
                 unit.out0 = 0xffffffff;
