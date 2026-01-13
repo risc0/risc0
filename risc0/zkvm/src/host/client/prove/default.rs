@@ -35,7 +35,7 @@ use crate::{
 
 use super::{Executor, Prover, ProverOpts};
 
-/// TODO
+/// A prover implementation that manages a local `r0vm` process for proof generation.
 pub struct DefaultProver {
     child: Child,
     socket: UnixStream,
@@ -61,7 +61,7 @@ impl DefaultProver {
         Ok(Self { child, socket })
     }
 
-    /// TODO
+    /// Stops the `r0vm` prover process and waits for it to terminate.
     pub fn stop(&mut self) -> Result<()> {
         self.socket.shutdown(std::net::Shutdown::Both)?;
         self.child.wait()?;
