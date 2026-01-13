@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -19,6 +19,7 @@
 //! operations across the RISC Zero zkVM architecture
 
 use alloc::vec::Vec;
+use bytemuck::checked::CheckedCastError;
 use core::{cmp, fmt::Debug, ops};
 
 pub mod baby_bear;
@@ -158,6 +159,12 @@ pub trait Elem: 'static
     /// These elements may not be INVALID.
     fn from_u32_slice(u32s: &[u32]) -> &[Self] {
         bytemuck::checked::cast_slice(u32s)
+    }
+
+    /// Interprets a slice of u32s as a slice of these elements.
+    /// These elements may not be INVALID.
+    fn try_from_u32_slice(u32s: &[u32]) -> Result<&[Self], CheckedCastError> {
+        bytemuck::checked::try_cast_slice(u32s)
     }
 }
 

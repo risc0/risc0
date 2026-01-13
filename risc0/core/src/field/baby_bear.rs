@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -42,11 +42,11 @@ impl field::Field for BabyBear {
 const M: u32 = 0x88000001;
 const R2: u32 = 1172168163;
 
-/// The BabyBear class is an element of the finite field F_p, where P is the
-/// prime number 15*2^27 + 1. Put another way, Fp is basically integer
-/// arithmetic modulo P.
+/// The `Elem` type represents an element of the finite field F_p, where P is the
+/// prime number 15*2^27 + 1. Put another way, elements of F_p are basically
+/// integer arithmetic modulo P.
 ///
-/// The `Fp` datatype is the core type of all of the operations done within the
+/// The `Elem` datatype is the core type of all of the operations done within the
 /// zero knowledge proofs, and is the smallest 'addressable' datatype, and the
 /// base type of which all composite types are built. In many ways, one can
 /// imagine it as the word size of a very strange architecture.
@@ -60,9 +60,9 @@ const R2: u32 = 1172168163;
 /// fourier transform equivalent on finite fields). See risc0_zkp::core::ntt
 /// for details.
 ///
-/// The Fp class wraps all the standard arithmetic operations to make the finite
+/// The `Elem` type wraps all the standard arithmetic operations to make the finite
 /// field elements look basically like ordinary numbers (which they mostly are).
-#[derive(Eq, Clone, Copy, NoUninit, Zeroable)]
+#[derive(Eq, Clone, Copy, NoUninit, Zeroable, PartialEq)]
 #[repr(transparent)]
 pub struct Elem(u32);
 
@@ -276,12 +276,6 @@ impl ops::Neg for Elem {
 
     fn neg(self) -> Self {
         Elem(0) - *self.ensure_valid()
-    }
-}
-
-impl PartialEq<Elem> for Elem {
-    fn eq(&self, rhs: &Self) -> bool {
-        self.ensure_valid().0 == rhs.ensure_valid().0
     }
 }
 
@@ -913,13 +907,6 @@ mod tests {
             assert_eq!(fa - fb, Elem::from(a + (P_U64 - b)));
             assert_eq!(fa * fb, Elem::from(a * b));
         }
-    }
-
-    #[test]
-    #[cfg_attr(not(debug_assertions), ignore)]
-    #[should_panic(expected = "assertion failed: self.is_valid")]
-    fn compare_against_invalid() {
-        let _ = Elem::ZERO == Elem::INVALID;
     }
 
     #[test]

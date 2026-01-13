@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,12 +17,11 @@ use std::collections::HashMap;
 
 use anyhow::{Context, Result, anyhow, bail, ensure};
 
-use super::{ProverServer, keccak::prove_keccak};
+use super::{PreflightIter, ProverServer, keccak::prove_keccak};
 use crate::{
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
-    MaybePruned, Output, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
-    UnionClaim, Unknown, VerifierContext, WorkClaim,
-    claim::merge::Merge,
+    MaybePruned, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
+    SuccinctReceiptVerifierParameters, UnionClaim, Unknown, VerifierContext, WorkClaim,
     host::{
         client::prove::opts::ReceiptKind,
         prove_info::ProveInfo,
@@ -45,8 +44,8 @@ pub struct ProverImpl {
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
-    pub fn new(opts: ProverOpts) -> Self {
-        Self { opts }
+    pub fn new(opts: ProverOpts) -> Result<Self> {
+        Ok(Self { opts })
     }
 }
 
@@ -81,38 +80,20 @@ impl ProverServer for ProverImpl {
             &self.opts.hashfn
         );
 
+        #[cfg(all(test, feature = "cuda"))]
+        gpu_guard::assert_gpu_semaphore_held();
+
         let mut segments = Vec::new();
-        for segment_ref in session.segments.iter() {
-            let segment = segment_ref.resolve()?;
+        for segment in session.segments() {
+            let segment = segment?;
             for hook in &session.hooks {
                 hook.on_pre_prove_segment(&segment);
             }
-            segments.push(self.prove_segment(ctx, &segment)?);
+            segments.extend(self.prove_segment(ctx, &segment)?);
             for hook in &session.hooks {
                 hook.on_post_prove_segment(&segment);
             }
         }
-
-        let (assumptions, session_assumption_receipts): (Vec<_>, Vec<_>) =
-            session.assumptions.iter().cloned().unzip();
-
-        // Merge the output, including journal digest and assumptions, into the last segment.
-        segments
-            .last_mut()
-            .ok_or_else(|| anyhow!("session is empty"))?
-            .claim
-            .output
-            .merge_with(
-                &session
-                    .journal
-                    .as_ref()
-                    .map(|journal| Output {
-                        journal: MaybePruned::Pruned(journal.digest()),
-                        assumptions: assumptions.into(),
-                    })
-                    .into(),
-            )
-            .context("failed to merge output into final segment claim")?;
 
         let verifier_parameters = ctx
             .composite_verifier_parameters()
@@ -122,8 +103,14 @@ impl ProverServer for ProverImpl {
         let mut zkr_receipts = HashMap::new();
         let mut keccak_receipts: MerkleMountainAccumulator<UnionPeak> =
             MerkleMountainAccumulator::new();
+
+        let keccak_ctx = VerifierContext::default()
+            .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters::for_keccak());
+
         for proof_request in session.pending_keccaks.iter() {
-            let receipt = prove_keccak(proof_request)?;
+            let receipt = prove_keccak(proof_request).context("prove keccak")?;
+            receipt.verify_integrity_with_context(&keccak_ctx)?;
+
             tracing::debug!("adding keccak assumption: {}", receipt.claim.digest());
             keccak_receipts.insert(receipt)?;
         }
@@ -138,6 +125,9 @@ impl ProverServer for ProverImpl {
             tracing::debug!("keccak root assumption: {:?}", assumption);
             zkr_receipts.insert(assumption, root_receipt.clone());
         }
+
+        let (_, session_assumption_receipts): (Vec<_>, Vec<_>) =
+            session.assumptions.iter().cloned().unzip();
 
         // TODO: add test case for when a single session refers to the same assumption multiple times
         let inner_assumption_receipts: Vec<_> = session_assumption_receipts
@@ -225,44 +215,28 @@ impl ProverServer for ProverImpl {
         );
     }
 
-    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
         tracing::debug!("segment_preflight");
-
-        ensure!(
-            segment.po2() <= self.opts.max_segment_po2,
-            "segment po2 exceeds max on ProverOpts: {} > {}",
+        Ok(Box::new(rv32im_m3::PreflightIter::new(
+            segment,
             segment.po2(),
-            self.opts.max_segment_po2
-        );
-        let inner = risc0_circuit_rv32im::prove::segment_prover()?.preflight(&segment.inner)?;
-
-        Ok(PreflightResults {
-            inner,
-            terminate_state: segment.inner.claim.terminate_state,
-            output: segment.output.clone(),
-            segment_index: segment.index,
-        })
+            segment.index,
+        )?))
     }
 
-    fn prove_segment_core(
+    fn prove_preflight(
         &self,
         ctx: &VerifierContext,
         preflight_results: PreflightResults,
     ) -> Result<SegmentReceipt> {
-        tracing::debug!("prove_segment_core");
-
-        ensure!(
-            self.opts.hashfn == "poseidon2",
-            "provided `ProverOpts` has unsupported `hashfn` value of \"{}\"; \
-            supported `hashfn` values are: \"poseidon2\".",
-            &self.opts.hashfn
-        );
+        tracing::debug!("prove_preflight");
 
         let po2 = preflight_results.inner.po2();
-        let seal =
-            risc0_circuit_rv32im::prove::segment_prover()?.prove_core(preflight_results.inner)?;
-        let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(po2))?;
-        claim.output = preflight_results.output.into();
+        let prover = risc0_circuit_rv32im::prove::segment_prover(po2 as usize)?;
+        let seal = prover.prove(&preflight_results.inner)?;
+
+        let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output.clone())
+            .context("Decode ReceiptClaim from seal")?;
 
         let verifier_parameters = ctx
             .segment_verifier_parameters
@@ -271,7 +245,7 @@ impl ProverServer for ProverImpl {
             .digest();
         let receipt = SegmentReceipt {
             seal,
-            index: preflight_results.segment_index,
+            index: preflight_results.segment_index(),
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,
@@ -400,4 +374,70 @@ fn check_claims(
         );
     }
     Ok(())
+}
+
+mod rv32im_m3 {
+    use risc0_circuit_rv32im::TerminateState;
+
+    use super::*;
+    use crate::{MaybePruned, Output};
+
+    pub(crate) struct PreflightIter {
+        max_prover_po2: usize,
+        ctx: risc0_circuit_rv32im::prove::SegmentContext,
+        output: MaybePruned<Option<Output>>,
+        terminate_state: Option<TerminateState>,
+        is_done: bool,
+        segment_index: u32,
+    }
+
+    impl PreflightIter {
+        pub(crate) fn new(
+            segment: &Segment,
+            max_prover_po2: usize,
+            segment_index: u32,
+        ) -> Result<Self> {
+            let terminate_state = segment.inner.terminate_state;
+            let ctx = risc0_circuit_rv32im::prove::SegmentContext::new(&segment.inner)?;
+            Ok(Self {
+                max_prover_po2,
+                ctx,
+                output: segment.output.clone(),
+                terminate_state,
+                is_done: false,
+                segment_index,
+            })
+        }
+    }
+
+    impl Iterator for PreflightIter {
+        type Item = Result<PreflightResults>;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            if self.is_done {
+                return None;
+            }
+
+            match self.ctx.preflight(self.max_prover_po2) {
+                Ok(preflight) => {
+                    self.is_done = preflight.is_final();
+                    let results = PreflightResults {
+                        inner: preflight,
+                        terminate_state: self.terminate_state,
+                        output: if self.is_done {
+                            self.output.clone()
+                        } else {
+                            Default::default()
+                        },
+                        segment_index: self.segment_index,
+                    };
+                    Some(Ok(results))
+                }
+                Err(err) => {
+                    self.is_done = true;
+                    Some(Err(err))
+                }
+            }
+        }
+    }
 }

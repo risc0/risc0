@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -28,7 +28,7 @@ pub(crate) mod syscall;
 mod tests;
 
 use std::{
-    io::Write,
+    io::{ErrorKind, Write},
     sync::{Arc, Mutex},
 };
 
@@ -36,6 +36,37 @@ use std::{
 #[derive(Clone, Default)]
 struct Journal {
     buf: Arc<Mutex<Vec<u8>>>,
+}
+
+impl Journal {
+    /// Wrap the [Journal] in a writer that limits the total amount of data that can be written.
+    pub(crate) fn limit_writer(&self, limit: usize) -> impl Write + 'static {
+        struct LimitedWriter {
+            journal: Journal,
+            limit: usize,
+        }
+
+        impl Write for LimitedWriter {
+            fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+                let mut vec = self.journal.buf.lock().unwrap();
+                if buf.len() + vec.len() > self.limit {
+                    let err =
+                        std::io::Error::new(ErrorKind::WriteZero, "journal write limit reached");
+                    return Err(err);
+                }
+                vec.write(buf)
+            }
+
+            fn flush(&mut self) -> std::io::Result<()> {
+                self.journal.flush()
+            }
+        }
+
+        LimitedWriter {
+            journal: self.clone(),
+            limit,
+        }
+    }
 }
 
 impl Write for Journal {

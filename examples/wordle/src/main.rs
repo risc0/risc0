@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -134,13 +134,12 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use serial_test::serial;
     use wordle_core::LetterFeedback;
 
     use crate::{Player, Server};
 
     #[test]
-    #[serial]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn main() {
         const TEST_GUESS_WRONG: &str = "roofs";
         const TEST_GUESS_RIGHT: &str = "proof";
@@ -167,7 +166,7 @@ mod tests {
     /// appear, and also in an incorrect position, the 'bonus' letter
     /// shouldn't flag yellow
     #[test]
-    #[serial]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn test_partial_match_false_positives() {
         let server = Server::new("spare");
         let player = Player {

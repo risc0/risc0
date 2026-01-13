@@ -3,15 +3,24 @@ name = "risc0-zkvm-methods"
 version = { workspace = true }
 edition = { workspace = true }
 
-[build-dependencies]
-risc0-build = { workspace = true }
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-
 [package.metadata.release]
 release = false
 
 [package.metadata.risc0]
-methods = ["cfg", "guest", "heap", "rand", "rand2", "std", "std-ext", "cpp-crates", "env"]
+methods = [
+    "cfg",
+    "guest",
+    "heap",
+    "rand",
+    "rand2",
+    "std",
+    "std-ext",
+    "cpp-crates",
+    "env",
+]
+
+[features]
+std = ["dep:bincode", "risc0-zkvm/std"]
 
 [dependencies]
 bincode = { version = "1.3", optional = true }
@@ -23,5 +32,6 @@ risc0-zkvm-platform = { workspace = true }
 rmp-serde = "1.3"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 
-[features]
-std = ["dep:bincode", "risc0-zkvm/std"]
+[build-dependencies]
+risc0-build = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

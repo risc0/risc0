@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -15,6 +15,7 @@
 
 use std::{env, path::PathBuf};
 
+use anyhow::{Context, Result};
 use cargo_metadata::Package;
 use derive_builder::Builder;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
@@ -43,10 +44,12 @@ pub struct DockerOptions {
 
 impl DockerOptions {
     /// Get the configured root dir, or current working directory if None.
-    pub fn root_dir(&self) -> PathBuf {
-        self.root_dir
-            .clone()
-            .unwrap_or_else(|| env::current_dir().unwrap())
+    pub fn root_dir(&self) -> Result<PathBuf> {
+        if let Some(root_dir) = &self.root_dir {
+            Ok(root_dir.clone())
+        } else {
+            Ok(env::current_dir().context("Failed to get current directory")?)
+        }
     }
 
     /// Get the configured custom environment variables.
@@ -129,7 +132,7 @@ impl From<&Package> for GuestMetadata {
         let Some(obj) = pkg.metadata.get("risc0") else {
             return Default::default();
         };
-        serde_json::from_value(obj.clone()).unwrap()
+        serde_json::from_value(obj.clone()).unwrap_or_default()
     }
 }
 

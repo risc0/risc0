@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -486,9 +486,9 @@ pub unsafe extern "C" fn sys_poseidon2(
     out_buf_addr: *mut [u32; DIGEST_WORDS],
     bits_count: u32,
 ) {
-    debug_assert!(state_addr as usize % WORD_SIZE == 0);
-    debug_assert!(in_buf_addr as usize % WORD_SIZE == 0);
-    debug_assert!(out_buf_addr as usize % WORD_SIZE == 0);
+    debug_assert!((state_addr as usize).is_multiple_of(WORD_SIZE));
+    debug_assert!((in_buf_addr as usize).is_multiple_of(WORD_SIZE));
+    debug_assert!((out_buf_addr as usize).is_multiple_of(WORD_SIZE));
 
     unsafe {
         ecall_3(
@@ -882,7 +882,13 @@ pub unsafe extern "C" fn sys_verify_integrity(
     }
 }
 
-/// TODO: Send a ReceiptClaim digest to the host to request verification. Meant for proofs that use union.
+/// Send a claim digest and control root to the host to register an unresolved assumption.
+///
+/// This is a lower-level companion to [`sys_verify_integrity`] used for advanced
+/// composition flows (for example, when aggregating accelerator proofs via union).
+/// Instead of resolving a pre-registered assumption, this syscall asks the host to
+/// create a new assumption identified by the given `(claim_digest, control_root)`,
+/// which will be resolved by a later proof.
 ///
 /// # Safety
 ///

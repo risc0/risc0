@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -22,6 +22,7 @@ use std::{
 };
 
 use anyhow::{Context as _, Result, bail, ensure};
+use risc0_zkvm_platform::fileno;
 use serde::de::DeserializeOwned;
 
 use crate::{
@@ -34,7 +35,7 @@ use crate::{
 
 use super::{Executor, Prover, ProverOpts};
 
-/// TODO
+/// A prover implementation that manages a local `r0vm` process for proof generation.
 pub struct DefaultProver {
     child: Child,
     socket: UnixStream,
@@ -49,7 +50,9 @@ impl DefaultProver {
         let (socket, child_socket) = UnixStream::pair()?;
         let child_fd: OwnedFd = child_socket.into();
         let mut cmd = Command::new(r0vm_path);
-        cmd.stdin(child_fd).arg("--rpc");
+        cmd.env_remove("RISC0_DEV_MODE")
+            .stdin(child_fd)
+            .arg("--rpc");
         if let Ok(num_gpus) = std::env::var("RISC0_DEFAULT_PROVER_NUM_GPUS") {
             cmd.arg("--num-gpus").arg(num_gpus);
         }
@@ -58,7 +61,7 @@ impl DefaultProver {
         Ok(Self { child, socket })
     }
 
-    /// TODO
+    /// Stops the `r0vm` prover process and waits for it to terminate.
     pub fn stop(&mut self) -> Result<()> {
         self.socket.shutdown(std::net::Shutdown::Both)?;
         self.child.wait()?;
@@ -91,7 +94,15 @@ impl Prover for DefaultProver {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<ProveInfo> {
-        let result = self.prove(env, elf, false /* execute_only */)?;
+        let stdout_writer = env
+            .posix_io
+            .borrow()
+            .get_writer(fileno::STDOUT)
+            .ok()
+            .clone();
+
+        let dev_mode = opts.dev_mode();
+        let result = self.prove(env, elf, false /* execute_only */, dev_mode)?;
 
         let mut prove_info = ProveInfo {
             receipt: Arc::into_inner(result.receipt.unwrap()).unwrap(),
@@ -102,22 +113,30 @@ impl Prover for DefaultProver {
         prove_info.stats.log_if_risc0_info_set();
 
         if opts.receipt_kind == ReceiptKind::Groth16 {
-            prove_info.receipt = self.shrink_wrap_groth16(&prove_info.receipt)?;
+            prove_info.receipt = self.shrink_wrap_groth16(&prove_info.receipt, dev_mode)?;
+        }
+
+        if let Some(stdout_writer) = stdout_writer {
+            stdout_writer
+                .borrow_mut()
+                .write_all(&result.session.stdout)?;
         }
 
         Ok(prove_info)
     }
 
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        let dev_mode = opts.dev_mode();
+
         match &receipt.inner {
             InnerReceipt::Composite(_) => match opts.receipt_kind {
                 ReceiptKind::Composite => Ok(receipt.clone()),
                 ReceiptKind::Succinct => unimplemented!("missing composite -> succinct conversion"),
-                ReceiptKind::Groth16 => self.shrink_wrap_groth16(receipt),
+                ReceiptKind::Groth16 => self.shrink_wrap_groth16(receipt, dev_mode),
             },
             InnerReceipt::Succinct(_) => match opts.receipt_kind {
                 ReceiptKind::Composite | ReceiptKind::Succinct => Ok(receipt.clone()),
-                ReceiptKind::Groth16 => self.shrink_wrap_groth16(receipt),
+                ReceiptKind::Groth16 => self.shrink_wrap_groth16(receipt, dev_mode),
             },
             InnerReceipt::Groth16(_) => match opts.receipt_kind {
                 ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Groth16 => {
@@ -126,7 +145,7 @@ impl Prover for DefaultProver {
             },
             InnerReceipt::Fake(_) => {
                 ensure!(
-                    opts.dev_mode(),
+                    dev_mode,
                     "dev mode must be enabled to compress fake receipts"
                 );
                 Ok(receipt.clone())
@@ -137,11 +156,15 @@ impl Prover for DefaultProver {
 
 impl Executor for DefaultProver {
     fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
-        Ok(
-            Arc::into_inner(self.prove(env, elf, true /* execute_only */)?.session)
-                .unwrap()
-                .into(),
+        Ok(Arc::into_inner(
+            self.prove(
+                env, elf, true,  /* execute_only */
+                false, /* dev_mode */
+            )?
+            .session,
         )
+        .unwrap()
+        .into())
     }
 }
 
@@ -186,22 +209,30 @@ impl DefaultProver {
         })
     }
 
-    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8], execute_only: bool) -> Result<ProofResult> {
+    fn prove(
+        &self,
+        env: ExecutorEnv<'_>,
+        elf: &[u8],
+        execute_only: bool,
+        dev_mode: bool,
+    ) -> Result<ProofResult> {
         let proof_request = ProofRequest {
             binary: elf.to_vec(),
             input: env.input,
             assumptions: env.assumptions.borrow().0.clone(),
             segment_limit_po2: env.segment_limit_po2,
             execute_only,
+            dev_mode,
         };
 
         self.rpc_request(proof_request)
     }
 
-    fn shrink_wrap_groth16(&self, receipt: &Receipt) -> Result<Receipt> {
+    fn shrink_wrap_groth16(&self, receipt: &Receipt, dev_mode: bool) -> Result<Receipt> {
         let shrink_wrap_request = ShrinkWrapRequest {
             kind: ShrinkWrapKind::Groth16,
             receipt: receipt.clone(),
+            dev_mode,
         };
         let result: ShrinkWrapResult = self.rpc_request(shrink_wrap_request)?;
         Ok(Arc::into_inner(result.receipt).unwrap())

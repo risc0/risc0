@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -60,12 +60,13 @@ pub struct MerkleProof {
 impl MerkleGroup {
     /// Create a new [MerkleGroup] from the given leaves.
     /// Will fail if too many leaves are given for the default depth.
-    pub fn new(leaves: Vec<Digest>) -> Result<Self> {
+    pub fn new(mut leaves: Vec<Digest>) -> Result<Self> {
         let max_len = 1 << ALLOWED_CODE_MERKLE_DEPTH;
         ensure!(
             leaves.len() < max_len,
             "a maximum of {max_len} leaves can be added to a MerkleGroup"
         );
+        leaves.sort();
         Ok(Self {
             depth: ALLOWED_CODE_MERKLE_DEPTH as u32,
             leaves,
@@ -204,8 +205,8 @@ mod tests {
         tracing::trace!("Proof3: {proof3:?}");
 
         proof1.verify(&digest1, &root, hashfn).unwrap();
-        proof1.verify(&digest1, &root, hashfn).unwrap();
-        proof1.verify(&digest1, &root, hashfn).unwrap();
+        proof2.verify(&digest2, &root, hashfn).unwrap();
+        proof3.verify(&digest3, &root, hashfn).unwrap();
 
         // Digest1 and digest2 should share 3 levels of proof, whereas proof2 and proof3
         // should only share 2

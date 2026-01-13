@@ -11,21 +11,22 @@ publish = false
 [package.metadata.release]
 release = false
 
+[package.metadata.risc0]
+methods = ["log-builder"]
+
+[build-dependencies]
+risc0-build = { workspace = true }
+
 [dev-dependencies]
 anyhow = "1.0"
 borsh = { version = "1.5", default-features = false, features = ["std"] }
+gpu-guard = { workspace = true }
 rand = "0.8"
 risc0-binfmt = { workspace = true }
 risc0-povw = { workspace = true, features = ["prover"] }
 risc0-zkvm = { workspace = true, features = ["client", "unstable"] }
 risc0-zkvm-methods = { path = "../../zkvm/methods" }
 ruint = { version = "1.15" }
-
-[build-dependencies]
-risc0-build = { workspace = true }
-
-[package.metadata.risc0]
-methods = ["log-builder"]
 
 [lints]
 workspace = true

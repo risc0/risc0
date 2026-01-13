@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -121,7 +121,7 @@ impl Component {
         match self {
             // rust toolchain uses date-based versions with r0. prefix
             Component::RustToolchain => {
-                format!("r0.{}.{}.{}", version.major, version.minor, version.patch)
+                format!("r0.{version}")
             }
             // cpp toolchain uses date-based versions
             Component::CppToolchain | Component::Gdb => format!(

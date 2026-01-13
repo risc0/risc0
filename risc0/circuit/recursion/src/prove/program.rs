@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -55,7 +55,9 @@ impl Program {
             po2,
         };
         assert_eq!(prog.code.len() % RECURSION_CODE_SIZE, 0);
-        assert!(prog.code.len() <= (RECURSION_CODE_SIZE * ((1 << po2) - ZK_CYCLES)));
+        let lhs = prog.code.len();
+        let rhs = RECURSION_CODE_SIZE * ((1 << po2) - ZK_CYCLES);
+        assert!(lhs <= rhs, "{lhs} <= {rhs}");
         prog
     }
 

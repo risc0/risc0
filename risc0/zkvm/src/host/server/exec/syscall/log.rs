@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -37,19 +37,17 @@ impl Syscall for SysLog {
 
         let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        let writer = ctx
-            .syscall_table()
-            .posix_io
-            .borrow()
-            .get_writer(fileno::STDOUT)?;
 
         tracing::debug!("sys_log({buf_len} bytes)");
-
         let msg = format!("R0VM[{}] ", ctx.get_cycle());
-        writer
-            .borrow_mut()
-            .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
+
+        let posix_io = ctx.syscall_table().posix_io.clone();
+        let mut from_guest = ctx.read_region(buf_ptr, buf_len)?;
+        let writer = posix_io.borrow().get_writer(fileno::STDOUT)?;
+
+        writer.borrow_mut().write_all(msg.as_bytes())?;
+        std::io::copy(&mut from_guest, &mut *writer.borrow_mut())?;
+        writer.borrow_mut().write_all(b"\n".as_slice())?;
         Ok((0, 0))
     }
 }

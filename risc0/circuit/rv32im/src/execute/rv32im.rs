@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,9 +17,13 @@ use anyhow::Result;
 use derive_more::Debug;
 use risc0_binfmt::{ByteAddr, WordAddr};
 
+use crate::execute::RV32IM_V2_CIRCUIT_VERSION;
+
 use super::platform::{REG_MAX, REG_ZERO, WORD_SIZE};
 
 pub trait EmuContext {
+    fn circuit_version(&self) -> u32;
+
     // Handle environment call
     fn ecall(&mut self) -> Result<bool>;
 
@@ -64,7 +68,7 @@ pub trait EmuContext {
 }
 
 #[derive(Default)]
-pub struct Emulator;
+pub struct Emulator {}
 
 #[derive(Debug)]
 #[repr(u32)]
@@ -88,6 +92,7 @@ pub enum Exception {
 }
 
 impl Exception {
+    #[allow(dead_code)]
     pub fn as_u32(&self) -> u32 {
         unsafe { *(self as *const Self as *const u32) }
     }
@@ -159,9 +164,8 @@ pub enum InsnKind {
     Sh = 49, // major: 6, minor: 1
     Sw = 50, // major: 6, minor: 2
 
-    Eany = 56,  // major: 7, minor: 0
-    Mret = 57,  // major: 7, minor: 1
-    Fence = 58, // major: 7, minor: 2
+    Eany = 56, // major: 7, minor: 0
+    Mret = 57, // major: 7, minor: 1
 
     Invalid = 255,
 }
@@ -272,12 +276,12 @@ impl Emulator {
             // U-format auipc
             (0b0010111, _, _) => self.step_compute(ctx, InsnKind::Auipc, decoded),
             // B-format branch
-            (0b1100011, 0b000, _) => self.step_compute(ctx, InsnKind::Beq, decoded),
-            (0b1100011, 0b001, _) => self.step_compute(ctx, InsnKind::Bne, decoded),
-            (0b1100011, 0b100, _) => self.step_compute(ctx, InsnKind::Blt, decoded),
-            (0b1100011, 0b101, _) => self.step_compute(ctx, InsnKind::Bge, decoded),
-            (0b1100011, 0b110, _) => self.step_compute(ctx, InsnKind::BltU, decoded),
-            (0b1100011, 0b111, _) => self.step_compute(ctx, InsnKind::BgeU, decoded),
+            (0b1100011, 0b000, _) => self.step_branch(ctx, InsnKind::Beq, decoded),
+            (0b1100011, 0b001, _) => self.step_branch(ctx, InsnKind::Bne, decoded),
+            (0b1100011, 0b100, _) => self.step_branch(ctx, InsnKind::Blt, decoded),
+            (0b1100011, 0b101, _) => self.step_branch(ctx, InsnKind::Bge, decoded),
+            (0b1100011, 0b110, _) => self.step_branch(ctx, InsnKind::BltU, decoded),
+            (0b1100011, 0b111, _) => self.step_branch(ctx, InsnKind::BgeU, decoded),
             // J-format jal
             (0b1101111, _, _) => self.step_compute(ctx, InsnKind::Jal, decoded),
             // I-format jalr
@@ -285,8 +289,6 @@ impl Emulator {
             // System instruction
             (0b1110011, 0b000, 0b0011000) => self.step_system(ctx, InsnKind::Mret, decoded),
             (0b1110011, 0b000, 0b0000000) => self.step_system(ctx, InsnKind::Eany, decoded),
-            // Fence instruction
-            (0b0001111, 0b000, _) => self.step_system(ctx, InsnKind::Fence, decoded),
             _ => Ok(ctx
                 .trap(Exception::IllegalInstruction(decoded.insn, line!()))?
                 .then_some(InsnKind::Invalid)),
@@ -309,7 +311,7 @@ impl Emulator {
         }
 
         if let Some(kind) = self.exec_rv32im(ctx, word)? {
-            ctx.on_normal_end(kind)?
+            ctx.on_normal_end(kind)?;
         }
 
         Ok(())
@@ -339,17 +341,9 @@ impl Emulator {
 
         let pc = ctx.get_pc();
         let mut new_pc = pc + WORD_SIZE;
-        let mut rd = decoded.rd;
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
         let rs2 = self.load_rs2(ctx, &decoded, rs1)?;
         let imm_i = decoded.imm_i();
-        let mut br_cond = |cond| -> u32 {
-            rd = 0;
-            if cond {
-                new_pc = pc.wrapping_add(decoded.imm_b());
-            }
-            0
-        };
         let out = match kind {
             InsnKind::Add => rs1.wrapping_add(rs2),
             InsnKind::Sub => rs1.wrapping_sub(rs2),
@@ -394,12 +388,6 @@ impl Emulator {
                     0
                 }
             }
-            InsnKind::Beq => br_cond(rs1 == rs2),
-            InsnKind::Bne => br_cond(rs1 != rs2),
-            InsnKind::Blt => br_cond((rs1 as i32) < (rs2 as i32)),
-            InsnKind::Bge => br_cond((rs1 as i32) >= (rs2 as i32)),
-            InsnKind::BltU => br_cond(rs1 < rs2),
-            InsnKind::BgeU => br_cond(rs1 >= rs2),
             InsnKind::Jal => {
                 new_pc = pc.wrapping_add(decoded.imm_j());
                 (pc + WORD_SIZE).0
@@ -449,7 +437,45 @@ impl Emulator {
         if !new_pc.is_aligned() {
             return Ok(ctx.trap(Exception::InstructionMisaligned)?.then_some(kind));
         }
-        ctx.store_register(rd as usize, out)?;
+        ctx.store_register(decoded.rd as usize, out)?;
+        ctx.set_pc(new_pc);
+        Ok(Some(kind))
+    }
+
+    #[inline(always)]
+    fn step_branch<M: EmuContext>(
+        &mut self,
+        ctx: &mut M,
+        kind: InsnKind,
+        decoded: DecodedInstruction,
+    ) -> Result<Option<InsnKind>> {
+        self.trace_instruction(ctx, kind, &decoded)?;
+
+        let pc = ctx.get_pc();
+        let rs1 = ctx.load_register(decoded.rs1 as usize)?;
+        let rs2 = self.load_rs2(ctx, &decoded, rs1)?;
+        let br_cond = match kind {
+            InsnKind::Beq => rs1 == rs2,
+            InsnKind::Bne => rs1 != rs2,
+            InsnKind::Blt => (rs1 as i32) < (rs2 as i32),
+            InsnKind::Bge => (rs1 as i32) >= (rs2 as i32),
+            InsnKind::BltU => rs1 < rs2,
+            InsnKind::BgeU => rs1 >= rs2,
+            _ => unreachable!(),
+        };
+
+        let new_pc = if br_cond {
+            pc.wrapping_add(decoded.imm_b())
+        } else {
+            pc + WORD_SIZE
+        };
+
+        if !new_pc.is_aligned() {
+            return Ok(ctx.trap(Exception::InstructionMisaligned)?.then_some(kind));
+        }
+        if ctx.circuit_version() == RV32IM_V2_CIRCUIT_VERSION {
+            ctx.store_register(0, 0)?;
+        }
         ctx.set_pc(new_pc);
         Ok(Some(kind))
     }
@@ -572,10 +598,6 @@ impl Emulator {
                 _ => ctx.trap(Exception::IllegalInstruction(decoded.insn, 2)),
             },
             InsnKind::Mret => ctx.mret(),
-            InsnKind::Fence => {
-                ctx.set_pc(ctx.get_pc() + WORD_SIZE);
-                Ok(true)
-            }
             _ => unreachable!(),
         }?
         .then_some(kind))
@@ -665,6 +687,5 @@ pub fn disasm(kind: InsnKind, decoded: &DecodedInstruction) -> String {
             _ => "illegal eany".to_string(),
         },
         InsnKind::Mret => "mret".to_string(),
-        InsnKind::Fence => "fence".to_string(),
     }
 }

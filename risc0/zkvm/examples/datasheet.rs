@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -41,22 +41,22 @@ use tabled::{Table, Tabled, settings::Style};
 /// Powers-of-two for cycles, paired with the number of loop iterations used to
 /// achieve that many cycles.
 const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
-    (15, 1024 * 8),        // 15, 32K
-    (16, 1024 * 16),       // 16, 64K
-    (17, 1024 * 32),       // 17, 128K
-    (18, 1024 * 96),       // 18, 256K
-    (19, 1024 * 128),      // 19, 512K
-    (20, 1024 * 256),      // 20, 1M
-    (21, 1024 * 256 * 3),  // 21, 2M
-    (22, 1024 * 256 * 7),  // 22, 4M
-    (23, 1024 * 256 * 15), // 23, 8M
-    (24, 1024 * 256 * 31), // 24, 16M
+    (15, 1024 * 16),
+    (16, 1024 * 64),
+    (17, 1024 * 128),
+    (18, 1024 * 192),
+    (19, 1024 * 512),
+    (20, 1024 * 1024),
+    (21, 1024 * 1024 * 2),
+    (22, 1024 * 1024 * 4),
+    (23, 1024 * 1024 * 16),
+    (24, 1024 * 1024 * 32),
 ];
 
 const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
 
 /// The number of iterations of the LOOP_ELF needed to fill up a po2=20 segment.
-const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 494 + 817;
+const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 494 + 785;
 
 /// The maximum number of cycles in a segment that can be reserved (for fitting the
 /// potential next instruction and for lookup table + control when proving)
@@ -250,7 +250,10 @@ impl Datasheet {
             let duration = start.elapsed();
 
             let ram = tracker().lock().unwrap().peak as u64;
-            assert_eq!(info.stats.total_cycles, expected, "actual vs expected");
+            assert_eq!(
+                info.stats.total_cycles, expected,
+                "actual vs expected for po2={po2}"
+            );
             let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
             let seal = info.receipt.inner.composite().unwrap().seal_size() as u64;
 
@@ -280,12 +283,13 @@ impl Datasheet {
 
         let session = execute_elf(env, &LOOP_ELF).unwrap();
         let segment = session.segments[0].resolve().unwrap();
-        let receipt = prover.prove_segment(&ctx, &segment).unwrap();
+        let receipts = prover.prove_segment(&ctx, &segment).unwrap();
+        let receipt = receipts.first().unwrap();
 
         tracker().lock().unwrap().reset();
 
         let start = Instant::now();
-        let receipt = black_box(prover.lift(&receipt).unwrap());
+        let receipt = black_box(prover.lift(receipt).unwrap());
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
@@ -570,6 +574,7 @@ impl Datasheet {
     }
 }
 
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

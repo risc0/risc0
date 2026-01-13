@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -85,7 +85,9 @@ mod test {
         },
     };
     use smartcore_ml_methods::ML_TEMPLATE_ELF;
+
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn basic() {
         const EXPECTED: &[u32] = &[
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -98,7 +100,9 @@ mod test {
         let result = super::predict();
         assert_eq!(EXPECTED, result);
     }
+
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn svc() {
         // We set is_svm equal to true for a SVC model.
         let is_svm: bool = true;

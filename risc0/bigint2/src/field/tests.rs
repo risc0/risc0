@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -29,6 +29,8 @@ use rstest::rstest;
 use crate::BigUintWrap;
 
 fn run_test_no_decode(env: ExecutorEnv, elf: &[u8]) -> Journal {
+    gpu_guard::assert_gpu_semaphore_held();
+
     let opts = ProverOpts::fast();
     let prover = get_prover_server(&opts).unwrap();
     let now = Instant::now();
@@ -51,6 +53,7 @@ fn run_test<T: DeserializeOwned>(env: ExecutorEnv, elf: &[u8]) -> T {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn modadd_256() {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
@@ -66,6 +69,7 @@ fn modadd_256() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn modinv_256() {
     let inp = BigUintWrap::from_str("02").unwrap();
     let modulus = BigUintWrap::from_str("05").unwrap();
@@ -80,6 +84,7 @@ fn modinv_256() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn modmul_256() {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
@@ -95,6 +100,7 @@ fn modmul_256() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn modsub_256() {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
@@ -110,6 +116,7 @@ fn modsub_256() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn modadd_384() {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
@@ -125,6 +132,7 @@ fn modadd_384() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn modinv_384() {
     let inp = BigUintWrap::from_str("02").unwrap();
     let modulus = BigUintWrap::from_str("05").unwrap();
@@ -139,6 +147,7 @@ fn modinv_384() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn modmul_384() {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
@@ -154,6 +163,7 @@ fn modmul_384() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn modsub_384() {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
@@ -169,6 +179,7 @@ fn modsub_384() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn extfieldadd_256() {
     let lhs0 = BigUintWrap::from_str("04").unwrap();
     let lhs1 = BigUintWrap::from_str("06").unwrap();
@@ -187,6 +198,7 @@ fn extfieldadd_256() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn extfieldadd_384() {
     let lhs0 = BigUintWrap::from_str("04").unwrap();
     let lhs1 = BigUintWrap::from_str("06").unwrap();
@@ -205,6 +217,7 @@ fn extfieldadd_384() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn extfieldsub_256() {
     let lhs0 = BigUintWrap::from_str("02").unwrap();
     let lhs1 = BigUintWrap::from_str("06").unwrap();
@@ -224,6 +237,7 @@ fn extfieldsub_256() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn extfieldsub_384() {
     let lhs0 = BigUintWrap::from_str("02").unwrap();
     let lhs1 = BigUintWrap::from_str("06").unwrap();
@@ -243,6 +257,7 @@ fn extfieldsub_384() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn extfieldmul() {
     // (2x+5)(3x+2) mod (xx+1) =
     //   6xx+4x+15x+10 = 6xx+5x+3 = 6(xx+0x+1)-0x-6 + 5x+3 = 5x+4
@@ -274,6 +289,7 @@ fn extfieldmul() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn extfield_xxone_mul_256() {
     // (5x+5)(2x+2) mod (xx+1) =
     //   10xx+10x+10x+10 = 10xx+20x+10 = 10(xx+1)-10 + 6x+3 = 6x+0
@@ -297,6 +313,7 @@ fn extfield_xxone_mul_256() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn extfield_xxone_mul_384() {
     // (5x+5)(2x+2) mod (xx+1) =
     //   10xx+10x+10x+10 = 10xx+20x+10 = 10(xx+1)-10 + 6x+3 = 6x+0
@@ -320,6 +337,7 @@ fn extfield_xxone_mul_384() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn extfield_deg4_mul() {
     // (4xxx + 2xx + 5x +4)(2xxx + 6xx + 6x + 3) mod (x^4 + 1) =
     //   8x^6 + 24x^5 + 24x^4 + 12xxx +
@@ -382,6 +400,7 @@ const BIGINT_ILLEGAL_ADDR: u32 = 0xc000_0000;
 #[should_panic(expected = "Invalid bigint address")]
 #[case(BIGINT_LEGAL_ADDR, BIGINT_LEGAL_ADDR, BIGINT_ILLEGAL_ADDR)]
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn raw_addr(#[case] lhs: u32, #[case] rhs: u32, #[case] result: u32) {
     let env = ExecutorEnv::builder()
         .write(&(lhs, rhs, result))

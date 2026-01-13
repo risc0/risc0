@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -16,9 +16,11 @@
 use std::time::Duration;
 
 use anyhow::{Context, Result, ensure};
+use risc0_circuit_keccak::KECCAK_CONTROL_ROOT;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Deserializer, Serialize};
 
+use super::PreflightIter;
 use crate::{
     ExecutorEnv, MaybePruned, PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim,
     ReceiptKind, Segment, Session, VerifierContext, WorkClaim,
@@ -26,12 +28,10 @@ use crate::{
         Unknown,
         receipt::{UnionClaim, exit_code_from_terminate_state},
     },
-    host::{
-        prove_info::ProveInfo,
-        server::{exec::executor::ExecutorImpl, session::null_callback},
-    },
+    host::{prove_info::ProveInfo, server::exec::executor::ExecutorImpl},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     recursion::MerkleProof,
+    sha::Digestible as _,
 };
 
 const ERR_DEV_MODE_DISABLED: &str =
@@ -97,16 +97,6 @@ pub struct DevModeProver {
     delay: Option<DevModeDelay>,
 }
 
-/// Utility macro to compress repeated checks that dev mode is not disabled.
-macro_rules! ensure_dev_mode_allowed {
-    () => {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
-    };
-}
-
 impl DevModeProver {
     /// Create a DevModeProver without delay.
     pub fn new() -> Self {
@@ -138,7 +128,7 @@ impl ProverServer for DevModeProver {
         );
 
         ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
-        ensure_dev_mode_allowed!();
+        ensure_dev_mode_allowed()?;
 
         let session_claim = session
             .claim()
@@ -169,34 +159,36 @@ impl ProverServer for DevModeProver {
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<ProveInfo> {
-        let session = ExecutorImpl::from_elf(env, elf)
-            .unwrap()
-            .run_with_callback(null_callback)?;
+        let mut exec = ExecutorImpl::from_elf(env, elf).unwrap();
+        while exec.run_segment()?.is_some() {}
+        let session = exec.finalize_session()?;
         self.prove_session(ctx, &session)
     }
 
-    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
-        ensure_dev_mode_allowed!();
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
+        ensure_dev_mode_allowed()?;
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.segment_preflight);
         }
 
-        Ok(PreflightResults {
+        let preflight_results = PreflightResults {
             inner: Default::default(),
-            terminate_state: segment.inner.claim.terminate_state,
+            terminate_state: segment.inner.terminate_state,
             output: segment.output.clone(),
             segment_index: segment.index,
-        })
+        };
+
+        Ok(Box::new(std::iter::once(Ok(preflight_results))))
     }
 
-    fn prove_segment_core(
+    fn prove_preflight(
         &self,
         ctx: &VerifierContext,
         preflight_results: PreflightResults,
     ) -> Result<SegmentReceipt> {
         ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
-        ensure_dev_mode_allowed!();
+        ensure_dev_mode_allowed()?;
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.prove_segment_core);
@@ -220,15 +212,17 @@ impl ProverServer for DevModeProver {
 
     fn prove_keccak(
         &self,
-        _request: &crate::ProveKeccakRequest,
+        request: &crate::ProveKeccakRequest,
     ) -> Result<SuccinctReceipt<Unknown>> {
-        ensure_dev_mode_allowed!();
+        ensure_dev_mode_allowed()?;
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.prove_keccak);
         }
 
-        Ok(fake_succinct_receipt())
+        Ok(fake_succinct_receipt(MaybePruned::Pruned(
+            request.claim_digest,
+        )))
     }
 
     fn lift(&self, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
@@ -268,10 +262,23 @@ impl ProverServer for DevModeProver {
 
     fn resolve(
         &self,
-        _conditional: &SuccinctReceipt<ReceiptClaim>,
-        _assumption: &SuccinctReceipt<Unknown>,
+        conditional: &SuccinctReceipt<ReceiptClaim>,
+        assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        fake_recursion(self.delay.map(|d| d.resolve))
+        ensure_dev_mode_allowed()?;
+
+        if let Some(ref delay) = self.delay {
+            std::thread::sleep(delay.resolve);
+        }
+
+        let claim = conditional
+            .claim
+            .as_value()
+            .context("conditional receipt claim is pruned")?
+            .resolve(&assumption.claim)
+            .context("failed to compute resolved claim")?;
+
+        Ok(fake_succinct_receipt(claim))
     }
 
     fn resolve_povw(
@@ -292,10 +299,30 @@ impl ProverServer for DevModeProver {
 
     fn union(
         &self,
-        _a: &SuccinctReceipt<Unknown>,
-        _b: &SuccinctReceipt<Unknown>,
+        a: &SuccinctReceipt<Unknown>,
+        b: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<UnionClaim>> {
-        fake_recursion(self.delay.map(|d| d.union))
+        ensure_dev_mode_allowed()?;
+
+        if let Some(delay) = self.delay {
+            std::thread::sleep(delay.union);
+        }
+
+        let mut a = a.to_assumption(true)?;
+        a.control_root = KECCAK_CONTROL_ROOT;
+
+        let mut b = b.to_assumption(true)?;
+        b.control_root = KECCAK_CONTROL_ROOT;
+
+        let mut assumptions = [a.digest(), b.digest()];
+        assumptions.sort();
+
+        let claim = UnionClaim {
+            left: assumptions[0],
+            right: assumptions[1],
+        };
+
+        Ok(fake_succinct_receipt(claim))
     }
 
     fn unwrap_povw(
@@ -316,7 +343,7 @@ impl ProverServer for DevModeProver {
 
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
         ensure!(opts.dev_mode(), ERR_DEV_MODE_DISABLED);
-        ensure_dev_mode_allowed!();
+        ensure_dev_mode_allowed()?;
 
         if let Some(delay) = &self.delay {
             match opts.receipt_kind {
@@ -344,20 +371,20 @@ impl ProverServer for DevModeProver {
 /// Private function used to simulate the delay of a lift.
 /// Return type is generic to handle any type of output claim.
 fn fake_recursion<Claim>(delay: Option<Duration>) -> Result<SuccinctReceipt<Claim>> {
-    ensure_dev_mode_allowed!();
+    ensure_dev_mode_allowed()?;
 
     if let Some(delay) = delay {
         std::thread::sleep(delay);
     }
 
-    Ok(fake_succinct_receipt())
+    Ok(fake_succinct_receipt(MaybePruned::Pruned(Digest::ZERO)))
 }
 
-fn fake_succinct_receipt<Claim>() -> SuccinctReceipt<Claim> {
+fn fake_succinct_receipt<Claim>(claim: impl Into<MaybePruned<Claim>>) -> SuccinctReceipt<Claim> {
     SuccinctReceipt {
         seal: vec![],
         control_id: Digest::ZERO,
-        claim: MaybePruned::Pruned(Digest::ZERO),
+        claim: claim.into(),
         hashfn: "fake".into(),
         verifier_parameters: Digest::ZERO,
         control_inclusion_proof: MerkleProof {
@@ -373,4 +400,13 @@ where
 {
     let secs = f64::deserialize(deserializer)?;
     Ok(Duration::from_secs_f64(secs))
+}
+
+/// Utility function to compress repeated checks that dev mode is not disabled.
+fn ensure_dev_mode_allowed() -> Result<()> {
+    ensure!(
+        cfg!(not(feature = "disable-dev-mode")),
+        ERR_DEV_MODE_DISABLED
+    );
+    Ok(())
 }

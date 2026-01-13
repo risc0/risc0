@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -47,6 +47,9 @@ pub struct MetalCircuitHal<MH: MetalHash> {
 
 impl<MH: MetalHash> MetalCircuitHal<MH> {
     pub fn new(hal: Rc<MetalHal<MH>>) -> Self {
+        #[cfg(test)]
+        gpu_guard::assert_gpu_semaphore_held();
+
         let library = hal.device.new_library_with_data(METAL_LIB).unwrap();
         let mut kernels = HashMap::new();
         for name in KERNEL_NAMES {
@@ -173,6 +176,7 @@ mod tests {
 
     // TODO: figure out a better way to test this.
     #[test]
+    #[gpu_guard::gpu_guard]
     #[ignore]
     fn eval_check() {
         // The number of cycles, choose a number that doesn't make tests take too long.

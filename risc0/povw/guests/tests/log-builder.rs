@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -49,7 +49,6 @@ fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     assert_eq!(session_info.exit_code, ExitCode::Halted(0));
 
     let decoded_journal = Journal::decode(&session_info.journal.bytes)?;
-    println!("decoded_journal: {decoded_journal:#?}");
 
     Ok(decoded_journal)
 }
@@ -84,6 +83,8 @@ fn prove_busy_loop(job_id: PovwJobId, cycles: u64) -> anyhow::Result<ProveInfo> 
         .povw(job_id)
         .build()
         .unwrap();
+
+    gpu_guard::assert_gpu_semaphore_held();
 
     // NOTE: If the compression level is not succinct or groth16, a work receipt will not be
     // produced. A work receipt can be produced from a composite receipt.
@@ -263,6 +264,7 @@ fn two_batched_updates() -> anyhow::Result<()> {
 
 #[test]
 #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
+#[gpu_guard::gpu_guard]
 fn prove_three_sequential_updates() -> anyhow::Result<()> {
     let work_log_id = uint!(0xdeafbee7_U160);
 

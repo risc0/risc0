@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -98,7 +98,6 @@ pub use bytes::Bytes;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
 pub use self::host::{
-    api::server::Server as ApiServer,
     client::prove::{local::LocalProver, local_executor},
     recursion::{
         self, RECURSION_PO2,
@@ -125,26 +124,19 @@ pub use self::host::client::prove::bonsai::BonsaiProver;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 pub use {
-    self::host::{
-        api::{
-            Asset, AssetRequest, Connector, RedisParams, SegmentInfo, SessionInfo,
-            client::Client as ApiClient,
-        },
-        client::{
-            env::{ExecutorEnv, ExecutorEnvBuilder},
-            prove::{
-                Executor, Prover,
-                default::DefaultProver,
-                default_executor, default_prover,
-                external::ExternalProver,
-                opts::{ProverOpts, ReceiptKind},
-            },
+    self::host::client::{
+        env::{ExecutorEnv, ExecutorEnvBuilder},
+        prove::{
+            Executor, Prover, SegmentInfo, SessionInfo,
+            default::DefaultProver,
+            default_executor, default_prover,
+            opts::{ProverOpts, ReceiptKind},
         },
     },
     risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
 
-/// TODO
+/// RPC protocol types for prover client-server communication.
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 pub mod rpc {
@@ -169,6 +161,7 @@ pub use self::{
     claim::{
         Unknown,
         maybe_pruned::{MaybePruned, PrunedValueError},
+        merge::{Merge, MergeInequalityError},
         receipt::{Assumption, Assumptions, Input, Output, ReceiptClaim, UnionClaim},
         work::{Work, WorkClaim},
     },

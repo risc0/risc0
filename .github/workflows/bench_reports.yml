@@ -19,7 +19,7 @@ concurrency:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.91.1
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
   RISC0_GROTH16_VERSION: 0.1.0
 
@@ -46,6 +46,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup

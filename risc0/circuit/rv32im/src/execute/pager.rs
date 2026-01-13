@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -18,7 +18,7 @@ use std::{
     sync::OnceLock,
 };
 
-use anyhow::{Result, bail};
+use anyhow::{Result, bail, ensure};
 use bit_vec::BitVec;
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
@@ -56,7 +56,7 @@ pub(crate) const RESERVED_PAGING_CYCLES: u32 = LOAD_ROOT_CYCLES
     + POSEIDON_PAGING
     + STORE_ROOT_CYCLES;
 
-const NUM_PAGES: usize = 4 * 1024 * 1024;
+pub(crate) const NUM_PAGES: usize = 4 * 1024 * 1024;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub(crate) enum PageState {
@@ -74,6 +74,7 @@ pub(crate) enum PageTraceEvent {
 #[derive(Debug)]
 pub(crate) struct PageStates {
     states: BitVec,
+    /// Node indices in the bit vector that have been set (i.e. are not PageStates::Unloaded).
     indexes: Vec<u32>,
 }
 
@@ -120,10 +121,6 @@ impl PageStates {
         }
     }
 
-    pub(crate) fn iter(&self) -> impl Iterator<Item = (u32, PageState)> + '_ {
-        self.indexes.iter().map(|index| (*index, self.get(*index)))
-    }
-
     pub(crate) fn keys(&self) -> impl Iterator<Item = u32> + '_ {
         self.indexes.iter().copied()
     }
@@ -135,6 +132,7 @@ impl PageStates {
 }
 
 #[test]
+#[cfg(feature = "prove")]
 fn page_states() {
     use PageState::*;
 
@@ -156,7 +154,10 @@ fn page_states() {
         }
 
         assert_eq!(
-            s.iter().collect::<Vec<_>>(),
+            s.indexes
+                .iter()
+                .map(|index| (*index, s.get(*index)))
+                .collect::<Vec<_>>(),
             vec![(0, a), (1, a), (2, a), (3, a), (4, a)]
         );
 
@@ -167,7 +168,10 @@ fn page_states() {
 const NUM_PAGE_STATES: usize = NUM_PAGES * 2;
 
 struct PageTable {
-    table: Vec<u32>,
+    // Epoch number is incremented on each call to clear. Entries in the table with a previous
+    // epoch number are invalid. This allows us to avoid actually clearing the table.
+    epoch: usize,
+    table: Box<[u32; NUM_PAGES]>,
 }
 
 impl Default for PageTable {
@@ -177,30 +181,59 @@ impl Default for PageTable {
 }
 
 impl PageTable {
-    const INVALID_IDX: u32 = 0;
+    const CACHE_INDEX_BITS: usize = NUM_PAGES.ilog2() as usize;
+    const CACHE_INDEX_MAX: usize = (1 << Self::CACHE_INDEX_BITS) - 1;
+    const CACHE_INDEX_MASK: u32 = Self::CACHE_INDEX_MAX as u32;
+    const EPOCH_BITS: usize = u32::BITS as usize - Self::CACHE_INDEX_BITS;
+    const EPOCH_MAX: usize = (1 << Self::EPOCH_BITS) - 1;
+    const EPOCH_MASK: u32 = (Self::EPOCH_MAX << Self::CACHE_INDEX_BITS) as u32;
 
     fn new() -> Self {
         Self {
-            table: vec![Self::INVALID_IDX; NUM_PAGES],
+            // Epoch starts from 1 such that all entries are invalid.
+            epoch: 1,
+            table: Box::new([0; NUM_PAGES]),
         }
+    }
+
+    // Takes a u32 table entry and decomposes it into (epoch, cache_idx)
+    fn unpack_value(value: u32) -> (usize, usize) {
+        let epoch = (value & Self::EPOCH_MASK) >> Self::CACHE_INDEX_BITS;
+        let cache_idx = value & Self::CACHE_INDEX_MASK;
+        (epoch as usize, cache_idx as usize)
+    }
+
+    // Takes a u32 cache index and an epoch number and packs it into a u32;
+    fn pack_value(epoch: usize, cache_idx: u32) -> u32 {
+        ((epoch as u32) << Self::CACHE_INDEX_BITS) | cache_idx
     }
 
     #[inline(always)]
     fn get(&self, index: u32) -> Option<usize> {
-        let value = self.table[index as usize] as usize;
-        value.checked_sub(1)
+        let value = self.table[index as usize];
+        let (epoch, cache_idx) = Self::unpack_value(value);
+        (epoch == self.epoch).then_some(cache_idx)
     }
 
+    // Panics if the given cache index is larger than the number of pages.
     #[inline(always)]
-    fn set(&mut self, index: u32, value: usize) {
-        self.table[index as usize] = (value + 1) as u32
+    fn set(&mut self, index: u32, cache_idx: usize) {
+        assert!(cache_idx <= Self::CACHE_INDEX_MAX);
+        self.table[index as usize] = Self::pack_value(self.epoch, cache_idx as u32);
     }
 
     fn clear(&mut self) {
-        // You would think its faster to reuse the memory, but filling it with zeros is
-        // slower
-        // than just allocating a new piece of zeroed memory.
-        self.table = vec![Self::INVALID_IDX; NUM_PAGES];
+        // If the epoch number is less than the max, then simply increment the epoch number. This
+        // serves to effectively clear the table since gets will return None for past epochs. If we
+        // would need to exceed the max clear the table itself as we cannot repeat an epoch number.
+        if self.epoch < Self::EPOCH_MAX {
+            self.epoch += 1;
+        } else {
+            // You would think it's faster to reuse the memory, but filling it with zeros is slower
+            // than just allocating a new piece of zeroed memory.
+            self.epoch = 1;
+            self.table = Box::new([0; NUM_PAGES]);
+        }
     }
 }
 
@@ -227,30 +260,38 @@ fn zero_page() -> &'static Page {
     ZERO_PAGE.get_or_init(Page::default)
 }
 
-#[derive(Default, Debug)]
+#[derive(Clone, Default, Debug)]
 pub(crate) struct WorkingImage {
     #[debug(skip)]
     pub(crate) pages: BTreeMap<u32, Page>,
 }
 
 impl WorkingImage {
+    /// Returns a reference to the page at the given index.
+    ///
+    /// If the page is not in the working image, it is assumed to be all zeroes. A page of zeroes
+    /// is inserted into the working image when this is called.
     #[inline(always)]
-    fn get_page(&mut self, page_idx: u32) -> Result<Page> {
-        // If page exists, return it
-        if let Some(page) = self.pages.get(&page_idx) {
-            return Ok(page.clone());
-        }
-        self.pages.insert(page_idx, zero_page().clone());
-
-        Ok(zero_page().clone())
+    fn get_page(&mut self, page_idx: u32) -> Result<&Page> {
+        Ok(self
+            .pages
+            .entry(page_idx)
+            .or_insert_with(|| zero_page().clone()))
     }
 
     fn set_page(&mut self, page_idx: u32, page: Page) {
         self.pages.insert(page_idx, page);
     }
+}
 
-    pub(crate) fn get_page_indexes(&self) -> BTreeSet<u32> {
-        self.pages.keys().copied().collect()
+impl From<WorkingImage> for MemoryImage {
+    /// Convert the given WorkingImage into a [MemoryImage]. Does not compute any digests.
+    fn from(val: WorkingImage) -> Self {
+        let mut memory_image = MemoryImage::default();
+        for (idx, page) in val.pages {
+            memory_image.set_page(idx, page);
+        }
+        memory_image
     }
 }
 
@@ -271,6 +312,7 @@ pub(crate) struct PagedMemory {
 
 impl PagedMemory {
     pub(crate) fn new(mut image: MemoryImage, tracing_enabled: bool) -> Self {
+        // Populate the register cache from the initial state of memory.
         let mut machine_registers = [0; REG_MAX];
         let mut user_registers = [0; REG_MAX];
         let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
@@ -302,6 +344,7 @@ impl PagedMemory {
         self.cycles = RESERVED_PAGING_CYCLES;
     }
 
+    /// Set of node indices in the paged memory (including inner nodes) that have been loaded.
     pub(crate) fn page_indexes(&self) -> BTreeSet<u32> {
         self.page_states.keys().collect()
     }
@@ -356,26 +399,31 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+    pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<&Page> {
+        // Registers are not stored in the main RAM during execution. As a result, the system page
+        // cannot be accessed with this method, as it would not be correct.
+        ensure!(page_idx != USER_REGS_ADDR.page_idx() && page_idx != MACHINE_REGS_ADDR.page_idx());
         if let Some(cache_idx) = self.page_table.get(page_idx) {
             // Loaded, get from cache
-            Ok(self.page_cache[cache_idx].data().clone())
+            Ok(&self.page_cache[cache_idx])
         } else {
             // Unloaded, peek into image
-            Ok(self.image.get_page(page_idx)?.data().clone())
+            Ok(self.image.get_page(page_idx)?)
         }
     }
 
+    /// Load a word from the RAM.
+    ///
+    /// This method cannot be used to access register values. If the given address is a memory
+    /// mapped register address, the results may not match the current values of the registers.
     #[inline(always)]
     fn load_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
-        let node_idx = node_idx(page_idx);
-        // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}, node: {node_idx:#08x}");
+        // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}");
         let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
             cache_idx
         } else {
-            self.load_page(page_idx)?;
-            self.page_states.set(node_idx, PageState::Loaded);
+            self.page_in(page_idx)?;
             self.page_table.get(page_idx).unwrap()
         };
         Ok(self.page_cache[cache_idx].load(addr))
@@ -442,7 +490,7 @@ impl PagedMemory {
         let node_idx = node_idx(page_idx);
         let mut state = self.page_states.get(node_idx);
         if state == PageState::Unloaded {
-            self.load_page(page_idx)?;
+            self.page_in(page_idx)?;
             state = PageState::Loaded;
         };
 
@@ -456,12 +504,15 @@ impl PagedMemory {
         Ok(self.page_cache.get_mut(cache_idx).unwrap())
     }
 
+    /// Write the registers, which are stored separate from the rest of RAM, to their memory mapped
+    /// location. This method is called when committing to the final memory state of a segment.
     fn write_registers(&mut self) {
         // Copy register values first to avoid borrow conflicts
         let user_registers = self.user_registers;
         let machine_registers = self.machine_registers;
         // This works because we can assume that user and machine register files
-        // live in the same page.
+        // live in the same page. This is a compile-time assertion that this is true.
+        const _: () = assert!(USER_REGS_ADDR.page_idx() == MACHINE_REGS_ADDR.page_idx());
         let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
         let page = self.page_for_writing(page_idx).unwrap();
         for idx in 0..REG_MAX {
@@ -502,11 +553,11 @@ impl PagedMemory {
     }
 
     #[inline(always)]
-    fn load_page(&mut self, page_idx: u32) -> Result<()> {
+    fn page_in(&mut self, page_idx: u32) -> Result<()> {
         tracing::trace!("load_page: {page_idx:#08x}");
         let page = self.image.get_page(page_idx)?;
         self.page_table.set(page_idx, self.page_cache.len());
-        self.page_cache.push(page);
+        self.page_cache.push(page.clone());
         self.cycles += PAGE_CYCLES;
         self.trace_page_in(PAGE_CYCLES);
         self.fixup_costs(node_idx(page_idx), PageState::Loaded);
@@ -545,6 +596,11 @@ impl PagedMemory {
         self.trace_events.clear();
     }
 
+    pub(crate) fn touched_pages(&self) -> u64 {
+        // add one for registers page and one for ??
+        self.page_cache.len() as u64 + 2
+    }
+
     #[inline(always)]
     fn trace_page_in(&mut self, cycles: u32) {
         if unlikely(self.tracing_enabled) {
@@ -566,17 +622,16 @@ pub(crate) fn page_idx(node_idx: u32) -> u32 {
 
 pub(crate) fn compute_partial_image(
     input_image: &mut MemoryImage,
-    indexes: BTreeSet<u32>,
+    indexes: &BTreeSet<u32>,
 ) -> MemoryImage {
-    let mut image = MemoryImage::default();
+    let mut partial_image = MemoryImage::default();
 
     for &node_idx in indexes.range((MEMORY_PAGES as u32)..) {
         let page_idx = page_idx(node_idx);
 
         // Copy original state of all pages accessed in this segment.
         let page = input_image.get_page(page_idx).unwrap();
-        let page_digest = *input_image.get_digest(node_idx).unwrap();
-        image.set_page_with_digest(page_idx, page, page_digest);
+        partial_image.set_page(page_idx, page);
     }
 
     // Add minimal needed 'uncles'
@@ -586,14 +641,12 @@ pub(crate) fn compute_partial_image(
 
         // Otherwise, add whichever child digest (if any) is not loaded
         if !indexes.contains(&lhs_idx) {
-            image.set_digest(lhs_idx, *input_image.get_digest(lhs_idx).unwrap());
+            partial_image.set_digest(lhs_idx, *input_image.get_or_update_digest(lhs_idx).unwrap());
         }
         if !indexes.contains(&rhs_idx) {
-            image.set_digest(rhs_idx, *input_image.get_digest(rhs_idx).unwrap());
+            partial_image.set_digest(rhs_idx, *input_image.get_or_update_digest(rhs_idx).unwrap());
         }
     }
 
-    image.update_digests();
-
-    image
+    partial_image
 }

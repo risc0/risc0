@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -15,10 +15,11 @@
 
 #pragma once
 
-#include "fp.h"
-#include "fpext.h"
+#include <cstdint>
 
 struct ShaDigest;
+struct Fp;
+struct FpExt;
 
 __global__ void eltwise_add_fp(Fp* out, const Fp* x, const Fp* y, const uint32_t count);
 
@@ -42,13 +43,13 @@ __global__ void eltwise_zeroize_fp(Fp* elems, uint32_t count);
 
 __global__ void eltwise_zeroize_fpext(FpExt* elems, uint32_t count);
 
-__global__ void fri_fold(Fp* out, const Fp* in, const FpExt* mix, const uint32_t count);
+__global__ void fri_fold(Fp* out, const Fp* in, const FpExt mix, const uint32_t count);
 
 __global__ void mix_poly_coeffs(FpExt* out,
                                 const Fp* in,
                                 const uint32_t* combos,
-                                const FpExt* mixStart,
-                                const FpExt* mix,
+                                const FpExt mixStart,
+                                const FpExt mix,
                                 const uint32_t inputSize,
                                 const uint32_t count);
 
@@ -79,3 +80,27 @@ __global__ void combos_prepare(FpExt* combos,
                                const FpExt* mix,
                                const uint32_t checkSize,
                                const uint32_t comboCount);
+
+struct CudaMerkleTreeProver {
+    size_t row_size;
+    size_t col_size;
+    size_t top_size;
+    const uint32_t *matrix;
+    const uint32_t *nodes;
+};
+
+__global__ void fri_prove_values(uint32_t* out_values,
+                                 const size_t values_column_width,
+                                 uint32_t* positions,
+                                 const size_t positions_len,
+                                 struct CudaMerkleTreeProver* trees,
+                                 const size_t trees_len,
+                                 uint32_t* groups);
+
+__global__ void fri_prove_digests(uint32_t* out_digests,
+                                  const size_t digests_column_width,
+                                  uint32_t* positions,
+                                  const size_t positions_len,
+                                  struct CudaMerkleTreeProver* trees,
+                                  const size_t trees_len,
+                                  uint32_t* groups);

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -22,6 +22,7 @@ use crate::core::to_po2;
 /// layers - the number of levels on the merkle tree
 /// top_layer - the index of the layer above which we check hashes only once
 /// top_size - the number of hashes in the top layer
+#[derive(Clone)]
 pub struct MerkleTreeParams {
     pub row_size: usize,
     pub col_size: usize,

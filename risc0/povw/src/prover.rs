@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -187,8 +187,9 @@ impl<P: Prover> WorkLogUpdateProver<P> {
             let job_number = work.nonce_min.job;
             ensure!(
                 job_number == work.nonce_max.job,
-                "work claim nonce min job number is not equal to nonce max job number: {} != {job_number}",
-                work.nonce_min.job
+                "work claim nonce min job number is not equal to nonce max job number: {} != {}",
+                work.nonce_min.job,
+                work.nonce_max.job
             );
             ensure!(
                 work.nonce_min.segment == 0,

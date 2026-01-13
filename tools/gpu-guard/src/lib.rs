@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -16,4 +16,14 @@
 mod semaphore;
 
 pub use gpu_guard_macros::gpu_guard;
-pub use semaphore::acquire_gpu_semaphore;
+pub use semaphore::{acquire_gpu_semaphore, assert_gpu_semaphore_held};
+
+/// Checks if RISC0_DEV_MODE environment variable is set. Useful so the macro can potentially
+/// disable itself if dev-mode is enabled.
+pub fn __is_dev_mode() -> bool {
+    std::env::var("RISC0_DEV_MODE")
+        .ok()
+        .map(|x| x.to_lowercase())
+        .filter(|x| x == "1" || x == "true" || x == "yes")
+        .is_some()
+}

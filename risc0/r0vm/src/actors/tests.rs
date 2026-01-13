@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -63,23 +63,17 @@ async fn basic() {
             version: VERSION,
             release_channel: None,
             api: None,
-            manager: Some(ManagerConfig {
-                allocator: None,
-                listen: None,
-            }),
-            allocator: Some(AllocatorConfig {
-                listen: None,
-                default_release_channel: None,
-            }),
+            manager: Some(ManagerConfig::default()),
+            allocator: Some(AllocatorConfig::default()),
             executor: Some(ExecutorConfig {
-                allocator: None,
                 count: 1,
+                ..Default::default()
             }),
             prover: Some(vec![crate::actors::config::ProverConfig {
-                allocator: None,
                 count: Some(100),
                 subscribe: task_kinds.clone(),
                 simulate: Some(PROFILE_RTX_5090),
+                ..Default::default()
             }]),
             storage: Some(StorageConfig {
                 path: storage_root.to_path_buf(),
@@ -99,6 +93,7 @@ async fn basic() {
         assumptions: vec![],
         segment_limit_po2: po2,
         execute_only: false,
+        dev_mode: false,
     };
 
     let info = app.proof_request(request).await.unwrap();
@@ -110,6 +105,7 @@ async fn basic() {
     let request = ShrinkWrapRequest {
         kind: ShrinkWrapKind::Groth16,
         receipt: (*result.receipt.unwrap()).clone(),
+        dev_mode: false,
     };
 
     let info = app.shrink_wrap_request(request).await.unwrap();

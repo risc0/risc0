@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -110,11 +110,11 @@ pub(crate) use self::verify::verify_assumption2;
 #[doc(hidden)]
 pub mod testing {
     #[cfg(feature = "unstable")]
-    pub fn sha_single_keccak(
+    pub fn commit_single_keccak(
         claim_state: &mut risc0_zkp::core::digest::Digest,
         keccak_state: &risc0_circuit_keccak::KeccakState,
     ) {
-        super::batcher::sha_single_keccak(claim_state, keccak_state)
+        super::batcher::commit_single_keccak(claim_state, keccak_state)
     }
 }
 
@@ -266,6 +266,7 @@ pub fn read_slice<T: Pod>(slice: &mut [T]) {
 ///
 /// [example page]: https://dev.risczero.com/api/zkvm/examples
 /// [I/O documentation]: https://dev.risczero.com/api/zkvm/tutorials/io
+/// [risc0-r0vm]: https://crates.io/crates/risc0-r0vm
 pub fn write<T: Serialize>(data: &T) {
     stdout().write(data)
 }
@@ -276,7 +277,7 @@ pub fn write<T: Serialize>(data: &T) {
 /// Some implementations, such as [risc0-r0vm] will also write the data to
 /// the host's stdout file descriptor. It is not included in the receipt.
 ///
-/// This function reads a slice of [plain old data][bytemuck::Pod], not
+/// This function writes a slice of [plain old data][bytemuck::Pod], not
 /// incurring in deserialization overhead. Recommended for performance
 /// optimizations. For more context on this, see RISC Zero's [instructions on
 /// guest optimization].
@@ -297,6 +298,7 @@ pub fn write<T: Serialize>(data: &T) {
 /// [example page]: https://dev.risczero.com/api/zkvm/examples
 /// [I/O documentation]: https://dev.risczero.com/api/zkvm/tutorials/io
 /// [instructions on guest optimization]: https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
+/// [risc0-r0vm]: https://crates.io/crates/risc0-r0vm
 pub fn write_slice<T: Pod>(slice: &[T]) {
     stdout().write_slice(slice);
 }
@@ -335,7 +337,7 @@ pub fn commit<T: Serialize>(data: &T) {
 /// Data in the journal is included in the receipt and is available to the
 /// verifier. It is considered "public" data.
 ///
-/// This function reads a slice of [plain old data][bytemuck::Pod], not
+/// This function commits a slice of [plain old data][bytemuck::Pod], not
 /// incurring in deserialization overhead. Recommended for performance
 /// optimizations. For more context on this, see RISC Zero's [instructions on
 /// guest optimization].

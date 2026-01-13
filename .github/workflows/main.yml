@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.91.1
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
   RISC0_GROTH16_VERSION: 0.1.0
 
@@ -59,7 +59,7 @@ jobs:
             bazel:
               - .github/actions/**
               - .github/workflows/main.yml
-              - risc0/circuit/rv32im-m3-sys/cxx/**
+              - risc0/circuit/rv32im-sys/cxx/**
             browser:
               - *base
               - examples/browser-verify/**
@@ -114,11 +114,12 @@ jobs:
       - check-semver
       - check-template
       - clippy
+      # - compute-sanitizer
       - doc
+      - docker
       - docs-rs
       - examples
       - extra
-      - docker
       # - test-crates
       - test
       - web
@@ -142,7 +143,7 @@ jobs:
         uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-sort
-          version: "1.0"
+          version: "2.0"
       - name: Install cargo-rdme
         uses: baptiste0928/cargo-install@v3
         with:
@@ -201,6 +202,9 @@ jobs:
       RISC0_SKIP_BUILD_KERNELS: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
@@ -228,7 +232,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
             partition: 1
             ci_profile: slow
           - os: macOS
@@ -261,7 +265,7 @@ jobs:
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
-        run: nvidia-smi
+        run: bash ./.github/scripts/cuda_smoke.sh
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - uses: ./.github/actions/protoc
@@ -285,9 +289,9 @@ jobs:
         run: brew install zstd gettext lz4 mpfr gmp
         if: matrix.os == 'macOS'
       - name: test workspace
-        run: ${{ matrix.test_command }} --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --exclude doc-test
+        run: ${{ matrix.test_command }} --release -F $FEATURE -F block_tracker_debug -F prove -F redis -F unstable --workspace --timings --exclude doc-test
       - name: test risc0-r0vm (disable-dev-mode)
-        run: cargo test --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
+        run: cargo nextest run --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode -- dev_mode
       - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}-${{ matrix.partition }}
@@ -308,7 +312,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
             ci_profile: slow
           - os: macOS
             arch: ARM64
@@ -326,10 +330,13 @@ jobs:
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
-        run: nvidia-smi
+        run: bash ./.github/scripts/cuda_smoke.sh
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - uses: ./.github/actions/protoc
@@ -357,6 +364,58 @@ jobs:
       - run: cargo check -p bonsai-sdk --all-features
       - run: sccache --show-stats
 
+  compute-sanitizer:
+    if: needs.changes.outputs.test == 'true'
+    needs: changes
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            arch: X64
+            device: nvidia_rtx_4000_ada
+            nvcc_arch: sm_89
+    env:
+      FEATURE: cuda
+      NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
+      RISC0_DEFAULT_PROVER_NUM_GPUS: 1
+      RISC0_BUILD_LOCKED: 1
+      RUST_BACKTRACE: full
+      # SCCACHE_RECACHE: 1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/actions/cuda
+      - run: bash ./.github/scripts/cuda_smoke.sh
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install risc0-groth16 $RISC0_GROTH16_VERSION
+      - run: cargo build --package risc0-r0vm -F cuda
+      - run: cargo build --package risc0-zkvm-methods
+      - name: compute-sanitizer memcheck
+        run: |
+          /usr/local/cuda/bin/compute-sanitizer \
+              --tool memcheck \
+              target/debug/r0vm \
+              --elf target/riscv-guest/risc0-zkvm-methods/risc0-zkvm-methods-guest/riscv32im-risc0-zkvm-elf/release/hello_commit.bin \
+              --receipt-kind groth16
+        shell: bash
+      - name: compute-sanitizer racecheck
+        run: |
+          /usr/local/cuda/bin/compute-sanitizer \
+              --tool racecheck \
+              target/debug/r0vm \
+              --elf target/riscv-guest/risc0-zkvm-methods/risc0-zkvm-methods-guest/riscv32im-risc0-zkvm-elf/release/hello_commit.bin \
+              --receipt-kind groth16
+        shell: bash
+      - run: sccache --show-stats
+
   examples:
     if: needs.changes.outputs.examples == 'true'
     needs: changes
@@ -370,7 +429,7 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-            test_command: cargo test
+            test_command: cargo nextest run
           - os: macOS
             arch: ARM64
             feature: default
@@ -389,10 +448,13 @@ jobs:
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
-        run: nvidia-smi
+        run: bash ./.github/scripts/cuda_smoke.sh
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - uses: ./.github/actions/protoc
@@ -404,10 +466,7 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - name: test in dev mode
-        run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace --exclude prover-example
-        working-directory: examples
-      - name: test prover example
-        run: ${{ matrix.test_command }} --release --locked -F $FEATURE -p prover-example
+        run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:
@@ -447,6 +506,9 @@ jobs:
     runs-on: [self-hosted, cluster, macOS, cpu]
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
@@ -467,6 +529,9 @@ jobs:
       NIGHTLY_RUST_TOOLCHAIN: nightly-2025-06-20
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - uses: ./.github/actions/rustup
         with:
           toolchain: ${{ env.NIGHTLY_RUST_TOOLCHAIN }}
@@ -504,7 +569,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          lfs: true
           fetch-depth: 0
+      - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
@@ -522,7 +589,7 @@ jobs:
     needs: changes
     runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     env:
-      RUST_TOOLCHAIN_VERSION: 1.88.0
+      RUST_TOOLCHAIN_VERSION: 1.91.1
     strategy:
       fail-fast: false
       matrix:
@@ -535,6 +602,9 @@ jobs:
             sed_bin: gsed
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - name: Install gsed
@@ -575,6 +645,9 @@ jobs:
       RISC0_BUILD_LOCKED: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
       - uses: browser-actions/setup-firefox@v1
       - run: firefox --version
       - uses: ./.github/actions/rustup
@@ -642,6 +715,7 @@ jobs:
 
   bazel:
     if: needs.changes.outputs.bazel == 'true'
+    needs: changes
     runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
@@ -656,15 +730,12 @@ jobs:
             arch: ARM64
             feature: default
             device: apple_m2_pro
-            #config: --config=ci
     steps:
       - uses: actions/checkout@v4
-        # with:
-        #   persist-credentials: false
-      # - run: '(echo machine github.com; echo login x-access-token; echo password $ZIRGEN_TOKEN) > $HOME/.netrc'
-      #   env:
-      #      ZIRGEN_TOKEN: ${{ secrets.GHA_ZIRGEN_TOKEN }}
       - uses: ./.github/actions/bazelisk
+      - name: clang-format check
+        run: bazelisk build //... --config=clang-format-check
+        working-directory: risc0/circuit/rv32im-sys/cxx
       - name: Build & test
         env:
           CONFIG: ${{ matrix.config }}
@@ -674,6 +745,4 @@ jobs:
               --test_output=errors \
               --strategy=TestRunner=local \
               --@rules_cuda//cuda:archs=${{ matrix.nvcc_arch }}
-        working-directory: risc0/circuit/rv32im-m3-sys/cxx
-      # - run: 'rm -f $HOME/.netrc'
-      #   continue-on-error: true
+        working-directory: risc0/circuit/rv32im-sys/cxx

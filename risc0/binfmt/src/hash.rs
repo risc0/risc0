@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -50,7 +50,12 @@ impl<D: Digestible> Digestible for [D] {
     /// domain separate typed data, and the digest of an empty slice is the zero digest.
     fn digest<S: Sha256>(&self) -> Digest {
         self.iter().rfold(Digest::ZERO, |accum, item| {
-            *S::hash_bytes(&[accum.as_bytes(), item.digest::<S>().as_bytes()].concat())
+            let item_digest = item.digest::<S>();
+            let mut buf = [0u8; DIGEST_BYTES * 2];
+            // Copy `accum` then `item_digest` into a contiguous stack buffer
+            buf[..DIGEST_BYTES].copy_from_slice(accum.as_bytes());
+            buf[DIGEST_BYTES..].copy_from_slice(item_digest.as_bytes());
+            *S::hash_bytes(&buf)
         })
     }
 }

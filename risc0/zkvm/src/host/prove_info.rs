@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -57,7 +57,7 @@ pub struct ProveInfo {
     /// This receipt will be produced by provers that support Proof of Verifiable Work when a
     /// [`PovwJobId`][risc0_binfmt::PovwJobId] is provided in the [`ExecutorEnv`][crate::ExecutorEnv].
     /// This receipt provides a proof of work completed for this job, and can be combined into a
-    /// work log using the [Log Builder guest][risc0-povw].
+    /// work log using the Log Builder guest from `risc0-povw`.
     ///
     /// Note that this receipt will not be provided if the [`ProverOpts`][crate::ProverOpts] has a
     /// compression level of [`ReceiptKind::Composite`][crate::ReceiptKind]. A

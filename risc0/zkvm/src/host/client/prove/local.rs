@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,12 +13,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    ExecutorEnv, ProveInfo, Receipt, SessionInfo, VerifierContext, get_prover_server,
-    host::server::{exec::executor::ExecutorImpl, session::NullSegmentRef},
+    ExecutorEnv, ProveInfo, Receipt, SegmentInfo, SessionInfo, VerifierContext, get_prover_server,
+    host::server::exec::executor::ExecutorImpl,
 };
 
 /// A [Prover] implementation that selects a [ProverServer][crate::ProverServer] by calling
@@ -59,12 +59,15 @@ impl Prover for LocalProver {
 impl Executor for LocalProver {
     fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
         let mut segments = Vec::new();
-        let session = ExecutorImpl::from_elf(env, elf)
-            .unwrap()
-            .run_with_callback(|segment| {
-                segments.push(segment.get_info());
-                Ok(Box::new(NullSegmentRef))
-            })?;
+        let mut exec = ExecutorImpl::from_elf(env, elf)
+            .context("Failed to create executor from provided program")?;
+        while let Some(update) = exec.run_segment()? {
+            segments.push(SegmentInfo {
+                po2: update.po2,
+                cycles: update.user_cycles,
+            });
+        }
+        let session = exec.finalize_session()?;
 
         let receipt_claim = session.claim()?;
         Ok(SessionInfo {

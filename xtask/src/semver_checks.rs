@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -919,13 +919,6 @@ mod tests {
                 .unwrap()
                 .success()
         );
-
-        // Locally published crates have this directory, but not ones on `crates.io`
-        let published_crate = tempdir
-            .path()
-            .join(baseline_name)
-            .join(format!("target/package/{crate_name}-{baseline_version}"));
-        std::fs::remove_dir_all(published_crate.join("target")).unwrap();
 
         let published_baseline = tempdir
             .path()

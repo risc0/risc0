@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -48,7 +48,11 @@ pub enum BuildStatus {
 pub fn docker_build(manifest_path: &Path, guest_opts: &GuestOptions) -> Result<BuildStatus> {
     let manifest_dir = manifest_path.parent().unwrap().canonicalize().unwrap();
     let pkg = get_package(manifest_dir);
-    let src_dir = guest_opts.use_docker.clone().unwrap_or_default().root_dir();
+    let src_dir = guest_opts
+        .use_docker
+        .clone()
+        .unwrap_or_default()
+        .root_dir()?;
     let guest_opts = guest_opts.clone();
     let guest_info = GuestInfo {
         options: guest_opts.clone(),
@@ -74,7 +78,7 @@ pub(crate) fn build_guest_package_docker(
         .use_docker
         .clone()
         .unwrap_or_default()
-        .root_dir()
+        .root_dir()?
         .canonicalize()?;
 
     eprintln!("Docker context: {src_dir:?}");
@@ -263,7 +267,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "f1f73a95da2c69192f591d090a66addbb8fc6d9d76d399e043f598f5743be87c",
+            "a0679b1a3a855119bf2fa852408e97dc994715a0de35216db9b1da7fecc78cc4",
         );
     }
 }

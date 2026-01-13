@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -147,9 +147,7 @@ where
         global.buf.view(|slice| {
             let mut digest = Digest::ZERO;
             for (i, word) in digest.as_mut_words().iter_mut().enumerate() {
-                let low: u32 = slice[i * 2].into();
-                let high: u32 = slice[i * 2 + 1].into();
-                *word = low | (high << 16);
+                *word = slice[i].into();
             }
             tracing::debug!("final digest: {digest}");
 

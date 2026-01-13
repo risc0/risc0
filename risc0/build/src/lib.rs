@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -56,7 +56,7 @@ pub use self::{
 };
 
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
-const DEFAULT_DOCKER_TAG: &str = "r0.1.88.0";
+const DEFAULT_DOCKER_TAG: &str = "r0.1.91.1";
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {

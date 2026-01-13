@@ -1,4 +1,4 @@
-// Copyright 2022 Risc0, Inc.
+// Copyright 2026 Risc0, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ __global__ void batch_evaluate_any(
   }
 }
 
-__global__ void fri_fold(Fp* out, const Fp* in, const FpExt* mix, const uint32_t count) {
+__global__ void fri_fold(Fp* out, const Fp* in, const FpExt mix, const uint32_t count) {
   uint idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
     FpExt tot;
@@ -84,7 +84,7 @@ __global__ void fri_fold(Fp* out, const Fp* in, const FpExt* mix, const uint32_t
                    in[2 * count * kFriFold + rev_idx],
                    in[3 * count * kFriFold + rev_idx]);
       tot += curMix * factor;
-      curMix *= *mix;
+      curMix *= mix;
     }
     for (size_t i = 0; i < 4; i++) {
       out[count * i + idx] = tot.elems[i];
@@ -116,17 +116,17 @@ __global__ void scatter(Fp* into,
 __global__ void mix_poly_coeffs(FpExt* out,
                                 const Fp* in,
                                 const uint32_t* combos,
-                                const FpExt* mixStart,
-                                const FpExt* mix,
+                                const FpExt mixStart,
+                                const FpExt mix,
                                 const uint32_t inputSize,
                                 const uint32_t count) {
   uint idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
-    FpExt cur = *mixStart;
+    FpExt cur = mixStart;
     for (size_t i = 0; i < inputSize; i++) {
       size_t id = combos[i];
       out[count * id + idx] += cur * in[count * i + idx];
-      cur *= *mix;
+      cur *= mix;
     }
   }
 }

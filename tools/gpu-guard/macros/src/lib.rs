@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,12 +13,26 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use darling::FromMeta;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, ItemFn};
 
+#[derive(Debug, FromMeta)]
+#[darling(derive_syn_parse)]
+struct Args {
+    #[darling(default)]
+    skip_if_dev_mode: bool,
+}
+
 #[proc_macro_attribute]
-pub fn gpu_guard(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn gpu_guard(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let args: Args = match syn::parse(attr) {
+        Ok(v) => v,
+        Err(e) => {
+            return e.to_compile_error().into();
+        }
+    };
     let input = parse_macro_input!(item as ItemFn);
 
     let attrs = &input.attrs;
@@ -26,9 +40,18 @@ pub fn gpu_guard(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let sig = &input.sig;
     let mut body = input.block.clone();
 
-    let injected = quote! {
-        let __gpu_guard = ::gpu_guard::acquire_gpu_semaphore()
-            .expect("Failed to acquire GPU semaphore");
+    let injected = if args.skip_if_dev_mode {
+        quote! {
+            let __gpu_guard = ::std::primitive::bool::then(
+                !::gpu_guard::__is_dev_mode(),
+                || ::gpu_guard::acquire_gpu_semaphore().expect("Failed to acquire GPU semaphore")
+            );
+        }
+    } else {
+        quote! {
+            let __gpu_guard = ::gpu_guard::acquire_gpu_semaphore()
+                .expect("Failed to acquire GPU semaphore");
+        }
     };
 
     body.stmts.insert(0, ::syn::parse2(injected).unwrap());

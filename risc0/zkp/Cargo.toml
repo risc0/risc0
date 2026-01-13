@@ -1,15 +1,35 @@
 [package]
 name = "risc0-zkp"
 description = "RISC Zero zero-knowledge proof system core crate"
-version = "3.0.3"
+version = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
-[[bench]]
-name = "hash"
-harness = false
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+# NOTE: cuda and metal are excluded because their build scripts require external tools.
+features = ["prove", "std"]
+
+[features]
+circuit_debug = []
+cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
+default = []
+metal = ["prove"]
+metal_prefix_products = []
+prove = [
+    "dep:ff",
+    "dep:ndarray",
+    "dep:parking_lot",
+    "dep:rand",
+    "dep:rayon",
+    "dep:risc0-sys",
+    "risc0-core/perf",
+    "std",
+]
+std = ["anyhow/std"]
+unstable = []
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
@@ -20,6 +40,7 @@ cfg-if = "1.0"
 cust = { version = "0.3", optional = true }
 digest = { version = "0.10", features = ["oid"] }
 ff = { version = "0.13", features = ["derive", "bits"], optional = true }
+generic-array = "=0.14.7"
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 hex-literal = "0.4.1"
 paste = "1.0"
@@ -30,7 +51,7 @@ serde = { version = "1.0", default-features = false, features = ["derive"] }
 sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 stability = "0.2"
 tracing = { version = "0.1", default-features = false, features = [
-  "attributes",
+    "attributes",
 ] }
 
 [target.'cfg(any(target_os="macos", target_os="ios"))'.dependencies]
@@ -49,26 +70,9 @@ rand = { version = "0.9.1", features = ["small_rng"] }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-[package.metadata.docs.rs]
-rustdoc-args = ["--cfg", "docsrs"]
-# NOTE: cuda and metal are excluded because their build scripts require external tools.
-features = ["prove", "std"]
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+gpu-guard = { workspace = true }
 
-[features]
-circuit_debug = []
-cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
-default = []
-metal = ["prove"]
-metal_prefix_products = []
-prove = [
-  "dep:ff",
-  "dep:ndarray",
-  "dep:parking_lot",
-  "dep:rand",
-  "dep:rayon",
-  "dep:risc0-sys",
-  "risc0-core/perf",
-  "std",
-]
-std = ["anyhow/std"]
-unstable = []
+[[bench]]
+name = "hash"
+harness = false

@@ -1,23 +1,23 @@
 [package]
 name = "risc0-sys"
 description = "Generated / Native / HAL code for RISC Zero"
-version = "1.5.1"
+version = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 links = "risc0-sys"
 
-[build-dependencies]
-risc0-build-kernel = { workspace = true }
+[features]
+default = []
+cuda = ["dep:blst", "dep:cust", "risc0-sppark/cuda"]
+metal = []
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 blst = { version = "~0.3.11", optional = true }
 cust = { version = "0.3", optional = true }
-sppark = { workspace = true, optional = true }
+risc0-sppark = { workspace = true, optional = true }
 
-[features]
-default = []
-cuda = ["dep:blst", "dep:cust", "dep:sppark"]
-metal = []
+[build-dependencies]
+risc0-build-kernel = { workspace = true }

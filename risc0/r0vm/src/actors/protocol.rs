@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -125,6 +125,21 @@ pub(crate) enum Task {
     ShrinkWrap(Arc<ShrinkWrapTask>),
 }
 
+impl Task {
+    pub(crate) fn dev_mode(&self) -> bool {
+        match self {
+            Self::Execute(_) => false,
+            Self::ProveSegment(task) => task.dev_mode,
+            Self::ProveKeccak(task) => task.dev_mode,
+            Self::Lift(task) => task.dev_mode,
+            Self::Join(task) => task.dev_mode,
+            Self::Union(task) => task.dev_mode,
+            Self::Resolve(task) => task.dev_mode,
+            Self::ShrinkWrap(task) => task.dev_mode,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ExecuteTask {
     pub request: ProofRequest,
@@ -133,12 +148,14 @@ pub(crate) struct ExecuteTask {
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ProveSegmentTask {
     pub segment: Segment,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ProveKeccakTask {
     pub index: usize,
     pub request: ProveKeccakRequest,
+    pub dev_mode: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -150,12 +167,14 @@ pub(crate) struct SegmentRange {
 #[derive(Serialize, Deserialize)]
 pub(crate) struct LiftTask {
     pub receipt: SegmentReceipt,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct JoinTask {
     pub range: SegmentRange,
     pub receipts: Vec<SuccinctReceipt<ReceiptClaim>>,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -163,25 +182,28 @@ pub(crate) struct UnionTask {
     pub height: usize,
     pub pos: usize,
     pub receipts: Vec<Arc<SuccinctReceipt<Unknown>>>,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ResolveTask {
     pub conditional: Arc<SuccinctReceipt<ReceiptClaim>>,
     pub assumption: Arc<SuccinctReceipt<Unknown>>,
+    pub dev_mode: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ShrinkWrapTask {
     pub kind: ShrinkWrapKind,
     pub receipt: Arc<Receipt>,
+    pub dev_mode: bool,
 }
 
 pub mod factory {
     use std::net::SocketAddr;
 
     use super::*;
-    use crate::actors::actor::Actor;
+    use crate::actors::{actor::Actor, job::tracer};
 
     #[derive(Clone, Serialize, Deserialize)]
     #[serde(bound = "")]
@@ -197,6 +219,7 @@ pub mod factory {
         pub job: ActorRef<JobT>,
         pub header: TaskHeader,
         pub task: Task,
+        pub tracing: tracer::SavedContext,
     }
 
     impl<JobT: Actor> Clone for SubmitTaskMsg<JobT> {
@@ -205,6 +228,7 @@ pub mod factory {
                 job: self.job.clone(),
                 header: self.header.clone(),
                 task: self.task.clone(),
+                tracing: self.tracing.clone(),
             }
         }
     }
@@ -284,7 +308,10 @@ pub mod factory {
 
 pub mod worker {
     use super::{Task, TaskHeader};
-    use crate::actors::allocator::{CpuCores, GpuTokens};
+    use crate::actors::{
+        allocator::{CpuCores, GpuTokens},
+        job::tracer,
+    };
     use serde::{Deserialize, Serialize};
 
     #[derive(Clone, Serialize, Deserialize)]
@@ -293,6 +320,7 @@ pub mod worker {
         pub task: Task,
         pub gpu_tokens: GpuTokens,
         pub cores: CpuCores,
+        pub tracing: tracer::SavedContext,
     }
 }
 

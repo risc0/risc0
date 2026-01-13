@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -23,58 +23,69 @@ use risc0_zkp::{
     core::{digest::Digest, log2_ceil},
 };
 
+use crate::execute::ExecutionLimit;
+
 use super::{
     Executor, SimpleSession, SyscallContext, executor::CycleLimit, pager::RESERVED_PAGING_CYCLES,
     platform::*, syscall::Syscall,
 };
 
 pub const DEFAULT_SESSION_LIMIT: CycleLimit = CycleLimit::Hard(1 << 24);
+pub const DEFAULT_EXECUTION_LIMIT: ExecutionLimit =
+    ExecutionLimit::DEFAULT.with_session_limit(DEFAULT_SESSION_LIMIT);
 pub const MIN_CYCLES_PO2: usize = log2_ceil(RESERVED_CYCLES + RESERVED_PAGING_CYCLES as usize);
 
 #[derive(Default)]
 pub struct NullSyscall;
 
 impl Syscall for NullSyscall {
-    fn host_read(&self, _ctx: &mut dyn SyscallContext, _fd: u32, buf: &mut [u8]) -> Result<u32> {
+    fn host_read(&self, _ctx: &mut impl SyscallContext, _fd: u32, buf: &mut [u8]) -> Result<u32> {
         for (i, byte) in buf.iter_mut().enumerate() {
             *byte = i as u8;
         }
         Ok(buf.len() as u32)
     }
 
-    fn host_write(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
+    fn host_write(&self, _ctx: &mut impl SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
         unimplemented!()
     }
 }
 
 pub fn execute<S: Syscall>(
-    image: MemoryImage,
-    segment_limit_po2: usize,
-    max_insn_cycles: usize,
-    max_cycles: CycleLimit,
-    syscall_handler: &S,
+    mut image: MemoryImage,
+    limit: ExecutionLimit,
+    syscall_handler: S,
     input_digest: Option<Digest>,
 ) -> Result<SimpleSession> {
     scope!("execute");
 
-    if !(MIN_CYCLES_PO2..=MAX_CYCLES_PO2).contains(&segment_limit_po2) {
-        bail!("Invalid segment_limit_po2: {segment_limit_po2}");
+    if !(MIN_CYCLES_PO2..=MAX_CYCLES_PO2).contains(&limit.segment_po2) {
+        bail!("Invalid segment_limit_po2: {}", limit.segment_po2);
     }
+
+    let circuit_version = RV32IM_M3_CIRCUIT_VERSION;
 
     let mut segments = Vec::new();
     let trace = Vec::new();
-    let result = Executor::new(image, syscall_handler, input_digest, trace, None).run(
-        segment_limit_po2,
-        max_insn_cycles,
-        max_cycles,
-        |segment| {
-            tracing::trace!("{segment:#?}");
-            segments.push(segment);
-            Ok(())
-        },
-    )?;
+    let mut executor = Executor::new(
+        image.clone(),
+        syscall_handler,
+        input_digest,
+        trace,
+        None,
+        circuit_version,
+    );
 
-    Ok(SimpleSession { segments, result })
+    while let Some(segment_update) = executor.run_segment(limit)? {
+        let segment = segment_update.apply_into_segment(&mut image)?;
+        tracing::trace!("{segment:#?}");
+        segments.push(segment);
+    }
+
+    Ok(SimpleSession {
+        segments,
+        result: executor.state(limit.segment_po2.try_into().unwrap()),
+    })
 }
 
 pub mod user {

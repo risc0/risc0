@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -46,6 +46,7 @@ use opentelemetry_sdk::{
     Resource,
     logs::SdkLoggerProvider,
     metrics::{PeriodicReader, SdkMeterProvider},
+    propagation::TraceContextPropagator,
     trace::SdkTracerProvider,
 };
 use risc0_zkvm::DevModeDelay;
@@ -66,8 +67,8 @@ use crate::init_logging;
 use self::{
     actor::{Actor, ActorRef, Message},
     allocator::{
-        AllocatorActor, DEFAULT_RELEASE_CHANNEL, DeploymentVersion, HardwareResource,
-        RegisterManager, RegisterWorker, RemoteAllocatorActor,
+        AllocatorActor, DEFAULT_RELEASE_CHANNEL, DEFAULT_WORKER_QUEUING_FACTOR, DeploymentVersion,
+        HardwareResource, RegisterManager, RegisterWorker, RemoteAllocatorActor,
     },
     config::{
         AllocatorConfig, AppConfig, ExecutorConfig, ManagerConfig, ProverConfig, TelemetryConfig,
@@ -217,10 +218,12 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
             manager: Some(ManagerConfig {
                 allocator: None,
                 listen: None,
+                api_po2: None,
             }),
             allocator: Some(AllocatorConfig {
                 listen: None,
                 default_release_channel: None,
+                worker_queuing_factor: None,
             }),
             executor: Some(ExecutorConfig {
                 allocator: None,
@@ -403,6 +406,9 @@ impl App {
                     .default_release_channel
                     .as_deref()
                     .unwrap_or(DEFAULT_RELEASE_CHANNEL),
+                cfg_allocator
+                    .worker_queuing_factor
+                    .unwrap_or(DEFAULT_WORKER_QUEUING_FACTOR),
             ));
             allocator = Some(alloc_ref.clone());
 
@@ -470,7 +476,7 @@ impl App {
                         manager_listen_addr(cfg_manager.listen),
                         storage_root,
                         manager_ref,
-                        cfg.api.and_then(|c| c.po2),
+                        cfg_manager.api_po2,
                     )
                     .await?,
                 );
@@ -613,6 +619,7 @@ impl App {
                     let child = Command::new(&r0vm_path)
                         .process_group(0)
                         .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
+                        .env_remove("RISC0_DEV_MODE")
                         .arg("--config")
                         .arg(cfg_child.file.path())
                         .spawn()
@@ -641,20 +648,20 @@ impl App {
         self.allocator_rpc_server = None;
 
         if let Some(allocator) = &self.allocator {
-            let _ = allocator.stop_gracefully();
+            let _ = allocator.stop_gracefully("app shutdown");
         }
 
         if let Some(manager) = &self.manager {
-            let _ = manager.stop_gracefully();
+            let _ = manager.stop_gracefully("app shutdown");
         }
 
         let workers = self.workers.lock().unwrap().clone();
         for worker in workers {
-            let _ = worker.stop_gracefully();
+            let _ = worker.stop_gracefully("app shutdown");
         }
 
         if let Some(factory) = &self.factory {
-            let _ = factory.stop_gracefully();
+            let _ = factory.stop_gracefully("app shutdown");
         }
     }
 
@@ -837,7 +844,7 @@ async fn route_rpc_msg_to_worker(
     if let Some(msg) = msg {
         msg.dispatch(remote_address, worker, ops).await
     } else {
-        let _ = worker.stop_gracefully();
+        let _ = worker.stop_gracefully("rpc end");
     }
 }
 
@@ -1149,7 +1156,7 @@ impl<ActorT: Send + 'static> Actor for RemoteActor<ActorT> {
         if let Some(rpc_death_recv) = self.rpc_death_recv.take() {
             tokio::task::spawn(async move {
                 let _ = rpc_death_recv.await;
-                let _ = actor_ref.stop_gracefully();
+                let _ = actor_ref.stop_gracefully("rpc connection closed");
             });
         }
     }
@@ -1173,15 +1180,17 @@ macro_rules! remote_actor_ask {
                 let msg: $msg_ty = msg.into();
                 let res = self
                     .rpc_sender
-                    .ask(&msg, move |response: $reply| {
+                    .ask(&msg, async move |response: $reply| {
                         if let Some(reply_sender) = reply_sender {
-                            reply_sender.send(response);
+                            reply_sender.send(response).await;
                         }
                     })
                     .await;
                 if let Err(error) = res {
                     tracing::error!("error communicating with remote actor: {error}");
-                    let _ = ctx.actor_ref().stop_gracefully();
+                    let _ = ctx
+                        .actor_ref()
+                        .stop_gracefully(format!("rpc error: {error}"));
                 }
             }
         }
@@ -1203,7 +1212,9 @@ macro_rules! remote_actor_tell {
                 let res = self.rpc_sender.tell(&msg).await;
                 if let Err(error) = res {
                     tracing::error!("error communicating with remote actor: {error}");
-                    let _ = ctx.actor_ref().stop_gracefully();
+                    let _ = ctx
+                        .actor_ref()
+                        .stop_gracefully(format!("rpc error: {error}"));
                 }
             }
         }
@@ -1275,6 +1286,8 @@ impl OpenTelemetryProvider {
             .build();
 
         opentelemetry::global::set_meter_provider(meter_provider.clone());
+
+        opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
 
         Ok(Self {
             tracer_provider,

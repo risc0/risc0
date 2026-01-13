@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -42,12 +42,18 @@ pub enum MultiTestSpec {
         /// Busy loop until the guest has run for at least this number of cycles
         cycles: u64,
     },
+    CommitSingleKeccak,
     DoNothing,
     DoRandom,
     Echo {
         bytes: Vec<u8>,
     },
+    /// Read from the given file descriptor in a loop until EOF, writing to stdout.
+    /// Uses a buffer of `nbytes` size for each read operation. This tests POSIX-style
+    /// reading with a fixed-size buffer, where the total amount of data read may
+    /// exceed the buffer size.
     EchoStdout {
+        /// Buffer size for each read operation (not the total amount to read).
         nbytes: u32,
         fd: u32,
     },
@@ -58,9 +64,13 @@ pub enum MultiTestSpec {
     EventTrace,
     Fault,
     Halt(u8),
+    KeccakProve {
+        claim_digest: Digest,
+        po2: u32,
+    },
+    KeccakUnion(usize),
     KeccakUpdate,
     KeccakUpdate2,
-    KeccakUnion(usize),
     LibM,
     Oom,
     OutOfBounds,
@@ -93,7 +103,6 @@ pub enum MultiTestSpec {
         data: Vec<u8>,
         num_iter: u32,
     },
-    ShaSingleKeccak,
     SysFork,
     SysForkFork,
     SysForkJournalPanic,

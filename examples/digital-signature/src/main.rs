@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -67,6 +67,7 @@ mod tests {
     const PASSPHRASE: &str = "passw0rd";
 
     #[test]
+    #[gpu_guard::gpu_guard(skip_if_dev_mode = true)]
     fn main() {
         let signing_receipt = sign(PASSPHRASE, MESSAGE).unwrap();
         let message_hash = signing_receipt.get_message().unwrap();

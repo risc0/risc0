@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -82,7 +82,9 @@ pub trait RecursionProver {
 
 pub fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>> {
     cfg_if! {
-        if #[cfg(feature = "cuda")] {
+        if #[cfg(feature = "dual")] {
+            self::hal::dual::recursion_prover(hashfn)
+        } else if #[cfg(feature = "cuda")] {
             self::hal::cuda::recursion_prover(hashfn)
         // } else if #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))] {
         // self::hal::metal::recursion_prover(hashfn)

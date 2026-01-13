@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -19,6 +19,7 @@ use risc0_core::field::Field;
 
 use super::{AccumPreflight, Buffer, CircuitHal, Hal};
 use crate::core::{digest::Digest, hash::HashSuite};
+use crate::prove::MerkleTreeProver;
 
 #[derive(Clone)]
 pub struct BufferImpl<T, L, R>
@@ -26,8 +27,8 @@ where
     L: Buffer<T>,
     R: Buffer<T>,
 {
-    lhs: L,
-    rhs: R,
+    pub lhs: L,
+    pub rhs: R,
     phantom: PhantomData<T>,
 }
 
@@ -45,7 +46,7 @@ where
         }
     }
 
-    fn assert_eq(&self) {
+    pub fn assert_eq(&self) {
         self.lhs.view(|lhs| {
             self.rhs.view(|rhs| {
                 assert_eq!(lhs.len(), rhs.len());
@@ -133,26 +134,42 @@ where
     }
 
     fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        let lhs = self.lhs.alloc_digest(name, size);
-        let rhs = self.rhs.alloc_digest(name, size);
+        self.alloc_digest_zeroed(name, size)
+    }
+
+    fn alloc_digest_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        let lhs = self.lhs.alloc_digest_zeroed(name, size);
+        let rhs = self.rhs.alloc_digest_zeroed(name, size);
         BufferImpl::new(lhs, rhs)
     }
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
-        let lhs = self.lhs.alloc_elem(name, size);
-        let rhs = self.rhs.alloc_elem(name, size);
+        self.alloc_elem_zeroed(name, size)
+    }
+
+    fn alloc_elem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        let lhs = self.lhs.alloc_elem_zeroed(name, size);
+        let rhs = self.rhs.alloc_elem_zeroed(name, size);
         BufferImpl::new(lhs, rhs)
     }
 
     fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        let lhs = self.lhs.alloc_extelem(name, size);
-        let rhs = self.rhs.alloc_extelem(name, size);
+        self.alloc_extelem_zeroed(name, size)
+    }
+
+    fn alloc_extelem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        let lhs = self.lhs.alloc_extelem_zeroed(name, size);
+        let rhs = self.rhs.alloc_extelem_zeroed(name, size);
         BufferImpl::new(lhs, rhs)
     }
 
     fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
-        let lhs = self.lhs.alloc_u32(name, size);
-        let rhs = self.rhs.alloc_u32(name, size);
+        self.alloc_u32_zeroed(name, size)
+    }
+
+    fn alloc_u32_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        let lhs = self.lhs.alloc_u32_zeroed(name, size);
+        let rhs = self.rhs.alloc_u32_zeroed(name, size);
         BufferImpl::new(lhs, rhs)
     }
 
@@ -413,6 +430,46 @@ where
             into_stride,
         );
         into.assert_eq();
+    }
+
+    fn fri_prove(
+        &self,
+        out_values: &Self::Buffer<u32>,
+        values_column_width: usize,
+        out_digests: &Self::Buffer<u32>,
+        digests_column_width: usize,
+        positions: &Self::Buffer<u32>,
+        trees: &[&MerkleTreeProver<Self>],
+        groups: &Self::Buffer<u32>,
+    ) {
+        let left_trees = trees
+            .iter()
+            .map(|tree| tree.map_hal(|b| b.lhs.clone(), |b| b.lhs.clone()))
+            .collect::<Vec<_>>();
+        self.lhs.fri_prove(
+            &out_values.lhs,
+            values_column_width,
+            &out_digests.lhs,
+            digests_column_width,
+            &positions.lhs,
+            &left_trees.iter().collect::<Vec<_>>(),
+            &groups.lhs,
+        );
+        let right_trees = trees
+            .iter()
+            .map(|tree| tree.map_hal(|b| b.rhs.clone(), |b| b.rhs.clone()))
+            .collect::<Vec<_>>();
+        self.rhs.fri_prove(
+            &out_values.rhs,
+            values_column_width,
+            &out_digests.rhs,
+            digests_column_width,
+            &positions.rhs,
+            &right_trees.iter().collect::<Vec<_>>(),
+            &groups.rhs,
+        );
+        out_values.assert_eq();
+        out_digests.assert_eq();
     }
 }
 

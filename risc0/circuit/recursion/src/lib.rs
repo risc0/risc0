@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -43,6 +43,8 @@ use risc0_zkp::{
     field::baby_bear::BabyBear,
     taps::TapSet,
 };
+
+pub const LIFT_PO2_RANGE: core::ops::RangeInclusive<usize> = 12..=24;
 
 pub const REGISTER_GROUP_ACCUM: usize = 0;
 pub const REGISTER_GROUP_CODE: usize = 1;

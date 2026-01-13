@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -71,7 +71,7 @@ fn build_cuda_kernels() {
         .flag("-Xcompiler")
         .flag("-Wno-missing-braces,-Wno-unused-function,-Wno-unknown-pragmas,-Wno-unused-parameter")
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
-        .include(env::var("DEP_SPPARK_ROOT").unwrap());
+        .include(env::var("DEP_RISC0_SPPARK_ROOT").unwrap());
     if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {
         build.flag("-arch=native");
     }

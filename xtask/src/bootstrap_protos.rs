@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -29,18 +29,6 @@ impl BootstrapProtos {
             .compile_protos(
                 &["risc0/zkvm/src/host/server/exec/profile.proto"],
                 &["risc0/zkvm/src/host/server/exec"],
-            )
-            .unwrap();
-
-        prost_build::Config::new()
-            .out_dir("risc0/zkvm/src/host/protos")
-            .skip_debug(["api.Asset", "api.OnIoReply", "api.SliceIo", "api.PosixCmd"])
-            .compile_protos(
-                &[
-                    "risc0/zkvm/src/host/protos/api.proto",
-                    "risc0/zkvm/src/host/protos/core.proto",
-                ],
-                &["risc0/zkvm/src/host/protos"],
             )
             .unwrap();
     }

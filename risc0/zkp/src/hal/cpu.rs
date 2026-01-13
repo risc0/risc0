@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -33,6 +33,7 @@ use crate::{
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
     },
+    prove::MerkleTreeProver,
 };
 
 pub struct CpuHal<F: Field> {
@@ -268,6 +269,10 @@ impl<F: Field> Hal for CpuHal<F> {
     type Buffer<T: Clone + Debug + PartialEq> = CpuBuffer<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        self.alloc_elem_zeroed(name, size)
+    }
+
+    fn alloc_elem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         CpuBuffer::new(name, size)
     }
 
@@ -276,6 +281,10 @@ impl<F: Field> Hal for CpuHal<F> {
     }
 
     fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        self.alloc_extelem_zeroed(name, size)
+    }
+
+    fn alloc_extelem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
         CpuBuffer::new(name, size)
     }
 
@@ -288,6 +297,10 @@ impl<F: Field> Hal for CpuHal<F> {
     }
 
     fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        self.alloc_digest_zeroed(name, size)
+    }
+
+    fn alloc_digest_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
         CpuBuffer::new(name, size)
     }
 
@@ -296,6 +309,10 @@ impl<F: Field> Hal for CpuHal<F> {
     }
 
     fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        self.alloc_u32_zeroed(name, size)
+    }
+
+    fn alloc_u32_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
         CpuBuffer::new(name, size)
     }
 
@@ -649,6 +666,70 @@ impl<F: Field> Hal for CpuHal<F> {
     fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
         &self.suite
     }
+
+    fn fri_prove(
+        &self,
+        out_values: &Self::Buffer<u32>,
+        values_column_width: usize,
+        out_digests: &Self::Buffer<u32>,
+        digests_column_width: usize,
+        positions: &Self::Buffer<u32>,
+        trees: &[&MerkleTreeProver<Self>],
+        groups: &Self::Buffer<u32>,
+    ) {
+        let mut out_values = out_values.as_slice_mut();
+        let mut out_digests = out_digests.as_slice_mut();
+
+        let positions = positions.as_slice();
+        let groups = groups.as_slice();
+
+        assert_eq!(trees.len(), groups.len());
+
+        let mut out_values_iter = out_values.chunks_mut(values_column_width);
+        let mut out_digests_iter = out_digests.chunks_mut(digests_column_width);
+
+        std::thread::scope(|scope| {
+            for pos in &positions[..] {
+                for (tree, group) in trees.iter().zip(groups.iter()) {
+                    let out_values = out_values_iter.next().unwrap();
+                    let out_digests = out_digests_iter.next().unwrap();
+
+                    scope.spawn(move || {
+                        fri_prove_values(tree, *pos, *group, out_values);
+                    });
+                    scope.spawn(move || {
+                        fri_prove_digests(tree, *pos, *group, out_digests);
+                    });
+                }
+            }
+        });
+    }
+}
+
+fn fri_prove_values<F: Field>(
+    tree: &MerkleTreeProver<CpuHal<F>>,
+    pos: u32,
+    group: u32,
+    out_values: &mut [u32],
+) {
+    let values_out = tree.get_column((pos % group) as usize);
+
+    let values_slice: &[u32] = bytemuck::cast_slice(values_out.as_slice());
+    out_values[0] = values_slice.len().try_into().unwrap();
+    out_values[1..(values_slice.len() + 1)].copy_from_slice(values_slice);
+}
+
+fn fri_prove_digests<F: Field>(
+    tree: &MerkleTreeProver<CpuHal<F>>,
+    pos: u32,
+    group: u32,
+    out_digests: &mut [u32],
+) {
+    let digests_out = tree.get_digests((pos % group) as usize);
+
+    let digests_slice: &[u32] = bytemuck::cast_slice(digests_out.as_slice());
+    out_digests[0] = digests_slice.len().try_into().unwrap();
+    out_digests[1..(digests_slice.len() + 1)].copy_from_slice(digests_slice);
 }
 
 #[cfg(test)]

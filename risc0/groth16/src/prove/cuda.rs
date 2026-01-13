@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -180,14 +180,10 @@ pub(crate) fn shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
     let witness =
         calc_witness(&graph_path, &inputs).context("failed to calculate groth16 witness")?;
 
-    {
-        let _lock = risc0_zkp::hal::cuda::singleton().lock();
+    let proof = risc0_groth16_sys::prove(witness.as_bytes(), &prove_inputs.prove_params())
+        .context("failed to run groth16 prove operation")?;
 
-        let proof = risc0_groth16_sys::prove(witness.as_bytes(), &prove_inputs.prove_params())
-            .context("failed to run groth16 prove operation")?;
-
-        Ok(proof.into())
-    }
+    Ok(proof.into())
 }
 
 struct CalcWitness {
@@ -197,7 +193,7 @@ struct CalcWitness {
 impl CalcWitness {
     fn as_bytes(&self) -> &[u8] {
         let r: &[wtns_file::FieldElement<32>] = &self.witness[..];
-        unsafe { std::slice::from_raw_parts(r.as_ptr() as *const u8, r.len() * 4) }
+        unsafe { std::slice::from_raw_parts(r.as_ptr() as *const u8, std::mem::size_of_val(r)) }
     }
 }
 

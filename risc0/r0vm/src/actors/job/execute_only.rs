@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -56,7 +56,7 @@ impl Actor for JobActor {
                 status: self.status.clone(),
                 elapsed_time,
             };
-            reply_sender.send(JobStatusReply::Proof(info));
+            reply_sender.send(JobStatusReply::Proof(info)).await;
         }
 
         self.tracer.end();
@@ -95,23 +95,27 @@ impl JobActor {
         self.status = JobStatus::Succeeded(result);
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully();
+        let _ = self_ref.stop_gracefully("job shutdown");
     }
 
     async fn submit_task(&mut self, task: Task) -> Result<()> {
+        let header = TaskHeader {
+            global_id: GlobalId {
+                job_id: self.job_id,
+                task_id: 0,
+            },
+            task_kind: task.kind(),
+        };
+        self.task_start(header.clone());
+
         let msg = SubmitTaskMsg {
             job: self
                 .parent_ref
                 .upgrade()
                 .ok_or_else(|| Error::new("parent job has stopped"))?,
-            header: TaskHeader {
-                global_id: GlobalId {
-                    job_id: self.job_id,
-                    task_id: 0,
-                },
-                task_kind: task.kind(),
-            },
             task,
+            tracing: self.tracer.saved_task_context(header.global_id.task_id),
+            header,
         };
         self.factory.tell(msg).await?;
         Ok(())
@@ -128,10 +132,12 @@ impl JobActor {
     }
 
     async fn fail_with_error(&mut self, self_ref: ActorRef<Self>, error: impl Into<TaskError>) {
-        self.status = JobStatus::Failed(error.into());
+        let error: TaskError = error.into();
 
         // on_stop will reply
-        let _ = self_ref.stop_gracefully();
+        let _ = self_ref.stop_gracefully(format!("job failure: {error:?}"));
+
+        self.status = JobStatus::Failed(error);
     }
 }
 
@@ -159,7 +165,7 @@ impl Message<TaskUpdateMsg> for JobActor {
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         match msg.payload {
-            TaskUpdate::Start => self.task_start(msg.header),
+            TaskUpdate::Start => {}
             TaskUpdate::Segment(_) => {}
             TaskUpdate::Keccak(_) => {
                 self.fail_with_error(
@@ -218,5 +224,6 @@ impl Message<JobStatusRequest> for JobActor {
             status: self.status.clone(),
             elapsed_time: self.start_time.elapsed(),
         })))
+        .await
     }
 }

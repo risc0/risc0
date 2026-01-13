@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -20,8 +20,6 @@ use anyhow::Result;
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
-
-use crate::receipt::DEFAULT_MAX_PO2;
 
 /// Options to configure a [Prover][super::Prover].
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -88,7 +86,7 @@ impl Default for ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            max_segment_po2: DEFAULT_MAX_PO2,
+            max_segment_po2: crate::receipt::DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
@@ -137,7 +135,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            max_segment_po2: DEFAULT_MAX_PO2,
+            max_segment_po2: crate::receipt::DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
@@ -150,7 +148,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Succinct,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            max_segment_po2: DEFAULT_MAX_PO2,
+            max_segment_po2: crate::receipt::DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
@@ -165,12 +163,12 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            max_segment_po2: DEFAULT_MAX_PO2,
+            max_segment_po2: crate::receipt::DEFAULT_MAX_PO2,
             dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
 
-    /// Return [ProverOpts] with the hashfn set to the given value.
+    /// Return [ProverOpts] with the `hashfn` set to the given value.
     pub fn with_hashfn(self, hashfn: String) -> Self {
         Self {
             hashfn: hashfn.to_owned(),
@@ -178,7 +176,7 @@ impl ProverOpts {
         }
     }
 
-    /// Return [ProverOpts] with prove_guest_errors set to the given value.
+    /// Return [ProverOpts] with `prove_guest_errors` set to the given value.
     pub fn with_prove_guest_errors(self, prove_guest_errors: bool) -> Self {
         Self {
             prove_guest_errors,
@@ -186,7 +184,7 @@ impl ProverOpts {
         }
     }
 
-    /// Return [ProverOpts] with the receipt_kind set to the given value.
+    /// Return [ProverOpts] with the `receipt_kind` set to the given value.
     pub fn with_receipt_kind(self, receipt_kind: ReceiptKind) -> Self {
         Self {
             receipt_kind,
@@ -194,7 +192,7 @@ impl ProverOpts {
         }
     }
 
-    /// Return [ProverOpts] with the control_ids set to the given value.
+    /// Return [ProverOpts] with the `control_ids` set to the given value.
     pub fn with_control_ids(self, control_ids: Vec<Digest>) -> Self {
         Self {
             control_ids,
@@ -202,9 +200,9 @@ impl ProverOpts {
         }
     }
 
-    /// Return [ProverOpts] with the max_segment_po2 set to the given value.
+    /// Return [ProverOpts] with the `max_segment_po2` set to the given value.
     #[stability::unstable]
-    pub fn with_segment_po2_max(self, max_segment_po2: usize) -> Self {
+    pub fn with_max_segment_po2(self, max_segment_po2: usize) -> Self {
         Self {
             max_segment_po2,
             ..self

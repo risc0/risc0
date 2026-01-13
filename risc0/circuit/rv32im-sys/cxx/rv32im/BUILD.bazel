@@ -1,0 +1,12 @@
+cc_library(
+    name = "rv32im",
+    srcs = glob(["*.cpp"]),
+    hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//hal/pick",
+        "//prove",
+        "//verify",
+        "@risc0_sys",
+    ],
+)

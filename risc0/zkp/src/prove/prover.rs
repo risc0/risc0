@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -371,13 +371,14 @@ impl<'a, H: Hal> Prover<'a, H> {
         );
         tracing::debug!("FRI-proof, size = {}", final_poly_coeffs.size() / ext_size);
 
-        fri_prove(self.hal, &mut self.iop, &final_poly_coeffs, |iop, idx| {
-            for pg in self.groups.iter() {
-                let pg = pg.as_ref().unwrap();
-                pg.merkle.prove(self.hal, iop, idx);
-            }
-            check_group.merkle.prove(self.hal, iop, idx);
-        });
+        let mut merkles: Vec<_> = self
+            .groups
+            .iter()
+            .map(|pg| &pg.as_ref().unwrap().merkle)
+            .collect();
+        merkles.push(&check_group.merkle);
+
+        fri_prove(self.hal, &mut self.iop, &final_poly_coeffs, &merkles);
 
         let proven_soundness_error =
             super::soundness::proven::<H>(self.taps, final_poly_coeffs.size());

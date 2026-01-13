@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,15 +13,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc, sync::OnceLock};
+use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc};
 
 use anyhow::{Context as _, Result, bail};
 use cust::{
     device::DeviceAttribute,
-    memory::{DeviceCopy, DevicePointer, GpuBuffer},
+    memory::{AsyncCopyDestination as _, DeviceCopy, DevicePointer, GpuBuffer},
     prelude::*,
 };
-use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use risc0_core::{
     field::{
         Elem, ExtElem, RootsOfUnity,
@@ -42,13 +41,8 @@ use crate::{
         },
         log2_ceil,
     },
+    prove::MerkleTreeProver,
 };
-
-// The GPU becomes unstable as the number of concurrent provers grow.
-pub fn singleton() -> &'static ReentrantMutex<()> {
-    static ONCE: OnceLock<ReentrantMutex<()>> = OnceLock::new();
-    ONCE.get_or_init(|| ReentrantMutex::new(()))
-}
 
 #[derive(Clone, Copy)]
 #[repr(transparent)]
@@ -93,13 +87,17 @@ impl CudaHash for CudaHashSha256 {
 
         unsafe extern "C" {
             fn risc0_zkp_cuda_sha_fold(
+                stream: cust::sys::CUstream,
                 output: DevicePointer<u8>,
                 input: DevicePointer<u8>,
                 count: u32,
             ) -> *const std::os::raw::c_char;
         }
 
-        ffi_wrap(|| unsafe { risc0_zkp_cuda_sha_fold(output, input, output_size as u32) }).unwrap();
+        ffi_wrap(|| unsafe {
+            risc0_zkp_cuda_sha_fold(io.stream.as_inner(), output, input, output_size as u32)
+        })
+        .unwrap();
     }
 
     fn hash_rows(&self, output: &BufferImpl<Digest>, matrix: &BufferImpl<BabyBearElem>) {
@@ -109,6 +107,7 @@ impl CudaHash for CudaHashSha256 {
 
         unsafe extern "C" {
             fn risc0_zkp_cuda_sha_rows(
+                stream: cust::sys::CUstream,
                 output: DevicePointer<u8>,
                 matrix: DevicePointer<u8>,
                 row_size: u32,
@@ -118,6 +117,7 @@ impl CudaHash for CudaHashSha256 {
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_sha_rows(
+                output.stream.as_inner(),
                 output.as_device_ptr(),
                 matrix.as_device_ptr(),
                 row_size as u32,
@@ -147,7 +147,7 @@ impl CudaHash for CudaHashPoseidon2 {
         let err = unsafe {
             let input = io.as_device_ptr_with_offset(2 * output_size);
             let output = io.as_device_ptr_with_offset(output_size);
-            sppark_poseidon2_fold(output, input, output_size)
+            sppark_poseidon2_fold(io.stream.as_inner(), output, input, output_size)
         };
         if err.code != 0 {
             panic!("Failure during hash_fold: {err}");
@@ -161,6 +161,7 @@ impl CudaHash for CudaHashPoseidon2 {
 
         let err = unsafe {
             sppark_poseidon2_rows(
+                output.stream.as_inner(),
                 output.as_device_ptr(),
                 matrix.as_device_ptr(),
                 row_size.try_into().unwrap(),
@@ -192,7 +193,7 @@ impl CudaHash for CudaHashPoseidon254 {
         let err = unsafe {
             let input = io.as_device_ptr_with_offset(2 * output_size);
             let output = io.as_device_ptr_with_offset(output_size);
-            sppark_poseidon254_fold(output, input, output_size)
+            sppark_poseidon254_fold(io.stream.as_inner(), output, input, output_size)
         };
         if err.code != 0 {
             panic!("Failure during hash_fold: {err}");
@@ -206,6 +207,7 @@ impl CudaHash for CudaHashPoseidon254 {
 
         let err = unsafe {
             sppark_poseidon254_rows(
+                output.stream.as_inner(),
                 output.as_device_ptr(),
                 matrix.as_device_ptr(),
                 row_size,
@@ -225,8 +227,8 @@ impl CudaHash for CudaHashPoseidon254 {
 pub struct CudaHal<Hash: CudaHash + ?Sized> {
     pub max_threads: u32,
     hash: Option<Box<Hash>>,
+    pub stream: Rc<Stream>,
     _context: Context,
-    _lock: ReentrantMutexGuard<'static, ()>,
 }
 
 pub type CudaHalSha256 = CudaHal<CudaHashSha256>;
@@ -243,6 +245,15 @@ impl RawBuffer {
         tracing::trace!("alloc: {size} bytes, {name}");
         tracker().lock().unwrap().alloc(size);
         let buf = unsafe { DeviceBuffer::uninitialized(size) }
+            .context(format!("allocation failed on {name}: {size} bytes"))
+            .unwrap();
+        Self { name, buf }
+    }
+
+    pub fn new_zeroed(name: &'static str, size: usize) -> Self {
+        tracing::trace!("alloc: {size} bytes, {name}");
+        tracker().lock().unwrap().alloc(size);
+        let buf = DeviceBuffer::zeroed(size)
             .context(format!("allocation failed on {name}: {size} bytes"))
             .unwrap();
         Self { name, buf }
@@ -266,6 +277,7 @@ pub struct BufferImpl<T> {
     size: usize,
     offset: usize,
     marker: PhantomData<T>,
+    stream: Rc<Stream>,
 }
 
 #[inline]
@@ -281,7 +293,7 @@ fn unchecked_cast_mut<A, B>(a: &mut [A]) -> &mut [B] {
 }
 
 impl<T> BufferImpl<T> {
-    fn new(name: &'static str, size: usize) -> Self {
+    fn new(name: &'static str, size: usize, stream: Rc<Stream>) -> Self {
         let bytes_len = std::mem::size_of::<T>() * size;
         assert!(bytes_len > 0);
         BufferImpl {
@@ -289,22 +301,39 @@ impl<T> BufferImpl<T> {
             size,
             offset: 0,
             marker: PhantomData,
+            stream,
         }
     }
 
-    pub fn copy_from(name: &'static str, slice: &[T]) -> Self {
+    fn new_zeroed(name: &'static str, size: usize, stream: Rc<Stream>) -> Self {
+        let bytes_len = std::mem::size_of::<T>() * size;
+        assert!(bytes_len > 0);
+        BufferImpl {
+            buffer: Rc::new(RefCell::new(RawBuffer::new_zeroed(name, bytes_len))),
+            size,
+            offset: 0,
+            marker: PhantomData,
+            stream,
+        }
+    }
+
+    pub fn copy_from(name: &'static str, slice: &[T], stream: Rc<Stream>) -> Self {
         // scope!("copy_from");
         let bytes_len = std::mem::size_of_val(slice);
         assert!(bytes_len > 0);
         let mut buffer = RawBuffer::new(name, bytes_len);
         let bytes = unchecked_cast(slice);
-        buffer.buf.copy_from(bytes).unwrap();
+
+        let copy_res = unsafe { buffer.buf.async_copy_from(bytes, &stream) };
+        stream.synchronize().unwrap();
+        copy_res.unwrap();
 
         BufferImpl {
             buffer: Rc::new(RefCell::new(buffer)),
             size: slice.len(),
             offset: 0,
             marker: PhantomData,
+            stream,
         }
     }
 
@@ -337,6 +366,7 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
             size,
             offset: self.offset + offset,
             marker: PhantomData,
+            stream: self.stream.clone(),
         }
     }
 
@@ -346,7 +376,12 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         let offset = (self.offset + idx) * item_size;
         let ptr = unsafe { buf.buf.as_device_ptr().offset(offset as isize) };
         let device_slice = unsafe { DeviceSlice::from_raw_parts(ptr, item_size) };
-        let host_buf = device_slice.as_host_vec().unwrap();
+
+        let mut host_buf = vec![0u8; device_slice.len()];
+        let copy_res = unsafe { device_slice.async_copy_to(&mut host_buf, &self.stream) };
+        self.stream.synchronize().unwrap();
+        copy_res.unwrap();
+
         let slice: &[T] = unchecked_cast(&host_buf);
         slice[0].clone()
     }
@@ -359,7 +394,12 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         let len = self.size * item_size;
         let ptr = unsafe { buf.buf.as_device_ptr().offset(offset as isize) };
         let device_slice = unsafe { DeviceSlice::from_raw_parts(ptr, len) };
-        let host_buf = device_slice.as_host_vec().unwrap();
+
+        let mut host_buf = vec![0u8; device_slice.len()];
+        let copy_res = unsafe { device_slice.async_copy_to(&mut host_buf, &self.stream) };
+        self.stream.synchronize().unwrap();
+        copy_res.unwrap();
+
         let slice = unchecked_cast(&host_buf);
         f(slice);
     }
@@ -367,15 +407,28 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         scope!("view_mut");
         let mut buf = self.buffer.borrow_mut();
-        let mut host_buf = buf.buf.as_host_vec().unwrap();
+
+        let mut host_buf = vec![0u8; buf.buf.len()];
+        let copy_res = unsafe { buf.buf.async_copy_to(&mut host_buf, &self.stream) };
+        self.stream.synchronize().unwrap();
+        copy_res.unwrap();
+
         let slice = unchecked_cast_mut(&mut host_buf);
         f(&mut slice[self.offset..]);
-        buf.buf.copy_from(&host_buf).unwrap();
+
+        let copy_res = unsafe { buf.buf.async_copy_from(&host_buf, &self.stream) };
+        self.stream.synchronize().unwrap();
+        copy_res.unwrap();
     }
 
     fn to_vec(&self) -> Vec<T> {
         let buf = self.buffer.borrow_mut();
-        let host_buf = buf.buf.as_host_vec().unwrap();
+
+        let mut host_buf = vec![0u8; buf.buf.len()];
+        let copy_res = unsafe { buf.buf.async_copy_to(&mut host_buf, &self.stream) };
+        self.stream.synchronize().unwrap();
+        copy_res.unwrap();
+
         let slice = unchecked_cast(&host_buf);
         slice.to_vec()
     }
@@ -396,12 +449,8 @@ impl<CH: CudaHash + ?Sized> CudaHal<CH> {
     }
 
     fn new_from_hash(hash: Box<CH>) -> Self {
-        let _lock = singleton().lock();
-
-        let err = unsafe { sppark_init() };
-        if err.code != 0 {
-            panic!("Failure during sppark_init: {err}");
-        }
+        #[cfg(all(test, feature = "cuda"))]
+        gpu_guard::assert_gpu_semaphore_held();
 
         cust::init(CudaFlags::empty()).unwrap();
         let device = Device::get_device(0).unwrap();
@@ -410,15 +459,14 @@ impl<CH: CudaHash + ?Sized> CudaHal<CH> {
             .unwrap();
         let context = Context::new(device).unwrap();
         context.set_flags(ContextFlags::SCHED_AUTO).unwrap();
+        let stream = Stream::new(StreamFlags::empty(), None).unwrap();
 
-        let mut hal = Self {
+        Self {
             max_threads: max_threads as u32,
+            hash: Some(hash),
+            stream: Rc::new(stream),
             _context: context,
-            hash: None,
-            _lock,
-        };
-        hal.hash = Some(hash);
-        hal
+        }
     }
 
     fn poly_divide(
@@ -432,6 +480,7 @@ impl<CH: CudaHash + ?Sized> CudaHal<CH> {
 
         let err = unsafe {
             supra_poly_divide(
+                self.stream.as_inner(),
                 polynomial.as_device_ptr(),
                 poly_size,
                 &mut remainder as *mut _ as *mut u32,
@@ -466,7 +515,11 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
     type Buffer<T: Clone + Debug + PartialEq> = BufferImpl<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
-        BufferImpl::new(name, size)
+        BufferImpl::new(name, size, self.stream.clone())
+    }
+
+    fn alloc_elem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        BufferImpl::new_zeroed(name, size, self.stream.clone())
     }
 
     fn alloc_elem_init(
@@ -484,11 +537,11 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
     }
 
     fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
-        BufferImpl::copy_from(name, slice)
+        BufferImpl::copy_from(name, slice, self.stream.clone())
     }
 
     fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        BufferImpl::new(name, size)
+        BufferImpl::new(name, size, self.stream.clone())
     }
 
     fn alloc_extelem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
@@ -502,23 +555,31 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         name: &'static str,
         slice: &[Self::ExtElem],
     ) -> Self::Buffer<Self::ExtElem> {
-        BufferImpl::copy_from(name, slice)
+        BufferImpl::copy_from(name, slice, self.stream.clone())
     }
 
     fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        BufferImpl::new(name, size)
+        BufferImpl::new(name, size, self.stream.clone())
+    }
+
+    fn alloc_digest_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        BufferImpl::new_zeroed(name, size, self.stream.clone())
     }
 
     fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
-        BufferImpl::copy_from(name, slice)
+        BufferImpl::copy_from(name, slice, self.stream.clone())
     }
 
     fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
-        BufferImpl::new(name, size)
+        BufferImpl::new(name, size, self.stream.clone())
+    }
+
+    fn alloc_u32_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        BufferImpl::new_zeroed(name, size, self.stream.clone())
     }
 
     fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
-        BufferImpl::copy_from(name, slice)
+        BufferImpl::copy_from(name, slice, self.stream.clone())
     }
 
     fn batch_expand_into_evaluate_ntt(
@@ -539,6 +600,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
             let in_bits = log2_ceil(in_size);
             let err = unsafe {
                 sppark_batch_expand(
+                    self.stream.as_inner(),
                     output.as_device_ptr(),
                     input.as_device_ptr(),
                     in_bits.try_into().unwrap(),
@@ -562,6 +624,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
             let err = unsafe {
                 sppark_batch_NTT(
+                    self.stream.as_inner(),
                     output.as_device_ptr(),
                     n_bits.try_into().unwrap(),
                     poly_count.try_into().unwrap(),
@@ -582,6 +645,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         let err = unsafe {
             sppark_batch_iNTT(
+                self.stream.as_inner(),
                 io.as_device_ptr(),
                 n_bits.try_into().unwrap(),
                 count.try_into().unwrap(),
@@ -601,6 +665,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         unsafe extern "C" {
             fn risc0_zkp_cuda_batch_bit_reverse(
+                stream: cust::sys::CUstream,
                 io: DevicePointer<u8>,
                 bits: u32,
                 count: u32,
@@ -608,7 +673,12 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         }
 
         ffi_wrap(|| unsafe {
-            risc0_zkp_cuda_batch_bit_reverse(io.as_device_ptr(), bits as u32, io_size as u32)
+            risc0_zkp_cuda_batch_bit_reverse(
+                self.stream.as_inner(),
+                io.as_device_ptr(),
+                bits as u32,
+                io_size as u32,
+            )
         })
         .unwrap();
     }
@@ -636,6 +706,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         unsafe extern "C" {
             fn risc0_zkp_cuda_batch_evaluate_any(
+                stream: cust::sys::CUstream,
                 output: DevicePointer<u8>,
                 coeffs: DevicePointer<u8>,
                 which: DevicePointer<u8>,
@@ -648,6 +719,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_batch_evaluate_any(
+                self.stream.as_inner(),
                 out.as_device_ptr(),
                 coeffs.as_device_ptr(),
                 which.as_device_ptr(),
@@ -670,6 +742,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
     ) {
         unsafe extern "C" {
             fn risc0_zkp_cuda_gather_sample(
+                stream: cust::sys::CUstream,
                 dst: DevicePointer<u8>,
                 src: DevicePointer<u8>,
                 idx: u32,
@@ -680,6 +753,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_gather_sample(
+                self.stream.as_inner(),
                 dst.as_device_ptr(),
                 src.as_device_ptr(),
                 idx as u32,
@@ -700,6 +774,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         let err = unsafe {
             sppark_batch_zk_shift(
+                self.stream.as_inner(),
                 io.as_device_ptr(),
                 bits.try_into().unwrap(),
                 poly_count.try_into().unwrap(),
@@ -720,28 +795,14 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         input_size: usize,
         count: usize,
     ) {
-        let mix_start = self.copy_from_extelem("mix_start", &[*mix_start]);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
-
-        unsafe extern "C" {
-            fn risc0_zkp_cuda_mix_poly_coeffs(
-                output: DevicePointer<u8>,
-                input: DevicePointer<u8>,
-                combos: DevicePointer<u8>,
-                mix_start: DevicePointer<u8>,
-                mix: DevicePointer<u8>,
-                input_size: u32,
-                count: u32,
-            ) -> *const std::os::raw::c_char;
-        }
-
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_mix_poly_coeffs(
+                self.stream.as_inner(),
                 output.as_device_ptr(),
                 input.as_device_ptr(),
                 combos.as_device_ptr(),
-                mix_start.as_device_ptr(),
-                mix.as_device_ptr(),
+                mix_start as *const _ as *const u32,
+                mix as *const _ as *const u32,
                 input_size as u32,
                 count as u32,
             )
@@ -761,6 +822,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         unsafe extern "C" {
             fn risc0_zkp_cuda_eltwise_add_fp(
+                stream: cust::sys::CUstream,
                 out: DevicePointer<u8>,
                 x: DevicePointer<u8>,
                 y: DevicePointer<u8>,
@@ -770,6 +832,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_eltwise_add_fp(
+                self.stream.as_inner(),
                 output.as_device_ptr(),
                 input1.as_device_ptr(),
                 input2.as_device_ptr(),
@@ -791,6 +854,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         unsafe extern "C" {
             fn risc0_zkp_cuda_eltwise_sum_fpext(
+                stream: cust::sys::CUstream,
                 output: DevicePointer<u8>,
                 input: DevicePointer<u8>,
                 to_add: u32,
@@ -800,6 +864,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_eltwise_sum_fpext(
+                self.stream.as_inner(),
                 output.as_device_ptr(),
                 input.as_device_ptr(),
                 to_add as u32,
@@ -819,6 +884,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         unsafe extern "C" {
             fn risc0_zkp_cuda_eltwise_copy_fp(
+                stream: cust::sys::CUstream,
                 output: DevicePointer<u8>,
                 input: DevicePointer<u8>,
                 count: u32,
@@ -827,6 +893,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_eltwise_copy_fp(
+                self.stream.as_inner(),
                 output.as_device_ptr(),
                 input.as_device_ptr(),
                 count as u32,
@@ -838,13 +905,18 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
     fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
         unsafe extern "C" {
             fn risc0_zkp_cuda_eltwise_zeroize_fp(
+                stream: cust::sys::CUstream,
                 elems: DevicePointer<u8>,
                 count: u32,
             ) -> *const std::os::raw::c_char;
         }
 
         ffi_wrap(|| unsafe {
-            risc0_zkp_cuda_eltwise_zeroize_fp(elems.as_device_ptr(), elems.size() as u32)
+            risc0_zkp_cuda_eltwise_zeroize_fp(
+                self.stream.as_inner(),
+                elems.as_device_ptr(),
+                elems.size() as u32,
+            )
         })
         .unwrap();
     }
@@ -871,6 +943,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         unsafe extern "C" {
             fn risc0_zkp_cuda_scatter(
+                stream: cust::sys::CUstream,
                 into: DevicePointer<u8>,
                 index: DevicePointer<u8>,
                 offsets: DevicePointer<u8>,
@@ -881,6 +954,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_scatter(
+                self.stream.as_inner(),
                 into.as_device_ptr(),
                 index.as_device_ptr(),
                 offsets.as_device_ptr(),
@@ -906,6 +980,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         unsafe extern "C" {
             fn risc0_zkp_cuda_eltwise_copy_fp_region(
+                stream: cust::sys::CUstream,
                 into: DevicePointer<u8>,
                 from: DevicePointer<u8>,
                 from_rows: u32,
@@ -919,6 +994,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_eltwise_copy_fp_region(
+                self.stream.as_inner(),
                 into.as_device_ptr(),
                 from.as_device_ptr(),
                 from_rows as u32,
@@ -941,22 +1017,13 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         let count = output.size() / Self::ExtElem::EXT_SIZE;
         assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), output.size() * FRI_FOLD);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
-
-        unsafe extern "C" {
-            fn risc0_zkp_cuda_fri_fold(
-                output: DevicePointer<u8>,
-                input: DevicePointer<u8>,
-                mix: DevicePointer<u8>,
-                count: u32,
-            ) -> *const std::os::raw::c_char;
-        }
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_fri_fold(
+                self.stream.as_inner(),
                 output.as_device_ptr(),
                 input.as_device_ptr(),
-                mix.as_device_ptr(),
+                mix as *const _ as *const u32,
                 count as u32,
             )
         })
@@ -1004,6 +1071,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         unsafe extern "C" {
             fn risc0_zkp_cuda_combos_prepare(
+                stream: cust::sys::CUstream,
                 combos: DevicePointer<u8>,
                 coeff_u: DevicePointer<u8>,
                 combo_count: u32,
@@ -1018,6 +1086,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
 
         ffi_wrap(|| unsafe {
             risc0_zkp_cuda_combos_prepare(
+                self.stream.as_inner(),
                 combos.as_device_ptr(),
                 coeff_u.as_device_ptr(),
                 combo_count,
@@ -1047,6 +1116,74 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
             }
         }
     }
+
+    fn fri_prove(
+        &self,
+        out_values: &Self::Buffer<u32>,
+        values_column_width: usize,
+        out_digests: &Self::Buffer<u32>,
+        digests_column_width: usize,
+        positions: &Self::Buffer<u32>,
+        trees: &[&MerkleTreeProver<Self>],
+        groups: &Self::Buffer<u32>,
+    ) {
+        assert_eq!(trees.len(), groups.size());
+
+        assert_eq!(
+            out_values.size() / values_column_width,
+            positions.size() * trees.len()
+        );
+        assert_eq!(
+            out_digests.size() / digests_column_width,
+            positions.size() * trees.len()
+        );
+
+        let trees_buffer = BufferImpl::<CudaMerkleTreeProver>::copy_from(
+            "fri_prove_trees",
+            &trees.iter().map(|t| t.to_cuda_prover()).collect::<Vec<_>>(),
+            self.stream.clone(),
+        );
+
+        unsafe extern "C" {
+            fn risc0_zkp_cuda_fri_prove(
+                stream: cust::sys::CUstream,
+                out_values: DevicePointer<u8>,
+                values_column_width: usize,
+                out_digests: DevicePointer<u8>,
+                digests_column_width: usize,
+                positions: DevicePointer<u8>,
+                positions_len: usize,
+                trees: DevicePointer<u8>,
+                trees_len: usize,
+                groups: DevicePointer<u8>,
+            ) -> *const std::os::raw::c_char;
+        }
+
+        ffi_wrap(|| unsafe {
+            risc0_zkp_cuda_fri_prove(
+                self.stream.as_inner(),
+                out_values.as_device_ptr(),
+                values_column_width,
+                out_digests.as_device_ptr(),
+                digests_column_width,
+                positions.as_device_ptr(),
+                positions.size(),
+                trees_buffer.as_device_ptr(),
+                trees.len(),
+                groups.as_device_ptr(),
+            )
+        })
+        .unwrap();
+    }
+}
+
+#[repr(C)]
+pub struct CudaMerkleTreeProver {
+    pub row_size: usize,
+    pub col_size: usize,
+    pub top_size: usize,
+    pub matrix: DevicePointer<u8>,
+    pub nodes: DevicePointer<u8>,
 }
 
 #[cfg(test)]
@@ -1057,82 +1194,104 @@ mod tests {
     use crate::hal::testutil;
 
     #[test]
+    #[gpu_guard::gpu_guard]
     #[should_panic]
     fn check_req() {
         testutil::check_req(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_add_elem() {
         testutil::eltwise_add_elem(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_copy_elem() {
         testutil::eltwise_copy_elem(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_sum_extelem() {
         testutil::eltwise_sum_extelem(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_rows_sha256() {
         testutil::hash_rows(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_fold_sha256() {
         testutil::hash_fold(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_rows_poseidon2() {
         testutil::hash_rows(CudaHalPoseidon2::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_fold_poseidon2() {
         testutil::hash_fold(CudaHalPoseidon2::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn fri_fold() {
         testutil::fri_fold(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
+    fn fri_prove() {
+        testutil::fri_prove(CudaHalSha256::new());
+    }
+
+    #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_expand_into_evaluate_ntt() {
         testutil::batch_expand_into_evaluate_ntt(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_interpolate_ntt() {
         testutil::batch_interpolate_ntt(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_bit_reverse() {
         testutil::batch_bit_reverse(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_evaluate_any() {
         testutil::batch_evaluate_any(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn gather_sample() {
         testutil::gather_sample(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn zk_shift() {
         testutil::zk_shift(CudaHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn mix_poly_coeffs() {
         testutil::mix_poly_coeffs(CudaHalSha256::new());
     }

@@ -1,15 +1,34 @@
 [package]
 name = "risc0-circuit-keccak"
 description = "RISC Zero circuit for keccak"
-version = "4.0.3"
+version = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
-[[example]]
-name = "keccak"
-required-features = ["prove"]
+[features]
+# Enables CUDA GPU support
+cuda = [
+    "prove",
+    "risc0-circuit-keccak-sys/cuda",
+    "risc0-sys/cuda",
+    "risc0-zkp/cuda",
+    "std",
+]
+default = ["prove"]
+# Enables ZKR registration to actually generate proofs.
+prove = [
+    "dep:cfg-if",
+    "dep:keccak",
+    "dep:rayon",
+    "dep:risc0-circuit-keccak-sys",
+    "dep:risc0-sys",
+    "dep:liblzma",
+    "risc0-circuit-recursion/prove",
+    "std",
+]
+std = ["risc0-zkp/std", "risc0-binfmt/std"]
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
@@ -18,48 +37,31 @@ risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true, features = ["default"] }
 tracing = { version = "0.1", default-features = false, features = [
-  "attributes",
+    "attributes",
 ] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 bytemuck = "1.20"
 cfg-if = { version = "1.0", optional = true }
 keccak = { version = "0.1.5", optional = true }
+liblzma = { version = "0.4", optional = true, features = ["static"] }
+rayon = { version = "1.10", optional = true }
 risc0-circuit-keccak-sys = { workspace = true, optional = true }
 risc0-circuit-recursion = { workspace = true, default-features = false }
 risc0-sys = { workspace = true, optional = true }
-rayon = { version = "1.10", optional = true }
+
+[build-dependencies]
 liblzma = { version = "0.4", optional = true, features = ["static"] }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
 rand = "0.9.1"
-risc0-circuit-keccak-methods = { path = "methods" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-[build-dependencies]
-liblzma = { version = "0.4", optional = true, features = ["static"] }
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+gpu-guard = { workspace = true }
 
-[features]
-# Enables CUDA GPU support
-cuda = [
-  "prove",
-  "risc0-circuit-keccak-sys/cuda",
-  "risc0-sys/cuda",
-  "risc0-zkp/cuda",
-  "std",
-]
-default = ["prove"]
-# Enables ZKR registration to actually generate proofs.
-prove = [
-  "dep:cfg-if",
-  "dep:keccak",
-  "dep:rayon",
-  "dep:risc0-circuit-keccak-sys",
-  "dep:risc0-sys",
-  "dep:liblzma",
-  "risc0-circuit-recursion/prove",
-  "std",
-]
-std = ["risc0-zkp/std", "risc0-binfmt/std"]
+[[example]]
+name = "keccak"
+required-features = ["prove"]

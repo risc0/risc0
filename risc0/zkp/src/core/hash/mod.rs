@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -39,6 +39,20 @@ pub trait HashFn<F: Field>: Send + Sync {
     /// Generate a hash from a slice of extension field element.  This may be
     /// unpadded so this is only safe to be used when the size is known.
     fn hash_ext_elem_slice(&self, slice: &[F::ExtElem]) -> Box<Digest>;
+
+    /// Checks whether the given [Digest] is valid for this hash function.
+    ///
+    /// Poseidon2 considers a Digest invalid is any of the words in the digest are not reduced Baby
+    /// Bear elements.
+    // NOTE: The HashFn API requires the caller to be diligent about calling is_digest_valid before
+    // calling hash_pair to avoid a panic (as Poseidon2 and Poseidon over BN254 will do). This
+    // could be embedded in the type signature instead if Digest was an associated type. However,
+    // this would be a major change and would make using `dyn` more complicated. If that change is
+    // implemented, this function should be removed.
+    fn is_digest_valid(&self, digest: &Digest) -> bool {
+        #![expect(unused_variables)]
+        true
+    }
 }
 
 /// A trait that sets the PRNG used by Fiat-Shamir.  We allow specialization at
@@ -87,7 +101,7 @@ impl<F: Field> Clone for HashSuite<F> {
     }
 }
 
-/// Construct a supported hash function given its name. Returns None is the name does not
+/// Construct a supported hash function given its name. Returns None if the name does not
 /// correspond to a supported hash function.
 pub fn hash_suite_from_name(name: impl AsRef<str>) -> Option<HashSuite<BabyBear>> {
     match name.as_ref() {

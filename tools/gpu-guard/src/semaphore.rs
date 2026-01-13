@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -67,4 +67,31 @@ pub fn acquire_gpu_semaphore() -> std::io::Result<File> {
     }
 
     unreachable!()
+}
+
+#[cfg(target_os = "linux")]
+fn gpu_semaphore_is_held() -> std::io::Result<bool> {
+    for entry in std::fs::read_dir("/proc/self/fd")? {
+        if let Ok(file_path) = entry?.path().canonicalize()
+            && file_path.starts_with(&*SEMAPHORE_DIR)
+        {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+pub fn assert_gpu_semaphore_held() {
+    #[cfg(target_os = "linux")]
+    match gpu_semaphore_is_held() {
+        Ok(held) => {
+            assert!(
+                held,
+                "GPU semaphore not held. Annotate test with `#[gpu_guard::gpu_guard]`"
+            );
+        }
+        Err(error) => {
+            panic!("failed to inspect if GPU semaphore was held: {error}");
+        }
+    }
 }

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -74,13 +74,10 @@ impl PovwJobId {
 
     /// Serializes the job ID to a byte array in little-endian format.
     pub fn to_bytes(self) -> [u8; U160::BYTES + U64::BYTES] {
-        [
-            self.job.to_le_bytes().as_slice(),
-            self.log.to_le_bytes::<{ U160::BYTES }>().as_slice(),
-        ]
-        .concat()
-        .try_into()
-        .unwrap()
+        let mut out = [0u8; U160::BYTES + U64::BYTES];
+        out[..U64::BYTES].copy_from_slice(&self.job.to_le_bytes());
+        out[U64::BYTES..].copy_from_slice(&self.log.to_le_bytes::<{ U160::BYTES }>());
+        out
     }
 
     /// Deserializes a job ID from a byte array in little-endian format.
@@ -173,6 +170,14 @@ impl PovwNonce {
             *x = u32::from_le(*x);
         }
         u32s
+    }
+
+    /// Creates a nonce from an array of 8 u32 values.
+    pub fn from_u32s(mut b: [u32; 8]) -> Self {
+        for x in &mut b {
+            *x = u32::to_le(*x);
+        }
+        Self::from_bytes(bytemuck::cast(b))
     }
 
     /// Converts the nonce to an array of 16 u16 values.

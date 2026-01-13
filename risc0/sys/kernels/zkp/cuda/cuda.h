@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -42,17 +42,6 @@ template <typename... Types> inline std::string fmt(const char* fmt, Types... ar
     }                                                                                              \
   } while (0)
 
-class CudaStream {
-private:
-  cudaStream_t stream;
-
-public:
-  CudaStream() { cudaStreamCreate(&stream); }
-  ~CudaStream() { cudaStreamDestroy(stream); }
-
-  inline operator cudaStream_t() const { return stream; }
-};
-
 struct LaunchConfig {
   dim3 grid;
   dim3 block;
@@ -77,11 +66,11 @@ inline LaunchConfig getSimpleConfig(uint32_t count) {
 
 template <typename... ExpTypes, typename... ActTypes>
 const char* launchKernel(void (*kernel)(ExpTypes...),
+                         cudaStream_t stream,
                          uint32_t count,
                          uint32_t shared_size,
                          ActTypes&&... args) {
   try {
-    CudaStream stream;
     LaunchConfig cfg = getSimpleConfig(count);
     cudaLaunchConfig_t config;
     config.attrs = nullptr;

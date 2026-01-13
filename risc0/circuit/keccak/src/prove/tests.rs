@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -29,6 +29,7 @@ use crate::{
 };
 
 #[test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn basic() {
     let po2 = 8; // 256
     let inputs = test_inputs(po2);
@@ -38,6 +39,7 @@ fn basic() {
 }
 
 #[test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn fwd_rev_ab() {
     cfg_if! {
         if #[cfg(feature = "cuda")] {

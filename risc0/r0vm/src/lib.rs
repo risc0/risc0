@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -21,8 +21,8 @@ use std::{io, net::SocketAddr, path::PathBuf, rc::Rc};
 use clap::{Args, Parser, ValueEnum};
 use risc0_circuit_rv32im::execute::Segment;
 use risc0_zkvm::{
-    ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
-    compute_image_id, compute_kernel_id, get_prover_server,
+    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext, compute_image_id,
+    compute_kernel_id, get_prover_server,
 };
 use tracing_subscriber::EnvFilter;
 
@@ -113,9 +113,6 @@ struct Mode {
     #[arg(long)]
     actor_status: Option<String>,
 
-    #[arg(long)]
-    port: Option<u16>,
-
     /// The ELF to execute
     #[arg(long)]
     elf: Option<PathBuf>,
@@ -185,11 +182,6 @@ pub fn main() {
         let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();
         let image_id = compute_kernel_id(&blob).unwrap();
         println!("{image_id}");
-        return;
-    }
-
-    if let Some(port) = args.mode.port {
-        run_server(port);
         return;
     }
 
@@ -277,12 +269,6 @@ impl Cli {
             });
         get_prover_server(&opts).unwrap()
     }
-}
-
-fn run_server(port: u16) {
-    let addr = format!("127.0.0.1:{port}");
-    let server = ApiServer::new_tcp(addr);
-    server.run().unwrap()
 }
 
 fn init_logging() {

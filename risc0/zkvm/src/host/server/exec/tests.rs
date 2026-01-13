@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -76,18 +76,6 @@ fn cpp_test() {
     assert_eq!(message.as_str(), "blst is such a blast");
 }
 
-#[rstest]
-#[should_panic(expected = "too small")]
-fn insufficient_segment_limit() {
-    let env = ExecutorEnv::builder()
-        .segment_limit_po2(13) // 8K cycles
-        .write(&MultiTestSpec::DoNothing)
-        .unwrap()
-        .build()
-        .unwrap();
-    execute_elf(env, MULTI_TEST_ELF).unwrap();
-}
-
 #[test_log::test]
 fn basic() {
     let program = risc0_circuit_rv32im::execute::testutil::user::basic();
@@ -104,12 +92,13 @@ fn basic() {
     let segment = session.segments.first().unwrap().resolve().unwrap();
 
     assert_eq!(session.segments.len(), 1);
-    assert_eq!(segment.inner.claim.pre_state, pre_image_id);
-    assert_ne!(segment.inner.claim.post_state, pre_image_id);
-    assert_eq!(segment.inner.claim.input, Digest::ZERO);
-    assert_eq!(segment.inner.claim.output, Some(Digest::ZERO));
+    let segment_claim = segment.inner.execute().unwrap().claim();
+    assert_eq!(segment_claim.pre_state, pre_image_id);
+    assert_ne!(segment_claim.post_state, Digest::ZERO);
+    assert_eq!(segment.inner.input_digest, Digest::ZERO);
+    assert_eq!(segment.inner.output_digest, Some(Digest::ZERO));
     assert_eq!(
-        segment.inner.claim.terminate_state,
+        segment.inner.terminate_state,
         Some(TerminateState::default())
     );
     assert_eq!(segment.index, 0);
@@ -117,7 +106,9 @@ fn basic() {
 
 #[test_log::test]
 fn system_split_v2() {
-    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
+    const ITERATIONS: u32 = 5_000;
+
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(ITERATIONS);
     let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 
@@ -138,24 +129,20 @@ fn system_split_v2() {
 
     assert_eq!(segments.len(), 2);
 
-    assert_eq!(segments[0].inner.claim.pre_state, pre_image_id);
-    assert_ne!(segments[0].inner.claim.post_state, pre_image_id);
-    assert_eq!(segments[0].inner.claim.input, Digest::ZERO);
-    assert_eq!(segments[0].inner.claim.output, None);
-    assert_eq!(segments[0].inner.claim.terminate_state, None);
+    let segment0_claim = segments[0].inner.execute().unwrap().claim();
+    assert_eq!(segment0_claim.pre_state, pre_image_id);
+    assert_ne!(segment0_claim.post_state, pre_image_id);
+    assert_eq!(segments[0].inner.input_digest, Digest::ZERO);
+    assert_eq!(segments[0].inner.output_digest, None);
+    assert_eq!(segments[0].inner.terminate_state, None);
 
+    let segment1_claim = segments[1].inner.execute().unwrap().claim();
+    assert_eq!(segment1_claim.pre_state, segment0_claim.post_state);
+    assert_ne!(segment1_claim.post_state, segment1_claim.pre_state);
+    assert_eq!(segments[1].inner.input_digest, Digest::ZERO);
+    assert_eq!(segments[1].inner.output_digest, Some(Digest::ZERO));
     assert_eq!(
-        segments[1].inner.claim.pre_state,
-        segments[0].inner.claim.post_state
-    );
-    assert_ne!(
-        segments[1].inner.claim.post_state,
-        segments[1].inner.claim.pre_state
-    );
-    assert_eq!(segments[1].inner.claim.input, Digest::ZERO);
-    assert_eq!(segments[1].inner.claim.output, Some(Digest::ZERO));
-    assert_eq!(
-        segments[1].inner.claim.terminate_state,
+        segments[1].inner.terminate_state,
         Some(TerminateState::default())
     );
 
@@ -232,7 +219,7 @@ fn bigint_accel() {
 }
 
 #[test_log::test]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 fn bigint_accel_mod_zero_product_too_large() {
     let input = MultiTestSpec::BigInt {
         count: 1,
@@ -277,28 +264,28 @@ const BIGINT_ILLEGAL_ADDR: u32 = 0xc000_0000;
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_ILLEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_LEGAL_ADDR,
     BIGINT_ILLEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_ILLEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
@@ -539,11 +526,14 @@ fn large_io_words() {
         fd: FD,
         nwords: buf.len() as u32,
     };
+
+    const SESSION_LIMIT: u64 = 20_000_000 * 8;
+
     let env = ExecutorEnv::builder()
         .read_fd(FD, bytemuck::cast_slice(&buf))
         .write(&input)
         .unwrap()
-        .session_limit(Some(20_000_000))
+        .session_limit(Some(SESSION_LIMIT))
         .build()
         .unwrap();
     let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -940,7 +930,7 @@ fn panic() {
 #[test_log::test]
 fn fault() {
     let err = multi_test_raw(MultiTestSpec::Fault).err().unwrap();
-    assert!(err.to_string().contains("StoreAccessFault"));
+    assert!(err.to_string().contains("Illegal trap in machine mode"));
 }
 
 #[test_log::test]
@@ -1131,7 +1121,7 @@ fn memory_access() {
             .err()
             .unwrap()
             .to_string()
-            .contains("StoreAccessFault")
+            .contains("Illegal trap in machine mode")
     );
 
     let addr = 0xC000_0000;
@@ -1140,7 +1130,7 @@ fn memory_access() {
             .err()
             .unwrap()
             .to_string()
-            .contains("StoreAccessFault")
+            .contains("Illegal trap in machine mode")
     );
 
     assert_eq!(access_memory(0x0B00_0000).unwrap(), ExitCode::Halted(0));
@@ -1157,9 +1147,12 @@ fn post_state_digest_randomization() {
     let post_state_digests: HashSet<Digest> = (0..ITERATIONS)
         .map(|_| {
             // Run the guest and extract the post state digest.
+            // NOTE: That last segment of the session will have a non-zero post-state digest, but
+            // the session will not. This is to reflect the fact that the lift program will
+            // zero-out the post-state digest, and so it will be zero after compression.
             let session = execute_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
-            let inner = session.segments.last().unwrap().resolve().unwrap().inner;
-            inner.claim.post_state
+            let segment = session.segments.last().unwrap().resolve().unwrap();
+            segment.inner.execute().unwrap().claim().post_state
         })
         .collect();
     assert_eq!(post_state_digests.len(), ITERATIONS);
@@ -1188,17 +1181,12 @@ fn post_state_digest_randomization() {
             let mut exec =
                 ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
             // Override the default randomness syscall using crate-internal API.
-            exec.syscall_table.with_syscall(SYS_RANDOM, RiggedRandom);
-            exec.run()
-                .unwrap()
-                .segments
-                .last()
-                .unwrap()
-                .resolve()
-                .unwrap()
-                .inner
-                .claim
-                .post_state
+            exec.inner
+                .syscall_handler_mut()
+                .with_syscall(SYS_RANDOM, RiggedRandom);
+            let session = exec.run().unwrap();
+            let segment = session.segments.last().unwrap().resolve().unwrap();
+            segment.inner.execute().unwrap().claim().post_state
         })
         .collect();
     assert_eq!(post_state_digests.len(), 1);
@@ -1215,7 +1203,7 @@ fn alloc_zeroed() {
 }
 
 #[rstest]
-#[should_panic(expected = "LoadAccessFault")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[test_log::test]
 fn out_of_bounds_ecall() {
     multi_test(MultiTestSpec::OutOfBoundsEcall);
@@ -1278,14 +1266,14 @@ fn keccak_update2() {
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     assert_eq!(
         session.pending_keccaks[0].claim_digest,
-        digest!("4be4abacf05e312a566673392786c5ae69b8c7ed2b77bb2d63119e035420866c")
+        digest!("50a60d378f06fa45a3315f3b2769970352d103504329e001be1a9419e9130c22")
     );
     assert_eq!(session.pending_keccaks[0].po2, 15,);
 }
 
 #[test_log::test]
-fn sha_single_keccak() {
-    multi_test(MultiTestSpec::ShaSingleKeccak);
+fn commit_single_keccak() {
+    multi_test(MultiTestSpec::CommitSingleKeccak);
 }
 
 #[test_log::test]

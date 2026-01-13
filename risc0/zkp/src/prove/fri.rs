@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -20,7 +20,7 @@ use tracing::debug;
 
 use crate::{
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
-    core::log2_ceil,
+    core::{digest::DIGEST_WORDS, log2_ceil},
     hal::{Buffer, Hal},
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
 };
@@ -73,25 +73,14 @@ impl<H: Hal> ProveRoundInfo<H> {
             merkle,
         }
     }
-
-    pub fn prove_query(&mut self, hal: &H, iop: &mut WriteIOP<H::Field>, pos: &mut usize) {
-        // Compute which group we are in
-        let group = *pos % (self.domain / FRI_FOLD);
-        // Generate the proof
-        self.merkle.prove(hal, iop, group);
-        // Update pos
-        *pos = group;
-    }
 }
 
-pub fn fri_prove<H: Hal, F>(
+pub fn fri_prove<H: Hal>(
     hal: &H,
     iop: &mut WriteIOP<H::Field>,
     coeffs: &H::Buffer<H::Elem>,
-    inner: F,
-) where
-    F: Fn(&mut WriteIOP<H::Field>, usize),
-{
+    inner_merkles: &[&MerkleTreeProver<H>],
+) {
     scope!("fri_prove");
     let ext_size = H::ExtElem::EXT_SIZE;
     let orig_domain = coeffs.size() / ext_size * INV_RATE;
@@ -114,14 +103,64 @@ pub fn fri_prove<H: Hal, F>(
     });
     // Do queries
     debug!("Doing Queries");
-    for _ in 0..QUERIES {
-        // Get a 'random' index.
-        let mut pos = iop.random_bits(log2_ceil(orig_domain)) as usize;
-        // Do the 'inner' proof for this index
-        inner(iop, pos);
-        // Write the per-round proofs
-        for round in rounds.iter_mut() {
-            round.prove_query(hal, iop, &mut pos);
+
+    // Get 'random' indexes.
+    let positions = hal.alloc_u32("fri_prove_pos", QUERIES);
+    positions.view_mut(|positions| positions.fill_with(|| iop.random_bits(log2_ceil(orig_domain))));
+
+    let trees: Vec<_> = inner_merkles
+        .iter()
+        .copied()
+        .chain(rounds.iter().map(|r| &r.merkle))
+        .collect();
+
+    let groups_iter = std::iter::repeat_n(u32::MAX as usize, inner_merkles.len())
+        .chain(rounds.iter().map(|r| r.domain / FRI_FOLD));
+    let groups = hal.alloc_u32("fri_groups", trees.len());
+    groups.view_mut(|groups_out| {
+        for (dst, src) in groups_out.iter_mut().zip(groups_iter) {
+            *dst = src.try_into().unwrap();
         }
-    }
+    });
+
+    let values_column_width = trees.iter().map(|m| m.params.col_size + 1).max().unwrap();
+
+    let digests_column_width = trees
+        .iter()
+        .map(|m| m.params.layers * DIGEST_WORDS + 1)
+        .max()
+        .unwrap();
+
+    let out_values = hal.alloc_u32(
+        "fri_prove_out_values",
+        values_column_width * QUERIES * trees.len(),
+    );
+    let out_digests = hal.alloc_u32(
+        "fri_prove_out_digests",
+        digests_column_width * QUERIES * trees.len(),
+    );
+
+    hal.fri_prove(
+        &out_values,
+        values_column_width,
+        &out_digests,
+        digests_column_width,
+        &positions,
+        &trees,
+        &groups,
+    );
+
+    out_values.view(|out_values| {
+        out_digests.view(|out_digests| {
+            for (chunk_a, chunk_b) in out_values
+                .chunks(values_column_width)
+                .zip(out_digests.chunks(digests_column_width))
+            {
+                for chunk in [chunk_a, chunk_b] {
+                    let len = chunk[0] as usize;
+                    iop.write_u32_slice(&chunk[1..(len + 1)]);
+                }
+            }
+        });
+    });
 }

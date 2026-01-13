@@ -3,13 +3,16 @@ name = "password-checker"
 version = "0.12.0"
 edition = { workspace = true }
 
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+prove = ["risc0-zkvm/prove"]
+
 [dependencies]
 password-checker-core = { path = "core" }
 password-checker-methods = { path = "methods" }
 rand = "0.9.1"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 
-[features]
-cuda = ["risc0-zkvm/cuda"]
-default = []
-prove = ["risc0-zkvm/prove"]
+[dev-dependencies]
+gpu-guard = { path = "../../tools/gpu-guard" }

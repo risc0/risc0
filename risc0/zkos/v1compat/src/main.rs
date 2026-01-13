@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -25,10 +25,13 @@ mod zkvm {
     use core::{
         arch::{asm, global_asm},
         cmp::min,
+        fmt,
         mem::MaybeUninit,
     };
     use include_bytes_aligned::include_bytes_aligned;
-    use risc0_zkvm_platform::syscall::Syscall;
+    use risc0_zkos_common::{get_ureg, set_ureg};
+    use risc0_zkvm_platform::syscall::{DIGEST_WORDS, Syscall};
+    use sha2::digest::generic_array::GenericArray;
 
     const MACHINE_MODE: u32 = 1;
     const HOST_ECALL_READ: u32 = 1;
@@ -36,12 +39,11 @@ mod zkvm {
     const HOST_ECALL_SHA: u32 = 4;
     const HOST_ECALL_BIGINT: u32 = 5;
     const WORD_SIZE: u32 = 4;
-    const DIGEST_WORDS: usize = 8;
     const BLOCK_WORDS: usize = 2 * DIGEST_WORDS;
     const MAX_IO_BYTES: u32 = 1024;
     const MAX_SHA_COUNT: u32 = 10;
-    const USER_REGS_ADDR: u32 = 0xffff_0080;
     const USER_END_ADDR: usize = 0xc000_0000;
+    const RV32IM_VERSION_ADDR: usize = 0xffff_0300;
     const REG_A0: usize = 10;
     const REG_A1: usize = 11;
     const REG_A4: usize = 14;
@@ -213,21 +215,52 @@ mod zkvm {
         };
     }
 
-    fn set_ureg(idx: usize, word: u32) {
-        let base = USER_REGS_ADDR as *mut u32;
-        unsafe { base.add(idx).write_volatile(word) };
-    }
-
-    #[allow(dead_code)]
-    fn get_ureg(idx: usize) -> u32 {
-        let base = USER_REGS_ADDR as *mut u32;
-        unsafe { base.add(idx).read_volatile() }
-    }
-
     #[allow(dead_code)]
     fn print(msg: &str) {
         let msg = msg.as_bytes();
         host_ecall_write(0, msg.as_ptr(), msg.len());
+    }
+
+    #[allow(dead_code)]
+    struct LineBuf {
+        buf: [u8; 256],
+        len: usize,
+    }
+
+    #[allow(dead_code)]
+    impl LineBuf {
+        fn new() -> Self {
+            Self {
+                buf: [0; 256],
+                len: 0,
+            }
+        }
+
+        fn as_str(&self) -> &str {
+            core::str::from_utf8(&self.buf[..self.len]).unwrap_or("<utf8-error>")
+        }
+    }
+
+    impl fmt::Write for LineBuf {
+        fn write_str(&mut self, s: &str) -> fmt::Result {
+            let bytes = s.as_bytes();
+            let space = self.buf.len().saturating_sub(self.len);
+            let copy_len = bytes.len().min(space);
+            self.buf[self.len..self.len + copy_len].copy_from_slice(&bytes[..copy_len]);
+            self.len += copy_len;
+            Ok(())
+        }
+    }
+
+    #[macro_export]
+    macro_rules! println {
+        ($($arg:tt)*) => ({
+            use core::fmt::Write;
+            let mut buf = LineBuf::new();
+            let _ = write!(&mut buf, $($arg)*);
+            let _ = buf.write_str("\n");
+            print(buf.as_str());
+        })
     }
 
     #[panic_handler]
@@ -241,6 +274,21 @@ mod zkvm {
     #[unsafe(no_mangle)]
     unsafe extern "C" fn ecall_sha(
         out_state: *const u32,
+        in_state: *const u32,
+        block1_ptr: *const u32,
+        block2_ptr: *const u32,
+        count: u32,
+    ) {
+        let rv32im_version = RV32IM_VERSION_ADDR as *mut u32;
+        if unsafe { rv32im_version.read_volatile() } == 3 {
+            sha_software(out_state, in_state, block1_ptr, block2_ptr, count);
+        } else {
+            sha_circuit(out_state, in_state, block1_ptr, block2_ptr, count);
+        }
+    }
+
+    fn sha_circuit(
+        out_state: *const u32,
         mut in_state: *const u32,
         block1_ptr: *const u32,
         block2_ptr: *const u32,
@@ -250,9 +298,9 @@ mod zkvm {
             block1_ptr
         } else {
             static mut TEMP_BLOCK: [u32; BLOCK_WORDS] = [0u32; BLOCK_WORDS];
-            let block1 = core::ptr::slice_from_raw_parts(block1_ptr, DIGEST_WORDS);
-            let block2 = core::ptr::slice_from_raw_parts(block2_ptr, DIGEST_WORDS);
             unsafe {
+                let block1 = core::slice::from_raw_parts(block1_ptr, DIGEST_WORDS);
+                let block2 = core::slice::from_raw_parts(block2_ptr, DIGEST_WORDS);
                 TEMP_BLOCK[..DIGEST_WORDS].copy_from_slice(&*block1);
                 TEMP_BLOCK[DIGEST_WORDS..].copy_from_slice(&*block2);
                 TEMP_BLOCK.as_ptr() as *const u32
@@ -280,6 +328,60 @@ mod zkvm {
         }
     }
 
+    fn sha_software(
+        out_state: *const u32,
+        in_state: *const u32,
+        block1_ptr: *const u32,
+        block2_ptr: *const u32,
+        count: u32,
+    ) {
+        let count = count as usize;
+        // println!(
+        //     "sha_software> out_state: {out_state:?}, in_state: {in_state:?}, block1_ptr: {block1_ptr:?}, block2_ptr: {block2_ptr:?}, count: {count}"
+        // );
+
+        let block_ptr = if block2_ptr == unsafe { block1_ptr.add(DIGEST_WORDS) } {
+            // println!("buffer");
+            block1_ptr
+        } else {
+            // println!("compress");
+
+            static mut TEMP_BLOCK: [u32; BLOCK_WORDS] = [0u32; BLOCK_WORDS];
+            unsafe {
+                let block1 = core::slice::from_raw_parts(block1_ptr, DIGEST_WORDS);
+                let block2 = core::slice::from_raw_parts(block2_ptr, DIGEST_WORDS);
+                TEMP_BLOCK[..DIGEST_WORDS].copy_from_slice(block1);
+                TEMP_BLOCK[DIGEST_WORDS..].copy_from_slice(block2);
+                TEMP_BLOCK.as_ptr() as *const u32
+            }
+        };
+
+        let total_words = count * BLOCK_WORDS;
+        let blocks_u32 = core::ptr::slice_from_raw_parts(block_ptr, total_words);
+        let blocks_u8 = unsafe {
+            core::slice::from_raw_parts(blocks_u32 as *const u8, total_words * WORD_SIZE as usize)
+        };
+        let blocks = unsafe {
+            core::slice::from_raw_parts(blocks_u8.as_ptr() as *const GenericArray<u8, _>, count)
+        };
+
+        let in_state = unsafe { core::slice::from_raw_parts(in_state, DIGEST_WORDS) };
+        let state = unsafe { core::slice::from_raw_parts_mut(out_state as *mut u32, DIGEST_WORDS) };
+        let state: &mut [u32; 8] = unsafe { &mut *(state.as_mut_ptr() as *mut [u32; 8]) };
+
+        // Convert the state from big-endian to native byte order.
+        for (dst, src) in state.iter_mut().zip(in_state.iter()) {
+            *dst = u32::from_be(*src);
+        }
+
+        sha2::compress256(state, blocks);
+
+        // Convert the state from big-endian to native byte order.
+        for word in state.iter_mut() {
+            *word = word.to_be();
+        }
+    }
+
     #[unsafe(no_mangle)]
     unsafe extern "C" fn ecall_software(nr: usize, fd: u32, buf: *mut u8, len: u32) {
         match Syscall::from(nr) {
@@ -299,7 +401,9 @@ mod zkvm {
             Syscall::VerifyIntegrity => sys_verify_integrity(fd),
             Syscall::VerifyIntegrity2 => sys_verify_integrity2(fd),
             Syscall::Write => sys_write(fd),
-            Syscall::Unknown(_) => unimplemented!(),
+            Syscall::Unknown(_) => {
+                unimplemented!("unknown ecall> nr: {nr}, fd: {fd}, buf: {buf:?}, len: {len}")
+            }
             Syscall::ProveZkr => todo!(),
         }
     }

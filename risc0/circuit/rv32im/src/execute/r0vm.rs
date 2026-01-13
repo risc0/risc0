@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,14 +13,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{cmp::min, fmt::Write as _};
+use std::{cmp::min, fmt::Write as _, io::Read};
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Context, Result, anyhow, bail};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::{
     platform::*,
-    poseidon2::{Poseidon2, Poseidon2State},
+    poseidon2::Poseidon2State,
     rv32im::{EmuContext, Emulator, Exception, InsnKind},
     sha2::{self, Sha2State},
 };
@@ -34,6 +34,8 @@ pub(crate) enum LoadOp {
 }
 
 pub(crate) trait Risc0Context {
+    fn circuit_version(&self) -> u32;
+
     /// Get the program counter
     fn get_pc(&self) -> ByteAddr;
 
@@ -88,19 +90,60 @@ pub(crate) trait Risc0Context {
 
     #[inline(always)]
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
-        let mut region = Vec::with_capacity(size);
-        if addr.is_aligned() && (0 == size % WORD_SIZE) {
-            let mut waddr = addr.waddr();
-            for _ in (0..size).step_by(WORD_SIZE) {
-                let word = self.load_u32(op, waddr.postfix_inc())?;
-                region.extend_from_slice(&word.to_le_bytes());
-            }
-        } else {
-            for i in 0..size {
-                region.push(self.load_u8(op, addr + i)?);
+        let mut buf = vec![0u8; size];
+        self.read_region(op, addr, size)?.read_exact(&mut buf)?;
+        Ok(buf)
+    }
+
+    /// Create an [`std::io`] reader over the given memory region for streaming reads.
+    fn read_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<impl Read> {
+        /// A reader for guest memory reagion implemented using [Risc0Context::load_region].
+        struct Reader<'a, C: ?Sized> {
+            ctx: &'a mut C,
+            op: LoadOp,
+            pos: ByteAddr,
+            end: ByteAddr,
+        }
+
+        impl<C: Risc0Context + ?Sized> Read for Reader<'_, C> {
+            #[inline(always)]
+            fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+                let end = ByteAddr::min(self.pos.saturating_add(buf.len() as u32), self.end);
+                let size = (end.0 - self.pos.0) as usize;
+                if self.pos.is_aligned()
+                    && let Ok(wbuf) = bytemuck::try_cast_slice_mut(&mut buf[..size])
+                {
+                    let waddr = self.pos.waddr();
+                    for (pos, word) in wbuf.iter_mut().enumerate() {
+                        *word = self
+                            .ctx
+                            .load_u32(self.op, waddr + pos)
+                            .map_err(std::io::Error::other)?
+                            .to_le();
+                    }
+                } else {
+                    for (pos, byte) in buf[..size].iter_mut().enumerate() {
+                        *byte = self
+                            .ctx
+                            .load_u8(self.op, self.pos + pos)
+                            .map_err(std::io::Error::other)?;
+                    }
+                }
+                self.pos += size;
+                Ok(size)
             }
         }
-        Ok(region)
+
+        let end = addr
+            .checked_add(size as u32)
+            .context("Region end is past the end of memory")?;
+
+        Ok(Reader {
+            ctx: self,
+            op,
+            pos: addr,
+            end,
+        })
     }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;
@@ -108,7 +151,7 @@ pub(crate) trait Risc0Context {
     #[inline(always)]
     fn store_region(&mut self, addr: ByteAddr, input: &[u8]) -> Result<()> {
         let size = input.len();
-        if addr.is_aligned() && (0 == size % WORD_SIZE) {
+        if addr.is_aligned() && size.is_multiple_of(WORD_SIZE) {
             let mut waddr = addr.waddr();
             for i in (0..size).step_by(WORD_SIZE) {
                 self.store_u32(
@@ -161,6 +204,8 @@ pub(crate) trait Risc0Context {
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32>;
 
     /// For writes, just pass through, record rlen only
+    ///
+    /// The given `buf` should be at most [MAX_IO_BYTES][super::MAX_IO_BYTES].
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32>;
 
     fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()>;
@@ -180,6 +225,16 @@ pub(crate) trait Risc0Context {
     fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State);
 
     fn ecall_bigint(&mut self) -> Result<()>;
+
+    fn ecall_poseidon2(&mut self) -> Result<()>;
+
+    fn on_ecall_read_end(&mut self, _read_bytes: u64, _read_words: u64) {}
+
+    fn on_ecall_write_end(&mut self) {}
+
+    fn on_user_ecall(&mut self) {}
+
+    fn on_trap(&mut self) {}
 }
 
 #[cfg(test)]
@@ -211,6 +266,10 @@ impl TestRisc0Context {
 
 #[cfg(test)]
 impl Risc0Context for TestRisc0Context {
+    fn circuit_version(&self) -> u32 {
+        RV32IM_V2_CIRCUIT_VERSION
+    }
+
     fn get_pc(&self) -> ByteAddr {
         self.pc
     }
@@ -301,6 +360,10 @@ impl Risc0Context for TestRisc0Context {
     ) {
     }
 
+    fn ecall_poseidon2(&mut self) -> Result<()> {
+        unimplemented!()
+    }
+
     fn ecall_bigint(&mut self) -> Result<()> {
         unimplemented!()
     }
@@ -329,9 +392,13 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
     }
 
     pub fn resume(ctx: &'a mut C) -> Result<()> {
+        let circuit_version = ctx.circuit_version();
         let mut this = Risc0Machine { ctx };
         let pc = guest_addr(this.load_memory(SUSPEND_PC_ADDR.waddr())?)?;
         let machine_mode = this.load_memory(SUSPEND_MODE_ADDR.waddr())?;
+        if circuit_version == RV32IM_M3_CIRCUIT_VERSION {
+            this.store_memory(RV32IM_VERSION_ADDR.waddr(), RV32IM_M3_CIRCUIT_VERSION)?;
+        }
         // tracing::debug!("resume(entry: {pc:?}, mode: {machine_mode})");
         this.ctx.set_pc(pc);
         this.ctx.set_machine_mode(machine_mode);
@@ -364,6 +431,8 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
             return self.trap(Exception::UserEnvCall(dispatch_addr));
         }
+
+        self.ctx.on_user_ecall();
 
         self.enter_trap(dispatch_addr)?;
         Ok(true)
@@ -416,6 +485,9 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
         if len > 0 {
             guest_addr(ptr.0)?;
         }
+
+        let (read_words, read_bytes) = calculate_bytes_and_words(ptr.0 as u64, len as u64);
+
         // tracing::trace!("ecall_read({fd}, {ptr:?}, {len})");
         let mut bytes = vec![0u8; len as usize];
         let mut rlen = self.ctx.host_read(fd, &mut bytes)?;
@@ -506,6 +578,8 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             add_cycle!(ptr, rlen);
         }
 
+        self.ctx.on_ecall_read_end(read_bytes, read_words);
+
         Ok(false)
     }
 
@@ -540,6 +614,8 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             0,
             EcallKind::Write,
         )?;
+        self.ctx.on_ecall_write_end();
+
         Ok(false)
     }
 
@@ -553,7 +629,7 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             0,
             EcallKind::Poseidon2,
         )?;
-        Poseidon2::ecall(self.ctx)?;
+        self.ctx.ecall_poseidon2()?;
         Ok(false)
     }
 
@@ -626,7 +702,37 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
     }
 }
 
+fn calculate_bytes_and_words(offset: u64, len: u64) -> (u64, u64) {
+    let word_size = WORD_SIZE as u64;
+    let initial_bytes = if !offset.is_multiple_of(word_size) {
+        std::cmp::min(word_size - (offset % word_size), len)
+    } else {
+        0
+    };
+    let final_bytes = (len - initial_bytes) % word_size;
+
+    let read_bytes = initial_bytes + final_bytes;
+    let read_words = (len - initial_bytes - final_bytes) / word_size;
+
+    (read_words, read_bytes)
+}
+
+#[test]
+fn calculate_bytes_and_words_test() {
+    assert_eq!(calculate_bytes_and_words(0, 4), (1, 0));
+    assert_eq!(calculate_bytes_and_words(0, 5), (1, 1));
+    assert_eq!(calculate_bytes_and_words(1, 1), (0, 1));
+    assert_eq!(calculate_bytes_and_words(1, 2), (0, 2));
+    assert_eq!(calculate_bytes_and_words(1, 10), (1, 3 + 3));
+    assert_eq!(calculate_bytes_and_words(1, 12), (2, 3 + 1));
+    assert_eq!(calculate_bytes_and_words(7, 12), (2, 1 + 3));
+}
+
 impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
+    fn circuit_version(&self) -> u32 {
+        self.ctx.circuit_version()
+    }
+
     fn ecall(&mut self) -> Result<bool> {
         if self.is_machine_mode() {
             self.machine_ecall()
@@ -655,12 +761,12 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
             self.dump_registers(true)?;
             self.dump_registers(false)?;
         }
-        let dispatch_addr =
-            ByteAddr(self.load_memory(TRAP_DISPATCH_ADDR.waddr() + cause.as_u32())?);
+        let dispatch_addr = ByteAddr(self.load_memory(TRAP_DISPATCH_ADDR.waddr())?);
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
             bail!("Invalid trap address: {dispatch_addr:?}, cause: {cause:?}");
         }
         self.enter_trap(dispatch_addr)?;
+        self.ctx.on_trap();
         self.ctx.trap(cause);
         Ok(false)
     }

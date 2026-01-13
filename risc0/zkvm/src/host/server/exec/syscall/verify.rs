@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -15,7 +15,7 @@
 
 use anyhow::{Result, anyhow, bail};
 use risc0_binfmt::ByteAddr;
-use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
+use risc0_zkvm_platform::syscall::reg_abi::REG_A3;
 
 use crate::sha::{DIGEST_BYTES, Digest};
 
@@ -42,8 +42,8 @@ impl Syscall for SysVerify {
         }
 
         let from_guest_ptr = ByteAddr(ctx.load_register(REG_A3));
-        let from_guest_len = ctx.load_register(REG_A4);
-        let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
+        let from_guest_len = DIGEST_BYTES as u32 * 2;
+        let from_guest = ctx.load_region(from_guest_ptr, from_guest_len)?;
 
         let claim_digest: Digest = from_guest[..DIGEST_BYTES]
             .try_into()

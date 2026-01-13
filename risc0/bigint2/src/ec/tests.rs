@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -21,6 +21,8 @@ use risc0_zkvm::{DeserializeOwned, ExecutorEnv, ExitCode, Journal, ProverOpts, g
 use crate::ec::secp256k1::SECP256K1_PRIME;
 
 fn run_test_no_decode(env: ExecutorEnv, elf: &[u8]) -> Journal {
+    gpu_guard::assert_gpu_semaphore_held();
+
     let opts = ProverOpts::fast();
     let prover = get_prover_server(&opts).unwrap();
     let now = Instant::now();
@@ -43,6 +45,7 @@ fn run_test<T: DeserializeOwned>(env: ExecutorEnv, elf: &[u8]) -> T {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn ec_add_basic() {
     let lhs: Option<[[u32; 8]; 2]> = Some([
         [
@@ -87,6 +90,7 @@ fn ec_add_basic() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn ec_double_basic() {
     let point: Option<[[u32; 8]; 2]> = Some([
         [
@@ -120,12 +124,14 @@ fn ec_double_basic() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn ec_mul() {
     let env = ExecutorEnv::builder().build().unwrap();
     run_test_no_decode(env, EC_MUL_256_ELF);
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn ec_add_point_plus_identity() {
     let point: Option<[[u32; 8]; 2]> = Some([
         [
@@ -149,6 +155,7 @@ fn ec_add_point_plus_identity() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn ec_add_identity_plus_point() {
     let point: Option<[[u32; 8]; 2]> = Some([
         [
@@ -172,6 +179,7 @@ fn ec_add_identity_plus_point() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn ec_add_point_plus_negative() {
     let point: [[u32; 8]; 2] = [
         [
@@ -204,6 +212,7 @@ fn ec_add_point_plus_negative() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn ec_double_identity() {
     let identity: Option<[[u32; 8]; 2]> = None;
 
@@ -217,6 +226,7 @@ fn ec_double_identity() {
 }
 
 #[test_log::test]
+#[gpu_guard::gpu_guard]
 fn ec_double_point_with_zero_y() {
     let point_with_zero_y: Option<[[u32; 8]; 2]> = Some([
         [
@@ -236,6 +246,7 @@ fn ec_double_point_with_zero_y() {
 }
 
 #[test]
+#[gpu_guard::gpu_guard]
 fn p384() {
     let point: Option<[[u32; 12]; 2]> = Some([
         [

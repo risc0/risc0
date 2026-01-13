@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -6837,7 +6837,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1375 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1375 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1376 = Fp(x1375.asUInt32() & x310.asUInt32());
         // components/bits.h:37
         {
@@ -6848,7 +6848,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1377 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1377 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1378 = Fp(x1377.asUInt32() & x310.asUInt32());
         // components/bits.h:37
         {
@@ -6863,15 +6863,15 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[0](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1380 = args[2][37 * steps + ((cycle - 0) & mask)];
       assert(x1380 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1381 = x1379 * x1380;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1382 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1382 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1383 = Fp(x1382.asUInt32() & x309.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1384 = x1383 * x297;
         // components/bits.h:37
         {
@@ -6882,9 +6882,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1385 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1385 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1386 = Fp(x1385.asUInt32() & x309.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1387 = x1386 * x297;
         // components/bits.h:37
         {
@@ -6899,19 +6899,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[1](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1389 = args[2][39 * steps + ((cycle - 0) & mask)];
       assert(x1389 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1390 = x1388 * x1389;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1391 = x1390 * x309;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1392 = x1381 + x1391;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1393 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1393 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1394 = Fp(x1393.asUInt32() & x307.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1395 = x1394 * x296;
         // components/bits.h:37
         {
@@ -6922,9 +6922,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1396 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1396 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1397 = Fp(x1396.asUInt32() & x307.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1398 = x1397 * x296;
         // components/bits.h:37
         {
@@ -6939,19 +6939,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[2](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1400 = args[2][41 * steps + ((cycle - 0) & mask)];
       assert(x1400 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1401 = x1399 * x1400;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1402 = x1401 * x307;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1403 = x1392 + x1402;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1404 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1404 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1405 = Fp(x1404.asUInt32() & x303.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1406 = x1405 * x295;
         // components/bits.h:37
         {
@@ -6962,9 +6962,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1407 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1407 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1408 = Fp(x1407.asUInt32() & x303.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1409 = x1408 * x295;
         // components/bits.h:37
         {
@@ -6979,19 +6979,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[3](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1411 = args[2][43 * steps + ((cycle - 0) & mask)];
       assert(x1411 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1412 = x1410 * x1411;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1413 = x1412 * x303;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1414 = x1403 + x1413;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1415 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1415 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1416 = Fp(x1415.asUInt32() & x294.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1417 = x1416 * x293;
         // components/bits.h:37
         {
@@ -7002,9 +7002,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1418 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1418 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1419 = Fp(x1418.asUInt32() & x294.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1420 = x1419 * x293;
         // components/bits.h:37
         {
@@ -7019,19 +7019,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[4](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1422 = args[2][45 * steps + ((cycle - 0) & mask)];
       assert(x1422 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1423 = x1421 * x1422;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1424 = x1423 * x294;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1425 = x1414 + x1424;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1426 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1426 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1427 = Fp(x1426.asUInt32() & x291.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1428 = x1427 * x292;
         // components/bits.h:37
         {
@@ -7042,9 +7042,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1429 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1429 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1430 = Fp(x1429.asUInt32() & x291.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1431 = x1430 * x292;
         // components/bits.h:37
         {
@@ -7059,19 +7059,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[5](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1433 = args[2][47 * steps + ((cycle - 0) & mask)];
       assert(x1433 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1434 = x1432 * x1433;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1435 = x1434 * x291;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1436 = x1425 + x1435;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1437 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1437 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1438 = Fp(x1437.asUInt32() & x289.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1439 = x1438 * x290;
         // components/bits.h:37
         {
@@ -7082,9 +7082,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1440 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1440 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1441 = Fp(x1440.asUInt32() & x289.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1442 = x1441 * x290;
         // components/bits.h:37
         {
@@ -7099,19 +7099,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[6](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1444 = args[2][49 * steps + ((cycle - 0) & mask)];
       assert(x1444 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1445 = x1443 * x1444;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1446 = x1445 * x289;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1447 = x1436 + x1446;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1448 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1448 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1449 = Fp(x1448.asUInt32() & x288.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1450 = x1449 * x287;
         // components/bits.h:37
         {
@@ -7122,9 +7122,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1451 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1451 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1452 = Fp(x1451.asUInt32() & x288.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1453 = x1452 * x287;
         // components/bits.h:37
         {
@@ -7139,19 +7139,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[7](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1455 = args[2][51 * steps + ((cycle - 0) & mask)];
       assert(x1455 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1456 = x1454 * x1455;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1457 = x1456 * x288;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1458 = x1447 + x1457;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1459 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1459 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1460 = Fp(x1459.asUInt32() & x285.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1461 = x1460 * x286;
         // components/bits.h:37
         {
@@ -7162,9 +7162,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1462 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1462 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1463 = Fp(x1462.asUInt32() & x285.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1464 = x1463 * x286;
         // components/bits.h:37
         {
@@ -7179,19 +7179,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[8](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1466 = args[2][53 * steps + ((cycle - 0) & mask)];
       assert(x1466 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1467 = x1465 * x1466;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1468 = x1467 * x285;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1469 = x1458 + x1468;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1470 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1470 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1471 = Fp(x1470.asUInt32() & x283.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1472 = x1471 * x284;
         // components/bits.h:37
         {
@@ -7202,9 +7202,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1473 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1473 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1474 = Fp(x1473.asUInt32() & x283.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1475 = x1474 * x284;
         // components/bits.h:37
         {
@@ -7219,19 +7219,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[9](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1477 = args[2][55 * steps + ((cycle - 0) & mask)];
       assert(x1477 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1478 = x1476 * x1477;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1479 = x1478 * x283;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1480 = x1469 + x1479;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1481 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1481 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1482 = Fp(x1481.asUInt32() & x282.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1483 = x1482 * x281;
         // components/bits.h:37
         {
@@ -7242,9 +7242,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1484 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1484 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1485 = Fp(x1484.asUInt32() & x282.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1486 = x1485 * x281;
         // components/bits.h:37
         {
@@ -7259,19 +7259,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[10](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1488 = args[2][57 * steps + ((cycle - 0) & mask)];
       assert(x1488 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1489 = x1487 * x1488;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1490 = x1489 * x282;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1491 = x1480 + x1490;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1492 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1492 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1493 = Fp(x1492.asUInt32() & x279.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1494 = x1493 * x280;
         // components/bits.h:37
         {
@@ -7282,9 +7282,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1495 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1495 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1496 = Fp(x1495.asUInt32() & x279.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1497 = x1496 * x280;
         // components/bits.h:37
         {
@@ -7299,19 +7299,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[11](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1499 = args[2][59 * steps + ((cycle - 0) & mask)];
       assert(x1499 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1500 = x1498 * x1499;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1501 = x1500 * x279;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1502 = x1491 + x1501;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1503 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1503 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1504 = Fp(x1503.asUInt32() & x277.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1505 = x1504 * x278;
         // components/bits.h:37
         {
@@ -7322,9 +7322,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1506 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1506 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1507 = Fp(x1506.asUInt32() & x277.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1508 = x1507 * x278;
         // components/bits.h:37
         {
@@ -7339,19 +7339,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[12](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1510 = args[2][61 * steps + ((cycle - 0) & mask)];
       assert(x1510 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1511 = x1509 * x1510;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1512 = x1511 * x277;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1513 = x1502 + x1512;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1514 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1514 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1515 = Fp(x1514.asUInt32() & x275.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1516 = x1515 * x276;
         // components/bits.h:37
         {
@@ -7362,9 +7362,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1517 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1517 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1518 = Fp(x1517.asUInt32() & x275.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1519 = x1518 * x276;
         // components/bits.h:37
         {
@@ -7379,19 +7379,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[13](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1521 = args[2][63 * steps + ((cycle - 0) & mask)];
       assert(x1521 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1522 = x1520 * x1521;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1523 = x1522 * x275;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1524 = x1513 + x1523;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1525 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1525 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1526 = Fp(x1525.asUInt32() & x274.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1527 = x1526 * x273;
         // components/bits.h:37
         {
@@ -7402,9 +7402,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1528 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1528 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1529 = Fp(x1528.asUInt32() & x274.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1530 = x1529 * x273;
         // components/bits.h:37
         {
@@ -7419,19 +7419,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[14](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1532 = args[2][65 * steps + ((cycle - 0) & mask)];
       assert(x1532 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1533 = x1531 * x1532;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1534 = x1533 * x274;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1535 = x1524 + x1534;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1536 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1536 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1537 = Fp(x1536.asUInt32() & x271.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1538 = x1537 * x272;
         // components/bits.h:37
         {
@@ -7442,9 +7442,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1539 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1539 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1540 = Fp(x1539.asUInt32() & x271.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1541 = x1540 * x272;
         // components/bits.h:37
         {
@@ -7459,19 +7459,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[15](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1543 = args[2][67 * steps + ((cycle - 0) & mask)];
       assert(x1543 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1544 = x1542 * x1543;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1545 = x1544 * x271;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1546 = x1535 + x1545;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1547 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1547 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1548 = Fp(x1547.asUInt32() & x298.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1549 = x1548 * x270;
         // components/bits.h:37
         {
@@ -7482,9 +7482,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1550 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1550 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1551 = Fp(x1550.asUInt32() & x298.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1552 = x1551 * x270;
         // components/bits.h:37
         {
@@ -7499,19 +7499,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[16](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1554 = args[2][69 * steps + ((cycle - 0) & mask)];
       assert(x1554 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1555 = x1553 * x1554;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1556 = x1555 * x298;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1557 = x1546 + x1556;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1558 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1558 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1559 = Fp(x1558.asUInt32() & x269.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1560 = x1559 * x268;
         // components/bits.h:37
         {
@@ -7522,9 +7522,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1561 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1561 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1562 = Fp(x1561.asUInt32() & x269.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1563 = x1562 * x268;
         // components/bits.h:37
         {
@@ -7539,19 +7539,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[17](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1565 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x1565 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1566 = x1564 * x1565;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1567 = x1566 * x269;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1568 = x1557 + x1567;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1569 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1569 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1570 = Fp(x1569.asUInt32() & x266.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1571 = x1570 * x267;
         // components/bits.h:37
         {
@@ -7562,9 +7562,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1572 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1572 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1573 = Fp(x1572.asUInt32() & x266.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1574 = x1573 * x267;
         // components/bits.h:37
         {
@@ -7579,19 +7579,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[18](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1576 = args[2][73 * steps + ((cycle - 0) & mask)];
       assert(x1576 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1577 = x1575 * x1576;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1578 = x1577 * x266;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1579 = x1568 + x1578;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1580 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1580 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1581 = Fp(x1580.asUInt32() & x264.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1582 = x1581 * x265;
         // components/bits.h:37
         {
@@ -7602,9 +7602,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1583 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1583 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1584 = Fp(x1583.asUInt32() & x264.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1585 = x1584 * x265;
         // components/bits.h:37
         {
@@ -7619,19 +7619,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[19](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1587 = args[2][75 * steps + ((cycle - 0) & mask)];
       assert(x1587 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1588 = x1586 * x1587;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1589 = x1588 * x264;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1590 = x1579 + x1589;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1591 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1591 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1592 = Fp(x1591.asUInt32() & x263.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1593 = x1592 * x262;
         // components/bits.h:37
         {
@@ -7642,9 +7642,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1594 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1594 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1595 = Fp(x1594.asUInt32() & x263.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1596 = x1595 * x262;
         // components/bits.h:37
         {
@@ -7659,19 +7659,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[20](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1598 = args[2][77 * steps + ((cycle - 0) & mask)];
       assert(x1598 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1599 = x1597 * x1598;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1600 = x1599 * x263;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1601 = x1590 + x1600;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1602 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1602 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1603 = Fp(x1602.asUInt32() & x260.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1604 = x1603 * x261;
         // components/bits.h:37
         {
@@ -7682,9 +7682,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1605 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1605 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1606 = Fp(x1605.asUInt32() & x260.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1607 = x1606 * x261;
         // components/bits.h:37
         {
@@ -7699,19 +7699,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[21](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1609 = args[2][79 * steps + ((cycle - 0) & mask)];
       assert(x1609 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1610 = x1608 * x1609;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1611 = x1610 * x260;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1612 = x1601 + x1611;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1613 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1613 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1614 = Fp(x1613.asUInt32() & x258.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1615 = x1614 * x259;
         // components/bits.h:37
         {
@@ -7722,9 +7722,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1616 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1616 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1617 = Fp(x1616.asUInt32() & x258.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1618 = x1617 * x259;
         // components/bits.h:37
         {
@@ -7739,19 +7739,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[22](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1620 = args[2][81 * steps + ((cycle - 0) & mask)];
       assert(x1620 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1621 = x1619 * x1620;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1622 = x1621 * x258;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1623 = x1612 + x1622;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1624 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1624 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1625 = Fp(x1624.asUInt32() & x256.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1626 = x1625 * x257;
         // components/bits.h:37
         {
@@ -7762,9 +7762,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1627 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1627 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1628 = Fp(x1627.asUInt32() & x256.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1629 = x1628 * x257;
         // components/bits.h:37
         {
@@ -7779,19 +7779,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[23](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1631 = args[2][83 * steps + ((cycle - 0) & mask)];
       assert(x1631 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1632 = x1630 * x1631;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1633 = x1632 * x256;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1634 = x1623 + x1633;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1635 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1635 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1636 = Fp(x1635.asUInt32() & x255.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1637 = x1636 * x254;
         // components/bits.h:37
         {
@@ -7802,9 +7802,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1638 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1638 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1639 = Fp(x1638.asUInt32() & x255.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1640 = x1639 * x254;
         // components/bits.h:37
         {
@@ -7819,19 +7819,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[24](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1642 = args[2][85 * steps + ((cycle - 0) & mask)];
       assert(x1642 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1643 = x1641 * x1642;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1644 = x1643 * x255;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1645 = x1634 + x1644;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1646 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1646 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1647 = Fp(x1646.asUInt32() & x252.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1648 = x1647 * x253;
         // components/bits.h:37
         {
@@ -7842,9 +7842,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1649 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1649 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1650 = Fp(x1649.asUInt32() & x252.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1651 = x1650 * x253;
         // components/bits.h:37
         {
@@ -7859,19 +7859,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[25](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1653 = args[2][87 * steps + ((cycle - 0) & mask)];
       assert(x1653 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1654 = x1652 * x1653;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1655 = x1654 * x252;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1656 = x1645 + x1655;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1657 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1657 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1658 = Fp(x1657.asUInt32() & x250.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1659 = x1658 * x251;
         // components/bits.h:37
         {
@@ -7882,9 +7882,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1660 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1660 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1661 = Fp(x1660.asUInt32() & x250.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1662 = x1661 * x251;
         // components/bits.h:37
         {
@@ -7899,19 +7899,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[26](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1664 = args[2][89 * steps + ((cycle - 0) & mask)];
       assert(x1664 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1665 = x1663 * x1664;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1666 = x1665 * x250;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1667 = x1656 + x1666;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1668 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1668 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1669 = Fp(x1668.asUInt32() & x249.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1670 = x1669 * x248;
         // components/bits.h:37
         {
@@ -7922,9 +7922,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1671 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1671 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1672 = Fp(x1671.asUInt32() & x249.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1673 = x1672 * x248;
         // components/bits.h:37
         {
@@ -7939,19 +7939,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[27](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1675 = args[2][91 * steps + ((cycle - 0) & mask)];
       assert(x1675 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1676 = x1674 * x1675;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1677 = x1676 * x249;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1678 = x1667 + x1677;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1679 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1679 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1680 = Fp(x1679.asUInt32() & x246.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1681 = x1680 * x247;
         // components/bits.h:37
         {
@@ -7962,9 +7962,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1682 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1682 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1683 = Fp(x1682.asUInt32() & x246.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1684 = x1683 * x247;
         // components/bits.h:37
         {
@@ -7979,19 +7979,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[28](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1686 = args[2][93 * steps + ((cycle - 0) & mask)];
       assert(x1686 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1687 = x1685 * x1686;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1688 = x1687 * x246;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1689 = x1678 + x1688;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1690 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1690 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1691 = Fp(x1690.asUInt32() & x244.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1692 = x1691 * x245;
         // components/bits.h:37
         {
@@ -8002,9 +8002,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1693 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1693 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1694 = Fp(x1693.asUInt32() & x244.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1695 = x1694 * x245;
         // components/bits.h:37
         {
@@ -8019,19 +8019,19 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/bits_b[29](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1697 = args[2][95 * steps + ((cycle - 0) & mask)];
       assert(x1697 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1698 = x1696 * x1697;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1699 = x1698 * x244;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1700 = x1689 + x1699;
       {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1701 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x1701 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1702 = Fp(x1701.asUInt32() & x243.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:85
+        // zirgen/circuit/recursion/bits.cpp:90
         auto x1703 = x1702 * x242;
         // components/bits.h:37
         {
@@ -8042,9 +8042,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
         auto x1704 = args[2][17 * steps + ((cycle - 0) & mask)];
         assert(x1704 != Fp::invalid());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1705 = Fp(x1704.asUInt32() & x243.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:86
+        // zirgen/circuit/recursion/bits.cpp:91
         auto x1706 = x1705 * x242;
         // components/bits.h:37
         {
@@ -8062,11 +8062,11 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
       auto x1709 = args[2][12 * steps + ((cycle - 0) & mask)];
       assert(x1709 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1710 = x1707 * x1708;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1711 = x1710 * x243;
-      // zirgen/circuit/recursion/bits.cpp:90
+      // zirgen/circuit/recursion/bits.cpp:95
       auto x1712 = x1700 + x1711;
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)(zirgen/circuit/recursion/wom.cpp:54)
       auto x1713 = args[2][17 * steps + ((cycle - 0) & mask)];
@@ -8236,7 +8236,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       assert(x1741 != Fp::invalid());
       extern_log(ctx, cycle, "  A = [%x, %x], B = [%x, %x]", {x1738, x1739, x1740, x1741});
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1742 = Fp(x1738.asUInt32() & x310.asUInt32());
         // components/bits.h:37
         {
@@ -8244,7 +8244,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1742);
           reg = x1742;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1743 = Fp(x1740.asUInt32() & x310.asUInt32());
         // components/bits.h:37
         {
@@ -8259,12 +8259,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[0](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1745 = args[2][68 * steps + ((cycle - 0) & mask)];
       assert(x1745 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1746 = x1744 * x1745;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1747 = Fp(x1738.asUInt32() & x309.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1748 = x1747 * x297;
         // components/bits.h:37
         {
@@ -8272,9 +8272,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1748);
           reg = x1748;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1749 = Fp(x1740.asUInt32() & x309.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1750 = x1749 * x297;
         // components/bits.h:37
         {
@@ -8289,16 +8289,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[1](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1752 = args[2][69 * steps + ((cycle - 0) & mask)];
       assert(x1752 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1753 = x1751 * x1752;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1754 = x1753 * x309;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1755 = x1746 + x1754;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1756 = Fp(x1738.asUInt32() & x307.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1757 = x1756 * x296;
         // components/bits.h:37
         {
@@ -8306,9 +8306,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1757);
           reg = x1757;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1758 = Fp(x1740.asUInt32() & x307.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1759 = x1758 * x296;
         // components/bits.h:37
         {
@@ -8323,16 +8323,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[2](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1761 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x1761 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1762 = x1760 * x1761;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1763 = x1762 * x307;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1764 = x1755 + x1763;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1765 = Fp(x1738.asUInt32() & x303.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1766 = x1765 * x295;
         // components/bits.h:37
         {
@@ -8340,9 +8340,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1766);
           reg = x1766;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1767 = Fp(x1740.asUInt32() & x303.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1768 = x1767 * x295;
         // components/bits.h:37
         {
@@ -8357,16 +8357,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[3](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1770 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x1770 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1771 = x1769 * x1770;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1772 = x1771 * x303;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1773 = x1764 + x1772;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1774 = Fp(x1738.asUInt32() & x294.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1775 = x1774 * x293;
         // components/bits.h:37
         {
@@ -8374,9 +8374,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1775);
           reg = x1775;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1776 = Fp(x1740.asUInt32() & x294.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1777 = x1776 * x293;
         // components/bits.h:37
         {
@@ -8391,16 +8391,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[4](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1779 = args[2][72 * steps + ((cycle - 0) & mask)];
       assert(x1779 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1780 = x1778 * x1779;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1781 = x1780 * x294;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1782 = x1773 + x1781;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1783 = Fp(x1738.asUInt32() & x291.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1784 = x1783 * x292;
         // components/bits.h:37
         {
@@ -8408,9 +8408,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1784);
           reg = x1784;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1785 = Fp(x1740.asUInt32() & x291.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1786 = x1785 * x292;
         // components/bits.h:37
         {
@@ -8425,16 +8425,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[5](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1788 = args[2][73 * steps + ((cycle - 0) & mask)];
       assert(x1788 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1789 = x1787 * x1788;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1790 = x1789 * x291;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1791 = x1782 + x1790;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1792 = Fp(x1738.asUInt32() & x289.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1793 = x1792 * x290;
         // components/bits.h:37
         {
@@ -8442,9 +8442,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1793);
           reg = x1793;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1794 = Fp(x1740.asUInt32() & x289.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1795 = x1794 * x290;
         // components/bits.h:37
         {
@@ -8459,16 +8459,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[6](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1797 = args[2][74 * steps + ((cycle - 0) & mask)];
       assert(x1797 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1798 = x1796 * x1797;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1799 = x1798 * x289;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1800 = x1791 + x1799;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1801 = Fp(x1738.asUInt32() & x288.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1802 = x1801 * x287;
         // components/bits.h:37
         {
@@ -8476,9 +8476,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1802);
           reg = x1802;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1803 = Fp(x1740.asUInt32() & x288.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1804 = x1803 * x287;
         // components/bits.h:37
         {
@@ -8493,16 +8493,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[7](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1806 = args[2][75 * steps + ((cycle - 0) & mask)];
       assert(x1806 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1807 = x1805 * x1806;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1808 = x1807 * x288;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1809 = x1800 + x1808;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1810 = Fp(x1738.asUInt32() & x285.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1811 = x1810 * x286;
         // components/bits.h:37
         {
@@ -8510,9 +8510,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1811);
           reg = x1811;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1812 = Fp(x1740.asUInt32() & x285.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1813 = x1812 * x286;
         // components/bits.h:37
         {
@@ -8527,16 +8527,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[8](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1815 = args[2][76 * steps + ((cycle - 0) & mask)];
       assert(x1815 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1816 = x1814 * x1815;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1817 = x1816 * x285;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1818 = x1809 + x1817;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1819 = Fp(x1738.asUInt32() & x283.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1820 = x1819 * x284;
         // components/bits.h:37
         {
@@ -8544,9 +8544,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1820);
           reg = x1820;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1821 = Fp(x1740.asUInt32() & x283.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1822 = x1821 * x284;
         // components/bits.h:37
         {
@@ -8561,16 +8561,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[9](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1824 = args[2][77 * steps + ((cycle - 0) & mask)];
       assert(x1824 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1825 = x1823 * x1824;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1826 = x1825 * x283;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1827 = x1818 + x1826;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1828 = Fp(x1738.asUInt32() & x282.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1829 = x1828 * x281;
         // components/bits.h:37
         {
@@ -8578,9 +8578,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1829);
           reg = x1829;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1830 = Fp(x1740.asUInt32() & x282.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1831 = x1830 * x281;
         // components/bits.h:37
         {
@@ -8595,16 +8595,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[10](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1833 = args[2][78 * steps + ((cycle - 0) & mask)];
       assert(x1833 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1834 = x1832 * x1833;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1835 = x1834 * x282;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1836 = x1827 + x1835;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1837 = Fp(x1738.asUInt32() & x279.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1838 = x1837 * x280;
         // components/bits.h:37
         {
@@ -8612,9 +8612,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1838);
           reg = x1838;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1839 = Fp(x1740.asUInt32() & x279.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1840 = x1839 * x280;
         // components/bits.h:37
         {
@@ -8629,16 +8629,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[11](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1842 = args[2][79 * steps + ((cycle - 0) & mask)];
       assert(x1842 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1843 = x1841 * x1842;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1844 = x1843 * x279;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1845 = x1836 + x1844;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1846 = Fp(x1738.asUInt32() & x277.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1847 = x1846 * x278;
         // components/bits.h:37
         {
@@ -8646,9 +8646,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1847);
           reg = x1847;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1848 = Fp(x1740.asUInt32() & x277.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1849 = x1848 * x278;
         // components/bits.h:37
         {
@@ -8663,16 +8663,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[12](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1851 = args[2][80 * steps + ((cycle - 0) & mask)];
       assert(x1851 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1852 = x1850 * x1851;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1853 = x1852 * x277;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1854 = x1845 + x1853;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1855 = Fp(x1738.asUInt32() & x275.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1856 = x1855 * x276;
         // components/bits.h:37
         {
@@ -8680,9 +8680,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1856);
           reg = x1856;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1857 = Fp(x1740.asUInt32() & x275.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1858 = x1857 * x276;
         // components/bits.h:37
         {
@@ -8697,16 +8697,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[13](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1860 = args[2][81 * steps + ((cycle - 0) & mask)];
       assert(x1860 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1861 = x1859 * x1860;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1862 = x1861 * x275;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1863 = x1854 + x1862;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1864 = Fp(x1738.asUInt32() & x274.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1865 = x1864 * x273;
         // components/bits.h:37
         {
@@ -8714,9 +8714,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1865);
           reg = x1865;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1866 = Fp(x1740.asUInt32() & x274.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1867 = x1866 * x273;
         // components/bits.h:37
         {
@@ -8731,16 +8731,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[14](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1869 = args[2][82 * steps + ((cycle - 0) & mask)];
       assert(x1869 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1870 = x1868 * x1869;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1871 = x1870 * x274;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1872 = x1863 + x1871;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1873 = Fp(x1738.asUInt32() & x271.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1874 = x1873 * x272;
         // components/bits.h:37
         {
@@ -8748,9 +8748,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1874);
           reg = x1874;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1875 = Fp(x1740.asUInt32() & x271.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1876 = x1875 * x272;
         // components/bits.h:37
         {
@@ -8765,14 +8765,14 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[15](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1878 = args[2][83 * steps + ((cycle - 0) & mask)];
       assert(x1878 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1879 = x1877 * x1878;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1880 = x1879 * x271;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1881 = x1872 + x1880;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1882 = Fp(x1739.asUInt32() & x310.asUInt32());
         // components/bits.h:37
         {
@@ -8780,7 +8780,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1882);
           reg = x1882;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1883 = Fp(x1741.asUInt32() & x310.asUInt32());
         // components/bits.h:37
         {
@@ -8795,12 +8795,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[16](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1885 = args[2][84 * steps + ((cycle - 0) & mask)];
       assert(x1885 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1886 = x1884 * x1885;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1887 = Fp(x1739.asUInt32() & x309.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1888 = x1887 * x297;
         // components/bits.h:37
         {
@@ -8808,9 +8808,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1888);
           reg = x1888;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1889 = Fp(x1741.asUInt32() & x309.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1890 = x1889 * x297;
         // components/bits.h:37
         {
@@ -8825,16 +8825,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[17](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1892 = args[2][85 * steps + ((cycle - 0) & mask)];
       assert(x1892 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1893 = x1891 * x1892;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1894 = x1893 * x309;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1895 = x1886 + x1894;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1896 = Fp(x1739.asUInt32() & x307.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1897 = x1896 * x296;
         // components/bits.h:37
         {
@@ -8842,9 +8842,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1897);
           reg = x1897;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1898 = Fp(x1741.asUInt32() & x307.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1899 = x1898 * x296;
         // components/bits.h:37
         {
@@ -8859,16 +8859,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[18](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1901 = args[2][86 * steps + ((cycle - 0) & mask)];
       assert(x1901 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1902 = x1900 * x1901;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1903 = x1902 * x307;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1904 = x1895 + x1903;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1905 = Fp(x1739.asUInt32() & x303.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1906 = x1905 * x295;
         // components/bits.h:37
         {
@@ -8876,9 +8876,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1906);
           reg = x1906;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1907 = Fp(x1741.asUInt32() & x303.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1908 = x1907 * x295;
         // components/bits.h:37
         {
@@ -8893,16 +8893,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[19](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1910 = args[2][87 * steps + ((cycle - 0) & mask)];
       assert(x1910 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1911 = x1909 * x1910;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1912 = x1911 * x303;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1913 = x1904 + x1912;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1914 = Fp(x1739.asUInt32() & x294.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1915 = x1914 * x293;
         // components/bits.h:37
         {
@@ -8910,9 +8910,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1915);
           reg = x1915;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1916 = Fp(x1741.asUInt32() & x294.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1917 = x1916 * x293;
         // components/bits.h:37
         {
@@ -8927,16 +8927,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[20](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1919 = args[2][88 * steps + ((cycle - 0) & mask)];
       assert(x1919 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1920 = x1918 * x1919;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1921 = x1920 * x294;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1922 = x1913 + x1921;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1923 = Fp(x1739.asUInt32() & x291.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1924 = x1923 * x292;
         // components/bits.h:37
         {
@@ -8944,9 +8944,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1924);
           reg = x1924;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1925 = Fp(x1741.asUInt32() & x291.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1926 = x1925 * x292;
         // components/bits.h:37
         {
@@ -8961,16 +8961,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[21](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1928 = args[2][89 * steps + ((cycle - 0) & mask)];
       assert(x1928 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1929 = x1927 * x1928;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1930 = x1929 * x291;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1931 = x1922 + x1930;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1932 = Fp(x1739.asUInt32() & x289.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1933 = x1932 * x290;
         // components/bits.h:37
         {
@@ -8978,9 +8978,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1933);
           reg = x1933;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1934 = Fp(x1741.asUInt32() & x289.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1935 = x1934 * x290;
         // components/bits.h:37
         {
@@ -8995,16 +8995,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[22](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1937 = args[2][90 * steps + ((cycle - 0) & mask)];
       assert(x1937 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1938 = x1936 * x1937;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1939 = x1938 * x289;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1940 = x1931 + x1939;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1941 = Fp(x1739.asUInt32() & x288.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1942 = x1941 * x287;
         // components/bits.h:37
         {
@@ -9012,9 +9012,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1942);
           reg = x1942;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1943 = Fp(x1741.asUInt32() & x288.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1944 = x1943 * x287;
         // components/bits.h:37
         {
@@ -9029,16 +9029,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[23](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1946 = args[2][91 * steps + ((cycle - 0) & mask)];
       assert(x1946 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1947 = x1945 * x1946;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1948 = x1947 * x288;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1949 = x1940 + x1948;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1950 = Fp(x1739.asUInt32() & x285.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1951 = x1950 * x286;
         // components/bits.h:37
         {
@@ -9046,9 +9046,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1951);
           reg = x1951;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1952 = Fp(x1741.asUInt32() & x285.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1953 = x1952 * x286;
         // components/bits.h:37
         {
@@ -9063,16 +9063,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[24](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1955 = args[2][92 * steps + ((cycle - 0) & mask)];
       assert(x1955 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1956 = x1954 * x1955;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1957 = x1956 * x285;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1958 = x1949 + x1957;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1959 = Fp(x1739.asUInt32() & x283.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1960 = x1959 * x284;
         // components/bits.h:37
         {
@@ -9080,9 +9080,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1960);
           reg = x1960;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1961 = Fp(x1741.asUInt32() & x283.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1962 = x1961 * x284;
         // components/bits.h:37
         {
@@ -9097,16 +9097,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[25](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1964 = args[2][93 * steps + ((cycle - 0) & mask)];
       assert(x1964 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1965 = x1963 * x1964;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1966 = x1965 * x283;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1967 = x1958 + x1966;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1968 = Fp(x1739.asUInt32() & x282.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1969 = x1968 * x281;
         // components/bits.h:37
         {
@@ -9114,9 +9114,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1969);
           reg = x1969;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1970 = Fp(x1741.asUInt32() & x282.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1971 = x1970 * x281;
         // components/bits.h:37
         {
@@ -9131,16 +9131,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[26](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1973 = args[2][94 * steps + ((cycle - 0) & mask)];
       assert(x1973 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1974 = x1972 * x1973;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1975 = x1974 * x282;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1976 = x1967 + x1975;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1977 = Fp(x1739.asUInt32() & x279.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1978 = x1977 * x280;
         // components/bits.h:37
         {
@@ -9148,9 +9148,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1978);
           reg = x1978;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1979 = Fp(x1741.asUInt32() & x279.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1980 = x1979 * x280;
         // components/bits.h:37
         {
@@ -9165,16 +9165,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[27](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1982 = args[2][95 * steps + ((cycle - 0) & mask)];
       assert(x1982 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1983 = x1981 * x1982;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1984 = x1983 * x279;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1985 = x1976 + x1984;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1986 = Fp(x1739.asUInt32() & x277.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1987 = x1986 * x278;
         // components/bits.h:37
         {
@@ -9182,9 +9182,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1987);
           reg = x1987;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1988 = Fp(x1741.asUInt32() & x277.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1989 = x1988 * x278;
         // components/bits.h:37
         {
@@ -9199,16 +9199,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[28](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x1991 = args[2][96 * steps + ((cycle - 0) & mask)];
       assert(x1991 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1992 = x1990 * x1991;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1993 = x1992 * x277;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x1994 = x1985 + x1993;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1995 = Fp(x1739.asUInt32() & x275.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x1996 = x1995 * x276;
         // components/bits.h:37
         {
@@ -9216,9 +9216,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x1996);
           reg = x1996;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1997 = Fp(x1741.asUInt32() & x275.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x1998 = x1997 * x276;
         // components/bits.h:37
         {
@@ -9233,16 +9233,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[29](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x2000 = args[2][97 * steps + ((cycle - 0) & mask)];
       assert(x2000 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x2001 = x1999 * x2000;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x2002 = x2001 * x275;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x2003 = x1994 + x2002;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x2004 = Fp(x1739.asUInt32() & x274.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x2005 = x2004 * x273;
         // components/bits.h:37
         {
@@ -9250,9 +9250,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x2005);
           reg = x2005;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x2006 = Fp(x1741.asUInt32() & x274.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x2007 = x2006 * x273;
         // components/bits.h:37
         {
@@ -9267,16 +9267,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[30](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x2009 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x2009 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x2010 = x2008 * x2009;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x2011 = x2010 * x274;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x2012 = x2003 + x2011;
       {
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x2013 = Fp(x1739.asUInt32() & x271.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:41
+        // zirgen/circuit/recursion/bits.cpp:42
         auto x2014 = x2013 * x272;
         // components/bits.h:37
         {
@@ -9284,9 +9284,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           assert(reg == Fp::invalid() || reg == x2014);
           reg = x2014;
         }
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x2015 = Fp(x1741.asUInt32() & x271.asUInt32());
-        // zirgen/circuit/recursion/bits.cpp:42
+        // zirgen/circuit/recursion/bits.cpp:43
         auto x2016 = x2015 * x272;
         // components/bits.h:37
         {
@@ -9301,16 +9301,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/bits_b[31](Bit)/bit(Reg)(compiler/edsl/component.h:164)
       auto x2018 = args[2][99 * steps + ((cycle - 0) & mask)];
       assert(x2018 != Fp::invalid());
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x2019 = x2017 * x2018;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x2020 = x2019 * x271;
-      // zirgen/circuit/recursion/bits.cpp:46
+      // zirgen/circuit/recursion/bits.cpp:48
       auto x2021 = x2012 + x2020;
       if (x1729 != 0) {
-        // zirgen/circuit/recursion/bits.cpp:54
+        // zirgen/circuit/recursion/bits.cpp:58
         auto x2022 = x2021 * x298;
-        // zirgen/circuit/recursion/bits.cpp:54
+        // zirgen/circuit/recursion/bits.cpp:58
         auto x2023 = x2022 + x1881;
         // zirgen/circuit/recursion/wom.cpp:97
         {
@@ -9374,20 +9374,20 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         assert(x2032 != Fp::invalid());
         extern_log(ctx, cycle, "  AND Result = %e", {x2029, x2030, x2031, x2032});
       }
-      // zirgen/circuit/recursion/bits.cpp:57
+      // zirgen/circuit/recursion/bits.cpp:61
       auto x2033 = x310 - x1729;
       if (x2033 != 0) {
-        // zirgen/circuit/recursion/bits.cpp:61
+        // zirgen/circuit/recursion/bits.cpp:66
         auto x2034 = x2021 * x309;
-        // zirgen/circuit/recursion/bits.cpp:60
+        // zirgen/circuit/recursion/bits.cpp:65
         auto x2035 = x1881 * x309;
-        // zirgen/circuit/recursion/bits.cpp:60
+        // zirgen/circuit/recursion/bits.cpp:65
         auto x2036 = x1738 + x1740;
-        // zirgen/circuit/recursion/bits.cpp:61
+        // zirgen/circuit/recursion/bits.cpp:66
         auto x2037 = x1739 + x1741;
-        // zirgen/circuit/recursion/bits.cpp:60
+        // zirgen/circuit/recursion/bits.cpp:65
         auto x2038 = x2036 - x2035;
-        // zirgen/circuit/recursion/bits.cpp:61
+        // zirgen/circuit/recursion/bits.cpp:66
         auto x2039 = x2037 - x2034;
         // zirgen/circuit/recursion/wom.cpp:97
         {

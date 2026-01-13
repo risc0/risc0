@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,15 +13,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{
-    collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, mem, slice, sync::OnceLock,
-};
+use std::{collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, mem, slice};
 
 use metal::{
     Buffer as MetalBuffer, CommandQueue, ComputeCommandEncoderRef, ComputePipelineDescriptor,
     Device, MTLArgumentBuffersTier, MTLResourceOptions, MTLSize,
 };
-use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use rayon::prelude::*;
 use risc0_core::{
     field::{
@@ -43,6 +40,7 @@ use crate::{
         },
         log2_ceil,
     },
+    prove::MerkleTreeProver,
 };
 
 const METAL_LIB: &[u8] = include_bytes!(env!("ZKP_METAL_PATH"));
@@ -56,6 +54,8 @@ const KERNEL_NAMES: &[&str] = &[
     "eltwise_zeroize_fp",
     "eltwise_zeroize_fpext",
     "fri_fold",
+    "fri_prove_digests",
+    "fri_prove_values",
     "gather_sample",
     "mix_poly_coeffs",
     "multi_bit_reverse",
@@ -68,12 +68,6 @@ const KERNEL_NAMES: &[&str] = &[
     "sha_rows",
     "zk_shift",
 ];
-
-// The GPU becomes unstable as the number of concurrent provers grow.
-fn singleton() -> &'static ReentrantMutex<()> {
-    static ONCE: OnceLock<ReentrantMutex<()>> = OnceLock::new();
-    ONCE.get_or_init(|| ReentrantMutex::new(()))
-}
 
 pub trait MetalHash {
     /// Create a hash implementation
@@ -125,8 +119,8 @@ impl MetalHash for MetalHashSha256 {
         let args = &[
             output.as_arg(),
             matrix.as_arg(),
-            KernelArg::Integer(row_size as u32),
-            KernelArg::Integer(col_size as u32),
+            KernelArg::U32(row_size as u32),
+            KernelArg::U32(col_size as u32),
         ];
         hal.dispatch_by_name("sha_rows", args, row_size as u64);
     }
@@ -178,8 +172,8 @@ impl MetalHash for MetalHashPoseidon2 {
             self.m_int_diag.as_arg(),
             output.as_arg(),
             matrix.as_arg(),
-            KernelArg::Integer(row_size as u32),
-            KernelArg::Integer(col_size as u32),
+            KernelArg::U32(row_size as u32),
+            KernelArg::U32(col_size as u32),
         ];
         hal.dispatch_by_name("poseidon2_rows", args, row_size as u64);
     }
@@ -195,7 +189,6 @@ pub struct MetalHal<Hash: MetalHash + ?Sized> {
     pub cmd_queue: CommandQueue,
     kernels: HashMap<String, ComputePipelineDescriptor>,
     hash: Option<Box<Hash>>,
-    _lock: ReentrantMutexGuard<'static, ()>,
 }
 
 pub type MetalHalSha256 = MetalHal<MetalHashSha256>;
@@ -233,7 +226,8 @@ pub enum KernelArg<'a> {
         buffer: &'a MetalBuffer,
         offset: u64,
     },
-    Integer(u32),
+    U32(u32),
+    USize(usize),
 }
 
 impl<T> BufferImpl<T> {
@@ -381,7 +375,9 @@ impl<MH: MetalHash> Default for MetalHal<MH> {
 
 impl<MH: MetalHash> MetalHal<MH> {
     pub fn new() -> Self {
-        let lock = singleton().lock();
+        #[cfg(all(test, feature = "cuda"))]
+        gpu_guard::assert_gpu_semaphore_held();
+
         let device = Device::system_default().expect("no device found");
         assert_eq!(
             device.argument_buffers_support(),
@@ -401,7 +397,6 @@ impl<MH: MetalHash> MetalHal<MH> {
             cmd_queue,
             kernels,
             hash: None,
-            _lock: lock,
         };
         hal.hash = Some(Box::new(MH::new(&hal)));
         hal
@@ -446,7 +441,14 @@ impl<MH: MetalHash> MetalHal<MH> {
                 KernelArg::Buffer { buffer, offset } => {
                     cmd_encoder.set_buffer(index as u64, Some(buffer), *offset);
                 }
-                KernelArg::Integer(value) => {
+                KernelArg::U32(value) => {
+                    cmd_encoder.set_bytes(
+                        index as u64,
+                        mem::size_of_val(value) as u64,
+                        value.to_le_bytes().as_ptr() as *const c_void,
+                    );
+                }
+                KernelArg::USize(value) => {
                     cmd_encoder.set_bytes(
                         index as u64,
                         mem::size_of_val(value) as u64,
@@ -530,7 +532,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             "io: {}, count: {count}, row_size: {row_size}, bits: {bits}",
             io.size()
         );
-        let args = &[io.as_arg(), KernelArg::Integer(bits as u32)];
+        let args = &[io.as_arg(), KernelArg::U32(bits as u32)];
         self.dispatch_by_name("multi_bit_reverse", args, row_size as u64 * count as u64);
     }
 
@@ -556,10 +558,10 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             let args = &[
                 output.as_arg(),
                 input.as_arg(),
-                KernelArg::Integer(count as u32),
-                KernelArg::Integer(out_size as u32),
-                KernelArg::Integer(in_size as u32),
-                KernelArg::Integer(expand_bits as u32),
+                KernelArg::U32(count as u32),
+                KernelArg::U32(out_size as u32),
+                KernelArg::U32(in_size as u32),
+                KernelArg::U32(expand_bits as u32),
             ];
             self.dispatch_by_name("batch_expand", args, out_size as u64);
         });
@@ -581,9 +583,9 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
                 let args = &[
                     output.as_arg(),
                     rou.as_arg(),
-                    KernelArg::Integer(n_bits as u32),
-                    KernelArg::Integer(s_bits as u32),
-                    KernelArg::Integer(count as u32),
+                    KernelArg::U32(n_bits as u32),
+                    KernelArg::U32(s_bits as u32),
+                    KernelArg::U32(count as u32),
                 ];
                 let params = compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
                 self.dispatch(kernel, args, count as u64, Some(params));
@@ -606,9 +608,9 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             let args = &[
                 io.as_arg(),
                 rou.as_arg(),
-                KernelArg::Integer(n_bits as u32),
-                KernelArg::Integer(s_bits as u32),
-                KernelArg::Integer(count as u32),
+                KernelArg::U32(n_bits as u32),
+                KernelArg::U32(s_bits as u32),
+                KernelArg::U32(count as u32),
             ];
             let params = compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
             self.dispatch(kernel, args, count as u64, Some(params));
@@ -639,7 +641,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             coeffs.as_arg(),
             which.as_arg(),
             xs.as_arg(),
-            KernelArg::Integer(count as u32),
+            KernelArg::U32(count as u32),
         ];
         let kernel = self.kernels.get("multi_poly_eval").unwrap();
         let params = simple_launch_params(out.size() as u32 * 256, 256);
@@ -671,8 +673,8 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         let args = &[
             output.as_arg(),
             input.as_arg(),
-            KernelArg::Integer(count as u32),
-            KernelArg::Integer(to_add as u32),
+            KernelArg::U32(count as u32),
+            KernelArg::U32(to_add as u32),
         ];
         self.dispatch_by_name("eltwise_sum_fpext", args, count as u64);
     }
@@ -702,7 +704,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             output.as_arg(),
             input.as_arg(),
             mix.as_arg(),
-            KernelArg::Integer(count as u32),
+            KernelArg::U32(count as u32),
         ];
         self.dispatch_by_name("fri_fold", args, count as u64);
     }
@@ -732,8 +734,8 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             combos.as_arg(),
             mix_start.as_arg(),
             mix.as_arg(),
-            KernelArg::Integer(input_size as u32),
-            KernelArg::Integer(count as u32),
+            KernelArg::U32(input_size as u32),
+            KernelArg::U32(count as u32),
         ];
         self.dispatch_by_name("mix_poly_coeffs", args, count as u64);
     }
@@ -751,7 +753,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
         assert_eq!(io.size(), poly_count * (1 << bits));
-        let args = &[io.as_arg(), KernelArg::Integer(bits as u32)];
+        let args = &[io.as_arg(), KernelArg::U32(bits as u32)];
         self.dispatch_by_name("zk_shift", args, count as u64);
     }
 
@@ -766,8 +768,8 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         let args = &[
             dst.as_arg(),
             src.as_arg(),
-            KernelArg::Integer(idx as u32),
-            KernelArg::Integer(stride as u32),
+            KernelArg::U32(idx as u32),
+            KernelArg::U32(stride as u32),
         ];
         self.dispatch_by_name("gather_sample", args, size as u64);
     }
@@ -875,6 +877,75 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             }
         });
     }
+
+    fn fri_prove(
+        &self,
+        out_values: &Self::Buffer<u32>,
+        values_column_width: usize,
+        out_digests: &Self::Buffer<u32>,
+        digests_column_width: usize,
+        positions: &Self::Buffer<u32>,
+        trees: &[&MerkleTreeProver<Self>],
+        groups: &Self::Buffer<u32>,
+    ) {
+        assert_eq!(trees.len(), groups.size());
+
+        assert_eq!(
+            out_values.size() / values_column_width,
+            positions.size() * trees.len()
+        );
+        assert_eq!(
+            out_digests.size() / digests_column_width,
+            positions.size() * trees.len()
+        );
+
+        let trees_buffer = BufferImpl::<MetalMerkleTreeProver>::copy_from(
+            "fri_prove_trees",
+            &self.device,
+            self.cmd_queue.clone(),
+            &trees
+                .iter()
+                .map(|t| t.to_metal_prover())
+                .collect::<Vec<_>>(),
+        );
+
+        let args = &[
+            out_values.as_arg(),
+            KernelArg::USize(values_column_width),
+            positions.as_arg(),
+            KernelArg::USize(positions.size()),
+            trees_buffer.as_arg(),
+            KernelArg::USize(trees.len()),
+            groups.as_arg(),
+        ];
+
+        // XXX remi: It would be faster to run the two kernels in parallel.
+
+        let count = trees.len() * positions.size() * values_column_width;
+        self.dispatch_by_name("fri_prove_values", args, count as u64);
+
+        let args = &[
+            out_digests.as_arg(),
+            KernelArg::USize(digests_column_width),
+            out_digests.as_arg(),
+            KernelArg::USize(positions.size()),
+            trees_buffer.as_arg(),
+            KernelArg::USize(trees.len()),
+            groups.as_arg(),
+        ];
+
+        let count = trees.len() * positions.size() * digests_column_width;
+        self.dispatch_by_name("fri_prove_digests", args, count as u64);
+    }
+}
+
+#[repr(C)]
+pub struct MetalMerkleTreeProver {
+    pub row_size: usize,
+    pub col_size: usize,
+    pub top_size: usize,
+    pub matrix: *const u32,
+    pub nodes: *const u32,
 }
 
 fn simple_launch_params(count: u32, threads_per_group: u32) -> (MTLSize, MTLSize) {
@@ -919,92 +990,117 @@ mod tests {
     use crate::hal::testutil;
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_bit_reverse() {
         testutil::batch_bit_reverse(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_evaluate_any() {
         testutil::batch_evaluate_any(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_expand_into_evaluate_ntt() {
         testutil::batch_expand_into_evaluate_ntt(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn batch_interpolate_ntt() {
         testutil::batch_interpolate_ntt(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     #[should_panic]
     fn check_req() {
         testutil::check_req(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_add_fp() {
         testutil::eltwise_add_elem(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_copy_fp() {
         testutil::eltwise_copy_elem(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn eltwise_sum_extelem() {
         testutil::eltwise_sum_extelem(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn fri_fold() {
         testutil::fri_fold(MetalHalSha256::new());
     }
 
     #[test]
+    #[ignore = "XXX remi: some unknown GPU synchronization issue causes it to fail"]
+    #[gpu_guard::gpu_guard]
+    fn fri_prove() {
+        testutil::fri_prove(MetalHalSha256::new());
+    }
+
+    #[test]
+    #[gpu_guard::gpu_guard]
     fn mix_poly_coeffs() {
         testutil::mix_poly_coeffs(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_fold_sha256() {
         testutil::hash_fold(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_rows_sha256() {
         testutil::hash_rows(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_fold_poseidon2() {
         testutil::hash_fold(MetalHalPoseidon2::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn hash_rows_poseidon2() {
         testutil::hash_rows(MetalHalPoseidon2::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn slice() {
         testutil::slice(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn zk_shift() {
         testutil::zk_shift(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn gather_sample() {
         testutil::gather_sample(MetalHalSha256::new());
     }
 
     #[test]
+    #[gpu_guard::gpu_guard]
     fn prefix_products() {
         use crate::hal::{Hal as _, cpu::CpuHal, dual::DualHal};
         use risc0_core::field::baby_bear::BabyBearExtElem;

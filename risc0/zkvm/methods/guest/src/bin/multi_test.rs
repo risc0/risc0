@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -31,22 +31,22 @@ use alloc::{
 use core::{arch::asm, ptr::null_mut};
 
 use getrandom::fill;
-use risc0_circuit_keccak::{KECCAK_DEFAULT_PO2, KeccakState};
+use risc0_circuit_keccak::{KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2, KeccakState};
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
     Assumption, GUEST_MAX_MEM, ReceiptClaim,
     guest::{
-        env::{self, FdReader, FdWriter, Read as _, Write as _, testing::sha_single_keccak},
+        env::{self, FdReader, FdWriter, Read as _, Write as _, testing::commit_single_keccak},
         memory_barrier, sha,
     },
-    sha::{Digest, SHA256_INIT, Sha256},
+    sha::{Digest, Sha256},
 };
 use risc0_zkvm_methods::multi_test::MultiTestSpec;
 use risc0_zkvm_platform::{
     PAGE_SIZE, fileno,
     syscall::{
         DIGEST_WORDS, bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
-        sys_poseidon2, sys_read, sys_read_words, sys_write,
+        sys_poseidon2, sys_prove_keccak, sys_read, sys_read_words, sys_write,
     },
 };
 
@@ -483,20 +483,20 @@ fn main() {
                 ]
             );
         }
-        MultiTestSpec::ShaSingleKeccak => {
-            let mut sha_state = SHA256_INIT;
+        MultiTestSpec::CommitSingleKeccak => {
+            let mut commit_state = Digest::ZERO;
             let mut keccak_state = KeccakState::default();
             unsafe { sys_keccak(&keccak_state, &mut keccak_state) };
-            sha_single_keccak(&mut sha_state, &keccak_state);
+            commit_single_keccak(&mut commit_state, &keccak_state);
             assert_eq!(
-                sha_state,
-                digest!("60ad7130b65fa874a29b3f44aeb6f46bb57cc45aa7f4a9a8db8ab4d378a66f06")
+                commit_state,
+                digest!("3479d5185c29125e82254e6aa1223d1ec1563c2adf5678507192da2a29e94356")
             );
 
-            sha_single_keccak(&mut sha_state, &keccak_state);
+            commit_single_keccak(&mut commit_state, &keccak_state);
             assert_eq!(
-                sha_state,
-                digest!("d72929ecbe90afdba8444f4b4e4dae6a3cb0465f67ee5dc12321a390dc7911b3")
+                commit_state,
+                digest!("b702a73769da83164c85332308cab412b94fe215fddf3229c2f77968d0fad233")
             );
         }
         MultiTestSpec::KeccakUpdate => {
@@ -566,13 +566,15 @@ fn main() {
             ];
             let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
 
-            unsafe {
-                sys_poseidon2(
-                    null_mut(),
-                    input.as_ptr() as *const u8,
-                    &mut actual,
-                    PFLAG_IS_ELEM | 1u32,
-                );
+            for _ in 0..100_000 {
+                unsafe {
+                    sys_poseidon2(
+                        null_mut(),
+                        input.as_ptr() as *const u8,
+                        &mut actual,
+                        PFLAG_IS_ELEM | 1u32,
+                    );
+                }
             }
             assert_eq!(expected, actual);
         }
@@ -642,6 +644,27 @@ fn main() {
             }
 
             assert_eq!(expected, out);
+        }
+        MultiTestSpec::KeccakProve { claim_digest, po2 } => {
+            fn test_input(po2: usize) -> Vec<KeccakState> {
+                let mut state = KeccakState::default();
+                let mut pows = 987654321_u64;
+                for part in state.as_mut_slice() {
+                    *part = pows;
+                    pows = pows.wrapping_mul(123456789);
+                }
+
+                let cycles = 1 << po2;
+                let count = cycles / 200; // roughly 200 cycles per keccakf
+                vec![state; count]
+            }
+
+            for mut input in test_input(po2 as usize) {
+                unsafe { sys_keccak(&input, &mut input) };
+            }
+
+            unsafe { sys_prove_keccak(claim_digest.as_ref(), KECCAK_CONTROL_ROOT.as_ref()) };
+            env::verify_assumption2(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
         }
     }
 }
