@@ -89,7 +89,7 @@ pub struct JobInfo<JobResultT> {
 /// Status of an RPC job.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum JobStatus<JobResultT> {
-    /// The job is still running; includes an optional progress message.
+    /// The job is still running; includes a progress message (may be empty)
     Running(String),
 
     /// The job completed successfully and produced a result.
