@@ -744,9 +744,9 @@ impl Emulator {
         };
         let rd = self.write_reg(dinst.rd as u32, out);
 
-        tracing::trace!("  RS1 = {}, value = {:x}", dinst.rs1, rs1.value);
-        tracing::trace!("  IMM = {imm:x}");
-        tracing::trace!("  RD = {}, value = {:x}", dinst.rd, rd.value);
+        tracing::trace!("  RS1 = {}, value = {:#010x}", dinst.rs1, rs1.value);
+        tracing::trace!("  IMM = {imm:#010x}");
+        tracing::trace!("  RD = {}, value = {:#010x}", dinst.rd, rd.value);
 
         trace.add_block(InstLoadWitness {
             mem,
@@ -798,10 +798,10 @@ impl Emulator {
 
         let mem = self.write_virt_memory(addr / BYTES_PER_WORD, out)?;
 
-        tracing::trace!("  RS1 = {}, value = {:x}", dinst.rs1, rs1.value);
-        tracing::trace!("  RS2 = {}, value = {:x}", dinst.rs2, rs2.value);
-        tracing::trace!("  IMM = {imm:x}");
-        tracing::trace!("  MEM addr = {addr:x}, value = {out}");
+        tracing::trace!("  RS1 = {}, value = {:#010x}", dinst.rs1, rs1.value);
+        tracing::trace!("  RS2 = {}, value = {:#010x}", dinst.rs2, rs2.value);
+        tracing::trace!("  IMM = {imm:#010x}");
+        tracing::trace!("  MEM addr = {addr:#010x}, value = {out}");
 
         trace.add_block(InstStoreWitness {
             cycle,
@@ -856,7 +856,7 @@ impl Emulator {
             self.new_pc = self.pc.wrapping_add(imm);
         }
         tracing::trace!("  rs1Val = {rs1_val}, rs2Val = {rs2_val}");
-        tracing::trace!("  PC = {:x}", self.pc);
+        tracing::trace!("  PC = {:#010x}", self.pc);
         Ok(())
     }
 
@@ -874,8 +874,8 @@ impl Emulator {
             imm: dinst.imm,
         });
         self.new_pc = self.pc.wrapping_add(imm);
-        tracing::trace!("  RD = {dinst_rd}, value = {:x}", rd.value as u32);
-        tracing::trace!("  PC = {:x}", self.pc);
+        tracing::trace!("  RD = {dinst_rd}, value = {:#010x}", rd.value as u32);
+        tracing::trace!("  PC = {:#010x}", self.pc);
         Ok(())
     }
 
@@ -895,9 +895,9 @@ impl Emulator {
             imm: dinst.imm,
         });
         self.new_pc = rs1_val.wrapping_add(imm);
-        tracing::trace!("  RS1 = {dinst_rs1}, value = {:x}", rs1.value);
-        tracing::trace!("  RD = {dinst_rd}, value = {:x}", rd.value);
-        tracing::trace!("  PC = {:x}", self.pc);
+        tracing::trace!("  RS1 = {dinst_rs1}, value = {:#010x}", rs1.value);
+        tracing::trace!("  RD = {dinst_rd}, value = {:#010x}", rd.value);
+        tracing::trace!("  PC = {:#010x}", self.pc);
         Ok(())
     }
 
@@ -1072,7 +1072,7 @@ impl Emulator {
             self.new_pc = decode_wit.fetch.nextPc;
 
             tracing::trace!(
-                "cycle: {}, pc: {:x}, inst: {}",
+                "cycle: {}, pc: {:#010x}, inst: {}",
                 self.user_cycles,
                 self.pc,
                 Opcode::from(decode_wit.opcode)
