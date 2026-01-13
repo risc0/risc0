@@ -23,124 +23,129 @@ use crate::{
     SessionStats,
 };
 
-/// TODO
+/// Request to execute/prove a guest ELF via the zkVM RPC interface.
+///
+/// This is primarily used by host-side clients that delegate execution/proving to a prover service
+/// (e.g. the `r0vm` cluster used by `DefaultProver`).
 #[derive(Serialize, Deserialize)]
 pub struct ProofRequest {
-    /// TODO
+    /// Guest program ELF bytes.
     pub binary: Vec<u8>,
 
-    /// TODO
+    /// Serialized executor input.
     pub input: Vec<u8>,
 
-    /// TODO
+    /// Assumption receipts that the proof may rely on.
     pub assumptions: Vec<AssumptionReceipt>,
 
-    /// TODO
+    /// Optional segment limit (log2) to use for execution/proving.
     pub segment_limit_po2: Option<u32>,
 
-    /// TODO
+    /// If `true`, execute without producing a proof/receipt (only session info).
     pub execute_only: bool,
 
-    /// TODO
+    /// If `true`, allow dev-mode behavior in the prover service.
     pub dev_mode: bool,
 }
 
-/// TODO
+/// Kind of shrink-wrapping requested for a receipt.
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 pub enum ShrinkWrapKind {
-    /// TODO
+    /// Convert the receipt to a Groth16-based succinct receipt.
     Groth16,
 }
 
-/// TODO
+/// Request to convert an existing receipt into a shrink-wrapped form.
 #[derive(Serialize, Deserialize)]
 pub struct ShrinkWrapRequest {
-    /// TODO
+    /// The shrink-wrapping mode to apply.
     pub kind: ShrinkWrapKind,
-    /// TODO
+    /// The receipt to shrink-wrap.
     pub receipt: Receipt,
-    /// TODO
+    /// If `true`, allow dev-mode behavior in the prover service.
     pub dev_mode: bool,
 }
 
-/// TODO
+/// A top-level request accepted by the zkVM prover RPC service.
 #[allow(clippy::large_enum_variant)]
 #[derive(Serialize, Deserialize, From)]
 pub enum JobRequest {
-    /// TODO
+    /// Run a proof (or execute-only) job.
     Proof(ProofRequest),
-    /// TODO
+    /// Shrink-wrap an existing receipt.
     ShrinkWrap(ShrinkWrapRequest),
 }
 
-/// TODO
+/// Metadata about an RPC job.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct JobInfo<JobResultT> {
-    /// TODO
+    /// Current job status (running/succeeded/failed/etc).
     pub status: JobStatus<JobResultT>,
 
-    /// TODO
+    /// Total elapsed time for the job, as measured by the prover service.
     pub elapsed_time: Duration,
 }
 
-/// TODO
+/// Status of an RPC job.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum JobStatus<JobResultT> {
-    /// TODO
+    /// The job is still running; includes an optional progress message.
     Running(String),
 
-    /// TODO
+    /// The job completed successfully and produced a result.
     Succeeded(JobResultT),
 
-    /// TODO
+    /// The job failed with an error returned by the prover service.
     Failed(TaskError),
 
-    /// TODO
+    /// The job exceeded its allowed time budget.
     TimedOut,
 
-    /// TODO
+    /// The job was aborted (e.g. by cancellation/shutdown).
     Aborted,
 }
 
-/// TODO
+/// Result of executing/proving a guest program via RPC.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ProofResult {
-    /// TODO
+    /// Session information (stats, journal, etc) produced by execution.
     pub session: Arc<Session>,
 
-    /// TODO
+    /// Optional receipt produced by proving.
+    ///
+    /// When `ProofRequest::execute_only` is `true`, this will typically be `None`.
     pub receipt: Option<Arc<Receipt>>,
 }
 
-/// TODO
+/// Result of shrinking-wrapping a receipt via RPC.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ShrinkWrapResult {
-    /// TODO
+    /// The shrink-wrapped receipt.
     pub receipt: Arc<Receipt>,
 }
 
-/// TODO
+/// Session data returned by the prover service for an execution/proving job.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Session {
-    /// TODO
+    /// Execution statistics.
     pub stats: SessionStats,
 
-    /// TODO
+    /// Optional journal output.
     pub journal: Option<Journal>,
 
-    /// TODO
+    /// Receipts assumed during execution/proving.
     pub assumptions: Vec<Arc<AssumptionReceipt>>,
 
-    /// TODO
+    /// Segment information for the session.
     pub segments: Vec<SegmentInfo>,
 
-    /// TODO
+    /// Guest exit code.
     pub exit_code: ExitCode,
 
-    /// TODO
+    /// Receipt claim produced by execution.
     pub receipt_claim: ReceiptClaim,
 
-    /// TOOD
+    /// Captured guest stdout bytes.
     pub stdout: Vec<u8>,
 }
 
@@ -155,15 +160,15 @@ impl From<Session> for SessionInfo {
     }
 }
 
-/// TODO
+/// Error returned by a task executed in the prover service.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TaskError {
-    /// TODO
+    /// A generic error message.
     Generic(String),
 }
 
 impl<JobResultT> JobStatus<JobResultT> {
-    /// TODO
+    /// Returns a status string compatible with Bonsai-style job statuses.
     pub fn bonsai_status(&self) -> &str {
         match self {
             JobStatus::Running(_) => "RUNNING",
