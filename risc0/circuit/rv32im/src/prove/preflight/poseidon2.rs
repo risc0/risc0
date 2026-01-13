@@ -269,7 +269,40 @@ mod tests {
     }
 
     #[test]
-    fn test_it() {
+    fn block_counts() {
+        let mut p2 = Poseidon2Witgen::new();
+        let mut rows = vec![RowInfo::zeroed(); 100];
+        let mut aux = vec![0u32; 1024];
+        let mut trace = Trace::new(&mut rows, &mut aux);
+
+        let input = Digest::new([0xDEADBEEF; DIGEST_WORDS]);
+        let data = [Elem::new(0xFF); CELLS_RATE];
+
+        let expected = reference_hash(input, &data, false);
+        assert_eq!(p2.do_block(&mut trace, input, &data, false), expected);
+
+        let data = [Elem::new(0xFE); CELLS_RATE];
+        let expected = reference_hash(input, &data, true);
+        assert_eq!(p2.do_block(&mut trace, input, &data, true), expected);
+
+        let mut block_counts: EnumMap<BlockType, u64> = Default::default();
+        for block in decode_trace(&rows, &aux) {
+            block_counts[block.block_type()] += 1;
+        }
+        assert_eq!(
+            block_counts,
+            enum_map! {
+                BlockType::Globals => 1,
+                BlockType::P2ExtRound => 8 * 2,
+                BlockType::P2Block => 2,
+                BlockType::P2IntRounds => 2,
+                _ => 0
+            }
+        );
+    }
+
+    #[test]
+    fn block_counts_cached() {
         let mut p2 = Poseidon2Witgen::new();
         let mut rows = vec![RowInfo::zeroed(); 100];
         let mut aux = vec![0u32; 1024];
@@ -291,9 +324,10 @@ mod tests {
         assert_eq!(
             block_counts,
             enum_map! {
-                BlockType::P2ExtRound => 8 * 2,
-                BlockType::P2Block => 2,
-                BlockType::P2IntRounds => 2,
+                BlockType::Globals => 1,
+                BlockType::P2ExtRound => 8,
+                BlockType::P2Block => 1,
+                BlockType::P2IntRounds => 1,
                 _ => 0
             }
         );

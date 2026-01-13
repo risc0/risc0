@@ -431,7 +431,7 @@ fn generate_rust_block_types(output: &str, block_types: &BTreeMap<String, BlockT
             const BLOCK_TYPE: BlockType = BlockType::#block_names;
         })*
 
-        #[derive(derive_more::From, PartialEq, Debug)]
+        #[derive(derive_more::From, PartialEq, Debug, Clone)]
         pub enum BlockWitness {
             #(#block_names(#block_witnesses),)*
         }

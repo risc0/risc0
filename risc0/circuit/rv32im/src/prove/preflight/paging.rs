@@ -36,7 +36,7 @@ use crate::prove::preflight::{
     trace::Trace,
 };
 
-#[derive(Default, Copy, Clone)]
+#[derive(Default, Debug, Copy, Clone)]
 pub struct MemoryInfo {
     pub cycle: u32,
     pub value: u32,
@@ -122,31 +122,22 @@ impl PagedMemory {
         self.paging_cost
     }
 
-    pub fn commit(&mut self, trace: &mut Trace, pages: &[Option<PageDetails>]) -> Result<()> {
-        if pages.len() != MEMORY_SIZE_MPAGES as usize {
-            bail!("Too few provided pages");
-        }
-
-        self.image.update_digests();
-
-        // Set initial root
-        trace.globals_mut().rootIn = to_fp_digest(self.image.get_digest(1)?);
-
-        let loaded = std::mem::take(&mut self.loaded);
-
-        // Page in all the pages that were read
+    fn commit_inner(
+        &mut self,
+        trace: &mut Trace<'_>,
+        pages: &[Option<PageDetails>],
+        loaded: &BTreeSet<u32>,
+    ) -> Result<()> {
         for &page_idx in loaded.range(MEMORY_SIZE_MPAGES as u32..) {
             let page_idx = page_idx - MEMORY_SIZE_MPAGES as u32;
             tracing::trace!("Paging in: {page_idx}");
             self.page_in_page(trace, page_idx)?;
         }
 
-        // Page in all nodes that were read
         for &node_idx in loaded.range(..MEMORY_SIZE_MPAGES as u32) {
             self.page_in_node(trace, node_idx)?;
         }
 
-        // Page out all the new pages, update image
         for &page_idx in loaded.range(MEMORY_SIZE_MPAGES as u32..) {
             let page_idx = page_idx - MEMORY_SIZE_MPAGES as u32;
             tracing::trace!("Paging out: {page_idx}");
@@ -155,9 +146,9 @@ impl PagedMemory {
             };
             self.page_out_page(trace, page_idx, page)?;
         }
+
         self.image.update_digests();
 
-        // Page out all nodes
         for &node_idx in loaded.range(..MEMORY_SIZE_MPAGES as u32) {
             self.page_out_node(trace, node_idx)?;
 
@@ -170,7 +161,26 @@ impl PagedMemory {
             }
         }
 
+        Ok(())
+    }
+
+    pub fn commit(&mut self, trace: &mut Trace, pages: &[Option<PageDetails>]) -> Result<()> {
+        if pages.len() != MEMORY_SIZE_MPAGES as usize {
+            bail!("Too few provided pages");
+        }
+
+        self.image.update_digests();
+
+        // Set initial root
+        trace.globals_mut().rootIn = to_fp_digest(self.image.get_digest(1)?);
+
+        let loaded = std::mem::take(&mut self.loaded);
+
+        let res = self.commit_inner(trace, pages, &loaded);
+
         self.loaded = loaded;
+
+        res?;
 
         trace.globals_mut().rootOut = to_fp_digest(self.image.get_digest(1)?);
 
@@ -346,6 +356,7 @@ impl PagedMemory {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::execute::PAGE_BYTES;
     use crate::prove::preflight::trace::tests::decode_trace;
 
     use bytemuck::Zeroable as _;
@@ -353,10 +364,39 @@ mod tests {
 
     use risc0_circuit_rv32im_sys::{BlockType, RowInfo};
 
-    #[test]
+    /// A memory image with 0 and 1 page filled in with a pattern
+    fn test_memory_image() -> MemoryImage {
+        let mut image = MemoryImage::default();
+        let mut p1 = Page::default();
+        let mut p2 = Page::default();
+        for i in 0..((PAGE_BYTES / 4) as u32) {
+            p1.store(WordAddr(i), i + 1);
+            p2.store(WordAddr(i), i + 2);
+        }
+        image.set_page(0, p1);
+        image.set_page(2, p2);
+        image.update_digests();
+        image
+    }
+
+    /// A PageDetails filled with increasing numbers starting at `s`
+    fn test_page_details(s: u32) -> PageDetails {
+        PageDetails(
+            (0..MPAGE_SIZE_WORDS as u32)
+                .map(|v| MemoryInfo {
+                    cycle: 0,
+                    value: s + v,
+                })
+                .collect::<Vec<_>>()
+                .into_boxed_slice()
+                .try_into()
+                .unwrap(),
+        )
+    }
+
+    #[test_log::test]
     fn test_it() {
-        let image = MemoryImage::default();
-        let mut paging = PagedMemory::new(image);
+        let mut paging = PagedMemory::new(test_memory_image());
         let mut rows = vec![RowInfo::zeroed(); 1024];
         let mut aux = vec![0u32; 4096 * 100];
         let mut trace = Trace::new(&mut rows, &mut aux);
@@ -365,8 +405,8 @@ mod tests {
         paging.page_in(1).unwrap();
 
         let mut page_details = vec![None; MEMORY_SIZE_MPAGES as usize];
-        page_details[0] = Some(PageDetails::default());
-        page_details[1] = Some(PageDetails::default());
+        page_details[0] = Some(test_page_details(0));
+        page_details[1] = Some(test_page_details(MPAGE_SIZE_WORDS as u32));
         paging.commit(&mut trace, &page_details).unwrap();
 
         let mut block_counts: EnumMap<BlockType, u64> = Default::default();
@@ -380,6 +420,7 @@ mod tests {
         assert_eq!(
             block_counts,
             enum_map! {
+                BlockType::Globals => 1,
                 BlockType::P2ExtRound => p2_blocks * 8,
                 BlockType::P2Block => p2_blocks,
                 BlockType::P2IntRounds => p2_blocks,

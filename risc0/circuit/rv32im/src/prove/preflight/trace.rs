@@ -236,7 +236,7 @@ pub mod tests {
     }
 
     fn test_trace(num_rows: usize, aux_bytes: usize, wits: &[BlockWitness]) {
-        let mut rows = vec![RowInfo::zeroed(); num_rows];
+        let mut rows = vec![RowInfo::zeroed(); num_rows + 1];
 
         assert_eq!(BlockType::PageInPage.count_per_row(), 1);
 
@@ -262,9 +262,21 @@ pub mod tests {
         }
         trace.finalize();
 
-        assert_eq!(trace.get_row_count(), num_rows);
+        assert_eq!(trace.get_row_count(), num_rows + 1);
         assert_eq!(trace.get_aux_size(), aux_bytes / size_of::<u32>());
 
+        let mut wits = wits.to_vec();
+        wits.insert(
+            0,
+            GlobalsWitness {
+                rootIn: FpDigest::default(),
+                rootOut: FpDigest::default(),
+                p2Count: 0,
+                finalCycle: 0,
+                v2Compat: 0,
+            }
+            .into(),
+        );
         assert_eq!(decode_trace(&rows, &aux), wits);
     }
 
@@ -272,7 +284,8 @@ pub mod tests {
     fn three_rows_filled() {
         let aux_bytes = size_of::<MakeTableWitness>()
             * BlockType::MakeTable.count_per_row() as usize
-            + size_of::<PageInPageWitness>() * 2;
+            + size_of::<PageInPageWitness>() * 2
+            + size_of::<GlobalsWitness>();
 
         let wits = vec![
             PageInPageWitness {
@@ -304,7 +317,8 @@ pub mod tests {
     fn four_rows_not_full() {
         let aux_bytes = size_of::<MakeTableWitness>()
             * BlockType::MakeTable.count_per_row() as usize
-            + size_of::<PageInPageWitness>() * 2;
+            + size_of::<PageInPageWitness>() * 2
+            + size_of::<GlobalsWitness>();
 
         let wits = vec![
             PageInPageWitness {
