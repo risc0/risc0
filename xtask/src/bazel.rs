@@ -57,7 +57,6 @@ impl Bazel {
         // into
         // risc0/circuit/recursion/src
         let pwd = std::env::current_dir().unwrap();
-        let dst_dir = pwd.join("risc0/circuit/recursion/src/prove");
         for src_path in srcs {
             let file_name = src_path.file_name().unwrap().to_owned();
             let src_data = File::open(&src_path).unwrap();
@@ -65,6 +64,11 @@ impl Bazel {
 
             // Avoid using `std::fs::copy` because bazel creates files with r/o permissions.
             // We create a new file with r/w permissions and .copy the contents instead.
+            let dst_dir = if file_name.display().to_string().contains("povw") {
+                pwd.join("risc0/circuit/recursion-povw-zkrs/src")
+            } else {
+                pwd.join("risc0/circuit/recursion-zkrs/src")
+            };
             let mut dst_path = dst_dir.join(file_name);
             dst_path.set_extension("zkr.xz");
             let mut dst_file = File::create(&dst_path).unwrap();

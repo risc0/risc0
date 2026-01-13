@@ -3877,7 +3877,9 @@ dependencies = [
  "metal",
  "rand 0.9.1",
  "rayon",
+ "risc0-circuit-recursion-povw-zkrs",
  "risc0-circuit-recursion-sys",
+ "risc0-circuit-recursion-zkrs",
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
@@ -3885,6 +3887,13 @@ dependencies = [
  "sha2",
  "tracing",
  "zip",
+]
+
+[[package]]
+name = "risc0-circuit-recursion-povw-zkrs"
+version = "5.0.0"
+dependencies = [
+ "liblzma",
 ]
 
 [[package]]
@@ -3897,6 +3906,13 @@ dependencies = [
  "risc0-core",
  "risc0-sppark",
  "risc0-sys",
+]
+
+[[package]]
+name = "risc0-circuit-recursion-zkrs"
+version = "5.0.0"
+dependencies = [
+ "liblzma",
 ]
 
 [[package]]
