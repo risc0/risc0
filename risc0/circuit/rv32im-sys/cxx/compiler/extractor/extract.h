@@ -15,8 +15,9 @@
 
 #pragma once
 
-#include "LayoutBuilderVisitor.h"
-#include "RecordingContext.h"
+#include "compiler/extractor/LayoutBuilderVisitor.h"
+#include "compiler/extractor/RecordingContext.h"
+
 struct VerifyFwd {
   template <typename T, typename... Args>
   static void apply(RecordingContext& ctx, const char*, T& obj, Args... args) {
@@ -43,26 +44,24 @@ struct VerifyFwd {
 };
 
 struct AddArgumentsFwd {
-  template <typename T, typename C, typename... Args>
-  FDEV static void apply(MTHR C& ctx, CONSTARG const char*, MDEV T& obj, Args... args) {
+  template <typename T, typename... Args>
+  static void apply(RecordingContext& ctx, const char*, T& obj, Args... args) {
     AddArgumentsFwd::apply(ctx, obj, args...);
   }
 
   template <typename T,
-            typename C,
             typename... Args,
             std::enable_if_t<!std::is_same<std::remove_cv_t<T>, char>::value, int> = 0>
-  FDEV static void apply(MTHR C& ctx, MDEV T& obj, Args... args) {
+  static void apply(RecordingContext& ctx, T& obj, Args... args) {
     obj.template applyInner<AddArgumentsFwd>(ctx, args...);
     obj.addArguments(ctx, args...);
   }
 
   template <typename T,
-            typename C,
             size_t N,
             typename... Args,
             std::enable_if_t<!std::is_same<std::remove_cv_t<T>, char>::value, int> = 0>
-  FDEV static void apply(MTHR C& ctx, MDEV T (&t)[N], Args... args) {
+  static void apply(RecordingContext& ctx, T (&t)[N], Args... args) {
     for (size_t i = 0; i < N; i++) {
       AddArgumentsFwd::apply(ctx, t[i], args...);
     }

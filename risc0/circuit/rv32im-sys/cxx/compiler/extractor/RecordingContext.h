@@ -17,9 +17,9 @@
 
 #include "compiler/extractor/RecordingVal.h"
 #include "zirgen/Dialect/ZHLT/IR/ZHLT.h"
+
 #include <mlir/IR/MLIRContext.h>
 #include <string>
-// #include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
 
 #define ZIRGEN
 

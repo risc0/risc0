@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #include "compiler/extractor/PicusDirectives.h"
-#include "RecordingVal.h"
+#include "compiler/extractor/RecordingVal.h"
 #include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
 
 using namespace mlir;

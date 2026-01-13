@@ -39,13 +39,13 @@
                    ctx.get(arg.immHigh),                                                           \
                    ctx.get(arg.options)}))
 
-// Note: because the units never push an `option` value greater than 12, we know
+// Note: because the units never push an `option` value greater than 17, we know
 // that the value pulled by an instruction block fits in that range. When there
 // are additional values packed into the `options` field from the decoder, we
 // need bounds on their values to prove that their values are fully determined
 // from their composition.
 #define UNIT_ARGUMENT(ctx, arg)                                                                    \
-  RANGE_POSTCONDITION(ctx, 0, arg.opts, 12);                                                       \
+  RANGE_POSTCONDITION(ctx, 0, arg.opts, 18);                                                       \
   PICUS_ARGUMENT(ctx,                                                                              \
                  ({ctx.get(arg.opts),                                                              \
                    ctx.get(arg.aLow),                                                              \

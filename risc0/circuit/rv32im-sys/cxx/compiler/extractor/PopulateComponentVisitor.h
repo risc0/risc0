@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include "RecordingVal.h"
 #include "compiler/extractor/NopVal.h"
 #include "compiler/extractor/RecordingContext.h"
+#include "compiler/extractor/RecordingVal.h"
 #include <mlir/Dialect/Arith/IR/Arith.h>
 
 namespace populate_component {

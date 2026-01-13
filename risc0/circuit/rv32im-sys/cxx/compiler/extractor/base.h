@@ -15,11 +15,9 @@
 
 #pragma once
 
-#include "LayoutBuilderVisitor.h"
-#include "PopulateComponentVisitor.h"
-#include "RecordingContext.h"
 #include "compiler/extractor/LayoutBuilderVisitor.h"
 #include "compiler/extractor/PicusDirectives.h"
+#include "compiler/extractor/PopulateComponentVisitor.h"
 #include "compiler/extractor/RecordingContext.h"
 #include "compiler/extractor/RecordingVal.h"
 #include "zkp/fp.h"
@@ -33,11 +31,15 @@ using namespace risc0;
 #define PICUS_INPUT(ctx, x) picusInput(ctx, x)
 #define RANGE_PRECONDITION(ctx, low, x, high) rangePrecondition(ctx, low, x, high)
 #define RANGE_POSTCONDITION(ctx, low, x, high) rangePostcondition(ctx, low, x, high)
-#define PICUS_ASSERT(ctx, cond)
-#define PICUS_ARGUMENT(ctx, inputs, outputs)                                                       \
-  picusArgument(ctx, llvm::SmallVector<mlir::Value> inputs, llvm::SmallVector<mlir::Value> outputs)
-#define PICUS_CALL(ctx, name, inputs, layout)                                                      \
-  picusCall(ctx, name, llvm::SmallVector<Val<C>> inputs, layout)
+#define PICUS_ARGUMENT(ctx, inputs, outputs) {                                                     \
+    llvm::SmallVector<mlir::Value> inputsVec = inputs;                                            \
+    llvm::SmallVector<mlir::Value> outputsVec = outputs;                                          \
+    picusArgument(ctx, inputsVec, outputsVec); \
+  }
+#define PICUS_CALL(ctx, name, inputs, layout) {                                                    \
+    llvm::SmallVector<mlir::Value> inputsVec = inputs;                                               \
+    picusCall(ctx, name, inputsVec, layout); \
+  }
 
 #define PICUS_BEGIN_OUTLINE(...)                                                                   \
   if (NAME != ctx.componentName) {                                                                 \

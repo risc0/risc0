@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include "RecordingVal.h"
 #include "compiler/extractor/RecordingContext.h"
+#include "compiler/extractor/RecordingVal.h"
 
 class PicusDeclareInputVisitor {
 public:
