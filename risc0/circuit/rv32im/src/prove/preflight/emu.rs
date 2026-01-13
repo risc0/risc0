@@ -323,7 +323,7 @@ impl Emulator {
             loadCycle: self.cur_cycle,
             mode: self.mode,
             pc: self.pc,
-            nextPc: self.pc + if compressed { 2 } else { 4 },
+            nextPc: self.pc.wrapping_add(if compressed { 2 } else { 4 }),
         };
 
         macro_rules! get_imm {
@@ -763,7 +763,7 @@ impl Emulator {
         let kind = Opt::STORE_KIND.unwrap();
         let dinst = trace.get_block_mut(self.dinst.unwrap());
         // Check alignement + access
-        let addr = self.peek_reg(dinst.rs1 as u32) + dinst.imm;
+        let addr = self.peek_reg(dinst.rs1 as u32).wrapping_add(dinst.imm);
 
         let alignment_req = match kind {
             StoreKind::Sh => 2,
@@ -851,7 +851,7 @@ impl Emulator {
             didBranch: did_branch as u32,
         });
         if did_branch {
-            self.new_pc = self.pc + imm;
+            self.new_pc = self.pc.wrapping_add(imm);
         }
         tracing::trace!("  rs1Val = {rs1_val}, rs2Val = {rs2_val}");
         tracing::trace!("  PC = {:x}", self.pc);
@@ -871,7 +871,7 @@ impl Emulator {
             rd,
             imm: dinst.imm,
         });
-        self.new_pc = self.pc + imm;
+        self.new_pc = self.pc.wrapping_add(imm);
         tracing::trace!("  RD = {dinst_rd}, value = {:x}", rd.value as u32);
         tracing::trace!("  PC = {:x}", self.pc);
         Ok(())
@@ -892,7 +892,7 @@ impl Emulator {
             rd,
             imm: dinst.imm,
         });
-        self.new_pc = rs1_val + imm;
+        self.new_pc = rs1_val.wrapping_add(imm);
         tracing::trace!("  RS1 = {dinst_rs1}, value = {:x}", rs1.value);
         tracing::trace!("  RD = {dinst_rd}, value = {:x}", rd.value);
         tracing::trace!("  PC = {:x}", self.pc);
@@ -918,7 +918,7 @@ impl Emulator {
             fetch: dinst.fetch,
             rs1: dinst.rs1 as u32,
             rs2: dinst.rs2 as u32,
-            rd: self.write_reg(dinst.rd as u32, self.pc + dinst.imm),
+            rd: self.write_reg(dinst.rd as u32, self.pc.wrapping_add(dinst.imm)),
             imm: dinst.imm,
         });
         Ok(())
@@ -1004,7 +1004,7 @@ impl Emulator {
         };
         let (mut new_pc, read_pc) = self.read_phys_memory(mempc_word)?;
         if self.v2_compat {
-            new_pc += 4
+            new_pc = new_pc.wrapping_add(4);
         }
 
         let wit = InstMretWitness {
