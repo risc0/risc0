@@ -36,7 +36,7 @@ template <typename C, size_t N> struct OneHot {
 };
 
 template <typename C, size_t N, size_t M> struct TwoHot {
-#define _NAME(N, M) "OneHot<" #N ", " #M ">"
+#define _NAME(N, M) "TwoHot<" #N ", " #M ">"
   CONSTANT static char NAME[] = _NAME(N, M);
 #undef _NAME
 
