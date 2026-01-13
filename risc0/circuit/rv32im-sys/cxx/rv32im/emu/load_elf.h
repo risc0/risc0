@@ -27,9 +27,6 @@ namespace risc0::rv32im {
 // Adds exansion table for compressed instructions
 void fillExpandTable(std::map<uint32_t, uint32_t>& words);
 
-// Loads for FFI test (TODO: remove?)
-void loadFFI(std::map<uint32_t, uint32_t>& words, const ArrayRef<uint8_t>& elfBytes);
-
 // Loads as only a machine mode kernel for machine mode test
 void loadKernelV2(std::map<uint32_t, uint32_t>& words, const std::string& elf);
 
