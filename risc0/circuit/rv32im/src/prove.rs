@@ -241,6 +241,7 @@ mod tests {
     };
     use paste::paste;
     use risc0_binfmt::{MemoryImage, Program};
+    use risc0_circuit_rv32im_sys::BlockType;
 
     use super::*;
 
@@ -359,6 +360,29 @@ mod tests {
         prover.prove(&preflight).unwrap();
     }
 
+    fn assert_trace_eq(a: &PreflightContext, b: &preflight::PreflightContext2) {
+        let a_rows = unsafe { std::slice::from_raw_parts(a.row_info_ptr(), a.row_info_size()) };
+        let a_aux = unsafe { std::slice::from_raw_parts(a.aux_ptr(), a.aux_size()) };
+        let trace_a = preflight::trace::tests::decode_trace(a_rows, a_aux);
+
+        let trace_b = preflight::trace::tests::decode_trace(&b.row_info, &b.aux);
+
+        for block_type in BlockType::iter() {
+            let a: Vec<_> = trace_a
+                .iter()
+                .filter(|b| b.block_type() == block_type)
+                .collect();
+            let b: Vec<_> = trace_b
+                .iter()
+                .filter(|b| b.block_type() == block_type)
+                .collect();
+
+            for i in 0..a.len() {
+                assert_eq!(a[i], b[i], "index = {i}");
+            }
+        }
+    }
+
     fn run_program2(elf: &[u8], po2: usize) {
         let program = Program::load_elf(elf, u32::MAX).unwrap();
         let mut image = MemoryImage::new_kernel(program);
@@ -384,11 +408,16 @@ mod tests {
         let segment = segments.first().unwrap().clone();
         // segment.partial_image.dump();
 
-        let segment_ctx = preflight::SegmentContext2::new(&segment).unwrap();
+        let segment_ctx = SegmentContext::new(&segment).unwrap();
         let preflight = segment_ctx.preflight(po2).unwrap();
 
+        let segment_ctx2 = preflight::SegmentContext2::new(&segment).unwrap();
+        let preflight2 = segment_ctx2.preflight(po2).unwrap();
+
+        assert_trace_eq(&preflight, &preflight2);
+
         let prover = segment_prover(po2).unwrap();
-        prover.prove2(&preflight).unwrap();
+        prover.prove2(&preflight2).unwrap();
     }
 
     const DEFAULT_PO2: usize = 13;

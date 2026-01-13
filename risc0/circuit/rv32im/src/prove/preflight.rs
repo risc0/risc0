@@ -20,7 +20,7 @@ mod decode;
 mod emu;
 mod paging;
 mod poseidon2;
-mod trace;
+pub mod trace;
 
 use anyhow::Result;
 use bytemuck::Zeroable as _;
