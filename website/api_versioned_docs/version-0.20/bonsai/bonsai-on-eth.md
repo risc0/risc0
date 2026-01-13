@@ -16,7 +16,7 @@ You can get started right away by cloning the template and following the instruc
 
 Below is a diagram and overview of a typical application with RISC Zero on Ethereum, utilizing Bonsai proving.
 
-![RISC Zero on Ethereum interactions diagram](/img/risc0-ethereum-interaction.png)
+![RISC Zero on Ethereum interactions diagram](../../../static/img/risc0-ethereum-interaction.png)
 
 1. Run your application logic in the zkVM. The off-chain component of your app (e.g. server or dApp client) sends a proof request to the Bonsai proving service.
 2. Bonsai generates the program result, written to the [journal][term-journal], and a SNARK proof of its correctness.
