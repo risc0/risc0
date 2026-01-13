@@ -31,18 +31,21 @@ using namespace risc0;
 #define PICUS_INPUT(ctx, x) picusInput(ctx, x)
 #define RANGE_PRECONDITION(ctx, low, x, high) rangePrecondition(ctx, low, x, high)
 #define RANGE_POSTCONDITION(ctx, low, x, high) rangePostcondition(ctx, low, x, high)
-#define PICUS_ARGUMENT(ctx, inputs, outputs) {                                                     \
-    llvm::SmallVector<mlir::Value> inputsVec = inputs;                                            \
-    llvm::SmallVector<mlir::Value> outputsVec = outputs;                                          \
-    picusArgument(ctx, inputsVec, outputsVec); \
+#define PICUS_ARGUMENT(ctx, inputs, outputs)                                                       \
+  {                                                                                                \
+    llvm::SmallVector<mlir::Value> inputsVec inputs;                                               \
+    llvm::SmallVector<mlir::Value> outputsVec outputs;                                             \
+    picusArgument(ctx, inputsVec, outputsVec);                                                     \
   }
-#define PICUS_CALL(ctx, name, inputs, layout) {                                                    \
-    llvm::SmallVector<mlir::Value> inputsVec = inputs;                                               \
-    picusCall(ctx, name, inputsVec, layout); \
+#define PICUS_CALL(ctx, name, inputs, layout)                                                      \
+  {                                                                                                \
+    llvm::SmallVector<RecordingVal> inputsVec{inputs};                                             \
+    picusCall(ctx, name, inputsVec, layout);                                                       \
   }
 
 #define PICUS_BEGIN_OUTLINE(...)                                                                   \
   if (NAME != ctx.componentName) {                                                                 \
-    PICUS_CALL(ctx, NAME, ({__VA_ARGS__}), ctx.get(*this));                                        \
+    llvm::SmallVector<RecordingVal> inputsVec{__VA_ARGS__};                                        \
+    picusCall(ctx, NAME, inputsVec, ctx.get(*this));                                               \
   } else {
 #define PICUS_END_OUTLINE }
