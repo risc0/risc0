@@ -92,7 +92,9 @@ pub(crate) struct StorageConfig {
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct TelemetryConfig {
-    // TODO
+    // Marker struct: presence of `[telemetry]` section in TOML enables OpenTelemetry/OTLP
+    // initialization (logs, traces, metrics) in `actors::App`. Export endpoints and filtering
+    // are configured via environment variables (e.g. OTEL_*, RUST_LOG).
 }
 
 impl Default for AppConfig {
