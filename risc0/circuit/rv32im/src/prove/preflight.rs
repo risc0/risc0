@@ -93,11 +93,17 @@ impl SegmentContext2 {
         let is_final = emu::emulate(&mut trace, &self.image, rows, self.end_cycle)?;
         let cycles = trace.user_cycles();
 
-        let row_count = trace.get_row_count();
-        let aux_size = trace.get_aux_size();
-        tracing::info!("Finalizing, trace row count = {row_count}, aux size = {aux_size}",);
+        tracing::info!(
+            "Finalizing, trace row count = {}, aux size = {}",
+            trace.get_row_count(),
+            trace.get_aux_size()
+        );
 
         trace.finalize();
+
+        let row_count = trace.get_row_count();
+        let aux_size = trace.get_aux_size();
+
         row_info.truncate(row_count);
         aux.truncate(aux_size);
 

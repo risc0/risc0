@@ -20,7 +20,7 @@ use enum_map::EnumMap;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
 use risc0_circuit_rv32im_sys::{
     BlockType, FpDigest, PageInNodeWitness, PageInPageWitness, PageInPartWitness,
-    PageOutNodeWitness, PageOutPageWitness, PageOutPartWitness, PageUncleWitness, fp::Fp,
+    PageOutNodeWitness, PageOutPageWitness, PageOutPartWitness, PageUncleWitness,
 };
 use risc0_zkp::{
     core::{
@@ -46,7 +46,7 @@ fn to_fp_digest(digest: &Digest) -> FpDigest {
     let mut out = FpDigest::default();
 
     for (out_cell, &word) in out.iter_mut().zip(digest.as_words().iter()) {
-        *out_cell = Fp::new_raw(word);
+        *out_cell = Elem::new(word).into();
     }
     out
 }
@@ -120,14 +120,6 @@ impl PagedMemory {
 
     pub fn paging_cost(&self) -> usize {
         self.paging_cost
-    }
-
-    pub fn p2(&self) -> &Poseidon2Witgen {
-        &self.p2
-    }
-
-    pub fn p2_mut(&mut self) -> &mut Poseidon2Witgen {
-        &mut self.p2
     }
 
     pub fn commit(&mut self, trace: &mut Trace, pages: &[Option<PageDetails>]) -> Result<()> {
@@ -257,7 +249,7 @@ impl PagedMemory {
         let mut data = [Elem::new(0); CELLS_RATE];
         for i in 0..DIGEST_WORDS {
             data[i] = right[i].to_elem();
-            data[DIGEST_WORDS + 1] = left[i].to_elem();
+            data[DIGEST_WORDS + i] = left[i].to_elem();
         }
 
         trace.add_block(PageInNodeWitness {

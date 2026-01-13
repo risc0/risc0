@@ -97,7 +97,7 @@ pub struct RawSegment {
 }
 
 #[repr(C)]
-#[derive(Zeroable, Pod, Copy, Clone)]
+#[derive(Zeroable, Pod, Copy, Clone, Debug, PartialEq, Eq)]
 pub struct RowInfo {
     pub row_type: u8,
     pub block_count: u8,

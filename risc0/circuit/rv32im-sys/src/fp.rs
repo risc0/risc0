@@ -24,7 +24,7 @@ pub struct Fp(u32);
 
 impl From<BabyBearElem> for Fp {
     fn from(elem: BabyBearElem) -> Self {
-        Self(elem.as_u32())
+        Self(elem.as_u32_montgomery())
     }
 }
 

@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, btree_map::Entry as BTreeMapEntry};
 
 use risc0_circuit_rv32im_sys::{P2BlockWitness, P2ExtRoundWitness, P2IntRoundsWitness, fp::Fp};
 use risc0_zkp::{
@@ -146,7 +146,7 @@ fn cells_from_input(input: Digest, data: &[Elem; CELLS_RATE]) -> Cells {
     let mut cells = Cells::default();
     cells[0..CELLS_RATE].copy_from_slice(&data[0..CELLS_RATE]);
     for (cell, &word) in cells[CELLS_RATE..].iter_mut().zip(input.as_words().iter()) {
-        *cell = Elem::new_raw(word);
+        *cell = Elem::new(word);
     }
     cells
 }
@@ -159,7 +159,7 @@ fn digest_from_cells(cells: &Cells, is_final: bool) -> Digest {
     };
     let mut out = Digest::ZERO;
     for (word, &fp) in out.as_mut_words().iter_mut().zip(fp_slice) {
-        *word = fp.as_u32_montgomery();
+        *word = fp.as_u32();
     }
     out
 }
@@ -185,17 +185,21 @@ impl Poseidon2Witgen {
         let mut cells = cells_from_input(input, data);
 
         // Check if we already have a witness for this one
-        if let Some(&idx) = self.saved.get(&cells) {
-            let block = trace.get_block_mut(idx);
-            let out = digest_from_cells(Fp::as_elem_array(&block.out), is_final);
+        let cache_entry = match self.saved.entry(cells.clone()) {
+            BTreeMapEntry::Occupied(entry) => {
+                let idx = *entry.get();
+                let block = trace.get_block_mut(idx);
+                let out = digest_from_cells(Fp::as_elem_array(&block.out), is_final);
 
-            if is_final {
-                block.outUseCount += 1;
-            } else {
-                block.contUseCount += 1;
+                if is_final {
+                    block.outUseCount += 1;
+                } else {
+                    block.contUseCount += 1;
+                }
+                return out;
             }
-            return out;
-        }
+            BTreeMapEntry::Vacant(entry) => entry,
+        };
 
         // Otherwise build the witness data for the full block it's parts
         // TODO: we can move the details to another thread
@@ -210,6 +214,7 @@ impl Poseidon2Witgen {
             out: Default::default(),
         };
         let block_idx = trace.add_block(witness);
+        cache_entry.insert(block_idx);
 
         poseidon_multiply_by_m_ext(&mut cells);
         for i in 0..ROUNDS_HALF_FULL {

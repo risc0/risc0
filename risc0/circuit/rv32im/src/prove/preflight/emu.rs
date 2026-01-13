@@ -526,17 +526,13 @@ impl Emulator {
             out0: 0,
             out1: 0,
         };
-        match Opt::MUL_KIND.unwrap() {
-            MulKind::Ss => {
-                unit.out0 = ((a as i32) as i64).wrapping_mul((b as i32) as i64) as u32;
-            }
-            MulKind::Su => {
-                unit.out0 = ((a as i32) as i64).wrapping_mul(b as i64) as u32;
-            }
-            MulKind::Uu => {
-                unit.out0 = (a as u64).wrapping_mul(b as u64) as u32;
-            }
-        }
+        let out = match Opt::MUL_KIND.unwrap() {
+            MulKind::Ss => ((a as i32) as i64).wrapping_mul((b as i32) as i64) as u64,
+            MulKind::Su => ((a as i32) as i64).wrapping_mul(b as i64) as u64,
+            MulKind::Uu => (a as u64).wrapping_mul(b as u64) as u64,
+        };
+        unit.out0 = out as u32;
+        unit.out1 = (out >> 32) as u32;
         trace.add_block(unit).cast()
     }
 
@@ -571,8 +567,10 @@ impl Emulator {
             }
             let abs_quot: u32 = if b == 0 {
                 0xffffffff
-            } else {
+            } else if unit.out0 as i32 != i32::MIN {
                 (unit.out0 as i32).abs() as u32
+            } else {
+                unit.out0
             };
             self.unit_mul::<MulUuOptions>(trace, abs_quot, (b as i32).abs() as u32);
         } else {
@@ -714,7 +712,7 @@ impl Emulator {
         let dinst = trace.get_block_mut(self.dinst.unwrap());
 
         // Check alignement + access
-        let addr = self.peek_reg(dinst.rs1 as u32) + dinst.imm;
+        let addr = self.peek_reg(dinst.rs1 as u32).wrapping_add(dinst.imm);
         let alignment_req = match kind {
             LoadKind::Lh | LoadKind::Lhu => 2,
             LoadKind::Lw => 4,

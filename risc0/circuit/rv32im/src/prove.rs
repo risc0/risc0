@@ -401,6 +401,7 @@ mod tests {
                 equality_report.join("\n\n=============\n")
             );
         }
+        assert_eq!(a_rows.len(), b.row_info.len());
     }
 
     fn run_program2(elf: &[u8], po2: usize) {
@@ -435,6 +436,9 @@ mod tests {
         let preflight2 = segment_ctx2.preflight(po2).unwrap();
 
         assert_trace_eq(&preflight, &preflight2);
+
+        let prover = segment_prover(po2).unwrap();
+        prover.prove(&preflight).unwrap();
 
         let prover = segment_prover(po2).unwrap();
         prover.prove2(&preflight2).unwrap();
