@@ -136,7 +136,7 @@ pub use {
     risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
 
-/// TODO
+/// RPC protocol types for prover client-server communication.
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 pub mod rpc {
