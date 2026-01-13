@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -20,9 +20,8 @@ use anyhow::{Context, Result, anyhow, bail, ensure};
 use super::{PreflightIter, ProverServer, keccak::prove_keccak};
 use crate::{
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
-    MaybePruned, Output, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
+    MaybePruned, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
     SuccinctReceiptVerifierParameters, UnionClaim, Unknown, VerifierContext, WorkClaim,
-    claim::merge::Merge,
     host::{
         client::prove::opts::ReceiptKind,
         prove_info::ProveInfo,
@@ -85,8 +84,8 @@ impl ProverServer for ProverImpl {
         gpu_guard::assert_gpu_semaphore_held();
 
         let mut segments = Vec::new();
-        for segment_ref in session.segments.iter() {
-            let segment = segment_ref.resolve()?;
+        for segment in session.segments() {
+            let segment = segment?;
             for hook in &session.hooks {
                 hook.on_pre_prove_segment(&segment);
             }
@@ -95,27 +94,6 @@ impl ProverServer for ProverImpl {
                 hook.on_post_prove_segment(&segment);
             }
         }
-
-        let (assumptions, session_assumption_receipts): (Vec<_>, Vec<_>) =
-            session.assumptions.iter().cloned().unzip();
-
-        // Merge the output, including journal digest and assumptions, into the last segment.
-        segments
-            .last_mut()
-            .ok_or_else(|| anyhow!("session is empty"))?
-            .claim
-            .output
-            .merge_with(
-                &session
-                    .journal
-                    .as_ref()
-                    .map(|journal| Output {
-                        journal: MaybePruned::Pruned(journal.digest()),
-                        assumptions: assumptions.into(),
-                    })
-                    .into(),
-            )
-            .context("failed to merge output into final segment claim")?;
 
         let verifier_parameters = ctx
             .composite_verifier_parameters()
@@ -147,6 +125,9 @@ impl ProverServer for ProverImpl {
             tracing::debug!("keccak root assumption: {:?}", assumption);
             zkr_receipts.insert(assumption, root_receipt.clone());
         }
+
+        let (_, session_assumption_receipts): (Vec<_>, Vec<_>) =
+            session.assumptions.iter().cloned().unzip();
 
         // TODO: add test case for when a single session refers to the same assumption multiple times
         let inner_assumption_receipts: Vec<_> = session_assumption_receipts
@@ -234,92 +215,27 @@ impl ProverServer for ProverImpl {
         );
     }
 
-    #[cfg(not(feature = "rv32im-m3"))]
-    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
-        tracing::debug!("segment_preflight");
-
-        ensure!(
-            segment.po2() <= self.opts.max_segment_po2,
-            "segment po2 exceeds max on ProverOpts: {} > {}",
-            segment.po2(),
-            self.opts.max_segment_po2
-        );
-
-        let prover = risc0_circuit_rv32im::prove::segment_prover()?;
-
-        let inner = prover.preflight(&segment.inner)?;
-        let preflight_results = PreflightResults {
-            inner,
-            terminate_state: segment.inner.claim.terminate_state,
-            output: segment.output.clone(),
-            segment_index: segment.index,
-        };
-
-        Ok(Box::new(std::iter::once(Ok(preflight_results))))
-    }
-
-    #[cfg(feature = "rv32im-m3")]
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
         tracing::debug!("segment_preflight");
         Ok(Box::new(rv32im_m3::PreflightIter::new(
             segment,
-            self.opts.max_segment_po2,
+            segment.po2(),
             segment.index,
         )?))
     }
 
-    #[cfg(not(feature = "rv32im-m3"))]
     fn prove_preflight(
         &self,
         ctx: &VerifierContext,
         preflight_results: PreflightResults,
     ) -> Result<SegmentReceipt> {
         tracing::debug!("prove_preflight");
-
-        ensure!(
-            self.opts.hashfn == "poseidon2",
-            "provided `ProverOpts` has unsupported `hashfn` value of \"{}\"; \
-            supported `hashfn` values are: \"poseidon2\".",
-            &self.opts.hashfn
-        );
 
         let po2 = preflight_results.inner.po2();
-        let prover = risc0_circuit_rv32im::prove::segment_prover()?;
-        let seal = prover.prove_core(preflight_results.inner)?;
-        let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(po2))?;
-        claim.output = preflight_results.output.into();
-
-        let verifier_parameters = ctx
-            .segment_verifier_parameters
-            .as_ref()
-            .ok_or_else(|| anyhow!("segment receipt verifier parameters missing from context"))?
-            .digest();
-        let receipt = SegmentReceipt {
-            seal,
-            index: preflight_results.segment_index,
-            hashfn: self.opts.hashfn.clone(),
-            claim,
-            verifier_parameters,
-        };
-        receipt
-            .verify_integrity_with_context(ctx)
-            .context("verify segment")?;
-
-        Ok(receipt)
-    }
-
-    #[cfg(feature = "rv32im-m3")]
-    fn prove_preflight(
-        &self,
-        ctx: &VerifierContext,
-        preflight_results: PreflightResults,
-    ) -> Result<SegmentReceipt> {
-        tracing::debug!("prove_preflight");
-
-        let prover = risc0_circuit_rv32im_m3::prove::segment_prover(self.opts.max_segment_po2)?;
+        let prover = risc0_circuit_rv32im::prove::segment_prover(po2 as usize)?;
         let seal = prover.prove(&preflight_results.inner)?;
 
-        let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output)
+        let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output.clone())
             .context("Decode ReceiptClaim from seal")?;
 
         let verifier_parameters = ctx
@@ -329,7 +245,7 @@ impl ProverServer for ProverImpl {
             .digest();
         let receipt = SegmentReceipt {
             seal,
-            index: preflight_results.segment_index,
+            index: preflight_results.segment_index(),
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,
@@ -460,16 +376,16 @@ fn check_claims(
     Ok(())
 }
 
-#[cfg(feature = "rv32im-m3")]
 mod rv32im_m3 {
     use risc0_circuit_rv32im::TerminateState;
 
     use super::*;
+    use crate::{MaybePruned, Output};
 
     pub(crate) struct PreflightIter {
         max_prover_po2: usize,
-        ctx: risc0_circuit_rv32im_m3::prove::SegmentContext,
-        output: Option<Output>,
+        ctx: risc0_circuit_rv32im::prove::SegmentContext,
+        output: MaybePruned<Option<Output>>,
         terminate_state: Option<TerminateState>,
         is_done: bool,
         segment_index: u32,
@@ -481,12 +397,13 @@ mod rv32im_m3 {
             max_prover_po2: usize,
             segment_index: u32,
         ) -> Result<Self> {
-            let ctx = risc0_circuit_rv32im_m3::prove::SegmentContext::new(&segment.inner)?;
+            let terminate_state = segment.inner.terminate_state;
+            let ctx = risc0_circuit_rv32im::prove::SegmentContext::new(&segment.inner)?;
             Ok(Self {
                 max_prover_po2,
                 ctx,
                 output: segment.output.clone(),
-                terminate_state: segment.inner.claim.terminate_state,
+                terminate_state,
                 is_done: false,
                 segment_index,
             })
@@ -507,7 +424,11 @@ mod rv32im_m3 {
                     let results = PreflightResults {
                         inner: preflight,
                         terminate_state: self.terminate_state,
-                        output: self.is_done.then(|| self.output.clone()).flatten(),
+                        output: if self.is_done {
+                            self.output.clone()
+                        } else {
+                            Default::default()
+                        },
                         segment_index: self.segment_index,
                     };
                     Some(Ok(results))

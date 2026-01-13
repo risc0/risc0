@@ -834,7 +834,7 @@ dependencies = [
  "jwt-compact",
  "serde",
  "serde_json",
- "thiserror",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -1258,20 +1258,9 @@ dependencies = [
  "risc0-binfmt",
  "risc0-core",
  "risc0-zkp",
- "serde",
- "tracing",
-]
-
-[[package]]
-name = "risc0-circuit-rv32im-m3"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "bytemuck",
- "risc0-binfmt",
- "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "thiserror 2.0.17",
  "tracing",
 ]
 
@@ -1304,11 +1293,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-common"
+version = "5.0.0"
+dependencies = [
+ "risc0-zkvm-platform",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
-version = "2.2.2"
+version = "5.0.0"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkos-common",
  "risc0-zkvm-platform",
  "sha2",
 ]
@@ -1339,7 +1336,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1352,7 +1349,6 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
- "risc0-circuit-rv32im-m3",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
@@ -1368,7 +1364,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.3.0"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -1578,7 +1574,16 @@ version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6aaf5339b578ea85b50e080feb250a3e8ae8cfcdff9a461c9ec2904bc923f52"
 dependencies = [
- "thiserror-impl",
+ "thiserror-impl 1.0.69",
+]
+
+[[package]]
+name = "thiserror"
+version = "2.0.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f63587ca0f12b72a0600bcba1d40081f830876000bb46dd2337a3051618f4fc8"
+dependencies = [
+ "thiserror-impl 2.0.17",
 ]
 
 [[package]]
@@ -1586,6 +1591,17 @@ name = "thiserror-impl"
 version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.87",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "2.0.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ff15c8ecd7de3849db632e14d18d2571fa09dfc5ed93479bc4485c7a517c913"
 dependencies = [
  "proc-macro2",
  "quote",

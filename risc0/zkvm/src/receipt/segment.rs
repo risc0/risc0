@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -106,17 +106,9 @@ impl SegmentReceipt {
         }
 
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
-        cfg_if::cfg_if! {
-            if #[cfg(feature = "rv32im-m3")] {
-                risc0_circuit_rv32im_m3::verify::verify(&self.seal)?;
-                let decoded_claim = ReceiptClaim::decode_from_seal_v3(&self.seal)
-                    .or(Err(VerificationError::ReceiptFormatError))?;
-            } else {
-                risc0_circuit_rv32im::verify(&self.seal)?;
-                let decoded_claim = ReceiptClaim::decode_from_seal_v2(&self.seal, None)
-                    .or(Err(VerificationError::ReceiptFormatError))?;
-            }
-        }
+        risc0_circuit_rv32im::verify(&self.seal)?;
+        let decoded_claim = ReceiptClaim::decode_from_seal_m3(&self.seal)
+            .or(Err(VerificationError::ReceiptFormatError))?;
 
         // Receipt is consistent with the claim encoded on the seal. Now check against the
         // claim on the struct.

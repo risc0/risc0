@@ -7,20 +7,31 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
-[dev-dependencies]
-rand = { version = "0.9", default-features = false, features = ["thread_rng"] }
-risc0-zkvm-methods = { path = "../zkvm/methods" }
-test-log = { version = "0.2", default-features = false, features = ["trace"] }
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+all-features = true
+
+[features]
+default = ["std"]
+std = [
+    "anyhow/std",
+    "derive_more/std",
+    "elf/std",
+    "risc0-zkp/std",
+    "serde/std",
+    "tracing/log",
+    "tracing/std",
+]
+rand = ["dep:rand", "ruint/rand-09"]
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 borsh = { version = "1.5", default-features = false, features = ["derive"] }
 bytemuck = { version = "1.13", default-features = false }
 derive_more = { version = "2.0.1", default-features = false, features = [
-  "add",
-  "add_assign",
-  "debug",
+    "add",
+    "add_assign",
+    "debug",
 ] }
 elf = { version = "0.7", default-features = false }
 lazy_static = { version = "1.5.0", features = ["spin_no_std"] }
@@ -29,29 +40,18 @@ rand = { version = "0.9", default-features = false, optional = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
 ruint = { version = "1.15.0", default-features = false, features = [
-  "serde",
-  "borsh",
+    "serde",
+    "borsh",
 ] }
 semver = { version = "1", default-features = false, features = ["serde"] }
 serde = { version = "1.0", default-features = false, features = [
-  "derive",
-  "alloc",
+    "derive",
+    "alloc",
 ] }
 tracing = { version = "0.1", default-features = false }
 
-[package.metadata.docs.rs]
-rustdoc-args = ["--cfg", "docsrs"]
-all-features = true
-
-[features]
-default = ["std"]
-std = [
-  "anyhow/std",
-  "derive_more/std",
-  "elf/std",
-  "risc0-zkp/std",
-  "serde/std",
-  "tracing/log",
-  "tracing/std",
-]
-rand = ["dep:rand", "ruint/rand-09"]
+[dev-dependencies]
+rand = { version = "0.9", default-features = false, features = ["thread_rng"] }
+risc0-zkvm-methods = { path = "../zkvm/methods" }
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -276,7 +276,7 @@ mod tests {
             iop.proof[manip_idx] ^= 1;
         }
         let mut r_iop = ReadIOP::new(&iop.proof, rng);
-        let verifier = MerkleTreeVerifier::new(&mut r_iop, hashfn, rows, cols, queries);
+        let verifier = MerkleTreeVerifier::new(&mut r_iop, hashfn, rows, cols, queries).unwrap();
         assert_eq!(verifier.root(), prover.root());
         let mut err = false;
         for query in 0..queries {
@@ -307,7 +307,7 @@ mod tests {
             }
         }
         if !err {
-            r_iop.verify_complete();
+            r_iop.verify_complete().unwrap();
         }
     }
 
@@ -474,10 +474,10 @@ mod tests {
         let rng = hal.get_hash_suite().rng.as_ref();
 
         let mut iop = ReadIOP::new(&transcript, rng);
-        let verifier = MerkleTreeVerifier::new(&mut iop, hashfn, rows, cols, queries);
+        let verifier = MerkleTreeVerifier::new(&mut iop, hashfn, rows, cols, queries).unwrap();
 
         let q = iop.random_bits(log2_ceil(rows)) as usize;
         verifier.verify(&mut iop, hashfn, q).unwrap();
-        iop.verify_complete();
+        iop.verify_complete().unwrap();
     }
 }

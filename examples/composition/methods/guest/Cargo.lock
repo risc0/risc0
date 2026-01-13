@@ -1515,7 +1515,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1576,20 +1576,9 @@ dependencies = [
  "risc0-binfmt",
  "risc0-core",
  "risc0-zkp",
- "serde",
- "tracing",
-]
-
-[[package]]
-name = "risc0-circuit-rv32im-m3"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "bytemuck",
- "risc0-binfmt",
- "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "thiserror",
  "tracing",
 ]
 
@@ -1622,11 +1611,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-common"
+version = "5.0.0"
+dependencies = [
+ "risc0-zkvm-platform",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
-version = "2.2.2"
+version = "5.0.0"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkos-common",
  "risc0-zkvm-platform",
  "sha2",
 ]
@@ -1657,7 +1654,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1670,7 +1667,6 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
- "risc0-circuit-rv32im-m3",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
@@ -1686,7 +1682,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.3.0"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -2040,18 +2036,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.9"
+version = "2.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f072643fd0190df67a8bab670c20ef5d8737177d6ac6b2e9a236cb096206b2cc"
+checksum = "f63587ca0f12b72a0600bcba1d40081f830876000bb46dd2337a3051618f4fc8"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.9"
+version = "2.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b50fa271071aae2e6ee85f842e2e28ba8cd2c5fb67f11fcb1fd70b276f9e7d4"
+checksum = "3ff15c8ecd7de3849db632e14d18d2571fa09dfc5ed93479bc4485c7a517c913"
 dependencies = [
  "proc-macro2",
  "quote",

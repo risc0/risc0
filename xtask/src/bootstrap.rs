@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -66,6 +66,10 @@ impl Bootstrap {
         .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
         .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_povw_{i}.zkr")))
         .chain((risc0_circuit_recursion::LIFT_PO2_RANGE).map(|i| format!("lift_rv32im_m3_{i}.zkr")))
+        .chain(
+            (risc0_circuit_recursion::LIFT_PO2_RANGE)
+                .map(|i| format!("lift_rv32im_m3_povw_{i}.zkr")),
+        )
         .collect();
 
         tracing::info!("Using allowed_zkr_names {allowed_zkr_names:#?}");

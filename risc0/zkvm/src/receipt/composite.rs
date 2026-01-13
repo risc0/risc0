@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -318,7 +318,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceiptVerifierParameters::default().digest(),
-            digest!("22d08479138616fc52f2ba262f1025f53ec2c7a8ace966caf41ee706cf21f119")
+            digest!("cccaaa966d6857342154bf608536f641d55b5200d062a8f8c121ebf280f7f51a")
         );
     }
 }

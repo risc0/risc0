@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -595,12 +595,9 @@ impl GpuProcessor {
             i64::from(task.preflight_results.po2()),
         ));
 
-        #[cfg(feature = "rv32im-m3")]
-        {
-            tracer
-                .span
-                .set_attribute(opentelemetry::KeyValue::new("rv32im-m3", true));
-        }
+        tracer
+            .span
+            .set_attribute(opentelemetry::KeyValue::new("rv32im-m3", true));
 
         self.task_start(header.clone()).await?;
         let prover = Prover {
@@ -976,12 +973,9 @@ impl CpuProcessor {
             i64::try_from(task.segment.po2()).expect("po2 value should fit in i64"),
         ));
 
-        #[cfg(feature = "rv32im-m3")]
-        {
-            tracer
-                .span
-                .set_attribute(opentelemetry::KeyValue::new("rv32im-m3", true));
-        }
+        tracer
+            .span
+            .set_attribute(opentelemetry::KeyValue::new("rv32im-m3", true));
 
         self.task_start(header.clone()).await?;
 

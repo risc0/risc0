@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -201,7 +201,7 @@ mod tests {
     fn groth16_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             Groth16ReceiptVerifierParameters::default().digest(),
-            digest!("a7b87ed1f2ce393df48caffeed4c466126fb7a094d8bf0d51939100e30efd846")
+            digest!("e71b92d9c9ac4d65c6569b1cc7d4e4330ac85ddd0573be7960bb388ddc34231c")
         );
     }
 }

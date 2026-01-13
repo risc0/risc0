@@ -1,6 +1,6 @@
 [package]
 name = "risc0-sppark"
-version = "0.1.14"
+version = "5.0.0"
 edition = "2021"
 description = "Zero-knowledge template library"
 repository = "https://github.com/supranational/sppark"
@@ -13,8 +13,8 @@ publish = false
 [package.metadata.release]
 release = false
 
-[build-dependencies]
-cc = { version = "1.2.16", features = ["parallel"] }
-
 [features]
 cuda = []
+
+[build-dependencies]
+cc = { version = "1.2.16", features = ["parallel"] }

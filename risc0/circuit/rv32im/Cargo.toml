@@ -7,17 +7,57 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
-[[example]]
-name = "rv32im"
-required-features = ["prove"]
+[features]
+cuda = [
+    "prove",
+    "risc0-circuit-rv32im-sys/cuda",
+    "risc0-sys/cuda",
+    "risc0-zkp/cuda",
+]
+default = []
+# entropy_finder = []
+execute = [
+    "anyhow/backtrace",
+    "dep:byteorder",
+    "dep:gdbstub",
+    "dep:gdbstub_arch",
+    "dep:malachite",
+    "dep:num-derive",
+    "dep:num-traits",
+    "dep:postcard",
+    "dep:ringbuffer",
+    "dep:risc0-circuit-rv32im-sys",
+    "dep:smallvec",
+    "risc0-core/perf",
+    "std",
+]
+prove = [
+    "dep:cfg-if",
+    "dep:rand",
+    "dep:rayon",
+    "dep:risc0-sys",
+    "dep:wide",
+    "execute",
+    "risc0-zkp/prove",
+]
+std = [
+    "anyhow/std",
+    "derive_more/std",
+    "risc0-binfmt/std",
+    "risc0-zkp/std",
+    "serde/std",
+    "thiserror/std",
+]
+witgen_debug = []
+block_tracker_debug = []
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 bytemuck = "1.13"
 derive_more = { version = "2.0.1", default-features = false, features = [
-  "add",
-  "add_assign",
-  "debug",
+    "add",
+    "add_assign",
+    "debug",
 ] }
 gdbstub = { version = "0.7", optional = true }
 gdbstub_arch = { version = "0.3", optional = true }
@@ -25,12 +65,14 @@ paste = "1.0"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true, default-features = false }
+risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = [
-  "derive",
-  "alloc",
+    "derive",
+    "alloc",
 ] }
+thiserror = { version = "2.0.17", default-features = false }
 tracing = { version = "0.1", default-features = false, features = [
-  "attributes",
+    "attributes",
 ] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
@@ -39,8 +81,8 @@ byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
 enum-map = { version = "2.7.3" }
 malachite = { version = "0.4.22", optional = true, default-features = false, features = [
-  "naturals_and_integers",
-  "32_bit_limbs",
+    "naturals_and_integers",
+    "32_bit_limbs",
 ] }
 num-derive = { version = "0.4.2", optional = true }
 num-traits = { version = "0.2.19", optional = true }
@@ -52,58 +94,18 @@ risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 smallvec = { version = "1.13", optional = true }
 wide = { version = "0.7", optional = true }
-risc0-circuit-rv32im-m3-sys = { workspace = true, optional = true }
-
-[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
-gpu-guard = { workspace = true }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
 flate2 = "1.0"
+gpu-guard = { workspace = true }
 tar = "0.4"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-[features]
-cuda = [
-  "prove",
-  "risc0-circuit-rv32im-sys/cuda",
-  "risc0-sys/cuda",
-  "risc0-zkp/cuda",
-]
-default = []
-# entropy_finder = []
-execute = [
-  "anyhow/backtrace",
-  "dep:byteorder",
-  "dep:gdbstub",
-  "dep:gdbstub_arch",
-  "dep:malachite",
-  "dep:num-derive",
-  "dep:num-traits",
-  "dep:postcard",
-  "dep:ringbuffer",
-  "dep:smallvec",
-  "risc0-core/perf",
-  "std",
-]
-prove = [
-  "dep:cfg-if",
-  "dep:rand",
-  "dep:rayon",
-  "dep:risc0-circuit-rv32im-sys",
-  "dep:risc0-sys",
-  "dep:wide",
-  "execute",
-  "risc0-zkp/prove",
-]
-rv32im-m3 = ["dep:risc0-circuit-rv32im-m3-sys"]
-std = [
-  "anyhow/std",
-  "derive_more/std",
-  "risc0-binfmt/std",
-  "risc0-zkp/std",
-  "serde/std",
-]
-witgen_debug = []
-block_tracker_debug = []
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+gpu-guard = { workspace = true }
+
+[[example]]
+name = "rv32im"
+required-features = ["prove"]

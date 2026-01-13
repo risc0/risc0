@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -15,23 +15,12 @@
 
 use anyhow::{Result, bail};
 use risc0_binfmt::WordAddr;
-use risc0_zkp::{
-    core::{
-        digest::DIGEST_WORDS,
-        hash::poseidon2::{
-            CELLS, M_INT_DIAG_HZN, ROUND_CONSTANTS, ROUNDS_HALF_FULL, ROUNDS_PARTIAL,
-        },
-    },
-    field::baby_bear::{self},
-};
+use risc0_zkp::core::{digest::DIGEST_WORDS, hash::poseidon2::CELLS};
 
 use crate::execute::{
     platform::*,
     r0vm::{LoadOp, Risc0Context},
 };
-
-const BABY_BEAR_P_U32: u32 = baby_bear::P;
-const BABY_BEAR_P_U64: u64 = baby_bear::P as u64;
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct Poseidon2State {
@@ -40,17 +29,11 @@ pub(crate) struct Poseidon2State {
     pub buf_out_addr: u32,
     pub is_elem: u32,
     pub check_out: u32,
-    #[cfg(feature = "prove")]
-    pub load_tx_type: u32,
     pub next_state: CycleState,
     pub sub_state: u32,
     pub buf_in_addr: u32,
     pub count: u32,
-    #[cfg(feature = "prove")]
-    pub mode: u32,
     pub inner: [u32; CELLS],
-    #[cfg(feature = "prove")]
-    pub zcheck: crate::zirgen::circuit::ExtVal,
 }
 
 impl Poseidon2State {
@@ -70,10 +53,6 @@ impl Poseidon2State {
             is_elem: if is_elem == 0 { 0 } else { 1 },
             check_out: if check_out == 0 { 0 } else { 1 },
             count: bits_count & 0xffff,
-            #[cfg(feature = "prove")]
-            mode: 1,
-            #[cfg(feature = "prove")]
-            load_tx_type: tx::READ,
             next_state: CycleState::PoseidonEntry,
             ..Default::default()
         }
@@ -90,17 +69,6 @@ impl Poseidon2State {
         self.sub_state = sub_state;
         ctx.on_poseidon2_cycle(*cur_state, self);
         *cur_state = next_state;
-    }
-
-    pub(crate) fn rest(
-        &mut self,
-        ctx: &mut (impl Risc0Context + ?Sized),
-        final_state: CycleState,
-    ) -> Result<()> {
-        self.rest_with_mix(ctx, final_state, |p2, cur_state, ctx| {
-            p2.mix(ctx, cur_state);
-            Ok(())
-        })
     }
 
     pub(crate) fn rest_with_mix<F, C>(
@@ -126,6 +94,10 @@ impl Poseidon2State {
             self.load_buf_in(ctx, &mut cur_state)?;
             mix(self, &mut cur_state, ctx)?;
             self.count -= 1;
+
+            if self.count != 0 {
+                self.trash_digest(ctx)?;
+            }
         }
 
         self.store_buf_out(ctx, &mut cur_state)?;
@@ -134,6 +106,8 @@ impl Poseidon2State {
 
         if self.has_state == 1 {
             self.store_p2_state(ctx, &mut cur_state)?;
+        } else {
+            self.trash_state(ctx)?;
         }
 
         self.step(ctx, &mut cur_state, final_state, 0);
@@ -202,6 +176,29 @@ impl Poseidon2State {
         Ok(())
     }
 
+    /// In M3, store the digest part of the sponge to the trash address.
+    fn trash_digest(&mut self, ctx: &mut (impl Risc0Context + ?Sized)) -> Result<()> {
+        if ctx.circuit_version() == RV32IM_M3_CIRCUIT_VERSION {
+            for i in 0..DIGEST_WORDS {
+                ctx.store_u32(RV32IM_M3_P2_TRASH_ADDR.waddr() + i, self.inner[i])?;
+            }
+        }
+        Ok(())
+    }
+
+    /// In M3, store the preserved state part of the sponge to the trash address.
+    fn trash_state(&mut self, ctx: &mut (impl Risc0Context + ?Sized)) -> Result<()> {
+        if ctx.circuit_version() == RV32IM_M3_CIRCUIT_VERSION {
+            for i in 0..DIGEST_WORDS {
+                ctx.store_u32(
+                    RV32IM_M3_P2_TRASH_ADDR.waddr() + i,
+                    self.inner[DIGEST_WORDS * 2 + i],
+                )?;
+            }
+        }
+        Ok(())
+    }
+
     fn store_buf_out(
         &mut self,
         ctx: &mut (impl Risc0Context + ?Sized),
@@ -232,122 +229,6 @@ impl Poseidon2State {
         }
         Ok(())
     }
-
-    pub(crate) fn mix(
-        &mut self,
-        ctx: &mut (impl Risc0Context + ?Sized),
-        cur_state: &mut CycleState,
-    ) {
-        self.multiply_by_m_ext();
-        for i in 0..ROUNDS_HALF_FULL {
-            self.step(ctx, cur_state, CycleState::PoseidonExtRound, i as u32);
-            self.do_ext_round(i);
-        }
-        self.step(ctx, cur_state, CycleState::PoseidonIntRound, 0);
-        self.do_int_rounds();
-        for i in ROUNDS_HALF_FULL..ROUNDS_HALF_FULL * 2 {
-            self.step(ctx, cur_state, CycleState::PoseidonExtRound, i as u32);
-            self.do_ext_round(i);
-        }
-    }
-
-    // Optimized method for multiplication by M_EXT.
-    // See appendix B of Poseidon2 paper for additional details.
-    fn multiply_by_m_ext(&mut self) {
-        let mut out = [0; CELLS];
-        let mut tmp_sums = [0; 4];
-
-        for i in 0..CELLS / 4 {
-            let chunk = multiply_by_4x4_circulant(&[
-                self.inner[i * 4],
-                self.inner[i * 4 + 1],
-                self.inner[i * 4 + 2],
-                self.inner[i * 4 + 3],
-            ]);
-            for j in 0..4 {
-                let to_add = chunk[j] as u64;
-                let to_add = (to_add % BABY_BEAR_P_U64) as u32;
-                tmp_sums[j] += to_add;
-                tmp_sums[j] %= BABY_BEAR_P_U32;
-                out[i * 4 + j] += to_add;
-                out[i * 4 + j] %= BABY_BEAR_P_U32;
-            }
-        }
-        for i in 0..CELLS {
-            self.inner[i] = (out[i] + tmp_sums[i % 4]) % BABY_BEAR_P_U32;
-        }
-    }
-
-    // Exploit the fact that off-diagonal entries of M_INT are all 1.
-    fn multiply_by_m_int(&mut self) {
-        let mut sum = 0u64;
-        for i in 0..CELLS {
-            sum += self.inner[i] as u64;
-        }
-        sum %= BABY_BEAR_P_U64;
-        for (i, diag) in M_INT_DIAG_HZN.iter().enumerate().take(CELLS) {
-            let diag = diag.as_u32() as u64;
-            let cell = self.inner[i] as u64;
-            self.inner[i] = ((sum + diag * cell) % BABY_BEAR_P_U64) as u32;
-        }
-    }
-
-    fn do_ext_round(&mut self, mut idx: usize) {
-        if idx >= ROUNDS_HALF_FULL {
-            idx += ROUNDS_PARTIAL;
-        }
-
-        self.add_round_constants_full(idx);
-        for i in 0..CELLS {
-            self.inner[i] = sbox2(self.inner[i]);
-        }
-
-        self.multiply_by_m_ext();
-    }
-
-    fn do_int_rounds(&mut self) {
-        for i in 0..ROUNDS_PARTIAL {
-            self.add_round_constants_partial(ROUNDS_HALF_FULL + i);
-            self.inner[0] = sbox2(self.inner[0]);
-            self.multiply_by_m_int();
-        }
-    }
-
-    fn add_round_constants_full(&mut self, round: usize) {
-        for i in 0..CELLS {
-            self.inner[i] += ROUND_CONSTANTS[round * CELLS + i].as_u32();
-            self.inner[i] %= BABY_BEAR_P_U32;
-        }
-    }
-
-    fn add_round_constants_partial(&mut self, round: usize) {
-        self.inner[0] += ROUND_CONSTANTS[round * CELLS].as_u32();
-        self.inner[0] %= BABY_BEAR_P_U32;
-    }
-}
-
-fn multiply_by_4x4_circulant(x: &[u32; 4]) -> [u32; 4] {
-    // See appendix B of Poseidon2 paper.
-    const CIRC_FACTOR_2: u64 = 2;
-    const CIRC_FACTOR_4: u64 = 4;
-    let t0 = (x[0] as u64 + x[1] as u64) % BABY_BEAR_P_U64;
-    let t1 = (x[2] as u64 + x[3] as u64) % BABY_BEAR_P_U64;
-    let t2 = (CIRC_FACTOR_2 * x[1] as u64 + t1) % BABY_BEAR_P_U64;
-    let t3 = (CIRC_FACTOR_2 * x[3] as u64 + t0) % BABY_BEAR_P_U64;
-    let t4 = (CIRC_FACTOR_4 * t1 + t3) % BABY_BEAR_P_U64;
-    let t5 = (CIRC_FACTOR_4 * t0 + t2) % BABY_BEAR_P_U64;
-    let t6 = (t3 + t5) % BABY_BEAR_P_U64;
-    let t7 = (t2 + t4) % BABY_BEAR_P_U64;
-    [t6 as u32, t5 as u32, t7 as u32, t4 as u32]
-}
-
-fn sbox2(x: u32) -> u32 {
-    let x = x as u64;
-    let x2 = (x * x) % BABY_BEAR_P_U64;
-    let x4 = (x2 * x2) % BABY_BEAR_P_U64;
-    let x6 = (x4 * x2) % BABY_BEAR_P_U64;
-    let x7 = (x6 * x) % BABY_BEAR_P_U64;
-    x7 as u32
 }
 
 pub(crate) struct Poseidon2;

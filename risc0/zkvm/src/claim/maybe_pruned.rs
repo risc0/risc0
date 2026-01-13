@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -83,6 +83,25 @@ where
             MaybePruned::Value(val) => val.digest::<S>(),
             MaybePruned::Pruned(digest) => *digest,
         }
+    }
+}
+
+impl<T> MaybePruned<T>
+where
+    T: Digestible,
+{
+    /// Return the pruned variant of this enum, with the value of its digest.
+    ///
+    /// This can be used to reduce the size of this object when only the digest is needed.
+    pub fn pruned(&self) -> Self {
+        MaybePruned::Pruned(self.digest::<sha::Impl>())
+    }
+
+    /// Prunes the value of this enum in place, removing the data of the value.
+    ///
+    /// This can be used to reduce the size of this object when only the digest is needed.
+    pub fn prune(&mut self) {
+        *self = self.pruned()
     }
 }
 

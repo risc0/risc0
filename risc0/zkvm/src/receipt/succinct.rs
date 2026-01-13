@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -282,6 +282,9 @@ pub(crate) fn allowed_control_ids(
     .chain(po2_range.clone().map(|i| format!("lift_rv32im_v2_{i}.zkr")))
     .chain(po2_range.map(|i| format!("lift_rv32im_v2_povw_{i}.zkr")))
     .chain((risc0_circuit_recursion::LIFT_PO2_RANGE).map(|i| format!("lift_rv32im_m3_{i}.zkr")))
+    .chain(
+        (risc0_circuit_recursion::LIFT_PO2_RANGE).map(|i| format!("lift_rv32im_m3_povw_{i}.zkr")),
+    )
     .collect();
 
     let zkr_control_ids = match hash_name.as_ref() {
@@ -413,7 +416,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("d928c92fd2aef6e8cdc059fe25a64745e568b1596b1e3eb519da98621134d1a2")
+            digest!("0052dc2d98bce191c19ee20f490f352bd1c9720d44b8ccab516947426f196904")
         );
     }
 

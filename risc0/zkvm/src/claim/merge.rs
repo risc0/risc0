@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -36,7 +36,7 @@ use crate::{
 ///
 /// Viewing the two structs as Merkle trees, in which subtrees may be pruned, the result of this
 /// operation is a tree with a set of nodes equal to the union of the set of nodes for each input.
-pub(crate) trait Merge: Digestible + Sized {
+pub trait Merge: Digestible + Sized {
     /// Merge two structs to produce an output with a union of the fields populated in the inputs.
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError>;
 
@@ -50,7 +50,7 @@ pub(crate) trait Merge: Digestible + Sized {
 
 /// Error returned when a merge is attempted with two values with unequal digests.
 #[derive(Debug, Clone)]
-pub(crate) struct MergeInequalityError(pub Digest, pub Digest);
+pub struct MergeInequalityError(pub Digest, pub Digest);
 
 impl fmt::Display for MergeInequalityError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

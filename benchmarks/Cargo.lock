@@ -682,7 +682,7 @@ dependencies = [
  "maybe-async",
  "reqwest",
  "serde",
- "thiserror 2.0.12",
+ "thiserror 2.0.17",
 ]
 
 [[package]]
@@ -790,7 +790,7 @@ dependencies = [
  "semver 1.0.26",
  "serde",
  "serde_json",
- "thiserror 2.0.12",
+ "thiserror 2.0.17",
 ]
 
 [[package]]
@@ -862,7 +862,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tempfile",
- "thiserror 2.0.12",
+ "thiserror 2.0.17",
  "winnow",
  "wtns-file",
 ]
@@ -3179,7 +3179,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1db05f56d34358a8b1066f67cbb203ee3e7ed2ba674a6263a1d5ec6db2204323"
 dependencies = [
  "memchr",
- "thiserror 2.0.12",
+ "thiserror 2.0.17",
  "ucd-trie",
 ]
 
@@ -3446,7 +3446,7 @@ dependencies = [
  "rustc-hash",
  "rustls",
  "socket2",
- "thiserror 2.0.12",
+ "thiserror 2.0.17",
  "tokio",
  "tracing",
 ]
@@ -3465,7 +3465,7 @@ dependencies = [
  "rustls",
  "rustls-pki-types",
  "slab",
- "thiserror 2.0.12",
+ "thiserror 2.0.17",
  "tinyvec",
  "tracing",
  "web-time",
@@ -3611,7 +3611,7 @@ checksum = "dd6f9d3d47bdd2ad6945c5015a226ec6155d0bcdfd8f7cd29f86b71f8de99d2b"
 dependencies = [
  "getrandom 0.2.15",
  "libredox",
- "thiserror 2.0.12",
+ "thiserror 2.0.17",
 ]
 
 [[package]]
@@ -3795,7 +3795,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3818,7 +3818,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "2.0.2"
+version = "5.0.0"
 dependencies = [
  "cc",
  "directories",
@@ -3925,31 +3925,17 @@ dependencies = [
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
+ "risc0-zkvm-platform",
  "serde",
  "smallvec",
+ "thiserror 2.0.17",
  "tracing",
  "wide",
 ]
 
 [[package]]
-name = "risc0-circuit-rv32im-m3"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "bytemuck",
- "cfg-if",
- "risc0-binfmt",
- "risc0-circuit-rv32im",
- "risc0-circuit-rv32im-m3-sys",
- "risc0-zkp",
- "risc0-zkvm-platform",
- "serde",
- "tracing",
-]
-
-[[package]]
-name = "risc0-circuit-rv32im-m3-sys"
-version = "0.0.0"
+name = "risc0-circuit-rv32im-sys"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "cc",
@@ -3959,21 +3945,9 @@ dependencies = [
  "risc0-build-kernel",
  "risc0-sppark",
  "risc0-sys",
+ "serde",
+ "strum",
  "tracing",
-]
-
-[[package]]
-name = "risc0-circuit-rv32im-sys"
-version = "5.0.0"
-dependencies = [
- "cc",
- "cust",
- "derive_more",
- "glob",
- "risc0-build-kernel",
- "risc0-core",
- "risc0-sppark",
- "risc0-sys",
 ]
 
 [[package]]
@@ -4017,7 +3991,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16-sys"
-version = "0.2.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blst",
@@ -4027,7 +4001,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sppark"
-version = "0.1.14"
+version = "5.0.0"
 dependencies = [
  "cc",
 ]
@@ -4044,11 +4018,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-common"
+version = "5.0.0"
+dependencies = [
+ "risc0-zkvm-platform",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
-version = "2.2.2"
+version = "5.0.0"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkos-common",
  "risc0-zkvm-platform",
  "sha2",
 ]
@@ -4086,7 +4068,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -4116,7 +4098,6 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
- "risc0-circuit-rv32im-m3",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
@@ -4136,7 +4117,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.3.0"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -4347,7 +4328,7 @@ dependencies = [
  "sha2",
  "strum",
  "tempfile",
- "thiserror 2.0.12",
+ "thiserror 2.0.17",
  "toml",
  "yaml-rust2",
 ]
@@ -4740,11 +4721,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.12"
+version = "2.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "567b8a2dae586314f7be2a752ec7474332959c6460e02bde30d702a66d488708"
+checksum = "f63587ca0f12b72a0600bcba1d40081f830876000bb46dd2337a3051618f4fc8"
 dependencies = [
- "thiserror-impl 2.0.12",
+ "thiserror-impl 2.0.17",
 ]
 
 [[package]]
@@ -4760,9 +4741,9 @@ dependencies = [
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.12"
+version = "2.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f7cf42b4507d8ea322120659672cf1b9dbb93f8f2d4ecfd6e51350ff5b17a1d"
+checksum = "3ff15c8ecd7de3849db632e14d18d2571fa09dfc5ed93479bc4485c7a517c913"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5661,7 +5642,7 @@ dependencies = [
  "flate2",
  "indexmap 2.7.1",
  "memchr",
- "thiserror 2.0.12",
+ "thiserror 2.0.17",
  "zopfli",
 ]
 

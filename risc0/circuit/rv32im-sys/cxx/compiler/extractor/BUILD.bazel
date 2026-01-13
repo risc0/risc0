@@ -1,0 +1,25 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "extractor",
+    srcs = [
+        "PicusDirectives.cpp",
+        "PopulateComponentVisitor.cpp",
+        "RecordingContext.cpp",
+        "RecordingVal.cpp",
+    ],
+    hdrs = [
+        "LayoutBuilderVisitor.h",
+        "NopVal.h",
+        "PicusDirectives.h",
+        "PopulateComponentVisitor.h",
+        "RecordingContext.h",
+        "RecordingVal.h",
+        "base.h",
+        "extract.h",
+    ],
+    deps = [
+        "//zkp",
+        "@zirgen//zirgen/Dialect/ZHLT/IR",
+    ],
+)

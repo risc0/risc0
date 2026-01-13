@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -19,11 +19,7 @@ use risc0_zkvm::{
 };
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 
-#[cfg(feature = "rv32im-m3")]
 const ITERATIONS: u32 = 800_000;
-
-#[cfg(not(feature = "rv32im-m3"))]
-const ITERATIONS: u32 = 300_000;
 
 #[test_log::test]
 #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]

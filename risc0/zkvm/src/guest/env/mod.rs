@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -276,7 +276,7 @@ pub fn write<T: Serialize>(data: &T) {
 /// Some implementations, such as [risc0-r0vm] will also write the data to
 /// the host's stdout file descriptor. It is not included in the receipt.
 ///
-/// This function reads a slice of [plain old data][bytemuck::Pod], not
+/// This function writes a slice of [plain old data][bytemuck::Pod], not
 /// incurring in deserialization overhead. Recommended for performance
 /// optimizations. For more context on this, see RISC Zero's [instructions on
 /// guest optimization].
@@ -335,7 +335,7 @@ pub fn commit<T: Serialize>(data: &T) {
 /// Data in the journal is included in the receipt and is available to the
 /// verifier. It is considered "public" data.
 ///
-/// This function reads a slice of [plain old data][bytemuck::Pod], not
+/// This function commits a slice of [plain old data][bytemuck::Pod], not
 /// incurring in deserialization overhead. Recommended for performance
 /// optimizations. For more context on this, see RISC Zero's [instructions on
 /// guest optimization].

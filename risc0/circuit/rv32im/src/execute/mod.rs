@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -15,6 +15,7 @@
 
 pub(crate) mod bibc;
 pub(crate) mod bigint;
+mod block_tracker;
 mod executor;
 pub mod gdb;
 pub(crate) mod pager;
@@ -29,12 +30,13 @@ mod syscall;
 mod tests;
 pub mod testutil;
 
-#[cfg(feature = "rv32im-m3")]
-mod block_tracker;
-
 pub use self::{
     bigint::analyze::analyze as bigint_analyze,
-    executor::{CycleLimit, Executor, ExecutorResult, SimpleSession},
+    block_tracker::BlockCollection,
+    executor::{
+        CycleLimit, ExecutionError, ExecutionLimit, Executor, ExecutorResult, SegmentUpdate,
+        SimpleSession,
+    },
     platform::*,
     segment::Segment,
     syscall::{Syscall, SyscallContext},

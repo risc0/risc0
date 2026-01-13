@@ -3,9 +3,6 @@ name = "risc0-bigint2-methods"
 version = { workspace = true }
 edition = { workspace = true }
 
-[build-dependencies]
-risc0-build = { workspace = true }
-
 [package.metadata.release]
 release = false
 
@@ -14,3 +11,6 @@ methods = ["guest"]
 
 [features]
 num-bigint-dig = []
+
+[build-dependencies]
+risc0-build = { workspace = true }

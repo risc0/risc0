@@ -3,6 +3,11 @@ name = "digital-signature"
 version = "0.1.0"
 edition = { workspace = true }
 
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+prove = ["risc0-zkvm/prove"]
+
 [dependencies]
 clap = { version = "4.4", features = ["derive"] }
 digital-signature-core = { path = "core" }
@@ -15,8 +20,3 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [dev-dependencies]
 gpu-guard = { path = "../../tools/gpu-guard" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
-
-[features]
-cuda = ["risc0-zkvm/cuda"]
-default = []
-prove = ["risc0-zkvm/prove"]
