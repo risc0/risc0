@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,33 +13,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#pragma once
+
 #include <functional>
 #include <vector>
 
+#include "verify/info/info.h"
 #include "verify/read_iop.h"
-#include "zkp/taps.h"
 
 namespace risc0 {
-
-struct VerifyGroupInfo {
-  size_t globalCount; // How many global values we need
-  size_t mixCount;    // How many elements of FS prng we need
-};
-
-// Similar to EvalCheckFunc, but runs in extension field
-//   * `evals` is the evaluation of all of the taps at point z in "natural
-//   sorting order" (group, then column, then distance)
-//   * `globals` is the value of all global values (concatenated between groups)
-//   * `ecMix` is the eval check mixing value
-//   * `z` is the challenge point in extension field
-using VerifyEvalCheckFunc =
-    std::function<FpExt(FpExt* evals, Fp* globals, FpExt* mix, FpExt ecMix, FpExt z)>;
-
-struct VerifyCircuitInfo {
-  TapManager taps;
-  std::vector<VerifyGroupInfo> groups;
-  VerifyEvalCheckFunc evalCheck;
-};
 
 void verify(VerifyCircuitInfo& ci, ReadIop& iop, size_t po2);
 

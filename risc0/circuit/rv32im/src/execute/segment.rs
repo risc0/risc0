@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -71,6 +71,9 @@ pub struct Segment {
     pub povw_nonce: Option<PovwNonce>,
 
     pub insn_counter: u32,
+
+    /// Used to help debug the block tracking
+    pub blocks: crate::execute::BlockCollection,
 }
 
 impl Segment {

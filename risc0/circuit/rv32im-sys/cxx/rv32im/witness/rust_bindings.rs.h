@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -20,7 +20,7 @@
 #define HASH #
 #define ATTR(key, ...) HASH [key(__VA_ARGS__)]
 
-ATTR(derive, Debug, Copy, Clone, Hash, PartialEq, Eq, enum_map::Enum)
+ATTR(derive, Debug, Copy, Clone, Hash, PartialEq, Eq, enum_map::Enum, strum::EnumIter, serde::Serialize, serde::Deserialize)
 pub enum BlockType {
 #define BLOCK_TYPE(name, count) name,
   BLOCK_TYPES
@@ -42,6 +42,10 @@ impl BlockType {
   BLOCK_TYPES
 #undef BLOCK_TYPE
         }
+    }
+
+    pub fn iter() -> impl Iterator<Item = Self> {
+        <Self as strum::IntoEnumIterator>::iter()
     }
 }
 

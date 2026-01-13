@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -42,7 +42,7 @@ template <typename C> struct FetchBlock {
 
   // Return 1 if in machine mode
   FDEV Val<C> isMM() DEV { return mode.get(); }
-  FDEV void verify(CTX, Val<C> cycle) DEV {}
+  FDEV void verify(CTX, Val<C> cycle) DEV;
   FDEV void addArguments(CTX, Val<C> cycle) DEV;
 };
 
