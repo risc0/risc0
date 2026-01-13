@@ -15,6 +15,8 @@
 
 #[cfg(test)]
 mod test {
+    use std::mem::size_of;
+
     use anyhow::Result;
     use risc0_circuit_recursion::{CircuitImpl, prove::Program};
     use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
