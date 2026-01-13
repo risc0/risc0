@@ -38,7 +38,6 @@ use crate::{
     Profile, ProfileConfig, Profiles,
     parser::Parser,
     types::{
-        traits::Reduce,
         version::{Version, Versions},
     },
 };
@@ -288,14 +287,13 @@ impl StateMachine<ProcessDatabase> {
             None => HashSet::new(),
         };
 
-        // Ensure that we don't have any duplicates
+        // Combine crates selected by count and by category.
         let selected_crates_profiles: Profiles = crates_by_count
             .union(&crates_by_category)
             .cloned()
             .map(|r| r.name.clone())
             .map(Profile::try_from)
-            .collect::<Result<Profiles>>()?
-            .reduce();
+            .collect::<Result<Profiles>>()?;
 
         // Remove all crates in selected_crates that are also in self.state.profiles
         let selected_crates_profiles: Profiles = selected_crates_profiles
