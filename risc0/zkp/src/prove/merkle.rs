@@ -218,7 +218,7 @@ mod tests {
             iop.proof[manip_idx] ^= 1;
         }
         let mut r_iop = ReadIOP::new(&iop.proof, rng);
-        let verifier = MerkleTreeVerifier::new(&mut r_iop, hashfn, rows, cols, queries);
+        let verifier = MerkleTreeVerifier::new(&mut r_iop, hashfn, rows, cols, queries).unwrap();
         assert_eq!(verifier.root(), prover.root());
         let mut err = false;
         for query in 0..queries {
@@ -249,7 +249,7 @@ mod tests {
             }
         }
         if !err {
-            r_iop.verify_complete();
+            r_iop.verify_complete().unwrap();
         }
     }
 
