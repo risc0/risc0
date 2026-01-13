@@ -367,6 +367,7 @@ mod tests {
 
         let trace_b = preflight::trace::tests::decode_trace(&b.row_info, &b.aux);
 
+        let mut equality_report = vec![];
         for block_type in BlockType::iter() {
             let a: Vec<_> = trace_a
                 .iter()
@@ -377,9 +378,28 @@ mod tests {
                 .filter(|b| b.block_type() == block_type)
                 .collect();
 
-            for i in 0..a.len() {
-                assert_eq!(a[i], b[i], "index = {i}");
+            if a.len() != b.len() {
+                equality_report.push(format!(
+                    "{block_type:?} lengths don't match; {} != {}",
+                    a.len(),
+                    b.len()
+                ));
+            } else {
+                for i in 0..a.len() {
+                    if a[i] != b[i] {
+                        equality_report.push(format!(
+                            "{block_type:?} index={i}: {:?} != {:?}",
+                            a[i], b[i]
+                        ));
+                    }
+                }
             }
+        }
+        if !equality_report.is_empty() {
+            panic!(
+                "traces not equal: \n{}",
+                equality_report.join("\n\n=============\n")
+            );
         }
     }
 
