@@ -135,6 +135,8 @@ impl PagedMemory {
             bail!("Too few provided pages");
         }
 
+        self.image.update_digests();
+
         // Set initial root
         trace.globals_mut().rootIn = to_fp_digest(self.image.get_digest(1)?);
 
