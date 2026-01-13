@@ -16,18 +16,19 @@
 use std::collections::BTreeMap;
 
 use anyhow::{Result, bail};
+use bytemuck::Zeroable as _;
 
 use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im_sys::{
-    DecodeWitness, FetchWitness, InstAuipcOptions, InstAuipcWitness, InstBranchOptions,
-    InstBranchWitness, InstEcallOptions, InstEcallWitness, InstImmOptions, InstImmWitness,
-    InstJalOptions, InstJalWitness, InstJalrOptions, InstJalrWitness, InstLoadOptions,
-    InstLoadWitness, InstLuiOptions, InstLuiWitness, InstMretOptions, InstMretWitness,
-    InstRegOptions, InstRegWitness, InstResumeWitness, InstStoreOptions, InstStoreWitness,
-    InstSuspendWitness, InstTrapWitness, MakeTableWitness, Opcode, PhysMemReadWitness,
-    PhysMemWriteWitness, RegMemReadWitness, RegMemWriteWitness, UnitAddSubWitness, UnitBaseWitness,
-    UnitBitWitness, UnitDivWitness, UnitLtWitness, UnitMulWitness, UnitShiftWitness,
-    VirtAddrWitness, VirtMemReadWitness, VirtMemWriteWitness,
+    DecodeWitness, EcallTerminateWitness, FetchWitness, InstAuipcOptions, InstAuipcWitness,
+    InstBranchOptions, InstBranchWitness, InstEcallOptions, InstEcallWitness, InstImmOptions,
+    InstImmWitness, InstJalOptions, InstJalWitness, InstJalrOptions, InstJalrWitness,
+    InstLoadOptions, InstLoadWitness, InstLuiOptions, InstLuiWitness, InstMretOptions,
+    InstMretWitness, InstRegOptions, InstRegWitness, InstResumeWitness, InstStoreOptions,
+    InstStoreWitness, InstSuspendWitness, InstTrapWitness, MakeTableWitness, Opcode,
+    PhysMemReadWitness, PhysMemWriteWitness, RegMemReadWitness, RegMemWriteWitness,
+    UnitAddSubWitness, UnitBaseWitness, UnitBitWitness, UnitDivWitness, UnitLtWitness,
+    UnitMulWitness, UnitShiftWitness, VirtAddrWitness, VirtMemReadWitness, VirtMemWriteWitness,
     opt::{
         AsKind, BitKind, BrKind, DivKind, DivUOptions, LoadKind, MulKind, MulUuOptions, OutKind,
         ShiftKind, StoreKind, UnitKind, UnitOptions,
@@ -37,16 +38,17 @@ use risc0_circuit_rv32im_sys::{
 
 use crate::execute::{
     HOST_ECALL_BIGINT, HOST_ECALL_POSEIDON2, HOST_ECALL_READ, HOST_ECALL_TERMINATE,
-    HOST_ECALL_WRITE, REG_A7,
+    HOST_ECALL_WRITE, REG_A0, REG_A1, REG_A7,
 };
 use crate::prove::preflight::{
     constants::{
         BITS_PER_BYTE, BYTES_PER_WORD, COMPRESSED_INST_LOOKUP_WORD, CSR_MEPC, CSR_MNOV2COMPAT,
         CSR_MSMODE, CSR_MSPC, CSR_MTECALL, CSR_MTEXCEPT, CSR_MVERSION, KERNEL_START_WORD,
         MACHINE_REGS_WORD, MEMORY_SIZE_MPAGES, MODE_MACHINE, MODE_USER, MPAGE_MASK_WORDS,
-        MPAGE_SIZE_WORDS_PO2, RV32IM_CIRCUIT_VERSION, USER_REGS_WORD, V2_COMPAT_ECALL_DISPATCH,
-        V2_COMPAT_MEPC, V2_COMPAT_SMODE, V2_COMPAT_SPC, V2_COMPAT_TRAP_DISPATCH, V2_COMPAT_VERSION,
-        VPAGE_MASK_WORDS, VPAGE_SIZE_WORDS_PO2, csr_word,
+        MPAGE_SIZE_WORDS_PO2, OUTPUT_WORD, RV32IM_CIRCUIT_VERSION, USER_REGS_WORD,
+        V2_COMPAT_ECALL_DISPATCH, V2_COMPAT_MEPC, V2_COMPAT_SMODE, V2_COMPAT_SPC,
+        V2_COMPAT_TRAP_DISPATCH, V2_COMPAT_VERSION, VPAGE_MASK_WORDS, VPAGE_SIZE_WORDS_PO2,
+        csr_word,
     },
     decode::{DecodedInst, get_opcode},
     paging::{PageDetails, PagedMemory},
@@ -924,8 +926,32 @@ impl Emulator {
         Ok(())
     }
 
-    fn do_ecall_terminate(&mut self) {
-        todo!("ecall_terminate")
+    fn do_ecall_terminate(&mut self, trace: &mut Trace) -> Result<()> {
+        let dinst = trace.get_block(self.dinst.unwrap());
+        let cycle = self.cur_cycle;
+        let fetch = dinst.fetch;
+        let (_, a7) = self.read_reg(REG_A7 as u32, false);
+        let (_, a0) = self.read_reg(REG_A0 as u32, false);
+        let (_, a1) = self.read_reg(REG_A1 as u32, false);
+
+        let mut output = [PhysMemReadWitness::zeroed(); 8];
+        for (out_mut, addr) in output.iter_mut().zip(OUTPUT_WORD..) {
+            let (_, out) = self.read_phys_memory(addr)?;
+            *out_mut = out;
+        }
+
+        trace.add_block(EcallTerminateWitness {
+            cycle,
+            fetch,
+            a7,
+            a0,
+            a1,
+            output,
+        });
+
+        self.done = true;
+
+        Ok(())
     }
 
     fn do_ecall_read(&mut self) {
@@ -976,7 +1002,7 @@ impl Emulator {
 
         let which = self.peek_reg(REG_A7 as u32);
         match which {
-            HOST_ECALL_TERMINATE => self.do_ecall_terminate(),
+            HOST_ECALL_TERMINATE => self.do_ecall_terminate(trace)?,
             HOST_ECALL_READ => self.do_ecall_read(),
             HOST_ECALL_WRITE => self.do_ecall_write(),
             HOST_ECALL_POSEIDON2 => self.do_ecall_p2(),
