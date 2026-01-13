@@ -22,10 +22,40 @@ mod paging;
 mod poseidon2;
 mod trace;
 
+use anyhow::Result;
+use bytemuck::Zeroable as _;
+
+use risc0_binfmt::MemoryImage;
+
 use crate::execute::Segment;
 use crate::prove::RowInfo;
-use anyhow::Result;
-use risc0_binfmt::MemoryImage;
+use trace::Trace;
+
+const fn compute_max_wit_per_row() -> usize {
+    use risc0_circuit_rv32im_sys::*;
+
+    let mut max = 0;
+
+    macro_rules! max_wit_row_size {
+        ($max:expr, $($block_name:ident),*) => {
+            paste::paste! {
+                $({
+                    let v = (std::mem::size_of::<[<$block_name Witness>]>()
+                     * BlockType::$block_name.count_per_row() as usize);
+                    if v >= max {
+                        max = v;
+                    }
+                })*
+            }
+        }
+    }
+
+    visit_blocks!(max_wit_row_size, max);
+
+    max
+}
+
+const MAX_WIT_PER_ROW: usize = compute_max_wit_per_row();
 
 pub struct PreflightContext2 {
     /// Did this preflight result in termination
@@ -55,11 +85,27 @@ impl SegmentContext2 {
     }
 
     pub fn preflight(&self, po2: usize) -> Result<PreflightContext2> {
+        let rows = 1usize << po2;
+        let mut row_info = vec![RowInfo::zeroed(); rows];
+        let mut aux = vec![0u32; rows * MAX_WIT_PER_ROW];
+        let mut trace = Trace::new(&mut row_info, &mut aux);
+
+        let is_final = emu::emulate(&mut trace, &self.image, rows, self.end_cycle)?;
+        let cycles = trace.user_cycles();
+
+        let row_count = trace.get_row_count();
+        let aux_size = trace.get_aux_size();
+        tracing::info!("Finalizing, trace row count = {row_count}, aux size = {aux_size}",);
+
+        trace.finalize();
+        row_info.truncate(row_count);
+        aux.truncate(aux_size);
+
         Ok(PreflightContext2 {
-            is_final: true,
-            cycles: 0,
-            row_info: vec![],
-            aux: vec![],
+            is_final,
+            cycles,
+            row_info,
+            aux,
             po2: po2 as u32,
         })
     }
