@@ -8,10 +8,6 @@ categories = ["cryptography"]
 keywords = ["crypto", "zero-knowledge", "cuda"]
 license = "Apache-2.0"
 links = "risc0-sppark"
-publish = false
-
-[package.metadata.release]
-release = false
 
 [features]
 cuda = []
