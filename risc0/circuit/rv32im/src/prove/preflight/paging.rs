@@ -56,11 +56,11 @@ pub struct PageDetails(Box<[MemoryInfo; MPAGE_SIZE_WORDS as usize]>);
 
 impl PageDetails {
     pub fn info(&self) -> &[MemoryInfo; MPAGE_SIZE_WORDS as usize] {
-        &*self.0
+        &self.0
     }
 
     pub fn info_mut(&mut self) -> &mut [MemoryInfo; MPAGE_SIZE_WORDS as usize] {
-        &mut *self.0
+        &mut self.0
     }
 }
 

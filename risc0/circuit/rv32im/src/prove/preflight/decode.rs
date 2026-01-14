@@ -107,8 +107,10 @@ impl FastDecodeTable {
         // Map 0 -> 0, 1 -> 1, 0x20 -> 2, everything else to 3
         let func72bits = if func7 <= 1 {
             func7
+        } else if func7 == 0x20 {
+            2
         } else {
-            if func7 == 0x20 { 2 } else { 3 }
+            3
         };
         (op_high << 5) | (func72bits << 3) | func3
     }

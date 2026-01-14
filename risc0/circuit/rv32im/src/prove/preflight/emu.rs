@@ -59,12 +59,6 @@ const CYCLE_TABLE_ROWS: u32 = 24;
 
 type InstCache = BTreeMap<u32, TraceIndex<DecodeWitness>>;
 
-/// Interpret given u32 as signed as do abs. If its i32::MIN, it is left alone.
-fn u32_abs(u: u32) -> u32 {
-    let s = u as i32;
-    if s == i32::MIN { u } else { s.abs() as u32 }
-}
-
 pub struct Emulator {
     memory: PagedMemory,
     pages: Vec<Option<PageDetails>>,
@@ -322,7 +316,7 @@ impl Emulator {
             }
         } else {
             // Remove any high bits, and then do a lookup to convert
-            self.read_virt_memory(COMPRESSED_INST_LOOKUP_WORD + tmp_inst & 0xFFFF)?
+            self.read_virt_memory((COMPRESSED_INST_LOOKUP_WORD + tmp_inst) & 0xFFFF)?
         };
 
         let decoded = DecodedInst::new(inst);
@@ -535,7 +529,7 @@ impl Emulator {
         let out = match Opt::MUL_KIND.unwrap() {
             MulKind::Ss => ((a as i32) as i64).wrapping_mul((b as i32) as i64) as u64,
             MulKind::Su => ((a as i32) as i64).wrapping_mul(b as i64) as u64,
-            MulKind::Uu => (a as u64).wrapping_mul(b as u64) as u64,
+            MulKind::Uu => (a as u64).wrapping_mul(b as u64),
         };
         unit.out0 = out as u32;
         unit.out1 = (out >> 32) as u32;
@@ -559,24 +553,22 @@ impl Emulator {
         if matches!(Opt::DIV_KIND.unwrap(), DivKind::S) {
             // Intel processors actually fault if you do a signed division on MIN_INT
             // by 1/-1
-            if a == 0x80000000 && u32_abs(b) == 1 {
+            if a == 0x80000000 && (b as i32).unsigned_abs() == 1 {
                 unit.out0 = 0x80000000;
                 unit.out1 = 0;
+            } else if b == 0 {
+                unit.out0 = 0xffffffff;
+                unit.out1 = a;
             } else {
-                if b == 0 {
-                    unit.out0 = 0xffffffff;
-                    unit.out1 = a;
-                } else {
-                    unit.out0 = (a as i32 / b as i32) as u32;
-                    unit.out1 = (a as i32 % b as i32) as u32;
-                }
+                unit.out0 = (a as i32 / b as i32) as u32;
+                unit.out1 = (a as i32 % b as i32) as u32;
             }
             let abs_quot: u32 = if b == 0 {
                 0xffffffff
             } else {
-                u32_abs(unit.out0)
+                (unit.out0 as i32).unsigned_abs()
             };
-            self.unit_mul::<MulUuOptions>(trace, abs_quot, u32_abs(b));
+            self.unit_mul::<MulUuOptions>(trace, abs_quot, (b as i32).unsigned_abs());
         } else {
             if b == 0 {
                 unit.out0 = 0xffffffff;
@@ -878,7 +870,7 @@ impl Emulator {
             imm: dinst.imm,
         });
         self.new_pc = self.pc.wrapping_add(imm);
-        tracing::trace!("  RD = {dinst_rd}, value = {:#010x}", rd.value as u32);
+        tracing::trace!("  RD = {dinst_rd}, value = {:#010x}", rd.value);
         tracing::trace!("  PC = {:#010x}", self.pc);
         Ok(())
     }
@@ -1084,7 +1076,7 @@ impl Emulator {
             };
 
             let decode_wit_index = match decode_wit_index_entry {
-                BTreeMapEntry::Occupied(entry) => entry.get().clone(),
+                BTreeMapEntry::Occupied(entry) => *entry.get(),
                 BTreeMapEntry::Vacant(entry) => {
                     if let Some(b) = self.fetch_and_decode()? {
                         *entry.insert(trace.add_block(b))

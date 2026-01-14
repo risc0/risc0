@@ -185,7 +185,7 @@ impl Poseidon2Witgen {
         let mut cells = cells_from_input(input, data);
 
         // Check if we already have a witness for this one
-        let cache_entry = match self.saved.entry(cells.clone()) {
+        let cache_entry = match self.saved.entry(cells) {
             BTreeMapEntry::Occupied(entry) => {
                 let idx = *entry.get();
                 let block = trace.get_block_mut(idx);
