@@ -1,6 +1,11 @@
 # C-KZG Crate Test
 
-This code demonstrates that Ethereum's c-kzg-4844 crate runs on the zkVM guest. Since verification takes about 100 million segments, this only runs the executor.
+This code demonstrates that Ethereum's c-kzg-4844 crate runs on the zkVM guest. The example performs two core KZG (Kate-Zaverucha-Goldberg) operations used in Ethereum's EIP-4844 blob transactions:
+
+1. **Blob to KZG Commitment**: Creates a KZG commitment from a blob of data (131,072 bytes, or 4096 × 32 bytes)
+2. **KZG Proof Verification**: Verifies a KZG proof that a given commitment corresponds to a specific evaluation point (z, y) using the provided proof
+
+The guest program loads the KZG trusted setup, processes the blob data, creates a commitment, and verifies a proof. It also measures and reports the cycle count for each operation. Since verification takes about 100 million segments, this example only runs the executor and does not produce a receipt.
 
 Something like this crate would normally be implemented as a test case in the risc0 repo. However, this crate fails to build when placed in complex workspace or directory structure. The test is placed here until we find a way to use it inside the risc0/zkvm/methods/ directory.
 
