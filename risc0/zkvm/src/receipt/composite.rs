@@ -362,12 +362,11 @@ mod tests {
         );
     }
 
-    #[test]
-    fn deserialize_deep_receipt() {
-        // Create a CompositeReceipt with a large depth of CompositeReceipt as assumptions. In
-        // previous versions of this crate, this could lead to a stack overflow on deserialization
-        // with the depth is very large. This checks that a error is returned past a max depth.
-        let receipt = (0..1000).fold(
+    /// Create a CompositeReceipt with a large depth of CompositeReceipt as assumptions. In
+    /// previous versions of this crate, this could lead to a stack overflow on deserialization
+    /// with the depth is very large. This checks that a error is returned past a max depth.
+    fn deep_receipt(depth: usize) -> CompositeReceipt {
+        (0..depth).fold(
             CompositeReceipt {
                 segments: vec![],
                 assumption_receipts: vec![],
@@ -378,9 +377,20 @@ mod tests {
                 assumption_receipts: vec![InnerReceipt::from(inner).into()],
                 verifier_parameters: Digest::ZERO,
             },
-        );
+        )
+    }
 
+    #[test]
+    fn borsh_deserialize_deep_receipt() {
+        let receipt = deep_receipt(1000);
         let data = borsh::to_vec(&receipt).unwrap();
         assert!(borsh::from_slice::<CompositeReceipt>(&data).is_err());
+    }
+
+    #[test]
+    fn bincode_deserialize_deep_receipt() {
+        let receipt = deep_receipt(10000);
+        let data = bincode::serialize(&receipt).unwrap();
+        bincode::deserialize::<CompositeReceipt>(&data).unwrap();
     }
 }
