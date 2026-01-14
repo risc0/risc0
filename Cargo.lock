@@ -7531,7 +7531,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sppark"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "cc",
 ]
