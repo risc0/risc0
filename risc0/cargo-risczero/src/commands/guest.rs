@@ -200,7 +200,7 @@ impl GuestCommand {
             bail!("failed to build crate")
         }
 
-        // If we are running `cargo risczero test`, load each test binary into the
+        // If we are running `cargo risczero guest test`, load each test binary into the
         // executor and run them.
         if matches!(self.command, GuestSubCommands::Test(_)) && !no_run_flag {
             eprintln!("Running tests: {tests:?}");
