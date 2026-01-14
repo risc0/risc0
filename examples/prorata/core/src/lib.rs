@@ -147,6 +147,7 @@ pub fn allocate_for(
 #[cfg(test)]
 mod tests {
     use rust_decimal_macros::dec;
+    use sha2::{Digest as _, Sha256};
 
     use super::*;
 
@@ -237,6 +238,53 @@ mod tests {
         assert_eq!(sum, dec!(100.0));
     }
 
+    
+    #[test]
+    fn test_allocation_query_compute_result_basic() {
+        let q = AllocationQuery {
+            amount: dec!(0.03),
+            recipients_csv: b"name,share\nA,0.5\nB,0.5\n".to_vec(),
+            target: "A".to_string(),
+        };
+        let res = q.compute_result();
+
+        assert_eq!(res.total, dec!(0.03));
+        assert_eq!(res.allocation.unwrap().amount, dec!(0.01));
+
+        let mut hasher = Sha256::new();
+        hasher.update(&q.recipients_csv);
+        let expected_hash = hasher.finalize().to_vec();
+        assert_eq!(res.csv_hash, expected_hash);
+    }
+
+    /// Demonstrates "CSV whitespace issues": leading/trailing whitespace in names is preserved,
+    /// which can cause `target` lookups to fail.
+    #[test]
+    fn test_allocation_query_whitespace_in_name_affects_target_match() {
+        let q = AllocationQuery {
+            amount: dec!(10),
+            // Name is `"A "` (note the trailing space), so searching for `"A"` should not match.
+            recipients_csv: b"name,share\nA ,1\nB,1\n".to_vec(),
+            target: "A".to_string(),
+        };
+        let res = q.compute_result();
+        assert!(res.allocation.is_none());
+    }
+
+    /// Demonstrates "CSV whitespace issues": whitespace in numeric fields may fail decimal parsing.
+    #[test]
+    #[should_panic]
+    fn test_allocation_query_whitespace_in_share_panics() {
+        let q = AllocationQuery {
+            amount: dec!(10),
+            // Share value has a leading space; decimal parsing may fail and compute_result unwraps.
+            recipients_csv: b"name,share\nA, 0.5\nB,0.5\n".to_vec(),
+            target: "A".to_string(),
+        };
+        let _ = q.compute_result();
+    }
+
+
     /// Basic test for allocate_for()
     #[test]
     fn test_allocate_for() {
@@ -273,6 +321,4 @@ mod tests {
 
     // TODO: Add better test cases for allocate() to test rounding, stability,
     // etc.
-    // TODO: Add test for AllocationQuery behavior including CSV white space
-    // issues.
 }
