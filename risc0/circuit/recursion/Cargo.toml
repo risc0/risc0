@@ -65,7 +65,7 @@ rand = { version = "0.9.1", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
-zip = { version = "2.1", default-features = false, optional = true, features = [
+zip = { version = "2.4", default-features = false, optional = true, features = [
     "deflate",
 ] }
 
