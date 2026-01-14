@@ -62,9 +62,9 @@ risc0-build-kernel = { version = "5.0.0-rc.1", default-features = false, path = 
 risc0-circuit-keccak = { version = "5.0.0-rc.1", default-features = false, path = "risc0/circuit/keccak" }
 risc0-circuit-keccak-sys = { version = "5.0.0-rc.1", default-features = false, path = "risc0/circuit/keccak-sys" }
 risc0-circuit-recursion = { version = "5.0.0-rc.1", default-features = false, path = "risc0/circuit/recursion" }
-risc0-circuit-recursion-povw-zkrs = { version = "5.0.0", default-features = false, path = "risc0/circuit/recursion-povw-zkrs" }
+risc0-circuit-recursion-povw-zkrs = { version = "5.0.0-rc.1", default-features = false, path = "risc0/circuit/recursion-povw-zkrs" }
 risc0-circuit-recursion-sys = { version = "5.0.0-rc.1", default-features = false, path = "risc0/circuit/recursion-sys" }
-risc0-circuit-recursion-zkrs = { version = "5.0.0", default-features = false, path = "risc0/circuit/recursion-zkrs" }
+risc0-circuit-recursion-zkrs = { version = "5.0.0-rc.1", default-features = false, path = "risc0/circuit/recursion-zkrs" }
 risc0-circuit-rv32im = { version = "5.0.0-rc.1", default-features = false, path = "risc0/circuit/rv32im" }
 risc0-circuit-rv32im-sys = { version = "5.0.0-rc.1", default-features = false, path = "risc0/circuit/rv32im-sys" }
 risc0-core = { version = "5.0.0-rc.1", default-features = false, path = "risc0/core" }
