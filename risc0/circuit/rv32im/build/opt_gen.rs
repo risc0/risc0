@@ -38,8 +38,8 @@ fn params_to_tokens(instr: &Rv32imInstrInfo) -> proc_macro2::TokenStream {
     let idx = instr.idx;
     let opcode = instr.opcode;
     let imm_type = format_ident!("{}", instr.imm_type.to_snake_case());
-    let func3: syn::Expr = syn::parse_str(&instr.func3).unwrap();
-    let func7: syn::Expr = syn::parse_str(&instr.func7).unwrap();
+    let func3: syn::Expr = syn::parse_str(instr.func3).unwrap();
+    let func7: syn::Expr = syn::parse_str(instr.func7).unwrap();
     let itype_name = format_ident!("{}", instr.itype.to_snake_case());
 
     let mut params = instr.params.to_vec();
@@ -126,7 +126,7 @@ fn generate_options(output: &str, rv32im_table: &[Rv32imInstrInfo]) {
         .map(|e| format_ident!("{}", e.name.to_pascal_case()))
         .collect::<Vec<_>>();
     let upper_names = rv32im_table.iter().map(|e| &e.name);
-    let entries = rv32im_table.iter().map(|entry| params_to_tokens(entry));
+    let entries = rv32im_table.iter().map(params_to_tokens);
     let indexes = rv32im_table.iter().map(|e| e.idx).collect::<Vec<_>>();
 
     let mut itypes = BTreeMap::new();
@@ -141,14 +141,14 @@ fn generate_options(output: &str, rv32im_table: &[Rv32imInstrInfo]) {
 
     let mut option_traits = vec![];
     for (itype, params) in &itypes {
-        option_traits.push(instr_option_trait(&itype, &params));
+        option_traits.push(instr_option_trait(itype, params));
     }
 
     let mut option_impls = vec![];
     for entry in rv32im_table {
         let trait_name = format!("{}Options", entry.itype.to_pascal_case());
         option_impls.push(instr_option_impl(
-            &entry,
+            entry,
             &trait_name,
             itypes.get(&entry.itype).unwrap(),
         ));
@@ -159,7 +159,7 @@ fn generate_options(output: &str, rv32im_table: &[Rv32imInstrInfo]) {
         .collect();
     for entry in rv32im_table {
         option_impls.push(instr_option_impl(
-            &entry,
+            entry,
             "UnitOptions",
             &unit_options_params,
         ));
