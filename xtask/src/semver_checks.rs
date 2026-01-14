@@ -605,6 +605,9 @@ fn write_semver_lock_file(workspace_root: &Path, baselines: &SemverBaselines) ->
 }
 
 fn semver_compatible(a: &semver::Version, b: &semver::Version) -> bool {
+    if a == b {
+        return true;
+    }
     if !a.pre.is_empty() || !b.pre.is_empty() {
         return false;
     }
@@ -634,7 +637,7 @@ fn semver_compatible_test() {
         &semver::Version::new(0, 1, 1)
     ));
 
-    assert!(!semver_compatible(
+    assert!(semver_compatible(
         &"1.2.3-rc.1".parse().unwrap(),
         &"1.2.3-rc.1".parse().unwrap()
     ));
