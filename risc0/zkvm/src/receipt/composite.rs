@@ -388,9 +388,9 @@ mod tests {
     }
 
     #[test]
-    fn bincode_deserialize_deep_receipt() {
+    fn serde_json_deserialize_deep_receipt() {
         let receipt = deep_receipt(10000);
-        let data = bincode::serialize(&receipt).unwrap();
-        bincode::deserialize::<CompositeReceipt>(&data).unwrap();
+        let data = serde_json::to_vec(&receipt).unwrap();
+        assert!(serde_json::from_slice::<CompositeReceipt>(&data).is_err());
     }
 }
