@@ -118,6 +118,10 @@ impl PagedMemory {
         Ok(page)
     }
 
+    pub fn p2_mut(&mut self) -> &mut Poseidon2Witgen {
+        &mut self.p2
+    }
+
     pub fn paging_cost(&self) -> usize {
         self.paging_cost
     }

@@ -20,28 +20,36 @@ use bytemuck::Zeroable as _;
 
 use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im_sys::{
-    DecodeWitness, EcallTerminateWitness, FetchWitness, InstAuipcWitness, InstBranchWitness,
-    InstEcallWitness, InstImmWitness, InstJalWitness, InstJalrWitness, InstLoadWitness,
-    InstLuiWitness, InstMretWitness, InstRegWitness, InstResumeWitness, InstStoreWitness,
-    InstSuspendWitness, InstTrapWitness, MakeTableWitness, PhysMemReadWitness, PhysMemWriteWitness,
-    RegMemReadWitness, RegMemWriteWitness, UnitAddSubWitness, UnitBaseWitness, UnitBitWitness,
-    UnitDivWitness, UnitLtWitness, UnitMulWitness, UnitShiftWitness, VirtAddrWitness,
-    VirtMemReadWitness, VirtMemWriteWitness,
+    DecodeWitness, EcallP2Witness, EcallTerminateWitness, FetchWitness, InstAuipcWitness,
+    InstBranchWitness, InstEcallWitness, InstImmWitness, InstJalWitness, InstJalrWitness,
+    InstLoadWitness, InstLuiWitness, InstMretWitness, InstRegWitness, InstResumeWitness,
+    InstStoreWitness, InstSuspendWitness, InstTrapWitness, MakeTableWitness, P2State,
+    P2StepWitness, PhysMemReadWitness, PhysMemWriteWitness, RegMemReadWitness, RegMemWriteWitness,
+    UnitAddSubWitness, UnitBaseWitness, UnitBitWitness, UnitDivWitness, UnitLtWitness,
+    UnitMulWitness, UnitShiftWitness, VirtAddrWitness, VirtMemReadWitness, VirtMemWriteWitness,
+    fp::Fp,
+};
+use risc0_zkp::{
+    core::{
+        digest::{DIGEST_WORDS, Digest},
+        hash::poseidon2::CELLS_RATE,
+    },
+    field::baby_bear::Elem,
 };
 
 use crate::execute::{
     HOST_ECALL_BIGINT, HOST_ECALL_POSEIDON2, HOST_ECALL_READ, HOST_ECALL_TERMINATE,
-    HOST_ECALL_WRITE, REG_A0, REG_A1, REG_A7,
+    HOST_ECALL_WRITE, REG_A0, REG_A1, REG_A2, REG_A3, REG_A7,
 };
 use crate::prove::preflight::{
     constants::{
         BITS_PER_BYTE, BYTES_PER_WORD, COMPRESSED_INST_LOOKUP_WORD, CSR_MEPC, CSR_MNOV2COMPAT,
         CSR_MSMODE, CSR_MSPC, CSR_MTECALL, CSR_MTEXCEPT, CSR_MVERSION, KERNEL_START_WORD,
         MACHINE_REGS_WORD, MEMORY_SIZE_MPAGES, MODE_MACHINE, MODE_USER, MPAGE_MASK_WORDS,
-        MPAGE_SIZE_WORDS_PO2, OUTPUT_WORD, RV32IM_CIRCUIT_VERSION, USER_REGS_WORD,
-        V2_COMPAT_ECALL_DISPATCH, V2_COMPAT_MEPC, V2_COMPAT_SMODE, V2_COMPAT_SPC,
-        V2_COMPAT_TRAP_DISPATCH, V2_COMPAT_VERSION, VPAGE_MASK_WORDS, VPAGE_SIZE_WORDS_PO2,
-        csr_word,
+        MPAGE_SIZE_WORDS_PO2, OUTPUT_WORD, P2_TRASH_WORD, P2_ZEROS_WORD, PFLAG_CHECK_OUT,
+        PFLAG_IS_ELEM, RV32IM_CIRCUIT_VERSION, USER_REGS_WORD, V2_COMPAT_ECALL_DISPATCH,
+        V2_COMPAT_MEPC, V2_COMPAT_SMODE, V2_COMPAT_SPC, V2_COMPAT_TRAP_DISPATCH, V2_COMPAT_VERSION,
+        VPAGE_MASK_WORDS, VPAGE_SIZE_WORDS_PO2, csr_word,
     },
     decode::{DecodedInst, get_opcode},
     opt::{
@@ -958,8 +966,131 @@ impl Emulator {
         todo!("ecall_write")
     }
 
-    fn do_ecall_p2(&mut self) {
-        todo!("ecall_p2")
+    fn do_ecall_p2(&mut self, trace: &mut Trace) -> Result<()> {
+        let dinst = trace.get_block(self.dinst.unwrap());
+
+        let cycle = self.cur_cycle;
+        let fetch = dinst.fetch;
+        let (_, a0) = self.read_reg(REG_A0 as u32, false);
+        let (_, a1) = self.read_reg(REG_A1 as u32, false);
+        let (_, a2) = self.read_reg(REG_A2 as u32, false);
+        let (_, a3) = self.read_reg(REG_A3 as u32, false);
+        let (_, a7) = self.read_reg(REG_A7 as u32, false);
+
+        let state_in_word_addr = if a0.value != 0 {
+            a0.value / 4
+        } else {
+            P2_ZEROS_WORD
+        };
+        let state_out_word_addr = if a0.value != 0 {
+            a0.value / 4
+        } else {
+            P2_TRASH_WORD
+        };
+
+        let mut state_in = [PhysMemReadWitness::zeroed(); DIGEST_WORDS];
+        let mut state_words = [0u32; DIGEST_WORDS];
+        for i in 0..DIGEST_WORDS {
+            let (value, wit) = self.read_phys_memory(state_in_word_addr + i as u32)?;
+            state_words[i] = Elem::new(value).as_u32();
+            state_in[i] = wit;
+        }
+        let mut state = Digest::new(state_words);
+
+        let ecall_wit_index = trace.add_block(EcallP2Witness {
+            cycle,
+            fetch,
+            a0,
+            a1,
+            a2,
+            a3,
+            a7,
+            stateIn: state_in,
+            stateOut: [PhysMemWriteWitness::zeroed(); DIGEST_WORDS],
+        });
+
+        self.cur_cycle += 1;
+        let mut p2 = P2State {
+            cycle: self.cur_cycle,
+            count: (a3.value & 0xFFFF) as u16,
+            inWordAddr: a1.value / 4,
+            outWordAddr: a2.value / 4,
+            isElem: (a3.value & PFLAG_IS_ELEM != 0) as u8,
+            isCheck: (a3.value & PFLAG_CHECK_OUT != 0) as u8,
+        };
+
+        while p2.count > 0 {
+            let p2_wit_state = p2;
+            let mut in_ = [Elem::new(0); CELLS_RATE];
+
+            let mut p2_wit_state_in = [Fp::new_raw(0); DIGEST_WORDS];
+            let mut p2_wit_data_in = [PhysMemReadWitness::zeroed(); DIGEST_WORDS * 2];
+            for i in 0..DIGEST_WORDS {
+                let i2 = DIGEST_WORDS + i;
+                p2_wit_state_in[i] = Elem::new(state.as_words()[i]).into();
+                if p2.isElem != 0 {
+                    let (value, wit) = self.read_phys_memory(p2.inWordAddr + i as u32)?;
+                    in_[i] = Elem::new(value);
+                    p2_wit_data_in[i] = wit;
+
+                    let (value, wit) = self.read_phys_memory(p2.inWordAddr + i2 as u32)?;
+                    in_[i2] = Elem::new(value);
+                    p2_wit_data_in[i2] = wit;
+                } else {
+                    let word;
+                    (word, p2_wit_data_in[i]) = self.read_phys_memory(p2.inWordAddr + i as u32)?;
+                    (_, p2_wit_data_in[i2]) = self.read_phys_memory(P2_ZEROS_WORD + i as u32)?;
+
+                    in_[2 * i] = Elem::new(word & 0xFFFF);
+                    in_[2 * i + 1] = Elem::new(word >> 16);
+                }
+            }
+            let out = self.memory.p2_mut().do_block(trace, state, &in_, true);
+            state = self.memory.p2_mut().do_block(trace, state, &in_, false);
+            let out_addr = if p2.count != 1 {
+                P2_TRASH_WORD
+            } else {
+                p2.outWordAddr
+            };
+            let mut p2_wit_state_out = [Fp::new_raw(0); DIGEST_WORDS];
+            let mut p2_wit_data_out = [PhysMemWriteWitness::zeroed(); DIGEST_WORDS];
+            for i in 0..DIGEST_WORDS {
+                p2_wit_state_out[i] = Elem::new(state.as_words()[i]).into();
+                p2_wit_data_out[i] =
+                    self.write_phys_memory(out_addr + i as u32, out.as_words()[i])?;
+                if p2.isCheck != 0
+                    && p2.count == 1
+                    && p2_wit_data_out[i].prevValue != p2_wit_data_out[i].value
+                {
+                    tracing::debug!("Mismatch on check");
+                    bail!("P2 ecall check failure");
+                }
+            }
+            if p2.isElem != 0 {
+                p2.inWordAddr += 16;
+            } else {
+                p2.inWordAddr += 8;
+            }
+            self.cur_cycle += 1;
+            p2.cycle = self.cur_cycle;
+            p2.count -= 1;
+
+            trace.add_block(P2StepWitness {
+                state: p2_wit_state,
+                stateIn: p2_wit_state_in,
+                stateOut: p2_wit_state_out,
+                dataIn: p2_wit_data_in,
+                dataOut: p2_wit_data_out,
+            });
+        }
+
+        let wit = trace.get_block_mut(ecall_wit_index);
+        for i in 0..DIGEST_WORDS {
+            wit.stateOut[i] =
+                self.write_phys_memory(state_out_word_addr + i as u32, state.as_words()[i])?;
+        }
+
+        Ok(())
     }
 
     fn do_ecall_big_int(&mut self) {
@@ -1001,7 +1132,7 @@ impl Emulator {
             HOST_ECALL_TERMINATE => self.do_ecall_terminate(trace)?,
             HOST_ECALL_READ => self.do_ecall_read(),
             HOST_ECALL_WRITE => self.do_ecall_write(),
-            HOST_ECALL_POSEIDON2 => self.do_ecall_p2(),
+            HOST_ECALL_POSEIDON2 => self.do_ecall_p2(trace)?,
             HOST_ECALL_BIGINT => self.do_ecall_big_int(),
             _ => {
                 tracing::error!("Invalid ECALL in machine mode: {which}");
