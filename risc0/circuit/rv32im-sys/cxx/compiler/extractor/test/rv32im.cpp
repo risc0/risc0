@@ -53,6 +53,7 @@ int main() {
   EXTRACT(ReadWordBlock);
   EXTRACT(UnitAddSubBlock);
   EXTRACT(UnitBitBlock);
+  EXTRACT(UnitLtBlock);
   // EXTRACT(UnitMulBlock); // slow (18 minutes)
   EXTRACT(PageInNodeBlock);
   EXTRACT(PageInPartBlock);

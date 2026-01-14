@@ -301,6 +301,8 @@ template <typename C> FDEV void UnitLtBlock<C>::addArguments(CTX) DEV {
   arg.out1Low = Val<C>(1) - diff.carryHigh.get();
   arg.out1High = 0;
   ctx.addArgument(count.get(), arg);
+  PICUS_INPUT(ctx, count);
+  UNIT_BLOCK_INPUTS(ctx, arg);
 }
 
 template <typename C> FDEV void UnitShiftBlock<C>::set(CTX, UnitShiftWitness wit) DEV {
