@@ -78,6 +78,7 @@ template <typename C> struct DecodeBlock {
     T::apply(ctx, "load0", load0, fetch.loadCycle.get());
     T::apply(ctx, "load1", load1, fetch.loadCycle.get());
     T::apply(ctx, "low16Decomp", low16Decomp, ValU32<C>{low16(), 0});
+    T::apply(ctx, "isCompressed", isCompressed);
     T::apply(ctx,
              "computeNext",
              computeNext,

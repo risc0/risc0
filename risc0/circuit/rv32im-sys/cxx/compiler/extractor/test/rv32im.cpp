@@ -31,6 +31,7 @@ int main() {
   extractWithU32Arg<AddressDecompose>(ctx);
 
   EXTRACT(GlobalsBlock);
+  // EXTRACT(DecodeBlock); // slow (10 minutes)
   EXTRACT(InstResumeBlock);
   EXTRACT(InstSuspendBlock);
   EXTRACT(InstRegBlock);
