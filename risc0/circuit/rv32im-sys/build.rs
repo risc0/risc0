@@ -14,14 +14,12 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use anyhow::{Result, anyhow};
-use heck::{ToPascalCase as _, ToShoutySnakeCase as _, ToSnakeCase as _};
 use quote::{format_ident, quote};
 use std::{
-    collections::{BTreeMap, BTreeSet},
+    collections::BTreeMap,
     env, fs,
     io::Write as _,
     path::{Path, PathBuf},
-    str::FromStr as _,
 };
 
 const MIN_PO2: usize = 12;
@@ -216,7 +214,6 @@ fn parse_block_types() -> Result<BTreeMap<String, BlockTypeInfo>> {
 }
 
 #[derive(Debug)]
-#[allow(dead_code)]
 struct Rv32imInstrInfo {
     name: String,
     idx: u8,
@@ -253,105 +250,6 @@ impl Rv32imInstrInfo {
             itype: next(),
             params,
         })
-    }
-
-    fn param_to_tokens(param: &str) -> syn::Expr {
-        let (prefix, rest) = param.split_once("_").unwrap();
-        let starts_with_int = u8::from_str(&rest[..1]).is_ok();
-        let name = if starts_with_int {
-            param.to_pascal_case()
-        } else {
-            rest.to_pascal_case()
-        };
-
-        syn::parse_str(&format!("{}Kind::{name}", prefix.to_pascal_case())).unwrap()
-    }
-
-    fn to_tokens(&self) -> proc_macro2::TokenStream {
-        let name = format_ident!("{}", self.name.to_pascal_case());
-        let idx = self.idx;
-        let opcode = self.opcode;
-        let imm_type = format_ident!("{}", self.imm_type.to_snake_case());
-        let func3: syn::Expr = syn::parse_str(&self.func3).unwrap();
-        let func7: syn::Expr = syn::parse_str(&self.func7).unwrap();
-        let itype_name = format_ident!("{}", self.itype.to_snake_case());
-
-        let mut params = self.params.clone();
-        params.insert(0, self.itype.clone());
-        let params = params.iter().map(|p| Self::param_to_tokens(p));
-
-        quote! {
-            (#name, #idx, #opcode, #imm_type, #func3, #func7, #itype_name, #(#params),*)
-        }
-    }
-}
-
-fn instr_option_trait(name: &str, params: &BTreeSet<&str>) -> proc_macro2::TokenStream {
-    let name = format_ident!("{}Options", name.to_pascal_case());
-
-    let op_types = params
-        .iter()
-        .map(|p| format_ident!("{}Kind", p.to_pascal_case()))
-        .collect::<Vec<_>>();
-
-    let op_idents = params
-        .iter()
-        .map(|p| format_ident!("{}_KIND", p.to_shouty_snake_case()))
-        .collect::<Vec<_>>();
-
-    quote! {
-        pub trait #name {
-            #(const #op_idents: Option<opt::#op_types>;)*
-
-            const OPT_VALUE: u32;
-        }
-    }
-}
-
-fn instr_option_impl(
-    entry: &Rv32imInstrInfo,
-    trait_name: &str,
-    params: &BTreeSet<&str>,
-) -> proc_macro2::TokenStream {
-    let name = format_ident!("{}Options", entry.name.to_pascal_case());
-    let trait_name = format_ident!("{trait_name}");
-
-    let op_types = params
-        .iter()
-        .map(|p| format_ident!("{}Kind", p.to_pascal_case()))
-        .collect::<Vec<_>>();
-
-    let op_idents = params
-        .iter()
-        .map(|p| format_ident!("{}_KIND", p.to_shouty_snake_case()))
-        .collect::<Vec<_>>();
-
-    let mut entry_params = entry.params.clone();
-    entry_params.insert(0, entry.itype.clone());
-    let value_map: BTreeMap<String, _> = entry_params
-        .iter()
-        .map(|p| {
-            let value = Rv32imInstrInfo::param_to_tokens(p);
-            let kind = p.split_once("_").unwrap().0.to_string();
-            (kind, value)
-        })
-        .collect();
-
-    let op_values = params.iter().map(|&p| match value_map.get(p) {
-        Some(v) => quote!(Some(opt::#v)),
-        None => quote!(None),
-    });
-    let op_values2 = entry_params
-        .iter()
-        .filter(|&p| params.contains(p.split_once("_").unwrap().0))
-        .map(|p| Rv32imInstrInfo::param_to_tokens(p));
-
-    quote! {
-        impl #trait_name for #name {
-            #(const #op_idents: Option<opt::#op_types> = #op_values;)*
-
-            const OPT_VALUE: u32 = opt::opt![#(opt::#op_values2),*].val();
-        }
     }
 }
 
@@ -461,99 +359,34 @@ fn generate_rust_block_types(output: &str, block_types: &BTreeMap<String, BlockT
 }
 
 fn generate_rv32im_table(output: &str, rv32im_table: &[Rv32imInstrInfo]) {
-    let names = rv32im_table
-        .iter()
-        .map(|e| format_ident!("{}", e.name.to_pascal_case()))
-        .collect::<Vec<_>>();
-    let upper_names = rv32im_table.iter().map(|e| &e.name);
-    let entries = rv32im_table.iter().map(|entry| entry.to_tokens());
-    let indexes = rv32im_table.iter().map(|e| e.idx).collect::<Vec<_>>();
-
-    let mut itypes = BTreeMap::new();
-    for entry in rv32im_table {
-        let e = itypes.entry(entry.itype.clone()).or_insert(BTreeSet::new());
-
-        e.insert(entry.itype.split_once("_").unwrap().0);
-        for param in &entry.params {
-            e.insert(param.split_once("_").unwrap().0);
+    let table_size = rv32im_table.len();
+    let instrs = rv32im_table.iter().map(|i| {
+        let Rv32imInstrInfo {
+            name,
+            idx,
+            opcode,
+            imm_type,
+            func3,
+            func7,
+            itype,
+            params,
+        } = i;
+        let params = quote! { &[#(#params),*] };
+        quote! {
+            Rv32imInstrInfo {
+                name: #name,
+                idx: #idx,
+                opcode: #opcode,
+                imm_type: #imm_type,
+                func3: #func3,
+                func7: #func7,
+                itype: #itype,
+                params: #params,
+            }
         }
-    }
-
-    let mut option_traits = vec![];
-    for (itype, params) in &itypes {
-        option_traits.push(instr_option_trait(&itype, &params));
-    }
-
-    let mut option_impls = vec![];
-    for entry in rv32im_table {
-        let trait_name = format!("{}Options", entry.itype.to_pascal_case());
-        option_impls.push(instr_option_impl(
-            &entry,
-            &trait_name,
-            itypes.get(&entry.itype).unwrap(),
-        ));
-    }
-
-    let unit_options_params = ["UNIT", "AS", "BIT", "MUL", "DIV", "SHIFT"]
-        .into_iter()
-        .collect();
-    for entry in rv32im_table {
-        option_impls.push(instr_option_impl(
-            &entry,
-            "UnitOptions",
-            &unit_options_params,
-        ));
-    }
-
-    let option_structs = rv32im_table.iter().map(|e| {
-        let name = format_ident!("{}Options", e.name.to_pascal_case());
-        quote!(pub struct #name;)
     });
-
     let contents = quote! {
-        #[repr(u8)]
-        #[derive(Copy, Clone, PartialEq, Eq)]
-        pub enum Opcode {
-            #(#names = #indexes,)*
-            Invalid
-        }
-
-        impl Opcode {
-            pub fn name(&self) -> &'static str {
-                match self {
-                    #(Self::#names => #upper_names,)*
-                    _ => "***UNKNOWN***"
-                }
-            }
-        }
-
-        impl std::fmt::Display for Opcode {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                self.name().fmt(f)
-            }
-        }
-
-        impl From<u8> for Opcode {
-            fn from(v: u8) -> Self {
-                match v {
-                    #(#indexes => Self::#names,)*
-                    _ => Self::Invalid
-                }
-            }
-        }
-
-        #(#option_structs)*
-
-        #(#option_traits)*
-
-        #(#option_impls)*
-
-        #[macro_export]
-        macro_rules! visit_rv32im_instr {
-            ($visitor:ident $(, $arg:expr)*) => {
-                $visitor!($($arg,)* #(#entries),*);
-            }
-        }
+        pub const RV32IM_TABLE: [Rv32imInstrInfo; #table_size] = [#(#instrs),*];
     };
 
     std::fs::write(output, contents.to_string()).unwrap();

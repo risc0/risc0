@@ -18,6 +18,7 @@
 mod constants;
 mod decode;
 mod emu;
+mod opt;
 mod paging;
 mod poseidon2;
 pub mod trace;

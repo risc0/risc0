@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use risc0_circuit_rv32im_sys::{Opcode, visit_rv32im_instr};
+use crate::prove::preflight::opt::{Opcode, visit_rv32im_instr};
 
 /// Decomposed instruction
 pub struct DecodedInst {

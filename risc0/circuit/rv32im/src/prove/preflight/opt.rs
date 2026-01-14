@@ -19,6 +19,8 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use strum::EnumCount;
 
+include!(concat!(env!("OUT_DIR"), "/preflight_opt_gen.rs"));
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug, EnumCount, IntoPrimitive, TryFromPrimitive)]
 #[repr(u32)]
 pub enum InstKind {
@@ -197,15 +199,15 @@ impl Opt {
 #[macro_export]
 macro_rules! opt {
     [] => {
-        $crate::opt::Opt::from_u32(0)
+        $crate::prove::preflight::opt::Opt::from_u32(0)
     };
 
     [$e:expr] => {
-        $crate::opt::Opt::from_u32($e as u32)
+        $crate::prove::preflight::opt::Opt::from_u32($e as u32)
     };
 
     [$e:expr, $($es:expr),+] => {{
-        let mut o = $crate::opt::opt![$($es),+];
+        let mut o = $crate::prove::preflight::opt::opt![$($es),+];
         let e = $e;
         o._push_const(e, e as u32);
         o

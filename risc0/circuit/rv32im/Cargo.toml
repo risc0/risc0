@@ -33,6 +33,7 @@ execute = [
 ]
 prove = [
     "dep:cfg-if",
+    "dep:num_enum",
     "dep:rand",
     "dep:rayon",
     "dep:risc0-sys",
@@ -87,6 +88,7 @@ malachite = { version = "0.4.22", optional = true, default-features = false, fea
 ] }
 num-derive = { version = "0.4.2", optional = true }
 num-traits = { version = "0.2.19", optional = true }
+num_enum = { version = "0.7", optional = true }
 postcard = { version = "1.1.1", optional = true, features = ["use-std"] }
 rand = { version = "0.9.1", optional = true }
 rayon = { version = "1.5", optional = true }
@@ -104,6 +106,13 @@ gpu-guard = { workspace = true }
 tar = "0.4"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[build-dependencies]
+heck = "0.5"
+proc-macro2 = "1"
+quote = "1"
+risc0-circuit-rv32im-sys = { workspace = true, optional = true }
+syn = { version = "2", features = ["parsing"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 gpu-guard = { workspace = true }

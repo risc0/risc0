@@ -17,7 +17,6 @@ anyhow = { version = "1.0", default-features = false }
 bytemuck = { version = "1.13", features = ["min_const_generics"] }
 derive_more = { version = "2.0.1", default-features = false, features = ["from"] }
 enum-map = "2.7.3"
-num_enum = "0.7"
 risc0-sppark = { workspace = true, optional = true }
 risc0-sys = { workspace = true }
 risc0-zkp = { workspace = true, default-features = false }
@@ -31,9 +30,6 @@ anyhow = { version = "1.0", default-features = false }
 bindgen = "0.72"
 cc = { version = "1.2.2", features = ["parallel"] }
 glob = "0.3"
-heck = "0.5"
-proc-macro2 = "1"
 quote = "1"
 regex = "1"
-syn = { version = "2", features = ["parsing"] }
 risc0-build-kernel = { workspace = true }

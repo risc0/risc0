@@ -20,20 +20,13 @@ use bytemuck::Zeroable as _;
 
 use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im_sys::{
-    DecodeWitness, EcallTerminateWitness, FetchWitness, InstAuipcOptions, InstAuipcWitness,
-    InstBranchOptions, InstBranchWitness, InstEcallOptions, InstEcallWitness, InstImmOptions,
-    InstImmWitness, InstJalOptions, InstJalWitness, InstJalrOptions, InstJalrWitness,
-    InstLoadOptions, InstLoadWitness, InstLuiOptions, InstLuiWitness, InstMretOptions,
-    InstMretWitness, InstRegOptions, InstRegWitness, InstResumeWitness, InstStoreOptions,
-    InstStoreWitness, InstSuspendWitness, InstTrapWitness, MakeTableWitness, Opcode,
-    PhysMemReadWitness, PhysMemWriteWitness, RegMemReadWitness, RegMemWriteWitness,
-    UnitAddSubWitness, UnitBaseWitness, UnitBitWitness, UnitDivWitness, UnitLtWitness,
-    UnitMulWitness, UnitShiftWitness, VirtAddrWitness, VirtMemReadWitness, VirtMemWriteWitness,
-    opt::{
-        AsKind, BitKind, BrKind, DivKind, DivUOptions, LoadKind, MulKind, MulUuOptions, OutKind,
-        ShiftKind, StoreKind, UnitKind, UnitOptions,
-    },
-    visit_rv32im_instr,
+    DecodeWitness, EcallTerminateWitness, FetchWitness, InstAuipcWitness, InstBranchWitness,
+    InstEcallWitness, InstImmWitness, InstJalWitness, InstJalrWitness, InstLoadWitness,
+    InstLuiWitness, InstMretWitness, InstRegWitness, InstResumeWitness, InstStoreWitness,
+    InstSuspendWitness, InstTrapWitness, MakeTableWitness, PhysMemReadWitness, PhysMemWriteWitness,
+    RegMemReadWitness, RegMemWriteWitness, UnitAddSubWitness, UnitBaseWitness, UnitBitWitness,
+    UnitDivWitness, UnitLtWitness, UnitMulWitness, UnitShiftWitness, VirtAddrWitness,
+    VirtMemReadWitness, VirtMemWriteWitness,
 };
 
 use crate::execute::{
@@ -51,6 +44,13 @@ use crate::prove::preflight::{
         csr_word,
     },
     decode::{DecodedInst, get_opcode},
+    opt::{
+        AsKind, BitKind, BrKind, DivKind, DivUOptions, InstAuipcOptions, InstBranchOptions,
+        InstEcallOptions, InstImmOptions, InstJalOptions, InstJalrOptions, InstLoadOptions,
+        InstLuiOptions, InstMretOptions, InstRegOptions, InstStoreOptions, LoadKind, MulKind,
+        MulUuOptions, Opcode, OutKind, ShiftKind, StoreKind, UnitKind, UnitOptions,
+        visit_rv32im_instr,
+    },
     paging::{PageDetails, PagedMemory},
     trace::{Trace, TraceIndex},
 };
@@ -1115,7 +1115,7 @@ impl Emulator {
                 ($(($name:ident, $idx:expr, $opcode:expr, $imm_type:expr, $func3:expr, $func7:expr,
                     $itype_name:ident $(, $rest:expr)*)),+) => {
                     paste::paste! {
-                        use risc0_circuit_rv32im_sys::*;
+                        use crate::prove::preflight::opt::*;
 
                         match Opcode::from(decode_wit.opcode) {
                             $(Opcode::$name => {

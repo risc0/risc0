@@ -14,7 +14,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 pub mod fp;
-pub mod opt;
 
 use std::{
     ffi::CStr,
@@ -25,10 +24,21 @@ use std::{
 use anyhow::{Result, anyhow};
 use bytemuck::{Pod, Zeroable};
 
-use opt::UnitOptions;
+#[derive(Debug)]
+pub struct Rv32imInstrInfo {
+    pub name: &'static str,
+    pub idx: u8,
+    pub opcode: u8,
+    pub imm_type: &'static str,
+    pub func3: &'static str,
+    pub func7: &'static str,
+    pub itype: &'static str,
+    pub params: &'static [&'static str],
+}
+
+include!(concat!(env!("OUT_DIR"), "/rv32im_table.rs"));
 
 include!(concat!(env!("OUT_DIR"), "/block_types.rs"));
-include!(concat!(env!("OUT_DIR"), "/rv32im_table.rs"));
 
 #[allow(
     dead_code,
