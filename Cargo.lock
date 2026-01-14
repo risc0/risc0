@@ -7312,7 +7312,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-povw-zkrs"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "liblzma",
 ]
@@ -7331,7 +7331,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-zkrs"
-version = "5.0.0"
+version = "5.0.0-rc.1"
 dependencies = [
  "liblzma",
 ]
