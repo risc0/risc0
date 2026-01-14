@@ -15,19 +15,19 @@
 
 use std::collections::{BTreeMap, btree_map::Entry as BTreeMapEntry};
 
-use anyhow::{Result, bail};
+use anyhow::{Result, bail, ensure};
 use bytemuck::Zeroable as _;
 
 use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im_sys::{
-    DecodeWitness, EcallP2Witness, EcallTerminateWitness, FetchWitness, InstAuipcWitness,
-    InstBranchWitness, InstEcallWitness, InstImmWitness, InstJalWitness, InstJalrWitness,
-    InstLoadWitness, InstLuiWitness, InstMretWitness, InstRegWitness, InstResumeWitness,
-    InstStoreWitness, InstSuspendWitness, InstTrapWitness, MakeTableWitness, P2State,
-    P2StepWitness, PhysMemReadWitness, PhysMemWriteWitness, RegMemReadWitness, RegMemWriteWitness,
-    UnitAddSubWitness, UnitBaseWitness, UnitBitWitness, UnitDivWitness, UnitLtWitness,
-    UnitMulWitness, UnitShiftWitness, VirtAddrWitness, VirtMemReadWitness, VirtMemWriteWitness,
-    fp::Fp,
+    DecodeWitness, EcallP2Witness, EcallReadWitness, EcallTerminateWitness, EcallWriteWitness,
+    FetchWitness, InstAuipcWitness, InstBranchWitness, InstEcallWitness, InstImmWitness,
+    InstJalWitness, InstJalrWitness, InstLoadWitness, InstLuiWitness, InstMretWitness,
+    InstRegWitness, InstResumeWitness, InstStoreWitness, InstSuspendWitness, InstTrapWitness,
+    MakeTableWitness, P2State, P2StepWitness, PhysMemReadWitness, PhysMemWriteWitness,
+    ReadByteWitness, ReadWordWitness, RegMemReadWitness, RegMemWriteWitness, UnitAddSubWitness,
+    UnitBaseWitness, UnitBitWitness, UnitDivWitness, UnitLtWitness, UnitMulWitness,
+    UnitShiftWitness, VirtAddrWitness, VirtMemReadWitness, VirtMemWriteWitness, fp::Fp,
 };
 use risc0_zkp::{
     core::{
@@ -63,13 +63,19 @@ use crate::prove::preflight::{
     trace::{Trace, TraceIndex},
 };
 
+pub trait HostIo {
+    fn on_write(&mut self, fd: u32, data: &[u8]) -> Result<u32>;
+    fn on_read(&mut self, fd: u32, data: &mut [u8]) -> Result<u32>;
+}
+
 const CYCLE_TABLE_ROWS: u32 = 24;
 
 type InstCache = BTreeMap<u32, TraceIndex<DecodeWitness>>;
 
-pub struct Emulator {
+pub struct Emulator<HostIoT> {
     memory: PagedMemory,
     pages: Vec<Option<PageDetails>>,
+    io: HostIoT,
 
     m_inst_cache: InstCache,
     us_inst_cache: InstCache,
@@ -87,8 +93,8 @@ pub struct Emulator {
     dinst: Option<TraceIndex<DecodeWitness>>,
 }
 
-impl Emulator {
-    pub fn new(image: MemoryImage) -> Result<Self> {
+impl<HostIoT: HostIo> Emulator<HostIoT> {
+    pub fn new(image: MemoryImage, io: HostIoT) -> Result<Self> {
         let mut memory = PagedMemory::new(image);
         let mut pages = vec![None; MEMORY_SIZE_MPAGES as usize];
         pages[(MACHINE_REGS_WORD >> MPAGE_SIZE_WORDS_PO2) as usize] =
@@ -97,6 +103,7 @@ impl Emulator {
         Ok(Self {
             memory,
             pages,
+            io,
 
             m_inst_cache: Default::default(),
             us_inst_cache: Default::default(),
@@ -371,9 +378,7 @@ impl Emulator {
     }
 
     fn trap(&mut self, trace: &mut Trace, reason: &str) -> Result<()> {
-        if self.mode == MODE_MACHINE {
-            bail!("Trap: Double trap: {reason}");
-        }
+        ensure!(self.mode != MODE_MACHINE, "Trap: Double trap: {reason}");
         tracing::debug!("Trap: {reason}");
 
         // Save PC + jump to dispatch address
@@ -448,6 +453,11 @@ impl Emulator {
         }
         let page = page_entry.as_ref().unwrap();
         Ok(page.info()[(word_addr & (MPAGE_MASK_WORDS as u32)) as usize].value)
+    }
+
+    fn peek_phys_byte(&mut self, addr: u32) -> Result<u8> {
+        let word = self.peek_phys_memory(addr / BYTES_PER_WORD)?;
+        Ok((word >> ((addr % BYTES_PER_WORD) * BITS_PER_BYTE)) as u8)
     }
 
     fn unit_add_sub<Opt: UnitOptions>(
@@ -958,12 +968,100 @@ impl Emulator {
         Ok(())
     }
 
-    fn do_ecall_read(&mut self) {
-        todo!("ecall_read")
+    fn do_ecall_read(&mut self, trace: &mut Trace) -> Result<()> {
+        let dinst = trace.get_block(self.dinst.unwrap());
+        let cycle = self.cur_cycle;
+        let fetch = dinst.fetch;
+
+        let (_, a7) = self.read_reg(REG_A7 as u32, false);
+
+        let fd = self.peek_reg(REG_A0 as u32);
+        let (mut buf, a1) = self.read_reg(REG_A1 as u32, false);
+        let (len, a2) = self.read_reg(REG_A2 as u32, false);
+
+        ensure!(len <= 0xFFFF, "Invalid READ, too long");
+
+        // TODO: Based on read length, decide if we have enough room for read
+        let mut host_data = vec![0u8; len as usize];
+        let mut ret = self.io.on_read(fd, &mut host_data)?;
+        ensure!(ret <= len, "Invalid host read");
+        let a0 = self.write_reg(REG_A0 as u32, ret);
+
+        let ecall_wit_index = trace.add_block(EcallReadWitness {
+            cycle,
+            fetch,
+            a7,
+            a1,
+            a2,
+            a0,
+            finalCycle: 0,
+        });
+
+        self.cur_cycle += 1;
+        let mut offset = 0;
+        while ret != 0 {
+            if !buf.is_multiple_of(4) || ret < 4 {
+                let mut data = self.peek_phys_memory(buf / 4)?;
+                data &= !(0xFFu32 << ((buf % 4) * 8));
+                data |= (host_data[offset] as u32) << ((buf % 4) * 8);
+                offset += 1;
+                trace.add_block(ReadByteWitness {
+                    cycle: self.cur_cycle,
+                    size: ret,
+                    lowBits: buf % 4,
+                    io: self.write_phys_memory(buf / 4, data)?,
+                });
+                ret -= 1;
+                buf += 1;
+                self.cur_cycle += 1;
+            } else {
+                let mut data = 0u32;
+                for i in 0..4 {
+                    data |= (host_data[offset] as u32) << (i * 8);
+                    offset += 1;
+                }
+                trace.add_block(ReadWordWitness {
+                    cycle: self.cur_cycle,
+                    size: ret,
+                    io: self.write_phys_memory(buf / 4, data)?,
+                });
+                ret -= 4;
+                buf += 4;
+                self.cur_cycle += 1;
+            }
+        }
+        trace.get_block_mut(ecall_wit_index).finalCycle = self.cur_cycle;
+
+        Ok(())
     }
 
-    fn do_ecall_write(&mut self) {
-        todo!("ecall_write")
+    fn do_ecall_write(&mut self, trace: &mut Trace) -> Result<()> {
+        let fetch = trace.get_block(self.dinst.unwrap()).fetch;
+        let cycle = self.cur_cycle;
+
+        let (_, a7) = self.read_reg(REG_A7 as u32, false);
+        let fd = self.peek_reg(REG_A0 as u32);
+        let buf = self.peek_reg(REG_A1 as u32);
+        let (len, a2) = self.read_reg(REG_A2 as u32, false);
+
+        ensure!(len <= 0xFFFF, "invalid WRITE, too long");
+        let mut host_data = vec![0u8; len as usize];
+        for i in 0..len {
+            host_data[i as usize] = self.peek_phys_byte(buf + i)?;
+        }
+        let ret = self.io.on_write(fd, &host_data)?;
+        ensure!(ret <= len, "Invalid host write");
+        let a0 = self.write_reg(REG_A0 as u32, ret);
+
+        trace.add_block(EcallWriteWitness {
+            cycle,
+            fetch,
+            a0,
+            a2,
+            a7,
+        });
+
+        Ok(())
     }
 
     fn do_ecall_p2(&mut self, trace: &mut Trace) -> Result<()> {
@@ -1130,8 +1228,8 @@ impl Emulator {
         let which = self.peek_reg(REG_A7 as u32);
         match which {
             HOST_ECALL_TERMINATE => self.do_ecall_terminate(trace)?,
-            HOST_ECALL_READ => self.do_ecall_read(),
-            HOST_ECALL_WRITE => self.do_ecall_write(),
+            HOST_ECALL_READ => self.do_ecall_read(trace)?,
+            HOST_ECALL_WRITE => self.do_ecall_write(trace)?,
             HOST_ECALL_POSEIDON2 => self.do_ecall_p2(trace)?,
             HOST_ECALL_BIGINT => self.do_ecall_big_int(),
             _ => {
@@ -1291,10 +1389,11 @@ impl Emulator {
 pub fn emulate(
     trace: &mut Trace,
     image: &MemoryImage,
+    io: impl HostIo,
     row_count: usize,
     end_cycle: u32,
 ) -> Result<bool> {
-    let mut emu = Emulator::new(image.clone())?;
+    let mut emu = Emulator::new(image.clone(), io)?;
     emu.add_tables(trace);
 
     let done = emu.run(trace, row_count, end_cycle)?;

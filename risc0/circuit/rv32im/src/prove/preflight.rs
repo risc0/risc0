@@ -23,7 +23,7 @@ mod paging;
 mod poseidon2;
 pub mod trace;
 
-use anyhow::Result;
+use anyhow::{Result, anyhow, ensure};
 use bytemuck::Zeroable as _;
 
 use risc0_binfmt::MemoryImage;
@@ -58,6 +58,52 @@ const fn compute_max_wit_per_row() -> usize {
 
 const MAX_WIT_PER_ROW: usize = compute_max_wit_per_row();
 
+struct ReplayHostIo<'a> {
+    reads: &'a [Vec<u8>],
+    writes: &'a [u32],
+}
+
+impl<'a> ReplayHostIo<'a> {
+    fn new(reads: &'a [Vec<u8>], writes: &'a [u32]) -> Self {
+        Self { reads, writes }
+    }
+}
+
+impl<'a> emu::HostIo for ReplayHostIo<'a> {
+    fn on_write(&mut self, _fd: u32, _data: &[u8]) -> Result<u32> {
+        ensure!(!self.writes.is_empty(), "write missing from replay");
+
+        let bytes = self.writes[0];
+        self.writes = &self.writes[1..];
+
+        tracing::trace!("onWrite: {bytes} bytes");
+
+        Ok(bytes)
+    }
+
+    fn on_read(&mut self, _fd: u32, data: &mut [u8]) -> Result<u32> {
+        ensure!(!self.reads.is_empty(), "read missing from replay");
+
+        let record = &self.reads[0];
+
+        ensure!(data.len() >= record.len(), "Read record too big");
+
+        tracing::trace!("onRead: {} bytes", record.len());
+
+        let ret = record
+            .len()
+            .try_into()
+            .map_err(|_| anyhow!("read record too long"))?;
+
+        let dst = &mut data[..record.len()];
+        dst.copy_from_slice(&record[..]);
+
+        self.reads = &self.reads[1..];
+
+        Ok(ret)
+    }
+}
+
 pub struct PreflightContext2 {
     /// Did this preflight result in termination
     pub is_final: bool,
@@ -91,7 +137,8 @@ impl SegmentContext2 {
         let mut aux = vec![0u32; rows * MAX_WIT_PER_ROW];
         let mut trace = Trace::new(&mut row_info, &mut aux);
 
-        let is_final = emu::emulate(&mut trace, &self.image, rows, self.end_cycle)?;
+        let io = ReplayHostIo::new(&self.read_record, &self.write_record);
+        let is_final = emu::emulate(&mut trace, &self.image, io, rows, self.end_cycle)?;
         let cycles = trace.user_cycles();
 
         tracing::info!(
