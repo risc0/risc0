@@ -203,6 +203,7 @@ template <typename C> struct UnitShiftBlock {
     T::apply(ctx, "po2First3", po2First3);
     T::apply(ctx, "po2", po2);
     T::apply(ctx, "signA", signA, a.get().high);
+    T::apply(ctx, "neg", neg);
     T::apply(ctx, "maybeNegA", maybeNegA);
     T::apply(ctx, "maybeNegOut", maybeNegOut);
     T::apply(ctx, "out", out);

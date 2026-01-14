@@ -19,6 +19,19 @@
   PICUS_INPUT(ctx, arg.bLow);                                                                      \
   PICUS_INPUT(ctx, arg.bHigh)
 
+// Do we need do bound the value of arg.opts here? (< 18)
+#define UNIT_ARGUMENT(ctx, arg)                                                                    \
+  PICUS_ARGUMENT(ctx,                                                                              \
+                 ({ctx.get(arg.opts),                                                              \
+                   ctx.get(arg.aLow),                                                              \
+                   ctx.get(arg.aHigh),                                                             \
+                   ctx.get(arg.bLow),                                                              \
+                   ctx.get(arg.bHigh)}),                                                           \
+                 ({ctx.get(arg.out0Low),                                                           \
+                   ctx.get(arg.out0High),                                                          \
+                   ctx.get(arg.out1Low),                                                           \
+                   ctx.get(arg.out1High)}))
+
 template <typename C> FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness wit) DEV {
   count.set(ctx, wit.count);
   Option opts(wit.opts);
@@ -380,6 +393,9 @@ template <typename C> FDEV void UnitShiftBlock<C>::addArguments(CTX) DEV {
   arg.out1Low = 0;
   arg.out1High = 0;
   ctx.addArgument(count.get(), arg);
+  PICUS_INPUT(ctx, count);
+  UNIT_BLOCK_INPUTS(ctx, arg);
+
   // Require multiplication or division
   arg.opts =
       opt.bits[0].get() * Val<C>(uint32_t(MUL_UU) * OptSize<UnitKind>::value + uint32_t(UNIT_MUL)) +
@@ -394,6 +410,8 @@ template <typename C> FDEV void UnitShiftBlock<C>::addArguments(CTX) DEV {
   arg.out1Low = out2.low.get();
   arg.out1High = out2.high.get();
   ctx.pull(arg);
+  UNIT_ARGUMENT(ctx, arg);
 }
 
 #undef UNIT_BLOCK_INPUTS
+#undef UNIT_ARGUMENT

@@ -28,6 +28,7 @@ int main() {
   BuilderSingleton::set(&ctx.builder);
 
   extractWithValArg<IsZero>(ctx);
+  extractWithValArg<GetSign>(ctx);
   extractWithU32Arg<AddressDecompose>(ctx);
 
   EXTRACT(GlobalsBlock);
@@ -55,6 +56,7 @@ int main() {
   EXTRACT(UnitBitBlock);
   EXTRACT(UnitLtBlock);
   // EXTRACT(UnitMulBlock); // slow (18 minutes)
+  EXTRACT(UnitShiftBlock);
   EXTRACT(PageInNodeBlock);
   EXTRACT(PageInPartBlock);
   EXTRACT(PageInPageBlock);

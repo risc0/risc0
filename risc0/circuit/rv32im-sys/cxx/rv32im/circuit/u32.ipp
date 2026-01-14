@@ -82,7 +82,9 @@ template <typename C> FDEV void GetSign<C>::set(CTX, uint32_t val) DEV {
 }
 
 template <typename C> FDEV void GetSign<C>::verify(CTX, Val<C> inHigh) DEV {
+  PICUS_BEGIN_OUTLINE(inHigh)
   EQ(inHigh, signVerify.get() * inv(Fp(2)) + sign.get() * 0x8000);
+  PICUS_END_OUTLINE
 }
 
 template <typename C> FDEV void NegU32<C>::set(CTX, uint32_t val, uint32_t neg) DEV {
