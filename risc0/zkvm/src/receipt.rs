@@ -768,7 +768,7 @@ impl From<ReceiptClaim> for AssumptionReceipt {
 /// An enumeration of receipt types similar to [InnerReceipt], but for use in [AssumptionReceipt].
 /// Instead of proving only RISC-V execution with [ReceiptClaim], this type can prove any claim
 /// implemented by one of its inner types.
-#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub enum InnerAssumptionReceipt {
@@ -857,6 +857,40 @@ impl InnerAssumptionReceipt {
             Self::Groth16(receipt) => receipt.seal_size(),
             Self::Fake(_) => 0,
         }
+    }
+
+    /// Implementation of BorshDeserialize's required function with depth tracking. This is
+    /// required to avoid a potential crash on deserialization of untrusted input because this is
+    /// part of a recursive data structure.
+    fn deserialize_reader_with_depth<R: borsh::io::Read>(
+        reader: &mut R,
+        depth: usize,
+    ) -> borsh::io::Result<Self> {
+        let variant = u8::deserialize_reader(reader)?;
+        match variant {
+            0 => Ok(Self::Composite(
+                CompositeReceipt::deserialize_reader_with_depth(reader, depth)?,
+            )),
+            1 => Ok(Self::Succinct(
+                SuccinctReceipt::<Unknown>::deserialize_reader(reader)?,
+            )),
+            2 => Ok(Self::Groth16(
+                Groth16Receipt::<Unknown>::deserialize_reader(reader)?,
+            )),
+            3 => Ok(Self::Fake(FakeReceipt::<Unknown>::deserialize_reader(
+                reader,
+            )?)),
+            _ => Err(borsh::io::Error::new(
+                borsh::io::ErrorKind::InvalidData,
+                "invalid InnerAssumptionReceipt variant",
+            )),
+        }
+    }
+}
+
+impl BorshDeserialize for InnerAssumptionReceipt {
+    fn deserialize_reader<R: borsh::io::Read>(reader: &mut R) -> borsh::io::Result<Self> {
+        Self::deserialize_reader_with_depth(reader, 0)
     }
 }
 

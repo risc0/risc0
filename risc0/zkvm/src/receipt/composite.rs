@@ -39,7 +39,7 @@ use crate::{
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
 /// continuations, and zero or more [InnerAssumptionReceipt](crate::InnerAssumptionReceipt) structs
 /// proving any assumptions.
-#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub struct CompositeReceipt {
@@ -237,6 +237,46 @@ impl CompositeReceipt {
 
         result
     }
+
+    /// Implementation of BorshDeserialize's required function with depth tracking. This is
+    /// required to avoid a potential crash on deserialization of untrusted input because this is
+    /// part of a recursive data structure.
+    pub(crate) fn deserialize_reader_with_depth<R: borsh::io::Read>(
+        reader: &mut R,
+        depth: usize,
+    ) -> borsh::io::Result<Self> {
+        const MAX_COMPOSITE_RECEIPT_DEPTH: usize = 256;
+
+        if depth > MAX_COMPOSITE_RECEIPT_DEPTH {
+            return Err(borsh::io::Error::new(
+                borsh::io::ErrorKind::InvalidData,
+                "composite receipt nesting too deep",
+            ));
+        }
+
+        let segments = Vec::<SegmentReceipt>::deserialize_reader(reader)?;
+        let assumptions_len = u32::deserialize_reader(reader)? as usize;
+        let mut assumption_receipts = Vec::with_capacity(assumptions_len);
+        for _ in 0..assumptions_len {
+            assumption_receipts.push(InnerAssumptionReceipt::deserialize_reader_with_depth(
+                reader,
+                depth + 1,
+            )?);
+        }
+        let verifier_parameters = Digest::deserialize_reader(reader)?;
+
+        Ok(Self {
+            segments,
+            assumption_receipts,
+            verifier_parameters,
+        })
+    }
+}
+
+impl BorshDeserialize for CompositeReceipt {
+    fn deserialize_reader<R: borsh::io::Read>(reader: &mut R) -> borsh::io::Result<Self> {
+        Self::deserialize_reader_with_depth(reader, 0)
+    }
 }
 
 /// Verifier parameters for [CompositeReceipt][super::CompositeReceipt].
@@ -307,8 +347,8 @@ impl Default for CompositeReceiptVerifierParameters {
 #[cfg(test)]
 mod tests {
     use super::CompositeReceiptVerifierParameters;
-    use crate::sha::Digestible;
-    use risc0_zkp::core::digest::digest;
+    use crate::{CompositeReceipt, InnerReceipt, sha::Digestible};
+    use risc0_zkp::core::digest::{Digest, digest};
 
     // Check that the verifier parameters has a stable digest (and therefore a stable value). This struct
     // encodes parameters used in verification, and so this value should be updated if and only if
@@ -320,5 +360,27 @@ mod tests {
             CompositeReceiptVerifierParameters::default().digest(),
             digest!("cccaaa966d6857342154bf608536f641d55b5200d062a8f8c121ebf280f7f51a")
         );
+    }
+
+    #[test]
+    fn deserialize_deep_receipt() {
+        // Create a CompositeReceipt with a large depth of CompositeReceipt as assumptions. In
+        // previous versions of this crate, this could lead to a stack overflow on deserialization
+        // with the depth is very large. This checks that a error is returned past a max depth.
+        let receipt = (0..1000).fold(
+            CompositeReceipt {
+                segments: vec![],
+                assumption_receipts: vec![],
+                verifier_parameters: Digest::ZERO,
+            },
+            |inner, _| CompositeReceipt {
+                segments: vec![],
+                assumption_receipts: vec![InnerReceipt::from(inner).into()],
+                verifier_parameters: Digest::ZERO,
+            },
+        );
+
+        let data = borsh::to_vec(&receipt).unwrap();
+        assert!(borsh::from_slice::<CompositeReceipt>(&data).is_err());
     }
 }
