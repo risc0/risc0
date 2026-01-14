@@ -15,7 +15,7 @@
 
 extern crate alloc;
 
-use alloc::{collections::BTreeMap, vec, vec::Vec};
+use alloc::{vec, vec::Vec};
 
 use anyhow::{Context, Result, anyhow, bail, ensure};
 use elf::{ElfBytes, endian::LittleEndian, file::Class};
@@ -37,13 +37,13 @@ pub struct Program {
     pub(crate) entry: u32,
 
     /// The initial memory image
-    pub(crate) image: BTreeMap<u32, u32>,
+    pub(crate) image: MemoryImage,
 }
 
 impl Program {
     /// Initialize a RISC Zero Program from an appropriate ELF file
     pub fn load_elf(input: &[u8], max_mem: u32) -> Result<Program> {
-        let mut image: BTreeMap<u32, u32> = BTreeMap::new();
+        let mut image = MemoryImage::default();
         let elf = ElfBytes::<LittleEndian>::minimal_parse(input)
             .map_err(|err| anyhow!("Elf parse error: {err}"))?;
         if elf.ehdr.class != Class::ELF32 {
@@ -84,68 +84,76 @@ impl Program {
             if mem_size >= max_mem {
                 bail!("Invalid segment mem_size");
             }
-            let vaddr: u32 = segment
-                .p_vaddr
-                .try_into()
-                .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?;
-            if !vaddr.is_multiple_of(WORD_SIZE as u32) {
-                bail!("vaddr {vaddr:08x} is unaligned");
+            let vaddr = ByteAddr(
+                segment
+                    .p_vaddr
+                    .try_into()
+                    .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?,
+            );
+            if !vaddr.is_aligned() {
+                bail!("vaddr {vaddr:?} is unaligned");
             }
-            let offset: u32 = segment
+            let input_offset: u32 = segment
                 .p_offset
                 .try_into()
                 .map_err(|err| anyhow!("offset is larger than 32 bits. {err}"))?;
-            for i in (0..mem_size).step_by(WORD_SIZE) {
-                let addr = vaddr.checked_add(i).context("Invalid segment vaddr")?;
-                if addr >= max_mem {
-                    bail!(
-                        "Address [0x{addr:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
-                    );
-                }
-                if i >= file_size {
-                    // Past the file size, all zeros.
-                    image.insert(addr, 0);
-                } else {
-                    let mut word = 0;
-                    // Don't read past the end of the file.
-                    let len = core::cmp::min(file_size - i, WORD_SIZE as u32);
-                    for j in 0..len {
-                        let offset = (offset + i + j) as usize;
-                        let byte = input.get(offset).context("Invalid segment offset")?;
-                        word |= (*byte as u32) << (j * 8);
-                    }
-                    image.insert(addr, word);
-                }
+
+            // Compute the end of the segment in the program image, to catch overflow here.
+            let program_end = vaddr
+                .checked_add(mem_size)
+                .context("Invalid segment vaddr")?;
+            if program_end.0 > max_mem {
+                bail!(
+                    "Address [{program_end:?}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
+                );
             }
+
+            // Copy the data from the input into the program image. If the mem_size puts the end
+            // past the input end, the remainder will be unset, defaulting to zeroes.
+            let input_end = usize::min(
+                input_offset
+                    .checked_add(mem_size)
+                    .context("Invalid input offset and size")? as usize,
+                input.len(),
+            );
+            let input_buf = input
+                .get((input_offset as usize)..input_end)
+                .context("Invalid segment size")?;
+            image
+                .set_region(vaddr, input_buf)
+                .context("Failed to write segment data to program image")?;
         }
         Ok(Program::new_from_entry_and_image(entry, image))
     }
 
     /// Create `Program` from given entry-point and image map
-    pub fn new_from_entry_and_image(entry: u32, image: BTreeMap<u32, u32>) -> Self {
+    pub fn new_from_entry_and_image(entry: u32, image: MemoryImage) -> Self {
         Self { entry, image }
-    }
-
-    /// The size of the image in a count of words
-    pub fn size_in_words(&self) -> usize {
-        self.image.len()
     }
 
     /// Read a word from the image
     pub fn read_u32(&self, address: &u32) -> Option<u32> {
-        self.image.get(address).copied()
+        let waddr = ByteAddr(*address).waddr_aligned()?;
+        self.image.get_word(waddr).ok()
     }
 
     pub(crate) fn prepare_user(&mut self) {
-        self.image.insert(USER_START_ADDR.0, self.entry);
+        self.image
+            .set_word(USER_START_ADDR.waddr(), self.entry)
+            .unwrap();
     }
 
     pub(crate) fn prepare_kernel(&mut self, user: Option<&mut Program>) {
+        // NOTE: The given user program should define a disjoint set of pages.
         if let Some(user) = user {
-            self.image.append(&mut user.image);
+            for (idx, page) in user.image.pages.clone() {
+                self.image.set_page(idx, page);
+            }
         }
-        self.image.insert(SUSPEND_PC_ADDR.0, self.entry);
-        self.image.insert(SUSPEND_MODE_ADDR.0, 1);
+        self.image
+            .set_word(SUSPEND_PC_ADDR.waddr(), self.entry)
+            .unwrap();
+        self.image.set_word(SUSPEND_MODE_ADDR.waddr(), 1).unwrap();
     }
 }
 

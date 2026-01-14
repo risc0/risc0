@@ -16,7 +16,7 @@
 use std::collections::BTreeMap;
 
 use anyhow::{Result, bail};
-use risc0_binfmt::{MemoryImage, Program};
+use risc0_binfmt::{MemoryImage, Program, WordAddr};
 use risc0_core::scope;
 use risc0_zkp::{
     MAX_CYCLES_PO2,
@@ -202,23 +202,14 @@ impl Assembler {
     }
 
     pub fn program(&self) -> Program {
-        let entry = USER_START_ADDR + WORD_SIZE;
-        let entry = entry.0;
-        let mut pc = entry;
+        let entry: WordAddr = USER_START_ADDR.waddr() + 1;
 
-        let mut image: BTreeMap<_, _> = self
-            .text
-            .iter()
-            .map(|instr| {
-                let result = (pc, *instr);
-                pc += WORD_SIZE as u32;
-                result
-            })
-            .collect();
+        let mut image = MemoryImage::default();
+        for (offset, &instr) in self.text.iter().enumerate() {
+            image.set_word(entry + offset, instr).unwrap();
+        }
 
-        image.extend(self.data.iter());
-
-        Program::new_from_entry_and_image(entry, image)
+        Program::new_from_entry_and_image(entry.baddr().0, image)
     }
 
     pub fn word(&mut self, addr: u32, word: u32) {
