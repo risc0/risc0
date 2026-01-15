@@ -27,6 +27,7 @@ use crate::{ByteAddr, Digestible as _, KERNEL_START_ADDR, MemoryImage, SystemSta
 
 /// The starting address for user programs in the RISC Zero zkVM.
 const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
+const USER_MAX_ADDR: ByteAddr = ByteAddr(KERNEL_START_ADDR.0 - 1);
 
 const SUSPEND_PC_ADDR: ByteAddr = ByteAddr(0xffff_0210);
 const SUSPEND_MODE_ADDR: ByteAddr = ByteAddr(0xffff_0214);
@@ -410,8 +411,7 @@ impl<'a> ProgramBinary<'a> {
     }
 
     fn user_program(&self) -> Result<Program> {
-        Program::load_elf(self.user_elf, KERNEL_START_ADDR.0 - WORD_SIZE as u32)
-            .context("Loading user ELF")
+        Program::load_elf(self.user_elf, USER_MAX_ADDR.0).context("Loading user ELF")
     }
 
     fn kernel_program(&self) -> Result<Program> {
