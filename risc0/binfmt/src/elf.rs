@@ -64,7 +64,7 @@ impl Program {
             .e_entry
             .try_into()
             .map_err(|err| anyhow!("e_entry was larger than 32 bits. {err}"))?;
-        if entry >= max_mem || !entry.is_multiple_of(WORD_SIZE as u32) {
+        if entry > max_mem || !entry.is_multiple_of(WORD_SIZE as u32) {
             bail!("Invalid entrypoint");
         }
         let segments = elf
@@ -78,14 +78,14 @@ impl Program {
                 .p_filesz
                 .try_into()
                 .map_err(|err| anyhow!("filesize was larger than 32 bits. {err}"))?;
-            if file_size >= max_mem {
+            if file_size > max_mem {
                 bail!("Invalid segment file_size");
             }
             let mem_size: u32 = segment
                 .p_memsz
                 .try_into()
                 .map_err(|err| anyhow!("mem_size was larger than 32 bits {err}"))?;
-            if mem_size >= max_mem {
+            if mem_size > max_mem {
                 bail!("Invalid segment mem_size");
             }
             let vaddr = ByteAddr(
