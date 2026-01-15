@@ -116,15 +116,13 @@ impl Program {
                 );
             }
             if file_size > mem_size {
-                bail!("Segment p_filesz is greater than p_memsz");
+                bail!("Segment p_filesz is greater than p_memsz: {file_size} > {mem_size}");
             }
 
             // Copy the data from the input into the program image. If the file_size puts the end
             // past the input end, the remainder will be unset, defaulting to zeroes.
-            let input_end =
-                usize::min(input_offset.saturating_add(file_size) as usize, input.len());
             let input_buf = input
-                .get((input_offset as usize)..input_end)
+                .get((input_offset as usize)..input_offset.saturating_add(file_size) as usize)
                 .context("Invalid segment size")?;
             image
                 .set_region(vaddr, input_buf)
