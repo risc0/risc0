@@ -24,10 +24,11 @@ mod paging;
 mod poseidon2;
 pub mod trace;
 
-use anyhow::{Result, anyhow, ensure};
+use anyhow::{Result, anyhow, bail, ensure};
 use bytemuck::Zeroable as _;
 
 use risc0_binfmt::MemoryImage;
+use risc0_core::scope;
 
 use crate::execute::Segment;
 use crate::prove::RowInfo;
@@ -134,13 +135,15 @@ impl SegmentContext2 {
     }
 
     pub fn preflight(&self, po2: usize) -> Result<PreflightContext2> {
+        scope!("preflight");
+
         let rows = 1usize << po2;
         let mut row_info = vec![RowInfo::zeroed(); rows];
         let mut aux = vec![0u32; rows * MAX_WIT_PER_ROW];
         let mut trace = Trace::new(&mut row_info, &mut aux);
 
         let io = ReplayHostIo::new(&self.read_record, &self.write_record);
-        let is_final = emu::emulate(&mut trace, &self.image, io, rows, self.end_cycle)?;
+        let mut is_final = emu::emulate(&mut trace, &self.image, io, rows, self.end_cycle)?;
         let cycles = trace.user_cycles();
 
         tracing::info!(
@@ -156,6 +159,22 @@ impl SegmentContext2 {
 
         row_info.truncate(row_count);
         aux.truncate(aux_size);
+
+        if cycles > self.end_cycle {
+            bail!("Preflight cycles > requested end cycle");
+        }
+        tracing::info!(
+            "endCycle: {}, retiredCycle: {cycles}, isFinal: {is_final}",
+            self.end_cycle
+        );
+
+        if is_final && self.end_cycle > cycles {
+            bail!("Termination before reaching requested end cycle");
+        }
+
+        if self.end_cycle == cycles {
+            is_final = true;
+        }
 
         Ok(PreflightContext2 {
             is_final,
