@@ -23,7 +23,6 @@ pub(crate) mod succinct;
 
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 
-use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
 use risc0_core::field::baby_bear::BabyBear;

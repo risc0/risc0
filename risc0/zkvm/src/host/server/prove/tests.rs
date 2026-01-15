@@ -711,7 +711,7 @@ fn verify_in_guest(#[case] kind: ReceiptKind) {
 
 fn hello_commit_receipt() -> &'static Receipt {
     static ONCE: OnceLock<Receipt> = OnceLock::new();
-    ONCE.get_or_init(|| prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap())
+    ONCE.get_or_init(|| prove_elf_succinct(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap())
 }
 
 mod sys_verify {
@@ -724,7 +724,7 @@ mod sys_verify {
     };
 
     fn prove_halt(exit_code: u8) -> Receipt {
-        let opts = ProverOpts::fast().with_prove_guest_errors(true);
+        let opts = ProverOpts::succinct().with_prove_guest_errors(true);
 
         let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::Halt(exit_code))
@@ -779,6 +779,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(hello_commit_receipt().clone())
+            .unwrap()
             .build()
             .unwrap();
 
@@ -820,6 +821,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(hello_commit_receipt().claim().unwrap())
+            .unwrap()
             .build()
             .unwrap();
 
@@ -847,6 +849,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(hello_commit_receipt().clone())
+            .unwrap()
             .build()
             .unwrap();
         prove_elf(env, MULTI_TEST_ELF)
@@ -869,6 +872,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(hello_commit_receipt().claim().unwrap())
+            .unwrap()
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
@@ -891,6 +895,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(halt_receipt)
+            .unwrap()
             .build()
             .unwrap();
         prove_elf(env, MULTI_TEST_ELF)
@@ -916,6 +921,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(test_circuit_receipt.clone())
+            .unwrap()
             .build()
             .unwrap();
         let receipt = prove_elf(env, MULTI_TEST_ELF).unwrap();
@@ -930,6 +936,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(test_circuit_receipt.clone())
+            .unwrap()
             .build()
             .unwrap();
         let receipt = prove_elf_succinct(env, MULTI_TEST_ELF).unwrap();
@@ -1092,6 +1099,7 @@ mod povw {
             .write(&spec)
             .unwrap()
             .add_assumption(hello_commit_receipt().clone())
+            .unwrap()
             .povw(povw_job_id)
             .build()
             .unwrap();

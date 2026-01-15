@@ -415,9 +415,9 @@ async fn prove_stark(
         let receipt: Receipt =
             bincode::deserialize(&bytes).context("Failed to deserialize assumption")?;
         let assumption_receipt: AssumptionReceipt = receipt.try_into().map_err(|e| {
-            AppError::AssumptionReceiptInvalid(
-                "failed to convert given receipt into assumption receipt".to_string(),
-            )
+            AppError::AssumptionReceiptInvalid(format!(
+                "failed to convert given receipt into assumption receipt: {e}"
+            ))
         })?;
         assumptions.push(assumption_receipt);
     }
