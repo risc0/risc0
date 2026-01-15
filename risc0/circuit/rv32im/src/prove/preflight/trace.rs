@@ -19,7 +19,9 @@ use std::mem::size_of;
 use bytemuck::Pod;
 use enum_map::EnumMap;
 
-use risc0_circuit_rv32im_sys::{BlockType, FpDigest, GlobalsWitness, HasBlockType, RowInfo};
+use risc0_circuit_rv32im_sys::{
+    BlockType, BlockWitness, FpDigest, GlobalsWitness, HasBlockType, RowInfo, visit_blocks,
+};
 
 #[derive(Default)]
 struct BlockCursor {
@@ -185,30 +187,20 @@ impl<'a> Trace<'a> {
     }
 }
 
-#[cfg(test)]
-pub mod tests {
-    use super::*;
+fn decode_witness<WitnessT: Pod>(aux: &[u32], offset: usize, i: usize) -> BlockWitness
+where
+    BlockWitness: From<WitnessT>,
+{
+    let wit_size = size_of::<WitnessT>() / size_of::<u32>();
+    let start = offset + i * wit_size;
+    let wit: &[WitnessT] = bytemuck::cast_slice(&aux[start..(start + wit_size)]);
+    wit[0].into()
+}
 
-    use bytemuck::Zeroable as _;
+pub fn decode_trace(rows: &[RowInfo], aux: &[u32]) -> Vec<BlockWitness> {
+    let mut out = vec![];
 
-    use risc0_circuit_rv32im_sys::{
-        BlockWitness, MakeTableWitness, PageInPageWitness, visit_blocks,
-    };
-
-    fn decode_witness<WitnessT: Pod>(aux: &[u32], offset: usize, i: usize) -> BlockWitness
-    where
-        BlockWitness: From<WitnessT>,
-    {
-        let wit_size = size_of::<WitnessT>() / size_of::<u32>();
-        let start = offset + i * wit_size;
-        let wit: &[WitnessT] = bytemuck::cast_slice(&aux[start..(start + wit_size)]);
-        wit[0].into()
-    }
-
-    pub fn decode_trace(rows: &[RowInfo], aux: &[u32]) -> Vec<BlockWitness> {
-        let mut out = vec![];
-
-        macro_rules! decode_witness {
+    macro_rules! decode_witness {
             ($block_type:expr, $aux:expr, $offset:expr, $i: expr, $($block_name:ident),*) => {
                 paste::paste! {
                     match $block_type {
@@ -222,18 +214,26 @@ pub mod tests {
             }
         }
 
-        for row in rows.iter() {
-            let block_type = BlockType::try_from(row.row_type).unwrap();
-            let offset = row.aux_offset as usize;
+    for row in rows.iter() {
+        let block_type = BlockType::try_from(row.row_type).unwrap();
+        let offset = row.aux_offset as usize;
 
-            for i in 0..row.block_count {
-                let i = i as usize;
-                out.push(visit_blocks!(decode_witness, block_type, aux, offset, i));
-            }
+        for i in 0..row.block_count {
+            let i = i as usize;
+            out.push(visit_blocks!(decode_witness, block_type, aux, offset, i));
         }
-
-        out
     }
+
+    out
+}
+
+#[cfg(test)]
+pub mod tests {
+    use super::*;
+
+    use bytemuck::Zeroable as _;
+
+    use risc0_circuit_rv32im_sys::{MakeTableWitness, PageInPageWitness};
 
     fn test_trace(num_rows: usize, aux_bytes: usize, wits: &[BlockWitness]) {
         let mut rows = vec![RowInfo::zeroed(); num_rows + 1];

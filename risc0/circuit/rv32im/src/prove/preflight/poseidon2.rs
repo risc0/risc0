@@ -255,7 +255,7 @@ impl Poseidon2Witgen {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prove::preflight::trace::tests::decode_trace;
+    use crate::prove::preflight::trace::decode_trace;
 
     use bytemuck::Zeroable as _;
     use enum_map::{EnumMap, enum_map};

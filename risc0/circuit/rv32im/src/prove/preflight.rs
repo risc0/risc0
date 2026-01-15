@@ -105,6 +105,7 @@ impl<'a> emu::HostIo for ReplayHostIo<'a> {
     }
 }
 
+#[derive(Default)]
 pub struct PreflightContext2 {
     /// Did this preflight result in termination
     pub is_final: bool,

@@ -20,7 +20,7 @@ use std::ptr::NonNull;
 use crate::execute::Segment;
 use anyhow::Result;
 use cfg_if::cfg_if;
-use preflight::PreflightContext2;
+use preflight::{PreflightContext2, SegmentContext2};
 use risc0_circuit_rv32im_sys::*;
 use risc0_zkp::{core::digest::DIGEST_WORDS, field::baby_bear::Elem};
 
@@ -28,26 +28,37 @@ use crate::verify::verify;
 
 pub type Seal = Vec<u32>;
 
-pub struct SegmentContext {
+struct SegmentContext1 {
     ctx: NonNull<risc0_circuit_rv32im_sys::SegmentContext>,
 }
 
 /// Safety: A [PreflightContext] is an immutable object that can be safely
 /// passed between threads.
 #[derive(Default)]
-pub struct PreflightContext {
+struct PreflightContext1 {
     ctx: *const risc0_circuit_rv32im_sys::PreflightContext,
     po2: u32,
 }
 
-unsafe impl Send for PreflightContext {}
+unsafe impl Send for PreflightContext1 {}
 
 pub struct ProverContext {
     ctx: NonNull<risc0_circuit_rv32im_sys::ProverContext>,
 }
 
-impl SegmentContext {
-    pub fn new(segment: &Segment) -> Result<Self> {
+#[derive(Default)]
+pub struct PreflightContext {
+    ctx1: PreflightContext1,
+    ctx2: PreflightContext2,
+}
+
+pub struct SegmentContext {
+    ctx1: SegmentContext1,
+    ctx2: SegmentContext2,
+}
+
+impl SegmentContext1 {
+    fn new(segment: &Segment) -> Result<Self> {
         tracing::debug!("load_segment: {segment:#?}",);
 
         let mut pages: Vec<RawPage> = Vec::with_capacity(segment.partial_image.pages.len());
@@ -108,25 +119,43 @@ impl SegmentContext {
         Ok(Self { ctx })
     }
 
-    pub fn preflight(&self, po2: usize) -> Result<PreflightContext> {
+    fn preflight(&self, po2: usize) -> Result<PreflightContext1> {
         tracing::debug!("preflight");
         let ctx = ffi_wrap_ptr(|| unsafe {
             risc0_circuit_rv32im_m3_segment_preflight(self.ctx.as_ptr(), po2)
         })?;
-        Ok(PreflightContext {
+        Ok(PreflightContext1 {
             ctx,
             po2: po2 as u32,
         })
     }
 }
 
-impl Drop for SegmentContext {
+impl Drop for SegmentContext1 {
     fn drop(&mut self) {
         unsafe { risc0_circuit_rv32im_m3_segment_free(self.ctx.as_ptr()) };
     }
 }
 
-impl PreflightContext {
+impl SegmentContext {
+    pub fn new(segment: &Segment) -> Result<Self> {
+        Ok(Self {
+            ctx1: SegmentContext1::new(segment)?,
+            ctx2: SegmentContext2::new(segment)?,
+        })
+    }
+
+    pub fn preflight(&self, po2: usize) -> Result<PreflightContext> {
+        let ctx1 = self.ctx1.preflight(po2)?;
+        let ctx2 = self.ctx2.preflight(po2)?;
+
+        assert_trace_eq(&ctx1, &ctx2);
+
+        Ok(PreflightContext { ctx1, ctx2 })
+    }
+}
+
+impl PreflightContext1 {
     pub fn is_final(&self) -> bool {
         unsafe { risc0_circuit_rv32im_m3_preflight_is_final(self.ctx) == 1 }
     }
@@ -135,26 +164,42 @@ impl PreflightContext {
         self.po2
     }
 
-    pub fn row_info_ptr(&self) -> *const RowInfo {
+    fn row_info_ptr(&self) -> *const RowInfo {
         unsafe { risc0_circuit_rv32im_m3_preflight_row_info(self.ctx) }
     }
 
-    pub fn row_info_size(&self) -> usize {
+    fn row_info_size(&self) -> usize {
         unsafe { risc0_circuit_rv32im_m3_preflight_row_info_size(self.ctx) }
     }
 
-    pub fn aux_ptr(&self) -> *const u32 {
+    fn aux_ptr(&self) -> *const u32 {
         unsafe { risc0_circuit_rv32im_m3_preflight_aux(self.ctx) }
     }
 
-    pub fn aux_size(&self) -> usize {
+    fn aux_size(&self) -> usize {
         unsafe { risc0_circuit_rv32im_m3_preflight_aux_size(self.ctx) }
     }
 }
 
-impl Drop for PreflightContext {
+impl Drop for PreflightContext1 {
     fn drop(&mut self) {
         unsafe { risc0_circuit_rv32im_m3_preflight_free(self.ctx) };
+    }
+}
+
+impl PreflightContext {
+    pub fn is_final(&self) -> bool {
+        let a = self.ctx1.is_final();
+        let b = self.ctx2.is_final;
+        assert_eq!(a, b);
+        a
+    }
+
+    pub fn po2(&self) -> u32 {
+        let a = self.ctx1.po2();
+        let b = self.ctx2.po2;
+        assert_eq!(a, b);
+        a
     }
 }
 
@@ -171,7 +216,7 @@ impl ProverContext {
         Ok(Self { ctx })
     }
 
-    pub fn prove(&self, preflight: &PreflightContext) -> Result<Seal> {
+    fn inner_prove1(&self, preflight: &PreflightContext1) -> Result<Seal> {
         tracing::debug!("prove");
         ffi_wrap_void(|| unsafe {
             risc0_circuit_rv32im_m3_prove(
@@ -189,7 +234,7 @@ impl ProverContext {
         Ok(transcript)
     }
 
-    pub fn prove2(&self, preflight: &PreflightContext2) -> Result<Seal> {
+    fn inner_prove2(&self, preflight: &PreflightContext2) -> Result<Seal> {
         tracing::debug!("prove");
         ffi_wrap_void(|| unsafe {
             risc0_circuit_rv32im_m3_prove(
@@ -205,6 +250,13 @@ impl ProverContext {
         verify(&transcript)?;
 
         Ok(transcript)
+    }
+
+    pub fn prove(&self, preflight: &PreflightContext) -> Result<Seal> {
+        let _ = self.inner_prove1(&preflight.ctx1)?;
+        let seal2 = self.inner_prove2(&preflight.ctx2)?;
+
+        Ok(seal2)
     }
 
     fn transcript(&self) -> Result<Seal> {
@@ -233,6 +285,50 @@ pub fn segment_prover(po2: usize) -> Result<ProverContext> {
     Ok(segment_prover)
 }
 
+fn assert_trace_eq(a: &PreflightContext1, b: &preflight::PreflightContext2) {
+    let a_rows = unsafe { std::slice::from_raw_parts(a.row_info_ptr(), a.row_info_size()) };
+    let a_aux = unsafe { std::slice::from_raw_parts(a.aux_ptr(), a.aux_size()) };
+    let trace_a = preflight::trace::decode_trace(a_rows, a_aux);
+
+    let trace_b = preflight::trace::decode_trace(&b.row_info, &b.aux);
+
+    let mut equality_report = vec![];
+    for block_type in BlockType::iter() {
+        let a: Vec<_> = trace_a
+            .iter()
+            .filter(|b| b.block_type() == block_type)
+            .collect();
+        let b: Vec<_> = trace_b
+            .iter()
+            .filter(|b| b.block_type() == block_type)
+            .collect();
+
+        if a.len() != b.len() {
+            equality_report.push(format!(
+                "{block_type:?} lengths don't match; {} != {}",
+                a.len(),
+                b.len()
+            ));
+        } else {
+            for i in 0..a.len() {
+                if a[i] != b[i] {
+                    equality_report.push(format!(
+                        "{block_type:?} index={i}: {:?} != {:?}",
+                        a[i], b[i]
+                    ));
+                }
+            }
+        }
+    }
+    if !equality_report.is_empty() {
+        panic!(
+            "traces not equal: \n{}",
+            equality_report.join("\n\n=============\n")
+        );
+    }
+    assert_eq!(a_rows.len(), b.row_info.len());
+}
+
 #[cfg(test)]
 #[cfg(feature = "cuda")]
 mod tests {
@@ -241,7 +337,6 @@ mod tests {
     };
     use paste::paste;
     use risc0_binfmt::{MemoryImage, Program};
-    use risc0_circuit_rv32im_sys::BlockType;
 
     use super::*;
 
@@ -252,7 +347,7 @@ mod tests {
     // The exception is the test of fence, which was built with
     // https://archlinux.org/packages/extra/x86_64/riscv64-elf-gcc/ v14.0.1-1
 
-    fn run_test_inner(test_name: &str, po2: usize, func: impl Fn(&[u8], usize)) {
+    fn run_test(test_name: &str, po2: usize) {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
@@ -274,18 +369,10 @@ mod tests {
             let mut elf = Vec::new();
             entry.read_to_end(&mut elf).unwrap();
 
-            func(&elf, po2);
+            run_program(&elf, po2);
             return;
         }
         panic!("No filename matching '{test_name}'");
-    }
-
-    fn run_test(test_name: &str, po2: usize) {
-        run_test_inner(test_name, po2, run_program);
-    }
-
-    fn run_test2(test_name: &str, po2: usize) {
-        run_test_inner(test_name, po2, run_program2);
     }
 
     /*  This test code was used to verify that recursion lift works (and fails if
@@ -360,90 +447,6 @@ mod tests {
         prover.prove(&preflight).unwrap();
     }
 
-    fn assert_trace_eq(a: &PreflightContext, b: &preflight::PreflightContext2) {
-        let a_rows = unsafe { std::slice::from_raw_parts(a.row_info_ptr(), a.row_info_size()) };
-        let a_aux = unsafe { std::slice::from_raw_parts(a.aux_ptr(), a.aux_size()) };
-        let trace_a = preflight::trace::tests::decode_trace(a_rows, a_aux);
-
-        let trace_b = preflight::trace::tests::decode_trace(&b.row_info, &b.aux);
-
-        let mut equality_report = vec![];
-        for block_type in BlockType::iter() {
-            let a: Vec<_> = trace_a
-                .iter()
-                .filter(|b| b.block_type() == block_type)
-                .collect();
-            let b: Vec<_> = trace_b
-                .iter()
-                .filter(|b| b.block_type() == block_type)
-                .collect();
-
-            if a.len() != b.len() {
-                equality_report.push(format!(
-                    "{block_type:?} lengths don't match; {} != {}",
-                    a.len(),
-                    b.len()
-                ));
-            } else {
-                for i in 0..a.len() {
-                    if a[i] != b[i] {
-                        equality_report.push(format!(
-                            "{block_type:?} index={i}: {:?} != {:?}",
-                            a[i], b[i]
-                        ));
-                    }
-                }
-            }
-        }
-        if !equality_report.is_empty() {
-            panic!(
-                "traces not equal: \n{}",
-                equality_report.join("\n\n=============\n")
-            );
-        }
-        assert_eq!(a_rows.len(), b.row_info.len());
-    }
-
-    fn run_program2(elf: &[u8], po2: usize) {
-        let program = Program::load_elf(elf, u32::MAX).unwrap();
-        let mut image = MemoryImage::new_kernel(program);
-
-        let mut segments = Vec::new();
-        let trace = Vec::new();
-        let execution_limit = ExecutionLimit::default()
-            .with_segment_po2(po2)
-            .with_hard_session_limit(1 << 24);
-        Executor::new(
-            image.clone(),
-            NullSyscall,
-            None,
-            trace,
-            None,
-            RV32IM_M3_CIRCUIT_VERSION,
-        )
-        .run(execution_limit, |update: SegmentUpdate| {
-            segments.push(update.apply_into_segment(&mut image)?);
-            Ok(())
-        })
-        .unwrap();
-        let segment = segments.first().unwrap().clone();
-        // segment.partial_image.dump();
-
-        let segment_ctx = SegmentContext::new(&segment).unwrap();
-        let preflight = segment_ctx.preflight(po2).unwrap();
-
-        let segment_ctx2 = preflight::SegmentContext2::new(&segment).unwrap();
-        let preflight2 = segment_ctx2.preflight(po2).unwrap();
-
-        assert_trace_eq(&preflight, &preflight2);
-
-        let prover = segment_prover(po2).unwrap();
-        prover.prove(&preflight).unwrap();
-
-        let prover = segment_prover(po2).unwrap();
-        prover.prove2(&preflight2).unwrap();
-    }
-
     const DEFAULT_PO2: usize = 13;
 
     macro_rules! test_case {
@@ -453,12 +456,6 @@ mod tests {
                 #[gpu_guard::gpu_guard]
                 fn $func_name() {
                     run_test(stringify!($func_name), DEFAULT_PO2);
-                }
-
-                #[test_log::test]
-                #[gpu_guard::gpu_guard]
-                fn [<$func_name _preflight2>]() {
-                    run_test2(stringify!($func_name), DEFAULT_PO2);
                 }
             }
         };

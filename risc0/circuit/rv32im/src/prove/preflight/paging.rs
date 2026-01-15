@@ -361,7 +361,7 @@ impl PagedMemory {
 mod tests {
     use super::*;
     use crate::execute::PAGE_BYTES;
-    use crate::prove::preflight::trace::tests::decode_trace;
+    use crate::prove::preflight::trace::decode_trace;
 
     use bytemuck::Zeroable as _;
     use enum_map::{EnumMap, enum_map};
