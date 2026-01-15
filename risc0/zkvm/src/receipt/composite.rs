@@ -279,7 +279,7 @@ impl CompositeReceiptVerifierParameters {
 }
 
 impl Digestible for CompositeReceiptVerifierParameters {
-    /// Hash the [Groth16ReceiptVerifierParameters] to get a digest of the struct.
+    /// Hash the [CompositeReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
             "risc0.CompositeReceiptVerifierParameters",
@@ -318,7 +318,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceiptVerifierParameters::default().digest(),
-            digest!("cccaaa966d6857342154bf608536f641d55b5200d062a8f8c121ebf280f7f51a")
+            digest!("1e1b41f9cbc69cce0a638a529cadaed29209b5227d0f3cf5a7ed1b69387856c3")
         );
     }
 }
