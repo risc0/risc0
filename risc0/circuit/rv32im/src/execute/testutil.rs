@@ -16,7 +16,7 @@
 use std::collections::BTreeMap;
 
 use anyhow::{Result, bail};
-use risc0_binfmt::{MemoryImage, Program, WordAddr};
+use risc0_binfmt::{ByteAddr, MemoryImage, Program, WordAddr};
 use risc0_core::scope;
 use risc0_zkp::{
     MAX_CYCLES_PO2,
@@ -207,6 +207,11 @@ impl Assembler {
         let mut image = MemoryImage::default();
         for (offset, &instr) in self.text.iter().enumerate() {
             image.set_word(entry + offset, instr).unwrap();
+        }
+        for (&addr, &word) in self.data.iter() {
+            image
+                .set_word(ByteAddr(addr).waddr_aligned().unwrap(), word)
+                .unwrap();
         }
 
         Program::new_from_entry_and_image(entry.baddr().0, image)
