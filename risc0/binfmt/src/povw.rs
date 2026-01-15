@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -170,6 +170,14 @@ impl PovwNonce {
             *x = u32::from_le(*x);
         }
         u32s
+    }
+
+    /// Creates a nonce from an array of 8 u32 values.
+    pub fn from_u32s(mut b: [u32; 8]) -> Self {
+        for x in &mut b {
+            *x = u32::to_le(*x);
+        }
+        Self::from_bytes(bytemuck::cast(b))
     }
 
     /// Converts the nonce to an array of 16 u16 values.

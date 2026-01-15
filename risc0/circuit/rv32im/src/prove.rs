@@ -111,6 +111,7 @@ impl SegmentContext1 {
                 len: segment.write_record.len(),
             },
             insn_counter: segment.insn_counter,
+            povw_nonce: segment.povw_nonce.map(|n| n.to_u32s()).unwrap_or_default(),
         };
 
         let ctx =
@@ -178,6 +179,15 @@ impl PreflightContext1 {
 
     fn aux_size(&self) -> usize {
         unsafe { risc0_circuit_rv32im_m3_preflight_aux_size(self.ctx) }
+    }
+
+    pub fn block_counts(&self) -> enum_map::EnumMap<BlockType, u32> {
+        let counts_ptr = unsafe { risc0_circuit_rv32im_m3_preflight_block_counts(self.ctx) };
+        let counts_slice = unsafe { std::slice::from_raw_parts(counts_ptr, BlockType::COUNT) };
+
+        BlockType::iter()
+            .zip(counts_slice.iter().copied())
+            .collect()
     }
 }
 

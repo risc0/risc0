@@ -36,33 +36,8 @@ struct PhysMemWriteWitness {
 using RegMemReadWitness = PhysMemReadWitness;
 using RegMemWriteWitness = PhysMemWriteWitness;
 
-/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
-struct VirtAddrWitness {
-  uint32_t readCycle;
-  uint32_t vpage;
-  uint32_t ppage;
-  uint32_t wordOffset;
-};
+// When we implment smode, we will actually neeed distinct witness data,
+// but for now, they are just typedefs
 
-/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
-struct VirtMemReadWitness {
-  VirtAddrWitness addr;
-  uint32_t prevCycle;
-  uint32_t value;
-};
-
-/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
-struct VirtMemWriteWitness {
-  VirtAddrWitness addr;
-  uint32_t prevCycle;
-  uint32_t prevValue;
-  uint32_t value;
-};
-
-struct VirtAddrResolve {
-  uint32_t cacheCycle;
-  VirtAddrWitness addr;
-  PhysMemReadWitness satp;
-  PhysMemReadWitness pte1;
-  PhysMemReadWitness pte2;
-};
+using VirtMemReadWitness = PhysMemReadWitness;
+using VirtMemWriteWitness = PhysMemWriteWitness;

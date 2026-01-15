@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -597,7 +597,8 @@ impl PagedMemory {
     }
 
     pub(crate) fn touched_pages(&self) -> u64 {
-        self.page_cache.len() as u64
+        // add one for registers page and one for ??
+        self.page_cache.len() as u64 + 2
     }
 
     #[inline(always)]

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -16,8 +16,6 @@
 fn main() {
     #[cfg(feature = "prove")]
     download_zkr();
-    #[cfg(feature = "prove")]
-    generate_zkr_table();
 }
 
 #[cfg(feature = "prove")]
@@ -83,38 +81,4 @@ fn download_zkr() {
         let summary: DownloadSummary = result.unwrap();
         eprintln!("{summary}");
     }
-}
-
-#[cfg(feature = "prove")]
-fn generate_zkr_table() {
-    use std::fmt::Write as _;
-    use std::path::Path;
-
-    use liblzma::read::XzDecoder;
-
-    let mut output = String::new();
-
-    writeln!(&mut output, "const ZKRS: &[(&[u8], usize)] = &[").unwrap();
-
-    for po2 in 12..=24 {
-        let zkr_name = format!("lift_rv32im_m3_{po2}.zkr.xz");
-        let zkr_path = Path::new("src/prove")
-            .join(&zkr_name)
-            .canonicalize()
-            .unwrap();
-        println!("cargo:rerun-if-changed={}", zkr_path.display());
-        let mut decoder = XzDecoder::new(std::fs::File::open(&zkr_path).unwrap());
-        std::io::copy(&mut decoder, &mut std::io::sink()).unwrap();
-        let size = decoder.total_out();
-        writeln!(
-            &mut output,
-            "(include_bytes!(\"{}\"), {size}),",
-            zkr_path.display()
-        )
-        .unwrap();
-    }
-    writeln!(&mut output, "];").unwrap();
-
-    let out_dir = std::env::var_os("OUT_DIR").unwrap();
-    std::fs::write(Path::new(&out_dir).join("zkr_table.rs"), &output).unwrap();
 }

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -35,6 +35,9 @@ use risc0_zkp::core::digest::{DIGEST_BYTES, DIGEST_SHORTS, DIGEST_WORDS, Digest}
 use risc0_zkp::field::baby_bear::Elem;
 use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "execute")]
+pub use risc0_circuit_rv32im_sys::BlockType;
 
 pub use self::zirgen::CircuitImpl;
 pub use verify::verify;
@@ -104,6 +107,7 @@ pub struct Claim {
     pub post_state: Digest,
     pub output: Option<Digest>,
     pub terminate_state: Option<TerminateState>,
+    pub povw_nonce: PovwNonce,
 }
 
 struct Decoder<'a> {
@@ -177,6 +181,10 @@ impl Claim {
         let term_a0 = decoder.read_u32_from_shorts()?;
         let term_a1 = decoder.read_u32_from_shorts()?;
         let output = decoder.read_digest_from_shorts()?;
+        let mut povw_nonce = [0u32; 8];
+        for v in &mut povw_nonce {
+            *v = decoder.read_u32_from_shorts()?;
+        }
 
         let (terminate_state, output) = if is_terminate == 1 {
             (
@@ -196,6 +204,7 @@ impl Claim {
             post_state,
             output,
             terminate_state,
+            povw_nonce: PovwNonce::from_u32s(povw_nonce),
         })
     }
 
@@ -216,12 +225,6 @@ impl Claim {
 
 /// Decodes a PoVW nonce from a segment seal.
 pub fn decode_povw_nonce(segment_seal: &[u32]) -> Result<PovwNonce> {
-    let seal_version = segment_seal[0];
-    ensure!(
-        seal_version == RV32IM_SEAL_VERSION,
-        "seal version mismatch: actual={seal_version} expected={RV32IM_SEAL_VERSION}"
-    );
-    let _segment_seal = &segment_seal[1..];
-
-    Err(anyhow!("m3 doesn't support povw"))
+    let claim = Claim::decode(segment_seal)?;
+    Ok(claim.povw_nonce)
 }

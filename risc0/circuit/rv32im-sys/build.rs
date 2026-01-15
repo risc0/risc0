@@ -88,6 +88,7 @@ fn main() {
         .files(glob_paths("cxx/rv32im/*.cpp"))
         .files(glob_paths("cxx/rv32im/emu/*.cpp"))
         .files(glob_paths("cxx/verify/*.cpp"))
+        .files(glob_paths("cxx/verify/info/*.cpp"))
         .files(glob_paths("cxx/zkp/*.cpp"))
         .files(generated_files);
 

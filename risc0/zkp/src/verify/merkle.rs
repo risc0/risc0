@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -88,11 +88,11 @@ impl<'a> MerkleTreeVerifier<'a> {
         row_size: usize,
         col_size: usize,
         queries: usize,
-    ) -> Self {
+    ) -> Result<Self, VerificationError> {
         let params = MerkleTreeParams::new(row_size, col_size, queries);
 
         // Fill top vector with digests from IOP.
-        let top = iop.read_pod_slice(params.top_size);
+        let top = iop.read_pod_slice(params.top_size)?;
         // Populate hashes up to the root of the tree.
         let mut rest = Vec::with_capacity(params.top_size - 1);
 
@@ -101,8 +101,12 @@ impl<'a> MerkleTreeVerifier<'a> {
         if !fill_rest.is_empty() {
             for i in (params.top_size / 2..params.top_size).rev() {
                 let top_idx = params.idx_to_top(2 * i);
-                fill_rest[params.idx_to_rest(i)]
-                    .write(hashfn.hash_pair(&top[top_idx], &top[top_idx + 1]));
+                let (left, right) = (&top[top_idx], &top[top_idx + 1]);
+                if !hashfn.is_digest_valid(left) || !hashfn.is_digest_valid(right) {
+                    tracing::debug!("top digests read from iop are invalid");
+                    return Err(VerificationError::ReceiptFormatError);
+                }
+                fill_rest[params.idx_to_rest(i)].write(hashfn.hash_pair(left, right));
             }
         }
         for i in (1..params.top_size / 2).rev() {
@@ -124,7 +128,7 @@ impl<'a> MerkleTreeVerifier<'a> {
         // Commit to root (index 1).
         let verifier = MerkleTreeVerifier { params, top, rest };
         iop.commit(verifier.root());
-        verifier
+        Ok(verifier)
     }
 
     /// Returns the root hash of the tree.
@@ -150,7 +154,7 @@ impl<'a> MerkleTreeVerifier<'a> {
             });
         }
         // Initialize a vector to hold field elements.
-        let out: &[F::Elem] = iop.read_field_elem_slice(self.params.col_size);
+        let out: &[F::Elem] = iop.read_field_elem_slice(self.params.col_size)?;
         // Get the hash at the leaf of the tree by hashing these field elements.
         let mut cur = hashfn.hash_elem_slice(out);
         // Shift idx to start of the row
@@ -160,10 +164,14 @@ impl<'a> MerkleTreeVerifier<'a> {
             // child.
             let low_bit = idx % 2;
             // Retrieve the other parent from the IOP.
-            let other: &Digest = match iop.read_pod_slice(1) {
+            let other: &Digest = match iop.read_pod_slice(1)? {
                 [other] => other,
                 _ => unreachable!(),
             };
+            if !hashfn.is_digest_valid(other) {
+                tracing::debug!("merkle proof node read from iop is invalid");
+                return Err(VerificationError::ReceiptFormatError);
+            }
             // Now ascend to the parent index, and compute the hash there.
             idx /= 2;
             if low_bit == 1 {

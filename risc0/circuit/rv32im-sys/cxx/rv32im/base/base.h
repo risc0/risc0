@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -42,6 +42,8 @@ template <typename C> struct ValU32 {
 #define PICUS_INPUT(ctx, x)
 #define RANGE_PRECONDITION(ctx, low, x, high)
 #define RANGE_POSTCONDITION(ctx, low, x, high)
+#define PICUS_ASSERT(ctx, cond)
+#define PICUS_ARGUMENT(ctx, inputs, outputs)
 #define PICUS_CALL(ctx, outputs, name, inputs)
 #define PICUS_BEGIN_OUTLINE(...)
 #define PICUS_END_OUTLINE

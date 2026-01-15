@@ -77,6 +77,7 @@ struct RustSegment {
   RustSliceReadRecord reads;
   RustSliceWord writes;
   uint32_t suspendCycle;
+  uint32_t povwNonce[8];
 };
 
 static void setLastError(const char* msg) {
@@ -167,6 +168,7 @@ struct SegmentContext {
   MemoryImage image;
   ReplayHostIO io;
   uint32_t endCycle;
+  uint32_t povwNonce[8];
 };
 
 struct PreflightContext {
@@ -212,6 +214,7 @@ SegmentContext* risc0_circuit_rv32im_m3_segment_new(const RustSegment* segment) 
     // ctx->image.dump();
     ctx->io.loadSegment(segment);
     ctx->endCycle = segment->suspendCycle;
+    memcpy(&ctx->povwNonce, &segment->povwNonce, sizeof(uint32_t) * 8);
     LOG(1, "endCycle: " << ctx->endCycle);
     return ctx;
   });
@@ -221,7 +224,8 @@ PreflightContext* risc0_circuit_rv32im_m3_segment_preflight(SegmentContext* ctx,
   return tryRet([&] {
     nvtx3::scoped_range range("preflight");
     PreflightContext* ret = new PreflightContext{};
-    ret->results = preflight(po2, ctx->image, ctx->io, ctx->endCycle);
+    PovwNonce povwNonce(ctx->povwNonce);
+    ret->results = preflight(po2, ctx->image, ctx->io, ctx->endCycle, povwNonce);
     if (ret->results->cycles > ctx->endCycle) {
       throw std::runtime_error("Preflight cycles > requested end cycle");
     }
@@ -257,6 +261,10 @@ const uint32_t* risc0_circuit_rv32im_m3_preflight_aux(PreflightContext* ctx) {
 
 size_t risc0_circuit_rv32im_m3_preflight_aux_size(PreflightContext* ctx) {
   return ctx->results->aux.size();
+}
+
+uint32_t* risc0_circuit_rv32im_m3_preflight_block_counts(PreflightContext* ctx) {
+  return ctx->results->block_counts;
 }
 
 ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {

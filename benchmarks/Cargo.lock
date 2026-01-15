@@ -3796,7 +3796,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3819,7 +3819,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "2.0.2"
+version = "5.0.0"
 dependencies = [
  "cc",
  "directories",
@@ -3878,7 +3878,9 @@ dependencies = [
  "metal",
  "rand 0.9.1",
  "rayon",
+ "risc0-circuit-recursion-povw-zkrs",
  "risc0-circuit-recursion-sys",
+ "risc0-circuit-recursion-zkrs",
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
@@ -3886,6 +3888,13 @@ dependencies = [
  "sha2",
  "tracing",
  "zip",
+]
+
+[[package]]
+name = "risc0-circuit-recursion-povw-zkrs"
+version = "5.0.0"
+dependencies = [
+ "liblzma",
 ]
 
 [[package]]
@@ -3898,6 +3907,13 @@ dependencies = [
  "risc0-core",
  "risc0-sppark",
  "risc0-sys",
+]
+
+[[package]]
+name = "risc0-circuit-recursion-zkrs"
+version = "5.0.0"
+dependencies = [
+ "liblzma",
 ]
 
 [[package]]
@@ -4002,7 +4018,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16-sys"
-version = "0.2.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blst",
@@ -4012,7 +4028,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sppark"
-version = "0.1.14"
+version = "5.0.0"
 dependencies = [
  "cc",
 ]
@@ -4029,11 +4045,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-common"
+version = "5.0.0"
+dependencies = [
+ "risc0-zkvm-platform",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
-version = "2.2.2"
+version = "5.0.0"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkos-common",
  "risc0-zkvm-platform",
  "sha2",
 ]
@@ -4071,7 +4095,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -4120,7 +4144,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.3.0"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "cfg-if",

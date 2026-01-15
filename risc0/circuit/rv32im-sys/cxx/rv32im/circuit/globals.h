@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -26,8 +26,11 @@ template <typename C> struct GlobalsBlock {
   Reg<C> p2Count;
   Reg<C> finalCycle;
   Reg<C> finalCycleCeilDiv;
-  RegU8<C> checkRoundedGT;
-  RegU8<C> checkRoundedLT;
+  RegU16<C> ceilDivLow;
+  RegU8<C> ceilDivHigh;
+  RegU8<C> delta;
+  RegU8<C> deltaTimes32;
+  RegU32<C> povwNonce[8];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, "rootIn", rootIn);
@@ -35,8 +38,11 @@ template <typename C> struct GlobalsBlock {
     T::apply(ctx, "p2Count", p2Count);
     T::apply(ctx, "finalCycle", finalCycle);
     T::apply(ctx, "finalCycleCeilDiv", finalCycleCeilDiv);
-    T::apply(ctx, "checkRoundedGT", checkRoundedGT);
-    T::apply(ctx, "checkRoundedLT", checkRoundedLT);
+    T::apply(ctx, "ceilDivLow", ceilDivLow);
+    T::apply(ctx, "ceilDivHigh", ceilDivHigh);
+    T::apply(ctx, "delta", delta);
+    T::apply(ctx, "deltaTimes32", deltaTimes32);
+    T::apply(ctx, "povwNonce", povwNonce);
   }
 
   FDEV void set(CTX, GlobalsWitness wit) DEV;

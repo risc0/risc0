@@ -23,4 +23,8 @@ fn main() {
         let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
         opt_gen::generate(&format!("{out_dir}/preflight_opt_gen.rs"));
     }
+
+    pub fn iter() -> impl Iterator<Item = Self> {
+        <Self as strum::IntoEnumIterator>::iter()
+    }
 }

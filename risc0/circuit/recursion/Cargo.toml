@@ -32,7 +32,9 @@ prove = [
     "dep:zip",
     "risc0-core/perf",
     "risc0-zkp/prove",
+    "risc0-circuit-recursion-povw-zkrs",
     "risc0-circuit-recursion-sys",
+    "risc0-circuit-recursion-zkrs",
     "std",
 ]
 std = ["risc0-zkp/std"]
@@ -63,7 +65,9 @@ lazy-regex = { version = "3.3", optional = true }
 liblzma = { version = "0.4", optional = true, features = ["static"] }
 rand = { version = "0.9.1", optional = true }
 rayon = { version = "1.5", optional = true }
+risc0-circuit-recursion-povw-zkrs = { workspace = true, optional = true }
 risc0-circuit-recursion-sys = { workspace = true, optional = true }
+risc0-circuit-recursion-zkrs = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 zip = { version = "2.1", default-features = false, optional = true, features = [
     "deflate",

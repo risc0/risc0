@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -21,8 +21,6 @@ use super::Program;
 
 const ZKR_ZIP: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/recursion_zkr.zip"));
 
-include!(concat!(env!("OUT_DIR"), "/zkr_table.rs"));
-
 pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
     let mut zip = zip::ZipArchive::new(Cursor::new(ZKR_ZIP))?;
     let encoded = extract_zkr(&mut zip, name)?;
@@ -31,7 +29,12 @@ pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
 
 pub fn get_zkr_m3(name: &str, po2: usize, recursion_po2: usize) -> Result<Program> {
     let encoded = if name.contains("rv32im_m3") {
-        extract_zkr_m3(po2)?
+        let section = if name.contains("povw") {
+            ZkrSection::LiftPovw
+        } else {
+            ZkrSection::Lift
+        };
+        extract_zkr_m3(section, po2, name)?
     } else {
         let mut zip = zip::ZipArchive::new(Cursor::new(ZKR_ZIP))?;
         extract_zkr(&mut zip, name)?
@@ -55,16 +58,43 @@ pub fn get_all_zkrs() -> Result<Vec<(String, Vec<u32>)>> {
             Ok((name, encoded))
         })
         .chain(crate::LIFT_PO2_RANGE.map(|po2| {
-            let encoded = extract_zkr_m3(po2)?;
             let name = format!("lift_rv32im_m3_{po2}.zkr");
+            let encoded = extract_zkr_m3(ZkrSection::Lift, po2, &name)?;
+            Ok((name, encoded))
+        }))
+        .chain(crate::LIFT_PO2_RANGE.map(|po2| {
+            let name = format!("lift_rv32im_m3_povw_{po2}.zkr");
+            let encoded = extract_zkr_m3(ZkrSection::LiftPovw, po2, &name)?;
             Ok((name, encoded))
         }))
         .collect()
 }
 
-fn extract_zkr_m3(po2: usize) -> Result<Vec<u32>> {
-    let idx = po2 - crate::LIFT_PO2_RANGE.min().unwrap();
-    let (xz_bytes, uncompressed_size) = ZKRS[idx];
+enum ZkrSection {
+    Lift,
+    LiftPovw,
+}
+
+impl ZkrSection {
+    fn table(&self) -> &[(&[u8], usize, &str)] {
+        use risc0_circuit_recursion_povw_zkrs::ZKRS as POVW_ZKRS;
+        use risc0_circuit_recursion_zkrs::ZKRS;
+
+        match self {
+            Self::Lift => ZKRS,
+            Self::LiftPovw => POVW_ZKRS,
+        }
+    }
+}
+
+fn extract_zkr_m3(section: ZkrSection, po2: usize, expected_name: &str) -> Result<Vec<u32>> {
+    let idx = po2 - crate::LIFT_PO2_RANGE.start();
+    let (xz_bytes, uncompressed_size, name) = section.table()[idx];
+
+    // Make sure we got the right one
+    if name != expected_name {
+        bail!("failed to find .zkr: {expected_name}");
+    }
 
     if uncompressed_size % std::mem::size_of::<u32>() != 0 {
         bail!(".zkr is incorrect size");

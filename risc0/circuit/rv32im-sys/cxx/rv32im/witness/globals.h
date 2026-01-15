@@ -25,4 +25,5 @@ struct GlobalsWitness {
   uint32_t p2Count;
   uint32_t finalCycle;
   uint32_t v2Compat;
+  uint32_t povwNonce[8];
 };

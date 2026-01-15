@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -49,7 +49,6 @@ fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     assert_eq!(session_info.exit_code, ExitCode::Halted(0));
 
     let decoded_journal = Journal::decode(&session_info.journal.bytes)?;
-    println!("decoded_journal: {decoded_journal:#?}");
 
     Ok(decoded_journal)
 }
@@ -263,7 +262,10 @@ fn two_batched_updates() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn prove_three_sequential_updates_inner() -> anyhow::Result<()> {
+#[test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
+#[gpu_guard::gpu_guard]
+fn prove_three_sequential_updates() -> anyhow::Result<()> {
     let work_log_id = uint!(0xdeafbee7_U160);
 
     let work_info = prove_busy_loop(
@@ -381,15 +383,6 @@ fn prove_three_sequential_updates_inner() -> anyhow::Result<()> {
 
     assert_eq!(journal, expected_journal);
     Ok(())
-}
-
-// XXX M3
-#[test]
-#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
-#[gpu_guard::gpu_guard]
-#[should_panic(expected = "m3 doesn't support povw")]
-fn prove_three_sequential_updates() {
-    prove_three_sequential_updates_inner().unwrap();
 }
 
 #[test]

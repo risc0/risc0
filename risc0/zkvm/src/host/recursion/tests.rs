@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -363,10 +363,8 @@ mod povw {
 
     use super::*;
 
-    // XXX M3
     #[test_log::test]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    #[should_panic(expected = "m3 doesn't support povw")]
     fn test_recursion_lift_then_unwrap() {
         // Prove the base case
         let (journal, segment) = ECHO_SEGMENT.clone();
@@ -457,11 +455,9 @@ mod povw {
         Ok(())
     }
 
-    // XXX M3
     #[test_log::test]
     #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    #[should_panic(expected = "m3 doesn't support povw")]
     fn test_recursion_lift_join_unwrap() {
         test_recursion_lift_join_unwrap_inner().unwrap();
     }
@@ -551,10 +547,8 @@ mod povw {
         Ok(())
     }
 
-    // XXX M3
     #[test_log::test]
     #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    #[should_panic(expected = "m3 doesn't support povw")]
     fn test_recursion_lift_resolve_unwrap() {
         test_recursion_lift_resolve_unwrap_inner().unwrap();
     }
@@ -599,7 +593,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("ab0e9172f4306b6a3b2250055036565c2421683b39ee6c20366d17350756ad19")
+        digest!("95099611e3084c19eadf886fcae4e41772ceee6a3961a726ae76c2232334e064")
     );
 }
 
