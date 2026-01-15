@@ -42,6 +42,9 @@ pub struct Program {
 
 impl Program {
     /// Initialize a RISC Zero Program from an appropriate ELF file
+    ///
+    /// max_mem is an inclusive upper bound on the addresses that can be loaded. If the ELF
+    /// specifies data to be loaded to a higher address, and error will be returned.
     pub fn load_elf(input: &[u8], max_mem: u32) -> Result<Program> {
         let mut image = MemoryImage::default();
         let elf = ElfBytes::<LittleEndian>::minimal_parse(input)
@@ -98,24 +101,20 @@ impl Program {
                 .try_into()
                 .map_err(|err| anyhow!("offset is larger than 32 bits. {err}"))?;
 
-            // Compute the end of the segment in the program image, to catch overflow here.
-            let program_end = vaddr
-                .checked_add(mem_size)
-                .context("Invalid segment vaddr")?;
-            if program_end.0 > max_mem {
+            // Compute the end of the segment in the program image, and compare to inclusive bound
+            // on the largest address that can be written, max_mem.
+            // Cast to u64 to avoid overflow if max_mem == u32::MAX.
+            let program_end = (vaddr.0 as u64) + (mem_size as u64);
+            if program_end > max_mem as u64 + 1 {
                 bail!(
-                    "Address [{program_end:?}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
+                    "Address [0x{program_end:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
                 );
             }
 
             // Copy the data from the input into the program image. If the mem_size puts the end
             // past the input end, the remainder will be unset, defaulting to zeroes.
-            let input_end = usize::min(
-                input_offset
-                    .checked_add(mem_size)
-                    .context("Invalid input offset and size")? as usize,
-                input.len(),
-            );
+            let input_end =
+                usize::min(input_offset.saturating_add(file_size) as usize, input.len());
             let input_buf = input
                 .get((input_offset as usize)..input_end)
                 .context("Invalid segment size")?;
@@ -411,7 +410,8 @@ impl<'a> ProgramBinary<'a> {
     }
 
     fn user_program(&self) -> Result<Program> {
-        Program::load_elf(self.user_elf, KERNEL_START_ADDR.0).context("Loading user ELF")
+        Program::load_elf(self.user_elf, KERNEL_START_ADDR.0 - WORD_SIZE as u32)
+            .context("Loading user ELF")
     }
 
     fn kernel_program(&self) -> Result<Program> {
