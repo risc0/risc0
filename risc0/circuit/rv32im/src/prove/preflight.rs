@@ -15,6 +15,7 @@
 
 #![allow(dead_code)]
 
+mod bigint;
 mod constants;
 mod decode;
 mod emu;

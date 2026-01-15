@@ -15,19 +15,20 @@
 
 use std::collections::{BTreeMap, btree_map::Entry as BTreeMapEntry};
 
-use anyhow::{Result, bail, ensure};
+use anyhow::{Result, anyhow, bail, ensure};
 use bytemuck::Zeroable as _;
 
 use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im_sys::{
-    DecodeWitness, EcallP2Witness, EcallReadWitness, EcallTerminateWitness, EcallWriteWitness,
-    FetchWitness, InstAuipcWitness, InstBranchWitness, InstEcallWitness, InstImmWitness,
-    InstJalWitness, InstJalrWitness, InstLoadWitness, InstLuiWitness, InstMretWitness,
-    InstRegWitness, InstResumeWitness, InstStoreWitness, InstSuspendWitness, InstTrapWitness,
-    MakeTableWitness, P2State, P2StepWitness, PhysMemReadWitness, PhysMemWriteWitness,
-    ReadByteWitness, ReadWordWitness, RegMemReadWitness, RegMemWriteWitness, UnitAddSubWitness,
-    UnitBaseWitness, UnitBitWitness, UnitDivWitness, UnitLtWitness, UnitMulWitness,
-    UnitShiftWitness, VirtAddrWitness, VirtMemReadWitness, VirtMemWriteWitness, fp::Fp,
+    BigIntWitness, DecodeWitness, EcallBigIntWitness, EcallP2Witness, EcallReadWitness,
+    EcallTerminateWitness, EcallWriteWitness, FetchWitness, InstAuipcWitness, InstBranchWitness,
+    InstEcallWitness, InstImmWitness, InstJalWitness, InstJalrWitness, InstLoadWitness,
+    InstLuiWitness, InstMretWitness, InstRegWitness, InstResumeWitness, InstStoreWitness,
+    InstSuspendWitness, InstTrapWitness, MakeTableWitness, P2State, P2StepWitness,
+    PhysMemReadWitness, PhysMemWriteWitness, ReadByteWitness, ReadWordWitness, RegMemReadWitness,
+    RegMemWriteWitness, UnitAddSubWitness, UnitBaseWitness, UnitBitWitness, UnitDivWitness,
+    UnitLtWitness, UnitMulWitness, UnitShiftWitness, VirtAddrWitness, VirtMemReadWitness,
+    VirtMemWriteWitness, fp::Fp,
 };
 use risc0_zkp::{
     core::{
@@ -39,9 +40,10 @@ use risc0_zkp::{
 
 use crate::execute::{
     HOST_ECALL_BIGINT, HOST_ECALL_POSEIDON2, HOST_ECALL_READ, HOST_ECALL_TERMINATE,
-    HOST_ECALL_WRITE, REG_A0, REG_A1, REG_A2, REG_A3, REG_A7,
+    HOST_ECALL_WRITE, REG_A0, REG_A1, REG_A2, REG_A3, REG_A7, REG_T0, REG_T2,
 };
 use crate::prove::preflight::{
+    bigint::{self, BigIntInstruction, BigIntPreflight, witgen_big_int},
     constants::{
         BITS_PER_BYTE, BYTES_PER_WORD, COMPRESSED_INST_LOOKUP_WORD, CSR_MEPC, CSR_MNOV2COMPAT,
         CSR_MSMODE, CSR_MSPC, CSR_MTECALL, CSR_MTEXCEPT, CSR_MVERSION, KERNEL_START_WORD,
@@ -1191,8 +1193,85 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
         Ok(())
     }
 
-    fn do_ecall_big_int(&mut self) {
-        todo!("ecall_big_int")
+    fn do_ecall_big_int(&mut self, trace: &mut Trace) -> Result<()> {
+        let (poly_witness, count) = witgen_big_int(|addr| self.peek_phys_memory(addr))?;
+        tracing::trace!("BIGINT ecall with count = {count}");
+        // TODO: Based on count + polyWitness paging, decide if we need to abort
+        let dinst = trace.get_block(self.dinst.unwrap());
+        let cycle = self.cur_cycle;
+        let fetch = dinst.fetch;
+        let (_, a7) = self.read_reg(REG_A7 as u32, false);
+        let (bi_mm, t0) = self.read_reg(REG_T0 as u32, false);
+        let (mut bi_pc_word, t2) = self.read_reg(REG_T2 as u32, false);
+        bi_pc_word /= 4;
+
+        trace.add_block(EcallBigIntWitness {
+            cycle,
+            fetch,
+            a7,
+            t0,
+            t2,
+            count,
+        });
+
+        self.cur_cycle += 1;
+        let mut pf = BigIntPreflight::new();
+
+        for i in 0..count {
+            tracing::trace!("BigIntPreflight: {i}");
+            let bi_wit_cycle = self.cur_cycle;
+            let bi_wit_mm = bi_mm;
+            let (inst, bi_wit_inst) = self.read_phys_memory(bi_pc_word)?;
+            bi_pc_word += 1;
+            let decoded = BigIntInstruction::decode(inst);
+
+            let reg_addr = if bi_mm != 0 {
+                MACHINE_REGS_WORD
+            } else {
+                USER_REGS_WORD
+            } + decoded.reg;
+            let (base, bi_wit_base_reg) = self.read_phys_memory(reg_addr)?;
+            let addr = (base / 4).wrapping_add(decoded.offset.wrapping_mul(4));
+            let mut bi_wit_data = [0u32; 4];
+            let mut bi_wit_prev_cycle = [0u32; 4];
+            let mut bi_wit_prev_value = [0u32; 4];
+            match bigint::MemoryOp::try_from(decoded.mem_op)? {
+                bigint::MemoryOp::Read => {
+                    for i in 0..4usize {
+                        let mw;
+                        (bi_wit_data[i], mw) =
+                            self.read_phys_memory(addr.wrapping_add(i as u32))?;
+                        bi_wit_prev_cycle[i] = mw.prevCycle;
+                        bi_wit_prev_value[i] = mw.value;
+                    }
+                }
+                bigint::MemoryOp::Write => {
+                    for i in 0..4usize {
+                        let out_addr = addr.wrapping_add(i as u32);
+                        let value = *poly_witness
+                            .get(&out_addr)
+                            .ok_or_else(|| anyhow!("Invalid BigInt output address"))?;
+                        let mw = self.write_phys_memory(out_addr, value)?;
+                        bi_wit_data[i] = mw.value;
+                        bi_wit_prev_cycle[i] = mw.prevCycle;
+                        bi_wit_prev_value[i] = mw.prevValue;
+                    }
+                }
+                bigint::MemoryOp::Check => {}
+            }
+            pf.step(&decoded, &mut bi_wit_data)?;
+            trace.add_block(BigIntWitness {
+                cycle: bi_wit_cycle,
+                mm: bi_wit_mm,
+                inst: bi_wit_inst,
+                baseReg: bi_wit_base_reg,
+                data: bi_wit_data,
+                prevCycle: bi_wit_prev_cycle,
+                prevValue: bi_wit_prev_value,
+            });
+            self.cur_cycle += 1;
+        }
+        Ok(())
     }
 
     fn do_inst_ecall<Opt: InstEcallOptions>(&mut self, trace: &mut Trace) -> Result<()> {
@@ -1231,7 +1310,7 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
             HOST_ECALL_READ => self.do_ecall_read(trace)?,
             HOST_ECALL_WRITE => self.do_ecall_write(trace)?,
             HOST_ECALL_POSEIDON2 => self.do_ecall_p2(trace)?,
-            HOST_ECALL_BIGINT => self.do_ecall_big_int(),
+            HOST_ECALL_BIGINT => self.do_ecall_big_int(trace)?,
             _ => {
                 tracing::error!("Invalid ECALL in machine mode: {which}");
                 bail!("Invalid ECALL in machine mode");
