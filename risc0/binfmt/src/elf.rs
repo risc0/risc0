@@ -47,6 +47,10 @@ impl Program {
     /// max_mem is an inclusive upper bound on the addresses that can be loaded. If the ELF
     /// specifies data to be loaded to a higher address, and error will be returned.
     pub fn load_elf(input: &[u8], max_mem: u32) -> Result<Program> {
+        // With max_mem as an inclusive upper bound on the addresses, any size greater than
+        // max_mem + 1 is invalid, by the fact that 0 + max_size > max_mem.
+        let max_size = max_mem as u64 + 1;
+
         let mut image = MemoryImage::default();
         let elf = ElfBytes::<LittleEndian>::minimal_parse(input)
             .map_err(|err| anyhow!("Elf parse error: {err}"))?;
@@ -78,14 +82,14 @@ impl Program {
                 .p_filesz
                 .try_into()
                 .map_err(|err| anyhow!("filesize was larger than 32 bits. {err}"))?;
-            if file_size > max_mem {
+            if file_size as u64 > max_size {
                 bail!("Invalid segment file_size");
             }
             let mem_size: u32 = segment
                 .p_memsz
                 .try_into()
                 .map_err(|err| anyhow!("mem_size was larger than 32 bits {err}"))?;
-            if mem_size > max_mem {
+            if mem_size as u64 > max_size {
                 bail!("Invalid segment mem_size");
             }
             let vaddr = ByteAddr(
@@ -105,14 +109,17 @@ impl Program {
             // Compute the end of the segment in the program image, and compare to inclusive bound
             // on the largest address that can be written, max_mem.
             // Cast to u64 to avoid overflow if max_mem == u32::MAX.
-            let program_end = (vaddr.0 as u64) + (mem_size as u64);
-            if program_end > max_mem as u64 + 1 {
+            let program_end = ((vaddr.0 as u64) + (mem_size as u64)).saturating_sub(1);
+            if program_end > max_mem as u64 {
                 bail!(
                     "Address [0x{program_end:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
                 );
             }
+            if file_size > mem_size {
+                bail!("Segment p_filesz is greater than p_memsz");
+            }
 
-            // Copy the data from the input into the program image. If the mem_size puts the end
+            // Copy the data from the input into the program image. If the file_size puts the end
             // past the input end, the remainder will be unset, defaulting to zeroes.
             let input_end =
                 usize::min(input_offset.saturating_add(file_size) as usize, input.len());
