@@ -251,7 +251,9 @@ impl<'a> ExecutorImpl<'a> {
         Self::with_details(env, Some(binary.user_elf), image, profiler)
     }
 
-    /// TODO(flaub)
+    /// Construct an [ExecutorImpl] from a kernel ELF.
+    ///
+    /// This is an internal helper used for kernel-level execution paths.
     #[allow(dead_code)]
     pub(crate) fn from_kernel_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let kernel = Program::load_elf(elf, u32::MAX)?;
