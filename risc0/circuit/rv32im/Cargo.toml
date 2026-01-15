@@ -103,6 +103,7 @@ wide = { version = "0.7", optional = true }
 clap = { version = "4.5", features = ["derive"] }
 flate2 = "1.0"
 gpu-guard = { workspace = true }
+maplit = "1"
 tar = "0.4"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

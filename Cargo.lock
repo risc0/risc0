@@ -7338,6 +7338,7 @@ dependencies = [
  "gpu-guard",
  "heck 0.5.0",
  "malachite",
+ "maplit",
  "num-derive",
  "num-traits",
  "num_enum",
