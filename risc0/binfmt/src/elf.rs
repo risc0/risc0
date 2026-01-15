@@ -45,10 +45,10 @@ impl Program {
     /// Initialize a RISC Zero Program from an appropriate ELF file
     ///
     /// max_mem is an inclusive upper bound on the addresses that can be loaded. If the ELF
-    /// specifies data to be loaded to a higher address, and error will be returned.
+    /// specifies data to be loaded to a higher address, an error will be returned.
     pub fn load_elf(input: &[u8], max_mem: u32) -> Result<Program> {
         // With max_mem as an inclusive upper bound on the addresses, any size greater than
-        // max_mem + 1 is invalid, by the fact that 0 + max_size > max_mem.
+        // max_mem + 1 is invalid because 0 + max_size > max_mem.
         let max_size = max_mem as u64 + 1;
 
         let mut image = MemoryImage::default();

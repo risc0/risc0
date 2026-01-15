@@ -207,8 +207,8 @@ impl MemoryImage {
     fn get_page_mut(&mut self, page_idx: u32) -> Result<&mut Page> {
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
 
-        // NOTE: We cannot use pages.get_mut in the if because it is create a mutable borrow that
-        // prevents the is_zero check. The Rust borrow checker cannot
+        // NOTE: We cannot use pages.get_mut in the if because it creates a mutable borrow that
+        // prevents the is_zero check. The Rust borrow checker cannot accept both borrows here.
         if self.pages.contains_key(&page_idx) {
             self.mark_dirty(digest_idx);
             return Ok(self.pages.get_mut(&page_idx).unwrap());
