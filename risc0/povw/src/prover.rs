@@ -19,8 +19,8 @@ use anyhow::{Context, anyhow, ensure};
 use derive_builder::Builder;
 use risc0_binfmt::PovwLogId;
 use risc0_zkvm::{
-    Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, ProverOpts, Receipt, VerifierContext,
-    WorkClaim, compute_image_id,
+    AssumptionReceipt, Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, ProverOpts, Receipt,
+    VerifierContext, WorkClaim, compute_image_id,
 };
 
 use crate::{
@@ -155,7 +155,10 @@ impl<P: Prover> WorkLogUpdateProver<P> {
                 let (journal, receipt) = self.continuation.clone().ok_or_else(|| {
                     anyhow!("missing continuation information with non-empty work log")
                 })?;
-                env_builder.add_assumption(receipt);
+                let assumption_receipt: AssumptionReceipt = receipt
+                    .try_into()
+                    .context("Failed to create assumption receipt from given receipt")?;
+                env_builder.add_assumption(assumption_receipt);
                 State::from(journal)
             }
         };
