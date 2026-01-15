@@ -200,7 +200,9 @@ impl MemoryImage {
         self.mark_dirty(digest_idx);
     }
 
-    /// TODO
+    /// Returns a mutable reference to the indexed page in the [MemoryImage]. Modifying this page
+    /// will modify the memory image.
+    ///
     /// Marks the retrieved page as dirty, under the assumption that the caller will modify it.
     fn get_page_mut(&mut self, page_idx: u32) -> Result<&mut Page> {
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
@@ -222,12 +224,12 @@ impl MemoryImage {
         bail!("Unavailable page: {page_idx}")
     }
 
-    /// TODO
+    /// Returns a single word at the given [WordAddr].
     pub(crate) fn get_word(&self, addr: WordAddr) -> Result<u32> {
         Ok(self.get_page(addr.page_idx())?.load(addr))
     }
 
-    /// TODO
+    /// Sets a single word at the given [WordAddr].
     pub fn set_word(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         self.get_page_mut(addr.page_idx())?.store(addr, word);
         Ok(())
