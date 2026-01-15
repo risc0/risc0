@@ -28,6 +28,7 @@ use anyhow::{Result, anyhow, bail, ensure};
 use bytemuck::Zeroable as _;
 
 use risc0_binfmt::MemoryImage;
+use risc0_circuit_rv32im_sys::BlockType;
 use risc0_core::scope;
 
 use crate::execute::Segment;
@@ -117,11 +118,22 @@ pub struct PreflightContext2 {
     pub po2: u32,
 }
 
+impl PreflightContext2 {
+    pub fn block_counts(&self) -> enum_map::EnumMap<BlockType, u32> {
+        let mut counts = enum_map::EnumMap::<BlockType, u32>::default();
+        for row in &self.row_info {
+            counts[BlockType::try_from(row.row_type).unwrap()] += row.block_count as u32;
+        }
+        counts
+    }
+}
+
 pub struct SegmentContext2 {
     pub image: MemoryImage,
     pub read_record: Vec<Vec<u8>>,
     pub write_record: Vec<u32>,
     pub end_cycle: u32,
+    pub povw_nonce: [u32; 8],
 }
 
 impl SegmentContext2 {
@@ -131,6 +143,7 @@ impl SegmentContext2 {
             read_record: segment.read_record.clone(),
             write_record: segment.write_record.clone(),
             end_cycle: segment.insn_counter,
+            povw_nonce: segment.povw_nonce.map(|n| n.to_u32s()).unwrap_or_default(),
         })
     }
 
@@ -141,6 +154,7 @@ impl SegmentContext2 {
         let mut row_info = vec![RowInfo::zeroed(); rows];
         let mut aux = vec![0u32; rows * MAX_WIT_PER_ROW];
         let mut trace = Trace::new(&mut row_info, &mut aux);
+        trace.globals_mut().povwNonce = self.povw_nonce;
 
         let io = ReplayHostIo::new(&self.read_record, &self.write_record);
         let mut is_final = emu::emulate(&mut trace, &self.image, io, rows, self.end_cycle)?;

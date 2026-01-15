@@ -295,7 +295,18 @@ fn generate_rust_block_types(output: &str, block_types: &BTreeMap<String, BlockT
     let num_blocks = block_types.len();
 
     let contents = quote! {
-        #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, enum_map::Enum, strum::EnumIter)]
+        #[derive(
+            Clone,
+            Copy,
+            Debug,
+            Eq,
+            Hash,
+            PartialEq,
+            enum_map::Enum,
+            serde::Deserialize,
+            serde::Serialize,
+            strum::EnumIter,
+        )]
         #[repr(u8)]
         pub enum BlockType {
             #(#block_names = #block_values),*

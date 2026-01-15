@@ -181,13 +181,16 @@ impl PreflightContext1 {
         unsafe { risc0_circuit_rv32im_m3_preflight_aux_size(self.ctx) }
     }
 
-    pub fn block_counts(&self) -> enum_map::EnumMap<BlockType, u32> {
+    fn block_counts(&self) -> enum_map::EnumMap<BlockType, u32> {
         let counts_ptr = unsafe { risc0_circuit_rv32im_m3_preflight_block_counts(self.ctx) };
-        let counts_slice = unsafe { std::slice::from_raw_parts(counts_ptr, BlockType::COUNT) };
+        let counts_slice = unsafe { std::slice::from_raw_parts(counts_ptr, BlockType::COUNT - 1) };
 
-        BlockType::iter()
-            .zip(counts_slice.iter().copied())
-            .collect()
+        let mut counts = enum_map::EnumMap::<BlockType, u32>::default();
+        for (bt, &count) in counts_slice.iter().enumerate() {
+            let block_type = BlockType::try_from(bt as u8).unwrap();
+            counts[block_type] += count;
+        }
+        counts
     }
 }
 
@@ -208,6 +211,13 @@ impl PreflightContext {
     pub fn po2(&self) -> u32 {
         let a = self.ctx1.po2();
         let b = self.ctx2.po2;
+        assert_eq!(a, b);
+        a
+    }
+
+    pub fn block_counts(&self) -> enum_map::EnumMap<BlockType, u32> {
+        let a = self.ctx1.block_counts();
+        let b = self.ctx2.block_counts();
         assert_eq!(a, b);
         a
     }

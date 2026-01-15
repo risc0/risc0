@@ -78,6 +78,7 @@ impl<'a> Trace<'a> {
             p2Count: 0,
             finalCycle: 0,
             v2Compat: 0,
+            povwNonce: [0u32; 8],
         });
         s_.globals = idx;
         s_
@@ -274,6 +275,7 @@ pub mod tests {
                 p2Count: 0,
                 finalCycle: 0,
                 v2Compat: 0,
+                povwNonce: [0u32; 8],
             }
             .into(),
         );

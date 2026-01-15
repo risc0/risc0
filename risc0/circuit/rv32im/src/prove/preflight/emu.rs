@@ -27,8 +27,7 @@ use risc0_circuit_rv32im_sys::{
     InstSuspendWitness, InstTrapWitness, MakeTableWitness, P2State, P2StepWitness,
     PhysMemReadWitness, PhysMemWriteWitness, ReadByteWitness, ReadWordWitness, RegMemReadWitness,
     RegMemWriteWitness, UnitAddSubWitness, UnitBaseWitness, UnitBitWitness, UnitDivWitness,
-    UnitLtWitness, UnitMulWitness, UnitShiftWitness, VirtAddrWitness, VirtMemReadWitness,
-    VirtMemWriteWitness, fp::Fp,
+    UnitLtWitness, UnitMulWitness, UnitShiftWitness, fp::Fp,
 };
 use risc0_zkp::{
     core::{
@@ -51,7 +50,7 @@ use crate::prove::preflight::{
         MPAGE_SIZE_WORDS_PO2, OUTPUT_WORD, P2_TRASH_WORD, P2_ZEROS_WORD, PFLAG_CHECK_OUT,
         PFLAG_IS_ELEM, RV32IM_CIRCUIT_VERSION, USER_REGS_WORD, V2_COMPAT_ECALL_DISPATCH,
         V2_COMPAT_MEPC, V2_COMPAT_SMODE, V2_COMPAT_SPC, V2_COMPAT_TRAP_DISPATCH, V2_COMPAT_VERSION,
-        VPAGE_MASK_WORDS, VPAGE_SIZE_WORDS_PO2, csr_word,
+        csr_word,
     },
     decode::{DecodedInst, get_opcode},
     opt::{
@@ -64,6 +63,9 @@ use crate::prove::preflight::{
     paging::{PageDetails, PagedMemory},
     trace::{Trace, TraceIndex},
 };
+
+type VirtMemReadWitness = PhysMemReadWitness;
+type VirtMemWriteWitness = PhysMemWriteWitness;
 
 pub trait HostIo {
     fn on_write(&mut self, fd: u32, data: &[u8]) -> Result<u32>;
@@ -179,32 +181,8 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
         self.peek_phys_memory(word_addr) // TODO
     }
 
-    fn translate_address(&mut self, v_word_addr: u32) -> (u32, VirtAddrWitness) {
-        let vpage = v_word_addr >> VPAGE_SIZE_WORDS_PO2;
-        let ppage = vpage; // TODO: Translate
-        let word_offset = v_word_addr & (VPAGE_MASK_WORDS as u32);
-
-        let value = (ppage << VPAGE_SIZE_WORDS_PO2) | word_offset;
-        let record = VirtAddrWitness {
-            readCycle: 0,
-            vpage,
-            ppage,
-            wordOffset: v_word_addr & (VPAGE_MASK_WORDS as u32),
-        };
-        (value, record)
-    }
-
-    fn read_virt_memory(&mut self, v_word_addr: u32) -> Result<(u32, VirtMemReadWitness)> {
-        let (p_word_addr, addr) = self.translate_address(v_word_addr);
-        let (_, phys) = self.read_phys_memory(p_word_addr)?;
-
-        let record = VirtMemReadWitness {
-            addr,
-            prevCycle: phys.prevCycle,
-            value: phys.value,
-        };
-
-        Ok((record.value, record))
+    fn read_virt_memory(&mut self, word_addr: u32) -> Result<(u32, VirtMemReadWitness)> {
+        self.read_phys_memory(word_addr)
     }
 
     fn undo_read_phys_memory(&mut self, record: &PhysMemReadWitness) {
@@ -214,24 +192,12 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
         page.info_mut()[word_num as usize].cycle = record.prevCycle;
     }
 
-    fn undo_read_virt_memory(&mut self, record: &VirtMemReadWitness) {
-        let phys = PhysMemReadWitness {
-            value: 0,
-            wordAddr: record.addr.vpage << VPAGE_SIZE_WORDS_PO2 | record.addr.wordOffset,
-            prevCycle: record.prevCycle,
-        };
-        self.undo_read_phys_memory(&phys);
+    fn undo_read_virt_memory(&mut self, record: &PhysMemReadWitness) {
+        self.undo_read_phys_memory(record);
     }
 
-    fn write_virt_memory(&mut self, v_word_addr: u32, value: u32) -> Result<VirtMemWriteWitness> {
-        let (p_word_addr, record_addr) = self.translate_address(v_word_addr);
-        let phys = self.write_phys_memory(p_word_addr, value)?;
-        Ok(VirtMemWriteWitness {
-            addr: record_addr,
-            prevCycle: phys.prevCycle,
-            prevValue: phys.prevValue,
-            value: phys.value,
-        })
+    fn write_virt_memory(&mut self, word_addr: u32, value: u32) -> Result<VirtMemWriteWitness> {
+        self.write_phys_memory(word_addr, value)
     }
 
     fn do_resume(&mut self, trace: &mut Trace) -> Result<()> {
