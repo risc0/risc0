@@ -4439,6 +4439,7 @@ dependencies = [
  "risc0-sppark",
  "risc0-sys",
  "risc0-zkp",
+ "serde",
  "strum",
  "tracing",
 ]
