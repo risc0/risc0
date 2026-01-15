@@ -171,14 +171,6 @@ impl<'a> Trace<'a> {
         self.rows.sort_by_key(|r| r.row_type);
     }
 
-    pub fn rows(&self) -> &[RowInfo] {
-        self.rows
-    }
-
-    pub fn aux(&self) -> &[u32] {
-        self.aux
-    }
-
     pub fn set_user_cycles(&mut self, cycles: u32) {
         self.user_cycles = cycles;
     }

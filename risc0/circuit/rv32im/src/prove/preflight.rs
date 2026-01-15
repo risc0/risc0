@@ -13,8 +13,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(dead_code)]
-
 mod bigint;
 mod constants;
 mod decode;
@@ -111,8 +109,6 @@ impl<'a> emu::HostIo for ReplayHostIo<'a> {
 pub struct PreflightContext2 {
     /// Did this preflight result in termination
     pub is_final: bool,
-    /// How many cycles did this preflight do
-    pub cycles: u32,
     pub row_info: Vec<RowInfo>,
     pub aux: Vec<u32>,
     pub po2: u32,
@@ -192,7 +188,6 @@ impl SegmentContext2 {
 
         Ok(PreflightContext2 {
             is_final,
-            cycles,
             row_info,
             aux,
             po2: po2 as u32,

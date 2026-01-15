@@ -65,6 +65,7 @@ fn instr_option_trait(name: &str, params: &BTreeSet<&str>) -> proc_macro2::Token
         .collect::<Vec<_>>();
 
     quote! {
+        #[allow(dead_code)]
         pub trait #name {
             #(const #op_idents: Option<#op_types>;)*
 

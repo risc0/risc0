@@ -55,6 +55,7 @@ struct BytePolynomial {
 }
 
 impl BytePolynomial {
+    #[cfg(test)]
     fn new_raw(coeffs: Vec<i32>) -> Self {
         Self { coeffs }
     }
@@ -337,8 +338,6 @@ impl TryFrom<u32> for PolyOp {
         }
     }
 }
-
-const POLY_OP_SIZE: u32 = 7;
 
 pub struct BigIntPreflight {
     poly: BytePolynomial,

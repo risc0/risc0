@@ -171,20 +171,24 @@ impl Opt {
         self.0
     }
 
+    #[allow(dead_code)]
     pub fn peek<T: OptValue>(&self) -> T {
         T::from_u32(self.0 % T::VALUE).expect("invalid encoding")
     }
 
+    #[allow(dead_code)]
     pub fn pop<T: OptValue>(&mut self) -> T {
         let ret = self.peek::<T>();
         self.0 /= T::VALUE;
         ret
     }
 
+    #[allow(dead_code)]
     pub const fn pop_ret<T: OptValue>(&self) -> Self {
         Self(self.0 / T::VALUE)
     }
 
+    #[allow(dead_code)]
     pub fn push<T: OptValue>(&mut self, t: T) {
         self.0 *= T::VALUE;
         self.0 += t.as_u32();
