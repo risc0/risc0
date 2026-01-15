@@ -159,8 +159,8 @@ template <typename C> struct UnitLtBlock {
     T::apply(ctx, "a", a);
     T::apply(ctx, "b", b);
     T::apply(ctx, "diff", diff, a.get(), negate(b.get()));
-    T::apply(ctx, "signA", signA, a.get().high);
-    T::apply(ctx, "signB", signB, b.get().high);
+    T::apply(ctx, "signA", signA, a.high.get());
+    T::apply(ctx, "signB", signB, b.high.get());
     T::apply(ctx, "signDiff", signDiff, diff.get().high);
     T::apply(ctx, "overflow", overflow);
     T::apply(ctx, "isLt", isLt);
@@ -203,6 +203,7 @@ template <typename C> struct UnitShiftBlock {
     T::apply(ctx, "po2First3", po2First3);
     T::apply(ctx, "po2", po2);
     T::apply(ctx, "signA", signA, a.get().high);
+    T::apply(ctx, "neg", neg);
     T::apply(ctx, "maybeNegA", maybeNegA);
     T::apply(ctx, "maybeNegOut", maybeNegOut);
     T::apply(ctx, "out", out);
