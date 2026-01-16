@@ -282,6 +282,7 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
         .ok_or_else(|| anyhow!("no work receipt returned from the prover for busy loop"))?;
 
     let mut prover = WorkLogUpdateProver::builder()
+        .prover_opts(ProverOpts::succinct())
         .prover(default_prover())
         .log_id(work_log_id)
         .log_builder_program(RISC0_POVW_LOG_BUILDER_ELF)?
