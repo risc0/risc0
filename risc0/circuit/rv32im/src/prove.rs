@@ -15,212 +15,28 @@
 
 mod preflight;
 
+/// The old preflight implementation
+#[allow(dead_code)]
+mod preflight_cxx;
+
+/// Use this if you want to run both and compare.
+#[allow(dead_code)]
+mod preflight_dual;
+
 use std::ptr::NonNull;
 
-use crate::execute::Segment;
 use anyhow::Result;
 use cfg_if::cfg_if;
-use preflight::{PreflightContext2, SegmentContext2};
 use risc0_circuit_rv32im_sys::*;
-use risc0_zkp::{core::digest::DIGEST_WORDS, field::baby_bear::Elem};
+
+pub use preflight::{PreflightContext, SegmentContext};
 
 use crate::verify::verify;
 
 pub type Seal = Vec<u32>;
 
-struct SegmentContext1 {
-    ctx: NonNull<risc0_circuit_rv32im_sys::SegmentContext>,
-}
-
-/// Safety: A [PreflightContext] is an immutable object that can be safely
-/// passed between threads.
-#[derive(Default)]
-struct PreflightContext1 {
-    ctx: *const risc0_circuit_rv32im_sys::PreflightContext,
-    po2: u32,
-}
-
-unsafe impl Send for PreflightContext1 {}
-
 pub struct ProverContext {
     ctx: NonNull<risc0_circuit_rv32im_sys::ProverContext>,
-}
-
-#[derive(Default)]
-pub struct PreflightContext {
-    ctx1: PreflightContext1,
-    ctx2: PreflightContext2,
-}
-
-pub struct SegmentContext {
-    ctx1: SegmentContext1,
-    ctx2: SegmentContext2,
-}
-
-impl SegmentContext1 {
-    fn new(segment: &Segment) -> Result<Self> {
-        tracing::debug!("load_segment: {segment:#?}",);
-
-        let mut pages: Vec<RawPage> = Vec::with_capacity(segment.partial_image.pages.len());
-        for (&addr, page) in segment.partial_image.pages.iter() {
-            let slice: &[u32] = bytemuck::cast_slice(page.data().as_slice());
-            pages.push(RawPage {
-                addr,
-                data: slice.as_ptr(),
-            });
-        }
-
-        // NOTE: If the memory image digests are not computed by this point, they will be here.
-        let mut digests: Vec<RawDigestEntry> = Vec::new();
-        let mut memory_image = segment.partial_image.clone();
-        for (&idx, &digest) in memory_image.digests() {
-            let mut words = [0; DIGEST_WORDS];
-            for (i, word) in words.iter_mut().enumerate() {
-                *word = Elem::new(digest.as_words()[i]).as_u32_montgomery();
-            }
-            digests.push(RawDigestEntry { idx, digest: words })
-        }
-
-        let image = RawMemoryImage {
-            pages: RawSlice {
-                ptr: pages.as_ptr(),
-                len: pages.len(),
-            },
-            digests: RawSlice {
-                ptr: digests.as_ptr(),
-                len: digests.len(),
-            },
-        };
-
-        let mut reads: Vec<RawSlice<u8>> = Vec::with_capacity(segment.read_record.len());
-        for record in segment.read_record.iter() {
-            reads.push(RawSlice {
-                ptr: record.as_ptr(),
-                len: record.len(),
-            });
-        }
-
-        let raw_segment = RawSegment {
-            image,
-            reads: RawSlice {
-                ptr: reads.as_ptr(),
-                len: reads.len(),
-            },
-            writes: RawSlice {
-                ptr: segment.write_record.as_ptr(),
-                len: segment.write_record.len(),
-            },
-            insn_counter: segment.insn_counter,
-            povw_nonce: segment.povw_nonce.map(|n| n.to_u32s()).unwrap_or_default(),
-        };
-
-        let ctx =
-            ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_m3_segment_new(&raw_segment) })?;
-
-        Ok(Self { ctx })
-    }
-
-    fn preflight(&self, po2: usize) -> Result<PreflightContext1> {
-        tracing::debug!("preflight");
-        let ctx = ffi_wrap_ptr(|| unsafe {
-            risc0_circuit_rv32im_m3_segment_preflight(self.ctx.as_ptr(), po2)
-        })?;
-        Ok(PreflightContext1 {
-            ctx,
-            po2: po2 as u32,
-        })
-    }
-}
-
-impl Drop for SegmentContext1 {
-    fn drop(&mut self) {
-        unsafe { risc0_circuit_rv32im_m3_segment_free(self.ctx.as_ptr()) };
-    }
-}
-
-impl SegmentContext {
-    pub fn new(segment: &Segment) -> Result<Self> {
-        Ok(Self {
-            ctx1: SegmentContext1::new(segment)?,
-            ctx2: SegmentContext2::new(segment)?,
-        })
-    }
-
-    pub fn preflight(&self, po2: usize) -> Result<PreflightContext> {
-        let ctx1 = self.ctx1.preflight(po2)?;
-        let ctx2 = self.ctx2.preflight(po2)?;
-
-        assert_trace_eq(&ctx1, &ctx2);
-
-        Ok(PreflightContext { ctx1, ctx2 })
-    }
-}
-
-impl PreflightContext1 {
-    pub fn is_final(&self) -> bool {
-        unsafe { risc0_circuit_rv32im_m3_preflight_is_final(self.ctx) == 1 }
-    }
-
-    pub fn po2(&self) -> u32 {
-        self.po2
-    }
-
-    fn row_info_ptr(&self) -> *const RowInfo {
-        unsafe { risc0_circuit_rv32im_m3_preflight_row_info(self.ctx) }
-    }
-
-    fn row_info_size(&self) -> usize {
-        unsafe { risc0_circuit_rv32im_m3_preflight_row_info_size(self.ctx) }
-    }
-
-    fn aux_ptr(&self) -> *const u32 {
-        unsafe { risc0_circuit_rv32im_m3_preflight_aux(self.ctx) }
-    }
-
-    fn aux_size(&self) -> usize {
-        unsafe { risc0_circuit_rv32im_m3_preflight_aux_size(self.ctx) }
-    }
-
-    fn block_counts(&self) -> enum_map::EnumMap<BlockType, u32> {
-        let counts_ptr = unsafe { risc0_circuit_rv32im_m3_preflight_block_counts(self.ctx) };
-        let counts_slice = unsafe { std::slice::from_raw_parts(counts_ptr, BlockType::COUNT - 1) };
-
-        let mut counts = enum_map::EnumMap::<BlockType, u32>::default();
-        for (bt, &count) in counts_slice.iter().enumerate() {
-            let block_type = BlockType::try_from(bt as u8).unwrap();
-            counts[block_type] += count;
-        }
-        counts
-    }
-}
-
-impl Drop for PreflightContext1 {
-    fn drop(&mut self) {
-        unsafe { risc0_circuit_rv32im_m3_preflight_free(self.ctx) };
-    }
-}
-
-impl PreflightContext {
-    pub fn is_final(&self) -> bool {
-        let a = self.ctx1.is_final();
-        let b = self.ctx2.is_final;
-        assert_eq!(a, b);
-        a
-    }
-
-    pub fn po2(&self) -> u32 {
-        let a = self.ctx1.po2();
-        let b = self.ctx2.po2;
-        assert_eq!(a, b);
-        a
-    }
-
-    pub fn block_counts(&self) -> enum_map::EnumMap<BlockType, u32> {
-        let a = self.ctx1.block_counts();
-        let b = self.ctx2.block_counts();
-        assert_eq!(a, b);
-        a
-    }
 }
 
 impl ProverContext {
@@ -236,25 +52,7 @@ impl ProverContext {
         Ok(Self { ctx })
     }
 
-    fn inner_prove1(&self, preflight: &PreflightContext1) -> Result<Seal> {
-        tracing::debug!("prove");
-        ffi_wrap_void(|| unsafe {
-            risc0_circuit_rv32im_m3_prove(
-                self.ctx.as_ptr(),
-                preflight.row_info_ptr(),
-                preflight.row_info_size(),
-                preflight.aux_ptr(),
-                preflight.aux_size(),
-            )
-        })?;
-
-        let transcript = self.transcript()?;
-        verify(&transcript)?;
-
-        Ok(transcript)
-    }
-
-    fn inner_prove2(&self, preflight: &PreflightContext2) -> Result<Seal> {
+    pub fn prove(&self, preflight: &PreflightContext) -> Result<Seal> {
         tracing::debug!("prove");
         ffi_wrap_void(|| unsafe {
             risc0_circuit_rv32im_m3_prove(
@@ -270,13 +68,6 @@ impl ProverContext {
         verify(&transcript)?;
 
         Ok(transcript)
-    }
-
-    pub fn prove(&self, preflight: &PreflightContext) -> Result<Seal> {
-        let _ = self.inner_prove1(&preflight.ctx1)?;
-        let seal2 = self.inner_prove2(&preflight.ctx2)?;
-
-        Ok(seal2)
     }
 
     fn transcript(&self) -> Result<Seal> {
@@ -303,50 +94,6 @@ pub fn segment_prover(po2: usize) -> Result<ProverContext> {
         }
     }
     Ok(segment_prover)
-}
-
-fn assert_trace_eq(a: &PreflightContext1, b: &preflight::PreflightContext2) {
-    let a_rows = unsafe { std::slice::from_raw_parts(a.row_info_ptr(), a.row_info_size()) };
-    let a_aux = unsafe { std::slice::from_raw_parts(a.aux_ptr(), a.aux_size()) };
-    let trace_a = preflight::trace::decode_trace(a_rows, a_aux);
-
-    let trace_b = preflight::trace::decode_trace(&b.row_info, &b.aux);
-
-    let mut equality_report = vec![];
-    for block_type in BlockType::iter() {
-        let a: Vec<_> = trace_a
-            .iter()
-            .filter(|b| b.block_type() == block_type)
-            .collect();
-        let b: Vec<_> = trace_b
-            .iter()
-            .filter(|b| b.block_type() == block_type)
-            .collect();
-
-        if a.len() != b.len() {
-            equality_report.push(format!(
-                "{block_type:?} lengths don't match; {} != {}",
-                a.len(),
-                b.len()
-            ));
-        } else {
-            for i in 0..a.len() {
-                if a[i] != b[i] {
-                    equality_report.push(format!(
-                        "{block_type:?} index={i}: {:?} != {:?}",
-                        a[i], b[i]
-                    ));
-                }
-            }
-        }
-    }
-    if !equality_report.is_empty() {
-        panic!(
-            "traces not equal: \n{}",
-            equality_report.join("\n\n=============\n")
-        );
-    }
-    assert_eq!(a_rows.len(), b.row_info.len());
 }
 
 #[cfg(test)]

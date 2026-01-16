@@ -106,7 +106,7 @@ impl<'a> emu::HostIo for ReplayHostIo<'a> {
 }
 
 #[derive(Default)]
-pub struct PreflightContext2 {
+pub struct PreflightContext {
     /// Did this preflight result in termination
     pub is_final: bool,
     pub row_info: Vec<RowInfo>,
@@ -114,7 +114,15 @@ pub struct PreflightContext2 {
     pub po2: u32,
 }
 
-impl PreflightContext2 {
+impl PreflightContext {
+    pub fn is_final(&self) -> bool {
+        self.is_final
+    }
+
+    pub fn po2(&self) -> u32 {
+        self.po2
+    }
+
     pub fn block_counts(&self) -> enum_map::EnumMap<BlockType, u32> {
         let mut counts = enum_map::EnumMap::<BlockType, u32>::default();
         for row in &self.row_info {
@@ -124,7 +132,7 @@ impl PreflightContext2 {
     }
 }
 
-pub struct SegmentContext2 {
+pub struct SegmentContext {
     pub image: MemoryImage,
     pub read_record: Vec<Vec<u8>>,
     pub write_record: Vec<u32>,
@@ -132,7 +140,7 @@ pub struct SegmentContext2 {
     pub povw_nonce: [u32; 8],
 }
 
-impl SegmentContext2 {
+impl SegmentContext {
     pub fn new(segment: &Segment) -> Result<Self> {
         Ok(Self {
             image: segment.partial_image.clone(),
@@ -143,7 +151,7 @@ impl SegmentContext2 {
         })
     }
 
-    pub fn preflight(&self, po2: usize) -> Result<PreflightContext2> {
+    pub fn preflight(&self, po2: usize) -> Result<PreflightContext> {
         scope!("preflight");
 
         let rows = 1usize << po2;
@@ -186,7 +194,7 @@ impl SegmentContext2 {
             is_final = true;
         }
 
-        Ok(PreflightContext2 {
+        Ok(PreflightContext {
             is_final,
             row_info,
             aux,
