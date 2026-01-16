@@ -23,7 +23,6 @@ pub(crate) mod succinct;
 
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 
-use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
 use risc0_core::field::baby_bear::BabyBear;
@@ -679,10 +678,12 @@ impl AssumptionReceipt {
     }
 }
 
-impl From<Receipt> for AssumptionReceipt {
+impl TryFrom<Receipt> for AssumptionReceipt {
+    type Error = VerificationError;
+
     /// Create a proven assumption from a [Receipt].
-    fn from(receipt: Receipt) -> Self {
-        Self::Proven(receipt.inner.into())
+    fn try_from(receipt: Receipt) -> Result<Self, VerificationError> {
+        Ok(Self::Proven(receipt.inner.try_into()?))
     }
 }
 
@@ -696,10 +697,12 @@ where
     }
 }
 
-impl From<InnerReceipt> for AssumptionReceipt {
+impl TryFrom<InnerReceipt> for AssumptionReceipt {
+    type Error = VerificationError;
+
     /// Create a proven assumption from a [InnerReceipt].
-    fn from(receipt: InnerReceipt) -> Self {
-        Self::Proven(receipt.into())
+    fn try_from(receipt: InnerReceipt) -> Result<Self, VerificationError> {
+        Ok(Self::Proven(receipt.try_into()?))
     }
 }
 
@@ -772,9 +775,6 @@ impl From<ReceiptClaim> for AssumptionReceipt {
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub enum InnerAssumptionReceipt {
-    /// A non-succinct [CompositeReceipt], made up of one inner receipt per segment and assumption.
-    Composite(CompositeReceipt),
-
     /// A [SuccinctReceipt], proving arbitrarily the claim with a single STARK.
     Succinct(SuccinctReceipt<Unknown>),
 
@@ -793,19 +793,9 @@ impl InnerAssumptionReceipt {
     ) -> Result<(), VerificationError> {
         tracing::debug!("InnerAssumptionReceipt::verify_integrity_with_context");
         match self {
-            Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
             Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
             Self::Fake(inner) => inner.verify_integrity_with_context(ctx),
-        }
-    }
-
-    /// Returns the [InnerAssumptionReceipt::Composite] arm.
-    pub fn composite(&self) -> Result<&CompositeReceipt, VerificationError> {
-        if let Self::Composite(x) = self {
-            Ok(x)
-        } else {
-            Err(VerificationError::ReceiptFormatError)
         }
     }
 
@@ -832,7 +822,6 @@ impl InnerAssumptionReceipt {
     /// Note that only the claim digest is available because the claim type may be unknown.
     pub fn claim_digest(&self) -> Result<Digest, VerificationError> {
         match self {
-            Self::Composite(inner) => Ok(inner.claim()?.digest()),
             Self::Groth16(inner) => Ok(inner.claim.digest()),
             Self::Succinct(inner) => Ok(inner.claim.digest()),
             Self::Fake(inner) => Ok(inner.claim.digest()),
@@ -842,7 +831,6 @@ impl InnerAssumptionReceipt {
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
         match self {
-            Self::Composite(inner) => inner.verifier_parameters,
             Self::Groth16(inner) => inner.verifier_parameters,
             Self::Succinct(inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
@@ -852,7 +840,6 @@ impl InnerAssumptionReceipt {
     /// Total number of bytes used by the seals of this receipt.
     pub fn seal_size(&self) -> usize {
         match self {
-            Self::Composite(receipt) => receipt.seal_size(),
             Self::Succinct(receipt) => receipt.seal_size(),
             Self::Groth16(receipt) => receipt.seal_size(),
             Self::Fake(_) => 0,
@@ -860,13 +847,15 @@ impl InnerAssumptionReceipt {
     }
 }
 
-impl From<InnerReceipt> for InnerAssumptionReceipt {
-    fn from(value: InnerReceipt) -> Self {
+impl TryFrom<InnerReceipt> for InnerAssumptionReceipt {
+    type Error = VerificationError;
+
+    fn try_from(value: InnerReceipt) -> Result<Self, VerificationError> {
         match value {
-            InnerReceipt::Composite(x) => InnerAssumptionReceipt::Composite(x),
-            InnerReceipt::Succinct(x) => InnerAssumptionReceipt::Succinct(x.into_unknown()),
-            InnerReceipt::Groth16(x) => InnerAssumptionReceipt::Groth16(x.into_unknown()),
-            InnerReceipt::Fake(x) => InnerAssumptionReceipt::Fake(x.into_unknown()),
+            InnerReceipt::Composite(_) => Err(VerificationError::ReceiptFormatError),
+            InnerReceipt::Succinct(x) => Ok(InnerAssumptionReceipt::Succinct(x.into_unknown())),
+            InnerReceipt::Groth16(x) => Ok(InnerAssumptionReceipt::Groth16(x.into_unknown())),
+            InnerReceipt::Fake(x) => Ok(InnerAssumptionReceipt::Fake(x.into_unknown())),
         }
     }
 }

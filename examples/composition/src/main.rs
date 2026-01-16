@@ -28,6 +28,7 @@ fn main() {
     let env = ExecutorEnv::builder()
         // add_assumption makes the receipt to be verified available to the prover.
         .add_assumption(multiply_receipt)
+        .unwrap()
         .write(&(n, 9u64, 100u64))
         .unwrap()
         .build()
