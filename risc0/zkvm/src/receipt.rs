@@ -906,7 +906,7 @@ impl VerifierContext {
             segment_verifier_parameters: None,
             succinct_verifier_parameters: None,
             groth16_verifier_parameters: None,
-            dev_mode: crate::is_dev_mode_enabled_via_environment(),
+            dev_mode: false,
         }
     }
 
