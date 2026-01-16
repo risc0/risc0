@@ -15,6 +15,7 @@
 
 use std::{borrow::Cow, rc::Rc, sync::Arc};
 
+use anyhow::Context as _;
 use opentelemetry::{
     global::BoxedSpan,
     trace::{Span as _, Tracer as _},
@@ -908,7 +909,8 @@ impl CpuProcessor {
             let session = {
                 let mut env = ExecutorEnv::builder();
                 for assumption in task.request.assumptions.iter() {
-                    env.add_assumption(assumption.clone());
+                    env.add_assumption(assumption.clone())
+                        .context("Failed to add assumption to executor env")?;
                 }
                 if let Some(po2) = task.request.segment_limit_po2 {
                     env.segment_limit_po2(po2);

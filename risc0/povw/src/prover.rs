@@ -158,7 +158,9 @@ impl<P: Prover> WorkLogUpdateProver<P> {
                 let assumption_receipt: AssumptionReceipt = receipt
                     .try_into()
                     .context("Failed to create assumption receipt from given receipt")?;
-                env_builder.add_assumption(assumption_receipt);
+                env_builder
+                    .add_assumption(assumption_receipt)
+                    .context("Failed to add continuation assumption receipt")?;
                 State::from(journal)
             }
         };
@@ -208,7 +210,9 @@ impl<P: Prover> WorkLogUpdateProver<P> {
                 claim: work_claim.into_unknown(),
                 noninclusion_proof,
             });
-            env_builder.add_assumption(receipt);
+            env_builder
+                .add_assumption(receipt)
+                .context("Failed to add work receipt assumption")?;
         }
 
         let input = Input {
