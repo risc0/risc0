@@ -21,8 +21,6 @@ use super::Program;
 
 const ZKR_ZIP: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/recursion_zkr.zip"));
 
-include!(concat!(env!("OUT_DIR"), "/zkr_table.rs"));
-
 pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
     let mut zip = zip::ZipArchive::new(Cursor::new(ZKR_ZIP))?;
     let encoded = extract_zkr(&mut zip, name)?;
@@ -72,16 +70,26 @@ pub fn get_all_zkrs() -> Result<Vec<(String, Vec<u32>)>> {
         .collect()
 }
 
-#[repr(usize)]
 enum ZkrSection {
-    Lift = 0,
-    LiftPovw = 1,
+    Lift,
+    LiftPovw,
+}
+
+impl ZkrSection {
+    fn table(&self) -> &[(&[u8], usize, &str)] {
+        use risc0_circuit_recursion_povw_zkrs::ZKRS as POVW_ZKRS;
+        use risc0_circuit_recursion_zkrs::ZKRS;
+
+        match self {
+            Self::Lift => ZKRS,
+            Self::LiftPovw => POVW_ZKRS,
+        }
+    }
 }
 
 fn extract_zkr_m3(section: ZkrSection, po2: usize, expected_name: &str) -> Result<Vec<u32>> {
-    let section_size = crate::LIFT_PO2_RANGE.count();
-    let idx = section_size * section as usize + po2 - crate::LIFT_PO2_RANGE.start();
-    let (xz_bytes, uncompressed_size, name) = ZKRS[idx];
+    let idx = po2 - crate::LIFT_PO2_RANGE.start();
+    let (xz_bytes, uncompressed_size, name) = section.table()[idx];
 
     // Make sure we got the right one
     if name != expected_name {
