@@ -617,6 +617,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(claim)
+            .unwrap()
             .build()
             .unwrap();
         let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -645,6 +646,7 @@ mod sys_verify {
                 .write(&spec)
                 .unwrap()
                 .add_assumption(halt_session.claim().unwrap())
+                .unwrap()
                 .build()
                 .unwrap();
             let session = execute_elf(env, MULTI_TEST_ELF);
@@ -671,6 +673,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(claim)
+            .unwrap()
             .build()
             .unwrap();
         let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -700,6 +703,7 @@ mod sys_verify {
                 .write(&spec)
                 .unwrap()
                 .add_assumption(claim)
+                .unwrap()
                 .build()
                 .unwrap();
             let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -722,6 +726,7 @@ mod sys_verify {
                 .write(&spec)
                 .unwrap()
                 .add_assumption(claim)
+                .unwrap()
                 .build()
                 .unwrap();
             let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -747,6 +752,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(claim)
+            .unwrap()
             .build()
             .unwrap();
 
