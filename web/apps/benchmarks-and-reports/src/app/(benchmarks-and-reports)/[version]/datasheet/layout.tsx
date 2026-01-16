@@ -91,7 +91,6 @@ export default async function DatasheetLayout(
                   <CodeBadge>rv32im</CodeBadge> + <CodeBadge>lift</CodeBadge> + <CodeBadge>identity_p254</CodeBadge> +
                   <CodeBadge>stark2snark</CodeBadge>.
                   <br />
-                  <br />
                   On Bonsai, calls to <CodeBadge>rv32im</CodeBadge>, <CodeBadge>lift</CodeBadge>, and{" "}
                   <CodeBadge>join</CodeBadge> are parallelized.
                 </p>
