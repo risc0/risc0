@@ -33,14 +33,14 @@ fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     env_builder.write_frame(&input.encode()?);
 
     for update in &input.updates {
-        env_builder.add_assumption(FakeReceipt::new(update.claim.clone()));
+        env_builder.add_assumption(FakeReceipt::new(update.claim.clone()))?;
     }
 
     if let State::Continuation { ref journal } = input.state {
         env_builder.add_assumption(FakeReceipt::new(ReceiptClaim::ok(
             RISC0_POVW_LOG_BUILDER_ID,
             journal.encode()?,
-        )));
+        )))?;
     }
 
     let env = env_builder.build()?;
@@ -475,6 +475,7 @@ fn reject_mismatched_self_image_id_in_journal() {
             RISC0_POVW_LOG_BUILDER_ID,
             journal.encode().unwrap(),
         )))
+        .unwrap()
         .build()
         .unwrap();
 
