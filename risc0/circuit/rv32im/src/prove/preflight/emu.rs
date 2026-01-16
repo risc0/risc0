@@ -210,7 +210,7 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
 
             (resume_wit_pc, resume_wit_mode, resume_wit_version)
         } else {
-            let (new_pc, resume_wit_pc) = self.read_phys_memory(V2_COMPAT_SPC)?;
+            let (new_pc, resume_wit_pc) = self.read_phys_memory(csr_word(CSR_MSPC))?;
             self.pc = new_pc;
             let (mode, resume_wit_mode) = self.read_phys_memory(csr_word(CSR_MSMODE))?;
             self.set_mode(mode);
