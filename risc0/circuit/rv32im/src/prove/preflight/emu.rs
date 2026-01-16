@@ -687,7 +687,7 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
         let kind = Opt::LOAD_KIND.unwrap();
         let dinst = trace.get_block_mut(self.dinst.unwrap());
 
-        // Check alignement + access
+        // Check alignment + access
         let addr = self.peek_reg(dinst.rs1 as u32).wrapping_add(dinst.imm);
         let alignment_req = match kind {
             LoadKind::Lh | LoadKind::Lhu => 2,
@@ -696,7 +696,7 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
         };
         if !addr.is_multiple_of(alignment_req) {
             dinst.count -= 1;
-            return self.trap(trace, "Alignement error on load");
+            return self.trap(trace, "Alignment error on load");
         }
         if self.mode != MODE_MACHINE && ((addr / 4) >= KERNEL_START_WORD) {
             dinst.count -= 1;
@@ -740,7 +740,7 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
     fn do_inst_store<Opt: InstStoreOptions>(&mut self, trace: &mut Trace) -> Result<()> {
         let kind = Opt::STORE_KIND.unwrap();
         let dinst = trace.get_block_mut(self.dinst.unwrap());
-        // Check alignement + access
+        // Check alignment + access
         let addr = self.peek_reg(dinst.rs1 as u32).wrapping_add(dinst.imm);
 
         let alignment_req = match kind {
@@ -750,7 +750,7 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
         };
         if !addr.is_multiple_of(alignment_req) {
             dinst.count -= 1;
-            return self.trap(trace, "Alignement error on store");
+            return self.trap(trace, "Alignment error on store");
         }
         if self.mode != MODE_MACHINE && ((addr / 4) >= KERNEL_START_WORD) {
             dinst.count -= 1;
