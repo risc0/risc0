@@ -130,6 +130,14 @@ void Rv32imProver::prove(WriteIop& iop,
   prover.prove(iop);
 }
 
+void Rv32imProver::prove(WriteIop& iop, const PreflightResults& preflight) {
+  prove(iop,
+        preflight.rowInfo.data(),
+        preflight.rowInfo.size(),
+        preflight.aux.data(),
+        preflight.aux.size());
+}
+
 size_t Rv32imProver::po2() const {
   return prover.getPo2();
 }
