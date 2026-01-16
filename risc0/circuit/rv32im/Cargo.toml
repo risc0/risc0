@@ -99,6 +99,13 @@ smallvec = { version = "1.13", optional = true }
 strum = { version = "0.27", optional = true, features = ["derive"] }
 wide = { version = "0.7", optional = true }
 
+[build-dependencies]
+heck = "0.5"
+proc-macro2 = "1"
+quote = "1"
+risc0-circuit-rv32im-sys = { workspace = true, optional = true }
+syn = { version = "2", features = ["parsing"] }
+
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
 flate2 = "1.0"
@@ -107,13 +114,6 @@ maplit = "1"
 tar = "0.4"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-
-[build-dependencies]
-heck = "0.5"
-proc-macro2 = "1"
-quote = "1"
-risc0-circuit-rv32im-sys = { workspace = true, optional = true }
-syn = { version = "2", features = ["parsing"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 gpu-guard = { workspace = true }
