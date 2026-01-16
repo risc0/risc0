@@ -132,6 +132,7 @@ impl CompositeReceipt {
                 // Otherwise, we should verify the assumption receipt using the guest-provided root.
                 control_root => Some(
                     VerifierContext::empty()
+                        .with_dev_mode(ctx.dev_mode())
                         .with_suites(ctx.suites.clone())
                         .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters {
                             control_root,
