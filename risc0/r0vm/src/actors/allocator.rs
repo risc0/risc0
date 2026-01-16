@@ -1438,7 +1438,6 @@ mod allocation_tests {
                     )
                     .await
                     .unwrap()
-                    .unwrap();
                 worker_addresses.insert(*worker_id, worker_addr);
             }
 
