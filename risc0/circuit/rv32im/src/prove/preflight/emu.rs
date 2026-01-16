@@ -81,9 +81,6 @@ pub struct Emulator<HostIoT> {
     pages: Vec<Option<PageDetails>>,
     io: HostIoT,
 
-    m_inst_cache: InstCache,
-    us_inst_cache: InstCache,
-
     // Machine state
     v2_compat: bool,
     done: bool,
@@ -108,9 +105,6 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
             memory,
             pages,
             io,
-
-            m_inst_cache: Default::default(),
-            us_inst_cache: Default::default(),
 
             v2_compat: true,
             done: false,
@@ -1315,31 +1309,9 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
     }
 
     pub fn run(&mut self, trace: &mut Trace, row_count: usize, end_cycle: u32) -> Result<bool> {
-        let mut m_inst_cache = std::mem::take(&mut self.m_inst_cache);
-        let mut us_inst_cache = std::mem::take(&mut self.m_inst_cache);
+        let mut m_inst_cache = InstCache::new();
+        let mut us_inst_cache = InstCache::new();
 
-        let res = self.run_inner(
-            trace,
-            &mut m_inst_cache,
-            &mut us_inst_cache,
-            row_count,
-            end_cycle,
-        );
-
-        self.m_inst_cache = m_inst_cache;
-        self.us_inst_cache = us_inst_cache;
-
-        res
-    }
-
-    fn run_inner(
-        &mut self,
-        trace: &mut Trace,
-        m_inst_cache: &mut InstCache,
-        us_inst_cache: &mut InstCache,
-        row_count: usize,
-        end_cycle: u32,
-    ) -> Result<bool> {
         self.do_resume(trace)?;
 
         while !self.is_done(trace, row_count, end_cycle) {
