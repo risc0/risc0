@@ -13,8 +13,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use anyhow::{Result, anyhow};
+use quote::{format_ident, quote};
 use std::{
+    collections::BTreeMap,
     env, fs,
+    io::Write as _,
     path::{Path, PathBuf},
 };
 
@@ -114,13 +118,28 @@ fn main() {
 
     build.compile(output);
 
-    generate_rust(
-        "cxx/rv32im/witness/rust_bindings.rs.h",
-        &format!("{out_dir}/bindings.rs"),
+    let mut block_types = parse_block_types().unwrap();
+    block_types.insert(
+        "Empty".into(),
+        BlockTypeInfo {
+            index: block_types.len(),
+            count_per_row: 0,
+        },
     );
+
+    generate_rust_block_types(&format!("{out_dir}/block_types.rs"), &block_types);
+    generate_rust_bindings(&format!("{out_dir}/bindings.rs"), &block_types);
+
+    let rv32im_table = parse_rv32im_inc().unwrap();
+    generate_rv32im_table(&format!("{out_dir}/rv32im_table.rs"), &rv32im_table);
 }
 
-fn generate_rust(input: &str, output: &str) {
+struct BlockTypeInfo {
+    index: usize,
+    count_per_row: u8,
+}
+
+fn preprocess_file(file_contents: &str) -> String {
     let mut build = cc::Build::new();
     build
         .cpp(true)
@@ -132,28 +151,284 @@ fn generate_rust(input: &str, output: &str) {
 
     let mut command = build.get_compiler().to_command();
 
-    let status = command
+    let mut proc = command
+        .arg("-x")
+        .arg("c++")
         .arg("-E")
-        .arg(input)
+        .arg("-") // read from stdin
         .arg("-o")
-        .arg(output)
-        .status()
+        .arg("-") // write to stdout
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .spawn()
         .unwrap();
-    assert!(status.success(), "preprocessing {input} failed");
 
-    let contents = std::fs::read_to_string(output).unwrap();
+    // Use the pre-processor to parse the table
+    write!(proc.stdin.as_mut().unwrap(), "{file_contents}").unwrap();
+    let _ = proc.stdin.take();
+
+    let output = proc.wait_with_output().unwrap();
+
+    assert!(output.status.success(), "preprocessing failed");
+
+    let contents = String::from_utf8(output.stdout).unwrap();
+
+    // Skip include directive output
     let inc_directive = regex::Regex::new("^# \\d+ .*$").unwrap();
     let contents = contents
         .lines()
         .filter(|l| !inc_directive.is_match(l))
         .collect::<Vec<_>>();
+    contents.join("")
+}
 
-    std::fs::write(output, contents.join("\n")).unwrap();
+/// Uses the C pre-processor to parse the block type table from "cxx/rv32im/witness/block_types.h"
+fn parse_block_types() -> Result<BTreeMap<String, BlockTypeInfo>> {
+    let contents = preprocess_file(
+        "\
+            #include \"rv32im/witness/block_types.h\"\n\
+            #define BLOCK_TYPE(name, count) name,count;\n\
+            BLOCK_TYPES
+        ",
+    );
+
+    contents
+        .trim()
+        .split(";")
+        .filter(|entry| !entry.trim().is_empty())
+        .enumerate()
+        .map(|(index, entry)| {
+            let mut entries = entry.trim().split(",");
+            Ok((
+                entries.next().unwrap().to_string(),
+                BlockTypeInfo {
+                    index,
+                    count_per_row: entries
+                        .next()
+                        .ok_or_else(|| anyhow!("block_type.h table entry missing count"))?
+                        .parse()
+                        .map_err(|e| anyhow!("block_type.h table entry count invalid: {e}"))?,
+                },
+            ))
+        })
+        .collect()
+}
+
+#[derive(Debug)]
+struct Rv32imInstrInfo {
+    name: String,
+    idx: u8,
+    opcode: u8,
+    imm_type: String,
+    func3: String,
+    func7: String,
+    itype: String,
+    params: Vec<String>,
+}
+
+impl Rv32imInstrInfo {
+    fn parse_from_parts(mut parts: Vec<String>) -> Result<Self> {
+        assert!(parts.len() >= 7, "rv32im.inc table entry is to small");
+        let params = parts.split_off(7);
+        let mut parts_iter = parts.into_iter();
+        let mut next = move || parts_iter.next().unwrap();
+
+        Ok(Self {
+            name: next(),
+            idx: next()
+                .parse()
+                .map_err(|e| anyhow!("rv32im.inc table entry invalid idx: {e}"))?,
+            opcode: u8::from_str_radix(
+                next()
+                    .strip_prefix("0b")
+                    .ok_or_else(|| anyhow!("rv32im.inc table entry invalid opcode"))?,
+                2,
+            )
+            .map_err(|e| anyhow!("rv32im.inc table entry invalid opcode: {e}"))?,
+            imm_type: next(),
+            func3: next(),
+            func7: next(),
+            itype: next(),
+            params,
+        })
+    }
+}
+
+/// Uses the C pre-processor to parse the block type table from "cxx/rv32im/base/rv32im.inc"
+fn parse_rv32im_inc() -> Result<Vec<Rv32imInstrInfo>> {
+    let contents = preprocess_file(
+        "\
+            #define ENTRY(...) __VA_ARGS__;\n\
+            #include \"rv32im/base/rv32im.inc\"\n\
+        ",
+    );
+
+    contents
+        .split(";")
+        .filter(|entry| !entry.trim().is_empty())
+        .map(|entry| {
+            let entries = entry
+                .trim()
+                .split(",")
+                .map(|e| e.trim().to_string())
+                .collect();
+            Rv32imInstrInfo::parse_from_parts(entries)
+        })
+        .collect()
+}
+
+fn generate_rust_block_types(output: &str, block_types: &BTreeMap<String, BlockTypeInfo>) {
+    let block_names = block_types
+        .keys()
+        .map(|n| format_ident!("{n}"))
+        .collect::<Vec<_>>();
+
+    let block_witnesses = block_types
+        .keys()
+        .map(|n| format_ident!("{n}Witness"))
+        .collect::<Vec<_>>();
+    let block_values = block_types
+        .values()
+        .map(|i| u8::try_from(i.index).expect("should be <= 255 block types"))
+        .collect::<Vec<_>>();
+    let block_counts = block_types.values().map(|i| i.count_per_row);
+    let num_blocks = block_types.len();
+
+    let contents = quote! {
+        #[derive(
+            Clone,
+            Copy,
+            Debug,
+            Eq,
+            Hash,
+            PartialEq,
+            enum_map::Enum,
+            serde::Deserialize,
+            serde::Serialize,
+            strum::EnumIter,
+        )]
+        #[repr(u8)]
+        pub enum BlockType {
+            #(#block_names = #block_values),*
+        }
+
+        impl BlockType {
+            pub const COUNT: usize = #num_blocks;
+
+            pub const fn count_per_row(&self) -> u8 {
+                match self {
+                    #(Self::#block_names => #block_counts),*
+                }
+            }
+
+            pub fn iter() -> impl Iterator<Item = Self> {
+                <Self as strum::IntoEnumIterator>::iter()
+            }
+        }
+
+        impl TryFrom<u8> for BlockType {
+            type Error = anyhow::Error;
+
+            fn try_from(v: u8) -> anyhow::Result<Self> {
+                match v {
+                    #(#block_values => Ok(Self::#block_names),)*
+                    unknown => Err(anyhow::anyhow!("bad value {unknown} for BlockType"))
+                }
+            }
+        }
+
+        #(impl HasBlockType for #block_witnesses {
+            const BLOCK_TYPE: BlockType = BlockType::#block_names;
+        })*
+
+        #[derive(derive_more::From, PartialEq, Debug, Clone)]
+        pub enum BlockWitness {
+            #(#block_names(#block_witnesses),)*
+        }
+
+        impl BlockWitness {
+            pub const fn block_type(&self) -> BlockType {
+                match self {
+                    #(Self::#block_names(_) => BlockType::#block_names),*
+                }
+            }
+        }
+
+        #[macro_export]
+        macro_rules! visit_blocks {
+            ($visitor:ident, $($arg:expr),*) => {
+                $visitor!($($arg,)* #(#block_names),*)
+            }
+        }
+    };
+
+    std::fs::write(output, contents.to_string()).unwrap();
     let status = std::process::Command::new("rustfmt")
         .arg(output)
         .status()
         .unwrap();
-    assert!(status.success(), "rustfmt {input} failed");
+    assert!(status.success(), "rustfmt {output} failed");
+}
+
+fn generate_rv32im_table(output: &str, rv32im_table: &[Rv32imInstrInfo]) {
+    let table_size = rv32im_table.len();
+    let instrs = rv32im_table.iter().map(|i| {
+        let Rv32imInstrInfo {
+            name,
+            idx,
+            opcode,
+            imm_type,
+            func3,
+            func7,
+            itype,
+            params,
+        } = i;
+        let params = quote! { &[#(#params),*] };
+        quote! {
+            Rv32imInstrInfo {
+                name: #name,
+                idx: #idx,
+                opcode: #opcode,
+                imm_type: #imm_type,
+                func3: #func3,
+                func7: #func7,
+                itype: #itype,
+                params: #params,
+            }
+        }
+    });
+    let contents = quote! {
+        pub const RV32IM_TABLE: [Rv32imInstrInfo; #table_size] = [#(#instrs),*];
+    };
+
+    std::fs::write(output, contents.to_string()).unwrap();
+    let status = std::process::Command::new("rustfmt")
+        .arg(output)
+        .status()
+        .unwrap();
+    assert!(status.success(), "rustfmt {output} failed");
+}
+
+fn generate_rust_bindings(output: &str, block_types: &BTreeMap<String, BlockTypeInfo>) {
+    let mut builder = bindgen::Builder::default()
+        .header("cxx/rv32im/witness/witness.h")
+        .derive_copy(false)
+        .derive_debug(false)
+        .clang_arg("-x")
+        .clang_arg("c++")
+        .clang_arg("-std=c++17")
+        .clang_arg("-Icxx")
+        .clang_arg("-Ivendor");
+
+    for name in block_types.keys() {
+        builder = builder.allowlist_type(format!("{name}Witness"));
+    }
+    for name in ["Base", "AddSub", "Bit", "Lt", "Mul", "Div", "Shift"] {
+        builder = builder.allowlist_type(format!("Unit{name}Witness"));
+    }
+
+    let bindings = builder.generate().unwrap();
+    bindings.write_to_file(output).unwrap();
 }
 
 fn rerun_if_changed<P: AsRef<Path>>(path: P) {

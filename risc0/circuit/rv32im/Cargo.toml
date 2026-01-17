@@ -33,9 +33,11 @@ execute = [
 ]
 prove = [
     "dep:cfg-if",
+    "dep:num_enum",
     "dep:rand",
     "dep:rayon",
     "dep:risc0-sys",
+    "dep:strum",
     "dep:wide",
     "execute",
     "risc0-zkp/prove",
@@ -86,6 +88,7 @@ malachite = { version = "0.4.22", optional = true, default-features = false, fea
 ] }
 num-derive = { version = "0.4.2", optional = true }
 num-traits = { version = "0.2.19", optional = true }
+num_enum = { version = "0.7", optional = true }
 postcard = { version = "1.1.1", optional = true, features = ["use-std"] }
 rand = { version = "0.9.1", optional = true }
 rayon = { version = "1.5", optional = true }
@@ -93,12 +96,21 @@ ringbuffer = { version = "0.15.0", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 smallvec = { version = "1.13", optional = true }
+strum = { version = "0.27", optional = true, features = ["derive"] }
 wide = { version = "0.7", optional = true }
+
+[build-dependencies]
+heck = "0.5"
+proc-macro2 = "1"
+quote = "1"
+risc0-circuit-rv32im-sys = { workspace = true, optional = true }
+syn = { version = "2", features = ["parsing"] }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
 flate2 = "1.0"
 gpu-guard = { workspace = true }
+maplit = "1"
 tar = "0.4"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

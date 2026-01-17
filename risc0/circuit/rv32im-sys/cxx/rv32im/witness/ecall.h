@@ -18,6 +18,7 @@
 #include "rv32im/base/poseidon2.h"
 #include "rv32im/witness/decode.h"
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct EcallTerminateWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -27,6 +28,7 @@ struct EcallTerminateWitness {
   PhysMemReadWitness output[8];
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct EcallReadWitness {
   uint32_t cycle;
   uint32_t finalCycle;
@@ -37,6 +39,7 @@ struct EcallReadWitness {
   RegMemWriteWitness a0;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct EcallWriteWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -45,6 +48,7 @@ struct EcallWriteWitness {
   RegMemWriteWitness a0;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct P2State {
   uint32_t cycle;
   uint8_t isElem;
@@ -54,6 +58,7 @@ struct P2State {
   uint32_t outWordAddr;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct P2StepWitness {
   P2State state;
   Fp stateIn[CELLS_DIGEST];
@@ -62,6 +67,7 @@ struct P2StepWitness {
   PhysMemWriteWitness dataOut[CELLS_DIGEST];
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct EcallP2Witness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -74,6 +80,7 @@ struct EcallP2Witness {
   PhysMemWriteWitness stateOut[CELLS_DIGEST];
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct EcallBigIntWitness {
   uint32_t cycle;
   FetchWitness fetch;

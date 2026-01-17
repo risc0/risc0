@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+pub mod fp;
+
 use std::{
     ffi::CStr,
     os::raw::{c_char, c_int},
@@ -20,8 +22,42 @@ use std::{
 };
 
 use anyhow::{Result, anyhow};
+use bytemuck::{Pod, Zeroable};
 
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+#[derive(Debug)]
+pub struct Rv32imInstrInfo {
+    pub name: &'static str,
+    pub idx: u8,
+    pub opcode: u8,
+    pub imm_type: &'static str,
+    pub func3: &'static str,
+    pub func7: &'static str,
+    pub itype: &'static str,
+    pub params: &'static [&'static str],
+}
+
+include!(concat!(env!("OUT_DIR"), "/rv32im_table.rs"));
+
+include!(concat!(env!("OUT_DIR"), "/block_types.rs"));
+
+#[allow(
+    dead_code,
+    non_camel_case_types,
+    non_snake_case,
+    non_upper_case_globals
+)]
+mod bindings {
+    type risc0_Fp = crate::fp::Fp;
+    use bytemuck::{Pod, Zeroable};
+
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+}
+
+pub use bindings::*;
+
+pub trait HasBlockType {
+    const BLOCK_TYPE: BlockType;
+}
 
 #[repr(C)]
 pub struct SegmentContext {
@@ -71,6 +107,15 @@ pub struct RawSegment {
     pub povw_nonce: [u32; 8],
 }
 
+#[repr(C)]
+#[derive(Zeroable, Pod, Copy, Clone, Debug, PartialEq, Eq)]
+pub struct RowInfo {
+    pub row_type: u8,
+    pub block_count: u8,
+    pub padding: u16,
+    pub aux_offset: u32,
+}
+
 type RawError = *const std::os::raw::c_char;
 
 unsafe extern "C" {
@@ -90,6 +135,16 @@ unsafe extern "C" {
 
     pub fn risc0_circuit_rv32im_m3_preflight_is_final(ctx: *const PreflightContext) -> usize;
 
+    pub fn risc0_circuit_rv32im_m3_preflight_row_info(
+        ctx: *const PreflightContext,
+    ) -> *const RowInfo;
+
+    pub fn risc0_circuit_rv32im_m3_preflight_row_info_size(ctx: *const PreflightContext) -> usize;
+
+    pub fn risc0_circuit_rv32im_m3_preflight_aux(ctx: *const PreflightContext) -> *const u32;
+
+    pub fn risc0_circuit_rv32im_m3_preflight_aux_size(ctx: *const PreflightContext) -> usize;
+
     pub fn risc0_circuit_rv32im_m3_preflight_block_counts(
         ctx: *const PreflightContext,
     ) -> *const u32;
@@ -101,7 +156,10 @@ unsafe extern "C" {
 
     pub fn risc0_circuit_rv32im_m3_prove(
         ctx: *const ProverContext,
-        preflight: *const PreflightContext,
+        rowInfo: *const RowInfo,
+        rowInfoSize: usize,
+        aux: *const u32,
+        auxSize: usize,
     );
 
     pub fn risc0_circuit_rv32im_m3_prover_transcript(ctx: *const ProverContext) -> RawSlice<u32>;

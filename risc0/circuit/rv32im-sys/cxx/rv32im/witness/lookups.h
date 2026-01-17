@@ -17,6 +17,7 @@
 
 #include "rv32im/base/base.h"
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct MakeTableWitness {
   uint32_t table;
   uint32_t start;

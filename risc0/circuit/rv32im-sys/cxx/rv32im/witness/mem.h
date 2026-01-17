@@ -17,12 +17,14 @@
 
 #include "rv32im/base/base.h"
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PhysMemReadWitness {
   uint32_t wordAddr;
   uint32_t prevCycle;
   uint32_t value;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PhysMemWriteWitness {
   uint32_t wordAddr;
   uint32_t prevCycle;
