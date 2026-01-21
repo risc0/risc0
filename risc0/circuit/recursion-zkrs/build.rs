@@ -24,8 +24,8 @@ fn main() {
     build_zkr_table();
 }
 
-/// The crates.io upload limit is 10mb. Give ourselves 4k of overhead for other files cargo adds.
-const UPLOAD_LIMIT: u64 = (10 * 1024 * 1024) - 4 * 1024;
+/// The crates.io upload limit is 10mb. Give ourselves 20k of overhead for other files cargo adds.
+const UPLOAD_LIMIT: u64 = (10 * 1024 * 1024) - 20 * 1024;
 
 const SOURCE_FILES: [&str; 3] = ["build.rs", "src/lib.rs", "Cargo.toml"];
 
