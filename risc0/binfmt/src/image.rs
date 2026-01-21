@@ -136,47 +136,16 @@ impl Default for MemoryImage {
 }
 
 impl MemoryImage {
-    /// Create a new [MemoryImage] from the given mapping of word address to word value.
-    ///
-    /// This function does not compute the page digests. Page digests are computed lazily, as
-    /// needed in response to e.g. [MemoryImage::image_id]. To eagerly compute the digests, call
-    /// [MemoryImage::update_digests].
-    fn new(image: BTreeMap<u32, u32>) -> Self {
-        let mut this = Self::default();
-        let mut cur_page_idx = u32::MAX;
-        let mut cur_page: Option<Page> = None;
-
-        for (&addr, &word) in image.iter() {
-            let addr = ByteAddr(addr).waddr();
-            let page_idx = addr.page_idx();
-            if page_idx != cur_page_idx {
-                if let Some(page) = cur_page.take() {
-                    this.set_page(cur_page_idx, page);
-                }
-                cur_page = Some(Page::default());
-                cur_page_idx = page_idx;
-            }
-
-            cur_page.as_mut().unwrap().store(addr, word);
-        }
-
-        if let Some(page) = cur_page.take() {
-            this.set_page(cur_page_idx, page);
-        }
-
-        this
-    }
-
     /// Creates the initial memory state for a user-mode `program`.
     pub fn new_user(mut program: Program) -> Self {
         program.prepare_user();
-        Self::new(program.image)
+        program.image
     }
 
     /// Creates the initial memory state for a kernel-mode `program`.
     pub fn new_kernel(mut program: Program) -> Self {
         program.prepare_kernel(None);
-        Self::new(program.image)
+        program.image
     }
 
     /// Creates the initial memory state for a user-mode `user` [Program] with a
@@ -184,7 +153,7 @@ impl MemoryImage {
     pub fn with_kernel(mut user: Program, mut kernel: Program) -> Self {
         user.prepare_user();
         kernel.prepare_kernel(Some(&mut user));
-        Self::new(kernel.image)
+        kernel.image
     }
 
     /// Returns a set of the page indexes that are loaded.
@@ -206,19 +175,16 @@ impl MemoryImage {
     }
 
     /// Return the page data, fails if unavailable.
-    pub fn get_page(&mut self, page_idx: u32) -> Result<Page> {
+    pub fn get_page(&self, page_idx: u32) -> Result<&Page> {
         // If page exists, return it
         if let Some(page) = self.pages.get(&page_idx) {
-            return Ok(page.clone());
+            return Ok(page);
         }
 
-        // If the page is zero, then populate it.
-        // NOTE: The page could be left empty, but it's likely this page will be accessed again.
+        // If the page is zero, return a reference to the cached zero page.
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
         if self.is_zero(digest_idx) {
-            let zero_page = &ZERO_CACHE.page;
-            self.pages.insert(page_idx, zero_page.clone());
-            return Ok(zero_page.clone());
+            return Ok(&ZERO_CACHE.page);
         }
 
         // Otherwise fail
@@ -232,6 +198,57 @@ impl MemoryImage {
         self.pages.insert(page_idx, page);
         // Mark the page digest and all ancestors as dirty.
         self.mark_dirty(digest_idx);
+    }
+
+    /// Returns a mutable reference to the indexed page in the [MemoryImage]. Modifying this page
+    /// will modify the memory image.
+    ///
+    /// Marks the retrieved page as dirty, under the assumption that the caller will modify it.
+    fn get_page_mut(&mut self, page_idx: u32) -> Result<&mut Page> {
+        let digest_idx = MEMORY_PAGES as u32 + page_idx;
+
+        // NOTE: We cannot use pages.get_mut in the if because it creates a mutable borrow that
+        // prevents the is_zero check. The Rust borrow checker cannot accept both borrows here.
+        if self.pages.contains_key(&page_idx) {
+            self.mark_dirty(digest_idx);
+            return Ok(self.pages.get_mut(&page_idx).unwrap());
+        }
+
+        // If the page is zero, then populate it.
+        if self.is_zero(digest_idx) {
+            let zero_page = ZERO_CACHE.page.clone();
+            self.mark_dirty(digest_idx);
+            return Ok(self.pages.entry(page_idx).or_insert(zero_page));
+        }
+
+        bail!("Unavailable page: {page_idx}")
+    }
+
+    /// Returns a single word at the given [WordAddr].
+    pub(crate) fn get_word(&self, addr: WordAddr) -> Result<u32> {
+        Ok(self.get_page(addr.page_idx())?.load(addr))
+    }
+
+    /// Sets a single word at the given [WordAddr].
+    pub fn set_word(&mut self, addr: WordAddr, word: u32) -> Result<()> {
+        self.get_page_mut(addr.page_idx())?.store(addr, word);
+        Ok(())
+    }
+
+    pub(crate) fn set_region(&mut self, start: ByteAddr, data: impl AsRef<[u8]>) -> Result<()> {
+        let mut data = data.as_ref();
+        let mut pos = start;
+        while !data.is_empty() {
+            let page = self.get_page_mut(pos.page_idx())?;
+            let buf_dst = &mut page.ensure_writable()[pos.page_subaddr().0 as usize..];
+            let copy_len = usize::min(buf_dst.len(), data.len());
+            // copy_len <= data.len() for split_off will return Some(_).
+            let buf_src = data.split_off(..copy_len).unwrap();
+            buf_dst[..copy_len].copy_from_slice(buf_src);
+
+            pos += copy_len;
+        }
+        Ok(())
     }
 
     /// Set the data for a page and with the given digest
@@ -544,12 +561,10 @@ fn cells_to_digest(cells: &[BabyBearElem; CELLS]) -> Digest {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeMap;
-
     use risc0_zkp::digest;
     use test_log::test;
 
-    use super::{MemoryImage, Program, ZERO_CACHE};
+    use super::{ByteAddr, MemoryImage, Program, ZERO_CACHE};
 
     #[test]
     fn poseidon2_zeros() {
@@ -584,10 +599,9 @@ mod tests {
     #[test]
     fn image_circuit_match() {
         let entry = 0x10000;
-        let program = Program {
-            entry,
-            image: BTreeMap::from([(entry, 0x1234b337)]),
-        };
+        let mut image = MemoryImage::default();
+        image.set_word(ByteAddr(entry).waddr(), 0x1234b337).unwrap();
+        let program = Program { entry, image };
         let mut image = MemoryImage::new_kernel(program);
         assert_eq!(
             *image.get_digest(0x0040_0100).unwrap(),

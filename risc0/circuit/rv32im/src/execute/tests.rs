@@ -25,7 +25,6 @@ use crate::{
 #[test]
 fn basic() {
     let program = testutil::kernel::basic();
-    let expected_cycles = program.size_in_words();
     let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 
@@ -50,7 +49,7 @@ fn basic() {
     assert_eq!(segment.terminate_state, Some(TerminateState::default()));
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
-    assert_eq!(segment.suspend_cycle, expected_cycles as u32 + 1);
+    assert_eq!(segment.suspend_cycle, 5);
 }
 
 #[test]
