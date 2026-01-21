@@ -17,6 +17,7 @@
 
 #include "rv32im/witness/decode.h"
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstResumeWitness {
   PhysMemReadWitness v2Compat;
   PhysMemReadWitness pc;
@@ -24,6 +25,7 @@ struct InstResumeWitness {
   PhysMemWriteWitness version;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstSuspendWitness {
   uint32_t cycle;
   uint32_t iCacheCycle;
@@ -31,6 +33,7 @@ struct InstSuspendWitness {
   PhysMemWriteWitness mode;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstRegWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -42,6 +45,7 @@ struct InstRegWitness {
   uint32_t out1;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstImmWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -54,6 +58,7 @@ struct InstImmWitness {
   uint32_t out1;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstLoadWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -65,6 +70,7 @@ struct InstLoadWitness {
   uint32_t options;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstStoreWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -76,6 +82,7 @@ struct InstStoreWitness {
   uint32_t options;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstBranchWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -89,6 +96,7 @@ struct InstBranchWitness {
   uint32_t didBranch;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstJalWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -98,6 +106,7 @@ struct InstJalWitness {
   uint32_t imm;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstJalrWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -107,6 +116,7 @@ struct InstJalrWitness {
   uint32_t imm;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstLuiWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -115,6 +125,7 @@ struct InstLuiWitness {
   RegMemWriteWitness rd;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstAuipcWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -124,6 +135,7 @@ struct InstAuipcWitness {
   uint32_t imm;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstEcallWitness {
   uint32_t cycle;
   FetchWitness fetch;
@@ -131,6 +143,7 @@ struct InstEcallWitness {
   PhysMemReadWitness dispatch;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstTrapWitness {
   uint32_t cycle;
   uint32_t iCacheCycle;
@@ -138,6 +151,7 @@ struct InstTrapWitness {
   PhysMemReadWitness dispatch;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct InstMretWitness {
   uint32_t cycle;
   FetchWitness fetch;
