@@ -7,5 +7,9 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[dependencies]
+phf = { version = "0.13", features = ["macros"] }
+
 [build-dependencies]
-liblzma = { version = "0.4", features = ["static"] }
+liblzma = { version = "0.4", features = ["static", "parallel"] }
+tar = "0.4"

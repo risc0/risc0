@@ -13,8 +13,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use std::{fmt::Write as _, fs::File, io::Read as _, path::Path};
+
+use liblzma::write::XzEncoder;
+
+const XZ_COMPRESS_LEVEL: u32 = 3;
+
 fn main() {
-    generate_zkr_table();
+    check_zkr_size();
+    build_zkr_table();
 }
 
 /// The crates.io upload limit is 10mb. Give ourselves 4k of overhead for other files cargo adds.
@@ -29,48 +36,62 @@ fn source_files_size() -> u64 {
         .sum()
 }
 
-fn generate_zkr_table() {
-    use std::fmt::Write as _;
-    use std::path::Path;
-
-    use liblzma::read::XzDecoder;
-
-    let mut output = String::new();
-
-    writeln!(&mut output, "pub const ZKRS: &[(&[u8], usize, &str)] = &[").unwrap();
-
-    let mut total_bytes = 0;
-
-    for po2 in 12..=24 {
-        let zkr_name = format!("lift_rv32im_m3_{po2}.zkr");
-        let zkr_path = Path::new("src")
-            .join(format!("{zkr_name}.xz"))
-            .canonicalize()
-            .unwrap();
-        println!("cargo:rerun-if-changed={}", zkr_path.display());
-
-        let f = std::fs::File::open(&zkr_path).unwrap();
-        total_bytes += f.metadata().unwrap().len();
-        let mut decoder = XzDecoder::new(f);
-        std::io::copy(&mut decoder, &mut std::io::sink()).unwrap();
-        let size = decoder.total_out();
-
-        writeln!(
-            &mut output,
-            "(include_bytes!(\"{}\"), {size}, \"{zkr_name}\"),",
-            zkr_path.display()
-        )
-        .unwrap();
-    }
-
-    total_bytes += source_files_size();
+fn check_zkr_size() {
+    let total_bytes = std::fs::metadata("src/zkrs.tar.xz").unwrap().len() + source_files_size();
 
     if total_bytes > UPLOAD_LIMIT {
         panic!("ZKRs are too big for uploading to crates.io ({total_bytes} > {UPLOAD_LIMIT})");
     }
+}
 
-    writeln!(&mut output, "];").unwrap();
+fn build_zkr_table() {
+    let mut tar = tar::Archive::new(liblzma::read::XzDecoder::new_parallel(
+        std::fs::File::open("src/zkrs.tar.xz").unwrap(),
+    ));
+    println!("cargo:rerun-if-changed=src/zkrs.tar.xz");
 
-    let out_dir = std::env::var_os("OUT_DIR").unwrap();
-    std::fs::write(Path::new(&out_dir).join("zkr_table.rs"), &output).unwrap();
+    let out_dir_str = std::env::var_os("OUT_DIR").unwrap();
+    let out_dir = Path::new(&out_dir_str);
+    let mut output = String::new();
+
+    writeln!(
+        &mut output,
+        "pub static ZKRS: phf::Map<&'static str, (&'static [u8], usize)> = phf::phf_map! {{"
+    )
+    .unwrap();
+
+    std::thread::scope(|scope| {
+        for entry in tar.entries().unwrap() {
+            let mut entry = entry.unwrap();
+            let entry_path = entry.path().unwrap();
+            let str_name = entry_path
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string();
+            let size = entry.size();
+            writeln!(
+                &mut output,
+                "\"{str_name}\" => (include_bytes!(concat!(env!(\"OUT_DIR\"), \"/{str_name}.xz\")), {size}),"
+            )
+            .unwrap();
+
+            let mut entry_data = vec![];
+            entry.read_to_end(&mut entry_data).unwrap();
+
+            scope.spawn(move || {
+                let mut encoder = XzEncoder::new(
+                    File::create(out_dir.join(format!("{str_name}.xz"))).unwrap(),
+                    XZ_COMPRESS_LEVEL,
+                );
+                std::io::copy(&mut &entry_data[..], &mut encoder).unwrap();
+                encoder.finish().unwrap();
+            });
+        }
+    });
+
+    writeln!(&mut output, "}};").unwrap();
+
+    std::fs::write(out_dir.join("zkr_table.rs"), &output).unwrap();
 }

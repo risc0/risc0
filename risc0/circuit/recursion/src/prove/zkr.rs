@@ -15,7 +15,7 @@
 
 use std::io::{Cursor, Read as _};
 
-use anyhow::{Context as _, Result, bail};
+use anyhow::{Context as _, Result, anyhow, bail};
 
 use super::Program;
 
@@ -76,34 +76,27 @@ enum ZkrSection {
 }
 
 impl ZkrSection {
-    fn table(&self) -> &[(&[u8], usize, &str)] {
+    fn table(&self) -> &phf::Map<&'static str, (&'static [u8], usize)> {
         use risc0_circuit_recursion_povw_zkrs::ZKRS as POVW_ZKRS;
         use risc0_circuit_recursion_zkrs::ZKRS;
 
         match self {
-            Self::Lift => ZKRS,
-            Self::LiftPovw => POVW_ZKRS,
+            Self::Lift => &ZKRS,
+            Self::LiftPovw => &POVW_ZKRS,
         }
     }
 }
 
-fn extract_zkr_m3(section: ZkrSection, po2: usize, expected_name: &str) -> Result<Vec<u32>> {
-    let idx = po2 - crate::LIFT_PO2_RANGE.start();
-    let (xz_bytes, uncompressed_size, name) = section.table()[idx];
+fn extract_zkr_m3(section: ZkrSection, _po2: usize, name: &str) -> Result<Vec<u32>> {
+    let &(xz_data, uncompressed_size) = section
+        .table()
+        .get(name)
+        .ok_or_else(|| anyhow!("given zkr not found: {name}"))?;
 
-    // Make sure we got the right one
-    if name != expected_name {
-        bail!("failed to find .zkr: {expected_name}");
-    }
-
-    if uncompressed_size % std::mem::size_of::<u32>() != 0 {
-        bail!(".zkr is incorrect size");
-    }
-
-    let mut decoder = liblzma::read::XzDecoder::new(xz_bytes);
+    let mut decoder = liblzma::read::XzDecoder::new_parallel(xz_data);
     let mut u32s = vec![0u32; uncompressed_size / std::mem::size_of::<u32>()];
     decoder.read_exact(bytemuck::cast_slice_mut(&mut u32s))?;
-    Ok(u32s)
+    return Ok(u32s);
 }
 
 fn extract_zkr(zip: &mut zip::ZipArchive<Cursor<&[u8]>>, name: &str) -> Result<Vec<u32>> {
