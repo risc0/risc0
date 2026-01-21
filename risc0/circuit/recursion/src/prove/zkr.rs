@@ -13,32 +13,19 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::io::{Cursor, Read as _};
+use std::io::Read as _;
 
-use anyhow::{Context as _, Result, anyhow, bail};
+use anyhow::{Result, anyhow};
 
 use super::Program;
 
-const ZKR_ZIP: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/recursion_zkr.zip"));
-
-pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
-    let mut zip = zip::ZipArchive::new(Cursor::new(ZKR_ZIP))?;
-    let encoded = extract_zkr(&mut zip, name)?;
-    Ok(Program::from_encoded(&encoded, po2))
-}
-
-pub fn get_zkr_m3(name: &str, po2: usize, recursion_po2: usize) -> Result<Program> {
-    let encoded = if name.contains("rv32im_m3") {
-        let section = if name.contains("povw") {
-            ZkrSection::LiftPovw
-        } else {
-            ZkrSection::Lift
-        };
-        extract_zkr_m3(section, po2, name)?
+pub fn get_zkr(name: &str, recursion_po2: usize) -> Result<Program> {
+    let section = if name.contains("povw") {
+        ZkrSection::LiftPovw
     } else {
-        let mut zip = zip::ZipArchive::new(Cursor::new(ZKR_ZIP))?;
-        extract_zkr(&mut zip, name)?
+        ZkrSection::Lift
     };
+    let encoded = extract_zkr(section, name)?;
     Ok(Program::from_encoded(&encoded, recursion_po2))
 }
 
@@ -49,25 +36,15 @@ pub fn get_zkr_m3(name: &str, po2: usize, recursion_po2: usize) -> Result<Progra
 /// println!("{}", listing.into_iter().map(|(name, _)| name).collect::<Vec<_>>().join("\n"));
 /// ```
 pub fn get_all_zkrs() -> Result<Vec<(String, Vec<u32>)>> {
-    let mut zip = zip::ZipArchive::new(Cursor::new(ZKR_ZIP))?;
-    let files: Vec<_> = zip.file_names().map(|name| name.to_string()).collect();
-    files
-        .into_iter()
-        .map(|name| {
-            let encoded = extract_zkr(&mut zip, &name)?;
-            Ok((name, encoded))
-        })
-        .chain(crate::LIFT_PO2_RANGE.map(|po2| {
-            let name = format!("lift_rv32im_m3_{po2}.zkr");
-            let encoded = extract_zkr_m3(ZkrSection::Lift, po2, &name)?;
-            Ok((name, encoded))
-        }))
-        .chain(crate::LIFT_PO2_RANGE.map(|po2| {
-            let name = format!("lift_rv32im_m3_povw_{po2}.zkr");
-            let encoded = extract_zkr_m3(ZkrSection::LiftPovw, po2, &name)?;
-            Ok((name, encoded))
-        }))
-        .collect()
+    let regular_zrs = ZkrSection::Lift.table().keys().map(|&name| {
+        let encoded = extract_zkr(ZkrSection::Lift, name)?;
+        Ok((name.into(), encoded))
+    });
+    let povw_zkrs = ZkrSection::LiftPovw.table().keys().map(|&name| {
+        let encoded = extract_zkr(ZkrSection::LiftPovw, name)?;
+        Ok((name.into(), encoded))
+    });
+    regular_zrs.chain(povw_zkrs).collect()
 }
 
 enum ZkrSection {
@@ -87,7 +64,7 @@ impl ZkrSection {
     }
 }
 
-fn extract_zkr_m3(section: ZkrSection, _po2: usize, name: &str) -> Result<Vec<u32>> {
+fn extract_zkr(section: ZkrSection, name: &str) -> Result<Vec<u32>> {
     let &(xz_data, uncompressed_size) = section
         .table()
         .get(name)
@@ -96,21 +73,5 @@ fn extract_zkr_m3(section: ZkrSection, _po2: usize, name: &str) -> Result<Vec<u3
     let mut decoder = liblzma::read::XzDecoder::new_parallel(xz_data);
     let mut u32s = vec![0u32; uncompressed_size / std::mem::size_of::<u32>()];
     decoder.read_exact(bytemuck::cast_slice_mut(&mut u32s))?;
-    return Ok(u32s);
-}
-
-fn extract_zkr(zip: &mut zip::ZipArchive<Cursor<&[u8]>>, name: &str) -> Result<Vec<u32>> {
-    let mut f = zip
-        .by_name(name)
-        .with_context(|| format!("Failed to read {name}"))?;
-    let uncompressed_size = f.size() as usize;
-
-    if !uncompressed_size.is_multiple_of(std::mem::size_of::<u32>()) {
-        bail!(".zkr is incorrect size");
-    }
-
-    let mut u32s = vec![0u32; uncompressed_size / std::mem::size_of::<u32>()];
-    f.read_exact(bytemuck::cast_slice_mut(&mut u32s[..]))?;
-
     Ok(u32s)
 }
