@@ -15,8 +15,14 @@
 
 use std::{collections::HashMap, rc::Rc};
 
+use anyhow::{Result, bail};
 use metal::ComputePipelineDescriptor;
+
+use risc0_circuit_recursion_sys::{
+    RawExecBuffers, RawPreflightTrace, StepMode, risc0_circuit_recursion_cpu_witgen,
+};
 use risc0_core::scope;
+use risc0_sys::ffi_wrap;
 use risc0_zkp::{
     INV_RATE, ZK_CYCLES,
     core::log2_ceil,
@@ -27,7 +33,10 @@ use risc0_zkp::{
     },
     hal::{
         AccumPreflight, Buffer as _, CircuitHal,
-        metal::{BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHash},
+        metal::{
+            BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalPoseidon2, MetalHalSha256,
+            MetalHash, MetalHashPoseidon2, MetalHashSha256,
+        },
     },
 };
 
@@ -37,7 +46,13 @@ const KERNEL_NAMES: &[&str] = &["eval_check", "step_compute_accum", "step_verify
 
 use crate::{
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
+    prove::{RecursionProver, RecursionProverImpl},
 };
+
+use super::{CircuitAccumulator, CircuitWitnessGenerator};
+
+pub type MetalCircuitHalSha256 = MetalCircuitHal<MetalHashSha256>;
+pub type MetalCircuitHalPoseidon2 = MetalCircuitHal<MetalHashPoseidon2>;
 
 #[derive(Debug)]
 pub struct MetalCircuitHal<MH: MetalHash> {
@@ -130,7 +145,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         let wom = MetalBuffer::copy_from("wom", &self.hal.device, self.hal.cmd_queue.clone(), &wom);
 
         let args = [
-            KernelArg::Integer(steps as u32),
+            KernelArg::U32(steps as u32),
             ctrl.as_arg(),
             data.as_arg(),
             mix.as_arg(),
@@ -143,7 +158,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         self.hal.prefix_products(&wom);
 
         let args = [
-            KernelArg::Integer(steps as u32),
+            KernelArg::U32(steps as u32),
             ctrl.as_arg(),
             data.as_arg(),
             mix.as_arg(),
@@ -158,6 +173,58 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
 
         self.hal
             .dispatch_by_name("eltwise_zeroize_fp", &[io.as_arg()], io.size() as u64);
+    }
+}
+
+impl<MH: MetalHash> CircuitAccumulator<MetalHal<MH>> for MetalCircuitHal<MH> {
+    fn accumulate(
+        &self,
+        _work_cycles: u32,
+        _total_cycles: u32,
+        _ctrl: &MetalBuffer<BabyBearElem>,
+        _global: &MetalBuffer<BabyBearElem>,
+        _data: &MetalBuffer<BabyBearElem>,
+        _mix: &MetalBuffer<BabyBearElem>,
+        _accum: &MetalBuffer<BabyBearElem>,
+    ) -> Result<()> {
+        unimplemented!()
+    }
+}
+
+impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH> {
+    fn generate_witness(
+        &self,
+        mode: StepMode,
+        total_cycles: u32,
+        preflight: &RawPreflightTrace,
+        ctrl: &MetalBuffer<BabyBearElem>,
+        data: &MetalBuffer<BabyBearElem>,
+        global: &MetalBuffer<BabyBearElem>,
+    ) -> Result<()> {
+        let buffers = RawExecBuffers {
+            ctrl: ctrl.as_ptr() as *const _,
+            data: data.as_ptr() as *const _,
+            global: global.as_ptr() as *const _,
+        };
+        ffi_wrap(|| unsafe {
+            risc0_circuit_recursion_cpu_witgen(mode, &buffers, preflight, total_cycles)
+        })
+    }
+}
+
+pub(crate) fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>> {
+    match hashfn {
+        "poseidon2" => {
+            let hal = Rc::new(MetalHalPoseidon2::new());
+            let circuit_hal = Rc::new(MetalCircuitHalPoseidon2::new(hal.clone()));
+            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
+        }
+        "sha-256" => {
+            let hal = Rc::new(MetalHalSha256::new());
+            let circuit_hal = Rc::new(MetalCircuitHalSha256::new(hal.clone()));
+            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
+        }
+        _ => bail!("Unsupported hashfn: {hashfn}"),
     }
 }
 
