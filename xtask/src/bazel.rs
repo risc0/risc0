@@ -21,9 +21,9 @@ use std::{
 };
 
 use clap::Parser;
-use liblzma::read::XzEncoder;
+use liblzma::write::XzEncoder;
 
-const XZ_COMPRESS_LEVEL: u32 = 6;
+const XZ_COMPRESS_LEVEL: u32 = 9;
 
 #[derive(Parser)]
 pub struct Bazel;
@@ -49,31 +49,32 @@ impl Bazel {
         assert!(status.success(), "bazelisk run //compiler/bootstrap failed");
     }
 
-    fn bootstrap_zkr() {
-        let srcs = Self::bazel("//compiler/bootstrap:zkr");
-
-        // copy
-        // bazel-bin/compiler/bootstrap/lift_rv32im_m3_12.zkr
-        // into
-        // risc0/circuit/recursion/src
-        let pwd = std::env::current_dir().unwrap();
-        for src_path in srcs {
-            let file_name = src_path.file_name().unwrap().to_owned();
-            let src_data = File::open(&src_path).unwrap();
-            let mut src_xz = XzEncoder::new(src_data, XZ_COMPRESS_LEVEL);
-
-            // Avoid using `std::fs::copy` because bazel creates files with r/o permissions.
-            // We create a new file with r/w permissions and .copy the contents instead.
-            let dst_dir = if file_name.display().to_string().contains("povw") {
-                pwd.join("risc0/circuit/recursion-povw-zkrs/src")
-            } else {
-                pwd.join("risc0/circuit/recursion-zkrs/src")
-            };
-            let mut dst_path = dst_dir.join(file_name);
-            dst_path.set_extension("zkr.xz");
-            let mut dst_file = File::create(&dst_path).unwrap();
-            std::io::copy(&mut src_xz, &mut dst_file).unwrap();
+    fn create_tar_xz<'a>(tar_xz_parent: PathBuf, files: impl Iterator<Item = &'a PathBuf>) {
+        let mut f = tar::Builder::new(XzEncoder::new(
+            File::create(tar_xz_parent.join("zkrs.tar.xz")).unwrap(),
+            XZ_COMPRESS_LEVEL,
+        ));
+        for file in files {
+            f.append_path_with_name(file, file.file_name().unwrap())
+                .unwrap();
         }
+        f.into_inner().unwrap().finish().unwrap();
+    }
+
+    fn bootstrap_zkr() {
+        let zkrs = Self::bazel("//compiler/bootstrap:zkr");
+
+        let pwd = std::env::current_dir().unwrap();
+
+        let normal_zkrs = zkrs
+            .iter()
+            .filter(|f| !f.display().to_string().contains("povw"));
+        let povw_zkrs = zkrs
+            .iter()
+            .filter(|f| f.display().to_string().contains("povw"));
+
+        Self::create_tar_xz(pwd.join("risc0/circuit/recursion-zkrs/src"), normal_zkrs);
+        Self::create_tar_xz(pwd.join("risc0/circuit/recursion-povw-zkrs/src"), povw_zkrs);
     }
 
     fn bootstrap_riscv_tests() {
