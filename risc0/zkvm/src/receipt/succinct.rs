@@ -27,7 +27,7 @@ use risc0_binfmt::{Digestible, read_sha_halfs, tagged_struct};
 use risc0_circuit_keccak::KECCAK_CONTROL_ROOT;
 use risc0_circuit_recursion::{
     CIRCUIT, CircuitImpl,
-    control_id::{ALLOWED_CONTROL_ROOT, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
+    control_id::{ALLOWED_CONTROL_ROOT, MIN_LIFT_PO2, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
 };
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{
@@ -262,9 +262,10 @@ impl<Claim> SuccinctReceipt<Claim> {
 /// Constructs the set of allowed control IDs, given a maximum cycle count as a po2.
 pub(crate) fn allowed_control_ids(
     hash_name: impl AsRef<str> + 'static,
-    _po2_max: usize,
+    po2_max: usize,
 ) -> anyhow::Result<impl Iterator<Item = Digest>> {
     // Recursion programs (ZKRs) that are to be included in the allowed set.
+    let po2_range = MIN_LIFT_PO2..=usize::min(po2_max, risc0_zkp::MAX_CYCLES_PO2);
     let allowed_zkr_names: BTreeSet<String> = [
         "join.zkr",
         "join_povw.zkr",
@@ -278,10 +279,8 @@ pub(crate) fn allowed_control_ids(
     ]
     .map(str::to_string)
     .into_iter()
-    .chain((risc0_circuit_recursion::LIFT_PO2_RANGE).map(|i| format!("lift_rv32im_m3_{i}.zkr")))
-    .chain(
-        (risc0_circuit_recursion::LIFT_PO2_RANGE).map(|i| format!("lift_rv32im_m3_povw_{i}.zkr")),
-    )
+    .chain(po2_range.clone().map(|i| format!("lift_rv32im_m3_{i}.zkr")))
+    .chain(po2_range.map(|i| format!("lift_rv32im_m3_povw_{i}.zkr")))
     .collect();
 
     let zkr_control_ids = match hash_name.as_ref() {
@@ -413,7 +412,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("d760c3ff8cbcd622017c8a8304f488ea9109f799b3f6e068286f665979ce3804")
+            digest!("c7e902ce13f681a0ec0d55611cc75ff7ae69e627d9a4262f7c5ef36789d68e28")
         );
     }
 

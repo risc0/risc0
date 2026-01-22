@@ -17,7 +17,7 @@ use risc0_zkp::core::digest::Digest;
 use risc0_zkp::digest;
 
 /// Smallest cycle limit, as a power of two (po2), supported as a lift program.
-pub const MIN_LIFT_PO2: usize = 14;
+pub const MIN_LIFT_PO2: usize = 12;
 
 /// Control IDs allowed in the default set of recursion programs. Includes control IDs for the base
 /// set of recursion programs, and each power-of-two of the rv32im circuit, using Poseidon2.
@@ -28,7 +28,6 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("7a8f24092c34ed3eb81b3d0a0b796c588c615d3488ef9e61c21dbd1e4b83ea6e"), // recursion join.zkr
     digest!("82586f2087e98368d494044945974671c28bd66d9831031737eaf553c9ede667"), // recursion lift_rv32im_m3_17.zkr
     digest!("785b312e52ab1d3ad16838647ce16e5f9d96f4591b9dc95ba569236ed9fb4c08"), // recursion lift_rv32im_m3_21.zkr
-    digest!("efb985727a3e2e5554be9439cc44474756ea833df1c81d437e2fec218221ae60"), // recursion lift_rv32im_m3_23.zkr
     digest!("0393c46672fd5f6c284e657083ad3c2504b0541be3e12406254dfe641a37870e"), // recursion lift_rv32im_m3_16.zkr
     digest!("956dd20900f7372f622be26aff79d960364ef8545e944b4f3a07626f6c270e09"), // recursion lift_rv32im_m3_18.zkr
     digest!("7771415b778fea1923440e2eb22c4a1e1d7ada2d42cbe03d13402743c0988a31"), // recursion union.zkr
@@ -36,7 +35,6 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("f9aae3753b2e13231a6bea3171686c31f39c521be7910c1a7fb7e11ed007cc1c"), // recursion lift_rv32im_m3_22.zkr
     digest!("1bd2d25d1b62ad5020548506a800a525cc9c4700b01b106f923c5d6f92735641"), // recursion lift_rv32im_m3_14.zkr
     digest!("786f9568460f243f5596e5238a2b8011cd23a3158d2ddc1e0a27800bc6462b3f"), // recursion lift_rv32im_m3_13.zkr
-    digest!("8b75e21f02f3d758d5b28c412c49da52b47b235c24fb7630f2902b2c50bd4177"), // recursion lift_rv32im_m3_24.zkr
     digest!("19c32545306c782d88b19c6339e8245d7bb8700d9a2ff85a898ed844831ded5f"), // recursion lift_rv32im_m3_15.zkr
     digest!("53a7b23d07f99e5d5685e85874f5181e8486aa267a0ae607ffe9ba47c8bdda4a"), // recursion resolve.zkr
     digest!("2f2982688422010adfada26f86900f3b0fbe4460971a743081d1ff5c4b8e7376"), // recursion lift_rv32im_m3_povw_15.zkr
@@ -45,10 +43,8 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("20ac6e29b1806a143b508414140e2e15e461f93e04e3830af39cca362b8f005d"), // recursion resolve_povw.zkr
     digest!("691f8926b443671edd875d45eca44673be87191ac93ad438791db8637db0c256"), // recursion lift_rv32im_m3_povw_19.zkr
     digest!("deaef06085281961b21a695f7dfb1976b5aa8f4830fa855413923b3e7d9b7603"), // recursion lift_rv32im_m3_povw_16.zkr
-    digest!("53d7fe47c144cb6cdeb6da1f76dd4b4653996b24f74aa3117f862914fa7d642b"), // recursion lift_rv32im_m3_povw_23.zkr
     digest!("4ec9a948421faa32a642a26fc25bfc734540ac6bb9493f31ac07c26b87ef0317"), // recursion lift_rv32im_m3_povw_17.zkr
     digest!("f74a894ff593584f65847630ead1a23af78c5f5fed2b61090866e01fa5767f12"), // recursion join_unwrap_povw.zkr
-    digest!("7ccdce333eb34e15c2146370a50f663c724dce11f4860f18612b6e25740fee4b"), // recursion lift_rv32im_m3_povw_24.zkr
     digest!("96cdf605f755f175a5661812810f2d491507c05f2ea4a83e4c3cad693d26651e"), // recursion join_povw.zkr
     digest!("1af45c65d3950d3b2f067b4995846812adc0b823082b384854ad334eb7865d3f"), // recursion lift_rv32im_m3_povw_12.zkr
     digest!("fb47dc098d6a1a490caf4a116723383e336dd75bf0f40b1686c48b474bdd981d"), // recursion lift_rv32im_m3_povw_14.zkr
@@ -61,7 +57,7 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
 
 /// Root of the Merkle tree constructed from [ALLOWED_CONTROL_IDS], using Poseidon2.
 pub const ALLOWED_CONTROL_ROOT: Digest =
-    digest!("af0fd10e02bf3b279642a176f2728937ce9ae84ccd40bc3fe2da5f0963236c5f");
+    digest!("b1f64013f70bbb386a8b3a3d63552c5cb5ea4a549ec7fb1ecc2a031dbf488167");
 
 /// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
 pub const BN254_IDENTITY_CONTROL_ID: Digest =

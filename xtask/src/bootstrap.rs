@@ -25,7 +25,7 @@ use risc0_zkp::core::{
     },
 };
 use risc0_zkvm::{
-    RECURSION_PO2,
+    DEFAULT_MAX_PO2, RECURSION_PO2,
     recursion::{MerkleGroup, Program},
 };
 
@@ -35,7 +35,7 @@ pub struct Bootstrap;
 const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
 const CONTROL_ID_PATH_KECCAK: &str = "risc0/circuit/keccak/src/control_id.rs";
 
-const MIN_LIFT_PO2: usize = 14;
+const MIN_LIFT_PO2: usize = 12;
 
 impl Bootstrap {
     pub fn run(&self) {
@@ -63,11 +63,8 @@ impl Bootstrap {
         ]
         .map(str::to_string)
         .into_iter()
-        .chain((risc0_circuit_recursion::LIFT_PO2_RANGE).map(|i| format!("lift_rv32im_m3_{i}.zkr")))
-        .chain(
-            (risc0_circuit_recursion::LIFT_PO2_RANGE)
-                .map(|i| format!("lift_rv32im_m3_povw_{i}.zkr")),
-        )
+        .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_m3_{i}.zkr")))
+        .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_m3_povw_{i}.zkr")))
         .collect();
 
         tracing::info!("Using allowed_zkr_names {allowed_zkr_names:#?}");
