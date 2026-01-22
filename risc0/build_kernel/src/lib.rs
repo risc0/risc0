@@ -28,6 +28,14 @@ const METAL_INCS: &[(&str, &str)] = &[
     ("fpext.h", include_str!("../kernels/metal/fpext.h")),
 ];
 
+const DISABLED_WARNINGS: [&str; 5] = [
+    "-Wno-deprecated-copy",
+    "-Wno-missing-braces",
+    "-Wno-unknown-pragmas",
+    "-Wno-unused-function",
+    "-Wno-unused-parameter",
+];
+
 #[derive(Eq, PartialEq, Hash)]
 #[non_exhaustive]
 pub enum KernelType {
@@ -139,7 +147,8 @@ impl KernelBuild {
 
         // It's *highly* recommended to install `sccache` and use this combined with
         // `RUSTC_WRAPPER=/path/to/sccache` to speed up rebuilds of C++ kernels
-        cc::Build::new()
+        let mut build = cc::Build::new();
+        build
             .cpp(true)
             .debug(false)
             .files(&self.files)
@@ -147,9 +156,13 @@ impl KernelBuild {
             .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
             .flag_if_supported("-fno-var-tracking")
-            .flag_if_supported("-fno-var-tracking-assignments")
-            .flag_if_supported("-g0")
-            .compile(output);
+            .flag_if_supported("-fno-var-tracking-assignments");
+
+        for warning in DISABLED_WARNINGS {
+            build.flag_if_supported(warning);
+        }
+
+        build.compile(output);
     }
 
     fn compile_cuda(&mut self, output: &str) {
@@ -196,13 +209,7 @@ impl KernelBuild {
 
         let cudart = env::var("RISC0_CUDART_LINKAGE").unwrap_or("static".to_string());
 
-        let warnings = [
-            "-Wno-missing-braces",
-            "-Wno-unused-function",
-            "-Wno-unknown-pragmas",
-            "-Wno-unused-parameter",
-        ]
-        .join(",");
+        let warnings = DISABLED_WARNINGS.join(",");
 
         build
             .cpp(true)

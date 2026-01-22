@@ -22,6 +22,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use risc0_build_kernel::{KernelBuild, KernelType};
+
 const MIN_PO2: usize = 12;
 const MAX_PO2: usize = 23;
 
@@ -30,7 +32,6 @@ const PLATFORM_CUDA: Platform = Platform::new("cuda", "cu", "hal/cuda/kernels");
 // const PLATFORM_METAL: Platform = Platform::new("metal", "metal", "hal/metal/kernels");
 
 fn main() {
-    let output = "risc0_rv32im_m3";
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
 
     rerun_if_env_changed("NVCC_APPEND_FLAGS");
@@ -67,18 +68,13 @@ fn main() {
         make_po2s(spec, &out_dir, &mut generated_files);
     }
 
-    let mut build = cc::Build::new();
+    let mut build = KernelBuild::new(if is_cuda() {
+        KernelType::Cuda
+    } else {
+        KernelType::Cpp
+    });
+
     build
-        .cpp(true)
-        .debug(false)
-        .warnings(false)
-        .flag("-std=c++17")
-        // .flag("-Xcompiler")
-        // .flag("-fsanitize=address")
-        // .flag("-Xcompiler")
-        // .flag("-fno-omit-frame-pointer")
-        // .flag("-Xcompiler")
-        // .flag("-g")
         .include("cxx")
         .include("vendor")
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
@@ -92,17 +88,8 @@ fn main() {
         .files(glob_paths("cxx/zkp/*.cpp"))
         .files(generated_files);
 
-    // println!("cargo:rustc-link-lib=asan");
-
-    // if is_metal() {
-    //     build
-    //         .file("cxx/hal/metal/hal.cpp")
-    //         .files(glob_paths("cxx/hal/metal/kernel/*.metal"));
-    // } else
     if is_cuda() {
         build
-            .cuda(true)
-            .cudart("static")
             .flag("-diag-suppress=20012")
             .flag("--expt-relaxed-constexpr")
             .flag("-DFEATURE_BABY_BEAR")
@@ -116,7 +103,11 @@ fn main() {
         }
     }
 
-    build.compile(output);
+    build.compile(if is_cuda() {
+        "risc0_rv32im_cuda"
+    } else {
+        "risc0_rv32im_cpu"
+    });
 
     let mut block_types = parse_block_types().unwrap();
     block_types.insert(
