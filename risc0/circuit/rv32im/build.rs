@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use std::env;
+
 #[cfg(feature = "prove")]
 #[path = "build/opt_gen.rs"]
 mod opt_gen;
@@ -22,5 +24,15 @@ fn main() {
     {
         let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
         opt_gen::generate(&format!("{out_dir}/preflight_opt_gen.rs"));
+    }
+
+    if env::var("CARGO_FEATURE_PROVE").is_ok()
+        && env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios")
+    {
+        println!(
+            "cargo:rustc-env=RV32IM_METAL_PATH={}",
+            env::var("DEP_RISC0_CIRCUIT_RV32IM_SYS_METAL_KERNEL")
+                .expect("on macos risc0-circuit-rv32im-sys should build metal kernels")
+        );
     }
 }

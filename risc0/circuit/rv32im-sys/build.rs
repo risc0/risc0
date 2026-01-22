@@ -29,7 +29,7 @@ const MAX_PO2: usize = 23;
 
 const PLATFORM_CPU: Platform = Platform::new("cpu", "cpp", "hal/cpu");
 const PLATFORM_CUDA: Platform = Platform::new("cuda", "cu", "hal/cuda/kernels");
-// const PLATFORM_METAL: Platform = Platform::new("metal", "metal", "hal/metal/kernels");
+const PLATFORM_METAL: Platform = Platform::new("metal", "metal", "hal/metal/kernels");
 
 fn main() {
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
@@ -46,11 +46,7 @@ fn main() {
     rerun_if_changed("cxx/zkp");
     rerun_if_changed("vendor");
 
-    let platform =
-    // if is_metal() {
-    //     PLATFORM_METAL
-    // } else
-    if is_cuda() {
+    let platform = if is_cuda() {
         PLATFORM_CUDA
     } else {
         PLATFORM_CPU
@@ -108,6 +104,25 @@ fn main() {
     } else {
         "risc0_rv32im_cpu"
     });
+
+    if is_metal() {
+        let specs = [
+            ExpandSpec::new("data_witgen", PLATFORM_METAL),
+            ExpandSpec::new("accum_witgen", PLATFORM_METAL),
+            ExpandSpec::new("eval_check", PLATFORM_METAL),
+        ];
+
+        let mut generated_files = vec![];
+        for spec in specs {
+            make_po2s(spec, &out_dir, &mut generated_files);
+        }
+
+        KernelBuild::new(KernelType::Metal)
+            .include("cxx")
+            .files(glob_paths("cxx/hal/metal/kernel/*.metal"))
+            .files(generated_files)
+            .compile("metal_kernel");
+    }
 
     let mut block_types = parse_block_types().unwrap();
     block_types.insert(
@@ -501,6 +516,6 @@ fn is_cuda() -> bool {
     env::var("CARGO_FEATURE_CUDA").is_ok()
 }
 
-// fn is_metal() -> bool {
-//     env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios")
-// }
+fn is_metal() -> bool {
+    env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios")
+}
