@@ -13,14 +13,16 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use anyhow::{Result, anyhow};
-use quote::{format_ident, quote};
 use std::{
     collections::BTreeMap,
     env, fs,
     io::Write as _,
     path::{Path, PathBuf},
 };
+
+use anyhow::{Result, anyhow};
+use quote::{format_ident, quote};
+use xshell::{Shell, cmd};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
@@ -99,11 +101,12 @@ fn main() {
         }
     }
 
-    build.compile(if is_cuda() {
-        "risc0_rv32im_cuda"
-    } else {
-        "risc0_rv32im_cpu"
-    });
+    if is_metal() {
+        install_metal_cpp_library(&mut build);
+        build.file("cxx/hal/metal/hal.cpp");
+    }
+
+    build.compile("risc0_rv32im");
 
     if is_metal() {
         let specs = [
@@ -447,6 +450,37 @@ fn rerun_if_env_changed(var_name: &str) {
 
 fn glob_paths(pattern: &str) -> Vec<PathBuf> {
     glob::glob(pattern).unwrap().map(|x| x.unwrap()).collect()
+}
+
+const METAL_SDK_URL: &str = "https://developer.apple.com/metal/cpp/files/metal-cpp_26.zip";
+
+fn install_metal_cpp_library(build: &mut KernelBuild) {
+    let sh = Shell::new().unwrap();
+
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
+    let metal_dir = Path::new(&out_dir).join("metal-sdk");
+
+    std::fs::create_dir_all(&metal_dir).unwrap();
+
+    cmd!(
+        sh,
+        "/usr/bin/curl -o {metal_dir}/metal-cpp.zip {METAL_SDK_URL}"
+    )
+    .run()
+    .unwrap();
+
+    if metal_dir.join("metal-cpp").exists() {
+        std::fs::remove_dir_all(metal_dir.join("metal-cpp")).unwrap();
+    }
+
+    cmd!(
+        sh,
+        "/usr/bin/unzip {metal_dir}/metal-cpp.zip -d {metal_dir}"
+    )
+    .run()
+    .unwrap();
+
+    build.include(metal_dir.join("metal-cpp"));
 }
 
 const TEMPLATE: &str = r#"
