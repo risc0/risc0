@@ -493,14 +493,14 @@ fn add_metal_kernel_include(build: &mut KernelBuild, kernel_path: &Path) {
 
     std::fs::create_dir_all(&kernel_inc).unwrap();
 
-    cmd!(
-        sh,
-        "/usr/bin/xxd -n metal_kernel -i {kernel_path} {kernel_inc}/metal_kernel.h"
-    )
-    .run()
-    .unwrap();
+    let header = kernel_inc.join("metal_kernel.h");
+    let header = header.to_str().unwrap();
 
-    build.include(kernel_inc);
+    cmd!(sh, "/usr/bin/xxd -n metal_kernel -i {kernel_path} {header}")
+        .run()
+        .unwrap();
+
+    build.flag(&format!("-DMETAL_KERNEL_H=\"{header}\""));
 }
 
 const TEMPLATE: &str = r#"

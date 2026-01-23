@@ -181,6 +181,10 @@ impl KernelBuild {
             .flag_if_supported("-fno-var-tracking")
             .flag_if_supported("-fno-var-tracking-assignments");
 
+        for flag in self.flags.iter() {
+            build.flag(flag);
+        }
+
         for warning in DISABLED_WARNINGS {
             build.flag_if_supported(warning);
         }

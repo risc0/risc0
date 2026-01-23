@@ -30,7 +30,7 @@
 #include "zkp/poseidon2_consts.h"
 #include "zkp/rou.h"
 
-#include "metal_kernel.h"
+#include METAL_KERNEL_H
 
 using namespace risc0;
 
