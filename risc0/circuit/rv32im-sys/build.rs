@@ -84,7 +84,7 @@ fn main() {
         .files(glob_paths("cxx/verify/*.cpp"))
         .files(glob_paths("cxx/verify/info/*.cpp"))
         .files(glob_paths("cxx/zkp/*.cpp"))
-        .files(generated_files);
+        .generated_files(generated_files);
 
     if is_cuda() {
         build
@@ -116,7 +116,7 @@ fn main() {
         KernelBuild::new(KernelType::Metal)
             .include("cxx")
             .files(glob_paths("cxx/hal/metal/kernels/*.metal"))
-            .files(generated_files)
+            .generated_files(generated_files)
             .compile("metal_kernel");
 
         add_metal_kernel_include(
