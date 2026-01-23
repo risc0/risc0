@@ -105,7 +105,11 @@ pub fn segment_prover(po2: usize) -> Result<ProverContext> {
 }
 
 #[cfg(test)]
-#[cfg(feature = "cuda")]
+#[cfg(any(
+    feature = "cuda",
+    all(target_os = "macos", target_arch = "aarch64"),
+    target_os = "ios"
+))]
 mod tests {
     use crate::execute::{
         ExecutionLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, SegmentUpdate, Syscall, SyscallContext,
