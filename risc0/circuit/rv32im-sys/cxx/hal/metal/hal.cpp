@@ -87,8 +87,10 @@ public:
     // Load the library and get the functions
     NS::Error* error;
 
-    auto data = dispatch_data_create(
-      metal_kernel, metal_kernel_len, dispatch_get_main_queue(), DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+    auto data = dispatch_data_create(metal_kernel,
+                                     metal_kernel_len,
+                                     dispatch_get_main_queue(),
+                                     DISPATCH_DATA_DESTRUCTOR_DEFAULT);
     MTL::Library* library = device->newLibrary(data, &error);
     dispatch_release(data);
 
