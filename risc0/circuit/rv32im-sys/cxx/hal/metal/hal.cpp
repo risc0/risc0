@@ -99,11 +99,13 @@ public:
       throw std::runtime_error("Unable to load library");
     }
 
+    std::mutex m;
     auto allNames = library->functionNames();
-    for (size_t i = 0; i < allNames->count(); i++) {
+    parallel_map(allNames->count(), [this, &allNames, &library, &m](size_t i) {
       NS::String* name = allNames->object<NS::String>(i);
       std::string cppName = name->utf8String();
       MTL::Function* func = library->newFunction(name);
+      NS::Error* error;
       MTL::ComputePipelineState* pls = device->newComputePipelineState(func, &error);
       func->release();
       if (!pls) {
@@ -112,8 +114,12 @@ public:
                                       << "`: " << error->localizedDescription()->utf8String());
         throw std::runtime_error("Unable to load kernel");
       }
+
+      m.lock();
       kernels[cppName] = pls;
-    }
+      m.unlock();
+    });
+
     library->release();
 
     // Prepare some constants
