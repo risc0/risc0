@@ -46,3 +46,17 @@ apple_metal_library(
     target_compatible_with = ["@platforms//os:macos"],
     visibility = ["//visibility:public"],
 )
+
+genrule(
+    name = "kernel_header",
+    srcs = [":kernels"],
+    outs = ["metal_kernel.h"],
+    cmd = "/usr/bin/xxd -n  metal_kernel -i $< > $@",
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "kernel_header_lib",
+    hdrs = [":kernel_header"],
+    visibility = ["//visibility:public"],
+)
