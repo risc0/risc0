@@ -30,6 +30,8 @@
 #include "zkp/poseidon2_consts.h"
 #include "zkp/rou.h"
 
+#include "metal_kernel.h"
+
 using namespace risc0;
 
 class MetalHal;
@@ -84,13 +86,17 @@ public:
 
     // Load the library and get the functions
     NS::Error* error;
-    // TODO: Loading from a file is annoying and dangerous
-    MTL::Library* library =
-        device->newLibrary(MTLSTR("hal/metal/kernels/kernels.metallib"), &error);
+
+    auto data = dispatch_data_create(
+      metal_kernel, metal_kernel_len, dispatch_get_main_queue(), DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+    MTL::Library* library = device->newLibrary(data, &error);
+    dispatch_release(data);
+
     if (!library) {
       LOG(0, "Unable to load library: " << error->localizedDescription()->utf8String());
       throw std::runtime_error("Unable to load library");
     }
+
     auto allNames = library->functionNames();
     for (size_t i = 0; i < allNames->count(); i++) {
       NS::String* name = allNames->object<NS::String>(i);

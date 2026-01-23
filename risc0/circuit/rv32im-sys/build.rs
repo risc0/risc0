@@ -102,13 +102,6 @@ fn main() {
     }
 
     if is_metal() {
-        install_metal_cpp_library(&mut build);
-        build.file("cxx/hal/metal/hal.cpp");
-    }
-
-    build.compile("risc0_rv32im");
-
-    if is_metal() {
         let specs = [
             ExpandSpec::new("data_witgen", PLATFORM_METAL),
             ExpandSpec::new("accum_witgen", PLATFORM_METAL),
@@ -125,7 +118,16 @@ fn main() {
             .files(glob_paths("cxx/hal/metal/kernel/*.metal"))
             .files(generated_files)
             .compile("metal_kernel");
+
+        add_metal_kernel_include(
+            &mut build,
+            &Path::new(&out_dir).join("metal_kernel.metallib"),
+        );
+        install_metal_cpp_library(&mut build);
+        build.file("cxx/hal/metal/hal.cpp");
     }
+
+    build.compile("risc0_rv32im");
 
     let mut block_types = parse_block_types().unwrap();
     block_types.insert(
@@ -481,6 +483,24 @@ fn install_metal_cpp_library(build: &mut KernelBuild) {
     .unwrap();
 
     build.include(metal_dir.join("metal-cpp"));
+}
+
+fn add_metal_kernel_include(build: &mut KernelBuild, kernel_path: &Path) {
+    let sh = Shell::new().unwrap();
+
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
+    let kernel_inc = Path::new(&out_dir).join("metal-sdk");
+
+    std::fs::create_dir_all(&kernel_inc).unwrap();
+
+    cmd!(
+        sh,
+        "/usr/bin/xxd -n metal_kernel -i {kernel_path} {kernel_inc}/metal_kernel.h"
+    )
+    .run()
+    .unwrap();
+
+    build.include(kernel_inc);
 }
 
 const TEMPLATE: &str = r#"
