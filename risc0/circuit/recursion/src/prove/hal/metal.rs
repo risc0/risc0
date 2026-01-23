@@ -19,7 +19,8 @@ use anyhow::{Result, bail};
 use metal::ComputePipelineDescriptor;
 
 use risc0_circuit_recursion_sys::{
-    RawExecBuffers, RawPreflightTrace, StepMode, risc0_circuit_recursion_cpu_witgen,
+    RawAccumBuffers, RawExecBuffers, RawPreflightTrace, StepMode,
+    risc0_circuit_recursion_cpu_accum, risc0_circuit_recursion_cpu_witgen,
 };
 use risc0_core::scope;
 use risc0_sys::ffi_wrap;
@@ -179,15 +180,24 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
 impl<MH: MetalHash> CircuitAccumulator<MetalHal<MH>> for MetalCircuitHal<MH> {
     fn accumulate(
         &self,
-        _work_cycles: u32,
-        _total_cycles: u32,
-        _ctrl: &MetalBuffer<BabyBearElem>,
-        _global: &MetalBuffer<BabyBearElem>,
-        _data: &MetalBuffer<BabyBearElem>,
-        _mix: &MetalBuffer<BabyBearElem>,
-        _accum: &MetalBuffer<BabyBearElem>,
+        work_cycles: u32,
+        total_cycles: u32,
+        ctrl: &MetalBuffer<BabyBearElem>,
+        global: &MetalBuffer<BabyBearElem>,
+        data: &MetalBuffer<BabyBearElem>,
+        mix: &MetalBuffer<BabyBearElem>,
+        accum: &MetalBuffer<BabyBearElem>,
     ) -> Result<()> {
-        unimplemented!()
+        let buffers = RawAccumBuffers {
+            ctrl: ctrl.as_ptr() as *const _,
+            global: global.as_ptr() as *const _,
+            data: data.as_ptr() as *const _,
+            mix: mix.as_ptr() as *const _,
+            accum: accum.as_ptr() as *const _,
+        };
+        ffi_wrap(|| unsafe {
+            risc0_circuit_recursion_cpu_accum(&buffers, work_cycles, total_cycles)
+        })
     }
 }
 
