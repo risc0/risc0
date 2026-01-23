@@ -115,7 +115,7 @@ fn main() {
 
         KernelBuild::new(KernelType::Metal)
             .include("cxx")
-            .files(glob_paths("cxx/hal/metal/kernel/*.metal"))
+            .files(glob_paths("cxx/hal/metal/kernels/*.metal"))
             .files(generated_files)
             .compile("metal_kernel");
 

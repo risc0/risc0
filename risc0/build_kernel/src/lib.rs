@@ -259,6 +259,7 @@ impl KernelBuild {
                         let mut cmd = Command::new("xcrun");
                         cmd.args(["--sdk", sdk_name]);
                         cmd.arg("metal");
+                        cmd.arg("-std=metal3.0");
                         cmd.arg("-o").arg(&air_path);
                         cmd.arg("-c").arg(src);
                         cmd.arg("-I").arg(sys_inc_dir);
