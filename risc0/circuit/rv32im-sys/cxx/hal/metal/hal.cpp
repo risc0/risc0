@@ -134,6 +134,9 @@ public:
     if (commandBuffer) {
       commandBuffer->release();
     }
+    for (auto& [_, value] : kernels) {
+      value->release();
+    }
     if (commandQueue) {
       commandQueue->release();
     }
@@ -531,6 +534,7 @@ private:
   void prepBuffer() {
     if (!commandBuffer) {
       commandBuffer = commandQueue->commandBuffer();
+      commandBuffer->retain();
     } else {
       return;
     }
@@ -548,6 +552,7 @@ private:
     groupSize = it->second->maxTotalThreadsPerThreadgroup();
     prepBuffer();
     auto* encode = commandBuffer->computeCommandEncoder();
+    encode->retain();
     encode->setComputePipelineState(it->second);
     return encode;
   }
