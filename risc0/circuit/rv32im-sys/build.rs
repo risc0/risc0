@@ -457,6 +457,10 @@ fn glob_paths(pattern: &str) -> Vec<PathBuf> {
 const METAL_SDK_URL: &str = "https://developer.apple.com/metal/cpp/files/metal-cpp_26.zip";
 
 fn install_metal_cpp_library(build: &mut KernelBuild) {
+    if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
+        return;
+    }
+
     let sh = Shell::new().unwrap();
 
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
@@ -486,6 +490,10 @@ fn install_metal_cpp_library(build: &mut KernelBuild) {
 }
 
 fn add_metal_kernel_include(build: &mut KernelBuild, kernel_path: &Path) {
+    if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
+        return;
+    }
+
     let sh = Shell::new().unwrap();
 
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
