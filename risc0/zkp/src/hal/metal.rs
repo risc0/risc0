@@ -478,6 +478,58 @@ impl<MH: MetalHash> MetalHal<MH> {
         cmd_buffer.commit();
         cmd_buffer.wait_until_completed();
     }
+
+    /// XXX remi: This has problems and I don't know why
+    #[expect(dead_code)]
+    #[allow(clippy::too_many_arguments)]
+    fn fri_prove_gpu(
+        &self,
+        out_values: &<Self as Hal>::Buffer<u32>,
+        values_column_width: usize,
+        out_digests: &<Self as Hal>::Buffer<u32>,
+        digests_column_width: usize,
+        positions: &<Self as Hal>::Buffer<u32>,
+        trees: &[&MerkleTreeProver<Self>],
+        groups: &<Self as Hal>::Buffer<u32>,
+    ) {
+        let trees_buffer = BufferImpl::<MetalMerkleTreeProver>::copy_from(
+            "fri_prove_trees",
+            &self.device,
+            self.cmd_queue.clone(),
+            &trees
+                .iter()
+                .map(|t| t.to_metal_prover())
+                .collect::<Vec<_>>(),
+        );
+
+        let args = &[
+            out_values.as_arg(),
+            KernelArg::USize(values_column_width),
+            positions.as_arg(),
+            KernelArg::USize(positions.size()),
+            trees_buffer.as_arg(),
+            KernelArg::USize(trees.len()),
+            groups.as_arg(),
+        ];
+
+        // XXX remi: It would be faster to run the two kernels in parallel.
+
+        let count = trees.len() * positions.size() * values_column_width;
+        self.dispatch_by_name("fri_prove_values", args, count as u64);
+
+        let args = &[
+            out_digests.as_arg(),
+            KernelArg::USize(digests_column_width),
+            out_digests.as_arg(),
+            KernelArg::USize(positions.size()),
+            trees_buffer.as_arg(),
+            KernelArg::USize(trees.len()),
+            groups.as_arg(),
+        ];
+
+        let count = trees.len() * positions.size() * digests_column_width;
+        self.dispatch_by_name("fri_prove_digests", args, count as u64);
+    }
 }
 
 #[allow(unused_variables)]
@@ -899,44 +951,61 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             positions.size() * trees.len()
         );
 
-        let trees_buffer = BufferImpl::<MetalMerkleTreeProver>::copy_from(
-            "fri_prove_trees",
-            &self.device,
-            self.cmd_queue.clone(),
-            &trees
-                .iter()
-                .map(|t| t.to_metal_prover())
-                .collect::<Vec<_>>(),
-        );
+        out_values.view_mut(|out_values| {
+            out_digests.view_mut(|out_digests| {
+                positions.view(|positions| {
+                    groups.view(|groups| {
+                        assert_eq!(trees.len(), groups.len());
 
-        let args = &[
-            out_values.as_arg(),
-            KernelArg::USize(values_column_width),
-            positions.as_arg(),
-            KernelArg::USize(positions.size()),
-            trees_buffer.as_arg(),
-            KernelArg::USize(trees.len()),
-            groups.as_arg(),
-        ];
+                        let mut out_values_iter = out_values.chunks_mut(values_column_width);
+                        let mut out_digests_iter = out_digests.chunks_mut(digests_column_width);
 
-        // XXX remi: It would be faster to run the two kernels in parallel.
+                        std::thread::scope(|scope| {
+                            for pos in positions {
+                                for (tree, group) in trees.iter().zip(groups.iter()) {
+                                    let out_values = out_values_iter.next().unwrap();
+                                    let out_digests = out_digests_iter.next().unwrap();
 
-        let count = trees.len() * positions.size() * values_column_width;
-        self.dispatch_by_name("fri_prove_values", args, count as u64);
-
-        let args = &[
-            out_digests.as_arg(),
-            KernelArg::USize(digests_column_width),
-            out_digests.as_arg(),
-            KernelArg::USize(positions.size()),
-            trees_buffer.as_arg(),
-            KernelArg::USize(trees.len()),
-            groups.as_arg(),
-        ];
-
-        let count = trees.len() * positions.size() * digests_column_width;
-        self.dispatch_by_name("fri_prove_digests", args, count as u64);
+                                    scope.spawn(move || {
+                                        fri_prove_values(tree, *pos, *group, out_values);
+                                    });
+                                    scope.spawn(move || {
+                                        fri_prove_digests(tree, *pos, *group, out_digests);
+                                    });
+                                }
+                            }
+                        });
+                    });
+                });
+            });
+        });
     }
+}
+
+fn fri_prove_values<MH: MetalHash>(
+    tree: &MerkleTreeProver<MetalHal<MH>>,
+    pos: u32,
+    group: u32,
+    out_values: &mut [u32],
+) {
+    let values_out = tree.get_column((pos % group) as usize);
+
+    let values_slice: &[u32] = bytemuck::cast_slice(values_out.as_slice());
+    out_values[0] = values_slice.len().try_into().unwrap();
+    out_values[1..(values_slice.len() + 1)].copy_from_slice(values_slice);
+}
+
+fn fri_prove_digests<MH: MetalHash>(
+    tree: &MerkleTreeProver<MetalHal<MH>>,
+    pos: u32,
+    group: u32,
+    out_digests: &mut [u32],
+) {
+    let digests_out = tree.get_digests((pos % group) as usize);
+
+    let digests_slice: &[u32] = bytemuck::cast_slice(digests_out.as_slice());
+    out_digests[0] = digests_slice.len().try_into().unwrap();
+    out_digests[1..(digests_slice.len() + 1)].copy_from_slice(digests_slice);
 }
 
 #[repr(C)]
@@ -1045,7 +1114,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "XXX remi: some unknown GPU synchronization issue causes it to fail"]
     #[gpu_guard::gpu_guard]
     fn fri_prove() {
         testutil::fri_prove(MetalHalSha256::new());
