@@ -106,11 +106,9 @@ a message within the zkvm where an observer can measure the proving time or view
 [discord-url]: https://discord.gg/risczero
 [ecdsa]: https://github.com/risc0/risc0/tree/release-1.2/examples/ecdsa
 [ecdsa-patched]: https://github.com/risc0/risc0/blob/release-1.2/examples/ecdsa/k256/methods/guest/Cargo.toml#L13-L18
-[feature-flag]: https://doc.rust-lang.org/cargo/reference/features.html#dependency-features
 [git-dep]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories
 [k256-diff]: https://github.com/risc0/RustCrypto-elliptic-curves/compare/k256/v0.13.3..k256/v0.13.3-risczero.1
 [k256-patch]: https://github.com/risc0/RustCrypto-elliptic-curves/tree/k256/v0.13.3-risczero.1
 [lincomb]: https://github.com/risc0/RustCrypto-elliptic-curves/blob/k256/v0.13.3-risczero.1/k256/src/arithmetic/mul.rs#L349-L377
 [revm-precompile-toml]: https://github.com/bluealloy/revm/blob/45581c451a440776fd59576d7b27c366b1528724/crates/precompile/Cargo.toml
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
-[Yes]: #stability
