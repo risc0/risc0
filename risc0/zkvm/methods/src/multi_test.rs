@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -48,7 +48,12 @@ pub enum MultiTestSpec {
     Echo {
         bytes: Vec<u8>,
     },
+    /// Read from the given file descriptor in a loop until EOF, writing to stdout.
+    /// Uses a buffer of `nbytes` size for each read operation. This tests POSIX-style
+    /// reading with a fixed-size buffer, where the total amount of data read may
+    /// exceed the buffer size.
     EchoStdout {
+        /// Buffer size for each read operation (not the total amount to read).
         nbytes: u32,
         fd: u32,
     },

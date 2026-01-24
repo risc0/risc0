@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -311,7 +311,7 @@ pub(crate) struct PagedMemory {
 }
 
 impl PagedMemory {
-    pub(crate) fn new(mut image: MemoryImage, tracing_enabled: bool) -> Self {
+    pub(crate) fn new(image: MemoryImage, tracing_enabled: bool) -> Self {
         // Populate the register cache from the initial state of memory.
         let mut machine_registers = [0; REG_MAX];
         let mut user_registers = [0; REG_MAX];
@@ -597,7 +597,8 @@ impl PagedMemory {
     }
 
     pub(crate) fn touched_pages(&self) -> u64 {
-        self.page_cache.len() as u64
+        // add one for registers page and one for ??
+        self.page_cache.len() as u64 + 2
     }
 
     #[inline(always)]
@@ -630,7 +631,7 @@ pub(crate) fn compute_partial_image(
 
         // Copy original state of all pages accessed in this segment.
         let page = input_image.get_page(page_idx).unwrap();
-        partial_image.set_page(page_idx, page);
+        partial_image.set_page(page_idx, page.clone());
     }
 
     // Add minimal needed 'uncles'

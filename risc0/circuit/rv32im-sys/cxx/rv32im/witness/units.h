@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,22 +17,47 @@
 
 #include "rv32im/base/base.h"
 
-#define UNIT_WITNESS(x)                                                                            \
-  struct Unit##x##Witness {                                                                        \
-    uint32_t count;                                                                                \
-    uint32_t opts;                                                                                 \
-    uint32_t a;                                                                                    \
-    uint32_t b;                                                                                    \
-    uint32_t out0;                                                                                 \
-    uint32_t out1;                                                                                 \
-  };
+#define UNIT_WITNESS_BODY                                                                          \
+  uint32_t count;                                                                                  \
+  uint32_t opts;                                                                                   \
+  uint32_t a;                                                                                      \
+  uint32_t b;                                                                                      \
+  uint32_t out0;                                                                                   \
+  uint32_t out1
 
-// Not a real unit, used as a generic unit type in fast_emu
-UNIT_WITNESS(Base)
+/// Not a real unit, used as a generic unit type in fast_emu
+///
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
+struct UnitBaseWitness {
+  UNIT_WITNESS_BODY;
+};
 
-UNIT_WITNESS(AddSub)
-UNIT_WITNESS(Bit)
-UNIT_WITNESS(Lt)
-UNIT_WITNESS(Mul)
-UNIT_WITNESS(Div)
-UNIT_WITNESS(Shift)
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
+struct UnitAddSubWitness {
+  UNIT_WITNESS_BODY;
+};
+
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
+struct UnitBitWitness {
+  UNIT_WITNESS_BODY;
+};
+
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
+struct UnitLtWitness {
+  UNIT_WITNESS_BODY;
+};
+
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
+struct UnitMulWitness {
+  UNIT_WITNESS_BODY;
+};
+
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
+struct UnitDivWitness {
+  UNIT_WITNESS_BODY;
+};
+
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
+struct UnitShiftWitness {
+  UNIT_WITNESS_BODY;
+};

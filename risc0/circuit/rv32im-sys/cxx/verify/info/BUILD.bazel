@@ -1,0 +1,11 @@
+cc_library(
+    name = "info",
+    srcs = glob(["*.cpp"]),
+    hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core",
+        "//rv32im/emu",
+        "//zkp",
+    ],
+)

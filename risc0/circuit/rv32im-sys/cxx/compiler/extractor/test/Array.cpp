@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,11 +13,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "compiler/extractor/base.h"
+#include "mlir/IR/Verifier.h"
 
+#include "compiler/extractor/base.h"
 #include "rv32im/base/base.h"
 
-#include "mlir/IR/Verifier.h"
+#include "compiler/extractor/extract.h"
 
 template <typename C> struct Top {
   CONSTANT static char NAME[] = "TestTop";
@@ -29,11 +30,10 @@ template <typename C> struct Top {
   FDEV void set(CTX, Fp val) DEV {}
   FDEV inline void finalize(CTX) DEV {}
   FDEV void verify(CTX) DEV {}
-  FDEV void addArguments(CTX, Val<C> val) DEV {}
+  FDEV void addArguments(CTX) DEV {}
 };
 
 int main() {
-  using C = RecordingContext;
   mlir::MLIRContext mlirCtx;
   RecordingContext ctx(&mlirCtx);
   RecordingReg::setContext(&ctx);

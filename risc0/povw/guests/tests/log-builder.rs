@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -33,14 +33,14 @@ fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     env_builder.write_frame(&input.encode()?);
 
     for update in &input.updates {
-        env_builder.add_assumption(FakeReceipt::new(update.claim.clone()));
+        env_builder.add_assumption(FakeReceipt::new(update.claim.clone()))?;
     }
 
     if let State::Continuation { ref journal } = input.state {
         env_builder.add_assumption(FakeReceipt::new(ReceiptClaim::ok(
             RISC0_POVW_LOG_BUILDER_ID,
             journal.encode()?,
-        )));
+        )))?;
     }
 
     let env = env_builder.build()?;
@@ -49,7 +49,6 @@ fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     assert_eq!(session_info.exit_code, ExitCode::Halted(0));
 
     let decoded_journal = Journal::decode(&session_info.journal.bytes)?;
-    println!("decoded_journal: {decoded_journal:#?}");
 
     Ok(decoded_journal)
 }
@@ -263,7 +262,10 @@ fn two_batched_updates() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn prove_three_sequential_updates_inner() -> anyhow::Result<()> {
+#[test]
+#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
+#[gpu_guard::gpu_guard]
+fn prove_three_sequential_updates() -> anyhow::Result<()> {
     let work_log_id = uint!(0xdeafbee7_U160);
 
     let work_info = prove_busy_loop(
@@ -280,6 +282,7 @@ fn prove_three_sequential_updates_inner() -> anyhow::Result<()> {
         .ok_or_else(|| anyhow!("no work receipt returned from the prover for busy loop"))?;
 
     let mut prover = WorkLogUpdateProver::builder()
+        .prover_opts(ProverOpts::succinct())
         .prover(default_prover())
         .log_id(work_log_id)
         .log_builder_program(RISC0_POVW_LOG_BUILDER_ELF)?
@@ -383,15 +386,6 @@ fn prove_three_sequential_updates_inner() -> anyhow::Result<()> {
     Ok(())
 }
 
-// XXX M3
-#[test]
-#[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
-#[gpu_guard::gpu_guard]
-#[should_panic(expected = "m3 doesn't support povw")]
-fn prove_three_sequential_updates() {
-    prove_three_sequential_updates_inner().unwrap();
-}
-
 #[test]
 fn reject_mismatched_work_log_id() {
     let work_log_id = uint!(0xdeafbee7_U160);
@@ -482,6 +476,7 @@ fn reject_mismatched_self_image_id_in_journal() {
             RISC0_POVW_LOG_BUILDER_ID,
             journal.encode().unwrap(),
         )))
+        .unwrap()
         .build()
         .unwrap();
 

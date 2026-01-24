@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,36 +13,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#include "rv32im/witness/block_types.h"
+#[cfg(feature = "prove")]
+#[path = "build/opt_gen.rs"]
+mod opt_gen;
 
-// clang-format off
-
-#define HASH #
-#define ATTR(key, ...) HASH [key(__VA_ARGS__)]
-
-ATTR(derive, Debug, Copy, Clone, Hash, PartialEq, Eq, enum_map::Enum)
-pub enum BlockType {
-#define BLOCK_TYPE(name, count) name,
-  BLOCK_TYPES
-#undef BLOCK_TYPE
-}
-
-
-impl BlockType {
-    ATTR(allow, clippy::identity_op)
-    pub const COUNT: usize = 0
-#define BLOCK_TYPE(name, count) + 1
-      BLOCK_TYPES
-#undef BLOCK_TYPE
-    ;
-
-    pub const fn count_per_row(&self) -> u8 {
-        match self {
-#define BLOCK_TYPE(name, count) Self::name => count,
-  BLOCK_TYPES
-#undef BLOCK_TYPE
-        }
+fn main() {
+    #[cfg(feature = "prove")]
+    {
+        let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
+        opt_gen::generate(&format!("{out_dir}/preflight_opt_gen.rs"));
     }
 }
-
-// clang-format on

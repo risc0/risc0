@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+#define READ_STATE_ARGUMENT(ctx, arg)                                                              \
+  PICUS_ARGUMENT(                                                                                  \
+      ctx,                                                                                         \
+      {},                                                                                          \
+      ({ctx.get(arg.cycle), ctx.get(arg.addrWord), ctx.get(arg.addrLowBits), ctx.get(arg.size)}))
 
 template <typename C> FDEV void ReadByteBlock<C>::set(CTX, ReadByteWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
@@ -26,6 +32,9 @@ template <typename C> FDEV void ReadByteBlock<C>::set(CTX, ReadByteWitness wit) 
 }
 
 template <typename C> FDEV void ReadByteBlock<C>::verify(CTX) DEV {
+  // The new byte is host input to the running program
+  PICUS_INPUT(ctx, newByte);
+
   Val<C> lb1 = lowBit1.get();
   // Verify we don't change non-selected short
   EQ(lb1 * io.prevData.low.get() + (Val<C>(1) - lb1) * io.prevData.high.get(),
@@ -48,9 +57,12 @@ template <typename C> FDEV void ReadByteBlock<C>::addArguments(CTX) DEV {
   Val<C> newAddr = io.wordAddr.get() + is3.get();
   Val<C> low3 = lowBit0.get() + lowBit1.get() * 2;
   Val<C> newLow3 = Val<C>(1) + low3 - is3.get() * 4;
+
   // Read + write state
-  ctx.pull(ReadStateArgument<C>(cycle.get(), io.wordAddr.get(), low3, sizeMinus1.get() + 1));
+  ReadStateArgument<C> readState(cycle.get(), io.wordAddr.get(), low3, sizeMinus1.get() + 1);
+  ctx.pull(readState);
   ctx.push(ReadStateArgument<C>(cycle.get() + 1, newAddr, newLow3, sizeMinus1.get()));
+  READ_STATE_ARGUMENT(ctx, readState);
 }
 
 template <typename C> FDEV void ReadWordBlock<C>::set(CTX, ReadWordWitness wit) DEV {
@@ -60,10 +72,13 @@ template <typename C> FDEV void ReadWordBlock<C>::set(CTX, ReadWordWitness wit) 
 }
 
 template <typename C> FDEV void ReadWordBlock<C>::verify(CTX) DEV {
-  // NOTHING TO DO
+  // The new data is host input to the running program
+  PICUS_INPUT(ctx, io.data);
 }
 
 template <typename C> FDEV void ReadWordBlock<C>::addArguments(CTX) DEV {
-  ctx.pull(ReadStateArgument<C>(cycle.get(), io.wordAddr.get(), 0, sizeMinus4.get() + 4));
+  ReadStateArgument<C> readState(cycle.get(), io.wordAddr.get(), 0, sizeMinus4.get() + 4);
+  ctx.pull(readState);
   ctx.push(ReadStateArgument<C>(cycle.get() + 1, io.wordAddr.get() + 1, 0, sizeMinus4.get()));
+  READ_STATE_ARGUMENT(ctx, readState);
 }
