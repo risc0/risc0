@@ -25,25 +25,25 @@ use risc0_circuit_recursion_sys::{
 use risc0_core::scope;
 use risc0_sys::ffi_wrap;
 use risc0_zkp::{
-    INV_RATE, ZK_CYCLES,
+    INV_RATE,
     core::log2_ceil,
     field::{
-        Elem as _, RootsOfUnity,
+        RootsOfUnity,
         baby_bear::{BabyBearElem, BabyBearExtElem},
         map_pow,
     },
     hal::{
-        AccumPreflight, Buffer as _, CircuitHal,
+        AccumPreflight, CircuitHal,
         metal::{
-            BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalPoseidon2, MetalHalSha256,
-            MetalHash, MetalHashPoseidon2, MetalHashSha256,
+            BufferImpl as MetalBuffer, MetalHal, MetalHalPoseidon2, MetalHalSha256, MetalHash,
+            MetalHashPoseidon2, MetalHashSha256,
         },
     },
 };
 
 const METAL_LIB: &[u8] = include_bytes!(env!("RECURSION_METAL_PATH"));
 
-const KERNEL_NAMES: &[&str] = &["eval_check", "step_compute_accum", "step_verify_accum"];
+const KERNEL_NAMES: &[&str] = &["eval_check"];
 
 use crate::{
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
@@ -133,47 +133,14 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
     fn accumulate(
         &self,
         _preflight: &AccumPreflight,
-        ctrl: &MetalBuffer<BabyBearElem>,
-        io: &MetalBuffer<BabyBearElem>,
-        data: &MetalBuffer<BabyBearElem>,
-        mix: &MetalBuffer<BabyBearElem>,
-        accum: &MetalBuffer<BabyBearElem>,
-        steps: usize,
+        _ctrl: &MetalBuffer<BabyBearElem>,
+        _io: &MetalBuffer<BabyBearElem>,
+        _data: &MetalBuffer<BabyBearElem>,
+        _mix: &MetalBuffer<BabyBearElem>,
+        _accum: &MetalBuffer<BabyBearElem>,
+        _steps: usize,
     ) {
-        let count = steps - ZK_CYCLES;
-
-        let wom = vec![BabyBearExtElem::ONE; steps];
-        let wom = MetalBuffer::copy_from("wom", &self.hal.device, self.hal.cmd_queue.clone(), &wom);
-
-        let args = [
-            KernelArg::U32(steps as u32),
-            ctrl.as_arg(),
-            data.as_arg(),
-            mix.as_arg(),
-            wom.as_arg(),
-        ];
-        let kernel = self.kernels.get("step_compute_accum").unwrap();
-        self.hal.dispatch(kernel, &args, count as u64, None);
-
-        use risc0_zkp::hal::Hal as _;
-        self.hal.prefix_products(&wom);
-
-        let args = [
-            KernelArg::U32(steps as u32),
-            ctrl.as_arg(),
-            data.as_arg(),
-            mix.as_arg(),
-            wom.as_arg(),
-            accum.as_arg(),
-        ];
-        let kernel = self.kernels.get("step_verify_accum").unwrap();
-        self.hal.dispatch(kernel, &args, count as u64, None);
-
-        self.hal
-            .dispatch_by_name("eltwise_zeroize_fp", &[accum.as_arg()], accum.size() as u64);
-
-        self.hal
-            .dispatch_by_name("eltwise_zeroize_fp", &[io.as_arg()], io.size() as u64);
+        unimplemented!()
     }
 }
 

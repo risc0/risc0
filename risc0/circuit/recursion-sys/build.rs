@@ -53,11 +53,7 @@ fn build_cuda_kernels() {
 }
 
 fn build_metal_kernels() {
-    const SRCS: &[&str] = &[
-        "eval_check.metal",
-        "step_compute_accum.metal",
-        "step_verify_accum.metal",
-    ];
+    const SRCS: &[&str] = &["eval_check.metal"];
 
     let dir = Path::new("kernels").join("metal");
     let src_paths = SRCS.iter().map(|x| dir.join(x));
