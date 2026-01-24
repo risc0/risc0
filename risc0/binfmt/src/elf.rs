@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -15,7 +15,7 @@
 
 extern crate alloc;
 
-use alloc::{collections::BTreeMap, vec, vec::Vec};
+use alloc::{vec, vec::Vec};
 
 use anyhow::{Context, Result, anyhow, bail, ensure};
 use elf::{ElfBytes, endian::LittleEndian, file::Class};
@@ -25,7 +25,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::{ByteAddr, Digestible as _, KERNEL_START_ADDR, MemoryImage, SystemState};
 
+/// The starting address for user programs in the RISC Zero zkVM.
 const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
+const USER_MAX_ADDR: ByteAddr = ByteAddr(KERNEL_START_ADDR.0 - 1);
 
 const SUSPEND_PC_ADDR: ByteAddr = ByteAddr(0xffff_0210);
 const SUSPEND_MODE_ADDR: ByteAddr = ByteAddr(0xffff_0214);
@@ -36,13 +38,20 @@ pub struct Program {
     pub(crate) entry: u32,
 
     /// The initial memory image
-    pub(crate) image: BTreeMap<u32, u32>,
+    pub(crate) image: MemoryImage,
 }
 
 impl Program {
     /// Initialize a RISC Zero Program from an appropriate ELF file
+    ///
+    /// max_mem is an inclusive upper bound on the addresses that can be loaded. If the ELF
+    /// specifies data to be loaded to a higher address, an error will be returned.
     pub fn load_elf(input: &[u8], max_mem: u32) -> Result<Program> {
-        let mut image: BTreeMap<u32, u32> = BTreeMap::new();
+        // With max_mem as an inclusive upper bound on the addresses, any size greater than
+        // max_mem + 1 is invalid because 0 + max_size > max_mem.
+        let max_size = max_mem as u64 + 1;
+
+        let mut image = MemoryImage::default();
         let elf = ElfBytes::<LittleEndian>::minimal_parse(input)
             .map_err(|err| anyhow!("Elf parse error: {err}"))?;
         if elf.ehdr.class != Class::ELF32 {
@@ -59,7 +68,7 @@ impl Program {
             .e_entry
             .try_into()
             .map_err(|err| anyhow!("e_entry was larger than 32 bits. {err}"))?;
-        if entry >= max_mem || !entry.is_multiple_of(WORD_SIZE as u32) {
+        if entry > max_mem || !entry.is_multiple_of(WORD_SIZE as u32) {
             bail!("Invalid entrypoint");
         }
         let segments = elf
@@ -73,78 +82,83 @@ impl Program {
                 .p_filesz
                 .try_into()
                 .map_err(|err| anyhow!("filesize was larger than 32 bits. {err}"))?;
-            if file_size >= max_mem {
+            if file_size as u64 > max_size {
                 bail!("Invalid segment file_size");
             }
             let mem_size: u32 = segment
                 .p_memsz
                 .try_into()
                 .map_err(|err| anyhow!("mem_size was larger than 32 bits {err}"))?;
-            if mem_size >= max_mem {
+            if mem_size as u64 > max_size {
                 bail!("Invalid segment mem_size");
             }
-            let vaddr: u32 = segment
-                .p_vaddr
-                .try_into()
-                .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?;
-            if !vaddr.is_multiple_of(WORD_SIZE as u32) {
-                bail!("vaddr {vaddr:08x} is unaligned");
+            let vaddr = ByteAddr(
+                segment
+                    .p_vaddr
+                    .try_into()
+                    .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?,
+            );
+            if !vaddr.is_aligned() {
+                bail!("vaddr {vaddr:?} is unaligned");
             }
-            let offset: u32 = segment
+            let input_offset: u32 = segment
                 .p_offset
                 .try_into()
                 .map_err(|err| anyhow!("offset is larger than 32 bits. {err}"))?;
-            for i in (0..mem_size).step_by(WORD_SIZE) {
-                let addr = vaddr.checked_add(i).context("Invalid segment vaddr")?;
-                if addr >= max_mem {
-                    bail!(
-                        "Address [0x{addr:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
-                    );
-                }
-                if i >= file_size {
-                    // Past the file size, all zeros.
-                    image.insert(addr, 0);
-                } else {
-                    let mut word = 0;
-                    // Don't read past the end of the file.
-                    let len = core::cmp::min(file_size - i, WORD_SIZE as u32);
-                    for j in 0..len {
-                        let offset = (offset + i + j) as usize;
-                        let byte = input.get(offset).context("Invalid segment offset")?;
-                        word |= (*byte as u32) << (j * 8);
-                    }
-                    image.insert(addr, word);
-                }
+
+            // Compute the end of the segment in the program image, and compare to inclusive bound
+            // on the largest address that can be written, max_mem.
+            // Cast to u64 to avoid overflow if max_mem == u32::MAX.
+            let program_end = ((vaddr.0 as u64) + (mem_size as u64)).saturating_sub(1);
+            if program_end > max_mem as u64 {
+                bail!(
+                    "Address [0x{program_end:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
+                );
             }
+            if file_size > mem_size {
+                bail!("Segment p_filesz is greater than p_memsz: {file_size} > {mem_size}");
+            }
+
+            // Copy the data from the input into the program image. If the file_size puts the end
+            // past the input end, the remainder will be unset, defaulting to zeroes.
+            let input_buf = input
+                .get((input_offset as usize)..input_offset.saturating_add(file_size) as usize)
+                .context("Invalid segment size")?;
+            image
+                .set_region(vaddr, input_buf)
+                .context("Failed to write segment data to program image")?;
         }
         Ok(Program::new_from_entry_and_image(entry, image))
     }
 
     /// Create `Program` from given entry-point and image map
-    pub fn new_from_entry_and_image(entry: u32, image: BTreeMap<u32, u32>) -> Self {
+    pub fn new_from_entry_and_image(entry: u32, image: MemoryImage) -> Self {
         Self { entry, image }
-    }
-
-    /// The size of the image in a count of words
-    pub fn size_in_words(&self) -> usize {
-        self.image.len()
     }
 
     /// Read a word from the image
     pub fn read_u32(&self, address: &u32) -> Option<u32> {
-        self.image.get(address).copied()
+        let waddr = ByteAddr(*address).waddr_aligned()?;
+        self.image.get_word(waddr).ok()
     }
 
     pub(crate) fn prepare_user(&mut self) {
-        self.image.insert(USER_START_ADDR.0, self.entry);
+        self.image
+            .set_word(USER_START_ADDR.waddr(), self.entry)
+            .unwrap();
     }
 
     pub(crate) fn prepare_kernel(&mut self, user: Option<&mut Program>) {
+        // NOTE: The given user program should define a disjoint set of pages.
         if let Some(user) = user {
-            self.image.append(&mut user.image);
+            for (idx, page) in user.image.pages.clone() {
+                self.image.set_page(idx, page);
+            }
         }
-        self.image.insert(SUSPEND_PC_ADDR.0, self.entry);
-        self.image.insert(SUSPEND_MODE_ADDR.0, 1);
+        self.image
+            .set_word(SUSPEND_PC_ADDR.waddr(), self.entry)
+            .unwrap();
+        self.image.set_word(SUSPEND_MODE_ADDR.waddr(), 1).unwrap();
     }
 }
 
@@ -402,7 +416,7 @@ impl<'a> ProgramBinary<'a> {
     }
 
     fn user_program(&self) -> Result<Program> {
-        Program::load_elf(self.user_elf, KERNEL_START_ADDR.0).context("Loading user ELF")
+        Program::load_elf(self.user_elf, USER_MAX_ADDR.0).context("Loading user ELF")
     }
 
     fn kernel_program(&self) -> Result<Program> {

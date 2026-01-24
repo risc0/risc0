@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -23,7 +23,6 @@ pub(crate) mod succinct;
 
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 
-use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
 use risc0_core::field::baby_bear::BabyBear;
@@ -233,6 +232,12 @@ impl Receipt {
             // require it to be empty.
             assumptions: Assumptions(vec![]).into(),
         });
+
+        // When the exit code does not expect an output, the journal is undefined. If a non-empty
+        // journal is provided, then the receipt is malformed.
+        if expected_output.is_none() && !self.journal.bytes.is_empty() {
+            return Err(VerificationError::ReceiptFormatError);
+        }
 
         if claim.output.digest() != expected_output.digest() {
             let empty_output = claim.output.is_none() && self.journal.bytes.is_empty();
@@ -673,10 +678,12 @@ impl AssumptionReceipt {
     }
 }
 
-impl From<Receipt> for AssumptionReceipt {
+impl TryFrom<Receipt> for AssumptionReceipt {
+    type Error = VerificationError;
+
     /// Create a proven assumption from a [Receipt].
-    fn from(receipt: Receipt) -> Self {
-        Self::Proven(receipt.inner.into())
+    fn try_from(receipt: Receipt) -> Result<Self, VerificationError> {
+        Ok(Self::Proven(receipt.inner.try_into()?))
     }
 }
 
@@ -690,10 +697,12 @@ where
     }
 }
 
-impl From<InnerReceipt> for AssumptionReceipt {
+impl TryFrom<InnerReceipt> for AssumptionReceipt {
+    type Error = VerificationError;
+
     /// Create a proven assumption from a [InnerReceipt].
-    fn from(receipt: InnerReceipt) -> Self {
-        Self::Proven(receipt.into())
+    fn try_from(receipt: InnerReceipt) -> Result<Self, VerificationError> {
+        Ok(Self::Proven(receipt.try_into()?))
     }
 }
 
@@ -766,9 +775,6 @@ impl From<ReceiptClaim> for AssumptionReceipt {
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub enum InnerAssumptionReceipt {
-    /// A non-succinct [CompositeReceipt], made up of one inner receipt per segment and assumption.
-    Composite(CompositeReceipt),
-
     /// A [SuccinctReceipt], proving arbitrarily the claim with a single STARK.
     Succinct(SuccinctReceipt<Unknown>),
 
@@ -787,19 +793,9 @@ impl InnerAssumptionReceipt {
     ) -> Result<(), VerificationError> {
         tracing::debug!("InnerAssumptionReceipt::verify_integrity_with_context");
         match self {
-            Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
             Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
             Self::Fake(inner) => inner.verify_integrity_with_context(ctx),
-        }
-    }
-
-    /// Returns the [InnerAssumptionReceipt::Composite] arm.
-    pub fn composite(&self) -> Result<&CompositeReceipt, VerificationError> {
-        if let Self::Composite(x) = self {
-            Ok(x)
-        } else {
-            Err(VerificationError::ReceiptFormatError)
         }
     }
 
@@ -826,7 +822,6 @@ impl InnerAssumptionReceipt {
     /// Note that only the claim digest is available because the claim type may be unknown.
     pub fn claim_digest(&self) -> Result<Digest, VerificationError> {
         match self {
-            Self::Composite(inner) => Ok(inner.claim()?.digest()),
             Self::Groth16(inner) => Ok(inner.claim.digest()),
             Self::Succinct(inner) => Ok(inner.claim.digest()),
             Self::Fake(inner) => Ok(inner.claim.digest()),
@@ -836,7 +831,6 @@ impl InnerAssumptionReceipt {
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
         match self {
-            Self::Composite(inner) => inner.verifier_parameters,
             Self::Groth16(inner) => inner.verifier_parameters,
             Self::Succinct(inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
@@ -846,7 +840,6 @@ impl InnerAssumptionReceipt {
     /// Total number of bytes used by the seals of this receipt.
     pub fn seal_size(&self) -> usize {
         match self {
-            Self::Composite(receipt) => receipt.seal_size(),
             Self::Succinct(receipt) => receipt.seal_size(),
             Self::Groth16(receipt) => receipt.seal_size(),
             Self::Fake(_) => 0,
@@ -854,13 +847,15 @@ impl InnerAssumptionReceipt {
     }
 }
 
-impl From<InnerReceipt> for InnerAssumptionReceipt {
-    fn from(value: InnerReceipt) -> Self {
+impl TryFrom<InnerReceipt> for InnerAssumptionReceipt {
+    type Error = VerificationError;
+
+    fn try_from(value: InnerReceipt) -> Result<Self, VerificationError> {
         match value {
-            InnerReceipt::Composite(x) => InnerAssumptionReceipt::Composite(x),
-            InnerReceipt::Succinct(x) => InnerAssumptionReceipt::Succinct(x.into_unknown()),
-            InnerReceipt::Groth16(x) => InnerAssumptionReceipt::Groth16(x.into_unknown()),
-            InnerReceipt::Fake(x) => InnerAssumptionReceipt::Fake(x.into_unknown()),
+            InnerReceipt::Composite(_) => Err(VerificationError::ReceiptFormatError),
+            InnerReceipt::Succinct(x) => Ok(InnerAssumptionReceipt::Succinct(x.into_unknown())),
+            InnerReceipt::Groth16(x) => Ok(InnerAssumptionReceipt::Groth16(x.into_unknown())),
+            InnerReceipt::Fake(x) => Ok(InnerAssumptionReceipt::Fake(x.into_unknown())),
         }
     }
 }
@@ -911,7 +906,7 @@ impl VerifierContext {
             segment_verifier_parameters: None,
             succinct_verifier_parameters: None,
             groth16_verifier_parameters: None,
-            dev_mode: crate::is_dev_mode_enabled_via_environment(),
+            dev_mode: false,
         }
     }
 
@@ -1027,11 +1022,16 @@ impl Default for VerifierContext {
 #[cfg(test)]
 mod tests {
     use super::{FakeReceipt, InnerReceipt, Receipt};
+
     use crate::{
-        MaybePruned,
+        Assumption, Assumptions, ExitCode, MaybePruned, Output, ReceiptClaim, SystemState,
+        VerifierContext,
         sha::{DIGEST_BYTES, Digest},
     };
     use risc0_zkp::verify::VerificationError;
+
+    const TEST_JOURNAL_A: &[u8] = &[1, 2, 3];
+    const TEST_JOURNAL_B: &[u8] = &[4, 5, 6];
 
     #[test]
     fn mangled_version_info_should_error() {
@@ -1079,5 +1079,96 @@ mod tests {
         let encoded = borsh::to_vec(&receipt).unwrap();
         let decoded: Receipt = borsh::from_slice(&encoded).unwrap();
         assert_eq!(receipt, decoded);
+    }
+
+    #[test]
+    fn non_empty_journal_without_expected_output_should_error() {
+        let claim = ReceiptClaim {
+            pre: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: Digest::ZERO,
+            }),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: Digest::ZERO,
+            }),
+            exit_code: ExitCode::SystemSplit,
+            input: None.into(),
+            output: None.into(),
+        };
+        let receipt = Receipt::new(
+            InnerReceipt::Fake(FakeReceipt {
+                claim: MaybePruned::Value(claim),
+            }),
+            TEST_JOURNAL_A.to_vec(),
+        );
+
+        let err = receipt
+            .verify_integrity_with_context(&VerifierContext::default().with_dev_mode(true))
+            .err()
+            .unwrap();
+        assert_eq!(err, VerificationError::ReceiptFormatError);
+    }
+
+    #[test]
+    fn output_digest_mismatch_should_error() {
+        let claim = ReceiptClaim {
+            pre: MaybePruned::Pruned(Digest::ZERO),
+            post: MaybePruned::Pruned(Digest::ZERO),
+            exit_code: ExitCode::Halted(0),
+            input: None.into(),
+            output: Some(Output {
+                journal: MaybePruned::Value(TEST_JOURNAL_B.to_vec()),
+                assumptions: MaybePruned::Value(Assumptions(vec![])),
+            })
+            .into(),
+        };
+        let receipt = Receipt::new(
+            InnerReceipt::Fake(FakeReceipt {
+                claim: MaybePruned::Value(claim),
+            }),
+            TEST_JOURNAL_A.to_vec(),
+        );
+
+        let err = receipt
+            .verify_integrity_with_context(&VerifierContext::default().with_dev_mode(true))
+            .err()
+            .unwrap();
+        assert_eq!(err, VerificationError::JournalDigestMismatch);
+    }
+
+    #[test]
+    fn non_empty_assumptions_should_error() {
+        let claim = ReceiptClaim {
+            pre: MaybePruned::Pruned(Digest::ZERO),
+            post: MaybePruned::Pruned(Digest::ZERO),
+            exit_code: ExitCode::Halted(0),
+            input: None.into(),
+            output: Some(Output {
+                journal: MaybePruned::Value(TEST_JOURNAL_A.to_vec()),
+                assumptions: MaybePruned::Value(Assumptions(vec![MaybePruned::Value(
+                    Assumption {
+                        claim: Digest::ZERO,
+                        control_root: Digest::ZERO,
+                    },
+                )])),
+            })
+            .into(),
+        };
+        let receipt = Receipt::new(
+            InnerReceipt::Fake(FakeReceipt {
+                claim: MaybePruned::Value(claim),
+            }),
+            TEST_JOURNAL_A.to_vec(),
+        );
+
+        // NOTE: Because the assumptions are in the output, which may be pruned, we cannot always
+        // distinguish between journal digest mismatch and an invalid assumption. Journal digest
+        // mismatch is the more common, when the issue is accidental.
+        let err = receipt
+            .verify_integrity_with_context(&VerifierContext::default().with_dev_mode(true))
+            .err()
+            .unwrap();
+        assert_eq!(err, VerificationError::JournalDigestMismatch);
     }
 }

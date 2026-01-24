@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -14,6 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use risc0_zkp::{
+    MAX_CYCLES_PO2,
     adapter::{CircuitCoreDefV3, CircuitInfoV3, GroupInfo, MixState, PolyExt},
     core::hash::poseidon2::Poseidon2HashSuite,
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
@@ -28,7 +29,7 @@ impl CircuitInfoV3 for CircuitInfo {
     fn get_groups(&self) -> &'static [GroupInfo] {
         &[
             GroupInfo {
-                global_count: 38,
+                global_count: 54,
                 mix_count: 0,
             },
             GroupInfo {
@@ -52,18 +53,27 @@ impl PolyExt<BabyBear> for CircuitInfo {
 
 impl CircuitCoreDefV3<BabyBear> for CircuitInfo {}
 
-pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
+pub fn verify(mut seal: &[u32]) -> Result<(), VerificationError> {
     let circuit = CircuitInfo;
     let suite = Poseidon2HashSuite::new_suite();
 
-    if seal[0] != RV32IM_SEAL_VERSION {
-        tracing::error!("seal[0]: {}", seal[0]);
+    let version = *seal
+        .split_off_first()
+        .ok_or(VerificationError::ReceiptFormatError)?;
+    if version != RV32IM_SEAL_VERSION {
+        tracing::debug!(
+            "version decoded from seal does not match the expected version: {version} != {RV32IM_SEAL_VERSION}",
+        );
         return Err(VerificationError::ReceiptFormatError);
     }
 
-    let po2 = seal[1];
-    tracing::debug!("po2: {po2}");
+    let po2 = *seal
+        .split_off_first()
+        .ok_or(VerificationError::ReceiptFormatError)? as usize;
+    if po2 > MAX_CYCLES_PO2 {
+        tracing::debug!("po2 in seal is larger than the max po2: {po2} > {MAX_CYCLES_PO2}");
+        return Err(VerificationError::ReceiptFormatError);
+    }
 
-    let seal = &seal[2..]; // skip past version, po2
-    risc0_zkp::verify::verify_v3(&circuit, &suite, seal, po2 as usize)
+    risc0_zkp::verify::verify_v3(&circuit, &suite, seal, po2)
 }

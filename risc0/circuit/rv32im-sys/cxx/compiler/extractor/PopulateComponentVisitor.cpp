@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -23,7 +23,6 @@ Populator::Populator(RecordingContext& ctx) : builder(ctx.mlirCtx), zero(ctx.zer
 }
 
 mlir::Value Populator::lookup(const char* memberName) {
-  llvm::outs() << "lookup " << memberName << "\n";
   mlir::Value layout = path.back();
   mlir::StringAttr name = builder.getStringAttr(memberName);
   mlir::Value sublayout =

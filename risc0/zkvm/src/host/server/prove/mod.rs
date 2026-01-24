@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -82,14 +82,19 @@ pub trait ProverServer: private::Sealed {
         let mut iter = self.segment_preflight(segment)?;
         let chunk = iter
             .next()
-            .ok_or_else(|| anyhow!("segment_preflight produced no segment results"))?;
+            .ok_or_else(|| anyhow!("segment_preflight produced no segment results"))??;
+
+        segment
+            .inner
+            .blocks
+            .assert_preflight_counts(chunk.block_counts());
 
         if iter.next().is_some() {
             bail!("segment_preflight produced multiple segments");
         }
 
         tracing::debug!("chunk");
-        let receipt = self.prove_preflight(ctx, chunk?)?;
+        let receipt = self.prove_preflight(ctx, chunk)?;
         receipts.push(receipt);
 
         Ok(receipts)
@@ -396,9 +401,6 @@ where
             continuation_receipt,
             |conditional: SuccinctReceipt<Claim>, assumption: &InnerAssumptionReceipt| match assumption {
                 InnerAssumptionReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
-                InnerAssumptionReceipt::Composite(assumption) => {
-                    self.resolve(&conditional, &SuccinctReceipt::<ReceiptClaim>::into_unknown(self.composite_to_succinct(assumption)?))
-                }
                 InnerAssumptionReceipt::Fake(_) => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
                 ),

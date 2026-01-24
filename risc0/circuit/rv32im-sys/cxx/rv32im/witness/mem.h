@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,12 +17,14 @@
 
 #include "rv32im/base/base.h"
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PhysMemReadWitness {
   uint32_t wordAddr;
   uint32_t prevCycle;
   uint32_t value;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct PhysMemWriteWitness {
   uint32_t wordAddr;
   uint32_t prevCycle;
@@ -34,30 +36,8 @@ struct PhysMemWriteWitness {
 using RegMemReadWitness = PhysMemReadWitness;
 using RegMemWriteWitness = PhysMemWriteWitness;
 
-struct VirtAddrWitness {
-  uint32_t readCycle;
-  uint32_t vpage;
-  uint32_t ppage;
-  uint32_t wordOffset;
-};
+// When we implment smode, we will actually neeed distinct witness data,
+// but for now, they are just typedefs
 
-struct VirtMemReadWitness {
-  VirtAddrWitness addr;
-  uint32_t prevCycle;
-  uint32_t value;
-};
-
-struct VirtMemWriteWitness {
-  VirtAddrWitness addr;
-  uint32_t prevCycle;
-  uint32_t prevValue;
-  uint32_t value;
-};
-
-struct VirtAddrResolve {
-  uint32_t cacheCycle;
-  VirtAddrWitness addr;
-  PhysMemReadWitness satp;
-  PhysMemReadWitness pte1;
-  PhysMemReadWitness pte2;
-};
+using VirtMemReadWitness = PhysMemReadWitness;
+using VirtMemWriteWitness = PhysMemWriteWitness;

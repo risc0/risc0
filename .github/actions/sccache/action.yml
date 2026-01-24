@@ -4,11 +4,6 @@ description: Install sccache
 runs:
   using: composite
   steps:
-    - name: Disable idle timeout to run sccache permanently
-      run: |
-        echo "SCCACHE_IDLE_TIMEOUT=0" >> $GITHUB_ENV
-      shell: bash
-
     - if: runner.os == 'Linux' && runner.arch == 'X64'
       run: |
         echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
