@@ -29,6 +29,7 @@ use crate::{
     ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
     SimpleSegmentRef, SuccinctReceiptVerifierParameters, VerifierContext,
     host::server::{exec::executor::ExecutorImpl, testutils},
+    recursion::prove::zkr,
     serde::{from_slice, to_vec},
     sha::Digestible,
 };
@@ -293,10 +294,10 @@ const POS: usize = crate::align_up(
 // Aligned read is fine
 #[case(&[(POS, 0)])]
 // Unaligned write is bad
-#[should_panic(expected = "StoreAddressMisaligned")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(&[(POS + 1001, 1)])]
 // Unaligned read is bad
-#[should_panic(expected = "LoadAddressMisaligned")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(&[(POS + 1, 0)])]
 #[test_log::test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
@@ -362,48 +363,47 @@ fn session_events() {
 
 // These tests come from:
 // https://github.com/riscv-software-src/riscv-tests
-// They were built using the toolchain from:
-// https://github.com/risc0/toolchain/releases/tag/2022.03.25
-// The exception is the test of fence, which was built with
-// https://archlinux.org/packages/extra/x86_64/riscv64-elf-gcc/ v14.0.1-1
+// They were built using: `cargo xfast bazel`.
 mod riscv {
+    use std::io::{Cursor, Read};
+
+    use risc0_binfmt::ProgramBinary;
+    use risc0_zkos_v1compat::V1COMPAT_ELF;
+    use zip::ZipArchive;
+
     use super::*;
     use crate::ExecutorEnv;
 
-    fn prove_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Receipt> {
-        let session = ExecutorImpl::from_kernel_elf(env, elf)
-            .unwrap()
-            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))?;
-        prove_session(&session)
-    }
-
     fn run_test(test_name: &str) {
-        use std::io::Read;
+        // Load guest ELF from testdata archive
+        let bytes = include_bytes!("../testdata/riscv-tests.zip");
+        let reader = Cursor::new(bytes);
+        let mut archive = ZipArchive::new(reader).unwrap();
 
-        use flate2::read::GzDecoder;
-        use tar::Archive;
+        let mut entry = archive.by_name(test_name).unwrap();
+        let mut user_elf = Vec::new();
+        entry.read_to_end(&mut user_elf).unwrap();
 
-        let bytes = include_bytes!("../testdata/riscv-tests.tgz");
-        let gz = GzDecoder::new(&bytes[..]);
-        let mut tar = Archive::new(gz);
-        for entry in tar.entries().unwrap() {
-            let mut entry = entry.unwrap();
-            if !entry.header().entry_type().is_file() {
-                continue;
-            }
-            let path = entry.path().unwrap();
-            let filename = path.file_name().unwrap().to_str().unwrap();
-            if filename != test_name {
-                continue;
-            }
-            let mut elf = Vec::new();
-            entry.read_to_end(&mut elf).unwrap();
+        // Create combined binary with user ELF and v1compat kernel
+        let combined_binary = ProgramBinary::new(&user_elf, V1COMPAT_ELF).encode();
 
-            let env = ExecutorEnv::default();
-            prove_elf(env, &elf).unwrap();
-            return;
-        }
-        panic!("No filename matching '{}'", test_name);
+        // Execute the program
+        let env = ExecutorEnv::default();
+        let session = ExecutorImpl::from_elf(env, &combined_binary)
+            .unwrap()
+            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+            .unwrap();
+
+        // Check that execution completed successfully
+        assert_eq!(
+            session.exit_code,
+            ExitCode::Halted(0),
+            "Test {} failed with exit code: {:?}",
+            test_name,
+            session.exit_code
+        );
+
+        prove_session(&session).unwrap();
     }
 
     macro_rules! test_case {
@@ -416,6 +416,19 @@ mod riscv {
         };
     }
 
+    // Atomic memory operations (RV32A)
+    test_case!(amoadd_w);
+    test_case!(amoand_w);
+    test_case!(amomax_w);
+    test_case!(amomaxu_w);
+    test_case!(amomin_w);
+    test_case!(amominu_w);
+    test_case!(amoor_w);
+    test_case!(amoswap_w);
+    test_case!(amoxor_w);
+    test_case!(lrsc);
+
+    // Standard instruction tests (RV32I, RV32M)
     test_case!(add);
     test_case!(addi);
     test_case!(and);
@@ -429,10 +442,9 @@ mod riscv {
     test_case!(bne);
     test_case!(div);
     test_case!(divu);
-    // test_case!(fence);
+    test_case!(fence_i);
     test_case!(jal);
     test_case!(jalr);
-    test_case!(misaligned_jalr);
     test_case!(lb);
     test_case!(lbu);
     test_case!(lh);
@@ -698,9 +710,30 @@ fn verify_in_guest(#[case] kind: ReceiptKind) {
     println!("{:?}", session.stats());
 }
 
+#[test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+fn succinct_receipt_binds_control_id() {
+    let mut receipt = prove_nothing_succinct().receipt;
+    let InnerReceipt::Succinct(ref mut succinct_receipt) = receipt.inner else {
+        panic!("what?!")
+    };
+    // Get the control ID for an allowed ZKR, but not the right one.
+    succinct_receipt.control_id = zkr::resolve_unwrap_povw(&succinct_receipt.hashfn)
+        .unwrap()
+        .1;
+    let err = receipt
+        .verify_integrity_with_context(&VerifierContext::default())
+        .unwrap_err();
+
+    assert!(matches!(
+        err,
+        VerificationError::ControlVerificationError { .. }
+    ));
+}
+
 fn hello_commit_receipt() -> &'static Receipt {
     static ONCE: OnceLock<Receipt> = OnceLock::new();
-    ONCE.get_or_init(|| prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap())
+    ONCE.get_or_init(|| prove_elf_succinct(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap())
 }
 
 mod sys_verify {
@@ -713,7 +746,7 @@ mod sys_verify {
     };
 
     fn prove_halt(exit_code: u8) -> Receipt {
-        let opts = ProverOpts::fast().with_prove_guest_errors(true);
+        let opts = ProverOpts::succinct().with_prove_guest_errors(true);
 
         let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::Halt(exit_code))
@@ -768,6 +801,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(hello_commit_receipt().clone())
+            .unwrap()
             .build()
             .unwrap();
 
@@ -809,6 +843,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(hello_commit_receipt().claim().unwrap())
+            .unwrap()
             .build()
             .unwrap();
 
@@ -836,6 +871,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(hello_commit_receipt().clone())
+            .unwrap()
             .build()
             .unwrap();
         prove_elf(env, MULTI_TEST_ELF)
@@ -858,6 +894,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(hello_commit_receipt().claim().unwrap())
+            .unwrap()
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
@@ -880,6 +917,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(halt_receipt)
+            .unwrap()
             .build()
             .unwrap();
         prove_elf(env, MULTI_TEST_ELF)
@@ -905,6 +943,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(test_circuit_receipt.clone())
+            .unwrap()
             .build()
             .unwrap();
         let receipt = prove_elf(env, MULTI_TEST_ELF).unwrap();
@@ -919,6 +958,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(test_circuit_receipt.clone())
+            .unwrap()
             .build()
             .unwrap();
         let receipt = prove_elf_succinct(env, MULTI_TEST_ELF).unwrap();
@@ -1081,6 +1121,7 @@ mod povw {
             .write(&spec)
             .unwrap()
             .add_assumption(hello_commit_receipt().clone())
+            .unwrap()
             .povw(povw_job_id)
             .build()
             .unwrap();

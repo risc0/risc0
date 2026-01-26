@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -171,6 +171,8 @@ template <typename C> struct EcallP2Block {
     T::apply(ctx, "readA2", readA2, cycle.get());
     T::apply(ctx, "readA3", readA3, cycle.get());
     T::apply(ctx, "readA7", readA7, cycle.get());
+    T::apply(ctx, "isElem", isElem);
+    T::apply(ctx, "isCheck", isCheck);
     T::apply(ctx, "decompState", decompState, readA0.data.get());
     T::apply(ctx, "decompIn", decompIn, readA1.data.get());
     T::apply(ctx, "decompOut", decompOut, readA2.data.get());
@@ -208,6 +210,7 @@ template <typename C> struct EcallBigIntBlock {
     T::apply(ctx, "readT0", readT0, cycle.get());
     T::apply(ctx, "readT2", readT2, cycle.get());
     T::apply(ctx, "cycleCount", cycleCount);
+    T::apply(ctx, "mm", mm);
     T::apply(ctx, "pcDecomp", pcDecomp, readT2.data.get());
     T::apply(ctx, "pcVerify", pcVerify, readT2.data.get(), mm.get() * Val<C>(MODE_MACHINE));
   }

@@ -219,7 +219,7 @@ fn bigint_accel() {
 }
 
 #[test_log::test]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 fn bigint_accel_mod_zero_product_too_large() {
     let input = MultiTestSpec::BigInt {
         count: 1,
@@ -264,28 +264,28 @@ const BIGINT_ILLEGAL_ADDR: u32 = 0xc000_0000;
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_ILLEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_LEGAL_ADDR,
     BIGINT_ILLEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_ILLEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
@@ -617,6 +617,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(claim)
+            .unwrap()
             .build()
             .unwrap();
         let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -645,6 +646,7 @@ mod sys_verify {
                 .write(&spec)
                 .unwrap()
                 .add_assumption(halt_session.claim().unwrap())
+                .unwrap()
                 .build()
                 .unwrap();
             let session = execute_elf(env, MULTI_TEST_ELF);
@@ -671,6 +673,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(claim)
+            .unwrap()
             .build()
             .unwrap();
         let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -700,6 +703,7 @@ mod sys_verify {
                 .write(&spec)
                 .unwrap()
                 .add_assumption(claim)
+                .unwrap()
                 .build()
                 .unwrap();
             let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -722,6 +726,7 @@ mod sys_verify {
                 .write(&spec)
                 .unwrap()
                 .add_assumption(claim)
+                .unwrap()
                 .build()
                 .unwrap();
             let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -747,6 +752,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(claim)
+            .unwrap()
             .build()
             .unwrap();
 
@@ -930,7 +936,7 @@ fn panic() {
 #[test_log::test]
 fn fault() {
     let err = multi_test_raw(MultiTestSpec::Fault).err().unwrap();
-    assert!(err.to_string().contains("StoreAccessFault"));
+    assert!(err.to_string().contains("Illegal trap in machine mode"));
 }
 
 #[test_log::test]
@@ -1121,7 +1127,7 @@ fn memory_access() {
             .err()
             .unwrap()
             .to_string()
-            .contains("StoreAccessFault")
+            .contains("Illegal trap in machine mode")
     );
 
     let addr = 0xC000_0000;
@@ -1130,7 +1136,7 @@ fn memory_access() {
             .err()
             .unwrap()
             .to_string()
-            .contains("StoreAccessFault")
+            .contains("Illegal trap in machine mode")
     );
 
     assert_eq!(access_memory(0x0B00_0000).unwrap(), ExitCode::Halted(0));
@@ -1203,7 +1209,7 @@ fn alloc_zeroed() {
 }
 
 #[rstest]
-#[should_panic(expected = "LoadAccessFault")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[test_log::test]
 fn out_of_bounds_ecall() {
     multi_test(MultiTestSpec::OutOfBoundsEcall);

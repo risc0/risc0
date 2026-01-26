@@ -49,6 +49,11 @@ PreflightResultsPtr preflight(size_t po2,
 class Rv32imProver {
 public:
   Rv32imProver(IHalPtr hal, size_t po2, bool doValidate = false);
+  void prove(WriteIop& iop,
+             const RowInfo* rowInfo,
+             size_t rowInfoSize,
+             const uint32_t* aux,
+             size_t aux_size);
   void prove(WriteIop& iop, const PreflightResults& preflight);
 
   size_t po2() const;

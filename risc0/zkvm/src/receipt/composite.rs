@@ -132,6 +132,7 @@ impl CompositeReceipt {
                 // Otherwise, we should verify the assumption receipt using the guest-provided root.
                 control_root => Some(
                     VerifierContext::empty()
+                        .with_dev_mode(ctx.dev_mode())
                         .with_suites(ctx.suites.clone())
                         .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters {
                             control_root,
@@ -279,7 +280,7 @@ impl CompositeReceiptVerifierParameters {
 }
 
 impl Digestible for CompositeReceiptVerifierParameters {
-    /// Hash the [Groth16ReceiptVerifierParameters] to get a digest of the struct.
+    /// Hash the [CompositeReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
             "risc0.CompositeReceiptVerifierParameters",
@@ -318,7 +319,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceiptVerifierParameters::default().digest(),
-            digest!("f1ca5d7007b647e2e8a22efeda2680c125aa211898220453ce8a02cfb2331b62")
+            digest!("d44f61cab1af92affdf2fed1c3e7298b39ed052ee28e01b58460cadde11f1da0")
         );
     }
 }

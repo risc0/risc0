@@ -22,6 +22,10 @@ template <typename C> FDEV void FetchBlock<C>::set(CTX, FetchWitness witness, Va
   ctx.tableAdd(256 + 65536 + cycleDiff * 2, 1);
 }
 
+template <typename C> FDEV void FetchBlock<C>::verify(CTX, Val<C> cycle) DEV {
+  PICUS_ARGUMENT(ctx, {cycle.value}, {ctx.get(loadCycle)});
+}
+
 template <typename C> FDEV void FetchBlock<C>::addArguments(CTX, Val<C> cycle) DEV {
   ctx.pull(LookupArgument<C>(2, (cycle - loadCycle.get()) * 2));
 }
@@ -196,6 +200,7 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
   EQ(instHigh, recomposeRange(16, 32));
 
   // Make the various parts
+  Val<C> recomposedOpcode = getOpcode();
   Val<C> f7 = getFunct7();
   Val<C> f3 = getFunct3();
 
@@ -217,11 +222,19 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
   Val<C> reqF3 = 0;
   Val<C> reqF7 = 0;
   Val<C> validCount = 0;
+
+  // Each major/minor mux arm has a unique "fingerprint" defined by its opcode,
+  // f3, and f7. This allows us to compute idx1 and idx2 deterministically from
+  // the loaded instruction bits. We can then use idx1 and idx2 to determine the
+  // required values of imm and options.
 #define XF3 f3
 #define XF7 f7
 #define ENTRY(name, gidx, gopcode, gt, gf3, gf7, ...)                                              \
   {                                                                                                \
     Val<C> isValid = idx1.bits[gidx / 7].get() * idx2.bits[gidx % 7].get();                        \
+    Val<C> opId = Val<C>(recomposedOpcode + f3 * 0x80 + f7 * 0x400);                               \
+    Val<C> reqOpId = Val<C>(gopcode) + gf3 * 0x80 + gf7 * 0x400;                                   \
+    EQZ(isValid*(opId - reqOpId));                                                                 \
     reqOpcode += isValid * gopcode;                                                                \
     reqF3 += isValid * gf3;                                                                        \
     reqF7 += isValid * gf7;                                                                        \
@@ -234,24 +247,43 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
 #undef ENTRY
 #undef XF7
 #undef XF3
-  // Do final validation
+  // Must have matched exactly one instruction. Note that the OneHot constraints
+  // aren't sufficient here, since some combinations of idx1 and idx2 are unused
+  // and must be prevented.
   EQ(validCount, 1);
+
+  // Even though f3 and f7 are included in the "fingerprint," checking them here
+  // guarantees that they are correctly related to the executed instruction.
+  // This might not be necessary for determinism, but Picus times out without it.
   EQ(reqF3, f3);
   EQ(reqF7, f7);
-  EQ(reqOptions, options.get());
   EQ(reqOpcode, opcode.get());
+  EQ(recomposedOpcode, opcode.get());
+
+  // Check that options and imm match for the decoded instruction.
+  EQ(reqOptions, options.get());
   EQ(reqImm.low, imm.low.get());
   EQ(reqImm.high, imm.high.get());
 }
 
 template <typename C> FDEV void DecodeBlock<C>::addArguments(CTX) DEV {
+  // In order for the decode argument to balance, these values must align with
+  // what's pulled by the instruction blocks. The instruction blocks, in turn,
+  // get these values from the CPU state argument.
+  PICUS_INPUT(ctx, count);
+  PICUS_INPUT(ctx, fetch.pc);
+  PICUS_INPUT(ctx, fetch.iCacheCycle);
+  PICUS_INPUT(ctx, fetch.mode);
+  RANGE_POSTCONDITION(ctx, 0, fetch.mode.get(), 4);
+  PICUS_INPUT(ctx, fetch.loadCycle);
+
   ctx.pull(LookupArgument<C>(2, (fetch.loadCycle.get() - fetch.iCacheCycle.get()) * 2));
   DecodeArgument<C> arg;
   arg.iCacheCycle = fetch.iCacheCycle.get();
   arg.pcLow = fetch.pc.low.get();
-  arg.pcLow = fetch.pc.high.get();
+  arg.pcHigh = fetch.pc.high.get();
   arg.newPcLow = fetch.nextPc.low.get();
-  arg.newPcLow = fetch.nextPc.high.get();
+  arg.newPcHigh = fetch.nextPc.high.get();
   arg.rs1 = getRS1();
   arg.rs2 = getRS2();
   arg.rd = getRD();

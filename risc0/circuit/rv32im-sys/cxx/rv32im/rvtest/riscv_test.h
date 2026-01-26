@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -21,7 +21,12 @@
   .endm
 
 #define RVTEST_FAIL unimp;
+
+// Invoke the terminate/halt ecall. This works for both user-mode and machine-mode ABIs.
 #define RVTEST_PASS                                                                                \
+  li t0, 0;                                                                                        \
+  li a0, 0;                                                                                        \
+  la a1, final_digest;                                                                             \
   li a7, 0;                                                                                        \
   ecall;
 
@@ -36,5 +41,9 @@
 
 #define RVTEST_CODE_END
 
-#define RVTEST_DATA_BEGIN .data
+#define RVTEST_DATA_BEGIN                                                                          \
+  .data;                                                                                           \
+  final_digest:                                                                                    \
+  .zero 32;
+
 #define RVTEST_DATA_END

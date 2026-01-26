@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define PICUS_U32_INPUT(ctx, x)                                                                    \
-  PICUS_INPUT(ctx, x);                                                                             \
-  RANGE_PRECONDITION(ctx, 0, x.low.get(), 0x10000);                                                \
-  RANGE_PRECONDITION(ctx, 0, x.high.get(), 0x10000)
+#define UNIT_BLOCK_INPUTS(ctx, arg)                                                                \
+  PICUS_INPUT(ctx, arg.opts);                                                                      \
+  PICUS_INPUT(ctx, arg.aLow);                                                                      \
+  PICUS_INPUT(ctx, arg.aHigh);                                                                     \
+  PICUS_INPUT(ctx, arg.bLow);                                                                      \
+  PICUS_INPUT(ctx, arg.bHigh)
 
-#define UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx)                                                          \
-  PICUS_INPUT(ctx, count);                                                                         \
-  PICUS_U32_INPUT(ctx, a);                                                                         \
-  PICUS_U32_INPUT(ctx, b)
+// Do we need do bound the value of arg.opts here? (< 18)
+#define UNIT_ARGUMENT(ctx, arg)                                                                    \
+  PICUS_ARGUMENT(ctx,                                                                              \
+                 ({ctx.get(arg.opts),                                                              \
+                   ctx.get(arg.aLow),                                                              \
+                   ctx.get(arg.aHigh),                                                             \
+                   ctx.get(arg.bLow),                                                              \
+                   ctx.get(arg.bHigh)}),                                                           \
+                 ({ctx.get(arg.out0Low),                                                           \
+                   ctx.get(arg.out0High),                                                          \
+                   ctx.get(arg.out1Low),                                                           \
+                   ctx.get(arg.out1High)}))
 
 template <typename C> FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness wit) DEV {
   count.set(ctx, wit.count);
@@ -32,10 +42,7 @@ template <typename C> FDEV void UnitAddSubBlock<C>::set(CTX, UnitAddSubWitness w
   out.set(ctx, wit.a, (opts.val ? ~wit.b : wit.b), opts.val);
 }
 
-template <typename C> FDEV void UnitAddSubBlock<C>::verify(CTX) DEV {
-  UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx);
-  PICUS_INPUT(ctx, doSub);
-}
+template <typename C> FDEV void UnitAddSubBlock<C>::verify(CTX) DEV {}
 
 template <typename C> FDEV void UnitAddSubBlock<C>::addArguments(CTX) DEV {
   UnitArgument<C> arg;
@@ -50,6 +57,8 @@ template <typename C> FDEV void UnitAddSubBlock<C>::addArguments(CTX) DEV {
   arg.out1Low = 0;
   arg.out1High = 0;
   ctx.addArgument(count.get(), arg);
+  PICUS_INPUT(ctx, count);
+  UNIT_BLOCK_INPUTS(ctx, arg);
 }
 
 template <typename C> FDEV void UnitBitBlock<C>::set(CTX, UnitBitWitness wit) DEV {
@@ -67,9 +76,6 @@ template <typename C> FDEV void UnitBitBlock<C>::set(CTX, UnitBitWitness wit) DE
 }
 
 template <typename C> FDEV void UnitBitBlock<C>::verify(CTX) DEV {
-  UNIT_BLOCK_PICUS_ASSUMPTIONS(ctx);
-  PICUS_INPUT(ctx, op);
-
   // Assert that aBits and bBits are bit decompositions of a and b. Also compute
   // the "recomposition" of aBits, bBits, and their product into shorts for use
   // in a moment.
@@ -124,6 +130,8 @@ template <typename C> FDEV void UnitBitBlock<C>::addArguments(CTX) DEV {
   arg.out1Low = 0;
   arg.out1High = 0;
   ctx.addArgument(count.get(), arg);
+  PICUS_INPUT(ctx, count);
+  UNIT_BLOCK_INPUTS(ctx, arg);
 }
 
 template <typename C> FDEV void UnitMulBlock<C>::set(CTX, UnitMulWitness wit) DEV {
@@ -149,22 +157,6 @@ template <typename C> FDEV void UnitMulBlock<C>::set(CTX, UnitMulWitness wit) DE
 }
 
 template <typename C> FDEV void UnitMulBlock<C>::verify(CTX) DEV {
-  PICUS_INPUT(ctx, count);
-  PICUS_INPUT(ctx, mul.signA);
-  PICUS_INPUT(ctx, mul.signB);
-
-  // Only the fields used in the argument are guaranteed to be determinstic. In
-  // particular, ExpandU32::topBit and ExpandU32::b3Low7times2 cannot be assumed.
-  // TODO: is there a more robust way to flag the correct fields?
-  PICUS_INPUT(ctx, mul.ax.b0);
-  PICUS_INPUT(ctx, mul.ax.b1);
-  PICUS_INPUT(ctx, mul.ax.b2);
-  PICUS_INPUT(ctx, mul.ax.b3);
-  PICUS_INPUT(ctx, mul.bx.b0);
-  PICUS_INPUT(ctx, mul.bx.b1);
-  PICUS_INPUT(ctx, mul.bx.b2);
-  PICUS_INPUT(ctx, mul.bx.b3);
-
   // Disallow signA = 0, sign B = 1
   EQZ((Val<C>(1) - mul.signA.get()) * mul.signB.get());
 }
@@ -182,6 +174,8 @@ template <typename C> FDEV void UnitMulBlock<C>::addArguments(CTX) DEV {
   arg.out1Low = mul.getOutHigh().low;
   arg.out1High = mul.getOutHigh().high;
   ctx.addArgument(count.get(), arg);
+  PICUS_INPUT(ctx, count);
+  UNIT_BLOCK_INPUTS(ctx, arg);
 }
 
 template <typename C> FDEV void UnitDivBlock<C>::set(CTX, UnitDivWitness wit) DEV {
@@ -225,11 +219,6 @@ template <typename C> FDEV void UnitDivBlock<C>::set(CTX, UnitDivWitness wit) DE
 }
 
 template <typename C> FDEV void UnitDivBlock<C>::verify(CTX) DEV {
-  PICUS_INPUT(ctx, count);
-  PICUS_INPUT(ctx, isSigned);
-  PICUS_U32_INPUT(ctx, numer.in);
-  PICUS_U32_INPUT(ctx, denom.in);
-
   /*
   LOG(0, std::hex);
   LOG(0, "isSigned = " << isSigned.get());
@@ -325,6 +314,8 @@ template <typename C> FDEV void UnitLtBlock<C>::addArguments(CTX) DEV {
   arg.out1Low = Val<C>(1) - diff.carryHigh.get();
   arg.out1High = 0;
   ctx.addArgument(count.get(), arg);
+  PICUS_INPUT(ctx, count);
+  UNIT_BLOCK_INPUTS(ctx, arg);
 }
 
 template <typename C> FDEV void UnitShiftBlock<C>::set(CTX, UnitShiftWitness wit) DEV {
@@ -402,6 +393,9 @@ template <typename C> FDEV void UnitShiftBlock<C>::addArguments(CTX) DEV {
   arg.out1Low = 0;
   arg.out1High = 0;
   ctx.addArgument(count.get(), arg);
+  PICUS_INPUT(ctx, count);
+  UNIT_BLOCK_INPUTS(ctx, arg);
+
   // Require multiplication or division
   arg.opts =
       opt.bits[0].get() * Val<C>(uint32_t(MUL_UU) * OptSize<UnitKind>::value + uint32_t(UNIT_MUL)) +
@@ -416,7 +410,8 @@ template <typename C> FDEV void UnitShiftBlock<C>::addArguments(CTX) DEV {
   arg.out1Low = out2.low.get();
   arg.out1High = out2.high.get();
   ctx.pull(arg);
+  UNIT_ARGUMENT(ctx, arg);
 }
 
-#undef UNIT_BLOCK_PICUS_ASSUMPTIONS
-#undef PICUS_U32_INPUT
+#undef UNIT_BLOCK_INPUTS
+#undef UNIT_ARGUMENT

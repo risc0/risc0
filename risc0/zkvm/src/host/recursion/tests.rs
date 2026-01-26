@@ -27,8 +27,8 @@ use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpe
 
 use super::{MerkleGroup, Prover, identity_p254, join, lift, prove::zkr};
 use crate::{
-    ALLOWED_CONTROL_ROOT, ExecutorEnv, InnerReceipt, Journal, MaybePruned, ProverOpts,
-    RECURSION_PO2, Receipt, ReceiptClaim, SegmentReceipt, Session, SimpleSegmentRef,
+    ALLOWED_CONTROL_ROOT, AssumptionReceipt, ExecutorEnv, InnerReceipt, Journal, MaybePruned,
+    ProverOpts, RECURSION_PO2, Receipt, ReceiptClaim, SegmentReceipt, Session, SimpleSegmentRef,
     SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext,
     claim::Unknown,
     default_prover, get_prover_server,
@@ -304,6 +304,14 @@ fn test_recursion_lift_resolve_e2e() {
         .build()
         .unwrap();
     let assumption_receipt_a = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
+    let assumption_receipt_a = Receipt::new(
+        InnerReceipt::Succinct(
+            prover
+                .composite_to_succinct(assumption_receipt_a.inner.composite().unwrap())
+                .unwrap(),
+        ),
+        assumption_receipt_a.journal.bytes.clone(),
+    );
     tracing::info!("Done proving: echo 'execution A'");
 
     tracing::info!("Proving: echo 'execution B'");
@@ -315,11 +323,21 @@ fn test_recursion_lift_resolve_e2e() {
         .build()
         .unwrap();
     let assumption_receipt_b = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
+    let assumption_receipt_b = Receipt::new(
+        InnerReceipt::Succinct(
+            prover
+                .composite_to_succinct(assumption_receipt_b.inner.composite().unwrap())
+                .unwrap(),
+        ),
+        assumption_receipt_b.journal.bytes.clone(),
+    );
     tracing::info!("Done proving: echo 'execution B'");
 
     let env = ExecutorEnv::builder()
-        .add_assumption(assumption_receipt_a.clone())
-        .add_assumption(assumption_receipt_b.clone())
+        .add_assumption(AssumptionReceipt::try_from(assumption_receipt_a).unwrap())
+        .unwrap()
+        .add_assumption(AssumptionReceipt::try_from(assumption_receipt_b).unwrap())
+        .unwrap()
         .write(&MultiTestSpec::SysVerify(vec![
             (MULTI_TEST_ID.into(), b"execution A".to_vec()),
             (MULTI_TEST_ID.into(), b"execution B".to_vec()),
@@ -467,7 +485,7 @@ mod povw {
 
         let povw_job_id: PovwJobId = rand::random();
         let env = ExecutorEnv::builder()
-            .add_assumption(assumption_receipt.claim.clone())
+            .add_assumption(assumption_receipt.claim.clone())?
             .write(&MultiTestSpec::SysVerify(vec![(
                 MULTI_TEST_ID.into(),
                 assumption_journal.bytes,
@@ -593,7 +611,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("4ec911509d6e5607f3bc083c61a2274824c71536ecffa208d02a472ffbde5b04")
+        digest!("b1f64013f70bbb386a8b3a3d63552c5cb5ea4a549ec7fb1ecc2a031dbf488167")
     );
 }
 

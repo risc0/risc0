@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 .equ GLOBAL_OUTPUT_ADDR, 0xffff0240
 .equ GLOBAL_INPUT_ADDR, 0xffff0260
 .equ ECALL_DISPATCH_ADDR, 0xffff1000
+.equ TRAP_DISPATCH, 0xffff2000
 .equ ECALL_TABLE_SIZE, 8
 .equ HOST_ECALL_TERMINATE, 0
 .equ HOST_ECALL_READ, 1
@@ -61,6 +62,11 @@ _start:
     la t1, _ecall_dispatch
     sw t1, 0(t0)
 
+    # Initialize the trap dispatch address
+    la a0, _trap_handler
+    li a1, TRAP_DISPATCH
+    sw a0, 0(a1)
+
     # Initialize useful constants
     li tp, USER_REGS_ADDR
     la s1, _ecall_table
@@ -87,6 +93,12 @@ _ecall_table:
     j _ecall_poseidon2
 
 _ecall_dispatch:
+    # Initialize useful constants again because we may have
+    # trashed them in the trap handler
+    li tp, USER_REGS_ADDR
+    la s1, _ecall_table
+    li s2, ECALL_TABLE_SIZE
+
     # load t0 from userspace
     lw a0, REG_T0 * WORD_SIZE (tp)
     # check that ecall request is within range
@@ -238,3 +250,9 @@ _ecall_bigint:
 
     # return back to userspace
     mret
+
+_trap_handler:
+    # Set the kernel stack pointer near the top of kernel memory
+    li sp, STACK_TOP
+
+    tail trap_handler

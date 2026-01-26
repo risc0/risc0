@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,6 +17,7 @@
 
 #include "rv32im/witness/mem.h"
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct ReadByteWitness {
   uint32_t cycle;
   uint32_t size;
@@ -24,6 +25,7 @@ struct ReadByteWitness {
   PhysMemWriteWitness io;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct ReadWordWitness {
   uint32_t cycle;
   uint32_t size;

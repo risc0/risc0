@@ -51,7 +51,7 @@ pub(crate) fn lift_m3(po2: usize, povw: bool) -> Result<(Program, Digest)> {
         } else {
             format!("lift_rv32im_m3_{po2}.zkr")
         };
-        let program = risc0_circuit_recursion::prove::zkr::get_zkr_m3(&name, po2, RECURSION_PO2)?;
+        let program = risc0_circuit_recursion::prove::zkr::get_zkr(&name, RECURSION_PO2)?;
         let control_id = POSEIDON2_CONTROL_IDS
             .iter()
             .copied()

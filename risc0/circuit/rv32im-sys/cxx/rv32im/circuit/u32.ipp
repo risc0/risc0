@@ -54,7 +54,9 @@ template <typename C> FDEV Val<C> AddressDecompose<C>::wordAddr(ValU32<C> val) D
 }
 
 template <typename C> FDEV void AddressDecompose<C>::verify(CTX, ValU32<C> val) DEV {
+  PICUS_BEGIN_OUTLINE(val.low, val.high)
   EQ(mid14.get() * 4 + low1.get() * 2 + low0.get(), val.low);
+  PICUS_END_OUTLINE
 }
 
 template <typename C> FDEV void AddressVerify<C>::set(CTX, uint32_t val, uint32_t mode) DEV {
@@ -63,8 +65,14 @@ template <typename C> FDEV void AddressVerify<C>::set(CTX, uint32_t val, uint32_
 }
 
 template <typename C> FDEV void AddressVerify<C>::verify(CTX, ValU32<C> val, Val<C> mode) DEV {
+  // High addresses are reserved for machine mode. We check this by comparing
+  // the top half of the address against the highest usable address in the
+  // current mode.
   Val<C> isMM = mode * Val<C>(inv(Fp(MODE_MACHINE)));
   Val<C> topAddr = cond<C>(isMM, 0xffff, 0xbfff);
+
+  // highSub stores a 16 bit value, so topAddr - val.high must not underflow. In
+  // other words, val.high <= topAddr.
   EQ(topAddr - val.high, highSub.get());
 }
 
@@ -74,7 +82,9 @@ template <typename C> FDEV void GetSign<C>::set(CTX, uint32_t val) DEV {
 }
 
 template <typename C> FDEV void GetSign<C>::verify(CTX, Val<C> inHigh) DEV {
+  PICUS_BEGIN_OUTLINE(inHigh)
   EQ(inHigh, signVerify.get() * inv(Fp(2)) + sign.get() * 0x8000);
+  PICUS_END_OUTLINE
 }
 
 template <typename C> FDEV void NegU32<C>::set(CTX, uint32_t val, uint32_t neg) DEV {
