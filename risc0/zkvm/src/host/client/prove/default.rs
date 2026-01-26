@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -35,7 +35,7 @@ use crate::{
 
 use super::{Executor, Prover, ProverOpts};
 
-/// TODO
+/// A prover implementation that manages a local `r0vm` process for proof generation.
 pub struct DefaultProver {
     child: Child,
     socket: UnixStream,
@@ -61,7 +61,7 @@ impl DefaultProver {
         Ok(Self { child, socket })
     }
 
-    /// TODO
+    /// Stops the `r0vm` prover process and waits for it to terminate.
     pub fn stop(&mut self) -> Result<()> {
         self.socket.shutdown(std::net::Shutdown::Both)?;
         self.child.wait()?;

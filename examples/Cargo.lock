@@ -1902,6 +1902,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "filetime"
+version = "0.2.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f98844151eee8917efc50bd9e8318cb963ae8b297431495d3f758616ea5c57db"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "libredox",
+]
+
+[[package]]
 name = "find_cuda_helper"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2958,6 +2969,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0791ab7e08ccc8e0ce893f6906eb2703ed8739d8e89b57c0714e71bad09024c8"
 dependencies = [
  "liblzma-sys",
+ "num_cpus",
 ]
 
 [[package]]
@@ -2985,6 +2997,7 @@ checksum = "c0ff37bd590ca25063e35af745c343cb7a0271906fb7b37e4813e8f79f00268d"
 dependencies = [
  "bitflags 2.9.0",
  "libc",
+ "redox_syscall",
 ]
 
 [[package]]
@@ -3413,6 +3426,7 @@ version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77e878c846a8abae00dd069496dbe8751b16ac1c3d6bd2a7283a938e8228f90d"
 dependencies = [
+ "proc-macro-crate",
  "proc-macro2",
  "quote",
  "syn 2.0.99",
@@ -3620,6 +3634,49 @@ dependencies = [
 ]
 
 [[package]]
+name = "phf"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1562dc717473dbaa4c1f85a36410e03c047b2e7df7f45ee938fbef64ae7fadf"
+dependencies = [
+ "phf_macros",
+ "phf_shared",
+ "serde",
+]
+
+[[package]]
+name = "phf_generator"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "135ace3a761e564ec88c03a77317a7c6b80bb7f7135ef2544dbe054243b89737"
+dependencies = [
+ "fastrand",
+ "phf_shared",
+]
+
+[[package]]
+name = "phf_macros"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "812f032b54b1e759ccd5f8b6677695d5268c588701effba24601f6932f8269ef"
+dependencies = [
+ "phf_generator",
+ "phf_shared",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.99",
+]
+
+[[package]]
+name = "phf_shared"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e57fef6bc5981e38c2ce2d63bfa546861309f875b8a75f092d1d54ae2d64f266"
+dependencies = [
+ "siphasher",
+]
+
+[[package]]
 name = "pin-project-lite"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3743,9 +3800,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.94"
+version = "1.0.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a31971752e70b8b2686d7e46ec17fb38dad4051d94024c88df49b667caea9c84"
+checksum = "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934"
 dependencies = [
  "unicode-ident",
 ]
@@ -4261,7 +4318,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -4284,7 +4341,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "2.0.2"
+version = "5.0.0"
 dependencies = [
  "cc",
  "directories",
@@ -4341,9 +4398,12 @@ dependencies = [
  "lazy-regex",
  "liblzma",
  "metal",
+ "phf",
  "rand 0.9.1",
  "rayon",
+ "risc0-circuit-recursion-povw-zkrs",
  "risc0-circuit-recursion-sys",
+ "risc0-circuit-recursion-zkrs",
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
@@ -4351,6 +4411,15 @@ dependencies = [
  "sha2",
  "tracing",
  "zip",
+]
+
+[[package]]
+name = "risc0-circuit-recursion-povw-zkrs"
+version = "5.0.0"
+dependencies = [
+ "liblzma",
+ "phf",
+ "tar",
 ]
 
 [[package]]
@@ -4366,6 +4435,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-recursion-zkrs"
+version = "5.0.0"
+dependencies = [
+ "liblzma",
+ "phf",
+ "tar",
+]
+
+[[package]]
 name = "risc0-circuit-rv32im"
 version = "5.0.0"
 dependencies = [
@@ -4378,11 +4456,15 @@ dependencies = [
  "enum-map",
  "gdbstub",
  "gdbstub_arch",
+ "heck",
  "malachite",
  "num-derive",
  "num-traits",
+ "num_enum",
  "paste",
  "postcard",
+ "proc-macro2",
+ "quote",
  "rand 0.9.1",
  "rayon",
  "ringbuffer",
@@ -4394,6 +4476,8 @@ dependencies = [
  "risc0-zkvm-platform",
  "serde",
  "smallvec",
+ "strum",
+ "syn 2.0.99",
  "thiserror 2.0.17",
  "tracing",
  "wide",
@@ -4404,13 +4488,20 @@ name = "risc0-circuit-rv32im-sys"
 version = "5.0.0"
 dependencies = [
  "anyhow",
+ "bindgen",
+ "bytemuck",
  "cc",
+ "derive_more",
  "enum-map",
  "glob",
+ "quote",
  "regex",
  "risc0-build-kernel",
  "risc0-sppark",
  "risc0-sys",
+ "risc0-zkp",
+ "serde",
+ "strum",
  "tracing",
 ]
 
@@ -4455,7 +4546,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16-sys"
-version = "0.2.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "blst",
@@ -4486,7 +4577,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sppark"
-version = "0.1.14"
+version = "5.0.0"
 dependencies = [
  "cc",
 ]
@@ -4503,11 +4594,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-common"
+version = "5.0.0"
+dependencies = [
+ "risc0-zkvm-platform",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
-version = "2.2.2"
+version = "5.0.0"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
+ "risc0-zkos-common",
  "risc0-zkvm-platform",
  "sha2",
 ]
@@ -4545,7 +4644,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -4594,7 +4693,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.3.0"
+version = "5.0.0"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -5161,6 +5260,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
 
 [[package]]
+name = "siphasher"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "56199f7ddabf13fe5074ce809e7d3f42b42ae711800501b5b16ea82ad029c39d"
+
+[[package]]
 name = "slab"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5352,6 +5457,17 @@ name = "tap"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
+
+[[package]]
+name = "tar"
+version = "0.4.44"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d863878d212c87a19c1a610eb53bb01fe12951c0501cf5a0d65f724914a667a"
+dependencies = [
+ "filetime",
+ "libc",
+ "xattr",
+]
 
 [[package]]
 name = "tempfile"
@@ -6330,6 +6446,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05f360fc0b24296329c78fda852a1e9ae82de9cf7b27dae4b7f62f118f77b9ed"
 dependencies = [
  "tap",
+]
+
+[[package]]
+name = "xattr"
+version = "1.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32e45ad4206f6d2479085147f02bc2ef834ac85886624a23575ae137c8aa8156"
+dependencies = [
+ "libc",
+ "rustix",
 ]
 
 [[package]]

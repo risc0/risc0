@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,6 +17,7 @@
 
 #include "rv32im/base/poseidon2.h"
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct P2BlockWitness {
   uint32_t id;
   uint32_t outUseCount;
@@ -25,12 +26,14 @@ struct P2BlockWitness {
   FpCells out;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct P2ExtRoundWitness {
   uint32_t id;
   uint32_t round;
   FpCells cells;
 };
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct P2IntRoundsWitness {
   uint32_t id;
   FpCells cells;

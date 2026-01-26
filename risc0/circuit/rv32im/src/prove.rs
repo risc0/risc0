@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,130 +13,30 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+mod preflight;
+
+/// The old preflight implementation
+#[allow(dead_code)]
+mod preflight_cxx;
+
+/// Use this if you want to run both and compare.
+#[allow(dead_code)]
+mod preflight_dual;
+
 use std::ptr::NonNull;
 
-use crate::execute::Segment;
 use anyhow::Result;
 use cfg_if::cfg_if;
 use risc0_circuit_rv32im_sys::*;
-use risc0_zkp::{core::digest::DIGEST_WORDS, field::baby_bear::Elem};
+
+pub use preflight::{PreflightContext, SegmentContext};
 
 use crate::verify::verify;
 
 pub type Seal = Vec<u32>;
 
-pub struct SegmentContext {
-    ctx: NonNull<risc0_circuit_rv32im_sys::SegmentContext>,
-}
-
-/// Safety: A [PreflightContext] is an immutable object that can be safely
-/// passed between threads.
-#[derive(Default)]
-pub struct PreflightContext {
-    ctx: *const risc0_circuit_rv32im_sys::PreflightContext,
-    po2: u32,
-}
-
-unsafe impl Send for PreflightContext {}
-
 pub struct ProverContext {
     ctx: NonNull<risc0_circuit_rv32im_sys::ProverContext>,
-}
-
-impl SegmentContext {
-    pub fn new(segment: &Segment) -> Result<Self> {
-        tracing::debug!("load_segment: {segment:#?}",);
-
-        let mut pages: Vec<RawPage> = Vec::with_capacity(segment.partial_image.pages.len());
-        for (&addr, page) in segment.partial_image.pages.iter() {
-            let slice: &[u32] = bytemuck::cast_slice(page.data().as_slice());
-            pages.push(RawPage {
-                addr,
-                data: slice.as_ptr(),
-            });
-        }
-
-        // NOTE: If the memory image digests are not computed by this point, they will be here.
-        let mut digests: Vec<RawDigestEntry> = Vec::new();
-        let mut memory_image = segment.partial_image.clone();
-        for (&idx, &digest) in memory_image.digests() {
-            let mut words = [0; DIGEST_WORDS];
-            for (i, word) in words.iter_mut().enumerate() {
-                *word = Elem::new(digest.as_words()[i]).as_u32_montgomery();
-            }
-            digests.push(RawDigestEntry { idx, digest: words })
-        }
-
-        let image = RawMemoryImage {
-            pages: RawSlice {
-                ptr: pages.as_ptr(),
-                len: pages.len(),
-            },
-            digests: RawSlice {
-                ptr: digests.as_ptr(),
-                len: digests.len(),
-            },
-        };
-
-        let mut reads: Vec<RawSlice<u8>> = Vec::with_capacity(segment.read_record.len());
-        for record in segment.read_record.iter() {
-            reads.push(RawSlice {
-                ptr: record.as_ptr(),
-                len: record.len(),
-            });
-        }
-
-        let raw_segment = RawSegment {
-            image,
-            reads: RawSlice {
-                ptr: reads.as_ptr(),
-                len: reads.len(),
-            },
-            writes: RawSlice {
-                ptr: segment.write_record.as_ptr(),
-                len: segment.write_record.len(),
-            },
-            insn_counter: segment.insn_counter,
-        };
-
-        let ctx =
-            ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_m3_segment_new(&raw_segment) })?;
-
-        Ok(Self { ctx })
-    }
-
-    pub fn preflight(&self, po2: usize) -> Result<PreflightContext> {
-        tracing::debug!("preflight");
-        let ctx = ffi_wrap_ptr(|| unsafe {
-            risc0_circuit_rv32im_m3_segment_preflight(self.ctx.as_ptr(), po2)
-        })?;
-        Ok(PreflightContext {
-            ctx,
-            po2: po2 as u32,
-        })
-    }
-}
-
-impl Drop for SegmentContext {
-    fn drop(&mut self) {
-        unsafe { risc0_circuit_rv32im_m3_segment_free(self.ctx.as_ptr()) };
-    }
-}
-
-impl PreflightContext {
-    pub fn is_final(&self) -> bool {
-        unsafe { risc0_circuit_rv32im_m3_preflight_is_final(self.ctx) == 1 }
-    }
-
-    pub fn po2(&self) -> u32 {
-        self.po2
-    }
-}
-
-impl Drop for PreflightContext {
-    fn drop(&mut self) {
-        unsafe { risc0_circuit_rv32im_m3_preflight_free(self.ctx) };
-    }
 }
 
 impl ProverContext {
@@ -155,7 +55,13 @@ impl ProverContext {
     pub fn prove(&self, preflight: &PreflightContext) -> Result<Seal> {
         tracing::debug!("prove");
         ffi_wrap_void(|| unsafe {
-            risc0_circuit_rv32im_m3_prove(self.ctx.as_ptr(), preflight.ctx)
+            risc0_circuit_rv32im_m3_prove(
+                self.ctx.as_ptr(),
+                preflight.row_info.as_ptr(),
+                preflight.row_info.len(),
+                preflight.aux.as_ptr(),
+                preflight.aux.len(),
+            )
         })?;
 
         let transcript = self.transcript()?;
@@ -196,6 +102,7 @@ mod tests {
     use crate::execute::{
         ExecutionLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, SegmentUpdate, Syscall, SyscallContext,
     };
+    use paste::paste;
     use risc0_binfmt::{MemoryImage, Program};
 
     use super::*;
@@ -311,10 +218,12 @@ mod tests {
 
     macro_rules! test_case {
         ($func_name:ident) => {
-            #[test_log::test]
-            #[gpu_guard::gpu_guard]
-            fn $func_name() {
-                run_test(stringify!($func_name), DEFAULT_PO2);
+            paste! {
+                #[test_log::test]
+                #[gpu_guard::gpu_guard]
+                fn $func_name() {
+                    run_test(stringify!($func_name), DEFAULT_PO2);
+                }
             }
         };
     }

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -165,6 +165,11 @@ impl PreflightResults {
     /// The po2
     pub fn po2(&self) -> u32 {
         self.inner.po2()
+    }
+
+    /// The counts of the different blocks used during preflight
+    pub fn block_counts(&self) -> enum_map::EnumMap<risc0_circuit_rv32im::BlockType, u32> {
+        self.inner.block_counts()
     }
 }
 

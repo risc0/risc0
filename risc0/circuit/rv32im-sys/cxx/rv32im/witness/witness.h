@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -27,6 +27,7 @@
 #include "rv32im/witness/poseidon2.h"
 #include "rv32im/witness/units.h"
 
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct EmptyWitness {
   // Empty
 };
@@ -60,6 +61,7 @@ struct Globals {
   OutU32 termA0;
   OutU32 termA1;
   OutU32 out[8];
+  OutU32 povwNonce[8];
   Fp v2Compat;
 };
 

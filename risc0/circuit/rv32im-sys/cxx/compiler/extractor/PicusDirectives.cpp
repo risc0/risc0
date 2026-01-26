@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -14,13 +14,14 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #include "compiler/extractor/PicusDirectives.h"
+#include "compiler/extractor/RecordingVal.h"
 #include "zirgen/Dialect/ZHLT/IR/TypeUtils.h"
 
 using namespace mlir;
 
-void PicusDeclareInputVisitor::apply(RecordingContext& ctx, RecordingReg& x) {
+void PicusDeclareInputVisitor::apply(RecordingContext& ctx, RecordingVal& x) {
   OpBuilder& builder = *BuilderSingleton::get();
-  SmallVector<Value> args = {x.val.value};
+  SmallVector<Value> args = {x.value};
   builder.create<zirgen::Zhlt::DirectiveOp>(builder.getUnknownLoc(), "PicusInput", args);
 }
 
@@ -52,4 +53,17 @@ void picusCall(RecordingContext& ctx,
   }
   builder.create<zirgen::Zhlt::ConstructOp>(
       builder.getUnknownLoc(), name, compType, arguments, layout);
+}
+
+void picusArgument(RecordingContext& ctx,
+                   llvm::ArrayRef<Value> inputs,
+                   llvm::ArrayRef<Value> outputs) {
+  OpBuilder& builder = *BuilderSingleton::get();
+  Location loc = builder.getUnknownLoc();
+
+  llvm::SmallVector<mlir::Value> operands;
+  operands.append(inputs.begin(), inputs.end());
+  operands.append(outputs.begin(), outputs.end());
+  auto dir = builder.create<zirgen::Zhlt::DirectiveOp>(loc, "PicusDeterministicIf", operands);
+  dir->setAttr("input_count", builder.getUI32IntegerAttr(inputs.size()));
 }

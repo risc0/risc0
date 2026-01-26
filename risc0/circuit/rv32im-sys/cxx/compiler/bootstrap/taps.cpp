@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -14,12 +14,12 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #include "core/log.h"
-#include "verify/rv32im.h"
+#include "verify/info/rv32im.h"
 
 #include <fstream>
 #include <string>
 
-static std::string prefix = R"***(// Copyright 2025 RISC Zero, Inc.
+static std::string prefix = R"***(// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
