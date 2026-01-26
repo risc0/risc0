@@ -17,7 +17,7 @@ use std::{collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, me
 
 use metal::{
     Buffer as MetalBuffer, CommandQueue, ComputeCommandEncoderRef, ComputePipelineDescriptor,
-    Device, MTLArgumentBuffersTier, MTLResourceOptions, MTLSize,
+    Device, MTLArgumentBuffersTier, MTLResourceOptions, MTLResourceUsage, MTLSize, ResourceRef,
 };
 use rayon::prelude::*;
 use risc0_core::{
@@ -292,10 +292,6 @@ impl<T> BufferImpl<T> {
     //     cmd_buffer.wait_until_completed();
     // }
 
-    pub fn as_device_ptr(&self) -> *mut c_void {
-        self.buffer.0.gpu_address() as *mut c_void
-    }
-
     pub fn as_ptr(&self) -> *mut c_void {
         self.buffer.0.contents()
     }
@@ -477,58 +473,6 @@ impl<MH: MetalHash> MetalHal<MH> {
 
         cmd_buffer.commit();
         cmd_buffer.wait_until_completed();
-    }
-
-    /// XXX remi: This has problems and I don't know why
-    #[expect(dead_code)]
-    #[allow(clippy::too_many_arguments)]
-    fn fri_prove_gpu(
-        &self,
-        out_values: &<Self as Hal>::Buffer<u32>,
-        values_column_width: usize,
-        out_digests: &<Self as Hal>::Buffer<u32>,
-        digests_column_width: usize,
-        positions: &<Self as Hal>::Buffer<u32>,
-        trees: &[&MerkleTreeProver<Self>],
-        groups: &<Self as Hal>::Buffer<u32>,
-    ) {
-        let trees_buffer = BufferImpl::<MetalMerkleTreeProver>::copy_from(
-            "fri_prove_trees",
-            &self.device,
-            self.cmd_queue.clone(),
-            &trees
-                .iter()
-                .map(|t| t.to_metal_prover())
-                .collect::<Vec<_>>(),
-        );
-
-        let args = &[
-            out_values.as_arg(),
-            KernelArg::USize(values_column_width),
-            positions.as_arg(),
-            KernelArg::USize(positions.size()),
-            trees_buffer.as_arg(),
-            KernelArg::USize(trees.len()),
-            groups.as_arg(),
-        ];
-
-        // XXX remi: It would be faster to run the two kernels in parallel.
-
-        let count = trees.len() * positions.size() * values_column_width;
-        self.dispatch_by_name("fri_prove_values", args, count as u64);
-
-        let args = &[
-            out_digests.as_arg(),
-            KernelArg::USize(digests_column_width),
-            out_digests.as_arg(),
-            KernelArg::USize(positions.size()),
-            trees_buffer.as_arg(),
-            KernelArg::USize(trees.len()),
-            groups.as_arg(),
-        ];
-
-        let count = trees.len() * positions.size() * digests_column_width;
-        self.dispatch_by_name("fri_prove_digests", args, count as u64);
     }
 }
 
@@ -932,80 +876,89 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
 
     fn fri_prove(
         &self,
-        out_values: &Self::Buffer<u32>,
+        out_values: &<Self as Hal>::Buffer<u32>,
         values_column_width: usize,
-        out_digests: &Self::Buffer<u32>,
+        out_digests: &<Self as Hal>::Buffer<u32>,
         digests_column_width: usize,
-        positions: &Self::Buffer<u32>,
+        positions: &<Self as Hal>::Buffer<u32>,
         trees: &[&MerkleTreeProver<Self>],
-        groups: &Self::Buffer<u32>,
+        groups: &<Self as Hal>::Buffer<u32>,
     ) {
-        assert_eq!(trees.len(), groups.size());
-
-        assert_eq!(
-            out_values.size() / values_column_width,
-            positions.size() * trees.len()
-        );
-        assert_eq!(
-            out_digests.size() / digests_column_width,
-            positions.size() * trees.len()
+        let trees_buffer = BufferImpl::<MetalMerkleTreeProver>::new(
+            "fri_prove_trees",
+            &self.device,
+            self.cmd_queue.clone(),
+            trees.len(),
         );
 
-        out_values.view_mut(|out_values| {
-            out_digests.view_mut(|out_digests| {
-                positions.view(|positions| {
-                    groups.view(|groups| {
-                        assert_eq!(trees.len(), groups.len());
+        let mut index = 0;
+        let arg_descriptors: Vec<_> = trees
+            .iter()
+            .flat_map(|tree| {
+                let d = tree.to_metal_arg_descriptor(index);
+                index += d.len() as u64;
+                d
+            })
+            .collect();
+        let arg_descriptors_array = metal::Array::from_slice(&arg_descriptors);
+        let argument_encoder = self.device.new_argument_encoder(arg_descriptors_array);
+        argument_encoder.set_argument_buffer(&trees_buffer.as_buf(), 0);
 
-                        let mut out_values_iter = out_values.chunks_mut(values_column_width);
-                        let mut out_digests_iter = out_digests.chunks_mut(digests_column_width);
+        let mut resources: Vec<&ResourceRef> = vec![];
+        let mut index = 0;
+        for tree in trees {
+            for arg in tree.to_metal_arg() {
+                match arg {
+                    KernelArg::Buffer { buffer, offset } => {
+                        resources.push(&**buffer);
+                        argument_encoder.set_buffer(index, buffer, offset);
+                    }
+                    KernelArg::U32(value) => unsafe {
+                        (argument_encoder.constant_data(index) as *mut u32).write(value)
+                    },
+                    KernelArg::USize(value) => unsafe {
+                        (argument_encoder.constant_data(index) as *mut usize).write(value)
+                    },
+                    KernelArg::Null => unimplemented!(),
+                }
+                index += 1;
+            }
+        }
 
-                        std::thread::scope(|scope| {
-                            for pos in positions {
-                                for (tree, group) in trees.iter().zip(groups.iter()) {
-                                    let out_values = out_values_iter.next().unwrap();
-                                    let out_digests = out_digests_iter.next().unwrap();
+        let args = &[
+            out_values.as_arg(),
+            KernelArg::USize(values_column_width),
+            positions.as_arg(),
+            KernelArg::USize(positions.size()),
+            trees_buffer.as_arg(),
+            KernelArg::USize(trees.len()),
+            groups.as_arg(),
+        ];
 
-                                    scope.spawn(move || {
-                                        fri_prove_values(tree, *pos, *group, out_values);
-                                    });
-                                    scope.spawn(move || {
-                                        fri_prove_digests(tree, *pos, *group, out_digests);
-                                    });
-                                }
-                            }
-                        });
-                    });
-                });
-            });
+        // XXX remi: It would be faster to run the two kernels in parallel.
+
+        let count = trees.len() * positions.size() * values_column_width;
+        let kernel = self.kernels.get("fri_prove_values").unwrap();
+        self.dispatch_with_resources(kernel, args, count as u64, None, |cmd_encoder| {
+            cmd_encoder.use_resources(&resources[..], MTLResourceUsage::Read);
+        });
+
+        let args = &[
+            out_digests.as_arg(),
+            KernelArg::USize(digests_column_width),
+            positions.as_arg(),
+            KernelArg::USize(positions.size()),
+            trees_buffer.as_arg(),
+            KernelArg::USize(trees.len()),
+            groups.as_arg(),
+        ];
+
+        let count = trees.len() * positions.size() * digests_column_width;
+        let kernel = self.kernels.get("fri_prove_digests").unwrap();
+        self.dispatch_with_resources(kernel, args, count as u64, None, |cmd_encoder| {
+            cmd_encoder.use_resources(&resources[..], MTLResourceUsage::Read);
         });
     }
-}
-
-fn fri_prove_values<MH: MetalHash>(
-    tree: &MerkleTreeProver<MetalHal<MH>>,
-    pos: u32,
-    group: u32,
-    out_values: &mut [u32],
-) {
-    let values_out = tree.get_column((pos % group) as usize);
-
-    let values_slice: &[u32] = bytemuck::cast_slice(values_out.as_slice());
-    out_values[0] = values_slice.len().try_into().unwrap();
-    out_values[1..(values_slice.len() + 1)].copy_from_slice(values_slice);
-}
-
-fn fri_prove_digests<MH: MetalHash>(
-    tree: &MerkleTreeProver<MetalHal<MH>>,
-    pos: u32,
-    group: u32,
-    out_digests: &mut [u32],
-) {
-    let digests_out = tree.get_digests((pos % group) as usize);
-
-    let digests_slice: &[u32] = bytemuck::cast_slice(digests_out.as_slice());
-    out_digests[0] = digests_slice.len().try_into().unwrap();
-    out_digests[1..(digests_slice.len() + 1)].copy_from_slice(digests_slice);
 }
 
 #[repr(C)]
