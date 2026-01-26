@@ -29,6 +29,7 @@ use crate::{
     ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
     SimpleSegmentRef, SuccinctReceiptVerifierParameters, VerifierContext,
     host::server::{exec::executor::ExecutorImpl, testutils},
+    recursion::prove::zkr,
     serde::{from_slice, to_vec},
     sha::Digestible,
 };
@@ -707,6 +708,27 @@ fn verify_in_guest(#[case] kind: ReceiptKind) {
         .unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     println!("{:?}", session.stats());
+}
+
+#[test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+fn succinct_receipt_binds_control_id() {
+    let mut receipt = prove_nothing_succinct().receipt;
+    let InnerReceipt::Succinct(ref mut succinct_receipt) = receipt.inner else {
+        panic!("what?!")
+    };
+    // Get the control ID for an allowed ZKR, but not the right one.
+    succinct_receipt.control_id = zkr::resolve_unwrap_povw(&succinct_receipt.hashfn)
+        .unwrap()
+        .1;
+    let err = receipt
+        .verify_integrity_with_context(&VerifierContext::default())
+        .unwrap_err();
+
+    assert!(matches!(
+        err,
+        VerificationError::ControlVerificationError { .. }
+    ));
 }
 
 fn hello_commit_receipt() -> &'static Receipt {
