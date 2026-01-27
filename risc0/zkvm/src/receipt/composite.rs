@@ -193,7 +193,7 @@ impl CompositeReceipt {
 
     fn assumptions(&self) -> Result<Vec<Assumption>, VerificationError> {
         // Collect the assumptions from the output of the last segment, handling any pruned values
-        // encountered and returning and empty list if the output is None.
+        // encountered and returning an empty list if the output is None.
         Ok(self
             .segments
             .last()
@@ -239,7 +239,7 @@ impl CompositeReceipt {
 /// Verifier parameters for [CompositeReceipt][super::CompositeReceipt].
 ///
 /// [CompositeReceipt][super::CompositeReceipt] is a collection of individual receipts that
-/// collectively  prove a claim. It can contain any of the individual receipt types, and so it's
+/// collectively prove a claim. It can contain any of the individual receipt types, and so its
 /// verifier is a combination of the verifiers for every other receipt type.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -274,7 +274,7 @@ impl CompositeReceiptVerifierParameters {
 }
 
 impl Digestible for CompositeReceiptVerifierParameters {
-    /// Hash the [Groth16ReceiptVerifierParameters] to get a digest of the struct.
+    /// Hash the [CompositeReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
             "risc0.CompositeReceiptVerifierParameters",
