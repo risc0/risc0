@@ -67,6 +67,8 @@ template <typename C> struct BigIntBlock {
     T::apply(ctx, "wordBase", wordBase, computeAddr.get());
     T::apply(ctx, "checkBase", checkBase, computeAddr.get(), mm.get() * Val<C>(MODE_MACHINE));
     T::apply(ctx, "bytes", bytes);
+    T::apply(ctx, "prevCycle", prevCycle);
+    T::apply(ctx, "prevValue", prevValue);
   }
 
   FDEV Val<C> getCoeff() DEV {

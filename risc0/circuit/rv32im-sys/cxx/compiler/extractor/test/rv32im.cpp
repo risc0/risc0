@@ -52,6 +52,7 @@ int main() {
   EXTRACT(EcallBigIntBlock);
   EXTRACT(ReadByteBlock);
   EXTRACT(ReadWordBlock);
+  EXTRACT(BigIntBlock); // Only verifies with Z3 solver
   EXTRACT(UnitAddSubBlock);
   EXTRACT(UnitBitBlock);
   EXTRACT(UnitLtBlock);
