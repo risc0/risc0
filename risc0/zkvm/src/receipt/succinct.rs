@@ -142,9 +142,15 @@ impl<Claim> SuccinctReceipt<Claim> {
             .get(&self.hashfn)
             .ok_or(VerificationError::InvalidHashSuite)?;
 
-        let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
+        let check_code = |_, &control_id: &Digest| -> Result<(), VerificationError> {
+            // Ensure that the control_id decoded from the seal matches the one in the
+            // SuccinctReceipt metadata.
+            if control_id != self.control_id {
+                return Err(VerificationError::ControlVerificationError { control_id });
+            }
+
             self.control_inclusion_proof
-                .verify(control_id, &params.control_root, suite.hashfn.as_ref())
+                .verify(&control_id, &params.control_root, suite.hashfn.as_ref())
                 .map_err(|_| {
                     tracing::debug!(
                         "failed to verify control inclusion proof for {control_id} against root {} with {}",
@@ -152,7 +158,7 @@ impl<Claim> SuccinctReceipt<Claim> {
                         suite.name,
                     );
                     VerificationError::ControlVerificationError {
-                        control_id: *control_id,
+                        control_id
                     }
                 })
         };
