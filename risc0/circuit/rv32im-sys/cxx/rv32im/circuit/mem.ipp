@@ -22,6 +22,13 @@ FDEV void PhysMemReadBlock<C>::set(CTX, PhysMemReadWitness wit, uint32_t cycle) 
   ctx.tableAdd(256 + 65536 + cycleDiff - 1, 1);
 }
 
+template <typename C> FDEV void PhysMemReadBlock<C>::verify(CTX, Val<C> cycle) DEV {
+  PICUS_INPUT(ctx, prevCycle);
+  RANGE_PRECONDITION(ctx, 0, data.get().low, (1 << 16));
+  RANGE_PRECONDITION(ctx, 0, data.get().high, (1 << 16));
+  PICUS_INPUT(ctx, data);
+}
+
 template <typename C> FDEV void PhysMemReadBlock<C>::addArguments(CTX, Val<C> cycle) DEV {
   ctx.pull(MemoryArgument<C>(wordAddr.get(), prevCycle.get(), data.low.get(), data.high.get()));
   ctx.push(MemoryArgument<C>(wordAddr.get(), cycle * 2, data.low.get(), data.high.get()));
