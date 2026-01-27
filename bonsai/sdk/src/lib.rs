@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #![deny(missing_docs)]
-#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 //! A library to handle HTTP REST requests to the Bonsai-alpha prover interface
 //!

@@ -15,7 +15,7 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
-use std::{collections::BTreeSet, fs, path::PathBuf};
+use std::{fs, path::PathBuf};
 
 use anyhow::{ensure, Context, Result};
 use enum_map::EnumMap;
@@ -36,12 +36,6 @@ use crate::{
 };
 
 use super::exec::syscall::{SyscallKind, SyscallMetric};
-
-#[derive(Clone, Default, Serialize, Deserialize, Debug)]
-pub struct PageFaults {
-    pub(crate) reads: BTreeSet<u32>,
-    pub(crate) writes: BTreeSet<u32>,
-}
 
 /// The execution trace of a program.
 ///
