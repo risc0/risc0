@@ -551,7 +551,7 @@ macro_rules! ensure_poseidon2 {
 
 impl Prover {
     pub(crate) fn new(program: Program, control_id: Digest, opts: ProverOpts) -> Self {
-        #[cfg(all(test, feature = "cuda"))]
+        #[cfg(all(test, gpu_accel))]
         gpu_guard::assert_gpu_semaphore_held();
 
         Self {

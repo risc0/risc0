@@ -13,19 +13,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::env;
-
 fn main() {
     let prove = std::env::var("CARGO_FEATURE_PROVE").is_ok();
+    let cuda = std::env::var("CARGO_FEATURE_CUDA").is_ok();
     let metal = (std::env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos")
         && std::env::var("CARGO_CFG_TARGET_ARCH").is_ok_and(|arch| arch == "aarch64"))
         || std::env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "ios");
 
-    if prove && metal {
-        println!(
-            "cargo:rustc-env=RECURSION_METAL_PATH={}",
-            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_METAL_KERNEL")
-                .expect("on macos risc0-circuit-recursion-sys should build metal kernels")
-        );
+    println!("cargo::rustc-check-cfg=cfg(gpu_accel)");
+    if prove && (cuda || metal) {
+        println!("cargo::rustc-cfg=gpu_accel");
     }
 }
