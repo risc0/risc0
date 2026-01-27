@@ -18,7 +18,9 @@ use std::{fs, io, io::Write, path::PathBuf, process::Stdio};
 use anyhow::{Context, Result, anyhow, bail, ensure};
 use cargo_metadata::{Artifact, ArtifactProfile, Message};
 use clap::{Args, Subcommand};
+use risc0_binfmt::ProgramBinary;
 use risc0_build::cargo_command;
+use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkvm::{ExecutorEnv, ExitCode, default_executor};
 use tempfile::{TempDir, tempdir};
 
@@ -221,8 +223,13 @@ impl GuestCommand {
 
                 let env = builder.build()?;
 
+                // Read the test ELF and join it with the V1COMPAT kernel.
+                let elf = fs::read(&test)
+                    .with_context(|| format!("Failed to read test binary at: {test}"))?;
+                let bin = ProgramBinary::new(&elf, V1COMPAT_ELF).encode();
+
                 let exec = default_executor();
-                let session = exec.execute(env, &fs::read(test)?)?;
+                let session = exec.execute(env, &bin)?;
                 ensure!(
                     session.exit_code == ExitCode::Halted(0),
                     "test exited with code {:?}",
