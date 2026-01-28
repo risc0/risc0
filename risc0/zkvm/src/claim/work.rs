@@ -57,7 +57,7 @@ impl<Claim> Digestible for WorkClaim<Claim>
 where
     Claim: Digestible,
 {
-    /// Hash the [ReceiptClaim] to get a digest of the struct.
+    /// Hash the [WorkClaim] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
             "risc0.WorkClaim",
@@ -230,7 +230,7 @@ fn decode_work_value_from_seal(buf: &mut VecDeque<u32>) -> Result<u64, risc0_bin
 }
 
 impl Digestible for Work {
-    /// Hash the [ReceiptClaim] to get a digest of the struct.
+    /// Hash the [Work] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         let mut buf = Vec::new();
         self.encode_to_seal(&mut buf);
