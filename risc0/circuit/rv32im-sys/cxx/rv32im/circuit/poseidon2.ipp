@@ -63,7 +63,9 @@ template <typename C> inline FDEV array<Val<C>, 4> multiply4x4(array<Val<C>, 4> 
   return {t6, t5, t7, t4};
 }
 
-template <typename C> inline FDEV void multiplyByMExt(ValCells<C> in) {
+template <typename C> inline FDEV void multiplyByMExt(CTX, ValCells<C> in) {
+  PICUS_SYNTHESIZE_COMPONENT_BEGIN("multiplyByMExt")
+
   // Optimized method for multiplication by M_EXT.
   // See appendix B of Poseidon2 paper for additional details.
   ValCells<C> out;
@@ -82,6 +84,15 @@ template <typename C> inline FDEV void multiplyByMExt(ValCells<C> in) {
   for (size_t i = 0; i < CELLS; i++) {
     in[i] = out[i] + tmpSums[i % 4];
   }
+
+  PICUS_SYNTHESIZE_COMPONENT_END(
+    "multiplyByMExt", llvm::ArrayRef(in, CELLS), [&](mlir::Value result) {
+      auto loc = ctx.builder.getUnknownLoc();
+      for (size_t i = 0; i < CELLS; i++) {
+        mlir::Value idx = ctx.builder.template create<zirgen::Zll::ConstOp>(loc, i);
+        in[i].value = ctx.builder.template create<zirgen::ZStruct::SubscriptOp>(loc, result, idx);
+      }
+    })
 }
 
 template <typename C> FDEV void P2ExtRoundBlock<C>::set(CTX, P2ExtRoundWitness wit) DEV {
@@ -96,7 +107,7 @@ template <typename C> FDEV void P2ExtRoundBlock<C>::set(CTX, P2ExtRoundWitness w
     sBoxTmp[i].set(ctx, cur3);
     cells[i] = cur3 * cur3 * cur;
   }
-  multiplyByMExt<C>(cells);
+  multiplyByMExt<C>(ctx, cells);
   for (size_t i = 0; i < CELLS; i++) {
     outputs[i].set(ctx, cells[i]);
   }
@@ -114,13 +125,17 @@ template <typename C> FDEV void P2ExtRoundBlock<C>::verify(CTX) DEV {
     ctx.eqz(computedCur3 - cur3);
     cells[i] = cur3 * cur3 * cur;
   }
-  multiplyByMExt<C>(cells);
+  multiplyByMExt<C>(ctx, cells);
   for (size_t i = 0; i < CELLS; i++) {
     ctx.eqz(cells[i] - outputs[i].get());
   }
 }
 
 template <typename C> FDEV void P2ExtRoundBlock<C>::addArguments(CTX) DEV {
+  PICUS_INPUT(ctx, id);
+  PICUS_INPUT(ctx, round);
+  PICUS_INPUT(ctx, inputs);
+
   Val<C> idVal = id.get();
   Val<C> roundVal = round.get();
   Val<C> nextRound = 0;
@@ -251,7 +266,7 @@ template <typename C> FDEV void P2BlockBlock<C>::addArguments(CTX) DEV {
   for (size_t i = 0; i < CELLS; i++) {
     in[i] = inputs[i].get();
   }
-  multiplyByMExt<C>(in);
+  multiplyByMExt<C>(ctx, in);
   P2StateArgument<C> state;
   state.id = idVal;
   state.round = 0;
