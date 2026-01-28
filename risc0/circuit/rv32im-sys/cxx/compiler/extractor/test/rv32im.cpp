@@ -63,6 +63,7 @@ int main() {
   EXTRACT(UnitShiftBlock);
   EXTRACT(P2ExtRoundBlock);
   EXTRACT(P2IntRoundsBlock);
+  EXTRACT(P2BlockBlock);
   EXTRACT(PageInNodeBlock);
   EXTRACT(PageInPartBlock);
   EXTRACT(PageInPageBlock);
