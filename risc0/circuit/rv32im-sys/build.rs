@@ -30,7 +30,7 @@ const PLATFORM_CUDA: Platform = Platform::new("cuda", "cu", "hal/cuda/kernels");
 // const PLATFORM_METAL: Platform = Platform::new("metal", "metal", "hal/metal/kernels");
 
 fn main() {
-    let output = "risc0_rv32im_m3";
+    let output = "risc0_rv32im";
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
 
     rerun_if_env_changed("NVCC_APPEND_FLAGS");

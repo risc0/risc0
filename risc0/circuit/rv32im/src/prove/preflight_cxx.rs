@@ -92,8 +92,7 @@ impl SegmentContext {
             povw_nonce: segment.povw_nonce.map(|n| n.to_u32s()).unwrap_or_default(),
         };
 
-        let ctx =
-            ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_m3_segment_new(&raw_segment) })?;
+        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_segment_new(&raw_segment) })?;
 
         Ok(Self { ctx })
     }
@@ -101,7 +100,7 @@ impl SegmentContext {
     pub fn preflight(&self, po2: usize) -> Result<PreflightContext> {
         tracing::debug!("preflight");
         let ctx = ffi_wrap_ptr(|| unsafe {
-            risc0_circuit_rv32im_m3_segment_preflight(self.ctx.as_ptr(), po2)
+            risc0_circuit_rv32im_segment_preflight(self.ctx.as_ptr(), po2)
         })?;
         Ok(PreflightContext {
             ctx,
@@ -112,13 +111,13 @@ impl SegmentContext {
 
 impl Drop for SegmentContext {
     fn drop(&mut self) {
-        unsafe { risc0_circuit_rv32im_m3_segment_free(self.ctx.as_ptr()) };
+        unsafe { risc0_circuit_rv32im_segment_free(self.ctx.as_ptr()) };
     }
 }
 
 impl PreflightContext {
     pub fn is_final(&self) -> bool {
-        unsafe { risc0_circuit_rv32im_m3_preflight_is_final(self.ctx) == 1 }
+        unsafe { risc0_circuit_rv32im_preflight_is_final(self.ctx) == 1 }
     }
 
     pub fn po2(&self) -> u32 {
@@ -126,23 +125,23 @@ impl PreflightContext {
     }
 
     pub fn row_info_ptr(&self) -> *const RowInfo {
-        unsafe { risc0_circuit_rv32im_m3_preflight_row_info(self.ctx) }
+        unsafe { risc0_circuit_rv32im_preflight_row_info(self.ctx) }
     }
 
     pub fn row_info_size(&self) -> usize {
-        unsafe { risc0_circuit_rv32im_m3_preflight_row_info_size(self.ctx) }
+        unsafe { risc0_circuit_rv32im_preflight_row_info_size(self.ctx) }
     }
 
     pub fn aux_ptr(&self) -> *const u32 {
-        unsafe { risc0_circuit_rv32im_m3_preflight_aux(self.ctx) }
+        unsafe { risc0_circuit_rv32im_preflight_aux(self.ctx) }
     }
 
     pub fn aux_size(&self) -> usize {
-        unsafe { risc0_circuit_rv32im_m3_preflight_aux_size(self.ctx) }
+        unsafe { risc0_circuit_rv32im_preflight_aux_size(self.ctx) }
     }
 
     pub fn block_counts(&self) -> enum_map::EnumMap<BlockType, u32> {
-        let counts_ptr = unsafe { risc0_circuit_rv32im_m3_preflight_block_counts(self.ctx) };
+        let counts_ptr = unsafe { risc0_circuit_rv32im_preflight_block_counts(self.ctx) };
         let counts_slice = unsafe { std::slice::from_raw_parts(counts_ptr, BlockType::COUNT - 1) };
 
         let mut counts = enum_map::EnumMap::<BlockType, u32>::default();
@@ -156,6 +155,6 @@ impl PreflightContext {
 
 impl Drop for PreflightContext {
     fn drop(&mut self) {
-        unsafe { risc0_circuit_rv32im_m3_preflight_free(self.ctx) };
+        unsafe { risc0_circuit_rv32im_preflight_free(self.ctx) };
     }
 }

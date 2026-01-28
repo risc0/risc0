@@ -44,7 +44,7 @@ pub fn test_recursion_circuit(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("test_recursion_circuit.zkr", hashfn)
 }
 
-pub(crate) fn lift_m3(po2: usize, povw: bool) -> Result<(Program, Digest)> {
+pub(crate) fn lift(po2: usize, povw: bool) -> Result<(Program, Digest)> {
     if risc0_circuit_recursion::LIFT_PO2_RANGE.contains(&po2) {
         let name = if povw {
             format!("lift_rv32im_m3_povw_{po2}.zkr")
@@ -59,7 +59,7 @@ pub(crate) fn lift_m3(po2: usize, povw: bool) -> Result<(Program, Digest)> {
             .ok_or_else(|| anyhow!("failed to find {name} in the list of control IDs"))?;
         Ok((program, control_id))
     } else {
-        bail!("No rv32im-m3 verifier available for po2={po2}")
+        bail!("No rv32im verifier available for po2={po2}")
     }
 }
 

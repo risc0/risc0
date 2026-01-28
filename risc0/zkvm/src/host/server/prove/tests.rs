@@ -511,7 +511,6 @@ fn continuation() {
 
     let _receipt = prove_session(&session).unwrap();
 
-    // The segment index is no longer used with rv32im-m3
     for (idx, receipt) in _receipt
         .inner
         .composite()

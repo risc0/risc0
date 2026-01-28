@@ -246,7 +246,7 @@ impl ProverServer for ProverImpl {
         let prover = risc0_circuit_rv32im::prove::segment_prover(po2 as usize)?;
         let seal = prover.prove(&preflight_results.inner)?;
 
-        let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output.clone())
+        let claim = ReceiptClaim::decode_with_output(&seal, preflight_results.output.clone())
             .context("Decode ReceiptClaim from seal")?;
 
         let verifier_parameters = ctx
