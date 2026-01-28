@@ -142,7 +142,9 @@ template <typename C> FDEV void P2ExtRoundBlock<C>::addArguments(CTX) DEV {
   ctx.push(state);
 }
 
-template <typename C> inline FDEV void multiplyByMInt(ValCells<C> in) {
+template <typename C> inline FDEV void multiplyByMInt(CTX, ValCells<C> in) {
+  PICUS_SYNTHESIZE_COMPONENT_BEGIN("multiplyByMInt")
+
   // Exploit the fact that off-diagonal entries of M_INT are all 1.
   Val<C> sum = 0;
   for (size_t i = 0; i < CELLS; i++) {
@@ -151,6 +153,14 @@ template <typename C> inline FDEV void multiplyByMInt(ValCells<C> in) {
   for (size_t i = 0; i < CELLS; i++) {
     in[i] = sum + Val<C>(M_INT_DIAG_HZN[i]) * in[i];
   }
+
+  PICUS_SYNTHESIZE_COMPONENT_END("multiplyByMInt", llvm::ArrayRef(in, CELLS), [&](mlir::Value result) {
+    auto loc = ctx.builder.getUnknownLoc();
+    for (size_t i = 0; i < CELLS; i++) {
+      mlir::Value idx = ctx.builder.template create<zirgen::Zll::ConstOp>(loc, i);
+      in[i].value = ctx.builder.template create<zirgen::ZStruct::SubscriptOp>(loc, result, idx);
+    }
+  })
 }
 
 template <typename C> FDEV void P2IntRoundsBlock<C>::set(CTX, P2IntRoundsWitness wit) DEV {
@@ -167,7 +177,7 @@ template <typename C> FDEV void P2IntRoundsBlock<C>::set(CTX, P2IntRoundsWitness
     Val<C> cur7 = cur3 * cur3 * cur;
     sBoxT2[i].set(ctx, cur7);
     cells[0] = cur7;
-    multiplyByMInt<C>(cells);
+    multiplyByMInt<C>(ctx, cells);
   }
   for (size_t i = 0; i < CELLS; i++) {
     outputs[i].set(ctx, cells[i]);
@@ -187,7 +197,7 @@ template <typename C> FDEV void P2IntRoundsBlock<C>::verify(CTX) DEV {
     Val<C> cur7 = cur3 * cur3 * cur;
     EQ(sBoxT2[i].get(), cur7);
     cells[0] = sBoxT2[i].get();
-    multiplyByMInt<C>(cells);
+    multiplyByMInt<C>(ctx, cells);
   }
   for (size_t i = 0; i < CELLS; i++) {
     EQ(outputs[i].get(), cells[i]);
@@ -195,6 +205,9 @@ template <typename C> FDEV void P2IntRoundsBlock<C>::verify(CTX) DEV {
 }
 
 template <typename C> FDEV void P2IntRoundsBlock<C>::addArguments(CTX) DEV {
+  PICUS_INPUT(ctx, id);
+  PICUS_INPUT(ctx, inputs);
+
   Val<C> idVal = id.get();
   P2StateArgument<C> state;
   state.id = idVal;
