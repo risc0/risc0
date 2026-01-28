@@ -35,6 +35,7 @@ use crate::{
         digest::Digest,
         hash::{
             HashSuite,
+            poseidon_254::Poseidon254HashSuite,
             poseidon2::{self, Poseidon2HashSuite},
             sha::Sha256HashSuite,
         },
@@ -183,6 +184,59 @@ impl MetalHash for MetalHashPoseidon2 {
     }
 }
 
+pub struct MetalHashPoseidon254 {
+    suite: HashSuite<BabyBear>,
+}
+
+// TODO: GPU accelerate this
+impl MetalHash for MetalHashPoseidon254 {
+    fn new(_hal: &MetalHal<Self>) -> Self {
+        Self {
+            suite: Poseidon254HashSuite::new_suite(),
+        }
+    }
+
+    fn hash_fold(&self, _hal: &MetalHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
+        let input_size = 2 * output_size;
+        assert_eq!(input_size, 2 * output_size);
+        io.view_mut(|io| {
+            let (output, input) = io.split_at_mut(input_size);
+            let output = &mut output[output_size..];
+            let hashfn = self.suite.hashfn.as_ref();
+            output.par_iter_mut().enumerate().for_each(|(idx, output)| {
+                let in1 = input[2 * idx];
+                let in2 = input[2 * idx + 1];
+                *output = *hashfn.hash_pair(&in1, &in2);
+            });
+        });
+    }
+
+    fn hash_rows(
+        &self,
+        _hal: &MetalHal<Self>,
+        output: &BufferImpl<Digest>,
+        matrix: &BufferImpl<BabyBearElem>,
+    ) {
+        let row_size = output.size();
+        let col_size = matrix.size() / output.size();
+        assert_eq!(matrix.size(), col_size * row_size);
+        output.view_mut(|output| {
+            matrix.view(|matrix| {
+                let hashfn = self.suite.hashfn.as_ref();
+                output.par_iter_mut().enumerate().for_each(|(idx, output)| {
+                    let column: Vec<_> =
+                        (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
+                    *output = *hashfn.hash_elem_slice(column.as_slice());
+                });
+            });
+        });
+    }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
+    }
+}
+
 #[derive(Debug)]
 pub struct MetalHal<Hash: MetalHash + ?Sized> {
     pub device: Device,
@@ -193,6 +247,7 @@ pub struct MetalHal<Hash: MetalHash + ?Sized> {
 
 pub type MetalHalSha256 = MetalHal<MetalHashSha256>;
 pub type MetalHalPoseidon2 = MetalHal<MetalHashPoseidon2>;
+pub type MetalHalPoseidon254 = MetalHal<MetalHashPoseidon254>;
 
 #[derive(Clone, Debug)]
 struct TrackedBuffer(MetalBuffer);

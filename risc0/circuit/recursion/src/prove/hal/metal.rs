@@ -34,8 +34,8 @@ use risc0_zkp::{
     hal::{
         AccumPreflight, CircuitHal,
         metal::{
-            BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalPoseidon2, MetalHalSha256,
-            MetalHash, MetalHashPoseidon2, MetalHashSha256,
+            BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalPoseidon2, MetalHalPoseidon254,
+            MetalHalSha256, MetalHash, MetalHashPoseidon2, MetalHashPoseidon254, MetalHashSha256,
         },
     },
 };
@@ -53,6 +53,7 @@ use super::{CircuitAccumulator, CircuitWitnessGenerator};
 
 pub type MetalCircuitHalSha256 = MetalCircuitHal<MetalHashSha256>;
 pub type MetalCircuitHalPoseidon2 = MetalCircuitHal<MetalHashPoseidon2>;
+pub type MetalCircuitHalPoseidon254 = MetalCircuitHal<MetalHashPoseidon254>;
 
 #[derive(Debug)]
 pub struct MetalCircuitHal<MH: MetalHash> {
@@ -293,6 +294,11 @@ pub(crate) fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>>
         "poseidon2" => {
             let hal = Rc::new(MetalHalPoseidon2::new());
             let circuit_hal = Rc::new(MetalCircuitHalPoseidon2::new(hal.clone()));
+            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
+        }
+        "poseidon_254" => {
+            let hal = Rc::new(MetalHalPoseidon254::new());
+            let circuit_hal = Rc::new(MetalCircuitHalPoseidon254::new(hal.clone()));
             Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
         }
         "sha-256" => {
