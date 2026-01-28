@@ -47,7 +47,8 @@ template <typename Component> void picusInput(RecordingContext& ctx, Component c
   PicusDeclareInputVisitor::apply(ctx, component);
 }
 
-template <typename Component, size_t N> void picusInput(RecordingContext& ctx, Component (&component)[N]) {
+template <typename Component, size_t N>
+void picusInput(RecordingContext& ctx, Component (&component)[N]) {
   PicusDeclareInputVisitor::apply(ctx, component);
 }
 

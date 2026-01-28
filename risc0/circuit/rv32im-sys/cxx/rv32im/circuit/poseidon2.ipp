@@ -154,13 +154,14 @@ template <typename C> inline FDEV void multiplyByMInt(CTX, ValCells<C> in) {
     in[i] = sum + Val<C>(M_INT_DIAG_HZN[i]) * in[i];
   }
 
-  PICUS_SYNTHESIZE_COMPONENT_END("multiplyByMInt", llvm::ArrayRef(in, CELLS), [&](mlir::Value result) {
-    auto loc = ctx.builder.getUnknownLoc();
-    for (size_t i = 0; i < CELLS; i++) {
-      mlir::Value idx = ctx.builder.template create<zirgen::Zll::ConstOp>(loc, i);
-      in[i].value = ctx.builder.template create<zirgen::ZStruct::SubscriptOp>(loc, result, idx);
-    }
-  })
+  PICUS_SYNTHESIZE_COMPONENT_END(
+      "multiplyByMInt", llvm::ArrayRef(in, CELLS), [&](mlir::Value result) {
+        auto loc = ctx.builder.getUnknownLoc();
+        for (size_t i = 0; i < CELLS; i++) {
+          mlir::Value idx = ctx.builder.template create<zirgen::Zll::ConstOp>(loc, i);
+          in[i].value = ctx.builder.template create<zirgen::ZStruct::SubscriptOp>(loc, result, idx);
+        }
+      })
 }
 
 template <typename C> FDEV void P2IntRoundsBlock<C>::set(CTX, P2IntRoundsWitness wit) DEV {

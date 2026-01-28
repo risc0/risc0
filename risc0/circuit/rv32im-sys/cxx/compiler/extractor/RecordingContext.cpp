@@ -109,7 +109,7 @@ RecordingVal RecordingContext::addValParameter() {
   if (argCount == 0) {
     pos = 0;
   } else {
-    if (zirgen::ZStruct::isLayoutType(componentBody->getArgumentTypes()[argCount-1])) {
+    if (zirgen::ZStruct::isLayoutType(componentBody->getArgumentTypes()[argCount - 1])) {
       pos = argCount - 1;
     } else {
       pos = argCount;
