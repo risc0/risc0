@@ -16,11 +16,10 @@
 use std::{collections::HashMap, rc::Rc};
 
 use anyhow::{Result, bail};
-use metal::ComputePipelineDescriptor;
+use metal::{ComputePipelineDescriptor, MTLResourceUsage, ResourceRef};
 
 use risc0_circuit_recursion_sys::{
-    RawAccumBuffers, RawExecBuffers, RawPreflightTrace, StepMode,
-    risc0_circuit_recursion_cpu_accum, risc0_circuit_recursion_cpu_witgen,
+    RawExecBuffers, RawPreflightTrace, StepMode, risc0_circuit_recursion_cpu_witgen,
 };
 use risc0_core::scope;
 use risc0_sys::ffi_wrap;
@@ -28,22 +27,22 @@ use risc0_zkp::{
     INV_RATE,
     core::log2_ceil,
     field::{
-        RootsOfUnity,
+        Elem as _, RootsOfUnity,
         baby_bear::{BabyBearElem, BabyBearExtElem},
         map_pow,
     },
     hal::{
         AccumPreflight, CircuitHal,
         metal::{
-            BufferImpl as MetalBuffer, MetalHal, MetalHalPoseidon2, MetalHalSha256, MetalHash,
-            MetalHashPoseidon2, MetalHashSha256,
+            BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalPoseidon2, MetalHalSha256,
+            MetalHash, MetalHashPoseidon2, MetalHashSha256,
         },
     },
 };
 
 const METAL_LIB: &[u8] = include_bytes!(env!("RECURSION_METAL_PATH"));
 
-const KERNEL_NAMES: &[&str] = &["eval_check"];
+const KERNEL_NAMES: &[&str] = &["eval_check", "step_compute_accum", "step_verify_accum"];
 
 use crate::{
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
@@ -144,6 +143,36 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
     }
 }
 
+#[repr(C)]
+struct AccumContext {
+    ctrl: *const u32,
+    global: *const u32,
+    data: *const u32,
+    mix: *const u32,
+    accum: *const u32,
+    total_cycles: u32,
+    work_cycles: u32,
+    accum_ext: *const u32,
+}
+
+impl AccumContext {
+    pub fn arg_descriptors<'a>() -> [&'a metal::ArgumentDescriptorRef; 8] {
+        use metal::MTLDataType::*;
+
+        let d = std::array::from_fn(|_| metal::ArgumentDescriptor::new());
+        let types = [
+            Pointer, Pointer, Pointer, Pointer, Pointer, UInt, UInt, Pointer,
+        ];
+
+        for (i, type_) in types.into_iter().enumerate() {
+            d[i].set_data_type(type_);
+            d[i].set_index(i as u64);
+        }
+
+        d
+    }
+}
+
 impl<MH: MetalHash> CircuitAccumulator<MetalHal<MH>> for MetalCircuitHal<MH> {
     fn accumulate(
         &self,
@@ -155,16 +184,86 @@ impl<MH: MetalHash> CircuitAccumulator<MetalHal<MH>> for MetalCircuitHal<MH> {
         mix: &MetalBuffer<BabyBearElem>,
         accum: &MetalBuffer<BabyBearElem>,
     ) -> Result<()> {
-        let buffers = RawAccumBuffers {
-            ctrl: ctrl.as_ptr() as *const _,
-            global: global.as_ptr() as *const _,
-            data: data.as_ptr() as *const _,
-            mix: mix.as_ptr() as *const _,
-            accum: accum.as_ptr() as *const _,
-        };
-        ffi_wrap(|| unsafe {
-            risc0_circuit_recursion_cpu_accum(&buffers, work_cycles, total_cycles)
-        })
+        let accum_init = vec![BabyBearExtElem::ONE; work_cycles as usize];
+        let accum_ext = MetalBuffer::copy_from(
+            "accum_ext",
+            &self.hal.device,
+            self.hal.cmd_queue.clone(),
+            &accum_init,
+        );
+
+        let ctx = MetalBuffer::<AccumContext>::new(
+            "ctx",
+            &self.hal.device,
+            self.hal.cmd_queue.clone(),
+            1,
+        );
+
+        let arg_descriptors_array = metal::Array::from_slice(&AccumContext::arg_descriptors());
+        let argument_encoder = self.hal.device.new_argument_encoder(arg_descriptors_array);
+        argument_encoder.set_argument_buffer(&ctx.as_buf(), 0);
+
+        let mut resources: Vec<&ResourceRef> = vec![];
+
+        let mut index = 0;
+        let buffers: Vec<_> = [ctrl, global, data, mix, accum]
+            .into_iter()
+            .map(|b| b.as_arg())
+            .collect();
+        for buf in buffers {
+            let KernelArg::Buffer { buffer, offset } = buf else {
+                panic!()
+            };
+            argument_encoder.set_buffer(index, buffer, offset);
+            resources.push(&**buffer);
+            index += 1;
+        }
+
+        unsafe { (argument_encoder.constant_data(index) as *mut u32).write(total_cycles) };
+        index += 1;
+
+        unsafe { (argument_encoder.constant_data(index) as *mut u32).write(work_cycles) };
+        index += 1;
+
+        let buf = accum_ext.as_buf();
+        argument_encoder.set_buffer(index, buf.as_ref(), 0);
+        resources.push(&**buf);
+
+        let args = [
+            ctx.as_arg(),
+            KernelArg::U32(total_cycles),
+            ctrl.as_arg(),
+            global.as_arg(),
+            data.as_arg(),
+            mix.as_arg(),
+            accum.as_arg(),
+        ];
+        let kernel = self.kernels.get("step_compute_accum").unwrap();
+        self.hal.dispatch_with_resources(
+            kernel,
+            &args[..],
+            work_cycles as u64,
+            None,
+            |cmd_encoder| {
+                cmd_encoder.use_resources(&resources[..], MTLResourceUsage::Read);
+            },
+        );
+
+        use risc0_zkp::hal::Hal as _;
+        self.hal.prefix_products(&accum_ext);
+
+        let kernel = self.kernels.get("step_verify_accum").unwrap();
+        self.hal.dispatch_with_resources(
+            kernel,
+            &args[..],
+            work_cycles as u64,
+            None,
+            |cmd_encoder| {
+                cmd_encoder.use_resources(&resources[..], MTLResourceUsage::Read);
+            },
+        );
+
+        Ok(())
     }
 }
 
