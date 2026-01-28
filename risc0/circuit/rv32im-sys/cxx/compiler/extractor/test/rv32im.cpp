@@ -32,6 +32,20 @@ int main() {
   extractWithU32Arg<AddressDecompose>(ctx);
 
   EXTRACT(GlobalsBlock);
+  {
+    ctx.enterComponent("multiplyByMInt", nullptr);
+    auto loc = ctx.builder.getUnknownLoc();
+    ValCells<RecordingContext> arg;
+    for (size_t i = 0; i < CELLS; i++) {
+      arg[i] = ctx.addValParameter();
+    }
+    multiplyByMInt<RecordingContext>(ctx, arg);
+    auto resultVals = llvm::map_to_vector(arg, [](const auto& v) { return v.value; });
+    auto resultVal = ctx.builder.create<zirgen::ZStruct::ArrayOp>(loc, resultVals);
+    ctx.builder.create<zirgen::Zhlt::ReturnOp>(loc, resultVal);
+    ctx.exitComponent();
+  }
+
   // EXTRACT(DecodeBlock); // slow (10 minutes)
   EXTRACT(InstResumeBlock);
   EXTRACT(InstSuspendBlock);
@@ -58,6 +72,7 @@ int main() {
   EXTRACT(UnitLtBlock);
   // EXTRACT(UnitMulBlock); // slow (18 minutes)
   EXTRACT(UnitShiftBlock);
+  EXTRACT(P2IntRoundsBlock);
   EXTRACT(PageInNodeBlock);
   EXTRACT(PageInPartBlock);
   EXTRACT(PageInPageBlock);

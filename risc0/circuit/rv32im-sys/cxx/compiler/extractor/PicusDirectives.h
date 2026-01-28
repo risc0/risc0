@@ -76,10 +76,10 @@ void rangePostcondition(RecordingContext& ctx, uint32_t low, RecordingVal x, uin
 //
 // Picus constraint language:
 // (call [layout_denomZero_invReg, layout_denomZero_isZero_inner] IsZero [x])
-void picusCall(RecordingContext& ctx,
-               const char* name,
-               llvm::ArrayRef<RecordingVal> inputs,
-               mlir::Value layout);
+mlir::Value picusCall(RecordingContext& ctx,
+                      const char* name,
+                      llvm::ArrayRef<RecordingVal> inputs,
+                      mlir::Value layout);
 
 // Emit a `DeterministicIf` directive into the IR. This indicates to Picus that
 // if all of the input signals are deterministic, then all of the output signals
