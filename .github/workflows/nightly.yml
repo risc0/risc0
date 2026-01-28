@@ -13,60 +13,6 @@ env:
   NIGHTLY_RUST_TOOLCHAIN: nightly-2025-06-20
 
 jobs:
-  crates_validate:
-    runs-on: [self-hosted, cluster, Linux, X64, cpu]
-    env:
-      RUST_BACKTRACE: full
-      RUST_LOG: info
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/rustup
-
-      - run: cargo install --force --path risc0/cargo-risczero --locked
-
-      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
-
-      - run: cargo build --release
-        working-directory: tools/crates-validator/
-
-      - name: Create working directory
-        run: mkdir -p ${{ runner.temp }}/crate-validation/
-
-      - name: Validate profiles
-        run: |
-          target/release/main \
-          -p ${{ github.workspace }} \
-          -P profiles/profiles-1000.yaml \
-          -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
-        shell: bash
-        working-directory: tools/crates-validator/
-
-      - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
-        if: always()
-
-      - name: Upload artifact results
-        uses: actions/upload-artifact@v4
-        if: always() # upload all artifacts even on failures
-        with:
-          name: crates-test-results
-          path: ${{ runner.temp }}/crate-validation/
-          retention-days: 2
-
-      - name: Clone ghpages repo
-        run: git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
-
-      - name: Export environment variable
-        run: |
-          echo "TEMP_DIR=${{ runner.temp }}" >> $GITHUB_ENV
-          echo "GITHUB_SHA=${{ github.sha }}" >> $GITHUB_ENV
-
-      - name: Commit results to risc0/ghpages
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-        run: bash ./parse_profile_compilation_results.sh
-        working-directory: ./.github/scripts
 
   alert_devops_if_failed:
     runs-on: ubuntu-latest
