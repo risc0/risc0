@@ -31,33 +31,8 @@ int main() {
   extractWithValArg<GetSign>(ctx);
   extractWithU32Arg<AddressDecompose>(ctx);
 
-  {
-    ctx.enterComponent("multiplyByMExt", nullptr);
-    auto loc = ctx.builder.getUnknownLoc();
-    ValCells<RecordingContext> arg;
-    for (size_t i = 0; i < CELLS; i++) {
-      arg[i] = ctx.addValParameter();
-    }
-    multiplyByMExt<RecordingContext>(ctx, arg);
-    auto resultVals = llvm::map_to_vector(arg, [](const auto& v) { return v.value; });
-    auto resultVal = ctx.builder.create<zirgen::ZStruct::ArrayOp>(loc, resultVals);
-    ctx.builder.create<zirgen::Zhlt::ReturnOp>(loc, resultVal);
-    ctx.exitComponent();
-  }
-  // TODO: abstract these two extractions, they're basically the same!
-  {
-    ctx.enterComponent("multiplyByMInt", nullptr);
-    auto loc = ctx.builder.getUnknownLoc();
-    ValCells<RecordingContext> arg;
-    for (size_t i = 0; i < CELLS; i++) {
-      arg[i] = ctx.addValParameter();
-    }
-    multiplyByMInt<RecordingContext>(ctx, arg);
-    auto resultVals = llvm::map_to_vector(arg, [](const auto& v) { return v.value; });
-    auto resultVal = ctx.builder.create<zirgen::ZStruct::ArrayOp>(loc, resultVals);
-    ctx.builder.create<zirgen::Zhlt::ReturnOp>(loc, resultVal);
-    ctx.exitComponent();
-  }
+  EXTRACT_MUTABLE_ARRAY_FUNCTION(multiplyByMExt, CELLS);
+  EXTRACT_MUTABLE_ARRAY_FUNCTION(multiplyByMInt, CELLS);
 
   // EXTRACT(GlobalsBlock);
   // EXTRACT(DecodeBlock); // slow (10 minutes)
