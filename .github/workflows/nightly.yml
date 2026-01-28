@@ -13,6 +13,20 @@ env:
   NIGHTLY_RUST_TOOLCHAIN: nightly-2025-06-20
 
 jobs:
+  fuzz:
+    runs-on: [self-hosted, cluster, Linux, cpu]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/actions/rustup
+        with:
+          toolchain: ${{ env.NIGHTLY_RUST_TOOLCHAIN }}
+      - uses: ./.github/actions/sccache
+      # Run fuzzing on the receipt_seal target on 8 cores for 1 hour.
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} fuzz run receipt_seal --fuzz-dir risc0/fuzz --sanitizer none -j8 -- -max_len=1048576 -max_total_time=3600
+      - run: sccache --show-stats
 
   alert_devops_if_failed:
     runs-on: ubuntu-latest
