@@ -198,7 +198,6 @@ impl MetalHash for MetalHashPoseidon254 {
 
     fn hash_fold(&self, _hal: &MetalHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
         let input_size = 2 * output_size;
-        assert_eq!(input_size, 2 * output_size);
         io.view_mut(|io| {
             let (output, input) = io.split_at_mut(input_size);
             let output = &mut output[output_size..];
