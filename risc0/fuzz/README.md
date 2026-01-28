@@ -1,15 +1,18 @@
 # RISC Zero Fuzzing Targets
 
-This crate defines fuzzing
+This crate provides fuzzing for RISC Zero library functions.
 
-Based on the
-https://github.com/AFLplusplus/LibAFL/tree/main/fuzzers/fuzz_anything/cargo_fuzz
+## Receipt verification
 
+Fuzzer for the receipt seal verification function, looking for panic issues.
 
-```sh
-rustup +nightly component add llvm-tools
-```
+The following command, relative to the repo root, will run the fuzzer.
 
 ```sh
-CARGO_PROFILE_RELEASE_LTO=off cargo +nightly-2025-06-20 fuzz run --release receipt_seal --fuzz-dir risc0/fuzz
+cargo +nightly fuzz run receipt_seal --fuzz-dir risc0/fuzz --sanitizer none -- -max_len=1048576
 ```
+
+Note that `cargo fuzz` requires the nightly toolchain to build.
+The flag `--sanitizer none` is provided since the goal is to find panics, and to avoid build issues encountered during development.
+The `-max_len` flag raises the default maximum input length from 4k bytes to 1 MB.
+Adding `-jX` before the `--` enables parallelism across cores, e.g. `-j$(nproc)`.

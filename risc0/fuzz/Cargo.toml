@@ -16,9 +16,13 @@ bench = false
 
 [dependencies]
 bytemuck = "1.24.0"
-# NOTE: LibAFL promises be improve upon libfuzzer. They also provide this  compatibility layer that allows it to be used with `cargo-fuzz`.
+# NOTE: LibAFL is an alternative to libfuzzer. They provide a compatible fuzzer implementation,
+# which can be enabled by replacing where the libfuzzer-sys crate is sourced. In experimentation,
+# LibAFL achieved a higher rate of executions/sec, and found a known panic issue quickly. However,
+# it also was more finicky to get working and required specific compilation otpions to build.
+#
+# See the following example for more about this setup.
 # https://github.com/AFLplusplus/LibAFL/tree/main/fuzzers/fuzz_anything/cargo_fuzz
-libfuzzer-sys = { package = "libafl_libfuzzer", version = "0.15.4" }
-#libfuzzer-sys = { version = "0.4.10" }
+#libfuzzer-sys = { package = "libafl_libfuzzer", version = "0.15.4" }
+libfuzzer-sys = { version = "0.4.10" }
 risc0-circuit-rv32im = { workspace = true }
-risc0-zkvm-platform = { workspace = true, features = ["export-syscalls"] }
