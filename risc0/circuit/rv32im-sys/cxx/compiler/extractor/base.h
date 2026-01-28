@@ -57,10 +57,10 @@ using namespace risc0;
 // function), which doesn't depend on having the full component structure. The
 // `END` macro takes a flattened list of inputs to pass into the call, and a
 // closure that can be used for postprocessing like updating mutated parameters.
-#define PICUS_SYNTHESIZE_COMPONENT_BEGIN(name)                                                \
-  if (ctx.componentName == name) {
-#define PICUS_SYNTHESIZE_COMPONENT_END(name, inputs, f)                                                    \
-  } else {                                                                                         \
+#define PICUS_SYNTHESIZE_COMPONENT_BEGIN(name) if (ctx.componentName == name) {
+#define PICUS_SYNTHESIZE_COMPONENT_END(name, inputs, f)                                            \
+  }                                                                                                \
+  else {                                                                                           \
     mlir::Value result = picusCall(ctx, name, inputs, nullptr);                                    \
     f(result);                                                                                     \
   }

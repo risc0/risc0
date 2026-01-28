@@ -42,9 +42,9 @@ void rangePostcondition(RecordingContext& ctx, uint32_t low, RecordingVal x, uin
 }
 
 mlir::Value picusCall(RecordingContext& ctx,
-               const char* name,
-               llvm::ArrayRef<RecordingVal> inputs,
-               mlir::Value layout) {
+                      const char* name,
+                      llvm::ArrayRef<RecordingVal> inputs,
+                      mlir::Value layout) {
   mlir::OpBuilder& builder = *BuilderSingleton::get();
   auto component = ctx.moduleOp.lookupSymbol<zirgen::Zhlt::ComponentOp>(name);
   auto compType = component.getOutType();
