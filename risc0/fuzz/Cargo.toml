@@ -1,7 +1,7 @@
 [package]
 name = "risc0-fuzz"
 version = "0.0.0"
-edition = "2021"
+edition = { workspace = true }
 publish = false
 
 [package.metadata]
@@ -12,8 +12,13 @@ name = "receipt_seal"
 path = "fuzz_targets/receipt_seal.rs"
 test = false
 doc = false
+bench = false
 
 [dependencies]
 bytemuck = "1.24.0"
-libfuzzer-sys = "0.4"
+# NOTE: LibAFL promises be improve upon libfuzzer. They also provide this  compatibility layer that allows it to be used with `cargo-fuzz`.
+# https://github.com/AFLplusplus/LibAFL/tree/main/fuzzers/fuzz_anything/cargo_fuzz
+libfuzzer-sys = { package = "libafl_libfuzzer", version = "0.15.4" }
+#libfuzzer-sys = { version = "0.4.10" }
 risc0-circuit-rv32im = { workspace = true }
+risc0-zkvm-platform = { workspace = true, features = ["export-syscalls"] }

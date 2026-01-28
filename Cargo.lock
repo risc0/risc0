@@ -5244,6 +5244,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "db13adb97ab515a3691f56e4dbab09283d0b86cb45abd991d8634a9d6f501760"
 
 [[package]]
+name = "libafl_libfuzzer"
+version = "0.15.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3792b08c22afc869ea6b4c9a82944385f9a1a0ab715ccff210a6c3b65501e36"
+dependencies = [
+ "cc",
+ "libfuzzer-sys",
+ "rustversion",
+ "toml 0.9.5",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.177"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7480,8 +7492,9 @@ name = "risc0-fuzz"
 version = "0.0.0"
 dependencies = [
  "bytemuck",
- "libfuzzer-sys",
+ "libafl_libfuzzer",
  "risc0-circuit-rv32im",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
