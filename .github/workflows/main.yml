@@ -20,6 +20,8 @@ env:
   RISC0_RUST_TOOLCHAIN_VERSION: 1.91.1
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
   RISC0_GROTH16_VERSION: 0.1.0
+  # Pin the nightly Rust version for jobs that need it.
+  NIGHTLY_RUST_TOOLCHAIN: nightly-2025-06-20
 
 defaults:
   run:
@@ -524,9 +526,6 @@ jobs:
     runs-on: [self-hosted, cluster, macOS, cpu]
     env:
       RUSTDOCFLAGS: "--cfg docsrs -D warnings"
-      # Building with docs.rs config requires the nightly toolchain.
-      # nightly-2025-06-20 corresponds to 1.89
-      NIGHTLY_RUST_TOOLCHAIN: nightly-2025-06-20
     steps:
       - uses: actions/checkout@v4
         with:

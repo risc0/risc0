@@ -9,6 +9,8 @@ env:
   RISC0_BUILD_LOCKED: 1
   RISC0_RUST_TOOLCHAIN_VERSION: 1.91.1
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
+  # Pin the nightly Rust version for jobs that need it.
+  NIGHTLY_RUST_TOOLCHAIN: nightly-2025-06-20
 
 jobs:
   crates_validate:
