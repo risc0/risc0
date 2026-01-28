@@ -21,7 +21,7 @@ env:
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
   RISC0_GROTH16_VERSION: 0.1.0
   # Pin the nightly Rust version for jobs that need it.
-  NIGHTLY_RUST_TOOLCHAIN: nightly-2025-06-20
+  NIGHTLY_RUST_TOOLCHAIN: nightly-2026-01-01
 
 defaults:
   run:
@@ -535,10 +535,10 @@ jobs:
         with:
           toolchain: ${{ env.NIGHTLY_RUST_TOOLCHAIN }}
       - uses: ./.github/actions/sccache
-      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
-      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-zkp -p risc0-groth16 -Fprove,std --no-deps
-      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p cargo-risczero -Fdocker,r0vm --no-deps
-      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-binfmt -p risc0-core -p risc0-zkvm-platform --all-features  --no-deps
+      - run: cargo "+${NIGHTLY_RUST_TOOLCHAIN}" doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
+      - run: cargo "+${NIGHTLY_RUST_TOOLCHAIN}" doc -p risc0-zkp -p risc0-groth16 -Fprove,std --no-deps
+      - run: cargo "+${NIGHTLY_RUST_TOOLCHAIN}" doc -p cargo-risczero -Fdocker,r0vm --no-deps
+      - run: cargo "+${NIGHTLY_RUST_TOOLCHAIN}" doc -p risc0-binfmt -p risc0-core -p risc0-zkvm-platform --all-features  --no-deps
       - run: sccache --show-stats
 
   check-external:
