@@ -47,6 +47,7 @@ mlir::Value picusCall(RecordingContext& ctx,
                       mlir::Value layout) {
   mlir::OpBuilder& builder = *BuilderSingleton::get();
   auto component = ctx.moduleOp.lookupSymbol<zirgen::Zhlt::ComponentOp>(name);
+  assert(component && "symbol not found");
   auto compType = component.getOutType();
   llvm::SmallVector<mlir::Value> arguments;
   for (auto val : inputs) {
