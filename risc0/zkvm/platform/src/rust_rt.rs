@@ -41,6 +41,8 @@ mod entrypoint {
 
     #[unsafe(no_mangle)]
     unsafe extern "C" fn __start() -> ! {
+        unsafe { crate::heap::init() };
+
         // This definition of __start differs from risc0_zkvm::guest in that it does not initialize the
         // journal and will halt with empty output. It also assumes main follows the standard C
         // convention, and uses the returned i32 value as the user exit code for halt.
