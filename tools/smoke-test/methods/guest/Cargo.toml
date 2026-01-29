@@ -6,6 +6,6 @@ edition = "2021"
 [workspace]
 
 [dependencies]
-risc0-zkvm = { version = "3.0.4", default-features = false }
+risc0-zkvm = { version = "3.0.5", default-features = false }
 # Use this only for testing locally before a release.
 # risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false }

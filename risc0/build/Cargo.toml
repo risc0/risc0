@@ -1,7 +1,7 @@
 [package]
 name = "risc0-build"
 description = "RISC Zero zero-knowledge VM build tool"
-version = "3.0.4"
+version = "3.0.5"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
