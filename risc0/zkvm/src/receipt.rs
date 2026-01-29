@@ -69,6 +69,14 @@ pub use self::{
 /// confirm that its results must have been generated from the expected code,
 /// even when this code was run by an untrusted source.
 ///
+/// # Serialization
+///
+/// The [Receipt] struct supports [serde] and [borsh] (de)serialization. Using [serde] a wide range
+/// of codecs can be used. Internally, this struct is recursive, and so in a context where receipt
+/// bytes will be accepted from unrestricted third-parties it is important to use a codec
+/// implementation that enforces depth limits, such as `serde_json` or `rmp-serde`, as unrestricted
+/// recursive decent parsers may overflow the stack.
+///
 /// # Example
 ///
 /// To create a [Receipt] attesting to the faithful execution of your code, run
