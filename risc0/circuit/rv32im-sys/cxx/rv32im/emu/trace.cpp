@@ -21,7 +21,6 @@
 #include "rv32im/emu/povw.h"
 
 #include <algorithm>
-#include <execution>
 #include <iostream>
 #include <vector>
 
