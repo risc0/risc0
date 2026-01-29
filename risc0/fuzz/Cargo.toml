@@ -19,7 +19,7 @@ bytemuck = "1.24.0"
 # NOTE: LibAFL is an alternative to libfuzzer. They provide a compatible fuzzer implementation,
 # which can be enabled by replacing where the libfuzzer-sys crate is sourced. In experimentation,
 # LibAFL achieved a higher rate of executions/sec, and found a known panic issue quickly. However,
-# it also was more finicky to get working and required specific compilation otpions to build.
+# it also was more finicky to get working and required specific compilation options to build.
 #
 # See the following example for more about this setup.
 # https://github.com/AFLplusplus/LibAFL/tree/main/fuzzers/fuzz_anything/cargo_fuzz
