@@ -35,7 +35,7 @@ jobs:
   alert_devops_if_failed:
     runs-on: ubuntu-latest
     if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
-    needs: [crates_validate]
+    needs: [fuzz]
     steps:
       - name: DevOps Alert
         env:
