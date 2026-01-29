@@ -19,7 +19,7 @@ each fork's repository on GitHub.
 
 | Crate                                                                         | Versions supported                    | Patch Statement Example                                                                                      |
 | ----------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [`sha2`](https://github.com/risc0/RustCrypto-hashes/releases)                 | 0.10.9 0.10.8, 0.10.7, 0.10.6, 0.9.9  | `sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.9-risczero.0" }`             |
+| [`sha2`](https://github.com/risc0/RustCrypto-hashes/releases)                 | 0.10.9, 0.10.8, 0.10.7, 0.10.6, 0.9.9 | `sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.9-risczero.0" }`             |
 | [`tiny-keccak`](https://github.com/risc0/tiny-keccak/releases)                | 2.0.2                                 | `tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", tag = "tiny-keccak/v2.0.2-risczero.0" }`      |
 | [`k256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases)        | 0.13.4, 0.13.3, 0.13.2, 0.13.1        | `k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.4-risczero.1" }`    |
 | [`p256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases)        | 0.13.2                                | `p256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "p256/v0.13.2-risczero.1" }`    |
@@ -27,7 +27,7 @@ each fork's repository on GitHub.
 | [`rsa`](https://github.com/risc0/RustCrypto-RSA/releases)                     | 0.9.9                                 | `rsa = { git = "https://github.com/risc0/RustCrypto-RSA", tag = "v0.9.9-risczero.0" }`                       |
 | [`substrate-bn`](https://github.com/risc0/paritytech-bn/releases)             | 0.6.0                                 | `substrate-bn = { git = "https://github.com/risc0/paritytech-bn", tag = "v0.6.0-risczero.0" }`               |
 | [`bls12_381`](https://github.com/risc0/zkcrypto-bls12_381/releases)           | 0.8.0                                 | `bls12_381 = { git = "https://github.com/risc0/zkcrypto-bls12_381", tag = "bls12_381/v0.8.0-risczero.1" }`   |
-| [`blst`](https://github.com/risc0/blst/releases)                              | 0.3.16 0.3.15 0.3.14                  | `blst = { git = "https://github.com/risc0/blst", tag = "blst/v0.3.16-risczero.0" }`                          |
+| [`blst`](https://github.com/risc0/blst/releases)                              | 0.3.16, 0.3.15, 0.3.14                | `blst = { git = "https://github.com/risc0/blst", tag = "blst/v0.3.16-risczero.0" }`                          |
 | [`crypto-bigint`](https://github.com/risc0/RustCrypto-crypto-bigint/releases) | 0.5.5, 0.5.4, 0.5.3, 0.5.2            | `crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.5-risczero.0" }`   |
 | [`c-kzg`](https://github.com/risc0/c-kzg-4844/releases)[^2]                   | 1.0.3, 2.1.0, 2.1.1, 2.1.5            | `c-kzg = { git = "https://github.com/risc0/c-kzg-4844", tag = "v2.1.5-risczero.0" }`                         |
 
