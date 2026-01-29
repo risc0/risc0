@@ -43,7 +43,7 @@ If using `tag = "sha2-v0.10.9-risczero.0"`, the dependency should be defined as 
 sha2 = "=0.10.9"
 
 [patch.crates-io]
-sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.8-risczero.0" }
+sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.9-risczero.0" }
 ```
 
 In some situations, for example when a patch is used indirectly, you may
