@@ -62,7 +62,7 @@ impl Syscall for SysArgs {
             let get_arg_len = ctx.load_register(REG_A4) != 0;
             if get_arg_len {
                 if to_guest.len() != WORD_SIZE * 2 {
-                    bail!("invalid get-env with get_var_len=1")
+                    bail!("invalid sys_argv with get_arg_len=1")
                 }
                 if arg_val.len() >= MAX_IO_BYTES as usize {
                     bail!("sys_argv failure: argv is too large");
