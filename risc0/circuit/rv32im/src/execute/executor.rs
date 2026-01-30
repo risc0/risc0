@@ -859,6 +859,9 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32> {
         // NOTE: This clone is required to allow host_read to have mutable access to self.
         let rlen = self.syscall_handler.clone().host_read(self, fd, buf)?;
+        if rlen as usize > buf.len() {
+            bail!("syscall returned invalid length: fd={fd}");
+        }
         let slice = &buf[..rlen as usize];
         self.read_record.push(slice.to_vec());
         Ok(rlen)
@@ -910,6 +913,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     fn on_ecall_read_end(&mut self, read_bytes: u64, read_words: u64) {
         self.block_tracker.track_ecall_read(read_bytes, read_words);
+        self.inc_user_cycles((read_bytes + read_words) as usize, Some(EcallKind::Read));
     }
 
     fn on_ecall_write_end(&mut self) {

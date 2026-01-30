@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{
-    cell::{Cell, RefCell},
+    cell::RefCell,
     io::Read,
     ops::{Deref, DerefMut},
     rc::Rc,
@@ -34,11 +34,10 @@ use risc0_binfmt::{
 use risc0_circuit_rv32im::execute::{
     CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, ExecutionError, ExecutionLimit, Executor, PAGE_BYTES,
     SegmentUpdate, Syscall as CircuitSyscall, SyscallContext as CircuitSyscallContext,
-    platform::WORD_SIZE,
 };
 use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
-use risc0_zkvm_platform::{align_up, fileno};
+use risc0_zkvm_platform::fileno;
 use tempfile::tempdir;
 use tracing::Level;
 
@@ -602,7 +601,6 @@ where
 #[derive(Clone)]
 pub(crate) struct CircuitSyscallTable<'a> {
     inner: SyscallTable<'a>,
-    return_cache: Cell<(u32, u32)>,
 }
 
 impl<'a> Deref for CircuitSyscallTable<'a> {
@@ -626,14 +624,6 @@ impl CircuitSyscall for CircuitSyscallTable<'_> {
         fd: u32,
         buf: &mut [u8],
     ) -> Result<u32> {
-        if fd == 0 {
-            let (a0, a1) = self.return_cache.get();
-            tracing::trace!("host_read(buf: {}) -> ({a0:#010x}, {a1:#010x})", buf.len());
-            let buf: &mut [u32] = bytemuck::cast_slice_mut(buf);
-            (buf[0], buf[1]) = (a0, a1);
-            return Ok(2 * WORD_SIZE as u32);
-        }
-
         let mut ctx = ContextAdapter {
             ctx,
             syscall_table: self.inner.clone(),
@@ -643,22 +633,14 @@ impl CircuitSyscall for CircuitSyscallTable<'_> {
         let syscall = ctx.peek_string(name_ptr)?;
         tracing::trace!("host_read({syscall}, into_guest: {})", buf.len());
 
-        let words = align_up(buf.len(), WORD_SIZE) / WORD_SIZE;
-        let mut to_guest = vec![0u32; words];
-
-        self.return_cache.set(
-            self.inner
-                .get_syscall(&syscall)
-                .context(format!("Unknown syscall: {syscall:?}"))?
-                .borrow_mut()
-                .syscall(&syscall, &mut ctx, &mut to_guest)?,
-        );
-
-        let bytes = bytemuck::cast_slice(to_guest.as_slice());
-        let rlen = buf.len();
-        buf.copy_from_slice(&bytes[..rlen]);
-
-        Ok(rlen as u32)
+        let ret = self
+            .inner
+            .get_syscall(&syscall)
+            .context(format!("Unknown syscall: {syscall:?}"))?
+            .borrow_mut()
+            .syscall(&syscall, &mut ctx, buf)?;
+        ret.try_into()
+            .map_err(|e| anyhow!("invalid syscall return value: {e}"))
     }
 
     fn host_write(
@@ -677,9 +659,6 @@ impl CircuitSyscall for CircuitSyscallTable<'_> {
 
 impl<'a> From<SyscallTable<'a>> for CircuitSyscallTable<'a> {
     fn from(inner: SyscallTable<'a>) -> Self {
-        Self {
-            inner,
-            return_cache: Cell::new((0, 0)),
-        }
+        Self { inner }
     }
 }
