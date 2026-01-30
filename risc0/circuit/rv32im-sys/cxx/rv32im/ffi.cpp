@@ -274,7 +274,7 @@ ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {
   });
 }
 
-ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2) {
+ProverContext* risc0_circuit_rv32im_m3_prover_new_gpu(size_t po2) {
   return tryRet([&] {
     IHalPtr hal = getGpuHal();
     return new ProverContext(hal, po2);

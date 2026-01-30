@@ -30,6 +30,8 @@
 #include "zkp/poseidon2_consts.h"
 #include "zkp/rou.h"
 
+#include METAL_KERNEL_H
+
 using namespace risc0;
 
 class MetalHal;
@@ -84,18 +86,26 @@ public:
 
     // Load the library and get the functions
     NS::Error* error;
-    // TODO: Loading from a file is annoying and dangerous
-    MTL::Library* library =
-        device->newLibrary(MTLSTR("hal/metal/kernels/kernels.metallib"), &error);
+
+    auto data = dispatch_data_create(metal_kernel,
+                                     metal_kernel_len,
+                                     dispatch_get_main_queue(),
+                                     DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+    MTL::Library* library = device->newLibrary(data, &error);
+    dispatch_release(data);
+
     if (!library) {
       LOG(0, "Unable to load library: " << error->localizedDescription()->utf8String());
       throw std::runtime_error("Unable to load library");
     }
+
+    std::mutex m;
     auto allNames = library->functionNames();
-    for (size_t i = 0; i < allNames->count(); i++) {
+    parallel_map(allNames->count(), [this, &allNames, &library, &m](size_t i) {
       NS::String* name = allNames->object<NS::String>(i);
       std::string cppName = name->utf8String();
       MTL::Function* func = library->newFunction(name);
+      NS::Error* error;
       MTL::ComputePipelineState* pls = device->newComputePipelineState(func, &error);
       func->release();
       if (!pls) {
@@ -104,8 +114,12 @@ public:
                                       << "`: " << error->localizedDescription()->utf8String());
         throw std::runtime_error("Unable to load kernel");
       }
+
+      m.lock();
       kernels[cppName] = pls;
-    }
+      m.unlock();
+    });
+
     library->release();
 
     // Prepare some constants
@@ -127,6 +141,9 @@ public:
   ~MetalHal() override {
     if (commandBuffer) {
       commandBuffer->release();
+    }
+    for (auto& [_, value] : kernels) {
+      value->release();
     }
     if (commandQueue) {
       commandQueue->release();
@@ -525,6 +542,7 @@ private:
   void prepBuffer() {
     if (!commandBuffer) {
       commandBuffer = commandQueue->commandBuffer();
+      commandBuffer->retain();
     } else {
       return;
     }
@@ -542,6 +560,7 @@ private:
     groupSize = it->second->maxTotalThreadsPerThreadgroup();
     prepBuffer();
     auto* encode = commandBuffer->computeCommandEncoder();
+    encode->retain();
     encode->setComputePipelineState(it->second);
     return encode;
   }
