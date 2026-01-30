@@ -480,56 +480,6 @@ mod riscv {
 
 #[test_log::test]
 #[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
-#[ignore = "XXX m3"]
-fn pause_resume() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::PauseResume(0))
-        .unwrap()
-        .build()
-        .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-
-    // Run until sys_pause
-    let session = exec.run().unwrap();
-    assert_eq!(session.segments.len(), 1);
-    assert_eq!(session.exit_code, ExitCode::Paused(0));
-    let receipt = prove_session(&session).unwrap();
-    let segments = &receipt.inner.composite().unwrap().segments;
-    assert_eq!(segments.len(), 1);
-    assert_eq!(segments[0].index, 0);
-
-    // Run until sys_halt
-    let session = exec.run().unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-    prove_session(&session).unwrap();
-}
-
-#[test_log::test]
-#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
-#[ignore = "XXX m3"]
-fn pause_exit_nonzero() {
-    let user_exit_code = 1;
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::PauseResume(user_exit_code))
-        .unwrap()
-        .build()
-        .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-
-    // Run until sys_pause
-    let session = exec.run().unwrap();
-    assert_eq!(session.segments.len(), 1);
-    assert_eq!(session.exit_code, ExitCode::Paused(user_exit_code as u32));
-    prove_session(&session).unwrap();
-
-    // Run until sys_halt
-    let session = exec.run().unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-    prove_session(&session).unwrap();
-}
-
-#[test_log::test]
-#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
@@ -561,7 +511,6 @@ fn continuation() {
 
     let _receipt = prove_session(&session).unwrap();
 
-    // The segment index is no longer used with rv32im-m3
     for (idx, receipt) in _receipt
         .inner
         .composite()
@@ -572,27 +521,6 @@ fn continuation() {
     {
         assert_eq!(receipt.index, idx as u32);
     }
-}
-
-#[test_log::test]
-#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
-#[ignore = "XXX m3"]
-fn sys_input() {
-    use hex::FromHex;
-    let digest =
-        Digest::from_hex("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
-            .unwrap();
-    let spec = MultiTestSpec::SysInput(digest);
-    let env = ExecutorEnv::builder()
-        .input_digest(digest)
-        .write(&spec)
-        .unwrap()
-        .build()
-        .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-    prove_session(&session).unwrap();
 }
 
 #[rstest]

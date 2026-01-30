@@ -42,26 +42,26 @@ pub struct ProverContext {
 impl ProverContext {
     #[allow(dead_code)]
     pub fn new_cpu(po2: usize) -> Result<Self> {
-        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_m3_prover_new_cpu(po2) })?;
+        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_prover_new_cpu(po2) })?;
         Ok(Self { ctx })
     }
 
     #[cfg(feature = "cuda")]
     pub fn new_cuda(po2: usize) -> Result<Self> {
-        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_m3_prover_new_gpu(po2) })?;
+        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_prover_new_gpu(po2) })?;
         Ok(Self { ctx })
     }
 
     #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))]
     pub fn new_metal(po2: usize) -> Result<Self> {
-        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_m3_prover_new_gpu(po2) })?;
+        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_prover_new_gpu(po2) })?;
         Ok(Self { ctx })
     }
 
     pub fn prove(&self, preflight: &PreflightContext) -> Result<Seal> {
         tracing::debug!("prove");
         ffi_wrap_void(|| unsafe {
-            risc0_circuit_rv32im_m3_prove(
+            risc0_circuit_rv32im_prove(
                 self.ctx.as_ptr(),
                 preflight.row_info.as_ptr(),
                 preflight.row_info.len(),
@@ -78,7 +78,7 @@ impl ProverContext {
 
     fn transcript(&self) -> Result<Seal> {
         let transcript = unsafe {
-            let transcript = risc0_circuit_rv32im_m3_prover_transcript(self.ctx.as_ptr());
+            let transcript = risc0_circuit_rv32im_prover_transcript(self.ctx.as_ptr());
             std::slice::from_raw_parts(transcript.ptr, transcript.len)
         };
         Ok(transcript.to_vec())
@@ -87,7 +87,7 @@ impl ProverContext {
 
 impl Drop for ProverContext {
     fn drop(&mut self) {
-        unsafe { risc0_circuit_rv32im_m3_prover_free(self.ctx.as_ptr()) };
+        unsafe { risc0_circuit_rv32im_prover_free(self.ctx.as_ptr()) };
     }
 }
 

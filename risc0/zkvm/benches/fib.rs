@@ -51,9 +51,8 @@ fn warmup(_group: &mut BenchGroup) {
         let prover = get_prover_server(&opts).unwrap();
         let session = setup_exec(1).run().unwrap();
         let segment = session.segments[0].resolve().unwrap();
-        let receipts = prover.prove_segment(&ctx, &segment).unwrap();
-        let receipt = receipts.first().unwrap();
-        prover.lift(receipt).unwrap();
+        let receipt = prover.prove_segment(&ctx, &segment).unwrap();
+        prover.lift(&receipt).unwrap();
     }
 }
 
@@ -96,10 +95,7 @@ fn lift(group: &mut BenchGroup) {
                 let segment = session.segments[0].resolve().unwrap();
                 prover.prove_segment(&ctx, &segment).unwrap()
             },
-            |receipts| {
-                let receipt = receipts.first().unwrap();
-                prover.lift(receipt)
-            },
+            |receipt| prover.lift(receipt),
         );
     })
 }
