@@ -13,8 +13,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use anyhow::{Result, anyhow};
-use quote::{format_ident, quote};
 use std::{
     collections::BTreeMap,
     env, fs,
@@ -22,15 +20,20 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use anyhow::{Result, anyhow};
+use quote::{format_ident, quote};
+use xshell::{Shell, cmd};
+
+use risc0_build_kernel::{KernelBuild, KernelType};
+
 const MIN_PO2: usize = 12;
 const MAX_PO2: usize = 23;
 
 const PLATFORM_CPU: Platform = Platform::new("cpu", "cpp", "hal/cpu");
 const PLATFORM_CUDA: Platform = Platform::new("cuda", "cu", "hal/cuda/kernels");
-// const PLATFORM_METAL: Platform = Platform::new("metal", "metal", "hal/metal/kernels");
+const PLATFORM_METAL: Platform = Platform::new("metal", "metal", "hal/metal/kernels");
 
 fn main() {
-    let output = "risc0_rv32im_m3";
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
 
     rerun_if_env_changed("NVCC_APPEND_FLAGS");
@@ -45,11 +48,7 @@ fn main() {
     rerun_if_changed("cxx/zkp");
     rerun_if_changed("vendor");
 
-    let platform =
-    // if is_metal() {
-    //     PLATFORM_METAL
-    // } else
-    if is_cuda() {
+    let platform = if is_cuda() {
         PLATFORM_CUDA
     } else {
         PLATFORM_CPU
@@ -67,18 +66,13 @@ fn main() {
         make_po2s(spec, &out_dir, &mut generated_files);
     }
 
-    let mut build = cc::Build::new();
+    let mut build = KernelBuild::new(if is_cuda() {
+        KernelType::Cuda
+    } else {
+        KernelType::Cpp
+    });
+
     build
-        .cpp(true)
-        .debug(false)
-        .warnings(false)
-        .flag("-std=c++17")
-        // .flag("-Xcompiler")
-        // .flag("-fsanitize=address")
-        // .flag("-Xcompiler")
-        // .flag("-fno-omit-frame-pointer")
-        // .flag("-Xcompiler")
-        // .flag("-g")
         .include("cxx")
         .include("vendor")
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
@@ -90,19 +84,10 @@ fn main() {
         .files(glob_paths("cxx/verify/*.cpp"))
         .files(glob_paths("cxx/verify/info/*.cpp"))
         .files(glob_paths("cxx/zkp/*.cpp"))
-        .files(generated_files);
+        .generated_files(generated_files);
 
-    // println!("cargo:rustc-link-lib=asan");
-
-    // if is_metal() {
-    //     build
-    //         .file("cxx/hal/metal/hal.cpp")
-    //         .files(glob_paths("cxx/hal/metal/kernel/*.metal"));
-    // } else
     if is_cuda() {
         build
-            .cuda(true)
-            .cudart("static")
             .flag("-diag-suppress=20012")
             .flag("--expt-relaxed-constexpr")
             .flag("-DFEATURE_BABY_BEAR")
@@ -116,7 +101,33 @@ fn main() {
         }
     }
 
-    build.compile(output);
+    if is_metal() {
+        let specs = [
+            ExpandSpec::new("data_witgen", PLATFORM_METAL),
+            ExpandSpec::new("accum_witgen", PLATFORM_METAL),
+            ExpandSpec::new("eval_check", PLATFORM_METAL),
+        ];
+
+        let mut generated_files = vec![];
+        for spec in specs {
+            make_po2s(spec, &out_dir, &mut generated_files);
+        }
+
+        KernelBuild::new(KernelType::Metal)
+            .include("cxx")
+            .files(glob_paths("cxx/hal/metal/kernels/*.metal"))
+            .generated_files(generated_files)
+            .compile("metal_kernel");
+
+        add_metal_kernel_include(
+            &mut build,
+            &Path::new(&out_dir).join("metal_kernel.metallib"),
+        );
+        install_metal_cpp_library(&mut build);
+        build.file("cxx/hal/metal/hal.cpp");
+    }
+
+    build.compile("risc0_rv32im");
 
     let mut block_types = parse_block_types().unwrap();
     block_types.insert(
@@ -443,6 +454,63 @@ fn glob_paths(pattern: &str) -> Vec<PathBuf> {
     glob::glob(pattern).unwrap().map(|x| x.unwrap()).collect()
 }
 
+const METAL_SDK_URL: &str = "https://developer.apple.com/metal/cpp/files/metal-cpp_26.zip";
+
+fn install_metal_cpp_library(build: &mut KernelBuild) {
+    if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
+        return;
+    }
+
+    let sh = Shell::new().unwrap();
+
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
+    let metal_dir = Path::new(&out_dir).join("metal-sdk");
+
+    std::fs::create_dir_all(&metal_dir).unwrap();
+
+    cmd!(
+        sh,
+        "/usr/bin/curl -o {metal_dir}/metal-cpp.zip {METAL_SDK_URL}"
+    )
+    .run()
+    .unwrap();
+
+    if metal_dir.join("metal-cpp").exists() {
+        std::fs::remove_dir_all(metal_dir.join("metal-cpp")).unwrap();
+    }
+
+    cmd!(
+        sh,
+        "/usr/bin/unzip {metal_dir}/metal-cpp.zip -d {metal_dir}"
+    )
+    .run()
+    .unwrap();
+
+    build.include(metal_dir.join("metal-cpp"));
+}
+
+fn add_metal_kernel_include(build: &mut KernelBuild, kernel_path: &Path) {
+    if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
+        return;
+    }
+
+    let sh = Shell::new().unwrap();
+
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
+    let kernel_inc = Path::new(&out_dir).join("metal-sdk");
+
+    std::fs::create_dir_all(&kernel_inc).unwrap();
+
+    let header = kernel_inc.join("metal_kernel.h");
+    let header = header.to_str().unwrap();
+
+    cmd!(sh, "/usr/bin/xxd -n metal_kernel -i {kernel_path} {header}")
+        .run()
+        .unwrap();
+
+    build.flag(&format!("-DMETAL_KERNEL_H=\"{header}\""));
+}
+
 const TEMPLATE: &str = r#"
 #define NUM_ROWS_PO2 {po2}
 #define NAMESPACE {func}_{platform}_impl_{po2}
@@ -510,6 +578,6 @@ fn is_cuda() -> bool {
     env::var("CARGO_FEATURE_CUDA").is_ok()
 }
 
-// fn is_metal() -> bool {
-//     env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios")
-// }
+fn is_metal() -> bool {
+    env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios")
+}

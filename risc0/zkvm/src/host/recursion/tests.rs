@@ -38,7 +38,7 @@ use crate::{
 };
 
 #[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_recursion_poseidon2() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -139,7 +139,7 @@ fn prove_segments(session: &Session) -> Result<Vec<SegmentReceipt>> {
     let ctx = VerifierContext::default();
     let segment_receipts = session
         .segments()
-        .flat_map(|x| prover.prove_segment(&ctx, &x.unwrap()).unwrap())
+        .map(|x| prover.prove_segment(&ctx, &x.unwrap()).unwrap())
         .collect::<Vec<_>>();
 
     tracing::info!("Done proving rv32im: {} segments", segment_receipts.len());
@@ -211,7 +211,7 @@ static ECHO_SUCCINCT: LazyLock<(Journal, SuccinctReceipt<ReceiptClaim>)> = LazyL
 
 #[test_log::test]
 #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_recursion_lift_join_identity_p254_e2e() {
     // Prove the base case
     let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();
@@ -243,7 +243,7 @@ fn test_recursion_lift_join_identity_p254_e2e() {
 }
 
 #[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_recursion_identity_sha256() {
     let (_, default_receipt) = ECHO_SUCCINCT.clone();
     let (_, control_id_sha256) = zkr::identity("sha-256").unwrap();
@@ -290,7 +290,7 @@ fn test_recursion_identity_sha256() {
 }
 
 #[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_recursion_lift_resolve_e2e() {
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
@@ -382,7 +382,7 @@ mod povw {
     use super::*;
 
     #[test_log::test]
-    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    #[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
     fn test_recursion_lift_then_unwrap() {
         // Prove the base case
         let (journal, segment) = ECHO_SEGMENT.clone();
@@ -475,7 +475,7 @@ mod povw {
 
     #[test_log::test]
     #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
-    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    #[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
     fn test_recursion_lift_join_unwrap() {
         test_recursion_lift_join_unwrap_inner().unwrap();
     }
@@ -566,21 +566,21 @@ mod povw {
     }
 
     #[test_log::test]
-    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+    #[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
     fn test_recursion_lift_resolve_unwrap() {
         test_recursion_lift_resolve_unwrap_inner().unwrap();
     }
 }
 
 #[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_recursion_circuit() {
     let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
     super::test_zkr(&digest, &digest, RECURSION_PO2).unwrap();
 }
 
 #[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_po2_16() {
     use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
 
@@ -616,7 +616,7 @@ fn stable_root() {
 }
 
 #[test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn union() {
     let mut mmr = MerkleMountainAccumulator::<UnionPeak>::new();
     for receipt in vec![ECHO_SUCCINCT.1.clone(); 5] {
