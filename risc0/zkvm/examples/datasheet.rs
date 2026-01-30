@@ -554,7 +554,7 @@ impl Datasheet {
     fn warmup(&self) {
         println!("warmup");
 
-        #[cfg(any(feature = "cuda", feature = "metal"))]
+        #[cfg(gpu_accel)]
         {
             let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
             let prover = get_prover_server(&opts).unwrap();
@@ -574,7 +574,7 @@ impl Datasheet {
     }
 }
 
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

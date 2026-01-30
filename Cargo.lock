@@ -7454,6 +7454,7 @@ dependencies = [
  "serde",
  "strum",
  "tracing",
+ "xshell",
 ]
 
 [[package]]

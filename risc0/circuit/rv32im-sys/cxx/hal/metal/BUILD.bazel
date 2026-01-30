@@ -6,10 +6,14 @@ objc_library(
         "Metal",
     ],
     target_compatible_with = ["@platforms//os:macos"],
-    visibility = ["//visibility:public"],
     deps = [
         "//core",
         "//hal",
         "@metal_cpp",
+        "//hal/metal/kernels:kernel_header_lib",
     ],
+    defines = [
+        "METAL_KERNEL_H=\\\"hal/metal/kernels/metal_kernel.h\\\""
+    ],
+    visibility = ["//visibility:public"],
 )

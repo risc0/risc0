@@ -53,7 +53,7 @@ const uint32_t* risc0_circuit_rv32im_m3_preflight_aux(PreflightContext* ctx);
 size_t risc0_circuit_rv32im_m3_preflight_aux_size(PreflightContext* ctx);
 
 ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2);
-ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2);
+ProverContext* risc0_circuit_rv32im_m3_prover_new_gpu(size_t po2);
 
 void risc0_circuit_rv32im_m3_prove(ProverContext* ctx,
                                    const risc0::RowInfo* rowInfo,
