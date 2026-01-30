@@ -21,7 +21,7 @@ use std::{
     ptr::NonNull,
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use bytemuck::{Pod, Zeroable};
 
 #[cfg_attr(

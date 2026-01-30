@@ -112,7 +112,7 @@ pub fn segment_prover(po2: usize) -> Result<ProverContext> {
 ))]
 mod tests {
     use crate::execute::{
-        ExecutionLimit, Executor, SegmentUpdate, Syscall, SyscallContext, RV32IM_M3_CIRCUIT_VERSION,
+        ExecutionLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, SegmentUpdate, Syscall, SyscallContext,
     };
     use paste::paste;
     use risc0_binfmt::{MemoryImage, Program};

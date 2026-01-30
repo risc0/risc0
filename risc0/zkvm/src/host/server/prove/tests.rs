@@ -19,19 +19,19 @@ use anyhow::Result;
 use risc0_binfmt::MemoryImage;
 use risc0_zkp::{core::digest::Digest, digest, verify::VerificationError};
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
+    HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec,
 };
-use risc0_zkvm_platform::{memory, WORD_SIZE};
+use risc0_zkvm_platform::{WORD_SIZE, memory};
 use rstest::rstest;
 
 use super::get_prover_server;
 use crate::{
+    ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
+    SimpleSegmentRef, SuccinctReceiptVerifierParameters, VerifierContext,
     host::server::{exec::executor::ExecutorImpl, testutils},
     recursion::prove::zkr,
     serde::{from_slice, to_vec},
     sha::Digestible,
-    ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
-    SimpleSegmentRef, SuccinctReceiptVerifierParameters, VerifierContext,
 };
 
 #[allow(dead_code)]
@@ -668,8 +668,8 @@ mod sys_verify {
 
     use super::*;
     use crate::{
-        recursion::{prove::zkr, test_zkr, MerkleGroup},
-        Assumption, SuccinctReceipt, Unknown, RECURSION_PO2,
+        Assumption, RECURSION_PO2, SuccinctReceipt, Unknown,
+        recursion::{MerkleGroup, prove::zkr, test_zkr},
     };
 
     fn prove_halt(exit_code: u8) -> Receipt {
@@ -1083,12 +1083,12 @@ mod povw {
 
 mod soundness {
     // use risc0_circuit_rv32im::{prove::emu::exec::DEFAULT_SEGMENT_LIMIT_PO2, CIRCUIT};
-    use risc0_circuit_rv32im::{execute::DEFAULT_SEGMENT_LIMIT_PO2, CircuitImpl};
+    use risc0_circuit_rv32im::{CircuitImpl, execute::DEFAULT_SEGMENT_LIMIT_PO2};
     use risc0_zkp::{
         adapter::TapsProvider,
         field::{
-            baby_bear::{BabyBear, BabyBearExtElem},
             ExtElem,
+            baby_bear::{BabyBear, BabyBearExtElem},
         },
         hal::cpu::CpuHal,
         prove::soundness,
@@ -1136,7 +1136,7 @@ mod soundness {
 
 mod keccak {
     use risc0_circuit_keccak::{
-        prove::zkr::get_keccak_zkr, KECCAK_CONTROL_IDS, KECCAK_CONTROL_ROOT, KECCAK_PO2_RANGE,
+        KECCAK_CONTROL_IDS, KECCAK_CONTROL_ROOT, KECCAK_PO2_RANGE, prove::zkr::get_keccak_zkr,
     };
     use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
 
@@ -1191,12 +1191,14 @@ mod keccak {
 
         // Make sure this receipt actually depends on the assumption;
         // otherwise this test might give a false negative.
-        assert!(!receipt
-            .inner
-            .composite()
-            .unwrap()
-            .assumption_receipts
-            .is_empty());
+        assert!(
+            !receipt
+                .inner
+                .composite()
+                .unwrap()
+                .assumption_receipts
+                .is_empty()
+        );
 
         // Make sure the receipt verifies OK
         receipt.verify(MULTI_TEST_ID).unwrap();

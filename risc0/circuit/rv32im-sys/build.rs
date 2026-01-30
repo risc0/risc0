@@ -20,9 +20,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use quote::{format_ident, quote};
-use xshell::{cmd, Shell};
+use xshell::{Shell, cmd};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
