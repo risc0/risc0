@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -205,8 +205,8 @@ mod tests {
         tracing::trace!("Proof3: {proof3:?}");
 
         proof1.verify(&digest1, &root, hashfn).unwrap();
-        proof1.verify(&digest1, &root, hashfn).unwrap();
-        proof1.verify(&digest1, &root, hashfn).unwrap();
+        proof2.verify(&digest2, &root, hashfn).unwrap();
+        proof3.verify(&digest3, &root, hashfn).unwrap();
 
         // Digest1 and digest2 should share 3 levels of proof, whereas proof2 and proof3
         // should only share 2

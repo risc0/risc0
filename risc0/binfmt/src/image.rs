@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -29,7 +29,7 @@ use std::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::boxed::Box;
 
-use anyhow::{Result, anyhow, bail, ensure};
+use anyhow::{Result, bail, ensure};
 use derive_more::Debug;
 use risc0_zkp::{
     core::{
@@ -96,6 +96,11 @@ pub struct Page(Arc<[u8; PAGE_BYTES]>);
 #[derive(Clone)]
 pub struct Page(Box<[u8; PAGE_BYTES]>);
 
+// INVARIANTS:
+// A) If a digest node is dirty, all of its ancestors are dirty.
+// B) The root digest node is always populated.
+// C) Any unpopulated subtree, for which the direct ancestor is marked dirty, has only zero pages.
+
 /// A memory image
 ///
 /// A full memory image of a zkVM guest. Includes functionality for accessing
@@ -111,14 +116,17 @@ pub struct MemoryImage {
     /// The digests of the memory image, representing a merkle tree.
     #[debug("{} entries", digests.len())]
     // #[debug("{:#010x?}", digests.keys())]
-    pub digests: BTreeMap<u32, Digest>,
+    digests: BTreeMap<u32, Digest>,
 
+    /// Set of indices that are marked as dirty (i.e. that a descendant was updated since the last
+    /// time this digest was updated).
     #[debug("{} entries", dirty.len())]
     dirty: BTreeSet<u32>,
 }
 
 impl Default for MemoryImage {
     fn default() -> Self {
+        // NOTE: The root digest is populated here from the zero cache, ensuring invariant B.
         Self {
             pages: Default::default(),
             digests: BTreeMap::from([(1, ZERO_CACHE.digests[0])]),
@@ -128,44 +136,16 @@ impl Default for MemoryImage {
 }
 
 impl MemoryImage {
-    fn new(image: BTreeMap<u32, u32>) -> Self {
-        let mut this = Self::default();
-        let mut cur_page_idx = u32::MAX;
-        let mut cur_page: Option<Page> = None;
-
-        for (&addr, &word) in image.iter() {
-            let addr = ByteAddr(addr).waddr();
-            let page_idx = addr.page_idx();
-            if page_idx != cur_page_idx {
-                if let Some(page) = cur_page.take() {
-                    this.set_page(cur_page_idx, page);
-                }
-                cur_page = Some(Page::default());
-                cur_page_idx = page_idx;
-            }
-
-            cur_page.as_mut().unwrap().store(addr, word);
-        }
-
-        if let Some(page) = cur_page.take() {
-            this.set_page(cur_page_idx, page);
-        }
-
-        this.update_digests();
-
-        this
-    }
-
     /// Creates the initial memory state for a user-mode `program`.
     pub fn new_user(mut program: Program) -> Self {
         program.prepare_user();
-        Self::new(program.image)
+        program.image
     }
 
     /// Creates the initial memory state for a kernel-mode `program`.
     pub fn new_kernel(mut program: Program) -> Self {
         program.prepare_kernel(None);
-        Self::new(program.image)
+        program.image
     }
 
     /// Creates the initial memory state for a user-mode `user` [Program] with a
@@ -173,7 +153,7 @@ impl MemoryImage {
     pub fn with_kernel(mut user: Program, mut kernel: Program) -> Self {
         user.prepare_user();
         kernel.prepare_kernel(Some(&mut user));
-        Self::new(kernel.image)
+        kernel.image
     }
 
     /// Returns a set of the page indexes that are loaded.
@@ -182,27 +162,29 @@ impl MemoryImage {
     }
 
     /// Sorted iterator over page digests (digest_idx -> Digest)
-    pub fn digests(&self) -> impl Iterator<Item = (&'_ u32, &'_ Digest)> + '_ {
-        assert!(
-            self.dirty.is_empty(),
-            "attempted to get digests on a dirty memory image"
-        );
+    ///
+    /// Updates digests if they are not already up to date.
+    pub fn digests(&mut self) -> impl Iterator<Item = (&'_ u32, &'_ Digest)> + '_ {
+        self.update_digests();
         self.digests.iter()
     }
 
-    /// Return the page data, fails if unavailable
-    pub fn get_page(&mut self, page_idx: u32) -> Result<Page> {
+    /// Discard the hashes and turn the MemoryImage into just its pages
+    pub fn into_pages(self) -> BTreeMap<u32, Page> {
+        self.pages
+    }
+
+    /// Return the page data, fails if unavailable.
+    pub fn get_page(&self, page_idx: u32) -> Result<&Page> {
         // If page exists, return it
         if let Some(page) = self.pages.get(&page_idx) {
-            return Ok(page.clone());
+            return Ok(page);
         }
 
-        // Otherwise try an expand
+        // If the page is zero, return a reference to the cached zero page.
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
-        if self.expand_if_zero(digest_idx) {
-            let zero_page = &ZERO_CACHE.page;
-            self.pages.insert(page_idx, zero_page.clone());
-            return Ok(zero_page.clone());
+        if self.is_zero(digest_idx) {
+            return Ok(&ZERO_CACHE.page);
         }
 
         // Otherwise fail
@@ -210,131 +192,151 @@ impl MemoryImage {
     }
 
     /// Set the data for a page.
-    ///
-    /// Inner nodes which are ancestors of this page will be marked as dirty. The caller must call
-    /// [MemoryImage::update_digests] to recompute these nodes after calling this function.
     pub fn set_page(&mut self, page_idx: u32, page: Page) {
         // tracing::trace!("set_page({page_idx:#08x})");
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
-        self.expand_if_zero(digest_idx);
-        self.digests.insert(digest_idx, page.digest());
         self.pages.insert(page_idx, page);
+        // Mark the page digest and all ancestors as dirty.
         self.mark_dirty(digest_idx);
+    }
+
+    /// Returns a mutable reference to the indexed page in the [MemoryImage]. Modifying this page
+    /// will modify the memory image.
+    ///
+    /// Marks the retrieved page as dirty, under the assumption that the caller will modify it.
+    fn get_page_mut(&mut self, page_idx: u32) -> Result<&mut Page> {
+        let digest_idx = MEMORY_PAGES as u32 + page_idx;
+
+        // NOTE: We cannot use pages.get_mut in the if because it creates a mutable borrow that
+        // prevents the is_zero check. The Rust borrow checker cannot accept both borrows here.
+        if self.pages.contains_key(&page_idx) {
+            self.mark_dirty(digest_idx);
+            return Ok(self.pages.get_mut(&page_idx).unwrap());
+        }
+
+        // If the page is zero, then populate it.
+        if self.is_zero(digest_idx) {
+            let zero_page = ZERO_CACHE.page.clone();
+            self.mark_dirty(digest_idx);
+            return Ok(self.pages.entry(page_idx).or_insert(zero_page));
+        }
+
+        bail!("Unavailable page: {page_idx}")
+    }
+
+    /// Returns a single word at the given [WordAddr].
+    pub(crate) fn get_word(&self, addr: WordAddr) -> Result<u32> {
+        Ok(self.get_page(addr.page_idx())?.load(addr))
+    }
+
+    /// Sets a single word at the given [WordAddr].
+    pub fn set_word(&mut self, addr: WordAddr, word: u32) -> Result<()> {
+        self.get_page_mut(addr.page_idx())?.store(addr, word);
+        Ok(())
+    }
+
+    pub(crate) fn set_region(&mut self, start: ByteAddr, data: impl AsRef<[u8]>) -> Result<()> {
+        let mut data = data.as_ref();
+        let mut pos = start;
+        while !data.is_empty() {
+            let page = self.get_page_mut(pos.page_idx())?;
+            let buf_dst = &mut page.ensure_writable()[pos.page_subaddr().0 as usize..];
+            let copy_len = usize::min(buf_dst.len(), data.len());
+            // copy_len <= data.len() for split_off will return Some(_).
+            let buf_src = data.split_off(..copy_len).unwrap();
+            buf_dst[..copy_len].copy_from_slice(buf_src);
+
+            pos += copy_len;
+        }
+        Ok(())
     }
 
     /// Set the data for a page and with the given digest
-    ///
-    /// Inner nodes which are ancestors of this page will be marked as dirty. The caller must call
-    /// [MemoryImage::update_digests] to recompute these nodes after calling this function.
     pub fn set_page_with_digest(&mut self, page_idx: u32, page: Page, digest: Digest) {
         let digest_idx = MEMORY_PAGES as u32 + page_idx;
-        self.expand_if_zero(digest_idx);
         self.digests.insert(digest_idx, digest);
         self.pages.insert(page_idx, page);
-        self.mark_dirty(digest_idx);
+        // Mark ancestor digests as dirty.
+        self.mark_dirty(digest_idx / 2);
     }
 
     /// Get a digest, fails if unavailable
-    pub fn get_digest(&mut self, digest_idx: u32) -> Result<&Digest> {
-        // Expand if needed
-        self.expand_if_zero(digest_idx);
+    pub fn get_digest(&self, digest_idx: u32) -> Result<&Digest> {
         ensure!(
             !self.dirty.contains(&digest_idx),
             "digest marked as dirty: {digest_idx}"
         );
-        self.digests
-            .get(&digest_idx)
-            .ok_or_else(|| anyhow!("Unavailable digest: {digest_idx}"))
+        if let Some(digest) = self.digests.get(&digest_idx) {
+            return Ok(digest);
+        }
+        if self.is_zero(digest_idx) {
+            return Ok(&ZERO_CACHE.digests[digest_idx.ilog2() as usize]);
+        }
+        bail!("Unavailable digest: {digest_idx}")
+    }
+
+    /// Get the digest of a node in the Merkle tree, updating it if marked as dirty.
+    pub fn get_or_update_digest(&mut self, digest_idx: u32) -> Result<&Digest> {
+        self.update_subtree_digests(digest_idx);
+        self.get_digest(digest_idx)
     }
 
     /// Set a digest.
     ///
-    /// Inner nodes which are ancestors of this page will be marked as dirty. The caller must call
-    /// [MemoryImage::update_digests] to recompute these nodes after calling this function.
+    /// It is the caller's responsibility to ensure that the digest set is consistent with the rest
+    /// of the tree. In particular, the digest must be a valid root for the subtree of digests and
+    /// pages rooted at this digest index.
     pub fn set_digest(&mut self, digest_idx: u32, digest: Digest) {
         // If digest is in a zero region, reify for proper uncles
-        self.expand_if_zero(digest_idx);
-        // Set the digest value
         self.digests.insert(digest_idx, digest);
-        self.mark_dirty(digest_idx);
+        // Mark ancestor digests as dirty.
+        self.mark_dirty(digest_idx / 2);
     }
 
     /// Return the root digest
     pub fn image_id(&mut self) -> Digest {
+        // When updating the whole tree, it is slightly faster to use the update_digests.
+        self.update_digests();
         *self.get_digest(1).unwrap()
     }
 
     /// Return the user portion of the Merkle tree.
     pub fn user_id(&mut self) -> Digest {
-        *self.get_digest(2).unwrap()
+        *self.get_or_update_digest(2).unwrap()
     }
 
     /// Return the kernel portion of the Merkle tree.
     pub fn kernel_id(&mut self) -> Digest {
-        *self.get_digest(3).unwrap()
-    }
-
-    /// Expand if digest at `digest_idx` is a zero, return if expanded
-    fn expand_if_zero(&mut self, digest_idx: u32) -> bool {
-        self.is_zero(digest_idx)
-            .then(|| {
-                self.expand_zero(digest_idx);
-            })
-            .is_some()
+        *self.get_or_update_digest(3).unwrap()
     }
 
     /// Check if given Merkle tree node is a zero
     fn is_zero(&self, mut digest_idx: u32) -> bool {
         // Compute the depth in the tree of this node
         let mut depth = digest_idx.ilog2() as usize;
-        // Go up until we hit a valid node or get past the root
+
+        // Go up until we hit a valid node or get past the root.
         while !self.digests.contains_key(&digest_idx) && digest_idx > 0 {
             digest_idx /= 2;
             depth -= 1;
         }
+
         if digest_idx == 0 {
-            false
-        } else {
-            self.digests[&digest_idx] == ZERO_CACHE.digests[depth]
+            unreachable!("corrupted memory image; contains no root digest")
         }
+
+        // If the nearest ancestor is dirty, then this is a zero-subtree by invariant C.
+        self.digests[&digest_idx] == ZERO_CACHE.digests[depth] || self.dirty.contains(&digest_idx)
     }
 
-    /// Expand zero Merkle tree node.
-    ///
-    /// Presumes `is_zero(digest_idx)` returned true. Populates the digests BTreeMap at the given
-    /// digest_idx, its sibling and all empty parents and uncles with zero-subtree digests.
-    fn expand_zero(&mut self, mut digest_idx: u32) {
-        // Compute the depth in the tree of this node
-        let mut depth = digest_idx.ilog2() as usize;
-        // Go up until we hit the valid zero node
-        while !self.digests.contains_key(&digest_idx) {
-            let parent_idx = digest_idx / 2;
-            let lhs_idx = parent_idx * 2;
-            let rhs_idx = parent_idx * 2 + 1;
-            self.digests.insert(lhs_idx, ZERO_CACHE.digests[depth]);
-            self.digests.insert(rhs_idx, ZERO_CACHE.digests[depth]);
-            digest_idx = parent_idx;
-            depth -= 1;
-        }
-    }
-
-    /// Mark inner digests as dirty after a change
+    /// Mark the given digest and all ancestors as dirty after a change.
     fn mark_dirty(&mut self, mut digest_idx: u32) {
-        while digest_idx != 1 {
-            let parent_idx = digest_idx / 2;
-            let lhs_idx = parent_idx * 2;
-            let rhs_idx = parent_idx * 2 + 1;
-            let lhs = self.digests.get(&lhs_idx);
-            let rhs = self.digests.get(&rhs_idx);
-            if let (Some(_), Some(_)) = (lhs, rhs) {
-                if !self.dirty.insert(parent_idx) {
-                    // Node already marked dirty. All parents will also be marked dirty already.
-                    break;
-                }
-                digest_idx = parent_idx;
-            } else {
-                unreachable!("corrupted MemoryImage");
-            };
+        while digest_idx != 0 {
+            if !self.dirty.insert(digest_idx) {
+                // Node already marked dirty. All parents will also be marked dirty already.
+                break;
+            }
+            digest_idx /= 2;
         }
     }
 
@@ -343,19 +345,66 @@ impl MemoryImage {
     pub fn update_digests(&mut self) {
         let dirty = mem::take(&mut self.dirty);
         for idx in dirty.into_iter().rev() {
-            let lhs_idx = idx * 2;
-            let rhs_idx = idx * 2 + 1;
-            let lhs = *self.digests.get(&lhs_idx).unwrap();
-            let rhs = *self.digests.get(&rhs_idx).unwrap();
-
-            let parent_digest = DigestPair { lhs, rhs }.digest();
-            self.digests.insert(idx, parent_digest);
+            self.update_dirty_digest(idx);
         }
     }
 
-    /// Discard the hashes and turn the MemoryImage into just its pages
-    pub fn into_pages(self) -> BTreeMap<u32, Page> {
-        self.pages
+    /// Update the Merkle tree node digest, and the digests of all children.
+    ///
+    /// Returns the updated digest if an update was performed.
+    fn update_subtree_digests(&mut self, digest_idx: u32) {
+        // Return early if the given node is already updated.
+        if !self.dirty.remove(&digest_idx) {
+            return;
+        }
+
+        // If this is an inner node, recursively update the children first.
+        if digest_idx < MEMORY_PAGES as u32 {
+            let lhs_idx = digest_idx * 2;
+            let rhs_idx = digest_idx * 2 + 1;
+            self.update_subtree_digests(lhs_idx);
+            self.update_subtree_digests(rhs_idx);
+        }
+
+        self.update_dirty_digest(digest_idx);
+    }
+
+    #[inline]
+    fn update_inner_digest(&mut self, digest_idx: u32) {
+        assert!(digest_idx < MEMORY_PAGES as u32);
+        let child_depth = digest_idx.ilog2() as usize + 1;
+        let lhs_idx = digest_idx * 2;
+        let rhs_idx = digest_idx * 2 + 1;
+        let zero_fill = || ZERO_CACHE.digests[child_depth];
+        // When updating the digest, populate any unpopulated children to preserve invariant C.
+        let lhs = *self.digests.entry(lhs_idx).or_insert_with(zero_fill);
+        let rhs = *self.digests.entry(rhs_idx).or_insert_with(zero_fill);
+
+        let digest = DigestPair { lhs, rhs }.digest();
+        self.digests.insert(digest_idx, digest);
+    }
+
+    #[inline]
+    fn update_page_digest(&mut self, digest_idx: u32) {
+        assert!(digest_idx >= MEMORY_PAGES as u32);
+        let page_idx = digest_idx - MEMORY_PAGES as u32;
+        // NOTE: The page must be set because this function will only be called if the digest was
+        // marked as dirty. The digest will only be marked as dirty if the page was set.
+        let digest = self.pages.get(&page_idx).unwrap().digest();
+        self.digests.insert(digest_idx, digest);
+    }
+
+    /// Update the digest at the given index.
+    ///
+    /// This function assumes that the page or child nodes required are already updated, and that
+    /// this node was marked as dirty. Any unpopulated children of the given node will be set to
+    /// their zero digest (to preserve invariant C).
+    fn update_dirty_digest(&mut self, digest_idx: u32) {
+        if digest_idx < MEMORY_PAGES as u32 {
+            self.update_inner_digest(digest_idx)
+        } else {
+            self.update_page_digest(digest_idx)
+        }
     }
 
     /// Dump the internal memory image state for diagnostics.
@@ -417,16 +466,16 @@ impl Page {
         word
     }
 
-    #[cfg(feature = "std")]
     #[inline(always)]
     fn ensure_writable(&mut self) -> &mut [u8; PAGE_BYTES] {
-        &mut *Arc::make_mut(&mut self.0)
-    }
-
-    #[cfg(not(feature = "std"))]
-    #[inline(always)]
-    fn ensure_writable(&mut self) -> &mut [u8; PAGE_BYTES] {
-        &mut *self.0
+        #[cfg(feature = "std")]
+        {
+            &mut *Arc::make_mut(&mut self.0)
+        }
+        #[cfg(not(feature = "std"))]
+        {
+            &mut *self.0
+        }
     }
 
     /// Store a word to this page
@@ -512,12 +561,10 @@ fn cells_to_digest(cells: &[BabyBearElem; CELLS]) -> Digest {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeMap;
-
     use risc0_zkp::digest;
     use test_log::test;
 
-    use super::{MemoryImage, Program, ZERO_CACHE};
+    use super::{ByteAddr, MemoryImage, Program, ZERO_CACHE};
 
     #[test]
     fn poseidon2_zeros() {
@@ -552,10 +599,9 @@ mod tests {
     #[test]
     fn image_circuit_match() {
         let entry = 0x10000;
-        let program = Program {
-            entry,
-            image: BTreeMap::from([(entry, 0x1234b337)]),
-        };
+        let mut image = MemoryImage::default();
+        image.set_word(ByteAddr(entry).waddr(), 0x1234b337).unwrap();
+        let program = Program { entry, image };
         let mut image = MemoryImage::new_kernel(program);
         assert_eq!(
             *image.get_digest(0x0040_0100).unwrap(),

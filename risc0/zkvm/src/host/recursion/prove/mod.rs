@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -22,14 +22,12 @@ use std::{
 };
 
 use anyhow::{Context, Result, anyhow, bail, ensure};
-use cfg_if::cfg_if;
 use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_recursion::{
     CircuitImpl,
     control_id::BN254_IDENTITY_CONTROL_ID,
     prove::{DigestKind, RecursionReceipt},
 };
-use risc0_circuit_rv32im::RV32IM_SEAL_VERSION;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::{
@@ -37,7 +35,6 @@ use risc0_zkp::{
         hash::{hash_suite_from_name, poseidon2::Poseidon2HashSuite},
     },
     field::baby_bear::BabyBearElem,
-    verify::ReadIOP,
 };
 
 use crate::{
@@ -554,7 +551,7 @@ macro_rules! ensure_poseidon2 {
 
 impl Prover {
     pub(crate) fn new(program: Program, control_id: Digest, opts: ProverOpts) -> Self {
-        #[cfg(all(test, feature = "cuda"))]
+        #[cfg(all(test, gpu_accel))]
         gpu_guard::assert_gpu_semaphore_held();
 
         Self {
@@ -602,13 +599,7 @@ impl Prover {
     /// then used as the input to all other recursion programs (e.g. join, resolve, and
     /// identity_p254).
     pub fn new_lift(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
-        cfg_if! {
-            if #[cfg(feature="rv32im-m3")] {
-                Self::new_lift_m3(segment, opts)
-            } else {
-                Self::new_lift_inner(segment, opts, false)
-            }
-        }
+        Self::new_lift_m3(segment, opts, false)
     }
 
     /// Create a prover job for the lift program that produces a work claim receipt.
@@ -616,33 +607,12 @@ impl Prover {
     /// Similar to [`Self::new_lift`], but produces a work claim receipt that tracks
     /// verifiable work by computing the work value from the segment proof.
     pub fn new_lift_povw(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
-        Self::new_lift_inner(segment, opts, true)
-    }
-
-    #[cfg(feature = "rv32im-m3")]
-    fn new_lift_m3(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
-        ensure_poseidon2!(segment);
-
-        let inner_hash_suite = hash_suite_from_name(&segment.hashfn)
-            .ok_or_else(|| anyhow!("unsupported hash function: {}", segment.hashfn))?;
-        let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
-        let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
-
-        let claim = risc0_circuit_rv32im_m3::Claim::decode(&segment.seal)?;
-
-        // Instantiate the prover with the lift recursion program and its control ID.
-        let (program, control_id) = zkr::lift_m3(claim.po2 as usize)?;
-        let mut prover = Prover::new(program, control_id, opts);
-
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_input(&segment.seal[2..]);
-
-        Ok(prover)
+        Self::new_lift_m3(segment, opts, true)
     }
 
     /// Instantiate a lift program, with the option of PoVW or not. Note that these programs
     /// produce different output but have the same inputs and so share the same logic here.
-    fn new_lift_inner(segment: &SegmentReceipt, opts: ProverOpts, povw: bool) -> Result<Self> {
+    fn new_lift_m3(segment: &SegmentReceipt, opts: ProverOpts, povw: bool) -> Result<Self> {
         ensure_poseidon2!(segment);
 
         let inner_hash_suite = hash_suite_from_name(&segment.hashfn)
@@ -650,30 +620,14 @@ impl Prover {
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
 
-        let out_size = risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE;
-
-        ensure!(
-            segment.seal[0] == RV32IM_SEAL_VERSION,
-            "seal version mismatch"
-        );
-
-        let seal = &segment.seal[1..];
-
-        // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
-        // which lift program we are going to run.
-        let mut iop = ReadIOP::new(seal, inner_hash_suite.rng.as_ref());
-        iop.read_field_elem_slice::<BabyBearElem>(out_size);
-        let po2 = *iop.read_u32s(1).first().unwrap() as usize;
+        let claim = risc0_circuit_rv32im::Claim::decode(&segment.seal)?;
 
         // Instantiate the prover with the lift recursion program and its control ID.
-        let (program, control_id) = match povw {
-            false => zkr::lift(po2, &opts.hashfn)?,
-            true => zkr::lift_povw(po2, &opts.hashfn)?,
-        };
+        let (program, control_id) = zkr::lift_m3(claim.po2 as usize, povw)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_input(seal);
+        prover.add_input(&segment.seal[2..]);
 
         Ok(prover)
     }

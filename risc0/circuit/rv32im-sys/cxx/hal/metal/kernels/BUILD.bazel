@@ -1,0 +1,64 @@
+load("@build_bazel_rules_apple//apple:resources.bzl", "apple_metal_library")
+load("//bazel/helpers:po2.bzl", "make_po2")
+
+make_po2(
+    name = "data_witgen_po2s",
+    ext = "metal",
+    func = "data_witgen",
+    platform = "metal",
+)
+
+make_po2(
+    name = "accum_witgen_po2s",
+    ext = "metal",
+    func = "accum_witgen",
+    platform = "metal",
+)
+
+make_po2(
+    name = "eval_check_po2s",
+    ext = "metal",
+    func = "eval_check",
+    platform = "metal",
+)
+
+apple_metal_library(
+    name = "kernels",
+    srcs = glob(["*.metal"]) + [
+        ":accum_witgen_po2s",
+        ":data_witgen_po2s",
+        ":eval_check_po2s",
+    ],
+    out = "kernels.metallib",
+    hdrs = glob(["*.h"]) + [
+        "//hal:files",
+        "//rv32im/argument:files",
+        "//rv32im/base:files",
+        "//rv32im/circuit:files",
+        "//rv32im/witness:files",
+    ],
+    copts = [
+        "-w",
+        "-frecord-sources=flat",
+        "-I",
+        ".",
+    ],  # or param symbols = True?
+    target_compatible_with = ["@platforms//os:macos"],
+    visibility = ["//visibility:public"],
+)
+
+genrule(
+    name = "kernel_header",
+    srcs = [":kernels"],
+    outs = ["metal_kernel.h"],
+    cmd = "/usr/bin/xxd -n  metal_kernel -i $< > $@",
+    target_compatible_with = ["@platforms//os:macos"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "kernel_header_lib",
+    hdrs = [":kernel_header"],
+    target_compatible_with = ["@platforms//os:macos"],
+    visibility = ["//visibility:public"],
+)

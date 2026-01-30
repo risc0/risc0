@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -28,6 +28,7 @@ fn main() {
     let env = ExecutorEnv::builder()
         // add_assumption makes the receipt to be verified available to the prover.
         .add_assumption(multiply_receipt)
+        .unwrap()
         .write(&(n, 9u64, 100u64))
         .unwrap()
         .build()

@@ -1,0 +1,19 @@
+objc_library(
+    name = "metal",
+    srcs = glob(["*.cpp"]),
+    sdk_frameworks = [
+        "Foundation",
+        "Metal",
+    ],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = [
+        "//core",
+        "//hal",
+        "@metal_cpp",
+        "//hal/metal/kernels:kernel_header_lib",
+    ],
+    defines = [
+        "METAL_KERNEL_H=\\\"hal/metal/kernels/metal_kernel.h\\\""
+    ],
+    visibility = ["//visibility:public"],
+)

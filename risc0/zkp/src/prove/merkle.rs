@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -43,7 +43,9 @@ impl<H: Hal + ?Sized> MerkleTreeProver<H> {
     /// Generate a merkle tree from a matrix of values.
     ///
     /// The proofs will prove a single 'column' of values in the tree at a
-    /// certain row. Layout is presumed to be packed row-major.
+    /// certain row. The matrix buffer has length `rows * cols` and is indexed
+    /// as `matrix[row + col * rows]`, so for a fixed `row` the `cols` values
+    /// are stored at stride `rows`.
     /// The number of queries represents the expected # of queries and
     /// determines the size of the 'top' layer. It is important that the
     /// verifier is constructed with identical size parameters, including # of
@@ -174,14 +176,40 @@ impl<CH: crate::hal::cuda::CudaHash + ?Sized> MerkleTreeProver<crate::hal::cuda:
 
 #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))]
 impl<MH: crate::hal::metal::MetalHash> MerkleTreeProver<crate::hal::metal::MetalHal<MH>> {
-    pub fn to_metal_prover(&self) -> crate::hal::metal::MetalMerkleTreeProver {
-        crate::hal::metal::MetalMerkleTreeProver {
-            row_size: self.params.row_size,
-            col_size: self.params.col_size,
-            top_size: self.params.top_size,
-            matrix: self.matrix.as_device_ptr() as *const u32,
-            nodes: self.nodes.as_device_ptr() as *const u32,
-        }
+    pub fn to_metal_arg(&self) -> [crate::hal::metal::KernelArg<'_>; 5] {
+        use crate::hal::metal::*;
+
+        [
+            KernelArg::USize(self.params.row_size),
+            KernelArg::USize(self.params.col_size),
+            KernelArg::USize(self.params.top_size),
+            self.matrix.as_arg(),
+            self.nodes.as_arg(),
+        ]
+    }
+
+    pub fn to_metal_arg_descriptor<'a>(&self, index: u64) -> [&'a metal::ArgumentDescriptorRef; 5] {
+        let row_size = metal::ArgumentDescriptor::new();
+        row_size.set_data_type(metal::MTLDataType::ULong);
+        row_size.set_index(index);
+
+        let col_size = metal::ArgumentDescriptor::new();
+        col_size.set_data_type(metal::MTLDataType::ULong);
+        col_size.set_index(index + 1);
+
+        let top_size = metal::ArgumentDescriptor::new();
+        top_size.set_data_type(metal::MTLDataType::ULong);
+        top_size.set_index(index + 2);
+
+        let matrix = metal::ArgumentDescriptor::new();
+        matrix.set_data_type(metal::MTLDataType::Pointer);
+        matrix.set_index(index + 3);
+
+        let nodes = metal::ArgumentDescriptor::new();
+        nodes.set_data_type(metal::MTLDataType::Pointer);
+        nodes.set_index(index + 4);
+
+        [row_size, col_size, top_size, matrix, nodes]
     }
 }
 
@@ -276,7 +304,7 @@ mod tests {
             iop.proof[manip_idx] ^= 1;
         }
         let mut r_iop = ReadIOP::new(&iop.proof, rng);
-        let verifier = MerkleTreeVerifier::new(&mut r_iop, hashfn, rows, cols, queries);
+        let verifier = MerkleTreeVerifier::new(&mut r_iop, hashfn, rows, cols, queries).unwrap();
         assert_eq!(verifier.root(), prover.root());
         let mut err = false;
         for query in 0..queries {
@@ -307,7 +335,7 @@ mod tests {
             }
         }
         if !err {
-            r_iop.verify_complete();
+            r_iop.verify_complete().unwrap();
         }
     }
 
@@ -474,10 +502,10 @@ mod tests {
         let rng = hal.get_hash_suite().rng.as_ref();
 
         let mut iop = ReadIOP::new(&transcript, rng);
-        let verifier = MerkleTreeVerifier::new(&mut iop, hashfn, rows, cols, queries);
+        let verifier = MerkleTreeVerifier::new(&mut iop, hashfn, rows, cols, queries).unwrap();
 
         let q = iop.random_bits(log2_ceil(rows)) as usize;
         verifier.verify(&mut iop, hashfn, q).unwrap();
-        iop.verify_complete();
+        iop.verify_complete().unwrap();
     }
 }

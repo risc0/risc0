@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,7 +17,7 @@ use std::{collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, me
 
 use metal::{
     Buffer as MetalBuffer, CommandQueue, ComputeCommandEncoderRef, ComputePipelineDescriptor,
-    Device, MTLArgumentBuffersTier, MTLResourceOptions, MTLSize,
+    Device, MTLArgumentBuffersTier, MTLResourceOptions, MTLResourceUsage, MTLSize, ResourceRef,
 };
 use rayon::prelude::*;
 use risc0_core::{
@@ -35,6 +35,7 @@ use crate::{
         digest::Digest,
         hash::{
             HashSuite,
+            poseidon_254::Poseidon254HashSuite,
             poseidon2::{self, Poseidon2HashSuite},
             sha::Sha256HashSuite,
         },
@@ -183,6 +184,58 @@ impl MetalHash for MetalHashPoseidon2 {
     }
 }
 
+pub struct MetalHashPoseidon254 {
+    suite: HashSuite<BabyBear>,
+}
+
+// TODO: GPU accelerate this
+impl MetalHash for MetalHashPoseidon254 {
+    fn new(_hal: &MetalHal<Self>) -> Self {
+        Self {
+            suite: Poseidon254HashSuite::new_suite(),
+        }
+    }
+
+    fn hash_fold(&self, _hal: &MetalHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
+        let input_size = 2 * output_size;
+        io.view_mut(|io| {
+            let (output, input) = io.split_at_mut(input_size);
+            let output = &mut output[output_size..];
+            let hashfn = self.suite.hashfn.as_ref();
+            output.par_iter_mut().enumerate().for_each(|(idx, output)| {
+                let in1 = input[2 * idx];
+                let in2 = input[2 * idx + 1];
+                *output = *hashfn.hash_pair(&in1, &in2);
+            });
+        });
+    }
+
+    fn hash_rows(
+        &self,
+        _hal: &MetalHal<Self>,
+        output: &BufferImpl<Digest>,
+        matrix: &BufferImpl<BabyBearElem>,
+    ) {
+        let row_size = output.size();
+        let col_size = matrix.size() / output.size();
+        assert_eq!(matrix.size(), col_size * row_size);
+        output.view_mut(|output| {
+            matrix.view(|matrix| {
+                let hashfn = self.suite.hashfn.as_ref();
+                output.par_iter_mut().enumerate().for_each(|(idx, output)| {
+                    let column: Vec<_> =
+                        (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
+                    *output = *hashfn.hash_elem_slice(column.as_slice());
+                });
+            });
+        });
+    }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
+    }
+}
+
 #[derive(Debug)]
 pub struct MetalHal<Hash: MetalHash + ?Sized> {
     pub device: Device,
@@ -193,6 +246,7 @@ pub struct MetalHal<Hash: MetalHash + ?Sized> {
 
 pub type MetalHalSha256 = MetalHal<MetalHashSha256>;
 pub type MetalHalPoseidon2 = MetalHal<MetalHashPoseidon2>;
+pub type MetalHalPoseidon254 = MetalHal<MetalHashPoseidon254>;
 
 #[derive(Clone, Debug)]
 struct TrackedBuffer(MetalBuffer);
@@ -291,10 +345,6 @@ impl<T> BufferImpl<T> {
     //     cmd_buffer.commit();
     //     cmd_buffer.wait_until_completed();
     // }
-
-    pub fn as_device_ptr(&self) -> *mut c_void {
-        self.buffer.0.gpu_address() as *mut c_void
-    }
 
     pub fn as_ptr(&self) -> *mut c_void {
         self.buffer.0.contents()
@@ -880,34 +930,54 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
 
     fn fri_prove(
         &self,
-        out_values: &Self::Buffer<u32>,
+        out_values: &<Self as Hal>::Buffer<u32>,
         values_column_width: usize,
-        out_digests: &Self::Buffer<u32>,
+        out_digests: &<Self as Hal>::Buffer<u32>,
         digests_column_width: usize,
-        positions: &Self::Buffer<u32>,
+        positions: &<Self as Hal>::Buffer<u32>,
         trees: &[&MerkleTreeProver<Self>],
-        groups: &Self::Buffer<u32>,
+        groups: &<Self as Hal>::Buffer<u32>,
     ) {
-        assert_eq!(trees.len(), groups.size());
-
-        assert_eq!(
-            out_values.size() / values_column_width,
-            positions.size() * trees.len()
-        );
-        assert_eq!(
-            out_digests.size() / digests_column_width,
-            positions.size() * trees.len()
-        );
-
-        let trees_buffer = BufferImpl::<MetalMerkleTreeProver>::copy_from(
+        let trees_buffer = BufferImpl::<MetalMerkleTreeProver>::new(
             "fri_prove_trees",
             &self.device,
             self.cmd_queue.clone(),
-            &trees
-                .iter()
-                .map(|t| t.to_metal_prover())
-                .collect::<Vec<_>>(),
+            trees.len(),
         );
+
+        let mut index = 0;
+        let arg_descriptors: Vec<_> = trees
+            .iter()
+            .flat_map(|tree| {
+                let d = tree.to_metal_arg_descriptor(index);
+                index += d.len() as u64;
+                d
+            })
+            .collect();
+        let arg_descriptors_array = metal::Array::from_slice(&arg_descriptors);
+        let argument_encoder = self.device.new_argument_encoder(arg_descriptors_array);
+        argument_encoder.set_argument_buffer(&trees_buffer.as_buf(), 0);
+
+        let mut resources: Vec<&ResourceRef> = vec![];
+        let mut index = 0;
+        for tree in trees {
+            for arg in tree.to_metal_arg() {
+                match arg {
+                    KernelArg::Buffer { buffer, offset } => {
+                        resources.push(&**buffer);
+                        argument_encoder.set_buffer(index, buffer, offset);
+                    }
+                    KernelArg::U32(value) => unsafe {
+                        (argument_encoder.constant_data(index) as *mut u32).write(value)
+                    },
+                    KernelArg::USize(value) => unsafe {
+                        (argument_encoder.constant_data(index) as *mut usize).write(value)
+                    },
+                    KernelArg::Null => unimplemented!(),
+                }
+                index += 1;
+            }
+        }
 
         let args = &[
             out_values.as_arg(),
@@ -922,12 +992,15 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         // XXX remi: It would be faster to run the two kernels in parallel.
 
         let count = trees.len() * positions.size() * values_column_width;
-        self.dispatch_by_name("fri_prove_values", args, count as u64);
+        let kernel = self.kernels.get("fri_prove_values").unwrap();
+        self.dispatch_with_resources(kernel, args, count as u64, None, |cmd_encoder| {
+            cmd_encoder.use_resources(&resources[..], MTLResourceUsage::Read);
+        });
 
         let args = &[
             out_digests.as_arg(),
             KernelArg::USize(digests_column_width),
-            out_digests.as_arg(),
+            positions.as_arg(),
             KernelArg::USize(positions.size()),
             trees_buffer.as_arg(),
             KernelArg::USize(trees.len()),
@@ -935,7 +1008,10 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         ];
 
         let count = trees.len() * positions.size() * digests_column_width;
-        self.dispatch_by_name("fri_prove_digests", args, count as u64);
+        let kernel = self.kernels.get("fri_prove_digests").unwrap();
+        self.dispatch_with_resources(kernel, args, count as u64, None, |cmd_encoder| {
+            cmd_encoder.use_resources(&resources[..], MTLResourceUsage::Read);
+        });
     }
 }
 
@@ -1045,7 +1121,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "XXX remi: some unknown GPU synchronization issue causes it to fail"]
     #[gpu_guard::gpu_guard]
     fn fri_prove() {
         testutil::fri_prove(MetalHalSha256::new());

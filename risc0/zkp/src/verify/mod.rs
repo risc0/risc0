@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -186,7 +186,6 @@ impl<'a, F: Field> Verifier<'a, F> {
             po2: 0,
             tot_cycles: 0,
             iop: RefCell::new(ReadIOP::new(seal, suite.rng.as_ref())),
-            // TODO: change this to core::iter::repeat_n once it's stabilized.
             merkle_verifiers: core::iter::repeat_with(|| None)
                 .take(taps.num_groups())
                 .collect(),
@@ -214,17 +213,21 @@ impl<'a, F: Field> Verifier<'a, F> {
     /// as specified in the taps.
     #[stability::unstable]
     pub fn verify_group(&mut self, reg_group_id: usize) -> Result<&Digest, VerificationError> {
-        assert!(
-            self.merkle_verifiers[reg_group_id].is_none(),
-            "Reg group id {reg_group_id} ({}) may only occur once",
-            self.taps.group_name(reg_group_id)
-        );
+        // NOTE: reg_group_id is from a set of constants associated with a circuit and protocol.
+        // It is not controlled by the prover.
+        if self.merkle_verifiers[reg_group_id].is_some() {
+            tracing::debug!(
+                "Reg group id {reg_group_id} ({}) may only occur once",
+                self.taps.group_name(reg_group_id)
+            );
+            return Err(VerificationError::ReceiptFormatError);
+        }
         let group_size = self.taps.group_size(reg_group_id);
         let domain = INV_RATE * self.tot_cycles;
         let hashfn = self.suite.hashfn.as_ref();
 
         let merkle =
-            MerkleTreeVerifier::new(self.iop().deref_mut(), hashfn, domain, group_size, QUERIES);
+            MerkleTreeVerifier::new(self.iop().deref_mut(), hashfn, domain, group_size, QUERIES)?;
         self.merkle_verifiers[reg_group_id] = Some(merkle);
         let root = self.merkle_verifiers[reg_group_id].as_ref().unwrap().root();
         trace_if_enabled!(
@@ -317,7 +320,7 @@ impl<'a, F: Field> Verifier<'a, F> {
             domain,
             Self::CHECK_SIZE,
             QUERIES,
-        );
+        )?;
         trace_if_enabled!("Check merkle root: {}", check_merkle.root());
 
         // Get a pseudorandom DEEP query point
@@ -331,6 +334,7 @@ impl<'a, F: Field> Verifier<'a, F> {
             }
         }
 
+        // NOTE: There is one ROU for each po2. If not, this will panic.
         trace_if_enabled!("Z = {z:?}");
         let back_one = F::Elem::ROU_REV[self.po2];
 
@@ -338,7 +342,7 @@ impl<'a, F: Field> Verifier<'a, F> {
         let num_taps = self.taps.tap_size();
         let coeff_u = self
             .iop()
-            .read_field_elem_slice(num_taps + Self::CHECK_SIZE);
+            .read_field_elem_slice(num_taps + Self::CHECK_SIZE)?;
         let hash_u = hashfn.hash_ext_elem_slice(coeff_u);
         self.iop().commit(&hash_u);
 
@@ -457,7 +461,7 @@ impl<'a, F: Field> Verifier<'a, F> {
                         .verify(self.iop().deref_mut(), hashfn, idx)
                 })
                 .collect::<Result<Vec<_>,_>>()?;
-            let check_row = check_merkle.verify(self.iop().deref_mut(),hashfn, idx)?;
+            let check_row = check_merkle.verify(self.iop().deref_mut(), hashfn, idx)?;
             let ret = self.fri_eval_taps(&combo_u, check_row, back_one, x, z, &rows, &tap_mix_pows, &check_mix_pows);
             Ok(ret)
         })?;
@@ -469,21 +473,27 @@ impl<'a, F: Field> Verifier<'a, F> {
     /// commits to them.  This is typically used at the beginning of
     /// the seal to encode the globals of the circuit.
     #[stability::unstable]
-    pub fn read_slice_with_po2(&mut self, size: usize) -> (&'a [F::Elem], usize) {
-        let slice = self.iop().read_field_elem_slice(size + 1);
+    pub fn read_slice_with_po2(
+        &mut self,
+        size: usize,
+    ) -> Result<(&'a [F::Elem], usize), VerificationError> {
+        let slice = self.iop().read_field_elem_slice(size + 1)?;
         self.iop().commit(&self.suite.hashfn.hash_elem_slice(slice));
 
         // Extract the out buffer and po2 from slice while checking sizes.
         let (out, &[po2_elem]) = slice.split_at(size) else {
-            unreachable!()
+            unreachable!("slice returned by read_field_elem_slice is wrong size");
         };
         let (&[po2], &[]) = po2_elem.to_u32_words().split_at(1) else {
-            panic!("po2 elem is larger than u32");
+            unreachable!("po2 elem is larger than u32");
         };
+        if po2 as usize > MAX_CYCLES_PO2 {
+            tracing::error!("po2 in seal is larger than the max po2: {po2} > {MAX_CYCLES_PO2}");
+            return Err(VerificationError::ReceiptFormatError);
+        }
         self.po2 = po2 as usize;
-        assert!(self.po2 <= MAX_CYCLES_PO2);
         self.tot_cycles = 1usize.checked_shl(po2).unwrap();
-        (out, self.po2)
+        Ok((out, self.po2))
     }
 
     /// Evaluate a polynomial whose coefficients are in the extension field at a
@@ -527,7 +537,7 @@ where
     // NOTE: The globals are the only values known to the verifier, and constitute the public
     // statement of the prover. In many scenarios, they are the first values sent to the
     // verifier by the prover, and therefore should be committed at the start of verification.
-    let (out, po2) = verifier.read_slice_with_po2(C::OUTPUT_SIZE);
+    let (out, po2) = verifier.read_slice_with_po2(C::OUTPUT_SIZE)?;
 
     // Get merkle root for the code merkle tree.
     // The code merkle tree contains the control instructions for the zkVM.
@@ -563,7 +573,7 @@ where
         .verify_validity(|poly_mix, eval_u| circuit.poly_ext(poly_mix, eval_u, &[out, &mix]).tot)?;
 
     // There should be nothing else in the IOP, so verify that's the case.
-    verifier.iop().verify_complete();
+    verifier.iop().verify_complete()?;
     Ok(())
 }
 
@@ -596,7 +606,7 @@ where
 
         // Commit to the globals for the group.
         if group.global_count > 0 {
-            let group_globals = verifier.iop().read_field_elem_slice(group.global_count);
+            let group_globals = verifier.iop().read_field_elem_slice(group.global_count)?;
             globals.extend(group_globals);
             verifier
                 .iop()
@@ -614,6 +624,6 @@ where
     })?;
 
     // There should be nothing else in the IOP, so verify that's the case.
-    verifier.iop().verify_complete();
+    verifier.iop().verify_complete()?;
     Ok(())
 }

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,108 +13,19 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use std::env;
+
 fn main() {
-    #[cfg(feature = "prove")]
-    download_zkr();
-    #[cfg(feature = "prove")]
-    generate_zkr_table();
-}
+    let prove = std::env::var("CARGO_FEATURE_PROVE").is_ok();
+    let metal = (std::env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos")
+        && std::env::var("CARGO_CFG_TARGET_ARCH").is_ok_and(|arch| arch == "aarch64"))
+        || std::env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "ios");
 
-#[cfg(feature = "prove")]
-fn download_zkr() {
-    use std::{
-        env, fs,
-        path::{Path, PathBuf},
-        str::FromStr,
-    };
-
-    use downloader::{Download, DownloadSummary, Downloader, verify};
-    use sha2::{Digest, Sha256};
-
-    const FILENAME: &str = "recursion_zkr.zip";
-    const SRC_PATH: &str = "src/recursion_zkr.zip";
-    // NOTE: This can be calculated with:
-    // shasum -a256 risc0/circuit/recursion/src/recursion_zkr.zip
-    const SHA256_HASH: &str = "9222c9ed7bf949124ebb0a8faf0989a7c46bd3a34617befeec61a95da2666423";
-
-    fn check_sha2(path: &Path) -> bool {
-        let data = fs::read(path).unwrap();
-        hex::encode(Sha256::digest(data)) == SHA256_HASH
+    if prove && metal {
+        println!(
+            "cargo:rustc-env=RECURSION_METAL_PATH={}",
+            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_METAL_KERNEL")
+                .expect("on macos risc0-circuit-recursion-sys should build metal kernels")
+        );
     }
-
-    println!("cargo:rerun-if-env-changed=RECURSION_SRC_PATH");
-
-    let src_path = env::var("RECURSION_SRC_PATH").unwrap_or(SRC_PATH.to_string());
-    let src_path = PathBuf::from_str(src_path.as_str()).unwrap();
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir);
-    let out_path = out_dir.join(FILENAME);
-
-    if env::var("DOCS_RS").is_ok() && !out_path.exists() {
-        fs::write(&out_path, b"").unwrap();
-        return;
-    }
-
-    if out_path.exists() {
-        if check_sha2(&out_path) {
-            return;
-        }
-        fs::remove_file(&out_path).unwrap();
-    }
-
-    if src_path.exists() && check_sha2(&src_path) {
-        fs::copy(&src_path, &out_path).unwrap();
-        return;
-    }
-
-    let mut downloader = Downloader::builder()
-        .download_folder(out_dir)
-        .build()
-        .unwrap();
-    let url = format!("https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkr/{SHA256_HASH}.zip");
-    eprintln!("Downloading {url}");
-    let dl = Download::new(&url)
-        .file_name(&PathBuf::from_str(FILENAME).unwrap())
-        .verify(verify::with_digest::<Sha256>(
-            hex::decode(SHA256_HASH).unwrap(),
-        ));
-    let results = downloader.download(&[dl]).unwrap();
-    for result in results {
-        let summary: DownloadSummary = result.unwrap();
-        eprintln!("{summary}");
-    }
-}
-
-#[cfg(feature = "prove")]
-fn generate_zkr_table() {
-    use std::fmt::Write as _;
-    use std::path::Path;
-
-    use liblzma::read::XzDecoder;
-
-    let mut output = String::new();
-
-    writeln!(&mut output, "const ZKRS: &[(&[u8], usize)] = &[").unwrap();
-
-    for po2 in 12..=24 {
-        let zkr_name = format!("lift_rv32im_m3_{po2}.zkr.xz");
-        let zkr_path = Path::new("src/prove")
-            .join(&zkr_name)
-            .canonicalize()
-            .unwrap();
-        println!("cargo:rerun-if-changed={}", zkr_path.display());
-        let mut decoder = XzDecoder::new(std::fs::File::open(&zkr_path).unwrap());
-        std::io::copy(&mut decoder, &mut std::io::sink()).unwrap();
-        let size = decoder.total_out();
-        writeln!(
-            &mut output,
-            "(include_bytes!(\"{}\"), {size}),",
-            zkr_path.display()
-        )
-        .unwrap();
-    }
-    writeln!(&mut output, "];").unwrap();
-
-    let out_dir = std::env::var_os("OUT_DIR").unwrap();
-    std::fs::write(Path::new(&out_dir).join("zkr_table.rs"), &output).unwrap();
 }

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -25,16 +25,14 @@ use core::{fmt, ops::Deref};
 
 #[cfg(feature = "std")]
 use anyhow::Context;
-use anyhow::{anyhow, bail, ensure};
+use anyhow::{anyhow, ensure};
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
 use risc0_binfmt::{
     Digestible, ExitCode, InvalidExitCodeError, read_sha_halfs, tagged_list, tagged_list_cons,
     tagged_struct, write_sha_halfs,
 };
-use risc0_circuit_rv32im::{HighLowU16, TerminateState};
 use risc0_zkp::core::digest::Digest;
-use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
 
 use super::{
@@ -152,12 +150,8 @@ impl ReceiptClaim {
         Ok(())
     }
 
-    #[cfg(feature = "rv32im-m3")]
-    pub(crate) fn decode_m3_with_output(
-        seal: &[u32],
-        output: Option<Output>,
-    ) -> anyhow::Result<ReceiptClaim> {
-        let claim = risc0_circuit_rv32im_m3::Claim::decode(seal)?;
+    pub(crate) fn decode_from_seal_m3(seal: &[u32]) -> anyhow::Result<ReceiptClaim> {
+        let claim = risc0_circuit_rv32im::Claim::decode(seal)?;
         tracing::debug!("claim: {claim:#?}");
 
         let exit_code = claim.exit_code()?;
@@ -166,11 +160,7 @@ impl ReceiptClaim {
             _ => claim.post_state,
         };
 
-        let output = if let Some(output) = output {
-            MaybePruned::Value(Some(output))
-        } else {
-            MaybePruned::Pruned(claim.output.unwrap_or_default())
-        };
+        let output = claim.output.map(MaybePruned::Pruned).unwrap_or_default();
 
         Ok(ReceiptClaim {
             pre: MaybePruned::Value(SystemState {
@@ -187,38 +177,19 @@ impl ReceiptClaim {
         })
     }
 
-    #[cfg(feature = "rv32im-m3")]
-    pub(crate) fn decode_from_seal_v3(seal: &[u32]) -> anyhow::Result<ReceiptClaim> {
-        Self::decode_m3_with_output(seal, None)
-    }
-
-    #[cfg(not(feature = "rv32im-m3"))]
-    pub(crate) fn decode_from_seal_v2(
+    #[cfg(feature = "prove")]
+    pub(crate) fn decode_m3_with_output(
         seal: &[u32],
-        _po2: Option<u32>,
+        output: MaybePruned<Option<Output>>,
     ) -> anyhow::Result<ReceiptClaim> {
-        let claim = risc0_circuit_rv32im::Rv32imV2Claim::decode(seal)?;
-        tracing::debug!("claim: {claim:#?}");
+        use crate::claim::merge::Merge;
 
-        let exit_code = exit_code_from_terminate_state(&claim.terminate_state)?;
-        let post_state = match exit_code {
-            ExitCode::Halted(_) => Digest::ZERO,
-            _ => claim.post_state,
-        };
-
-        Ok(ReceiptClaim {
-            pre: MaybePruned::Value(SystemState {
-                pc: 0,
-                merkle_root: claim.pre_state,
-            }),
-            post: MaybePruned::Value(SystemState {
-                pc: 0,
-                merkle_root: post_state,
-            }),
-            exit_code,
-            input: MaybePruned::Pruned(claim.input),
-            output: MaybePruned::Pruned(claim.output.unwrap_or_default()),
-        })
+        let mut claim = Self::decode_from_seal_m3(seal)?;
+        claim
+            .output
+            .merge_with(&output)
+            .context("Provided output does not match decoded output")?;
+        Ok(claim)
     }
 
     /// Produce the claim for joining two claims of execution in a continuation, asserting the
@@ -343,9 +314,14 @@ impl MaybePruned<WorkClaim<ReceiptClaim>> {
     }
 }
 
+#[cfg(feature = "prove")]
 pub(crate) fn exit_code_from_terminate_state(
-    terminate_state: &Option<TerminateState>,
+    terminate_state: &Option<risc0_circuit_rv32im::TerminateState>,
 ) -> anyhow::Result<ExitCode> {
+    use anyhow::bail;
+    use risc0_circuit_rv32im::HighLowU16;
+    use risc0_zkvm_platform::syscall::halt;
+
     let exit_code = if let Some(term) = terminate_state {
         let HighLowU16(user_exit, halt_type) = term.a0;
         match halt_type as u32 {

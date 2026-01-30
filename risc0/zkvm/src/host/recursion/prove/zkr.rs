@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -18,7 +18,7 @@ use risc0_circuit_recursion::{
     control_id::{BN254_IDENTITY_CONTROL_ID, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
     prove::Program,
 };
-use risc0_zkp::{MAX_CYCLES_PO2, MIN_CYCLES_PO2, core::digest::Digest};
+use risc0_zkp::core::digest::Digest;
 
 use crate::RECURSION_PO2;
 
@@ -44,19 +44,14 @@ pub fn test_recursion_circuit(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("test_recursion_circuit.zkr", hashfn)
 }
 
-pub fn lift(po2: usize, hashfn: &str) -> Result<(Program, Digest)> {
-    if (MIN_CYCLES_PO2..MAX_CYCLES_PO2).contains(&po2) {
-        get_zkr(&format!("lift_rv32im_v2_{po2}.zkr"), hashfn)
-    } else {
-        bail!("No rv32im verifier available for po2={po2}")
-    }
-}
-
-#[cfg(feature = "rv32im-m3")]
-pub(crate) fn lift_m3(po2: usize) -> Result<(Program, Digest)> {
+pub(crate) fn lift_m3(po2: usize, povw: bool) -> Result<(Program, Digest)> {
     if risc0_circuit_recursion::LIFT_PO2_RANGE.contains(&po2) {
-        let name = format!("lift_rv32im_m3_{po2}.zkr");
-        let program = risc0_circuit_recursion::prove::zkr::get_zkr_m3(&name, po2, RECURSION_PO2)?;
+        let name = if povw {
+            format!("lift_rv32im_m3_povw_{po2}.zkr")
+        } else {
+            format!("lift_rv32im_m3_{po2}.zkr")
+        };
+        let program = risc0_circuit_recursion::prove::zkr::get_zkr(&name, RECURSION_PO2)?;
         let control_id = POSEIDON2_CONTROL_IDS
             .iter()
             .copied()
@@ -82,14 +77,6 @@ pub fn identity(hashfn: &str) -> Result<(Program, Digest)> {
 
 pub fn union(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("union.zkr", hashfn)
-}
-
-pub fn lift_povw(po2: usize, hashfn: &str) -> Result<(Program, Digest)> {
-    if (MIN_CYCLES_PO2..MAX_CYCLES_PO2).contains(&po2) {
-        get_zkr(&format!("lift_rv32im_v2_povw_{po2}.zkr"), hashfn)
-    } else {
-        bail!("No rv32im verifier available for po2={po2}")
-    }
 }
 
 pub fn join_povw(hashfn: &str) -> Result<(Program, Digest)> {

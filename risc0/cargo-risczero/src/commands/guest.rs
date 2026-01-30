@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -18,7 +18,9 @@ use std::{fs, io, io::Write, path::PathBuf, process::Stdio};
 use anyhow::{Context, Result, anyhow, bail, ensure};
 use cargo_metadata::{Artifact, ArtifactProfile, Message};
 use clap::{Args, Subcommand};
+use risc0_binfmt::ProgramBinary;
 use risc0_build::cargo_command;
+use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkvm::{ExecutorEnv, ExitCode, default_executor};
 use tempfile::{TempDir, tempdir};
 
@@ -34,10 +36,10 @@ pub struct GuestCommand {
 /// Subcommands of cargo that are supported by this cargo risczero command.
 #[derive(Debug, Subcommand)]
 pub enum GuestSubCommands {
-    /// Invocation of `cargo risczero build` which calls `cargo build`.
+    /// Invocation of `cargo risczero guest build` which calls `cargo build`.
     Build(CommonArgs),
 
-    /// Invocation of `cargo risczero build` which calls `cargo test --no-run`.
+    /// Invocation of `cargo risczero guest test` which calls `cargo test --no-run`.
     Test(CommonArgs),
 }
 
@@ -221,8 +223,13 @@ impl GuestCommand {
 
                 let env = builder.build()?;
 
+                // Read the test ELF and join it with the V1COMPAT kernel.
+                let elf = fs::read(&test)
+                    .with_context(|| format!("Failed to read test binary at: {test}"))?;
+                let bin = ProgramBinary::new(&elf, V1COMPAT_ELF).encode();
+
                 let exec = default_executor();
-                let session = exec.execute(env, &fs::read(test)?)?;
+                let session = exec.execute(env, &bin)?;
                 ensure!(
                     session.exit_code == ExitCode::Halted(0),
                     "test exited with code {:?}",

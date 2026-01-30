@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #![deny(missing_docs)]
-#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 //! A library to handle HTTP REST requests to the Bonsai-alpha prover interface
 //!
@@ -1347,7 +1347,7 @@ mod tests {
                 .header(VERSION_HEADER, TEST_VERSION);
             then.status(200)
                 .header("content-type", "text/plain")
-                .json_body_obj(&response);
+                .body(response);
         });
 
         let server_url = format!("http://{}", server.address());
@@ -1355,7 +1355,7 @@ mod tests {
 
         let logs = session_id.logs(&client).unwrap();
 
-        assert_eq!(logs, "\"Hello\\nWorld\"");
+        assert_eq!(logs, "Hello\nWorld");
 
         create_mock.assert();
     }

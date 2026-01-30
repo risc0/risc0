@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -35,7 +35,7 @@ pub struct BootstrapGroth16 {
     test_receipt_only: bool,
 }
 
-const SOL_HEADER: &str = r#"// Copyright 2025 RISC Zero, Inc.
+const SOL_HEADER: &str = r#"// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

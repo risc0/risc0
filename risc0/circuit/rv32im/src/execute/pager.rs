@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -74,6 +74,7 @@ pub(crate) enum PageTraceEvent {
 #[derive(Debug)]
 pub(crate) struct PageStates {
     states: BitVec,
+    /// Node indices in the bit vector that have been set (i.e. are not PageStates::Unloaded).
     indexes: Vec<u32>,
 }
 
@@ -120,11 +121,6 @@ impl PageStates {
         }
     }
 
-    #[cfg(feature = "prove")]
-    pub(crate) fn iter(&self) -> impl Iterator<Item = (u32, PageState)> + '_ {
-        self.indexes.iter().map(|index| (*index, self.get(*index)))
-    }
-
     pub(crate) fn keys(&self) -> impl Iterator<Item = u32> + '_ {
         self.indexes.iter().copied()
     }
@@ -158,7 +154,10 @@ fn page_states() {
         }
 
         assert_eq!(
-            s.iter().collect::<Vec<_>>(),
+            s.indexes
+                .iter()
+                .map(|index| (*index, s.get(*index)))
+                .collect::<Vec<_>>(),
             vec![(0, a), (1, a), (2, a), (3, a), (4, a)]
         );
 
@@ -261,7 +260,7 @@ fn zero_page() -> &'static Page {
     ZERO_PAGE.get_or_init(Page::default)
 }
 
-#[derive(Default, Debug)]
+#[derive(Clone, Default, Debug)]
 pub(crate) struct WorkingImage {
     #[debug(skip)]
     pub(crate) pages: BTreeMap<u32, Page>,
@@ -283,10 +282,16 @@ impl WorkingImage {
     fn set_page(&mut self, page_idx: u32, page: Page) {
         self.pages.insert(page_idx, page);
     }
+}
 
-    #[cfg(feature = "prove")]
-    pub(crate) fn get_page_indexes(&self) -> BTreeSet<u32> {
-        self.pages.keys().copied().collect()
+impl From<WorkingImage> for MemoryImage {
+    /// Convert the given WorkingImage into a [MemoryImage]. Does not compute any digests.
+    fn from(val: WorkingImage) -> Self {
+        let mut memory_image = MemoryImage::default();
+        for (idx, page) in val.pages {
+            memory_image.set_page(idx, page);
+        }
+        memory_image
     }
 }
 
@@ -306,7 +311,8 @@ pub(crate) struct PagedMemory {
 }
 
 impl PagedMemory {
-    pub(crate) fn new(mut image: MemoryImage, tracing_enabled: bool) -> Self {
+    pub(crate) fn new(image: MemoryImage, tracing_enabled: bool) -> Self {
+        // Populate the register cache from the initial state of memory.
         let mut machine_registers = [0; REG_MAX];
         let mut user_registers = [0; REG_MAX];
         let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
@@ -338,6 +344,7 @@ impl PagedMemory {
         self.cycles = RESERVED_PAGING_CYCLES;
     }
 
+    /// Set of node indices in the paged memory (including inner nodes) that have been loaded.
     pub(crate) fn page_indexes(&self) -> BTreeSet<u32> {
         self.page_states.keys().collect()
     }
@@ -589,9 +596,9 @@ impl PagedMemory {
         self.trace_events.clear();
     }
 
-    #[cfg(feature = "rv32im-m3")]
     pub(crate) fn touched_pages(&self) -> u64 {
-        self.page_cache.len() as u64
+        // add one for registers page and one for ??
+        self.page_cache.len() as u64 + 2
     }
 
     #[inline(always)]
@@ -615,17 +622,16 @@ pub(crate) fn page_idx(node_idx: u32) -> u32 {
 
 pub(crate) fn compute_partial_image(
     input_image: &mut MemoryImage,
-    indexes: BTreeSet<u32>,
+    indexes: &BTreeSet<u32>,
 ) -> MemoryImage {
-    let mut image = MemoryImage::default();
+    let mut partial_image = MemoryImage::default();
 
     for &node_idx in indexes.range((MEMORY_PAGES as u32)..) {
         let page_idx = page_idx(node_idx);
 
         // Copy original state of all pages accessed in this segment.
         let page = input_image.get_page(page_idx).unwrap();
-        let page_digest = *input_image.get_digest(node_idx).unwrap();
-        image.set_page_with_digest(page_idx, page, page_digest);
+        partial_image.set_page(page_idx, page.clone());
     }
 
     // Add minimal needed 'uncles'
@@ -635,14 +641,12 @@ pub(crate) fn compute_partial_image(
 
         // Otherwise, add whichever child digest (if any) is not loaded
         if !indexes.contains(&lhs_idx) {
-            image.set_digest(lhs_idx, *input_image.get_digest(lhs_idx).unwrap());
+            partial_image.set_digest(lhs_idx, *input_image.get_or_update_digest(lhs_idx).unwrap());
         }
         if !indexes.contains(&rhs_idx) {
-            image.set_digest(rhs_idx, *input_image.get_digest(rhs_idx).unwrap());
+            partial_image.set_digest(rhs_idx, *input_image.get_or_update_digest(rhs_idx).unwrap());
         }
     }
 
-    image.update_digests();
-
-    image
+    partial_image
 }

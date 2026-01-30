@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -15,7 +15,7 @@
 
 use risc0_zkvm::{ProverOpts, recursion::Prover, sha::Digest};
 
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

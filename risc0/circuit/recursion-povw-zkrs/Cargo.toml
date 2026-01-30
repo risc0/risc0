@@ -1,0 +1,15 @@
+[package]
+name = "risc0-circuit-recursion-povw-zkrs"
+description = "RISC Zero POVW ZKRs for the circuit for recursion"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+phf = { version = "0.13", features = ["macros"] }
+
+[build-dependencies]
+liblzma = { version = "0.4", features = ["static", "parallel"] }
+tar = "0.4"
