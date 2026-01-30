@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cmp::min, fmt::Write as _};
+use std::{cmp::min, fmt::Write as _, io::Read};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use enum_map::Enum;
 use risc0_binfmt::{ByteAddr, WordAddr};
 
@@ -98,19 +98,63 @@ pub(crate) trait Risc0Context {
 
     #[inline(always)]
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
-        let mut region = Vec::with_capacity(size);
-        if addr.is_aligned() && (0 == size % WORD_SIZE) {
-            let mut waddr = addr.waddr();
-            for _ in (0..size).step_by(WORD_SIZE) {
-                let word = self.load_u32(op, waddr.postfix_inc())?;
-                region.extend_from_slice(&word.to_le_bytes());
-            }
-        } else {
-            for i in 0..size {
-                region.push(self.load_u8(op, addr + i)?);
+        let mut buf = vec![0u8; size];
+        self.read_region(op, addr, size)?.read_exact(&mut buf)?;
+        Ok(buf)
+    }
+
+    /// Create an [`std::io`] reader over the given memory region for streaming reads.
+    fn read_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<impl Read> {
+        /// A reader for guest memory reagion implemented using [Risc0Context::load_region].
+        struct Reader<'a, C: ?Sized> {
+            ctx: &'a mut C,
+            op: LoadOp,
+            pos: ByteAddr,
+            end: ByteAddr,
+        }
+
+        impl<C: Risc0Context + ?Sized> Read for Reader<'_, C> {
+            #[inline(always)]
+            fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+                let end = ByteAddr::min(self.pos.saturating_add(buf.len() as u32), self.end);
+                let size = (end.0 - self.pos.0) as usize;
+                if self.pos.is_aligned() {
+                    if let Ok(wbuf) = bytemuck::try_cast_slice_mut(&mut buf[..size]) {
+                        let waddr = self.pos.waddr();
+                        for (pos, word) in wbuf.iter_mut().enumerate() {
+                            *word = self
+                                .ctx
+                                .load_u32(self.op, waddr + pos)
+                                .map_err(std::io::Error::other)?
+                                .to_le();
+                        }
+                        self.pos += size;
+                        return Ok(size);
+                    }
+                }
+
+                // If the read pos or buf is not aligned, copy byte by byte.
+                for (pos, byte) in buf[..size].iter_mut().enumerate() {
+                    *byte = self
+                        .ctx
+                        .load_u8(self.op, self.pos + pos)
+                        .map_err(std::io::Error::other)?;
+                }
+                self.pos += size;
+                Ok(size)
             }
         }
-        Ok(region)
+
+        let end = addr
+            .checked_add(size as u32)
+            .context("Region end is past the end of memory")?;
+
+        Ok(Reader {
+            ctx: self,
+            op,
+            pos: addr,
+            end,
+        })
     }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;
@@ -171,6 +215,8 @@ pub(crate) trait Risc0Context {
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32>;
 
     /// For writes, just pass through, record rlen only
+    ///
+    /// The given `buf` should be at most [MAX_IO_BYTES][super::MAX_IO_BYTES].
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32>;
 
     fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()>;

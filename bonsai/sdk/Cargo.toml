@@ -1,7 +1,7 @@
 [package]
 name = "bonsai-sdk"
 description = "Bonsai Software Development Kit"
-version = "1.4.1"
+version = "1.4.2"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -131,6 +131,7 @@ impl CompositeReceipt {
                 // Otherwise, we should verify the assumption receipt using the guest-provided root.
                 control_root => Some(
                     VerifierContext::empty()
+                        .with_dev_mode(ctx.dev_mode())
                         .with_suites(ctx.suites.clone())
                         .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters {
                             control_root,

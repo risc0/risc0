@@ -14,7 +14,7 @@
 
 use derive_more::{Add, AddAssign, Debug, Sub};
 
-use crate::{PAGE_WORDS, WORD_SIZE};
+use crate::{PAGE_BYTES, PAGE_WORDS, WORD_SIZE};
 
 /// A memory address expressed in bytes
 #[derive(Add, AddAssign, Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Sub)]
@@ -34,6 +34,19 @@ impl ByteAddr {
     /// If the address is not aligned to a word boundary, this will return the highest aligned address smaller than the input address.
     pub const fn waddr(self) -> WordAddr {
         WordAddr(self.0 / WORD_SIZE as u32)
+    }
+
+    /// Gives the [Page][crate::image::Page] containing this memory address
+    pub const fn page_idx(&self) -> u32 {
+        self.0 / PAGE_BYTES as u32
+    }
+
+    /// The subaddress of this address relative to its containing
+    /// [Page][crate::image::Page]
+    ///
+    /// The number of bytes this address is beyond the first byte of the page which contains it.
+    pub const fn page_subaddr(&self) -> ByteAddr {
+        Self(self.0 % PAGE_BYTES as u32)
     }
 
     /// Convert to a [WordAddr] if aligned
@@ -57,17 +70,30 @@ impl ByteAddr {
         self.0 == 0
     }
 
+    /// Add an offset to an address, returning `None` on overflow.
+    pub const fn checked_add(self, rhs: u32) -> Option<Self> {
+        match self.0.checked_add(rhs) {
+            None => None,
+            Some(x) => Some(Self(x)),
+        }
+    }
+
+    /// Add an offset to an address, saturating on overflow.
+    pub const fn saturating_add(self, rhs: u32) -> Self {
+        Self(self.0.saturating_add(rhs))
+    }
+
     /// Add an offset to an address
     ///
     /// This will wrap on overflow, e.g. `0xFFFFFFFF + 0x00000001` is `0x00000000`.
-    pub fn wrapping_add(self, rhs: u32) -> Self {
+    pub const fn wrapping_add(self, rhs: u32) -> Self {
         Self(self.0.wrapping_add(rhs))
     }
 
     /// The subaddress of this address relative to its containing word
     ///
     /// The number of bytes this address is beyond the previous aligned address. So for example an aligned address will have a subaddress of `0`, while the address `0x00003001` will have subaddress `1`.
-    pub fn subaddr(&self) -> u32 {
+    pub const fn subaddr(&self) -> u32 {
         self.0 % WORD_SIZE as u32
     }
 }
@@ -79,28 +105,28 @@ impl WordAddr {
     }
 
     /// Gives the [crate::image::Page] containing this memory address
-    pub fn page_idx(&self) -> u32 {
+    pub const fn page_idx(&self) -> u32 {
         self.0 / PAGE_WORDS as u32
     }
 
     /// The subaddress of this address relative to its containing [crate::image::Page]
     ///
     /// The number of words this address is beyond the first word of the page which contains it.
-    pub fn page_subaddr(&self) -> WordAddr {
+    pub const fn page_subaddr(&self) -> WordAddr {
         Self(self.0 % PAGE_WORDS as u32)
     }
 
     /// Increments this address to the next word
     ///
     /// This increments the address without returning any value.
-    pub fn inc(&mut self) {
+    pub const fn inc(&mut self) {
         self.0 += 1;
     }
 
     /// Increments this address to the next word and returns its previous value
     ///
     /// This is a postfixing increment, analogous to `addr++` in C; the value this evaluates to is the value prior to the increment.
-    pub fn postfix_inc(&mut self) -> Self {
+    pub const fn postfix_inc(&mut self) -> Self {
         let cur = *self;
         self.0 += 1;
         cur

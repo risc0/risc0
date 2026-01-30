@@ -34,14 +34,14 @@ pub const MIN_CYCLES_PO2: usize = log2_ceil(RESERVED_CYCLES + RESERVED_PAGING_CY
 pub struct NullSyscall;
 
 impl Syscall for NullSyscall {
-    fn host_read(&self, _ctx: &mut dyn SyscallContext, _fd: u32, buf: &mut [u8]) -> Result<u32> {
+    fn host_read(&self, _ctx: &mut impl SyscallContext, _fd: u32, buf: &mut [u8]) -> Result<u32> {
         for (i, byte) in buf.iter_mut().enumerate() {
             *byte = i as u8;
         }
         Ok(buf.len() as u32)
     }
 
-    fn host_write(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
+    fn host_write(&self, _ctx: &mut impl SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
         unimplemented!()
     }
 }

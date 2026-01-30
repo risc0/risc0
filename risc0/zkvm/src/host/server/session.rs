@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
-use std::{collections::BTreeSet, fs, path::PathBuf};
+use std::{fs, path::PathBuf};
 
 use anyhow::{ensure, Context, Result};
 use enum_map::EnumMap;
@@ -36,12 +36,6 @@ use crate::{
 };
 
 use super::exec::syscall::{SyscallKind, SyscallMetric};
-
-#[derive(Clone, Default, Serialize, Deserialize, Debug)]
-pub struct PageFaults {
-    pub(crate) reads: BTreeSet<u32>,
-    pub(crate) writes: BTreeSet<u32>,
-}
 
 /// The execution trace of a program.
 ///

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ mod rng;
 
 use alloc::{boxed::Box, rc::Rc, vec::Vec};
 
+use bytemuck::CheckedBitPattern;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem,
@@ -66,6 +67,14 @@ impl HashFn<BabyBear> for Poseidon2HashFn {
         to_digest(unpadded_hash(
             slice.iter().flat_map(|ee| ee.subelems().iter()),
         ))
+    }
+
+    /// Checks if all words in the digest are less than the Baby Bear modulus.
+    fn is_digest_valid(&self, digest: &Digest) -> bool {
+        digest
+            .as_words()
+            .iter()
+            .all(<BabyBearElem as CheckedBitPattern>::is_valid_bit_pattern)
     }
 }
 
