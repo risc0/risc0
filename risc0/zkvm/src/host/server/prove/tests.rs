@@ -479,6 +479,7 @@ mod riscv {
 }
 
 #[test_log::test]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
