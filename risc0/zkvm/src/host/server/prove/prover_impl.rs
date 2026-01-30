@@ -80,7 +80,7 @@ impl ProverServer for ProverImpl {
             &self.opts.hashfn
         );
 
-        #[cfg(all(test, feature = "cuda"))]
+        #[cfg(all(test, gpu_accel))]
         gpu_guard::assert_gpu_semaphore_held();
 
         let mut segments = Vec::new();

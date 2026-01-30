@@ -48,7 +48,13 @@ impl ProverContext {
 
     #[cfg(feature = "cuda")]
     pub fn new_cuda(po2: usize) -> Result<Self> {
-        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_prover_new_cuda(po2) })?;
+        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_prover_new_gpu(po2) })?;
+        Ok(Self { ctx })
+    }
+
+    #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))]
+    pub fn new_metal(po2: usize) -> Result<Self> {
+        let ctx = ffi_wrap_ptr_mut(|| unsafe { risc0_circuit_rv32im_prover_new_gpu(po2) })?;
         Ok(Self { ctx })
     }
 
@@ -89,6 +95,8 @@ pub fn segment_prover(po2: usize) -> Result<ProverContext> {
     cfg_if! {
         if #[cfg(feature = "cuda")] {
             let segment_prover = ProverContext::new_cuda(po2)?;
+        } else if #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))] {
+            let segment_prover = ProverContext::new_metal(po2)?;
         } else {
             let segment_prover = ProverContext::new_cpu(po2)?;
         }
@@ -97,10 +105,14 @@ pub fn segment_prover(po2: usize) -> Result<ProverContext> {
 }
 
 #[cfg(test)]
-#[cfg(feature = "cuda")]
+#[cfg(any(
+    feature = "cuda",
+    all(target_os = "macos", target_arch = "aarch64"),
+    target_os = "ios"
+))]
 mod tests {
     use crate::execute::{
-        ExecutionLimit, Executor, RV32IM_M3_CIRCUIT_VERSION, SegmentUpdate, Syscall, SyscallContext,
+        ExecutionLimit, Executor, SegmentUpdate, Syscall, SyscallContext, RV32IM_M3_CIRCUIT_VERSION,
     };
     use paste::paste;
     use risc0_binfmt::{MemoryImage, Program};

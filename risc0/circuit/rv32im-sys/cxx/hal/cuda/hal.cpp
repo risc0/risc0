@@ -159,7 +159,7 @@ class CudaBuffer : public IBuffer {
 
 public:
   CudaBuffer(cudaStream_t stream, void* devPtr, size_t size)
-      : stream(stream), devPtr(devPtr), bufSize(size) {}
+      : devPtr(devPtr), bufSize(size), stream(stream) {}
   ~CudaBuffer() override { cuda_free(devPtr); }
   size_t size() override { return bufSize; }
   void copyFromCpu(size_t offset, const void* data, size_t size) override {

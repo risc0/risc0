@@ -21,8 +21,20 @@ use std::{
     ptr::NonNull,
 };
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use bytemuck::{Pod, Zeroable};
+
+#[cfg_attr(
+    any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"),
+    link(name = "Foundation", kind = "framework")
+)]
+unsafe extern "C" {}
+
+#[cfg_attr(
+    any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"),
+    link(name = "Metal", kind = "framework")
+)]
+unsafe extern "C" {}
 
 #[derive(Debug)]
 pub struct Rv32imInstrInfo {
@@ -147,8 +159,12 @@ unsafe extern "C" {
 
     pub fn risc0_circuit_rv32im_prover_new_cpu(po2: usize) -> *mut ProverContext;
 
-    #[cfg(feature = "cuda")]
-    pub fn risc0_circuit_rv32im_prover_new_cuda(po2: usize) -> *mut ProverContext;
+    #[cfg(any(
+        feature = "cuda",
+        all(target_os = "macos", target_arch = "aarch64"),
+        target_os = "ios"
+    ))]
+    pub fn risc0_circuit_rv32im_prover_new_gpu(po2: usize) -> *mut ProverContext;
 
     pub fn risc0_circuit_rv32im_prove(
         ctx: *const ProverContext,
