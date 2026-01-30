@@ -1195,9 +1195,9 @@ dependencies = [
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.2.0"
+version = "1.4.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f4c185a3bfaee681eed5bfac1440128184bf0b6544c345fb4d7bd4317c909fb"
+checksum = "3bd8ae1058e6f5d4635dfd206a41bab7ad64067df70421a5f32e18b1a17979ac"
 dependencies = [
  "include_bytes_aligned",
  "num-bigint-dig",
@@ -1398,11 +1398,12 @@ dependencies = [
 
 [[package]]
 name = "rsa"
-version = "0.9.6"
-source = "git+https://www.github.com/risc0/RustCrypto-RSA.git?rev=v0.9.6-risczero.0#cb42fd295c096c6dddd8386cd57b122add8d0cbc"
+version = "0.9.9"
+source = "git+https://www.github.com/risc0/RustCrypto-RSA.git?rev=v0.9.9-risczero.0#30de2b62532b7ec736614f6f7a84e6c5efbb8e24"
 dependencies = [
  "const-oid",
  "digest",
+ "getrandom 0.2.15",
  "num-bigint-dig",
  "num-integer",
  "num-traits",
