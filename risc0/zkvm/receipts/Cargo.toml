@@ -2,6 +2,7 @@
 name = "risc0-zkvm-receipts"
 version = { workspace = true }
 edition = { workspace = true }
+publish = false
 
 [package.metadata.release]
 release = false
