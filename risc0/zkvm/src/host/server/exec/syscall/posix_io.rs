@@ -17,10 +17,7 @@ use std::rc::Rc;
 
 use anyhow::{Result, bail};
 use risc0_binfmt::ByteAddr;
-use risc0_zkvm_platform::{
-    WORD_SIZE,
-    syscall::reg_abi::{REG_A3, REG_A4, REG_A5},
-};
+use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4, REG_A5};
 
 use super::{Syscall, SyscallContext, SyscallKind};
 
@@ -31,21 +28,11 @@ impl Syscall for SysRead {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
         let fd = ctx.load_register(REG_A3);
-        let nbytes = ctx.load_register(REG_A4) as usize;
 
-        tracing::trace!(
-            "sys_read(fd: {fd}, nbytes: {nbytes}, into: {} bytes)",
-            to_guest.len() * WORD_SIZE
-        );
-
-        assert!(
-            nbytes >= to_guest.len() * WORD_SIZE,
-            "Word-aligned read buffer must be fully filled"
-        );
-
+        tracing::trace!("sys_read(fd: {fd}, into: {} bytes)", to_guest.len());
         let reader = ctx.syscall_table().posix_io.borrow().get_reader(fd)?;
 
         // So that we don't have to deal with short reads, keep
@@ -63,29 +50,11 @@ impl Syscall for SysRead {
             Ok(tot_nread)
         };
 
-        let to_guest_u8 = bytemuck::cast_slice_mut(to_guest);
-        let nread_main = read_all(to_guest_u8)?;
+        let nread_main = read_all(to_guest)?;
 
-        tracing::trace!("read: {nread_main}, requested: {}", to_guest_u8.len());
+        tracing::trace!("read: {nread_main}, requested: {}", to_guest.len());
 
-        // It's possible that there's an unaligned word at the end
-        let unaligned_end = if nbytes - nread_main <= WORD_SIZE {
-            nbytes - nread_main
-        } else {
-            // We encountered an EOF. There's nothing left to read
-            0
-        };
-
-        // Fill unaligned word out.
-        let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
-        let nread_end = read_all(&mut to_guest_end[0..unaligned_end])?;
-        let nread_total = nread_main + nread_end;
-
-        let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::Read];
-        metric.count += 1;
-        metric.size += nread_total as u64;
-
-        Ok((nread_total as u32, u32::from_le_bytes(to_guest_end)))
+        Ok(nread_main)
     }
 }
 
@@ -96,8 +65,8 @@ impl Syscall for SysWrite {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
         if !to_guest.is_empty() {
             bail!("invalid sys_write call");
         }
@@ -118,6 +87,6 @@ impl Syscall for SysWrite {
         metric.count += 1;
         metric.size += buf_len as u64;
 
-        Ok((0, 0))
+        Ok(0)
     }
 }

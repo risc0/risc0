@@ -29,8 +29,8 @@ impl Syscall for SysPanic {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
         if !to_guest.is_empty() {
             bail!("invalid sys_panic call");
         }
