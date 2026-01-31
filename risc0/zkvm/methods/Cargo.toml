@@ -2,6 +2,7 @@
 name = "risc0-zkvm-methods"
 version = { workspace = true }
 edition = { workspace = true }
+publish = false
 
 [package.metadata.release]
 release = false
