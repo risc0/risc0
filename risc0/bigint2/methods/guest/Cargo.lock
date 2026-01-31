@@ -764,8 +764,8 @@ dependencies = [
 
 [[package]]
 name = "k256"
-version = "0.13.3"
-source = "git+https://github.com/risc0/RustCrypto-elliptic-curves?tag=k256%2Fv0.13.3-risczero.1#ff5d67b095cfcc2569b7789f2079ed87ef2c7756"
+version = "0.13.4"
+source = "git+https://github.com/risc0/RustCrypto-elliptic-curves?tag=k256%2Fv0.13.4-risczero.1#7d4a8d6477e258ce4169ee4669cf92aee0582c39"
 dependencies = [
  "bytemuck",
  "cfg-if",
