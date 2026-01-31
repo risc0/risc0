@@ -31,7 +31,10 @@ int main() {
   extractWithValArg<GetSign>(ctx);
   extractWithU32Arg<AddressDecompose>(ctx);
 
-  EXTRACT(GlobalsBlock);
+  EXTRACT_MUTABLE_ARRAY_FUNCTION(multiplyByMExt, CELLS);
+  EXTRACT_MUTABLE_ARRAY_FUNCTION(multiplyByMInt, CELLS);
+
+  // EXTRACT(GlobalsBlock);
   // EXTRACT(DecodeBlock); // slow (10 minutes)
   EXTRACT(InstResumeBlock);
   EXTRACT(InstSuspendBlock);
@@ -52,11 +55,15 @@ int main() {
   EXTRACT(EcallBigIntBlock);
   EXTRACT(ReadByteBlock);
   EXTRACT(ReadWordBlock);
+  EXTRACT(BigIntBlock); // Only verifies with Z3 solver
   EXTRACT(UnitAddSubBlock);
   EXTRACT(UnitBitBlock);
   EXTRACT(UnitLtBlock);
   // EXTRACT(UnitMulBlock); // slow (18 minutes)
   EXTRACT(UnitShiftBlock);
+  EXTRACT(P2ExtRoundBlock);
+  EXTRACT(P2IntRoundsBlock);
+  EXTRACT(P2BlockBlock);
   EXTRACT(PageInNodeBlock);
   EXTRACT(PageInPartBlock);
   EXTRACT(PageInPageBlock);

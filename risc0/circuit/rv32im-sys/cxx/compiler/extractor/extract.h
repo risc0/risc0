@@ -103,4 +103,22 @@ void extractWithU32Arg(RecordingContext& ctx) {
   ctx.exitComponent();
 }
 
+template <typename F, F f, size_t N>
+void extractMutableArrayFunction(RecordingContext& ctx, const char* name) {
+  ctx.enterComponent(name, nullptr);
+  auto loc = ctx.builder.getUnknownLoc();
+  Val<RecordingContext> arg[N];
+  for (size_t i = 0; i < N; i++) {
+    arg[i] = ctx.addValParameter();
+  }
+  f(ctx, arg);
+  auto resultVals = llvm::map_to_vector(arg, [](const auto& v) { return v.value; });
+  auto resultVal = ctx.builder.create<zirgen::ZStruct::ArrayOp>(loc, resultVals);
+  ctx.builder.create<zirgen::Zhlt::ReturnOp>(loc, resultVal);
+  ctx.exitComponent();
+}
+
 #define EXTRACT(Comp) extract<Comp>(ctx)
+
+#define EXTRACT_MUTABLE_ARRAY_FUNCTION(f, N)                                                       \
+  extractMutableArrayFunction<decltype(f<RecordingContext>), f<RecordingContext>, N>(ctx, #f);
