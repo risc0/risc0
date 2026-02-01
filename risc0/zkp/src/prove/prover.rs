@@ -197,7 +197,8 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         // Get rev rou for size
         let back_one = H::ExtElem::from_subfield(&H::Elem::ROU_REV[self.po2]);
-        let mut all_xs = Vec::new();
+        let tap_size = self.taps.tap_size();
+        let mut all_xs = Vec::with_capacity(tap_size);
 
         // Now, we evaluate each group at the appropriate points (relative to Z).
         // From here on out, we always process groups in accum, code, data order,
@@ -205,13 +206,14 @@ impl<'a, H: Hal> Prover<'a, H> {
         // Sometimes it's a requirement for matching generated code, but even when
         // it's not we keep the order for consistency.
 
-        let mut eval_u: Vec<H::ExtElem> = Vec::new();
+        let mut eval_u: Vec<H::ExtElem> = Vec::with_capacity(tap_size);
         scope!("eval_u", {
             for (id, pg) in self.groups.iter().enumerate() {
                 let pg = pg.as_ref().unwrap();
 
-                let mut which = Vec::new();
-                let mut xs = Vec::new();
+                let group_tap_count = self.taps.group_tap_count(id);
+                let mut which = Vec::with_capacity(group_tap_count);
+                let mut xs = Vec::with_capacity(group_tap_count);
                 for tap in self.taps.group_taps(id) {
                     which.push(tap.offset() as u32);
                     let x = back_one.pow(tap.back()) * z;
@@ -336,12 +338,13 @@ impl<'a, H: Hal> Prover<'a, H> {
             });
 
             scope!("divide", {
-                let mut chunks = vec![];
+                let mut chunks = Vec::with_capacity(combo_count + 1);
 
                 // Divide each element by (x - Z * back1^back) for each back
                 for i in 0..combo_count {
-                    let mut pows = vec![];
-                    for &back in self.taps.get_combo(i).slice() {
+                    let combo = self.taps.get_combo(i);
+                    let mut pows = Vec::with_capacity(combo.size());
+                    for &back in combo.slice() {
                         pows.push(z * back_one.pow(back.into()));
                     }
                     chunks.push((i, pows));
