@@ -24,6 +24,18 @@ use std::{
 use anyhow::{Result, anyhow};
 use bytemuck::{Pod, Zeroable};
 
+#[cfg_attr(
+    any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"),
+    link(name = "Foundation", kind = "framework")
+)]
+unsafe extern "C" {}
+
+#[cfg_attr(
+    any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"),
+    link(name = "Metal", kind = "framework")
+)]
+unsafe extern "C" {}
+
 #[derive(Debug)]
 pub struct Rv32imInstrInfo {
     pub name: &'static str,
@@ -119,42 +131,42 @@ pub struct RowInfo {
 type RawError = *const std::os::raw::c_char;
 
 unsafe extern "C" {
-    pub fn risc0_circuit_rv32im_m3_last_error() -> RawError;
-    pub fn risc0_circuit_rv32im_m3_clear_last_error();
+    pub fn risc0_circuit_rv32im_last_error() -> RawError;
+    pub fn risc0_circuit_rv32im_clear_last_error();
 
-    pub fn risc0_circuit_rv32im_m3_segment_free(ctx: *const SegmentContext);
-    pub fn risc0_circuit_rv32im_m3_preflight_free(ctx: *const PreflightContext);
-    pub fn risc0_circuit_rv32im_m3_prover_free(ctx: *const ProverContext);
+    pub fn risc0_circuit_rv32im_segment_free(ctx: *const SegmentContext);
+    pub fn risc0_circuit_rv32im_preflight_free(ctx: *const PreflightContext);
+    pub fn risc0_circuit_rv32im_prover_free(ctx: *const ProverContext);
 
-    pub fn risc0_circuit_rv32im_m3_segment_new(segment: *const RawSegment) -> *mut SegmentContext;
+    pub fn risc0_circuit_rv32im_segment_new(segment: *const RawSegment) -> *mut SegmentContext;
 
-    pub fn risc0_circuit_rv32im_m3_segment_preflight(
+    pub fn risc0_circuit_rv32im_segment_preflight(
         sctx: *mut SegmentContext,
         po2: usize,
     ) -> *mut PreflightContext;
 
-    pub fn risc0_circuit_rv32im_m3_preflight_is_final(ctx: *const PreflightContext) -> usize;
+    pub fn risc0_circuit_rv32im_preflight_is_final(ctx: *const PreflightContext) -> usize;
 
-    pub fn risc0_circuit_rv32im_m3_preflight_row_info(
-        ctx: *const PreflightContext,
-    ) -> *const RowInfo;
+    pub fn risc0_circuit_rv32im_preflight_row_info(ctx: *const PreflightContext) -> *const RowInfo;
 
-    pub fn risc0_circuit_rv32im_m3_preflight_row_info_size(ctx: *const PreflightContext) -> usize;
+    pub fn risc0_circuit_rv32im_preflight_row_info_size(ctx: *const PreflightContext) -> usize;
 
-    pub fn risc0_circuit_rv32im_m3_preflight_aux(ctx: *const PreflightContext) -> *const u32;
+    pub fn risc0_circuit_rv32im_preflight_aux(ctx: *const PreflightContext) -> *const u32;
 
-    pub fn risc0_circuit_rv32im_m3_preflight_aux_size(ctx: *const PreflightContext) -> usize;
+    pub fn risc0_circuit_rv32im_preflight_aux_size(ctx: *const PreflightContext) -> usize;
 
-    pub fn risc0_circuit_rv32im_m3_preflight_block_counts(
-        ctx: *const PreflightContext,
-    ) -> *const u32;
+    pub fn risc0_circuit_rv32im_preflight_block_counts(ctx: *const PreflightContext) -> *const u32;
 
-    pub fn risc0_circuit_rv32im_m3_prover_new_cpu(po2: usize) -> *mut ProverContext;
+    pub fn risc0_circuit_rv32im_prover_new_cpu(po2: usize) -> *mut ProverContext;
 
-    #[cfg(feature = "cuda")]
-    pub fn risc0_circuit_rv32im_m3_prover_new_cuda(po2: usize) -> *mut ProverContext;
+    #[cfg(any(
+        feature = "cuda",
+        all(target_os = "macos", target_arch = "aarch64"),
+        target_os = "ios"
+    ))]
+    pub fn risc0_circuit_rv32im_prover_new_gpu(po2: usize) -> *mut ProverContext;
 
-    pub fn risc0_circuit_rv32im_m3_prove(
+    pub fn risc0_circuit_rv32im_prove(
         ctx: *const ProverContext,
         rowInfo: *const RowInfo,
         rowInfoSize: usize,
@@ -162,7 +174,7 @@ unsafe extern "C" {
         auxSize: usize,
     );
 
-    pub fn risc0_circuit_rv32im_m3_prover_transcript(ctx: *const ProverContext) -> RawSlice<u32>;
+    pub fn risc0_circuit_rv32im_prover_transcript(ctx: *const ProverContext) -> RawSlice<u32>;
 }
 
 #[repr(C)]
@@ -200,7 +212,7 @@ where
     F: FnMut() -> *const T,
 {
     unsafe {
-        risc0_circuit_rv32im_m3_clear_last_error();
+        risc0_circuit_rv32im_clear_last_error();
         let ptr = inner();
         if ptr.is_null() {
             Err(take_last_error())
@@ -218,7 +230,7 @@ where
     F: FnMut() -> *mut T,
 {
     unsafe {
-        risc0_circuit_rv32im_m3_clear_last_error();
+        risc0_circuit_rv32im_clear_last_error();
         match NonNull::new(inner()) {
             Some(x) => Ok(x),
             None => Err(take_last_error()),
@@ -236,11 +248,11 @@ where
 {
     unsafe {
         // Clear stale error before the call
-        risc0_circuit_rv32im_m3_clear_last_error();
+        risc0_circuit_rv32im_clear_last_error();
         inner();
 
         // After the call, see if an error message was set
-        let ptr = risc0_circuit_rv32im_m3_last_error();
+        let ptr = risc0_circuit_rv32im_last_error();
         if ptr.is_null() {
             Ok(())
         } else {
@@ -254,7 +266,7 @@ where
 /// If there's nothing set, synthesize a generic message (optionally include an error code).
 fn take_last_error() -> anyhow::Error {
     unsafe {
-        let ptr = risc0_circuit_rv32im_m3_last_error();
+        let ptr = risc0_circuit_rv32im_last_error();
         let msg = if ptr.is_null() {
             "FFI call failed with no message".to_string()
         } else {

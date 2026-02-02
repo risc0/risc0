@@ -28,6 +28,14 @@ const METAL_INCS: &[(&str, &str)] = &[
     ("fpext.h", include_str!("../kernels/metal/fpext.h")),
 ];
 
+const DISABLED_WARNINGS: [&str; 5] = [
+    "-Wno-deprecated-copy",
+    "-Wno-missing-braces",
+    "-Wno-unknown-pragmas",
+    "-Wno-unused-function",
+    "-Wno-unused-parameter",
+];
+
 #[derive(Eq, PartialEq, Hash)]
 #[non_exhaustive]
 pub enum KernelType {
@@ -42,6 +50,7 @@ pub struct KernelBuild {
     files: Vec<PathBuf>,
     inc_dirs: Vec<PathBuf>,
     deps: Vec<PathBuf>,
+    rerun_if_changed: Vec<PathBuf>,
 }
 
 impl KernelBuild {
@@ -52,6 +61,7 @@ impl KernelBuild {
             files: Vec::new(),
             inc_dirs: Vec::new(),
             deps: Vec::new(),
+            rerun_if_changed: Vec::new(),
         }
     }
 
@@ -70,6 +80,7 @@ impl KernelBuild {
     /// Add a file which will be compiled
     pub fn file<P: AsRef<Path>>(&mut self, p: P) -> &mut KernelBuild {
         self.files.push(p.as_ref().to_path_buf());
+        self.rerun_if_changed.push(p.as_ref().to_path_buf());
         self
     }
 
@@ -81,6 +92,28 @@ impl KernelBuild {
     {
         for file in p.into_iter() {
             self.file(file);
+        }
+        self
+    }
+
+    /// Add a generated file which will be compiled.
+    ///
+    /// A generated file being changed won't cause a rebuild.
+    pub fn generated_file<P: AsRef<Path>>(&mut self, p: P) -> &mut KernelBuild {
+        self.files.push(p.as_ref().to_path_buf());
+        self
+    }
+
+    /// Add generated files which will be compiled
+    ///
+    /// A generated file being changed won't cause a rebuild.
+    pub fn generated_files<P>(&mut self, p: P) -> &mut KernelBuild
+    where
+        P: IntoIterator,
+        P::Item: AsRef<Path>,
+    {
+        for file in p.into_iter() {
+            self.generated_file(file);
         }
         self
     }
@@ -102,6 +135,7 @@ impl KernelBuild {
     /// Add a dependency
     pub fn dep<P: AsRef<Path>>(&mut self, p: P) -> &mut KernelBuild {
         self.deps.push(p.as_ref().to_path_buf());
+        self.rerun_if_changed.push(p.as_ref().to_path_buf());
         self
     }
 
@@ -119,11 +153,8 @@ impl KernelBuild {
 
     pub fn compile(&mut self, output: &str) {
         println!("cargo:rerun-if-env-changed=RISC0_SKIP_BUILD_KERNELS");
-        for src in self.files.iter() {
+        for src in &self.rerun_if_changed {
             rerun_if_changed(src);
-        }
-        for dep in self.deps.iter() {
-            rerun_if_changed(dep);
         }
         match &self.kernel_type {
             KernelType::Cpp => self.compile_cpp(output),
@@ -139,7 +170,8 @@ impl KernelBuild {
 
         // It's *highly* recommended to install `sccache` and use this combined with
         // `RUSTC_WRAPPER=/path/to/sccache` to speed up rebuilds of C++ kernels
-        cc::Build::new()
+        let mut build = cc::Build::new();
+        build
             .cpp(true)
             .debug(false)
             .files(&self.files)
@@ -147,9 +179,17 @@ impl KernelBuild {
             .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
             .flag_if_supported("-fno-var-tracking")
-            .flag_if_supported("-fno-var-tracking-assignments")
-            .flag_if_supported("-g0")
-            .compile(output);
+            .flag_if_supported("-fno-var-tracking-assignments");
+
+        for flag in self.flags.iter() {
+            build.flag(flag);
+        }
+
+        for warning in DISABLED_WARNINGS {
+            build.flag_if_supported(warning);
+        }
+
+        build.compile(output);
     }
 
     fn compile_cuda(&mut self, output: &str) {
@@ -196,13 +236,7 @@ impl KernelBuild {
 
         let cudart = env::var("RISC0_CUDART_LINKAGE").unwrap_or("static".to_string());
 
-        let warnings = [
-            "-Wno-missing-braces",
-            "-Wno-unused-function",
-            "-Wno-unknown-pragmas",
-            "-Wno-unused-parameter",
-        ]
-        .join(",");
+        let warnings = DISABLED_WARNINGS.join(",");
 
         build
             .cpp(true)
@@ -252,6 +286,7 @@ impl KernelBuild {
                         let mut cmd = Command::new("xcrun");
                         cmd.args(["--sdk", sdk_name]);
                         cmd.arg("metal");
+                        cmd.arg("-std=metal3.0");
                         cmd.arg("-o").arg(&air_path);
                         cmd.arg("-c").arg(src);
                         cmd.arg("-I").arg(sys_inc_dir);

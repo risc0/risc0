@@ -13,31 +13,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use anyhow::{Result, bail};
+fn main() {
+    let prove = std::env::var("CARGO_FEATURE_PROVE").is_ok();
+    let cuda = std::env::var("CARGO_FEATURE_CUDA").is_ok();
+    let metal = (std::env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos")
+        && std::env::var("CARGO_CFG_TARGET_ARCH").is_ok_and(|arch| arch == "aarch64"))
+        || std::env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "ios");
 
-use super::{Syscall, SyscallContext};
-
-use risc0_zkvm_platform::WORD_SIZE;
-
-pub(crate) struct SysCycleCount;
-impl Syscall for SysCycleCount {
-    fn syscall(
-        &mut self,
-        _syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u8],
-    ) -> Result<usize> {
-        if to_guest.len() != WORD_SIZE * 2 {
-            bail!("invalid sys_cycle_count call");
-        }
-
-        let cycle = ctx.get_cycle();
-        let hi = (cycle >> 32) as u32;
-        let lo = cycle as u32;
-
-        to_guest[..WORD_SIZE].copy_from_slice(&hi.to_le_bytes());
-        to_guest[WORD_SIZE..].copy_from_slice(&lo.to_le_bytes());
-
-        Ok(to_guest.len())
+    println!("cargo::rustc-check-cfg=cfg(gpu_accel)");
+    if prove && (cuda || metal) {
+        println!("cargo::rustc-cfg=gpu_accel");
     }
 }

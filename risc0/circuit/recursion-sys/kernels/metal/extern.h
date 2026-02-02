@@ -13,31 +13,20 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use anyhow::{Result, bail};
+#include "context.h"
 
-use super::{Syscall, SyscallContext};
+inline void
+extern_plonkWriteAccum_wom(device void* ctx, size_t cycle, const constant char* extra, thread Fp* args, thread Fp* outs) {
+  device AccumContext* actx = static_cast<device AccumContext*>(ctx);
+  actx->accum[cycle] = FpExt(args[0], args[1], args[2], args[3]);
+}
 
-use risc0_zkvm_platform::WORD_SIZE;
-
-pub(crate) struct SysCycleCount;
-impl Syscall for SysCycleCount {
-    fn syscall(
-        &mut self,
-        _syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u8],
-    ) -> Result<usize> {
-        if to_guest.len() != WORD_SIZE * 2 {
-            bail!("invalid sys_cycle_count call");
-        }
-
-        let cycle = ctx.get_cycle();
-        let hi = (cycle >> 32) as u32;
-        let lo = cycle as u32;
-
-        to_guest[..WORD_SIZE].copy_from_slice(&hi.to_le_bytes());
-        to_guest[WORD_SIZE..].copy_from_slice(&lo.to_le_bytes());
-
-        Ok(to_guest.len())
-    }
+inline void
+extern_plonkReadAccum_wom(device void* ctx, size_t cycle, const constant char* extra, thread Fp* args, thread Fp* outs) {
+  device AccumContext* actx = static_cast<device AccumContext*>(ctx);
+  const device FpExt& value = actx->accum[cycle];
+  outs[0] = value.elems[0];
+  outs[1] = value.elems[1];
+  outs[2] = value.elems[2];
+  outs[3] = value.elems[3];
 }

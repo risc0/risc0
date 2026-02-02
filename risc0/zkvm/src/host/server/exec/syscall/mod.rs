@@ -73,8 +73,8 @@ pub(crate) trait Syscall {
         &mut self,
         syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)>;
+        to_guest: &mut [u8],
+    ) -> Result<usize>;
 }
 
 /// Access to memory and machine state for syscalls.

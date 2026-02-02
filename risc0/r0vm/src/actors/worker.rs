@@ -596,10 +596,6 @@ impl GpuProcessor {
             i64::from(task.preflight_results.po2()),
         ));
 
-        tracer
-            .span
-            .set_attribute(opentelemetry::KeyValue::new("rv32im-m3", true));
-
         self.task_start(header.clone()).await?;
         let prover = Prover {
             delay: self.delay,
@@ -975,10 +971,6 @@ impl CpuProcessor {
             i64::try_from(task.segment.po2()).expect("po2 value should fit in i64"),
         ));
 
-        tracer
-            .span
-            .set_attribute(opentelemetry::KeyValue::new("rv32im-m3", true));
-
         self.task_start(header.clone()).await?;
 
         let dev_mode = task.dev_mode;
@@ -987,24 +979,16 @@ impl CpuProcessor {
             dev_mode,
         };
 
-        let preflight_results = tokio::task::spawn_blocking(move || -> Result<_> {
-            let mut segment_iter = prover.get()?.segment_preflight(&task.segment)?;
-            let preflight_results = segment_iter
-                .next()
-                .ok_or_else(|| Error::new("segment_preflight produced no segment results"))?;
-            if segment_iter.next().is_some() {
-                return Err(Error::new("segment_preflight produced multiple segments"));
-            }
-            Ok(preflight_results)
-        })
-        .await
-        .map_err(|e| Error::new(format!("JoinHandle error: preflight task: {e}")))??;
+        let preflight_results =
+            tokio::task::spawn_blocking(move || prover.get()?.segment_preflight(&task.segment))
+                .await
+                .map_err(|e| Error::new(format!("JoinHandle error: preflight task: {e}")))??;
 
         self.gpu_queue
             .send(GpuTaskMsg {
                 header: header.clone(),
                 task: GpuTask::ProveSegmentCore(ProveSegmentCoreTask {
-                    preflight_results: Box::new(preflight_results?),
+                    preflight_results: Box::new(preflight_results),
                     dev_mode,
                 }),
                 to_reserve: to_reserve.clone(),

@@ -13,31 +13,19 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use anyhow::{Result, bail};
+use std::env;
 
-use super::{Syscall, SyscallContext};
+fn main() {
+    let prove = std::env::var("CARGO_FEATURE_PROVE").is_ok();
+    let metal = (std::env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos")
+        && std::env::var("CARGO_CFG_TARGET_ARCH").is_ok_and(|arch| arch == "aarch64"))
+        || std::env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "ios");
 
-use risc0_zkvm_platform::WORD_SIZE;
-
-pub(crate) struct SysCycleCount;
-impl Syscall for SysCycleCount {
-    fn syscall(
-        &mut self,
-        _syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u8],
-    ) -> Result<usize> {
-        if to_guest.len() != WORD_SIZE * 2 {
-            bail!("invalid sys_cycle_count call");
-        }
-
-        let cycle = ctx.get_cycle();
-        let hi = (cycle >> 32) as u32;
-        let lo = cycle as u32;
-
-        to_guest[..WORD_SIZE].copy_from_slice(&hi.to_le_bytes());
-        to_guest[WORD_SIZE..].copy_from_slice(&lo.to_le_bytes());
-
-        Ok(to_guest.len())
+    if prove && metal {
+        println!(
+            "cargo:rustc-env=RECURSION_METAL_PATH={}",
+            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_METAL_KERNEL")
+                .expect("on macos risc0-circuit-recursion-sys should build metal kernels")
+        );
     }
 }

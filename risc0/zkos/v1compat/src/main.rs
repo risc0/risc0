@@ -47,6 +47,8 @@ mod zkvm {
     const REG_A0: usize = 10;
     const REG_A1: usize = 11;
     const REG_A4: usize = 14;
+    const REG_A5: usize = 15;
+    const REG_A6: usize = 16;
 
     const SHA_K: [u32; 64] = [
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4,
@@ -443,19 +445,14 @@ mod zkvm {
         host_ecall_read(fd, core::ptr::null_mut(), 0)
     }
 
-    fn read_a0_a1() -> (u32, u32) {
+    fn host_syscall_a0_a1(fd: u32) -> (u32, u32) {
         let mut buf = [0u32, 0u32];
         host_ecall_read(
-            0,
+            fd,
             buf.as_mut_ptr() as *mut u8,
             core::mem::size_of_val(&buf) as u32,
         );
         (buf[0], buf[1])
-    }
-
-    fn host_syscall_a0_a1(fd: u32) -> (u32, u32) {
-        host_syscall(fd);
-        read_a0_a1()
     }
 
     // word-oriented
@@ -486,13 +483,21 @@ mod zkvm {
         // a1: from_host_words
         // a2: syscall_name
         // a3: arg_index
+        // a4: get_var_len
+
+        let old_a4 = get_ureg(REG_A4);
+        set_ureg(REG_A4, 0);
 
         // Truncate the requested size since:
         // 1. The rv32im circuit can only transfer a max of 1KB.
         // 2. The host-side can only handle a single chunk.
         host_ecall_read_trunc(fd, buf, nwords * WORD_SIZE);
-        let (a0, _a1) = read_a0_a1();
+
+        set_ureg(REG_A4, 1);
+        let (a0, _a1) = host_syscall_a0_a1(fd);
+
         set_ureg(REG_A0, a0);
+        set_ureg(REG_A4, old_a4);
     }
 
     fn sys_cycle_count(fd: u32) {
@@ -529,13 +534,21 @@ mod zkvm {
         // a2: syscall_name
         // a3: varname
         // a4: varname_len
+        // a5: get_var_len
+
+        let old_a5 = get_ureg(REG_A5);
+        set_ureg(REG_A5, 0);
 
         // Truncate the requested size since:
         // 1. The rv32im circuit can only transfer a max of 1KB.
         // 2. The host-side can only handle a single chunk.
         host_ecall_read_trunc(fd, buf, nwords * WORD_SIZE);
-        let (a0, _a1) = read_a0_a1();
+
+        set_ureg(REG_A5, 1);
+        let (a0, _a1) = host_syscall_a0_a1(fd);
+
         set_ureg(REG_A0, a0);
+        set_ureg(REG_A5, old_a5);
     }
 
     fn sys_keccak(fd: u32, buf: *mut u8, nwords: u32) {
@@ -545,13 +558,21 @@ mod zkvm {
         // a3: keccak_mode
         // a4: in_state/claim_digest
         // a5: reserved/control_root
+        // a6: check_is_full
+        //
+        let old_a6 = get_ureg(REG_A6);
+        set_ureg(REG_A6, 0);
 
         // Truncate the requested size since:
         // 1. The rv32im circuit can only transfer a max of 1KB.
         // 2. The host-side can only handle a single chunk.
         host_ecall_read_trunc(fd, buf, nwords * WORD_SIZE);
-        let (a0, _a1) = read_a0_a1();
+
+        set_ureg(REG_A6, 1);
+        let (a0, _a1) = host_syscall_a0_a1(fd);
+
         set_ureg(REG_A0, a0);
+        set_ureg(REG_A6, old_a6);
     }
 
     fn sys_log(fd: u32) {
@@ -582,9 +603,8 @@ mod zkvm {
         // Truncate the requested size since:
         // 1. The rv32im circuit can only transfer a max of 1KB.
         // 2. The host-side can only handle a single chunk.
-        host_ecall_read_trunc(fd, buf, nwords * WORD_SIZE);
-        let (a0, _a1) = read_a0_a1();
-        set_ureg(REG_A0, a0);
+        let len = host_ecall_read_trunc(fd, buf, nwords * WORD_SIZE);
+        set_ureg(REG_A0, len);
     }
 
     fn sys_random(fd: u32, buf: *mut u8, nwords: u32) {
@@ -618,12 +638,8 @@ mod zkvm {
             let nbytes = chunk.len() as u32;
             set_ureg(REG_A4, nbytes);
 
-            // Read protocol with host expects a "main" read of whole words, then sends any final
-            // partial words in a seconds read for user (a0, a1).
-            let nbytes_main = (nbytes / WORD_SIZE) * WORD_SIZE;
-            host_ecall_read(fd, chunk.as_mut_ptr(), nbytes_main);
+            let nread_bytes = host_ecall_read(fd, chunk.as_mut_ptr(), nbytes);
 
-            let (nread_bytes, final_word) = read_a0_a1();
             if nread_bytes > nbytes {
                 // Host returned an invalid number of bytes read.
                 illegal_instruction()
@@ -632,16 +648,6 @@ mod zkvm {
             // SAFETY: With the check that nread_bytes <= nbytes, which is the chunk size,
             // total_bytes can never exceed the size of the slice; this will not overflow.
             total_bytes += nread_bytes;
-
-            // final_word handling
-            // NOTE: If true, this implies that nbytes % WORD_SIZE != 0 in combination with the
-            // length check above.
-            if nread_bytes > nbytes_main {
-                let final_bytes = final_word.to_le_bytes();
-                let pos = nbytes_main as usize;
-                let bytes_remain = (nread_bytes - nbytes_main) as usize;
-                chunk[pos..pos + bytes_remain].copy_from_slice(&final_bytes[..bytes_remain]);
-            }
 
             // short read
             if (nread_bytes as usize) < chunk.len() {
@@ -661,9 +667,8 @@ mod zkvm {
         // Truncate the requested size since:
         // 1. The rv32im circuit can only transfer a max of 1KB.
         // 2. The host-side can only handle a single chunk.
-        host_ecall_read_trunc(fd, buf, nwords * WORD_SIZE);
-        let (a0, _a1) = read_a0_a1();
-        set_ureg(REG_A0, a0);
+        let len = host_ecall_read_trunc(fd, buf, nwords * WORD_SIZE);
+        set_ureg(REG_A0, len);
     }
 
     fn sys_verify_integrity(fd: u32) {
@@ -673,8 +678,8 @@ mod zkvm {
         // a3: buf_ptr
         // a4: buf_nbytes
 
-        let (a0, _a1) = host_syscall_a0_a1(fd);
-        set_ureg(REG_A0, a0);
+        let len = host_syscall(fd);
+        set_ureg(REG_A0, len);
     }
 
     fn sys_verify_integrity2(fd: u32) {
@@ -684,8 +689,8 @@ mod zkvm {
         // a3: buf_ptr
         // a4: buf_nbytes
 
-        let (a0, _a1) = host_syscall_a0_a1(fd);
-        set_ureg(REG_A0, a0);
+        let len = host_syscall(fd);
+        set_ureg(REG_A0, len);
     }
 
     fn sys_write(fd: u32) {

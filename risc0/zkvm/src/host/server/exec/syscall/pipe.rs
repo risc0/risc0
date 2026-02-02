@@ -23,6 +23,7 @@ use std::{
 use anyhow::{Result, anyhow, bail};
 
 use crate::host::client::posix_io::PosixIo;
+use risc0_zkvm_platform::WORD_SIZE;
 
 use super::{Syscall, SyscallContext};
 
@@ -37,19 +38,23 @@ impl Syscall for SysPipe {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        if to_guest.len() != 2 {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
+        if to_guest.len() != 2 * WORD_SIZE {
             bail!("invalid sys_pipe call");
         }
 
         let posix_io = &ctx.syscall_table().posix_io;
         let pipe = Rc::new(RefCell::new(VecDeque::new()));
-        (to_guest[0], to_guest[1]) = posix_io
+        let (first, second) = posix_io
             .borrow_mut()
             .alloc_pipe(pipe)
             .ok_or_else(|| anyhow!("Could not allocate pipe"))?;
-        Ok((0, 0))
+
+        to_guest[..WORD_SIZE].copy_from_slice(&first.to_le_bytes());
+        to_guest[WORD_SIZE..].copy_from_slice(&second.to_le_bytes());
+
+        Ok(to_guest.len())
     }
 }
 

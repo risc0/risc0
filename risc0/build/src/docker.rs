@@ -160,6 +160,8 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
         .env(manifest_env)
         .env(rustflags_env)
         .env(&[("CARGO_TARGET_DIR", "target")])
+        // NOTE: This is no longer required when using an up to date version of risc0-bigint2.
+        // It is kept to avoid breaking code that links older versions of that crate without cause.
         .env(&[("RISC0_FEATURE_bigint2", "")])
         .env(&[(
             "CC_riscv32im_risc0_zkvm_elf",
@@ -267,7 +269,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "0cd1b6d6ecd13722a91de42cab326b0c5d90dd6b749ddf4753c96eb2832ee954",
+            "c6555ce348de47de63606d946669995a77ed5d0430e5dd862234a22f2506142a",
         );
     }
 }

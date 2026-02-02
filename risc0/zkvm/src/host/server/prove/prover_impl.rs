@@ -17,7 +17,7 @@ use std::collections::HashMap;
 
 use anyhow::{Context, Result, anyhow, bail, ensure};
 
-use super::{PreflightIter, ProverServer, keccak::prove_keccak};
+use super::{ProverServer, keccak::prove_keccak};
 use crate::{
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
     MaybePruned, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
@@ -80,7 +80,7 @@ impl ProverServer for ProverImpl {
             &self.opts.hashfn
         );
 
-        #[cfg(all(test, feature = "cuda"))]
+        #[cfg(all(test, gpu_accel))]
         gpu_guard::assert_gpu_semaphore_held();
 
         let mut segments = Vec::new();
@@ -89,7 +89,7 @@ impl ProverServer for ProverImpl {
             for hook in &session.hooks {
                 hook.on_pre_prove_segment(&segment);
             }
-            segments.extend(self.prove_segment(ctx, &segment)?);
+            segments.push(self.prove_segment(ctx, &segment)?);
             for hook in &session.hooks {
                 hook.on_post_prove_segment(&segment);
             }
@@ -215,13 +215,24 @@ impl ProverServer for ProverImpl {
         );
     }
 
-    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
         tracing::debug!("segment_preflight");
-        Ok(Box::new(rv32im_m3::PreflightIter::new(
-            segment,
-            segment.po2(),
-            segment.index,
-        )?))
+
+        let terminate_state = segment.inner.terminate_state;
+        let ctx = risc0_circuit_rv32im::prove::SegmentContext::new(&segment.inner)?;
+
+        let preflight = ctx.preflight(segment.po2())?;
+
+        if !preflight.is_final() {
+            bail!("segment_preflight produced multiple segments");
+        }
+
+        Ok(PreflightResults {
+            inner: preflight,
+            terminate_state,
+            output: segment.output.clone(),
+            segment_index: segment.index,
+        })
     }
 
     fn prove_preflight(
@@ -235,7 +246,7 @@ impl ProverServer for ProverImpl {
         let prover = risc0_circuit_rv32im::prove::segment_prover(po2 as usize)?;
         let seal = prover.prove(&preflight_results.inner)?;
 
-        let claim = ReceiptClaim::decode_m3_with_output(&seal, preflight_results.output.clone())
+        let claim = ReceiptClaim::decode_with_output(&seal, preflight_results.output.clone())
             .context("Decode ReceiptClaim from seal")?;
 
         let verifier_parameters = ctx
@@ -374,70 +385,4 @@ fn check_claims(
         );
     }
     Ok(())
-}
-
-mod rv32im_m3 {
-    use risc0_circuit_rv32im::TerminateState;
-
-    use super::*;
-    use crate::{MaybePruned, Output};
-
-    pub(crate) struct PreflightIter {
-        max_prover_po2: usize,
-        ctx: risc0_circuit_rv32im::prove::SegmentContext,
-        output: MaybePruned<Option<Output>>,
-        terminate_state: Option<TerminateState>,
-        is_done: bool,
-        segment_index: u32,
-    }
-
-    impl PreflightIter {
-        pub(crate) fn new(
-            segment: &Segment,
-            max_prover_po2: usize,
-            segment_index: u32,
-        ) -> Result<Self> {
-            let terminate_state = segment.inner.terminate_state;
-            let ctx = risc0_circuit_rv32im::prove::SegmentContext::new(&segment.inner)?;
-            Ok(Self {
-                max_prover_po2,
-                ctx,
-                output: segment.output.clone(),
-                terminate_state,
-                is_done: false,
-                segment_index,
-            })
-        }
-    }
-
-    impl Iterator for PreflightIter {
-        type Item = Result<PreflightResults>;
-
-        fn next(&mut self) -> Option<Self::Item> {
-            if self.is_done {
-                return None;
-            }
-
-            match self.ctx.preflight(self.max_prover_po2) {
-                Ok(preflight) => {
-                    self.is_done = preflight.is_final();
-                    let results = PreflightResults {
-                        inner: preflight,
-                        terminate_state: self.terminate_state,
-                        output: if self.is_done {
-                            self.output.clone()
-                        } else {
-                            Default::default()
-                        },
-                        segment_index: self.segment_index,
-                    };
-                    Some(Ok(results))
-                }
-                Err(err) => {
-                    self.is_done = true;
-                    Some(Err(err))
-                }
-            }
-        }
-    }
 }

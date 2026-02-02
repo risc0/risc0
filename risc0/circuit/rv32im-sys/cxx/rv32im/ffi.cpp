@@ -85,11 +85,11 @@ static void setLastError(const char* msg) {
   gLastError = msg ? msg : "Unknown error";
 }
 
-const char* risc0_circuit_rv32im_m3_last_error() noexcept {
+const char* risc0_circuit_rv32im_last_error() noexcept {
   return gLastError.empty() ? nullptr : gLastError.c_str();
 }
 
-void risc0_circuit_rv32im_m3_clear_last_error() noexcept {
+void risc0_circuit_rv32im_clear_last_error() noexcept {
   gLastError.clear();
 }
 
@@ -183,19 +183,19 @@ struct ProverContext {
   ProverContext(IHalPtr hal, size_t po2) : prover(hal, po2) {}
 };
 
-void risc0_circuit_rv32im_m3_segment_free(SegmentContext* ctx) {
+void risc0_circuit_rv32im_segment_free(SegmentContext* ctx) {
   delete ctx;
 }
 
-void risc0_circuit_rv32im_m3_preflight_free(PreflightContext* ctx) {
+void risc0_circuit_rv32im_preflight_free(PreflightContext* ctx) {
   delete ctx;
 }
 
-void risc0_circuit_rv32im_m3_prover_free(ProverContext* ctx) {
+void risc0_circuit_rv32im_prover_free(ProverContext* ctx) {
   delete ctx;
 }
 
-SegmentContext* risc0_circuit_rv32im_m3_segment_new(const RustSegment* segment) {
+SegmentContext* risc0_circuit_rv32im_segment_new(const RustSegment* segment) {
   return tryRet([&] {
     nvtx3::scoped_range range("load_segment");
     SegmentContext* ctx = new SegmentContext{};
@@ -220,7 +220,7 @@ SegmentContext* risc0_circuit_rv32im_m3_segment_new(const RustSegment* segment) 
   });
 }
 
-PreflightContext* risc0_circuit_rv32im_m3_segment_preflight(SegmentContext* ctx, size_t po2) {
+PreflightContext* risc0_circuit_rv32im_segment_preflight(SegmentContext* ctx, size_t po2) {
   return tryRet([&] {
     nvtx3::scoped_range range("preflight");
     PreflightContext* ret = new PreflightContext{};
@@ -243,49 +243,49 @@ PreflightContext* risc0_circuit_rv32im_m3_segment_preflight(SegmentContext* ctx,
   });
 }
 
-size_t risc0_circuit_rv32im_m3_preflight_is_final(PreflightContext* ctx) {
+size_t risc0_circuit_rv32im_preflight_is_final(PreflightContext* ctx) {
   return ctx->isFinal;
 }
 
-const RowInfo* risc0_circuit_rv32im_m3_preflight_row_info(PreflightContext* ctx) {
+const RowInfo* risc0_circuit_rv32im_preflight_row_info(PreflightContext* ctx) {
   return ctx->results->rowInfo.data();
 }
 
-size_t risc0_circuit_rv32im_m3_preflight_row_info_size(PreflightContext* ctx) {
+size_t risc0_circuit_rv32im_preflight_row_info_size(PreflightContext* ctx) {
   return ctx->results->rowInfo.size();
 }
 
-const uint32_t* risc0_circuit_rv32im_m3_preflight_aux(PreflightContext* ctx) {
+const uint32_t* risc0_circuit_rv32im_preflight_aux(PreflightContext* ctx) {
   return ctx->results->aux.data();
 }
 
-size_t risc0_circuit_rv32im_m3_preflight_aux_size(PreflightContext* ctx) {
+size_t risc0_circuit_rv32im_preflight_aux_size(PreflightContext* ctx) {
   return ctx->results->aux.size();
 }
 
-uint32_t* risc0_circuit_rv32im_m3_preflight_block_counts(PreflightContext* ctx) {
+uint32_t* risc0_circuit_rv32im_preflight_block_counts(PreflightContext* ctx) {
   return ctx->results->block_counts;
 }
 
-ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2) {
+ProverContext* risc0_circuit_rv32im_prover_new_cpu(size_t po2) {
   return tryRet([&] {
     IHalPtr hal = getCpuHal();
     return new ProverContext(hal, po2);
   });
 }
 
-ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2) {
+ProverContext* risc0_circuit_rv32im_prover_new_gpu(size_t po2) {
   return tryRet([&] {
     IHalPtr hal = getGpuHal();
     return new ProverContext(hal, po2);
   });
 }
 
-void risc0_circuit_rv32im_m3_prove(ProverContext* ctx,
-                                   const RowInfo* rowInfo,
-                                   size_t rowInfoSize,
-                                   const uint32_t* aux,
-                                   size_t auxSize) {
+void risc0_circuit_rv32im_prove(ProverContext* ctx,
+                                const RowInfo* rowInfo,
+                                size_t rowInfoSize,
+                                const uint32_t* aux,
+                                size_t auxSize) {
   return tryVoid([&] {
     nvtx3::scoped_range range("prove");
     WriteIop writeIop;
@@ -306,7 +306,7 @@ void risc0_circuit_rv32im_m3_prove(ProverContext* ctx,
   });
 }
 
-RustSliceFp risc0_circuit_rv32im_m3_prover_transcript(ProverContext* ctx) {
+RustSliceFp risc0_circuit_rv32im_prover_transcript(ProverContext* ctx) {
   return RustSliceFp{ctx->transcript.data(), ctx->transcript.size()};
 }
 

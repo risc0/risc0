@@ -13,31 +13,21 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use anyhow::{Result, bail};
+#pragma once
 
-use super::{Syscall, SyscallContext};
+#include "fpext.h"
 
-use risc0_zkvm_platform::WORD_SIZE;
+struct AccumBuffers {
+  device Fp* ctrl;
+  device Fp* global;
+  device Fp* data;
+  device Fp* mix;
+  device Fp* accum;
+};
 
-pub(crate) struct SysCycleCount;
-impl Syscall for SysCycleCount {
-    fn syscall(
-        &mut self,
-        _syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u8],
-    ) -> Result<usize> {
-        if to_guest.len() != WORD_SIZE * 2 {
-            bail!("invalid sys_cycle_count call");
-        }
-
-        let cycle = ctx.get_cycle();
-        let hi = (cycle >> 32) as u32;
-        let lo = cycle as u32;
-
-        to_guest[..WORD_SIZE].copy_from_slice(&hi.to_le_bytes());
-        to_guest[WORD_SIZE..].copy_from_slice(&lo.to_le_bytes());
-
-        Ok(to_guest.len())
-    }
-}
+struct AccumContext {
+  AccumBuffers buffers;
+  uint32_t totalCycles;
+  uint32_t workCycles;
+  device FpExt* accum;
+};

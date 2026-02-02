@@ -421,34 +421,34 @@ fn posix_style_read() {
 #[case(0, 1, b"abcdefghijkl")]
 #[case(0, 2, b"abcdefghijkl")]
 #[case(0, 3, b"abcdefghijkl")]
-#[case(0, 4, b"\0\0\0\0efghijkl")]
-#[case(0, 5, b"\0\0\0\0efghijkl")]
-#[case(0, 6, b"\0\0\0\0efghijkl")]
-#[case(0, 7, b"\0\0\0\0efghijkl")]
+#[case(0, 4, b"abcdefghijkl")]
+#[case(0, 5, b"abcdefghijkl")]
+#[case(0, 6, b"abcdefghijkl")]
+#[case(0, 7, b"abcdefghijkl")]
 #[case(1, 0, b"Abcdefghijkl")]
 #[case(1, 1, b"Abcdefghijkl")]
 #[case(1, 2, b"Abcdefghijkl")]
-#[case(1, 3, b"A\0\0\0efghijkl")]
-#[case(1, 4, b"A\0\0\0efghijkl")]
-#[case(1, 5, b"A\0\0\0efghijkl")]
-#[case(1, 6, b"A\0\0\0efghijkl")]
-#[case(1, 7, b"A\0\0\0\0\0\0\0ijkl")]
+#[case(1, 3, b"Abcdefghijkl")]
+#[case(1, 4, b"Abcdefghijkl")]
+#[case(1, 5, b"Abcdefghijkl")]
+#[case(1, 6, b"Abcdefghijkl")]
+#[case(1, 7, b"Abcdefghijkl")]
 #[case(2, 0, b"ABcdefghijkl")]
 #[case(2, 1, b"ABcdefghijkl")]
-#[case(2, 2, b"AB\0\0efghijkl")]
-#[case(2, 3, b"AB\0\0efghijkl")]
-#[case(2, 4, b"AB\0\0efghijkl")]
-#[case(2, 5, b"AB\0\0efghijkl")]
-#[case(2, 6, b"AB\0\0\0\0\0\0ijkl")]
-#[case(2, 7, b"AB\0\0\0\0\0\0ijkl")]
+#[case(2, 2, b"ABcdefghijkl")]
+#[case(2, 3, b"ABcdefghijkl")]
+#[case(2, 4, b"ABcdefghijkl")]
+#[case(2, 5, b"ABcdefghijkl")]
+#[case(2, 6, b"ABcdefghijkl")]
+#[case(2, 7, b"ABcdefghijkl")]
 #[case(3, 0, b"ABCdefghijkl")]
-#[case(3, 1, b"ABC\0efghijkl")]
-#[case(3, 2, b"ABC\0efghijkl")]
-#[case(3, 3, b"ABC\0efghijkl")]
-#[case(3, 4, b"ABC\0efghijkl")]
-#[case(3, 5, b"ABC\0\0\0\0\0ijkl")]
-#[case(3, 6, b"ABC\0\0\0\0\0ijkl")]
-#[case(3, 7, b"ABC\0\0\0\0\0ijkl")]
+#[case(3, 1, b"ABCdefghijkl")]
+#[case(3, 2, b"ABCdefghijkl")]
+#[case(3, 3, b"ABCdefghijkl")]
+#[case(3, 4, b"ABCdefghijkl")]
+#[case(3, 5, b"ABCdefghijkl")]
+#[case(3, 6, b"ABCdefghijkl")]
+#[case(3, 7, b"ABCdefghijkl")]
 #[test_log::test]
 fn short_read_combinations(
     #[case] read_len: usize,
@@ -1170,11 +1170,11 @@ fn post_state_digest_randomization() {
             &mut self,
             _syscall: &str,
             _ctx: &mut dyn SyscallContext,
-            to_guest: &mut [u32],
-        ) -> Result<(u32, u32)> {
-            let rand_buf = vec![27u8; to_guest.len() * WORD_SIZE];
-            bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
-            Ok((0, 0))
+            to_guest: &mut [u8],
+        ) -> Result<usize> {
+            let rand_buf = vec![27u8; to_guest.len()];
+            to_guest.clone_from_slice(rand_buf.as_slice());
+            Ok(to_guest.len())
         }
     }
 
