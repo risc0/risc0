@@ -140,7 +140,7 @@ pub struct ExecutionLimit {
     /// execution failure.
     pub max_insn_cycles: Option<usize>,
     /// Limit on the number of cycles to execute in the session.
-    pub session: CycleLimit,
+    pub session: RowLimit,
 }
 
 impl Default for ExecutionLimit {
@@ -153,7 +153,7 @@ impl ExecutionLimit {
     pub const DEFAULT: Self = Self {
         segment_po2: DEFAULT_SEGMENT_LIMIT_PO2,
         max_insn_cycles: None,
-        session: CycleLimit::None,
+        session: RowLimit::None,
     };
 
     pub const fn with_segment_po2(self, segment_po2: usize) -> Self {
@@ -170,20 +170,20 @@ impl ExecutionLimit {
         }
     }
 
-    pub const fn with_session_limit(self, session: CycleLimit) -> Self {
+    pub const fn with_session_limit(self, session: RowLimit) -> Self {
         Self { session, ..self }
     }
 
-    pub const fn with_soft_session_limit(self, cycles: u64) -> Self {
+    pub const fn with_soft_session_limit(self, rows: u64) -> Self {
         Self {
-            session: CycleLimit::Soft(cycles),
+            session: RowLimit::Soft(rows),
             ..self
         }
     }
 
-    pub const fn with_hard_session_limit(self, cycles: u64) -> Self {
+    pub const fn with_hard_session_limit(self, rows: u64) -> Self {
         Self {
-            session: CycleLimit::Hard(cycles),
+            session: RowLimit::Hard(rows),
             ..self
         }
     }
@@ -206,7 +206,7 @@ impl ExecutionLimit {
 }
 
 #[derive(Copy, Clone, Debug, Default)]
-pub enum CycleLimit {
+pub enum RowLimit {
     /// Hard limit on the number of cycles, it is an error to exceed this limit.
     Hard(u64),
     /// Soft limit on the number of cycles. Terminate, without error, if this limit is reached.
@@ -219,9 +219,9 @@ pub enum CycleLimit {
 #[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum ExecutionError {
-    /// Error when when a hard [CycleLimit] is exceeded.
-    #[error("Session limit exceeded: {cycle} >= {limit}")]
-    CycleLimitExceeded { limit: u64, cycle: u64 },
+    /// Error when when a hard [RowLimit] is exceeded.
+    #[error("Session limit exceeded: {rows} >= {limit}")]
+    RowLimitExceeded { limit: u64, rows: u64 },
     /// Error when the execution encounters an error. Optionally includes a [SegmentUpdate] with
     /// the results of execution up to the point of error in the final segment.
     #[error("Execution failed at program counter {pc:?}: {error}")]
@@ -410,8 +410,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
         if self.terminate_state.is_some() {
             return Ok(None);
         }
-        if let CycleLimit::Soft(soft_limit) = limit.session
-            && self.cycles.user >= soft_limit
+        let used_rows = 0; // XXX row count missing
+        if let RowLimit::Soft(soft_limit) = limit.session
+            && used_rows >= soft_limit
         {
             return Ok(None);
         }
@@ -426,26 +427,28 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
             // Check the session-level cycle limit.
             match limit.session {
-                CycleLimit::Hard(max_cycles) => {
-                    if self.cycles.user >= max_cycles {
-                        return Err(ExecutionError::CycleLimitExceeded {
-                            limit: max_cycles,
-                            cycle: self.cycles.user,
+                RowLimit::Hard(max_rows) => {
+                    let used_rows = 0; // XXX row count missing
+                    if used_rows >= max_rows {
+                        return Err(ExecutionError::RowLimitExceeded {
+                            limit: max_rows,
+                            rows: used_rows,
                         });
                     }
                 }
-                CycleLimit::Soft(max_cycles) => {
-                    if self.cycles.user >= max_cycles {
+                RowLimit::Soft(max_rows) => {
+                    let used_rows = 0; // XXX row count missing
+                    if used_rows >= max_rows {
                         break;
                     }
                 }
-                CycleLimit::None => {}
+                RowLimit::None => {}
             }
 
             // Check the segment-level cycle limit.
             if self.should_split(limit.segment_threshold()) {
                 // NOTE: If the max_insn_cycles is set accurately, this should never happen.
-                if self.segment_cycles() > limit.segment_limit() {
+                if self.segment_used_rows() > limit.segment_limit() {
                     return Err(anyhow!(
                         "segment limit ({}) too small for instruction at pc: {:?}",
                         limit.segment_limit(),
@@ -477,9 +480,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         Risc0Machine::suspend(self)?;
 
-        let cycles = self.segment_cycles().next_power_of_two();
+        let cycles = self.segment_used_rows().next_power_of_two();
         let po2 = log2_ceil(cycles as usize);
-        let segment_threshold_min = u32::min(self.segment_cycles(), limit.segment_threshold());
+        let segment_threshold_min = u32::min(self.segment_used_rows(), limit.segment_threshold());
         let update = self.split_segment(po2, segment_threshold_min)?;
 
         Ok(Some(update))
@@ -512,7 +515,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
             self.user_cycles,
             self.pager.cycles,
-            self.segment_cycles()
+            self.segment_used_rows()
         );
 
         let partial_image = self.pager.commit();
@@ -635,7 +638,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         )
     }
 
-    fn segment_cycles(&self) -> u32 {
+    fn segment_used_rows(&self) -> u32 {
         let blocks = self
             .block_tracker
             .get_blocks(self.insn_counter, self.pager.touched_pages());
@@ -697,7 +700,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             tracing::trace!(
                 "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
                 self.user_cycles + 1,
-                self.segment_cycles() + 1,
+                self.segment_used_rows() + 1,
                 self.pc,
                 decoded.insn,
                 super::rv32im::disasm(kind, decoded)

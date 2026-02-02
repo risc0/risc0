@@ -32,7 +32,7 @@ use risc0_binfmt::{
     SystemState,
 };
 use risc0_circuit_rv32im::execute::{
-    CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, ExecutionError, ExecutionLimit, Executor, PAGE_BYTES,
+    DEFAULT_SEGMENT_LIMIT_PO2, ExecutionError, ExecutionLimit, Executor, PAGE_BYTES, RowLimit,
     SegmentUpdate, Syscall as CircuitSyscall, SyscallContext as CircuitSyscallContext,
 };
 use risc0_core::scope;
@@ -523,8 +523,8 @@ impl<'a> ExecutorImpl<'a> {
         let segment_limit_po2 = self.segment_limit_po2() as usize;
 
         let session_limit = match self.env.session_limit {
-            Some(limit) => CycleLimit::Hard(limit),
-            None => CycleLimit::None,
+            Some(limit) => RowLimit::Hard(limit),
+            None => RowLimit::None,
         };
 
         ExecutionLimit::default()
