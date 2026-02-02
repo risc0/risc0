@@ -69,20 +69,14 @@ pub struct Session {
     /// The hooks to be called during the proving phase.
     pub hooks: Vec<Box<dyn SessionEvents>>,
 
-    /// The number of user cycles without any overhead for continuations or po2
-    /// padding.
-    pub user_cycles: u64,
+    /// The total number of rows generated during this session
+    pub row_count: u64,
 
-    /// The number of cycles needed for paging operations.
-    pub paging_cycles: u64,
+    /// Empty rows used to reach the power of two.
+    pub padding_row_count: u64,
 
-    /// The number of cycles needed for the proof system which includes padding
-    /// up to the nearest power of 2.
-    pub reserved_cycles: u64,
-
-    /// Total number of cycles that a prover experiences. This includes overhead
-    /// associated with continuations and padding up to the nearest power of 2.
-    pub total_cycles: u64,
+    /// The number of riscv instructions ran during this session
+    pub insn_count: u64,
 
     /// The system state of the initial MemoryImage.
     pub pre_state: SystemState,
@@ -289,7 +283,7 @@ impl Session {
         self.povw_job_id.map(|povw_job_id| Work {
             nonce_min: povw_job_id.nonce(0),
             nonce_max: povw_job_id.nonce(self.segments.len() as u32),
-            value: self.total_cycles,
+            value: self.row_count,
         })
     }
 
@@ -312,10 +306,9 @@ impl Session {
     pub fn stats(&self) -> SessionStats {
         SessionStats {
             segments: self.segments.len(),
-            total_cycles: self.total_cycles,
-            user_cycles: self.user_cycles,
-            paging_cycles: self.paging_cycles,
-            reserved_cycles: self.reserved_cycles,
+            row_count: self.row_count,
+            padding_row_count: self.padding_row_count,
+            insn_count: self.insn_count,
             ecall_metrics: self
                 .ecall_metrics
                 .iter()

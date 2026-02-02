@@ -31,9 +31,9 @@ impl Syscall for SysCycleCount {
             bail!("invalid sys_cycle_count call");
         }
 
-        let cycle = ctx.get_cycle();
-        let hi = (cycle >> 32) as u32;
-        let lo = cycle as u32;
+        let rows = ctx.get_rows();
+        let hi = (rows >> 32) as u32;
+        let lo = rows as u32;
 
         to_guest[..WORD_SIZE].copy_from_slice(&hi.to_le_bytes());
         to_guest[WORD_SIZE..].copy_from_slice(&lo.to_le_bytes());

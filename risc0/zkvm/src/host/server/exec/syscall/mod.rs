@@ -83,8 +83,8 @@ pub(crate) trait SyscallContext<'a> {
     /// Returns the current program counter.
     fn get_pc(&self) -> u32;
 
-    /// Returns the current cycle being executed.
-    fn get_cycle(&self) -> u64;
+    /// Returns the number of rows filled so far.
+    fn get_rows(&self) -> u64;
 
     /// Loads the value of the given register, e.g. REG_A0.
     fn load_register(&mut self, idx: usize) -> u32;

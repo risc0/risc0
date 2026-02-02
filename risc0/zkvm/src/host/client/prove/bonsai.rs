@@ -144,11 +144,10 @@ impl Prover for BonsaiProver {
                     work_receipt: None,
                     stats: SessionStats {
                         segments: stats.segments,
-                        total_cycles: stats.total_cycles,
-                        user_cycles: stats.cycles,
                         // These are currently unavailable from Bonsai
-                        paging_cycles: 0,
-                        reserved_cycles: 0,
+                        row_count: 0,
+                        padding_row_count: 0,
+                        insn_count: 0,
                         ecall_metrics: Default::default(),
                         syscall_metrics: Default::default(),
                         execution_time: None,

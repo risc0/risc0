@@ -444,10 +444,9 @@ impl<'a> ExecutorImpl<'a> {
             exit_code,
             assumptions,
             mmr_assumptions,
-            user_cycles: exec_result.user_cycles,
-            paging_cycles: exec_result.paging_cycles,
-            reserved_cycles: exec_result.reserved_cycles,
-            total_cycles: exec_result.total_cycles,
+            row_count: exec_result.row_count,
+            padding_row_count: exec_result.padding_row_count,
+            insn_count: exec_result.insn_count,
             pre_state: SystemState {
                 pc: 0,
                 merkle_root: pre_image_digest,
@@ -565,8 +564,8 @@ where
         self.ctx.get_pc()
     }
 
-    fn get_cycle(&self) -> u64 {
-        self.ctx.get_cycle()
+    fn get_rows(&self) -> u64 {
+        self.ctx.get_rows()
     }
 
     fn load_register(&mut self, idx: usize) -> u32 {
@@ -645,13 +644,13 @@ impl CircuitSyscall for CircuitSyscallTable<'_> {
 
     fn host_write(
         &self,
-        ctx: &mut impl CircuitSyscallContext,
+        _ctx: &mut impl CircuitSyscallContext,
         _fd: u32,
         buf: &[u8],
     ) -> Result<u32> {
         if tracing::enabled!(Level::DEBUG) {
             let str = String::from_utf8(buf.to_vec())?;
-            tracing::debug!("R0VM[{}] {str}", ctx.get_cycle());
+            tracing::debug!("R0VM {str}");
         }
         Ok(buf.len() as u32)
     }

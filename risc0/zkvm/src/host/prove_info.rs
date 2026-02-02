@@ -73,17 +73,14 @@ pub struct SessionStats {
     /// Count of segments in this proof request
     pub segments: usize,
 
-    /// Total cycles run within guest
-    pub total_cycles: u64,
+    /// Total rows generated during this session
+    pub row_count: u64,
 
-    /// User cycles run within guest
-    pub user_cycles: u64,
+    /// Empty rows used to reach a power of two
+    pub padding_row_count: u64,
 
-    /// Paging cycles run within guest
-    pub paging_cycles: u64,
-
-    /// Reserved cycles run within guest
-    pub reserved_cycles: u64,
+    /// Total number of riscv instructions ran during this session
+    pub insn_count: u64,
 
     /// ecall metrics grouped by kind.
     pub ecall_metrics: EnumMap<EcallKind, Option<EcallMetric>>,
@@ -109,30 +106,14 @@ impl SessionStats {
 
 impl fmt::Display for SessionStats {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let pct = |cycles: u64| cycles as f64 / self.total_cycles as f64 * 100.0;
-
         if let Some(execution_time) = self.execution_time {
             writeln!(f, "execution time: {execution_time:?}")?;
         }
         writeln!(f, "number of segments: {}", self.segments)?;
-        writeln!(f, "{} total cycles", self.total_cycles)?;
         writeln!(
             f,
-            "{} user cycles ({:.2}%)",
-            self.user_cycles,
-            pct(self.user_cycles)
-        )?;
-        writeln!(
-            f,
-            "{} paging cycles ({:.2}%)",
-            self.paging_cycles,
-            pct(self.paging_cycles)
-        )?;
-        writeln!(
-            f,
-            "{} reserved cycles ({:.2}%)",
-            self.reserved_cycles,
-            pct(self.reserved_cycles)
+            "{} total rows ({} padding)",
+            self.row_count, self.padding_row_count
         )?;
 
         writeln!(f, "ecalls")?;
