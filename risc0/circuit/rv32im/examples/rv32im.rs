@@ -18,8 +18,8 @@ use std::time::Instant;
 use clap::Parser;
 use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im::{
-    MAX_INSN_CYCLES,
-    execute::{DEFAULT_SEGMENT_LIMIT_PO2, platform::RESERVED_CYCLES, testutil},
+    MAX_INSN_ROWS,
+    execute::{DEFAULT_SEGMENT_LIMIT_PO2, testutil},
     prove::segment_prover,
 };
 use risc0_core::scope;
@@ -41,11 +41,6 @@ struct Cli {
     skip_verification: bool,
 }
 
-const PAGING_CYCLES: usize = 1821;
-const BEFORE_LOOP_CYCLES: usize = 8;
-const NON_LOOP_CYCLES: usize =
-    RESERVED_CYCLES + PAGING_CYCLES + BEFORE_LOOP_CYCLES + MAX_INSN_CYCLES;
-
 fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
@@ -54,18 +49,16 @@ fn main() {
     let args = Cli::parse();
 
     let po2 = args.po2;
-    let segment_cycles = 1 << po2;
-    assert!(segment_cycles > NON_LOOP_CYCLES);
-    let iterations = (segment_cycles - NON_LOOP_CYCLES) / 2;
+    let iterations = 10_000;
 
-    let program = testutil::kernel::simple_loop(iterations as u32);
+    let program = testutil::kernel::simple_loop(iterations);
     let image = MemoryImage::new_kernel(program);
     let prover = segment_prover(po2).unwrap();
 
     let result = testutil::execute(
         image.clone(),
         testutil::DEFAULT_EXECUTION_LIMIT
-            .with_max_insn_cycles(MAX_INSN_CYCLES)
+            .with_max_insn_rows(MAX_INSN_ROWS)
             .with_segment_po2(args.po2),
         testutil::NullSyscall,
         None,
@@ -85,7 +78,7 @@ fn main() {
         let result = testutil::execute(
             image,
             testutil::DEFAULT_EXECUTION_LIMIT
-                .with_max_insn_cycles(MAX_INSN_CYCLES)
+                .with_max_insn_rows(MAX_INSN_ROWS)
                 .with_segment_po2(args.po2),
             testutil::NullSyscall,
             None,

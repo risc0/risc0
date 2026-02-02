@@ -64,7 +64,7 @@ fn system_split() {
         ExecutionLimit::default()
             .with_segment_po2(testutil::MIN_CYCLES_PO2)
             .with_session_limit(testutil::DEFAULT_SESSION_LIMIT)
-            .with_max_insn_cycles(100),
+            .with_max_insn_rows(100),
         testutil::NullSyscall,
         None,
     )
@@ -101,7 +101,7 @@ fn insufficient_segment_limit() {
         image,
         ExecutionLimit::default()
             .with_segment_po2(13)
-            .with_max_insn_cycles(0),
+            .with_max_insn_rows(0),
         testutil::NullSyscall,
         None,
     )

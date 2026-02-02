@@ -25,7 +25,7 @@ use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
 use risc0_circuit_rv32im::{
-    MAX_INSN_CYCLES,
+    MAX_INSN_ROWS,
     execute::{DEFAULT_SEGMENT_LIMIT_PO2, RESERVED_CYCLES},
 };
 use risc0_zkos_v1compat::V1COMPAT_ELF;
@@ -60,7 +60,7 @@ const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 494 + 785;
 
 /// The maximum number of cycles in a segment that can be reserved (for fitting the
 /// potential next instruction and for lookup table + control when proving)
-const RESERVED_CYCLES_MAX: usize = RESERVED_CYCLES + MAX_INSN_CYCLES;
+const RESERVED_CYCLES_MAX: usize = RESERVED_CYCLES + MAX_INSN_ROWS;
 
 /// Pre-compiled program that simply loops `count: u32` times (read from stdin).
 static LOOP_ELF: LazyLock<Vec<u8>> = LazyLock::new(|| {

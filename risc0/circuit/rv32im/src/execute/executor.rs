@@ -28,7 +28,7 @@ use risc0_zkp::core::{
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
 use crate::{
-    Claim, EcallKind, EcallMetric, MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, TerminateState,
+    Claim, EcallKind, EcallMetric, MAX_INSN_ROWS, MAX_INSN_ROWS_LOWER_PO2, TerminateState,
     execute::{DEFAULT_SEGMENT_LIMIT_PO2, poseidon2::Poseidon2, rv32im::disasm},
     trace::{TraceCallback, TraceEvent},
 };
@@ -75,7 +75,7 @@ pub struct Executor<'a, S: Syscall> {
 }
 
 /// Results from running the [Executor], including information about the initial and final memory
-/// states as well metrics for the number of segments and cycles used.
+/// states as well metrics for the number of segments and rows used.
 ///
 /// This struct has the information required to compute the [Claim] for the execution.
 #[derive(Clone, Debug)]
@@ -130,13 +130,13 @@ pub struct SimpleSession {
 pub struct ExecutionLimit {
     /// Maximum size of a segment, expressed as a power-of-two.
     pub segment_po2: usize,
-    /// Maximum number of cycles a single instruction is allowed to consume.
+    /// Maximum number of rows a single instruction is allowed to consume.
     ///
     /// Ecall instructions and paging can result in a single worst-case instruction taking
-    /// thousands of cycles. This is the limit on a number of cycles a single instruction can take.
+    /// thousands of rows. This is the limit on a number of rows a single instruction can take.
     /// If an instruction exceeds this limit, and falls at the end of segment, it may result in an
     /// execution failure.
-    pub max_insn_cycles: Option<usize>,
+    pub max_insn_rows: Option<usize>,
     /// Limit on the number of cycles to execute in the session.
     pub session: RowLimit,
 }
@@ -150,7 +150,7 @@ impl Default for ExecutionLimit {
 impl ExecutionLimit {
     pub const DEFAULT: Self = Self {
         segment_po2: DEFAULT_SEGMENT_LIMIT_PO2,
-        max_insn_cycles: None,
+        max_insn_rows: None,
         session: RowLimit::None,
     };
 
@@ -161,9 +161,9 @@ impl ExecutionLimit {
         }
     }
 
-    pub const fn with_max_insn_cycles(self, max_insn_cycles: usize) -> Self {
+    pub const fn with_max_insn_rows(self, max_insn_rows: usize) -> Self {
         Self {
-            max_insn_cycles: Some(max_insn_cycles),
+            max_insn_rows: Some(max_insn_rows),
             ..self
         }
     }
@@ -191,14 +191,14 @@ impl ExecutionLimit {
     }
 
     fn segment_threshold(&self) -> u32 {
-        self.segment_limit() - self.max_insn_cycles() as u32
+        self.segment_limit() - self.max_insn_rows() as u32
     }
 
-    pub fn max_insn_cycles(&self) -> usize {
-        self.max_insn_cycles.unwrap_or(if self.segment_po2 >= 15 {
-            MAX_INSN_CYCLES
+    pub fn max_insn_rows(&self) -> usize {
+        self.max_insn_rows.unwrap_or(if self.segment_po2 >= 15 {
+            MAX_INSN_ROWS
         } else {
-            MAX_INSN_CYCLES_LOWER_PO2
+            MAX_INSN_ROWS_LOWER_PO2
         })
     }
 }
@@ -419,7 +419,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
                 break;
             };
 
-            // Check the session-level cycle limit.
+            // Check the session-level row limit.
             match limit.session {
                 RowLimit::Hard(max_rows) => {
                     let used_rows = self.get_rows();
@@ -439,9 +439,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
                 RowLimit::None => {}
             }
 
-            // Check the segment-level cycle limit.
+            // Check the segment-level row limit.
             if self.should_split(limit.segment_threshold()) {
-                // NOTE: If the max_insn_cycles is set accurately, this should never happen.
+                // NOTE: If the max_insn_rows is set accurately, this should never happen.
                 if self.segment_used_rows() > limit.segment_limit() {
                     return Err(anyhow!(
                         "segment limit ({}) too small for instruction at pc: {:?}",
@@ -474,8 +474,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         Risc0Machine::suspend(self)?;
 
-        let cycles = self.segment_used_rows().next_power_of_two();
-        let po2 = log2_ceil(cycles as usize);
+        let rows = self.segment_used_rows().next_power_of_two();
+        let po2 = log2_ceil(rows as usize);
         let segment_threshold_min = u32::min(self.segment_used_rows(), limit.segment_threshold());
         let update = self.split_segment(po2, segment_threshold_min)?;
 

@@ -104,9 +104,9 @@ impl Segment {
             ExecutionLimit::default()
                 .with_segment_po2(self.po2 as usize)
                 .with_soft_session_limit(self.used_rows.into())
-                // Set the max_insn_cycles to 0 to prevent splits based on this. We know we need to
+                // Set the max_insn_rows to 0 to prevent splits based on this. We know we need to
                 // split on used_rows.
-                .with_max_insn_cycles(0),
+                .with_max_insn_rows(0),
             |_| Ok(()),
         )
     }

@@ -287,9 +287,9 @@ impl Session {
         })
     }
 
-    /// Log cycle information for this [Session].
+    /// Log information for this [Session].
     ///
-    /// This logs the total and user cycles for this [Session] at the INFO level.
+    /// This logs information about this [Session] at the INFO level.
     pub fn log(&self) {
         if std::env::var_os("RISC0_INFO").is_none() {
             return;
@@ -302,7 +302,7 @@ impl Session {
 
     /// Returns stats for the session
     ///
-    /// This contains cycle and segment information about the session useful for debugging and measuring performance.
+    /// This contains information about the session useful for debugging and measuring performance.
     pub fn stats(&self) -> SessionStats {
         SessionStats {
             segments: self.segments.len(),
