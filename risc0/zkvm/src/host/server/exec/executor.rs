@@ -463,12 +463,6 @@ impl<'a> ExecutorImpl<'a> {
             execution_time: self.execution_time,
         };
 
-        // XXX M3: For m3, these cycle counts no longer add up to the po2
-        // assert_eq!(
-        //     session.total_cycles,
-        //     session.user_cycles + session.paging_cycles + session.reserved_cycles
-        // );
-
         // Reset the executor, into a state where calling `run` will resume execution from the
         // final state of this execution (i.e. resuming from a pause).
         *self = Self::with_details(
