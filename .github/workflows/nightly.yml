@@ -14,7 +14,7 @@ env:
 
 jobs:
   fuzz:
-    runs-on: [self-hosted, cluster, Linux, cpu]
+    runs-on: [self-hosted, cluster, Linux, cpu, fuzz]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,7 +29,7 @@ jobs:
           version: "0.13.1"
       - uses: ./.github/actions/sccache
       # Run fuzzing on the receipt_seal target on 8 cores for 1 hour.
-      - run: cargo "+${NIGHTLY_RUST_TOOLCHAIN}" fuzz run receipt_seal --fuzz-dir risc0/fuzz --sanitizer none -j8 -- -max_len=1048576 -max_total_time=3600
+      - run: cargo "+${NIGHTLY_RUST_TOOLCHAIN}" fuzz run --fuzz-dir risc0/fuzz --sanitizer none -j8 receipt_seal ~/fuzz/receipt_seal/ -- -max_len=1048576 -max_total_time=3600
       - run: sccache --show-stats
 
   alert_devops_if_failed:
