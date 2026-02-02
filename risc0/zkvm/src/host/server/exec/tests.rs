@@ -1370,19 +1370,19 @@ mod docker {
 }
 
 #[rstest]
-#[case((0, 16, 1))]
+#[case((0, 17, 1))]
 // this should contain exactly 2 segments
-#[case((16, 16, 2))]
+#[case((17, 17, 2))]
 // it's ok to run with a limit that's higher than the actual count
-#[case((16, 16, 10))]
-#[case((16, 15, 17))]
+#[case((17, 17, 10))]
+#[case((17, 16, 18))]
 // This test should always fail if the last parameter is zero
 #[should_panic(expected = "Session limit exceeded")]
-#[case((0, 16, 0))]
+#[case((0, 17, 0))]
 #[should_panic(expected = "Session limit exceeded")]
-#[case((16, 16, 1))]
+#[case((17, 17, 1))]
 #[should_panic(expected = "Session limit exceeded")]
-#[case((16, 15, 2))]
+#[case((17, 16, 2))]
 #[test_log::test]
 fn session_limit(
     #[case] (loop_cycles_po2, segment_limit_po2, session_count_limit): (u32, u32, u64),

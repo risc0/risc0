@@ -71,8 +71,8 @@ fn main() {
         None,
     )
     .unwrap();
-    let user_cycles = result.result.user_cycles as usize;
-    let total_cycles = result.result.total_cycles as usize;
+    let insn_count = result.result.insn_count as usize;
+    let row_count = result.result.row_count as usize;
 
     scope!("top");
 
@@ -106,20 +106,20 @@ fn main() {
         let prove_time = start_time.elapsed().as_secs_f64();
 
         println!(
-            "PO2={po2} Run [{i}] exec: {exec_time:.3}s, {:.3} cycles/sec | prove: {prove_time:.3}s, {:.3} cycles/sec",
-            user_cycles as f64 / exec_time,
-            total_cycles as f64 / prove_time
+            "PO2={po2} Run [{i}] exec: {exec_time:.3}s, {:.3} insn/sec | prove: {prove_time:.3}s, {:.3} rows/sec",
+            insn_count as f64 / exec_time,
+            row_count as f64 / prove_time
         );
         tot_exec_time += exec_time;
         tot_prove_time += prove_time;
     }
 
     println!(
-        "{} runs of PO2={po2} exec: {tot_exec_time:.3}s, avg={:.3}s, {:.3} cycles/sec | prove: {tot_prove_time:.3}s, avg={:.3}s, {:.3} cycles/sec",
+        "{} runs of PO2={po2} exec: {tot_exec_time:.3}s, avg={:.3}s, {:.3} insn/sec | prove: {tot_prove_time:.3}s, avg={:.3}s, {:.3} rows/sec",
         args.count,
         tot_exec_time / (args.count as f64),
-        (args.count * user_cycles) as f64 / tot_exec_time,
+        (args.count * insn_count) as f64 / tot_exec_time,
         tot_prove_time / (args.count as f64),
-        (args.count * total_cycles) as f64 / tot_prove_time,
+        (args.count * row_count) as f64 / tot_prove_time,
     );
 }

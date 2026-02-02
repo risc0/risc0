@@ -262,13 +262,10 @@ pub struct SegmentUpdate {
     /// Value set upon termination of execution, indicating the termination type.
     terminate_state: Option<TerminateState>,
 
-    /// Count of "user cycles", the cycles directly associated with instructions executed by the
-    /// user guest program, before suspend in this segment. Does not include paging costs.
-    pub user_cycles: u32,
-    /// Count of cycles associated with memory paging (i.e. page-in and page-out operations).
-    pager_cycles: u32,
+    pub used_rows: u32,
     insn_counter: u32,
     segment_threshold: u32,
+
     /// Power-of-two for the segment size required to prove this segment.
     pub po2: u32,
     /// Index of the segment in the session.
@@ -320,8 +317,7 @@ impl SegmentUpdate {
             terminate_state: self.terminate_state,
             read_record: self.read_record,
             write_record: self.write_record,
-            suspend_cycle: self.user_cycles,
-            paging_cycles: self.pager_cycles,
+            used_rows: self.used_rows,
             insn_counter: self.insn_counter,
             po2: self.po2,
             index: self.index,
@@ -517,6 +513,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         );
 
         let partial_image = self.pager.commit();
+        let used_rows = self.segment_used_rows();
 
         let update = SegmentUpdate {
             update_partial_image: partial_image,
@@ -525,8 +522,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             output_digest: self.output_digest,
             read_record: std::mem::take(&mut self.read_record),
             write_record: std::mem::take(&mut self.write_record),
-            user_cycles: self.user_cycles,
-            pager_cycles: self.pager.cycles,
+            used_rows,
             insn_counter: self.insn_counter,
             terminate_state: self.terminate_state,
             segment_threshold,
@@ -544,7 +540,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             .context("segment_counter overflow")?;
 
         let total_rows = 1u64 << segment_po2;
-        let padding = total_rows - self.segment_used_rows() as u64;
+        let padding = total_rows - used_rows as u64;
         self.row_info.count += total_rows;
         self.row_info.insn_count += self.insn_counter as u64;
         self.row_info.padding_count += padding;
@@ -606,10 +602,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
             output_digest: self.output_digest,
             read_record: self.read_record.clone(),
             write_record: self.write_record.clone(),
-            user_cycles: self.user_cycles,
-            pager_cycles: self.pager.cycles,
             insn_counter: self.insn_counter,
             terminate_state: self.terminate_state,
+            used_rows: self.get_rows() as u32,
             segment_threshold,
             po2: po2 as u32,
             index: index as u64,

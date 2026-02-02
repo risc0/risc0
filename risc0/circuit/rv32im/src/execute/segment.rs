@@ -55,13 +55,9 @@ pub struct Segment {
     /// Value set upon termination of execution, indicating the termination type.
     pub terminate_state: Option<TerminateState>,
 
-    // NOTE: This is the same as SegmentUpdate::user_cycles.
-    /// Count of "user cycles", the cycles directly associated with instructions executed by the
-    /// user guest program, before suspend in this segment. Does not include paging costs.
-    pub suspend_cycle: u32,
-    /// Count of cycles associated with memory paging (i.e. page-in and page-out operations).
-    pub paging_cycles: u32,
     pub segment_threshold: u32,
+
+    pub used_rows: u32,
 
     /// Power-of-two for the segment size required to prove this segment.
     pub po2: u32,
@@ -107,9 +103,9 @@ impl Segment {
         .run(
             ExecutionLimit::default()
                 .with_segment_po2(self.po2 as usize)
-                .with_soft_session_limit(self.suspend_cycle.into())
+                .with_soft_session_limit(self.used_rows.into())
                 // Set the max_insn_cycles to 0 to prevent splits based on this. We know we need to
-                // split on suspend_cycle.
+                // split on used_rows.
                 .with_max_insn_cycles(0),
             |_| Ok(()),
         )

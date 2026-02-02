@@ -49,7 +49,6 @@ fn basic() {
     assert_eq!(segment.terminate_state, Some(TerminateState::default()));
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
-    assert_eq!(segment.suspend_cycle, 5);
 }
 
 #[test]

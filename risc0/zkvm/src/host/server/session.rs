@@ -129,15 +129,15 @@ impl Segment {
         self.inner.po2 as usize
     }
 
-    pub(crate) fn user_cycles(&self) -> u32 {
-        self.inner.suspend_cycle
+    pub(crate) fn used_rows(&self) -> u32 {
+        self.inner.used_rows
     }
 
     /// Construct a `SegmentInfo` containing information about this segment.
     pub fn get_info(&self) -> SegmentInfo {
         SegmentInfo {
             po2: self.po2() as u32,
-            cycles: self.user_cycles(),
+            rows: self.used_rows(),
         }
     }
 }
