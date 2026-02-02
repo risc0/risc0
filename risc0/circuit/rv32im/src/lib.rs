@@ -66,13 +66,12 @@ pub enum EcallKind {
 #[non_exhaustive]
 pub struct EcallMetric {
     pub count: u64,
-    pub cycles: u64,
 }
 
 #[cfg(not(target_os = "zkvm"))]
 impl EcallMetric {
-    pub fn new(count: u64, cycles: u64) -> Self {
-        Self { count, cycles }
+    pub fn new(count: u64) -> Self {
+        Self { count }
     }
 }
 

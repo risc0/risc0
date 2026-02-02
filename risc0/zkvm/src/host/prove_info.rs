@@ -136,20 +136,10 @@ impl fmt::Display for SessionStats {
         )?;
 
         writeln!(f, "ecalls")?;
-        let mut ecall_metrics: Vec<_> = self
-            .ecall_metrics
-            .iter()
-            .filter_map(|(k, v)| v.as_ref().map(|v| (k, v)))
-            .collect();
-        ecall_metrics.sort_by(|a, b| a.1.cycles.cmp(&b.1.cycles));
-        for (name, metric) in ecall_metrics.iter().rev() {
-            writeln!(
-                f,
-                "\t{} {name:?} calls, {} cycles, ({:.2}%)",
-                metric.count,
-                metric.cycles,
-                pct(metric.cycles)
-            )?;
+        for (name, metric) in &self.ecall_metrics {
+            if let Some(metric) = metric {
+                writeln!(f, "\t{} {name:?} calls", metric.count)?;
+            }
         }
 
         writeln!(f, "syscalls")?;

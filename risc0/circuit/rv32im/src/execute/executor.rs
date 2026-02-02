@@ -662,12 +662,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
         blocks
     }
 
-    fn inc_user_cycles(&mut self, count: usize, ecall: Option<EcallKind>) {
+    fn inc_user_cycles(&mut self, count: usize, _ecall: Option<EcallKind>) {
         self.cycles.user += count as u64;
         self.user_cycles += count as u32;
-        if let Some(kind) = ecall {
-            self.ecall_metrics[kind].cycles += count as u64;
-        }
     }
 
     fn povw_nonce(&self, segment_index: u32) -> Option<PovwNonce> {
