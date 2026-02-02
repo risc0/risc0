@@ -137,7 +137,7 @@ pub struct ExecutionLimit {
     /// If an instruction exceeds this limit, and falls at the end of segment, it may result in an
     /// execution failure.
     pub max_insn_rows: Option<usize>,
-    /// Limit on the number of cycles to execute in the session.
+    /// Limit on the number of rows to execute in the session.
     pub session: RowLimit,
 }
 
@@ -205,11 +205,11 @@ impl ExecutionLimit {
 
 #[derive(Copy, Clone, Debug, Default)]
 pub enum RowLimit {
-    /// Hard limit on the number of cycles, it is an error to exceed this limit.
+    /// Hard limit on the number of rows, it is an error to exceed this limit.
     Hard(u64),
-    /// Soft limit on the number of cycles. Terminate, without error, if this limit is reached.
+    /// Soft limit on the number of rows. Terminate, without error, if this limit is reached.
     Soft(u64),
-    /// No limit on the number of cycles.
+    /// No limit on the number of rows.
     #[default]
     None,
 }
@@ -505,12 +505,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         segment_po2: usize,
         segment_threshold: u32,
     ) -> Result<SegmentUpdate, ExecutionError> {
-        tracing::debug!(
-            "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
-            self.user_cycles,
-            self.pager.cycles,
-            self.segment_used_rows()
-        );
+        tracing::debug!("split({} >= {segment_threshold}", self.segment_used_rows());
 
         let partial_image = self.pager.commit();
         let used_rows = self.segment_used_rows();
