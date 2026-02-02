@@ -20,7 +20,6 @@ compile_commands.json
 node_modules
 *.code-workspace
 
-# Include the fuzzing corpus, to improve coverage at startup.
-#risc0/fuzz/corpus/
 risc0/fuzz/artifacts/
+risc0/fuzz/corpus/
 risc0/fuzz/coverage/
