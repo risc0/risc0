@@ -12,6 +12,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use serde::{Deserialize, Serialize};
 
 use risc0_circuit_rv32im_sys::BlockType;
@@ -176,6 +177,16 @@ impl BlockCollection {
                     &self.blocks,
                     &_preflight,
                 );
+            }
+        }
+    }
+
+    pub fn add_counts(&self, _out: &mut Option<enum_map::EnumMap<BlockType, u64>>) {
+        #[cfg(any(test, feature = "block_tracker_debug"))]
+        {
+            let out = _out.get_or_insert_default();
+            for (b, &v) in &self.blocks {
+                out[b] += v as u64;
             }
         }
     }

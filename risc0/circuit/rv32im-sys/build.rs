@@ -354,6 +354,12 @@ fn generate_rust_block_types(output: &str, block_types: &BTreeMap<String, BlockT
             pub fn iter() -> impl Iterator<Item = Self> {
                 <Self as strum::IntoEnumIterator>::iter()
             }
+
+            pub fn name(&self) -> &'static str {
+                match self {
+                    #(Self::#block_names => stringify!(#block_names)),*
+                }
+            }
         }
 
         impl TryFrom<u8> for BlockType {

@@ -22,7 +22,7 @@ use alloc::vec::Vec;
 use core::{fmt, time::Duration};
 
 use crate::{Receipt, ReceiptClaim, WorkClaim, receipt::GenericReceipt};
-use risc0_circuit_rv32im::{EcallKind, EcallMetric};
+use risc0_circuit_rv32im::{BlockType, EcallKind, EcallMetric};
 
 #[derive(Clone, Debug, Enum, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -88,6 +88,9 @@ pub struct SessionStats {
     /// syscall metrics grouped by kind.
     pub syscall_metrics: EnumMap<SyscallKind, Option<SyscallMetric>>,
 
+    /// count of different block types.
+    pub block_counts: Option<EnumMap<BlockType, u64>>,
+
     /// Execution elapsed time.
     pub execution_time: Option<Duration>,
 }
@@ -132,6 +135,25 @@ impl fmt::Display for SessionStats {
         syscall_metrics.sort_by(|a, b| a.1.count.cmp(&b.1.count));
         for (name, metric) in syscall_metrics.iter().rev() {
             writeln!(f, "\t{} {name:?} calls", metric.count)?;
+        }
+
+        if let Some(block_counts) = &self.block_counts {
+            writeln!(f, "blocks")?;
+
+            let used_rows = self.row_count - self.padding_row_count;
+            let max_name_width = BlockType::iter().map(|b| b.name().len()).max().unwrap_or(0);
+            for (block, count) in block_counts {
+                if block == BlockType::Empty {
+                    continue;
+                }
+                let pct = (count.div_ceil(block.count_per_row() as u64) as f64 * 100.0)
+                    / used_rows as f64;
+                let name = block.name();
+                writeln!(
+                    f,
+                    "\t{name:<max_name_width$}: {count:>12} ({pct:>6.2}% of rows)"
+                )?;
+            }
         }
 
         Ok(())

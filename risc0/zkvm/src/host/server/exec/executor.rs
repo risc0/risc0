@@ -461,6 +461,7 @@ impl<'a> ExecutorImpl<'a> {
             ecall_metrics: exec_result.ecall_metrics,
             povw_job_id: self.env.povw_job_id,
             execution_time: self.execution_time,
+            block_counts: exec_result.block_counts,
         };
 
         // Reset the executor, into a state where calling `run` will resume execution from the

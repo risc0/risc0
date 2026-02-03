@@ -22,7 +22,7 @@ use anyhow::{Context, Result, ensure};
 use enum_map::EnumMap;
 use risc0_binfmt::{PovwJobId, SystemState};
 use risc0_circuit_keccak::{KECCAK_CONTROL_ROOT, compute_keccak_digest};
-use risc0_circuit_rv32im::{EcallKind, EcallMetric, TerminateState};
+use risc0_circuit_rv32im::{BlockType, EcallKind, EcallMetric, TerminateState};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -102,6 +102,9 @@ pub struct Session {
     /// This duration captures the amount of time spent execution the virtual machine. It does not,
     /// for instance, include the time spent hashing the memory image to produce a [Segment].
     pub(crate) execution_time: Duration,
+
+    /// Breakdown of count of different block types used in the session
+    pub(crate) block_counts: Option<EnumMap<BlockType, u64>>,
 }
 
 /// The execution trace of a portion of a program.
@@ -320,6 +323,7 @@ impl Session {
                 .map(|(k, v)| (k, Some(v.clone())))
                 .collect(),
             execution_time: Some(self.execution_time),
+            block_counts: self.block_counts,
         }
     }
 

@@ -27,7 +27,8 @@ use risc0_zkp::core::{
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
 use crate::{
-    Claim, EcallKind, EcallMetric, MAX_INSN_ROWS, MAX_INSN_ROWS_LOWER_PO2, TerminateState,
+    BlockType, Claim, EcallKind, EcallMetric, MAX_INSN_ROWS, MAX_INSN_ROWS_LOWER_PO2,
+    TerminateState,
     execute::{DEFAULT_SEGMENT_LIMIT_PO2, poseidon2::Poseidon2, rv32im::disasm},
     trace::{TraceCallback, TraceEvent},
 };
@@ -87,6 +88,7 @@ pub struct ExecutorResult {
     pub padding_row_count: u64,
     pub insn_count: u64,
     pub ecall_metrics: EnumMap<EcallKind, EcallMetric>,
+    pub block_counts: Option<EnumMap<BlockType, u64>>,
 
     // Fields used to populate the [Claim].
     pub output: Option<Digest>,
@@ -115,6 +117,7 @@ struct RowInfo {
     count: u64,
     padding_count: u64,
     insn_count: u64,
+    block_counts: Option<EnumMap<BlockType, u64>>,
 }
 
 #[non_exhaustive]
@@ -509,6 +512,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         let partial_image = self.pager.commit();
         let used_rows = self.segment_used_rows();
 
+        let blocks = self.get_blocks();
         let update = SegmentUpdate {
             update_partial_image: partial_image,
             access_page_indexes: self.pager.page_indexes(),
@@ -523,7 +527,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             po2: segment_po2 as u32,
             index: self.segment_counter as u64,
             povw_nonce: self.povw_nonce(self.segment_counter),
-            blocks: self.get_blocks(),
+            blocks: blocks.clone(),
         };
 
         // NOTE: There is no reasonable scenario where a session will have more than 4B
@@ -538,6 +542,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         self.row_info.count += total_rows;
         self.row_info.insn_count += self.insn_counter as u64;
         self.row_info.padding_count += padding;
+        blocks.add_counts(&mut self.row_info.block_counts);
 
         self.preflight_user_cycles = 0;
         self.insn_counter = 0;
@@ -572,6 +577,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             padding_row_count: self.row_info.padding_count,
             insn_count: self.row_info.insn_count,
             ecall_metrics: self.ecall_metrics.clone(),
+            block_counts: self.row_info.block_counts,
             output: self.output_digest,
             terminate_state: self.terminate_state,
             po2,
