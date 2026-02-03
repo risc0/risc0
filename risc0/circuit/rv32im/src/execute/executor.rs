@@ -21,7 +21,6 @@ use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
 use risc0_zkp::core::{
     digest::{DIGEST_BYTES, Digest},
-    hash::poseidon2::ROUNDS_HALF_FULL,
     log2_ceil,
 };
 
@@ -51,7 +50,7 @@ pub struct Executor<'a, S: Syscall> {
     pc: ByteAddr,
     user_pc: ByteAddr,
     machine_mode: u32,
-    user_cycles: u32,
+    preflight_user_cycles: u32,
     initial_image: MemoryImage,
     pager: PagedMemory,
     terminate_state: Option<TerminateState>,
@@ -371,7 +370,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             pc: ByteAddr(0),
             user_pc: ByteAddr(0),
             machine_mode: 0,
-            user_cycles: 0,
+            preflight_user_cycles: 0,
             insn_counter: 0,
             pager: PagedMemory::new(image.clone(), /*tracing_enabled=*/ !trace.is_empty()),
             initial_image: image,
@@ -540,7 +539,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         self.row_info.insn_count += self.insn_counter as u64;
         self.row_info.padding_count += padding;
 
-        self.user_cycles = 0;
+        self.preflight_user_cycles = 0;
         self.insn_counter = 0;
         self.pager.reset();
         self.block_tracker = Default::default();
@@ -632,7 +631,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     fn should_split(&self, segment_threshold: u32) -> bool {
         let blocks = self
             .block_tracker
-            .get_blocks(self.user_cycles, self.pager.touched_pages());
+            .get_blocks(self.preflight_user_cycles, self.pager.touched_pages());
         if blocks.row_points().div_ceil(POINTS_PER_ROW) as u32 > segment_threshold {
             tracing::debug!("block_tracker blocks = {blocks:?}");
             true
@@ -644,13 +643,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
     fn get_blocks(&self) -> super::block_tracker::BlockCollection {
         let blocks = self
             .block_tracker
-            .get_blocks(self.user_cycles, self.pager.touched_pages());
+            .get_blocks(self.preflight_user_cycles, self.pager.touched_pages());
         tracing::debug!("block_tracker blocks = {blocks:?}");
         blocks
-    }
-
-    fn inc_user_cycles(&mut self, count: usize, _ecall: Option<EcallKind>) {
-        self.user_cycles += count as u32;
     }
 
     fn povw_nonce(&self, segment_index: u32) -> Option<PovwNonce> {
@@ -681,9 +676,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     fn trace_instruction(&mut self, kind: InsnKind, decoded: &DecodedInstruction) {
         if unlikely(tracing::enabled!(tracing::Level::TRACE)) {
             tracing::trace!(
-                "[{}:{}] {:?}> {:#010x}  {}",
-                self.user_cycles + 1,
-                self.segment_used_rows() + 1,
+                "{:?}> {:#010x}  {}",
                 self.pc,
                 decoded.insn,
                 super::rv32im::disasm(kind, decoded)
@@ -747,7 +740,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     fn on_insn_end(&mut self, #[allow(unused_variables)] kind: InsnKind) -> Result<()> {
         self.block_tracker.track_instr(kind);
 
-        self.inc_user_cycles(1, None);
+        self.preflight_user_cycles += 1;
         if unlikely(!self.trace.is_empty()) {
             self.trace_pager()?;
         }
@@ -766,7 +759,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
         if cur == CycleState::MachineEcall {
             self.ecall_metrics[kind].count += 1;
         }
-        self.inc_user_cycles(1, Some(kind));
+        self.preflight_user_cycles += 1;
 
         if !self.trace.is_empty() {
             self.trace_pager()?;
@@ -857,11 +850,11 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     }
 
     fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {
-        self.inc_user_cycles(1, Some(EcallKind::Sha2));
+        self.preflight_user_cycles += 1;
     }
 
     fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
-        self.inc_user_cycles(1, Some(EcallKind::Poseidon2));
+        self.preflight_user_cycles += 1;
     }
 
     fn ecall_bigint(&mut self) -> Result<()> {
@@ -870,7 +863,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
         self.block_tracker
             .track_ecall_bigint(verify_program_size as u64);
 
-        self.inc_user_cycles(verify_program_size + 1, Some(EcallKind::BigInt));
+        self.preflight_user_cycles += (verify_program_size + 1) as u32;
 
         Ok(())
     }
@@ -879,9 +872,9 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
         let mut p2 = Poseidon2::load_ecall(self)?;
 
         self.block_tracker.track_ecall_poseidon2(p2.count as u64);
+        self.preflight_user_cycles += p2.count;
 
-        p2.rest_with_mix(self, CycleState::Decode, |p2, _, ctx| {
-            ctx.inc_user_cycles(ROUNDS_HALF_FULL * 2 + 1, Some(EcallKind::Poseidon2));
+        p2.rest_with_mix(self, CycleState::Decode, |p2, _, _| {
             // Convert to Montgomery form, run the mix function, then convert back.
             // NOTE: It's possible this could be optimized to not convert the back and forth on
             // every mix, and instead only convert the input, initial state and final state.
@@ -895,7 +888,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     fn on_ecall_read_end(&mut self, read_bytes: u64, read_words: u64) {
         self.block_tracker.track_ecall_read(read_bytes, read_words);
-        self.inc_user_cycles((read_bytes + read_words) as usize, Some(EcallKind::Read));
+        self.preflight_user_cycles += (read_bytes + read_words) as u32;
     }
 
     fn on_ecall_write_end(&mut self) {
@@ -907,7 +900,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     }
 
     fn on_trap(&mut self) {
-        self.inc_user_cycles(1, None);
+        self.preflight_user_cycles += 1;
         self.block_tracker.track_trap();
     }
 }
