@@ -118,6 +118,7 @@ struct RowInfo {
     padding_count: u64,
     insn_count: u64,
     block_counts: Option<EnumMap<BlockType, u64>>,
+    row_points: u64,
 }
 
 #[non_exhaustive]
@@ -542,6 +543,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         self.row_info.count += total_rows;
         self.row_info.insn_count += self.insn_counter as u64;
         self.row_info.padding_count += padding;
+        self.row_info.row_points += blocks.row_points();
         blocks.add_counts(&mut self.row_info.block_counts);
 
         self.preflight_user_cycles = 0;
@@ -692,6 +694,13 @@ impl<'a, S: Syscall> Executor<'a, S> {
             self.ring.push((self.pc, kind, decoded.clone()));
         }
     }
+
+    fn get_row_points(&self) -> u64 {
+        let blocks = self
+            .block_tracker
+            .get_blocks(self.insn_counter, self.pager.touched_pages());
+        self.row_info.row_points + blocks.row_points()
+    }
 }
 
 impl<S: Syscall> Risc0Context for Executor<'_, S> {
@@ -734,7 +743,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
         self.trace_instruction(kind, decoded);
         if unlikely(!self.trace.is_empty()) {
             self.trace(TraceEvent::InstructionStart {
-                cycle: self.get_rows(),
+                cycle: self.get_row_points(),
                 pc: self.pc.0,
                 insn: decoded.insn,
             })?;
@@ -955,12 +964,8 @@ impl<S: Syscall> SyscallContext for Executor<'_, S> {
 impl From<PageTraceEvent> for TraceEvent {
     fn from(event: PageTraceEvent) -> Self {
         match event {
-            PageTraceEvent::PageIn { cycles } => TraceEvent::PageIn {
-                cycles: cycles as u64,
-            },
-            PageTraceEvent::PageOut { cycles } => TraceEvent::PageOut {
-                cycles: cycles as u64,
-            },
+            PageTraceEvent::PageIn { cycles } => TraceEvent::PageIn { cycles },
+            PageTraceEvent::PageOut { cycles } => TraceEvent::PageOut { cycles },
         }
     }
 }
