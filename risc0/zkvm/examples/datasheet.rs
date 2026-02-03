@@ -24,10 +24,7 @@ use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
-use risc0_circuit_rv32im::{
-    MAX_INSN_ROWS,
-    execute::{DEFAULT_SEGMENT_LIMIT_PO2, RESERVED_CYCLES},
-};
+use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{MAX_CYCLES_PO2, hal::tracker};
 use risc0_zkvm::{
@@ -58,10 +55,6 @@ const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
 /// The number of iterations of the LOOP_ELF needed to fill up a po2=20 segment.
 const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 494 + 785;
 
-/// The maximum number of cycles in a segment that can be reserved (for fitting the
-/// potential next instruction and for lookup table + control when proving)
-const RESERVED_CYCLES_MAX: usize = RESERVED_CYCLES + MAX_INSN_ROWS;
-
 /// Pre-compiled program that simply loops `count: u32` times (read from stdin).
 static LOOP_ELF: LazyLock<Vec<u8>> = LazyLock::new(|| {
     const LOOP_ELF: &[u8] = include_bytes!("loop.bin");
@@ -74,7 +67,7 @@ struct PerformanceData {
     name: String,
     hashfn: String,
 
-    /// Cycles per second.
+    /// Iterations per second.
     #[tabled(display = "display::hertz")]
     throughput: f64,
 
@@ -82,12 +75,9 @@ struct PerformanceData {
     #[tabled(display = "display::duration")]
     duration: Duration,
 
-    /// Either user execution cycle count or the total cycle count.
-    ///
-    /// When this is the total cycle count, it includes overhead associated with
-    /// continuations and padding up to the nearest power of 2.
-    #[tabled(display = "display::cycles")]
-    cycles: u64,
+    /// Either riscv instructions or rows
+    #[tabled(display = "display::n")]
+    n: u64,
 
     #[tabled(display = "display::bytes")]
     ram: u64,
@@ -204,20 +194,14 @@ impl Datasheet {
             session.segments.len(),
             1,
             "{} didn't fit in po2={DEFAULT_SEGMENT_LIMIT_PO2}",
-            session.total_cycles
-        );
-        assert!(
-            session.reserved_cycles as usize <= RESERVED_CYCLES_MAX,
-            "more room in the segment ({} <= {})",
-            session.reserved_cycles,
-            RESERVED_CYCLES_MAX
+            session.row_count
         );
 
-        let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
+        let throughput = (session.insn_count as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
             name: "execute".into(),
             hashfn: "N/A".into(),
-            cycles: session.user_cycles,
+            n: session.insn_count,
             duration,
             ram: 0,
             seal: 0,
@@ -251,16 +235,16 @@ impl Datasheet {
 
             let ram = tracker().lock().unwrap().peak as u64;
             assert_eq!(
-                info.stats.total_cycles, expected,
+                info.stats.row_count, expected,
                 "actual vs expected for po2={po2}"
             );
-            let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
+            let throughput = (info.stats.row_count as f64) / duration.as_secs_f64();
             let seal = info.receipt.inner.composite().unwrap().seal_size() as u64;
 
             self.results.push(PerformanceData {
                 name: "rv32im".into(),
                 hashfn: hashfn.into(),
-                cycles: info.stats.total_cycles,
+                n: info.stats.row_count,
                 duration,
                 ram,
                 seal,
@@ -292,14 +276,14 @@ impl Datasheet {
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
-        let cycles = 1 << RECURSION_PO2;
-        let throughput = (cycles as f64) / duration.as_secs_f64();
+        let rows = 1 << RECURSION_PO2;
+        let throughput = (rows as f64) / duration.as_secs_f64();
         let seal = receipt.seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "lift".into(),
             hashfn: opts.hashfn,
-            cycles,
+            n: rows,
             duration,
             ram,
             seal,
@@ -322,11 +306,7 @@ impl Datasheet {
             .build()
             .unwrap();
         let session = execute_elf(env, &LOOP_ELF).unwrap();
-        assert!(
-            session.segments.len() >= 2,
-            "cycles: {}",
-            session.total_cycles
-        );
+        assert!(session.segments.len() >= 2, "rows: {}", session.row_count);
 
         let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
         let composite = receipt.inner.composite().unwrap();
@@ -340,14 +320,14 @@ impl Datasheet {
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
-        let cycles = 1 << RECURSION_PO2;
-        let throughput = (cycles as f64) / duration.as_secs_f64();
+        let rows = 1 << RECURSION_PO2;
+        let throughput = (rows as f64) / duration.as_secs_f64();
         let seal = receipt.seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "join".into(),
             hashfn: opts.hashfn,
-            cycles,
+            n: rows,
             duration,
             ram,
             seal,
@@ -374,13 +354,13 @@ impl Datasheet {
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
-        let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
+        let throughput = (info.stats.row_count as f64) / duration.as_secs_f64();
         let seal = info.receipt.inner.succinct().unwrap().seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "succinct".into(),
             hashfn: opts.hashfn,
-            cycles: info.stats.total_cycles,
+            n: info.stats.row_count,
             duration,
             ram,
             seal,
@@ -409,14 +389,14 @@ impl Datasheet {
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
-        let cycles = 1 << RECURSION_PO2;
-        let throughput = (cycles as f64) / duration.as_secs_f64();
+        let rows = 1 << RECURSION_PO2;
+        let throughput = (rows as f64) / duration.as_secs_f64();
         let seal = receipt.seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "identity_p254".into(),
             hashfn: opts.hashfn,
-            cycles,
+            n: rows,
             duration,
             ram,
             seal,
@@ -445,14 +425,14 @@ impl Datasheet {
         let seal = black_box(risc0_groth16::prove::shrink_wrap(&seal_bytes).unwrap());
         let duration = start.elapsed();
 
-        let cycles = 1 << RECURSION_PO2;
-        let throughput = (cycles as f64) / duration.as_secs_f64();
+        let rows = 1 << RECURSION_PO2;
+        let throughput = (rows as f64) / duration.as_secs_f64();
         let encoded = bincode::serialize(&seal).unwrap();
 
         self.results.push(PerformanceData {
             name: "shrink_wrap".into(),
             hashfn: opts.hashfn,
-            cycles,
+            n: rows,
             duration,
             ram: 0,
             seal: encoded.len() as u64,
@@ -480,13 +460,13 @@ impl Datasheet {
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
-        let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
+        let throughput = (info.stats.row_count as f64) / duration.as_secs_f64();
         let seal = info.receipt.inner.groth16().unwrap().seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "groth16".into(),
             hashfn: opts.hashfn,
-            cycles: info.stats.total_cycles,
+            n: info.stats.row_count,
             duration,
             ram,
             seal,
@@ -503,11 +483,11 @@ impl Datasheet {
         let session = execute_elf(env, BIGINT2_ELF).unwrap();
         let duration = start.elapsed();
 
-        let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
+        let throughput = (session.insn_count as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
             name: "bigint2_execute".into(),
             hashfn: "N/A".into(),
-            cycles: session.user_cycles,
+            n: session.insn_count,
             duration,
             ram: 0,
             seal: 0,
@@ -532,11 +512,11 @@ impl Datasheet {
         let duration = start.elapsed();
         let ram = tracker().lock().unwrap().peak as u64;
 
-        let throughput = (session.total_cycles as f64) / duration.as_secs_f64();
+        let throughput = (session.row_count as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
             name: "bigint2_prove_segment".into(),
             hashfn: opts.hashfn,
-            cycles: session.total_cycles,
+            n: session.row_count,
             duration,
             ram,
             seal: 0,
@@ -595,8 +575,8 @@ mod display {
         bytes.human_count_bytes().to_string()
     }
 
-    pub fn cycles(cycles: &u64) -> String {
-        cycles.human_count_bare().to_string()
+    pub fn n(count: &u64) -> String {
+        count.human_count_bare().to_string()
     }
 
     pub fn duration(duration: &Duration) -> String {
