@@ -132,15 +132,13 @@ impl Segment {
         self.inner.po2 as usize
     }
 
-    pub(crate) fn used_rows(&self) -> u32 {
-        self.inner.used_rows
-    }
-
     /// Construct a `SegmentInfo` containing information about this segment.
     pub fn get_info(&self) -> SegmentInfo {
         SegmentInfo {
             po2: self.po2() as u32,
-            rows: self.used_rows(),
+            padding_row_count: (1 << self.inner.po2) - self.inner.used_rows as u64,
+            row_count: 1 << self.inner.po2,
+            insn_count: self.inner.insn_counter as u64,
         }
     }
 }

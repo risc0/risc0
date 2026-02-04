@@ -266,7 +266,7 @@ pub struct SegmentUpdate {
     terminate_state: Option<TerminateState>,
 
     pub used_rows: u32,
-    insn_counter: u32,
+    pub insn_counter: u32,
     segment_threshold: u32,
 
     /// Power-of-two for the segment size required to prove this segment.

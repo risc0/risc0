@@ -64,7 +64,9 @@ impl Executor for LocalProver {
         while let Some(update) = exec.run_segment()? {
             segments.push(SegmentInfo {
                 po2: update.po2,
-                rows: update.used_rows,
+                padding_row_count: (1 << update.po2) - update.used_rows as u64,
+                row_count: 1 << update.po2,
+                insn_count: update.insn_counter as u64,
             });
         }
         let session = exec.finalize_session()?;
