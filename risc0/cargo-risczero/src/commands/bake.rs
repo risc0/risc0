@@ -32,8 +32,8 @@ pub struct BakeCommand {
     #[command(flatten)]
     features: clap_cargo::Features,
 
-    ///  Run compilation using a Docker container for reproducible builds.
-    #[arg(long, default_value_t = false)]
+    /// Run compilation using a Docker container for reproducible builds.
+    #[arg(long)]
     pub docker: bool,
 }
 
@@ -45,8 +45,13 @@ impl BakeCommand {
 
         let target_dir = meta.target_directory.as_std_path().join("guest");
 
-        let (included, _excluded) = self.workspace.partition_packages(&meta);
+        let (included, excluded) = self.workspace.partition_packages(&meta);
+        if tracing::enabled!(tracing::Level::DEBUG) {
+            let excluded_names = excluded.iter().map(|pkg| &pkg.name).collect::<Vec<_>>();
+            tracing::debug!("Excluding packages {:?}", excluded_names);
+        }
         for pkg in included {
+            tracing::debug!("Starting build for package {}", pkg.name);
             if let Some(_risc0) = pkg.metadata.get("risc0")
                 && pkg.targets.iter().any(|x| x.is_bin())
             {

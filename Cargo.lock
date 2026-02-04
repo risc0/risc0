@@ -1816,6 +1816,7 @@ dependencies = [
  "tempfile",
  "text_io",
  "tokio",
+ "tracing",
  "tracing-subscriber 0.3.19",
  "zip 2.4.2",
 ]
