@@ -14,19 +14,21 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{
+    collections::BTreeMap,
     hint::black_box,
     path::PathBuf,
     sync::LazyLock,
     time::{Duration, Instant},
 };
 
+use anyhow::anyhow;
 use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
-use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
+use risc0_circuit_rv32im::{MAX_INSN_ROWS, execute::DEFAULT_SEGMENT_LIMIT_PO2};
 use risc0_zkos_v1compat::V1COMPAT_ELF;
-use risc0_zkp::{MAX_CYCLES_PO2, hal::tracker};
+use risc0_zkp::{MAX_CYCLES_PO2, MIN_CYCLES_PO2, hal::tracker};
 use risc0_zkvm::{
     ExecutorEnv, ExecutorImpl, ProverOpts, RECURSION_PO2, ReceiptKind, Segment, Session,
     SimpleSegmentRef, VerifierContext, get_prover_server,
@@ -35,25 +37,65 @@ use serde::Serialize;
 use serde_with::{DurationNanoSeconds, serde_as};
 use tabled::{Table, Tabled, settings::Style};
 
-/// Powers-of-two for cycles, paired with the number of loop iterations used to
-/// achieve that many cycles.
-const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
-    (15, 1024 * 16),
-    (16, 1024 * 64),
-    (17, 1024 * 128),
-    (18, 1024 * 192),
-    (19, 1024 * 512),
-    (20, 1024 * 1024),
-    (21, 1024 * 1024 * 2),
-    (22, 1024 * 1024 * 4),
-    (23, 1024 * 1024 * 16),
-    (24, 1024 * 1024 * 32),
-];
+fn find_iterations_for_po2(po2: usize) -> u32 {
+    let env = ExecutorEnv::builder()
+        .segment_limit_po2(po2 as u32)
+        .write_slice(&u32::MAX.to_le_bytes())
+        .build()
+        .unwrap();
 
-const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
+    let mut saved_segment = None;
+    let error = ExecutorImpl::from_elf(env, &LOOP_ELF)
+        .unwrap()
+        .run_with_callback(|segment| {
+            saved_segment = Some(segment);
+            Err(anyhow!("stop early"))
+        })
+        .map(|_| ())
+        .unwrap_err();
 
-/// The number of iterations of the LOOP_ELF needed to fill up a po2=20 segment.
-const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 494 + 785;
+    let Some(segment) = saved_segment else {
+        panic!("failed to produce segment: {error}");
+    };
+    let opts = ProverOpts::all_po2s();
+    let prover = get_prover_server(&opts).unwrap();
+    let results = prover.segment_preflight(&segment).unwrap();
+    results.block_counts()[risc0_circuit_rv32im::BlockType::InstBranch]
+}
+
+/// We need to leave some room for the instructions after the loop finishes.
+const LOOP_PADDING: u32 = 70;
+
+#[derive(Default)]
+struct Po2Table(BTreeMap<u32, u32>);
+
+impl Po2Table {
+    fn build(max_po2: usize) -> Self {
+        let mut table = BTreeMap::new();
+        for po2 in MIN_CYCLES_PO2..=max_po2 {
+            let iterations = find_iterations_for_po2(po2);
+            if iterations > LOOP_PADDING {
+                table.insert(po2 as u32, iterations - LOOP_PADDING);
+            } else {
+                print!("no iterations fit in po2={po2}");
+            }
+        }
+        Self(table)
+    }
+
+    fn get(&self, po2: u32) -> u32 {
+        *self.0.get(&po2).unwrap()
+    }
+
+    fn lowest(&self) -> (u32, u32) {
+        let (k, v) = self.0.first_key_value().unwrap();
+        (*k, *v)
+    }
+
+    fn iter(&self) -> impl Iterator<Item = (u32, u32)> {
+        self.0.iter().map(|(k, v)| (*k, *v))
+    }
+}
 
 /// Pre-compiled program that simply loops `count: u32` times (read from stdin).
 static LOOP_ELF: LazyLock<Vec<u8>> = LazyLock::new(|| {
@@ -143,14 +185,17 @@ enum Command {
     BigInt2,
 }
 
+const ROW_PADDING_LIMIT: u64 = MAX_INSN_ROWS as u64 + 10;
+
 #[derive(Default)]
 struct Datasheet {
+    po2_table: Po2Table,
     results: Vec<PerformanceData>,
 }
 
 impl Datasheet {
     pub fn run(&mut self, args: Args) {
-        self.warmup();
+        self.warmup(args.max_po2);
 
         if let Some(ref cmd) = args.command {
             self.run_cmd(cmd, &args);
@@ -191,7 +236,12 @@ impl Datasheet {
 
     fn execute(&mut self) {
         let env = ExecutorEnv::builder()
-            .write_slice(&ITERATIONS_FULL_PO2_20_SEGMENT.to_le_bytes())
+            .write_slice(
+                &self
+                    .po2_table
+                    .get(DEFAULT_SEGMENT_LIMIT_PO2 as u32)
+                    .to_le_bytes(),
+            )
             .build()
             .unwrap();
 
@@ -205,6 +255,11 @@ impl Datasheet {
             1,
             "{} didn't fit in po2={DEFAULT_SEGMENT_LIMIT_PO2}",
             session.row_count
+        );
+        assert!(
+            session.padding_row_count < ROW_PADDING_LIMIT,
+            "{}",
+            session.padding_row_count
         );
 
         let instruction_throughput = (session.insn_count as f64) / duration.as_secs_f64();
@@ -223,7 +278,8 @@ impl Datasheet {
         let opts = ProverOpts::all_po2s().with_hashfn(hashfn.to_string());
         let prover = get_prover_server(&opts).unwrap();
 
-        for (po2, iterations) in CYCLES_PO2_ITERS
+        for (po2, iterations) in self
+            .po2_table
             .iter()
             .take(args.max_po2 - MIN_CYCLES_PO2 + 1)
         {
@@ -247,6 +303,12 @@ impl Datasheet {
                 info.stats.row_count, expected,
                 "actual vs expected for po2={po2}"
             );
+            assert!(
+                info.stats.padding_row_count < ROW_PADDING_LIMIT,
+                "{}",
+                info.stats.padding_row_count
+            );
+
             let instruction_throughput = (info.stats.insn_count as f64) / duration.as_secs_f64();
             let row_throughput = (info.stats.row_count as f64) / duration.as_secs_f64();
             let seal = info.receipt.inner.composite().unwrap().seal_size() as u64;
@@ -311,7 +373,7 @@ impl Datasheet {
         let ctx = VerifierContext::default();
         let prover = get_prover_server(&opts).unwrap();
 
-        let (po2, iters) = CYCLES_PO2_ITERS[0];
+        let (po2, iters) = self.po2_table.lowest();
 
         let env = ExecutorEnv::builder()
             .write_slice(&iters.to_le_bytes())
@@ -549,11 +611,13 @@ impl Datasheet {
         self.bigint2_prove_segment(&session, &segment);
     }
 
-    fn warmup(&self) {
-        println!("warmup");
+    fn warmup(&mut self, max_po2: usize) {
+        println!("build po2 table (also CPU warmup)");
+        self.po2_table = Po2Table::build(max_po2);
 
         #[cfg(gpu_accel)]
         {
+            println!("gpu warmup");
             let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
             let prover = get_prover_server(&opts).unwrap();
 
@@ -563,12 +627,6 @@ impl Datasheet {
                 .unwrap();
             prover.prove(env, &LOOP_ELF).unwrap();
         }
-
-        let env = ExecutorEnv::builder()
-            .write_slice(&ITERATIONS_FULL_PO2_20_SEGMENT.to_le_bytes())
-            .build()
-            .unwrap();
-        execute_elf(env, &LOOP_ELF).unwrap();
     }
 }
 
