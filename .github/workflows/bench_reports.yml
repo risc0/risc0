@@ -89,6 +89,8 @@ jobs:
   publish:
     needs: bench
     runs-on: ubuntu-latest
+    # Publishing of the datasheet is currently broken.
+    if: false
 
     steps:
       - name: Checkout gh-pages repository branch ${{ github.base_ref || github.ref_name }}
@@ -127,7 +129,7 @@ jobs:
   alert_devops_if_failed:
     runs-on: ubuntu-latest
     if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
-    needs: [bench, publish]
+    needs: [bench]
     steps:
       - name: DevOps Alert
         env:
