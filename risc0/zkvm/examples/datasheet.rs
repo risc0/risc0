@@ -62,28 +62,38 @@ static LOOP_ELF: LazyLock<Vec<u8>> = LazyLock::new(|| {
 });
 
 #[serde_as]
-#[derive(Debug, Serialize, Tabled)]
+#[derive(Debug, Default, Serialize, Tabled)]
 struct PerformanceData {
     name: String,
-    hashfn: String,
+
+    #[tabled(display = "display::str")]
+    hashfn: Option<String>,
 
     /// Iterations per second.
     #[tabled(display = "display::hertz")]
-    throughput: f64,
+    instruction_throughput: Option<f64>,
+
+    /// Rows per second.
+    #[tabled(display = "display::hertz")]
+    row_throughput: Option<f64>,
 
     #[serde_as(as = "DurationNanoSeconds")]
     #[tabled(display = "display::duration")]
     duration: Duration,
 
-    /// Either riscv instructions or rows
+    /// riscv instructions
     #[tabled(display = "display::n")]
-    n: u64,
+    instruction_count: Option<u64>,
+
+    /// Rows
+    #[tabled(display = "display::n")]
+    row_count: Option<u64>,
 
     #[tabled(display = "display::bytes")]
-    ram: u64,
+    ram: Option<u64>,
 
     #[tabled(display = "display::bytes")]
-    seal: u64,
+    seal: Option<u64>,
 }
 
 #[derive(Parser)]
@@ -197,15 +207,14 @@ impl Datasheet {
             session.row_count
         );
 
-        let throughput = (session.insn_count as f64) / duration.as_secs_f64();
+        let instruction_throughput = (session.insn_count as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
             name: "execute".into(),
-            hashfn: "N/A".into(),
-            n: session.insn_count,
+            instruction_count: Some(session.insn_count),
+            row_count: Some(session.row_count),
             duration,
-            ram: 0,
-            seal: 0,
-            throughput,
+            instruction_throughput: Some(instruction_throughput),
+            ..Default::default()
         });
     }
 
@@ -238,17 +247,20 @@ impl Datasheet {
                 info.stats.row_count, expected,
                 "actual vs expected for po2={po2}"
             );
-            let throughput = (info.stats.row_count as f64) / duration.as_secs_f64();
+            let instruction_throughput = (info.stats.insn_count as f64) / duration.as_secs_f64();
+            let row_throughput = (info.stats.row_count as f64) / duration.as_secs_f64();
             let seal = info.receipt.inner.composite().unwrap().seal_size() as u64;
 
             self.results.push(PerformanceData {
                 name: "rv32im".into(),
-                hashfn: hashfn.into(),
-                n: info.stats.row_count,
+                hashfn: Some(hashfn.into()),
+                row_count: Some(info.stats.row_count),
+                instruction_count: Some(info.stats.insn_count),
                 duration,
-                ram,
-                seal,
-                throughput,
+                ram: Some(ram),
+                seal: Some(seal),
+                row_throughput: Some(row_throughput),
+                instruction_throughput: Some(instruction_throughput),
             });
         }
     }
@@ -276,18 +288,19 @@ impl Datasheet {
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
-        let rows = 1 << RECURSION_PO2;
-        let throughput = (rows as f64) / duration.as_secs_f64();
+        let row_count = 1 << RECURSION_PO2;
+        let row_throughput = (row_count as f64) / duration.as_secs_f64();
         let seal = receipt.seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "lift".into(),
-            hashfn: opts.hashfn,
-            n: rows,
+            hashfn: Some(opts.hashfn),
+            row_count: Some(row_count),
             duration,
-            ram,
-            seal,
-            throughput,
+            ram: Some(ram),
+            seal: Some(seal),
+            row_throughput: Some(row_throughput),
+            ..Default::default()
         });
     }
 
@@ -320,18 +333,19 @@ impl Datasheet {
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
-        let rows = 1 << RECURSION_PO2;
-        let throughput = (rows as f64) / duration.as_secs_f64();
+        let row_count = 1 << RECURSION_PO2;
+        let row_throughput = (row_count as f64) / duration.as_secs_f64();
         let seal = receipt.seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "join".into(),
-            hashfn: opts.hashfn,
-            n: rows,
+            hashfn: Some(opts.hashfn),
+            row_count: Some(row_count),
             duration,
-            ram,
-            seal,
-            throughput,
+            ram: Some(ram),
+            seal: Some(seal),
+            row_throughput: Some(row_throughput),
+            ..Default::default()
         });
     }
 
@@ -354,17 +368,18 @@ impl Datasheet {
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
-        let throughput = (info.stats.row_count as f64) / duration.as_secs_f64();
+        let row_throughput = (info.stats.row_count as f64) / duration.as_secs_f64();
         let seal = info.receipt.inner.succinct().unwrap().seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "succinct".into(),
-            hashfn: opts.hashfn,
-            n: info.stats.row_count,
+            hashfn: Some(opts.hashfn),
+            row_count: Some(info.stats.row_count),
             duration,
-            ram,
-            seal,
-            throughput,
+            ram: Some(ram),
+            seal: Some(seal),
+            row_throughput: Some(row_throughput),
+            ..Default::default()
         });
     }
 
@@ -389,18 +404,19 @@ impl Datasheet {
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
-        let rows = 1 << RECURSION_PO2;
-        let throughput = (rows as f64) / duration.as_secs_f64();
+        let row_count = 1 << RECURSION_PO2;
+        let row_throughput = (row_count as f64) / duration.as_secs_f64();
         let seal = receipt.seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "identity_p254".into(),
-            hashfn: opts.hashfn,
-            n: rows,
+            hashfn: Some(opts.hashfn),
+            row_count: Some(row_count),
             duration,
-            ram,
-            seal,
-            throughput,
+            ram: Some(ram),
+            seal: Some(seal),
+            row_throughput: Some(row_throughput),
+            ..Default::default()
         });
     }
 
@@ -425,18 +441,18 @@ impl Datasheet {
         let seal = black_box(risc0_groth16::prove::shrink_wrap(&seal_bytes).unwrap());
         let duration = start.elapsed();
 
-        let rows = 1 << RECURSION_PO2;
-        let throughput = (rows as f64) / duration.as_secs_f64();
+        let row_count = 1 << RECURSION_PO2;
+        let row_throughput = (row_count as f64) / duration.as_secs_f64();
         let encoded = bincode::serialize(&seal).unwrap();
 
         self.results.push(PerformanceData {
             name: "shrink_wrap".into(),
-            hashfn: opts.hashfn,
-            n: rows,
+            hashfn: Some(opts.hashfn),
+            row_count: Some(row_count),
             duration,
-            ram: 0,
-            seal: encoded.len() as u64,
-            throughput,
+            seal: Some(encoded.len() as u64),
+            row_throughput: Some(row_throughput),
+            ..Default::default()
         });
     }
 
@@ -460,17 +476,18 @@ impl Datasheet {
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
-        let throughput = (info.stats.row_count as f64) / duration.as_secs_f64();
+        let row_throughput = (info.stats.row_count as f64) / duration.as_secs_f64();
         let seal = info.receipt.inner.groth16().unwrap().seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "groth16".into(),
-            hashfn: opts.hashfn,
-            n: info.stats.row_count,
+            hashfn: Some(opts.hashfn),
+            row_count: Some(info.stats.row_count),
             duration,
-            ram,
-            seal,
-            throughput,
+            ram: Some(ram),
+            seal: Some(seal),
+            row_throughput: Some(row_throughput),
+            ..Default::default()
         });
     }
 
@@ -483,15 +500,14 @@ impl Datasheet {
         let session = execute_elf(env, BIGINT2_ELF).unwrap();
         let duration = start.elapsed();
 
-        let throughput = (session.insn_count as f64) / duration.as_secs_f64();
+        let instruction_throughput = (session.insn_count as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
             name: "bigint2_execute".into(),
-            hashfn: "N/A".into(),
-            n: session.insn_count,
+            instruction_count: Some(session.insn_count),
+            row_count: Some(session.row_count),
             duration,
-            ram: 0,
-            seal: 0,
-            throughput,
+            instruction_throughput: Some(instruction_throughput),
+            ..Default::default()
         });
 
         session
@@ -512,15 +528,18 @@ impl Datasheet {
         let duration = start.elapsed();
         let ram = tracker().lock().unwrap().peak as u64;
 
-        let throughput = (session.row_count as f64) / duration.as_secs_f64();
+        let row_throughput = (session.row_count as f64) / duration.as_secs_f64();
+        let instruction_throughput = (session.insn_count as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
             name: "bigint2_prove_segment".into(),
-            hashfn: opts.hashfn,
-            n: session.row_count,
+            hashfn: Some(opts.hashfn),
+            row_count: Some(session.row_count),
+            instruction_count: Some(session.insn_count),
             duration,
-            ram,
-            seal: 0,
-            throughput,
+            ram: Some(ram),
+            row_throughput: Some(row_throughput),
+            instruction_throughput: Some(instruction_throughput),
+            ..Default::default()
         });
     }
 
@@ -568,22 +587,35 @@ mod display {
 
     use human_repr::{HumanCount, HumanDuration};
 
-    pub fn bytes(bytes: &u64) -> String {
-        if *bytes == 0 {
-            return "N/A".into();
+    pub fn bytes(bytes: &Option<u64>) -> String {
+        if let Some(bytes) = bytes {
+            bytes.human_count_bytes().to_string()
+        } else {
+            "N/A".into()
         }
-        bytes.human_count_bytes().to_string()
     }
 
-    pub fn n(count: &u64) -> String {
-        count.human_count_bare().to_string()
+    pub fn n(count: &Option<u64>) -> String {
+        if let Some(count) = count {
+            count.human_count_bare().to_string()
+        } else {
+            "N/A".into()
+        }
+    }
+
+    pub fn str(s: &Option<String>) -> String {
+        s.clone().unwrap_or("N/A".into())
     }
 
     pub fn duration(duration: &Duration) -> String {
         duration.human_duration().to_string()
     }
 
-    pub fn hertz(hertz: &f64) -> String {
-        hertz.human_count("Hz").to_string()
+    pub fn hertz(hertz: &Option<f64>) -> String {
+        if let Some(hertz) = hertz {
+            hertz.human_count("Hz").to_string()
+        } else {
+            "N/A".into()
+        }
     }
 }
