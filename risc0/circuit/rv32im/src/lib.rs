@@ -36,7 +36,7 @@ use risc0_zkp::field::baby_bear::Elem;
 use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "execute")]
+#[cfg(not(target_os = "zkvm"))]
 pub use risc0_circuit_rv32im_sys::BlockType;
 
 pub use self::zirgen::CircuitImpl;

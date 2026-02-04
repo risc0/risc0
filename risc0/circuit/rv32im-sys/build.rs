@@ -34,6 +34,36 @@ const PLATFORM_CUDA: Platform = Platform::new("cuda", "cu", "hal/cuda/kernels");
 const PLATFORM_METAL: Platform = Platform::new("metal", "metal", "hal/metal/kernels");
 
 fn main() {
+    let prove = std::env::var("CARGO_FEATURE_PROVE").is_ok();
+    if prove {
+        compile_provers();
+    }
+
+    generate_rust_code(prove);
+}
+
+fn generate_rust_code(prove: bool) {
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
+
+    let mut block_types = parse_block_types().unwrap();
+    block_types.insert(
+        "Empty".into(),
+        BlockTypeInfo {
+            index: block_types.len(),
+            count_per_row: 0,
+        },
+    );
+
+    generate_rust_block_types(&format!("{out_dir}/block_types.rs"), &block_types);
+    if prove {
+        generate_rust_bindings(&format!("{out_dir}/bindings.rs"), &block_types);
+    }
+
+    let rv32im_table = parse_rv32im_inc().unwrap();
+    generate_rv32im_table(&format!("{out_dir}/rv32im_table.rs"), &rv32im_table);
+}
+
+fn compile_provers() {
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
 
     rerun_if_env_changed("NVCC_APPEND_FLAGS");
@@ -128,21 +158,6 @@ fn main() {
     }
 
     build.compile("risc0_rv32im");
-
-    let mut block_types = parse_block_types().unwrap();
-    block_types.insert(
-        "Empty".into(),
-        BlockTypeInfo {
-            index: block_types.len(),
-            count_per_row: 0,
-        },
-    );
-
-    generate_rust_block_types(&format!("{out_dir}/block_types.rs"), &block_types);
-    generate_rust_bindings(&format!("{out_dir}/bindings.rs"), &block_types);
-
-    let rv32im_table = parse_rv32im_inc().unwrap();
-    generate_rv32im_table(&format!("{out_dir}/rv32im_table.rs"), &rv32im_table);
 }
 
 struct BlockTypeInfo {
@@ -195,6 +210,8 @@ fn preprocess_file(file_contents: &str) -> String {
 
 /// Uses the C pre-processor to parse the block type table from "cxx/rv32im/witness/block_types.h"
 fn parse_block_types() -> Result<BTreeMap<String, BlockTypeInfo>> {
+    rerun_if_changed("cxx/rv32im/witness/block_types.h");
+
     let contents = preprocess_file(
         "\
             #include \"rv32im/witness/block_types.h\"\n\
@@ -267,6 +284,8 @@ impl Rv32imInstrInfo {
 
 /// Uses the C pre-processor to parse the block type table from "cxx/rv32im/base/rv32im.inc"
 fn parse_rv32im_inc() -> Result<Vec<Rv32imInstrInfo>> {
+    rerun_if_changed("cxx/rv32im/base/rv32im.inc");
+
     let contents = preprocess_file(
         "\
             #define ENTRY(...) __VA_ARGS__;\n\
@@ -348,15 +367,20 @@ fn generate_rust_block_types(output: &str, block_types: &BTreeMap<String, BlockT
             }
         }
 
-        #(impl HasBlockType for #block_witnesses {
-            const BLOCK_TYPE: BlockType = BlockType::#block_names;
-        })*
+        #(
+            #[cfg(feature = "prove")]
+            impl HasBlockType for #block_witnesses {
+                const BLOCK_TYPE: BlockType = BlockType::#block_names;
+            }
+        )*
 
+        #[cfg(feature = "prove")]
         #[derive(derive_more::From, PartialEq, Debug, Clone)]
         pub enum BlockWitness {
             #(#block_names(#block_witnesses),)*
         }
 
+        #[cfg(feature = "prove")]
         impl BlockWitness {
             pub const fn block_type(&self) -> BlockType {
                 match self {
