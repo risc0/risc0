@@ -249,6 +249,8 @@ impl Datasheet {
         let session = execute_elf(env, &LOOP_ELF).unwrap();
         let duration = start.elapsed();
 
+        session.stats().log_if_risc0_info_set();
+
         // We want to ensure that we're using a full single segment for this benchmark.
         assert_eq!(
             session.segments.len(),
