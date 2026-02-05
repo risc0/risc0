@@ -16,7 +16,21 @@
 #include "hal/cuda/kernels/base.h"
 #include "rv32im/circuit/eval_check.h"
 
-constexpr size_t k_threads = 512;
+template <typename Kernel> int max_legal_1d_block_threads(Kernel k, int device = -1) {
+  if (device < 0)
+    cudaGetDevice(&device);
+
+  cudaDeviceProp prop{};
+  cudaGetDeviceProperties(&prop, device);
+
+  cudaFuncAttributes attr{};
+  cudaFuncGetAttributes(&attr, (const void*)k);
+
+  int t = prop.maxThreadsPerBlock;
+  t = std::min(t, prop.maxThreadsDim[0]);
+  t = std::min(t, attr.maxThreadsPerBlock);
+  return t;
+}
 
 namespace NAMESPACE {
 
@@ -28,7 +42,9 @@ __global__ void kernel(Fp* check,
                        FpExt ecMix,
                        Fp rou) {
   uint32_t row = blockDim.x * blockIdx.x + threadIdx.x;
-  if (row >= (1 << (NUM_ROWS_PO2 + 2))) { return; }
+  if (row >= (1 << (NUM_ROWS_PO2 + 2))) {
+    return;
+  }
   computeRow<NUM_ROWS_PO2>(check, data, accum, globals, accMix, ecMix, rou, row);
 }
 
@@ -44,8 +60,18 @@ extern "C" void FUNCNAME(cudaStream_t stream,
                          const FpExt* accMix,
                          FpExt ecMix,
                          Fp rou) {
+  static int maxThreads = 0;
+  if (maxThreads == 0) {
+    maxThreads = max_legal_1d_block_threads(kernel);
+  }
   constexpr size_t NUM_ROWS = size_t(1) << (NUM_ROWS_PO2 + 2);
-  constexpr size_t block_size = NUM_ROWS < k_threads ? NUM_ROWS : k_threads;
-  constexpr size_t num_blocks = (NUM_ROWS + block_size - 1) / block_size;
-  kernel<<<num_blocks, block_size, 0, stream>>>(check, data, accum, globals, accMix, ecMix, rou);
+  size_t blockSize = maxThreads;
+  if (blockSize > 512) {
+    blockSize = 512;
+  }
+  if (blockSize > NUM_ROWS) {
+    blockSize = NUM_ROWS;
+  }
+  size_t numBlocks = (NUM_ROWS + blockSize - 1) / blockSize;
+  kernel<<<numBlocks, blockSize, 0, stream>>>(check, data, accum, globals, accMix, ecMix, rou);
 }
