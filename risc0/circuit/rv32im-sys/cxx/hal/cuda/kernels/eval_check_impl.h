@@ -16,15 +16,23 @@
 #include "hal/cuda/kernels/base.h"
 #include "rv32im/circuit/eval_check.h"
 
-template <typename Kernel> int max_legal_1d_block_threads(Kernel k, int device = -1) {
-  if (device < 0)
-    cudaGetDevice(&device);
+template <typename Kernel> int max_legal_1d_block_threads(Kernel k, cudaStream_t stream) {
+  constexpr size_t fallbackMaxThreads = 256;
+  int device = -1;
+  cudaError_t error;
 
+  if (cudaStreamGetDevice(stream, &device) != cudaSuccess) {
+    return fallbackMaxThreads;
+  }
   cudaDeviceProp prop{};
-  cudaGetDeviceProperties(&prop, device);
+  if (cudaGetDeviceProperties(&prop, device) != cudaSuccess) {
+    return fallbackMaxThreads;
+  }
 
   cudaFuncAttributes attr{};
-  cudaFuncGetAttributes(&attr, (const void*)k);
+  if (cudaFuncGetAttributes(&attr, (const void*)k) != cudaSuccess) {
+    return fallbackMaxThreads;
+  }
 
   int t = prop.maxThreadsPerBlock;
   t = std::min(t, prop.maxThreadsDim[0]);
@@ -60,10 +68,8 @@ extern "C" void FUNCNAME(cudaStream_t stream,
                          const FpExt* accMix,
                          FpExt ecMix,
                          Fp rou) {
-  static int maxThreads = 0;
-  if (maxThreads == 0) {
-    maxThreads = max_legal_1d_block_threads(kernel);
-  }
+  static int maxThreads = max_legal_1d_block_threads(kernel, stream);
+
   constexpr size_t NUM_ROWS = size_t(1) << (NUM_ROWS_PO2 + 2);
   size_t blockSize = maxThreads;
   if (blockSize > 512) {
