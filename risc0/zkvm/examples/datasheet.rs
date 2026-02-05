@@ -615,7 +615,7 @@ impl Datasheet {
 
     fn warmup(&mut self, max_po2: usize) {
         println!("build po2 table (also CPU warmup)");
-        self.po2_table = Po2Table::build(max_po2);
+        self.po2_table = Po2Table::build(std::cmp::max(max_po2, DEFAULT_SEGMENT_LIMIT_PO2));
 
         #[cfg(gpu_accel)]
         {

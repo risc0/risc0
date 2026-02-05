@@ -606,7 +606,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             write_record: self.write_record.clone(),
             insn_counter: self.insn_counter,
             terminate_state: self.terminate_state,
-            used_rows: self.get_rows() as u32,
+            used_rows: self.segment_used_rows(),
             segment_threshold,
             po2: po2 as u32,
             index: index as u64,
