@@ -16,6 +16,8 @@
 #include "hal/cuda/kernels/base.h"
 #include "rv32im/circuit/eval_check.h"
 
+constexpr size_t k_threads = 512;
+
 namespace NAMESPACE {
 
 __global__ void kernel(Fp* check,
@@ -26,6 +28,7 @@ __global__ void kernel(Fp* check,
                        FpExt ecMix,
                        Fp rou) {
   uint32_t row = blockDim.x * blockIdx.x + threadIdx.x;
+  if (row >= (1 << (NUM_ROWS_PO2 + 2))) { return; }
   computeRow<NUM_ROWS_PO2>(check, data, accum, globals, accMix, ecMix, rou, row);
 }
 
@@ -42,7 +45,7 @@ extern "C" void FUNCNAME(cudaStream_t stream,
                          FpExt ecMix,
                          Fp rou) {
   constexpr size_t NUM_ROWS = size_t(1) << (NUM_ROWS_PO2 + 2);
-  constexpr size_t block_size = NUM_ROWS < 256 ? NUM_ROWS : 256;
+  constexpr size_t block_size = NUM_ROWS < k_threads ? NUM_ROWS : k_threads;
   constexpr size_t num_blocks = (NUM_ROWS + block_size - 1) / block_size;
   kernel<<<num_blocks, block_size, 0, stream>>>(check, data, accum, globals, accMix, ecMix, rou);
 }
