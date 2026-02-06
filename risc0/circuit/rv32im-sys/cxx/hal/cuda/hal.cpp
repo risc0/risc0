@@ -208,7 +208,10 @@ public:
     }
   }
 
-  ~CudaHal() override { (void)cuda_stream_destroy(stream); }
+  ~CudaHal() override {
+    (void)cudaDeviceSetLimit(cudaLimit::cudaLimitStackSize, 0);
+    (void)cuda_stream_destroy(stream);
+  }
 
   void hashRows(HalArray<Digest> out, HalMatrix<Fp> in) override {
     if (in.rows() != out.size()) {

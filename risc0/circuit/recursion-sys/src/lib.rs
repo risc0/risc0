@@ -110,4 +110,6 @@ unsafe extern "C" {
         domain: u32,
         poly_mix: *const BabyBearExtElem,
     ) -> *const std::os::raw::c_char;
+
+    pub fn risc0_circuit_recursion_cuda_reset() -> *const std::os::raw::c_char;
 }
