@@ -32,7 +32,7 @@ fn execute(group: &mut BenchGroup) {
         let iterations = 100_000;
         let session = setup_exec(iterations).run().unwrap();
         b.iter(
-            session.user_cycles as usize,
+            session.insn_count as usize,
             || setup_exec(iterations),
             |exec| exec.run(),
         )
@@ -70,7 +70,7 @@ fn prove_segment(group: &mut BenchGroup, hashfn: &str) {
         let segment = session.segments[0].resolve().unwrap();
 
         b.iter(
-            session.total_cycles as usize,
+            session.row_count as usize,
             || {},
             |()| prover.prove_segment(&ctx, &segment),
         );
@@ -139,7 +139,7 @@ fn total_composite(group: &mut BenchGroup) {
 
         let session = setup_exec(iterations).run().unwrap();
         b.iter(
-            session.total_cycles as usize,
+            session.row_count as usize,
             || setup_exec(iterations),
             |exec| {
                 let session = exec.run().unwrap();
@@ -159,7 +159,7 @@ fn total_succinct(group: &mut BenchGroup) {
 
         let session = setup_exec(iterations).run().unwrap();
         b.iter(
-            session.total_cycles as usize,
+            session.row_count as usize,
             || setup_exec(iterations),
             |exec| {
                 let session = exec.run().unwrap();

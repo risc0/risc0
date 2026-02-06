@@ -12,6 +12,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use serde::{Deserialize, Serialize};
 
 use risc0_circuit_rv32im_sys::BlockType;
@@ -26,9 +27,35 @@ pub const POINTS_PER_ROW: u64 = 5040;
 const PART_SIZE: u64 = 8;
 const NUM_PARTS: u64 = (PAGE_BYTES as u64 / WORD_SIZE as u64) / PART_SIZE;
 
-const fn row_points(block: BlockType) -> u64 {
+pub const fn row_points(block: BlockType) -> u64 {
     POINTS_PER_ROW / block.count_per_row() as u64
 }
+
+const P2_BLOCK_ROW_POINTS: u64 = row_points(BlockType::P2Block)
+    + row_points(BlockType::P2IntRounds)
+    + row_points(BlockType::P2ExtRound) * 8;
+
+/// tree_levels = tree_height + 1
+/// tree_height = floor(log2(NUM_PAGES))
+/// inner_block_levels = tree_levels - 1 = tree_height = floor(log2(NUM_PAGES))
+const PAGE_TREE_INNER_LEVELS: u64 = NUM_PAGES.ilog2() as u64;
+
+pub const PAGE_IN_ROW_POINTS: u64 = row_points(BlockType::PageInPage)
+    + row_points(BlockType::PageInPart) * NUM_PARTS
+    + P2_BLOCK_ROW_POINTS * NUM_PARTS;
+
+pub const PAGE_OUT_ROW_POINTS: u64 = row_points(BlockType::PageOutPage)
+    + row_points(BlockType::PageOutPart) * NUM_PARTS
+    + P2_BLOCK_ROW_POINTS * NUM_PARTS;
+
+pub const PAGE_IN_NODE_ROW_POINTS: u64 =
+    (row_points(BlockType::PageInNode) + P2_BLOCK_ROW_POINTS) * PAGE_TREE_INNER_LEVELS;
+
+pub const PAGE_OUT_NODE_ROW_POINTS: u64 =
+    (row_points(BlockType::PageOutNode) + P2_BLOCK_ROW_POINTS) * PAGE_TREE_INNER_LEVELS;
+
+//pub const PAGE_OUT_ROW_POINTS: u64 = ...;
+//pub const PAGE_NODE_ROW_POINTS: u64 = ...;
 
 /// Which block types the given instruction ends up being implemented with.
 fn add_blocks_for_insn(blocks: &mut BlockCollection, i: &InsnKind) {
@@ -179,6 +206,16 @@ impl BlockCollection {
             }
         }
     }
+
+    pub fn add_counts(&self, _out: &mut Option<enum_map::EnumMap<BlockType, u64>>) {
+        #[cfg(any(test, feature = "block_tracker_debug"))]
+        {
+            let out = _out.get_or_insert_default();
+            for (b, &v) in &self.blocks {
+                out[b] += v as u64;
+            }
+        }
+    }
 }
 
 pub struct BlockTracker {
@@ -259,20 +296,13 @@ impl BlockTracker {
             .add_blocks(BlockType::MakeTable, (block_count + 1).div_ceil(8));
     }
 
-    const fn page_tree_inner_levels() -> u64 {
-        // tree_levels = tree_height + 1
-        // tree_height = floor(log2(NUM_PAGES))
-        // inner_block_levels = tree_levels - 1 = tree_height = floor(log2(NUM_PAGES))
-        NUM_PAGES.ilog2() as u64
-    }
-
     fn add_page_in_blocks(blocks: &mut BlockCollection, num: u64) {
         blocks.add_blocks(BlockType::PageInPage, num);
         blocks.add_blocks(BlockType::PageInPart, num * NUM_PARTS);
         Self::add_p2_blocks(blocks, num * NUM_PARTS);
 
-        blocks.add_blocks(BlockType::PageInNode, Self::page_tree_inner_levels() * num);
-        Self::add_p2_blocks(blocks, Self::page_tree_inner_levels() * num);
+        blocks.add_blocks(BlockType::PageInNode, PAGE_TREE_INNER_LEVELS * num);
+        Self::add_p2_blocks(blocks, PAGE_TREE_INNER_LEVELS * num);
     }
 
     fn add_page_out_blocks(blocks: &mut BlockCollection, num: u64) {
@@ -280,12 +310,12 @@ impl BlockTracker {
         blocks.add_blocks(BlockType::PageOutPart, num * NUM_PARTS);
         Self::add_p2_blocks(blocks, num * NUM_PARTS);
 
-        blocks.add_blocks(BlockType::PageOutNode, Self::page_tree_inner_levels() * num);
-        Self::add_p2_blocks(blocks, Self::page_tree_inner_levels() * num);
+        blocks.add_blocks(BlockType::PageOutNode, PAGE_TREE_INNER_LEVELS * num);
+        Self::add_p2_blocks(blocks, PAGE_TREE_INNER_LEVELS * num);
     }
 
     fn add_page_uncle_blocks(blocks: &mut BlockCollection, num: u64) {
-        blocks.add_blocks(BlockType::PageUncle, Self::page_tree_inner_levels() * num);
+        blocks.add_blocks(BlockType::PageUncle, PAGE_TREE_INNER_LEVELS * num);
     }
 
     fn add_table_blocks(blocks: &mut BlockCollection, cycles: u32) {

@@ -49,10 +49,10 @@ pub struct Metrics {
     #[serde_as(as = "DurationNanoSeconds")]
     #[tabled(display_with = "display_duration")]
     pub verify_duration: Duration,
-    #[tabled(display_with = "display_cycles")]
-    pub total_cycles: u64,
-    #[tabled(display_with = "display_cycles")]
-    pub user_cycles: u64,
+    #[tabled(display_with = "display_count")]
+    pub row_count: u64,
+    #[tabled(display_with = "display_count")]
+    pub insn_count: u64,
     #[tabled(display_with = "display_bytes")]
     pub output_bytes: usize,
     #[tabled(display_with = "display_bytes")]
@@ -63,7 +63,7 @@ fn display_bytes(bytes: &usize) -> String {
     bytes.human_count_bytes().to_string()
 }
 
-fn display_cycles(cycles: &u64) -> String {
+fn display_count(cycles: &u64) -> String {
     cycles.human_count_bare().to_string()
 }
 
@@ -84,8 +84,8 @@ impl Metrics {
             proof_duration: Duration::default(),
             total_duration: Duration::default(),
             verify_duration: Duration::default(),
-            total_cycles: 0,
-            user_cycles: 0,
+            row_count: 0,
+            insn_count: 0,
             output_bytes: 0,
             proof_bytes: 0,
             speed: 0.0,
@@ -129,8 +129,8 @@ impl Job {
 
         let (session, duration) = self.exec_compute();
 
-        metrics.total_cycles = session.total_cycles;
-        metrics.user_cycles = session.user_cycles;
+        metrics.row_count = session.row_count;
+        metrics.insn_count = session.insn_count;
         metrics.exec_duration = duration;
 
         let prover = get_prover_server(&ProverOpts::succinct()).unwrap();

@@ -21,7 +21,7 @@ use std::{
 
 use anyhow::Result;
 use risc0_binfmt::{ExitCode, MemoryImage, PovwJobId, PovwLogId, Program, ProgramBinary};
-use risc0_circuit_rv32im::TerminateState;
+use risc0_circuit_rv32im::{BlockType, TerminateState, execute::row_points};
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
@@ -977,7 +977,12 @@ fn profiler() {
 
     for sample in &test_samples {
         let frames = Vec::from_iter(sample.frames.iter().map(|fr| fr.frame.name.clone()));
-        *named_stacks_and_counts.entry(frames).or_default() += sample.count;
+        *named_stacks_and_counts.entry(frames).or_default() += sample.count as u64;
+    }
+
+    fn nop_row_points() -> u64 {
+        // A nop ends up adding zero to a register
+        row_points(BlockType::InstImm) + row_points(BlockType::UnitAddSub)
     }
 
     // Check the stacks
@@ -991,7 +996,10 @@ fn profiler() {
                     "main".into(),
                     "__start".into()
                 ],
-                2 // auicpc + jr
+                // auipc, jr
+                row_points(BlockType::InstAuipc)
+                    + row_points(BlockType::InstJalr)
+                    + row_points(BlockType::Decode) * 2
             ),
             (
                 vec![
@@ -1001,7 +1009,8 @@ fn profiler() {
                     "main".into(),
                     "__start".into(),
                 ],
-                1 // nop
+                // nop
+                nop_row_points() + row_points(BlockType::Decode)
             ),
             (
                 vec![
@@ -1011,7 +1020,8 @@ fn profiler() {
                     "main".into(),
                     "__start".into(),
                 ],
-                1 // nop
+                // nop
+                nop_row_points() + row_points(BlockType::Decode)
             ),
             (
                 vec![
@@ -1022,7 +1032,9 @@ fn profiler() {
                     "main".into(),
                     "__start".into(),
                 ],
-                10 // nop * 10
+                // nop * 10 + ret
+                (nop_row_points() + row_points(BlockType::Decode)) * 10
+                    + row_points(BlockType::MakeTable)
             ),
             (
                 vec![
@@ -1032,7 +1044,14 @@ fn profiler() {
                     "main".into(),
                     "__start".into(),
                 ],
-                4 // la, jr, nop
+                // auipc, add, jr, nop
+                row_points(BlockType::InstAuipc)
+                    + row_points(BlockType::InstImm)
+                    + row_points(BlockType::UnitAddSub)
+                    + row_points(BlockType::InstJalr)
+                    + nop_row_points()
+                    + row_points(BlockType::Decode) * 4
+                    + row_points(BlockType::MakeTable)
             ),
             (
                 vec![
@@ -1042,7 +1061,8 @@ fn profiler() {
                     "main".into(),
                     "__start".into(),
                 ],
-                1 // ret
+                // ret
+                row_points(BlockType::InstJalr) + row_points(BlockType::Decode)
             ),
         ]
     );
@@ -1370,19 +1390,19 @@ mod docker {
 }
 
 #[rstest]
-#[case((0, 16, 1))]
+#[case((0, 17, 1))]
 // this should contain exactly 2 segments
-#[case((16, 16, 2))]
+#[case((17, 17, 2))]
 // it's ok to run with a limit that's higher than the actual count
-#[case((16, 16, 10))]
-#[case((16, 15, 17))]
+#[case((17, 17, 10))]
+#[case((17, 16, 18))]
 // This test should always fail if the last parameter is zero
 #[should_panic(expected = "Session limit exceeded")]
-#[case((0, 16, 0))]
+#[case((0, 17, 0))]
 #[should_panic(expected = "Session limit exceeded")]
-#[case((16, 16, 1))]
+#[case((17, 17, 1))]
 #[should_panic(expected = "Session limit exceeded")]
-#[case((16, 15, 2))]
+#[case((17, 16, 2))]
 #[test_log::test]
 fn session_limit(
     #[case] (loop_cycles_po2, segment_limit_po2, session_count_limit): (u32, u32, u64),

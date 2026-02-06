@@ -22,7 +22,7 @@ use risc0_binfmt::ByteAddr;
 //     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
 // };
 use risc0_circuit_rv32im::{
-    MAX_INSN_CYCLES,
+    MAX_INSN_ROWS,
     execute::{
         DEFAULT_SEGMENT_LIMIT_PO2, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, USER_END_ADDR, platform::WORD_SIZE,

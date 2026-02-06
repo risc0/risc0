@@ -26,7 +26,6 @@ execute = [
     "dep:num-traits",
     "dep:postcard",
     "dep:ringbuffer",
-    "dep:risc0-circuit-rv32im-sys",
     "dep:smallvec",
     "risc0-core/perf",
     "std",
@@ -41,6 +40,7 @@ prove = [
     "dep:wide",
     "execute",
     "risc0-zkp/prove",
+    "risc0-circuit-rv32im-sys/prove",
 ]
 std = [
     "anyhow/std",
@@ -93,17 +93,17 @@ postcard = { version = "1.1.1", optional = true, features = ["use-std"] }
 rand = { version = "0.9.1", optional = true }
 rayon = { version = "1.5", optional = true }
 ringbuffer = { version = "0.15.0", optional = true }
-risc0-circuit-rv32im-sys = { workspace = true, optional = true }
+risc0-circuit-rv32im-sys = { workspace = true }
 risc0-sys = { workspace = true, optional = true }
 smallvec = { version = "1.13", optional = true }
 strum = { version = "0.27", optional = true, features = ["derive"] }
 wide = { version = "0.7", optional = true }
 
-[build-dependencies]
+[target.'cfg(not(target_os = "zkvm"))'.build-dependencies]
 heck = "0.5"
 proc-macro2 = "1"
 quote = "1"
-risc0-circuit-rv32im-sys = { workspace = true, optional = true }
+risc0-circuit-rv32im-sys = { workspace = true }
 syn = { version = "2", features = ["parsing"] }
 
 [dev-dependencies]
