@@ -32,9 +32,9 @@ pub mod testutil;
 
 pub use self::{
     bigint::analyze::analyze as bigint_analyze,
-    block_tracker::BlockCollection,
+    block_tracker::{BlockCollection, row_points},
     executor::{
-        CycleLimit, ExecutionError, ExecutionLimit, Executor, ExecutorResult, SegmentUpdate,
+        ExecutionError, ExecutionLimit, Executor, ExecutorResult, RowLimit, SegmentUpdate,
         SimpleSession,
     },
     platform::*,

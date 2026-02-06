@@ -35,7 +35,7 @@ fn run_test_no_decode(env: ExecutorEnv, elf: &[u8]) -> Journal {
     );
 
     tracing::info!("Runtime: {}", elapsed.as_millis());
-    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
+    tracing::info!("RISC-V instructions : {}", prove_info.stats.insn_count);
 
     receipt.journal.clone()
 }

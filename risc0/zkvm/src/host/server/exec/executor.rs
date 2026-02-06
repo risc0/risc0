@@ -32,7 +32,7 @@ use risc0_binfmt::{
     SystemState,
 };
 use risc0_circuit_rv32im::execute::{
-    CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, ExecutionError, ExecutionLimit, Executor, PAGE_BYTES,
+    DEFAULT_SEGMENT_LIMIT_PO2, ExecutionError, ExecutionLimit, Executor, PAGE_BYTES, RowLimit,
     SegmentUpdate, Syscall as CircuitSyscall, SyscallContext as CircuitSyscallContext,
 };
 use risc0_core::scope;
@@ -444,10 +444,9 @@ impl<'a> ExecutorImpl<'a> {
             exit_code,
             assumptions,
             mmr_assumptions,
-            user_cycles: exec_result.user_cycles,
-            paging_cycles: exec_result.paging_cycles,
-            reserved_cycles: exec_result.reserved_cycles,
-            total_cycles: exec_result.total_cycles,
+            row_count: exec_result.row_count,
+            padding_row_count: exec_result.padding_row_count,
+            insn_count: exec_result.insn_count,
             pre_state: SystemState {
                 pc: 0,
                 merkle_root: pre_image_digest,
@@ -462,13 +461,8 @@ impl<'a> ExecutorImpl<'a> {
             ecall_metrics: exec_result.ecall_metrics,
             povw_job_id: self.env.povw_job_id,
             execution_time: self.execution_time,
+            block_counts: exec_result.block_counts,
         };
-
-        // XXX M3: For m3, these cycle counts no longer add up to the po2
-        // assert_eq!(
-        //     session.total_cycles,
-        //     session.user_cycles + session.paging_cycles + session.reserved_cycles
-        // );
 
         // Reset the executor, into a state where calling `run` will resume execution from the
         // final state of this execution (i.e. resuming from a pause).
@@ -523,8 +517,8 @@ impl<'a> ExecutorImpl<'a> {
         let segment_limit_po2 = self.segment_limit_po2() as usize;
 
         let session_limit = match self.env.session_limit {
-            Some(limit) => CycleLimit::Hard(limit),
-            None => CycleLimit::None,
+            Some(limit) => RowLimit::Hard(limit),
+            None => RowLimit::None,
         };
 
         ExecutionLimit::default()
@@ -565,8 +559,8 @@ where
         self.ctx.get_pc()
     }
 
-    fn get_cycle(&self) -> u64 {
-        self.ctx.get_cycle()
+    fn get_rows(&self) -> u64 {
+        self.ctx.get_rows()
     }
 
     fn load_register(&mut self, idx: usize) -> u32 {
@@ -645,13 +639,13 @@ impl CircuitSyscall for CircuitSyscallTable<'_> {
 
     fn host_write(
         &self,
-        ctx: &mut impl CircuitSyscallContext,
+        _ctx: &mut impl CircuitSyscallContext,
         _fd: u32,
         buf: &[u8],
     ) -> Result<u32> {
         if tracing::enabled!(Level::DEBUG) {
             let str = String::from_utf8(buf.to_vec())?;
-            tracing::debug!("R0VM[{}] {str}", ctx.get_cycle());
+            tracing::debug!("R0VM {str}");
         }
         Ok(buf.len() as u32)
     }

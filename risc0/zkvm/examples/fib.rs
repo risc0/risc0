@@ -42,8 +42,8 @@ struct Args {
 #[allow(unused)]
 struct Metrics {
     segments: usize,
-    user_cycles: u64,
-    total_cycles: u64,
+    insn_count: u64,
+    row_count: u64,
     seal: usize,
 }
 
@@ -102,8 +102,8 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
 
     Metrics {
         segments: session.segments.len(),
-        user_cycles: session.user_cycles,
-        total_cycles: session.total_cycles,
+        insn_count: session.insn_count,
+        row_count: session.row_count,
         seal,
     }
 }

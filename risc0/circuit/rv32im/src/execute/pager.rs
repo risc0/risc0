@@ -23,7 +23,13 @@ use bit_vec::BitVec;
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
 
-use super::{node_idx, platform::*};
+use super::{
+    block_tracker::{
+        PAGE_IN_NODE_ROW_POINTS, PAGE_IN_ROW_POINTS, PAGE_OUT_NODE_ROW_POINTS, PAGE_OUT_ROW_POINTS,
+    },
+    node_idx,
+    platform::*,
+};
 use crate::execute::unlikely;
 
 pub const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
@@ -67,8 +73,8 @@ pub(crate) enum PageState {
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum PageTraceEvent {
-    PageIn { cycles: u32 },
-    PageOut { cycles: u32 },
+    PageIn { cycles: u64 },
+    PageOut { cycles: u64 },
 }
 
 #[derive(Debug)]
@@ -496,7 +502,7 @@ impl PagedMemory {
 
         if state == PageState::Loaded {
             self.cycles += PAGE_CYCLES;
-            self.trace_page_out(PAGE_CYCLES);
+            self.trace_page_out(PAGE_OUT_ROW_POINTS);
             self.fixup_costs(node_idx, PageState::Dirty);
             self.page_states.set(node_idx, PageState::Dirty);
         }
@@ -559,7 +565,7 @@ impl PagedMemory {
         self.page_table.set(page_idx, self.page_cache.len());
         self.page_cache.push(page.clone());
         self.cycles += PAGE_CYCLES;
-        self.trace_page_in(PAGE_CYCLES);
+        self.trace_page_in(PAGE_IN_ROW_POINTS);
         self.fixup_costs(node_idx(page_idx), PageState::Loaded);
         Ok(())
     }
@@ -574,12 +580,12 @@ impl PagedMemory {
                     if state == PageState::Unloaded {
                         // tracing::trace!("fixup: {state:?}: {node_idx:#010x}");
                         self.cycles += NODE_CYCLES;
-                        self.trace_page_in(NODE_CYCLES);
+                        self.trace_page_in(PAGE_IN_NODE_ROW_POINTS);
                     }
                     if goal == PageState::Dirty {
                         // tracing::trace!("fixup: {goal:?}: {node_idx:#010x}");
                         self.cycles += NODE_CYCLES;
-                        self.trace_page_out(NODE_CYCLES);
+                        self.trace_page_out(PAGE_OUT_NODE_ROW_POINTS);
                     }
                 }
                 self.page_states.set(node_idx, goal);
@@ -602,14 +608,14 @@ impl PagedMemory {
     }
 
     #[inline(always)]
-    fn trace_page_in(&mut self, cycles: u32) {
+    fn trace_page_in(&mut self, cycles: u64) {
         if unlikely(self.tracing_enabled) {
             self.trace_events.push(PageTraceEvent::PageIn { cycles });
         }
     }
 
     #[inline(always)]
-    fn trace_page_out(&mut self, cycles: u32) {
+    fn trace_page_out(&mut self, cycles: u64) {
         if unlikely(self.tracing_enabled) {
             self.trace_events.push(PageTraceEvent::PageOut { cycles });
         }
