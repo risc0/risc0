@@ -70,14 +70,6 @@ fn compile_provers() {
     rerun_if_env_changed("NVCC_PREPEND_FLAGS");
     rerun_if_env_changed("SCCACHE_RECACHE");
 
-    rerun_if_changed("cxx/core");
-    rerun_if_changed("cxx/hal");
-    rerun_if_changed("cxx/prove");
-    rerun_if_changed("cxx/rv32im");
-    rerun_if_changed("cxx/verify");
-    rerun_if_changed("cxx/zkp");
-    rerun_if_changed("vendor");
-
     let platform = if is_cuda() {
         PLATFORM_CUDA
     } else {
@@ -96,11 +88,12 @@ fn compile_provers() {
         make_po2s(spec, &out_dir, &mut generated_files);
     }
 
-    let mut build = KernelBuild::new(if is_cuda() {
+    let build_type = if is_cuda() {
         KernelType::Cuda
     } else {
         KernelType::Cpp
-    });
+    };
+    let mut build = KernelBuild::new(build_type, "kernel_build.manifest");
 
     build
         .include("cxx")
@@ -143,7 +136,7 @@ fn compile_provers() {
             make_po2s(spec, &out_dir, &mut generated_files);
         }
 
-        KernelBuild::new(KernelType::Metal)
+        KernelBuild::new(KernelType::Metal, "kernel_build.manifest")
             .include("cxx")
             .files(glob_paths("cxx/hal/metal/kernels/*.metal"))
             .generated_files(generated_files)
@@ -210,8 +203,6 @@ fn preprocess_file(file_contents: &str) -> String {
 
 /// Uses the C pre-processor to parse the block type table from "cxx/rv32im/witness/block_types.h"
 fn parse_block_types() -> Result<BTreeMap<String, BlockTypeInfo>> {
-    rerun_if_changed("cxx/rv32im/witness/block_types.h");
-
     let contents = preprocess_file(
         "\
             #include \"rv32im/witness/block_types.h\"\n\
@@ -284,8 +275,6 @@ impl Rv32imInstrInfo {
 
 /// Uses the C pre-processor to parse the block type table from "cxx/rv32im/base/rv32im.inc"
 fn parse_rv32im_inc() -> Result<Vec<Rv32imInstrInfo>> {
-    rerun_if_changed("cxx/rv32im/base/rv32im.inc");
-
     let contents = preprocess_file(
         "\
             #define ENTRY(...) __VA_ARGS__;\n\
@@ -470,10 +459,6 @@ fn generate_rust_bindings(output: &str, block_types: &BTreeMap<String, BlockType
 
     let bindings = builder.generate().unwrap();
     bindings.write_to_file(output).unwrap();
-}
-
-fn rerun_if_changed<P: AsRef<Path>>(path: P) {
-    println!("cargo:rerun-if-changed={}", path.as_ref().display());
 }
 
 fn rerun_if_env_changed(var_name: &str) {

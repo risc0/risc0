@@ -1,0 +1,6 @@
+cuda/chacha.cuh
+cuda/ffi.cu
+cuda/groth16_coeffs.cuh
+cuda/groth16_prover.cuh
+cuda/groth16_srs.cuh
+cuda/util.cuh
