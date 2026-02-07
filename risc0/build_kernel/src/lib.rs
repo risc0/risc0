@@ -38,7 +38,11 @@ const DISABLED_WARNINGS: [&str; 5] = [
 
 fn read_manifest(manifest_path: &Path) -> Vec<PathBuf> {
     let contents = std::fs::read_to_string(manifest_path).unwrap();
-    contents.split("\n").map(PathBuf::from).collect()
+    contents
+        .split("\n")
+        .filter(|l| !l.trim().is_empty())
+        .map(PathBuf::from)
+        .collect()
 }
 
 fn copy_to_dir(src: &Path, dest_dir: &Path) -> PathBuf {
@@ -179,7 +183,7 @@ impl KernelBuild {
 
         let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
         let sandbox_dir = out_dir.join(format!("kernel_build_{output}"));
-        let _ = std::fs::remove_dir(&sandbox_dir);
+        let _ = std::fs::remove_dir_all(&sandbox_dir);
         std::fs::create_dir_all(&sandbox_dir).unwrap();
 
         rerun_if_changed(&self.manifest_path);

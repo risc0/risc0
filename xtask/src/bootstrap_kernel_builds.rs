@@ -49,7 +49,7 @@ impl BootstrapKernelBuilds {
     }
 
     pub fn run(&self) {
-        let c_and_kernels = ["cpp", "h", "hpp", "cuh", "cu", "metal", "h", "ipp", "inc"];
+        let c_and_kernels = ["cpp", "h", "hpp", "cuh", "cu", "metal", "ipp", "inc"];
         Self::write_manifest("risc0/circuit/rv32im-sys/", &c_and_kernels);
         Self::write_manifest("risc0/circuit/recursion-sys/kernels", &c_and_kernels);
         Self::write_manifest("risc0/circuit/keccak-sys/kernels", &c_and_kernels);
