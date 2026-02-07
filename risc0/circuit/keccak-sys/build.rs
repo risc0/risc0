@@ -13,10 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{
-    env,
-    path::{Path, PathBuf},
-};
+use std::{env, path::PathBuf};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
@@ -38,47 +35,13 @@ fn build_cpu_kernels() {
 fn build_cuda_kernels() {
     let output = "risc0_keccak_cuda";
 
-    println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
-    println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
-    println!("cargo:rerun-if-env-changed=SCCACHE_RECACHE");
-    rerun_if_changed("kernels/cuda");
-
-    if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
-        let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
-        let out_path = out_dir.join(format!("lib{output}-skip.a"));
-        std::fs::OpenOptions::new()
-            .create(true)
-            .truncate(true)
-            .write(true)
-            .open(&out_path)
-            .unwrap();
-        println!("cargo:{}={}", output, out_path.display());
-        return;
-    }
-
     unsafe { env::set_var("SCCACHE_IDLE_TIMEOUT", "0") };
 
-    let mut build = cc::Build::new();
-    build
-        .cuda(true)
-        .cudart("static")
-        .debug(false)
-        .flag("-diag-suppress=177")
-        .flag("-diag-suppress=550")
-        .flag("-diag-suppress=2922")
-        .flag("-std=c++17")
-        .flag("-Xcompiler")
-        .flag("-Wno-missing-braces,-Wno-unused-function,-Wno-unknown-pragmas,-Wno-unused-parameter")
+    KernelBuild::new(KernelType::Cuda, "kernels/kernel_build.manifest")
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
-        .include(env::var("DEP_RISC0_SPPARK_ROOT").unwrap());
-    if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {
-        build.flag("-arch=native");
-    }
-    build.files(glob_paths("kernels/cuda/*.cu")).compile(output);
-}
-
-fn rerun_if_changed<P: AsRef<Path>>(path: P) {
-    println!("cargo:rerun-if-changed={}", path.as_ref().display());
+        .include(env::var("DEP_RISC0_SPPARK_ROOT").unwrap())
+        .files(glob_paths("kernels/cuda/*.cu"))
+        .compile(output);
 }
 
 fn glob_paths(pattern: &str) -> Vec<PathBuf> {
