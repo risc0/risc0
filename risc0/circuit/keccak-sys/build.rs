@@ -29,8 +29,7 @@ fn main() {
 }
 
 fn build_cpu_kernels() {
-    rerun_if_changed("kernels/cxx");
-    KernelBuild::new(KernelType::Cpp)
+    KernelBuild::new(KernelType::Cpp, "kernels/kernel_build.manifest")
         .files(glob_paths("kernels/cxx/*.cpp"))
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .compile("risc0_keccak_cpu");

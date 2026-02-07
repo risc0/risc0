@@ -24,7 +24,7 @@ fn main() {
 }
 
 fn build_cuda_kernels() {
-    let mut build = KernelBuild::new(KernelType::Cuda);
+    let mut build = KernelBuild::new(KernelType::Cuda, "kernels/kernel_build.manifest");
     if env::var("CARGO_FEATURE_SETUP").is_ok() {
         build.flag("-DSRS_READ_COEFFS");
     }
