@@ -694,6 +694,32 @@ jobs:
           RISC0_USE_DOCKER: "1"
       - run: sccache --show-stats
 
+  # TODO(victor): This is likely too noisy a test to merge, as any change to risc0 is likely to
+  # change this, and we may not want to the hassle of updating these on every PR. It is important
+  # however to update these when creating a new release for instance.
+  # Check that guest artifacts, the guest binaries that are checked into git, are up to date.
+  guest-artifacts:
+    if: needs.changes.outputs.risc0 == 'true'
+    needs: changes
+    runs-on: [self-hosted, cluster, Linux, X64, cpu, docker]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - name: Login to Docker Hub
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_CI_USER }}
+          password: ${{ secrets.DOCKERHUB_CI_PAT }}
+      - run: cargo install --force --path risc0/cargo-risczero --locked --no-default-features -F docker
+      - run: cargo risczero build --manifest-path risc0/povw/guests/log-builder/Cargo.toml --archive && git diff --exit-code
+      - run: cargo risczero build --manifest-path risc0/zkos/v1compat/Cargo.toml --archive && git diff --exit-code
+      - run: sccache --show-stats
+
   web:
     if: needs.changes.outputs.web == 'true'
     needs: changes

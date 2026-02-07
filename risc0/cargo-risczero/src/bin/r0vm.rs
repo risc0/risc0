@@ -14,6 +14,5 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 fn main() {
-    #[cfg(feature = "r0vm")]
     risc0_r0vm::main();
 }
