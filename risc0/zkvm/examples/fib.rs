@@ -42,12 +42,12 @@ struct Args {
 #[allow(unused)]
 struct Metrics {
     segments: usize,
-    user_cycles: u64,
-    total_cycles: u64,
+    insn_count: u64,
+    row_count: u64,
     seal: usize,
 }
 
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
@@ -102,8 +102,8 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
 
     Metrics {
         segments: session.segments.len(),
-        user_cycles: session.user_cycles,
-        total_cycles: session.total_cycles,
+        insn_count: session.insn_count,
+        row_count: session.row_count,
         seal,
     }
 }

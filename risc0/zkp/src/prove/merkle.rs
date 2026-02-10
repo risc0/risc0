@@ -176,14 +176,40 @@ impl<CH: crate::hal::cuda::CudaHash + ?Sized> MerkleTreeProver<crate::hal::cuda:
 
 #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))]
 impl<MH: crate::hal::metal::MetalHash> MerkleTreeProver<crate::hal::metal::MetalHal<MH>> {
-    pub fn to_metal_prover(&self) -> crate::hal::metal::MetalMerkleTreeProver {
-        crate::hal::metal::MetalMerkleTreeProver {
-            row_size: self.params.row_size,
-            col_size: self.params.col_size,
-            top_size: self.params.top_size,
-            matrix: self.matrix.as_device_ptr() as *const u32,
-            nodes: self.nodes.as_device_ptr() as *const u32,
-        }
+    pub fn to_metal_arg(&self) -> [crate::hal::metal::KernelArg<'_>; 5] {
+        use crate::hal::metal::*;
+
+        [
+            KernelArg::USize(self.params.row_size),
+            KernelArg::USize(self.params.col_size),
+            KernelArg::USize(self.params.top_size),
+            self.matrix.as_arg(),
+            self.nodes.as_arg(),
+        ]
+    }
+
+    pub fn to_metal_arg_descriptor<'a>(&self, index: u64) -> [&'a metal::ArgumentDescriptorRef; 5] {
+        let row_size = metal::ArgumentDescriptor::new();
+        row_size.set_data_type(metal::MTLDataType::ULong);
+        row_size.set_index(index);
+
+        let col_size = metal::ArgumentDescriptor::new();
+        col_size.set_data_type(metal::MTLDataType::ULong);
+        col_size.set_index(index + 1);
+
+        let top_size = metal::ArgumentDescriptor::new();
+        top_size.set_data_type(metal::MTLDataType::ULong);
+        top_size.set_index(index + 2);
+
+        let matrix = metal::ArgumentDescriptor::new();
+        matrix.set_data_type(metal::MTLDataType::Pointer);
+        matrix.set_index(index + 3);
+
+        let nodes = metal::ArgumentDescriptor::new();
+        nodes.set_data_type(metal::MTLDataType::Pointer);
+        nodes.set_index(index + 4);
+
+        [row_size, col_size, top_size, matrix, nodes]
     }
 }
 

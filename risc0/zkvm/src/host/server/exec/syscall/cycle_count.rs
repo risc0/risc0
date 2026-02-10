@@ -17,21 +17,27 @@ use anyhow::{Result, bail};
 
 use super::{Syscall, SyscallContext};
 
+use risc0_zkvm_platform::WORD_SIZE;
+
 pub(crate) struct SysCycleCount;
 impl Syscall for SysCycleCount {
     fn syscall(
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        if !to_guest.is_empty() {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
+        if to_guest.len() != WORD_SIZE * 2 {
             bail!("invalid sys_cycle_count call");
         }
 
-        let cycle = ctx.get_cycle();
-        let hi = (cycle >> 32) as u32;
-        let lo = cycle as u32;
-        Ok((hi, lo))
+        let rows = ctx.get_rows();
+        let hi = (rows >> 32) as u32;
+        let lo = rows as u32;
+
+        to_guest[..WORD_SIZE].copy_from_slice(&hi.to_le_bytes());
+        to_guest[WORD_SIZE..].copy_from_slice(&lo.to_le_bytes());
+
+        Ok(to_guest.len())
     }
 }

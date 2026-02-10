@@ -26,11 +26,11 @@ use risc0_zkp::{
 use crate::execute::ExecutionLimit;
 
 use super::{
-    Executor, SimpleSession, SyscallContext, executor::CycleLimit, pager::RESERVED_PAGING_CYCLES,
+    Executor, SimpleSession, SyscallContext, executor::RowLimit, pager::RESERVED_PAGING_CYCLES,
     platform::*, syscall::Syscall,
 };
 
-pub const DEFAULT_SESSION_LIMIT: CycleLimit = CycleLimit::Hard(1 << 24);
+pub const DEFAULT_SESSION_LIMIT: RowLimit = RowLimit::Hard(1 << 24);
 pub const DEFAULT_EXECUTION_LIMIT: ExecutionLimit =
     ExecutionLimit::DEFAULT.with_session_limit(DEFAULT_SESSION_LIMIT);
 pub const MIN_CYCLES_PO2: usize = log2_ceil(RESERVED_CYCLES + RESERVED_PAGING_CYCLES as usize);

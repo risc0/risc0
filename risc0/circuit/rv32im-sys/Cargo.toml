@@ -9,7 +9,8 @@ repository = { workspace = true }
 links = "risc0-circuit-rv32im-sys"
 
 [features]
-cuda = ["risc0-sppark/cuda", "risc0-sys/cuda"]
+prove = ["dep:risc0-sys", "dep:risc0-zkp"]
+cuda = ["prove", "risc0-sppark/cuda", "risc0-sys/cuda"]
 default = []
 
 [dependencies]
@@ -18,8 +19,8 @@ bytemuck = { version = "1.13", features = ["min_const_generics"] }
 derive_more = { version = "2.0.1", default-features = false, features = ["from"] }
 enum-map = "2.7.3"
 risc0-sppark = { workspace = true, optional = true }
-risc0-sys = { workspace = true }
-risc0-zkp = { workspace = true, default-features = false }
+risc0-sys = { workspace = true, optional = true }
+risc0-zkp = { workspace = true, default-features = false, optional = true }
 serde = { version = "1.0", default-features = false, features = [
   "derive",
   "alloc",
@@ -37,3 +38,4 @@ glob = "0.3"
 quote = "1"
 regex = "1"
 risc0-build-kernel = { workspace = true }
+xshell = "0.2"

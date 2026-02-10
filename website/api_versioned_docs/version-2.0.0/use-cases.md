@@ -34,12 +34,6 @@ We've built a number of applications and primitives showcasing these capabilitie
 - **[ECDSA signature verification][ecdsa]**: prove the validity of an ECDSA
   signature
 
-These examples are all made possible by **leveraging a mature software
-ecosystem**: over 70% of the [top 1000 Rust crates][crate-validation] work
-out-of-the-box in the zkVM. Being able to import Rust crates is a game changer
-for the ZK software world: projects that would take months or years to build on
-other platforms can be solved trivially on our platform.
-
 In addition to being far easier to build on, we're also delivering on
 [performance]. The zkVM has GPU acceleration for CUDA and Metal, and with
 [continuations] we've enabled parallel proving of large programs.
@@ -50,7 +44,6 @@ Check out our [Getting Started] page.
 [Bonsai Pay]: https://risczero.com/news/bonsai-pay
 [chess]: https://github.com/risc0/risc0/tree/release-2.0/examples/chess
 [continuations]: https://risczero.com/news/continuations
-[crate-validation]: https://reports.risczero.com/crates-validation
 [ecdsa]: https://github.com/risc0/risc0/tree/release-2.0/examples/ecdsa
 [Getting Started]: ./getting-started.md
 [JSON]: https://github.com/risc0/risc0/tree/release-2.0/examples/json

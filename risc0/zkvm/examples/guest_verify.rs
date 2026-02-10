@@ -37,7 +37,7 @@ fn main() {
 }
 
 #[cfg_attr(test, test)]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn guest_verify() {
     let receipt = generate_receipt(&ProverOpts::default());
     exec_verify(&receipt, false /* dev_mode */);

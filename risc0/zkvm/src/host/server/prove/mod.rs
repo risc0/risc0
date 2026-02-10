@@ -50,8 +50,6 @@ mod private {
     impl Sealed for DevModeProver {}
 }
 
-pub type PreflightIter = Box<dyn Iterator<Item = Result<PreflightResults>>>;
-
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a
 /// [Receipt][crate::Receipt] that can be used to verify correct computation.
 pub trait ProverServer: private::Sealed {
@@ -72,36 +70,20 @@ pub trait ProverServer: private::Sealed {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo>;
 
     /// Prove the specified [Segment].
-    fn prove_segment(
-        &self,
-        ctx: &VerifierContext,
-        segment: &Segment,
-    ) -> Result<Vec<SegmentReceipt>> {
+    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         tracing::debug!("prove_segment");
-        let mut receipts = vec![];
-        let mut iter = self.segment_preflight(segment)?;
-        let chunk = iter
-            .next()
-            .ok_or_else(|| anyhow!("segment_preflight produced no segment results"))??;
+        let results = self.segment_preflight(segment)?;
 
         segment
             .inner
             .blocks
-            .assert_preflight_counts(chunk.block_counts());
+            .assert_preflight_counts(results.block_counts());
 
-        if iter.next().is_some() {
-            bail!("segment_preflight produced multiple segments");
-        }
-
-        tracing::debug!("chunk");
-        let receipt = self.prove_preflight(ctx, chunk)?;
-        receipts.push(receipt);
-
-        Ok(receipts)
+        self.prove_preflight(ctx, results)
     }
 
-    /// Perform preflight on a [Segment] to produce a sequence of [PreflightResults].
-    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter>;
+    /// Perform preflight on a [Segment] to produce a [PreflightResults].
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults>;
 
     /// Prove the specified [PreflightResults].
     fn prove_preflight(

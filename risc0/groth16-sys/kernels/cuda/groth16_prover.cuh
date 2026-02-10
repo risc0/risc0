@@ -279,6 +279,8 @@ public:
     p1.cneg(true);
     results.c.add(p1);
 
+    CUDA_OK(cudaDeviceSetLimit(cudaLimit::cudaLimitStackSize, 0));
+
     return groth16_proof{results.a, results.c, results.b_g2};
   }
 

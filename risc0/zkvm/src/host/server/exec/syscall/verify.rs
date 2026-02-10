@@ -35,8 +35,8 @@ impl Syscall for SysVerify {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
         if !to_guest.is_empty() {
             bail!("invalid sys_verify call");
         }
@@ -72,6 +72,6 @@ impl Syscall for SysVerify {
         metric.count += 1;
         metric.size += from_guest_len as u64;
 
-        Ok((0, 0))
+        Ok(0)
     }
 }

@@ -24,13 +24,13 @@ fn run_guest(msg: &str, spec: BenchmarkSpec) {
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
-    println!("{msg}: {}, {}", session.user_cycles, session.total_cycles);
+    println!("{msg}: {}, {}", session.insn_count, session.row_count);
 }
 
 fn run_guest_with(msg: &str, env: ExecutorEnv) {
     let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
-    println!("{msg}: {}, {}", session.user_cycles, session.total_cycles);
+    println!("{msg}: {}, {}", session.insn_count, session.row_count);
 }
 
 fn run_guest_framed(msg: &str, spec: BenchmarkSpec, payload: &[u8]) {
@@ -42,7 +42,7 @@ fn run_guest_framed(msg: &str, spec: BenchmarkSpec, payload: &[u8]) {
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
-    println!("{msg}: {}, {}", session.user_cycles, session.total_cycles);
+    println!("{msg}: {}, {}", session.insn_count, session.row_count);
 }
 
 pub fn main() {

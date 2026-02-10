@@ -1611,7 +1611,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "1.4.2"
+version = "1.4.3"
 dependencies = [
  "anyhow",
  "bincode",
@@ -1805,8 +1805,10 @@ dependencies = [
  "const_format",
  "hex",
  "regex",
+ "risc0-binfmt",
  "risc0-build",
  "risc0-r0vm",
+ "risc0-zkos-v1compat",
  "risc0-zkvm",
  "semver 1.0.26",
  "serde_json",
@@ -5250,6 +5252,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2874a2af47a2325c2001a6e6fad9b16a53b802102b528163885171cf92b15976"
 
 [[package]]
+name = "libfuzzer-sys"
+version = "0.4.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5037190e1f70cbeef565bd267599242926f724d3b8a9f510fd7e0b540cfa4404"
+dependencies = [
+ "arbitrary",
+ "cc",
+]
+
+[[package]]
 name = "libloading"
 version = "0.8.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7452,6 +7464,7 @@ dependencies = [
  "serde",
  "strum",
  "tracing",
+ "xshell",
 ]
 
 [[package]]
@@ -7463,6 +7476,15 @@ dependencies = [
  "puffin",
  "rand 0.9.2",
  "rand_core 0.9.3",
+]
+
+[[package]]
+name = "risc0-fuzz"
+version = "0.0.0"
+dependencies = [
+ "bytemuck",
+ "libfuzzer-sys",
+ "risc0-circuit-rv32im",
 ]
 
 [[package]]
