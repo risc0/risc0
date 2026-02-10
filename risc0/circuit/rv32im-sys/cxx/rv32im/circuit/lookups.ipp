@@ -31,6 +31,11 @@ template <typename C> FDEV void RegU8<C>::addArguments(CTX) DEV {
   ctx.pull(LookupArgument<C>(0, inner.get()));
 }
 
+template <typename C> FDEV void assertU16(CTX, Val<C> val) {
+  ctx.pull(LookupArgument<C>(1, val));
+  RANGE_POSTCONDITION(ctx, 0, val, (1 << 16));
+}
+
 template <typename C> FDEV void RegU16<C>::set(CTX, Val<C> in) DEV {
   inner.set(ctx, in);
   uint32_t val = in.asUInt32();
@@ -47,7 +52,7 @@ template <typename C> FDEV Val<C> RegU16<C>::get() DEV {
 }
 
 template <typename C> FDEV void RegU16<C>::addArguments(CTX) DEV {
-  ctx.pull(LookupArgument<C>(1, inner.get()));
+  assertU16(ctx, inner.get());
 }
 
 template <typename C> FDEV void MakeTableBlock<C>::set(CTX, MakeTableWitness wit) DEV {

@@ -29,3 +29,9 @@ template <typename C> struct MemoryArgument {
   Val<C> dataLow;
   Val<C> dataHigh;
 };
+
+template <typename C> struct DigestWriteArgument {
+  Val<C> wordAddr;
+  Val<C> cycle;
+  ValDigest<C> digest;
+};

@@ -77,6 +77,13 @@ struct EcallP2Witness {
   RegMemReadWitness a3;
   RegMemReadWitness a7;
   PhysMemReadWitness stateIn[CELLS_DIGEST];
+  uint32_t stateOut[CELLS_DIGEST];
+};
+
+/// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
+struct DigestWriteWitness {
+  uint32_t cycle;
+  uint32_t digest[CELLS_DIGEST];
   PhysMemWriteWitness stateOut[CELLS_DIGEST];
 };
 

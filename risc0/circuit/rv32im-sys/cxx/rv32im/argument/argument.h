@@ -40,7 +40,8 @@
   ARGUMENT_TYPE(PageOut)                                                                           \
   ARGUMENT_TYPE(PageOutPart)                                                                       \
   ARGUMENT_TYPE(P2Step)                                                                            \
-  ARGUMENT_TYPE(ReadState)
+  ARGUMENT_TYPE(ReadState)                                                                         \
+  ARGUMENT_TYPE(DigestWrite)
 
 enum class ArgumentType {
 #define ARGUMENT_TYPE(name) name,

@@ -695,6 +695,8 @@ struct Emulator {
   }
 
   void do_ECALL_P2() {
+    // Set up witness for instruction
+    uint32_t startCycle = curCycle;
     auto& wit = trace.makeEcallP2();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
@@ -710,6 +712,8 @@ struct Emulator {
       state.words[i] = Fp(readPhysMemory(wit.stateIn[i], stateInWordAddr + i)).asRaw();
     }
     curCycle++;
+
+    // Do actual Poseidon2 hashing work with P2StepBlock
     P2State p2;
     p2.cycle = curCycle;
     p2.count = wit.a3.value & 0xffff;
@@ -756,10 +760,19 @@ struct Emulator {
       p2.cycle = curCycle;
       p2.count--;
     }
+
+    // Delegate writing the resulting digest to DigestWriteBlock
+    uint32_t endCycle = curCycle;
+    curCycle = startCycle;
+    auto& dwWit = trace.makeDigestWrite();
+    dwWit.cycle = curCycle;
     for (size_t i = 0; i < CELLS_DIGEST; i++) {
-      writePhysMemory(
-          wit.stateOut[i], stateOutWordAddr + i, Fp::fromRaw(state.words[i]).asUInt32());
+      uint32_t fp = Fp::fromRaw(state.words[i]).asUInt32();
+      wit.stateOut[i] = fp;
+      dwWit.digest[i] = fp;
+      writePhysMemory(dwWit.stateOut[i], stateOutWordAddr + i, fp);
     }
+    curCycle = endCycle;
   }
 
   void do_ECALL_BIG_INT() {
