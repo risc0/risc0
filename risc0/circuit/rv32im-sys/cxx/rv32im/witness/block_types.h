@@ -39,6 +39,7 @@
   BLOCK_TYPE(EcallP2, 1)                                                                           \
   BLOCK_TYPE(EcallBigInt, 1)                                                                       \
   BLOCK_TYPE(P2Step, 1)                                                                            \
+  BLOCK_TYPE(DigestWrite, 1)                                                                       \
   BLOCK_TYPE(ReadByte, 1)                                                                          \
   BLOCK_TYPE(ReadWord, 4)                                                                          \
   BLOCK_TYPE(BigInt, 1)                                                                            \

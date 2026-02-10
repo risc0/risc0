@@ -30,6 +30,7 @@ int main() {
   extractWithValArg<IsZero>(ctx);
   extractWithValArg<GetSign>(ctx);
   extractWithU32Arg<AddressDecompose>(ctx);
+  extractWithValValValArg<FpWrite>(ctx);
 
   EXTRACT_MUTABLE_ARRAY_FUNCTION(multiplyByMExt, CELLS);
   EXTRACT_MUTABLE_ARRAY_FUNCTION(multiplyByMInt, CELLS);
@@ -52,6 +53,8 @@ int main() {
   EXTRACT(EcallTerminateBlock);
   EXTRACT(EcallReadBlock);
   EXTRACT(EcallWriteBlock);
+  EXTRACT(EcallP2Block);
+  EXTRACT(DigestWriteBlock);
   EXTRACT(EcallBigIntBlock);
   EXTRACT(ReadByteBlock);
   EXTRACT(ReadWordBlock);

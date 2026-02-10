@@ -57,6 +57,20 @@ mlir::Value picusCall(RecordingContext& ctx,
       builder.getUnknownLoc(), name, compType, arguments, layout);
 }
 
+bool outliningEnabled = true;
+
+void picusEnableOutlining() {
+  outliningEnabled = true;
+}
+
+void picusDisableOutlining() {
+  outliningEnabled = false;
+}
+
+bool picusOutliningEnabled() {
+  return outliningEnabled;
+}
+
 void picusArgument(RecordingContext& ctx,
                    llvm::ArrayRef<Value> inputs,
                    llvm::ArrayRef<Value> outputs) {

@@ -33,6 +33,8 @@ template <typename C> struct RegU8 {
   FDEV void addArguments(CTX) DEV;
 };
 
+template <typename C> FDEV void assertU16(CTX, Val<C> val);
+
 // A register that is constrained to be [0, 65535]
 template <typename C> struct RegU16 {
   CONSTANT static char NAME[] = "RegU16";
@@ -44,7 +46,7 @@ template <typename C> struct RegU16 {
   FDEV void set(CTX, Val<C> in) DEV;
   FDEV inline void finalize(CTX) DEV {}
   FDEV Val<C> get() DEV;
-  FDEV void verify(CTX) DEV { RANGE_POSTCONDITION(ctx, 0, inner.get(), (1 << 16)); }
+  FDEV void verify(CTX) DEV {}
   FDEV void addArguments(CTX) DEV;
 };
 
