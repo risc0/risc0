@@ -151,11 +151,9 @@ jobs:
         with:
           node-version: 20
       - run: cargo fmt --all --check
-      - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
       - run: cargo sort --workspace --grouped --check
-      - run: cargo sort --workspace --grouped --check benchmarks
       - run: cargo sort --workspace --grouped --check examples
       - run: cargo sort --workspace --grouped --check tools/crates-validator
       - name: cargo rdme in bonsai/sdk
@@ -210,9 +208,6 @@ jobs:
       - uses: ./.github/actions/protoc
       - name: "root: cargo clippy"
         run: cargo clippy -F $FEATURE -F unstable --all-targets
-      - name: "benchmarks: cargo clippy"
-        run: cargo clippy -F $FEATURE --all-targets
-        working-directory: benchmarks
       - name: "examples: cargo clippy"
         run: cargo clippy -F $FEATURE --all-targets
         working-directory: examples

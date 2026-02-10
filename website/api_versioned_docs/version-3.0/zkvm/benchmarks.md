@@ -1,13 +1,5 @@
 # Performance Benchmarks
 
-## Pregenerated Benchmarks
-
-We have [a performance datasheet][datasheet] with runtime and memory performance
-information. This information is organized by both program size and hardware
-target, and includes both CPU and GPU targets. The datasheet also includes the
-RISC Zero zkVM version used and the size of several example programs to give
-context for the [cycle count] size data.
-
 ## Generating your own datasheet
 
 You can generate a datasheet yourself to get performance data for your exact
@@ -54,7 +46,6 @@ the CPU by default, and you can benchmark a CUDA or Metal GPU by setting the
 appropriate feature flag.
 
 [cycle count]: /terminology#clock-cycles
-[datasheet]: https://reports.risczero.com/main/datasheet
 [execution]: /terminology#execute
 [install]: ./install.md
 [prover]: /terminology#prover
