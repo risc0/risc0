@@ -308,11 +308,14 @@ template <typename C> FDEV void EcallP2Block<C>::set(CTX, EcallP2Witness wit) DE
   inWordAddrFinal.set(ctx, wit.a1.value / 4 + count * (isElemBool ? 16 : 8));
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     stateIn[i].set(ctx, wit.stateIn[i], wit.cycle);
-    stateOut[i].set(ctx, wit.stateOut[i], 1 + wit.cycle + count);
+    stateOut[i].set(ctx, wit.stateOut[i]);
   }
 }
 
 template <typename C> FDEV void EcallP2Block<C>::verify(CTX) DEV {
+  // Must be in machine mode
+  EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
+
   // Make sure A7 = HOST_ECALL_POSEIDON2
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_POSEIDON2);
@@ -327,10 +330,9 @@ template <typename C> FDEV void EcallP2Block<C>::verify(CTX) DEV {
   EQ(stateOutWordAddr.get(), cond<C>(iszState.isZero.get(), P2_TRASH_WORD, stateWordAddr));
   // Verify bits
   EQ(readA3.data.high.get(), isElem.get() * 0x8000 + isCheck.get() * 0x4000);
-  // Verify load + store addresses
+  // Verify load addresses
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     EQ(stateIn[i].wordAddr.get(), stateInWordAddr.get() + i);
-    EQ(stateOut[i].wordAddr.get(), stateOutWordAddr.get() + i);
   }
   Val<C> count = readA3.data.low.get();
   EQ(inWordAddrFinal.get(),
@@ -341,7 +343,13 @@ template <typename C> FDEV void EcallP2Block<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
   Val<C> count = readA3.data.low.get();
   Val<C> bits = readA3.data.high.get() * 4;
-  ctx.pull(CpuStateArgument<C>(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  CpuStateArgument<C> cpuState(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get());
+  ctx.pull(cpuState);
+  ctx.push(CpuStateArgument<C>(
+      cycleVal + count + 2, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  CPU_STATE_ARGUMENT(ctx, cpuState);
+
+  // Delegate Poseidon2 computation to P2StepBlock
   P2StepArgument<C> p2Arg;
   p2Arg.cycle = cycleVal + 1;
   p2Arg.countBits = count + bits;
@@ -355,12 +363,95 @@ template <typename C> FDEV void EcallP2Block<C>::addArguments(CTX) DEV {
   p2Arg.countBits = bits;
   p2Arg.inWordAddr = inWordAddrFinal.get();
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
-    p2Arg.state[i] = stateOut[i].data.flat();
+    p2Arg.state[i] = stateOut[i].get();
   }
   ctx.pull(p2Arg);
-  ctx.push(CpuStateArgument<C>(
-      cycleVal + count + 2, fetch.nextPc.get(), MODE_MACHINE, fetch.iCacheCycle.get()));
+  PICUS_ARGUMENT(ctx,
+                 ({ctx.get(p2Arg.cycle),
+                   ctx.get(p2Arg.countBits),
+                   ctx.get(p2Arg.inWordAddr),
+                   ctx.get(p2Arg.outWordAddr),
+                   ctx.get(stateIn[0].data.flat()),
+                   ctx.get(stateIn[1].data.flat()),
+                   ctx.get(stateIn[2].data.flat()),
+                   ctx.get(stateIn[3].data.flat()),
+                   ctx.get(stateIn[4].data.flat()),
+                   ctx.get(stateIn[5].data.flat()),
+                   ctx.get(stateIn[6].data.flat()),
+                   ctx.get(stateIn[7].data.flat())}),
+                 ({UNPACK_DIGEST(ctx, p2Arg.state)}));
+
+  DigestWriteArgument<C> dwArg;
+  dwArg.wordAddr = stateOutWordAddr.get();
+  dwArg.cycle = cycleVal;
+  GET_ARR(dwArg.digest, stateOut, CELLS_DIGEST);
+  ctx.push(dwArg);
+
   VERIFY_DECODE
+}
+
+template <typename C> FDEV void FpWrite<C>::set(CTX, PhysMemWriteWitness wit, uint32_t cycle) DEV {
+  write.set(ctx, wit, cycle);
+  uint32_t high = wit.value >> 16;
+  uint32_t low = wit.value & 0xffff;
+  pHighMinusHigh.set(ctx, 0x7800 - high);
+  ctx.tableAdd(256 + high, 1);
+  ctx.tableAdd(256 + low, 1);
+  ctx.tableAdd(256 + (0x7800 - high), 1);
+}
+
+template <typename C> FDEV void FpWrite<C>::verify(CTX, Val<C> cycle, Val<C> wordAddr, Val<C> fp) DEV {
+  PICUS_BEGIN_OUTLINE(cycle, wordAddr, fp)
+  // Write is to the correct address
+  EQ(write.wordAddr.get(), wordAddr);
+
+  // The u32 we write to memory must be a decomposition of the field element
+  EQ(write.data.flat(), fp);
+
+  // The u32 we write must be normalized. Since p = 0x78000001, it suffices to
+  // check the following:
+  //  * data.high is between 0 and 0x7800 (inclusive), checked by:
+  //    * data.high is a U16
+  //    * (0x7800 - data.high) is also a U16
+  //  * data.low is a U16
+  //  * if data.high = 0x7800, then data.low = 0
+  EQZ(pHighMinusHigh.isZero.get() * write.data.low.get());
+  PICUS_END_OUTLINE
+}
+
+template <typename C> FDEV void FpWrite<C>::addArguments(CTX, Val<C> cycle, Val<C> wordAddr, Val<C> fp) DEV {
+  Val<C> high = write.data.high.get();
+  Val<C> low = write.data.low.get();
+  assertU16(ctx, high);
+  assertU16(ctx, low);
+  assertU16(ctx, Val<C>(0x7800) - high);
+}
+
+template <typename C> FDEV void DigestWriteBlock<C>::set(CTX, DigestWriteWitness wit) DEV {
+  // TODO: remove redundant information in the witness structure
+  cycle.set(ctx, wit.cycle);
+  wordAddr.set(ctx, wit.stateOut[0].wordAddr);
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    digest[i].set(ctx, wit.stateOut[i].value);
+    writes[i].set(ctx, wit.stateOut[i], wit.cycle);
+  }
+}
+
+template <typename C> FDEV void DigestWriteBlock<C>::verify(CTX) DEV {}
+
+#define DIGEST_WRITE_ARGUMENT(ctx, arg) \
+  PICUS_INPUT(ctx, arg.wordAddr); \
+  PICUS_INPUT(ctx, arg.cycle); \
+  PICUS_INPUT(ctx, arg.digest)
+
+template <typename C> FDEV void DigestWriteBlock<C>::addArguments(CTX) DEV {
+  // The data to write and where to write it are inputs
+  DigestWriteArgument<C> dwArg;
+  dwArg.wordAddr = wordAddr.get();
+  dwArg.cycle = cycle.get();
+  GET_ARR(dwArg.digest, digest, CELLS_DIGEST);
+  ctx.pull(dwArg);
+  DIGEST_WRITE_ARGUMENT(ctx, dwArg);
 }
 
 template <typename C> FDEV void EcallBigIntBlock<C>::set(CTX, EcallBigIntWitness wit) DEV {

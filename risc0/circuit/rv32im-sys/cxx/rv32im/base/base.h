@@ -50,3 +50,11 @@ template <typename C> struct ValU32 {
 #define PICUS_SYNTHESIZE_COMPONENT_BEGIN(name)
 #define PICUS_SYNTHESIZE_COMPONENT_END(name, inputs, f)
 #endif
+
+#define UNPACK_DIGEST(ctx, digest)                                                                 \
+  ctx.get((digest)[0]), ctx.get((digest)[1]), ctx.get((digest)[2]), ctx.get((digest)[3]),          \
+      ctx.get((digest)[4]), ctx.get((digest)[5]), ctx.get((digest)[6]), ctx.get((digest)[7])
+
+#define UNPACK_CELLS(ctx, cells)                                                                   \
+  UNPACK_DIGEST(ctx, &((cells)[0])), UNPACK_DIGEST(ctx, &((cells)[8])),                            \
+      UNPACK_DIGEST(ctx, &((cells)[16]))

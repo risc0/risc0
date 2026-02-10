@@ -21,5 +21,6 @@ ah start-picus-v2-task \
     --version-id $VID \
     --solver multi-solver \
     --solver-timeout 2000 \
+    --assume-deterministic FpWrite \
     --wait # > picus_output.log
 # grep -q "Verification result for module Top is: verified" picus_output.log
