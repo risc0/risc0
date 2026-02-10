@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define P2_CALL_ARGUMENT(ctx, callArg)                                                             \
+  PICUS_INPUT(ctx, callArg.in);                                                                    \
+  PICUS_INPUT(ctx, callArg.data)
+
+#define P2_STATE_ARGUMENT(ctx, inState, outState)                                                  \
+  PICUS_ARGUMENT(ctx, ({UNPACK_CELLS(ctx, inState)}), ({UNPACK_CELLS(ctx, outState)}))
+
 FDEV CONSTANT Fp INT_ROUND_CONSTANTS[21] = {
     0x1DA78EC2, 0x730B0924, 0x3EB56CF3, 0x5BD93073, 0x37204C97, 0x51642D89, 0x66E943E8,
     0x1A3E72DE, 0x70BEB1E9, 0x30FF3B3F, 0x4240D1C4, 0x12647B8D, 0x65D86965, 0x49EF4D7C,
@@ -63,7 +70,9 @@ template <typename C> inline FDEV array<Val<C>, 4> multiply4x4(array<Val<C>, 4> 
   return {t6, t5, t7, t4};
 }
 
-template <typename C> inline FDEV void multiplyByMExt(ValCells<C> in) {
+template <typename C> inline FDEV void multiplyByMExt(CTX, ValCells<C> in) {
+  PICUS_SYNTHESIZE_COMPONENT_BEGIN("multiplyByMExt")
+
   // Optimized method for multiplication by M_EXT.
   // See appendix B of Poseidon2 paper for additional details.
   ValCells<C> out;
@@ -82,6 +91,15 @@ template <typename C> inline FDEV void multiplyByMExt(ValCells<C> in) {
   for (size_t i = 0; i < CELLS; i++) {
     in[i] = out[i] + tmpSums[i % 4];
   }
+
+  PICUS_SYNTHESIZE_COMPONENT_END(
+      "multiplyByMExt", llvm::ArrayRef(in, CELLS), [&](mlir::Value result) {
+        auto loc = ctx.builder.getUnknownLoc();
+        for (size_t i = 0; i < CELLS; i++) {
+          mlir::Value idx = ctx.builder.template create<zirgen::Zll::ConstOp>(loc, i);
+          in[i].value = ctx.builder.template create<zirgen::ZStruct::SubscriptOp>(loc, result, idx);
+        }
+      })
 }
 
 template <typename C> FDEV void P2ExtRoundBlock<C>::set(CTX, P2ExtRoundWitness wit) DEV {
@@ -96,7 +114,7 @@ template <typename C> FDEV void P2ExtRoundBlock<C>::set(CTX, P2ExtRoundWitness w
     sBoxTmp[i].set(ctx, cur3);
     cells[i] = cur3 * cur3 * cur;
   }
-  multiplyByMExt<C>(cells);
+  multiplyByMExt<C>(ctx, cells);
   for (size_t i = 0; i < CELLS; i++) {
     outputs[i].set(ctx, cells[i]);
   }
@@ -114,13 +132,17 @@ template <typename C> FDEV void P2ExtRoundBlock<C>::verify(CTX) DEV {
     ctx.eqz(computedCur3 - cur3);
     cells[i] = cur3 * cur3 * cur;
   }
-  multiplyByMExt<C>(cells);
+  multiplyByMExt<C>(ctx, cells);
   for (size_t i = 0; i < CELLS; i++) {
     ctx.eqz(cells[i] - outputs[i].get());
   }
 }
 
 template <typename C> FDEV void P2ExtRoundBlock<C>::addArguments(CTX) DEV {
+  PICUS_INPUT(ctx, id);
+  PICUS_INPUT(ctx, round);
+  PICUS_INPUT(ctx, inputs);
+
   Val<C> idVal = id.get();
   Val<C> roundVal = round.get();
   Val<C> nextRound = 0;
@@ -142,7 +164,9 @@ template <typename C> FDEV void P2ExtRoundBlock<C>::addArguments(CTX) DEV {
   ctx.push(state);
 }
 
-template <typename C> inline FDEV void multiplyByMInt(ValCells<C> in) {
+template <typename C> inline FDEV void multiplyByMInt(CTX, ValCells<C> in) {
+  PICUS_SYNTHESIZE_COMPONENT_BEGIN("multiplyByMInt")
+
   // Exploit the fact that off-diagonal entries of M_INT are all 1.
   Val<C> sum = 0;
   for (size_t i = 0; i < CELLS; i++) {
@@ -151,6 +175,15 @@ template <typename C> inline FDEV void multiplyByMInt(ValCells<C> in) {
   for (size_t i = 0; i < CELLS; i++) {
     in[i] = sum + Val<C>(M_INT_DIAG_HZN[i]) * in[i];
   }
+
+  PICUS_SYNTHESIZE_COMPONENT_END(
+      "multiplyByMInt", llvm::ArrayRef(in, CELLS), [&](mlir::Value result) {
+        auto loc = ctx.builder.getUnknownLoc();
+        for (size_t i = 0; i < CELLS; i++) {
+          mlir::Value idx = ctx.builder.template create<zirgen::Zll::ConstOp>(loc, i);
+          in[i].value = ctx.builder.template create<zirgen::ZStruct::SubscriptOp>(loc, result, idx);
+        }
+      })
 }
 
 template <typename C> FDEV void P2IntRoundsBlock<C>::set(CTX, P2IntRoundsWitness wit) DEV {
@@ -167,7 +200,7 @@ template <typename C> FDEV void P2IntRoundsBlock<C>::set(CTX, P2IntRoundsWitness
     Val<C> cur7 = cur3 * cur3 * cur;
     sBoxT2[i].set(ctx, cur7);
     cells[0] = cur7;
-    multiplyByMInt<C>(cells);
+    multiplyByMInt<C>(ctx, cells);
   }
   for (size_t i = 0; i < CELLS; i++) {
     outputs[i].set(ctx, cells[i]);
@@ -187,7 +220,7 @@ template <typename C> FDEV void P2IntRoundsBlock<C>::verify(CTX) DEV {
     Val<C> cur7 = cur3 * cur3 * cur;
     EQ(sBoxT2[i].get(), cur7);
     cells[0] = sBoxT2[i].get();
-    multiplyByMInt<C>(cells);
+    multiplyByMInt<C>(ctx, cells);
   }
   for (size_t i = 0; i < CELLS; i++) {
     EQ(outputs[i].get(), cells[i]);
@@ -195,6 +228,9 @@ template <typename C> FDEV void P2IntRoundsBlock<C>::verify(CTX) DEV {
 }
 
 template <typename C> FDEV void P2IntRoundsBlock<C>::addArguments(CTX) DEV {
+  PICUS_INPUT(ctx, id);
+  PICUS_INPUT(ctx, inputs);
+
   Val<C> idVal = id.get();
   P2StateArgument<C> state;
   state.id = idVal;
@@ -217,9 +253,22 @@ template <typename C> FDEV void P2BlockBlock<C>::set(CTX, P2BlockWitness wit) DE
 }
 
 template <typename C> FDEV void P2BlockBlock<C>::addArguments(CTX) DEV {
+  // This block takes in Poseidon2 calls generated by ecalls and paging
+  // operations via the P2CallArgument, and delegates that hashing work to
+  // P2ExtRoundBlock and P2IntRoundsBlock.
+
+  // Assign each P2 call a unique ID.
+  PICUS_INPUT(ctx, id);
   Val<C> idVal = id.get();
   ctx.pull(P2IdArgument<C>(idVal));
   ctx.push(P2IdArgument<C>(idVal + 1));
+
+  // Process the actual call to Poseidon2, which comes from either a P2 ecall or
+  // from memory paging. The "inputs" to the calls that are pushed here can be
+  // taken as deterministic, because these are determined by the blocks where
+  // the calls are generated.
+  PICUS_INPUT(ctx, outUseCount);
+  PICUS_INPUT(ctx, contUseCount);
   P2CallArgument<C> callArg;
   callArg.isFinal = 1;
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
@@ -228,16 +277,22 @@ template <typename C> FDEV void P2BlockBlock<C>::addArguments(CTX) DEV {
   GET_ARR(callArg.data, inputs, CELLS_RATE);
   GET_ARR(callArg.out, outputs, CELLS_DIGEST);
   ctx.addArgument(outUseCount.get(), callArg);
+  P2_CALL_ARGUMENT(ctx, callArg);
   callArg.isFinal = 0;
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     callArg.out[i] = outputs[CELLS_RATE + i].get();
   }
   ctx.addArgument(contUseCount.get(), callArg);
+  P2_CALL_ARGUMENT(ctx, callArg);
+
+  // The actual work of Poseidon2 hashing is done by P2ExtRoundBlock and
+  // P2IntRoundsBlock. The P2StateArgument ensures that these blocks are used
+  // as expected.
   ValCells<C> in;
   for (size_t i = 0; i < CELLS; i++) {
     in[i] = inputs[i].get();
   }
-  multiplyByMExt<C>(in);
+  multiplyByMExt<C>(ctx, in);
   P2StateArgument<C> state;
   state.id = idVal;
   state.round = 0;
@@ -248,4 +303,8 @@ template <typename C> FDEV void P2BlockBlock<C>::addArguments(CTX) DEV {
   state.round = 8;
   GET_ARR(state.state, outputs, CELLS);
   ctx.pull(state);
+  P2_STATE_ARGUMENT(ctx, in, outputs);
 }
+
+#undef P2_CALL_ARGUMENT
+#undef P2_STATE_ARGUMENT

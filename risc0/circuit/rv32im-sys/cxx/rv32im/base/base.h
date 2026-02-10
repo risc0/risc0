@@ -47,4 +47,6 @@ template <typename C> struct ValU32 {
 #define PICUS_CALL(ctx, outputs, name, inputs)
 #define PICUS_BEGIN_OUTLINE(...)
 #define PICUS_END_OUTLINE
+#define PICUS_SYNTHESIZE_COMPONENT_BEGIN(name)
+#define PICUS_SYNTHESIZE_COMPONENT_END(name, inputs, f)
 #endif

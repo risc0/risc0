@@ -43,9 +43,24 @@ using namespace risc0;
     picusCall(ctx, name, inputsVec, layout);                                                       \
   }
 
+// These macros outline a "full component" (i.e. one defined by a C++ struct) by
+// generating a zhlt.ComponentOp and inserting calls to that component wherever
+// it is used.
 #define PICUS_BEGIN_OUTLINE(...)                                                                   \
   if (NAME != ctx.componentName) {                                                                 \
     llvm::SmallVector<RecordingVal> inputsVec{__VA_ARGS__};                                        \
     picusCall(ctx, NAME, inputsVec, ctx.get(*this));                                               \
   } else {
 #define PICUS_END_OUTLINE }
+
+// These macros outline a "function component" (i.e. one defined by a C++
+// function), which doesn't depend on having the full component structure. The
+// `END` macro takes a flattened list of inputs to pass into the call, and a
+// closure that can be used for postprocessing like updating mutated parameters.
+#define PICUS_SYNTHESIZE_COMPONENT_BEGIN(name) if (ctx.componentName == name) {
+#define PICUS_SYNTHESIZE_COMPONENT_END(name, inputs, f)                                            \
+  }                                                                                                \
+  else {                                                                                           \
+    mlir::Value result = picusCall(ctx, name, inputs, nullptr);                                    \
+    f(result);                                                                                     \
+  }
