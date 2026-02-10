@@ -15,7 +15,7 @@ branch or tag you wish to generate a datasheet for. Then run:
 cargo run --release --example datasheet
 ```
 
-This will produce the benchmark data shown in the [datasheet] for your system
+This will produce the benchmark data shown in the datasheet for your system
 (using the CPU) on the checked out version of the RISC Zero zkVM.
 
 If you want to benchmark a GPU, you will need to build with the `cuda` or
@@ -45,7 +45,6 @@ were added per second) with separate statistics for [execution] and
 the CPU by default, and you can benchmark a CUDA or Metal GPU by setting the
 appropriate feature flag.
 
-[cycle count]: /terminology#clock-cycles
 [execution]: /terminology#execute
 [install]: ./install.md
 [prover]: /terminology#prover
