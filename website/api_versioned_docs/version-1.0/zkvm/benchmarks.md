@@ -1,13 +1,5 @@
 # Performance Benchmarks
 
-## Pregenerated Benchmarks
-
-We have [a performance datasheet][datasheet] with runtime and memory performance
-information. This information is organized by both program size and hardware
-target, and includes both CPU and GPU targets. The datasheet also includes the
-RISC Zero zkVM version used and the size of several example programs to give
-context for the [cycle count] size data.
-
 ## Generating your own datasheet
 
 You can generate a datsheet yourself to get performance data for your exact
@@ -23,7 +15,7 @@ branch or tag you wish to generate a datasheet for. Then run:
 cargo run --release --example datasheet
 ```
 
-This will produce the benchmark data shown in the [datasheet] for your system
+This will produce the benchmark data shown in the datasheet for your system
 (using the CPU) on the checked out version of the RISC Zero zkVM.
 
 If you want to benchmark a GPU, you will need to build with the `cuda` or
@@ -53,8 +45,6 @@ were added per second) with separate statistics for [execution] and
 the CPU by default, and you can benchmark a CUDA or Metal GPU by setting the
 appropriate feature flag.
 
-[cycle count]: /terminology#clock-cycles
-[datasheet]: https://reports.risczero.com/release-1.0/datasheet
 [execution]: /terminology#execute
 [install]: ./install.md
 [prover]: /terminology#prover

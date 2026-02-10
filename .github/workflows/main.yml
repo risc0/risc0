@@ -44,7 +44,6 @@ jobs:
       risc0: ${{ steps.filter.outputs.risc0 }}
       test: ${{ steps.filter.outputs.test }}
       cargo-risczero-test: ${{ steps.filter.outputs.cargo-risczero-test }}
-      web: ${{ steps.filter.outputs.web }}
     steps:
       - uses: actions/checkout@v4
       - uses: risc0/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
@@ -102,8 +101,6 @@ jobs:
             cargo-risczero-test:
               - *base
               - risc0/**
-            web:
-              - web/**
 
   # see: https://github.com/orgs/community/discussions/26822
   main-status-check:
@@ -124,7 +121,6 @@ jobs:
       - extra
       - cargo-risczero-test
       - test
-      - web
     runs-on: ubuntu-latest
     steps:
       - name: Check all job status
@@ -155,11 +151,9 @@ jobs:
         with:
           node-version: 20
       - run: cargo fmt --all --check
-      - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
       - run: cargo sort --workspace --grouped --check
-      - run: cargo sort --workspace --grouped --check benchmarks
       - run: cargo sort --workspace --grouped --check examples
       - run: cargo sort --workspace --grouped --check tools/crates-validator
       - name: cargo rdme in bonsai/sdk
@@ -214,9 +208,6 @@ jobs:
       - uses: ./.github/actions/protoc
       - name: "root: cargo clippy"
         run: cargo clippy -F $FEATURE -F unstable --all-targets
-      - name: "benchmarks: cargo clippy"
-        run: cargo clippy -F $FEATURE --all-targets
-        working-directory: benchmarks
       - name: "examples: cargo clippy"
         run: cargo clippy -F $FEATURE --all-targets
         working-directory: examples
@@ -693,25 +684,6 @@ jobs:
         env:
           RISC0_USE_DOCKER: "1"
       - run: sccache --show-stats
-
-  web:
-    if: needs.changes.outputs.web == 'true'
-    needs: changes
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: 🍞 Setup Bun
-        uses: risc0/setup-bun@v1.2.1
-        with:
-          bun-version: 1.1.34
-      - run: bun install
-        working-directory: web
-      - run: bun run ci
-        working-directory: web
-      - run: bun run typecheck
-        working-directory: web
-      - run: bun run test
-        working-directory: web
 
   bazel:
     if: needs.changes.outputs.bazel == 'true'

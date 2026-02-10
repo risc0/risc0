@@ -133,16 +133,6 @@
 
 ### Features, Performance, and Limitations
 
-<a class="anchor" id="benchmarks" />
-
-<details closed>
-  <summary>
-    Q: Are performance benchmarks available?
-  </summary>
-
-  A: Yes. We have a <a href="https://reports.risczero.com/">benchmarks website</a>, and you can also generate your own benchmarks. More details are available on the <a href="https://dev.risczero.com/zkvm/benchmarks">benchmarks page</a>.
-</details>
-
 <a class="anchor" id="language-support" />
 
 <details closed>
@@ -165,23 +155,6 @@
 
   A: Since we added support for <a href="https://www.risczero.com/news/continuations"> continuations</a>, the execution length can be very large.
   So far, we've made proofs for executions that exceed 4 billion cycles, and there's plenty of room to expand that further.
-</details>
-
-<a class="anchor" id="rust-crate" />
-
-<details closed>
-  <summary>
-    Q: I have a specific Rust crate I'd like to use. Will it work inside the zkVM?
-  </summary>
-
-  A: Each night, we check the top 1000 Rust crates for zkVM compatibility.
-  You can see the results <a href="https://reports.risczero.com/crates-validation"> here</a>.
-  As of this writing, 71% of the top 1000 Rust crates work inside the zkVM. <br />
-
-  <br />
-
-  If the crate you'd like to use isn't working, there may be a workaround <a href="https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22">here</a>.
-  If there's not already a workaround, please <a href="https://github.com/risc0/risc0/issues/new">open an issue</a> or reach out on <a href="https://discord.gg/risczero">Discord.</a>
 </details>
 
 <a class="anchor" id="large-data" />

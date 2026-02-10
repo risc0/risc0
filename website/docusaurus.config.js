@@ -210,10 +210,6 @@ export default async function createConfigAsync() {
               label: "Community",
               items: [
                 {
-                  label: "Discord",
-                  href: "https://discord.gg/risczero",
-                },
-                {
                   label: "Twitter",
                   href: "https://twitter.com/risczero",
                 },
@@ -252,10 +248,6 @@ export default async function createConfigAsync() {
                   href: "https://jobs.ashbyhq.com/RiscZero",
                 },
                 {
-                  label: "Reports & Benchmarks",
-                  href: "https://reports.risczero.com",
-                },
-                {
                   label: "Bug Bounties",
                   href: "https://hackenproof.com/company/risc-zero/programs",
                 },
@@ -266,10 +258,6 @@ export default async function createConfigAsync() {
                 {
                   label: "GitHub",
                   href: "https://github.com/risc0",
-                },
-                {
-                  label: "Discord",
-                  href: "https://discord.com/invite/risczero",
                 },
                 {
                   label: "X",
