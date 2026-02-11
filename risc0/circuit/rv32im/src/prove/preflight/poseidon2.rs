@@ -30,18 +30,17 @@ use crate::prove::preflight::trace::{Trace, TraceIndex};
 
 type Cells = [Elem; CELLS];
 
-fn add_round_constants_partial(input: &Cells, round: usize) -> Cells {
-    let mut out = *input;
-    out[0] += ROUND_CONSTANTS[round * CELLS];
-    out
+fn add_round_constants_partial(cells: &mut Cells, round: usize) {
+    cells[0] += ROUND_CONSTANTS[round * CELLS];
 }
 
-fn add_round_constants_full(input: &Cells, round: usize) -> Cells {
-    let mut out = *input;
-    for (out_cell, &constant) in out.iter_mut().zip(ROUND_CONSTANTS[round * CELLS..].iter()) {
-        *out_cell += constant;
+fn add_round_constants_full(cells: &mut Cells, round: usize) {
+    for (cell, &constant) in cells
+        .iter_mut()
+        .zip(ROUND_CONSTANTS[round * CELLS..].iter())
+    {
+        *cell += constant;
     }
-    out
 }
 
 fn multiply_by_4x4_circulant(input: &[Elem; 4]) -> [Elem; 4] {
@@ -110,18 +109,18 @@ fn sbox2(input: Elem) -> Elem {
     in6 * input
 }
 
-fn full_poseidon2_round(input: &Cells, idx: usize) -> Cells {
-    let mut out = add_round_constants_full(input, idx);
-    for out_cell in &mut out {
-        *out_cell = sbox2(*out_cell);
+fn full_poseidon2_round(cells: &mut Cells, idx: usize) {
+    add_round_constants_full(cells, idx);
+    for cell in cells.iter_mut() {
+        *cell = sbox2(*cell);
     }
-    multiply_by_m_ext(&out)
+    *cells = multiply_by_m_ext(cells);
 }
 
-fn partial_poseidon2_round(input: &Cells, idx: usize) -> Cells {
-    let mut out = add_round_constants_partial(input, idx);
-    out[0] = sbox2(out[0]);
-    multiply_by_m_int(&out)
+fn partial_poseidon2_round(cells: &mut Cells, idx: usize) {
+    add_round_constants_partial(cells, idx);
+    cells[0] = sbox2(cells[0]);
+    *cells = multiply_by_m_int(cells);
 }
 
 fn poseidon_multiply_by_m_ext(cells: &mut Cells) {
@@ -133,12 +132,12 @@ fn poseidon_do_ext_round(cells: &mut Cells, mut idx: usize) {
         idx += ROUNDS_PARTIAL;
     }
 
-    *cells = full_poseidon2_round(cells, idx);
+    full_poseidon2_round(cells, idx);
 }
 
 fn poseidon_do_int_rounds(cells: &mut Cells) {
     for idx in ROUNDS_HALF_FULL..(ROUNDS_HALF_FULL + ROUNDS_PARTIAL) {
-        *cells = partial_poseidon2_round(cells, idx);
+        partial_poseidon2_round(cells, idx);
     }
 }
 
