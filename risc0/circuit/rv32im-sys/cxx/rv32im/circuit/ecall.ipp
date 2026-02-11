@@ -400,7 +400,8 @@ template <typename C> FDEV void FpWrite<C>::set(CTX, PhysMemWriteWitness wit, ui
   ctx.tableAdd(256 + (0x7800 - high), 1);
 }
 
-template <typename C> FDEV void FpWrite<C>::verify(CTX, Val<C> cycle, Val<C> wordAddr, Val<C> fp) DEV {
+template <typename C>
+FDEV void FpWrite<C>::verify(CTX, Val<C> cycle, Val<C> wordAddr, Val<C> fp) DEV {
   PICUS_BEGIN_OUTLINE(cycle, wordAddr, fp)
   // Write is to the correct address
   EQ(write.wordAddr.get(), wordAddr);
@@ -419,7 +420,8 @@ template <typename C> FDEV void FpWrite<C>::verify(CTX, Val<C> cycle, Val<C> wor
   PICUS_END_OUTLINE
 }
 
-template <typename C> FDEV void FpWrite<C>::addArguments(CTX, Val<C> cycle, Val<C> wordAddr, Val<C> fp) DEV {
+template <typename C>
+FDEV void FpWrite<C>::addArguments(CTX, Val<C> cycle, Val<C> wordAddr, Val<C> fp) DEV {
   Val<C> high = write.data.high.get();
   Val<C> low = write.data.low.get();
   assertU16(ctx, high);
@@ -439,9 +441,9 @@ template <typename C> FDEV void DigestWriteBlock<C>::set(CTX, DigestWriteWitness
 
 template <typename C> FDEV void DigestWriteBlock<C>::verify(CTX) DEV {}
 
-#define DIGEST_WRITE_ARGUMENT(ctx, arg) \
-  PICUS_INPUT(ctx, arg.wordAddr); \
-  PICUS_INPUT(ctx, arg.cycle); \
+#define DIGEST_WRITE_ARGUMENT(ctx, arg)                                                            \
+  PICUS_INPUT(ctx, arg.wordAddr);                                                                  \
+  PICUS_INPUT(ctx, arg.cycle);                                                                     \
   PICUS_INPUT(ctx, arg.digest)
 
 template <typename C> FDEV void DigestWriteBlock<C>::addArguments(CTX) DEV {
