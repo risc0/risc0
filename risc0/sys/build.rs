@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -45,7 +45,7 @@ fn main() {
 }
 
 fn build_cuda_kernels(cxx_root: &Path) {
-    KernelBuild::new(KernelType::Cuda)
+    KernelBuild::new(KernelType::Cuda, "kernel_build.manifest")
         .files([
             "kernels/zkp/cuda/combos.cu",
             "kernels/zkp/cuda/eltwise.cu",
@@ -57,7 +57,6 @@ fn build_cuda_kernels(cxx_root: &Path) {
             "kernels/zkp/cuda/supra/ntt.cu",
             "kernels/zkp/cuda/supra/poseidon2.cu",
         ])
-        .deps(["kernels/zkp/cuda", "kernels/zkp/cuda/supra"])
         .flag("-DFEATURE_BABY_BEAR")
         .include(cxx_root)
         .include(env::var("DEP_BLST_C_SRC").unwrap())
@@ -84,10 +83,9 @@ fn build_metal_kernels() {
         let dir = Path::new("kernels").join(name).join("metal");
         let src_paths = srcs.iter().map(|x| dir.join(x));
         let out = format!("metal_kernels_{name}");
-        KernelBuild::new(KernelType::Metal)
+        KernelBuild::new(KernelType::Metal, "kernel_build.manifest")
             .files(src_paths)
             .include(inc_path)
-            .dep(inc_path.join("sha256.h"))
             .compile(&out);
     }
 }

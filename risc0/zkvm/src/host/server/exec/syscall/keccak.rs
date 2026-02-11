@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,10 +17,12 @@ use crate::host::client::env::ProveKeccakRequest;
 use anyhow::{Result, bail};
 use risc0_binfmt::ByteAddr;
 use risc0_circuit_keccak::{KECCAK_DEFAULT_PO2, KeccakState, max_keccak_inputs};
-use risc0_circuit_rv32im::execute::MAX_IO_BYTES;
-use risc0_zkvm_platform::syscall::{
-    keccak_mode::{KECCAK_PERMUTE, KECCAK_PROVE},
-    reg_abi::*,
+use risc0_zkvm_platform::{
+    WORD_SIZE,
+    syscall::{
+        keccak_mode::{KECCAK_PERMUTE, KECCAK_PROVE},
+        reg_abi::*,
+    },
 };
 
 use super::{Syscall, SyscallContext, SyscallKind};
@@ -37,15 +39,21 @@ impl Syscall for SysKeccak {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        let mode = ctx.load_register(REG_A3);
-        if mode == KECCAK_PERMUTE {
-            self.keccak_permute(ctx, to_guest)
-        } else if mode == KECCAK_PROVE {
-            self.keccak_prove(ctx, to_guest)
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
+        let check_is_full = ctx.load_register(REG_A6) != 0;
+
+        if check_is_full {
+            self.keccak_check_full(to_guest)
         } else {
-            bail!("sys_keccak: invalid mode: {mode}")
+            let mode = ctx.load_register(REG_A3);
+            if mode == KECCAK_PERMUTE {
+                self.keccak_permute(ctx, to_guest)
+            } else if mode == KECCAK_PROVE {
+                self.keccak_prove(ctx, to_guest)
+            } else {
+                bail!("sys_keccak: invalid mode: {mode}")
+            }
         }
     }
 }
@@ -68,14 +76,14 @@ impl SysKeccak {
     fn keccak_permute(
         &mut self,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
         // if we are full at this point, it means that the guest forgot to call prove.
         if self.is_full() {
             bail!("keccak batch is full, prove must be called");
         }
 
-        if to_guest.len() >= MAX_IO_BYTES as usize {
+        if to_guest.len() != 25 * 8 {
             bail!("invalid sys_keccak_permute");
         }
 
@@ -85,20 +93,15 @@ impl SysKeccak {
         self.inputs.push(from_guest);
 
         keccak::f1600(&mut from_guest);
-        to_guest.clone_from_slice(bytemuck::cast_slice(&from_guest));
+        to_guest.clone_from_slice(bytemuck::cast_slice(from_guest.as_slice()));
 
         let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::Keccak];
         metric.count += 1;
 
-        // if full, the guest must call prove.
-        Ok((self.is_full() as u32, 0))
+        Ok(to_guest.len())
     }
 
-    fn keccak_prove(
-        &mut self,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+    fn keccak_prove(&mut self, ctx: &mut dyn SyscallContext, to_guest: &mut [u8]) -> Result<usize> {
         if !to_guest.is_empty() {
             bail!("invalid sys_keccak_prove");
         }
@@ -129,6 +132,16 @@ impl SysKeccak {
         // reset
         self.inputs.clear();
 
-        Ok((0, 0))
+        Ok(0)
+    }
+
+    fn keccak_check_full(&mut self, to_guest: &mut [u8]) -> Result<usize> {
+        if to_guest.len() != WORD_SIZE * 2 {
+            bail!("invalid sys_keccak check full");
+        }
+
+        to_guest[..WORD_SIZE].copy_from_slice(&(self.is_full() as u32).to_le_bytes());
+
+        Ok(to_guest.len())
     }
 }

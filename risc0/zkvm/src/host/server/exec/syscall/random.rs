@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -14,7 +14,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use anyhow::Result;
-use risc0_zkvm_platform::WORD_SIZE;
 
 use super::{Syscall, SyscallContext};
 
@@ -24,12 +23,10 @@ impl Syscall for SysRandom {
         &mut self,
         _syscall: &str,
         _ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
         tracing::debug!("SYS_RANDOM: {}", to_guest.len());
-        let mut rand_buf = vec![0u8; to_guest.len() * WORD_SIZE];
-        rand::fill(rand_buf.as_mut_slice());
-        bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
-        Ok(((to_guest.len() * WORD_SIZE) as u32, 0))
+        rand::fill(to_guest);
+        Ok(to_guest.len())
     }
 }

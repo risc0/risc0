@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -25,7 +25,6 @@ use crate::{
 #[test]
 fn basic() {
     let program = testutil::kernel::basic();
-    let expected_cycles = program.size_in_words();
     let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 
@@ -50,7 +49,6 @@ fn basic() {
     assert_eq!(segment.terminate_state, Some(TerminateState::default()));
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
-    assert_eq!(segment.suspend_cycle, expected_cycles as u32 + 1);
 }
 
 #[test]
@@ -66,7 +64,7 @@ fn system_split() {
         ExecutionLimit::default()
             .with_segment_po2(testutil::MIN_CYCLES_PO2)
             .with_session_limit(testutil::DEFAULT_SESSION_LIMIT)
-            .with_max_insn_cycles(100),
+            .with_max_insn_rows(100),
         testutil::NullSyscall,
         None,
     )
@@ -103,7 +101,7 @@ fn insufficient_segment_limit() {
         image,
         ExecutionLimit::default()
             .with_segment_po2(13)
-            .with_max_insn_cycles(0),
+            .with_max_insn_rows(0),
         testutil::NullSyscall,
         None,
     )

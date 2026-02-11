@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -19,8 +19,8 @@ use anyhow::{Context, anyhow, ensure};
 use derive_builder::Builder;
 use risc0_binfmt::PovwLogId;
 use risc0_zkvm::{
-    Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, ProverOpts, Receipt, VerifierContext,
-    WorkClaim, compute_image_id,
+    AssumptionReceipt, Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, ProverOpts, Receipt,
+    VerifierContext, WorkClaim, compute_image_id,
 };
 
 use crate::{
@@ -155,7 +155,12 @@ impl<P: Prover> WorkLogUpdateProver<P> {
                 let (journal, receipt) = self.continuation.clone().ok_or_else(|| {
                     anyhow!("missing continuation information with non-empty work log")
                 })?;
-                env_builder.add_assumption(receipt);
+                let assumption_receipt: AssumptionReceipt = receipt
+                    .try_into()
+                    .context("Failed to create assumption receipt from given receipt")?;
+                env_builder
+                    .add_assumption(assumption_receipt)
+                    .context("Failed to add continuation assumption receipt")?;
                 State::from(journal)
             }
         };
@@ -205,7 +210,9 @@ impl<P: Prover> WorkLogUpdateProver<P> {
                 claim: work_claim.into_unknown(),
                 noninclusion_proof,
             });
-            env_builder.add_assumption(receipt);
+            env_builder
+                .add_assumption(receipt)
+                .context("Failed to add work receipt assumption")?;
         }
 
         let input = Input {

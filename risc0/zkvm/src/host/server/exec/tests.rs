@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -21,7 +21,7 @@ use std::{
 
 use anyhow::Result;
 use risc0_binfmt::{ExitCode, MemoryImage, PovwJobId, PovwLogId, Program, ProgramBinary};
-use risc0_circuit_rv32im::TerminateState;
+use risc0_circuit_rv32im::{BlockType, TerminateState, execute::row_points};
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
@@ -106,7 +106,7 @@ fn basic() {
 
 #[test_log::test]
 fn system_split_v2() {
-    const ITERATIONS: u32 = 10_000;
+    const ITERATIONS: u32 = 5_000;
 
     let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(ITERATIONS);
     let mut image = MemoryImage::new_kernel(program);
@@ -219,7 +219,7 @@ fn bigint_accel() {
 }
 
 #[test_log::test]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 fn bigint_accel_mod_zero_product_too_large() {
     let input = MultiTestSpec::BigInt {
         count: 1,
@@ -264,28 +264,28 @@ const BIGINT_ILLEGAL_ADDR: u32 = 0xc000_0000;
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_ILLEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_LEGAL_ADDR,
     BIGINT_ILLEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
     BIGINT_ILLEGAL_ADDR,
     BIGINT_LEGAL_ADDR
 )]
-#[should_panic(expected = "IllegalInstruction")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[case(
     BIGINT_LEGAL_ADDR,
     BIGINT_LEGAL_ADDR,
@@ -421,34 +421,34 @@ fn posix_style_read() {
 #[case(0, 1, b"abcdefghijkl")]
 #[case(0, 2, b"abcdefghijkl")]
 #[case(0, 3, b"abcdefghijkl")]
-#[case(0, 4, b"\0\0\0\0efghijkl")]
-#[case(0, 5, b"\0\0\0\0efghijkl")]
-#[case(0, 6, b"\0\0\0\0efghijkl")]
-#[case(0, 7, b"\0\0\0\0efghijkl")]
+#[case(0, 4, b"abcdefghijkl")]
+#[case(0, 5, b"abcdefghijkl")]
+#[case(0, 6, b"abcdefghijkl")]
+#[case(0, 7, b"abcdefghijkl")]
 #[case(1, 0, b"Abcdefghijkl")]
 #[case(1, 1, b"Abcdefghijkl")]
 #[case(1, 2, b"Abcdefghijkl")]
-#[case(1, 3, b"A\0\0\0efghijkl")]
-#[case(1, 4, b"A\0\0\0efghijkl")]
-#[case(1, 5, b"A\0\0\0efghijkl")]
-#[case(1, 6, b"A\0\0\0efghijkl")]
-#[case(1, 7, b"A\0\0\0\0\0\0\0ijkl")]
+#[case(1, 3, b"Abcdefghijkl")]
+#[case(1, 4, b"Abcdefghijkl")]
+#[case(1, 5, b"Abcdefghijkl")]
+#[case(1, 6, b"Abcdefghijkl")]
+#[case(1, 7, b"Abcdefghijkl")]
 #[case(2, 0, b"ABcdefghijkl")]
 #[case(2, 1, b"ABcdefghijkl")]
-#[case(2, 2, b"AB\0\0efghijkl")]
-#[case(2, 3, b"AB\0\0efghijkl")]
-#[case(2, 4, b"AB\0\0efghijkl")]
-#[case(2, 5, b"AB\0\0efghijkl")]
-#[case(2, 6, b"AB\0\0\0\0\0\0ijkl")]
-#[case(2, 7, b"AB\0\0\0\0\0\0ijkl")]
+#[case(2, 2, b"ABcdefghijkl")]
+#[case(2, 3, b"ABcdefghijkl")]
+#[case(2, 4, b"ABcdefghijkl")]
+#[case(2, 5, b"ABcdefghijkl")]
+#[case(2, 6, b"ABcdefghijkl")]
+#[case(2, 7, b"ABcdefghijkl")]
 #[case(3, 0, b"ABCdefghijkl")]
-#[case(3, 1, b"ABC\0efghijkl")]
-#[case(3, 2, b"ABC\0efghijkl")]
-#[case(3, 3, b"ABC\0efghijkl")]
-#[case(3, 4, b"ABC\0efghijkl")]
-#[case(3, 5, b"ABC\0\0\0\0\0ijkl")]
-#[case(3, 6, b"ABC\0\0\0\0\0ijkl")]
-#[case(3, 7, b"ABC\0\0\0\0\0ijkl")]
+#[case(3, 1, b"ABCdefghijkl")]
+#[case(3, 2, b"ABCdefghijkl")]
+#[case(3, 3, b"ABCdefghijkl")]
+#[case(3, 4, b"ABCdefghijkl")]
+#[case(3, 5, b"ABCdefghijkl")]
+#[case(3, 6, b"ABCdefghijkl")]
+#[case(3, 7, b"ABCdefghijkl")]
 #[test_log::test]
 fn short_read_combinations(
     #[case] read_len: usize,
@@ -617,6 +617,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(claim)
+            .unwrap()
             .build()
             .unwrap();
         let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -645,6 +646,7 @@ mod sys_verify {
                 .write(&spec)
                 .unwrap()
                 .add_assumption(halt_session.claim().unwrap())
+                .unwrap()
                 .build()
                 .unwrap();
             let session = execute_elf(env, MULTI_TEST_ELF);
@@ -671,6 +673,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(claim)
+            .unwrap()
             .build()
             .unwrap();
         let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -700,6 +703,7 @@ mod sys_verify {
                 .write(&spec)
                 .unwrap()
                 .add_assumption(claim)
+                .unwrap()
                 .build()
                 .unwrap();
             let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -722,6 +726,7 @@ mod sys_verify {
                 .write(&spec)
                 .unwrap()
                 .add_assumption(claim)
+                .unwrap()
                 .build()
                 .unwrap();
             let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -747,6 +752,7 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(claim)
+            .unwrap()
             .build()
             .unwrap();
 
@@ -930,7 +936,7 @@ fn panic() {
 #[test_log::test]
 fn fault() {
     let err = multi_test_raw(MultiTestSpec::Fault).err().unwrap();
-    assert!(err.to_string().contains("StoreAccessFault"));
+    assert!(err.to_string().contains("Illegal trap in machine mode"));
 }
 
 #[test_log::test]
@@ -971,7 +977,12 @@ fn profiler() {
 
     for sample in &test_samples {
         let frames = Vec::from_iter(sample.frames.iter().map(|fr| fr.frame.name.clone()));
-        *named_stacks_and_counts.entry(frames).or_default() += sample.count;
+        *named_stacks_and_counts.entry(frames).or_default() += sample.count as u64;
+    }
+
+    fn nop_row_points() -> u64 {
+        // A nop ends up adding zero to a register
+        row_points(BlockType::InstImm) + row_points(BlockType::UnitAddSub)
     }
 
     // Check the stacks
@@ -985,7 +996,10 @@ fn profiler() {
                     "main".into(),
                     "__start".into()
                 ],
-                2 // auicpc + jr
+                // auipc, jr
+                row_points(BlockType::InstAuipc)
+                    + row_points(BlockType::InstJalr)
+                    + row_points(BlockType::Decode) * 2
             ),
             (
                 vec![
@@ -995,7 +1009,8 @@ fn profiler() {
                     "main".into(),
                     "__start".into(),
                 ],
-                1 // nop
+                // nop
+                nop_row_points() + row_points(BlockType::Decode)
             ),
             (
                 vec![
@@ -1005,7 +1020,8 @@ fn profiler() {
                     "main".into(),
                     "__start".into(),
                 ],
-                1 // nop
+                // nop
+                nop_row_points() + row_points(BlockType::Decode)
             ),
             (
                 vec![
@@ -1016,7 +1032,9 @@ fn profiler() {
                     "main".into(),
                     "__start".into(),
                 ],
-                10 // nop * 10
+                // nop * 10 + ret
+                (nop_row_points() + row_points(BlockType::Decode)) * 10
+                    + row_points(BlockType::MakeTable)
             ),
             (
                 vec![
@@ -1026,7 +1044,14 @@ fn profiler() {
                     "main".into(),
                     "__start".into(),
                 ],
-                4 // la, jr, nop
+                // auipc, add, jr, nop
+                row_points(BlockType::InstAuipc)
+                    + row_points(BlockType::InstImm)
+                    + row_points(BlockType::UnitAddSub)
+                    + row_points(BlockType::InstJalr)
+                    + nop_row_points()
+                    + row_points(BlockType::Decode) * 4
+                    + row_points(BlockType::MakeTable)
             ),
             (
                 vec![
@@ -1036,7 +1061,8 @@ fn profiler() {
                     "main".into(),
                     "__start".into(),
                 ],
-                1 // ret
+                // ret
+                row_points(BlockType::InstJalr) + row_points(BlockType::Decode)
             ),
         ]
     );
@@ -1121,7 +1147,7 @@ fn memory_access() {
             .err()
             .unwrap()
             .to_string()
-            .contains("StoreAccessFault")
+            .contains("Illegal trap in machine mode")
     );
 
     let addr = 0xC000_0000;
@@ -1130,7 +1156,7 @@ fn memory_access() {
             .err()
             .unwrap()
             .to_string()
-            .contains("StoreAccessFault")
+            .contains("Illegal trap in machine mode")
     );
 
     assert_eq!(access_memory(0x0B00_0000).unwrap(), ExitCode::Halted(0));
@@ -1164,11 +1190,11 @@ fn post_state_digest_randomization() {
             &mut self,
             _syscall: &str,
             _ctx: &mut dyn SyscallContext,
-            to_guest: &mut [u32],
-        ) -> Result<(u32, u32)> {
-            let rand_buf = vec![27u8; to_guest.len() * WORD_SIZE];
-            bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
-            Ok((0, 0))
+            to_guest: &mut [u8],
+        ) -> Result<usize> {
+            let rand_buf = vec![27u8; to_guest.len()];
+            to_guest.clone_from_slice(rand_buf.as_slice());
+            Ok(to_guest.len())
         }
     }
 
@@ -1203,7 +1229,7 @@ fn alloc_zeroed() {
 }
 
 #[rstest]
-#[should_panic(expected = "LoadAccessFault")]
+#[should_panic(expected = "Illegal trap in machine mode")]
 #[test_log::test]
 fn out_of_bounds_ecall() {
     multi_test(MultiTestSpec::OutOfBoundsEcall);
@@ -1364,19 +1390,19 @@ mod docker {
 }
 
 #[rstest]
-#[case((0, 16, 1))]
+#[case((0, 17, 1))]
 // this should contain exactly 2 segments
-#[case((16, 16, 2))]
+#[case((17, 17, 2))]
 // it's ok to run with a limit that's higher than the actual count
-#[case((16, 16, 10))]
-#[case((16, 15, 17))]
+#[case((17, 17, 10))]
+#[case((17, 16, 18))]
 // This test should always fail if the last parameter is zero
 #[should_panic(expected = "Session limit exceeded")]
-#[case((0, 16, 0))]
+#[case((0, 17, 0))]
 #[should_panic(expected = "Session limit exceeded")]
-#[case((16, 16, 1))]
+#[case((17, 17, 1))]
 #[should_panic(expected = "Session limit exceeded")]
-#[case((16, 15, 2))]
+#[case((17, 16, 2))]
 #[test_log::test]
 fn session_limit(
     #[case] (loop_cycles_po2, segment_limit_po2, session_count_limit): (u32, u32, u64),

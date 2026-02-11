@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -21,7 +21,7 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
     syscall::{
         nr::{SYS_ARGC, SYS_ARGV},
-        reg_abi::REG_A3,
+        reg_abi::{REG_A3, REG_A4},
     },
 };
 
@@ -35,14 +35,20 @@ impl Syscall for SysArgs {
         &mut self,
         syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
         if syscall == SYS_ARGC.as_str() {
-            if !to_guest.is_empty() {
+            if to_guest.len() != WORD_SIZE * 2 {
                 bail!("invalid sys_argc call");
             }
 
-            Ok((self.0.len().try_into()?, 0))
+            let arg_len: u32 = self
+                .0
+                .len()
+                .try_into()
+                .map_err(|e| anyhow!("too many arguments: {e}"))?;
+            to_guest[..WORD_SIZE].copy_from_slice(&arg_len.to_le_bytes());
+            Ok(to_guest.len())
         } else if syscall == SYS_ARGV.as_str() {
             // Get the arg or return an error if out of bounds.
             let arg_index = ctx.load_register(REG_A3);
@@ -53,15 +59,23 @@ impl Syscall for SysArgs {
                 )
             })?;
 
-            let nbytes = min(to_guest.len() * WORD_SIZE, arg_val.len());
-            let to_guest_u8s: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
-            to_guest_u8s[0..nbytes].clone_from_slice(&arg_val.as_bytes()[0..nbytes]);
+            let get_arg_len = ctx.load_register(REG_A4) != 0;
+            if get_arg_len {
+                if to_guest.len() != WORD_SIZE * 2 {
+                    bail!("invalid sys_argv with get_arg_len=1")
+                }
+                if arg_val.len() >= MAX_IO_BYTES as usize {
+                    bail!("sys_argv failure: argv is too large");
+                }
+                let ret = arg_val.len() as u32;
+                to_guest[..WORD_SIZE].copy_from_slice(&ret.to_le_bytes());
+                Ok(to_guest.len())
+            } else {
+                let nbytes = min(to_guest.len(), arg_val.len());
+                to_guest[0..nbytes].clone_from_slice(&arg_val.as_bytes()[0..nbytes]);
 
-            if arg_val.len() >= MAX_IO_BYTES as usize {
-                bail!("sys_argv failure: argv is too large");
+                Ok(nbytes)
             }
-
-            Ok((arg_val.len() as u32, 0))
         } else {
             bail!("Unknown syscall {syscall}")
         }

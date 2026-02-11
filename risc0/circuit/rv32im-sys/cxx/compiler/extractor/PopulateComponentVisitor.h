@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include "RecordingVal.h"
 #include "compiler/extractor/NopVal.h"
 #include "compiler/extractor/RecordingContext.h"
+#include "compiler/extractor/RecordingVal.h"
 #include <mlir/Dialect/Arith/IR/Arith.h>
 
 namespace populate_component {
@@ -30,6 +30,7 @@ struct Populator {
   mlir::Value load();
 
   void pop() { path.pop_back(); }
+  mlir::Value back() { return path.back(); }
 
   ComponentIRMap map;
 
@@ -52,10 +53,16 @@ public:
   template <typename T, typename... Args>
   static void apply(RecordingContext& ctx, const char* memberName, T& t, Args... args) {
     Populator* populator = PopulatorSingleton::get();
-    mlir::Value sublayout = populator->lookup(memberName);
-    populator->map.insert(&t, sublayout);
-    t.template applyInner<Visitor>(ctx, args...);
-    populator->pop();
+    if (memberName) {
+      mlir::Value sublayout = populator->lookup(memberName);
+      populator->map.insert(&t, sublayout);
+      t.template applyInner<Visitor>(ctx, args...);
+      populator->pop();
+    } else {
+      // If it's an element of an array, we don't have the extra indirection.
+      populator->map.insert(&t, populator->back());
+      t.template applyInner<Visitor>(ctx, args...);
+    }
   }
 
   template <typename T, size_t N, typename... Args>
@@ -65,7 +72,7 @@ public:
     for (size_t i = 0; i < N; i++) {
       mlir::Value element = populator->subscript(i);
       populator->map.insert(&(t[i]), element);
-      t[i].template applyInner<Visitor>(ctx, args...);
+      Visitor::apply(ctx, nullptr, t[i], args...);
       populator->pop();
     }
     populator->pop();
@@ -73,11 +80,17 @@ public:
 
   static void apply(RecordingContext& ctx, const char* memberName, RecordingReg& r) {
     Populator* populator = PopulatorSingleton::get();
-    mlir::Value reg = populator->lookup(memberName);
-    mlir::Value val = populator->load();
-    r.val = val;
-    populator->map.insert(&r, reg);
-    populator->pop();
+    if (memberName) {
+      // If the reg is a member of a struct, we need to look it up by name.
+      populator->lookup(memberName);
+      r.val = populator->load();
+      populator->map.insert(&r, populator->back());
+      populator->pop();
+    } else {
+      // If it's an element of an array, we don't have the extra indirection.
+      r.val = populator->load();
+      populator->map.insert(&r, populator->back());
+    }
   }
 
   static void apply(RecordingContext& ctx, const char* memberName, RecordingVal&) {

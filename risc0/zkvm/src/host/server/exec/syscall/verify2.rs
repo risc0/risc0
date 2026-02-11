@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -32,8 +32,8 @@ impl Syscall for SysVerify2 {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
         if !to_guest.is_empty() {
             bail!("invalid sys_verify2 call");
         }
@@ -79,6 +79,6 @@ impl Syscall for SysVerify2 {
         metric.count += 1;
         metric.size += from_guest_len as u64;
 
-        Ok((0, 0))
+        Ok(0)
     }
 }

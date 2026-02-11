@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -551,7 +551,7 @@ macro_rules! ensure_poseidon2 {
 
 impl Prover {
     pub(crate) fn new(program: Program, control_id: Digest, opts: ProverOpts) -> Self {
-        #[cfg(all(test, feature = "cuda"))]
+        #[cfg(all(test, gpu_accel))]
         gpu_guard::assert_gpu_semaphore_held();
 
         Self {
@@ -599,7 +599,7 @@ impl Prover {
     /// then used as the input to all other recursion programs (e.g. join, resolve, and
     /// identity_p254).
     pub fn new_lift(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
-        Self::new_lift_m3(segment, opts, false)
+        Self::new_lift_inner(segment, opts, false)
     }
 
     /// Create a prover job for the lift program that produces a work claim receipt.
@@ -607,16 +607,12 @@ impl Prover {
     /// Similar to [`Self::new_lift`], but produces a work claim receipt that tracks
     /// verifiable work by computing the work value from the segment proof.
     pub fn new_lift_povw(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
-        Self::new_lift_m3(segment, opts, true)
+        Self::new_lift_inner(segment, opts, true)
     }
 
     /// Instantiate a lift program, with the option of PoVW or not. Note that these programs
     /// produce different output but have the same inputs and so share the same logic here.
-    fn new_lift_m3(segment: &SegmentReceipt, opts: ProverOpts, povw: bool) -> Result<Self> {
-        if povw {
-            bail!("m3 doesn't support povw");
-        }
-
+    fn new_lift_inner(segment: &SegmentReceipt, opts: ProverOpts, povw: bool) -> Result<Self> {
         ensure_poseidon2!(segment);
 
         let inner_hash_suite = hash_suite_from_name(&segment.hashfn)
@@ -627,7 +623,7 @@ impl Prover {
         let claim = risc0_circuit_rv32im::Claim::decode(&segment.seal)?;
 
         // Instantiate the prover with the lift recursion program and its control ID.
-        let (program, control_id) = zkr::lift_m3(claim.po2 as usize)?;
+        let (program, control_id) = zkr::lift(claim.po2 as usize, povw)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);

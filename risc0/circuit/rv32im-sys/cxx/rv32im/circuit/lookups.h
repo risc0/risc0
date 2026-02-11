@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -29,7 +29,7 @@ template <typename C> struct RegU8 {
   FDEV void set(CTX, Val<C> in) DEV;
   FDEV inline void finalize(CTX) DEV {}
   FDEV Val<C> get() DEV;
-  FDEV void verify(CTX) DEV { RANGE_POSTCONDITION(ctx, 0, inner.get(), 0x100); }
+  FDEV void verify(CTX) DEV { RANGE_POSTCONDITION(ctx, 0, inner.get(), (1 << 8)); }
   FDEV void addArguments(CTX) DEV;
 };
 
@@ -44,7 +44,7 @@ template <typename C> struct RegU16 {
   FDEV void set(CTX, Val<C> in) DEV;
   FDEV inline void finalize(CTX) DEV {}
   FDEV Val<C> get() DEV;
-  FDEV void verify(CTX) DEV { RANGE_POSTCONDITION(ctx, 0, inner.get(), 0x10000); }
+  FDEV void verify(CTX) DEV { RANGE_POSTCONDITION(ctx, 0, inner.get(), (1 << 16)); }
   FDEV void addArguments(CTX) DEV;
 };
 

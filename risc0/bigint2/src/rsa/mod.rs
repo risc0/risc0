@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -31,6 +31,7 @@ pub fn modpow_65537(base: &RsaArray, modulus: &RsaArray, result: &mut RsaArray) 
     // A dishonest prover could return a result greater than the modulus that differs by a multiple
     // of the modulus, e.g. they could return `4` (instead of `1`) as the answer to `1^65537 % 3`,
     // since `4 - 1 = 3`.
-    // Therefore, we check that we are in the honest case for the final result.
+    // We rely on the final checked modmul to ensure the result is reduced
+    // modulo `modulus`, assuming intermediate unchecked operations are correct.
     crate::field::modmul_4096(&buffer, base, modulus, result);
 }

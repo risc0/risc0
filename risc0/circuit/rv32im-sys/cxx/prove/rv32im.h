@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -17,6 +17,7 @@
 
 #include "prove/prove.h"
 #include "rv32im/emu/emu.h"
+#include "rv32im/emu/povw.h"
 
 namespace risc0 {
 
@@ -34,6 +35,7 @@ struct PreflightResults {
   uint32_t cycles; // How many cycles did this preflight do
   std::vector<RowInfo> rowInfo;
   std::vector<uint32_t> aux;
+  uint32_t block_counts[NUM_BLOCK_TYPES];
 };
 
 using PreflightResultsPtr = std::shared_ptr<PreflightResults>;
@@ -41,11 +43,17 @@ using PreflightResultsPtr = std::shared_ptr<PreflightResults>;
 PreflightResultsPtr preflight(size_t po2,
                               rv32im::MemoryImage& image,
                               rv32im::HostIO& io,
-                              uint32_t endCycle = UINT32_MAX);
+                              uint32_t endCycle = UINT32_MAX,
+                              rv32im::PovwNonce povwNonce = rv32im::PovwNonce::zero());
 
 class Rv32imProver {
 public:
   Rv32imProver(IHalPtr hal, size_t po2, bool doValidate = false);
+  void prove(WriteIop& iop,
+             const RowInfo* rowInfo,
+             size_t rowInfoSize,
+             const uint32_t* aux,
+             size_t aux_size);
   void prove(WriteIop& iop, const PreflightResults& preflight);
 
   size_t po2() const;

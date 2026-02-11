@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -32,8 +32,9 @@ pub mod testutil;
 
 pub use self::{
     bigint::analyze::analyze as bigint_analyze,
+    block_tracker::{BlockCollection, row_points},
     executor::{
-        CycleLimit, ExecutionError, ExecutionLimit, Executor, ExecutorResult, SegmentUpdate,
+        ExecutionError, ExecutionLimit, Executor, ExecutorResult, RowLimit, SegmentUpdate,
         SimpleSession,
     },
     platform::*,

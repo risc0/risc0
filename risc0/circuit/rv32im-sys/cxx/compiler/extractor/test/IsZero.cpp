@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,20 +13,21 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#include "mlir/IR/Verifier.h"
+
 #include "compiler/extractor/PopulateComponentVisitor.h"
 #include "compiler/extractor/base.h"
 #include "rv32im/circuit/circuit.ipp"
 
-#include "mlir/IR/Verifier.h"
+#include "compiler/extractor/extract.h"
 
 int main() {
-  using C = RecordingContext;
   mlir::MLIRContext mlirCtx;
   RecordingContext ctx(&mlirCtx);
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);
 
-  extract1<IsZero>(ctx);
+  extractWithValArg<IsZero>(ctx);
 
   ctx.getModuleOp().print(llvm::outs());
   return failed(mlir::verify(ctx.getModuleOp()));

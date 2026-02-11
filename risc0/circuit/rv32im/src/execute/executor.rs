@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -21,14 +21,14 @@ use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
 use risc0_zkp::core::{
     digest::{DIGEST_BYTES, Digest},
-    hash::poseidon2::ROUNDS_HALF_FULL,
     log2_ceil,
 };
 
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
 use crate::{
-    Claim, EcallKind, EcallMetric, MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, TerminateState,
+    BlockType, Claim, EcallKind, EcallMetric, MAX_INSN_ROWS, MAX_INSN_ROWS_LOWER_PO2,
+    TerminateState,
     execute::{DEFAULT_SEGMENT_LIMIT_PO2, poseidon2::Poseidon2, rv32im::disasm},
     trace::{TraceCallback, TraceEvent},
 };
@@ -51,7 +51,7 @@ pub struct Executor<'a, S: Syscall> {
     pc: ByteAddr,
     user_pc: ByteAddr,
     machine_mode: u32,
-    user_cycles: u32,
+    preflight_user_cycles: u32,
     initial_image: MemoryImage,
     pager: PagedMemory,
     terminate_state: Option<TerminateState>,
@@ -61,7 +61,7 @@ pub struct Executor<'a, S: Syscall> {
     input_digest: Digest,
     output_digest: Option<Digest>,
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
-    cycles: SessionCycles,
+    row_info: RowInfo,
     ecall_metrics: EnumMap<EcallKind, EcallMetric>,
     /// Ring buffer storing the most recent instructions executed. When the exec_debug feature is
     /// enabled, if the executor encounter an error, it dumps these recent instructions.
@@ -75,7 +75,7 @@ pub struct Executor<'a, S: Syscall> {
 }
 
 /// Results from running the [Executor], including information about the initial and final memory
-/// states as well metrics for the number of segments and cycles used.
+/// states as well metrics for the number of segments and rows used.
 ///
 /// This struct has the information required to compute the [Claim] for the execution.
 #[derive(Clone, Debug)]
@@ -84,11 +84,11 @@ pub struct ExecutorResult {
     pub segments: u64,
     pub pre_image: MemoryImage,
     pub post_image: MemoryImage,
-    pub user_cycles: u64,
-    pub total_cycles: u64,
-    pub paging_cycles: u64,
-    pub reserved_cycles: u64,
+    pub row_count: u64,
+    pub padding_row_count: u64,
+    pub insn_count: u64,
     pub ecall_metrics: EnumMap<EcallKind, EcallMetric>,
+    pub block_counts: Option<EnumMap<BlockType, u64>>,
 
     // Fields used to populate the [Claim].
     pub output: Option<Digest>,
@@ -107,16 +107,18 @@ impl ExecutorResult {
             post_state: self.post_image.image_id(),
             output: self.output,
             terminate_state: self.terminate_state,
+            povw_nonce: PovwNonce::default(),
         }
     }
 }
 
 #[derive(Default)]
-struct SessionCycles {
-    total: u64,
-    user: u64,
-    paging: u64,
-    reserved: u64,
+struct RowInfo {
+    count: u64,
+    padding_count: u64,
+    insn_count: u64,
+    block_counts: Option<EnumMap<BlockType, u64>>,
+    row_points: u64,
 }
 
 #[non_exhaustive]
@@ -131,15 +133,15 @@ pub struct SimpleSession {
 pub struct ExecutionLimit {
     /// Maximum size of a segment, expressed as a power-of-two.
     pub segment_po2: usize,
-    /// Maximum number of cycles a single instruction is allowed to consume.
+    /// Maximum number of rows a single instruction is allowed to consume.
     ///
     /// Ecall instructions and paging can result in a single worst-case instruction taking
-    /// thousands of cycles. This is the limit on a number of cycles a single instruction can take.
+    /// thousands of rows. This is the limit on a number of rows a single instruction can take.
     /// If an instruction exceeds this limit, and falls at the end of segment, it may result in an
     /// execution failure.
-    pub max_insn_cycles: Option<usize>,
-    /// Limit on the number of cycles to execute in the session.
-    pub session: CycleLimit,
+    pub max_insn_rows: Option<usize>,
+    /// Limit on the number of rows to execute in the session.
+    pub session: RowLimit,
 }
 
 impl Default for ExecutionLimit {
@@ -151,8 +153,8 @@ impl Default for ExecutionLimit {
 impl ExecutionLimit {
     pub const DEFAULT: Self = Self {
         segment_po2: DEFAULT_SEGMENT_LIMIT_PO2,
-        max_insn_cycles: None,
-        session: CycleLimit::None,
+        max_insn_rows: None,
+        session: RowLimit::None,
     };
 
     pub const fn with_segment_po2(self, segment_po2: usize) -> Self {
@@ -162,27 +164,27 @@ impl ExecutionLimit {
         }
     }
 
-    pub const fn with_max_insn_cycles(self, max_insn_cycles: usize) -> Self {
+    pub const fn with_max_insn_rows(self, max_insn_rows: usize) -> Self {
         Self {
-            max_insn_cycles: Some(max_insn_cycles),
+            max_insn_rows: Some(max_insn_rows),
             ..self
         }
     }
 
-    pub const fn with_session_limit(self, session: CycleLimit) -> Self {
+    pub const fn with_session_limit(self, session: RowLimit) -> Self {
         Self { session, ..self }
     }
 
-    pub const fn with_soft_session_limit(self, cycles: u64) -> Self {
+    pub const fn with_soft_session_limit(self, rows: u64) -> Self {
         Self {
-            session: CycleLimit::Soft(cycles),
+            session: RowLimit::Soft(rows),
             ..self
         }
     }
 
-    pub const fn with_hard_session_limit(self, cycles: u64) -> Self {
+    pub const fn with_hard_session_limit(self, rows: u64) -> Self {
         Self {
-            session: CycleLimit::Hard(cycles),
+            session: RowLimit::Hard(rows),
             ..self
         }
     }
@@ -192,25 +194,25 @@ impl ExecutionLimit {
     }
 
     fn segment_threshold(&self) -> u32 {
-        self.segment_limit() - self.max_insn_cycles() as u32
+        self.segment_limit() - self.max_insn_rows() as u32
     }
 
-    pub fn max_insn_cycles(&self) -> usize {
-        self.max_insn_cycles.unwrap_or(if self.segment_po2 >= 15 {
-            MAX_INSN_CYCLES
+    pub fn max_insn_rows(&self) -> usize {
+        self.max_insn_rows.unwrap_or(if self.segment_po2 >= 15 {
+            MAX_INSN_ROWS
         } else {
-            MAX_INSN_CYCLES_LOWER_PO2
+            MAX_INSN_ROWS_LOWER_PO2
         })
     }
 }
 
 #[derive(Copy, Clone, Debug, Default)]
-pub enum CycleLimit {
-    /// Hard limit on the number of cycles, it is an error to exceed this limit.
+pub enum RowLimit {
+    /// Hard limit on the number of rows, it is an error to exceed this limit.
     Hard(u64),
-    /// Soft limit on the number of cycles. Terminate, without error, if this limit is reached.
+    /// Soft limit on the number of rows. Terminate, without error, if this limit is reached.
     Soft(u64),
-    /// No limit on the number of cycles.
+    /// No limit on the number of rows.
     #[default]
     None,
 }
@@ -218,9 +220,9 @@ pub enum CycleLimit {
 #[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum ExecutionError {
-    /// Error when when a hard [CycleLimit] is exceeded.
-    #[error("Session limit exceeded: {cycle} >= {limit}")]
-    CycleLimitExceeded { limit: u64, cycle: u64 },
+    /// Error when when a hard [RowLimit] is exceeded.
+    #[error("Session limit exceeded: {rows} >= {limit}")]
+    RowLimitExceeded { limit: u64, rows: u64 },
     /// Error when the execution encounters an error. Optionally includes a [SegmentUpdate] with
     /// the results of execution up to the point of error in the final segment.
     #[error("Execution failed at program counter {pc:?}: {error}")]
@@ -263,19 +265,19 @@ pub struct SegmentUpdate {
     /// Value set upon termination of execution, indicating the termination type.
     terminate_state: Option<TerminateState>,
 
-    /// Count of "user cycles", the cycles directly associated with instructions executed by the
-    /// user guest program, before suspend in this segment. Does not include paging costs.
-    pub user_cycles: u32,
-    /// Count of cycles associated with memory paging (i.e. page-in and page-out operations).
-    pager_cycles: u32,
-    insn_counter: u32,
+    pub used_rows: u32,
+    pub insn_counter: u32,
     segment_threshold: u32,
+
     /// Power-of-two for the segment size required to prove this segment.
     pub po2: u32,
     /// Index of the segment in the session.
     index: u64,
     /// Gloablly unique nonce used within the proof of verifiable work system.
     povw_nonce: Option<PovwNonce>,
+
+    /// Used to help debug the block tracking
+    blocks: super::block_tracker::BlockCollection,
 }
 
 impl SegmentUpdate {
@@ -318,13 +320,13 @@ impl SegmentUpdate {
             terminate_state: self.terminate_state,
             read_record: self.read_record,
             write_record: self.write_record,
-            suspend_cycle: self.user_cycles,
-            paging_cycles: self.pager_cycles,
+            used_rows: self.used_rows,
             insn_counter: self.insn_counter,
             po2: self.po2,
             index: self.index,
             segment_threshold: self.segment_threshold,
             povw_nonce: self.povw_nonce,
+            blocks: self.blocks,
         }
     }
 
@@ -339,8 +341,6 @@ impl SegmentUpdate {
         Ok(self.into_segment(partial_image))
     }
 }
-
-const MIN_EXECUTOR_SEGMENT_PO2: usize = 14;
 
 impl<'a, S: Syscall> Executor<'a, S> {
     pub fn new(
@@ -374,7 +374,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             pc: ByteAddr(0),
             user_pc: ByteAddr(0),
             machine_mode: 0,
-            user_cycles: 0,
+            preflight_user_cycles: 0,
             insn_counter: 0,
             pager: PagedMemory::new(image.clone(), /*tracing_enabled=*/ !trace.is_empty()),
             initial_image: image,
@@ -385,7 +385,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             input_digest: input_digest.unwrap_or_default(),
             output_digest: None,
             trace,
-            cycles: SessionCycles::default(),
+            row_info: RowInfo::default(),
             ecall_metrics: Default::default(),
             ring: AllocRingBuffer::new(10),
             povw_job_id,
@@ -407,8 +407,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
         if self.terminate_state.is_some() {
             return Ok(None);
         }
-        if let CycleLimit::Soft(soft_limit) = limit.session
-            && self.cycles.user >= soft_limit
+        let used_rows = self.get_rows();
+        if let RowLimit::Soft(soft_limit) = limit.session
+            && used_rows >= soft_limit
         {
             return Ok(None);
         }
@@ -421,28 +422,30 @@ impl<'a, S: Syscall> Executor<'a, S> {
                 break;
             };
 
-            // Check the session-level cycle limit.
+            // Check the session-level row limit.
             match limit.session {
-                CycleLimit::Hard(max_cycles) => {
-                    if self.cycles.user >= max_cycles {
-                        return Err(ExecutionError::CycleLimitExceeded {
-                            limit: max_cycles,
-                            cycle: self.cycles.user,
+                RowLimit::Hard(max_rows) => {
+                    let used_rows = self.get_rows();
+                    if used_rows >= max_rows {
+                        return Err(ExecutionError::RowLimitExceeded {
+                            limit: max_rows,
+                            rows: used_rows,
                         });
                     }
                 }
-                CycleLimit::Soft(max_cycles) => {
-                    if self.cycles.user >= max_cycles {
+                RowLimit::Soft(max_rows) => {
+                    let used_rows = self.get_rows();
+                    if used_rows >= max_rows {
                         break;
                     }
                 }
-                CycleLimit::None => {}
+                RowLimit::None => {}
             }
 
-            // Check the segment-level cycle limit.
+            // Check the segment-level row limit.
             if self.should_split(limit.segment_threshold()) {
-                // NOTE: If the max_insn_cycles is set accurately, this should never happen.
-                if self.segment_cycles() > limit.segment_limit() {
+                // NOTE: If the max_insn_rows is set accurately, this should never happen.
+                if self.segment_used_rows() > limit.segment_limit() {
                     return Err(anyhow!(
                         "segment limit ({}) too small for instruction at pc: {:?}",
                         limit.segment_limit(),
@@ -474,9 +477,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         Risc0Machine::suspend(self)?;
 
-        let cycles = self.segment_cycles().next_power_of_two();
-        let po2 = std::cmp::max(log2_ceil(cycles as usize), MIN_EXECUTOR_SEGMENT_PO2);
-        let segment_threshold_min = u32::min(self.segment_cycles(), limit.segment_threshold());
+        let rows = self.segment_used_rows().next_power_of_two();
+        let po2 = log2_ceil(rows as usize);
+        let segment_threshold_min = u32::min(self.segment_used_rows(), limit.segment_threshold());
         let update = self.split_segment(po2, segment_threshold_min)?;
 
         Ok(Some(update))
@@ -505,15 +508,12 @@ impl<'a, S: Syscall> Executor<'a, S> {
         segment_po2: usize,
         segment_threshold: u32,
     ) -> Result<SegmentUpdate, ExecutionError> {
-        tracing::debug!(
-            "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
-            self.user_cycles,
-            self.pager.cycles,
-            self.segment_cycles()
-        );
+        tracing::debug!("split({} >= {segment_threshold}", self.segment_used_rows());
 
         let partial_image = self.pager.commit();
+        let used_rows = self.segment_used_rows();
 
+        let blocks = self.get_blocks();
         let update = SegmentUpdate {
             update_partial_image: partial_image,
             access_page_indexes: self.pager.page_indexes(),
@@ -521,14 +521,14 @@ impl<'a, S: Syscall> Executor<'a, S> {
             output_digest: self.output_digest,
             read_record: std::mem::take(&mut self.read_record),
             write_record: std::mem::take(&mut self.write_record),
-            user_cycles: self.user_cycles,
-            pager_cycles: self.pager.cycles,
+            used_rows,
             insn_counter: self.insn_counter,
             terminate_state: self.terminate_state,
             segment_threshold,
             po2: segment_po2 as u32,
             index: self.segment_counter as u64,
             povw_nonce: self.povw_nonce(self.segment_counter),
+            blocks: blocks.clone(),
         };
 
         // NOTE: There is no reasonable scenario where a session will have more than 4B
@@ -538,16 +538,15 @@ impl<'a, S: Syscall> Executor<'a, S> {
             .checked_add(1)
             .context("segment_counter overflow")?;
 
-        let total_cycles = 1 << segment_po2;
-        let pager_cycles = self.pager.cycles as u64;
-        self.cycles.total += total_cycles;
-        self.cycles.paging += pager_cycles;
+        let total_rows = 1u64 << segment_po2;
+        let padding = total_rows - used_rows as u64;
+        self.row_info.count += total_rows;
+        self.row_info.insn_count += self.insn_counter as u64;
+        self.row_info.padding_count += padding;
+        self.row_info.row_points += blocks.row_points();
+        blocks.add_counts(&mut self.row_info.block_counts);
 
-        // XXX M3: For m3, these cycle counts no longer add up to the po2
-        // let user_cycles = self.user_cycles as u64;
-        // self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
-
-        self.user_cycles = 0;
+        self.preflight_user_cycles = 0;
         self.insn_counter = 0;
         self.pager.reset();
         self.block_tracker = Default::default();
@@ -576,11 +575,11 @@ impl<'a, S: Syscall> Executor<'a, S> {
             segments: self.segment_counter as u64 + 1,
             pre_image: self.initial_image.clone(),
             post_image: self.pager.image.clone().into(),
-            user_cycles: self.cycles.user,
-            total_cycles: self.cycles.total,
-            paging_cycles: self.cycles.paging,
-            reserved_cycles: self.cycles.reserved,
+            row_count: self.row_info.count,
+            padding_row_count: self.row_info.padding_count,
+            insn_count: self.row_info.insn_count,
             ecall_metrics: self.ecall_metrics.clone(),
+            block_counts: self.row_info.block_counts,
             output: self.output_digest,
             terminate_state: self.terminate_state,
             po2,
@@ -605,14 +604,14 @@ impl<'a, S: Syscall> Executor<'a, S> {
             output_digest: self.output_digest,
             read_record: self.read_record.clone(),
             write_record: self.write_record.clone(),
-            user_cycles: self.user_cycles,
-            pager_cycles: self.pager.cycles,
             insn_counter: self.insn_counter,
             terminate_state: self.terminate_state,
+            used_rows: self.segment_used_rows(),
             segment_threshold,
             po2: po2 as u32,
             index: index as u64,
             povw_nonce: self.povw_nonce(index),
+            blocks: self.get_blocks(),
         }
     }
 
@@ -630,17 +629,17 @@ impl<'a, S: Syscall> Executor<'a, S> {
         )
     }
 
-    fn segment_cycles(&self) -> u32 {
+    fn segment_used_rows(&self) -> u32 {
         let blocks = self
             .block_tracker
-            .get_blocks(self.user_cycles, self.pager.touched_pages());
+            .get_blocks(self.insn_counter, self.pager.touched_pages());
         blocks.row_points().div_ceil(POINTS_PER_ROW) as u32
     }
 
     fn should_split(&self, segment_threshold: u32) -> bool {
         let blocks = self
             .block_tracker
-            .get_blocks(self.user_cycles, self.pager.touched_pages());
+            .get_blocks(self.preflight_user_cycles, self.pager.touched_pages());
         if blocks.row_points().div_ceil(POINTS_PER_ROW) as u32 > segment_threshold {
             tracing::debug!("block_tracker blocks = {blocks:?}");
             true
@@ -649,12 +648,12 @@ impl<'a, S: Syscall> Executor<'a, S> {
         }
     }
 
-    fn inc_user_cycles(&mut self, count: usize, ecall: Option<EcallKind>) {
-        self.cycles.user += count as u64;
-        self.user_cycles += count as u32;
-        if let Some(kind) = ecall {
-            self.ecall_metrics[kind].cycles += count as u64;
-        }
+    fn get_blocks(&self) -> super::block_tracker::BlockCollection {
+        let blocks = self
+            .block_tracker
+            .get_blocks(self.preflight_user_cycles, self.pager.touched_pages());
+        tracing::debug!("block_tracker blocks = {blocks:?}");
+        blocks
     }
 
     fn povw_nonce(&self, segment_index: u32) -> Option<PovwNonce> {
@@ -682,12 +681,10 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     #[inline(always)]
-    fn trace_instruction(&mut self, cycle: u64, kind: InsnKind, decoded: &DecodedInstruction) {
+    fn trace_instruction(&mut self, kind: InsnKind, decoded: &DecodedInstruction) {
         if unlikely(tracing::enabled!(tracing::Level::TRACE)) {
             tracing::trace!(
-                "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
-                self.user_cycles + 1,
-                self.segment_cycles() + 1,
+                "{:?}> {:#010x}  {}",
                 self.pc,
                 decoded.insn,
                 super::rv32im::disasm(kind, decoded)
@@ -696,6 +693,13 @@ impl<'a, S: Syscall> Executor<'a, S> {
         if unlikely(tracing::enabled!(tracing::Level::DEBUG)) {
             self.ring.push((self.pc, kind, decoded.clone()));
         }
+    }
+
+    fn get_row_points(&self) -> u64 {
+        let blocks = self
+            .block_tracker
+            .get_blocks(self.insn_counter, self.pager.touched_pages());
+        self.row_info.row_points + blocks.row_points()
     }
 }
 
@@ -734,13 +738,12 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     #[inline(always)]
     fn on_insn_start(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()> {
-        self.block_tracker.track_pc(self.user_pc.0);
+        self.block_tracker.track_pc(self.pc.0);
 
-        let cycle = self.cycles.user;
-        self.trace_instruction(cycle, kind, decoded);
+        self.trace_instruction(kind, decoded);
         if unlikely(!self.trace.is_empty()) {
             self.trace(TraceEvent::InstructionStart {
-                cycle,
+                cycle: self.get_row_points(),
                 pc: self.pc.0,
                 insn: decoded.insn,
             })?;
@@ -752,7 +755,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     fn on_insn_end(&mut self, #[allow(unused_variables)] kind: InsnKind) -> Result<()> {
         self.block_tracker.track_instr(kind);
 
-        self.inc_user_cycles(1, None);
+        self.preflight_user_cycles += 1;
         if unlikely(!self.trace.is_empty()) {
             self.trace_pager()?;
         }
@@ -771,7 +774,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
         if cur == CycleState::MachineEcall {
             self.ecall_metrics[kind].count += 1;
         }
-        self.inc_user_cycles(1, Some(kind));
+        self.preflight_user_cycles += 1;
 
         if !self.trace.is_empty() {
             self.trace_pager()?;
@@ -846,6 +849,9 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32> {
         // NOTE: This clone is required to allow host_read to have mutable access to self.
         let rlen = self.syscall_handler.clone().host_read(self, fd, buf)?;
+        if rlen as usize > buf.len() {
+            bail!("syscall returned invalid length: fd={fd}");
+        }
         let slice = &buf[..rlen as usize];
         self.read_record.push(slice.to_vec());
         Ok(rlen)
@@ -859,11 +865,11 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     }
 
     fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {
-        self.inc_user_cycles(1, Some(EcallKind::Sha2));
+        self.preflight_user_cycles += 1;
     }
 
     fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
-        self.inc_user_cycles(1, Some(EcallKind::Poseidon2));
+        self.preflight_user_cycles += 1;
     }
 
     fn ecall_bigint(&mut self) -> Result<()> {
@@ -872,7 +878,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
         self.block_tracker
             .track_ecall_bigint(verify_program_size as u64);
 
-        self.inc_user_cycles(verify_program_size + 1, Some(EcallKind::BigInt));
+        self.preflight_user_cycles += (verify_program_size + 1) as u32;
 
         Ok(())
     }
@@ -881,9 +887,9 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
         let mut p2 = Poseidon2::load_ecall(self)?;
 
         self.block_tracker.track_ecall_poseidon2(p2.count as u64);
+        self.preflight_user_cycles += p2.count;
 
-        p2.rest_with_mix(self, CycleState::Decode, |p2, _, ctx| {
-            ctx.inc_user_cycles(ROUNDS_HALF_FULL * 2 + 1, Some(EcallKind::Poseidon2));
+        p2.rest_with_mix(self, CycleState::Decode, |p2, _, _| {
             // Convert to Montgomery form, run the mix function, then convert back.
             // NOTE: It's possible this could be optimized to not convert the back and forth on
             // every mix, and instead only convert the input, initial state and final state.
@@ -897,10 +903,20 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     fn on_ecall_read_end(&mut self, read_bytes: u64, read_words: u64) {
         self.block_tracker.track_ecall_read(read_bytes, read_words);
+        self.preflight_user_cycles += (read_bytes + read_words) as u32;
     }
 
     fn on_ecall_write_end(&mut self) {
         self.block_tracker.track_ecall_write();
+    }
+
+    fn on_user_ecall(&mut self) {
+        self.block_tracker.track_user_ecall();
+    }
+
+    fn on_trap(&mut self) {
+        self.preflight_user_cycles += 1;
+        self.block_tracker.track_trap();
     }
 }
 
@@ -936,8 +952,8 @@ impl<S: Syscall> SyscallContext for Executor<'_, S> {
         Ok(self.pager.peek_page(page_idx)?.data())
     }
 
-    fn get_cycle(&self) -> u64 {
-        self.cycles.user
+    fn get_rows(&self) -> u64 {
+        self.row_info.count + self.segment_used_rows() as u64
     }
 
     fn get_pc(&self) -> u32 {
@@ -948,12 +964,8 @@ impl<S: Syscall> SyscallContext for Executor<'_, S> {
 impl From<PageTraceEvent> for TraceEvent {
     fn from(event: PageTraceEvent) -> Self {
         match event {
-            PageTraceEvent::PageIn { cycles } => TraceEvent::PageIn {
-                cycles: cycles as u64,
-            },
-            PageTraceEvent::PageOut { cycles } => TraceEvent::PageOut {
-                cycles: cycles as u64,
-            },
+            PageTraceEvent::PageIn { cycles } => TraceEvent::PageIn { cycles },
+            PageTraceEvent::PageOut { cycles } => TraceEvent::PageOut { cycles },
         }
     }
 }

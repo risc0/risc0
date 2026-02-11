@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -110,4 +110,6 @@ unsafe extern "C" {
         domain: u32,
         poly_mix: *const BabyBearExtElem,
     ) -> *const std::os::raw::c_char;
+
+    pub fn risc0_circuit_recursion_cuda_reset() -> *const std::os::raw::c_char;
 }

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ extern "C" void prefix_sum(cudaStream_t stream, fr_t* buf, uint32_t count) {
   thrust::inclusive_scan(thrust::cuda::par.on(stream), buf, buf + count, buf);
 }
 
-extern "C" RustError::by_value rv32im_m3_poly_divide(
+extern "C" RustError::by_value rv32im_poly_divide(
     cudaStream_t stream, fr4_t d_inout[/*len*/], size_t len, fr4_t* remainder, fr4_t pow) {
   stream_t sppark_stream(stream, 0);
   try {

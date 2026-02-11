@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -20,7 +20,7 @@ use risc0_binfmt::ByteAddr;
 use risc0_circuit_rv32im::execute::MAX_IO_BYTES;
 use risc0_zkvm_platform::{
     WORD_SIZE,
-    syscall::reg_abi::{REG_A3, REG_A4},
+    syscall::reg_abi::{REG_A3, REG_A4, REG_A5},
 };
 
 use super::{Syscall, SyscallContext};
@@ -31,8 +31,8 @@ impl Syscall for SysGetenv {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
         let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
 
@@ -44,18 +44,33 @@ impl Syscall for SysGetenv {
             bail!("sys_getenv failure: env var name is too large");
         }
 
-        match self.0.get(msg) {
-            None => Ok((u32::MAX, 0)),
-            Some(val) => {
-                let nbytes = min(to_guest.len() * WORD_SIZE, val.len());
-                let to_guest_u8s: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
-                to_guest_u8s[0..nbytes].clone_from_slice(&val.as_bytes()[0..nbytes]);
+        let get_var_len = ctx.load_register(REG_A5) != 0;
 
-                if val.len() >= MAX_IO_BYTES as usize {
-                    bail!("sys_getenv failure: value is too large");
+        if get_var_len {
+            if to_guest.len() != WORD_SIZE * 2 {
+                bail!("invalid get-env with get_var_len=1")
+            }
+            let ret = match self.0.get(msg) {
+                None => u32::MAX,
+                Some(val) => {
+                    if val.len() >= MAX_IO_BYTES as usize {
+                        bail!("sys_getenv failure: value is too large");
+                    }
+                    val.len() as u32
                 }
+            };
 
-                Ok((val.len() as u32, 0))
+            to_guest[..WORD_SIZE].copy_from_slice(&ret.to_le_bytes());
+            Ok(to_guest.len())
+        } else {
+            match self.0.get(msg) {
+                None => Ok(0),
+                Some(val) => {
+                    let nbytes = min(to_guest.len(), val.len());
+                    to_guest[0..nbytes].clone_from_slice(&val.as_bytes()[0..nbytes]);
+
+                    Ok(nbytes)
+                }
             }
         }
     }

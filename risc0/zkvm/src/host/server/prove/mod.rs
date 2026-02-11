@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -50,8 +50,6 @@ mod private {
     impl Sealed for DevModeProver {}
 }
 
-pub type PreflightIter = Box<dyn Iterator<Item = Result<PreflightResults>>>;
-
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a
 /// [Receipt][crate::Receipt] that can be used to verify correct computation.
 pub trait ProverServer: private::Sealed {
@@ -72,31 +70,20 @@ pub trait ProverServer: private::Sealed {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo>;
 
     /// Prove the specified [Segment].
-    fn prove_segment(
-        &self,
-        ctx: &VerifierContext,
-        segment: &Segment,
-    ) -> Result<Vec<SegmentReceipt>> {
+    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         tracing::debug!("prove_segment");
-        let mut receipts = vec![];
-        let mut iter = self.segment_preflight(segment)?;
-        let chunk = iter
-            .next()
-            .ok_or_else(|| anyhow!("segment_preflight produced no segment results"))?;
+        let results = self.segment_preflight(segment)?;
 
-        if iter.next().is_some() {
-            bail!("segment_preflight produced multiple segments");
-        }
+        segment
+            .inner
+            .blocks
+            .assert_preflight_counts(results.block_counts());
 
-        tracing::debug!("chunk");
-        let receipt = self.prove_preflight(ctx, chunk?)?;
-        receipts.push(receipt);
-
-        Ok(receipts)
+        self.prove_preflight(ctx, results)
     }
 
-    /// Perform preflight on a [Segment] to produce a sequence of [PreflightResults].
-    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter>;
+    /// Perform preflight on a [Segment] to produce a [PreflightResults].
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults>;
 
     /// Prove the specified [PreflightResults].
     fn prove_preflight(
@@ -396,9 +383,6 @@ where
             continuation_receipt,
             |conditional: SuccinctReceipt<Claim>, assumption: &InnerAssumptionReceipt| match assumption {
                 InnerAssumptionReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
-                InnerAssumptionReceipt::Composite(assumption) => {
-                    self.resolve(&conditional, &SuccinctReceipt::<ReceiptClaim>::into_unknown(self.composite_to_succinct(assumption)?))
-                }
                 InnerAssumptionReceipt::Fake(_) => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
                 ),

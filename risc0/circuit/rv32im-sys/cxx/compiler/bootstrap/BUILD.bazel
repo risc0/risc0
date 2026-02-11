@@ -6,7 +6,7 @@ cc_library(
     hdrs = ["extract_zkr.h"],
     deps = [
         "//rv32im/circuit",
-        "//verify",
+        "//verify/info",
         "@zirgen//zirgen/circuit/predicates:lib",
         "@zirgen//zirgen/compiler/codegen",
     ],
@@ -23,6 +23,7 @@ cc_test(
         ":extract_zkr",
         "//hal/pick",
         "//prove",
+        "//verify",
     ],
 )
 
@@ -30,16 +31,45 @@ ZKRS = [
     ("lift_rv32im_m3_" + str(po2))
     for po2 in range(12, 25)
 ]
+ZKRS += [
+    ("lift_rv32im_m3_povw_" + str(po2))
+    for po2 in range(12, 25)
+]
+
+OTHER_ZKRS = [
+    "identity",
+    "join_povw",
+    "join_unwrap_povw",
+    "join",
+    "resolve_povw",
+    "resolve_unwrap_povw",
+    "resolve",
+    "test_recursion_circuit",
+    "union",
+    "unwrap_povw",
+]
+
+[filegroup(
+    name = n + ".zkr",
+    srcs = ["@zirgen//zirgen/circuit/predicates:" + n + ".zkr"]
+) for n in OTHER_ZKRS]
 
 build_circuit(
-    name = "zkr",
+    name = "gen_zkr",
     srcs = ["gen_zkr.cpp"],
     outs = [fn for zkr in ZKRS for fn in [
         zkr + ".zkr",
     ]],
     deps = [
         ":extract_zkr",
-    ],
+    ]
+)
+
+filegroup(
+    name = "zkr",
+    srcs = [
+        zkr + ".zkr" for zkr in ZKRS + OTHER_ZKRS
+    ]
 )
 
 cc_binary(
@@ -53,6 +83,6 @@ cc_binary(
         "//compiler/extractor",
         "//rv32im/circuit",
         "//rv32im/emu",
-        "//verify",
+        "//verify/info",
     ],
 )

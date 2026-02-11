@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -22,6 +22,8 @@
 #include "llvm/Support/InitLLVM.h"
 
 #include "rv32im/circuit/circuit.ipp"
+
+#include "compiler/extractor/extract.h"
 
 using namespace zirgen;
 namespace cl = llvm::cl;
@@ -47,7 +49,6 @@ int main(int argc, char** argv) {
 
   // Build a module with the circuit
   Module module;
-  using C = RecordingContext;
   RecordingContext ctx(module.getCtx());
   RecordingReg::setContext(&ctx);
   BuilderSingleton::set(&ctx.builder);

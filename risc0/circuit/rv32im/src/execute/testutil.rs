@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -16,7 +16,7 @@
 use std::collections::BTreeMap;
 
 use anyhow::{Result, bail};
-use risc0_binfmt::{MemoryImage, Program};
+use risc0_binfmt::{ByteAddr, MemoryImage, Program, WordAddr};
 use risc0_core::scope;
 use risc0_zkp::{
     MAX_CYCLES_PO2,
@@ -26,11 +26,11 @@ use risc0_zkp::{
 use crate::execute::ExecutionLimit;
 
 use super::{
-    Executor, SimpleSession, SyscallContext, executor::CycleLimit, pager::RESERVED_PAGING_CYCLES,
+    Executor, SimpleSession, SyscallContext, executor::RowLimit, pager::RESERVED_PAGING_CYCLES,
     platform::*, syscall::Syscall,
 };
 
-pub const DEFAULT_SESSION_LIMIT: CycleLimit = CycleLimit::Hard(1 << 24);
+pub const DEFAULT_SESSION_LIMIT: RowLimit = RowLimit::Hard(1 << 24);
 pub const DEFAULT_EXECUTION_LIMIT: ExecutionLimit =
     ExecutionLimit::DEFAULT.with_session_limit(DEFAULT_SESSION_LIMIT);
 pub const MIN_CYCLES_PO2: usize = log2_ceil(RESERVED_CYCLES + RESERVED_PAGING_CYCLES as usize);
@@ -202,23 +202,19 @@ impl Assembler {
     }
 
     pub fn program(&self) -> Program {
-        let entry = USER_START_ADDR + WORD_SIZE;
-        let entry = entry.0;
-        let mut pc = entry;
+        let entry: WordAddr = USER_START_ADDR.waddr() + 1;
 
-        let mut image: BTreeMap<_, _> = self
-            .text
-            .iter()
-            .map(|instr| {
-                let result = (pc, *instr);
-                pc += WORD_SIZE as u32;
-                result
-            })
-            .collect();
+        let mut image = MemoryImage::default();
+        for (offset, &instr) in self.text.iter().enumerate() {
+            image.set_word(entry + offset, instr).unwrap();
+        }
+        for (&addr, &word) in self.data.iter() {
+            image
+                .set_word(ByteAddr(addr).waddr_aligned().unwrap(), word)
+                .unwrap();
+        }
 
-        image.extend(self.data.iter());
-
-        Program::new_from_entry_and_image(entry, image)
+        Program::new_from_entry_and_image(entry.baddr().0, image)
     }
 
     pub fn word(&mut self, addr: u32, word: u32) {

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -22,7 +22,7 @@ use alloc::vec::Vec;
 use core::{fmt, time::Duration};
 
 use crate::{Receipt, ReceiptClaim, WorkClaim, receipt::GenericReceipt};
-use risc0_circuit_rv32im::{EcallKind, EcallMetric};
+use risc0_circuit_rv32im::{BlockType, EcallKind, EcallMetric};
 
 #[derive(Clone, Debug, Enum, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -73,23 +73,23 @@ pub struct SessionStats {
     /// Count of segments in this proof request
     pub segments: usize,
 
-    /// Total cycles run within guest
-    pub total_cycles: u64,
+    /// Total rows generated during this session
+    pub row_count: u64,
 
-    /// User cycles run within guest
-    pub user_cycles: u64,
+    /// Empty rows used to reach a power of two
+    pub padding_row_count: u64,
 
-    /// Paging cycles run within guest
-    pub paging_cycles: u64,
-
-    /// Reserved cycles run within guest
-    pub reserved_cycles: u64,
+    /// Total number of riscv instructions ran during this session
+    pub insn_count: u64,
 
     /// ecall metrics grouped by kind.
     pub ecall_metrics: EnumMap<EcallKind, Option<EcallMetric>>,
 
     /// syscall metrics grouped by kind.
     pub syscall_metrics: EnumMap<SyscallKind, Option<SyscallMetric>>,
+
+    /// count of different block types.
+    pub block_counts: Option<EnumMap<BlockType, u64>>,
 
     /// Execution elapsed time.
     pub execution_time: Option<Duration>,
@@ -109,47 +109,21 @@ impl SessionStats {
 
 impl fmt::Display for SessionStats {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let pct = |cycles: u64| cycles as f64 / self.total_cycles as f64 * 100.0;
-
         if let Some(execution_time) = self.execution_time {
             writeln!(f, "execution time: {execution_time:?}")?;
         }
         writeln!(f, "number of segments: {}", self.segments)?;
-        writeln!(f, "{} total cycles", self.total_cycles)?;
         writeln!(
             f,
-            "{} user cycles ({:.2}%)",
-            self.user_cycles,
-            pct(self.user_cycles)
-        )?;
-        writeln!(
-            f,
-            "{} paging cycles ({:.2}%)",
-            self.paging_cycles,
-            pct(self.paging_cycles)
-        )?;
-        writeln!(
-            f,
-            "{} reserved cycles ({:.2}%)",
-            self.reserved_cycles,
-            pct(self.reserved_cycles)
+            "{} total rows ({} padding)",
+            self.row_count, self.padding_row_count
         )?;
 
         writeln!(f, "ecalls")?;
-        let mut ecall_metrics: Vec<_> = self
-            .ecall_metrics
-            .iter()
-            .filter_map(|(k, v)| v.as_ref().map(|v| (k, v)))
-            .collect();
-        ecall_metrics.sort_by(|a, b| a.1.cycles.cmp(&b.1.cycles));
-        for (name, metric) in ecall_metrics.iter().rev() {
-            writeln!(
-                f,
-                "\t{} {name:?} calls, {} cycles, ({:.2}%)",
-                metric.count,
-                metric.cycles,
-                pct(metric.cycles)
-            )?;
+        for (name, metric) in &self.ecall_metrics {
+            if let Some(metric) = metric {
+                writeln!(f, "\t{} {name:?} calls", metric.count)?;
+            }
         }
 
         writeln!(f, "syscalls")?;
@@ -161,6 +135,25 @@ impl fmt::Display for SessionStats {
         syscall_metrics.sort_by(|a, b| a.1.count.cmp(&b.1.count));
         for (name, metric) in syscall_metrics.iter().rev() {
             writeln!(f, "\t{} {name:?} calls", metric.count)?;
+        }
+
+        if let Some(block_counts) = &self.block_counts {
+            writeln!(f, "blocks")?;
+
+            let used_rows = self.row_count - self.padding_row_count;
+            let max_name_width = BlockType::iter().map(|b| b.name().len()).max().unwrap_or(0);
+            for (block, count) in block_counts {
+                if block == BlockType::Empty {
+                    continue;
+                }
+                let pct = (count.div_ceil(block.count_per_row() as u64) as f64 * 100.0)
+                    / used_rows as f64;
+                let name = block.name();
+                writeln!(
+                    f,
+                    "\t{name:<max_name_width$}: {count:>12} ({pct:>6.2}% of rows)"
+                )?;
+            }
         }
 
         Ok(())

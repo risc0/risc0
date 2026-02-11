@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -68,5 +68,6 @@ int main() {
   runTestBinary("rv32im/test/test_p2_kernel", 13);
   runTestBinary("rv32im/test/test_bigint_kernel", 13);
   runTestBinary("rv32im/test/test_io_kernel", 13, true);
+  runTestBinary("rv32im/test/store_bug_kernel", 13);
   return 0;
 }

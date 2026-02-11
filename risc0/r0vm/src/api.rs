@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -37,7 +37,7 @@ use bonsai_sdk::responses::{
     CreateSessRes, ImgUploadRes, ProofReq, ReceiptDownload, SessionStats, SessionStatusRes,
     SnarkReq, SnarkStatusRes, UploadRes,
 };
-use risc0_zkvm::{Receipt, compute_image_id, rpc::JobRequest};
+use risc0_zkvm::{AssumptionReceipt, Receipt, compute_image_id, rpc::JobRequest};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tokio::net::TcpListener;
@@ -139,6 +139,9 @@ pub(crate) enum AppError {
     #[error("receipt does not exist: {0}")]
     ReceiptMissing(String),
 
+    #[error("assumption receipt is invalid: {0}")]
+    AssumptionReceiptInvalid(String),
+
     #[error("preflight journal does not exist: {0}")]
     JournalMissing(String),
 
@@ -155,6 +158,7 @@ impl AppError {
             Self::InputAlreadyExists(_) => "InputAlreadyExists",
             Self::ReceiptAlreadyExists(_) => "ReceiptAlreadyExists",
             Self::ReceiptMissing(_) => "ReceiptMissing",
+            Self::AssumptionReceiptInvalid(_) => "AssumptionReceiptInvalid",
             Self::JournalMissing(_) => "JournalMissing",
             Self::InternalErr(_) => "InternalErr",
         }
@@ -171,7 +175,9 @@ impl From<AnyhowErr> for AppError {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let code = match self {
-            Self::ImageInvalid(_) | Self::ImageIdMismatch(_, _) => StatusCode::BAD_REQUEST,
+            Self::ImageInvalid(_)
+            | Self::ImageIdMismatch(_, _)
+            | Self::AssumptionReceiptInvalid(_) => StatusCode::BAD_REQUEST,
             Self::ImgAlreadyExists(_)
             | Self::InputAlreadyExists(_)
             | Self::ReceiptAlreadyExists(_) => StatusCode::NO_CONTENT,
@@ -408,7 +414,12 @@ async fn prove_stark(
             .context("Failed to read receipt")?;
         let receipt: Receipt =
             bincode::deserialize(&bytes).context("Failed to deserialize assumption")?;
-        assumptions.push(receipt.into());
+        let assumption_receipt: AssumptionReceipt = receipt.try_into().map_err(|e| {
+            AppError::AssumptionReceiptInvalid(format!(
+                "failed to convert given receipt into assumption receipt: {e}"
+            ))
+        })?;
+        assumptions.push(assumption_receipt);
     }
 
     let reply = state
@@ -499,8 +510,8 @@ async fn stark_status(
     let (stats, receipt_url) = if let Some(result) = status.result {
         let stats = SessionStats {
             segments: result.session.stats.segments,
-            total_cycles: result.session.stats.total_cycles,
-            cycles: result.session.stats.user_cycles,
+            total_cycles: result.session.stats.row_count,
+            cycles: result.session.stats.insn_count,
         };
         let receipt_url = result
             .receipt

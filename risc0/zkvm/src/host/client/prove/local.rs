@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -64,7 +64,9 @@ impl Executor for LocalProver {
         while let Some(update) = exec.run_segment()? {
             segments.push(SegmentInfo {
                 po2: update.po2,
-                cycles: update.user_cycles,
+                padding_row_count: (1 << update.po2) - update.used_rows as u64,
+                row_count: 1 << update.po2,
+                insn_count: update.insn_counter as u64,
             });
         }
         let session = exec.finalize_session()?;

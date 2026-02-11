@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -150,7 +150,7 @@ impl ReceiptClaim {
         Ok(())
     }
 
-    pub(crate) fn decode_from_seal_m3(seal: &[u32]) -> anyhow::Result<ReceiptClaim> {
+    pub(crate) fn decode_from_seal(seal: &[u32]) -> anyhow::Result<ReceiptClaim> {
         let claim = risc0_circuit_rv32im::Claim::decode(seal)?;
         tracing::debug!("claim: {claim:#?}");
 
@@ -178,13 +178,13 @@ impl ReceiptClaim {
     }
 
     #[cfg(feature = "prove")]
-    pub(crate) fn decode_m3_with_output(
+    pub(crate) fn decode_with_output(
         seal: &[u32],
         output: MaybePruned<Option<Output>>,
     ) -> anyhow::Result<ReceiptClaim> {
         use crate::claim::merge::Merge;
 
-        let mut claim = Self::decode_from_seal_m3(seal)?;
+        let mut claim = Self::decode_from_seal(seal)?;
         claim
             .output
             .merge_with(&output)

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -20,34 +20,47 @@
 
 extern "C" {
 
-struct SegmentContext;
 struct PreflightContext;
 struct ProverContext;
-
 struct RustSegment;
+struct SegmentContext;
 
 struct RustSliceFp {
   const risc0::Fp* ptr;
   size_t len;
 };
 
-const char* risc0_circuit_rv32im_m3_last_error() noexcept;
-void risc0_circuit_rv32im_m3_clear_last_error() noexcept;
+namespace risc0 {
+struct RowInfo;
+}
 
-void risc0_circuit_rv32im_m3_segment_free(SegmentContext* ctx);
-void risc0_circuit_rv32im_m3_preflight_free(PreflightContext* ctx);
-void risc0_circuit_rv32im_m3_prover_free(ProverContext* ctx);
+const char* risc0_circuit_rv32im_last_error() noexcept;
+void risc0_circuit_rv32im_clear_last_error() noexcept;
 
-SegmentContext* risc0_circuit_rv32im_m3_segment_new(const RustSegment* segment);
-PreflightContext* risc0_circuit_rv32im_m3_segment_preflight(SegmentContext* sctx, size_t po2);
+void risc0_circuit_rv32im_segment_free(SegmentContext* ctx);
+void risc0_circuit_rv32im_preflight_free(PreflightContext* ctx);
+void risc0_circuit_rv32im_prover_free(ProverContext* ctx);
 
-size_t risc0_circuit_rv32im_m3_preflight_is_final(PreflightContext* ctx);
+SegmentContext* risc0_circuit_rv32im_segment_new(const RustSegment* segment);
+PreflightContext* risc0_circuit_rv32im_segment_preflight(SegmentContext* sctx, size_t po2);
 
-ProverContext* risc0_circuit_rv32im_m3_prover_new_cpu(size_t po2);
-ProverContext* risc0_circuit_rv32im_m3_prover_new_cuda(size_t po2);
+size_t risc0_circuit_rv32im_preflight_is_final(PreflightContext* ctx);
 
-void risc0_circuit_rv32im_m3_prove(ProverContext* ctx, PreflightContext* preflight);
+const risc0::RowInfo* risc0_circuit_rv32im_preflight_row_info(PreflightContext* ctx);
+size_t risc0_circuit_rv32im_preflight_row_info_size(PreflightContext* ctx);
 
-RustSliceFp risc0_circuit_rv32im_m3_prover_transcript(ProverContext* ctx);
+const uint32_t* risc0_circuit_rv32im_preflight_aux(PreflightContext* ctx);
+size_t risc0_circuit_rv32im_preflight_aux_size(PreflightContext* ctx);
+
+ProverContext* risc0_circuit_rv32im_prover_new_cpu(size_t po2);
+ProverContext* risc0_circuit_rv32im_prover_new_gpu(size_t po2);
+
+void risc0_circuit_rv32im_prove(ProverContext* ctx,
+                                const risc0::RowInfo* rowInfo,
+                                size_t rowInfoSize,
+                                const uint32_t* aux,
+                                size_t auxSize);
+
+RustSliceFp risc0_circuit_rv32im_prover_transcript(ProverContext* ctx);
 
 } // extern "C"

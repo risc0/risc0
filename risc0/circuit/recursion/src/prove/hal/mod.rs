@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -23,11 +23,11 @@ pub(crate) mod cuda;
 #[cfg(feature = "cuda")]
 pub(crate) mod dual;
 
-// #[cfg(all(
-//     feature = "prove",
-//     any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios")
-// ))]
-// pub mod metal;
+#[cfg(all(
+    feature = "prove",
+    any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios")
+))]
+pub mod metal;
 
 pub(crate) trait CircuitWitnessGenerator<H: Hal> {
     fn generate_witness(

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -16,6 +16,7 @@
 #pragma once
 
 #include "compiler/extractor/RecordingContext.h"
+#include "compiler/extractor/RecordingVal.h"
 
 class PicusDeclareInputVisitor {
 public:
@@ -35,10 +36,19 @@ public:
     }
   }
 
-  static void apply(RecordingContext& ctx, RecordingReg& x);
+  static void apply(RecordingContext& ctx, RecordingReg& x) {
+    PicusDeclareInputVisitor::apply(ctx, x.val);
+  }
+
+  static void apply(RecordingContext& ctx, RecordingVal& x);
 };
 
 template <typename Component> void picusInput(RecordingContext& ctx, Component component) {
+  PicusDeclareInputVisitor::apply(ctx, component);
+}
+
+template <typename Component, size_t N>
+void picusInput(RecordingContext& ctx, Component (&component)[N]) {
   PicusDeclareInputVisitor::apply(ctx, component);
 }
 
@@ -67,7 +77,16 @@ void rangePostcondition(RecordingContext& ctx, uint32_t low, RecordingVal x, uin
 //
 // Picus constraint language:
 // (call [layout_denomZero_invReg, layout_denomZero_isZero_inner] IsZero [x])
-void picusCall(RecordingContext& ctx,
-               const char* name,
-               llvm::ArrayRef<RecordingVal> inputs,
-               mlir::Value layout);
+mlir::Value picusCall(RecordingContext& ctx,
+                      const char* name,
+                      llvm::ArrayRef<RecordingVal> inputs,
+                      mlir::Value layout);
+
+// Emit a `DeterministicIf` directive into the IR. This indicates to Picus that
+// if all of the input signals are deterministic, then all of the output signals
+// are also deterministic. This is primarily used for arguments where some other
+// block force the outputs to be determined by the inputs, but that fact is
+// otherwise unclear from only considering the current block.
+void picusArgument(RecordingContext& ctx,
+                   llvm::ArrayRef<mlir::Value> inputs,
+                   llvm::ArrayRef<mlir::Value> outputs);

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -19,7 +19,7 @@ use anyhow::{Result, bail};
 use risc0_circuit_recursion_sys::{
     RawAccumBuffers, RawExecBuffers, RawPreflightTrace, StepMode,
     risc0_circuit_recursion_cuda_accum, risc0_circuit_recursion_cuda_eval_check,
-    risc0_circuit_recursion_cuda_witgen,
+    risc0_circuit_recursion_cuda_reset, risc0_circuit_recursion_cuda_witgen,
 };
 use risc0_sys::ffi_wrap;
 use risc0_zkp::{
@@ -61,6 +61,16 @@ impl<CH: CudaHash> CudaCircuitHal<CH> {
 
         Self { hal }
     }
+}
+
+impl<CH: CudaHash> Drop for CudaCircuitHal<CH> {
+    fn drop(&mut self) {
+        cuda_reset();
+    }
+}
+
+fn cuda_reset() {
+    ffi_wrap(|| unsafe { risc0_circuit_recursion_cuda_reset() }).unwrap();
 }
 
 impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -16,7 +16,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(missing_docs)]
-#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 //! The RISC Zero zkVM is a RISC-V virtual machine that produces [zero-knowledge
 //! proofs] of code it executes. By using the zkVM, a cryptographic [receipt] is
@@ -136,7 +136,7 @@ pub use {
     risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
 
-/// TODO
+/// RPC protocol types for prover client-server communication.
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 pub mod rpc {

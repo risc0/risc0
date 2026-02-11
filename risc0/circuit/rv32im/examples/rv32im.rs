@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -18,8 +18,8 @@ use std::time::Instant;
 use clap::Parser;
 use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im::{
-    MAX_INSN_CYCLES,
-    execute::{DEFAULT_SEGMENT_LIMIT_PO2, platform::RESERVED_CYCLES, testutil},
+    MAX_INSN_ROWS,
+    execute::{DEFAULT_SEGMENT_LIMIT_PO2, testutil},
     prove::segment_prover,
 };
 use risc0_core::scope;
@@ -41,11 +41,6 @@ struct Cli {
     skip_verification: bool,
 }
 
-const PAGING_CYCLES: usize = 1821;
-const BEFORE_LOOP_CYCLES: usize = 8;
-const NON_LOOP_CYCLES: usize =
-    RESERVED_CYCLES + PAGING_CYCLES + BEFORE_LOOP_CYCLES + MAX_INSN_CYCLES;
-
 fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
@@ -54,25 +49,23 @@ fn main() {
     let args = Cli::parse();
 
     let po2 = args.po2;
-    let segment_cycles = 1 << po2;
-    assert!(segment_cycles > NON_LOOP_CYCLES);
-    let iterations = (segment_cycles - NON_LOOP_CYCLES) / 2;
+    let iterations = 10_000;
 
-    let program = testutil::kernel::simple_loop(iterations as u32);
+    let program = testutil::kernel::simple_loop(iterations);
     let image = MemoryImage::new_kernel(program);
     let prover = segment_prover(po2).unwrap();
 
     let result = testutil::execute(
         image.clone(),
         testutil::DEFAULT_EXECUTION_LIMIT
-            .with_max_insn_cycles(MAX_INSN_CYCLES)
+            .with_max_insn_rows(MAX_INSN_ROWS)
             .with_segment_po2(args.po2),
         testutil::NullSyscall,
         None,
     )
     .unwrap();
-    let user_cycles = result.result.user_cycles as usize;
-    let total_cycles = result.result.total_cycles as usize;
+    let insn_count = result.result.insn_count as usize;
+    let row_count = result.result.row_count as usize;
 
     scope!("top");
 
@@ -85,7 +78,7 @@ fn main() {
         let result = testutil::execute(
             image,
             testutil::DEFAULT_EXECUTION_LIMIT
-                .with_max_insn_cycles(MAX_INSN_CYCLES)
+                .with_max_insn_rows(MAX_INSN_ROWS)
                 .with_segment_po2(args.po2),
             testutil::NullSyscall,
             None,
@@ -106,20 +99,20 @@ fn main() {
         let prove_time = start_time.elapsed().as_secs_f64();
 
         println!(
-            "PO2={po2} Run [{i}] exec: {exec_time:.3}s, {:.3} cycles/sec | prove: {prove_time:.3}s, {:.3} cycles/sec",
-            user_cycles as f64 / exec_time,
-            total_cycles as f64 / prove_time
+            "PO2={po2} Run [{i}] exec: {exec_time:.3}s, {:.3} insn/sec | prove: {prove_time:.3}s, {:.3} rows/sec",
+            insn_count as f64 / exec_time,
+            row_count as f64 / prove_time
         );
         tot_exec_time += exec_time;
         tot_prove_time += prove_time;
     }
 
     println!(
-        "{} runs of PO2={po2} exec: {tot_exec_time:.3}s, avg={:.3}s, {:.3} cycles/sec | prove: {tot_prove_time:.3}s, avg={:.3}s, {:.3} cycles/sec",
+        "{} runs of PO2={po2} exec: {tot_exec_time:.3}s, avg={:.3}s, {:.3} insn/sec | prove: {tot_prove_time:.3}s, avg={:.3}s, {:.3} rows/sec",
         args.count,
         tot_exec_time / (args.count as f64),
-        (args.count * user_cycles) as f64 / tot_exec_time,
+        (args.count * insn_count) as f64 / tot_exec_time,
         tot_prove_time / (args.count as f64),
-        (args.count * total_cycles) as f64 / tot_prove_time,
+        (args.count * row_count) as f64 / tot_prove_time,
     );
 }

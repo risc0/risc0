@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Sets `polyOp` and `local.`
+// Also sets `poly`, `term`, and `total` for "simple" rows (NOP and EQZ).
 template <typename C> FDEV void AccumTop<C>::setPhase1(CTX, MDEV Top<C>* top, ValExt<C> z) DEV {
   Val<C> isBigInt = top->select.major.bits[size_t(BlockType::BigInt) / MINOR_SPLIT_SIZE].get() *
                     top->select.minor.bits[size_t(BlockType::BigInt) % MINOR_SPLIT_SIZE].get();
@@ -23,8 +25,8 @@ template <typename C> FDEV void AccumTop<C>::setPhase1(CTX, MDEV Top<C>* top, Va
     for (size_t i = 0; i < 16; i++) {
       tot += cur * top->mux.BigInt.data[0].bytes[i].get();
       cur *= z;
-      local.set(ctx, tot);
     }
+    local.set(ctx, tot);
   } else {
     polyOp.set(ctx, uint32_t(PolyOp::NOP));
     local.set(ctx, ValExt<C>(0));
@@ -41,6 +43,7 @@ template <typename C> FDEV bool AccumTop<C>::isSimple() DEV {
   return (polyOpVal == uint32_t(PolyOp::NOP) || polyOpVal == uint32_t(PolyOp::EQZ));
 }
 
+// Sets `poly`, `term`, and `total` for "non-simple" rows.
 template <typename C>
 FDEV void AccumTop<C>::setPhase2(
     CTX, MDEV Top<C>* top, MDEV AccumTop<C>* prev, ValExt<C> z16, ValExt<C> neg) DEV {
@@ -100,8 +103,8 @@ FDEV void AccumTop<C>::verify(CTX, MDEV Top<C>* top, MDEV AccumTop<C>* prev, Val
   // Verify local
   ctx.eqz(localGoal - local.get());
   // Now, we verify phase 2 by computing all conditions and multiply by selector
-  // bit This is ugly because we don't really have muxing here First we compute
-  // some common values
+  // bit. This is ugly because we don't really have muxing here. First we
+  // compute some common values.
   ValExt<C> newPoly = prev->poly.get() + local.get();
   Val<C> coeff = top->mux.BigInt.data[0].getCoeff() - Val<C>(4);
   // Now go over branches

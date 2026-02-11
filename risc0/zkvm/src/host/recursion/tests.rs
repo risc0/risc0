@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -27,8 +27,8 @@ use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpe
 
 use super::{MerkleGroup, Prover, identity_p254, join, lift, prove::zkr};
 use crate::{
-    ALLOWED_CONTROL_ROOT, ExecutorEnv, InnerReceipt, Journal, MaybePruned, ProverOpts,
-    RECURSION_PO2, Receipt, ReceiptClaim, SegmentReceipt, Session, SimpleSegmentRef,
+    ALLOWED_CONTROL_ROOT, AssumptionReceipt, ExecutorEnv, InnerReceipt, Journal, MaybePruned,
+    ProverOpts, RECURSION_PO2, Receipt, ReceiptClaim, SegmentReceipt, Session, SimpleSegmentRef,
     SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext,
     claim::Unknown,
     default_prover, get_prover_server,
@@ -38,7 +38,7 @@ use crate::{
 };
 
 #[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_recursion_poseidon2() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -139,7 +139,7 @@ fn prove_segments(session: &Session) -> Result<Vec<SegmentReceipt>> {
     let ctx = VerifierContext::default();
     let segment_receipts = session
         .segments()
-        .flat_map(|x| prover.prove_segment(&ctx, &x.unwrap()).unwrap())
+        .map(|x| prover.prove_segment(&ctx, &x.unwrap()).unwrap())
         .collect::<Vec<_>>();
 
     tracing::info!("Done proving rv32im: {} segments", segment_receipts.len());
@@ -211,7 +211,7 @@ static ECHO_SUCCINCT: LazyLock<(Journal, SuccinctReceipt<ReceiptClaim>)> = LazyL
 
 #[test_log::test]
 #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_recursion_lift_join_identity_p254_e2e() {
     // Prove the base case
     let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();
@@ -243,7 +243,7 @@ fn test_recursion_lift_join_identity_p254_e2e() {
 }
 
 #[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_recursion_identity_sha256() {
     let (_, default_receipt) = ECHO_SUCCINCT.clone();
     let (_, control_id_sha256) = zkr::identity("sha-256").unwrap();
@@ -290,7 +290,7 @@ fn test_recursion_identity_sha256() {
 }
 
 #[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_recursion_lift_resolve_e2e() {
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
@@ -304,6 +304,14 @@ fn test_recursion_lift_resolve_e2e() {
         .build()
         .unwrap();
     let assumption_receipt_a = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
+    let assumption_receipt_a = Receipt::new(
+        InnerReceipt::Succinct(
+            prover
+                .composite_to_succinct(assumption_receipt_a.inner.composite().unwrap())
+                .unwrap(),
+        ),
+        assumption_receipt_a.journal.bytes.clone(),
+    );
     tracing::info!("Done proving: echo 'execution A'");
 
     tracing::info!("Proving: echo 'execution B'");
@@ -315,11 +323,21 @@ fn test_recursion_lift_resolve_e2e() {
         .build()
         .unwrap();
     let assumption_receipt_b = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
+    let assumption_receipt_b = Receipt::new(
+        InnerReceipt::Succinct(
+            prover
+                .composite_to_succinct(assumption_receipt_b.inner.composite().unwrap())
+                .unwrap(),
+        ),
+        assumption_receipt_b.journal.bytes.clone(),
+    );
     tracing::info!("Done proving: echo 'execution B'");
 
     let env = ExecutorEnv::builder()
-        .add_assumption(assumption_receipt_a.clone())
-        .add_assumption(assumption_receipt_b.clone())
+        .add_assumption(AssumptionReceipt::try_from(assumption_receipt_a).unwrap())
+        .unwrap()
+        .add_assumption(AssumptionReceipt::try_from(assumption_receipt_b).unwrap())
+        .unwrap()
         .write(&MultiTestSpec::SysVerify(vec![
             (MULTI_TEST_ID.into(), b"execution A".to_vec()),
             (MULTI_TEST_ID.into(), b"execution B".to_vec()),
@@ -363,10 +381,8 @@ mod povw {
 
     use super::*;
 
-    // XXX M3
     #[test_log::test]
-    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    #[should_panic(expected = "m3 doesn't support povw")]
+    #[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
     fn test_recursion_lift_then_unwrap() {
         // Prove the base case
         let (journal, segment) = ECHO_SEGMENT.clone();
@@ -457,11 +473,9 @@ mod povw {
         Ok(())
     }
 
-    // XXX M3
     #[test_log::test]
     #[cfg_attr(all(ci, not(ci_profile = "slow")), ignore = "slow test")]
-    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    #[should_panic(expected = "m3 doesn't support povw")]
+    #[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
     fn test_recursion_lift_join_unwrap() {
         test_recursion_lift_join_unwrap_inner().unwrap();
     }
@@ -471,7 +485,7 @@ mod povw {
 
         let povw_job_id: PovwJobId = rand::random();
         let env = ExecutorEnv::builder()
-            .add_assumption(assumption_receipt.claim.clone())
+            .add_assumption(assumption_receipt.claim.clone())?
             .write(&MultiTestSpec::SysVerify(vec![(
                 MULTI_TEST_ID.into(),
                 assumption_journal.bytes,
@@ -551,24 +565,22 @@ mod povw {
         Ok(())
     }
 
-    // XXX M3
     #[test_log::test]
-    #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
-    #[should_panic(expected = "m3 doesn't support povw")]
+    #[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
     fn test_recursion_lift_resolve_unwrap() {
         test_recursion_lift_resolve_unwrap_inner().unwrap();
     }
 }
 
 #[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_recursion_circuit() {
     let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
     super::test_zkr(&digest, &digest, RECURSION_PO2).unwrap();
 }
 
 #[test_log::test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn test_po2_16() {
     use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
 
@@ -599,12 +611,12 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("ab0e9172f4306b6a3b2250055036565c2421683b39ee6c20366d17350756ad19")
+        digest!("b1f64013f70bbb386a8b3a3d63552c5cb5ea4a549ec7fb1ecc2a031dbf488167")
     );
 }
 
 #[test]
-#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
 fn union() {
     let mut mmr = MerkleMountainAccumulator::<UnionPeak>::new();
     for receipt in vec![ECHO_SUCCINCT.1.clone(); 5] {

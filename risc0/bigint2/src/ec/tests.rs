@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -35,7 +35,7 @@ fn run_test_no_decode(env: ExecutorEnv, elf: &[u8]) -> Journal {
     );
 
     tracing::info!("Runtime: {}", elapsed.as_millis());
-    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
+    tracing::info!("RISC-V instructions : {}", prove_info.stats.insn_count);
 
     receipt.journal.clone()
 }

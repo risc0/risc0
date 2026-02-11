@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -55,13 +55,9 @@ pub struct Segment {
     /// Value set upon termination of execution, indicating the termination type.
     pub terminate_state: Option<TerminateState>,
 
-    // NOTE: This is the same as SegmentUpdate::user_cycles.
-    /// Count of "user cycles", the cycles directly associated with instructions executed by the
-    /// user guest program, before suspend in this segment. Does not include paging costs.
-    pub suspend_cycle: u32,
-    /// Count of cycles associated with memory paging (i.e. page-in and page-out operations).
-    pub paging_cycles: u32,
     pub segment_threshold: u32,
+
+    pub used_rows: u32,
 
     /// Power-of-two for the segment size required to prove this segment.
     pub po2: u32,
@@ -71,6 +67,9 @@ pub struct Segment {
     pub povw_nonce: Option<PovwNonce>,
 
     pub insn_counter: u32,
+
+    /// Used to help debug the block tracking
+    pub blocks: crate::execute::BlockCollection,
 }
 
 impl Segment {
@@ -104,10 +103,10 @@ impl Segment {
         .run(
             ExecutionLimit::default()
                 .with_segment_po2(self.po2 as usize)
-                .with_soft_session_limit(self.suspend_cycle.into())
-                // Set the max_insn_cycles to 0 to prevent splits based on this. We know we need to
-                // split on suspend_cycle.
-                .with_max_insn_cycles(0),
+                .with_soft_session_limit(self.used_rows.into())
+                // Set the max_insn_rows to 0 to prevent splits based on this. We know we need to
+                // split on used_rows.
+                .with_max_insn_rows(0),
             |_| Ok(()),
         )
     }

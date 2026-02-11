@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -57,7 +57,7 @@ impl<Claim> Digestible for WorkClaim<Claim>
 where
     Claim: Digestible,
 {
-    /// Hash the [ReceiptClaim] to get a digest of the struct.
+    /// Hash the [WorkClaim] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
             "risc0.WorkClaim",
@@ -112,7 +112,7 @@ pub struct Work {
     pub value: u64,
 }
 
-/// Error returned when the
+/// Error returned when joining or decoding WorkClaim fails.
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub enum WorkClaimError {
@@ -126,7 +126,7 @@ impl fmt::Display for WorkClaimError {
             WorkClaimError::NonceRangesNotContiguous(ab) => {
                 write!(
                     f,
-                    "work nonce ranges are not contiguous: ({:?}, {:?}) and ({:?}. {:?})",
+                    "work nonce ranges are not contiguous: ({:?}, {:?}) and ({:?}, {:?})",
                     ab.0.nonce_min, ab.0.nonce_max, ab.1.nonce_min, ab.1.nonce_max
                 )
             }
@@ -230,7 +230,7 @@ fn decode_work_value_from_seal(buf: &mut VecDeque<u32>) -> Result<u64, risc0_bin
 }
 
 impl Digestible for Work {
-    /// Hash the [ReceiptClaim] to get a digest of the struct.
+    /// Hash the [Work] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         let mut buf = Vec::new();
         self.encode_to_seal(&mut buf);

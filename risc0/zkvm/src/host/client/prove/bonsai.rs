@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -144,14 +144,8 @@ impl Prover for BonsaiProver {
                     work_receipt: None,
                     stats: SessionStats {
                         segments: stats.segments,
-                        total_cycles: stats.total_cycles,
-                        user_cycles: stats.cycles,
-                        // These are currently unavailable from Bonsai
-                        paging_cycles: 0,
-                        reserved_cycles: 0,
-                        ecall_metrics: Default::default(),
-                        syscall_metrics: Default::default(),
-                        execution_time: None,
+                        // The rest of the fields are currently unavailable from Bonsai
+                        ..Default::default()
                     },
                 };
             } else {

@@ -1,6 +1,6 @@
 [package]
 name = "cargo-risczero"
-version = "4.0.0"
+version = "5.0.0"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -23,11 +23,13 @@ cuda = ["risc0-zkvm/cuda"]
 default = ["r0vm"]
 docker = []
 experimental = [
-    "dep:tracing-subscriber",
+    "dep:risc0-binfmt",
     "dep:risc0-build",
+    "dep:risc0-zkos-v1compat",
+    "dep:tracing-subscriber",
     "dep:zip",
-    "risc0-zkvm/prove",
     "risc0-build/unstable",
+    "risc0-zkvm/prove",
 ]
 metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]
@@ -44,8 +46,10 @@ clap-cargo = { version = "0.15.1", features = ["cargo_metadata"] }
 const_format = "0.2"
 hex = "0.4"
 regex = "1.11.1"
+risc0-binfmt = { workspace = true, optional = true }
 risc0-build = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
+risc0-zkos-v1compat = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true }
 semver = "1"
 serde_json = "1"

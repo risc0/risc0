@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -160,6 +160,8 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
         .env(manifest_env)
         .env(rustflags_env)
         .env(&[("CARGO_TARGET_DIR", "target")])
+        // NOTE: This is no longer required when using an up to date version of risc0-bigint2.
+        // It is kept to avoid breaking code that links older versions of that crate without cause.
         .env(&[("RISC0_FEATURE_bigint2", "")])
         .env(&[(
             "CC_riscv32im_risc0_zkvm_elf",
@@ -267,7 +269,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "1adc9844aed376a96b3829cff37eafa0cf6bf9d5dc096b48a30a1ba5f8829e96",
+            "00f54b9e768f1bb42cde89c42b68557fda14136ca3ca6af9873268fda0098763",
         );
     }
 }

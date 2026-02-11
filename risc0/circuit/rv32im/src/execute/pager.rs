@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -23,7 +23,13 @@ use bit_vec::BitVec;
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
 
-use super::{node_idx, platform::*};
+use super::{
+    block_tracker::{
+        PAGE_IN_NODE_ROW_POINTS, PAGE_IN_ROW_POINTS, PAGE_OUT_NODE_ROW_POINTS, PAGE_OUT_ROW_POINTS,
+    },
+    node_idx,
+    platform::*,
+};
 use crate::execute::unlikely;
 
 pub const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
@@ -67,8 +73,8 @@ pub(crate) enum PageState {
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum PageTraceEvent {
-    PageIn { cycles: u32 },
-    PageOut { cycles: u32 },
+    PageIn { cycles: u64 },
+    PageOut { cycles: u64 },
 }
 
 #[derive(Debug)]
@@ -311,7 +317,7 @@ pub(crate) struct PagedMemory {
 }
 
 impl PagedMemory {
-    pub(crate) fn new(mut image: MemoryImage, tracing_enabled: bool) -> Self {
+    pub(crate) fn new(image: MemoryImage, tracing_enabled: bool) -> Self {
         // Populate the register cache from the initial state of memory.
         let mut machine_registers = [0; REG_MAX];
         let mut user_registers = [0; REG_MAX];
@@ -496,7 +502,7 @@ impl PagedMemory {
 
         if state == PageState::Loaded {
             self.cycles += PAGE_CYCLES;
-            self.trace_page_out(PAGE_CYCLES);
+            self.trace_page_out(PAGE_OUT_ROW_POINTS);
             self.fixup_costs(node_idx, PageState::Dirty);
             self.page_states.set(node_idx, PageState::Dirty);
         }
@@ -559,7 +565,7 @@ impl PagedMemory {
         self.page_table.set(page_idx, self.page_cache.len());
         self.page_cache.push(page.clone());
         self.cycles += PAGE_CYCLES;
-        self.trace_page_in(PAGE_CYCLES);
+        self.trace_page_in(PAGE_IN_ROW_POINTS);
         self.fixup_costs(node_idx(page_idx), PageState::Loaded);
         Ok(())
     }
@@ -574,12 +580,12 @@ impl PagedMemory {
                     if state == PageState::Unloaded {
                         // tracing::trace!("fixup: {state:?}: {node_idx:#010x}");
                         self.cycles += NODE_CYCLES;
-                        self.trace_page_in(NODE_CYCLES);
+                        self.trace_page_in(PAGE_IN_NODE_ROW_POINTS);
                     }
                     if goal == PageState::Dirty {
                         // tracing::trace!("fixup: {goal:?}: {node_idx:#010x}");
                         self.cycles += NODE_CYCLES;
-                        self.trace_page_out(NODE_CYCLES);
+                        self.trace_page_out(PAGE_OUT_NODE_ROW_POINTS);
                     }
                 }
                 self.page_states.set(node_idx, goal);
@@ -597,18 +603,19 @@ impl PagedMemory {
     }
 
     pub(crate) fn touched_pages(&self) -> u64 {
-        self.page_cache.len() as u64
+        // add one for registers page and one for ??
+        self.page_cache.len() as u64 + 2
     }
 
     #[inline(always)]
-    fn trace_page_in(&mut self, cycles: u32) {
+    fn trace_page_in(&mut self, cycles: u64) {
         if unlikely(self.tracing_enabled) {
             self.trace_events.push(PageTraceEvent::PageIn { cycles });
         }
     }
 
     #[inline(always)]
-    fn trace_page_out(&mut self, cycles: u32) {
+    fn trace_page_out(&mut self, cycles: u64) {
         if unlikely(self.tracing_enabled) {
             self.trace_events.push(PageTraceEvent::PageOut { cycles });
         }
@@ -630,7 +637,7 @@ pub(crate) fn compute_partial_image(
 
         // Copy original state of all pages accessed in this segment.
         let page = input_image.get_page(page_idx).unwrap();
-        partial_image.set_page(page_idx, page);
+        partial_image.set_page(page_idx, page.clone());
     }
 
     // Add minimal needed 'uncles'

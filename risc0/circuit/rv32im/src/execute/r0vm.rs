@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -13,9 +13,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{cmp::min, fmt::Write as _, io::Read};
+use std::{fmt::Write as _, io::Read};
 
-use anyhow::{Context, Result, anyhow, bail};
+use anyhow::{Context, Result, anyhow, bail, ensure};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::{
@@ -149,19 +149,24 @@ pub(crate) trait Risc0Context {
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;
 
     #[inline(always)]
-    fn store_region(&mut self, addr: ByteAddr, input: &[u8]) -> Result<()> {
-        let size = input.len();
-        if addr.is_aligned() && size.is_multiple_of(WORD_SIZE) {
-            let mut waddr = addr.waddr();
-            for i in (0..size).step_by(WORD_SIZE) {
-                self.store_u32(
-                    waddr.postfix_inc(),
-                    u32::from_le_bytes(input[i..(i + WORD_SIZE)].try_into().unwrap()),
-                )?;
-            }
-        } else {
-            for (i, byte) in input.iter().enumerate() {
-                self.store_u8(addr + i, *byte)?;
+    fn store_region(&mut self, mut dest_addr: ByteAddr, mut to_write: &[u8]) -> Result<()> {
+        while !to_write.is_empty() {
+            if !dest_addr.0.is_multiple_of(WORD_SIZE as u32) || to_write.len() < WORD_SIZE {
+                self.store_u8(dest_addr, to_write[0])?;
+                to_write = &to_write[1..];
+                dest_addr = dest_addr.checked_add(1).unwrap();
+            } else {
+                let aligned_to_write = to_write
+                    .split_off(..((to_write.len() / WORD_SIZE) * WORD_SIZE))
+                    .unwrap();
+
+                for chunk in aligned_to_write.chunks(WORD_SIZE) {
+                    self.store_u32(
+                        dest_addr.waddr(),
+                        u32::from_le_bytes(chunk.try_into().unwrap()),
+                    )?;
+                    dest_addr = dest_addr.checked_add(WORD_SIZE as u32).unwrap();
+                }
             }
         }
         Ok(())
@@ -231,6 +236,10 @@ pub(crate) trait Risc0Context {
     fn on_ecall_read_end(&mut self, _read_bytes: u64, _read_words: u64) {}
 
     fn on_ecall_write_end(&mut self) {}
+
+    fn on_user_ecall(&mut self) {}
+
+    fn on_trap(&mut self) {}
 }
 
 #[cfg(test)]
@@ -428,6 +437,8 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             return self.trap(Exception::UserEnvCall(dispatch_addr));
         }
 
+        self.ctx.on_user_ecall();
+
         self.enter_trap(dispatch_addr)?;
         Ok(true)
     }
@@ -466,117 +477,39 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
             0,
             EcallKind::Read,
         )?;
-        let mut cur_state = CycleState::HostReadSetup;
+
         let fd = self.load_register(REG_A0)?;
-        let mut ptr = ByteAddr(self.load_register(REG_A1)?);
-        let len = self.load_register(REG_A2)?;
-        if ptr + len < ptr {
-            bail!("Invalid length in host read: {len}");
-        }
-        if len > MAX_IO_BYTES {
-            bail!("Invalid length (too big) in host read: {len}");
-        }
-        if len > 0 {
-            guest_addr(ptr.0)?;
-        }
-        // tracing::trace!("ecall_read({fd}, {ptr:?}, {len})");
-        let mut bytes = vec![0u8; len as usize];
-        let mut rlen = self.ctx.host_read(fd, &mut bytes)?;
-        self.store_register(REG_A0, rlen)?;
-        // tracing::trace!("rlen: {rlen}");
-        if rlen == 0 {
-            self.next_pc();
+        let guest_ptr = ByteAddr(self.load_register(REG_A1)?);
+        let request_buffer_size = self.load_register(REG_A2)?;
+        ensure!(
+            guest_ptr.checked_add(request_buffer_size).is_some(),
+            "Invalid length in host read: {request_buffer_size}"
+        );
+        ensure!(
+            request_buffer_size <= MAX_IO_BYTES,
+            "Invalid length (too big) in host read: {request_buffer_size}"
+        );
+
+        if request_buffer_size > 0 {
+            guest_addr(guest_ptr.0)?;
         }
 
-        fn next_io_state(ptr: ByteAddr, rlen: u32) -> CycleState {
-            if rlen == 0 {
-                CycleState::Decode
-            } else if !ptr.is_aligned() || rlen < WORD_SIZE as u32 {
-                CycleState::HostReadBytes
-            } else {
-                CycleState::HostReadWords
-            }
-        }
+        let mut buffer = vec![0u8; request_buffer_size as usize];
+        let actual_bytes_read = self.ctx.host_read(fd, &mut buffer)?;
+        ensure!(
+            actual_bytes_read <= request_buffer_size,
+            "Invalid host read"
+        );
 
-        let mut read_bytes = 0;
-        let mut read_words = 0;
+        self.store_register(REG_A0, actual_bytes_read)?;
 
-        macro_rules! add_cycle {
-            ($ptr:expr, $rlen:expr) => {{
-                if cur_state == CycleState::HostReadBytes {
-                    read_bytes += 1;
-                } else if cur_state == CycleState::HostReadWords {
-                    read_words += 1;
-                }
-                let next_state = next_io_state($ptr, $rlen);
-                self.ctx.on_ecall_cycle(
-                    cur_state,
-                    next_state,
-                    $ptr.waddr().0,
-                    $ptr.subaddr(),
-                    $rlen,
-                    EcallKind::Read,
-                )?;
-                cur_state = next_state;
-            }};
-        }
+        self.ctx
+            .store_region(guest_ptr, &buffer[..actual_bytes_read as usize])?;
 
-        add_cycle!(ptr, rlen);
+        self.next_pc();
 
-        let mut i = 0;
-
-        while rlen > 0 && !ptr.is_aligned() {
-            // tracing::trace!("prefix");
-            self.ctx.store_u8(ptr, bytes[i])?;
-            ptr += 1u32;
-            i += 1;
-            rlen -= 1;
-            if rlen == 0 {
-                self.next_pc();
-            }
-
-            add_cycle!(ptr, rlen);
-        }
-
-        // HERE!
-        while rlen >= MAX_IO_WORDS {
-            let words = min(rlen / MAX_IO_WORDS, MAX_IO_WORDS);
-            // tracing::trace!("body: {words}");
-            for j in 0..MAX_IO_WORDS {
-                if j < words {
-                    let word = u32::from_le_bytes(bytes[i..i + WORD_SIZE].try_into()?);
-                    // tracing::trace!("store: {i}, {j}, {word:#010x} -> {ptr:?}");
-                    self.store_memory(ptr.waddr(), word)?;
-                    ptr += WORD_SIZE;
-                    i += WORD_SIZE;
-                    rlen -= WORD_SIZE as u32;
-                } else {
-                    // tracing::trace!("store: {:#010x} -> null", 0);
-                    self.store_memory(SAFE_WRITE_ADDR.waddr() + j, 0)?;
-                }
-            }
-
-            if rlen == 0 {
-                self.next_pc();
-            }
-
-            add_cycle!(ptr, rlen);
-        }
-
-        while rlen > 0 {
-            // tracing::trace!("suffix");
-            self.ctx.store_u8(ptr, bytes[i])?;
-            ptr += 1u32;
-            i += 1;
-            rlen -= 1;
-
-            if rlen == 0 {
-                self.next_pc();
-            }
-
-            add_cycle!(ptr, rlen);
-        }
-
+        let (read_bytes, read_words) =
+            calculate_bytes_and_words(guest_ptr.0 as u64, actual_bytes_read as u64);
         self.ctx.on_ecall_read_end(read_bytes, read_words);
 
         Ok(false)
@@ -701,6 +634,32 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
     }
 }
 
+fn calculate_bytes_and_words(offset: u64, len: u64) -> (u64, u64) {
+    let word_size = WORD_SIZE as u64;
+    let initial_bytes = if !offset.is_multiple_of(word_size) {
+        std::cmp::min(word_size - (offset % word_size), len)
+    } else {
+        0
+    };
+    let final_bytes = (len - initial_bytes) % word_size;
+
+    let read_bytes = initial_bytes + final_bytes;
+    let read_words = (len - initial_bytes - final_bytes) / word_size;
+
+    (read_bytes, read_words)
+}
+
+#[test]
+fn calculate_bytes_and_words_test() {
+    assert_eq!(calculate_bytes_and_words(0, 4), (0, 1));
+    assert_eq!(calculate_bytes_and_words(0, 5), (1, 1));
+    assert_eq!(calculate_bytes_and_words(1, 1), (1, 0));
+    assert_eq!(calculate_bytes_and_words(1, 2), (2, 0));
+    assert_eq!(calculate_bytes_and_words(1, 10), (3 + 3, 1));
+    assert_eq!(calculate_bytes_and_words(1, 12), (3 + 1, 2));
+    assert_eq!(calculate_bytes_and_words(7, 12), (1 + 3, 2));
+}
+
 impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
     fn circuit_version(&self) -> u32 {
         self.ctx.circuit_version()
@@ -734,12 +693,12 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
             self.dump_registers(true)?;
             self.dump_registers(false)?;
         }
-        let dispatch_addr =
-            ByteAddr(self.load_memory(TRAP_DISPATCH_ADDR.waddr() + cause.as_u32())?);
+        let dispatch_addr = ByteAddr(self.load_memory(TRAP_DISPATCH_ADDR.waddr())?);
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
             bail!("Invalid trap address: {dispatch_addr:?}, cause: {cause:?}");
         }
         self.enter_trap(dispatch_addr)?;
+        self.ctx.on_trap();
         self.ctx.trap(cause);
         Ok(false)
     }
@@ -816,5 +775,68 @@ pub(crate) fn guest_addr(addr: u32) -> Result<ByteAddr> {
         Err(anyhow!("{addr:?} is an invalid guest address"))
     } else {
         Ok(addr)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn store_region_test_inner(offset: u32, length: u32) {
+        println!("store_region_test_inner(offset={offset}, length={length})");
+
+        let mut ctx = TestRisc0Context::default();
+
+        // Write a test pattern at the given offset
+        let start_addr = 0x420000 + offset;
+        let test_pattern = (1u8..).take(length as usize).collect::<Vec<_>>();
+        ctx.store_region(ByteAddr(start_addr), &test_pattern[..])
+            .unwrap();
+
+        // Check the region of written words matches what we expect
+        let start_word = start_addr / WORD_SIZE as u32;
+        let end_word = if length > 0 {
+            (start_addr + length).next_multiple_of(WORD_SIZE as u32) / WORD_SIZE as u32
+        } else {
+            start_word
+        };
+        let mut expected_addresses: Vec<_> = (start_word..end_word).rev().collect();
+
+        let mut written_region = vec![];
+        for (written_word_addr, written_word) in ctx.memory {
+            assert_eq!(written_word_addr.0, expected_addresses.pop().unwrap());
+            written_region.extend(written_word.to_le_bytes());
+        }
+        assert_eq!(
+            written_region.len(),
+            (end_word - start_word) as usize * WORD_SIZE
+        );
+
+        // Check the bytes written has any beginning and ending padding as well at the pattern
+        if !written_region.is_empty() {
+            let aligned_start = start_addr % WORD_SIZE as u32;
+
+            assert_eq!(
+                &written_region[..aligned_start as usize],
+                &vec![0u8; aligned_start as usize]
+            );
+            assert_eq!(
+                &written_region[aligned_start as usize..(aligned_start + length) as usize],
+                &test_pattern
+            );
+            assert_eq!(
+                &written_region[(aligned_start + length) as usize..],
+                &vec![0u8; written_region.len() - (aligned_start + length) as usize]
+            );
+        }
+    }
+
+    #[test]
+    fn store_region_test() {
+        for offset in 0..5 {
+            for length in 0..5 {
+                store_region_test_inner(offset, length);
+            }
+        }
     }
 }

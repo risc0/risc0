@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -328,6 +328,17 @@ const char* risc0_circuit_recursion_cuda_accum(cudaStream_t stream,
     ctx.verifyAccum();
   } catch (const std::exception& err) {
     return strdup(err.what());
+  }
+  return nullptr;
+}
+
+const char* risc0_circuit_recursion_cuda_reset(void) {
+  try {
+    CUDA_OK(cudaDeviceSetLimit(cudaLimit::cudaLimitStackSize, 0));
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -67,6 +67,8 @@ template <typename C> struct BigIntBlock {
     T::apply(ctx, "wordBase", wordBase, computeAddr.get());
     T::apply(ctx, "checkBase", checkBase, computeAddr.get(), mm.get() * Val<C>(MODE_MACHINE));
     T::apply(ctx, "bytes", bytes);
+    T::apply(ctx, "prevCycle", prevCycle);
+    T::apply(ctx, "prevValue", prevValue);
   }
 
   FDEV Val<C> getCoeff() DEV {

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -29,8 +29,8 @@ impl Syscall for SysLog {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
         if !to_guest.is_empty() {
             bail!("invalid sys_log call");
         }
@@ -39,15 +39,14 @@ impl Syscall for SysLog {
         let buf_len = ctx.load_register(REG_A4);
 
         tracing::debug!("sys_log({buf_len} bytes)");
-        let msg = format!("R0VM[{}] ", ctx.get_cycle());
 
         let posix_io = ctx.syscall_table().posix_io.clone();
         let mut from_guest = ctx.read_region(buf_ptr, buf_len)?;
         let writer = posix_io.borrow().get_writer(fileno::STDOUT)?;
 
-        writer.borrow_mut().write_all(msg.as_bytes())?;
+        writer.borrow_mut().write_all("R0VM ".as_bytes())?;
         std::io::copy(&mut from_guest, &mut *writer.borrow_mut())?;
         writer.borrow_mut().write_all(b"\n".as_slice())?;
-        Ok((0, 0))
+        Ok(0)
     }
 }

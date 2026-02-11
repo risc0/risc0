@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -73,8 +73,8 @@ pub(crate) trait Syscall {
         &mut self,
         syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)>;
+        to_guest: &mut [u8],
+    ) -> Result<usize>;
 }
 
 /// Access to memory and machine state for syscalls.
@@ -83,8 +83,8 @@ pub(crate) trait SyscallContext<'a> {
     /// Returns the current program counter.
     fn get_pc(&self) -> u32;
 
-    /// Returns the current cycle being executed.
-    fn get_cycle(&self) -> u64;
+    /// Returns the number of rows filled so far.
+    fn get_rows(&self) -> u64;
 
     /// Loads the value of the given register, e.g. REG_A0.
     fn load_register(&mut self, idx: usize) -> u32;

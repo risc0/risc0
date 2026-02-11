@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -107,7 +107,7 @@ impl SegmentReceipt {
 
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
         risc0_circuit_rv32im::verify(&self.seal)?;
-        let decoded_claim = ReceiptClaim::decode_from_seal_m3(&self.seal)
+        let decoded_claim = ReceiptClaim::decode_from_seal(&self.seal)
             .or(Err(VerificationError::ReceiptFormatError))?;
 
         // Receipt is consistent with the claim encoded on the seal. Now check against the
