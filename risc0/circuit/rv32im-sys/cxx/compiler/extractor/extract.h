@@ -112,7 +112,8 @@ void extractWithValValValArg(RecordingContext& ctx) {
   auto arg2 = ctx.addValParameter();
   auto arg3 = ctx.addValParameter();
   Component<RecordingContext> component;
-  ctx.componentIRMap = populateComponent<Component, RecordingVal, RecordingVal, RecordingVal>(ctx, component);
+  ctx.componentIRMap =
+      populateComponent<Component, RecordingVal, RecordingVal, RecordingVal>(ctx, component);
   AddArgumentsFwd::apply(ctx, component, arg1, arg2, arg3);
   VerifyFwd::apply(ctx, component, arg1, arg2, arg3);
   ctx.exitComponent();
