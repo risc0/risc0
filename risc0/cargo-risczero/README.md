@@ -117,9 +117,6 @@ The `datasheet` command performs a benchmark to evaluate zkVM performance for
 the current machine's hardware, and then prints a table (along with optional
 `--json` output).
 
-See [our benchmarks](https://reports.risczero.com/main/datasheet) for numbers
-you can expect to see from this.
-
 Schema:
 
 ```ts

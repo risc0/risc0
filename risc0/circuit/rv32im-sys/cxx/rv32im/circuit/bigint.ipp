@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define BIGINT_STATE_ARGUMENT(ctx, arg)                                                            \
+  PICUS_ARGUMENT(ctx, ({}), ({ctx.get(arg.cycle), ctx.get(arg.pcWord), ctx.get(arg.mm)}))
+
 template <typename C> FDEV void BigIntBlock<C>::set(CTX, BigIntWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   mm.set(ctx, wit.mm);
@@ -48,12 +51,18 @@ template <typename C> FDEV void BigIntBlock<C>::set(CTX, BigIntWitness wit) DEV 
 }
 
 template <typename C> FDEV void BigIntBlock<C>::verify(CTX) DEV {
-  // Verify instruction decoding
+  // Verification of these values is done in the accum phase, and therefore
+  // isn't readily verifiable with Picus.
+  PICUS_INPUT(ctx, bytes);
+  PICUS_INPUT(ctx, prevCycle);
+  PICUS_INPUT(ctx, prevValue);
+
+  Val<C> regVal = getReg();
   EQ(readInst.data.high.get(),
-     memOp.get() * (1 << 12) + polyOp.get() * (1 << 8) + getCoeff() * (1 << 5) + getReg());
+     memOp.get() * (1 << 12) + polyOp.get() * (1 << 8) + getCoeff() * (1 << 5) + regVal);
   EQ(readInst.data.low.get(), offset.get());
   // Verify we are reading the right base register
-  EQ(readBaseReg.wordAddr.get(), cond<C>(mm.get(), MACHINE_REGS_WORD, USER_REGS_WORD) + getReg());
+  EQ(readBaseReg.wordAddr.get(), cond<C>(mm.get(), MACHINE_REGS_WORD, USER_REGS_WORD) + regVal);
   // Verify offset16 is 16 * offset
   EQ(offset16High.get() * 65536 + offset16Low.get(), offset.get() * 16);
   // Verify alignment
@@ -85,6 +94,10 @@ template <typename C> FDEV void BigIntBlock<C>::addArguments(CTX) DEV {
     ctx.addArgument(-doMem, LookupArgument<C>(2, memCycleVal - prevCycle[i].get() - 1));
   }
   Val<C> oldPcWord = readInst.wordAddr.get();
-  ctx.pull(BigIntCpuStateArgument<C>(cycleVal, oldPcWord, mm.get()));
+  BigIntCpuStateArgument<C> bigintState(cycleVal, oldPcWord, mm.get());
+  ctx.pull(bigintState);
+  BIGINT_STATE_ARGUMENT(ctx, bigintState);
   ctx.push(BigIntCpuStateArgument<C>(cycleVal + 1, oldPcWord + 1, mm.get()));
 }
+
+#undef BIGINT_STATE_ARGUMENT

@@ -43,9 +43,14 @@ pub struct SegmentInfo {
     /// The number of cycles used for proving in powers of 2.
     pub po2: u32,
 
-    /// The number of user cycles without any overhead for continuations or po2
-    /// padding.
-    pub cycles: u32,
+    /// The number of rows of overhead for po2 padding.
+    pub padding_row_count: u64,
+
+    /// Total number of rows
+    pub row_count: u64,
+
+    /// Total number of RISC-V instructions
+    pub insn_count: u64,
 }
 
 /// Provides information about the result of execution.
@@ -69,8 +74,10 @@ pub struct SessionInfo {
 impl SessionInfo {
     /// The total number of user cycles across all segments, without any
     /// overhead for continuations or po2 padding.
-    pub fn cycles(&self) -> u64 {
-        self.segments.iter().map(|s| s.cycles as u64).sum()
+    pub fn rows(&self) -> u64 {
+        let total: u64 = self.segments.iter().map(|s| s.row_count).sum();
+        let padding: u64 = self.segments.iter().map(|s| s.padding_row_count).sum();
+        total - padding
     }
 }
 

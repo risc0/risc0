@@ -34,19 +34,41 @@ const PLATFORM_CUDA: Platform = Platform::new("cuda", "cu", "hal/cuda/kernels");
 const PLATFORM_METAL: Platform = Platform::new("metal", "metal", "hal/metal/kernels");
 
 fn main() {
+    let prove = std::env::var("CARGO_FEATURE_PROVE").is_ok();
+    if prove {
+        compile_provers();
+    }
+
+    generate_rust_code(prove);
+}
+
+fn generate_rust_code(prove: bool) {
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
+
+    let mut block_types = parse_block_types().unwrap();
+    block_types.insert(
+        "Empty".into(),
+        BlockTypeInfo {
+            index: block_types.len(),
+            count_per_row: 0,
+        },
+    );
+
+    generate_rust_block_types(&format!("{out_dir}/block_types.rs"), &block_types);
+    if prove {
+        generate_rust_bindings(&format!("{out_dir}/bindings.rs"), &block_types);
+    }
+
+    let rv32im_table = parse_rv32im_inc().unwrap();
+    generate_rv32im_table(&format!("{out_dir}/rv32im_table.rs"), &rv32im_table);
+}
+
+fn compile_provers() {
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
 
     rerun_if_env_changed("NVCC_APPEND_FLAGS");
     rerun_if_env_changed("NVCC_PREPEND_FLAGS");
     rerun_if_env_changed("SCCACHE_RECACHE");
-
-    rerun_if_changed("cxx/core");
-    rerun_if_changed("cxx/hal");
-    rerun_if_changed("cxx/prove");
-    rerun_if_changed("cxx/rv32im");
-    rerun_if_changed("cxx/verify");
-    rerun_if_changed("cxx/zkp");
-    rerun_if_changed("vendor");
 
     let platform = if is_cuda() {
         PLATFORM_CUDA
@@ -66,11 +88,12 @@ fn main() {
         make_po2s(spec, &out_dir, &mut generated_files);
     }
 
-    let mut build = KernelBuild::new(if is_cuda() {
+    let build_type = if is_cuda() {
         KernelType::Cuda
     } else {
         KernelType::Cpp
-    });
+    };
+    let mut build = KernelBuild::new(build_type, "kernel_build.manifest");
 
     build
         .include("cxx")
@@ -113,7 +136,7 @@ fn main() {
             make_po2s(spec, &out_dir, &mut generated_files);
         }
 
-        KernelBuild::new(KernelType::Metal)
+        KernelBuild::new(KernelType::Metal, "kernel_build.manifest")
             .include("cxx")
             .files(glob_paths("cxx/hal/metal/kernels/*.metal"))
             .generated_files(generated_files)
@@ -128,21 +151,6 @@ fn main() {
     }
 
     build.compile("risc0_rv32im");
-
-    let mut block_types = parse_block_types().unwrap();
-    block_types.insert(
-        "Empty".into(),
-        BlockTypeInfo {
-            index: block_types.len(),
-            count_per_row: 0,
-        },
-    );
-
-    generate_rust_block_types(&format!("{out_dir}/block_types.rs"), &block_types);
-    generate_rust_bindings(&format!("{out_dir}/bindings.rs"), &block_types);
-
-    let rv32im_table = parse_rv32im_inc().unwrap();
-    generate_rv32im_table(&format!("{out_dir}/rv32im_table.rs"), &rv32im_table);
 }
 
 struct BlockTypeInfo {
@@ -335,6 +343,12 @@ fn generate_rust_block_types(output: &str, block_types: &BTreeMap<String, BlockT
             pub fn iter() -> impl Iterator<Item = Self> {
                 <Self as strum::IntoEnumIterator>::iter()
             }
+
+            pub fn name(&self) -> &'static str {
+                match self {
+                    #(Self::#block_names => stringify!(#block_names)),*
+                }
+            }
         }
 
         impl TryFrom<u8> for BlockType {
@@ -348,15 +362,20 @@ fn generate_rust_block_types(output: &str, block_types: &BTreeMap<String, BlockT
             }
         }
 
-        #(impl HasBlockType for #block_witnesses {
-            const BLOCK_TYPE: BlockType = BlockType::#block_names;
-        })*
+        #(
+            #[cfg(feature = "prove")]
+            impl HasBlockType for #block_witnesses {
+                const BLOCK_TYPE: BlockType = BlockType::#block_names;
+            }
+        )*
 
+        #[cfg(feature = "prove")]
         #[derive(derive_more::From, PartialEq, Debug, Clone)]
         pub enum BlockWitness {
             #(#block_names(#block_witnesses),)*
         }
 
+        #[cfg(feature = "prove")]
         impl BlockWitness {
             pub const fn block_type(&self) -> BlockType {
                 match self {
@@ -440,10 +459,6 @@ fn generate_rust_bindings(output: &str, block_types: &BTreeMap<String, BlockType
 
     let bindings = builder.generate().unwrap();
     bindings.write_to_file(output).unwrap();
-}
-
-fn rerun_if_changed<P: AsRef<Path>>(path: P) {
-    println!("cargo:rerun-if-changed={}", path.as_ref().display());
 }
 
 fn rerun_if_env_changed(var_name: &str) {
