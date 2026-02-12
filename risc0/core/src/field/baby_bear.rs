@@ -104,7 +104,7 @@ impl field::Elem for Elem {
     /// Note that if computed this way, the *inverse* of zero comes out as zero,
     /// which we allow because it is convenient in many cases.
     fn inv(self) -> Self {
-        self.ensure_valid().pow((P - 2) as usize)
+        self.debug_ensure_reduced().pow((P - 2) as usize)
     }
 
     /// Generate a random value within the Baby Bear field
@@ -228,14 +228,17 @@ impl ops::Add for Elem {
 
     /// Addition for Baby Bear [Elem]
     fn add(self, rhs: Self) -> Self {
-        Elem(add(self.ensure_valid().0, rhs.ensure_valid().0))
+        Elem(add(
+            self.debug_ensure_reduced().0,
+            rhs.debug_ensure_reduced().0,
+        ))
     }
 }
 
 impl ops::AddAssign for Elem {
     /// Simple addition case for Baby Bear [Elem]
     fn add_assign(&mut self, rhs: Self) {
-        self.0 = add(self.ensure_valid().0, rhs.ensure_valid().0)
+        self.0 = add(self.debug_ensure_reduced().0, rhs.debug_ensure_reduced().0)
     }
 }
 
@@ -244,14 +247,17 @@ impl ops::Sub for Elem {
 
     /// Subtraction for Baby Bear [Elem]
     fn sub(self, rhs: Self) -> Self {
-        Elem(sub(self.ensure_valid().0, rhs.ensure_valid().0))
+        Elem(sub(
+            self.debug_ensure_reduced().0,
+            rhs.debug_ensure_reduced().0,
+        ))
     }
 }
 
 impl ops::SubAssign for Elem {
     /// Simple subtraction case for Baby Bear [Elem]
     fn sub_assign(&mut self, rhs: Self) {
-        self.0 = sub(self.ensure_valid().0, rhs.ensure_valid().0)
+        self.0 = sub(self.debug_ensure_reduced().0, rhs.debug_ensure_reduced().0)
     }
 }
 
@@ -260,14 +266,17 @@ impl ops::Mul for Elem {
 
     /// Multiplication for Baby Bear [Elem]
     fn mul(self, rhs: Self) -> Self {
-        Elem(mul(self.ensure_valid().0, rhs.ensure_valid().0))
+        Elem(mul(
+            self.debug_ensure_reduced().0,
+            rhs.debug_ensure_reduced().0,
+        ))
     }
 }
 
 impl ops::MulAssign for Elem {
     /// Simple multiplication case for Baby Bear [Elem]
     fn mul_assign(&mut self, rhs: Self) {
-        self.0 = mul(self.ensure_valid().0, rhs.ensure_valid().0)
+        self.0 = mul(self.debug_ensure_reduced().0, rhs.debug_ensure_reduced().0)
     }
 }
 
@@ -275,13 +284,13 @@ impl ops::Neg for Elem {
     type Output = Self;
 
     fn neg(self) -> Self {
-        Elem(0) - *self.ensure_valid()
+        Elem(0) - *self.debug_ensure_reduced()
     }
 }
 
 impl Ord for Elem {
     fn cmp(&self, rhs: &Self) -> Ordering {
-        decode(self.ensure_valid().0).cmp(&decode(rhs.ensure_valid().0))
+        decode(self.debug_ensure_reduced().0).cmp(&decode(rhs.debug_ensure_reduced().0))
     }
 }
 
@@ -318,13 +327,21 @@ impl From<u64> for Elem {
 /// Wrapping addition of [Elem] using Baby Bear field modulus
 fn add(lhs: u32, rhs: u32) -> u32 {
     let x = lhs.wrapping_add(rhs);
-    if x >= P { x - P } else { x }
+    if x >= P {
+        x - P
+    } else {
+        x
+    }
 }
 
 /// Wrapping subtraction of [Elem] using Baby Bear field modulus
 fn sub(lhs: u32, rhs: u32) -> u32 {
     let x = lhs.wrapping_sub(rhs);
-    if x > P { x.wrapping_add(P) } else { x }
+    if x > P {
+        x.wrapping_add(P)
+    } else {
+        x
+    }
 }
 
 /// Wrapping multiplication of [Elem]  using Baby Bear field modulus
@@ -341,7 +358,11 @@ const fn mul(lhs: u32, rhs: u32) -> u32 {
     // uint32_t ret = o64 >> 32;
     let ret = (o64 >> 32) as u32;
     // return (ret >= P ? ret - P : ret);
-    if ret >= P { ret - P } else { ret }
+    if ret >= P {
+        ret - P
+    } else {
+        ret
+    }
 }
 
 /// Encode to Montgomery form from direct form.
@@ -428,7 +449,7 @@ impl field::Elem for ExtElem {
     fn pow(self, n: usize) -> Self {
         let mut n = n;
         let mut tot = ExtElem::ONE;
-        let mut x = *self.ensure_valid();
+        let mut x = *self.debug_ensure_reduced();
         while n != 0 {
             if n % 2 == 1 {
                 tot *= x;
@@ -441,7 +462,7 @@ impl field::Elem for ExtElem {
 
     /// Compute the multiplicative inverse of an `ExtElem`.
     fn inv(self) -> Self {
-        let a = &self.ensure_valid().0;
+        let a = &self.debug_ensure_reduced().0;
         // Compute the multiplicative inverse by looking at `ExtElem` as a composite
         // field and using the same basic methods used to invert complex
         // numbers. We imagine that initially we have a numerator of `1`, and a
@@ -510,16 +531,21 @@ impl field::ExtElem for ExtElem {
     type SubElem = Elem;
 
     fn from_subfield(elem: &Elem) -> Self {
-        Self::from([*elem.ensure_valid(), Elem::ZERO, Elem::ZERO, Elem::ZERO])
+        Self::from([
+            *elem.debug_ensure_reduced(),
+            Elem::ZERO,
+            Elem::ZERO,
+            Elem::ZERO,
+        ])
     }
 
     fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self {
         let mut iter = elems.into_iter();
         let elem = Self::from([
-            *iter.next().unwrap().ensure_valid(),
-            *iter.next().unwrap().ensure_valid(),
-            *iter.next().unwrap().ensure_valid(),
-            *iter.next().unwrap().ensure_valid(),
+            *iter.next().unwrap().debug_ensure_reduced(),
+            *iter.next().unwrap().debug_ensure_reduced(),
+            *iter.next().unwrap().debug_ensure_reduced(),
+            *iter.next().unwrap().debug_ensure_reduced(),
         ]);
         assert!(
             iter.next().is_none(),
@@ -530,23 +556,22 @@ impl field::ExtElem for ExtElem {
 
     /// Returns the subelements of a [Elem].
     fn subelems(&self) -> &[Elem] {
-        &self.ensure_valid().0
+        &self.debug_ensure_reduced().0
     }
 }
 
 impl PartialEq<ExtElem> for ExtElem {
     fn eq(&self, rhs: &Self) -> bool {
-        self.ensure_valid().0 == rhs.ensure_valid().0
+        self.debug_ensure_reduced().0 == rhs.debug_ensure_reduced().0
     }
 }
 
 impl From<[Elem; EXT_SIZE]> for ExtElem {
     fn from(val: [Elem; EXT_SIZE]) -> Self {
-        if cfg!(debug_assertions) {
-            for elem in val.iter() {
-                elem.ensure_valid();
-            }
+        for elem in val.iter() {
+            elem.debug_ensure_reduced();
         }
+        debug_assert!(false);
         ExtElem(val)
     }
 }
@@ -555,7 +580,7 @@ const BETA: Elem = Elem::new(11);
 const NBETA: Elem = Elem::new(P - 11);
 
 // TODO: refactor if rust gets const trait methods.
-const fn const_ensure_valid(x: Elem) -> Elem {
+const fn const_debug_ensure_reduced(x: Elem) -> Elem {
     debug_assert!(x.0 != Elem::INVALID.0);
     x
 }
@@ -564,10 +589,10 @@ impl ExtElem {
     /// Explicitly construct an ExtElem from parts.
     pub const fn new(x0: Elem, x1: Elem, x2: Elem, x3: Elem) -> Self {
         Self([
-            const_ensure_valid(x0),
-            const_ensure_valid(x1),
-            const_ensure_valid(x2),
-            const_ensure_valid(x3),
+            const_debug_ensure_reduced(x0),
+            const_debug_ensure_reduced(x1),
+            const_debug_ensure_reduced(x2),
+            const_debug_ensure_reduced(x3),
         ])
     }
 
@@ -593,12 +618,12 @@ impl ExtElem {
 
     /// Return the base field term of an [Elem].
     pub fn const_part(self) -> Elem {
-        self.ensure_valid().0[0]
+        self.debug_ensure_reduced().0[0]
     }
 
     /// Return [Elem] as a vector of base field values.
     pub fn elems(&self) -> &[Elem] {
-        &self.ensure_valid().0
+        &self.debug_ensure_reduced().0
     }
 }
 
@@ -788,7 +813,7 @@ mod tests {
 
     use rand::{Rng, SeedableRng};
 
-    use super::{Elem, ExtElem, P, P_U64, field};
+    use super::{field, Elem, ExtElem, P, P_U64};
     use crate::field::Elem as FieldElem;
 
     #[test]
