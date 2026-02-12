@@ -28,8 +28,16 @@ jobs:
           crate: cargo-fuzz
           version: "0.13.1"
       - uses: ./.github/actions/sccache
-      # Run fuzzing on the receipt_seal target on 8 cores for 1 hour.
-      - run: cargo "+${NIGHTLY_RUST_TOOLCHAIN}" fuzz run --fuzz-dir risc0/fuzz --sanitizer none -j8 receipt_seal ~/fuzz/receipt_seal/ -- -max_len=1048576 -max_total_time=3600
+      # Run fuzzing on the two fuzz targets on 8 cores for 1 hour each.
+      # Each job takes two corpus dir args. The first is in the home directory, and so persists between runs.
+      # The second contains only the checked in corpus files, which provide a seed for coverage.
+      # New corpus entries are saved to the first location provided (the home directory).
+      - run: cargo "+${NIGHTLY_RUST_TOOLCHAIN}" fuzz run --fuzz-dir risc0/fuzz --sanitizer none -j8 "$FUZZ_TARGET" "$HOME/fuzz/$FUZZ_TARGET/" "./risc0/fuzz/corpus/$FUZZ_TARGET" -- -max_len=1048576 -max_total_time=3600
+        env:
+          FUZZ_TARGET: receipt_seal_verify
+      - run: cargo "+${NIGHTLY_RUST_TOOLCHAIN}" fuzz run --fuzz-dir risc0/fuzz --sanitizer none -j8 "$FUZZ_TARGET" "$HOME/fuzz/$FUZZ_TARGET/" "./risc0/fuzz/corpus/$FUZZ_TARGET" -- -max_len=1048576 -max_total_time=3600
+        env:
+          FUZZ_TARGET: receipt_decode_and_verify
       - run: sccache --show-stats
 
   alert_devops_if_failed:
