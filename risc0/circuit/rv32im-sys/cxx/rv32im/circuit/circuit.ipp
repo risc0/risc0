@@ -67,6 +67,7 @@ template <typename T, typename U> struct if_not_char {
 };
 template <typename U> struct if_not_char<char, U> {};
 template <typename U> struct if_not_char<const char, U> {};
+template <typename U> struct if_not_char<CONSTARG char* const, U> {};
 
 #include "rv32im/circuit/bigint.ipp"
 #include "rv32im/circuit/bits.ipp"
