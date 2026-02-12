@@ -41,10 +41,22 @@ cargo +nightly fuzz coverage --fuzz-dir ./risc0/fuzz receipt_seal --sanitizer=no
 
 2. Create a coverage report
 
+The following command will create a text report in the terminal, showing the regions with at least one covered line.
+
 ```sh
 rust-cov show ./target/x86_64-unknown-linux-gnu/coverage/x86_64-unknown-linux-gnu/release/receipt_seal \
     -Xdemangler=rustfilt \
     -instr-profile=./risc0/fuzz/coverage/receipt_seal/coverage.profdata \
     -show-line-counts-or-regions \
-    -show-instantiations
+    -show-instantiations \
+    -region-coverage-gt=0
+```
+
+The following command will produce an `lcov.info` file. This can be used to display coverage information in your editor.
+
+```sh
+rust-cov export --Xdemangler=rustfilt ./target/x86_64-unknown-linux-gnu/coverage/x86_64-unknown-linux-gnu/release/receipt_seal \
+    -instr-profile=./risc0/fuzz/coverage/receipt_seal/coverage.profdata \
+    -region-coverage-gt=0  \
+    -format=lcov > lcov.info
 ```
