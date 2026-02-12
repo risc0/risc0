@@ -18,7 +18,7 @@
 
 use alloc::vec::Vec;
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::core::{digest::Digest, hash::HashFn};

@@ -16,8 +16,8 @@
 use std::{fs, path::PathBuf};
 
 use anyhow::{Context, Result};
-use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts, Receipt, ReceiptKind};
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+use risc0_zkvm::{ExecutorEnv, ProverOpts, Receipt, ReceiptKind, get_prover_server};
+use risc0_zkvm_methods::{MULTI_TEST_ELF, multi_test::MultiTestSpec};
 
 fn prove_nothing(kind: ReceiptKind) -> Result<Receipt> {
     let opts = ProverOpts::default().with_receipt_kind(kind);
