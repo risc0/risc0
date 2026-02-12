@@ -7482,9 +7482,12 @@ dependencies = [
 name = "risc0-fuzz"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
  "bytemuck",
  "libfuzzer-sys",
  "risc0-circuit-rv32im",
+ "risc0-zkvm",
+ "risc0-zkvm-methods",
 ]
 
 [[package]]

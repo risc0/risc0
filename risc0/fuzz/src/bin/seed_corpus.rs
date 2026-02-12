@@ -15,9 +15,9 @@
 
 use std::{fs, path::PathBuf};
 
-use anyhow::{Context, Result, bail};
-use risc0_zkvm::{ExecutorEnv, ProverOpts, ReceiptKind, get_prover_server};
-use risc0_zkvm_methods::{MULTI_TEST_ELF, multi_test::MultiTestSpec};
+use anyhow::{bail, Context, Result};
+use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts, ReceiptKind};
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 
 fn main() -> Result<()> {
     let opts = ProverOpts::default().with_receipt_kind(ReceiptKind::Composite);
@@ -55,11 +55,7 @@ fn main() -> Result<()> {
     fs::write(&out_path, &seal_bytes)
         .with_context(|| format!("failed to write {}", out_path.display()))?;
 
-    println!(
-        "Wrote {} bytes to {}",
-        seal_bytes.len(),
-        out_path.display()
-    );
+    println!("Wrote {} bytes to {}", seal_bytes.len(), out_path.display());
 
     Ok(())
 }
