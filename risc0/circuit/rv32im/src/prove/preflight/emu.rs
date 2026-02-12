@@ -1148,7 +1148,7 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
 
         // Delegate writing the resulting digest to DigestWriteBlock
         let dw_wit_index = trace.add_block(DigestWriteWitness {
-            cycle,
+            cycle: self.cur_cycle,
             digest: [0; DIGEST_WORDS],
             stateOut: [PhysMemWriteWitness::zeroed(); DIGEST_WORDS],
         });
