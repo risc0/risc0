@@ -289,6 +289,7 @@ impl BlockTracker {
 
     pub fn track_ecall_poseidon2(&mut self, block_count: u64) {
         self.blocks.add_block(BlockType::EcallP2);
+        self.blocks.add_block(BlockType::DigestWrite);
         self.blocks.add_blocks(BlockType::P2Step, block_count);
         Self::add_p2_blocks(&mut self.blocks, block_count);
 
