@@ -52,7 +52,7 @@ cargo install rustfilt
 1. Run the corpus under coverage instrumentation to get a coverage profile
 
 ```sh
-cargo +nightly fuzz coverage --fuzz-dir ./risc0/fuzz receipt_seal --sanitizer=none
+cargo +nightly fuzz coverage --fuzz-dir ./risc0/fuzz receipt_seal_verify --sanitizer=none
 ```
 
 2. Create a coverage report
@@ -60,9 +60,9 @@ cargo +nightly fuzz coverage --fuzz-dir ./risc0/fuzz receipt_seal --sanitizer=no
 The following command will create a text report in the terminal, showing the regions with at least one covered line.
 
 ```sh
-rust-cov show ./target/x86_64-unknown-linux-gnu/coverage/x86_64-unknown-linux-gnu/release/receipt_seal \
+rust-cov show ./target/x86_64-unknown-linux-gnu/coverage/x86_64-unknown-linux-gnu/release/receipt_seal_verify \
     -Xdemangler=rustfilt \
-    -instr-profile=./risc0/fuzz/coverage/receipt_seal/coverage.profdata \
+    -instr-profile=./risc0/fuzz/coverage/receipt_seal_verify/coverage.profdata \
     -show-line-counts-or-regions \
     -show-instantiations \
     -region-coverage-gt=0
@@ -71,8 +71,8 @@ rust-cov show ./target/x86_64-unknown-linux-gnu/coverage/x86_64-unknown-linux-gn
 The following command will produce an `lcov.info` file. This can be used to display coverage information in your editor.
 
 ```sh
-rust-cov export --Xdemangler=rustfilt ./target/x86_64-unknown-linux-gnu/coverage/x86_64-unknown-linux-gnu/release/receipt_seal \
-    -instr-profile=./risc0/fuzz/coverage/receipt_seal/coverage.profdata \
+rust-cov export --Xdemangler=rustfilt ./target/x86_64-unknown-linux-gnu/coverage/x86_64-unknown-linux-gnu/release/receipt_seal_verify \
+    -instr-profile=./risc0/fuzz/coverage/receipt_seal_verify/coverage.profdata \
     -region-coverage-gt=0  \
     -format=lcov > lcov.info
 ```
