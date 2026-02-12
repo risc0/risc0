@@ -12,8 +12,15 @@ cargo-fuzz = true
 seed = ["dep:risc0-zkvm-methods", "dep:anyhow"]
 
 [[bin]]
-name = "receipt_seal"
-path = "fuzz_targets/receipt_seal.rs"
+name = "receipt_seal_verify"
+path = "fuzz_targets/receipt_seal_verify.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "receipt_decode_and_verify"
+path = "fuzz_targets/receipt_decode_and_verify.rs"
 test = false
 doc = false
 bench = false
@@ -35,5 +42,6 @@ bytemuck = "1.24.0"
 #libfuzzer-sys = { package = "libafl_libfuzzer", version = "0.15.4" }
 libfuzzer-sys = { version = "0.4.10" }
 risc0-circuit-rv32im = { workspace = true }
+bincode = "1"
 risc0-zkvm = { workspace = true, default-features = false, features = ["prove", "std"] }
 risc0-zkvm-methods = { path = "../zkvm/methods", features = ["std"], optional = true }
