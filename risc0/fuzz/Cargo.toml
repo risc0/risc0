@@ -27,7 +27,7 @@ bench = false
 
 [[bin]]
 name = "seed_corpus"
-required-feature = ["seed"]
+required-features = ["seed"]
 
 [dependencies]
 anyhow = { version = "1.0", optional = true }
