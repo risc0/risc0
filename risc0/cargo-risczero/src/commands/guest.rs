@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@ use std::{fs, io, io::Write, path::PathBuf, process::Stdio};
 use anyhow::{anyhow, bail, ensure, Context, Result};
 use cargo_metadata::{Artifact, ArtifactProfile, Message};
 use clap::{Args, Subcommand};
+use risc0_binfmt::ProgramBinary;
 use risc0_build::cargo_command;
+use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkvm::{default_executor, ExecutorEnv, ExitCode};
 use tempfile::{tempdir, TempDir};
 
@@ -220,8 +222,13 @@ impl GuestCommand {
 
                 let env = builder.build()?;
 
+                // Read the test ELF and join it with the V1COMPAT kernel.
+                let elf = fs::read(&test)
+                    .with_context(|| format!("Failed to read test binary at: {test}"))?;
+                let bin = ProgramBinary::new(&elf, V1COMPAT_ELF).encode();
+
                 let exec = default_executor();
-                let session = exec.execute(env, &fs::read(test)?)?;
+                let session = exec.execute(env, &bin)?;
                 ensure!(
                     session.exit_code == ExitCode::Halted(0),
                     "test exited with code {:?}",
