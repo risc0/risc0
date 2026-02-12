@@ -696,7 +696,6 @@ struct Emulator {
 
   void do_ECALL_P2() {
     // Set up witness for instruction
-    uint32_t startCycle = curCycle;
     auto& wit = trace.makeEcallP2();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
@@ -762,8 +761,6 @@ struct Emulator {
     }
 
     // Delegate writing the resulting digest to DigestWriteBlock
-    uint32_t endCycle = curCycle;
-    curCycle = startCycle;
     auto& dwWit = trace.makeDigestWrite();
     dwWit.cycle = curCycle;
     for (size_t i = 0; i < CELLS_DIGEST; i++) {
@@ -772,7 +769,6 @@ struct Emulator {
       dwWit.digest[i] = fp;
       writePhysMemory(dwWit.stateOut[i], stateOutWordAddr + i, fp);
     }
-    curCycle = endCycle;
   }
 
   void do_ECALL_BIG_INT() {
