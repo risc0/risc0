@@ -383,7 +383,7 @@ template <typename C> FDEV void EcallP2Block<C>::addArguments(CTX) DEV {
 
   DigestWriteArgument<C> dwArg;
   dwArg.wordAddr = stateOutWordAddr.get();
-  dwArg.cycle = cycleVal;
+  dwArg.cycle = cycleVal + 1 + readA3.data.low.get();
   GET_ARR(dwArg.digest, stateOut, CELLS_DIGEST);
   ctx.push(dwArg);
 
