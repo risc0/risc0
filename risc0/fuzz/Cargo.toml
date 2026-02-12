@@ -19,7 +19,7 @@ doc = false
 bench = false
 
 [[bin]]
-name = "generate_segment_receipt_corpus"
+name = "seed_corpus"
 required-feature = ["seed"]
 
 [dependencies]
