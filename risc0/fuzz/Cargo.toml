@@ -7,10 +7,6 @@ publish = false
 [package.metadata]
 cargo-fuzz = true
 
-[features]
-# Add requirements to build the corpus seed generator.
-seed = ["dep:risc0-zkvm-methods", "dep:anyhow"]
-
 [[bin]]
 name = "receipt_seal_verify"
 path = "fuzz_targets/receipt_seal_verify.rs"
@@ -29,8 +25,13 @@ bench = false
 name = "seed_corpus"
 required-features = ["seed"]
 
+[features]
+# Add requirements to build the corpus seed generator.
+seed = ["dep:risc0-zkvm-methods", "dep:anyhow"]
+
 [dependencies]
 anyhow = { version = "1.0", optional = true }
+bincode = "1"
 bytemuck = "1.24.0"
 # NOTE: LibAFL is an alternative to libfuzzer. They provide a compatible fuzzer implementation,
 # which can be enabled by replacing where the libfuzzer-sys crate is sourced. In experimentation,
@@ -42,6 +43,5 @@ bytemuck = "1.24.0"
 #libfuzzer-sys = { package = "libafl_libfuzzer", version = "0.15.4" }
 libfuzzer-sys = { version = "0.4.10" }
 risc0-circuit-rv32im = { workspace = true }
-bincode = "1"
 risc0-zkvm = { workspace = true, default-features = false, features = ["prove", "std"] }
 risc0-zkvm-methods = { path = "../zkvm/methods", features = ["std"], optional = true }
