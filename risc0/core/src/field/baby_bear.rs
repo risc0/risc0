@@ -571,7 +571,6 @@ impl From<[Elem; EXT_SIZE]> for ExtElem {
         for elem in val.iter() {
             elem.debug_ensure_reduced();
         }
-        debug_assert!(false);
         ExtElem(val)
     }
 }
