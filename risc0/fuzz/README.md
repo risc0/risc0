@@ -17,6 +17,22 @@ The flag `--sanitizer none` is provided since the goal is to find panics, and to
 The `-max_len` flag raises the default maximum input length from 4k bytes to 1 MB.
 Adding `-jX` before the `--` enables parallelism across cores, e.g. `-j$(nproc)`.
 
+## Seed corpus
+
+The `seed_corpus` binary generates initial corpus files for the fuzz targets in this crate.
+These seed file greately increase the coverage of the fuzzer by starting it off with valid receipts.
+
+The following command, relative to the repo root, will run the corpus seeder.
+
+```sh
+cargo run -p risc0-fuzz --bin seed_corpus --features seed
+```
+
+This writes seed files into:
+
+- `risc0/fuzz/corpus/receipt_seal_verify`
+- `risc0/fuzz/corpus/receipt_decode_and_verify`
+
 ### Coverage
 
 After running the fuzzer using the command above, it's possible to view a coverage report for the corpus.
