@@ -18,7 +18,7 @@
 
 use alloc::vec::Vec;
 
-use anyhow::{Result, ensure};
+use anyhow::{ensure, Result};
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::core::{digest::Digest, hash::HashFn};
@@ -144,17 +144,32 @@ impl MerkleProof {
         hashfn: &dyn HashFn<BabyBear>,
     ) -> Result<()> {
         ensure!(
-            self.root(leaf, hashfn) == *root,
+            self.try_root(leaf, hashfn)? == *root,
             "merkle proof verify failed"
         );
         Ok(())
     }
 
     /// Calculate the root of this branch by iteratively hashing, starting from the leaf.
+    /// If any of the hashes are not valid for the hash function, this function panics.
     pub fn root(&self, leaf: &Digest, hashfn: &dyn HashFn<BabyBear>) -> Digest {
+        self.try_root(leaf, hashfn).unwrap()
+    }
+
+    /// Calculate the root of this branch by iteratively hashing, starting from the leaf.
+    /// If any of the hashes are not valid for the hash function, return an error.
+    pub(crate) fn try_root(&self, leaf: &Digest, hashfn: &dyn HashFn<BabyBear>) -> Result<Digest> {
+        ensure!(
+            hashfn.is_digest_valid(leaf),
+            "Merkle proof digest is invalid"
+        );
         let mut cur = *leaf;
         let mut cur_index = self.index;
         for sibling in &self.digests {
+            ensure!(
+                hashfn.is_digest_valid(sibling),
+                "Merkle proof digest is invalid"
+            );
             cur = if cur_index & 1 == 0 {
                 *hashfn.hash_pair(&cur, sibling)
             } else {
@@ -162,7 +177,7 @@ impl MerkleProof {
             };
             cur_index >>= 1;
         }
-        cur
+        Ok(cur)
     }
 }
 
