@@ -20,6 +20,8 @@ use risc0_zkvm::Receipt;
 
 fuzz_target!(|data: &[u8]| -> Corpus {
     // Deserialize the receipt. Do not add items to the corpus that fail to deserialize.
+    // We are not trying to fuzz bincode. We use it to make specifying the input more convenient
+    // and avoid implementing a method for generating Receipts directly as structs.
     let Ok(receipt) = bincode::deserialize::<Receipt>(data) else {
         return Corpus::Reject;
     };
