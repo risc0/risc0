@@ -568,7 +568,7 @@ const NBETA: Elem = Elem::new(P - 11);
 
 // TODO: refactor if rust gets const trait methods.
 const fn const_debug_ensure_reduced(x: Elem) -> Elem {
-    debug_assert!(x.0 != Elem::INVALID.0);
+    debug_assert!(x.0 < P);
     x
 }
 
