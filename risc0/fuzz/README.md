@@ -9,7 +9,7 @@ Fuzzer for the receipt seal verification function, looking for panic issues.
 The following command, relative to the repo root, will run the fuzzer.
 
 ```sh
-cargo +nightly fuzz run receipt_seal --fuzz-dir risc0/fuzz --sanitizer none -- -max_len=1048576
+cargo +nightly fuzz run receipt_seal_verify --fuzz-dir risc0/fuzz --sanitizer none -- -max_len=1048576
 ```
 
 Note that `cargo fuzz` requires the nightly toolchain to build.
@@ -20,7 +20,7 @@ Adding `-jX` before the `--` enables parallelism across cores, e.g. `-j$(nproc)`
 ## Seed corpus
 
 The `seed_corpus` binary generates initial corpus files for the fuzz targets in this crate.
-These seed file greately increase the coverage of the fuzzer by starting it off with valid receipts.
+These seed files greatly increase the coverage of the fuzzer by starting it off with valid receipts.
 
 The following command, relative to the repo root, will run the corpus seeder.
 

@@ -1,4 +1,4 @@
-# Ignore the corpus and artifacts, expect that that are explicitly included to seed the corpus.
+# Ignore the corpus and artifacts, except those that are explicitly included to seed the corpus.
 artifacts/
 coverage/
 
