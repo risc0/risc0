@@ -18,8 +18,8 @@ use risc0_zkp::core::digest::Digest;
 use test_log::test;
 
 use crate::{
+    execute::{testutil, ExecutionLimit},
     TerminateState,
-    execute::{ExecutionLimit, testutil},
 };
 
 #[test]
@@ -111,4 +111,23 @@ fn insufficient_segment_limit() {
         error.to_string().contains("too small"),
         "too small not found in {error}"
     );
+}
+
+#[test]
+fn segment_replay_multi_write() {
+    let program = testutil::kernel::multi_write();
+    let image = MemoryImage::new_kernel(program);
+
+    let session = testutil::execute(
+        image,
+        testutil::DEFAULT_EXECUTION_LIMIT,
+        testutil::NullSyscall,
+        None,
+    )
+    .unwrap();
+
+    assert_eq!(session.segments.len(), 1);
+    let segment = session.segments.first().unwrap();
+    assert_eq!(segment.write_record, vec![5, 7, 11]);
+    segment.execute().unwrap();
 }
