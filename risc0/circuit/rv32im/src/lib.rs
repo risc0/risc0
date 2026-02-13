@@ -155,14 +155,18 @@ impl Rv32imV2Claim {
 }
 
 /// Decodes a PoVW nonce from a segment seal.
-pub fn decode_povw_nonce(segment_seal: &[u32]) -> Result<PovwNonce> {
+pub fn decode_povw_nonce(mut segment_seal: &[u32]) -> Result<PovwNonce> {
     ensure!(
-        segment_seal[0] == RV32IM_SEAL_VERSION,
+        segment_seal.split_off(..1) == Some(&[RV32IM_SEAL_VERSION]),
         "seal version mismatch"
     );
-    let segment_seal = &segment_seal[1..];
 
-    let io: &[Val] = bytemuck::checked::cast_slice(&segment_seal[..CircuitImpl::OUTPUT_SIZE]);
+    let io: &[Val] = bytemuck::checked::try_cast_slice(
+        segment_seal
+            .split_off(..CircuitImpl::OUTPUT_SIZE)
+            .context("Seal too short; failed to decode output")?,
+    )
+    .map_err(|_| anyhow!("Invalid values in seal output section"))?;
     let global = Tree::new(io, LAYOUT_GLOBAL);
 
     let povw_nonce_shorts_vec = global.map(|c| c.povw_nonce).get_shorts()?;
@@ -170,4 +174,16 @@ pub fn decode_povw_nonce(segment_seal: &[u32]) -> Result<PovwNonce> {
         .try_into()
         .map_err(|_| anyhow!("povw nonce global has unexpected length"))?;
     Ok(PovwNonce::from_u16s(povw_nonce_shorts_arr))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{decode_povw_nonce, Rv32imV2Claim};
+
+    // Regression test for https://github.com/risc0/risc0/pull/3712
+    #[test]
+    fn decode_empty_seal_does_not_panic() {
+        assert!(decode_povw_nonce(&[]).is_err());
+        assert!(Rv32imV2Claim::decode(&[]).is_err());
+    }
 }
