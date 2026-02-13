@@ -22,11 +22,11 @@ use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    execute::{
-        executor::ExecutionError, ExecutionLimit, Executor, ExecutorResult,
-        RV32IM_M3_CIRCUIT_VERSION,
-    },
     TerminateState,
+    execute::{
+        ExecutionLimit, Executor, ExecutorResult, RV32IM_M3_CIRCUIT_VERSION,
+        executor::ExecutionError,
+    },
 };
 
 use super::{Syscall, SyscallContext};

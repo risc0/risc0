@@ -18,8 +18,8 @@ use risc0_zkp::core::digest::Digest;
 use test_log::test;
 
 use crate::{
-    execute::{testutil, ExecutionLimit},
     TerminateState,
+    execute::{ExecutionLimit, testutil},
 };
 
 #[test]
