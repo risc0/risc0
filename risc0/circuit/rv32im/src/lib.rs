@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ mod zirgen;
 
 use core::num::TryFromIntError;
 
-use anyhow::{anyhow, ensure, Result};
+use anyhow::{anyhow, ensure, Context, Result};
 use derive_more::Debug;
 use risc0_binfmt::PovwNonce;
 use risc0_zkp::{
@@ -47,17 +47,18 @@ pub const MAX_INSN_CYCLES: usize = 25_000;
 /// This is a smaller number used by lower po2's < 15 which can't fit a large bigint program.
 pub const MAX_INSN_CYCLES_LOWER_PO2: usize = 2_000;
 
-pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
+pub fn verify(mut seal: &[u32]) -> Result<(), VerificationError> {
     tracing::debug!("verify");
 
     // We don't have a `code' buffer to verify.
     let check_code_fn = |_: u32, _: &Digest| Ok(());
 
-    if seal[0] != RV32IM_SEAL_VERSION {
+    let Some([version]) = seal.split_off(..1) else {
+        return Err(VerificationError::ReceiptFormatError);
+    };
+    if *version != RV32IM_SEAL_VERSION {
         return Err(VerificationError::ReceiptFormatError);
     }
-
-    let seal = &seal[1..];
 
     let hash_suite = Poseidon2HashSuite::new_suite();
     risc0_zkp::verify::verify(&CircuitImpl, &hash_suite, seal, check_code_fn)
@@ -95,14 +96,18 @@ pub struct Rv32imV2Claim {
 }
 
 impl Rv32imV2Claim {
-    pub fn decode(segment_seal: &[u32]) -> Result<Rv32imV2Claim> {
+    pub fn decode(mut segment_seal: &[u32]) -> Result<Rv32imV2Claim> {
         ensure!(
-            segment_seal[0] == RV32IM_SEAL_VERSION,
+            segment_seal.split_off(..1) == Some(&[RV32IM_SEAL_VERSION]),
             "seal version mismatch"
         );
-        let segment_seal = &segment_seal[1..];
 
-        let io: &[Val] = bytemuck::checked::cast_slice(&segment_seal[..CircuitImpl::OUTPUT_SIZE]);
+        let io: &[Val] = bytemuck::checked::try_cast_slice(
+            segment_seal
+                .split_off(..CircuitImpl::OUTPUT_SIZE)
+                .context("Seal too short; failed to decode output")?,
+        )
+        .map_err(|_| anyhow!("Invalid values in seal output section"))?;
         let global = Tree::new(io, LAYOUT_GLOBAL);
 
         // NOTE: rng and povw are not read from the globals here. Neither need to be checked to
@@ -150,14 +155,18 @@ impl Rv32imV2Claim {
 }
 
 /// Decodes a PoVW nonce from a segment seal.
-pub fn decode_povw_nonce(segment_seal: &[u32]) -> Result<PovwNonce> {
+pub fn decode_povw_nonce(mut segment_seal: &[u32]) -> Result<PovwNonce> {
     ensure!(
-        segment_seal[0] == RV32IM_SEAL_VERSION,
+        segment_seal.split_off(..1) == Some(&[RV32IM_SEAL_VERSION]),
         "seal version mismatch"
     );
-    let segment_seal = &segment_seal[1..];
 
-    let io: &[Val] = bytemuck::checked::cast_slice(&segment_seal[..CircuitImpl::OUTPUT_SIZE]);
+    let io: &[Val] = bytemuck::checked::try_cast_slice(
+        segment_seal
+            .split_off(..CircuitImpl::OUTPUT_SIZE)
+            .context("Seal too short; failed to decode output")?,
+    )
+    .map_err(|_| anyhow!("Invalid values in seal output section"))?;
     let global = Tree::new(io, LAYOUT_GLOBAL);
 
     let povw_nonce_shorts_vec = global.map(|c| c.povw_nonce).get_shorts()?;
@@ -165,4 +174,16 @@ pub fn decode_povw_nonce(segment_seal: &[u32]) -> Result<PovwNonce> {
         .try_into()
         .map_err(|_| anyhow!("povw nonce global has unexpected length"))?;
     Ok(PovwNonce::from_u16s(povw_nonce_shorts_arr))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{decode_povw_nonce, Rv32imV2Claim};
+
+    // Regression test for https://github.com/risc0/risc0/pull/3712
+    #[test]
+    fn decode_empty_seal_does_not_panic() {
+        assert!(decode_povw_nonce(&[]).is_err());
+        assert!(Rv32imV2Claim::decode(&[]).is_err());
+    }
 }
