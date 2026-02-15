@@ -250,8 +250,8 @@ mod tests {
 
     #[test]
     fn p254_test_vectors() {
-        let mut input = Vec::<BabyBearElem>::new();
-        let mut output = Vec::<BabyBearElem>::new();
+        let mut input = Vec::new();
+        let mut output = Vec::new();
         for i in 1..6 {
             input.push(BabyBearElem::from(i as u32));
         }
