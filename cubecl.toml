@@ -1,0 +1,4 @@
+[compilation]
+[compilation.logger]
+level = "full"
+file = "/home/flaub/src/risc0/tmp/cubecl-codegen.log"
