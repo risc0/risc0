@@ -556,6 +556,7 @@ private:
       LOG(0, "Invalid kernel name in call to `" << name);
       throw std::runtime_error("Invalid kernel name");
     }
+    LOG(0, "GOT METAL KERNEL FOR " << name);
     groupSize = it->second->maxTotalThreadsPerThreadgroup();
     prepBuffer();
     auto* encode = commandBuffer->computeCommandEncoder();
