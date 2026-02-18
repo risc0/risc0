@@ -431,12 +431,14 @@ public:
     setBufArg(encoder, 1, extract(data));
     setBufArg(encoder, 2, extract(globals), getOffset(globals));
     setBufArg(encoder, 3, extract(accMix), getOffset(accMix));
+    setFpArg(encoder, 4, ROU_FWD[po2]);
     dispatchEasy(encoder, accum.rows(), groupSize);
     encoder = getEncoder("accum_witgen_metal_" + std::to_string(po2) + "_phase2", groupSize);
     setBufArg(encoder, 0, extract(accum));
     setBufArg(encoder, 1, extract(data));
     setBufArg(encoder, 2, extract(globals), getOffset(globals));
     setBufArg(encoder, 3, extract(accMix), getOffset(accMix));
+    setFpArg(encoder, 4, ROU_FWD[po2]);
     dispatchEasy(encoder, accum.rows(), groupSize);
     PinnedMatrixRW<Fp> pAccum(shared_from_this(), accum);
     FpExt tot;
