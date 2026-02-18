@@ -23,12 +23,11 @@ use cubecl::prelude::*;
 /// The Baby Bear prime: P = 15 * 2^27 + 1
 pub const P: u32 = 0x78000001;
 
-/// Montgomery constant: M = -P^{-1} mod 2^32
+/// Montgomery constant: M0 = -P^{-1} mod 2^32 (standard REDC convention)
 ///
-/// Note: The CUDA implementation (mont32_t) uses M0 = 0x77ffffff which is
-/// P^{-1} mod 2^32 (not negated), but the Rust CPU implementation uses
-/// M = 0x88000001 which is -P^{-1} mod 2^32. We match the Rust CPU code.
-pub const M: u32 = 0x88000001;
+/// This is the standard REDC reduction constant. sppark calls this M0.
+/// Verified: P * M0 ≡ -1 (mod 2^32), i.e., 0x78000001 * 0x77ffffff = 0xFFFFFFFF (mod 2^32).
+pub const M0: u32 = 0x77ffffff;
 
 /// Modular addition in Montgomery form.
 ///
@@ -55,22 +54,26 @@ pub fn bb_sub(a: u32, b: u32) -> u32 {
     if x > P { x + P } else { x }
 }
 
-/// Montgomery multiplication.
+/// Montgomery multiplication using mul_hi (u32-only arithmetic).
 ///
-/// Computes (a * b * R^{-1}) mod P where R = 2^32, using the REDC algorithm.
-/// This matches the Rust CPU implementation in baby_bear.rs.
+/// Computes (a * b * R^{-1}) mod P where R = 2^32, using REDC with
+/// only 32-bit operations + mul_hi intrinsic (__umulhi on CUDA).
+///
+/// Standard REDC: product = a*b, red = lo(product) * M0 mod 2^32,
+/// result = hi(product + red*P). Since lo(product + red*P) = 0 by
+/// construction, carry = (product_lo != 0) ? 1 : 0.
 #[cube]
 pub fn bb_mul(a: u32, b: u32) -> u32 {
-    // Widening multiply: o64 = a * b
-    let o64: u64 = (a as u64) * (b as u64);
-    // low = -o64 mod 2^32 (i.e., negate the low 32 bits)
-    let low: u32 = 0u32 - (o64 as u32);
-    // red = M * low mod 2^32
-    let red: u32 = M * low;
-    // o64 += red * P (this makes the low 32 bits zero)
-    let o64 = o64 + (red as u64) * (P as u64);
-    // Result is the high 32 bits
-    let ret: u32 = (o64 >> 32) as u32;
-    // Final reduction
+    let product_lo: u32 = a * b;
+    let product_hi: u32 = a.mul_hi(b);
+    let red: u32 = product_lo * M0;
+    let q_hi: u32 = red.mul_hi(P);
+    // Carry from REDC: lo(red*P) + product_lo = 0 mod 2^32,
+    // so carry = 1 iff product_lo != 0
+    let mut ret: u32 = product_hi + q_hi;
+    if product_lo != 0u32 {
+        ret = ret + 1u32;
+    }
+    // Final conditional reduction
     if ret >= P { ret - P } else { ret }
 }
