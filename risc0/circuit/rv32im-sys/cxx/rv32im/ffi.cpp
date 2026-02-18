@@ -15,6 +15,7 @@
 
 #include "rv32im/ffi.h"
 
+#include "hal/dual/dual.h"
 #include "hal/hal.h"
 #include "prove/rv32im.h"
 #include "vendor/nvtx3/nvtx3.hpp"
@@ -276,8 +277,9 @@ ProverContext* risc0_circuit_rv32im_prover_new_cpu(size_t po2) {
 
 ProverContext* risc0_circuit_rv32im_prover_new_gpu(size_t po2) {
   return tryRet([&] {
-    IHalPtr hal = getGpuHal();
-    return new ProverContext(hal, po2);
+    IHalPtr gpu_hal = getGpuHal();
+    IHalPtr cpu_hal = getCpuHal();
+    return new ProverContext(getDualHal(gpu_hal, cpu_hal), po2);
   });
 }
 

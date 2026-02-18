@@ -101,6 +101,7 @@ fn compile_provers() {
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .files(glob_paths("cxx/core/*.cpp"))
         .files(glob_paths("cxx/hal/cpu/*.cpp"))
+        .files(glob_paths("cxx/hal/dual/*.cpp"))
         .files(glob_paths("cxx/prove/*.cpp"))
         .files(glob_paths("cxx/rv32im/*.cpp"))
         .files(glob_paths("cxx/rv32im/emu/*.cpp"))
