@@ -320,6 +320,7 @@ jobs:
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
       RUSTFLAGS: --cfg ci --cfg ci_profile="${{ matrix.ci_profile }}"
+      MTL_DEBUG_LAYER: 1
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
