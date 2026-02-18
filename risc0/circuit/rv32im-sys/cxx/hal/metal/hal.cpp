@@ -407,6 +407,9 @@ public:
     setBufArg(encoder, 4, extract(tables), getOffset(tables));
     setFpArg(encoder, 5, ROU_FWD[po2]);
     dispatchEasy(encoder, rows.size(), groupSize);
+
+    sync();
+
     encoder = getEncoder("data_witgen_metal_" + std::to_string(po2) + "_finalize", groupSize);
     setBufArg(encoder, 0, extract(data));
     setBufArg(encoder, 1, extract(globals), getOffset(globals));
@@ -433,6 +436,8 @@ public:
     setBufArg(encoder, 3, extract(accMix), getOffset(accMix));
     setFpArg(encoder, 4, ROU_FWD[po2]);
     dispatchEasy(encoder, accum.rows(), groupSize);
+    sync();
+
     encoder = getEncoder("accum_witgen_metal_" + std::to_string(po2) + "_phase2", groupSize);
     setBufArg(encoder, 0, extract(accum));
     setBufArg(encoder, 1, extract(data));
