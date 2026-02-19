@@ -461,7 +461,7 @@ impl KernelBuild {
         }
         let digest = hasher.finalize();
         let cache_path = cache_dir.join(digest).with_extension(extension);
-        if !cache_path.is_file() {
+        if true {
             let tmp_dir = temp_dir.path();
             let tmp_path = tmp_dir.join(output).with_extension(extension);
             inner(tmp_dir, &tmp_path, &sys_inc_dir, flags);
