@@ -354,13 +354,25 @@ impl KernelBuild {
 
         let (files, includes) = self.build_sandbox(output);
 
+        let manifest_path = self.manifest_path.canonicalize().unwrap();
+        let manifest_root = manifest_path.parent().unwrap().to_path_buf();
+        let mut deps: Vec<_> = read_manifest(&self.manifest_path)
+            .into_iter()
+            .map(|p| manifest_root.join(p))
+            .collect();
+        deps.extend(self.deps.clone());
+
+        let flags = ["-std=metal3.0", "-Wno-unused-variable"];
+
         self.cached_compile(
             output,
             "metallib",
+            &deps,
             METAL_INCS,
-            &[],
+            sdk_name,
+            &flags,
             &[sdk_name.to_string()],
-            |out_dir, out_path, sys_inc_dir, _flags| {
+            |out_dir, out_path, sys_inc_dir, sdk_name, flags| {
                 let files: Vec<_> = files.iter().map(|x| x.as_path()).collect();
 
                 let air_paths: Vec<_> = files
@@ -373,14 +385,18 @@ impl KernelBuild {
                         let mut cmd = Command::new("xcrun");
                         cmd.args(["--sdk", sdk_name]);
                         cmd.arg("metal");
-                        cmd.arg("-std=metal3.0");
+
+                        for flag in flags {
+                            cmd.arg(flag);
+                        }
+
                         cmd.arg("-o").arg(&air_path);
                         cmd.arg("-c").arg(src);
                         cmd.arg("-I").arg(sys_inc_dir);
-                        cmd.arg("-Wno-unused-variable");
                         for inc_dir in &includes {
                             cmd.arg("-I").arg(inc_dir);
                         }
+
                         println!("Running: {cmd:?}");
                         let status = cmd.status().unwrap();
                         if !status.success() {
@@ -405,12 +421,15 @@ impl KernelBuild {
         );
     }
 
-    fn cached_compile<F: Fn(&Path, &Path, &Path, &[String])>(
+    #[allow(clippy::too_many_arguments)]
+    fn cached_compile<F: Fn(&Path, &Path, &Path, &str, &[&str])>(
         &self,
         output: &str,
         extension: &str,
+        deps: &[PathBuf],
         assets: &[(&str, &str)],
-        flags: &[String],
+        sdk_name: &str,
+        flags: &[&str],
         tags: &[String],
         inner: F,
     ) {
@@ -439,6 +458,7 @@ impl KernelBuild {
 
         let temp_dir = tempdir_in(&cache_dir).unwrap();
         let mut hasher = Hasher::new();
+        hasher.add_flag(sdk_name);
         for flag in flags {
             hasher.add_flag(flag);
         }
@@ -456,7 +476,7 @@ impl KernelBuild {
             fs::write(&path, contents).unwrap();
             hasher.add_file(path);
         }
-        for dep in self.deps.iter() {
+        for dep in deps {
             hasher.add_file(dep);
         }
         let digest = hasher.finalize();
@@ -464,7 +484,7 @@ impl KernelBuild {
         if !cache_path.is_file() {
             let tmp_dir = temp_dir.path();
             let tmp_path = tmp_dir.join(output).with_extension(extension);
-            inner(tmp_dir, &tmp_path, &sys_inc_dir, flags);
+            inner(tmp_dir, &tmp_path, &sys_inc_dir, sdk_name, flags);
             fs::rename(tmp_path, &cache_path).unwrap();
         }
         fs::copy(cache_path, &out_path).unwrap();
@@ -494,7 +514,8 @@ impl Hasher {
     }
 
     pub fn add_file<P: AsRef<Path>>(&mut self, path: P) {
-        let bytes = fs::read(path).unwrap();
+        let bytes = fs::read(path.as_ref())
+            .unwrap_or_else(|_| panic!("failed to read {}", path.as_ref().display()));
         self.sha.update(bytes);
     }
 
