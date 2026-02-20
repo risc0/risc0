@@ -40,6 +40,18 @@
                  ({ctx.get(arg.iCacheCycle), ctx.get(arg.pcLow), ctx.get(arg.pcHigh)}),            \
                  ({ctx.get(arg.newPcLow), ctx.get(arg.newPcHigh)}))
 
+#define P2_CALL_ARGUMENT(ctx, arg) \
+  PICUS_ARGUMENT(ctx, \
+                 ({ctx.get(call.isFinal), UNPACK_DIGEST(ctx, call.in), UNPACK_RATE(ctx, call.data)}), \
+                 ({UNPACK_DIGEST(ctx, call.out)}))
+
+#define P2_STEP_ARGUMENT(ctx, arg) \
+  PICUS_INPUT(ctx, arg.cycle); \
+  PICUS_INPUT(ctx, arg.countBits); \
+  PICUS_INPUT(ctx, arg.inWordAddr); \
+  PICUS_INPUT(ctx, arg.outWordAddr); \
+  PICUS_INPUT(ctx, arg.state)
+
 #define GLOBAL_SET_U32(member, val)                                                                \
   GLOBAL_SET(member.low, val.low);                                                                 \
   GLOBAL_SET(member.high, val.high)
@@ -214,15 +226,17 @@ template <typename C> FDEV void P2StepBlock<C>::set(CTX, P2StepWitness wit) DEV 
   isCheck.set(ctx, wit.state.isCheck);
   count.set(ctx, wit.state.count);
   countOne.set(ctx, wit.state.count - 1);
+  verifyCheck.set(ctx, wit.state.isCheck && wit.state.count == 1);
   inWordAddr.set(ctx, wit.state.inWordAddr);
   outWordAddr.set(ctx, wit.state.outWordAddr);
+  writeWordAddr.set(ctx, wit.state.count == 1 ? wit.state.outWordAddr : P2_TRASH_WORD);
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     uint32_t i2 = i + CELLS_DIGEST;
     stateIn[i].set(ctx, wit.stateIn[i]);
     stateOut[i].set(ctx, wit.stateOut[i]);
     dataIn[i].set(ctx, wit.dataIn[i], wit.state.cycle);
     dataIn[i2].set(ctx, wit.dataIn[i2], wit.state.cycle);
-    dataOut[i].set(ctx, wit.dataOut[i], wit.state.cycle);
+    dataOut[i].set(ctx, wit.dataOut[i]);
     if (wit.state.isElem) {
       inValues[i].set(ctx, wit.dataIn[i].value);
       inValues[i2].set(ctx, wit.dataIn[i2].value);
@@ -235,15 +249,12 @@ template <typename C> FDEV void P2StepBlock<C>::set(CTX, P2StepWitness wit) DEV 
 }
 
 template <typename C> FDEV void P2StepBlock<C>::verify(CTX) DEV {
-  Val<C> verifyCheck = countOne.isZero.get() * isCheck.get();
+  EQ(verifyCheck.get(), countOne.isZero.get() * isCheck.get());
+  EQ(writeWordAddr.get(), cond<C>(countOne.isZero.get(), outWordAddr.get(), P2_TRASH_WORD));
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     uint32_t i2 = i + CELLS_DIGEST;
     EQ(dataIn[i].wordAddr.get(), inWordAddr.get() + i);
     EQ(dataIn[i2].wordAddr.get(), cond<C>(isElem.get(), inWordAddr.get() + i2, P2_ZEROS_WORD + i));
-    EQ(dataOut[i].wordAddr.get(),
-       cond<C>(countOne.isZero.get(), outWordAddr.get() + i, P2_TRASH_WORD + i));
-    EQZ(verifyCheck * (dataOut[i].prevData.low.get() - dataOut[i].data.low.get()));
-    EQZ(verifyCheck * (dataOut[i].prevData.high.get() - dataOut[i].data.high.get()));
     // Relate inValues to dataIn
     EQZ(isElem.get() * (inValues[i].get() - dataIn[i].data.flat()));
     EQZ(isElem.get() * (inValues[i2].get() - dataIn[i2].data.flat()));
@@ -253,9 +264,10 @@ template <typename C> FDEV void P2StepBlock<C>::verify(CTX) DEV {
 }
 
 template <typename C> FDEV void P2StepBlock<C>::addArguments(CTX) DEV {
+  Val<C> cycleVal = cycle.get();
   Val<C> countBits = count.get() + isElem.get() * 0x20000 + isCheck.get() * 0x10000;
   P2StepArgument<C> p2Arg;
-  p2Arg.cycle = cycle.get();
+  p2Arg.cycle = cycleVal;
   p2Arg.countBits = countBits;
   p2Arg.inWordAddr = inWordAddr.get();
   p2Arg.outWordAddr = outWordAddr.get();
@@ -263,6 +275,7 @@ template <typename C> FDEV void P2StepBlock<C>::addArguments(CTX) DEV {
     p2Arg.state[i] = stateIn[i].get();
   }
   ctx.pull(p2Arg);
+  P2_STEP_ARGUMENT(ctx, p2Arg);
   p2Arg.cycle += 1;
   p2Arg.countBits = countBits - 1;
   p2Arg.inWordAddr += isElem.get() * CELLS_DIGEST + CELLS_DIGEST;
@@ -270,6 +283,7 @@ template <typename C> FDEV void P2StepBlock<C>::addArguments(CTX) DEV {
     p2Arg.state[i] = stateOut[i].get();
   }
   ctx.push(p2Arg);
+
   P2CallArgument<C> call;
   call.isFinal = 1;
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
@@ -277,14 +291,24 @@ template <typename C> FDEV void P2StepBlock<C>::addArguments(CTX) DEV {
     call.in[i] = stateIn[i].get();
     call.data[i] = inValues[i].get();
     call.data[i2] = inValues[i2].get();
-    call.out[i] = dataOut[i].data.high.get() * 0x10000 + dataOut[i].data.low.get();
+    call.out[i] = dataOut[i].get();
   }
   ctx.pull(call);
+  P2_CALL_ARGUMENT(ctx, call);
   call.isFinal = 0;
   for (size_t i = 0; i < 8; i++) {
     call.out[i] = stateOut[i].get();
   }
   ctx.pull(call);
+  P2_CALL_ARGUMENT(ctx, call);
+
+  // Offload writing into memory to DigestWriteBlock
+  DigestWriteArgument<C> dwArg;
+  dwArg.wordAddr = writeWordAddr.get();
+  dwArg.cycle = cycleVal;
+  dwArg.verifyCheck = verifyCheck.get();
+  GET_ARR(dwArg.digest, dataOut, CELLS_DIGEST);
+  ctx.push(dwArg);
 }
 
 template <typename C> FDEV void EcallP2Block<C>::set(CTX, EcallP2Witness wit) DEV {
@@ -384,6 +408,7 @@ template <typename C> FDEV void EcallP2Block<C>::addArguments(CTX) DEV {
   DigestWriteArgument<C> dwArg;
   dwArg.wordAddr = stateOutWordAddr.get();
   dwArg.cycle = cycleVal + 1 + readA3.data.low.get();
+  dwArg.verifyCheck = Val<C>(0);
   GET_ARR(dwArg.digest, stateOut, CELLS_DIGEST);
   ctx.push(dwArg);
 
@@ -430,20 +455,26 @@ FDEV void FpWrite<C>::addArguments(CTX, Val<C> cycle, Val<C> wordAddr, Val<C> fp
 }
 
 template <typename C> FDEV void DigestWriteBlock<C>::set(CTX, DigestWriteWitness wit) DEV {
-  // TODO: remove redundant information in the witness structure
   cycle.set(ctx, wit.cycle);
   wordAddr.set(ctx, wit.stateOut[0].wordAddr);
+  verifyCheck.set(ctx, wit.verifyCheck);
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     digest[i].set(ctx, wit.stateOut[i].value);
     writes[i].set(ctx, wit.stateOut[i], wit.cycle);
   }
 }
 
-template <typename C> FDEV void DigestWriteBlock<C>::verify(CTX) DEV {}
+template <typename C> FDEV void DigestWriteBlock<C>::verify(CTX) DEV {
+  for (size_t i = 0; i < CELLS_DIGEST; i++) {
+    EQZ(verifyCheck.get() * (writes[i].write.prevData.low.get() - writes[i].write.data.low.get()));
+    EQZ(verifyCheck.get() * (writes[i].write.prevData.high.get() - writes[i].write.data.high.get()));
+  }
+}
 
 #define DIGEST_WRITE_ARGUMENT(ctx, arg)                                                            \
   PICUS_INPUT(ctx, arg.wordAddr);                                                                  \
   PICUS_INPUT(ctx, arg.cycle);                                                                     \
+  PICUS_INPUT(ctx, arg.verifyCheck);                                                               \
   PICUS_INPUT(ctx, arg.digest)
 
 template <typename C> FDEV void DigestWriteBlock<C>::addArguments(CTX) DEV {
@@ -451,6 +482,7 @@ template <typename C> FDEV void DigestWriteBlock<C>::addArguments(CTX) DEV {
   DigestWriteArgument<C> dwArg;
   dwArg.wordAddr = wordAddr.get();
   dwArg.cycle = cycle.get();
+  dwArg.verifyCheck = verifyCheck.get();
   GET_ARR(dwArg.digest, digest, CELLS_DIGEST);
   ctx.pull(dwArg);
   DIGEST_WRITE_ARGUMENT(ctx, dwArg);
@@ -509,3 +541,5 @@ template <typename C> FDEV void EcallBigIntBlock<C>::addArguments(CTX) DEV {
 #undef CPU_STATE_ARGUMENT
 #undef DECODE_ARGUMENT
 #undef READ_STATE_ARGUMENT
+#undef P2_CALL_ARGUMENT
+#undef P2_STEP_ARGUMENT
