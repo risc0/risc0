@@ -40,16 +40,17 @@
                  ({ctx.get(arg.iCacheCycle), ctx.get(arg.pcLow), ctx.get(arg.pcHigh)}),            \
                  ({ctx.get(arg.newPcLow), ctx.get(arg.newPcHigh)}))
 
-#define P2_CALL_ARGUMENT(ctx, arg) \
-  PICUS_ARGUMENT(ctx, \
-                 ({ctx.get(call.isFinal), UNPACK_DIGEST(ctx, call.in), UNPACK_RATE(ctx, call.data)}), \
-                 ({UNPACK_DIGEST(ctx, call.out)}))
+#define P2_CALL_ARGUMENT(ctx, arg)                                                                 \
+  PICUS_ARGUMENT(                                                                                  \
+      ctx,                                                                                         \
+      ({ctx.get(call.isFinal), UNPACK_DIGEST(ctx, call.in), UNPACK_RATE(ctx, call.data)}),         \
+      ({UNPACK_DIGEST(ctx, call.out)}))
 
-#define P2_STEP_ARGUMENT(ctx, arg) \
-  PICUS_INPUT(ctx, arg.cycle); \
-  PICUS_INPUT(ctx, arg.countBits); \
-  PICUS_INPUT(ctx, arg.inWordAddr); \
-  PICUS_INPUT(ctx, arg.outWordAddr); \
+#define P2_STEP_ARGUMENT(ctx, arg)                                                                 \
+  PICUS_INPUT(ctx, arg.cycle);                                                                     \
+  PICUS_INPUT(ctx, arg.countBits);                                                                 \
+  PICUS_INPUT(ctx, arg.inWordAddr);                                                                \
+  PICUS_INPUT(ctx, arg.outWordAddr);                                                               \
   PICUS_INPUT(ctx, arg.state)
 
 #define GLOBAL_SET_U32(member, val)                                                                \
@@ -467,7 +468,8 @@ template <typename C> FDEV void DigestWriteBlock<C>::set(CTX, DigestWriteWitness
 template <typename C> FDEV void DigestWriteBlock<C>::verify(CTX) DEV {
   for (size_t i = 0; i < CELLS_DIGEST; i++) {
     EQZ(verifyCheck.get() * (writes[i].write.prevData.low.get() - writes[i].write.data.low.get()));
-    EQZ(verifyCheck.get() * (writes[i].write.prevData.high.get() - writes[i].write.data.high.get()));
+    EQZ(verifyCheck.get() *
+        (writes[i].write.prevData.high.get() - writes[i].write.data.high.get()));
   }
 }
 
