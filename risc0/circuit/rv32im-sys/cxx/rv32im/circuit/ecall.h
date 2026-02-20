@@ -110,12 +110,14 @@ template <typename C> struct P2StepBlock {
   Reg<C> cycle;
   BitReg<C> isElem;
   BitReg<C> isCheck;
-  Reg<C> count;
+  RegU16<C> count;
   IsZero<C> countOne;
+  Reg<C> verifyCheck;
   Reg<C> inWordAddr;
   Reg<C> outWordAddr;
+  Reg<C> writeWordAddr;
   PhysMemReadBlock<C> dataIn[CELLS_RATE];
-  PhysMemWriteBlock<C> dataOut[CELLS_DIGEST];
+  Reg<C> dataOut[CELLS_DIGEST];
   Reg<C> stateIn[CELLS_DIGEST];
   Reg<C> inValues[CELLS_RATE];
   Reg<C> stateOut[CELLS_DIGEST];
@@ -126,10 +128,12 @@ template <typename C> struct P2StepBlock {
     T::apply(ctx, "isCheck", isCheck);
     T::apply(ctx, "count", count);
     T::apply(ctx, "countOne", countOne, count.get() - 1);
+    T::apply(ctx, "verifyCheck", verifyCheck);
     T::apply(ctx, "inWordAddr", inWordAddr);
     T::apply(ctx, "outWordAddr", outWordAddr);
+    T::apply(ctx, "writeWordAddr", writeWordAddr);
     T::apply(ctx, "dataIn", dataIn, cycle.get());
-    T::apply(ctx, "dataOut", dataOut, cycle.get());
+    T::apply(ctx, "dataOut", dataOut);
     T::apply(ctx, "stateIn", stateIn);
     T::apply(ctx, "inValues", inValues);
     T::apply(ctx, "stateOut", stateOut);
@@ -217,12 +221,14 @@ template <typename C> struct DigestWriteBlock {
 
   Reg<C> cycle;
   Reg<C> wordAddr;
+  Reg<C> verifyCheck;
   Reg<C> digest[CELLS_DIGEST];
   FpWrite<C> writes[CELLS_DIGEST];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, "cycle", cycle);
     T::apply(ctx, "wordAddr", wordAddr);
+    T::apply(ctx, "verifyCheck", verifyCheck);
     T::apply(ctx, "digest", digest);
     Val<C> cycleVal = cycle.get();
     Val<C> wordAddrVal = wordAddr.get();

@@ -64,7 +64,7 @@ struct P2StepWitness {
   Fp stateIn[CELLS_DIGEST];
   Fp stateOut[CELLS_DIGEST];
   PhysMemReadWitness dataIn[CELLS_RATE];
-  PhysMemWriteWitness dataOut[CELLS_DIGEST];
+  uint32_t dataOut[CELLS_DIGEST];
 };
 
 /// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
@@ -83,6 +83,7 @@ struct EcallP2Witness {
 /// <div rustbindgen derive="Debug, Copy, Clone, PartialEq, Pod, Zeroable"></div>
 struct DigestWriteWitness {
   uint32_t cycle;
+  uint32_t verifyCheck;
   uint32_t digest[CELLS_DIGEST];
   PhysMemWriteWitness stateOut[CELLS_DIGEST];
 };

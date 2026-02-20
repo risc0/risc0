@@ -33,5 +33,6 @@ template <typename C> struct MemoryArgument {
 template <typename C> struct DigestWriteArgument {
   Val<C> wordAddr;
   Val<C> cycle;
+  Val<C> verifyCheck;
   ValDigest<C> digest;
 };

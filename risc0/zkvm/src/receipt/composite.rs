@@ -319,7 +319,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceiptVerifierParameters::default().digest(),
-            digest!("713a050146371665772ab45ba2aae2806c727e6ee32d1b66e567abfa8eff5a1e")
+            digest!("bda76333a41cc03af62c8dd83fc1bde3171a57766ec1b69301961547e0709202")
         );
     }
 }

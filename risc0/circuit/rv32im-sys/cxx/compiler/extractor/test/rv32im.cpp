@@ -35,7 +35,7 @@ int main() {
   EXTRACT_MUTABLE_ARRAY_FUNCTION(multiplyByMExt, CELLS);
   EXTRACT_MUTABLE_ARRAY_FUNCTION(multiplyByMInt, CELLS);
 
-  // EXTRACT(GlobalsBlock);
+  EXTRACT(GlobalsBlock);
   // EXTRACT(DecodeBlock); // slow (10 minutes)
   EXTRACT(InstResumeBlock);
   EXTRACT(InstSuspendBlock);
@@ -59,7 +59,7 @@ int main() {
   EXTRACT(ReadByteBlock);
   EXTRACT(ReadWordBlock);
   EXTRACT(BigIntBlock); // Only verifies with Z3 solver
-  // EXTRACT(P2StepBlock); // TODO
+  EXTRACT(P2StepBlock);
   EXTRACT(UnitAddSubBlock);
   EXTRACT(UnitBitBlock);
   EXTRACT(UnitLtBlock);
