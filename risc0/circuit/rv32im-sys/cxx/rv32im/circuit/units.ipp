@@ -236,14 +236,27 @@ template <typename C> FDEV void UnitDivBlock<C>::verify(CTX) DEV {
   flipQuot.outLow.get()); LOG(0, "flipRem = " << flipRem.outHigh.get() << ":" <<
   flipRem.outLow.get()); LOG(0, std::dec);
   */
+
+  // Verify that negQuot is the sign of the quotient. It should be set if we're
+  // doing signed division, the signs of the numerator and denominator differ,
+  // and the denominator is nonzero.
   Val<C> negDenom = denom.neg.get();
   Val<C> negNumer = numer.neg.get();
   Val<C> negXor = negDenom * (Val<C>(1) - negNumer) + (Val<C>(1) - negDenom) * negNumer;
   Val<C> nz = Val<C>(1) - denomZero.isZero.get();
   EQ(negQuot.get(), nz * negXor);
+
+  // Check that quotient * denom + remainder = numerator
   EQ(addTotRem.get().low, numer.absLow.get());
   EQ(addTotRem.get().high, numer.absHigh.get());
+
+  // Prevent quotient * denom + remainder from overflowing.
+  EQZ(addTotRem.carryHigh.get());
   EQZ(nz * (Val<C>(1) - verifyRem.carryHigh.get()));
+
+  // If the denominator is zero, then we should have quotient = 0xffffffff.
+  EQZ(denomZero.isZero.get() * (absQuot.high.get() - 0xffff));
+  EQZ(denomZero.isZero.get() * (absQuot.low.get() - 0xffff));
 }
 
 template <typename C> FDEV void UnitDivBlock<C>::addArguments(CTX) DEV {

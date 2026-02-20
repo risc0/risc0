@@ -469,7 +469,8 @@ fn glob_paths(pattern: &str) -> Vec<PathBuf> {
     glob::glob(pattern).unwrap().map(|x| x.unwrap()).collect()
 }
 
-const METAL_SDK_URL: &str = "https://developer.apple.com/metal/cpp/files/metal-cpp_26.zip";
+const METAL_SDK_URL: &str =
+    "https://developer.apple.com/metal/cpp/files/metal-cpp_macOS13.3_iOS16.4.zip";
 
 fn install_metal_cpp_library(build: &mut KernelBuild) {
     if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
