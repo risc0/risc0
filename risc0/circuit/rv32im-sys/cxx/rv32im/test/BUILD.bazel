@@ -105,6 +105,16 @@ cc_test(
 )
 
 cc_test(
+    name = "block",
+    srcs = [
+        "block.cpp",
+    ],
+    deps = [
+        "//rv32im/emu",
+    ],
+)
+
+cc_test(
     name = "test_kernels",
     srcs = ["test_kernels.cpp"],
     data = [
