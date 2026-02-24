@@ -40,6 +40,16 @@ fn basic() {
 
 #[test]
 #[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
+fn too_many_inputs_for_po2() {
+    let po2 = 8;
+    let inputs = vec![[0u64; 25]; 1000];
+    let prover = keccak_prover().unwrap();
+    let error = prover.prove(&inputs, po2).unwrap_err();
+    assert_eq!(error.to_string(), "Too many inputs for given po2=8");
+}
+
+#[test]
+#[cfg_attr(feature = "cuda", gpu_guard::gpu_guard)]
 fn fwd_rev_ab() {
     cfg_if! {
         if #[cfg(feature = "cuda")] {
@@ -59,7 +69,7 @@ fn fwd_rev_ab() {
     let po2 = 8;
     let inputs = test_inputs(po2);
     let cycles: usize = 1 << po2;
-    let preflight = PreflightTrace::<ForwardPreflightOrder>::new(&inputs, cycles);
+    let preflight = PreflightTrace::<ForwardPreflightOrder>::new(&inputs, cycles).unwrap();
 
     let fwd_data = {
         let global = MetaBuffer::new("global", hal.as_ref(), 1, REGCOUNT_GLOBAL, true);
