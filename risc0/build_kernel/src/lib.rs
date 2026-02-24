@@ -369,10 +369,9 @@ impl KernelBuild {
             "metallib",
             &deps,
             METAL_INCS,
-            sdk_name,
             &flags,
             &[sdk_name.to_string()],
-            |out_dir, out_path, sys_inc_dir, sdk_name, flags| {
+            |out_dir, out_path, sys_inc_dir, flags| {
                 let files: Vec<_> = files.iter().map(|x| x.as_path()).collect();
 
                 let air_paths: Vec<_> = files
@@ -422,13 +421,12 @@ impl KernelBuild {
     }
 
     #[allow(clippy::too_many_arguments)]
-    fn cached_compile<F: Fn(&Path, &Path, &Path, &str, &[&str])>(
+    fn cached_compile<F: Fn(&Path, &Path, &Path, &[&str])>(
         &self,
         output: &str,
         extension: &str,
         deps: &[PathBuf],
         assets: &[(&str, &str)],
-        sdk_name: &str,
         flags: &[&str],
         tags: &[String],
         inner: F,
@@ -458,7 +456,6 @@ impl KernelBuild {
 
         let temp_dir = tempdir_in(&cache_dir).unwrap();
         let mut hasher = Hasher::new();
-        hasher.add_flag(sdk_name);
         for flag in flags {
             hasher.add_flag(flag);
         }
@@ -484,7 +481,7 @@ impl KernelBuild {
         if !cache_path.is_file() {
             let tmp_dir = temp_dir.path();
             let tmp_path = tmp_dir.join(output).with_extension(extension);
-            inner(tmp_dir, &tmp_path, &sys_inc_dir, sdk_name, flags);
+            inner(tmp_dir, &tmp_path, &sys_inc_dir, flags);
             fs::rename(tmp_path, &cache_path).unwrap();
         }
         fs::copy(cache_path, &out_path).unwrap();
