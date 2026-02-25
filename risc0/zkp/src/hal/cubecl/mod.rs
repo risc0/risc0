@@ -18,8 +18,10 @@
 //! This module provides a portable GPU implementation using cubecl,
 //! supporting CUDA, WGPU, ROCm, and Metal backends from a single codebase.
 
+pub mod buffer;
 pub mod ext_field;
 pub mod field;
+pub mod hal;
 pub mod kernels;
 pub mod ntt;
 pub mod poseidon2;

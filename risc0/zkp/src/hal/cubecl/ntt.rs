@@ -86,6 +86,44 @@ fn get_intermediate_root(pow: u32, partial_twiddles: &Array<u32>) -> u32 {
     result
 }
 
+/// Per-stage forward NTT butterfly (natural-order DIT).
+///
+/// Performs a single butterfly stage of the Cooley-Tukey DIT on natural-order data.
+/// Used for `batch_expand_into_evaluate_ntt` where the CPU's recursive evaluate_ntt
+/// operates on natural-order expanded data, skipping the first `expand_bits` stages.
+///
+/// Each thread handles one butterfly pair at stage `s_bits`:
+///   - Pairs elements 2^(s_bits-1) apart within groups of 2^s_bits
+///   - Twiddle factor: ROU_FWD[s_bits]^pos_in_group
+#[cube(launch_unchecked)]
+pub fn ntt_fwd_step(
+    data: &mut Array<u32>,
+    partial_twiddles: &Array<u32>,
+    #[comptime] n_bits: u32,
+    #[comptime] s_bits: u32,
+) {
+    let num_threads = 1u32 << (n_bits - 1u32);
+    let tid = ABSOLUTE_POS as u32;
+    if tid >= num_threads {
+        terminate!();
+    }
+
+    let step_half = 1u32 << (s_bits - 1u32);
+    let group = tid >> (s_bits - 1u32);
+    let pos_in_group = tid & (step_half - 1u32);
+    let idx0 = group * (step_half << 1u32) + pos_in_group;
+    let idx1 = idx0 + step_half;
+
+    // twiddle = ROU_FWD[s_bits]^pos_in_group = ROU_FWD[27]^(pos_in_group << (27 - s_bits))
+    let pow = pos_in_group << (27u32 - s_bits);
+    let twiddle = get_intermediate_root(pow, partial_twiddles);
+
+    let a = data[idx0 as usize];
+    let b = bb_mul(data[idx1 as usize], twiddle);
+    data[idx0 as usize] = bb_add(a, b);
+    data[idx1 as usize] = bb_sub(a, b);
+}
+
 /// Perform a single GS butterfly stage with shared memory exchange.
 #[cube]
 fn gs_shared_butterfly(

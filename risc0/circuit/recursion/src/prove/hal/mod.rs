@@ -18,6 +18,8 @@ use risc0_circuit_recursion_sys::{RawPreflightTrace, StepMode};
 use risc0_zkp::hal::Hal;
 
 pub(crate) mod cpu;
+#[cfg(feature = "cubecl")]
+pub(crate) mod cubecl;
 #[cfg(feature = "cuda")]
 pub(crate) mod cuda;
 #[cfg(feature = "cuda")]
