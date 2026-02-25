@@ -13,6 +13,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use anyhow::{Result, ensure};
+
 use risc0_circuit_keccak_sys::ScatterInfo;
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_core::scope;
@@ -177,7 +179,7 @@ fn chi_iota(s: &mut KeccakState, round: usize) {
 }
 
 impl<Order: PreflightCycleOrder> PreflightTrace<Order> {
-    pub(crate) fn new(inputs: &[KeccakState], cycles: usize) -> Self {
+    pub(crate) fn new(inputs: &[KeccakState], cycles: usize) -> Result<Self> {
         scope!("preflight");
 
         let mut cur_idx = 0;
@@ -243,13 +245,19 @@ impl<Order: PreflightCycleOrder> PreflightTrace<Order> {
 
             // Sha and write all for blocks
             ret.write_poseidon(&mut cells, &data, kflat, &mut pflat, cur_idx, false);
+
+            ensure!(
+                ret.cycle <= cycles,
+                "Too many inputs for given po2={}",
+                cycles.ilog2()
+            );
         }
 
         while ret.cycle < cycles {
             ret.add_cycle(Control::Shutdown, 0, 0, pflat, cur_idx);
         }
 
-        ret
+        Ok(ret)
     }
 
     fn add_cycle(&mut self, ctrl: Control, bits: u32, kflat: u32, pflat: u32, preimage_idx: u32) {
