@@ -14,6 +14,8 @@ features = ["prove", "std"]
 
 [features]
 circuit_debug = []
+cubecl = ["dep:cubecl", "prove"]
+cubecl-cpu = ["cubecl", "cubecl/cpu"]
 cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
 default = []
 metal = ["prove"]
@@ -37,6 +39,7 @@ blake2 = { version = "0.10.6", default-features = false }
 borsh = { version = "1.5", default-features = false, features = ["derive"] }
 bytemuck = { version = "1.12", features = ["derive"] }
 cfg-if = "1.0"
+cubecl = { version = "0.9", optional = true, features = ["cuda"] }
 cust = { version = "0.3", optional = true }
 digest = { version = "0.10", features = ["oid"] }
 ff = { version = "0.13", features = ["derive", "bits"], optional = true }

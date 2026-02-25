@@ -8,6 +8,11 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [features]
+cubecl = [
+    "prove",
+    "risc0-zkp/cubecl",
+    "std",
+]
 cuda = [
     "dep:cust",
     "prove",
