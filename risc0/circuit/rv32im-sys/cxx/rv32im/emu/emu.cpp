@@ -695,6 +695,7 @@ struct Emulator {
   }
 
   void do_ECALL_P2() {
+    // Set up witness for instruction
     auto& wit = trace.makeEcallP2();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
@@ -710,6 +711,8 @@ struct Emulator {
       state.words[i] = Fp(readPhysMemory(wit.stateIn[i], stateInWordAddr + i)).asRaw();
     }
     curCycle++;
+
+    // Do actual Poseidon2 hashing work with P2StepBlock
     P2State p2;
     p2.cycle = curCycle;
     p2.count = wit.a3.value & 0xffff;
@@ -734,17 +737,25 @@ struct Emulator {
           in[2 * i + 1] = word >> 16;
         }
       }
+
+      auto& dwWit = trace.makeDigestWrite();
+      dwWit.cycle = curCycle;
       Digest out = memory.getP2().doBlock(*reinterpret_cast<Digest*>(&state), in, true);
       state = memory.getP2().doBlock(*reinterpret_cast<Digest*>(&state), in, false);
       uint32_t outAddr = (p2.count != 1) ? P2_TRASH_WORD : p2.outWordAddr;
       for (size_t i = 0; i < CELLS_DIGEST; i++) {
         p2Wit.stateOut[i] = Fp::fromRaw(state.words[i]).asUInt32();
-        writePhysMemory(p2Wit.dataOut[i], outAddr + i, Fp::fromRaw(out.words[i]).asUInt32());
+        uint32_t fp = Fp::fromRaw(out.words[i]).asUInt32();
+        p2Wit.dataOut[i] = fp;
+        writePhysMemory(dwWit.stateOut[i], outAddr + i, fp);
         if (p2.isCheck && p2.count == 1) {
-          if (p2Wit.dataOut[i].prevValue != p2Wit.dataOut[i].value) {
+          dwWit.verifyCheck = 1;
+          if (dwWit.stateOut[i].prevValue != dwWit.stateOut[i].value) {
             DLOG("Mismatch on check");
             throw std::runtime_error("BAD");
           }
+        } else {
+          dwWit.verifyCheck = 0;
         }
       }
       if (p2.isElem) {
@@ -756,9 +767,15 @@ struct Emulator {
       p2.cycle = curCycle;
       p2.count--;
     }
+
+    // Delegate writing the resulting digest to DigestWriteBlock
+    auto& dwWit = trace.makeDigestWrite();
+    dwWit.cycle = curCycle;
     for (size_t i = 0; i < CELLS_DIGEST; i++) {
-      writePhysMemory(
-          wit.stateOut[i], stateOutWordAddr + i, Fp::fromRaw(state.words[i]).asUInt32());
+      uint32_t fp = Fp::fromRaw(state.words[i]).asUInt32();
+      wit.stateOut[i] = fp;
+      dwWit.digest[i] = fp;
+      writePhysMemory(dwWit.stateOut[i], stateOutWordAddr + i, fp);
     }
   }
 

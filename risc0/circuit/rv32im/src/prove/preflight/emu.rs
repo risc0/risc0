@@ -20,14 +20,14 @@ use bytemuck::Zeroable as _;
 
 use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im_sys::{
-    BigIntWitness, DecodeWitness, EcallBigIntWitness, EcallP2Witness, EcallReadWitness,
-    EcallTerminateWitness, EcallWriteWitness, FetchWitness, InstAuipcWitness, InstBranchWitness,
-    InstEcallWitness, InstImmWitness, InstJalWitness, InstJalrWitness, InstLoadWitness,
-    InstLuiWitness, InstMretWitness, InstRegWitness, InstResumeWitness, InstStoreWitness,
-    InstSuspendWitness, InstTrapWitness, MakeTableWitness, P2State, P2StepWitness,
-    PhysMemReadWitness, PhysMemWriteWitness, ReadByteWitness, ReadWordWitness, RegMemReadWitness,
-    RegMemWriteWitness, UnitAddSubWitness, UnitBaseWitness, UnitBitWitness, UnitDivWitness,
-    UnitLtWitness, UnitMulWitness, UnitShiftWitness, fp::Fp,
+    BigIntWitness, DecodeWitness, DigestWriteWitness, EcallBigIntWitness, EcallP2Witness,
+    EcallReadWitness, EcallTerminateWitness, EcallWriteWitness, FetchWitness, InstAuipcWitness,
+    InstBranchWitness, InstEcallWitness, InstImmWitness, InstJalWitness, InstJalrWitness,
+    InstLoadWitness, InstLuiWitness, InstMretWitness, InstRegWitness, InstResumeWitness,
+    InstStoreWitness, InstSuspendWitness, InstTrapWitness, MakeTableWitness, P2State,
+    P2StepWitness, PhysMemReadWitness, PhysMemWriteWitness, ReadByteWitness, ReadWordWitness,
+    RegMemReadWitness, RegMemWriteWitness, UnitAddSubWitness, UnitBaseWitness, UnitBitWitness,
+    UnitDivWitness, UnitLtWitness, UnitMulWitness, UnitShiftWitness, fp::Fp,
 };
 use risc0_zkp::{
     core::{
@@ -1027,6 +1027,7 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
     }
 
     fn do_ecall_p2(&mut self, trace: &mut Trace) -> Result<()> {
+        // Set up witness for instruction
         let dinst = trace.get_block(self.dinst.unwrap());
 
         let cycle = self.cur_cycle;
@@ -1066,9 +1067,10 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
             a3,
             a7,
             stateIn: state_in,
-            stateOut: [PhysMemWriteWitness::zeroed(); DIGEST_WORDS],
+            stateOut: [0; DIGEST_WORDS],
         });
 
+        // Do actual Poseidon2 hashing work with P2StepBlock
         self.cur_cycle += 1;
         let mut p2 = P2State {
             cycle: self.cur_cycle,
@@ -1112,20 +1114,28 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
             } else {
                 p2.outWordAddr
             };
+            let verify_check = p2.isCheck != 0 && p2.count == 1;
             let mut p2_wit_state_out = [Fp::new_raw(0); DIGEST_WORDS];
-            let mut p2_wit_data_out = [PhysMemWriteWitness::zeroed(); DIGEST_WORDS];
+            let mut p2_wit_data_out = [0; DIGEST_WORDS];
+            let mut dw_wit_data_out = [PhysMemWriteWitness::zeroed(); DIGEST_WORDS];
             for i in 0..DIGEST_WORDS {
                 p2_wit_state_out[i] = Elem::new(state.as_words()[i]).into();
-                p2_wit_data_out[i] =
+                p2_wit_data_out[i] = out.as_words()[i];
+                dw_wit_data_out[i] =
                     self.write_phys_memory(out_addr + i as u32, out.as_words()[i])?;
-                if p2.isCheck != 0
-                    && p2.count == 1
-                    && p2_wit_data_out[i].prevValue != p2_wit_data_out[i].value
-                {
+                if verify_check && dw_wit_data_out[i].prevValue != dw_wit_data_out[i].value {
                     tracing::debug!("Mismatch on check");
                     bail!("P2 ecall check failure");
                 }
             }
+
+            trace.add_block(DigestWriteWitness {
+                cycle: self.cur_cycle,
+                verifyCheck: if verify_check { 1 } else { 0 },
+                digest: p2_wit_data_out,
+                stateOut: dw_wit_data_out,
+            });
+
             if p2.isElem != 0 {
                 p2.inWordAddr += 16;
             } else {
@@ -1144,9 +1154,21 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
             });
         }
 
+        // Delegate writing the resulting digest to DigestWriteBlock
+        let dw_wit_index = trace.add_block(DigestWriteWitness {
+            cycle: self.cur_cycle,
+            verifyCheck: 0,
+            digest: [0; DIGEST_WORDS],
+            stateOut: [PhysMemWriteWitness::zeroed(); DIGEST_WORDS],
+        });
         let wit = trace.get_block_mut(ecall_wit_index);
         for i in 0..DIGEST_WORDS {
-            wit.stateOut[i] =
+            wit.stateOut[i] = state.as_words()[i];
+        }
+        let dw_wit = trace.get_block_mut(dw_wit_index);
+        for i in 0..DIGEST_WORDS {
+            dw_wit.digest[i] = state.as_words()[i];
+            dw_wit.stateOut[i] =
                 self.write_phys_memory(state_out_word_addr + i as u32, state.as_words()[i])?;
         }
 

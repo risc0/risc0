@@ -96,10 +96,26 @@ void extractWithU32Arg(RecordingContext& ctx) {
   ctx.enterComponent(Component<RecordingContext>::NAME, layoutType);
   auto low = ctx.addValParameter();
   auto high = ctx.addValParameter();
+  ValU32<RecordingContext> arg1(low, high);
   Component<RecordingContext> component;
   ctx.componentIRMap = populateComponent<Component, ValU32<RecordingContext>>(ctx, component);
-  AddArgumentsFwd::apply(ctx, component, ValU32<RecordingContext>(low, high));
-  VerifyFwd::apply(ctx, component, ValU32<RecordingContext>(low, high));
+  AddArgumentsFwd::apply(ctx, component, arg1);
+  VerifyFwd::apply(ctx, component, arg1);
+  ctx.exitComponent();
+}
+
+template <template <typename Ctx> typename Component>
+void extractWithValValValArg(RecordingContext& ctx) {
+  mlir::Type layoutType = getLayoutType<Component, NopVal, NopVal, NopVal>(ctx.mlirCtx);
+  ctx.enterComponent(Component<RecordingContext>::NAME, layoutType);
+  auto arg1 = ctx.addValParameter();
+  auto arg2 = ctx.addValParameter();
+  auto arg3 = ctx.addValParameter();
+  Component<RecordingContext> component;
+  ctx.componentIRMap =
+      populateComponent<Component, RecordingVal, RecordingVal, RecordingVal>(ctx, component);
+  AddArgumentsFwd::apply(ctx, component, arg1, arg2, arg3);
+  VerifyFwd::apply(ctx, component, arg1, arg2, arg3);
   ctx.exitComponent();
 }
 

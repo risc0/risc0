@@ -110,12 +110,14 @@ template <typename C> struct P2StepBlock {
   Reg<C> cycle;
   BitReg<C> isElem;
   BitReg<C> isCheck;
-  Reg<C> count;
+  RegU16<C> count;
   IsZero<C> countOne;
+  Reg<C> verifyCheck;
   Reg<C> inWordAddr;
   Reg<C> outWordAddr;
+  Reg<C> writeWordAddr;
   PhysMemReadBlock<C> dataIn[CELLS_RATE];
-  PhysMemWriteBlock<C> dataOut[CELLS_DIGEST];
+  Reg<C> dataOut[CELLS_DIGEST];
   Reg<C> stateIn[CELLS_DIGEST];
   Reg<C> inValues[CELLS_RATE];
   Reg<C> stateOut[CELLS_DIGEST];
@@ -126,10 +128,12 @@ template <typename C> struct P2StepBlock {
     T::apply(ctx, "isCheck", isCheck);
     T::apply(ctx, "count", count);
     T::apply(ctx, "countOne", countOne, count.get() - 1);
+    T::apply(ctx, "verifyCheck", verifyCheck);
     T::apply(ctx, "inWordAddr", inWordAddr);
     T::apply(ctx, "outWordAddr", outWordAddr);
+    T::apply(ctx, "writeWordAddr", writeWordAddr);
     T::apply(ctx, "dataIn", dataIn, cycle.get());
-    T::apply(ctx, "dataOut", dataOut, cycle.get());
+    T::apply(ctx, "dataOut", dataOut);
     T::apply(ctx, "stateIn", stateIn);
     T::apply(ctx, "inValues", inValues);
     T::apply(ctx, "stateOut", stateOut);
@@ -161,7 +165,7 @@ template <typename C> struct EcallP2Block {
   Reg<C> stateOutWordAddr;
   Reg<C> inWordAddrFinal;
   PhysMemReadBlock<C> stateIn[CELLS_DIGEST];
-  PhysMemWriteBlock<C> stateOut[CELLS_DIGEST];
+  Reg<C> stateOut[CELLS_DIGEST];
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, "cycle", cycle);
@@ -181,10 +185,71 @@ template <typename C> struct EcallP2Block {
     T::apply(ctx, "stateOutWordAddr", stateOutWordAddr);
     T::apply(ctx, "inWordAddrFinal", inWordAddrFinal);
     T::apply(ctx, "stateIn", stateIn, cycle.get());
-    T::apply(ctx, "stateOut", stateOut, cycle.get() + 1 + readA3.data.low.get());
+    T::apply(ctx, "stateOut", stateOut);
   }
 
   FDEV void set(CTX, EcallP2Witness wit) DEV;
+  FDEV inline void finalize(CTX) DEV {}
+  FDEV void verify(CTX) DEV;
+  FDEV void addArguments(CTX) DEV;
+};
+
+template <typename C> struct FpWrite {
+  CONSTANT static char NAME[] = "FpWrite";
+
+  PhysMemWriteBlock<C> write;
+  IsZero<C> pHighMinusHigh;
+
+  template <typename T> FDEV void applyInner(CTX, Val<C> cycle, Val<C> wordAddr, Val<C> fp) DEV {
+    T::apply(ctx, "write", write, cycle);
+    // Picus needs to prove that the "inputs" to IsZero are deterministic, so
+    // we need to inline it here even though outlining this is generally useful
+    // in other components.
+    // PICUS_DISABLE_OUTLINING();
+    T::apply(ctx, "pHighMinusHigh", pHighMinusHigh, Val<C>(0x7800) - write.data.high.get());
+    // PICUS_ENABLE_OUTLINING();
+  }
+
+  FDEV void set(CTX, PhysMemWriteWitness wit, uint32_t cycle) DEV;
+  FDEV inline void finalize(CTX) DEV {}
+  FDEV void verify(CTX, Val<C> cycle, Val<C> wordAddr, Val<C> fp) DEV;
+  FDEV void addArguments(CTX, Val<C> cycle, Val<C> wordAddr, Val<C> fp) DEV;
+};
+
+template <typename C> struct DigestWriteBlock {
+  CONSTANT static char NAME[] = "DigestWriteBlock";
+
+  Reg<C> cycle;
+  Reg<C> wordAddr;
+  Reg<C> verifyCheck;
+  Reg<C> digest[CELLS_DIGEST];
+  FpWrite<C> writes[CELLS_DIGEST];
+
+  template <typename T> FDEV void applyInner(CTX) DEV {
+    T::apply(ctx, "cycle", cycle);
+    T::apply(ctx, "wordAddr", wordAddr);
+    T::apply(ctx, "verifyCheck", verifyCheck);
+    T::apply(ctx, "digest", digest);
+    Val<C> cycleVal = cycle.get();
+    Val<C> wordAddrVal = wordAddr.get();
+    for (unsigned i = 0; i < CELLS_DIGEST; i++) {
+      // Since our member visitor for `writes` has arguments that vary
+      // nontrivially between indices, we need to explicitly loop over the
+      // elements. This means we need to construct the name explicitly, which
+      // is troublesome on the GPU. Luckily, any visitors that run on the GPU
+      // discard the name anway, so we can just use nullptr.
+#if defined(CUDA) || defined(METAL)
+      CONSTANT char* name = nullptr;
+#else
+      char rawName[] = "writes_0";
+      rawName[7] = '0' + i;
+      const char* name = rawName;
+#endif
+      T::apply(ctx, name, writes[i], cycleVal, wordAddrVal + Val<C>(i), digest[i].get());
+    }
+  }
+
+  FDEV void set(CTX, DigestWriteWitness wit) DEV;
   FDEV inline void finalize(CTX) DEV {}
   FDEV void verify(CTX) DEV;
   FDEV void addArguments(CTX) DEV;
