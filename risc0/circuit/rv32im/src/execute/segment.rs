@@ -127,7 +127,7 @@ impl Syscall for SegmentSyscallHandler<'_> {
     }
 
     fn host_write(&self, _ctx: &mut impl SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
-        let pos = self.write_pos.replace(self.read_pos.get() + 1);
+        let pos = self.write_pos.replace(self.write_pos.get() + 1);
         Ok(self.segment.write_record[pos])
     }
 }
