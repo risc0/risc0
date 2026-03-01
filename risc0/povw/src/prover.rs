@@ -165,7 +165,7 @@ impl<P: Prover> WorkLogUpdateProver<P> {
             }
         };
 
-        let mut work_log_updates = Vec::<WorkLogUpdate>::new();
+        let mut work_log_updates = Vec::new();
 
         for receipt in work_receipts.into_iter() {
             let work_claim = receipt
