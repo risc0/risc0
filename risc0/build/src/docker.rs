@@ -174,11 +174,18 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
         build = build.env(&docker_env);
     }
 
+    // Use BuildKit cache mounts to persist the cargo registry and git index between
+    // builds. This avoids re-downloading all dependencies on every build when the
+    // source tree changes (which invalidates the COPY layer cache).
+    //
+    // Cache mounts are not part of any image layer and do not affect the output binary.
+    // Reproducibility is preserved because `--locked` pins exact dependency versions.
+    let cache_mounts = "--mount=type=cache,target=/usr/local/cargo/registry \
+                        --mount=type=cache,target=/usr/local/cargo/git/db";
+
     build = build
-        // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
-        // doesn't change.
-        .run(&fetch_cmd)
-        .run(&build_cmd);
+        .run(&format!("{cache_mounts} {fetch_cmd}"))
+        .run(&format!("{cache_mounts} {build_cmd}"));
 
     let src_dir = format!("/src/target/{RISC0_TARGET_TRIPLE}/release");
     let binary = DockerFile::new()
@@ -187,7 +194,9 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
         .copy_from("build", &src_dir, "/");
 
     let file = DockerFile::new().dockerfile(build).dockerfile(binary);
-    fs::write(temp_dir.join("Dockerfile"), file.to_string())?;
+    // Prepend BuildKit syntax directive for cache mount support (requires Docker 18.09+)
+    let dockerfile_content = format!("# syntax=docker/dockerfile:1\n{}", file.to_string());
+    fs::write(temp_dir.join("Dockerfile"), dockerfile_content)?;
     fs::write(temp_dir.join("Dockerfile.dockerignore"), DOCKER_IGNORE)?;
 
     Ok(())
@@ -198,6 +207,7 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
 /// Overwrites if an ELF with the same name already exists.
 fn build(src_dir: &Path, temp_dir: &Path, target_dir: &Path) -> Result<()> {
     if Command::new("docker")
+        .env("DOCKER_BUILDKIT", "1")
         .arg("build")
         .arg(format!("--output={}", target_dir.to_str().unwrap()))
         .arg("-f")
