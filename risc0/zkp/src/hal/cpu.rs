@@ -551,8 +551,7 @@ impl<F: Field> Hal for CpuHal<F> {
         let mut output = output.as_slice_mut();
         let input = input.as_slice();
 
-        // TODO(flaub): parallelize
-        for idx in 0..count {
+        (0..count).into_par_iter().for_each(|idx| {
             let mut tot = Self::ExtElem::ZERO;
             let mut cur_mix = Self::ExtElem::ONE;
             for i in 0..FRI_FOLD {
@@ -567,7 +566,7 @@ impl<F: Field> Hal for CpuHal<F> {
             for i in 0..Self::ExtElem::EXT_SIZE {
                 output[count * i + idx] = tot.subelems()[i];
             }
-        }
+        });
     }
 
     fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>) {
