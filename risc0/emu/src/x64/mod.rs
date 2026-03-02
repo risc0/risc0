@@ -42,7 +42,7 @@ use libc::{
     MAP_ANON, MAP_FAILED, MAP_PRIVATE, PROT_NONE, PROT_READ, PROT_WRITE, SA_SIGINFO, c_int, c_void,
     mmap, mprotect, sigaction, sigemptyset, siginfo_t, ucontext_t,
 };
-use risc0_binfmt::Program;
+use risc0_binfmt::{Program, WordAddr};
 use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
 use self::memory::HostMemory;
@@ -265,8 +265,14 @@ impl Translator {
     fn new(program: Program) -> Result<Self> {
         let mut ctx = JitContext::new(program.entry);
 
-        for (addr, word) in program.image {
-            ctx.ram.store_u32_untracked(addr, word);
+        for (page_idx, page) in program.image.pages {
+            let page_addr = page_idx * PAGE_SIZE as u32;
+
+            for i in 0..(PAGE_SIZE as u32 / WORD_SIZE as u32) {
+                let page_offset = i * WORD_SIZE as u32;
+                ctx.ram
+                    .store_u32_untracked(page_addr + page_offset, page.load(WordAddr(i)));
+            }
         }
 
         Ok(Self {

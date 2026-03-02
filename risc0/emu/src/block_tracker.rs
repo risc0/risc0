@@ -15,7 +15,7 @@
 
 #![allow(unused)]
 
-use risc0_circuit_rv32im_m3_sys::BlockType;
+use risc0_circuit_rv32im_sys::BlockType;
 
 use crate::rv32im::{RvOp, WORD_SIZE};
 

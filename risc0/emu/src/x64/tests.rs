@@ -15,7 +15,18 @@
 
 use dynasmrt::dynasm;
 
+use risc0_binfmt::{ByteAddr, MemoryImage};
+
 use super::*;
+
+fn image_from_words(words: BTreeMap<u32, u32>) -> MemoryImage {
+    let mut image = MemoryImage::default();
+    for (addr, word) in words {
+        image.set_word(ByteAddr(addr).waddr(), word);
+    }
+
+    image
+}
 
 #[test_log::test]
 fn basic() {
@@ -36,7 +47,10 @@ fn basic() {
         .map(|(i, &insn)| (entry + (i * WORD_SIZE) as u32, insn))
         .collect();
 
-    let program = Program { entry, image };
+    let program = Program {
+        entry,
+        image: image_from_words(image),
+    };
     let mut xlate = Translator::new(program).unwrap();
     let offset = xlate.jit_block().unwrap();
 
@@ -76,7 +90,10 @@ fn simple_loop() {
         .map(|(i, &insn)| (entry + (i * WORD_SIZE) as u32, insn))
         .collect();
 
-    let program = Program { entry, image };
+    let program = Program {
+        entry,
+        image: image_from_words(image),
+    };
     run_program(program);
 }
 

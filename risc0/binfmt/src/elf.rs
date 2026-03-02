@@ -38,7 +38,7 @@ pub struct Program {
     pub entry: u32,
 
     /// The initial memory image
-    pub(crate) image: MemoryImage,
+    pub image: MemoryImage,
 }
 
 impl Program {
