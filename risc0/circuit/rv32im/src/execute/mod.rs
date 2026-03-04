@@ -18,6 +18,7 @@ pub(crate) mod bigint;
 mod block_tracker;
 mod executor;
 pub mod gdb;
+mod interp;
 pub(crate) mod pager;
 pub mod platform;
 pub(crate) mod poseidon2;
@@ -34,13 +35,14 @@ pub use self::{
     bigint::analyze::analyze as bigint_analyze,
     block_tracker::{BlockCollection, row_points},
     executor::{
-        ExecutionError, ExecutionLimit, Executor, ExecutorResult, RowLimit, SegmentUpdate,
-        SimpleSession,
+        ExecutionError, ExecutionLimit, ExecutorResult, RowLimit, SegmentUpdate, SimpleSession,
     },
     platform::*,
     segment::Segment,
     syscall::{Syscall, SyscallContext},
 };
+
+pub use self::interp::Executor;
 
 pub const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20;
 
