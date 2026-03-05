@@ -632,7 +632,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     fn segment_used_rows(&self) -> u32 {
         let blocks = self
             .block_tracker
-            .get_blocks(self.insn_counter, self.pager.touched_pages());
+            .get_blocks(self.preflight_user_cycles, self.pager.touched_pages());
         blocks.row_points().div_ceil(POINTS_PER_ROW) as u32
     }
 
@@ -698,7 +698,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     fn get_row_points(&self) -> u64 {
         let blocks = self
             .block_tracker
-            .get_blocks(self.insn_counter, self.pager.touched_pages());
+            .get_blocks(self.preflight_user_cycles, self.pager.touched_pages());
         self.row_info.row_points + blocks.row_points()
     }
 }

@@ -1000,6 +1000,7 @@ fn profiler() {
                 row_points(BlockType::InstAuipc)
                     + row_points(BlockType::InstJalr)
                     + row_points(BlockType::Decode) * 2
+                    + row_points(BlockType::MakeTable)
             ),
             (
                 vec![
@@ -1051,7 +1052,6 @@ fn profiler() {
                     + row_points(BlockType::InstJalr)
                     + nop_row_points()
                     + row_points(BlockType::Decode) * 4
-                    + row_points(BlockType::MakeTable)
             ),
             (
                 vec![
