@@ -432,7 +432,7 @@ impl Page {
 
     /// Produce the digest of this page
     ///
-    /// Hashes the data in this page to produce a digest wh∑ich can be used for
+    /// Hashes the data in this page to produce a digest which can be used for
     /// verifying memory integrity.
     pub fn digest(&self) -> Digest {
         let mut cells = [BabyBearElem::ZERO; CELLS];
