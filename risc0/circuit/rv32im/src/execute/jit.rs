@@ -44,7 +44,7 @@ use super::{
     platform::*,
     poseidon2::Poseidon2State,
     r0vm::{LoadOp, Risc0Context, Risc0Machine},
-    rv32im::{DecodedInstruction, Emulator, InsnKind},
+    rv32im::{DecodedInstruction, InsnKind},
     sha2::Sha2State,
     syscall::Syscall,
     unlikely,
@@ -194,7 +194,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             }
 
             // Execute a step of the virtual machine.
-            if let Err(error) = Risc0Machine::step(&mut Emulator {}, self) {
+            if let Err(error) = self.run_jit() {
                 // On error, log information about the most recent instructions (at `debug` level),
                 // and include a SegmentUpdate for the segment up to the point of the error.
                 self.dump_recent_instructions();
@@ -219,6 +219,10 @@ impl<'a, S: Syscall> Executor<'a, S> {
         let update = self.split_segment(po2, segment_threshold_min)?;
 
         Ok(Some(update))
+    }
+
+    pub fn run_jit(&mut self) -> Result<()> {
+        todo!()
     }
 
     /// Execute until the program reaches a terminal state. Either due to the machine exiting, or

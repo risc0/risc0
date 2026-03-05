@@ -7465,6 +7465,7 @@ dependencies = [
  "risc0-binfmt",
  "risc0-circuit-rv32im-sys",
  "risc0-core",
+ "risc0-emu",
  "risc0-sys",
  "risc0-zkp",
  "risc0-zkvm-platform",

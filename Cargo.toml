@@ -81,6 +81,7 @@ risc0-zkos-v1compat = { version = "5.0.0", path = "risc0/zkos/v1compat" }
 risc0-zkp = { version = "5.0.0", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "5.0.0", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-platform = { version = "5.0.0", default-features = false, path = "risc0/zkvm/platform" }
+risc0-emu = { version = "5.0.0", default-features = false, path = "risc0/emu" }
 rzup = { version = "0.6.0", default-features = false, path = "rzup" }
 
 [workspace.lints.rust]
