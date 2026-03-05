@@ -480,6 +480,13 @@ impl<'a, S: Syscall> Executor<'a, S> {
         let rows = self.segment_used_rows().next_power_of_two();
         let po2 = log2_ceil(rows as usize);
         let segment_threshold_min = u32::min(self.segment_used_rows(), limit.segment_threshold());
+
+        tracing::debug!(
+            "split({} >= {}",
+            self.segment_used_rows(),
+            limit.segment_threshold()
+        );
+
         let update = self.split_segment(po2, segment_threshold_min)?;
 
         Ok(Some(update))
@@ -508,8 +515,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
         segment_po2: usize,
         segment_threshold: u32,
     ) -> Result<SegmentUpdate, ExecutionError> {
-        tracing::debug!("split({} >= {segment_threshold}", self.segment_used_rows());
-
         let partial_image = self.pager.commit();
         let used_rows = self.segment_used_rows();
 
