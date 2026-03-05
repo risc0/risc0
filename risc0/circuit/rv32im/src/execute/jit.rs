@@ -18,11 +18,14 @@ use std::{cell::RefCell, io::Read, rc::Rc};
 use anyhow::{Context, Result, anyhow, bail};
 use enum_map::EnumMap;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
-use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
+use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, Program, WordAddr};
 use risc0_zkp::core::{
     digest::{DIGEST_BYTES, Digest},
     log2_ceil,
 };
+
+#[cfg(target_arch = "x86_64")]
+use risc0_emu::x64::Translator as JitTranslator;
 
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
@@ -40,7 +43,7 @@ use crate::{
 
 use super::{
     SyscallContext, bigint,
-    pager::PagedMemory,
+    pager::WorkingImage,
     platform::*,
     poseidon2::Poseidon2State,
     r0vm::{LoadOp, Risc0Context, Risc0Machine},
@@ -57,7 +60,6 @@ pub struct Executor<'a, S: Syscall> {
     machine_mode: u32,
     preflight_user_cycles: u32,
     initial_image: MemoryImage,
-    pager: PagedMemory,
     terminate_state: Option<TerminateState>,
     read_record: Vec<Vec<u8>>,
     write_record: Vec<u32>,
@@ -76,6 +78,7 @@ pub struct Executor<'a, S: Syscall> {
     insn_counter: u32,
 
     block_tracker: BlockTracker,
+    jit: JitTranslator,
 }
 
 impl<'a, S: Syscall> Executor<'a, S> {
@@ -112,8 +115,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             machine_mode: 0,
             preflight_user_cycles: 0,
             insn_counter: 0,
-            pager: PagedMemory::new(image.clone(), /*tracing_enabled=*/ !trace.is_empty()),
-            initial_image: image,
+            initial_image: image.clone(),
             terminate_state: None,
             read_record: Vec::new(),
             write_record: Vec::new(),
@@ -128,6 +130,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             circuit_version,
             segment_counter: 0,
             block_tracker: Default::default(),
+            jit: JitTranslator::new(Program { entry: 0, image }).unwrap(),
         }
     }
 
@@ -250,13 +253,15 @@ impl<'a, S: Syscall> Executor<'a, S> {
     ) -> Result<SegmentUpdate, ExecutionError> {
         tracing::debug!("split({} >= {segment_threshold}", self.segment_used_rows());
 
-        let partial_image = self.pager.commit();
+        let partial_image = WorkingImage {
+            pages: self.jit.ctx.partial_image(),
+        };
         let used_rows = self.segment_used_rows();
 
         let blocks = self.get_blocks();
         let update = SegmentUpdate {
             update_partial_image: partial_image,
-            access_page_indexes: self.pager.page_indexes(),
+            access_page_indexes: self.jit.ctx.page_indexes(),
             input_digest: self.input_digest,
             output_digest: self.output_digest,
             read_record: std::mem::take(&mut self.read_record),
@@ -288,7 +293,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         self.preflight_user_cycles = 0;
         self.insn_counter = 0;
-        self.pager.reset();
+        self.jit.ctx.paging_checkpoint();
         self.block_tracker = Default::default();
 
         Ok(update)
@@ -310,7 +315,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         ExecutorResult {
             segments: self.segment_counter as u64 + 1,
             pre_image: self.initial_image.clone(),
-            post_image: self.pager.image.clone().into(),
+            post_image: self.jit.ctx.full_image(),
             row_count: self.row_info.count,
             padding_row_count: self.row_info.padding_count,
             insn_count: self.row_info.insn_count,
@@ -332,10 +337,12 @@ impl<'a, S: Syscall> Executor<'a, S> {
     /// Produce a [SegmentUpdate] from the current state of the executor. Unlike
     /// [Executor::split_segment], this does not reset the state of the executor.
     fn dump_segment(&mut self, po2: usize, segment_threshold: u32, index: u32) -> SegmentUpdate {
-        let partial_image = self.pager.commit();
+        let partial_image = WorkingImage {
+            pages: self.jit.ctx.partial_image(),
+        };
         SegmentUpdate {
             update_partial_image: partial_image,
-            access_page_indexes: self.pager.page_indexes(),
+            access_page_indexes: self.jit.ctx.page_indexes(),
             input_digest: self.input_digest,
             output_digest: self.output_digest,
             read_record: self.read_record.clone(),
@@ -354,7 +361,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     /// Reset the state of the executor, such that a new session can be stated from the current
     /// memory state and with the same syscall handler and tracer (if any).
     pub fn reset(&mut self) {
-        let image: MemoryImage = std::mem::take(&mut self.pager.image).into();
+        let image = self.jit.ctx.full_image();
         *self = Self::new_inner(
             image,
             self.syscall_handler.clone(),
@@ -368,14 +375,14 @@ impl<'a, S: Syscall> Executor<'a, S> {
     fn segment_used_rows(&self) -> u32 {
         let blocks = self
             .block_tracker
-            .get_blocks(self.insn_counter, self.pager.touched_pages());
+            .get_blocks(self.insn_counter, self.jit.ctx.touched_pages());
         blocks.row_points().div_ceil(POINTS_PER_ROW) as u32
     }
 
     fn should_split(&self, segment_threshold: u32) -> bool {
         let blocks = self
             .block_tracker
-            .get_blocks(self.preflight_user_cycles, self.pager.touched_pages());
+            .get_blocks(self.preflight_user_cycles, self.jit.ctx.touched_pages());
         if blocks.row_points().div_ceil(POINTS_PER_ROW) as u32 > segment_threshold {
             tracing::debug!("block_tracker blocks = {blocks:?}");
             true
@@ -387,7 +394,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     fn get_blocks(&self) -> super::block_tracker::BlockCollection {
         let blocks = self
             .block_tracker
-            .get_blocks(self.preflight_user_cycles, self.pager.touched_pages());
+            .get_blocks(self.preflight_user_cycles, self.jit.ctx.touched_pages());
         tracing::debug!("block_tracker blocks = {blocks:?}");
         blocks
     }
@@ -401,18 +408,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
         for trace in self.trace.iter() {
             trace.borrow_mut().trace_callback(event.clone())?;
         }
-        Ok(())
-    }
-
-    #[cold]
-    fn trace_pager(&mut self) -> Result<(), ExecutionError> {
-        for &event in self.pager.trace_events() {
-            let event = TraceEvent::from(event);
-            for trace in self.trace.iter() {
-                trace.borrow_mut().trace_callback(event.clone())?;
-            }
-        }
-        self.pager.clear_trace_events();
         Ok(())
     }
 
@@ -434,7 +429,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     fn get_row_points(&self) -> u64 {
         let blocks = self
             .block_tracker
-            .get_blocks(self.insn_counter, self.pager.touched_pages());
+            .get_blocks(self.insn_counter, self.jit.ctx.touched_pages());
         self.row_info.row_points + blocks.row_points()
     }
 }
@@ -492,9 +487,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
         self.block_tracker.track_instr(kind);
 
         self.preflight_user_cycles += 1;
-        if unlikely(!self.trace.is_empty()) {
-            self.trace_pager()?;
-        }
         Ok(())
     }
 
@@ -511,18 +503,14 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
             self.ecall_metrics[kind].count += 1;
         }
         self.preflight_user_cycles += 1;
-
-        if !self.trace.is_empty() {
-            self.trace_pager()?;
-        }
         Ok(())
     }
 
     #[inline(always)]
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
         let word = match op {
-            LoadOp::Peek => self.pager.peek(addr)?,
-            LoadOp::Load | LoadOp::Record => self.pager.load(addr)?,
+            LoadOp::Peek => self.jit.ctx.load_u32_untracked(addr.0),
+            LoadOp::Load | LoadOp::Record => self.jit.ctx.load_u32(addr.0),
         };
         // tracing::trace!("load_mem({:?}) -> {word:#010x}", addr.baddr());
         Ok(word)
@@ -530,7 +518,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     #[inline(always)]
     fn load_register(&mut self, _op: LoadOp, base: WordAddr, idx: usize) -> Result<u32> {
-        let word = self.pager.load_register(base, idx);
+        let word = self.jit.ctx.load_register(base.0, idx);
         // tracing::trace!("load_register({:?}) -> {word:#010x}", addr.baddr());
         Ok(word)
     }
@@ -548,7 +536,8 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
                 region: word.to_be_bytes().to_vec(),
             })?;
         }
-        self.pager.store(addr, word)
+        self.jit.ctx.store_u32(addr.0, word);
+        Ok(())
     }
 
     #[inline(always)]
@@ -560,7 +549,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
                 region: word.to_be_bytes().to_vec(),
             })?;
         }
-        self.pager.store_register(base, idx, word);
+        self.jit.ctx.store_register(base.0, idx, word);
         Ok(())
     }
 
@@ -685,7 +674,7 @@ impl<S: Syscall> SyscallContext for Executor<'_, S> {
     }
 
     fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]> {
-        Ok(self.pager.peek_page(page_idx)?.data())
+        Ok(self.jit.ctx.peek_page(page_idx))
     }
 
     fn get_rows(&self) -> u64 {

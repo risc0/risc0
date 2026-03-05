@@ -24,7 +24,7 @@ mod tests;
 use std::{
     arch::asm,
     cell::{Cell, RefCell},
-    collections::{BTreeMap, HashMap},
+    collections::{BTreeMap, BTreeSet, HashMap},
     mem::offset_of,
     ptr,
     sync::{Arc, Once, OnceLock},
@@ -41,11 +41,10 @@ use libc::{
     MAP_ANON, MAP_FAILED, MAP_PRIVATE, PROT_NONE, PROT_READ, PROT_WRITE, SA_SIGINFO, c_int, c_void,
     mmap, mprotect, sigaction, sigemptyset, siginfo_t, ucontext_t,
 };
-use risc0_binfmt::{Program, WordAddr};
+use risc0_binfmt::{MemoryImage, Page, Program, WordAddr};
 use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
-use self::memory::HostMemory;
-use self::memory::PageSlot;
+use self::memory::{HostMemory, PageBytes, PageSlot};
 use self::page::PAGE_OFFSET_MASK;
 use self::page::PAGE_SHIFT;
 use self::page::PAGE_SIZE;
@@ -53,7 +52,7 @@ use crate::rv32im::{Instruction, REG_MAX, RvOp, WORD_SIZE};
 
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-enum Terminal {
+pub enum Terminal {
     Jump,
     Break,
     Trap,
@@ -240,7 +239,7 @@ const HOST_PAGE_SIZE: usize = 4096;
 
 // This is visible to the generated x64 code.
 #[repr(C)]
-struct JitContext {
+pub struct JitContext {
     pc: u32,
     quota: u32,
     registers: [u32; REG_MAX],
@@ -251,15 +250,15 @@ struct JitContext {
     ram: HostMemory,
 }
 
-struct Translator {
+pub struct Translator {
     asm: Assembler,
-    ctx: JitContext,
+    pub ctx: JitContext,
     labels: BTreeMap<u32, AssemblyOffset>,
     fixups: BTreeMap<u32, Vec<AssemblyOffset>>,
 }
 
 impl Translator {
-    fn new(program: Program) -> Result<Self> {
+    pub fn new(program: Program) -> Result<Self> {
         let mut ctx = JitContext::new(program.entry);
 
         for (page_idx, page) in program.image.pages {
@@ -281,7 +280,7 @@ impl Translator {
     }
 
     fn fetch(&mut self) -> Instruction {
-        Instruction::new(self.ctx.load_u32(self.ctx.pc).unwrap())
+        Instruction::new(self.ctx.load_u32_untracked(self.ctx.pc))
     }
 
     fn next(&mut self) {
@@ -461,7 +460,7 @@ impl JitContext {
         page.as_ptr()
     }
 
-    fn load_u32(&mut self, addr: u32) -> Result<u32> {
+    pub fn load_u32_untracked(&mut self, addr: u32) -> u32 {
         let page_idx = addr >> PAGE_SHIFT;
         let offset = (addr & PAGE_OFFSET_MASK) as usize;
 
@@ -474,13 +473,58 @@ impl JitContext {
             let ptr = page.as_ptr().add(offset) as *const u32;
             u32::from_le(ptr.read_unaligned())
         };
-        Ok(word)
+        word
+    }
+
+    pub fn load_u32(&mut self, addr: u32) -> u32 {
+        todo!()
+    }
+
+    pub fn load_register(&mut self, base: u32, idx: usize) -> u32 {
+        todo!()
+    }
+
+    pub fn store_u32(&mut self, addr: u32, word: u32) {
+        todo!()
+    }
+
+    pub fn store_register(&mut self, base: u32, idx: usize, word: u32) {
+        todo!()
+    }
+
+    pub fn peek_page(&mut self, page_idx: u32) -> &PageBytes {
+        todo!()
     }
 
     fn dump_registers(&self) {
         for (i, reg) in self.registers.iter().enumerate() {
             tracing::debug!("x{i}: {reg:#010x}");
         }
+    }
+
+    /// sparse MemoryImage containing all touched pages since last checkpoint
+    pub fn partial_image(&self) -> BTreeMap<u32, Page> {
+        todo!()
+    }
+
+    /// the indexes of all the touched pages since last checkpoint
+    pub fn page_indexes(&self) -> BTreeSet<u32> {
+        todo!()
+    }
+
+    /// the count of all touched pages since last checkpoint
+    pub fn touched_pages(&self) -> u64 {
+        todo!()
+    }
+
+    /// clear all tracked pages
+    pub fn paging_checkpoint(&mut self) {
+        todo!()
+    }
+
+    /// the full memory image containing all pages
+    pub fn full_image(&self) -> MemoryImage {
+        todo!()
     }
 }
 
