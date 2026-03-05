@@ -129,6 +129,10 @@ impl HostMemory {
         }
     }
 
+    pub fn add_page(&mut self, page_idx: u32, page: Page) {
+        self.pages.insert(page_idx, page);
+    }
+
     pub fn store_u32_untracked(&mut self, addr: u32, word: u32) {
         let page_idx = addr >> PAGE_SHIFT;
         let offset = (addr & PAGE_OFFSET_MASK) as usize;
