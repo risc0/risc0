@@ -45,10 +45,11 @@ use risc0_binfmt::{MemoryImage, Page, Program, WordAddr};
 use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
 use self::memory::{HostMemory, PageBytes, PageSlot};
-use self::page::PAGE_OFFSET_MASK;
-use self::page::PAGE_SHIFT;
-use self::page::PAGE_SIZE;
+use self::page::{PAGE_OFFSET_MASK, PAGE_SHIFT, PAGE_SIZE, PAGE_WRITABLE_FLAG};
 use crate::rv32im::{Instruction, REG_MAX, RvOp, WORD_SIZE};
+
+pub const MACHINE_REGS_ADDR: u32 = 0xffff_0000;
+pub const USER_REGS_ADDR: u32 = 0xffff_0080;
 
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -237,10 +238,27 @@ const JITCTX_STORE_PAGE_MISS_OFFSET: i32 = offset_of!(JitContext, jit_store_page
 const HOST_WORD_SIZE: usize = (usize::BITS / u8::BITS) as usize;
 const HOST_PAGE_SIZE: usize = 4096;
 
+#[derive(Copy, Clone, PartialEq, Eq)]
+#[repr(u32)]
+enum RegisterMode {
+    User = 0,
+    Machine = 1,
+}
+
+impl RegisterMode {
+    fn from_u32(v: u32) -> Self {
+        match v {
+            0 => Self::User,
+            1 => Self::Machine,
+            v => panic!("unknown mode {v}"),
+        }
+    }
+}
+
 // This is visible to the generated x64 code.
 #[repr(C)]
 pub struct JitContext {
-    pc: u32,
+    pub pc: u32,
     quota: u32,
     registers: [u32; REG_MAX],
     current_tag: u16,
@@ -248,6 +266,7 @@ pub struct JitContext {
     jit_load_page_miss: extern "C" fn(ctx: *mut JitContext, vaddr: u32) -> *const u8,
     jit_store_page_miss: extern "C" fn(ctx: *mut JitContext, vaddr: u32) -> *const u8,
     ram: HostMemory,
+    mode: RegisterMode,
 }
 
 pub struct Translator {
@@ -259,6 +278,8 @@ pub struct Translator {
 
 impl Translator {
     pub fn new(program: Program) -> Result<Self> {
+        tracing::trace!("JIT Translation new");
+
         let mut ctx = JitContext::new(program.entry);
 
         for (page_idx, page) in program.image.pages {
@@ -274,7 +295,7 @@ impl Translator {
     }
 
     fn fetch(&mut self) -> Instruction {
-        Instruction::new(self.ctx.load_u32_untracked(self.ctx.pc))
+        Instruction::new(self.ctx.load_u32(self.ctx.pc))
     }
 
     fn next(&mut self) {
@@ -335,20 +356,30 @@ impl Translator {
         Ok(())
     }
 
+    pub fn jit_one(&mut self) -> Result<Terminal> {
+        let retval = if let Some(&offset) = self.labels.get(&self.ctx.pc) {
+            tracing::debug!("existing label: {:#10x}", self.ctx.pc);
+            self.enter_block(offset)?
+        } else {
+            let offset = self.jit_block()?;
+            self.enter_block(offset)?
+        };
+
+        let terminal =
+            Terminal::from_u32((retval >> 32) as u32).ok_or_else(|| anyhow!("Invalid terminal"))?;
+
+        let pc = (retval & 0xffffffff) as u32;
+        self.ctx.pc = pc;
+        tracing::trace!("jit block ran; new pc = {pc:x}; terminal = {terminal:?}");
+
+        Ok(terminal)
+    }
+
     fn jit_loop(&mut self) -> Result<Terminal> {
         self.dump(self.enter_offset()?);
         loop {
-            let retval = if let Some(&offset) = self.labels.get(&self.ctx.pc) {
-                tracing::debug!("existing label: {:#10x}", self.ctx.pc);
-                self.enter_block(offset)?
-            } else {
-                let offset = self.jit_block()?;
-                self.enter_block(offset)?
-            };
+            let terminal = self.jit_one()?;
 
-            let terminal = Terminal::from_u32((retval >> 32) as u32)
-                .ok_or_else(|| anyhow!("Invalid terminal"))?;
-            let pc = (retval & 0xffffffff) as u32;
             match terminal {
                 Terminal::Jump => (),
                 Terminal::Break | Terminal::Trap => return Ok(terminal),
@@ -357,9 +388,6 @@ impl Translator {
                     self.ctx.quota = MAX_QUOTA;
                 }
             }
-            // self.dump_registers();
-            tracing::trace!("next pc: {pc:#10x}");
-            self.ctx.pc = pc;
         }
     }
 
@@ -416,7 +444,7 @@ impl Translator {
 impl JitContext {
     fn new(pc: u32) -> Self {
         let mut ram = HostMemory::new();
-        Self {
+        let mut s = Self {
             pc,
             quota: MAX_QUOTA,
             registers: [0; REG_MAX],
@@ -425,6 +453,63 @@ impl JitContext {
             jit_load_page_miss: JitContext::jit_load_page_miss_trampoline,
             jit_store_page_miss: JitContext::jit_store_page_miss_trampoline,
             ram,
+            mode: RegisterMode::User,
+        };
+        s.load_registers();
+        s
+    }
+
+    pub fn set_mode(&mut self, mode: u32) {
+        let mode = RegisterMode::from_u32(mode);
+
+        if self.mode == mode {
+            return;
+        }
+
+        self.write_registers();
+
+        self.mode = mode;
+
+        self.load_registers();
+    }
+
+    pub fn get_mode(&self) -> u32 {
+        self.mode as u32
+    }
+
+    fn write_registers(&mut self) {
+        match self.mode {
+            RegisterMode::User => {
+                self.write_registers_to_addr(USER_REGS_ADDR);
+            }
+            RegisterMode::Machine => {
+                self.write_registers_to_addr(MACHINE_REGS_ADDR);
+            }
+        }
+    }
+
+    fn load_registers(&mut self) {
+        match self.mode {
+            RegisterMode::User => {
+                self.load_registers_from_addr(USER_REGS_ADDR);
+            }
+            RegisterMode::Machine => {
+                self.load_registers_from_addr(MACHINE_REGS_ADDR);
+            }
+        }
+    }
+
+    fn write_registers_to_addr(&mut self, mut addr: u32) {
+        for register in self.registers {
+            self.store_u32(addr, register);
+            addr += WORD_SIZE as u32;
+        }
+    }
+
+    fn load_registers_from_addr(&mut self, mut addr: u32) {
+        for i in 0..self.registers.len() {
+            self.registers[i] = self.load_u32(addr);
+            addr += WORD_SIZE as u32;
         }
     }
 
@@ -454,7 +539,7 @@ impl JitContext {
         page.as_ptr()
     }
 
-    pub fn load_u32_untracked(&mut self, addr: u32) -> u32 {
+    pub fn load_u32(&mut self, addr: u32) -> u32 {
         let page_idx = addr >> PAGE_SHIFT;
         let offset = (addr & PAGE_OFFSET_MASK) as usize;
 
@@ -470,16 +555,35 @@ impl JitContext {
         word
     }
 
-    pub fn load_u32(&mut self, addr: u32) -> u32 {
-        todo!()
-    }
+    pub fn load_register(&mut self, base_waddr: u32, idx: usize) -> u32 {
+        let requested_mode = if base_waddr == USER_REGS_ADDR / WORD_SIZE as u32 {
+            RegisterMode::User
+        } else if base_waddr == MACHINE_REGS_ADDR / WORD_SIZE as u32 {
+            RegisterMode::Machine
+        } else {
+            unimplemented!("unknown register address {base_waddr:?}");
+        };
 
-    pub fn load_register(&mut self, base: u32, idx: usize) -> u32 {
-        todo!()
+        if self.mode == requested_mode {
+            self.registers[idx]
+        } else {
+            let addr = (base_waddr + idx as u32) * WORD_SIZE as u32;
+            self.load_u32(addr)
+        }
     }
 
     pub fn store_u32(&mut self, addr: u32, word: u32) {
-        todo!()
+        let page_idx = addr >> PAGE_SHIFT;
+        let offset = (addr & PAGE_OFFSET_MASK) as usize;
+
+        let page = self
+            .ram
+            .ensure_page_write_for_segment(self.current_tag, page_idx);
+        debug_assert!(offset + WORD_SIZE <= PAGE_SIZE);
+        unsafe {
+            let ptr = page.as_mut_ptr().add(offset) as *mut u32;
+            ptr.write_unaligned(word);
+        }
     }
 
     pub fn store_register(&mut self, base: u32, idx: usize, word: u32) {
@@ -497,28 +601,31 @@ impl JitContext {
     }
 
     /// sparse MemoryImage containing all touched pages since last checkpoint
-    pub fn partial_image(&self) -> BTreeMap<u32, Page> {
-        todo!()
+    pub fn partial_image(&mut self) -> BTreeMap<u32, Page> {
+        self.write_registers();
+        self.ram.partial_image(self.current_tag)
     }
 
     /// the indexes of all the touched pages since last checkpoint
     pub fn page_indexes(&self) -> BTreeSet<u32> {
-        todo!()
+        self.ram.page_indexes(self.current_tag)
     }
 
     /// the count of all touched pages since last checkpoint
     pub fn touched_pages(&self) -> u64 {
-        todo!()
+        self.ram.touched_pages
     }
 
     /// clear all tracked pages
     pub fn paging_checkpoint(&mut self) {
-        todo!()
+        self.ram.touched_pages = 0;
+        self.current_tag += 1;
+        assert!(self.current_tag < PAGE_WRITABLE_FLAG, "too many segments");
     }
 
     /// the full memory image containing all pages
     pub fn full_image(&self) -> MemoryImage {
-        todo!()
+        self.ram.full_image()
     }
 }
 

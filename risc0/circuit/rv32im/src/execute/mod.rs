@@ -19,6 +19,7 @@ mod block_tracker;
 mod executor;
 pub mod gdb;
 mod interp;
+#[cfg(feature = "jit")]
 mod jit;
 pub(crate) mod pager;
 pub mod platform;

@@ -13,12 +13,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::mem::offset_of;
 use std::ptr;
 use std::sync::Arc;
 
-use risc0_binfmt::Page;
+use risc0_binfmt::{MemoryImage, Page};
 
 use crate::rv32im::WORD_SIZE;
 
@@ -74,6 +74,7 @@ pub type PageBytes = [u8; PAGE_SIZE];
 pub struct HostMemory {
     pub slots: Vec<PageSlot>,      // len = NUM_PAGES
     pub pages: HashMap<u32, Page>, // only allocated pages
+    pub touched_pages: u64,
 }
 
 impl HostMemory {
@@ -81,6 +82,7 @@ impl HostMemory {
         HostMemory {
             slots: vec![PageSlot::default(); NUM_PAGES],
             pages: HashMap::new(),
+            touched_pages: 0,
         }
     }
 
@@ -97,6 +99,10 @@ impl HostMemory {
         let page = self.pages.entry(page_idx).or_default();
         let slot = &mut self.slots[page_idx as usize];
 
+        if slot.tag() != current_tag {
+            self.touched_pages += 1;
+        }
+
         let page_mut = self.pages.get_mut(&page_idx).unwrap();
 
         let page_data = page_mut.ensure_writable();
@@ -111,6 +117,10 @@ impl HostMemory {
     pub fn ensure_page_read_for_segment(&mut self, current_tag: u16, page_idx: u32) -> &PageBytes {
         let page = self.pages.entry(page_idx).or_default();
         let slot = &mut self.slots[page_idx as usize];
+
+        if slot.tag() != current_tag {
+            self.touched_pages += 1;
+        }
 
         slot.set(page.data().as_ptr(), current_tag);
 
@@ -145,5 +155,30 @@ impl HostMemory {
             let ptr = page_data.as_mut_ptr().add(offset) as *mut u32;
             ptr.write_unaligned(word);
         }
+    }
+
+    pub fn partial_image(&self, current_tag: u16) -> BTreeMap<u32, Page> {
+        self.pages
+            .iter()
+            .filter(|&(&page_idx, _)| self.slots[page_idx as usize].tag() == current_tag)
+            .map(|(&page_idx, page)| (page_idx, page.clone()))
+            .collect()
+    }
+
+    pub fn page_indexes(&self, current_tag: u16) -> BTreeSet<u32> {
+        self.pages
+            .iter()
+            .filter(|&(&page_idx, _)| self.slots[page_idx as usize].tag() == current_tag)
+            .map(|(&page_idx, _)| page_idx)
+            .collect()
+    }
+
+    pub fn full_image(&self) -> MemoryImage {
+        let mut image = MemoryImage::default();
+
+        for (&page_idx, page) in &self.pages {
+            image.set_page(page_idx, page.clone());
+        }
+        image
     }
 }

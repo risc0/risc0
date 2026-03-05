@@ -25,7 +25,7 @@ use risc0_zkp::core::{
 };
 
 #[cfg(target_arch = "x86_64")]
-use risc0_emu::x64::Translator as JitTranslator;
+use risc0_emu::x64::{Terminal, Translator as JitTranslator};
 
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
@@ -36,7 +36,7 @@ use crate::{
             ExecutionError, ExecutionLimit, ExecutorResult, RowInfo, RowLimit, SegmentUpdate,
         },
         poseidon2::Poseidon2,
-        rv32im::disasm,
+        rv32im::{EmuContext, Exception, disasm},
     },
     trace::{TraceCallback, TraceEvent},
 };
@@ -47,7 +47,7 @@ use super::{
     platform::*,
     poseidon2::Poseidon2State,
     r0vm::{LoadOp, Risc0Context, Risc0Machine},
-    rv32im::{DecodedInstruction, InsnKind},
+    rv32im::{DecodedInstruction, Emulator, InsnKind},
     sha2::Sha2State,
     syscall::Syscall,
     unlikely,
@@ -55,9 +55,7 @@ use super::{
 
 /// Executor implementing the RISC Zero virtual machine for the `rv32im` circuit.
 pub struct Executor<'a, S: Syscall> {
-    pc: ByteAddr,
     user_pc: ByteAddr,
-    machine_mode: u32,
     preflight_user_cycles: u32,
     initial_image: MemoryImage,
     terminate_state: Option<TerminateState>,
@@ -110,9 +108,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         circuit_version: u32,
     ) -> Self {
         Self {
-            pc: ByteAddr(0),
             user_pc: ByteAddr(0),
-            machine_mode: 0,
             preflight_user_cycles: 0,
             insn_counter: 0,
             initial_image: image.clone(),
@@ -188,7 +184,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
                     return Err(anyhow!(
                         "segment limit ({}) too small for instruction at pc: {:?}",
                         limit.segment_limit(),
-                        self.pc
+                        self.jit.ctx.pc
                     )
                     .into());
                 };
@@ -197,13 +193,13 @@ impl<'a, S: Syscall> Executor<'a, S> {
             }
 
             // Execute a step of the virtual machine.
-            if let Err(error) = self.run_jit() {
+            if let Err(error) = self.jit_some() {
                 // On error, log information about the most recent instructions (at `debug` level),
                 // and include a SegmentUpdate for the segment up to the point of the error.
                 self.dump_recent_instructions();
                 return Err(ExecutionError::ExecutionFailed {
                     error,
-                    pc: self.pc,
+                    pc: ByteAddr(self.jit.ctx.pc),
                     update: Some(Box::new(self.dump_segment(
                         limit.segment_po2,
                         0,
@@ -224,8 +220,18 @@ impl<'a, S: Syscall> Executor<'a, S> {
         Ok(Some(update))
     }
 
-    pub fn run_jit(&mut self) -> Result<()> {
-        todo!()
+    pub fn jit_some(&mut self) -> Result<()> {
+        let terminal = self.jit.jit_one()?;
+
+        if matches!(terminal, Terminal::Trap) {
+            Risc0Machine { ctx: self }.trap(Exception::IllegalInstruction(0, 0))?;
+        }
+
+        if matches!(terminal, Terminal::Break) {
+            Risc0Machine::step(&mut Emulator {}, self)?;
+        }
+
+        Ok(())
     }
 
     /// Execute until the program reaches a terminal state. Either due to the machine exiting, or
@@ -375,7 +381,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     fn segment_used_rows(&self) -> u32 {
         let blocks = self
             .block_tracker
-            .get_blocks(self.insn_counter, self.jit.ctx.touched_pages());
+            .get_blocks(self.preflight_user_cycles, self.jit.ctx.touched_pages());
         blocks.row_points().div_ceil(POINTS_PER_ROW) as u32
     }
 
@@ -416,20 +422,21 @@ impl<'a, S: Syscall> Executor<'a, S> {
         if unlikely(tracing::enabled!(tracing::Level::TRACE)) {
             tracing::trace!(
                 "{:?}> {:#010x}  {}",
-                self.pc,
+                self.jit.ctx.pc,
                 decoded.insn,
                 super::rv32im::disasm(kind, decoded)
             );
         }
         if unlikely(tracing::enabled!(tracing::Level::DEBUG)) {
-            self.ring.push((self.pc, kind, decoded.clone()));
+            self.ring
+                .push((ByteAddr(self.jit.ctx.pc), kind, decoded.clone()));
         }
     }
 
     fn get_row_points(&self) -> u64 {
         let blocks = self
             .block_tracker
-            .get_blocks(self.insn_counter, self.jit.ctx.touched_pages());
+            .get_blocks(self.preflight_user_cycles, self.jit.ctx.touched_pages());
         self.row_info.row_points + blocks.row_points()
     }
 }
@@ -440,11 +447,11 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     }
 
     fn get_pc(&self) -> ByteAddr {
-        self.pc
+        ByteAddr(self.jit.ctx.pc)
     }
 
     fn set_pc(&mut self, addr: ByteAddr) {
-        self.pc = addr;
+        self.jit.ctx.pc = addr.0;
     }
 
     fn set_user_pc(&mut self, addr: ByteAddr) {
@@ -452,11 +459,11 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     }
 
     fn get_machine_mode(&self) -> u32 {
-        self.machine_mode
+        self.jit.ctx.get_mode()
     }
 
     fn set_machine_mode(&mut self, mode: u32) {
-        self.machine_mode = mode;
+        self.jit.ctx.set_mode(mode);
     }
 
     fn resume(&mut self) -> Result<()> {
@@ -469,13 +476,13 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     #[inline(always)]
     fn on_insn_start(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()> {
-        self.block_tracker.track_pc(self.pc.0);
+        self.block_tracker.track_pc(self.jit.ctx.pc);
 
         self.trace_instruction(kind, decoded);
         if unlikely(!self.trace.is_empty()) {
             self.trace(TraceEvent::InstructionStart {
                 cycle: self.get_row_points(),
-                pc: self.pc.0,
+                pc: self.jit.ctx.pc,
                 insn: decoded.insn,
             })?;
         }
@@ -509,8 +516,8 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     #[inline(always)]
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
         let word = match op {
-            LoadOp::Peek => self.jit.ctx.load_u32_untracked(addr.0),
-            LoadOp::Load | LoadOp::Record => self.jit.ctx.load_u32(addr.0),
+            LoadOp::Peek => self.jit.ctx.load_u32(addr.baddr().0),
+            LoadOp::Load | LoadOp::Record => self.jit.ctx.load_u32(addr.baddr().0),
         };
         // tracing::trace!("load_mem({:?}) -> {word:#010x}", addr.baddr());
         Ok(word)
@@ -525,18 +532,13 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     #[inline(always)]
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
-        // tracing::trace!(
-        //     "store_u32({:?}, {word:#010x}), pc: {:?}",
-        //     addr.baddr(),
-        //     self.pc
-        // );
         if unlikely(!self.trace.is_empty()) {
             self.trace(TraceEvent::MemorySet {
                 addr: addr.baddr().0,
                 region: word.to_be_bytes().to_vec(),
             })?;
         }
-        self.jit.ctx.store_u32(addr.0, word);
+        self.jit.ctx.store_u32(addr.baddr().0, word);
         Ok(())
     }
 
