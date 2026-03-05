@@ -426,7 +426,7 @@ impl JitContext {
             pc,
             quota: MAX_QUOTA,
             registers: [0; REG_MAX],
-            current_tag: 0,
+            current_tag: 1,
             page_table: ram.slots.as_mut_ptr(),
             jit_load_page_miss: JitContext::jit_load_page_miss_trampoline,
             jit_store_page_miss: JitContext::jit_store_page_miss_trampoline,

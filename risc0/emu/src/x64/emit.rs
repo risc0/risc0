@@ -796,10 +796,9 @@ impl Translator {
             ; cmp cx, WORD [r15 + JITCTX_CURRENT_TAG_OFFSET]
             ; jne >page_miss
 
-            // (rax): check if ptr is null
+            // (rax): load page ptr
             ; mov rax, QWORD [rax + PAGE_SLOT_PTR_OFFSET]
-            ; test rax, rax
-            ; jnz >done
+            ; jmp >done
 
             ;page_miss:
 
@@ -1181,10 +1180,9 @@ mod tests {
         "movzx ecx,word [rax+8]",
         "and cx,7FFFh",
         "cmp cx,[r15+88h]",
-        "jne near 000000000000004Eh",
+        "jne near 000000000000004Ah",
         "mov rax,[rax]",
-        "test rax,rax",
-        "jne near 000000000000006Bh",
+        "jmp 0000000000000067h",
         "mov ecx,[rsp]",
         "sub rsp,8",
         "push rdi",
