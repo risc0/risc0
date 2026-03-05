@@ -52,6 +52,7 @@ std = [
 ]
 witgen_debug = []
 block_tracker_debug = []
+jit = []
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
