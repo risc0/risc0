@@ -24,6 +24,7 @@ use super::memory::{
     PAGE_SLOT_PTR_OFFSET, PAGE_SLOT_SHIFT, PAGE_SLOT_SIZE, PAGE_SLOT_TAG_OFFSET,
     PAGE_SLOT_TAG_SHIFT,
 };
+use super::page::*;
 use super::*;
 
 const CALLEE_REGISTERS: &[GPR] = &[GPR::RBX, GPR::RBP, GPR::R12, GPR::R13, GPR::R14, GPR::R15];
@@ -747,7 +748,7 @@ impl Translator {
     // The result is:
     //   rax = host_base_page_address
     //   rdx = offset
-    fn emit_resolve_page(&mut self, page_miss_offset: i32) {
+    fn emit_resolve_page(&mut self, page_miss_offset: i32, writable: bool) {
         // available registers:
         // eax, ecx, edx
         // reserved:
@@ -777,6 +778,19 @@ impl Translator {
 
             // (ecx): last_tag = slot.tag
             ; movzx ecx, WORD [rax + PAGE_SLOT_TAG_OFFSET]
+        );
+
+        if writable {
+            emit!(self
+                // Check if writable is flag is set
+                ; bt cx, PAGE_WRITABLE_BIT as i8
+                ; jnc >page_miss
+            );
+        }
+
+        emit!(self
+            // Extract current_tag by masking the writable flag
+            ; and cx, PAGE_WRITABLE_MASK as i16
 
             // check if last_tag == current_tag
             ; cmp cx, WORD [r15 + JITCTX_CURRENT_TAG_OFFSET]
@@ -830,7 +844,7 @@ impl Translator {
         self.emit_lea(GPR::RAX, None, rs1, imm);
 
         // Resolve the page for the specified guest address (in rax).
-        self.emit_resolve_page(JITCTX_LOAD_PAGE_MISS_OFFSET);
+        self.emit_resolve_page(JITCTX_LOAD_PAGE_MISS_OFFSET, false);
 
         // load byte/word/dword into eax
         match (size, extend) {
@@ -856,7 +870,7 @@ impl Translator {
         self.emit_lea(GPR::RAX, None, rs1, imm);
 
         // Resolve the page for the specified guest address (in rax).
-        self.emit_resolve_page(JITCTX_STORE_PAGE_MISS_OFFSET);
+        self.emit_resolve_page(JITCTX_STORE_PAGE_MISS_OFFSET, true);
 
         match rs2 {
             Loc::GPR(rs2) => match size {
@@ -1165,11 +1179,12 @@ mod tests {
         "shl rcx,4",
         "add rax,rcx",
         "movzx ecx,word [rax+8]",
+        "and cx,7FFFh",
         "cmp cx,[r15+88h]",
-        "jne near 0000000000000049h",
+        "jne near 000000000000004Eh",
         "mov rax,[rax]",
         "test rax,rax",
-        "jne near 0000000000000066h",
+        "jne near 000000000000006Bh",
         "mov ecx,[rsp]",
         "sub rsp,8",
         "push rdi",

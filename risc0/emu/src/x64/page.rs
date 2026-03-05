@@ -20,3 +20,6 @@ use risc0_zkp::core::digest::Digest;
 pub const PAGE_SHIFT: usize = 10; // 1 KiB pages
 pub const PAGE_SIZE: usize = 1 << PAGE_SHIFT;
 pub const PAGE_OFFSET_MASK: u32 = (1 << PAGE_SHIFT) - 1;
+pub const PAGE_WRITABLE_FLAG: u16 = 0x8000u16;
+pub const PAGE_WRITABLE_MASK: u16 = !PAGE_WRITABLE_FLAG;
+pub const PAGE_WRITABLE_BIT: u8 = 15;

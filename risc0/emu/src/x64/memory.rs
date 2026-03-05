@@ -22,7 +22,7 @@ use risc0_binfmt::Page;
 
 use crate::rv32im::WORD_SIZE;
 
-use super::page::{PAGE_OFFSET_MASK, PAGE_SHIFT, PAGE_SIZE};
+use super::page::{PAGE_OFFSET_MASK, PAGE_SHIFT, PAGE_SIZE, PAGE_WRITABLE_FLAG};
 
 pub const NUM_PAGES: usize = 1 << (32 - PAGE_SHIFT);
 pub const PAGE_SLOT_PTR_OFFSET: i32 = offset_of!(PageSlot, ptr) as i32;
@@ -102,7 +102,7 @@ impl HostMemory {
         let page_data = page_mut.ensure_writable();
 
         // Update slot pointer + generation for JIT fast path.
-        slot.set(page_data.as_ptr(), current_tag);
+        slot.set(page_data.as_ptr(), current_tag | PAGE_WRITABLE_FLAG);
 
         page_data
     }
