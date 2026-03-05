@@ -18,7 +18,6 @@
 mod emit;
 mod memory;
 mod page;
-mod segment;
 #[cfg(test)]
 mod tests;
 
@@ -50,7 +49,6 @@ use self::memory::PageSlot;
 use self::page::PAGE_OFFSET_MASK;
 use self::page::PAGE_SHIFT;
 use self::page::PAGE_SIZE;
-use self::segment::SegmentTracker;
 use crate::rv32im::{Instruction, REG_MAX, RvOp, WORD_SIZE};
 
 #[repr(u32)]
@@ -251,7 +249,6 @@ struct JitContext {
     jit_load_page_miss: extern "C" fn(ctx: *mut JitContext, vaddr: u32) -> *const u8,
     jit_store_page_miss: extern "C" fn(ctx: *mut JitContext, vaddr: u32) -> *const u8,
     ram: HostMemory,
-    tracker: SegmentTracker,
 }
 
 struct Translator {
@@ -345,30 +342,6 @@ impl Translator {
         Ok(())
     }
 
-    fn check(&self) {
-        let slots = &self.ctx.ram.slots;
-        tracing::info!("slots: {}", slots.len());
-        for (i, slot) in slots.iter().enumerate() {
-            if !slot.is_empty() {
-                tracing::info!("[{i:#010x}]: {:?}", slot.ptr());
-            }
-        }
-        for (&k, v) in self.ctx.ram.versions.iter() {
-            let strong = Arc::strong_count(v);
-            tracing::info!("[{k:#010x}]: ptr={:?}, strong={strong}", v.bytes.as_ptr());
-        }
-
-        tracing::info!("page_index_map: {:#010x?}", self.ctx.tracker.page_index_map);
-        for page in self.ctx.tracker.pages.iter() {
-            tracing::info!(
-                "page: {:#010x}, pre: {:?}, post: {:?}",
-                page.page_idx,
-                page.pre.bytes.as_ptr(),
-                page.post.bytes.as_ptr()
-            );
-        }
-    }
-
     fn jit_loop(&mut self) -> Result<Terminal> {
         self.dump(self.enter_offset()?);
         loop {
@@ -459,7 +432,6 @@ impl JitContext {
             jit_load_page_miss: JitContext::jit_load_page_miss_trampoline,
             jit_store_page_miss: JitContext::jit_store_page_miss_trampoline,
             ram,
-            tracker: SegmentTracker::new(),
         }
     }
 
@@ -474,32 +446,32 @@ impl JitContext {
     #[inline]
     fn jit_load_page_miss(&mut self, page_idx: u32) -> *const u8 {
         tracing::info!("jit_load_page_miss: {page_idx:#08x}");
-        let page =
-            self.ram
-                .ensure_page_read_for_segment(&mut self.tracker, self.current_tag, page_idx);
-        page.bytes.as_ptr()
+        let page = self
+            .ram
+            .ensure_page_read_for_segment(self.current_tag, page_idx);
+        page.as_ptr()
     }
 
     #[inline]
     fn jit_store_page_miss(&mut self, page_idx: u32) -> *const u8 {
         tracing::info!("jit_store_page_miss: {page_idx:#010x}");
-        let page =
-            self.ram
-                .ensure_page_write_for_segment(&mut self.tracker, self.current_tag, page_idx);
-        page.bytes.as_ptr()
+        let page = self
+            .ram
+            .ensure_page_write_for_segment(self.current_tag, page_idx);
+        page.as_ptr()
     }
 
     fn load_u32(&mut self, addr: u32) -> Result<u32> {
         let page_idx = addr >> PAGE_SHIFT;
         let offset = (addr & PAGE_OFFSET_MASK) as usize;
 
-        let page =
-            self.ram
-                .ensure_page_read_for_segment(&mut self.tracker, self.current_tag, page_idx);
+        let page = self
+            .ram
+            .ensure_page_read_for_segment(self.current_tag, page_idx);
 
         debug_assert!(offset + WORD_SIZE <= PAGE_SIZE);
         let word = unsafe {
-            let ptr = page.bytes.as_ptr().add(offset) as *const u32;
+            let ptr = page.as_ptr().add(offset) as *const u32;
             u32::from_le(ptr.read_unaligned())
         };
         Ok(word)

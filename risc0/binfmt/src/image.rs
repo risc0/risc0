@@ -466,8 +466,10 @@ impl Page {
         word
     }
 
+    /// Ensures that we are able to write to the page data by ensuring we have an exclusive
+    /// reference to it and returns a mutable references to that data
     #[inline(always)]
-    fn ensure_writable(&mut self) -> &mut [u8; PAGE_BYTES] {
+    pub fn ensure_writable(&mut self) -> &mut [u8; PAGE_BYTES] {
         #[cfg(feature = "std")]
         {
             &mut *Arc::make_mut(&mut self.0)

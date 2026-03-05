@@ -18,10 +18,11 @@ use std::mem::offset_of;
 use std::ptr;
 use std::sync::Arc;
 
+use risc0_binfmt::Page;
+
 use crate::rv32im::WORD_SIZE;
 
-use super::page::{PAGE_OFFSET_MASK, PAGE_SHIFT, PAGE_SIZE, PageBytes, PageRef, PageVersion};
-use super::segment::{SegmentPage, SegmentTracker};
+use super::page::{PAGE_OFFSET_MASK, PAGE_SHIFT, PAGE_SIZE};
 
 pub const NUM_PAGES: usize = 1 << (32 - PAGE_SHIFT);
 pub const PAGE_SLOT_PTR_OFFSET: i32 = offset_of!(PageSlot, ptr) as i32;
@@ -66,106 +67,54 @@ impl PageSlot {
     }
 }
 
-/// Canonical owner of all page versions.
-/// The page *slots* table is fixed-size; the versions map is sparse.
+pub type PageBytes = [u8; PAGE_SIZE];
+
+/// Canonical owner of all pages.
+/// The page *slots* table is fixed-size; the pages map is sparse.
 pub struct HostMemory {
-    pub slots: Vec<PageSlot>,            // len = NUM_PAGES
-    pub versions: HashMap<u32, PageRef>, // only allocated pages
+    pub slots: Vec<PageSlot>,      // len = NUM_PAGES
+    pub pages: HashMap<u32, Page>, // only allocated pages
 }
 
 impl HostMemory {
     pub fn new() -> Self {
         HostMemory {
             slots: vec![PageSlot::default(); NUM_PAGES],
-            versions: HashMap::new(),
+            pages: HashMap::new(),
         }
-    }
-
-    /// Ensure there is a version for `page_idx` and return a clone of it.
-    fn ensure_page_ref(&mut self, page_idx: u32) -> PageRef {
-        self.versions
-            .entry(page_idx)
-            .or_insert_with(PageVersion::new_zeroed)
-            .clone()
     }
 
     /// Returns raw pointer for writing.
     ///
-    /// - pre: the version that was visible at segment start.
-    /// - post: the version to be used *after* this write (may be new).
-    ///
     /// Also:
-    /// - updates the `SegmentTracker` with (page_idx, pre, post),
     /// - updates the PageSlot pointer + generation for fast-path JIT use.
     pub fn ensure_page_write_for_segment(
         &mut self,
-        tracker: &mut SegmentTracker,
         current_tag: u16,
         page_idx: u32,
-    ) -> PageRef {
+    ) -> &mut PageBytes {
         // Ensure a current version exists.
-        let page = self.ensure_page_ref(page_idx);
+        let page = self.pages.entry(page_idx).or_default();
         let slot = &mut self.slots[page_idx as usize];
 
-        // Find or create SegmentPage record.
-        let entry_idx = if let Some(&i) = tracker.page_index_map.get(&page_idx) {
-            i
-        } else {
-            let idx = tracker.pages.len();
-            tracker.pages.push(SegmentPage {
-                page_idx,
-                pre: page.clone(),
-                post: page.clone(),
-                wrote: false,
-            });
-            tracker.page_index_map.insert(page_idx, idx);
-            idx
-        };
+        let page_mut = self.pages.get_mut(&page_idx).unwrap();
 
-        let seg_page = &mut tracker.pages[entry_idx];
-        let post = seg_page.copy_on_write();
-
-        // Update canonical version map and segment record.
-        self.versions.insert(page_idx, post.clone());
+        let page_data = page_mut.ensure_writable();
 
         // Update slot pointer + generation for JIT fast path.
-        slot.set(post.bytes.as_ptr(), current_tag);
+        slot.set(page_data.as_ptr(), current_tag);
 
-        post
+        page_data
     }
 
-    /// Ensure page exists for read, update generation and segment tracker
-    /// if this is the first access in this segment.
-    pub fn ensure_page_read_for_segment(
-        &mut self,
-        tracker: &mut SegmentTracker,
-        current_tag: u16,
-        page_idx: u32,
-    ) -> PageRef {
-        let page = self.ensure_page_ref(page_idx);
-        let ptr = page.bytes.as_ptr();
+    /// Ensure page exists for read
+    pub fn ensure_page_read_for_segment(&mut self, current_tag: u16, page_idx: u32) -> &PageBytes {
+        let page = self.pages.entry(page_idx).or_default();
         let slot = &mut self.slots[page_idx as usize];
 
-        // First access this segment?
-        if slot.tag() != current_tag || slot.ptr.is_null() {
-            let idx = tracker.pages.len();
-            tracker.pages.push(SegmentPage {
-                page_idx,
-                pre: page.clone(),
-                post: page.clone(),
-                wrote: false,
-            });
-            tracker.page_index_map.insert(page_idx, idx);
-            slot.set(ptr, current_tag);
-        } else {
-            // Already active this segment; just return current pointer.
-            if slot.ptr().is_null() {
-                // Shouldn't happen: tag matches but no ptr. Fix by re-pointing.
-                slot.set(ptr, current_tag);
-            }
-        }
+        slot.set(page.data().as_ptr(), current_tag);
 
-        page
+        page.data()
     }
 
     pub fn load_u32_untracked(&mut self, addr: u32) -> u32 {
@@ -173,9 +122,9 @@ impl HostMemory {
         let offset = (addr & PAGE_OFFSET_MASK) as usize;
         debug_assert!(offset + WORD_SIZE <= PAGE_SIZE);
 
-        let page = self.ensure_page_ref(page_idx);
+        let page = self.pages.entry(page_idx).or_default();
         unsafe {
-            let ptr = page.bytes.as_ptr().add(offset) as *const u32;
+            let ptr = page.data().as_ptr().add(offset) as *const u32;
             u32::from_le(ptr.read_unaligned())
         }
     }
@@ -185,14 +134,11 @@ impl HostMemory {
         let offset = (addr & PAGE_OFFSET_MASK) as usize;
         debug_assert!(offset + WORD_SIZE <= PAGE_SIZE);
 
-        let page = self
-            .versions
-            .entry(page_idx)
-            .or_insert_with(PageVersion::new_zeroed);
+        let page = self.pages.entry(page_idx).or_default();
 
-        let page = Arc::get_mut(page).expect("store_u32 requires unique ownership");
+        let page_data = page.ensure_writable();
         unsafe {
-            let ptr = page.bytes.as_mut_ptr().add(offset) as *mut u32;
+            let ptr = page_data.as_mut_ptr().add(offset) as *mut u32;
             ptr.write_unaligned(word);
         }
     }
