@@ -306,6 +306,7 @@ impl<'a> ExecutorImpl<'a> {
     }
 
     /// This will run the executor with a gdb server so gdb can be attached.
+    #[cfg(not(feature = "jit"))]
     pub fn run_with_debugger(&mut self) -> Result<()> {
         let debugger = super::gdb::GdbExecutor::new(self)?;
         eprintln!(

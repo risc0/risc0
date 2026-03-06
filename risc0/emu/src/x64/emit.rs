@@ -21,7 +21,7 @@ use dynasmrt::{
 };
 
 use super::memory::{
-    PAGE_SLOT_PTR_OFFSET, PAGE_SLOT_SHIFT, PAGE_SLOT_SIZE, PAGE_SLOT_TAG_OFFSET,
+    PAGE_SLOT_META_OFFSET, PAGE_SLOT_PTR_OFFSET, PAGE_SLOT_SHIFT, PAGE_SLOT_SIZE,
     PAGE_SLOT_TAG_SHIFT,
 };
 use super::page::*;
@@ -219,19 +219,7 @@ extern "C" fn print(ptr: *const u8, len: u64) {
 }
 
 impl Translator {
-    pub(crate) fn step_prologue(&mut self) {
-        self.emit_retval(Terminal::Split, self.ctx.pc);
-        emit!(self
-            ; cmp DWORD [r15 + JITCTX_QUOTA_OFFSET], 0
-            ; je ->exit
-        );
-    }
-
-    pub(crate) fn step_epilogue(&mut self) {
-        emit!(self ; dec DWORD [r15 + JITCTX_QUOTA_OFFSET]);
-    }
-
-    pub(crate) fn dispatch(&mut self, insn: Instruction) -> Result<Option<Terminal>> {
+    pub(crate) fn dispatch(&mut self, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
         match (insn.opcode, insn.func3, insn.func7) {
             // I-format memory loads
             (0b0000011, 0b000, _) => self.step_load(RvOp::Lb, insn),
@@ -342,10 +330,10 @@ impl Translator {
         }
     }
 
-    fn step_trap(&mut self) -> Result<Option<Terminal>> {
+    fn step_trap(&mut self) -> Result<(Option<RvOp>, bool)> {
         self.emit_retval(Terminal::Trap, self.ctx.pc);
         emit!(self ; jmp ->exit);
-        Ok(Some(Terminal::Trap))
+        Ok((None, true))
     }
 
     fn emit_mov(&mut self, dst: Loc, src: Loc) {
@@ -439,7 +427,7 @@ impl Translator {
         }
     }
 
-    fn step_compute(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+    fn step_compute(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
         self.trace(op, &insn);
         let (rd, rs1, rs2) = (insn.rd_loc(), insn.rs1_loc(), insn.rs2_loc());
         match op {
@@ -571,7 +559,7 @@ impl Translator {
             }
             _ => unreachable!(),
         };
-        Ok(None)
+        Ok((Some(op), false))
     }
 
     fn emit_mul(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
@@ -777,7 +765,7 @@ impl Translator {
             ; add rax, rcx
 
             // (ecx): last_tag = slot.tag
-            ; movzx ecx, WORD [rax + PAGE_SLOT_TAG_OFFSET]
+            ; movzx ecx, WORD [rax + PAGE_SLOT_META_OFFSET]
         );
 
         if writable {
@@ -905,7 +893,7 @@ impl Translator {
         }
     }
 
-    fn step_load(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+    fn step_load(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
         self.trace(op, &insn);
         let (rd, rs1, imm) = (insn.rd_loc(), insn.rs1_loc(), insn.imm_i());
         match op {
@@ -931,10 +919,10 @@ impl Translator {
             }
             _ => unreachable!(),
         }
-        Ok(None)
+        Ok((Some(op), false))
     }
 
-    fn step_store(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+    fn step_store(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
         self.trace(op, &insn);
         let (rs1, rs2, imm) = (insn.rs1_loc(), insn.rs2_loc(), insn.imm_s());
         match op {
@@ -952,10 +940,10 @@ impl Translator {
             }
             _ => unreachable!(),
         }
-        Ok(None)
+        Ok((Some(op), false))
     }
 
-    fn step_branch(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+    fn step_branch(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
         self.trace(op, &insn);
         let (rs1, rs2, imm) = (insn.rs1_loc(), insn.rs2_loc(), insn.imm_b());
         self.emit_cmp(GPR::RAX, rs1, rs2);
@@ -994,7 +982,7 @@ impl Translator {
         emit!(self ;taken:);
         self.emit_exit(Terminal::Jump, taken_pc as u32, true);
 
-        Ok(Some(Terminal::Jump))
+        Ok((Some(op), true))
     }
 
     fn emit_retval(&mut self, terminal: Terminal, pc: u32) {
@@ -1022,7 +1010,7 @@ impl Translator {
         Ok(())
     }
 
-    fn step_jump(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+    fn step_jump(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
         self.trace(op, &insn);
         match op {
             RvOp::Jal => {
@@ -1036,7 +1024,7 @@ impl Translator {
             }
             _ => unreachable!(),
         }
-        Ok(Some(Terminal::Jump))
+        Ok((Some(op), true))
     }
 
     fn emit_jal(&mut self, rd: Loc, imm: u32, emit_jmp: bool) {
@@ -1051,11 +1039,11 @@ impl Translator {
     }
 
     // TODO
-    fn step_system(&mut self, op: RvOp, insn: Instruction) -> Result<Option<Terminal>> {
+    fn step_system(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
         self.trace(op, &insn);
         self.emit_retval(Terminal::Break, self.ctx.pc);
         emit!(self ; jmp ->exit);
-        Ok(Some(Terminal::Break))
+        Ok((Some(op), true))
     }
 }
 
@@ -1174,12 +1162,12 @@ mod tests {
         "mov edx,eax",
         "and edx,3FFh",
         "push rcx",
-        "mov rax,[r15+90h]",
+        "mov rax,[r15+88h]",
         "shl rcx,4",
         "add rax,rcx",
         "movzx ecx,word [rax+8]",
         "and cx,7FFFh",
-        "cmp cx,[r15+88h]",
+        "cmp cx,[r15+84h]",
         "jne near 000000000000004Ah",
         "mov rax,[rax]",
         "jmp 0000000000000067h",
@@ -1190,7 +1178,7 @@ mod tests {
         "push rdx",
         "mov rdi,r15",
         "mov esi,ecx",
-        "call qword [r15+98h]",
+        "call qword [r15+90h]",
         "pop rdx",
         "pop rsi",
         "pop rdi",

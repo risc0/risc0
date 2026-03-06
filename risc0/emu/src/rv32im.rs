@@ -18,7 +18,7 @@
 pub const WORD_SIZE: usize = 4;
 pub const REG_MAX: usize = 32; // maximum number of registers
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, enum_map::Enum)]
 pub enum RvOp {
     Add,
     Sub,

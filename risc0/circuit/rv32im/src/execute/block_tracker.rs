@@ -58,12 +58,12 @@ pub const PAGE_OUT_NODE_ROW_POINTS: u64 =
 //pub const PAGE_NODE_ROW_POINTS: u64 = ...;
 
 /// Which block types the given instruction ends up being implemented with.
-fn add_blocks_for_insn(blocks: &mut BlockCollection, i: &InsnKind) {
+fn add_blocks_for_insn(blocks: &mut BlockCollection, i: &InsnKind, count: u64) {
     use BlockType::*;
 
     macro_rules! blocks {
         ($($value:expr),+) => {
-            { $(blocks.add_block($value);)+ }
+            { $(blocks.add_blocks($value, count);)+ }
         }
     }
 
@@ -238,7 +238,11 @@ impl Default for BlockTracker {
 
 impl BlockTracker {
     pub fn track_instr(&mut self, kind: InsnKind) {
-        add_blocks_for_insn(&mut self.blocks, &kind);
+        add_blocks_for_insn(&mut self.blocks, &kind, 1);
+    }
+
+    pub fn track_instrs(&mut self, kind: InsnKind, count: u64) {
+        add_blocks_for_insn(&mut self.blocks, &kind, count);
     }
 
     pub fn track_pc(&mut self, pc: u32) {

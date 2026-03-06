@@ -7524,6 +7524,7 @@ dependencies = [
  "cc",
  "derive_more",
  "dynasmrt",
+ "enum-map",
  "iced-x86",
  "libc",
  "risc0-binfmt",

@@ -37,6 +37,7 @@ use dynasmrt::{
     relocations::{Relocation as _, RelocationSize},
     x64::{Assembler, X64Relocation},
 };
+use enum_map::EnumMap;
 use libc::{
     MAP_ANON, MAP_FAILED, MAP_PRIVATE, PROT_NONE, PROT_READ, PROT_WRITE, SA_SIGINFO, c_int, c_void,
     mmap, mprotect, sigaction, sigemptyset, siginfo_t, ucontext_t,
@@ -57,7 +58,6 @@ pub enum Terminal {
     Jump,
     Break,
     Trap,
-    Split,
 }
 
 impl Terminal {
@@ -66,7 +66,6 @@ impl Terminal {
             0 => Some(Self::Jump),
             1 => Some(Self::Break),
             2 => Some(Self::Trap),
-            3 => Some(Self::Split),
             _ => None,
         }
     }
@@ -225,10 +224,8 @@ const REGISTER_MAPPING: [Loc; REG_MAX] = [
 //     Loc::Memory(GPR::RBX, 31 * WORD_SIZE as i32),
 // ];
 
-const MAX_QUOTA: u32 = 1_000_000;
 const GUEST_RAM_SIZE: usize = 1 << 32; // 4GB
 
-const JITCTX_QUOTA_OFFSET: i32 = offset_of!(JitContext, quota) as i32;
 const JITCTX_REGISTERS_OFFSET: i32 = offset_of!(JitContext, registers) as i32;
 const JITCTX_CURRENT_TAG_OFFSET: i32 = offset_of!(JitContext, current_tag) as i32;
 const JITCTX_PAGE_TABLE_OFFSET: i32 = offset_of!(JitContext, page_table) as i32;
@@ -259,7 +256,6 @@ impl RegisterMode {
 #[repr(C)]
 pub struct JitContext {
     pub pc: u32,
-    quota: u32,
     registers: [u32; REG_MAX],
     current_tag: u16,
     page_table: *mut PageSlot,
@@ -269,11 +265,19 @@ pub struct JitContext {
     mode: RegisterMode,
 }
 
+#[derive(Clone, Default)]
+pub struct BlockInfo {
+    pub op_counts: EnumMap<RvOp, u32>,
+    pub start_pc: u32,
+    pub end_pc: u32,
+}
+
 pub struct Translator {
     asm: Assembler,
     pub ctx: JitContext,
     labels: BTreeMap<u32, AssemblyOffset>,
     fixups: BTreeMap<u32, Vec<AssemblyOffset>>,
+    instr_counts: BTreeMap<AssemblyOffset, EnumMap<RvOp, u32>>,
 }
 
 impl Translator {
@@ -291,6 +295,7 @@ impl Translator {
             ctx,
             labels: Default::default(),
             fixups: Default::default(),
+            instr_counts: BTreeMap::new(),
         })
     }
 
@@ -312,11 +317,18 @@ impl Translator {
             self.process_fixups(offset)?;
 
             let insn = self.fetch();
-            // self.step_prologue();
-            if let Some(terminal) = self.dispatch(insn)? {
+            let (op, terminal) = self.dispatch(insn)?;
+
+            for addr in start.0..=offset.0 {
+                let counts = self.instr_counts.entry(AssemblyOffset(addr)).or_default();
+                if let Some(op) = op {
+                    counts[op] += 1;
+                }
+            }
+            if terminal {
                 break;
             }
-            // self.step_epilogue();
+
             self.next();
         }
 
@@ -356,8 +368,10 @@ impl Translator {
         Ok(())
     }
 
-    pub fn jit_one(&mut self) -> Result<Terminal> {
-        let retval = if let Some(&offset) = self.labels.get(&self.ctx.pc) {
+    pub fn jit_one(&mut self) -> Result<(Terminal, BlockInfo)> {
+        let start_pc = self.ctx.pc;
+
+        let (retval, op_counts) = if let Some(&offset) = self.labels.get(&self.ctx.pc) {
             tracing::debug!("existing label: {:#10x}", self.ctx.pc);
             self.enter_block(offset)?
         } else {
@@ -367,32 +381,36 @@ impl Translator {
 
         let terminal =
             Terminal::from_u32((retval >> 32) as u32).ok_or_else(|| anyhow!("Invalid terminal"))?;
+        let end_pc = self.ctx.pc;
 
         let pc = (retval & 0xffffffff) as u32;
         self.ctx.pc = pc;
         tracing::trace!("jit block ran; new pc = {pc:x}; terminal = {terminal:?}");
 
-        Ok(terminal)
+        let info = BlockInfo {
+            op_counts,
+            start_pc,
+            end_pc,
+        };
+
+        Ok((terminal, info))
     }
 
     fn jit_loop(&mut self) -> Result<Terminal> {
         self.dump(self.enter_offset()?);
         loop {
-            let terminal = self.jit_one()?;
+            let (terminal, _) = self.jit_one()?;
 
             match terminal {
                 Terminal::Jump => (),
                 Terminal::Break | Terminal::Trap => return Ok(terminal),
-                Terminal::Split => {
-                    tracing::debug!("split");
-                    self.ctx.quota = MAX_QUOTA;
-                }
             }
         }
     }
 
-    fn enter_block(&mut self, offset: AssemblyOffset) -> Result<u64> {
+    fn enter_block(&mut self, offset: AssemblyOffset) -> Result<(u64, EnumMap<RvOp, u32>)> {
         tracing::debug!("enter_block: {offset:x?}");
+        let counts = self.instr_counts.get(&offset).unwrap().clone();
         let enter = self.enter_offset()?;
         let reader = self.asm.reader();
         let exe = reader.lock();
@@ -402,7 +420,9 @@ impl Translator {
         tracing::trace!("enter: {enter_ptr:?}, block: {block_ptr:?}, ctx: {ctx_ptr:?}");
         let enter: extern "C" fn(*const u8, *mut JitContext) -> u64 =
             unsafe { std::mem::transmute(enter_ptr) };
-        Ok(enter(block_ptr, ctx_ptr))
+        let retval = enter(block_ptr, ctx_ptr);
+
+        Ok((retval, counts))
     }
 
     fn disasm(&self, start: AssemblyOffset, print_pos: bool) -> Vec<String> {
@@ -446,7 +466,6 @@ impl JitContext {
         let mut ram = HostMemory::new();
         let mut s = Self {
             pc,
-            quota: MAX_QUOTA,
             registers: [0; REG_MAX],
             current_tag: 1,
             page_table: ram.slots.as_mut_ptr(),
@@ -552,6 +571,7 @@ impl JitContext {
             let ptr = page.as_ptr().add(offset) as *const u32;
             u32::from_le(ptr.read_unaligned())
         };
+
         word
     }
 

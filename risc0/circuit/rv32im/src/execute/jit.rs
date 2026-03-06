@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{cell::RefCell, io::Read, rc::Rc};
+use std::{cell::RefCell, collections::BTreeSet, io::Read, rc::Rc};
 
 use anyhow::{Context, Result, anyhow, bail};
 use enum_map::EnumMap;
@@ -25,7 +25,7 @@ use risc0_zkp::core::{
 };
 
 #[cfg(target_arch = "x86_64")]
-use risc0_emu::x64::{Terminal, Translator as JitTranslator};
+use risc0_emu::x64::{BlockInfo, Terminal, Translator as JitTranslator};
 
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
@@ -53,6 +53,68 @@ use super::{
     unlikely,
 };
 
+impl From<risc0_emu::rv32im::RvOp> for InsnKind {
+    fn from(op: risc0_emu::rv32im::RvOp) -> Self {
+        match op {
+            risc0_emu::rv32im::RvOp::Add => Self::Add,
+            risc0_emu::rv32im::RvOp::Sub => Self::Sub,
+            risc0_emu::rv32im::RvOp::Xor => Self::Xor,
+            risc0_emu::rv32im::RvOp::Or => Self::Or,
+            risc0_emu::rv32im::RvOp::And => Self::And,
+            risc0_emu::rv32im::RvOp::Slt => Self::Slt,
+            risc0_emu::rv32im::RvOp::SltU => Self::SltU,
+            risc0_emu::rv32im::RvOp::AddI => Self::AddI,
+            risc0_emu::rv32im::RvOp::XorI => Self::XorI,
+            risc0_emu::rv32im::RvOp::OrI => Self::OrI,
+            risc0_emu::rv32im::RvOp::AndI => Self::AndI,
+            risc0_emu::rv32im::RvOp::SltI => Self::SltI,
+            risc0_emu::rv32im::RvOp::SltIU => Self::SltIU,
+            risc0_emu::rv32im::RvOp::Beq => Self::Beq,
+            risc0_emu::rv32im::RvOp::Bne => Self::Bne,
+            risc0_emu::rv32im::RvOp::Blt => Self::Blt,
+            risc0_emu::rv32im::RvOp::Bge => Self::Bge,
+            risc0_emu::rv32im::RvOp::BltU => Self::BltU,
+            risc0_emu::rv32im::RvOp::BgeU => Self::BgeU,
+            risc0_emu::rv32im::RvOp::Jal => Self::Jal,
+            risc0_emu::rv32im::RvOp::JalR => Self::JalR,
+            risc0_emu::rv32im::RvOp::Lui => Self::Lui,
+            risc0_emu::rv32im::RvOp::Auipc => Self::Auipc,
+            risc0_emu::rv32im::RvOp::Sll => Self::Sll,
+            risc0_emu::rv32im::RvOp::SllI => Self::SllI,
+            risc0_emu::rv32im::RvOp::Mul => Self::Mul,
+            risc0_emu::rv32im::RvOp::MulH => Self::MulH,
+            risc0_emu::rv32im::RvOp::MulHSU => Self::MulHSU,
+            risc0_emu::rv32im::RvOp::MulHU => Self::MulHU,
+            risc0_emu::rv32im::RvOp::Srl => Self::Srl,
+            risc0_emu::rv32im::RvOp::Sra => Self::Sra,
+            risc0_emu::rv32im::RvOp::SrlI => Self::SrlI,
+            risc0_emu::rv32im::RvOp::SraI => Self::SraI,
+            risc0_emu::rv32im::RvOp::Div => Self::Div,
+            risc0_emu::rv32im::RvOp::DivU => Self::DivU,
+            risc0_emu::rv32im::RvOp::Rem => Self::Rem,
+            risc0_emu::rv32im::RvOp::RemU => Self::RemU,
+            risc0_emu::rv32im::RvOp::Lb => Self::Lb,
+            risc0_emu::rv32im::RvOp::Lh => Self::Lh,
+            risc0_emu::rv32im::RvOp::Lw => Self::Lw,
+            risc0_emu::rv32im::RvOp::LbU => Self::LbU,
+            risc0_emu::rv32im::RvOp::LhU => Self::LhU,
+            risc0_emu::rv32im::RvOp::Sb => Self::Sb,
+            risc0_emu::rv32im::RvOp::Sh => Self::Sh,
+            risc0_emu::rv32im::RvOp::Sw => Self::Sw,
+            risc0_emu::rv32im::RvOp::Eany => Self::Eany,
+            risc0_emu::rv32im::RvOp::Mret => Self::Mret,
+            risc0_emu::rv32im::RvOp::Fence => Self::Invalid,
+            risc0_emu::rv32im::RvOp::Invalid => Self::Invalid,
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+enum JitState {
+    Break,
+    Run,
+}
+
 /// Executor implementing the RISC Zero virtual machine for the `rv32im` circuit.
 pub struct Executor<'a, S: Syscall> {
     user_pc: ByteAddr,
@@ -77,6 +139,7 @@ pub struct Executor<'a, S: Syscall> {
 
     block_tracker: BlockTracker,
     jit: JitTranslator,
+    jit_state: JitState,
 }
 
 impl<'a, S: Syscall> Executor<'a, S> {
@@ -127,6 +190,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             segment_counter: 0,
             block_tracker: Default::default(),
             jit: JitTranslator::new(Program { entry: 0, image }).unwrap(),
+            jit_state: JitState::Run,
         }
     }
 
@@ -220,15 +284,33 @@ impl<'a, S: Syscall> Executor<'a, S> {
         Ok(Some(update))
     }
 
-    pub fn jit_some(&mut self) -> Result<()> {
-        let terminal = self.jit.jit_one()?;
-
-        if matches!(terminal, Terminal::Trap) {
-            Risc0Machine { ctx: self }.trap(Exception::IllegalInstruction(0, 0))?;
+    fn add_jit_block_cost(&mut self, info: BlockInfo) {
+        for (op, count) in info.op_counts {
+            self.block_tracker.track_instrs(op.into(), count as u64);
         }
+        for pc in info.start_pc..info.end_pc {
+            self.block_tracker.track_pc(pc);
+            self.preflight_user_cycles += 1;
+        }
+    }
 
-        if matches!(terminal, Terminal::Break) {
-            Risc0Machine::step(&mut Emulator {}, self)?;
+    pub fn jit_some(&mut self) -> Result<()> {
+        match self.jit_state {
+            JitState::Run => {
+                let (terminal, info) = self.jit.jit_one()?;
+                self.add_jit_block_cost(info);
+
+                if matches!(terminal, Terminal::Trap) {
+                    Risc0Machine { ctx: self }.trap(Exception::IllegalInstruction(0, 0))?;
+                }
+                if matches!(terminal, Terminal::Break) {
+                    self.jit_state = JitState::Break;
+                }
+            }
+            JitState::Break => {
+                Risc0Machine::step(&mut Emulator {}, self)?;
+                self.jit_state = JitState::Run;
+            }
         }
 
         Ok(())
@@ -245,6 +327,15 @@ impl<'a, S: Syscall> Executor<'a, S> {
             callback(update).context("Segment update callback returned error")?;
         }
         Ok(self.state(limit.segment_po2.try_into().unwrap()))
+    }
+
+    fn page_indexes(&self) -> BTreeSet<u32> {
+        self.jit
+            .ctx
+            .page_indexes()
+            .into_iter()
+            .map(|idx| idx + MEMORY_PAGES as u32)
+            .collect()
     }
 
     /// Execute a segment split, committing the current pager state, sending the segment to the
@@ -267,7 +358,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         let blocks = self.get_blocks();
         let update = SegmentUpdate {
             update_partial_image: partial_image,
-            access_page_indexes: self.jit.ctx.page_indexes(),
+            access_page_indexes: self.page_indexes(),
             input_digest: self.input_digest,
             output_digest: self.output_digest,
             read_record: std::mem::take(&mut self.read_record),
@@ -290,7 +381,12 @@ impl<'a, S: Syscall> Executor<'a, S> {
             .context("segment_counter overflow")?;
 
         let total_rows = 1u64 << segment_po2;
+        assert!(
+            used_rows as u64 <= total_rows,
+            "{used_rows} > {total_rows}, po2={segment_po2}"
+        );
         let padding = total_rows - used_rows as u64;
+
         self.row_info.count += total_rows;
         self.row_info.insn_count += self.insn_counter as u64;
         self.row_info.padding_count += padding;
@@ -348,7 +444,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         };
         SegmentUpdate {
             update_partial_image: partial_image,
-            access_page_indexes: self.jit.ctx.page_indexes(),
+            access_page_indexes: self.page_indexes(),
             input_digest: self.input_digest,
             output_digest: self.output_digest,
             read_record: self.read_record.clone(),

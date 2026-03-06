@@ -96,6 +96,7 @@ std = [
 unstable = ["risc0-zkvm-platform/unstable"]
 witgen_debug = ["risc0-circuit-rv32im/witgen_debug"]
 block_tracker_debug = ["risc0-circuit-rv32im/block_tracker_debug"]
+jit = ["risc0-circuit-rv32im/jit"]
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }

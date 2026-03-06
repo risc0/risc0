@@ -54,7 +54,7 @@ fn basic() {
     let mut xlate = Translator::new(program).unwrap();
     let offset = xlate.jit_block().unwrap();
 
-    let pc = xlate.enter_block(offset).unwrap();
+    let (pc, _) = xlate.enter_block(offset).unwrap();
     tracing::debug!("final pc: {pc:#10x}");
 }
 
@@ -143,9 +143,6 @@ mod riscv {
             Terminal::Trap => {
                 let test_num = ctx.registers[REG_TESTNUM];
                 panic!("Test case failed: {test_num}")
-            }
-            Terminal::Split => {
-                panic!("Split!");
             }
         }
     }
