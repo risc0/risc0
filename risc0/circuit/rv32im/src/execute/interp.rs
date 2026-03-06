@@ -27,8 +27,7 @@ use risc0_zkp::core::{
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
 use crate::{
-    EcallKind, EcallMetric,
-    TerminateState,
+    EcallKind, EcallMetric, TerminateState,
     execute::{
         executor::{
             ExecutionError, ExecutionLimit, ExecutorResult, RowInfo, RowLimit, SegmentUpdate,
