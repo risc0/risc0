@@ -70,6 +70,7 @@ risc0-circuit-recursion-zkrs = { version = "5.0.0", default-features = false, pa
 risc0-circuit-rv32im = { version = "5.0.0", default-features = false, path = "risc0/circuit/rv32im" }
 risc0-circuit-rv32im-sys = { version = "5.0.0", default-features = false, path = "risc0/circuit/rv32im-sys" }
 risc0-core = { version = "5.0.0", default-features = false, path = "risc0/core" }
+risc0-emu = { version = "5.0.0", default-features = false, path = "risc0/emu" }
 risc0-groth16 = { version = "5.0.0", default-features = false, path = "risc0/groth16" }
 risc0-groth16-sys = { version = "5.0.0", default-features = false, path = "risc0/groth16-sys" }
 risc0-povw = { default-features = false, path = "risc0/povw" }
@@ -81,7 +82,6 @@ risc0-zkos-v1compat = { version = "5.0.0", path = "risc0/zkos/v1compat" }
 risc0-zkp = { version = "5.0.0", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "5.0.0", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-platform = { version = "5.0.0", default-features = false, path = "risc0/zkvm/platform" }
-risc0-emu = { version = "5.0.0", default-features = false, path = "risc0/emu" }
 rzup = { version = "0.6.0", default-features = false, path = "rzup" }
 
 [workspace.lints.rust]
