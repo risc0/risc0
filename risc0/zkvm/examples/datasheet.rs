@@ -77,7 +77,7 @@ impl Po2Table {
             if iterations > LOOP_PADDING {
                 table.insert(po2 as u32, iterations - LOOP_PADDING);
             } else {
-                print!("no iterations fit in po2={po2}");
+                println!("no iterations fit in po2={po2}");
             }
         }
         Self(table)
