@@ -353,9 +353,12 @@ impl<'a> ExecutorImpl<'a> {
     pub(crate) fn run_segment(&mut self) -> Result<Option<SegmentUpdate>, ExecutionError> {
         scope!("execute");
 
+        tracing::trace!("run_segment start");
+
         // Run the segment.
         let start = Instant::now();
         let update = self.inner.run_segment(self.execution_limit())?;
+        tracing::trace!("run_segment ending");
 
         // If an update was produced, increment the running total of the execution time.
         self.execution_time += if update.is_some() {

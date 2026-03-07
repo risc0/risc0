@@ -430,7 +430,10 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     fn dump_recent_instructions(&self) {
-        tracing::debug!("Dumping last {} instructions:", self.ring.len());
+        tracing::debug!(
+            "Dumping last {} (interpreted) instructions:",
+            self.ring.len()
+        );
         for (pc, kind, decoded) in self.ring.iter() {
             tracing::debug!("{pc:?}> {:#010x}  {}", decoded.insn, disasm(*kind, decoded));
         }

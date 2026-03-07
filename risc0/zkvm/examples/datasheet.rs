@@ -45,17 +45,15 @@ fn find_iterations_for_po2(po2: usize) -> u32 {
         .unwrap();
 
     let mut saved_segment = None;
-    let error = ExecutorImpl::from_elf(env, &LOOP_ELF)
+    let _ = ExecutorImpl::from_elf(env, &LOOP_ELF)
         .unwrap()
         .run_with_callback(|segment| {
             saved_segment = Some(segment);
             Err(anyhow!("stop early"))
-        })
-        .map(|_| ())
-        .unwrap_err();
+        });
 
     let Some(segment) = saved_segment else {
-        panic!("failed to produce segment: {error}");
+        panic!("failed to produce segment");
     };
     let opts = ProverOpts::all_po2s();
     let prover = get_prover_server(&opts).unwrap();

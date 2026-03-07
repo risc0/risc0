@@ -85,6 +85,12 @@ macro_rules! binop {
             (Loc::Memory(src, disp), Loc::GPR(dst)) => {
                 emit!($self ; $op Rd(dst), [Rq(src) + disp]);
             },
+            (Loc::Memory(src, src_disp), Loc::Memory(dst, dst_disp)) => {
+                emit!($self
+                    ; mov Rd(GPR::RCX), [Rq(src) + src_disp]
+                    ; $op DWORD [Rq(dst) + dst_disp], Rd(GPR::RCX)
+                );
+            },
             _ => {
                 panic!("bad {}, {:?}, {:?}", stringify!($op), $dst, $src);
             }
@@ -800,6 +806,10 @@ impl Translator {
             ; push rdi
             ; push rsi
             ; push rdx
+            ; push r8
+            ; push r9
+            ; push r10
+            ; push r11
 
             // extern "C" fn jit_load_page_miss(ctx: *mut JitContext, page_idx: u32) -> *mut u8
             ; mov rdi, r15 // arg0 = ctx
@@ -808,6 +818,10 @@ impl Translator {
             // on return:
             //   rax = host_page_ptr
 
+            ; pop r11
+            ; pop r10
+            ; pop r9
+            ; pop r8
             ; pop rdx
             ; pop rsi
             ; pop rdi

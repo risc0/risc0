@@ -334,7 +334,7 @@ impl Translator {
 
         tracing::debug!("commit");
         self.asm.commit()?;
-        self.dump(start);
+        // self.dump(start);
 
         Ok(start)
     }
@@ -397,7 +397,7 @@ impl Translator {
     }
 
     fn jit_loop(&mut self) -> Result<Terminal> {
-        self.dump(self.enter_offset()?);
+        // self.dump(self.enter_offset()?);
         loop {
             let (terminal, _) = self.jit_one()?;
 
@@ -519,15 +519,17 @@ impl JitContext {
     }
 
     fn write_registers_to_addr(&mut self, mut addr: u32) {
-        for register in self.registers {
-            self.store_u32(addr, register);
+        for i in 0..self.registers.len() {
+            let value = self.registers[i];
+            self.store_u32_internal(addr, value);
             addr += WORD_SIZE as u32;
         }
     }
 
     fn load_registers_from_addr(&mut self, mut addr: u32) {
         for i in 0..self.registers.len() {
-            self.registers[i] = self.load_u32(addr);
+            let value = self.load_u32_internal(addr);
+            self.registers[i] = value;
             addr += WORD_SIZE as u32;
         }
     }
@@ -558,7 +560,7 @@ impl JitContext {
         page.as_ptr()
     }
 
-    pub fn load_u32(&mut self, addr: u32) -> u32 {
+    fn load_u32_internal(&mut self, addr: u32) -> u32 {
         let page_idx = addr >> PAGE_SHIFT;
         let offset = (addr & PAGE_OFFSET_MASK) as usize;
 
@@ -573,6 +575,19 @@ impl JitContext {
         };
 
         word
+    }
+
+    pub fn load_u32(&mut self, addr: u32) -> u32 {
+        let reg_base = match self.mode {
+            RegisterMode::User => USER_REGS_ADDR,
+            RegisterMode::Machine => MACHINE_REGS_ADDR,
+        };
+
+        if addr >= reg_base && addr < reg_base + REG_MAX as u32 {
+            panic!("read from register being used");
+        }
+
+        self.load_u32_internal(addr)
     }
 
     pub fn load_register(&mut self, base_waddr: u32, idx: usize) -> u32 {
@@ -592,7 +607,7 @@ impl JitContext {
         }
     }
 
-    pub fn store_u32(&mut self, addr: u32, word: u32) {
+    fn store_u32_internal(&mut self, addr: u32, word: u32) {
         let page_idx = addr >> PAGE_SHIFT;
         let offset = (addr & PAGE_OFFSET_MASK) as usize;
 
@@ -602,12 +617,38 @@ impl JitContext {
         debug_assert!(offset + WORD_SIZE <= PAGE_SIZE);
         unsafe {
             let ptr = page.as_mut_ptr().add(offset) as *mut u32;
-            ptr.write_unaligned(word);
+            ptr.write_unaligned(word.to_le());
         }
     }
 
-    pub fn store_register(&mut self, base: u32, idx: usize, word: u32) {
-        todo!()
+    pub fn store_u32(&mut self, addr: u32, word: u32) {
+        let reg_base = match self.mode {
+            RegisterMode::User => USER_REGS_ADDR,
+            RegisterMode::Machine => MACHINE_REGS_ADDR,
+        };
+
+        if addr >= reg_base && addr < reg_base + REG_MAX as u32 {
+            panic!("write to register being used");
+        }
+
+        self.store_u32_internal(addr, word);
+    }
+
+    pub fn store_register(&mut self, base_waddr: u32, idx: usize, word: u32) {
+        let requested_mode = if base_waddr == USER_REGS_ADDR / WORD_SIZE as u32 {
+            RegisterMode::User
+        } else if base_waddr == MACHINE_REGS_ADDR / WORD_SIZE as u32 {
+            RegisterMode::Machine
+        } else {
+            unimplemented!("unknown register address {base_waddr:?}");
+        };
+
+        if self.mode == requested_mode {
+            self.registers[idx] = word;
+        } else {
+            let addr = (base_waddr + idx as u32) * WORD_SIZE as u32;
+            self.store_u32(addr, word);
+        }
     }
 
     pub fn peek_page(&mut self, page_idx: u32) -> &PageBytes {
