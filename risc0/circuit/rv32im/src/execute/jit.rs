@@ -271,7 +271,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
                     ))),
                 });
             }
-            self.insn_counter += 1;
         }
 
         Risc0Machine::suspend(self)?;
@@ -291,6 +290,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         for pc in info.start_pc..info.end_pc {
             self.block_tracker.track_pc(pc);
             self.preflight_user_cycles += 1;
+            self.insn_counter += 1;
         }
     }
 
@@ -309,6 +309,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             }
             JitState::Break => {
                 Risc0Machine::step(&mut Emulator {}, self)?;
+                self.insn_counter += 1;
                 self.jit_state = JitState::Run;
             }
         }
