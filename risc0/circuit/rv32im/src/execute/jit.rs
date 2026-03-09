@@ -287,10 +287,13 @@ impl<'a, S: Syscall> Executor<'a, S> {
         for (op, count) in info.op_counts {
             self.block_tracker.track_instrs(op.into(), count as u64);
         }
-        for pc in info.start_pc..info.end_pc {
+
+        let mut pc = info.start_pc;
+        while pc <= info.end_pc {
             self.block_tracker.track_pc(pc);
             self.preflight_user_cycles += 1;
             self.insn_counter += 1;
+            pc += WORD_SIZE as u32;
         }
     }
 

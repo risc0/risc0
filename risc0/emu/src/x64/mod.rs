@@ -31,6 +31,7 @@ use std::{
 };
 
 use anyhow::{Result, anyhow, bail};
+use derive_more::Debug;
 use dynasmrt::{
     AssemblyOffset, DynasmApi as _, DynasmError, DynasmLabelApi,
     components::StaticLabel,
@@ -265,10 +266,12 @@ pub struct JitContext {
     mode: RegisterMode,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct BlockInfo {
     pub op_counts: EnumMap<RvOp, u32>,
+    #[debug("0x{start_pc:x}")]
     pub start_pc: u32,
+    #[debug("0x{end_pc:x}")]
     pub end_pc: u32,
 }
 
