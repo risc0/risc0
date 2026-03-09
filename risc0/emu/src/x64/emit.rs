@@ -1006,6 +1006,7 @@ impl Translator {
 
     fn emit_exit(&mut self, terminal: Terminal, target_pc: u32, emit_jmp: bool) -> Result<()> {
         self.emit_retval(terminal, target_pc);
+        /*
         if let Some(&offset) = self.labels.get(&target_pc) {
             tracing::debug!("direct target: {target_pc:#10x?} -> {:#04x?}", offset.0);
             let label = self.asm.new_dynamic_label();
@@ -1020,6 +1021,9 @@ impl Translator {
             if emit_jmp {
                 emit!(self ; jmp ->exit);
             }
+        }*/
+        if emit_jmp {
+            emit!(self ; jmp ->exit);
         }
         Ok(())
     }
