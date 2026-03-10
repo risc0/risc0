@@ -102,7 +102,7 @@ where
         scope!("prove");
 
         let cycles: usize = 1 << po2;
-        let preflight = PreflightTrace::<C::PreferredPreflightOrder>::new(inputs, cycles);
+        let preflight = PreflightTrace::<C::PreferredPreflightOrder>::new(inputs, cycles)?;
 
         let mut global = vec![Val::INVALID; REGCOUNT_GLOBAL];
         global[LAYOUT_GLOBAL.total_cycles._super.offset] = Elem::from_u64(1 << po2);

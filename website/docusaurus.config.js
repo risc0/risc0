@@ -145,14 +145,6 @@ export default async function createConfigAsync() {
       },
     ],
 
-    scripts: [
-      {
-        src: "https://plausible.io/js/script.js",
-        "data-domain": "risczero.com",
-        defer: true,
-      },
-    ],
-
     themeConfig:
       /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
       ({
@@ -282,9 +274,9 @@ export default async function createConfigAsync() {
           respectPrefersColorScheme: false,
         },
         algolia: {
-          appId: "TQC8F4X8Z5",
-          apiKey: "b9687cf1594ea03ea3a92eaf103b2763", // Public API key
-          indexName: "risczero",
+          appId: "ZCZDPHYHKH",
+          apiKey: "9fe8b9b5a0f08f1df1fc4dc90086ee43", // Public API key
+          indexName: "docs",
           searchPagePath: "search",
 
           // Leaving at the default of `true` for now

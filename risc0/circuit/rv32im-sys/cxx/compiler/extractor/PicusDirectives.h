@@ -82,6 +82,11 @@ mlir::Value picusCall(RecordingContext& ctx,
                       llvm::ArrayRef<RecordingVal> inputs,
                       mlir::Value layout);
 
+// Functions to give granular control over outlining. Enabled by default.
+void picusEnableOutlining();
+void picusDisableOutlining();
+bool picusOutliningEnabled();
+
 // Emit a `DeterministicIf` directive into the IR. This indicates to Picus that
 // if all of the input signals are deterministic, then all of the output signals
 // are also deterministic. This is primarily used for arguments where some other
