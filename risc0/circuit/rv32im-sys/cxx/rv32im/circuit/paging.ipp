@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define UNPACK_DIGEST(ctx, digest)                                                                 \
-  ctx.get((digest)[0]), ctx.get((digest)[1]), ctx.get((digest)[2]), ctx.get((digest)[3]),          \
-      ctx.get((digest)[4]), ctx.get((digest)[5]), ctx.get((digest)[6]), ctx.get((digest)[7])
-
 #define PAGE_IN_PART_ARGUMENT2(ctx, arg)                                                           \
   PICUS_ARGUMENT(ctx, {}, ({ctx.get(arg.addr), ctx.get(arg.partNum), UNPACK_DIGEST(ctx, arg.node)}))
 
@@ -295,3 +291,6 @@ template <typename C> FDEV void PageUncleBlock<C>::addArguments(CTX) DEV {
   GET_ARR(po.node, node, CELLS_DIGEST);
   ctx.push(po);
 }
+
+#undef P2_CALL_ARGUMENT
+#undef P2_CALL_ARGUMENT_REV

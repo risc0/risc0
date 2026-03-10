@@ -65,14 +65,12 @@ Before submitting a PR, ensure the following:
    ```
    RISC0_SKIP_BUILD=1 cargo clippy
    $(cd examples && RISC0_SKIP_BUILD=1 cargo clippy)
-   $(cd benchmarks && RISC0_SKIP_BUILD=1 cargo clippy)
    ```
 4. Perform the license check with `python3 license-check.py`.
 5. Tests pass with:
    ```
    cargo test -F prove -F docker
    $(cd examples && cargo test)
-   $(cd benchmarks && cargo test)
    ```
 6. Commit any outdated `Cargo.lock` files.
 7. Open a PR against the `main` branch.

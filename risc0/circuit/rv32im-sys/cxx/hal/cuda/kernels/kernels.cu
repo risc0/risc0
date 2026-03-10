@@ -78,12 +78,12 @@ struct EvalInfo {
   uint32_t coeffIndex;
 };
 
-__global__ void rv32im_m3_combos_prepare(FpExt* combos,
-                                         const FpExt* eval,
-                                         const EvalInfo* info,
-                                         FpExt mix,
-                                         uint32_t rows,
-                                         uint32_t evalSize) {
+__global__ void rv32im_combos_prepare(FpExt* combos,
+                                      const FpExt* eval,
+                                      const EvalInfo* info,
+                                      FpExt mix,
+                                      uint32_t rows,
+                                      uint32_t evalSize) {
   FpExt cur(1);
   for (size_t i = 0; i < evalSize; i++) {
     combos[info[i].coeffIndex + info[i].comboId * rows] -= cur * eval[i];
@@ -101,7 +101,7 @@ extern "C" bool cuda_combos_prepare(cudaStream_t stream,
                                     FpExt mix,
                                     uint32_t rows,
                                     uint32_t evalSize) {
-  rv32im_m3_combos_prepare<<<1, 1, 0, stream>>>(combos, eval, info, mix, rows, evalSize);
+  rv32im_combos_prepare<<<1, 1, 0, stream>>>(combos, eval, info, mix, rows, evalSize);
   return true;
 }
 

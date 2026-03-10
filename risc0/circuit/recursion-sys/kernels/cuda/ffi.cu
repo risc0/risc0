@@ -332,4 +332,15 @@ const char* risc0_circuit_recursion_cuda_accum(cudaStream_t stream,
   return nullptr;
 }
 
+const char* risc0_circuit_recursion_cuda_reset(void) {
+  try {
+    CUDA_OK(cudaDeviceSetLimit(cudaLimit::cudaLimitStackSize, 0));
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
+  }
+  return nullptr;
+}
+
 } // extern "C"

@@ -19,8 +19,8 @@ using namespace metal;
 
 kernel void sha_rows(device ShaDigest* out,
                      const device Fp* matrix,
-                     device uint32_t& count,
-                     device uint32_t& col_size,
+                     const device uint32_t& count,
+                     const device uint32_t& col_size,
                      uint gid [[thread_position_in_grid]]) {
   out[gid] = shaHash(matrix + gid, col_size, count);
 }

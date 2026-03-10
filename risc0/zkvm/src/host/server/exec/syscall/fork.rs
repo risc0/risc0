@@ -22,7 +22,7 @@ use risc0_binfmt::ByteAddr;
 //     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
 // };
 use risc0_circuit_rv32im::{
-    MAX_INSN_CYCLES,
+    MAX_INSN_ROWS,
     execute::{
         DEFAULT_SEGMENT_LIMIT_PO2, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, USER_END_ADDR, platform::WORD_SIZE,
@@ -54,12 +54,17 @@ impl Syscall for SysFork {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        to_guest: &mut [u8],
+    ) -> Result<usize> {
+        if to_guest.len() != WORD_SIZE * 2 {
+            bail!("invalid sys_fork");
+        }
+
         let mut exec = ChildExecutor::new(ctx)?;
         exec.run()?;
+
         // Return a non-zero value for sys_fork, which means this is the 'parent' process.
-        Ok((PID_PARENT, 0))
+        to_guest[..WORD_SIZE].copy_from_slice(&PID_PARENT.to_le_bytes());
     }
 }
 

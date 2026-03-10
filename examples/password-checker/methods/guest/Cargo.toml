@@ -6,7 +6,7 @@ edition = "2024"
 [workspace]
 
 [dependencies]
-sha2 = "0.10.6"
+sha2 = "0.10.9"
 pbkdf2 = "0.12.2"
 password-checker-core = { path = "../../core" }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [ "std" ] }
@@ -14,4 +14,4 @@ risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, featur
 [patch.crates-io]
 # Placing these patch statement in the workspace Cargo.toml will add RISC Zero SHA-256 and bigint
 # multiplication accelerator support for all downstream usages of the following crates.
-sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.6-risczero.0" }
+sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.9-risczero.0" }

@@ -1,11 +1,9 @@
 {
   "ignore_dirs": [
     "target",
-    "benchmarks/target",
     "examples/target",
     "risc0/cargo-risczero/tests/test_crate/target",
     "risc0/zkvm/methods/guest/target",
-    "risc0/zkvm/methods/std/target",
-    "tools/crates-validator/target"
+    "risc0/zkvm/methods/std/target"
   ]
 }

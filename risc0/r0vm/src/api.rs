@@ -510,8 +510,8 @@ async fn stark_status(
     let (stats, receipt_url) = if let Some(result) = status.result {
         let stats = SessionStats {
             segments: result.session.stats.segments,
-            total_cycles: result.session.stats.total_cycles,
-            cycles: result.session.stats.user_cycles,
+            total_cycles: result.session.stats.row_count,
+            cycles: result.session.stats.insn_count,
         };
         let receipt_url = result
             .receipt

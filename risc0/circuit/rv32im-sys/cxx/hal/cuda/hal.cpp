@@ -55,7 +55,7 @@ extern "C" SparkError sppark_poseidon2_rows(
     cudaStream_t stream, void* d_out, const void* d_in, uint32_t count, uint32_t col_size);
 extern "C" void prefix_sum(cudaStream_t stream, Fp* d_inout, uint32_t count);
 extern "C" SparkError
-rv32im_m3_poly_divide(cudaStream_t stream, FpExt* d_inout, size_t len, FpExt* remainder, FpExt pow);
+rv32im_poly_divide(cudaStream_t stream, FpExt* d_inout, size_t len, FpExt* remainder, FpExt pow);
 
 // query.cu
 extern "C" bool cuda_query(cudaStream_t stream,
@@ -159,7 +159,7 @@ class CudaBuffer : public IBuffer {
 
 public:
   CudaBuffer(cudaStream_t stream, void* devPtr, size_t size)
-      : stream(stream), devPtr(devPtr), bufSize(size) {}
+      : devPtr(devPtr), bufSize(size), stream(stream) {}
   ~CudaBuffer() override { cuda_free(devPtr); }
   size_t size() override { return bufSize; }
   void copyFromCpu(size_t offset, const void* data, size_t size) override {
@@ -208,7 +208,10 @@ public:
     }
   }
 
-  ~CudaHal() override { (void)cuda_stream_destroy(stream); }
+  ~CudaHal() override {
+    (void)cudaDeviceSetLimit(cudaLimit::cudaLimitStackSize, 0);
+    (void)cuda_stream_destroy(stream);
+  }
 
   void hashRows(HalArray<Digest> out, HalMatrix<Fp> in) override {
     if (in.rows() != out.size()) {
@@ -362,7 +365,7 @@ public:
     FpExt rem;
     for (size_t i = 0; i < info.size(); i++) {
       FpExt* poly = reinterpret_cast<FpExt*>(toDevPtr(combos)) + pInfo[i].comboId * combos.rows();
-      auto err = rv32im_m3_poly_divide(stream, poly, combos.rows(), &rem, pInfo[i].z);
+      auto err = rv32im_poly_divide(stream, poly, combos.rows(), &rem, pInfo[i].z);
       if (err.code != 0) {
         throw std::runtime_error(std::string("Error during combosDivide:") + err.message);
       }

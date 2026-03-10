@@ -17,8 +17,8 @@
 
 #include "extern.h"
 
-void step_compute_accum(
-    device void* ctx, uint32_t steps, uint32_t cycle, device Fp* arg0, device Fp* arg1, device Fp* arg2, device Fp* arg3, device Fp* arg4) {
+kernel void step_compute_accum(
+    device void* ctx, const device uint32_t& steps, uint cycle [[thread_position_in_grid]], device Fp* arg0, device Fp* arg1, device Fp* arg2, device Fp* arg3, device Fp* arg4) {
   uint32_t mask = steps - 1;
   Fp extern_args[96];
   Fp extern_outs[32];

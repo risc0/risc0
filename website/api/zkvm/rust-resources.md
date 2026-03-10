@@ -24,12 +24,10 @@ Rust crates inside your [zkVM applications][zkvm-overview]. Being able to easily
 import crates means that you can quickly build complex applications.
 
 Each night, we test the top 1000 Rust crates for compatibility with the zkVM. As
-of this writing, 71% of those tests are passing. You can see the latest results
-in our [Crate Validation Report][crate-validation].
+of this writing, 71% of those tests are passing.
 
 ![From Guest Code to Receipt][from-rust-to-receipt]
 
-[crate-validation]: https://reports.risczero.com/crates-validation
 [from-rust-to-receipt]: /diagrams/from-rust-to-receipt.png
 [install-rust]: https://www.rust-lang.org/tools/install
 [risc0-zkvm]: https://docs.rs/risc0-zkvm

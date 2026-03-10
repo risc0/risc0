@@ -57,8 +57,8 @@ pub trait SyscallContext {
     /// inherit pages from the parent process.
     fn peek_page(&mut self, page_idx: u32) -> Result<&[u8; PAGE_BYTES]>;
 
-    /// Returns the current cycle count.
-    fn get_cycle(&self) -> u64;
+    /// Returns the number of used rows.
+    fn get_rows(&self) -> u64;
 
     /// Returns the current program counter.
     fn get_pc(&self) -> u32;

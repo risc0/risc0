@@ -22,7 +22,6 @@ You can find out more info in the relevant issues [#1520] and [#1749].
 :::
 
 > TIP: In cases where memory is constrained (i.e. less than 10 GB is available), it may be necessary to change the [segment size limit][segment-limit-docs].
-> You can find information about expected memory consumption on our [benchmarks page][datasheet].
 
 > NOTE: When run for the first time, the GPU (e.g. Metal or CUDA) kernels may need to be JIT compiled.
 > This can take a few minutes, but should only happen once.
@@ -74,7 +73,6 @@ No options need to be configured to take advantage of acceleration through the u
 [#1749]: https://github.com/risc0/risc0/issues/1749
 [apple-metal]: https://developer.apple.com/metal
 [Bonsai]: ./remote-proving.md
-[datasheet]: https://benchmarks.risczero.com/main/datasheet
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [open-source]: https://risczero.com/news/open-source
 [segment-limit-docs]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.segment_limit_po2

@@ -28,6 +28,30 @@ const METAL_INCS: &[(&str, &str)] = &[
     ("fpext.h", include_str!("../kernels/metal/fpext.h")),
 ];
 
+const DISABLED_WARNINGS: [&str; 5] = [
+    "-Wno-deprecated-copy",
+    "-Wno-missing-braces",
+    "-Wno-unknown-pragmas",
+    "-Wno-unused-function",
+    "-Wno-unused-parameter",
+];
+
+fn read_manifest(manifest_path: &Path) -> Vec<PathBuf> {
+    let contents = std::fs::read_to_string(manifest_path).unwrap();
+    contents
+        .split("\n")
+        .filter(|l| !l.trim().is_empty())
+        .map(PathBuf::from)
+        .collect()
+}
+
+fn copy_to_dir(src: &Path, dest_dir: &Path) -> PathBuf {
+    std::fs::create_dir_all(dest_dir).unwrap();
+    let dest_path = dest_dir.join(src.file_name().unwrap());
+    std::fs::copy(src, &dest_path).unwrap();
+    dest_path
+}
+
 #[derive(Eq, PartialEq, Hash)]
 #[non_exhaustive]
 pub enum KernelType {
@@ -40,18 +64,22 @@ pub struct KernelBuild {
     kernel_type: KernelType,
     flags: Vec<String>,
     files: Vec<PathBuf>,
+    generated_files: Vec<PathBuf>,
     inc_dirs: Vec<PathBuf>,
     deps: Vec<PathBuf>,
+    manifest_path: PathBuf,
 }
 
 impl KernelBuild {
-    pub fn new(kernel_type: KernelType) -> Self {
+    pub fn new(kernel_type: KernelType, manifest_path: impl AsRef<Path>) -> Self {
         Self {
             kernel_type,
             flags: Vec::new(),
             files: Vec::new(),
+            generated_files: Vec::new(),
             inc_dirs: Vec::new(),
             deps: Vec::new(),
+            manifest_path: manifest_path.as_ref().to_path_buf(),
         }
     }
 
@@ -81,6 +109,28 @@ impl KernelBuild {
     {
         for file in p.into_iter() {
             self.file(file);
+        }
+        self
+    }
+
+    /// Add a generated file which will be compiled.
+    ///
+    /// A generated file being changed won't cause a rebuild.
+    pub fn generated_file<P: AsRef<Path>>(&mut self, p: P) -> &mut KernelBuild {
+        self.generated_files.push(p.as_ref().to_path_buf());
+        self
+    }
+
+    /// Add generated files which will be compiled
+    ///
+    /// A generated file being changed won't cause a rebuild.
+    pub fn generated_files<P>(&mut self, p: P) -> &mut KernelBuild
+    where
+        P: IntoIterator,
+        P::Item: AsRef<Path>,
+    {
+        for file in p.into_iter() {
+            self.generated_file(file);
         }
         self
     }
@@ -119,12 +169,6 @@ impl KernelBuild {
 
     pub fn compile(&mut self, output: &str) {
         println!("cargo:rerun-if-env-changed=RISC0_SKIP_BUILD_KERNELS");
-        for src in self.files.iter() {
-            rerun_if_changed(src);
-        }
-        for dep in self.deps.iter() {
-            rerun_if_changed(dep);
-        }
         match &self.kernel_type {
             KernelType::Cpp => self.compile_cpp(output),
             KernelType::Cuda => self.compile_cuda(output),
@@ -132,24 +176,107 @@ impl KernelBuild {
         }
     }
 
+    fn build_sandbox(&mut self, output: &str) -> (Vec<PathBuf>, Vec<PathBuf>) {
+        let manifest_path = self.manifest_path.canonicalize().unwrap();
+        let manifest_root = manifest_path.parent().unwrap().to_path_buf();
+        let manifest_files = read_manifest(&self.manifest_path);
+
+        let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
+        let sandbox_dir = out_dir.join(format!("kernel_build_{output}"));
+        let _ = std::fs::remove_dir_all(&sandbox_dir);
+        std::fs::create_dir_all(&sandbox_dir).unwrap();
+
+        rerun_if_changed(&self.manifest_path);
+        for manifest_file in manifest_files {
+            rerun_if_changed(manifest_root.join(&manifest_file));
+
+            let sandbox_file = sandbox_dir.join(&manifest_file);
+            let dest_dir = sandbox_file.parent().unwrap();
+            copy_to_dir(&manifest_root.join(&manifest_file), dest_dir);
+        }
+
+        let mut files = vec![];
+        for file in &self.generated_files {
+            let dest_path = copy_to_dir(file, &sandbox_dir);
+            files.push(dest_path);
+        }
+
+        let cargo_manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+
+        for file in &self.files {
+            let abs_file = file.canonicalize().unwrap();
+            let file = abs_file
+                .strip_prefix(&manifest_root)
+                .unwrap_or_else(|_| panic!("{} not found in manifest", file.display()));
+
+            if file.is_relative() {
+                let sandbox_path = sandbox_dir.join(file);
+                assert!(
+                    sandbox_path.exists(),
+                    "{} not found in manifest",
+                    file.display()
+                );
+                files.push(sandbox_path);
+            } else if let Ok(relative_path) = file.strip_prefix(&cargo_manifest_dir) {
+                let sandbox_path = sandbox_dir.join(relative_path);
+                assert!(
+                    sandbox_path.exists(),
+                    "{} not found in manifest",
+                    file.display()
+                );
+                files.push(sandbox_path);
+            } else {
+                panic!(
+                    "compiling file from outside cargo manifest directory: {}",
+                    file.display()
+                );
+            }
+        }
+
+        let mut includes = vec![];
+
+        for path in &self.inc_dirs {
+            if path.is_relative() {
+                includes.push(sandbox_dir.join(path));
+            } else if let Ok(relative_path) = path.strip_prefix(&cargo_manifest_dir) {
+                includes.push(sandbox_dir.join(relative_path));
+            } else {
+                includes.push(path.to_path_buf());
+            }
+        }
+
+        (files, includes)
+    }
+
     fn compile_cpp(&mut self, output: &str) {
         if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
             return;
         }
 
+        let (files, includes) = self.build_sandbox(output);
+
         // It's *highly* recommended to install `sccache` and use this combined with
         // `RUSTC_WRAPPER=/path/to/sccache` to speed up rebuilds of C++ kernels
-        cc::Build::new()
+        let mut build = cc::Build::new();
+        build
             .cpp(true)
             .debug(false)
-            .files(&self.files)
-            .includes(&self.inc_dirs)
+            .files(&files)
+            .includes(&includes)
             .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
             .flag_if_supported("-fno-var-tracking")
-            .flag_if_supported("-fno-var-tracking-assignments")
-            .flag_if_supported("-g0")
-            .compile(output);
+            .flag_if_supported("-fno-var-tracking-assignments");
+
+        for flag in self.flags.iter() {
+            build.flag(flag);
+        }
+
+        for warning in DISABLED_WARNINGS {
+            build.flag_if_supported(warning);
+        }
+
+        build.compile(output);
     }
 
     fn compile_cuda(&mut self, output: &str) {
@@ -157,10 +284,6 @@ impl KernelBuild {
         println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=RISC0_CUDART_LINKAGE");
         println!("cargo:rerun-if-env-changed=NVCC_CCBIN");
-
-        for inc_dir in self.inc_dirs.iter() {
-            rerun_if_changed(inc_dir);
-        }
 
         if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
             let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
@@ -175,13 +298,15 @@ impl KernelBuild {
             return;
         }
 
+        let (files, includes) = self.build_sandbox(output);
+
         let mut build = cc::Build::new();
 
-        for file in self.files.iter() {
+        for file in files {
             build.file(file);
         }
 
-        for inc in self.inc_dirs.iter() {
+        for inc in includes {
             build.include(inc);
         }
 
@@ -196,13 +321,7 @@ impl KernelBuild {
 
         let cudart = env::var("RISC0_CUDART_LINKAGE").unwrap_or("static".to_string());
 
-        let warnings = [
-            "-Wno-missing-braces",
-            "-Wno-unused-function",
-            "-Wno-unknown-pragmas",
-            "-Wno-unused-parameter",
-        ]
-        .join(",");
+        let warnings = DISABLED_WARNINGS.join(",");
 
         build
             .cpp(true)
@@ -233,14 +352,27 @@ impl KernelBuild {
             panic!("unsupported target: {target}")
         };
 
+        let (files, includes) = self.build_sandbox(output);
+
+        let manifest_path = self.manifest_path.canonicalize().unwrap();
+        let manifest_root = manifest_path.parent().unwrap().to_path_buf();
+        let mut deps: Vec<_> = read_manifest(&self.manifest_path)
+            .into_iter()
+            .map(|p| manifest_root.join(p))
+            .collect();
+        deps.extend(self.deps.clone());
+
+        let flags = ["-std=metal3.0", "-Wno-unused-variable"];
+
         self.cached_compile(
             output,
             "metallib",
+            &deps,
             METAL_INCS,
-            &[],
+            &flags,
             &[sdk_name.to_string()],
-            |out_dir, out_path, sys_inc_dir, _flags| {
-                let files: Vec<_> = self.files.iter().map(|x| x.as_path()).collect();
+            |out_dir, out_path, sys_inc_dir, flags| {
+                let files: Vec<_> = files.iter().map(|x| x.as_path()).collect();
 
                 let air_paths: Vec<_> = files
                     .into_par_iter()
@@ -252,13 +384,18 @@ impl KernelBuild {
                         let mut cmd = Command::new("xcrun");
                         cmd.args(["--sdk", sdk_name]);
                         cmd.arg("metal");
+
+                        for flag in flags {
+                            cmd.arg(flag);
+                        }
+
                         cmd.arg("-o").arg(&air_path);
                         cmd.arg("-c").arg(src);
                         cmd.arg("-I").arg(sys_inc_dir);
-                        cmd.arg("-Wno-unused-variable");
-                        for inc_dir in self.inc_dirs.iter() {
+                        for inc_dir in &includes {
                             cmd.arg("-I").arg(inc_dir);
                         }
+
                         println!("Running: {cmd:?}");
                         let status = cmd.status().unwrap();
                         if !status.success() {
@@ -283,12 +420,14 @@ impl KernelBuild {
         );
     }
 
-    fn cached_compile<F: Fn(&Path, &Path, &Path, &[String])>(
+    #[allow(clippy::too_many_arguments)]
+    fn cached_compile<F: Fn(&Path, &Path, &Path, &[&str])>(
         &self,
         output: &str,
         extension: &str,
+        deps: &[PathBuf],
         assets: &[(&str, &str)],
-        flags: &[String],
+        flags: &[&str],
         tags: &[String],
         inner: F,
     ) {
@@ -334,7 +473,7 @@ impl KernelBuild {
             fs::write(&path, contents).unwrap();
             hasher.add_file(path);
         }
-        for dep in self.deps.iter() {
+        for dep in deps {
             hasher.add_file(dep);
         }
         let digest = hasher.finalize();
@@ -372,7 +511,8 @@ impl Hasher {
     }
 
     pub fn add_file<P: AsRef<Path>>(&mut self, path: P) {
-        let bytes = fs::read(path).unwrap();
+        let bytes = fs::read(path.as_ref())
+            .unwrap_or_else(|_| panic!("failed to read {}", path.as_ref().display()));
         self.sha.update(bytes);
     }
 
@@ -382,5 +522,12 @@ impl Hasher {
 }
 
 fn rerun_if_changed<P: AsRef<Path>>(path: P) {
+    // Cargo's directory scanning is buggy and causes many needless rebuilds
+    assert!(
+        !path.as_ref().metadata().unwrap().is_dir(),
+        "rerun_if_changed on dir {}",
+        path.as_ref().display()
+    );
+
     println!("cargo:rerun-if-changed={}", path.as_ref().display());
 }

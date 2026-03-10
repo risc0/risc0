@@ -32,7 +32,7 @@ fn execute(group: &mut BenchGroup) {
         let iterations = 100_000;
         let session = setup_exec(iterations).run().unwrap();
         b.iter(
-            session.user_cycles as usize,
+            session.insn_count as usize,
             || setup_exec(iterations),
             |exec| exec.run(),
         )
@@ -51,9 +51,8 @@ fn warmup(_group: &mut BenchGroup) {
         let prover = get_prover_server(&opts).unwrap();
         let session = setup_exec(1).run().unwrap();
         let segment = session.segments[0].resolve().unwrap();
-        let receipts = prover.prove_segment(&ctx, &segment).unwrap();
-        let receipt = receipts.first().unwrap();
-        prover.lift(receipt).unwrap();
+        let receipt = prover.prove_segment(&ctx, &segment).unwrap();
+        prover.lift(&receipt).unwrap();
     }
 }
 
@@ -71,7 +70,7 @@ fn prove_segment(group: &mut BenchGroup, hashfn: &str) {
         let segment = session.segments[0].resolve().unwrap();
 
         b.iter(
-            session.total_cycles as usize,
+            session.row_count as usize,
             || {},
             |()| prover.prove_segment(&ctx, &segment),
         );
@@ -96,10 +95,7 @@ fn lift(group: &mut BenchGroup) {
                 let segment = session.segments[0].resolve().unwrap();
                 prover.prove_segment(&ctx, &segment).unwrap()
             },
-            |receipts| {
-                let receipt = receipts.first().unwrap();
-                prover.lift(receipt)
-            },
+            |receipt| prover.lift(receipt),
         );
     })
 }
@@ -143,7 +139,7 @@ fn total_composite(group: &mut BenchGroup) {
 
         let session = setup_exec(iterations).run().unwrap();
         b.iter(
-            session.total_cycles as usize,
+            session.row_count as usize,
             || setup_exec(iterations),
             |exec| {
                 let session = exec.run().unwrap();
@@ -163,7 +159,7 @@ fn total_succinct(group: &mut BenchGroup) {
 
         let session = setup_exec(iterations).run().unwrap();
         b.iter(
-            session.total_cycles as usize,
+            session.row_count as usize,
             || setup_exec(iterations),
             |exec| {
                 let session = exec.run().unwrap();

@@ -22,7 +22,7 @@ use anyhow::{Context, Result, ensure};
 use enum_map::EnumMap;
 use risc0_binfmt::{PovwJobId, SystemState};
 use risc0_circuit_keccak::{KECCAK_CONTROL_ROOT, compute_keccak_digest};
-use risc0_circuit_rv32im::{EcallKind, EcallMetric, TerminateState};
+use risc0_circuit_rv32im::{BlockType, EcallKind, EcallMetric, TerminateState};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -69,20 +69,14 @@ pub struct Session {
     /// The hooks to be called during the proving phase.
     pub hooks: Vec<Box<dyn SessionEvents>>,
 
-    /// The number of user cycles without any overhead for continuations or po2
-    /// padding.
-    pub user_cycles: u64,
+    /// The total number of rows generated during this session
+    pub row_count: u64,
 
-    /// The number of cycles needed for paging operations.
-    pub paging_cycles: u64,
+    /// Empty rows used to reach the power of two.
+    pub padding_row_count: u64,
 
-    /// The number of cycles needed for the proof system which includes padding
-    /// up to the nearest power of 2.
-    pub reserved_cycles: u64,
-
-    /// Total number of cycles that a prover experiences. This includes overhead
-    /// associated with continuations and padding up to the nearest power of 2.
-    pub total_cycles: u64,
+    /// The number of riscv instructions ran during this session
+    pub insn_count: u64,
 
     /// The system state of the initial MemoryImage.
     pub pre_state: SystemState,
@@ -108,6 +102,9 @@ pub struct Session {
     /// This duration captures the amount of time spent execution the virtual machine. It does not,
     /// for instance, include the time spent hashing the memory image to produce a [Segment].
     pub(crate) execution_time: Duration,
+
+    /// Breakdown of count of different block types used in the session
+    pub(crate) block_counts: Option<EnumMap<BlockType, u64>>,
 }
 
 /// The execution trace of a portion of a program.
@@ -135,15 +132,13 @@ impl Segment {
         self.inner.po2 as usize
     }
 
-    pub(crate) fn user_cycles(&self) -> u32 {
-        self.inner.suspend_cycle
-    }
-
     /// Construct a `SegmentInfo` containing information about this segment.
     pub fn get_info(&self) -> SegmentInfo {
         SegmentInfo {
             po2: self.po2() as u32,
-            cycles: self.user_cycles(),
+            padding_row_count: (1 << self.inner.po2) - self.inner.used_rows as u64,
+            row_count: 1 << self.inner.po2,
+            insn_count: self.inner.insn_counter as u64,
         }
     }
 }
@@ -289,13 +284,13 @@ impl Session {
         self.povw_job_id.map(|povw_job_id| Work {
             nonce_min: povw_job_id.nonce(0),
             nonce_max: povw_job_id.nonce(self.segments.len() as u32),
-            value: self.total_cycles,
+            value: self.row_count,
         })
     }
 
-    /// Log cycle information for this [Session].
+    /// Log information for this [Session].
     ///
-    /// This logs the total and user cycles for this [Session] at the INFO level.
+    /// This logs information about this [Session] at the INFO level.
     pub fn log(&self) {
         if std::env::var_os("RISC0_INFO").is_none() {
             return;
@@ -308,14 +303,13 @@ impl Session {
 
     /// Returns stats for the session
     ///
-    /// This contains cycle and segment information about the session useful for debugging and measuring performance.
+    /// This contains information about the session useful for debugging and measuring performance.
     pub fn stats(&self) -> SessionStats {
         SessionStats {
             segments: self.segments.len(),
-            total_cycles: self.total_cycles,
-            user_cycles: self.user_cycles,
-            paging_cycles: self.paging_cycles,
-            reserved_cycles: self.reserved_cycles,
+            row_count: self.row_count,
+            padding_row_count: self.padding_row_count,
+            insn_count: self.insn_count,
             ecall_metrics: self
                 .ecall_metrics
                 .iter()
@@ -327,6 +321,7 @@ impl Session {
                 .map(|(k, v)| (k, Some(v.clone())))
                 .collect(),
             execution_time: Some(self.execution_time),
+            block_counts: self.block_counts,
         }
     }
 

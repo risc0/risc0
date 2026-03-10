@@ -86,8 +86,8 @@ pub fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>> {
             self::hal::dual::recursion_prover(hashfn)
         } else if #[cfg(feature = "cuda")] {
             self::hal::cuda::recursion_prover(hashfn)
-        // } else if #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))] {
-        // self::hal::metal::recursion_prover(hashfn)
+        } else if #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))] {
+            self::hal::metal::recursion_prover(hashfn)
         } else {
             self::hal::cpu::recursion_prover(hashfn)
         }

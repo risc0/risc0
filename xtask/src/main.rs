@@ -18,6 +18,7 @@ mod bazel;
 mod bootstrap;
 #[cfg(feature = "zkvm")]
 mod bootstrap_groth16;
+mod bootstrap_kernel_builds;
 mod bootstrap_poseidon;
 mod bootstrap_protos;
 mod extract_elf;
@@ -33,7 +34,8 @@ mod update_lock_files;
 use clap::{Parser, Subcommand};
 
 use self::{
-    bazel::Bazel, bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos,
+    bazel::Bazel, bootstrap_kernel_builds::BootstrapKernelBuilds,
+    bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos,
     extract_elf::ExtractElf, install::Install, semver_checks::SemverChecks,
     update_crate_version::UpdateCrateVersion, update_lock_files::UpdateLockFiles,
 };
@@ -64,6 +66,7 @@ enum Commands {
     UpdateLockFiles(UpdateLockFiles),
     UpdateCrateVersion(UpdateCrateVersion),
     ExtractElf(ExtractElf),
+    BootstrapKernelBuilds(BootstrapKernelBuilds),
 }
 
 impl Commands {
@@ -85,6 +88,7 @@ impl Commands {
             Commands::ExtractElf(cmd) => cmd.run(),
             #[cfg(feature = "setup-groth16")]
             Commands::SetupGroth16(cmd) => cmd.run(),
+            Commands::BootstrapKernelBuilds(cmd) => cmd.run(),
         }
     }
 }

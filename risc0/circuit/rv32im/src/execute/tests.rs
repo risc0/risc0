@@ -49,7 +49,6 @@ fn basic() {
     assert_eq!(segment.terminate_state, Some(TerminateState::default()));
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
-    assert_eq!(segment.suspend_cycle, 5);
 }
 
 #[test]
@@ -65,7 +64,7 @@ fn system_split() {
         ExecutionLimit::default()
             .with_segment_po2(testutil::MIN_CYCLES_PO2)
             .with_session_limit(testutil::DEFAULT_SESSION_LIMIT)
-            .with_max_insn_cycles(100),
+            .with_max_insn_rows(100),
         testutil::NullSyscall,
         None,
     )
@@ -102,7 +101,7 @@ fn insufficient_segment_limit() {
         image,
         ExecutionLimit::default()
             .with_segment_po2(13)
-            .with_max_insn_cycles(0),
+            .with_max_insn_rows(0),
         testutil::NullSyscall,
         None,
     )

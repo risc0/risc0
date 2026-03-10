@@ -20,7 +20,6 @@ use risc0_circuit_keccak::KECCAK_CONTROL_ROOT;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Deserializer, Serialize};
 
-use super::PreflightIter;
 use crate::{
     ExecutorEnv, MaybePruned, PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim,
     ReceiptKind, Segment, Session, VerifierContext, WorkClaim,
@@ -165,21 +164,19 @@ impl ProverServer for DevModeProver {
         self.prove_session(ctx, &session)
     }
 
-    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightIter> {
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
         ensure_dev_mode_allowed()?;
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.segment_preflight);
         }
 
-        let preflight_results = PreflightResults {
+        Ok(PreflightResults {
             inner: Default::default(),
             terminate_state: segment.inner.terminate_state,
             output: segment.output.clone(),
             segment_index: segment.index,
-        };
-
-        Ok(Box::new(std::iter::once(Ok(preflight_results))))
+        })
     }
 
     fn prove_preflight(

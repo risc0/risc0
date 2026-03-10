@@ -10,4 +10,4 @@ jwt-core = { path = "../../core/" }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
 
 [patch.crates-io]
-rsa = { git = "https://www.github.com/risc0/RustCrypto-RSA.git", rev = "v0.9.6-risczero.0" }
+rsa = { git = "https://www.github.com/risc0/RustCrypto-RSA.git", rev = "v0.9.9-risczero.0" }
