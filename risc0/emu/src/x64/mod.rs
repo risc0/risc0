@@ -482,7 +482,7 @@ impl Translator {
         for (id, count) in self.ctx.jit_block_count_table.iter_mut().enumerate() {
             if *count > 0 {
                 let offset = self.jit_block_id_to_offset.get(&id).unwrap();
-                let info = self.block_infos.get(&offset).unwrap();
+                let info = self.block_infos.get(offset).unwrap();
                 runs.push(BlockRun {
                     info: info.clone(),
                     count: *count,
@@ -699,12 +699,10 @@ impl JitContext {
             .ensure_page_read_for_segment(self.current_tag, page_idx);
 
         debug_assert!(offset + WORD_SIZE <= PAGE_SIZE);
-        let word = unsafe {
+        unsafe {
             let ptr = page.as_ptr().add(offset) as *const u32;
             u32::from_le(ptr.read_unaligned())
-        };
-
-        word
+        }
     }
 
     pub fn load_u32(&mut self, addr: u32) -> u32 {
