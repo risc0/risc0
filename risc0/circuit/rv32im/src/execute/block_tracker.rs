@@ -245,6 +245,7 @@ impl Default for BlockTracker {
 }
 
 impl BlockTracker {
+    #[cfg(feature = "jit")]
     pub fn empty() -> Self {
         Self {
             pc_cache: Default::default(),
@@ -256,6 +257,7 @@ impl BlockTracker {
         add_blocks_for_insn(&mut self.blocks, &kind, 1);
     }
 
+    #[cfg(feature = "jit")]
     pub fn track_instrs(&mut self, kind: InsnKind, count: u64) {
         add_blocks_for_insn(&mut self.blocks, &kind, count);
     }
