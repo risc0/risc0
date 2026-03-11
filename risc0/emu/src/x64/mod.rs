@@ -457,12 +457,8 @@ impl Translator {
 
     pub fn jit_one_inner(
         &mut self,
-        quota: u64,
         point_calculator: impl Fn(&BlockInfo) -> u64,
     ) -> Result<(Terminal, Vec<BlockRun>)> {
-        self.ctx.quota = quota;
-        tracing::info!("jit_one quota = {quota}");
-
         let retval = if let Some(&offset) = self.labels.get(&self.ctx.pc) {
             tracing::debug!("existing label: {:#10x}", self.ctx.pc);
             self.enter_block(offset)?
@@ -506,9 +502,13 @@ impl Translator {
         quota: u64,
         point_calculator: impl Fn(&BlockInfo) -> u64,
     ) -> Result<(Terminal, Vec<BlockRun>)> {
+        tracing::info!("jit_one quota = {quota}");
+
         let mut runs_total = vec![];
+        self.ctx.quota = quota;
+
         loop {
-            let (terminal, runs) = self.jit_one_inner(quota, &point_calculator)?;
+            let (terminal, runs) = self.jit_one_inner(&point_calculator)?;
             runs_total.extend(runs);
 
             if !matches!(terminal, Terminal::Jump) {
@@ -518,9 +518,9 @@ impl Translator {
     }
 
     fn jit_loop(&mut self) -> Result<Terminal> {
-        // self.dump(self.enter_offset()?);
+        self.ctx.quota = u64::MAX;
         loop {
-            let (terminal, _) = self.jit_one_inner(u64::MAX, |_| 0)?;
+            let (terminal, _) = self.jit_one_inner(|_| 0)?;
 
             match terminal {
                 Terminal::Jump => (),
