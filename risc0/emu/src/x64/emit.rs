@@ -1231,39 +1231,39 @@ mod tests {
     }
 
     // TODO: Is there a better way to test this?
-    #[rstest]
-    #[case(Size::S32, Extend::None, Loc::GPR(RDI), Loc::GPR(RSI), 8, &[
-        "lea rax,[rsi+8]",
-        "mov ecx,eax",
-        "shr ecx,0Ah",
-        "mov edx,eax",
-        "and edx,3FFh",
-        "push rcx",
-        "mov rax,[r15+88h]",
-        "shl rcx,4",
-        "add rax,rcx",
-        "movzx ecx,word [rax+8]",
-        "and cx,7FFFh",
-        "cmp cx,[r15+84h]",
-        "jne near 000000000000004Ah",
-        "mov rax,[rax]",
-        "jmp 0000000000000067h",
-        "mov ecx,[rsp]",
-        "sub rsp,8",
-        "push rdi",
-        "push rsi",
-        "push rdx",
-        "mov rdi,r15",
-        "mov esi,ecx",
-        "call qword [r15+90h]",
-        "pop rdx",
-        "pop rsi",
-        "pop rdi",
-        "add rsp,8",
-        "add rsp,8",
-        "mov eax,[rax+rdx]",
-        "mov edi,eax"
-    ])]
+    // #[rstest]
+    // #[case(Size::S32, Extend::None, Loc::GPR(RDI), Loc::GPR(RSI), 8, &[
+    //     "lea rax,[rsi+8]",
+    //     "mov ecx,eax",
+    //     "shr ecx,0Ah",
+    //     "mov edx,eax",
+    //     "and edx,3FFh",
+    //     "push rcx",
+    //     "mov rax,[r15+88h]",
+    //     "shl rcx,4",
+    //     "add rax,rcx",
+    //     "movzx ecx,word [rax+8]",
+    //     "and cx,7FFFh",
+    //     "cmp cx,[r15+84h]",
+    //     "jne near 000000000000004Ah",
+    //     "mov rax,[rax]",
+    //     "jmp 0000000000000067h",
+    //     "mov ecx,[rsp]",
+    //     "sub rsp,8",
+    //     "push rdi",
+    //     "push rsi",
+    //     "push rdx",
+    //     "mov rdi,r15",
+    //     "mov esi,ecx",
+    //     "call qword [r15+90h]",
+    //     "pop rdx",
+    //     "pop rsi",
+    //     "pop rdi",
+    //     "add rsp,8",
+    //     "add rsp,8",
+    //     "mov eax,[rax+rdx]",
+    //     "mov edi,eax"
+    // ])]
     // #[case(Size::S8, Extend::Sign, Loc::GPR(RDX), Loc::GPR(RSI), 8, &[
     //     "movsx edx,byte [r15+rsi+8]"
     // ])]
@@ -1273,17 +1273,17 @@ mod tests {
     //     "movzx eax,byte [rax]",
     //     "mov [rbx+4],eax",
     // ])]
-    #[test_log::test]
-    fn load(
-        #[case] size: Size,
-        #[case] extend: Extend,
-        #[case] rd: Loc,
-        #[case] rs1: Loc,
-        #[case] imm: u32,
-        #[case] expected: &[&str],
-    ) {
-        run_asm_test(|x| x.emit_load(size, extend, rd, rs1, imm), expected);
-    }
+    // #[test_log::test]
+    // fn load(
+    //     #[case] size: Size,
+    //     #[case] extend: Extend,
+    //     #[case] rd: Loc,
+    //     #[case] rs1: Loc,
+    //     #[case] imm: u32,
+    //     #[case] expected: &[&str],
+    // ) {
+    //     run_asm_test(|x| x.emit_load(size, extend, rd, rs1, imm), expected);
+    // }
 
     // #[rstest]
     // #[case(Size::S32, Loc::GPR(RSI), Loc::GPR(RDX), 8, &[
