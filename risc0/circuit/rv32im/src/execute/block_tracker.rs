@@ -142,6 +142,14 @@ impl Default for BlockCollection {
 }
 
 impl BlockCollection {
+    fn empty() -> Self {
+        Self {
+            #[cfg(any(test, feature = "block_tracker_debug"))]
+            blocks: enum_map::EnumMap::default(),
+            row_points: 0,
+        }
+    }
+
     fn add_block(&mut self, block: BlockType) {
         self.row_points += row_points(block);
 
@@ -237,6 +245,13 @@ impl Default for BlockTracker {
 }
 
 impl BlockTracker {
+    pub fn empty() -> Self {
+        Self {
+            pc_cache: Default::default(),
+            blocks: BlockCollection::empty(),
+        }
+    }
+
     pub fn track_instr(&mut self, kind: InsnKind) {
         add_blocks_for_insn(&mut self.blocks, &kind, 1);
     }

@@ -59,6 +59,7 @@ pub enum Terminal {
     Jump,
     Break,
     Trap,
+    QuotaExhausted,
 }
 
 impl Terminal {
@@ -67,6 +68,7 @@ impl Terminal {
             0 => Some(Self::Jump),
             1 => Some(Self::Break),
             2 => Some(Self::Trap),
+            3 => Some(Self::QuotaExhausted),
             _ => None,
         }
     }
@@ -227,11 +229,14 @@ const REGISTER_MAPPING: [Loc; REG_MAX] = [
 
 const GUEST_RAM_SIZE: usize = 1 << 32; // 4GB
 
+const JITCTX_QUOTA_OFFSET: i32 = offset_of!(JitContext, quota) as i32;
 const JITCTX_REGISTERS_OFFSET: i32 = offset_of!(JitContext, registers) as i32;
 const JITCTX_CURRENT_TAG_OFFSET: i32 = offset_of!(JitContext, current_tag) as i32;
 const JITCTX_PAGE_TABLE_OFFSET: i32 = offset_of!(JitContext, page_table) as i32;
 const JITCTX_LOAD_PAGE_MISS_OFFSET: i32 = offset_of!(JitContext, jit_load_page_miss) as i32;
 const JITCTX_STORE_PAGE_MISS_OFFSET: i32 = offset_of!(JitContext, jit_store_page_miss) as i32;
+const JITCTX_BLOCK_COUNT_TABLE_OFFSET: i32 =
+    offset_of!(JitContext, jit_block_count_table_ptr) as i32;
 
 const HOST_WORD_SIZE: usize = (usize::BITS / u8::BITS) as usize;
 const HOST_PAGE_SIZE: usize = 4096;
@@ -257,6 +262,7 @@ impl RegisterMode {
 #[repr(C)]
 pub struct JitContext {
     pub pc: u32,
+    quota: u64,
     registers: [u32; REG_MAX],
     current_tag: u16,
     page_table: *mut PageSlot,
@@ -264,6 +270,9 @@ pub struct JitContext {
     jit_store_page_miss: extern "C" fn(ctx: *mut JitContext, vaddr: u32) -> *const u8,
     ram: HostMemory,
     mode: RegisterMode,
+
+    jit_block_count_table: Vec<u32>,
+    jit_block_count_table_ptr: *mut u32,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -275,12 +284,19 @@ pub struct BlockInfo {
     pub end_pc: u32,
 }
 
+#[derive(Clone, Debug, Default)]
+pub struct BlockRun {
+    pub info: BlockInfo,
+    pub count: u32,
+}
+
 pub struct Translator {
     asm: Assembler,
     pub ctx: JitContext,
     labels: BTreeMap<u32, AssemblyOffset>,
     fixups: BTreeMap<u32, Vec<AssemblyOffset>>,
-    instr_counts: BTreeMap<AssemblyOffset, EnumMap<RvOp, u32>>,
+    block_infos: BTreeMap<AssemblyOffset, BlockInfo>,
+    jit_block_id_to_offset: BTreeMap<usize, AssemblyOffset>,
 }
 
 impl Translator {
@@ -298,7 +314,8 @@ impl Translator {
             ctx,
             labels: Default::default(),
             fixups: Default::default(),
-            instr_counts: BTreeMap::new(),
+            block_infos: Default::default(),
+            jit_block_id_to_offset: Default::default(),
         })
     }
 
@@ -310,25 +327,43 @@ impl Translator {
         self.ctx.pc += WORD_SIZE as u32;
     }
 
-    fn jit_block(&mut self) -> Result<AssemblyOffset> {
-        tracing::debug!("jit_block: {:#10x}", self.ctx.pc);
+    fn jit_block(
+        &mut self,
+        point_calculator: impl Fn(&BlockInfo) -> u64,
+    ) -> Result<AssemblyOffset> {
         let start = self.asm.offset();
+        let start_pc = self.ctx.pc;
+
+        tracing::debug!("jit_block: {:#10x}: offset = {start:?}", self.ctx.pc);
+
+        let mut fixup_locs = vec![];
 
         loop {
             let offset = self.asm.offset();
-            self.labels.insert(self.ctx.pc, offset);
-            self.process_fixups(offset)?;
+            fixup_locs.push((offset, self.ctx.pc));
 
             let insn = self.fetch();
             let (op, terminal) = self.dispatch(insn)?;
 
             for addr in start.0..=offset.0 {
-                let counts = self.instr_counts.entry(AssemblyOffset(addr)).or_default();
-                if let Some(op) = op {
-                    counts[op] += 1;
+                let info = self
+                    .block_infos
+                    .entry(AssemblyOffset(addr))
+                    .or_insert_with(|| BlockInfo {
+                        op_counts: Default::default(),
+                        start_pc: self.ctx.pc,
+                        end_pc: self.ctx.pc,
+                    });
+                if matches!(terminal, Some(Terminal::Break)) {
+                    info.end_pc = self.ctx.pc;
+                } else {
+                    if let Some(op) = op {
+                        info.op_counts[op] += 1;
+                    }
+                    info.end_pc = self.ctx.pc + WORD_SIZE as u32;
                 }
             }
-            if terminal {
+            if terminal.is_some() {
                 break;
             }
 
@@ -337,24 +372,73 @@ impl Translator {
 
         tracing::debug!("commit");
         self.asm.commit()?;
+
+        for (offset, target_pc) in fixup_locs {
+            self.process_fixups(offset, target_pc, &point_calculator)?;
+        }
+
+        let id = self.ctx.new_jit_block_id();
+        self.jit_block_id_to_offset.insert(id, start);
+
+        let dest_prologue_offset = self.asm.offset();
+        let points = point_calculator(self.block_infos.get(&start).unwrap());
+        tracing::info!("jit block points = {points}");
+
+        self.block_prologue(id as u32, points);
+        self.jump(start);
+
+        self.labels.insert(start_pc, dest_prologue_offset);
+
+        self.asm.commit()?;
+
         // self.dump(start);
 
-        Ok(start)
+        Ok(dest_prologue_offset)
     }
 
-    fn process_fixups(&mut self, offset: AssemblyOffset) -> Result<()> {
-        if let Some(fixups) = self.fixups.remove(&self.ctx.pc) {
-            let kind = X64Relocation::from_size(RelocationSize::DWord);
+    fn add_jump_entry(
+        &mut self,
+        jmp_offset: AssemblyOffset,
+        dest_offset: AssemblyOffset,
+        target_pc: u32,
+        point_calculator: impl Fn(&BlockInfo) -> u64,
+    ) -> Result<()> {
+        let id = self.ctx.new_jit_block_id();
+        self.jit_block_id_to_offset.insert(id, dest_offset);
+
+        let dest_prologue_offset = self.asm.offset();
+        let points = point_calculator(self.block_infos.get(&dest_offset).unwrap());
+        self.block_prologue(id as u32, points);
+        self.jump(dest_offset);
+
+        self.labels.insert(target_pc, dest_prologue_offset);
+
+        tracing::debug!(
+            "fixup: {jmp_offset:x?} -> {dest_offset:x?} prologue offset: {dest_prologue_offset:?}"
+        );
+
+        let kind = X64Relocation::from_size(RelocationSize::DWord);
+        self.asm.alter(|modifier| {
+            // goto the rel32 operand of the source jump instruction
+            modifier.goto(AssemblyOffset(jmp_offset.0 + 1));
+            // compute the rel32 offset from the end of the jump instruction
+            let offset = dest_prologue_offset.0 as isize - WORD_SIZE as isize;
+            // perform the actual patch
+            modifier.bare_relocation(offset as usize, 0, 0, kind.clone());
+        })?;
+
+        Ok(())
+    }
+
+    fn process_fixups(
+        &mut self,
+        dest_offset: AssemblyOffset,
+        target_pc: u32,
+        point_calculator: impl Fn(&BlockInfo) -> u64,
+    ) -> Result<()> {
+        if let Some(fixups) = self.fixups.remove(&target_pc) {
             for jmp_offset in fixups {
-                tracing::debug!("fixup: {jmp_offset:x?} -> {offset:x?}");
-                self.asm.alter(|modifier| {
-                    // goto the rel32 operand of the source jump instruction
-                    modifier.goto(AssemblyOffset(jmp_offset.0 + 1));
-                    // compute the rel32 offset from the end of the jump instruction
-                    let offset = offset.0 as isize - WORD_SIZE as isize;
-                    // perform the actual patch
-                    modifier.bare_relocation(offset as usize, 0, 0, kind.clone());
-                })?;
+                self.add_jump_entry(jmp_offset, dest_offset, target_pc, &point_calculator)?;
             }
         }
         Ok(())
@@ -371,49 +455,82 @@ impl Translator {
         Ok(())
     }
 
-    pub fn jit_one(&mut self) -> Result<(Terminal, BlockInfo)> {
-        let start_pc = self.ctx.pc;
+    pub fn jit_one_inner(
+        &mut self,
+        quota: u64,
+        point_calculator: impl Fn(&BlockInfo) -> u64,
+    ) -> Result<(Terminal, Vec<BlockRun>)> {
+        self.ctx.quota = quota;
+        tracing::info!("jit_one quota = {quota}");
 
-        let (retval, op_counts) = if let Some(&offset) = self.labels.get(&self.ctx.pc) {
+        let retval = if let Some(&offset) = self.labels.get(&self.ctx.pc) {
             tracing::debug!("existing label: {:#10x}", self.ctx.pc);
             self.enter_block(offset)?
         } else {
-            let offset = self.jit_block()?;
+            let offset = self.jit_block(point_calculator)?;
             self.enter_block(offset)?
         };
 
         let terminal =
             Terminal::from_u32((retval >> 32) as u32).ok_or_else(|| anyhow!("Invalid terminal"))?;
-        let end_pc = self.ctx.pc;
 
         let pc = (retval & 0xffffffff) as u32;
         self.ctx.pc = pc;
         tracing::trace!("jit block ran; new pc = {pc:x}; terminal = {terminal:?}");
 
-        let info = BlockInfo {
-            op_counts,
-            start_pc,
-            end_pc,
-        };
+        let mut runs = vec![];
+        for (id, count) in self.ctx.jit_block_count_table.iter_mut().enumerate() {
+            if *count > 0 {
+                let offset = self.jit_block_id_to_offset.get(&id).unwrap();
+                let info = self.block_infos.get(&offset).unwrap();
+                runs.push(BlockRun {
+                    info: info.clone(),
+                    count: *count,
+                });
+                *count = 0;
+            }
+        }
 
-        Ok((terminal, info))
+        assert!(!runs.is_empty());
+
+        tracing::info!(
+            "jit_one runs: {:?}",
+            runs.iter().map(|r| r.count).collect::<Vec<_>>()
+        );
+
+        Ok((terminal, runs))
+    }
+
+    pub fn jit_one(
+        &mut self,
+        quota: u64,
+        point_calculator: impl Fn(&BlockInfo) -> u64,
+    ) -> Result<(Terminal, Vec<BlockRun>)> {
+        let mut runs_total = vec![];
+        loop {
+            let (terminal, runs) = self.jit_one_inner(quota, &point_calculator)?;
+            runs_total.extend(runs);
+
+            if !matches!(terminal, Terminal::Jump) {
+                return Ok((terminal, runs_total));
+            }
+        }
     }
 
     fn jit_loop(&mut self) -> Result<Terminal> {
         // self.dump(self.enter_offset()?);
         loop {
-            let (terminal, _) = self.jit_one()?;
+            let (terminal, _) = self.jit_one_inner(u64::MAX, |_| 0)?;
 
             match terminal {
                 Terminal::Jump => (),
-                Terminal::Break | Terminal::Trap => return Ok(terminal),
+                Terminal::Break | Terminal::Trap | Terminal::QuotaExhausted => return Ok(terminal),
             }
         }
     }
 
-    fn enter_block(&mut self, offset: AssemblyOffset) -> Result<(u64, EnumMap<RvOp, u32>)> {
+    fn enter_block(&mut self, offset: AssemblyOffset) -> Result<u64> {
         tracing::debug!("enter_block: {offset:x?}");
-        let counts = self.instr_counts.get(&offset).unwrap().clone();
         let enter = self.enter_offset()?;
         let reader = self.asm.reader();
         let exe = reader.lock();
@@ -425,7 +542,7 @@ impl Translator {
             unsafe { std::mem::transmute(enter_ptr) };
         let retval = enter(block_ptr, ctx_ptr);
 
-        Ok((retval, counts))
+        Ok(retval)
     }
 
     fn disasm(&self, start: AssemblyOffset, print_pos: bool) -> Vec<String> {
@@ -476,9 +593,19 @@ impl JitContext {
             jit_store_page_miss: JitContext::jit_store_page_miss_trampoline,
             ram,
             mode: RegisterMode::User,
+            quota: 0,
+            jit_block_count_table: vec![],
+            jit_block_count_table_ptr: std::ptr::null_mut(),
         };
         s.load_registers();
         s
+    }
+
+    pub fn new_jit_block_id(&mut self) -> usize {
+        let new_id = self.jit_block_count_table.len();
+        self.jit_block_count_table.push(0);
+        self.jit_block_count_table_ptr = self.jit_block_count_table.as_mut_ptr();
+        new_id
     }
 
     pub fn set_mode(&mut self, mode: u32) {
@@ -677,7 +804,8 @@ impl JitContext {
 
     /// the count of all touched pages since last checkpoint
     pub fn touched_pages(&self) -> u64 {
-        self.ram.touched_pages
+        // add one for registers page and one for ??
+        self.ram.touched_pages + 2
     }
 
     /// clear all tracked pages

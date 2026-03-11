@@ -225,7 +225,46 @@ extern "C" fn print(ptr: *const u8, len: u64) {
 }
 
 impl Translator {
-    pub(crate) fn dispatch(&mut self, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
+    pub(crate) fn block_prologue(&mut self, id: u32, points: u64) {
+        emit!(self
+            // check if quota is empty
+            ; mov rax, QWORD [r15 + JITCTX_QUOTA_OFFSET]
+            ; test rax, rax
+            ; jnz >cont1
+        );
+        self.emit_retval(Terminal::QuotaExhausted, self.ctx.pc);
+        emit!(self
+            ; jmp ->exit
+
+            ; cont1:
+            // load points into rax (64bit)
+            ; mov eax, DWORD (points >> 32) as i32
+            ; shl rax, 32
+            ; mov eax, DWORD points as i32
+
+            // subtract points from the quota clamping to zero
+            ; sub QWORD [r15 + JITCTX_QUOTA_OFFSET], rax
+            ; jnc >cont2
+            ; xor rax, rax
+            ; mov QWORD [r15 + JITCTX_QUOTA_OFFSET], rax
+            ; cont2:
+
+            // mark the block as used
+            ; mov rax, QWORD [r15 + JITCTX_BLOCK_COUNT_TABLE_OFFSET]
+            ; inc DWORD [rax + id as i32 * std::mem::size_of::<u32>() as i32]
+        );
+    }
+
+    pub(crate) fn jump(&mut self, offset: AssemblyOffset) {
+        let label = self.asm.new_dynamic_label();
+        self.asm.labels_mut().define_dynamic(label, offset);
+        emit!(self ; jmp =>label);
+    }
+
+    pub(crate) fn dispatch(
+        &mut self,
+        insn: Instruction,
+    ) -> Result<(Option<RvOp>, Option<Terminal>)> {
         match (insn.opcode, insn.func3, insn.func7) {
             // I-format memory loads
             (0b0000011, 0b000, _) => self.step_load(RvOp::Lb, insn),
@@ -336,10 +375,10 @@ impl Translator {
         }
     }
 
-    fn step_trap(&mut self) -> Result<(Option<RvOp>, bool)> {
+    fn step_trap(&mut self) -> Result<(Option<RvOp>, Option<Terminal>)> {
         self.emit_retval(Terminal::Trap, self.ctx.pc);
         emit!(self ; jmp ->exit);
-        Ok((None, true))
+        Ok((None, Some(Terminal::Trap)))
     }
 
     fn emit_mov(&mut self, dst: Loc, src: Loc) {
@@ -433,7 +472,11 @@ impl Translator {
         }
     }
 
-    fn step_compute(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
+    fn step_compute(
+        &mut self,
+        op: RvOp,
+        insn: Instruction,
+    ) -> Result<(Option<RvOp>, Option<Terminal>)> {
         self.trace(op, &insn);
         let (rd, rs1, rs2) = (insn.rd_loc(), insn.rs1_loc(), insn.rs2_loc());
         match op {
@@ -565,7 +608,7 @@ impl Translator {
             }
             _ => unreachable!(),
         };
-        Ok((Some(op), false))
+        Ok((Some(op), None))
     }
 
     fn emit_mul(&mut self, rd: Loc, rs1: Loc, rs2: Loc) {
@@ -907,7 +950,11 @@ impl Translator {
         }
     }
 
-    fn step_load(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
+    fn step_load(
+        &mut self,
+        op: RvOp,
+        insn: Instruction,
+    ) -> Result<(Option<RvOp>, Option<Terminal>)> {
         self.trace(op, &insn);
         let (rd, rs1, imm) = (insn.rd_loc(), insn.rs1_loc(), insn.imm_i());
         match op {
@@ -933,10 +980,14 @@ impl Translator {
             }
             _ => unreachable!(),
         }
-        Ok((Some(op), false))
+        Ok((Some(op), None))
     }
 
-    fn step_store(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
+    fn step_store(
+        &mut self,
+        op: RvOp,
+        insn: Instruction,
+    ) -> Result<(Option<RvOp>, Option<Terminal>)> {
         self.trace(op, &insn);
         let (rs1, rs2, imm) = (insn.rs1_loc(), insn.rs2_loc(), insn.imm_s());
         match op {
@@ -954,10 +1005,14 @@ impl Translator {
             }
             _ => unreachable!(),
         }
-        Ok((Some(op), false))
+        Ok((Some(op), None))
     }
 
-    fn step_branch(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
+    fn step_branch(
+        &mut self,
+        op: RvOp,
+        insn: Instruction,
+    ) -> Result<(Option<RvOp>, Option<Terminal>)> {
         self.trace(op, &insn);
         let (rs1, rs2, imm) = (insn.rs1_loc(), insn.rs2_loc(), insn.imm_b());
         self.emit_cmp(GPR::RAX, rs1, rs2);
@@ -996,7 +1051,7 @@ impl Translator {
         emit!(self ;taken:);
         self.emit_exit(Terminal::Jump, taken_pc as u32, true);
 
-        Ok((Some(op), true))
+        Ok((Some(op), Some(Terminal::Jump)))
     }
 
     fn emit_retval(&mut self, terminal: Terminal, pc: u32) {
@@ -1006,7 +1061,6 @@ impl Translator {
 
     fn emit_exit(&mut self, terminal: Terminal, target_pc: u32, emit_jmp: bool) -> Result<()> {
         self.emit_retval(terminal, target_pc);
-        /*
         if let Some(&offset) = self.labels.get(&target_pc) {
             tracing::debug!("direct target: {target_pc:#10x?} -> {:#04x?}", offset.0);
             let label = self.asm.new_dynamic_label();
@@ -1021,14 +1075,15 @@ impl Translator {
             if emit_jmp {
                 emit!(self ; jmp ->exit);
             }
-        }*/
-        if emit_jmp {
-            emit!(self ; jmp ->exit);
         }
         Ok(())
     }
 
-    fn step_jump(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
+    fn step_jump(
+        &mut self,
+        op: RvOp,
+        insn: Instruction,
+    ) -> Result<(Option<RvOp>, Option<Terminal>)> {
         self.trace(op, &insn);
         match op {
             RvOp::Jal => {
@@ -1042,7 +1097,7 @@ impl Translator {
             }
             _ => unreachable!(),
         }
-        Ok((Some(op), true))
+        Ok((Some(op), Some(Terminal::Jump)))
     }
 
     fn emit_jal(&mut self, rd: Loc, imm: u32, emit_jmp: bool) {
@@ -1057,11 +1112,15 @@ impl Translator {
     }
 
     // TODO
-    fn step_system(&mut self, op: RvOp, insn: Instruction) -> Result<(Option<RvOp>, bool)> {
+    fn step_system(
+        &mut self,
+        op: RvOp,
+        insn: Instruction,
+    ) -> Result<(Option<RvOp>, Option<Terminal>)> {
         self.trace(op, &insn);
         self.emit_retval(Terminal::Break, self.ctx.pc);
         emit!(self ; jmp ->exit);
-        Ok((Some(op), true))
+        Ok((Some(op), Some(Terminal::Break)))
     }
 }
 

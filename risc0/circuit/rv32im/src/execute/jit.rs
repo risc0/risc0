@@ -25,7 +25,7 @@ use risc0_zkp::core::{
 };
 
 #[cfg(target_arch = "x86_64")]
-use risc0_emu::x64::{BlockInfo, Terminal, Translator as JitTranslator};
+use risc0_emu::x64::{BlockInfo, BlockRun, Terminal, Translator as JitTranslator};
 
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
@@ -107,6 +107,18 @@ impl From<risc0_emu::rv32im::RvOp> for InsnKind {
             risc0_emu::rv32im::RvOp::Invalid => Self::Invalid,
         }
     }
+}
+
+fn point_calculator(info: &BlockInfo) -> u64 {
+    let mut block_tracker = BlockTracker::empty();
+    for (op, count) in info.op_counts {
+        block_tracker.track_instrs(op.into(), count as u64);
+    }
+
+    let preflight_user_cycles = (info.end_pc - info.start_pc) / WORD_SIZE as u32;
+    block_tracker
+        .get_blocks(preflight_user_cycles, 0)
+        .row_points()
 }
 
 #[derive(Copy, Clone)]
@@ -257,7 +269,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
             }
 
             // Execute a step of the virtual machine.
-            if let Err(error) = self.jit_some() {
+            let remaining_row_points =
+                limit.segment_threshold() as u64 * POINTS_PER_ROW - self.segment_used_row_points();
+            if let Err(error) = self.jit_some(remaining_row_points) {
                 // On error, log information about the most recent instructions (at `debug` level),
                 // and include a SegmentUpdate for the segment up to the point of the error.
                 self.dump_recent_instructions();
@@ -283,36 +297,49 @@ impl<'a, S: Syscall> Executor<'a, S> {
         Ok(Some(update))
     }
 
-    fn add_jit_block_cost(&mut self, info: BlockInfo) {
-        for (op, count) in info.op_counts {
-            self.block_tracker.track_instrs(op.into(), count as u64);
-        }
+    fn add_jit_block_cost(&mut self, runs: Vec<BlockRun>) {
+        for run in runs {
+            for (op, count) in run.info.op_counts {
+                self.block_tracker
+                    .track_instrs(op.into(), count as u64 * run.count as u64);
+            }
 
-        let mut pc = info.start_pc;
-        while pc <= info.end_pc {
-            self.block_tracker.track_pc(pc);
-            self.preflight_user_cycles += 1;
-            self.insn_counter += 1;
-            pc += WORD_SIZE as u32;
+            let mut pc = run.info.start_pc;
+            while pc < run.info.end_pc {
+                self.block_tracker.track_pc(pc);
+                self.preflight_user_cycles += run.count;
+                self.insn_counter += run.count;
+                pc += WORD_SIZE as u32;
+            }
+            tracing::trace!("executor insn count = {}", self.insn_counter);
         }
     }
 
-    pub fn jit_some(&mut self) -> Result<()> {
+    pub fn jit_some(&mut self, remaining_row_points: u64) -> Result<()> {
         match self.jit_state {
             JitState::Run => {
-                let (terminal, info) = self.jit.jit_one()?;
-                self.add_jit_block_cost(info);
+                let (terminal, runs) = self.jit.jit_one(remaining_row_points, point_calculator)?;
+                self.add_jit_block_cost(runs);
 
-                if matches!(terminal, Terminal::Trap) {
-                    Risc0Machine { ctx: self }.trap(Exception::IllegalInstruction(0, 0))?;
-                }
-                if matches!(terminal, Terminal::Break) {
-                    self.jit_state = JitState::Break;
+                match terminal {
+                    Terminal::Trap => {
+                        Risc0Machine { ctx: self }.trap(Exception::IllegalInstruction(0, 0))?;
+                    }
+                    Terminal::Break => {
+                        self.jit_state = JitState::Break;
+                    }
+                    Terminal::QuotaExhausted => {
+                        tracing::info!("Jit quota exhausted");
+                    }
+                    Terminal::Jump => {
+                        panic!("unexpected Jump terminal")
+                    }
                 }
             }
             JitState::Break => {
                 Risc0Machine::step(&mut Emulator {}, self)?;
                 self.insn_counter += 1;
+                tracing::trace!("executor insn count = {}", self.insn_counter);
                 self.jit_state = JitState::Run;
             }
         }
@@ -401,6 +428,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
         self.insn_counter = 0;
         self.jit.ctx.paging_checkpoint();
         self.block_tracker = Default::default();
+        tracing::trace!("block_tracker reset");
 
         Ok(update)
     }
@@ -486,6 +514,15 @@ impl<'a, S: Syscall> Executor<'a, S> {
             .block_tracker
             .get_blocks(self.preflight_user_cycles, self.jit.ctx.touched_pages());
         blocks.row_points().div_ceil(POINTS_PER_ROW) as u32
+    }
+
+    fn segment_used_row_points(&self) -> u64 {
+        let blocks = self
+            .block_tracker
+            .get_blocks(self.preflight_user_cycles, self.jit.ctx.touched_pages());
+        let points = blocks.row_points();
+        tracing::info!("segment_used_row_points = {points}");
+        points
     }
 
     fn should_split(&self, segment_threshold: u32) -> bool {
