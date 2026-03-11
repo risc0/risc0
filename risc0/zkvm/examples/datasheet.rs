@@ -45,20 +45,27 @@ fn find_iterations_for_po2(po2: usize) -> u32 {
         .unwrap();
 
     let mut saved_segment = None;
-    let _ = ExecutorImpl::from_elf(env, &LOOP_ELF)
+    let err = ExecutorImpl::from_elf(env, &LOOP_ELF)
         .unwrap()
         .run_with_callback(|segment| {
             saved_segment = Some(segment);
             Err(anyhow!("stop early"))
-        });
+        })
+        .map(|_| ())
+        .unwrap_err();
 
     let Some(segment) = saved_segment else {
-        panic!("failed to produce segment");
+        panic!("failed to produce segment: {err}");
     };
     let opts = ProverOpts::all_po2s();
     let prover = get_prover_server(&opts).unwrap();
     let results = prover.segment_preflight(&segment).unwrap();
-    results.block_counts()[risc0_circuit_rv32im::BlockType::InstBranch]
+    let block_counts = results.block_counts();
+    let total = block_counts[risc0_circuit_rv32im::BlockType::InstBranch];
+
+    segment.assert_preflight_counts(block_counts);
+
+    total
 }
 
 /// We need to leave some room for the instructions after the loop finishes.

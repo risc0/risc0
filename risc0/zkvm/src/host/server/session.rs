@@ -141,6 +141,11 @@ impl Segment {
             insn_count: self.inner.insn_counter as u64,
         }
     }
+
+    /// Assert the block counts match
+    pub fn assert_preflight_counts(&self, block_counts: enum_map::EnumMap<BlockType, u32>) {
+        self.inner.blocks.assert_preflight_counts(block_counts);
+    }
 }
 
 /// The results of running preflight on a [Segment].
