@@ -142,6 +142,7 @@ impl Default for BlockCollection {
 }
 
 impl BlockCollection {
+    #[cfg(feature = "jit")]
     fn empty() -> Self {
         Self {
             #[cfg(any(test, feature = "block_tracker_debug"))]
