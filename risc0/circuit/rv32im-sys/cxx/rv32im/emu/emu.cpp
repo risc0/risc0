@@ -533,7 +533,7 @@ struct Emulator {
     wit.rs2 = dinst->rs2;
     writeReg(wit.rd, dinst->rd, newPc);
     wit.imm = dinst->imm;
-    newPc = rs1Val + wit.imm;
+    newPc = (rs1Val + wit.imm) & 0xfffffffe;
     DLOG("  RS1 = " << uint32_t(dinst->rs1) << ", value = " << std::hex << wit.rs1.value
                     << std::dec);
     DLOG("  RD = " << uint32_t(dinst->rd) << ", value = " << std::hex << wit.rd.value << std::dec);

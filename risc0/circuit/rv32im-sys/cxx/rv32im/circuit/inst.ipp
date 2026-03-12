@@ -611,11 +611,15 @@ template <typename C> FDEV void InstJalrBlock<C>::set(CTX, InstJalrWitness wit) 
   rd.set(ctx, wit.rd.wordAddr);
   imm.set(ctx, wit.imm);
   sumPc.set(ctx, wit.rs1.value, wit.imm);
+  mid15.set(ctx, ((wit.rs1.value + wit.imm) & 0xfffe) / 2);
 }
 
 template <typename C> FDEV void InstJalrBlock<C>::verify(CTX) DEV {
   EQ(fetch.nextPc.low.get(), writeRd.data.low.get());
   EQ(fetch.nextPc.high.get(), writeRd.data.high.get());
+  // Verify mid15*2 is low part of sum with low bit zeroed
+  Val<C> lowBit = sumPc.low.get() - mid15.get() * 2;
+  EQZ(lowBit * (lowBit - 1));
 }
 
 template <typename C> FDEV void InstJalrBlock<C>::addArguments(CTX) DEV {
@@ -623,7 +627,8 @@ template <typename C> FDEV void InstJalrBlock<C>::addArguments(CTX) DEV {
   Val<C> mode = fetch.mode.get();
   CpuStateArgument<C> cpuState(cycleVal, fetch.pc.get(), mode, fetch.iCacheCycle.get());
   ctx.pull(cpuState);
-  ctx.push(CpuStateArgument<C>(cycleVal + 1, sumPc.get(), mode, fetch.iCacheCycle.get()));
+  ValU32<C> outPc(mid15.get() * 2, sumPc.high.get());
+  ctx.push(CpuStateArgument<C>(cycleVal + 1, outPc, mode, fetch.iCacheCycle.get()));
   CPU_STATE_ARGUMENT(ctx, cpuState);
 
   DecodeArgument<C> arg;
