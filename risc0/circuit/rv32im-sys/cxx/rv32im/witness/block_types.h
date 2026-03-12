@@ -27,7 +27,7 @@
   BLOCK_TYPE(InstStore, 3)                                                                         \
   BLOCK_TYPE(InstBranch, 4)                                                                        \
   BLOCK_TYPE(InstJal, 7)                                                                           \
-  BLOCK_TYPE(InstJalr, 6)                                                                          \
+  BLOCK_TYPE(InstJalr, 5)                                                                          \
   BLOCK_TYPE(InstLui, 9)                                                                           \
   BLOCK_TYPE(InstAuipc, 7)                                                                         \
   BLOCK_TYPE(InstEcall, 1)                                                                         \
