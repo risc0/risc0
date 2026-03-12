@@ -27,6 +27,7 @@ use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
 use risc0_circuit_rv32im::{MAX_INSN_ROWS, execute::DEFAULT_SEGMENT_LIMIT_PO2};
+use risc0_core::scope;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{MAX_CYCLES_PO2, MIN_CYCLES_PO2, hal::tracker};
 use risc0_zkvm::{
@@ -169,9 +170,20 @@ fn po2_in_range(s: &str) -> Result<usize, String> {
 }
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> anyhow::Result<Session> {
-    ExecutorImpl::from_elf(env, elf)
-        .unwrap()
-        .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+    scope!("execute_elf");
+
+    let mut exec = {
+        scope!("execute_elf:create_executor");
+        ExecutorImpl::from_elf(env, elf).unwrap()
+    };
+
+    let session = {
+        scope!("execute_elf:run");
+        exec.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))?
+    };
+
+    scope!("execute_elf:destroy");
+    Ok(session)
 }
 
 #[derive(Eq, PartialEq, Subcommand, Sequence)]
@@ -240,6 +252,8 @@ impl Datasheet {
     }
 
     fn execute(&mut self) {
+        scope!("datasheet:execute");
+
         let env = ExecutorEnv::builder()
             .write_slice(
                 &self
