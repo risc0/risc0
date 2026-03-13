@@ -493,10 +493,11 @@ template <typename C> FDEV void DigestWriteBlock<C>::addArguments(CTX) DEV {
 template <typename C> FDEV void EcallBigIntBlock<C>::set(CTX, EcallBigIntWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   fetch.set(ctx, wit.fetch, wit.cycle);
+  readA0.set(ctx, wit.a0, wit.cycle);
   readA7.set(ctx, wit.a7, wit.cycle);
   readT0.set(ctx, wit.t0, wit.cycle);
   readT2.set(ctx, wit.t2, wit.cycle);
-  cycleCount.set(ctx, wit.count);
+  readCount.set(ctx, wit.count, wit.cycle);
   mm.set(ctx, wit.t0.value);
   pcDecomp.set(ctx, wit.t2.value);
   pcVerify.set(ctx, wit.t2.value, wit.t0.value * MODE_MACHINE);
@@ -505,7 +506,8 @@ template <typename C> FDEV void EcallBigIntBlock<C>::set(CTX, EcallBigIntWitness
 template <typename C> FDEV void EcallBigIntBlock<C>::verify(CTX) DEV {
   // Must be in machine mode
   EQ(fetch.mode.get(), Val<C>(MODE_MACHINE));
-
+  // Make sure read from A0 has a valid address
+  EQ(readA0.wordAddr.get(), MACHINE_REGS_WORD + REG_A0);
   // Make sure A7 = HOST_ECALL_BIGINT
   EQ(readA7.wordAddr.get(), MACHINE_REGS_WORD + REG_A7);
   EQ(readA7.data.low.get(), HOST_ECALL_BIGINT);
@@ -518,11 +520,18 @@ template <typename C> FDEV void EcallBigIntBlock<C>::verify(CTX) DEV {
   EQ(readT0.data.high.get(), 0);
   // Make sure new PC is aligned
   EQZ(pcDecomp.low0.get() + pcDecomp.low1.get());
+  // Get address of verifier size: Note, this is a trusted value from the kernel
+  // thus we assume alignmenet is valid
+  Val<C> descriptorAddr = readA0.data.high.get()  * 0x4000 + readA0.data.low.get() * Val<C>(inv(Fp(4)));
+  // Count is the second value in the descriptor
+  EQ(readCount.wordAddr.get(), descriptorAddr + 1);
+  // Make sure count < 64k
+  EQ(readCount.data.high.get(), 0);
 }
 
 template <typename C> FDEV void EcallBigIntBlock<C>::addArguments(CTX) DEV {
   Val<C> cycleVal = cycle.get();
-  Val<C> countVal = cycleCount.get();
+  Val<C> countVal = readCount.data.low.get();
   Val<C> biPc = pcDecomp.wordAddr(readT2.data.get());
   CpuStateArgument<C> cpuState(cycleVal, fetch.pc.get(), MODE_MACHINE, fetch.iCacheCycle.get());
   ctx.pull(cpuState);
