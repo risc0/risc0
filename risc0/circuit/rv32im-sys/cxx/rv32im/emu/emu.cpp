@@ -781,16 +781,17 @@ struct Emulator {
 
   void do_ECALL_BIG_INT() {
     std::map<uint32_t, uint32_t> polyWitness;
-    size_t count = witgenBigInt(polyWitness, [&](uint32_t addr) { return peekPhysMemory(addr); });
+    uint32_t count = witgenBigInt(polyWitness, [&](uint32_t addr) { return peekPhysMemory(addr); });
     LOG(2, "BIGINT ecall with count = " << count);
     // TODO: Based on count + polyWitness paging, decide if we need to abort
     auto& wit = trace.makeEcallBigInt();
     wit.cycle = curCycle;
     wit.fetch = dinst->fetch;
-    wit.count = count;
+    uint32_t descAddr = readReg(wit.a0, REG_A0);
     readReg(wit.a7, REG_A7);
     uint32_t biMm = readReg(wit.t0, REG_T0);
     uint32_t biPcWord = readReg(wit.t2, REG_T2) / 4;
+    readPhysMemory(wit.count, descAddr / 4 + 1);
     curCycle++;
     BigIntPreflight pf;
     for (size_t i = 0; i < count; i++) {
