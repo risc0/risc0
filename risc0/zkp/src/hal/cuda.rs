@@ -589,6 +589,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         poly_count: usize,
         expand_bits: usize,
     ) {
+        scope!("batch_expand_into_evaluate_ntt");
         // batch_expand
         {
             let out_size = output.size() / poly_count;
@@ -637,6 +638,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
     }
 
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
+        scope!("batch_interpolate_ntt");
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         let n_bits = log2_ceil(row_size);
@@ -657,6 +659,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
     }
 
     fn batch_bit_reverse(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
+        scope!("batch_bit_reverse");
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         let bits = log2_ceil(row_size);
@@ -769,6 +772,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
     }
 
     fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
+        scope!("zk_shift");
         let bits = log2_ceil(io.size() / poly_count);
         assert_eq!(io.size(), poly_count * (1 << bits));
 
@@ -1014,6 +1018,7 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         input: &Self::Buffer<Self::Elem>,
         mix: &Self::ExtElem,
     ) {
+        scope!("fri_fold");
         let count = output.size() / Self::ExtElem::EXT_SIZE;
         assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), output.size() * FRI_FOLD);
@@ -1031,11 +1036,13 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
     }
 
     fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize) {
+        scope!("hash_fold");
         assert_eq!(input_size, 2 * output_size);
         self.hash.as_ref().unwrap().hash_fold(io, output_size);
     }
 
     fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>) {
+        scope!("hash_rows");
         self.hash.as_ref().unwrap().hash_rows(output, matrix);
     }
 
