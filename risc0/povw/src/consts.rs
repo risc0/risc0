@@ -20,6 +20,16 @@ use crate::WorkSet;
 /// List of pre-calculated subtree roots with all-empty bitmaps for leaves.
 ///
 /// Indexed by the height with height zero defined as the value of the leaf.
+///
+/// These values are computed recursively:
+/// - Height 0: `hash_leaf(Bitmap::EMPTY)`
+/// - Height n > 0: `join(EMPTY_SUBTREE_ROOTS[n-1], EMPTY_SUBTREE_ROOTS[n-1])`
+///
+/// This represents the Merkle root of a complete binary tree where all leaves
+/// are empty bitmaps (no nonces used). Used for efficient computation of empty
+/// subtrees in the Merkle tree structure.
+///
+/// See the test `empty_subtree_root_correct` for the reference implementation.
 pub(crate) const EMPTY_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
     digest!("a505c1affa9b6d2ed829d837d14eb8614f198bfc7f40e3c438ac9e366f410073"),
     digest!("6603858652cd6a283a3df113a010d2b05e56d65539bd1fba68d732529eaa88da"),
@@ -275,6 +285,16 @@ pub(crate) const EMPTY_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
 /// List of pre-calculated subtree roots with all-full bitmaps for leaves.
 ///
 /// Indexed by the height with height zero defined as the value of the leaf.
+///
+/// These values are computed recursively:
+/// - Height 0: `hash_leaf(Bitmap::FULL)`
+/// - Height n > 0: `join(FULL_SUBTREE_ROOTS[n-1], FULL_SUBTREE_ROOTS[n-1])`
+///
+/// This represents the Merkle root of a complete binary tree where all leaves
+/// are full bitmaps (all nonces used). Used for efficient computation of full
+/// subtrees in the Merkle tree structure.
+///
+/// See the test `full_subtree_root_correct` for the reference implementation.
 pub(crate) const FULL_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
     digest!("db015763e201a3f7e51178938859ce0f6c6d9c3457f42b0dc9244c3ab65ebe89"),
     digest!("bb025bc4bcfefdbd43a39e0507738a3efc6137465e70f4682926cb3b7d201103"),
