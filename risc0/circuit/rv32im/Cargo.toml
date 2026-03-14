@@ -52,6 +52,7 @@ std = [
 ]
 witgen_debug = []
 block_tracker_debug = []
+jit = ["risc0-emu"]
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
@@ -66,6 +67,7 @@ gdbstub_arch = { version = "0.3", optional = true }
 paste = "1.0"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
+risc0-emu = { workspace = true, optional = true }
 risc0-zkp = { workspace = true, default-features = false }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = [

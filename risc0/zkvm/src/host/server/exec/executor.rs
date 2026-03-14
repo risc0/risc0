@@ -297,6 +297,8 @@ impl<'a> ExecutorImpl<'a> {
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
     pub fn run(&mut self) -> Result<Session> {
+        scope!("executor:run");
+
         if self.env.segment_path.is_none() {
             self.env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));
         }
@@ -306,6 +308,7 @@ impl<'a> ExecutorImpl<'a> {
     }
 
     /// This will run the executor with a gdb server so gdb can be attached.
+    #[cfg(not(feature = "jit"))]
     pub fn run_with_debugger(&mut self) -> Result<()> {
         let debugger = super::gdb::GdbExecutor::new(self)?;
         eprintln!(
@@ -323,6 +326,8 @@ impl<'a> ExecutorImpl<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send,
     {
+        scope!("executor:run_with_callback");
+
         thread::scope(|scope| {
             let update_processor = SegmentUpdateProcessor::spawn(scope, &self.image, callback);
             while let Some(update) = self
@@ -331,6 +336,9 @@ impl<'a> ExecutorImpl<'a> {
             {
                 update_processor.on_segment_update(update)?;
             }
+
+            scope!("executor:finalize_segments");
+
             // Send the constructed Output to merge into the final segment.
             update_processor
                 .output_channel
@@ -340,6 +348,8 @@ impl<'a> ExecutorImpl<'a> {
 
             // Close the update channel to indicate to the sidecar thread execution has finished.
             drop(update_processor.update_channel);
+
+            scope!("executor:wait_for_hash_thread");
 
             // Get the pre_image_digest and the segments from the update_processor.
             // pre_image_digest is only received to avoid recomputation.
@@ -352,9 +362,12 @@ impl<'a> ExecutorImpl<'a> {
     pub(crate) fn run_segment(&mut self) -> Result<Option<SegmentUpdate>, ExecutionError> {
         scope!("execute");
 
+        tracing::trace!("run_segment start");
+
         // Run the segment.
         let start = Instant::now();
         let update = self.inner.run_segment(self.execution_limit())?;
+        tracing::trace!("run_segment ending");
 
         // If an update was produced, increment the running total of the execution time.
         self.execution_time += if update.is_some() {

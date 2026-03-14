@@ -27,6 +27,7 @@ use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
 use risc0_circuit_rv32im::{MAX_INSN_ROWS, execute::DEFAULT_SEGMENT_LIMIT_PO2};
+use risc0_core::scope;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{MAX_CYCLES_PO2, MIN_CYCLES_PO2, hal::tracker};
 use risc0_zkvm::{
@@ -45,7 +46,7 @@ fn find_iterations_for_po2(po2: usize) -> u32 {
         .unwrap();
 
     let mut saved_segment = None;
-    let error = ExecutorImpl::from_elf(env, &LOOP_ELF)
+    let err = ExecutorImpl::from_elf(env, &LOOP_ELF)
         .unwrap()
         .run_with_callback(|segment| {
             saved_segment = Some(segment);
@@ -55,12 +56,17 @@ fn find_iterations_for_po2(po2: usize) -> u32 {
         .unwrap_err();
 
     let Some(segment) = saved_segment else {
-        panic!("failed to produce segment: {error}");
+        panic!("failed to produce segment: {err}");
     };
     let opts = ProverOpts::all_po2s();
     let prover = get_prover_server(&opts).unwrap();
     let results = prover.segment_preflight(&segment).unwrap();
-    results.block_counts()[risc0_circuit_rv32im::BlockType::InstBranch]
+    let block_counts = results.block_counts();
+    let total = block_counts[risc0_circuit_rv32im::BlockType::InstBranch];
+
+    segment.assert_preflight_counts(block_counts);
+
+    total
 }
 
 /// We need to leave some room for the instructions after the loop finishes.
@@ -164,9 +170,20 @@ fn po2_in_range(s: &str) -> Result<usize, String> {
 }
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> anyhow::Result<Session> {
-    ExecutorImpl::from_elf(env, elf)
-        .unwrap()
-        .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+    scope!("execute_elf");
+
+    let mut exec = {
+        scope!("execute_elf:create_executor");
+        ExecutorImpl::from_elf(env, elf).unwrap()
+    };
+
+    let session = {
+        scope!("execute_elf:run");
+        exec.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))?
+    };
+
+    scope!("execute_elf:destroy");
+    Ok(session)
 }
 
 #[derive(Eq, PartialEq, Subcommand, Sequence)]
@@ -235,6 +252,8 @@ impl Datasheet {
     }
 
     fn execute(&mut self) {
+        scope!("datasheet:execute");
+
         let env = ExecutorEnv::builder()
             .write_slice(
                 &self

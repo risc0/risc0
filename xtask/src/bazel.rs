@@ -80,13 +80,18 @@ impl Bazel {
     fn bootstrap_riscv_tests() {
         let srcs = Self::bazel("//rv32im/rvtest:riscv-tests");
         let pwd = std::env::current_dir().unwrap();
-        let dst_dir = pwd.join("risc0/zkvm/src/host/server/testdata");
+        let dst_dirs = [
+            pwd.join("risc0/zkvm/src/host/server/testdata"),
+            pwd.join("risc0/emu/src/testdata"),
+        ];
         for src_path in srcs {
             let file_name = src_path.file_name().unwrap();
             let mut src_data = File::open(&src_path).unwrap();
-            let dst_path = dst_dir.join(file_name);
-            let mut dst_file = File::create(&dst_path).unwrap();
-            std::io::copy(&mut src_data, &mut dst_file).unwrap();
+            for dst_dir in &dst_dirs {
+                let dst_path = dst_dir.join(file_name);
+                let mut dst_file = File::create(&dst_path).unwrap();
+                std::io::copy(&mut src_data, &mut dst_file).unwrap();
+            }
         }
     }
 
