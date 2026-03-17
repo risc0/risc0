@@ -236,7 +236,7 @@ jobs:
             test_command: cargo nextest run --partition hash:1/2
             partition: 1
             ci_profile: fast
-            extra_features: ""
+            extra_features: "-F jit"
           - os: macOS
             arch: ARM64
             feature: default
@@ -244,7 +244,7 @@ jobs:
             test_command: cargo nextest run --partition hash:2/2
             partition: 2
             ci_profile: fast
-            extra_features: ""
+            extra_features: "-F jit"
     env:
       FEATURE: ${{ matrix.feature }}
       EXTRA_FEATURES: ${{ matrix.extra_features }}
