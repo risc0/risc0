@@ -212,7 +212,7 @@ struct Datasheet {
 
 impl Datasheet {
     pub fn run(&mut self, args: Args) {
-        self.warmup(args.max_po2);
+        self.warmup(args.max_po2, &args.command);
 
         if let Some(ref cmd) = args.command {
             self.run_cmd(cmd, &args);
@@ -632,12 +632,12 @@ impl Datasheet {
         self.bigint2_prove_segment(&session, &segment);
     }
 
-    fn warmup(&mut self, max_po2: usize) {
+    fn warmup(&mut self, max_po2: usize, #[allow(unused)] command: &Option<Command>) {
         println!("build po2 table (also CPU warmup)");
         self.po2_table = Po2Table::build(std::cmp::max(max_po2, DEFAULT_SEGMENT_LIMIT_PO2));
 
         #[cfg(gpu_accel)]
-        {
+        if !matches!(command, Some(Command::Execute)) {
             println!("gpu warmup");
             let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
             let prover = get_prover_server(&opts).unwrap();
