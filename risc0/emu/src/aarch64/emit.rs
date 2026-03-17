@@ -317,12 +317,15 @@ impl Translator {
             ; cbnz x0, >cont1
         );
         self.emit_retval(Terminal::QuotaExhausted, self.ctx.pc);
-        emit!(self ; b ->exit);
-
-        emit!(self ; cont1:);
+        emit!(self
+            ; b ->exit
+            ; cont1:
+        );
 
         // Load points (64-bit) into x0.
         mov_imm64!(self.asm, 0, points);
+
+        let table_offset = id * std::mem::size_of::<u32>() as u32;
 
         // Subtract points from quota, clamping to zero.
         emit!(self
@@ -335,12 +338,9 @@ impl Translator {
 
             // Mark the block as used: ctx.block_count_table[id]++
             ; ldr x0, [x20, JITCTX_BLOCK_COUNT_TABLE_OFFSET as u32]
-        );
-        let byte_off = id as u32 * std::mem::size_of::<u32>() as u32;
-        emit!(self
-            ; ldr w1, [x0, byte_off]
+            ; ldr w1, [x0, table_offset]
             ; add w1, w1, 1
-            ; str w1, [x0, byte_off]
+            ; str w1, [x0, table_offset]
         );
     }
 
@@ -481,11 +481,11 @@ impl Translator {
             return;
         }
         // Zero-initialise GPR with mov reg, wzr
-        if let Loc::GPR(dst) = dst {
-            if src == Loc::Zero {
-                emit!(self ; mov W(dst), wzr);
-                return;
-            }
+        if let Loc::GPR(dst) = dst
+            && src == Loc::Zero
+        {
+            emit!(self ; mov W(dst), wzr);
+            return;
         }
         // Use binop `orr dst, wzr, src` as a general move (AArch64 idiom).
         match (src, dst) {
@@ -942,7 +942,7 @@ impl Translator {
             ; lsr x1, x0, PAGE_SHIFT as u32
 
             // x2 = offset = addr & PAGE_OFFSET_MASK
-            ; and w2, w0, PAGE_OFFSET_MASK as u32
+            ; and w2, w0, PAGE_OFFSET_MASK
 
             // Save both onto the stack in one frame: [sp+8]=page_idx, [sp+0]=offset
             ; stp x2, x1, [sp, -16]!
@@ -1245,7 +1245,7 @@ pub(crate) fn patch_jump(
     );
     let imm26 = delta_bytes / 4;
     assert!(
-        imm26 >= -(1 << 25) && imm26 < (1 << 25),
+        (-(1 << 25)..(1 << 25)).contains(&imm26),
         "patch_jump: branch target out of ±128 MiB range (imm26 = {imm26})"
     );
 
