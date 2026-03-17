@@ -214,7 +214,11 @@ impl<Claim> SuccinctReceipt<Claim> {
 
     /// Return the seal for this receipt, as a vector of bytes.
     pub fn get_seal_bytes(&self) -> Vec<u8> {
-        self.seal.iter().flat_map(|x| x.to_le_bytes()).collect()
+        let mut out = Vec::with_capacity(self.seal.len() * core::mem::size_of::<u32>());
+        for word in &self.seal {
+            out.extend_from_slice(&word.to_le_bytes());
+        }
+        out
     }
 
     /// Number of bytes used by the seal for this receipt.
