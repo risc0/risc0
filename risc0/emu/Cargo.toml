@@ -12,6 +12,7 @@ block_tracker_debug = []
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 bytemuck = "1.24.0"
+capstone = "0.14.0"
 derive_more = { version = "2.0.1", default-features = false, features = [
   "add",
   "add_assign",

@@ -19,6 +19,9 @@ mod memory;
 mod page;
 pub mod rv32im;
 
+#[cfg(test)]
+mod tests;
+
 #[cfg(target_arch = "x86_64")]
 pub mod x86_64;
 
@@ -46,8 +49,14 @@ use dynasmrt::{
     AssemblyOffset, DynasmApi as _, DynasmError, DynasmLabelApi,
     components::StaticLabel,
     relocations::{Relocation as _, RelocationSize},
-    x64::{Assembler, X64Relocation},
 };
+
+#[cfg(target_arch = "x86_64")]
+use dynasmrt::x64::Assembler;
+
+#[cfg(target_arch = "aarch64")]
+use dynasmrt::aarch64::Assembler;
+
 use enum_map::EnumMap;
 use libc::{
     MAP_ANON, MAP_FAILED, MAP_PRIVATE, PROT_NONE, PROT_READ, PROT_WRITE, SA_SIGINFO, c_int, c_void,
@@ -274,15 +283,7 @@ impl Translator {
             "fixup: {jmp_offset:x?} -> {dest_offset:x?} prologue offset: {dest_prologue_offset:?}"
         );
 
-        let kind = X64Relocation::from_size(RelocationSize::DWord);
-        self.asm.alter(|modifier| {
-            // goto the rel32 operand of the source jump instruction
-            modifier.goto(AssemblyOffset(jmp_offset.0 + 1));
-            // compute the rel32 offset from the end of the jump instruction
-            let offset = dest_prologue_offset.0 as isize - WORD_SIZE as isize;
-            // perform the actual patch
-            modifier.bare_relocation(offset as usize, 0, 0, kind.clone());
-        })?;
+        emit::patch_jump(&mut self.asm, jmp_offset, dest_prologue_offset)?;
 
         Ok(())
     }

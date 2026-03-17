@@ -117,7 +117,7 @@ mod riscv {
     use risc0_binfmt::Program;
     use zip::ZipArchive;
 
-    use crate::{rv32im::REG_MAX, x64::Terminal};
+    use crate::{Terminal, rv32im::REG_MAX};
 
     use super::run_program;
 
@@ -125,7 +125,7 @@ mod riscv {
     const REG_TESTNUM: usize = 31;
 
     fn run_test(test_name: &str) {
-        let bytes = include_bytes!("../testdata/riscv-tests.zip");
+        let bytes = include_bytes!("testdata/riscv-tests.zip");
         let reader = Cursor::new(bytes);
         let mut archive = ZipArchive::new(reader).unwrap();
 

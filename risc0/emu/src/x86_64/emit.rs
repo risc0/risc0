@@ -1134,10 +1134,52 @@ impl Translator {
     }
 }
 
+/// Patch the `jmp ->exit` instruction that was emitted at `jmp_offset` so that
+/// it instead jumps directly to `dest_offset`.
+///
+/// x86-64 `jmp rel32` encoding:
+///   [0xE9] [rel32]   — 5 bytes total
+///
+/// The rel32 field is a signed 32-bit offset from the *end* of the instruction
+/// (i.e. from jmp_offset + 5) to the destination.  We skip the 1-byte opcode
+/// and overwrite the 4-byte operand with a DWord relocation.
+pub(crate) fn patch_jump(
+    asm: &mut Assembler,
+    jmp_offset: AssemblyOffset,
+    dest_offset: AssemblyOffset,
+) -> Result<(), dynasmrt::DynasmError> {
+    let kind = X64Relocation::from_size(RelocationSize::DWord);
+    asm.alter(|modifier| {
+        // Skip the 0xE9 opcode byte to reach the rel32 operand.
+        modifier.goto(AssemblyOffset(jmp_offset.0 + 1));
+        // rel32 is relative to the end of the 5-byte instruction.
+        // dynasmrt's bare_relocation adds `value - patch_site` for us when
+        // the addend and offset are set this way:
+        //   value  = dest_offset.0
+        //   offset = -(instruction_length) = -5  expressed as the addend
+        // Simpler: compute the raw rel32 directly.
+        // bare_relocation(target, offset, addend, kind) writes:
+        //   target + offset - patch_site + addend
+        // We want dest_offset.0 - (jmp_offset.0 + 5), so:
+        //   target  = dest_offset.0
+        //   offset  = 0
+        //   addend  = -(jmp_offset.0 + 5)  — but addend is i32, use isize arithmetic
+        // The original code used:
+        //   offset = dest_offset.0 as isize - WORD_SIZE as isize
+        // which worked because bare_relocation subtracts the current write
+        // position (jmp_offset.0 + 1) from `offset` automatically.
+        // Preserving that exact idiom:
+        use crate::rv32im::WORD_SIZE;
+        let offset = dest_offset.0 as isize - WORD_SIZE as isize;
+        modifier.bare_relocation(offset as usize, 0, 0, kind.clone());
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::GPR::*;
     use super::*;
+    use risc0_binfmt::Program;
     use rstest::rstest;
 
     fn run_asm_test(mut inner: impl FnMut(&mut Translator), expected: &[&str]) {
