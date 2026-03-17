@@ -522,7 +522,8 @@ template <typename C> FDEV void EcallBigIntBlock<C>::verify(CTX) DEV {
   EQZ(pcDecomp.low0.get() + pcDecomp.low1.get());
   // Get address of verifier size: Note, this is a trusted value from the kernel
   // thus we assume alignmenet is valid
-  Val<C> descriptorAddr = readA0.data.high.get()  * 0x4000 + readA0.data.low.get() * Val<C>(inv(Fp(4)));
+  Val<C> descriptorAddr =
+      readA0.data.high.get() * 0x4000 + readA0.data.low.get() * Val<C>(inv(Fp(4)));
   // Count is the second value in the descriptor
   EQ(readCount.wordAddr.get(), descriptorAddr + 1);
   // Make sure count < 64k
