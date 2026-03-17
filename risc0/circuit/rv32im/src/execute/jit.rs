@@ -24,8 +24,7 @@ use risc0_zkp::core::{
     log2_ceil,
 };
 
-#[cfg(target_arch = "x86_64")]
-use risc0_emu::x64::{BlockInfo, BlockRun, Terminal, Translator as JitTranslator};
+use risc0_emu::{BlockInfo, BlockRun, Terminal, Translator as JitTranslator};
 
 use super::block_tracker::{BlockTracker, POINTS_PER_ROW};
 
