@@ -260,10 +260,11 @@ template <typename C> struct EcallBigIntBlock {
 
   Reg<C> cycle;
   FetchBlock<C> fetch;
+  RegMemReadBlock<C> readA0;
   RegMemReadBlock<C> readA7;
   RegMemReadBlock<C> readT0;
   RegMemReadBlock<C> readT2;
-  Reg<C> cycleCount;
+  PhysMemReadBlock<C> readCount;
   BitReg<C> mm;
   AddressDecompose<C> pcDecomp;
   AddressVerify<C> pcVerify;
@@ -271,10 +272,11 @@ template <typename C> struct EcallBigIntBlock {
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, "cycle", cycle);
     T::apply(ctx, "fetch", fetch, cycle.get());
+    T::apply(ctx, "readA0", readA0, cycle.get());
     T::apply(ctx, "readA7", readA7, cycle.get());
     T::apply(ctx, "readT0", readT0, cycle.get());
     T::apply(ctx, "readT2", readT2, cycle.get());
-    T::apply(ctx, "cycleCount", cycleCount);
+    T::apply(ctx, "readCount", readCount, cycle.get());
     T::apply(ctx, "mm", mm);
     T::apply(ctx, "pcDecomp", pcDecomp, readT2.data.get());
     T::apply(ctx, "pcVerify", pcVerify, readT2.data.get(), mm.get() * Val<C>(MODE_MACHINE));
