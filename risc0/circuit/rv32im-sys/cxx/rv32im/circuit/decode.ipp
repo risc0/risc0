@@ -182,6 +182,7 @@ template <typename C> FDEV void DecodeBlock<C>::verify(CTX) DEV {
   // Verify low 2 bits relate to isCompressed
   EQ(isCompressed.get(), Val<C>(1) - low16Decomp.low0.get() * low16Decomp.low1.get());
   // Compute address of second read + verify
+  EQZ(pcDecomp.low0.get());
   Val<C> isUnaligned = pcDecomp.low1.get();
   Val<C> load1Addr = cond<C>(isCompressed.get(),
                              Val<C>(COMPRESSED_INST_LOOKUP_WORD) + low16(),
