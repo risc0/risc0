@@ -374,18 +374,9 @@ mod riscv {
     use super::*;
     use crate::ExecutorEnv;
 
-    fn run_test(test_name: &str) {
-        // Load guest ELF from testdata archive
-        let bytes = include_bytes!("../testdata/riscv-tests.zip");
-        let reader = Cursor::new(bytes);
-        let mut archive = ZipArchive::new(reader).unwrap();
-
-        let mut entry = archive.by_name(test_name).unwrap();
-        let mut user_elf = Vec::new();
-        entry.read_to_end(&mut user_elf).unwrap();
-
+    fn run_test_inner(test_name: &str, user_elf: &[u8]) {
         // Create combined binary with user ELF and v1compat kernel
-        let combined_binary = ProgramBinary::new(&user_elf, V1COMPAT_ELF).encode();
+        let combined_binary = ProgramBinary::new(user_elf, V1COMPAT_ELF).encode();
 
         // Execute the program
         let env = ExecutorEnv::default();
@@ -406,12 +397,38 @@ mod riscv {
         prove_session(&session).unwrap();
     }
 
+    fn run_zip_test(test_name: &str) {
+        // Load guest ELF from testdata archive
+        let bytes = include_bytes!("../testdata/riscv-tests.zip");
+        let reader = Cursor::new(bytes);
+        let mut archive = ZipArchive::new(reader).unwrap();
+
+        let mut entry = archive.by_name(test_name).unwrap();
+        let mut user_elf = Vec::new();
+        entry.read_to_end(&mut user_elf).unwrap();
+
+        run_test_inner(test_name, &user_elf);
+    }
+
     macro_rules! test_case {
         ($func_name:ident) => {
             #[test_log::test]
             #[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
             fn $func_name() {
-                run_test(stringify!($func_name));
+                run_zip_test(stringify!($func_name));
+            }
+        };
+    }
+
+    macro_rules! ext_test_case {
+        ($func_name:ident) => {
+            #[test_log::test]
+            #[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
+            fn $func_name() {
+                run_test_inner(
+                    stringify!($func_name),
+                    include_bytes!(concat!("../testdata/", stringify!($func_name), ".bin")),
+                );
             }
         };
     }
@@ -476,6 +493,9 @@ mod riscv {
     test_case!(sw);
     test_case!(xor);
     test_case!(xori);
+
+    // Extra tests we added
+    ext_test_case!(jalr_addr_lowest_bit);
 }
 
 #[test_log::test]
