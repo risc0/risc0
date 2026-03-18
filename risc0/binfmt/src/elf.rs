@@ -151,7 +151,7 @@ impl Program {
     pub(crate) fn prepare_kernel(&mut self, user: Option<&mut Program>) {
         // NOTE: The given user program should define a disjoint set of pages.
         if let Some(user) = user {
-            for (idx, page) in user.image.pages.clone() {
+            for (idx, page) in core::mem::take(&mut user.image.pages) {
                 self.image.set_page(idx, page);
             }
         }
