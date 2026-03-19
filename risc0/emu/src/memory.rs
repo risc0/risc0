@@ -22,8 +22,9 @@ use risc0_binfmt::{MemoryImage, Page};
 
 use crate::rv32im::WORD_SIZE;
 
-use super::page::{
-    PAGE_OFFSET_MASK, PAGE_SHIFT, PAGE_SIZE, PAGE_WRITABLE_FLAG, PAGE_WRITABLE_MASK,
+use super::{
+    REGISTER_PAGE_IDX,
+    page::{PAGE_OFFSET_MASK, PAGE_SHIFT, PAGE_SIZE, PAGE_WRITABLE_FLAG, PAGE_WRITABLE_MASK},
 };
 
 pub const NUM_PAGES: usize = 1 << (32 - PAGE_SHIFT);
@@ -100,7 +101,9 @@ impl HostMemory {
         let slot = &mut self.slots[page_idx as usize];
 
         if slot.tag() != current_tag {
-            self.touched_pages += 1;
+            if page_idx != REGISTER_PAGE_IDX {
+                self.touched_pages += 1;
+            }
         }
 
         let page_mut = self.pages.get_mut(&page_idx).unwrap();
@@ -119,7 +122,9 @@ impl HostMemory {
         let slot = &mut self.slots[page_idx as usize];
 
         if slot.tag() != current_tag {
-            self.touched_pages += 1;
+            if page_idx != REGISTER_PAGE_IDX {
+                self.touched_pages += 1;
+            }
             slot.set(page.data().as_ptr(), current_tag, false);
         }
 
