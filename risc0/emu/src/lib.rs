@@ -71,7 +71,6 @@ use crate::rv32im::{Instruction, REG_MAX, RvOp, WORD_SIZE};
 
 pub const MACHINE_REGS_ADDR: u32 = 0xffff_0000;
 pub const USER_REGS_ADDR: u32 = 0xffff_0080;
-pub const REGISTER_PAGE_IDX: u32 = MACHINE_REGS_ADDR >> PAGE_SHIFT;
 
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -647,8 +646,8 @@ impl JitContext {
 
     /// the count of all touched pages since last checkpoint
     pub fn touched_pages(&self) -> u64 {
-        // add one for registers page
-        self.ram.touched_pages + 1
+        // add two for csr touches
+        self.ram.touched_pages + 2
     }
 
     /// clear all tracked pages
