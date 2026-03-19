@@ -321,7 +321,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
                 self.insn_counter += run.count;
                 pc += WORD_SIZE as u32;
             }
-            tracing::trace!("executor insn count = {}", self.insn_counter);
         }
     }
 
@@ -349,7 +348,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
             JitState::Break => {
                 Risc0Machine::step(&mut Emulator {}, self)?;
                 self.insn_counter += 1;
-                tracing::trace!("executor insn count = {}", self.insn_counter);
                 self.jit_state = JitState::Run;
             }
         }
@@ -441,7 +439,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
         self.insn_counter = 0;
         self.jit.ctx.paging_checkpoint();
         self.block_tracker = Default::default();
-        tracing::trace!("block_tracker reset");
 
         Ok(update)
     }
@@ -671,14 +668,12 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
             LoadOp::Peek => self.jit.ctx.load_u32(addr.baddr().0),
             LoadOp::Load | LoadOp::Record => self.jit.ctx.load_u32(addr.baddr().0),
         };
-        // tracing::trace!("load_mem({:?}) -> {word:#010x}", addr.baddr());
         Ok(word)
     }
 
     #[inline(always)]
     fn load_register(&mut self, _op: LoadOp, base: WordAddr, idx: usize) -> Result<u32> {
         let word = self.jit.ctx.load_register(base.0, idx);
-        // tracing::trace!("load_register({:?}) -> {word:#010x}", addr.baddr());
         Ok(word)
     }
 
@@ -696,7 +691,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
 
     #[inline(always)]
     fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
-        // tracing::trace!("store_register({:?}, {word:#010x})", addr.baddr());
         if unlikely(!self.trace.is_empty()) {
             self.trace(TraceEvent::MemorySet {
                 addr: (base + idx).baddr().0,
