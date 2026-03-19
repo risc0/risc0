@@ -70,7 +70,7 @@ impl RecursionReceipt {
 
     /// Allocates a [VecDeque] and copies the output stream into it for decoding.
     pub fn out_stream(&self) -> VecDeque<u32> {
-        let mut vec: VecDeque<u32> = VecDeque::new();
+        let mut vec: VecDeque<u32> = VecDeque::with_capacity(self.output.len());;
         vec.extend(self.output.iter());
         vec
     }
