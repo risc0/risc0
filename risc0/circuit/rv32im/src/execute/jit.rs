@@ -525,7 +525,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
             .block_tracker
             .get_blocks(self.preflight_user_cycles, self.jit.ctx.touched_pages());
         let points = blocks.row_points();
-        tracing::info!("segment_used_row_points = {points}");
         points
     }
 

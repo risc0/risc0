@@ -201,7 +201,7 @@ impl Translator {
         let start = self.asm.offset();
         let start_pc = self.ctx.pc;
 
-        tracing::debug!("jit_block: {:#10x}: offset = {start:?}", self.ctx.pc);
+        tracing::trace!("jit_block: {:#10x}: offset = {start:?}", self.ctx.pc);
 
         let mut fixup_locs = vec![];
 
@@ -237,7 +237,7 @@ impl Translator {
             self.next();
         }
 
-        tracing::debug!("commit");
+        tracing::trace!("commit");
         self.asm.commit()?;
 
         for (offset, target_pc) in fixup_locs {
@@ -249,7 +249,7 @@ impl Translator {
 
         let dest_prologue_offset = self.asm.offset();
         let points = point_calculator(self.block_infos.get(&start).unwrap());
-        tracing::info!("jit block points = {points}");
+        tracing::trace!("jit block points = {points}");
 
         self.block_prologue(id as u32, points);
         self.jump(start);
@@ -280,7 +280,7 @@ impl Translator {
 
         self.labels.insert(target_pc, dest_prologue_offset);
 
-        tracing::debug!(
+        tracing::trace!(
             "fixup: {jmp_offset:x?} -> {dest_offset:x?} prologue offset: {dest_prologue_offset:?}"
         );
 
@@ -310,7 +310,6 @@ impl Translator {
     }
 
     fn resume(&mut self) -> Result<()> {
-        // TODO: clear state
         Ok(())
     }
 
@@ -319,7 +318,7 @@ impl Translator {
         point_calculator: impl Fn(&BlockInfo) -> u64,
     ) -> Result<(Terminal, Vec<BlockRun>)> {
         let retval = if let Some(&offset) = self.labels.get(&self.ctx.pc) {
-            tracing::debug!("existing label: {:#10x}", self.ctx.pc);
+            tracing::trace!("existing label: {:#10x}", self.ctx.pc);
             self.enter_block(offset)?
         } else {
             let offset = self.jit_block(point_calculator)?;
@@ -348,7 +347,7 @@ impl Translator {
 
         assert!(!runs.is_empty());
 
-        tracing::info!(
+        tracing::trace!(
             "jit_one runs: {:?}",
             runs.iter().map(|r| r.count).collect::<Vec<_>>()
         );
@@ -361,7 +360,7 @@ impl Translator {
         quota: u64,
         point_calculator: impl Fn(&BlockInfo) -> u64,
     ) -> Result<(Terminal, Vec<BlockRun>)> {
-        tracing::info!("jit_one quota = {quota}");
+        tracing::trace!("jit_one quota = {quota}");
 
         let mut runs_total = vec![];
         self.ctx.quota = quota;
@@ -389,7 +388,7 @@ impl Translator {
     }
 
     fn enter_block(&mut self, offset: AssemblyOffset) -> Result<u64> {
-        tracing::debug!("enter_block: {offset:x?}");
+        tracing::trace!("enter_block: {offset:x?}");
         let enter = self.enter_offset()?;
         let reader = self.asm.reader();
         let exe = reader.lock();
@@ -505,7 +504,7 @@ impl JitContext {
 
     #[inline]
     fn jit_load_page_miss(&mut self, page_idx: u32) -> *const u8 {
-        tracing::info!("jit_load_page_miss: {page_idx:#08x}");
+        tracing::trace!("jit_load_page_miss: {page_idx:#010x}");
         let page = self
             .ram
             .ensure_page_read_for_segment(self.current_tag, page_idx);
@@ -514,7 +513,7 @@ impl JitContext {
 
     #[inline]
     fn jit_store_page_miss(&mut self, page_idx: u32) -> *const u8 {
-        tracing::info!("jit_store_page_miss: {page_idx:#010x}");
+        tracing::trace!("jit_store_page_miss: {page_idx:#010x}");
         let page = self
             .ram
             .ensure_page_write_for_segment(self.current_tag, page_idx);
