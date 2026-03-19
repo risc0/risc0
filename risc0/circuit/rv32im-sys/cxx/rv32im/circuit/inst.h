@@ -389,6 +389,7 @@ template <typename C> struct InstJalrBlock {
   DestReg<C> rd;
   RegU32<C> imm;
   AddU32<C> sumPc;
+  RegU16<C> mid15;
 
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, "cycle", cycle);
@@ -400,6 +401,7 @@ template <typename C> struct InstJalrBlock {
     T::apply(ctx, "rd", rd, writeRd.wordAddr.get(), fetch.isMM());
     T::apply(ctx, "imm", imm);
     T::apply(ctx, "sumPc", sumPc, readRs1.data.get(), imm.get());
+    T::apply(ctx, "mid15", mid15);
   }
 
   FDEV void set(CTX, InstJalrWitness wit) DEV;

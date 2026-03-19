@@ -870,7 +870,7 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
             rd,
             imm: dinst.imm,
         });
-        self.new_pc = rs1_val.wrapping_add(imm);
+        self.new_pc = rs1_val.wrapping_add(imm) & 0xfffffffe;
         tracing::trace!("  RS1 = {dinst_rs1}, value = {:#010x}", rs1.value);
         tracing::trace!("  RD = {dinst_rd}, value = {:#010x}", rd.value);
         tracing::trace!("  PC = {:#010x}", self.pc);
@@ -1187,13 +1187,16 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
         let (mut bi_pc_word, t2) = self.read_reg(REG_T2 as u32, false);
         bi_pc_word /= 4;
 
+        let (desc_addr, a0) = self.read_reg(REG_A0 as u32, false);
+        let (_, count_wit) = self.read_phys_memory(desc_addr / 4 + 1)?;
         trace.add_block(EcallBigIntWitness {
             cycle,
             fetch,
             a7,
+            a0,
             t0,
             t2,
-            count,
+            count: count_wit,
         });
 
         self.cur_cycle += 1;

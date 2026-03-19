@@ -92,8 +92,9 @@ struct DigestWriteWitness {
 struct EcallBigIntWitness {
   uint32_t cycle;
   FetchWitness fetch;
+  RegMemReadWitness a0;
   RegMemReadWitness a7;
   RegMemReadWitness t0;
   RegMemReadWitness t2;
-  uint32_t count;
+  PhysMemReadWitness count;
 };
