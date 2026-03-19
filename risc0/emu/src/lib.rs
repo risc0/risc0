@@ -131,6 +131,7 @@ pub struct JitContext {
     pub pc: u32,
     quota: u64,
     registers: [u32; REG_MAX],
+    registers_dirty: bool,
     current_tag: u16,
     page_table: *mut PageSlot,
     jit_load_page_miss: extern "C" fn(ctx: *mut JitContext, vaddr: u32) -> *const u8,
@@ -325,6 +326,8 @@ impl Translator {
             self.enter_block(offset)?
         };
 
+        self.ctx.registers_dirty = true;
+
         let terminal =
             Terminal::from_u32((retval >> 32) as u32).ok_or_else(|| anyhow!("Invalid terminal"))?;
 
@@ -370,6 +373,7 @@ impl Translator {
             runs_total.extend(runs);
 
             if !matches!(terminal, Terminal::Jump) {
+                self.ctx.write_registers();
                 return Ok((terminal, runs_total));
             }
         }
@@ -417,6 +421,7 @@ impl JitContext {
         let mut s = Self {
             pc,
             registers: [0; REG_MAX],
+            registers_dirty: false,
             current_tag: 1,
             page_table: ram.slots.as_mut_ptr(),
             jit_load_page_miss: JitContext::jit_load_page_miss_trampoline,
@@ -484,6 +489,7 @@ impl JitContext {
             self.store_u32_internal(addr, value);
             addr += WORD_SIZE as u32;
         }
+        self.registers_dirty = false;
     }
 
     fn write_registers_to_image(&self, mut addr: u32, image: &mut MemoryImage) {
@@ -500,6 +506,7 @@ impl JitContext {
             self.registers[i] = value;
             addr += WORD_SIZE as u32;
         }
+        self.registers_dirty = false;
     }
 
     extern "C" fn jit_load_page_miss_trampoline(ctx: *mut JitContext, page_idx: u32) -> *const u8 {
@@ -549,8 +556,8 @@ impl JitContext {
             RegisterMode::Machine => MACHINE_REGS_ADDR,
         };
 
-        if addr >= reg_base && addr < reg_base + REG_MAX as u32 {
-            panic!("read from register being used");
+        if addr >= reg_base && addr < reg_base + REG_MAX as u32 && self.registers_dirty {
+            panic!("read from dirty register");
         }
 
         self.load_u32_internal(addr)
@@ -593,8 +600,8 @@ impl JitContext {
             RegisterMode::Machine => MACHINE_REGS_ADDR,
         };
 
-        if addr >= reg_base && addr < reg_base + REG_MAX as u32 {
-            panic!("write to register being used");
+        if addr >= reg_base && addr < reg_base + REG_MAX as u32 && self.registers_dirty {
+            panic!("write to dirty register");
         }
 
         self.store_u32_internal(addr, word);
