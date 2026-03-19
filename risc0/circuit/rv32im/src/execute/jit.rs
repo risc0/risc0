@@ -52,6 +52,10 @@ use super::{
     unlikely,
 };
 
+fn node_idx(page_idx: u32) -> u32 {
+    MEMORY_PAGES as u32 + page_idx
+}
+
 impl From<risc0_emu::rv32im::RvOp> for InsnKind {
     fn from(op: risc0_emu::rv32im::RvOp) -> Self {
         match op {
@@ -367,12 +371,17 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     fn page_indexes(&self) -> BTreeSet<u32> {
-        self.jit
-            .ctx
-            .page_indexes()
-            .into_iter()
-            .map(|idx| idx + MEMORY_PAGES as u32)
-            .collect()
+        let mut indexes = BTreeSet::new();
+
+        for page_idx in self.jit.ctx.page_indexes() {
+            let mut node_idx = node_idx(page_idx);
+            while node_idx != 0 {
+                indexes.insert(node_idx);
+                node_idx /= 2;
+            }
+        }
+
+        indexes
     }
 
     /// Execute a segment split, committing the current pager state, sending the segment to the

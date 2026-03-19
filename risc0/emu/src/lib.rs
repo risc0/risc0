@@ -62,7 +62,7 @@ use libc::{
     MAP_ANON, MAP_FAILED, MAP_PRIVATE, PROT_NONE, PROT_READ, PROT_WRITE, SA_SIGINFO, c_int, c_void,
     mmap, mprotect, sigaction, sigemptyset, siginfo_t, ucontext_t,
 };
-use risc0_binfmt::{MemoryImage, Page, Program, WordAddr};
+use risc0_binfmt::{ByteAddr, MemoryImage, Page, Program, WordAddr};
 use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
 use self::memory::{HostMemory, PageBytes, PageSlot};
@@ -486,6 +486,14 @@ impl JitContext {
         }
     }
 
+    fn write_registers_to_image(&self, mut addr: u32, image: &mut MemoryImage) {
+        for i in 0..self.registers.len() {
+            let value = self.registers[i];
+            image.set_word(ByteAddr(addr).waddr(), value);
+            addr += WORD_SIZE as u32;
+        }
+    }
+
     fn load_registers_from_addr(&mut self, mut addr: u32) {
         for i in 0..self.registers.len() {
             let value = self.load_u32_internal(addr);
@@ -645,7 +653,18 @@ impl JitContext {
 
     /// the full memory image containing all pages
     pub fn full_image(&self) -> MemoryImage {
-        self.ram.full_image()
+        let mut image = self.ram.full_image();
+
+        match self.mode {
+            RegisterMode::User => {
+                self.write_registers_to_image(USER_REGS_ADDR, &mut image);
+            }
+            RegisterMode::Machine => {
+                self.write_registers_to_image(MACHINE_REGS_ADDR, &mut image);
+            }
+        }
+
+        image
     }
 }
 
