@@ -665,7 +665,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, S> {
     #[inline(always)]
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
         let word = match op {
-            LoadOp::Peek => self.jit.ctx.load_u32(addr.baddr().0),
+            LoadOp::Peek => self.jit.ctx.load_u32_untracked(addr.baddr().0),
             LoadOp::Load | LoadOp::Record => self.jit.ctx.load_u32(addr.baddr().0),
         };
         Ok(word)

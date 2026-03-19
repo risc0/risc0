@@ -549,7 +549,7 @@ impl JitContext {
         }
     }
 
-    pub fn load_u32(&mut self, addr: u32) -> u32 {
+    fn assert_no_bad_register_read(&self, addr: u32) {
         let reg_base = match self.mode {
             RegisterMode::User => USER_REGS_ADDR,
             RegisterMode::Machine => MACHINE_REGS_ADDR,
@@ -558,8 +558,16 @@ impl JitContext {
         if addr >= reg_base && addr < reg_base + REG_MAX as u32 && self.registers_dirty {
             panic!("read from dirty register");
         }
+    }
 
+    pub fn load_u32(&mut self, addr: u32) -> u32 {
+        self.assert_no_bad_register_read(addr);
         self.load_u32_internal(addr)
+    }
+
+    pub fn load_u32_untracked(&mut self, addr: u32) -> u32 {
+        self.assert_no_bad_register_read(addr);
+        self.ram.load_u32_untracked(addr)
     }
 
     pub fn load_register(&mut self, base_waddr: u32, idx: usize) -> u32 {
@@ -646,15 +654,19 @@ impl JitContext {
 
     /// the count of all touched pages since last checkpoint
     pub fn touched_pages(&self) -> u64 {
-        // add two for csr touches
+        // add one for reading CSR_MNOV2COMPAT and COMPRESSED_INST_LOOKUP_ADDR
         self.ram.touched_pages + 2
     }
 
     /// clear all tracked pages
     pub fn paging_checkpoint(&mut self) {
         self.ram.touched_pages = 0;
+
         self.current_tag += 1;
         assert!(self.current_tag < PAGE_WRITABLE_FLAG, "too many segments");
+
+        assert!(!self.registers_dirty);
+        self.load_registers();
     }
 
     /// the full memory image containing all pages
