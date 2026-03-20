@@ -27,9 +27,11 @@ template <typename C> FDEV void AccumTop<C>::setPhase1(CTX, MDEV Top<C>* top, Va
       cur *= z;
     }
     local.set(ctx, tot);
+    biCycle.set(ctx, top->mux.BigInt.data[0].cycle.get());
   } else {
     polyOp.set(ctx, uint32_t(PolyOp::NOP));
     local.set(ctx, ValExt<C>(0));
+    biCycle.set(ctx, 0);
   }
   if (isSimple()) {
     poly.set(ctx, ValExt<C>(0));
@@ -88,6 +90,13 @@ FDEV void AccumTop<C>::verify(CTX, MDEV Top<C>* top, MDEV AccumTop<C>* prev, Val
   Val<C> isBigInt = top->select.major.bits[size_t(BlockType::BigInt) / MINOR_SPLIT_SIZE].get() *
                     top->select.minor.bits[size_t(BlockType::BigInt) % MINOR_SPLIT_SIZE].get();
   Val<C> polyOpGoal = isBigInt * top->mux.BigInt.data[0].polyOp.get();
+  // Verify cycle is set propery
+  EQ(biCycle.get(), isBigInt * top->mux.BigInt.data[0].cycle.get());
+  // Verify polyOps are in order
+  Val<C> checkOrder =
+	  isBigInt * // Skip non-bigint
+	  (Val<C>(1) - top->mux.BigInt.data[0].first.get()); // Skip if first
+  EQZ(checkOrder * (biCycle.get() - (prev->biCycle.get() + 1)));
   // Verify polyOp
   EQ(polyOp.get(), polyOpGoal);
   ValExt<C> cur(1);

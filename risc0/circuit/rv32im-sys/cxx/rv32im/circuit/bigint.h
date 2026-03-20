@@ -29,6 +29,7 @@ template <typename C> struct BigIntBlock {
 
   Reg<C> cycle;
   BitReg<C> mm;
+  BitReg<C> first;
   PhysMemReadBlock<C> readInst;
   PhysMemReadBlock<C> readBaseReg;
   OneHot<C, 3> memOp;
@@ -49,6 +50,7 @@ template <typename C> struct BigIntBlock {
   template <typename T> FDEV void applyInner(CTX) DEV {
     T::apply(ctx, "cycle", cycle);
     T::apply(ctx, "mm", mm);
+    T::apply(ctx, "first", first);
     T::apply(ctx, "readInst", readInst, cycle.get());
     T::apply(ctx, "readBaseReg", readBaseReg, cycle.get());
     T::apply(ctx, "memOp", memOp);

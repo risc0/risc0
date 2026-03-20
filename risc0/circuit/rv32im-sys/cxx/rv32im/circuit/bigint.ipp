@@ -18,6 +18,7 @@
 template <typename C> FDEV void BigIntBlock<C>::set(CTX, BigIntWitness wit) DEV {
   cycle.set(ctx, wit.cycle);
   mm.set(ctx, wit.mm);
+  first.set(ctx, wit.first);
   readInst.set(ctx, wit.inst, wit.cycle);
   readBaseReg.set(ctx, wit.baseReg, wit.cycle);
   memOp.set(ctx, (wit.inst.value >> 28) & 0x0f);
@@ -94,10 +95,10 @@ template <typename C> FDEV void BigIntBlock<C>::addArguments(CTX) DEV {
     ctx.addArgument(-doMem, LookupArgument<C>(2, memCycleVal - prevCycle[i].get() - 1));
   }
   Val<C> oldPcWord = readInst.wordAddr.get();
-  BigIntCpuStateArgument<C> bigintState(cycleVal, oldPcWord, mm.get());
+  BigIntCpuStateArgument<C> bigintState(cycleVal, oldPcWord, mm.get(), first.get());
   ctx.pull(bigintState);
   BIGINT_STATE_ARGUMENT(ctx, bigintState);
-  ctx.push(BigIntCpuStateArgument<C>(cycleVal + 1, oldPcWord + 1, mm.get()));
+  ctx.push(BigIntCpuStateArgument<C>(cycleVal + 1, oldPcWord + 1, mm.get(), 0));
 }
 
 #undef BIGINT_STATE_ARGUMENT
