@@ -1245,9 +1245,11 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
                 bigint::MemoryOp::Check => {}
             }
             pf.step(&decoded, &mut bi_wit_data)?;
+
             trace.add_block(BigIntWitness {
                 cycle: bi_wit_cycle,
                 mm: bi_wit_mm,
+                first: (i == 0) as u32,
                 inst: bi_wit_inst,
                 baseReg: bi_wit_base_reg,
                 data: bi_wit_data,
