@@ -93,9 +93,8 @@ FDEV void AccumTop<C>::verify(CTX, MDEV Top<C>* top, MDEV AccumTop<C>* prev, Val
   // Verify cycle is set propery
   EQ(biCycle.get(), isBigInt * top->mux.BigInt.data[0].cycle.get());
   // Verify polyOps are in order
-  Val<C> checkOrder =
-	  isBigInt * // Skip non-bigint
-	  (Val<C>(1) - top->mux.BigInt.data[0].first.get()); // Skip if first
+  Val<C> checkOrder = isBigInt *                                         // Skip non-bigint
+                      (Val<C>(1) - top->mux.BigInt.data[0].first.get()); // Skip if first
   EQZ(checkOrder * (biCycle.get() - (prev->biCycle.get() + 1)));
   // Verify polyOp
   EQ(polyOp.get(), polyOpGoal);
