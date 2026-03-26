@@ -39,6 +39,7 @@ CONSTANT uint32_t POLY_OP_SIZE = 7;
 struct BigIntWitness {
   uint32_t cycle;
   uint32_t mm;
+  uint32_t first;
   PhysMemReadWitness inst;
   PhysMemReadWitness baseReg;
   uint32_t data[4];

@@ -33,12 +33,13 @@ template <typename C> struct CpuStateArgument {
 
 template <typename C> struct BigIntCpuStateArgument {
   FDEV BigIntCpuStateArgument() = default;
-  FDEV BigIntCpuStateArgument(Val<C> cycle, Val<C> pcWord, Val<C> mm)
-      : cycle(cycle), pcWord(pcWord), mm(mm) {}
+  FDEV BigIntCpuStateArgument(Val<C> cycle, Val<C> pcWord, Val<C> mm, Val<C> first)
+      : cycle(cycle), pcWord(pcWord), mm(mm), first(first) {}
 
   Val<C> cycle;
   Val<C> pcWord;
   Val<C> mm;
+  Val<C> first;
 };
 
 template <typename C> struct P2StepArgument {

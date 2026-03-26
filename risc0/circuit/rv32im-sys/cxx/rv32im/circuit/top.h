@@ -33,6 +33,7 @@ template <typename C> struct Top {
 
 template <typename C> struct AccumTop {
   OneHot<C, POLY_OP_SIZE> polyOp;
+  Reg<C> biCycle;
   RegExt<C> local;
   RegExt<C> poly;
   RegExt<C> term;
@@ -41,6 +42,7 @@ template <typename C> struct AccumTop {
   template <typename T>
   FDEV void applyInner(CTX, MDEV Top<C>* top, MDEV AccumTop<C>* prev, ValExt<C> z) DEV {
     T::apply(ctx, "polyOp", polyOp);
+    T::apply(ctx, "biCycle", biCycle);
     T::apply(ctx, "local", local);
     T::apply(ctx, "poly", poly);
     T::apply(ctx, "term", term);
