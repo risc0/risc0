@@ -4,11 +4,3 @@
 # precedence.
 
 *                                      @risc0/platform
-
-/website/                              @risc0/platform @pdg744
-
-# These are sensitive files
-/groth16_proof/groth16/                @flaub @nategraf
-/SECURITY.md                           @flaub
-control_id.rs                          @flaub @nategraf
-recursion_zkr.zip                      @flaub @nategraf
