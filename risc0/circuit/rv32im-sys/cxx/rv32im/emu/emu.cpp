@@ -799,6 +799,7 @@ struct Emulator {
       auto& biWit = trace.makeBigInt();
       biWit.cycle = curCycle;
       biWit.mm = biMm;
+      biWit.first = (i == 0);
       uint32_t inst = readPhysMemory(biWit.inst, biPcWord++);
       auto decoded = BigIntInstruction::decode(inst);
       uint32_t base =

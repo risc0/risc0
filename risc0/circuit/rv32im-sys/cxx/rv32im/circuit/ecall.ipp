@@ -538,8 +538,8 @@ template <typename C> FDEV void EcallBigIntBlock<C>::addArguments(CTX) DEV {
   ctx.pull(cpuState);
   CPU_STATE_ARGUMENT(ctx, cpuState);
 
-  BigIntCpuStateArgument<C> initialBigIntState(cycleVal + 1, biPc, mm.get());
-  BigIntCpuStateArgument<C> finalBigIntState(cycleVal + countVal + 1, biPc + countVal, mm.get());
+  BigIntCpuStateArgument<C> initialBigIntState(cycleVal + 1, biPc, mm.get(), 1);
+  BigIntCpuStateArgument<C> finalBigIntState(cycleVal + countVal + 1, biPc + countVal, mm.get(), 0);
   ctx.push(initialBigIntState);
   ctx.pull(finalBigIntState);
   BIGINT_STATE_ARGUMENT(ctx, initialBigIntState, finalBigIntState);
