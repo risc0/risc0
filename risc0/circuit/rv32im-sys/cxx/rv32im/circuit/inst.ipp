@@ -378,6 +378,12 @@ template <typename C> FDEV void InstLoadBlock<C>::verify(CTX) DEV {
   EQ(pickShort.get(), b1.get() * 256 + b0.get());
   EQ(pickByte.get(), cond<C>(readAddr.low0.get(), b1.get(), b0.get()));
 
+  // Verify alignement
+  EQZ(opt.bits[2].get() * readAddr.low0.get()); // LW: bit0 must be 0
+  EQZ(opt.bits[2].get() * readAddr.low1.get()); // LW: bit1 must be 0
+  EQZ(opt.bits[1].get() * readAddr.low0.get()); // LH: bit0 must be 0
+  EQZ(opt.bits[4].get() * readAddr.low0.get()); // LHU: bit0 must be 0
+
   // Now compute the final value written to the destination register based on the
   // kind of load that was actually done.
   EQ(writeRd.data.low.get(),
@@ -451,6 +457,11 @@ template <typename C> FDEV void InstStoreBlock<C>::set(CTX, InstStoreWitness wit
 }
 
 template <typename C> FDEV void InstStoreBlock<C>::verify(CTX) DEV {
+  // Verify alignment
+  EQZ(opt.bits[2].get() * writeAddr.low0.get()); // SW: bit0 must be 0
+  EQZ(opt.bits[2].get() * writeAddr.low1.get()); // SW: bit1 must be 0
+  EQZ(opt.bits[1].get() * writeAddr.low0.get()); // SH: bit0 must be 0
+
   EQ(writeAddr.wordAddr(computeAddr.get()), writeMem.wordAddr.get());
   EQ(pickShort.get(),
      cond<C>(writeAddr.low1.get(), writeMem.prevData.high.get(), writeMem.prevData.low.get()));
