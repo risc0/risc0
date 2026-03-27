@@ -15,7 +15,7 @@
 
 use std::cell::Cell;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, PovwNonce};
 use risc0_zkp::core::digest::Digest;
@@ -127,7 +127,11 @@ impl Syscall for SegmentSyscallHandler<'_> {
     }
 
     fn host_write(&self, _ctx: &mut impl SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
-        let pos = self.write_pos.replace(self.read_pos.get() + 1);
-        Ok(self.segment.write_record[pos])
+        let pos = self.write_pos.replace(self.write_pos.get() + 1);
+        Ok(*self
+            .segment
+            .write_record
+            .get(pos)
+            .context("malformed segment: write_pos is past the end of write_record")?)
     }
 }
