@@ -228,8 +228,15 @@ pub fn main() {
             unreachable!()
         };
         if args.with_debugger {
-            exec.run_with_debugger().unwrap();
-            return;
+            #[cfg(not(feature = "jit"))]
+            {
+                exec.run_with_debugger().unwrap();
+                return;
+            }
+            #[cfg(feature = "jit")]
+            {
+                panic!("jit does not support debugger");
+            }
         } else {
             exec.run().unwrap()
         }

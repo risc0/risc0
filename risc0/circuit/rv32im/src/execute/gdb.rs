@@ -35,7 +35,7 @@ use crate::TerminateState;
 
 use super::{
     Syscall,
-    executor::Executor,
+    interp::Executor,
     platform::*,
     r0vm::{LoadOp, Risc0Context as _, Risc0Machine},
     rv32im::Emulator,
