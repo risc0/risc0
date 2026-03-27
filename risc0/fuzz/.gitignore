@@ -1,0 +1,14 @@
+# Ignore the corpus and artifacts, except those that are explicitly included to seed the corpus.
+artifacts/
+coverage/
+
+corpus/**
+!/corpus/receipt_seal_verify/
+/corpus/receipt_seal_verify/*
+!/corpus/receipt_decode_and_verify/
+/corpus/receipt_decode_and_verify/*
+!/corpus/receipt_decode_and_verify/receipt_groth16_do_nothing.bin
+!/corpus/receipt_seal_verify/segment_do_nothing_seal.bin
+!/corpus/receipt_decode_and_verify/receipt_groth16_do_nothing.bin
+!/corpus/receipt_decode_and_verify/receipt_succinct_do_nothing.bin
+!/corpus/receipt_decode_and_verify/receipt_composite_do_nothing.bin
