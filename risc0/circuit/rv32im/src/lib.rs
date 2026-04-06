@@ -131,18 +131,18 @@ impl<'a> Decoder<'a> {
     }
 
     fn read_u32_from_elem(&mut self) -> Result<u32> {
-        Ok(bytemuck::checked::cast::<_, Elem>(self.read_u32()?).as_u32())
+        Ok(try_cast(self.read_u32()?)?.as_u32())
     }
 
     fn read_u32_from_shorts(&mut self) -> Result<u32> {
-        let slice = bytemuck::checked::cast_slice::<_, Elem>(self.read(2)?);
+        let slice = try_cast_slice(self.read(2)?)?;
         let (high, low) = (slice[1], slice[0]);
         let val = (high.as_u32() & 0xffff) << 16 | (low.as_u32() & 0xffff);
         Ok(val)
     }
 
     fn read_digest_from_words(&mut self) -> Result<Digest> {
-        let slice = bytemuck::checked::cast_slice::<_, Elem>(self.read(DIGEST_WORDS)?);
+        let slice = try_cast_slice(self.read(DIGEST_WORDS)?)?;
         let buf = slice.iter().map(|x| x.as_u32()).collect::<Vec<u32>>();
         Ok(Digest::try_from(buf).unwrap())
     }
@@ -151,7 +151,7 @@ impl<'a> Decoder<'a> {
         let slice = self.read(DIGEST_SHORTS)?;
         let mut digest_bytes = [0; DIGEST_BYTES];
         for i in 0..DIGEST_SHORTS {
-            let elem: Elem = bytemuck::checked::cast(slice[i]);
+            let elem = try_cast(slice[i])?;
             let word = elem.as_u32();
             let short =
                 u16::try_from(word).map_err(|e| anyhow!("failed to convert u32 to u16: {e}"))?;
@@ -160,6 +160,14 @@ impl<'a> Decoder<'a> {
         }
         Ok(Digest::from_bytes(digest_bytes))
     }
+}
+
+fn try_cast(raw: u32) -> Result<Elem> {
+    bytemuck::checked::try_cast(raw).map_err(|e| anyhow!(e))
+}
+
+fn try_cast_slice(slice: &[u32]) -> Result<&[Elem]> {
+    bytemuck::checked::try_cast_slice(slice).map_err(|e| anyhow!(e))
 }
 
 impl Claim {

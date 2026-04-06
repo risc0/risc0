@@ -169,7 +169,8 @@ impl<Claim> SuccinctReceipt<Claim> {
 
         // Extract the globals from the seal
         let output_elems: &[BabyBearElem] =
-            bytemuck::checked::cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE]);
+            bytemuck::checked::try_cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE])
+                .map_err(|_| VerificationError::ReceiptFormatError)?;
         let mut seal_claim = VecDeque::new();
         for elem in output_elems {
             seal_claim.push_back(elem.as_u32())
