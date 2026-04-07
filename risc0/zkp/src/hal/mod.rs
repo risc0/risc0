@@ -16,6 +16,8 @@
 //! Hardware Abstraction Layer (HAL) for accelerating the ZKP system.
 
 pub mod cpu;
+#[cfg(feature = "cubecl")]
+pub mod cubecl;
 #[cfg(feature = "cuda")]
 pub mod cuda;
 pub mod dual;
