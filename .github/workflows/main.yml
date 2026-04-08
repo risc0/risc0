@@ -580,7 +580,7 @@ jobs:
     needs: changes
     runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     env:
-      RUST_TOOLCHAIN_VERSION: 1.94.1+alpha
+      RUST_TOOLCHAIN_VERSION: 1.94.1
     strategy:
       fail-fast: false
       matrix:
