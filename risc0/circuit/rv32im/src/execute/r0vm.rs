@@ -380,7 +380,7 @@ fn check_aligned_addr(addr: ByteAddr) -> Result<WordAddr> {
 }
 
 pub struct Risc0Machine<'a, C: Risc0Context> {
-    ctx: &'a mut C,
+    pub(crate) ctx: &'a mut C,
 }
 
 impl<'a, C: Risc0Context> Risc0Machine<'a, C> {

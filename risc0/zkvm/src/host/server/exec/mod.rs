@@ -20,6 +20,7 @@
 //! contains an execution trace of the specified program.
 
 pub(crate) mod executor;
+#[cfg(not(feature = "jit"))]
 mod gdb;
 pub(crate) mod profiler;
 mod proto;
