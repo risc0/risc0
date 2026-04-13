@@ -1,4 +1,4 @@
-# To build run: docker build -f Dockerfile.release --build-arg="RISC0_RUST_TOOLCHAIN_VERSION=1.91.1" -t risczero/risc0-guest-builder:r0.1.91.1 .
+# To build run: docker build -f Dockerfile.release --build-arg="RISC0_RUST_TOOLCHAIN_VERSION=1.94.1" # -t risczero/risc0-guest-builder:r0.1.94.1 .
 FROM ubuntu:22.04@sha256:104ae83764a5119017b8e8d6218fa0832b09df65aae7d5a6de29a85d813da2fb
 
 ARG RISC0_RUST_TOOLCHAIN_VERSION=

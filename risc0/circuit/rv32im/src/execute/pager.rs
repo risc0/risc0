@@ -238,7 +238,7 @@ impl PageTable {
             // You would think it's faster to reuse the memory, but filling it with zeros is slower
             // than just allocating a new piece of zeroed memory.
             self.epoch = 1;
-            self.table = Box::new([0; NUM_PAGES]);
+            *self.table = [0; NUM_PAGES];
         }
     }
 }

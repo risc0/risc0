@@ -590,6 +590,7 @@ impl<Claim> FakeReceipt<Claim> {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
+        #[allow(clippy::assertions_on_constants)]
         if ctx.dev_mode() {
             assert!(cfg!(not(feature = "disable-dev-mode")));
             Ok(())

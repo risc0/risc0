@@ -796,7 +796,7 @@ mod tests {
         // Check the region of written words matches what we expect
         let start_word = start_addr / WORD_SIZE as u32;
         let end_word = if length > 0 {
-            (start_addr + length).next_multiple_of(WORD_SIZE as u32) / WORD_SIZE as u32
+            (start_addr + length).div_ceil(WORD_SIZE as u32)
         } else {
             start_word
         };

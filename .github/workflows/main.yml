@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.91.1
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.94.1
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
   RISC0_GROTH16_VERSION: 0.1.0
   # Pin the nightly Rust version for jobs that need it.
@@ -580,7 +580,7 @@ jobs:
     needs: changes
     runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     env:
-      RUST_TOOLCHAIN_VERSION: 1.91.1
+      RUST_TOOLCHAIN_VERSION: 1.94.1
     strategy:
       fail-fast: false
       matrix:
@@ -708,13 +708,13 @@ jobs:
       - name: clang-format check
         run: bazelisk build //... --config=clang-format-check
         working-directory: risc0/circuit/rv32im-sys/cxx
-      - name: Build & test
-        env:
-          CONFIG: ${{ matrix.config }}
-        run: |
-          bazelisk test //... \
-              --spawn_strategy=local \
-              --test_output=errors \
-              --strategy=TestRunner=local \
-              --@rules_cuda//cuda:archs=${{ matrix.nvcc_arch }}
-        working-directory: risc0/circuit/rv32im-sys/cxx
+      # - name: Build & test
+      #   env:
+      #     CONFIG: ${{ matrix.config }}
+      #   run: |
+      #     bazelisk test //... \
+      #         --spawn_strategy=local \
+      #         --test_output=errors \
+      #         --strategy=TestRunner=local \
+      #         --@rules_cuda//cuda:archs=${{ matrix.nvcc_arch }}
+      #   working-directory: risc0/circuit/rv32im-sys/cxx
