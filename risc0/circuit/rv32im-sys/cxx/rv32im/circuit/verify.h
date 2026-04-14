@@ -168,6 +168,12 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
 #define BLOCK_TYPE(name, _count) this->verify##name();
     BLOCK_TYPES
 #undef BLOCK_TYPE
+    // Make sure accumulation conditions holds in empty case as well
+    reset();
+    finalize();
+    ValT condEmpty = top->select.at(uint32_t(BlockType::Empty));
+    outerMix = eqzCtx.andCond(outerMix, condEmpty, innerMix);
+
     // Verify accumTop
     // TODO: this is very ugly
     auto accumTop = reinterpret_cast<MDEV AccumTop<C>*>(reinterpret_cast<MDEV RegT*>(accum) +
