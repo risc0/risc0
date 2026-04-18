@@ -79,7 +79,7 @@ pub trait Elem: 'static
 
     /// Return an element raised to the given power.
     fn pow(self, exp: usize) -> Self {
-        debug_assert!(self.is_valid());
+        debug_assert!(self.is_reduced());
         let mut n = exp;
         let mut tot = Self::ONE;
         let mut x = self;
@@ -126,25 +126,26 @@ pub trait Elem: 'static
         }
     }
 
-    /// Returns this element, but checks to make sure it's valid.
-    fn ensure_valid(&self) -> &Self {
-        debug_assert!(self.is_valid());
+    /// Returns this element, but checks to make sure it's in reduced form.
+    #[inline(always)]
+    fn ensure_reduced(&self) -> &Self {
+        assert!(self.is_reduced());
         self
     }
 
-    /// Returns this element, but checks to make sure it's in reduced form.
-    fn ensure_reduced(&self) -> &Self {
-        assert!(self.is_reduced());
+    /// Returns this element, but checks to make sure it's in reduced form when `debug_assertions`
+    /// are enabled. Note that this does nothing in release builds.
+    #[inline(always)]
+    fn debug_ensure_reduced(&self) -> &Self {
+        debug_assert!(self.is_reduced());
         self
     }
 
     /// Interprets a slice of these elements as u32s.  These elements
     /// may not be INVALID.
     fn as_u32_slice(elems: &[Self]) -> &[u32] {
-        if cfg!(debug_assertions) {
-            for elem in elems {
-                elem.ensure_valid();
-            }
+        for elem in elems {
+            elem.debug_ensure_reduced();
         }
         Self::as_u32_slice_unchecked(elems)
     }
