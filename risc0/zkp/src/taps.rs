@@ -113,6 +113,11 @@ impl TapSet<'_> {
         last + 1
     }
 
+    /// Returns the number of taps in a group
+    pub fn group_tap_count(&self, group_id: usize) -> usize {
+        self.group_begin[group_id + 1] - self.group_begin[group_id]
+    }
+
     pub fn group_name(&self, group_id: usize) -> &str {
         self.group_names[group_id]
     }
