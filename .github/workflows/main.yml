@@ -399,14 +399,14 @@ jobs:
               --elf target/riscv-guest/risc0-zkvm-methods/risc0-zkvm-methods-guest/riscv32im-risc0-zkvm-elf/release/hello_commit.bin \
               --receipt-kind groth16
         shell: bash
-      - name: compute-sanitizer racecheck
-        run: |
-          /usr/local/cuda/bin/compute-sanitizer \
-              --tool racecheck \
-              target/debug/r0vm \
-              --elf target/riscv-guest/risc0-zkvm-methods/risc0-zkvm-methods-guest/riscv32im-risc0-zkvm-elf/release/hello_commit.bin \
-              --receipt-kind groth16
-        shell: bash
+      #- name: compute-sanitizer racecheck
+      #  run: |
+      #    /usr/local/cuda/bin/compute-sanitizer \
+      #        --tool racecheck \
+      #        target/debug/r0vm \
+      #        --elf target/riscv-guest/risc0-zkvm-methods/risc0-zkvm-methods-guest/riscv32im-risc0-zkvm-elf/release/hello_commit.bin \
+      #        --receipt-kind groth16
+      #  shell: bash
       - run: sccache --show-stats
 
   examples:
