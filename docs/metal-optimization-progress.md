@@ -123,13 +123,15 @@ per-`po2` kernels for `data_witgen`, `accum_witgen`, and `eval_check`.
 The RISC0 checkout pins Bazel `@zirgen` to
 `df6fb9dda1c20209058d6ee90a8912351b741081`, which is current
 `risc0/zirgen` `main` as of this investigation. So the external Zirgen pin is
-not stale. The checked-in rv32im M3 `eval_check` implementation is still from
-the M3 circuit integration lineage, though: it entered with `cbcc6f79e`
-(`Initial commit for rv32im-m3 circuit`, PR #3430), was moved into the merged
-rv32im crates by `ccc793fc9` (PR #3600), and has not had a substantive
-`eval_check` code-shape change since. The generic Zirgen Metal
-`eval_check.tmpl.metal` template dates back to the initial Zirgen import and is
-not the exact code path used by the rv32im M3 C++/Metal HAL.
+not stale. The recent Zirgen `main` commits checked here are out-of-tree build
+support, V3/PoVW predicate work, and a CUDA `poly_mix` codegen change; they do
+not change the generic Metal `eval_check` template. The checked-in rv32im M3
+`eval_check` implementation is still from the M3 circuit integration lineage,
+though: it entered with `cbcc6f79e` (`Initial commit for rv32im-m3 circuit`, PR
+#3430), was moved into the merged rv32im crates by `ccc793fc9` (PR #3600), and
+has not had a substantive `eval_check` code-shape change since. The generic
+Zirgen Metal `eval_check.tmpl.metal` template dates back to the initial Zirgen
+import and is not the exact code path used by the rv32im M3 C++/Metal HAL.
 
 Historical RISC Zero issue #999 is relevant context: old Metal support was
 deprecated because `eval_check` codegen could exceed Apple temporary-register
