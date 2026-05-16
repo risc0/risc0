@@ -535,6 +535,59 @@ Remaining gaps before marking P0 complete:
 - Keccak Metal remains disabled. This is outside rv32im eval-check correctness,
   but it is still a major gap for best local proving on Keccak-heavy workloads.
 
+### Cross-Machine Validation Packet
+
+Run this packet on any other Apple Silicon host or CI runner before treating the
+branch as more than M5 Max/Xcode 26.5 evidence.
+
+Environment capture:
+
+```sh
+git rev-parse --short HEAD
+git branch --show-current
+xcode-select -p
+xcodebuild -version
+xcrun --sdk macosx metal -v
+uname -a
+sysctl -n machdep.cpu.brand_string
+```
+
+Correctness gates:
+
+```sh
+cargo fmt --check
+cargo test -p risc0-circuit-rv32im --features prove prove::tests --release -- --nocapture
+RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 \
+  cargo test -p risc0-circuit-rv32im --features prove prove::tests --release -- --nocapture
+RISC0_RV32IM_METAL_EVAL_CHECK=1 RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 \
+  cargo test -p risc0-circuit-rv32im --features prove \
+    prove::tests::metal_eval_check_sltiu_repeated --release -- --ignored --nocapture --test-threads=1
+cargo test -p risc0-zkvm --features prove host::server::prove::tests::basic -- --nocapture
+cargo test -p risc0-zkvm --features prove host::server::prove::tests::keccak::basic -- --nocapture
+cargo test --manifest-path examples/keccak/Cargo.toml --features prove hash_abc -- --nocapture
+```
+
+Benchmark gates:
+
+```sh
+cargo bench -p risc0-zkvm --features prove,metal --bench fib prove/poseidon2
+cargo run --release -p risc0-zkvm --features prove,metal --example datasheet -- --max-po2 20 composite
+cargo run --release -p risc0-zkvm --features prove,metal --example datasheet -- --max-po2 18 succinct
+RISC0_RV32IM_METAL_EVAL_CHECK=0 \
+  cargo bench -p risc0-zkvm --features prove,metal --bench fib prove/poseidon2
+```
+
+Failure triage:
+
+```sh
+RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1 \
+  RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 \
+  cargo test -p risc0-circuit-rv32im --features prove prove::tests::sltiu --release -- --nocapture --test-threads=1
+RISC0_RV32IM_METAL_KERNEL_O0=1 \
+  RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 \
+  cargo test -p risc0-circuit-rv32im --features prove prove::tests::sltiu --release -- --nocapture --test-threads=1
+```
+
 ### P1: Optimize Transparent Local Proving
 
 - Treat `ProverOpts::composite()` as the throughput baseline.
