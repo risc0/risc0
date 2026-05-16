@@ -490,9 +490,7 @@ impl KernelBuild {
         for tag in tags {
             hasher.add_flag(tag);
         }
-        for src in self.files.iter() {
-            hasher.add_file(src);
-        }
+        self.add_kernel_source_files_to_hash(&mut hasher);
         for (name, contents) in assets {
             let path = sys_inc_dir.join(name);
             if let Some(parent) = path.parent() {
@@ -515,6 +513,15 @@ impl KernelBuild {
         fs::copy(cache_path, &out_path).unwrap();
 
         println!("cargo:{}={}", output, out_path.display());
+    }
+
+    fn add_kernel_source_files_to_hash(&self, hasher: &mut Hasher) {
+        for src in self.files.iter() {
+            hasher.add_file(src);
+        }
+        for src in self.generated_files.iter() {
+            hasher.add_file(src);
+        }
     }
 }
 
@@ -558,4 +565,30 @@ fn rerun_if_changed<P: AsRef<Path>>(path: P) {
     );
 
     println!("cargo:rerun-if-changed={}", path.as_ref().display());
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn generated_files_are_part_of_kernel_source_hash() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let generated = temp_dir.path().join("generated.metal");
+
+        fs::write(&generated, "kernel void before() {}\n").unwrap();
+        let mut build = KernelBuild::new(KernelType::Metal, temp_dir.path().join("manifest"));
+        build.generated_file(&generated);
+
+        let mut before = Hasher::new();
+        build.add_kernel_source_files_to_hash(&mut before);
+        let before = before.finalize();
+
+        fs::write(&generated, "kernel void after() {}\n").unwrap();
+        let mut after = Hasher::new();
+        build.add_kernel_source_files_to_hash(&mut after);
+        let after = after.finalize();
+
+        assert_ne!(before, after);
+    }
 }

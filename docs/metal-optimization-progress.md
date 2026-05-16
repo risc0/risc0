@@ -315,6 +315,17 @@ Metal-focused validation on the M5 Max:
   `RISC0_USE_DOCKER=1 cargo test -p risc0-zkvm --features prove,docker
   host::server::exec::tests::cpp_test -- --nocapture` rebuilt the guest Docker
   artifacts and executed the `blst` guest successfully.
+- The Metal build cache now hashes `KernelBuild::generated_files` contents in
+  addition to manifest/static files. This matters for rv32im because
+  `eval_check_*.metal`, `data_witgen_*.metal`, and `accum_witgen_*.metal` are
+  generated into `OUT_DIR`; without hashing those generated sources, local cache
+  reuse could hide a changed generated kernel and weaken Metal validation.
+  After this cache-key fix, the focused rv32im Metal eval-check regression
+  rebuilt through `risc0-build-kernel` and passed in 14.23s. Package-level
+  checks also pass, including the direct
+  `generated_files_are_part_of_kernel_source_hash` regression test:
+  `cargo test -p risc0-build-kernel` and
+  `cargo clippy -p risc0-build-kernel --all-targets -- -D warnings`.
 - The small Metal-enabled release datasheet matrix is now runnable with
   `--max-po2 16`. Refreshed under the current default scoped `-fno-inline`
   rv32im eval-check path:
