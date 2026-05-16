@@ -357,6 +357,12 @@ Metal-focused validation on the M5 Max:
   template also passed the focused direct verifier test with the scoped default
   noinline mitigation disabled, but the single proof still took 61.00s. That is
   not a viable replacement either.
+- An even narrower source-level Metal `__attribute__((noinline))` experiment on
+  only `EvalCheckReg<po2>::get()` also passed the focused 20-proof
+  `metal_eval_check_sltiu_repeated` regression with the scoped compiler flag
+  disabled, but it took 83.70s versus 14.55s for the current scoped `-fno-inline`
+  default. That confirms the row-load wrapper is in the sensitive area, but it
+  is still not a viable replacement.
 - Apple Metal accepts LLVM inline-threshold flags such as
   `-mllvm -inline-threshold=10`. With the scoped default noinline mitigation
   disabled, that threshold passed the same focused direct verifier test, but the
