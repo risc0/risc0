@@ -279,6 +279,11 @@ Metal-focused validation on the M5 Max:
   - `cargo test -p risc0-zkvm --features prove
     host::server::prove::tests::bigint_accel -- --nocapture` passed the BigInt
     accelerator proof workload across 15 generated test cases.
+  - `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 cargo test --manifest-path
+    examples/voting-machine/Cargo.toml --features prove protocol --
+    --nocapture` passed a product-style protocol workload: init, five
+    pre-freeze ballot submissions, freeze, one post-freeze submission, and
+    receipt verification for all seven receipts.
 - Before flipping the runtime default, the scoped full-Metal path passed five
   consecutive non-serial full-suite verifier runs with
   `RISC0_RV32IM_METAL_EVAL_CHECK=1
@@ -534,6 +539,8 @@ Prompt-to-artifact checklist:
 - Benchmark matrix: present for default segment proving, CPU eval-check
   fallback, composite up to 1M rows, succinct at 64K rows, Keccak CPU fallback,
   and Keccak syscall/assumption proof coverage.
+- Product-style workload: present. The voting-machine protocol example passed
+  under the default Metal path with eval-check CPU verification enabled.
 - M5 Max and modern Apple toolchain context: present. Validation records Xcode
   26.5 build `17F42`, Metal `32023.883`, and that no alternate Xcode is locally
   installed.
@@ -553,9 +560,10 @@ Remaining gaps before marking P0 complete:
   code-shape fix. Source-level noinline on `computeRow<po2>` was rejected as too
   slow; a better split of `verifyCircuit`/validity-polynomial code is still open.
 - The default path has strong local smoke, benchmark, 10-pass verifier-loop,
-  SHA, continuation, BigInt, and Keccak example coverage, including a 100KB
-  Keccak input proof, but not a broad product-style application workload beyond
-  the current datasheet/examples/zkVM tests.
+  SHA, continuation, BigInt, voting-machine protocol, and Keccak example
+  coverage, including a 100KB Keccak input proof. More external application
+  workloads would still improve confidence, but the earlier absence of any
+  product-style workload is closed locally.
 - Keccak Metal remains disabled. This is outside rv32im eval-check correctness,
   but it is still a major gap for best local proving on Keccak-heavy workloads.
 
