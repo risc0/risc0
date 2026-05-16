@@ -95,6 +95,10 @@ impl Po2Table {
     fn iter(&self) -> impl Iterator<Item = (u32, u32)> {
         self.0.iter().map(|(k, v)| (*k, *v))
     }
+
+    fn iter_up_to(&self, max_po2: usize) -> impl Iterator<Item = (u32, u32)> {
+        self.iter().filter(move |(po2, _)| *po2 <= max_po2 as u32)
+    }
 }
 
 /// Pre-compiled program that simply loops `count: u32` times (read from stdin).
@@ -280,11 +284,7 @@ impl Datasheet {
         let opts = ProverOpts::all_po2s().with_hashfn(hashfn.to_string());
         let prover = get_prover_server(&opts).unwrap();
 
-        for (po2, iterations) in self
-            .po2_table
-            .iter()
-            .take(args.max_po2 - MIN_CYCLES_PO2 + 1)
-        {
+        for (po2, iterations) in self.po2_table.iter_up_to(args.max_po2) {
             let expected = 1 << po2;
             println!("rv32im/{hashfn}: {expected}");
 

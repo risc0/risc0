@@ -167,6 +167,10 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
             "CC_riscv32im_risc0_zkvm_elf",
             "/root/.risc0/cpp/bin/riscv32-unknown-elf-gcc",
         )])
+        .env(&[(
+            "AR_riscv32im_risc0_zkvm_elf",
+            "/root/.risc0/cpp/bin/riscv32-unknown-elf-ar",
+        )])
         .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")]);
 
     let docker_env = docker_opts.env();

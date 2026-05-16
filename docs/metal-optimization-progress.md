@@ -145,10 +145,29 @@ Metal-focused validation on the M5 Max:
   can stall badly with this toolchain when it compiles unused kernels such as
   higher-`po2` `eval_check` variants. Lazy pipeline creation avoids that startup
   problem, but it does not fix the `Poly check failed` correctness failure.
-- Broad zkVM tests and documented `datasheet` / `fib` benchmarks are currently
-  blocked by a guest `risc0-zkvm-methods-cpp-crates` link failure with undefined
-  `blst_*` symbols. This is not a Metal runtime failure, but it blocks the
-  benchmark harness.
+- The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
+  the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
+  macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
+  `libblst.a`; the adjacent RISC-V object did contain the missing symbols.
+  Setting the target-specific RISC-V archiver fixes the build. Validation:
+  `cargo test -p risc0-zkvm --features prove --no-run` now succeeds, and
+  `cargo test -p risc0-zkvm --features prove host::server::exec::tests::cpp_test
+  -- --nocapture` passes.
+- The small Metal-enabled release datasheet matrix is now runnable with
+  `--max-po2 16`:
+  - `execute`: 28.8ms for 2.7M instructions.
+  - `composite`: 897.8ms for 16K rows, 4.56s for 64K rows.
+  - `lift`: 731.5ms for 256K recursion rows.
+  - `join`: 923.6ms for 256K recursion rows.
+  - `succinct`: 4.09s for 64K rows.
+- `cargo bench -p risc0-zkvm --features prove,metal --bench fib execute` now
+  runs; one filtered run averaged about 73MHz. The full `fib` benchmark suite is
+  still not part of the default quick gate because each selected hotbench entry
+  runs for roughly 10s plus setup.
+- The `datasheet composite` harness had a sparse-`po2` bug: it used `.take(...)`
+  over a table that intentionally omits too-small powers of two, so `--max-po2
+  16` could still run `po2=17` and panic. The harness now filters by the actual
+  `po2` key.
 
 ## Metal Binding Status
 
@@ -190,8 +209,9 @@ than at stale C++ header bindings alone.
   eval-check with `RISC0_RV32IM_METAL_EVAL_CHECK=1`.
 - Add a deterministic Metal rv32im regression command or mark the test harness
   serial if the Metal runtime cannot safely run these tests concurrently.
-- Fix the `risc0-zkvm-methods-cpp-crates` `blst_*` guest link failure so the
-  zkVM test and benchmark harness can run.
+- Keep the `risc0-zkvm-methods-cpp-crates` `blst_*` guest link fix covered in
+  both native and Docker guest builds. The current fix sets
+  `AR_riscv32im_risc0_zkvm_elf` beside the RISC-V guest compiler.
 - Check whether the pinned Metal-cpp header bundle is stale in a way that
   affects current Apple Silicon proving. `rv32im-sys` currently downloads
   `metal-cpp_macOS13.3_iOS16.4.zip`; Apple now publishes newer bundles such as
@@ -207,9 +227,12 @@ than at stale C++ header bindings alone.
   versions if possible. A CI Apple Silicon runner passing with a different Xcode
   or Metal Toolchain would be a strong signal that this is toolchain-sensitive.
 - Establish a stable benchmark matrix:
-  - warm `hello-world` proof
+  - warm `hello-world` proof: present, but too small to distinguish safe
+    CPU-eval-check and forced full-Metal eval-check.
+  - small Metal-enabled `datasheet execute`, `composite`, `lift`, `join`, and
+    `succinct`: present at `--max-po2 16`.
+  - filtered `fib execute`: present.
   - rv32im segment-only benchmark
-  - `datasheet execute`, `composite`, `lift`, `join`, `succinct`
   - Keccak-heavy workload
 
 ### P1: Optimize Transparent Local Proving

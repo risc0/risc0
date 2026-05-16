@@ -420,6 +420,10 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
     if !cpp_toolchain_override() {
         if let Some(toolchain_path) = cpp_toolchain() {
             cmd.env("CC", toolchain_path.join("bin/riscv32-unknown-elf-gcc"));
+            cmd.env(
+                "AR_riscv32im_risc0_zkvm_elf",
+                toolchain_path.join("bin/riscv32-unknown-elf-ar"),
+            );
         } else {
             // If you aren't compiling any C/C++ code, it might be just fine to not have a C++
             // toolchain installed, but if you are then your compilation will surely fail. To avoid
