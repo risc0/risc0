@@ -198,6 +198,11 @@ than at stale C++ header bindings alone.
   `metal-cpp_26.4.zip`, whose README mentions bugfixing and other improvements.
   A first trial suggests this is not the root cause. Keep the check open only as
   a binding-health task, not as the leading correctness hypothesis.
+- Do not treat the Rust `metal = "0.29"` dependency as a normal bump target.
+  Upstream `metal-rs` is deprecated and recommends `objc2` / `objc2-metal` for
+  new development. That dependency still matters for the Rust ZKP and recursion
+  Metal HALs, but replacing it is a migration task rather than a quick P0
+  correctness fix for rv32im's C++ Metal-cpp path.
 - Compare `.metallib` output and runtime behavior across Apple Metal Toolchain
   versions if possible. A CI Apple Silicon runner passing with a different Xcode
   or Metal Toolchain would be a strong signal that this is toolchain-sensitive.
