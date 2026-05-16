@@ -362,7 +362,11 @@ impl KernelBuild {
             .collect();
         deps.extend(self.deps.clone());
 
-        let flags = ["-std=metal3.0", "-Wno-unused-variable"];
+        let mut flags = vec![
+            "-std=metal3.0".to_string(),
+            "-Wno-unused-variable".to_string(),
+        ];
+        flags.extend(self.flags.clone());
 
         self.cached_compile(
             output,
@@ -421,13 +425,13 @@ impl KernelBuild {
     }
 
     #[allow(clippy::too_many_arguments)]
-    fn cached_compile<F: Fn(&Path, &Path, &Path, &[&str])>(
+    fn cached_compile<F: Fn(&Path, &Path, &Path, &[String])>(
         &self,
         output: &str,
         extension: &str,
         deps: &[PathBuf],
         assets: &[(&str, &str)],
-        flags: &[&str],
+        flags: &[String],
         tags: &[String],
         inner: F,
     ) {

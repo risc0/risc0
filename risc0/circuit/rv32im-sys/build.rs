@@ -20,9 +20,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use quote::{format_ident, quote};
-use xshell::{cmd, Shell};
+use xshell::{Shell, cmd};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
@@ -69,6 +69,7 @@ fn compile_provers() {
     rerun_if_env_changed("NVCC_APPEND_FLAGS");
     rerun_if_env_changed("NVCC_PREPEND_FLAGS");
     rerun_if_env_changed("RISC0_RV32IM_METAL_COMPARE_CPU");
+    rerun_if_env_changed("RISC0_RV32IM_METAL_KERNEL_O0");
     rerun_if_env_changed("SCCACHE_RECACHE");
 
     let platform = if is_cuda() {
@@ -138,11 +139,15 @@ fn compile_provers() {
             make_po2s(spec, &out_dir, &mut generated_files);
         }
 
-        KernelBuild::new(KernelType::Metal, "kernel_build.manifest")
+        let mut metal_build = KernelBuild::new(KernelType::Metal, "kernel_build.manifest");
+        metal_build
             .include("cxx")
             .files(glob_paths("cxx/hal/metal/kernels/*.metal"))
-            .generated_files(generated_files)
-            .compile("metal_kernel");
+            .generated_files(generated_files);
+        if env::var_os("RISC0_RV32IM_METAL_KERNEL_O0").is_some() {
+            metal_build.flag("-O0");
+        }
+        metal_build.compile("metal_kernel");
 
         add_metal_kernel_include(
             &mut build,

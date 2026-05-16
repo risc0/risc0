@@ -108,6 +108,25 @@ The practical optimization boundary is:
 For M3 rv32im, main already has a hand-integrated Metal HAL and generated
 per-`po2` kernels for `data_witgen`, `accum_witgen`, and `eval_check`.
 
+The RISC0 checkout pins Bazel `@zirgen` to
+`df6fb9dda1c20209058d6ee90a8912351b741081`, which is current
+`risc0/zirgen` `main` as of this investigation. So the external Zirgen pin is
+not stale. The checked-in rv32im M3 `eval_check` implementation is still from
+the M3 circuit integration lineage, though: it entered with `cbcc6f79e`
+(`Initial commit for rv32im-m3 circuit`, PR #3430), was moved into the merged
+rv32im crates by `ccc793fc9` (PR #3600), and has not had a substantive
+`eval_check` code-shape change since. The generic Zirgen Metal
+`eval_check.tmpl.metal` template dates back to the initial Zirgen import and is
+not the exact code path used by the rv32im M3 C++/Metal HAL.
+
+Historical RISC Zero issue #999 is relevant context: old Metal support was
+deprecated because `eval_check` codegen could exceed Apple temporary-register
+limits, and the issue explicitly pointed at needing more structured Zirgen
+output. The current M5 Max failure is different in symptom (`Poly check failed`
+rather than compile-time register exhaustion), but the successful `-O0`
+experiment makes generated eval-check code shape and Metal optimizer pressure a
+leading hypothesis.
+
 ## Validation Snapshot
 
 Metal-focused validation on the M5 Max:
@@ -177,6 +196,14 @@ Metal-focused validation on the M5 Max:
   `RISC0_RV32IM_METAL_EVAL_CHECK=1`, the 20-run focused `sltiu` loop failed at
   row 5568 col 0 with `1869206222 vs 201529409`. This confirms the bug is in
   the Metal eval-check output itself, not only in later proof verification.
+- Compiling the rv32im Metal kernels with `-O0` is a strong diagnostic. With a
+  temporary hardcoded `-O0`, the focused direct verifier loop
+  (`RISC0_RV32IM_METAL_EVAL_CHECK=1
+  RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 ... prove::tests::sltiu`) passed
+  20/20, and the full serial rv32im prove suite passed 46/46 under forced Metal
+  eval-check plus CPU verification. The branch now exposes this as
+  `RISC0_RV32IM_METAL_KERNEL_O0=1` when rebuilding rv32im Metal kernels instead
+  of hardcoding it globally.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
@@ -247,6 +274,15 @@ than at stale C++ header bindings alone.
   full-Metal eval-check path.
 - Use `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1` for lower-overhead direct
   eval-check mismatch localization before falling back to full DualHal runs.
+- Use `RISC0_RV32IM_METAL_KERNEL_O0=1` as the current strongest compiler/codegen
+  diagnostic. It should not become the default without performance measurement,
+  but it is the best available evidence that optimized Metal compilation is
+  mishandling the generated rv32im eval-check shape.
+- Investigate a Zirgen/M3 code-shape fix for `eval_check` rather than treating
+  Metal bindings alone as the root issue. Promising directions are reducing
+  inlining/register pressure in `verifyCircuit`, avoiding the giant
+  `EvalCheckReg<po2>` reinterpret-cast access pattern, or splitting the validity
+  polynomial into smaller Metal functions/kernels.
 - Benchmark the default CPU eval-check safety path against full Metal eval-check
   once full Metal is reliable enough to compare. The branch can force full Metal
   eval-check with `RISC0_RV32IM_METAL_EVAL_CHECK=1`.
