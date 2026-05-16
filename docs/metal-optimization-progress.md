@@ -327,10 +327,18 @@ Metal-focused validation on the M5 Max:
   `eval_check_*.metal`, `data_witgen_*.metal`, and `accum_witgen_*.metal` are
   generated into `OUT_DIR`; without hashing those generated sources, local cache
   reuse could hide a changed generated kernel and weaken Metal validation.
-  After this cache-key fix, the focused rv32im Metal eval-check regression
-  rebuilt through `risc0-build-kernel` and passed in 14.23s. Package-level
+  The Metal cache key also includes the resolved `xcrun` `metal`/`metallib`
+  paths and version banners, so installing or switching Apple Metal Toolchains
+  does not silently reuse a `.metallib` compiled by a different compiler/linker.
+  Cargo rerun signals now also cover `DEVELOPER_DIR`, `SDKROOT`, and the macOS
+  `/var/db/xcode_select_link` symlink when present, so common Xcode switches
+  should rerun the build script before the cache lookup.
+  After these cache-key and rerun-signal fixes, the focused rv32im Metal
+  eval-check regression rebuilt through `risc0-build-kernel` and passed again in
+  14.09s. Package-level
   checks also pass, including the direct
-  `generated_files_are_part_of_kernel_source_hash` regression test:
+  `generated_files_are_part_of_kernel_source_hash` and cache-tag regression
+  tests:
   `cargo test -p risc0-build-kernel` and
   `cargo clippy -p risc0-build-kernel --all-targets -- -D warnings`.
 - The small Metal-enabled release datasheet matrix is now runnable with
@@ -525,7 +533,12 @@ than at stale C++ header bindings alone.
   versions if possible. A CI Apple Silicon runner passing with a different Xcode
   or Metal Toolchain would be a strong signal that this is toolchain-sensitive.
   This machine only has Xcode 26.5 build `17F42` installed, so this comparison
-  is not locally actionable without installing another Xcode or using CI.
+  is not locally actionable without installing another Xcode or using CI. The
+  build cache now keys `.metallib` artifacts by the resolved `metal`/`metallib`
+  tool paths and version banners, so future cross-toolchain runs should rebuild
+  instead of reusing stale local Metal compiler output. The build script also
+  watches common Xcode selection inputs (`DEVELOPER_DIR`, `SDKROOT`, and
+  `/var/db/xcode_select_link` when present).
 - Establish a stable benchmark matrix:
   - warm `hello-world` proof: present, but too small to distinguish safe
     CPU-eval-check and forced full-Metal eval-check.
@@ -582,6 +595,11 @@ Prompt-to-artifact checklist:
 - Metal binding check: present. Newer Metal-cpp headers did not fix correctness,
   and the deprecated Rust `metal` crate is tracked as a separate maintenance
   risk rather than the rv32im P0 root cause.
+- Metal build-cache hygiene: present. Generated Metal sources and Apple Metal
+  compiler/linker identity are included in the persistent `.metallib` cache key,
+  and common Xcode selection inputs are build-script rerun signals. This reduces
+  the chance that local or CI validation accidentally tests stale kernels after
+  source, flag, or toolchain changes.
 
 Remaining gaps before marking P0 complete:
 

@@ -350,6 +350,13 @@ impl KernelBuild {
     }
 
     fn compile_metal(&mut self, output: &str) {
+        println!("cargo:rerun-if-env-changed=DEVELOPER_DIR");
+        println!("cargo:rerun-if-env-changed=SDKROOT");
+        let xcode_select_link = Path::new("/var/db/xcode_select_link");
+        if xcode_select_link.exists() {
+            println!("cargo:rerun-if-changed={}", xcode_select_link.display());
+        }
+
         let target = env::var("TARGET").unwrap();
         let sdk_name = if target.ends_with("ios") {
             "iphoneos"
@@ -379,6 +386,7 @@ impl KernelBuild {
         let file_prefix_flags = self.file_prefix_flags.clone();
 
         let mut tags = vec![sdk_name.to_string()];
+        tags.extend(metal_toolchain_cache_tags(sdk_name));
         tags.extend(
             file_prefix_flags
                 .iter()
@@ -525,6 +533,41 @@ impl KernelBuild {
     }
 }
 
+fn metal_toolchain_cache_tags(sdk_name: &str) -> Vec<String> {
+    let commands: &[(&str, &[&str])] = &[
+        ("metal-path", &["--find", "metal"]),
+        ("metallib-path", &["--find", "metallib"]),
+        ("metal-version", &["metal", "-v"]),
+        ("metallib-version", &["metallib", "-v"]),
+    ];
+
+    commands
+        .iter()
+        .map(|(label, args)| {
+            let output = Command::new("xcrun")
+                .arg("--sdk")
+                .arg(sdk_name)
+                .args(*args)
+                .output()
+                .unwrap_or_else(|err| panic!("failed to query {label}: {err}"));
+            format_command_cache_tag(label, &output.status, &output.stdout, &output.stderr)
+        })
+        .collect()
+}
+
+fn format_command_cache_tag(
+    label: &str,
+    status: &std::process::ExitStatus,
+    stdout: &[u8],
+    stderr: &[u8],
+) -> String {
+    format!(
+        "{label}:status={status}:stdout={}:stderr={}",
+        String::from_utf8_lossy(stdout),
+        String::from_utf8_lossy(stderr)
+    )
+}
+
 fn risc0_cache() -> PathBuf {
     directories::ProjectDirs::from("com.risczero", "RISC Zero", "risc0")
         .unwrap()
@@ -587,6 +630,19 @@ mod tests {
         fs::write(&generated, "kernel void after() {}\n").unwrap();
         let mut after = Hasher::new();
         build.add_kernel_source_files_to_hash(&mut after);
+        let after = after.finalize();
+
+        assert_ne!(before, after);
+    }
+
+    #[test]
+    fn cache_tags_are_part_of_hash() {
+        let mut before = Hasher::new();
+        before.add_flag("metal-version:old");
+        let before = before.finalize();
+
+        let mut after = Hasher::new();
+        after.add_flag("metal-version:new");
         let after = after.finalize();
 
         assert_ne!(before, after);
