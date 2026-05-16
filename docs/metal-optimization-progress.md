@@ -269,6 +269,28 @@ Metal-focused validation on the M5 Max:
 - The narrowed `-fno-inline` default also passed a 10-run full-suite stress loop
   with `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1`; each run passed 46/46 with
   the ignored Metal regression test skipped.
+- The build now has a diagnostic exact-file flag knob:
+  `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S=13` applies `-fno-inline` only
+  to `eval_check_13.metal` instead of every generated eval-check kernel. With
+  `RISC0_RV32IM_METAL_EVAL_CHECK=1` and
+  `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1`, the serial rv32im prove suite
+  passed 46/46 with one ignored regression test under that narrower `po2=13`
+  setting. A larger datasheet composite probe with the same exact `po2=13`
+  setting and CPU verifier enabled failed immediately at 16K rows in
+  `eval_check_metal_14` (`po2 14 row 4864 col 0, 1648141424 vs 659109993`).
+  Re-running the same composite probe with
+  `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S=13,14` passed first through
+  `--max-po2 18` and then through `--max-po2 20`, covering 16K, 64K, 128K,
+  256K, 512K, and 1M rows with the direct CPU verifier enabled. This is useful
+  diagnostic evidence, but it is not yet enough to narrow the production
+  default. The exact `13,14` set also passed datasheet `--max-po2 18 succinct`
+  with the direct CPU verifier enabled, producing the 64K-row succinct receipt
+  in 5.54s. The voting-machine protocol example also passed under exact
+  `13,14` with the direct CPU verifier enabled, proving and verifying the full
+  protocol flow in 38.40s. The Keccak long-input example then found another
+  required protected kernel: exact `13,14` failed in `eval_check_metal_20`
+  (`po2 20 row 691936 col 0, 1488903 vs 1888965691`), while exact `13,14,20`
+  passed `hash_long` in 148.27s with the direct CPU verifier enabled.
 - Full Metal eval-check is now the runtime default in this branch. The default
   full rv32im prove suite passed 46/46 with one ignored Metal regression test,
   and a default full-suite run with
@@ -393,6 +415,19 @@ Metal-focused validation on the M5 Max:
   completed without a mismatch in 35.93s, about 14.2K rows/sec. The CPU verifier
   makes this number diagnostic-only, but the pass is still useful evidence that
   the serial rv32im test suite remains the compact repro for the inline bug.
+- Exact-`po2` diagnostics suggest at least `eval_check_13.metal` and
+  `eval_check_14.metal`, and `eval_check_20.metal` need the no-inline mitigation
+  on this M5 Max toolchain. `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S=13`
+  passed the full serial rv32im prove suite, but failed datasheet composite at
+  16K rows in `eval_check_metal_14`.
+  `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S=13,14` then passed datasheet
+  `--max-po2 20 composite` with direct CPU verifier enabled, covering through 1M
+  rows, and datasheet `--max-po2 18 succinct` passed at 64K rows. The same exact
+  set passed the voting-machine protocol proof workload, but failed
+  `examples/keccak` `hash_long` in `eval_check_metal_20`.
+  `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S=13,14,20` passed that Keccak
+  long-input workload. Because verifier overhead dominates these timings, use
+  this result for correctness localization, not performance comparison.
 - A source-level Metal `__attribute__((noinline))` experiment on
   `computeRow<po2>` compiled and passed the focused default
   `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 ... prove::tests::sltiu` sanity
@@ -515,6 +550,10 @@ than at stale C++ header bindings alone.
   `eval_check_*.metal` files. Full Metal eval-check is now the runtime default
   in this branch. Keep stressing this scoped default with longer proof loops and
   larger real workloads before treating it as upstream-production evidence.
+- Use `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S` to test exact `po2`
+  mitigation sets. `13` is known to cover the current serial rv32im test-suite
+  repro, but that should remain diagnostic until larger `po2` kernels have
+  direct verifier coverage.
 - Investigate a Zirgen/M3 code-shape fix for `eval_check` rather than treating
   Metal bindings alone as the root issue. Promising directions are reducing
   inlining/register pressure in `verifyCircuit`, avoiding the giant

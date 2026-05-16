@@ -64,6 +64,7 @@ pub struct KernelBuild {
     kernel_type: KernelType,
     flags: Vec<String>,
     file_prefix_flags: Vec<(String, String)>,
+    file_name_flags: Vec<(String, String)>,
     files: Vec<PathBuf>,
     generated_files: Vec<PathBuf>,
     inc_dirs: Vec<PathBuf>,
@@ -77,6 +78,7 @@ impl KernelBuild {
             kernel_type,
             flags: Vec::new(),
             file_prefix_flags: Vec::new(),
+            file_name_flags: Vec::new(),
             files: Vec::new(),
             generated_files: Vec::new(),
             inc_dirs: Vec::new(),
@@ -101,6 +103,13 @@ impl KernelBuild {
     pub fn flag_file_prefix(&mut self, prefix: &str, flag: &str) -> &mut KernelBuild {
         self.file_prefix_flags
             .push((prefix.to_string(), flag.to_string()));
+        self
+    }
+
+    /// Add an arbitrary flag to files whose file name exactly matches `file_name`.
+    pub fn flag_file_name(&mut self, file_name: &str, flag: &str) -> &mut KernelBuild {
+        self.file_name_flags
+            .push((file_name.to_string(), flag.to_string()));
         self
     }
 
@@ -384,6 +393,7 @@ impl KernelBuild {
         ];
         flags.extend(self.flags.clone());
         let file_prefix_flags = self.file_prefix_flags.clone();
+        let file_name_flags = self.file_name_flags.clone();
 
         let mut tags = vec![sdk_name.to_string()];
         tags.extend(metal_toolchain_cache_tags(sdk_name));
@@ -391,6 +401,11 @@ impl KernelBuild {
             file_prefix_flags
                 .iter()
                 .map(|(prefix, flag)| format!("file-prefix-flag:{prefix}:{flag}")),
+        );
+        tags.extend(
+            file_name_flags
+                .iter()
+                .map(|(file_name, flag)| format!("file-name-flag:{file_name}:{flag}")),
         );
 
         self.cached_compile(
@@ -420,6 +435,11 @@ impl KernelBuild {
                         if let Some(file_name) = src.file_name().and_then(|name| name.to_str()) {
                             for (prefix, flag) in &file_prefix_flags {
                                 if file_name.starts_with(prefix) {
+                                    cmd.arg(flag);
+                                }
+                            }
+                            for (flag_file_name, flag) in &file_name_flags {
+                                if file_name == flag_file_name {
                                     cmd.arg(flag);
                                 }
                             }

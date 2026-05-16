@@ -71,6 +71,7 @@ fn compile_provers() {
     rerun_if_env_changed("RISC0_RV32IM_METAL_COMPARE_CPU");
     rerun_if_env_changed("RISC0_RV32IM_METAL_APPEND_FLAGS");
     rerun_if_env_changed("RISC0_RV32IM_METAL_INLINE_EVAL_CHECK");
+    rerun_if_env_changed("RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S");
     rerun_if_env_changed("RISC0_RV32IM_METAL_KERNEL_O0");
     rerun_if_env_changed("SCCACHE_RECACHE");
 
@@ -150,7 +151,13 @@ fn compile_provers() {
             metal_build.flag("-O0");
         }
         if env::var_os("RISC0_RV32IM_METAL_INLINE_EVAL_CHECK").is_none() {
-            metal_build.flag_file_prefix("eval_check_", "-fno-inline");
+            if let Ok(po2s) = env::var("RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S") {
+                for po2 in parse_po2_list(&po2s) {
+                    metal_build.flag_file_name(&format!("eval_check_{po2}.metal"), "-fno-inline");
+                }
+            } else {
+                metal_build.flag_file_prefix("eval_check_", "-fno-inline");
+            }
         }
         if let Ok(flags) = env::var("RISC0_RV32IM_METAL_APPEND_FLAGS") {
             for flag in flags.split_whitespace() {
@@ -484,6 +491,17 @@ fn rerun_if_env_changed(var_name: &str) {
 
 fn glob_paths(pattern: &str) -> Vec<PathBuf> {
     glob::glob(pattern).unwrap().map(|x| x.unwrap()).collect()
+}
+
+fn parse_po2_list(value: &str) -> Vec<usize> {
+    value
+        .split([',', ' '])
+        .filter(|part| !part.is_empty())
+        .map(|part| {
+            part.parse::<usize>()
+                .unwrap_or_else(|err| panic!("invalid po2 '{part}': {err}"))
+        })
+        .collect()
 }
 
 const METAL_SDK_URL: &str =

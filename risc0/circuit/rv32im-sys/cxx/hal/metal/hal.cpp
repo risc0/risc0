@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <sstream>
 
 #define NS_PRIVATE_IMPLEMENTATION
 #define MTL_PRIVATE_IMPLEMENTATION
@@ -523,11 +524,11 @@ public:
         if (cpuCheck[i] != pCheck[i]) {
           size_t row = i % check.rows();
           size_t col = i / check.rows();
-          LOG(0,
-              "Metal evalCheck CPU verify mismatch at po2 "
-                  << po2 << " row " << row << " col " << col << ", " << cpuCheck[i] << " vs "
-                  << pCheck[i]);
-          throw std::runtime_error("Metal evalCheck CPU verify mismatch");
+          std::ostringstream msg;
+          msg << "Metal evalCheck CPU verify mismatch at po2 " << po2 << " row " << row << " col "
+              << col << ", " << cpuCheck[i] << " vs " << pCheck[i];
+          LOG(0, msg.str());
+          throw std::runtime_error(msg.str());
         }
       }
     }
