@@ -25,7 +25,8 @@ The best current experimental full-Metal rv32im candidate is:
 On this branch, generated `eval_check_*.metal` files are compiled with
 `-fno-inline-functions` by default while the other rv32im Metal kernels keep the
 normal optimization pipeline. Set `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1` when
-reproducing the original fully optimized eval-check failure mode.
+comparing against or reproducing the original fully optimized eval-check failure
+mode.
 
 On the M5 Max this passes the current serial rv32im suite with eval-check CPU
 verification, the non-serial rv32im harness, and 1M-row composite plus 64K-row
@@ -236,7 +237,9 @@ Metal-focused validation on the M5 Max:
   `eval_check_*.metal` files by default. With no global append flags, forced
   Metal eval-check plus CPU verification passed the focused `sltiu` loop 20/20
   and the full rv32im prove suite 46/46. This preserves the original repro path
-  behind `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1`.
+  behind `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1`: a focused inline `sltiu`
+  loop passed 25/25, but the inline full rv32im prove suite failed in `sltiu`
+  with a direct eval-check verifier mismatch at row 31840 col 0.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
