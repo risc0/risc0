@@ -385,6 +385,9 @@ Metal-focused validation on the M5 Max:
     receipts and receipt verification.
   - `cargo test --manifest-path examples/keccak/Cargo.toml --features prove
     hash_abc -- --nocapture` passed the public tiny-keccak accelerator example.
+  - `cargo test --manifest-path examples/keccak/Cargo.toml --features prove
+    hash_long -- --nocapture` passed the same public example with a 100KB input
+    in 72.79s.
 - The `datasheet composite` harness had a sparse-`po2` bug: it used `.take(...)`
   over a table that intentionally omits too-small powers of two, so `--max-po2
   16` could still run `po2=17` and panic. The harness now filters by the actual
@@ -531,8 +534,9 @@ Remaining gaps before marking P0 complete:
   code-shape fix. Source-level noinline on `computeRow<po2>` was rejected as too
   slow; a better split of `verifyCircuit`/validity-polynomial code is still open.
 - The default path has strong local smoke, benchmark, short repeat-loop, and
-  Keccak example coverage, but not a long-duration stress run or a broad
-  real-application workload beyond the current datasheet/examples/zkVM tests.
+  Keccak example coverage, including a 100KB input proof, but not a
+  long-duration stress run or a broad non-example application workload beyond
+  the current datasheet/examples/zkVM tests.
 - Keccak Metal remains disabled. This is outside rv32im eval-check correctness,
   but it is still a major gap for best local proving on Keccak-heavy workloads.
 
