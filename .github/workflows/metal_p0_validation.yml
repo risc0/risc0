@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/metal_p0_validation.yml"
       - "docs/metal-optimization-progress.md"
+      - "risc0/build_kernel/**"
       - "risc0/circuit/rv32im/**"
       - "risc0/circuit/rv32im-sys/**"
       - "risc0/circuit/keccak/**"
@@ -65,6 +66,9 @@ jobs:
       - name: Format
         run: cargo fmt --check
 
+      - name: build-kernel tests
+        run: cargo test -p risc0-build-kernel
+
       - name: rv32im Metal prove suite
         run: cargo test -p risc0-circuit-rv32im --features prove prove::tests --release -- --nocapture
 
@@ -113,5 +117,25 @@ jobs:
         run: |
           RISC0_RV32IM_METAL_EVAL_CHECK=0 \
             cargo bench -p risc0-zkvm --features prove,metal --bench fib prove/poseidon2
+
+      - name: Exact po2 candidate segment benchmark
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_benchmarks == 'true' }}
+        run: |
+          RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S=13,14,20 \
+            cargo bench -p risc0-zkvm --features prove,metal --bench fib prove/poseidon2
+
+      - name: Exact po2 candidate Keccak long proof
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_benchmarks == 'true' }}
+        run: |
+          RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S=13,14,20 \
+            cargo test --manifest-path examples/keccak/Cargo.toml \
+              --features prove,risc0-zkvm/metal hash_long --release -- --nocapture
+
+      - name: Exact po2 candidate voting-machine proof
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_benchmarks == 'true' }}
+        run: |
+          RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S=13,14,20 \
+            cargo test --manifest-path examples/voting-machine/Cargo.toml \
+              --features prove,risc0-zkvm/metal protocol --release -- --nocapture
 
       - run: sccache --show-stats

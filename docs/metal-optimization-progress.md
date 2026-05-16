@@ -694,6 +694,10 @@ Prompt-to-artifact checklist:
   `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S` diagnostic, including the case
   where `eval_check_20.metal` must not accidentally match
   `eval_check_200.metal`.
+- Metal P0 workflow coverage: present but awaiting fork approval. The workflow
+  now triggers for `risc0/build_kernel/**`, runs `risc0-build-kernel` unit tests,
+  and can run exact `13,14,20` candidate benchmarks/workloads during manual
+  dispatches with `run_benchmarks=true`.
 
 Remaining gaps before marking P0 complete:
 
@@ -726,8 +730,13 @@ themselves run the explicit eval-check CPU-verifier packet below.
 This branch adds `.github/workflows/metal_p0_validation.yml` on the existing
 `apple_m2_pro` runner labels. It has a constrained `pull_request` trigger for
 Metal-relevant paths plus a manual `workflow_dispatch` trigger, runs the focused
-correctness packet and the voting-machine product-style proof workload, and has
-optional longer benchmark gates for manual runs. P0 is still not complete until
+correctness packet, runs `risc0-build-kernel` unit tests for the Metal cache and
+per-file flag-selection helpers, runs the voting-machine product-style proof
+workload, and has optional longer benchmark gates for manual runs. The path
+filter includes `risc0/build_kernel/**` because stale or incorrectly selected
+Metal `.metallib` artifacts can invalidate this investigation. The optional
+manual benchmark packet also includes the exact `13,14,20` candidate segment,
+Keccak long-input, and voting-machine workloads. P0 is still not complete until
 this or an equivalent packet actually passes on another Apple Silicon
 machine/toolchain.
 
