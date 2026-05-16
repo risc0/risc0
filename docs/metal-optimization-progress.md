@@ -166,6 +166,10 @@ Metal-focused validation on the M5 Max:
   Metal dispatch also did not stabilize non-dual full Metal. The serial suite
   still failed with `Poly check failed` in `bltu`, so this is not just a missing
   post-dispatch readback.
+- Forcing a command-buffer sync after every Metal dispatch also did not
+  stabilize non-dual full Metal. The serial suite still failed with `Poly check
+  failed` in `div`, `divu`, and `lh`, so command-buffer batching is unlikely to
+  be the only root cause.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
