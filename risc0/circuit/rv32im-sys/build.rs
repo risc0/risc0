@@ -69,6 +69,7 @@ fn compile_provers() {
     rerun_if_env_changed("NVCC_APPEND_FLAGS");
     rerun_if_env_changed("NVCC_PREPEND_FLAGS");
     rerun_if_env_changed("RISC0_RV32IM_METAL_COMPARE_CPU");
+    rerun_if_env_changed("RISC0_RV32IM_METAL_APPEND_FLAGS");
     rerun_if_env_changed("RISC0_RV32IM_METAL_KERNEL_O0");
     rerun_if_env_changed("SCCACHE_RECACHE");
 
@@ -146,6 +147,11 @@ fn compile_provers() {
             .generated_files(generated_files);
         if env::var_os("RISC0_RV32IM_METAL_KERNEL_O0").is_some() {
             metal_build.flag("-O0");
+        }
+        if let Ok(flags) = env::var("RISC0_RV32IM_METAL_APPEND_FLAGS") {
+            for flag in flags.split_whitespace() {
+                metal_build.flag(flag);
+            }
         }
         metal_build.compile("metal_kernel");
 
