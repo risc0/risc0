@@ -15,24 +15,23 @@ MetalToolchain`; `xcrun --sdk macosx metal -v` reports Apple metal version
 ## Current Recommendation
 
 Use the M3 rv32im segment prover on Apple Silicon with Metal enabled by target
-selection, but keep the current rv32im eval-check safety fallback enabled. Do
-not force full Metal rv32im eval-check for production proofs yet.
+selection. On this branch, rv32im eval-check also uses Metal by default after
+compiling generated `eval_check_*.metal` files with `-fno-inline-functions`.
 
-The best current experimental full-Metal rv32im candidate is:
+Use this env var only to force the old CPU eval-check safety fallback:
 
-`RISC0_RV32IM_METAL_EVAL_CHECK=1`
+`RISC0_RV32IM_METAL_EVAL_CHECK=0`
 
-On this branch, generated `eval_check_*.metal` files are compiled with
-`-fno-inline-functions` by default while the other rv32im Metal kernels keep the
-normal optimization pipeline. Set `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1` when
-comparing against or reproducing the original fully optimized eval-check failure
-mode.
+The other rv32im Metal kernels keep the normal optimization pipeline. Set
+`RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1` when comparing against or reproducing
+the original fully optimized eval-check failure mode.
 
 On the M5 Max this passes the current serial rv32im suite with eval-check CPU
 verification, the non-serial rv32im harness, and 1M-row composite plus 64K-row
 succinct datasheet runs. It is much faster than the CPU-eval-check safety
-fallback on the filtered `fib prove/poseidon2` benchmark, but this still needs
-longer stress testing before full Metal eval-check becomes the runtime default.
+fallback on the filtered `fib prove/poseidon2` benchmark. This still needs
+broader cross-machine and cross-toolchain validation before treating it as
+upstream-production evidence.
 
 For the best local proving throughput, start with `ProverOpts::fast()` or
 `ProverOpts::composite()`. This produces a composite STARK receipt: fastest,
@@ -240,6 +239,17 @@ Metal-focused validation on the M5 Max:
   behind `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1`: a focused inline `sltiu`
   loop passed 25/25, but the inline full rv32im prove suite failed in `sltiu`
   with a direct eval-check verifier mismatch at row 31840 col 0.
+- Full Metal eval-check is now the runtime default in this branch. The default
+  full rv32im prove suite passed 46/46 with one ignored Metal regression test,
+  and a default full-suite run with
+  `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1` also passed 46/46. The old CPU
+  eval-check fallback remains available with `RISC0_RV32IM_METAL_EVAL_CHECK=0`;
+  a focused `sltiu` fallback sanity run passed with that env set.
+- Before flipping the runtime default, the scoped full-Metal path passed five
+  consecutive non-serial full-suite verifier runs with
+  `RISC0_RV32IM_METAL_EVAL_CHECK=1
+  RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1`: each run passed 46/46, with the
+  ignored Metal regression test skipped unless `--ignored` is provided.
 - The branch also has an ignored focused regression test for the scoped
   eval-check mitigation:
   `RISC0_RV32IM_METAL_EVAL_CHECK=1
@@ -367,9 +377,9 @@ than at stale C++ header bindings alone.
   inlining/register pressure in `verifyCircuit`, avoiding the giant
   `EvalCheckReg<po2>` reinterpret-cast access pattern, or splitting the validity
   polynomial into smaller Metal functions/kernels.
-- Benchmark the default CPU eval-check safety path against full Metal eval-check
-  once full Metal is reliable enough to compare. The branch can force full Metal
-  eval-check with `RISC0_RV32IM_METAL_EVAL_CHECK=1`.
+- Keep benchmarking the default full-Metal eval-check path against the CPU
+  eval-check safety fallback. The branch can force the fallback with
+  `RISC0_RV32IM_METAL_EVAL_CHECK=0`.
 - Keep the ignored `metal_eval_check_sltiu_repeated` test as the focused
   regression command for the scoped eval-check mitigation. Broaden it only if a
   smaller deterministic repro is found for the original inline failure.

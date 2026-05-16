@@ -473,7 +473,7 @@ public:
     }
     const char* metalEvalCheck = std::getenv("RISC0_RV32IM_METAL_EVAL_CHECK");
     bool useMetalEvalCheck =
-        metalEvalCheck && metalEvalCheck[0] != '\0' && metalEvalCheck[0] != '0';
+        !metalEvalCheck || (metalEvalCheck[0] != '\0' && metalEvalCheck[0] != '0');
     if (!useMetalEvalCheck) {
       PinnedMatrixWO<Fp> pCheck(shared_from_this(), check);
       PinnedMatrixRO<Fp> pData(shared_from_this(), data);
