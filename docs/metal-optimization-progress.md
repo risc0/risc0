@@ -428,6 +428,14 @@ Metal-focused validation on the M5 Max:
   `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S=13,14,20` passed that Keccak
   long-input workload. Because verifier overhead dominates these timings, use
   this result for correctness localization, not performance comparison.
+- The same exact `13,14,20` set without the direct CPU verifier is a promising
+  future narrowing candidate, but not the default yet. The full serial rv32im
+  prove suite passed 46/46 with one ignored test in 8.18s. Filtered
+  `fib prove/poseidon2` passed in 2.37s to 2.56s, about 200.3K to 215.6K
+  rows/sec. `examples/keccak` `hash_long` also passed with
+  `--features prove,risc0-zkvm/metal` in 44.37s. This is faster than the broad
+  default, but it still needs broader workload and cross-machine validation
+  before replacing the safer `eval_check_*.metal` default mitigation.
 - A source-level Metal `__attribute__((noinline))` experiment on
   `computeRow<po2>` compiled and passed the focused default
   `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 ... prove::tests::sltiu` sanity
@@ -497,6 +505,10 @@ Metal-focused validation on the M5 Max:
   - `cargo test --manifest-path examples/keccak/Cargo.toml --features prove
     hash_long -- --nocapture` passed the same public example with a 100KB input
     in 72.79s.
+  - `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S=13,14,20 cargo test
+    --manifest-path examples/keccak/Cargo.toml --features
+    prove,risc0-zkvm/metal hash_long --release -- --nocapture` passed the same
+    100KB input in 44.37s.
 - The `datasheet composite` harness had a sparse-`po2` bug: it used `.take(...)`
   over a table that intentionally omits too-small powers of two, so `--max-po2
   16` could still run `po2=17` and panic. The harness now filters by the actual
@@ -634,8 +646,9 @@ Prompt-to-artifact checklist:
 - Native and Docker guest C/C++ archiver fix: present. Both native
   `cpp_test`/`--no-run` and Docker `RISC0_USE_DOCKER=1 ... cpp_test` passed.
 - Benchmark matrix: present for default segment proving, CPU eval-check
-  fallback, composite up to 1M rows, succinct at 64K rows, Keccak CPU fallback,
-  and Keccak syscall/assumption proof coverage.
+  fallback, exact `13,14,20` rv32im suite and segment proving, composite up to 1M
+  rows, succinct at 64K rows, Keccak CPU fallback, and Keccak syscall/assumption
+  proof coverage.
 - Product-style workload: present. The voting-machine protocol example passed
   under the default Metal path with eval-check CPU verification enabled.
 - M5 Max and modern Apple toolchain context: present. Validation records Xcode
