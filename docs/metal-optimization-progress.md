@@ -294,6 +294,10 @@ Metal-focused validation on the M5 Max:
   path it completed one timed iteration in 28.31s, about 18.1K rows/sec. This is
   intentionally recorded as the CPU-eval-check safety-path baseline, not a
   full-Metal result.
+- Re-running the same benchmark after the runtime default flip with
+  `RISC0_RV32IM_METAL_EVAL_CHECK=0` confirmed the old CPU eval-check fallback is
+  still much slower than the default full-Metal path: 30.68s, about 16.7K
+  rows/sec.
 - The same filtered `fib prove/poseidon2` benchmark with
   `RISC0_RV32IM_METAL_KERNEL_O0=1 RISC0_RV32IM_METAL_EVAL_CHECK=1` completed in
   48.05s, about 10.7K rows/sec. This is slower than the CPU-eval-check safety
