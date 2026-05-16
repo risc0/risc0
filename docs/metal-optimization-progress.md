@@ -302,7 +302,11 @@ Metal-focused validation on the M5 Max:
 - With scoped default no-inline on only generated `eval_check_*.metal` files and
   `RISC0_RV32IM_METAL_EVAL_CHECK=1`, the same filtered `fib prove/poseidon2`
   benchmark completed in 4.89s to 6.16s, about 83.1K to 104.8K rows/sec. This
-  is the best current segment-proving measurement.
+  is the best pre-default-flip segment-proving measurement.
+- After flipping full Metal eval-check on by default, the same filtered
+  benchmark without any rv32im eval-check env flags passed with a 4.73s to 4.84s
+  range, about 105.8K to 108.3K rows/sec. This is the best current default
+  segment-proving measurement.
 - The same `-fno-inline-functions` full-Metal eval-check candidate passed
   `datasheet --max-po2 16 composite`: 658.9ms for 16K rows and 2.04s for 64K
   rows. This improves on the current safety-path baseline of 897.8ms and 4.56s,
@@ -323,9 +327,18 @@ Metal-focused validation on the M5 Max:
   rows, 783.8ms for 64K rows, 1.29s for 128K rows, 2.48s for 256K rows, 4.85s
   for 512K rows, and 9.68s for 1M rows. The 1M-row case reached about 105.7K
   rows/sec.
+- After flipping full Metal eval-check on by default, the same
+  `datasheet --max-po2 20 composite` run passed without any rv32im eval-check
+  env flags and reached 286.9ms for 16K rows, 727.3ms for 64K rows, 1.36s for
+  128K rows, 2.46s for 256K rows, 4.93s for 512K rows, and 9.84s for 1M rows.
+  The 1M-row case reached about 104.1K rows/sec.
 - With the scoped eval-check-only no-inline default, `datasheet --max-po2 18
   succinct` passed: 1.47s for the 64K-row succinct case, about 43.5K rows/sec,
   with about 930MB max RAM and a 217.4KB seal.
+- After flipping full Metal eval-check on by default, the same
+  `datasheet --max-po2 18 succinct` run passed without any rv32im eval-check env
+  flags: 1.49s for the 64K-row succinct case, about 43K rows/sec, with about
+  930MB max RAM and a 217.4KB seal.
 - `cargo run --release -p risc0-circuit-keccak --features prove --example
   keccak -- --po2 14 --count 1` completed in 1.930s, about 41.975 keccak/sec.
   Keccak Metal is still disabled in `risc0-circuit-keccak`, so this is a CPU
@@ -415,13 +428,13 @@ than at stale C++ header bindings alone.
   - warm `hello-world` proof: present, but too small to distinguish safe
     CPU-eval-check and forced full-Metal eval-check.
   - small Metal-enabled `datasheet execute`, `composite`, `lift`, `join`, and
-    `succinct`: present at `--max-po2 16`; the `-fno-inline-functions`
-    full-Metal candidate also has scoped-default `succinct` coverage at
-    `--max-po2 18` and scoped-default `composite` coverage at `--max-po2 20`.
+    `succinct`: present at `--max-po2 16`; the default full-Metal eval-check
+    path also has `succinct` coverage at `--max-po2 18` and `composite`
+    coverage at `--max-po2 20`.
   - filtered `fib execute`: present.
   - rv32im segment-only benchmark: present through filtered `fib
-    prove/poseidon2`; currently slow because the safety path keeps rv32im
-    eval-check on CPU.
+    prove/poseidon2`; the default full-Metal eval-check path is now the best
+    measured segment-proving configuration on this branch.
   - Keccak-heavy workload: CPU fallback baseline present; Metal Keccak remains
     disabled.
 
