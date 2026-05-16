@@ -335,6 +335,10 @@ Metal-focused validation on the M5 Max:
   `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 ... prove::tests::sltiu` sanity
   test, but the single proof took 63.38s. That is not a viable replacement for
   the scoped compiler-flag mitigation.
+- A narrower source-level noinline experiment on only the `verifyCircuit`
+  template also passed the focused direct verifier test with the scoped default
+  noinline mitigation disabled, but the single proof still took 61.00s. That is
+  not a viable replacement either.
 - Apple Metal accepts LLVM inline-threshold flags such as
   `-mllvm -inline-threshold=10`. With the scoped default noinline mitigation
   disabled, that threshold passed the same focused direct verifier test, but the
