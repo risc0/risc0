@@ -369,9 +369,10 @@ than at stale C++ header bindings alone.
   the `-O0` full-Metal path is slower than the CPU-eval-check safety path.
 - Use `RISC0_RV32IM_METAL_APPEND_FLAGS` for targeted compiler-flag experiments.
   The first strong candidate, `-fno-inline-functions`, is now applied only to
-  generated `eval_check_*.metal` files by default. Keep stressing this scoped
-  default with longer proof loops and larger real workloads before making full
-  Metal eval-check the runtime default.
+  generated `eval_check_*.metal` files by default, and full Metal eval-check is
+  now the runtime default in this branch. Keep stressing this scoped default
+  with longer proof loops and larger real workloads before treating it as
+  upstream-production evidence.
 - Investigate a Zirgen/M3 code-shape fix for `eval_check` rather than treating
   Metal bindings alone as the root issue. Promising directions are reducing
   inlining/register pressure in `verifyCircuit`, avoiding the giant
