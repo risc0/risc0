@@ -138,7 +138,9 @@ Metal-focused validation on the M5 Max:
 - `cargo test -p risc0-circuit-recursion --features prove prove::hal::metal::tests::eval_check --release -- --ignored --nocapture`
   passed: 1 test, including after the Xcode 26.5 Metal Toolchain install.
 - `examples/target/release/hello-world` with `RISC0_PROVER=local` completed a
-  proof in about 0.9s warm with the default CPU eval-check safety path.
+  proof in about 0.5s warm with the default CPU eval-check safety path. A
+  forced full-Metal eval-check run of the same binary was also about 0.5s, so
+  this tiny example is not a useful performance discriminator.
 - Eager `newComputePipelineState` over every function in the rv32im `.metallib`
   can stall badly with this toolchain when it compiles unused kernels such as
   higher-`po2` `eval_check` variants. Lazy pipeline creation avoids that startup
