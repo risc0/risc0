@@ -583,6 +583,13 @@ Remaining gaps before marking P0 complete:
 Run this packet on any other Apple Silicon host or CI runner before treating the
 branch as more than M5 Max/Xcode 26.5 evidence.
 
+Existing GitHub workflow context: `.github/workflows/main.yml` already has
+`macOS`/`ARM64` jobs on `apple_m2_pro` runners for clippy, workspace tests,
+extra tests, and Bazel checks, and `.github/workflows/bench_pr.yml` has an
+Apple Silicon benchmark runner. Those jobs are useful cross-machine signal once
+the branch is pushed as a PR or manually dispatched, but they do not by
+themselves run the explicit eval-check CPU-verifier packet below.
+
 Environment capture:
 
 ```sh
