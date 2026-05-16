@@ -20,9 +20,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use quote::{format_ident, quote};
-use xshell::{Shell, cmd};
+use xshell::{cmd, Shell};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
@@ -68,6 +68,7 @@ fn compile_provers() {
 
     rerun_if_env_changed("NVCC_APPEND_FLAGS");
     rerun_if_env_changed("NVCC_PREPEND_FLAGS");
+    rerun_if_env_changed("RISC0_RV32IM_METAL_COMPARE_CPU");
     rerun_if_env_changed("SCCACHE_RECACHE");
 
     let platform = if is_cuda() {
@@ -101,6 +102,7 @@ fn compile_provers() {
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .files(glob_paths("cxx/core/*.cpp"))
         .files(glob_paths("cxx/hal/cpu/*.cpp"))
+        .files(glob_paths("cxx/hal/dual/*.cpp"))
         .files(glob_paths("cxx/prove/*.cpp"))
         .files(glob_paths("cxx/rv32im/*.cpp"))
         .files(glob_paths("cxx/rv32im/emu/*.cpp"))

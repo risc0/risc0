@@ -115,17 +115,30 @@ Metal-focused validation on the M5 Max:
 - After installing the Xcode 26.5 Metal Toolchain and forcing the rv32im Metal
   kernels to rebuild, serial rv32im Metal tests are not reliable:
   `cargo test -p risc0-circuit-rv32im --features prove prove::tests --release
-  -- --nocapture --test-threads=1` failed with `Poly check failed` in
-  `prove::tests::addi`, `prove::tests::divu`, and `prove::tests::rem`.
-  Earlier failures also appeared in different tests such as `lh`, `lbu`, and
-  `sub`. Treat rv32im Metal as correctness-suspect on this machine/toolchain.
+  -- --nocapture --test-threads=1` failed with `Poly check failed`. The failing
+  test moves between runs; observed failures include `addi`, `divu`, `rem`,
+  `lh`, `lbu`, `lw`, `or`, and `sub`. Treat rv32im Metal as
+  correctness-suspect on this machine/toolchain.
+- The existing C++ `DualHal` CPU+Metal checker narrows the first divergent
+  rv32im operation to `evalCheck`: with
+  `RISC0_RV32IM_METAL_COMPARE_CPU=1 RISC0_RV32IM_METAL_EVAL_CHECK=1`, a serial
+  suite run failed in `beq` with `DualHal matrix verify mismatch after
+  evalCheck`.
+- Bypassing only the Metal `eval_check_metal_*` kernels restores correctness.
+  The branch now keeps the rest of the Metal HAL active but computes the rv32im
+  validity polynomial on CPU by default:
+  `cargo test -p risc0-circuit-rv32im --features prove prove::tests --release
+  -- --nocapture --test-threads=1` passed 46 tests, and the default parallel
+  run passed 46 tests. Set
+  `RISC0_RV32IM_METAL_EVAL_CHECK=1` to force the full Metal eval-check kernel
+  for diagnosis and benchmarking; the same serial suite failed in that mode
+  with `jalr`, `mulhsu`, and `or` hitting `Poly check failed`.
 - `cargo test -p risc0-zkp --features prove hal::metal --release -- --nocapture`
   passed: 19 tests, including after the Xcode 26.5 Metal Toolchain install.
 - `cargo test -p risc0-circuit-recursion --features prove prove::hal::metal::tests::eval_check --release -- --ignored --nocapture`
   passed: 1 test, including after the Xcode 26.5 Metal Toolchain install.
 - `examples/target/release/hello-world` with `RISC0_PROVER=local` completed a
-  proof in about 0.6s warm and links `Metal.framework` before the full toolchain
-  rebuild. This should be rerun after the rv32im correctness issue is isolated.
+  proof in about 0.9s warm with the default CPU eval-check safety path.
 - Eager `newComputePipelineState` over every function in the rv32im `.metallib`
   can stall badly with this toolchain when it compiles unused kernels such as
   higher-`po2` `eval_check` variants. Lazy pipeline creation avoids that startup
@@ -163,7 +176,16 @@ than at stale C++ header bindings alone.
 
 - Reproduce and isolate the serial rv32im `Poly check failed` failure with the
   Xcode 26.5 Metal Toolchain. This is now a correctness issue, not just a
-  parallel-test flake.
+  parallel-test flake. Current evidence points specifically at the generated
+  `eval_check_metal_*` kernels or the Metal compiler/runtime handling of the
+  generated `EvalCheckReg<po2>` access pattern.
+- Keep the `RISC0_RV32IM_METAL_COMPARE_CPU=1` dual-HAL diagnostic available for
+  CPU/Metal operation-level mismatch localization. Use it together with
+  `RISC0_RV32IM_METAL_EVAL_CHECK=1` when specifically investigating the unsafe
+  full-Metal eval-check path.
+- Benchmark the default CPU eval-check safety path against full Metal eval-check
+  once full Metal is reliable enough to compare. The branch can force full Metal
+  eval-check with `RISC0_RV32IM_METAL_EVAL_CHECK=1`.
 - Add a deterministic Metal rv32im regression command or mark the test harness
   serial if the Metal runtime cannot safely run these tests concurrently.
 - Fix the `risc0-zkvm-methods-cpp-crates` `blst_*` guest link failure so the
@@ -219,7 +241,10 @@ itself dramatically faster without deeper kernel/layout changes.
 - Is the rv32im parallel failure a Metal HAL command-buffer/resource lifetime
   issue, a generated-kernel/toolchain issue, a `gpu_guard` coverage issue, or a
   test harness artifact? The current serial failures make a pure parallelism
-  explanation unlikely.
+  explanation unlikely, and dual-HAL evidence currently points at `evalCheck`.
+- Is the generated `EvalCheckReg<po2>` pointer/array pattern miscompiled by the
+  Xcode 26.5 Metal Toolchain, or is the generated Metal eval-check code relying
+  on undefined behavior that older toolchains happened to tolerate?
 - Which Apple Metal Toolchain versions pass or fail rv32im Metal on Apple
   Silicon, and what does the CI runner use?
 - Which real target workload should represent "best local prover" for M5 Max:

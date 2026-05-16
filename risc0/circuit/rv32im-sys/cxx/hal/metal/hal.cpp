@@ -16,6 +16,7 @@
 #include "hal/hal.h"
 #include "hal/po2s.h"
 
+#include <cstdlib>
 #include <iostream>
 #include <map>
 
@@ -35,6 +36,18 @@
 using namespace risc0;
 
 class MetalHal;
+
+namespace risc0 {
+
+void evalCheckCpu(Fp* check,
+                  const Fp* data,
+                  const Fp* accum,
+                  const Fp* globals,
+                  const FpExt* accMix,
+                  FpExt ecMix,
+                  size_t numRows);
+
+} // namespace risc0
 
 class MetalBuffer : public IBuffer {
   friend class MetalHal;
@@ -67,7 +80,7 @@ size_t getPo2(size_t in) {
 
 class MetalHal : public IHal {
 public:
-  MetalHal() : device(nullptr) {
+  MetalHal() : autoreleasePool(NS::AutoreleasePool::alloc()->init()), device(nullptr) {
     // Get all metal devices and pick the first
     NS::Array* all = MTLCopyAllDevices();
     if (all->count() == 0) {
@@ -91,7 +104,7 @@ public:
                                      metal_kernel_len,
                                      dispatch_get_main_queue(),
                                      DISPATCH_DATA_DESTRUCTOR_DEFAULT);
-    MTL::Library* library = device->newLibrary(data, &error);
+    library = device->newLibrary(data, &error);
     dispatch_release(data);
 
     if (!library) {
@@ -99,28 +112,13 @@ public:
       throw std::runtime_error("Unable to load library");
     }
 
-    std::mutex m;
     auto allNames = library->functionNames();
-    parallel_map(allNames->count(), [this, &allNames, &library, &m](size_t i) {
+    for (size_t i = 0; i < allNames->count(); i++) {
       NS::String* name = allNames->object<NS::String>(i);
       std::string cppName = name->utf8String();
-      MTL::Function* func = library->newFunction(name);
-      NS::Error* error;
-      MTL::ComputePipelineState* pls = device->newComputePipelineState(func, &error);
-      func->release();
-      if (!pls) {
-        LOG(0,
-            "Unable to load kernel `" << cppName
-                                      << "`: " << error->localizedDescription()->utf8String());
-        throw std::runtime_error("Unable to load kernel");
-      }
-
-      m.lock();
-      kernels[cppName] = pls;
-      m.unlock();
-    });
-
-    library->release();
+      name->retain();
+      functionNames[cppName] = name;
+    }
 
     // Prepare some constants
     roundConstants = copyData(risc0::p2impl::ROUND_CONSTANTS, sizeof(Fp) * 696);
@@ -145,11 +143,20 @@ public:
     for (auto& [_, value] : kernels) {
       value->release();
     }
+    for (auto& [_, value] : functionNames) {
+      value->release();
+    }
+    if (library) {
+      library->release();
+    }
     if (commandQueue) {
       commandQueue->release();
     }
     if (device) {
       device->release();
+    }
+    if (autoreleasePool) {
+      autoreleasePool->release();
     }
   }
 
@@ -464,6 +471,25 @@ public:
     if (check.rows() != accum.rows() || accum.rows() != data.rows()) {
       throw std::runtime_error("Mismatched sizes in evalCheck");
     }
+    const char* metalEvalCheck = std::getenv("RISC0_RV32IM_METAL_EVAL_CHECK");
+    bool useMetalEvalCheck =
+        metalEvalCheck && metalEvalCheck[0] != '\0' && metalEvalCheck[0] != '0';
+    if (!useMetalEvalCheck) {
+      PinnedMatrixWO<Fp> pCheck(shared_from_this(), check);
+      PinnedMatrixRO<Fp> pData(shared_from_this(), data);
+      PinnedMatrixRO<Fp> pAccum(shared_from_this(), accum);
+      PinnedArrayRO<Fp> pGlobals(shared_from_this(), globals);
+      PinnedArrayRO<FpExt> pAccMix(shared_from_this(), accMix);
+      evalCheckCpu(
+          pCheck.data(),
+          pData.data(),
+          pAccum.data(),
+          pGlobals.data(),
+          pAccMix.data(),
+          ecMix,
+          check.rows());
+      return;
+    }
     // -2 to undo to expansion factor
     size_t po2 = getPo2(check.rows()) - 2;
     size_t groupSize;
@@ -498,9 +524,12 @@ public:
   }
 
 private:
+  NS::AutoreleasePool* autoreleasePool = nullptr;
   MTL::Device* device = nullptr;
   MTL::CommandQueue* commandQueue = nullptr;
   MTL::CommandBuffer* commandBuffer = nullptr;
+  MTL::Library* library = nullptr;
+  std::map<std::string, NS::String*> functionNames;
   std::map<std::string, MTL::ComputePipelineState*> kernels;
   IBufferPtr roundConstants;
   IBufferPtr mIntDiag;
@@ -556,8 +585,25 @@ private:
   MTL::ComputeCommandEncoder* getEncoder(const std::string& name, size_t& groupSize) {
     auto it = kernels.find(name);
     if (it == kernels.end()) {
-      LOG(0, "Invalid kernel name in call to `" << name);
-      throw std::runtime_error("Invalid kernel name");
+      auto funcName = functionNames.find(name);
+      if (funcName == functionNames.end()) {
+        LOG(0, "Invalid kernel name in call to `" << name);
+        throw std::runtime_error("Invalid kernel name");
+      }
+
+      LOG(1, "Loading metal kernel `" << name << "`");
+      MTL::Function* func = library->newFunction(funcName->second);
+      NS::Error* error = nullptr;
+      MTL::ComputePipelineState* pls = device->newComputePipelineState(func, &error);
+      func->release();
+      if (!pls) {
+        LOG(0,
+            "Unable to load kernel `" << name << "`: "
+                                      << error->localizedDescription()->utf8String());
+        throw std::runtime_error("Unable to load kernel");
+      }
+
+      it = kernels.emplace(name, pls).first;
     }
     groupSize = it->second->maxTotalThreadsPerThreadgroup();
     prepBuffer();

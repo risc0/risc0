@@ -76,30 +76,33 @@ class DualHal : public IHal {
     return out;
   }
 
-  void verify(IBufferPtr buf) {
+  void verify(const char* label, IBufferPtr buf) {
     uint8_t* aPin = reinterpret_cast<uint8_t*>(a->pin(getA(buf), 0, buf->size(), true));
     uint8_t* bPin = reinterpret_cast<uint8_t*>(b->pin(getB(buf), 0, buf->size(), true));
     for (size_t i = 0; i < buf->size(); i++) {
       if (aPin[i] != bPin[i]) {
         LOG(0,
-            "DualHal buffer verify mismatch at byte " << i << ", " << aPin[i] << " vs " << bPin[i]);
+            "DualHal buffer verify mismatch after " << label << " at byte " << i << ", "
+                                                     << aPin[i] << " vs " << bPin[i]);
         throw std::runtime_error("DualHal mismatch");
       }
     }
     a->unpin(getA(buf), aPin, 0, buf->size(), false);
     b->unpin(getB(buf), bPin, 0, buf->size(), false);
   }
-  template <typename T> void verify(HalArray<T> buf) {
+  template <typename T> void verify(const char* label, HalArray<T> buf) {
     PinnedArrayRO<T> aBuf(a, getA(buf));
     PinnedArrayRO<T> bBuf(b, getB(buf));
     for (size_t i = 0; i < buf.size(); i++) {
       if (aBuf[i] != bBuf[i]) {
-        LOG(0, "DualHal array verify mismatch at " << i << ", " << aBuf[i] << " vs " << bBuf[i]);
+        LOG(0,
+            "DualHal array verify mismatch after " << label << " at " << i << ", " << aBuf[i]
+                                                   << " vs " << bBuf[i]);
         throw std::runtime_error("DualHal mismatch");
       }
     }
   }
-  template <typename T> void verify(HalMatrix<T> buf) {
+  template <typename T> void verify(const char* label, HalMatrix<T> buf) {
     PinnedMatrixRO<T> aBuf(a, getA(buf));
     PinnedMatrixRO<T> bBuf(b, getB(buf));
     for (size_t i = 0; i < buf.size(); i++) {
@@ -107,8 +110,9 @@ class DualHal : public IHal {
       size_t col = i / buf.rows();
       if (aBuf[i] != bBuf[i]) {
         LOG(0,
-            "DualHal matrix verify mismatch at row " << row << "col " << col << ", " << aBuf[i]
-                                                     << " vs " << bBuf[i]);
+            "DualHal matrix verify mismatch after " << label << " at row " << row << " col "
+                                                    << col << ", " << aBuf[i] << " vs "
+                                                    << bBuf[i]);
         throw std::runtime_error("DualHal mismatch");
       }
     }
@@ -125,25 +129,25 @@ public:
   copy(IBufferPtr dst, size_t dstOffset, IBufferPtr src, size_t srcOffset, size_t count) override {
     a->copy(getA(dst), dstOffset, getA(src), srcOffset, count);
     b->copy(getB(dst), dstOffset, getB(src), srcOffset, count);
-    verify(dst);
+    verify("copy", dst);
   }
 
   void zero(IBufferPtr buf, size_t offset, size_t size) override {
     a->zero(getA(buf), offset, size);
     b->zero(getB(buf), offset, size);
-    verify(buf);
+    verify("zero", buf);
   }
 
   void hashRows(HalArray<Digest> out, HalMatrix<Fp> in) override {
     a->hashRows(getA(out), getA(in));
     b->hashRows(getB(out), getB(in));
-    verify(out);
+    verify("hashRows", out);
   }
 
   void hashFold(HalArray<Digest> out, HalArray<Digest> in) override {
     a->hashFold(getA(out), getA(in));
     b->hashFold(getB(out), getB(in));
-    verify(out);
+    verify("hashFold", out);
   }
 
   void query(HalArray<Fp> out,
@@ -153,31 +157,31 @@ public:
              size_t idx) override {
     a->query(getA(out), getA(data), getA(tree), topSize, idx);
     b->query(getB(out), getB(data), getB(tree), topSize, idx);
-    verify(out);
+    verify("query", out);
   }
 
   void batchBitReverse(HalMatrix<Fp> io) override {
     a->batchBitReverse(getA(io));
     b->batchBitReverse(getB(io));
-    verify(io);
+    verify("batchBitReverse", io);
   }
 
   void batchExpandAndEvaluate(HalMatrix<Fp> out, HalMatrix<Fp> in) override {
     a->batchExpandAndEvaluate(getA(out), getA(in));
     b->batchExpandAndEvaluate(getB(out), getB(in));
-    verify(out);
+    verify("batchExpandAndEvaluate", out);
   }
 
   void batchInterpolate(HalMatrix<Fp> io) override {
     a->batchInterpolate(getA(io));
     b->batchInterpolate(getB(io));
-    verify(io);
+    verify("batchInterpolate", io);
   }
 
   void batchShift(HalMatrix<Fp> io) override {
     a->batchShift(getA(io));
     b->batchShift(getB(io));
-    verify(io);
+    verify("batchShift", io);
   }
 
   void batchPolyEval(HalArray<FpExt> out,
@@ -186,7 +190,7 @@ public:
                      HalArray<FpExt> xs) override {
     a->batchPolyEval(getA(out), getA(coeffs), getA(cols), getA(xs));
     b->batchPolyEval(getB(out), getB(coeffs), getB(cols), getB(xs));
-    verify(out);
+    verify("batchPolyEval", out);
   }
 
   void combosMix(HalMatrix<FpExt> combos,
@@ -196,7 +200,7 @@ public:
                  FpExt mix) override {
     a->combosMix(getA(combos), getA(coeffs), getA(whichCombo), cur, mix);
     b->combosMix(getB(combos), getB(coeffs), getB(whichCombo), cur, mix);
-    verify(combos);
+    verify("combosMix", combos);
   }
 
   void combosPrep(HalMatrix<FpExt> combos,
@@ -205,25 +209,25 @@ public:
                   FpExt mix) override {
     a->combosPrep(getA(combos), getA(eval), getA(info), mix);
     b->combosPrep(getB(combos), getB(eval), getB(info), mix);
-    verify(combos);
+    verify("combosPrep", combos);
   }
 
   void combosDivide(HalMatrix<FpExt> combos, HalArray<DivideInfo> info) override {
     a->combosDivide(getA(combos), getA(info));
     b->combosDivide(getB(combos), getB(info));
-    verify(combos);
+    verify("combosDivide", combos);
   }
 
   void combosFinalize(HalMatrix<Fp> out, HalMatrix<FpExt> combos) override {
     a->combosFinalize(getA(out), getA(combos));
     b->combosFinalize(getB(out), getB(combos));
-    verify(out);
+    verify("combosFinalize", out);
   }
 
   void friFold(HalMatrix<Fp> out, HalMatrix<Fp> in, FpExt mix) override {
     a->friFold(getA(out), getA(in), mix);
     b->friFold(getB(out), getB(in), mix);
-    verify(out);
+    verify("friFold", out);
   }
 
   void computeDataWitness(HalMatrix<Fp> data,
@@ -233,9 +237,9 @@ public:
                           HalArray<uint32_t> tables) override {
     a->computeDataWitness(getA(data), getA(globals), getA(rows), getA(aux), getA(tables));
     b->computeDataWitness(getB(data), getB(globals), getB(rows), getB(aux), getB(tables));
-    verify(data);
-    verify(globals);
-    verify(tables);
+    verify("computeDataWitness/data", data);
+    verify("computeDataWitness/globals", globals);
+    verify("computeDataWitness/tables", tables);
   }
 
   void computeAccumWitness(HalMatrix<Fp> accum,
@@ -244,7 +248,7 @@ public:
                            HalArray<FpExt> accMix) override {
     a->computeAccumWitness(getA(accum), getA(data), getA(globals), getA(accMix));
     b->computeAccumWitness(getB(accum), getB(data), getB(globals), getB(accMix));
-    verify(accum);
+    verify("computeAccumWitness", accum);
   }
 
   void evalCheck(HalMatrix<Fp> check,
@@ -255,7 +259,7 @@ public:
                  FpExt ecMix) override {
     a->evalCheck(getA(check), getA(data), getA(accum), getA(globals), getA(accMix), ecMix);
     b->evalCheck(getB(check), getB(data), getB(accum), getB(globals), getB(accMix), ecMix);
-    verify(check);
+    verify("evalCheck", check);
   }
 
   void sync() override {
