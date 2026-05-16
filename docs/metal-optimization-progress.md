@@ -88,10 +88,12 @@ The local host path is:
 5. Keccak receipts are inserted into a union tree and later resolved against the
    main session receipt.
 
-Current Metal status: Keccak has CUDA and CPU prover branches, but the Metal
-branch is still commented out. On Apple Silicon, Keccak proving falls back to the
-CPU circuit path today. This is a clear gap for workloads that use the Keccak
-precompile heavily.
+Current Metal status: Keccak has CUDA and CPU prover branches, but no working
+Metal branch. The selector still has a commented-out Metal arm, but this is not
+just a stale selector gate: `risc0-circuit-keccak` has no `metal` feature or
+Metal HAL module, and `risc0-circuit-keccak-sys` only builds C++ CPU and CUDA
+kernels/FFI. On Apple Silicon, Keccak proving falls back to the CPU circuit path
+today. This is a clear gap for workloads that use the Keccak precompile heavily.
 
 ## Groth16 / Trusted Setup
 
@@ -402,8 +404,9 @@ Metal-focused validation on the M5 Max:
   930MB max RAM and a 217.4KB seal.
 - `cargo run --release -p risc0-circuit-keccak --features prove --example
   keccak -- --po2 14 --count 1` completed in 1.930s, about 41.975 keccak/sec.
-  Keccak Metal is still disabled in `risc0-circuit-keccak`, so this is a CPU
-  fallback baseline and not evidence of Metal Keccak coverage.
+  Keccak Metal is still absent in `risc0-circuit-keccak` and
+  `risc0-circuit-keccak-sys`, so this is a CPU fallback baseline and not
+  evidence of Metal Keccak coverage.
 - Higher-level Keccak syscall/assumption proving also passes on the current
   default M3 + Metal rv32im path, while the Keccak accelerator proof itself
   still uses the CPU Keccak circuit path:
@@ -640,7 +643,10 @@ RISC0_RV32IM_METAL_KERNEL_O0=1 \
 
 ### P2: Fill Metal Coverage Gaps
 
-- Implement or restore Keccak Metal proving.
+- Implement Keccak Metal proving. This needs generated Metal kernels and FFI in
+  `risc0-circuit-keccak-sys`, a Rust Metal circuit HAL in
+  `risc0-circuit-keccak`, and a real `metal` feature/selector path; the current
+  commented selector arm is not enough by itself.
 - Decide whether recursion CPU witgen is acceptable or should become a Metal
   target.
 - Plan a Rust Metal HAL binding migration from the deprecated `metal` crate to
