@@ -74,6 +74,10 @@ impl WordRead for &[u32] {
 /// possible, such as if `slice` is not the serialized form of an object of type
 /// `T`.
 pub fn from_slice<T: DeserializeOwned, P: Pod>(slice: &[P]) -> Result<T> {
+    if core::mem::size_of_val(slice) % WORD_SIZE != 0 {
+        return Err(Error::DeserializeUnexpectedEnd);
+    }
+
     match bytemuck::try_cast_slice(slice) {
         Ok(slice) => {
             let mut deserializer = Deserializer::new(slice);
@@ -85,7 +89,7 @@ pub fn from_slice<T: DeserializeOwned, P: Pod>(slice: &[P]) -> Result<T> {
             let mut deserializer = Deserializer::new(vec.as_slice());
             T::deserialize(&mut deserializer)
         }
-        Err(ref e) => panic!("failed to cast or read slice as [u32]: {e}"),
+        Err(_) => Err(Error::NotSupported),
     }
 }
 
@@ -572,6 +576,20 @@ mod tests {
             f64: 2.71,
         };
         assert_eq!(expected, from_slice(&words).unwrap());
+    }
+
+    #[test]
+    fn partial_word_byte_slice_returns_error() {
+        assert_eq!(
+            Err(Error::DeserializeUnexpectedEnd),
+            from_slice::<u32, u8>(&[0, 1, 2])
+        );
+    }
+
+    #[test]
+    fn unaligned_complete_byte_slice_deserializes() {
+        let bytes = [0xff, 1, 0, 0, 0];
+        assert_eq!(1u32, from_slice::<u32, u8>(&bytes[1..]).unwrap());
     }
 
     #[test]
