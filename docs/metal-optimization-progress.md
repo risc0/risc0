@@ -148,6 +148,20 @@ wraps checked-in `computeRow<po2>` / `verifyCircuit` code. The generic Zirgen
 Metal `eval_check` template itself dates back to the initial Zirgen import and
 was only wrapped into a static C++ template by Zirgen PR #258.
 
+Source-shape audit: the generated `eval_check_{po2}.metal` files are tiny
+wrappers around `hal/metal/kernels/eval_check_impl.h`, which launches one Metal
+thread per row and calls `computeRow<NUM_ROWS_PO2>`. The heavy code is
+`rv32im/circuit/eval_check.h`: `EvalCheckReg<po2>` defines `Fp data[numRows]`,
+`computeRow` casts row-offset `Fp*` pointers to that huge register type, and
+then `verifyCircuit` expands the checked-in rv32im validity polynomial against
+those pseudo-registers. For `po2=20`, `numRows` is `1 << 22`, so this is an
+optimization-hostile device-memory access shape even though each logical
+register getter returns `data[0]` relative to a row-shifted base. This makes a
+generator/code-shape fix more plausible than a Metal-cpp binding fix: the next
+real fix should reduce the size or inlining pressure of the validity-polynomial
+expansion, not merely move the same giant template call behind a different
+wrapper.
+
 Historical RISC Zero issue #999 is relevant context: old Metal support was
 deprecated because `eval_check` codegen could exceed Apple temporary-register
 limits, and the issue explicitly pointed at needing more structured Zirgen
@@ -657,6 +671,10 @@ Prompt-to-artifact checklist:
 - Zirgen freshness check: present. The local RISC0 pin matches current
   `risc0/zirgen` `main`; recent Zirgen work does not contain a Metal eval-check
   fix for this path.
+- rv32im M3 source-shape audit: present. The current Metal `eval_check` path is a
+  thin generated wrapper around the checked-in `EvalCheckReg<po2>` /
+  `verifyCircuit` template expansion, which is still the leading code-shape risk
+  for the Metal optimizer.
 - Metal binding check: present. Newer Metal-cpp headers did not fix correctness,
   and the deprecated Rust `metal` crate is tracked as a separate maintenance
   risk rather than the rv32im P0 root cause.
