@@ -304,12 +304,13 @@ Metal-focused validation on the M5 Max:
   host::server::exec::tests::cpp_test -- --nocapture` rebuilt the guest Docker
   artifacts and executed the `blst` guest successfully.
 - The small Metal-enabled release datasheet matrix is now runnable with
-  `--max-po2 16`:
-  - `execute`: 28.8ms for 2.7M instructions.
-  - `composite`: 897.8ms for 16K rows, 4.56s for 64K rows.
-  - `lift`: 731.5ms for 256K recursion rows.
-  - `join`: 923.6ms for 256K recursion rows.
-  - `succinct`: 4.09s for 64K rows.
+  `--max-po2 16`. Refreshed under the current default scoped `-fno-inline`
+  rv32im eval-check path:
+  - `execute`: 29.5ms for 2.7M instructions.
+  - `composite`: 288.4ms for 16K rows, 726.6ms for 64K rows.
+  - `lift`: 728.9ms for 256K recursion rows.
+  - `join`: 920.2ms for 256K recursion rows.
+  - `succinct`: 1.48s for 64K rows.
 - `cargo bench -p risc0-zkvm --features prove,metal --bench fib execute` now
   runs; one filtered run averaged about 73MHz. The full `fib` benchmark suite is
   still not part of the default quick gate because each selected hotbench entry
