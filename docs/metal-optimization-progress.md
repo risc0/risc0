@@ -465,6 +465,59 @@ than at stale C++ header bindings alone.
   - Keccak-heavy workload: CPU fallback baseline present; Metal Keccak remains
     disabled.
 
+### P0 Exit Audit
+
+Current status: not complete for upstream-production confidence, but the branch
+has a usable local M5 Max default path.
+
+Prompt-to-artifact checklist:
+
+- Branch and commits: present. Work is on `metal-p0-m5-validation` with focused
+  code and documentation commits.
+- Living progress document: present in this file. It records prover selection,
+  Keccak, Groth16/trusted setup, Zirgen, Metal bindings, validation results, and
+  remaining work.
+- M3 rv32im Metal eval-check default: present. `rv32im-sys` applies scoped
+  `-fno-inline` only to generated `eval_check_*.metal` files, and the Metal HAL
+  uses eval-check on Metal by default unless `RISC0_RV32IM_METAL_EVAL_CHECK=0`
+  is set.
+- Unsafe original repro path: present. `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1`
+  removes the scoped noinline mitigation, and prior inline full-suite testing
+  reproduced a direct eval-check mismatch.
+- Direct correctness diagnostic: present.
+  `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1` compares Metal eval-check output
+  against CPU eval-check output from the same inputs.
+- Focused regression: present as ignored test
+  `prove::tests::metal_eval_check_sltiu_repeated`.
+- Native and Docker guest C/C++ archiver fix: present. Both native
+  `cpp_test`/`--no-run` and Docker `RISC0_USE_DOCKER=1 ... cpp_test` passed.
+- Benchmark matrix: present for default segment proving, CPU eval-check
+  fallback, composite up to 1M rows, succinct at 64K rows, and Keccak CPU
+  fallback.
+- M5 Max and modern Apple toolchain context: present. Validation records Xcode
+  26.5 build `17F42`, Metal `32023.883`, and that no alternate Xcode is locally
+  installed.
+- Zirgen freshness check: present. The local RISC0 pin matches current
+  `risc0/zirgen` `main`; recent Zirgen work does not contain a Metal eval-check
+  fix for this path.
+- Metal binding check: present. Newer Metal-cpp headers did not fix correctness,
+  and the deprecated Rust `metal` crate is tracked as a separate maintenance
+  risk rather than the rv32im P0 root cause.
+
+Remaining gaps before marking P0 complete:
+
+- Cross-machine or cross-toolchain validation is still missing. This machine has
+  only Xcode 26.5, so the branch needs CI or another Apple Silicon host to
+  separate an M5 Max/Metal Toolchain sensitivity from a general Metal issue.
+- The mitigation is still a compiler-flag workaround, not a real Zirgen/M3
+  code-shape fix. Source-level noinline on `computeRow<po2>` was rejected as too
+  slow; a better split of `verifyCircuit`/validity-polynomial code is still open.
+- The default path has strong local smoke and benchmark coverage, but not a
+  long-duration stress run or broad application workload beyond the current
+  datasheet/hello-world/zkVM tests.
+- Keccak Metal remains disabled. This is outside rv32im eval-check correctness,
+  but it is still a major gap for best local proving on Keccak-heavy workloads.
+
 ### P1: Optimize Transparent Local Proving
 
 - Treat `ProverOpts::composite()` as the throughput baseline.
