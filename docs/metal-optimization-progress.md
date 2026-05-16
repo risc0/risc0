@@ -370,6 +370,15 @@ Metal-focused validation on the M5 Max:
   keccak -- --po2 14 --count 1` completed in 1.930s, about 41.975 keccak/sec.
   Keccak Metal is still disabled in `risc0-circuit-keccak`, so this is a CPU
   fallback baseline and not evidence of Metal Keccak coverage.
+- Higher-level Keccak syscall/assumption proving also passes on the current
+  default M3 + Metal rv32im path, while the Keccak accelerator proof itself
+  still uses the CPU Keccak circuit path:
+  - `cargo test -p risc0-zkvm --features prove
+    host::server::prove::tests::keccak::basic -- --nocapture` passed both
+    built-in `po2=16` and `po2=17` cases, including non-empty assumption
+    receipts and receipt verification.
+  - `cargo test --manifest-path examples/keccak/Cargo.toml --features prove
+    hash_abc -- --nocapture` passed the public tiny-keccak accelerator example.
 - The `datasheet composite` harness had a sparse-`po2` bug: it used `.take(...)`
   over a table that intentionally omits too-small powers of two, so `--max-po2
   16` could still run `po2=17` and panic. The harness now filters by the actual
@@ -465,8 +474,8 @@ than at stale C++ header bindings alone.
   - rv32im segment-only benchmark: present through filtered `fib
     prove/poseidon2`; the default full-Metal eval-check path is now the best
     measured segment-proving configuration on this branch.
-  - Keccak-heavy workload: CPU fallback baseline present; Metal Keccak remains
-    disabled.
+  - Keccak-heavy workload: CPU fallback baseline and higher-level syscall proof
+    coverage present; Metal Keccak remains disabled.
 
 ### P0 Exit Audit
 
@@ -495,8 +504,8 @@ Prompt-to-artifact checklist:
 - Native and Docker guest C/C++ archiver fix: present. Both native
   `cpp_test`/`--no-run` and Docker `RISC0_USE_DOCKER=1 ... cpp_test` passed.
 - Benchmark matrix: present for default segment proving, CPU eval-check
-  fallback, composite up to 1M rows, succinct at 64K rows, and Keccak CPU
-  fallback.
+  fallback, composite up to 1M rows, succinct at 64K rows, Keccak CPU fallback,
+  and Keccak syscall/assumption proof coverage.
 - M5 Max and modern Apple toolchain context: present. Validation records Xcode
   26.5 build `17F42`, Metal `32023.883`, and that no alternate Xcode is locally
   installed.
@@ -515,9 +524,9 @@ Remaining gaps before marking P0 complete:
 - The mitigation is still a compiler-flag workaround, not a real Zirgen/M3
   code-shape fix. Source-level noinline on `computeRow<po2>` was rejected as too
   slow; a better split of `verifyCircuit`/validity-polynomial code is still open.
-- The default path has strong local smoke, benchmark, and short repeat-loop
-  coverage, but not a long-duration stress run or broad application workload
-  beyond the current datasheet/hello-world/zkVM tests.
+- The default path has strong local smoke, benchmark, short repeat-loop, and
+  Keccak example coverage, but not a long-duration stress run or a broad
+  real-application workload beyond the current datasheet/examples/zkVM tests.
 - Keccak Metal remains disabled. This is outside rv32im eval-check correctness,
   but it is still a major gap for best local proving on Keccak-heavy workloads.
 
