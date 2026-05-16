@@ -524,8 +524,9 @@ public:
           size_t row = i % check.rows();
           size_t col = i / check.rows();
           LOG(0,
-              "Metal evalCheck CPU verify mismatch at row "
-                  << row << " col " << col << ", " << cpuCheck[i] << " vs " << pCheck[i]);
+              "Metal evalCheck CPU verify mismatch at po2 "
+                  << po2 << " row " << row << " col " << col << ", " << cpuCheck[i] << " vs "
+                  << pCheck[i]);
           throw std::runtime_error("Metal evalCheck CPU verify mismatch");
         }
       }

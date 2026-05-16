@@ -178,8 +178,13 @@ Metal-focused validation on the M5 Max:
   RISC0_RV32IM_METAL_EVAL_CHECK=1
   RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1` 20-iteration `sltiu` loop passed
   20/20. The current compact current-head repro is the serial full prove suite
-  with the same unsafe inline env; it failed in `xori` with `Metal evalCheck CPU
-  verify mismatch at row 6720 col 0, 1336042307 vs 806756744`.
+  with the same unsafe inline env. After adding `po2` to the mismatch
+  diagnostic, it failed in `rem` with `Metal evalCheck CPU verify mismatch at
+  po2 13 row 24576 col 0, 1808158766 vs 1376630858`.
+  The same unsafe-inline env plus direct CPU verifier did not fail the filtered
+  `fib prove/poseidon2` benchmark probe, which completed in 35.93s at about
+  14.2K rows/sec. That benchmark is therefore not a compact correctness canary
+  for the optimized-inline failure, especially with verifier overhead enabled.
 - Bypassing only the Metal `eval_check_metal_*` kernels restores correctness.
   The branch now keeps the rest of the Metal HAL active but computes the rv32im
   validity polynomial on CPU by default:
@@ -381,6 +386,13 @@ Metal-focused validation on the M5 Max:
 - After narrowing the scoped eval-check flag to `-fno-inline`, the default
   no-env benchmark stayed in the same range: 4.77s to 4.93s, about 103.9K to
   107.4K rows/sec.
+- The unsafe-inline diagnostic path is not a reliable benchmark canary. With
+  `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1
+  RISC0_RV32IM_METAL_EVAL_CHECK=1
+  RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1`, filtered `fib prove/poseidon2`
+  completed without a mismatch in 35.93s, about 14.2K rows/sec. The CPU verifier
+  makes this number diagnostic-only, but the pass is still useful evidence that
+  the serial rv32im test suite remains the compact repro for the inline bug.
 - A source-level Metal `__attribute__((noinline))` experiment on
   `computeRow<po2>` compiled and passed the focused default
   `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 ... prove::tests::sltiu` sanity
@@ -571,7 +583,8 @@ Prompt-to-artifact checklist:
   is set.
 - Unsafe original repro path: present. `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1`
   removes the scoped noinline mitigation, and current-head inline full-suite
-  testing reproduced a direct eval-check mismatch in `xori` at row 6720 col 0.
+  testing reproduced a direct eval-check mismatch in `eval_check_metal_13`
+  during `rem` at row 24576 col 0.
 - Direct correctness diagnostic: present.
   `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1` compares Metal eval-check output
   against CPU eval-check output from the same inputs.
