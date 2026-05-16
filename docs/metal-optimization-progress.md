@@ -598,6 +598,11 @@ optional longer benchmark gates for manual runs. P0 is still not complete until
 this or an equivalent packet actually passes on another Apple Silicon
 machine/toolchain.
 
+Draft PR `risc0/risc0#3756` opens this branch against upstream `main` to obtain
+that CI signal. GitHub creates `Metal P0 Validation` runs for the PR, but the
+fork PR currently reports `action_required`, so a maintainer must approve
+Actions before the Apple Silicon runner executes it.
+
 Environment capture:
 
 ```sh
