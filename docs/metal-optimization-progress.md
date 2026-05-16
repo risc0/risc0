@@ -274,7 +274,10 @@ Metal-focused validation on the M5 Max:
   Setting the target-specific RISC-V archiver fixes the build. Validation:
   `cargo test -p risc0-zkvm --features prove --no-run` now succeeds, and
   `cargo test -p risc0-zkvm --features prove host::server::exec::tests::cpp_test
-  -- --nocapture` passes.
+  -- --nocapture` passes. Docker guest-build validation also passes:
+  `RISC0_USE_DOCKER=1 cargo test -p risc0-zkvm --features prove,docker
+  host::server::exec::tests::cpp_test -- --nocapture` rebuilt the guest Docker
+  artifacts and executed the `blst` guest successfully.
 - The small Metal-enabled release datasheet matrix is now runnable with
   `--max-po2 16`:
   - `execute`: 28.8ms for 2.7M instructions.
@@ -409,7 +412,8 @@ than at stale C++ header bindings alone.
   smaller deterministic repro is found for the original inline failure.
 - Keep the `risc0-zkvm-methods-cpp-crates` `blst_*` guest link fix covered in
   both native and Docker guest builds. The current fix sets
-  `AR_riscv32im_risc0_zkvm_elf` beside the RISC-V guest compiler.
+  `AR_riscv32im_risc0_zkvm_elf` beside the RISC-V guest compiler, and the
+  focused Docker `cpp_test` path now passes.
 - Check whether the pinned Metal-cpp header bundle is stale in a way that
   affects current Apple Silicon proving. `rv32im-sys` currently downloads
   `metal-cpp_macOS13.3_iOS16.4.zip`; Apple now publishes newer bundles such as
