@@ -299,6 +299,8 @@ Metal-focused validation on the M5 Max:
   prove::tests::metal_eval_check_sltiu_repeated --release -- --ignored
   --nocapture --test-threads=1`. After narrowing the scoped compiler flag to
   `-fno-inline`, this ignored regression passed 20 `sltiu` proofs in 14.55s.
+  After reverting the rejected `EvalCheckReg<po2>::get()` noinline experiment,
+  the same focused regression recheck passed in 13.81s.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
