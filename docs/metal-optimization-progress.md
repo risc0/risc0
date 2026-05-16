@@ -335,6 +335,10 @@ Metal-focused validation on the M5 Max:
     --nocapture` passed a product-style protocol workload: init, five
     pre-freeze ballot submissions, freeze, one post-freeze submission, and
     receipt verification for all seven receipts.
+  - `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S=13,14,20 cargo test
+    --manifest-path examples/voting-machine/Cargo.toml --features
+    prove,risc0-zkvm/metal protocol --release -- --nocapture` passed the same
+    protocol workload in 3.28s without the direct CPU verifier.
 - Before flipping the runtime default, the scoped full-Metal path passed five
   consecutive non-serial full-suite verifier runs with
   `RISC0_RV32IM_METAL_EVAL_CHECK=1
@@ -447,9 +451,11 @@ Metal-focused validation on the M5 Max:
   prove suite passed 46/46 with one ignored test in 8.18s. Filtered
   `fib prove/poseidon2` passed in 2.37s to 2.56s, about 200.3K to 215.6K
   rows/sec. `examples/keccak` `hash_long` also passed with
-  `--features prove,risc0-zkvm/metal` in 44.37s. This is faster than the broad
-  default, but it still needs broader workload and cross-machine validation
-  before replacing the safer `eval_check_*.metal` default mitigation.
+  `--features prove,risc0-zkvm/metal` in 44.37s. The voting-machine protocol
+  workload passed with the same exact set and Metal feature in 3.28s. This is
+  faster than the broad default, but it still needs broader workload and
+  cross-machine validation before replacing the safer `eval_check_*.metal`
+  default mitigation.
 - A source-level Metal `__attribute__((noinline))` experiment on
   `computeRow<po2>` compiled and passed the focused default
   `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 ... prove::tests::sltiu` sanity
