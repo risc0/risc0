@@ -97,19 +97,19 @@ jobs:
               --features prove protocol -- --nocapture
 
       - name: Segment benchmark
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_benchmarks }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_benchmarks == 'true' }}
         run: cargo bench -p risc0-zkvm --features prove,metal --bench fib prove/poseidon2
 
       - name: Datasheet composite benchmark
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_benchmarks }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_benchmarks == 'true' }}
         run: cargo run --release -p risc0-zkvm --features prove,metal --example datasheet -- --max-po2 20 composite
 
       - name: Datasheet succinct benchmark
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_benchmarks }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_benchmarks == 'true' }}
         run: cargo run --release -p risc0-zkvm --features prove,metal --example datasheet -- --max-po2 18 succinct
 
       - name: CPU eval-check fallback benchmark
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_benchmarks }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_benchmarks == 'true' }}
         run: |
           RISC0_RV32IM_METAL_EVAL_CHECK=0 \
             cargo bench -p risc0-zkvm --features prove,metal --bench fib prove/poseidon2
