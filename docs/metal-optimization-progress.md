@@ -28,10 +28,10 @@ normal optimization pipeline. Set `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1` when
 reproducing the original fully optimized eval-check failure mode.
 
 On the M5 Max this passes the current serial rv32im suite with eval-check CPU
-verification, the non-serial rv32im harness, and small-to-medium composite and
-succinct datasheet runs. It is faster than the CPU-eval-check safety fallback on
-the filtered `fib prove/poseidon2` benchmark, but this still needs longer stress
-testing before becoming the default.
+verification, the non-serial rv32im harness, and 1M-row composite plus 64K-row
+succinct datasheet runs. It is much faster than the CPU-eval-check safety
+fallback on the filtered `fib prove/poseidon2` benchmark, but this still needs
+longer stress testing before full Metal eval-check becomes the runtime default.
 
 For the best local proving throughput, start with `ProverOpts::fast()` or
 `ProverOpts::composite()`. This produces a composite STARK receipt: fastest,
@@ -269,6 +269,10 @@ Metal-focused validation on the M5 Max:
   RISC0_RV32IM_METAL_EVAL_CHECK=1`, the filtered `fib prove/poseidon2`
   benchmark completed in 15.94s, about 32.1K rows/sec. This is faster than both
   the CPU-eval-check safety path and the `-O0` diagnostic path.
+- With scoped default no-inline on only generated `eval_check_*.metal` files and
+  `RISC0_RV32IM_METAL_EVAL_CHECK=1`, the same filtered `fib prove/poseidon2`
+  benchmark completed in 4.89s to 6.16s, about 83.1K to 104.8K rows/sec. This
+  is the best current segment-proving measurement.
 - The same `-fno-inline-functions` full-Metal eval-check candidate passed
   `datasheet --max-po2 16 composite`: 658.9ms for 16K rows and 2.04s for 64K
   rows. This improves on the current safety-path baseline of 897.8ms and 4.56s,
@@ -282,7 +286,16 @@ Metal-focused validation on the M5 Max:
 - A larger `datasheet --max-po2 20 composite` run passed with forced full Metal
   eval-check: 767ms for 16K rows, 2.52s for 64K rows, 4.52s for 128K rows,
   8.57s for 256K rows, 16.88s for 512K rows, and 37.47s for 1M rows. The 1M-row
-  case reached about 27.3K rows/sec.
+  case reached about 27.3K rows/sec. This was still using the global append flag
+  and is now a historical lower bound.
+- With the scoped eval-check-only no-inline default, the repeated
+  `datasheet --max-po2 20 composite` run passed and reached 288.7ms for 16K
+  rows, 783.8ms for 64K rows, 1.29s for 128K rows, 2.48s for 256K rows, 4.85s
+  for 512K rows, and 9.68s for 1M rows. The 1M-row case reached about 105.7K
+  rows/sec.
+- With the scoped eval-check-only no-inline default, `datasheet --max-po2 18
+  succinct` passed: 1.47s for the 64K-row succinct case, about 43.5K rows/sec,
+  with about 930MB max RAM and a 217.4KB seal.
 - `cargo run --release -p risc0-circuit-keccak --features prove --example
   keccak -- --po2 14 --count 1` completed in 1.930s, about 41.975 keccak/sec.
   Keccak Metal is still disabled in `risc0-circuit-keccak`, so this is a CPU
@@ -371,8 +384,8 @@ than at stale C++ header bindings alone.
     CPU-eval-check and forced full-Metal eval-check.
   - small Metal-enabled `datasheet execute`, `composite`, `lift`, `join`, and
     `succinct`: present at `--max-po2 16`; the `-fno-inline-functions`
-    full-Metal candidate also has `succinct` coverage at `--max-po2 18` and
-    `composite` coverage at `--max-po2 20`.
+    full-Metal candidate also has scoped-default `succinct` coverage at
+    `--max-po2 18` and scoped-default `composite` coverage at `--max-po2 20`.
   - filtered `fib execute`: present.
   - rv32im segment-only benchmark: present through filtered `fib
     prove/poseidon2`; currently slow because the safety path keeps rv32im
