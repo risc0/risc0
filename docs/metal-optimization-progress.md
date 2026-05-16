@@ -257,6 +257,10 @@ Metal-focused validation on the M5 Max:
   RISC0_RV32IM_METAL_EVAL_CHECK=1`, the filtered `fib prove/poseidon2`
   benchmark completed in 15.94s, about 32.1K rows/sec. This is faster than both
   the CPU-eval-check safety path and the `-O0` diagnostic path.
+- The same `-fno-inline-functions` full-Metal eval-check candidate passed
+  `datasheet --max-po2 16 composite`: 658.9ms for 16K rows and 2.04s for 64K
+  rows. This improves on the current safety-path baseline of 897.8ms and 4.56s,
+  so the candidate is meaningful beyond the isolated `fib` segment benchmark.
 - `cargo run --release -p risc0-circuit-keccak --features prove --example
   keccak -- --po2 14 --count 1` completed in 1.930s, about 41.975 keccak/sec.
   Keccak Metal is still disabled in `risc0-circuit-keccak`, so this is a CPU
