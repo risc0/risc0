@@ -165,13 +165,14 @@ Metal-focused validation on the M5 Max:
   `RISC0_RV32IM_METAL_COMPARE_CPU=1 RISC0_RV32IM_METAL_EVAL_CHECK=1`, a serial
   suite run failed in `beq` with `DualHal matrix verify mismatch after
   evalCheck`. A later serial run failed in `sltiu` after `evalCheck` at row
-  8288 col 0. Running only `prove::tests::sltiu` can also fail after
-  `evalCheck`, but not every run; one observed loop failed after 19 repeats.
-  Use this as the current compact repro shape:
-  `for i in {1..20}; do RISC0_RV32IM_METAL_COMPARE_CPU=1
-  RISC0_RV32IM_METAL_EVAL_CHECK=1 cargo test -p risc0-circuit-rv32im --features
-  prove prove::tests::sltiu --release -- --nocapture --test-threads=1 || exit
-  $?; done`.
+  8288 col 0. Running only `prove::tests::sltiu` has reproduced the problem in
+  older local runs, but it is not a stable current-head canary: a current
+  `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1
+  RISC0_RV32IM_METAL_EVAL_CHECK=1
+  RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1` 20-iteration `sltiu` loop passed
+  20/20. The current compact current-head repro is the serial full prove suite
+  with the same unsafe inline env; it failed in `xori` with `Metal evalCheck CPU
+  verify mismatch at row 6720 col 0, 1336042307 vs 806756744`.
 - Bypassing only the Metal `eval_check_metal_*` kernels restores correctness.
   The branch now keeps the rest of the Metal HAL active but computes the rv32im
   validity polynomial on CPU by default:
@@ -300,7 +301,9 @@ Metal-focused validation on the M5 Max:
   --nocapture --test-threads=1`. After narrowing the scoped compiler flag to
   `-fno-inline`, this ignored regression passed 20 `sltiu` proofs in 14.55s.
   After reverting the rejected `EvalCheckReg<po2>::get()` noinline experiment,
-  the same focused regression recheck passed in 13.81s.
+  the same focused regression recheck passed in 13.81s. After the current-head
+  unsafe-inline full-suite repro, rebuilding the mitigated default and rerunning
+  the same focused regression passed in 13.65s.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
@@ -536,8 +539,8 @@ Prompt-to-artifact checklist:
   uses eval-check on Metal by default unless `RISC0_RV32IM_METAL_EVAL_CHECK=0`
   is set.
 - Unsafe original repro path: present. `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1`
-  removes the scoped noinline mitigation, and prior inline full-suite testing
-  reproduced a direct eval-check mismatch.
+  removes the scoped noinline mitigation, and current-head inline full-suite
+  testing reproduced a direct eval-check mismatch in `xori` at row 6720 col 0.
 - Direct correctness diagnostic: present.
   `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1` compares Metal eval-check output
   against CPU eval-check output from the same inputs.
@@ -644,8 +647,9 @@ Failure triage:
 
 ```sh
 RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1 \
+  RISC0_RV32IM_METAL_EVAL_CHECK=1 \
   RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 \
-  cargo test -p risc0-circuit-rv32im --features prove prove::tests::sltiu --release -- --nocapture --test-threads=1
+  cargo test -p risc0-circuit-rv32im --features prove prove::tests --release -- --nocapture --test-threads=1
 RISC0_RV32IM_METAL_KERNEL_O0=1 \
   RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 \
   cargo test -p risc0-circuit-rv32im --features prove prove::tests::sltiu --release -- --nocapture --test-threads=1
