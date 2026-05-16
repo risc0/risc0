@@ -11,6 +11,8 @@ Current Apple toolchain used for Metal validation: Xcode 26.5 build `17F42`
 with Metal Toolchain `17F42` installed via `xcodebuild -downloadComponent
 MetalToolchain`; `xcrun --sdk macosx metal -v` reports Apple metal version
 `32023.883`.
+Only `/Applications/Xcode.app` is installed locally, so comparing against an
+older Apple Metal Toolchain requires CI or a second machine.
 
 ## Current Recommendation
 
@@ -447,6 +449,8 @@ than at stale C++ header bindings alone.
 - Compare `.metallib` output and runtime behavior across Apple Metal Toolchain
   versions if possible. A CI Apple Silicon runner passing with a different Xcode
   or Metal Toolchain would be a strong signal that this is toolchain-sensitive.
+  This machine only has Xcode 26.5 build `17F42` installed, so this comparison
+  is not locally actionable without installing another Xcode or using CI.
 - Establish a stable benchmark matrix:
   - warm `hello-world` proof: present, but too small to distinguish safe
     CPU-eval-check and forced full-Metal eval-check.
