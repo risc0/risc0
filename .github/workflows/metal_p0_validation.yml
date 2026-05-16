@@ -1,0 +1,117 @@
+name: Metal P0 Validation
+
+on:
+  pull_request:
+    branches: [main, "release-*"]
+    paths:
+      - ".github/workflows/metal_p0_validation.yml"
+      - "docs/metal-optimization-progress.md"
+      - "risc0/circuit/rv32im/**"
+      - "risc0/circuit/rv32im-sys/**"
+      - "risc0/circuit/keccak/**"
+      - "risc0/circuit/keccak-sys/**"
+      - "risc0/zkvm/**"
+      - "examples/keccak/**"
+      - "examples/voting-machine/**"
+  workflow_dispatch:
+    inputs:
+      run_benchmarks:
+        description: "Run the longer benchmark gates"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  RISC0_BUILD_LOCKED: 1
+  RISC0_DEFAULT_PROVER_NUM_GPUS: 1
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.94.1
+  RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
+  RUST_BACKTRACE: full
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  apple-silicon:
+    name: Apple Silicon Metal P0
+    runs-on: [self-hosted, cluster, macOS, ARM64, apple_m2_pro]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
+
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+
+      - name: Capture environment
+        run: |
+          git rev-parse --short HEAD
+          git branch --show-current
+          xcode-select -p
+          xcodebuild -version
+          xcrun --sdk macosx metal -v
+          uname -a
+          sysctl -n machdep.cpu.brand_string
+
+      - name: Format
+        run: cargo fmt --check
+
+      - name: rv32im Metal prove suite
+        run: cargo test -p risc0-circuit-rv32im --features prove prove::tests --release -- --nocapture
+
+      - name: rv32im Metal prove suite with eval-check verification
+        run: |
+          RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 \
+            cargo test -p risc0-circuit-rv32im --features prove prove::tests --release -- --nocapture
+
+      - name: rv32im focused eval-check regression
+        run: |
+          RISC0_RV32IM_METAL_EVAL_CHECK=1 \
+          RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 \
+            cargo test -p risc0-circuit-rv32im --features prove \
+              prove::tests::metal_eval_check_sltiu_repeated --release -- \
+              --ignored --nocapture --test-threads=1
+
+      - name: zkVM basic proof
+        run: cargo test -p risc0-zkvm --features prove host::server::prove::tests::basic -- --nocapture
+
+      - name: zkVM Keccak assumption proof
+        run: cargo test -p risc0-zkvm --features prove host::server::prove::tests::keccak::basic -- --nocapture
+
+      - name: Keccak example proof
+        run: cargo test --manifest-path examples/keccak/Cargo.toml --features prove hash_abc -- --nocapture
+
+      - name: Voting-machine protocol proof workload
+        run: |
+          RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 \
+            cargo test --manifest-path examples/voting-machine/Cargo.toml \
+              --features prove protocol -- --nocapture
+
+      - name: Segment benchmark
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_benchmarks }}
+        run: cargo bench -p risc0-zkvm --features prove,metal --bench fib prove/poseidon2
+
+      - name: Datasheet composite benchmark
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_benchmarks }}
+        run: cargo run --release -p risc0-zkvm --features prove,metal --example datasheet -- --max-po2 20 composite
+
+      - name: Datasheet succinct benchmark
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_benchmarks }}
+        run: cargo run --release -p risc0-zkvm --features prove,metal --example datasheet -- --max-po2 18 succinct
+
+      - name: CPU eval-check fallback benchmark
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_benchmarks }}
+        run: |
+          RISC0_RV32IM_METAL_EVAL_CHECK=0 \
+            cargo bench -p risc0-zkvm --features prove,metal --bench fib prove/poseidon2
+
+      - run: sccache --show-stats

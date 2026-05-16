@@ -590,6 +590,14 @@ Apple Silicon benchmark runner. Those jobs are useful cross-machine signal once
 the branch is pushed as a PR or manually dispatched, but they do not by
 themselves run the explicit eval-check CPU-verifier packet below.
 
+This branch adds `.github/workflows/metal_p0_validation.yml` on the existing
+`apple_m2_pro` runner labels. It has a constrained `pull_request` trigger for
+Metal-relevant paths plus a manual `workflow_dispatch` trigger, runs the focused
+correctness packet and the voting-machine product-style proof workload, and has
+optional longer benchmark gates for manual runs. P0 is still not complete until
+this or an equivalent packet actually passes on another Apple Silicon
+machine/toolchain.
+
 Environment capture:
 
 ```sh
