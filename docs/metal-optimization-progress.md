@@ -278,7 +278,8 @@ Metal-focused validation on the M5 Max:
   RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 cargo test -p
   risc0-circuit-rv32im --features prove
   prove::tests::metal_eval_check_sltiu_repeated --release -- --ignored
-  --nocapture --test-threads=1`.
+  --nocapture --test-threads=1`. After narrowing the scoped compiler flag to
+  `-fno-inline`, this ignored regression passed 20 `sltiu` proofs in 14.55s.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
