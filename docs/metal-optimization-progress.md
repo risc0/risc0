@@ -170,6 +170,13 @@ Metal-focused validation on the M5 Max:
   stabilize non-dual full Metal. The serial suite still failed with `Poly check
   failed` in `div`, `divu`, and `lh`, so command-buffer batching is unlikely to
   be the only root cause.
+- The branch now has a narrower opt-in eval-check verifier:
+  `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1`. It runs the Metal eval-check
+  kernel, computes the same check buffer with `evalCheckCpu` from the same
+  pinned inputs, and reports the first mismatch. With
+  `RISC0_RV32IM_METAL_EVAL_CHECK=1`, the 20-run focused `sltiu` loop failed at
+  row 5568 col 0 with `1869206222 vs 201529409`. This confirms the bug is in
+  the Metal eval-check output itself, not only in later proof verification.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
@@ -238,6 +245,8 @@ than at stale C++ header bindings alone.
   CPU/Metal operation-level mismatch localization. Use it together with
   `RISC0_RV32IM_METAL_EVAL_CHECK=1` when specifically investigating the unsafe
   full-Metal eval-check path.
+- Use `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1` for lower-overhead direct
+  eval-check mismatch localization before falling back to full DualHal runs.
 - Benchmark the default CPU eval-check safety path against full Metal eval-check
   once full Metal is reliable enough to compare. The branch can force full Metal
   eval-check with `RISC0_RV32IM_METAL_EVAL_CHECK=1`.

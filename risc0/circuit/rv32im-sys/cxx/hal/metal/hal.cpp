@@ -502,6 +502,34 @@ public:
     setFpExtArg(encoder, 5, ecMix);
     setFpArg(encoder, 6, ROU_FWD[po2 + 2]);
     dispatchEasy(encoder, check.rows(), groupSize);
+
+    const char* verifyEvalCheck = std::getenv("RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU");
+    if (verifyEvalCheck && verifyEvalCheck[0] != '\0' && verifyEvalCheck[0] != '0') {
+      PinnedMatrixRO<Fp> pCheck(shared_from_this(), check);
+      PinnedMatrixRO<Fp> pData(shared_from_this(), data);
+      PinnedMatrixRO<Fp> pAccum(shared_from_this(), accum);
+      PinnedArrayRO<Fp> pGlobals(shared_from_this(), globals);
+      PinnedArrayRO<FpExt> pAccMix(shared_from_this(), accMix);
+
+      std::vector<Fp> cpuCheck(check.size());
+      evalCheckCpu(cpuCheck.data(),
+                   pData.data(),
+                   pAccum.data(),
+                   pGlobals.data(),
+                   pAccMix.data(),
+                   ecMix,
+                   check.rows());
+      for (size_t i = 0; i < cpuCheck.size(); i++) {
+        if (cpuCheck[i] != pCheck[i]) {
+          size_t row = i % check.rows();
+          size_t col = i / check.rows();
+          LOG(0,
+              "Metal evalCheck CPU verify mismatch at row "
+                  << row << " col " << col << ", " << cpuCheck[i] << " vs " << pCheck[i]);
+          throw std::runtime_error("Metal evalCheck CPU verify mismatch");
+        }
+      }
+    }
   }
 
   void sync() override {
