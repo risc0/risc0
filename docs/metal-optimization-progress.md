@@ -1,0 +1,230 @@
+# Metal Optimization Progress
+
+This document tracks work toward the best local Apple Silicon proving setup.
+The primary target is an untrusted local prover in the normal cryptographic
+sense: the verifier does not trust the prover. When we say "no trusted setup"
+below, we mean staying in the STARK receipt path and not depending on Groth16.
+
+Current checkout: `upstream/main` at `35ed22a1ba1c0025b990befd0c9d7ec4f39f3840`.
+Local machine used for validation: Apple M5 Max.
+Current Apple toolchain used for Metal validation: Xcode 26.5 build `17F42`
+with Metal Toolchain `17F42` installed via `xcodebuild -downloadComponent
+MetalToolchain`; `xcrun --sdk macosx metal -v` reports Apple metal version
+`32023.883`.
+
+## Current Recommendation
+
+Use the M3 rv32im segment prover on Apple Silicon with Metal enabled by target
+selection.
+
+For the best local proving throughput, start with `ProverOpts::fast()` or
+`ProverOpts::composite()`. This produces a composite STARK receipt: fastest,
+transparent, no trusted setup, but proof size grows with segment count.
+
+For the best untrusted constant-size local receipt, use `ProverOpts::succinct()`.
+This keeps the proof in the STARK/recursion path and avoids Groth16 trusted
+setup, but it pays the recursion cost for `lift`, `join`, and `resolve`.
+
+Do not use `ProverOpts::groth16()` for the primary "no trusted setup" goal.
+Groth16 receipts are useful for very small proofs and on-chain verification, but
+they depend on the STARK-to-SNARK trusted setup and are currently documented as
+unsupported on Apple Silicon.
+
+## Prover Selection Path
+
+The public/default local prover path is:
+
+1. `default_prover()` / `get_prover_server(opts)`.
+2. If dev mode is disabled, `get_prover_server` constructs `ProverImpl`.
+3. `ProverImpl::prove_with_ctx` executes the ELF into a `Session`.
+4. `ProverImpl::prove_session` proves each segment with `prove_segment`.
+5. `prove_segment` calls `segment_preflight`, then `prove_preflight`.
+6. `prove_preflight` calls `risc0_circuit_rv32im::prove::segment_prover(po2)`.
+7. On macOS/aarch64, `segment_prover` selects `ProverContext::new_metal(po2)`.
+
+The M3 choice is also baked into execution. `ExecutorImpl::circuit_version()`
+returns `RV32IM_M3_CIRCUIT_VERSION`, and the rv32im circuit defines that version
+as `3`. So the "M3 engine" is not a separate receipt kind; it is the current
+rv32im segment proving circuit used underneath composite/succinct/Groth16.
+
+Receipt kind controls what happens after segment proofs:
+
+- `Composite`: stop after segment receipts and assumption receipts are assembled.
+- `Succinct`: run recursion programs (`lift`, `join`, `resolve`) to compress the
+  composite receipt into a constant-size STARK receipt.
+- `Groth16`: run `identity_p254`, then `risc0_groth16::prove::shrink_wrap`.
+
+## Keccak Path
+
+Keccak is a special accelerator circuit, not ordinary rv32im guest execution.
+Guest code can request Keccak work through the Keccak syscall path. The host then
+builds a `ProveKeccakRequest` and the prover resolves it as an assumption.
+
+The local host path is:
+
+1. `ProverImpl::prove_session` iterates over `session.pending_keccaks`.
+2. Each request calls `prove_keccak`.
+3. `prove_keccak` calls `risc0_circuit_keccak::prove::keccak_prover()`.
+4. The Keccak seal is verified and then lifted with `prove_zkr` into a succinct
+   receipt over an `Unknown` claim.
+5. Keccak receipts are inserted into a union tree and later resolved against the
+   main session receipt.
+
+Current Metal status: Keccak has CUDA and CPU prover branches, but the Metal
+branch is still commented out. On Apple Silicon, Keccak proving falls back to the
+CPU circuit path today. This is a clear gap for workloads that use the Keccak
+precompile heavily.
+
+## Groth16 / Trusted Setup
+
+Groth16 is the final STARK-to-SNARK wrapping stage. It produces the smallest
+receipt and is the usual route for Ethereum-style verification, but it is not a
+transparent proving path.
+
+The project docs describe a trusted setup ceremony for the Groth16 prover and
+verifier. The security model page also notes that the STARK-to-SNARK translator
+uses Groth16 over BN254, so it depends on elliptic curve cryptography and the
+setup ceremony assumptions.
+
+For this optimization track, Groth16 is useful context but not the main target.
+The main target is:
+
+1. Fast local composite STARK proving on M3 + Metal.
+2. Stable local succinct STARK proving on M3 + Metal recursion.
+3. Optional Groth16 only after the transparent/STARK local path is solid.
+
+## Zirgen Role
+
+Zirgen is the circuit DSL/code generator. In the current codebase, it matters for
+Metal because generated circuit kernels include Metal variants for recursion
+work such as `eval_check`, `step_compute_accum`, and `step_verify_accum`.
+
+The practical optimization boundary is:
+
+- RISC Zero decides when a prover uses CPU, CUDA, or Metal.
+- Zirgen decides what generated circuit code exists for those targets.
+- `risc0-build-kernel` compiles Metal source into `.metallib` artifacts.
+
+For M3 rv32im, main already has a hand-integrated Metal HAL and generated
+per-`po2` kernels for `data_witgen`, `accum_witgen`, and `eval_check`.
+
+## Validation Snapshot
+
+Metal-focused validation on the M5 Max:
+
+- After installing the Xcode 26.5 Metal Toolchain and forcing the rv32im Metal
+  kernels to rebuild, serial rv32im Metal tests are not reliable:
+  `cargo test -p risc0-circuit-rv32im --features prove prove::tests --release
+  -- --nocapture --test-threads=1` failed with `Poly check failed` in
+  `prove::tests::addi`, `prove::tests::divu`, and `prove::tests::rem`.
+  Earlier failures also appeared in different tests such as `lh`, `lbu`, and
+  `sub`. Treat rv32im Metal as correctness-suspect on this machine/toolchain.
+- `cargo test -p risc0-zkp --features prove hal::metal --release -- --nocapture`
+  passed: 19 tests, including after the Xcode 26.5 Metal Toolchain install.
+- `cargo test -p risc0-circuit-recursion --features prove prove::hal::metal::tests::eval_check --release -- --ignored --nocapture`
+  passed: 1 test, including after the Xcode 26.5 Metal Toolchain install.
+- `examples/target/release/hello-world` with `RISC0_PROVER=local` completed a
+  proof in about 0.6s warm and links `Metal.framework` before the full toolchain
+  rebuild. This should be rerun after the rv32im correctness issue is isolated.
+- Eager `newComputePipelineState` over every function in the rv32im `.metallib`
+  can stall badly with this toolchain when it compiles unused kernels such as
+  higher-`po2` `eval_check` variants. Lazy pipeline creation avoids that startup
+  problem, but it does not fix the `Poly check failed` correctness failure.
+- Broad zkVM tests and documented `datasheet` / `fib` benchmarks are currently
+  blocked by a guest `risc0-zkvm-methods-cpp-crates` link failure with undefined
+  `blst_*` symbols. This is not a Metal runtime failure, but it blocks the
+  benchmark harness.
+
+## Metal Binding Status
+
+There are two separate Metal binding stacks in the current tree:
+
+- `rv32im-sys` uses C++ through Apple's `metal-cpp` headers. The pinned bundle is
+  `metal-cpp_macOS13.3_iOS16.4.zip`.
+- `risc0-zkp` and `risc0-circuit-recursion` use the Rust `metal` crate from the
+  workspace dependency `metal = "0.29"`.
+
+The Rust `metal` crate is deprecated upstream because it depends on the older
+`objc` ecosystem. That is a real maintenance risk for the Rust ZKP and recursion
+Metal HALs, but it is not the direct rv32im P0 correctness path. The rv32im
+failure reproduces in the C++ Metal-cpp HAL.
+
+Apple's Metal-cpp download page currently publishes `metal-cpp_26.4.zip` as the
+latest observed bundle; a guessed `metal-cpp_26.5.zip` URL did not return a ZIP.
+A trial local bump to `metal-cpp_26.4.zip` was not sufficient to make rv32im
+Metal reliable, and reverting to the older pinned bundle did not restore serial
+rv32im correctness after rebuilding kernels with the Xcode 26.5 Metal Toolchain.
+This points more strongly at generated Metal kernel/compiler/runtime behavior
+than at stale C++ header bindings alone.
+
+## Work Plan
+
+### P0: Make The Current M3 Metal Path Trustworthy
+
+- Reproduce and isolate the serial rv32im `Poly check failed` failure with the
+  Xcode 26.5 Metal Toolchain. This is now a correctness issue, not just a
+  parallel-test flake.
+- Add a deterministic Metal rv32im regression command or mark the test harness
+  serial if the Metal runtime cannot safely run these tests concurrently.
+- Fix the `risc0-zkvm-methods-cpp-crates` `blst_*` guest link failure so the
+  zkVM test and benchmark harness can run.
+- Check whether the pinned Metal-cpp header bundle is stale in a way that
+  affects current Apple Silicon proving. `rv32im-sys` currently downloads
+  `metal-cpp_macOS13.3_iOS16.4.zip`; Apple now publishes newer bundles such as
+  `metal-cpp_26.4.zip`, whose README mentions bugfixing and other improvements.
+  A first trial suggests this is not the root cause. Keep the check open only as
+  a binding-health task, not as the leading correctness hypothesis.
+- Compare `.metallib` output and runtime behavior across Apple Metal Toolchain
+  versions if possible. A CI Apple Silicon runner passing with a different Xcode
+  or Metal Toolchain would be a strong signal that this is toolchain-sensitive.
+- Establish a stable benchmark matrix:
+  - warm `hello-world` proof
+  - rv32im segment-only benchmark
+  - `datasheet execute`, `composite`, `lift`, `join`, `succinct`
+  - Keccak-heavy workload
+
+### P1: Optimize Transparent Local Proving
+
+- Treat `ProverOpts::composite()` as the throughput baseline.
+- Treat `ProverOpts::succinct()` as the constant-size STARK target.
+- Profile M3 Metal segment proving for:
+  - preflight time
+  - GPU kernel time
+  - command buffer and pipeline overhead
+  - memory traffic and shared buffer behavior
+- Profile recursion Metal separately; its witness generation currently still
+  uses CPU witgen in the Metal circuit HAL.
+
+### P2: Fill Metal Coverage Gaps
+
+- Implement or restore Keccak Metal proving.
+- Decide whether recursion CPU witgen is acceptable or should become a Metal
+  target.
+- Plan a Rust Metal HAL binding migration from the deprecated `metal` crate to
+  `objc2-metal`, `objc2-foundation`, or a narrow local ObjC shim. This should be
+  done behind an adapter layer and validated with the existing `risc0-zkp` and
+  recursion Metal tests before touching rv32im.
+- Keep Groth16 out of the primary path unless the product need is on-chain proof
+  size rather than transparent local proving.
+
+### P3: Evaluate Metal 4 Selectively
+
+Metal 4 should be treated as a follow-up optimization, not the first milestone.
+Likely useful areas are command submission, pipeline caching, compilation APIs,
+and argument-table style binding. It is unlikely to make the field arithmetic
+itself dramatically faster without deeper kernel/layout changes.
+
+## Open Questions
+
+- Is the rv32im parallel failure a Metal HAL command-buffer/resource lifetime
+  issue, a generated-kernel/toolchain issue, a `gpu_guard` coverage issue, or a
+  test harness artifact? The current serial failures make a pure parallelism
+  explanation unlikely.
+- Which Apple Metal Toolchain versions pass or fail rv32im Metal on Apple
+  Silicon, and what does the CI runner use?
+- Which real target workload should represent "best local prover" for M5 Max:
+  single segment, multi-segment, Keccak-heavy, or recursion-heavy?
+- Is `Succinct` required for the local workflow, or is `Composite` acceptable as
+  the main artifact when proof size is not the bottleneck?
+- Do we need Apple Silicon Groth16 at all, or is transparent STARK proving the
+  actual target?
