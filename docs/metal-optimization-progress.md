@@ -24,9 +24,10 @@ The best current experimental full-Metal rv32im candidate is:
 RISC0_RV32IM_METAL_EVAL_CHECK=1`
 
 On the M5 Max this passes the current serial rv32im suite with eval-check CPU
-verification and is faster than the CPU-eval-check safety fallback on the
-filtered `fib prove/poseidon2` benchmark. The non-serial test harness also
-passes, but this still needs longer stress testing before becoming the default.
+verification, the non-serial rv32im harness, and small-to-medium composite and
+succinct datasheet runs. It is faster than the CPU-eval-check safety fallback on
+the filtered `fib prove/poseidon2` benchmark, but this still needs longer stress
+testing before becoming the default.
 
 For the best local proving throughput, start with `ProverOpts::fast()` or
 `ProverOpts::composite()`. This produces a composite STARK receipt: fastest,
@@ -261,6 +262,12 @@ Metal-focused validation on the M5 Max:
   `datasheet --max-po2 16 composite`: 658.9ms for 16K rows and 2.04s for 64K
   rows. This improves on the current safety-path baseline of 897.8ms and 4.56s,
   so the candidate is meaningful beyond the isolated `fib` segment benchmark.
+- The candidate also passed `datasheet --max-po2 18 composite`: 658.7ms for 16K
+  rows, 1.85s for 64K rows, 5.96s for 128K rows, and 9.04s for 256K rows. The
+  larger 256K-row case reached about 28.3K rows/sec.
+- The same candidate passed `datasheet --max-po2 18 succinct`: 2.57s for the
+  64K-row succinct case, about 24.9K rows/sec, with about 930MB max RAM and a
+  217.4KB seal.
 - `cargo run --release -p risc0-circuit-keccak --features prove --example
   keccak -- --po2 14 --count 1` completed in 1.930s, about 41.975 keccak/sec.
   Keccak Metal is still disabled in `risc0-circuit-keccak`, so this is a CPU
@@ -348,7 +355,9 @@ than at stale C++ header bindings alone.
   - warm `hello-world` proof: present, but too small to distinguish safe
     CPU-eval-check and forced full-Metal eval-check.
   - small Metal-enabled `datasheet execute`, `composite`, `lift`, `join`, and
-    `succinct`: present at `--max-po2 16`.
+    `succinct`: present at `--max-po2 16`; the `-fno-inline-functions`
+    full-Metal candidate also has `composite` and `succinct` coverage at
+    `--max-po2 18`.
   - filtered `fib execute`: present.
   - rv32im segment-only benchmark: present through filtered `fib
     prove/poseidon2`; currently slow because the safety path keeps rv32im
