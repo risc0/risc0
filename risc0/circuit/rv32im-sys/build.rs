@@ -150,7 +150,7 @@ fn compile_provers() {
             metal_build.flag("-O0");
         }
         if env::var_os("RISC0_RV32IM_METAL_INLINE_EVAL_CHECK").is_none() {
-            metal_build.flag_file_prefix("eval_check_", "-fno-inline-functions");
+            metal_build.flag_file_prefix("eval_check_", "-fno-inline");
         }
         if let Ok(flags) = env::var("RISC0_RV32IM_METAL_APPEND_FLAGS") {
             for flag in flags.split_whitespace() {

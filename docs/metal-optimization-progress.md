@@ -16,7 +16,7 @@ MetalToolchain`; `xcrun --sdk macosx metal -v` reports Apple metal version
 
 Use the M3 rv32im segment prover on Apple Silicon with Metal enabled by target
 selection. On this branch, rv32im eval-check also uses Metal by default after
-compiling generated `eval_check_*.metal` files with `-fno-inline-functions`.
+compiling generated `eval_check_*.metal` files with `-fno-inline`.
 
 Use this env var only to force the old CPU eval-check safety fallback:
 
@@ -232,13 +232,20 @@ Metal-focused validation on the M5 Max:
   `RISC0_RV32IM_METAL_APPEND_FLAGS`. The same filtered suite also passed 46/46
   without `--test-threads=1`. This points at inlining pressure in the generated
   `verifyCircuit` / eval-check path as the most actionable current hypothesis.
-- The branch now applies `-fno-inline-functions` only to generated
+- The branch first applied `-fno-inline-functions` only to generated
   `eval_check_*.metal` files by default. With no global append flags, forced
   Metal eval-check plus CPU verification passed the focused `sltiu` loop 20/20
   and the full rv32im prove suite 46/46. This preserves the original repro path
   behind `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1`: a focused inline `sltiu`
   loop passed 25/25, but the inline full rv32im prove suite failed in `sltiu`
   with a direct eval-check verifier mismatch at row 31840 col 0.
+- The scoped default was then narrowed from `-fno-inline-functions` to
+  `-fno-inline` on generated `eval_check_*.metal` files. Apple Metal accepts
+  `-fno-inline`, but ignores narrower candidates such as
+  `-fno-inline-functions-called-once` and `-fno-inline-small-functions`. With
+  scoped `-fno-inline`, the focused `sltiu` eval-check verifier passed and the
+  full rv32im prove suite with `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1`
+  passed 46/46 with one ignored regression test.
 - Full Metal eval-check is now the runtime default in this branch. The default
   full rv32im prove suite passed 46/46 with one ignored Metal regression test,
   and a default full-suite run with
@@ -314,11 +321,14 @@ Metal-focused validation on the M5 Max:
   benchmark without any rv32im eval-check env flags passed with a 4.73s to 4.84s
   range, about 105.8K to 108.3K rows/sec. This is the best current default
   segment-proving measurement.
+- After narrowing the scoped eval-check flag to `-fno-inline`, the default
+  no-env benchmark stayed in the same range: 4.77s to 4.93s, about 103.9K to
+  107.4K rows/sec.
 - A source-level Metal `__attribute__((noinline))` experiment on
   `computeRow<po2>` compiled and passed the focused default
   `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 ... prove::tests::sltiu` sanity
   test, but the single proof took 63.38s. That is not a viable replacement for
-  the scoped `-fno-inline-functions` compiler flag.
+  the scoped compiler-flag mitigation.
 - The same `-fno-inline-functions` full-Metal eval-check candidate passed
   `datasheet --max-po2 16 composite`: 658.9ms for 16K rows and 2.04s for 64K
   rows. This improves on the current safety-path baseline of 897.8ms and 4.56s,
@@ -403,11 +413,11 @@ than at stale C++ header bindings alone.
   mishandling the generated rv32im eval-check shape. Initial measurement shows
   the `-O0` full-Metal path is slower than the CPU-eval-check safety path.
 - Use `RISC0_RV32IM_METAL_APPEND_FLAGS` for targeted compiler-flag experiments.
-  The first strong candidate, `-fno-inline-functions`, is now applied only to
-  generated `eval_check_*.metal` files by default, and full Metal eval-check is
-  now the runtime default in this branch. Keep stressing this scoped default
-  with longer proof loops and larger real workloads before treating it as
-  upstream-production evidence.
+  The first strong candidate was `-fno-inline-functions`, but the current
+  narrower default is `-fno-inline` applied only to generated
+  `eval_check_*.metal` files. Full Metal eval-check is now the runtime default
+  in this branch. Keep stressing this scoped default with longer proof loops and
+  larger real workloads before treating it as upstream-production evidence.
 - Investigate a Zirgen/M3 code-shape fix for `eval_check` rather than treating
   Metal bindings alone as the root issue. Promising directions are reducing
   inlining/register pressure in `verifyCircuit`, avoiding the giant
