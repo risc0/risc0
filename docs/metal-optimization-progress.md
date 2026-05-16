@@ -652,6 +652,11 @@ Prompt-to-artifact checklist:
   and common Xcode selection inputs are build-script rerun signals. This reduces
   the chance that local or CI validation accidentally tests stale kernels after
   source, flag, or toolchain changes.
+- Exact Metal file-flag coverage: present. `risc0-build-kernel` now unit-tests
+  the per-file flag selection used by the
+  `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S` diagnostic, including the case
+  where `eval_check_20.metal` must not accidentally match
+  `eval_check_200.metal`.
 
 Remaining gaps before marking P0 complete:
 

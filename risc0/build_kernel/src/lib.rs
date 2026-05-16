@@ -433,15 +433,12 @@ impl KernelBuild {
                             cmd.arg(flag);
                         }
                         if let Some(file_name) = src.file_name().and_then(|name| name.to_str()) {
-                            for (prefix, flag) in &file_prefix_flags {
-                                if file_name.starts_with(prefix) {
-                                    cmd.arg(flag);
-                                }
-                            }
-                            for (flag_file_name, flag) in &file_name_flags {
-                                if file_name == flag_file_name {
-                                    cmd.arg(flag);
-                                }
+                            for flag in metal_file_specific_flags(
+                                file_name,
+                                &file_prefix_flags,
+                                &file_name_flags,
+                            ) {
+                                cmd.arg(flag);
                             }
                         }
 
@@ -575,6 +572,20 @@ fn metal_toolchain_cache_tags(sdk_name: &str) -> Vec<String> {
         .collect()
 }
 
+fn metal_file_specific_flags<'a>(
+    file_name: &str,
+    file_prefix_flags: &'a [(String, String)],
+    file_name_flags: &'a [(String, String)],
+) -> Vec<&'a str> {
+    file_prefix_flags
+        .iter()
+        .filter_map(|(prefix, flag)| file_name.starts_with(prefix).then_some(flag.as_str()))
+        .chain(file_name_flags.iter().filter_map(|(flag_file_name, flag)| {
+            (file_name == flag_file_name).then_some(flag.as_str())
+        }))
+        .collect()
+}
+
 fn format_command_cache_tag(
     label: &str,
     status: &std::process::ExitStatus,
@@ -666,5 +677,34 @@ mod tests {
         let after = after.finalize();
 
         assert_ne!(before, after);
+    }
+
+    #[test]
+    fn metal_file_specific_flags_match_prefixes_and_exact_names() {
+        let prefix_flags = vec![
+            ("eval_check_".to_string(), "-fno-inline".to_string()),
+            ("data_witgen_".to_string(), "-fdata".to_string()),
+        ];
+        let file_name_flags = vec![
+            ("eval_check_20.metal".to_string(), "-fpo2-20".to_string()),
+            ("eval_check_2.metal".to_string(), "-fpo2-2".to_string()),
+        ];
+
+        assert_eq!(
+            metal_file_specific_flags("eval_check_20.metal", &prefix_flags, &file_name_flags),
+            vec!["-fno-inline", "-fpo2-20"]
+        );
+        assert_eq!(
+            metal_file_specific_flags("eval_check_200.metal", &prefix_flags, &file_name_flags),
+            vec!["-fno-inline"]
+        );
+        assert_eq!(
+            metal_file_specific_flags("data_witgen_20.metal", &prefix_flags, &file_name_flags),
+            vec!["-fdata"]
+        );
+        assert!(
+            metal_file_specific_flags("accum_witgen_20.metal", &prefix_flags, &file_name_flags)
+                .is_empty()
+        );
     }
 }
