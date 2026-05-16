@@ -693,7 +693,12 @@ Prompt-to-artifact checklist:
   the per-file flag selection used by the
   `RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S` diagnostic, including the case
   where `eval_check_20.metal` must not accidentally match
-  `eval_check_200.metal`.
+  `eval_check_200.metal`. The rv32im build script also rejects empty exact lists
+  and `po2` values outside the generated `12..=23` range so typoed exact-set
+  diagnostics do not silently compile unprotected kernels. This was checked with
+  a valid `13,14,20` `cargo check -p risc0-circuit-rv32im-sys --features prove`,
+  an invalid `200` value that failed with the range error, and an empty value
+  that failed with the non-empty-list error.
 - Metal P0 workflow coverage: present but awaiting fork approval. The workflow
   now triggers for `risc0/build_kernel/**`, runs `risc0-build-kernel` unit tests,
   and can run exact `13,14,20` candidate benchmarks/workloads during manual

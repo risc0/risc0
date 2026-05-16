@@ -494,14 +494,25 @@ fn glob_paths(pattern: &str) -> Vec<PathBuf> {
 }
 
 fn parse_po2_list(value: &str) -> Vec<usize> {
-    value
+    let po2s: Vec<_> = value
         .split([',', ' '])
         .filter(|part| !part.is_empty())
         .map(|part| {
-            part.parse::<usize>()
-                .unwrap_or_else(|err| panic!("invalid po2 '{part}': {err}"))
+            let po2 = part
+                .parse::<usize>()
+                .unwrap_or_else(|err| panic!("invalid po2 '{part}': {err}"));
+            assert!(
+                (MIN_PO2..=MAX_PO2).contains(&po2),
+                "po2 '{po2}' is outside the generated rv32im range {MIN_PO2}..={MAX_PO2}"
+            );
+            po2
         })
-        .collect()
+        .collect();
+    assert!(
+        !po2s.is_empty(),
+        "RISC0_RV32IM_METAL_NOINLINE_EVAL_CHECK_PO2S must contain at least one po2"
+    );
+    po2s
 }
 
 const METAL_SDK_URL: &str =
