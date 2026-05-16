@@ -180,9 +180,12 @@ Metal-focused validation on the M5 Max:
   for diagnosis and benchmarking; the same serial suite failed in that mode
   with `jalr`, `mulhsu`, and `or` hitting `Poly check failed`.
 - `cargo test -p risc0-zkp --features prove hal::metal --release -- --nocapture`
-  passed: 19 tests, including after the Xcode 26.5 Metal Toolchain install.
+  passed: 19 tests, including after the Xcode 26.5 Metal Toolchain install and
+  again at the current branch head after narrowing the rv32im eval-check flag to
+  `-fno-inline`.
 - `cargo test -p risc0-circuit-recursion --features prove prove::hal::metal::tests::eval_check --release -- --ignored --nocapture`
-  passed: 1 test, including after the Xcode 26.5 Metal Toolchain install.
+  passed: 1 test, including after the Xcode 26.5 Metal Toolchain install and
+  again at the current branch head.
 - `examples/target/release/hello-world` with `RISC0_PROVER=local` completed a
   proof in about 0.5s warm with the default CPU eval-check safety path. A
   forced full-Metal eval-check run of the same binary was also about 0.5s, so
@@ -521,6 +524,8 @@ Prompt-to-artifact checklist:
 - Direct correctness diagnostic: present.
   `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1` compares Metal eval-check output
   against CPU eval-check output from the same inputs.
+- Non-rv32im Metal gates: present. Current-head `risc0-zkp` Metal HAL and
+  recursion Metal eval-check tests pass.
 - Focused regression: present as ignored test
   `prove::tests::metal_eval_check_sltiu_repeated`.
 - Native and Docker guest C/C++ archiver fix: present. Both native
