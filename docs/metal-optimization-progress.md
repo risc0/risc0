@@ -123,7 +123,14 @@ Metal-focused validation on the M5 Max:
   rv32im operation to `evalCheck`: with
   `RISC0_RV32IM_METAL_COMPARE_CPU=1 RISC0_RV32IM_METAL_EVAL_CHECK=1`, a serial
   suite run failed in `beq` with `DualHal matrix verify mismatch after
-  evalCheck`.
+  evalCheck`. A later serial run failed in `sltiu` after `evalCheck` at row
+  8288 col 0. Running only `prove::tests::sltiu` can also fail after
+  `evalCheck`, but not every run; one observed loop failed after 19 repeats.
+  Use this as the current compact repro shape:
+  `for i in {1..20}; do RISC0_RV32IM_METAL_COMPARE_CPU=1
+  RISC0_RV32IM_METAL_EVAL_CHECK=1 cargo test -p risc0-circuit-rv32im --features
+  prove prove::tests::sltiu --release -- --nocapture --test-threads=1 || exit
+  $?; done`.
 - Bypassing only the Metal `eval_check_metal_*` kernels restores correctness.
   The branch now keeps the rest of the Metal HAL active but computes the rv32im
   validity polynomial on CPU by default:
@@ -145,6 +152,10 @@ Metal-focused validation on the M5 Max:
   can stall badly with this toolchain when it compiles unused kernels such as
   higher-`po2` `eval_check` variants. Lazy pipeline creation avoids that startup
   problem, but it does not fix the `Poly check failed` correctness failure.
+- Adding missing `device`-qualified compound assignment overloads for Metal
+  `Fp` / `FpExt` was tested as a compiler-sensitivity hypothesis. It rebuilt and
+  initially passed focused `sltiu`, but the 20-run loop still failed after
+  `evalCheck`, so that change was not kept.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
