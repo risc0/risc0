@@ -156,6 +156,12 @@ Metal-focused validation on the M5 Max:
   `Fp` / `FpExt` was tested as a compiler-sensitivity hypothesis. It rebuilt and
   initially passed focused `sltiu`, but the 20-run loop still failed after
   `evalCheck`, so that change was not kept.
+- Forcing `eval_check_metal_*` to dispatch one thread per threadgroup is also
+  only a partial diagnostic. With that local experiment, the 20-run `sltiu`
+  dual-HAL loop and full serial dual-HAL rv32im suite passed, which points at
+  threadgroup/compiler scheduling pressure. But the non-dual full-Metal serial
+  suite still failed with `Poly check failed` in `remu` and `srai`, so the
+  one-threadgroup change is not a correctness fix and was not kept.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
