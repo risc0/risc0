@@ -310,6 +310,11 @@ Metal-focused validation on the M5 Max:
   benchmark without any rv32im eval-check env flags passed with a 4.73s to 4.84s
   range, about 105.8K to 108.3K rows/sec. This is the best current default
   segment-proving measurement.
+- A source-level Metal `__attribute__((noinline))` experiment on
+  `computeRow<po2>` compiled and passed the focused default
+  `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 ... prove::tests::sltiu` sanity
+  test, but the single proof took 63.38s. That is not a viable replacement for
+  the scoped `-fno-inline-functions` compiler flag.
 - The same `-fno-inline-functions` full-Metal eval-check candidate passed
   `datasheet --max-po2 16 composite`: 658.9ms for 16K rows and 2.04s for 64K
   rows. This improves on the current safety-path baseline of 897.8ms and 4.56s,
