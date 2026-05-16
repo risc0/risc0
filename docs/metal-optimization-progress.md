@@ -240,6 +240,13 @@ Metal-focused validation on the M5 Max:
   behind `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1`: a focused inline `sltiu`
   loop passed 25/25, but the inline full rv32im prove suite failed in `sltiu`
   with a direct eval-check verifier mismatch at row 31840 col 0.
+- The branch also has an ignored focused regression test for the scoped
+  eval-check mitigation:
+  `RISC0_RV32IM_METAL_EVAL_CHECK=1
+  RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 cargo test -p
+  risc0-circuit-rv32im --features prove
+  prove::tests::metal_eval_check_sltiu_repeated --release -- --ignored
+  --nocapture --test-threads=1`.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
@@ -363,8 +370,9 @@ than at stale C++ header bindings alone.
 - Benchmark the default CPU eval-check safety path against full Metal eval-check
   once full Metal is reliable enough to compare. The branch can force full Metal
   eval-check with `RISC0_RV32IM_METAL_EVAL_CHECK=1`.
-- Add a deterministic Metal rv32im regression command or mark the test harness
-  serial if the Metal runtime cannot safely run these tests concurrently.
+- Keep the ignored `metal_eval_check_sltiu_repeated` test as the focused
+  regression command for the scoped eval-check mitigation. Broaden it only if a
+  smaller deterministic repro is found for the original inline failure.
 - Keep the `risc0-zkvm-methods-cpp-crates` `blst_*` guest link fix covered in
   both native and Docker guest builds. The current fix sets
   `AR_riscv32im_risc0_zkvm_elf` beside the RISC-V guest compiler.

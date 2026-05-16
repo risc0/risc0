@@ -287,4 +287,29 @@ mod tests {
     test_case!(sw);
     test_case!(xor);
     test_case!(xori);
+
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+    fn require_enabled_env(name: &str) {
+        let enabled = std::env::var(name)
+            .map(|value| !value.is_empty() && value != "0")
+            .unwrap_or(false);
+        assert!(
+            enabled,
+            "{name}=1 must be set by the test command; this test intentionally \
+             avoids mutating process-global environment"
+        );
+    }
+
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+    #[test_log::test]
+    #[ignore = "requires Metal eval-check env vars; see metal-optimization-progress.md"]
+    #[gpu_guard::gpu_guard]
+    fn metal_eval_check_sltiu_repeated() {
+        require_enabled_env("RISC0_RV32IM_METAL_EVAL_CHECK");
+        require_enabled_env("RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU");
+
+        for _ in 0..20 {
+            run_test("sltiu", DEFAULT_PO2);
+        }
+    }
 }
