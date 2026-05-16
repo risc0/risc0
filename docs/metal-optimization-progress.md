@@ -245,6 +245,16 @@ Metal-focused validation on the M5 Max:
   `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1` also passed 46/46. The old CPU
   eval-check fallback remains available with `RISC0_RV32IM_METAL_EVAL_CHECK=0`;
   a focused `sltiu` fallback sanity run passed with that env set.
+- Higher-level zkVM validation also passes with the default full-Metal
+  eval-check path:
+  - `cargo test -p risc0-zkvm --features prove
+    host::server::exec::tests::cpp_test -- --nocapture` passed.
+  - `RISC0_PROVER=local cargo test --manifest-path examples/Cargo.toml -p
+    hello-world --features prove test_hello_world -- --nocapture` passed and
+    produced a local proof for the hello-world multiply example.
+  - `cargo test -p risc0-zkvm --features prove
+    host::server::prove::tests::basic -- --nocapture` passed, producing a
+    succinct receipt for the `DoNothing` multi-test guest.
 - Before flipping the runtime default, the scoped full-Metal path passed five
   consecutive non-serial full-suite verifier runs with
   `RISC0_RV32IM_METAL_EVAL_CHECK=1
