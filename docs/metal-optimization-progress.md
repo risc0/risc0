@@ -248,9 +248,9 @@ Metal-focused validation on the M5 Max:
   scoped `-fno-inline`, the focused `sltiu` eval-check verifier passed and the
   full rv32im prove suite with `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1`
   passed 46/46 with one ignored regression test.
-- The narrowed `-fno-inline` default also passed a three-run full-suite stress
-  loop with `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1`; each run passed 46/46
-  with the ignored Metal regression test skipped.
+- The narrowed `-fno-inline` default also passed a 10-run full-suite stress loop
+  with `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1`; each run passed 46/46 with
+  the ignored Metal regression test skipped.
 - Full Metal eval-check is now the runtime default in this branch. The default
   full rv32im prove suite passed 46/46 with one ignored Metal regression test,
   and a default full-suite run with
@@ -533,10 +533,10 @@ Remaining gaps before marking P0 complete:
 - The mitigation is still a compiler-flag workaround, not a real Zirgen/M3
   code-shape fix. Source-level noinline on `computeRow<po2>` was rejected as too
   slow; a better split of `verifyCircuit`/validity-polynomial code is still open.
-- The default path has strong local smoke, benchmark, short repeat-loop, and
-  Keccak example coverage, including a 100KB input proof, but not a
-  long-duration stress run or a broad non-example application workload beyond
-  the current datasheet/examples/zkVM tests.
+- The default path has strong local smoke, benchmark, 10-pass verifier-loop, and
+  Keccak example coverage, including a 100KB input proof, but not a broad
+  non-example application workload beyond the current datasheet/examples/zkVM
+  tests.
 - Keccak Metal remains disabled. This is outside rv32im eval-check correctness,
   but it is still a major gap for best local proving on Keccak-heavy workloads.
 
