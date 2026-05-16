@@ -20,8 +20,12 @@ not force full Metal rv32im eval-check for production proofs yet.
 
 The best current experimental full-Metal rv32im candidate is:
 
-`RISC0_RV32IM_METAL_APPEND_FLAGS=-fno-inline-functions
-RISC0_RV32IM_METAL_EVAL_CHECK=1`
+`RISC0_RV32IM_METAL_EVAL_CHECK=1`
+
+On this branch, generated `eval_check_*.metal` files are compiled with
+`-fno-inline-functions` by default while the other rv32im Metal kernels keep the
+normal optimization pipeline. Set `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1` when
+reproducing the original fully optimized eval-check failure mode.
 
 On the M5 Max this passes the current serial rv32im suite with eval-check CPU
 verification, the non-serial rv32im harness, and small-to-medium composite and
@@ -221,13 +225,18 @@ Metal-focused validation on the M5 Max:
   `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1`. This strongly implicates
   optimized Metal compilation or optimization-sensitive generated eval-check
   code shape, but it is not a performance fix.
-- `RISC0_RV32IM_METAL_APPEND_FLAGS=-fno-inline-functions` is a narrower and
-  much better mitigation candidate than `-O0`. With full Metal eval-check forced
-  and CPU verification enabled, the focused `sltiu` loop passed 20/20 and the
-  full serial rv32im prove suite passed 46/46. The same filtered suite also
-  passed 46/46 without `--test-threads=1`. This points at inlining pressure in
-  the generated `verifyCircuit` / eval-check path as the most actionable current
-  hypothesis.
+- `-fno-inline-functions` is a narrower and much better mitigation candidate
+  than `-O0`. With full Metal eval-check forced and CPU verification enabled,
+  the focused `sltiu` loop passed 20/20 and the full serial rv32im prove suite
+  passed 46/46 when the flag was appended globally with
+  `RISC0_RV32IM_METAL_APPEND_FLAGS`. The same filtered suite also passed 46/46
+  without `--test-threads=1`. This points at inlining pressure in the generated
+  `verifyCircuit` / eval-check path as the most actionable current hypothesis.
+- The branch now applies `-fno-inline-functions` only to generated
+  `eval_check_*.metal` files by default. With no global append flags, forced
+  Metal eval-check plus CPU verification passed the focused `sltiu` loop 20/20
+  and the full rv32im prove suite 46/46. This preserves the original repro path
+  behind `RISC0_RV32IM_METAL_INLINE_EVAL_CHECK=1`.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
@@ -270,6 +279,10 @@ Metal-focused validation on the M5 Max:
 - The same candidate passed `datasheet --max-po2 18 succinct`: 2.57s for the
   64K-row succinct case, about 24.9K rows/sec, with about 930MB max RAM and a
   217.4KB seal.
+- A larger `datasheet --max-po2 20 composite` run passed with forced full Metal
+  eval-check: 767ms for 16K rows, 2.52s for 64K rows, 4.52s for 128K rows,
+  8.57s for 256K rows, 16.88s for 512K rows, and 37.47s for 1M rows. The 1M-row
+  case reached about 27.3K rows/sec.
 - `cargo run --release -p risc0-circuit-keccak --features prove --example
   keccak -- --po2 14 --count 1` completed in 1.930s, about 41.975 keccak/sec.
   Keccak Metal is still disabled in `risc0-circuit-keccak`, so this is a CPU
@@ -322,10 +335,10 @@ than at stale C++ header bindings alone.
   mishandling the generated rv32im eval-check shape. Initial measurement shows
   the `-O0` full-Metal path is slower than the CPU-eval-check safety path.
 - Use `RISC0_RV32IM_METAL_APPEND_FLAGS` for targeted compiler-flag experiments.
-  The first strong candidate is `-fno-inline-functions`, which preserves full
-  optimization otherwise and currently outperforms the CPU eval-check fallback.
-  Stress it with parallel tests, longer proof loops, and larger segment
-  benchmarks before promoting it to a default rv32im Metal flag.
+  The first strong candidate, `-fno-inline-functions`, is now applied only to
+  generated `eval_check_*.metal` files by default. Keep stressing this scoped
+  default with longer proof loops and larger real workloads before making full
+  Metal eval-check the runtime default.
 - Investigate a Zirgen/M3 code-shape fix for `eval_check` rather than treating
   Metal bindings alone as the root issue. Promising directions are reducing
   inlining/register pressure in `verifyCircuit`, avoiding the giant
@@ -358,8 +371,8 @@ than at stale C++ header bindings alone.
     CPU-eval-check and forced full-Metal eval-check.
   - small Metal-enabled `datasheet execute`, `composite`, `lift`, `join`, and
     `succinct`: present at `--max-po2 16`; the `-fno-inline-functions`
-    full-Metal candidate also has `composite` and `succinct` coverage at
-    `--max-po2 18`.
+    full-Metal candidate also has `succinct` coverage at `--max-po2 18` and
+    `composite` coverage at `--max-po2 20`.
   - filtered `fib execute`: present.
   - rv32im segment-only benchmark: present through filtered `fib
     prove/poseidon2`; currently slow because the safety path keeps rv32im
