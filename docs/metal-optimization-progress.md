@@ -162,6 +162,10 @@ Metal-focused validation on the M5 Max:
   threadgroup/compiler scheduling pressure. But the non-dual full-Metal serial
   suite still failed with `Poly check failed` in `remu` and `srai`, so the
   one-threadgroup change is not a correctness fix and was not kept.
+- Adding an immediate opt-in CPU readback of the eval-check output after the
+  Metal dispatch also did not stabilize non-dual full Metal. The serial suite
+  still failed with `Poly check failed` in `bltu`, so this is not just a missing
+  post-dispatch readback.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
