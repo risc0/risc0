@@ -273,6 +273,9 @@ Metal-focused validation on the M5 Max:
   - `cargo test -p risc0-zkvm --features prove
     host::server::prove::tests::continuation -- --nocapture` passed, proving a
     two-segment continuation session and checking segment indices.
+  - `cargo test -p risc0-zkvm --features prove
+    host::server::prove::tests::bigint_accel -- --nocapture` passed the BigInt
+    accelerator proof workload across 15 generated test cases.
 - Before flipping the runtime default, the scoped full-Metal path passed five
   consecutive non-serial full-suite verifier runs with
   `RISC0_RV32IM_METAL_EVAL_CHECK=1
@@ -544,9 +547,9 @@ Remaining gaps before marking P0 complete:
   code-shape fix. Source-level noinline on `computeRow<po2>` was rejected as too
   slow; a better split of `verifyCircuit`/validity-polynomial code is still open.
 - The default path has strong local smoke, benchmark, 10-pass verifier-loop,
-  SHA, continuation, and Keccak example coverage, including a 100KB Keccak input
-  proof, but not a broad product-style application workload beyond the current
-  datasheet/examples/zkVM tests.
+  SHA, continuation, BigInt, and Keccak example coverage, including a 100KB
+  Keccak input proof, but not a broad product-style application workload beyond
+  the current datasheet/examples/zkVM tests.
 - Keccak Metal remains disabled. This is outside rv32im eval-check correctness,
   but it is still a major gap for best local proving on Keccak-heavy workloads.
 
