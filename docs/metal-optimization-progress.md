@@ -164,6 +164,15 @@ Metal-focused validation on the M5 Max:
   runs; one filtered run averaged about 73MHz. The full `fib` benchmark suite is
   still not part of the default quick gate because each selected hotbench entry
   runs for roughly 10s plus setup.
+- `cargo bench -p risc0-zkvm --features prove,metal --bench fib
+  prove/poseidon2` now runs as a segment-only benchmark. On the current safety
+  path it completed one timed iteration in 28.31s, about 18.1K rows/sec. This is
+  intentionally recorded as the CPU-eval-check safety-path baseline, not a
+  full-Metal result.
+- `cargo run --release -p risc0-circuit-keccak --features prove --example
+  keccak -- --po2 14 --count 1` completed in 1.930s, about 41.975 keccak/sec.
+  Keccak Metal is still disabled in `risc0-circuit-keccak`, so this is a CPU
+  fallback baseline and not evidence of Metal Keccak coverage.
 - The `datasheet composite` harness had a sparse-`po2` bug: it used `.take(...)`
   over a table that intentionally omits too-small powers of two, so `--max-po2
   16` could still run `po2=17` and panic. The harness now filters by the actual
@@ -232,8 +241,11 @@ than at stale C++ header bindings alone.
   - small Metal-enabled `datasheet execute`, `composite`, `lift`, `join`, and
     `succinct`: present at `--max-po2 16`.
   - filtered `fib execute`: present.
-  - rv32im segment-only benchmark
-  - Keccak-heavy workload
+  - rv32im segment-only benchmark: present through filtered `fib
+    prove/poseidon2`; currently slow because the safety path keeps rv32im
+    eval-check on CPU.
+  - Keccak-heavy workload: CPU fallback baseline present; Metal Keccak remains
+    disabled.
 
 ### P1: Optimize Transparent Local Proving
 
