@@ -63,6 +63,7 @@ pub enum KernelType {
 pub struct KernelBuild {
     kernel_type: KernelType,
     flags: Vec<String>,
+    file_prefix_flags: Vec<(String, String)>,
     files: Vec<PathBuf>,
     generated_files: Vec<PathBuf>,
     inc_dirs: Vec<PathBuf>,
@@ -75,6 +76,7 @@ impl KernelBuild {
         Self {
             kernel_type,
             flags: Vec::new(),
+            file_prefix_flags: Vec::new(),
             files: Vec::new(),
             generated_files: Vec::new(),
             inc_dirs: Vec::new(),
@@ -92,6 +94,13 @@ impl KernelBuild {
     /// Add an arbitrary flag to the invocation of the compiler
     pub fn flag(&mut self, flag: &str) -> &mut KernelBuild {
         self.flags.push(flag.to_string());
+        self
+    }
+
+    /// Add an arbitrary flag to files whose file name starts with `prefix`.
+    pub fn flag_file_prefix(&mut self, prefix: &str, flag: &str) -> &mut KernelBuild {
+        self.file_prefix_flags
+            .push((prefix.to_string(), flag.to_string()));
         self
     }
 
@@ -367,6 +376,14 @@ impl KernelBuild {
             "-Wno-unused-variable".to_string(),
         ];
         flags.extend(self.flags.clone());
+        let file_prefix_flags = self.file_prefix_flags.clone();
+
+        let mut tags = vec![sdk_name.to_string()];
+        tags.extend(
+            file_prefix_flags
+                .iter()
+                .map(|(prefix, flag)| format!("file-prefix-flag:{prefix}:{flag}")),
+        );
 
         self.cached_compile(
             output,
@@ -374,7 +391,7 @@ impl KernelBuild {
             &deps,
             METAL_INCS,
             &flags,
-            &[sdk_name.to_string()],
+            &tags,
             |out_dir, out_path, sys_inc_dir, flags| {
                 let files: Vec<_> = files.iter().map(|x| x.as_path()).collect();
 
@@ -391,6 +408,13 @@ impl KernelBuild {
 
                         for flag in flags {
                             cmd.arg(flag);
+                        }
+                        if let Some(file_name) = src.file_name().and_then(|name| name.to_str()) {
+                            for (prefix, flag) in &file_prefix_flags {
+                                if file_name.starts_with(prefix) {
+                                    cmd.arg(flag);
+                                }
+                            }
                         }
 
                         cmd.arg("-o").arg(&air_path);
