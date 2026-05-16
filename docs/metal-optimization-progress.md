@@ -15,7 +15,8 @@ MetalToolchain`; `xcrun --sdk macosx metal -v` reports Apple metal version
 ## Current Recommendation
 
 Use the M3 rv32im segment prover on Apple Silicon with Metal enabled by target
-selection.
+selection, but keep the current rv32im eval-check safety fallback enabled. Do
+not force full Metal rv32im eval-check for production proofs yet.
 
 For the best local proving throughput, start with `ProverOpts::fast()` or
 `ProverOpts::composite()`. This produces a composite STARK receipt: fastest,
@@ -201,9 +202,12 @@ Metal-focused validation on the M5 Max:
   (`RISC0_RV32IM_METAL_EVAL_CHECK=1
   RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1 ... prove::tests::sltiu`) passed
   20/20, and the full serial rv32im prove suite passed 46/46 under forced Metal
-  eval-check plus CPU verification. The branch now exposes this as
-  `RISC0_RV32IM_METAL_KERNEL_O0=1` when rebuilding rv32im Metal kernels instead
-  of hardcoding it globally.
+  eval-check plus CPU verification. After wiring this as
+  `RISC0_RV32IM_METAL_KERNEL_O0=1`, the same full serial rv32im suite passed
+  46/46 with `RISC0_RV32IM_METAL_EVAL_CHECK=1` and
+  `RISC0_RV32IM_METAL_VERIFY_EVAL_CHECK_CPU=1`. This strongly implicates
+  optimized Metal compilation or optimization-sensitive generated eval-check
+  code shape, but it is not a performance fix.
 - The guest `risc0-zkvm-methods-cpp-crates` `blst_*` link failure was caused by
   the guest C compiler being set to the RISC-V GCC while `AR` was left unset on
   macOS. The `cc` crate fell back to `/usr/bin/ar`, producing a 96-byte empty
@@ -228,6 +232,10 @@ Metal-focused validation on the M5 Max:
   path it completed one timed iteration in 28.31s, about 18.1K rows/sec. This is
   intentionally recorded as the CPU-eval-check safety-path baseline, not a
   full-Metal result.
+- The same filtered `fib prove/poseidon2` benchmark with
+  `RISC0_RV32IM_METAL_KERNEL_O0=1 RISC0_RV32IM_METAL_EVAL_CHECK=1` completed in
+  48.05s, about 10.7K rows/sec. This is slower than the CPU-eval-check safety
+  path, so `-O0` should remain diagnostic only.
 - `cargo run --release -p risc0-circuit-keccak --features prove --example
   keccak -- --po2 14 --count 1` completed in 1.930s, about 41.975 keccak/sec.
   Keccak Metal is still disabled in `risc0-circuit-keccak`, so this is a CPU
@@ -277,7 +285,8 @@ than at stale C++ header bindings alone.
 - Use `RISC0_RV32IM_METAL_KERNEL_O0=1` as the current strongest compiler/codegen
   diagnostic. It should not become the default without performance measurement,
   but it is the best available evidence that optimized Metal compilation is
-  mishandling the generated rv32im eval-check shape.
+  mishandling the generated rv32im eval-check shape. Initial measurement shows
+  the `-O0` full-Metal path is slower than the CPU-eval-check safety path.
 - Investigate a Zirgen/M3 code-shape fix for `eval_check` rather than treating
   Metal bindings alone as the root issue. Promising directions are reducing
   inlining/register pressure in `verifyCircuit`, avoiding the giant
