@@ -1,6 +1,19 @@
 name: sccache install
 description: Install sccache
 
+inputs:
+  key:
+    required: true
+    default: rust-cache-${{ runner.os }}-${{ runner.arch }}
+  disable_s3:
+    default: false
+  aws_region:
+    default: us-west-2
+  aws_account:
+    default: '083632199359'
+  aws_role:
+    default: gha_oidc_risc0_cache_public_access
+
 runs:
   using: composite
   steps:
@@ -40,6 +53,14 @@ runs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
 
+    - if: >
+        runner.os == 'Linux' && inputs.disable_s3 == 'false' && startsWith(runner.name, 'i-') == true
+      run: |
+        echo "SCCACHE_REGION=us-west-2" >> $GITHUB_ENV
+        echo "SCCACHE_BUCKET=risc0-ci-cache" >> $GITHUB_ENV
+        echo "SCCACHE_S3_KEY_PREFIX=public/risc0/${{ inputs.key }}/sccache" >> $GITHUB_ENV
+      shell: bash
+
     - run: |
         echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
         echo "CARGO_PROFILE_DEV_DEBUG=0" >> $GITHUB_ENV
@@ -49,3 +70,13 @@ runs:
         echo "CXX=sccache clang++" >> $GITHUB_ENV
         echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
       shell: bash
+
+    - if: >
+        runner.os == 'Linux' && inputs.disable_s3 == 'false' &&
+        github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
+      id: aws-creds
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: "${{ inputs.aws_region }}"
+        role-duration-seconds: 14400
+        role-to-assume: "arn:aws:iam::${{ inputs.aws_account }}:role/${{ inputs.aws_role }}"
