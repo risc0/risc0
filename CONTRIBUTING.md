@@ -37,6 +37,26 @@ sudo dnf install @development-tools
 sudo pacman -S base-devel
 ```
 
+#### build-essential (Linux only)
+
+For Linux systems, you'll need build tools installed. Without these, you may encounter cryptic cmake errors during `rzup build`.
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get update
+sudo apt-get install build-essential
+```
+
+**Fedora/RHEL/CentOS:**
+```bash
+sudo dnf install @development-tools
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S base-devel
+```
+
 #### [Rust](https://www.rust-lang.org/tools/install)
 
 ```bash
