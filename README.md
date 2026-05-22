@@ -92,6 +92,11 @@ To install `rzup` run the following command and follow the instructions:
 curl -L https://risczero.com/install | bash
 ```
 
+> **Note:** If you encounter rate limiting errors during installation, you may need to set a GitHub personal access token. Create one at [GitHub Settings > Tokens](https://github.com/settings/tokens) and export it:
+> ```bash
+> export GITHUB_TOKEN=your_token_here
+> ```
+
 Next we can install the RISC Zero toolchain by running `rzup install`:
 
 ```bash
