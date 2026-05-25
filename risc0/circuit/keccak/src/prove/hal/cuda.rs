@@ -219,6 +219,20 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         })
         .unwrap();
     }
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn eval_check_interleave(
+        &self,
+        _check: &CudaBuffer<BabyBearElem>,
+        _groups: &[&CudaBuffer<BabyBearElem>],
+        _globals: &[&CudaBuffer<BabyBearElem>],
+        _poly_mix: BabyBearExtElem,
+        _po2: usize,
+        _steps: usize,
+        _codeword_id: usize,
+    ) {
+        panic!("eval_check_interleave is not supported for CudaCircuitHal");
+    }
 }
 
 pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;

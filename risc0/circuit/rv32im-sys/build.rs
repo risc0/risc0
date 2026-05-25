@@ -82,7 +82,32 @@ fn build_cuda_kernels() {
     if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {
         build.flag("-arch=native");
     }
-    build.files(glob_paths("kernels/cuda/*.cu")).compile(output);
+
+    if env::var("CARGO_FEATURE_PINNED_WITGEN").is_ok() {
+        println!("cargo:warning=Building with pinned_witgen feature.");
+        build.define("PINNED_WITGEN", None);
+    }
+
+    let cu_files: Vec<PathBuf> = if env::var("CARGO_FEATURE_LOW_VRAM").is_ok() {
+        println!("cargo:warning=Building with low_vram feature.");
+        build.define("LOW_VRAM", None);
+        // Include all .cu files except *_opt.cu files
+        glob_paths("kernels/cuda/*.cu")
+            .into_iter()
+            .filter(|path| !path.to_string_lossy().contains("_opt.cu"))
+            .collect()
+    } else {
+        // Exclude *_opt.cu/*low_mem_*.cu files when feature is not enabled
+        glob_paths("kernels/cuda/*.cu")
+            .into_iter()
+            .filter(|path| {
+                !(path.to_string_lossy().contains("_opt.cu")
+                    || path.to_string_lossy().contains("_lowmem_"))
+            })
+            .collect()
+    };
+
+    build.files(cu_files).compile(output);
 }
 
 fn rerun_if_changed<P: AsRef<Path>>(path: P) {

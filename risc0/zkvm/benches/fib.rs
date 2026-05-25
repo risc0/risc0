@@ -14,7 +14,8 @@
 
 use hotbench::{benchmark_group, benchmark_main, BenchGroup};
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, VerifierContext,
+    RECURSION_PO2,
 };
 use risc0_zkvm_methods::FIB_ELF;
 
@@ -170,6 +171,51 @@ fn total_succinct(group: &mut BenchGroup) {
     });
 }
 
+/// Parameterized Succinct end-to-end bench.
+///
+/// Reads two env vars at run time, defaulting to (n=12_000_000, po2=22):
+///   FIB_N    — value of `n` passed to the fib guest (fib(n) iterations)
+///   FIB_PO2  — segment_limit_po2 controlling how cycles are sharded
+///
+/// Always uses ReceiptKind::Succinct. Used as the canonical perf bench for
+/// the low_vram + pinned_witgen feature combination on RTX 4090.
+///
+/// Example:
+///   FIB_N=12000000 FIB_PO2=22 cargo bench -F cuda --features low_vram,pinned_witgen --bench fib -- fib_succinct
+fn fib_succinct(group: &mut BenchGroup) {
+    let n: u32 = std::env::var("FIB_N")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(12_000_000);
+    let po2: u32 = std::env::var("FIB_PO2")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(22);
+
+    let label = format!("fib_succinct/n={n}/po2={po2}");
+    group.bench(label, |b| {
+        let env = ExecutorEnv::builder()
+            .write_slice(&[n])
+            .segment_limit_po2(po2)
+            .build()
+            .unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, FIB_ELF).unwrap();
+        let session = exec.run().unwrap();
+
+        let opts = ProverOpts::default().with_receipt_kind(ReceiptKind::Succinct);
+        let prover = get_prover_server(&opts).unwrap();
+        let ctx = VerifierContext::default();
+
+        b.iter(
+            session.total_cycles as usize,
+            || {},
+            |()| {
+                let _receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
+            },
+        );
+    });
+}
+
 benchmark_group!(
     fib,
     warmup,
@@ -178,6 +224,7 @@ benchmark_group!(
     lift,
     join,
     total_composite,
-    total_succinct
+    total_succinct,
+    fib_succinct,
 );
 benchmark_main!(fib);

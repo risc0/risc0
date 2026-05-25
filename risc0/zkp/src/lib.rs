@@ -45,6 +45,15 @@ pub const MIN_PO2: usize = core::log2_ceil(1 + ZK_CYCLES);
 /// Inverse of Reed-Solomon Expansion Rate
 pub const INV_RATE: usize = 4;
 
+/// Minimum segment po2 considered "large".
+///
+/// At po2 >= LARGE_SEGMENT_PO2 the LDE codeword domain (INV_RATE * 2^po2
+/// base elements) plus auxiliary buffers no longer fits comfortably in a
+/// 24 GB GPU, so the prover dispatches memory-efficient code paths
+/// (codeword coset split, early buffer release, host-pinned Merkle
+/// nodes). At po2 < LARGE_SEGMENT_PO2 the standard v3.0.4 path is used.
+pub const LARGE_SEGMENT_PO2: usize = 22;
+
 const FRI_FOLD_PO2: usize = 4;
 
 /// FRI folding factor is 2 ^ FRI_FOLD_PO2

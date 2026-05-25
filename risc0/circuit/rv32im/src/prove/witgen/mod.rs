@@ -15,12 +15,14 @@
 pub(crate) mod bigint;
 pub(crate) mod byte_poly;
 pub(crate) mod paged_map;
+pub(crate) mod pinned_vec;
 pub(crate) mod poseidon2;
 pub(crate) mod preflight;
 pub(crate) mod sha2;
 #[cfg(test)]
 mod tests;
 
+use rayon::prelude::*;
 use std::iter::zip;
 
 use anyhow::{Context, Result};
@@ -64,7 +66,7 @@ impl PreflightResults {
     pub fn new(segment: &Segment, rand_z: ExtVal) -> Result<Self> {
         scope!("preflight_result_new");
 
-        let trace = segment.preflight(rand_z)?;
+        let mut trace = segment.preflight(rand_z)?;
 
         tracing::trace!("{segment:#?}");
         tracing::trace!("{trace:#?}");
@@ -75,6 +77,23 @@ impl PreflightResults {
 
         let global = build_global_vec(segment, &trace);
         let injector = build_injector(&trace, cycles);
+
+        let mut bigint_items: Vec<(usize, BigIntState)> = trace
+            .backs
+            .par_iter()
+            .enumerate()
+            .filter_map(|(row, back)| {
+                if let Back::BigInt(state) = back {
+                    Some((row, state.clone()))
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        // Sort by row to maintain original order
+        bigint_items.sort_by_key(|(row, _)| *row);
+        trace.bigint_items = bigint_items;
 
         Ok(Self {
             global,
@@ -188,15 +207,14 @@ where
         let mut injector = Injector::new(self.cycles);
         let mut bigint_accum = BigIntAccum::new(last_mix);
 
-        for (row, back) in self.trace.backs.iter().enumerate() {
-            if let Back::BigInt(state) = back {
-                bigint_accum.step(state)?;
-                for (col, value) in zip(BigIntAccumState::offsets(), bigint_accum.state.as_array())
-                {
-                    injector.set(row, col, value);
-                }
-                injector.push();
+        let bigint_items = &self.trace.bigint_items;
+
+        for (row, state) in bigint_items {
+            bigint_accum.step(&state)?;
+            for (col, value) in zip(BigIntAccumState::offsets(), bigint_accum.state.as_array()) {
+                injector.set(*row, col, value);
             }
+            injector.push();
         }
 
         hal.scatter(
@@ -230,13 +248,9 @@ fn build_injector(trace: &PreflightTrace, cycles: usize) -> Injector {
     let mut injector = Injector::new(cycles);
     for (row, back) in trace.backs.iter().enumerate() {
         let cycle = &trace.cycles[row];
-        // tracing::trace!(
-        //     "[{row}] pc: {:#010x}, state: {:?}",
-        //     cycle.pc,
-        //     crate::execute::CycleState::from_u32(cycle.state).unwrap()
-        // );
-        match back {
-            Back::None => {}
+
+        let need_push = match back {
+            Back::None => false,
             Back::Ecall(s0, s1, s2) => {
                 const ECALL_S0: usize = LAYOUT_TOP.inst_result.arm8.s0._super.offset;
                 const ECALL_S1: usize = LAYOUT_TOP.inst_result.arm8.s1._super.offset;
@@ -244,11 +258,13 @@ fn build_injector(trace: &PreflightTrace, cycles: usize) -> Injector {
                 injector.set(row, ECALL_S0, *s0);
                 injector.set(row, ECALL_S1, *s1);
                 injector.set(row, ECALL_S2, *s2);
+                true
             }
             Back::Poseidon2(p2_state) => {
                 for (col, value) in zip(Poseidon2State::offsets(), p2_state.as_array()) {
                     injector.set(row, col, value);
                 }
+                true
             }
             Back::Sha2(sha2_state) => {
                 for (col, value) in zip(Sha2State::fp_offsets(), sha2_state.fp_array()) {
@@ -257,14 +273,25 @@ fn build_injector(trace: &PreflightTrace, cycles: usize) -> Injector {
                 for (col, value) in zip(Sha2State::u32_offsets(), sha2_state.u32_array()) {
                     injector.set_u32_bits(row, col, value);
                 }
+                true
             }
             Back::BigInt(state) => {
                 for (col, value) in zip(BigIntState::offsets(), state.as_array()) {
                     injector.set(row, col, value);
                 }
+                true
             }
+        };
+
+        // Skip set_cycle for Back::None rows only under cuda+pinned_witgen:
+        // there the per-row work avoided is a real perf win. For other
+        // backends (notably the cpu C++ witgen via ffi.cpp), skipping leaves
+        // injector.index unpushed for that row; stepExec then reads garbage
+        // offsets out of injector.offsets / values and MutableBufObj::load
+        // segfaults. Keep the v3.0.4 unconditional call there.
+        if need_push || !cfg!(all(feature = "pinned_witgen", feature = "cuda")) {
+            injector.set_cycle(row, cycle);
         }
-        injector.set_cycle(row, cycle);
     }
     injector
 }

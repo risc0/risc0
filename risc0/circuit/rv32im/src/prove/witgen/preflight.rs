@@ -55,18 +55,21 @@ pub(crate) enum Back {
     BigInt(BigIntState),
 }
 
+use super::pinned_vec::PinnedVec;
+
 #[derive(Clone, Debug, Default)]
 pub(crate) struct PreflightTrace {
     #[debug("{}", cycles.len())]
-    pub cycles: Vec<RawPreflightCycle>,
+    pub cycles: PinnedVec<RawPreflightCycle>,
     #[debug("{}", txns.len())]
-    pub txns: Vec<RawMemoryTransaction>,
+    pub txns: PinnedVec<RawMemoryTransaction>,
     #[debug("{}", bigint_bytes.len())]
-    pub bigint_bytes: Vec<u8>,
+    pub bigint_bytes: PinnedVec<u8>,
     #[debug("{}", backs.len())]
     pub backs: Vec<Back>,
     pub table_split_cycle: u32,
     pub rand_z: ExtVal,
+    pub bigint_items: Vec<(usize, BigIntState)>,
 }
 
 pub(crate) struct Preflight<'a> {
@@ -124,7 +127,12 @@ impl<'a> Preflight<'a> {
         }
         Self {
             trace: PreflightTrace {
-                cycles: Vec::with_capacity(total_cycles),
+                cycles: PinnedVec::with_capacity(total_cycles),
+                // txns: observed ~4 txns per cycle on rv32im at po2=22.
+                // Pre-allocating avoids ~log2(N) cudaMallocHost calls during grow.
+                txns: PinnedVec::with_capacity(total_cycles * 4),
+                // bigint_bytes: usually 0 (no bigint), small starting cap.
+                bigint_bytes: PinnedVec::with_capacity(1024),
                 backs: Vec::with_capacity(total_cycles),
                 rand_z,
                 ..Default::default()

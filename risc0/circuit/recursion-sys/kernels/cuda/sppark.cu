@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "ff/baby_bear.hpp"
+#include <ff/baby_bear.hpp>
 #include "polynomial/prefix_op.cuh"
 #include "util/gpu_t.cuh"
 

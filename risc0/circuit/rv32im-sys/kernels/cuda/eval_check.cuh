@@ -298,7 +298,12 @@ extern __device__ FpExt poly_fp(uint32_t idx,
                                 const Fp* mix,
                                 const Fp* accum);
 
+#ifdef LOW_VRAM
+extern __constant__ size_t INV_RATE;
+#else
 constexpr size_t INV_RATE = 4;
+#endif
+
 constexpr size_t kNumPolyMixPows = 458;
 extern __constant__ FpExt poly_mix[kNumPolyMixPows];
 

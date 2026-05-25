@@ -52,6 +52,19 @@ pub trait Buffer<T>: Clone {
     fn to_vec(&self) -> Vec<T>;
 }
 
+/// Pre-NTT bit-reverse flag for the `factor` argument of
+/// [`Hal::zk_shift_outplace`]. Set when the input coefficients are in
+/// NTT-friendly (bit-reversed) layout and must be unscrambled to natural
+/// order before the coset shift. Honored only by the CUDA HAL (sppark
+/// `LDE_shift_outplace`); other HALs panic or no-op on `zk_shift_outplace`.
+pub const ZK_SHIFT_PRE_BITREV: u32 = 0x100;
+
+/// Post-NTT bit-reverse flag for the `factor` argument of
+/// [`Hal::zk_shift_outplace`]. Set when the input is in natural order;
+/// the result is left in bit-reversed order after the shift. See
+/// [`ZK_SHIFT_PRE_BITREV`] for backend caveats.
+pub const ZK_SHIFT_POST_BITREV: u32 = 0x80;
+
 pub trait Hal {
     type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
     type Elem: Elem + RootsOfUnity;
@@ -108,9 +121,11 @@ pub trait Hal {
     );
 
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize);
-
     fn batch_bit_reverse(&self, io: &Self::Buffer<Self::Elem>, count: usize);
 
+    fn batch_evaluate_ntt(&self, _io: &Self::Buffer<Self::Elem>, _count: usize) {
+        unimplemented!("batch_evaluate_ntt not implemented for this HAL");
+    }
     fn batch_evaluate_any(
         &self,
         coeffs: &Self::Buffer<Self::Elem>,
@@ -120,7 +135,31 @@ pub trait Hal {
         out: &Self::Buffer<Self::ExtElem>,
     );
 
-    fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, count: usize);
+    fn batch_evaluate_same_x(
+        &self,
+        _coeffs: &Self::Buffer<Self::Elem>,
+        _poly_count: usize,
+        _which: &Self::Buffer<u32>,
+        _x: Vec<Self::Elem>,
+    ) -> Vec<Self::Elem> {
+        unimplemented!("batch_evaluate_same_x not implemented for this HAL");
+    }
+
+    fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, count: usize, beta: Self::Elem, factor: u32);
+    fn zk_shift_outplace(
+        &self,
+        _d_in: &Self::Buffer<Self::Elem>,
+        _d_out: &Self::Buffer<Self::Elem>,
+        _poly_count: usize,
+        _beta: Self::Elem,
+        _factor: u32,
+    ) {
+        unimplemented!("zk_shift_outplace not implemented for this HAL");
+    }
+
+    fn batch_coeffs_bitrev(&self, _d_inout: &Self::Buffer<Self::Elem>, _poly_count: usize) {
+        unimplemented!("batch_coeffs_bitrev not implemented for this HAL");
+    }
 
     #[allow(clippy::too_many_arguments)]
     fn mix_poly_coeffs(
@@ -153,6 +192,28 @@ pub trait Hal {
         input: &Self::Buffer<Self::Elem>,
     );
 
+    /// Copy Digest buffer to Elem buffer at specified byte offset.
+    /// This is a device-to-device copy for CUDA HAL, panics for other HALs.
+    fn copy_digest2elem(
+        &self,
+        _output: &Self::Buffer<Self::Elem>,
+        _input: &Self::Buffer<Digest>,
+        _offset_bytes: usize,
+    ) {
+        unimplemented!("copy_digest2elem not implemented for this HAL");
+    }
+
+    /// Reinterpret a Buffer<Elem> as Buffer<Digest> at specified byte offset.
+    /// This is only supported for CUDA HAL, panics for other HALs.
+    fn elem2dig_buffer_transmute(
+        &self,
+        _buffer: &Self::Buffer<Self::Elem>,
+        _offset_bytes: usize,
+        _count: usize,
+    ) -> Self::Buffer<Digest> {
+        unimplemented!("elem2dig_buffer_transmute not implemented for this HAL");
+    }
+
     #[allow(clippy::too_many_arguments)]
     fn eltwise_copy_elem_slice(
         &self,
@@ -177,6 +238,14 @@ pub trait Hal {
 
     fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>);
 
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn hash_rows_interleave(
+        &self,
+        output: &Self::Buffer<Digest>,
+        matrix: &Self::Buffer<Self::Elem>,
+        codeword_id: u32,
+    );
+
     fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize);
 
     fn gather_sample(
@@ -187,6 +256,36 @@ pub trait Hal {
         size: usize,
         stride: usize,
     );
+
+    /// Batched variant of `gather_sample`: gather `idxs.len()` samples
+    /// from `src` in a single kernel launch. `dst` must hold
+    /// `idxs.len() * col_size` elements; result layout is
+    /// `[k][col]` row-major (sample k starts at offset `k * col_size`).
+    /// Used by FRI query phase to avoid one launch per query index.
+    ///
+    /// Default impl loops `gather_sample` so non-CUDA backends compile
+    /// unchanged. CUDA overrides for a real kernel launch.
+    fn gather_samples_batch(
+        &self,
+        dst: &Self::Buffer<Self::Elem>,
+        src: &Self::Buffer<Self::Elem>,
+        idxs: &[u32],
+        col_size: usize,
+        stride: usize,
+    ) {
+        // Generic fallback: per-index single gather + slice into dst.
+        for (k, &idx) in idxs.iter().enumerate() {
+            let slot = dst.slice(k * col_size, col_size);
+            self.gather_sample(&slot, src, idx as usize, col_size, stride);
+        }
+    }
+
+    /// Batched merkle-path Digest fetch: gather `indices.len()` digests from
+    /// `nodes` in one shot. Replaces ~50×depth tiny per-element cudaMemcpy
+    /// in `prove_with_idxs` idx2nodes loop. CUDA backend overrides.
+    fn gather_digests_batch(&self, nodes: &Self::Buffer<Digest>, indices: &[u32]) -> Vec<Digest> {
+        indices.iter().map(|&i| nodes.get_at(i as usize)).collect()
+    }
 
     fn scatter(
         &self,
@@ -287,6 +386,19 @@ pub trait CircuitHal<H: Hal> {
         po2: usize,
         steps: usize,
     );
+
+    /// Compute check polynomial with interleaved evaluation.
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn eval_check_interleave(
+        &self,
+        check: &H::Buffer<H::Elem>,
+        groups: &[&H::Buffer<H::Elem>],
+        globals: &[&H::Buffer<H::Elem>],
+        poly_mix: H::ExtElem,
+        po2: usize,
+        steps: usize,
+        codeword_id: usize,
+    );
 }
 
 pub fn tracker() -> &'static Mutex<MemoryTracker> {
@@ -314,6 +426,28 @@ impl MemoryTracker {
     pub fn free(&mut self, size: usize) {
         self.total -= size as isize;
     }
+}
+
+pub fn release_buffer<H>(name: &'static str, hal: &H, buf: &mut H::Buffer<H::Elem>)
+where
+    H: Hal,
+{
+    tracing::debug!("Release {}", name);
+
+    let placeholder = hal.alloc_elem("placeholder", 1024);
+    let _dropped = std::mem::replace(buf, placeholder);
+    drop(_dropped);
+}
+
+pub fn release_buffer_ext<H>(name: &'static str, hal: &H, buf: &mut H::Buffer<H::ExtElem>)
+where
+    H: Hal,
+{
+    tracing::debug!("Release {}", name);
+
+    let placeholder = hal.alloc_extelem("placeholder", 1024);
+    let _dropped = std::mem::replace(buf, placeholder);
+    drop(_dropped);
 }
 
 #[cfg(test)]
@@ -607,10 +741,12 @@ mod testutil {
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
         let counts = [(1000, (1 << 8)), (900, (1 << 12))];
+        let beta = H::Elem::from_u64(3);
+        let factor = 1;
         for (poly_count, steps) in counts {
             let count = poly_count * steps;
             let io = generate_elem(&hal, &mut rng, count);
-            hal.zk_shift(&io, poly_count);
+            hal.zk_shift(&io, poly_count, beta, factor);
         }
     }
 }

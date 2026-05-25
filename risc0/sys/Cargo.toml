@@ -21,3 +21,4 @@ sppark = { workspace = true, optional = true }
 default = []
 cuda = ["dep:blst", "dep:cust", "dep:sppark"]
 metal = []
+low_vram = []

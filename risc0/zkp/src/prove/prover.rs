@@ -17,25 +17,78 @@ use risc0_core::{
     scope, scope_with,
 };
 
+#[cfg(all(feature = "low_vram", feature = "cuda"))]
 use crate::{
-    core::poly::poly_interpolate,
+    adapter::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
+    hal::{release_buffer, release_buffer_ext, ZK_SHIFT_POST_BITREV, ZK_SHIFT_PRE_BITREV},
+    LARGE_SEGMENT_PO2,
+};
+use crate::{
+    core::{digest::Digest, poly::poly_interpolate},
     hal::{Buffer, CircuitHal, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::TapSet,
     INV_RATE,
 };
 
+/// Tag value used to detect that the active circuit is rv32im (and not
+/// recursion/keccak). It mirrors `risc0_circuit_rv32im::zirgen::REGCOUNT_ACCUM`
+/// (set by `define_tap_buffer!{accum, 103, 0}` in
+/// `risc0/circuit/rv32im/src/zirgen/defs.rs.inc`). `risc0-zkp` cannot import
+/// that constant directly because `risc0-circuit-rv32im` depends on
+/// `risc0-zkp` — taking the reverse path would form a circular dep. Only used
+/// under `low_vram + cuda` to release rv32im's accum evaluated buffer at
+/// po2 > 21, where memory pressure is real; recursion/keccak's accum groups
+/// have different sizes and don't need the release.
+#[cfg(all(feature = "low_vram", feature = "cuda"))]
+const RV32IM_ACCUM_REGCOUNT: usize = 103;
+
 /// Object to generate a zero-knowledge proof of the execution of some circuit.
 pub struct Prover<'a, H: Hal> {
     hal: &'a H,
     taps: &'a TapSet<'a>,
     iop: WriteIOP<H::Field>,
-    groups: Vec<Option<PolyGroup<H>>>,
+    pub groups: Vec<Option<PolyGroup<H>>>,
     cycles: usize,
     po2: usize,
 }
 
-fn make_coeffs<H: Hal>(hal: &H, witness: &H::Buffer<H::Elem>, count: usize) -> H::Buffer<H::Elem> {
+#[cfg(all(feature = "low_vram", feature = "cuda"))]
+fn make_coeffs<H: Hal>(
+    hal: &H,
+    witness: &H::Buffer<H::Elem>,
+    count: usize,
+    grp_id: usize,
+) -> H::Buffer<H::Elem> {
+    scope!("make_coeffs");
+
+    let coeffs = if grp_id != REGISTER_GROUP_ACCUM {
+        let coeffs = hal.alloc_elem("coeffs", witness.size());
+        hal.eltwise_copy_elem(&coeffs, witness);
+        coeffs
+    } else {
+        witness.clone()
+    };
+
+    // Do interpolate
+    hal.batch_interpolate_ntt(&coeffs, count);
+    // Convert f(x) -> f(3x), which effective multiplies coefficients c_i by 3^i.
+    #[cfg(not(feature = "circuit_debug"))]
+    {
+        let beta = Elem::from_u64(3);
+        hal.zk_shift(&coeffs, count, beta, 1);
+    }
+
+    coeffs
+}
+
+#[cfg(not(all(feature = "low_vram", feature = "cuda")))]
+fn make_coeffs<H: Hal>(
+    hal: &H,
+    witness: &H::Buffer<H::Elem>,
+    count: usize,
+    _grp_id: usize,
+) -> H::Buffer<H::Elem> {
     scope!("make_coeffs");
     let coeffs = hal.alloc_elem("coeffs", witness.size());
     hal.eltwise_copy_elem(&coeffs, witness);
@@ -43,11 +96,258 @@ fn make_coeffs<H: Hal>(hal: &H, witness: &H::Buffer<H::Elem>, count: usize) -> H
     hal.batch_interpolate_ntt(&coeffs, count);
     // Convert f(x) -> f(3x), which effective multiplies coefficients c_i by 3^i.
     #[cfg(not(feature = "circuit_debug"))]
-    hal.zk_shift(&coeffs, count);
+    {
+        let beta = Elem::from_u64(3);
+        hal.zk_shift(&coeffs, count, beta, 1);
+    }
+
     coeffs
 }
 
 impl<'a, H: Hal> Prover<'a, H> {
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn eval_check<C>(
+        &mut self,
+        check_poly: &H::Buffer<H::Elem>,
+        globals: &[&H::Buffer<H::Elem>],
+        poly_mix: H::ExtElem,
+        circuit_hal: &C,
+    ) -> Result<&str, &str>
+    where
+        C: CircuitHal<H>,
+    {
+        let data_id = REGISTER_GROUP_DATA;
+        let accum_id = REGISTER_GROUP_ACCUM;
+        let code_id = REGISTER_GROUP_CODE;
+
+        // Collect evaluated buffers into owned vector first, then create references
+        if self.groups[accum_id].as_ref().unwrap().evaluated.is_some()
+            || self.po2 < LARGE_SEGMENT_PO2
+        {
+            let buffers: Vec<_> = self
+                .groups
+                .iter()
+                .map(|pg| pg.as_ref().unwrap().evaluated.as_ref().unwrap().clone())
+                .collect();
+            let groups: Vec<&_> = buffers.iter().collect();
+
+            circuit_hal.eval_check(
+                check_poly,
+                groups.as_slice(),
+                globals,
+                poly_mix,
+                self.po2,
+                self.cycles,
+            );
+
+            {
+                let pg = self.groups[accum_id].as_mut().unwrap();
+                if pg.count == RV32IM_ACCUM_REGCOUNT && self.po2 >= LARGE_SEGMENT_PO2 {
+                    release_buffer(
+                        "accum poly evalueated",
+                        self.hal,
+                        &mut pg.evaluated.as_mut().unwrap(),
+                    );
+                }
+            }
+        } else {
+            {
+                let dgp = &self.groups[data_id].as_ref().unwrap();
+                let agp = &self.groups[accum_id].as_ref().unwrap();
+                let cgp = &self.groups[code_id].as_ref().unwrap();
+                let dcode2 = dgp.codewords[2].as_ref().unwrap();
+                let acode2 = agp.codewords[2].as_ref().unwrap();
+
+                let groups: Vec<&_> = vec![acode2, cgp.evaluated.as_ref().unwrap(), dcode2];
+
+                circuit_hal.eval_check_interleave(
+                    check_poly,
+                    groups.as_slice(),
+                    globals,
+                    poly_mix,
+                    self.po2,
+                    self.cycles,
+                    2,
+                );
+            }
+            {
+                let pg = self.groups[REGISTER_GROUP_ACCUM].as_mut().unwrap();
+                release_buffer(
+                    "accum codeword 2",
+                    self.hal,
+                    &mut pg.codewords[2].as_mut().unwrap(),
+                );
+                pg.codewords[2] = None;
+            }
+
+            {
+                let dgp = &self.groups[data_id].as_ref().unwrap();
+                let agp = &self.groups[accum_id].as_ref().unwrap();
+                let cgp = &self.groups[code_id].as_ref().unwrap();
+                let dcode3 = dgp.codewords[3].as_ref().unwrap();
+                let acode3 = agp.codewords[3].as_ref().unwrap();
+
+                let groups: Vec<&_> = vec![acode3, cgp.evaluated.as_ref().unwrap(), dcode3];
+
+                circuit_hal.eval_check_interleave(
+                    check_poly,
+                    groups.as_slice(),
+                    globals,
+                    poly_mix,
+                    self.po2,
+                    self.cycles,
+                    3,
+                );
+            }
+
+            {
+                let dgp = self.groups[data_id].as_mut().unwrap();
+                let dcode0 = self.hal.alloc_elem("dcodeword0", dgp.count * self.cycles);
+                dgp.codewords[0] = Some(dcode0);
+            }
+            {
+                let dgp = &self.groups[data_id].as_ref().unwrap();
+                let agp = &self.groups[accum_id].as_ref().unwrap();
+                let cgp = &self.groups[code_id].as_ref().unwrap();
+                let dcode0 = dgp.codewords[0].as_ref().unwrap();
+                let acode0 = agp.codewords[3].as_ref().unwrap();
+
+                self.hal.eltwise_copy_elem(&dcode0, &dgp.coeffs);
+                self.hal.batch_evaluate_ntt(&dcode0, dgp.count);
+                self.hal.eltwise_copy_elem(acode0, &agp.coeffs);
+                self.hal.batch_evaluate_ntt(acode0, agp.count);
+
+                let groups: Vec<&_> = vec![acode0, cgp.evaluated.as_ref().unwrap(), &dcode0];
+                circuit_hal.eval_check_interleave(
+                    check_poly,
+                    groups.as_slice(),
+                    globals,
+                    poly_mix,
+                    self.po2,
+                    self.cycles,
+                    0,
+                );
+            }
+
+            {
+                let pg = self.groups[data_id].as_mut().unwrap();
+                pg.codewords[1] = pg.codewords[3].clone();
+                pg.codewords[3] = None;
+            }
+            {
+                let beta = H::Elem::ROU_FWD[self.po2 + 2];
+                let dgp = &self.groups[data_id].as_ref().unwrap();
+                let agp = &self.groups[accum_id].as_ref().unwrap();
+                let cgp = &self.groups[code_id].as_ref().unwrap();
+                let dcode1 = dgp.codewords[1].as_ref().unwrap();
+                let acode1 = agp.codewords[3].as_ref().unwrap();
+
+                self.hal.zk_shift_outplace(
+                    &dgp.coeffs,
+                    dcode1,
+                    dgp.count,
+                    beta,
+                    1 | ZK_SHIFT_POST_BITREV,
+                ); // codeword_id=1, post-NTT bit-reverse
+                self.hal.batch_evaluate_ntt(&dcode1, dgp.count);
+                self.hal.zk_shift_outplace(
+                    &agp.coeffs,
+                    acode1,
+                    agp.count,
+                    beta,
+                    1 | ZK_SHIFT_POST_BITREV,
+                ); // codeword_id=1, post-NTT bit-reverse
+                self.hal.batch_evaluate_ntt(&acode1, agp.count);
+
+                let groups: Vec<&_> = vec![acode1, cgp.evaluated.as_ref().unwrap(), &dcode1];
+                circuit_hal.eval_check_interleave(
+                    check_poly,
+                    groups.as_slice(),
+                    globals,
+                    poly_mix,
+                    self.po2,
+                    self.cycles,
+                    1,
+                );
+            }
+        }
+
+        {
+            let pg = self.groups[accum_id].as_mut().unwrap();
+            if pg.codewords[2].is_some() {
+                release_buffer(
+                    "accum codeword 2",
+                    self.hal,
+                    &mut pg.codewords[2].as_mut().unwrap(),
+                )
+            };
+            if pg.codewords[3].is_some() {
+                release_buffer(
+                    "accum codeword 3",
+                    self.hal,
+                    &mut pg.codewords[3].as_mut().unwrap(),
+                )
+            };
+        }
+
+        Ok("Eval Check.")
+    }
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn prove_group_with_idxs(
+        hal: &'a H,
+        pg: &PolyGroup<H>,
+        iop: &mut WriteIOP<H::Field>,
+        idxs: Vec<usize>,
+        rou: H::Elem,
+    ) -> (Vec<Vec<H::Elem>>, Vec<Vec<Digest>>) {
+        pg.merkle.prove_with_idxs(
+            hal,
+            iop,
+            idxs,
+            &pg.coeffs,
+            rou,
+            pg.evaluated.clone(),
+            pg.codewords.clone(),
+        )
+    }
+
+    #[cfg(not(all(feature = "low_vram", feature = "cuda")))]
+    fn prove_group_with_idxs(
+        hal: &'a H,
+        pg: &PolyGroup<H>,
+        iop: &mut WriteIOP<H::Field>,
+        idxs: Vec<usize>,
+        _rou: H::Elem,
+    ) -> (Vec<Vec<H::Elem>>, Vec<Vec<Digest>>) {
+        pg.merkle.prove_with_idxs(hal, iop, idxs)
+    }
+
+    #[allow(dead_code)]
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn fri_prepare(&mut self, _check: &mut PolyGroup<H>) {
+        let beta = H::Elem::ROU_FWD[self.po2 + 2];
+
+        {
+            let pg = self.groups[REGISTER_GROUP_DATA].as_mut().unwrap();
+            if self.po2 >= LARGE_SEGMENT_PO2 && pg.codewords[0].is_some() {
+                let codeword3 = pg.coeffs.clone();
+
+                self.hal.zk_shift_outplace(
+                    &pg.coeffs,
+                    &codeword3,
+                    pg.count,
+                    beta,
+                    3 | ZK_SHIFT_PRE_BITREV,
+                ); // codeword_id=3, pre-NTT bit-reverse
+                self.hal.batch_evaluate_ntt(&codeword3, pg.count);
+                pg.codewords[3] = Some(codeword3);
+            } else {
+                release_buffer("data coeffs", self.hal, &mut pg.coeffs);
+            }
+        }
+    }
+
     /// Creates a new prover.
     pub fn new(hal: &'a H, taps: &'a TapSet) -> Self {
         Self {
@@ -89,7 +389,7 @@ impl<'a, H: Hal> Prover<'a, H> {
             self.taps.group_name(tap_group_index)
         );
 
-        let coeffs = make_coeffs(self.hal, witness, group_size);
+        let coeffs = make_coeffs(self.hal, witness, group_size, tap_group_index);
         let group_ref = self.groups[tap_group_index].insert(PolyGroup::new(
             self.hal,
             coeffs,
@@ -126,19 +426,25 @@ impl<'a, H: Hal> Prover<'a, H> {
         // DEEP-ALI paper for details on the construction of the check_poly.
         let check_poly = self.hal.alloc_elem("check_poly", ext_size * domain);
 
-        let groups: Vec<&_> = self
-            .groups
-            .iter()
-            .map(|pg| &pg.as_ref().unwrap().evaluated)
-            .collect();
-        circuit_hal.eval_check(
-            &check_poly,
-            groups.as_slice(),
-            globals,
-            poly_mix,
-            self.po2,
-            self.cycles,
-        );
+        cfg_if::cfg_if! {
+            if #[cfg(all(feature = "low_vram", feature = "cuda"))] {
+                let _ = self.eval_check(&check_poly, globals, poly_mix, circuit_hal);
+            } else {
+                let groups: Vec<&_> = self
+                    .groups
+                    .iter()
+                    .map(|pg| &pg.as_ref().unwrap().evaluated)
+                    .collect();
+                circuit_hal.eval_check(
+                    &check_poly,
+                    groups.as_slice(),
+                    globals,
+                    poly_mix,
+                    self.po2,
+                    self.cycles,
+                );
+            }
+        }
 
         #[cfg(feature = "circuit_debug")]
         let mut bad_z = None;
@@ -175,7 +481,14 @@ impl<'a, H: Hal> Prover<'a, H> {
         // invRate*size to 16 polys of size, without actually doing anything.
 
         // Make the PolyGroup + add it to the IOP;
-        let check_group = PolyGroup::new(self.hal, check_poly, H::CHECK_SIZE, self.cycles, "check");
+        cfg_if::cfg_if! {
+            if #[cfg(all(feature = "low_vram", feature = "cuda"))] {
+                let mut check_group = PolyGroup::new(self.hal, check_poly, H::CHECK_SIZE, self.cycles, "check");
+            } else {
+                let check_group = PolyGroup::new(self.hal, check_poly, H::CHECK_SIZE, self.cycles, "check");
+            }
+        }
+
         check_group.merkle.commit(&mut self.iop);
         tracing::debug!("checkGroup: {}", check_group.merkle.root());
 
@@ -275,11 +588,22 @@ impl<'a, H: Hal> Prover<'a, H> {
         // Do the coefficient mixing
         // Begin by making a zeroed output buffer
         let combo_count = self.taps.combos_size();
-        let combos = scope!(
-            "alloc(combos)",
-            self.hal
-                .alloc_extelem_zeroed("combos", self.cycles * (combo_count + 1))
-        );
+
+        cfg_if::cfg_if! {
+            if #[cfg(all(feature = "low_vram", feature = "cuda"))] {
+                let mut combos = scope!(
+                    "alloc(combos)",
+                    self.hal
+                        .alloc_extelem_zeroed("combos", self.cycles * (combo_count + 1))
+                );
+            } else {
+                let combos = scope!(
+                    "alloc(combos)",
+                    self.hal
+                        .alloc_extelem_zeroed("combos", self.cycles * (combo_count + 1))
+                );
+            }
+        }
 
         scope!("mix_poly_coeffs", {
             let mut cur_mix = H::ExtElem::ONE;
@@ -363,6 +687,12 @@ impl<'a, H: Hal> Prover<'a, H> {
             final_poly_coeffs
         });
 
+        cfg_if::cfg_if! {
+            if #[cfg(all(feature = "low_vram", feature = "cuda"))] {
+                release_buffer_ext("combos", self.hal, &mut combos);
+            }
+        }
+
         // Finally do the FRI protocol to prove the degree of the polynomial
         scope!(
             "bit_rev",
@@ -370,12 +700,33 @@ impl<'a, H: Hal> Prover<'a, H> {
         );
         tracing::debug!("FRI-proof, size = {}", final_poly_coeffs.size() / ext_size);
 
+        cfg_if::cfg_if! {
+            if #[cfg(all(feature = "low_vram", feature = "cuda"))] {
+                self.fri_prepare(&mut check_group);
+            }
+        }
+
+        let rou = H::Elem::ROU_FWD[self.po2 + 2];
         fri_prove(self.hal, &mut self.iop, &final_poly_coeffs, |iop, idx| {
+            let mut querys = Vec::new();
             for pg in self.groups.iter() {
                 let pg = pg.as_ref().unwrap();
-                pg.merkle.prove(self.hal, iop, idx);
+                querys.push(Self::prove_group_with_idxs(
+                    self.hal,
+                    pg,
+                    iop,
+                    idx.clone(),
+                    rou,
+                ));
             }
-            check_group.merkle.prove(self.hal, iop, idx);
+            querys.push(Self::prove_group_with_idxs(
+                self.hal,
+                &check_group,
+                iop,
+                idx.clone(),
+                rou,
+            ));
+            querys
         });
 
         let proven_soundness_error =

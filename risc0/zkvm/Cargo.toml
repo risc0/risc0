@@ -160,7 +160,7 @@ cuda = [
   "risc0-groth16/cuda",
   "risc0-zkp/cuda",
 ]
-default = ["client", "bonsai"]
+default = ["client", "bonsai", "low_vram", "pinned_witgen"]
 r0vm-ver-compat = []
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test
@@ -219,3 +219,14 @@ std = [
 ]
 unstable = ["risc0-zkvm-platform/unstable"]
 witgen_debug = ["risc0-circuit-rv32im/witgen_debug"]
+
+low_vram = [
+    "risc0-zkp/low_vram",
+    "risc0-circuit-keccak/low_vram",
+    "risc0-circuit-recursion/low_vram",
+    "risc0-circuit-rv32im/low_vram",
+]
+pinned_witgen = [
+    "risc0-circuit-rv32im/pinned_witgen",
+    "risc0-circuit-recursion/pinned_witgen",
+]

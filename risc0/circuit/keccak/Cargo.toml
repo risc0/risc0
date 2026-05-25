@@ -63,3 +63,5 @@ prove = [
   "std",
 ]
 std = ["risc0-zkp/std", "risc0-binfmt/std"]
+
+low_vram = []
