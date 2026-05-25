@@ -48,6 +48,11 @@ use crate::{
 };
 
 pub use self::program::Program;
+cfg_if::cfg_if! {
+    if #[cfg(all(feature = "cuda", feature = "pinned_witgen"))] {
+        use risc0_zkp::hal::{release_buffer};
+    }
+}
 
 // TODO: Automatically generate this constant from the circuit somehow without
 // messing up bootstrap dependencies.
@@ -167,12 +172,23 @@ where
 
         let preflight = self.preflight(&program, input)?;
 
-        let witgen = WitnessGenerator::new(
-            self.hal.as_ref(),
-            self.circuit_hal.as_ref(),
-            &program,
-            &preflight,
-        )?;
+        cfg_if::cfg_if! {
+            if #[cfg(all(feature = "cuda", feature = "pinned_witgen"))] {
+                let mut witgen = WitnessGenerator::new(
+                    self.hal.as_ref(),
+                    self.circuit_hal.as_ref(),
+                    &program,
+                    &preflight,
+                )?;
+            } else {
+                let witgen = WitnessGenerator::new(
+                    self.hal.as_ref(),
+                    self.circuit_hal.as_ref(),
+                    &program,
+                    &preflight,
+                )?;
+            }
+        }
 
         let global = &witgen.global;
 
@@ -214,7 +230,12 @@ where
                     std::array::from_fn(|_| prover.iop().random_elem());
 
                 let mix = witgen.accum(&self.hal, self.circuit_hal.as_ref(), &mix)?;
-
+                cfg_if::cfg_if! {
+                    if #[cfg(all(feature = "cuda", feature = "pinned_witgen"))] {
+                        release_buffer("recursion_witgen_data", self.hal.as_ref(), &mut witgen.data);
+                        release_buffer("recursion_witgen_ctrl", self.hal.as_ref(), &mut witgen.ctrl);
+                    }
+                }
                 prover.commit_group(REGISTER_GROUP_ACCUM, &witgen.accum);
 
                 mix
