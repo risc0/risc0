@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -203,7 +203,7 @@ pub trait Hal {
         unimplemented!("copy_digest2elem not implemented for this HAL");
     }
 
-    /// Reinterpret a Buffer<Elem> as Buffer<Digest> at specified byte offset.
+    /// Reinterpret a `Buffer<Elem>` as `Buffer<Digest>` at specified byte offset.
     /// This is only supported for CUDA HAL, panics for other HALs.
     fn elem2dig_buffer_transmute(
         &self,

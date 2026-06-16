@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -1629,13 +1629,14 @@ impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
         // same concrete type when monomorphized on the CUDA backend; the
         // transmute is a no-op cast through the trait's associated type.
         #[allow(clippy::useless_transmute)]
-        let buffer_as_digest: BufferImpl<Digest> =
-            unsafe { std::mem::transmute(buffer.clone()) };
+        let buffer_as_digest: BufferImpl<Digest> = unsafe { std::mem::transmute(buffer.clone()) };
         let digest_elem_offset = offset_bytes / size_of::<Digest>();
 
         let nodes_slice = buffer_as_digest.slice(digest_elem_offset, count);
         #[allow(clippy::useless_transmute)]
-        unsafe { std::mem::transmute(nodes_slice) }
+        unsafe {
+            std::mem::transmute(nodes_slice)
+        }
     }
 
     fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {

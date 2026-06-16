@@ -22,7 +22,8 @@ __device__ FpExt rv32im_v2_19(uint32_t idx,
                               const Fp* arg8,
                               const Fp* arg9,
                               const Fp* arg10,
-                              const Fp* arg11) {
+                              const Fp* arg11,
+                              FpExt* out_x1037) {
   uint32_t mask = size - 1;
   Fp x0(115);
   Fp x1(23);
@@ -1231,9 +1232,8 @@ __device__ FpExt rv32im_v2_19(uint32_t idx,
   arg0[107] = x1155;
   Fp x1156 = x1046 + x1153;
   arg0[106] = x1156;
-  auto x1157 = rv32im_v2_18(idx, size, arg0, x1146, x1037, arg4, arg7, arg8, arg9, arg10, arg11);
-
-  return x1157;
+  *out_x1037 = x1037;
+  return x1146;
 }
 __device__ FpExt rv32im_v2_15(uint32_t idx,
                               uint32_t size,
@@ -1249,7 +1249,11 @@ __device__ FpExt rv32im_v2_15(uint32_t idx,
                               const Fp* arg9,
                               const Fp* arg10,
                               const Fp* arg11,
-                              const Fp* arg12) {
+                              const Fp* arg12,
+                              FpExt* out_x1114,
+                              FpExt* out_x1160,
+                              FpExt* out_x663,
+                              FpExt* out_x916) {
   uint32_t mask = size - 1;
   Fp x0(1073725568);
   Fp x1(1073726464);
@@ -2537,24 +2541,11 @@ __device__ FpExt rv32im_v2_15(uint32_t idx,
   FpExt x1206 = x1205 + poly_mix[61] * x104;
   FpExt x1207 = x1206 + poly_mix[62] * x72;
   FpExt x1208 = x1207 + poly_mix[63] * x73;
-  auto x1209 = rv32im_v2_14(idx,
-                            size,
-                            x1208,
-                            x1114,
-                            x1160,
-                            arg0,
-                            arg2,
-                            x663,
-                            x916,
-                            arg6,
-                            arg7,
-                            arg8,
-                            arg9,
-                            arg10,
-                            arg11,
-                            arg12);
-
-  return x1209;
+  *out_x1114 = x1114;
+  *out_x1160 = x1160;
+  *out_x663 = x663;
+  *out_x916 = x916;
+  return x1208;
 }
 __device__ FpExt rv32im_v2_11(uint32_t idx,
                               uint32_t size,
@@ -2570,7 +2561,28 @@ __device__ FpExt rv32im_v2_11(uint32_t idx,
                               FpExt arg9,
                               const Fp* arg10,
                               const Fp* arg11,
-                              const Fp* arg12) {
+                              const Fp* arg12,
+                              FpExt* out_x1173,
+                              FpExt* out_x924,
+                              FpExt* out_x609,
+                              FpExt* out_x618,
+                              FpExt* out_x623,
+                              FpExt* out_x653,
+                              FpExt* out_x658,
+                              FpExt* out_x686,
+                              FpExt* out_x691,
+                              FpExt* out_x719,
+                              FpExt* out_x724,
+                              FpExt* out_x752,
+                              FpExt* out_x757,
+                              FpExt* out_x785,
+                              FpExt* out_x790,
+                              FpExt* out_x818,
+                              FpExt* out_x823,
+                              FpExt* out_x852,
+                              FpExt* out_x857,
+                              FpExt* out_x280,
+                              FpExt* out_x220) {
   uint32_t mask = size - 1;
   Fp x0(1073741824);
   Fp x1(32);
@@ -3821,40 +3833,28 @@ __device__ FpExt rv32im_v2_11(uint32_t idx,
   FpExt x1201 = x1200 + poly_mix[26] * x261;
   FpExt x1202 = x1201 + poly_mix[27] * x263;
   FpExt x1203 = x1202 + poly_mix[28] * x265;
-  auto x1204 = rv32im_v2_10(idx,
-                            size,
-                            arg0,
-                            x1203,
-                            arg2,
-                            x1173,
-                            x924,
-                            x609,
-                            x618,
-                            x623,
-                            x653,
-                            x658,
-                            x686,
-                            x691,
-                            x719,
-                            x724,
-                            x752,
-                            x757,
-                            x785,
-                            x790,
-                            x818,
-                            x823,
-                            x852,
-                            x857,
-                            arg9,
-                            arg7,
-                            x280,
-                            x220,
-                            arg5,
-                            arg10,
-                            arg11,
-                            arg12);
-
-  return x1204;
+  *out_x1173 = x1173;
+  *out_x924 = x924;
+  *out_x609 = x609;
+  *out_x618 = x618;
+  *out_x623 = x623;
+  *out_x653 = x653;
+  *out_x658 = x658;
+  *out_x686 = x686;
+  *out_x691 = x691;
+  *out_x719 = x719;
+  *out_x724 = x724;
+  *out_x752 = x752;
+  *out_x757 = x757;
+  *out_x785 = x785;
+  *out_x790 = x790;
+  *out_x818 = x818;
+  *out_x823 = x823;
+  *out_x852 = x852;
+  *out_x857 = x857;
+  *out_x280 = x280;
+  *out_x220 = x220;
+  return x1203;
 }
 __device__ FpExt rv32im_v2_7(uint32_t idx,
                              uint32_t size,
@@ -3869,7 +3869,11 @@ __device__ FpExt rv32im_v2_7(uint32_t idx,
                              FpExt arg8,
                              const Fp* arg9,
                              const Fp* arg10,
-                             const Fp* arg11) {
+                             const Fp* arg11,
+                              FpExt* out_x936,
+                              FpExt* out_x538,
+                              FpExt* out_x548,
+                              FpExt* out_x403) {
   uint32_t mask = size - 1;
   Fp x0(15);
   Fp x1(256);
@@ -5250,10 +5254,11 @@ __device__ FpExt rv32im_v2_7(uint32_t idx,
   arg0[828] = x1290;
   Fp x1291 = x220 + x1188;
   arg0[764] = x1291;
-  auto x1292 = rv32im_v2_6(
-      idx, size, arg0, x1096, x936, x538, x548, arg7, x403, arg6, arg8, arg2, arg9, arg10, arg11);
-
-  return x1292;
+  *out_x936 = x936;
+  *out_x538 = x538;
+  *out_x548 = x548;
+  *out_x403 = x403;
+  return x1096;
 }
 __device__ FpExt rv32im_v2_3(uint32_t idx,
                              uint32_t size,
@@ -6549,9 +6554,7 @@ __device__ FpExt rv32im_v2_3(uint32_t idx,
   arg6[18] = x1253;
   FpExt x1254 = x1141 * x0;
   arg6[19] = x1254;
-  auto x1255 = rv32im_v2_2(idx, size, arg6, arg2, x1240, arg7, arg8, arg9);
-
-  return x1255;
+  return x1240;
 }
 __device__ FpExt poly_fp(uint32_t idx,
                          uint32_t size,
@@ -7849,10 +7852,45 @@ __device__ FpExt poly_fp(uint32_t idx,
   FpExt x1094 = x1093 + poly_mix[4] * x691;
   FpExt x1095 = x1094 + poly_mix[5] * x694;
   FpExt x1096 = x1095 + poly_mix[6] * x697;
-  auto x1097 = rv32im_v2_19(
-      idx, size, x33, x1096, x1089, x667, x203, x344, x665, x34, data, accum, mix, out);
+  // Flatten chain locals
+  FpExt f19_x1037;
+  FpExt f18_x309, f18_x1098, f18_x1102, f18_x1099;
+  FpExt f17_x1005, f17_x1016, f17_x1021, f17_x1113, f17_x479, f17_x480, f17_x798, f17_x196;
+  FpExt f16_x910, f16_x1079;
+  FpExt f15_x1114, f15_x1160, f15_x663, f15_x916;
+  FpExt f14_x1148, f14_x988;
+  FpExt f13_x1142, f13_x942, f13_x849, f13_x819;
+  FpExt f12_x1048, f12_x376;
+  FpExt f11_x1173, f11_x924, f11_x609, f11_x618, f11_x623, f11_x653, f11_x658, f11_x686, f11_x691, f11_x719, f11_x724, f11_x752, f11_x757, f11_x785, f11_x790, f11_x818, f11_x823, f11_x852, f11_x857, f11_x280, f11_x220;
+  FpExt f10_x708, f10_x699;
+  FpExt f9_x320;
+  FpExt f7_x936, f7_x538, f7_x548, f7_x403;
+  FpExt f5_x853;
+  FpExt f4_x1383, f4_x1247;
+  FpExt f2_x908;
+  FpExt f1_x1085;
 
-  return x1097;
+  // Sequential calls v_19..v_0 (flat replacement of 20-level nested chain)
+  FpExt f19_primary = rv32im_v2_19(idx, size, x33, x1096, x1089, x667, x203, x344, x665, x34, data, accum, mix, out, &f19_x1037);
+  FpExt f18_primary = rv32im_v2_18(idx, size, x33, f19_primary, f19_x1037, x203, x34, data, accum, mix, out, &f18_x309, &f18_x1098, &f18_x1102, &f18_x1099);
+  FpExt f17_primary = rv32im_v2_17(idx, size, x33, f18_primary, f18_x309, x203, f18_x1098, f18_x1102, f18_x1099, x34, data, accum, mix, out, &f17_x1005, &f17_x1016, &f17_x1021, &f17_x1113, &f17_x479, &f17_x480, &f17_x798, &f17_x196);
+  FpExt f16_primary = rv32im_v2_16(idx, size, x33, f17_primary, f17_x1005, f17_x1016, f17_x1021, f17_x1113, f17_x479, x203, f17_x480, f17_x798, f17_x196, f18_x1102, f18_x1099, x34, f18_x1098, data, accum, mix, out, &f16_x910, &f16_x1079);
+  FpExt f15_primary = rv32im_v2_15(idx, size, x33, f16_primary, x203, f18_x1102, f16_x910, f16_x1079, f18_x1099, x34, f18_x1098, data, accum, mix, out, &f15_x1114, &f15_x1160, &f15_x663, &f15_x916);
+  FpExt f14_primary = rv32im_v2_14(idx, size, f15_primary, f15_x1114, f15_x1160, x33, x203, f15_x663, f15_x916, f18_x1099, x34, f18_x1098, data, accum, mix, out, &f14_x1148, &f14_x988);
+  FpExt f13_primary = rv32im_v2_13(idx, size, x33, f14_primary, f14_x1148, x203, f18_x1099, f14_x988, x34, f18_x1098, data, accum, mix, out, &f13_x1142, &f13_x942, &f13_x849, &f13_x819);
+  FpExt f12_primary = rv32im_v2_12(idx, size, x33, f13_primary, x34, f13_x1142, x203, f13_x942, f18_x1098, f13_x849, f13_x819, data, accum, mix, out, &f12_x1048, &f12_x376);
+  FpExt f11_primary = rv32im_v2_11(idx, size, x33, f12_primary, x34, f12_x1048, f12_x376, f18_x1098, f13_x942, x203, f13_x849, f13_x819, data, accum, mix, &f11_x1173, &f11_x924, &f11_x609, &f11_x618, &f11_x623, &f11_x653, &f11_x658, &f11_x686, &f11_x691, &f11_x719, &f11_x724, &f11_x752, &f11_x757, &f11_x785, &f11_x790, &f11_x818, &f11_x823, &f11_x852, &f11_x857, &f11_x280, &f11_x220);
+  FpExt f10_primary = rv32im_v2_10(idx, size, x33, f11_primary, x34, f11_x1173, f11_x924, f11_x609, f11_x618, f11_x623, f11_x653, f11_x658, f11_x686, f11_x691, f11_x719, f11_x724, f11_x752, f11_x757, f11_x785, f11_x790, f11_x818, f11_x823, f11_x852, f11_x857, f13_x819, x203, f11_x280, f11_x220, f18_x1098, data, accum, mix, &f10_x708, &f10_x699);
+  FpExt f9_primary = rv32im_v2_9(idx, size, x33, f10_primary, x34, f10_x708, x203, f11_x280, f10_x699, f11_x220, f18_x1098, data, accum, mix, &f9_x320);
+  FpExt f8_primary = rv32im_v2_8(idx, size, x33, f9_primary, x34, f9_x320, f11_x280, f10_x699, x203, f11_x220, f18_x1098, data, accum, mix);
+  FpExt f7_primary = rv32im_v2_7(idx, size, x33, f8_primary, x34, f9_x320, f11_x280, f10_x699, x203, f11_x220, f18_x1098, data, accum, mix, &f7_x936, &f7_x538, &f7_x548, &f7_x403);
+  rv32im_v2_6(idx, size, x33, f7_primary, f7_x936, f7_x538, f7_x548, f11_x220, f7_x403, x203, f18_x1098, x34, data, accum, mix);
+  FpExt f5_primary = rv32im_v2_5(idx, size, x33, f7_primary, f7_x936, f7_x538, f7_x548, f11_x220, f7_x403, x203, f18_x1098, x34, data, accum, mix, &f5_x853);
+  FpExt f4_primary = rv32im_v2_4(idx, size, x33, f5_primary, f5_x853, f7_x548, f11_x220, f7_x403, x203, f18_x1098, x34, data, accum, mix, &f4_x1383, &f4_x1247);
+  FpExt f3_primary = rv32im_v2_3(idx, size, x33, f4_primary, x203, f4_x1383, f18_x1098, f4_x1247, x34, data, accum, mix);
+  FpExt f2_primary = rv32im_v2_2(idx, size, x34, x203, f3_primary, data, accum, mix, &f2_x908);
+  FpExt f1_primary = rv32im_v2_1(idx, size, x34, f2_primary, f2_x908, x203, data, accum, &f1_x1085);
+  return rv32im_v2_0(idx, size, x34, f1_primary, f1_x1085, x203, data);
 }
 
 } // namespace risc0::circuit::rv32im_v2::cuda

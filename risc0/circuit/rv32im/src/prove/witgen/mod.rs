@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -210,7 +210,7 @@ where
         let bigint_items = &self.trace.bigint_items;
 
         for (row, state) in bigint_items {
-            bigint_accum.step(&state)?;
+            bigint_accum.step(state)?;
             for (col, value) in zip(BigIntAccumState::offsets(), bigint_accum.state.as_array()) {
                 injector.set(*row, col, value);
             }
