@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -216,12 +216,27 @@ impl CircuitHal<CpuHal> for CpuCircuitHal {
     ) {
         unimplemented!()
     }
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn eval_check_interleave(
+        &self,
+        _check: &CpuBuffer<Val>,
+        _groups: &[&CpuBuffer<Val>],
+        _globals: &[&CpuBuffer<Val>],
+        _poly_mix: ExtVal,
+        _po2: usize,
+        _steps: usize,
+        _codeword_id: usize,
+    ) {
+        panic!("eval_check_interleave is not supported for CpuCircuitHal");
+    }
 }
 
 #[allow(dead_code)]
 pub fn segment_prover() -> Result<Box<dyn SegmentProver>> {
     let hal_factory = || {
         let suite = Poseidon2HashSuite::new_suite();
+        // (Rc::new(CpuHal::new(suite)), Rc::new(CpuCircuitHal))
         (Rc::new(CpuHal::new(suite)), Rc::new(CpuCircuitHal))
     };
     Ok(Box::new(SegmentProverImpl::new(hal_factory)))

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
 type CudaCircuitHalPoseidon254 = CudaCircuitHal<CudaHashPoseidon254>;
 
 struct CudaCircuitHal<CH: CudaHash> {
+    // _hal: Rc<CudaHal<CH>>,
     _hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
 }
 
@@ -181,6 +182,20 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         steps: usize,
     ) {
         unimplemented!()
+    }
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn eval_check_interleave(
+        &self,
+        _check: &CudaBuffer<BabyBearElem>,
+        _groups: &[&CudaBuffer<BabyBearElem>],
+        _globals: &[&CudaBuffer<BabyBearElem>],
+        _poly_mix: BabyBearExtElem,
+        _po2: usize,
+        _steps: usize,
+        _codeword_id: usize,
+    ) {
+        panic!("eval_check_interleave is not supported for CudaCircuitHal");
     }
 }
 

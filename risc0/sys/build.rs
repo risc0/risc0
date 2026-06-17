@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,16 +42,41 @@ fn main() {
 }
 
 fn build_cuda_kernels(cxx_root: &Path) {
-    KernelBuild::new(KernelType::Cuda)
-        .files([
-            "kernels/zkp/cuda/combos.cu",
-            "kernels/zkp/cuda/eltwise.cu",
-            "kernels/zkp/cuda/ffi.cu",
-            "kernels/zkp/cuda/kernels.cu",
-            "kernels/zkp/cuda/sha.cu",
-            "kernels/zkp/cuda/supra/api.cu",
-            "kernels/zkp/cuda/supra/ntt.cu",
-        ])
+    // KernelBuild::new(KernelType::Cuda)
+    //     .files([
+    //         "kernels/zkp/cuda/combos.cu",
+    //         "kernels/zkp/cuda/eltwise.cu",
+    //         "kernels/zkp/cuda/ffi.cu",
+    //         "kernels/zkp/cuda/kernels.cu",
+    //         "kernels/zkp/cuda/sha.cu",
+    //         "kernels/zkp/cuda/supra/api.cu",
+    //         "kernels/zkp/cuda/supra/ntt.cu",
+    //     ])
+    //     .deps(["kernels/zkp/cuda", "kernels/zkp/cuda/supra"])
+    //     .flag("-DFEATURE_BABY_BEAR")
+    //     .include(cxx_root)
+    //     .include(env::var("DEP_BLST_C_SRC").unwrap())
+    //     .include(env::var("DEP_SPPARK_ROOT").unwrap())
+    //     .compile("risc0_zkp_cuda");
+
+    let mut builder = KernelBuild::new(KernelType::Cuda);
+
+    let files = vec![
+        "kernels/zkp/cuda/combos.cu",
+        "kernels/zkp/cuda/eltwise.cu",
+        "kernels/zkp/cuda/ffi.cu",
+        "kernels/zkp/cuda/kernels.cu",
+        "kernels/zkp/cuda/sha.cu",
+        "kernels/zkp/cuda/supra/api.cu",
+        "kernels/zkp/cuda/supra/ntt.cu",
+    ];
+
+    if env::var("CARGO_FEATURE_LOW_VRAM").is_ok() {
+        builder.flag("-DLOW_VRAM");
+    }
+
+    builder
+        .files(files)
         .deps(["kernels/zkp/cuda", "kernels/zkp/cuda/supra"])
         .flag("-DFEATURE_BABY_BEAR")
         .include(cxx_root)

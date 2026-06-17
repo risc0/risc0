@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -235,10 +235,49 @@ where
         out.assert_eq();
     }
 
-    fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
-        self.lhs.zk_shift(&io.lhs, count);
-        self.rhs.zk_shift(&io.rhs, count);
+    fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
+        self.lhs.batch_evaluate_ntt(&io.lhs, count);
+        self.rhs.batch_evaluate_ntt(&io.rhs, count);
         io.assert_eq();
+    }
+
+    fn batch_evaluate_same_x(
+        &self,
+        coeffs: &Self::Buffer<Self::Elem>,
+        poly_count: usize,
+        which: &Self::Buffer<u32>,
+        x: Vec<Self::Elem>,
+    ) -> Vec<Self::Elem> {
+        let lhs_result =
+            self.lhs
+                .batch_evaluate_same_x(&coeffs.lhs, poly_count, &which.lhs, x.clone());
+        let rhs_result = self
+            .rhs
+            .batch_evaluate_same_x(&coeffs.rhs, poly_count, &which.rhs, x);
+        assert_eq!(lhs_result, rhs_result);
+        lhs_result
+    }
+
+    fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, count: usize, beta: Self::Elem, factor: u32) {
+        self.lhs.zk_shift(&io.lhs, count, beta, factor);
+        self.rhs.zk_shift(&io.rhs, count, beta, factor);
+        io.assert_eq();
+    }
+
+    fn zk_shift_outplace(
+        &self,
+        _d_in: &Self::Buffer<Self::Elem>,
+        _d_out: &Self::Buffer<Self::Elem>,
+        _poly_count: usize,
+        _beta: Self::Elem,
+        _factor: u32,
+    ) {
+    }
+
+    fn batch_coeffs_bitrev(&self, d_inout: &Self::Buffer<Self::Elem>, poly_count: usize) {
+        self.lhs.batch_coeffs_bitrev(&d_inout.lhs, poly_count);
+        self.rhs.batch_coeffs_bitrev(&d_inout.rhs, poly_count);
+        d_inout.assert_eq();
     }
 
     fn mix_poly_coeffs(
@@ -305,6 +344,24 @@ where
         output.assert_eq();
     }
 
+    fn copy_digest2elem(
+        &self,
+        _output: &Self::Buffer<Self::Elem>,
+        _input: &Self::Buffer<Digest>,
+        _offset_bytes: usize,
+    ) {
+        panic!("copy_digest2elem is only supported for CUDA HAL");
+    }
+
+    fn elem2dig_buffer_transmute(
+        &self,
+        _buffer: &Self::Buffer<Self::Elem>,
+        _offset_bytes: usize,
+        _count: usize,
+    ) -> Self::Buffer<Digest> {
+        panic!("elem2dig_buffer_transmute is only supported for CUDA HAL");
+    }
+
     fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
         self.lhs.eltwise_zeroize_elem(&elems.lhs);
         self.rhs.eltwise_zeroize_elem(&elems.rhs);
@@ -326,6 +383,16 @@ where
         self.lhs.hash_rows(&output.lhs, &matrix.lhs);
         self.rhs.hash_rows(&output.rhs, &matrix.rhs);
         output.assert_eq();
+    }
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn hash_rows_interleave(
+        &self,
+        _output: &Self::Buffer<Digest>,
+        _matrix: &Self::Buffer<Self::Elem>,
+        _codeword_id: u32,
+    ) {
+        panic!("hash_rows_interleave is not supported for DualHal");
     }
 
     fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize) {
@@ -496,5 +563,19 @@ where
         _steps: usize,
     ) {
         todo!()
+    }
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn eval_check_interleave(
+        &self,
+        _check: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _groups: &[&<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>],
+        _globals: &[&<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>],
+        _poly_mix: <DualHal<F, LH, RH> as Hal>::ExtElem,
+        _po2: usize,
+        _steps: usize,
+        _codeword_id: usize,
+    ) {
+        panic!("eval_check_interleave is not supported for DualCircuitHal");
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -746,7 +746,13 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         self.hash.as_ref().unwrap().hash_rows(self, output, matrix);
     }
 
-    fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
+    fn zk_shift(
+        &self,
+        io: &Self::Buffer<Self::Elem>,
+        poly_count: usize,
+        _beta: Self::Elem,
+        _factor: u32,
+    ) {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
         assert_eq!(io.size(), poly_count * (1 << bits));

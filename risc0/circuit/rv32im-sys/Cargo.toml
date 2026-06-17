@@ -24,3 +24,5 @@ risc0-build-kernel = { workspace = true }
 default = []
 cuda = ["dep:cust", "dep:sppark", "risc0-sys/cuda"]
 metal = []
+low_vram = ["risc0-sys/low_vram"]
+pinned_witgen = []

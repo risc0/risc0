@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -95,7 +95,10 @@ impl Program {
         let coeffs = hal.copy_from_elem("coeffs", &code);
         // Do interpolate & shift
         hal.batch_interpolate_ntt(&coeffs, self.code_size);
-        hal.zk_shift(&coeffs, self.code_size);
+        let beta = BabyBearElem::from(3u32);
+        let factor = 1;
+        hal.zk_shift(&coeffs, self.code_size, beta, factor);
+
         // Make the poly-group & extract the root
         let code_group = PolyGroup::new(hal, coeffs, self.code_size, cycles, "code");
         let root = *code_group.merkle.root();

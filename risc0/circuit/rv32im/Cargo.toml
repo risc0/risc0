@@ -69,6 +69,8 @@ cuda = [
 ]
 default = []
 # entropy_finder = []
+low_vram = ["risc0-circuit-rv32im-sys/low_vram"]
+pinned_witgen = ["risc0-circuit-rv32im-sys/pinned_witgen"]
 execute = [
   "anyhow/backtrace",
   "dep:byteorder",

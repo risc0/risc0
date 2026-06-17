@@ -55,6 +55,76 @@ struct DeviceExecContext {
   LookupTables* tables;
 };
 
+#ifdef PINNED_WITGEN
+PreflightTrace gd_preflight;
+
+struct HostExecContext {
+  DeviceExecContext* ctx;
+//   PreflightTrace d_preflight;
+  LookupTables d_tables;
+
+  HostExecContext(ExecBuffers* buffers, PreflightTrace* preflight, size_t cycles) {
+    CUDA_OK(cudaMallocManaged(&ctx, sizeof(DeviceExecContext)));
+
+    CUDA_OK(cudaMalloc(&ctx->data, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->data, &buffers->data, sizeof(Buffer), cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&ctx->global, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->global, &buffers->global, sizeof(Buffer), cudaMemcpyHostToDevice));
+
+    size_t cycles_mem_size = cycles * sizeof(PreflightCycle);
+    CUDA_OK(cudaMalloc(&gd_preflight.cycles, cycles_mem_size));
+
+    CUDA_OK(cudaMemcpy(gd_preflight.cycles,
+                       preflight->cycles,
+                       cycles_mem_size,
+                       cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&gd_preflight.txns, preflight->txnsLen * sizeof(MemoryTransaction)));
+    CUDA_OK(cudaMemcpy(gd_preflight.txns,
+                       preflight->txns,
+                       preflight->txnsLen * sizeof(MemoryTransaction),
+                       cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&gd_preflight.bigintBytes, preflight->bigintBytesLen));
+    CUDA_OK(cudaMemcpy(gd_preflight.bigintBytes,
+                       preflight->bigintBytes,
+                       preflight->bigintBytesLen,
+                       cudaMemcpyHostToDevice));
+
+    gd_preflight.txnsLen = preflight->txnsLen;
+    gd_preflight.bigintBytesLen = preflight->bigintBytesLen;
+    gd_preflight.tableSplitCycle = preflight->tableSplitCycle;
+
+    CUDA_OK(cudaMalloc(&ctx->preflight, sizeof(PreflightTrace)));
+    CUDA_OK(
+        cudaMemcpy(ctx->preflight, &gd_preflight, sizeof(PreflightTrace), cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&d_tables.tableU8, (1 << 8) * sizeof(uint32_t)));
+    CUDA_OK(cudaMemset(d_tables.tableU8, 0, (1 << 8) * sizeof(uint32_t)));
+
+    CUDA_OK(cudaMalloc(&d_tables.tableU16, (1 << 16) * sizeof(uint32_t)));
+    CUDA_OK(cudaMemset(d_tables.tableU16, 0, (1 << 16) * sizeof(uint32_t)));
+
+    CUDA_OK(cudaMalloc(&ctx->tables, sizeof(LookupTables)));
+    CUDA_OK(cudaMemcpy(ctx->tables, &d_tables, sizeof(LookupTables), cudaMemcpyHostToDevice));
+  }
+
+  ~HostExecContext() {
+    cudaFree(d_tables.tableU16);
+    cudaFree(d_tables.tableU8);
+    cudaFree(ctx->tables);
+    cudaFree(gd_preflight.bigintBytes);
+    // cudaFree(d_preflight.txns);
+    // cudaFree(d_preflight.cycles);
+    cudaFree(ctx->preflight);
+    cudaFree(ctx->global);
+    cudaFree(ctx->data);
+    cudaFree(ctx);
+  }
+};
+#else
+
 struct HostExecContext {
   DeviceExecContext* ctx;
   PreflightTrace d_preflight;
@@ -119,6 +189,8 @@ struct HostExecContext {
   }
 };
 
+#endif
+
 struct AccumBuffers {
   Buffer data;
   Buffer accum;
@@ -135,6 +207,75 @@ struct DeviceAccumContext {
   LookupTables* tables;
 };
 
+
+#ifdef PINNED_WITGEN
+
+struct HostAccumContext {
+    DeviceAccumContext* ctx;
+  //   PreflightTrace d_preflight;
+    LookupTables d_tables;
+
+    HostAccumContext(AccumBuffers* buffers, PreflightTrace* preflight, size_t cycles) {
+      CUDA_OK(cudaMallocManaged(&ctx, sizeof(DeviceAccumContext)));
+
+      CUDA_OK(cudaMalloc(&ctx->data, sizeof(Buffer)));
+      CUDA_OK(cudaMemcpy(ctx->data, &buffers->data, sizeof(Buffer), cudaMemcpyHostToDevice));
+
+      CUDA_OK(cudaMalloc(&ctx->accum, sizeof(Buffer)));
+      CUDA_OK(cudaMemcpy(ctx->accum, &buffers->accum, sizeof(Buffer), cudaMemcpyHostToDevice));
+
+      CUDA_OK(cudaMalloc(&ctx->global, sizeof(Buffer)));
+      CUDA_OK(cudaMemcpy(ctx->global, &buffers->global, sizeof(Buffer), cudaMemcpyHostToDevice));
+
+      CUDA_OK(cudaMalloc(&ctx->mix, sizeof(Buffer)));
+      CUDA_OK(cudaMemcpy(ctx->mix, &buffers->mix, sizeof(Buffer), cudaMemcpyHostToDevice));
+
+    //   size_t cycles_mem_size = cycles * sizeof(PreflightCycle);
+      // CUDA_OK(cudaMalloc(&d_preflight.cycles, cycles_mem_size));
+      // CUDA_OK(cudaMemcpy(d_preflight.cycles,
+      //                    preflight->cycles,
+      //                    cycles_mem_size,
+      //                    cudaMemcpyHostToDevice));
+
+      // CUDA_OK(cudaMalloc(&d_preflight.txns, preflight->txnsLen * sizeof(MemoryTransaction)));
+      // CUDA_OK(cudaMemcpy(d_preflight.txns,
+      //                    preflight->txns,
+      //                    preflight->txnsLen * sizeof(MemoryTransaction),
+      //                    cudaMemcpyHostToDevice));
+
+      // d_preflight.txnsLen = preflight->txnsLen;
+      // d_preflight.tableSplitCycle = preflight->tableSplitCycle;
+
+      CUDA_OK(cudaMalloc(&ctx->preflight, sizeof(PreflightTrace)));
+      CUDA_OK(
+          cudaMemcpy(ctx->preflight, &gd_preflight, sizeof(PreflightTrace), cudaMemcpyHostToDevice));
+
+      CUDA_OK(cudaMalloc(&d_tables.tableU8, (1 << 8) * sizeof(uint32_t)));
+      CUDA_OK(cudaMemset(d_tables.tableU8, 0, (1 << 8) * sizeof(uint32_t)));
+
+      CUDA_OK(cudaMalloc(&d_tables.tableU16, (1 << 16) * sizeof(uint32_t)));
+      CUDA_OK(cudaMemset(d_tables.tableU16, 0, (1 << 16) * sizeof(uint32_t)));
+
+      CUDA_OK(cudaMalloc(&ctx->tables, sizeof(LookupTables)));
+      CUDA_OK(cudaMemcpy(ctx->tables, &d_tables, sizeof(LookupTables), cudaMemcpyHostToDevice));
+    }
+
+    ~HostAccumContext() {
+      cudaFree(d_tables.tableU16);
+      cudaFree(d_tables.tableU8);
+      cudaFree(ctx->tables);
+      cudaFree(gd_preflight.txns);
+      cudaFree(gd_preflight.cycles);
+      cudaFree(ctx->preflight);
+      cudaFree(ctx->mix);
+      cudaFree(ctx->global);
+      cudaFree(ctx->accum);
+      cudaFree(ctx->data);
+      cudaFree(ctx);
+    }
+  };
+
+#else
 struct HostAccumContext {
   DeviceAccumContext* ctx;
   PreflightTrace d_preflight;
@@ -198,6 +339,8 @@ struct HostAccumContext {
     cudaFree(ctx);
   }
 };
+
+#endif
 
 __device__ ::cuda::std::array<uint32_t, 2>
 divide_rv32im(uint32_t numer, uint32_t denom, uint32_t signType) {
@@ -428,6 +571,30 @@ extern "C" {
 
 using namespace risc0::circuit::rv32im_v2::cuda;
 
+__global__ void rv32im_witgen_scatter(Fp* into,
+    PreflightCycle* cycles,
+    const uint32_t count) {
+
+    #define CYCLE_COL         (0)
+    #define NEXT_PC_LOW       (14)
+    #define NEXT_PC_HIGH      (15)
+    #define NEXT_STATE        (16)
+    #define NEXT_MACHINE_MODE (17)
+
+    uint32_t gid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (gid < count) {
+        uint32_t pc    = cycles[gid].pc;
+        uint32_t state = cycles[gid].state;
+        uint32_t mode  = cycles[gid].machineMode;
+
+        into[count*CYCLE_COL + gid]         = Fp(gid);
+        into[count*NEXT_PC_LOW + gid]       = Fp(pc & 0xffff);
+        into[count*NEXT_PC_HIGH + gid]      = Fp(pc >> 16);
+        into[count*NEXT_STATE + gid]        = Fp(state);
+        into[count*NEXT_MACHINE_MODE + gid] = Fp(mode);
+    }
+}
+
 const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
                                              ExecBuffers* buffers,
                                              PreflightTrace* preflight,
@@ -436,6 +603,14 @@ const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
     HostExecContext ctx(buffers, preflight, lastCycle);
     CudaStream stream;
     size_t split = preflight->tableSplitCycle;
+
+    launchKernel(rv32im_witgen_scatter, buffers->data.rows, 0,
+#ifdef PINNED_WITGEN
+        buffers->data.buf, gd_preflight.cycles, buffers->data.rows);
+#else
+        buffers->data.buf, ctx.d_preflight.cycles, buffers->data.rows);
+#endif
+    CUDA_OK(cudaStreamSynchronize(stream));
 
     switch (mode) {
     case kStepModeParallel: {

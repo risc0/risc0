@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -349,6 +349,17 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
+    fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
+        use crate::core::ntt::evaluate_ntt;
+        let row_size = io.size() / count;
+        assert_eq!(row_size * count, io.size());
+        io.as_slice_mut()
+            .par_chunks_exact_mut(row_size)
+            .for_each(|row| {
+                evaluate_ntt::<Self::Elem, Self::Elem>(row, 0);
+            });
+    }
+
     fn batch_bit_reverse(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
@@ -392,7 +403,44 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
+    fn batch_evaluate_same_x(
+        &self,
+        coeffs: &Self::Buffer<Self::Elem>,
+        poly_count: usize,
+        which: &Self::Buffer<u32>,
+        x: Vec<Self::Elem>,
+    ) -> Vec<Self::Elem> {
+        let po2 = log2_ceil(coeffs.size() / poly_count);
+        assert_eq!(poly_count * (1 << po2), coeffs.size());
+        let eval_count = which.size();
+        let coeffs = &*coeffs.as_slice();
+        let which = which.as_slice();
+        let mut result = vec![Self::Elem::ZERO; eval_count];
+        let x_val = x.first().copied().unwrap_or(Self::Elem::ZERO);
+        (&which[..], &mut result[..])
+            .into_par_iter()
+            .for_each(|(id, out)| {
+                let mut tot = Self::Elem::ZERO;
+                let mut cur = x_val;
+                let id = *id as usize;
+                let count = 1 << po2;
+                let local = &coeffs[count * id..count * id + count];
+                for coeff in local {
+                    tot += cur * *coeff;
+                    cur *= x_val;
+                }
+                *out = tot;
+            });
+        result
+    }
+
+    fn zk_shift(
+        &self,
+        io: &Self::Buffer<Self::Elem>,
+        poly_count: usize,
+        _beta: Self::Elem,
+        _factor: u32,
+    ) {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
         assert_eq!(io.size(), poly_count * (1 << bits));
@@ -405,6 +453,20 @@ impl<F: Field> Hal for CpuHal<F> {
                 let pow3 = Self::Elem::from_u64(3).pow(rev as usize);
                 *io *= pow3;
             });
+    }
+
+    fn zk_shift_outplace(
+        &self,
+        _d_in: &Self::Buffer<Self::Elem>,
+        _d_out: &Self::Buffer<Self::Elem>,
+        _poly_count: usize,
+        _beta: Self::Elem,
+        _factor: u32,
+    ) {
+    }
+
+    fn batch_coeffs_bitrev(&self, _d_inout: &Self::Buffer<Self::Elem>, _poly_count: usize) {
+        panic!("batch_coeffs_bitrev is not implemented for CPU backend");
     }
 
     fn mix_poly_coeffs(
@@ -515,6 +577,24 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
+    fn copy_digest2elem(
+        &self,
+        _output: &Self::Buffer<Self::Elem>,
+        _input: &Self::Buffer<Digest>,
+        _offset_bytes: usize,
+    ) {
+        panic!("copy_digest2elem is only supported for CUDA HAL");
+    }
+
+    fn elem2dig_buffer_transmute(
+        &self,
+        _buffer: &Self::Buffer<Self::Elem>,
+        _offset_bytes: usize,
+        _count: usize,
+    ) -> Self::Buffer<Digest> {
+        panic!("elem2dig_buffer_transmute is only supported for CUDA HAL");
+    }
+
     fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
         elems.as_slice_mut().par_iter_mut().for_each(|elem| {
             *elem = elem.valid_or_zero();
@@ -564,6 +644,16 @@ impl<F: Field> Hal for CpuHal<F> {
                 (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
             *output = *hashfn.hash_elem_slice(column.as_slice());
         });
+    }
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn hash_rows_interleave(
+        &self,
+        _output: &Self::Buffer<Digest>,
+        _matrix: &Self::Buffer<Self::Elem>,
+        _codeword_id: u32,
+    ) {
+        panic!("hash_rows_interleave is not supported for CpuHal");
     }
 
     fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize) {

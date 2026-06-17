@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,12 +39,12 @@ use crate::{
 
 #[derive(Debug)]
 pub struct MetalCircuitHal<MH: MetalHash> {
-    hal: Rc<MetalHal<MH>>,
+    hal: Arc<MetalHal<MH>>,
     kernels: HashMap<String, ComputePipelineDescriptor>,
 }
 
 impl<MH: MetalHash> MetalCircuitHal<MH> {
-    pub fn new(hal: Rc<MetalHal<MH>>) -> Self {
+    pub fn new(hal: Arc<MetalHal<MH>>) -> Self {
         let library = hal.device.new_library_with_data(METAL_LIB).unwrap();
         let mut kernels = HashMap::new();
         for name in KERNEL_NAMES {
@@ -154,11 +154,25 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         self.hal
             .dispatch_by_name("eltwise_zeroize_fp", &[io.as_arg()], io.size() as u64);
     }
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn eval_check_interleave(
+        &self,
+        _check: &MetalBuffer<BabyBearElem>,
+        _groups: &[&MetalBuffer<BabyBearElem>],
+        _globals: &[&MetalBuffer<BabyBearElem>],
+        _poly_mix: BabyBearExtElem,
+        _po2: usize,
+        _steps: usize,
+        _codeword_id: usize,
+    ) {
+        panic!("eval_check_interleave is not supported for MetalCircuitHal");
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::rc::Rc;
+use std::rc::Rc;
 
     use risc0_core::field::baby_bear::BabyBear;
     use risc0_zkp::{

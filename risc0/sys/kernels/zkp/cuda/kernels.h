@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,10 +54,35 @@ __global__ void mix_poly_coeffs(FpExt* out,
 __global__ void batch_bit_reverse(Fp* io, const uint32_t nBits, const uint32_t count);
 
 __global__ void batch_evaluate_any(
-    FpExt* out, const Fp* coeffs, const uint32_t* which, const FpExt* xs, const uint32_t deg);
+    FpExt* out, const Fp* coeffs, const uint32_t* which, const FpExt* xs, const uint32_t deg,
+    const uint32_t eval_count, const uint32_t chunk_num);
+
+__global__ void batch_evaluate_any_merge(
+        FpExt* out, const FpExt* chunk_out, const FpExt* xs,
+        const uint32_t eval_count, const uint32_t chunk_num, const uint32_t chunk_size);
+
+__global__ void batch_evaluate_same_x(
+    Fp* out, const Fp* coeffs, const uint32_t* which, const uint32_t deg, const uint32_t poly_n, const uint32_t x_n, const uint32_t chunk_n);
 
 __global__ void gather_sample(
     Fp* dst, const Fp* src, const uint32_t idx, const uint32_t size, const uint32_t stride);
+
+// Batched variant: gather n_idxs samples from `src` (col-major matrix) in one
+// kernel launch. dst layout: [n_idxs][col_size] row-major. Used by FRI query
+// phase where N>=50 distinct row indices are sampled from the same source.
+__global__ void gather_samples_batch(Fp* dst,
+                                     const Fp* src,
+                                     const uint32_t* idxs,
+                                     const uint32_t n_idxs,
+                                     const uint32_t col_size,
+                                     const uint32_t stride);
+
+// Batch-gather n digests from src[idxs[k]] into dst[k]. Each digest = 8×u32.
+// Replaces ~50×depth tiny per-element cudaMemcpy in merkle path collection.
+__global__ void gather_digests_batch(uint32_t* dst,
+                                     const uint32_t* src,
+                                     const uint32_t* idxs,
+                                     const uint32_t n);
 
 __global__ void scatter(Fp* into,
                         const uint32_t* index,

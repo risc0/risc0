@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -159,6 +159,20 @@ impl CircuitHal<CpuHal> for CpuCircuitHal {
         steps: usize,
     ) {
         unimplemented!()
+    }
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn eval_check_interleave(
+        &self,
+        _check: &CpuBuffer<BabyBearElem>,
+        _groups: &[&CpuBuffer<BabyBearElem>],
+        _globals: &[&CpuBuffer<BabyBearElem>],
+        _poly_mix: BabyBearExtElem,
+        _po2: usize,
+        _steps: usize,
+        _codeword_id: usize,
+    ) {
+        panic!("eval_check_interleave is not supported for CpuCircuitHal");
     }
 }
 

@@ -78,3 +78,5 @@ prove = [
 ]
 std = ["risc0-zkp/std"]
 test = []
+low_vram = []
+pinned_witgen = []

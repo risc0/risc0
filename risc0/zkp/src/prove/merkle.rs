@@ -14,6 +14,8 @@
 
 use alloc::vec::Vec;
 
+#[allow(unused_imports)]
+use risc0_core::field::Elem;
 use risc0_core::scope;
 
 use crate::{
@@ -24,18 +26,19 @@ use crate::{
 };
 
 pub struct MerkleTreeProver<H: Hal> {
-    params: MerkleTreeParams,
+    pub params: MerkleTreeParams,
 
     // The retained matrix of values
+    #[cfg(not(all(feature = "low_vram", feature = "cuda")))]
     matrix: H::Buffer<H::Elem>,
 
     // A heap style array where node N has children 2*N and 2*N+1.  The size of
     // this buffer is (1 << (layers + 1)) and begins at offset 1 (zero is unused
     // to make indexing nicer).
-    nodes: H::Buffer<Digest>,
+    pub nodes: H::Buffer<Digest>,
 
     // The root value
-    root: Digest,
+    pub root: Digest,
 }
 
 impl<H: Hal> MerkleTreeProver<H> {
@@ -72,11 +75,12 @@ impl<H: Hal> MerkleTreeProver<H> {
             }
         });
         let root = nodes.get_at(1);
-        MerkleTreeProver {
+        Self {
             params,
-            matrix: matrix.clone(),
             nodes,
             root,
+            #[cfg(not(all(feature = "low_vram", feature = "cuda")))]
+            matrix: matrix.clone(),
         }
     }
 
@@ -105,6 +109,119 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// It is presumed the verifier is given the index of the row from other
     /// parts of the protocol, and verification will of course fail if the
     /// wrong row is specified.
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    #[allow(unused_variables)]
+    #[allow(clippy::too_many_arguments)]
+    pub fn prove_with_idxs(
+        &self,
+        hal: &H,
+        iop: &mut WriteIOP<H::Field>,
+        idxs: Vec<usize>,
+        coeffs: &H::Buffer<H::Elem>,
+        rou: H::Elem,
+        evals: Option<H::Buffer<H::Elem>>,
+        codewords: [Option<H::Buffer<H::Elem>>; 4],
+    ) -> (Vec<Vec<H::Elem>>, Vec<Vec<Digest>>) {
+        let mut idx2evals = Vec::with_capacity(idxs.len());
+
+        if let Some(evals) = evals {
+            for idx in idxs.iter() {
+                assert!(*idx < self.params.row_size);
+            }
+            if hal.has_unified_memory() {
+                evals.view(|view| {
+                    for idx in idxs.iter() {
+                        let mut out = Vec::with_capacity(self.params.col_size);
+                        for i in 0..self.params.col_size {
+                            out.push(view[*idx + i * self.params.row_size]);
+                        }
+                        idx2evals.push(out);
+                    }
+                });
+            } else {
+                let col_size = self.params.col_size;
+                let n = idxs.len();
+                let batch = hal.alloc_elem("samples_batch", n * col_size);
+                let idxs_u32: Vec<u32> = idxs.iter().map(|&i| i as u32).collect();
+                hal.gather_samples_batch(&batch, &evals, &idxs_u32, col_size, self.params.row_size);
+                batch.view(|view| {
+                    for k in 0..n {
+                        let chunk = &view[k * col_size..(k + 1) * col_size];
+                        idx2evals.push(chunk.to_vec());
+                    }
+                });
+            }
+        } else if let [Some(c0), Some(c1), Some(c2), Some(c3)] = &codewords {
+            let codes: [&H::Buffer<H::Elem>; 4] = [c0, c1, c2, c3];
+            for idx in idxs.iter() {
+                let code = codes[idx % 4];
+
+                let mut out = Vec::with_capacity(self.params.col_size);
+                if hal.has_unified_memory() {
+                    code.view(|view| {
+                        for i in 0..self.params.col_size {
+                            out.push(view[*idx / 4 + i * self.params.row_size / 4]);
+                        }
+                    });
+                } else {
+                    let sample = hal.alloc_elem("sample", self.params.col_size);
+                    hal.gather_sample(
+                        &sample,
+                        code,
+                        *idx / 4,
+                        self.params.col_size,
+                        self.params.row_size / 4,
+                    );
+                    sample.view(|view| {
+                        out.extend_from_slice(view);
+                    });
+                }
+                idx2evals.push(out);
+            }
+        } else {
+            let xs: Vec<_> = idxs.iter().map(|idx| rou.pow(*idx)).collect();
+            let seq: Vec<u32> = (0..self.params.col_size).map(|i| i as u32).collect();
+            let ps = hal.copy_from_u32("which", seq.as_slice());
+
+            let out = hal.batch_evaluate_same_x(coeffs, self.params.col_size, &ps, xs);
+
+            // Split out into chunks of col_size and push to idx2evals
+            for chunk in out.chunks(self.params.col_size) {
+                idx2evals.push(chunk.to_vec());
+            }
+        }
+
+        // iop.write_field_elem_slice::<H::Elem>(out.as_slice());
+
+        // Batch the merkle-path Digest fetch: collect all (idx, level) node
+        // indices into one Vec, then call gather_digests_batch to do one D2H
+        // (or one host walk if nodes is host-pinned, e.g. rv32im code group).
+        let mut all_indices: Vec<u32> = Vec::new();
+        let mut counts: Vec<usize> = Vec::with_capacity(idxs.len());
+        for idx in idxs.iter() {
+            let mut count = 0;
+            let mut current_idx = *idx + self.params.row_size;
+            while current_idx >= 2 * self.params.top_size {
+                let low_bit = current_idx % 2;
+                current_idx /= 2;
+                let other_idx = 2 * current_idx + (1 - low_bit);
+                all_indices.push(other_idx as u32);
+                count += 1;
+            }
+            counts.push(count);
+        }
+        let all_digests = hal.gather_digests_batch(&self.nodes, &all_indices);
+        let mut idx2nodes = Vec::with_capacity(idxs.len());
+        let mut offset = 0;
+        for count in counts {
+            idx2nodes.push(all_digests[offset..offset + count].to_vec());
+            offset += count;
+        }
+
+        (idx2evals, idx2nodes)
+    }
+
+    #[cfg(not(all(feature = "low_vram", feature = "cuda")))]
     pub fn prove(&self, hal: &H, iop: &mut WriteIOP<H::Field>, idx: usize) -> Vec<H::Elem> {
         assert!(idx < self.params.row_size);
         let mut out = Vec::with_capacity(self.params.col_size);
@@ -128,6 +245,7 @@ impl<H: Hal> MerkleTreeProver<H> {
             });
         }
         iop.write_field_elem_slice::<H::Elem>(out.as_slice());
+
         let mut idx = idx + self.params.row_size;
         while idx >= 2 * self.params.top_size {
             let low_bit = idx % 2;
@@ -138,9 +256,64 @@ impl<H: Hal> MerkleTreeProver<H> {
         }
         out
     }
+
+    #[cfg(not(all(feature = "low_vram", feature = "cuda")))]
+    pub fn prove_with_idxs(
+        &self,
+        hal: &H,
+        _iop: &mut WriteIOP<H::Field>,
+        idxs: Vec<usize>,
+    ) -> (Vec<Vec<H::Elem>>, Vec<Vec<Digest>>) {
+        let mut idx2evals = Vec::with_capacity(idxs.len());
+
+        for idx in idxs.iter() {
+            assert!(*idx < self.params.row_size);
+            let mut out = Vec::with_capacity(self.params.col_size);
+
+            if hal.has_unified_memory() {
+                self.matrix.view(|view| {
+                    for i in 0..self.params.col_size {
+                        out.push(view[*idx + i * self.params.row_size]);
+                    }
+                });
+            } else {
+                let sample = hal.alloc_elem("sample", self.params.col_size);
+                hal.gather_sample(
+                    &sample,
+                    &self.matrix,
+                    *idx,
+                    self.params.col_size,
+                    self.params.row_size,
+                );
+                sample.view(|view| {
+                    out.extend_from_slice(view);
+                });
+            }
+            idx2evals.push(out);
+        }
+        // Per-element merkle path Digest fetch (matches v3.0.4 semantics:
+        // one cudaMemcpy D2H per merkle-path element via get_at). The
+        // batched gather_digests_batch is reserved for low_vram.
+        let mut idx2nodes = Vec::with_capacity(idxs.len());
+        for idx in idxs.iter() {
+            let mut nodes_for_idx = Vec::new();
+            let mut current_idx = *idx + self.params.row_size;
+            while current_idx >= 2 * self.params.top_size {
+                let low_bit = current_idx % 2;
+                current_idx /= 2;
+                let other_idx = 2 * current_idx + (1 - low_bit);
+                let other = self.nodes.get_at(other_idx);
+                nodes_for_idx.push(other);
+            }
+            idx2nodes.push(nodes_for_idx);
+        }
+
+        (idx2evals, idx2nodes)
+    }
 }
 
 #[cfg(test)]
+#[cfg(not(all(feature = "low_vram", feature = "cuda")))]
 mod tests {
     use rand::Rng;
     use risc0_core::field::{

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ use risc0_zkp::{
     INV_RATE,
 };
 
+#[cfg(all(feature = "low_vram", feature = "cuda"))]
+use risc0_circuit_rv32im_sys::risc0_circuit_rv32im_cuda_eval_check_interleave;
+
 use crate::{
     prove::{SegmentProver, GLOBAL_MIX, GLOBAL_OUT},
     zirgen::{
@@ -48,6 +51,7 @@ use super::{
 };
 
 pub struct CudaCircuitHal<CH: CudaHash> {
+    // _hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
     _hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
 }
 
@@ -222,6 +226,66 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 po2 as u32,
                 domain as u32,
                 poly_mix_pows.as_ptr(),
+            )
+        })
+        .unwrap();
+    }
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn eval_check_interleave(
+        &self,
+        check: &CudaBuffer<Val>,
+        groups: &[&CudaBuffer<Val>],
+        globals: &[&CudaBuffer<Val>],
+        poly_mix: ExtVal,
+        po2: usize,
+        steps: usize,
+        codeword_id: usize,
+    ) {
+        scope!("eval_check_interleave");
+
+        let accum = groups[REGISTER_GROUP_ACCUM];
+        let ctrl = groups[REGISTER_GROUP_CODE];
+        let data = groups[REGISTER_GROUP_DATA];
+        let mix = globals[GLOBAL_MIX];
+        let out = globals[GLOBAL_OUT];
+        tracing::debug!(
+            "check: {}, ctrl: {}, data: {}, accum: {}, mix: {} out: {}",
+            check.size(),
+            ctrl.size(),
+            data.size(),
+            accum.size(),
+            mix.size(),
+            out.size()
+        );
+        tracing::debug!(
+            "total: {}",
+            (check.size() + ctrl.size() + data.size() + accum.size() + mix.size() + out.size()) * 4
+        );
+
+        const EXP_PO2: usize = log2_ceil(INV_RATE);
+        let domain = steps * INV_RATE;
+        let rou = Val::ROU_FWD[po2 + EXP_PO2];
+
+        tracing::debug!("steps: {steps}, domain: {domain}, po2: {po2}, rou: {rou:?}");
+        let poly_mix_pows = map_pow(poly_mix, POLY_MIX_POWERS);
+        let poly_mix_pows: &[u32; ExtVal::EXT_SIZE * NUM_POLY_MIX_POWERS] =
+            ExtVal::as_u32_slice(poly_mix_pows.as_slice())
+                .try_into()
+                .unwrap();
+
+        ffi_wrap(|| unsafe {
+            risc0_circuit_rv32im_cuda_eval_check_interleave(
+                check.as_device_ptr(),
+                ctrl.as_device_ptr(),
+                data.as_device_ptr(),
+                accum.as_device_ptr(),
+                mix.as_device_ptr(),
+                out.as_device_ptr(),
+                &rou as *const Val,
+                po2 as u32,
+                poly_mix_pows.as_ptr(),
+                codeword_id as u32,
             )
         })
         .unwrap();

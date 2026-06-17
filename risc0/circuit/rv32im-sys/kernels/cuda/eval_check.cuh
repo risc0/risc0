@@ -20,7 +20,8 @@ extern __device__ FpExt rv32im_v2_19(uint32_t idx,
                                      const Fp* arg8,
                                      const Fp* arg9,
                                      const Fp* arg10,
-                                     const Fp* arg11);
+                                     const Fp* arg11,
+                                     FpExt* out_x1037);
 extern __device__ FpExt rv32im_v2_18(uint32_t idx,
                                      uint32_t size,
                                      Fp* arg0,
@@ -31,7 +32,11 @@ extern __device__ FpExt rv32im_v2_18(uint32_t idx,
                                      const Fp* arg5,
                                      const Fp* arg6,
                                      const Fp* arg7,
-                                     const Fp* arg8);
+                                     const Fp* arg8,
+                                     FpExt* out_x309,
+                                     FpExt* out_x1098,
+                                     FpExt* out_x1102,
+                                     FpExt* out_x1099);
 extern __device__ FpExt rv32im_v2_17(uint32_t idx,
                                      uint32_t size,
                                      Fp* arg0,
@@ -45,7 +50,15 @@ extern __device__ FpExt rv32im_v2_17(uint32_t idx,
                                      const Fp* arg8,
                                      const Fp* arg9,
                                      const Fp* arg10,
-                                     const Fp* arg11);
+                                     const Fp* arg11,
+                                     FpExt* out_x1005,
+                                     FpExt* out_x1016,
+                                     FpExt* out_x1021,
+                                     FpExt* out_x1113,
+                                     FpExt* out_x479,
+                                     FpExt* out_x480,
+                                     FpExt* out_x798,
+                                     FpExt* out_x196);
 extern __device__ FpExt rv32im_v2_16(uint32_t idx,
                                      uint32_t size,
                                      Fp* arg0,
@@ -66,7 +79,9 @@ extern __device__ FpExt rv32im_v2_16(uint32_t idx,
                                      const Fp* arg15,
                                      const Fp* arg16,
                                      const Fp* arg17,
-                                     const Fp* arg18);
+                                     const Fp* arg18,
+                                     FpExt* out_x910,
+                                     FpExt* out_x1079);
 extern __device__ FpExt rv32im_v2_15(uint32_t idx,
                                      uint32_t size,
                                      Fp* arg0,
@@ -81,7 +96,11 @@ extern __device__ FpExt rv32im_v2_15(uint32_t idx,
                                      const Fp* arg9,
                                      const Fp* arg10,
                                      const Fp* arg11,
-                                     const Fp* arg12);
+                                     const Fp* arg12,
+                                     FpExt* out_x1114,
+                                     FpExt* out_x1160,
+                                     FpExt* out_x663,
+                                     FpExt* out_x916);
 extern __device__ FpExt rv32im_v2_14(uint32_t idx,
                                      uint32_t size,
                                      FpExt arg0,
@@ -97,7 +116,9 @@ extern __device__ FpExt rv32im_v2_14(uint32_t idx,
                                      const Fp* arg10,
                                      const Fp* arg11,
                                      const Fp* arg12,
-                                     const Fp* arg13);
+                                     const Fp* arg13,
+                                     FpExt* out_x1148,
+                                     FpExt* out_x988);
 extern __device__ FpExt rv32im_v2_13(uint32_t idx,
                                      uint32_t size,
                                      Fp* arg0,
@@ -111,7 +132,11 @@ extern __device__ FpExt rv32im_v2_13(uint32_t idx,
                                      const Fp* arg8,
                                      const Fp* arg9,
                                      const Fp* arg10,
-                                     const Fp* arg11);
+                                     const Fp* arg11,
+                                     FpExt* out_x1142,
+                                     FpExt* out_x942,
+                                     FpExt* out_x849,
+                                     FpExt* out_x819);
 extern __device__ FpExt rv32im_v2_12(uint32_t idx,
                                      uint32_t size,
                                      Fp* arg0,
@@ -126,7 +151,9 @@ extern __device__ FpExt rv32im_v2_12(uint32_t idx,
                                      const Fp* arg9,
                                      const Fp* arg10,
                                      const Fp* arg11,
-                                     const Fp* arg12);
+                                     const Fp* arg12,
+                                     FpExt* out_x1048,
+                                     FpExt* out_x376);
 extern __device__ FpExt rv32im_v2_11(uint32_t idx,
                                      uint32_t size,
                                      Fp* arg0,
@@ -141,7 +168,28 @@ extern __device__ FpExt rv32im_v2_11(uint32_t idx,
                                      FpExt arg9,
                                      const Fp* arg10,
                                      const Fp* arg11,
-                                     const Fp* arg12);
+                                     const Fp* arg12,
+                                     FpExt* out_x1173,
+                                     FpExt* out_x924,
+                                     FpExt* out_x609,
+                                     FpExt* out_x618,
+                                     FpExt* out_x623,
+                                     FpExt* out_x653,
+                                     FpExt* out_x658,
+                                     FpExt* out_x686,
+                                     FpExt* out_x691,
+                                     FpExt* out_x719,
+                                     FpExt* out_x724,
+                                     FpExt* out_x752,
+                                     FpExt* out_x757,
+                                     FpExt* out_x785,
+                                     FpExt* out_x790,
+                                     FpExt* out_x818,
+                                     FpExt* out_x823,
+                                     FpExt* out_x852,
+                                     FpExt* out_x857,
+                                     FpExt* out_x280,
+                                     FpExt* out_x220);
 extern __device__ FpExt rv32im_v2_10(uint32_t idx,
                                      uint32_t size,
                                      Fp* arg0,
@@ -173,7 +221,9 @@ extern __device__ FpExt rv32im_v2_10(uint32_t idx,
                                      FpExt arg26,
                                      const Fp* arg27,
                                      const Fp* arg28,
-                                     const Fp* arg29);
+                                     const Fp* arg29,
+                                     FpExt* out_x708,
+                                     FpExt* out_x699);
 extern __device__ FpExt rv32im_v2_9(uint32_t idx,
                                     uint32_t size,
                                     Fp* arg0,
@@ -187,7 +237,8 @@ extern __device__ FpExt rv32im_v2_9(uint32_t idx,
                                     FpExt arg8,
                                     const Fp* arg9,
                                     const Fp* arg10,
-                                    const Fp* arg11);
+                                    const Fp* arg11,
+                                     FpExt* out_x320);
 extern __device__ FpExt rv32im_v2_8(uint32_t idx,
                                     uint32_t size,
                                     Fp* arg0,
@@ -215,7 +266,11 @@ extern __device__ FpExt rv32im_v2_7(uint32_t idx,
                                     FpExt arg8,
                                     const Fp* arg9,
                                     const Fp* arg10,
-                                    const Fp* arg11);
+                                    const Fp* arg11,
+                                     FpExt* out_x936,
+                                     FpExt* out_x538,
+                                     FpExt* out_x548,
+                                     FpExt* out_x403);
 extern __device__ FpExt rv32im_v2_6(uint32_t idx,
                                     uint32_t size,
                                     Fp* arg0,
@@ -245,7 +300,8 @@ extern __device__ FpExt rv32im_v2_5(uint32_t idx,
                                     FpExt* arg9,
                                     const Fp* arg10,
                                     const Fp* arg11,
-                                    const Fp* arg12);
+                                    const Fp* arg12,
+                                     FpExt* out_x853);
 extern __device__ FpExt rv32im_v2_4(uint32_t idx,
                                     uint32_t size,
                                     Fp* arg0,
@@ -259,7 +315,9 @@ extern __device__ FpExt rv32im_v2_4(uint32_t idx,
                                     FpExt* arg8,
                                     const Fp* arg9,
                                     const Fp* arg10,
-                                    const Fp* arg11);
+                                    const Fp* arg11,
+                                     FpExt* out_x1383,
+                                     FpExt* out_x1247);
 extern __device__ FpExt rv32im_v2_3(uint32_t idx,
                                     uint32_t size,
                                     Fp* arg0,
@@ -279,7 +337,8 @@ extern __device__ FpExt rv32im_v2_2(uint32_t idx,
                                     FpExt arg2,
                                     const Fp* arg3,
                                     const Fp* arg4,
-                                    const Fp* arg5);
+                                    const Fp* arg5,
+                                     FpExt* out_x908);
 extern __device__ FpExt rv32im_v2_1(uint32_t idx,
                                     uint32_t size,
                                     FpExt* arg0,
@@ -287,7 +346,8 @@ extern __device__ FpExt rv32im_v2_1(uint32_t idx,
                                     FpExt arg2,
                                     FpExt arg3,
                                     const Fp* arg4,
-                                    const Fp* arg5);
+                                    const Fp* arg5,
+                                     FpExt* out_x1085);
 extern __device__ FpExt rv32im_v2_0(
     uint32_t idx, uint32_t size, FpExt* arg0, FpExt arg1, FpExt arg2, FpExt arg3, const Fp* arg4);
 extern __device__ FpExt poly_fp(uint32_t idx,
@@ -298,7 +358,12 @@ extern __device__ FpExt poly_fp(uint32_t idx,
                                 const Fp* mix,
                                 const Fp* accum);
 
+#ifdef LOW_VRAM
+extern __constant__ size_t INV_RATE;
+#else
 constexpr size_t INV_RATE = 4;
+#endif
+
 constexpr size_t kNumPolyMixPows = 458;
 extern __constant__ FpExt poly_mix[kNumPolyMixPows];
 

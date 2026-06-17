@@ -161,3 +161,55 @@ __launch_bounds__(256, 4) __global__
 
   out[gid] = tmp;
 }
+
+#ifdef LOW_VRAM
+
+__launch_bounds__(256, 4) __global__
+    void _poseidon2_rows_interleave(poseidon_out_t* out, const fr_t* matrix, uint32_t dim_x, uint32_t dim_y, uint32_t codeword_id) {
+  // Shared memory buffer for thread block results
+  __shared__ poseidon_out_t s_results[256];
+
+  uint32_t gid = blockDim.x * blockIdx.x + threadIdx.x;
+  uint32_t tid = threadIdx.x;
+  bool valid = (gid < dim_x);
+
+  //          24
+  fr_t cells[CELLS] = {0};
+
+  if (valid) {
+    matrix += gid;
+    uint32_t i = 0;
+
+    do {
+#pragma unroll //                16
+      for (uint32_t j = 0; j < CELLS_RATE; j++, i++)
+        cells[j] = i < dim_y ? matrix[i * dim_x] : fr_t{0};
+
+      poseidon2::poseidon2_mix(cells);
+    } while (i < dim_y);
+
+    // Store result directly in shared memory (avoiding temporary variable)
+#pragma unroll
+    for (uint32_t i = 0; i < CELLS_OUT; i++) {
+      s_results[tid].data[i] = cells[i];
+    }
+  }
+
+  __syncthreads();
+
+  // Write to global memory using vectorized access (uint4 = 16 bytes)
+  // poseidon_out_t is 32 bytes (8 * 4 bytes), aligned to 16 bytes
+  // Use uint4 to reduce memory transactions from 8 to 2
+  if (valid) {
+    uint32_t out_idx = 4 * gid + codeword_id;
+    // Cast shared memory result to uint4 for vectorized write
+    const uint4* s_data = reinterpret_cast<const uint4*>(&s_results[tid]);
+    uint4* g_data = reinterpret_cast<uint4*>(&out[out_idx]);
+
+    // Write first 16 bytes (4 fr_t elements) as a single vectorized transaction
+    g_data[0] = s_data[0];
+    // Write second 16 bytes (4 fr_t elements) as a single vectorized transaction
+    g_data[1] = s_data[1];
+  }
+}
+#endif // LOW_VRAM

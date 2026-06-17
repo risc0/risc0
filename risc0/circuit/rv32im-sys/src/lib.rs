@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -130,4 +130,19 @@ extern "C" {
         domain: u32,
         poly_mix_pows: *const u32,
     ) -> *const std::os::raw::c_char;
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    pub fn risc0_circuit_rv32im_cuda_eval_check_interleave(
+        check: DevicePointer<u8>,
+        ctrl: DevicePointer<u8>,
+        data: DevicePointer<u8>,
+        accum: DevicePointer<u8>,
+        mix: DevicePointer<u8>,
+        out: DevicePointer<u8>,
+        rou: *const BabyBearElem,
+        po2: u32,
+        poly_mix_pows: *const u32,
+        codeword_id: u32,
+    ) -> *const std::os::raw::c_char;
+
 }

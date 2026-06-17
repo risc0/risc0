@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,6 +43,23 @@ extern "C" {
         d_inout: DevicePointer<u8>,
         lg_domain_size: u32,
         poly_count: u32,
+        beta: u32,
+        factor: u32,
+    ) -> sppark::Error;
+
+    pub fn sppark_batch_zk_shift_outplace(
+        d_in: DevicePointer<u8>,
+        d_out: DevicePointer<u8>,
+        lg_domain_size: u32,
+        poly_count: u32,
+        beta: u32,
+        factor: u32,
+    ) -> sppark::Error;
+
+    pub fn sppark_batch_coeffs_bitrev(
+        d_inout: DevicePointer<u8>,
+        lg_domain_size: u32,
+        poly_count: u32,
     ) -> sppark::Error;
 
     pub fn sppark_poseidon2_fold(
@@ -56,6 +73,15 @@ extern "C" {
         d_in: DevicePointer<u8>,
         count: u32,
         col_size: u32,
+    ) -> sppark::Error;
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    pub fn sppark_poseidon2_rows_interleave(
+        d_out: DevicePointer<u8>,
+        d_in: DevicePointer<u8>,
+        count: u32,
+        col_size: u32,
+        codeword_id: u32,
     ) -> sppark::Error;
 
     pub fn sppark_poseidon254_fold(

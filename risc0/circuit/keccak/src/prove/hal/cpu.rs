@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-use std::rc::Rc;
 
 use anyhow::Result;
 use rayon::{iter::IntoParallelIterator, prelude::*};
@@ -31,6 +29,7 @@ use risc0_zkp::{
     },
     INV_RATE,
 };
+use std::rc::Rc;
 
 use crate::{
     prove::{KeccakProver, KeccakProverImpl, GLOBAL_MIX, GLOBAL_OUT},
@@ -206,11 +205,26 @@ impl CircuitHal<CpuHal<CircuitField>> for CpuCircuitHal {
             }
         });
     }
+
+    #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    fn eval_check_interleave(
+        &self,
+        _check: &CpuBuffer<Val>,
+        _groups: &[&CpuBuffer<Val>],
+        _globals: &[&CpuBuffer<Val>],
+        _poly_mix: ExtVal,
+        _po2: usize,
+        _steps: usize,
+        _codeword_id: usize,
+    ) {
+        panic!("eval_check_interleave is not supported for CpuCircuitHal");
+    }
 }
 
 #[allow(dead_code)]
 pub fn keccak_prover() -> Result<Box<dyn KeccakProver>> {
     let hash_suite = Poseidon2HashSuite::new_suite();
+
     let hal = Rc::new(CpuHal::new(hash_suite));
     let circuit_hal = Rc::new(CpuCircuitHal);
     Ok(Box::new(KeccakProverImpl { hal, circuit_hal }))
