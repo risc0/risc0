@@ -111,6 +111,7 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// wrong row is specified.
     #[cfg(all(feature = "low_vram", feature = "cuda"))]
     #[allow(unused_variables)]
+    #[allow(clippy::too_many_arguments)]
     pub fn prove_with_idxs(
         &self,
         hal: &H,
@@ -166,7 +167,7 @@ impl<H: Hal> MerkleTreeProver<H> {
                     let sample = hal.alloc_elem("sample", self.params.col_size);
                     hal.gather_sample(
                         &sample,
-                        &code,
+                        code,
                         *idx / 4,
                         self.params.col_size,
                         self.params.row_size / 4,
@@ -182,7 +183,7 @@ impl<H: Hal> MerkleTreeProver<H> {
             let seq: Vec<u32> = (0..self.params.col_size).map(|i| i as u32).collect();
             let ps = hal.copy_from_u32("which", seq.as_slice());
 
-            let out = hal.batch_evaluate_same_x(&coeffs, self.params.col_size, &ps, xs);
+            let out = hal.batch_evaluate_same_x(coeffs, self.params.col_size, &ps, xs);
 
             // Split out into chunks of col_size and push to idx2evals
             for chunk in out.chunks(self.params.col_size) {

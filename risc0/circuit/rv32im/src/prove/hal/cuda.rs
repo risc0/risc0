@@ -100,10 +100,9 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
             bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
-        let __r = ffi_wrap(|| unsafe {
+        ffi_wrap(|| unsafe {
             risc0_circuit_rv32im_cuda_witgen(mode as u32, &buffers, &preflight, cycles as u32)
-        });
-        __r
+        })
     }
 }
 

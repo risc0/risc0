@@ -146,7 +146,7 @@ impl<'a, H: Hal> Prover<'a, H> {
                     release_buffer(
                         "accum poly evalueated",
                         self.hal,
-                        &mut pg.evaluated.as_mut().unwrap(),
+                        pg.evaluated.as_mut().unwrap(),
                     );
                 }
             }
@@ -175,7 +175,7 @@ impl<'a, H: Hal> Prover<'a, H> {
                 release_buffer(
                     "accum codeword 2",
                     self.hal,
-                    &mut pg.codewords[2].as_mut().unwrap(),
+                    pg.codewords[2].as_mut().unwrap(),
                 );
                 pg.codewords[2] = None;
             }
@@ -212,8 +212,8 @@ impl<'a, H: Hal> Prover<'a, H> {
                 let dcode0 = dgp.codewords[0].as_ref().unwrap();
                 let acode0 = agp.codewords[3].as_ref().unwrap();
 
-                self.hal.eltwise_copy_elem(&dcode0, &dgp.coeffs);
-                self.hal.batch_evaluate_ntt(&dcode0, dgp.count);
+                self.hal.eltwise_copy_elem(dcode0, &dgp.coeffs);
+                self.hal.batch_evaluate_ntt(dcode0, dgp.count);
                 self.hal.eltwise_copy_elem(acode0, &agp.coeffs);
                 self.hal.batch_evaluate_ntt(acode0, agp.count);
 
@@ -249,7 +249,7 @@ impl<'a, H: Hal> Prover<'a, H> {
                     beta,
                     1 | ZK_SHIFT_POST_BITREV,
                 ); // codeword_id=1, post-NTT bit-reverse
-                self.hal.batch_evaluate_ntt(&dcode1, dgp.count);
+                self.hal.batch_evaluate_ntt(dcode1, dgp.count);
                 self.hal.zk_shift_outplace(
                     &agp.coeffs,
                     acode1,
@@ -257,7 +257,7 @@ impl<'a, H: Hal> Prover<'a, H> {
                     beta,
                     1 | ZK_SHIFT_POST_BITREV,
                 ); // codeword_id=1, post-NTT bit-reverse
-                self.hal.batch_evaluate_ntt(&acode1, agp.count);
+                self.hal.batch_evaluate_ntt(acode1, agp.count);
 
                 let groups: Vec<&_> = vec![acode1, cgp.evaluated.as_ref().unwrap(), &dcode1];
                 circuit_hal.eval_check_interleave(
@@ -278,14 +278,14 @@ impl<'a, H: Hal> Prover<'a, H> {
                 release_buffer(
                     "accum codeword 2",
                     self.hal,
-                    &mut pg.codewords[2].as_mut().unwrap(),
+                    pg.codewords[2].as_mut().unwrap(),
                 )
             };
             if pg.codewords[3].is_some() {
                 release_buffer(
                     "accum codeword 3",
                     self.hal,
-                    &mut pg.codewords[3].as_mut().unwrap(),
+                    pg.codewords[3].as_mut().unwrap(),
                 )
             };
         }

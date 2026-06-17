@@ -55,13 +55,12 @@ mod imp {
         // Find the smallest buffer that fits — minimizes wasted capacity.
         let mut best: Option<usize> = None;
         for (i, e) in pool.iter().enumerate() {
-            if e.cap_bytes >= bytes_needed {
-                if best
+            if e.cap_bytes >= bytes_needed
+                && best
                     .map(|b| pool[b].cap_bytes > e.cap_bytes)
                     .unwrap_or(true)
-                {
-                    best = Some(i);
-                }
+            {
+                best = Some(i);
             }
         }
         best.map(|i| pool.swap_remove(i))

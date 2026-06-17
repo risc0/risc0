@@ -214,19 +214,18 @@ pub fn fri_prove<H: Hal, F>(
                 let mut cur = positions.clone();
                 for round in rounds.iter() {
                     let mut g = Vec::with_capacity(n);
-                    for pi in 0..n {
-                        cur[pi] = cur[pi] % (round.domain / FRI_FOLD);
-                        g.push(cur[pi]);
+                    for c in cur.iter_mut() {
+                        *c %= round.domain / FRI_FOLD;
+                        g.push(*c);
                     }
                     round_groups.push(g);
                 }
             }
 
             // 2. Per-round one batched prove for all positions.
-            let mut round_outputs: Vec<(Vec<Vec<H::Elem>>, Vec<Vec<Digest>>)>
-                = Vec::with_capacity(n_rounds);
-            for ri in 0..n_rounds {
-                round_outputs.push(rounds[ri].prove_queries_batch(hal, &round_groups[ri]));
+            let mut round_outputs = Vec::with_capacity(n_rounds);
+            for (round, group) in rounds.iter().zip(round_groups.iter()) {
+                round_outputs.push(round.prove_queries_batch(hal, group));
             }
 
             // 3. Write IOP pos-major (same byte order as the original loop).
@@ -235,8 +234,7 @@ pub fn fri_prove<H: Hal, F>(
                     iop.write_field_elem_slice::<H::Elem>(query.0[pi].as_slice());
                     iop.write_pod_slice(&query.1[pi]);
                 }
-                for ri in 0..n_rounds {
-                    let (samples, paths) = &round_outputs[ri];
+                for (samples, paths) in round_outputs.iter() {
                     iop.write_field_elem_slice::<H::Elem>(&samples[pi]);
                     iop.write_pod_slice(&paths[pi]);
                 }

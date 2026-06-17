@@ -79,7 +79,7 @@ impl<H: Hal> PolyGroup<H> {
         codeword_id: u32,
     ) {
         if codeword_id == 0 {
-            hal.eltwise_copy_elem(&codeword, &coeffs);
+            hal.eltwise_copy_elem(codeword, coeffs);
         } else {
             hal.zk_shift_outplace(coeffs, codeword, count, beta, codeword_id);
         }

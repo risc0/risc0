@@ -389,6 +389,7 @@ pub trait CircuitHal<H: Hal> {
 
     /// Compute check polynomial with interleaved evaluation.
     #[cfg(all(feature = "low_vram", feature = "cuda"))]
+    #[allow(clippy::too_many_arguments)]
     fn eval_check_interleave(
         &self,
         check: &H::Buffer<H::Elem>,
