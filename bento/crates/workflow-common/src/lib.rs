@@ -1,4 +1,4 @@
-// Copyright (c) 2025 RISC Zero, Inc.
+// Copyright (c) 2026 RISC Zero, Inc.
 //
 // All rights reserved.
 
@@ -28,16 +28,11 @@ pub const JOIN_WORK_TYPE: &str = "join";
 pub const SNARK_RETRIES: i32 = 0;
 pub const SNARK_TIMEOUT: i32 = 60 * 2;
 
-#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq)]
+#[derive(Debug, Default, Deserialize, Serialize, Clone, Copy, PartialEq)]
 pub enum CompressType {
+    #[default]
     None,
     Groth16,
-}
-
-impl Default for CompressType {
-    fn default() -> Self {
-        Self::None
-    }
 }
 
 /// Executor / init request
