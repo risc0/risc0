@@ -160,7 +160,7 @@ mod imp {
             let drop_count = self.len - new_len;
             unsafe {
                 let drop_start = self.ptr.as_ptr().add(new_len);
-                std::ptr::drop_in_place(std::slice::from_raw_parts_mut(drop_start, drop_count));
+                std::ptr::drop_in_place(std::ptr::slice_from_raw_parts_mut(drop_start, drop_count));
             }
             self.len = new_len;
         }
