@@ -162,7 +162,7 @@ pub(crate) trait Risc0Context {
     #[inline(always)]
     fn store_region(&mut self, addr: ByteAddr, input: &[u8]) -> Result<()> {
         let size = input.len();
-        if addr.is_aligned() && (0 == size % WORD_SIZE) {
+        if addr.is_aligned() && size.is_multiple_of(WORD_SIZE) {
             let mut waddr = addr.waddr();
             for i in (0..size).step_by(WORD_SIZE) {
                 self.store_u32(

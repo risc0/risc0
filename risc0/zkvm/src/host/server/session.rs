@@ -37,6 +37,7 @@ use crate::{
 
 use super::exec::syscall::{SyscallKind, SyscallMetric};
 
+
 /// The execution trace of a program.
 ///
 /// The record of memory transactions of an execution that starts from an
