@@ -3,7 +3,7 @@ name: CI
 on:
   merge_group:
   pull_request:
-    branches: [main, "release-*"]
+    branches: [main, "release-*", "boundless-release-*"]
   workflow_dispatch:
 
 concurrency:
@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.91.1
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
   RISC0_GROTH16_VERSION: 0.1.0
 
@@ -379,7 +379,7 @@ jobs:
             device: apple_m2_pro
             test_command: cargo nextest run
     env:
-      CARGO_BUILD_JOBS: 32
+      #CARGO_BUILD_JOBS: 32
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
@@ -517,7 +517,7 @@ jobs:
         env:
             # Pass `--update` on release branches to ensure the release-branch semver-checks are
             # always testing against the latest crates.io versions.
-            UPDATE: ${{ startsWith(github.event.pull_request.base.ref || github.head_ref || github.ref_name, 'release-') && '--update' || '' }}
+            UPDATE: ${{ (startsWith(github.event.pull_request.base.ref || github.head_ref || github.ref_name, 'release-') || startsWith(github.event.pull_request.base.ref || github.head_ref || github.ref_name, 'boundless-release-')) && '--update' || '' }}
       - run: sccache --show-stats
 
   check-template:
@@ -525,7 +525,7 @@ jobs:
     needs: changes
     runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     env:
-      RUST_TOOLCHAIN_VERSION: 1.88.0
+      RUST_TOOLCHAIN_VERSION: 1.91.1
     strategy:
       fail-fast: false
       matrix:

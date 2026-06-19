@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ fn extract_zkr(zip: &mut zip::ZipArchive<Cursor<&[u8]>>, name: &str) -> Result<V
         .with_context(|| format!("Failed to read {name}"))?;
     let uncompressed_size = f.size() as usize;
 
-    if uncompressed_size % std::mem::size_of::<u32>() != 0 {
+    if !uncompressed_size.is_multiple_of(std::mem::size_of::<u32>()) {
         bail!(".zkr is incorrect size");
     }
 

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ impl ByteAddr {
     ///
     /// Returns `true` if the address is aligned to a word boundary, otherwise returns `false`
     pub const fn is_aligned(&self) -> bool {
-        self.0 % WORD_SIZE as u32 == 0
+        self.0.is_multiple_of(WORD_SIZE as u32)
     }
 
     /// Reports if the address is null
