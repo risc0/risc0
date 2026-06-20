@@ -352,6 +352,22 @@ impl KernelBuild {
             panic!("unsupported target: {target}")
         };
 
+        let missing_tool = if env::var("RISC0_SKIP_BUILD_KERNELS").is_err() {
+            missing_metal_tool(sdk_name)
+        } else {
+            None
+        };
+        if let Some(tool) = missing_tool {
+            println!(
+                "cargo:warning=Skipping Metal kernel build: xcrun could not find `{tool}` for the {sdk_name} SDK"
+            );
+            println!(
+                "cargo:warning=CPU proving remains available; install Xcode and run `cargo clean -p risc0-sys` to enable Metal acceleration"
+            );
+            write_empty_artifact(output, "metallib");
+            return;
+        }
+
         let (files, includes) = self.build_sandbox(output);
 
         let manifest_path = self.manifest_path.canonicalize().unwrap();
@@ -431,21 +447,12 @@ impl KernelBuild {
         tags: &[String],
         inner: F,
     ) {
-        let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
         if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
-            let out_path = out_dir
-                .join("skip-".to_string() + output)
-                .with_extension(extension);
-            fs::OpenOptions::new()
-                .create(true)
-                .truncate(true)
-                .write(true)
-                .open(&out_path)
-                .unwrap();
-            println!("cargo:{}={}", output, out_path.display());
+            write_empty_artifact(output, extension);
             return;
         }
 
+        let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
         let out_path = out_dir.join(output).with_extension(extension);
         let sys_inc_dir = out_dir.join("_sys_");
 
@@ -495,6 +502,33 @@ fn risc0_cache() -> PathBuf {
         .unwrap()
         .cache_dir()
         .into()
+}
+
+fn missing_metal_tool(sdk_name: &str) -> Option<&'static str> {
+    ["metal", "metallib"]
+        .into_iter()
+        .find(|tool| !xcrun_tool_exists(sdk_name, tool))
+}
+
+fn xcrun_tool_exists(sdk_name: &str, tool: &str) -> bool {
+    Command::new("xcrun")
+        .args(["--sdk", sdk_name, "--find", tool])
+        .output()
+        .is_ok_and(|output| output.status.success())
+}
+
+fn write_empty_artifact(output: &str, extension: &str) {
+    let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
+    let out_path = out_dir
+        .join("skip-".to_string() + output)
+        .with_extension(extension);
+    fs::OpenOptions::new()
+        .create(true)
+        .truncate(true)
+        .write(true)
+        .open(&out_path)
+        .unwrap();
+    println!("cargo:{}={}", output, out_path.display());
 }
 
 struct Hasher {
