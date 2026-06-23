@@ -85,7 +85,7 @@ pub fn from_slice<T: DeserializeOwned, P: Pod>(slice: &[P]) -> Result<T> {
             let mut deserializer = Deserializer::new(vec.as_slice());
             T::deserialize(&mut deserializer)
         }
-        Err(ref e) => panic!("failed to cast or read slice as [u32]: {e}"),
+        Err(_) => return Err(Error::DeserializeUnexpectedEnd),
     }
 }
 
