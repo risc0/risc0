@@ -132,7 +132,7 @@ impl fmt::Display for SessionStats {
             .iter()
             .filter_map(|(k, v)| v.as_ref().map(|v| (k, v)))
             .collect();
-        syscall_metrics.sort_by(|a, b| a.1.count.cmp(&b.1.count));
+        syscall_metrics.sort_by_key(|a| a.1.count);
         for (name, metric) in syscall_metrics.iter().rev() {
             writeln!(f, "\t{} {name:?} calls", metric.count)?;
         }

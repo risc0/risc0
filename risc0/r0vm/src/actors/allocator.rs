@@ -88,7 +88,7 @@ impl fmt::Display for GpuUuid {
             let gpu_short = &gpu_id[gpu_id.len() - 5..];
             write!(f, "GPU-{gpu_short}")
         } else {
-            write!(f, "GPU-{}", &self.0)
+            write!(f, "GPU-{}", self.0)
         }
     }
 }
@@ -271,7 +271,7 @@ impl fmt::Display for Task {
             hw += " GPU in-use";
         }
 
-        write!(f, "{}{hw}", &self.description,)
+        write!(f, "{}{hw}", self.description,)
     }
 }
 
@@ -316,7 +316,7 @@ impl Worker {
             .hardware
             .iter()
             .filter_map(|h| match h {
-                HardwareResource::Gpu(gpu) => Some(format!("{:#}", &gpu.uuid)),
+                HardwareResource::Gpu(gpu) => Some(format!("{:#}", gpu.uuid)),
                 _ => None,
             })
             .collect::<Vec<_>>();
@@ -1102,7 +1102,7 @@ impl DeploymentVersion {
 
 impl fmt::Display for DeploymentVersion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}:{}", &self.release_channel, &self.zkvm_version)
+        write!(f, "{}:{}", self.release_channel, self.zkvm_version)
     }
 }
 
