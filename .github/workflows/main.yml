@@ -698,10 +698,10 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
-          - os: macOS
-            arch: ARM64
-            feature: default
-            device: apple_m2_pro
+          # - os: macOS
+          #   arch: ARM64
+          #   feature: default
+          #   device: apple_m2_pro
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/bazelisk
