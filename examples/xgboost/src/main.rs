@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ const JSON_MODEL: &str = include_str!("../res/trained_model.json");
 
 fn main() {
     let answer = predict();
-    println!("Prediction from the trained XGBoost model is: {}", &answer);
+    println!("Prediction from the trained XGBoost model is: {}", answer);
 }
 
 fn predict() -> f64 {

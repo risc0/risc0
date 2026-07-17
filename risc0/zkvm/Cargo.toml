@@ -1,7 +1,7 @@
 [package]
 name = "risc0-zkvm"
 description = "RISC Zero zero-knowledge VM"
-version = "3.0.5"
+version = "3.0.6"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -219,3 +219,7 @@ std = [
 ]
 unstable = ["risc0-zkvm-platform/unstable"]
 witgen_debug = ["risc0-circuit-rv32im/witgen_debug"]
+
+# This is producing false-positives for some reason
+[package.metadata.cargo-semver-checks.lints]
+method_receiver_ref_became_mut = { level = "warn" }

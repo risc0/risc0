@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -304,7 +304,7 @@ impl Display for Block {
 
 impl Debug for Block {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        f.write_str(&format!("Block({})", &hex::encode(self)))
+        f.write_str(&format!("Block({})", hex::encode(self)))
     }
 }
 

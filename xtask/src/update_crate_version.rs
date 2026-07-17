@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -140,7 +140,7 @@ fn run_inner(args: &UpdateCrateVersion, workspace_root: &Path) -> Result<()> {
         if old_version != new_version {
             println!(
                 "Updated version of {} from {old_version} to {new_version}",
-                &package.name
+                package.name
             );
         }
         new_workspace_versions.insert(package.name.clone(), new_version);

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ pub struct PrunedValueError(pub Digest);
 
 impl fmt::Display for PrunedValueError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "value is pruned: {}", &self.0)
+        write!(f, "value is pruned: {}", self.0)
     }
 }
 

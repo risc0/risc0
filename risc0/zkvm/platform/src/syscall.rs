@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -477,9 +477,9 @@ pub unsafe extern "C" fn sys_poseidon2(
     out_buf_addr: *mut [u32; DIGEST_WORDS],
     bits_count: u32,
 ) {
-    debug_assert!(state_addr as usize % WORD_SIZE == 0);
-    debug_assert!(in_buf_addr as usize % WORD_SIZE == 0);
-    debug_assert!(out_buf_addr as usize % WORD_SIZE == 0);
+    debug_assert!((state_addr as usize).is_multiple_of(WORD_SIZE));
+    debug_assert!((in_buf_addr as usize).is_multiple_of(WORD_SIZE));
+    debug_assert!((out_buf_addr as usize).is_multiple_of(WORD_SIZE));
 
     ecall_3(
         ecall::POSEIDON2,
