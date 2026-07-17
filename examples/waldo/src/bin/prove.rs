@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let img = ImageReader::open(&args.image)?.decode()?;
     println!(
         "Read image at {} with size: {} x {}",
-        &args.image.display(),
+        args.image.display(),
         img.width(),
         img.height()
     );
@@ -92,7 +92,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             )
             .into());
         }
-        println!("Read image mask at {}", &path.display(),);
+        println!("Read image mask at {}", path.display(),);
 
         Ok(Some(mask.into_raw()))
     })?;
@@ -135,7 +135,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Save the receipt to disk so it can be sent to the verifier.
     fs::write(&args.receipt, bincode::serialize(&receipt).unwrap())?;
-    println!("Success! Saved the receipt to {}", &args.receipt.display());
+    println!("Success! Saved the receipt to {}", args.receipt.display());
 
     Ok(())
 }

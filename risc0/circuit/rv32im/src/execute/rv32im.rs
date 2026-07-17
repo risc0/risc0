@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -419,7 +419,9 @@ impl Emulator {
                     ((rs1 as i32).wrapping_div(rs2 as i32)) as u32
                 }
             }
-            InsnKind::DivU => {
+            InsnKind::DivU =>
+            {
+                #[allow(clippy::manual_checked_ops)]
                 if rs2 == 0 {
                     u32::MAX
                 } else {

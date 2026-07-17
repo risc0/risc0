@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let img = ImageReader::open(&args.image)?.decode()?;
     println!(
         "Read image at {} with size: {} x {}",
-        &args.image.display(),
+        args.image.display(),
         img.width(),
         img.height()
     );
@@ -80,8 +80,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     if journal.root != img_merkle_tree.root() {
         return Err(format!(
             "Image root in journal does not match the expected image: {:?} != {:?}",
-            &journal.root,
-            &img_merkle_tree.root(),
+            journal.root,
+            img_merkle_tree.root(),
         )
         .into());
     }
@@ -109,12 +109,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Save the image to disk for the verifier to inspect.
     subimage.save(&args.waldo)?;
-    println!("Saved Waldo cutout to {}", &args.waldo.display());
+    println!("Saved Waldo cutout to {}", args.waldo.display());
 
     if args.no_display {
         println!(
             "IMPORTANT: Verify that the cutout in {} contains Waldo.",
-            &args.waldo.display()
+            args.waldo.display()
         );
     } else {
         // Display the image in the terminal for them to see whether it's Waldo.

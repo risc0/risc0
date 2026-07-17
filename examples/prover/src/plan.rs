@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -308,10 +308,10 @@ impl std::fmt::Debug for Planner {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let mut stack = Vec::new();
 
-        if self.last_task.is_none() {
-            writeln!(f, "Still in planning phases ...")?;
+        if let Some(task) = self.last_task {
+            stack.push((0, task));
         } else {
-            stack.push((0, self.last_task.unwrap()));
+            writeln!(f, "Still in planning phases ...")?;
         }
 
         while let Some((indent, cursor)) = stack.pop() {

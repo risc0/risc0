@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ const DATA_SERIALIZED: &[u8] = include_bytes!("../res/input-data/tree_model_data
 
 fn main() {
     let result = predict();
-    println!("Prediction recorded in journal is: {:?}", &result);
+    println!("Prediction recorded in journal is: {:?}", result);
 }
 
 fn predict() -> Vec<u32> {

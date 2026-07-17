@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -509,7 +509,7 @@ impl<Order: PreflightCycleOrder> PreflightTrace<Order> {
     }
 
     fn add_bits(&mut self, row: u32, col: u16, offset: u32, count: u16) {
-        assert!(count % 32 == 0);
+        assert!(count.is_multiple_of(32));
         self.scatter.push(ScatterInfo {
             offset,
             row,
@@ -520,7 +520,7 @@ impl<Order: PreflightCycleOrder> PreflightTrace<Order> {
     }
 
     fn add_shorts(&mut self, row: u32, col: u16, offset: u32, count: u16) {
-        assert!(count % 2 == 0);
+        assert!(count.is_multiple_of(2));
         self.scatter.push(ScatterInfo {
             offset,
             row,

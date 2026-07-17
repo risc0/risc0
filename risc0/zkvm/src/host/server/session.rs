@@ -301,7 +301,7 @@ impl Session {
 
         tracing::info!("ecalls");
         let mut ecall_metrics = self.ecall_metrics.clone();
-        ecall_metrics.sort_by(|a, b| a.1.cycles.cmp(&b.1.cycles));
+        ecall_metrics.sort_by_key(|a| a.1.cycles);
         for (name, metric) in ecall_metrics.iter().rev() {
             tracing::info!(
                 "\t{} {name} calls, {} cycles, ({:.2}%)",
@@ -313,7 +313,7 @@ impl Session {
 
         tracing::info!("syscalls");
         let mut syscall_metrics: Vec<_> = self.syscall_metrics.iter().collect();
-        syscall_metrics.sort_by(|a, b| a.1.count.cmp(&b.1.count));
+        syscall_metrics.sort_by_key(|a| a.1.count);
         for (name, metric) in syscall_metrics.iter().rev() {
             tracing::info!("\t{} {name:?} calls", metric.count);
         }
