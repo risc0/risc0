@@ -45,10 +45,10 @@ impl core::fmt::Debug for Planner {
 
         let mut stack = Vec::new();
 
-        if self.last_task.is_none() {
-            writeln!(f, "Still in planning phases ...")?;
+        if let Some(task) = self.last_task {
+            stack.push((0, task));
         } else {
-            stack.push((0, self.last_task.unwrap()));
+            writeln!(f, "Still in planning phases ...")?;
         }
 
         while let Some((indent, cursor)) = stack.pop() {
