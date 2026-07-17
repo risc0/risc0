@@ -18,14 +18,18 @@ stability = "0.2"
 [target.'cfg(target_os = "zkvm")'.dependencies]
 bytemuck = { version = "1.13", optional = true }
 critical-section = { version = "1.1.2", optional = true }
-embedded-alloc = { version = "0.6.0", features = [
-  "allocator_api",
-], optional = true }
 getrandom = { version = "0.3", optional = true }
 getrandom-v2 = { version = "0.2", package = "getrandom", features = [
   "custom",
 ], optional = true }
 libm = { version = "0.2", optional = true }
+
+# The current published embedded-alloc doesn't compile
+[target.'cfg(target_os = "zkvm")'.dependencies.embedded-alloc]
+git = "https://github.com/risc0/embedded-alloc"
+rev = "e412fe7ec11a3f951c8b37ceee9ee2d9fdac9d05"
+features = ["allocator_api"]
+optional = true
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
