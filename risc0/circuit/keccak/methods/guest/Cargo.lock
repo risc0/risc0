@@ -1063,7 +1063,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "3.0.5"
+version = "3.0.6"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1089,7 +1089,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.2.2"
+version = "2.2.3"
 dependencies = [
  "bytemuck",
  "cfg-if",
