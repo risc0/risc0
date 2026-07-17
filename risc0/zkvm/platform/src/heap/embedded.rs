@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use critical_section::RawRestoreState;
-use embedded_alloc::TlsfHeap as Heap;
+use risc0_embedded_alloc::TlsfHeap as Heap;
 
 #[global_allocator]
 pub static HEAP: Heap = Heap::empty();
