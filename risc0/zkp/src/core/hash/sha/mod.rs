@@ -305,7 +305,7 @@ impl Display for Block {
 
 impl Debug for Block {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        f.write_str(&format!("Block({})", &hex::encode(self)))
+        f.write_str(&format!("Block({})", hex::encode(self)))
     }
 }
 

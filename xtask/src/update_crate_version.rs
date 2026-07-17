@@ -140,7 +140,7 @@ fn run_inner(args: &UpdateCrateVersion, workspace_root: &Path) -> Result<()> {
         if old_version != new_version {
             println!(
                 "Updated version of {} from {old_version} to {new_version}",
-                &package.name
+                package.name
             );
         }
         new_workspace_versions.insert(package.name.clone(), new_version);

@@ -986,7 +986,7 @@ mod tests {
                 ",
                 crates
                     .iter()
-                    .map(|c| format!("\"{}\"", &c.name))
+                    .map(|c| format!("\"{}\"", c.name))
                     .collect::<Vec<_>>()
                     .join(", ")
             ),
@@ -1023,7 +1023,7 @@ mod tests {
                 ",
                 crates
                     .iter()
-                    .map(|c| format!("\"{}\"", &c.name))
+                    .map(|c| format!("\"{}\"", c.name))
                     .collect::<Vec<_>>()
                     .join(", ")
             ),

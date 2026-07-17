@@ -575,14 +575,10 @@ impl Profiler {
     }
 
     fn handle_inline_functions(&mut self, pc: u32, update_stack: &mut bool) {
-        loop {
-            let Some(FunctionStart::Inline(InlineFunction {
-                low_pc, high_pc, ..
-            })) = self.call_stack_path.last()
-            else {
-                break;
-            };
-
+        while let Some(FunctionStart::Inline(InlineFunction {
+            low_pc, high_pc, ..
+        })) = self.call_stack_path.last()
+        {
             if !(*low_pc..*high_pc).contains(&(pc as u64)) {
                 self.call_stack_path.pop();
                 *update_stack = true;

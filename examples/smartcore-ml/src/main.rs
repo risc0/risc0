@@ -30,7 +30,7 @@ const DATA_SERIALIZED: &[u8] = include_bytes!("../res/input-data/tree_model_data
 
 fn main() {
     let result = predict();
-    println!("Prediction recorded in journal is: {:?}", &result);
+    println!("Prediction recorded in journal is: {:?}", result);
 }
 
 fn predict() -> Vec<u32> {

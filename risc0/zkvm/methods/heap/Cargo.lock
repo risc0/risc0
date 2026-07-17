@@ -615,14 +615,14 @@ checksum = "4445909572dbd556c457c849c4ca58623d84b27c8fff1e74b0b4227d8b90d17b"
 
 [[package]]
 name = "embedded-alloc"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f2de9133f68db0d4627ad69db767726c99ff8585272716708227008d3f1bddd"
+version = "0.7.0"
+source = "git+https://github.com/risc0/embedded-alloc?rev=e412fe7ec11a3f951c8b37ceee9ee2d9fdac9d05#e412fe7ec11a3f951c8b37ceee9ee2d9fdac9d05"
 dependencies = [
  "const-default",
  "critical-section",
  "linked_list_allocator",
  "rlsf",
+ "rustversion",
 ]
 
 [[package]]
