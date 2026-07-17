@@ -1738,7 +1738,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "3.0.5"
+version = "3.0.6"
 dependencies = [
  "anyhow",
  "bincode",
@@ -6987,7 +6987,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "3.0.5"
+version = "3.0.6"
 dependencies = [
  "anyhow",
  "cargo_metadata 0.19.2",
@@ -7240,7 +7240,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "3.0.5"
+version = "3.0.6"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -7344,7 +7344,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "3.0.5"
+version = "3.0.6"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -7436,7 +7436,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.2.2"
+version = "2.2.3"
 dependencies = [
  "bytemuck",
  "cfg-if",
