@@ -1396,7 +1396,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.4"
+version = "3.0.5"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1438,7 +1438,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "4.0.5"
+version = "4.0.6"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1452,7 +1452,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.4"
+version = "4.0.5"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1465,7 +1465,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "4.0.4"
+version = "4.0.5"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -1481,7 +1481,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "3.0.1"
+version = "3.0.2"
 dependencies = [
  "bytemuck",
  "rand_core 0.9.3",
@@ -1489,7 +1489,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.4"
+version = "3.0.5"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1508,7 +1508,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.2.2"
+version = "2.2.3"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -1517,7 +1517,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "3.0.4"
+version = "3.0.5"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1657,7 +1657,7 @@ checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 
 [[package]]
 name = "rzup"
-version = "0.5.1"
+version = "0.5.2"
 dependencies = [
  "hex",
  "rsa",
