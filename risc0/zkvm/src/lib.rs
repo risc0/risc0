@@ -54,7 +54,7 @@
 //! | client           | all except rv32im | std        | Enables the client API.                                                                                                                                      |
 //! | cuda             |                   | prove, std | Enables CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed.                                                                         |
 //! | disable-dev-mode | all except rv32im |            | Disables dev mode so that proving and verifying may not be faked. Used to prevent a misplaced `RISC0_DEV_MODE` from breaking security in production systems. |
-//! | metal            | macos             | prove, std | Deprecated - Metal GPU acceleration for the prover is now enabled by default on Apple Silicon.                                                               |
+//! | metal            | macos             | prove, std | Deprecated - release-3.0 does not enable Metal GPU acceleration by default on Apple Silicon; local proving falls back to CPU in this release line.         |
 //! | prove            | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                                                                                                      |
 //! | std              | all               |            | Support for the Rust stdlib.                                                                                                                                 |
 //!
