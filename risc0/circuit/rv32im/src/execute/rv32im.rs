@@ -285,7 +285,7 @@ impl Emulator {
             // J-format jal
             (0b1101111, _, _) => self.step_compute(ctx, InsnKind::Jal, decoded),
             // I-format jalr
-            (0b1100111, _, _) => self.step_compute(ctx, InsnKind::JalR, decoded),
+            (0b1100111, 0b000, _) => self.step_compute(ctx, InsnKind::JalR, decoded),
             // System instruction
             (0b1110011, 0b000, 0b0011000) => self.step_system(ctx, InsnKind::Mret, decoded),
             (0b1110011, 0b000, 0b0000000) => self.step_system(ctx, InsnKind::Eany, decoded),
