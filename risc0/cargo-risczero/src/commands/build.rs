@@ -42,6 +42,8 @@ impl BuildCommand {
 
         let guest_opts = GuestOptionsBuilder::default()
             .features(self.features.features.clone())
+            .all_features(self.features.all_features)
+            .default_features(!self.features.no_default_features)
             .use_docker(DockerOptionsBuilder::default().build()?)
             .build()?;
 
