@@ -144,7 +144,7 @@ impl<'a> Decoder<'a> {
     fn read_digest_from_words(&mut self) -> Result<Digest> {
         let slice = try_cast_slice(self.read(DIGEST_WORDS)?)?;
         let buf = slice.iter().map(|x| x.as_u32()).collect::<Vec<u32>>();
-        Ok(Digest::try_from(buf).unwrap())
+        Ok(Digest::try_from(buf).map_err(|_| anyhow::anyhow!("invalid digest words"))?)
     }
 
     fn read_digest_from_shorts(&mut self) -> Result<Digest> {

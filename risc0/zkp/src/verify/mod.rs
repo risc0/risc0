@@ -300,10 +300,7 @@ impl<'a, F: Field> Verifier<'a, F> {
         // Ensure that we were given verifiers for all tap groups
         for (reg_group_id, verifier) in self.merkle_verifiers.iter().enumerate() {
             if !verifier.is_some() {
-                panic!(
-                    "Missing merkle verifier for reg group {reg_group_id} ({})",
-                    self.taps.group_name(reg_group_id)
-                );
+                return Err(VerificationError::InvalidProof);
             }
         }
 
@@ -457,7 +454,7 @@ impl<'a, F: Field> Verifier<'a, F> {
                 .iter()
                 .map(|merkle: &Option<MerkleTreeVerifier>| -> Result<&'a [F::Elem], VerificationError> {
                     merkle.as_ref()
-                        .unwrap()
+                        .ok_or(VerificationError::InvalidProof)?
                         .verify(self.iop().deref_mut(), hashfn, idx)
                 })
                 .collect::<Result<Vec<_>,_>>()?;
@@ -482,10 +479,10 @@ impl<'a, F: Field> Verifier<'a, F> {
 
         // Extract the out buffer and po2 from slice while checking sizes.
         let (out, &[po2_elem]) = slice.split_at(size) else {
-            unreachable!("slice returned by read_field_elem_slice is wrong size");
+            return Err(VerificationError::ReceiptFormatError);
         };
         let (&[po2], &[]) = po2_elem.to_u32_words().split_at(1) else {
-            unreachable!("po2 elem is larger than u32");
+            return Err(VerificationError::ReceiptFormatError);
         };
         if po2 as usize > MAX_CYCLES_PO2 {
             tracing::error!("po2 in seal is larger than the max po2: {po2} > {MAX_CYCLES_PO2}");
