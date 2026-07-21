@@ -61,8 +61,8 @@ struct Cli {
     verbose: u8,
 
     /// Add environment variables in the form of NAME=value.
-    #[arg(long, action = clap::ArgAction::Append)]
-    env: Vec<String>,
+    #[arg(long, action = clap::ArgAction::Append, value_parser = parse_env_var)]
+    env: Vec<(String, String)>,
 
     /// Write "pprof" protobuf output of the guest's run to this file.
     /// You can use google's pprof (<https://github.com/google/pprof>)
@@ -75,11 +75,11 @@ struct Cli {
     receipt_kind: ReceiptKind,
 
     /// Compute the image_id for the specified ELF
-    #[arg(long)]
+    #[arg(long, requires = "elf")]
     id: bool,
 
     /// Compute the kernel image ID for the specified binary.
-    #[arg(long, conflicts_with = "id")]
+    #[arg(long, conflicts_with = "id", requires = "elf")]
     kernel_id: bool,
 
     #[arg(long)]
@@ -147,6 +147,12 @@ enum ReceiptKind {
     Groth16,
 }
 
+fn parse_env_var(s: &str) -> std::result::Result<(String, String), String> {
+    s.split_once('=')
+        .map(|(k, v)| (k.to_owned(), v.to_owned()))
+        .ok_or_else(|| format!("`{s}` is not in NAME=value form"))
+}
+
 pub fn main() {
     let args = Cli::parse();
 
@@ -195,10 +201,7 @@ pub fn main() {
     let env = {
         let mut builder = ExecutorEnv::builder();
 
-        for var in args.env.iter() {
-            let (name, value) = var
-                .split_once('=')
-                .expect("Environment variables should be of the form NAME=value");
+        for (name, value) in args.env.iter() {
             builder.env_var(name, value);
         }
 
