@@ -22,11 +22,7 @@ use crate::core::{digest::Digest, hash::HashSuite};
 use crate::prove::MerkleTreeProver;
 
 #[derive(Clone)]
-pub struct BufferImpl<T, L, R>
-where
-    L: Buffer<T>,
-    R: Buffer<T>,
-{
+pub struct BufferImpl<T, L, R> {
     pub lhs: L,
     pub rhs: R,
     phantom: PhantomData<T>,
@@ -99,13 +95,10 @@ where
     }
 }
 
-pub struct DualHal<F, L, R>
-where
-    L: Hal<Field = F>,
-    R: Hal<Field = F>,
-{
+pub struct DualHal<F, L, R> {
     lhs: Rc<L>,
     rhs: Rc<R>,
+    phantom: PhantomData<F>,
 }
 
 impl<F, L, R> DualHal<F, L, R>
@@ -114,7 +107,11 @@ where
     R: Hal<Field = F>,
 {
     pub fn new(lhs: Rc<L>, rhs: Rc<R>) -> Self {
-        Self { lhs, rhs }
+        Self {
+            lhs,
+            rhs,
+            phantom: PhantomData,
+        }
     }
 }
 
@@ -473,17 +470,10 @@ where
     }
 }
 
-pub struct DualCircuitHal<F, LH, RH, LC, RC>
-where
-    F: Field,
-    LH: Hal<Field = F>,
-    RH: Hal<Field = F>,
-    LC: CircuitHal<LH>,
-    RC: CircuitHal<RH>,
-{
+pub struct DualCircuitHal<F, LH, RH, LC, RC> {
     lhs: Rc<LC>,
     rhs: Rc<RC>,
-    phantom: PhantomData<(LH, RH)>,
+    phantom: PhantomData<(F, LH, RH)>,
 }
 
 impl<F, LH, RH, LC, RC> DualCircuitHal<F, LH, RH, LC, RC>
@@ -513,10 +503,10 @@ where
 {
     fn eval_check(
         &self,
-        check: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
-        groups: &[&<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>],
-        globals: &[&<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>],
-        poly_mix: <DualHal<F, LH, RH> as Hal>::ExtElem,
+        check: &DualHal<F, LH, RH>::Buffer<F::Elem>,
+        groups: &[&DualHal<F, LH, RH>::Buffer<F::Elem>],
+        globals: &[&DualHal<F, LH, RH>::Buffer<F::Elem>],
+        poly_mix: DualHal<F, LH, RH>::ExtElem,
         po2: usize,
         steps: usize,
     ) {
@@ -546,11 +536,11 @@ where
     fn accumulate(
         &self,
         _preflight: &AccumPreflight,
-        _ctrl: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
-        _io: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
-        _data: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
-        _mix: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
-        _accum: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _ctrl: &DualHal<F, LH, RH>::Buffer<F::Elem>,
+        _io: &DualHal<F, LH, RH>::Buffer<F::Elem>,
+        _data: &DualHal<F, LH, RH>::Buffer<F::Elem>,
+        _mix: &DualHal<F, LH, RH>::Buffer<F::Elem>,
+        _accum: &DualHal<F, LH, RH>::Buffer<F::Elem>,
         _steps: usize,
     ) {
         todo!()
