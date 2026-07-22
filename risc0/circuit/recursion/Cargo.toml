@@ -20,7 +20,6 @@ default = ["prove", "test"]
 metal = ["prove"]
 prove = [
     "dep:cfg-if",
-    "dep:downloader",
     "dep:lazy-regex",
     "dep:liblzma",
     "dep:phf",
@@ -29,7 +28,6 @@ prove = [
     "dep:risc0-sys",
     "dep:serde",
     "dep:sha2",
-    "dep:zip",
     "risc0-core/perf",
     "risc0-zkp/prove",
     "risc0-circuit-recursion-povw-zkrs",
@@ -70,18 +68,6 @@ risc0-circuit-recursion-povw-zkrs = { workspace = true, optional = true }
 risc0-circuit-recursion-sys = { workspace = true, optional = true }
 risc0-circuit-recursion-zkrs = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
-zip = { version = "2.1", default-features = false, optional = true, features = [
-    "deflate",
-] }
-
-[build-dependencies]
-downloader = { version = "0.2", default-features = false, features = [
-    "rustls-tls",
-    "verify",
-], optional = true }
-hex = "0.4"
-liblzma = { version = "0.4", optional = true, features = ["static"] }
-sha2 = { version = "0.10", optional = true }
 
 [dev-dependencies]
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
