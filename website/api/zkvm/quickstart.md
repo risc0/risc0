@@ -30,6 +30,8 @@ Run `rzup` to install the RISC Zero toolchain and `cargo-risczero`.
 rzup install
 ```
 
+If `rzup install` fails while querying GitHub releases with a `401` or `Bad credentials` error, set a `GITHUB_TOKEN` environment variable or sign in with the GitHub CLI so `rzup` can reuse `~/.config/gh/hosts.yml`.
+
 ## 2. Create a New Project
 
 The `cargo-risczero` tool takes `--guest-name` parameter, a [guest] program that
