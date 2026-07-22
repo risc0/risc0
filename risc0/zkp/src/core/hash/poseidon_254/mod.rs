@@ -140,6 +140,8 @@ where
 
 impl HashFn<BabyBear> for Poseidon254HashFn {
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Box<Digest> {
+        assert!(self.is_digest_valid(a));
+        assert!(self.is_digest_valid(b));
         let mut cells = [Fr::ZERO; CELLS];
         cells[1] = digest_to_fr(a);
         cells[2] = digest_to_fr(b);
