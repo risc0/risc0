@@ -16,6 +16,7 @@
 use std::path::Path;
 
 use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin;
 use assert_fs::{TempDir, fixture::PathChild};
 use risc0_zkvm::Receipt;
 use risc0_zkvm_methods::STANDARD_LIB_ID;
@@ -38,7 +39,7 @@ fn stdio_outputs_in_receipt() {
     let temp = TempDir::new().unwrap();
     let receipt_file = temp.child("receipt.dat");
 
-    let mut cmd = Command::cargo_bin("r0vm").unwrap();
+    let mut cmd = Command::new(cargo_bin("r0vm"));
 
     cmd.arg("--elf")
         .arg(risc0_zkvm_methods::STANDARD_LIB_PATH)

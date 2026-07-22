@@ -14,6 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin;
 use assert_fs::{TempDir, fixture::PathChild};
 use risc0_zkvm::{Receipt, serde::to_vec};
 use risc0_zkvm_methods::{MULTI_TEST_PATH, multi_test::MultiTestSpec};
@@ -23,7 +24,7 @@ fn run_dev_mode() -> Receipt {
     let receipt_file = temp.child("receipt.dat");
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
 
-    let mut cmd = Command::cargo_bin("r0vm").unwrap();
+    let mut cmd = Command::new(cargo_bin("r0vm"));
     cmd.arg("--elf")
         .env("RISC0_DEV_MODE", "1")
         .arg(MULTI_TEST_PATH)
