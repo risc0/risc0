@@ -46,8 +46,8 @@ impl Syscall for NullSyscall {
         Ok(buf.len() as u32)
     }
 
-    fn host_write(&self, _ctx: &mut impl SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
-        unimplemented!()
+    fn host_write(&self, _ctx: &mut impl SyscallContext, _fd: u32, buf: &[u8]) -> Result<u32> {
+        Ok(buf.len() as u32)
     }
 }
 
@@ -154,6 +154,20 @@ pub mod kernel {
 
         asm.host_terminate(0, 0);
 
+        asm.program()
+    }
+
+    pub fn multi_write() -> Program {
+        let mut asm = Assembler::new();
+
+        for expected_len in [5_u32, 7_u32, 11_u32] {
+            asm.host_ecall_write(0, 0, expected_len);
+            asm.li(REG_T0, expected_len);
+            asm.beq(REG_A0, REG_T0, 8);
+            asm.die();
+        }
+
+        asm.host_terminate(0, 0);
         asm.program()
     }
 }
@@ -296,6 +310,14 @@ impl Assembler {
 
     pub fn host_ecall_read(&mut self, fd: u32, ptr: u32, len: u32) {
         self.li(REG_A7, HOST_ECALL_READ);
+        self.li(REG_A0, fd);
+        self.li(REG_A1, ptr);
+        self.li(REG_A2, len);
+        self.ecall();
+    }
+
+    pub fn host_ecall_write(&mut self, fd: u32, ptr: u32, len: u32) {
+        self.li(REG_A7, HOST_ECALL_WRITE);
         self.li(REG_A0, fd);
         self.li(REG_A1, ptr);
         self.li(REG_A2, len);
