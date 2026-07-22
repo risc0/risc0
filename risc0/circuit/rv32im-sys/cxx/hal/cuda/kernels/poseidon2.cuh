@@ -162,7 +162,7 @@ __launch_bounds__(256, 4) __global__
   do {
 #pragma unroll
     for (uint32_t j = 0; j < CELLS_RATE; j++, i++)
-      cells[j] = i < dim_y ? matrix[i * dim_x] : fr_t{0};
+      cells[j] = i < dim_y ? matrix[(size_t)i * dim_x] : fr_t{0};
 
     poseidon2::poseidon2_mix(cells);
   } while (i < dim_y);
