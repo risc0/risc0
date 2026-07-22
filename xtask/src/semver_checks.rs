@@ -157,7 +157,13 @@ impl SemverOutput {
         Ok(Self {
             crate_versions: crate_versions
                 .into_iter()
-                .map(|(k, v)| Ok((k, v.try_into().context("{k} missing version")?)))
+                .map(|(k, v)| {
+                    Ok((
+                        k,
+                        v.try_into()
+                            .with_context(|| format!("{k} missing version"))?,
+                    ))
+                })
                 .collect::<Result<_>>()?,
         })
     }
