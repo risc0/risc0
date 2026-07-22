@@ -187,8 +187,8 @@ impl BlockCollection {
                      preflight = {:#?}",
                     _preflight[b],
                     self.blocks[b],
-                    &self.blocks,
-                    &_preflight,
+                    self.blocks,
+                    _preflight,
                 );
             }
 
@@ -200,8 +200,8 @@ impl BlockCollection {
                      preflight = {:#?}",
                     _preflight[b],
                     self.blocks[b],
-                    &self.blocks,
-                    &_preflight,
+                    self.blocks,
+                    _preflight,
                 );
             }
         }

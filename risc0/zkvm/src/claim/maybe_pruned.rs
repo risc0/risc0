@@ -170,7 +170,7 @@ pub struct PrunedValueError(pub Digest);
 
 impl fmt::Display for PrunedValueError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "value is pruned: {}", &self.0)
+        write!(f, "value is pruned: {}", self.0)
     }
 }
 

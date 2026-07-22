@@ -416,12 +416,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         Risc0Machine::resume(self)?;
 
-        loop {
-            // Check if the machine has reached termination.
-            let None = self.terminate_state else {
-                break;
-            };
-
+        // Check if the machine has reached termination.
+        while self.terminate_state.is_none() {
             // Check the session-level row limit.
             match limit.session {
                 RowLimit::Hard(max_rows) => {

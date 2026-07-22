@@ -21,7 +21,7 @@ const JSON_MODEL: &str = include_str!("../res/trained_model.json");
 
 fn main() {
     let answer = predict();
-    println!("Prediction from the trained XGBoost model is: {}", &answer);
+    println!("Prediction from the trained XGBoost model is: {}", answer);
 }
 
 fn predict() -> f64 {

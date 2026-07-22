@@ -29,7 +29,7 @@ fn main() {
     };
 
     let password_hash = password_checker(request);
-    println!("Password hash is: {}", &password_hash);
+    println!("Password hash is: {}", password_hash);
 }
 
 fn password_checker(request: PasswordRequest) -> Digest {

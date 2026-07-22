@@ -43,7 +43,7 @@ impl fmt::Display for WorkerIdFmt {
             let short_id = &worker_id[worker_id.len() - 5..];
             write!(f, "WID-{short_id}")
         } else {
-            write!(f, "WID-{}", &self.0)
+            write!(f, "WID-{}", self.0)
         }
     }
 }
@@ -103,7 +103,7 @@ pub(crate) struct GlobalId {
 
 impl fmt::Display for GlobalId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "TASK-{}:{}", &self.job_id, &self.task_id)
+        write!(f, "TASK-{}:{}", self.job_id, self.task_id)
     }
 }
 

@@ -265,7 +265,7 @@ impl Display for Digest {
 
 impl Debug for Digest {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        f.write_str(&format!("Digest({})", &hex::encode(self)))
+        f.write_str(&format!("Digest({})", hex::encode(self)))
     }
 }
 

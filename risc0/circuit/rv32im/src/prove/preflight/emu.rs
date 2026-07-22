@@ -550,6 +550,7 @@ impl<HostIoT: HostIo> Emulator<HostIoT> {
             };
             self.unit_mul::<MulUuOptions>(trace, abs_quot, (b as i32).unsigned_abs());
         } else {
+            #[allow(clippy::manual_checked_ops)]
             if b == 0 {
                 unit.out0 = 0xffffffff;
                 unit.out1 = a;

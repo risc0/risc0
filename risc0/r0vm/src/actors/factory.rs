@@ -319,7 +319,7 @@ impl<DepsT: FactoryDeps> FactoryActor<DepsT> {
                 ScheduleTask {
                     candidates,
                     task_id,
-                    description: format!("{:?}", &msg.header.task_kind),
+                    description: format!("{:?}", msg.header.task_kind),
                     cores,
                     gpu_tokens,
                 },

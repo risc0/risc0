@@ -411,7 +411,9 @@ impl Emulator {
                     ((rs1 as i32).wrapping_div(rs2 as i32)) as u32
                 }
             }
-            InsnKind::DivU => {
+            InsnKind::DivU =>
+            {
+                #[allow(clippy::manual_checked_ops)]
                 if rs2 == 0 {
                     u32::MAX
                 } else {

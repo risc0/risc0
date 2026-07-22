@@ -80,7 +80,7 @@ impl fmt::Display for AllocationQueryResult {
                     allocation.name, allocation.amount,
                 )
                 .unwrap();
-                writeln!(f, "Total: {}", &self.total).unwrap();
+                writeln!(f, "Total: {}", self.total).unwrap();
             }
         }
         writeln!(f, "CSV hash: {}", hex::encode(&self.csv_hash))
@@ -99,7 +99,7 @@ pub fn allocate(amount: Decimal, recipients: Vec<Recipient>) -> Vec<Allocation> 
     // give consistent behavior regardless of input order. Show an example of
     // testing with a tool like proptest to detect before fixing.
     let mut recipients = recipients;
-    recipients.sort_by(|a, b| b.share.cmp(&a.share));
+    recipients.sort_by_key(|a| std::cmp::Reverse(a.share));
 
     // Compute an allocation for each recipient.
     let total_share: Decimal = recipients.iter().map(|r| r.share).sum();
