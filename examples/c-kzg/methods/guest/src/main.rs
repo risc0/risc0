@@ -18,7 +18,7 @@ use c_kzg_core::Proof;
 use risc0_zkvm::guest::env;
 use sha2::{Digest as _, Sha256};
 use std::alloc::{alloc, handle_alloc_error};
-use std::{alloc::Layout, ffi::c_void};
+use std::{alloc::Layout, ffi::c_void, mem};
 
 pub const VERSIONED_HASH_VERSION_KZG: u8 = 0x01;
 
@@ -31,8 +31,8 @@ pub fn kzg_to_versioned_hash(commitment: &KzgCommitment) -> [u8; 32] {
 #[unsafe(no_mangle)]
 // TODO ideally this is c_size_t, but not stabilized (not guaranteed to be usize on all archs)
 unsafe extern "C" fn malloc(size: usize) -> *mut c_void {
-    let layout = Layout::from_size_align(size, 4).expect("unable to allocate more memory");
-    let ptr = unsafe { alloc(layout) };
+    let align = mem::align_of::<usize>().max(16);
+    let layout = Layout::from_size_align(size, align).expect("unable to allocate more memory");
 
     if ptr.is_null() {
         handle_alloc_error(layout);
