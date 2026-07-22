@@ -74,15 +74,12 @@ where
         // Get the column data
         let hashfn = self.suite.hashfn.as_ref();
         let data = round.merkle.verify(self.iop().deref_mut(), hashfn, group)?;
-        let mut data_ext: Vec<F::ExtElem> = (0..FRI_FOLD)
-            .map(|i| {
-                let mut inps = Vec::with_capacity(F::ExtElem::EXT_SIZE);
-                for j in 0..F::ExtElem::EXT_SIZE {
-                    inps.push(data[j * FRI_FOLD + i]);
-                }
-                F::ExtElem::from_subelems(inps)
-            })
-            .collect();
+        let mut data_ext = [F::ExtElem::ZERO; FRI_FOLD];
+        for i in 0..FRI_FOLD {
+            data_ext[i] = F::ExtElem::from_subelems(
+                (0..F::ExtElem::EXT_SIZE).map(|j| data[j * FRI_FOLD + i]),
+            );
+        }
         // Check the existing goal
         if data_ext[quot] != *goal {
             return Err(VerificationError::InvalidProof);
