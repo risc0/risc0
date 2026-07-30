@@ -20,7 +20,7 @@ use std::{
     io::{Cursor, Read},
 };
 
-use anyhow::{Result, ensure};
+use anyhow::{Result, anyhow, ensure};
 use malachite::Natural;
 use risc0_binfmt::WordAddr;
 use smallvec::SmallVec;
@@ -69,6 +69,29 @@ fn check_bigint_addr(addr: WordAddr, mode: u32) -> Result<()> {
     Ok(())
 }
 
+/// Validates that the *entire* `[addr, addr + word_count)` range of words lies within the
+/// permitted bigint address space for the given `mode`.
+///
+/// `check_bigint_addr` on its own only validates the first word of a range; since `word_count`
+/// is derived from attacker/blob-controlled data (`Type::coeffs` in the bigint2 nondet program),
+/// a range starting at a valid address can still extend past the permitted boundary
+/// (`USER_BIGINT_END_ADDR` in user mode) if `word_count` is large enough. This also guards
+/// against `u32` overflow when computing the end of the range, which would otherwise let a
+/// crafted `word_count` wrap the address back into the valid range and bypass the check
+/// entirely.
+fn check_bigint_range(addr: WordAddr, word_count: u32, mode: u32) -> Result<()> {
+    check_bigint_addr(addr, mode)?;
+    if word_count == 0 {
+        return Ok(());
+    }
+    let last_word_addr = addr
+        .0
+        .checked_add(word_count - 1)
+        .map(WordAddr)
+        .ok_or_else(|| anyhow!("bigint address range overflows"))?;
+    check_bigint_addr(last_word_addr, mode)
+}
+
 impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
         tracing::trace!("load(arena: {arena}, offset: {offset}, count: {count})");
@@ -76,9 +99,9 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
             .ctx
             .load_aligned_addr_from_machine_register(LoadOp::Load, arena as usize)?;
         let start_addr = base + offset * BIGINT_WIDTH_WORDS as u32;
-        check_bigint_addr(start_addr, self.mode)?;
 
         let word_count = count.div_ceil(4);
+        check_bigint_range(start_addr, word_count, self.mode)?;
         // Note: Inline cap of 12 is chosen because blst_fp are 6 u64 limbs, so 12 u32 limbs
         let mut limbs = SmallVec::<[u32; 12]>::with_capacity(word_count as usize);
         let mut addr = start_addr;
@@ -104,6 +127,9 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
             .ctx
             .load_aligned_addr_from_machine_register(LoadOp::Load, arena as usize)?;
         let addr = base + offset * BIGINT_WIDTH_WORDS as u32;
+        // Preserve the original ordering (address check before the `count` validations below):
+        // this keeps error messages/precedence stable for callers that pass both an invalid
+        // start address and an invalid count.
         check_bigint_addr(addr, self.mode)?;
 
         tracing::trace!(
@@ -120,6 +146,12 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
             (count as usize).is_multiple_of(BIGINT_WIDTH_BYTES),
             "bigint_store: count ({count}) is not a multiple of {BIGINT_WIDTH_BYTES}"
         );
+        // `count` is validated above to be an exact, non-negative multiple of
+        // BIGINT_WIDTH_BYTES, so this division is exact. Now that `word_count` (and thus the
+        // full extent of the range) is known, validate that the *end* of the range is also
+        // within bounds -- `check_bigint_addr` above only validated the start.
+        let word_count = count / WORD_SIZE as u32;
+        check_bigint_range(addr, word_count, self.mode)?;
 
         let mut filled_chunks = 0;
         for (c_i, chunk) in limbs.chunks(BIGINT_WIDTH_WORDS).enumerate() {
@@ -550,5 +582,67 @@ mod tests {
             true,
         )
         .unwrap();
+    }
+
+    // Regression tests for a missing end-of-range check: `check_bigint_addr` only validated the
+    // *first* word of a load/store range. A range starting at a valid, in-bounds address could
+    // still extend past `USER_BIGINT_END_ADDR` (in user mode) if `count`/`word_count` was large
+    // enough, since only the start address was checked. Prior to the fix, the calls below would
+    // have succeeded instead of erroring.
+
+    #[test]
+    fn bigint_write_end_of_range_past_user_boundary() {
+        // Start address is the last valid 16-byte-aligned chunk below `USER_BIGINT_END_ADDR`,
+        // so it passes an address-only check on its own. A count of two chunks pushes the *end*
+        // of the write 16 bytes past the boundary.
+        bigint_write_oob(
+            USER_BIGINT_END_ADDR - ByteAddr(BIGINT_WIDTH_BYTES as u32),
+            (BIGINT_WIDTH_BYTES * 2) as u32,
+            false,
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_read_end_of_range_past_user_boundary() {
+        bigint_read_oob(
+            USER_BIGINT_END_ADDR - ByteAddr(BIGINT_WIDTH_BYTES as u32),
+            (BIGINT_WIDTH_BYTES * 2) as u32,
+            false,
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_write_end_of_range_within_user_boundary_still_succeeds() {
+        // Sanity check: a range that starts and ends within bounds is unaffected by the fix.
+        bigint_write_to(
+            USER_BIGINT_END_ADDR - ByteAddr(BIGINT_WIDTH_BYTES as u32),
+            false,
+            vec![0x1000001, 0x1000002, 0x1000003, 0x1000004],
+            16,
+            vec![
+                0x1, 0x0, 0x0, 0x1, // u32
+                0x2, 0x0, 0x0, 0x1, // u32
+                0x3, 0x0, 0x0, 0x1, // u32
+                0x4, 0x0, 0x0, 0x1, // u32
+            ],
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_range_check_rejects_u32_overflow_instead_of_wrapping() {
+        // A word_count large enough that `addr + (word_count - 1)` overflows `u32` must be
+        // rejected outright, rather than silently wrapping back into a range that happens to
+        // pass the bounds check.
+        let err = check_bigint_range(WordAddr(0xffff_fff0), 0xffff_ffff, 1).unwrap_err();
+        assert_eq!(err.to_string(), "bigint address range overflows");
+    }
+
+    #[test]
+    fn bigint_range_check_zero_word_count_only_checks_start() {
+        let addr = (USER_BIGINT_END_ADDR - ByteAddr(BIGINT_WIDTH_BYTES as u32)).waddr();
+        check_bigint_range(addr, 0, 0).unwrap();
     }
 }
