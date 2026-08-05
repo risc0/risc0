@@ -31,15 +31,21 @@ runs:
     - run: rustup override unset
       shell: bash
 
-    - run: rustup default ${{ inputs.toolchain }}
+    - env:
+        TOOLCHAIN: ${{ inputs.toolchain }}
+      run: rustup default "$TOOLCHAIN"
       shell: bash
 
     - if: ${{ inputs.targets != '' }}
-      run: rustup target add ${{ inputs.targets }}
+      env:
+        TARGETS: ${{ inputs.targets }}
+      run: rustup target add $TARGETS
       shell: bash
 
     - if: ${{ inputs.components != '' }}
-      run: rustup component add ${{ inputs.components }}
+      env:
+        COMPONENTS: ${{ inputs.components }}
+      run: rustup component add $COMPONENTS
       shell: bash
 
     - run: |
