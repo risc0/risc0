@@ -55,10 +55,12 @@ runs:
 
     - if: >
         runner.os == 'Linux' && inputs.disable_s3 == 'false' && startsWith(runner.name, 'i-') == true
+      env:
+        SCCACHE_KEY: ${{ inputs.key }}
       run: |
         echo "SCCACHE_REGION=us-west-2" >> $GITHUB_ENV
         echo "SCCACHE_BUCKET=risc0-ci-cache" >> $GITHUB_ENV
-        echo "SCCACHE_S3_KEY_PREFIX=public/risc0/${{ inputs.key }}/sccache" >> $GITHUB_ENV
+        echo "SCCACHE_S3_KEY_PREFIX=public/risc0/${SCCACHE_KEY}/sccache" >> $GITHUB_ENV
       shell: bash
 
     - run: |
