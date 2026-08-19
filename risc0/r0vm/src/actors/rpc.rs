@@ -76,8 +76,15 @@ impl<StreamT: AsyncWrite + Unpin> RpcSender<StreamT> {
         FutT: Future<Output = ()> + Send + 'static,
     {
         let message_id = self.registry.lock().unwrap().add_request(callback);
-        self.send(msg, message_id, RpcMessageKind::ExpectsResponse)
+        if let Err(error) = self
+            .send(msg, message_id, RpcMessageKind::ExpectsResponse)
             .await
+        {
+            self.registry.lock().unwrap().cancel_request(message_id);
+            return Err(error);
+        }
+
+        Ok(())
     }
 
     /// Send a message to the remote machine and expect no response.
@@ -204,6 +211,10 @@ impl RpcRegistry {
         self.pending_requests
             .remove(&message_id)
             .ok_or_else(|| anyhow!("received response RPC which didn't have matching request"))
+    }
+
+    fn cancel_request(&mut self, message_id: RpcMessageId) {
+        let _ = self.pending_requests.remove(&message_id);
     }
 
     fn add_request<ResponseT: DeserializeOwned, FutT>(
@@ -485,6 +496,35 @@ mod tests {
         meter_provider: SdkMeterProvider,
     }
 
+    struct FailingWriter;
+
+    impl AsyncWrite for FailingWriter {
+        fn poll_write(
+            self: Pin<&mut Self>,
+            _cx: &mut std::task::Context<'_>,
+            _buf: &[u8],
+        ) -> std::task::Poll<std::io::Result<usize>> {
+            std::task::Poll::Ready(Err(std::io::Error::new(
+                std::io::ErrorKind::BrokenPipe,
+                "write failed",
+            )))
+        }
+
+        fn poll_flush(
+            self: Pin<&mut Self>,
+            _cx: &mut std::task::Context<'_>,
+        ) -> std::task::Poll<std::io::Result<()>> {
+            std::task::Poll::Ready(Ok(()))
+        }
+
+        fn poll_shutdown(
+            self: Pin<&mut Self>,
+            _cx: &mut std::task::Context<'_>,
+        ) -> std::task::Poll<std::io::Result<()>> {
+            std::task::Poll::Ready(Ok(()))
+        }
+    }
+
     impl Fixture {
         async fn new() -> Self {
             let exporter = InMemoryMetricExporter::default();
@@ -595,6 +635,25 @@ mod tests {
         );
 
         assert_eq!(fix.tx_and_rx_messages_metrics(), (2, 2));
+    }
+
+    #[tokio::test]
+    async fn ask_send_failure_cancels_request() {
+        let meter_provider = SdkMeterProvider::builder().build();
+        let sender = RpcSender::new(
+            FailingWriter,
+            Arc::new(Mutex::new(RpcRegistry::new())),
+            meter_provider.meter("r0vm"),
+        );
+
+        for _ in 0..3 {
+            let error = sender
+                .ask(&Request::A, |_: Response| async {})
+                .await
+                .unwrap_err();
+            assert!(error.to_string().contains("error sending RPC message"));
+            assert!(sender.registry.lock().unwrap().pending_requests.is_empty());
+        }
     }
 
     #[tokio::test]
