@@ -84,43 +84,20 @@ public:
       throw std::runtime_error("Unable to make command queue");
     }
 
-    // Load the library and get the functions
+    // Load the library; pipeline states are compiled lazily in getEncoder
     NS::Error* error;
 
     auto data = dispatch_data_create(metal_kernel,
                                      metal_kernel_len,
                                      dispatch_get_main_queue(),
                                      DISPATCH_DATA_DESTRUCTOR_DEFAULT);
-    MTL::Library* library = device->newLibrary(data, &error);
+    library = device->newLibrary(data, &error);
     dispatch_release(data);
 
     if (!library) {
       LOG(0, "Unable to load library: " << error->localizedDescription()->utf8String());
       throw std::runtime_error("Unable to load library");
     }
-
-    std::mutex m;
-    auto allNames = library->functionNames();
-    parallel_map(allNames->count(), [this, &allNames, &library, &m](size_t i) {
-      NS::String* name = allNames->object<NS::String>(i);
-      std::string cppName = name->utf8String();
-      MTL::Function* func = library->newFunction(name);
-      NS::Error* error;
-      MTL::ComputePipelineState* pls = device->newComputePipelineState(func, &error);
-      func->release();
-      if (!pls) {
-        LOG(0,
-            "Unable to load kernel `" << cppName
-                                      << "`: " << error->localizedDescription()->utf8String());
-        throw std::runtime_error("Unable to load kernel");
-      }
-
-      m.lock();
-      kernels[cppName] = pls;
-      m.unlock();
-    });
-
-    library->release();
 
     // Prepare some constants
     roundConstants = copyData(risc0::p2impl::ROUND_CONSTANTS, sizeof(Fp) * 696);
@@ -144,6 +121,9 @@ public:
     }
     for (auto& [_, value] : kernels) {
       value->release();
+    }
+    if (library) {
+      library->release();
     }
     if (commandQueue) {
       commandQueue->release();
@@ -501,6 +481,7 @@ private:
   MTL::Device* device = nullptr;
   MTL::CommandQueue* commandQueue = nullptr;
   MTL::CommandBuffer* commandBuffer = nullptr;
+  MTL::Library* library = nullptr;
   std::map<std::string, MTL::ComputePipelineState*> kernels;
   IBufferPtr roundConstants;
   IBufferPtr mIntDiag;
@@ -553,17 +534,40 @@ private:
     }
   }
 
-  MTL::ComputeCommandEncoder* getEncoder(const std::string& name, size_t& groupSize) {
+  MTL::ComputePipelineState* getKernel(const std::string& name) {
     auto it = kernels.find(name);
-    if (it == kernels.end()) {
-      LOG(0, "Invalid kernel name in call to `" << name);
+    if (it != kernels.end()) {
+      return it->second;
+    }
+    MTL::Function* func =
+        library->newFunction(NS::String::string(name.c_str(), NS::UTF8StringEncoding));
+    if (!func) {
+      LOG(0, "Invalid kernel name in call to `" << name << "`");
       throw std::runtime_error("Invalid kernel name");
     }
-    groupSize = it->second->maxTotalThreadsPerThreadgroup();
+    // First use of a kernel on this machine triggers the Metal backend compile, which can take
+    // minutes for the large circuit kernels; macOS caches the result for later processes.
+    LOG(1, "Compiling metal kernel `" << name << "`");
+    NS::Error* error;
+    MTL::ComputePipelineState* pls = device->newComputePipelineState(func, &error);
+    func->release();
+    if (!pls) {
+      LOG(0,
+          "Unable to load kernel `" << name
+                                    << "`: " << error->localizedDescription()->utf8String());
+      throw std::runtime_error("Unable to load kernel");
+    }
+    kernels[name] = pls;
+    return pls;
+  }
+
+  MTL::ComputeCommandEncoder* getEncoder(const std::string& name, size_t& groupSize) {
+    MTL::ComputePipelineState* pls = getKernel(name);
+    groupSize = pls->maxTotalThreadsPerThreadgroup();
     prepBuffer();
     auto* encode = commandBuffer->computeCommandEncoder();
     encode->retain();
-    encode->setComputePipelineState(it->second);
+    encode->setComputePipelineState(pls);
     return encode;
   }
 
