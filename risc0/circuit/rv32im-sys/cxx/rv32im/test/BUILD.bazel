@@ -179,3 +179,16 @@ cc_test(
     deps = ["//rv32im/test:test_prove"],
 )
 
+cc_test(
+    name = "selector_soundness",
+    srcs = ["selector_soundness.cpp"],
+    data = [
+        ":seal_test_kernel",
+    ],
+    deps = [
+        "//prove",
+        "//rv32im/circuit",
+        "//rv32im/test:test_prove",
+        "//rv32im/witness",
+    ],
+)
