@@ -162,12 +162,28 @@ template <typename RegT, typename ValT, typename ValExtT, typename EqzCtx> struc
   FDEV typename EqzCtx::MixStateT verify() {
     // Verify the selector
     VerifyFwd::apply(*this, top->select);
+
+    // TwoHot has MAJOR_SPLIT_SIZE * MINOR_SPLIT_SIZE encodings, which may be
+    // larger than NUM_BLOCK_TYPES. Require the selected encoding to name an
+    // actual block before using it to condition the block constraints.
+    ValT validSelector = top->select.at(uint32_t(BlockType::Empty));
+#define BLOCK_TYPE(name, _count) validSelector += top->select.at(uint32_t(BlockType::name));
+    BLOCK_TYPES
+#undef BLOCK_TYPE
+    eqz(validSelector - ValT(1));
     outerMix = innerMix;
 
 // Verify inner data
 #define BLOCK_TYPE(name, _count) this->verify##name();
     BLOCK_TYPES
 #undef BLOCK_TYPE
+    // Empty rows have no block constraints, but they must still preserve the
+    // lookup accumulator.
+    reset();
+    finalize();
+    ValT condEmpty = top->select.at(uint32_t(BlockType::Empty));
+    outerMix = eqzCtx.andCond(outerMix, condEmpty, innerMix);
+
     // Verify accumTop
     // TODO: this is very ugly
     auto accumTop = reinterpret_cast<MDEV AccumTop<C>*>(reinterpret_cast<MDEV RegT*>(accum) +
