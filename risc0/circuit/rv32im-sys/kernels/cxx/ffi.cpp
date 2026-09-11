@@ -352,7 +352,15 @@ const char* risc0_circuit_rv32im_cpu_accum(AccumBuffers* buffers,
         for (size_t j = 0; j < machineColumns - 1; j++) {
           for (size_t k = 0; k < 4; k++) {
             size_t col = kUserAccumSplit + j * 4 + k;
-            buffers->accum.set(row, col, buffers->accum.get(row, col) + prev[k]);
+            // Columns this row's instruction did not write still hold Fp::invalid() here (checked
+            // is false). invalid() + prev[k] is prev[k] - 1, harmless in an unconstrained cell, but
+            // when prev[k] == 0 it is 0xffffffff - P = 0x87fffffe: a non-canonical value (>= P)
+            // that eltwise_zeroize cannot clear and that corrupts one butterfly pair of the NTT, so
+            // the committed polynomial no longer interpolates the witness and the proof fails to
+            // verify.
+            Fp cur = buffers->accum.get(row, col);
+            cur.zeroize();
+            buffers->accum.set(row, col, cur + prev[k]);
           }
         }
       });
