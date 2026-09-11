@@ -413,7 +413,14 @@ __global__ void finalizeAccum(DeviceAccumContext* ctx, uint32_t lastCycle) {
   for (size_t j = 0; j < machineColumns - 1; j++) {
     for (size_t k = 0; k < 4; k++) {
       size_t col = kUserAccumSplit + j * 4 + k;
-      accum.set(cycle, col, accum.get(cycle, col) + prev[k]);
+      // Columns this row's instruction did not write still hold Fp::invalid() here (checked is
+      // false). invalid() + prev[k] is prev[k] - 1, harmless in an unconstrained cell, but when
+      // prev[k] == 0 it is 0xffffffff - P = 0x87fffffe: a non-canonical value (>= P) that
+      // eltwise_zeroize cannot clear and that corrupts one butterfly pair of the NTT, so the
+      // committed polynomial no longer interpolates the witness and the proof fails to verify.
+      Fp cur = accum.get(cycle, col);
+      cur.zeroize();
+      accum.set(cycle, col, cur + prev[k]);
     }
   }
 }
