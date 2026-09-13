@@ -18,7 +18,7 @@
 use std::{
     cell::RefCell,
     collections::HashMap,
-    io::{BufRead, BufReader, Cursor, Read, Write},
+    io::{BufRead, BufReader, Read, Write},
     mem,
     path::{Path, PathBuf},
     rc::Rc,
@@ -142,11 +142,11 @@ impl<'a> ExecutorEnvBuilder<'a> {
         let mut inner = mem::take(&mut self.inner);
 
         if !inner.input.is_empty() {
-            let reader = Cursor::new(inner.input.clone());
+            // Serve the buffered writes first, then anything from a reader attached with `stdin`.
             inner
                 .posix_io
                 .borrow_mut()
-                .with_read_fd(fileno::STDIN, reader);
+                .prepend_read_fd(fileno::STDIN, inner.input.clone());
         }
 
         if inner.pprof_out.is_none()
@@ -350,6 +350,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add a posix-style standard input.
+    ///
+    /// Data written with [ExecutorEnvBuilder::write], [ExecutorEnvBuilder::write_slice] or
+    /// [ExecutorEnvBuilder::write_frame] is read before data from this reader.
     pub fn stdin(&mut self, reader: impl Read + 'a) -> &mut Self {
         self.read_fd(fileno::STDIN, BufReader::new(reader))
     }
@@ -458,5 +461,54 @@ impl<'a> ExecutorEnvBuilder<'a> {
     pub fn povw(&mut self, povw_job_id: impl Into<PovwJobId>) -> &mut Self {
         self.inner.povw_job_id = Some(povw_job_id.into());
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+
+    use risc0_zkvm_platform::fileno;
+
+    use super::*;
+
+    fn read_stdin(env: &ExecutorEnv<'_>) -> Vec<u8> {
+        let reader = env.posix_io.borrow().read_fds[&fileno::STDIN].clone();
+        let mut buf = vec![];
+        reader.borrow_mut().read_to_end(&mut buf).unwrap();
+        buf
+    }
+
+    #[test]
+    fn writes_only() {
+        let env = ExecutorEnv::builder().write_slice(b"head").build().unwrap();
+        assert_eq!(read_stdin(&env), b"head");
+    }
+
+    #[test]
+    fn stdin_only() {
+        let env = ExecutorEnv::builder()
+            .stdin(Cursor::new(b"tail".to_vec()))
+            .build()
+            .unwrap();
+        assert_eq!(read_stdin(&env), b"tail");
+    }
+
+    #[test]
+    fn stdin_is_kept_after_writes() {
+        let env = ExecutorEnv::builder()
+            .stdin(Cursor::new(b"tail".to_vec()))
+            .write_slice(b"head")
+            .build()
+            .unwrap();
+        assert_eq!(read_stdin(&env), b"headtail");
+
+        // Order of the builder calls does not matter; buffered writes always come first.
+        let env = ExecutorEnv::builder()
+            .write_slice(b"head")
+            .stdin(Cursor::new(b"tail".to_vec()))
+            .build()
+            .unwrap();
+        assert_eq!(read_stdin(&env), b"headtail");
     }
 }
