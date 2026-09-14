@@ -15,7 +15,9 @@
 
 use anyhow::{Result, anyhow, bail};
 use risc0_circuit_recursion::{
-    control_id::{BN254_IDENTITY_CONTROL_ID, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
+    control_id::{
+        BLAKE2B_CONTROL_IDS, BN254_IDENTITY_CONTROL_ID, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS,
+    },
     prove::Program,
 };
 use risc0_zkp::core::digest::Digest;
@@ -26,6 +28,7 @@ fn get_zkr(name: &str, hashfn: &str) -> Result<(Program, Digest)> {
     let control_ids: &[(&str, Digest)] = match hashfn {
         "poseidon2" => &POSEIDON2_CONTROL_IDS,
         "sha-256" => &SHA256_CONTROL_IDS,
+        "blake2b" => &BLAKE2B_CONTROL_IDS,
         "poseidon_254" => &[("identity.zkr", BN254_IDENTITY_CONTROL_ID)],
         _ => bail!("no control id found for {name} with {hashfn}"),
     };

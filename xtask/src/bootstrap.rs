@@ -83,6 +83,7 @@ impl Bootstrap {
         let poseidon2_control_ids =
             Self::generate_recursion_control_ids_with_hash(&zkrs, "poseidon2");
         let sha256_control_ids = Self::generate_recursion_control_ids_with_hash(&zkrs, "sha-256");
+        let blake2b_control_ids = Self::generate_recursion_control_ids_with_hash(&zkrs, "blake2b");
 
         let allowed_control_ids: Vec<(String, Digest)> = poseidon2_control_ids
             .iter()
@@ -117,6 +118,8 @@ impl Bootstrap {
             Self::format_control_ids_with_name(&poseidon2_control_ids),
             sha256_control_ids.len(),
             Self::format_control_ids_with_name(&sha256_control_ids),
+            blake2b_control_ids.len(),
+            Self::format_control_ids_with_name(&blake2b_control_ids),
         );
 
         tracing::info!("writing control ids to {CONTROL_ID_PATH_RECURSION}");

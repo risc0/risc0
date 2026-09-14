@@ -26,7 +26,8 @@ use risc0_zkp::{
     INV_RATE,
     core::{
         hash::{
-            poseidon_254::Poseidon254HashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
+            blake2b::Blake2bCpuHashSuite, poseidon_254::Poseidon254HashSuite,
+            poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
         },
         log2_ceil,
     },
@@ -170,6 +171,7 @@ pub(crate) fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>>
         "poseidon2" => Poseidon2HashSuite::new_suite(),
         "poseidon_254" => Poseidon254HashSuite::new_suite(),
         "sha-256" => Sha256HashSuite::new_suite(),
+        "blake2b" => Blake2bCpuHashSuite::new_suite(),
         _ => bail!("Unsupported hashfn: {hashfn}"),
     };
 

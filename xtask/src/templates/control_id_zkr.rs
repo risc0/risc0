@@ -34,3 +34,6 @@ pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); {}] = [{}];
 
 /// Control IDs for included recursion programs (ZKRs), using SHA-256.
 pub const SHA256_CONTROL_IDS: [(&str, Digest); {}] = [{}];
+
+/// Control IDs for included recursion programs (ZKRs), using BLAKE2b.
+pub const BLAKE2B_CONTROL_IDS: [(&str, Digest); {}] = [{}];
