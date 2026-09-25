@@ -284,8 +284,8 @@ impl Emulator {
             (0b1100011, 0b111, _) => self.step_branch(ctx, InsnKind::BgeU, decoded),
             // J-format jal
             (0b1101111, _, _) => self.step_compute(ctx, InsnKind::Jal, decoded),
-            // I-format jalr
-            (0b1100111, _, _) => self.step_compute(ctx, InsnKind::JalR, decoded),
+            // I-format jalr, funct3 is reserved as 0
+            (0b1100111, 0b000, _) => self.step_compute(ctx, InsnKind::JalR, decoded),
             // System instruction
             (0b1110011, 0b000, 0b0011000) => self.step_system(ctx, InsnKind::Mret, decoded),
             (0b1110011, 0b000, 0b0000000) => self.step_system(ctx, InsnKind::Eany, decoded),
