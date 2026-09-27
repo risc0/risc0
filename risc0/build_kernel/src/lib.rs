@@ -268,6 +268,15 @@ impl KernelBuild {
             .flag_if_supported("-fno-var-tracking")
             .flag_if_supported("-fno-var-tracking-assignments");
 
+        // Add RISC-V specific flags to handle large generated functions
+        // The poly_fp.cpp files can exceed the default medlow code model's ±1MB jump range
+        // Using medany allows jumps up to ±2GB, which accommodates these large functions
+        if let Ok(target_arch) = env::var("CARGO_CFG_TARGET_ARCH") {
+            if target_arch == "riscv64" {
+                build.flag_if_supported("-mcmodel=medany");
+            }
+        }
+
         for flag in self.flags.iter() {
             build.flag(flag);
         }
