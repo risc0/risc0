@@ -21,8 +21,8 @@ use docker_generate::DockerFile;
 use tempfile::tempdir;
 
 use crate::{
-    GuestOptions, RISC0_TARGET_TRIPLE, config::GuestInfo, encode_rust_flags, get_env_var,
-    get_package,
+    GuestOptions, RISC0_TARGET_TRIPLE, config::GuestInfo, config::GuestMetadata, encode_rust_flags,
+    get_env_var, get_package,
 };
 
 const DOCKER_IGNORE: &str = r#"
@@ -56,7 +56,7 @@ pub fn docker_build(manifest_path: &Path, guest_opts: &GuestOptions) -> Result<B
     let guest_opts = guest_opts.clone();
     let guest_info = GuestInfo {
         options: guest_opts.clone(),
-        metadata: (&pkg).into(),
+        metadata: GuestMetadata::from_package(&pkg)?,
     };
     let pkg_name = pkg.name.replace('-', "_");
     let target_dir = src_dir.join(TARGET_DIR).join(pkg_name);
