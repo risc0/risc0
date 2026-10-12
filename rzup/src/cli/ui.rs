@@ -66,8 +66,8 @@ impl TerminalUi {
                 RzupEvent::ComponentAlreadyInstalled { id, version } => {
                     self.handle_already_installed(id, version)
                 }
-                RzupEvent::InstallationFailed { id: _, version: _ } => {
-                    self.status.finish_and_clear();
+                RzupEvent::InstallationFailed { id, version } => {
+                    self.handle_install_failed(id, version);
                 }
                 RzupEvent::Uninstalled { id, version } => self.handle_uninstall(id, version),
                 RzupEvent::CheckUpdates { id } => self.handle_checking_updates(id),
@@ -102,7 +102,7 @@ impl TerminalUi {
         kind: TransferKind,
         id: String,
         version: Option<String>,
-        _url: Option<String>,
+        url: Option<String>,
         len: Option<u64>,
     ) {
         let action = match kind {
@@ -115,10 +115,22 @@ impl TerminalUi {
             message += &format!(" version {version}");
         }
         self.start_progress(message);
+        if self.verbose {
+            if let Some(url) = &url {
+                self.multi_progress
+                    .println(format!("  source: {url}"))
+                    .unwrap();
+            }
+            if let Some(len) = len {
+                self.multi_progress
+                    .println(format!("  size: {len} bytes"))
+                    .unwrap();
+            }
+        }
         if let Some(len) = len {
             let transfer_progress = ProgressBar::new(len);
             transfer_progress.set_style(
-                ProgressStyle::with_template("  [{bar}] {bytes}/{total_bytes}")
+                ProgressStyle::with_template("  [{bar}] {bytes}/{total_bytes} ({eta})")
                     .unwrap()
                     .progress_chars("=> "),
             );
@@ -190,6 +202,10 @@ impl TerminalUi {
         ));
     }
 
+    fn handle_install_failed(&mut self, id: String, version: String) {
+        self.complete_progress(&format!("✗ Failed to install {id} version {version}"));
+    }
+
     fn handle_already_installed(&mut self, id: String, version: String) {
         self.complete_progress(&format!(
             "\
@@ -205,8 +221,8 @@ impl TerminalUi {
 
     fn handle_checking_updates(&mut self, id: Option<String>) {
         match id {
-            Some(_) => {
-                self.start_progress("Checking for updates ...".to_string());
+            Some(id) => {
+                self.start_progress(format!("Checking for updates for {id} ..."));
             }
             None => {
                 self.status.finish_and_clear();
@@ -264,7 +280,9 @@ impl TextUi {
                 RzupEvent::ComponentAlreadyInstalled { id, version } => {
                     self.handle_already_installed(id, version)
                 }
-                RzupEvent::InstallationFailed { id: _, version: _ } => {}
+                RzupEvent::InstallationFailed { id, version } => {
+                    self.handle_install_failed(id, version)
+                }
                 RzupEvent::Uninstalled { id, version } => self.handle_uninstall(id, version),
                 RzupEvent::CheckUpdates { id } => self.handle_checking_updates(id),
                 RzupEvent::Debug { message } => self.handle_debug(message),
@@ -285,8 +303,8 @@ impl TextUi {
         kind: TransferKind,
         id: String,
         version: Option<String>,
-        _url: Option<String>,
-        _len: Option<u64>,
+        url: Option<String>,
+        len: Option<u64>,
     ) {
         let action = match kind {
             TransferKind::Upload => "Uploading",
@@ -298,6 +316,14 @@ impl TextUi {
             print!(" version {version}");
         }
         println!();
+        if self.verbose {
+            if let Some(url) = url {
+                println!("  source: {url}");
+            }
+            if let Some(len) = len {
+                println!("  size: {len} bytes");
+            }
+        }
     }
 
     fn handle_transfer_progress(&mut self, _id: String, _incr: u64) {}
@@ -354,6 +380,10 @@ impl TextUi {
         );
     }
 
+    fn handle_install_failed(&mut self, id: String, version: String) {
+        println!("✗ Failed to install {id} version {version}");
+    }
+
     fn handle_already_installed(&mut self, id: String, version: String) {
         println!(
             "\
@@ -368,8 +398,8 @@ impl TextUi {
     }
 
     fn handle_checking_updates(&mut self, id: Option<String>) {
-        if id.is_some() {
-            println!("Checking for updates ...");
+        if let Some(id) = id {
+            println!("Checking for updates for {id} ...");
         }
     }
 
