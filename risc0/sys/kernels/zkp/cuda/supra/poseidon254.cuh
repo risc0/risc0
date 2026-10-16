@@ -51,7 +51,7 @@ fr_t to_montgomery(fr_t fr)
 template<typename fr_t>
 __device__ __noinline__
 static fr_t sbox(fr_t fr)
-{ fr ^= 8; return fr; }
+{ fr ^= 7; return fr; }
 
 template<typename fr_t>
 __device__ __forceinline__

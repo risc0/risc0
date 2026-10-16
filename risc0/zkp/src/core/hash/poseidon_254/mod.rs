@@ -39,7 +39,8 @@ fn add_round_constants(cells: &mut [Fr; CELLS], round: usize) {
 fn sbox(x: Fr) -> Fr {
     let x2 = x * x;
     let x4 = x2 * x2;
-    x4 * x4
+    let x6 = x4 * x2;
+    x6 * x
 }
 
 fn do_full_sboxes(cells: &mut [Fr; CELLS]) {

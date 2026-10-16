@@ -58,7 +58,7 @@ const SOL_HEADER: &str = r#"// Copyright 2025 RISC Zero, Inc.
 const SOLIDITY_VERIFIER_SOURCE: &str = "groth16_proof/groth16/verifier.sol";
 const SOLIDITY_VERIFIER_TARGET: &str = "contracts/src/groth16/Groth16Verifier.sol";
 const SOLIDITY_CONTROL_ID_PATH: &str = "contracts/src/groth16/ControlID.sol";
-const SOLIDITY_TEST_RECEIPT_PATH: &str = "contracts/test/TestReceipt.sol";
+const SOLIDITY_TEST_RECEIPT_PATH: &str = "contracts/test/TestReceiptV3_1.sol";
 const RUST_VERIFIER_PATH: &str = "risc0/groth16/src/verifier.rs";
 
 impl BootstrapGroth16 {

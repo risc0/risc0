@@ -8,7 +8,7 @@ WORKDIR /usr/src/
 
 # Clone and build Circom version 2.2.2 from a specific commit
 ADD https://github.com/iden3/circom.git#e410b0d5cd2948a15931df0bc50d79ce56fa8c32 circom
-RUN (cd circom; cargo install --path circom)
+RUN (cd circom; cargo install --locked --path circom)
 
 # Add the required circuit files
 COPY groth16/risc0.circom groth16/risc0.circom
@@ -52,8 +52,8 @@ FROM golang:1.23-bookworm AS gnark
 WORKDIR /usr/src/gnark
 
 # Download the proving key and copy the generated constraint system
-ADD --checksum=sha256:69c6056451ea814b37e30ccbc44639dbaafef73540cbfbff6ec7e68e2d325735 \
-  https://artifacts.risczero.net/zkey/2024-05-17.1/stark_verify_final.zkey.gz groth16/stark_verify_final.zkey.gz
+ADD --checksum=sha256:b69993d9dbb22e6c064b1f1b75da6e176c983e23d9b308664b91188f0479abf8 \
+  https://artifacts.risczero.net/zkey/2026-10-20.1/stark_verify_final.zkey.gz groth16/stark_verify_final.zkey.gz
 COPY --from=circom /usr/src/groth16/stark_verify.r1cs groth16/stark_verify.r1cs
 
 # Pre-download Go modules for cache efficiency

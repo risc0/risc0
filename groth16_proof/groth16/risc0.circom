@@ -247,10 +247,11 @@ function MDS() {
 template sbox() {
   signal input in;
   signal output out;
-  signal x2, x4;
+  signal x2, x4, x6;
   x2 <== in * in;
   x4 <== x2 * x2;
-  out <== x4 * x4;
+  x6 <== x4 * x2;
+  out <== x6 * in;
 }
 
 template full_round(round_num) {
