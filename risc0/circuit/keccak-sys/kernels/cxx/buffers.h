@@ -30,7 +30,7 @@ struct Buffer {
   void set(size_t row, size_t col, Fp val) {
     Fp& elem = buf[col * rows + row];
     if (elem != Fp::invalid() && elem != val) {
-      printf("set(row: %zu, col: %zu, val: 0x%08x) cur: 0x%08x\n",
+      printf("KECCAK-SYS set(row: %zu, col: %zu, val: 0x%08x) cur: 0x%08x\n",
              row,
              col,
              val.asUInt32(),

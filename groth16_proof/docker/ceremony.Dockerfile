@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM rust:1.74.0 AS dependencies
+FROM rust:1.84-bookworm AS dependencies
 
 WORKDIR /src/
 
@@ -10,10 +10,11 @@ RUN apt -qq update && \
 WORKDIR /src/
 
 # Build and install circom
+# Use the same circom version and flags as prover.Dockerfile so the r1cs matches
 RUN git clone https://github.com/iden3/circom.git && \
   cd circom && \
-  git checkout e60c4ab8a0b55672f0f42fbc68a74203bdb6a700 && \
-  cargo install --path circom
+  git checkout e410b0d5cd2948a15931df0bc50d79ce56fa8c32 && \
+  cargo install --locked --path circom
 
 ENV CC=clang
 ENV CXX=clang++
@@ -26,7 +27,7 @@ COPY groth16/risc0.circom ./groth16/risc0.circom
 COPY groth16/stark_verify.circom ./groth16/stark_verify.circom
 
 # Build the r1cs
-RUN (cd groth16; circom --r1cs stark_verify.circom)
+RUN (cd groth16; circom --r1cs --O2 stark_verify.circom)
 
 # Create a final clean image with all the dependencies to run the ceremony
 FROM node AS ceremony
