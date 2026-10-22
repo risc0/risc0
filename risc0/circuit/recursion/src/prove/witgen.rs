@@ -102,7 +102,9 @@ where
         scope!("noise", {
             use risc0_zkp::ZK_CYCLES;
             let mut rng = rand::rng();
-            let noise = vec![BabyBearElem::random(&mut rng); ZK_CYCLES * CIRCUIT.data_size()];
+            let noise: Vec<BabyBearElem> = (0..ZK_CYCLES * CIRCUIT.data_size())
+                .map(|_| BabyBearElem::random(&mut rng))
+                .collect();
             hal.eltwise_copy_elem_slice(
                 &data,
                 &noise,
@@ -146,7 +148,9 @@ where
             use risc0_zkp::ZK_CYCLES;
             let mut rng = rand::rng();
             let total_cycles = self.total_cycles as usize;
-            let noise = vec![BabyBearElem::random(&mut rng); ZK_CYCLES * CIRCUIT.accum_size()];
+            let noise: Vec<BabyBearElem> = (0..ZK_CYCLES * CIRCUIT.accum_size())
+                .map(|_| BabyBearElem::random(&mut rng))
+                .collect();
             hal.eltwise_copy_elem_slice(
                 &self.accum,
                 &noise,
