@@ -158,6 +158,8 @@ struct RecursionImplWomPlonkElementLayout {
 };
 using Reg31LayoutArray = std::array<Reg, 31>;
 struct RecursionBitAndElemLayout {
+  Reg topA;
+  Reg topB;
   RecursionImplWomPlonkElementLayout inA;
   RecursionImplWomPlonkElementLayout inB;
   RecursionImplWomPlonkElementLayout out;
@@ -240,18 +242,18 @@ constexpr Mux5Layout kDataLayout =
             Mux3Layout{
                 .bitAndElem =
                     RecursionBitAndElemLayout{
+                        .topA = /*offset=*/5,
+                        .topB = /*offset=*/6,
                         .inA =
                             RecursionImplWomPlonkElementLayout{
                                 .addr = /*offset=*/11,
                                 .data = Reg4LayoutArray{
                                     /*offset=*/12, /*offset=*/13, /*offset=*/14, /*offset=*/15}},
                         .inB =
-                            RecursionImplWomPlonkElementLayout{.addr = /*offset=*/16,
-                                                               .data = Reg4LayoutArray{
-                                                                   /*offset=*/17,
-                                                                   /*offset=*/18,
-                                                                   /*offset=*/19,
-                                                                   /*offset=*/20}},
+                            RecursionImplWomPlonkElementLayout{
+                                .addr = /*offset=*/16,
+                                .data = Reg4LayoutArray{
+                                    /*offset=*/17, /*offset=*/18, /*offset=*/19, /*offset=*/20}},
                         .out =
                             RecursionImplWomPlonkElementLayout{
                                 .addr = /*offset=*/21,

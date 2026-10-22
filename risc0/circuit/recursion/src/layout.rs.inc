@@ -371,6 +371,8 @@ impl risc0_zkp::layout::Component for RecursionImplWomPlonkElementLayout {
 }
 pub type Reg31LayoutArray = [&'static Reg; 31];
 pub struct RecursionBitAndElemLayout {
+    pub top_a: &'static Reg,
+    pub top_b: &'static Reg,
     pub in_a: &'static RecursionImplWomPlonkElementLayout,
     pub in_b: &'static RecursionImplWomPlonkElementLayout,
     pub out: &'static RecursionImplWomPlonkElementLayout,
@@ -383,6 +385,8 @@ impl risc0_zkp::layout::Component for RecursionBitAndElemLayout {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("top_a", self.top_a)?;
+        v.visit_component("top_b", self.top_b)?;
         v.visit_component("in_a", self.in_a)?;
         v.visit_component("in_b", self.in_b)?;
         v.visit_component("out", self.out)?;
@@ -579,6 +583,8 @@ pub const DATA_LAYOUT: &Mux5Layout = &Mux5Layout {
     },
     macro_ops: &Mux3Layout {
         bit_and_elem: &RecursionBitAndElemLayout {
+            top_a: &Reg { offset: 5 },
+            top_b: &Reg { offset: 6 },
             in_a: &RecursionImplWomPlonkElementLayout {
                 addr: &Reg { offset: 11 },
                 data: &[

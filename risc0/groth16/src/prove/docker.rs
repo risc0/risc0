@@ -54,7 +54,7 @@ pub(crate) fn shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         .arg("--rm")
         .arg("-v")
         .arg(format!("{}:/mnt", work_dir.to_string_lossy()))
-        .arg("risczero/risc0-groth16-prover:v2026-10-14.1")
+        .arg("risczero/risc0-groth16-prover:v2026-10-20.1")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .output()?;

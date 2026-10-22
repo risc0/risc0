@@ -28,7 +28,7 @@ pub(crate) fn shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
 
     let root_dir = Rzup::new()
         .context("failed to initialize rzup")?
-        .get_version_dir(&Component::Risc0Groth16, &Version::new(0, 1, 0))
+        .get_version_dir(&Component::Risc0Groth16, &Version::new(0, 2, 0))
         .context(
             "Missing required `risc0-groth16` rzup component. \
             To install it, run `rzup install risc0-groth16`. \
