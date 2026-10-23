@@ -55,7 +55,7 @@ cargo run --release
 [example-ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 [example-hello]: https://github.com/risc0/risc0/tree/main/examples/hello-world
 [example-json]: https://github.com/risc0/risc0/tree/main/examples/json
-[example-waldo]: https://github.com/risc0/risc0/tree/main/examples/waldo
+[example-waldo]: https://github.com/risc0/risc0/tree/release-3.0/examples/waldo
 [examples-dir]: https://github.com/risc0/risc0/tree/main/examples
 [install]: ./install.md
 [releases]: https://github.com/risc0/risc0/releases
