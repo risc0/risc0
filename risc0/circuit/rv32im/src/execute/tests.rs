@@ -22,6 +22,63 @@ use crate::{
     execute::{ExecutionLimit, testutil},
 };
 
+/// Builds a `jalr x0, 0(x0)` raw word with the given `funct3`.
+fn jalr_word(funct3: u32) -> u32 {
+    (0 << 20) | (0 << 15) | (funct3 << 12) | (0 << 7) | 0b1100111
+}
+
+/// Runs a one-instruction program and returns the trap message, or `None` if it ran to
+/// completion.
+///
+/// On unfixed code every `funct3` decodes as `jalr` and jumps to 0, so all eight encodings
+/// produce the same `InstructionFault`. With the fix, only `funct3 == 0` reaches the jump.
+fn trap_with(funct3: u32) -> Option<String> {
+    let mut asm = testutil::Assembler::new();
+    asm.push_word(jalr_word(funct3));
+
+    let image = MemoryImage::new_kernel(asm.program());
+    testutil::execute(
+        image,
+        testutil::DEFAULT_EXECUTION_LIMIT,
+        testutil::NullSyscall,
+        None,
+    )
+    .err()
+    .map(|err| format!("{err:?}"))
+}
+
+/// `jalr` is only defined for `funct3 == 0`. The fast executor matched
+/// `(0b1100111, _, _)`, so a reserved encoding was decoded as `jalr` and the resulting jump
+/// produced `InstructionFault` instead of the `IllegalInstruction` the preflight decoder
+/// requires.
+#[test]
+fn jalr_with_reserved_funct3_traps_as_illegal_instruction() {
+    for funct3 in 1..=7u32 {
+        let message = trap_with(funct3).unwrap_or_else(|| {
+            panic!("funct3 = {funct3:03b} should trap as IllegalInstruction, but it ran")
+        });
+        assert!(
+            message.contains("IllegalInstruction"),
+            "funct3 = {funct3:03b} should trap as IllegalInstruction, got {message}"
+        );
+    }
+}
+
+/// The control: with `funct3 == 0` the encoding is a real `jalr`, so the failure is the jump
+/// landing at 0 rather than an illegal-instruction decode.
+#[test]
+fn jalr_with_valid_funct3_is_decoded_as_jalr() {
+    let message = trap_with(0b000).expect("jalr to address 0 must fault");
+    assert!(
+        !message.contains("IllegalInstruction"),
+        "funct3 = 000 is a valid jalr and must not decode as illegal, got {message}"
+    );
+    assert!(
+        message.contains("InstructionFault"),
+        "expected the jump itself to fault, got {message}"
+    );
+}
+
 #[test]
 fn basic() {
     let program = testutil::kernel::basic();
