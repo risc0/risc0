@@ -92,8 +92,6 @@
   "rust-analyzer.showUnlinkedFileNotification": false,
   "rust-analyzer.linkedProjects": [
     "Cargo.toml",
-    "benchmarks/Cargo.toml",
-    "bento/Cargo.toml",
     "examples/Cargo.toml",
     "risc0/bigint2/methods/guest/Cargo.toml",
     "risc0/cargo-risczero/tests/test_crate/Cargo.toml",
@@ -110,6 +108,5 @@
   "rust-analyzer.check.command": "clippy",
   "rust-analyzer.check.extraArgs": [
     "--target-dir=target/analyzer"
-  ],
-  "biome.lspBin": "web/node_modules/.bin/biome"
+  ]
 }
