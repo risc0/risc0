@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "biomejs.biome",
     "EditorConfig.EditorConfig",
     "kriegalex.vscode-cudacpp",
     "llvm-vs-code-extensions.vscode-clangd",
