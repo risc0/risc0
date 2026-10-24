@@ -10,13 +10,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# this is needed to gain access via OIDC to the S3 bucket for caching
 permissions:
-  id-token: write
   contents: read
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CC: clang
+  CXX: clang++
 
 jobs:
   # see: https://github.com/orgs/community/discussions/26822
@@ -91,14 +93,14 @@ jobs:
   doc-test-main:
     if: needs.changes.outputs.doc-test-main == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, Linux, X64, cpu]
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
+      - uses: ./.github/actions/free-disk
       - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
       - run: cargo run --bin rzup -- --verbose install rust 1.97.0
       - run: cargo run --bin rzup -- --verbose install cpp 2024.01.05
         env:
@@ -110,8 +112,6 @@ jobs:
       - name: test
         run: cargo test --release
         working-directory: website/doc-test/main
-
-      - run: sccache --show-stats
 
   # doc-test-stable:
   #   if: needs.changes.outputs.doc-test-stable == 'true'
