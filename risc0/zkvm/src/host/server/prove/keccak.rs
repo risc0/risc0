@@ -51,7 +51,7 @@ pub(crate) fn prove_keccak(request: &ProveKeccakRequest) -> Result<SuccinctRecei
             .map(BabyBearElem::new)
             .collect::<Vec<_>>();
 
-        let mut zkr_input: Vec<u32> = Vec::new();
+        let mut zkr_input: Vec<u32> = Vec::with_capacity(DIGEST_WORDS + seal.len() + claim_sha_input.len() + 1);
         zkr_input.extend(request.control_root.as_words());
         zkr_input.extend(seal);
         zkr_input.extend(bytemuck::cast_slice(claim_sha_input.as_slice()));
