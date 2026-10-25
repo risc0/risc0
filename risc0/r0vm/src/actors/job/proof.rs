@@ -508,75 +508,88 @@ impl JobActor {
     }
 
     async fn maybe_finish_keccak_mmr(&mut self) -> Result<bool> {
+        // Early return if no keccak proofs or already done
         if self.keccak_count == 0 || self.keccak_phase == KeccakPhase::Done {
             self.keccak_phase = KeccakPhase::Done;
             return Ok(true);
         }
 
-        if self.keccak_phase == KeccakPhase::Build {
-            if self.unions.is_empty() || self.unions[0].len() != self.keccak_count {
-                return Ok(false);
+        match self.keccak_phase {
+            KeccakPhase::Build => self.handle_build_phase().await,
+            KeccakPhase::MergePeaks => {
+                tracing::info!("MergePeaks");
+                Ok(false)
             }
-
-            tracing::debug!("required: {:?}", self.required_keccak_layers);
-            tracing::debug!(
-                "actual:   {:?}",
-                self.unions.iter().map(|x| x.len()).collect::<Vec<_>>()
-            );
-            if self.required_keccak_layers.len() != self.unions.len()
-                || self
-                    .required_keccak_layers
-                    .iter()
-                    .zip(self.unions.iter().map(|x| x.len()))
-                    .any(|(x, y)| *x != y)
-            {
-                return Ok(false);
-            }
-
-            for layer_pos in mmr_peaks(&self.required_keccak_layers) {
-                let receipt = self
-                    .unions
-                    .get(layer_pos)
-                    .ok_or_else(|| Error::new("union mismatch: wrong length"))?
-                    .last()
-                    .ok_or_else(|| Error::new("union mismatch: empty layer"))?
-                    .clone()
-                    .ok_or_else(|| Error::new("union mismatch: missing receipt"))?;
-                self.pending_keccak_peaks.push_back(receipt);
-            }
-
-            if self.pending_keccak_peaks.len() > 1 {
-                let lhs = self
-                    .pending_keccak_peaks
-                    .pop_front()
-                    .expect("len should be > 1");
-                let rhs = self
-                    .pending_keccak_peaks
-                    .pop_front()
-                    .expect("len should be > 1");
-                self.union(0, 0, lhs, rhs).await?;
-                self.keccak_phase = KeccakPhase::MergePeaks;
-            }
+            KeccakPhase::Done => Ok(true),
         }
+    }
 
-        if self.keccak_phase == KeccakPhase::MergePeaks {
-            tracing::info!("MergePeaks");
+    async fn handle_build_phase(&mut self) -> Result<bool> {
+        // Check if unions are ready
+        if self.unions.is_empty() || self.unions[0].len() != self.keccak_count {
             return Ok(false);
         }
 
-        if self.pending_keccak_peaks.len() == 1 {
-            if self.keccak_root.is_some() {
-                return Err(Error::new("completed keccak root twice"));
-            }
-            self.keccak_root = Some(
-                self.pending_keccak_peaks
-                    .pop_front()
-                    .expect("len should be == 1"),
-            );
-            self.keccak_phase = KeccakPhase::Done;
-            tracing::info!("KeccakPhase::Done from Singleton");
+        // Validate that all required layers are complete
+        tracing::debug!("required: {:?}", self.required_keccak_layers);
+        tracing::debug!(
+            "actual:   {:?}",
+            self.unions.iter().map(|x| x.len()).collect::<Vec<_>>()
+        );
+        if self.required_keccak_layers.len() != self.unions.len()
+            || self
+                .required_keccak_layers
+                .iter()
+                .zip(self.unions.iter().map(|x| x.len()))
+                .any(|(x, y)| *x != y)
+        {
+            return Ok(false);
         }
 
+        // Collect MMR peaks from completed layers
+        for layer_pos in mmr_peaks(&self.required_keccak_layers) {
+            let receipt = self
+                .unions
+                .get(layer_pos)
+                .ok_or_else(|| Error::new("union mismatch: wrong length"))?
+                .last()
+                .ok_or_else(|| Error::new("union mismatch: empty layer"))?
+                .clone()
+                .ok_or_else(|| Error::new("union mismatch: missing receipt"))?;
+            self.pending_keccak_peaks.push_back(receipt);
+        }
+
+        // If multiple peaks, start merging; otherwise finalize single peak
+        if self.pending_keccak_peaks.len() > 1 {
+            let lhs = self
+                .pending_keccak_peaks
+                .pop_front()
+                .expect("len should be > 1");
+            let rhs = self
+                .pending_keccak_peaks
+                .pop_front()
+                .expect("len should be > 1");
+            self.union(0, 0, lhs, rhs).await?;
+            self.keccak_phase = KeccakPhase::MergePeaks;
+            Ok(false)
+        } else if self.pending_keccak_peaks.len() == 1 {
+            self.finalize_keccak_root().await
+        } else {
+            Ok(true)
+        }
+    }
+
+    async fn finalize_keccak_root(&mut self) -> Result<bool> {
+        if self.keccak_root.is_some() {
+            return Err(Error::new("completed keccak root twice"));
+        }
+        let root = self
+            .pending_keccak_peaks
+            .pop_front()
+            .expect("len should be == 1");
+        self.keccak_root = Some(root);
+        self.keccak_phase = KeccakPhase::Done;
+        tracing::info!("KeccakPhase::Done from Singleton");
         Ok(true)
     }
 
