@@ -29,6 +29,9 @@ use risc0_zkvm::{
 use ruint::{aliases::U256, Uint};
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "prover")]
+use rayon::prelude::*;
+
 use crate::{
     consts::{EMPTY_SUBTREE_ROOTS, FULL_SUBTREE_ROOTS},
     error::Error,
@@ -318,12 +321,27 @@ impl WorkLog {
     /// This proves that the job subtree at the given ID is empty (for non-inclusion proofs).
     pub fn prove_job_opening(&self, job_id: u64) -> SubtreeOpening<Self, { Job::TREE_HEIGHT }> {
         let mut index = job_id;
+        let path_len = Self::TREE_HEIGHT - Job::TREE_HEIGHT;
+        // Pre-calculate all indices
+        let indices: Vec<(usize, U96)> = (0..path_len)
+            .map(|i| {
+                let height = Job::TREE_HEIGHT + i;
+                let idx = U96::from(index ^ 1);
+                index >>= 1;
+                (height, idx)
+            })
+            .collect();
 
-        // Build the path as the sibling of each subtree root in the path to the root.
+        // Compute all subtree_root in parallel
+        let digests: Vec<Digest> = if path_len > 4 {
+            indices.par_iter().map(|(h, idx)| self.subtree_root(*h, *idx)).collect()
+        } else {
+            indices.iter().map(|(h, idx)| self.subtree_root(*h, *idx)).collect()
+        };
+
         let mut path = Box::<Array<Digest, _>>::default();
-        for i in 0..path.len() {
-            path[i] = self.subtree_root(Job::TREE_HEIGHT + i, U96::from(index ^ 1));
-            index >>= 1;
+        for (i, digest) in digests.into_iter().enumerate() {
+            path[i] = digest;
         }
 
         SubtreeOpening { path }
@@ -351,12 +369,22 @@ impl WorkLog {
 
         // A level of the tree, holding only roots of non-empty subtrees that are decendents of the
         // desired root. Starts holding all decendent nodes at Job::TREE_HEIGHT + 1.
-        let mut level: BTreeMap<u64, Digest> = self
-            .jobs
-            .iter()
-            .filter(|(id, _)| id.checked_shr(height_offset as u32).unwrap_or(0) == index)
-            .map(|(id, job)| (*id, job.commit()))
-            .collect();
+
+        let mut level: BTreeMap<u64, Digest> = if self.jobs.len() > 20 {
+            // Parallel for large job sets
+            self.jobs
+                .par_iter()
+                .filter(|(id, _)| id.checked_shr(height_offset as u32).unwrap_or(0) == index)
+                .map(|(id, job)| (*id, job.commit()))
+                .collect()
+        } else {
+            // Sequential for small job sets
+            self.jobs
+                .iter()
+                .filter(|(id, _)| id.checked_shr(height_offset as u32).unwrap_or(0) == index)
+                .map(|(id, job)| (*id, job.commit()))
+                .collect()
+        };
 
         // Index is of an empty subtree
         if level.is_empty() {
@@ -367,15 +395,29 @@ impl WorkLog {
         #[allow(clippy::needless_range_loop)]
         for i in Job::TREE_HEIGHT..height {
             let next_level_keys: BTreeSet<u64> = level.keys().map(|idx| idx >> 1).collect();
-            level = next_level_keys
-                .into_iter()
-                .map(|idx| {
-                    let empty = &EMPTY_SUBTREE_ROOTS[i];
-                    let left = level.get(&(idx << 1)).unwrap_or(empty);
-                    let right = level.get(&((idx << 1) ^ 1)).unwrap_or(empty);
-                    (idx, join(*left, *right))
-                })
-                .collect();
+            level = if next_level_keys.len() > 4 {
+                // Parallel processing
+                next_level_keys
+                    .par_iter()
+                    .map(|&idx| {
+                        let empty = &EMPTY_SUBTREE_ROOTS[i];
+                        let left = level.get(&(idx << 1)).unwrap_or(empty);
+                        let right = level.get(&((idx << 1) ^ 1)).unwrap_or(empty);
+                        (idx, join(*left, *right))
+                    })
+                    .collect()
+            } else {
+                // For small sets, sequential is faster (no threading overhead)
+                next_level_keys
+                    .into_iter()
+                    .map(|idx| {
+                        let empty = &EMPTY_SUBTREE_ROOTS[i];
+                        let left = level.get(&(idx << 1)).unwrap_or(empty);
+                        let right = level.get(&((idx << 1) ^ 1)).unwrap_or(empty);
+                        (idx, join(*left, *right))
+                    })
+                    .collect()
+            };
         }
 
         // At this point, there should be exactly one node in the level.
