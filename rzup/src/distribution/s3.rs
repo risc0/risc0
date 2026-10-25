@@ -14,7 +14,7 @@
 
 use crate::components::Component;
 use crate::distribution::{
-    download_bytes, download_json,
+    copy_with_resume, download_bytes, download_json,
     sha2::{Sha256Digest, Sha256Writer},
     signature::{PublicKey, Signature},
     DistributionPlatform, ProgressWriter,
@@ -590,7 +590,7 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
         let base_url = &self.base_urls.s3_base_url;
         let download_url =
             format!("{base_url}/rzup/components/{component}/sha256/{artifact_sha256}");
-        let mut resp = download_bytes(&download_url, &None)?;
+        let resp = download_bytes(&download_url, &None)?;
 
         env.emit(RzupEvent::TransferStarted {
             kind: TransferKind::Download,
@@ -605,8 +605,13 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
             env,
             &mut download_file,
         ));
-        resp.copy_to(&mut writer)
-            .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
+        copy_with_resume(resp, &download_url, &None, &mut writer, |received, err| {
+            env.emit(RzupEvent::Print {
+                message: format!(
+                    "Download of {component} interrupted after {received} bytes ({err}); resuming"
+                ),
+            });
+        })?;
 
         let download_sha = writer.finish();
 
