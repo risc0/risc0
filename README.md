@@ -98,6 +98,8 @@ Next we can install the RISC Zero toolchain by running `rzup install`:
 rzup install
 ```
 
+If this step fails while querying GitHub releases with a `401` or `Bad credentials` error, set a `GITHUB_TOKEN` environment variable or sign in with the GitHub CLI so `rzup` can reuse `~/.config/gh/hosts.yml`.
+
 You can verify the installation was successful by running:
 
 ```bash

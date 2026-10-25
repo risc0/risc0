@@ -15,6 +15,8 @@ curl -L https://risczero.com/install | bash
 rzup install
 ```
 
+If `rzup install` fails while querying GitHub releases with a `401` or `Bad credentials` error, set a `GITHUB_TOKEN` environment variable or sign in with the GitHub CLI so `rzup` can reuse `~/.config/gh/hosts.yml`.
+
 To install from local source, use:
 
 ```bash

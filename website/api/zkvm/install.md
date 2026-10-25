@@ -20,6 +20,7 @@ The RISC Zero zkVM requires [Rust]. If you don't already have Rust and [rustup] 
    ```
 
 Running `rzup` will install the latest released version of the RISC Zero toolchain.
+If the GitHub releases request returns `401` or `Bad credentials`, set a `GITHUB_TOKEN` environment variable or sign in with the GitHub CLI so `rzup` can reuse `~/.config/gh/hosts.yml`.
 
 For a specific version, use `rzup install cargo-risczero <version>`, where the `<version>` is a released SemVer version (e.g `1.1.1`). See [releases].
 
