@@ -50,7 +50,7 @@ fn error_on_status(
         let body = response.text().ok();
 
         Err(RzupError::Other(format!(
-            "Remote error: {host}: {body:?}: {url}"
+            "Remote error: {host}: {status}: {body:?}: {url}"
         )))
     } else {
         Ok(response)

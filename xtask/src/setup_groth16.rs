@@ -44,7 +44,7 @@ impl SetupGroth16 {
         if !sh.path_exists(setup_params.srs_path.as_path()) {
             let mut zkey_gz_path = setup_params.srs_path.as_path().to_path_buf();
             zkey_gz_path.set_extension("zkey.gz");
-            let url = "https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkey/2024-05-17.1/stark_verify_final.zkey.gz";
+            let url = "https://artifacts.risczero.net/zkey/2024-05-17.1/stark_verify_final.zkey.gz";
             cmd!(sh, "curl -o {zkey_gz_path} {url}").run().unwrap();
             cmd!(sh, "gunzip {zkey_gz_path}").run().unwrap();
         }
