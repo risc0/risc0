@@ -14,7 +14,7 @@
 
 #include "eval_check.cuh"
 
-#include "cuda.h"
+#include "cuda_util.h"
 #include "supra/fp.h"
 
 #include <exception>

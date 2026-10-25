@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "cuda.h"
+#include "cuda_util.h"
 #include "fp.h"
 #include "fpext.h"
 #include "kernels.h"

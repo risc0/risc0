@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "context.h"
-#include "cuda.h"
+#include "cuda_util.h"
 #include "fp.h"
 #include "fpext.h"
 #include "kernels.h"

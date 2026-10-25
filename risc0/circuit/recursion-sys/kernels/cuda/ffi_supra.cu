@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "cuda.h"
+#include "cuda_util.h"
 #include "supra/fp.h"
 
 extern __constant__ FpExt poly_mix[158];
