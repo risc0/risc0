@@ -40,9 +40,20 @@ RISC0_PPROF_OUT=./profile.pb RUST_LOG=info RISC0_DEV_MODE=1 RISC0_INFO=1 cargo r
 ```
 
 The above command will run the Fibonacci computation for 1000 iterations and
-write the profiling output to `profile.pb`. Use the environment variable
-`RISC0_PPROF_OUT` to set to the desired output path for the profiling data.
-We recommend running profiling in [dev mode][devmode] to avoid unnecessary proving time.
+write the profiling output to `profile.pb`. The `RISC0_PPROF_OUT` environment
+variable is required to enable pprof output when launching your program via
+the CLI; it tells the host to write the profile to the given path. You can
+also enable profiling programmatically by calling
+`ExecutorEnv::builder().enable_profiler("profile.pb")` in your host code.
+
+The `RISC0_DEV_MODE=1` setting enables [dev mode][devmode], which disables
+proof generation and is recommended while iterating on performance to avoid
+unnecessary proving time.
+
+The `RISC0_INFO=1` environment variable turns on additional textual statistics
+about the zkVM session, including total and user cycles and other per-session
+metrics. These statistics are logged with `tracing::info!`, so setting
+`RUST_LOG=info` ensures they are visible in your log output.
 
 ### Step 3: Visualization
 
