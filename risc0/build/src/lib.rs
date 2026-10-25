@@ -724,6 +724,7 @@ struct GuestPackageWithOptions {
     name: String,
     pkg: Package,
     opts: GuestOptions,
+    metadata: GuestMetadata,
     target_dir: PathBuf,
 }
 
@@ -741,10 +742,16 @@ fn do_embed_methods<G: GuestBuilder>(mut guest_opts: HashMap<&str, GuestOptions>
         let opts = guest_opts
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
+        // Parse the guest metadata up front so that a malformed
+        // `[package.metadata.risc0]` table is reported once, before any guest is
+        // built, instead of being silently ignored.
+        let metadata =
+            GuestMetadata::from_package(&guest_pkg).unwrap_or_else(|err| panic!("{err:#}"));
         pkg_opts.push(GuestPackageWithOptions {
             name: format!("{}.{}", pkg.name, guest_pkg.name),
             pkg: guest_pkg,
             opts,
+            metadata,
             target_dir: guest_dir,
         });
     }
@@ -775,7 +782,7 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
 
             let guest_info = GuestInfo {
                 options: guest.opts.clone(),
-                metadata: (&guest.pkg).into(),
+                metadata: guest.metadata.clone(),
             };
 
             if guest.opts.use_docker.is_some() {
@@ -877,7 +884,7 @@ pub fn build_package(
 
     let guest_info = GuestInfo {
         options: options.clone(),
-        metadata: pkg.into(),
+        metadata: GuestMetadata::from_package(pkg)?,
     };
 
     let profile = if is_debug() { "debug" } else { "release" };

@@ -116,7 +116,7 @@ impl GuestOptions {
 }
 
 /// Metadata defining options to build a guest
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub(crate) struct GuestMetadata {
     /// Configuration flags to build the guest with.
     #[serde(rename = "rustc-flags")]
@@ -127,12 +127,22 @@ pub(crate) struct GuestMetadata {
     pub(crate) kernel: bool,
 }
 
-impl From<&Package> for GuestMetadata {
-    fn from(pkg: &Package) -> Self {
+impl GuestMetadata {
+    /// Read the `[package.metadata.risc0]` table from a package.
+    ///
+    /// A missing table is not an error and yields the defaults. A table that is
+    /// present but cannot be deserialized is reported as an error naming the
+    /// offending package, rather than silently falling back to the defaults.
+    pub(crate) fn from_package(pkg: &Package) -> Result<Self> {
         let Some(obj) = pkg.metadata.get("risc0") else {
-            return Default::default();
+            return Ok(Self::default());
         };
-        serde_json::from_value(obj.clone()).unwrap_or_default()
+        serde_json::from_value(obj.clone()).with_context(|| {
+            format!(
+                "invalid `[package.metadata.risc0]` table in package `{}`",
+                pkg.name
+            )
+        })
     }
 }
 
@@ -145,4 +155,72 @@ pub(crate) struct GuestInfo {
 
     /// Metadata specified in guest crate `Cargo.toml`.
     pub(crate) metadata: GuestMetadata,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Build a `Package` whose `[package.metadata.risc0]` table is `metadata`.
+    fn package(metadata: serde_json::Value) -> Package {
+        serde_json::from_value(serde_json::json!({
+            "name": "guest",
+            "version": "0.1.0",
+            "id": "path+file:///tmp/guest#0.1.0",
+            "manifest_path": "/tmp/guest/Cargo.toml",
+            "dependencies": [],
+            "targets": [],
+            "features": {},
+            "edition": "2021",
+            "metadata": metadata,
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn missing_risc0_table_yields_defaults() {
+        let metadata = GuestMetadata::from_package(&package(serde_json::json!({}))).unwrap();
+        assert!(metadata.rustc_flags.is_none());
+        assert!(!metadata.kernel);
+    }
+
+    #[test]
+    fn parses_rustc_flags_and_kernel() {
+        let metadata = GuestMetadata::from_package(&package(serde_json::json!({
+            "risc0": { "rustc-flags": ["--cfg", "foo"], "kernel": true },
+        })))
+        .unwrap();
+        assert_eq!(
+            metadata.rustc_flags,
+            Some(vec!["--cfg".to_string(), "foo".to_string()])
+        );
+        assert!(metadata.kernel);
+    }
+
+    #[test]
+    fn malformed_rustc_flags_is_reported() {
+        let err = GuestMetadata::from_package(&package(serde_json::json!({
+            "risc0": { "rustc-flags": "not-an-array" },
+        })))
+        .unwrap_err();
+        let msg = format!("{err:#}");
+        assert!(
+            msg.contains("invalid `[package.metadata.risc0]` table in package `guest`"),
+            "missing context in: {msg}"
+        );
+        assert!(
+            msg.contains("invalid type: string"),
+            "missing serde detail in: {msg}"
+        );
+    }
+
+    #[test]
+    fn unknown_risc0_keys_are_ignored() {
+        let metadata = GuestMetadata::from_package(&package(serde_json::json!({
+            "risc0": { "kernel": true, "not-a-real-key": 1 },
+        })))
+        .unwrap();
+        assert!(metadata.kernel);
+        assert!(metadata.rustc_flags.is_none());
+    }
 }
