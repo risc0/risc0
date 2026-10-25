@@ -15,6 +15,7 @@ We call $x^{-1}$ the _reciprocal_ of $x$ or the _multiplicative inverse_ of $x$.
 `Example: The integers modulo 5 are a field. In this field, the reciprocal of 2 is 3. 4 is its own reciprocal.`
 
 If $p$ is prime, the integers modulo $p$ are a field.
+More generally, finite fields of order $p^k$ (written as $\mathbb{F}_{p^k}$) exist for any prime $p$ and integer $k\ge 1$, and they are widely used in modern cryptographic protocols and proof systems.
 Moreover, I can find some element $g$ and write all the integers modulo $p$ as powers of $g$.
 
 `Example: The integers modulo 5 can all be written as a power of 3.`
