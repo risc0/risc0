@@ -63,7 +63,7 @@ pub struct Segment {
     pub po2: u32,
     /// Index of the segment in the session.
     pub index: u64,
-    /// Gloablly unique nonce used within the proof of verifiable work system.
+    /// Globally unique nonce used within the proof of verifiable work system.
     pub povw_nonce: Option<PovwNonce>,
 
     pub insn_counter: u32,
