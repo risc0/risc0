@@ -68,7 +68,7 @@ fn download_zkr() {
         .download_folder(out_dir)
         .build()
         .unwrap();
-    let url = format!("https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkr/{SHA256_HASH}.zip");
+    let url = format!("https://artifacts.risczero.net/zkr/{SHA256_HASH}.zip");
     eprintln!("Downloading {url}");
     let dl = Download::new(&url)
         .file_name(&PathBuf::from_str(FILENAME).unwrap())

@@ -99,18 +99,23 @@ fn get_github_token_from_hosts_yml_test() {
     assert_eq!(token, "mysecret");
 }
 
+/// Credentials for the S3 API of the artifacts bucket, from the standard AWS environment
+/// variables. Nothing else is consulted: no profiles, no instance roles.
 #[cfg(feature = "publish")]
-#[tokio::main]
-async fn get_aws_creds() -> Result<AwsCredentials> {
-    use aws_credential_types::provider::ProvideCredentials as _;
-
-    let config = aws_config::load_from_env().await;
-    config
-        .credentials_provider()
-        .ok_or_else(|| RzupError::Other("no AWS credentials provider".into()))?
-        .provide_credentials()
-        .await
-        .map_err(|err| RzupError::Other(format!("failed to get AWS credentials: {err}")))
+fn get_aws_creds() -> Result<AwsCredentials> {
+    let var = |name: &str| {
+        std::env::var(name).map_err(|_| RzupError::Other(format!("{name} is not set")))
+    };
+    let access_key_id = var("AWS_ACCESS_KEY_ID")?;
+    let secret_access_key = var("AWS_SECRET_ACCESS_KEY")?;
+    let session_token = std::env::var("AWS_SESSION_TOKEN").ok();
+    Ok(AwsCredentials::new(
+        access_key_id,
+        secret_access_key,
+        session_token,
+        None,
+        "environment",
+    ))
 }
 
 #[cfg(not(feature = "publish"))]
@@ -118,23 +123,17 @@ fn get_aws_creds() -> Result<AwsCredentials> {
     Err(RzupError::Other("publish feature not enabled".into()))
 }
 
+/// Environment variable holding the PEM-encoded private key that signs published manifests.
 #[cfg(feature = "publish")]
-const RZUP_PUBLISH_SECRET_ID: &str = "rzup-publish-key";
+pub const RZUP_PUBLISH_KEY_VAR: &str = "RZUP_PUBLISH_KEY";
 
 #[cfg(feature = "publish")]
-#[tokio::main]
-async fn get_private_key() -> Result<PrivateKey> {
-    let config = aws_config::load_from_env().await;
-    let client = aws_sdk_secretsmanager::Client::new(&config);
-    let secret = client
-        .get_secret_value()
-        .secret_id(RZUP_PUBLISH_SECRET_ID)
-        .send()
-        .await
-        .map_err(|e| RzupError::Other(format!("failed to get private key: {e}")))?;
-    let key_pem = secret
-        .secret_string
-        .ok_or_else(|| RzupError::Other("missing secret_string".into()))?;
+fn get_private_key() -> Result<PrivateKey> {
+    let key_pem = std::env::var(RZUP_PUBLISH_KEY_VAR).map_err(|_| {
+        RzupError::Other(format!(
+            "{RZUP_PUBLISH_KEY_VAR} is not set; it must hold the PEM-encoded rzup publish key"
+        ))
+    })?;
     PrivateKey::new(&key_pem)
 }
 
