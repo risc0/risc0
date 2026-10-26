@@ -53,7 +53,7 @@ WORKDIR /usr/src/gnark
 
 # Download the proving key and copy the generated constraint system
 ADD --checksum=sha256:69c6056451ea814b37e30ccbc44639dbaafef73540cbfbff6ec7e68e2d325735 \
-  https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkey/2024-05-17.1/stark_verify_final.zkey.gz groth16/stark_verify_final.zkey.gz
+  https://artifacts.risczero.net/zkey/2024-05-17.1/stark_verify_final.zkey.gz groth16/stark_verify_final.zkey.gz
 COPY --from=circom /usr/src/groth16/stark_verify.r1cs groth16/stark_verify.r1cs
 
 # Pre-download Go modules for cache efficiency

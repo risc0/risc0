@@ -324,16 +324,23 @@ impl BuildCommand {
 }
 
 pub const PUBLISH_HELP: &str = "Discussion:
-    Tools for publishing a component to S3.
+    Tools for publishing a component to the artifacts bucket.
 
-    The create-archive sub-command creates a tar.xz file to send to S3.
+    The create-artifact sub-command creates a tar.xz file to upload.
 
-    The upload sub-command uploads the tar.xz file to S3 as a component with a particular version
-    and optional target.
+    The upload sub-command uploads the tar.xz file to the bucket as a component with a particular
+    version and optional target.
 
-    The set-version sub-command sets the latest version of a component.
+    The set-latest sub-command sets the latest version of a component.
 
-    upload and set-version require that AWS credentials be available in the environment.
+    upload and set-latest need these environment variables:
+      RZUP_PUBLISH_URL       S3 API URL of the bucket, including the bucket name, e.g.
+                             https://<account-id>.r2.cloudflarestorage.com/risc0-artifacts
+      AWS_ACCESS_KEY_ID      S3 API token for that bucket
+      AWS_SECRET_ACCESS_KEY
+      RZUP_PUBLISH_KEY       PEM-encoded private key that signs the component manifest
+    Before uploading, the current manifest is read from the download URL (RZUP_DOWNLOAD_URL, default
+    https://artifacts.risczero.net), so point both at the same bucket.
 ";
 
 #[derive(Args)]
@@ -387,19 +394,21 @@ pub struct PublishCreateArtifactCommand {
 
 #[derive(Subcommand)]
 pub(crate) enum PublishCommand {
-    /// Uploads an artifact to S3 as a component.
+    /// Uploads an artifact to the artifacts bucket as a component.
     ///
     /// Each version of a component is either tagged with a target, or is target agnostic. A
     /// particular version can only have one target-agnostic artifact, or many target specific
     /// artifacts, but each target may only have one artifact each.
     ///
-    /// Requires that AWS credentials be available in the environment.
+    /// Requires RZUP_PUBLISH_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and RZUP_PUBLISH_KEY in
+    /// the environment.
     Upload(PublishUploadCommand),
-    /// Sets the latest version for a component on S3.
+    /// Sets the latest version for a component in the artifacts bucket.
     ///
     /// This will cause rzup install and rzup check to consider the given version as the latest.
     ///
-    /// Requires that AWS credentials be available in the environment.
+    /// Requires RZUP_PUBLISH_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and RZUP_PUBLISH_KEY in
+    /// the environment.
     SetLatest(PublishSetLatestCommand),
     /// Creates an artifact by creating a tar.xz file.
     ///
