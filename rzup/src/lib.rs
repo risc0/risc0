@@ -47,12 +47,22 @@ pub use self::components::Component;
 pub use self::error::{Result, RzupError};
 pub use semver::Version;
 
+/// Environment variable that overrides where published components are downloaded from.
+pub const RZUP_DOWNLOAD_URL_VAR: &str = "RZUP_DOWNLOAD_URL";
+/// Environment variable holding the S3 API URL that `rzup publish` uploads to.
+pub const RZUP_PUBLISH_URL_VAR: &str = "RZUP_PUBLISH_URL";
+
 #[derive(Clone, Debug)]
 pub struct BaseUrls {
     pub risc0_github_base_url: String,
     pub github_api_base_url: String,
     pub risc0_base_url: String,
+    /// Where components published with `rzup publish` are downloaded from: the public hostname
+    /// in front of the artifacts bucket.
     pub s3_base_url: String,
+    /// Where `rzup publish` uploads to: the S3 API URL of the bucket behind `s3_base_url`,
+    /// including the bucket name. `None` disables publishing.
+    pub publish_base_url: Option<String>,
 }
 
 impl Default for BaseUrls {
@@ -61,8 +71,26 @@ impl Default for BaseUrls {
             risc0_github_base_url: "https://github.com/risc0".into(),
             github_api_base_url: "https://api.github.com".into(),
             risc0_base_url: "https://risczero.com".into(),
-            s3_base_url: "https://risc0-artifacts.s3.us-west-2.amazonaws.com".into(),
+            s3_base_url: "https://artifacts.risczero.net".into(),
+            publish_base_url: None,
         }
+    }
+}
+
+impl BaseUrls {
+    /// The default URLs, with `s3_base_url` overridden by `RZUP_DOWNLOAD_URL` when it is set and
+    /// `publish_base_url` taken from `RZUP_PUBLISH_URL`.
+    pub fn from_env(
+        mut env_accessor: impl FnMut(&str) -> std::result::Result<String, std::env::VarError>,
+    ) -> Self {
+        let mut urls = Self::default();
+        if let Ok(url) = env_accessor(RZUP_DOWNLOAD_URL_VAR) {
+            urls.s3_base_url = url.trim_end_matches('/').to_owned();
+        }
+        urls.publish_base_url = env_accessor(RZUP_PUBLISH_URL_VAR)
+            .ok()
+            .map(|url| url.trim_end_matches('/').to_owned());
+        urls
     }
 }
 
@@ -77,7 +105,7 @@ impl Rzup {
     /// Creates a new Rzup instance using default environment paths.
     pub fn new() -> Result<Self> {
         let environment = Environment::new(|s| std::env::var(s), |_| {})?;
-        let registry = Registry::new(&environment, Default::default())?;
+        let registry = Registry::new(&environment, BaseUrls::from_env(|s| std::env::var(s)))?;
 
         Ok(Self {
             environment,
@@ -106,9 +134,10 @@ impl Rzup {
     /// * `cargo_dir` - The path to cargo's home directory (usually ~/.cargo)
     /// * `base_urls` - The base URLs used to communicate with GitHub
     /// * `github_token` - The token to use when communicating with GitHub
-    /// * `aws_creds_factory` - Function which gets credentials for communicating with S3
+    /// * `aws_creds_factory` - Function which gets credentials for uploading to the artifacts
+    ///   bucket
     /// * `private_key_getter` - Function which gets the private key for signing uploads
-    /// * `public_key` - The public key used to verify S3 components
+    /// * `public_key` - The public key used to verify published components
     /// * `platform` - The platform of the system which we are installing artifacts for
     /// * `event_handler` - Callback for events that provide progress during rzup operations.
     #[allow(clippy::too_many_arguments)]
@@ -369,7 +398,7 @@ impl Rzup {
         )
     }
 
-    /// Set the given version as the latest version for a given component on S3.
+    /// Set the given version as the latest version for a given component in the artifacts bucket.
     ///
     /// If the given release doesn't exist, an error is returned.
     #[cfg(feature = "publish")]
@@ -860,6 +889,7 @@ mod tests {
                     github_api_base_url: format!("http://{address}/github_api"),
                     risc0_base_url: format!("http://{address}/risc0"),
                     s3_base_url: format!("http://{address}/s3"),
+                    publish_base_url: Some(format!("http://{address}/s3")),
                 },
                 private_key,
             }
@@ -903,7 +933,30 @@ mod tests {
             github_api_base_url: "".into(),
             risc0_base_url: "".into(),
             s3_base_url: "".into(),
+            publish_base_url: None,
         }
+    }
+
+    #[test]
+    fn base_urls_from_env() {
+        let urls = BaseUrls::from_env(|_| Err(std::env::VarError::NotPresent));
+        assert_eq!(urls.s3_base_url, "https://artifacts.risczero.net");
+        assert_eq!(urls.publish_base_url, None);
+
+        let urls = BaseUrls::from_env(|key| match key {
+            "RZUP_DOWNLOAD_URL" => Ok("https://example.com/download/".into()),
+            "RZUP_PUBLISH_URL" => Ok("https://example.com/publish/bucket".into()),
+            other => panic!("unexpected read of {other:?} environment variable"),
+        });
+        assert_eq!(urls.s3_base_url, "https://example.com/download");
+        assert_eq!(
+            urls.publish_base_url.as_deref(),
+            Some("https://example.com/publish/bucket")
+        );
+        assert_eq!(
+            urls.risc0_github_base_url,
+            BaseUrls::default().risc0_github_base_url
+        );
     }
 
     fn setup_test_env(
@@ -3567,7 +3620,7 @@ mod tests {
             },
             vec![
                 RzupEvent::Print {
-                    message: "Getting private key from AWS".into(),
+                    message: "Reading signing key from RZUP_PUBLISH_KEY".into(),
                 },
                 RzupEvent::Print {
                     message: "Reading distribution_manifest.json".into(),
@@ -3889,6 +3942,35 @@ mod tests {
         assert_eq!(
             err,
             RzupError::Other("release for risc0-groth16 at version 7.0.0 not found".into())
+        );
+    }
+
+    #[test]
+    fn publish_without_publish_url() {
+        let server = MockDistributionServer::new();
+        let mut base_urls = server.base_urls.clone();
+        base_urls.publish_base_url = None;
+        let aws_creds = AwsCredentials::new(
+            "AKIDEXAMPLE",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            None,
+            None,
+            "hardcoded-credentials",
+        );
+        let (_tmp_dir, mut rzup) = setup_test_env(
+            base_urls,
+            None,
+            Some(aws_creds),
+            server.private_key.clone(),
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        let err = rzup
+            .publish_set_latest(&Component::Risc0Groth16, &Version::new(2, 0, 0))
+            .unwrap_err();
+        assert!(
+            err.to_string().contains("RZUP_PUBLISH_URL is not set"),
+            "{err}"
         );
     }
 
