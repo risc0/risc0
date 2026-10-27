@@ -34,6 +34,15 @@ pub struct PosixIo<'a> {
     pub(crate) write_fds: BTreeMap<u32, SharedWrite<'a>>,
 }
 
+/// Adapter to use a [SharedRead] where an owned [Read] is required, e.g. to chain readers.
+struct SharedReader<'a>(SharedRead<'a>);
+
+impl Read for SharedReader<'_> {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        self.0.borrow_mut().read(buf)
+    }
+}
+
 impl Default for PosixIo<'_> {
     fn default() -> Self {
         let mut new = Self::new();
@@ -54,6 +63,16 @@ impl<'a> PosixIo<'a> {
 
     pub fn with_read_fd(&mut self, fd: u32, reader: impl Read + 'a) -> &mut Self {
         self.with_shared_read_fd(fd, Rc::new(RefCell::new(reader)))
+    }
+
+    /// Prepend `data` to the reader registered for `fd`, keeping the existing reader for whatever
+    /// is read after `data` is exhausted. If no reader is registered, `data` becomes the reader.
+    pub fn prepend_read_fd(&mut self, fd: u32, data: Vec<u8>) -> &mut Self {
+        let data = Cursor::new(data);
+        match self.read_fds.get(&fd).cloned() {
+            Some(reader) => self.with_read_fd(fd, data.chain(SharedReader(reader))),
+            None => self.with_read_fd(fd, data),
+        }
     }
 
     pub fn with_shared_read_fd<T>(&mut self, fd: u32, reader: Rc<RefCell<T>>) -> &mut Self
