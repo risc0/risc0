@@ -169,8 +169,9 @@ pub(crate) fn shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
         .get_version_dir(&Component::Risc0Groth16, &Version::new(0, 1, 0))
         .context(
             "Missing required `risc0-groth16` rzup component. \
-            To install it, ensure that your `rzup` version is >= 0.5.0, \
-            and then run `rzup install risc0-groth16`.",
+            To install it, run `rzup install risc0-groth16`. \
+            If rzup cannot find this version, it is too old to see current releases: \
+            reinstall it with `curl -L https://risczero.com/install | bash` and try again.",
         )?;
     let prove_inputs = ProveInputs::new(&root_dir).context("failed to open groth16 input files")?;
 

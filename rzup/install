@@ -16,8 +16,8 @@
 
 set -euo pipefail
 
-readonly VERSION="1.0.0"
-readonly RZUP_URL="${RZUP_URL:-https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup}"
+readonly VERSION="1.1.0"
+readonly RZUP_URL="${RZUP_URL:-https://artifacts.risczero.net/rzup}"
 readonly ENV_PATH="${ENV_PATH:-prod}"
 readonly RZUP_BIN_DIR="${HOME}/.risc0/bin"
 
