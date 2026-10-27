@@ -29,12 +29,18 @@ use anyhow::{Context, Result, bail};
 use bytemuck::Pod;
 use risc0_binfmt::PovwJobId;
 use risc0_circuit_keccak::{KECCAK_PO2_RANGE, KeccakState};
-use risc0_zkp::core::digest::Digest;
+use risc0_circuit_recursion::control_id::MIN_LIFT_PO2;
+use risc0_zkp::{MAX_CYCLES_PO2, core::digest::Digest};
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 use tempfile::TempDir;
 
 use crate::{AssumptionReceipt, TraceCallback, host::client::posix_io::PosixIo, serde::to_vec};
+
+/// Range of segment limits, as a power of two (po2), that can be proven and verified. The lower
+/// bound is the smallest po2 with a lift program, the upper bound is the largest po2 the verifier
+/// accepts.
+const SEGMENT_LIMIT_PO2_RANGE: core::ops::RangeInclusive<usize> = MIN_LIFT_PO2..=MAX_CYCLES_PO2;
 
 /// A builder pattern used to construct an [ExecutorEnv].
 #[derive(Default)]
@@ -141,6 +147,15 @@ impl<'a> ExecutorEnvBuilder<'a> {
     pub fn build(&mut self) -> Result<ExecutorEnv<'a>> {
         let mut inner = mem::take(&mut self.inner);
 
+        if let Some(po2) = inner.segment_limit_po2
+            && !SEGMENT_LIMIT_PO2_RANGE.contains(&(po2 as usize))
+        {
+            bail!(
+                "invalid segment limit po2 {po2}. Expected range: {:?}",
+                SEGMENT_LIMIT_PO2_RANGE
+            );
+        }
+
         if !inner.input.is_empty() {
             let reader = Cursor::new(inner.input.clone());
             inner
@@ -178,8 +193,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
     /// either up or down, may result in better proving performance.
     ///
-    /// Given value must be between [risc0_zkp::MIN_CYCLES_PO2] and
-    /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive).
+    /// Given value must be between [risc0_circuit_recursion::control_id::MIN_LIFT_PO2] and
+    /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive); [ExecutorEnvBuilder::build] returns an error
+    /// otherwise.
     pub fn segment_limit_po2(&mut self, limit: u32) -> &mut Self {
         self.inner.segment_limit_po2 = Some(limit);
         self
@@ -458,5 +474,42 @@ impl<'a> ExecutorEnvBuilder<'a> {
     pub fn povw(&mut self, povw_job_id: impl Into<PovwJobId>) -> &mut Self {
         self.inner.povw_job_id = Some(povw_job_id.into());
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn segment_limit_po2_in_range() {
+        for po2 in [
+            *SEGMENT_LIMIT_PO2_RANGE.start(),
+            20,
+            *SEGMENT_LIMIT_PO2_RANGE.end(),
+        ] {
+            let env = ExecutorEnv::builder()
+                .segment_limit_po2(po2 as u32)
+                .build()
+                .unwrap();
+            assert_eq!(env.segment_limit_po2, Some(po2 as u32));
+        }
+    }
+
+    #[test]
+    fn segment_limit_po2_out_of_range() {
+        let too_small = (*SEGMENT_LIMIT_PO2_RANGE.start() - 1) as u32;
+        let too_large = (*SEGMENT_LIMIT_PO2_RANGE.end() + 1) as u32;
+        // 32 and above would overflow the u32 segment limit (1 << po2) in the executor.
+        for po2 in [0, too_small, too_large, 32, u32::MAX] {
+            let err = match ExecutorEnv::builder().segment_limit_po2(po2).build() {
+                Ok(_) => panic!("po2 {po2} should be rejected"),
+                Err(err) => err,
+            };
+            assert!(
+                err.to_string().contains("invalid segment limit po2"),
+                "unexpected error for po2 {po2}: {err}"
+            );
+        }
     }
 }
