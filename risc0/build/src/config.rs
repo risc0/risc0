@@ -88,6 +88,7 @@ impl DockerOptions {
 ///
 /// let guest_options = GuestOptionsBuilder::default()
 ///     .features(vec!["my-features".to_string()])
+///     .no_default_features(true)
 ///     .use_docker(docker_options)
 ///     .build()
 ///     .unwrap();
@@ -98,6 +99,12 @@ impl DockerOptions {
 pub struct GuestOptions {
     /// Features for cargo to build the guest with.
     pub features: Vec<String>,
+
+    /// Do not activate the `default` feature of the guest crate.
+    pub no_default_features: bool,
+
+    /// Activate all available features of the guest crate.
+    pub all_features: bool,
 
     /// Use a docker environment for building.
     #[builder(setter(strip_option))]

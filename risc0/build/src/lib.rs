@@ -386,6 +386,27 @@ fn rust_toolchain() -> PathBuf {
     path
 }
 
+/// Adds the cargo feature flags requested in `options` to `cmd`.
+///
+/// `no_default_features` and `all_features` are part of `clap_cargo::Features` and so are
+/// parsed by `cargo risczero build`, but `GuestOptions.features` is a plain `Vec<String>`
+/// and can only express `--features`. Without forwarding them here the flags are accepted
+/// and then silently dropped.
+fn forward_feature_args(cmd: &mut Command, options: &GuestOptions) {
+    if options.no_default_features {
+        cmd.args(["--no-default-features"]);
+    }
+
+    if options.all_features {
+        cmd.args(["--all-features"]);
+    }
+
+    let features_str = options.features.join(",");
+    if !features_str.is_empty() {
+        cmd.args(["--features", &features_str]);
+    }
+}
+
 /// Creates a std::process::Command to execute the given cargo
 /// command in an environment suitable for targeting the zkvm guest.
 #[stability::unstable]
@@ -629,10 +650,7 @@ fn build_guest_package(pkg: &Package, target_dir: impl AsRef<Path>, guest_info: 
 
     let mut cmd = cargo_command_internal("build", guest_info);
 
-    let features_str = guest_info.options.features.join(",");
-    if !features_str.is_empty() {
-        cmd.args(["--features", &features_str]);
-    }
+    forward_feature_args(&mut cmd, &guest_info.options);
 
     cmd.args([
         "--manifest-path",
@@ -903,6 +921,64 @@ mod tests {
         "-C",
         "link-args=--fatal-warnings",
     ];
+
+    /// Exercises the same `forward_feature_args` that `build_package` uses, so a regression
+    /// that stops forwarding the flags fails here.
+    fn guest_cargo_args(options: GuestOptions) -> Vec<String> {
+        let guest_info = GuestInfo {
+            options,
+            ..Default::default()
+        };
+
+        let mut cmd = cargo_command_internal("build", &guest_info);
+        forward_feature_args(&mut cmd, &guest_info.options);
+
+        cmd.get_args()
+            .map(|a| a.to_string_lossy().into_owned())
+            .collect()
+    }
+
+    #[test]
+    fn no_default_features_reaches_the_guest_cargo_command() {
+        let args = guest_cargo_args(GuestOptions {
+            no_default_features: true,
+            ..Default::default()
+        });
+        assert!(
+            args.iter().any(|a| a == "--no-default-features"),
+            "expected --no-default-features in {args:?}"
+        );
+    }
+
+    #[test]
+    fn all_features_reaches_the_guest_cargo_command() {
+        let args = guest_cargo_args(GuestOptions {
+            all_features: true,
+            ..Default::default()
+        });
+        assert!(
+            args.iter().any(|a| a == "--all-features"),
+            "expected --all-features in {args:?}"
+        );
+    }
+
+    #[test]
+    fn flags_are_omitted_by_default() {
+        let args = guest_cargo_args(GuestOptions::default());
+        assert!(!args.iter().any(|a| a == "--no-default-features"));
+        assert!(!args.iter().any(|a| a == "--all-features"));
+    }
+
+    #[test]
+    fn builder_carries_the_feature_flags() {
+        let opts = GuestOptionsBuilder::default()
+            .no_default_features(true)
+            .all_features(true)
+            .build()
+            .unwrap();
+        assert!(opts.no_default_features);
+        assert!(opts.all_features);
+    }
 
     #[test]
     fn encodes_rustc_flags() {
