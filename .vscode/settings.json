@@ -96,8 +96,7 @@
     "risc0/bigint2/methods/guest/Cargo.toml",
     "risc0/cargo-risczero/tests/test_crate/Cargo.toml",
     "risc0/zkvm/methods/guest/Cargo.toml",
-    "risc0/zkvm/methods/std/Cargo.toml",
-    "tools/crates-validator/Cargo.toml"
+    "risc0/zkvm/methods/std/Cargo.toml"
   ],
   "clangd.checkUpdates": true,
   "rust-analyzer.server.extraEnv": {

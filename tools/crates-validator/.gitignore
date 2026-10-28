@@ -1,6 +1,0 @@
-/target
-!Cargo.lock
-db-dump.tar.gz
-profile-results.json
-profile.json
-crate-results.log
