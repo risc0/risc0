@@ -106,6 +106,8 @@ jobs:
       RISC0_SKIP_BUILD_KERNELS: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
       - uses: ./.github/actions/free-disk
       - uses: ./.github/actions/rustup
       - name: "root: cargo clippy"
