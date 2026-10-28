@@ -35,7 +35,7 @@ We've built a number of applications and primitives showcasing these capabilitie
   signature
 
 These examples are all made possible by **leveraging a mature software
-ecosystem**: over 70% of the [top 1000 Rust crates][crate-validation] work
+ecosystem**: over 70% of the top 1000 Rust crates work
 out-of-the-box in the zkVM. Being able to import Rust crates is a game changer
 for the ZK software world: projects that would take months or years to build on
 other platforms can be solved trivially on our platform.
@@ -50,7 +50,6 @@ Check out our [Getting Started] page.
 [Bonsai Pay]: https://risczero.com/news/bonsai-pay
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess
 [continuations]: https://risczero.com/news/continuations
-[crate-validation]: https://reports.risczero.com/crates-validation
 [ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 [Getting Started]: ./getting-started.md
 [JSON]: https://github.com/risc0/risc0/tree/main/examples/json
