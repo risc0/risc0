@@ -11,7 +11,9 @@ members = [
   "risc0/circuit/keccak",
   "risc0/circuit/keccak-sys",
   "risc0/circuit/recursion",
+  "risc0/circuit/recursion-control-zkrs",
   "risc0/circuit/recursion-sys",
+  "risc0/circuit/recursion-zkrs",
   "risc0/circuit/rv32im",
   "risc0/circuit/rv32im-sys",
   "risc0/core",
@@ -52,8 +54,10 @@ risc0-build = { version = "3.0.6", default-features = false, path = "risc0/build
 risc0-build-kernel = { version = "2.0.1", default-features = false, path = "risc0/build_kernel" }
 risc0-circuit-keccak = { version = "4.0.6", default-features = false, path = "risc0/circuit/keccak" }
 risc0-circuit-keccak-sys = { version = "4.0.3", default-features = false, path = "risc0/circuit/keccak-sys" }
-risc0-circuit-recursion = { version = "4.0.5", default-features = false, path = "risc0/circuit/recursion" }
+risc0-circuit-recursion = { version = "4.0.6", default-features = false, path = "risc0/circuit/recursion" }
+risc0-circuit-recursion-control-zkrs = { version = "4.0.6", default-features = false, path = "risc0/circuit/recursion-control-zkrs" }
 risc0-circuit-recursion-sys = { version = "4.0.3", default-features = false, path = "risc0/circuit/recursion-sys" }
+risc0-circuit-recursion-zkrs = { version = "4.0.6", default-features = false, path = "risc0/circuit/recursion-zkrs" }
 risc0-circuit-rv32im = { version = "4.0.5", default-features = false, path = "risc0/circuit/rv32im" }
 risc0-circuit-rv32im-sys = { version = "4.0.3", default-features = false, path = "risc0/circuit/rv32im-sys" }
 risc0-core = { version = "3.0.2", default-features = false, path = "risc0/core" }

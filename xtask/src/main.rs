@@ -22,6 +22,7 @@ mod extract_elf;
 #[cfg(feature = "zkvm")]
 mod gen_receipt;
 mod install;
+mod pack_zkrs;
 mod semver_checks;
 #[cfg(feature = "setup-groth16")]
 mod setup_groth16;
@@ -34,7 +35,7 @@ use clap::{Parser, Subcommand};
 use self::{bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16, gen_receipt::GenReceipt};
 use self::{
     bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos,
-    extract_elf::ExtractElf, install::Install, semver_checks::SemverChecks,
+    extract_elf::ExtractElf, install::Install, pack_zkrs::PackZkrs, semver_checks::SemverChecks,
     update_crate_version::UpdateCrateVersion, update_lock_files::UpdateLockFiles,
 };
 
@@ -55,6 +56,7 @@ enum Commands {
     #[cfg(feature = "zkvm")]
     GenReceipt(GenReceipt),
     Install(Install),
+    PackZkrs(PackZkrs),
     SemverChecks(SemverChecks),
     #[cfg(feature = "setup-groth16")]
     SetupGroth16(self::setup_groth16::SetupGroth16),
@@ -73,6 +75,7 @@ impl Commands {
             Commands::BootstrapPoseidon(cmd) => cmd.run(),
             Commands::BootstrapProtos(cmd) => cmd.run(),
             Commands::Install(cmd) => cmd.run(),
+            Commands::PackZkrs(cmd) => cmd.run(),
             #[cfg(feature = "zkvm")]
             Commands::GenReceipt(cmd) => cmd.run(),
             Commands::SemverChecks(cmd) => cmd.run(),

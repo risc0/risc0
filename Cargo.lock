@@ -2415,20 +2415,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea8a8b81cacc08888170eef4d13b775126db426d0b348bee9d18c2c1eaf123cf"
 
 [[package]]
-name = "downloader"
-version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ac1e888d6830712d565b2f3a974be3200be9296bc1b03db8251a4cbf18a4a34"
-dependencies = [
- "digest 0.10.7",
- "futures",
- "rand 0.8.5",
- "reqwest 0.12.23",
- "thiserror 1.0.69",
- "tokio",
-]
-
-[[package]]
 name = "dunce"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5605,10 +5591,53 @@ dependencies = [
 ]
 
 [[package]]
+name = "phf"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1562dc717473dbaa4c1f85a36410e03c047b2e7df7f45ee938fbef64ae7fadf"
+dependencies = [
+ "phf_macros",
+ "phf_shared 0.13.1",
+ "serde",
+]
+
+[[package]]
+name = "phf_generator"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "135ace3a761e564ec88c03a77317a7c6b80bb7f7135ef2544dbe054243b89737"
+dependencies = [
+ "fastrand",
+ "phf_shared 0.13.1",
+]
+
+[[package]]
+name = "phf_macros"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "812f032b54b1e759ccd5f8b6677695d5268c588701effba24601f6932f8269ef"
+dependencies = [
+ "phf_generator",
+ "phf_shared 0.13.1",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
 name = "phf_shared"
 version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67eabc2ef2a60eb7faa00097bd1ffdb5bd28e62bf39990626a582201b7a754e5"
+dependencies = [
+ "siphasher",
+]
+
+[[package]]
+name = "phf_shared"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e57fef6bc5981e38c2ce2d63bfa546861309f875b8a75f092d1d54ae2d64f266"
 dependencies = [
  "siphasher",
 ]
@@ -6640,19 +6669,21 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.5"
+version = "4.0.6"
 dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
  "cust",
- "downloader",
- "hex",
  "lazy-regex",
+ "liblzma",
  "metal",
+ "phf",
  "rand 0.9.2",
  "rayon",
+ "risc0-circuit-recursion-control-zkrs",
  "risc0-circuit-recursion-sys",
+ "risc0-circuit-recursion-zkrs",
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
@@ -6662,7 +6693,15 @@ dependencies = [
  "tracing",
  "tracing-forest",
  "tracing-subscriber 0.3.19",
- "zip",
+]
+
+[[package]]
+name = "risc0-circuit-recursion-control-zkrs"
+version = "4.0.6"
+dependencies = [
+ "liblzma",
+ "phf",
+ "tar",
 ]
 
 [[package]]
@@ -6674,6 +6713,15 @@ dependencies = [
  "risc0-core",
  "risc0-sys",
  "sppark",
+]
+
+[[package]]
+name = "risc0-circuit-recursion-zkrs"
+version = "4.0.6"
+dependencies = [
+ "liblzma",
+ "phf",
+ "tar",
 ]
 
 [[package]]
@@ -7782,12 +7830,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "simd-adler32"
-version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
-
-[[package]]
 name = "simd_cesu8"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7919,7 +7961,7 @@ checksum = "bf776ba3fa74f83bf4b63c3dcbbf82173db2632ed8452cb2d891d33f459de70f"
 dependencies = [
  "new_debug_unreachable",
  "parking_lot",
- "phf_shared",
+ "phf_shared 0.11.3",
  "precomputed-hash",
 ]
 
@@ -9665,6 +9707,7 @@ dependencies = [
  "cargo_metadata 0.21.0",
  "clap 4.5.60",
  "hex",
+ "liblzma",
  "log",
  "prost-build 0.14.1",
  "protobuf-src",
@@ -9681,6 +9724,7 @@ dependencies = [
  "semver 1.0.26",
  "serde",
  "serde_with",
+ "tar",
  "tempfile",
  "toml 0.9.5",
  "toml_edit 0.23.4",
@@ -9836,11 +9880,9 @@ dependencies = [
  "crc32fast",
  "crossbeam-utils",
  "displaydoc",
- "flate2",
  "indexmap 2.11.0",
  "memchr",
  "thiserror 2.0.18",
- "zopfli",
 ]
 
 [[package]]
@@ -9848,15 +9890,3 @@ name = "zlib-rs"
 version = "0.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b142a20ec14a91d5bc708c1dc21b080c550113d8aa77afa29635673a65dd02c5"
-
-[[package]]
-name = "zopfli"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "edfc5ee405f504cd4984ecc6f14d02d55cfda60fa4b689434ef4102aae150cd7"
-dependencies = [
- "bumpalo",
- "crc32fast",
- "log",
- "simd-adler32",
-]
