@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use risc0_binfmt::MemoryImage;
+use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::core::digest::Digest;
 use test_log::test;
 
@@ -49,6 +49,33 @@ fn basic() {
     assert_eq!(segment.terminate_state, Some(TerminateState::default()));
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
+}
+
+#[test]
+fn reserved_jalr_func3_is_illegal() {
+    const RESERVED_JALR_FUNC3: u32 = 0x0002_90e7;
+
+    let entry = crate::execute::USER_START_ADDR.waddr() + 1;
+    let mut image = MemoryImage::default();
+    image.set_word(entry, RESERVED_JALR_FUNC3).unwrap();
+    let program = Program::new_from_entry_and_image(entry.baddr().0, image);
+    let image = MemoryImage::new_kernel(program);
+
+    let error = testutil::execute(
+        image,
+        ExecutionLimit::default()
+            .with_segment_po2(testutil::MIN_CYCLES_PO2)
+            .with_max_insn_rows(100),
+        testutil::NullSyscall,
+        None,
+    )
+    .map(|_| ())
+    .unwrap_err();
+
+    assert!(
+        error.to_string().contains("IllegalInstruction(0x000290e7"),
+        "unexpected error: {error:?}"
+    );
 }
 
 #[test]
