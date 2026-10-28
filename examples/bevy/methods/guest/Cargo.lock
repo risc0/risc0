@@ -1352,11 +1352,10 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.5"
+version = "4.0.6"
 dependencies = [
  "anyhow",
  "bytemuck",
- "hex",
  "metal",
  "risc0-core",
  "risc0-zkp",
