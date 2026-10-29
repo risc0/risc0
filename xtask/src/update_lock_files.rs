@@ -80,7 +80,7 @@ fn visit_path(path: &Path) -> Result<()> {
     Ok(())
 }
 
-fn run_inner(repo_root: &Path) -> Result<()> {
+pub(crate) fn run_inner(repo_root: &Path) -> Result<()> {
     let skip_dirs = [
         repo_root.join("external"),
         repo_root.join("tools"),

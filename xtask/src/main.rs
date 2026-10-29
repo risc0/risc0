@@ -18,6 +18,7 @@ mod bootstrap;
 mod bootstrap_groth16;
 mod bootstrap_poseidon;
 mod bootstrap_protos;
+mod bump;
 mod extract_elf;
 #[cfg(feature = "zkvm")]
 mod gen_receipt;
@@ -34,7 +35,7 @@ use clap::{Parser, Subcommand};
 #[cfg(feature = "zkvm")]
 use self::{bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16, gen_receipt::GenReceipt};
 use self::{
-    bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos,
+    bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos, bump::Bump,
     extract_elf::ExtractElf, install::Install, pack_zkrs::PackZkrs, semver_checks::SemverChecks,
     update_crate_version::UpdateCrateVersion, update_lock_files::UpdateLockFiles,
 };
@@ -53,6 +54,7 @@ enum Commands {
     BootstrapGroth16(BootstrapGroth16),
     BootstrapPoseidon(BootstrapPoseidon),
     BootstrapProtos(BootstrapProtos),
+    Bump(Bump),
     #[cfg(feature = "zkvm")]
     GenReceipt(GenReceipt),
     Install(Install),
@@ -74,6 +76,7 @@ impl Commands {
             Commands::BootstrapGroth16(cmd) => cmd.run(),
             Commands::BootstrapPoseidon(cmd) => cmd.run(),
             Commands::BootstrapProtos(cmd) => cmd.run(),
+            Commands::Bump(cmd) => cmd.run(),
             Commands::Install(cmd) => cmd.run(),
             Commands::PackZkrs(cmd) => cmd.run(),
             #[cfg(feature = "zkvm")]
