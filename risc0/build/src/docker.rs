@@ -192,6 +192,8 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
 fn build(src_dir: &Path, temp_dir: &Path, target_dir: &Path) -> Result<()> {
     if Command::new("docker")
         .arg("build")
+        // The guest builder images are published for linux/amd64 only
+        .arg("--platform=linux/amd64")
         .arg(format!("--output={}", target_dir.to_str().unwrap()))
         .arg("-f")
         .arg(temp_dir.join("Dockerfile"))
