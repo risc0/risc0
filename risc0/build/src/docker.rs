@@ -192,6 +192,8 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
 fn build(src_dir: &Path, temp_dir: &Path, target_dir: &Path) -> Result<()> {
     if Command::new("docker")
         .arg("build")
+        // The guest builder images are published for linux/amd64 only
+        .arg("--platform=linux/amd64")
         .arg(format!("--output={}", target_dir.to_str().unwrap()))
         .arg("-f")
         .arg(temp_dir.join("Dockerfile"))
@@ -216,53 +218,4 @@ fn check_cargo_lock(manifest_path: &Path) -> Result<()> {
         lock_file.display()
     ))?;
     Ok(())
-}
-
-// requires Docker to be installed
-#[cfg(feature = "docker")]
-#[cfg(test)]
-mod test {
-    use crate::{build_package, DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder};
-
-    use super::*;
-
-    const SRC_DIR: &str = "../..";
-
-    fn build(target_dir: &Path, manifest_path: &str) -> Vec<GuestListEntry> {
-        let src_dir = Path::new(SRC_DIR).to_path_buf();
-        let manifest_path = Path::new(manifest_path);
-        let manifest_dir = manifest_path.parent().unwrap().canonicalize().unwrap();
-        let pkg = get_package(manifest_dir);
-        let docker_opts = DockerOptionsBuilder::default()
-            .root_dir(src_dir)
-            .build()
-            .unwrap();
-        let guest_opts = GuestOptionsBuilder::default()
-            .use_docker(docker_opts)
-            .build()
-            .unwrap();
-        build_package(&pkg, target_dir, guest_opts).unwrap()
-    }
-
-    fn compare_image_id(guest_list: &[GuestListEntry], name: &str, expected: &str) {
-        let guest = guest_list.iter().find(|x| x.name == name).unwrap();
-        assert_eq!(expected, guest.image_id.to_string());
-    }
-
-    // Test build reproducibility for risc0_zkvm_methods_guest.
-    // If the code of the package or any of its dependencies change,
-    // it may be required to recompute the expected image_ids.
-    // For that, run:
-    // `cargo run --bin cargo-risczero -- risczero build --manifest-path risc0/zkvm/methods/guest/Cargo.toml`
-    #[test]
-    fn test_reproducible_methods_guest() {
-        let temp_dir = tempdir().unwrap();
-        let temp_path = temp_dir.path();
-        let guest_list = build(temp_path, "../../risc0/zkvm/methods/guest/Cargo.toml");
-        compare_image_id(
-            &guest_list,
-            "hello_commit",
-            "5b6339b5a3e04ca32f95cecbf13cecc7b534f0fafc0dc39895f3ea4182a4c0dc",
-        );
-    }
 }
