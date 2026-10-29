@@ -14,7 +14,7 @@
 
 use crate::components::Component;
 use crate::distribution::{
-    copy_with_resume, download_bytes, download_json,
+    download_bytes, download_json,
     sha2::{Sha256Digest, Sha256Writer},
     signature::{PublicKey, Signature},
     DistributionPlatform, ProgressWriter,
@@ -137,9 +137,8 @@ fn validate_tar_xz(file: &mut File) -> Result<()> {
     Ok(())
 }
 
-/// The region signed into upload requests. Cloudflare R2 accepts `auto`.
 #[cfg(feature = "publish")]
-const S3_REGION: &str = "auto";
+const S3_REGION: &str = "us-west-2";
 
 #[cfg(feature = "publish")]
 fn sign_s3_request(
@@ -195,17 +194,9 @@ fn sign_s3_request(
 fn is_object_not_found_error(error: &RzupError) -> bool {
     let error_str = error.to_string();
 
-    error_str.contains("<Code>AccessDenied</Code>")
-        || error_str.contains("<Code>NoSuchKey</Code>")
-        || error_str.contains("404 Not Found")
+    error_str.contains("<Code>AccessDenied</Code>") || error_str.contains("<Code>NoSuchKey</Code>")
 }
 
-#[cfg(feature = "publish")]
-const MISSING_CREDENTIALS: &str = "missing credentials: set AWS_ACCESS_KEY_ID and \
-    AWS_SECRET_ACCESS_KEY to an S3 API token for the artifacts bucket";
-
-/// Components published with `rzup publish`: downloaded from the public artifacts hostname,
-/// uploaded through the bucket's S3 API.
 pub struct S3Bucket<'a> {
     base_urls: &'a BaseUrls,
 }
@@ -213,17 +204,6 @@ pub struct S3Bucket<'a> {
 impl<'a> S3Bucket<'a> {
     pub fn new(base_urls: &'a BaseUrls) -> Self {
         Self { base_urls }
-    }
-
-    #[cfg(feature = "publish")]
-    fn publish_base_url(&self) -> Result<&str> {
-        self.base_urls.publish_base_url.as_deref().ok_or_else(|| {
-            RzupError::Other(format!(
-                "{} is not set; it must be the S3 API URL of the artifacts bucket, \
-                e.g. https://<account-id>.r2.cloudflarestorage.com/risc0-artifacts",
-                crate::RZUP_PUBLISH_URL_VAR
-            ))
-        })
     }
 
     fn get_distribution_manifest(
@@ -348,7 +328,7 @@ impl<'a> S3Bucket<'a> {
             .expect("serde_json should serialize successfully to memory");
 
         let manifest_json_len = manifest_json.len() as u64;
-        let base_url = self.publish_base_url()?;
+        let base_url = &self.base_urls.s3_base_url;
         let upload_url =
             format!("{base_url}/rzup/components/{component}/distribution_manifest.json");
         upload_bytes(
@@ -372,7 +352,7 @@ impl<'a> S3Bucket<'a> {
         data_length: u64,
         sha256: &Sha256Digest,
     ) -> Result<()> {
-        let base_url = self.publish_base_url()?;
+        let base_url = &self.base_urls.s3_base_url;
         let upload_url = format!("{base_url}/rzup/components/{component}/sha256/{sha256}");
         let upload_id = format!("{component}/{sha256}");
 
@@ -421,13 +401,12 @@ impl<'a> S3Bucket<'a> {
         payload: &Path,
         force: bool,
     ) -> Result<()> {
-        self.publish_base_url()?;
         let creds = env
             .get_aws_creds()
-            .ok_or_else(|| RzupError::Other(MISSING_CREDENTIALS.into()))?;
+            .ok_or_else(|| RzupError::Other("missing AWS S3 credentials".into()))?;
 
         env.emit(RzupEvent::Print {
-            message: "Reading signing key from RZUP_PUBLISH_KEY".into(),
+            message: "Getting private key from AWS".into(),
         });
         let private_key = env.get_private_key()?;
 
@@ -466,7 +445,7 @@ impl<'a> S3Bucket<'a> {
         let sha256 = Sha256Digest::calculate_for_file(&mut data_stream)?;
         data_stream.seek(SeekFrom::Start(0))?;
 
-        // Upload the artifact to the bucket
+        // Upload the artifact to S3
         self.upload_artifact(
             env,
             component,
@@ -495,10 +474,9 @@ impl<'a> S3Bucket<'a> {
         component: &Component,
         version: &Version,
     ) -> Result<()> {
-        self.publish_base_url()?;
         let creds = env
             .get_aws_creds()
-            .ok_or_else(|| RzupError::Other(MISSING_CREDENTIALS.into()))?;
+            .ok_or_else(|| RzupError::Other("missing AWS S3 credentials".into()))?;
         let private_key = env.get_private_key()?;
 
         let mut manifest = self.get_distribution_manifest(env, component)?;
@@ -590,7 +568,7 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
         let base_url = &self.base_urls.s3_base_url;
         let download_url =
             format!("{base_url}/rzup/components/{component}/sha256/{artifact_sha256}");
-        let resp = download_bytes(&download_url, &None)?;
+        let mut resp = download_bytes(&download_url, &None)?;
 
         env.emit(RzupEvent::TransferStarted {
             kind: TransferKind::Download,
@@ -605,13 +583,8 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
             env,
             &mut download_file,
         ));
-        copy_with_resume(resp, &download_url, &None, &mut writer, |received, err| {
-            env.emit(RzupEvent::Print {
-                message: format!(
-                    "Download of {component} interrupted after {received} bytes ({err}); resuming"
-                ),
-            });
-        })?;
+        resp.copy_to(&mut writer)
+            .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
 
         let download_sha = writer.finish();
 

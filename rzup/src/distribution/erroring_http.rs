@@ -20,16 +20,10 @@ impl Response {
     pub fn content_length(&self) -> Option<u64> {
         unreachable!()
     }
-}
 
-pub fn copy_with_resume(
-    response: Response,
-    _url: impl IntoUrl,
-    _bearer_token: &Option<String>,
-    _writer: &mut impl io::Write,
-    _on_resume: impl FnMut(u64, &io::Error),
-) -> Result<u64> {
-    match response {}
+    pub fn copy_to(&mut self, _writer: impl io::Write) -> Result<()> {
+        unreachable!()
+    }
 }
 
 pub trait IntoUrl {}

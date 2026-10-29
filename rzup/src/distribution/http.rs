@@ -18,21 +18,9 @@ use std::time::Duration;
 /// 3 hour HTTP timeout, internet can be slow and components can be up to 5gb.
 const HTTP_TIMEOUT_SECS: u64 = 3 * 60 * 60;
 
-/// How many times a broken transfer is resumed before giving up.
-const MAX_RESUMES: u32 = 5;
-
 fn http_client_get(
     url: &Url,
     bearer_token: &Option<String>,
-) -> Result<reqwest::blocking::Response> {
-    http_client_get_from(url, bearer_token, None)
-}
-
-/// GET `url`, asking for the body from byte `offset` on when one is given.
-fn http_client_get_from(
-    url: &Url,
-    bearer_token: &Option<String>,
-    offset: Option<u64>,
 ) -> Result<reqwest::blocking::Response> {
     let client = Client::builder()
         .timeout(Duration::from_secs(HTTP_TIMEOUT_SECS))
@@ -45,66 +33,9 @@ fn http_client_get_from(
         builder = builder.header("Authorization", format!("Bearer {token}"));
     }
 
-    if let Some(offset) = offset {
-        builder = builder.header("Range", format!("bytes={offset}-"));
-    }
-
     builder
         .send()
         .map_err(|e| RzupError::Other(format!("{e:?}: {url}")))
-}
-
-/// Copies the body of `response`, which came from GET `url`, into `writer`. When the transfer
-/// breaks, the rest is requested again from `url` with an HTTP Range request and the copy
-/// continues, up to `MAX_RESUMES` times. The original URL is used rather than the response's
-/// final one so that a redirect to a signed URL, as GitHub release assets use, is followed afresh
-/// and the bearer token never reaches the redirect target. Before each resume, `on_resume` gets
-/// the number of bytes received so far and the error that interrupted the transfer. Returns the
-/// number of bytes copied.
-pub fn copy_with_resume(
-    response: reqwest::blocking::Response,
-    url: impl IntoUrl,
-    bearer_token: &Option<String>,
-    writer: &mut impl std::io::Write,
-    mut on_resume: impl FnMut(u64, &std::io::Error),
-) -> Result<u64> {
-    let url = url
-        .into_url()
-        .map_err(|e| RzupError::Other(e.to_string()))?;
-    let mut reader: Box<dyn std::io::Read> = Box::new(response);
-    let mut received = 0u64;
-    let mut resumes = 0u32;
-    let mut buf = vec![0u8; 64 * 1024];
-
-    loop {
-        match reader.read(&mut buf) {
-            Ok(0) => return Ok(received),
-            Ok(n) => {
-                writer.write_all(&buf[..n])?;
-                received += n as u64;
-            }
-            Err(e) => {
-                if resumes >= MAX_RESUMES {
-                    return Err(RzupError::Other(format!(
-                        "Failed to download file after {resumes} resumes: {e:?}: {url}"
-                    )));
-                }
-                resumes += 1;
-                on_resume(received, &e);
-
-                let response = http_client_get_from(&url, bearer_token, Some(received))?;
-                let status = response.status();
-                if status != reqwest::StatusCode::PARTIAL_CONTENT {
-                    let host = response.url().host_str().unwrap_or("").to_owned();
-                    return Err(RzupError::Other(format!(
-                        "Remote error: {host}: expected 206 Partial Content when resuming at \
-                        byte {received}, got {status}: {url}"
-                    )));
-                }
-                reader = Box::new(response);
-            }
-        }
-    }
 }
 
 fn error_on_status(
@@ -119,7 +50,7 @@ fn error_on_status(
         let body = response.text().ok();
 
         Err(RzupError::Other(format!(
-            "Remote error: {host}: {status}: {body:?}: {url}"
+            "Remote error: {host}: {body:?}: {url}"
         )))
     } else {
         Ok(response)
@@ -216,132 +147,4 @@ pub fn upload_bytes<BodyT: std::io::Read + Send + 'static>(
     error_on_status(response, &url)?;
 
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::io::{Read as _, Write as _};
-    use std::net::{TcpListener, TcpStream};
-
-    const BODY_LEN: usize = 300_000;
-    const CUT_AT: usize = 123_456;
-
-    fn body() -> Vec<u8> {
-        (0..BODY_LEN).map(|i| (i % 251) as u8).collect()
-    }
-
-    fn read_request(stream: &mut TcpStream) -> String {
-        let mut req = Vec::new();
-        let mut chunk = [0u8; 1024];
-        while !req.windows(4).any(|w| w == b"\r\n\r\n") {
-            let n = stream.read(&mut chunk).unwrap();
-            assert!(n > 0, "client closed before sending a request");
-            req.extend_from_slice(&chunk[..n]);
-        }
-        String::from_utf8(req).unwrap()
-    }
-
-    fn range_offset(request: &str) -> Option<usize> {
-        request.lines().find_map(|line| {
-            let (name, value) = line.split_once(':')?;
-            if !name.eq_ignore_ascii_case("range") {
-                return None;
-            }
-            value
-                .trim()
-                .strip_prefix("bytes=")?
-                .strip_suffix('-')?
-                .parse()
-                .ok()
-        })
-    }
-
-    /// Serves `/blob`: the first response claims the whole body but stops after `CUT_AT` bytes and
-    /// closes the connection. The second response honours the Range header when `honor_range` is
-    /// set, otherwise it is a plain 200 with the whole body.
-    fn flaky_server(honor_range: bool) -> String {
-        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-        let url = format!("http://{}/blob", listener.local_addr().unwrap());
-        std::thread::spawn(move || {
-            let body = body();
-
-            let mut stream = listener.accept().unwrap().0;
-            let request = read_request(&mut stream);
-            assert_eq!(range_offset(&request), None);
-            stream
-                .write_all(
-                    format!(
-                        "HTTP/1.1 200 OK\r\nContent-Length: {BODY_LEN}\r\nConnection: close\r\n\r\n"
-                    )
-                    .as_bytes(),
-                )
-                .unwrap();
-            stream.write_all(&body[..CUT_AT]).unwrap();
-            drop(stream);
-
-            let mut stream = listener.accept().unwrap().0;
-            let request = read_request(&mut stream);
-            let offset = range_offset(&request).expect("second request carries a Range header");
-            assert_eq!(offset, CUT_AT);
-            if honor_range {
-                let rest = &body[offset..];
-                stream
-                    .write_all(
-                        format!(
-                            "HTTP/1.1 206 Partial Content\r\nContent-Length: {}\r\n\
-                            Content-Range: bytes {offset}-{}/{BODY_LEN}\r\nConnection: close\r\n\r\n",
-                            rest.len(),
-                            BODY_LEN - 1
-                        )
-                        .as_bytes(),
-                    )
-                    .unwrap();
-                stream.write_all(rest).unwrap();
-            } else {
-                stream
-                    .write_all(
-                        format!(
-                            "HTTP/1.1 200 OK\r\nContent-Length: {BODY_LEN}\r\nConnection: close\r\n\r\n"
-                        )
-                        .as_bytes(),
-                    )
-                    .unwrap();
-                stream.write_all(&body).unwrap();
-            }
-        });
-        url
-    }
-
-    #[test]
-    fn copy_with_resume_resumes_after_broken_transfer() {
-        let url = flaky_server(true);
-        let response = download_bytes(&url, &None).unwrap();
-
-        let mut out = Vec::new();
-        let mut resumes = Vec::new();
-        let copied = copy_with_resume(response, &url, &None, &mut out, |received, _err| {
-            resumes.push(received)
-        })
-        .unwrap();
-
-        assert_eq!(copied, BODY_LEN as u64);
-        assert_eq!(out, body());
-        assert_eq!(resumes, vec![CUT_AT as u64]);
-    }
-
-    #[test]
-    fn copy_with_resume_rejects_server_that_ignores_range() {
-        let url = flaky_server(false);
-        let response = download_bytes(&url, &None).unwrap();
-
-        let mut out = Vec::new();
-        let err = copy_with_resume(response, &url, &None, &mut out, |_, _| {}).unwrap_err();
-
-        assert!(
-            err.to_string().contains("expected 206 Partial Content"),
-            "{err}"
-        );
-        assert_eq!(out.len(), CUT_AT);
-    }
 }
