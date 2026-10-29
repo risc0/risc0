@@ -14,8 +14,8 @@
 
 use crate::components::Component;
 use crate::distribution::{
-    check_for_not_found, copy_with_resume, download_bytes, download_json, parse_cpp_version,
-    DistributionPlatform, Platform, ProgressWriter,
+    check_for_not_found, download_bytes, download_json, parse_cpp_version, DistributionPlatform,
+    Platform, ProgressWriter,
 };
 use crate::env::Environment;
 use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferKind};
@@ -164,7 +164,7 @@ impl<'a> DistributionPlatform for GithubRelease<'a> {
             .open(&download_path)?;
 
         let download_url = self.download_url(component, version, platform)?;
-        let resp = download_bytes(&download_url, env.github_token())?;
+        let mut resp = download_bytes(&download_url, env.github_token())?;
 
         env.emit(RzupEvent::TransferStarted {
             kind: TransferKind::Download,
@@ -174,21 +174,12 @@ impl<'a> DistributionPlatform for GithubRelease<'a> {
             len: resp.content_length(),
         });
 
-        let mut writer = ProgressWriter::new(component.to_string(), env, &mut download_file);
-        copy_with_resume(
-            resp,
-            &download_url,
-            env.github_token(),
-            &mut writer,
-            |received, err| {
-                env.emit(RzupEvent::Print {
-                    message: format!(
-                        "Download of {component} interrupted after {received} bytes ({err}); \
-                        resuming"
-                    ),
-                });
-            },
-        )?;
+        resp.copy_to(&mut ProgressWriter::new(
+            component.to_string(),
+            env,
+            &mut download_file,
+        ))
+        .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
 
         env.emit(RzupEvent::TransferCompleted {
             kind: TransferKind::Download,

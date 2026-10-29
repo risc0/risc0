@@ -46,7 +46,7 @@ enum Commands {
     /// Build a component
     #[command(after_help = commands::BUILD_HELP)]
     Build(BuildCommand),
-    /// Publish a component to the artifacts bucket
+    /// Publish a component on S3
     #[command(after_help = commands::PUBLISH_HELP, subcommand)]
     Publish(PublishCommand),
 }

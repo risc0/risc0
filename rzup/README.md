@@ -150,17 +150,12 @@ When communicating with GitHub, it tries using authentication. This can be usefu
 rate-limiting. It attempts to get a token from the `GITHUB_TOKEN` environment variable, then from
 ~/.config/gh/hosts.yml.
 
-Components published with `rzup publish` (currently `risc0-groth16`) are downloaded from
-`https://artifacts.risczero.net`. Set `RZUP_DOWNLOAD_URL` to download them from somewhere else, for
-example a staging copy of the bucket; the component manifest is signature-checked wherever it comes
-from.
-
 ### publish
 
-rzup downloads components from both GitHub releases and the artifacts bucket. The publish command
-is for uploading new components to the bucket.
+rzup currently downloads components from both GitHub and S3. We are in the process of transitioning
+where components live from GitHub to S3. The publish command is for uploading new components to S3.
 
-It stores the components under `rzup/components/<component-name>/` in the bucket.
+It stores the components in s3://risc0-artifacts/rzup/components/<component-name>/
 
 #### create-artifact
 
@@ -177,30 +172,20 @@ command doesn't have to be used, but is provided for convenience.
 
 #### upload
 
-To upload an artifact to the bucket as a component, `publish upload` can be used like
+To upload an artifact to S3 as a component, `publish upload` can be used like
 ```bash
 rzup publish upload (--target-agnostic|--target <target-triple>) <component-name> <version> <artifact>.tar.xz
 ```
 
-This command needs these environment variables:
-
-- `RZUP_PUBLISH_URL`: the S3 API URL of the bucket, including the bucket name, for example
-  `https://<account-id>.r2.cloudflarestorage.com/risc0-artifacts`. Uploads cannot go through the
-  download hostname.
-- `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`: an S3 API token for that bucket. Requests are
-  signed with SigV4 and region `auto`.
-- `RZUP_PUBLISH_KEY`: the PEM-encoded private key that signs the component manifest.
-
-It reads the current manifest from the download URL (`RZUP_DOWNLOAD_URL`), uploads the artifact,
-and uploads the updated, signed manifest. To rehearse against a scratch bucket, point both URLs at
-it.
+This command must be run in an environment with AWS credentials available. It will publish the
+artifact as a component with the given name and version.
 
 If `--target-agnostic` flag is given, the artifact will be used for all targets, otherwise `--target
 <target-triple>` must be used to mark which target the artifact should be used for (e.g.
 aarch64-apple-darwin, or x86_64-unknown-linux-gnu)
 
-Uploads are signed with the private key in `RZUP_PUBLISH_KEY`; rzup verifies manifests with the
-matching public key built into it.
+Uploads are signed with a private key that is stored in AWS secrets manager, the key is obtained at
+publish time using aforementioned AWS credentials.
 
 #### set-latest
 The published component metadata includes information about what component version is the latest
