@@ -1,7 +1,7 @@
 [package]
 name = "risc0-circuit-recursion-control-zkrs"
 description = "RISC Zero control ZKRs for the circuit for recursion"
-version = "4.0.6"
+version = "4.0.6-rc.1"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
