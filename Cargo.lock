@@ -1728,7 +1728,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "3.0.6"
+version = "3.1.0-rc.1"
 dependencies = [
  "anyhow",
  "bincode",
@@ -6901,7 +6901,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "3.0.5"
+version = "3.0.6-rc.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -6924,7 +6924,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "3.0.6"
+version = "3.0.7-rc.1"
 dependencies = [
  "anyhow",
  "cargo_metadata 0.19.2",
@@ -6958,7 +6958,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "4.0.6"
+version = "4.0.7-rc.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -6990,7 +6990,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "4.0.3"
+version = "4.0.4-rc.1"
 dependencies = [
  "cc",
  "cust",
@@ -7004,7 +7004,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "4.0.6"
+version = "4.0.6-rc.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -7032,7 +7032,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-control-zkrs"
-version = "4.0.6"
+version = "4.0.6-rc.1"
 dependencies = [
  "liblzma",
  "phf",
@@ -7041,7 +7041,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "4.0.3"
+version = "4.0.4-rc.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -7052,7 +7052,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-zkrs"
-version = "4.0.6"
+version = "4.0.6-rc.1"
 dependencies = [
  "liblzma",
  "phf",
@@ -7061,7 +7061,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "4.0.5"
+version = "4.0.6-rc.1"
 dependencies = [
  "anyhow",
  "bit-vec 0.8.0",
@@ -7098,7 +7098,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "4.0.3"
+version = "4.0.4-rc.1"
 dependencies = [
  "cc",
  "cust",
@@ -7136,7 +7136,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "3.0.5"
+version = "3.0.6-rc.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -7177,7 +7177,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-povw"
-version = "0.4.3"
+version = "0.4.4-rc.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -7209,7 +7209,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "3.0.6"
+version = "3.1.0-rc.1"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -7249,7 +7249,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.5.0"
+version = "1.5.1-rc.1"
 dependencies = [
  "anyhow",
  "blst",
@@ -7260,7 +7260,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-tools"
-version = "2.0.0"
+version = "2.0.1-rc.1"
 dependencies = [
  "assert_cmd",
  "clap 4.5.60",
@@ -7280,7 +7280,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "3.0.5"
+version = "3.0.6-rc.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -7313,7 +7313,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "3.0.6"
+version = "3.1.0-rc.1"
 dependencies = [
  "addr2line",
  "anyhow",
