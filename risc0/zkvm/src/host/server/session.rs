@@ -329,7 +329,7 @@ impl Session {
     /// The populated [Output] is merged into the last segment, including journal and assumptions.
     pub fn segments(&self) -> impl Iterator<Item = Result<Segment>> {
         // NOTE: When using the default run or run_with_callback on ExecutorImpl, merging in the
-        // output is redudant. However, callers that run the ExecutorImpl iteratively and without
+        // output is redundant. However, callers that run the ExecutorImpl iteratively and without
         // the SegmentUpdateProcessor, this is where the output merging happens.
 
         // Construct the populated Output from the session's journal and assumptions.
