@@ -446,6 +446,26 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
     cmd
 }
 
+pub(crate) fn cargo_feature_args(options: &GuestOptions) -> Vec<String> {
+    let mut args = Vec::new();
+
+    if options.all_features {
+        args.push("--all-features".to_string());
+    }
+
+    if !options.default_features {
+        args.push("--no-default-features".to_string());
+    }
+
+    let features_str = options.features.join(",");
+    if !features_str.is_empty() {
+        args.push("--features".to_string());
+        args.push(features_str);
+    }
+
+    args
+}
+
 fn get_rust_toolchain_version() -> semver::Version {
     let rzup = rzup::Rzup::new().unwrap();
     let Some((version, _)) = rzup
@@ -628,11 +648,7 @@ fn build_guest_package(pkg: &Package, target_dir: impl AsRef<Path>, guest_info: 
     fs::create_dir_all(target_dir).unwrap();
 
     let mut cmd = cargo_command_internal("build", guest_info);
-
-    let features_str = guest_info.options.features.join(",");
-    if !features_str.is_empty() {
-        cmd.args(["--features", &features_str]);
-    }
+    cmd.args(cargo_feature_args(&guest_info.options));
 
     cmd.args([
         "--manifest-path",
@@ -940,5 +956,34 @@ mod tests {
         ]
         .join("\x1f");
         assert!(encoded.contains(&expected));
+    }
+
+    #[test]
+    fn cargo_feature_args_disable_default_features() {
+        let options = GuestOptionsBuilder::default()
+            .default_features(false)
+            .features(vec!["foo".to_string(), "bar".to_string()])
+            .build()
+            .unwrap();
+
+        assert_eq!(
+            cargo_feature_args(&options),
+            vec!["--no-default-features", "--features", "foo,bar"]
+        );
+    }
+
+    #[test]
+    fn guest_options_default_enables_default_features() {
+        assert!(GuestOptions::default().default_features);
+    }
+
+    #[test]
+    fn cargo_feature_args_enable_all_features() {
+        let options = GuestOptionsBuilder::default()
+            .all_features(true)
+            .build()
+            .unwrap();
+
+        assert_eq!(cargo_feature_args(&options), vec!["--all-features"]);
     }
 }

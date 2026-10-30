@@ -21,8 +21,8 @@ use docker_generate::DockerFile;
 use tempfile::tempdir;
 
 use crate::{
-    GuestOptions, RISC0_TARGET_TRIPLE, config::GuestInfo, encode_rust_flags, get_env_var,
-    get_package,
+    GuestOptions, RISC0_TARGET_TRIPLE, cargo_feature_args, config::GuestInfo, encode_rust_flags,
+    get_env_var, get_package,
 };
 
 const DOCKER_IGNORE: &str = r#"
@@ -123,26 +123,33 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
     let rustflags_env = &[("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags.as_str())];
 
     let common_args = vec![
-        "--locked",
-        "--target",
-        RISC0_TARGET_TRIPLE,
-        "--manifest-path",
-        "$CARGO_MANIFEST_PATH",
+        "--locked".to_string(),
+        "--target".to_string(),
+        RISC0_TARGET_TRIPLE.to_string(),
+        "--manifest-path".to_string(),
+        "$CARGO_MANIFEST_PATH".to_string(),
     ];
 
-    let mut build_args = common_args.clone();
-    let features_str = guest_info.options.features.join(",");
-    if !guest_info.options.features.is_empty() {
-        build_args.push("--features");
-        build_args.push(&features_str);
-    }
+    let build_args = [common_args.clone(), cargo_feature_args(&guest_info.options)].concat();
 
-    let fetch_cmd = [&["cargo", "+risc0", "fetch"], common_args.as_slice()]
-        .concat()
-        .join(" ");
+    let fetch_cmd = [
+        vec![
+            "cargo".to_string(),
+            "+risc0".to_string(),
+            "fetch".to_string(),
+        ],
+        common_args,
+    ]
+    .concat()
+    .join(" ");
     let build_cmd = [
-        &["cargo", "+risc0", "build", "--release"],
-        build_args.as_slice(),
+        vec![
+            "cargo".to_string(),
+            "+risc0".to_string(),
+            "build".to_string(),
+            "--release".to_string(),
+        ],
+        build_args,
     ]
     .concat()
     .join(" ");

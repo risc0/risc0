@@ -92,12 +92,19 @@ impl DockerOptions {
 ///     .build()
 ///     .unwrap();
 /// ```
-#[derive(Default, Clone, Debug, Builder)]
+#[derive(Clone, Debug, Builder)]
 #[builder(default)]
 #[non_exhaustive]
 pub struct GuestOptions {
     /// Features for cargo to build the guest with.
     pub features: Vec<String>,
+
+    /// Whether to build the guest with all features enabled.
+    pub all_features: bool,
+
+    /// Whether to build the guest with default features enabled.
+    #[builder(default = "true")]
+    pub default_features: bool,
 
     /// Use a docker environment for building.
     #[builder(setter(strip_option))]
@@ -106,6 +113,18 @@ pub struct GuestOptions {
     /// Override the default kernel ELF to be used for execution.
     #[builder(setter(strip_option))]
     pub kernel: Option<Vec<u8>>,
+}
+
+impl Default for GuestOptions {
+    fn default() -> Self {
+        Self {
+            features: Vec::new(),
+            all_features: false,
+            default_features: true,
+            use_docker: None,
+            kernel: None,
+        }
+    }
 }
 
 impl GuestOptions {
