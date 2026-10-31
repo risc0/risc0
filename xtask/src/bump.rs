@@ -19,16 +19,28 @@
 //! [workspace.metadata.release-version]
 //! version = "3.1.0-rc.1"
 //! lockstep = ["cargo-risczero", "risc0-r0vm", "risc0-zkvm"]
+//!
+//! [workspace.metadata.release-version.pin]
+//! risc0-circuit-recursion = "4.1.0"
+//!
+//! [workspace.metadata.release-version.allow-breaking]
+//! risc0-circuit-recursion = { from = "4.0.5", reason = "the layout types are not used outside the crate" }
 //! ```
 //!
 //! The lockstep crates get `version`. Every other crate is compared with its version at the last
 //! stable `v*` tag, as published on crates.io, and gets the smallest bump that covers its changes,
 //! with the pre-release of `version`: a patch if its packaged files changed or one of its
 //! dependencies is bumped, a minor if `cargo-semver-checks` finds API additions. A crate that
-//! needs a breaking change is an error. Unchanged crates keep the tag's version, and crates that
-//! are new since the tag keep theirs with the pre-release. Since everything is computed from the
-//! tag, running it again gives the same versions; going from a release candidate to the release
-//! is a change to `version` only.
+//! needs a breaking change is an error, unless `allow-breaking` names it with the baseline
+//! version the break is against and the reason, which makes the change count as a minor. Once a
+//! release moves the baseline past `from`, the entry is stale and must be removed. A pinned
+//! crate gets its pin with the pre-release of
+//! `version`, like a lockstep crate gets `version`, for changes the files and the API don't
+//! show, such as a circuit whose receipts are incompatible with the baseline's; a pin smaller
+//! than the crate's changes need is an error. Unchanged crates keep the tag's version, and
+//! crates that are new since the tag keep theirs with the pre-release. Since everything is
+//! computed from the tag, running it again gives the same versions; going from a release
+//! candidate to the release is a change to `version` only.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
@@ -76,6 +88,17 @@ impl fmt::Display for Level {
 struct Config {
     version: Version,
     lockstep: BTreeSet<String>,
+    /// The release part each listed crate gets, whatever its changes show.
+    pin: BTreeMap<String, Version>,
+    /// Crates whose breaking API change against `from` is accepted as a minor.
+    allow_breaking: BTreeMap<String, AllowBreaking>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct AllowBreaking {
+    /// The baseline version the break is against; the entry is stale against any other.
+    from: Version,
+    reason: String,
 }
 
 /// A released crate of the workspace.
@@ -98,6 +121,8 @@ struct Row {
     changed_files: Vec<String>,
     bumped_deps: Vec<String>,
     api: Option<Level>,
+    pinned: bool,
+    allowed_breaking: Option<String>,
     new: Option<Version>,
 }
 
@@ -106,6 +131,9 @@ impl Row {
         let mut reasons = vec![];
         if lockstep {
             reasons.push("lockstep".to_string());
+        }
+        if self.pinned {
+            reasons.push("pinned".to_string());
         }
         if self.baseline.is_none() {
             reasons.push("new since the baseline".to_string());
@@ -127,6 +155,9 @@ impl Row {
         }
         if let Some(api) = self.api.filter(|api| *api > Level::Patch) {
             reasons.push(format!("api: {api}"));
+        }
+        if let Some(reason) = &self.allowed_breaking {
+            reasons.push(format!("breaking allowed: {reason}"));
         }
         reasons.join("; ")
     }
@@ -159,7 +190,58 @@ fn read_config(metadata: &cargo_metadata::Metadata) -> Result<Config> {
         })
         .transpose()?
         .unwrap_or_default();
-    Ok(Config { version, lockstep })
+    let pin = table
+        .get("pin")
+        .map(|v| {
+            v.as_object()
+                .ok_or_else(|| anyhow!("pin must be a table of crate name to version"))?
+                .iter()
+                .map(|(name, version)| {
+                    let version = version
+                        .as_str()
+                        .ok_or_else(|| anyhow!("pin.{name} must be a version string"))?;
+                    let version = Version::parse(version).with_context(|| format!("pin.{name}"))?;
+                    ensure!(
+                        version.pre.is_empty() && version.build.is_empty(),
+                        "pin.{name} must be a release version; the pre-release comes from `version`"
+                    );
+                    Ok((name.clone(), version))
+                })
+                .collect::<Result<BTreeMap<_, _>>>()
+        })
+        .transpose()?
+        .unwrap_or_default();
+    let allow_breaking = table
+        .get("allow-breaking")
+        .map(|v| {
+            v.as_object()
+                .ok_or_else(|| {
+                    anyhow!("allow-breaking must be a table of crate name to {{ from, reason }}")
+                })?
+                .iter()
+                .map(|(name, entry)| {
+                    let field = |key: &str| {
+                        entry
+                            .get(key)
+                            .and_then(|v| v.as_str())
+                            .filter(|v| !v.trim().is_empty())
+                            .ok_or_else(|| anyhow!("allow-breaking.{name} must give `{key}`"))
+                    };
+                    let from = Version::parse(field("from")?)
+                        .with_context(|| format!("allow-breaking.{name}.from"))?;
+                    let reason = field("reason")?.to_string();
+                    Ok((name.clone(), AllowBreaking { from, reason }))
+                })
+                .collect::<Result<BTreeMap<_, _>>>()
+        })
+        .transpose()?
+        .unwrap_or_default();
+    Ok(Config {
+        version,
+        lockstep,
+        pin,
+        allow_breaking,
+    })
 }
 
 /// Workspace crates that cargo-release publishes, in dependency order.
@@ -516,14 +598,33 @@ fn decide(
             baseline: baseline.clone(),
             changed_files,
             bumped_deps,
+            pinned: config.pin.contains_key(&c.name),
             ..Default::default()
         };
         let lockstep = config.lockstep.contains(&c.name);
+        let pin = config.pin.get(&c.name).map(|pin| {
+            let mut pin = pin.clone();
+            pin.pre = pre.clone();
+            pin
+        });
 
         let result = (|| -> Result<Version> {
+            if let Some(allow) = config.allow_breaking.get(&c.name) {
+                ensure!(
+                    baseline.as_ref() == Some(&allow.from),
+                    "allow-breaking.{} is for the baseline {}, but the baseline is {}; remove it",
+                    c.name,
+                    allow.from,
+                    baseline
+                        .as_ref()
+                        .map_or("none".to_string(), Version::to_string)
+                );
+            }
             let Some(baseline) = &baseline else {
                 return Ok(if lockstep {
                     config.version.clone()
+                } else if let Some(pin) = pin {
+                    pin
                 } else {
                     let mut version =
                         Version::new(c.version.major, c.version.minor, c.version.patch);
@@ -542,7 +643,22 @@ fn decide(
                 level = level.max(found);
             }
             if level == Level::Major {
-                bail!("{} needs a breaking change against {baseline}", c.name);
+                match config.allow_breaking.get(&c.name) {
+                    Some(allow) => {
+                        row.allowed_breaking = Some(allow.reason.clone());
+                        level = Level::Minor;
+                    }
+                    None => bail!("{} needs a breaking change against {baseline}", c.name),
+                }
+            }
+            if let Some(pin) = pin {
+                let needed = bump(baseline, level, pre);
+                ensure!(
+                    release_part(&pin) >= release_part(&needed),
+                    "{} needs at least {needed}, more than its pin {pin}",
+                    c.name
+                );
+                return Ok(pin);
             }
             if lockstep {
                 let needed = bump(baseline, level.max(Level::Patch), pre);
@@ -667,6 +783,22 @@ fn run_inner(args: &Bump, root: &Path) -> Result<()> {
             "lockstep crate {name} is not a released workspace crate"
         );
     }
+    for name in config.pin.keys() {
+        ensure!(
+            crates.iter().any(|c| &c.name == name),
+            "pinned crate {name} is not a released workspace crate"
+        );
+        ensure!(
+            !config.lockstep.contains(name),
+            "{name} is both pinned and lockstep"
+        );
+    }
+    for name in config.allow_breaking.keys() {
+        ensure!(
+            crates.iter().any(|c| &c.name == name),
+            "allow-breaking crate {name} is not a released workspace crate"
+        );
+    }
     let workspace = crates
         .iter()
         .map(|c| c.name.clone())
@@ -759,6 +891,8 @@ mod tests {
         Config {
             version: v(version),
             lockstep: lockstep.iter().map(|l| l.to_string()).collect(),
+            pin: BTreeMap::new(),
+            allow_breaking: BTreeMap::new(),
         }
     }
 
@@ -881,6 +1015,110 @@ mod tests {
         )
         .unwrap_err();
         assert!(err.to_string().contains("needs at least 3.1.0"), "{err}");
+    }
+
+    #[test]
+    fn pinned_crates_get_the_pin_with_the_pre_release() {
+        let mut config = config("3.1.0-rc.2", &["zkvm"]);
+        config.pin.insert("rv32im".to_string(), v("4.1.0"));
+        config.pin.insert("keccak".to_string(), v("4.1.0"));
+        let versions = run(
+            &config,
+            vec![
+                krate("rv32im", "4.0.5", &[]),
+                krate("keccak", "4.0.6", &[]),
+                krate("zkvm", "3.0.6", &["rv32im", "keccak"]),
+                krate("povw", "0.4.3", &["zkvm"]),
+            ],
+            &["rv32im"],
+            &[],
+        )
+        .unwrap();
+        // Changed files alone would make this a patch.
+        assert_eq!(versions["rv32im"], v("4.1.0-rc.2"));
+        // Unchanged, but pinned all the same.
+        assert_eq!(versions["keccak"], v("4.1.0-rc.2"));
+        assert_eq!(versions["zkvm"], v("3.1.0-rc.2"));
+        assert_eq!(versions["povw"], v("0.4.4-rc.2"));
+    }
+
+    #[test]
+    fn pinned_new_crates_get_the_pin() {
+        let mut config = config("3.1.0-rc.2", &[]);
+        config.pin.insert("zkrs".to_string(), v("4.1.0"));
+        let crates = vec![krate("zkrs", "4.0.6", &[])];
+        let rows = decide(
+            &config,
+            &crates,
+            &[("zkrs".to_string(), None)].into_iter().collect(),
+            &BTreeMap::new(),
+            |_, _| unreachable!(),
+        )
+        .unwrap();
+        assert_eq!(rows[0].new, Some(v("4.1.0-rc.2")));
+    }
+
+    #[test]
+    fn pin_too_small_for_the_changes_fails() {
+        let mut config = config("3.1.0", &[]);
+        config.pin.insert("zkp".to_string(), v("3.0.5"));
+        let err = run(&config, vec![krate("zkp", "3.0.5", &[])], &["zkp"], &[]).unwrap_err();
+        assert!(err.to_string().contains("needs at least 3.0.6"), "{err}");
+    }
+
+    fn allow(from: &str) -> AllowBreaking {
+        AllowBreaking {
+            from: v(from),
+            reason: "reason".to_string(),
+        }
+    }
+
+    #[test]
+    fn allowed_breaking_changes_count_as_a_minor() {
+        let mut config = config("3.1.0-rc.2", &[]);
+        config
+            .allow_breaking
+            .insert("recursion".to_string(), allow("4.0.5"));
+        config.pin.insert("recursion".to_string(), v("4.1.0"));
+        let versions = run(
+            &config,
+            vec![krate("recursion", "4.0.5", &[]), krate("zkp", "3.0.5", &[])],
+            &["recursion", "zkp"],
+            &[("recursion", Level::Major), ("zkp", Level::Major)],
+        )
+        .map(|_| ())
+        .unwrap_err();
+        // Only the named crate is excused.
+        assert!(versions.to_string().contains("zkp needs a breaking change"));
+
+        config.allow_breaking.remove("recursion");
+        config.pin.remove("recursion");
+        config
+            .allow_breaking
+            .insert("zkp".to_string(), allow("3.0.5"));
+        let versions = run(
+            &config,
+            vec![krate("zkp", "3.0.5", &[])],
+            &["zkp"],
+            &[("zkp", Level::Major)],
+        )
+        .unwrap();
+        assert_eq!(versions["zkp"], v("3.1.0-rc.2"));
+    }
+
+    #[test]
+    fn stale_allow_breaking_fails() {
+        // The break was against 4.0.5; after a release the baseline is 4.1.0.
+        let mut config = config("3.2.0-rc.1", &[]);
+        config
+            .allow_breaking
+            .insert("recursion".to_string(), allow("4.0.5"));
+        let err = run(&config, vec![krate("recursion", "4.1.0", &[])], &[], &[]).unwrap_err();
+        assert!(
+            err.to_string()
+                .contains("is for the baseline 4.0.5, but the baseline is 4.1.0; remove it"),
+            "{err}"
+        );
     }
 
     #[test]
