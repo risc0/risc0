@@ -31,7 +31,7 @@ extern crate alloc;
 
 pub mod control_id;
 mod info;
-pub mod layout;
+pub(crate) mod layout;
 mod poly_ext;
 #[cfg(feature = "prove")]
 pub mod prove;
