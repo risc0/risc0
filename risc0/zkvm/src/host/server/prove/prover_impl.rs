@@ -89,7 +89,24 @@ impl ProverServer for ProverImpl {
             for hook in &session.hooks {
                 hook.on_pre_prove_segment(&segment);
             }
-            segments.push(self.prove_segment(ctx, &segment)?);
+            // Retry a failed segment up to 2 more times, so one failure does not discard the
+            // segments already proved.
+            let mut retries = 0;
+            let receipt = loop {
+                #[cfg(test)]
+                let result = fault::check(&segment).and_then(|_| self.prove_segment(ctx, &segment));
+                #[cfg(not(test))]
+                let result = self.prove_segment(ctx, &segment);
+                match result {
+                    Ok(receipt) => break receipt,
+                    Err(err) if retries < 2 => {
+                        retries += 1;
+                        tracing::warn!("prove_segment {} failed, retrying: {err:?}", segment.index);
+                    }
+                    Err(err) => return Err(err),
+                }
+            };
+            segments.push(receipt);
             for hook in &session.hooks {
                 hook.on_post_prove_segment(&segment);
             }
@@ -385,4 +402,46 @@ fn check_claims(
         );
     }
     Ok(())
+}
+
+/// Test-only fault injection for the segment retry in `prove_session`.
+#[cfg(test)]
+pub(crate) mod fault {
+    use std::cell::RefCell;
+
+    use anyhow::{Result, bail};
+
+    use crate::Segment;
+
+    #[derive(Default)]
+    pub(crate) struct Fault {
+        /// Index of the segment to fail.
+        pub(crate) index: u32,
+        /// Number of attempts on that segment to fail.
+        pub(crate) failures: usize,
+        /// Number of prove attempts made for each segment index.
+        pub(crate) attempts: Vec<usize>,
+    }
+
+    thread_local! {
+        pub(crate) static FAULT: RefCell<Option<Fault>> = const { RefCell::new(None) };
+    }
+
+    pub(super) fn check(segment: &Segment) -> Result<()> {
+        FAULT.with_borrow_mut(|fault| {
+            let Some(fault) = fault else {
+                return Ok(());
+            };
+            let idx = segment.index as usize;
+            if fault.attempts.len() <= idx {
+                fault.attempts.resize(idx + 1, 0);
+            }
+            fault.attempts[idx] += 1;
+            if segment.index == fault.index && fault.failures > 0 {
+                fault.failures -= 1;
+                bail!("injected failure for segment {}", segment.index);
+            }
+            Ok(())
+        })
+    }
 }

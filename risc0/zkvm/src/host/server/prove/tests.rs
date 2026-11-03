@@ -361,6 +361,51 @@ fn session_events() {
     assert!(on_post_prove_segment_flag.take());
 }
 
+/// Prove a two-segment session, failing segment 1 `failures` times. Returns the result and the
+/// number of prove attempts per segment.
+fn prove_with_segment_failures(failures: usize) -> (Result<Receipt>, Vec<usize>) {
+    use super::prover_impl::fault::{FAULT, Fault};
+
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(25_000);
+    let env = ExecutorEnv::builder()
+        .segment_limit_po2(14)
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::new(env, MemoryImage::new_kernel(program))
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.segments.len(), 2);
+
+    FAULT.set(Some(Fault {
+        index: 1,
+        failures,
+        ..Default::default()
+    }));
+    let result = prove_session(&session);
+    let attempts = FAULT.take().unwrap().attempts;
+    (result, attempts)
+}
+
+#[test_log::test]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
+fn segment_retry_succeeds() {
+    let (result, attempts) = prove_with_segment_failures(1);
+    result.unwrap();
+    assert_eq!(attempts, vec![1, 2]);
+}
+
+#[test_log::test]
+#[cfg_attr(gpu_accel, gpu_guard::gpu_guard)]
+fn segment_retry_exhausted() {
+    let (result, attempts) = prove_with_segment_failures(usize::MAX);
+    assert_eq!(
+        result.unwrap_err().to_string(),
+        "injected failure for segment 1"
+    );
+    assert_eq!(attempts, vec![1, 3]);
+}
+
 // These tests come from:
 // https://github.com/riscv-software-src/riscv-tests
 // They were built using: `cargo xfast bazel`.
