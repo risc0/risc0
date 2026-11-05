@@ -39,7 +39,8 @@ use self::zirgen::circuit::{Val, LAYOUT_GLOBAL};
 pub use self::zirgen::CircuitImpl;
 
 // NOTE: Seal version two introduced with PoVW, changing the output size from 74 to 90.
-pub const RV32IM_SEAL_VERSION: u32 = 2;
+// NOTE: Seal version three added the totalCycles global, changing the output size from 90 to 91.
+pub const RV32IM_SEAL_VERSION: u32 = 3;
 
 /// This number was picked by running `bigint2-analyze` on all the current bigint programs
 pub const MAX_INSN_CYCLES: usize = 25_000;
@@ -50,17 +51,41 @@ pub const MAX_INSN_CYCLES_LOWER_PO2: usize = 2_000;
 pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
     tracing::debug!("verify");
 
-    // We don't have a `code' buffer to verify.
-    let check_code_fn = |_: u32, _: &Digest| Ok(());
-
     if seal[0] != RV32IM_SEAL_VERSION {
         return Err(VerificationError::ReceiptFormatError);
     }
 
     let seal = &seal[1..];
 
+    // We don't have a `code' buffer to verify, but we use this callback (which receives the po2
+    // of the trace as read from the seal) to check the `totalCycles` global. The circuit
+    // constrains the row preceding each first-cycle row (circularly) to have cycle number
+    // `totalCycles - 1`, so requiring `totalCycles == 2^po2` ensures that the trace contains
+    // exactly one execution. Without this check, a prover could put two executions in a single
+    // trace, and the memory argument could not tell their memory transactions apart.
+    let check_code_fn = |po2: u32, _: &Digest| {
+        let total_cycles =
+            decode_total_cycles(seal).map_err(|_| VerificationError::ReceiptFormatError)?;
+        let expected = 1u32
+            .checked_shl(po2)
+            .ok_or(VerificationError::ReceiptFormatError)?;
+        if total_cycles != expected {
+            tracing::debug!("totalCycles global ({total_cycles}) != 2^po2 ({expected})");
+            return Err(VerificationError::InvalidProof);
+        }
+        Ok(())
+    };
+
     let hash_suite = Poseidon2HashSuite::new_suite();
     risc0_zkp::verify::verify(&CircuitImpl, &hash_suite, seal, check_code_fn)
+}
+
+/// Decodes the `totalCycles` global from a segment seal with the version header removed.
+fn decode_total_cycles(seal: &[u32]) -> Result<u32> {
+    ensure!(seal.len() >= CircuitImpl::OUTPUT_SIZE, "seal too short");
+    let io: &[Val] = bytemuck::checked::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
+    let global = Tree::new(io, LAYOUT_GLOBAL);
+    global.map(|c| c.total_cycles).get_u32_from_elem()
 }
 
 #[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq)]

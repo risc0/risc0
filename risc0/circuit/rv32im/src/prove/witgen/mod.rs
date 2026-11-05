@@ -306,6 +306,11 @@ fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
     // shutdown_cycle
     global[LAYOUT_GLOBAL.shutdown_cycle._super.offset] = segment.segment_threshold.into();
 
+    // total_cycles: the number of rows in the trace. The circuit constrains the row before each
+    // first-cycle row (circularly) to have cycle number total_cycles - 1, and the verifier checks
+    // that total_cycles == 2^po2, which together ensure the trace holds exactly one execution.
+    global[LAYOUT_GLOBAL.total_cycles._super.offset] = (1u32 << segment.po2).into();
+
     // povw nonce
     // Split the U256 nonce into LE shorts and assign to the globals.
     let nonce = segment.povw_nonce.unwrap_or(PovwNonce::ZERO);

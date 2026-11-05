@@ -20896,6 +20896,9 @@ pub const LAYOUT_GLOBAL: &_globalLayout = &_globalLayout {
     term_a1low: &NondetRegLayout {
         _super: &Reg { offset: 89 },
     },
+    total_cycles: &NondetRegLayout {
+        _super: &Reg { offset: 90 },
+    },
 };
 pub const LAYOUT_MIX: &_mixLayout = &_mixLayout {
     randomness: LAYOUT__1196,

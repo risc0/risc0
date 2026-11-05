@@ -23,8 +23,8 @@ use crate::{
         testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
         DEFAULT_SEGMENT_LIMIT_PO2,
     },
-    prove::{hal::StepMode, witgen::WitnessGenerator, PreflightResults},
-    zirgen::circuit::{ExtVal, REGCOUNT_DATA},
+    prove::{hal::StepMode, segment_prover, witgen::WitnessGenerator, PreflightResults},
+    zirgen::circuit::{ExtVal, LAYOUT_GLOBAL, REGCOUNT_DATA},
     MAX_INSN_CYCLES,
 };
 
@@ -132,4 +132,55 @@ fn fwd_rev_ab_basic() {
 #[test]
 fn fwd_rev_ab_split() {
     fwd_rev_ab_test(testutil::kernel::simple_loop(2000));
+}
+
+/// The `totalCycles` global must equal the number of rows in the trace: the circuit requires the
+/// row preceding each first-cycle row (circularly) to have cycle number `totalCycles - 1`. A
+/// prover that claims a different trace length (e.g. half of it, as if the trace held two
+/// executions) must fail witness generation.
+///
+/// The tampered cases use the sequential step modes: the parallel mode does not unwind cleanly
+/// on a constraint failure (worker threads keep running while the error propagates).
+#[test]
+fn total_cycles_mismatch_fails() {
+    let image = MemoryImage::new_kernel(testutil::kernel::basic());
+    let result = testutil::execute(
+        image,
+        DEFAULT_SEGMENT_LIMIT_PO2,
+        MAX_INSN_CYCLES,
+        DEFAULT_SESSION_LIMIT,
+        &NullSyscall,
+        None,
+    )
+    .unwrap();
+    let segment = result.segments.first().unwrap();
+    let prover = segment_prover().unwrap();
+    let offset = LAYOUT_GLOBAL.total_cycles._super.offset;
+    let total_cycles = 1u32 << segment.po2;
+
+    // Sanity check: the honest value proves and verifies.
+    let results = prover.preflight(segment).unwrap();
+    assert_eq!(results.global[offset], total_cycles.into());
+    let seal = prover.prove_core(results).unwrap();
+    crate::verify(&seal).unwrap();
+
+    let suite = risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite::new_suite();
+    let hal = risc0_zkp::hal::cpu::CpuHal::new(suite);
+    let circuit_hal = crate::prove::hal::cpu::CpuCircuitHal;
+    let mut rng = rand::rng();
+    let rand_z = ExtVal::random(&mut rng);
+
+    // Claiming a shorter trace (two executions of half the length) or a longer one must fail.
+    for (claimed, mode) in [
+        (total_cycles / 2, StepMode::SeqForward),
+        (total_cycles / 2, StepMode::SeqReverse),
+        (total_cycles * 2, StepMode::SeqForward),
+    ] {
+        let mut results = PreflightResults::new(segment, rand_z).unwrap();
+        results.global[offset] = claimed.into();
+        match WitnessGenerator::new(&hal, &circuit_hal, results, mode) {
+            Ok(_) => panic!("witgen accepted totalCycles = {claimed} ({mode:?})"),
+            Err(err) => tracing::debug!("expected failure ({claimed}, {mode:?}): {err:#}"),
+        }
+    }
 }

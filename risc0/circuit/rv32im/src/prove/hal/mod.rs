@@ -72,7 +72,7 @@ where
 }
 
 #[allow(dead_code)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) enum StepMode {
     Parallel,
     SeqForward,

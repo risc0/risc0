@@ -8415,6 +8415,7 @@ pub struct _globalLayout {
     pub term_a0low: &'static NondetRegLayout,
     pub term_a1high: &'static NondetRegLayout,
     pub term_a1low: &'static NondetRegLayout,
+    pub total_cycles: &'static NondetRegLayout,
 }
 impl risc0_zkp::layout::Component for _globalLayout {
     fn ty_name(&self) -> &'static str {
@@ -8434,6 +8435,7 @@ impl risc0_zkp::layout::Component for _globalLayout {
         v.visit_component("term_a0low", self.term_a0low)?;
         v.visit_component("term_a1high", self.term_a1high)?;
         v.visit_component("term_a1low", self.term_a1low)?;
+        v.visit_component("total_cycles", self.total_cycles)?;
         Ok(())
     }
 }

@@ -8407,6 +8407,7 @@ constexpr _globalLayout kLayoutGlobal = _globalLayout{
   ._super = /*offset=*/86},   .termA0low = NondetRegLayout{
   ._super = /*offset=*/87},   .termA1high = NondetRegLayout{
   ._super = /*offset=*/88},   .termA1low = NondetRegLayout{
-  ._super = /*offset=*/89}};
+  ._super = /*offset=*/89},   .totalCycles = NondetRegLayout{
+  ._super = /*offset=*/90}};
 constexpr _mixLayout kLayoutMix = _mixLayout{
   .randomness = kLayout__1196};
