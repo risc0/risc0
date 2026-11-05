@@ -2995,6 +2995,7 @@ struct _globalLayout {
   NondetRegLayout termA0low;
   NondetRegLayout termA1high;
   NondetRegLayout termA1low;
+  NondetRegLayout totalCycles;
 };
 struct _mixLayout {
   _accumLayout randomness;
