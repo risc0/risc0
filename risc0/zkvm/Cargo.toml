@@ -21,6 +21,10 @@ name = "datasheet"
 required-features = ["prove"]
 
 [[example]]
+name = "evm_receipt"
+required-features = ["client"]
+
+[[example]]
 name = "fib"
 required-features = ["prove"]
 
