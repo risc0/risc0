@@ -98,7 +98,7 @@ impl ProverOpts {
     /// adjusted to support a larger po2.
     ///
     /// NOTE: If the po2 used to prove is greater than the targeted verifier supports,
-    /// [DEFAULT_MAX_PO2] by default, receipts will be rejected by the verifier.
+    /// [`DEFAULT_MAX_PO2`](crate::receipt::DEFAULT_MAX_PO2) by default, receipts will be rejected by the verifier.
     #[stability::unstable]
     pub fn from_max_po2(po2_max: usize) -> Self {
         Self {
@@ -113,8 +113,8 @@ impl ProverOpts {
         }
     }
 
-    /// Construct a verifier context that will accept receipts with control any of the default
-    /// control ID associated with cycle counts of all supported powers of two (po2).
+    /// Construct prover options that will support segments with any of the default
+    /// control IDs associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
     pub fn all_po2s() -> Self {
         Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
