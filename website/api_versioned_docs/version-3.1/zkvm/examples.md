@@ -5,12 +5,9 @@
 - **[JSON][example-json]**: prove the contents of some entry in a JSON file,
   while keeping the rest of the data private
 - **[Where's Waldo][example-waldo]**: prove that Waldo appears in a JPG file,
-  while keeping the rest of the image private, additionally, there is [Where's
-  Waldo blog][waldo-blog]
+  while keeping the rest of the image private
 - **[ZK Checkmate][example-chess]**: prove that you see a mate-in-one, without
   revealing the winning move
-- **[ZK Proof of Exploit][zkpoex]**: prove that you _could_ exploit an Ethereum
-  account, without revealing the exploit
 - **[ECDSA signature verification][example-ecdsa]**: prove the validity of an
   ECDSA signature
 
@@ -59,5 +56,3 @@ cargo run --release
 [examples-dir]: https://github.com/risc0/risc0/tree/release-3.1/examples
 [install]: ./install.md
 [releases]: https://github.com/risc0/risc0/releases
-[waldo-blog]: https://risczero.com/news/waldo
-[zkpoex]: https://risczero.com/news/zkpoex

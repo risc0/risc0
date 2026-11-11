@@ -286,8 +286,8 @@ input data. Examples of when this may be useful are if you are reading in image
 data as bytes, or reading data that is binary encoded from the source like with
 [CBOR].
 
-Here is a [snippet from the Bonsai Governance
-example][snippet-bonsai-governance] showing how to read bytes.
+Here is a [snippet from the governance
+example][snippet-governance] showing how to read bytes.
 
 ```rust no_run
 # use std::io::Read;
@@ -502,7 +502,7 @@ below.
 [ARM]: https://en.wikipedia.org/wiki/ARM_architecture_family
 [bigint]: https://github.com/risc0/risc0/pull/466
 [CBOR]: https://cbor.io
-[continuation segments]: https://www.risczero.com/news/continuations
+[continuation segments]: /terminology#segment
 [CUDA]: https://developer.nvidia.com/cuda-toolkit
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
 [example-ecdsa]: https://github.com/risc0/risc0/tree/release-3.1/examples/ecdsa
@@ -528,7 +528,7 @@ below.
 [RISC-V operations]: https://marks.page/riscv
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
-[snippet-bonsai-governance]: https://github.com/risc0/risc0-ethereum/blob/release-2.3/examples/governance/methods/guest/src/bin/finalize_votes.rs#L86-L87
+[snippet-governance]: https://github.com/risc0/risc0-ethereum/blob/release-2.3/examples/governance/methods/guest/src/bin/finalize_votes.rs#L86-L87
 [snippet-password-checker]: https://github.com/risc0/risc0/blob/release-3.1/examples/password-checker/methods/guest/src/main.rs#L24
 [superscalar]: https://en.wikipedia.org/wiki/Superscalar_processor
 [waldo-merkle]: https://github.com/risc0/risc0/blob/release-3.1/examples/waldo/core/src/merkle.rs

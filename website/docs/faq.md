@@ -153,7 +153,7 @@
     Q: What is the maximum execution length for a program running on the zkVM?
   </summary>
 
-  A: Since we added support for <a href="https://www.risczero.com/news/continuations"> continuations</a>, the execution length can be very large.
+  A: Since we added support for <a href="/terminology#continuations"> continuations</a>, the execution length can be very large.
   So far, we've made proofs for executions that exceed 4 billion cycles, and there's plenty of room to expand that further.
 </details>
 
@@ -200,7 +200,7 @@
 
   A: No!
   We take care of the circuit building so that you can focus on building applications.
-  Everything you'll need to build is outlined in the <a href="https://dev.risczero.com/zkvm">zkVM docs</a> and the <a href="https://dev.risczero.com/bonsai">Bonsai docs</a>.
+  Everything you'll need to build is outlined in the <a href="https://dev.risczero.com/zkvm">zkVM docs</a>.
 </details>
 
 <a class="anchor" id="circuits" />

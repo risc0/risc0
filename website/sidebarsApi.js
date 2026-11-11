@@ -134,11 +134,6 @@ export default {
           label: "Local Proving",
           id: "generating-proofs/local-proving",
         },
-        {
-          type: "doc",
-          label: "Remote Proving",
-          id: "generating-proofs/remote-proving",
-        },
       ],
     },
     {

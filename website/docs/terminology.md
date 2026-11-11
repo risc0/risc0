@@ -51,7 +51,7 @@ Conditional receipts are a part of the [composition] feature.
 
 As of our 0.15 release, the [zkVM] uses continuations to enable proof generation for very large programs without blowing up memory requirements.
 Large proof generation is made possible by splitting the execution trace for a single [session] into a number of [segments], and proving those segments independently. <br />
-See also: [Continuations study club], [Continuations blog]
+See also: [Continuations study club]
 
 ### Control ID
 
@@ -266,7 +266,6 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [composition]: #composition
 [conditional]: #conditional
 [continuations]: #continuations
-[Continuations blog]: https://www.risczero.com/news/continuations
 [Continuations study club]: https://www.youtube.com/watch?v=v4HIwaqmIxk&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=1
 [control ID]: #control-id
 [ELF binary]: #elf-binary

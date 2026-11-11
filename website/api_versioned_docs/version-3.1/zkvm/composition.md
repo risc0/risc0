@@ -2,7 +2,7 @@
 
 RISC Zero's zkVM offers a convenient API for efficiently verifying proofs inside the guest program.
 
-This feature enables rich possibilities for building modular applications. Check out the [blog post] to learn more about the power of proof composition.
+This feature enables rich possibilities for building modular applications.
 
 :::info
 Although the "obvious" approach to proof composition would be to simply run the verifier inside the guest program, this approach doesn't result in compression.
@@ -43,7 +43,6 @@ For a more detailed dive into proof composition and RISC Zero's approach to recu
 [`env::verify()`]: https://github.com/risc0/risc0/blob/release-3.1/examples/composition/methods/guest/src/main.rs#L24
 [`Prover::prove_with_opts`]: https://docs.rs/risc0-zkvm/3.1/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [assumptions]: /terminology#assumption
-[blog post]: https://www.risczero.com/blog/proof-composition
 [code example]: https://github.com/risc0/risc0/tree/release-3.1/examples/composition#readme
 [composition-add-assumption]: /diagrams/composition-add-assumption.png
 [composition-no-assumptions]: /diagrams/composition-no-assumptions.png
