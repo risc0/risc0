@@ -23,10 +23,10 @@ To ensure that the circuit itself does not have security holes, we have used a m
 
 Our ceremony transcript is included in the `zkey` published on ceremony.pse.dev in the "Download ZKey" tab of the [RISC Zero STARK-to-SNARK Prover page][pse-risc0-ceremony]. (We mirror this file [here][zkey-mirror], and have a compressed version [here][zkey-compressed]) You can verify it matches the circuit using Circom and snarkjs:
 
-1. Install [Circom][install-circom] and [snarkjs][snarkjs].
+1. Install [Circom][install-circom] (version [`v2.2.2`][circom-v2.2.2]) and [snarkjs][snarkjs].
 2. Download the [`stark_verify.circom`][stark-verify-circom] and [`risc0.circom`][risc0-circom-library] source files.
 3. Download the Powers of Tau (`ptau`) file we used for our ceremony; we used the Hermez rollup with `2^23` powers of tau, which is linked in [the snarkjs readme][snarkjs] or available directly [here][powers-of-tau-hez-23] (mirrored [here][powers-of-tau-hez-23-our-mirror]).
-4. Generate the `r1cs` file from the `circom` source files, by running `circom stark_verify.circom --r1cs` in the directory where you downloaded these files. This should generate the same `r1cs` file as listed in our [p0tion configuration][p0tion-config] ([available directly here][r1cs-file]). The SHA-256 hash of this file (i.e. as computed by `shasum -a 256`) is `84d3c34b7c0eb55ad1b16b24f75e0b9de307f7b74089ea4a20a998390ee24178`.
+4. Generate the `r1cs` file from the `circom` source files, by running `circom stark_verify.circom --r1cs --O2` in the directory where you downloaded these files. This should generate the same `r1cs` file as listed in our [p0tion configuration][p0tion-config] ([available directly here][r1cs-file]). The SHA-256 hash of this file (i.e. as computed by `shasum -a 256`) is `84d3c34b7c0eb55ad1b16b24f75e0b9de307f7b74089ea4a20a998390ee24178`.
 5. Prepare JavaScript to use a large amount of memory: Its default settings generally are insufficient to verify this circuit. On my system, I needed to run `export NODE_OPTIONS="--max-old-space-size=32768"`.
 6. Use snarkjs to verify that the transcript matches this circuit and powers of tau, by running `snarkjs zkey verify stark_verify.r1cs powersOfTau28_hez_final_23.ptau stark_verify_final.zkey`. You should see a list of contribution hashes (attestations) followed by the message `snarkJS: ZKey Ok!`.
 
@@ -42,7 +42,7 @@ To verify an attestation, confirm that the hash in the attestation in the transc
 
 If you are looking for your own contribution, you can also go to gist.github.com and navigate to your Gist named "`risc-zero-stark-to-snark-prover_attestation.log`" (which will be linked at the top if you don't make Gists for other reasons; otherwise you can look for it under "View your gists" or with the search function as described in the previous paragraph). You can also find your contribution the same way as for any other user (i.e. by searching the transcript for your username).
 
-Important Note: Contributors can remove their attestations from GitHub at any time. They can also edit their attestations (although in this case the edit history will be visible). _Only the original version of the attestation can be valid; an edited version cannot be a valid attestation_. Note that that if any malicious contributors were able to participate in the ceremony, it does not damage the security of the ceremony, but it _does_ mean that they can pretend to have a bad attestation by editing or deleting their Gist. Therefore, a contribution with no attestation provides no security to the ceremony, but does not necessarily mean anything is wrong, either.
+Important Note: Contributors can remove their attestations from GitHub at any time. They can also edit their attestations (although in this case the edit history will be visible). _Only the original version of the attestation can be valid; an edited version cannot be a valid attestation_. Note that if any malicious contributors were able to participate in the ceremony, it does not damage the security of the ceremony, but it _does_ mean that they can pretend to have a bad attestation by editing or deleting their Gist. Therefore, a contribution with no attestation provides no security to the ceremony, but does not necessarily mean anything is wrong, either.
 
 Please exercise good judgment about whether a missing or edited attestation represents:
 
@@ -55,6 +55,7 @@ Please exercise good judgment about whether a missing or edited attestation repr
 We used the open-source tools [p0tion] and [DefinitelySetup] to run our ceremony, and our ceremony was coordinated with the [PSE] team. This gave us tools that had been battle-tested by prior ceremonies, and moreover, by using tools written by an external team, we put substantial limits on our own ability to maliciously manipulate the ceremony software.
 
 [audits-readme]: https://github.com/risc0/rz-security/blob/main/audits/README.md
+[circom-v2.2.2]: https://github.com/iden3/circom/releases/tag/v2.2.2
 [DefinitelySetup]: https://github.com/privacy-scaling-explorations/DefinitelySetup
 [install-circom]: https://docs.circom.io/getting-started/installation
 [kobi-bad-ceremony-list]: https://twitter.com/kobigurk/status/1782502969453494530

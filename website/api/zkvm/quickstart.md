@@ -75,8 +75,8 @@ RISC0_DEV_MODE=0 cargo run --release
 Note that since proofs are now being generated, the execution time will be
 significantly longer than when running in dev-mode. To create a proof with the
 zkVM on your own machine, we recommend at least 16 GB of RAM. To avoid these
-hardware requirements, consider using [Bonsai] to generate proofs remotely, as
-it will be significantly faster than running proofs locally. You can [request access] to Bonsai to set additional flags.
+hardware requirements, consider using [Boundless] to generate proofs remotely, as
+it will be significantly faster than running proofs locally.
 
 ### Executor Statistics
 
@@ -101,14 +101,14 @@ The statistics include:
 - Execution time
 
 Knowing these statistics is useful for estimating the cost of your application
-before submitting real workloads to Bonsai, as the cost of proof generation is
+before submitting real workloads to Boundless, as the cost of proof generation is
 proportional to the number of cycles and segments used.
 
 > **Congratulations!**
 >
 > _That's all it takes to build and run a minimal RISC Zero application._
 
-[Bonsai]: ../generating-proofs/remote-proving.md
+[Boundless]: https://boundless.network
 [dev-mode]: ../generating-proofs/dev-mode.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest]: /terminology#guest-program
@@ -117,7 +117,6 @@ proportional to the number of cycles and segments used.
 [journal]: /terminology#journal
 [prover]: /terminology#prover
 [receipt]: /terminology#receipt
-[request access]: https://bonsai.xyz/apply
 [seal]: /terminology#seal
 [tutorial-step-2]: tutorials/hello-world.md#step-2-host-share-private-data-as-input-with-the-guest
 [tutorial-step-3]: tutorials/hello-world.md#step-3-guest-read-input-and-commit-output

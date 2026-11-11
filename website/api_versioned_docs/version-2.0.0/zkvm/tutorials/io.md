@@ -306,12 +306,12 @@ Happy coding!
 [examples page]: ../examples.md
 [guest]: https://dev.risczero.com/terminology#guest
 [host]: https://dev.risczero.com/terminology#host
-[journal]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.journal.html
-[source-env::commit]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.commit.html
-[source-env::commit_slice]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.commit_slice.html
-[source-env::read]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.read.html
-[source-env::read_slice]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.read_slice.html
-[source-env::write]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.write.html
+[journal]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/guest/env/fn.journal.html
+[source-env::commit]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/guest/env/fn.commit.html
+[source-env::commit_slice]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/guest/env/fn.commit_slice.html
+[source-env::read]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/guest/env/fn.read.html
+[source-env::read_slice]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/guest/env/fn.read_slice.html
+[source-env::write]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/guest/env/fn.write.html
 [source-executor-env]: https://docs.rs/risc0-zkvm/2.0/struct.ExecutorEnv.html
 [source-ExecutorEnvBuilder::stderr]: https://docs.rs/risc0-zkvm/2.0/struct.ExecutorEnvBuilder.html#method.stderr
 [source-ExecutorEnvBuilder::stdout]: https://docs.rs/risc0-zkvm/2.0/struct.ExecutorEnvBuilder.html#method.stdout
@@ -322,8 +322,8 @@ Happy coding!
 [source-Journal]: https://docs.rs/risc0-zkvm/2.0/struct.Journal.html
 [source-Journal::decode]: https://docs.rs/risc0-zkvm/2.0/struct.Journal.html#method.decode
 [source-receipt]: https://docs.rs/risc0-zkvm/2.0/struct.Receipt.html
-[stderr]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.stderr.html
-[stdin]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.stdin.html
-[stdout]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.stdout.html
+[stderr]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/guest/env/fn.stderr.html
+[stdin]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/guest/env/fn.stdin.html
+[stdout]: https://docs.rs/risc0-zkvm/2.0/risc0_zkvm/guest/env/fn.stdout.html
 [term-cycles]: https://dev.risczero.com/terminology#clock-cycles
 [term-journal]: https://dev.risczero.com/terminology#journal
