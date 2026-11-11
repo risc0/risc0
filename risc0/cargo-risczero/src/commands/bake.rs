@@ -60,6 +60,8 @@ impl BakeCommand {
     fn bake_target(&self, pkg: &Package, target_dir: &Path) -> Result<()> {
         let mut guest_opts = GuestOptionsBuilder::default();
         guest_opts.features(self.features.features.clone());
+        guest_opts.all_features(self.features.all_features);
+        guest_opts.default_features(!self.features.no_default_features);
         if self.docker {
             guest_opts.use_docker(
                 DockerOptionsBuilder::default()
