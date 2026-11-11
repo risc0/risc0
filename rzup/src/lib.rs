@@ -117,7 +117,7 @@ impl Rzup {
         event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
     ) -> Result<Self> {
         let environment = Environment::new(|s| std::env::var(s), event_handler)?;
-        let registry = Registry::new(&environment, Default::default())?;
+        let registry = Registry::new(&environment, BaseUrls::from_env(|s| std::env::var(s)))?;
 
         Ok(Self {
             environment,
