@@ -58,9 +58,8 @@ the `build-toolchain` command to build the toolchain locally.
 
 ## `new`
 
-The `new` command will create a new project from an existing template. It
-defaults to the [rust-starter template][rust-starter] but can be used with other
-templates locally or hosted on github.
+The `new` command will create a new project from the
+[rust-starter template][rust-starter] bundled with `cargo-risczero`.
 
 ### Examples
 
@@ -71,11 +70,11 @@ cargo risczero new my_project
 # Create a project with 'no_std' in the guest
 cargo risczero new my_project --no-std
 
-# Disable git initialization
-cargo risczero new my_project --no-git
+# Set the name of the guest method
+cargo risczero new my_project --guest-name my_guest
 
-# Create from github template
-cargo risczero new my_project --template https://github.com/risc0/risc0-rust-starter
+# Create the project in a different directory
+cargo risczero new my_project --dest /tmp
 ```
 
 ## `build-toolchain`

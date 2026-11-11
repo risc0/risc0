@@ -61,12 +61,12 @@ Check for available updates of installed components.
 rzup check
 ```
 
-### Use
+### Default
 
-Switch to a specific version of a component.
+Set the default version of a component. The version must already be installed.
 
 ```sh
-rzup use <NAME> <VERSION>
+rzup default <NAME> <VERSION>
 ```
 
 Arguments:
