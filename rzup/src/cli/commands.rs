@@ -286,7 +286,11 @@ pub const BUILD_HELP: &str = "Discussion:
     Builds and installs the given component.
 
     Grabs the source code from GitHub, compiles it, installs it, and makes it
-    the default version. The resulting component version contains the commit hash.";
+    the default version. The resulting component version contains the commit hash.
+
+    Building the Rust toolchain also requires native build dependencies such as
+    cmake, ninja, and a C/C++ toolchain. On Debian/Ubuntu systems, install
+    packages such as build-essential, cmake, and ninja-build first.";
 
 #[derive(Parser)]
 #[command(group(

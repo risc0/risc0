@@ -123,6 +123,10 @@ the default version.
 
 The resulting version of the component will contain the commit hash.
 
+Building the Rust toolchain also requires native build dependencies such as `cmake`,
+`ninja`, and a C/C++ toolchain. On Debian/Ubuntu systems, install packages such as
+`build-essential`, `cmake`, and `ninja-build` first.
+
 ## Components
 
 rzup manages the following components:
