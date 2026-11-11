@@ -56,11 +56,17 @@ You can find detailed information in the [version management design][version-man
 
 > NOTE: The tables below are generated from the [`deployment.toml`][deployment.toml] file in the risc0-ethereum repository.
 
+:::warning
+The RISC Zero v1 verifiers has been removed from the managed `RiscZeroVerifierRouter`.
+If you would like to use the v1 verifiers, you may use the verifier contracts directly.
+Upgrading to v2 or higher is recommended.
+:::
+
 ### Ethereum Mainnet (1)
 
 | Contract                                   | Address                                                              |
 | ------------------------------------------ | -------------------------------------------------------------------- |
-| [RiscZeroVerifierRouter][router-src]       | [`0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319`][router-1-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                  |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x94A4684d6F7085C19138Bd4f9F3295fa9943C622`][verifier-1-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x08AeD6C108E500540a9544beF7a8B8a05E056e87`][estop-1-etherscan]    |
 | TimelockController                         | [`0x0b144E07A0826182B6b59788c34b32Bfa86Fb711`][timelock-1-etherscan] |
@@ -71,7 +77,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                     |
 | ------------------------------------------ | --------------------------------------------------------------------------- |
-| [RiscZeroVerifierRouter][router-src]       | [`0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187`][router-11155111-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                         |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0xd9b0d07CeCd808a8172F21fA7C97992168f045CA`][verifier-11155111-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x7a028d6f0BD603Ad2a47e3a3B1E504C0D6234877`][estop-11155111-etherscan]    |
 | TimelockController                         | [`0xB4E3306129208cC8e6E75157f75f62eAe0B920a0`][timelock-11155111-etherscan] |
@@ -82,7 +88,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
-| [RiscZeroVerifierRouter][router-src]       | [`0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C`][router-17000-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                      |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x44c220f0598345195cE99AD6A57aDfFcb9Ea33e7`][verifier-17000-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0xBDaEd5bbf8016AfD05Fc4659572e5fEb5854aAD4`][estop-17000-etherscan]    |
 | TimelockController                         | [`0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319`][timelock-17000-etherscan] |
@@ -93,7 +99,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
-| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-42161-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                      |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF`][verifier-42161-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1`][estop-42161-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-42161-etherscan] |
@@ -104,7 +110,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                   |
 | ------------------------------------------ | ------------------------------------------------------------------------- |
-| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-421614-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                       |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF`][verifier-421614-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1`][estop-421614-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-421614-etherscan] |
@@ -115,7 +121,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
-| [RiscZeroVerifierRouter][router-src]       | [`0x0b144E07A0826182B6b59788c34b32Bfa86Fb711`][router-43114-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                      |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF`][verifier-43114-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1`][estop-43114-etherscan]    |
 | TimelockController                         | [`0xDC986a09728F76110FF666eE7b20d99086501d15`][timelock-43114-etherscan] |
@@ -126,7 +132,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
-| [RiscZeroVerifierRouter][router-src]       | [`0x0b144E07A0826182B6b59788c34b32Bfa86Fb711`][router-43113-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                      |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF`][verifier-43113-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1`][estop-43113-etherscan]    |
 | TimelockController                         | [`0xDC986a09728F76110FF666eE7b20d99086501d15`][timelock-43113-etherscan] |
@@ -137,7 +143,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                 |
 | ------------------------------------------ | ----------------------------------------------------------------------- |
-| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-8453-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                     |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF`][verifier-8453-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1`][estop-8453-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-8453-etherscan] |
@@ -148,7 +154,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
-| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-84532-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                      |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x2DEfEA335392bb62d01f74e338697C7B31De254C`][verifier-84532-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0xB369b4dd27FBfb59921d3A4a3D23AC2fc32FB908`][estop-84532-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-84532-etherscan] |
@@ -159,7 +165,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                               |
 | ------------------------------------------ | --------------------------------------------------------------------- |
-| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-10-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                   |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF`][verifier-10-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1`][estop-10-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-10-etherscan] |
@@ -170,7 +176,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                     |
 | ------------------------------------------ | --------------------------------------------------------------------------- |
-| [RiscZeroVerifierRouter][router-src]       | [`0xB369b4dd27FBfb59921d3A4a3D23AC2fc32FB908`][router-11155420-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                         |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF`][verifier-11155420-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1`][estop-11155420-etherscan]    |
 | TimelockController                         | [`0x2DEfEA335392bb62d01f74e338697C7B31De254C`][timelock-11155420-etherscan] |
@@ -181,7 +187,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
-| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-59144-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                      |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF`][verifier-59144-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1`][estop-59144-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-59144-etherscan] |
@@ -192,7 +198,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
-| [RiscZeroVerifierRouter][router-src]       | [`0x27983ee173aD10E171D17C9c5C14d5baFE997609`][router-59141-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                      |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C`][verifier-59141-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x44c220f0598345195cE99AD6A57aDfFcb9Ea33e7`][estop-59141-etherscan]    |
 | TimelockController                         | [`0xBDaEd5bbf8016AfD05Fc4659572e5fEb5854aAD4`][timelock-59141-etherscan] |
@@ -203,7 +209,7 @@ You can find detailed information in the [version management design][version-man
 
 | Contract                                   | Address                                                                 |
 | ------------------------------------------ | ----------------------------------------------------------------------- |
-| [RiscZeroVerifierRouter][router-src]       | [`0x0b144e07a0826182b6b59788c34b32bfa86fb711`][router-1101-etherscan]   |
+| [RiscZeroVerifierRouter][router-src]       | N/A                                                                     |
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF`][verifier-1101-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1`][estop-1101-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-1101-etherscan] |
@@ -230,20 +236,6 @@ You can find detailed information in the [version management design][version-man
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/1.1/risc0_zkvm/struct.Groth16Receipt.html
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/src/IRiscZeroVerifier.sol
-[router-1-etherscan]: https://etherscan.io/address/0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319#code
-[router-10-etherscan]: https://optimistic.etherscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
-[router-1101-etherscan]: https://zkevm.polygonscan.com/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
-[router-8453-etherscan]: https://basescan.org/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
-[router-17000-etherscan]: https://holesky.etherscan.io/address/0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C#code
-[router-42161-etherscan]: https://arbiscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
-[router-43113-etherscan]: https://testnet.snowtrace.io/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711#code
-[router-43114-etherscan]: https://snowtrace.io/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711#code
-[router-59141-etherscan]: https://sepolia.lineascan.build/address/0x27983ee173aD10E171D17C9c5C14d5baFE997609#code
-[router-59144-etherscan]: https://lineascan.build/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
-[router-84532-etherscan]: https://sepolia.basescan.org/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
-[router-421614-etherscan]: https://sepolia.arbiscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
-[router-11155111-etherscan]: https://sepolia.etherscan.io/address/0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187#code
-[router-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0xB369b4dd27FBfb59921d3A4a3D23AC2fc32FB908#code
 [router-src]: https://github.com/risc0/risc0-ethereum/tree/v1.1.0-rc.3/contracts/src/RiscZeroVerifierRouter.sol
 [term-image-id]: /terminology#image-id
 [term-journal]: /terminology#journal

@@ -314,18 +314,18 @@ This time, the leaves are indexed by powers of $28^4$.
 ### Round 3 of FRI Commit Phase
 
 Again, we split $f_2$ into an even and odd part and then mix.
-At this point, $f_{2,even}=31$ and $f_{2,odd}=35$.
+At this point, $f_{2,even}=35$ and $f_{2,odd}=31$.
 Using randomness of $r_3=64$, we find:
 
 $$
-f_3(x)=f_{2,even}+r_2f_{2,odd}
+f_3(x)=f_{2,even}+r_3f_{2,odd}
 $$
 
 $$
-= 31 + 64\cdot35=79
+= 35 + 64\cdot31=79
 $$
 
-The Prover sends evaluations of $f_3$ on powers of $28^8$ without Merklization; the Verifier can check for themselves that the evaluations for $f_3$ correspond to a constant polynomial.
+The Prover sends evaluations of $f_3$ on powers of $28^8$ without Merkleization; the Verifier can check for themselves that the evaluations for $f_3$ correspond to a constant polynomial.
 
 This completes the commit phase of the FRI protocol. In 3 rounds of folding, we've reduced a polynomial with 8 coefficients into a polynomial with 1 coefficient (i.e., a constant polynomial).
 

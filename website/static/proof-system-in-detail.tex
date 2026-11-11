@@ -269,7 +269,7 @@ In addition to the inputs to the RAP instance listed above, the IOP also uses th
   We define the rate of the IOP by $\rho := \frac{2^\mathsf{h}}{2^\mathsf{k}}$. 
   \item $\mathsf{aux}_\mathsf{FRI}$ is defined as $(\vec{\mathsf{t}},\mathsf{n_{queries}}, \mathsf{d_{final}})$ where 
     \begin{itemize}
-      \item $\vec{\mathsf{t}}=(t_1,...,t_r$) is a vector describing the the FRI-folding factor for each round of the COMMIT phase. In our system, $t_i=16$ for all $i$.
+      \item $\vec{\mathsf{t}}=(t_1,...,t_r$) is a vector describing the FRI-folding factor for each round of the COMMIT phase. In our system, $t_i=16$ for all $i$.
       \item $\mathsf{n_{queries}}=50$ is the number of FRI queries, and 
       \item $\mathsf{d_{final}}=256$ is the degree at which we terminate our FRI algorithm.
     \end{itemize}
@@ -653,7 +653,7 @@ Of course the details here matter a great deal, as do all of the precise probabi
 We often care that the \hyperref[divergence]{divergence} of a given block from the set of \hyperref[codeword]{RS codewords} is below some critical distance $\dd$. 
 We say such a block is \hyperref[delta-close]{$\dd$-close} to the code.\\
 \\
-In the next sub-sections we will introduce the the core building blocks we will use for the protocols, and provide proofs of their correctness (directly or via reference).\\
+In the next sub-sections we will introduce the core building blocks we will use for the protocols, and provide proofs of their correctness (directly or via reference).\\
 \\
 In all cases below, we presume $\dd$ is within the unique decode range.
 The key concepts are (informally):
