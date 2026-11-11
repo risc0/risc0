@@ -54,6 +54,11 @@ You can find detailed information in the [version management design][version-man
 
 ### Contract Addresses
 
+:::warning
+The RISC Zero 3.0 verifiers are affected by [GHSA-g6qg-9j8p-7j87][ghsa-g6qg] and will be emergency-stopped, after which receipts from risc0-zkvm 3.0 no longer verify on-chain.
+Upgrade to risc0-zkvm 3.1 and use the [3.1 verifier contracts][doc-latest-contracts].
+:::
+
 ### Ethereum Mainnet (1)
 
 | Contract                                   | Address                                                              |
@@ -241,6 +246,7 @@ You can find detailed information in the [version management design][version-man
 
 <br />
 
+[doc-latest-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
 [estop-1-etherscan]: https://etherscan.io/address/0x9F9994Eb4Cb5200198FEfb470f8b50301662e696#code
 [estop-10-etherscan]: https://optimistic.etherscan.io/address/0x9F9994Eb4Cb5200198FEfb470f8b50301662e696#code
 [estop-137-etherscan]: https://polygonscan.com/address/0x9F9994Eb4Cb5200198FEfb470f8b50301662e696#code
@@ -261,6 +267,7 @@ You can find detailed information in the [version management design][version-man
 [estop-src]: https://github.com/risc0/risc0-ethereum/blob/release-3.0/contracts/src/RiscZeroVerifierEmergencyStop.sol
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/release-3.0/contracts/EvenNumber.sol#L46-L52
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
+[ghsa-g6qg]: https://github.com/risc0/risc0/security/advisories/GHSA-g6qg-9j8p-7j87
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/3.0/risc0_zkvm/struct.Groth16Receipt.html
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/release-3.0/contracts/src/IRiscZeroVerifier.sol
 [router-1-etherscan]: https://etherscan.io/address/0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319#code
