@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 use crate::components::Component;
 use crate::error::Result;
 use crate::events::RzupEvent;
@@ -33,8 +34,18 @@ fn parser(cmd: &str) -> Vec<&'static str> {
     }
 }
 
-pub const INSTALL_HELP: &str = "Discussion:
-    Installs a component (or all components) of a particular version.
+pub fn install_help() -> String {
+    let default_components_str = Component::iter()
+        .filter(|c| c.install_by_default())
+        .map(|c| c.as_str())
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    format!(
+        "Discussion:
+    Installs a component (or all default components) of a particular version.
+
+    The default components are: [{default_components_str}]
 
     If no version is specified, the latest version is used.
 
@@ -47,11 +58,13 @@ pub const INSTALL_HELP: &str = "Discussion:
     `GITHUB_TOKEN` environment variable, then from ~/.config/gh/hosts.yml.
 
     The default version of the component is updated to the version that was
-    just installed.";
+    just installed."
+    )
+}
 
 #[derive(Parser)]
 pub(crate) struct InstallCommand {
-    /// Name of component to install (e.g. rust). If not provided, installs all components.
+    /// Name of component to install (e.g. rust). If not provided, installs all default components.
     #[arg(value_parser=parser("install"))]
     name: Option<String>,
     /// Version of the component to install (e.g. 1.0.0). If not provided, installs the latest version.
@@ -103,7 +116,7 @@ impl InstallCommand {
                 rzup.self_update()?
             }
         } else {
-            rzup.install_all(self.force)?;
+            rzup.install_default(self.force)?;
         }
 
         Ok(())
@@ -141,15 +154,15 @@ impl ShowCommand {
                 }
 
                 // Only show warning if version in settings doesn't exist in versions list
-                if let Some(settings_version) = current_version {
-                    if !versions.contains(&settings_version) {
-                        rzup.print(format!(
-                            "! Version {settings_version} specified in settings.toml is not installed",
-                        ));
-                        rzup.print(format!(
-                            "  Please use 'rzup use {component} <VERSION>' to switch default component",
-                        ));
-                    }
+                if let Some(settings_version) = current_version
+                    && !versions.contains(&settings_version)
+                {
+                    rzup.print(format!(
+                        "! Version {settings_version} specified in settings.toml is not installed",
+                    ));
+                    rzup.print(format!(
+                        "  Please use 'rzup use {component} <VERSION>' to switch default component",
+                    ));
                 }
             }
         }
@@ -310,16 +323,23 @@ impl BuildCommand {
 }
 
 pub const PUBLISH_HELP: &str = "Discussion:
-    Tools for publishing a component to S3.
+    Tools for publishing a component to the artifacts bucket.
 
-    The create-archive sub-command creates a tar.xz file to send to S3.
+    The create-artifact sub-command creates a tar.xz file to upload.
 
-    The upload sub-command uploads the tar.xz file to S3 as a component with a particular version
-    and optional target.
+    The upload sub-command uploads the tar.xz file to the bucket as a component with a particular
+    version and optional target.
 
-    The set-version sub-command sets the latest version of a component.
+    The set-latest sub-command sets the latest version of a component.
 
-    upload and set-version require that AWS credentials be available in the environment.
+    upload and set-latest need these environment variables:
+      RZUP_PUBLISH_URL       S3 API URL of the bucket, including the bucket name, e.g.
+                             https://<account-id>.r2.cloudflarestorage.com/risc0-artifacts
+      AWS_ACCESS_KEY_ID      S3 API token for that bucket
+      AWS_SECRET_ACCESS_KEY
+      RZUP_PUBLISH_KEY       PEM-encoded private key that signs the component manifest
+    Before uploading, the current manifest is read from the download URL (RZUP_DOWNLOAD_URL, default
+    https://artifacts.risczero.net), so point both at the same bucket.
 ";
 
 #[derive(Args)]
@@ -373,19 +393,21 @@ pub struct PublishCreateArtifactCommand {
 
 #[derive(Subcommand)]
 pub(crate) enum PublishCommand {
-    /// Uploads an artifact to S3 as a component.
+    /// Uploads an artifact to the artifacts bucket as a component.
     ///
     /// Each version of a component is either tagged with a target, or is target agnostic. A
     /// particular version can only have one target-agnostic artifact, or many target specific
     /// artifacts, but each target may only have one artifact each.
     ///
-    /// Requires that AWS credentials be available in the environment.
+    /// Requires RZUP_PUBLISH_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and RZUP_PUBLISH_KEY in
+    /// the environment.
     Upload(PublishUploadCommand),
-    /// Sets the latest version for a component on S3.
+    /// Sets the latest version for a component in the artifacts bucket.
     ///
     /// This will cause rzup install and rzup check to consider the given version as the latest.
     ///
-    /// Requires that AWS credentials be available in the environment.
+    /// Requires RZUP_PUBLISH_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and RZUP_PUBLISH_KEY in
+    /// the environment.
     SetLatest(PublishSetLatestCommand),
     /// Creates an artifact by creating a tar.xz file.
     ///

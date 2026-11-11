@@ -9,6 +9,9 @@ cargo-native-static = true
 lld = true
 llvm-tools = true
 omit-git-hash = false
+# With a single CGU, std's embedded LTO bitcode (pulled in by our `lto = true` guests)
+# keeps atomics that -C passes=lower-atomic already stripped from its regular object code.
+codegen-units-std = 16
 
 [llvm]
 download-ci-llvm = false
