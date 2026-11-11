@@ -40,7 +40,8 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
-all-features = true
+# NOTE: cuda is excluded because its build script requires nvcc.
+features = ["prove", "std", "unstable"]
 
 [features]
 cuda = [
