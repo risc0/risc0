@@ -17,7 +17,7 @@ new approach.
 
 In particular, it is an implementation of the [RISC-V architecture]
 (specifically riscv32im), similar to how your laptop's CPU may be an
-implementation of an [x86] or [ARM] architecture. This biggest difference is
+implementation of an [x86] or [ARM] architecture. The biggest difference is
 that the zkVM is implemented with [arithmetic circuits], in software, instead of
 circuitry made from silicon and copper.
 
