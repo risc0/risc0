@@ -30,13 +30,13 @@ cargo-risczero $MAJOR.$MINOR.$PATCH # e.g. release-1.2
 To match the example release version with your local installation, check out the corresponding branch of the example:
 
 ```sh
-git checkout release-$MAJOR.$MINOR # e.g. release-1.2
+git checkout release-$MAJOR.$MINOR # e.g. release-3.1
 ```
 
-For example, if your local version is `cargo-risczero 1.2.0`, run:
+For example, if your local version is `cargo-risczero 3.1.0`, run:
 
 ```sh
-git checkout release-1.2
+git checkout release-3.1
 ```
 
 Once on the correct release branch, run the example:
