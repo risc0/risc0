@@ -48,11 +48,11 @@ In addition to being far easier to build on, we're also delivering on
 Check out our [Getting Started] page.
 
 [Bonsai Pay]: https://risczero.com/news/bonsai-pay
-[chess]: https://github.com/risc0/risc0/tree/main/examples/chess
+[chess]: https://github.com/risc0/risc0/tree/release-3.1/examples/chess
 [continuations]: https://risczero.com/news/continuations
-[ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
+[ecdsa]: https://github.com/risc0/risc0/tree/release-3.1/examples/ecdsa
 [Getting Started]: ./getting-started.md
-[JSON]: https://github.com/risc0/risc0/tree/main/examples/json
+[JSON]: https://github.com/risc0/risc0/tree/release-3.1/examples/json
 [optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals
 [performance]: ./zkvm/benchmarks.md
 [waldo]: https://risczero.com/news/waldo

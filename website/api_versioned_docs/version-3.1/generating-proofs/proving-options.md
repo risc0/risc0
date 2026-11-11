@@ -15,9 +15,9 @@ We recommend option 1 during development, option 2 for applications involving pr
 See the [Shrink-Wrapping] page for more details about groth16 receipts.
 :::
 
-[`prove_with_opts`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
+[`prove_with_opts`]: https://docs.rs/risc0-zkvm/3.1/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [Boundless]: http://boundless.network
-[composite, succinct or groth16 receipts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/enum.ReceiptKind.html
+[composite, succinct or groth16 receipts]: https://docs.rs/risc0-zkvm/3.1/risc0_zkvm/enum.ReceiptKind.html
 [dev-mode]: ./dev-mode.md
 [Local Proving]: ./local-proving.md
 [Remote Proving]: ./remote-proving.md

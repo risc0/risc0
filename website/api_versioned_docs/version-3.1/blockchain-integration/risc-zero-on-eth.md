@@ -1,7 +1,7 @@
 # RISC Zero on Ethereum
 
 :::tip
-The [risc0-ethereum][risc0-ethereum] repo is where you can find [blockchain examples][blockchain-examples], [verifier contracts][verifier-contracts] and [Steel][steel-src].
+The [risc0-ethereum][risc0-ethereum] repo is where you can find the [verifier contracts][verifier-contracts].
 :::
 
 Prove computation with the [RISC Zero zkVM][docs-zkvm] and verify the results in your Ethereum contract.
@@ -27,16 +27,14 @@ The [Boundless Foundry Template][foundry-template] provides a minimal applicatio
 [Zeth][zeth-repo] produces ZK validity proofs for Ethereum Virtual Machine blocks (EVM). This is accomplished by running [revm], a Rust implementation of the EVM in the zkVM. The end result is an open-source zkEVM with high code reuse and minute, not hour, proving times. For more info check out [Announcing Zeth: The first Type Zero zkEVM][zeth-article].
 
 [article-coprocessor]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability
-[blockchain-examples]: https://github.com/risc0/risc0-ethereum/tree/main/examples
 [docs-zkvm]: ../zkvm/zkvm-overview.md
 [foundry-template]: https://github.com/boundless-xyz/boundless-foundry-template
 [revm]: https://crates.io/crates/revm
 [risc0-ethereum]: https://github.com/risc0/risc0-ethereum
 [steel-blog]: https://risczero.com/blog/introducing-steel-2.0
-[steel-repo]: https://risc0.github.io/risc0-ethereum/risc0_steel
-[steel-src]: https://github.com/risc0/risc0-ethereum/tree/main/crates/steel
+[steel-repo]: https://github.com/boundless-xyz/steel
 [term-snark]: /terminology#snark
 [term-stark]: /terminology#stark
-[verifier-contracts]: https://github.com/risc0/risc0-ethereum/tree/main/contracts
+[verifier-contracts]: https://github.com/risc0/risc0-ethereum/tree/release-3.1/contracts
 [zeth-article]: https://www.risczero.com/news/zeth-release
 [zeth-repo]: https://github.com/risc0/zeth
