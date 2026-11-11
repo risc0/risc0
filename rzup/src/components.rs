@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,14 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+use crate::BaseUrls;
+use crate::RzupEvent;
 use crate::distribution::{
-    github::GithubRelease, s3::S3Bucket, DistributionPlatform, Os, Platform,
+    DistributionPlatform, Os, Platform, github::GithubRelease, s3::S3Bucket,
 };
 use crate::env::Environment;
 use crate::error::{Result, RzupError};
 use crate::paths::Paths;
-use crate::BaseUrls;
-use crate::RzupEvent;
 use semver::Version;
 use std::fmt;
 use std::path::{Path, PathBuf};
@@ -93,7 +94,7 @@ impl Component {
                 (other, os) => {
                     return Err(RzupError::UnsupportedPlatform(format!(
                         "unknown architecture {other} for {os}"
-                    )))
+                    )));
                 }
             },
             Component::CppToolchain => match (platform.arch, platform.os) {
@@ -102,7 +103,7 @@ impl Component {
                 (other, os) => {
                     return Err(RzupError::UnsupportedPlatform(format!(
                         "unknown architecture {other} for {os}"
-                    )))
+                    )));
                 }
             },
             Component::R0Vm => (format!("r0vm-{platform}"), "tgz"),
@@ -119,7 +120,7 @@ impl Component {
         match self {
             // rust toolchain uses date-based versions with r0. prefix
             Component::RustToolchain => {
-                format!("r0.{}.{}.{}", version.major, version.minor, version.patch)
+                format!("r0.{version}")
             }
             // cpp toolchain uses date-based versions
             Component::CppToolchain | Component::Gdb => format!(
@@ -206,7 +207,7 @@ fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) ->
         _ => {
             return Err(crate::RzupError::InstallationFailed(format!(
                 "Unsupported archive format: {filename}",
-            )))
+            )));
         }
     }
     Ok(())
@@ -252,22 +253,29 @@ pub fn install(
         version: version.to_string(),
     });
 
-    let downloaded_file = env
-        .tmp_dir()
-        .join(component_to_install.archive_name(env.platform())?);
-
     if force {
         Paths::cleanup_version(env, &component_to_install, version)?;
     }
+
+    let archive_name = component_to_install.archive_name(env.platform())?;
 
     // Download and extract
     distribution.download_version(env, &component_to_install, version)?;
     let version_dir = component_to_install.get_version_dir(env, version);
 
-    if let Err(e) = extract_archive(env, &downloaded_file, &version_dir) {
-        Paths::cleanup_version(env, &component_to_install, version)?;
-        return Err(e);
+    let mut extraction_dir = tempfile::TempDir::with_prefix_in(
+        format!("{component_to_install}-{version}"),
+        env.tmp_dir(),
+    )?;
+
+    let downloaded_file = env.tmp_dir().join(archive_name);
+    extract_archive(env, &downloaded_file, extraction_dir.path())?;
+
+    if let Some(parent) = version_dir.parent() {
+        std::fs::create_dir_all(parent)?;
     }
+    std::fs::rename(extraction_dir.path(), &version_dir)?;
+    extraction_dir.disable_cleanup(true);
 
     if let Err(e) = std::fs::remove_file(&downloaded_file) {
         env.emit(RzupEvent::Debug {
@@ -363,10 +371,10 @@ pub fn get_latest_version(
 mod tests {
     use super::*;
     use crate::{
-        components,
-        distribution::{signature::PublicKey, Platform},
+        BaseUrls, components,
+        distribution::{Platform, signature::PublicKey},
         env::Environment,
-        http_test_harness, BaseUrls,
+        http_test_harness,
     };
     use semver::Version;
     use tempfile::TempDir;
