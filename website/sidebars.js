@@ -8,11 +8,6 @@ export default {
       label: "Talks and Podcasts",
       href: "https://www.youtube.com/playlist?list=PLcPzhUaCxlCgCvzkkaBWzVuHdBRsTNxj1",
     },
-    {
-      type: "link",
-      label: "Articles",
-      href: "https://risczero.com/blog",
-    },
     "studyclub",
     {
       type: "link",

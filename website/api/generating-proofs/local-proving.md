@@ -4,13 +4,6 @@ RISC Zero offers a fully [open-source] prover.
 Users can run the [zkVM] locally, generating proofs using their own hardware.
 The [feature flags] include options to toggle between CPU and GPU proving.
 
-## Local vs. Remote Proving
-
-For most use cases, we recommend remote proving using [Boundless].
-
-Proving with **private data** is a key reason to consider using local proof generation, as whoever is generating the proofs can see all private information involved.
-With local proof generation your private data never leaves your machine.
-
 ## Proving hardware
 
 RISC Zero's proving system for multiple hardware targets.
@@ -72,8 +65,7 @@ No options need to be configured to take advantage of acceleration through the u
 [#1520]: https://github.com/risc0/risc0/issues/1520
 [#1749]: https://github.com/risc0/risc0/issues/1749
 [apple-metal]: https://developer.apple.com/metal
-[Boundless]: https://boundless.network
 [feature flags]: https://github.com/risc0/risc0#feature-flags
-[open-source]: https://risczero.com/news/open-source
+[open-source]: https://github.com/risc0/risc0
 [segment-limit-docs]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.segment_limit_po2
 [zkVM]: ../zkvm/zkvm-overview.md

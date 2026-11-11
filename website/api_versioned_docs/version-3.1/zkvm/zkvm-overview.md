@@ -27,9 +27,7 @@ To prove correct execution of the [guest program]:
 3. The [prover] checks and proves the validity of the [session], outputting a
    [receipt].
 
-> **Note:** You only need to worry about the details of step 2 & step 3 if
-> you're running the zkVM on your own hardware. See [Host Code 101][host program] for more details on these steps. If you're using [Boundless] for remote
-> proving, you won't need to write host code.
+> **Note:** See [Host Code 101][host program] for more details on steps 2 and 3.
 
 ![From Guest Code to Receipt](/diagrams/from-rust-to-receipt.png)
 
@@ -41,7 +39,7 @@ identifier for the expected ELF binary.
 ## Deploying a zkVM Application
 
 Once you've built a zkVM application, you can generate proofs on your own
-machine(s) or you can make requests to [Boundless] to generate proofs as needed.
+machine(s).
 
 For local proof generation, we recommend a machine with at least 16GB of RAM.
 Options for generating proofs using GPU acceleration and skipping proof
@@ -58,14 +56,10 @@ Check out the [zkVM example applications][examples].
 _Curious about performance?_ <br />
 Check the [performance benchmarks][benchmarks] page.
 
-_Looking for information about remote proving?_ <br />
-Check out [Boundless].
-
 _Looking for information about blockchain integration?_ <br />
 Check out our [Risc Zero on Eth] page.
 
 [benchmarks]: ./benchmarks.md
-[Boundless]: http://boundless.network
 [Risc Zero on Eth]: ../blockchain-integration/risc-zero-on-eth.md
 [ELF binary]: /terminology#elf-binary
 [examples]: ./examples.md

@@ -48,24 +48,19 @@ circuit is available in the [zkVM] docs.
 
 All three of these circuits are open-source and permissionless; anyone may
 generate proofs on their own hardware using the implementations available at our
-[GitHub]. Users may also choose to delegate the work of proof generation to
-[Bonsai].
-
-[Read more about our philosophy on open-source software][open-source].
+[GitHub].
 
 ## Learn More
 
 In addition to the links in the sidebar, we recommend the following resources:
 
 - [About the zkVM][about-zkvm]
-- [RISC Zero News][news]
 - [Start Building][quickstart]
 - [Study Club]
 
 [`env::commit_slice()`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit_slice.html
 [`env::commit()`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
 [about-zkvm]: /api/zkvm
-[Bonsai]: https://bonsai.xyz
 [composite receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.CompositeReceipt.html
 [dev-mode]: /api/generating-proofs/dev-mode
 [fake receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/enum.InnerReceipt.html#variant.Fake
@@ -75,8 +70,6 @@ In addition to the links in the sidebar, we recommend the following resources:
 [Groth16 receipt]: /terminology#groth16-receipt
 [guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
-[news]: https://risczero.com/news
-[open-source]: https://risczero.com/news/open-source
 [proof composition]: /terminology#composition
 [quickstart]: /api/zkvm/quickstart
 [Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html

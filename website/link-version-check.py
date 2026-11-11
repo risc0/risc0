@@ -19,7 +19,11 @@ EXCEPTIONS = [
     # allow links to v1.1.0-rc.3, which is referenced as a deployed version of contracts.
     "github.com/risc0/risc0-ethereum/tree/v1.1.0-rc.3/contracts/",
     # For 2.1, we didn't release a new version of risc0-zkvm-platform
-    "https://docs.rs/risc0-zkvm-platform/2.0/risc0_zkvm_platform/fileno/index.html"
+    "https://docs.rs/risc0-zkvm-platform/2.0/risc0_zkvm_platform/fileno/index.html",
+    # risc0-zkvm 3.1 depends on risc0-zkvm-platform 2.2
+    "https://docs.rs/risc0-zkvm-platform/2.2/risc0_zkvm_platform/fileno/index.html",
+    # risc0-ethereum dropped its examples after 2.3
+    "github.com/risc0/risc0-ethereum/blob/release-2.3/examples/governance/",
 ]
 
 REPOS = [

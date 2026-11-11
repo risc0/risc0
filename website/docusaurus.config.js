@@ -92,19 +92,20 @@ export default async function createConfigAsync() {
         "@docusaurus/plugin-client-redirects",
         {
           createRedirects(existingPath) {
+            // Remote proving is gone; send its old paths to the proving options.
             if (
-              existingPath.includes("/api/generating-proofs/remote-proving")
+              existingPath.includes("/api/generating-proofs/proving-options")
             ) {
               return [
+                "/api/generating-proofs/remote-proving",
+                "/bonsai",
+                "/bonsai/quickstart",
+              ].map((path) =>
                 existingPath.replace(
-                  "/api/generating-proofs/remote-proving",
-                  "/bonsai",
+                  "/api/generating-proofs/proving-options",
+                  path,
                 ),
-                existingPath.replace(
-                  "/api/generating-proofs/remote-proving",
-                  "/bonsai/quickstart",
-                ),
-              ];
+              );
             }
             if (existingPath.includes("/zkvm/precompiles")) {
               return [
@@ -187,11 +188,6 @@ export default async function createConfigAsync() {
               className: "docsVersionDropdown",
             },
             {
-              href: "https://www.risczero.com/blog",
-              position: "right",
-              label: "Blog",
-            },
-            {
               href: "https://github.com/risc0",
               position: "right",
               label: "GitHub",
@@ -231,14 +227,6 @@ export default async function createConfigAsync() {
           links: [
             {
               items: [
-                {
-                  label: "Blog",
-                  href: "https://www.risczero.com/blog",
-                },
-                {
-                  label: "Careers",
-                  href: "https://jobs.ashbyhq.com/RiscZero",
-                },
                 {
                   label: "Bug Bounties",
                   href: "https://hackenproof.com/company/risc-zero/programs",

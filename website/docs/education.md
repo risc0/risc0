@@ -9,7 +9,6 @@ Welcome to the RISC Zero Education Hub!
 The materials here are intended to support learners of all backgrounds to make sense of the technology that underlies RISC Zero's tooling.
 
 - Our **[conference talks and podcast appearances]** offer an overview of what we're building.
-- Our **[blog]** highlights the key features and technical progress we've made.
 - Our **[Study Club]** goes deeper into the tech, explaining the technological components that make our tooling possible.
 - Our **[Education Database]** is a curated list of some of our favorite resources.
 
@@ -19,7 +18,6 @@ Or find us on [Discord] and ask us there!
 _Looking for documentation?_<br />
 Check out the [dev docs].
 
-[blog]: https://risczero.com/blog
 [conference talks and podcast appearances]: https://www.youtube.com/playlist?list=PLcPzhUaCxlCgCvzkkaBWzVuHdBRsTNxj1
 [Dev Docs]: ../api/zkvm
 [Discord]: https://discord.gg/risczero

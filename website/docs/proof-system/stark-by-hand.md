@@ -13,7 +13,7 @@ In this series of 12 brief lessons, we walk through a simplified numerical examp
 - [PDF Version](https://dev.risczero.com/STARK-by-hand.pdf) (PDF)
 - [Python Version](https://dev.risczero.com/didactic_stark.py)
 
-If you make sense of these 12 lessons, you'll have a solid handle on the mechanics of a zk-STARK (and we'd likely love to [hire you](https://jobs.ashbyhq.com/RiscZero)).
+If you make sense of these 12 lessons, you'll have a solid handle on the mechanics of a zk-STARK.
 
 The [proof system sequence diagram](proof-system-sequence-diagram.md) describes this process in more generality; we suggest going back and forth between this document and the sequence diagram.
 

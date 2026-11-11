@@ -74,9 +74,7 @@ RISC0_DEV_MODE=0 cargo run --release
 
 Note that since proofs are now being generated, the execution time will be
 significantly longer than when running in dev-mode. To create a proof with the
-zkVM on your own machine, we recommend at least 16 GB of RAM. To avoid these
-hardware requirements, consider using [Boundless] to generate proofs remotely, as
-it will be significantly faster than running proofs locally.
+zkVM on your own machine, we recommend at least 16 GB of RAM.
 
 ### Executor Statistics
 
@@ -100,15 +98,14 @@ The statistics include:
 - Segments Count
 - Execution time
 
-Knowing these statistics is useful for estimating the cost of your application
-before submitting real workloads to Boundless, as the cost of proof generation is
-proportional to the number of cycles and segments used.
+Knowing these statistics is useful for estimating the cost of proving your
+application, as the cost of proof generation is proportional to the number of
+cycles and segments used.
 
 > **Congratulations!**
 >
 > _That's all it takes to build and run a minimal RISC Zero application._
 
-[Boundless]: https://boundless.network
 [dev-mode]: ../generating-proofs/dev-mode.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest]: /terminology#guest-program

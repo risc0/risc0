@@ -286,8 +286,8 @@ input data. Examples of when this may be useful are if you are reading in image
 data as bytes, or reading data that is binary encoded from the source like with
 [CBOR].
 
-Here is a [snippet from the Bonsai Governance
-example][snippet-bonsai-governance] showing how to read bytes.
+Here is a [snippet from the governance
+example][snippet-governance] showing how to read bytes.
 
 ```rust no_run
 # use std::io::Read;
@@ -490,9 +490,9 @@ below.
     compute otherwise expensive operations in fewer instruction cycles.
 
 [`counts`]: https://github.com/nnethercote/counts
-[`env::cycle_count()`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.cycle_count.html
-[`env::read_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html
-[`env::read`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/guest/env/fn.read.html
+[`env::cycle_count()`]: https://docs.rs/risc0-zkvm/3.1/risc0_zkvm/guest/env/fn.cycle_count.html
+[`env::read_slice`]: https://docs.rs/risc0-zkvm/3.1/risc0_zkvm/guest/env/fn.read_slice.html
+[`env::read`]: https://docs.rs/risc0-zkvm/3.1/risc0_zkvm/guest/env/fn.read.html
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
 [algorithm]: https://briansmith.org/ecc-inversion-addition-chains-01
 [alignment]: https://doc.rust-lang.org/reference/type-layout.html#the-alignment-modifiers
@@ -502,11 +502,11 @@ below.
 [ARM]: https://en.wikipedia.org/wiki/ARM_architecture_family
 [bigint]: https://github.com/risc0/risc0/pull/466
 [CBOR]: https://cbor.io
-[continuation segments]: https://www.risczero.com/news/continuations
+[continuation segments]: /terminology#segment
 [CUDA]: https://developer.nvidia.com/cuda-toolkit
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
-[example-ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
-[example-waldo]: https://github.com/risc0/risc0/tree/main/examples/waldo
+[example-ecdsa]: https://github.com/risc0/risc0/tree/release-3.1/examples/ecdsa
+[example-waldo]: https://github.com/risc0/risc0/tree/release-3.1/examples/waldo
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
 [hibernates]: https://en.wikipedia.org/wiki/Hibernation_%28computing%29
@@ -528,9 +528,9 @@ below.
 [RISC-V operations]: https://marks.page/riscv
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
-[snippet-bonsai-governance]: https://github.com/risc0/risc0-ethereum/blob/main/examples/governance/methods/guest/src/bin/finalize_votes.rs#L86-L87
-[snippet-password-checker]: https://github.com/risc0/risc0/blob/main/examples/password-checker/methods/guest/src/main.rs#L24
+[snippet-governance]: https://github.com/risc0/risc0-ethereum/blob/release-2.3/examples/governance/methods/guest/src/bin/finalize_votes.rs#L86-L87
+[snippet-password-checker]: https://github.com/risc0/risc0/blob/release-3.1/examples/password-checker/methods/guest/src/main.rs#L24
 [superscalar]: https://en.wikipedia.org/wiki/Superscalar_processor
-[waldo-merkle]: https://github.com/risc0/risc0/blob/main/examples/waldo/core/src/merkle.rs
+[waldo-merkle]: https://github.com/risc0/risc0/blob/release-3.1/examples/waldo/core/src/merkle.rs
 [x86]: https://en.wikipedia.org/wiki/X86
 [zkVM guest programs]: ./guest-code-101.md
