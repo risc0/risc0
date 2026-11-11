@@ -89,14 +89,16 @@ impl Paths {
 
     pub fn parse_version_from_path(dir_name: &str, component: &Component) -> Option<Version> {
         fn extract_version(version_part: &str) -> Option<Version> {
-            let segments: Vec<&str> = version_part.split('-').collect();
-            match segments.len() {
-                1 => Version::parse(version_part).ok(),
-                2 | 3 => {
-                    let version_with_pre = format!("{}-{}", segments[0], segments[1]);
-                    Version::parse(&version_with_pre).ok()
+            // Split on the first '-' only: everything before is the numeric
+            // version, everything after is the pre-release identifier.
+            // Additional hyphens within the pre-release part are normalised
+            // to dots so semver::Version::parse accepts them.
+            match version_part.split_once('-') {
+                None => Version::parse(version_part).ok(),
+                Some((base, pre)) => {
+                    let pre_normalized = pre.replace('-', ".");
+                    Version::parse(&format!("{base}-{pre_normalized}")).ok()
                 }
-                _ => None,
             }
         }
 
