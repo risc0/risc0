@@ -192,8 +192,7 @@ pub(crate) struct DefaultCommand {
 
 impl DefaultCommand {
     pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
-        let version = Version::parse(&self.version)
-            .map_err(|_| RzupError::InvalidVersion(self.version.clone()))?;
+        let version = parse_version(Some(&self.name), &self.version)?;
         let component = self.name.parse()?;
         if rzup.version_exists(&component, &version)? {
             rzup.set_default_version(&component, version.clone())?;
@@ -276,8 +275,7 @@ pub(crate) struct UninstallCommand {
 
 impl UninstallCommand {
     pub(crate) fn execute(&self, rzup: &mut Rzup) -> Result<()> {
-        let version = Version::parse(&self.version)
-            .map_err(|_| RzupError::InvalidVersion(self.version.clone()))?;
+        let version = parse_version(Some(&self.name), &self.version)?;
         rzup.uninstall_component(&self.name.parse()?, version)
     }
 }
