@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ mod settings;
 use std::path::{Path, PathBuf};
 
 use self::distribution::{
-    signature::{PrivateKey, PublicKey},
     Platform,
+    signature::{PrivateKey, PublicKey},
 };
 use self::env::Environment;
 use self::events::{RzupEvent, TransferKind};
@@ -46,12 +46,22 @@ pub use self::components::Component;
 pub use self::error::{Result, RzupError};
 pub use semver::Version;
 
+/// Environment variable that overrides where published components are downloaded from.
+pub const RZUP_DOWNLOAD_URL_VAR: &str = "RZUP_DOWNLOAD_URL";
+/// Environment variable holding the S3 API URL that `rzup publish` uploads to.
+pub const RZUP_PUBLISH_URL_VAR: &str = "RZUP_PUBLISH_URL";
+
 #[derive(Clone, Debug)]
 pub struct BaseUrls {
     pub risc0_github_base_url: String,
     pub github_api_base_url: String,
     pub risc0_base_url: String,
+    /// Where components published with `rzup publish` are downloaded from: the public hostname
+    /// in front of the artifacts bucket.
     pub s3_base_url: String,
+    /// Where `rzup publish` uploads to: the S3 API URL of the bucket behind `s3_base_url`,
+    /// including the bucket name. `None` disables publishing.
+    pub publish_base_url: Option<String>,
 }
 
 impl Default for BaseUrls {
@@ -60,8 +70,26 @@ impl Default for BaseUrls {
             risc0_github_base_url: "https://github.com/risc0".into(),
             github_api_base_url: "https://api.github.com".into(),
             risc0_base_url: "https://risczero.com".into(),
-            s3_base_url: "https://risc0-artifacts.s3.us-west-2.amazonaws.com".into(),
+            s3_base_url: "https://artifacts.risczero.net".into(),
+            publish_base_url: None,
         }
+    }
+}
+
+impl BaseUrls {
+    /// The default URLs, with `s3_base_url` overridden by `RZUP_DOWNLOAD_URL` when it is set and
+    /// `publish_base_url` taken from `RZUP_PUBLISH_URL`.
+    pub fn from_env(
+        mut env_accessor: impl FnMut(&str) -> std::result::Result<String, std::env::VarError>,
+    ) -> Self {
+        let mut urls = Self::default();
+        if let Ok(url) = env_accessor(RZUP_DOWNLOAD_URL_VAR) {
+            urls.s3_base_url = url.trim_end_matches('/').to_owned();
+        }
+        urls.publish_base_url = env_accessor(RZUP_PUBLISH_URL_VAR)
+            .ok()
+            .map(|url| url.trim_end_matches('/').to_owned());
+        urls
     }
 }
 
@@ -76,7 +104,7 @@ impl Rzup {
     /// Creates a new Rzup instance using default environment paths.
     pub fn new() -> Result<Self> {
         let environment = Environment::new(|s| std::env::var(s), |_| {})?;
-        let registry = Registry::new(&environment, Default::default())?;
+        let registry = Registry::new(&environment, BaseUrls::from_env(|s| std::env::var(s)))?;
 
         Ok(Self {
             environment,
@@ -89,7 +117,7 @@ impl Rzup {
         event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
     ) -> Result<Self> {
         let environment = Environment::new(|s| std::env::var(s), event_handler)?;
-        let registry = Registry::new(&environment, Default::default())?;
+        let registry = Registry::new(&environment, BaseUrls::from_env(|s| std::env::var(s)))?;
 
         Ok(Self {
             environment,
@@ -105,9 +133,10 @@ impl Rzup {
     /// * `cargo_dir` - The path to cargo's home directory (usually ~/.cargo)
     /// * `base_urls` - The base URLs used to communicate with GitHub
     /// * `github_token` - The token to use when communicating with GitHub
-    /// * `aws_creds_factory` - Function which gets credentials for communicating with S3
+    /// * `aws_creds_factory` - Function which gets credentials for uploading to the artifacts
+    ///   bucket
     /// * `private_key_getter` - Function which gets the private key for signing uploads
-    /// * `public_key` - The public key used to verify S3 components
+    /// * `public_key` - The public key used to verify published components
     /// * `platform` - The platform of the system which we are installing artifacts for
     /// * `event_handler` - Callback for events that provide progress during rzup operations.
     #[allow(clippy::too_many_arguments)]
@@ -145,7 +174,7 @@ impl Rzup {
     /// Sets an event handler for receiving notifications about operations.
     ///
     /// # Arguments
-    /// * `handler` - Function that will be called for each event
+    /// * `event_handler` - Function that will be called for each event
     #[cfg(test)]
     pub(crate) fn set_event_handler(
         &mut self,
@@ -159,9 +188,9 @@ impl Rzup {
     /// # Arguments
     /// * `force` - If true, reinstalls even if already installed
     #[cfg_attr(not(feature = "cli"), expect(dead_code))]
-    pub(crate) fn install_all(&mut self, force: bool) -> Result<()> {
+    pub(crate) fn install_default(&mut self, force: bool) -> Result<()> {
         self.registry
-            .install_all_components(&self.environment, force)?;
+            .install_default_components(&self.environment, force)?;
         Ok(())
     }
 
@@ -368,7 +397,7 @@ impl Rzup {
         )
     }
 
-    /// Set the given version as the latest version for a given component on S3.
+    /// Set the given version as the latest version for a given component in the artifacts bucket.
     ///
     /// If the given release doesn't exist, an error is returned.
     #[cfg(feature = "publish")]
@@ -546,6 +575,42 @@ mod tests {
             .unwrap()
     }
 
+    fn bad_tar_gz_response() -> HyperResponse {
+        let mut tar_bytes = vec![];
+        let mut tar_builder = tar::Builder::new(&mut tar_bytes);
+        let mut header = tar::Header::new_gnu();
+        header.set_size(4);
+        for i in 0..10 {
+            tar_builder
+                .append_data(
+                    &mut header,
+                    format!("tar_contents{i}.bin"),
+                    &[0xFF, 0xFE, 0xFF, 0xFF][..],
+                )
+                .unwrap();
+        }
+        tar_builder.finish().unwrap();
+        drop(tar_builder);
+
+        // truncate the tar in the middle of the data to make it invalid
+        let idx = tar_bytes.iter().rposition(|b| *b == 0xFE).unwrap();
+        tar_bytes.truncate(idx);
+
+        let mut tar_gz_bytes = vec![];
+        let mut encoder =
+            flate2::write::GzEncoder::new(&mut tar_gz_bytes, flate2::Compression::default());
+        encoder.write_all(&tar_bytes).unwrap();
+        drop(encoder);
+
+        hyper::Response::builder()
+            .status(200)
+            .header("content-type", "application/octet-stream")
+            .body(http_body_util::Full::new(hyper::body::Bytes::from(
+                tar_gz_bytes,
+            )))
+            .unwrap()
+    }
+
     fn dummy_tar_xz_response(sub_dir: &str) -> HyperResponse {
         let mut tar_bytes = vec![];
         let mut tar_builder = tar::Builder::new(&mut tar_bytes);
@@ -651,6 +716,7 @@ mod tests {
             "/github_api/repos/risc0/risc0/releases/tags/v1.0.0".into() => json_response("{}"),
             "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.1".into() => json_response("{}"),
             "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.2".into() => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.3".into() => json_response("{}"),
             "/github_api/repos/risc0/rust/releases/tags/r0.1.79.0".into() => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.0.0/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => dummy_tar_gz_response(),
@@ -658,6 +724,8 @@ mod tests {
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => dummy_tar_gz_response(),
             "/risc0_github/risc0/releases/download/v1.0.0-rc.2/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => dummy_tar_gz_response(),
+            "/risc0_github/risc0/releases/download/v1.0.0-rc.3/\
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => bad_tar_gz_response(),
             "/risc0_github/risc0/releases/download/v1.0.0/\
                 cargo-risczero-aarch64-apple-darwin.tgz".into() => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.79.0/\
@@ -820,6 +888,7 @@ mod tests {
                     github_api_base_url: format!("http://{address}/github_api"),
                     risc0_base_url: format!("http://{address}/risc0"),
                     s3_base_url: format!("http://{address}/s3"),
+                    publish_base_url: Some(format!("http://{address}/s3")),
                 },
                 private_key,
             }
@@ -863,7 +932,30 @@ mod tests {
             github_api_base_url: "".into(),
             risc0_base_url: "".into(),
             s3_base_url: "".into(),
+            publish_base_url: None,
         }
+    }
+
+    #[test]
+    fn base_urls_from_env() {
+        let urls = BaseUrls::from_env(|_| Err(std::env::VarError::NotPresent));
+        assert_eq!(urls.s3_base_url, "https://artifacts.risczero.net");
+        assert_eq!(urls.publish_base_url, None);
+
+        let urls = BaseUrls::from_env(|key| match key {
+            "RZUP_DOWNLOAD_URL" => Ok("https://example.com/download/".into()),
+            "RZUP_PUBLISH_URL" => Ok("https://example.com/publish/bucket".into()),
+            other => panic!("unexpected read of {other:?} environment variable"),
+        });
+        assert_eq!(urls.s3_base_url, "https://example.com/download");
+        assert_eq!(
+            urls.publish_base_url.as_deref(),
+            Some("https://example.com/publish/bucket")
+        );
+        assert_eq!(
+            urls.risc0_github_base_url,
+            BaseUrls::default().risc0_github_base_url
+        );
     }
 
     fn setup_test_env(
@@ -900,14 +992,16 @@ mod tests {
             test_private_key(),
             Platform::new("x86_64", Os::Linux),
         );
-        assert!(rzup
-            .settings()
-            .get_default_version(&Component::RustToolchain)
-            .is_none());
-        assert!(rzup
-            .settings()
-            .get_default_version(&Component::CargoRiscZero)
-            .is_none());
+        assert!(
+            rzup.settings()
+                .get_default_version(&Component::RustToolchain)
+                .is_none()
+        );
+        assert!(
+            rzup.settings()
+                .get_default_version(&Component::CargoRiscZero)
+                .is_none()
+        );
     }
 
     fn test_install_and_uninstall_end_to_end(base_urls: BaseUrls, public_key: PublicKey) {
@@ -944,9 +1038,10 @@ mod tests {
             false,
         )
         .unwrap();
-        assert!(rzup
-            .version_exists(&Component::CargoRiscZero, &cargo_risczero_version)
-            .unwrap());
+        assert!(
+            rzup.version_exists(&Component::CargoRiscZero, &cargo_risczero_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.settings()
                 .get_default_version(&Component::CargoRiscZero)
@@ -957,16 +1052,19 @@ mod tests {
             rzup.list_versions(&Component::CargoRiscZero).unwrap(),
             vec![Version::new(1, 0, 0)]
         );
-        assert!(rzup
-            .get_version_dir(&Component::CargoRiscZero, &cargo_risczero_version)
-            .is_ok());
+        assert!(
+            rzup.get_version_dir(&Component::CargoRiscZero, &cargo_risczero_version)
+                .is_ok()
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::CargoRiscZero, cargo_risczero_version.clone())
             .unwrap();
-        assert!(!rzup
-            .version_exists(&Component::CargoRiscZero, &cargo_risczero_version)
-            .unwrap());
+        assert!(
+            !rzup
+                .version_exists(&Component::CargoRiscZero, &cargo_risczero_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::CargoRiscZero).unwrap(),
             vec![]
@@ -983,9 +1081,10 @@ mod tests {
             false,
         )
         .unwrap();
-        assert!(rzup
-            .version_exists(&Component::R0Vm, &cargo_risczero_version)
-            .unwrap());
+        assert!(
+            rzup.version_exists(&Component::R0Vm, &cargo_risczero_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.settings()
                 .get_default_version(&Component::R0Vm)
@@ -996,16 +1095,19 @@ mod tests {
             rzup.list_versions(&Component::R0Vm).unwrap(),
             vec![Version::new(1, 0, 0)]
         );
-        assert!(rzup
-            .get_version_dir(&Component::R0Vm, &cargo_risczero_version)
-            .is_ok());
+        assert!(
+            rzup.get_version_dir(&Component::R0Vm, &cargo_risczero_version)
+                .is_ok()
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::R0Vm, cargo_risczero_version.clone())
             .unwrap();
-        assert!(!rzup
-            .version_exists(&Component::R0Vm, &cargo_risczero_version)
-            .unwrap());
+        assert!(
+            !rzup
+                .version_exists(&Component::R0Vm, &cargo_risczero_version)
+                .unwrap()
+        );
         assert_eq!(rzup.list_versions(&Component::R0Vm).unwrap(), vec![]);
         assert_eq!(
             rzup.get_version_dir(&Component::R0Vm, &cargo_risczero_version),
@@ -1020,23 +1122,27 @@ mod tests {
         );
         rzup.install_component(&Component::RustToolchain, Some(rust_version.clone()), false)
             .unwrap();
-        assert!(rzup
-            .version_exists(&Component::RustToolchain, &rust_version)
-            .unwrap());
+        assert!(
+            rzup.version_exists(&Component::RustToolchain, &rust_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::RustToolchain).unwrap(),
             vec![Version::new(1, 79, 0)]
         );
-        assert!(rzup
-            .get_version_dir(&Component::RustToolchain, &rust_version)
-            .is_ok());
+        assert!(
+            rzup.get_version_dir(&Component::RustToolchain, &rust_version)
+                .is_ok()
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::RustToolchain, rust_version.clone())
             .unwrap();
-        assert!(!rzup
-            .version_exists(&Component::RustToolchain, &rust_version)
-            .unwrap());
+        assert!(
+            !rzup
+                .version_exists(&Component::RustToolchain, &rust_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::RustToolchain).unwrap(),
             vec![]
@@ -1054,23 +1160,27 @@ mod tests {
         );
         rzup.install_component(&Component::CppToolchain, Some(cpp_version.clone()), false)
             .unwrap();
-        assert!(rzup
-            .version_exists(&Component::CppToolchain, &cpp_version)
-            .unwrap());
+        assert!(
+            rzup.version_exists(&Component::CppToolchain, &cpp_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::CppToolchain).unwrap(),
             vec![Version::new(2024, 1, 5)]
         );
-        assert!(rzup
-            .get_version_dir(&Component::CppToolchain, &cpp_version)
-            .is_ok());
+        assert!(
+            rzup.get_version_dir(&Component::CppToolchain, &cpp_version)
+                .is_ok()
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::CppToolchain, cpp_version.clone())
             .unwrap();
-        assert!(!rzup
-            .version_exists(&Component::CppToolchain, &cpp_version)
-            .unwrap());
+        assert!(
+            !rzup
+                .version_exists(&Component::CppToolchain, &cpp_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::CppToolchain).unwrap(),
             vec![]
@@ -1092,23 +1202,27 @@ mod tests {
             false,
         )
         .unwrap();
-        assert!(rzup
-            .version_exists(&Component::Risc0Groth16, &groth16_version)
-            .unwrap());
+        assert!(
+            rzup.version_exists(&Component::Risc0Groth16, &groth16_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::Risc0Groth16).unwrap(),
             vec![Version::new(1, 0, 0)]
         );
-        assert!(rzup
-            .get_version_dir(&Component::Risc0Groth16, &groth16_version)
-            .is_ok());
+        assert!(
+            rzup.get_version_dir(&Component::Risc0Groth16, &groth16_version)
+                .is_ok()
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::Risc0Groth16, groth16_version.clone())
             .unwrap();
-        assert!(!rzup
-            .version_exists(&Component::Risc0Groth16, &groth16_version)
-            .unwrap());
+        assert!(
+            !rzup
+                .version_exists(&Component::Risc0Groth16, &groth16_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::Risc0Groth16).unwrap(),
             vec![]
@@ -1715,6 +1829,59 @@ mod tests {
             true, /* use_github_token */
             Platform::new("x86_64", Os::Linux),
         )
+    }
+
+    #[test]
+    fn install_bad_tar_gz() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            None,
+            server.private_key.clone(),
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        let base_url = &server.base_urls.risc0_github_base_url;
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                let error = rzup
+                    .install_component(&Component::R0Vm, Some("1.0.0-rc.3".parse().unwrap()), false)
+                    .unwrap_err();
+                assert!(
+                    matches!(&error, RzupError::Io(msg) if msg.starts_with("failed to unpack")),
+                    "{error:?}"
+                );
+            },
+            vec![
+                RzupEvent::InstallationStarted {
+                    id: "r0vm".into(),
+                    version: "1.0.0-rc.3".into(),
+                },
+                RzupEvent::TransferStarted {
+                    kind: TransferKind::Download,
+                    id: "cargo-risczero".into(),
+                    version: Some("1.0.0-rc.3".into()),
+                    url: Some(format!(
+                        "{base_url}/risc0/releases/download/v1.0.0-rc.3/\
+                        cargo-risczero-x86_64-unknown-linux-gnu.tgz"
+                    )),
+                    len: Some(hyper_len(bad_tar_gz_response())),
+                },
+                RzupEvent::TransferProgress {
+                    id: "cargo-risczero".into(),
+                    incr: hyper_len(bad_tar_gz_response()),
+                },
+                RzupEvent::TransferCompleted {
+                    kind: TransferKind::Download,
+                    id: "cargo-risczero".into(),
+                    version: Some("1.0.0-rc.3".into()),
+                },
+            ],
+        );
+
+        assert_eq!(rzup.list_versions(&Component::R0Vm).unwrap(), vec![]);
     }
 
     fn test_list_multiple_versions(component: Component, version1: Version, version2: Version) {
@@ -2821,7 +2988,7 @@ mod tests {
     }
 
     #[test]
-    fn list_legacy_versions_cargo_risczero_install_aaple_aarch64() {
+    fn list_legacy_versions_cargo_risczero_install_apple_aarch64() {
         list_legacy_versions(
             "rust_aarch64-apple-darwin_r0.1.79.0",
             "rust_aarch64-apple-darwin_r0.1.81.0",
@@ -3452,7 +3619,7 @@ mod tests {
             },
             vec![
                 RzupEvent::Print {
-                    message: "Getting private key from AWS".into(),
+                    message: "Reading signing key from RZUP_PUBLISH_KEY".into(),
                 },
                 RzupEvent::Print {
                     message: "Reading distribution_manifest.json".into(),
@@ -3774,6 +3941,35 @@ mod tests {
         assert_eq!(
             err,
             RzupError::Other("release for risc0-groth16 at version 7.0.0 not found".into())
+        );
+    }
+
+    #[test]
+    fn publish_without_publish_url() {
+        let server = MockDistributionServer::new();
+        let mut base_urls = server.base_urls.clone();
+        base_urls.publish_base_url = None;
+        let aws_creds = AwsCredentials::new(
+            "AKIDEXAMPLE",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            None,
+            None,
+            "hardcoded-credentials",
+        );
+        let (_tmp_dir, mut rzup) = setup_test_env(
+            base_urls,
+            None,
+            Some(aws_creds),
+            server.private_key.clone(),
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        let err = rzup
+            .publish_set_latest(&Component::Risc0Groth16, &Version::new(2, 0, 0))
+            .unwrap_err();
+        assert!(
+            err.to_string().contains("RZUP_PUBLISH_URL is not set"),
+            "{err}"
         );
     }
 

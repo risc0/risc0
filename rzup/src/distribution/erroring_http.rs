@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 use crate::error::{Result, RzupError};
 use std::io;
 
@@ -20,10 +21,16 @@ impl Response {
     pub fn content_length(&self) -> Option<u64> {
         unreachable!()
     }
+}
 
-    pub fn copy_to(&mut self, _writer: impl io::Write) -> Result<()> {
-        unreachable!()
-    }
+pub fn copy_with_resume(
+    response: Response,
+    _url: impl IntoUrl,
+    _bearer_token: &Option<String>,
+    _writer: &mut impl io::Write,
+    _on_resume: impl FnMut(u64, &io::Error),
+) -> Result<u64> {
+    match response {}
 }
 
 pub trait IntoUrl {}

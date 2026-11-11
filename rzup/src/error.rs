@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 use thiserror::Error;
 
 #[derive(Debug, Error, Clone, PartialEq, Eq)]
@@ -45,7 +46,7 @@ pub enum RzupError {
     #[error("Unsupported distribution platform: {0}")]
     UnsupportedDistributionPlatform(String),
 
-    #[error("SHA-265 sum mismatch: expected = {expected}, actual = {actual}")]
+    #[error("SHA-256 sum mismatch: expected = {expected}, actual = {actual}")]
     Sha256Mismatch { expected: String, actual: String },
 
     #[error("Signature failed to verify: {0}")]

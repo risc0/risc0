@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2026 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,12 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 pub(crate) mod commands;
 pub(crate) mod ui;
 
+use crate::Rzup;
 use crate::error::Result;
 use crate::events::RzupEvent;
-use crate::Rzup;
 
 use clap::{Parser, Subcommand};
 use colored::Colorize;
@@ -29,7 +30,7 @@ use ui::{TerminalUi, TextUi};
 #[derive(Subcommand)]
 enum Commands {
     /// Install and update components
-    #[command(alias = "update", after_help = commands::INSTALL_HELP)]
+    #[command(alias = "update", after_help = commands::install_help())]
     Install(InstallCommand),
     /// Check for new component versions
     #[command(after_help = commands::CHECK_HELP)]
@@ -46,7 +47,7 @@ enum Commands {
     /// Build a component
     #[command(after_help = commands::BUILD_HELP)]
     Build(BuildCommand),
-    /// Publish a component on S3
+    /// Publish a component to the artifacts bucket
     #[command(after_help = commands::PUBLISH_HELP, subcommand)]
     Publish(PublishCommand),
 }
