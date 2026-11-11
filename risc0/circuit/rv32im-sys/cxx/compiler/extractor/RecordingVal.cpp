@@ -95,7 +95,7 @@ RecordingValExt::RecordingValExt(risc0::FpExt v) {
 }
 
 RecordingValExt::RecordingValExt(RecordingVal v) {
-  // Technically, we don't need to do anything here since arithemetic ops in zll
+  // Technically, we don't need to do anything here since arithmetic ops in zll
   // are autocasting
   this->value = v.value;
 }

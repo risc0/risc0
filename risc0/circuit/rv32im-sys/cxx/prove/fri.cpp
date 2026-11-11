@@ -61,7 +61,7 @@ void FriProver::compute(WriteIop& iop, ProvePointFunction func) {
   // Copy + put final coefficients into normal order
   hal->copy<Fp>(finalCoeffs, last);
   hal->batchBitReverse(finalCoeffs);
-  // Write coeffients + commit
+  // Write coefficients + commit
   {
     PinnedMatrixRO<Fp> pFinal(hal, finalCoeffs);
     iop.write(pFinal.data(), pFinal.size());

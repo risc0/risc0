@@ -52,7 +52,7 @@ void picusInput(RecordingContext& ctx, Component (&component)[N]) {
   PicusDeclareInputVisitor::apply(ctx, component);
 }
 
-// Emit an `AssumeRange` directive into the IR. This will result in assuptions
+// Emit an `AssumeRange` directive into the IR. This will result in assumptions
 // in the generated picus code that the value is in the given range, which means
 // that Picus will assume that condition for its proof. It will then check any
 // callers of this component to make sure that the condition is met before

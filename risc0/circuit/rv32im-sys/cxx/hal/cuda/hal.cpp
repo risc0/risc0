@@ -290,7 +290,7 @@ public:
   void batchInterpolate(HalMatrix<Fp> io) override {
     uint32_t inPo2 = log2Ceil(io.rows());
     if (io.rows() != (size_t(1) << inPo2)) {
-      throw std::runtime_error("invlaid size in batchInterpolateNtt");
+      throw std::runtime_error("invalid size in batchInterpolateNtt");
     }
     auto err = sppark_batch_iNTT(stream, toDevPtr(io), inPo2, io.cols());
     if (err.code != 0) {
@@ -301,7 +301,7 @@ public:
   void batchShift(HalMatrix<Fp> io) override {
     uint32_t inPo2 = log2Ceil(io.rows());
     if (io.rows() != (size_t(1) << inPo2)) {
-      throw std::runtime_error("invlaid size in batchInterpolateNtt");
+      throw std::runtime_error("invalid size in batchInterpolateNtt");
     }
     auto err = sppark_batch_zk_shift(stream, toDevPtr(io), inPo2, io.cols());
     if (err.code != 0) {

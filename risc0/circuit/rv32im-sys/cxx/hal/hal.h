@@ -210,7 +210,7 @@ public:
   virtual void combosDivide(HalMatrix<FpExt> combos, HalArray<DivideInfo> info) = 0;
   virtual void combosFinalize(HalMatrix<Fp> out, HalMatrix<FpExt> combos) = 0;
 
-  // FRI functins
+  // FRI functions
   virtual void friFold(HalMatrix<Fp> out, HalMatrix<Fp> in, FpExt mix) = 0;
 
   // Compute the data witness from the preflight data
