@@ -1,6 +1,5 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Support & Troubleshooting with the RISC Zero Community
-    url: https://discord.com/invite/risczero
-    about: |
-      For general questions and problems you are facing with RISC Zero, please **search** our `🙋｜dev-questions-support-forum` first for solutions, by keyword and tags. If you discover no solution, please then ask and questions in our community! We highly encourage everyone also share their understanding by answering questions for others!
+  - name: Questions and support
+    url: https://github.com/risc0/risc0/discussions
+    about: For general questions and problems you are facing with RISC Zero, please search GitHub Discussions first, and ask there if you find no answer.
