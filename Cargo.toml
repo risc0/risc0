@@ -52,14 +52,8 @@ risc0-circuit-recursion-zkrs = "4.1.0"
 risc0-circuit-rv32im = "4.1.0"
 risc0-circuit-rv32im-sys = "4.1.0"
 
-# The regenerated recursion circuit added fields to its generated layout structs, which were
-# public but used nowhere outside the crate. The layout module is now crate-private. Remove this
-# once 4.1.0 is the baseline.
-[workspace.metadata.release-version.allow-breaking]
-risc0-circuit-recursion = { from = "4.0.5", reason = "generated layout types gained fields and are now crate-private; nothing outside the crate used them" }
-
 [workspace.package]
-version = "3.0.0"
+version = "3.1.0"
 edition = "2021"
 license = "Apache-2.0"
 homepage = "https://risczero.com/"

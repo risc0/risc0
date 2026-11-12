@@ -6559,7 +6559,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-bigint2-methods"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "risc0-build",
 ]
@@ -7054,7 +7054,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "bincode",
  "borsh",
@@ -7086,7 +7086,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "3.0.0"
+version = "3.1.0"
 
 [[package]]
 name = "rlimit"
@@ -9702,7 +9702,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bincode",
- "camino",
  "cargo-semver-checks",
  "cargo_metadata 0.21.0",
  "clap 4.5.60",
@@ -9724,7 +9723,6 @@ dependencies = [
  "semver 1.0.26",
  "serde",
  "serde_json",
- "serde_with",
  "tar",
  "tempfile",
  "toml 0.9.5",

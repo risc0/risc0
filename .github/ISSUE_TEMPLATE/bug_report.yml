@@ -12,8 +12,8 @@ body:
           required: true
   - type: checkboxes
     attributes:
-      label: Experiencing problems? Have you tried our Discord first?
-      description: Please search <https://discord.com/invite/risczero> to see if an post already exists, and ask if not. Please do not file support issues here.
+      label: Is this a support question?
+      description: Please ask questions in [GitHub Discussions](https://github.com/risc0/risc0/discussions) instead of filing an issue.
       options:
         - label: This is not a support question.
           required: true

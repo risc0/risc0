@@ -40,7 +40,12 @@
 //! than the crate's changes need is an error. Unchanged crates keep the tag's version, and
 //! crates that are new since the tag keep theirs with the pre-release. Since everything is
 //! computed from the tag, running it again gives the same versions; going from a release
-//! candidate to the release is a change to `version` only.
+//! candidate to the release is a change to `version` only. `[workspace.package] version` follows
+//! `version` too, for the unpublished crates that inherit it.
+//!
+//! A crate published on its own after the tag has a newer baseline than the tag shows: when
+//! crates.io has a stable, unyanked release newer than the tag's version and not past the
+//! crate's version in the tree, that release is the baseline instead.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
@@ -362,7 +367,8 @@ fn index_path(name: &str) -> String {
     }
 }
 
-fn published_versions(name: &str) -> Result<BTreeSet<Version>> {
+/// Every version of `name` on crates.io, and whether it is yanked.
+fn published_versions(name: &str) -> Result<BTreeMap<Version, bool>> {
     let output = Command::new("curl")
         .args(["-sSL", "-w", "\n%{http_code}"])
         .arg(format!("https://index.crates.io/{}", index_path(name)))
@@ -372,7 +378,7 @@ fn published_versions(name: &str) -> Result<BTreeSet<Version>> {
     let (index, status) = body.rsplit_once('\n').unwrap_or(("", &body));
     match status {
         "200" => {}
-        "404" => return Ok(BTreeSet::new()),
+        "404" => return Ok(BTreeMap::new()),
         _ => bail!("the crates.io index returned {status} for {name}"),
     }
     index
@@ -382,9 +388,31 @@ fn published_versions(name: &str) -> Result<BTreeSet<Version>> {
             let vers = entry["vers"]
                 .as_str()
                 .ok_or_else(|| anyhow!("index entry for {name} without vers"))?;
-            Ok(Version::parse(vers)?)
+            Ok((
+                Version::parse(vers)?,
+                entry["yanked"].as_bool().unwrap_or(false),
+            ))
         })
         .collect()
+}
+
+/// The version to compare a crate with: its version at the tag, or the newest stable, unyanked
+/// release on crates.io that is newer than that and not past `current`.
+fn baseline_version(
+    at_tag: Option<Version>,
+    current: &Version,
+    published: &BTreeMap<Version, bool>,
+) -> Option<Version> {
+    let newest = published
+        .iter()
+        .filter(|(version, yanked)| !**yanked && version.pre.is_empty() && *version <= current)
+        .map(|(version, _)| version)
+        .max();
+    match (at_tag, newest) {
+        (Some(at_tag), Some(newest)) if newest > &at_tag => Some(newest.clone()),
+        (None, Some(newest)) => Some(newest.clone()),
+        (at_tag, _) => at_tag,
+    }
 }
 
 /// Downloads `name` at `version` from crates.io and unpacks it into `dir`.
@@ -724,7 +752,7 @@ fn check_published(
     let mut errors = vec![];
     for (row, c) in rows.iter().zip(crates) {
         let new = row.new.as_ref().unwrap();
-        if row.baseline.as_ref() == Some(new) || !published_versions(&c.name)?.contains(new) {
+        if row.baseline.as_ref() == Some(new) || !published_versions(&c.name)?.contains_key(new) {
             continue;
         }
         let dir = scratch.join("published").join(&c.name);
@@ -743,7 +771,23 @@ fn check_published(
     Ok(())
 }
 
-fn write_versions(root: &Path, rows: &[Row], crates: &[Crate]) -> Result<()> {
+/// `[workspace.package] version` in the workspace `Cargo.toml`, if it has one.
+fn workspace_package_version(root: &Path) -> Result<Option<Version>> {
+    let manifest = std::fs::read_to_string(root.join("Cargo.toml"))?.parse::<toml::Table>()?;
+    manifest
+        .get("workspace")
+        .and_then(|w| w.get("package"))
+        .and_then(|p| p.get("version"))
+        .map(|v| {
+            let v = v
+                .as_str()
+                .ok_or_else(|| anyhow!("workspace.package.version is not a string"))?;
+            Version::parse(v).context("failed to parse workspace.package.version")
+        })
+        .transpose()
+}
+
+fn write_versions(root: &Path, config: &Config, rows: &[Row], crates: &[Crate]) -> Result<()> {
     for (row, c) in rows.iter().zip(crates) {
         let new = row.new.as_ref().unwrap();
         if new == &c.version {
@@ -763,6 +807,11 @@ fn write_versions(root: &Path, rows: &[Row], crates: &[Crate]) -> Result<()> {
     for row in rows {
         if let Some(dep) = deps.get_mut(&row.name) {
             dep["version"] = toml_edit::value(row.new.as_ref().unwrap().to_string());
+        }
+    }
+    if let Some(package) = manifest["workspace"].get_mut("package") {
+        if package.get("version").is_some() {
+            package["version"] = toml_edit::value(config.version.to_string());
         }
     }
     std::fs::write(&path, manifest.to_string())?;
@@ -811,10 +860,17 @@ fn run_inner(args: &Bump, root: &Path) -> Result<()> {
     eprintln!("Baseline: {tag}");
     let mut baselines = BTreeMap::new();
     for c in &crates {
-        baselines.insert(
-            c.name.clone(),
-            version_at_tag(root, &tag, &c.manifest_path)?,
-        );
+        let at_tag = version_at_tag(root, &tag, &c.manifest_path)?;
+        let baseline = baseline_version(at_tag.clone(), &c.version, &published_versions(&c.name)?);
+        if baseline != at_tag {
+            let at_tag = at_tag.map_or("none".to_string(), |v| v.to_string());
+            eprintln!(
+                "{}: {} is on crates.io, newer than {at_tag} at {tag}; comparing with it",
+                c.name,
+                baseline.as_ref().unwrap()
+            );
+        }
+        baselines.insert(c.name.clone(), baseline);
     }
 
     package_all(root, &crates)?;
@@ -843,11 +899,20 @@ fn run_inner(args: &Bump, root: &Path) -> Result<()> {
     print_rows(&config, &rows);
     check_published(&rows, &crates, &packaged, &workspace, scratch.path())?;
 
-    let outdated = rows
+    let mut outdated = rows
         .iter()
         .filter(|row| row.new != row.current)
         .map(|row| row.name.as_str())
         .collect::<Vec<_>>();
+    if let Some(version) = workspace_package_version(root)? {
+        if version != config.version {
+            println!(
+                "workspace.package.version {version} differs from the release {}",
+                config.version
+            );
+            outdated.push("workspace.package");
+        }
+    }
     if outdated.is_empty() {
         println!("All versions are up to date");
         return Ok(());
@@ -855,7 +920,7 @@ fn run_inner(args: &Bump, root: &Path) -> Result<()> {
     if args.check {
         bail!("Versions to update: {}", outdated.join(", "));
     }
-    write_versions(root, &rows, &crates)?;
+    write_versions(root, &config, &rows, &crates)?;
     println!("Updated {}; updating the lock files", outdated.join(", "));
     crate::update_lock_files::run_inner(root)
 }
@@ -1196,5 +1261,63 @@ version = "1.1"
         assert_eq!(index_path("ab"), "2/ab");
         assert_eq!(index_path("abc"), "3/a/abc");
         assert_eq!(index_path("risc0-zkvm"), "ri/sc/risc0-zkvm");
+    }
+
+    #[test]
+    fn newer_releases_on_crates_io_are_the_baseline() {
+        let published = |versions: &[(&str, bool)]| {
+            versions
+                .iter()
+                .map(|(version, yanked)| (v(version), *yanked))
+                .collect::<BTreeMap<_, _>>()
+        };
+        let all = published(&[
+            ("0.5.2", false),
+            ("0.6.0-rc.1", false),
+            ("0.6.0", false),
+            ("0.6.1", true),
+            ("0.7.0", false),
+        ]);
+        // Published after the tag, up to the tree's version
+        assert_eq!(
+            baseline_version(Some(v("0.5.2")), &v("0.6.1"), &all),
+            Some(v("0.6.0"))
+        );
+        // Releases past the tree's version are from another line or the release in progress
+        assert_eq!(
+            baseline_version(Some(v("0.5.2")), &v("0.5.3-rc.1"), &all),
+            Some(v("0.5.2"))
+        );
+        assert_eq!(
+            baseline_version(Some(v("0.5.2")), &v("0.6.0-rc.2"), &all),
+            Some(v("0.5.2"))
+        );
+        // Nothing newer than the tag
+        assert_eq!(
+            baseline_version(Some(v("0.7.0")), &v("0.7.0"), &all),
+            Some(v("0.7.0"))
+        );
+        // New since the tag, but already published
+        assert_eq!(baseline_version(None, &v("0.6.0"), &all), Some(v("0.6.0")));
+        assert_eq!(baseline_version(None, &v("0.1.0"), &all), None);
+    }
+
+    #[test]
+    fn workspace_package_follows_the_release() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(
+            dir.path().join("Cargo.toml"),
+            "[workspace.package]\nversion = \"3.0.0\"\n\n[workspace.dependencies]\n",
+        )
+        .unwrap();
+        assert_eq!(
+            workspace_package_version(dir.path()).unwrap(),
+            Some(v("3.0.0"))
+        );
+        write_versions(dir.path(), &config("3.1.0-rc.1", &[]), &[], &[]).unwrap();
+        assert_eq!(
+            workspace_package_version(dir.path()).unwrap(),
+            Some(v("3.1.0-rc.1"))
+        );
     }
 }
