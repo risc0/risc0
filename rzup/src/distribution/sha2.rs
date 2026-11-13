@@ -14,6 +14,7 @@
 
 use crate::Result;
 
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use sha2::Digest as _;
 
 use std::fs::File;
@@ -78,6 +79,21 @@ impl std::str::FromStr for Sha256Digest {
 impl fmt::Display for Sha256Digest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:x}", &self.0)
+    }
+}
+
+/// Serialized as its hex string.
+impl Serialize for Sha256Digest {
+    fn serialize<S: Serializer>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> {
+        serializer.collect_str(self)
+    }
+}
+
+impl<'de> Deserialize<'de> for Sha256Digest {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> std::result::Result<Self, D::Error> {
+        String::deserialize(deserializer)?
+            .parse()
+            .map_err(serde::de::Error::custom)
     }
 }
 

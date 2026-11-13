@@ -27,7 +27,6 @@ use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferKind};
 
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use serde_with::{DisplayFromStr, serde_as};
 
 use std::collections::BTreeMap;
 use std::fmt;
@@ -44,10 +43,8 @@ impl fmt::Display for TargetTriple {
     }
 }
 
-#[serde_as]
 #[derive(Serialize, Deserialize)]
 struct Artifact {
-    #[serde_as(as = "Vec<DisplayFromStr>")]
     sha256_blobs: Vec<Sha256Digest>,
 }
 
@@ -68,12 +65,10 @@ enum Release {
     TargetAgnostic(TargetAgnosticRelease),
 }
 
-#[serde_as]
 #[derive(Serialize, Deserialize)]
 struct DistributionManifest {
     releases: BTreeMap<semver::Version, Release>,
     latest_version: semver::Version,
-    #[serde_as(as = "Option<DisplayFromStr>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     signature: Option<Signature>,
 }

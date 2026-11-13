@@ -44,6 +44,9 @@ pub struct Environment {
     public_key: PublicKey,
 }
 
+/// The token the GitHub CLI (`gh`) stored. Only downloads use a GitHub token, so this is only read
+/// with the `install` feature.
+#[cfg(feature = "install")]
 fn get_github_token_from_hosts_yml(home_dir: &Path) -> Result<String> {
     let host_yml_path = home_dir.join(".config/gh/hosts.yml");
     let yaml_docs =
@@ -59,7 +62,12 @@ fn get_github_token_from_hosts_yml(home_dir: &Path) -> Result<String> {
         .ok_or_else(|| RzupError::Other("unexpected YAML".into()))
 }
 
-#[cfg(test)]
+#[cfg(not(feature = "install"))]
+fn get_github_token_from_hosts_yml(_home_dir: &Path) -> Result<String> {
+    Err(RzupError::Other("install feature not enabled".into()))
+}
+
+#[cfg(all(test, feature = "install"))]
 const TEST_HOSTS_YML: &str = "
 github.com:
     oauth_token: mysecret
@@ -72,6 +80,7 @@ example.com:
     other_key: baz
 ";
 
+#[cfg(feature = "install")]
 #[test]
 fn get_github_token_from_hosts_yml_test() {
     let tmp_dir = tempfile::tempdir().unwrap();

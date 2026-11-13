@@ -24,9 +24,9 @@ use semver::Version;
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use strum::EnumIter;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, EnumIter)]
+/// A new variant also goes in [`Component::ALL`].
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Component {
     CargoRiscZero,
     CppToolchain,
@@ -61,8 +61,18 @@ impl Component {
         }
     }
 
+    /// Every component, in declaration order.
+    const ALL: [Self; 6] = [
+        Self::CargoRiscZero,
+        Self::CppToolchain,
+        Self::Gdb,
+        Self::R0Vm,
+        Self::RustToolchain,
+        Self::Risc0Groth16,
+    ];
+
     pub fn iter() -> impl Iterator<Item = Self> {
-        <Self as strum::IntoEnumIterator>::iter()
+        Self::ALL.into_iter()
     }
 
     pub fn install_by_default(&self) -> bool {
