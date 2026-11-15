@@ -136,7 +136,7 @@ Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for the full instructions.
 | cargo-risczero | [![x](https://img.shields.io/badge/crates.io-v3.1-orange)](https://crates.io/crates/cargo-risczero) |
 | risc0-r0vm     | [![x](https://img.shields.io/badge/crates.io-v3.1-orange)](https://crates.io/crates/risc0-r0vm)     |
 | risc0-tools    | [![x](https://img.shields.io/badge/crates.io-v2.0-orange)](https://crates.io/crates/risc0-tools)    |
-| rzup           | [![x](https://img.shields.io/badge/crates.io-v0.5-orange)](https://crates.io/crates/rzup)           |
+| rzup           | [![x](https://img.shields.io/badge/crates.io-v0.6-orange)](https://crates.io/crates/rzup)           |
 
 ## Rust Libraries
 
