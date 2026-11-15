@@ -3357,20 +3357,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35bd024e8b2ff75562e5f34e7f4905839deb4b22955ef5e73d2fea1b9813cb23"
-dependencies = [
- "num-bigint 0.4.6",
- "num-complex",
- "num-integer",
- "num-iter",
- "num-rational",
- "num-traits",
-]
-
-[[package]]
 name = "num-bigint"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3451,17 +3437,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1429034a0490724d0075ebb2bc9e875d6503c3cf69e235a8941aa757d83ef5bf"
 dependencies = [
  "autocfg",
- "num-integer",
- "num-traits",
-]
-
-[[package]]
-name = "num-rational"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f83d14da390562dca69fc84082e73e548e1ad308d24accdedd2720017cb37824"
-dependencies = [
- "num-bigint 0.4.6",
  "num-integer",
  "num-traits",
 ]
@@ -4818,7 +4793,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "borsh",
  "ciborium",
@@ -4847,7 +4822,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "3.0.0"
+version = "3.1.0"
 
 [[package]]
 name = "rkyv"
@@ -5491,37 +5466,6 @@ name = "smallvec"
 version = "1.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
-
-[[package]]
-name = "smartcore"
-version = "0.3.2"
-source = "git+https://github.com/risc0/smartcore.git?rev=4bd3cadd50ed988c45c239f5264c3e2c2af0a690#4bd3cadd50ed988c45c239f5264c3e2c2af0a690"
-dependencies = [
- "approx",
- "cfg-if",
- "num",
- "num-traits",
- "rand 0.8.5",
- "serde",
- "typetag",
-]
-
-[[package]]
-name = "smartcore-ml"
-version = "0.1.0"
-dependencies = [
- "risc0-zkvm",
- "rmp-serde",
- "smartcore",
- "smartcore-ml-methods",
-]
-
-[[package]]
-name = "smartcore-ml-methods"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
-]
 
 [[package]]
 name = "socket2"
