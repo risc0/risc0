@@ -73,7 +73,7 @@ impl WordRead for &[u32] {
 /// possible, such as if `slice` is not the serialized form of an object of type
 /// `T`.
 pub fn from_slice<T: DeserializeOwned, P: Pod>(slice: &[P]) -> Result<T> {
-    if core::mem::size_of_val(slice) % WORD_SIZE != 0 {
+    if !core::mem::size_of_val(slice).is_multiple_of(WORD_SIZE) {
         return Err(Error::DeserializeUnexpectedEnd);
     }
 
