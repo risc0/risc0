@@ -27,7 +27,7 @@ use risc0_zkvm_platform::syscall::{sys_halt, sys_panic, sys_read, sys_write};
 // relaxed with an uninitialized global pointer: mv gp, gp
 //
 // This will also set up the stack pointer to the _stack_top address from the linker script and
-// call the main function.
+// initialize the platform heap before calling C main.
 //
 // Note: this is slightly different than the rust program because it uses a linker script symbol to
 // set the stack pointer and calls main instead of __start.
@@ -43,8 +43,10 @@ _start:
     .option pop
     la sp, _stack_top
 
+    call {heap_init};
     call main;
 "#,
+    heap_init = sym risc0_zkvm_platform::heap::init,
 );
 
 const ERR_FREED: &[u8] = b"error: sha256_state has not been initialized or has already been freed";
